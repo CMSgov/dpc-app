@@ -4,7 +4,7 @@ import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.entities.TokenEntity;
 import gov.cms.dpc.api.models.CollectionResponse;
 import gov.cms.dpc.api.models.JWTAuthResponse;
-import gov.cms.dpc.api.models.TokenRequest;
+import gov.cms.dpc.api.models.CreateTokenRequest;
 import gov.cms.dpc.common.annotations.NoHtml;
 import io.dropwizard.jersey.jsr310.OffsetDateTimeParam;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -45,12 +45,12 @@ public abstract class AbstractTokenResource {
      * @param principal  - {@link OrganizationPrincipal} supplied by auth handler
      * @param  label      - {@link Optional} {@link String} to use as token label
      * @param expiration - {@link Optional} {@link OffsetDateTime} to use for token expiration
-     * @param  token - {@link TokenRequest} model representing token resource. Token fields take precedence over query parameters.
+     * @param  token - {@link CreateTokenRequest} model representing token resource. Token fields take precedence over query parameters.
      * @return - {@link String} base64 (URL) encoded token
      */
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     @POST
-    public abstract TokenEntity createOrganizationToken(OrganizationPrincipal principal, @Valid TokenRequest token, @NoHtml String label, Optional<OffsetDateTimeParam> expiration);
+    public abstract TokenEntity createOrganizationToken(OrganizationPrincipal principal, @Valid CreateTokenRequest requestBody, @NoHtml String label, Optional<OffsetDateTimeParam> expiration);
 
     @GET
     @Path("/{tokenID}")

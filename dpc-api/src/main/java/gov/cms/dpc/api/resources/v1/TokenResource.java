@@ -11,7 +11,7 @@ import gov.cms.dpc.api.entities.TokenEntity;
 import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.api.models.CollectionResponse;
 import gov.cms.dpc.api.models.JWTAuthResponse;
-import gov.cms.dpc.api.models.TokenRequest;
+import gov.cms.dpc.api.models.CreateTokenRequest;
 import gov.cms.dpc.api.resources.AbstractTokenResource;
 import gov.cms.dpc.common.annotations.APIV1;
 import gov.cms.dpc.common.annotations.NoHtml;
@@ -94,9 +94,7 @@ public class TokenResource extends AbstractTokenResource {
     @ApiResponses(value = @ApiResponse(code = 404, message = "Could not find Organization"))
     public CollectionResponse<TokenEntity> getOrganizationTokens(
             @ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal) {
-        List<TokenEntity> tokenEntities = this.dao.fetchTokens(organizationPrincipal.getID());
-
-        return new CollectionResponse<>(tokenEntities);
+        return new CollectionResponse<>(this.dao.fetchTokens(organizationPrincipal.getID()));
     }
 
     @GET
@@ -108,7 +106,7 @@ public class TokenResource extends AbstractTokenResource {
     @ApiResponses(value = @ApiResponse(code = 404, message = "Could not find Token", response = OperationOutcome.class))
     @Override
     public TokenEntity getOrganizationToken(@ApiParam(hidden = true) @Auth OrganizationPrincipal principal,
-                                             @ApiParam(value = "Token ID", required = true) @NotNull @PathParam("tokenID") UUID tokenID) {
+                                            @ApiParam(value = "Token ID", required = true) @NotNull @PathParam("tokenID") UUID tokenID) {
         final List<TokenEntity> tokens = this.dao.findTokenByOrgAndID(principal.getID(), tokenID);
         if (tokens.isEmpty()) {
             throw new WebApplicationException("Cannot find token with matching ID", Response.Status.NOT_FOUND);
@@ -132,13 +130,13 @@ public class TokenResource extends AbstractTokenResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public TokenEntity createOrganizationToken(
-            @ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal, @Valid TokenRequest body,
+            @ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal, @Valid CreateTokenRequest body,
             @ApiParam(value = "Optional label for token") @QueryParam("label") @NoHtml String tokenLabel, @QueryParam("expiration") Optional<OffsetDateTimeParam> expiration) {
 
         final UUID organizationID = organizationPrincipal.getID();
 
         final Macaroon macaroon = generateMacaroon(this.policy, organizationID);
-        final Optional<TokenRequest> optionalBody = Optional.ofNullable(body);
+        final Optional<CreateTokenRequest> optionalBody = Optional.ofNullable(body);
 
         // Ensure that each generated Macaroon has an associated Organization ID
         // This way we check to make sure we never generate a Golden Macaroon
@@ -319,7 +317,7 @@ public class TokenResource extends AbstractTokenResource {
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    private OffsetDateTime handleExpirationTime(Optional<OffsetDateTimeParam> expiresQueryParam, Optional<TokenRequest> token) {
+    private OffsetDateTime handleExpirationTime(Optional<OffsetDateTimeParam> expiresQueryParam, Optional<CreateTokenRequest> token) {
         // Compute default expiration
         final OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
         final OffsetDateTime defaultExpiration = now.plus(this.policy.getExpirationPolicy().getExpirationOffset(), this.policy.getExpirationPolicy().getExpirationUnit());

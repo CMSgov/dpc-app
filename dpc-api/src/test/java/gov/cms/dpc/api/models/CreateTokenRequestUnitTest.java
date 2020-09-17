@@ -3,19 +3,18 @@ package gov.cms.dpc.api.models;
 import org.junit.jupiter.api.Test;
 
 import java.time.OffsetDateTime;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class TokenRequestUnitTest {
+class CreateTokenRequestUnitTest {
 
     @Test
     void testEqualsAndHashCode() {
-        TokenRequest token1 = new TokenRequest();
+        CreateTokenRequest token1 = new CreateTokenRequest();
         token1.setExpiresAt(OffsetDateTime.now());
         token1.setLabel("Test Label");
 
-        TokenRequest token2 = new TokenRequest();
+        CreateTokenRequest token2 = new CreateTokenRequest();
         token2.setExpiresAt(token1.getExpiresAt());
         token2.setLabel(token1.getLabel());
 
