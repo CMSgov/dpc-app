@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypto/rsa"
+	"encoding/json"
 	"fmt"
 	"os"
 	"time"
@@ -13,6 +14,7 @@ import (
 var (
 	apiURL, adminURL string
 	goldenMacaroon   []byte
+	keyIDs           []string
 )
 
 func init() {
@@ -22,7 +24,7 @@ func init() {
 }
 
 func main() {
-	//testMetadata()
+	testMetadata()
 
 	orgID := createOrg()
 	pubKeyStr, privateKey, signature := getKeyPairAndSignature()
@@ -49,42 +51,45 @@ func testMetadata() {
 
 func testKeyEndpoints(accessToken string) {
 
-	runTestWithTargeter(newPOSTKeyTargeter(accessToken), 5, 5)
+	resps := runTestWithTargeter(fmt.Sprintf("POST %s/Key", apiURL), newPOSTKeyTargeter(accessToken), 5, 5)
+	for _, resp := range resps {
+		var result Resource
+		json.Unmarshal(resp, &result)
+		keyIDs = append(keyIDs, result.ID)
+	}
 
-	// getKeysTarget := vegeta.Target{
-	// 	Method: "GET",
-	// 	URL:    fmt.Sprintf("%s%s", apiURL, "/Key"),
-	// 	Header: map[string][]string{
-	// 		"Accept":        {"application/json"},
-	// 		"Authorization": {fmt.Sprintf("Bearer %s", accessToken)},
-	// 	},
-	// }
-	// runTest(getKeysTarget, 5, 5)
+	getKeysTarget := vegeta.Target{
+		Method: "GET",
+		URL:    fmt.Sprintf("%s%s", apiURL, "/Key"),
+		Header: map[string][]string{
+			"Accept":        {"application/json"},
+			"Authorization": {fmt.Sprintf("Bearer %s", accessToken)},
+		},
+	}
+	runTest(getKeysTarget, 5, 5)
 
-	// getKeyTarget := vegeta.Target{
-	// 	Method: "GET",
-	// 	URL:    fmt.Sprintf("%s%s%s", apiURL, "/Key/", keyID),
-	// 	Header: map[string][]string{
-	// 		"Accept":        {"application/json"},
-	// 		"Authorization": {fmt.Sprintf("Bearer %s", accessToken)},
-	// 	},
-	// }
-	// runTest(getKeyTarget, 5, 5)
+	getKeyTarget := vegeta.Target{
+		Method: "GET",
+		URL:    fmt.Sprintf("%s%s%s", apiURL, "/Key/", keyIDs[0]),
+		Header: map[string][]string{
+			"Accept":        {"application/json"},
+			"Authorization": {fmt.Sprintf("Bearer %s", accessToken)},
+		},
+	}
+	runTest(getKeyTarget, 5, 5)
 
-	// deleteKeyTarget := vegeta.Target{
-	// 	Method: "DELETE",
-	// 	URL:    fmt.Sprintf("%s%s%s", apiURL, "/Key/", keyID),
-	// 	Header: map[string][]string{
-	// 		"Authorization": {fmt.Sprintf("Bearer %s", accessToken)},
-	// 	},
-	// }
-	// runTest(deleteKeyTarget, 5, 5)
+	deleteKeyTargeter := newDELETEKeyTargeter(accessToken, func() string {
+		keyID := keyIDs[0]
+		keyIDs = keyIDs[1:]
+		return keyID
+	})
+	runTestWithTargeter(fmt.Sprintf("DELETE %s/Key/{id}", apiURL), deleteKeyTargeter, 5, 5)
 }
 
 func newPOSTKeyTargeter(accessToken string) vegeta.Targeter {
 	return func(t *vegeta.Target) error {
 		t.Method = "POST"
-		t.URL = fmt.Sprintf("%s%s", apiURL, "/Key")
+		t.URL = fmt.Sprintf("%s/Key", apiURL)
 		t.Header = map[string][]string{
 			"Content-Type":  {"application/json"},
 			"Authorization": {fmt.Sprintf("Bearer %s", accessToken)},
@@ -94,6 +99,17 @@ func newPOSTKeyTargeter(accessToken string) vegeta.Targeter {
 		body := fmt.Sprintf("{ \"key\": \"%s\", \"signature\": \"%s\"}", pubKeyStr, signature)
 		t.Body = []byte(body)
 
+		return nil
+	}
+}
+
+func newDELETEKeyTargeter(accessToken string, nextKeyID func() string) vegeta.Targeter {
+	return func(t *vegeta.Target) error {
+		t.Method = "DELETE"
+		t.URL = fmt.Sprintf("%s/Key/%s", apiURL, nextKeyID())
+		t.Header = map[string][]string{
+			"Authorization": {fmt.Sprintf("Bearer %s", accessToken)},
+		}
 		return nil
 	}
 }
@@ -112,26 +128,30 @@ func refreshAccessToken(privateKey *rsa.PrivateKey, keyID string, clientToken []
 	return accessToken
 }
 
-func runTest(target vegeta.Target, duration, frequency int) {
-	fmt.Printf("Running performance test on %s %s...\n", target.Method, target.URL)
-	runTestWithTargeter(vegeta.NewStaticTargeter(target), duration, frequency)
+func runTest(target vegeta.Target, duration, frequency int) [][]byte {
+	return runTestWithTargeter(fmt.Sprintf("%s %s", target.Method, target.URL), vegeta.NewStaticTargeter(target), duration, frequency)
 }
 
-func runTestWithTargeter(targeter vegeta.Targeter, duration, frequency int) {
-	fmt.Printf("Running performance test on %s...\n", targeter)
+func runTestWithTargeter(name string, targeter vegeta.Targeter, duration, frequency int) [][]byte {
+
+	fmt.Printf("\nRunning performance test on %s...\n", name)
 
 	d := time.Second * time.Duration(duration)
 	r := vegeta.Rate{Freq: frequency, Per: time.Second}
 
 	attacker := vegeta.NewAttacker()
 	var metrics vegeta.Metrics
+	var respBodies [][]byte
 	for results := range attacker.Attack(targeter, r, d, fmt.Sprintf("%dps:", r.Freq)) {
 		metrics.Add(results)
+		respBodies = append(respBodies, results.Body)
 	}
 	metrics.Close()
 
 	reporter := vegeta.NewJSONReporter(&metrics)
 	reporter.Report(os.Stdout)
+
+	return respBodies
 }
 
 func cleanAndPanic(err error) {
