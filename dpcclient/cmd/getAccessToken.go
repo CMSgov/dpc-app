@@ -38,7 +38,7 @@ directory. (The timestamp portion of the name will be different with each invoca
 			os.Exit(-1)
 		}
 
-		token, err := lib.GetAccessToken(authTokenBytes, domain)
+		token, err := lib.GetAccessToken(authTokenBytes, baseURL)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(-1)
