@@ -21,6 +21,7 @@ import gov.cms.dpc.fhir.validations.DPCProfileSupport;
 import gov.cms.dpc.fhir.validations.ProfileValidator;
 import gov.cms.dpc.fhir.validations.dropwizard.FHIRValidatorProvider;
 import gov.cms.dpc.fhir.validations.dropwizard.InjectingConstraintValidatorFactory;
+import io.dropwizard.auth.AuthValueFactoryProvider;
 import io.dropwizard.testing.DropwizardTestSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -133,7 +134,8 @@ public class APITestHelpers {
                 .addProvider(PersistenceExceptionHandler.class)
                 .addProvider(HAPIExceptionHandler.class)
                 .addProvider(DefaultFHIRExceptionHandler.class)
-                .addProvider(JsonParseExceptionMapper.class);
+                .addProvider(JsonParseExceptionMapper.class)
+                .addProvider(new AuthValueFactoryProvider.Binder<>(OrganizationPrincipal.class));
 
         // Optionally enable validation
         if (validation) {
