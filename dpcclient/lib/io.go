@@ -28,14 +28,14 @@ func WriteSmallFile(path string, content []byte) error {
 	return nil
 }
 
-func GetAccessToken(authTokenBytes []byte, host string) (string, error) {
+func GetAccessToken(authTokenBytes []byte, baseURL string) (string, error) {
 	data := url.Values{}
 	data.Set("grant_type", "client_credentials")
 	data.Set("scope", "system/*.*")
 	data.Set("client_assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer")
 	data.Set("client_assertion", string(authTokenBytes))
 
-	resp, err := http.PostForm(fmt.Sprintf("%s://%s/api/v1/Token/auth", "https", host), data)
+	resp, err := http.PostForm(fmt.Sprintf("%s/Token/auth", baseURL), data)
 	// make sure we close the body if necessary when there's an error
 	if resp != nil {
 		defer func() {
@@ -64,7 +64,7 @@ func GetAccessToken(authTokenBytes []byte, host string) (string, error) {
 	if err = json.NewDecoder(resp.Body).Decode(&t); err != nil {
 		panic(fmt.Sprintf("unexpected token response format: %s", err.Error()))
 	}
-	fmt.Printf("TokenResponse: %+v", t)
+	//fmt.Printf("TokenResponse: %+v", t)
 
 	return t.AccessToken, nil
 }
