@@ -573,9 +573,9 @@ The DPC team has created a collection of sample Practitioner, Patient, and Group
 _Users can provide their own sample FHIR resources that fulfill the required FHIR profiles to DPC, but will need to ensure that all Patient resources have a Medicare Beneficiary Identifier (MBI) that matches a record in the Beneficiary FHIR Data Server (BFD)._
 
 ### Find Organization ID
-You will need your organization ID to create an Attribution Group for Attestation. To find your Organization ID, sign-in to your account in the DPC Portal and locate your Organization ID within your token.
+You will need your organization ID to create an Attribution Group for Attestation. To find your Organization ID, sign-in to your account in the DPC Portal and locate your Organization ID underneath the organization name.
 
-![Dashboard Org Id](/assets/guide_org_id.svg)
+![Dashboard Org Id](/assets/guide_org_id.png)
 
 The Organization endpoint supports a GET /Organization operation, which allows the user to retrieve their Organization ID.
 

@@ -13,6 +13,7 @@ class PublicKeysController < ApplicationController
   def create
     @organization = current_user.organizations.find(params[:organization_id])
     return render_error('Required values missing.') if missing_params
+    return render_error('Public key cannot be over 25 characters') if public_key_length
 
     reg_org = @organization.registered_organization
     manager = PublicKeyManager.new(registered_organization: reg_org)
@@ -54,6 +55,10 @@ class PublicKeysController < ApplicationController
 
   def missing_params
     params[:public_key].blank?
+  end
+
+  def public_key_length
+    params[:public_key].length <= 25
   end
 
   # :nocov:
