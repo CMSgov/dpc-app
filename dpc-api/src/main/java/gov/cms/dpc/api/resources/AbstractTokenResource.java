@@ -45,7 +45,7 @@ public abstract class AbstractTokenResource {
      * @param principal  - {@link OrganizationPrincipal} supplied by auth handler
      * @param  label      - {@link Optional} {@link String} to use as token label
      * @param expiration - {@link Optional} {@link OffsetDateTime} to use for token expiration
-     * @param  token - {@link CreateTokenRequest} model representing token resource. Token fields take precedence over query parameters.
+     * @param  requestBody - {@link CreateTokenRequest} model representing token resource. Token fields take precedence over query parameters.
      * @return - {@link String} base64 (URL) encoded token
      */
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
