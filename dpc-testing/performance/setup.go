@@ -75,7 +75,7 @@ func createOrg() string {
 	return result.ID
 }
 
-func getKeyPairAndSignature() (string, *rsa.PrivateKey, string) {
+func generateKeyPairAndSignature() (string, *rsa.PrivateKey, string) {
 	privKey, pubKey, err := dpcclient.GenRSAKeyPair()
 	if err := dpcclient.SaveDPCKeyPair("./keys/dpc-key", privKey, pubKey); err != nil {
 		cleanAndPanic(err)
@@ -91,7 +91,8 @@ func getKeyPairAndSignature() (string, *rsa.PrivateKey, string) {
 		cleanAndPanic(err)
 	}
 
-	signature, err := privKey.Sign(rand.Reader, snippetHash.Sum(nil), crypto.SHA256)
+	//signature, err := privKey.Sign(rand.Reader, snippetHash.Sum(nil), crypto.SHA256)
+	signature, err := rsa.SignPKCS1v15(rand.Reader, privKey, crypto.SHA256, snippetHash.Sum(nil))
 	if err != nil {
 		cleanAndPanic(err)
 	}

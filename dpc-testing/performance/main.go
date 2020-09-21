@@ -27,7 +27,7 @@ func main() {
 	testMetadata()
 
 	orgID := createOrg()
-	pubKeyStr, privateKey, signature := getKeyPairAndSignature()
+	pubKeyStr, privateKey, signature := generateKeyPairAndSignature()
 	keyID := uploadKey(pubKeyStr, signature, orgID)
 	clientToken := getClientToken(orgID)
 
@@ -95,7 +95,7 @@ func newPOSTKeyTargeter(accessToken string) vegeta.Targeter {
 			"Authorization": {fmt.Sprintf("Bearer %s", accessToken)},
 		}
 
-		pubKeyStr, _, signature := getKeyPairAndSignature()
+		pubKeyStr, _, signature := generateKeyPairAndSignature()
 		body := fmt.Sprintf("{ \"key\": \"%s\", \"signature\": \"%s\"}", pubKeyStr, signature)
 		t.Body = []byte(body)
 
@@ -145,6 +145,9 @@ func runTestWithTargeter(name string, targeter vegeta.Targeter, duration, freque
 	for results := range attacker.Attack(targeter, r, d, fmt.Sprintf("%dps:", r.Freq)) {
 		metrics.Add(results)
 		respBodies = append(respBodies, results.Body)
+		if results.Code != 200 {
+			cleanAndPanic(fmt.Errorf("unexpected response: %v", results.Code))
+		}
 	}
 	metrics.Close()
 
