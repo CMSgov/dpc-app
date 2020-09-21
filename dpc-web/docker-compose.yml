@@ -25,6 +25,8 @@ services:
       context: ..
       dockerfile: dpc-web/Dockerfile
     image: dpc-web:latest
+    volumes:
+      - "./coverage:/dpc-web/coverage"
     environment:
       - REDIS_URL=redis://redis:6379/1
       - DATABASE_URL=postgresql://db/dpc-website_development
