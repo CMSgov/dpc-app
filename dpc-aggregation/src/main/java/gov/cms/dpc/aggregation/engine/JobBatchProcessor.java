@@ -3,6 +3,7 @@ package gov.cms.dpc.aggregation.engine;
 import ca.uhn.fhir.context.FhirContext;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
+import gov.cms.dpc.aggregation.service.LookBackAnswer;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.common.utils.MetricMaker;
 import gov.cms.dpc.queue.IJobQueue;
@@ -10,8 +11,7 @@ import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatchFile;
 import io.reactivex.Flowable;
 import org.apache.commons.lang3.tuple.Pair;
-import org.hl7.fhir.dstu3.model.Resource;
-import org.hl7.fhir.dstu3.model.ResourceType;
+import org.hl7.fhir.dstu3.model.*;
 import org.reactivestreams.Publisher;
 
 import javax.inject.Inject;
@@ -47,11 +47,29 @@ public class JobBatchProcessor {
      * @param queue         the queue
      * @param job           the job to process
      * @param patientID     the current patient id to process
+     * @param lookBackAnswers
      * @return A list of batch files {@link JobQueueBatchFile}
      */
-    public List<JobQueueBatchFile> processJobBatchPartial(UUID aggregatorID, IJobQueue queue, JobQueueBatch job, String patientID) {
+    public List<JobQueueBatchFile> processJobBatchPartial(UUID aggregatorID, IJobQueue queue, JobQueueBatch job, String patientID, List<LookBackAnswer> lookBackAnswers) {
         final var results = Flowable.fromIterable(job.getResourceTypes())
-                .map(resourceType -> fetchResource(job, patientID, resourceType, job.getSince().orElse(null)))
+                .map(resourceType -> {
+                    boolean matched = lookBackAnswers.stream().anyMatch(a -> a.matchDateCriteria() && (a.orgNPIMatchAnyEobNPIs() || a.practitionerNPIMatchAnyEobNPIs()));
+                    if (matched) {
+                        return fetchResource(job, patientID, resourceType, job.getSince().orElse(null));
+                    } else {
+                        return Pair.of(Flowable.fromCallable(() -> {
+                            final var patientLocation = List.of(new StringType("Patient"), new StringType("id"), new StringType(patientID));
+                            final var outcome = new OperationOutcome();
+                            final String detail = lookBackAnswers.isEmpty() ? "Failed to get data for look back" : "Failed to retrieve " + resourceType + " because of look back";
+                            outcome.addIssue()
+                                    .setSeverity(OperationOutcome.IssueSeverity.ERROR)
+                                    .setCode(OperationOutcome.IssueType.EXCEPTION)
+                                    .setDetails(new CodeableConcept().setText(detail))
+                                    .setLocation(patientLocation);
+                            return List.of(outcome);
+                        }), ResourceType.OperationOutcome);
+                    }
+                })
                 .flatMap(result -> writeResource(job, result.getRight(), result.getLeft().flatMap(Flowable::fromIterable)))
                 .toList()
                 .blockingGet(); // Wait on the main thread until completion

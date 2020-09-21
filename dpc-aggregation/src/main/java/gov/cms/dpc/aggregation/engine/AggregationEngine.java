@@ -1,6 +1,7 @@
 package gov.cms.dpc.aggregation.engine;
 
 import com.newrelic.api.agent.Trace;
+import gov.cms.dpc.aggregation.service.LookBackAnswer;
 import gov.cms.dpc.aggregation.service.LookBackService;
 import gov.cms.dpc.aggregation.util.AggregationUtils;
 import gov.cms.dpc.common.MDCConstants;
@@ -23,6 +24,7 @@ import org.slf4j.MDC;
 import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -186,27 +188,26 @@ public class AggregationEngine implements Runnable {
     }
 
     private Optional<String> processPatient(JobQueueBatch job, String patientId) {
-        if (isValidLookBack(job, patientId)) {
-            jobBatchProcessor.processJobBatchPartial(aggregatorID, queue, job, patientId);
-        }
+        jobBatchProcessor.processJobBatchPartial(aggregatorID, queue, job, patientId, isValidLookBack(job, patientId));
+
         // Stop processing when no patients or early shutdown
         return this.isRunning() ? job.fetchNextPatient(aggregatorID) : Optional.empty();
     }
 
-    private boolean isValidLookBack(JobQueueBatch job, String patientId) {
-        boolean result = false;
+    private List<LookBackAnswer> isValidLookBack(JobQueueBatch job, String patientId) {
+        List<LookBackAnswer> result = new ArrayList<>();
         //job.getProviderID is really not providerID, it is the rosterID, see createJob in GroupResource export for confirmation
         //patientId here is the patient MBI
         final String practitionerNPI = lookBackService.getPractitionerNPIFromRoster(job.getOrgID(), job.getProviderID(), patientId);
         if (practitionerNPI != null) {
             Pair<Flowable<List<Resource>>, ResourceType> pair = jobBatchProcessor.fetchResource(job, patientId, ResourceType.ExplanationOfBenefit, null);
-            Boolean hasClaims = pair.getLeft()
+            result = pair.getLeft()
                     .flatMap(Flowable::fromIterable)
                     .filter(resource -> pair.getRight() == resource.getResourceType())
-                    .any(resource -> lookBackService.hasClaimWithin((ExplanationOfBenefit) resource, job.getOrgID(), practitionerNPI, operationsConfig.getLookBackMonths()))
-                    .onErrorReturn((error) -> false)
+                    .map(resource -> lookBackService.hasClaimWithin((ExplanationOfBenefit) resource, job.getOrgID(), practitionerNPI, operationsConfig.getLookBackMonths()))
+                    .toList()
+                    .doOnError(e -> new ArrayList<>())
                     .blockingGet();
-            result = Boolean.TRUE.equals(hasClaims);
         } else {
             logger.error("couldn't get practitionerNPI from roster");
         }
