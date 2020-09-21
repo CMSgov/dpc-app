@@ -145,9 +145,6 @@ func runTestWithTargeter(name string, targeter vegeta.Targeter, duration, freque
 	for results := range attacker.Attack(targeter, r, d, fmt.Sprintf("%dps:", r.Freq)) {
 		metrics.Add(results)
 		respBodies = append(respBodies, results.Body)
-		if results.Code != 200 {
-			cleanAndPanic(fmt.Errorf("unexpected response: %v", results.Code))
-		}
 	}
 	metrics.Close()
 

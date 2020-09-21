@@ -91,7 +91,6 @@ func generateKeyPairAndSignature() (string, *rsa.PrivateKey, string) {
 		cleanAndPanic(err)
 	}
 
-	//signature, err := privKey.Sign(rand.Reader, snippetHash.Sum(nil), crypto.SHA256)
 	signature, err := rsa.SignPKCS1v15(rand.Reader, privKey, crypto.SHA256, snippetHash.Sum(nil))
 	if err != nil {
 		cleanAndPanic(err)
