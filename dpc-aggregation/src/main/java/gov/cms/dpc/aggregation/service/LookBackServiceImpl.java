@@ -45,7 +45,7 @@ public class LookBackServiceImpl implements LookBackService {
 
     @Override
     @UnitOfWork(readOnly = true)
-    public LookBackAnswer hasClaimWithin(ExplanationOfBenefit explanationOfBenefit, UUID organizationUUID, String practitionerNPI, long withinMonth) {
+    public LookBackAnswer getLookBackAnswer(ExplanationOfBenefit explanationOfBenefit, UUID organizationUUID, String practitionerNPI, long withinMonth) {
         MDC.put(EOB_ID, explanationOfBenefit.getId());
         Date billingPeriod = Optional.of(explanationOfBenefit)
                 .map(ExplanationOfBenefit::getBillablePeriod)

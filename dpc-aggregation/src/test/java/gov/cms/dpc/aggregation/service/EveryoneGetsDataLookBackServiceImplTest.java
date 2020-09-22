@@ -17,7 +17,7 @@ public class EveryoneGetsDataLookBackServiceImplTest {
 
     @Test
     public void alwaysReturnTrueFromHasClaimWithin() {
-        LookBackAnswer result = lookBackService.hasClaimWithin(null, UUID.randomUUID(), UUID.randomUUID().toString(), 0L);
+        LookBackAnswer result = lookBackService.getLookBackAnswer(null, UUID.randomUUID(), UUID.randomUUID().toString(), 0L);
         Assertions.assertTrue(result.orgNPIMatchAnyEobNPIs());
         Assertions.assertTrue(result.practitionerMatchEob());
         Assertions.assertTrue(result.practitionerNPIMatchAnyEobNPIs());

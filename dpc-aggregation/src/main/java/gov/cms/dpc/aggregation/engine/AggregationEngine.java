@@ -204,7 +204,7 @@ public class AggregationEngine implements Runnable {
             result = pair.getLeft()
                     .flatMap(Flowable::fromIterable)
                     .filter(resource -> pair.getRight() == resource.getResourceType())
-                    .map(resource -> lookBackService.hasClaimWithin((ExplanationOfBenefit) resource, job.getOrgID(), practitionerNPI, operationsConfig.getLookBackMonths()))
+                    .map(resource -> lookBackService.getLookBackAnswer((ExplanationOfBenefit) resource, job.getOrgID(), practitionerNPI, operationsConfig.getLookBackMonths()))
                     .toList()
                     .doOnError(e -> new ArrayList<>())
                     .blockingGet();

@@ -70,19 +70,19 @@ public class LookBackServiceImplTest {
         OffsetDateTime dateTime = OffsetDateTime.now(ZoneOffset.UTC);
         eob.getBillablePeriod().setEnd(Date.from(dateTime.toInstant()));
 
-        LookBackAnswer result = lookBackService.hasClaimWithin(eob, orgID, providerNPI, 1);
+        LookBackAnswer result = lookBackService.getLookBackAnswer(eob, orgID, providerNPI, 1);
         Assertions.assertTrue(result.matchDateCriteria());
 
         dateTime = OffsetDateTime.now(ZoneOffset.UTC).minusMonths(1);
         eob.getBillablePeriod().setEnd(Date.from(dateTime.toInstant()));
 
-        result = lookBackService.hasClaimWithin(eob, orgID, providerNPI, 1);
+        result = lookBackService.getLookBackAnswer(eob, orgID, providerNPI, 1);
         Assertions.assertFalse(result.matchDateCriteria());
 
         dateTime = OffsetDateTime.now(ZoneOffset.UTC).plusMonths(1);
         eob.getBillablePeriod().setEnd(Date.from(dateTime.toInstant()));
 
-        result = lookBackService.hasClaimWithin(eob, orgID, providerNPI, 1);
+        result = lookBackService.getLookBackAnswer(eob, orgID, providerNPI, 1);
         Assertions.assertTrue(result.matchDateCriteria());
     }
 
@@ -91,10 +91,10 @@ public class LookBackServiceImplTest {
         OffsetDateTime dateTime = OffsetDateTime.now(ZoneOffset.UTC);
         eob.getBillablePeriod().setEnd(Date.from(dateTime.toInstant()));
 
-        LookBackAnswer result = lookBackService.hasClaimWithin(eob, orgID, NPIUtil.generateNPI(), 1);
+        LookBackAnswer result = lookBackService.getLookBackAnswer(eob, orgID, NPIUtil.generateNPI(), 1);
         Assertions.assertTrue(result.orgNPIMatchAnyEobNPIs());
 
-        result = lookBackService.hasClaimWithin(eob, UUID.randomUUID(), NPIUtil.generateNPI(), 1);
+        result = lookBackService.getLookBackAnswer(eob, UUID.randomUUID(), NPIUtil.generateNPI(), 1);
         Assertions.assertFalse(result.orgNPIMatchAnyEobNPIs());
     }
 
@@ -103,10 +103,10 @@ public class LookBackServiceImplTest {
         OffsetDateTime dateTime = OffsetDateTime.now(ZoneOffset.UTC);
         eob.getBillablePeriod().setEnd(Date.from(dateTime.toInstant()));
 
-        LookBackAnswer result = lookBackService.hasClaimWithin(eob, UUID.randomUUID(), providerNPI, 1);
+        LookBackAnswer result = lookBackService.getLookBackAnswer(eob, UUID.randomUUID(), providerNPI, 1);
         Assertions.assertTrue(result.practitionerNPIMatchAnyEobNPIs());
 
-        result = lookBackService.hasClaimWithin(eob, UUID.randomUUID(), NPIUtil.generateNPI(), 1);
+        result = lookBackService.getLookBackAnswer(eob, UUID.randomUUID(), NPIUtil.generateNPI(), 1);
         Assertions.assertFalse(result.orgNPIMatchAnyEobNPIs());
     }
 }

@@ -18,7 +18,7 @@ public class EveryoneGetsDataLookBackServiceImpl implements LookBackService {
     }
 
     @Override
-    public LookBackAnswer hasClaimWithin(ExplanationOfBenefit explanationOfBenefit, UUID organizationID, String practitionerNPI, long withinMonth) {
+    public LookBackAnswer getLookBackAnswer(ExplanationOfBenefit explanationOfBenefit, UUID organizationID, String practitionerNPI, long withinMonth) {
         String npi = NPIUtil.generateNPI();
         return new LookBackAnswer(npi, npi, 1, new Date())
                 .addEobBillingPeriod(new Date())
