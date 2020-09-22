@@ -51,28 +51,28 @@ public class JobBatchProcessor {
      * @return A list of batch files {@link JobQueueBatchFile}
      */
     public List<JobQueueBatchFile> processJobBatchPartial(UUID aggregatorID, IJobQueue queue, JobQueueBatch job, String patientID, List<LookBackAnswer> lookBackAnswers) {
-        final var results = Flowable.fromIterable(job.getResourceTypes())
-                .map(resourceType -> {
-                    boolean matched = lookBackAnswers.stream().anyMatch(a -> a.matchDateCriteria() && (a.orgNPIMatchAnyEobNPIs() || a.practitionerNPIMatchAnyEobNPIs()));
-                    if (matched) {
-                        return fetchResource(job, patientID, resourceType, job.getSince().orElse(null));
-                    } else {
-                        return Pair.of(Flowable.fromCallable(() -> {
-                            final var patientLocation = List.of(new StringType("Patient"), new StringType("id"), new StringType(patientID));
-                            final var outcome = new OperationOutcome();
-                            final String detail = lookBackAnswers.isEmpty() ? "Failed to get data for look back" : "Failed to retrieve " + resourceType + " because of look back";
-                            outcome.addIssue()
-                                    .setSeverity(OperationOutcome.IssueSeverity.ERROR)
-                                    .setCode(OperationOutcome.IssueType.EXCEPTION)
-                                    .setDetails(new CodeableConcept().setText(detail))
-                                    .setLocation(patientLocation);
-                            return List.of(outcome);
-                        }), ResourceType.OperationOutcome);
-                    }
-                })
-                .flatMap(result -> writeResource(job, result.getRight(), result.getLeft().flatMap(Flowable::fromIterable)))
+        boolean matched = lookBackAnswers.stream().anyMatch(a -> a.matchDateCriteria() && (a.orgNPIMatchAnyEobNPIs() || a.practitionerNPIMatchAnyEobNPIs()));
+
+        Flowable<Pair<Flowable<List<Resource>>, ResourceType>> flowable = matched ?
+                Flowable.fromIterable(job.getResourceTypes())
+                        .map(resourceType -> fetchResource(job, patientID, resourceType, job.getSince().orElse(null)))
+                :
+                Flowable.fromCallable(() -> Pair.of(Flowable.fromCallable(() -> {
+                    final var patientLocation = List.of(new StringType("Patient"), new StringType("id"), new StringType(patientID));
+                    final var outcome = new OperationOutcome();
+                    final var detail = lookBackAnswers.isEmpty() ? "Failed to get data for look back" : "Failed look back";
+                    outcome.addIssue()
+                            .setSeverity(OperationOutcome.IssueSeverity.ERROR)
+                            .setCode(OperationOutcome.IssueType.EXCEPTION)
+                            .setDetails(new CodeableConcept().setText(detail))
+                            .setLocation(patientLocation);
+                    return List.of(outcome);
+                }), ResourceType.OperationOutcome));
+
+        final var results = flowable.flatMap(result -> writeResource(job, result.getRight(), result.getLeft().flatMap(Flowable::fromIterable)))
                 .toList()
-                .blockingGet(); // Wait on the main thread until completion
+                .blockingGet();
+
         queue.completePartialBatch(job, aggregatorID);
         return results;
     }
