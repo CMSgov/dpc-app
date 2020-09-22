@@ -98,8 +98,7 @@ public class JobBatchProcessor {
     }
 
     private Flowable<JobQueueBatchFile> writeResource(JobQueueBatch job, ResourceType resourceType, Flowable<Resource> flow) {
-        var connectableMixedFlow = flow.publish().autoConnect(2);
-        // Batch the non-error resources into files
+        var connectableMixedFlow = flow.publish().autoConnect(1);
         final var resourceCount = new AtomicInteger();
         final var sequenceCount = new AtomicInteger();
         job.getJobQueueFileLatest(resourceType).ifPresent(file -> {
@@ -107,20 +106,9 @@ public class JobBatchProcessor {
             sequenceCount.set(file.getSequence());
         });
         final var writer = new ResourceWriter(fhirContext, job, resourceType, operationsConfig);
-        final Flowable<JobQueueBatchFile> resourceFlow = connectableMixedFlow.compose((upstream) -> bufferAndWrite(upstream, writer, resourceCount, sequenceCount));
-
-        // Batch the error resources into files
-        final var errorResourceCount = new AtomicInteger();
-        final var errorSequenceCount = new AtomicInteger();
-        job.getJobQueueFileLatest(ResourceType.OperationOutcome).ifPresent(file -> {
-            errorResourceCount.set(file.getCount());
-            errorSequenceCount.set(file.getSequence());
-        });
-        final var errorWriter = new ResourceWriter(fhirContext, job, ResourceType.OperationOutcome, operationsConfig);
-        final Flowable<JobQueueBatchFile> outcomeFlow = connectableMixedFlow.compose((upstream) -> bufferAndWrite(upstream, errorWriter, errorResourceCount, errorSequenceCount));
 
         // Merge the resultant flows
-        return resourceFlow.mergeWith(outcomeFlow);
+        return connectableMixedFlow.compose((upstream) -> bufferAndWrite(upstream, writer, resourceCount, sequenceCount));
     }
 
     /**
