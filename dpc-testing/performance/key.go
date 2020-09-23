@@ -10,6 +10,7 @@ import (
 func testKeyEndpoints(accessToken string) {
 
 	resps := runTestWithTargeter(fmt.Sprintf("POST %s/Key", apiURL), newPOSTKeyTargeter(accessToken), 5, 5)
+	var keyIDs []string
 	for _, resp := range resps {
 		var result Resource
 		json.Unmarshal(resp, &result)

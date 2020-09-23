@@ -13,8 +13,6 @@ import (
 var (
 	apiURL, adminURL string
 	goldenMacaroon   []byte
-	keyIDs           []string
-	clientTokenResps []ClientTokenResp
 )
 
 func init() {
