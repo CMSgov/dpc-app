@@ -11,7 +11,6 @@ import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatchFile;
 import io.reactivex.Flowable;
-import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.reactivestreams.Publisher;
@@ -56,16 +55,15 @@ public class JobBatchProcessor {
         boolean matched = lookBackAnswers.stream()
                 .anyMatch(a -> a.matchDateCriteria() && (a.orgNPIMatchAnyEobNPIs() || a.practitionerNPIMatchAnyEobNPIs()));
 
-        Flowable<Pair<ResourceType, Flowable<Resource>>> pairFlowable = matched ?
+        Flowable<Resource> flowable = matched ?
                 Flowable.fromIterable(job.getResourceTypes())
-                        .map(r -> Pair.of(r, fetchResource(job, patientID, r, job.getSince().orElse(null))))
+                        .flatMap(r -> fetchResource(job, patientID, r, job.getSince().orElse(null)))
                 :
-                Flowable.fromCallable(() -> Pair.of(ResourceType.OperationOutcome, Flowable.just(LookBackService.getOperationOutcome(lookBackAnswers, patientID))));
+                Flowable.just(LookBackService.getOperationOutcome(lookBackAnswers, patientID));
 
-        final var results = pairFlowable
-                .flatMap(p -> writeResource(job, p.getKey(), p.getValue()))
+        final var results = writeResource(job, flowable)
                 .toList()
-                .blockingGet(); // Wait on the main thread until completion
+                .blockingGet();
         queue.completePartialBatch(job, aggregatorID);
         return results;
     }
@@ -91,19 +89,21 @@ public class JobBatchProcessor {
                 .flatMap(Flowable::fromIterable);
     }
 
-    private Flowable<JobQueueBatchFile> writeResource(JobQueueBatch job, ResourceType resourceType, Flowable<Resource> flow) {
-        var connectableMixedFlow = flow.publish().autoConnect(1);
-        final var resourceCount = new AtomicInteger();
-        final var sequenceCount = new AtomicInteger();
-        job.getJobQueueFileLatest(resourceType).ifPresent(file -> {
-            resourceCount.set(file.getCount());
-            sequenceCount.set(file.getSequence());
-        });
-        final var writer = new ResourceWriter(fhirContext, job, resourceType, operationsConfig);
-
-        // Merge the resultant flows
-        return connectableMixedFlow.compose((upstream) -> bufferAndWrite(upstream, writer, resourceCount, sequenceCount));
+    private Flowable<JobQueueBatchFile> writeResource(JobQueueBatch job, Flowable<Resource> flow) {
+        return flow.groupBy(Resource::getResourceType)
+                .flatMap(groupedByResourceFlow -> {
+                    final var resourceCount = new AtomicInteger();
+                    final var sequenceCount = new AtomicInteger();
+                    final var resourceType = groupedByResourceFlow.getKey();
+                    job.getJobQueueFileLatest(resourceType).ifPresent(file -> {
+                        resourceCount.set(file.getCount());
+                        sequenceCount.set(file.getSequence());
+                    });
+                    final var writer = new ResourceWriter(fhirContext, job, resourceType, operationsConfig);
+                    return groupedByResourceFlow.compose((upstream) -> bufferAndWrite(upstream, writer, resourceCount, sequenceCount));
+                });
     }
+
 
     /**
      * This part of the flow chain buffers resources and writes them in batches to a file
