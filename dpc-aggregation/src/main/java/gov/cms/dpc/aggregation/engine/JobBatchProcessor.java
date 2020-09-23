@@ -11,29 +11,36 @@ import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatchFile;
 import io.reactivex.Flowable;
+import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.reactivestreams.Publisher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class JobBatchProcessor {
+    private static final Logger logger = LoggerFactory.getLogger(JobBatchProcessor.class);
 
     private final BlueButtonClient bbclient;
     private final OperationsConfig operationsConfig;
     private final FhirContext fhirContext;
     private final Meter resourceMeter;
     private final Meter operationalOutcomeMeter;
+    private final LookBackService lookBackService;
 
     @Inject
-    public JobBatchProcessor(BlueButtonClient bbclient, FhirContext fhirContext, MetricRegistry metricRegistry, OperationsConfig operationsConfig) {
+    public JobBatchProcessor(BlueButtonClient bbclient, FhirContext fhirContext, MetricRegistry metricRegistry, OperationsConfig operationsConfig, LookBackService lookBackService) {
         this.bbclient = bbclient;
         this.fhirContext = fhirContext;
         this.operationsConfig = operationsConfig;
+        this.lookBackService = lookBackService;
 
         // Metrics
         final var metricFactory = new MetricMaker(metricRegistry, JobBatchProcessor.class);
@@ -48,18 +55,18 @@ public class JobBatchProcessor {
      * @param queue         the queue
      * @param job           the job to process
      * @param patientID     the current patient id to process
-     * @param lookBackAnswers
      * @return A list of batch files {@link JobQueueBatchFile}
      */
-    public List<JobQueueBatchFile> processJobBatchPartial(UUID aggregatorID, IJobQueue queue, JobQueueBatch job, String patientID, List<LookBackAnswer> lookBackAnswers) {
-        boolean matched = lookBackAnswers.stream()
+    public List<JobQueueBatchFile> processJobBatchPartial(UUID aggregatorID, IJobQueue queue, JobQueueBatch job, String patientID) {
+        List<LookBackAnswer> answers = getAnswers(job, patientID);
+        boolean matched = answers.stream()
                 .anyMatch(a -> a.matchDateCriteria() && (a.orgNPIMatchAnyEobNPIs() || a.practitionerNPIMatchAnyEobNPIs()));
 
         Flowable<Resource> flowable = matched ?
                 Flowable.fromIterable(job.getResourceTypes())
                         .flatMap(r -> fetchResource(job, patientID, r, job.getSince().orElse(null)))
                 :
-                Flowable.just(LookBackService.getOperationOutcome(lookBackAnswers, patientID));
+                Flowable.just(LookBackService.getOperationOutcome(answers, patientID));
 
         final var results = writeResource(job, flowable)
                 .toList()
@@ -77,7 +84,7 @@ public class JobBatchProcessor {
      * @param since        the since date
      * @return A flowable and resourceType the user requested
      */
-    public Flowable<Resource> fetchResource(JobQueueBatch job, String patientID, ResourceType resourceType, OffsetDateTime since) {
+    private Flowable<Resource> fetchResource(JobQueueBatch job, String patientID, ResourceType resourceType, OffsetDateTime since) {
         // Make this flow hot (ie. only called once) when multiple subscribers attach
         final var fetcher = new ResourceFetcher(bbclient,
                 job.getJobID(),
@@ -87,6 +94,26 @@ public class JobBatchProcessor {
                 job.getTransactionTime());
         return fetcher.fetchResources(patientID)
                 .flatMap(Flowable::fromIterable);
+    }
+
+    private List<LookBackAnswer> getAnswers(JobQueueBatch job, String patientId) {
+        List<LookBackAnswer> result = new ArrayList<>();
+        //job.getProviderID is really not providerID, it is the rosterID, see createJob in GroupResource export for confirmation
+        //patientId here is the patient MBI
+        final String practitionerNPI = lookBackService.getPractitionerNPIFromRoster(job.getOrgID(), job.getProviderID(), patientId);
+        if (practitionerNPI != null) {
+            Flowable<Resource> flowable = fetchResource(job, patientId, ResourceType.ExplanationOfBenefit, null);
+            result = flowable
+                    .filter(resource -> ResourceType.ExplanationOfBenefit == resource.getResourceType())
+                    .map(ExplanationOfBenefit.class::cast)
+                    .map(resource -> lookBackService.getLookBackAnswer(resource, job.getOrgID(), practitionerNPI, operationsConfig.getLookBackMonths()))
+                    .toList()
+                    .doOnError(e -> new ArrayList<>())
+                    .blockingGet();
+        } else {
+            logger.error("couldn't get practitionerNPI from roster");
+        }
+        return result;
     }
 
     private Flowable<JobQueueBatchFile> writeResource(JobQueueBatch job, Flowable<Resource> flow) {
