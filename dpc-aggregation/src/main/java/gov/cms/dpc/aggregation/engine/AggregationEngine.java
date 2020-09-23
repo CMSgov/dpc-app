@@ -13,7 +13,6 @@ import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.exceptions.UndeliverableException;
 import io.reactivex.plugins.RxJavaPlugins;
-import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.ResourceType;
@@ -200,11 +199,11 @@ public class AggregationEngine implements Runnable {
         //patientId here is the patient MBI
         final String practitionerNPI = lookBackService.getPractitionerNPIFromRoster(job.getOrgID(), job.getProviderID(), patientId);
         if (practitionerNPI != null) {
-            Pair<Flowable<List<Resource>>, ResourceType> pair = jobBatchProcessor.fetchResource(job, patientId, ResourceType.ExplanationOfBenefit, null);
-            result = pair.getLeft()
-                    .flatMap(Flowable::fromIterable)
-                    .filter(resource -> pair.getRight() == resource.getResourceType())
-                    .map(resource -> lookBackService.getLookBackAnswer((ExplanationOfBenefit) resource, job.getOrgID(), practitionerNPI, operationsConfig.getLookBackMonths()))
+            Flowable<Resource> flowable = jobBatchProcessor.fetchResource(job, patientId, ResourceType.ExplanationOfBenefit, null);
+            result = flowable
+                    .filter(resource -> ResourceType.ExplanationOfBenefit == resource.getResourceType())
+                    .map(ExplanationOfBenefit.class::cast)
+                    .map(resource -> lookBackService.getLookBackAnswer(resource, job.getOrgID(), practitionerNPI, operationsConfig.getLookBackMonths()))
                     .toList()
                     .doOnError(e -> new ArrayList<>())
                     .blockingGet();

@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.dpc.aggregation.service.LookBackAnswer;
+import gov.cms.dpc.aggregation.service.LookBackService;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.common.utils.MetricMaker;
 import gov.cms.dpc.queue.IJobQueue;
@@ -11,7 +12,8 @@ import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatchFile;
 import io.reactivex.Flowable;
 import org.apache.commons.lang3.tuple.Pair;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.Resource;
+import org.hl7.fhir.dstu3.model.ResourceType;
 import org.reactivestreams.Publisher;
 
 import javax.inject.Inject;
@@ -51,28 +53,19 @@ public class JobBatchProcessor {
      * @return A list of batch files {@link JobQueueBatchFile}
      */
     public List<JobQueueBatchFile> processJobBatchPartial(UUID aggregatorID, IJobQueue queue, JobQueueBatch job, String patientID, List<LookBackAnswer> lookBackAnswers) {
-        boolean matched = lookBackAnswers.stream().anyMatch(a -> a.matchDateCriteria() && (a.orgNPIMatchAnyEobNPIs() || a.practitionerNPIMatchAnyEobNPIs()));
+        boolean matched = lookBackAnswers.stream()
+                .anyMatch(a -> a.matchDateCriteria() && (a.orgNPIMatchAnyEobNPIs() || a.practitionerNPIMatchAnyEobNPIs()));
 
-        Flowable<Pair<Flowable<List<Resource>>, ResourceType>> flowable = matched ?
+        Flowable<Pair<ResourceType, Flowable<Resource>>> pairFlowable = matched ?
                 Flowable.fromIterable(job.getResourceTypes())
-                        .map(resourceType -> fetchResource(job, patientID, resourceType, job.getSince().orElse(null)))
+                        .map(r -> Pair.of(r, fetchResource(job, patientID, r, job.getSince().orElse(null))))
                 :
-                Flowable.fromCallable(() -> Pair.of(Flowable.fromCallable(() -> {
-                    final var patientLocation = List.of(new StringType("Patient"), new StringType("id"), new StringType(patientID));
-                    final var outcome = new OperationOutcome();
-                    final var detail = lookBackAnswers.isEmpty() ? "Failed to get data for look back" : "Failed look back";
-                    outcome.addIssue()
-                            .setSeverity(OperationOutcome.IssueSeverity.ERROR)
-                            .setCode(OperationOutcome.IssueType.EXCEPTION)
-                            .setDetails(new CodeableConcept().setText(detail))
-                            .setLocation(patientLocation);
-                    return List.of(outcome);
-                }), ResourceType.OperationOutcome));
+                Flowable.fromCallable(() -> Pair.of(ResourceType.OperationOutcome, Flowable.just(LookBackService.getOperationOutcome(lookBackAnswers, patientID))));
 
-        final var results = flowable.flatMap(result -> writeResource(job, result.getRight(), result.getLeft().flatMap(Flowable::fromIterable)))
+        final var results = pairFlowable
+                .flatMap(p -> writeResource(job, p.getKey(), p.getValue()))
                 .toList()
-                .blockingGet();
-
+                .blockingGet(); // Wait on the main thread until completion
         queue.completePartialBatch(job, aggregatorID);
         return results;
     }
@@ -86,7 +79,7 @@ public class JobBatchProcessor {
      * @param since        the since date
      * @return A flowable and resourceType the user requested
      */
-    public Pair<Flowable<List<Resource>>, ResourceType> fetchResource(JobQueueBatch job, String patientID, ResourceType resourceType, OffsetDateTime since) {
+    public Flowable<Resource> fetchResource(JobQueueBatch job, String patientID, ResourceType resourceType, OffsetDateTime since) {
         // Make this flow hot (ie. only called once) when multiple subscribers attach
         final var fetcher = new ResourceFetcher(bbclient,
                 job.getJobID(),
@@ -94,7 +87,8 @@ public class JobBatchProcessor {
                 resourceType,
                 since,
                 job.getTransactionTime());
-        return Pair.of(fetcher.fetchResources(patientID), resourceType);
+        return fetcher.fetchResources(patientID)
+                .flatMap(Flowable::fromIterable);
     }
 
     private Flowable<JobQueueBatchFile> writeResource(JobQueueBatch job, ResourceType resourceType, Flowable<Resource> flow) {
