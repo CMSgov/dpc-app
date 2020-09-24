@@ -134,7 +134,7 @@ GEM
       factory_bot (~> 6.1.0)
       railties (>= 5.0.0)
     fakefs (1.2.2)
-    faker (2.13.0)
+    faker (2.14.0)
       i18n (>= 1.6, < 2)
     fakeredis (0.8.0)
       redis (~> 4.1)
