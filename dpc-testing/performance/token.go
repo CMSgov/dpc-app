@@ -39,7 +39,7 @@ func testTokenEndpoints(accessToken string, privateKey *rsa.PrivateKey, keyID st
 		clientTokenResps = append(clientTokenResps, result)
 	}
 
-	// POST /Token/auth
+	// POST /Token/validate
 	var authTokens = list.New()
 	for i := 0; i < 25; i++ {
 		authToken, err := dpcclient.GenerateAuthToken(privateKey, keyID, clientTokenResps[0].ClientToken, apiURL)
@@ -49,6 +49,18 @@ func testTokenEndpoints(accessToken string, privateKey *rsa.PrivateKey, keyID st
 		authTokens.PushBack(authToken)
 	}
 	currentAuthToken := authTokens.Front()
+	validateTokenTargeter := newPOSTTokenValidateTargeter(func() []byte {
+		b, ok := currentAuthToken.Value.([]byte)
+		if !ok {
+			cleanAndPanic(fmt.Errorf("not a valid byte array: %v", currentAuthToken.Value))
+		}
+		currentAuthToken = currentAuthToken.Next()
+		return b
+	})
+	runTestWithTargeter(fmt.Sprintf("POST %s/Token/validate", apiURL), validateTokenTargeter, 5, 5)
+
+	// POST /Token/auth
+	currentAuthToken = authTokens.Front()
 	postTokenAuthTargeter := newPOSTTokenAuthTargeter(func() string {
 		b, ok := currentAuthToken.Value.([]byte)
 		if !ok {
@@ -57,7 +69,7 @@ func testTokenEndpoints(accessToken string, privateKey *rsa.PrivateKey, keyID st
 		currentAuthToken = currentAuthToken.Next()
 		return string(b)
 	})
-	resps = runTestWithTargeter(fmt.Sprintf("%s/Token/auth", apiURL), postTokenAuthTargeter, 5, 5)
+	resps = runTestWithTargeter(fmt.Sprintf("POST %s/Token/auth", apiURL), postTokenAuthTargeter, 5, 5)
 	var accessTokens []string
 	for _, resp := range resps {
 		var result AccessTokenResp
@@ -87,25 +99,13 @@ func testTokenEndpoints(accessToken string, privateKey *rsa.PrivateKey, keyID st
 	}
 	runTest(getTokenTarget, 5, 5)
 
-	// POST /Token/validate
-	// currentAuthToken = authTokens.Front()
-	// validateTokenTargeter := newPOSTTokenValidateTargeter(func() []byte {
-	// 	b, ok := currentAuthToken.Value.([]byte)
-	// 	if !ok {
-	// 		cleanAndPanic(fmt.Errorf("not a valid byte array: %v", currentAuthToken.Value))
-	// 	}
-	// 	currentAuthToken = currentAuthToken.Next()
-	// 	return b
-	// })
-	// runTestWithTargeter(fmt.Sprintf("POST %s/Token/validate", apiURL), validateTokenTargeter, 5, 5)
-
 	// DELETE /Token/{id}
-	// deleteTokensTargeter := newDELETETokenTargeter(func() string {
-	// 	clientTokenResp := clientTokenResps[0]
-	// 	clientTokenResps = clientTokenResps[1:]
-	// 	return clientTokenResp.ID
-	// }, accessToken)
-	// runTestWithTargeter(fmt.Sprintf("DELETE %s/Token/{id}", apiURL), deleteTokensTargeter, 5, 5)
+	deleteTokensTargeter := newDELETETokenTargeter(func() string {
+		clientTokenResp := clientTokenResps[0]
+		clientTokenResps = clientTokenResps[1:]
+		return clientTokenResp.ID
+	}, accessToken)
+	runTestWithTargeter(fmt.Sprintf("DELETE %s/Token/{id}", apiURL), deleteTokensTargeter, 5, 5)
 }
 
 func newPOSTTokenAuthTargeter(nextAuthToken func() string) vegeta.Targeter {
