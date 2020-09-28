@@ -47,7 +47,7 @@ group :development, :test do
   gem 'factory_bot_rails'
   gem 'faker'
   # Version 0.18 has a breaking change for sonarqube
-  gem 'simplecov', '<= 0.17'
+  gem 'simplecov', '<= 0.20'
   gem 'vcr'
   gem 'webmock'
   gem 'bundler-audit'
