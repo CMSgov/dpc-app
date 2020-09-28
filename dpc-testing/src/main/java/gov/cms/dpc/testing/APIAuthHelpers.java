@@ -258,7 +258,7 @@ public class APIAuthHelpers {
         if (disableSSLCheck) {
             try {
                 clientBuilder.setSSLContext(createTrustingSSLContext());
-                clientBuilder.setSSLHostnameVerifier((s, sslSession) -> true);
+                clientBuilder.setSSLHostnameVerifier((s, sslSession) -> s.equalsIgnoreCase(sslSession.getPeerHost()));
             } catch (NoSuchAlgorithmException | KeyManagementException e) {
                 throw new RuntimeException("Cannot create custom SSL context", e);
             }
@@ -278,7 +278,7 @@ public class APIAuthHelpers {
     }
 
     private static SSLContext createTrustingSSLContext() throws KeyManagementException, NoSuchAlgorithmException {
-        final SSLContext tls = SSLContext.getInstance("TLS");
+        final SSLContext tls = SSLContext.getInstance("TLSv1.2");
         tls.init(null, getTrustingManager(), new SecureRandom());
         return tls;
     }
@@ -469,7 +469,7 @@ public class APIAuthHelpers {
             try {
                 builder
                         .setSSLContext(createTrustingSSLContext())
-                        .setSSLHostnameVerifier((s, sslSession) -> true);
+                        .setSSLHostnameVerifier((s, sslSession) -> s.equalsIgnoreCase(sslSession.getPeerHost()));
             } catch (KeyManagementException | NoSuchAlgorithmException e) {
                 throw new IllegalStateException("Cannot create trusting http context");
             }
