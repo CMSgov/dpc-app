@@ -40,6 +40,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.security.spec.ECGenParameterSpec;
 import java.sql.Date;
@@ -291,13 +292,23 @@ public class APIAuthHelpers {
             }
 
             @Override
-            public void checkClientTrusted(X509Certificate[] certs, String authType) {
-                // Do nothing
+            public void checkClientTrusted(X509Certificate[] certs, String authType) throws CertificateException {
+                if (certs.length == 0) {
+                    // Do nothing because this is only used for smoke tests
+                }
+                else {
+                    throw new CertificateException();
+                }
             }
 
             @Override
-            public void checkServerTrusted(X509Certificate[] certs, String authType) {
-                // Do nothing
+            public void checkServerTrusted(X509Certificate[] certs, String authType) throws CertificateException {
+                if (certs.length == 0) {
+                    // Do nothing because this is only used for smoke tests
+                }
+                else {
+                    throw new CertificateException();
+                }
             }
 
         }};
