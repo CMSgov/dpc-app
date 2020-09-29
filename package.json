@@ -7,12 +7,15 @@
     "node": ">=0.12"
   },
   "dependencies": {
-    "newman": "^4.6.1",
-    "minimist": "1.2.3"
+    "newman": "^5.2.0",
+    "minimist": "1.2.3",
+    "snyk": "^1.404.0"
   },
   "devDependencies": {},
   "scripts": {
-    "test": "newman run src/test/EndToEndRequestTest.postman_collection.json"
+    "test": "newman run src/test/EndToEndRequestTest.postman_collection.json",
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
   },
   "repository": {
     "type": "git",
@@ -23,5 +26,6 @@
   "bugs": {
     "url": "https://github.com/CMSgov/dpc-app/issues"
   },
-  "homepage": "https://github.com/CMSgov/dpc-app#readme"
+  "homepage": "https://github.com/CMSgov/dpc-app#readme",
+  "snyk": true
 }
