@@ -25,7 +25,7 @@ func testTokenEndpoints(accessToken string, privateKey *rsa.PrivateKey, keyID st
 	// POST /Token
 	postTokenTarget := vegeta.Target{
 		Method: "POST",
-		URL:    fmt.Sprintf("%s%s", apiURL, "/Token"),
+		URL:    fmt.Sprintf("%s/Token", apiURL),
 		Header: map[string][]string{
 			"Content-Type":  {"application/json"},
 			"Authorization": {fmt.Sprintf("Bearer %s", accessToken)},
@@ -80,7 +80,7 @@ func testTokenEndpoints(accessToken string, privateKey *rsa.PrivateKey, keyID st
 	// GET /Token
 	getTokensTarget := vegeta.Target{
 		Method: "GET",
-		URL:    fmt.Sprintf("%s%s", apiURL, "/Token"),
+		URL:    fmt.Sprintf("%s/Token", apiURL),
 		Header: map[string][]string{
 			"Accept":        {"application/json"},
 			"Authorization": {fmt.Sprintf("Bearer %s", accessTokens[0])},
@@ -91,7 +91,7 @@ func testTokenEndpoints(accessToken string, privateKey *rsa.PrivateKey, keyID st
 	// GET /Token/{id}
 	getTokenTarget := vegeta.Target{
 		Method: "GET",
-		URL:    fmt.Sprintf("%s%s%s", apiURL, "/Token/", clientTokenResps[0].ID),
+		URL:    fmt.Sprintf("%s/Token/%s", apiURL, clientTokenResps[0].ID),
 		Header: map[string][]string{
 			"Accept":        {"application/json"},
 			"Authorization": {fmt.Sprintf("Bearer %s", accessTokens[0])},
