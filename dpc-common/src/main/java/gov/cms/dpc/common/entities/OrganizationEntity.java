@@ -1,8 +1,11 @@
 package gov.cms.dpc.common.entities;
 
+import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import gov.cms.dpc.common.annotations.NoHtml;
 import gov.cms.dpc.common.annotations.OrganizationId;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
+import org.hibernate.annotations.Type;
+import org.hibernate.annotations.TypeDef;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Organization;
@@ -14,6 +17,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Entity(name = "organizations")
+@TypeDef(name = "json", typeClass = JsonBinaryType.class)
 public class OrganizationEntity implements Serializable {
     public static final long serialVersionUID = 42L;
 
@@ -51,6 +55,10 @@ public class OrganizationEntity implements Serializable {
 
     @OneToMany(cascade = CascadeType.REMOVE, mappedBy = "managingOrganization")
     private List<RosterEntity> rosters;
+
+    @Type(type = "json")
+    @Column(name = "features", columnDefinition = "json")
+    private FeatureFlags features;
 
     public OrganizationEntity() {
         // Not used
@@ -132,6 +140,14 @@ public class OrganizationEntity implements Serializable {
         this.rosters = rosters;
     }
 
+    public FeatureFlags getFeatures() {
+        return features;
+    }
+
+    public void setFeatures(FeatureFlags features) {
+        this.features = features;
+    }
+
     /**
      * Update {@link Organization} fields.
      *
@@ -149,6 +165,7 @@ public class OrganizationEntity implements Serializable {
 
         return this;
     }
+
 
     @Embeddable
     public static class OrganizationID implements Serializable {

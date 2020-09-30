@@ -180,6 +180,11 @@
                 <version>5.4.14.Final</version>
             </dependency>
             <dependency>
+                <groupId>com.vladmihalcea</groupId>
+                <artifactId>hibernate-types-52</artifactId>
+                <version>2.9.13</version>
+            </dependency>
+            <dependency>
                 <groupId>org.postgresql</groupId>
                 <artifactId>postgresql</artifactId>
                 <version>${pgsql.version}</version>

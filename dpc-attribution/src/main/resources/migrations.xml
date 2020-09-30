@@ -434,4 +434,10 @@
             <column name="beneficiary_id" valueComputed="UPPER(beneficiary_id)"/>
         </update>
     </changeSet>
+
+    <changeSet id="features" author="sal">
+        <addColumn tableName="ORGANIZATIONS">
+            <column name="features" type="JSON"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>
