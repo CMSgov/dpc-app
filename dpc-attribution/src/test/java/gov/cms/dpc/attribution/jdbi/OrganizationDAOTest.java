@@ -70,33 +70,33 @@ class OrganizationDAOTest extends AbstractAttributionTest{
     @Test
     void registerOrganizationWithFeatureFlags() {
         OrganizationEntity org = buildValidOrgEntity(UUID.randomUUID(), "Test Org 1", "1334567892");
-        org.setFeatures(new FeatureFlags());
-        org.getFeatures().setFeature(FeatureFlagCodes.ALLOW_ADMIN_HEADERS, true);
-        org.getFeatures().setFeature(FeatureFlagCodes.LOOKBACK_MONTHS, 10);
+        org.setFeatureFlags(new FeatureFlags());
+        org.getFeatureFlags().setFeature(FeatureFlagCodes.ALLOW_ADMIN_HEADERS, true);
+        org.getFeatureFlags().setFeature(FeatureFlagCodes.LOOKBACK_MONTHS, 10);
         daoTestExtension.inTransaction(() -> organizationDAO.registerOrganization(org));
 
         Optional<OrganizationEntity> retrievedOrg = daoTestExtension.inTransaction(()->organizationDAO.fetchOrganization(org.getId()));
         assertTrue(retrievedOrg.isPresent(), "Org should exist.");
-        assertNotNull(retrievedOrg.get().getFeatures(),"features should not be null");
-        assertTrue(retrievedOrg.get().getFeatures().getBooleanFeature(FeatureFlagCodes.ALLOW_ADMIN_HEADERS).isPresent(), "flag should have been present");
-        assertTrue(retrievedOrg.get().getFeatures().getBooleanFeature(FeatureFlagCodes.ALLOW_ADMIN_HEADERS).get(), "flag should have been true");
-        assertTrue(retrievedOrg.get().getFeatures().getBooleanFeature(FeatureFlagCodes.LOOKBACK_MONTHS).isPresent(), "flag should have been present");
-        assertEquals(10, retrievedOrg.get().getFeatures().getIntegerFeature(FeatureFlagCodes.LOOKBACK_MONTHS).get(), "string flag should have been present and equal");
+        assertNotNull(retrievedOrg.get().getFeatureFlags(),"features should not be null");
+        assertTrue(retrievedOrg.get().getFeatureFlags().getBooleanFeature(FeatureFlagCodes.ALLOW_ADMIN_HEADERS).isPresent(), "flag should have been present");
+        assertTrue(retrievedOrg.get().getFeatureFlags().getBooleanFeature(FeatureFlagCodes.ALLOW_ADMIN_HEADERS).get(), "flag should have been true");
+        assertTrue(retrievedOrg.get().getFeatureFlags().getBooleanFeature(FeatureFlagCodes.LOOKBACK_MONTHS).isPresent(), "flag should have been present");
+        assertEquals(10, retrievedOrg.get().getFeatureFlags().getIntegerFeature(FeatureFlagCodes.LOOKBACK_MONTHS).get(), "string flag should have been present and equal");
     }
 
     @Test
     void updateFeatureFlag() {
         OrganizationEntity org = buildValidOrgEntity(UUID.randomUUID(), "Test Org 1", "1334567892");
-        org.setFeatures(new FeatureFlags());
-        org.getFeatures().setFeature(FeatureFlagCodes.LOOKBACK_MONTHS, 10);
+        org.setFeatureFlags(new FeatureFlags());
+        org.getFeatureFlags().setFeature(FeatureFlagCodes.LOOKBACK_MONTHS, 10);
         daoTestExtension.inTransaction(() -> organizationDAO.registerOrganization(org));
 
-        org.getFeatures().setFeature(FeatureFlagCodes.LOOKBACK_MONTHS, 42);
+        org.getFeatureFlags().setFeature(FeatureFlagCodes.LOOKBACK_MONTHS, 42);
         daoTestExtension.inTransaction(()->organizationDAO.updateOrganization(org.getId(), org));
 
         Optional<OrganizationEntity> retrievedOrg = daoTestExtension.inTransaction(()->organizationDAO.fetchOrganization(org.getId()));
-        assertTrue(retrievedOrg.get().getFeatures().getBooleanFeature(FeatureFlagCodes.LOOKBACK_MONTHS).isPresent(), "flag should have been present");
-        assertEquals(42, retrievedOrg.get().getFeatures().getIntegerFeature(FeatureFlagCodes.LOOKBACK_MONTHS).get(), "Value was not update");
+        assertTrue(retrievedOrg.get().getFeatureFlags().getBooleanFeature(FeatureFlagCodes.LOOKBACK_MONTHS).isPresent(), "flag should have been present");
+        assertEquals(42, retrievedOrg.get().getFeatureFlags().getIntegerFeature(FeatureFlagCodes.LOOKBACK_MONTHS).get(), "Value was not update");
     }
 
     @Test

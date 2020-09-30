@@ -9,12 +9,10 @@ import java.util.Optional;
 public class FeatureFlags {
     private ObjectNode featuresRootNode;
 
-    public FeatureFlags(){
-        featuresRootNode = JsonNodeFactory.instance.objectNode();
-    }
+    public FeatureFlags(){}
 
-    public Optional<JsonNode> getFeaturesRootNode() {
-        return Optional.ofNullable(featuresRootNode);
+    public ObjectNode getFeaturesRootNode() {
+        return featuresRootNode;
     }
 
     public void setFeaturesRootNode(ObjectNode featuresRootNode) {
@@ -22,23 +20,30 @@ public class FeatureFlags {
     }
 
     public void setFeature(String featureCode, String value){
-        featuresRootNode.set(featureCode,JsonNodeFactory.instance.textNode(value));
+        setFeature(featureCode,JsonNodeFactory.instance.textNode(value));
     }
 
     public void setFeature(String featureCode, double value){
-        featuresRootNode.set(featureCode,JsonNodeFactory.instance.numberNode(value));
+        setFeature(featureCode,JsonNodeFactory.instance.numberNode(value));
     }
 
     public void setFeature(String featureCode, int value){
-        featuresRootNode.set(featureCode,JsonNodeFactory.instance.numberNode(value));
+        setFeature(featureCode,JsonNodeFactory.instance.numberNode(value));
     }
 
     public void setFeature(String featureCode, long value){
-        featuresRootNode.set(featureCode,JsonNodeFactory.instance.numberNode(value));
+        setFeature(featureCode,JsonNodeFactory.instance.numberNode(value));
     }
 
     public void setFeature(String featureCode, boolean value){
-        featuresRootNode.set(featureCode,JsonNodeFactory.instance.booleanNode(value));
+        setFeature(featureCode, JsonNodeFactory.instance.booleanNode(value));
+    }
+
+    public void setFeature(String featureCode, JsonNode node){
+        if(featuresRootNode == null){
+            featuresRootNode = JsonNodeFactory.instance.objectNode();
+        }
+        featuresRootNode.set(featureCode,node);
     }
 
     public Optional<String> getStringFeature(String featureCode){
@@ -66,6 +71,9 @@ public class FeatureFlags {
     }
 
     private Optional<JsonNode> getValueNode(String code){
+        if(featuresRootNode == null){
+            return Optional.empty();
+        }
         return Optional.ofNullable(featuresRootNode.get(code));
     }
 }

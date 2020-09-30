@@ -58,7 +58,7 @@ public class OrganizationEntity implements Serializable {
 
     @Type(type = "json")
     @Column(name = "features", columnDefinition = "json")
-    private FeatureFlags features;
+    private FeatureFlags featureFlags;
 
     public OrganizationEntity() {
         // Not used
@@ -140,12 +140,12 @@ public class OrganizationEntity implements Serializable {
         this.rosters = rosters;
     }
 
-    public FeatureFlags getFeatures() {
-        return features;
+    public FeatureFlags getFeatureFlags() {
+        return featureFlags;
     }
 
-    public void setFeatures(FeatureFlags features) {
-        this.features = features;
+    public void setFeatureFlags(FeatureFlags features) {
+        this.featureFlags = features;
     }
 
     /**
