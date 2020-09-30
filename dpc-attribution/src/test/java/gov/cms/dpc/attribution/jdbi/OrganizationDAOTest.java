@@ -1,7 +1,5 @@
 package gov.cms.dpc.attribution.jdbi;
 
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import gov.cms.dpc.attribution.AbstractAttributionTest;
 import gov.cms.dpc.common.FeatureFlagCodes;
 import gov.cms.dpc.common.entities.*;
@@ -84,6 +82,21 @@ class OrganizationDAOTest extends AbstractAttributionTest{
         assertTrue(retrievedOrg.get().getFeatures().getBooleanFeature(FeatureFlagCodes.ALLOW_ADMIN_HEADERS).get(), "flag should have been true");
         assertTrue(retrievedOrg.get().getFeatures().getBooleanFeature(FeatureFlagCodes.LOOKBACK_MONTHS).isPresent(), "flag should have been present");
         assertEquals(10, retrievedOrg.get().getFeatures().getIntegerFeature(FeatureFlagCodes.LOOKBACK_MONTHS).get(), "string flag should have been present and equal");
+    }
+
+    @Test
+    void updateFeatureFlag() {
+        OrganizationEntity org = buildValidOrgEntity(UUID.randomUUID(), "Test Org 1", "1334567892");
+        org.setFeatures(new FeatureFlags());
+        org.getFeatures().setFeature(FeatureFlagCodes.LOOKBACK_MONTHS, 10);
+        daoTestExtension.inTransaction(() -> organizationDAO.registerOrganization(org));
+
+        org.getFeatures().setFeature(FeatureFlagCodes.LOOKBACK_MONTHS, 42);
+        daoTestExtension.inTransaction(()->organizationDAO.updateOrganization(org.getId(), org));
+
+        Optional<OrganizationEntity> retrievedOrg = daoTestExtension.inTransaction(()->organizationDAO.fetchOrganization(org.getId()));
+        assertTrue(retrievedOrg.get().getFeatures().getBooleanFeature(FeatureFlagCodes.LOOKBACK_MONTHS).isPresent(), "flag should have been present");
+        assertEquals(42, retrievedOrg.get().getFeatures().getIntegerFeature(FeatureFlagCodes.LOOKBACK_MONTHS).get(), "Value was not update");
     }
 
     @Test

@@ -61,6 +61,10 @@ public class FeatureFlags {
         return getValueNode(featureCode).map(f->f.asBoolean());
     }
 
+    public void removeFeature(String featureCode){
+        featuresRootNode.remove(featureCode);
+    }
+
     private Optional<JsonNode> getValueNode(String code){
         return Optional.ofNullable(featuresRootNode.get(code));
     }
