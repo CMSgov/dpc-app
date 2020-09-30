@@ -9,8 +9,6 @@ import java.util.Optional;
 public class FeatureFlags {
     private ObjectNode featuresRootNode;
 
-    public FeatureFlags(){}
-
     public ObjectNode getFeaturesRootNode() {
         return featuresRootNode;
     }
