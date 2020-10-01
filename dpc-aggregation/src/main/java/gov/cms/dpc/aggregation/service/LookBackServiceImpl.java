@@ -45,7 +45,7 @@ public class LookBackServiceImpl implements LookBackService {
 
     @Override
     @UnitOfWork(readOnly = true)
-    public boolean hasClaimWithin(ExplanationOfBenefit explanationOfBenefit, UUID organizationUUID, String practitionerNPI, long withinMonth) {
+    public LookBackAnswer getLookBackAnswer(ExplanationOfBenefit explanationOfBenefit, UUID organizationUUID, String practitionerNPI, long withinMonth) {
         MDC.put(EOB_ID, explanationOfBenefit.getId());
         Date billingPeriod = Optional.of(explanationOfBenefit)
                 .map(ExplanationOfBenefit::getBillablePeriod)
@@ -74,7 +74,7 @@ public class LookBackServiceImpl implements LookBackService {
                 organizationID, lookBackAnswer.matchDateCriteria(), lookBackAnswer.practitionerMatchEob(), lookBackAnswer.orgMatchEob());
 
         MDC.remove(EOB_ID);
-        return lookBackAnswer.matchDateCriteria() && (lookBackAnswer.orgNPIMatchAnyEobNPIs() || lookBackAnswer.practitionerNPIMatchAnyEobNPIs());
+        return lookBackAnswer;
     }
 
     private Pair<String, Set<String>> extractProviderNPIs(ExplanationOfBenefit explanationOfBenefit) {
