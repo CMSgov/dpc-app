@@ -6,6 +6,7 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import com.codahale.metrics.MetricRegistry;
 import com.typesafe.config.ConfigFactory;
 import gov.cms.dpc.aggregation.health.AggregationEngineHealthCheck;
+import gov.cms.dpc.aggregation.service.EveryoneGetsDataLookBackServiceImpl;
 import gov.cms.dpc.aggregation.service.LookBackService;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
@@ -69,9 +70,9 @@ class AggregationEngineTest {
         queue = Mockito.spy(new MemoryBatchQueue(10));
         bbclient = Mockito.spy(new MockBlueButtonClient(fhirContext));
         var operationalConfig = new OperationsConfig(1000, exportPath, 500, new SimpleDateFormat("dd/MM/yyyy").parse("03/01/2014"));
-        lookBackService = Mockito.spy(LookBackService.class);
-        jobBatchProcessor = Mockito.spy(new JobBatchProcessor(bbclient, fhirContext, metricRegistry, operationalConfig));
-        engine = Mockito.spy(new AggregationEngine(aggregatorID, queue, operationalConfig, lookBackService, jobBatchProcessor));
+        lookBackService = Mockito.spy(EveryoneGetsDataLookBackServiceImpl.class);
+        jobBatchProcessor = Mockito.spy(new JobBatchProcessor(bbclient, fhirContext, metricRegistry, operationalConfig, lookBackService));
+        engine = Mockito.spy(new AggregationEngine(aggregatorID, queue, operationalConfig, jobBatchProcessor));
         engine.queueRunning.set(true);
         AggregationEngine.setGlobalErrorHandler();
         subscribe = Mockito.mock(Disposable.class);
@@ -94,7 +95,6 @@ class AggregationEngineTest {
     @Test
     void claimBatchException() throws InterruptedException {
         Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getPractitionerNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
-        Mockito.doReturn(true).when(lookBackService).hasClaimWithin(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyLong());
 
         final var orgID = UUID.randomUUID();
 
@@ -191,7 +191,6 @@ class AggregationEngineTest {
     @Test
     void simpleJobTest() {
         Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getPractitionerNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
-        Mockito.doReturn(true).when(lookBackService).hasClaimWithin(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyLong());
 
         final var orgID = UUID.randomUUID();
 
@@ -255,7 +254,6 @@ class AggregationEngineTest {
     @Test
     void multipleFileJobTest() {
         Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getPractitionerNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
-        Mockito.doReturn(true).when(lookBackService).hasClaimWithin(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyLong());
 
         final var orgID = UUID.randomUUID();
         final List<String> mbis = List.of(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0), MockBlueButtonClient.TEST_PATIENT_MBIS.get(1));
@@ -311,7 +309,6 @@ class AggregationEngineTest {
     @Test
     void pauseJobTest() {
         Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getPractitionerNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
-        Mockito.doReturn(true).when(lookBackService).hasClaimWithin(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyLong());
 
         final var orgID = UUID.randomUUID();
         final List<String> mbis = List.of(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0), MockBlueButtonClient.TEST_PATIENT_MBIS.get(1));
@@ -353,7 +350,6 @@ class AggregationEngineTest {
     @Test
     void appendBatchFileTest() {
         Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getPractitionerNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
-        Mockito.doReturn(true).when(lookBackService).hasClaimWithin(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyLong());
 
         final var orgID = UUID.randomUUID();
         final List<String> mbis = List.of(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0), MockBlueButtonClient.TEST_PATIENT_MBIS.get(1));
@@ -425,7 +421,6 @@ class AggregationEngineTest {
     @Test
     void badJobTest() {
         Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getPractitionerNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
-        Mockito.doReturn(true).when(lookBackService).hasClaimWithin(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyLong());
 
         final var orgID = UUID.randomUUID();
         final List<String> mbis = List.of(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0), MockBlueButtonClient.TEST_PATIENT_MBIS.get(1));
@@ -455,7 +450,6 @@ class AggregationEngineTest {
     @Test
     void badJobTestWithFailBatchException() {
         Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getPractitionerNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
-        Mockito.doReturn(true).when(lookBackService).hasClaimWithin(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyLong());
 
         final var orgID = UUID.randomUUID();
         final List<String> mbis = List.of(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0), MockBlueButtonClient.TEST_PATIENT_MBIS.get(1));
@@ -493,7 +487,6 @@ class AggregationEngineTest {
 
         Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getPractitionerNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
         Mockito.doReturn(null).when(lookBackService).getPractitionerNPIFromRoster(orgID, TEST_PROVIDER_ID, "-1");
-        Mockito.doReturn(true).when(lookBackService).hasClaimWithin(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyLong());
 
         final List<String> mbis = List.of(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0), MockBlueButtonClient.TEST_PATIENT_MBIS.get(1), "-1");
         assertEquals(3, mbis.size());
@@ -532,15 +525,14 @@ class AggregationEngineTest {
         final var actual = queue.getJobBatches(jobID).stream().findFirst().get();
         var expectedErrorPath = ResourceWriter.formOutputFilePath(exportPath, actual.getBatchID(), ResourceType.OperationOutcome, 0);
         assertAll(() -> assertEquals(JobStatus.COMPLETED, actual.getStatus()),
-                () -> assertEquals(2, actual.getJobQueueBatchFiles().size(), "expected 2 (= 2 good patient ids and 1 bad patient id never made past lookback)"),
-                () -> assertTrue(actual.getJobQueueFile(ResourceType.OperationOutcome).isEmpty(), "bad patient id never makes past lookback"),
-                () -> assertFalse(Files.exists(Path.of(expectedErrorPath)), "expected an error file"));
+                () -> assertEquals(3, actual.getJobQueueBatchFiles().size(), "expected 3 (2 good patient ids and 1 bad patient id that failed lookback)"),
+                () -> assertFalse(actual.getJobQueueFile(ResourceType.OperationOutcome).isEmpty(), "bad patient id fails lookback"),
+                () -> assertTrue(Files.exists(Path.of(expectedErrorPath)), "expected an error file"));
     }
 
     @Test
     void multiplePatientsMatchTest() {
         Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getPractitionerNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
-        Mockito.doReturn(true).when(lookBackService).hasClaimWithin(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyLong());
 
         final List<String> mbis = Collections.singletonList(MockBlueButtonClient.MULTIPLE_RESULTS_MBI);
 
@@ -565,15 +557,14 @@ class AggregationEngineTest {
         final var actual = queue.getJobBatches(jobID).stream().findFirst().get();
         var expectedErrorPath = ResourceWriter.formOutputFilePath(exportPath, actual.getBatchID(), ResourceType.OperationOutcome, 0);
         assertAll(() -> assertEquals(JobStatus.COMPLETED, actual.getStatus()),
-                () -> assertEquals(0, actual.getJobQueueBatchFiles().size(), "Should be no files because it never made it past lookback"),
-                () -> assertTrue(actual.getJobQueueFile(ResourceType.OperationOutcome).isEmpty(), "Should be no files because it never made it past lookback"),
-                () -> assertFalse(Files.exists(Path.of(expectedErrorPath)), "Error file should not exist"));
+                () -> assertEquals(1, actual.getJobQueueBatchFiles().size(), "Should be one error file for lookback failure"),
+                () -> assertFalse(actual.getJobQueueFile(ResourceType.OperationOutcome).isEmpty(), "Should be one error for lookback failure"),
+                () -> assertTrue(Files.exists(Path.of(expectedErrorPath)), "Error file should not exist"));
     }
 
     @Test
     void testBlueButtonException() throws GeneralSecurityException {
         Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getPractitionerNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
-        Mockito.doReturn(true).when(lookBackService).hasClaimWithin(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyLong());
 
         // Test generic runtime exception
         testWithThrowable(new RuntimeException("Error!!!!"));
@@ -645,8 +636,8 @@ class AggregationEngineTest {
         final var actual = queue.getJobBatches(jobID).stream().findFirst().get();
         var expectedErrorPath = ResourceWriter.formOutputFilePath(exportPath, actual.getBatchID(), ResourceType.OperationOutcome, 0);
         assertAll(() -> assertEquals(JobStatus.COMPLETED, actual.getStatus()),
-                () -> assertEquals(0, actual.getJobQueueBatchFiles().size(), "expected just a operational outcome"),
-                () -> assertTrue(actual.getJobQueueFile(ResourceType.OperationOutcome).isEmpty(), "expected 1 bad patient fetch"),
-                () -> assertFalse(Files.exists(Path.of(expectedErrorPath)), "expected an error file"));
+                () -> assertEquals(1, actual.getJobQueueBatchFiles().size(), "expected just a operational outcome"),
+                () -> assertFalse(actual.getJobQueueFile(ResourceType.OperationOutcome).isEmpty(), "expected 1 bad patient fetch"),
+                () -> assertTrue(Files.exists(Path.of(expectedErrorPath)), "expected an error file"));
     }
 }

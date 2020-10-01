@@ -1,7 +1,11 @@
 package gov.cms.dpc.aggregation.service;
 
+import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
+import org.hl7.fhir.dstu3.model.OperationOutcome;
+import org.hl7.fhir.dstu3.model.StringType;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface LookBackService {
@@ -24,5 +28,17 @@ public interface LookBackService {
      * @param withinMonth           The limit of months to qualify for having a claim
      * @return true or false if the EoB matches the organizationID and providerID and has a claim within certain months
      */
-    boolean hasClaimWithin(ExplanationOfBenefit explanationOfBenefit, UUID organizationID, String practitionerNPI, long withinMonth);
+    LookBackAnswer getLookBackAnswer(ExplanationOfBenefit explanationOfBenefit, UUID organizationID, String practitionerNPI, long withinMonth);
+
+    static OperationOutcome getOperationOutcome(List<LookBackAnswer> answers, String patientID) {
+        final var patientLocation = List.of(new StringType("Patient"), new StringType("id"), new StringType(patientID));
+        final var outcome = new OperationOutcome();
+        final var detail = answers.isEmpty() ? "Failed to get data for look back" : "Failed look back";
+        outcome.addIssue()
+                .setSeverity(OperationOutcome.IssueSeverity.ERROR)
+                .setCode(OperationOutcome.IssueType.EXCEPTION)
+                .setDetails(new CodeableConcept().setText(detail))
+                .setLocation(patientLocation);
+        return outcome;
+    }
 }
