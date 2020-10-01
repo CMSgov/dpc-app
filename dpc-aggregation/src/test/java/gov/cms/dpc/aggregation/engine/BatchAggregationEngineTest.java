@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.PerformanceOptionsEnum;
 import com.codahale.metrics.MetricRegistry;
 import com.typesafe.config.ConfigFactory;
+import gov.cms.dpc.aggregation.service.EveryoneGetsDataLookBackServiceImpl;
 import gov.cms.dpc.aggregation.service.LookBackService;
 import gov.cms.dpc.aggregation.util.AggregationUtils;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
@@ -65,9 +66,9 @@ class BatchAggregationEngineTest {
     void setupEach() {
         queue = new MemoryBatchQueue(100);
         final var bbclient = Mockito.spy(new MockBlueButtonClient(fhirContext));
-        lookBackService = Mockito.spy(LookBackService.class);
-        jobBatchProcessor = Mockito.spy(new JobBatchProcessor(bbclient, fhirContext, metricRegistry, operationsConfig));
-        engine = Mockito.spy(new AggregationEngine(aggregatorID, queue, operationsConfig, lookBackService, jobBatchProcessor));
+        lookBackService = Mockito.spy(EveryoneGetsDataLookBackServiceImpl.class);
+        jobBatchProcessor = Mockito.spy(new JobBatchProcessor(bbclient, fhirContext, metricRegistry, operationsConfig, lookBackService));
+        engine = Mockito.spy(new AggregationEngine(aggregatorID, queue, operationsConfig, jobBatchProcessor));
         engine.queueRunning.set(true);
         subscribe = Mockito.mock(Disposable.class);
         doReturn(false).when(subscribe).isDisposed();
@@ -80,7 +81,6 @@ class BatchAggregationEngineTest {
     @Test
     void largeJobTestSingleResource() {
         Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getPractitionerNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
-        Mockito.doReturn(true).when(lookBackService).hasClaimWithin(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyLong());
         // Make a simple job with one resource type
         final var orgID = UUID.randomUUID();
         final var jobID = queue.createJob(
@@ -160,7 +160,6 @@ class BatchAggregationEngineTest {
 
         Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getPractitionerNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
         Mockito.doReturn(null).when(lookBackService).getPractitionerNPIFromRoster(orgID,TEST_PROVIDER_ID, null);
-        Mockito.doReturn(true).when(lookBackService).hasClaimWithin(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyLong());
 
         // Make a simple job with one resource type
         final var jobID = queue.createJob(
@@ -180,14 +179,14 @@ class BatchAggregationEngineTest {
         final var completeJob = queue.getJobBatches(jobID).stream().findFirst().orElseThrow();
         assertEquals(JobStatus.COMPLETED, completeJob.getStatus());
         assertAll(
-                () -> assertEquals(4, completeJob.getJobQueueBatchFiles().size(), String.format("Unexpected JobModel: %s", completeJob.toString())),
+                () -> assertEquals(5, completeJob.getJobQueueBatchFiles().size(), String.format("Unexpected JobModel: %s", completeJob.toString())),
                 () -> assertTrue(completeJob.getJobQueueFile(ResourceType.ExplanationOfBenefit).isPresent(), "Expect a EOB"),
-                () -> assertTrue(completeJob.getJobQueueFile(ResourceType.OperationOutcome).isEmpty(), "Expect an error"));
+                () -> assertFalse(completeJob.getJobQueueFile(ResourceType.OperationOutcome).isEmpty(), "Expect an error"));
 
         // Look at the output files
         final var outputFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), ResourceType.ExplanationOfBenefit, 0);
         assertTrue(Files.exists(Path.of(outputFilePath)));
         final var errorFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), ResourceType.OperationOutcome, 0);
-        assertFalse(Files.exists(Path.of(errorFilePath)), "expect no error file");
+        assertTrue(Files.exists(Path.of(errorFilePath)), "expect error file for failed patient");
     }
 }
