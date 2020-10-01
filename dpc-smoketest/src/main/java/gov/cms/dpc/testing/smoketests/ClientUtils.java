@@ -61,11 +61,11 @@ public class ClientUtils {
                 .map(npi -> exportRequestDispatcher(exportClient, npi))
                 .map(search -> (Group) search.getEntryFirstRep().getResource())
                 .map(group -> jobCompletionLambda(exportClient, httpClient, group, overrideURL))
-                .peek(jobResponse -> {
-                    //TODO: ignore until we can skip lookback per request and switch over to use real bfd client
+                //TODO: ignore until we can skip lookback per request and switch over to use real bfd client
+//                .peek(jobResponse -> {
 //                    if (jobResponse.getError().size() > 0)
 //                        throw new IllegalStateException("Export job completed, but with errors");
-                })
+//                })
                 .forEach(jobResponse -> jobResponse.getOutput().forEach(entry -> {
                     jobResponseHandler(httpClient, entry);
                 }));
