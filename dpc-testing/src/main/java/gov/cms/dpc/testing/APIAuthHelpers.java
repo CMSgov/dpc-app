@@ -40,6 +40,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.security.spec.ECGenParameterSpec;
 import java.sql.Date;
@@ -258,7 +259,7 @@ public class APIAuthHelpers {
         if (disableSSLCheck) {
             try {
                 clientBuilder.setSSLContext(createTrustingSSLContext());
-                clientBuilder.setSSLHostnameVerifier((s, sslSession) -> true);
+                clientBuilder.setSSLHostnameVerifier((s, sslSession) -> s.equalsIgnoreCase(sslSession.getPeerHost()));
             } catch (NoSuchAlgorithmException | KeyManagementException e) {
                 throw new RuntimeException("Cannot create custom SSL context", e);
             }
@@ -278,7 +279,7 @@ public class APIAuthHelpers {
     }
 
     private static SSLContext createTrustingSSLContext() throws KeyManagementException, NoSuchAlgorithmException {
-        final SSLContext tls = SSLContext.getInstance("TLS");
+        final SSLContext tls = SSLContext.getInstance("TLSv1.2");
         tls.init(null, getTrustingManager(), new SecureRandom());
         return tls;
     }
@@ -291,13 +292,15 @@ public class APIAuthHelpers {
             }
 
             @Override
-            public void checkClientTrusted(X509Certificate[] certs, String authType) {
-                // Do nothing
+            public void checkClientTrusted(X509Certificate[] certs, String authType) throws CertificateException {
+                // only used for testing, so no certificates expected
+                if (certs.length != 0) { throw new CertificateException(); }
             }
 
             @Override
-            public void checkServerTrusted(X509Certificate[] certs, String authType) {
-                // Do nothing
+            public void checkServerTrusted(X509Certificate[] certs, String authType) throws CertificateException {
+                // only used for testing, so no certificates expected
+                if (certs.length != 0) { throw new CertificateException(); }
             }
 
         }};
@@ -469,7 +472,7 @@ public class APIAuthHelpers {
             try {
                 builder
                         .setSSLContext(createTrustingSSLContext())
-                        .setSSLHostnameVerifier((s, sslSession) -> true);
+                        .setSSLHostnameVerifier((s, sslSession) -> s.equalsIgnoreCase(sslSession.getPeerHost()));
             } catch (KeyManagementException | NoSuchAlgorithmException e) {
                 throw new IllegalStateException("Cannot create trusting http context");
             }
