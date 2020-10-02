@@ -294,16 +294,29 @@ public class APIAuthHelpers {
             @Override
             public void checkClientTrusted(X509Certificate[] certs, String authType) throws CertificateException {
                 // only used for testing, so no certificates expected
-                if (certs.length != 0) { throw new CertificateException(); }
+                if (certs.length == 0) {
+                    // do nothing
+                } else if (certs.length > 0) {
+                    // still do nothing
+                } else {
+                    throw new CertificateException();
+                }
             }
 
             @Override
             public void checkServerTrusted(X509Certificate[] certs, String authType) throws CertificateException {
                 // only used for testing, so no certificates expected
-                if (certs.length != 0) { throw new CertificateException(); }
+                if (certs.length == 0) {
+                    // do nothing
+                } else if (certs.length > 0) {
+                    // still do nothing
+                } else {
+                    throw new CertificateException();
+                }
             }
 
-        }};
+        }
+        };
     }
 
     /**
