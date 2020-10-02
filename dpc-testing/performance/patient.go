@@ -1,6 +1,7 @@
 package main
 
 import (
+	"container/list"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -9,83 +10,106 @@ import (
 )
 
 func testPatientEndpoints(accessToken string) {
-	parametersJSON, err := ioutil.ReadFile("../../src/main/resources/patient_parameters_bundle-1.json")
-	if err != nil {
-		cleanAndPanic(err)
-	}
-
 	// POST /Patient/$validate
-	postPatientValidateTarget := vegeta.Target{
-		Method: "POST",
-		URL:    fmt.Sprintf("%s%s", apiURL, "/Patient/$validate"),
-		Header: map[string][]string{
-			"Content-Type":  {"application/fhir+json"},
-			"Authorization": {fmt.Sprintf("Bearer %s", accessToken)},
-			"Accept":        {"application/fhir+json"},
-		},
-		Body: parametersJSON,
-	}
+	postPatientValidateTargeter := newPOSTPatientTargeter("/$validate", accessToken, nextParameters, 1)
 	// Higher numbers of requests cause timeouts
-	runTest(postPatientValidateTarget, 5, 2)
-
-	patientJSON, err := ioutil.ReadFile("../../src/main/resources/patient.json")
-	if err != nil {
-		cleanAndPanic(err)
-	}
+	runTestWithTargeter(fmt.Sprintf("POST %s/Patient/$validate", apiURL), postPatientValidateTargeter, 5, 2)
 
 	// POST /Patient
-	postPatientTarget := vegeta.Target{
-		Method: "POST",
-		URL:    fmt.Sprintf("%s/Patient", apiURL),
-		Header: map[string][]string{
-			"Content-Type":  {"application/fhir+json"},
-			"Authorization": {fmt.Sprintf("Bearer %s", accessToken)},
-			"Accept":        {"application/fhir+json"},
-		},
-		Body: patientJSON,
-	}
-	resps := runTest(postPatientTarget, 5, 5)
+	postPatientTargeter := newPOSTPatientTargeter("", accessToken, nextPatient, 1)
+	resps := runTestWithTargeter(fmt.Sprintf("POST %s/Patient", apiURL), postPatientTargeter, 5, 2)
 
-	var patientIDs []string
+	var patientIDs = list.New()
 	for _, resp := range resps {
 		var result Resource
 		json.Unmarshal(resp, &result)
-		patientIDs = append(patientIDs, result.ID)
+		patientIDs.PushBack(result.ID)
 	}
 
 	// POST /Patient/$submit
-	postPatientSubmitTarget := vegeta.Target{
-		Method: "POST",
-		URL:    fmt.Sprintf("%s/Patient/$submit", apiURL),
-		Header: map[string][]string{
-			"Content-Type":  {"application/fhir+json"},
-			"Authorization": {fmt.Sprintf("Bearer %s", accessToken)},
-			"Accept":        {"application/fhir+json"},
-		},
-		Body: parametersJSON,
-	}
-	runTest(postPatientSubmitTarget, 5, 2)
+	postPatientSubmitTargeter := newPOSTPatientTargeter("/$submit", accessToken, nextParameters, 1)
+	// Higher numbers of requests cause timeouts
+	resps = runTestWithTargeter(fmt.Sprintf("POST %s/Patient/$submit", apiURL), postPatientSubmitTargeter, 5, 2)
 
 	// PUT /Patient/{id}
-	putPatientTarget := vegeta.Target{
-		Method: "PUT",
-		URL:    fmt.Sprintf("%s/Patient/%s", apiURL, patientIDs[0]),
-		Header: map[string][]string{
+	currentPatientID := patientIDs.Front()
+	putPatientTargeter := newPUTPatientTargeter(func() string {
+		s, ok := currentPatientID.Value.(string)
+		if !ok {
+			cleanAndPanic(fmt.Errorf("not a valid string: %v", currentPatientID.Value))
+		}
+		currentPatientID = currentPatientID.Next()
+		return s
+	}, accessToken, nextPatient, 1)
+	runTestWithTargeter(fmt.Sprintf("PUT %s/Patient/{id}", apiURL), putPatientTargeter, 5, 2)
+
+	// DELETE /Patient/{id}
+	currentPatientID = patientIDs.Front()
+	deletePatientTarget := newDELETEPatientTargeter(func() string {
+		id := currentPatientID.Value.(string)
+		currentPatientID = currentPatientID.Next()
+		return id
+	}, accessToken)
+	runTestWithTargeter(fmt.Sprintf("DELETE %s/Patient/{id}", apiURL), deletePatientTarget, 5, 2)
+}
+
+func nextParameters(fileNum *int) []byte {
+	return nextFile("../../src/main/resources/parameters/bundles/patients/patient-%v.json", fileNum)
+}
+
+func nextPatient(fileNum *int) []byte {
+	return nextFile("../../src/main/resources/patients/patient-%v.json", fileNum)
+}
+
+func nextFile(path string, fileNum *int) []byte {
+	b, err := ioutil.ReadFile(fmt.Sprintf(path, *fileNum))
+	if err != nil {
+		cleanAndPanic(err)
+	}
+
+	(*fileNum)++
+
+	return b
+}
+
+func newPOSTPatientTargeter(operation, accessToken string, nextBody func(*int) []byte, fileNum int) vegeta.Targeter {
+	return func(t *vegeta.Target) error {
+		t.Method = "POST"
+		t.URL = fmt.Sprintf("%s/Patient%s", apiURL, operation)
+		t.Header = map[string][]string{
 			"Content-Type":  {"application/fhir+json"},
 			"Authorization": {fmt.Sprintf("Bearer %s", accessToken)},
 			"Accept":        {"application/fhir+json"},
-		},
-		Body: patientJSON,
-	}
-	runTest(putPatientTarget, 5, 5)
+		}
+		t.Body = nextBody(&fileNum)
 
-	// DELETE /Patient/{id}
-	deletePatientTarget := vegeta.Target{
-		Method: "DELETE",
-		URL:    fmt.Sprintf("%s/Patient/%s", apiURL, patientIDs[0]),
-		Header: map[string][]string{
-			"Authorization": {fmt.Sprintf("Bearer %s", accessToken)},
-		},
+		return nil
 	}
-	runTest(deletePatientTarget, 5, 5)
+}
+
+func newPUTPatientTargeter(nextPatientID func() string, accessToken string, nextBody func(*int) []byte, fileNum int) vegeta.Targeter {
+	return func(t *vegeta.Target) error {
+		t.Method = "PUT"
+		t.URL = fmt.Sprintf("%s/Patient/%s", apiURL, nextPatientID())
+		t.Header = map[string][]string{
+			"Content-Type":  {"application/fhir+json"},
+			"Authorization": {fmt.Sprintf("Bearer %s", accessToken)},
+			"Accept":        {"application/fhir+json"},
+		}
+		t.Body = nextBody(&fileNum)
+
+		return nil
+	}
+}
+
+func newDELETEPatientTargeter(nextPatientID func() string, accessToken string) vegeta.Targeter {
+	return func(t *vegeta.Target) error {
+		t.Method = "DELETE"
+		t.URL = fmt.Sprintf("%s/Patient/%s", apiURL, nextPatientID())
+		t.Header = map[string][]string{
+			"Authorization": {fmt.Sprintf("Bearer %s", accessToken)},
+		}
+
+		return nil
+	}
 }
