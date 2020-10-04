@@ -46,25 +46,21 @@ class PublicKeysController < ApplicationController
 
   private
 
-  # :nocov:
   def render_error(msg)
     flash[:alert] = msg
     render :new
   end
-  # :nocov:
 
   def missing_params
     params[:public_key].blank?
   end
 
   def public_key_length
-    params[:public_key].length <= 25
+    params[:public_key].length >= 25
   end
 
-  # :nocov:
   def unauthorized
     flash[:error] = 'Unauthorized'
     redirect_to portal_path
   end
-  # :nocov:
 end
