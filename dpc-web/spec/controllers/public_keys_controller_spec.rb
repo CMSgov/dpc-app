@@ -57,7 +57,7 @@ RSpec.describe PublicKeysController, type: :controller do
       it 'renders an error' do
         post :create, params: {
           organization_id: org.id,
-          public_key: ''
+          label: ''
         }
 
         expect(response).to render_template(:new)
@@ -67,17 +67,18 @@ RSpec.describe PublicKeysController, type: :controller do
       end
     end
 
-    context 'when public key is greater than 25' do
+    context 'when label is greater than 25' do
       it 'renders an error' do
         post :create, params: {
           organization_id: org.id,
-          public_key: 'aaaaabbbbbcccccdddddeeeeefffff'
+          public_key: 'test key',
+          label: 'aaaaabbbbbcccccdddddeeeeefffff'
         }
 
         expect(response).to render_template(:new)
 
         expect(controller.flash[:alert])
-          .to include('Public key cannot be over 25 characters')
+          .to include('Label cannot be over 25 characters')
       end
     end
 
@@ -94,7 +95,8 @@ RSpec.describe PublicKeysController, type: :controller do
 
         post :create, params: {
           organization_id: org.id,
-          public_key: 'aaaaabbbbbcccccddddd'
+          public_key: 'test key',
+          label: 'aaaaabbbbbcccccddddd'
         }
 
         expect(response).to render_template(:new)
@@ -117,7 +119,8 @@ RSpec.describe PublicKeysController, type: :controller do
 
         expect(post :create, params: {
           organization_id: org.id,
-          public_key: 'aaaaabbbbbcccccddddd'
+          public_key: 'test key',
+          label: 'aaaaabbbbbcccccddddd'
         }).to redirect_to(portal_path)
       end
     end
