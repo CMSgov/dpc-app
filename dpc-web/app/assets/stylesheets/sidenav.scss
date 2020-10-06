@@ -84,3 +84,11 @@
   margin: 0 !important;
   padding: 0 0 0 25px;
 }
+
+.usa-accordion__content {
+  li {
+    ol {
+      list-style-type: lower-alpha;
+    }
+  }
+}
