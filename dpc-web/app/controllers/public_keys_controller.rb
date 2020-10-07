@@ -13,7 +13,7 @@ class PublicKeysController < ApplicationController
   def create
     @organization = current_user.organizations.find(params[:organization_id])
     return render_error('Required values missing.') if missing_params
-    return render_error('Public key cannot be over 25 characters') if public_key_length
+    return render_error('Label cannot be over 25 characters') if label_length
 
     reg_org = @organization.registered_organization
     manager = PublicKeyManager.new(registered_organization: reg_org)
@@ -46,25 +46,21 @@ class PublicKeysController < ApplicationController
 
   private
 
-  # :nocov:
   def render_error(msg)
     flash[:alert] = msg
     render :new
   end
-  # :nocov:
 
   def missing_params
     params[:public_key].blank?
   end
 
-  def public_key_length
-    params[:public_key].length <= 25
+  def label_length
+    params[:label].length > 25
   end
 
-  # :nocov:
   def unauthorized
     flash[:error] = 'Unauthorized'
     redirect_to portal_path
   end
-  # :nocov:
 end
