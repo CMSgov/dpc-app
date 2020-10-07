@@ -9,21 +9,50 @@
   <div class="usa-accordion usa-accordion--bordered ds-u-margin-top--7">
 
     <!-- Use the accurate heading level to maintain the document outline -->
+    <h1>About DBC: </h1>
+
+    <h1>About Sandbox:</h1>
     <h2 class="usa-accordion__heading">
       <button class="usa-accordion__button" aria-expanded="false" aria-controls="a1">
-        I've tested my solution with synthetic data - how do I get access to production data?
+        What types of providers is CMS looking for to join the synthetic sandbox?
       </button>
     </h2>
     <div id="a1" class="usa-accordion__content">
+      <ul>
+        <li>Fee-for-Service (FFS) providers who treat Medicare patients</li>
+        <li>Providers who already receive claims from other payers and who have successfully integrated the information into existing clinical workflows</li>
+        <li>Providers who have experience using Blue Button 2.0 or the Beneficiary Claims Data API project</li>
+        <li>Providers who already use or test with FHIR, especially Bulk FHIR</li>
+      </ul>
+    </div>
+
+    <h2 class="usa-accordion__heading">
+      <button class="usa-accordion__button" aria-expanded="false" aria-controls="a3">
+        How can I access the synthetic sandbox and begin testing workflows?
+      </button>
+    </h2>
+    <div id="a3" class="usa-accordion__content">
+      <ul>
+        <li>Any Fee-for-Service provider or Health IT vendor can request access to synthetic data via <%= link_to "Request access", new_user_registration_path %></li>
+      </ul>
+    </div>
+
+    <h1>About Pilot Production:</h1>
+    <h2 class="usa-accordion__heading">
+      <button class="usa-accordion__button" aria-expanded="false" aria-controls="c1">
+        I've tested my solution with synthetic data - how do I get access to production data?
+      </button>
+    </h2>
+    <div id="c1" class="usa-accordion__content">
       We're excited to invite you to apply to be a production pilot participant! You can sign up to <a href="https://airtable.com/shr3m3BL3IWY5hYnm" target="_blank">join the queue here</a>.
     </div>
 
     <h2 class="usa-accordion__heading">
-      <button class="usa-accordion__button" aria-expanded="false" aria-controls="a2">
+      <button class="usa-accordion__button" aria-expanded="false" aria-controls="c2">
         How will I know my organization is ready to join the pilot?
       </button>
     </h2>
-    <div id="a2" class="usa-accordion__content">
+    <div id="c2" class="usa-accordion__content">
       DPC is looking for healthcare organizations who meet the following criteria:
 
       <ol>
@@ -68,11 +97,11 @@
     </div>
 
     <h2 class="usa-accordion__heading">
-    <button class="usa-accordion__button" aria-expanded="false" aria-controls="a3">
+    <button class="usa-accordion__button" aria-expanded="false" aria-controls="c3">
       How should I prepare for the demo of our DPC solution?
     </button>
     </h2>
-    <div id="a3" class="usa-accordion__content">
+    <div id="c3" class="usa-accordion__content">
       Here's a list of starter questions to help guide your plan for the demo. As we see your solution, additional technical questions may arise.
       <ol>
         <li>
@@ -122,11 +151,11 @@
     </div>
 
     <h2 class="usa-accordion__heading">
-      <button class="usa-accordion__button" aria-expanded="false" aria-controls="a4">
+      <button class="usa-accordion__button" aria-expanded="false" aria-controls="c4">
         What are the limitations on the data I’ll receive during the pilot?
       </button>
     </h2>
-    <div id="a4" class="usa-accordion__content">
+    <div id="c4" class="usa-accordion__content">
       Our goal with the production pilot is not to grant early access to DPC production data, but rather to test specific technical and workflow solutions in a production environment with actual users. The pilot phase of DPC is a learning experience for CMS as well as for our partner organizations, which means that we will make breaking changes to the code while organizations are working in production, and will be looking for feedback from our pilot participants to help us grow. A few limitations for you to know up front:
 
       <ul>
@@ -143,20 +172,20 @@
     </div>
 
     <h2 class="usa-accordion__heading">
-      <button class="usa-accordion__button" aria-expanded="false" aria-controls="a5">
+      <button class="usa-accordion__button" aria-expanded="false" aria-controls="c5">
         I applied to the DPC pilot, what next?
       </button>
     </h2>
-    <div id="a5" class="usa-accordion__content">
+    <div id="c5" class="usa-accordion__content">
       DPC will onboard one organization at a time. Depending on the backlog of organizations, this may mean that your organization will sit in the queue for a few months before it is your turn to onboard. We will keep you updated as much as we can and ask that you continue to test your solution in the sandbox during that time as any changes to the production environment will be changed in the sandbox environment first.
     </div>
 
     <h2 class="usa-accordion__heading">
-      <button class="usa-accordion__button" aria-expanded="false" aria-controls="16">
+      <button class="usa-accordion__button" aria-expanded="false" aria-controls="c6">
         What can I do while I’m waiting to join the pilot? 
       </button>
     </h2>
-    <div id="16" class="usa-accordion__content">
+    <div id="c6" class="usa-accordion__content">
       Good news: our sandbox environment matches the production environment, and we'll roll out new functionality in sandbox before sending it into production. Even if you are not able to participate in the production pilot at this juncture, please continue to test in the sandbox environment with synthetic data. Your feedback through the Google Group is invaluable to our researchers and engineers as we all work together to shape the future of DPC.
     </div>
   </div>
