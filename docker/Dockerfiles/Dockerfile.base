@@ -2,7 +2,7 @@
 FROM openjdk:11-jdk-slim
 
 # Install additional packages used acros DPC images
-RUN  apt-get update && apt-get -y install awscli
+RUN  apt-get update && apt-get -y install awscli && apt-get -y install curl
 
 # Use the openjdk:11-jdk-slim default command/entrypoint
 CMD ["jshell"]
