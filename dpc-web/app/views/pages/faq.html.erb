@@ -10,14 +10,66 @@
 
     <!-- Use the accurate heading level to maintain the document outline -->
     <h1>About DBC: </h1>
-
-    <h1>About Sandbox:</h1>
     <h2 class="usa-accordion__heading">
       <button class="usa-accordion__button" aria-expanded="false" aria-controls="a1">
-        What types of providers is CMS looking for to join the synthetic sandbox?
+        How can I get more information?
       </button>
     </h2>
     <div id="a1" class="usa-accordion__content">
+      <ul>
+        <li>Technical documentation is available in the <%= link_to "API Documentation", docs_path %>.</li>
+        <li>A DPC Google Group has been created to provide answers to questions and to support providers and developers who are implementing Data at the Point of Care.</li>
+      </ul>
+    </div>
+
+    <h2 class="usa-accordion__heading">
+      <button class="usa-accordion__button" aria-expanded="false" aria-controls="a2">
+        How is the Data at the Point of Care pilot program different from Blue Button 2.0 and Beneficiary Claims Data API (BCDA)?
+      </button>
+    </h2>
+    <div id="a2" class="usa-accordion__content">
+      <ul>
+        <li>Blue Button 2.0 provides FHIR-formatted data for one individual Medicare beneficiary at a time, to registered applications with beneficiary authorization. See <a href="https://bluebutton.cms.gov/">https://bluebutton.cms.gov/</a>.</li>
+        <li>BCDA provides FHIR-formatted bulk data files to Medicare Shared Savings Program Accountable Care Organizations (MSSP ACOs) for all of the beneficiaries assigned to a given ACO. See <a href="https://bcda.cms.gov/">https://bcda.cms.gov/</a>.</li>
+        <li>Data at the Point of Care provides FHIR-formatted bulk data files to fee-for-service providers for their active patients as needed for treatment purposes under HIPAA. With DPC, providers identify their own rosters of patients to track, and no action is required from the beneficiary to authorize sharing of data. Data is shared between covered entities for treatment purposes as defined under HIPAA.</li>
+      </ul>
+    </div>
+
+    <h2 class="usa-accordion__heading">
+      <button class="usa-accordion__button" aria-expanded="false" aria-controls="a3">
+        What type of information does CMS want as feedback?
+      </button>
+    </h2>
+    <div id="a3" class="usa-accordion__content">
+      <ul>
+        <li>Usefulness of the data to evaluate how helpful CMS claims data is for impacting treatment, provider burden, and quality of care for Fee-for-Service (FFS) providers at the point of care</li>
+        <li>Ease of implementation for vendors and providers to evaluate how easy it is to configure and get started with requesting and receiving claims data</li>
+        <li>Practicality and effectiveness of attribution logic that determines which providers can request and receive claims data for which patients and for how long</li>
+        <li>Ease and effectiveness of ways that vendors and providers can collaborate to access the data</li>
+        <li>Measure of the frequency of use and an evaluation of performance in different use cases to determine infrastructure decisions</li>
+        <li>Any other feedback, additions, or changes</li>
+      </ul>
+    </div>
+
+    <h2 class="usa-accordion__heading">
+      <button class="usa-accordion__button" aria-expanded="false" aria-controls="a4">
+        How will CMS make sure that the data is secure and protected?
+      </button>
+    </h2>
+    <div id="a4" class="usa-accordion__content">
+      <ul>
+        <li>Data at the Point of Care secures Protected Health Information (PHI) and Personally Identifiable Information (PII) and has multiple layers of protection, such as encryption in transit and at rest, security certification requirements of connecting vendors, auditing and analytics to look for suspicious activity, terms of service restrictions, public and private security keys, and IP address restriction.</li>
+        <li>Data at the Point of Care is built based on privacy requirements defined by HIPAA.</li>
+      </ul>
+    </div>
+
+    <h1>About Sandbox:</h1>
+    <h2 class="usa-accordion__heading">
+      <button class="usa-accordion__button" aria-expanded="false" aria-controls="b1">
+        What types of providers is CMS looking for to join the synthetic sandbox?
+      </button>
+    </h2>
+    <div id="b1" class="usa-accordion__content">
       <ul>
         <li>Fee-for-Service (FFS) providers who treat Medicare patients</li>
         <li>Providers who already receive claims from other payers and who have successfully integrated the information into existing clinical workflows</li>
@@ -27,17 +79,26 @@
     </div>
 
     <h2 class="usa-accordion__heading">
-      <button class="usa-accordion__button" aria-expanded="false" aria-controls="a3">
+      <button class="usa-accordion__button" aria-expanded="false" aria-controls="b2">
         How can I access the synthetic sandbox and begin testing workflows?
       </button>
     </h2>
-    <div id="a3" class="usa-accordion__content">
+    <div id="b2" class="usa-accordion__content">
       <ul>
         <li>Any Fee-for-Service provider or Health IT vendor can request access to synthetic data via <%= link_to "Request access", new_user_registration_path %></li>
       </ul>
     </div>
 
     <h1>About Pilot Production:</h1>
+    <h2 class="usa-accordion__heading">
+      <button class="usa-accordion__button" aria-expanded="false" aria-controls="a6">
+        Is there a cost to get the claims information in the Data at the Point of Care pilot?
+      </button>
+    </h2>
+    <div id="a6" class="usa-accordion__content">
+      <p>There is no cost for the data.</p>
+    </div>
+
     <h2 class="usa-accordion__heading">
       <button class="usa-accordion__button" aria-expanded="false" aria-controls="c1">
         I've tested my solution with synthetic data - how do I get access to production data?
