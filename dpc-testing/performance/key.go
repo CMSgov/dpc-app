@@ -19,7 +19,7 @@ func testKeyEndpoints(accessToken string) {
 
 	getKeysTarget := vegeta.Target{
 		Method: "GET",
-		URL:    fmt.Sprintf("%s%s", apiURL, "/Key"),
+		URL:    fmt.Sprintf("%s/Key", apiURL),
 		Header: map[string][]string{
 			"Accept":        {"application/json"},
 			"Authorization": {fmt.Sprintf("Bearer %s", accessToken)},
@@ -29,7 +29,7 @@ func testKeyEndpoints(accessToken string) {
 
 	getKeyTarget := vegeta.Target{
 		Method: "GET",
-		URL:    fmt.Sprintf("%s%s%s", apiURL, "/Key/", keyIDs[0]),
+		URL:    fmt.Sprintf("%s/Key/%s", apiURL, keyIDs[0]),
 		Header: map[string][]string{
 			"Accept":        {"application/json"},
 			"Authorization": {fmt.Sprintf("Bearer %s", accessToken)},
