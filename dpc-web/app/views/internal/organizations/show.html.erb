@@ -66,6 +66,38 @@
         <label class="ds-u-margin-right--1 ds-u-color--muted">Vendor</label>
         <%= @organization.vendor %>
       </div>
+
+      <div class="ds-u-margin-top--2 ds-u-margin-bottom--1">
+        <div class="ds-u-margin-bottom--2">
+          <h2 class="box__heading">Tags</h2>
+          <% if @organization.taggings.count == 0 %>
+            <p>No tags</p>
+          <% else %>
+            <% @organization.taggings.each do |tagging| %>
+
+              <span class="site-pills__item site-pills__item--small">
+                <%= tagging.tag_name %>
+
+                <%= link_to(internal_tagging_url(tagging), class: "site-pills__item__button", method: :delete, data: {test: "delete-tag-#{tagging.id}"}) do %>
+                  <svg class="icon" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <use xlink:href="/assets/solid.svg#times"></use>
+                  </svg>
+                </span>
+              <%end%>
+            <% end %>
+          <% end %>
+        </div>
+
+        <div>
+          <%= form_for Tagging.new, url: internal_taggings_path, html: { method: :post } do |f| %>
+            <%= f.label :tag_id, "New tag", class: "ds-c-label ds-u-margin-top--0" %>
+            <%= f.collection_select :tag_id, available_tags(@organization), :id, :name, { include_blank: true }, class: "ds-c-field drop-down" %>
+            <%= f.hidden_field :taggable_id, value: @organization.id %>
+            <%= f.hidden_field :taggable_type, value: 'Organization' %>
+            <%= f.submit "Add tag", class: "ds-c-button ds-u-margin-top--1", data: { test: "add-tag-submit" } %>
+          <% end %>
+        </div>
+      </div>
     </div>
 
     <div class="box__content">
