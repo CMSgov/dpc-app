@@ -8,10 +8,10 @@ import java.util.List;
 
 public final class LookBackAnalyzer {
 
-    public static final String NO_DATA_FOR_LOOK_BACK_DETAIL = "Failed to get data for look back";
-    public static final String NO_NPI_MATCH_DETAIL = "No matches on organization npi or provider npi";
-    public static final String NO_MATCHES_DETAIL = "No matches within date limit, organization npi, and provider npi";
-    public static final String NO_DATE_MATCH_DETAIL = "No matches within look back date limit";
+    public static final String NO_DATA_FOR_LOOK_BACK_DETAIL = "DPC couldn't find any claims for this MBI; unable to demonstrate relationship with provider or organization";
+    public static final String NO_NPI_MATCH_DETAIL = "DPC couldn't find a claim for this MBI from an NPI in this organization";
+    public static final String NO_MATCHES_DETAIL = "DPC couldn't find a claim for this MBI related to an NPI in this organization, or within the past 18 months";
+    public static final String NO_DATE_MATCH_DETAIL = "DPC couldn't find a claim within the past 18 months for this MBI from an NPI in this organization";
 
     private LookBackAnalyzer() {
     }
