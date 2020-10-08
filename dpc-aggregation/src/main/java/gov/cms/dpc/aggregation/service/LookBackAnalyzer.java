@@ -10,8 +10,8 @@ public final class LookBackAnalyzer {
 
     public static final String NO_DATA_FOR_LOOK_BACK_DETAIL = "Failed to get data for look back";
     public static final String NO_NPI_MATCH_DETAIL = "No matches on organization npi or provider npi";
-    public static final String NO_MATCHES_DETAIL = "No matches on date, organization npi, and provider npi";
-    public static final String NO_DATE_MATCH_DETAIL = "No matches on date";
+    public static final String NO_MATCHES_DETAIL = "No matches within date limit, organization npi, and provider npi";
+    public static final String NO_DATE_MATCH_DETAIL = "No matches within look back date limit";
 
     private LookBackAnalyzer() {
     }
