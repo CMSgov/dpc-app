@@ -30,7 +30,7 @@ module Internal
 
     # Right now only users are taggable
     def taggable_path
-      if @tagging.taggable_type == "User"
+      if @tagging.taggable_type == 'User'
         internal_user_path(id: @tagging.taggable_id)
       else
         internal_organization_path(id: @tagging.taggable_id)
