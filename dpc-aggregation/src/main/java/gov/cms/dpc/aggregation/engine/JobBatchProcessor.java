@@ -3,6 +3,7 @@ package gov.cms.dpc.aggregation.engine;
 import ca.uhn.fhir.context.FhirContext;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
+import gov.cms.dpc.aggregation.service.LookBackAnalyzer;
 import gov.cms.dpc.aggregation.service.LookBackAnswer;
 import gov.cms.dpc.aggregation.service.LookBackService;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
@@ -71,8 +72,9 @@ public class JobBatchProcessor {
                 Flowable.fromIterable(job.getResourceTypes())
                         .flatMap(r -> fetchResource(job, patientID, r, job.getSince().orElse(null)))
                 :
-                Flowable.just(LookBackService.getOperationOutcome(answers, patientID));
+          Flowable.just(LookBackAnalyzer.analyze(answers, patientID));
     }
+
 
         final var results = writeResource(job, flowable)
                 .toList()
