@@ -15,6 +15,7 @@ import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
+import java.util.List;
 
 public class DPCAggregationConfiguration extends TypesafeConfiguration implements BlueButtonBundleConfiguration, IDPCDatabase, IDPCQueueDatabase, DPCQueueConfig {
 
@@ -56,6 +57,8 @@ public class DPCAggregationConfiguration extends TypesafeConfiguration implement
 
     @Min(-1)
     private int lookBackMonths;
+
+    private List<String> lookBackExemptOrgs;
 
     @NotNull
     private Date lookBackDate = new Date();
@@ -112,5 +115,11 @@ public class DPCAggregationConfiguration extends TypesafeConfiguration implement
         return lookBackDate;
     }
 
+    public List<String> getLookBackExemptOrgs() {
+        return lookBackExemptOrgs;
+    }
 
+    public void setLookBackExemptOrgs(List<String> lookBackExemptOrgs) {
+        this.lookBackExemptOrgs = lookBackExemptOrgs;
+    }
 }

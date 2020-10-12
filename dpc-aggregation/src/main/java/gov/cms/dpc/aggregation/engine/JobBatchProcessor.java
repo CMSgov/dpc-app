@@ -58,21 +58,35 @@ public class JobBatchProcessor {
      * @return A list of batch files {@link JobQueueBatchFile}
      */
     public List<JobQueueBatchFile> processJobBatchPartial(UUID aggregatorID, IJobQueue queue, JobQueueBatch job, String patientID) {
-        List<LookBackAnswer> answers = getAnswers(job, patientID);
+    Flowable<Resource> flowable;
+        if(isLookBackExempt(job.getOrgID())){
+        logger.info("Skipping lookBack for org: {}", job.getOrgID().toString());
+        flowable = Flowable.fromIterable(job.getResourceTypes())
+                .flatMap(r -> fetchResource(job, patientID, r, job.getSince().orElse(null)));
+    }else{
+        List<LookBackAnswer> answers = getLookBackAnswers(job, patientID);
         boolean matched = answers.stream()
                 .anyMatch(a -> a.matchDateCriteria() && (a.orgNPIMatchAnyEobNPIs() || a.practitionerNPIMatchAnyEobNPIs()));
-
-        Flowable<Resource> flowable = matched ?
+        flowable = matched?
                 Flowable.fromIterable(job.getResourceTypes())
                         .flatMap(r -> fetchResource(job, patientID, r, job.getSince().orElse(null)))
                 :
                 Flowable.just(LookBackService.getOperationOutcome(answers, patientID));
+    }
 
         final var results = writeResource(job, flowable)
                 .toList()
                 .blockingGet();
         queue.completePartialBatch(job, aggregatorID);
         return results;
+    }
+
+    private boolean isLookBackExempt(UUID orgId) {
+        List<String> exemptOrgs = operationsConfig.getLookBackExemptOrgs();
+        if(exemptOrgs!=null){
+           return exemptOrgs.contains(orgId.toString());
+        }
+        return false;
     }
 
     /**
@@ -96,7 +110,7 @@ public class JobBatchProcessor {
                 .flatMap(Flowable::fromIterable);
     }
 
-    private List<LookBackAnswer> getAnswers(JobQueueBatch job, String patientId) {
+    private List<LookBackAnswer> getLookBackAnswers(JobQueueBatch job, String patientId) {
         List<LookBackAnswer> result = new ArrayList<>();
         //job.getProviderID is really not providerID, it is the rosterID, see createJob in GroupResource export for confirmation
         //patientId here is the patient MBI
@@ -172,4 +186,5 @@ public class JobBatchProcessor {
     private Meter getMeter(ResourceType resourceType) {
         return ResourceType.OperationOutcome == resourceType ? operationalOutcomeMeter : resourceMeter;
     }
+
 }
