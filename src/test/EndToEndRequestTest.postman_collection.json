@@ -1241,7 +1241,7 @@
 									"    pm.expect(operationOutcomeItem.resourceType).to.equal(\"OperationOutcome\");",
 									"    pm.expect(operationOutcomeItem.issue).to.have.lengthOf(1);",
 									"    var issue = operationOutcomeItem.issue[0];",
-									"    pm.expect(issue.details.text).to.equal(\"Failed to get data for look back\");",
+									"    pm.expect(issue.details.text).to.equal(\"DPC couldn't find any claims for this MBI; unable to demonstrate relationship with provider or organization\");",
 									"    pm.expect(issue.location).to.include('0S80C00AA00');",
 									"});",
 									"",
