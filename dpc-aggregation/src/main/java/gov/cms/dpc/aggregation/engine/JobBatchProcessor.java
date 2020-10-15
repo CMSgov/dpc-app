@@ -60,7 +60,7 @@ public class JobBatchProcessor {
      */
     public List<JobQueueBatchFile> processJobBatchPartial(UUID aggregatorID, IJobQueue queue, JobQueueBatch job, String patientID) {
     Flowable<Resource> flowable;
-        if(isLookBackExempt(job.getOrgID())){
+    if(isLookBackExempt(job.getOrgID())){
         logger.info("Skipping lookBack for org: {}", job.getOrgID().toString());
         flowable = Flowable.fromIterable(job.getResourceTypes())
                 .flatMap(r -> fetchResource(job, patientID, r, job.getSince().orElse(null)));

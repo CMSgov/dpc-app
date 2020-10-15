@@ -67,7 +67,7 @@ public class MockBlueButtonClient implements BlueButtonClient {
 
     @Override
     public Bundle requestPatientFromServerByMbi(String mbi) throws ResourceNotFoundException {
-        return loadBundle(SAMPLE_PATIENT_PATH_PREFIX, MBI_BENE_ID_MAP.get(mbi));
+        return loadBundle(SAMPLE_PATIENT_PATH_PREFIX, MBI_BENE_ID_MAP.getOrDefault(mbi,""));
     }
 
     @Override
