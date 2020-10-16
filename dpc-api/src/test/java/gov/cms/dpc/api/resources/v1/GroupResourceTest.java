@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.HttpMethod;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -394,5 +395,34 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
                 .resource(createdPractitioner)
                 .encodedJson()
                 .execute();
+    }
+
+    @Test
+    void testGroupExportRequiresHeaders() throws IOException, URISyntaxException {
+        // create group
+        Group group = SeedProcessor.createBaseAttributionGroup(NPIUtil.generateNPI(), ORGANIZATION_ID);
+
+        URL url = new URL(getBaseURL() + "/Group/" + group.getId() + "/$export");
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod(HttpMethod.GET);
+        conn.setRequestProperty(HttpHeaders.CONTENT_TYPE, "application/fhir+json");
+
+        APIAuthHelpers.AuthResponse auth = APIAuthHelpers.jwtAuthFlow(getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
+        conn.setRequestProperty(HttpHeaders.AUTHORIZATION, "Bearer " + auth.accessToken);
+
+        assertEquals(HttpStatus.BAD_REQUEST_400, conn.getResponseCode());
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getErrorStream()))) {
+            StringBuilder respBuilder = new StringBuilder();
+            String respLine = null;
+            while ((respLine = reader.readLine()) != null) {
+                respBuilder.append(respLine.trim());
+            }
+            String resp = respBuilder.toString();
+            assertAll(() -> assertTrue(resp.contains("\"resourceType\":\"OperationOutcome\"")),
+                    () -> assertTrue(resp.contains("The 'Prefer' header must be 'respond-async'")));
+        }
+
+        conn.disconnect();
     }
 }
