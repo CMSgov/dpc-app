@@ -272,11 +272,11 @@ public class GroupResource extends AbstractGroupResource {
                            @QueryParam("_outputFormat") @NoHtml String outputFormat,
                            @ApiParam(value = "Resources will be included in the response if their state has changed after the supplied time (e.g. if Resource.meta.lastUpdated is later than the supplied _since time).")
                            @QueryParam("_since") @NoHtml String since,
-                           @ApiParam(hidden = true) @HeaderParam("Prefer")  @Valid String Prefer) {
+                           @ApiParam(hidden = true) @HeaderParam("Prefer")  @Valid String prefer) {
         logger.info("Exporting data for provider: {} _since: {}", rosterID, since);
 
         // Check the parameters
-        checkExportRequest(outputFormat, Prefer);
+        checkExportRequest(outputFormat, prefer);
 
         // Get the attributed patients
         final List<String> attributedPatients = fetchPatientMBIs(rosterID);
