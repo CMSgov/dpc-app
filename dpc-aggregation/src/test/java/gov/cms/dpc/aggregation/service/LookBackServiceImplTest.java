@@ -5,6 +5,7 @@ import com.typesafe.config.ConfigFactory;
 import gov.cms.dpc.aggregation.dao.OrganizationDAO;
 import gov.cms.dpc.aggregation.dao.RosterDAO;
 import gov.cms.dpc.aggregation.engine.OperationsConfig;
+import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
@@ -27,9 +28,11 @@ import java.util.UUID;
 @ExtendWith(BufferedLoggerHandler.class)
 public class LookBackServiceImplTest {
 
-    private String providerID = UUID.randomUUID().toString();
+    private String providerNPI = NPIUtil.generateNPI();
+    private String careTeamNPI = NPIUtil.generateNPI();
     private UUID orgID = UUID.randomUUID();
-    private String orgNPI = "1111111112";
+    private String orgNPI = NPIUtil.generateNPI();
+
 
     private LookBackServiceImpl lookBackService;
     private ExplanationOfBenefit eob;
@@ -51,11 +54,13 @@ public class LookBackServiceImplTest {
         eob.setBillablePeriod(new Period());
         eob.setProvider(new Reference());
         eob.getProvider().getIdentifier().setSystem(DPCIdentifierSystem.NPPES.getSystem());
-        eob.getProvider().getIdentifier().setValue(providerID);
+        eob.getProvider().getIdentifier().setValue(providerNPI);
         eob.setOrganization(new Reference());
         eob.getOrganization().getIdentifier().setSystem(DPCIdentifierSystem.NPPES.getSystem());
         eob.getOrganization().getIdentifier().setValue(orgNPI);
         eob.getOrganization().setId(orgID.toString());
+        eob.getCareTeamFirstRep().getProvider().getIdentifier().setSystem(DPCIdentifierSystem.NPPES.getSystem());
+        eob.getCareTeamFirstRep().getProvider().getIdentifier().setValue(careTeamNPI);
 
         Mockito.when(organizationDAO.fetchOrganizationNPI(orgID)).thenReturn(Optional.of(orgNPI));
     }
@@ -65,37 +70,43 @@ public class LookBackServiceImplTest {
         OffsetDateTime dateTime = OffsetDateTime.now(ZoneOffset.UTC);
         eob.getBillablePeriod().setEnd(Date.from(dateTime.toInstant()));
 
-        boolean result = lookBackService.hasClaimWithin(eob, orgID, providerID, 1);
-        Assertions.assertTrue(result);
+        LookBackAnswer result = lookBackService.getLookBackAnswer(eob, orgID, providerNPI, 1);
+        Assertions.assertTrue(result.matchDateCriteria());
 
         dateTime = OffsetDateTime.now(ZoneOffset.UTC).minusMonths(1);
         eob.getBillablePeriod().setEnd(Date.from(dateTime.toInstant()));
 
-        result = lookBackService.hasClaimWithin(eob, orgID, providerID, 1);
-        Assertions.assertFalse(result);
+        result = lookBackService.getLookBackAnswer(eob, orgID, providerNPI, 1);
+        Assertions.assertFalse(result.matchDateCriteria());
 
         dateTime = OffsetDateTime.now(ZoneOffset.UTC).plusMonths(1);
         eob.getBillablePeriod().setEnd(Date.from(dateTime.toInstant()));
 
-        result = lookBackService.hasClaimWithin(eob, orgID, providerID, 1);
-        Assertions.assertTrue(result);
+        result = lookBackService.getLookBackAnswer(eob, orgID, providerNPI, 1);
+        Assertions.assertTrue(result.matchDateCriteria());
     }
 
     @Test
-    public void testNonMatchingOrgID() {
+    public void testJobOrgMatchAnyEobNPIs() {
         OffsetDateTime dateTime = OffsetDateTime.now(ZoneOffset.UTC);
         eob.getBillablePeriod().setEnd(Date.from(dateTime.toInstant()));
 
-        boolean result = lookBackService.hasClaimWithin(eob, UUID.randomUUID(), providerID, 1);
-        Assertions.assertFalse(result);
+        LookBackAnswer result = lookBackService.getLookBackAnswer(eob, orgID, NPIUtil.generateNPI(), 1);
+        Assertions.assertTrue(result.orgNPIMatchAnyEobNPIs());
+
+        result = lookBackService.getLookBackAnswer(eob, UUID.randomUUID(), NPIUtil.generateNPI(), 1);
+        Assertions.assertFalse(result.orgNPIMatchAnyEobNPIs());
     }
 
     @Test
-    public void testNonMatchingProviderID() {
+    public void testJobProviderMatchAnyEobNPIs() {
         OffsetDateTime dateTime = OffsetDateTime.now(ZoneOffset.UTC);
         eob.getBillablePeriod().setEnd(Date.from(dateTime.toInstant()));
 
-        boolean result = lookBackService.hasClaimWithin(eob, orgID, UUID.randomUUID().toString(), 1);
-        Assertions.assertFalse(result);
+        LookBackAnswer result = lookBackService.getLookBackAnswer(eob, UUID.randomUUID(), providerNPI, 1);
+        Assertions.assertTrue(result.practitionerNPIMatchAnyEobNPIs());
+
+        result = lookBackService.getLookBackAnswer(eob, UUID.randomUUID(), NPIUtil.generateNPI(), 1);
+        Assertions.assertFalse(result.orgNPIMatchAnyEobNPIs());
     }
 }

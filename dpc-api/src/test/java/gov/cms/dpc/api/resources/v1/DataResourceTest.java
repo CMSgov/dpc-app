@@ -10,6 +10,8 @@ import gov.cms.dpc.api.converters.ChecksumConverterProvider;
 import gov.cms.dpc.api.converters.HttpRangeHeaderParamConverterProvider;
 import gov.cms.dpc.api.core.FileManager;
 import gov.cms.dpc.fhir.dropwizard.filters.StreamingContentSizeFilter;
+import gov.cms.dpc.queue.IJobQueue;
+import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import io.dropwizard.auth.AuthFilter;
 import io.dropwizard.auth.AuthValueFactoryProvider;
@@ -50,6 +52,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class DataResourceTest {
 
     private static FileManager manager = Mockito.mock(FileManager.class);
+    private static IJobQueue queue = Mockito.mock(IJobQueue.class);
     private static final ResourceExtension RESOURCE = buildDataResource();
 
     private DataResourceTest() {
@@ -81,6 +84,31 @@ class DataResourceTest {
         assertAll(() -> assertEquals("This is a test", bos.toString(StandardCharsets.UTF_8), "Should have correct string"),
                 () -> assertEquals(HttpStatus.OK_200, response.getStatus(), "Should have ok status"),
                 () -> assertNotNull(response.getHeaderString(HttpHeaders.ETAG), "Should have eTag"));
+    }
+
+    @Test
+    void testFileFromExpiredJob() throws IOException {
+        UUID jobId = UUID.randomUUID();
+
+        Mockito.when(manager.getFile(Mockito.any(), Mockito.anyString())).thenAnswer(answer -> {
+            final File tempPath = FileUtils.getTempDirectory();
+            final File file = File.createTempFile("test", ".ndjson", tempPath);
+            FileUtils.write(file, "This is a test", StandardCharsets.UTF_8);
+            return new FileManager.FilePointer("", file.length(), jobId, OffsetDateTime.now(ZoneOffset.UTC), file);
+        });
+
+        UUID aggregatorId = UUID.randomUUID();
+        JobQueueBatch jobQueueBatch = new JobQueueBatch(jobId, null, null, Collections.emptyList(), null, null, null);
+        jobQueueBatch.setRunningStatus(aggregatorId);
+        jobQueueBatch.setCompletedStatus(aggregatorId);
+        jobQueueBatch.setCompleteTime(OffsetDateTime.now().minusHours(25));
+        Mockito.when(queue.getJobBatches(jobId)).thenReturn(List.of(jobQueueBatch));
+
+        final Response response = RESOURCE.target("/v1/Data/test.ndjson")
+                .request()
+                .get();
+
+        assertEquals(HttpStatus.GONE_410, response.getStatus(), "Should have 410 Gone status");
     }
 
     @Test
@@ -285,7 +313,7 @@ class DataResourceTest {
 
     private static ResourceExtension buildDataResource() {
 
-        final DataResource dataResource = new DataResource(manager);
+        final DataResource dataResource = new DataResource(manager, queue);
         final FhirContext ctx = FhirContext.forDstu3();
         final AuthFilter<DPCAuthCredentials, OrganizationPrincipal> staticFilter = new StaticAuthFilter(new StaticAuthenticator());
 

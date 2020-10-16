@@ -171,11 +171,6 @@
       "defns": "OperationDefinition-dpc-operation-patient-validate-definition.html",
       "source": "dpc-patient-validate.json"
     },
-    "OperationDefinition/dpc-operation-patient-everything": {
-      "base": "OperationDefinition-dpc-operation-patient-everything.html",
-      "defns": "OperationDefinition-dpc-operation-patient-everything-definition.html",
-      "source": "dpc-patient-everything.json"
-    },
     "OperationDefinition/dpc-operation-group-add": {
       "base": "OperationDefinition-dpc-operation-group-add.html",
       "defns": "OperationDefinition-dpc-operation-group-add-definition.html",

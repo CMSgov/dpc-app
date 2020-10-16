@@ -2,6 +2,7 @@ package gov.cms.dpc.api;
 
 import ca.mestevens.java.configuration.bundle.TypesafeConfigurationBundle;
 import com.codahale.metrics.jersey2.InstrumentedResourceMethodApplicationListener;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.datatype.hibernate5.Hibernate5Module;
 import com.hubspot.dropwizard.guicier.GuiceBundle;
 import com.squarespace.jersey2.guice.JerseyGuiceUtils;
@@ -31,7 +32,6 @@ import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.federecio.dropwizard.swagger.SwaggerBundle;
 import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
-
 import java.util.List;
 
 public class DPCAPIService extends Application<DPCAPIConfiguration> {
@@ -111,7 +111,7 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
 
     private void setupCustomBundles(final Bootstrap<DPCAPIConfiguration> bootstrap) {
         final PropertiesProvider propertiesProvider = new PropertiesProvider();
-        bootstrap.addBundle(new SwaggerBundle<>() {
+        bootstrap.addBundle(new SwaggerBundle<DPCAPIConfiguration>() {
             @Override
             protected SwaggerBundleConfiguration getSwaggerBundleConfiguration(DPCAPIConfiguration dpcapiConfiguration) {
                 final SwaggerBundleConfiguration swaggerBundleConfiguration = dpcapiConfiguration.getSwaggerBundleConfiguration();
@@ -138,5 +138,6 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
         final Hibernate5Module h5M = new Hibernate5Module();
         h5M.disable(Hibernate5Module.Feature.USE_TRANSIENT_ANNOTATION);
         bootstrap.getObjectMapper().registerModule(h5M);
+        bootstrap.getObjectMapper().disable(DeserializationFeature.WRAP_EXCEPTIONS);
     }
 }

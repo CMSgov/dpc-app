@@ -5,10 +5,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.Patient;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import java.time.LocalDate;
@@ -116,6 +113,14 @@ public class PatientEntity extends PersonEntity {
         this.setDob(updated.getDob());
         this.setGender(updated.getGender());
         return this;
+    }
+
+    @PrePersist
+    @PreUpdate
+    public void upperCaseBeneficiaryId() {
+        if(this.getBeneficiaryID()!=null){
+            this.setBeneficiaryID(this.getBeneficiaryID().toUpperCase());
+        }
     }
 
     @Override

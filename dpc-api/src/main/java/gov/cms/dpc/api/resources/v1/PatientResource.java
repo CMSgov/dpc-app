@@ -165,7 +165,7 @@ public class PatientResource extends AbstractPatientResource {
     @Timed
     @ExceptionMetered
     @ApiImplicitParams(
-            @ApiImplicitParam(name = "X-Provenance", required = true, paramType = "header", dataTypeClass = Provenance.class))
+            @ApiImplicitParam(name = "X-Provenance", required = true, paramType = "header", type = "string", dataTypeClass = Provenance.class))
     @ApiOperation(value = "Fetch entire Patient record", notes = "Fetch entire record for Patient with given ID synchronously. " +
             "All resources available for the Patient are included in the result Bundle.")
     @ApiResponses(value = {
@@ -268,15 +268,13 @@ public class PatientResource extends AbstractPatientResource {
     }
 
     private static void validateAndAddOrg(Patient patient, String organizationID, FhirValidator validator, String profileURL) {
-        {
-            // Set the Managing Org, since we need it for the validation
-            patient.setManagingOrganization(new Reference(new IdType("Organization", organizationID)));
-            final ValidationResult result = validator.validateWithResult(patient, new ValidationOptions().addProfile(profileURL));
-            if (!result.isSuccessful()) {
-                // Temporary until DPC-536 is merged in
-                if (result.getMessages().get(0).getSeverity() != ResultSeverityEnum.INFORMATION) {
-                    throw new WebApplicationException(APIHelpers.formatValidationMessages(result.getMessages()), HttpStatus.UNPROCESSABLE_ENTITY_422);
-                }
+        // Set the Managing Org, since we need it for the validation
+        patient.setManagingOrganization(new Reference(new IdType("Organization", organizationID)));
+        final ValidationResult result = validator.validateWithResult(patient, new ValidationOptions().addProfile(profileURL));
+        if (!result.isSuccessful()) {
+            // Temporary until DPC-536 is merged in
+            if (result.getMessages().get(0).getSeverity() != ResultSeverityEnum.INFORMATION) {
+                throw new WebApplicationException(APIHelpers.formatValidationMessages(result.getMessages()), HttpStatus.UNPROCESSABLE_ENTITY_422);
             }
         }
     }

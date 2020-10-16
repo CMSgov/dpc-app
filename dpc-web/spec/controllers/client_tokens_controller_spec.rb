@@ -7,7 +7,6 @@ RSpec.describe ClientTokensController, type: :controller do
 
   describe 'GET #new' do
     let!(:user) { create(:user, :assigned) }
-    let!(:organization) { user.organizations.first }
 
     context 'authenticated user' do
       before(:each) do
@@ -15,7 +14,18 @@ RSpec.describe ClientTokensController, type: :controller do
       end
 
       it 'returns http success' do
-        get :new, params: { organization_id: organization.id }
+        stub = stub_api_client(
+          message: :create_organization,
+          success: true,
+          response: default_org_creation_response
+        )
+        allow(stub).to receive(:get_public_keys).and_return(stub)
+        allow(stub).to receive(:response_body).and_return(default_org_creation_response, { 'entities' => [] })
+
+        org = create(:organization, :api_enabled)
+        user.organizations << org
+
+        get :new, params: { organization_id: org.id }
         expect(response).to have_http_status(:success)
       end
 
@@ -24,6 +34,57 @@ RSpec.describe ClientTokensController, type: :controller do
           other_org = create(:organization)
           get :new, params: { organization_id: other_org.id }
           expect(response.location).to include(portal_path)
+        end
+      end
+    end
+  end
+
+  describe 'GET #destroy' do
+    let!(:user) { create(:user, :assigned) }
+
+    context 'authenticated user' do
+      before(:each) do
+        sign_in user, scope: :user
+      end
+
+      context 'with a successful call to the api' do
+        it 'returns http success' do
+          stub = stub_api_client(
+            message: :create_organization,
+            success: true,
+            response: default_org_creation_response
+          )
+          allow(stub).to receive(:get_public_keys).and_return(stub)
+          allow(stub).to receive(:response_body).and_return(default_org_creation_response, { 'entities' => [] })
+
+          org = create(:organization, :api_enabled)
+          user.organizations << org
+
+          allow(stub).to receive(:delete_client_token).and_return(true)
+
+          get :destroy, params: { id: 1, organization_id: org.id }
+          expect(response.location).to include(request.host + root_path)
+          expect(response).to have_http_status(:found)
+        end
+      end
+
+      context 'with a failed call to the api' do
+        it 'renders new' do
+          stub = stub_api_client(
+            message: :create_organization,
+            success: true,
+            response: default_org_creation_response
+          )
+          allow(stub).to receive(:get_public_keys).and_return(stub)
+          allow(stub).to receive(:response_body).and_return(default_org_creation_response, { 'entities' => [] })
+
+          org = create(:organization, :api_enabled)
+          user.organizations << org
+
+          allow(stub).to receive(:delete_client_token).and_return(false)
+
+          get :destroy, params: { id: 1, organization_id: org.id }
+          expect(response).to render_template(:new)
         end
       end
     end
@@ -40,7 +101,18 @@ RSpec.describe ClientTokensController, type: :controller do
 
       context 'with invalid params' do
         it 'renders new if no label' do
-          post :create, params: { organization_id: organization.id, label: '' }
+          stub = stub_api_client(
+            message: :create_organization,
+            success: true,
+            response: default_org_creation_response
+          )
+          allow(stub).to receive(:get_public_keys).and_return(stub)
+          allow(stub).to receive(:response_body).and_return(default_org_creation_response, { 'entities' => [] })
+
+          org = create(:organization, :api_enabled)
+          user.organizations << org
+
+          post :create, params: { organization_id: org.id, label: '' }
           expect(response).to render_template(:new)
         end
 
@@ -52,6 +124,9 @@ RSpec.describe ClientTokensController, type: :controller do
       end
 
       context 'with valid params' do
+        let!(:user) { create(:user, :assigned) }
+        let!(:organization) { user.organizations.first }
+
         context 'successful API request' do
           before(:each) do
             stub_api_client(message: :create_organization, success: true, response: default_org_creation_response)

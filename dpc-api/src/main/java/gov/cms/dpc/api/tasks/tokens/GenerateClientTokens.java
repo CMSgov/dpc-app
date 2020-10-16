@@ -52,7 +52,7 @@ public class GenerateClientTokens extends Task {
             orgResource.setId(organization);
             final TokenEntity tokenResponse = this.resource
                     .createOrganizationToken(
-                            new OrganizationPrincipal(orgResource),
+                            new OrganizationPrincipal(orgResource),null,
                             null,
                             Optional.empty());
 

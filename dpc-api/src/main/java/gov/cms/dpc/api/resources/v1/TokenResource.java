@@ -11,6 +11,7 @@ import gov.cms.dpc.api.entities.TokenEntity;
 import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.api.models.CollectionResponse;
 import gov.cms.dpc.api.models.JWTAuthResponse;
+import gov.cms.dpc.api.models.CreateTokenRequest;
 import gov.cms.dpc.api.resources.AbstractTokenResource;
 import gov.cms.dpc.common.annotations.APIV1;
 import gov.cms.dpc.common.annotations.NoHtml;
@@ -25,6 +26,7 @@ import io.dropwizard.jersey.jsr310.OffsetDateTimeParam;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.SecurityException;
 import io.swagger.annotations.*;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.slf4j.Logger;
@@ -33,6 +35,7 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.persistence.NoResultException;
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -124,34 +127,42 @@ public class TokenResource extends AbstractTokenResource {
             "Note: The expiration time cannot exceed the maximum lifetime specified by the system (current 1 year)")
     @ApiResponses(value = @ApiResponse(code = 400, message = "Cannot create token with specified parameters"))
     @Override
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     public TokenEntity createOrganizationToken(
-            @ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
+            @ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal, @Valid CreateTokenRequest body,
             @ApiParam(value = "Optional label for token") @QueryParam("label") @NoHtml String tokenLabel, @QueryParam("expiration") Optional<OffsetDateTimeParam> expiration) {
 
         final UUID organizationID = organizationPrincipal.getID();
 
         final Macaroon macaroon = generateMacaroon(this.policy, organizationID);
+        final Optional<CreateTokenRequest> optionalBody = Optional.ofNullable(body);
 
         // Ensure that each generated Macaroon has an associated Organization ID
         // This way we check to make sure we never generate a Golden Macaroon
         ensureOrganizationPresent(macaroon);
 
-        final TokenEntity token = new TokenEntity(macaroon.identifier, organizationID, TokenEntity.TokenType.MACAROON);
+        final TokenEntity tokenEntity = new TokenEntity(macaroon.identifier, organizationID, TokenEntity.TokenType.MACAROON);
 
         // Set the expiration time
-        token.setExpiresAt(handleExpirationTime(expiration));
+        tokenEntity.setExpiresAt(handleExpirationTime(expiration, optionalBody));
 
-        // Set the label, if provided, otherwise, generate a default one
-        token.setLabel(Optional.ofNullable(tokenLabel).orElse(String.format("Token for organization %s.", organizationID)));
-        logger.info("Generating access token: {}", token);
+        //Set the label, if provided, otherwise, generate a default one
+        if(optionalBody.isPresent() && StringUtils.isNotEmpty(optionalBody.get().getLabel())){
+            tokenEntity.setLabel(optionalBody.get().getLabel());
+        }else{
+            tokenEntity.setLabel(Optional.ofNullable(tokenLabel).orElse(String.format("Token for organization %s.", organizationID)));
+        }
+        logger.info("Generating access token: {}", tokenEntity);
         final TokenEntity persisted;
         try {
-            persisted = this.dao.persistToken(token);
+            persisted = this.dao.persistToken(tokenEntity);
         } catch (NoResultException e) {
             throw new WebApplicationException(String.format(ORG_NOT_FOUND, organizationID), Response.Status.NOT_FOUND);
         }
 
         persisted.setToken(new String(this.bakery.serializeMacaroon(macaroon, true), StandardCharsets.UTF_8));
+
         return persisted;
     }
 
@@ -162,7 +173,7 @@ public class TokenResource extends AbstractTokenResource {
     @Timed
     @ExceptionMetered
     @ApiOperation(value = "Delete authentication token", notes = "Delete the specified authentication token for the given Organization (identified by Resource ID)")
-    @ApiResponses(@ApiResponse(code = 404, message = "Unable to find token with given id"))
+    @ApiResponses({@ApiResponse(code = 204, message = "Successfully deleted token"), @ApiResponse(code = 404, message = "Unable to find token with given id")})
     public Response deleteOrganizationToken(
             @ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
             @ApiParam(value = "Token ID", required = true) @NotNull @PathParam("tokenID") UUID tokenID) {
@@ -171,7 +182,7 @@ public class TokenResource extends AbstractTokenResource {
 
         this.dao.deleteToken(matchedToken.get(0));
 
-        return Response.ok().build();
+        return Response.noContent().build();
     }
 
     @POST
@@ -306,14 +317,15 @@ public class TokenResource extends AbstractTokenResource {
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    private OffsetDateTime handleExpirationTime(Optional<OffsetDateTimeParam> expiresParam) {
+    private OffsetDateTime handleExpirationTime(Optional<OffsetDateTimeParam> expiresQueryParam, Optional<CreateTokenRequest> token) {
         // Compute default expiration
         final OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
         final OffsetDateTime defaultExpiration = now.plus(this.policy.getExpirationPolicy().getExpirationOffset(), this.policy.getExpirationPolicy().getExpirationUnit());
+        final OffsetDateTime expiresBodyParam = token.isPresent() ? token.get().getExpiresAt() : null;
 
         // If a custom expiration is supplied use it, unless it violates our default policy
-        if (expiresParam.isPresent()) {
-            final OffsetDateTime customExpiration = expiresParam.get().get();
+        if (expiresQueryParam.isPresent() || expiresBodyParam!=null) {
+            final OffsetDateTime customExpiration = expiresBodyParam!=null ? expiresBodyParam:expiresQueryParam.get().get();
 
             // Verify custom expiration is not greater than policy
             if (customExpiration.isAfter(defaultExpiration)) {

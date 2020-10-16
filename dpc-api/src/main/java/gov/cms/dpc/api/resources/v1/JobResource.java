@@ -26,12 +26,13 @@ import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import java.time.OffsetDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -43,6 +44,10 @@ import java.util.stream.Collectors;
 public class JobResource extends AbstractJobResource {
 
     private static final Logger logger = LoggerFactory.getLogger(JobResource.class);
+
+    public static final int JOB_EXPIRATION_HOURS = 24;
+    public static final DateTimeFormatter HTTP_DATE_FORMAT =
+            DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss z", Locale.US).withZone(ZoneId.of("GMT"));
 
     private final IJobQueue queue;
     private final String baseURL;
@@ -63,10 +68,11 @@ public class JobResource extends AbstractJobResource {
                     "When the job is in progress, the API returns a 202 status." +
                     "When completed, an output response is returned, which contains the necessary metadata for retrieving any output files.")
     @ApiResponses({
+            @ApiResponse(code = 200, message = "Export job has completed. Any failures are listed in the response body", response = JobCompletionModel.class),
             @ApiResponse(code = 202, message = "Export job is in progress. X-Progress header is present with the format \"<STATUS>: <50.00%>\""),
             @ApiResponse(code = 404, message = "Export job cannot be found"),
-            @ApiResponse(code = 500, message = "Export job has failed with no results"),
-            @ApiResponse(code = 200, message = "Export job has completed. Any failures are listed in the response body", response = JobCompletionModel.class)
+            @ApiResponse(code = 410, message = "Job has expired"),
+            @ApiResponse(code = 500, message = "Export job has failed with no results")
     })
     public Response checkJobStatus(@Auth OrganizationPrincipal organizationPrincipal, @PathParam("jobID") @NoHtml String jobID) {
         final UUID jobUUID = UUID.fromString(jobID);
@@ -140,6 +146,14 @@ public class JobResource extends AbstractJobResource {
      * @return the response builder
      */
     private Response.ResponseBuilder buildJobStatusCompleted(Response.ResponseBuilder builder, List<JobQueueBatch> batches) {
+        OffsetDateTime lastCompleteTime = getLatestBatchCompleteTime(batches);
+
+        if (lastCompleteTime.isBefore(OffsetDateTime.now(ZoneOffset.UTC).minusHours(JOB_EXPIRATION_HOURS))) {
+            return builder.status(HttpStatus.GONE_410);
+        }
+
+        builder.header(HttpHeaders.EXPIRES, lastCompleteTime.plusDays(1).format(HTTP_DATE_FORMAT));
+
         JobQueueBatch firstBatch = batches.get(0);
 
         final String resourceQueryParam = firstBatch.getResourceTypes().stream()
@@ -216,5 +230,12 @@ public class JobResource extends AbstractJobResource {
         return List.of(
                 new JobCompletionModel.FhirExtension(JobCompletionModel.SUBMIT_TIME_URL, submitTime),
                 new JobCompletionModel.FhirExtension(JobCompletionModel.COMPLETE_TIME_URL, completeTime));
+    }
+
+    public static OffsetDateTime getLatestBatchCompleteTime(List<JobQueueBatch> batches) {
+        return batches.stream()
+                .filter(b -> b.getCompleteTime().isPresent())
+                .map(b -> b.getCompleteTime().get())
+                .max(OffsetDateTime::compareTo).get();
     }
 }

@@ -1,126 +1,139 @@
-## Information on accessing and working with the API
-- [Join the Data at the Point of Care Google Group](https://groups.google.com/d/forum/dpc-api)
+Welcome to the Data at the Point of Care pilot API program! This documentation covers using the sandbox API with synthetic data. Once you've tested your implementation in sandbox, you can sign up for [the queue to be onboarded to the production environment](https://airtable.com/shr3m3BL3IWY5hYnm).
 
+# Authorization
+------------------
 
----
+Welcome to the Data at the Point of Care pilot API program!
 
-As patients move throughout the healthcare system, providers often struggle to gain and maintain a complete picture of their medical history.
-The Data at the Point of Care (DPC) pilot project fills in the gaps with claims data to inform providers with structured patient history, past procedures, medication adherence, and more.
-This data is made available through a set of [FHIR](http://hl7.org/fhir/STU3/) compliant APIs. 
+## Step One: Request Access
+Any Fee-for-Service provider or Health IT vendor may [request access](https://dpc.cms.gov/users/sign_up) to the sandbox environment and obtain synthetic data by signing-up for an account in the DPC Portal. You will receive a confirmation email from CMS upon account creation. 
 
-This guide serves as a starting point for users to begin working with the API by introducing the core APIs as well as two key concepts of [Bulk Data](#bulk-data) and [Patient Attribution](#attribution).
+Once your account has been assigned to an organization, you will be notified with a second email, which will include next steps and an invite to join our [Google Group](https://groups.google.com/g/dpc-api) community. At this time, you may log in to the DPC Portal at [https://dpc.cms.gov](https://dpc.cms.gov) to create your first client token and start your journey with the Data at the Point of Care pilot API!
 
-Documentation is also available in a comprehensive [OpenAPI format](https://sandbox.dpc.cms.gov/api/swagger) as well as a FHIR [implementation guide](/ig/index.html).
+## Step Two: Client Tokens
 
-## Bulk Data
+<a href="#create-your-first-client-token" class="ds-u-padding-left--3 guide_sub-link">Create your first client token</a><br />
+<a href="#create-multiple-client-tokens" class="ds-u-padding-left--3 guide_sub-link">Create multiple client tokens</a><br />
+<a href="#list-all-client-tokens" class="ds-u-padding-left--3 guide_sub-link">List all client tokens</a><br />
+<a href="#delete-client-tokens" class="ds-u-padding-left--3 guide_sub-link">Delete client tokens</a>
 
-This project provides an implementation of the FHIR [Bulk Data Access](http://hl7.org/fhir/us/bulkdata/2019May/index.html) specification, which provides an async interface over the existing Blue Button 2.0 data model.
-Details on the Blue Button data model can be found on its [project page](https://bluebutton.cms.gov).
+Client tokens help monitor who is accessing the API through your account. A client token is required to create an access token, which is needed with every request made to the API. This ensures every interaction with the API can be traced back to the person who created the client token.
 
-This project will closely track changes in the underlying standard and is fully compliant with the current specification, with the following limitations:
+### Prerequisites:
+- A registered account in the DPC Portal
+- CMS email stating you have been assigned to an organization
 
-- Type filters are not supported
-- The `_since` parameter is not currently supported.
-- Only `Group` level exporting is supported, not `Patient` or `System` level exports
+### Create your first client token
+<div class="ds-c-alert ds-c-alert--warn">
+  <div class="ds-c-alert__body">
+    <p class="ds-c-alert__text">
+      You MUST create different client tokens for every vendor that works with the API. A single client token should not be shared with multiple vendors.
+    </p>
+  </div>
+</div>
 
+Your first client token must be created through the DPC Portal. After successfully accessing the API, you may choose to add client tokens through the API or continue using the DPC Portal.
 
-In addition, the only available resource types are those exposed by [Blue Button](https://bluebutton.cms.gov/developers/#core-resources) which include:
+1. **Log in to your account in the [DPC Portal](https://dpc.cms.gov/users/sign_in)** and select <span class="button-ex">+ New Token</span>
+2. **Add a Label:** Title your token with a recognizable name that includes the environment for which you are requesting access
+3. Click "Create Token" to generate your client token
 
-- [Explanation of Benefits](https://bluebutton.cms.gov/eob/)
-- [Patient](https://www.hl7.org/fhir/patient.html)
-- [Coverage](http://hl7.org/fhir/coverage.html)
+![Client Token](/assets/guide_client_token.svg)
 
-## Attribution
+<div class="ds-c-alert ds-c-alert--warn">
+  <div class="ds-c-alert__body">
+    <p class="ds-c-alert__text">
+      This is the only time that this client token will be visible to you. Ensure that the value is recorded in a safe and durable location.
+    </p>
+  </div>
+</div>
 
-In order to receive data from the DPC application, a healthcare provider must have a treatment related purpose for viewing a patient's claims history.
-Providers can attest to their treatment purposes by submitting a an *attribution roster* which lists the patients currently under their care.
+### Create multiple client tokens
 
-In order for a provider to establish a treatment related purpose for viewing patient data, they must fulfill one of the following conditions:
+You may create as many tokens as you like via your account in the DPC Portal using the instructions above. You can also create multiple client tokens at once by making a POST request to the /Token endpoint.
 
-1. Have an existing treatment relationship, defined as a visit or processed claim for the given patient with the provider's [National Provider Identity (NPI)](https://www.cms.gov/Regulations-and-Guidance/Administrative-Simplification/NationalProvIdentStand/) number within the past 18 months.
-2. Have an upcoming appointment for the given patient within 10 days.
+This endpoint accepts two (optional) query parameters:
 
-If neither of these conditions are met, a treatment relationship cannot be established and the provider is is **NOT** authorized to retrieve claims data.
-With each roster addition or renewal, the provider is attesting that there is an active treatment relationship that creates a need for the data being requested.  
+<table cellspacing="0" class="guide__table">
+  <tr>
+    <th cellspacing="0">Parameter</th>
+    <th cellspacing="0">Parameter Values</th>
+    <th cellspacing="0">Fixed/Dynamic</th>
+    <th cellspacing="0">Description</th>
+    <th cellspacing="0">Notes</th>
+  </tr>
+  <tr>
+    <td cellspacing="0">label</td>
+    <td cellspacing="0">{ insert name for the client token }</td>
+    <td cellspacing="0">Dynamic</td>
+    <td cellspacing="0">Sets a human-readable label for the token</td>
+    <td cellspacing="0">Token labels are not required to be unique.</td>
+  </tr>
+  <tr>
+    <td cellspacing="0">expiration</td>
+    <td cellspacing="0">ISO formatted string</td>
+    <td cellspacing="0">Dynamic</td>
+    <td cellspacing="0">Sets a custom expiration for the <code>client_token</code></td>
+    <td cellspacing="0">The user cannot set an expiration time longer than five minutes.</td>
+  </tr>
+</table>
 
-Given that existing standards for patient rosters do not exist, CMS is currently piloting an implementation of the [Attribution Guide](https://github.com/smart-on-fhir/smart-on-fhir.github.io/wiki/Bulk-data:-thoughts-on-attribution-lists-and-groups) currently under discussion with the [SMART-ON-FHIR](https://docs.smarthealthit.org/) team.
-The goal is to provide feedback to the group on experiences related to implementation and supporting the recommendations.
+#### Request:
 
-> Note: The attribution logic and interaction flow will be subject to revision over time.
-CMS welcomes [feedback on the implementation](https://groups.google.com/d/forum/dpc-api) as well as experiences with other systems.
-
-Specific details on creating and updating treatment rosters is given in a later [section](#create-an-attribution-group).
-
-Providers are required to keep their treatment rosters up to date, as patient attributions automatically expire after 90 days.
-If an attribution expires, the provider may resubmit the patient to their roster and re-attest to a treatment purpose for another 90 days.
-
-CMS currently restricts individual providers to no more than 5,000 attributed patients.
-These restrictions are subject to change over time.
-
-## Authentication and Authorization
-
-The Data at the Point of Care pilot project is currently accessible as a private sandbox environment, which returns sample [NDJSON](http://ndjson.org/) files with synthetic beneficiary data.
-There is no beneficiary PII or PHI in the files you can access via the sandbox.
-
-DPC implements the *SMART Backend Services Authentication* (BSA) as described by the [SMART ON FHIR team](https://hl7.org/fhir/uv/bulkdata/authorization/index.html).
-This specification requires the user to exchange their DPC provided `client_token` for an `access_token` which can be used to make API requests to the FHIR endpoints.
-This exchange requires the user to submit a self-signed [JSON Web Token](https://jwt.io) using a public/private key pair that they submit to DPC either via the Web UI or the API.
-
-> Note: Authentication is performed on a per-environment basis. Users will need to request a `client_token` and upload a public key for *each* environment they wish to access (e.g. sandbox, production, etc).
-
-The `access_token` is then set as a **Bearer** token in the `Authorization` header for each API request.
-
-~~~ sh
-Authorization: Bearer {access_token}
+~~~
+POST /api/v1/Token
 ~~~
 
-**cURL command**
+#### cURL command:
 
+<pre><code>curl -v https://sandbox.dpc.cms.gov/api/v1/Token?label={token label}&expiration={ISO formatted dateTime} \
+     -H 'Authorization: Bearer <span style="color: #046B99;">{access_token}</span>' \
+     -H 'Accept: application/json' \
+     -H 'Content-Type: application/json' \
+     -X POST</code></pre>
+
+#### Response:
+The response from the API will include the client_token in the token field.
+
+~~~json
+{
+  "id": "3c308f6e-0223-42f8-80c2-cab242d68afc",
+  "tokenType": "MACAROON",
+  "label": "Token for organization 46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0.",
+  "createdAt": "2019-11-04T11:49:55.126-05:00",
+  "expiresAt": "2020-11-04T11:49:55.095-05:00",
+  "token:": "{client_token}"
+}
 ~~~
-curl -H 'Authorization: Bearer {access_token}' {command to execute}
+
+<div class="ds-c-alert ds-c-alert--warn">
+  <div class="ds-c-alert__body">
+    <p class="ds-c-alert__text">
+      This is the only time that this client token will be visible to you. Ensure that the value is recorded in a safe and durable location.
+    </p>
+  </div>
+</div>
+
+### List all client tokens
+If you have created multiple client tokens, you may want to list them to reference ID’s, expiration dates, or delete specific client tokens from your account in the DPC Portal.
+
+All client tokens registered by your organization for a given environment can be listed by making a GET request to the /Token endpoint. This will return a list of token IDs with details on when they were created, when they expire, and the label associated with that token.
+
+#### Request:
 ~~~
-
-The authorization flow is as follows:
-
-1. The user first submits a public key to DPC for the given environment.
-This can be done either through the Web UI or via the `PublicKey` endpoint in the API.
-
-> Note: Because the `PublicKey` endpoint is secured by BSA, the initial public key for each environment **must** be uploaded via the Web UI.
->Any additional keys can then be submitted via the API endpoints, using an existing key for signing the JWT.
-
-2. The user creates a `client_token` to use for a given application.
-
-3. For each API request, the user creates an `access_token` by submitting a self-signed JWT to the `/Token/auth` endpoint.
-
-4. The user sets the provided `access_token` as a `Bearer` token in the `Authorization` header, for each request to the DPC API 
-
-### Managing client_tokens
-
-Client tokens are required in order to provide the ability for a given application to access the DPC API.
-Details on how to create an `access_token` from a given `client_token` are given in a later [section](#creating-an-accesstoken).
-
-#### Listing client_tokens
-
-All client tokens registered by the organization for a given environment can be listed by making a GET request to the `/Token` endpoint.
-This will return an array of objects which list the token ID, when it was created, when it expires, and the label associated with the token. 
-
-~~~sh
 GET /api/v1/Token
 ~~~
 
-**cURL command**
+#### cURL command:
 
-~~~sh
-curl -v https://sandbox.dpc.cms.gov/api/v1/Token \
--H 'Authorization: Bearer {access_token}' \
--H 'Accept: application/json' \
--H 'Content-Type: application/json' \
--X GET
+<pre><code>curl -v https://sandbox.dpc.cms.gov/api/v1/Token \
+     -H 'Authorization: Bearer <span style="color: #046B99;">{access_token}</span>' \
+     -H 'Accept: application/json' \
+     -H 'Content-Type: application/json' \
+     -X GET</code></pre>
+
+#### Response:
 ~~~
-
-**Response**
-
-~~~json
 {
   "created_at": "2019-11-04T11:49:55.126-05:00",
   "count": 3,
@@ -150,136 +163,131 @@ curl -v https://sandbox.dpc.cms.gov/api/v1/Token \
 }
 ~~~
 
-Specific client_tokens can be listed by making a `GET` request to the `/Token` endpoint using the unique id of the client_token.
+### Delete client tokens
+You may want to delete a client token from your organization if a vendor or group no longer exists or needs access to the API. This can be done by clicking the “x” on the right side of each client token listed in the DPC Portal or by sending a DELETE request to the /Token endpoint using the unique ID of the client_token. 
 
-~~~sh
-GET /api/v1/Token/{client_token id}
+Client_token IDs can be found either at creation or as the result of [listing client_tokens](#list-all-client-tokens).
+
+#### Request:
+<pre><code>DELETE /api/v1/Token/<span style="color: #046B99;">{client_token id}</span></code></pre>
+
+#### cURL command:
+<pre><code>curl -v https://sandbox.dpc.cms.gov/api/v1/Token/{client_token id} \
+     -H 'Authorization: Bearer <span style="color: #046B99;">{access_token}</span>' \
+     -H 'Accept: application/json' \
+     -H 'Content-Type: application/json' \
+     -X DELETE</code></pre>
+
+#### Response:
 ~~~
-
-**cURL command**
-
-~~~sh
-curl -v https://sandbox.dpc.cms.gov/api/v1/Token/{client_token id} \
--H 'Authorization: Bearer {access_token}' \
--H 'Accept: application/json' \
--H 'Content-Type: application/json' \
--X GET
-~~~
-
-**Response**
-
-~~~json
-{
-    "id": "3c308f6e-0223-42f8-80c2-cab242d68afc",
-    "tokenType": "MACAROON",
-    "label": "Token for organization 46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0.",
-    "createdAt": "2019-11-04T11:49:55.126-05:00",
-    "expiresAt": "2020-11-04T11:49:55.095-05:00"
-}
-~~~
-
-#### Creating a client_token
-
-Creating a `client_token` can be done by making a `POST` request to the `/Token` endpoint. 
-This endpoint accepts two, optional query params:
-
-* `label` sets a human readable label for the token. If omitted, DPC will auto-generate one.
-Note, token labels are not guaranteed to be unique. 
-
-*  `expiration` sets a custom expiration for the `client_token`.
-This is provided as an [ISO formatted](https://www.iso.org/iso-8601-date-and-time-format.html) string and if omitted will default to the system specified expiration time.
-
-> Note: The user cannot set an expiration time longer than the system allowed maximum, which is currently five minutes.
-This will result in an error being returned to the user.
-
-The response from the API includes the `client_token` in the `token` field. 
-
->Note: This is the _only_ time that the client token will be visible to user.
->Ensure that the value is recorded in a safe and durable location.
-
-~~~sh
-POST /api/v1/Token
-~~~
-
-**cURL command**
-
-~~~sh
-curl -v https://sandbox.dpc.cms.gov/api/v1/Token?label={token label}&expiration={ISO formatted dateTime} \
--H 'Authorization: Bearer {access_token}' \
--H 'Accept: application/json' \
--H 'Content-Type: application/json' \
--X POST
-~~~
-
-**Response**
-
-~~~json
-{
-    "id": "3c308f6e-0223-42f8-80c2-cab242d68afc",
-    "tokenType": "MACAROON",
-    "label": "Token for organization 46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0.",
-    "createdAt": "2019-11-04T11:49:55.126-05:00",
-    "expiresAt": "2020-11-04T11:49:55.095-05:00",
-    "token:": "{client_token}"
-}
-~~~
-
-#### Deleting a client_token
-
-Client tokens can be removed by sending a `DELETE` request to the `/Token` endpoint, using the unique ID of the client_token, which is returned either on creation, or as the result of listing the client_tokens.
-
-~~~sh
-DELETE /api/v1/Token/{client_token id}
-~~~
-
-**cURL command**
-
-~~~sh
-curl -v https://sandbox.dpc.cms.gov/api/v1/Token/{client_token id} \
--H 'Authorization: Bearer {access_token}' \
--H 'Accept: application/json' \
--H 'Content-Type: application/json' \
--X DELETE
-~~~
-
-**Response**
-
-~~~sh
 200 - Token was removed
 ~~~
 
-### Managing public keys
+## Step Three: Public Keys
 
-Creating an `access_token` from a given `client_token` requires that the user to submit a self-signed JWT with the specific request information (details are given in a later [section](#creating-an-accesstoken)).
-In order for DPC to validate that the token request is coming from an authorized application, it verifies that the private key used to sign the JWT matches a public key previously uploaded to the system.
-Users are required to maintain a list of acceptable public keys with the DPC system and management operations are described in this section.
+<a href="#upload-your-first-public-key" class="ds-u-padding-left--3 guide_sub-link">Upload your first public key</a><br />
+<a href="#create-a-public-key-signature" class="ds-u-padding-left--3 guide_sub-link">Create a public key signature</a><br />
+<a href="#list-all-public-keys" class="ds-u-padding-left--3 guide_sub-link">List all public keys</a><br />
+<a href="#list-a-specific-public-key" class="ds-u-padding-left--3 guide_sub-link">List a specific public key</a><br />
+<a href="#delete-public-keys" class="ds-u-padding-left--3 guide_sub-link">Delete public keys</a>
 
-> Note: There is no direct correlation between the number of `client_tokens` an organization has and the number of public/private key pairs.
-> A keypair can be used to sign any number of client_tokens.   
+Public keys verify that client token requests are coming from an authorized application. This is by verifying that the private key used to sign your JSON Web Token (JWT) also matches a public key previously uploaded to DPC. Please complete the upload of your public key + signature through the DPC Portal.
+
+**ALL files in this section must be stored in ONE folder.**
+
+(private.pem, public.pem, snippet.txt, snippet.txt.sig, signature.sig files)
+
+### Prerequisites:
+- A registered account in the DPC Portal
+- CMS email stating you have been assigned to an organization
 
 
-#### Listing public keys
+### Upload your first public key
 
-All public keys registered by the organization for the given endpoint can be listed by making a GET request to the `/Key` endpoint.
-This will return an array of objects which list the public key ID, the human readable label, creation time and the PEM encoded value of the public key
+**1. Generate a private key**
 
-~~~sh
+- Use the command invocation:
+
+  ~~~
+  openssl genrsa -out ./private.pem 4096
+  ~~~
+
+<div class="ds-c-alert ds-c-alert--warn">
+  <div class="ds-c-alert__body">
+    <p class="ds-c-alert__text">
+      The contents of your private key (private.pem file) should be treated as sensitive/secret information. Take care in the handling and storage of this information as it is essential to the security of your connection with DPC.
+    </p>
+  </div>
+</div>
+
+**2. Generate a public key**
+
+- Use the command invocation:
+
+  ~~~
+  openssl rsa -in ./private.pem -outform PEM -pubout -out ./public.pem
+  ~~~
+
+**3. Paste the contents** of your public key (public.pem file) into the ‘Public Key’ field in the DPC Portal. You must include the “BEGIN PUBLIC KEY” and “END PUBLIC KEY” tags before and after your key.
+
+![Public Key Example - Shows public key with the BEGIN PUBLIC KEY and END PUBLIC KEY tags.](/assets/guide_public_key_ex.svg)
+
+**4. Add a Label:** Title your public key with a descriptive name that can be easily recognized for future purposes.
+
+**5. Proceed** to creating your public key signature.
+
+### Create a public key signature
+
+**1. Download the snippet.txt file located in the DPC Portal to create a signature.**
+
+**2. Create your public key signature.**
+
+- Use the command invocation:
+
+  ~~~
+  openssl dgst -sign private.pem -sha256 -out snippet.txt.sig snippet.txt
+  ~~~
+
+**3. Verify your public key signature.**
+
+- Use the command invocation:
+
+  ~~~
+  openssl base64 -in snippet.txt.sig -out signature.txt
+  ~~~
+
+  <p style="font-weight: 700;">Response <u>must yield</u> <span style="color: #4AA564;">Verified Ok</span>.</p>
+
+**4. Generate a _verified_ public key signature.**
+
+**5. Paste the contents** of your verified public key signature (signature.txt file) into the ‘Public Key Signature’ field in your DPC Account.
+
+**6. Click Add Key** to upload your public key.
+
+
+### List all public keys
+If you have created multiple public keys, you may want to list them to reference ID’s, check expiration dates, or delete specific public keys from your account in the DPC Portal.
+
+All public keys registered by your organization for an environment can be listed by making a GET request to the /Key endpoint. This will return a list of public key IDs with details on when they were created, when they expire, and the label associated with that key.
+
+#### Request:
+
+~~~
 GET /api/v1/Key
 ~~~
 
-**cURL command**
+#### cURL command:
 
-~~~sh
-curl -v http://localhost:3002/v1/Key \
--H 'Authorization: Bearer {access_token}' \
--H 'Accept: application/json' \
--H 'Content-Type: application/json' \
--X GET
+<pre><code>curl -v http://localhost:3002/v1/Key \
+     -H 'Authorization: Bearer <span style="color: #046B99;">{access_token}</span>' \
+     -H 'Accept: application/json' \
+     -H 'Content-Type: application/json' \
+     -X GET</code></pre>
+
+#### Response:
+The response from the API will include the client_token in the token field.
+
 ~~~
-
-**Response**
-
-~~~json
 {
   "created_at": "2019-11-04T13:16:29.008-05:00",
   "count": 1,
@@ -294,1084 +302,641 @@ curl -v http://localhost:3002/v1/Key \
 }
 ~~~
 
-Specific public keys can be listed by making a `GET` request to the `/Key` endpoint using the unique id of the public key.
+### List a specific public key
+If you have created multiple public keys, you may want to confirm the expiration date or content of a single public key from your account in the DPC portal.
 
-~~~sh
-GET /api/v1/Key/{public key id}
+Specific public keys can be listed by making a GET request to the /Key endpoint using the unique id of the public key.
+
+#### Request:
+
+<pre><code>GET /api/v1/Key/<span style="color: #046B99;">{public key id}</span></code></pre>
+
+#### cURL command:
+
+<pre><code>curl -v https://sandbox.dpc.cms.gov/api/v1/Key/{public key id} \
+     -H 'Authorization: Bearer <span style="color: #046B99;">{access_token}</span>' \
+     -H 'Accept: application/json' \
+     -H 'Content-Type: application/json' \
+     -X GET</code></pre>
+
+#### Response:
+
 ~~~
-
-**cURL command**
-
-~~~sh
-curl -v https://sandbox.dpc.cms.gov/api/v1/Key/{public key id} \
--H 'Authorization: Bearer {access_token}' \
--H 'Accept: application/json' \
--H 'Content-Type: application/json' \
--X GET
-~~~
-
-**Response**
-
-~~~json
 {
-    "id": "b296f9d2-1aae-4c59-b6c7-c759b9db5226",
-    "publicKey": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAmyI+y8vAAFcV4deNdyKC\nH16ZPU7tgwnUzvtEYOp6s0DFjzgaqWmYZd/CNlb1psi+J0ChtcL9+Cx3v+HwDqVx\nToQrEqJ8hMavtXnxm2jPoRaxmbIGjHZ6jfyMot5+CdP8Vr5o9G2WIUgzjhFwMEXh\nlYg97uZadLLVKVXYTl4HtluVX5y7p1Wh4vkyJFBiqrX7qAJXvr6PK7OUeZDeVsse\nOMm33VwgbQSGRw7yWNOw+H/RbpGQkAUtHvGYvo/qLeb+iJsF2zBtjnkTmk5I8Vlo\n4xzbqaoqZqsHp4NgCw+bq0Y6AWLE2yUYi/DOatOdIBfLxlpf/FAY3f5FbNjISUuL\nmwIDAQAB\n-----END PUBLIC KEY-----\n",
-    "createdAt": "2019-11-04T13:16:29.008-05:00",
-    "label": "test-key"
+  "id": "b296f9d2-1aae-4c59-b6c7-c759b9db5226",
+  "publicKey": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAmyI+y8vAAFcV4deNdyKC\nH16ZPU7tgwnUzvtEYOp6s0DFjzgaqWmYZd/CNlb1psi+J0ChtcL9+Cx3v+HwDqVx\nToQrEqJ8hMavtXnxm2jPoRaxmbIGjHZ6jfyMot5+CdP8Vr5o9G2WIUgzjhFwMEXh\nlYg97uZadLLVKVXYTl4HtluVX5y7p1Wh4vkyJFBiqrX7qAJXvr6PK7OUeZDeVsse\nOMm33VwgbQSGRw7yWNOw+H/RbpGQkAUtHvGYvo/qLeb+iJsF2zBtjnkTmk5I8Vlo\n4xzbqaoqZqsHp4NgCw+bq0Y6AWLE2yUYi/DOatOdIBfLxlpf/FAY3f5FbNjISUuL\nmwIDAQAB\n-----END PUBLIC KEY-----\n",
+  "createdAt": "2019-11-04T13:16:29.008-05:00",
+  "label": "test-key"
 }
 ~~~
 
-#### Uploading a public key
+### Delete public keys
+You may need to delete a public key from your organization if a user no longer needs access or otherwise needs to be removed from the system. 
 
-Uploading a public key can be done by making a `POST` request to the `/Key` endpoint. 
-This endpoint requires one additional query param:
+Public keys can be removed by sending a DELETE request to the /Key endpoint using the unique ID of the public key, which is returned either at creation, or as the result of listing the public keys.
 
-* `label` sets a human readable label for the public key (this must be less than 26 characters long). 
+#### Request:
 
-The submitted public key must be unique to each environment and meet the following requirements:
+<pre><code>DELETE /api/v1/Key/<span style="color: #046B99;">{public key ID}</span></code></pre>
 
-* PEM encoded
-* Be an `RSA` key with a minimum length of at least 4096 bits.
-* Or, be an `ECC` key with one of the following curves:
-    - secp256r1
-    - secp384r1
+#### cURL command:
 
-~~~sh
-POST /api/v1/Key
+<pre><code>curl -v https://sandbox.dpc.cms.gov/api/v1/Key/{public key id} \
+     -H 'Authorization: Bearer <span style="color: #046B99;">{access_token}</span>' \
+     -H 'Accept: application/json' \
+     -H 'Content-Type: application/json' \
+     -X DELETE</code></pre>
+
+#### Response:
+
+The response from the API will include the client_token in the token field.
+
 ~~~
-
-**cURL command**
-
-~~~sh
-curl -v https://sandbox.dpc.cms.gov/api/v1/Key?label={key label} \
--H 'Authorization: Bearer {access_token}' \
--H 'Accept: application/json' \
--H 'Content-Type: text/plain' \
--X POST \
--d "{PEM encoded public key}"
-~~~
-
-**Response**
-
-~~~json
-{
-    "id": "b296f9d2-1aae-4c59-b6c7-c759b9db5226",
-    "publicKey": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAmyI+y8vAAFcV4deNdyKC\nH16ZPU7tgwnUzvtEYOp6s0DFjzgaqWmYZd/CNlb1psi+J0ChtcL9+Cx3v+HwDqVx\nToQrEqJ8hMavtXnxm2jPoRaxmbIGjHZ6jfyMot5+CdP8Vr5o9G2WIUgzjhFwMEXh\nlYg97uZadLLVKVXYTl4HtluVX5y7p1Wh4vkyJFBiqrX7qAJXvr6PK7OUeZDeVsse\nOMm33VwgbQSGRw7yWNOw+H/RbpGQkAUtHvGYvo/qLeb+iJsF2zBtjnkTmk5I8Vlo\n4xzbqaoqZqsHp4NgCw+bq0Y6AWLE2yUYi/DOatOdIBfLxlpf/FAY3f5FbNjISUuL\nmwIDAQAB\n-----END PUBLIC KEY-----\n",
-    "createdAt": "2019-11-04T13:16:29.008-05:00",
-    "label": "test-key"
-}
-~~~
-
-The `id` field of the response will be used as the `kid` JWT header value, as described in a later [section](#creating-an-accesstoken)
-
-#### Deleting a public key
-
-Public keys can be removed by sending a `DELETE` request to the `/Key` endpoint, using the unique ID of the public key, which is returned either on creation, or as the result of listing the public keys.
-
-~~~sh
-DELETE /api/v1/Key/{public key ID}
-~~~
-
-**cURL command**
-
-~~~sh
-curl -v https://sandbox.dpc.cms.gov/api/v1/Key/{public key id} \
--H 'Authorization: Bearer {access_token}' \
--H 'Accept: application/json' \
--H 'Content-Type: application/json' \
--X DELETE
-~~~
-
-**Response**
-
-~~~javascript
 200 - Key was removed
 ~~~
 
-### Creating an access_token
+## Step Four: JSON Web Tokens
 
-Creating an *access_token* for API access requires the user to submit a self-signed JWT to the `/Token/auth` endpoint.
-This token must be signed with a public key previously registered and contain the following header and claim values:
+<a href="#validate-a-json-web-token-for-dpc" class="ds-u-padding-left--3 guide_sub-link">Validate a JSON Web Token for DPC</a>
 
+A JSON Web Token (JWT) authenticates your organization with DPC. If you have not generated your client token and public/private key pair through the DPC Portal, please obtain the following prerequisites before proceeding.
 
-**Authentication JWT Header Values**
+### Prerequisites:
+- Internet access
+- A registered client token
+- Your private key
+- Your public key ID
 
-`alg`	_required_	- Fixed value: RS384
+Once completed, please download the DPC JWT Tool (found in the navigation bar) to generate your JWT for DPC.
 
-`kid`   _required_	- The identifier of the key-pair used to sign this JWT. This must be the ID of a previously registered public key
+The following instructions are to be completed via the JWT Tool downloaded onto your personal computer. You must have internet access in order for this tool to use its cryptography library.  Your information is not sent over the network, in order to ensure your private key and JWT remain confidential.
 
-`typ`	_required_	- Fixed value: JWT.
+1. Please input your Private Key.
+2. Please input your Client Token.
+3. Please input your Public Key ID
+    * This ID can be found under the "Public Keys” section in your DPC Portal.
+![Public Key Id - The public key id is found underneath the key's label.](/assets/guide_public_key_id.svg)
+4. Click "Generate JWT"
+5. Copy "Your JWT" to begin validation for DPC
 
-**Authentication JWT Claims**
+### Validate a JSON Web Token for DPC
+The DPC API supports a /Token/validate endpoint, which allows you to submit your signed JWT for DPC validation. If the fields do not contain the required requests, the response will return an error message with details as to which claims or values on the JWT are missing or incorrect.
 
-`iss`	_required_	Issuer of the JWT -- the `client_token` provided by DPC
+<div class="ds-c-alert ds-c-alert--warn">
+  <div class="ds-c-alert__body">
+    <p class="ds-c-alert__text">
+      This method DOES NOT validate the JWT signature, public key or client tokens, it merely verifies the necessary elements are present in the JWT entity.
+    </p>
+  </div>
+</div>
 
-`sub`	_required_	Issuer of the JWT -- the `client_token` provided by DPC (note that this is the same as the value for the `iss` claim)
+#### Request:
 
-`aud`	_required_	The DPC "token URL" (the same URL to which this authentication JWT will be posted. e.g. https://dpc.cms.gov/api/v1/Token/auth)
-
-`exp`	_required_	Expiration time integer for this authentication JWT, expressed in seconds since the "Epoch" (1970-01-01T00:00:00Z UTC). This time SHALL be no more than five minutes in the future.
-
-`jti`	_required_	A nonce string value that uniquely identifies this authentication JWT.
-
-#### Creating a JSON Web Token (JWT)
-[JWT.io](https://jwt.io/) provides comprehensive information about what JSON Web Tokens are and how to use them.  For testing purposes, the site offers a [debugger](https://jwt.io/#debugger-io) that allows you to enter a header, payload, and keys to generate a signed JWT.
-
-Online tools for creating JWTs **should not** be considered secure and **should not** be used to create tokens to access production data. Instead, use one of the [libraries](https://jwt.io/#libraries-io) listed on JWT.io to generate JWTs in your DPC API client.
-
-##### JWT for testing in the sandbox
-For the DPC sandbox environment, which contains no PII or PHI, a JWT can be created with the [JWT.io debugger](https://jwt.io/#debugger-io). More details on each field can be found under [Authentication JWT Header Values](#authentication-jwt-header-values) and [Authentication JWT Claims](#authentication-jwt-claims).
-1. From the Algorithm dropdown, select `RS384`.
-1. On the "Decoded" side, the "Header: Algorithm & Token Type" text area must contain a JSON object with the fields below. `alg` and `typ` will already be set, so you will need to add `kid`.
-   1. `"alg": "RS384"` (set for you after you select the algorithm)
-   1. `"kid": "{ID of public key}"`
-   1. `"typ": "JWT"` (set by default)
-1. The "Payload: Data" text area must contain a JSON object with the fields below. It will already contain `sub`, `name`, `admin`, and `iat`. The value of `sub` will change, and `name`, `admin`, and `iat` should be removed.
-   1. `"iss": "{client token}"`
-   1. `"sub": "{client token}"`
-   1. `"aud": "https://sandbox.dpc.cms.gov/api/v1/Token/auth"`
-   1. `"exp": "{expiration time}"`
-   1. `"jti": "{nonce}"`
-1. Under "Verify Signature", the first text area should contain your public key, and the second, your private key. This keypair should be for testing in the sandbox, not one that is used to access any production data.
-
-![Example of using JWT.io's debugger](../../assets/images/jwt-io-example.png)
-
-##### JWT for production use
-JWT.io's debugger **should not** be used to create tokens for accessing the production environment. JWTs can be created by your DPC client using one of the many [JWT libraries](https://jwt.io/#libraries-io) in a variety of programming languages. For example, Auth0 has created a [Java library](https://github.com/auth0/java-jwt), and its [README](https://github.com/auth0/java-jwt#usage) shows you how to implement it to create your own tokens.
-
-#### Validating a DPC token
-The DPC API supports a `/Token/validate` endpoint, which allows the user to submit their signed JWT for validation.
-This will return an error message with details as to which claims or values on the JWT are missing or incorrect.
-This method *DOES NOT* validate the JWT signature, public key or client tokens, it merely verifies the necessary elements are present in the JWT entity.
-
-~~~sh
+~~~
 POST /api/v1/Token/validate
 ~~~
 
-**cURL command**
+#### cURL command:
 
-~~~sh
-curl -v https://sandbox.dpc.cms.gov/api/v1/Token/validate \
--H 'Accept: application/json' \
--H 'Content-Type: text/plain' \
--X POST \
--d "{Signed JWT}"
+<pre><code>curl -v https://sandbox.dpc.cms.gov/api/v1/Token/validate \
+     -H 'Accept: application/json' \
+     -H 'Content-Type: text/plain' \
+     -X POST \
+     -d <span style="color: #046B99;">"{Signed JWT}"</span></code></pre>
+
+#### Response:
+The response from the API will return with a HTTP 200 if the JWT is valid, otherwise an error message will be returned.
+
+## Step Five: Access/Bearer Token
+
+<a href="#obtain-an-accesstoken" class="ds-u-padding-left--3 guide_sub-link">Obtain an access_token</a><br />
+<a href="#obtain-a-bearertoken" class="ds-u-padding-left--3 guide_sub-link">Obtain a bearer_token</a>
+
+Obtaining an access_token and setting it as your bearer_token are the final steps in connecting to the DPC API. **The access_token must be set as the bearer_token in EVERY API request and has a maximum expiration time of FIVE MINUTES.**
+
+### Prerequisites:
+- A valid JSON Web Token (JWT)
+
+### Obtain an access_token
+In order to receive an access_token, the valid JWT must be submitted to the /Token/auth endpoint via a POST request. The POST request is encoded as an application/x-www-form-url.
+
+**1. Set the JWT as the client_assertion** form parameter.
+
+**2. Add the remaining fields below:**
+
+<table cellspacing="0" class="guide__table">
+  <tr>
+    <th cellspacing="0">Parameters</th>
+    <th cellspacing="0">Parameter Values</th>
+    <th cellspacing="0">Fixed/Dynamic</th>
+    <th cellspacing="0" style="width: 33%">Notes</th>
+  </tr>
+  <tr>
+    <td cellspacing="0">"scope":</td>
+    <td cellspacing="0">"system/*.*"</td>
+    <td cellspacing="0">Fixed</td>
+    <td cellspacing="0">The requested scope MUST be equal to or less than a the scope originally granted to the authorized accessor.</td>
+  </tr>
+  <tr>
+    <td cellspacing="0">"grant_type":</td>
+    <td cellspacing="0">"client_credentials"</td>
+    <td cellspacing="0">Dynamic</td>
+    <td cellspacing="0">The format of the assertion as defined by the authorization server.</td>
+  </tr>
+  <tr>
+    <td cellspacing="0">"client_assertion_type":</td>
+    <td cellspacing="0">"urn:ietf:params:oauth:client-assertion-type:jwt-bearer"</td>
+    <td cellspacing="0">Fixed</td>
+    <td cellspacing="0">The format of the assertion as defined by the authorization server.</td>
+  </tr>
+  <tr>
+    <td cellspacing="0">"client_assertion":</td>
+    <td cellspacing="0">"<span style="color: #046B99;">{Signed authentication JWT value}</span>"</td>
+    <td cellspacing="0">Dynamic</td>
+    <td cellspacing="0">The assertion being used to authenticate the client.</td>
+  </tr>
+</table>
+
+The endpoint response will be a JSON object, which contains:
+
+1. Your access_token
+2. The lifetime of your token (in seconds)
+3. Authorized system scopes
+
+#### Request:
+
 ~~~
-
-In order to receive an `access_token` the JWT is submitted to the `/Token/auth` endpoint as the `client_assertion` form param of an `application/x-www-form-urlencoded` POST request, along with the following, additional, form params:
-
-**Parameters**
-
-`scope`	                _required_	The scope of access requested. (Currently, the only supported scope is `system/*.*`)
-
-`grant_type`            _required_	Fixed value: `client_credentials`
-
-`client_assertion_type`	_required_	Fixed value: `urn:ietf:params:oauth:client-assertion-type:jwt-bearer`
-
-`client_assertion`  	_required_	Signed authentication JWT value (see above)
-
-The endpoint response is a JSON object which contains the access_token, the lifetime of the token (in seconds) and the authorized system scopes.
-
-~~~sh
 POST /api/v1/Token/auth
 ~~~
 
-**cURL command**
+#### cURL command:
 
-~~~sh
-curl -v "https://sandbox.dpc.cms.gov/api/v1/Token/auth" \
--H 'Content-Type: application/x-www-form-urlencoded' \
--H 'Accept: application/json' \
--X POST
--d "grant_type=client_credentials&scope=system%2F*.*&client_assertion_type=urn%3Aietf%3Aparams%3Aoauth%3Aclient-assertion-type%3Ajwt-bearer&client_assertion={self-signed JWT}"
+<pre><code>curl -v "https://sandbox.dpc.cms.gov/api/v1/Token/auth" \
+     -H 'Content-Type: application/x-www-form-urlencoded' \
+     -H 'Accept: application/json' \
+     -X POST
+     -d "grant_type=client_credentials&scope=system%2F*.*&client_assertion_type=urn%3Aietf%3Aparams%3Aoauth%3Aclient-assertion-type%3Ajwt-bearer&client_assertion=<span style="color: #046B99;">{self-signed JWT}</span>"</code></pre>
+
+#### Response:
+The endpoint response is a JSON object which contains the access_token, the lifetime of the token (in seconds) and the authorized system scopes.
+
 ~~~
-
-**Response**
-
-~~~json
 {
-  "access_token": "{access_token value}",
-  "token_type": "bearer",
-  "expires_in": 300,
-  "scope": "system/*.*"
-}
-~~~ 
-
-## Environment
-The examples below include cURL commands, but may be followed using any tool that can make HTTP GET requests with headers, such as [Postman](https://getpostman.com).
-
-> Note: DPC sandbox environments do not have any test data loaded.
-> Users will need to provide their own FHIR resources in order to use the Sandbox. Details on finding sample data is given in a later [section](#sample-data).
->
-
-### Examples
-
-Examples are shown as requests to the DPC sandbox environment.
-Any resource Identifiers that are show are merely examples and cannot be used as actual requests to the DPC sandbox.
-
-Be sure to include the CMS generated Access token in the requests, as documented in the [Authorization](#authentication-and-authorization) section.
-
-## DPC Metadata
-
-Metadata about the Data at the Point of Care (DPC) pilot project is available as a FHIR [CapabilityStatement](http://hl7.org/fhir/STU3/capabilitystatement.html) resource.
-
-~~~ sh
-GET /api/v1/metadata
-~~~
-
-**cURL command**
-
-~~~sh
-curl https://sandbox.dpc.cms.gov/api/v1/metadata
-~~~
-
-
-**Response**
-
-~~~ json
-{
-  "resourceType": "CapabilityStatement",
-  "description": "This Capability Statement defines the available resource, endpoints and operations supported by the Data @ the Point of Care Application.",
-  "id": "dpc-capabilities",
-  "version": "0.3.0-SNAPSHOT",
-  "status": "draft",
-  "date": "2019",
-  "publisher": "Centers for Medicare and Medicaid Services",
-  "kind": "capability",
-  "instantiates": [
-    "http://build.fhir.org/ig/HL7/bulk-data/CapabilityStatement-bulk-data"
-  ],
-  "software": {
-    "name": "Data @ Point of Care API",
-    "version": "0.3.0-SNAPSHOT",
-    "releaseDate": "2019"
-  },
-  "fhirVersion": "3.0.1",
-  "acceptUnknown": "extensions",
-  "format": [
-    "application/json",
-    "application/fhir+json"
-  ],
-  "rest": [
-    {
-      "mode": "server",
-      "resource": [
-        {
-          "type": "Endpoint",
-          "profile": {
-            "reference": "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-endpoint"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "versioning": "no-version"
-        },
-        {
-          "type": "Organization",
-          "profile": {
-            "reference": "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-organization"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            }
-          ],
-          "versioning": "no-version"
-        },
-        {
-          "type": "Patient",
-          "profile": {
-            "reference": "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "versioning": "no-version",
-          "searchParam": [
-            {
-              "name": "identifier",
-              "type": "string"
-            }
-          ]
-        },
-        {
-          "type": "Practitioner",
-          "profile": {
-            "reference": "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-practitioner"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "versioning": "no-version",
-          "searchParam": [
-            {
-              "name": "identifier",
-              "type": "string"
-            }
-          ]
-        },
-        {
-          "type": "StructureDefinition",
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "versioning": "no-version"
-        }
-      ],
-      "interaction": [
-        {
-          "code": "batch"
-        }
-      ],
-      "operation": [
-        {
-          "name": "Group level data export",
-          "definition": {
-            "reference": "http://build.fhir.org/ig/HL7/bulk-data/OperationDefinition-group-export"
-          }
-        }
-      ]
-    }
-  ]
+ "access_token": "{access_token value}",
+ "token_type": "bearer",
+ "expires_in": 300,
+ "scope": "system/*.*"
 }
 ~~~
 
-## Attributing Patients to Providers
+### Obtain a bearer_token
+To obtain your bearer_token, set your access_token returned in the previous step as your bearer_token. You will need to set the "{access_token value}" from the previous response as a header in most of your API calls preceded by the word Bearer and a space.
 
-In order to export data from the DPC application, a healthcare provider must have attributed [Patient](https://hl7.org/fhir/STU3/patient.html) resources.
-This attribution assertion attests to CMS that the provider has a treatment related purpose for accessing patient information.
-More details on the attribution logic and rules are given [earlier](#attribution) in this reference.
+As access tokens expire, you will need to generate new tokens. You will not need to create new JWT’s to create a new access token, unless you are making a call with a different client token or public key.
 
-### Sample data
+### Sample Javascript Code to create a JWT and obtain an Access Token
 
-As previously mentioned, the DPC sandbox environments do not have any pre-loaded test data.
-Users will need to provide their own FHIR resources in order to successfully make export requests to the Blue Button backend.
+<pre><code>const jsrsasign = require('jsrsasign')
+const fetch = require('node-fetch')
+const { URLSearchParams } = require('url')
+var dt = new Date().getTime();
+var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var r = (dt + Math.random()*16)%16 | 0;
+    dt = Math.floor(dt/16);
+    return (c=='x' ? r :(r&0x3|0x8)).toString(16);
+  });
+var data = {
+    "iss": "W3sidiI6Miwib....==",  //THESE VALUES COME FROM THE MACAROON (CLIENT TOKEN) YOU OBTAINED FROM DPC
+    "sub": "W3sidiI6Miwib....==",  // THE SAME VALUE GOES IN BOTH "iss" and "sub" fields
+    "aud": "https://sandbox.dpc.cms.gov/api/v1/Token/auth",
+    "exp": Math.round(new Date().getTime() / 1000) + 300,
+    "iat": Math.round(Date.now()),
+    "jti": uuid,
+  };
+var secret = "-----BEGIN RSA PRIVATE KEY-----\n" +
+   "MIIJKAIBAAKCAgEAyw/is619pPp2jxQBYHBsF75XrGYh27X/UKzrKsBAWKb3ymC9\n" +
+   //THIS IS THE PRIVATE KEY THAT IS ASSOCIATED WITH THE PUBLIC KEY 
+   "................................................................\n" +
+   //YOU REGISTERED WITH DPC
+   "................................................................\n" +
+   "-----END RSA PRIVATE KEY-----\n";
+   //PRIVATE KEY
+var sHeader = JSON.stringify("de56ae6d-e42c-4738-81e6-c23009797cd1");
+const header = {
+    'alg': 'RS384',
+    'kid': 'XXXXXXXXXXXXXXXXX', 
+    //THIS IS THE KEY ID HAT IS ASSOCIATED WITH THE PUBLIC KEY
+    //YOU REGISTERED WITH DPC
+  }
+var sPayload = JSON.stringify(data);
+var sJWT = jsrsasign.jws.JWS.sign("RS384", header, sPayload, secret);
+fetch('https://sandbox.dpc.cms.gov/api/v1/Token/auth', {
+   method: 'POST',
+   header: 'ACCEPT: application/json',
+   body: new URLSearchParams({
+       scope: "system/*.*",
+       grant_type: "client_credentials",
+       client_assertion_type: "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
+       client_assertion: sJWT
+   })
+}).then(response => {
+   if (response.ok) {
+       response.json().then(json => {
+           console.log(json);
+       });
+   }
+});
+</code></pre>
 
-The DPC team has created a collection of sample Patient and Practitioner resources which can be used to get started with the sandbox.
-The files are available in our public [GitHub](https://github.com/CMSgov/dpc-app/tree/master/src/main/resources) repository.
-More details are given in the included [README](https://github.com/CMSgov/dpc-app/blob/master/src/main/resources/README.md) file.
+<a class="guide_top_link" href="#authorization">Back to Start of Section</a><br />
+<a class="guide_top_link" href="#">Back to Top of Page</a>
 
-The sample data was generated using the excellent [Synthea](https://synthea.mitre.org) project, with some modifications that are documented in the repository. 
+# Attestation & Attribution
+------------------
+Before accessing Patient data, DPC must establish that you have a valid Patient-Practitioner relationship with CMS Medicare and Medicaid Beneficiaries.  This process is referred to as Attestation/Attribution in the DPC API.
 
-Users can provide any sample FHIR resources (that fulfill the required FHIR profiles) to DPC, but will need to ensure that, for the sandbox environments, any `Patient` resources have an *Medicare Beneficiary Identifier* (MBI) that matches a record in the Blue Button backend.
+You will need to register Practitioners in your Organization, register Patients in your care, and attribute Patients to the Practitioners treating them. You must also keep these attributions up-to-date by submitting an attestation that  testifies these relationships are valid with each submission.
 
-The Blue Button team maintains a list of beneficiaries (along with their MBIs) that can be used for matching existing synthetic data (such as from an organization's training EMR) with valid sandbox MBIs.
-More details and the corresponding data files can be found [here](https://bluebutton.cms.gov/developers/#sample-beneficiaries).
+<div class="ds-c-alert ds-c-alert--warn">
+  <div class="ds-c-alert__body">
+    <p class="ds-c-alert__text">
+      The DPC sandbox environment does not contain any preloaded test data.
+    </p>
+  </div>
+</div>
 
-### Create a Provider
+## Load Sample Data
+The DPC team has created a collection of sample Practitioner, Patient, and Group resources which can be used to get started in the sandbox environment. These Resources can be found in our public [GitHub repository](https://github.com/CMSgov/dpc-app/tree/master/src/main/resources) as JSON files. More details included in this [README](https://github.com/CMSgov/dpc-app/blob/master/src/main/resources/README.md) file.
 
-An organization must first create a [Practitioner](http://hl7.org/fhir/STU3/practitioner.html) resource, which represents a healthcare provider that is associated with the organization.
-This is accomplished by executing a `POST` request against the `Practitioner` resource, with the body containing a FHIR Practitioner resource.
+**Uploading Practitioners:** We have included 4 Practitioner Resources that represent fictitious Practitioners that you can add to your Organization.
 
-~~~sh
-POST /api/v1/Practitioner
+**Uploading Patients:** The Beneficiary FHIR Data Server (BFD) maintains a list of 101 Patients, along with their MBIs, that can be used for matching existing synthetic data in the sandbox environment. More details and the corresponding data files can be found on the Blue Button 2.0 API’s documentation under [Sample Beneficiaries](https://bluebutton.cms.gov/developers/#sample-beneficiaries).
+
+_Users can provide their own sample FHIR resources that fulfill the required FHIR profiles to DPC, but will need to ensure that all Patient resources have a Medicare Beneficiary Identifier (MBI) that matches a record in the Beneficiary FHIR Data Server (BFD)._
+
+### Find Organization ID
+You will need your organization ID to create an Attribution Group for Attestation. To find your Organization ID, sign-in to your account in the DPC Portal and locate your Organization ID underneath the organization name.
+
+![Dashboard Org Id](/assets/guide_org_id.png)
+
+The Organization endpoint supports a GET /Organization operation, which allows the user to retrieve their Organization ID.
+
+#### Request:
+
+~~~
+GET /api/v1/Organization
 ~~~
 
-Details on the exact data format are given in the [implementation guide](https://dpc.cms.gov/ig/StructureDefinition-dpc-profile-practitioner.html) but at a minimum, each resource must include:
+#### cURL command:
 
-- The [NPI](https://www.cms.gov/Regulations-and-Guidance/Administrative-Simplification/NationalProvIdentStand/) of the provider
-- The provider's first and last name
+<pre><code>curl -v https://sandbox.dpc.cms.gov/api/v1/Organization
+     -H 'Authorization: Bearer <span style="color: #046B99;">{access_token}</span>' \
+     -H 'Accept: application/fhir+json' \
+     -H 'Content-Type: application/fhir+json' \
+     -X GET</code></pre>
 
-**cURL command**
+#### Response:
 
-~~~sh
-curl -v https://sandbox.dpc.cms.gov/api/v1/Practitioner
--H 'Authorization: Bearer {access_token}' \
--H 'Accept: application/fhir+json' \
--H 'Content-Type: application/fhir+json' \
--X POST \
--d @provider.json
 ~~~
-
-**provider.json**
-
-~~~json
 {
-  "meta": {
-    "profile": [
-      "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-practitioner"
-    ],
-    "lastUpdated": "2019-04-09T12:25:36.450182+00:00",
-    "versionId": "MTU1NDgxMjczNjQ1MDE4MjAwMA"
-  },
-  "resourceType": "Practitioner",
-  "id": "0c527d2e-2e8a-4808-b11d-0fa06baf8254",
+  "resourceType": "Organization",
+  "id": "351fbb5f-f2f9-4094-bc6f-2b3600bb56e9",
   "identifier": [
     {
       "system": "http://hl7.org/fhir/sid/us-npi",
-      "value": "3116145044854423862"
+      "value": "3905293015"
     }
   ],
+  "name": "Happy Healthcare",
   "address": [
     {
-      "city": "PLYMOUTH",
-      "country": "US",
+      "use": "work",
+      "type": "postal",
       "line": [
-        "275 SANDWICH STREET"
+          "1 Main Street"
       ],
-      "postalCode": "02360",
-      "state": "MA"
-    }
-  ],
-  "gender": "male",
-  "name": [
-    {
-      "family": "Klocko335",
-      "given": [
-        "Leonard963"
-      ],
-      "prefix": [
-        "Dr."
-      ]
-    }
-  ]
-}
-~~~
-
-The `Practitioner.identifier` value of the returned resource can be used in the attribution group created in a later [section](#create-an-attribution-group).
-
-The `Practitioner` endpoint also supports a `$submit` operation, which allows the user to upload a [Bundle](https://www.hl7.org/fhir/STU3/bundle.html) of resources for registration in a single batch operation.
-
-Each `Practioner` resource in the Bundle *MUST* satisfy the [dpc-practitioner](https://dpc.cms.gov/ig/StructureDefinition-dpc-profile-practitioner.html) profile, otherwise a `422 - Unprocessable Entity` error will be returned.
-
-~~~sh
-POST /api/v1/Practitioner/$submit
-~~~
-
-**cURL command**
-
-~~~sh
-curl -v https://sandbox.dpc.cms.gov/api/v1/Practitioner/\$submit
--H 'Authorization: Bearer {access_token}' \
--H 'Accept: application/fhir+json' \
--H 'Content-Type: application/fhir+json' \
--X POST \
--d @provider_bundle.json
-~~~
-
-**provider_bundle.json**
-
-~~~javascript
-{
-    "resourceType": "Parameters",
-    "parameter": [{
-        "name": "resource",
-        "resource": {
-                      "resourceType": "Bundle",
-                      "type": "collection",
-                      "entry": [
-                        {
-                          "resource": {
-                            "resourceType": "Practitioner",
-                            ... Omitted for Brevity ...
-                          }
-                        }
-                      ]
-                    }
-       
-    }]
-}
-~~~
-
-
-### Create a Patient
-
-The organization is also required to maintain a list of [Patient](http://hl7.org/fhir/STU3/patient.html) resources which represent the patient population currently being treated by their facilities.
-
-
-~~~sh
-POST /api/v1/Patient
-~~~
-
-Details on the exact data format are given in the [implementation guide](https://dpc.cms.gov/ig/StructureDefinition-dpc-profile-patient.html) but at a minimum, each resource must include:
-
-- The MBI of the patient
-- The patient's first and last name
-- The patient's birthdate
-
-> Note: The Blue Button team is currently in the process of implementing support for MBIs in accordance with CMS policies.
->
->In the interim, DPC is making use of the *Blue Button Beneficiary Identifiers* as a proxy for MBI values.
->Once MBI support is fully implemented, users will need to migrate their tooling by remapping from the **https://bluebutton.cms.gov/resources/variables/bene_id** system to the new **http://hl7.org/fhir/sid/us-mbi** system.
-> Existing resources in the DPC sandbox will be automatically updated to utilize the new system.
-
-**cURL command**
-
-~~~sh
-curl -v https://sandbox.dpc.cms.gov/api/v1/Patient
--H 'Authorization: Bearer {access_token}' \
--H 'Accept: application/fhir+json' \
--H 'Content-Type: application/fhir+json' \
--X POST \
--d @patient.json
-~~~
-
-**patient.json**
-
-~~~json
-{
-  "resourceType": "Patient",
-  "id": "728b270d-d7de-4143-82fe-d3ccd92cebe4",
-  "meta": {
-      "profile": [
-        "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-      ],
-      "lastUpdated": "2019-04-09T12:25:36.450182+00:00"
-    },
-  "identifier": [
-    {
-      "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
-      "value": "-20000000001809"
-    }
-  ],
-  "name": [
-    {
-      "use": "official",
-      "family": "Prosacco",
-      "given": [
-        "Jonathan"
-      ],
-      "prefix": [
-        "Mr."
-      ]
-    }
-  ],
-  "telecom": [
-    {
-      "system": "phone",
-      "value": "555-719-3748",
-      "use": "home"
-    }
-  ],
-  "gender": "male",
-  "birthDate": "1943-06-08",
-  "address": [
-    {
-      "extension": [
-        {
-          "url": "http://hl7.org/fhir/StructureDefinition/geolocation",
-          "extension": [
-            {
-              "url": "latitude",
-              "valueDecimal": 42.187011
-            },
-            {
-              "url": "longitude",
-              "valueDecimal": -71.30040
-            }
-          ]
-        }
-      ],
-      "line": [
-        "1038 Ratke Throughway Apt 10"
-      ],
-      "city": "Medfield",
-      "state": "Massachusetts",
-      "postalCode": "02052",
+      "city": "Baltimore",
+      "state": "MD",
+      "postalCode": "21224",
       "country": "US"
     }
   ],
-  "maritalStatus": {
-    "coding": [
-      {
-        "system": "http://hl7.org/fhir/v3/MaritalStatus",
-        "code": "M",
-        "display": "Married"
-      }
-    ],
-    "text": "M"
-  },
-  "multipleBirthBoolean": false,
-  "communication": [
+  "endpoint": [
     {
-      "language": {
-        "coding": [
+      "reference": "Endpoint/ccf649dd-5258-4c97-a378-449693e73997"
+    }
+  ]
+}
+~~~
+
+## Practioners
+
+
+<a href="#add-a-practitioner" class="ds-u-padding-left--3 guide_sub-link">Add a Practitioner</a><br />
+<a href="#add-multiple-practitioners" class="ds-u-padding-left--3 guide_sub-link">Add Multiple Practitioners</a><br />
+<a href="#list-all-practitioners" class="ds-u-padding-left--3 guide_sub-link">List all Practitioners</a><br />
+<a href="#list-a-specific-practitioner" class="ds-u-padding-left--3 guide_sub-link">List a specific Practitioner</a>
+
+Every organization is required to keep a list of [Practitioner](https://dpc.cms.gov/ig/StructureDefinition-dpc-profile-practitioner.html) Resources who are authorized to have access to DPC data. The DPC Team has included four Practitioner Resources that represent fictitious Practitioners that can be added to your Organization.
+
+### Prerequisites:
+- A registered account in the DPC Portal
+- Access to the API: active Bearer {access_token}
+- Practitioner information:
+    - First and Last Name
+    - Type 1 National Provider Identifier (NPI)
+
+### Add a Practitioner
+To register a Practitioner at your Organization, you must send a FHIR-formatted [Practitioner](https://dpc.cms.gov/ig/StructureDefinition-dpc-profile-practitioner.html) Resource as the BODY of your request. Please use no encoding (raw) when uploading via a POST request to the /Practitioner endpoint.
+
+The Practitioner Resource may include additional attributes detailed in the FHIR Implementation Guide within [DPC Practitioner Profile](https://dpc.cms.gov/ig/StructureDefinition-dpc-profile-practitioner.html), but at a minimum must include the Practitioner’s:
+
+  - First and Last Name
+  - Type 1 National Provider Identifier (NPI)
+
+#### Request:
+
+~~~
+POST /api/v1/Practitioner
+~~~
+
+#### cURL command:
+
+<pre><code>curl -v https://sandbox.dpc.cms.gov/api/v1/Practitioner
+     -H 'Authorization: Bearer <span style="color: #046B99;">{access_token}</span>' \
+     -H 'Accept: application/fhir+json' \
+     -H 'Content-Type: application/fhir+json' \
+     -X POST \
+     -d @practitioner.json</code></pre>
+
+### Add Multiple Practitioners
+The Practitioner endpoint supports a $submit operation, which allows you to upload a Bundle of resources for registration in a single batch operation.
+ 
+Each individual Practitioner Resource in your Bundle must satisfy the requirements on how to add a [Practitioner Resource](#add-a-practitioner), otherwise a 422-Unprocessable Entity error will be returned.
+
+#### Request:
+
+~~~
+POST /api/v1/Practitioner/$submit
+~~~
+
+#### cURL command:
+
+<pre><code>curl -v https://sandbox.dpc.cms.gov/api/v1/Practitioner/\$submit
+-H 'Authorization: Bearer <span style="color: #046B99;">{access_token}</span>' \
+-H 'Accept: application/fhir+json'</span> \
+-H 'Content-Type: application/fhir+json'</span> \
+-X POST \
+-d @practitioner_bundle.json</code></pre>
+
+### List all Practitioners
+The Practitioner endpoint supports a GET /Practitioner operation, which allows you to retrieve a [Bundle](https://www.hl7.org/fhir/STU3/bundle.html) of Practitioner resources. You will need to retrieve a Practitioner’s NPI when you get to the Attribution section.
+
+#### Request:
+
+~~~
+GET /api/v1/Practitioner
+~~~
+
+#### cURL command:
+
+<pre><code>curl -v https://sandbox.dpc.cms.gov/api/v1/Practitioner
+     -H 'Authorization: Bearer <span style="color: #046B99;">{access_token}</span>' \
+     -H 'Accept: application/fhir+json' \
+     -H 'Content-Type: application/fhir+json' \
+     -X GET</code></pre>
+
+### List a specific Practitioner
+The Practitioner endpoint also supports a GET /Practitioner operation where you can supply an NPI number and receive the Practitioner resource. You will use this to identify a Practitioners’ system ID based off of an NPI when adding a Patient and/or creating a Group.
+
+#### Request:
+
+<pre><code>GET /api/v1/Practitioner?identifier=<span style="color: #046B99;">{{Practitioner NPI}}</span></code></pre>
+
+#### cURL command:
+
+<pre><code>curl -v https://sandbox.dpc.cms.gov/api/v1/Practitioner
+     -H 'Authorization: Bearer <span style="color: #046B99;">{access_token}</span>' \
+     -H 'Accept: application/fhir+json'</span> \
+     -H 'Content-Type: application/fhir+json'</span> \
+     -X GET</code></pre>
+
+#### Response:
+
+~~~
+{
+  "resourceType": "Bundle",
+  "type": "searchset",
+  "total": 1,
+  "entry": [
+    {         
+      "resource": {
+        "resourceType": "Practitioner",
+        "id": "8d80925a-027e-43dd-8aed-9a501cc4cd91",
+        "meta": {
+          "lastUpdated": "2020-06-10T18:43:14.150+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-practitioner"
+          ]
+        },
+        "identifier": [
           {
-            "system": "urn:ietf:bcp:47",
-            "code": "en-US",
-            "display": "English (Region=United States)"
+            "system": "http://hl7.org/fhir/sid/us-npi",
+            "value": "2323232225"
           }
         ],
-        "text": "English"
+        "name": [
+          {
+            "family": "Holguín308",
+            "given": [
+              "Alejandro916"
+            ]
+          }
+        ]
       }
     }
   ]
 }
 ~~~
 
+## Patients
 
-The `Patient.id` value of the returned resource can be used in the attribution group created in a later [section](#create-an-attribution-group).
+<a href="#add-a-patient" class="ds-u-padding-left--3 guide_sub-link">Add a Patient</a><br />
+<a href="#add-multiple-patients" class="ds-u-padding-left--3 guide_sub-link">Add Multiple Patients</a><br />
+<a href="#list-all-patients" class="ds-u-padding-left--3 guide_sub-link">List all Patients</a><br />
+<a href="#list-a-specific-patient" class="ds-u-padding-left--3 guide_sub-link">List a specific Patient</a>
 
-The `Patient` endpoint also supports a `$submit` operation, which allows the user to upload a [Bundle](https://www.hl7.org/fhir/STU3/bundle.html) of resources for registration in a single batch operation.
+Every organization is required to maintain a list of patients which represent the patient population currently being treated at your facilities. 
 
-Each `Patient` resource in the Bundle *MUST* satisfy the [dpc-patient](https://dpc.cms.gov/ig/StructureDefinition-dpc-profile-patient.html) profile, otherwise a `422 - Unprocessable Entity` error will be returned.
+Since there is not any preloaded data in DPC’s sandbox, The Beneficiary FHIR Data Server (BFD) maintains a list of 101 Patients, along with their MBIs, that can be used for matching existing synthetic data in the sandbox environment. More details and the corresponding data files can be found on the Blue Button 2.0 API’s documentation under [Sample Beneficiaries](https://bluebutton.cms.gov/developers/#sample-beneficiaries).
 
-~~~sh
+### Prerequisites:
+- A registered account in the DPC Portal
+- Access to the API: active Bearer {access_token}
+- Patient information:
+    - First and last name
+    - Birth date in YY-MM-DD format
+    - Medicare Beneficiary Identifier (MBI)
+    - Managing Organization ID
+    - System ID
+
+### Add a Patient
+To register a Patient at your Organization, you must create a [Patient](https://dpc.cms.gov/ig/StructureDefinition-dpc-profile-patient.html) Resource as a JSON file in FHIR format. The JSON file must be in the BODY of your request with no encoding (raw) when uploading via a POST request to the /Patient endpoint.
+
+To create the Patient Resource, the JSON file may include additional attributes detailed in the FHIR Implementation Guide within the [DPC Practitioner Profile](https://dpc.cms.gov/ig/StructureDefinition-dpc-profile-patient.html), but at a minimum must include the Patient’s:
+
+- First and last name
+- Birth date in YYYY-MM-DD
+- Medicare Beneficiary Identifier (MBI)
+  - identifier: 
+
+  ~~~
+  {
+    system: 'https://bluebutton.cms.gov/resources/variables/bene_id',
+    value:  'Value of the MBI number'
+  }
+  ~~~
+
+- Managing Organization ID:
+
+  ~~~
+  "managingOrganization": {
+    "reference": "Organization/{ID}"
+  }
+  ~~~
+
+- System ID:
+  - This can be found by listing all patients or finding a specific patient by their MBI.
+
+  ~~~
+  "resource": {
+    "resourceType": "Patient",
+    "id": "728b270d-d7de-4143-82fe-d3ccd92cebe4"
+  }
+  ~~~
+
+#### Request:
+
+~~~
+POST /api/v1/Patient
+~~~
+
+#### cURL command:
+
+<pre><code>curl -v https://sandbox.dpc.cms.gov/api/v1/Patient
+     -H 'Authorization: Bearer <span style="color: #046B99;">{access_token}</span>' \
+     -H 'Accept: application/fhir+json' \
+     -H 'Content-Type: application/fhir+json' \
+     -X POST \
+     -d @patient.json</code></pre>
+
+#### Response:
+
+~~~
+{
+ "resourceType": "Parameters",
+ "parameter": [
+   {
+     "name": "resource",
+     "resource": {
+       "resourceType": "Bundle",
+       "id": "synthetic-roster-bundle",
+       "type": "collection",
+       "entry": [
+         {
+           "resource": {
+             "resourceType": "Patient",
+             "id": "728b270d-d7de-4143-82fe-d3ccd92cebe4",
+             "meta": {
+               "versionId": "MTU1NDgxMjczNTM5MjYwMDAwMA",
+               "lastUpdated": "2019-04-09T12:25:35.392600+00:00",
+               "profile": [
+                 "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+               ]
+             },
+ 
+             "identifier": [
+               {
+                 "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
+                 "value": "1SQ3F00AA00"
+               }
+             ],
+             "name": [
+               {
+                 "use": "official",
+                 "family": "Prosacco716",
+                 "given": [
+                   "Jonathan639"
+                 ],
+                 "prefix": [
+                   "Mr."
+                 ]
+               }
+             ],
+             "birthDate": "1943-06-08",
+           }
+         }
+
+       ]
+     }
+   }
+ ]
+}
+~~~
+
+### Add Multiple Patients
+The Patient endpoint supports a $submit operation, which allows you to upload a Bundle of resources for registration in a single batch operation.
+ 
+Each Patient Resource in your Bundle may include additional attributes detailed in the FHIR Implementation Guide within the [DPC Patient Profile](https://dpc.cms.gov/ig/StructureDefinition-dpc-profile-patient.html), but at a minimum must satisfy the requirements on how to add a [Patient Resource](#add-a-patient), otherwise a 422 - Unprocessable Entity error will be returned.
+
+#### Request:
+
+~~~
 POST /api/v1/Patient/$submit
 ~~~
 
-**cURL command**
+#### cURL command:
 
-~~~sh
-curl -v https://sandbox.dpc.cms.gov/api/v1/Patient/\$submit
--H 'Authorization: Bearer {access_token}' \
--H 'Accept: application/fhir+json' \
--H 'Content-Type: application/fhir+json' \
--X POST \
--d @patient_bundle.json
+<pre><code>curl -v https://sandbox.dpc.cms.gov/api/v1/Patient/\$submit
+     -H 'Authorization: Bearer <span style="color: #046B99;">{access_token}</span>' \
+     -H 'Accept: application/fhir+json' \
+     -H 'Content-Type: application/fhir+json' \
+     -X POST \
+     -d @patient_bundle.json</code></pre>
+
+### List all Patients
+The Patient endpoint supports a GET /Patient operation, which allows you to retrieve a Bundle of Patient Resources. You will need to retrieve the system ID of patients when you get to the Attribution section.
+
+#### Request:
+
+~~~
+GET /api/v1/Patient
 ~~~
 
-**patient_bundle.json**
+#### cURL command:
 
-~~~javascript
-{
-  "resourceType": "Parameters",
-  "parameter": [
-    {
-      "name": "resource",
-      "resource": {
-        "resourceType": "Bundle",
-        "type": "collection",
-        "entry": [
-          {
-            "resource": {
-              "resourceType": "Patient",
-              ... Omitted for Brevity ...
-            }
-          }
-        ]
-      }
-    }
-  ]
-}
+<pre><code>curl -v https://sandbox.dpc.cms.gov/api/v1/Patient
+     -H 'Authorization: Bearer <span style="color: #046B99;">{access_token}</span>' \
+     -H 'Accept: application/fhir+json' \
+     -H 'Content-Type: application/fhir+json' \
+     -X GET</code></pre>
+
+### List a specific Patient
+The Patient endpoint also supports a GET /Patient operation where you can supply the Patient MBI and receive the Patient Resource. You may use this to identify a Patient’s system ID based off of an MBI.
+
+#### Request:
+<pre><code>GET /api/v1/Patient?identifier=<span style="color: #046B99;">{{Patient MBI}}</span></code></pre>
+
+#### cURL command:
+<pre><code>curl -v https://sandbox.dpc.cms.gov/api/v1/Patient
+     -H 'Authorization: Bearer <span style="color: #046B99;">{access_token}</span>' \
+     -H 'Accept: application/fhir+json' \
+     -H 'Content-Type: application/fhir+json' \
+     -X GET</code></pre>
+
+#### Response:
+
 ~~~
-
-### Create attestation record for data release
-
-CMS requires that the provider attest they have a treatment related purpose for adding a patient to their roster **each** time they make a roster addition.
-This is accomplished by submitting a `Provenance` resource via the `X-Provenance` header, as outlined in the FHIR specification.
-
-Details on the exact data format are given in the [implementation guide](/ig/index.html) but at a minimum, each attestation must include:
-
-- A timestamp of when the attestation is made.
-- The reason for the attestation (currently only: `http://hl7.org/fhir/v3/ActReason#TREAT` is supported).
-- The agent making the attestation (identified by their Organization resource ID) on behalf of a given provider (identified by their resource ID).
-
-**Example attestation**
-
-```javascript
-{
-  "resourceType": "Provenance",
-  "meta": {
-    "profile": [
-      "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-attestation"
-    ]
-  },
-  "recorded": "1990-01-01T00:00:00.000-05:00",
-  "reason": [
-    {
-      "system": "http://hl7.org/fhir/v3/ActReason",
-      "code": "TREAT"
-    }
-  ],
-  "agent": [
-    {
-      "role": [
-        {
-          "coding": [
-            {
-              "system": "http://hl7.org/fhir/v3/RoleClass",
-              "code": "AGNT"
-            }
-          ]
-        }
-      ],
-      "whoReference": {
-        "reference": "Organization/{organization ID}"
-      },
-      "onBehalfOfReference": {
-        "reference": "Practitioner/{practitioner ID}"
-      }
-    }
-  ]
-}
-```
-
-The provenance resource is then included in the `X-Provenance` header as part of any `/Group` operations which add patients to a given roster.
-
-### Create an Attribution Group
-
-Once the Provider and Patient records have been created, the final step is to associate the records into an attribution [Group](http://hl7.org/fhir/STU3/patient.html) resource, also known as a Patient roster.
-
-Details on the exact data format are given in the [implementation guide](/ig/index.html) but at a minimum, each resource must include:
-
-- A list of `Patient` references
-- The NPI of the provider which the patients are being attributed to
-
-~~~sh
-POST /api/v1/Group
-~~~
-
-**cURL command**
-
-~~~sh
-curl -v https://sandbox.dpc.cms.gov/api/v1/Group
--H 'Authorization: Bearer {access_token}' \
--H 'Accept: application/fhir+json' \
--H 'Content-Type: application/fhir+json' \
--H 'X-Provenance: {FHIR provenance resource} \
--X POST \
--d @group.json
-~~~
-
-**group.json**
-
-~~~ json
-{
-  "resourceType": "Group",
-  "type": "person",
-  "actual": true,
-  "characteristic": [
-    {
-      "code": {
-        "coding": [
-          {
-            "code": "attributed-to"
-          }
-        ]
-      },
-      "valueCodeableConcept": {
-        "coding": [
-          {
-            "system": "http://hl7.org/fhir/sid/us-npi",
-            "code": "110001029483"
-          }
-        ]
-      }
-    }
-  ],
-  "member": [
-    {
-      "entity": {
-        "reference": "Patient/4d72ad76-fbc6-4525-be91-7f358f0fea9d"
-      }
-    },
-    {
-      "entity": {
-        "reference": "Patient/74af8018-f3a1-469c-9bfa-1dfd8a646874"
-      }
-    }
-  ]
-}
-~~~
-
-**Attribution Response**
-
-~~~ json
-{
-  "resourceType": "Group",
-  "type": "person",
-  "actual": true,
-  "characteristic": [
-    {
-      "code": {
-        "coding": [
-          {
-            "code": "attributed-to"
-          }
-        ]
-      },
-      "valueCodeableConcept": {
-        "coding": [
-          {
-            "system": "http://hl7.org/fhir/sid/us-npi",
-            "code": "110001029483"
-          }
-        ]
-      }
-    }
-  ],
-  "member": [
-    {
-      "entity": {
-        "reference": "Patient/4d72ad76-fbc6-4525-be91-7f358f0fea9d"
-      },
-      "period": {
-        "start": "2019-10-30T14:00:30+00:00",
-        "end": "2020-01-28T14:00:53+00:00"
-      },
-      "inactive": false
-    },
-    {
-      "entity": {
-        "reference": "Patient/74af8018-f3a1-469c-9bfa-1dfd8a646874"
-      },
-      "period": {
-        "start": "2019-10-30T14:00:30+00:00",
-        "end": "2020-01-28T14:00:53+00:00"
-      },
-      "inactive": false
-    }
-  ]
-}
-~~~
-
-The `Group` response returned by DPC includes additional `period` and `inactive` elements for each member, which indicate the time period for which the patient is active on the provider's roster, or, if the relationship has expired, the time period for which the patient *was* active on the roster.
-When an attribution relationship between a patient and provider has expired, either due to exceeding the 90 day threshold or being manually removed. The `inactive` flag will be set to `true` for the given patient.
-Patient's which are listed on a provider's roster but have their `inactive` flag set to `true` will not be included in Bulk Data exports.
-
-The `Group.id` value of the returned resource can be used by the client to initiate an [export job](#exporting-data).
-
-### Update an Attribution Group
-
-Patient attribution relationships automatically expire after 90 days and must be re-attested by the provider.
-This is accomplished by resubmitting the patient to the provider's attribution Group.
-
-#### Adding patients to roster
-
-Roster additions are handled through a custom `$add` operation on the *Group* endpoint.
-This takes the members listed into given resource and adds them to the existing attribution list. 
-
-~~~sh
-POST /api/v1/Group/{Group.id}/$add
-~~~
-
-**cURL command**
-
-~~~sh
-curl -v https://sandbox.dpc.cms.gov/api/v1/Group/{Group.id}/\$add
--H 'Authorization: Bearer {access_token}' \
--H 'Accept: application/fhir+json' \
--H 'X-Provenance: {FHIR provenance resource} \
--X POST \
--d @group_addition.json
-~~~
-
-**updated_group.json**
-
-~~~json
-"resource": {
-        "resourceType": "Group",
-        "type": "person",
-        "actual": true,
-        "characteristic": [{
-          "code": {
-            "coding": [
-              {
-                "code": "attributed-to"
-              }
-            ]
-          },
-          "valueCodeableConcept": {
-            "coding": [
-              {
-                "system": "http://hl7.org/fhir/sid/us-npi",
-                "code": "110001029483"
-              }
-            ]
-          }
-        }],
-        "member": [
-          {
-            "entity": {
-              "reference": "Patient/bb151edf-a8b5-4f5c-9867-69794bcb48d1"
-            }
-           }
-        ]
-      }
-~~~
-
-
-#### Removing patients from a roster
-
-Roster removals are handled through a custom `remove` operation on the *Group* endpoint.
-This takes the members listed into given resource and removes them from the existing attribution list.
-
-~~~sh
-POST /api/v1/Group/{Group.id}/$remove
-~~~
-
-**cURL command**
-
-~~~sh
-curl -v https://sandbox.dpc.cms.gov/api/v1/Group/{Group.id}/\$remove
--H 'Authorization: Bearer {access_token}' \
--H 'Accept: application/fhir+json' \
--X POST \
--d @group_removal.json
-~~~
-
-**group_removal.json**
-
-~~~json
-"resource": {
-        "resourceType": "Group",
-        "type": "person",
-        "actual": true,
-        "characteristic": [{
-          "code": {
-            "coding": [
-              {
-                "code": "attributed-to"
-              }
-            ]
-          },
-          "valueCodeableConcept": {
-            "coding": [
-              {
-                "system": "http://hl7.org/fhir/sid/us-npi",
-                "code": "110001029483"
-              }
-            ]
-          }
-        }],
-        "member": [
-          {
-              "entity": {
-                "reference": "Patient/4d72ad76-fbc6-4525-be91-7f358f0fea9d"
-              },
-            },
-        ]
-      }
-~~~
-
-
-#### Replacing roster membership
-
-Users can also submit a `Group` resource which completely replaces the existing attribution roster.
-This results in the current group membership being *completely* replaced with the members listed in the given resource.
-This endpoint does *not* merge with the existing membership state, it completely replaces whatever currently exists.
-
-~~~sh
-PUT /api/v1/Group/{Group.id}
-~~~
-
-**cURL command**
-
-~~~sh
-curl -v https://sandbox.dpc.cms.gov/api/v1/Group/{Group.id}
--H 'Authorization: Bearer {access_token}' \
--H 'Accept: application/fhir+json' \
--H 'X-Provenance: {FHIR provenance resource} \
--X PUT \
--d @updated_group.json
-~~~
-
-**updated_group.json**
-
-~~~json
-"resource": {
-        "resourceType": "Group",
-        "type": "person",
-        "actual": true,
-        "characteristic": [{
-          "code": {
-            "coding": [
-              {
-                "code": "attributed-to"
-              }
-            ]
-          },
-          "valueCodeableConcept": {
-            "coding": [
-              {
-                "system": "http://hl7.org/fhir/sid/us-npi",
-                "code": "110001029483"
-              }
-            ]
-          }
-        }],
-        "member": [
-          {
-            "entity": {
-              "reference": "Patient/4d72ad76-fbc6-4525-be91-7f358f0fea9d"
-            },
-          },
-          {
-            "entity": {
-              "reference": "Patient/bb151edf-a8b5-4f5c-9867-69794bcb48d1"
-            }
-           }
-        ]
-      }
-~~~
-
-## Exporting data
-
-The primary interaction with the DPC pilot is via the FHIR `$export` operation.
-This allows an organization to export data for their providers in an asynchronous and bulk manner.
-Details on the operation itself can be found in the [FHIR Bulk Data Specification](https://build.fhir.org/ig/HL7/bulk-data/OperationDefinition-group-export.html).
-
-Steps for creating and monitoring an export job are given in this section.
-
-
-**1. Obtain an access token**
-
-See the [Authentication and Authorization](#authentication-and-authorization) section above.
-
-**2. Find the Provider Group**
-
-Lookup the attribution [Group](https://hl7.org/fhir/STU3/group.html) resource associated to a specific provider using their [National Provider Identity (NPI)](https://www.cms.gov/Regulations-and-Guidance/Administrative-Simplification/NationalProvIdentStand/) number.
-Creating attribution groups is covered in an earlier [section](#attributing-patients-to-providers).
-
-> Note: DPC supports the standard FHIR search protocol, detailed [here](https://www.hl7.org/fhir/search.html).
->Searching for rosters associated to a given provider makes use of [composite search parameters](https://www.hl7.org/fhir/search.html#combining). 
-
-~~~ sh
-GET /api/v1/Group?characteristic-value=attributed-to${provider NPI}
-~~~
-
-**cURL command**
-
-~~~ sh
-curl -v https://sandbox.dpc.cms.gov/api/v1/Group?characteristic=attributed-to&characteristic-code={provider NPI} \
--H 'Authorization: Bearer {access_token}' \
--H 'Accept: application/fhir+json
-~~~
-
-This returns a [Bundle](https://hl7.org/fhir/STU3/bundle.html) resource which contains the attribution groups for the given provider.
-
-**Response**
-
-~~~ json
 {
   "resourceType": "Bundle",
   "type": "searchset",
@@ -1379,439 +944,876 @@ This returns a [Bundle](https://hl7.org/fhir/STU3/bundle.html) resource which co
   "entry": [
     {
       "resource": {
-        "resourceType": "Group",
-        "id": "64d0cd85-7767-425a-a3b8-dcc9bdfd5402",
-        "type": "person",
-        "actual": true,
-        "characteristic": {
-          "code": {
-            "coding": [
-              {
-                "code": "attributed-to"
-              }
-            ]
-          },
-          "valueCodeableConcept": {
-            "coding": [
-              {
-                "system": "http://hl7.org/fhir/sid/us-npi",
-                "code": "{provider NPI}"
-              }
-            ]
-          }
-        },
-        "member": [
-          {
-            "entity": {
-              "reference": "Patient/4d72ad76-fbc6-4525-be91-7f358f0fea9d"
-            }
-          },
-          {
-            "entity": {
-              "reference": "Patient/74af8018-f3a1-469c-9bfa-1dfd8a646874"
-            }
-          }
-        ]
-      }
-    }
-  ]
-}
-~~~
-
-Using the `Group.id` value of the returned resources a client can initiate an export job.   
-
-**3. Initiate an export job**
-
-~~~ sh
-GET /api/v1/Group/{attribution group ID}/$export
-~~~
-
-To start an explanation of benefit data export job, a GET request is made to the ExplanationOfBenefit export endpoint.
-An access token as well as Accept and Prefer headers are required.
-
-The dollar sign (‘$’) before the word “export” in the URL indicates that the endpoint is an action rather than a resource. The format is defined by the FHIR Bulk Data Export spec.
-
-**Headers**
-
-- Authorization: Bearer {access_token}
-- Accept: `application/fhir+json`
-- Prefer: `respond-async`
-
-**cURL command**
-
-~~~ sh
-curl -v https://sandbox.DPC.cms.gov/api/v1/Group/{attribution Group.id}/\$export \
--H 'Authorization: Bearer {access_token}' \
--H 'Accept: application/fhir+json' \
--H 'Prefer: respond-async'
-~~~
-
-**Response**
-
-If the request was successful, a `202 Accepted` response code will be returned and the response will include a `Content-Location` header.
-The value of this header indicates the location to check for job status and outcome.
-In the example header below, the number `42` in the URL represents the ID of the export job.
-
-**Headers**
-
-- Content-Location: https://sandbox.dpc.cms.gov/api/v1/Jobs/{unique ID of export job}
-
-
-**4. Check the status of the export job**
-
-> Note: The `Job` endpoint is not a FHIR resource and does not require the `Accept` header to be set to `application/fhir+json`.
-
-**Request**
-
-~~~ sh
-GET https://sandbox.dpc.cms.gov/api/v1/Jobs/{unique ID of export job}
-~~~
-
-Using the `Content-Location` header value from the data export response, you can check the status of the export job.
-The status will change from `202 Accepted` to `200 OK` when the export job is complete and the data is ready to be downloaded.
-
-**Headers**
-
-- Authorization: Bearer {access_token}
-
-**cURL Command**
-
-~~~ sh
-curl -v https://sandbox.dpc.cms.gov/api/v1/Jobs/{unique ID of export job} \
--H 'Authorization: Bearer {access_token}'
-~~~
-
-**Responses**
-
-- `202 Accepted` indicates that the job is processing. Headers will include `X-Progress: In Progress`
-- `200 OK` indicates that the job is complete. Below is an example of the format of the response body.
-
-~~~ json
-{
-"transactionTime": "2018-10-19T14:47:33.975024Z",
-"request": "https://sandbox.dpc.cms.gov/api/v1/Group/64d0cd85-7767-425a-a3b8-dcc9bdfd5402/$export",
-"requiresAccessToken": true,
-"output": [
-  {
-    "type": "ExplanationOfBenefit",
-    "url": "https://sandbox.dpc.cms.gov/api/v1/data/42/DBBD1CE1-AE24-435C-807D-ED45953077D3.ndjson",
-    "extension": [
-        {
-            "url": "https://dpc.cms.gov/checksum",
-            "valueString": "sha256:8b74ba377554fa73de2a2da52cab9e1d160550247053e4d6aba1968624c67b10"
-        },
-        {
-            "url": "https://dpc.cms.gov/file_length",
-            "valueDecimal": 2468
-        }
-    ]
-  }
-],
-"error": [
-  {
-    "type": "OperationOutcome",
-    "url": "https://sandbox.dpc.cms.gov/api/v1/data/42/DBBD1CE1-AE24-435C-807D-ED45953077D3-error.ndjson"
-  }
-]
-}
-~~~
-
-Claims data can be found at the URLs within the output field. The output includes file integrity information in an `extension` array. It contains `https://dpc.cms.gov/checksum`, a checksum in the format `algorithm:checksum`, and `https://dpc.cms.gov/file_length`, the file length in bytes.
-The number `42` in the data file URLs is the same job ID from the Content-Location header URL in previous step.
-If some of the data cannot be exported due to errors, details of the errors can be found at the URLs in the error field.
-The errors are provided in [NDJSON](http://ndjson.org/) files as FHIR [OperationOutcome](http://hl7.org/fhir/STU3/operationoutcome.html) resources.
-
-**5. Retrieve the NDJSON output file(s)**
-
-> Note: The `Data` endpoint is not a FHIR resource and doesn't require the `Accept` header to be set to `application/fhir+json`.
-
-To obtain the exported explanation of benefit data, a GET request is made to the output URLs in the job status response when the job reaches the Completed state. The data will be presented as an [NDJSON](http://ndjson.org/) file of ExplanationOfBenefit resources.
-
-**Request**
-
-~~~ sh
-GET https://sandbox.dpc.cms.gov/api/v1/data/42/DBBD1CE1-AE24-435C-807D-ED45953077D3.ndjson
-~~~
-
-**Headers**
-
-- Authorization: Bearer {access_token}
-
-**cURL command**
-
-~~~sh
-curl https://sandbox.dpc.cms.gov/api/v1/data/42/DBBD1CE1-AE24-435C-807D-ED45953077D3.ndjson \
--H 'Authorization: Bearer {access_token}'
-~~~
-
-**Response**
-
-An example resource is shown below.
-
-~~~ json
-{
-  "status":"active",
-  "diagnosis":[
-    {
-      "diagnosisCodeableConcept":{
-        "coding":[
-          {
-            "system":"http://hl7.org/fhir/sid/icd-9-cm",
-            "code":"2113"
-          }
-        ]
-      },
-      "sequence":1,
-      "type":[
-        {
-          "coding":[
-            {
-              "system":"https://bluebutton.cms.gov/resources/codesystem/diagnosis-type",
-              "code":"principal",
-              "display":"The single medical diagnosis that is most relevant to the patient's chief complaint or need for treatment."
-            }
+        "resourceType": "Patient",
+        "id": "995a1c0f-b6bc-4d16-b6b0-b8a6597c6e1d",
+        "meta": {
+          "lastUpdated": "2020-06-12T15:39:42.834+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
           ]
-        }
-      ]
-    }
-  ],
-  "id":"carrier-10300336722",
-  "payment":{
-    "amount":{
-      "system":"urn:iso:std:iso:4217",
-      "code":"USD",
-      "value":250.0
-    }
-  },
-  "resourceType":"ExplanationOfBenefit",
-  "billablePeriod":{
-    "start":"2000-10-01",
-    "end":"2000-10-01"
-  },
-  "extension":[
-    {
-      "valueMoney":{
-        "system":"urn:iso:std:iso:4217",
-        "code":"USD",
-        "value":0.0
-      },
-      "url":"https://bluebutton.cms.gov/resources/variables/prpayamt"
-    },
-    {
-      "valueIdentifier":{
-        "system":"https://bluebutton.cms.gov/resources/variables/carr_num",
-        "value":"99999"
-      },
-      "url":"https://bluebutton.cms.gov/resources/variables/carr_num"
-    },
-    {
-      "valueCoding":{
-        "system":"https://bluebutton.cms.gov/resources/variables/carr_clm_pmt_dnl_cd",
-        "code":"1",
-        "display":"Physician/supplier"
-      },
-      "url":"https://bluebutton.cms.gov/resources/variables/carr_clm_pmt_dnl_cd"
-    }
-  ],
-  "type":{
-    "coding":[
-      {
-        "system":"https://bluebutton.cms.gov/resources/variables/nch_clm_type_cd",
-        "code":"71",
-        "display":"Local carrier non-durable medical equipment, prosthetics, orthotics, and supplies (DMEPOS) claim"
-      },
-      {
-        "system":"https://bluebutton.cms.gov/resources/codesystem/eob-type",
-        "code":"CARRIER"
-      },
-      {
-        "system":"http://hl7.org/fhir/ex-claimtype",
-        "code":"professional",
-        "display":"Professional"
-      },
-      {
-        "system":"https://bluebutton.cms.gov/resources/variables/nch_near_line_rec_ident_cd",
-        "code":"O",
-        "display":"Part B physician/supplier claim record (processed by local carriers; can include DMEPOS services)"
-      }
-    ]
-  },
-  "patient":{
-    "reference":"Patient/20000000000001"
-  },
-  "identifier":[
-    {
-      "system":"https://bluebutton.cms.gov/resources/variables/clm_id",
-      "value":"10300336722"
-    },
-    {
-      "system":"https://bluebutton.cms.gov/resources/identifier/claim-group",
-      "value":"44077735787"
-    }
-  ],
-  "insurance":{
-    "coverage":{
-      "reference":"Coverage/part-b-20000000000001"
-    }
-  },
-  "item":[
-    {
-      "locationCodeableConcept":{
-        "extension":[
+        },
+        "identifier": [
           {
-            "valueCoding":{
-              "system":"https://bluebutton.cms.gov/resources/variables/prvdr_state_cd",
-              "code":"99",
-              "display":"With 000 county code is American Samoa; otherwise unknown"
-            },
-            "url":"https://bluebutton.cms.gov/resources/variables/prvdr_state_cd"
-          },
-          {
-            "valueCoding":{
-              "system":"https://bluebutton.cms.gov/resources/variables/prvdr_zip",
-              "code":"999999999"
-            },
-            "url":"https://bluebutton.cms.gov/resources/variables/prvdr_zip"
-          },
-          {
-            "valueCoding":{
-              "system":"https://bluebutton.cms.gov/resources/variables/carr_line_prcng_lclty_cd",
-              "code":"99"
-            },
-            "url":"https://bluebutton.cms.gov/resources/variables/carr_line_prcng_lclty_cd"
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "5S41C00AA00"
           }
         ],
-        "coding":[
+        "name": [
           {
-            "system":"https://bluebutton.cms.gov/resources/variables/line_place_of_srvc_cd",
-            "code":"99",
-            "display":"Other Place of Service. Other place of service not identified above."
+            "family": "Wyman904",
+            "given": [
+              "Cruz300"
+            ]
           }
-        ]
-      },
-      "service":{
-        "coding":[
-          {
-            "system":"https://bluebutton.cms.gov/resources/codesystem/hcpcs",
-            "code":"45384",
-            "version":"0"
-          }
-        ]
-      },
-      "extension":[
-        {
-          "valueCoding":{
-            "system":"https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cd",
-            "code":"3",
-            "display":"Services"
-          },
-          "url":"https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cd"
-        },
-        {
-          "valueQuantity":{
-            "value":1
-          },
-          "url":"https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt"
+        ],
+        "gender": "male",
+        "birthDate": "1956-02-08",
+        "managingOrganization": {
+          "reference": "Organization/351fbb5f-f2f9-4094-bc6f-2b3600bb56e9"
         }
-      ],
-      "servicedPeriod":{
-        "start":"2000-10-01",
-        "end":"2000-10-01"
-      },
-      "quantity":{
-        "value":1
-      },
-      "category":{
-        "coding":[
-          {
-            "system":"https://bluebutton.cms.gov/resources/variables/line_cms_type_srvc_cd",
-            "code":"2",
-            "display":"Surgery"
-          }
-        ]
-      },
-      "sequence":1,
-      "diagnosisLinkId":[
-        2
-      ],
-      "adjudication":[
-        {
-          "category":{
-            "coding":[
-              {
-                "system":"https://bluebutton.cms.gov/resources/codesystem/adjudication",
-                "code":"https://bluebutton.cms.gov/resources/variables/carr_line_rdcd_pmt_phys_astn_c",
-                "display":"Carrier Line Reduced Payment Physician Assistant Code"
-              }
-            ]
-          },
-          "reason":{
-            "coding":[
-              {
-                "system":"https://bluebutton.cms.gov/resources/variables/carr_line_rdcd_pmt_phys_astn_c",
-                "code":"0",
-                "display":"N/A"
-              }
-            ]
-          }
-        },
-        {
-          "extension":[
-            {
-              "valueCoding":{
-                "system":"https://bluebutton.cms.gov/resources/variables/line_pmt_80_100_cd",
-                "code":"0",
-                "display":"80%"
-              },
-              "url":"https://bluebutton.cms.gov/resources/variables/line_pmt_80_100_cd"
-            }
-          ],
-          "amount":{
-            "system":"urn:iso:std:iso:4217",
-            "code":"USD",
-            "value":250.0
-          },
-          "category":{
-            "coding":[
-              {
-                "system":"https://bluebutton.cms.gov/resources/codesystem/adjudication",
-                "code":"https://bluebutton.cms.gov/resources/variables/line_nch_pmt_amt",
-                "display":"Line NCH Medicare Payment Amount"
-              }
-            ]
-          }
-        },
-        {
-          "category":{
-            "coding":[
-              {
-                "system":"https://bluebutton.cms.gov/resources/codesystem/adjudication",
-                "code":"https://bluebutton.cms.gov/resources/variables/line_bene_pmt_amt",
-                "display":"Line Payment Amount to Beneficiary"
-              }
-            ]
-          },
-          "amount":{
-            "system":"urn:iso:std:iso:4217",
-            "code":"USD",
-            "value":0.0
-          }
-        }
-      ]
+      }
     }
   ]
 }
 ~~~
 
-## DPC Implementation Guide
+## Attestation
 
-The DPC team has created a FHIR Implementation Guide which provides detailed information regarding the FHIR APIs and Data Models.
+<a href="#create-an-attestation" class="ds-u-padding-left--3 guide_sub-link">Create an Attestation</a>
 
-<a href="/ig/index.html" class="ds-c-button">Read the Implementation Guide</a>
+CMS requires Practitioners to attest that they have a treatment related purpose for adding a patient to their Group each time they make a Group addition. This is accomplished by submitting an attestation with every request. Attestations are posted as a [Provenance](https://www.hl7.org/fhir/provenance.html) Resource via the X-Provenance header, as outlined in the [FHIR specification](https://www.hl7.org/fhir/implementationguide.html).
 
-## OpenAPI Documentation
+### Prerequisites:
+- Access to the API: active Bearer <span style="color: #046B99;">{access_token}</span>
+- At least one registered Practitioner
+- At least one registered Patient
 
-The DPC team has created comprehensive [OpenAPI](https://swagger.io/docs/specification/about/) (formerly Swagger) documentation which provides detailed information regarding public endpoints available for the DPC project.
-In addition, this documentation allows organizations to interactively explore the API, using their own access tokens and datasets.
+### Create an Attestation
+Details on Provenance resources are given in the [FHIR implementation guide](https://www.hl7.org/fhir/implementationguide.html), but at a minimum, each attestation must include:
 
-<a href="https://sandbox.dpc.cms.gov/api/swagger" class="ds-c-button">View the OpenAPI Documentation</a>
+- **Timestamp:** Time when attestation was made.
+- **Reason:** Reason for the attestation (currently only: http://hl7.org/fhir/v3/ActReason#TREAT is supported).
+- **Organization ID:** The agent making the attestation referenced by their Organization Resource ID. 
+  - _Your Organization ID can be found by referencing the {id} variable in the resource object of your Practitioner._
+- **Practitioner ID:** The practitioner attached to the attestation referenced by their Practitioner ID.
+  - _Your Practitioner ID can be found by referencing the {id} variable in the resource object of your Practitioner._
+
+The attestation is then included in the X-Provenance header as part of any operations which add patients to the Group resource.
+
+### Example Attestation for X-Provenance header
+
+~~~
+{
+ "resourceType":"Provenance",
+ "meta":{
+   "profile":[
+     "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-attestation"
+   ]
+ },
+ "recorded":"1990-01-01T00:00:00.000-05:00",
+ "reason":[
+   {
+     "system":"http://hl7.org/fhir/v3/ActReason",
+     "code":"TREAT"
+   }
+ ],
+ "agent":[
+   {
+     "role":[
+       {
+         "coding":[
+           {
+             "system":"http://hl7.org/fhir/v3/RoleClass",
+             "code":"AGNT"
+           }
+         ]
+       }
+     ],
+     "whoReference":{
+       "reference":"Organization/{{organization_id}}"
+     },
+     "onBehalfOfReference":{
+       "reference":"Practitioner/{{practitioner-id}}"
+     }
+   }
+ ]
+}
+~~~
+
+## Groups (Attribution)
+
+<a href="#create-a-group" class="ds-u-padding-left--3 guide_sub-link">Create a Group</a><br />
+<a href="#update-a-group" class="ds-u-padding-left--3 guide_sub-link">Update a Group</a><br />
+<a href="#add-patients-to-group" class="ds-u-padding-left--3 guide_sub-link">Add Patients to Group</a><br />
+<a href="#overwrite-a-group-membership" class="ds-u-padding-left--3 guide_sub-link">Overwrite a Group Membership</a><br />
+<a href="#locate-your-groupid" class="ds-u-padding-left--3 guide_sub-link">Locate your Group.id</a>
+
+Once the Practitioner, Patient, and Provenance (Attestation) resources have been created, the final step is to link a list of registered Patients to a registered Practitioner in what is called an Attribution Roster. This is done by creating a Group resource.
+
+### Prerequisites:
+- A registered account in the DPC Portal
+- At least one Patient in your Organization
+- At least one Practitioner in your Organization
+
+### Create a Group
+To link a list of registered Patients to a registered Practitioner, you must create a Group Resource by creating a JSON file with a list of patients and a single Practitioner to be attributed to. Upload this JSON file via a POST request to the /Group endpoint.
+
+Additional details on Provenance Resource can be found in DPC’s implementation guide but, at a minimum, each Attribution Group resource must include:
+
+- **The Practitioner’s NPI** which patients are being attributed to.
+- **The system ID of the Patient(s)** that are members of the Group. This value is the alphanumeric system ID of the Patient Resource in DPC. It is a UUID.
+
+<div class="ds-c-alert ds-c-alert--warn">
+  <div class="ds-c-alert__body">
+    <p class="ds-c-alert__text">
+      Parameter and Bundle Resources are NOT to be used when adding, updating, or overwriting Groups.
+    </p>
+  </div>
+</div>
+
+The Group response returned by DPC includes additional “period” and “inactive” elements for each Patient. These indicate the time period for which the Patient has an active relationship with the Practitioner, or, if the relationship has expired, the time period for which the Patient was active.
+
+<div class="ds-c-alert ds-c-alert--warn">
+  <div class="ds-c-alert__body">
+    <p class="ds-c-alert__text">
+      Attribution Groups must be updated every 90 days!
+    </p>
+  </div>
+</div>
+
+Practitioners at your organization must update their Provenance (Attestation) and Group Resources by re-attributing the Patient to the Practitioner’s Group every 90 days.
+
+When an attribution relationship between a Patient and Practitioner has expired, either due to exceeding the 90 day threshold or being manually removed, the patient’s “inactive” flag will be set to “true.” Patients who are attributed to a Practitioner, but have their inactive flag set to true, will NOT be included in Bulk Data exports.
+
+#### Request:
+
+~~~
+POST /api/v1/Group
+~~~
+
+#### cURL command:
+
+<pre><code>curl -v https://sandbox.dpc.cms.gov/api/v1/Group
+     -H 'Authorization: Bearer <span style="color: #046B99;">{access_token}</span>' \
+     -H 'Accept: application/fhir+json' \
+     -H 'Content-Type: application/fhir+json' \
+     -H 'X-Provenance: {FHIR Provenance resource} \
+     -X POST \
+     -d @group.json</code></pre>
+
+#### Response:
+
+~~~
+{
+ "resourceType": "Group",
+ "type": "person",
+ "actual": true,
+ "characteristic": [
+   {
+     "code": {
+       "coding": [
+         {
+           "code": "attributed-to"
+         }
+       ]
+     },
+     "valueCodeableConcept": {
+       "coding": [
+         {
+           "system": "http://hl7.org/fhir/sid/us-npi",
+           "code": "110001029483"
+         }
+       ]
+     }
+   }
+ ],
+ "member": [
+   {
+     "entity": {
+       "reference": "Patient/4d72ad76-fbc6-4525-be91-7f358f0fea9d"
+     }
+   },
+   {
+     "entity": {
+       "reference": "Patient/74af8018-f3a1-469c-9bfa-1dfd8a646874"
+     }
+   }
+ ]
+}
+~~~
+
+### Update a Group
+
+Patient/Practitioner relationships automatically expire after 90 days and must be re-attested by the Practitioner. This is accomplished by re-attributing the Patient to the Practitioner’s Group.
+
+### Identifying Expired Patients
+
+After 90 days, patient attributions expire and must be renewed. You can identify these patients through a GET request to the /Group endpoint. This will return a JSON file with all the patients attributed to the Group. Evaluate this JSON for patients with attribution dates greater than 90 days.
+
+#### Request
+
+<pre><code>GET api/v1/Group?characteristic-value=attributed-to$<span style="color: #046B99;">{Group ID}</span></code></pre>
+
+#### cURL command:
+
+<pre><code>curl -v https://sandbox.dpc.cms.gov/api/v1/Group?characteristic-value=attributed-to$<span style="color: #046B99;">{Group ID}</span>
+     -H 'Authorization: Bearer {access_token}' \
+     -H 'Accept: application/fhir+json'</code></pre>
+
+#### Response:
+
+~~~
+{
+ "resourceType": "Group",
+ "type": "person",
+ "actual": true,
+ "characteristic": [
+   {
+     "code": {
+       "coding": [
+         {
+           "code": "attributed-to"
+         }
+       ]
+     },
+     "valueCodeableConcept": {
+       "coding": [
+         {
+           "system": "http://hl7.org/fhir/sid/us-npi",
+           "code": "110001029483"
+         }
+       ]
+     }
+   }
+ ],
+ "member": [
+   {
+     "entity": {
+       "reference": "Patient/bb151edf-a8b5-4f5c-9867-69794bcb48d1"
+     }
+   }
+ ]
+}
+~~~
+
+### Add Patients to Group
+
+Additions are handled through a custom $add operation on the /Group endpoint. This takes the members listed into a given resource and adds them to the existing Group.
+
+#### Request:
+<pre><code>POST /api/v1/Group/<span style="color: #046B99;">{Group.id}</span>/$add</code></pre>
+
+#### cURL command:
+<pre><code>curl -v https://sandbox.dpc.cms.gov/api/v1/Group/{Group.id}/\$add
+     -H 'Authorization: Bearer <span style="color: #046B99;">{access_token}</span>' \
+     -H 'Accept: application/fhir+json' \
+     -H 'X-Provenance: <span style="color: #046B99;">{FHIR provenance resource}</span> \
+     -X POST \
+     -d @group_addition.json</code></pre>
+
+#### Response:
+
+~~~
+"member": [
+  {
+    "entity": {
+        "reference": "Patient/871c83f5-5674-450b-a3b6-be3bbcf8a095"
+    },
+    "period": {
+        "start": "2020-06-17T17:44:27+00:00",
+        "end": "2020-09-15T17:44:27+00:00"
+    },
+    "inactive": false
+  },
+  {
+    "entity": {
+        "reference": "Patient/ef25ddf1-615e-43d5-b539-6af200ae7da4"
+    },
+    "period": {
+        "start": "2020-06-17T17:53:42+00:00",
+        "end": "2020-09-15T17:53:42+00:00"
+    },
+    "inactive": false
+  }
+]
+~~~
+
+### Removing Patients from a Group
+Removals are handled through a custom remove operation on the /Group endpoint. This takes the members listed into a given resource and removes them from the existing Group.
+
+<div class="ds-c-alert ds-c-alert--warn">
+  <div class="ds-c-alert__body">
+    <p class="ds-c-alert__text">
+      The remove function does not delete the resources, but sets the inactive parameter to true.
+    </p>
+  </div>
+</div>
+
+#### Request:
+<pre><code>POST /api/v1/Group/<span style="color: #046B99;">{Group.id}</span>/$remove</code></pre>
+
+#### cURL command:
+<pre><code>curl -v https://sandbox.dpc.cms.gov/api/v1/Group/<span style="color: #046B99;">{Group.id}</span>/\$remove
+     -H 'Authorization: Bearer <span style="color: #046B99;">{access_token}</span>' \
+     -H 'Accept: application/fhir+json' \
+     -X POST \
+     -d @group_removal.json</code></pre>
+
+#### Response:
+
+~~~
+{
+ "resourceType": "Group",
+ "type": "person",
+ "actual": true,
+ "characteristic": [
+   {
+     "code": {
+       "coding": [
+         {
+           "code": "attributed-to"
+         }
+       ]
+     },
+     "valueCodeableConcept": {
+       "coding": [
+         {
+           "system": "http://hl7.org/fhir/sid/us-npi",
+           "code": "110001029483"
+         }
+       ]
+     }
+   }
+ ],
+ "member": [
+   {
+     "entity": {
+       "reference": "Patient/4d72ad76-fbc6-4525-be91-7f358f0fea9d"
+     }
+   }
+ ]
+}
+~~~
+
+### Overwrite a Group Membership
+Users can also submit a Group resource which completely overwrites the existing Group. This results in the current group membership being completely overwritten with the members listed in the given resource.
+
+<div class="ds-c-alert ds-c-alert--warn">
+  <div class="ds-c-alert__body">
+    <p class="ds-c-alert__text">
+      This endpoint does not merge with the existing membership state, but completely replaces what currently exists.
+    </p>
+  </div>
+</div>
+
+#### Request:
+<pre><code>PUT /api/v1/Group/<span style="color: #046B99;">{Group.id}</span></code></pre>
+
+#### cURL command:
+<pre><code>curl -v https://sandbox.dpc.cms.gov/api/v1/Group/<span style="color: #046B99;">{Group.id}</span>
+     -H 'Authorization: Bearer <span style="color: #046B99;">{access_token}</span>' \
+     -H 'Accept: application/fhir+json' \
+     -H 'X-Provenance: <span style="color: #046B99;">{FHIR provenance resource}</span> \
+     -X PUT \
+     -d @updated_group.json</code></pre>
+
+#### Response:
+~~~
+{
+ "resourceType": "Group",
+ "type": "person",
+ "actual": true,
+ "characteristic": [
+   {
+     "code": {
+       "coding": [
+         {
+           "code": "attributed-to"
+         }
+       ]
+     },
+     "valueCodeableConcept": {
+       "coding": [
+         {
+           "system": "http://hl7.org/fhir/sid/us-npi",
+           "code": "110001029483"
+         }
+       ]
+     }
+   }
+ ],
+ "member": [
+   {
+     "entity": {
+       "reference": "Patient/4d72ad76-fbc6-4525-be91-7f358f0fea9d"
+     }
+   },
+   {
+     "entity": {
+       "reference": "Patient/bb151edf-a8b5-4f5c-9867-69794bcb48d1"
+     }
+   }
+ ]
+}
+~~~
+
+### Locate your Group.id
+You may only pull data for one practitioner’s roster at a time.
+
+You can do this by sending a GET request to the Group endpoint to retrieve the [Attribution Group](https://hl7.org/fhir/STU3/group.html) of the Practitioner. Use the Practitioners’ [National Provider Identity (NPI)](https://www.cms.gov/Regulations-and-Guidance/Administrative-Simplification/NationalProvIdentStand/) number as a parameter in this request.
+
+<div class="ds-c-alert ds-c-alert--hide-icon">
+  <div class="ds-c-alert__body ds-u-measure--wide">
+    <p class="ds-c-alert__text">DPC supports the standard <a href="https://www.hl7.org/fhir/search.html">FHIR search protocol</a>. Searching for Patients associated with a given Practitioner makes use of <a href="https://www.hl7.org/fhir/search.html#combining">composite search parameters</a>.</p>
+  </div>
+</div>
+
+The response will return a [Bundle](https://www.hl7.org/fhir/STU3/bundle.html) resource which contains the attribution groups for the given Practitioner. **You can use the Group.id value of the returned resources to initiate an export job.** Your Group ID can be found by referencing the {id} variable in the resource object of your Group.
+
+**Example:**
+
+~~~
+"resource": {
+  "resourceType": "Group",
+  "id": "64d0cd85-7767-425a-a3b8-dcc9bdfd5402"
+}
+~~~
+
+#### Request:
+<pre><code>GET
+/api/v1/Group?characteristic-value=attributed-to$<span style="color: #046B99;">{Practitioner NPI}</span></code></pre>
+
+#### cURL command:
+<pre><code>curl -v https://sandbox.dpc.cms.gov/api/v1/Group/<span style="color: #046B99;">{Group.id}</span>
+     -H 'Authorization: Bearer <span style="color: #046B99;">{access_token}</span>' \
+     -H 'Accept: application/fhir+json' \
+     -H 'X-Provenance: <span style="color: #046B99;">{FHIR provenance resource}</span></code></pre>
+
+#### Response:
+
+~~~
+{
+ "resourceType": "Bundle",
+ "type": "searchset",
+ "total": 1,
+ "entry": [
+   {
+     "resource": {
+       "resourceType": "Group",
+       "id": "64d0cd85-7767-425a-a3b8-dcc9bdfd5402",
+       "type": "person",
+       "actual": true,
+       "characteristic": {
+         "code": {
+           "coding": [
+             {
+               "code": "attributed-to"
+             }
+           ]
+         },
+         "valueCodeableConcept": {
+           "coding": [
+             {
+               "system": "http://hl7.org/fhir/sid/us-npi",
+               "code": "{Practitioner NPI}"
+             }
+           ]
+         }
+       },
+       "member": [
+         {
+           "entity": {
+             "reference": "Patient/4d72ad76-fbc6-4525-be91-7f358f0fea9d"
+           }
+         },
+         {
+           "entity": {
+             "reference": "Patient/74af8018-f3a1-469c-9bfa-1dfd8a646874"
+           }
+         }
+       ]
+     }
+   }
+~~~
+
+<a class="guide_top_link" href="#attestation--attribution">Back to Start of Section</a><br />
+<a class="guide_top_link" href="#">Back to Top of Page</a>
+
+# Export Data
+------------
+The primary interaction with the DPC pilot API is via the FHIR /Group/$export operation.This allows an organization to export Patient. Coverage, and Explanation of Benefit data in an asynchronous and bulk manner. Details on the FHIR bulk data operations can be found in the [FHIR Bulk Data Specification](https://build.fhir.org/ig/HL7/bulk-data/OperationDefinition-group-export.html).
+
+## Prerequisites:
+- Completion of the Authorization section
+- Access to the API: active Bearer <span style="color: #046B99;">{access_token}</span>
+- Completion of the Attestation & Attribution section
+
+## Initiate an export job
+In order to start a Patient data export job, you will need to locate your Group.id. Locate your Group.id by referencing the {id} variable in the resource object of your Group.
+
+**Example:**
+
+~~~
+"resource": {
+  "resourceType": "Group",
+  "id": "64d0cd85-7767-425a-a3b8-dcc9bdfd5402"
+}
+~~~
+
+Next, make a GET request to the /Group/$export endpoint with three required headers: an access token, an Accept header, and a Prefer header.
+
+The dollar sign (‘$’) before the word “export” in the URL indicates that the endpoint is an action rather than a resource. The format is defined by the [FHIR Bulk Data Specification](https://build.fhir.org/ig/HL7/bulk-data/OperationDefinition-group-export.html).
+
+### Request:
+
+<pre><code>GET /api/v1/Group/<span style="color: #046B99;">{attribution group ID}</span>/$export</code></pre>
+
+### cURL command:
+
+<pre><code>curl -v https://sandbox.DPC.cms.gov/api/v1/Group/<span style="color: #046B99;">{attribution Group.id}</span>/\$export \
+     -H 'Authorization: Bearer <span style="color: #046B99;">{access_token}</span>' \
+     -H 'Accept: application/fhir+json' \
+     -H 'Prefer: respond-async'</code></pre>
+
+### Response:
+If the request was successful, a 202 Accepted response code will be returned with a Content-Location header. The value of this header indicates the location to monitor your job status and outcomes. The value of the header also contains the Export Job ID of the Job. There is no BODY to the Response, only headers.
+
+**Example:**
+<pre><code>Content-Location: https://sandbox.dpc.cms.gov/api/v1/Jobs/<span style="color: #046B99;">{unique ID of export job}</span></code></pre>
+
+## Specify which Resources to Download
+The Resources to Export can be specified using the _type Parameter. Multiple Resources are specified in a comma delimited list. The following request will export the Patient and Coverage esources, but NOT the Explanation of Benefit Resource.
+
+### Request:
+<pre><code>GET /api/v1/Group/<span style="color: #046B99;">{attribution group ID}</span>/$export?_type=Patient,Coverage</code></pre>
+
+## Check status of the export job
+You can check the status of your job using the {unique ID of the export job}. This is retrieved from the Content-Location header of the response as shown in the previous section. The status of the job will change from 202 Accepted to 200 OK when the export job is complete and the data is ready to be downloaded.
+
+### Request:
+<pre><code>GET https://sandbox.dpc.cms.gov/api/v1/Jobs/<span style="color: #046B99;">{unique ID of export job}</span></code></pre>
+
+### cURL command:
+<pre><code>curl -v https://sandbox.dpc.cms.gov/api/v1/Jobs/<span style="color: #046B99;">{unique ID of export job}</span> \
+     -H 'Authorization: Bearer <span style="color: #046B99;">{access_token}</span>'</code></pre>
+
+### Response:
+If the request was successful, the status of the job will change from 202 Accepted to 200 OK when the export job is complete and the data is ready to be downloaded.
+
+**Example:** Bulk Export Job
+
+~~~
+{
+ "transactionTime": "2018-10-19T14:47:33.975024Z",
+ "request": "https://sandbox.dpc.cms.gov/api/v1/Group/64d0cd85-7767-425a-a3b8-dcc9bdfd5402/$export",
+ "requiresAccessToken": true,
+ "output": [
+   {
+     "type": "ExplanationOfBenefit",
+     "url": "https://sandbox.dpc.cms.gov/api/v1/data/42/DBBD1CE1-AE24-435C-807D-ED45953077D3.ndjson",
+     "extension": [
+       {
+         "url": "https://dpc.cms.gov/checksum",
+         "valueString": "sha256:8b74ba377554fa73de2a2da52cab9e1d160550247053e4d6aba1968624c67b10"
+       },
+       {
+         "url": "https://dpc.cms.gov/file_length",
+         "valueDecimal": 2468
+       }
+     ]
+   }
+ ],
+ "error": [
+   {
+     "type": "OperationOutcome",
+     "url": "https://sandbox.dpc.cms.gov/api/v1/data/42/DBBD1CE1-AE24-435C-807D-ED45953077D3-error.ndjson"
+   }
+ ]
+}
+~~~
+
+Claims data can be found at the URLs within the output field.
+
+The output includes file integrity information in an extension array. It contains https://dpc.cms.gov/checksum (a checksum in the format algorithm:checksum) and https://dpc.cms.gov/file_length (the file length in bytes).
+
+The number 42 in the example data file URLs is the same job ID from the Content-Location header URL when you initiate an export job. If some of the data cannot be exported due to errors, details of the errors can be found at the URLs in the error field. The errors are provided in [NDJSON](http://ndjson.org/) files as FHIR [OperationOutcome](http://hl7.org/fhir/STU3/operationoutcome.html) resources.
+
+## Retrieve the NDJSON output file(s)
+To obtain the exported explanation of benefit data, a GET request is made to the output URLs in the job status response when the job reaches the Completed state. The data will be presented as an [NDJSON](http://ndjson.org/) file of ExplanationOfBenefit resources.
+
+<div class="ds-c-alert ds-c-alert--warn">
+  <div class="ds-c-alert__body">
+    <p class="ds-c-alert__text">
+      The Data endpoint is not a FHIR resource and doesn’t require the Accept header to be set to application/fhir+json.
+    </p>
+  </div>
+</div>
+
+### Request:
+
+<pre><code>GET https://sandbox.dpc.cms.gov/api/v1/data/<span style="color: #046B99;">{job_id}</span>/<span style="color: #046B99;">{file_name}</span></code></pre>
+
+### cURL command:
+
+<pre><code>curl https://sandbox.dpc.cms.gov/api/v1/data/<span style="color: #046B99;">{job_id}</span>/<span style="color: #046B99;">{file_name}</span> \
+     -H 'Authorization: Bearer <span style="color: #046B99;">{access_token}</span>'</code></pre>
+
+**Example:** Explanation of Benefit Resource
+
+~~~
+{
+ "status":"active",
+ "diagnosis":[
+   {
+    "diagnosisCodeableConcept":{
+       "coding":[
+         {
+           "system":"http://hl7.org/fhir/sid/icd-9-cm",
+           "code":"2113"
+         }
+       ]
+     },
+     "sequence":1,
+     "type":[
+       {
+         "coding":[
+           {
+             "system":"https://bluebutton.cms.gov/resources/codesystem/diagnosis-type",
+             "code":"principal",
+             "display":"The single medical diagnosis that is most relevant to the patient's chief complaint or need for treatment."
+           }
+         ]
+       }
+     ]
+   }
+ ],
+ "id":"carrier-10300336722",
+ "payment":{
+   "amount":{
+     "system":"urn:iso:std:iso:4217",
+     "code":"USD",
+     "value":250.0
+   }
+ },
+ "resourceType":"ExplanationOfBenefit",
+ "billablePeriod":{
+   "start":"2000-10-01",
+   "end":"2000-10-01"
+ },
+ "extension":[
+   {
+     "valueMoney":{
+       "system":"urn:iso:std:iso:4217",
+       "code":"USD",
+       "value":0.0
+     },
+     "url":"https://bluebutton.cms.gov/resources/variables/prpayamt"
+   },
+   {
+     "valueIdentifier":{
+       "system":"https://bluebutton.cms.gov/resources/variables/carr_num",
+       "value":"99999"
+     },
+     "url":"https://bluebutton.cms.gov/resources/variables/carr_num"
+   },
+   {
+     "valueCoding":{
+       "system":"https://bluebutton.cms.gov/resources/variables/carr_clm_pmt_dnl_cd",
+       "code":"1",
+       "display":"Physician/supplier"
+     },
+     "url":"https://bluebutton.cms.gov/resources/variables/carr_clm_pmt_dnl_cd"
+   }
+ ],
+ "type":{
+   "coding":[
+     {
+       "system":"https://bluebutton.cms.gov/resources/variables/nch_clm_type_cd",
+       "code":"71",
+       "display":"Local carrier non-durable medical equipment, prosthetics, orthotics, and supplies (DMEPOS) claim"
+     },
+     {
+       "system":"https://bluebutton.cms.gov/resources/codesystem/eob-type",
+       "code":"CARRIER"
+     },
+     {
+       "system":"http://hl7.org/fhir/ex-claimtype",
+       "code":"professional",
+       "display":"Professional"
+     },
+     {
+       "system":"https://bluebutton.cms.gov/resources/variables/nch_near_line_rec_ident_cd",
+       "code":"O",
+       "display":"Part B physician/supplier claim record (processed by local carriers; can include DMEPOS services)"
+     }
+   ]
+ },
+ "patient":{
+   "reference":"Patient/20000000000001"
+ },
+ "identifier":[
+   {
+     "system":"https://bluebutton.cms.gov/resources/variables/clm_id",
+     "value":"10300336722"
+   },
+   {
+     "system":"https://bluebutton.cms.gov/resources/identifier/claim-group",
+     "value":"44077735787"
+   }
+ ],
+ "insurance":{
+   "coverage":{
+     "reference":"Coverage/part-b-20000000000001"
+   }
+ },
+ "item":[
+   {
+     "locationCodeableConcept":{
+       "extension":[
+         {
+           "valueCoding":{
+             "system":"https://bluebutton.cms.gov/resources/variables/prvdr_state_cd",
+             "code":"99",
+             "display":"With 000 county code is American Samoa; otherwise unknown"
+           },
+           "url":"https://bluebutton.cms.gov/resources/variables/prvdr_state_cd"
+         },
+         {
+           "valueCoding":{
+             "system":"https://bluebutton.cms.gov/resources/variables/prvdr_zip",
+             "code":"999999999"
+           },
+           "url":"https://bluebutton.cms.gov/resources/variables/prvdr_zip"
+         },
+         {
+           "valueCoding":{
+             "system":"https://bluebutton.cms.gov/resources/variables/carr_line_prcng_lclty_cd",
+             "code":"99"
+           },
+           "url":"https://bluebutton.cms.gov/resources/variables/carr_line_prcng_lclty_cd"
+         }
+       ],
+       "coding":[
+         {
+           "system":"https://bluebutton.cms.gov/resources/variables/line_place_of_srvc_cd",
+           "code":"99",
+           "display":"Other Place of Service. Other place of service not identified above."
+         }
+       ]
+     },
+     "service":{
+       "coding":[
+         {
+           "system":"https://bluebutton.cms.gov/resources/codesystem/hcpcs",
+           "code":"45384",
+           "version":"0"
+         }
+       ]
+     },
+     "extension":[
+       {
+         "valueCoding":{
+           "system":"https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cd",
+           "code":"3",
+           "display":"Services"
+         },
+         "url":"https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cd"
+       },
+       {
+         "valueQuantity":{
+           "value":1
+         },
+         "url":"https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt"
+       }
+     ],
+     "servicedPeriod":{
+       "start":"2000-10-01",
+       "end":"2000-10-01"
+     },
+     "quantity":{
+       "value":1
+     },
+     "category":{
+       "coding":[
+         {
+           "system":"https://bluebutton.cms.gov/resources/variables/line_cms_type_srvc_cd",
+           "code":"2",
+           "display":"Surgery"
+         }
+       ]
+     },
+     "sequence":1,
+     "diagnosisLinkId":[
+       2
+     ],
+     "adjudication":[
+       {
+         "category":{
+           "coding":[
+             {
+               "system": "https://bluebutton.cms.gov/resources/codesystem/adjudication",
+               "code": "https://bluebutton.cms.gov/resources/variables/carr_line_rdcd_pmt_phys_astn_c",
+               "display":"Carrier Line Reduced Payment Physician Assistant Code"
+             }
+           ]
+         },
+         "reason":{
+           "coding":[
+             {
+               "system":"https://bluebutton.cms.gov/resources/variables/carr_line_rdcd_pmt_phys_astn_c",
+               "code":"0",
+               "display":"N/A"
+             }
+           ]
+         }
+       },
+       {
+         "extension":[
+           {
+             "valueCoding":{
+               "system":"https://bluebutton.cms.gov/resources/variables/line_pmt_80_100_cd",
+               "code":"0",
+               "display":"80%"
+             },
+             "url":"https://bluebutton.cms.gov/resources/variables/line_pmt_80_100_cd"
+           }
+         ],
+         "amount":{
+           "system":"urn:iso:std:iso:4217",
+           "code":"USD",
+           "value":250.0
+         },
+         "category":{
+           "coding":[
+             {
+               "system":"https://bluebutton.cms.gov/resources/codesystem/adjudication",
+               "code":"https://bluebutton.cms.gov/resources/variables/line_nch_pmt_amt",
+               "display":"Line NCH Medicare Payment Amount"
+             }
+           ]
+         }
+       },
+       {
+         "category":{
+           "coding":[
+             {
+               "system":"https://bluebutton.cms.gov/resources/codesystem/adjudication",
+               "code":"https://bluebutton.cms.gov/resources/variables/line_bene_pmt_amt",
+               "display":"Line Payment Amount to Beneficiary"
+             }
+           ]
+         },
+         "amount":{
+           "system":"urn:iso:std:iso:4217",
+           "code":"USD",
+           "value":0.0
+         }
+       }
+     ]
+   }
+ ]
+}
+~~~
+
+<a class="guide_top_link" href="#export-data">Back to Start of Section</a><br />
+<a class="guide_top_link" href="#">Back to Top of Page</a>

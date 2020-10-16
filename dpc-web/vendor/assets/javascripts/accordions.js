@@ -829,3 +829,8 @@ module.exports = function (button, expanded) {
 };
 
 },{}]},{},[15])
+
+function collapseButtons(button, collapse) {
+  document.getElementById(button).setAttribute('aria-expanded', 'false');
+  document.getElementById(collapse).setAttribute('hidden', '');
+}

@@ -39,7 +39,7 @@ public class PatientDAO extends AbstractDAO<PatientEntity> {
         }
 
         if (patientMBI != null) {
-            predicates.add(builder.equal(root.get(PatientEntity_.beneficiaryID), patientMBI));
+            predicates.add(builder.equal(root.get(PatientEntity_.beneficiaryID), patientMBI.toUpperCase()));
         }
         if (organizationID != null) {
             predicates.add(builder.equal(root.get(PatientEntity_.organization).get(OrganizationEntity_.id), organizationID));
