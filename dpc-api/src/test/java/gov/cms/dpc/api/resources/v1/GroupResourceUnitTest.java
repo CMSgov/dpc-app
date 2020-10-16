@@ -7,6 +7,7 @@ import ca.uhn.fhir.rest.gclient.IReadExecutable;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.common.utils.NPIUtil;
+import gov.cms.dpc.common.utils.SeedProcessor;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import org.hl7.fhir.dstu3.model.*;
 import org.junit.jupiter.api.Assertions;
@@ -17,12 +18,16 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.UUID;
 
+import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
+import static gov.cms.dpc.fhir.FHIRMediaTypes.FHIR_NDJSON;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class GroupResourceUnitTest {
 
@@ -155,6 +160,22 @@ public class GroupResourceUnitTest {
         Mockito.when(readExec.execute()).thenThrow(new ResourceNotFoundException("practitioner not found"));
 
         Assertions.assertThrows(WebApplicationException.class, () -> resource.createRoster(organizationPrincipal, provenance, group));
+    }
+
+    @Test
+    public void testGroupExportRequiresHeaders() {
+        Organization organization = new Organization();
+        OrganizationPrincipal organizationPrincipal = new OrganizationPrincipal(organization);
+        Group group = SeedProcessor.createBaseAttributionGroup(NPIUtil.generateNPI(), ORGANIZATION_ID);
+        assertThrows(BadRequestException.class, () -> resource.export(
+                organizationPrincipal,
+                group.getId(),
+                "Patient",
+                FHIR_NDJSON,
+                null,
+                null,
+                null
+        ));
     }
 
 }
