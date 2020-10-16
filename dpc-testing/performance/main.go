@@ -25,6 +25,14 @@ func main() {
 	testMetadata()
 
 	orgID := createOrg()
+	defer func() {
+		if err := recover(); err != nil {
+			fmt.Printf("recovering from: %q\n", err)
+		}
+
+		cleanUp(orgID)
+	}()
+
 	pubKeyStr, privateKey, signature := generateKeyPairAndSignature()
 	keyID := uploadKey(pubKeyStr, signature, orgID)
 	clientToken := getClientToken(orgID)
@@ -38,7 +46,8 @@ func main() {
 	accessToken = refreshAccessToken(privateKey, keyID, clientToken)
 	testPatientEndpoints(accessToken)
 
-	cleanUp(orgID)
+	accessToken = refreshAccessToken(privateKey, keyID, clientToken)
+	testOrganizationEndpoints(accessToken)
 }
 
 func testMetadata() {
