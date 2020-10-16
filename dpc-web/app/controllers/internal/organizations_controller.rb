@@ -12,8 +12,8 @@ module Internal
     end
 
     def new
-      if from_user_params[:from_user].present?
-        user = User.find from_user_params[:from_user]
+      if user_id_params[:user_id].present?
+        user = User.find user_id_params[:user_id]
         @organization = Organization.new name: user.requested_organization,
                                          organization_type: user.requested_organization_type,
                                          num_providers: user.requested_num_providers
@@ -35,12 +35,14 @@ module Internal
       if @organization.save
         flash[:notice] = 'Organization created.'
 
-        add_user(from_user_params[:from_user]) if from_user_params[:from_user].present?
+        if user_id_params[:user_id].present?
+          @user = User.find user_id_params[:user_id]
+          add_user_to_org
+          return
+        end
 
         if prod_sbx?
           redirect_to new_internal_organization_registered_organization_path(organization_id: @organization.id)
-        elsif from_user_params[:from_user].present?
-          redirect_to edit_internal_user_path(from_user_params[:from_user], user_organization_ids: @organization.id)
         else
           redirect_to internal_organization_path(@organization)
         end
@@ -63,7 +65,10 @@ module Internal
     def update
       @organization = Organization.find id_param
 
-      if @organization.update organization_params
+      if organization_enabled?(@organization) && npi_blank?
+        flash[:alert] = 'Enabled organizations require an NPI.'
+        render :edit
+      elsif @organization.update organization_params
         flash[:notice] = 'Organization updated.'
         redirect_to internal_organization_path(@organization)
       else
@@ -85,42 +90,71 @@ module Internal
 
     def add_or_delete
       @organization = Organization.find(params[:organization_id])
-      @user = User.find(params[:organization][:id])
+      @user = user_identify
 
       if params[:_method] == 'add'
-        add_user = add_user(params[:organization][:id])
-        action = 'added to'
+        add_user_to_org
       elsif params[:_method] == 'delete'
-        delete_user = @organization.users.delete(@user)
-        action = 'deleted from the organization'
-      end
-
-      if delete_user || add_user
-        flash[:notice] = "User has been successfully #{action} the organization."
-        redirect_to internal_organization_path(@organization)
+        delete_user_from_org
       else
-        flash[:alert] = "User could not be #{action}."
+        redirect_to internal_organization_path(@organization)
       end
     end
 
     private
 
-    def add_user(user_id)
-      @user = User.find(user_id)
-      @organization.users << @user
+    def add_user_to_org
+      @user.organizations.clear
+      if @organization.users << @user
+        flash[:notice] = 'User has been successfully added to the organization.'
+        page_redirect
+      else
+        flash[:alert] = 'User could not be added to the organization.'
+      end
+    end
+
+    def delete_user_from_org
+      if @organization.users.delete(@user)
+        flash[:notice] = 'User has been successfully deleted from the organization.'
+        page_redirect
+      else
+        flash[:alert] = 'User could not be deleted from the organization.'
+      end
+    end
+
+    def npi_blank?
+      organization_params[:npi].blank?
+    end
+
+    def organization_enabled?(org)
+      @reg_org = org.reg_org
+
+      return true if @reg_org.present? && @reg_org.enabled == true
     end
 
     def org_page_params(results)
       results.page params[:page]
     end
 
-    def from_user_params
-      params.permit(:from_user)
+    def page_redirect
+      return redirect_to internal_user_url(@user) if params[:user_id].present?
+
+      redirect_to internal_organization_path(@organization)
+    end
+
+    def user_id_params
+      params.permit(:user_id)
     end
 
     def user_filter
       User.left_joins(:organization_user_assignments)
           .where('organization_user_assignments.id IS NULL')
+    end
+
+    def user_identify
+      return User.find(params[:user_id]) if params[:user_id].present?
+
+      User.find(params[:organization][:id])
     end
 
     def organization_params

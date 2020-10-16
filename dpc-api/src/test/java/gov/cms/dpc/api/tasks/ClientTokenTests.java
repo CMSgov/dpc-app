@@ -72,7 +72,7 @@ public class ClientTokenTests {
 
         final TokenEntity response = Mockito.mock(TokenEntity.class);
         Mockito.when(response.getToken()).thenReturn("test token");
-        Mockito.when(tokenResource.createOrganizationToken(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(response);
+        Mockito.when(tokenResource.createOrganizationToken(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(response);
 
         final UUID id = UUID.randomUUID();
         final Organization org = new Organization();
@@ -82,7 +82,7 @@ public class ClientTokenTests {
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
             gct.execute(map, new PrintWriter(new OutputStreamWriter(bos)));
             Mockito.verify(bakery, never()).createMacaroon(eq(Collections.emptyList()));
-            Mockito.verify(tokenResource, times(1)).createOrganizationToken(principalCaptor.capture(), Mockito.isNull(), eq(Optional.empty()));
+            Mockito.verify(tokenResource, times(1)).createOrganizationToken(principalCaptor.capture(), Mockito.isNull(),Mockito.isNull(), eq(Optional.empty()));
             assertEquals(id, principalCaptor.getValue().getID(), "Should have correct ID");
         }
     }

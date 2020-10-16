@@ -14,6 +14,7 @@ import gov.cms.dpc.api.auth.staticauth.StaticAuthFilter;
 import gov.cms.dpc.api.auth.staticauth.StaticAuthenticator;
 import gov.cms.dpc.macaroons.thirdparty.BakeryKeyPair;
 import io.dropwizard.auth.Authenticator;
+import io.dropwizard.auth.UnauthorizedHandler;
 import io.jsonwebtoken.SigningKeyResolverAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +42,8 @@ public class AuthModule extends DropwizardAwareModule<DPCAPIConfiguration> {
             binder.bind(authenticatorTypeLiteral).to(StaticAuthenticator.class);
 
         } else {
+            binder.bind(DPCUnauthorizedHandler.class);
+            binder.bind(UnauthorizedHandler.class).to(DPCUnauthorizedHandler.class);
             binder.bind(AuthFactory.class).to(DPCAuthFactory.class);
             binder.bind(authenticatorTypeLiteral).to(MacaroonsAuthenticator.class);
         }

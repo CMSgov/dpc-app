@@ -19,10 +19,12 @@ module Internal
 
     def edit
       @user = User.find(id_param)
+      @organizations = Organization.all
     end
 
     def update
       @user = User.find(id_param)
+      @organizations = Organization.all
       if @user.update user_params
         flash[:notice] = 'User successfully updated.'
         redirect_to internal_user_url(@user)

@@ -13,7 +13,7 @@
 
 .module-container__id {
   background-color: $color-gray-dark;
-  color: #fff;
+  color: $color-white;
   padding: $spacer-1 $spacer-2;
 
   @media (min-width: $width-sm) {
@@ -98,13 +98,29 @@
 }
 
 .module-list-container {
+  border: 1px solid $color-gray-lighter;
   list-style: none;
   max-width: 850px;
-  max-height: 850px;
+  max-height: 500px;
   overflow: auto;
   padding: 0;
 
   ul {
     padding: 0;
+  }
+}
+
+.module-container__link {
+  color: $color-primary;
+  text-decoration: none;
+}
+
+.module-container__link:visited {
+  color: $color-primary;
+}
+
+.module-container__link:hover {
+  .module-container__primary {
+    background-color: $color-gray-lightest;
   }
 }

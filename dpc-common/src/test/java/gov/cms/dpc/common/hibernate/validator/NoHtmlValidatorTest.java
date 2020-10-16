@@ -63,7 +63,8 @@ public class NoHtmlValidatorTest {
                         "<![endif]-->", false),
                 Arguments.of("&#X000003C;", false),
                 Arguments.of("&#0000060;", false),
-                Arguments.of("/?param=<data:text/html;base64,PHNjcmlwdD5hbGVydCgnWFNTJyk8L3NjcmlwdD4=", false)
+                Arguments.of("/?param=<data:text/html;base64,PHNjcmlwdD5hbGVydCgnWFNTJyk8L3NjcmlwdD4=", false),
+                Arguments.of("Sherlock & Watson", true)
         );
     }
 

@@ -2,9 +2,18 @@
   "name": "dpc-website",
   "private": true,
   "dependencies": {
-    "@cmsgov/design-system-layout": "^3.7.0",
     "@cmsgov/design-system-core": "^3.7.0",
+    "@cmsgov/design-system-layout": "^3.7.0",
+    "jsrsasign": "^9.0.3",
+    "jsrsasign-util": "^1.0.0",
+    "jwt-decode": "^2.2.0",
     "normalize.css": "^8.0.1",
     "svg4everybody": "^2.1.9"
+  },
+  "devDependencies": {
+    "jest": "^26.4.0"
+  },
+  "scripts": {
+    "test": "jest"
   }
 }

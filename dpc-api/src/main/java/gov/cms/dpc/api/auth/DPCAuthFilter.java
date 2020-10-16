@@ -8,7 +8,6 @@ import io.dropwizard.auth.AuthFilter;
 import io.dropwizard.auth.Authenticator;
 import org.apache.http.HttpHeaders;
 import org.slf4j.*;
-
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.UriInfo;
@@ -34,12 +33,14 @@ public abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organ
 
     private final TokenDAO dao;
     private final MacaroonBakery bakery;
+    private final DPCUnauthorizedHandler dpc401handler;
 
 
-    protected DPCAuthFilter(MacaroonBakery bakery, Authenticator<DPCAuthCredentials, OrganizationPrincipal> auth, TokenDAO dao) {
+    protected DPCAuthFilter(MacaroonBakery bakery, Authenticator<DPCAuthCredentials, OrganizationPrincipal> auth, TokenDAO dao, DPCUnauthorizedHandler dpc401handler ) {
         this.authenticator = auth;
         this.bakery = bakery;
         this.dao = dao;
+        this.dpc401handler = dpc401handler;
     }
 
     protected abstract DPCAuthCredentials buildCredentials(String macaroon, UUID organizationID, UriInfo uriInfo);
@@ -53,9 +54,9 @@ public abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organ
 
         final boolean authenticated = this.authenticate(requestContext, dpcAuthCredentials, null);
         if (!authenticated) {
-            throw new WebApplicationException(unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
+            throw new WebApplicationException(dpc401handler.buildResponse(BEARER_PREFIX, realm));
         }
-        logger.info("Resource Requested: {}, Method: {}",uriInfo.getPath(),requestContext.getMethod());
+        logger.info("resource_requested={}, method={}",uriInfo.getPath(),requestContext.getMethod());
     }
 
     private DPCAuthCredentials validateMacaroon(String macaroon, UriInfo uriInfo) {
@@ -67,7 +68,7 @@ public abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organ
             m1 = MacaroonBakery.deserializeMacaroon(macaroon);
         } catch (BakeryException e) {
             logger.error("Cannot deserialize Macaroon", e);
-            throw new WebApplicationException(unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
+            throw new WebApplicationException(dpc401handler.buildResponse(BEARER_PREFIX, realm));
         }
 
         // Lookup the organization by Macaroon id
@@ -82,7 +83,7 @@ public abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organ
             this.bakery.verifyMacaroon(m1, String.format("organization_id = %s", orgID));
         } catch (BakeryException e) {
             logger.error("Macaroon verification failed", e);
-            throw new WebApplicationException(unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
+            throw new WebApplicationException(dpc401handler.buildResponse(BEARER_PREFIX, realm));
         }
 
         return buildCredentials(macaroon, orgID, uriInfo);
@@ -99,13 +100,13 @@ public abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organ
             // Check the length of the provided Macaroons, if more than 1, it's a client token which has been removed, so fail
             // If the length is 1 it's either a golden macaroon or an undischarged Macaroon, which will fail in the next auth phase
             if (macaroons.size() > 1) {
-                throw new WebApplicationException(unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
+                throw new WebApplicationException(dpc401handler.buildResponse(BEARER_PREFIX, realm));
             }
             // Find the org_id caveat and extract the value
             orgID = MacaroonHelpers.extractOrgIDFromCaveats(Collections.singletonList(rootMacaroon))
                     .orElseThrow(() -> {
                         logger.error("Cannot find organization_id on Macaroon");
-                        throw new WebApplicationException(unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
+                        throw new WebApplicationException(dpc401handler.buildResponse(BEARER_PREFIX, realm));
                     });
         }
 

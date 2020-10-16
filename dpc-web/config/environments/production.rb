@@ -79,7 +79,7 @@ Rails.application.configure do
   # Use a different cache store in production.
   config.action_controller.perform_caching = true
 
-  config.cache_store = :redis_cache_store, { url: "redis://#{ENV.fetch('REDIS_URL', 'localhost')}:6379/1" }
+  config.cache_store = :redis_cache_store, { url: "#{ENV.fetch('REDIS_URL', 'redis://localhost')}:6379/1" }
 
   # Use a real queuing backend for Active Job (and separate queues per environment)
   # config.active_job.queue_adapter     = :resque
@@ -107,7 +107,7 @@ Rails.application.configure do
 
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
   # the I18n.default_locale when a translation cannot be found).
-  config.i18n.fallbacks = true
+  config.i18n.fallbacks = [I18n.default_locale]
 
   # Send deprecation notices to registered listeners.
   config.active_support.deprecation = :notify

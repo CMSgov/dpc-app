@@ -41,7 +41,6 @@ When using content, data, documentation, code, and related materials associated 
 
 You may use CMS’s name or logo in order to identify the source of API content subject to these Terms. You may not use the CMS name, logo, or the like to imply endorsement of any product, service, or entity, not-for-profit, commercial or otherwise.
 
-- [Blue Button branding guidelines](https://bluebutton.cms.gov/developers/#branding-guidelines)
 - [HealthIT.gov logo and usage guidelines](https://www.healthit.gov/topic/health-it-initiatives/blue-button/logo-and-usage)
 
 ### Service Management

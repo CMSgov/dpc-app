@@ -4,9 +4,11 @@ import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import com.google.inject.name.Named;
+import gov.cms.dpc.api.APIHelpers;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.resources.AbstractGroupResource;
@@ -25,6 +27,7 @@ import gov.cms.dpc.queue.models.JobQueueBatch;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.*;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,14 +81,15 @@ public class GroupResource extends AbstractGroupResource {
             @ApiImplicitParam(name = "X-Provenance", required = true, paramType = "header", type="string",dataTypeClass = Provenance.class))
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "Successfully created Roster"),
-            @ApiResponse(code = 200, message = "Roster already exists")
+            @ApiResponse(code = 200, message = "Roster already exists"),
+            @ApiResponse(code = 422, message = "Provider in Provenance header does not match Provider in Roster")
     })
     @Override
     public Response createRoster(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
                                  @ApiParam(hidden=true)  @Valid @Profiled(profile = AttestationProfile.PROFILE_URI) @ProvenanceHeader Provenance rosterAttestation,
                                  Group attributionRoster) {
         // Log attestation
-        logAttestation(rosterAttestation, null, attributionRoster);
+        logAndVerifyAttestation(rosterAttestation, null, attributionRoster);
         addOrganizationTag(attributionRoster, organizationPrincipal.getOrganization().getId());
 
         final MethodOutcome outcome = this
@@ -166,12 +170,15 @@ public class GroupResource extends AbstractGroupResource {
      )
 
 
-    @ApiResponses(@ApiResponse(code = 404, message = "Cannot find Roster with given ID"))
+    @ApiResponses({
+            @ApiResponse(code = 404, message = "Cannot find Roster with given ID"),
+            @ApiResponse(code = 422, message = "Provider in Provenance header does not match Provider in Roster")
+    })
     @Override
     public Group updateRoster(@ApiParam(value = "Attribution Group ID") @PathParam("rosterID") UUID rosterID,
                               @ApiParam(hidden=true)  @Valid @Profiled(profile = AttestationProfile.PROFILE_URI) @ProvenanceHeader Provenance rosterAttestation,
                               Group rosterUpdate) {
-        logAttestation(rosterAttestation, rosterID, rosterUpdate);
+        logAndVerifyAttestation(rosterAttestation, rosterID, rosterUpdate);
         final MethodOutcome outcome = this.client
                 .update()
                 .resource(rosterUpdate)
@@ -195,7 +202,7 @@ public class GroupResource extends AbstractGroupResource {
     @Override
     public Group addRosterMembers(@ApiParam(value = "Attribution roster ID") @PathParam("rosterID") UUID rosterID,
                                   @ApiParam(hidden=true) @Valid @Profiled(profile = AttestationProfile.PROFILE_URI) @ProvenanceHeader Provenance rosterAttestation, @ApiParam Group groupUpdate) {
-        logAttestation(rosterAttestation, rosterID, groupUpdate);
+        logAndVerifyAttestation(rosterAttestation, rosterID, groupUpdate);
         return this.executeGroupOperation(rosterID, groupUpdate, "add");
     }
 
@@ -263,14 +270,15 @@ public class GroupResource extends AbstractGroupResource {
                            @PathParam("rosterID") @NoHtml String rosterID,
                            @ApiParam(value = "List of FHIR resources to export", allowableValues = "ExplanationOfBenefits, Coverage, Patient")
                            @QueryParam("_type") @NoHtml String resourceTypes,
-                           @ApiParam(value = "Output format of requested data", allowableValues = FHIR_NDJSON, defaultValue = FHIR_NDJSON)
+                           @ApiParam(value = "Output format of requested data", allowableValues = FHIR_NDJSON , defaultValue = FHIR_NDJSON)
                            @QueryParam("_outputFormat") @NoHtml String outputFormat,
                            @ApiParam(value = "Resources will be included in the response if their state has changed after the supplied time (e.g. if Resource.meta.lastUpdated is later than the supplied _since time).")
-                           @QueryParam("_since") @NoHtml String since) {
+                           @QueryParam("_since") @NoHtml String since,
+                           @ApiParam(hidden = true) @HeaderParam("Prefer")  @Valid String Prefer) {
         logger.info("Exporting data for provider: {} _since: {}", rosterID, since);
 
         // Check the parameters
-        checkExportRequest(outputFormat);
+        checkExportRequest(outputFormat, Prefer);
 
         // Get the attributed patients
         final List<String> attributedPatients = fetchPatientMBIs(rosterID);
@@ -281,7 +289,7 @@ public class GroupResource extends AbstractGroupResource {
         // Handle the _type query parameter
         final var resources = handleTypeQueryParam(resourceTypes);
         final var sinceDate = handleSinceQueryParam(since);
-        final var transactionTime = fetchTransactionTime();
+        final var transactionTime = APIHelpers.fetchTransactionTime(bfdClient);
         final UUID jobID = this.queue.createJob(orgID, rosterID, attributedPatients, resources, sinceDate, transactionTime);
 
         return Response.status(Response.Status.ACCEPTED)
@@ -350,28 +358,23 @@ public class GroupResource extends AbstractGroupResource {
     }
 
     /**
-     * Fetch the BFD database last update time. Use it as the transactionTime for a job.
-     * @return transactionTime from the BFD service
-     */
-    private OffsetDateTime fetchTransactionTime() {
-        // Every bundle has transaction time after the Since RFC has beneficiary
-        final Meta meta = bfdClient.requestPatientFromServer(SYNTHETIC_BENE_ID, null).getMeta();
-        return Optional.ofNullable(meta.getLastUpdated())
-                .map(u -> u.toInstant().atOffset(ZoneOffset.UTC))
-                .orElse(OffsetDateTime.now(ZoneOffset.UTC));
-    }
-
-    /**
      * Check the query parameters of the request. If valid, return empty. If not valid,
      * return an error response with an {@link OperationOutcome} in the body.
      *
      * @param outputFormat param to check
      */
-    private static void checkExportRequest(String outputFormat) {
+    private static void checkExportRequest(String outputFormat, String headerPrefer) {
         // _outputFormat only supports FHIR_NDJSON
         if (StringUtils.isNotEmpty(outputFormat) && !FHIR_NDJSON.equals(outputFormat)) {
             throw new BadRequestException("'_outputFormat' query parameter must be 'application/fhir+ndjson'");
         }
+        if (headerPrefer==null || StringUtils.isEmpty(headerPrefer)){
+            throw new BadRequestException("The 'Prefer' header must be 'respond-async'");
+        }
+        if (StringUtils.isNotEmpty(headerPrefer) && !headerPrefer.equals("respond-async")) {
+            throw new BadRequestException("The 'Prefer' header must be 'respond-async'");
+        }
+
     }
 
     private List<String> fetchPatientMBIs(String groupID) {
@@ -419,7 +422,7 @@ public class GroupResource extends AbstractGroupResource {
      * @param rosterID          - {@link UUID} of roster being updated
      * @param attributionRoster - {@link Group} roster being attested
      */
-    private void logAttestation(Provenance provenance, UUID rosterID, Group attributionRoster) {
+    private void logAndVerifyAttestation(Provenance provenance, UUID rosterID, Group attributionRoster) {
 
         final String groupIDLog;
         if (rosterID == null) {
@@ -431,6 +434,7 @@ public class GroupResource extends AbstractGroupResource {
         final Coding reason = provenance.getReasonFirstRep();
 
         final Provenance.ProvenanceAgentComponent performer = FHIRExtractors.getProvenancePerformer(provenance);
+        final String practitionerUUID = performer.getOnBehalfOfReference().getReference();
         final List<String> attributedPatients = attributionRoster
                 .getMember()
                 .stream()
@@ -440,7 +444,29 @@ public class GroupResource extends AbstractGroupResource {
 
         logger.info("Organization {} is attesting a {} purpose between provider {} and patient(s) {}{}", performer.getWhoReference().getReference(),
                 reason.getCode(),
-                performer.getOnBehalfOfReference().getReference(), attributedPatients, groupIDLog);
+                practitionerUUID, attributedPatients, groupIDLog);
+
+        verifyHeader(practitionerUUID, attributionRoster);
+    }
+
+    private void verifyHeader(String practitionerUUID, Group attributionRoster) {
+        try {
+            Practitioner practitioner = client.read()
+                    .resource(Practitioner.class)
+                    .withId(FHIRExtractors.getEntityUUID(practitionerUUID).toString())
+                    .encodedJson()
+                    .execute();
+
+            Identifier provenancePractitionerNPI = FHIRExtractors.findMatchingIdentifier(practitioner.getIdentifier(), DPCIdentifierSystem.NPPES);
+            String groupPractitionerNPI = FHIRExtractors.getAttributedNPI(attributionRoster);
+
+            if (!provenancePractitionerNPI.getValue().equals(groupPractitionerNPI)) {
+                throw new WebApplicationException("Provenance header's provider does not match group provider", HttpStatus.SC_UNPROCESSABLE_ENTITY);
+            }
+        } catch(ResourceNotFoundException e) {
+            throw new WebApplicationException("Could not find provider defined in provenance header", HttpStatus.SC_UNPROCESSABLE_ENTITY);
+        }
+
     }
 
     /**
