@@ -41,8 +41,9 @@ Rails.application.routes.draw do
     resources :public_keys, only: [:new, :create]
   end
 
-
-  root to: 'portal#show'
+  devise_scope :user do
+    root to: "devise/sessions#new"
+  end
 
   match '/home', to: redirect("#{ENV['STATIC_SITE_URL']}"), via: :get
 
