@@ -27,6 +27,7 @@ import gov.cms.dpc.queue.models.JobQueueBatch;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.*;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
 import org.slf4j.Logger;
@@ -41,6 +42,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static gov.cms.dpc.api.APIHelpers.addOrganizationTag;
 import static gov.cms.dpc.fhir.FHIRMediaTypes.FHIR_JSON;
@@ -280,7 +282,16 @@ public class GroupResource extends AbstractGroupResource {
         logger.info("Exporting data for provider: {} _since: {}", rosterID, since);
 
         // Check the parameters
-        checkExportRequest(outputFormat, prefer);
+        Map<String, String> headers = Stream.of(Pair.of("Prefer", prefer), Pair.of("Accept", accept))
+                .peek(header -> {
+                    if (header.getRight() == null) {
+                        throw new BadRequestException("The " + header.getLeft() + " header is required");
+                    }
+                })
+                .map(pair -> Map.entry(pair.getLeft(), pair.getRight()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+        checkExportRequest(outputFormat, headers);
 
         // Get the attributed patients
         final List<String> attributedPatients = fetchPatientMBIs(rosterID);
@@ -361,18 +372,23 @@ public class GroupResource extends AbstractGroupResource {
      *
      * @param outputFormat param to check
      */
-    private static void checkExportRequest(String outputFormat, String headerPrefer) {
+    private static void checkExportRequest(String outputFormat, Map<String, String> headers) {
         // _outputFormat only supports FHIR_NDJSON
         if (StringUtils.isNotEmpty(outputFormat) && !FHIR_NDJSON.equals(outputFormat)) {
             throw new BadRequestException("'_outputFormat' query parameter must be 'application/fhir+ndjson'");
         }
-        if (headerPrefer == null || StringUtils.isEmpty(headerPrefer)) {
-            throw new BadRequestException("The 'Prefer' header must be 'respond-async'");
-        }
-        if (StringUtils.isNotEmpty(headerPrefer) && !headerPrefer.equals("respond-async")) {
-            throw new BadRequestException("The 'Prefer' header must be 'respond-async'");
-        }
+        checkRequestHeaders(headers);
+    }
 
+    private static void checkRequestHeaders(Map<String, String> headers) {
+        headers.forEach((k, v) -> {
+            if (k.equals("Prefer") && !v.equals("respond-async")) {
+                throw new BadRequestException("The 'Prefer' header must be 'respond-async'");
+            }
+            if (k.equals("Accept") && !v.equals(FHIR_JSON)) {
+                throw new BadRequestException("The 'Accept' header must be " + FHIR_JSON);
+            }
+        });
     }
 
     private List<String> fetchPatientMBIs(String groupID) {
