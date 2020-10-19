@@ -31,7 +31,7 @@ module Internal
     def taggable_path
       if @tagging.taggable_type == 'User'
         internal_user_path(id: @tagging.taggable_id)
-      else
+      elsif @tagging.taggable_type == 'Organization'
         internal_organization_path(id: @tagging.taggable_id)
       end
     end
