@@ -42,7 +42,7 @@ Rails.application.routes.draw do
   end
 
 
-  root to: 'public#home'
+  root to: 'portal#show'
 
   match '/home', to: redirect("#{ENV['STATIC_SITE_URL']}"), via: :get
 
