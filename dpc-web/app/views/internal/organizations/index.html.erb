@@ -36,6 +36,13 @@
       <div class="module-container">
         <div class="module-container__primary">
           <h2 class="module-container__heading"><%= link_to org.name, internal_organization_path(org) %></h2>
+          <div class="site-pills ds-u-margin--0 ds-u-padding--2">
+          <% org.taggings.each do |tagging| %>
+            <span class="site-pills__item site-pills__item--small">
+              <%= tagging.tag_name %>
+            </span>
+          <% end %>
+          </div>
         </div>
         <div class="module-container__secondary ds-u-padding--2">
           <% if org.reg_org.present? && org.reg_org.enabled == true %>
