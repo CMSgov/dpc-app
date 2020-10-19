@@ -44,7 +44,7 @@ Rails.application.routes.draw do
 
   root to: 'public#home'
 
-  match '/home', to: 'public#home', via: :get
+  match '/home', to: redirect("#{ENV['STATIC_SITE_URL']}"), via: :get
 
   match '/docs', to: redirect("#{ENV['STATIC_SITE_URL']}/docs"), via: :get
 

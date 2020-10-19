@@ -1,9 +1,8 @@
 <a class="ds-c-skip-nav" href="#main">Skip to main content</a>
 
 <nav class="navbar" id="navbar">
-  <a class="site-logo" href="/">
-    <%= image_tag("top-nav-heart.svg", alt: "Heart logo") %> <span class="site-logo-text">Data at the Point of Care</span>
-  </a>
+
+  <%= link_to "#{image_tag("top-nav-heart.svg", alt: "Heart logo")} Data at the Point of Care".html_safe, ENV['STATIC_SITE_URL'], class: "site-logo" %>
 
 
   <button id="topnav__show-button" class="ds-c-button ds-c-button--transparent ds-c-button--big topnav__show-button" type="button" aria-controls="topnav-wrap" aria-label="Show menu">
@@ -23,7 +22,7 @@ aria-controls="topnav-wrap" aria-label="Close menu">
     </button>
     <ul class="topnav">
       <li class="topnav__item">
-        <%= link_to "Home", root_path, class: "topnav__link"  %>
+        <%= link_to "Home", ENV['STATIC_SITE_URL'], class: "topnav__link"  %>
       </li>
 
       <li class="topnav__item">
