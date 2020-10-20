@@ -19,10 +19,11 @@ type orgTargetConfig struct {
 }
 
 type orgTargeter struct {
-	bodies chan []byte
+	bodies chan []byte // channel for generating new request bodies
 	orgTargetConfig
 }
 
+// NewOrgTargeter constructs a new orgTargeter using provided config
 func NewOrgTargeter(config orgTargetConfig) *orgTargeter {
 	targeter := &orgTargeter{
 		bodies:          make(chan []byte),
@@ -34,6 +35,8 @@ func NewOrgTargeter(config orgTargetConfig) *orgTargeter {
 	return targeter
 }
 
+// genReqs setups the go routine necessary to generate new request bodies
+// used by the vegeta test runner
 func (o *orgTargeter) genReqs() {
 	bodies := make([][]byte, 0)
 
@@ -52,6 +55,8 @@ func (o *orgTargeter) genReqs() {
 		}
 	}
 
+	// kicks off generator to pull a new body from the request files that
+	// were loaded previously
 	go func() {
 		for {
 			for _, body := range bodies {
@@ -61,12 +66,14 @@ func (o *orgTargeter) genReqs() {
 	}()
 }
 
+// builtTarget is the function passed to the vegeta test runner. It expects a
+// *vegeta.Target as an argument and a return error.
 func (o *orgTargeter) buildTarget(t *vegeta.Target) error {
 	t.Method = o.Method
 
 	var body []byte
 	if o.FilePattern != "" {
-		body = o.nextRequest()
+		body = o.nextRequest() // pull the next body from the channel
 	}
 
 	t.URL = o.FullURL(o.ID)
@@ -87,6 +94,7 @@ func (o *orgTargeter) buildTarget(t *vegeta.Target) error {
 	return nil
 }
 
+// Name creates the name of the test that will be displayed
 func (o *orgTargeter) Name() string {
 	var id string
 	if o.Method != "POST" {
@@ -95,6 +103,8 @@ func (o *orgTargeter) Name() string {
 	return fmt.Sprintf("%s %s", o.Method, o.FullURL(id))
 }
 
+// FullURL generates the full url to be used by the test runner with
+// and optional `id`
 func (o *orgTargeter) FullURL(id string) string {
 	url := fmt.Sprintf("%s/%s", o.BaseURL, o.Path)
 	if id != "" {
@@ -103,13 +113,17 @@ func (o *orgTargeter) FullURL(id string) string {
 	return url
 }
 
+// nextRequest simple iterator method to pull from the bodies channel
 func (o *orgTargeter) nextRequest() []byte {
 	return <-o.bodies
 }
 
+// testOrganizationEndpoints is the test script to run through performance tests for the
+// organization endpoints
 func testOrganizationEndpoints() {
 	const endpoint = "Organization"
 
+	//POST /organization/$submit call initializer
 	o := NewOrgTargeter(orgTargetConfig{
 		Method:      "POST",
 		BaseURL:     apiURL,
@@ -119,39 +133,42 @@ func testOrganizationEndpoints() {
 	})
 	resp := runTestWithTargeter(o.Name(), o.buildTarget, 1, 1)
 
+	// Retrieve the organization id from the response
 	var resource Resource
 	json.Unmarshal(resp[0], &resource)
 
-	// Every org requires its own access token
 	pubKeyStr, privateKey, signature := generateKeyPairAndSignature()
 	keyID := uploadKey(pubKeyStr, signature, resource.ID)
 	clientToken := getClientToken(resource.ID)
 	accessToken := refreshAccessToken(privateKey, keyID, clientToken)
 
+	// GET /organization/{id} call performance test
 	o = NewOrgTargeter(orgTargetConfig{
 		Method:      "GET",
 		BaseURL:     apiURL,
 		Path:        endpoint,
-		AccessToken: accessToken, // Users cannot create orgs so the golden macaroon is required
+		AccessToken: accessToken,
 		ID:          resource.ID,
 	})
 	runTestWithTargeter(o.Name(), o.buildTarget, 5, 2)
 
+	// PUT /organization/{id} call performance test using json update files
 	o = NewOrgTargeter(orgTargetConfig{
 		Method:      "PUT",
 		BaseURL:     apiURL,
 		Path:        endpoint,
-		AccessToken: accessToken, // Users cannot create orgs so the golden macaroon is required
+		AccessToken: accessToken,
 		FilePattern: "../../src/main/resources/organizations/organization-*.json",
 		ID:          resource.ID,
 	})
 	runTestWithTargeter(o.Name(), o.buildTarget, 5, 2)
 
+	// DELETE /organization/{id} call performance test and cleanup
 	o = NewOrgTargeter(orgTargetConfig{
 		Method:      "DELETE",
 		BaseURL:     apiURL,
 		Path:        endpoint,
-		AccessToken: string(goldenMacaroon),
+		AccessToken: string(goldenMacaroon), // Users cannot delete orgs so the golden macaroon is required
 		ID:          resource.ID,
 	})
 	runTestWithTargeter(o.Name(), o.buildTarget, 1, 1)
