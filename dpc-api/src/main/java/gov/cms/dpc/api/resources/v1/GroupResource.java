@@ -42,7 +42,6 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static gov.cms.dpc.api.APIHelpers.addOrganizationTag;
 import static gov.cms.dpc.fhir.FHIRMediaTypes.FHIR_JSON;
@@ -282,16 +281,7 @@ public class GroupResource extends AbstractGroupResource {
         logger.info("Exporting data for provider: {} _since: {}", rosterID, since);
 
         // Check the parameters
-        Map<String, String> headers = Stream.of(Pair.of("Prefer", prefer), Pair.of("Accept", accept))
-                .peek(header -> {
-                    if (header.getRight() == null) {
-                        throw new BadRequestException("The " + header.getLeft() + " header is required");
-                    }
-                })
-                .map(pair -> Map.entry(pair.getLeft(), pair.getRight()))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-
-        checkExportRequest(outputFormat, headers);
+        checkExportRequest(outputFormat, List.of(Pair.of("Prefer", prefer), Pair.of("Accept", accept)));
 
         // Get the attributed patients
         final List<String> attributedPatients = fetchPatientMBIs(rosterID);
@@ -372,23 +362,33 @@ public class GroupResource extends AbstractGroupResource {
      *
      * @param outputFormat param to check
      */
-    private static void checkExportRequest(String outputFormat, Map<String, String> headers) {
+    private static void checkExportRequest(String outputFormat, List<Pair<String, String>> headers) {
+        checkOutputFormat(outputFormat);
+        checkRequestHeaders(headers);
+    }
+
+    private static void checkOutputFormat(String outputFormat) {
         // _outputFormat only supports FHIR_NDJSON
         if (StringUtils.isNotEmpty(outputFormat) && !FHIR_NDJSON.equals(outputFormat)) {
             throw new BadRequestException("'_outputFormat' query parameter must be 'application/fhir+ndjson'");
         }
-        checkRequestHeaders(headers);
     }
 
-    private static void checkRequestHeaders(Map<String, String> headers) {
-        headers.forEach((k, v) -> {
-            if (k.equals("Prefer") && !v.equals("respond-async")) {
-                throw new BadRequestException("The 'Prefer' header must be 'respond-async'");
-            }
-            if (k.equals("Accept") && !v.equals(FHIR_JSON)) {
-                throw new BadRequestException("The 'Accept' header must be " + FHIR_JSON);
-            }
-        });
+    private static void checkRequestHeaders(List<Pair<String, String>> headers) {
+        headers.stream()
+                .peek(header -> {
+                    if (header.getRight() == null) {
+                        throw new BadRequestException("The " + header.getLeft() + " header is required");
+                    }
+                })
+                .forEach(pair -> {
+                    if (pair.getLeft().equals("Prefer") && !pair.getRight().equals("respond-async")) {
+                        throw new BadRequestException("The 'Prefer' header must be 'respond-async'");
+                    }
+                    if (pair.getLeft().equals("Accept") && !pair.getRight().equals(FHIR_JSON)) {
+                        throw new BadRequestException("The 'Accept' header must be " + FHIR_JSON);
+                    }
+                });
     }
 
     private List<String> fetchPatientMBIs(String groupID) {
