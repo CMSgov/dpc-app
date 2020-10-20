@@ -3,7 +3,7 @@
   "identifier": [
     {
       "system": "http://hl7.org/fhir/sid/us-npi",
-      "value": "1111112110"
+      "value": "2906714268"
     }
   ],
   "name": "Template Provider Organization",
@@ -11,7 +11,7 @@
     "use": "work",
     "type": "both",
     "line": [
-      "556 Test Address"
+      "557 Test Address"
     ],
     "city": "Washington",
     "state": "DC",
@@ -29,7 +29,7 @@
         "use": "work",
         "type": "both",
         "line": [
-          "555 Test Address"
+          "556 Test Address"
         ],
         "city": "Washington",
         "state": "DC",
