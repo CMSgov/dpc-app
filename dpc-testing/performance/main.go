@@ -47,6 +47,8 @@ func main() {
 	testPatientEndpoints(accessToken)
 
 	testOrganizationEndpoints()
+
+	cleanUp(orgID)
 }
 
 func testMetadata() {
