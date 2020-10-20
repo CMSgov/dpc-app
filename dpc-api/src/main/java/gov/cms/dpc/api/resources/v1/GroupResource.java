@@ -331,14 +331,13 @@ public class GroupResource extends AbstractGroupResource {
     }
 
     private OffsetDateTime handleSinceQueryParam(Optional<OffsetDateTimeParam> sinceParam) {
-        if (sinceParam.isEmpty()) {
-            return null;
+        if (sinceParam.isPresent()) {
+            if (sinceParam.get().get().isAfter(OffsetDateTime.now(ZoneId.systemDefault()))) {
+                throw new WebApplicationException("'_since' query parameter cannot be a future date");
+            }
+            return sinceParam.get().get();
         }
-        OffsetDateTime now = OffsetDateTime.now(ZoneId.systemDefault());
-        if (sinceParam.get().get().isAfter(now)){
-            throw new BadRequestException("'_since' query parameter cannot be a future date");
-        }
-        return sinceParam.get().get();
+        return null;
     }
 
     /**
