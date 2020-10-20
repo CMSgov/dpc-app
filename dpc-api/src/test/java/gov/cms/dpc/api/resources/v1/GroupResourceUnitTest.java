@@ -27,6 +27,7 @@ import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.UUID;
 
+import static gov.cms.dpc.fhir.FHIRMediaTypes.FHIR_JSON;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class GroupResourceUnitTest {
@@ -169,6 +170,81 @@ public class GroupResourceUnitTest {
     }
 
     @Test
+    public void testExportRequestHeaders() {
+        UUID practitionerId = UUID.randomUUID();
+        UUID orgId = UUID.randomUUID();
+        Organization organization = new Organization();
+        organization.setId(orgId.toString());
+        OrganizationPrincipal organizationPrincipal = new OrganizationPrincipal(organization);
+
+        IReadExecutable<Group> readExec = Mockito.mock(IReadExecutable.class);
+        Group fakeGroup = new Group();
+        fakeGroup.getMember().add(new Group.GroupMemberComponent());
+        Mockito.when(attributionClient
+                .read()
+                .resource(Group.class)
+                .withId(Mockito.any(IdType.class))
+                .encodedJson())
+                .thenReturn(readExec);
+
+        Mockito.when(readExec.execute())
+                .thenReturn(fakeGroup);
+
+        IOperationUntypedWithInput<Bundle> operationInput = Mockito.mock(IOperationUntypedWithInput.class);
+        Patient fakePatient = new Patient();
+        fakePatient.getIdentifier().add(new Identifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("2S51C00AA00"));
+        Bundle fakeBundle = new Bundle();
+        fakeBundle.getEntry().add(new Bundle.BundleEntryComponent().setResource(fakePatient));
+        Mockito.when(attributionClient
+                .operation()
+                .onInstance(Mockito.any(IdType.class))
+                .named("patients")
+                .withParameters(Mockito.any(Parameters.class))
+                .returnResourceType(Bundle.class)
+                .useHttpGet()
+                .encodedJson())
+                .thenReturn(operationInput);
+        Mockito.when(operationInput.execute())
+                .thenReturn(fakeBundle);
+
+        Mockito.when(blueButtonClient.requestPatientFromServer(Mockito.anyString(), Mockito.any()))
+                .thenReturn(new Bundle());
+
+        Assertions.assertDoesNotThrow(() -> {
+            resource.export(organizationPrincipal, "roster-id", "Coverage", FHIRMediaTypes.FHIR_NDJSON, "2017-01-01T00:00:00Z", "respond-async", FHIR_JSON);
+        });
+
+        Assertions.assertThrows(BadRequestException.class, () -> {
+            resource.export(organizationPrincipal, "roster-id", "Coverage", FHIRMediaTypes.FHIR_NDJSON, "2017-01-01T00:00:00Z", null, FHIR_JSON);
+        });
+
+        Assertions.assertThrows(BadRequestException.class, () -> {
+            resource.export(organizationPrincipal, "roster-id", "Coverage", FHIRMediaTypes.FHIR_NDJSON, "2017-01-01T00:00:00Z", "asdfasdf", FHIR_JSON);
+        });
+
+        Assertions.assertThrows(BadRequestException.class, () -> {
+            resource.export(organizationPrincipal, "roster-id", "Coverage", FHIRMediaTypes.FHIR_NDJSON, "2017-01-01T00:00:00Z", "", FHIR_JSON);
+        });
+
+        Assertions.assertThrows(BadRequestException.class, () -> {
+            resource.export(organizationPrincipal, "roster-id", "Coverage", FHIRMediaTypes.FHIR_NDJSON, "2017-01-01T00:00:00Z", " ", FHIR_JSON);
+        });
+
+        Assertions.assertThrows(BadRequestException.class, () -> {
+            resource.export(organizationPrincipal, "roster-id", "Coverage", FHIRMediaTypes.FHIR_NDJSON, "2017-01-01T00:00:00Z", "respond-async", "asdfasdf");
+        });
+
+        Assertions.assertThrows(BadRequestException.class, () -> {
+            resource.export(organizationPrincipal, "roster-id", "Coverage", FHIRMediaTypes.FHIR_NDJSON, "2017-01-01T00:00:00Z", "respond-async", "");
+        });
+
+        Assertions.assertThrows(BadRequestException.class, () -> {
+            resource.export(organizationPrincipal, "roster-id", "Coverage", FHIRMediaTypes.FHIR_NDJSON, "2017-01-01T00:00:00Z", "respond-async", " ");
+        });
+
+    }
+
+    @Test
     public void testOutputFormatSetting() {
         UUID practitionerId = UUID.randomUUID();
         UUID orgId = UUID.randomUUID();
@@ -210,27 +286,27 @@ public class GroupResourceUnitTest {
                 .thenReturn(new Bundle());
 
         Assertions.assertDoesNotThrow(() -> {
-            resource.export(organizationPrincipal, "roster-id", "Coverage", FHIRMediaTypes.APPLICATION_NDJSON, "2017-01-01T00:00:00Z", "respond-async");
+            resource.export(organizationPrincipal, "roster-id", "Coverage", FHIRMediaTypes.APPLICATION_NDJSON, "2017-01-01T00:00:00Z", "respond-async", FHIR_JSON);
         });
 
         Assertions.assertDoesNotThrow(() -> {
-            resource.export(organizationPrincipal, "roster-id", "Coverage", FHIRMediaTypes.FHIR_NDJSON, "2017-01-01T00:00:00Z", "respond-async");
+            resource.export(organizationPrincipal, "roster-id", "Coverage", FHIRMediaTypes.FHIR_NDJSON, "2017-01-01T00:00:00Z", "respond-async", FHIR_JSON);
         });
 
         Assertions.assertDoesNotThrow(() -> {
-            resource.export(organizationPrincipal, "roster-id", "Coverage", FHIRMediaTypes.NDJSON, "2017-01-01T00:00:00Z", "respond-async");
+            resource.export(organizationPrincipal, "roster-id", "Coverage", FHIRMediaTypes.NDJSON, "2017-01-01T00:00:00Z", "respond-async", FHIR_JSON);
         });
 
         Assertions.assertThrows(BadRequestException.class, () -> {
-            resource.export(organizationPrincipal, "roster-id", "Coverage", FHIRMediaTypes.FHIR_JSON, "2017-01-01T00:00:00Z", "respond-async");
+            resource.export(organizationPrincipal, "roster-id", "Coverage", FHIRMediaTypes.FHIR_JSON, "2017-01-01T00:00:00Z", "respond-async", FHIR_JSON);
         });
 
         Assertions.assertThrows(BadRequestException.class, () -> {
-            resource.export(organizationPrincipal, "roster-id", "Coverage", null, "2017-01-01T00:00:00Z", "respond-async");
+            resource.export(organizationPrincipal, "roster-id", "Coverage", null, "2017-01-01T00:00:00Z", "respond-async", FHIR_JSON);
         });
 
         Assertions.assertThrows(BadRequestException.class, () -> {
-            resource.export(organizationPrincipal, "roster-id", "Coverage", "", "2017-01-01T00:00:00Z", "respond-async");
+            resource.export(organizationPrincipal, "roster-id", "Coverage", "", "2017-01-01T00:00:00Z", "respond-async", FHIR_JSON);
         });
 
     }
