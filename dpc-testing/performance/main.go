@@ -24,15 +24,6 @@ func init() {
 func main() {
 	testMetadata()
 
-	orgID := createOrg()
-	defer func() {
-		if err := recover(); err != nil {
-			fmt.Printf("recovering from: %q\n", err)
-		}
-
-		cleanUp(orgID)
-	}()
-
 	pubKeyStr, privateKey, signature := generateKeyPairAndSignature()
 	keyID := uploadKey(pubKeyStr, signature, orgID)
 	clientToken := getClientToken(orgID)
