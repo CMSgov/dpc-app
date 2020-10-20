@@ -46,8 +46,7 @@ func main() {
 	accessToken = refreshAccessToken(privateKey, keyID, clientToken)
 	testPatientEndpoints(accessToken)
 
-	accessToken = refreshAccessToken(privateKey, keyID, clientToken)
-	testOrganizationEndpoints(accessToken)
+	testOrganizationEndpoints()
 }
 
 func testMetadata() {
