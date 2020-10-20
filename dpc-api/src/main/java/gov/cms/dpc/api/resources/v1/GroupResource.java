@@ -1,7 +1,5 @@
 package gov.cms.dpc.api.resources.v1;
 
-import ca.uhn.fhir.model.primitive.DateTimeDt;
-import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -25,6 +23,7 @@ import gov.cms.dpc.fhir.validations.profiles.AttestationProfile;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import io.dropwizard.auth.Auth;
+import io.dropwizard.jersey.jsr310.OffsetDateTimeParam;
 import io.swagger.annotations.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
@@ -37,10 +36,8 @@ import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.net.URI;
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-import java.time.chrono.ChronoLocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -247,7 +244,7 @@ public class GroupResource extends AbstractGroupResource {
      * @param rosterID      {@link String} ID of provider to retrieve data for
      * @param resourceTypes - {@link String} of comma separated values corresponding to FHIR {@link ResourceType}
      * @param outputFormat  - Optional outputFormats parameter
-     * @param since         - Optional since parameter
+     * @param sinceParam         - Optional since parameter
      * @return - {@link OperationOutcome} specifying whether or not the request was successful.
      */
     @Override
@@ -273,12 +270,15 @@ public class GroupResource extends AbstractGroupResource {
                            @ApiParam(value = "Output format of requested data", allowableValues = FHIR_NDJSON , defaultValue = FHIR_NDJSON)
                            @QueryParam("_outputFormat") @NoHtml String outputFormat,
                            @ApiParam(value = "Resources will be included in the response if their state has changed after the supplied time (e.g. if Resource.meta.lastUpdated is later than the supplied _since time).")
-                           @QueryParam("_since") @NoHtml String since,
+                           @QueryParam("_since") Optional<OffsetDateTimeParam> sinceParam,
                            @ApiParam(hidden = true) @HeaderParam("Prefer")  @Valid String Prefer) {
-        logger.info("Exporting data for provider: {} _since: {}", rosterID, since);
+
 
         // Check the parameters
         checkExportRequest(outputFormat, Prefer);
+        final var resources = handleTypeQueryParam(resourceTypes);
+        final var since = handleSinceQueryParam(sinceParam);
+        logger.info("Exporting data for provider: {} _since: {}", rosterID, since);
 
         // Get the attributed patients
         final List<String> attributedPatients = fetchPatientMBIs(rosterID);
@@ -286,11 +286,8 @@ public class GroupResource extends AbstractGroupResource {
         // Generate a job ID and submit it to the queue
         final UUID orgID = FHIRExtractors.getEntityUUID(organizationPrincipal.getOrganization().getId());
 
-        // Handle the _type query parameter
-        final var resources = handleTypeQueryParam(resourceTypes);
-        final var sinceDate = handleSinceQueryParam(since);
         final var transactionTime = APIHelpers.fetchTransactionTime(bfdClient);
-        final UUID jobID = this.queue.createJob(orgID, rosterID, attributedPatients, resources, sinceDate, transactionTime);
+        final UUID jobID = this.queue.createJob(orgID, rosterID, attributedPatients, resources, since, transactionTime);
 
         return Response.status(Response.Status.ACCEPTED)
                 .contentLocation(URI.create(this.baseURL + "/Jobs/" + jobID)).build();
@@ -333,28 +330,15 @@ public class GroupResource extends AbstractGroupResource {
         return resources;
     }
 
-    /**
-     * Convert the '_since' {@link QueryParam} to a Date
-     *
-     * @param since - {@link String} an instant
-     * @return - A {@link OffsetDateTime} for this since.
-     */
-    private OffsetDateTime handleSinceQueryParam(String since) {
-        if (StringUtils.isEmpty(since)) {
+    private OffsetDateTime handleSinceQueryParam(Optional<OffsetDateTimeParam> sinceParam) {
+        if (sinceParam.isEmpty()) {
             return null;
         }
-        // check that _since is a valid time
-        try {
-            var dt = new DateTimeDt();
-            dt.setValueAsString(since);
-            LocalDateTime rightNow = LocalDateTime.now( ZoneOffset.UTC );
-            if (rightNow.isBefore((ChronoLocalDateTime<?>) dt)){
-                throw new BadRequestException("'_since' query parameter cannot be a future date");
-            }
-            return dt.getValue().toInstant().atOffset(ZoneOffset.UTC);
-        } catch (DataFormatException ex) {
-            throw new BadRequestException("'_since' query parameter must be a valid date time value");
+        OffsetDateTime now = OffsetDateTime.now(ZoneId.systemDefault());
+        if (sinceParam.get().get().isAfter(now)){
+            throw new BadRequestException("'_since' query parameter cannot be a future date");
         }
+        return sinceParam.get().get();
     }
 
     /**
