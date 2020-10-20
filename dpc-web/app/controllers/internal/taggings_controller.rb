@@ -28,9 +28,12 @@ module Internal
 
     private
 
-    # Right now only users are taggable
     def taggable_path
-      internal_user_path(id: @tagging.taggable_id)
+      if @tagging.taggable_type == 'User'
+        internal_user_path(id: @tagging.taggable_id)
+      elsif @tagging.taggable_type == 'Organization'
+        internal_organization_path(id: @tagging.taggable_id)
+      end
     end
 
     def tagging_params

@@ -77,6 +77,7 @@ RSpec.feature 'updating users' do
     find("[data-test=\"delete-tag-#{tagging.id}\"]").click
 
     within('[data-test="user-tags"]') do
+      expect(page).not_to have_content('Red')
       expect(page).to have_content('Yellow')
     end
   end
