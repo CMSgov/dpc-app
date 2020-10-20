@@ -2,6 +2,7 @@
 
 require 'fakeredis/rspec'
 require 'simplecov'
+SimpleCov.start 'rails'
 
 SimpleCov.start 'rails' do
   track_files '**/{app,lib}/**/*.rb'
