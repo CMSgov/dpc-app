@@ -24,6 +24,8 @@ func init() {
 func main() {
 	testMetadata()
 
+	orgID := createOrg()
+
 	pubKeyStr, privateKey, signature := generateKeyPairAndSignature()
 	keyID := uploadKey(pubKeyStr, signature, orgID)
 	clientToken := getClientToken(orgID)
