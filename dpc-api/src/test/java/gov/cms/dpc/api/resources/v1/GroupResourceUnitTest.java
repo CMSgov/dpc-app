@@ -225,6 +225,14 @@ public class GroupResourceUnitTest {
             resource.export(organizationPrincipal, "roster-id", "Coverage", FHIRMediaTypes.FHIR_JSON, "2017-01-01T00:00:00Z", "respond-async");
         });
 
+        Assertions.assertThrows(BadRequestException.class, () -> {
+            resource.export(organizationPrincipal, "roster-id", "Coverage", null, "2017-01-01T00:00:00Z", "respond-async");
+        });
+
+        Assertions.assertThrows(BadRequestException.class, () -> {
+            resource.export(organizationPrincipal, "roster-id", "Coverage", "", "2017-01-01T00:00:00Z", "respond-async");
+        });
+
     }
 
 }
