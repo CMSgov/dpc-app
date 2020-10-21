@@ -367,8 +367,8 @@ public class GroupResource extends AbstractGroupResource {
     }
 
     private static void checkOutputFormat(String outputFormat) {
-        // _outputFormat only supports FHIR_NDJSON
-        if (!StringUtils.equalsAny(outputFormat, FHIR_NDJSON, APPLICATION_NDJSON, NDJSON)) {
+        // _outputFormat only supports FHIR_NDJSON, APPLICATION_NDJSON, NDJSON
+        if (!StringUtils.equalsAnyIgnoreCase(outputFormat, FHIR_NDJSON, APPLICATION_NDJSON, NDJSON)) {
             throw new BadRequestException("'_outputFormat' query parameter must be 'application/fhir+ndjson', 'application/ndjson', or 'ndjson' ");
         }
     }
