@@ -20,4 +20,16 @@ RSpec.describe Internal::TagsHelper, type: :helper do
       expect(helper.confirm_text(tag)).to eq('Are you sure? 2 records have this tag.')
     end
   end
+
+  describe '#available_tags' do
+    it 'only shows tags that the user does not have' do
+      user = create(:user)
+      tag = create(:tag)
+      user.tags << tag
+
+      available_tag = create(:tag)
+
+      expect(helper.available_tags(user)).to match_array([available_tag])
+    end
+  end
 end

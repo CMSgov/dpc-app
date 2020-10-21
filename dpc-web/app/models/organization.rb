@@ -3,6 +3,8 @@
 class Organization < ApplicationRecord
   include OrganizationTypable
 
+  has_many :taggings, as: :taggable
+  has_many :tags, through: :taggings
   has_one :address, as: :addressable, dependent: :destroy
   has_many :organization_user_assignments, dependent: :destroy
   has_many :users, through: :organization_user_assignments
