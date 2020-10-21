@@ -6,17 +6,17 @@ import (
 	vegeta "github.com/tsenart/vegeta/lib"
 )
 
-func testPractionerEndpoints(accessToken string) {
+func testPractitionerEndpoints(accessToken string) {
 	// POST /Practitioner/$validate
-	postPractionerValidateTargeter := newPOSTPractionerTargeter("/$validate", accessToken, nextParameters, 1)
+	postPractitionerValidateTargeter := newPOSTPractitionerTargeter("/$validate", accessToken, nextParameters, 1)
 	// Higher numbers of requests cause timeouts
-	runTestWithTargeter(fmt.Sprintf("POST %s/Patient/$validate", apiURL), postPractionerValidateTargeter, 5, 2)
+	runTestWithTargeter(fmt.Sprintf("POST %s/Practitioner/$validate", apiURL), postPractitionerValidateTargeter, 5, 2)
 }
 
-func newPOSTPractionerTargeter(operation, accessToken string, nextBody func(*int) []byte, fileNum int) vegeta.Targeter {
+func newPOSTPractitionerTargeter(operation, accessToken string, nextBody func(*int) []byte, fileNum int) vegeta.Targeter {
 	return func(t *vegeta.Target) error {
 		t.Method = "POST"
-		t.URL = fmt.Sprintf("%s/Practioner%s", apiURL, operation)
+		t.URL = fmt.Sprintf("%s/Practitioner%s", apiURL, operation)
 		t.Header = map[string][]string{
 			"Content-Type":  {"application/fhirs+json"},
 			"Authorization": {fmt.Sprintf("Bearer %s", accessToken)},
