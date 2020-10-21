@@ -6,7 +6,6 @@ import gov.cms.dpc.common.annotations.NoHtml;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.Profiled;
 import gov.cms.dpc.fhir.validations.profiles.AttestationProfile;
-import io.dropwizard.jersey.jsr310.OffsetDateTimeParam;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Group;
 import org.hl7.fhir.dstu3.model.Provenance;
@@ -14,7 +13,6 @@ import org.hl7.fhir.dstu3.model.Provenance;
 import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
-import java.util.Optional;
 import java.util.UUID;
 
 @FHIR
@@ -57,7 +55,7 @@ public abstract class AbstractGroupResource {
                                     @PathParam("rosterID") @NoHtml String rosterID,
                                     @QueryParam("_type") @NoHtml String resourceTypes,
                                     @QueryParam("_outputFormat") @NoHtml String outputFormat,
-                                    @QueryParam("_since") Optional<OffsetDateTimeParam> since,
+                                    @QueryParam("_since")  @NoHtml String since,
                                     @HeaderParam("Prefer") @Valid String prefer,
                                     @HeaderParam("Accept") @Valid String accept);
 }

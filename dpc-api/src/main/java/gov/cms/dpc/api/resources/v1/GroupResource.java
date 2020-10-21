@@ -23,7 +23,6 @@ import gov.cms.dpc.fhir.validations.profiles.AttestationProfile;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import io.dropwizard.auth.Auth;
-import io.dropwizard.jersey.jsr310.OffsetDateTimeParam;
 import io.swagger.annotations.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -39,6 +38,8 @@ import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -274,7 +275,7 @@ public class GroupResource extends AbstractGroupResource {
                            @ApiParam(value = "Output format of requested data", allowableValues = FHIR_NDJSON, defaultValue = FHIR_NDJSON)
                            @QueryParam("_outputFormat") @NoHtml String outputFormat,
                            @ApiParam(value = "Resources will be included in the response if their state has changed after the supplied time (e.g. if Resource.meta.lastUpdated is later than the supplied _since time).")
-                               @QueryParam("_since") Optional<OffsetDateTimeParam> sinceParam,
+                               @QueryParam("_since") @NoHtml String sinceParam,
                            @ApiParam(hidden = true) @HeaderParam("Prefer") @Valid String prefer,
                            @ApiParam(hidden = true) @HeaderParam("Accept") @Valid String accept) {
         logger.info("Exporting data for provider: {} _since: {}", rosterID, sinceParam);
@@ -335,12 +336,17 @@ public class GroupResource extends AbstractGroupResource {
         return resources;
     }
 
-    private OffsetDateTime handleSinceQueryParam(Optional<OffsetDateTimeParam> sinceParam) {
-        if (sinceParam.isPresent()) {
-            if (sinceParam.get().get().isAfter(OffsetDateTime.now(ZoneId.systemDefault()))) {
-                throw new BadRequestException("'_since' query parameter cannot be a future date");
+    private OffsetDateTime handleSinceQueryParam(String sinceParam) {
+        if (!StringUtils.isBlank(sinceParam)) {
+            try{
+                OffsetDateTime sinceDate = OffsetDateTime.parse(sinceParam, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+                if (sinceDate.isAfter(OffsetDateTime.now(ZoneId.systemDefault()))) {
+                    throw new BadRequestException("'_since' query parameter cannot be a future date");
+                }
+                return sinceDate;
+            }catch (DateTimeParseException e){
+                throw new BadRequestException("_since parameter `"+e.getParsedString()+"` could not be parsed at index "+e.getErrorIndex());
             }
-            return sinceParam.get().get();
         }
         return null;
     }

@@ -12,7 +12,6 @@ import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
 import gov.cms.dpc.queue.IJobQueue;
-import io.dropwizard.jersey.jsr310.OffsetDateTimeParam;
 import org.hl7.fhir.dstu3.model.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,7 +28,6 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import static gov.cms.dpc.fhir.FHIRMediaTypes.FHIR_JSON;
 import static gov.cms.dpc.api.resources.v1.GroupResource.SYNTHETIC_BENE_ID;
@@ -211,17 +209,17 @@ public class GroupResourceUnitTest {
 
         //Past date with Z offset
         String since = "2020-05-26T16:43:01.780Z";
-        Response response = resource.export(organizationPrincipal, groupId, null, null, Optional.of(new OffsetDateTimeParam(since)), "respond-async", FHIR_JSON);
+        Response response = resource.export(organizationPrincipal, groupId, null, null, since, "respond-async", FHIR_JSON);
         assertEquals(Response.Status.ACCEPTED.getStatusCode(), response.getStatus(), "Expected ACCEPTED response code");
 
         //Past date with +10:00 offset
         since = "2020-05-26T16:43:01.780+10:00";
-        response = resource.export(organizationPrincipal, groupId, null, null, Optional.of(new OffsetDateTimeParam(since)), "respond-async", FHIR_JSON);
+        response = resource.export(organizationPrincipal, groupId, null, null,since, "respond-async", FHIR_JSON);
         assertEquals(Response.Status.ACCEPTED.getStatusCode(), response.getStatus(), "Expected ACCEPTED response code");
 
         //A few seconds ago using -04:00 offset
         since = OffsetDateTime.now(ZoneId.of("America/Puerto_Rico")).minusSeconds(5).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-        response = resource.export(organizationPrincipal, groupId, null, null, Optional.of(new OffsetDateTimeParam(since)), "respond-async", FHIR_JSON);
+        response = resource.export(organizationPrincipal, groupId, null, null,since, "respond-async", FHIR_JSON);
         assertEquals(Response.Status.ACCEPTED.getStatusCode(), response.getStatus(), "Expected ACCEPTED response code");
     }
 
@@ -261,7 +259,7 @@ public class GroupResourceUnitTest {
         //Test a few seconds into the future
         WebApplicationException exception = Assertions.assertThrows(BadRequestException.class, () ->{
                 String since =  OffsetDateTime.now(ZoneId.of("America/Puerto_Rico")).plusSeconds(10).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-                resource.export(organizationPrincipal, groupId, null, null, Optional.of(new OffsetDateTimeParam(since)), "respond-async", FHIR_JSON);
+                resource.export(organizationPrincipal, groupId, null, null,since, "respond-async", FHIR_JSON);
             });
 
         assertEquals("'_since' query parameter cannot be a future date", exception.getMessage());
@@ -269,7 +267,7 @@ public class GroupResourceUnitTest {
         //Test a few days into the future
         exception = Assertions.assertThrows(BadRequestException.class, () -> {
                     final String since =  OffsetDateTime.now().plusDays(2).toString();
-                    resource.export(organizationPrincipal, groupId, null, null, Optional.of(new OffsetDateTimeParam(since)), "respond-async", FHIR_JSON);
+                    resource.export(organizationPrincipal, groupId, null, null, since, "respond-async", FHIR_JSON);
                 });
 
         assertEquals("'_since' query parameter cannot be a future date", exception.getMessage());
@@ -277,7 +275,7 @@ public class GroupResourceUnitTest {
         //Test bad format
         exception = Assertions.assertThrows(WebApplicationException.class, () -> {
             final String since = "2020-05-2X616:43:01.780+10:00";
-            resource.export(organizationPrincipal, groupId, null, null, Optional.of(new OffsetDateTimeParam(since)), "respond-async", FHIR_JSON);
+            resource.export(organizationPrincipal, groupId, null, null, since, "respond-async", FHIR_JSON);
         });
 
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), exception.getResponse().getStatus());
@@ -325,35 +323,35 @@ public class GroupResourceUnitTest {
                 .thenReturn(new Bundle());
 
         Assertions.assertDoesNotThrow(() -> {
-            resource.export(organizationPrincipal, "roster-id", "Coverage", FHIRMediaTypes.FHIR_NDJSON, Optional.of(new OffsetDateTimeParam("2017-01-01T00:00:00Z")), "respond-async", FHIR_JSON);
+            resource.export(organizationPrincipal, "roster-id", "Coverage", FHIRMediaTypes.FHIR_NDJSON,"2017-01-01T00:00:00Z", "respond-async", FHIR_JSON);
         });
 
         Assertions.assertThrows(BadRequestException.class, () -> {
-            resource.export(organizationPrincipal, "roster-id", "Coverage", FHIRMediaTypes.FHIR_NDJSON, Optional.of(new OffsetDateTimeParam("2017-01-01T00:00:00Z")), null, FHIR_JSON);
+            resource.export(organizationPrincipal, "roster-id", "Coverage", FHIRMediaTypes.FHIR_NDJSON,"2017-01-01T00:00:00Z", null, FHIR_JSON);
         });
 
         Assertions.assertThrows(BadRequestException.class, () -> {
-            resource.export(organizationPrincipal, "roster-id", "Coverage", FHIRMediaTypes.FHIR_NDJSON, Optional.of(new OffsetDateTimeParam("2017-01-01T00:00:00Z")), "asdfasdf", FHIR_JSON);
+            resource.export(organizationPrincipal, "roster-id", "Coverage", FHIRMediaTypes.FHIR_NDJSON,"2017-01-01T00:00:00Z", "asdfasdf", FHIR_JSON);
         });
 
         Assertions.assertThrows(BadRequestException.class, () -> {
-            resource.export(organizationPrincipal, "roster-id", "Coverage", FHIRMediaTypes.FHIR_NDJSON, Optional.of(new OffsetDateTimeParam("2017-01-01T00:00:00Z")), "", FHIR_JSON);
+            resource.export(organizationPrincipal, "roster-id", "Coverage", FHIRMediaTypes.FHIR_NDJSON, "2017-01-01T00:00:00Z", "", FHIR_JSON);
         });
 
         Assertions.assertThrows(BadRequestException.class, () -> {
-            resource.export(organizationPrincipal, "roster-id", "Coverage", FHIRMediaTypes.FHIR_NDJSON, Optional.of(new OffsetDateTimeParam("2017-01-01T00:00:00Z")), " ", FHIR_JSON);
+            resource.export(organizationPrincipal, "roster-id", "Coverage", FHIRMediaTypes.FHIR_NDJSON, "2017-01-01T00:00:00Z", " ", FHIR_JSON);
         });
 
         Assertions.assertThrows(BadRequestException.class, () -> {
-            resource.export(organizationPrincipal, "roster-id", "Coverage", FHIRMediaTypes.FHIR_NDJSON, Optional.of(new OffsetDateTimeParam("2017-01-01T00:00:00Z")), "respond-async", "asdfasdf");
+            resource.export(organizationPrincipal, "roster-id", "Coverage", FHIRMediaTypes.FHIR_NDJSON,"2017-01-01T00:00:00Z", "respond-async", "asdfasdf");
         });
 
         Assertions.assertThrows(BadRequestException.class, () -> {
-            resource.export(organizationPrincipal, "roster-id", "Coverage", FHIRMediaTypes.FHIR_NDJSON, Optional.of(new OffsetDateTimeParam("2017-01-01T00:00:00Z")),"respond-async", "");
+            resource.export(organizationPrincipal, "roster-id", "Coverage", FHIRMediaTypes.FHIR_NDJSON, "2017-01-01T00:00:00Z","respond-async", "");
         });
 
         Assertions.assertThrows(BadRequestException.class, () -> {
-            resource.export(organizationPrincipal, "roster-id", "Coverage", FHIRMediaTypes.FHIR_NDJSON, Optional.of(new OffsetDateTimeParam("2017-01-01T00:00:00Z")), "respond-async", " ");
+            resource.export(organizationPrincipal, "roster-id", "Coverage", FHIRMediaTypes.FHIR_NDJSON, "2017-01-01T00:00:00Z", "respond-async", " ");
         });
 
     }
