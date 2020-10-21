@@ -8,9 +8,13 @@ import (
 
 func testPractitionerEndpoints(accessToken string) {
 	// POST /Practitioner/$validate
-	postPractitionerValidateTargeter := newPOSTPractitionerTargeter("/$validate", accessToken, nextParameters, 1)
+	postPractitionerValidateTargeter := newPOSTPractitionerTargeter("/$validate", accessToken, nextPartParams, 1)
 	// Higher numbers of requests cause timeouts
 	runTestWithTargeter(fmt.Sprintf("POST %s/Practitioner/$validate", apiURL), postPractitionerValidateTargeter, 5, 2)
+}
+
+func nextPartParams(fileNum *int) []byte {
+	return nextFile("../../src/main/resources/parameters/bundles/practitioners/practitioner-%v.json", fileNum)
 }
 
 func newPOSTPractitionerTargeter(operation, accessToken string, nextBody func(*int) []byte, fileNum int) vegeta.Targeter {
