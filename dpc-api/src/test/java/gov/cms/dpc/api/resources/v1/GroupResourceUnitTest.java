@@ -214,6 +214,36 @@ public class GroupResourceUnitTest {
             resource.export(organizationPrincipal, "roster-id", "Coverage", FHIRMediaTypes.FHIR_NDJSON, "2017-01-01T00:00:00Z", "respond-async", FHIR_JSON);
         });
 
+        Assertions.assertDoesNotThrow(() -> {
+            resource.export(organizationPrincipal, "roster-id", "Coverage", FHIRMediaTypes.FHIR_NDJSON, "2017-01-01T00:00:00Z", "respond-async", "application/fhir+json;q=1.0");
+        });
+
+        Assertions.assertDoesNotThrow(() -> {
+            resource.export(organizationPrincipal, "roster-id", "Coverage", FHIRMediaTypes.FHIR_NDJSON, "2017-01-01T00:00:00Z", "respond-async", "application/json+fhir");
+        });
+
+        Assertions.assertDoesNotThrow(() -> {
+            resource.export(organizationPrincipal, "roster-id", "Coverage", FHIRMediaTypes.FHIR_NDJSON, "2017-01-01T00:00:00Z", "respond-async", "application/json+fhir;q=0.9");
+        });
+
+        Assertions.assertDoesNotThrow(() -> {
+            resource.export(organizationPrincipal, "roster-id", "Coverage", FHIRMediaTypes.FHIR_NDJSON, "2017-01-01T00:00:00Z", "respond-async", "application/fhir+json;q=1.0, application/json+fhir;q=0.9");
+        });
+
+        Assertions.assertDoesNotThrow(() -> {
+            resource.export(organizationPrincipal, "roster-id", "Coverage", FHIRMediaTypes.FHIR_NDJSON, "2017-01-01T00:00:00Z", "respond-async", "application/fhir+json;q=1.0,application/json+fhir;q=0.9");
+        });
+
+
+        Assertions.assertDoesNotThrow(() -> {
+            resource.export(organizationPrincipal, "roster-id", "Coverage", FHIRMediaTypes.FHIR_NDJSON, "2017-01-01T00:00:00Z", "respond-async", "application/json+fhir;q=0.9, application/fhir+json;q=1.0");
+        });
+
+        Assertions.assertDoesNotThrow(() -> {
+            resource.export(organizationPrincipal, "roster-id", "Coverage", FHIRMediaTypes.FHIR_NDJSON, "2017-01-01T00:00:00Z", "respond-async", "application/json+fhir;q=0.9,application/fhir+json;q=1.0");
+        });
+
+
         Assertions.assertThrows(BadRequestException.class, () -> {
             resource.export(organizationPrincipal, "roster-id", "Coverage", FHIRMediaTypes.FHIR_NDJSON, "2017-01-01T00:00:00Z", null, FHIR_JSON);
         });
