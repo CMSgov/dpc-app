@@ -81,6 +81,7 @@ public class APIAuthHelpers {
             public void interceptRequest(IHttpRequest iHttpRequest) {
                 // Manually set these values, rather than pulling a dependency on dpc-common, where the constants are defined
                 iHttpRequest.addHeader("Prefer", "respond-async");
+                iHttpRequest.addHeader("Accept", "application/fhir+json");
             }
 
             @Override
