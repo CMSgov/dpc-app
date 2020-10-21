@@ -66,7 +66,7 @@ func (o *orgTargeter) genReqs() {
 	}()
 }
 
-// builtTarget is the function passed to the vegeta test runner. It expects a
+// buildTarget is the function passed to the vegeta test runner. It expects a
 // *vegeta.Target as an argument and a return error.
 func (o *orgTargeter) buildTarget(t *vegeta.Target) error {
 	t.Method = o.Method
