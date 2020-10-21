@@ -31,8 +31,20 @@ func testPatientEndpoints(accessToken string) {
 	// Higher numbers of requests cause timeouts
 	resps = runTestWithTargeter(fmt.Sprintf("POST %s/Patient/$submit", apiURL), postPatientSubmitTargeter, 5, 2)
 
-	// PUT /Patient/{id}
+	// GET /Patient/{id}
 	currentPatientID := patientIDs.Front()
+	getPatientTargeter := newGETPatientTargeter(func() string {
+		s, ok := currentPatientID.Value.(string)
+		if !ok {
+			cleanAndPanic(fmt.Errorf("not a valid string: %v", currentPatientID.Value))
+		}
+		currentPatientID = currentPatientID.Next()
+		return s
+	}, accessToken)
+	runTestWithTargeter(fmt.Sprintf("GET %s/Patient/{id}", apiURL), getPatientTargeter, 5, 2)
+
+	// PUT /Patient/{id}
+	currentPatientID = patientIDs.Front()
 	putPatientTargeter := newPUTPatientTargeter(func() string {
 		s, ok := currentPatientID.Value.(string)
 		if !ok {
@@ -82,6 +94,19 @@ func newPOSTPatientTargeter(operation, accessToken string, nextBody func(*int) [
 			"Accept":        {"application/fhir+json"},
 		}
 		t.Body = nextBody(&fileNum)
+
+		return nil
+	}
+}
+
+func newGETPatientTargeter(nextPatientID func() string, accessToken string) vegeta.Targeter {
+	return func(t *vegeta.Target) error {
+		t.Method = "GET"
+		t.URL = fmt.Sprintf("%s/Patient/%s", apiURL, nextPatientID())
+		t.Header = map[string][]string{
+			"Authorization": {fmt.Sprintf("Bearer %s", accessToken)},
+			"Accept":        {"application/fhir+json"},
+		}
 
 		return nil
 	}
