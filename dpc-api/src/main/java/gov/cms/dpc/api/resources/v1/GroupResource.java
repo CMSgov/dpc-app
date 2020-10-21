@@ -44,8 +44,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static gov.cms.dpc.api.APIHelpers.addOrganizationTag;
-import static gov.cms.dpc.fhir.FHIRMediaTypes.FHIR_JSON;
-import static gov.cms.dpc.fhir.FHIRMediaTypes.FHIR_NDJSON;
+import static gov.cms.dpc.fhir.FHIRMediaTypes.*;
 import static gov.cms.dpc.fhir.helpers.FHIRHelpers.handleMethodOutcome;
 
 
@@ -377,7 +376,7 @@ public class GroupResource extends AbstractGroupResource {
     private static void checkRequestHeaders(List<Pair<String, String>> headers) {
         headers.stream()
                 .peek(header -> {
-                    if (header.getRight() == null) {
+                    if (header.getRight() == null || header.getRight().isBlank()) {
                         throw new BadRequestException("The " + header.getLeft() + " header is required");
                     }
                 })
@@ -385,8 +384,13 @@ public class GroupResource extends AbstractGroupResource {
                     if (pair.getLeft().equals("Prefer") && !pair.getRight().equals("respond-async")) {
                         throw new BadRequestException("The 'Prefer' header must be 'respond-async'");
                     }
-                    if (pair.getLeft().equals("Accept") && !pair.getRight().equals(FHIR_JSON)) {
-                        throw new BadRequestException("The 'Accept' header must be " + FHIR_JSON);
+                    if (pair.getLeft().equals("Accept")) {
+                        String[] values = StringUtils.split(pair.getRight(), ",");
+                        for (String value : values) {
+                            if (!ACCEPT_FHIR_JSON_VALUES.contains(value.trim())) {
+                                throw new BadRequestException("The 'Accept' header must be " + FHIR_JSON);
+                            }
+                        }
                     }
                 });
     }

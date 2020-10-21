@@ -1,11 +1,17 @@
 package gov.cms.dpc.fhir;
 
 import javax.ws.rs.core.MediaType;
+import java.util.List;
 
 public class FHIRMediaTypes {
 
     public static final String FHIR_JSON = "application/fhir+json";
     public static final String FHIR_NDJSON = "application/fhir+ndjson";
+    public static final List<String> ACCEPT_FHIR_JSON_VALUES = List.of(
+            FHIR_JSON,
+            "application/fhir+json;q=1.0",
+            "application/json+fhir",
+            "application/json+fhir;q=0.9");
 
     private static final MediaType FHIR_JSON_MT = MediaType.valueOf(FHIR_JSON);
     private static final MediaType FHIR_NDJSON_MT = MediaType.valueOf(FHIR_NDJSON);
