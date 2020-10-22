@@ -27,7 +27,6 @@ import gov.cms.dpc.queue.models.JobQueueBatch;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.*;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
 import org.slf4j.Logger;
@@ -44,7 +43,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static gov.cms.dpc.api.APIHelpers.addOrganizationTag;
-import static gov.cms.dpc.fhir.FHIRMediaTypes.FHIR_JSON;
 import static gov.cms.dpc.fhir.FHIRMediaTypes.FHIR_NDJSON;
 import static gov.cms.dpc.fhir.helpers.FHIRHelpers.handleMethodOutcome;
 
@@ -78,7 +76,7 @@ public class GroupResource extends AbstractGroupResource {
     @ExceptionMetered
     @ApiOperation(value = "Create Attribution Group", notes = "FHIR endpoint to create an Attribution Group resource) associated to the provider listed in the in the Group characteristics.")
     @ApiImplicitParams(
-            @ApiImplicitParam(name = "X-Provenance", required = true, paramType = "header", type = "string", dataTypeClass = Provenance.class))
+            @ApiImplicitParam(name = "X-Provenance", required = true, paramType = "header", type="string",dataTypeClass = Provenance.class))
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "Successfully created Roster"),
             @ApiResponse(code = 200, message = "Roster already exists"),
@@ -86,7 +84,7 @@ public class GroupResource extends AbstractGroupResource {
     })
     @Override
     public Response createRoster(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
-                                 @ApiParam(hidden = true) @Valid @Profiled(profile = AttestationProfile.PROFILE_URI) @ProvenanceHeader Provenance rosterAttestation,
+                                 @ApiParam(hidden=true)  @Valid @Profiled(profile = AttestationProfile.PROFILE_URI) @ProvenanceHeader Provenance rosterAttestation,
                                  Group attributionRoster) {
         // Log attestation
         logAndVerifyAttestation(rosterAttestation, null, attributionRoster);
@@ -117,7 +115,7 @@ public class GroupResource extends AbstractGroupResource {
                                @NoHtml String providerNPI,
                                @ApiParam(value = "Patient ID")
                                @QueryParam(value = Group.SP_MEMBER)
-                               @NoHtml String patientID) {
+                                   @NoHtml String patientID) {
 
         final Map<String, List<String>> queryParams = new HashMap<>();
 
@@ -166,8 +164,8 @@ public class GroupResource extends AbstractGroupResource {
     @ApiOperation(value = "Update Attribution Group", notes = "Update specific Attribution Group." +
             "<p>Updates allow for adding or removing patients as members of an Attribution Group.")
     @ApiImplicitParams(
-            @ApiImplicitParam(name = "X-Provenance", value = "Provenance Resource attesting to Group attribution", required = true, paramType = "header", type = "string", dataTypeClass = Provenance.class)
-    )
+            @ApiImplicitParam(name = "X-Provenance", value = "Provenance Resource attesting to Group attribution",  required = true, paramType = "header", type="string", dataTypeClass = Provenance.class)
+     )
 
 
     @ApiResponses({
@@ -176,7 +174,7 @@ public class GroupResource extends AbstractGroupResource {
     })
     @Override
     public Group updateRoster(@ApiParam(value = "Attribution Group ID") @PathParam("rosterID") UUID rosterID,
-                              @ApiParam(hidden = true) @Valid @Profiled(profile = AttestationProfile.PROFILE_URI) @ProvenanceHeader Provenance rosterAttestation,
+                              @ApiParam(hidden=true)  @Valid @Profiled(profile = AttestationProfile.PROFILE_URI) @ProvenanceHeader Provenance rosterAttestation,
                               Group rosterUpdate) {
         logAndVerifyAttestation(rosterAttestation, rosterID, rosterUpdate);
         final MethodOutcome outcome = this.client
@@ -197,11 +195,11 @@ public class GroupResource extends AbstractGroupResource {
     @ExceptionMetered
     @ApiOperation(value = "Add Group Members (Patients)", notes = "Update specific Attribution Group by adding Patient members given in the provided resource.")
     @ApiImplicitParams(
-            @ApiImplicitParam(name = "X-Provenance", required = true, paramType = "header", type = "string", dataTypeClass = Provenance.class))
+            @ApiImplicitParam(name = "X-Provenance", required = true, paramType = "header", type="string", dataTypeClass = Provenance.class))
     @ApiResponses(@ApiResponse(code = 404, message = "Cannot find Roster with given ID"))
     @Override
     public Group addRosterMembers(@ApiParam(value = "Attribution roster ID") @PathParam("rosterID") UUID rosterID,
-                                  @ApiParam(hidden = true) @Valid @Profiled(profile = AttestationProfile.PROFILE_URI) @ProvenanceHeader Provenance rosterAttestation, @ApiParam Group groupUpdate) {
+                                  @ApiParam(hidden=true) @Valid @Profiled(profile = AttestationProfile.PROFILE_URI) @ProvenanceHeader Provenance rosterAttestation, @ApiParam Group groupUpdate) {
         logAndVerifyAttestation(rosterAttestation, rosterID, groupUpdate);
         return this.executeGroupOperation(rosterID, groupUpdate, "add");
     }
@@ -259,10 +257,8 @@ public class GroupResource extends AbstractGroupResource {
     @FHIRAsync
     @ApiOperation(value = "Begin Group export request", tags = {"Group", "Bulk Data"},
             notes = "FHIR export operation which initiates a bulk data export for the given Provider")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "Prefer", required = true, paramType = "header", type = "string", value = "respond-async", dataTypeClass = String.class),
-            @ApiImplicitParam(name = "Accept", required = true, paramType = "header", type = "string", value = FHIR_JSON, dataTypeClass = String.class)
-    })
+    @ApiImplicitParams(
+            @ApiImplicitParam(name = "Prefer", required = true, paramType = "header", type="string", value = "respond-async", dataTypeClass = String.class))
     @ApiResponses(
             @ApiResponse(code = 202, message = "Export request has started", responseHeaders = @ResponseHeader(name = "Content-Location", description = "URL to query job status", response = UUID.class))
     )
@@ -272,16 +268,15 @@ public class GroupResource extends AbstractGroupResource {
                            @PathParam("rosterID") @NoHtml String rosterID,
                            @ApiParam(value = "List of FHIR resources to export", allowableValues = "ExplanationOfBenefits, Coverage, Patient")
                            @QueryParam("_type") @NoHtml String resourceTypes,
-                           @ApiParam(value = "Output format of requested data", allowableValues = FHIR_NDJSON, defaultValue = FHIR_NDJSON)
+                           @ApiParam(value = "Output format of requested data", allowableValues = FHIR_NDJSON , defaultValue = FHIR_NDJSON)
                            @QueryParam("_outputFormat") @NoHtml String outputFormat,
                            @ApiParam(value = "Resources will be included in the response if their state has changed after the supplied time (e.g. if Resource.meta.lastUpdated is later than the supplied _since time).")
                            @QueryParam("_since") @NoHtml String since,
-                           @ApiParam(hidden = true) @HeaderParam("Prefer") @Valid String prefer,
-                           @ApiParam(hidden = true) @HeaderParam("Accept") @Valid String accept) {
+                           @ApiParam(hidden = true) @HeaderParam("Prefer")  @Valid String Prefer) {
         logger.info("Exporting data for provider: {} _since: {}", rosterID, since);
 
         // Check the parameters
-        checkExportRequest(outputFormat, List.of(Pair.of("Prefer", prefer), Pair.of("Accept", accept)));
+        checkExportRequest(outputFormat, Prefer);
 
         // Get the attributed patients
         final List<String> attributedPatients = fetchPatientMBIs(rosterID);
@@ -362,33 +357,18 @@ public class GroupResource extends AbstractGroupResource {
      *
      * @param outputFormat param to check
      */
-    private static void checkExportRequest(String outputFormat, List<Pair<String, String>> headers) {
-        checkOutputFormat(outputFormat);
-        checkRequestHeaders(headers);
-    }
-
-    private static void checkOutputFormat(String outputFormat) {
+    private static void checkExportRequest(String outputFormat, String headerPrefer) {
         // _outputFormat only supports FHIR_NDJSON
         if (StringUtils.isNotEmpty(outputFormat) && !FHIR_NDJSON.equals(outputFormat)) {
             throw new BadRequestException("'_outputFormat' query parameter must be 'application/fhir+ndjson'");
         }
-    }
+        if (headerPrefer==null || StringUtils.isEmpty(headerPrefer)){
+            throw new BadRequestException("The 'Prefer' header must be 'respond-async'");
+        }
+        if (StringUtils.isNotEmpty(headerPrefer) && !headerPrefer.equals("respond-async")) {
+            throw new BadRequestException("The 'Prefer' header must be 'respond-async'");
+        }
 
-    private static void checkRequestHeaders(List<Pair<String, String>> headers) {
-        headers.stream()
-                .peek(header -> {
-                    if (header.getRight() == null) {
-                        throw new BadRequestException("The " + header.getLeft() + " header is required");
-                    }
-                })
-                .forEach(pair -> {
-                    if (pair.getLeft().equals("Prefer") && !pair.getRight().equals("respond-async")) {
-                        throw new BadRequestException("The 'Prefer' header must be 'respond-async'");
-                    }
-                    if (pair.getLeft().equals("Accept") && !pair.getRight().equals(FHIR_JSON)) {
-                        throw new BadRequestException("The 'Accept' header must be " + FHIR_JSON);
-                    }
-                });
     }
 
     private List<String> fetchPatientMBIs(String groupID) {
@@ -477,7 +457,7 @@ public class GroupResource extends AbstractGroupResource {
             if (!provenancePractitionerNPI.getValue().equals(groupPractitionerNPI)) {
                 throw new WebApplicationException("Provenance header's provider does not match group provider", HttpStatus.SC_UNPROCESSABLE_ENTITY);
             }
-        } catch (ResourceNotFoundException e) {
+        } catch(ResourceNotFoundException e) {
             throw new WebApplicationException("Could not find provider defined in provenance header", HttpStatus.SC_UNPROCESSABLE_ENTITY);
         }
 
