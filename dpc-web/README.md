@@ -1,7 +1,7 @@
 # README
 This is the *draft* version of the Data Point of Care (DPC) website. The website has a sign-up section allowing providers to volunteer for beta-testing the DPC application. The sign-up section, and whatever functionality and specialized content that we provide signed up beta participants will require authentication to view. In addition, there is an administrator portal to manage the registration and communications with the participants.
 
-There all static public pages are now hosted on a separate static site. This may result in broken links when run locally.
+All of the static public pages are now hosted on a separate static site. This may result in broken links when run locally.
 
 ## Installation of Ruby
 This is a Ruby on Rails driven website, so you'll need Ruby and a few "gems" to get up and running. Installing Ruby and Rails, as well as PostGresql - the database on a Windows environment is difficult, and beyond the scope of this document - sorry, but you'll need a third party package to install Ruby, such as [Ruby Installer](https://rubyinstaller.org/). **Disclaimer**: the previous sentence was not an endorsement.
@@ -114,7 +114,7 @@ All static public pages are hosted in a separate [jekyll site](https://github.co
 You will need to add a `STATIC_SITE_URL` variable to your `.env` file:
 
 ```
-STATIC_SITE_URL=http://localhost:xxxx
+STATIC_SITE_URL=http://localhost:4000
 ```
 
 #### Background job processing
