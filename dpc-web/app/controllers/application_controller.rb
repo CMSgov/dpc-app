@@ -56,10 +56,6 @@ class ApplicationController < ActionController::Base
     params.require(:id)
   end
 
-  def static_site_url
-    static_site_url = ENV['STATIC_SITE_URL']
-  end
-
   def prod_sbx?
     ENV['ENV'] == 'prod-sbx'
   end
