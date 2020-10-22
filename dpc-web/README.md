@@ -114,7 +114,7 @@ All static public pages are hosted in a separate [jekyll site](https://github.co
 You will need to add a `STATIC_SITE_URL` variable to your `.env` file:
 
 ```
-STATIC_SITE_URL=http://localhost:4000
+STATIC_SITE_URL=http://localhost:4001
 ```
 
 #### Background job processing
