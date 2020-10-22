@@ -21,7 +21,7 @@
       var data = {
         "iss": clientToken,
         "sub": clientToken,
-        "aud": "https://" + env + "dpc.cms.gov/api/v1/Token/auth",
+        "aud": "https://" + env + ".dpc.cms.gov/api/v1/Token/auth",
         "exp": Math.round(new Date().getTime() / 1000) + 300,
         "iat": Math.round(Date.now()),
         "jti": uuid,
@@ -330,8 +330,8 @@
             </div>
         </div>
         <select name="env-select" id="env" style="width:800px;">
-            <option value="sandbox.">Sandbox</option>
-            <option value="">Production</option>
+            <option value="sandbox">Sandbox</option>
+            <option value="prod">Production</option>
         </select>
       </div>
 
