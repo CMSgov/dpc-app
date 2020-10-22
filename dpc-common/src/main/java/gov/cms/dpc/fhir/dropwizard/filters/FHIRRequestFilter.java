@@ -30,7 +30,9 @@ public class FHIRRequestFilter implements ContainerRequestFilter {
     private void checkAccepts(ContainerRequestContext requestContext) {
         final List<MediaType> contentHeader = requestContext.getAcceptableMediaTypes();
 
-        if (contentHeader == null || !shortCircuitBooleanCheck(contentHeader, FHIRMediaTypes::isFHIRContent)) {
+        if ((requestContext.getUriInfo().getPath().contains("$export") &&
+                requestContext.getHeaderString(HttpHeaders.ACCEPT) == null) ||
+                !shortCircuitBooleanCheck(contentHeader, FHIRMediaTypes::isFHIRContent)) {
             throw new WebApplicationException("`Accept:` header must specify valid FHIR content type", Response.SC_UNSUPPORTED_MEDIA_TYPE);
         }
     }
