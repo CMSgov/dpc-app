@@ -25,6 +25,9 @@ Bundler.require(*Rails.groups)
 
 module DpcWebsite
   class Application < Rails::Application
+    # Check for STATIC_SITE_URL environment variable
+    abort('STATIC_SITE_URL required') if ENV['STATIC_SITE_URL'].blank?
+
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 5.2
 
