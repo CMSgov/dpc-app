@@ -231,7 +231,7 @@ public class SmokeTest extends AbstractJavaSamplerClient {
             throw new IllegalStateException("Somehow, could not monitor export response", e);
         }
     }
-
+    
     private  String getTestOrganizationId(JavaSamplerContext javaSamplerContext){
         String orgIdsString = javaSamplerContext.getParameter("organization-ids");
         if(orgIdsString == null){

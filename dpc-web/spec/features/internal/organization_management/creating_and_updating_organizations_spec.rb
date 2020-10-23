@@ -173,6 +173,42 @@ RSpec.feature 'creating and updating organizations' do
     expect(page).to have_content('API access disabled')
   end
 
+  scenario 'adding and removing tags from an organization' do
+    org = create(:organization)
+
+    cat_tag = create(:tag, name: 'Cat')
+    create(:tag, name: 'Dog')
+
+    visit internal_organization_path(org)
+
+    within('[data-test="org-tags"]') do
+      expect(page).to have_content('No tags')
+    end
+
+    select 'Cat', from: 'tagging_tag_id'
+    find('[data-test="add-tag-submit"]').click
+
+    within('[data-test="org-tags"]') do
+      expect(page).to have_content('Cat')
+    end
+
+    select 'Dog', from: 'tagging_tag_id'
+    find('[data-test="add-tag-submit"]').click
+
+    within('[data-test="org-tags"]') do
+      expect(page).to have_content('Cat')
+      expect(page).to have_content('Dog')
+    end
+
+    tagging = org.taggings.find_by(tag_id: cat_tag.id)
+    find("[data-test=\"delete-tag-#{tagging.id}\"]").click
+
+    within('[data-test="org-tags"]') do
+      expect(page).not_to have_content('Cat')
+      expect(page).to have_content('Dog')
+    end
+  end
+
   def stub_sandbox_notification_mailer(org, users=[])
     mailer = double(UserMailer)
     users.each do |user|
