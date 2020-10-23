@@ -5,7 +5,7 @@
   <% if user_signed_in? %>
     <%= link_to "#{image_tag("top-nav-heart.svg", alt: "Heart logo")} Data at the Point of Care".html_safe, root_path, class: "site-logo" %>
   <% else %>
-    <%= link_to "#{image_tag("top-nav-heart.svg", alt: "Heart logo")} Data at the Point of Care".html_safe, home, class: "site-logo" %>
+    <%= link_to "#{image_tag("top-nav-heart.svg", alt: "Heart logo")} Data at the Point of Care".html_safe, home_path, class: "site-logo" %>
   <% end %>
 
 
@@ -24,7 +24,7 @@ aria-controls="topnav-wrap" aria-label="Close menu">
     </button>
     <ul class="topnav">
       <li class="topnav__item">
-        <%= link_to "Home", home, class: "topnav__link"  %>
+        <%= link_to "Home", home_path, class: "topnav__link"  %>
       </li>
 
       <li class="topnav__item">
