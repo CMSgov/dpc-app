@@ -271,9 +271,9 @@ public class GroupResource extends AbstractGroupResource {
                            @ApiParam(value = "Output format of requested data", allowableValues = FHIR_NDJSON , defaultValue = FHIR_NDJSON)
                            @QueryParam("_outputFormat") @NoHtml String outputFormat,
                            @ApiParam(value = "Resources will be included in the response if their state has changed after the supplied time (e.g. if Resource.meta.lastUpdated is later than the supplied _since time).")
-                           @QueryParam("_since") @NoHtml String since,
+                           @QueryParam("_since") @NoHtml String sinceParam,
                            @ApiParam(hidden = true) @HeaderParam("Prefer")  @Valid String Prefer) {
-        logger.info("Exporting data for provider: {} _since: {}", rosterID, since);
+        logger.info("Exporting data for provider: {} _since: {}", rosterID, sinceParam);
 
         // Check the parameters
         checkExportRequest(outputFormat, Prefer);

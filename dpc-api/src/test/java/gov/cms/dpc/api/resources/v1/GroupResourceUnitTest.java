@@ -3,11 +3,14 @@ package gov.cms.dpc.api.resources.v1;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.ICreateTyped;
+import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import ca.uhn.fhir.rest.gclient.IReadExecutable;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
+import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
+import gov.cms.dpc.queue.IJobQueue;
 import org.hl7.fhir.dstu3.model.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,6 +20,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import java.time.OffsetDateTime;
@@ -25,6 +29,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
 
+import static gov.cms.dpc.api.resources.v1.GroupResource.SYNTHETIC_BENE_ID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class GroupResourceUnitTest {
@@ -203,17 +208,17 @@ public class GroupResourceUnitTest {
 
         //Past date with Z offset
         String since = "2020-05-26T16:43:01.780Z";
-        Response response = resource.export(organizationPrincipal, groupId, null, null, since, "respond-async", FHIR_JSON);
+        Response response = resource.export(organizationPrincipal, groupId, null, null, since, "respond-async");
         assertEquals(Response.Status.ACCEPTED.getStatusCode(), response.getStatus(), "Expected ACCEPTED response code");
 
         //Past date with +10:00 offset
         since = "2020-05-26T16:43:01.780+10:00";
-        response = resource.export(organizationPrincipal, groupId, null, null,since, "respond-async", FHIR_JSON);
+        response = resource.export(organizationPrincipal, groupId, null, null,since, "respond-async");
         assertEquals(Response.Status.ACCEPTED.getStatusCode(), response.getStatus(), "Expected ACCEPTED response code");
 
         //A few seconds ago using -04:00 offset
         since = OffsetDateTime.now(ZoneId.of("America/Puerto_Rico")).minusSeconds(5).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-        response = resource.export(organizationPrincipal, groupId, null, null,since, "respond-async", FHIR_JSON);
+        response = resource.export(organizationPrincipal, groupId, null, null,since, "respond-async");
         assertEquals(Response.Status.ACCEPTED.getStatusCode(), response.getStatus(), "Expected ACCEPTED response code");
     }
 
@@ -253,7 +258,7 @@ public class GroupResourceUnitTest {
         //Test a few seconds into the future
         WebApplicationException exception = Assertions.assertThrows(BadRequestException.class, () ->{
                 String since =  OffsetDateTime.now(ZoneId.of("America/Puerto_Rico")).plusSeconds(10).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-                resource.export(organizationPrincipal, groupId, null, null,since, "respond-async", FHIR_JSON);
+                resource.export(organizationPrincipal, groupId, null, null,since, "respond-async");
             });
 
         assertEquals("'_since' query parameter cannot be a future date", exception.getMessage());
@@ -261,7 +266,7 @@ public class GroupResourceUnitTest {
         //Test a few days into the future
         exception = Assertions.assertThrows(BadRequestException.class, () -> {
                     final String since =  OffsetDateTime.now().plusDays(2).toString();
-                    resource.export(organizationPrincipal, groupId, null, null, since, "respond-async", FHIR_JSON);
+                    resource.export(organizationPrincipal, groupId, null, null, since, "respond-async");
                 });
 
         assertEquals("'_since' query parameter cannot be a future date", exception.getMessage());
@@ -269,7 +274,7 @@ public class GroupResourceUnitTest {
         //Test bad format
         exception = Assertions.assertThrows(WebApplicationException.class, () -> {
             final String since = "2020-05-2X616:43:01.780+10:00";
-            resource.export(organizationPrincipal, groupId, null, null, since, "respond-async", FHIR_JSON);
+            resource.export(organizationPrincipal, groupId, null, null, since, "respond-async");
         });
 
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), exception.getResponse().getStatus());
