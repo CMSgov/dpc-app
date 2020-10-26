@@ -1,3 +1,4 @@
+// Package dpc contains all test methods, the api test runner, and common functionalities
 package dpc
 
 import (
