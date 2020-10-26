@@ -1,3 +1,4 @@
+// Package targeter package is used to create a generic Vegeta Targeter
 package targeter
 
 import (
@@ -62,7 +63,7 @@ func (dt *Targeter) Run(duration, frequency int) [][]byte {
 	d := time.Second * time.Duration(duration)
 	r := vegeta.Rate{Freq: frequency, Per: time.Second}
 
-	attacker := vegeta.NewAttacker()
+	attacker := vegeta.NewAttacker(vegeta.Timeout(60 * time.Second))
 	var metrics vegeta.Metrics
 	var respBodies [][]byte
 	for results := range attacker.Attack(dt.buildTarget, r, d, fmt.Sprintf("%dps:", r.Freq)) {
