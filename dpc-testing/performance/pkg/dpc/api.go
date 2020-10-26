@@ -134,15 +134,6 @@ func (api *API) DeleteOrg(orgID string) {
 
 }
 
-func (api *API) generateKeyBodies(n int, fn func() (string, *rsa.PrivateKey, string)) [][]byte {
-	var bodies [][]byte
-	for i := 0; i < n; i++ {
-		pubKeyStr, _, signature := fn()
-		bodies = append(bodies, []byte(fmt.Sprintf("{ \"key\": \"%s\", \"signature\": \"%s\"}", pubKeyStr, signature)))
-	}
-	return bodies
-}
-
 func (api *API) SetupOrgAuth(orgID string) (string, string, *rsa.PrivateKey, []byte) {
 	pubKeyStr, privateKey, signature := api.GenerateKeyPairAndSignature()
 	keyID := api.UploadKey(pubKeyStr, signature, orgID)
