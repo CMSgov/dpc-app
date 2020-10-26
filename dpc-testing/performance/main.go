@@ -36,7 +36,9 @@ func main() {
 	testTokenEndpoints(accessToken, privateKey, keyID, clientToken)
 
 	accessToken = refreshAccessToken(privateKey, keyID, clientToken)
-	// testPatientEndpoints(accessToken)
+	testPatientEndpoints(accessToken)
+
+	accessToken = refreshAccessToken(privateKey, keyID, clientToken)
 	testPractitionerEndpoints(accessToken)
 
 	cleanUp(orgID)
