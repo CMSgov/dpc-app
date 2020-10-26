@@ -134,11 +134,11 @@ func (api *API) DeleteOrg(orgID string) {
 
 }
 
-func (api *API) SetupOrgAuth(orgID string) (string, string, *rsa.PrivateKey, []byte) {
+func (api *API) SetupOrgAuth(orgID string) (string, string, *rsa.PrivateKey) {
 	pubKeyStr, privateKey, signature := api.GenerateKeyPairAndSignature()
 	keyID := api.UploadKey(pubKeyStr, signature, orgID)
 	clientToken := api.GetClientToken(orgID)
 	accessToken := api.RefreshAccessToken(privateKey, keyID, clientToken)
 
-	return accessToken, keyID, privateKey, clientToken
+	return accessToken, keyID, privateKey
 }
