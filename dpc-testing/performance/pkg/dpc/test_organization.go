@@ -17,7 +17,7 @@ func (api *API) RunOrgTests() {
 	}).Run(1, 1)
 
 	orgID := unmarshalIDs(resps)[0]
-	accessToken, _, _, _ := api.SetupOrgAuth(orgID)
+	auth := api.SetupOrgAuth(orgID)
 
 	// GET
 	// ids := []string{resource.ID}
@@ -25,7 +25,7 @@ func (api *API) RunOrgTests() {
 		Method:      "GET",
 		BaseURL:     api.URL,
 		Endpoint:    ENDPOINT,
-		AccessToken: accessToken,
+		AccessToken: auth.accessToken,
 		ID:          orgID,
 	}).Run(5, 2)
 
@@ -35,7 +35,7 @@ func (api *API) RunOrgTests() {
 		BaseURL:     api.URL,
 		Endpoint:    ENDPOINT,
 		ID:          orgID,
-		AccessToken: accessToken,
+		AccessToken: auth.accessToken,
 		Bodies:      readBodies("../../src/main/resources/organizations/organization-*.json"),
 	}).Run(5, 2)
 

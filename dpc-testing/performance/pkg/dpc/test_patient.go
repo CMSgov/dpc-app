@@ -4,16 +4,23 @@ import (
 	"github.com/CMSgov/dpc-app/dpc-testing/performance/pkg/dpc/targeter"
 )
 
-func (api *API) RunPatientTests(accessToken string) {
+func (api *API) RunPatientTests() {
 	const ENDPOINT = "Patient"
+
+	// Create organization (and delete at the end) and setup accesstoken
+	auth := api.SetupOrgAuth()
+	defer api.DeleteOrg(auth.orgID)
+
+	bundleBodies := readBodies("../../src/main/resources/parameters/bundles/patients/patient-*.json")
+	bodies := readBodies("../../src/main/resources/patients/patient-*.json")
 
 	// POST /Patient/$validate
 	targeter.New(targeter.Config{
 		Method:      "POST",
 		BaseURL:     api.URL,
 		Endpoint:    ENDPOINT + "/$validate",
-		AccessToken: accessToken,
-		Bodies:      readBodies("../../src/main/resources/parameters/bundles/patients/patient-*.json"),
+		AccessToken: auth.accessToken,
+		Bodies:      bundleBodies,
 	}).Run(5, 2)
 
 	// POST /Patient
@@ -21,8 +28,8 @@ func (api *API) RunPatientTests(accessToken string) {
 		Method:      "POST",
 		BaseURL:     api.URL,
 		Endpoint:    ENDPOINT,
-		AccessToken: accessToken,
-		Bodies:      readBodies("../../src/main/resources/patients/patient-*.json"),
+		AccessToken: auth.accessToken,
+		Bodies:      bodies,
 	}).Run(5, 2)
 
 	// Retrieve patient IDs which are required by the remaining tests
@@ -33,8 +40,8 @@ func (api *API) RunPatientTests(accessToken string) {
 		Method:      "POST",
 		BaseURL:     api.URL,
 		Endpoint:    ENDPOINT + "/$submit",
-		AccessToken: accessToken,
-		Bodies:      readBodies("../../src/main/resources/parameters/bundles/patients/patient-*.json"),
+		AccessToken: auth.accessToken,
+		Bodies:      bundleBodies,
 	}).Run(5, 2)
 
 	// PUT /Patient/{id}
@@ -42,9 +49,9 @@ func (api *API) RunPatientTests(accessToken string) {
 		Method:      "PUT",
 		BaseURL:     api.URL,
 		Endpoint:    ENDPOINT,
-		AccessToken: accessToken,
+		AccessToken: auth.accessToken,
 		IDs:         patientIDs,
-		Bodies:      readBodies("../../src/main/resources/patients/patient-*.json"),
+		Bodies:      bodies,
 	}).Run(5, 2)
 
 	// DELETE /Patient/{id}
@@ -52,7 +59,7 @@ func (api *API) RunPatientTests(accessToken string) {
 		Method:      "DELETE",
 		BaseURL:     api.URL,
 		Endpoint:    ENDPOINT,
-		AccessToken: accessToken,
+		AccessToken: auth.accessToken,
 		IDs:         patientIDs,
 	}).Run(5, 2)
 }

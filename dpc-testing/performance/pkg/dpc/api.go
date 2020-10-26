@@ -134,11 +134,29 @@ func (api *API) DeleteOrg(orgID string) {
 
 }
 
-func (api *API) SetupOrgAuth(orgID string) (string, string, *rsa.PrivateKey) {
+type orgAuth struct {
+	orgID       string
+	accessToken string
+	keyID       string
+	privateKey  *rsa.PrivateKey
+}
+
+func (api *API) SetupOrgAuth(orgIDs ...string) orgAuth {
+	var orgID string
+	if len(orgIDs) > 0 {
+		orgID = orgIDs[0]
+	} else {
+		orgID = api.CreateOrg()
+	}
 	pubKeyStr, privateKey, signature := api.GenerateKeyPairAndSignature()
 	keyID := api.UploadKey(pubKeyStr, signature, orgID)
 	clientToken := api.GetClientToken(orgID)
 	accessToken := api.RefreshAccessToken(privateKey, keyID, clientToken)
 
-	return accessToken, keyID, privateKey
+	return orgAuth{
+		orgID:       orgID,
+		accessToken: accessToken,
+		keyID:       keyID,
+		privateKey:  privateKey,
+	}
 }

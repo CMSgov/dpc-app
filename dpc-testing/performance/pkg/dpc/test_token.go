@@ -1,22 +1,25 @@
 package dpc
 
 import (
-	"crypto/rsa"
 	"net/url"
 
 	"github.com/CMSgov/dpc-app/dpc-testing/performance/pkg/dpc/targeter"
 	dpcclient "github.com/CMSgov/dpc-app/dpcclient/lib"
 )
 
-func (api *API) RunTokenTests(accessToken, keyID string, privateKey *rsa.PrivateKey, clientToken []byte) {
+func (api *API) RunTokenTests() {
 	const ENDPOINT = "Token"
+
+	// Create organization (and delete at the end) and setup accesstoken
+	auth := api.SetupOrgAuth()
+	defer api.DeleteOrg(auth.orgID)
 
 	// POST /Token
 	resps := targeter.New(targeter.Config{
 		Method:      "POST",
 		BaseURL:     api.URL,
 		Endpoint:    ENDPOINT,
-		AccessToken: accessToken,
+		AccessToken: auth.accessToken,
 		Bodies:      generateKeyBodies(25, api.GenerateKeyPairAndSignature),
 		Headers:     Headers(JSON, UNSET),
 	}).Run(5, 5)
@@ -27,7 +30,7 @@ func (api *API) RunTokenTests(accessToken, keyID string, privateKey *rsa.Private
 	// Generate an auth token for each client token
 	var authTokens [][]byte
 	for _, ct := range clientTokens {
-		authToken, err := dpcclient.GenerateAuthToken(privateKey, keyID, ct, api.URL)
+		authToken, err := dpcclient.GenerateAuthToken(auth.privateKey, auth.keyID, ct, api.URL)
 		if err != nil {
 			cleanAndPanic(err)
 		}
@@ -68,7 +71,7 @@ func (api *API) RunTokenTests(accessToken, keyID string, privateKey *rsa.Private
 		Method:      "DELETE",
 		BaseURL:     api.URL,
 		Endpoint:    ENDPOINT,
-		AccessToken: accessToken,
+		AccessToken: auth.accessToken,
 		IDs:         clientTokenIDs,
 		Headers:     Headers(UNSET, UNSET),
 	}).Run(5, 5)
