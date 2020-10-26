@@ -1,0 +1,63 @@
+package dpc
+
+import "github.com/CMSgov/dpc-app/dpc-testing/performance/pkg/dpc/targeter"
+
+func (api *API) RunPractitionerTests() {
+	const ENDPOINT = "Practitioner"
+
+	// Create organization (and delete at the end) and setup accesstoken
+	auth := api.SetupOrgAuth()
+	defer api.DeleteOrg(auth.orgID)
+
+	bundleBodies := readBodies("../../src/main/resources/parameters/bundles/practitioners/practitioner-*.json")
+	bodies := readBodies("../../src/main/resources/practitioners/practitioner-*.json")
+
+	// POST /Practitioner/$validate
+	targeter.New(targeter.Config{
+		Method:      "POST",
+		BaseURL:     api.URL,
+		Endpoint:    ENDPOINT + "/$validate",
+		AccessToken: auth.accessToken,
+		Bodies:      bundleBodies,
+	}).Run(5, 2)
+
+	// POST /Practitioner
+	resps := targeter.New(targeter.Config{
+		Method:      "POST",
+		BaseURL:     api.URL,
+		Endpoint:    ENDPOINT,
+		AccessToken: auth.accessToken,
+		Bodies:      bodies,
+	}).Run(5, 2)
+
+	// Retrieve patient IDs which are required by the remaining tests
+	pracIDs := unmarshalIDs(resps)
+
+	// POST /Practitioner/$submit
+	targeter.New(targeter.Config{
+		Method:      "POST",
+		BaseURL:     api.URL,
+		Endpoint:    ENDPOINT + "/$submit",
+		AccessToken: auth.accessToken,
+		Bodies:      bundleBodies,
+	}).Run(5, 2)
+
+	// PUT /Practitioner/{id}
+	targeter.New(targeter.Config{
+		Method:      "PUT",
+		BaseURL:     api.URL,
+		Endpoint:    ENDPOINT,
+		AccessToken: auth.accessToken,
+		IDs:         pracIDs,
+		Bodies:      bodies,
+	}).Run(5, 2)
+
+	// DELETE /Practitioner/{id}
+	targeter.New(targeter.Config{
+		Method:      "DELETE",
+		BaseURL:     api.URL,
+		Endpoint:    ENDPOINT,
+		AccessToken: auth.accessToken,
+		IDs:         pracIDs,
+	}).Run(5, 2)
+}
