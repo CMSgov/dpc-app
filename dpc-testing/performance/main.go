@@ -17,15 +17,11 @@ func main() {
 	dpc.CreateDirs()
 	defer dpc.DeleteDirs()
 
-	orgID := api.CreateOrg()
-	defer api.DeleteOrg(orgID)
-
-	accessToken, keyID, privateKey, clientToken := api.SetupOrgAuth(orgID)
-
 	// Run Perfomance test files
 	api.RunMetadataTests()
-	api.RunKeyTests(accessToken)
-	api.RunTokenTests(accessToken, keyID, privateKey, clientToken)
-	api.RunPatientTests(accessToken)
+	api.RunKeyTests()
+	api.RunTokenTests()
+	api.RunPatientTests()
+	api.RunPractitionerTests()
 	api.RunOrgTests()
 }
