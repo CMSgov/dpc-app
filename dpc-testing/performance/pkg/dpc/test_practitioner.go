@@ -1,6 +1,8 @@
 package dpc
 
-import "github.com/CMSgov/dpc-app/dpc-testing/performance/pkg/dpc/targeter"
+import (
+	"github.com/CMSgov/dpc-app/dpc-testing/performance/pkg/dpc/targeter"
+)
 
 func (api *API) RunPractitionerTests() {
 	const ENDPOINT = "Practitioner"
