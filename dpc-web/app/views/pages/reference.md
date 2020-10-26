@@ -1817,3 +1817,50 @@ To obtain the exported explanation of benefit data, a GET request is made to the
 
 <a class="guide_top_link" href="#export-data">Back to Start of Section</a><br />
 <a class="guide_top_link" href="#">Back to Top of Page</a>
+
+# Postman Collection
+
+This collection contains example requests to public endpoints for the DPC API. To use this collection, you must have the Postman App downloaded onto your computer. Next, please obtain the prerequisites listed below and refer to the DPC User Guide for additional instructions. You will need these to successfully update the required values in your local Postman sandbox environment to make requests.
+
+### Prerequisites:
+- Download the [Postman App](https://www.postman.com/downloads/)
+- A registered client token
+- Your private key
+- Your public key ID
+
+1. Please download the DPC Postman collection found in the left sidebar. This will include the collection of requests, the sandbox environment, and global variables to be imported into your Postman App.
+2. Select the environment (top right): Data at the Point of Care Sandbox
+3. Please fill in the following values:
+    - client_token: Your [client token](#step-two-client-tokens) is generated through the DPC portal. Be sure to save a copy of your token in a safe place.
+    - PRIVATE_KEY: Paste the contents of your private key in the `PRIVATE_KEY` field of your local Postman sandbox environment. Do not share your private key otherwise. If you do not already have your public and private keys, please [generate your public/private key pair](#step-three-public-keys) through the DPC portal.
+    - key-id: This is the system id of your public key, which is returned to you when the public key is uploaded to the DPC portal. You need this to generate a JWT, which will be exchanged for an access token.
+
+With these 3 values in place, the JWT and a fresh access token are automatically generated for you before each request in this Postman collection to prevent you from having to manually refresh the access token every 5 minutes while using the collection. You may occasionally  receive a 401 error message regarding invalid credentials. If this happens, please try your request a second time to fix the error.
+
+Additional instructions and details can be found within the description of each request in the Postman collection. These can be viewed by clicking the drop-down arrow next to each request title.
+
+## Patient/$everything
+
+Patient/<span style="color: #046B99;">{id}</span>/$everything is an endpoint that allows users to retrieve all resources about a Patient using their Medicare Beneficiary Identifier (MBI), represented as {id} in the request. Included in the resources will be the Patient, Coverage, and ExplanationOfBenefit resources for one patient’s historical data from the last seven years, combined into a Bundle. It is a synchronous download, so it differs from the Group $export operation in that it does not create a job that needs to be monitored or data files to download. The response body will contain the Bundle.
+
+The request requires an `X-Provenance` header for attestation ([see example](example-attestation-for-x-provenance-header)).
+
+Learn more about the HL7 FHIR Specification for:
+
+[Operation Patient Everything  (Release v4)](http://hl7.org/fhir/R4/operation-patient-everything.html)
+
+[Operation Patient Everything  (Release v3)](http://hl7.org/fhir/STU3/operation-patient-everything.html)
+
+#### Request:
+
+<pre><code>GET /api/v1/Patient/<span style="color: #046B99;">{id}</span>/$everything</code></pre>
+
+#### cURL request:
+
+<pre><code>curl -v https://sandbox.dpc.cms.gov/api/v1/Patient/<span style="color: #046B99;">{id}</span>/$everything
+     -H 'Authorization: Bearer <span style="color: #046B99;">{access_token}</span>' \
+     -H 'Accept: application/fhir+json' \
+     -H 'X-Provenance: <span style="color: #046B99;">{FHIR Provenance resource}</span></code></pre>
+
+<a class="guide_top_link" href="#postman-collection">Back to Start of Section</a><br />
+<a class="guide_top_link" href="#">Back to Top of Page</a>
