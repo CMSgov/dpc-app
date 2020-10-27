@@ -1835,7 +1835,7 @@ This collection contains example requests to public endpoints for the DPC API. T
     - PRIVATE_KEY: Paste the contents of your private key in the `PRIVATE_KEY` field of your local Postman sandbox environment. Do not share your private key otherwise. If you do not already have your public and private keys, please [generate your public/private key pair](#step-three-public-keys) through the DPC portal.
     - key-id: This is the system id of your public key, which is returned to you when the public key is uploaded to the DPC portal. You need this to generate a JWT, which will be exchanged for an access token.
 
-With these 3 values in place, the JWT and a fresh access token are automatically generated for you before each request in this Postman collection to prevent you from having to manually refresh the access token every 5 minutes while using the collection. You may occasionally  receive a 401 error message regarding invalid credentials. If this happens, please try your request a second time to fix the error.
+With these 3 values in place, the JWT and a fresh access token are automatically generated for you before each request in this Postman collection to prevent you from having to manually refresh the access token every 5 minutes while using the collection. You may occasionally  receive a 401 error message regarding invalid credentials. If this happens, please try your request a second time.
 
 Additional instructions and details can be found within the description of each request in the Postman collection. These can be viewed by clicking the drop-down arrow next to each request title.
 
