@@ -5,10 +5,10 @@ import (
 )
 
 func (api *API) RunPatientTests() {
-	const ENDPOINT = "Patient"
+	const endpoint = "Patient"
 
 	// Create organization (and delete at the end) and setup accesstoken
-	auth := api.SetupOrgAuth()
+	auth := api.SetUpOrgAuth()
 	defer api.DeleteOrg(auth.orgID)
 
 	bundleBodies := readBodies("../../src/main/resources/parameters/bundles/patients/patient-*.json")
@@ -18,7 +18,7 @@ func (api *API) RunPatientTests() {
 	targeter.New(targeter.Config{
 		Method:      "POST",
 		BaseURL:     api.URL,
-		Endpoint:    ENDPOINT + "/$validate",
+		Endpoint:    endpoint + "/$validate",
 		AccessToken: auth.accessToken,
 		Bodies:      bundleBodies,
 	}).Run(5, 2)
@@ -27,7 +27,7 @@ func (api *API) RunPatientTests() {
 	resps := targeter.New(targeter.Config{
 		Method:      "POST",
 		BaseURL:     api.URL,
-		Endpoint:    ENDPOINT,
+		Endpoint:    endpoint,
 		AccessToken: auth.accessToken,
 		Bodies:      bodies,
 	}).Run(5, 2)
@@ -39,7 +39,7 @@ func (api *API) RunPatientTests() {
 	targeter.New(targeter.Config{
 		Method:      "POST",
 		BaseURL:     api.URL,
-		Endpoint:    ENDPOINT + "/$submit",
+		Endpoint:    endpoint + "/$submit",
 		AccessToken: auth.accessToken,
 		Bodies:      bundleBodies,
 	}).Run(5, 2)
@@ -48,7 +48,7 @@ func (api *API) RunPatientTests() {
 	targeter.New(targeter.Config{
 		Method:      "PUT",
 		BaseURL:     api.URL,
-		Endpoint:    ENDPOINT,
+		Endpoint:    endpoint,
 		AccessToken: auth.accessToken,
 		IDs:         patientIDs,
 		Bodies:      bodies,
@@ -58,7 +58,7 @@ func (api *API) RunPatientTests() {
 	targeter.New(targeter.Config{
 		Method:      "DELETE",
 		BaseURL:     api.URL,
-		Endpoint:    ENDPOINT,
+		Endpoint:    endpoint,
 		AccessToken: auth.accessToken,
 		IDs:         patientIDs,
 	}).Run(5, 2)

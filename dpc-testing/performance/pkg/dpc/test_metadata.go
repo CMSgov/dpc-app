@@ -5,11 +5,11 @@ import (
 )
 
 func (api *API) RunMetadataTests() {
-	ENDPOINT := "metadata"
+	endpoint := "metadata"
 
 	targeter.New(targeter.Config{
 		Method:   "GET",
 		BaseURL:  api.URL,
-		Endpoint: ENDPOINT,
+		Endpoint: endpoint,
 	}).Run(5, 5)
 }

@@ -54,11 +54,13 @@ func unmarshalAccessTokens(resps [][]byte) []string {
 	return accessTokens
 }
 
-var FHIR = "application/fhir+json"
-var JSON = "application/json"
-var PLAIN = "text/plain"
-var FORM = "application/x-www-form-urlencoded"
-var UNSET = ""
+const (
+	FHIR  = "application/fhir+json"
+	JSON  = "application/json"
+	Plain = "text/plain"
+	Form  = "application/x-www-form-urlencoded"
+	Unset = ""
+)
 
 func Headers(contentType, accept string) *targeter.Headers {
 	return &targeter.Headers{

@@ -5,10 +5,10 @@ import (
 )
 
 func (api *API) RunPractitionerTests() {
-	const ENDPOINT = "Practitioner"
+	const endpoint = "Practitioner"
 
 	// Create organization (and delete at the end) and setup accesstoken
-	auth := api.SetupOrgAuth()
+	auth := api.SetUpOrgAuth()
 	defer api.DeleteOrg(auth.orgID)
 
 	bundleBodies := readBodies("../../src/main/resources/parameters/bundles/practitioners/practitioner-*.json")
@@ -18,7 +18,7 @@ func (api *API) RunPractitionerTests() {
 	targeter.New(targeter.Config{
 		Method:      "POST",
 		BaseURL:     api.URL,
-		Endpoint:    ENDPOINT + "/$validate",
+		Endpoint:    endpoint + "/$validate",
 		AccessToken: auth.accessToken,
 		Bodies:      bundleBodies,
 	}).Run(5, 2)
@@ -27,19 +27,19 @@ func (api *API) RunPractitionerTests() {
 	resps := targeter.New(targeter.Config{
 		Method:      "POST",
 		BaseURL:     api.URL,
-		Endpoint:    ENDPOINT,
+		Endpoint:    endpoint,
 		AccessToken: auth.accessToken,
 		Bodies:      bodies,
 	}).Run(5, 2)
 
-	// Retrieve patient IDs which are required by the remaining tests
+	// Retrieve practitioner IDs which are required by the remaining tests
 	pracIDs := unmarshalIDs(resps)
 
 	// POST /Practitioner/$submit
 	targeter.New(targeter.Config{
 		Method:      "POST",
 		BaseURL:     api.URL,
-		Endpoint:    ENDPOINT + "/$submit",
+		Endpoint:    endpoint + "/$submit",
 		AccessToken: auth.accessToken,
 		Bodies:      bundleBodies,
 	}).Run(5, 2)
@@ -48,7 +48,7 @@ func (api *API) RunPractitionerTests() {
 	targeter.New(targeter.Config{
 		Method:      "PUT",
 		BaseURL:     api.URL,
-		Endpoint:    ENDPOINT,
+		Endpoint:    endpoint,
 		AccessToken: auth.accessToken,
 		IDs:         pracIDs,
 		Bodies:      bodies,
@@ -58,7 +58,7 @@ func (api *API) RunPractitionerTests() {
 	targeter.New(targeter.Config{
 		Method:      "DELETE",
 		BaseURL:     api.URL,
-		Endpoint:    ENDPOINT,
+		Endpoint:    endpoint,
 		AccessToken: auth.accessToken,
 		IDs:         pracIDs,
 	}).Run(5, 2)

@@ -5,26 +5,26 @@ import (
 )
 
 func (api *API) RunOrgTests() {
-	const ENDPOINT = "Organization"
+	const endpoint = "Organization"
 
 	// POST
 	resps := targeter.New(targeter.Config{
 		Method:      "POST",
 		BaseURL:     api.URL,
-		Endpoint:    ENDPOINT + "/$submit",
+		Endpoint:    endpoint + "/$submit",
 		AccessToken: string(api.goldenMacaroon),
 		Bodies:      readBodies("../../src/main/resources/organizations/base-organization.json"),
 	}).Run(1, 1)
 
 	orgID := unmarshalIDs(resps)[0]
-	auth := api.SetupOrgAuth(orgID)
+	auth := api.SetUpOrgAuth(orgID)
 
 	// GET
 	// ids := []string{resource.ID}
 	targeter.New(targeter.Config{
 		Method:      "GET",
 		BaseURL:     api.URL,
-		Endpoint:    ENDPOINT,
+		Endpoint:    endpoint,
 		AccessToken: auth.accessToken,
 		ID:          orgID,
 	}).Run(5, 2)
@@ -33,7 +33,7 @@ func (api *API) RunOrgTests() {
 	targeter.New(targeter.Config{
 		Method:      "PUT",
 		BaseURL:     api.URL,
-		Endpoint:    ENDPOINT,
+		Endpoint:    endpoint,
 		ID:          orgID,
 		AccessToken: auth.accessToken,
 		Bodies:      readBodies("../../src/main/resources/organizations/organization-*.json"),
@@ -43,7 +43,7 @@ func (api *API) RunOrgTests() {
 	targeter.New(targeter.Config{
 		Method:      "DELETE",
 		BaseURL:     api.URL,
-		Endpoint:    ENDPOINT,
+		Endpoint:    endpoint,
 		AccessToken: string(api.goldenMacaroon),
 		ID:          orgID,
 	}).Run(1, 1)

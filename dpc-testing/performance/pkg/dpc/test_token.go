@@ -8,20 +8,20 @@ import (
 )
 
 func (api *API) RunTokenTests() {
-	const ENDPOINT = "Token"
+	const endpoint = "Token"
 
 	// Create organization (and delete at the end) and setup accesstoken
-	auth := api.SetupOrgAuth()
+	auth := api.SetUpOrgAuth()
 	defer api.DeleteOrg(auth.orgID)
 
 	// POST /Token
 	resps := targeter.New(targeter.Config{
 		Method:      "POST",
 		BaseURL:     api.URL,
-		Endpoint:    ENDPOINT,
+		Endpoint:    endpoint,
 		AccessToken: auth.accessToken,
 		Bodies:      generateKeyBodies(25, api.GenerateKeyPairAndSignature),
-		Headers:     Headers(JSON, UNSET),
+		Headers:     Headers(JSON, Unset),
 	}).Run(5, 5)
 
 	clientTokens := unmarshalClientTokens(resps)
@@ -41,18 +41,18 @@ func (api *API) RunTokenTests() {
 	targeter.New(targeter.Config{
 		Method:   "POST",
 		BaseURL:  api.URL,
-		Endpoint: ENDPOINT + "/validate",
+		Endpoint: endpoint + "/validate",
 		Bodies:   authTokens,
-		Headers:  Headers(PLAIN, UNSET),
+		Headers:  Headers(Plain, Unset),
 	}).Run(5, 5)
 
 	// POST /Token/auth
 	resps = targeter.New(targeter.Config{
 		Method:   "POST",
 		BaseURL:  api.URL,
-		Endpoint: ENDPOINT + "/auth",
+		Endpoint: endpoint + "/auth",
 		Bodies:   generateAuthBodies(authTokens),
-		Headers:  Headers(FORM, UNSET),
+		Headers:  Headers(Form, Unset),
 	}).Run(5, 5)
 
 	accessTokens := unmarshalAccessTokens(resps)
@@ -61,19 +61,19 @@ func (api *API) RunTokenTests() {
 	targeter.New(targeter.Config{
 		Method:      "GET",
 		BaseURL:     api.URL,
-		Endpoint:    ENDPOINT,
+		Endpoint:    endpoint,
 		AccessToken: accessTokens[0], // Targeter cannot iterate over a set of tokens; just use the first
-		Headers:     Headers(UNSET, JSON),
+		Headers:     Headers(Unset, JSON),
 	}).Run(5, 5)
 
 	// DELETE /Token/{id}
 	targeter.New(targeter.Config{
 		Method:      "DELETE",
 		BaseURL:     api.URL,
-		Endpoint:    ENDPOINT,
+		Endpoint:    endpoint,
 		AccessToken: auth.accessToken,
 		IDs:         clientTokenIDs,
-		Headers:     Headers(UNSET, UNSET),
+		Headers:     Headers(Unset, Unset),
 	}).Run(5, 5)
 }
 
