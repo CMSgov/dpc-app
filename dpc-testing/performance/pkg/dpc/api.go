@@ -18,8 +18,19 @@ import (
 )
 
 type API struct {
-	URL, AdminURL  string
+	URL            string
 	goldenMacaroon []byte
+	AdminAPI
+}
+
+func New(apiURL string, admin AdminAPI) *API {
+	api := API{
+		URL:      apiURL,
+		AdminAPI: admin,
+	}
+	api.goldenMacaroon = admin.GetClientToken()
+
+	return &api
 }
 
 func (api *API) RefreshAccessToken(privateKey *rsa.PrivateKey, keyID string, clientToken []byte) string {
@@ -34,27 +45,6 @@ func (api *API) RefreshAccessToken(privateKey *rsa.PrivateKey, keyID string, cli
 	}
 
 	return accessToken
-}
-
-func (api *API) CreateGoldenMacaroon() {
-	api.goldenMacaroon = api.GetClientToken("")
-}
-
-func (api *API) GetClientToken(orgID string) []byte {
-	reqURL := fmt.Sprintf("%s/generate-token", api.AdminURL)
-	if orgID != "" {
-		reqURL = fmt.Sprintf("%s?organization=%s", reqURL, orgID)
-	}
-	resp, err := http.Post(reqURL, "", nil)
-	if err != nil {
-		cleanAndPanic(err)
-	}
-	defer resp.Body.Close()
-	clientToken, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		cleanAndPanic(err)
-	}
-	return clientToken
 }
 
 func (api *API) CreateOrg() string {
@@ -102,7 +92,7 @@ func (api *API) GenerateKeyPairAndSignature() (string, *rsa.PrivateKey, string) 
 
 func (api *API) UploadKey(key, sig, orgID string) string {
 	keySigReader := strings.NewReader(fmt.Sprintf("{ \"key\": \"%s\", \"signature\": \"%s\" }", key, sig))
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/upload-key?organization=%s", api.AdminURL, orgID), keySigReader)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/upload-key?organization=%s", api.AdminAPI.URL, orgID), keySigReader)
 	if err != nil {
 		cleanAndPanic(err)
 	}
@@ -141,7 +131,7 @@ type orgAuth struct {
 	privateKey  *rsa.PrivateKey
 }
 
-func (api *API) SetupOrgAuth(orgIDs ...string) orgAuth {
+func (api *API) SetUpOrgAuth(orgIDs ...string) orgAuth {
 	var orgID string
 	if len(orgIDs) > 0 {
 		orgID = orgIDs[0]
@@ -150,7 +140,7 @@ func (api *API) SetupOrgAuth(orgIDs ...string) orgAuth {
 	}
 	pubKeyStr, privateKey, signature := api.GenerateKeyPairAndSignature()
 	keyID := api.UploadKey(pubKeyStr, signature, orgID)
-	clientToken := api.GetClientToken(orgID)
+	clientToken := api.AdminAPI.GetClientToken(orgID)
 	accessToken := api.RefreshAccessToken(privateKey, keyID, clientToken)
 
 	return orgAuth{
