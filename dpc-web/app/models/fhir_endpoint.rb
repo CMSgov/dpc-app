@@ -17,7 +17,7 @@ class FhirEndpoint < ApplicationRecord
 
   def uri_is_valid_format
     parsed_uri = URI.parse(self[:uri])
-    errors.add :uri, 'must be valid URI (must have valid domain name)' if parsed_uri.host.nil?
+    errors.add :uri, 'must be valid URI present' if parsed_uri.host.nil?
   rescue URI::InvalidURIError
     errors.add :uri, 'must be valid URI (must have valid domain name)'
   end
