@@ -28,7 +28,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.sql.Date;
 import java.time.Instant;
 import java.util.*;
@@ -256,7 +258,7 @@ public class ClientUtils {
     }
 
     private static void verifyOperationOutcomeContents(File outcomeFile){
-        try (BufferedReader reader = new BufferedReader(new FileReader(outcomeFile))){
+        try (BufferedReader reader = Files.newBufferedReader(outcomeFile.toPath(), Charset.defaultCharset())){
             String line = reader.readLine();
             while (line != null) {
                 JsonObject outcomeEntry = new JsonParser().parse(line).getAsJsonObject();
@@ -273,7 +275,7 @@ public class ClientUtils {
             throw new RuntimeException("Cannot read operation outcome file.", e);
         }
     }
-
+    
     private static JobCompletionModel jobCompletionLambda(IGenericClient exportClient, CloseableHttpClient client, Group group, String overrideURL) {
         final IOperationUntypedWithInput<Parameters> exportOperation = createExportOperation(exportClient, group.getId());
         try {
