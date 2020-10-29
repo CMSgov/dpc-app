@@ -50,6 +50,10 @@ class ApplicationController < ActionController::Base
     send_file 'public/patient_bundle.json', type: 'application/zip', status: 202
   end
 
+  def download_postman
+    send_file 'public/postman.zip', type: 'application/zip', status: 202
+  end
+
   private
 
   def id_param
