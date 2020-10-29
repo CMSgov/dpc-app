@@ -15,10 +15,7 @@ import org.apache.jmeter.protocol.java.sampler.JavaSamplerContext;
 import org.apache.jmeter.samplers.SampleResult;
 import org.apache.jmeter.threads.JMeterContextService;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.Practitioner;
-import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.dstu3.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,6 +37,7 @@ public class SmokeTest extends AbstractJavaSamplerClient {
     private FhirContext ctx;
     private String organizationID;
     private String goldenMacaroon;
+    private boolean orgWasCreated = false;
 
     public SmokeTest() {
         // Not used
@@ -77,13 +75,18 @@ public class SmokeTest extends AbstractJavaSamplerClient {
         final IGenericClient client = APIAuthHelpers.buildAdminClient(ctx, hostParam, goldenMacaroon, true, true);
 
         try {
-            client
-                    .delete()
-                    .resourceById(new IdType("Organization", this.organizationID))
-                    .encodedJson()
-                    .execute();
+            if(orgWasCreated){
+                client
+                        .delete()
+                        .resourceById(new IdType("Organization", this.organizationID))
+                        .encodedJson()
+                        .execute();
+            }else{
+                logger.error("Can not delete org with id: {} since it was not successfully created during smokes tests.", this.organizationID);
+                System.exit(1);
+            }
         } catch (Exception e) {
-            logger.error(String.format("Cannot remove organization: %s", e.getMessage()));
+            logger.error("Cannot remove organization: {}", e.getMessage());
             System.exit(1);
         }
 
@@ -117,6 +120,7 @@ public class SmokeTest extends AbstractJavaSamplerClient {
         final IGenericClient adminClient = APIAuthHelpers.buildAdminClient(ctx, apiURL, goldenMacaroon, true, true);
 
         String clientToken = createOrganization(smokeTestResult, adminClient, adminURL);
+        orgWasCreated = true;
 
         Pair<UUID, PrivateKey> keyTuple = createPublicKey(apiURL);
 
