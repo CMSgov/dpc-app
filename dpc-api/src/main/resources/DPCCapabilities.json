@@ -202,7 +202,7 @@
           }
         },
         {
-        "name": "patient-export",
+        "name": "patient-everything",
         "definition": {
             "reference": "http://hl7.org/fhir/OperationDefinition/Patient-everything" 
           }
