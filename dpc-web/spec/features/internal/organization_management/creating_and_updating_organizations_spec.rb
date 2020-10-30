@@ -4,6 +4,7 @@ require 'rails_helper'
 
 RSpec.feature 'creating and updating organizations' do
   include APIClientSupport
+  include OrganizationsHelper
 
   let!(:internal_user) { create :internal_user }
 
@@ -12,6 +13,9 @@ RSpec.feature 'creating and updating organizations' do
   end
 
   scenario 'successfully creating and updating an organization\'s attributes' do
+    npi1 = generate_npi
+    npi2 = generate_npi
+
     visit new_internal_organization_path
 
     fill_in 'organization_name', with: 'Good Health'
@@ -27,7 +31,7 @@ RSpec.feature 'creating and updating organizations' do
     fill_in 'organization_address_attributes_zip', with: '29601'
 
     fill_in 'organization_vendor', visible: false, with: 'Cool EMR Vendor'
-    fill_in 'organization_npi', visible: false, with: '555ttt444'
+    fill_in 'organization_npi', visible: false, with: npi1
 
     find('[data-test="form-submit"]').click
 
@@ -42,14 +46,14 @@ RSpec.feature 'creating and updating organizations' do
     find('[data-test="edit-link"]').click
 
     fill_in 'organization_name', with: 'Health Revisited'
-    fill_in 'organization_npi', visible: false, with: '9987966711'
+    fill_in 'organization_npi', visible: false, with: npi2
     select 'Multispecialty Clinic', from: 'organization_organization_type'
     fill_in 'organization_address_attributes_street', with: '50 River St'
     find('[data-test="form-submit"]').click
 
     expect(page).not_to have_css('[data-test="form-submit"]')
     expect(page.body).to have_content('Health Revisited')
-    expect(page.body).to have_content('9987966711')
+    expect(page.body).to have_content(npi2)
     expect(page.body).to have_content('Multispecialty Clinic')
     expect(page.body).to have_content('50 River St')
   end

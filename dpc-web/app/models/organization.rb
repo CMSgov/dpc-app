@@ -2,6 +2,7 @@
 
 class Organization < ApplicationRecord
   include OrganizationTypable
+  include OrganizationsHelper
 
   has_many :taggings, as: :taggable
   has_many :tags, through: :taggings
@@ -84,13 +85,6 @@ class Organization < ApplicationRecord
 end
 
 private
-
-def generate_npi
-  loop do
-    npi = Luhnacy.generate(15, prefix: '808403')[-10..-1]
-    break npi unless Organization.where(npi: npi).exists?
-  end
-end
 
 def validate_npi
   npi = '80840' + self.npi
