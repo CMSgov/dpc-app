@@ -43,7 +43,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static gov.cms.dpc.api.APIHelpers.addOrganizationTag;
-import static gov.cms.dpc.fhir.FHIRMediaTypes.FHIR_NDJSON;
+import static gov.cms.dpc.fhir.FHIRMediaTypes.*;
 import static gov.cms.dpc.fhir.helpers.FHIRHelpers.handleMethodOutcome;
 
 
@@ -268,8 +268,8 @@ public class GroupResource extends AbstractGroupResource {
                            @PathParam("rosterID") @NoHtml String rosterID,
                            @ApiParam(value = "List of FHIR resources to export", allowableValues = "ExplanationOfBenefits, Coverage, Patient")
                            @QueryParam("_type") @NoHtml String resourceTypes,
-                           @ApiParam(value = "Output format of requested data", allowableValues = FHIR_NDJSON , defaultValue = FHIR_NDJSON)
-                           @QueryParam("_outputFormat") @NoHtml String outputFormat,
+                           @ApiParam(value = "Output format of requested data", allowableValues = FHIR_NDJSON + "," + APPLICATION_NDJSON + "," + NDJSON , defaultValue = FHIR_NDJSON)
+                           @DefaultValue(FHIR_NDJSON) @QueryParam("_outputFormat") @NoHtml String outputFormat,
                            @ApiParam(value = "Resources will be included in the response if their state has changed after the supplied time (e.g. if Resource.meta.lastUpdated is later than the supplied _since time).")
                            @QueryParam("_since") @NoHtml String sinceParam,
                            @ApiParam(hidden = true) @HeaderParam("Prefer")  @Valid String Prefer) {
@@ -353,9 +353,9 @@ public class GroupResource extends AbstractGroupResource {
      * @param outputFormat param to check
      */
     private static void checkExportRequest(String outputFormat, String headerPrefer) {
-        // _outputFormat only supports FHIR_NDJSON
-        if (StringUtils.isNotEmpty(outputFormat) && !FHIR_NDJSON.equals(outputFormat)) {
-            throw new BadRequestException("'_outputFormat' query parameter must be 'application/fhir+ndjson'");
+        // _outputFormat only supports FHIR_NDJSON, APPLICATION_NDJSON, NDJSON
+        if (!StringUtils.equalsAnyIgnoreCase(outputFormat, FHIR_NDJSON, APPLICATION_NDJSON, NDJSON)) {
+            throw new BadRequestException("'_outputFormat' query parameter must be 'application/fhir+ndjson', 'application/ndjson', or 'ndjson' ");
         }
         if (headerPrefer==null || StringUtils.isEmpty(headerPrefer)){
             throw new BadRequestException("The 'Prefer' header must be 'respond-async'");
