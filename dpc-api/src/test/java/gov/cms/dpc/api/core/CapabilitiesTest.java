@@ -35,7 +35,7 @@ class CapabilitiesTest {
 
     @Test
     void capabilitiesIsValid() {
-        final CapabilityStatement capabilities = Capabilities.getCapabilities();
+        final CapabilityStatement capabilities = Capabilities.getCapabilities("https://sandbox.dpc.cms.gov/api/v1");
         final ValidationResult validationResult = validator.validateWithResult(capabilities);
         assertTrue(validationResult.isSuccessful(), validationResultsToString(validationResult));
     }
