@@ -24,9 +24,6 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: '3.8.1'
-      - name: "Set vault password"
-        run: |
-          echo $VAULT_PW > .vault_password
       - name: "API Build"
         run: |
           make ci-app
