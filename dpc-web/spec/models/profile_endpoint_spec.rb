@@ -15,7 +15,7 @@ RSpec.describe FhirEndpoint, type: :model do
         uri = 'invalid`uri-bad-!!'
         fhir_endpoint = build(:fhir_endpoint, uri: uri)
         expect(fhir_endpoint).not_to be_valid
-        expect(fhir_endpoint.errors.full_messages).to eq(['Uri must be valid URI'])
+        expect(fhir_endpoint.errors.full_messages).to eq(['Uri must be valid URI (must have valid domain name)'])
       end
     end
   end
