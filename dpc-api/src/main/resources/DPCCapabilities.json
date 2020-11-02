@@ -6,7 +6,7 @@
   "status": "draft",
   "date": "2019",
   "publisher": "Centers for Medicare and Medicaid Services",
-  "kind": "capability",
+  "kind": "instance",
   "instantiates": [
     "http://hl7.org/fhir/uv/bulkdata/CapabilityStatement/bulk-data"
   ],
@@ -203,7 +203,7 @@
         },
         {
         "name": "patient-everything",
-        "definition": { 
+        "definition": {
             "reference": "http://hl7.org/fhir/OperationDefinition/Patient-everything" 
           }
         },
