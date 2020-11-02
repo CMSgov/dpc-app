@@ -6,8 +6,6 @@ env:
   VAULT_PW: ${{ secrets.VAULT_PW }}
   REPORT_COVERAGE: true
   CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
-  RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
-  COVERITY_SCAN_TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
 
 jobs:
   build-api:
