@@ -21,10 +21,6 @@ ig/publish: ${IG_PUBLISHER}
 	@echo "Building Implementation Guide"
 	@java -jar ${IG_PUBLISHER} -ig ig/ig.json
 
-.PHONY: travis secure-envs
-travis:
-	@./dpc-test.sh
-
 .PHONY: website
 website:
 	@docker build -f dpc-web/Dockerfile . -t dpc-web

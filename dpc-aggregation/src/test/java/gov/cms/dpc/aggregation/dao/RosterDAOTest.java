@@ -49,7 +49,9 @@ public class RosterDAOTest {
             .addEntityClass(EndpointEntity.class)
             .addEntityClass(ContactPointEntity.class)
             .addEntityClass(AddressEntity.class)
-            .addEntityClass(ProviderEntity.class).build();
+            .addEntityClass(ProviderEntity.class)
+            .setProperty("webAllowOthers", "false")
+            .build();
 
     private RosterDAO rosterDAO;
     private OrganizationEntity organizationEntity;
