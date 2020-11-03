@@ -9,6 +9,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.inject.name.Named;
 import gov.cms.dpc.bluebutton.config.BBClientConfiguration;
+import gov.cms.dpc.common.MDCConstants;
 import gov.cms.dpc.common.utils.MetricMaker;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import org.apache.commons.lang3.StringUtils;
@@ -18,6 +19,7 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
@@ -104,13 +106,25 @@ public class BlueButtonClientImpl implements BlueButtonClient {
     @Override
     public Bundle requestPatientFromServerByMbiHash(String mbiHash) throws ResourceNotFoundException {
         logger.info("Attempting to fetch patient with MBI hash {} from baseURL: {}", mbiHash, client.getServerBase());
-        return instrumentCall(REQUEST_PATIENT_METRIC, () -> client
-                .search()
-                .forResource(Patient.class)
-                .where(Patient.IDENTIFIER.exactly().systemAndIdentifier(DPCIdentifierSystem.MBI_HASH.getSystem(), mbiHash))
-                .withAdditionalHeader("IncludeIdentifiers", "mbi")
-                .returnBundle(Bundle.class)
-                .execute());
+        var jobId = MDC.get(MDCConstants.JOB_ID);
+        var providerId = MDC.get(MDCConstants.PROVIDER_ID);
+        return instrumentCall(REQUEST_PATIENT_METRIC, () -> {
+            IQuery<IBaseBundle> query = client
+                    .search()
+                    .forResource(Patient.class)
+                    .where(Patient.IDENTIFIER.exactly().systemAndIdentifier(DPCIdentifierSystem.MBI_HASH.getSystem(), mbiHash))
+                    .withAdditionalHeader("IncludeIdentifiers", "mbi");
+            if (StringUtils.isNotBlank(jobId)) {
+                query.withAdditionalHeader("DPC-JOBID", jobId);
+            }
+            if (StringUtils.isNotBlank(providerId)) {
+                query.withAdditionalHeader("DPC-CMSID", providerId);
+            }
+            return query
+                    .returnBundle(Bundle.class)
+                    .execute();
+
+        });
     }
 
     /**
@@ -234,12 +248,23 @@ public class BlueButtonClientImpl implements BlueButtonClient {
             query = query.and(criterion);
         }
 
-        final Bundle bundle = query
+        var jobId = MDC.get(MDCConstants.JOB_ID);
+        var providerId = MDC.get(MDCConstants.PROVIDER_ID);
+
+        IQuery<Bundle> iQuery = query
                 .count(config.getResourcesCount())
                 .lastUpdated(lastUpdated)
                 .returnBundle(Bundle.class)
-                .withAdditionalHeader("IncludeIdentifiers", "mbi")
-                .execute();
+                .withAdditionalHeader("IncludeIdentifiers", "mbi");
+
+        if (StringUtils.isNotBlank(jobId)) {
+            iQuery.withAdditionalHeader("DPC-JOBID", jobId);
+        }
+        if (StringUtils.isNotBlank(providerId)) {
+            iQuery.withAdditionalHeader("DPC-CMSID", providerId);
+        }
+
+        final Bundle bundle = iQuery.execute();
 
         // Case where patientID does not exist at all
         if(!bundle.hasEntry() && lastUpdated == null) {
