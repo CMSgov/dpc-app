@@ -8,6 +8,7 @@
       var clientToken = document.getElementById("clientToken").value.trim();
       var privateKey = document.getElementById("privateKey").value.trim();
       var keyId = document.getElementById("keyId").value.trim();
+      var env = document.getElementById("env").value.trim();
 
 
       var dt = new Date().getTime();
@@ -20,6 +21,7 @@
       var data = {
         "iss": clientToken,
         "sub": clientToken,
+        "aud": "https://" + env + ".dpc.cms.gov/api/v1/Token/auth",
         "exp": Math.round(new Date().getTime() / 1000) + 300,
         "iat": Math.round(Date.now()),
         "jti": uuid,
@@ -277,7 +279,7 @@
   </div>
 
   <div class="container">
-    <div id="form">  
+    <div id="form">
       <div>
         <div class="form-label">
           <div>
@@ -315,6 +317,22 @@
           </div>
         </div>
         <input type="text" id="keyId" placeholder="xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" style="width:800px;">
+      </div>
+
+      <div>
+        <div class="form-label">
+            <div>
+                Please select the Environment for this JWT:
+            </div>
+            <div class="tooltip">
+                <img class="info-logo" src="https://dpc.cms.gov/assets/information-b8baf2e245c158d1de47193512ae79db36874c8f64793d1a47d9dbef70d86699.svg">
+                <span class="tooltiptext">The JWT's environment must match the URL you will use to make requests.</span>
+            </div>
+        </div>
+        <select name="env-select" id="env" style="width:800px;">
+            <option value="sandbox">Sandbox</option>
+            <option value="prod">Production</option>
+        </select>
       </div>
 
       <div>
