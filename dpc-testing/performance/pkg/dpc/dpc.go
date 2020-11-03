@@ -8,8 +8,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-
-	"github.com/CMSgov/dpc-app/dpc-testing/performance/pkg/dpc/targeter"
 )
 
 type Resource struct {
@@ -61,13 +59,6 @@ const (
 	Form  = "application/x-www-form-urlencoded"
 	Unset = ""
 )
-
-func Headers(contentType, accept string) *targeter.Headers {
-	return &targeter.Headers{
-		ContentType: contentType,
-		Accept:      accept,
-	}
-}
 
 func CreateDirs() {
 	err := os.MkdirAll("keys", os.ModePerm)
