@@ -21,7 +21,7 @@ func (api *API) RunTokenTests() {
 		Endpoint:    endpoint,
 		AccessToken: auth.accessToken,
 		Bodies:      generateKeyBodies(25, api.GenerateKeyPairAndSignature),
-		Headers:     Headers(JSON, Unset),
+		Headers:     &targeter.Headers{ContentType: JSON},
 	}).Run(5, 5)
 
 	clientTokens := unmarshalClientTokens(resps)
@@ -43,7 +43,7 @@ func (api *API) RunTokenTests() {
 		BaseURL:  api.URL,
 		Endpoint: endpoint + "/validate",
 		Bodies:   authTokens,
-		Headers:  Headers(Plain, Unset),
+		Headers:  &targeter.Headers{ContentType: Plain},
 	}).Run(5, 5)
 
 	// POST /Token/auth
@@ -52,7 +52,7 @@ func (api *API) RunTokenTests() {
 		BaseURL:  api.URL,
 		Endpoint: endpoint + "/auth",
 		Bodies:   generateAuthBodies(authTokens),
-		Headers:  Headers(Form, Unset),
+		Headers:  &targeter.Headers{ContentType: Form},
 	}).Run(5, 5)
 
 	accessTokens := unmarshalAccessTokens(resps)
@@ -63,7 +63,7 @@ func (api *API) RunTokenTests() {
 		BaseURL:     api.URL,
 		Endpoint:    endpoint,
 		AccessToken: accessTokens[0], // Targeter cannot iterate over a set of tokens; just use the first
-		Headers:     Headers(Unset, JSON),
+		Headers:     &targeter.Headers{Accept: JSON},
 	}).Run(5, 5)
 
 	// DELETE /Token/{id}
@@ -73,7 +73,7 @@ func (api *API) RunTokenTests() {
 		Endpoint:    endpoint,
 		AccessToken: auth.accessToken,
 		IDs:         clientTokenIDs,
-		Headers:     Headers(Unset, Unset),
+		Headers:     &targeter.Headers{},
 	}).Run(5, 5)
 }
 
