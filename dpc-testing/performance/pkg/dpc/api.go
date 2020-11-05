@@ -52,6 +52,9 @@ func (api *API) CreateOrg() string {
 	defer orgBundleFile.Close()
 	orgBundleReader := bufio.NewReader(orgBundleFile)
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/Organization/$submit", api.URL), orgBundleReader)
+	if err != nil {
+		cleanAndPanic(err)
+	}
 	req.Header.Add("Content-Type", "application/fhir+json")
 	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", api.goldenMacaroon))
 	resp, err := http.DefaultClient.Do(req)
@@ -67,11 +70,17 @@ func (api *API) CreateOrg() string {
 
 func (api *API) GenerateKeyPairAndSignature() (string, *rsa.PrivateKey, string) {
 	privKey, pubKey, err := dpcclient.GenRSAKeyPair()
+	if err != nil {
+		cleanAndPanic(err)
+	}
 	if err := dpcclient.SaveDPCKeyPair("./keys/dpc-key", privKey, pubKey); err != nil {
 		cleanAndPanic(err)
 	}
 
 	pubKeyBytes, err := dpcclient.ReadSmallFile("./keys/dpc-key-public.pem")
+	if err != nil {
+		cleanAndPanic(err)
+	}
 	pubKeyStr := strings.ReplaceAll(string(pubKeyBytes), "\n", "\\n")
 
 	snippet := []byte("This is the snippet used to verify a key pair in DPC.")
