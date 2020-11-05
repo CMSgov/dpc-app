@@ -18,7 +18,7 @@ func (api *API) RunKeyTests() {
 		Endpoint:    endpoint,
 		AccessToken: auth.accessToken,
 		Bodies:      generateKeyBodies(25, api.GenerateKeyPairAndSignature),
-		Headers:     Headers(JSON, Unset),
+		Headers:     &targeter.Headers{ContentType: JSON},
 	}).Run(5, 5)
 
 	keyIDs := unmarshalIDs(resps)
@@ -29,7 +29,7 @@ func (api *API) RunKeyTests() {
 		BaseURL:     api.URL,
 		Endpoint:    endpoint,
 		AccessToken: auth.accessToken,
-		Headers:     Headers(Unset, JSON),
+		Headers:     &targeter.Headers{Accept: JSON},
 	}).Run(5, 5)
 
 	// GET /Key/{id}
@@ -38,7 +38,7 @@ func (api *API) RunKeyTests() {
 		BaseURL:     api.URL,
 		Endpoint:    endpoint,
 		AccessToken: auth.accessToken,
-		Headers:     Headers(Unset, JSON),
+		Headers:     &targeter.Headers{Accept: JSON},
 		IDs:         keyIDs,
 	}).Run(5, 5)
 
@@ -48,7 +48,7 @@ func (api *API) RunKeyTests() {
 		BaseURL:     api.URL,
 		Endpoint:    endpoint,
 		AccessToken: auth.accessToken,
-		Headers:     Headers(Unset, Unset),
+		Headers:     &targeter.Headers{},
 		IDs:         keyIDs,
 	}).Run(5, 5)
 }
