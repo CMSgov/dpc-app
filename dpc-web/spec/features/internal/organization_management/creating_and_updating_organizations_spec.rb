@@ -71,6 +71,26 @@ RSpec.feature 'creating and updating organizations' do
     expect(page).to have_css('[data-test="form-submit"]')
   end
 
+  scenario 'adding an invalid npi' do
+    org = create(:organization, npi: nil)
+
+    visit edit_internal_organization_path(org)
+    fill_in 'organization_npi', visible: false, with: '12345678'
+    find('[data-test="form-submit"]').click
+
+    expect(page).to have_content('Organization could not be updated: Npi must be valid.')
+  end
+
+  scenario 'adding a valid npi' do
+    org = create(:organization, npi: nil)
+
+    visit edit_internal_organization_path(org)
+    fill_in 'organization_npi', visible: false, with: generate_npi
+    find('[data-test="form-submit"]').click
+
+    expect(page).to have_content('Organization updated.')
+  end
+
   scenario 'enabling API access successfully' do
     stub = stub_api_client(
       message: :create_organization,
