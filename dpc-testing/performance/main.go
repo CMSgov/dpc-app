@@ -25,4 +25,5 @@ func main() {
 	api.RunPatientTests()
 	api.RunPractitionerTests()
 	api.RunOrgTests()
+	api.RunGroupTests()
 }
