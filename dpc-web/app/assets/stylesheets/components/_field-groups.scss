@@ -16,6 +16,16 @@
   padding: $spacer-4 0;
 }
 
+.field-group__fields.tag_list {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+
+  .tag_container {
+    cursor: pointer;
+  }
+}
+
 .field-group__hint {
   color: $color-gray;
   margin-bottom: 0;
