@@ -6,6 +6,7 @@ module Internal
 
     def index
       results = BaseSearch.new(params: params, scope: params[:org_type]).results
+      @tags = Tag.all
 
       @organizations = org_page_params(results)
       render layout: 'table_index'
@@ -159,7 +160,7 @@ module Internal
 
     def organization_params
       params.require(:organization).permit(
-        :name, :organization_type, :num_providers, :npi, :vendor,
+        :name, :organization_type, :num_providers, :npi, :tags, :vendor,
         address_attributes: %i[id street street_2 city state zip address_use address_type]
       )
     end

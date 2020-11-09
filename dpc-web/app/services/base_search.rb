@@ -75,7 +75,7 @@ class BaseSearch
 
   def apply_tag_queries(scope)
     if params[:tags].present?
-      scope = scope.with_tags(params[:tags])
+      scope = scope.with_tags(params[:tags].values)
     end
 
     scope

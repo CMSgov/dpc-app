@@ -44,7 +44,7 @@
           <div class="ds-l-col--9 field-group__fields">
             <% @tags.order('LOWER(name)').each do |t| %>
               <div>
-                <%= check_box_tag "tags[]", t.name %>
+                <%= check_box_tag "tags[#{t.id}]", t.name %>
                 <%= t.name %>
               </div>
             <% end %>
