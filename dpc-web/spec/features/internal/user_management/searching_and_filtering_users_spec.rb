@@ -89,7 +89,7 @@ RSpec.feature 'searching and filtering users' do
     expect(page.body).not_to have_content('As Fast As Legs Can Carry')
   end
 
-  scenario 'filter by tags' do
+  scenario 'filter users by tags' do
     user1 = create(:user, first_name: 'Jean Luc', last_name: 'Picard', email: 'picard@gmail.com')
     user2 = create(:user, first_name: 'James T.', last_name: 'Kirk', email: 'kirk@gmail.com')
     user3 = create(:user, first_name: 'Data', last_name: 'Soong', email: 'data@gmail.com')
@@ -122,5 +122,12 @@ RSpec.feature 'searching and filtering users' do
     expect(page.body).to have_content('James T. Kirk')
     expect(page.body).not_to have_content('Jean Luc Picard')
     expect(page.body).not_to have_content('Data Soong')
+
+    find('[data-test="filter-modal-trigger"]').click
+    find('[data-test="users-filter-submit"]').click
+
+    expect(page.body).to have_content('Jean Luc Picard')
+    expect(page.body).to have_content('James T. Kirk')
+    expect(page.body).to have_content('Data Soong')
   end
 end
