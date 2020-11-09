@@ -160,7 +160,7 @@ module Internal
 
     def organization_params
       params.require(:organization).permit(
-        :name, :organization_type, :num_providers, :npi, :tags, :vendor,
+        :name, :organization_type, :num_providers, :npi, :vendor,
         address_attributes: %i[id street street_2 city state zip address_use address_type]
       )
     end
