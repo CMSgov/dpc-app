@@ -120,9 +120,6 @@ public class AggregationEngine implements Runnable {
 
     protected void onCompleted() {
         logger.info("Finished processing queue. Exiting...");
-        MDC.remove(MDCConstants.JOB_ID);
-        MDC.remove(MDCConstants.JOB_BATCH_ID);
-        MDC.remove(MDCConstants.PROVIDER_ID);
         queueRunning.set(false);
     }
 
