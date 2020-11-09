@@ -43,7 +43,7 @@
           </div>
           <div class="ds-l-col--9 field-group__fields tag_list">
             <% @tags.order('LOWER(name)').each do |t| %>
-              <div id="pill_<%= t.id %>" class="site-pills__item site-pills__item--medium tag_container" onclick="tagSelector('tags_<%= t.id %>', 'pill_<%= t.id %>')" >
+              <div id="pill_<%= t.name %>" class="site-pills__item site-pills__item--medium tag_container" onclick="tagSelector('tags_<%= t.id %>', 'pill_<%= t.name %>')" data-test="tag_select_<%= t.name %>">
                 <div style="display:none;">
                   <%= check_box_tag "tags[#{t.id}]", t.name %>
                 </div>

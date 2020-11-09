@@ -88,4 +88,39 @@ RSpec.feature 'searching and filtering users' do
     expect(page.body).not_to have_content('Primary Claw')
     expect(page.body).not_to have_content('As Fast As Legs Can Carry')
   end
+
+  scenario 'filter by tags' do
+    user1 = create(:user, first_name: 'Jean Luc', last_name: 'Picard', email: 'picard@gmail.com')
+    user2 = create(:user, first_name: 'James T.', last_name: 'Kirk', email: 'kirk@gmail.com')
+    user3 = create(:user, first_name: 'Data', last_name: 'Soong', email: 'data@gmail.com')
+
+    tag1 = create(:tag, name: 'TOS')
+    tag2 = create(:tag, name: 'TNG')
+
+    user1.tags << tag2
+    user2.tags << tag1
+    user3.tags << tag2
+
+    tag_id = "#tags_" + tag1.id.to_s
+
+    visit internal_users_path
+
+    expect(page.body).to have_content('Jean Luc Picard')
+    expect(page.body).to have_content('James T. Kirk')
+    expect(page.body).to have_content('Data Soong')
+    expect(page.body).to have_content('TOS')
+    expect(page.body).to have_content('TNG')
+
+    find('[data-test="filter-modal-trigger"]').click
+
+    expect(page.body).to have_content('TOS')
+    expect(page.body).to have_content('TNG')
+
+    find(:css, tag_id, visible: false).set(true)
+    find('[data-test="users-filter-submit"]').click
+
+    expect(page.body).to have_content('James T. Kirk')
+    expect(page.body).not_to have_content('Jean Luc Picard')
+    expect(page.body).not_to have_content('Data Soong')
+  end
 end
