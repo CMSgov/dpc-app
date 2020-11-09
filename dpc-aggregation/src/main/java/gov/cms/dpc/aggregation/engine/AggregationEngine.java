@@ -106,6 +106,11 @@ public class AggregationEngine implements Runnable {
                 .retry()
                 .filter(Optional::isPresent)
                 .map(Optional::get)
+                .doOnDispose(() -> {
+                    MDC.remove(MDCConstants.JOB_ID);
+                    MDC.remove(MDCConstants.JOB_BATCH_ID);
+                    MDC.remove(MDCConstants.PROVIDER_ID);
+                })
                 .subscribe(
                         this::processJobBatch,
                         this::onError,

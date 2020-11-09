@@ -11,6 +11,7 @@ import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.bluebutton.client.BlueButtonClientImpl;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
 import gov.cms.dpc.bluebutton.config.BBClientConfiguration;
+import gov.cms.dpc.common.MDCConstants;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.MemoryBatchQueue;
@@ -25,13 +26,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+import org.slf4j.MDC;
 
 import java.nio.file.Path;
 import java.security.GeneralSecurityException;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -54,7 +53,7 @@ public class AggregationEngineBFDClientTest {
     @BeforeEach
     public void setup() throws GeneralSecurityException {
         BlueButtonClient blueButtonClient = Mockito.spy(new BlueButtonClientImpl(bbClient, new BBClientConfiguration(), metricRegistry));
-        OperationsConfig config = new OperationsConfig(1000, tempDir.toString(), 1, 500, 1, new Date(), List.of(orgID.toString()));
+        OperationsConfig config = new OperationsConfig(1000, tempDir.toString(), 1, 1, 1, new Date(), List.of(orgID.toString()));
         JobBatchProcessor processor = new JobBatchProcessor(blueButtonClient, fhirContext, metricRegistry, config, lookBackService);
         queue = new MemoryBatchQueue(100);
         engine = new AggregationEngine(UUID.randomUUID(), queue, config, processor);
@@ -85,16 +84,19 @@ public class AggregationEngineBFDClientTest {
                 MockBlueButtonClient.BFD_TRANSACTION_TIME
         );
 
-        queue.claimBatch(engine.getAggregatorID())
-                .ifPresent(engine::processJobBatch);
+        engine.run();
 
         // Look at the result
         final var completeJob = queue.getJobBatches(jobID).stream().findFirst().orElseThrow();
         assertEquals(JobStatus.COMPLETED, completeJob.getStatus());
-        assertEquals(1000, completeJob.getPriority());
 
         Assertions.assertThat(headerKey.getAllValues()).containsExactlyInAnyOrder("IncludeIdentifiers", "DPC-JOBID", "DPC-CMSID");
         Assertions.assertThat(headerValue.getAllValues()).containsExactlyInAnyOrder("mbi", jobID.toString(), providerID.toString());
+
+        engine.stop();
+
+        Map<String, String> mdcs = MDC.getCopyOfContextMap();
+        Assertions.assertThat(mdcs).doesNotContainKeys(MDCConstants.JOB_ID, MDCConstants.JOB_BATCH_ID, MDCConstants.PROVIDER_ID);
 
     }
 }
