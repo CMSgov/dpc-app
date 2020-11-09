@@ -170,7 +170,7 @@ public class ClientUtils {
                         responseBody = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
                         jobResponse = mapper.readValue(responseBody, JobCompletionModel.class);
                     } catch (JsonParseException e) {
-                        logger.error(String.format("Failed to parse job status response: %s", responseBody));
+                        logger.error("Failed to parse job status response: {}", responseBody);
                         throw e;
                     }
                 }
@@ -223,7 +223,7 @@ public class ClientUtils {
 
         // Get the headers and check the status
         final String exportURL = headers.get("content-location").get(0);
-        logger.info(String.format("Export job started. Progress URL: %s%n", exportURL));
+        logger.info("Export job started. Progress URL: %s%n", exportURL);
 
         // Poll the job until it's done
         return awaitExportResponse(exportURL, "Checking job status", client, overrideURL);
@@ -265,7 +265,7 @@ public class ClientUtils {
                 JsonArray outcomeIssues = outcomeEntry.getAsJsonArray("issue");
                 String finalLine = line;
                 outcomeIssues.forEach(issue-> {
-                    if("error".equals(issue.getAsJsonObject().get("severity").getAsString())){
+                    if("error".equalsIgnoreCase(issue.getAsJsonObject().get("severity").getAsString())){
                         throw new IllegalStateException(String.format("Operation outcome contains an error: File path:  %s, Error line: %s", outcomeFile.getPath(), finalLine));
                     }
                 });

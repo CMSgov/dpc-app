@@ -37,7 +37,6 @@ public class SmokeTest extends AbstractJavaSamplerClient {
     private FhirContext ctx;
     private String organizationID;
     private String goldenMacaroon;
-    private boolean orgWasCreated = false;
 
     public SmokeTest() {
         // Not used
@@ -69,22 +68,17 @@ public class SmokeTest extends AbstractJavaSamplerClient {
         logger.info("Cleaning up tests against {}", hostParam);
 
         // Remove the organization, which should delete it all
-        logger.info(String.format("Deleting organization %s", organizationID));
+        logger.info("Deleting organization {}", organizationID);
 
         // Build admin client for removing the organization
         final IGenericClient client = APIAuthHelpers.buildAdminClient(ctx, hostParam, goldenMacaroon, true, true);
 
         try {
-            if(orgWasCreated){
                 client
                         .delete()
                         .resourceById(new IdType("Organization", this.organizationID))
                         .encodedJson()
                         .execute();
-            }else{
-                logger.error("Can not delete org with id: {} since it was not successfully created during smokes tests.", this.organizationID);
-                System.exit(1);
-            }
         } catch (Exception e) {
             logger.error("Cannot remove organization: {}", e.getMessage());
             System.exit(1);
@@ -120,7 +114,6 @@ public class SmokeTest extends AbstractJavaSamplerClient {
         final IGenericClient adminClient = APIAuthHelpers.buildAdminClient(ctx, apiURL, goldenMacaroon, true, true);
 
         String clientToken = createOrganization(smokeTestResult, adminClient, adminURL);
-        orgWasCreated = true;
 
         Pair<UUID, PrivateKey> keyTuple = createPublicKey(apiURL);
 
@@ -147,7 +140,7 @@ public class SmokeTest extends AbstractJavaSamplerClient {
     }
 
     private String createOrganization(SampleResult smokeTestResult, IGenericClient adminClient, String adminURL){
-        logger.info(String.format("Creating organization %s", organizationID));
+        logger.info("Creating organization {}", organizationID);
         final SampleResult orgRegistrationResult = new SampleResult();
         smokeTestResult.addSubResult(orgRegistrationResult);
         orgRegistrationResult.sampleStart();
