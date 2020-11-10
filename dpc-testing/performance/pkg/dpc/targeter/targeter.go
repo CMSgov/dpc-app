@@ -24,13 +24,10 @@ type Config struct {
 }
 
 type Targeter struct {
-	nextBody func() []byte
-	nextID   func() string
+	nextBody    func() []byte
+	nextID      func() string
+	nextHeaders func() map[string][]string
 	Config
-}
-
-type Headers struct {
-	ContentType, Accept string
 }
 
 func New(config Config) *Targeter {
@@ -51,9 +48,10 @@ func New(config Config) *Targeter {
 	}
 
 	return &Targeter{
-		nextBody: genBodies(config),
-		nextID:   genIDs(config),
-		Config:   config,
+		nextBody:    genBodies(config),
+		nextID:      genIDs(config),
+		nextHeaders: genHeaders(config),
+		Config:      config,
 	}
 }
 
@@ -83,13 +81,8 @@ func (dt *Targeter) buildTarget(t *vegeta.Target) error {
 	t.Body = dt.nextBody()
 	t.Method = dt.Method
 
-	t.Header = map[string][]string{"Authorization": {fmt.Sprintf("Bearer %s", dt.AccessToken)}}
-	if dt.Headers.ContentType != "" {
-		t.Header.Add("Content-Type", dt.Headers.ContentType)
-	}
-	if dt.Headers.Accept != "" {
-		t.Header.Add("Accept", dt.Headers.Accept)
-	}
+	t.Header = dt.nextHeaders()
+	t.Header.Add("Authorization", fmt.Sprintf("Bearer %s", dt.AccessToken))
 
 	return nil
 }
@@ -111,6 +104,21 @@ func (dt *Targeter) name() string {
 	return fmt.Sprintf("%s %s/%s/%s", dt.Method, dt.BaseURL, dt.Endpoint, id)
 }
 
+// genStrs general generator function that returns strings
+func genStrs(strs []string) func() string {
+	i := 0
+	n := len(strs)
+	return func() string {
+		if i >= n {
+			return ""
+		}
+
+		nextVal := strs[i]
+		i++
+		return nextVal
+	}
+}
+
 // genIDs produces a closure that returns successive ids from the supplied list
 func genIDs(config Config) func() string {
 	// If `ID` is present it has precedence over `IDs`
@@ -118,17 +126,7 @@ func genIDs(config Config) func() string {
 		return func() string { return config.ID }
 	}
 
-	i := 0
-	n := len(config.IDs)
-	return func() string {
-		if i >= n {
-			return ""
-		}
-
-		nextID := config.IDs[i]
-		i++
-		return nextID
-	}
+	return genStrs(config.IDs)
 }
 
 // genBodies produces a closure that returns successive request bodies from all files matching the pattern
