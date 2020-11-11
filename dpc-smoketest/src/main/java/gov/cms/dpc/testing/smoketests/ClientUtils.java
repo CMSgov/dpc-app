@@ -218,7 +218,7 @@ public class ClientUtils {
 
         // Get the headers and check the status
         final String exportURL = headers.get("content-location").get(0);
-        logger.info("Export job started. Progress URL: %s%n", exportURL);
+        logger.info("Export job started. Progress URL: {}", exportURL);
 
         // Poll the job until it's done
         return awaitExportResponse(exportURL, "Checking job status", client, overrideURL);
