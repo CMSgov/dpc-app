@@ -8,9 +8,6 @@ import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import gov.cms.dpc.common.models.JobCompletionModel;
 import gov.cms.dpc.common.utils.SeedProcessor;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
@@ -28,9 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.sql.Date;
 import java.time.Instant;
 import java.util.*;
@@ -249,30 +244,8 @@ public class ClientUtils {
             if(file.length() == 0){
                 throw new IllegalStateException(String.format("Downloaded file was empty. file path:  %s", file.getPath()));
             }
-            if(ResourceType.OperationOutcome.equals(entry.getType())){
-                verifyOperationOutcomeContents(file);
-            }
         } catch (IOException e) {
             throw new RuntimeException("Cannot output file", e);
-        }
-    }
-
-    private static void verifyOperationOutcomeContents(File outcomeFile){
-        try (BufferedReader reader = Files.newBufferedReader(outcomeFile.toPath(), Charset.defaultCharset())){
-            String line = reader.readLine();
-            while (line != null) {
-                JsonObject outcomeEntry = new JsonParser().parse(line).getAsJsonObject();
-                JsonArray outcomeIssues = outcomeEntry.getAsJsonArray("issue");
-                String finalLine = line;
-                outcomeIssues.forEach(issue-> {
-                    if("error".equalsIgnoreCase(issue.getAsJsonObject().get("severity").getAsString())){
-                        throw new IllegalStateException(String.format("Operation outcome contains an error: File path:  %s, Error line: %s", outcomeFile.getPath(), finalLine));
-                    }
-                });
-                line = reader.readLine();
-            }
-        } catch (IOException e) {
-            throw new RuntimeException("Cannot read operation outcome file.", e);
         }
     }
     
