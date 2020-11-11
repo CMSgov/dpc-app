@@ -22,6 +22,7 @@ services:
       - ./ops/config/decrypted/local.env
     environment:
       - ENV=local
+      - USE_BFD_MOCK=${USE_BFD_MOCK:-true}
       - JACOCO=${REPORT_COVERAGE}
     depends_on:
       - db
