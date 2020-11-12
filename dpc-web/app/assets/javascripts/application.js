@@ -17,6 +17,7 @@
 //= require copy-text
 //= require password-check
 //= require rails-ujs
+//= require tag-selector
 //= require activestorage
 //= require_tree ./utils
 //= require_tree .

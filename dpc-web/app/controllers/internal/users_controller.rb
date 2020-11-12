@@ -8,6 +8,7 @@ module Internal
 
     def index
       results = BaseSearch.new(params: params, scope: params[:org_type]).results
+      @tags = Tag.all
 
       @users = results.order('users.created_at DESC').page params[:page]
       render layout: 'table_index'

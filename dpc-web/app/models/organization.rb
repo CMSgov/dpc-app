@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
 class Organization < ApplicationRecord
-  include OrganizationTypable
   include OrganizationsHelper
+  include OrganizationTypable
+  include Taggable
 
   has_many :taggings, as: :taggable
   has_many :tags, through: :taggings
