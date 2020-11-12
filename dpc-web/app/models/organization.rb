@@ -2,6 +2,7 @@
 
 class Organization < ApplicationRecord
   include OrganizationTypable
+  include OrganizationsHelper
 
   has_many :taggings, as: :taggable
   has_many :tags, through: :taggings
@@ -20,6 +21,7 @@ class Organization < ApplicationRecord
   accepts_nested_attributes_for :address, reject_if: :all_blank
 
   before_save :assign_id, if: -> { prod_sbx? }
+  before_save :npi_valid?
 
   after_update :update_registered_organization
 
@@ -57,6 +59,12 @@ class Organization < ApplicationRecord
     organization_user_assignments.each(&:send_organization_sandbox_email)
   end
 
+  def npi_valid?
+    return if npi.blank?
+
+    validate_npi
+  end
+
   def prod_sbx?
     ENV['ENV'] == 'prod-sbx'
   end
@@ -78,9 +86,11 @@ end
 
 private
 
-def generate_npi
-  loop do
-    npi = Luhnacy.generate(15, prefix: '808403')[-10..-1]
-    break npi unless Organization.where(npi: npi).exists?
-  end
+def validate_npi
+  npi = '80840' + self.npi
+
+  return if Luhnacy.doctor_npi?(npi)
+
+  errors.add :npi, 'must be valid.'
+  throw(:abort)
 end
