@@ -4,6 +4,7 @@ require 'csv'
 
 class User < ApplicationRecord
   include OrganizationTypable
+  include Taggable
 
   has_many :taggings, as: :taggable
   has_many :tags, through: :taggings
