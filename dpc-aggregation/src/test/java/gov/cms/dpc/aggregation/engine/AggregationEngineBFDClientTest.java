@@ -6,11 +6,13 @@ import ca.uhn.fhir.rest.gclient.ICriterion;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.IUntypedQuery;
 import com.codahale.metrics.MetricRegistry;
+import com.google.common.net.HttpHeaders;
 import gov.cms.dpc.aggregation.service.LookBackService;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.bluebutton.client.BlueButtonClientImpl;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
 import gov.cms.dpc.bluebutton.config.BBClientConfiguration;
+import gov.cms.dpc.common.Constants;
 import gov.cms.dpc.common.MDCConstants;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.JobStatus;
@@ -28,6 +30,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.slf4j.MDC;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.file.Path;
 import java.security.GeneralSecurityException;
 import java.util.*;
@@ -63,7 +67,7 @@ public class AggregationEngineBFDClientTest {
     }
 
     @Test
-    void testHeadersPassedToBFD() {
+    void testHeadersPassedToBFD() throws UnknownHostException {
         //Mock out the interactions of using IGenericClient to capture things
         IUntypedQuery<IBaseBundle> iUntypedQuery = Mockito.mock(IUntypedQuery.class);
         Mockito.when(bbClient.search()).thenReturn(iUntypedQuery);
@@ -90,8 +94,8 @@ public class AggregationEngineBFDClientTest {
         final var completeJob = queue.getJobBatches(jobID).stream().findFirst().orElseThrow();
         assertEquals(JobStatus.COMPLETED, completeJob.getStatus());
 
-        Assertions.assertThat(headerKey.getAllValues()).containsExactlyInAnyOrder("IncludeIdentifiers", "DPC-JOBID", "DPC-CMSID");
-        Assertions.assertThat(headerValue.getAllValues()).containsExactlyInAnyOrder("mbi", jobID.toString(), providerID.toString());
+        Assertions.assertThat(headerKey.getAllValues()).containsExactlyInAnyOrder(Constants.INCLUDE_IDENTIFIERS_HEADER, Constants.BULK_CLIENT_ID_HEADER, Constants.BULK_JOB_ID_HEADER, HttpHeaders.X_FORWARDED_FOR);
+        Assertions.assertThat(headerValue.getAllValues()).containsExactlyInAnyOrder("mbi", providerID.toString(), jobID.toString(), InetAddress.getLocalHost().getHostAddress());
 
         engine.stop();
 

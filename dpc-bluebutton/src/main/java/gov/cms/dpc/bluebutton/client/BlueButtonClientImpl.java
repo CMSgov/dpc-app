@@ -7,8 +7,10 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
+import com.google.common.net.HttpHeaders;
 import com.google.inject.name.Named;
 import gov.cms.dpc.bluebutton.config.BBClientConfiguration;
+import gov.cms.dpc.common.Constants;
 import gov.cms.dpc.common.MDCConstants;
 import gov.cms.dpc.common.utils.MetricMaker;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
@@ -24,6 +26,8 @@ import org.slf4j.MDC;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.KeySpec;
@@ -106,20 +110,12 @@ public class BlueButtonClientImpl implements BlueButtonClient {
     @Override
     public Bundle requestPatientFromServerByMbiHash(String mbiHash) throws ResourceNotFoundException {
         logger.info("Attempting to fetch patient with MBI hash {} from baseURL: {}", mbiHash, client.getServerBase());
-        var jobId = MDC.get(MDCConstants.JOB_ID);
-        var providerId = MDC.get(MDCConstants.PROVIDER_ID);
         return instrumentCall(REQUEST_PATIENT_METRIC, () -> {
             IQuery<IBaseBundle> query = client
                     .search()
                     .forResource(Patient.class)
-                    .where(Patient.IDENTIFIER.exactly().systemAndIdentifier(DPCIdentifierSystem.MBI_HASH.getSystem(), mbiHash))
-                    .withAdditionalHeader("IncludeIdentifiers", "mbi");
-            if (StringUtils.isNotBlank(jobId)) {
-                query.withAdditionalHeader("DPC-JOBID", jobId);
-            }
-            if (StringUtils.isNotBlank(providerId)) {
-                query.withAdditionalHeader("DPC-CMSID", providerId);
-            }
+                    .where(Patient.IDENTIFIER.exactly().systemAndIdentifier(DPCIdentifierSystem.MBI_HASH.getSystem(), mbiHash));
+            addBFDHeaders(query);
             return query
                     .returnBundle(Bundle.class)
                     .execute();
@@ -248,21 +244,11 @@ public class BlueButtonClientImpl implements BlueButtonClient {
             query = query.and(criterion);
         }
 
-        var jobId = MDC.get(MDCConstants.JOB_ID);
-        var providerId = MDC.get(MDCConstants.PROVIDER_ID);
-
         IQuery<Bundle> iQuery = query
                 .count(config.getResourcesCount())
                 .lastUpdated(lastUpdated)
-                .returnBundle(Bundle.class)
-                .withAdditionalHeader("IncludeIdentifiers", "mbi");
-
-        if (StringUtils.isNotBlank(jobId)) {
-            iQuery.withAdditionalHeader("DPC-JOBID", jobId);
-        }
-        if (StringUtils.isNotBlank(providerId)) {
-            iQuery.withAdditionalHeader("DPC-CMSID", providerId);
-        }
+                .returnBundle(Bundle.class);
+        addBFDHeaders(query);
 
         final Bundle bundle = iQuery.execute();
 
@@ -292,5 +278,24 @@ public class BlueButtonClientImpl implements BlueButtonClient {
         } finally {
             timerContext.stop();
         }
+    }
+
+    private void addBFDHeaders(IQuery<?> query) {
+
+        try {
+            query.withAdditionalHeader(Constants.INCLUDE_IDENTIFIERS_HEADER, "mbi");
+            var providerId = MDC.get(MDCConstants.PROVIDER_ID);
+            var jobId = MDC.get(MDCConstants.JOB_ID);
+            if (StringUtils.isNotBlank(providerId)) {
+                query.withAdditionalHeader(Constants.BULK_CLIENT_ID_HEADER, providerId);
+            }
+            if (StringUtils.isNotBlank(jobId)) {
+                query.withAdditionalHeader(Constants.BULK_JOB_ID_HEADER, jobId);
+            }
+            query.withAdditionalHeader(HttpHeaders.X_FORWARDED_FOR, InetAddress.getLocalHost().getHostAddress());
+        } catch(UnknownHostException e) {
+            logger.warn("Could not get ip address to add to request header");
+        }
+
     }
 }
