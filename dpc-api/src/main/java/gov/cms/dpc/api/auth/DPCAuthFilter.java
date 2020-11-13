@@ -2,12 +2,16 @@ package gov.cms.dpc.api.auth;
 
 import com.github.nitram509.jmacaroons.Macaroon;
 import gov.cms.dpc.api.jdbi.TokenDAO;
+import gov.cms.dpc.common.MDCConstants;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.macaroons.exceptions.BakeryException;
 import io.dropwizard.auth.AuthFilter;
 import io.dropwizard.auth.Authenticator;
 import org.apache.http.HttpHeaders;
-import org.slf4j.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
+
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.UriInfo;
@@ -76,8 +80,8 @@ public abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organ
 
         // Now that we have the organization_id, set it in the logging context
         MDC.clear();
-        MDC.put("organization_id", orgID.toString());
-        MDC.put("token_id", m1.get(0).identifier);
+        MDC.put(MDCConstants.ORGANIZATION_ID, orgID.toString());
+        MDC.put(MDCConstants.TOKEN_ID, m1.get(0).identifier);
 
         try {
             this.bakery.verifyMacaroon(m1, String.format("organization_id = %s", orgID));
