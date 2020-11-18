@@ -152,6 +152,7 @@ public class AggregationEngine implements Runnable {
             MDC.put(MDCConstants.JOB_BATCH_ID, job.getBatchID().toString());
             MDC.put(MDCConstants.PROVIDER_ID, job.getProviderID());
             MDC.put(MDCConstants.ORGANIZATION_ID, job.getOrgID().toString());
+            MDC.put(MDCConstants.REQUESTING_IP, job.getRequestingIP());
             logger.info("Processing job, exporting to: {}.", this.operationsConfig.getExportPath());
             logger.debug("Has {} attributed beneficiaries", job.getPatients().size());
 

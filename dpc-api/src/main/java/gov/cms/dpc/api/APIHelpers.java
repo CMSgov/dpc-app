@@ -2,10 +2,13 @@ package gov.cms.dpc.api;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.validation.SingleValidationMessage;
+import com.google.common.net.HttpHeaders;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
@@ -75,5 +78,17 @@ public class APIHelpers {
         return Optional.ofNullable(meta.getLastUpdated())
                 .map(u -> u.toInstant().atOffset(ZoneOffset.UTC))
                 .orElse(OffsetDateTime.now(ZoneOffset.UTC));
+    }
+
+    public static String fetchRequestingIP(HttpServletRequest request) {
+        if (request == null) {
+            return null;
+        }
+        //If client uses the forwarded for header, respect that, otherwise use the requester's ip address
+        String ipAddress = request.getHeader(HttpHeaders.X_FORWARDED_FOR);
+        if (StringUtils.isBlank(ipAddress)) {
+            ipAddress = request.getRemoteAddr();
+        }
+        return ipAddress;
     }
 }

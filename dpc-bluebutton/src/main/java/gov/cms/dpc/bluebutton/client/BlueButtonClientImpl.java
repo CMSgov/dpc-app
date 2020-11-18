@@ -26,8 +26,6 @@ import org.slf4j.MDC;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.KeySpec;
@@ -281,21 +279,18 @@ public class BlueButtonClientImpl implements BlueButtonClient {
     }
 
     private void addBFDHeaders(IQuery<?> query) {
-
-        try {
-            query.withAdditionalHeader(Constants.INCLUDE_IDENTIFIERS_HEADER, "mbi");
-            var providerId = MDC.get(MDCConstants.PROVIDER_ID);
-            var jobId = MDC.get(MDCConstants.JOB_ID);
-            if (StringUtils.isNotBlank(providerId)) {
-                query.withAdditionalHeader(Constants.BULK_CLIENT_ID_HEADER, providerId);
-            }
-            if (StringUtils.isNotBlank(jobId)) {
-                query.withAdditionalHeader(Constants.BULK_JOB_ID_HEADER, jobId);
-            }
-            query.withAdditionalHeader(HttpHeaders.X_FORWARDED_FOR, InetAddress.getLocalHost().getHostAddress());
-        } catch(UnknownHostException e) {
-            logger.warn("Could not get ip address to add to request header");
+        query.withAdditionalHeader(Constants.INCLUDE_IDENTIFIERS_HEADER, "mbi");
+        var providerId = MDC.get(MDCConstants.PROVIDER_ID);
+        var jobId = MDC.get(MDCConstants.JOB_ID);
+        var requestingIP = MDC.get(MDCConstants.REQUESTING_IP);
+        if (StringUtils.isNotBlank(providerId)) {
+            query.withAdditionalHeader(Constants.BULK_CLIENT_ID_HEADER, providerId);
         }
-
+        if (StringUtils.isNotBlank(jobId)) {
+            query.withAdditionalHeader(Constants.BULK_JOB_ID_HEADER, jobId);
+        }
+        if (StringUtils.isNotBlank(requestingIP)) {
+            query.withAdditionalHeader(HttpHeaders.X_FORWARDED_FOR, requestingIP);
+        }
     }
 }

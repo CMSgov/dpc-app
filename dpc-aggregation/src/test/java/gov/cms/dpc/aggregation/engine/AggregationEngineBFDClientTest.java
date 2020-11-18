@@ -30,8 +30,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.slf4j.MDC;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.nio.file.Path;
 import java.security.GeneralSecurityException;
 import java.util.*;
@@ -67,7 +65,7 @@ public class AggregationEngineBFDClientTest {
     }
 
     @Test
-    void testHeadersPassedToBFD() throws UnknownHostException {
+    void testHeadersPassedToBFD() {
         //Mock out the interactions of using IGenericClient to capture things
         IUntypedQuery<IBaseBundle> iUntypedQuery = Mockito.mock(IUntypedQuery.class);
         Mockito.when(bbClient.search()).thenReturn(iUntypedQuery);
@@ -85,7 +83,8 @@ public class AggregationEngineBFDClientTest {
                 Collections.singletonList(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0)),
                 Collections.singletonList(ResourceType.Patient),
                 null,
-                MockBlueButtonClient.BFD_TRANSACTION_TIME
+                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                "127.0.0.1"
         );
 
         engine.run();
@@ -95,7 +94,7 @@ public class AggregationEngineBFDClientTest {
         assertEquals(JobStatus.COMPLETED, completeJob.getStatus());
 
         Assertions.assertThat(headerKey.getAllValues()).containsExactlyInAnyOrder(Constants.INCLUDE_IDENTIFIERS_HEADER, Constants.BULK_CLIENT_ID_HEADER, Constants.BULK_JOB_ID_HEADER, HttpHeaders.X_FORWARDED_FOR);
-        Assertions.assertThat(headerValue.getAllValues()).containsExactlyInAnyOrder("mbi", providerID.toString(), jobID.toString(), InetAddress.getLocalHost().getHostAddress());
+        Assertions.assertThat(headerValue.getAllValues()).containsExactlyInAnyOrder("mbi", providerID.toString(), jobID.toString(), "127.0.0.1");
 
         engine.stop();
 

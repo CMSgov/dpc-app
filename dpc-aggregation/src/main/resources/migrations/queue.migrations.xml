@@ -85,5 +85,13 @@
             </column>
         </addColumn>
     </changeSet>
+
+    <changeSet id="add-requesting-ip" author="hkxb">
+        <addColumn tableName="JOB_QUEUE_BATCH">
+            <column name="requesting_ip" type="VARCHAR(50)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
     
 </databaseChangeLog>

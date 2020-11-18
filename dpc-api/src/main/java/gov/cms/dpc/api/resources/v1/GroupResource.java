@@ -31,8 +31,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.time.OffsetDateTime;
@@ -272,7 +274,8 @@ public class GroupResource extends AbstractGroupResource {
                            @DefaultValue(FHIR_NDJSON) @QueryParam("_outputFormat") @NoHtml String outputFormat,
                            @ApiParam(value = "Resources will be included in the response if their state has changed after the supplied time (e.g. if Resource.meta.lastUpdated is later than the supplied _since time).")
                            @QueryParam("_since") @NoHtml String sinceParam,
-                           @ApiParam(hidden = true) @HeaderParam("Prefer")  @Valid String Prefer) {
+                           @ApiParam(hidden = true) @HeaderParam("Prefer")  @Valid String Prefer,
+                           @Context HttpServletRequest request) {
         logger.info("Exporting data for provider: {} _since: {}", rosterID, sinceParam);
 
         // Check the parameters
@@ -288,7 +291,8 @@ public class GroupResource extends AbstractGroupResource {
         final var resources = handleTypeQueryParam(resourceTypes);
         final var since = handleSinceQueryParam(sinceParam);
         final var transactionTime = APIHelpers.fetchTransactionTime(bfdClient);
-        final UUID jobID = this.queue.createJob(orgID, rosterID, attributedPatients, resources, since, transactionTime);
+        final var requestingIP = APIHelpers.fetchRequestingIP(request);
+        final UUID jobID = this.queue.createJob(orgID, rosterID, attributedPatients, resources, since, transactionTime, requestingIP);
 
         return Response.status(Response.Status.ACCEPTED)
                 .contentLocation(URI.create(this.baseURL + "/Jobs/" + jobID)).build();

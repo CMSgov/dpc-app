@@ -10,5 +10,6 @@ public final class MDCConstants {
     public static final String PROVIDER_ID = "providerID";
     public static final String ORGANIZATION_ID = "organization_id";
     public static final String TOKEN_ID = "token_id";
+    public static final String REQUESTING_IP= "requesting_ip";
 
 }
