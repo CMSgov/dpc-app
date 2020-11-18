@@ -99,7 +99,7 @@ public class AggregationEngineBFDClientTest {
         engine.stop();
 
         Map<String, String> mdcs = MDC.getCopyOfContextMap();
-        Assertions.assertThat(mdcs).doesNotContainKeys(MDCConstants.JOB_ID, MDCConstants.JOB_BATCH_ID, MDCConstants.PROVIDER_ID);
+        Assertions.assertThat(mdcs).doesNotContainKeys(MDCConstants.JOB_ID, MDCConstants.JOB_BATCH_ID, MDCConstants.PROVIDER_ID, MDCConstants.REQUESTING_IP);
 
     }
 }
