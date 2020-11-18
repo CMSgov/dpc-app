@@ -88,7 +88,7 @@
 
     <changeSet id="add-requesting-ip" author="hkxb">
         <addColumn tableName="JOB_QUEUE_BATCH">
-            <column name="requesting_ip" type="VARCHAR(50)">
+            <column name="requesting_ip" type="VARCHAR(255)">
                 <constraints nullable="true"/>
             </column>
         </addColumn>
