@@ -45,6 +45,20 @@
           </div>
         </fieldset>
 
+        <fieldset class="ds-l-row field-group">
+          <div class="ds-l-col--9 field-group__fields tag_list">
+            <%= label_tag :tag, 'Tags', class: "ds-c-label" %>
+            <% @tags.order('LOWER(name)').each_with_index do |t,i| %>
+              <div id="pill_<%= t.id %>" class="site-pills__item site-pills__item--medium tag_container" onclick="tagSelector('tags_<%= t.id %>', 'pill_<%= t.id %>')" >
+                <div style="display:none;">
+                  <%= check_box_tag "tags[#{t.id}]", t.name -%>
+                </div>
+                <%= t.name %>
+              </div>
+            <% end %>
+          </div>
+        </fieldset>
+
       </main>
       <aside class="ds-l-row ds-c-dialog__actions" role="complementary">
         <div class="ds-l-col--3">
