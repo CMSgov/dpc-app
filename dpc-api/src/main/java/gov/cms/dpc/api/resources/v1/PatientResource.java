@@ -31,8 +31,10 @@ import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
 import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.UUID;
@@ -176,7 +178,8 @@ public class PatientResource extends AbstractPatientResource {
     @Override
     public Bundle everything(@ApiParam(hidden = true) @Auth OrganizationPrincipal organization,
                              @Valid @Profiled(profile = AttestationProfile.PROFILE_URI) @ProvenanceHeader Provenance provenance,
-                             @ApiParam(value = "Patient resource ID", required = true) @PathParam("patientID") UUID patientId) {
+                             @ApiParam(value = "Patient resource ID", required = true) @PathParam("patientID") UUID patientId,
+                             @Context HttpServletRequest request) {
 
         final Provenance.ProvenanceAgentComponent performer = FHIRExtractors.getProvenancePerformer(provenance);
         final UUID practitionerId = FHIRExtractors.getEntityUUID(performer.getOnBehalfOfReference().getReference());
@@ -199,8 +202,9 @@ public class PatientResource extends AbstractPatientResource {
             throw new WebApplicationException(HttpStatus.UNAUTHORIZED_401);
         }
 
+        final String requestingIP = APIHelpers.fetchRequestingIP(request);
         Resource result = dataService.retrieveData(orgId, practitionerId, List.of(patientMbi), APIHelpers.fetchTransactionTime(bfdClient),
-                ResourceType.Patient, ResourceType.ExplanationOfBenefit, ResourceType.Coverage);
+                requestingIP, ResourceType.Patient, ResourceType.ExplanationOfBenefit, ResourceType.Coverage);
         if (ResourceType.Bundle.equals(result.getResourceType())) {
             return (Bundle) result;
         }
