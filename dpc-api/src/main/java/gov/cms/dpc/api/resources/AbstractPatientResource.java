@@ -10,6 +10,7 @@ import io.dropwizard.auth.Auth;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
@@ -39,7 +40,7 @@ public abstract class AbstractPatientResource {
 
     @GET
     @Path("/{patientID}/$everything")
-    public abstract Resource everything(OrganizationPrincipal organization, @Valid @Profiled(profile = AttestationProfile.PROFILE_URI) Provenance attestation, UUID patientId);
+    public abstract Resource everything(OrganizationPrincipal organization, @Valid @Profiled(profile = AttestationProfile.PROFILE_URI) Provenance attestation, UUID patientId, HttpServletRequest request);
 
     @DELETE
     @Path("/{patientID}")
