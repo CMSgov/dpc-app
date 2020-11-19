@@ -7,8 +7,11 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
+import com.google.common.net.HttpHeaders;
 import com.google.inject.name.Named;
 import gov.cms.dpc.bluebutton.config.BBClientConfiguration;
+import gov.cms.dpc.common.Constants;
+import gov.cms.dpc.common.MDCConstants;
 import gov.cms.dpc.common.utils.MetricMaker;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import org.apache.commons.lang3.StringUtils;
@@ -18,6 +21,7 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
@@ -104,13 +108,17 @@ public class BlueButtonClientImpl implements BlueButtonClient {
     @Override
     public Bundle requestPatientFromServerByMbiHash(String mbiHash) throws ResourceNotFoundException {
         logger.info("Attempting to fetch patient with MBI hash {} from baseURL: {}", mbiHash, client.getServerBase());
-        return instrumentCall(REQUEST_PATIENT_METRIC, () -> client
-                .search()
-                .forResource(Patient.class)
-                .where(Patient.IDENTIFIER.exactly().systemAndIdentifier(DPCIdentifierSystem.MBI_HASH.getSystem(), mbiHash))
-                .withAdditionalHeader("IncludeIdentifiers", "mbi")
-                .returnBundle(Bundle.class)
-                .execute());
+        return instrumentCall(REQUEST_PATIENT_METRIC, () -> {
+            IQuery<IBaseBundle> query = client
+                    .search()
+                    .forResource(Patient.class)
+                    .where(Patient.IDENTIFIER.exactly().systemAndIdentifier(DPCIdentifierSystem.MBI_HASH.getSystem(), mbiHash));
+            addBFDHeaders(query);
+            return query
+                    .returnBundle(Bundle.class)
+                    .execute();
+
+        });
     }
 
     /**
@@ -234,12 +242,13 @@ public class BlueButtonClientImpl implements BlueButtonClient {
             query = query.and(criterion);
         }
 
-        final Bundle bundle = query
+        IQuery<Bundle> iQuery = query
                 .count(config.getResourcesCount())
                 .lastUpdated(lastUpdated)
-                .returnBundle(Bundle.class)
-                .withAdditionalHeader("IncludeIdentifiers", "mbi")
-                .execute();
+                .returnBundle(Bundle.class);
+        addBFDHeaders(query);
+
+        final Bundle bundle = iQuery.execute();
 
         // Case where patientID does not exist at all
         if(!bundle.hasEntry() && lastUpdated == null) {
@@ -266,6 +275,22 @@ public class BlueButtonClientImpl implements BlueButtonClient {
             throw ex;
         } finally {
             timerContext.stop();
+        }
+    }
+
+    private void addBFDHeaders(IQuery<?> query) {
+        query.withAdditionalHeader(Constants.INCLUDE_IDENTIFIERS_HEADER, "mbi");
+        var providerId = MDC.get(MDCConstants.PROVIDER_ID);
+        var jobId = MDC.get(MDCConstants.JOB_ID);
+        var requestingIP = MDC.get(MDCConstants.REQUESTING_IP);
+        if (StringUtils.isNotBlank(providerId)) {
+            query.withAdditionalHeader(Constants.BULK_CLIENT_ID_HEADER, providerId);
+        }
+        if (StringUtils.isNotBlank(jobId)) {
+            query.withAdditionalHeader(Constants.BULK_JOB_ID_HEADER, jobId);
+        }
+        if (StringUtils.isNotBlank(requestingIP)) {
+            query.withAdditionalHeader(HttpHeaders.X_FORWARDED_FOR, requestingIP);
         }
     }
 }

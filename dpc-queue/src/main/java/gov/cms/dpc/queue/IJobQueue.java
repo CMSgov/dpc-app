@@ -24,6 +24,7 @@ public interface IJobQueue {
      * @param resourceTypes - The resource types to fetch patient data for
      * @param since         - The since parameter to use for the requests. May be null.
      * @param transactionTime - The transactionTime of the job
+     * @param requestingIP
      * @return The UUID of the created job
      */
     UUID createJob(UUID orgID,
@@ -31,7 +32,7 @@ public interface IJobQueue {
                    List<String> mbis,
                    List<ResourceType> resourceTypes,
                    OffsetDateTime since,
-                   OffsetDateTime transactionTime);
+                   OffsetDateTime transactionTime, String requestingIP);
 
     /**
      * Find a batch in the queue, regardless of job status. Does not alter the batch.
