@@ -6,7 +6,7 @@ import (
 
 func (api *API) RunKeyTests() {
 	const endpoint = "Key"
-
+    bodies := generateKeyBodies(25, api.GenerateKeyPairAndSignature)
 	// Create organization (and delete at the end) and setup accesstoken
 	auth := api.SetUpOrgAuth()
 	defer api.DeleteOrg(auth.orgID)
@@ -17,7 +17,7 @@ func (api *API) RunKeyTests() {
 		BaseURL:     api.URL,
 		Endpoint:    endpoint,
 		AccessToken: auth.accessToken,
-		Bodies:      generateKeyBodies(25, api.GenerateKeyPairAndSignature),
+		Bodies:      bodies,
 		Headers:     &targeter.Headers{ContentType: JSON},
 	}).Run(5, 5)
 
