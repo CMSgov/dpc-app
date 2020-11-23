@@ -2,6 +2,7 @@ package gov.cms.dpc.attribution.resources;
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.gclient.ICreate;
 import ca.uhn.fhir.rest.gclient.ICreateTyped;
 import ca.uhn.fhir.rest.gclient.IDeleteTyped;
 import ca.uhn.fhir.rest.gclient.IReadExecutable;
@@ -9,6 +10,8 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import gov.cms.dpc.attribution.AbstractAttributionTest;
 import gov.cms.dpc.attribution.AttributionTestHelpers;
+import gov.cms.dpc.attribution.jdbi.ProviderDAO;
+import gov.cms.dpc.common.entities.ProviderEntity;
 import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;
@@ -16,11 +19,11 @@ import gov.cms.dpc.fhir.validations.profiles.PractitionerProfile;
 import org.hl7.fhir.dstu3.model.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
 
 import java.util.*;
 
-import static gov.cms.dpc.attribution.AttributionTestHelpers.DEFAULT_ORG_ID;
-import static gov.cms.dpc.attribution.AttributionTestHelpers.createFHIRClient;
+import static gov.cms.dpc.attribution.AttributionTestHelpers.*;
 import static gov.cms.dpc.common.utils.SeedProcessor.createBaseAttributionGroup;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -254,21 +257,26 @@ class PractitionerResourceTest extends AbstractAttributionTest {
         APPLICATION.getConfiguration().setProviderLimit(5);
 
         final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
+        final Practitioner practitioner2 = AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
 
-        final ICreateTyped creation = client
-                .create()
-                .resource(practitioner)
-                .encodedJson();
-        final MethodOutcome mo = creation
-                .execute();
+        final MethodOutcome mo = submitPractitioner(practitioner).execute();
 
-        final Practitioner pract2 = (Practitioner) mo.getResource();
-        practitionersToCleanUp.add(pract2);
+        final Practitioner pract = (Practitioner) mo.getResource();
+        practitionersToCleanUp.add(pract);
 
-        assertNotNull(pract2, "Should be created");
+        assertNotNull(pract, "Should be created");
 
         // Try again, should fail
-        assertThrows(UnprocessableEntityException.class, creation::execute, "Should not modify");
+        final ICreateTyped creation2 = submitPractitioner(practitioner2);
+        practitionersToCleanUp.add(practitioner2);
+
+        assertThrows(UnprocessableEntityException.class, creation2::execute, "Should not modify");
+    }
+
+    private ICreateTyped submitPractitioner(Practitioner practitioner) {
+        return client.create()
+                .resource(practitioner)
+                .encodedJson();
     }
 
     @Test
