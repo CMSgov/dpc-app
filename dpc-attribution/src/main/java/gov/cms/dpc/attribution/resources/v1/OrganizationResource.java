@@ -2,6 +2,7 @@ package gov.cms.dpc.attribution.resources.v1;
 
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
+import gov.cms.dpc.attribution.DPCAttributionConfiguration;
 import gov.cms.dpc.attribution.jdbi.EndpointDAO;
 import gov.cms.dpc.attribution.jdbi.OrganizationDAO;
 import gov.cms.dpc.attribution.resources.AbstractOrganizationResource;
@@ -13,6 +14,7 @@ import gov.cms.dpc.fhir.annotations.FHIRParameter;
 import gov.cms.dpc.fhir.converters.FHIREntityConverter;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.swagger.annotations.*;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
 import org.slf4j.Logger;
@@ -36,12 +38,14 @@ public class OrganizationResource extends AbstractOrganizationResource {
     private final OrganizationDAO dao;
     private final EndpointDAO endpointDAO;
     private final FHIREntityConverter converter;
+    private final DPCAttributionConfiguration config;
 
     @Inject
-    OrganizationResource(FHIREntityConverter converter, OrganizationDAO dao, EndpointDAO endpointDAO) {
+    OrganizationResource(FHIREntityConverter converter, OrganizationDAO dao, EndpointDAO endpointDAO, DPCAttributionConfiguration config) {
         this.converter = converter;
         this.dao = dao;
         this.endpointDAO = endpointDAO;
+        this.config = config;
     }
 
     @Override
@@ -81,18 +85,20 @@ public class OrganizationResource extends AbstractOrganizationResource {
     })
     public Response submitOrganization(@FHIRParameter(name = "resource") Bundle transactionBundle) {
 
-        final Optional<Organization> organization = transactionBundle
+        final Optional<Organization> optOrganization = transactionBundle
                 .getEntry()
                 .stream()
                 .filter(entry -> entry.hasResource() && entry.getResource().getResourceType() == ResourceType.Organization)
                 .map(entry -> (Organization) entry.getResource())
                 .findFirst();
 
-        if (organization.isEmpty()) {
+        if (optOrganization.isEmpty()) {
             return Response.status(HttpStatus.UNPROCESSABLE_ENTITY_422).entity("Must provide organization to register").build();
         }
 
-        final OrganizationEntity entity = this.converter.fromFHIR(OrganizationEntity.class, organization.get());
+        Organization organization = optOrganization.get();
+        organization.setId(getNewOrgId(organization));
+        final OrganizationEntity entity = this.converter.fromFHIR(OrganizationEntity.class, organization);
         final List<EndpointEntity> endpoints = extractEndpoints(transactionBundle);
         endpoints.forEach(endpointEntity -> endpointEntity.setOrganization(entity));
         entity.setEndpoints(endpoints);
@@ -174,5 +180,16 @@ public class OrganizationResource extends AbstractOrganizationResource {
                 .map(entry -> (Endpoint) entry.getResource())
                 .map(e -> this.converter.fromFHIR(EndpointEntity.class, e))
                 .collect(Collectors.toList());
+    }
+
+    private String getNewOrgId(Organization organization){
+        String orgId = organization.getId();
+        if(StringUtils.isBlank(orgId)){
+            final List<String> prohibitedIds = config.getLookBackExemptOrgs();
+            do{
+                orgId = UUID.randomUUID().toString();
+            }while(prohibitedIds!=null && prohibitedIds.contains(orgId));
+        }
+        return orgId;
     }
 }
