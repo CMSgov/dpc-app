@@ -26,6 +26,7 @@ import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static gov.cms.dpc.attribution.utils.RESTUtils.parseTokenTag;
@@ -39,6 +40,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
     private final EndpointDAO endpointDAO;
     private final FHIREntityConverter converter;
     private final DPCAttributionConfiguration config;
+    private final Supplier<UUID> uuidSupplier = UUID::randomUUID;
 
     @Inject
     OrganizationResource(FHIREntityConverter converter, OrganizationDAO dao, EndpointDAO endpointDAO, DPCAttributionConfiguration config) {
@@ -92,12 +94,14 @@ public class OrganizationResource extends AbstractOrganizationResource {
                 .map(entry -> (Organization) entry.getResource())
                 .findFirst();
 
-        if (optOrganization.isEmpty()) {
+        if (!optOrganization.isPresent()) {
             return Response.status(HttpStatus.UNPROCESSABLE_ENTITY_422).entity("Must provide organization to register").build();
         }
 
         Organization organization = optOrganization.get();
-        organization.setId(getNewOrgId(organization));
+        if(StringUtils.isBlank(organization.getId())){
+            organization.setId(generateNewOrgId());
+        }
         final OrganizationEntity entity = this.converter.fromFHIR(OrganizationEntity.class, organization);
         final List<EndpointEntity> endpoints = extractEndpoints(transactionBundle);
         endpoints.forEach(endpointEntity -> endpointEntity.setOrganization(entity));
@@ -182,14 +186,12 @@ public class OrganizationResource extends AbstractOrganizationResource {
                 .collect(Collectors.toList());
     }
 
-    private String getNewOrgId(Organization organization){
-        String orgId = organization.getId();
-        if(StringUtils.isBlank(orgId)){
-            final List<String> prohibitedIds = config.getLookBackExemptOrgs();
-            do{
-                orgId = UUID.randomUUID().toString();
-            }while(prohibitedIds!=null && prohibitedIds.contains(orgId));
-        }
+    private String generateNewOrgId(){
+        final List<String> prohibitedIds = config.getLookBackExemptOrgs();
+        String orgId;
+        do{
+            orgId = uuidSupplier.get().toString();
+        }while(prohibitedIds!=null && prohibitedIds.contains(orgId));
         return orgId;
     }
 }
