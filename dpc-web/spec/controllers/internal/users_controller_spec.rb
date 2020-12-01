@@ -44,10 +44,9 @@ RSpec.describe Internal::UsersController, type: :controller do
     end
 
     it 'sends file from User.to_csv' do
-      users = create_list(:user, 2)
-      allow(User).to receive(:csv_convert).and_return('test_file')
+      allow(User).to receive(:to_csv).and_return('test_file')
 
-      get :download, format: :csv, users: users
+      get :download, format: :csv
 
       expect(response.body).to eq('test_file')
     end
