@@ -1,12 +1,11 @@
 package gov.cms.dpc.attribution.resources.v1;
 
+import gov.cms.dpc.attribution.AttributionTestHelpers;
 import gov.cms.dpc.attribution.DPCAttributionConfiguration;
 import gov.cms.dpc.attribution.jdbi.EndpointDAO;
 import gov.cms.dpc.attribution.jdbi.OrganizationDAO;
 import gov.cms.dpc.fhir.converters.FHIREntityConverter;
-import org.hl7.fhir.dstu3.model.Address;
 import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -107,19 +106,7 @@ public class OrganizationResourceUnitTest {
 
 
     private Bundle buildBundleWithTestOrg(String uuid){
-        final Organization organization = new Organization();
-        organization.setId(uuid);
-        Identifier identifier = new Identifier();
-        identifier.setSystem("http://hl7.org/fhir/sid/us-npi");
-        identifier.setValue("1334567892");
-        organization.setIdentifier(List.of(identifier));
-        organization.setName("Test Org");
-        Address address = new Address();
-        address.addLine("12345 Fake Street");
-        organization.setAddress(List.of(address));
-
-        final Bundle bundle = new Bundle();
-        bundle.addEntry(new Bundle.BundleEntryComponent().setResource(organization));
-        return bundle;
+        Organization organization = AttributionTestHelpers.createOrgResource(uuid, "1334567892");
+        return AttributionTestHelpers.createBundle(organization);
     }
 }
