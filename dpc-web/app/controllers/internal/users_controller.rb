@@ -51,7 +51,7 @@ module Internal
       user_ids = params[:users]
 
       if user_ids.blank?
-        flash[:alert] = "No users have been selected."
+        flash[:alert] = 'No users have been selected.'
       else
         respond_to do |format|
           filename = "users-#{Time.now.strftime('%Y%m%dT%H%M')}.csv"
