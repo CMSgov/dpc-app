@@ -83,14 +83,14 @@ class User < ApplicationRecord
   end
 
   ATTRS = %w[id first_name last_name email requested_organization requested_organization_type
-    address_1 address_2 city state zip agree_to_terms requested_num_providers created_at updated_at].freeze
+             address_1 address_2 city state zip agree_to_terms requested_num_providers created_at updated_at].freeze
 
   # html escape these fields for XSS protection
   ESCAPED_ATTRS = %w[first_name last_name requested_organization address_1 address_2 city].freeze
 
   def self.to_csv(user_ids)
     users = User.find(user_ids)
-    CSV.generate(headers:true) do |csv|
+    CSV.generate(headers: true) do |csv|
       csv << ATTRS
       users.each do |user|
         attributes = user.attributes

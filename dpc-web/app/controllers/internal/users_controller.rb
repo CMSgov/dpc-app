@@ -49,9 +49,14 @@ module Internal
 
     def download
       user_ids = params[:users]
-      respond_to do |format|
-        filename = "users-#{Time.now.strftime('%Y%m%dT%H%M')}.csv"
-        format.csv { send_data User.to_csv(user_ids), filename: filename }
+
+      if user_ids.blank?
+        flash[:alert] = "No users have been selected."
+      else
+        respond_to do |format|
+          filename = "users-#{Time.now.strftime('%Y%m%dT%H%M')}.csv"
+          format.csv { send_data User.to_csv(user_ids), filename: filename }
+        end
       end
     end
 
