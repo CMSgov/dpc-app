@@ -8,6 +8,7 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -65,6 +66,9 @@ func (api *API) CreateOrg() string {
 	orgResp, _ := ioutil.ReadAll(resp.Body)
 	var result Resource
 	json.Unmarshal(orgResp, &result)
+	if result.Type == "OperationOutcome" {
+		cleanAndPanic(errors.New(string(orgResp)))
+	}
 	return result.ID
 }
 
