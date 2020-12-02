@@ -51,7 +51,8 @@ module Internal
       user_ids = params[:users]
 
       if user_ids.blank?
-        flash[:alert] = 'No users have been selected.'
+        flash[:alert] = 'CSV file could not be compiled. No users were found.'
+        redirect_to root_path
       else
         respond_to do |format|
           filename = "users-#{Time.now.strftime('%Y%m%dT%H%M')}.csv"
