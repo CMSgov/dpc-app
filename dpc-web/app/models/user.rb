@@ -99,14 +99,14 @@ class User < ApplicationRecord
         escaped_attributes = attributes.map do |k, v|
           if ESCAPED_ATTRS.include? k
             v = ERB::Util.html_escape(v)
-    
+
             if k == 'tags'
               v.gsub!('&quot;', '')
               v.delete!('[')
               v.delete!(']')
             end
           end
-    
+
           [k, v]
         end.to_h
         csv << escaped_attributes.values_at(*ATTRS)
@@ -127,7 +127,6 @@ class User < ApplicationRecord
   end
 
   private
-
 
   def password_complexity
     return if password.nil?
