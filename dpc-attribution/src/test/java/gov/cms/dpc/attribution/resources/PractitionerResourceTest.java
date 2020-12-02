@@ -254,21 +254,26 @@ class PractitionerResourceTest extends AbstractAttributionTest {
         APPLICATION.getConfiguration().setProviderLimit(5);
 
         final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
+        final Practitioner practitioner2 = AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
 
-        final ICreateTyped creation = client
-                .create()
-                .resource(practitioner)
-                .encodedJson();
-        final MethodOutcome mo = creation
-                .execute();
+        final MethodOutcome mo = submitPractitioner(practitioner).execute();
 
-        final Practitioner pract2 = (Practitioner) mo.getResource();
-        practitionersToCleanUp.add(pract2);
+        final Practitioner pract = (Practitioner) mo.getResource();
+        practitionersToCleanUp.add(pract);
 
-        assertNotNull(pract2, "Should be created");
+        assertNotNull(pract, "Should be created");
 
         // Try again, should fail
-        assertThrows(UnprocessableEntityException.class, creation::execute, "Should not modify");
+        final ICreateTyped creation2 = submitPractitioner(practitioner2);
+        practitionersToCleanUp.add(practitioner2);
+
+        assertThrows(UnprocessableEntityException.class, creation2::execute, "Should not modify");
+    }
+
+    private ICreateTyped submitPractitioner(Practitioner practitioner) {
+        return client.create()
+                .resource(practitioner)
+                .encodedJson();
     }
 
     @Test
