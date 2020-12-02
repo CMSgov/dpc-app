@@ -83,7 +83,8 @@ class User < ApplicationRecord
   end
 
   ATTRS = %w[id first_name last_name email requested_organization requested_organization_type
-             address_1 address_2 city state zip agree_to_terms requested_num_providers created_at updated_at tags].freeze
+             address_1 address_2 city state zip agree_to_terms requested_num_providers created_at
+             updated_at tags].freeze
 
   # html escape these fields for XSS protection
   ESCAPED_ATTRS = %w[first_name last_name requested_organization address_1 address_2 city tags].freeze
@@ -94,15 +95,15 @@ class User < ApplicationRecord
       csv << ATTRS
       users.each do |user|
         attributes = user.attributes
-        attributes["tags"] = user.tags.map(&:name)
+        attributes['tags'] = user.tags.map(&:name)
         escaped_attributes = attributes.map do |k, v|
           if ESCAPED_ATTRS.include? k
             v = ERB::Util.html_escape(v)
 
-            if k == "tags"
-              v.gsub!("&quot;", '')
-              v.gsub!("[", '')
-              v.gsub!("]", '')
+            if k == 'tags'
+              v.gsub!('&quot;', '')
+              v.gsub!('[', '')
+              v.gsub!(']', '')
             end
           end
 
