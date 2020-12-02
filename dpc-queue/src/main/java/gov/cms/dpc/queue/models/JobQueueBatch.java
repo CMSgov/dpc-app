@@ -154,6 +154,9 @@ public class JobQueueBatch implements Serializable {
     @JoinColumn(name = "batch_id", insertable = false, updatable = false, nullable = false)
     private List<JobQueueBatchFile> jobQueueBatchFiles;
 
+    @Column(name = "requesting_ip")
+    private String requestingIP;
+
     public JobQueueBatch() {
     }
 
@@ -163,7 +166,7 @@ public class JobQueueBatch implements Serializable {
                          List<String> patients,
                          List<ResourceType> resourceTypes,
                          OffsetDateTime since,
-                         OffsetDateTime transactionTime) {
+                         OffsetDateTime transactionTime, String requestingIP) {
         this.batchID = UUID.randomUUID();
         this.jobID = jobID;
         this.orgID = orgID;
@@ -175,6 +178,7 @@ public class JobQueueBatch implements Serializable {
         this.status = JobStatus.QUEUED;
         this.submitTime = OffsetDateTime.now(ZoneOffset.UTC);
         this.jobQueueBatchFiles = new ArrayList<>();
+        this.requestingIP = requestingIP;
     }
 
     /**
@@ -266,6 +270,14 @@ public class JobQueueBatch implements Serializable {
 
     public void setCompleteTime(OffsetDateTime time) {
         this.completeTime = time;
+    }
+
+    public String getRequestingIP() {
+        return requestingIP;
+    }
+
+    public void setRequestingIP(String requestingIP) {
+        this.requestingIP = requestingIP;
     }
 
     public List<JobQueueBatchFile> getJobQueueBatchFiles() {

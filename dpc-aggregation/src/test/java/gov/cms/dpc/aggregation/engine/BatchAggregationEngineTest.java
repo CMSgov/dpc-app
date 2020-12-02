@@ -92,8 +92,8 @@ class BatchAggregationEngineTest {
                 Collections.singletonList(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0)),
                 Collections.singletonList(ResourceType.ExplanationOfBenefit),
                 MockBlueButtonClient.TEST_LAST_UPDATED.minusSeconds(1),
-                MockBlueButtonClient.BFD_TRANSACTION_TIME
-        );
+                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                null);
 
         // Do the job
         queue.claimBatch(engine.getAggregatorID())
@@ -129,8 +129,8 @@ class BatchAggregationEngineTest {
                 MockBlueButtonClient.TEST_PATIENT_MBIS,
                 JobQueueBatch.validResourceTypes,
                 MockBlueButtonClient.TEST_LAST_UPDATED.minusSeconds(1),
-                MockBlueButtonClient.BFD_TRANSACTION_TIME
-        );
+                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                null);
 
         // Do the job
         queue.claimBatch(engine.getAggregatorID())
@@ -171,8 +171,8 @@ class BatchAggregationEngineTest {
                 MockBlueButtonClient.TEST_PATIENT_WITH_BAD_IDS,
                 Collections.singletonList(ResourceType.ExplanationOfBenefit),
                 MockBlueButtonClient.TEST_LAST_UPDATED.minusSeconds(1),
-                MockBlueButtonClient.BFD_TRANSACTION_TIME
-        );
+                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                null);
 
         // Do the job
         queue.claimBatch(engine.getAggregatorID())
@@ -211,8 +211,8 @@ class BatchAggregationEngineTest {
                 MockBlueButtonClient.TEST_PATIENT_MBIS.subList(0,1),
                 Collections.singletonList(ResourceType.ExplanationOfBenefit),
                 MockBlueButtonClient.TEST_LAST_UPDATED.minusSeconds(1),
-                MockBlueButtonClient.BFD_TRANSACTION_TIME
-        );
+                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                null);
 
         // Do the job
         queue.claimBatch(engine.getAggregatorID())
@@ -254,8 +254,8 @@ class BatchAggregationEngineTest {
                 MockBlueButtonClient.TEST_PATIENT_MBIS.subList(0,1),
                 Collections.singletonList(ResourceType.ExplanationOfBenefit),
                 MockBlueButtonClient.TEST_LAST_UPDATED.minusSeconds(1),
-                MockBlueButtonClient.BFD_TRANSACTION_TIME
-        );
+                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                null);
 
         // Do the job
         queue.claimBatch(engine.getAggregatorID())
@@ -297,8 +297,8 @@ class BatchAggregationEngineTest {
                 MockBlueButtonClient.TEST_PATIENT_MBIS.subList(0,1),
                 Collections.singletonList(ResourceType.ExplanationOfBenefit),
                 MockBlueButtonClient.TEST_LAST_UPDATED.minusSeconds(1),
-                MockBlueButtonClient.BFD_TRANSACTION_TIME
-        );
+                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                null);
 
         // Do the job
         queue.claimBatch(engine.getAggregatorID())
@@ -340,8 +340,8 @@ class BatchAggregationEngineTest {
                 MockBlueButtonClient.TEST_PATIENT_MBIS.subList(0,1),
                 Collections.singletonList(ResourceType.ExplanationOfBenefit),
                 MockBlueButtonClient.TEST_LAST_UPDATED.minusSeconds(1),
-                MockBlueButtonClient.BFD_TRANSACTION_TIME
-        );
+                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                null);
 
         // Do the job
         queue.claimBatch(engine.getAggregatorID())

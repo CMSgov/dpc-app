@@ -6,6 +6,7 @@ import ca.uhn.fhir.rest.gclient.ICreateTyped;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import ca.uhn.fhir.rest.gclient.IReadExecutable;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import com.google.common.net.HttpHeaders;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.common.utils.NPIUtil;
@@ -21,6 +22,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
@@ -33,6 +35,7 @@ import java.util.UUID;
 import static gov.cms.dpc.api.resources.v1.GroupResource.SYNTHETIC_BENE_ID;
 import static gov.cms.dpc.fhir.FHIRMediaTypes.FHIR_JSON;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.times;
 
 public class GroupResourceUnitTest {
 
@@ -44,6 +47,9 @@ public class GroupResourceUnitTest {
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     IJobQueue mockQueue;
+
+    @Mock
+    HttpServletRequest request;
 
     GroupResource resource;
 
@@ -210,18 +216,21 @@ public class GroupResourceUnitTest {
 
         //Past date with Z offset
         String since = "2020-05-26T16:43:01.780Z";
-        Response response = resource.export(organizationPrincipal, groupId, null, FHIRMediaTypes.NDJSON, since, "respond-async");
+        Response response = resource.export(organizationPrincipal, groupId, null, FHIRMediaTypes.NDJSON, since, "respond-async", request);
         assertEquals(Response.Status.ACCEPTED.getStatusCode(), response.getStatus(), "Expected ACCEPTED response code");
 
         //Past date with +10:00 offset
         since = "2020-05-26T16:43:01.780+10:00";
-        response = resource.export(organizationPrincipal, groupId, null, FHIRMediaTypes.NDJSON, since, "respond-async");
+        response = resource.export(organizationPrincipal, groupId, null, FHIRMediaTypes.NDJSON, since, "respond-async", request);
         assertEquals(Response.Status.ACCEPTED.getStatusCode(), response.getStatus(), "Expected ACCEPTED response code");
 
         //A few seconds ago using -04:00 offset
         since = OffsetDateTime.now(ZoneId.of("America/Puerto_Rico")).minusSeconds(5).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-        response = resource.export(organizationPrincipal, groupId, null, FHIRMediaTypes.NDJSON, since, "respond-async");
+        response = resource.export(organizationPrincipal, groupId, null, FHIRMediaTypes.NDJSON, since, "respond-async", request);
         assertEquals(Response.Status.ACCEPTED.getStatusCode(), response.getStatus(), "Expected ACCEPTED response code");
+
+        Mockito.verify(request, times(3)).getHeader(HttpHeaders.X_FORWARDED_FOR);
+        Mockito.verify(request, times(3)).getRemoteAddr();
     }
 
     @Test
@@ -260,7 +269,7 @@ public class GroupResourceUnitTest {
         //Test a few seconds into the future
         WebApplicationException exception = Assertions.assertThrows(BadRequestException.class, () ->{
                 String since =  OffsetDateTime.now(ZoneId.of("America/Puerto_Rico")).plusSeconds(10).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-                resource.export(organizationPrincipal, groupId, null, FHIRMediaTypes.NDJSON ,since, "respond-async");
+                resource.export(organizationPrincipal, groupId, null, FHIRMediaTypes.NDJSON ,since, "respond-async", request);
             });
 
         assertEquals("'_since' query parameter cannot be a future date", exception.getMessage());
@@ -268,7 +277,7 @@ public class GroupResourceUnitTest {
         //Test a few days into the future
         exception = Assertions.assertThrows(BadRequestException.class, () -> {
                     final String since =  OffsetDateTime.now().plusDays(2).toString();
-                    resource.export(organizationPrincipal, groupId, null, FHIRMediaTypes.NDJSON, since, "respond-async");
+                    resource.export(organizationPrincipal, groupId, null, FHIRMediaTypes.NDJSON, since, "respond-async", request);
                 });
 
         assertEquals("'_since' query parameter cannot be a future date", exception.getMessage());
@@ -276,10 +285,12 @@ public class GroupResourceUnitTest {
         //Test bad format
         exception = Assertions.assertThrows(WebApplicationException.class, () -> {
             final String since = "2020-05-2X616:43:01.780+10:00";
-            resource.export(organizationPrincipal, groupId, null, FHIRMediaTypes.NDJSON, since, "respond-async");
+            resource.export(organizationPrincipal, groupId, null, FHIRMediaTypes.NDJSON, since, "respond-async", request);
         });
 
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), exception.getResponse().getStatus());
+
+        Mockito.verifyNoInteractions(request);
     }
     @Test
     public void testOutputFormatSetting() {
@@ -322,29 +333,32 @@ public class GroupResourceUnitTest {
                 .thenReturn(new Bundle());
 
         Assertions.assertDoesNotThrow(() -> {
-            resource.export(organizationPrincipal, "roster-id", "Coverage", FHIRMediaTypes.APPLICATION_NDJSON, "2017-01-01T00:00:00Z", "respond-async");
+            resource.export(organizationPrincipal, "roster-id", "Coverage", FHIRMediaTypes.APPLICATION_NDJSON, "2017-01-01T00:00:00Z", "respond-async", request);
         });
 
         Assertions.assertDoesNotThrow(() -> {
-            resource.export(organizationPrincipal, "roster-id", "Coverage", FHIRMediaTypes.FHIR_NDJSON, "2017-01-01T00:00:00Z", "respond-async");
+            resource.export(organizationPrincipal, "roster-id", "Coverage", FHIRMediaTypes.FHIR_NDJSON, "2017-01-01T00:00:00Z", "respond-async", request);
         });
 
         Assertions.assertDoesNotThrow(() -> {
-            resource.export(organizationPrincipal, "roster-id", "Coverage", FHIRMediaTypes.NDJSON, "2017-01-01T00:00:00Z", "respond-async");
+            resource.export(organizationPrincipal, "roster-id", "Coverage", FHIRMediaTypes.NDJSON, "2017-01-01T00:00:00Z", "respond-async", request);
         });
 
         Assertions.assertThrows(BadRequestException.class, () -> {
-            resource.export(organizationPrincipal, "roster-id", "Coverage", FHIR_JSON, "2017-01-01T00:00:00Z", "respond-async");
+            resource.export(organizationPrincipal, "roster-id", "Coverage", FHIR_JSON, "2017-01-01T00:00:00Z", "respond-async", request);
         });
 
         Assertions.assertThrows(BadRequestException.class, () -> {
-            resource.export(organizationPrincipal, "roster-id", "Coverage", null, "2017-01-01T00:00:00Z", "respond-async");
+            resource.export(organizationPrincipal, "roster-id", "Coverage", null, "2017-01-01T00:00:00Z", "respond-async", request);
         });
 
         Assertions.assertThrows(BadRequestException.class, () -> {
-            resource.export(organizationPrincipal, "roster-id", "Coverage", "", "2017-01-01T00:00:00Z", "respond-async");
+            resource.export(organizationPrincipal, "roster-id", "Coverage", "", "2017-01-01T00:00:00Z", "respond-async", request);
         });
 
+        //3 non bad requests
+        Mockito.verify(request, times(3)).getHeader(HttpHeaders.X_FORWARDED_FOR);
+        Mockito.verify(request, times(3)).getRemoteAddr();
     }
 
 }

@@ -3,6 +3,7 @@ package gov.cms.dpc.api.auth.staticauth;
 import gov.cms.dpc.api.auth.DPCAuthCredentials;
 import gov.cms.dpc.api.auth.DPCAuthFilter;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
+import gov.cms.dpc.common.MDCConstants;
 import io.dropwizard.auth.AuthFilter;
 import io.dropwizard.auth.Authenticator;
 import org.hl7.fhir.dstu3.model.IdType;
@@ -41,7 +42,7 @@ public class StaticAuthFilter extends AuthFilter<DPCAuthCredentials, Organizatio
 
         // Now that we have the organization_id, set it in the logging context
         MDC.clear();
-        MDC.put("organization_id", orgID);
+        MDC.put(MDCConstants.ORGANIZATION_ID, orgID);
 
         final Organization org = new Organization();
         org.setId(new IdType("Organization", orgID));
