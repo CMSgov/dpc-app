@@ -8,6 +8,7 @@ import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import org.hl7.fhir.dstu3.model.*;
 
 import java.sql.Date;
+import java.util.List;
 
 public class AttributionTestHelpers {
 
@@ -41,6 +42,25 @@ public class AttributionTestHelpers {
         patient.setManagingOrganization(new Reference(new IdType("Organization", organizationID)));
 
         return patient;
+    }
+
+    public static Organization createOrgResource(String uuid, String npi){
+        final Organization organization = new Organization();
+        organization.setId(uuid);
+        organization.addIdentifier().setSystem(DPCIdentifierSystem.NPPES.getSystem()).setValue(npi);
+        organization.setName("Test Org");
+        organization.addAddress().addLine("12345 Fake Street");
+        return organization;
+    }
+
+    public static Bundle createBundle(Resource... resources){
+        final Bundle bundle = new Bundle();
+        if(resources != null){
+            for(Resource resource:resources){
+                bundle.addEntry(new Bundle.BundleEntryComponent().setResource(resource));
+            }
+        }
+        return bundle;
     }
 
     public static IGenericClient createFHIRClient(FhirContext ctx, String serverURL) {
