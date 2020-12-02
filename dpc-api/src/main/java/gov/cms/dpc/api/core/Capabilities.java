@@ -8,12 +8,12 @@ import org.hl7.fhir.dstu3.model.CapabilityStatement;
 import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.MissingResourceException;
 
 import static org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementSoftwareComponent;
+import static org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementImplementationComponent;
 
 public class Capabilities {
 
@@ -33,13 +33,13 @@ public class Capabilities {
      *
      * @return - {@link CapabilityStatement} of system.
      */
-    public static CapabilityStatement getCapabilities() {
+    public static CapabilityStatement getCapabilities(String baseURL) {
         // Double lock check to lazy init capabilities statement
         if (statement == null) {
             synchronized (lock) {
                 if (statement == null) {
                     logger.debug("Building capabilities statement");
-                    statement = buildCapabilities();
+                    statement = buildCapabilities(baseURL);
                     return statement;
                 }
             }
@@ -49,7 +49,7 @@ public class Capabilities {
     }
 
 
-    private static CapabilityStatement buildCapabilities() {
+    private static CapabilityStatement buildCapabilities(String baseURL) {
         final PropertiesProvider pp = new PropertiesProvider();
 
         DateTimeType releaseDate = DateTimeType.parseV3(pp.getBuildTimestamp().format(FHIRFormatters.DATE_TIME_FORMATTER));
@@ -63,6 +63,7 @@ public class Capabilities {
             final CapabilityStatement capabilityStatement = FhirContext.forDstu3().newJsonParser().parseResource(CapabilityStatement.class, resource);
             return capabilityStatement
                     .setVersion(pp.getApplicationVersion())
+                    .setImplementation(generateImplementationComponent(baseURL))
                     .setSoftware(generateSoftwareComponent(releaseDate, pp.getApplicationVersion()));
         } catch (IOException e) {
             throw new IllegalStateException("Unable to read capability statement", e);
@@ -74,5 +75,12 @@ public class Capabilities {
                 .setName("Data @ Point of Care API")
                 .setVersion(releaseVersion)
                 .setReleaseDateElement(releaseDate);
+    }
+
+    private static CapabilityStatementImplementationComponent generateImplementationComponent(String baseURL) {
+
+        return new CapabilityStatementImplementationComponent()
+                .setDescription("As patients move throughout the healthcare system, providers often struggle to gain and maintain a complete picture of their medical history. Data at the Point of Care fills in the gaps with claims data to inform providers with secure, structured patient history, past procedures, medication adherence, and more.")
+                .setUrl(baseURL);
     }
 }

@@ -111,7 +111,7 @@ class AuthHandlerTest {
     private static BaseResource mockBaseResource() {
         final BaseResource base = mock(BaseResource.class);
 
-        doReturn(Capabilities.getCapabilities()).when(base).metadata();
+        doReturn(Capabilities.getCapabilities("https://sandbox.dpc.cms.gov/api/v1")).when(base).metadata();
 
         return base;
     }

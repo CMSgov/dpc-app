@@ -10,6 +10,7 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Group;
 import org.hl7.fhir.dstu3.model.Provenance;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
@@ -56,5 +57,6 @@ public abstract class AbstractGroupResource {
                                     @QueryParam("_type") @NoHtml String resourceTypes,
                                     @QueryParam("_outputFormat") @NoHtml String outputFormat,
                                     @QueryParam("_since") @NoHtml String since,
-                                    @HeaderParam("Prefer") @Valid String Prefer);
+                                    @HeaderParam("Prefer") @Valid String Prefer,
+                                    HttpServletRequest httpServletRequest);
 }
