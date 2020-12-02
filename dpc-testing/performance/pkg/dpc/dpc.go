@@ -14,6 +14,7 @@ type Resource struct {
 	ID          string `json:"id"`
 	ClientToken []byte `json:"token"`
 	AccessToken string `json:"access_token"`
+	Type        string `json:"resourceType"`
 }
 
 // Pull `ids` out of a set of response bodies
