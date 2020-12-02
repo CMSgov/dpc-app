@@ -137,12 +137,12 @@ func genBodies(config Config) func() []byte {
 	}
 
 	n := len(config.Bodies)
+	if n == 0 {
+		return func() []byte { return []byte{} }
+	}
 	i := 0
 	return func() []byte {
-		if i >= n {
-			return nil
-		}
-		body := config.Bodies[i]
+		body := config.Bodies[i%n]
 		i++
 		return body
 	}
