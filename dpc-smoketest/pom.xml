@@ -13,7 +13,7 @@
     <name>DPC SmokeTests</name>
 
     <properties>
-        <jmeter.version>5.2.1</jmeter.version>
+        <jmeter.version>5.4</jmeter.version>
     </properties>
 
     <dependencies>
@@ -72,10 +72,8 @@
                 <configuration>
                     <createDependencyReducedPom>true</createDependencyReducedPom>
                     <transformers>
-                        <transformer
-                                implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
-                        <transformer
-                                implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                        <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                        <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
 <!--                            <mainClass>${mainClass}</mainClass>-->
                         </transformer>
                     </transformers>
