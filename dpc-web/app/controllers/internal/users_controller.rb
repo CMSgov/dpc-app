@@ -48,9 +48,16 @@ module Internal
     end
 
     def download
-      respond_to do |format|
-        filename = "users-#{Time.now.strftime('%Y%m%dT%H%M')}.csv"
-        format.csv { send_data User.all.to_csv, filename: filename }
+      user_ids = params[:users]
+
+      if user_ids.blank?
+        flash[:alert] = 'CSV file could not be compiled. No users were found.'
+        redirect_to root_path
+      else
+        respond_to do |format|
+          filename = "users-#{Time.now.strftime('%Y%m%dT%H%M')}.csv"
+          format.csv { send_data User.to_csv(user_ids), filename: filename }
+        end
       end
     end
 
