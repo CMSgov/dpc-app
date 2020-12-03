@@ -14,6 +14,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.time.Duration;
+import java.util.List;
 
 public class DPCAttributionConfiguration extends TypesafeConfiguration implements IDPCDatabase, IDPCFHIRConfiguration {
 
@@ -49,6 +50,8 @@ public class DPCAttributionConfiguration extends TypesafeConfiguration implement
 
     @Min(-1)
     private Integer patientLimit;
+
+    private List<String> lookBackExemptOrgs;
 
     @Override
     public DataSourceFactory getDatabase() {
@@ -115,5 +118,11 @@ public class DPCAttributionConfiguration extends TypesafeConfiguration implement
 
     public void setPatientLimit(Integer patientLimit) {
         this.patientLimit = patientLimit;
+    }
+
+    public List<String> getLookBackExemptOrgs() { return lookBackExemptOrgs; }
+
+    public void setLookBackExemptOrgs(List<String> lookBackExemptOrgs) {
+        this.lookBackExemptOrgs = lookBackExemptOrgs;
     }
 }

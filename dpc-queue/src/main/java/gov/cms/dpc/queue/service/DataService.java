@@ -21,7 +21,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
@@ -43,7 +46,7 @@ public class DataService {
     }
 
     public Resource retrieveData(UUID organizationId, UUID providerId, List<String> patientIds, ResourceType... resourceTypes) {
-        return retrieveData(organizationId, providerId, patientIds, OffsetDateTime.now(ZoneOffset.UTC), resourceTypes);
+        return retrieveData(organizationId, providerId, patientIds, OffsetDateTime.now(ZoneOffset.UTC), null, resourceTypes);
     }
 
     /**
@@ -51,6 +54,7 @@ public class DataService {
      * @param organizationID UUID of organization
      * @param providerID UUID of provider
      * @param patientIDs List of patient String UUIDs
+     * @param requestingIP
      * @param resourceTypes List of ResourceType data to retrieve
      * @return Resource
      */
@@ -58,8 +62,8 @@ public class DataService {
                                  UUID providerID,
                                  List<String> patientIDs,
                                  OffsetDateTime transactionTime,
-                                 ResourceType... resourceTypes) {
-        UUID jobID = this.queue.createJob(organizationID, providerID.toString(), patientIDs, List.of(resourceTypes), null, transactionTime);
+                                 String requestingIP, ResourceType... resourceTypes) {
+        UUID jobID = this.queue.createJob(organizationID, providerID.toString(), patientIDs, List.of(resourceTypes), null, transactionTime, requestingIP);
         Optional<List<JobQueueBatch>> optionalBatches = waitForJobToComplete(jobID, organizationID, this.queue);
 
         if (optionalBatches.isPresent()) {

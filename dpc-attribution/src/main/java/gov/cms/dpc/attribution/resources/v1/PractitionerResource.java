@@ -86,7 +86,7 @@ public class PractitionerResource extends AbstractPractitionerResource {
         final List<ProviderEntity> existingProvidersByNPI = this.dao.getProviders(null, entity.getProviderNPI(), entity.getOrganization().getId());
 
         if (providerLimit != null && providerLimit != -1 && totalExistingProviders >= providerLimit) {
-            return Response.status(422).entity(this.converter.toFHIR(Practitioner.class, existingProvidersByNPI.get(0))).build();
+            return Response.status(422).entity(this.converter.toFHIR(Practitioner.class, entity)).build();
         }
 
         if (existingProvidersByNPI.isEmpty()) {
