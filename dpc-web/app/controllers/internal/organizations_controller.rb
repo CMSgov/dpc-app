@@ -6,6 +6,7 @@ module Internal
 
     def index
       results = BaseSearch.new(params: params, scope: params[:org_type]).results
+      @tags = Tag.all
 
       @organizations = org_page_params(results)
       render layout: 'table_index'
