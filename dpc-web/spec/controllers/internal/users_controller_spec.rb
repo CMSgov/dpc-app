@@ -46,9 +46,15 @@ RSpec.describe Internal::UsersController, type: :controller do
     it 'sends file from User.to_csv' do
       allow(User).to receive(:to_csv).and_return('test_file')
 
-      get :download, format: :csv
+      get :download, format: :csv, params: { users: [50000] }
 
       expect(response.body).to eq('test_file')
+    end
+
+    it 'redirects with error if no users' do
+      get :download, format: :csv
+
+      expect(response).to redirect_to root_path
     end
   end
 end
