@@ -51,7 +51,7 @@
         <jooq.version>3.13.1</jooq.version>
         <bouncey.version>1.66</bouncey.version>
         <pitest.version>1.5.1</pitest.version>
-        <newrelic.agent.version>5.13.0</newrelic.agent.version>
+        <newrelic.agent.version>5.14.0</newrelic.agent.version>
         <newrelic.agent.type>zip</newrelic.agent.type>
         <h2.version>1.4.200</h2.version>
     </properties>
@@ -286,7 +286,7 @@
             <dependency>
                 <groupId>org.apache.httpcomponents</groupId>
                 <artifactId>httpclient</artifactId>
-                <version>4.5.12</version>
+                <version>4.5.13</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
