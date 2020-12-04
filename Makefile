@@ -21,10 +21,6 @@ ig/publish: ${IG_PUBLISHER}
 	@echo "Building Implementation Guide"
 	@java -jar ${IG_PUBLISHER} -ig ig/ig.json
 
-.PHONY: travis secure-envs
-travis:
-	@./dpc-test.sh
-
 .PHONY: website
 website:
 	@docker build -f dpc-web/Dockerfile . -t dpc-web
@@ -32,7 +28,7 @@ website:
 .PHONY: start-app
 start-app: secure-envs
 	@docker-compose up start_core_dependencies
-	@docker-compose up start_api_dependencies
+	@USE_BFD_MOCK=false docker-compose up start_api_dependencies
 	@docker-compose up start_api
 
 .PHONY: ci-app

@@ -45,7 +45,7 @@ public class SuppressionFileImportTest {
     final Path PATH_1800_COPY = Paths.get("./src/test/resources/synthetic-1800-files/copy");
 
     @Rule
-    public DAOTestRule database = DAOTestRule.newBuilder().addEntityClass(ConsentEntity.class).build();
+    public DAOTestRule database = DAOTestRule.newBuilder().addEntityClass(ConsentEntity.class).setProperty("webAllowOthers", "false").build();
 
     @BeforeEach
     void setUp() throws Exception {

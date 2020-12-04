@@ -13,7 +13,7 @@ class OrganizationsController < ApplicationController
       flash[:notice] = 'Organization updated.'
       redirect_to portal_path
     else
-      flash[:alert] = 'Organization could not be updated.'
+      flash[:alert] = "Organization could not be updated: #{model_error_string(@organization)}"
       render :edit
     end
   end

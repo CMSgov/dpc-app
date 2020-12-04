@@ -1,4 +1,4 @@
-package main
+package dpc
 
 import (
 	"bufio"
@@ -8,7 +8,7 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
-	"flag"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -18,52 +18,46 @@ import (
 	dpcclient "github.com/CMSgov/dpc-app/dpcclient/lib"
 )
 
-type Resource struct {
-	ID string `json:"id"`
+type API struct {
+	URL            string
+	goldenMacaroon []byte
+	AdminAPI
 }
 
-func initFlags() {
-	flag.StringVar(&apiURL, "api_url", "http://localhost:3002/v1", "Base URL of API")
-	flag.StringVar(&adminURL, "admin_url", "http://localhost:9903/tasks", "Base URL of admin tasks")
-	flag.Parse()
+func New(apiURL string, admin AdminAPI) *API {
+	api := API{
+		URL:      apiURL,
+		AdminAPI: admin,
+	}
+	api.goldenMacaroon = admin.GetClientToken()
+
+	return &api
 }
 
-func createDirs() {
-	err := os.MkdirAll("keys", os.ModePerm)
+func (api *API) RefreshAccessToken(privateKey *rsa.PrivateKey, keyID string, clientToken []byte) string {
+	authToken, err := dpcclient.GenerateAuthToken(privateKey, keyID, clientToken, api.URL)
 	if err != nil {
 		cleanAndPanic(err)
 	}
 
-	err = os.MkdirAll("tokens", os.ModePerm)
+	accessToken, err := dpcclient.GetAccessToken(authToken, api.URL)
 	if err != nil {
 		cleanAndPanic(err)
 	}
+
+	return accessToken
 }
 
-func getClientToken(orgID string) []byte {
-	reqURL := fmt.Sprintf("%s/generate-token", adminURL)
-	if orgID != "" {
-		reqURL = fmt.Sprintf("%s?organization=%s", reqURL, orgID)
-	}
-	resp, err := http.Post(reqURL, "", nil)
-	if err != nil {
-		cleanAndPanic(err)
-	}
-	defer resp.Body.Close()
-	clientToken, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		cleanAndPanic(err)
-	}
-	return clientToken
-}
-
-func createOrg() string {
+func (api *API) CreateOrg() string {
 	orgBundleFile, _ := os.Open("../../src/main/resources/organization_bundle_parameters.json")
 	defer orgBundleFile.Close()
 	orgBundleReader := bufio.NewReader(orgBundleFile)
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/Organization/$submit", apiURL), orgBundleReader)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/Organization/$submit", api.URL), orgBundleReader)
+	if err != nil {
+		cleanAndPanic(err)
+	}
 	req.Header.Add("Content-Type", "application/fhir+json")
-	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", goldenMacaroon))
+	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", api.goldenMacaroon))
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		cleanAndPanic(err)
@@ -72,16 +66,25 @@ func createOrg() string {
 	orgResp, _ := ioutil.ReadAll(resp.Body)
 	var result Resource
 	json.Unmarshal(orgResp, &result)
+	if result.Type == "OperationOutcome" {
+		cleanAndPanic(errors.New(string(orgResp)))
+	}
 	return result.ID
 }
 
-func generateKeyPairAndSignature() (string, *rsa.PrivateKey, string) {
+func (api *API) GenerateKeyPairAndSignature() (string, *rsa.PrivateKey, string) {
 	privKey, pubKey, err := dpcclient.GenRSAKeyPair()
+	if err != nil {
+		cleanAndPanic(err)
+	}
 	if err := dpcclient.SaveDPCKeyPair("./keys/dpc-key", privKey, pubKey); err != nil {
 		cleanAndPanic(err)
 	}
 
 	pubKeyBytes, err := dpcclient.ReadSmallFile("./keys/dpc-key-public.pem")
+	if err != nil {
+		cleanAndPanic(err)
+	}
 	pubKeyStr := strings.ReplaceAll(string(pubKeyBytes), "\n", "\\n")
 
 	snippet := []byte("This is the snippet used to verify a key pair in DPC.")
@@ -100,9 +103,9 @@ func generateKeyPairAndSignature() (string, *rsa.PrivateKey, string) {
 	return pubKeyStr, privKey, sigEnc
 }
 
-func uploadKey(key, sig, orgID string) string {
+func (api *API) UploadKey(key, sig, orgID string) string {
 	keySigReader := strings.NewReader(fmt.Sprintf("{ \"key\": \"%s\", \"signature\": \"%s\" }", key, sig))
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/upload-key?organization=%s", adminURL, orgID), keySigReader)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/upload-key?organization=%s", api.AdminAPI.URL, orgID), keySigReader)
 	if err != nil {
 		cleanAndPanic(err)
 	}
@@ -121,19 +124,12 @@ func uploadKey(key, sig, orgID string) string {
 	return result.ID
 }
 
-func cleanUp(orgIDs ...string) {
-	for _, orgID := range orgIDs {
-		deleteOrg(orgID)
-	}
-	deleteDirs()
-}
-
-func deleteOrg(orgID string) {
-	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/Organization/%s", apiURL, orgID), nil)
+func (api *API) DeleteOrg(orgID string) {
+	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/Organization/%s", api.URL, orgID), nil)
 	if err != nil {
 		fmt.Println("Organization could not be deleted", err)
 	}
-	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", goldenMacaroon))
+	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", api.goldenMacaroon))
 	_, err = http.DefaultClient.Do(req)
 	if err != nil {
 		fmt.Println("Organization could not be deleted", err)
@@ -141,14 +137,29 @@ func deleteOrg(orgID string) {
 
 }
 
-func deleteDirs() {
-	err := os.RemoveAll("keys")
-	if err != nil {
-		fmt.Println("keys directory could not be deleted", err)
-	}
+type orgAuth struct {
+	orgID       string
+	accessToken string
+	keyID       string
+	privateKey  *rsa.PrivateKey
+}
 
-	err = os.RemoveAll("tokens")
-	if err != nil {
-		fmt.Println("tokens directory could not be deleted", err)
+func (api *API) SetUpOrgAuth(orgIDs ...string) orgAuth {
+	var orgID string
+	if len(orgIDs) > 0 {
+		orgID = orgIDs[0]
+	} else {
+		orgID = api.CreateOrg()
+	}
+	pubKeyStr, privateKey, signature := api.GenerateKeyPairAndSignature()
+	keyID := api.UploadKey(pubKeyStr, signature, orgID)
+	clientToken := api.AdminAPI.GetClientToken(orgID)
+	accessToken := api.RefreshAccessToken(privateKey, keyID, clientToken)
+
+	return orgAuth{
+		orgID:       orgID,
+		accessToken: accessToken,
+		keyID:       keyID,
+		privateKey:  privateKey,
 	}
 }
