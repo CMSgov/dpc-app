@@ -86,7 +86,7 @@ POST /api/v1/Token
 
 #### cURL command:
 
-<pre><code>curl -v https://sandbox.dpc.cms.gov/api/v1/Token?label={token label}&expiration={ISO formatted dateTime} \
+<pre><code>curl -d '' -v https://sandbox.dpc.cms.gov/api/v1/Token?label={token label}&expiration={ISO formatted dateTime} \
      -H 'Authorization: Bearer <span style="color: #046B99;">{access_token}</span>' \
      -H 'Accept: application/json' \
      -H 'Content-Type: application/json' \
@@ -412,13 +412,16 @@ The response from the API will return with a HTTP 200 if the JWT is valid, other
 <a href="#obtain-an-accesstoken" class="ds-u-padding-left--3 guide_sub-link">Obtain an access_token</a><br />
 <a href="#obtain-a-bearertoken" class="ds-u-padding-left--3 guide_sub-link">Obtain a bearer_token</a>
 
-Obtaining an access_token and setting it as your bearer_token are the final steps in connecting to the DPC API. **The access_token must be set as the bearer_token in EVERY API request and has a maximum expiration time of FIVE MINUTES.**
+Obtaining an access token is the final step in connecting to the DPC API. **The access token must be set in the Authorization header in EVERY API request and has a maximum expiration time of 5 MINUTES.**
+
+Example Header:
+<pre><code>Authorization: Bearer <span style="color: #046B99;">{access_token}</span></code></pre>
 
 ### Prerequisites:
 - A valid JSON Web Token (JWT)
 
 ### Obtain an access_token
-In order to receive an access_token, the valid JWT must be submitted to the /Token/auth endpoint via a POST request. The POST request is encoded as an application/x-www-form-url.
+In order to receive an access token, the valid JWT must be submitted to the /Token/auth endpoint via a POST request. The POST request body is encoded as application/x-www-form-urlencoded.
 
 **1. Set the JWT as the client_assertion** form parameter.
 
@@ -478,7 +481,7 @@ POST /api/v1/Token/auth
      -d "grant_type=client_credentials&scope=system%2F*.*&client_assertion_type=urn%3Aietf%3Aparams%3Aoauth%3Aclient-assertion-type%3Ajwt-bearer&client_assertion=<span style="color: #046B99;">{self-signed JWT}</span>"</code></pre>
 
 #### Response:
-The endpoint response is a JSON object which contains the access_token, the lifetime of the token (in seconds) and the authorized system scopes.
+The endpoint response is a JSON object which contains the access token, the lifetime of the token (in seconds), and the authorized system scopes.
 
 ~~~
 {
@@ -488,6 +491,16 @@ The endpoint response is a JSON object which contains the access_token, the life
  "scope": "system/*.*"
 }
 ~~~
+
+<div class="ds-c-alert ds-c-alert--warn">
+  <div class="ds-c-alert__body">
+    <p class="ds-c-alert__text">
+      Your access token and JWT will expire every five minutes.
+    </p>
+  </div>
+</div>
+
+You can create multiple access tokens with the same valid JWT. However, once your access token expires, you will likely need to generate a new JWT using the JWT Tool to refresh your access token.
 
 ### Obtain a bearer_token
 To obtain your bearer_token, set your access_token returned in the previous step as your bearer_token. You will need to set the "{access_token value}" from the previous response as a header in most of your API calls preceded by the word Bearer and a space.
