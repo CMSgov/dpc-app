@@ -25,9 +25,7 @@ jobs:
       - name: "API Build"
         run: |
           make ci-app
-      - name: "Smoke Test"
-        run: |
-          make smoke
+
   build-web:
     name: "Build and Test Website"
     runs-on: ubuntu-latest
@@ -37,3 +35,22 @@ jobs:
       - name: "Website Build"
         run: |
           make ci-web
+          
+  smoke-test:
+    name: "Run Smoke Test"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@v1
+      - name: "Set up JDK 11" 
+        uses: actions/setup-java@v1
+        with:
+          java-version: '11.0.2'
+      - name: "Set up Python 3.8.1"
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8.1'
+      - name: "Smoke Test"
+        run: |
+          make smoke
+  
