@@ -25,6 +25,9 @@ jobs:
       - name: "API Build"
         run: |
           make ci-app
+      - name: "Smoke Test"
+        run: |
+          make smoke
   build-web:
     name: "Build and Test Website"
     runs-on: ubuntu-latest
