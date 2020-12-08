@@ -41,7 +41,7 @@ ci-web:
 
 .PHONY: smoke
 smoke:
-	@mvn clean package -DskipTests -Djib.skip=True -pl dpc-smoketest -am
+	@mvn clean package -DskipTests -Djib.skip=True -pl dpc-smoketest -am -ntp
 
 .PHONY: smoke/local
 smoke/local: venv smoke
