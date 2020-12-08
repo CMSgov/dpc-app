@@ -19,10 +19,12 @@
 .field-group__fields.tag_list {
   display: flex;
   flex-direction: row;
+  flex-wrap: wrap;
   justify-content: space-around;
 
   .tag_container {
     cursor: pointer;
+    width: 100px;
   }
 }
 
