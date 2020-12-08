@@ -23,7 +23,7 @@ echo "│          Running Unit Tests...           │"
 echo "│                                          │"
 echo "└──────────────────────────────────────────┘"
 
-mvn test -Punit-tests
+mvn test -Punit-tests -ntp
 
 echo "┌──────────────────────────────────────────┐"
 echo "│                                          │"

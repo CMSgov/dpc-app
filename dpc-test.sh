@@ -41,12 +41,12 @@ fi
 
 # Build the application
 docker-compose up start_core_dependencies
-mvn clean compile -Perror-prone -B -V
-mvn package -Pci
+mvn clean compile -Perror-prone -B -V -ntp
+mvn package -Pci -ntp
 
 # Format the test results and copy to a new directory
 if [ -n "$REPORT_COVERAGE" ]; then
-    mvn jacoco:report
+    mvn jacoco:report -ntp
     mkdir -p reports
 
     for module in dpc-aggregation dpc-api dpc-attribution dpc-queue dpc-macaroons
@@ -78,7 +78,7 @@ docker-compose down -t 60
 
 # Collect the coverage reports for the Docker integration tests
 if [ -n "$REPORT_COVERAGE" ]; then
-    mvn jacoco:report-integration -Pci
+    mvn jacoco:report-integration -Pci -ntp
 
     for module in dpc-aggregation dpc-api dpc-attribution
     do
