@@ -11,6 +11,7 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
+import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.common.utils.SeedProcessor;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;
@@ -51,214 +52,11 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
             "{ \"reference\": \"Organization/ORGANIZATION_ID\" }, \"onBehalfOfReference\": { \"reference\": " +
             "\"Practitioner/PRACTITIONER_ID\" } } ] }";
 
+    final IParser parser = ctx.newJsonParser();
+    final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
+
     PatientResourceTest() {
         // Not used
-    }
-
-    @Test
-    @Order(2)
-    void ensurePatientsExist() throws IOException, URISyntaxException, GeneralSecurityException {
-        final IParser parser = ctx.newJsonParser();
-        final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
-        IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
-        APITestHelpers.setupPatientTest(client, parser);
-
-        final Bundle patients = client
-                .search()
-                .forResource(Patient.class)
-                .encodedJson()
-                .returnBundle(Bundle.class)
-                .execute();
-
-        assertEquals(100, patients.getTotal(), "Should have correct number of patients");
-
-        final Bundle specificSearch = client
-                .search()
-                .forResource(Patient.class)
-                .where(Patient.IDENTIFIER.exactly().systemAndCode(DPCIdentifierSystem.MBI.getSystem(), "4S41C00AA00"))
-                .returnBundle(Bundle.class)
-                .encodedJson()
-                .execute();
-
-        assertEquals(1, specificSearch.getTotal(), "Should have a single patient");
-
-        // Fetch the patient directly
-        final Patient foundPatient = (Patient) specificSearch.getEntryFirstRep().getResource();
-
-        final Patient queriedPatient = client
-                .read()
-                .resource(Patient.class)
-                .withId(foundPatient.getIdElement())
-                .encodedJson()
-                .execute();
-
-        assertTrue(foundPatient.equalsDeep(queriedPatient), "Search and GET should be identical");
-
-        // Create a new org and make sure it has no providers
-        final String m2 = FHIRHelpers.registerOrganization(attrClient, parser, OTHER_ORG_ID, "1112111111", getAdminURL());
-        // Submit a new public key to use for JWT flow
-        final String keyID = "new-key";
-        final Pair<UUID, PrivateKey> uuidPrivateKeyPair = APIAuthHelpers.generateAndUploadKey(keyID, OTHER_ORG_ID, GOLDEN_MACAROON, getBaseURL());
-
-        // Update the authenticated client to use the new organization
-        client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), m2, uuidPrivateKeyPair.getLeft(), uuidPrivateKeyPair.getRight());
-
-        final Bundle otherPatients = client
-                .search()
-                .forResource(Patient.class)
-                .returnBundle(Bundle.class)
-                .encodedJson()
-                .execute();
-
-        assertEquals(0, otherPatients.getTotal(), "Should not have any practitioners");
-
-        // Try to look for one of the other patients
-        final IReadExecutable<Patient> fetchRequest = client
-                .read()
-                .resource(Patient.class)
-                .withId(foundPatient.getId())
-                .encodedJson();
-
-        assertThrows(AuthenticationException.class, fetchRequest::execute, "Should not be authorized");
-
-        // Search, and find nothing
-        final Bundle otherSpecificSearch = client
-                .search()
-                .forResource(Patient.class)
-                .where(Patient.IDENTIFIER.exactly().identifier(foundPatient.getIdentifierFirstRep().getValue()))
-                .returnBundle(Bundle.class)
-                .encodedJson()
-                .execute();
-
-        assertEquals(0, otherSpecificSearch.getTotal(), "Should have a specific provider");
-    }
-
-    @Test
-    @Order(3)
-    void testPatientRemoval() throws IOException, URISyntaxException, GeneralSecurityException {
-        final IParser parser = ctx.newJsonParser();
-        final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
-        final String macaroon = FHIRHelpers.registerOrganization(attrClient, parser, ORGANIZATION_ID, ORGANIZATION_NPI, getAdminURL());
-        final String keyLabel = "patient-deletion-key";
-        final Pair<UUID, PrivateKey> uuidPrivateKeyPair = APIAuthHelpers.generateAndUploadKey(keyLabel, ORGANIZATION_ID, GOLDEN_MACAROON, getBaseURL());
-        final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), macaroon, uuidPrivateKeyPair.getLeft(), uuidPrivateKeyPair.getRight());
-
-        final Bundle patients = client
-                .search()
-                .forResource(Patient.class)
-                .encodedJson()
-                .returnBundle(Bundle.class)
-                .execute();
-
-        assertEquals(100, patients.getTotal(), "Should have correct number of patients");
-
-        // Try to remove one
-
-        final Patient patient = (Patient) patients.getEntry().get(patients.getTotal() - 2).getResource();
-
-        client
-                .delete()
-                .resource(patient)
-                .encodedJson()
-                .execute();
-
-        // Make sure it's done
-
-        final IReadExecutable<Patient> fetchRequest = client
-                .read()
-                .resource(Patient.class)
-                .withId(patient.getId())
-                .encodedJson();
-
-        // TODO: DPC-433, this really should be NotFound, but we can't disambiguate between the two cases
-        assertThrows(AuthenticationException.class, fetchRequest::execute, "Should not have found the resource");
-
-        // Search again
-        final Bundle secondSearch = client
-                .search()
-                .forResource(Patient.class)
-                .encodedJson()
-                .returnBundle(Bundle.class)
-                .execute();
-
-        assertEquals(99, secondSearch.getTotal(), "Should have correct number of patients");
-    }
-
-    @Test
-    @Order(4)
-    void testPatientUpdating() throws IOException, URISyntaxException, GeneralSecurityException {
-        final IParser parser = ctx.newJsonParser();
-        final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
-        final String macaroon = FHIRHelpers.registerOrganization(attrClient, parser, ORGANIZATION_ID, ORGANIZATION_NPI, getAdminURL());
-        final String keyLabel = "patient-update-key";
-        final Pair<UUID, PrivateKey> uuidPrivateKeyPair = APIAuthHelpers.generateAndUploadKey(keyLabel, ORGANIZATION_ID, GOLDEN_MACAROON, getBaseURL());
-        final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), macaroon, uuidPrivateKeyPair.getLeft(), uuidPrivateKeyPair.getRight());
-
-        final Bundle patients = client
-                .search()
-                .forResource(Patient.class)
-                .encodedJson()
-                .returnBundle(Bundle.class)
-                .execute();
-
-        assertEquals(99, patients.getTotal(), "Should have correct number of patients");
-
-        // Try to update one
-        final Patient patient = (Patient) patients.getEntry().get(patients.getTotal() - 2).getResource();
-        patient.setBirthDate(Date.valueOf("2000-01-01"));
-        patient.setGender(Enumerations.AdministrativeGender.MALE);
-
-        final MethodOutcome outcome = client
-                .update()
-                .resource(patient)
-                .withId(patient.getId())
-                .encodedJson()
-                .execute();
-
-        assertTrue(((Patient) outcome.getResource()).equalsDeep(patient), "Should have been updated correctly");
-
-        // Try to update with invalid MBI
-        Identifier mbiIdentifier = patient.getIdentifier().stream()
-                .filter(i -> DPCIdentifierSystem.MBI.getSystem().equals(i.getSystem())).findFirst().get();
-        mbiIdentifier.setValue("not-a-valid-MBI");
-
-        IUpdateExecutable update = client
-                .update()
-                .resource(patient)
-                .withId(patient.getId());
-
-        assertThrows(UnprocessableEntityException.class, update::execute);
-    }
-
-    @Test
-    @Order(5)
-    void testCreateInvalidPatient() throws IOException, URISyntaxException {
-        URL url = new URL(getBaseURL() + "/Patient");
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setRequestMethod(HttpMethod.POST);
-        conn.setRequestProperty(HttpHeaders.CONTENT_TYPE, "application/fhir+json");
-
-        APIAuthHelpers.AuthResponse auth = APIAuthHelpers.jwtAuthFlow(getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
-        conn.setRequestProperty(HttpHeaders.AUTHORIZATION, "Bearer " + auth.accessToken);
-
-        conn.setDoOutput(true);
-        String reqBody = "{\"test\": \"test\"}";
-        conn.getOutputStream().write(reqBody.getBytes());
-
-        assertEquals(HttpStatus.BAD_REQUEST_400, conn.getResponseCode());
-
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getErrorStream()))) {
-            StringBuilder respBuilder = new StringBuilder();
-            String respLine = null;
-            while ((respLine = reader.readLine()) != null) {
-                respBuilder.append(respLine.trim());
-            }
-            String resp = respBuilder.toString();
-            assertTrue(resp.contains("\"resourceType\":\"OperationOutcome\""));
-            assertTrue(resp.contains("Invalid JSON content"));
-        }
-
-        conn.disconnect();
     }
 
     @Test
@@ -292,50 +90,185 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
+    @Order(2)
+    void ensurePatientsExist() throws IOException, URISyntaxException, GeneralSecurityException {
+        IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
+        APITestHelpers.setupPatientTest(client, parser);
+
+        final Bundle patients = fetchPatients(client);
+        assertEquals(100, patients.getTotal(), "Should have correct number of patients");
+
+        final Bundle specificSearch = fetchPatientBundleByMBI(client, "4S41C00AA00");
+
+        assertEquals(1, specificSearch.getTotal(), "Should have a single patient");
+
+        // Fetch the patient directly
+        final Patient foundPatient = (Patient) specificSearch.getEntryFirstRep().getResource();
+
+        final Patient queriedPatient = client
+                .read()
+                .resource(Patient.class)
+                .withId(foundPatient.getIdElement())
+                .encodedJson()
+                .execute();
+
+        assertTrue(foundPatient.equalsDeep(queriedPatient), "Search and GET should be identical");
+
+        // Create a new org and make sure it has no providers
+        final String m2 = FHIRHelpers.registerOrganization(attrClient, parser, OTHER_ORG_ID, "1112111111", getAdminURL());
+        // Submit a new public key to use for JWT flow
+        final String keyID = "new-key";
+        final Pair<UUID, PrivateKey> uuidPrivateKeyPair = APIAuthHelpers.generateAndUploadKey(keyID, OTHER_ORG_ID, GOLDEN_MACAROON, getBaseURL());
+
+        // Update the authenticated client to use the new organization
+        client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), m2, uuidPrivateKeyPair.getLeft(), uuidPrivateKeyPair.getRight());
+
+        final Bundle otherPatients = fetchPatients(client);
+
+        assertEquals(0, otherPatients.getTotal(), "Should not have any patients");
+
+        // Try to look for one of the other patients
+        final IReadExecutable<Patient> fetchRequest = client
+                .read()
+                .resource(Patient.class)
+                .withId(foundPatient.getId())
+                .encodedJson();
+
+        assertThrows(AuthenticationException.class, fetchRequest::execute, "Should not be authorized");
+
+        // Search, and find nothing
+        final Bundle otherSpecificSearch = client
+                .search()
+                .forResource(Patient.class)
+                .where(Patient.IDENTIFIER.exactly().identifier(foundPatient.getIdentifierFirstRep().getValue()))
+                .returnBundle(Bundle.class)
+                .encodedJson()
+                .execute();
+
+        assertEquals(0, otherSpecificSearch.getTotal(), "Should have a specific provider");
+    }
+
+    @Test
+    @Order(3)
+    void testPatientRemoval() throws IOException, URISyntaxException, GeneralSecurityException {
+        final String macaroon = FHIRHelpers.registerOrganization(attrClient, parser, ORGANIZATION_ID, ORGANIZATION_NPI, getAdminURL());
+        final String keyLabel = "patient-deletion-key";
+        final Pair<UUID, PrivateKey> uuidPrivateKeyPair = APIAuthHelpers.generateAndUploadKey(keyLabel, ORGANIZATION_ID, GOLDEN_MACAROON, getBaseURL());
+        final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), macaroon, uuidPrivateKeyPair.getLeft(), uuidPrivateKeyPair.getRight());
+
+        final Bundle patients = fetchPatients(client);
+
+        assertEquals(100, patients.getTotal(), "Should have correct number of patients");
+
+        // Try to remove one
+
+        final Patient patient = (Patient) patients.getEntry().get(patients.getTotal() - 2).getResource();
+
+        client
+                .delete()
+                .resource(patient)
+                .encodedJson()
+                .execute();
+
+        // Make sure it's done
+
+        final IReadExecutable<Patient> fetchRequest = client
+                .read()
+                .resource(Patient.class)
+                .withId(patient.getId())
+                .encodedJson();
+
+        // TODO: DPC-433, this really should be NotFound, but we can't disambiguate between the two cases
+        assertThrows(AuthenticationException.class, fetchRequest::execute, "Should not have found the resource");
+
+        // Search again
+        final Bundle secondSearch = fetchPatients(client);
+
+        assertEquals(99, secondSearch.getTotal(), "Should have correct number of patients");
+    }
+
+    @Test
+    @Order(4)
+    void testPatientUpdating() throws IOException, URISyntaxException, GeneralSecurityException {
+        final String macaroon = FHIRHelpers.registerOrganization(attrClient, parser, ORGANIZATION_ID, ORGANIZATION_NPI, getAdminURL());
+        final String keyLabel = "patient-update-key";
+        final Pair<UUID, PrivateKey> uuidPrivateKeyPair = APIAuthHelpers.generateAndUploadKey(keyLabel, ORGANIZATION_ID, GOLDEN_MACAROON, getBaseURL());
+        final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), macaroon, uuidPrivateKeyPair.getLeft(), uuidPrivateKeyPair.getRight());
+
+        final Bundle patients = fetchPatients(client);
+
+        assertEquals(99, patients.getTotal(), "Should have correct number of patients");
+
+        // Try to update one
+        final Patient patient = (Patient) patients.getEntry().get(patients.getTotal() - 2).getResource();
+        patient.setBirthDate(Date.valueOf("2000-01-01"));
+        patient.setGender(Enumerations.AdministrativeGender.MALE);
+
+        final MethodOutcome outcome = client
+                .update()
+                .resource(patient)
+                .withId(patient.getId())
+                .encodedJson()
+                .execute();
+
+        assertTrue(((Patient) outcome.getResource()).equalsDeep(patient), "Should have been updated correctly");
+
+        // Try to update with invalid MBI
+        Identifier mbiIdentifier = patient.getIdentifier().stream()
+                .filter(i -> DPCIdentifierSystem.MBI.getSystem().equals(i.getSystem())).findFirst().orElseThrow();
+        mbiIdentifier.setValue("not-a-valid-MBI");
+
+        IUpdateExecutable update = client
+                .update()
+                .resource(patient)
+                .withId(patient.getId());
+
+        assertThrows(UnprocessableEntityException.class, update::execute);
+    }
+
+    @Test
+    @Order(5)
+    void testCreateInvalidPatient() throws IOException, URISyntaxException {
+        URL url = new URL(getBaseURL() + "/Patient");
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod(HttpMethod.POST);
+        conn.setRequestProperty(HttpHeaders.CONTENT_TYPE, "application/fhir+json");
+
+        APIAuthHelpers.AuthResponse auth = APIAuthHelpers.jwtAuthFlow(getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
+        conn.setRequestProperty(HttpHeaders.AUTHORIZATION, "Bearer " + auth.accessToken);
+
+        conn.setDoOutput(true);
+        String reqBody = "{\"test\": \"test\"}";
+        conn.getOutputStream().write(reqBody.getBytes());
+
+        assertEquals(HttpStatus.BAD_REQUEST_400, conn.getResponseCode());
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getErrorStream()))) {
+            StringBuilder respBuilder = new StringBuilder();
+            String respLine;
+            while ((respLine = reader.readLine()) != null) {
+                respBuilder.append(respLine.trim());
+            }
+            String resp = respBuilder.toString();
+            assertTrue(resp.contains("\"resourceType\":\"OperationOutcome\""));
+            assertTrue(resp.contains("Invalid JSON content"));
+        }
+
+        conn.disconnect();
+    }
+
+    @Test
     @Order(6)
-    void testPatientEverything() throws IOException, URISyntaxException, GeneralSecurityException {
-        final IParser parser = ctx.newJsonParser();
-        final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
-        String macaroon = FHIRHelpers.registerOrganization(attrClient, parser, ORGANIZATION_ID, ORGANIZATION_NPI, getAdminURL());
-        String keyLabel = "patient-everything-key";
-        Pair<UUID, PrivateKey> uuidPrivateKeyPair = APIAuthHelpers.generateAndUploadKey(keyLabel, ORGANIZATION_ID, GOLDEN_MACAROON, getBaseURL());
-        IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), macaroon, uuidPrivateKeyPair.getLeft(), uuidPrivateKeyPair.getRight(), false, true);
+    void testPatientEverythingWithoutGroupFetchesData() throws IOException, URISyntaxException, GeneralSecurityException {
+        IGenericClient client = generateClient(ORGANIZATION_ID, ORGANIZATION_NPI, "patient-everything-key");
         APITestHelpers.setupPractitionerTest(client, parser);
 
         String mbi = MockBlueButtonClient.TEST_PATIENT_MBIS.get(2);
-        final Bundle patients = client
-                .search()
-                .forResource(Patient.class)
-                .where(Patient.IDENTIFIER.exactly().systemAndCode(DPCIdentifierSystem.MBI.getSystem(), mbi))
-                .encodedJson()
-                .returnBundle(Bundle.class)
-                .execute();
-
-        final Patient patient = (Patient) patients.getEntry().get(0).getResource();
+        Patient patient = fetchPatient(client, mbi);
+        Practitioner practitioner = fetchPractitionerByNPI(client, "1234329724");
         final String patientId = FHIRExtractors.getEntityUUID(patient.getId()).toString();
 
-        final String practitionerNpi = "1234329724";
-        Bundle practSearch = client
-                .search()
-                .forResource(Practitioner.class)
-                .where(Practitioner.IDENTIFIER.exactly().code(practitionerNpi))
-                .returnBundle(Bundle.class)
-                .encodedJson()
-                .execute();
-        Practitioner foundPractitioner = (Practitioner) practSearch.getEntryFirstRep().getResource();
-
-        Group group = SeedProcessor.createBaseAttributionGroup(FHIRExtractors.getProviderNPI(foundPractitioner), ORGANIZATION_ID);
-        final Reference patientRef = new Reference("Patient/" + patientId);
-        group.addMember().setEntity(patientRef);
-
-        String provenance = PROVENANCE_FMT.replaceAll("ORGANIZATION_ID", ORGANIZATION_ID).replace("PRACTITIONER_ID", foundPractitioner.getId());
-        client
-                .create()
-                .resource(group)
-                .withAdditionalHeader("X-Provenance", provenance)
-                .encodedJson()
-                .execute();
-
+        // Patient without Group should still return data
         Bundle result = client
                 .operation()
                 .onInstance(new IdType("Patient", patientId))
@@ -343,39 +276,18 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
                 .withNoParameters(Parameters.class)
                 .returnResourceType(Bundle.class)
                 .useHttpGet()
-                .withAdditionalHeader("X-Provenance", provenance)
+                .withAdditionalHeader("X-Provenance", generateProvenance(ORGANIZATION_ID, practitioner.getId()))
                 .execute();
 
         assertEquals(64, result.getTotal(), "Should have 64 entries in Bundle");
-        for (Bundle.BundleEntryComponent bec : result.getEntry()) {
-            List<ResourceType> resourceTypes = List.of(ResourceType.Coverage, ResourceType.ExplanationOfBenefit, ResourceType.Patient);
-            assertTrue(resourceTypes.contains(bec.getResource().getResourceType()), "Resource type should be Coverage, EOB, or Patient");
-        }
 
-        // Unattributed organization (unauthorized)
-        macaroon = FHIRHelpers.registerOrganization(attrClient, parser, OTHER_ORG_ID, "1112111111", getAdminURL());
-        keyLabel = "patient-everything-key-2";
-        uuidPrivateKeyPair = APIAuthHelpers.generateAndUploadKey(keyLabel, OTHER_ORG_ID, GOLDEN_MACAROON, getBaseURL());
-        client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), macaroon, uuidPrivateKeyPair.getLeft(), uuidPrivateKeyPair.getRight());
-        APITestHelpers.setupPractitionerTest(client, parser);
+        // Unattributed organization (unauthorized) without Group
+        client = generateClient(OTHER_ORG_ID, "1112111111", "patient-everything-key-1");
+        practitioner = createRandomPractitionerForOrg(client, OTHER_ORG_ID);
 
-        Bundle practitioners = client
-                .search()
-                .forResource(Practitioner.class)
-                .returnBundle(Bundle.class)
-                .encodedJson()
-                .execute();
-        Practitioner practitioner = (Practitioner) practitioners.getEntryFirstRep().getResource();
+        String provenance = generateProvenance(OTHER_ORG_ID, practitioner.getId());
 
-        provenance = PROVENANCE_FMT.replaceAll("ORGANIZATION_ID", OTHER_ORG_ID).replace("PRACTITIONER_ID", practitioner.getId());
-        client
-                .create()
-                .resource(group)
-                .withAdditionalHeader("X-Provenance", provenance)
-                .encodedJson()
-                .execute();
-
-        IOperationUntypedWithInput everythingOp = client
+        IOperationUntypedWithInput<Bundle> everythingOp = client
                 .operation()
                 .onInstance(new IdType("Patient", patientId))
                 .named("$everything")
@@ -386,4 +298,125 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
 
         assertThrows(AuthenticationException.class, everythingOp::execute);
     }
+
+    @Test
+    @Order(7)
+    void testPatientEverythingWithGroupFetchesData() throws IOException, URISyntaxException, GeneralSecurityException {
+        IGenericClient client = generateClient(ORGANIZATION_ID, ORGANIZATION_NPI, "patient-everything-key-2");
+        APITestHelpers.setupPractitionerTest(client, parser);
+
+        String mbi = MockBlueButtonClient.TEST_PATIENT_MBIS.get(2);
+        Patient patient = fetchPatient(client, mbi);
+        Practitioner practitioner = fetchPractitionerByNPI(client, "1234329724");
+        final String patientId = FHIRExtractors.getEntityUUID(patient.getId()).toString();
+
+        // Patient in Group should also return data
+        Group group = SeedProcessor.createBaseAttributionGroup(FHIRExtractors.getProviderNPI(practitioner), ORGANIZATION_ID);
+        Reference patientRef = new Reference("Patient/" + patientId);
+        group.addMember().setEntity(patientRef);
+
+        client
+                .create()
+                .resource(group)
+                .withAdditionalHeader("X-Provenance", generateProvenance(ORGANIZATION_ID, practitioner.getId()))
+                .encodedJson()
+                .execute();
+
+        Bundle result = client
+                .operation()
+                .onInstance(new IdType("Patient", patientId))
+                .named("$everything")
+                .withNoParameters(Parameters.class)
+                .returnResourceType(Bundle.class)
+                .useHttpGet()
+                .withAdditionalHeader("X-Provenance", generateProvenance(ORGANIZATION_ID, practitioner.getId()))
+                .execute();
+
+        assertEquals(64, result.getTotal(), "Should have 64 entries in Bundle");
+        for (Bundle.BundleEntryComponent bec : result.getEntry()) {
+            List<ResourceType> resourceTypes = List.of(ResourceType.Coverage, ResourceType.ExplanationOfBenefit, ResourceType.Patient);
+            assertTrue(resourceTypes.contains(bec.getResource().getResourceType()), "Resource type should be Coverage, EOB, or Patient");
+        }
+
+        // Unattributed organization (unauthorized) with Group
+        client = generateClient(OTHER_ORG_ID, "1112111111", "patient-everything-key-3");
+        practitioner = createRandomPractitionerForOrg(client, OTHER_ORG_ID);
+
+        group = SeedProcessor.createBaseAttributionGroup(FHIRExtractors.getProviderNPI(practitioner), OTHER_ORG_ID);
+        patientRef = new Reference("Patient/" + patientId);
+        group.addMember().setEntity(patientRef);
+
+        String provenance = generateProvenance(OTHER_ORG_ID, practitioner.getId());
+        client
+                .create()
+                .resource(group)
+                .withAdditionalHeader("X-Provenance", provenance)
+                .encodedJson()
+                .execute();
+
+        IOperationUntypedWithInput<Bundle> everythingOp = client
+                .operation()
+                .onInstance(new IdType("Patient", patientId))
+                .named("$everything")
+                .withNoParameters(Parameters.class)
+                .returnResourceType(Bundle.class)
+                .useHttpGet()
+                .withAdditionalHeader("X-Provenance", provenance);
+
+        assertThrows(AuthenticationException.class, everythingOp::execute);
+    }
+
+    private IGenericClient generateClient(String orgID, String orgNPI, String keyLabel) throws IOException, URISyntaxException, GeneralSecurityException {
+        final String macaroon = FHIRHelpers.registerOrganization(attrClient, parser, orgID, orgNPI, getAdminURL());
+        final Pair<UUID, PrivateKey> uuidPrivateKeyPair = APIAuthHelpers.generateAndUploadKey(keyLabel, orgID, GOLDEN_MACAROON, getBaseURL());
+        return APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), macaroon, uuidPrivateKeyPair.getLeft(), uuidPrivateKeyPair.getRight(), false, true);
+    }
+
+    private String generateProvenance(String orgID, String practitionerID) {
+        return PROVENANCE_FMT.replaceAll("ORGANIZATION_ID", orgID).replace("PRACTITIONER_ID", practitionerID);
+    }
+
+    private Bundle fetchPatients(IGenericClient client) {
+        return client
+                .search()
+                .forResource(Patient.class)
+                .encodedJson()
+                .returnBundle(Bundle.class)
+                .execute();
+    }
+
+    private Patient fetchPatient(IGenericClient client, String mbi) {
+        return (Patient) fetchPatientBundleByMBI(client, mbi).getEntry().get(0).getResource();
+    }
+
+    private Bundle fetchPatientBundleByMBI(IGenericClient client, String mbi) {
+        return client
+                .search()
+                .forResource(Patient.class)
+                .where(Patient.IDENTIFIER.exactly().systemAndCode(DPCIdentifierSystem.MBI.getSystem(), mbi))
+                .returnBundle(Bundle.class)
+                .encodedJson()
+                .execute();
+    }
+
+    private Practitioner fetchPractitionerByNPI(IGenericClient client, String npi) {
+        Bundle practSearch = client
+                .search()
+                .forResource(Practitioner.class)
+                .where(Practitioner.IDENTIFIER.exactly().code(npi))
+                .returnBundle(Bundle.class)
+                .encodedJson()
+                .execute();
+        return (Practitioner) practSearch.getEntry().get(0).getResource();
+    }
+
+    private Practitioner createRandomPractitionerForOrg(IGenericClient client, String orgId) {
+        Practitioner practitioner = APITestHelpers.createPractitionerResource(NPIUtil.generateNPI(), orgId);
+        MethodOutcome methodOutcome = client.create()
+                .resource(practitioner)
+                .encodedJson()
+                .execute();
+        return (Practitioner) methodOutcome.getResource();
+    }
+
 }
