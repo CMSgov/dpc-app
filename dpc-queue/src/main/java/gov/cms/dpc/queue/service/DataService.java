@@ -53,17 +53,17 @@ public class DataService {
      * Retrieves data from BFD
      * @param organizationID UUID of organization
      * @param providerID UUID of provider
-     * @param patientIDs List of patient String UUIDs
+     * @param patientMBIs List of patient String UUIDs
      * @param requestingIP
      * @param resourceTypes List of ResourceType data to retrieve
      * @return Resource
      */
     public Resource retrieveData(UUID organizationID,
                                  UUID providerID,
-                                 List<String> patientIDs,
+                                 List<String> patientMBIs,
                                  OffsetDateTime transactionTime,
                                  String requestingIP, ResourceType... resourceTypes) {
-        UUID jobID = this.queue.createJob(organizationID, providerID.toString(), patientIDs, List.of(resourceTypes), null, transactionTime, requestingIP);
+        UUID jobID = this.queue.createJob(organizationID, providerID.toString(), patientMBIs, List.of(resourceTypes), null, transactionTime, requestingIP);
         Optional<List<JobQueueBatch>> optionalBatches = waitForJobToComplete(jobID, organizationID, this.queue);
 
         if (optionalBatches.isPresent()) {
