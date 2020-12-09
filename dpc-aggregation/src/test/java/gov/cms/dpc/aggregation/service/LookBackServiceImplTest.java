@@ -3,6 +3,7 @@ package gov.cms.dpc.aggregation.service;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import gov.cms.dpc.aggregation.dao.OrganizationDAO;
+import gov.cms.dpc.aggregation.dao.ProviderDAO;
 import gov.cms.dpc.aggregation.dao.RosterDAO;
 import gov.cms.dpc.aggregation.engine.OperationsConfig;
 import gov.cms.dpc.common.utils.NPIUtil;
@@ -38,6 +39,9 @@ public class LookBackServiceImplTest {
     private ExplanationOfBenefit eob;
 
     @Mock
+    private ProviderDAO providerDAO;
+
+    @Mock
     private RosterDAO rosterDAO;
 
     @Mock
@@ -49,7 +53,7 @@ public class LookBackServiceImplTest {
         Config config = ConfigFactory.load("testing.conf").getConfig("dpc.aggregation");
         String exportPath = config.getString("exportPath");
         OperationsConfig operationsConfig = new OperationsConfig(10, exportPath, 3, new Date());
-        lookBackService = new LookBackServiceImpl(rosterDAO, organizationDAO, operationsConfig);
+        lookBackService = new LookBackServiceImpl(providerDAO, rosterDAO, organizationDAO, operationsConfig);
         eob = new ExplanationOfBenefit();
         eob.setBillablePeriod(new Period());
         eob.setProvider(new Reference());
