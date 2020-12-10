@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "luhnacy"
+
 class Organization < ApplicationRecord
   include OrganizationsHelper
   include OrganizationTypable
@@ -51,9 +53,10 @@ class Organization < ApplicationRecord
   end
 
   def assign_id
+    binding.pry
     return true if npi.present?
 
-    self.npi = generate_npi
+    self.npi = Luhnacy.generate_npi
   end
 
   def notify_users_of_sandbox_access
