@@ -3,7 +3,7 @@ package gov.cms.dpc.api;
 import java.security.PrivateKey;
 
 /**
- * Helper class to hold all items related to an organization during testing. Helpful when using multiple organization during testing.
+ * Helper class to hold all items related to an organization. Helpful when using multiple organization during testing.
  */
 public class TestOrganizationContext {
 
