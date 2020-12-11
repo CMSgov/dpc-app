@@ -5,7 +5,7 @@ require 'rails_helper'
 RSpec.describe APIClient do
   include OrganizationsHelper
   
-  let!(:org) { create(:organization, npi: generate_npi) }
+  let!(:org) { create(:organization, npi: LuhnacyLib.generate_npi) }
   let!(:registered_org) { build(:registered_organization, organization: org) }
   let!(:fhir_endpoint) do
     build(

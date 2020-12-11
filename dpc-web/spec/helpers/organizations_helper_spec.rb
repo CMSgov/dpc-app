@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require 'luhnacy_lib'
 require 'rails_helper'
 
 RSpec.describe OrganizationsHelper, type: :helper do
@@ -19,22 +18,6 @@ RSpec.describe OrganizationsHelper, type: :helper do
           ['Other', 'other']
         ]
       )
-    end
-  end
-
-  describe '#generate_npi' do
-    it 'generates a valid npi' do
-      npi1 = helper.generate_npi
-      npi2 = helper.generate_npi
-      npi3 = helper.generate_npi
-      # binding.pry
-      npi1_check = LuhnacyLib.validate_npi('80840' + npi1)
-      npi2_check = LuhnacyLib.validate_npi('80840' + npi2)
-      npi3_check = LuhnacyLib.validate_npi('80840' + npi3)
-
-      expect(npi1_check).to eq(true)
-      expect(npi2_check).to eq(true)
-      expect(npi3_check).to eq(true)
     end
   end
 end

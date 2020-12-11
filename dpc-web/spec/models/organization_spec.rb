@@ -28,7 +28,7 @@ RSpec.describe Organization, type: :model do
         end
 
         it 'does not set npi if present' do
-          npi = generate_npi
+          npi = LuhnacyLib.generate_npi
 
           org = create(:organization, npi: npi)
           org.assign_id
@@ -45,7 +45,7 @@ RSpec.describe Organization, type: :model do
     end
 
     it 'does not replace non-blank values' do
-      npi = generate_npi
+      npi = LuhnacyLib.generate_npi
       org = create(:organization, npi: npi)
       expect(org.npi).to eq(npi)
     end
@@ -54,7 +54,7 @@ RSpec.describe Organization, type: :model do
   describe '#registered_organization?' do
     context 'when organization is a provider' do
       it 'returns true if org has a registered org and an npi' do
-        npi = generate_npi
+        npi = LuhnacyLib.generate_npi
         stub_api_client(message: :create_organization, success: true, response: default_org_creation_response)
         org = create(:organization, :api_enabled, organization_type: 'primary_care_clinic', npi: npi)
 

@@ -12,7 +12,7 @@ RSpec.feature 'updating my organization' do
   end
 
   scenario 'updating the org with a vailid Npi' do
-    npi = generate_npi
+    npi = LuhnacyLib.generate_npi
 
     visit portal_path
     find('[data-test="edit-link"]').click
