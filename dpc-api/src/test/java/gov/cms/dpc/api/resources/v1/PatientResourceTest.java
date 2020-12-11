@@ -7,6 +7,7 @@ import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import ca.uhn.fhir.rest.gclient.IReadExecutable;
 import ca.uhn.fhir.rest.gclient.IUpdateExecutable;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
@@ -296,7 +297,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
                 .useHttpGet()
                 .withAdditionalHeader("X-Provenance", provenance);
 
-        assertThrows(AuthenticationException.class, everythingOp::execute);
+        assertThrows(InternalErrorException.class, everythingOp::execute);
     }
 
     @Test
@@ -363,7 +364,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
                 .useHttpGet()
                 .withAdditionalHeader("X-Provenance", provenance);
 
-        assertThrows(AuthenticationException.class, everythingOp::execute);
+        assertThrows(InternalErrorException.class, everythingOp::execute);
     }
 
     private IGenericClient generateClient(String orgID, String orgNPI, String keyLabel) throws IOException, URISyntaxException, GeneralSecurityException {
