@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.helpers.FHIRHelpers;
 import gov.cms.dpc.testing.APIAuthHelpers;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
@@ -22,6 +23,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
 import java.util.UUID;
 
@@ -50,8 +53,13 @@ public class AbstractSecureApplicationTest {
     protected static PrivateKey PRIVATE_KEY;
     protected static UUID PUBLIC_KEY_ID;
 
-    protected AbstractSecureApplicationTest() {
-        // Not used
+    protected TestOrganizationContext registerAndSetupNewOrg() throws IOException, GeneralSecurityException, URISyntaxException {
+        final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
+        final String orgId = UUID.randomUUID().toString();
+        final String npi = NPIUtil.generateNPI();
+        final String clientToken = FHIRHelpers.registerOrganization(attrClient, ctx.newJsonParser(), orgId,  npi, TASK_URL);
+        final Pair<UUID, PrivateKey> newKeyPair = APIAuthHelpers.generateAndUploadKey("integration-test-key", orgId, GOLDEN_MACAROON, "http://localhost:3002/v1/");
+        return new TestOrganizationContext(clientToken,npi,orgId,newKeyPair.getLeft().toString(),newKeyPair.getRight());
     }
 
     protected String getBaseURL() {
