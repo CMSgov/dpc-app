@@ -205,7 +205,7 @@ public class PatientResource extends AbstractPatientResource {
         }
         if (ResourceType.OperationOutcome.equals(result.getResourceType())) {
             OperationOutcome resultOp = (OperationOutcome) result;
-            throw new NotAuthorizedException(resultOp.getIssueFirstRep().getDetails().getText());
+            throw new WebApplicationException(resultOp.getIssueFirstRep().getDetails().getText());
         }
 
         throw new WebApplicationException(HttpStatus.INTERNAL_SERVER_ERROR_500);
