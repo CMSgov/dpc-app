@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Luhnacy
+class LuhnacyLib
 
   def self.generate_npi
     loop do

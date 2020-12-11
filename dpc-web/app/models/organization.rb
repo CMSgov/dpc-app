@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "luhnacy"
+require "luhnacy_lib"
 
 class Organization < ApplicationRecord
   include OrganizationsHelper
@@ -53,10 +53,9 @@ class Organization < ApplicationRecord
   end
 
   def assign_id
-    binding.pry
     return true if npi.present?
 
-    self.npi = Luhnacy.generate_npi
+    self.npi = LuhnacyLib.generate_npi
   end
 
   def notify_users_of_sandbox_access
@@ -93,7 +92,7 @@ private
 def validate_npi
   npi = '80840' + self.npi
 
-  return if Luhnacy.doctor_npi?(npi)
+  return if LuhnacyLib.validate_npi(npi)
 
   errors.add :npi, 'must be valid.'
   throw(:abort)
