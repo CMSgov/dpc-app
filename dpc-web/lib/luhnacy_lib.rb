@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 class LuhnacyLib
-
   def self.generate_npi
     loop do
       npi = Luhnacy.generate(15, prefix: '808403')[-10..-1]

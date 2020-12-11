@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "luhnacy_lib"
-
 desc 'Generate fake npis to existing organizations if null'
 
 task generate_npis: :environment do
