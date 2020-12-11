@@ -53,6 +53,10 @@ public class AbstractSecureApplicationTest {
     protected static PrivateKey PRIVATE_KEY;
     protected static UUID PUBLIC_KEY_ID;
 
+    protected AbstractSecureApplicationTest() {
+        //not used
+    }
+
     protected TestOrganizationContext registerAndSetupNewOrg() throws IOException, GeneralSecurityException, URISyntaxException {
         final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
         final String orgId = UUID.randomUUID().toString();
