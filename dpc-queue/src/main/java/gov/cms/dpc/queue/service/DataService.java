@@ -53,7 +53,7 @@ public class DataService {
      * Retrieves data from BFD
      * @param organizationID UUID of organization
      * @param providerID UUID of provider
-     * @param patientMBIs List of patient String UUIDs
+     * @param patientMBIs List of patient String MBIs
      * @param requestingIP
      * @param resourceTypes List of ResourceType data to retrieve
      * @return Resource
