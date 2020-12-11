@@ -40,7 +40,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import static gov.cms.dpc.api.APIHelpers.bulkResourceClient;
 import static gov.cms.dpc.fhir.helpers.FHIRHelpers.handleMethodOutcome;
@@ -198,15 +197,15 @@ public class PatientResource extends AbstractPatientResource {
         final String patientMbi = FHIRExtractors.getPatientMBI(patient);
         final UUID orgId = organization.getID();
 
-        if (!isPatientInRoster(patientId, FHIRExtractors.getProviderNPI(practitioner), orgId)) {
-            throw new WebApplicationException(HttpStatus.UNAUTHORIZED_401);
-        }
-
         final String requestingIP = APIHelpers.fetchRequestingIP(request);
         Resource result = dataService.retrieveData(orgId, practitionerId, List.of(patientMbi), APIHelpers.fetchTransactionTime(bfdClient),
                 requestingIP, ResourceType.Patient, ResourceType.ExplanationOfBenefit, ResourceType.Coverage);
         if (ResourceType.Bundle.equals(result.getResourceType())) {
             return (Bundle) result;
+        }
+        if (ResourceType.OperationOutcome.equals(result.getResourceType())) {
+            OperationOutcome resultOp = (OperationOutcome) result;
+            throw new WebApplicationException(resultOp.getIssueFirstRep().getDetails().getText());
         }
 
         throw new WebApplicationException(HttpStatus.INTERNAL_SERVER_ERROR_500);
@@ -281,31 +280,5 @@ public class PatientResource extends AbstractPatientResource {
                 throw new WebApplicationException(APIHelpers.formatValidationMessages(result.getMessages()), HttpStatus.UNPROCESSABLE_ENTITY_422);
             }
         }
-    }
-
-    private boolean isPatientInRoster(UUID patientId, String providerNpi, UUID organizationId) {
-        Bundle providerRosters = client.search()
-                .forResource(Group.class)
-                .where(Group.CHARACTERISTIC_VALUE
-                        .withLeft(Group.CHARACTERISTIC.exactly().code("attributed-to"))
-                        .withRight(Group.VALUE.exactly().systemAndCode(DPCIdentifierSystem.NPPES.getSystem(), providerNpi)))
-                .withTag("", organizationId.toString())
-                .returnBundle(Bundle.class)
-                .encodedJson()
-                .execute();
-
-        for (Bundle.BundleEntryComponent bec : providerRosters.getEntry()) {
-            Group roster = (Group) bec.getResource();
-            List<Group.GroupMemberComponent> members = roster.getMember();
-            List<UUID> rosterPatientIds = members.stream()
-                    .map(Group.GroupMemberComponent::getEntity)
-                    .map(ref -> FHIRExtractors.getEntityUUID(ref.getReference()))
-                    .collect(Collectors.toList());
-            if (rosterPatientIds.contains(patientId)) {
-                return true;
-            }
-        }
-
-        return false;
     }
 }

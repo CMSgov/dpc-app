@@ -2,6 +2,7 @@ package gov.cms.dpc.aggregation.service;
 
 import com.google.common.base.Joiner;
 import gov.cms.dpc.aggregation.dao.OrganizationDAO;
+import gov.cms.dpc.aggregation.dao.ProviderDAO;
 import gov.cms.dpc.aggregation.dao.RosterDAO;
 import gov.cms.dpc.aggregation.engine.OperationsConfig;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
@@ -25,12 +26,14 @@ public class LookBackServiceImpl implements LookBackService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LookBackService.class);
 
+    private final ProviderDAO providerDAO;
     private final RosterDAO rosterDAO;
     private final OrganizationDAO organizationDAO;
     private final OperationsConfig operationsConfig;
 
     @Inject
-    public LookBackServiceImpl(RosterDAO rosterDAO, OrganizationDAO organizationDAO, OperationsConfig operationsConfig) {
+    public LookBackServiceImpl(ProviderDAO providerDAO, RosterDAO rosterDAO, OrganizationDAO organizationDAO, OperationsConfig operationsConfig) {
+        this.providerDAO = providerDAO;
         this.rosterDAO = rosterDAO;
         this.organizationDAO = organizationDAO;
         this.operationsConfig = operationsConfig;
@@ -40,7 +43,11 @@ public class LookBackServiceImpl implements LookBackService {
     @UnitOfWork(readOnly = true)
     public String getPractitionerNPIFromRoster(UUID orgUUID, String providerOrRosterID, String patientMBI) {
         //Expect only one roster for the parameters, otherwise return null
-        return rosterDAO.retrieveProviderNPIFromRoster(orgUUID, UUID.fromString(providerOrRosterID), patientMBI).orElse(null);
+        String npiFromRosterID = rosterDAO.retrieveProviderNPIFromRoster(orgUUID, UUID.fromString(providerOrRosterID), patientMBI).orElse(null);
+        if (npiFromRosterID == null) {
+            return providerDAO.fetchProviderNPI(UUID.fromString(providerOrRosterID), orgUUID).orElse(null);
+        }
+        return npiFromRosterID;
     }
 
     @Override
