@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
+require './lib/luhnacy_lib/luhnacy_lib'
 
 RSpec.describe Organization, type: :model do
   include APIClientSupport

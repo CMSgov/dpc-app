@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
+require './lib/luhnacy_lib/luhnacy_lib'
+
 
 RSpec.feature 'creating and updating organizations' do
   include APIClientSupport

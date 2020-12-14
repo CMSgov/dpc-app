@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
-require_relative "../../lib/luhnacy_lib.rb"
+require "./lib/luhnacy_lib/luhnacy_lib"
 
 FactoryBot.define do
   factory :organization do
     sequence(:name) { |n| "The Health Factory #{n}" }
     organization_type { 0 }
     num_providers { 5 }
-    npi { 
+    npi {
       loop do
         npi = LuhnacyLib.generate_npi
         break npi unless Organization.where(npi: npi).exists?
