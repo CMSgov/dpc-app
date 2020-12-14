@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'luhnacy_lib'
+require '../../lib/luhnacy_lib.rb'
 
 class Organization < ApplicationRecord
   include OrganizationsHelper
