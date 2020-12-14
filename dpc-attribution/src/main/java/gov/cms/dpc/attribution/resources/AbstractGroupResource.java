@@ -26,7 +26,7 @@ public abstract class AbstractGroupResource {
     public abstract Response createRoster(Group attributionRoster);
 
     @GET
-    public abstract List<Group> rosterSearch(@NotEmpty String organizationID, String providerNPI, String patientID);
+    public abstract List<Group> rosterSearch(UUID rosterID, @NotEmpty String organizationID, String providerNPI, String patientID);
 
     @GET
     @Path("/{rosterID}")
