@@ -82,7 +82,7 @@ public class GroupResource extends AbstractGroupResource {
 
         // Check and see if a roster already exists for the provider
         final UUID organizationID = UUID.fromString(FHIRExtractors.getOrganizationID(attributionRoster));
-        final List<RosterEntity> entities = this.rosterDAO.findEntities(organizationID, providerNPI, null);
+        final List<RosterEntity> entities = this.rosterDAO.findEntities(null, organizationID, providerNPI, null);
         if (!entities.isEmpty()) {
             final RosterEntity rosterEntity = entities.get(0);
             return Response.status(Response.Status.OK).entity(this.converter.toFHIR(Group.class, rosterEntity)).build();
@@ -108,7 +108,9 @@ public class GroupResource extends AbstractGroupResource {
             "<p> You can search for Groups associated to a given provider (via the Provider NPI) and groups for which a patient is a member of (by the Patient resource ID)",
             response = Bundle.class)
     @Override
-    public List<Group> rosterSearch(@ApiParam(value = "Organization ID")
+    public List<Group> rosterSearch(@ApiParam(value = "Group resource UUID")
+                                        @QueryParam(Group.SP_RES_ID) UUID rosterID,
+                                    @ApiParam(value = "Organization ID")
                                     @NotEmpty @QueryParam("_tag") String organizationToken,
                                     @ApiParam(value = "Provider NPI")
                                     @QueryParam(Group.SP_CHARACTERISTIC_VALUE) String providerNPI,
@@ -123,7 +125,7 @@ public class GroupResource extends AbstractGroupResource {
         }
 
         final UUID organizationID = RESTUtils.tokenTagToUUID(organizationToken);
-        return this.rosterDAO.findEntities(organizationID, providerIDPart, patientID)
+        return this.rosterDAO.findEntities(rosterID,organizationID, providerIDPart, patientID)
                 .stream()
                 .map(r -> this.converter.toFHIR(Group.class, r))
                 .collect(Collectors.toList());
@@ -353,5 +355,4 @@ public class GroupResource extends AbstractGroupResource {
 
         return Pair.of(leftID, rightID);
     }
-
 }

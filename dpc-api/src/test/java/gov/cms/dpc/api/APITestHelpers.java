@@ -34,12 +34,16 @@ import org.glassfish.jersey.test.grizzly.GrizzlyWebTestContainerFactory;
 import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.dstu3.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.codesystems.V3RoleClass;
 
 import javax.validation.Validation;
 import javax.validation.Validator;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Date;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -227,6 +231,30 @@ public class APITestHelpers {
         patient.setManagingOrganization(new Reference(new IdType("Organization", organizationID)));
 
         return patient;
+    }
+
+    public static Provenance createProvenance(String orgId, String practitionerId, List<String> patientIds){
+        final Coding reasonCoding = new Coding().setSystem("http://hl7.org/fhir/v3/ActReason").setCode("TREAT");
+
+        final Coding roleCode = new Coding()
+                .setSystem(V3RoleClass.AGNT.getSystem())
+                .setCode(V3RoleClass.AGNT.toCode());
+
+        final CodeableConcept roleConcept = new CodeableConcept().addCoding(roleCode);
+        final Provenance.ProvenanceAgentComponent component = new Provenance.ProvenanceAgentComponent()
+                .setRole(Collections.singletonList(roleConcept))
+                .setWho(new Reference(new IdType("Organization", orgId)))
+                .setOnBehalfOf(new Reference(practitionerId));
+
+        final Provenance provenance = new Provenance()
+                .setRecorded(Date.valueOf(Instant.now().atZone(ZoneOffset.UTC).toLocalDate()))
+                .setReason(Collections.singletonList(reasonCoding))
+                .addAgent(component);
+
+        for(String patientId:patientIds){
+            provenance.addTarget(new Reference(patientId));
+        }
+        return provenance;
     }
 
 }
