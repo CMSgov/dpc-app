@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require './lib/luhnacy_lib/luhnacy_lib'
+
 class Organization < ApplicationRecord
   include OrganizationsHelper
   include OrganizationTypable
