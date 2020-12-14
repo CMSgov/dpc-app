@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
-desc 'Generate fake npis to existing organizations if null'
+require './lib/luhnacy_lib/luhnacy_lib'
 
+desc 'Generate fake npis to existing organizations if null'
 task generate_npis: :environment do
   if ENV['ENV'] == 'prod-sbx'
     Organization.find_each do |o|
