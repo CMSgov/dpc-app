@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 class Organization < ApplicationRecord
-  include LuhnacyLib
   include OrganizationsHelper
   include OrganizationTypable
   include Taggable
