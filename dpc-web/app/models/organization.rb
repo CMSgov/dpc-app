@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
+require "#{Rails.root}/lib/luhnacy_lib"
+
 class Organization < ApplicationRecord
-  require './lib/luhnacy_lib'
+  include LuhnacyLib
   include OrganizationsHelper
   include OrganizationTypable
   include Taggable
