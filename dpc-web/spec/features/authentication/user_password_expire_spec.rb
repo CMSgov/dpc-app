@@ -17,7 +17,7 @@ RSpec.feature 'user password expires after 2 months' do
     expect(page.body).to include('1 lowercase letter')
     expect(page.body).to include('1 uppercase letter')
     expect(page.body).to include('1 number')
-    expect(page.body).to include('1 special character (!@#$&*)')
+    expect(page.body).to include('1 special character (!@#$&*-)')
     expect(page.body).to include('Confirm password')
   end
 
