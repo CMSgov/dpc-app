@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
+require './lib/luhnacy_lib/luhnacy_lib'
+
 
 RSpec.feature 'updating my organization' do
   include OrganizationsHelper
@@ -12,7 +14,7 @@ RSpec.feature 'updating my organization' do
   end
 
   scenario 'updating the org with a vailid Npi' do
-    npi = generate_npi
+    npi = LuhnacyLib.generate_npi
 
     visit portal_path
     find('[data-test="edit-link"]').click

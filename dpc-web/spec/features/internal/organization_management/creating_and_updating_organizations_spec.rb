@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
+require './lib/luhnacy_lib/luhnacy_lib'
+
 
 RSpec.feature 'creating and updating organizations' do
   include APIClientSupport
@@ -13,8 +15,8 @@ RSpec.feature 'creating and updating organizations' do
   end
 
   scenario 'successfully creating and updating an organization\'s attributes' do
-    npi1 = generate_npi
-    npi2 = generate_npi
+    npi1 = LuhnacyLib.generate_npi
+    npi2 = LuhnacyLib.generate_npi
 
     visit new_internal_organization_path
 
@@ -85,7 +87,7 @@ RSpec.feature 'creating and updating organizations' do
     org = create(:organization, npi: nil)
 
     visit edit_internal_organization_path(org)
-    fill_in 'organization_npi', visible: false, with: generate_npi
+    fill_in 'organization_npi', visible: false, with: LuhnacyLib.generate_npi
     find('[data-test="form-submit"]').click
 
     expect(page).to have_content('Organization updated.')
