@@ -52,7 +52,7 @@ RSpec.feature 'user password expires after 2 months' do
 
       expect(page.body).to include('1 error prohibited this user from being saved:')
       expect(page.body).to include('Password must include at least one number, one lowercase letter')
-      expect(page.body).to include('one uppercase letter, and one special character (!@#$&amp;*)')
+      expect(page.body).to include('one uppercase letter, and one special character (!@#$&amp;*-)')
 
 
       fill_in 'user_current_password', with: '12345ABCDEfghi!'
