@@ -38,18 +38,18 @@ func unmarshalIDs(resps [][]byte) []string {
 
 // Pull `identifier` out of a set of response bodies
 func unmarshalIdentifiers(resps [][]byte, system string) []string {
-	var NPIs []string
+	var identifierValue []string
 	for _, resp := range resps {
 		var result Resource
 		json.Unmarshal(resp, &result)
 		for _, i := range result.Identifier {
 			if i.System == system {
-				NPIs = append(NPIs, i.Value)
+				identifierValue = append(identifierValue, i.Value)
 			}
 		}
 	}
 
-	return NPIs
+	return identifierValue
 }
 
 // Pull `clientTokens` out of a set of response bodies
