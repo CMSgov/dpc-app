@@ -18,7 +18,7 @@ function complexCheck(inputValue) {
   var lowerCase = /[a-z]/g,
       upperCase = /[A-Z]/g,
       number = /[0-9]/g,
-      specialChar = /[!@#$&*]/g;
+      specialChar = /[!@#$&*-]/g;
 
   // Validates character count
   if (inputValue.length >= 15) {
