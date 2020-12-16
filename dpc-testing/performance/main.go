@@ -22,8 +22,9 @@ func main() {
 	api.RunMetadataTests()
 	api.RunKeyTests()
 	api.RunTokenTests()
-	// api.RunPatientTests()
+	api.RunPatientTests()
 	api.RunPractitionerTests()
 	api.RunOrgTests()
 	api.RunGroupTests()
+
 }

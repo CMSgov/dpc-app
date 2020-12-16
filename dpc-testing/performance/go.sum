@@ -184,6 +184,8 @@ github.com/tsenart/vegeta v12.7.0+incompatible/go.mod h1:Smz/ZWfhKRcyDDChZkG3CyT
 github.com/ugorji/go v1.1.4/go.mod h1:uQMGLiO92mf5W77hV/PUCpI3pbzQx3CRekS0kk+RGrc=
 github.com/xiang90/probing v0.0.0-20190116061207-43a291ad63a2/go.mod h1:UETIi67q53MR2AWcXfiuqkDkRtnGDLqkBTpCHuJHxtU=
 github.com/xordataexchange/crypt v0.0.3-0.20170626215501-b2862e3d0a77/go.mod h1:aYKd//L2LvnjZzWKhF00oedf4jCCReLcmhLdhm1A27Q=
+github.com/zach-klippenstein/goregen v0.0.0-20160303162051-795b5e3961ea h1:CyhwejzVGvZ3Q2PSbQ4NRRYn+ZWv5eS1vlaEusT+bAI=
+github.com/zach-klippenstein/goregen v0.0.0-20160303162051-795b5e3961ea/go.mod h1:eNr558nEUjP8acGw8FFjTeWvSgU1stO7FAO6eknhHe4=
 go.etcd.io/bbolt v1.3.2/go.mod h1:IbVyRI1SCnLcuJnV2u8VeU0CEYM7e686BmAb1XKL+uU=
 go.opencensus.io v0.21.0/go.mod h1:mSImk1erAIZhrmZN+AvHh14ztQfjbGwt4TtuofqLduU=
 go.opencensus.io v0.22.0/go.mod h1:+kGneAE2xo2IficOXnaByMWTGM9T73dGwxeWcUqIpI8=

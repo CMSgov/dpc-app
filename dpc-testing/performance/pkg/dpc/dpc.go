@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 
 	"github.com/joeljunstrom/go-luhn"
+	regen "github.com/zach-klippenstein/goregen"
 )
 
 type Identifier struct {
@@ -124,4 +125,12 @@ func readBodies(pattern string) [][]byte {
 func generateNPI() string {
 	luhnWithPrefix := luhn.GenerateWithPrefix(15, "808403")
 	return luhnWithPrefix[len(luhnWithPrefix)-10:]
+}
+
+func generateMBI() string {
+	mbi, err := regen.Generate("^[1-9][a-zA-Z][a-zA-Z0-9][0-9][a-zA-Z][a-zA-Z0-9][0-9][a-zA-Z]{2}[0-9]{2}$")
+	if err != nil {
+		panic(err)
+	}
+	return mbi
 }

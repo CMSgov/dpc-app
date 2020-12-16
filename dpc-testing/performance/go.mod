@@ -11,6 +11,7 @@ require (
 	github.com/mailru/easyjson v0.7.6 // indirect
 	github.com/streadway/quantile v0.0.0-20150917103942-b0c588724d25 // indirect
 	github.com/tsenart/vegeta v12.7.0+incompatible
+	github.com/zach-klippenstein/goregen v0.0.0-20160303162051-795b5e3961ea
 )
 
 replace github.com/CMSgov/dpc-app/dpcclient => ../../dpcclient
