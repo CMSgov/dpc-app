@@ -2,7 +2,6 @@ package dpc
 
 import (
 	"github.com/CMSgov/dpc-app/dpc-testing/performance/pkg/dpc/targeter"
-	"github.com/joeljunstrom/go-luhn"
 )
 
 func (api *API) RunOrgTests() {
@@ -14,10 +13,7 @@ func (api *API) RunOrgTests() {
 		BaseURL:     api.URL,
 		Endpoint:    endpoint + "/$submit",
 		AccessToken: string(api.goldenMacaroon),
-		Generator: templateBodyGenerator("./templates/organization-bundle-template.json", map[string]func() string{"{NPI}": func() string {
-			luhnWithPrefix := luhn.GenerateWithPrefix(15, "808403")
-			return luhnWithPrefix[len(luhnWithPrefix)-10:]
-		}}),
+		Generator:   templateBodyGenerator("./templates/organization-bundle-template.json", map[string]func() string{"{NPI}": generateNPI}),
 	}).Run(1, 1)
 
 	orgID := unmarshalIDs(resps)[0]
@@ -40,10 +36,7 @@ func (api *API) RunOrgTests() {
 		Endpoint:    endpoint,
 		ID:          orgID,
 		AccessToken: auth.accessToken,
-		Generator: templateBodyGenerator("./templates/organization-template.json", map[string]func() string{"{NPI}": func() string {
-			luhnWithPrefix := luhn.GenerateWithPrefix(15, "808403")
-			return luhnWithPrefix[len(luhnWithPrefix)-10:]
-		}}),
+		Generator:   templateBodyGenerator("./templates/organization-template.json", map[string]func() string{"{NPI}": generateNPI}),
 	}).Run(5, 2)
 
 	// DELETE

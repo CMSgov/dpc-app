@@ -33,7 +33,7 @@ func keyBodyGenerator(n int, fn func() (string, *rsa.PrivateKey, string)) func()
 	var bodies [][]byte
 	for i := 0; i < n; i++ {
 		pubKeyStr, _, signature := fn()
-		bodies = append(bodies, []byte(fmt.Sprintf("{ \"key\": \"%s\", \"signature\": \"%s\"}", pubKeyStr, signature)))
+		bodies = append(bodies, []byte(fmt.Sprintf(`{ "key": "%s", "signature": "%s"}`, pubKeyStr, signature)))
 	}
 
 	num := len(bodies)
