@@ -366,13 +366,11 @@ public class GroupResource extends AbstractGroupResource {
     }
 
     private void verifyMembers(Group group, UUID orgId){
-        if(group.getMember() != null){
-            for (Group.GroupMemberComponent member : group.getMember()){
-                final UUID patientID = UUID.fromString(new IdType(member.getEntity().getReference()).getIdPart());
-                List<PatientEntity> patientEntities = patientDAO.patientSearch(patientID, null, orgId);
-                if(patientEntities.isEmpty()){
-                    throw  new WebApplicationException(String.format("Cannot find patient with ID %s", patientID.toString()), Response.Status.BAD_REQUEST);
-                }
+        for (Group.GroupMemberComponent member : group.getMember()){
+            final UUID patientID = UUID.fromString(new IdType(member.getEntity().getReference()).getIdPart());
+            List<PatientEntity> patientEntities = patientDAO.patientSearch(patientID, null, orgId);
+            if(patientEntities.isEmpty()){
+                throw  new WebApplicationException(String.format("Cannot find patient with ID %s", patientID.toString()), Response.Status.BAD_REQUEST);
             }
         }
     }
