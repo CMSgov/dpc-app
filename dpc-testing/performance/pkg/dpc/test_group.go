@@ -13,8 +13,8 @@ func (api *API) RunGroupTests() {
 	auth := api.SetUpOrgAuth()
 	defer api.DeleteOrg(auth.orgID)
 
-	pracBodies := readBodies("../../src/main/resources/practitioners/practitioner-*.json")
-	grpBodies := readBodies("../../src/main/resources/groups/group-*.json")
+	// pracBodies := readBodies("../../src/main/resources/practitioners/practitioner-*.json")
+	// grpBodies := readBodies("../../src/main/resources/groups/group-*.json")
 
 	// POST /Practitioner
 	resps := targeter.New(targeter.Config{
@@ -22,14 +22,21 @@ func (api *API) RunGroupTests() {
 		BaseURL:     api.URL,
 		Endpoint:    "Practitioner",
 		AccessToken: auth.accessToken,
-		Bodies:      pracBodies,
+		Generator:   templateBodyGenerator("./templates/practitioner-template.json", map[string]func() string{"{NPI}": generateNPI}),
 	}).Run(5, 2)
 
-	pracIDs := unmarshalIDs(resps)
+	pracIDs, NPIs := unmarshalIDs(resps)
 
 	var xProvValues []string
 	for _, id := range pracIDs {
 		xProvValues = append(xProvValues, fmt.Sprintf("{ \"resourceType\": \"Provenance\", \"meta\": { \"profile\": [ \"https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-attestation\" ] }, \"recorded\": \"1990-01-01T00:00:00.000-05:00\", \"reason\": [ { \"system\": \"http://hl7.org/fhir/v3/ActReason\", \"code\": \"TREAT\" } ], \"agent\": [ { \"role\": [ { \"coding\": [ { \"system\": \"http://hl7.org/fhir/v3/RoleClass\", \"code\": \"AGNT\" } ] } ], \"whoReference\": { \"reference\": \"Organization/%s}}\" }, \"onBehalfOfReference\": { \"reference\": \"Practitioner/%s\" } } ] }", auth.orgID, id))
+	}
+
+	i := 0
+	NPIGenerator := func() string {
+		npi := NPIs[i]
+		i++
+		return npi
 	}
 
 	// POST /Group
@@ -45,11 +52,13 @@ func (api *API) RunGroupTests() {
 				"X-Provenance": xProvValues,
 			},
 		},
-		Bodies: grpBodies,
+		Generator: templateBodyGenerator("./templates/group-template.json", map[string]func() string{"{NPI}": func() string {
+			return NPIGenerator()
+		}}),
 	}).Run(5, 2)
 
 	// Retrieve group IDs which are required by the remaining tests
-	grpIDs := unmarshalIDs(resps)
+	grpIDs, _ := unmarshalIDs(resps)
 
 	// GET /Group
 	targeter.New(targeter.Config{
@@ -80,7 +89,7 @@ func (api *API) RunGroupTests() {
 				"X-Provenance": xProvValues,
 			},
 		},
-		Bodies:      grpBodies,
+		Generator:   byteArrayGenerator(resps),
 		IDs:         grpIDs,
 		AccessToken: auth.accessToken,
 	}).Run(5, 2)

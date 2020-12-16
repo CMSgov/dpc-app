@@ -2,31 +2,43 @@
 package dpc
 
 import (
-	"crypto/rsa"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+
+	"github.com/joeljunstrom/go-luhn"
 )
 
+type Identifier struct {
+	System string `json:system`
+	Value  string `json:value`
+}
 type Resource struct {
 	ID          string `json:"id"`
 	ClientToken []byte `json:"token"`
 	AccessToken string `json:"access_token"`
 	Type        string `json:"resourceType"`
+	Identifier  []Identifier
 }
 
 // Pull `ids` out of a set of response bodies
-func unmarshalIDs(resps [][]byte) []string {
+func unmarshalIDs(resps [][]byte) ([]string, []string) {
 	var IDs []string
+	var NPIs []string
 	for _, resp := range resps {
 		var result Resource
 		json.Unmarshal(resp, &result)
 		IDs = append(IDs, result.ID)
+		for _, i := range result.Identifier {
+			if i.System == "http://hl7.org/fhir/sid/us-npi" {
+				NPIs = append(NPIs, i.Value)
+			}
+		}
 	}
 
-	return IDs
+	return IDs, NPIs
 }
 
 // Pull `clientTokens` out of a set of response bodies
@@ -109,11 +121,7 @@ func readBodies(pattern string) [][]byte {
 	return bodies
 }
 
-func generateKeyBodies(n int, fn func() (string, *rsa.PrivateKey, string)) [][]byte {
-	var bodies [][]byte
-	for i := 0; i < n; i++ {
-		pubKeyStr, _, signature := fn()
-		bodies = append(bodies, []byte(fmt.Sprintf("{ \"key\": \"%s\", \"signature\": \"%s\"}", pubKeyStr, signature)))
-	}
-	return bodies
+func generateNPI() string {
+	luhnWithPrefix := luhn.GenerateWithPrefix(15, "808403")
+	return luhnWithPrefix[len(luhnWithPrefix)-10:]
 }
