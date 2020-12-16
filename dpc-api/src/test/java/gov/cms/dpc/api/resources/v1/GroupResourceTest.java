@@ -6,7 +6,6 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.ICreateTyped;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
@@ -26,7 +25,6 @@ import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-
 import javax.ws.rs.HttpMethod;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -41,6 +39,7 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
@@ -534,33 +533,25 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
         final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());
         final IGenericClient orgBClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgBContext.getClientToken(), UUID.fromString(orgBContext.getPublicKeyId()), orgBContext.getPrivateKey());
 
-        Practitioner orgAPractitioner = createAndSubmitPractitioner(orgAContext.getOrgId(),orgAClient);
+        //Setup Org A with a practitioner and patient.
+        final Practitioner orgAPractitioner = createAndSubmitPractitioner(orgAContext.getOrgId(),orgAClient);
+        final Patient orgAPatient = APITestHelpers.submitNewPatient(orgAClient, APITestHelpers.createPatientResource("4S41C00AA00", orgAContext.getOrgId()));
+        assertNotNull(orgAPatient, "Patient should have been created");
 
+        //Setup OrgB with a practitioner
+        final Practitioner orgBPractitioner = createAndSubmitPractitioner(orgBContext.getOrgId(),orgBClient);
 
-        Patient patient = APITestHelpers.createPatientResource("4S41C00AA00", orgAContext.getOrgId());
-        Patient persistedPatient = (Patient) orgAClient.create()
-                .resource(patient)
-                .encodedJson()
-                .execute()
-                .getResource();
-
-        String managingOrgId = persistedPatient.getManagingOrganization().getReferenceElement().getIdPart();
-
-        assertNotNull(persistedPatient, "Patient should have been created");
-        assertEquals(orgAContext.getOrgId(), managingOrgId, "Patient should have been created");
-
-
-        Practitioner orgBPractitioner = createAndSubmitPractitioner(orgBContext.getOrgId(),orgBClient);
-
-        String patientId = persistedPatient.getId();
-        Group orgAGroup = createAndSubmitGroup(orgAContext.getOrgId(),orgAPractitioner,orgAClient, Collections.singletonList(patientId));
+        //Assert org A can add their own patient to roster successfully.
+        final String orgAPatientId = orgAPatient.getId();
+        final Group orgAGroup = createAndSubmitGroup(orgAContext.getOrgId(),orgAPractitioner,orgAClient, Collections.singletonList(orgAPatientId));
         assertNotNull(orgAGroup, "Roster for Org A should have been created with patient they manage.");
 
+        //Assert Org B can NOT add OrgA's patient
+        InvalidRequestException e = assertThrows(InvalidRequestException.class, () -> {
+            createAndSubmitGroup(orgBContext.getOrgId(),orgBPractitioner,orgBClient,Collections.singletonList(orgAPatientId));
+        }, "Org should not be able to add patients they do not managed to their group." );
 
-        ResourceNotFoundException e = assertThrows(ResourceNotFoundException.class, () -> {
-            createAndSubmitGroup(orgBContext.getOrgId(),orgBPractitioner,orgBClient,Collections.singletonList(patientId));
-
-        }, "Org A should not be able to add patient managed by Org B to their roster." );
+        assertTrue(e.getResponseBody().contains("Cannot find patient with ID "+ new IdType(orgAPatient.getId()).getIdPart()));
     }
 
     @Test
@@ -570,40 +561,25 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
         final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());
         final IGenericClient orgBClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgBContext.getClientToken(), UUID.fromString(orgBContext.getPublicKeyId()), orgBContext.getPrivateKey());
 
-        Practitioner orgAPractitioner = createAndSubmitPractitioner(orgAContext.getOrgId(),orgAClient);
+        //Setup Org A with a practitioner, patient, and group.
+        final Practitioner orgAPractitioner = createAndSubmitPractitioner(orgAContext.getOrgId(),orgAClient);
+        final Patient orgAPatient  = APITestHelpers.submitNewPatient(orgAClient, APITestHelpers.createPatientResource("4S41C00AA00", orgAContext.getOrgId()));
+        final Group orgAGroup = createAndSubmitGroup(orgAContext.getOrgId(),orgAPractitioner,orgAClient, Collections.singletonList(orgAPatient.getId()));
+        assertNotNull(orgAGroup, "Org should have been able to create group with patient they manage.");
 
+        //Setup Org B with a practitioner, and empty group.
+        final Practitioner orgBPractitioner = createAndSubmitPractitioner(orgBContext.getOrgId(),orgBClient);
+        final Group orgBGroup = createAndSubmitGroup(orgBContext.getOrgId(),orgBPractitioner,orgBClient, Collections.emptyList());
 
-        Patient patient = APITestHelpers.createPatientResource("4S41C00AA00", orgAContext.getOrgId());
-        Patient persistedPatient = (Patient) orgAClient.create()
-                .resource(patient)
-                .encodedJson()
-                .execute()
-                .getResource();
-
-
-        final Group orgAGroup = createAndSubmitGroup(orgAContext.getOrgId(),orgAPractitioner,orgAClient, Collections.singletonList(persistedPatient.getId()));
-        assertNotNull(orgAGroup, "Roster for Org A should have been created with patient they manage.");
-
-
-        Practitioner orgBPractitioner = createAndSubmitPractitioner(orgBContext.getOrgId(),orgBClient);
-        Group orgBGroup = createAndSubmitGroup(orgBContext.getOrgId(),orgBPractitioner,orgBClient, Collections.emptyList());
-        assertNotNull(orgBGroup, "Roster for Org B should have been created with empty members.");
-        Reference patientRef = new Reference(persistedPatient.getId());
-        orgBGroup.addMember(new Group.GroupMemberComponent().setEntity(patientRef));
-
-        ResourceNotFoundException e = assertThrows(ResourceNotFoundException.class, () -> {
+        //Assert an org can NOT update their group with another org's patient.
+        InvalidRequestException e = assertThrows(InvalidRequestException.class, () -> {
+            orgBGroup.addMember(new Group.GroupMemberComponent().setEntity(new Reference(orgAPatient.getId())));
             Provenance provenance = APITestHelpers.createProvenance(orgBContext.getOrgId(),orgBPractitioner.getId(),Collections.EMPTY_LIST);
-            final MethodOutcome outcome = orgBClient
-                    .update()
-                    .resource(orgBGroup)
-                    .withId(orgBGroup.getId())
-                    .withAdditionalHeader("X-Provenance", ctx.newJsonParser().encodeResourceToString(provenance))
-                    .encodedJson()
-                    .execute();
-
+            String provenanceStr = ctx.newJsonParser().encodeResourceToString(provenance);
+            APITestHelpers.updateResource(orgBClient, orgBGroup.getId(),orgBGroup, Map.of("X-Provenance", provenanceStr));
         }, "Org B should not be able to update roster with patient managed by Org A " );
 
-        assertTrue(e.getResponseBody().contains("Unable to find group member: "+ persistedPatient.getId()));
+        assertTrue(e.getResponseBody().contains("Cannot find patient with ID "+ new IdType(orgAPatient.getId()).getIdPart()));
     }
 
 
@@ -611,21 +587,17 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
     public void testOrgCanOnlyAddPatientsTheyManageToGroup() throws IOException, URISyntaxException, GeneralSecurityException {
         final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
         final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
-
-        Patient orgAPatient = APITestHelpers.createPatientResource("4S41C00AA00", orgAContext.getOrgId());
-
         final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());
         final IGenericClient orgBClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgBContext.getClientToken(), UUID.fromString(orgBContext.getPublicKeyId()), orgBContext.getPrivateKey());
 
-        orgAPatient = (Patient) orgAClient.create()
-                .resource(orgAPatient)
-                .encodedJson()
-                .execute()
-                .getResource();
+        //Setup org A with a patient
+        final Patient orgAPatient = APITestHelpers.submitNewPatient(orgAClient,APITestHelpers.createPatientResource("4S41C00AA00", orgAContext.getOrgId()));
 
-        Practitioner orgBPractitioner = createAndSubmitPractitioner(orgBContext.getOrgId(), orgBClient);
-        Group orgBGroup = createAndSubmitGroup(orgBContext.getOrgId(), orgBPractitioner, orgBClient, Collections.emptyList());
+        //Setup org B with a practitioner and empty group.
+        final Practitioner orgBPractitioner = createAndSubmitPractitioner(orgBContext.getOrgId(), orgBClient);
+        final Group orgBGroup = createAndSubmitGroup(orgBContext.getOrgId(), orgBPractitioner, orgBClient, Collections.emptyList());
 
+        //Ensure Org B can not add Org A's patient to group using add operation:  /Group/{id}/$add
         orgBGroup.addMember(new Group.GroupMemberComponent().setEntity(new Reference(orgAPatient.getId())));
 
 
@@ -633,19 +605,22 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod(HttpMethod.POST);
         conn.setRequestProperty(HttpHeaders.CONTENT_TYPE, "application/fhir+json");
-
-        Provenance provenance = createProvenance(orgBContext.getOrgId(), orgBPractitioner.getId(), Lists.emptyList());
-        String provString = ctx.newJsonParser().encodeResourceToString(provenance);
+        conn.setDoOutput(true);
 
         APIAuthHelpers.AuthResponse auth = APIAuthHelpers.jwtAuthFlow(getBaseURL(), orgBContext.getClientToken(), UUID.fromString(orgBContext.getPublicKeyId()), orgBContext.getPrivateKey());
         conn.setRequestProperty(HttpHeaders.AUTHORIZATION, "Bearer " + auth.accessToken);
+
+        Provenance provenance = createProvenance(orgBContext.getOrgId(), orgBPractitioner.getId(), Lists.emptyList());
+        String provString = ctx.newJsonParser().encodeResourceToString(provenance);
         conn.setRequestProperty("X-Provenance", provString);
 
-        conn.setDoOutput(true);
         String reqBody = ctx.newJsonParser().encodeResourceToString(orgBGroup);
         conn.getOutputStream().write(reqBody.getBytes());
 
         assertEquals(HttpStatus.BAD_REQUEST_400, conn.getResponseCode());
+        String body = new String(conn.getErrorStream().readAllBytes());
+        assertTrue(body.contains("Cannot find patient with ID "+ new IdType(orgAPatient.getId()).getIdPart()));
+
         conn.disconnect();
     }
 

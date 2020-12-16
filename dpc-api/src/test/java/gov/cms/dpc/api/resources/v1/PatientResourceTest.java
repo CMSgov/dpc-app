@@ -356,17 +356,15 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
         final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());
         final IGenericClient orgBClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgBContext.getClientToken(), UUID.fromString(orgBContext.getPublicKeyId()), orgBContext.getPrivateKey());
 
-        Patient orgAPatient = APITestHelpers.createPatientResource("4S41C00AA00", orgAContext.getOrgId());
-        orgAPatient = addPatientToOrg(orgAClient, orgAPatient);
+        //Setup org A with a patient
+        final Patient orgAPatient = APITestHelpers.submitNewPatient(orgAClient, APITestHelpers.createPatientResource("4S41C00AA00", orgAContext.getOrgId()));
 
-        Patient orgBPatient = APITestHelpers.createPatientResource("4S41C00AA00", orgBContext.getOrgId());
-        orgBPatient = addPatientToOrg(orgBClient, orgBPatient);
+        //Setup org B with a patient
+        final Patient orgBPatient = APITestHelpers.submitNewPatient(orgBClient, APITestHelpers.createPatientResource("4S41C00AA00", orgBContext.getOrgId()));
 
         assertNotNull(fetchPatientById(orgAClient,orgAPatient.getId()), "Org should be able to retrieve their own patient.");
         assertNotNull(fetchPatientById(orgBClient,orgBPatient.getId()), "Org should be able to retrieve their own patient.");
-
-        final String patientId = orgBPatient.getId();
-        assertThrows(AuthenticationException.class, () -> fetchPatientById(orgAClient, patientId), "Expected auth error when retrieving another org's patient.");
+        assertThrows(AuthenticationException.class, () -> fetchPatientById(orgAClient, orgBPatient.getId()), "Expected auth error when retrieving another org's patient.");
     }
 
     @Test
@@ -376,13 +374,11 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
         final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());
         final IGenericClient orgBClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgBContext.getClientToken(), UUID.fromString(orgBContext.getPublicKeyId()), orgBContext.getPrivateKey());
 
-        Patient orgBPatient = APITestHelpers.createPatientResource("4S41C00AA00", orgBContext.getOrgId());
-        orgBPatient = addPatientToOrg(orgBClient, orgBPatient);
+        //Setup org B with a patient
+        final Patient orgBPatient = APITestHelpers.submitNewPatient(orgBClient, APITestHelpers.createPatientResource("4S41C00AA00", orgBContext.getOrgId()));
 
-        final String orgBPatientId = orgBPatient.getId();
-        assertThrows(AuthenticationException.class, () -> deletePatientById(orgAClient, orgBPatientId), "Expected auth error when deleting another org's patient.");
-
-        assertNull(deletePatientById(orgBClient,orgBPatientId), "Org should be able to delete their own patient.");
+        assertThrows(AuthenticationException.class, () -> deletePatientById(orgAClient, orgBPatient.getId()), "Expected auth error when deleting another org's patient.");
+        assertNull(deletePatientById(orgBClient,orgBPatient.getId()), "Org should be able to delete their own patient.");
     }
 
     private IGenericClient generateClient(String orgID, String orgNPI, String keyLabel) throws IOException, URISyntaxException, GeneralSecurityException {
@@ -421,14 +417,6 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
                 .resourceById(new IdType(id))
                 .encodedJson()
                 .execute();
-    }
-
-    private Patient addPatientToOrg(IGenericClient client, Patient patient){
-        return (Patient) client.create()
-                .resource(patient)
-                .encodedJson()
-                .execute()
-                .getResource();
     }
 
     private Bundle fetchPatientBundleByMBI(IGenericClient client, String mbi) {

@@ -371,7 +371,7 @@ public class GroupResource extends AbstractGroupResource {
                 final UUID patientID = UUID.fromString(new IdType(member.getEntity().getReference()).getIdPart());
                 List<PatientEntity> patientEntities = patientDAO.patientSearch(patientID, null, orgId);
                 if(patientEntities.isEmpty()){
-                    throw new WebApplicationException("Unable to find group member: "+ member.getEntity().getReference(), Response.Status.NOT_FOUND);
+                    throw  new WebApplicationException(String.format("Cannot find patient with ID %s", patientID.toString()), Response.Status.BAD_REQUEST);
                 }
             }
         }
