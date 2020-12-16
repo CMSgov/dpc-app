@@ -3,7 +3,7 @@ package gov.cms.dpc.api.resources.v1;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
-import gov.cms.dpc.api.auth.annotations.Authorized;
+import gov.cms.dpc.api.auth.annotations.Authorizer;
 import gov.cms.dpc.api.resources.AbstractJobResource;
 import gov.cms.dpc.common.annotations.APIV1;
 import gov.cms.dpc.common.annotations.NoHtml;
@@ -64,7 +64,7 @@ public class JobResource extends AbstractJobResource {
     @GET
     @Timed
     @ExceptionMetered
-    @Authorized
+    @Authorizer
     @ApiOperation(value = "Check export job status",
             notes = "This endpoint is used to query the status of a given Export operation. " +
                     "When the job is in progress, the API returns a 202 status." +

@@ -1,6 +1,6 @@
 package gov.cms.dpc.api.auth;
 
-import gov.cms.dpc.api.auth.annotations.PathAuthorized;
+import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import org.hl7.fhir.dstu3.model.Organization;
 
 /**
@@ -10,10 +10,10 @@ public class DPCAuthCredentials {
 
     private final String macaroon;
     private final Organization organization;
-    private final PathAuthorized pa;
+    private final PathAuthorizer pa;
     private final String pathValue;
 
-    public DPCAuthCredentials(String macaroon, Organization organization, PathAuthorized pa, String pathValue) {
+    public DPCAuthCredentials(String macaroon, Organization organization, PathAuthorizer pa, String pathValue) {
         this.macaroon = macaroon;
         this.organization = organization;
         this.pa = pa;
@@ -28,7 +28,7 @@ public class DPCAuthCredentials {
         return organization;
     }
 
-    public PathAuthorized getPathAuthorizer() {
+    public PathAuthorizer getPathAuthorizer() {
         return pa;
     }
 

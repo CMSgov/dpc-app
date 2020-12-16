@@ -1,8 +1,8 @@
 package gov.cms.dpc.api.auth;
 
 import gov.cms.dpc.api.auth.annotations.AdminOperation;
-import gov.cms.dpc.api.auth.annotations.Authorized;
-import gov.cms.dpc.api.auth.annotations.PathAuthorized;
+import gov.cms.dpc.api.auth.annotations.Authorizer;
+import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.auth.annotations.Public;
 import io.dropwizard.auth.AuthDynamicFeature;
 import org.glassfish.jersey.server.model.AnnotatedMethod;
@@ -51,15 +51,15 @@ public class DPCAuthDynamicFeature implements DynamicFeature {
             return;
         }
 
-        if (isMethodClassAnnotated(PathAuthorized.class, resourceInfo, am)) {
-            logger.trace("Registering PathAuthorized param on method {}", am.toString());
-            final PathAuthorized pa = am.getAnnotation(PathAuthorized.class);
+        if (isMethodClassAnnotated(PathAuthorizer.class, resourceInfo, am)) {
+            logger.trace("Registering PathAuthorizer param on method {}", am.toString());
+            final PathAuthorizer pa = am.getAnnotation(PathAuthorizer.class);
             context.register(this.factory.createPathAuthorizer(pa));
             return;
         }
 
         // Check for @Authorized annotated param
-        if (isMethodClassAnnotated(Authorized.class, resourceInfo, am)) {
+        if (isMethodClassAnnotated(Authorizer.class, resourceInfo, am)) {
             logger.trace("Registering Auth param on method {}", am.toString());
             context.register(this.factory.createStandardAuthorizer());
             return;

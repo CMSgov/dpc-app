@@ -11,8 +11,8 @@ import com.codahale.metrics.annotation.Timed;
 import com.google.inject.name.Named;
 import gov.cms.dpc.api.APIHelpers;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
-import gov.cms.dpc.api.auth.annotations.Authorized;
-import gov.cms.dpc.api.auth.annotations.PathAuthorized;
+import gov.cms.dpc.api.auth.annotations.Authorizer;
+import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.resources.AbstractPatientResource;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.common.annotations.NoHtml;
@@ -70,7 +70,7 @@ public class PatientResource extends AbstractPatientResource {
     @FHIR
     @Timed
     @ExceptionMetered
-    @Authorized
+    @Authorizer
     @ApiOperation(value = "Search for Patients", notes = "FHIR endpoint for searching for Patient resources." +
             "<p> If Patient Identifier is provided, results will be filtered to match the given property")
     @Override
@@ -107,7 +107,7 @@ public class PatientResource extends AbstractPatientResource {
     @FHIR
     @POST
     @Timed
-    @Authorized
+    @Authorizer
     @ExceptionMetered
     @ApiOperation(value = "Create Patient", notes = "Create a Patient record associated to the Organization.")
     @ApiResponses(@ApiResponse(code = 422, message = "Patient does not satisfy the required FHIR profile"))
@@ -131,7 +131,7 @@ public class PatientResource extends AbstractPatientResource {
     @Path("/$submit")
     @Timed
     @ExceptionMetered
-    @Authorized
+    @Authorizer
     @ApiOperation(value = "Bulk submit Patient resources", notes = "FHIR operation for submitting a Bundle of Patient resources, which will be associated to the given Organization." +
             "<p> Each Patient resource MUST implement the " + PatientProfile.PROFILE_URI + "profile.")
     @ApiResponses(@ApiResponse(code = 422, message = "Patient does not satisfy the required FHIR profile"))
@@ -148,7 +148,7 @@ public class PatientResource extends AbstractPatientResource {
     @GET
     @FHIR
     @Path("/{patientID}")
-    @PathAuthorized(type = ResourceType.Patient, pathParam = "patientID")
+    @PathAuthorizer(type = ResourceType.Patient, pathParam = "patientID")
     @Timed
     @ExceptionMetered
     @ApiOperation(value = "Fetch Patient", notes = "Fetch specific Patient record.")
@@ -166,7 +166,7 @@ public class PatientResource extends AbstractPatientResource {
     @GET
     @FHIR
     @Path("/{patientID}/$everything")
-    @PathAuthorized(type = ResourceType.Patient, pathParam = "patientID")
+    @PathAuthorizer(type = ResourceType.Patient, pathParam = "patientID")
     @Timed
     @ExceptionMetered
     @ApiImplicitParams(
@@ -218,7 +218,7 @@ public class PatientResource extends AbstractPatientResource {
     @DELETE
     @FHIR
     @Path("/{patientID}")
-    @PathAuthorized(type = ResourceType.Patient, pathParam = "patientID")
+    @PathAuthorizer(type = ResourceType.Patient, pathParam = "patientID")
     @Timed
     @ExceptionMetered
     @ApiOperation(value = "Delete Patient", notes = "Remove specific Patient record")
@@ -236,7 +236,7 @@ public class PatientResource extends AbstractPatientResource {
 
     @PUT
     @Path("/{patientID}")
-    @PathAuthorized(type = ResourceType.Patient, pathParam = "patientID")
+    @PathAuthorizer(type = ResourceType.Patient, pathParam = "patientID")
     @FHIR
     @Timed
     @ExceptionMetered
@@ -267,7 +267,7 @@ public class PatientResource extends AbstractPatientResource {
     @FHIR
     @Timed
     @ExceptionMetered
-    @Authorized
+    @Authorizer
     @ApiOperation(value = "Validate Patient resource", notes = "Validates the given resource against the " + PatientProfile.PROFILE_URI + " profile." +
             "<p>This method always returns a 200 status, even in response to a non-conformant resource.")
     @Override

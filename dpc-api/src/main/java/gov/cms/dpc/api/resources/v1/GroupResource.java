@@ -8,8 +8,8 @@ import com.codahale.metrics.annotation.Timed;
 import com.google.inject.name.Named;
 import gov.cms.dpc.api.APIHelpers;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
-import gov.cms.dpc.api.auth.annotations.Authorized;
-import gov.cms.dpc.api.auth.annotations.PathAuthorized;
+import gov.cms.dpc.api.auth.annotations.Authorizer;
+import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.resources.AbstractGroupResource;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.common.annotations.APIV1;
@@ -74,7 +74,7 @@ public class GroupResource extends AbstractGroupResource {
     @FHIR
     @Timed
     @ExceptionMetered
-    @Authorized
+    @Authorizer
     @ApiOperation(value = "Create Attribution Group", notes = "FHIR endpoint to create an Attribution Group resource) associated to the provider listed in the in the Group characteristics.")
     @ApiImplicitParams(
             @ApiImplicitParam(name = "X-Provenance", required = true, paramType = "header", type="string",dataTypeClass = Provenance.class))
@@ -105,7 +105,7 @@ public class GroupResource extends AbstractGroupResource {
     @FHIR
     @Timed
     @ExceptionMetered
-    @Authorized
+    @Authorizer
     @ApiOperation(value = "Search for Attribution Groups", notes = "FHIR endpoint for searching for Attribution Groups." +
             "<p> If Provider NPI is given, all attribution groups for that provider will be returned. " +
             "If a Patient ID is given, all attribution groups for which that patient is a member will be returned.")
@@ -142,7 +142,7 @@ public class GroupResource extends AbstractGroupResource {
     @GET
     @FHIR
     @Path("/{rosterID}")
-    @PathAuthorized(type = ResourceType.Group, pathParam = "rosterID")
+    @PathAuthorizer(type = ResourceType.Group, pathParam = "rosterID")
     @Timed
     @ExceptionMetered
     @ApiOperation(value = "Fetch Attribution Roster", notes = "Fetch specific Attribution roster.")
@@ -159,7 +159,7 @@ public class GroupResource extends AbstractGroupResource {
 
     @PUT
     @Path("/{rosterID}")
-    @PathAuthorized(type = ResourceType.Group, pathParam = "rosterID")
+    @PathAuthorizer(type = ResourceType.Group, pathParam = "rosterID")
     @FHIR
     @Timed
     @ExceptionMetered
@@ -193,7 +193,7 @@ public class GroupResource extends AbstractGroupResource {
 
     @POST
     @Path("/{rosterID}/$add")
-    @PathAuthorized(type = ResourceType.Group, pathParam = "rosterID")
+    @PathAuthorizer(type = ResourceType.Group, pathParam = "rosterID")
     @FHIR
     @Timed
     @ExceptionMetered
@@ -211,7 +211,7 @@ public class GroupResource extends AbstractGroupResource {
 
     @POST
     @Path("/{rosterID}/$remove")
-    @PathAuthorized(type = ResourceType.Group, pathParam = "rosterID")
+    @PathAuthorizer(type = ResourceType.Group, pathParam = "rosterID")
     @FHIR
     @Timed
     @ExceptionMetered
@@ -226,7 +226,7 @@ public class GroupResource extends AbstractGroupResource {
     @DELETE
     @FHIR
     @Path("/{rosterID}")
-    @PathAuthorized(type = ResourceType.Group, pathParam = "rosterID")
+    @PathAuthorizer(type = ResourceType.Group, pathParam = "rosterID")
     @Timed
     @ExceptionMetered
     @ApiOperation(value = "Delete Attribution Group", notes = "Remove specific Attribution Group")
@@ -256,7 +256,7 @@ public class GroupResource extends AbstractGroupResource {
     @Override
     @GET // Need this here, since we're using a path param
     @Path("/{rosterID}/$export")
-    @PathAuthorized(type = ResourceType.Group, pathParam = "rosterID")
+    @PathAuthorizer(type = ResourceType.Group, pathParam = "rosterID")
     @Timed
     @ExceptionMetered
     @FHIRAsync

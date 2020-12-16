@@ -1,6 +1,6 @@
 package gov.cms.dpc.api.auth;
 
-import gov.cms.dpc.api.auth.annotations.PathAuthorized;
+import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.auth.filters.AdminAuthFilter;
 import gov.cms.dpc.api.auth.filters.PathAuthorizationFilter;
 import gov.cms.dpc.api.auth.filters.PrincipalInjectionAuthFilter;
@@ -27,7 +27,7 @@ public class DPCAuthFactory implements AuthFactory {
     }
 
     @Override
-    public DPCAuthFilter createPathAuthorizer(PathAuthorized pa) {
+    public DPCAuthFilter createPathAuthorizer(PathAuthorizer pa) {
         return new PathAuthorizationFilter(bakery, authenticator, dao, pa, dpc401handler);
     }
 

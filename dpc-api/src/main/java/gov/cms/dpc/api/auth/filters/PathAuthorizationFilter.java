@@ -1,6 +1,6 @@
 package gov.cms.dpc.api.auth.filters;
 
-import gov.cms.dpc.api.auth.annotations.PathAuthorized;
+import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.auth.DPCAuthCredentials;
 import gov.cms.dpc.api.auth.DPCAuthFilter;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
@@ -22,16 +22,16 @@ import java.util.UUID;
 
 
 /**
- * Implementation of {@link DPCAuthFilter} that is used when a {@link PathAuthorized} annotated method is called.
+ * Implementation of {@link DPCAuthFilter} that is used when a {@link PathAuthorizer} annotated method is called.
  * This extracts the Path value from the {@link UriInfo} and passes that value in the {@link DPCAuthCredentials} to the underlying {@link Authenticator}
  */
 @Priority(Priorities.AUTHENTICATION)
 public class PathAuthorizationFilter extends DPCAuthFilter {
 
     private static final Logger logger = LoggerFactory.getLogger(PathAuthorizationFilter.class);
-    private final PathAuthorized pa;
+    private final PathAuthorizer pa;
 
-    public PathAuthorizationFilter(MacaroonBakery bakery, Authenticator<DPCAuthCredentials, OrganizationPrincipal> auth, TokenDAO dao, PathAuthorized pa, DPCUnauthorizedHandler dpc401handler) {
+    public PathAuthorizationFilter(MacaroonBakery bakery, Authenticator<DPCAuthCredentials, OrganizationPrincipal> auth, TokenDAO dao, PathAuthorizer pa, DPCUnauthorizedHandler dpc401handler) {
         super(bakery, auth, dao, dpc401handler);
         this.pa = pa;
     }
