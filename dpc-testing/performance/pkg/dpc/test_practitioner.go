@@ -30,7 +30,7 @@ func (api *API) RunPractitionerTests() {
 	}).Run(5, 2)
 
 	// Retrieve practitioner IDs which are required by the remaining tests
-	pracIDs, _ := unmarshalIDs(resps)
+	pracIDs := unmarshalIDs(resps)
 
 	// POST /Practitioner/$submit
 	targeter.New(targeter.Config{

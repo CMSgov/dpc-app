@@ -33,7 +33,7 @@ func (api *API) RunPatientTests() {
 	}).Run(5, 2)
 
 	// // Retrieve patient IDs which are required by the remaining tests
-	patientIDs, _ := unmarshalIDs(resps)
+	patientIDs := unmarshalIDs(resps)
 
 	// POST /Patient/$submit
 	targeter.New(targeter.Config{

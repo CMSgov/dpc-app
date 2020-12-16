@@ -23,7 +23,7 @@ func (api *API) RunTokenTests() {
 	}).Run(5, 5)
 
 	clientTokens := unmarshalClientTokens(resps)
-	clientTokenIDs, _ := unmarshalIDs(resps)
+	clientTokenIDs := unmarshalIDs(resps)
 
 	// Generate an auth token for each client token
 	var authTokens [][]byte

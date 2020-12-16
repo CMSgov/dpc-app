@@ -20,7 +20,7 @@ func (api *API) RunKeyTests() {
 		Headers:     &targeter.Headers{ContentType: JSON},
 	}).Run(5, 5)
 
-	keyIDs, _ := unmarshalIDs(resps)
+	keyIDs := unmarshalIDs(resps)
 
 	// GET /Key
 	targeter.New(targeter.Config{

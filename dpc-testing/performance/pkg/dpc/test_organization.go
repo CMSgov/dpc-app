@@ -20,8 +20,7 @@ func (api *API) RunOrgTests() {
 		}}),
 	}).Run(1, 1)
 
-	orgIDs, _ := unmarshalIDs(resps)
-	orgID := orgIDs[0]
+	orgID := unmarshalIDs(resps)[0]
 	auth := api.SetUpOrgAuth(orgID)
 
 	// GET

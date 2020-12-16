@@ -13,9 +13,6 @@ func (api *API) RunGroupTests() {
 	auth := api.SetUpOrgAuth()
 	defer api.DeleteOrg(auth.orgID)
 
-	// pracBodies := readBodies("../../src/main/resources/practitioners/practitioner-*.json")
-	// grpBodies := readBodies("../../src/main/resources/groups/group-*.json")
-
 	// POST /Practitioner
 	resps := targeter.New(targeter.Config{
 		Method:      "POST",
@@ -25,16 +22,17 @@ func (api *API) RunGroupTests() {
 		Generator:   templateBodyGenerator("./templates/practitioner-template.json", map[string]func() string{"{NPI}": generateNPI}),
 	}).Run(5, 2)
 
-	pracIDs, NPIs := unmarshalIDs(resps)
+	pracIDs := unmarshalIDs(resps)
 
 	var xProvValues []string
 	for _, id := range pracIDs {
 		xProvValues = append(xProvValues, fmt.Sprintf("{ \"resourceType\": \"Provenance\", \"meta\": { \"profile\": [ \"https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-attestation\" ] }, \"recorded\": \"1990-01-01T00:00:00.000-05:00\", \"reason\": [ { \"system\": \"http://hl7.org/fhir/v3/ActReason\", \"code\": \"TREAT\" } ], \"agent\": [ { \"role\": [ { \"coding\": [ { \"system\": \"http://hl7.org/fhir/v3/RoleClass\", \"code\": \"AGNT\" } ] } ], \"whoReference\": { \"reference\": \"Organization/%s}}\" }, \"onBehalfOfReference\": { \"reference\": \"Practitioner/%s\" } } ] }", auth.orgID, id))
 	}
 
+	npis := unmarshalIdentifiers(resps, "http://hl7.org/fhir/sid/us-npi")
 	i := 0
 	NPIGenerator := func() string {
-		npi := NPIs[i]
+		npi := npis[i]
 		i++
 		return npi
 	}
@@ -58,7 +56,7 @@ func (api *API) RunGroupTests() {
 	}).Run(5, 2)
 
 	// Retrieve group IDs which are required by the remaining tests
-	grpIDs, _ := unmarshalIDs(resps)
+	grpIDs := unmarshalIDs(resps)
 
 	// GET /Group
 	targeter.New(targeter.Config{

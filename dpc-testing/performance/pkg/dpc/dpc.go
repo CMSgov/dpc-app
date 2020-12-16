@@ -25,21 +25,31 @@ type Resource struct {
 }
 
 // Pull `ids` out of a set of response bodies
-func unmarshalIDs(resps [][]byte) ([]string, []string) {
+func unmarshalIDs(resps [][]byte) []string {
 	var IDs []string
-	var NPIs []string
 	for _, resp := range resps {
 		var result Resource
 		json.Unmarshal(resp, &result)
 		IDs = append(IDs, result.ID)
+	}
+
+	return IDs
+}
+
+// Pull `identifier` out of a set of response bodies
+func unmarshalIdentifiers(resps [][]byte, system string) []string {
+	var NPIs []string
+	for _, resp := range resps {
+		var result Resource
+		json.Unmarshal(resp, &result)
 		for _, i := range result.Identifier {
-			if i.System == "http://hl7.org/fhir/sid/us-npi" {
+			if i.System == system {
 				NPIs = append(NPIs, i.Value)
 			}
 		}
 	}
 
-	return IDs, NPIs
+	return NPIs
 }
 
 // Pull `clientTokens` out of a set of response bodies
