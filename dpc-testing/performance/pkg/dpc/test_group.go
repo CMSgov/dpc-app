@@ -30,12 +30,6 @@ func (api *API) RunGroupTests() {
 	}
 
 	npis := unmarshalIdentifiers(resps, "http://hl7.org/fhir/sid/us-npi")
-	i := 0
-	NPIGenerator := func() string {
-		npi := npis[i]
-		i++
-		return npi
-	}
 
 	// POST /Group
 	resps = targeter.New(targeter.Config{
@@ -50,9 +44,7 @@ func (api *API) RunGroupTests() {
 				"X-Provenance": xProvValues,
 			},
 		},
-		Generator: templateBodyGenerator("./templates/group-template.json", map[string]func() string{"{NPI}": func() string {
-			return NPIGenerator()
-		}}),
+		Generator: templateBodyGenerator("./templates/group-template.json", map[string]func() string{"{NPI}": targeter.GenStrs(npis)}),
 	}).Run(5, 2)
 
 	// Retrieve group IDs which are required by the remaining tests

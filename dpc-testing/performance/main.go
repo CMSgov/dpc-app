@@ -26,5 +26,4 @@ func main() {
 	api.RunPractitionerTests()
 	api.RunOrgTests()
 	api.RunGroupTests()
-
 }

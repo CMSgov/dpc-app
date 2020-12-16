@@ -114,8 +114,8 @@ func (dt *Targeter) name() string {
 	return fmt.Sprintf("%s %s/%s/%s", dt.Method, dt.BaseURL, dt.Endpoint, id)
 }
 
-// genStrs general generator function that returns strings
-func genStrs(strs []string) func() string {
+// GenStrs general generator function that returns strings
+func GenStrs(strs []string) func() string {
 	i := 0
 	n := len(strs)
 	return func() string {
@@ -136,7 +136,7 @@ func genIDs(config Config) func() string {
 		return func() string { return config.ID }
 	}
 
-	return genStrs(config.IDs)
+	return GenStrs(config.IDs)
 }
 
 // genBodies produces a closure that returns successive request bodies from all files matching the pattern

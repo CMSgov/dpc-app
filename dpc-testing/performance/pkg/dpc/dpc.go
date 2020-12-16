@@ -29,7 +29,10 @@ func unmarshalIDs(resps [][]byte) []string {
 	var IDs []string
 	for _, resp := range resps {
 		var result Resource
-		json.Unmarshal(resp, &result)
+		var err = json.Unmarshal(resp, &result)
+		if err != nil {
+			cleanAndPanic(err)
+		}
 		IDs = append(IDs, result.ID)
 	}
 
@@ -41,7 +44,10 @@ func unmarshalIdentifiers(resps [][]byte, system string) []string {
 	var identifierValue []string
 	for _, resp := range resps {
 		var result Resource
-		json.Unmarshal(resp, &result)
+		var err = json.Unmarshal(resp, &result)
+		if err != nil {
+			cleanAndPanic(err)
+		}
 		for _, i := range result.Identifier {
 			if i.System == system {
 				identifierValue = append(identifierValue, i.Value)
@@ -57,7 +63,10 @@ func unmarshalClientTokens(resps [][]byte) [][]byte {
 	var clientTokens [][]byte
 	for _, resp := range resps {
 		var result Resource
-		json.Unmarshal(resp, &result)
+		var err = json.Unmarshal(resp, &result)
+		if err != nil {
+			cleanAndPanic(err)
+		}
 		clientTokens = append(clientTokens, result.ClientToken)
 	}
 
@@ -69,7 +78,10 @@ func unmarshalAccessTokens(resps [][]byte) []string {
 	var accessTokens []string
 	for _, resp := range resps {
 		var result Resource
-		json.Unmarshal(resp, &result)
+		var err = json.Unmarshal(resp, &result)
+		if err != nil {
+			cleanAndPanic(err)
+		}
 		accessTokens = append(accessTokens, result.AccessToken)
 	}
 

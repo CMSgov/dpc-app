@@ -24,7 +24,6 @@ func templateBodyGenerator(templateFile string, replacementMap map[string]func()
 			}
 
 		}
-
 		return output
 	}
 }
