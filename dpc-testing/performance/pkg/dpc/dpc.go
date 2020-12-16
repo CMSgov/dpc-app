@@ -138,7 +138,7 @@ func generateNPI() string {
 }
 
 func generateMBI() string {
-	mbi, err := regen.Generate("^[1-9][a-zA-Z][a-zA-Z0-9][0-9][a-zA-Z][a-zA-Z0-9][0-9][a-zA-Z]{2}[0-9]{2}$")
+	mbi, err := regen.Generate("^[1-9][ac-hj-km-np-rt-yAC-HJ-KM-NP-RT-Y][ac-hj-km-np-rt-yAC-HJ-KM-NP-RT-Y0-9][0-9][ac-hj-km-np-rt-yAC-HJ-KM-NP-RT-Y][ac-hj-km-np-rt-yAC-HJ-KM-NP-RT-Y0-9][0-9][ac-hj-km-np-rt-yAC-HJ-KM-NP-RT-Y]{2}[0-9]{2}$")
 	if err != nil {
 		panic(err)
 	}
