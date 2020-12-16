@@ -4,6 +4,7 @@ import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import com.github.nitram509.jmacaroons.Macaroon;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
+import gov.cms.dpc.api.auth.annotations.Authorized;
 import gov.cms.dpc.api.auth.annotations.Public;
 import gov.cms.dpc.api.auth.jwt.IJTICache;
 import gov.cms.dpc.api.auth.jwt.ValidatingKeyResolver;
@@ -90,6 +91,7 @@ public class TokenResource extends AbstractTokenResource {
     @UnitOfWork
     @Timed
     @ExceptionMetered
+    @Authorized
     @ApiOperation(value = "Fetch client tokens", notes = "Method to retrieve the client tokens associated to the given Organization.")
     @ApiResponses(value = @ApiResponse(code = 404, message = "Could not find Organization"))
     public CollectionResponse<TokenEntity> getOrganizationTokens(
@@ -102,6 +104,7 @@ public class TokenResource extends AbstractTokenResource {
     @UnitOfWork
     @Timed
     @ExceptionMetered
+    @Authorized
     @ApiOperation(value = "Fetch client token", notes = "Method to retrieve metadata for a specific access token")
     @ApiResponses(value = @ApiResponse(code = 404, message = "Could not find Token", response = OperationOutcome.class))
     @Override
@@ -120,6 +123,7 @@ public class TokenResource extends AbstractTokenResource {
     @UnitOfWork
     @Timed
     @ExceptionMetered
+    @Authorized
     @ApiOperation(value = "Create authentication token", notes = "Create a new authentication token for the given Organization (identified by Resource ID)." +
             "<p>" +
             "Token supports a custom human-readable label via the `label` query param as well as a custom expiration period via the `expiration` param." +
@@ -172,6 +176,7 @@ public class TokenResource extends AbstractTokenResource {
     @UnitOfWork
     @Timed
     @ExceptionMetered
+    @Authorized
     @ApiOperation(value = "Delete authentication token", notes = "Delete the specified authentication token for the given Organization (identified by Resource ID)")
     @ApiResponses({@ApiResponse(code = 204, message = "Successfully deleted token"), @ApiResponse(code = 404, message = "Unable to find token with given id")})
     public Response deleteOrganizationToken(

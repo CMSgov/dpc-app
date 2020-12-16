@@ -7,10 +7,10 @@ import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import ca.uhn.fhir.rest.gclient.IReadExecutable;
 import ca.uhn.fhir.rest.gclient.IUpdateExecutable;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
+import gov.cms.dpc.api.TestOrganizationContext;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
 import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.common.utils.SeedProcessor;
@@ -22,6 +22,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpHeaders;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -297,7 +298,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
                 .useHttpGet()
                 .withAdditionalHeader("X-Provenance", provenance);
 
-        assertThrows(InternalErrorException.class, everythingOp::execute);
+        assertThrows(AuthenticationException.class, everythingOp::execute, "Org should not be be able to export another org's patient");
     }
 
     @Test
@@ -346,25 +347,42 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
         group = SeedProcessor.createBaseAttributionGroup(FHIRExtractors.getProviderNPI(practitioner), OTHER_ORG_ID);
         patientRef = new Reference("Patient/" + patientId);
         group.addMember().setEntity(patientRef);
+    }
 
-        String provenance = generateProvenance(OTHER_ORG_ID, practitioner.getId());
-        client
-                .create()
-                .resource(group)
-                .withAdditionalHeader("X-Provenance", provenance)
-                .encodedJson()
-                .execute();
+    @Test
+    public void tesGetPatientByUUID() throws GeneralSecurityException, IOException, URISyntaxException {
+        final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
+        final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
+        final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());
+        final IGenericClient orgBClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgBContext.getClientToken(), UUID.fromString(orgBContext.getPublicKeyId()), orgBContext.getPrivateKey());
 
-        IOperationUntypedWithInput<Bundle> everythingOp = client
-                .operation()
-                .onInstance(new IdType("Patient", patientId))
-                .named("$everything")
-                .withNoParameters(Parameters.class)
-                .returnResourceType(Bundle.class)
-                .useHttpGet()
-                .withAdditionalHeader("X-Provenance", provenance);
+        Patient orgAPatient = APITestHelpers.createPatientResource("4S41C00AA00", orgAContext.getOrgId());
+        orgAPatient = addPatientToOrg(orgAClient, orgAPatient);
 
-        assertThrows(InternalErrorException.class, everythingOp::execute);
+        Patient orgBPatient = APITestHelpers.createPatientResource("4S41C00AA00", orgBContext.getOrgId());
+        orgBPatient = addPatientToOrg(orgBClient, orgBPatient);
+
+        assertNotNull(fetchPatientById(orgAClient,orgAPatient.getId()), "Org should be able to retrieve their own patient.");
+        assertNotNull(fetchPatientById(orgBClient,orgBPatient.getId()), "Org should be able to retrieve their own patient.");
+
+        final String patientId = orgBPatient.getId();
+        assertThrows(AuthenticationException.class, () -> fetchPatientById(orgAClient, patientId), "Expected auth error when retrieving another org's patient.");
+    }
+
+    @Test
+    public void tesDeletePatient() throws GeneralSecurityException, IOException, URISyntaxException {
+        final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
+        final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
+        final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());
+        final IGenericClient orgBClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgBContext.getClientToken(), UUID.fromString(orgBContext.getPublicKeyId()), orgBContext.getPrivateKey());
+
+        Patient orgBPatient = APITestHelpers.createPatientResource("4S41C00AA00", orgBContext.getOrgId());
+        orgBPatient = addPatientToOrg(orgBClient, orgBPatient);
+
+        final String orgBPatientId = orgBPatient.getId();
+        assertThrows(AuthenticationException.class, () -> deletePatientById(orgAClient, orgBPatientId), "Expected auth error when deleting another org's patient.");
+
+        assertNull(deletePatientById(orgBClient,orgBPatientId), "Org should be able to delete their own patient.");
     }
 
     private IGenericClient generateClient(String orgID, String orgNPI, String keyLabel) throws IOException, URISyntaxException, GeneralSecurityException {
@@ -388,6 +406,29 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
 
     private Patient fetchPatient(IGenericClient client, String mbi) {
         return (Patient) fetchPatientBundleByMBI(client, mbi).getEntry().get(0).getResource();
+    }
+
+    private Patient fetchPatientById(IGenericClient client, String id) {
+        return client.read()
+                .resource(Patient.class)
+                .withId(id)
+                .encodedJson()
+                .execute();
+    }
+
+    private IBaseOperationOutcome deletePatientById(IGenericClient client, String id) {
+        return client.delete()
+                .resourceById(new IdType(id))
+                .encodedJson()
+                .execute();
+    }
+
+    private Patient addPatientToOrg(IGenericClient client, Patient patient){
+        return (Patient) client.create()
+                .resource(patient)
+                .encodedJson()
+                .execute()
+                .getResource();
     }
 
     private Bundle fetchPatientBundleByMBI(IGenericClient client, String mbi) {

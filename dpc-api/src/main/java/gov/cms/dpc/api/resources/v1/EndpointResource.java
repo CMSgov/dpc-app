@@ -6,7 +6,8 @@ import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import com.google.inject.name.Named;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
-import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
+import gov.cms.dpc.api.auth.annotations.Authorized;
+import gov.cms.dpc.api.auth.annotations.PathAuthorized;
 import gov.cms.dpc.api.resources.AbstractEndpointResource;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.Profiled;
@@ -39,6 +40,7 @@ public class EndpointResource extends AbstractEndpointResource {
     @FHIR
     @Timed
     @ExceptionMetered
+    @Authorized
     @ApiOperation(value = "Create an Endpoint", notes = "Create an Endpoint resource for an Organization")
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Endpoint created"),
@@ -67,6 +69,7 @@ public class EndpointResource extends AbstractEndpointResource {
     @FHIR
     @Timed
     @ExceptionMetered
+    @Authorized
     @ApiOperation(value = "Search for Endpoints", notes = "Search for public Endpoint resources associated to the given Organization.")
     @Override
     public Bundle getEndpoints(@ApiParam(hidden=true) @Auth OrganizationPrincipal organization) {
@@ -81,7 +84,7 @@ public class EndpointResource extends AbstractEndpointResource {
 
     @GET
     @Path("/{endpointID}")
-    @PathAuthorizer(type = ResourceType.Endpoint, pathParam = "endpointID")
+    @PathAuthorized(type = ResourceType.Endpoint, pathParam = "endpointID")
     @FHIR
     @Timed
     @ExceptionMetered
@@ -99,7 +102,7 @@ public class EndpointResource extends AbstractEndpointResource {
 
     @PUT
     @Path("/{endpointID}")
-    @PathAuthorizer(type = ResourceType.Endpoint, pathParam = "endpointID")
+    @PathAuthorized(type = ResourceType.Endpoint, pathParam = "endpointID")
     @FHIR
     @Timed
     @ExceptionMetered
@@ -129,7 +132,7 @@ public class EndpointResource extends AbstractEndpointResource {
 
     @DELETE
     @Path("/{endpointID}")
-    @PathAuthorizer(type = ResourceType.Endpoint, pathParam = "endpointID")
+    @PathAuthorized(type = ResourceType.Endpoint, pathParam = "endpointID")
     @FHIR
     @Timed
     @ExceptionMetered

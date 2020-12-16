@@ -1,9 +1,9 @@
 package gov.cms.dpc.api.auth;
 
 import gov.cms.dpc.api.auth.annotations.AdminOperation;
-import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
+import gov.cms.dpc.api.auth.annotations.Authorized;
+import gov.cms.dpc.api.auth.annotations.PathAuthorized;
 import gov.cms.dpc.api.auth.annotations.Public;
-import io.dropwizard.auth.Auth;
 import io.dropwizard.auth.AuthDynamicFeature;
 import org.glassfish.jersey.server.model.AnnotatedMethod;
 import org.slf4j.Logger;
@@ -35,20 +35,10 @@ public class DPCAuthDynamicFeature implements DynamicFeature {
     @Override
     public void configure(ResourceInfo resourceInfo, FeatureContext context) {
 
+
         final AnnotatedMethod am = new AnnotatedMethod(resourceInfo.getResourceMethod());
 
-        // If we're public don't do anything
-        if (isMethodClassAnnotated(Public.class, resourceInfo, am)) {
-            return;
-        }
-
-        // Check for any @Auth annotated params
-        if (authAnnotated(am)) {
-            logger.trace("Registering Auth param on method {}", am.toString());
-            context.register(this.factory.createStandardAuthorizer());
-            return;
-        }
-
+        resourceInfo.getResourceClass().getPackageName();
         // Check for Admin annotated params
         if (isMethodClassAnnotated(AdminOperation.class, resourceInfo, am)) {
             logger.trace("Registering Admin authorizer on method {}", am);
@@ -56,27 +46,24 @@ public class DPCAuthDynamicFeature implements DynamicFeature {
             return;
         }
 
-        // Next, check for any authorization annotations on the class or method.
-        // This should include all annotations specified in gov.cms.dpc.api.auth.annotations
-        final boolean annotationOnClass = (resourceInfo.getResourceClass().getAnnotation(PathAuthorizer.class) != null);
-        final boolean annotationOnMethod = am.isAnnotationPresent(PathAuthorizer.class);
+        // If we're public don't do anything
+        if (isMethodClassAnnotated(Public.class, resourceInfo, am)) {
+            return;
+        }
 
-        if (annotationOnClass || annotationOnMethod) {
-            final PathAuthorizer pa = am.getAnnotation(PathAuthorizer.class);
+        if (isMethodClassAnnotated(PathAuthorized.class, resourceInfo, am)) {
+            logger.trace("Registering PathAuthorized param on method {}", am.toString());
+            final PathAuthorized pa = am.getAnnotation(PathAuthorized.class);
             context.register(this.factory.createPathAuthorizer(pa));
+            return;
         }
-    }
-    private boolean authAnnotated(AnnotatedMethod am) {
-        final Annotation[][] parameterAnnotations = am.getParameterAnnotations();
 
-        for (Annotation[] parameterAnnotation : parameterAnnotations) {
-            for (final Annotation annotation : parameterAnnotation) {
-                if (annotation instanceof Auth) {
-                    return true;
-                }
-            }
+        // Check for @Authorized annotated param
+        if (isMethodClassAnnotated(Authorized.class, resourceInfo, am)) {
+            logger.trace("Registering Auth param on method {}", am.toString());
+            context.register(this.factory.createStandardAuthorizer());
+            return;
         }
-        return false;
     }
 
     private boolean isMethodClassAnnotated(Class<? extends Annotation> annotation, ResourceInfo resourceInfo, AnnotatedMethod am) {

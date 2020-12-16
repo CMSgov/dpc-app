@@ -6,7 +6,7 @@ import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import com.google.inject.name.Named;
 import gov.cms.dpc.api.auth.annotations.AdminOperation;
-import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
+import gov.cms.dpc.api.auth.annotations.PathAuthorized;
 import gov.cms.dpc.api.jdbi.PublicKeyDAO;
 import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.api.resources.AbstractOrganizationResource;
@@ -73,7 +73,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
     @FHIR
     @Timed
     @ExceptionMetered
-    @PathAuthorizer(type = ResourceType.Organization, pathParam = "organizationID")
+    @PathAuthorized(type = ResourceType.Organization, pathParam = "organizationID")
     @ApiOperation(value = "Get organization details",
             notes = "FHIR endpoint which returns the Organization resource that is currently registered with the application.",
             authorizations = @Authorization(value = "access_token"))
@@ -125,7 +125,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
 
     @PUT
     @Path("/{organizationID}")
-    @PathAuthorizer(type = ResourceType.Organization, pathParam = "organizationID")
+    @PathAuthorized(type = ResourceType.Organization, pathParam = "organizationID")
     @FHIR
     @Timed
     @ExceptionMetered

@@ -9,7 +9,8 @@ import com.codahale.metrics.annotation.Timed;
 import com.google.inject.name.Named;
 import gov.cms.dpc.api.APIHelpers;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
-import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
+import gov.cms.dpc.api.auth.annotations.Authorized;
+import gov.cms.dpc.api.auth.annotations.PathAuthorized;
 import gov.cms.dpc.api.resources.AbstractPractitionerResource;
 import gov.cms.dpc.common.annotations.NoHtml;
 import gov.cms.dpc.fhir.annotations.FHIR;
@@ -53,6 +54,7 @@ public class PractitionerResource extends AbstractPractitionerResource {
     @FHIR
     @Timed
     @ExceptionMetered
+    @Authorized
     @ApiOperation(value = "Search for providers", notes = "FHIR endpoint to search for Practitioner resources." +
             "<p>If a provider NPI is given, the results are filtered accordingly. " +
             "Otherwise, the method returns all Practitioners associated to the given Organization")
@@ -88,7 +90,7 @@ public class PractitionerResource extends AbstractPractitionerResource {
     @GET
     @FHIR
     @Path("/{providerID}")
-    @PathAuthorizer(type = ResourceType.Practitioner, pathParam = "providerID")
+    @PathAuthorized(type = ResourceType.Practitioner, pathParam = "providerID")
     @Timed
     @ExceptionMetered
     @ApiOperation(value = "Fetch provider", notes = "FHIR endpoint to fetch a specific Practitioner resource." +
@@ -110,6 +112,7 @@ public class PractitionerResource extends AbstractPractitionerResource {
     @FHIR
     @Timed
     @ExceptionMetered
+    @Authorized
     @ApiOperation(value = "Register provider", notes = "FHIR endpoint to register a provider with the system")
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "Successfully created provider"),
@@ -133,6 +136,7 @@ public class PractitionerResource extends AbstractPractitionerResource {
     @FHIR
     @Timed
     @ExceptionMetered
+    @Authorized
     @ApiOperation(value = "Bulk submit Practitioner resources", notes = "FHIR operation for submitting a Bundle of Practitioner resources, which will be associated to the given Organization." +
             "<p> Each Practitioner MUST implement the " + PRACTITIONER_PROFILE + " profile.")
     @ApiResponses(@ApiResponse(code = 422, message = "Provider does not satisfy the required FHIR profile"))
@@ -150,7 +154,7 @@ public class PractitionerResource extends AbstractPractitionerResource {
 
     @DELETE
     @Path("/{providerID}")
-    @PathAuthorizer(type = ResourceType.Practitioner, pathParam = "providerID")
+    @PathAuthorized(type = ResourceType.Practitioner, pathParam = "providerID")
     @FHIR
     @Timed
     @ExceptionMetered
@@ -171,7 +175,7 @@ public class PractitionerResource extends AbstractPractitionerResource {
 
     @PUT
     @Path("/{providerID}")
-    @PathAuthorizer(type = ResourceType.Practitioner, pathParam = "providerID")
+    @PathAuthorized(type = ResourceType.Practitioner, pathParam = "providerID")
     @FHIR
     @Timed
     @ExceptionMetered
@@ -187,6 +191,7 @@ public class PractitionerResource extends AbstractPractitionerResource {
     @FHIR
     @Timed
     @ExceptionMetered
+    @Authorized
     @ApiOperation(value = "Validate Practitioner resource", notes = "Validates the given resource against the " + PractitionerProfile.PROFILE_URI + " profile." +
             "<p>This method always returns a 200 status, even in respond to a non-conformant resource.")
     @Override

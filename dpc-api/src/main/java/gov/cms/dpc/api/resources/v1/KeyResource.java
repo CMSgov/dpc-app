@@ -4,6 +4,7 @@ package gov.cms.dpc.api.resources.v1;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
+import gov.cms.dpc.api.auth.annotations.Authorized;
 import gov.cms.dpc.api.auth.jwt.PublicKeyHandler;
 import gov.cms.dpc.api.entities.PublicKeyEntity;
 import gov.cms.dpc.api.exceptions.PublicKeyException;
@@ -50,6 +51,7 @@ public class KeyResource extends AbstractKeyResource {
     @GET
     @Timed
     @ExceptionMetered
+    @Authorized
     @UnitOfWork
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Fetch public keys for Organization",
@@ -66,6 +68,7 @@ public class KeyResource extends AbstractKeyResource {
     @ExceptionMetered
     @Path("/{keyID}")
     @UnitOfWork
+    @Authorized
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Fetch public key for Organization",
             notes = "This endpoint returns the specified public key associated with the organization." +
@@ -86,6 +89,7 @@ public class KeyResource extends AbstractKeyResource {
     @Path("/{keyID}")
     @UnitOfWork
     @Produces(MediaType.APPLICATION_JSON)
+    @Authorized
     @ApiOperation(value = "Delete public key for Organization",
             notes = "This endpoint deletes the specified public key associated with the organization.")
     @ApiResponses(value = {
@@ -109,6 +113,7 @@ public class KeyResource extends AbstractKeyResource {
     @ExceptionMetered
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
+    @Authorized
     @ApiOperation(value = "Register public key for Organization",
             notes = "This endpoint registers the provided public key with the organization." +
                     "<p>The provided key MUST be PEM encoded." +
