@@ -11,9 +11,6 @@ func (api *API) RunPatientTests() {
 	auth := api.SetUpOrgAuth()
 	defer api.DeleteOrg(auth.orgID)
 
-	// bundleBodies := readBodies("../../src/main/resources/parameters/bundles/patients/patient-*.json")
-	// bodies := readBodies("../../src/main/resources/patients/patient-*.json")
-
 	// POST /Patient/$validate
 	targeter.New(targeter.Config{
 		Method:      "POST",
@@ -32,7 +29,7 @@ func (api *API) RunPatientTests() {
 		Generator:   templateBodyGenerator("./templates/patient-template.json", map[string]func() string{"{MBI}": generateMBI}),
 	}).Run(5, 2)
 
-	// // Retrieve patient IDs which are required by the remaining tests
+	// Retrieve patient IDs which are required by the remaining tests
 	patientIDs := unmarshalIDs(resps)
 
 	// POST /Patient/$submit
