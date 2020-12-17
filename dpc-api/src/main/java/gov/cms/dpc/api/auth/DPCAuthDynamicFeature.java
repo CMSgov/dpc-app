@@ -46,11 +46,6 @@ public class DPCAuthDynamicFeature implements DynamicFeature {
             return;
         }
 
-        // If we're public don't do anything
-        if (isMethodClassAnnotated(Public.class, resourceInfo, am)) {
-            return;
-        }
-
         if (isMethodClassAnnotated(PathAuthorizer.class, resourceInfo, am)) {
             logger.trace("Registering PathAuthorizer param on method {}", am.toString());
             final PathAuthorizer pa = am.getAnnotation(PathAuthorizer.class);
@@ -62,6 +57,11 @@ public class DPCAuthDynamicFeature implements DynamicFeature {
         if (isMethodClassAnnotated(Authorizer.class, resourceInfo, am)) {
             logger.trace("Registering Auth param on method {}", am.toString());
             context.register(this.factory.createStandardAuthorizer());
+            return;
+        }
+
+        // If we're public don't do anything
+        if (isMethodClassAnnotated(Public.class, resourceInfo, am)) {
             return;
         }
     }
