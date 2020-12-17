@@ -79,7 +79,7 @@ func (api *API) RunGroupTests() {
 				"X-Provenance": xProvValues,
 			},
 		},
-		Generator:   byteArrayGenerator(resps),
+		Generator:   templateBodyGenerator("./templates/group-template.json", map[string]func() string{"{NPI}": targeter.GenStrs(npis)}),
 		IDs:         grpIDs,
 		AccessToken: auth.accessToken,
 	}).Run(5, 2)

@@ -35,20 +35,7 @@ func keyBodyGenerator(n int, fn func() (string, *rsa.PrivateKey, string)) func()
 		bodies = append(bodies, []byte(fmt.Sprintf(`{ "key": "%s", "signature": "%s"}`, pubKeyStr, signature)))
 	}
 
-	num := len(bodies)
-	if num == 0 {
-		return func() []byte { return []byte{} }
-	}
-	i := 0
-	return func() []byte {
-		if i >= num {
-			return []byte{}
-		}
-
-		body := bodies[i]
-		i++
-		return body
-	}
+	return byteArrayGenerator(bodies)
 }
 
 func authBodyGenerator(authTokens [][]byte) func() []byte {
@@ -64,20 +51,7 @@ func authBodyGenerator(authTokens [][]byte) func() []byte {
 		)
 	}
 
-	num := len(bodies)
-	if num == 0 {
-		return func() []byte { return []byte{} }
-	}
-	i := 0
-	return func() []byte {
-		if i >= num {
-			return []byte{}
-		}
-
-		body := bodies[i]
-		i++
-		return body
-	}
+	return byteArrayGenerator(bodies)
 }
 
 func byteArrayGenerator(arrayOfBytes [][]byte) func() []byte {
@@ -91,8 +65,8 @@ func byteArrayGenerator(arrayOfBytes [][]byte) func() []byte {
 			return []byte{}
 		}
 
-		token := arrayOfBytes[i]
+		bytes := arrayOfBytes[i]
 		i++
-		return token
+		return bytes
 	}
 }
