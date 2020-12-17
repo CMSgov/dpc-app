@@ -38,7 +38,6 @@ public class DPCAuthDynamicFeature implements DynamicFeature {
 
         final AnnotatedMethod am = new AnnotatedMethod(resourceInfo.getResourceMethod());
 
-        resourceInfo.getResourceClass().getPackageName();
         // Check for Admin annotated params
         if (isMethodClassAnnotated(AdminOperation.class, resourceInfo, am)) {
             logger.trace("Registering Admin authorizer on method {}", am);
@@ -46,6 +45,7 @@ public class DPCAuthDynamicFeature implements DynamicFeature {
             return;
         }
 
+        // Check for @PathAuthorizer annotated param
         if (isMethodClassAnnotated(PathAuthorizer.class, resourceInfo, am)) {
             logger.trace("Registering PathAuthorizer param on method {}", am.toString());
             final PathAuthorizer pa = am.getAnnotation(PathAuthorizer.class);
