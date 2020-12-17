@@ -80,11 +80,6 @@ func (dt *Targeter) buildTarget(t *vegeta.Target) error {
 	t.Header = dt.nextHeaders()
 	t.Header.Add("Authorization", fmt.Sprintf("Bearer %s", dt.AccessToken))
 
-	// if t.Header.Get("X-Provenance") != "" {
-	// 	fmt.Println("Header: " + t.Header.Get("X-Provenance"))
-	// 	fmt.Println("Body: " + string(t.Body))
-	// }
-
 	return nil
 }
 
