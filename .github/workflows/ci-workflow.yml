@@ -6,6 +6,7 @@ env:
   VAULT_PW: ${{ secrets.VAULT_PW }}
   REPORT_COVERAGE: true
   CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+  SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
 jobs:
   build-api:
@@ -40,16 +41,26 @@ jobs:
           make ci-web
 
   snyk:
-    name: "Run Snyk scan"
+    name: "Run Snyk scans"
     runs-on: ubuntu-latest
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v1
-      - name: Run Snyk to check for vulnerabilities
+      - name: Run Snyk - Java
         uses: snyk/actions/maven@master
         continue-on-error: false
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           command: test
           args: --severity-threshold=high --file=pom.xml
+      - name: Run Snyk - Ruby
+        uses: snyk/actions/ruby@master
+        continue-on-error: false
+        with:
+          command: test
+          args: --severity-threshold=high --file=dpc-web/Gemfile.lock
+      - name: Run Snyk - Python
+        uses: snyk/actions/python@master
+        continue-on-error: false
+        with:
+          command: test
+          args: --severity-threshold=high --file=requirements.txt
