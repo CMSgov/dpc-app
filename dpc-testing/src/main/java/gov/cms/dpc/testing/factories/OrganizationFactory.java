@@ -62,6 +62,7 @@ public class OrganizationFactory {
         return endpoint;
     }
 
+
     public static Endpoint createValidFakeEndpoint(String organizationId) {
         Endpoint endpoint = createValidFakeEndpoint();
         endpoint.setManagingOrganization(new Reference(new IdType("Organization", organizationId)));

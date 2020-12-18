@@ -61,7 +61,6 @@ public class MacaroonsAuthenticator implements Authenticator<DPCAuthCredentials,
                 .search()
                 .forResource(credentials.getPathAuthorizer().type().toString())
                 .whereMap(searchParams)
-//                .withTag("", credentials.getOrganization().getId())
                 .returnBundle(Bundle.class)
                 .encodedJson()
                 .execute();

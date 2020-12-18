@@ -19,7 +19,7 @@ public abstract class AbstractEndpointResource {
     public abstract Response createEndpoint(@NotNull Endpoint endpoint);
 
     @GET
-    public abstract List<Endpoint> searchEndpoints(@NotNull String organizationID);
+    public abstract List<Endpoint> searchEndpoints(@NotNull String organizationID, String resourceId);
 
     @GET
     @Path("/{endpointID}")
