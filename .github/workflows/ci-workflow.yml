@@ -48,19 +48,19 @@ jobs:
         uses: actions/checkout@v1
       - name: Run Snyk - Java
         uses: snyk/actions/maven@master
-        continue-on-error: false
+        continue-on-error: true
         with:
           command: test
           args: --severity-threshold=high --file=pom.xml
       - name: Run Snyk - Ruby
         uses: snyk/actions/ruby@master
-        continue-on-error: false
+        continue-on-error: true
         with:
           command: test
           args: --severity-threshold=high --file=dpc-web/Gemfile.lock
       - name: Run Snyk - Python
         uses: snyk/actions/python@master
-        continue-on-error: false
+        continue-on-error: true
         with:
           command: test
           args: --severity-threshold=high --file=requirements.txt
