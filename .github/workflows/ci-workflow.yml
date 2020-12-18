@@ -46,10 +46,10 @@ jobs:
       - name: "Checkout code"
         uses: actions/checkout@v1
       - name: Run Snyk to check for vulnerabilities
-        uses: snyk/actions/maven@master
-        continue-on-error: true
+        uses: snyk/actions/gradle-jdk11@master
+        continue-on-error: false
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           command: test
-          args: --severity-threshold=high
+          args: --severity-threshold=high --file=pom.xml
