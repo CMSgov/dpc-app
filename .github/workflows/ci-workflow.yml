@@ -23,18 +23,6 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: "3.8.1"
-      - name: Run Snyk - Java
-        uses: snyk/actions/maven@master
-        continue-on-error: false
-        with:
-          command: test
-          args: --severity-threshold=high --file=pom.xml
-      - name: Run Snyk - Python
-        uses: snyk/actions/python@master
-        continue-on-error: false
-        with:
-          command: test
-          args: --severity-threshold=high --file=requirements.txt
       - name: "API Build"
         run: |
           make ci-app
@@ -48,12 +36,31 @@ jobs:
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v1
-      - name: Run Snyk - Ruby
-        uses: snyk/actions/ruby@master
-        continue-on-error: false
-        with:
-          command: test
-          args: --severity-threshold=high --file=dpc-web/Gemfile.lock
       - name: "Website Build"
         run: |
           make ci-web
+
+  snyk:
+    name: "Run Snyk scans"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@v1
+      - name: Run Snyk - Java
+        uses: snyk/actions/maven@master
+        continue-on-error: true
+        with:
+          command: test
+          args: --severity-threshold=high --file=pom.xml
+      - name: Run Snyk - Ruby
+        uses: snyk/actions/ruby@master
+        continue-on-error: true
+        with:
+          command: test
+          args: --severity-threshold=high --file=dpc-web/Gemfile.lock
+      - name: Run Snyk - Python
+        uses: snyk/actions/python@master
+        continue-on-error: true
+        with:
+          command: test
+          args: --severity-threshold=high --file=requirements.txt
