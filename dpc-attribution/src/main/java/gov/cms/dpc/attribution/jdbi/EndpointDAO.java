@@ -29,7 +29,7 @@ public class EndpointDAO extends AbstractDAO<EndpointEntity> {
         return Optional.ofNullable(get(endpointID));
     }
 
-    public List<EndpointEntity> search(UUID organizationID, UUID endpointId) {
+    public List<EndpointEntity> endpointSearch(UUID organizationID, UUID endpointId) {
         // Build a selection query to get records from the database
         final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
         final CriteriaQuery<EndpointEntity> query = builder.createQuery(EndpointEntity.class);

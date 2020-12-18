@@ -67,7 +67,7 @@ public class EndpointResource extends AbstractEndpointResource {
             endpointUUID = FHIRExtractors.getEntityUUID(resourceId);
         }
 
-        final List<EndpointEntity> endpointList = this.endpointDAO.search(orgUUID, endpointUUID);
+        final List<EndpointEntity> endpointList = this.endpointDAO.endpointSearch(orgUUID, endpointUUID);
 
         return endpointList
                 .stream()
