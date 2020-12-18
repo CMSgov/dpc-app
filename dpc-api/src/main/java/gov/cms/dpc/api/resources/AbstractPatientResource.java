@@ -6,7 +6,6 @@ import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.Profiled;
 import gov.cms.dpc.fhir.validations.profiles.AttestationProfile;
 import gov.cms.dpc.fhir.validations.profiles.PatientProfile;
-import io.dropwizard.auth.Auth;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
@@ -32,7 +31,7 @@ public abstract class AbstractPatientResource {
     public abstract Response submitPatient(OrganizationPrincipal organization, @Valid @Profiled(profile = PatientProfile.PROFILE_URI) Patient patient);
     @POST
     @Path("/$submit")
-    public abstract Bundle bulkSubmitPatients(@Auth OrganizationPrincipal organization, Parameters params);
+    public abstract Bundle bulkSubmitPatients(OrganizationPrincipal organization, Parameters params);
 
     @GET
     @Path("/{patientID}")
