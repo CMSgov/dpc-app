@@ -82,7 +82,7 @@ public class FHIRPatientBuilder {
 
     //add more test data if needed, this is just a start.
     public FHIRPatientBuilder withTestData(){
-        withName("Salvaorito", "Nacho");
+        withName("Salvadorito", "Nacho");
         withGender("other");
         withBirthDate("1991-12-01");
         return this;
