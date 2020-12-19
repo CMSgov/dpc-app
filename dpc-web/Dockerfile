@@ -1,8 +1,8 @@
 FROM adoptopenjdk/openjdk11:latest AS java_builder
 
 # Install build dependencies
-RUN apt-get update && apt-get install -y build-essential ruby-full fontconfig ttf-dejavu zlib1g-dev ruby-dev
-RUN gem install jekyll bundler
+RUN apt-get update && apt-get install -y build-essential ruby-full fontconfig ttf-dejavu ruby-dev
+RUN gem install jekyll
 
 # Build the IG assets
 WORKDIR /dpc-app
