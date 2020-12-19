@@ -15,18 +15,6 @@ jobs:
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v1
-      - name: Run Snyk - Java
-        uses: snyk/actions/maven@master
-        continue-on-error: false
-        with:
-          command: test
-          args: --severity-threshold=high --file=pom.xml
-      - name: Run Snyk - Python
-        uses: snyk/actions/python@master
-        continue-on-error: false
-        with:
-          command: test
-          args: --severity-threshold=high --file=requirements.txt
       - name: "Set up JDK 11"
         uses: actions/setup-java@v1
         with:
@@ -35,6 +23,10 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: "3.8.1"
+      - name: "Set-up Snyk"
+        uses: snyk/actions/setup@master
+      - name: "Snyk Test"
+        run: snyk test --all-projects --severity-threshold=high --detection-depth=2
       - name: "API Build"
         run: |
           make ci-app
@@ -48,12 +40,6 @@ jobs:
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v1
-      - name: Run Snyk - Ruby
-        uses: snyk/actions/ruby@master
-        continue-on-error: false
-        with:
-          command: test
-          args: --severity-threshold=high --file=dpc-web/Gemfile.lock
       - name: "Website Build"
         run: |
           make ci-web
