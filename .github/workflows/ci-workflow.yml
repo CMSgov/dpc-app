@@ -63,4 +63,4 @@ jobs:
         continue-on-error: true
         with:
           command: test
-          args: --severity-threshold=high
+          args: --severity-threshold=high --file=requirements.txt
