@@ -26,7 +26,7 @@ jobs:
       - name: "Set-up Snyk"
         uses: snyk/actions/setup@master
       - name: "Snyk Test"
-        run: snyk test --all-projects --severity-threshold=high --detection-depth=2
+        run: snyk test --all-projects --severity-threshold=high --detection-depth=2 --exclude=ig,src,ops,dpcclient,docker,bbtcerts,bzt-out,docker
       - name: "API Build"
         run: |
           make ci-app
