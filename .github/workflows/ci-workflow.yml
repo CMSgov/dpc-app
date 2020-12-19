@@ -21,12 +21,6 @@ jobs:
         with:
           command: test
           args: --severity-threshold=high --file=pom.xml
-      - name: Run Snyk - Python
-        uses: snyk/actions/python@master
-        continue-on-error: false
-        with:
-          command: test
-          args: --severity-threshold=high --file=requirements.txt
       - name: "Set up JDK 11"
         uses: actions/setup-java@v1
         with:
