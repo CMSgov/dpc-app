@@ -15,6 +15,12 @@ jobs:
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v1
+      - name: Run Snyk - Java
+        uses: snyk/actions/maven@master
+        continue-on-error: false
+        with:
+          command: test
+          args: --severity-threshold=high --file=pom.xml
       - name: "Set up JDK 11"
         uses: actions/setup-java@v1
         with:
@@ -29,12 +35,6 @@ jobs:
       - name: "Smoke Test"
         run: |
           make smoke
-      - name: Run Snyk - Java
-        uses: snyk/actions/maven@master
-        continue-on-error: false
-        with:
-          command: test
-          args: --severity-threshold=high --file=pom.xml
 
   build-web:
     name: "Build and Test Website"
