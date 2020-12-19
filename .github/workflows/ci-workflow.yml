@@ -6,6 +6,7 @@ env:
   VAULT_PW: ${{ secrets.VAULT_PW }}
   REPORT_COVERAGE: true
   CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+  SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
 jobs:
   build-api:
@@ -28,6 +29,18 @@ jobs:
       - name: "Smoke Test"
         run: |
           make smoke
+      - name: Run Snyk - Java
+        uses: snyk/actions/maven@master
+        continue-on-error: true
+        with:
+          command: test
+          args: --severity-threshold=high --file=pom.xml
+      - name: Run Snyk - Python
+        uses: snyk/actions/python@master
+        continue-on-error: true
+        with:
+          command: test
+          args: --severity-threshold=high --file=requirements.txt
 
   build-web:
     name: "Build and Test Website"
@@ -38,3 +51,9 @@ jobs:
       - name: "Website Build"
         run: |
           make ci-web
+      - name: Run Snyk - Ruby
+        uses: snyk/actions/ruby@master
+        continue-on-error: true
+        with:
+          command: test
+          args: --severity-threshold=high --file=dpc-web/Gemfile.lock
