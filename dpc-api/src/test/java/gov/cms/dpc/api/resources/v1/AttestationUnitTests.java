@@ -21,9 +21,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Request;
-import javax.ws.rs.core.SecurityContext;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -96,16 +93,13 @@ public class AttestationUnitTests {
 
     @Test
     void testUpdateLogging() {
-        final Organization org = new Organization();
-        org.setId(new IdType("Organization", APITestHelpers.ORGANIZATION_ID));
-
         final Group group = new Group();
         group.addMember().setEntity(new Reference("Patient/test-patient"));
 
         final Provenance provenance = createTestProvenance();
         final UUID rosterID = UUID.randomUUID();
 
-        assertThrows(NullPointerException.class, () -> groupResource.updateRoster(new OrganizationPrincipal(org), rosterID, provenance, group));
+        assertThrows(NullPointerException.class, () -> groupResource.updateRoster(rosterID, provenance, group));
 
         // Check the log worked correctly
         assertEquals(1, listAppender.list.size(), "Should have a logged message");
@@ -126,9 +120,6 @@ public class AttestationUnitTests {
 
     @Test
     void testUpdateLoggingMultiplePatients() {
-        final Organization org = new Organization();
-        org.setId(new IdType("Organization", APITestHelpers.ORGANIZATION_ID));
-
         final Group group = new Group();
         group.addMember().setEntity(new Reference("Patient/test-patient"));
         group.addMember().setEntity(new Reference("Patient/test-patient2"));
@@ -137,7 +128,7 @@ public class AttestationUnitTests {
         final Provenance provenance = createTestProvenance();
         final UUID rosterID = UUID.randomUUID();
 
-        assertThrows(NullPointerException.class, () -> groupResource.addRosterMembers(new OrganizationPrincipal(org), rosterID, provenance, group));
+        assertThrows(NullPointerException.class, () -> groupResource.addRosterMembers(rosterID, provenance, group));
 
         // Check the log worked correctly
         assertEquals(1, listAppender.list.size(), "Should have a logged message");
@@ -158,9 +149,6 @@ public class AttestationUnitTests {
 
     @Test
     void testRosterAddLogging() {
-        final Organization org = new Organization();
-        org.setId(new IdType("Organization", APITestHelpers.ORGANIZATION_ID));
-
         final Group group = new Group();
         group.addMember().setEntity(new Reference("Patient/test-patient"));
         group.addMember().setEntity(new Reference("Patient/test-patient2"));
@@ -169,7 +157,7 @@ public class AttestationUnitTests {
         final Provenance provenance = createTestProvenance();
         final UUID rosterID = UUID.randomUUID();
 
-        assertThrows(NullPointerException.class, () -> groupResource.updateRoster(new OrganizationPrincipal(org), rosterID, provenance, group));
+        assertThrows(NullPointerException.class, () -> groupResource.updateRoster(rosterID, provenance, group));
 
         // Check the log worked correctly
         assertEquals(1, listAppender.list.size(), "Should have a logged message");

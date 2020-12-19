@@ -5,6 +5,7 @@ import gov.cms.dpc.common.annotations.NoHtml;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.Profiled;
 import gov.cms.dpc.fhir.validations.profiles.PractitionerProfile;
+import io.dropwizard.auth.Auth;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Practitioner;
@@ -31,7 +32,7 @@ public abstract class AbstractPractitionerResource {
 
     @POST
     @Path("/$submit")
-    public abstract Bundle bulkSubmitProviders(OrganizationPrincipal organization, Parameters params);
+    public abstract Bundle bulkSubmitProviders(@Auth OrganizationPrincipal organization, Parameters params);
 
     @GET
     @Path("/{providerID}")

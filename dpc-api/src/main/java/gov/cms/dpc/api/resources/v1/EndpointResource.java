@@ -6,7 +6,6 @@ import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import com.google.inject.name.Named;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
-import gov.cms.dpc.api.auth.annotations.Authorizer;
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.resources.AbstractEndpointResource;
 import gov.cms.dpc.fhir.annotations.FHIR;
@@ -40,7 +39,6 @@ public class EndpointResource extends AbstractEndpointResource {
     @FHIR
     @Timed
     @ExceptionMetered
-    @Authorizer
     @ApiOperation(value = "Create an Endpoint", notes = "Create an Endpoint resource for an Organization")
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Endpoint created"),
@@ -69,7 +67,6 @@ public class EndpointResource extends AbstractEndpointResource {
     @FHIR
     @Timed
     @ExceptionMetered
-    @Authorizer
     @ApiOperation(value = "Search for Endpoints", notes = "Search for public Endpoint resources associated to the given Organization.")
     @Override
     public Bundle getEndpoints(@ApiParam(hidden=true) @Auth OrganizationPrincipal organization) {

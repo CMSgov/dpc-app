@@ -92,8 +92,6 @@ public class GroupResource extends AbstractGroupResource {
             throw new WebApplicationException("Unable to find attributable provider", Response.Status.NOT_FOUND);
         }
 
-        verifyMembers(attributionRoster, organizationID);
-
         final RosterEntity rosterEntity = RosterEntity.fromFHIR(attributionRoster, providers.get(0), generateExpirationTime());
 
         // Add the first provider
@@ -111,7 +109,7 @@ public class GroupResource extends AbstractGroupResource {
             response = Bundle.class)
     @Override
     public List<Group> rosterSearch(@ApiParam(value = "Group resource UUID")
-                                    @QueryParam(Group.SP_RES_ID) UUID rosterID,
+                                        @QueryParam(Group.SP_RES_ID) UUID rosterID,
                                     @ApiParam(value = "Organization ID")
                                     @NotEmpty @QueryParam("_tag") String organizationToken,
                                     @ApiParam(value = "Provider NPI")
@@ -127,7 +125,7 @@ public class GroupResource extends AbstractGroupResource {
         }
 
         final UUID organizationID = RESTUtils.tokenTagToUUID(organizationToken);
-        return this.rosterDAO.findEntities(rosterID, organizationID, providerIDPart, patientID)
+        return this.rosterDAO.findEntities(rosterID,organizationID, providerIDPart, patientID)
                 .stream()
                 .map(r -> this.converter.toFHIR(Group.class, r))
                 .collect(Collectors.toList());
@@ -177,8 +175,6 @@ public class GroupResource extends AbstractGroupResource {
         if (rosterSizeTooBig(config.getPatientLimit(), groupUpdate)) {
             throw TOO_MANY_MEMBERS_EXCEPTION;
         }
-        final UUID organizationID = UUID.fromString(FHIRExtractors.getOrganizationID(groupUpdate));
-        verifyMembers(groupUpdate, organizationID);
 
         final RosterEntity rosterEntity = new RosterEntity();
         rosterEntity.setId(rosterID);
@@ -230,8 +226,6 @@ public class GroupResource extends AbstractGroupResource {
             throw TOO_MANY_MEMBERS_EXCEPTION;
         }
 
-        final UUID orgId = UUID.fromString(FHIRExtractors.getOrganizationID(groupUpdate));
-
         final OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
         // For each group member, check to see if the patient exists, if not, throw an exception
         // Check to see if they're already rostered, if so, ignore
@@ -242,11 +236,8 @@ public class GroupResource extends AbstractGroupResource {
                 // Check to see if patient exists, if not, throw an exception
                 .map(entity -> {
                     final UUID patientID = UUID.fromString(new IdType(entity.getReference()).getIdPart());
-                    List<PatientEntity> patientEntities = this.patientDAO.patientSearch(patientID, null, orgId);
-                    if(patientEntities == null || patientEntities.isEmpty()){
-                       throw  new WebApplicationException(String.format("Cannot find patient with ID %s", patientID.toString()), Response.Status.BAD_REQUEST);
-                    }
-                    return patientEntities.get(0);
+                    return this.patientDAO.getPatient(patientID).orElseThrow(() -> new WebApplicationException(String.format("Cannot find patient with ID %s",
+                            patientID.toString()), Response.Status.BAD_REQUEST));
                 })
                 .map(patient -> {
                     // Check to see if the attribution already exists, if so, re-extend the expiration time
@@ -363,15 +354,5 @@ public class GroupResource extends AbstractGroupResource {
         final IdType rightID = new IdType(rightPair.getLeft(), rightPair.getRight());
 
         return Pair.of(leftID, rightID);
-    }
-
-    private void verifyMembers(Group group, UUID orgId){
-        for (Group.GroupMemberComponent member : group.getMember()){
-            final UUID patientID = UUID.fromString(new IdType(member.getEntity().getReference()).getIdPart());
-            List<PatientEntity> patientEntities = patientDAO.patientSearch(patientID, null, orgId);
-            if(patientEntities.isEmpty()){
-                throw  new WebApplicationException(String.format("Cannot find patient with ID %s", patientID.toString()), Response.Status.BAD_REQUEST);
-            }
-        }
     }
 }

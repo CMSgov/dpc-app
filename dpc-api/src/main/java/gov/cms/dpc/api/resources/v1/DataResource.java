@@ -3,7 +3,6 @@ package gov.cms.dpc.api.resources.v1;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
-import gov.cms.dpc.api.auth.annotations.Authorizer;
 import gov.cms.dpc.api.core.FileManager;
 import gov.cms.dpc.api.models.RangeHeader;
 import gov.cms.dpc.api.resources.AbstractDataResource;
@@ -62,7 +61,6 @@ public class DataResource extends AbstractDataResource {
     @HEAD
     @Timed
     @ExceptionMetered
-    @Authorizer
     @ApiOperation(value = "Metadata for downloading output files.", notes = "Retrieve the metadata for a corresponding `GET` request to download ndjson formatted output files from the server.")
     @ApiResponses({
             @ApiResponse(code = HttpStatus.OK_200, message = "File of newline-delimited JSON FHIR objects", responseHeaders = {
@@ -106,7 +104,6 @@ public class DataResource extends AbstractDataResource {
     @GET
     @Timed
     @ExceptionMetered
-    @Authorizer
     @ApiOperation(value = "Download output files.", notes = "Download ndjson formatted output files from the server. " +
             "This endpoint supports returning partial results when the `" + HttpHeaders.RANGE + "` header is provided. " +
             "<p>This endpoint will return a `" + HttpStatus.NOT_MODIFIED_304 + "` response if the `"
