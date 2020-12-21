@@ -4,7 +4,9 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IReadExecutable;
+import ca.uhn.fhir.rest.gclient.IUpdateExecutable;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
+import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
 import gov.cms.dpc.common.utils.NPIUtil;
@@ -26,6 +28,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
+import java.sql.Date;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -179,4 +182,30 @@ class PractitionerResourceTest extends AbstractSecureApplicationTest {
                 .encodedJson()
                 .execute();
     }
+
+    @Test
+    public void testUpdatePractitionerNotImplemented() throws IOException {
+        IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
+        final IParser parser = ctx.newJsonParser();
+        APITestHelpers.setupPractitionerTest(client, parser);
+
+        // Grab a practitioner to update
+        final Bundle practitioners = client
+                .search()
+                .forResource(Practitioner.class)
+                .returnBundle(Bundle.class)
+                .encodedJson()
+                .execute();
+        final Practitioner practitioner = (Practitioner) practitioners.getEntryFirstRep().getResource();
+
+        practitioner.setBirthDate(Date.valueOf("1989-01-01"));
+        IUpdateExecutable update = client
+                .update()
+                .resource(practitioner)
+                .withId(practitioner.getId());
+
+        assertThrows(NotImplementedOperationException.class, update::execute);
+    }
+
+
 }
