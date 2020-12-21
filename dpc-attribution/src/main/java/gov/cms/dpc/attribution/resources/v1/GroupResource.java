@@ -77,7 +77,6 @@ public class GroupResource extends AbstractGroupResource {
             throw TOO_MANY_MEMBERS_EXCEPTION;
         }
 
-        // Lookup the Provider by NPI
         final String providerNPI = FHIRExtractors.getAttributedNPI(attributionRoster);
 
         // Check and see if a roster already exists for the provider
