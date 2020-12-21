@@ -11,6 +11,7 @@ import com.codahale.metrics.annotation.Timed;
 import com.google.inject.name.Named;
 import gov.cms.dpc.api.APIHelpers;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
+import gov.cms.dpc.api.auth.annotations.Authorizer;
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.resources.AbstractPatientResource;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
@@ -69,6 +70,7 @@ public class PatientResource extends AbstractPatientResource {
     @FHIR
     @Timed
     @ExceptionMetered
+    @Authorizer
     @ApiOperation(value = "Search for Patients", notes = "FHIR endpoint for searching for Patient resources." +
             "<p> If Patient Identifier is provided, results will be filtered to match the given property")
     @Override
@@ -105,6 +107,7 @@ public class PatientResource extends AbstractPatientResource {
     @FHIR
     @POST
     @Timed
+    @Authorizer
     @ExceptionMetered
     @ApiOperation(value = "Create Patient", notes = "Create a Patient record associated to the Organization.")
     @ApiResponses(@ApiResponse(code = 422, message = "Patient does not satisfy the required FHIR profile"))
@@ -128,6 +131,7 @@ public class PatientResource extends AbstractPatientResource {
     @Path("/$submit")
     @Timed
     @ExceptionMetered
+    @Authorizer
     @ApiOperation(value = "Bulk submit Patient resources", notes = "FHIR operation for submitting a Bundle of Patient resources, which will be associated to the given Organization." +
             "<p> Each Patient resource MUST implement the " + PatientProfile.PROFILE_URI + "profile.")
     @ApiResponses(@ApiResponse(code = 422, message = "Patient does not satisfy the required FHIR profile"))
@@ -263,6 +267,7 @@ public class PatientResource extends AbstractPatientResource {
     @FHIR
     @Timed
     @ExceptionMetered
+    @Authorizer
     @ApiOperation(value = "Validate Patient resource", notes = "Validates the given resource against the " + PatientProfile.PROFILE_URI + " profile." +
             "<p>This method always returns a 200 status, even in response to a non-conformant resource.")
     @Override

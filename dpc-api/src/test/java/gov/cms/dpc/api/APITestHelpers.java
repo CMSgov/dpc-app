@@ -2,9 +2,11 @@ package gov.cms.dpc.api;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
+import ca.uhn.fhir.rest.gclient.IUpdateExecutable;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.typesafe.config.ConfigFactory;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
@@ -35,6 +37,7 @@ import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.dstu3.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.codesystems.V3RoleClass;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import javax.validation.Validation;
 import javax.validation.Validator;
@@ -45,6 +48,7 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -255,6 +259,25 @@ public class APITestHelpers {
             provenance.addTarget(new Reference(patientId));
         }
         return provenance;
+    }
+
+    public static Patient submitNewPatient(IGenericClient client, Patient patient){
+        return (Patient) client.create()
+                .resource(patient)
+                .encodedJson()
+                .execute()
+                .getResource();
+    }
+
+    public static MethodOutcome updateResource(IGenericClient client, String id, IBaseResource resource, Map<String,String> extraHeaders){
+        IUpdateExecutable executable = client
+                .update()
+                .resource(resource)
+                .withId(id)
+                .encodedJson();
+
+        extraHeaders.entrySet().forEach(entry -> executable.withAdditionalHeader(entry.getKey(),entry.getValue()));
+       return executable.execute();
     }
 
 }
