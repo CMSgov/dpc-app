@@ -119,10 +119,10 @@ public class PractitionerResource extends AbstractPractitionerResource {
             @ApiResponse(code = 422, message = "Provider does not satisfy the required FHIR profile")
     })
     @Override
-    public Response submitProvider(@ApiParam(hidden = true) @Auth OrganizationPrincipal organization,
+    public Response submitProvider(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
                                    @Valid @Profiled(profile = PractitionerProfile.PROFILE_URI) Practitioner provider) {
 
-        APIHelpers.addOrganizationTag(provider, organization.getOrganization().getIdElement().getIdPart());
+        APIHelpers.addOrganizationTag(provider, organizationPrincipal.getID().toString());
         final var providerCreate = this.client
                 .create()
                 .resource(provider)
