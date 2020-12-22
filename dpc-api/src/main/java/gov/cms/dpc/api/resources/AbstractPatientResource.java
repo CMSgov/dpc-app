@@ -39,7 +39,11 @@ public abstract class AbstractPatientResource {
 
     @GET
     @Path("/{patientID}/$everything")
-    public abstract Resource everything(OrganizationPrincipal organization, @Valid @Profiled(profile = AttestationProfile.PROFILE_URI) Provenance attestation, UUID patientId, HttpServletRequest request);
+    public abstract Resource everything(OrganizationPrincipal organization,
+                                        @Valid @Profiled(profile = AttestationProfile.PROFILE_URI) Provenance attestation,
+                                        UUID patientId, 
+                                        @QueryParam("_since") @NoHtml String since,
+                                        HttpServletRequest request);
 
     @DELETE
     @Path("/{patientID}")
