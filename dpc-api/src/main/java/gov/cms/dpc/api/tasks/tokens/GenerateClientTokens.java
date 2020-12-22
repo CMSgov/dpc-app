@@ -8,6 +8,7 @@ import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.entities.TokenEntity;
 import gov.cms.dpc.api.resources.v1.TokenResource;
 import gov.cms.dpc.macaroons.MacaroonBakery;
+import io.dropwizard.jersey.jsr310.OffsetDateTimeParam;
 import io.dropwizard.servlets.tasks.Task;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.slf4j.Logger;
@@ -40,7 +41,8 @@ public class GenerateClientTokens extends Task {
 
     @Override
     public void execute(ImmutableMultimap<String, String> parameters, PrintWriter output) {
-
+        final ImmutableCollection<String> expirationCollection = parameters.get("expiration");
+        final ImmutableCollection<String> tokenCollection = parameters.get("label");
         final ImmutableCollection<String> organizationCollection = parameters.get("organization");
         if (organizationCollection.isEmpty()) {
             logger.warn("CREATING UNRESTRICTED MACAROON. ENSURE THIS IS OK");
@@ -50,11 +52,14 @@ public class GenerateClientTokens extends Task {
             final String organization = organizationCollection.asList().get(0);
             final Organization orgResource = new Organization();
             orgResource.setId(organization);
+            final String tokenLabel = tokenCollection.isEmpty() ? null : tokenCollection.asList().get(0);
+            final Optional<OffsetDateTimeParam> expiration = expirationCollection.isEmpty() ?
+                    Optional.empty() : Optional.of(new OffsetDateTimeParam(expirationCollection.asList().get(0)));
             final TokenEntity tokenResponse = this.resource
                     .createOrganizationToken(
-                            new OrganizationPrincipal(orgResource),null,
-                            null,
-                            Optional.empty());
+                            new OrganizationPrincipal(orgResource), null,
+                            tokenLabel,
+                            expiration);
 
             output.write(tokenResponse.getToken());
         }
