@@ -287,7 +287,7 @@ class PractitionerResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    public void testRequestBodyForgeryOnUpdate() throws GeneralSecurityException, IOException, URISyntaxException {
+    public void testRequestBodyForgeryOnCreate() throws GeneralSecurityException, IOException, URISyntaxException {
         final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
         final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
         final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());
