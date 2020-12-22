@@ -60,10 +60,14 @@ public class EndpointResource extends AbstractEndpointResource {
     @UnitOfWork
     @ApiOperation(value = "Search Endpoints", notes = "Search for Endpoints associated to the given Organization", response = Bundle.class)
     @Override
-    public List<Endpoint> searchEndpoints(@NotNull @QueryParam("organization") String organizationID) {
-        final UUID entityID = FHIRExtractors.getEntityUUID(organizationID);
+    public List<Endpoint> searchEndpoints(@NotNull @QueryParam("organization") String organizationID, @QueryParam("_id") String resourceId) {
+        final UUID orgUUID = FHIRExtractors.getEntityUUID(organizationID);
+        UUID endpointUUID = null;
+        if(resourceId!=null){
+            endpointUUID = FHIRExtractors.getEntityUUID(resourceId);
+        }
 
-        final List<EndpointEntity> endpointList = this.endpointDAO.findByOrganization(entityID);
+        final List<EndpointEntity> endpointList = this.endpointDAO.endpointSearch(orgUUID, endpointUUID);
 
         return endpointList
                 .stream()
