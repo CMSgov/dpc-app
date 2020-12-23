@@ -46,11 +46,9 @@ jobs:
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v2
-      - name: "Install Go dependencies"
-        uses: actions/setup-go@v2
       - name: "Run Snyk"
         uses: snyk/actions/maven-3-jdk-11@master
-        continue-on-error: true
+        continue-on-error: false
         with:
           command: test
           args: --severity-threshold=high --all-projects --detection-depth=2 --exclude=bbcerts,docker,ig,ops,src --skip-unresolved=true
