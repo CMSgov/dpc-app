@@ -46,8 +46,8 @@ jobs:
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v2
-      - name: "Install Snyk Go Dependencies"
-        uses: snyk/actions/golang@master
+      - name: "Install Go dependencies"
+        uses: actions/setup-go@v2
       - name: "Run Snyk"
         uses: snyk/actions/maven-3-jdk-11@master
         continue-on-error: true
