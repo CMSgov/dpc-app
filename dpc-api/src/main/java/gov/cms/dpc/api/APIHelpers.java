@@ -64,6 +64,7 @@ public class APIHelpers {
             newMeta.addTag(orgTag);
             resource.setMeta(newMeta);
         } else {
+            meta.getTag().removeIf(coding -> DPCIdentifierSystem.DPC.getSystem().equalsIgnoreCase(coding.getSystem().trim()));
             meta.addTag(orgTag);
         }
     }
