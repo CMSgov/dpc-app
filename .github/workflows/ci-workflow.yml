@@ -45,13 +45,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: "Checkout code"
-        uses: actions/checkout@v1
+        uses: actions/checkout@v2
       - name: Run Snyk - Java (All)
         uses: snyk/actions/maven-3-jdk-11@master
         continue-on-error: true
         with:
           command: test
-          args: --severity-threshold=high --all-projects --exclude=bbcerts,docker,dpc-web,dpcclient,ig,ops,src
+          args: --severity-threshold=high --all-projects --exclude=bbcerts,docker,dpc-web,dpcclient,ig,ops,src -d
       - name: Run Snyk - Web/Ruby
         uses: snyk/actions/ruby@master
         continue-on-error: true
