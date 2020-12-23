@@ -51,22 +51,4 @@ jobs:
         continue-on-error: true
         with:
           command: test
-          args: --severity-threshold=high --all-projects --detection-depth=2 --exclude=bbcerts,docker,dpc-web,dpcclient,ig,ops,src
-      - name: Run Snyk - Web/Ruby
-        uses: snyk/actions/ruby@master
-        continue-on-error: true
-        with:
-          command: test
-          args: --severity-threshold=high --file=dpc-web/Gemfile.lock
-      - name: Run Snyk - Web/Node
-        uses: snyk/actions/node@master
-        continue-on-error: true
-        with:
-          command: test
-          args: --severity-threshold=high --file=dpc-web/package-lock.json
-      - name: Run Snyk - Python
-        uses: snyk/actions/python@master
-        continue-on-error: true
-        with:
-          command: test
-          args: --severity-threshold=high --file=requirements.txt -- --allow-missing
+          args: --severity-threshold=high --all-projects --detection-depth=2 --exclude=bbcerts,docker,dpcclient,ig,ops,src --skip-unresolved=true
