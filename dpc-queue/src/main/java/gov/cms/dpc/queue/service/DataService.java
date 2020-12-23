@@ -46,7 +46,7 @@ public class DataService {
     }
 
     public Resource retrieveData(UUID organizationId, UUID providerId, List<String> patientIds, ResourceType... resourceTypes) {
-        return retrieveData(organizationId, providerId, patientIds, OffsetDateTime.now(ZoneOffset.UTC), null, resourceTypes);
+        return retrieveData(organizationId, providerId, patientIds, null, OffsetDateTime.now(ZoneOffset.UTC), null, resourceTypes);
     }
 
     /**
@@ -54,6 +54,8 @@ public class DataService {
      * @param organizationID UUID of organization
      * @param providerID UUID of provider
      * @param patientMBIs List of patient String MBIs
+     * @param since
+     * @param transactionTime
      * @param requestingIP
      * @param resourceTypes List of ResourceType data to retrieve
      * @return Resource
@@ -61,9 +63,10 @@ public class DataService {
     public Resource retrieveData(UUID organizationID,
                                  UUID providerID,
                                  List<String> patientMBIs,
+                                 OffsetDateTime since,
                                  OffsetDateTime transactionTime,
                                  String requestingIP, ResourceType... resourceTypes) {
-        UUID jobID = this.queue.createJob(organizationID, providerID.toString(), patientMBIs, List.of(resourceTypes), null, transactionTime, requestingIP);
+        UUID jobID = this.queue.createJob(organizationID, providerID.toString(), patientMBIs, List.of(resourceTypes), since, transactionTime, requestingIP);
         Optional<List<JobQueueBatch>> optionalBatches = waitForJobToComplete(jobID, organizationID, this.queue);
 
         if (optionalBatches.isPresent()) {
