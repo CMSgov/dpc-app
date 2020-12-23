@@ -46,21 +46,27 @@ jobs:
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v1
-      - name: Run Snyk - Java
+      - name: Run Snyk - Java (All)
         uses: snyk/actions/maven-3-jdk-11@master
         continue-on-error: true
         with:
           command: test
-          args: --severity-threshold=high
-      - name: Run Snyk - Ruby
+          args: --severity-threshold=high --all-projects --exclude=bbcerts,docker,dpc-web,dpcclient,ig,ops,src
+      - name: Run Snyk - Web/Ruby
         uses: snyk/actions/ruby@master
         continue-on-error: true
         with:
           command: test
-          args: --severity-threshold=high
-      - name: "Run - Snyk (All Projects)"
+          args: --severity-threshold=high --file=dpc-web/Gemfile.lock
+      - name: Run Snyk - Web/Node
+        uses: snyk/actions/node@master
+        continue-on-error: true
+        with:
+          command: test
+          args: --severity-threshold=high --file=dpc-web/package-lock.json
+      - name: "Run Snyk - Python"
         uses: snyk/actions/python@master
         continue-on-error: true
         with:
           command: test
-          args: --all-projects
+          args: --severity-threshold=high --file=requirements.txt --skip-unresolved=true
