@@ -48,19 +48,19 @@ jobs:
         uses: actions/checkout@v1
       - name: Run Snyk - Java
         uses: snyk/actions/maven-3-jdk-11@master
-        continue-on-error: false
+        continue-on-error: true
         with:
           command: test
-          args: --severity-threshold=high --file=pom.xml
+          args: --severity-threshold=high
       - name: Run Snyk - Ruby
         uses: snyk/actions/ruby@master
-        continue-on-error: false
+        continue-on-error: true
         with:
           command: test
-          args: --severity-threshold=high --file=dpc-web/Gemfile.lock
+          args: --severity-threshold=high
       - name: "Run - Snyk (All Projects)"
         uses: snyk/actions/python@master
-        continue-on-error: false
+        continue-on-error: true
         with:
           command: test
           args: --all-projects
