@@ -51,6 +51,8 @@ public abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organ
 
     @Override
     public void filter(final ContainerRequestContext requestContext) {
+        MDC.clear();
+        MDC.put(MDCConstants.DPC_REQUEST_ID, UUID.randomUUID().toString());
         final UriInfo uriInfo = requestContext.getUriInfo();
         final String macaroon = MacaroonHelpers.extractMacaroonFromRequest(requestContext, unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
 
@@ -60,6 +62,7 @@ public abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organ
         if (!authenticated) {
             throw new WebApplicationException(dpc401handler.buildResponse(BEARER_PREFIX, realm));
         }
+        //TODO Remove this redundant log statement once we have the response logger working.
         logger.info("resource_requested={}, method={}",uriInfo.getPath(),requestContext.getMethod());
     }
 
@@ -79,7 +82,7 @@ public abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organ
         final UUID orgID = extractOrgIDFromMacaroon(m1);
 
         // Now that we have the organization_id, set it in the logging context
-        MDC.clear();
+
         MDC.put(MDCConstants.ORGANIZATION_ID, orgID.toString());
         MDC.put(MDCConstants.TOKEN_ID, m1.get(0).identifier);
 

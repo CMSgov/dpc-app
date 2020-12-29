@@ -59,6 +59,8 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
         EnvironmentParser.getEnvironment("Attribution");
         final var listener = new InstrumentedResourceMethodApplicationListener(environment.metrics());
         environment.jersey().getResourceConfig().register(listener);
+        environment.jersey().register(new RequestFilter());
+        environment.jersey().register(new ResponseLoggingFilter());
     }
 
     private void registerBundles(Bootstrap<DPCAttributionConfiguration> bootstrap) {
