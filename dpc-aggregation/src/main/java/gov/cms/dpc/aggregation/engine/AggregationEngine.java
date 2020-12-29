@@ -112,6 +112,7 @@ public class AggregationEngine implements Runnable {
                     MDC.remove(MDCConstants.PROVIDER_ID);
                     MDC.remove(MDCConstants.ORGANIZATION_ID);
                     MDC.remove(MDCConstants.REQUESTING_IP);
+                    MDC.remove(MDCConstants.PROVIDER_NPI);
                 })
                 .subscribe(
                         this::processJobBatch,
