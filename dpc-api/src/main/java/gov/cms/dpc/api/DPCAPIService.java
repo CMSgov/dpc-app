@@ -79,10 +79,9 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
         EnvironmentParser.getEnvironment("API");
         final var listener = new InstrumentedResourceMethodApplicationListener(environment.metrics());
         environment.jersey().getResourceConfig().register(listener);
-
         environment.jersey().register(new AuthValueFactoryProvider.Binder<>(OrganizationPrincipal.class));
-
         environment.jersey().register(new JsonParseExceptionMapper());
+        environment.jersey().register(new ResponseLoggingFilter());
     }
 
     private GuiceBundle<DPCAPIConfiguration> setupGuiceBundle() {
