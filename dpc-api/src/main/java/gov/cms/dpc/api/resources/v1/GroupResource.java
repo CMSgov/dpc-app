@@ -297,6 +297,7 @@ public class GroupResource extends AbstractGroupResource {
         final var requestingIP = APIHelpers.fetchRequestingIP(request);
         final UUID jobID = this.queue.createJob(orgID, rosterID, attributedPatients, resources, since, transactionTime, requestingIP);
 
+        logger.info("Export job created with job_id={}",jobID.toString());
         return Response.status(Response.Status.ACCEPTED)
                 .contentLocation(URI.create(this.baseURL + "/Jobs/" + jobID)).build();
     }
