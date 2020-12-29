@@ -13,12 +13,11 @@ import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;
 import javax.ws.rs.core.Context;
 
-public class ResponseLoggingFilter implements ContainerResponseFilter {
+public class LogResponseFilter implements ContainerResponseFilter{
+    private static final Logger logger = LoggerFactory.getLogger(LogResponseFilter.class);
 
     @Context
     private Provider<HttpServletRequest> request;
-
-    private static final Logger logger = LoggerFactory.getLogger(ResponseLoggingFilter.class);
 
     @Override
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext){

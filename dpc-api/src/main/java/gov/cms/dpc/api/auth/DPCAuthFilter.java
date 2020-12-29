@@ -62,8 +62,7 @@ public abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organ
         if (!authenticated) {
             throw new WebApplicationException(dpc401handler.buildResponse(BEARER_PREFIX, realm));
         }
-        //TODO Remove this redundant log statement once we have the response logger working.
-        logger.info("resource_requested={}, method={}",uriInfo.getPath(),requestContext.getMethod());
+        logger.info("event_type=request-received, resource_requested={}, method={}",uriInfo.getPath(),requestContext.getMethod());
     }
 
     private DPCAuthCredentials validateMacaroon(String macaroon, UriInfo uriInfo) {
