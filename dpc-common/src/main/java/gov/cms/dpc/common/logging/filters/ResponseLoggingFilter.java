@@ -1,4 +1,4 @@
-package gov.cms.dpc.api;
+package gov.cms.dpc.common.logging.filters;
 
 import com.google.inject.Provider;
 import gov.cms.dpc.common.Constants;

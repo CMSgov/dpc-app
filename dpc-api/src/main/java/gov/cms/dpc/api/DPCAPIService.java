@@ -19,6 +19,7 @@ import gov.cms.dpc.common.hibernate.auth.DPCAuthHibernateBundle;
 import gov.cms.dpc.common.hibernate.auth.DPCAuthHibernateModule;
 import gov.cms.dpc.common.hibernate.queue.DPCQueueHibernateBundle;
 import gov.cms.dpc.common.hibernate.queue.DPCQueueHibernateModule;
+import gov.cms.dpc.common.logging.filters.ResponseLoggingFilter;
 import gov.cms.dpc.common.utils.EnvironmentParser;
 import gov.cms.dpc.common.utils.PropertiesProvider;
 import gov.cms.dpc.fhir.FHIRModule;

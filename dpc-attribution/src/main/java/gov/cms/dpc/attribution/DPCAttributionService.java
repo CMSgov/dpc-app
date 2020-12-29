@@ -7,6 +7,7 @@ import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.attribution.cli.SeedCommand;
 import gov.cms.dpc.common.hibernate.attribution.DPCHibernateBundle;
 import gov.cms.dpc.common.hibernate.attribution.DPCHibernateModule;
+import gov.cms.dpc.common.logging.filters.ResponseLoggingFilter;
 import gov.cms.dpc.common.utils.EnvironmentParser;
 import gov.cms.dpc.common.utils.PropertiesProvider;
 import gov.cms.dpc.fhir.FHIRModule;
