@@ -35,6 +35,7 @@ import java.util.UUID;
 import static gov.cms.dpc.api.resources.v1.GroupResource.SYNTHETIC_BENE_ID;
 import static gov.cms.dpc.fhir.FHIRMediaTypes.FHIR_JSON;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 
 public class GroupResourceUnitTest {
@@ -213,6 +214,9 @@ public class GroupResourceUnitTest {
         Meta bfdTransactionMeta = new Meta();
         Mockito.when(mockBfdClient.requestPatientFromServer(SYNTHETIC_BENE_ID, null).getMeta()).thenReturn(bfdTransactionMeta);
 
+        //Mock create job
+        Mockito.when(mockQueue.createJob(any(),any(),any(),any(),any(),any(),any())).thenReturn(UUID.randomUUID());
+
 
         //Past date with Z offset
         String since = "2020-05-26T16:43:01.780Z";
@@ -331,6 +335,9 @@ public class GroupResourceUnitTest {
 
         Mockito.when(mockBfdClient.requestPatientFromServer(Mockito.anyString(), Mockito.any()))
                 .thenReturn(new Bundle());
+
+        //Mock create job
+        Mockito.when(mockQueue.createJob(any(),any(),any(),any(),any(),any(),any())).thenReturn(UUID.randomUUID());
 
         Assertions.assertDoesNotThrow(() -> {
             resource.export(organizationPrincipal, "roster-id", "Coverage", FHIRMediaTypes.APPLICATION_NDJSON, "2017-01-01T00:00:00Z", "respond-async", request);
