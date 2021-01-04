@@ -7,21 +7,22 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.CapabilityStatement;
 
 import java.security.GeneralSecurityException;
+import java.util.Map;
 
 
 public interface BlueButtonClient {
 
-    Bundle requestPatientFromServerByMbi(String mbi) throws ResourceNotFoundException, GeneralSecurityException;
+    Bundle requestPatientFromServerByMbi(String mbi, Map<String, String> headers) throws ResourceNotFoundException, GeneralSecurityException;
 
-    Bundle requestPatientFromServerByMbiHash(String mbiHash) throws ResourceNotFoundException;
+    Bundle requestPatientFromServerByMbiHash(String mbiHash, Map<String, String> headers) throws ResourceNotFoundException;
 
-    Bundle requestPatientFromServer(String beneId, DateRangeParam lastUpdated) throws ResourceNotFoundException;
+    Bundle requestPatientFromServer(String beneId, DateRangeParam lastUpdated, Map<String, String> headers) throws ResourceNotFoundException;
 
-    Bundle requestEOBFromServer(String beneId, DateRangeParam lastUpdated) throws ResourceNotFoundException;
+    Bundle requestEOBFromServer(String beneId, DateRangeParam lastUpdated, Map<String, String> headers) throws ResourceNotFoundException;
 
-    Bundle requestCoverageFromServer(String beneId, DateRangeParam lastUpdated) throws ResourceNotFoundException;
+    Bundle requestCoverageFromServer(String beneId, DateRangeParam lastUpdated, Map<String, String> headers) throws ResourceNotFoundException;
 
-    Bundle requestNextBundleFromServer(Bundle bundle) throws ResourceNotFoundException;
+    Bundle requestNextBundleFromServer(Bundle bundle, Map<String, String> headers) throws ResourceNotFoundException;
 
     CapabilityStatement requestCapabilityStatement() throws ResourceNotFoundException;
 
