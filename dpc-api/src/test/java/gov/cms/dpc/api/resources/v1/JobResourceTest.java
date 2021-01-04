@@ -62,7 +62,7 @@ public class JobResourceTest {
                 List.of(TEST_PATIENT_ID),
                 JobQueueBatch.validResourceTypes,
                 null,
-                OffsetDateTime.now(ZoneOffset.UTC), null);
+                OffsetDateTime.now(ZoneOffset.UTC), null, true);
 
         // Test the response
         final var resource = new JobResource(queue, TEST_BASEURL);
@@ -86,7 +86,7 @@ public class JobResourceTest {
                 List.of(TEST_PATIENT_ID, TEST_PATIENT_ID),
                 JobQueueBatch.validResourceTypes,
                 null,
-                OffsetDateTime.now(ZoneOffset.UTC), null);
+                OffsetDateTime.now(ZoneOffset.UTC), null, true);
         final var runningJob = queue.claimBatch(AGGREGATOR_ID);
         runningJob.get().fetchNextPatient(AGGREGATOR_ID);
         queue.completePartialBatch(runningJob.get(), AGGREGATOR_ID);
@@ -113,7 +113,7 @@ public class JobResourceTest {
                 List.of(TEST_PATIENT_ID),
                 JobQueueBatch.validResourceTypes,
                 null,
-                OffsetDateTime.now(ZoneOffset.UTC), null);
+                OffsetDateTime.now(ZoneOffset.UTC), null, true);
         queue.claimBatch(AGGREGATOR_ID);
 
         final var runningJob = queue.getJobBatches(jobID).get(0);
@@ -158,7 +158,7 @@ public class JobResourceTest {
                 List.of(TEST_PATIENT_ID),
                 JobQueueBatch.validResourceTypes,
                 null,
-                OffsetDateTime.now(ZoneOffset.UTC), null);
+                OffsetDateTime.now(ZoneOffset.UTC), null, true);
         queue.claimBatch(AGGREGATOR_ID);
 
         final var runningJob = queue.getJobBatches(jobID).get(0);
@@ -196,7 +196,7 @@ public class JobResourceTest {
                 List.of(TEST_PATIENT_ID),
                 JobQueueBatch.validResourceTypes,
                 null,
-                OffsetDateTime.now(ZoneOffset.UTC), null);
+                OffsetDateTime.now(ZoneOffset.UTC), null, true);
         queue.claimBatch(AGGREGATOR_ID);
 
         final var runningJob = queue.getJobBatches(jobID).get(0);
@@ -219,7 +219,7 @@ public class JobResourceTest {
                 List.of(TEST_PATIENT_ID, "2", "3"),
                 JobQueueBatch.validResourceTypes,
                 null,
-                OffsetDateTime.now(ZoneOffset.UTC), null);
+                OffsetDateTime.now(ZoneOffset.UTC), null, true);
 
         List<JobQueueBatch> batches = queue.getJobBatches(jobId);
         OffsetDateTime timeAgo = OffsetDateTime.now().minusHours(24);
@@ -261,7 +261,7 @@ public class JobResourceTest {
                 List.of(TEST_PATIENT_ID),
                 JobQueueBatch.validResourceTypes,
                 null,
-                OffsetDateTime.now(ZoneOffset.UTC), null);
+                OffsetDateTime.now(ZoneOffset.UTC), null, true);
         queue.claimBatch(AGGREGATOR_ID);
 
         final var runningJob = queue.getJobBatches(jobID).get(0);
@@ -316,7 +316,7 @@ public class JobResourceTest {
                 Collections.emptyList(),
                 Collections.emptyList(),
                 null,
-                OffsetDateTime.now(), null);
+                OffsetDateTime.now(), null, true);
         final var aggregatorId = UUID.randomUUID();
         batch.setRunningStatus(aggregatorId);
         batch.setCompletedStatus(aggregatorId);
