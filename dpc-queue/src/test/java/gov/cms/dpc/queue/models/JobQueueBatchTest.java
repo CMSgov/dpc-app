@@ -322,7 +322,7 @@ public class JobQueueBatchTest {
     }
 
     JobQueueBatch createJobQueueBatch() {
-        return new JobQueueBatch(jobID, orgID, providerID, patientList, resourceTypes, null, OffsetDateTime.now(ZoneOffset.UTC), null);
+        return new JobQueueBatch(jobID, orgID, providerID, patientList, resourceTypes, null, OffsetDateTime.now(ZoneOffset.UTC), null, true);
     }
 
 }
