@@ -12,6 +12,7 @@ import gov.cms.dpc.api.auth.annotations.Authorizer;
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.resources.AbstractGroupResource;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
+import gov.cms.dpc.common.MDCConstants;
 import gov.cms.dpc.common.annotations.APIV1;
 import gov.cms.dpc.common.annotations.NoHtml;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
@@ -30,6 +31,7 @@ import org.apache.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -282,13 +284,17 @@ public class GroupResource extends AbstractGroupResource {
                            @QueryParam("_since") @NoHtml String sinceParam,
                            @ApiParam(hidden = true) @HeaderParam("Prefer")  @Valid String Prefer,
                            @Context HttpServletRequest request) {
-        logger.info("Exporting data for provider: {} _since: {}", rosterID, sinceParam);
+
+
+
 
         // Check the parameters
         checkExportRequest(outputFormat, Prefer);
 
-        // Get the attributed patients
-        final List<String> attributedPatients = fetchPatientMBIs(rosterID);
+        final Group group = fetchGroupById(rosterID);
+        final List<String> attributedPatients = fetchPatientMBIs(group);
+        final String groupPractitionerNPI = FHIRExtractors.getAttributedNPI(group);
+        MDC.put(MDCConstants.PRACTITIONER_NPI,groupPractitionerNPI);
 
         // Generate a job ID and submit it to the queue
         final UUID orgID = FHIRExtractors.getEntityUUID(organizationPrincipal.getOrganization().getId());
@@ -377,15 +383,16 @@ public class GroupResource extends AbstractGroupResource {
 
     }
 
-    private List<String> fetchPatientMBIs(String groupID) {
-
-        final Group attributionRoster = this.client
+    private Group fetchGroupById(String groupID){
+        return  this.client
                 .read()
                 .resource(Group.class)
                 .withId(new IdType("Group", groupID))
                 .encodedJson()
                 .execute();
+    }
 
+    private List<String> fetchPatientMBIs(Group attributionRoster) {
         if (attributionRoster.getMember().isEmpty()) {
             throw new WebApplicationException("Cannot perform export with no beneficiaries", Response.Status.NOT_ACCEPTABLE);
         }
