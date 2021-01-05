@@ -109,7 +109,6 @@ public class AggregationEngine implements Runnable {
                 .doOnDispose(() -> {
                     MDC.remove(MDCConstants.JOB_ID);
                     MDC.remove(MDCConstants.JOB_BATCH_ID);
-                    MDC.remove(MDCConstants.PROVIDER_ID);
                     MDC.remove(MDCConstants.ORGANIZATION_ID);
                     MDC.remove(MDCConstants.PROVIDER_NPI);
                 })
