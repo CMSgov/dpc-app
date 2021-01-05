@@ -27,7 +27,7 @@
           <p>No tags</p>
         <% else %>
           <% @user.taggings.each do |tagging| %>
-            <%= link_to(internal_tagging_url(tagging), class: "site-pills__item__button", method: :delete, data: {test: "delete-tag-#{tagging.id}"}) do %>
+            <%= link_to(internal_tagging_url(tagging), class: "site-pills__item__button dashboard__pills", method: :delete, data: {test: "delete-tag-#{tagging.id}"}) do %>
               <span class="site-pills__item site-pills__item--small">
                 <%= tagging.tag_name %>
               </span>

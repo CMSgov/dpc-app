@@ -28,11 +28,6 @@
   }
 }
 
-.site-pills__item:hover {
-  background-color: $color-error-lighter;
-  color: $color-error-darkest;
-}
-
 .site-pills__item--small {
   align-items: center;
   display: inline-flex;
@@ -104,6 +99,11 @@
   text-decoration: none;
 }
 
-.site-pills__item__button:hover span.site-pills__item--small:before {
+.dashboard__pills:hover span.site-pills__item--small:before {
   content: "✖\00a0";
+}
+
+.dashboard__pills span.site-pills__item--small:hover{
+  background-color: $color-error-lighter;
+  color: $color-error-darkest;
 }
