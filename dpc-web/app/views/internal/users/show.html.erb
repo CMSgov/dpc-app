@@ -37,6 +37,10 @@
       </div>
 
       <div>
+        <div class="ds-c-label ds-u-margin-top--0">New tag</div>
+      </div>
+
+      <div>
         <%= form_for Tagging.new, url: internal_taggings_path, html: { method: :post } do |f| %>
           <%= f.label :tag_id, "New tag", class: "ds-c-label ds-u-margin-top--0" %>
           <%= f.collection_select :tag_id, available_tags(@user), :id, :name, { include_blank: true }, class: "ds-c-field drop-down" %>
