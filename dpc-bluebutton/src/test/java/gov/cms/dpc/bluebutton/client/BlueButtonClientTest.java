@@ -26,7 +26,8 @@ import org.mockserver.model.Header;
 import org.mockserver.model.HttpRequest;
 import org.mockserver.model.Parameter;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
@@ -148,7 +149,7 @@ class BlueButtonClientTest {
 
     @Test
     void shouldGetFHIRFromPatientID() {
-        Bundle ret = bbc.requestPatientFromServer(TEST_PATIENT_ID, TEST_LAST_UPDATED);
+        Bundle ret = bbc.requestPatientFromServer(TEST_PATIENT_ID, TEST_LAST_UPDATED, null);
         // Verify that the bundle has one
         assertNotNull(ret, "The demo Patient object returned from BlueButtonClient should not be null");
         assertEquals(ResourceType.Bundle, ret.getResourceType());
@@ -166,7 +167,7 @@ class BlueButtonClientTest {
 
     @Test
     void shouldGetFHIRFromPatientIDWithoutLastUpdated() {
-        Bundle ret = bbc.requestPatientFromServer(TEST_PATIENT_ID, null);
+        Bundle ret = bbc.requestPatientFromServer(TEST_PATIENT_ID, null, null);
         // Verify that the bundle has one
         assertNotNull(ret, "The demo Patient object returned from BlueButtonClient should not be null");
         assertEquals(ResourceType.Bundle, ret.getResourceType());
@@ -176,7 +177,7 @@ class BlueButtonClientTest {
 
     @Test
     void shouldGetFHIRFromPatientIDWithLastUpdated() {
-        Bundle ret = bbc.requestPatientFromServer(TEST_PATIENT_ID, TEST_LAST_UPDATED);
+        Bundle ret = bbc.requestPatientFromServer(TEST_PATIENT_ID, TEST_LAST_UPDATED, null);
         // Verify that the bundle has one
         assertNotNull(ret, "The demo Patient object returned from BlueButtonClient should not be null");
         assertEquals(ResourceType.Bundle, ret.getResourceType());
@@ -186,7 +187,7 @@ class BlueButtonClientTest {
 
     @Test
     void shouldGetFHIRFromPatientMbiHash() {
-        Bundle ret = bbc.requestPatientFromServerByMbiHash(TEST_PATIENT_MBI_HASH);
+        Bundle ret = bbc.requestPatientFromServerByMbiHash(TEST_PATIENT_MBI_HASH, null);
 
         assertNotNull(ret, "Bundle returned from BlueButtonClient should not be null");
         assertTrue(ret.hasEntry(), "Bundle should have an entry");
@@ -203,7 +204,7 @@ class BlueButtonClientTest {
 
     @Test
     void shouldGetEOBFromPatientID() {
-        Bundle response = bbc.requestEOBFromServer(TEST_PATIENT_ID, TEST_LAST_UPDATED);
+        Bundle response = bbc.requestEOBFromServer(TEST_PATIENT_ID, TEST_LAST_UPDATED, null);
 
         assertNotNull(response, "The demo patient should have a non-null EOB bundle");
         assertEquals(32, response.getTotal(), "The demo patient should have exactly 32 EOBs");
@@ -211,7 +212,7 @@ class BlueButtonClientTest {
 
     @Test
     void shouldNotHaveNextBundle() {
-        Bundle response = bbc.requestEOBFromServer(TEST_SINGLE_EOB_PATIENT_ID, TEST_LAST_UPDATED);
+        Bundle response = bbc.requestEOBFromServer(TEST_SINGLE_EOB_PATIENT_ID, TEST_LAST_UPDATED, null);
 
         assertNotNull(response, "The demo patient should have a non-null EOB bundle");
         assertEquals(1, response.getTotal(), "The demo patient should have exactly 1 EOBs");
@@ -220,18 +221,18 @@ class BlueButtonClientTest {
 
     @Test
     void shouldHaveNextBundle() {
-        Bundle response = bbc.requestEOBFromServer(TEST_PATIENT_ID, TEST_LAST_UPDATED);
+        Bundle response = bbc.requestEOBFromServer(TEST_PATIENT_ID, TEST_LAST_UPDATED, null);
 
         assertNotNull(response, "The demo patient should have a non-null EOB bundle");
         assertNotNull(response.getLink(Bundle.LINK_NEXT), "Should have no next link since all the resources are in the bundle");
-        Bundle nextResponse = bbc.requestNextBundleFromServer(response);
+        Bundle nextResponse = bbc.requestNextBundleFromServer(response, null);
         assertNotNull(nextResponse, "Should have a next bundle");
         assertEquals(10, nextResponse.getEntry().size());
     }
 
     @Test
     void shouldReturnBundleContainingOnlyEOBs() {
-        Bundle response = bbc.requestEOBFromServer(TEST_PATIENT_ID, TEST_LAST_UPDATED);
+        Bundle response = bbc.requestEOBFromServer(TEST_PATIENT_ID, TEST_LAST_UPDATED, null);
 
         response.getEntry().forEach((entry) -> assertEquals(
                 entry.getResource().getResourceType(),
@@ -242,7 +243,7 @@ class BlueButtonClientTest {
 
     @Test
     void shouldGetCoverageFromPatientID() {
-        final Bundle response = bbc.requestCoverageFromServer(TEST_PATIENT_ID, TEST_LAST_UPDATED);
+        final Bundle response = bbc.requestCoverageFromServer(TEST_PATIENT_ID, TEST_LAST_UPDATED, null);
 
         assertNotNull(response, "The demo patient should have a non-null Coverage bundle");
         assertEquals(3, response.getTotal(), "The demo patient should have exactly 3 Coverage");
@@ -259,7 +260,7 @@ class BlueButtonClientTest {
 
     @Test
     void shouldHandlePatientsWithOnlyOneEOB() {
-        final Bundle response = bbc.requestEOBFromServer(TEST_SINGLE_EOB_PATIENT_ID, TEST_LAST_UPDATED);
+        final Bundle response = bbc.requestEOBFromServer(TEST_SINGLE_EOB_PATIENT_ID, TEST_LAST_UPDATED, null);
         assertEquals(1, response.getTotal(), "This demo patient should have exactly 1 EOB");
     }
 
@@ -267,13 +268,13 @@ class BlueButtonClientTest {
     void shouldThrowExceptionWhenResourceNotFound() {
         assertThrows(
                 ResourceNotFoundException.class,
-                () -> bbc.requestPatientFromServer(TEST_NONEXISTENT_PATIENT_ID, null),
+                () -> bbc.requestPatientFromServer(TEST_NONEXISTENT_PATIENT_ID, null, null),
                 "BlueButton client should throw exceptions when asked to retrieve a non-existent patient"
         );
 
         assertThrows(
                 ResourceNotFoundException.class,
-                () -> bbc.requestEOBFromServer(TEST_NONEXISTENT_PATIENT_ID, null),
+                () -> bbc.requestEOBFromServer(TEST_NONEXISTENT_PATIENT_ID, null, null),
                 "BlueButton client should throw exceptions when asked to retrieve EOBs for a non-existent patient"
         );
     }

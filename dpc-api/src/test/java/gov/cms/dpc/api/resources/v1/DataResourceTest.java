@@ -98,7 +98,7 @@ class DataResourceTest {
         });
 
         UUID aggregatorId = UUID.randomUUID();
-        JobQueueBatch jobQueueBatch = new JobQueueBatch(jobId, null, null, Collections.emptyList(), null, null, null, null);
+        JobQueueBatch jobQueueBatch = new JobQueueBatch(jobId, null, null, Collections.emptyList(), null, null, null, null, true);
         jobQueueBatch.setRunningStatus(aggregatorId);
         jobQueueBatch.setCompletedStatus(aggregatorId);
         jobQueueBatch.setCompleteTime(OffsetDateTime.now().minusHours(25));
