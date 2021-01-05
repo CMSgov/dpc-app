@@ -33,7 +33,6 @@ start-app: secure-envs
 
 .PHONY: start-local
 start-local: secure-envs
-	@docker-compose up start_core_dependencies
 	@USE_BFD_MOCK=false docker-compose -f docker-compose.yml -f docker-compose-local.yml up start_api_dependencies
 
 .PHONY: ci-app
