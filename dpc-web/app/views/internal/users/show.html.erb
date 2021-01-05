@@ -24,10 +24,10 @@
       <h2 class="box__heading">Tags</h2>
       <div class="ds-u-margin-bottom--3" data-test="user-tags">
         <% if @user.taggings.count == 0 %>
-          <p>No tags</p>
+          <p>No tags have been assigned to <%= @user.name %>.</p>
         <% else %>
           <% @user.taggings.each do |tagging| %>
-            <%= link_to(internal_tagging_url(tagging), class: "site-pills__item__button dashboard__pills", method: :delete, data: {test: "delete-tag-#{tagging.id}"}) do %>
+            <%= link_to(internal_tagging_url(tagging), class: "site-pills__item__button dashboard__pills--delete", method: :delete, data: {test: "delete-tag-#{tagging.id}"}) do %>
               <span class="site-pills__item site-pills__item--small">
                 <%= tagging.tag_name %>
               </span>
@@ -38,15 +38,19 @@
 
       <div>
         <div class="ds-c-label ds-u-margin-top--0">New tag</div>
-      </div>
-
-      <div>
-        <%= form_for Tagging.new, url: internal_taggings_path, html: { method: :post } do |f| %>
-          <%= f.label :tag_id, "New tag", class: "ds-c-label ds-u-margin-top--0" %>
-          <%= f.collection_select :tag_id, available_tags(@user), :id, :name, { include_blank: true }, class: "ds-c-field drop-down" %>
-          <%= f.hidden_field :taggable_id, value: @user.id %>
-          <%= f.hidden_field :taggable_type, value: 'User' %>
-          <%= f.submit "Add tag", class: "ds-c-button ds-u-margin-top--1", data: { test: "add-tag-submit" } %>
+        <% if @tags.count == 0 %>
+          <p>There are no tags available.</p>
+        <% else %>
+          <% @tags.each do |tag| %>
+            <div class="site-pills__item__button dashboard__pills--add">
+              <%= form_for Tagging.new, url: internal_taggings_path, html: { method: :post } do |f| %>
+                <%= f.hidden_field :tag_id, value: tag.id %>
+                <%= f.hidden_field :taggable_id, value: @user.id %>
+                <%= f.hidden_field :taggable_type, value: 'User' %>
+                <%= f.submit tag.name, class: "site-pills__item site-pills__item--small" %>
+              <% end %>
+            </div>
+          <% end %>
         <% end %>
       </div>
     </div>

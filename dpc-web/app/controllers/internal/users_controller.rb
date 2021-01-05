@@ -16,6 +16,7 @@ module Internal
 
     def show
       @user = User.find(id_param)
+      @tags = Tag.where.not(id: @user.taggings.pluck(:tag_id))
     end
 
     def edit
