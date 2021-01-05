@@ -85,7 +85,7 @@ class AggregationEngineTest {
      */
     @Test
     void mockBlueButtonClientTest() {
-        Bundle patient = bbclient.requestPatientFromServer(MockBlueButtonClient.MBI_BENE_ID_MAP.get(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0)), null);
+        Bundle patient = bbclient.requestPatientFromServer(MockBlueButtonClient.MBI_BENE_ID_MAP.get(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0)), null, null);
         assertNotNull(patient);
     }
 
@@ -106,7 +106,7 @@ class AggregationEngineTest {
                 Collections.singletonList(ResourceType.Patient),
                 null,
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                null);
+                null, true);
 
         // Throw a failure on the first poll, then be successful
         JobQueueFailure ex = new JobQueueFailure("Any failure");
@@ -202,7 +202,7 @@ class AggregationEngineTest {
                 Collections.singletonList(ResourceType.Patient),
                 null,
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                null);
+                null, true);
 
         // Work the batch
         queue.claimBatch(engine.getAggregatorID())
@@ -233,7 +233,7 @@ class AggregationEngineTest {
                 Collections.singletonList(ResourceType.Patient),
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                null);
+                null, true);
 
         // Work the batch
         queue.claimBatch(engine.getAggregatorID())
@@ -266,7 +266,7 @@ class AggregationEngineTest {
                 JobQueueBatch.validResourceTypes,
                 null,
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                null);
+                null, true);
 
         // Work the batch
         queue.claimBatch(engine.getAggregatorID())
@@ -296,7 +296,7 @@ class AggregationEngineTest {
                 JobQueueBatch.validResourceTypes,
                 null,
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                null);
+                null, true);
 
         // Assert the queue size
         assertEquals(2, queue.queueSize());
@@ -321,7 +321,7 @@ class AggregationEngineTest {
                 JobQueueBatch.validResourceTypes,
                 null,
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                null);
+                null, true);
 
         // Work the batch
         engine.stop();
@@ -362,7 +362,7 @@ class AggregationEngineTest {
                 Collections.singletonList(ResourceType.Patient),
                 null,
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                null);
+                null, true);
 
         // Work the batch
         queue.claimBatch(engine.getAggregatorID())
@@ -398,7 +398,7 @@ class AggregationEngineTest {
                 Collections.singletonList(ResourceType.Patient),
                 null,
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                null);
+                null, true);
 
         // Work the batch
         queue.claimBatch(engine.getAggregatorID())
@@ -433,7 +433,7 @@ class AggregationEngineTest {
                 Collections.singletonList(ResourceType.Schedule),
                 null,
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                null);
+                null, true);
 
         // Work the batch
         queue.claimBatch(engine.getAggregatorID())
@@ -462,7 +462,7 @@ class AggregationEngineTest {
                 Collections.singletonList(ResourceType.Schedule),
                 null,
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                null);
+                null, true);
 
         // Throw an exception when failing the batch
         Exception e = new RuntimeException("Failed to mark batch as failed");
@@ -500,7 +500,7 @@ class AggregationEngineTest {
                 List.of(ResourceType.ExplanationOfBenefit, ResourceType.Patient),
                 null,
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                null);
+                null, true);
 
         // Work the batch
         queue.claimBatch(engine.getAggregatorID())
@@ -513,8 +513,8 @@ class AggregationEngineTest {
         // Check that the bad ID was called 3 times
         ArgumentCaptor<String> idCaptor = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<DateRangeParam> lastUpdatedCaptor = ArgumentCaptor.forClass(DateRangeParam.class);
-        Mockito.verify(bbclient, atLeastOnce()).requestPatientFromServerByMbi(idCaptor.capture());
-        Mockito.verify(bbclient, atLeastOnce()).requestEOBFromServer(idCaptor.capture(), lastUpdatedCaptor.capture());
+        Mockito.verify(bbclient, atLeastOnce()).requestPatientFromServerByMbi(idCaptor.capture(), anyMap());
+        Mockito.verify(bbclient, atLeastOnce()).requestEOBFromServer(idCaptor.capture(), lastUpdatedCaptor.capture(), anyMap());
         var values = idCaptor.getAllValues();
         assertEquals(0,
                 values.stream().filter(value -> value.equals("-1")).count(),
@@ -545,7 +545,7 @@ class AggregationEngineTest {
                 List.of(ResourceType.ExplanationOfBenefit, ResourceType.Patient),
                 null,
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                null);
+                null, true);
 
         queue.claimBatch(engine.getAggregatorID())
                 .ifPresent(engine::processJobBatch);
@@ -589,7 +589,7 @@ class AggregationEngineTest {
                 Collections.singletonList(ResourceType.Patient),
                 null,
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                null);
+                null, true);
 
         AggregationEngineHealthCheck healthCheck = new AggregationEngineHealthCheck(engine);
         Assert.assertTrue(healthCheck.check().isHealthy());
@@ -604,7 +604,7 @@ class AggregationEngineTest {
     private void testWithThrowable(Throwable throwable) throws GeneralSecurityException {
         Mockito.reset(bbclient);
         // Override throwing an error on fetching a patient
-        Mockito.doThrow(throwable).when(bbclient).requestPatientFromServer(Mockito.anyString(), Mockito.any(DateRangeParam.class));
+        Mockito.doThrow(throwable).when(bbclient).requestPatientFromServer(Mockito.anyString(), Mockito.any(DateRangeParam.class), anyMap());
 
         final var orgID = UUID.randomUUID();
 
@@ -616,7 +616,7 @@ class AggregationEngineTest {
                 Collections.singletonList(ResourceType.Patient),
                 null,
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                null);
+                null, true);
 
         // Work the batch
         queue.claimBatch(engine.getAggregatorID())
@@ -628,7 +628,7 @@ class AggregationEngineTest {
 
         // Check that the bad ID was called 3 times
         ArgumentCaptor<String> idCaptor = ArgumentCaptor.forClass(String.class);
-        Mockito.verify(bbclient, atLeastOnce()).requestPatientFromServerByMbi(idCaptor.capture());
+        Mockito.verify(bbclient, atLeastOnce()).requestPatientFromServerByMbi(idCaptor.capture(), anyMap());
         assertEquals(1, idCaptor.getAllValues().stream().filter(value -> value.equals("1")).count(), "Should have been called once to get the patient, but with errors instead");
 
         // Look at the result. It should have one error, but be successful otherwise.

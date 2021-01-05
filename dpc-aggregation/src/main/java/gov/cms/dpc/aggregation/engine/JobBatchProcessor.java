@@ -3,10 +3,12 @@ package gov.cms.dpc.aggregation.engine;
 import ca.uhn.fhir.context.FhirContext;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
+import com.google.common.net.HttpHeaders;
 import gov.cms.dpc.aggregation.service.LookBackAnalyzer;
 import gov.cms.dpc.aggregation.service.LookBackAnswer;
 import gov.cms.dpc.aggregation.service.LookBackService;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
+import gov.cms.dpc.common.Constants;
 import gov.cms.dpc.common.utils.MetricMaker;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.models.JobQueueBatch;
@@ -21,9 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class JobBatchProcessor {
@@ -108,8 +108,21 @@ public class JobBatchProcessor {
                 resourceType,
                 since,
                 job.getTransactionTime());
-        return fetcher.fetchResources(patientID)
+        return fetcher.fetchResources(patientID, buildHeaders(job))
                 .flatMap(Flowable::fromIterable);
+    }
+
+    private Map<String, String> buildHeaders(JobQueueBatch job) {
+        Map<String, String> headers = new HashMap<>();
+        headers.put(HttpHeaders.X_FORWARDED_FOR, job.getRequestingIP());
+        headers.put(Constants.BFD_ORIGINAL_QUERY_ID_HEADER, job.getJobID().toString());
+        if (job.isBulk()) {
+            headers.put(Constants.BULK_JOB_ID_HEADER, job.getJobID().toString());
+            headers.put(Constants.BULK_CLIENT_ID_HEADER, job.getProviderID());
+        } else {
+            headers.put(Constants.DPC_CLIENT_ID_HEADER, job.getProviderID());
+        }
+        return headers;
     }
 
     private List<LookBackAnswer> getLookBackAnswers(JobQueueBatch job, String patientId) {

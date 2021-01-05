@@ -211,7 +211,7 @@ public class GroupResourceUnitTest {
 
         Mockito.when(bundleOperation.execute()).thenReturn(new Bundle());
         Meta bfdTransactionMeta = new Meta();
-        Mockito.when(mockBfdClient.requestPatientFromServer(SYNTHETIC_BENE_ID, null).getMeta()).thenReturn(bfdTransactionMeta);
+        Mockito.when(mockBfdClient.requestPatientFromServer(SYNTHETIC_BENE_ID, null, null).getMeta()).thenReturn(bfdTransactionMeta);
 
 
         //Past date with Z offset
@@ -264,7 +264,7 @@ public class GroupResourceUnitTest {
 
         Mockito.when(bundleOperation.execute()).thenReturn(new Bundle());
         Meta bfdTransactionMeta = new Meta();
-        Mockito.when(mockBfdClient.requestPatientFromServer(SYNTHETIC_BENE_ID, null).getMeta()).thenReturn(bfdTransactionMeta);
+        Mockito.when(mockBfdClient.requestPatientFromServer(SYNTHETIC_BENE_ID, null, null).getMeta()).thenReturn(bfdTransactionMeta);
 
         //Test a few seconds into the future
         WebApplicationException exception = Assertions.assertThrows(BadRequestException.class, () ->{
@@ -329,7 +329,7 @@ public class GroupResourceUnitTest {
         Mockito.when(operationInput.execute())
                 .thenReturn(fakeBundle);
 
-        Mockito.when(mockBfdClient.requestPatientFromServer(Mockito.anyString(), Mockito.any()))
+        Mockito.when(mockBfdClient.requestPatientFromServer(Mockito.anyString(), Mockito.any(), Mockito.any()))
                 .thenReturn(new Bundle());
 
         Assertions.assertDoesNotThrow(() -> {
