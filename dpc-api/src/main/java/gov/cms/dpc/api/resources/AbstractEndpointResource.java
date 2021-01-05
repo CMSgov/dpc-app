@@ -3,7 +3,6 @@ package gov.cms.dpc.api.resources;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.fhir.annotations.Profiled;
 import gov.cms.dpc.fhir.validations.profiles.EndpointProfile;
-import io.dropwizard.auth.Auth;
 import io.swagger.annotations.ApiParam;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Endpoint;
@@ -22,7 +21,7 @@ public abstract class AbstractEndpointResource {
     }
 
     @POST
-    public abstract Response createEndpoint(@ApiParam(hidden = true) @Auth OrganizationPrincipal organization, @Valid @Profiled(profile = EndpointProfile.PROFILE_URI) Endpoint endpoint);
+    public abstract Response createEndpoint(@ApiParam(hidden = true) OrganizationPrincipal organization, @Valid @Profiled(profile = EndpointProfile.PROFILE_URI) Endpoint endpoint);
 
     @GET
     public abstract Bundle getEndpoints(OrganizationPrincipal organization);

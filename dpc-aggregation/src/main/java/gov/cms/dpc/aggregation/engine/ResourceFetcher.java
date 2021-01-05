@@ -18,10 +18,7 @@ import org.slf4j.MDC;
 import java.security.GeneralSecurityException;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * A resource fetcher will fetch resources of particular type from passed {@link BlueButtonClient}
@@ -63,14 +60,15 @@ class ResourceFetcher {
      * a OperationOutcome resource is used.
      *
      * @param mbi to use
+     * @param headers
      * @return a flow with all the resources for specific patient
      */
-    Flowable<List<Resource>> fetchResources(String mbi) {
+    Flowable<List<Resource>> fetchResources(String mbi, Map<String, String> headers) {
         return Flowable.fromCallable(() -> {
             String fetchId = UUID.randomUUID().toString();
             logger.debug("Fetching first {} from BlueButton for {}", resourceType.toString(), fetchId);
-            final Bundle firstFetched = fetchFirst(mbi);
-            return fetchAllBundles(firstFetched, fetchId);
+            final Bundle firstFetched = fetchFirst(mbi, headers);
+            return fetchAllBundles(firstFetched, fetchId, headers);
         })
                 .onErrorResumeNext((Throwable error) -> handleError(mbi, error));
     }
@@ -82,7 +80,7 @@ class ResourceFetcher {
      * @param firstBundle of resources. Included in the result list
      * @return a list of all the resources in the first bundle and all next bundles
      */
-    private List<Resource> fetchAllBundles(Bundle firstBundle, String fetchId) {
+    private List<Resource> fetchAllBundles(Bundle firstBundle, String fetchId,  Map<String, String> headers) {
         final var resources = new ArrayList<Resource>();
         checkBundleTransactionTime(firstBundle);
         addResources(resources, firstBundle);
@@ -91,7 +89,7 @@ class ResourceFetcher {
         var bundle = firstBundle;
         while (bundle.getLink(Bundle.LINK_NEXT) != null) {
             logger.debug("Fetching next bundle {} from BlueButton for {}", resourceType.toString(), fetchId);
-            bundle = blueButtonClient.requestNextBundleFromServer(bundle);
+            bundle = blueButtonClient.requestNextBundleFromServer(bundle, headers);
             checkBundleTransactionTime(bundle);
             addResources(resources, bundle);
         }
@@ -124,8 +122,8 @@ class ResourceFetcher {
      * @param mbi of the resource to fetch
      * @return the first bundle of resources
      */
-    private Bundle fetchFirst(String mbi) {
-        Patient patient = fetchPatient(mbi);
+    private Bundle fetchFirst(String mbi, Map<String, String> headers) {
+        Patient patient = fetchPatient(mbi, headers);
         patient.getIdentifier().stream()
                 .filter(i -> i.getSystem().equals(DPCIdentifierSystem.MBI_HASH.getSystem()))
                 .findFirst()
@@ -135,20 +133,20 @@ class ResourceFetcher {
         final var lastUpdated = formLastUpdatedParam();
         switch (resourceType) {
             case Patient:
-                return blueButtonClient.requestPatientFromServer(beneId, lastUpdated);
+                return blueButtonClient.requestPatientFromServer(beneId, lastUpdated, headers);
             case ExplanationOfBenefit:
-                return blueButtonClient.requestEOBFromServer(beneId, lastUpdated);
+                return blueButtonClient.requestEOBFromServer(beneId, lastUpdated, headers);
             case Coverage:
-                return blueButtonClient.requestCoverageFromServer(beneId, lastUpdated);
+                return blueButtonClient.requestCoverageFromServer(beneId, lastUpdated, headers);
             default:
                 throw new JobQueueFailure(jobID, batchID, "Unexpected resource type: " + resourceType.toString());
         }
     }
 
-    private Patient fetchPatient(String mbi) {
+    private Patient fetchPatient(String mbi, Map<String, String> headers) {
         Bundle patients;
         try {
-            patients = blueButtonClient.requestPatientFromServerByMbi(mbi);
+            patients = blueButtonClient.requestPatientFromServerByMbi(mbi, headers);
         } catch (GeneralSecurityException e) {
             logger.error("Failed to retrieve Patient", e);
             throw new ResourceNotFoundException("Failed to retrieve Patient");

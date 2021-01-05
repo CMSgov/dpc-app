@@ -5,6 +5,7 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import com.codahale.metrics.MetricRegistry;
 import com.typesafe.config.ConfigFactory;
 import gov.cms.dpc.aggregation.dao.OrganizationDAO;
+import gov.cms.dpc.aggregation.dao.ProviderDAO;
 import gov.cms.dpc.aggregation.dao.RosterDAO;
 import gov.cms.dpc.aggregation.engine.AggregationEngine;
 import gov.cms.dpc.aggregation.engine.JobBatchProcessor;
@@ -32,6 +33,8 @@ import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+
+import static org.mockito.ArgumentMatchers.anyMap;
 
 /**
  * These tests are here to make sure the engine is still running/polling in situations where errors are recoverable.
@@ -66,8 +69,8 @@ public class AggregationEngineHealthCheckTest {
     void setupEach() throws ParseException {
         queue = Mockito.spy(new MemoryBatchQueue(10));
         bbclient = Mockito.spy(new MockBlueButtonClient(fhirContext));
-        var operationalConfig = new OperationsConfig(1000, exportPath, 500,new SimpleDateFormat("dd/MM/yyyy").parse("03/01/2015"));
-        lookBackService = Mockito.spy(new LookBackServiceImpl(Mockito.mock(RosterDAO.class), Mockito.mock(OrganizationDAO.class), operationalConfig));
+        var operationalConfig = new OperationsConfig(1000, exportPath, 500, new SimpleDateFormat("dd/MM/yyyy").parse("03/01/2015"));
+        lookBackService = Mockito.spy(new LookBackServiceImpl(Mockito.mock(ProviderDAO.class), Mockito.mock(RosterDAO.class), Mockito.mock(OrganizationDAO.class), operationalConfig));
         jobBatchProcessor = Mockito.spy(new JobBatchProcessor(bbclient, fhirContext, metricRegistry, operationalConfig, lookBackService));
         engine = Mockito.spy(new AggregationEngine(aggregatorID, queue, operationalConfig, jobBatchProcessor));
         AggregationEngine.setGlobalErrorHandler();
@@ -85,7 +88,7 @@ public class AggregationEngineHealthCheckTest {
                 Collections.singletonList(ResourceType.Patient),
                 null,
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                null);
+                null, true);
 
         AggregationEngineHealthCheck healthCheck = new AggregationEngineHealthCheck(engine);
         Assert.assertTrue(healthCheck.check().isHealthy());
@@ -101,7 +104,7 @@ public class AggregationEngineHealthCheckTest {
     @Test
     public void testHealthyEngineWhenJobBatchErrors() throws InterruptedException {
 
-        Mockito.doThrow(new RuntimeException("Error")).when(bbclient).requestPatientFromServer(Mockito.anyString(), Mockito.any(DateRangeParam.class));
+        Mockito.doThrow(new RuntimeException("Error")).when(bbclient).requestPatientFromServer(Mockito.anyString(), Mockito.any(DateRangeParam.class), anyMap());
 
         final var orgID = UUID.randomUUID();
 
@@ -112,7 +115,7 @@ public class AggregationEngineHealthCheckTest {
                 Collections.singletonList(ResourceType.Patient),
                 null,
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                null);
+                null, true);
 
         AggregationEngineHealthCheck healthCheck = new AggregationEngineHealthCheck(engine);
         Assert.assertTrue(healthCheck.check().isHealthy());
@@ -137,7 +140,7 @@ public class AggregationEngineHealthCheckTest {
                 Collections.singletonList(ResourceType.Patient),
                 null,
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                null);
+                null, true);
 
         Mockito.doThrow(new RuntimeException("Error")).when(queue).claimBatch(Mockito.any(UUID.class));
 
@@ -165,7 +168,7 @@ public class AggregationEngineHealthCheckTest {
                 Collections.singletonList(ResourceType.Patient),
                 null,
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                null);
+                null, true);
 
         AggregationEngineHealthCheck healthCheck = new AggregationEngineHealthCheck(engine);
         Assert.assertTrue(healthCheck.check().isHealthy());

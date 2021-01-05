@@ -8,6 +8,7 @@ import com.codahale.metrics.annotation.Timed;
 import com.google.inject.name.Named;
 import gov.cms.dpc.api.APIHelpers;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
+import gov.cms.dpc.api.auth.annotations.Authorizer;
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.resources.AbstractGroupResource;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
@@ -76,6 +77,7 @@ public class GroupResource extends AbstractGroupResource {
     @FHIR
     @Timed
     @ExceptionMetered
+    @Authorizer
     @ApiOperation(value = "Create Attribution Group", notes = "FHIR endpoint to create an Attribution Group resource) associated to the provider listed in the in the Group characteristics.")
     @ApiImplicitParams(
             @ApiImplicitParam(name = "X-Provenance", required = true, paramType = "header", type="string",dataTypeClass = Provenance.class))
@@ -106,6 +108,7 @@ public class GroupResource extends AbstractGroupResource {
     @FHIR
     @Timed
     @ExceptionMetered
+    @Authorizer
     @ApiOperation(value = "Search for Attribution Groups", notes = "FHIR endpoint for searching for Attribution Groups." +
             "<p> If Provider NPI is given, all attribution groups for that provider will be returned. " +
             "If a Patient ID is given, all attribution groups for which that patient is a member will be returned.")
@@ -175,10 +178,12 @@ public class GroupResource extends AbstractGroupResource {
             @ApiResponse(code = 422, message = "Provider in Provenance header does not match Provider in Roster")
     })
     @Override
-    public Group updateRoster(@ApiParam(value = "Attribution Group ID") @PathParam("rosterID") UUID rosterID,
+    public Group updateRoster(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal, @ApiParam(value = "Attribution Group ID") @PathParam("rosterID") UUID rosterID,
                               @ApiParam(hidden=true)  @Valid @Profiled(profile = AttestationProfile.PROFILE_URI) @ProvenanceHeader Provenance rosterAttestation,
                               Group rosterUpdate) {
+
         logAndVerifyAttestation(rosterAttestation, rosterID, rosterUpdate);
+        addOrganizationTag(rosterUpdate, organizationPrincipal.getID().toString());
         final MethodOutcome outcome = this.client
                 .update()
                 .resource(rosterUpdate)
@@ -200,9 +205,10 @@ public class GroupResource extends AbstractGroupResource {
             @ApiImplicitParam(name = "X-Provenance", required = true, paramType = "header", type="string", dataTypeClass = Provenance.class))
     @ApiResponses(@ApiResponse(code = 404, message = "Cannot find Roster with given ID"))
     @Override
-    public Group addRosterMembers(@ApiParam(value = "Attribution roster ID") @PathParam("rosterID") UUID rosterID,
-                                  @ApiParam(hidden=true) @Valid @Profiled(profile = AttestationProfile.PROFILE_URI) @ProvenanceHeader Provenance rosterAttestation, @ApiParam Group groupUpdate) {
+    public Group addRosterMembers(@Auth OrganizationPrincipal organizationPrincipal, @ApiParam(value = "Attribution roster ID") @PathParam("rosterID") UUID rosterID,
+                                  @ApiParam(hidden=true) @Valid @Profiled(profile = AttestationProfile.PROFILE_URI) @ProvenanceHeader Provenance rosterAttestation, Group groupUpdate ) {
         logAndVerifyAttestation(rosterAttestation, rosterID, groupUpdate);
+        addOrganizationTag(groupUpdate, organizationPrincipal.getID().toString());
         return this.executeGroupOperation(rosterID, groupUpdate, "add");
     }
 
@@ -292,7 +298,7 @@ public class GroupResource extends AbstractGroupResource {
         final var since = handleSinceQueryParam(sinceParam);
         final var transactionTime = APIHelpers.fetchTransactionTime(bfdClient);
         final var requestingIP = APIHelpers.fetchRequestingIP(request);
-        final UUID jobID = this.queue.createJob(orgID, rosterID, attributedPatients, resources, since, transactionTime, requestingIP);
+        final UUID jobID = this.queue.createJob(orgID, rosterID, attributedPatients, resources, since, transactionTime, requestingIP, true);
 
         return Response.status(Response.Status.ACCEPTED)
                 .contentLocation(URI.create(this.baseURL + "/Jobs/" + jobID)).build();

@@ -64,6 +64,7 @@ public class APIHelpers {
             newMeta.addTag(orgTag);
             resource.setMeta(newMeta);
         } else {
+            meta.getTag().removeIf(coding -> DPCIdentifierSystem.DPC.getSystem().equalsIgnoreCase(coding.getSystem().trim()));
             meta.addTag(orgTag);
         }
     }
@@ -74,7 +75,7 @@ public class APIHelpers {
      */
     public static OffsetDateTime fetchTransactionTime(BlueButtonClient bfdClient) {
         // Every bundle has transaction time after the Since RFC has beneficiary
-        final Meta meta = bfdClient.requestPatientFromServer(SYNTHETIC_BENE_ID, null).getMeta();
+        final Meta meta = bfdClient.requestPatientFromServer(SYNTHETIC_BENE_ID, null, null).getMeta();
         return Optional.ofNullable(meta.getLastUpdated())
                 .map(u -> u.toInstant().atOffset(ZoneOffset.UTC))
                 .orElse(OffsetDateTime.now(ZoneOffset.UTC));

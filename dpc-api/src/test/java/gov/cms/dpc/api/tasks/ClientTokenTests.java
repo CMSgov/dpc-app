@@ -14,6 +14,7 @@ import gov.cms.dpc.api.tasks.tokens.GenerateClientTokens;
 import gov.cms.dpc.api.tasks.tokens.ListClientTokens;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
+import io.dropwizard.jersey.jsr310.OffsetDateTimeParam;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -23,6 +24,9 @@ import org.mockito.Mockito;
 
 import javax.ws.rs.WebApplicationException;
 import java.io.*;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.UUID;
@@ -39,6 +43,8 @@ public class ClientTokenTests {
     private TokenResource tokenResource = Mockito.mock(TokenResource.class);
     private static MacaroonBakery bakery = Mockito.mock(MacaroonBakery.class);
     private ArgumentCaptor<OrganizationPrincipal> principalCaptor = ArgumentCaptor.forClass(OrganizationPrincipal.class);
+    private ArgumentCaptor<String> tokenLabelCaptor = ArgumentCaptor.forClass(String.class);
+    private ArgumentCaptor<Optional<OffsetDateTimeParam>> expirationCaptor = ArgumentCaptor.forClass(Optional.class);
     private final GenerateClientTokens gct;
     private final ListClientTokens lct;
     private final DeleteToken dct;
@@ -82,8 +88,50 @@ public class ClientTokenTests {
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
             gct.execute(map, new PrintWriter(new OutputStreamWriter(bos)));
             Mockito.verify(bakery, never()).createMacaroon(eq(Collections.emptyList()));
-            Mockito.verify(tokenResource, times(1)).createOrganizationToken(principalCaptor.capture(), Mockito.isNull(),Mockito.isNull(), eq(Optional.empty()));
+            Mockito.verify(tokenResource, times(1)).createOrganizationToken(principalCaptor.capture(), Mockito.isNull(), Mockito.isNull(), eq(Optional.empty()));
             assertEquals(id, principalCaptor.getValue().getID(), "Should have correct ID");
+        }
+    }
+
+    @Test
+    void testTokenCreationWithLabel() throws IOException {
+        final String tokenLabel = "test-token-label";
+        final TokenEntity response = Mockito.mock(TokenEntity.class);
+        response.setLabel(tokenLabel);
+        Mockito.when(response.getToken()).thenReturn("test token");
+        Mockito.when(tokenResource.createOrganizationToken(Mockito.any(), Mockito.any(), Mockito.matches(tokenLabel), Mockito.any())).thenReturn(response);
+
+        final UUID id = UUID.randomUUID();
+        final Organization org = new Organization();
+        org.setId(id.toString());
+
+        final ImmutableMultimap<String, String> map = ImmutableMultimap.of("organization", id.toString(), "label", tokenLabel);
+        try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+            gct.execute(map, new PrintWriter(new OutputStreamWriter(bos)));
+            Mockito.verify(bakery, never()).createMacaroon(eq(Collections.emptyList()));
+            Mockito.verify(tokenResource, times(1)).createOrganizationToken(Mockito.isNotNull(), Mockito.isNull(), tokenLabelCaptor.capture(), eq(Optional.empty()));
+            assertEquals(tokenLabel, tokenLabelCaptor.getValue(), "Should have correct label");
+        }
+    }
+
+    @Test
+    void testTokenCreationWithExpiration() throws IOException {
+        final String expires = OffsetDateTime.now(ZoneOffset.UTC).plusMonths(12).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+        final Optional<OffsetDateTimeParam> optExpires = Optional.of(new OffsetDateTimeParam(expires));
+        final TokenEntity response = Mockito.mock(TokenEntity.class);
+        Mockito.when(response.getToken()).thenReturn("test token");
+        Mockito.when(tokenResource.createOrganizationToken(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.isNotNull())).thenReturn(response);
+
+        final UUID id = UUID.randomUUID();
+        final Organization org = new Organization();
+        org.setId(id.toString());
+
+        final ImmutableMultimap<String, String> map = ImmutableMultimap.of("organization", id.toString(), "expiration", expires);
+        try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+            gct.execute(map, new PrintWriter(new OutputStreamWriter(bos)));
+            Mockito.verify(bakery, never()).createMacaroon(eq(Collections.emptyList()));
+            Mockito.verify(tokenResource, times(1)).createOrganizationToken(Mockito.isNotNull(), Mockito.isNull(), Mockito.any(), expirationCaptor.capture());
+            assertEquals(optExpires, expirationCaptor.getValue(), "Should have correct expiration");
         }
     }
 

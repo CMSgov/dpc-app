@@ -80,7 +80,7 @@ class FHIRSubmissionTest {
         mockFactory();
         mockClient();
         mockBfdClient();
-        doCallRealMethod().when(queue).createJob(Mockito.any(UUID.class), Mockito.anyString(), Mockito.anyList(), Mockito.anyList(), Mockito.any(OffsetDateTime.class), Mockito.any(OffsetDateTime.class), Mockito.anyString());
+        doCallRealMethod().when(queue).createJob(Mockito.any(UUID.class), Mockito.anyString(), Mockito.anyList(), Mockito.anyList(), Mockito.any(OffsetDateTime.class), Mockito.any(OffsetDateTime.class), Mockito.anyString(), Mockito.anyBoolean());
     }
 
     @Test
@@ -222,7 +222,7 @@ class FHIRSubmissionTest {
     private static void mockBfdClient() {
         Bundle mockBundle = new Bundle();
         mockBundle.getMeta().setLastUpdated(new Date());
-        Mockito.when(bfdClient.requestPatientFromServer(anyString(), isNull())).thenReturn(mockBundle);
+        Mockito.when(bfdClient.requestPatientFromServer(anyString(), isNull(), any())).thenReturn(mockBundle);
     }
 
     @SuppressWarnings("unchecked")
