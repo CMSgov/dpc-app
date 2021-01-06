@@ -66,12 +66,12 @@ public class MockBlueButtonClient implements BlueButtonClient {
     }
 
     @Override
-    public Bundle requestPatientFromServerByMbi(String mbi) throws ResourceNotFoundException {
+    public Bundle requestPatientFromServerByMbi(String mbi, Map<String, String> headers) throws ResourceNotFoundException {
         return loadBundle(SAMPLE_PATIENT_PATH_PREFIX, MBI_BENE_ID_MAP.getOrDefault(mbi,""));
     }
 
     @Override
-    public Bundle requestPatientFromServer(String beneId, DateRangeParam lastUpdated) throws ResourceNotFoundException {
+    public Bundle requestPatientFromServer(String beneId, DateRangeParam lastUpdated, Map<String, String> headers) throws ResourceNotFoundException {
         return isInDateRange(lastUpdated) ?
                 loadBundle(SAMPLE_PATIENT_PATH_PREFIX, beneId) :
                 loadEmptyBundle();
@@ -79,7 +79,7 @@ public class MockBlueButtonClient implements BlueButtonClient {
 
 
     @Override
-    public Bundle requestPatientFromServerByMbiHash(String mbiHash) throws ResourceNotFoundException {
+    public Bundle requestPatientFromServerByMbiHash(String mbiHash, Map<String, String> headers) throws ResourceNotFoundException {
         String mbi = MBI_HASH_MAP.values().stream()
                 .filter(h -> h.equals(mbiHash))
                 .findFirst()
@@ -88,21 +88,21 @@ public class MockBlueButtonClient implements BlueButtonClient {
     }
 
     @Override
-    public Bundle requestEOBFromServer(String beneId, DateRangeParam lastUpdated) throws ResourceNotFoundException {
+    public Bundle requestEOBFromServer(String beneId, DateRangeParam lastUpdated, Map<String, String> headers) throws ResourceNotFoundException {
         return isInDateRange(lastUpdated) ?
                 loadBundle(SAMPLE_EOB_PATH_PREFIX, beneId) :
                 loadEmptyBundle();
     }
 
     @Override
-    public Bundle requestCoverageFromServer(String beneId, DateRangeParam lastUpdated) throws ResourceNotFoundException {
+    public Bundle requestCoverageFromServer(String beneId, DateRangeParam lastUpdated, Map<String, String> headers) throws ResourceNotFoundException {
         return isInDateRange(lastUpdated) ?
                 loadBundle(SAMPLE_COVERAGE_PATH_PREFIX, beneId) :
                 loadEmptyBundle();
     }
 
     @Override
-    public Bundle requestNextBundleFromServer(Bundle bundle) throws ResourceNotFoundException {
+    public Bundle requestNextBundleFromServer(Bundle bundle, Map<String, String> headers) throws ResourceNotFoundException {
         // This is code is very specific to the bb-test-data directory and its contents
         final var nextLink = bundle.getLink(Bundle.LINK_NEXT).getUrl();
         final var nextUrl = URI.create(nextLink);

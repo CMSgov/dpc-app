@@ -91,8 +91,8 @@ class QueueTest {
         final UUID orgID = UUID.randomUUID();
 
         // Add a couple of jobs
-        var firstJobID = queue.createJob(orgID, "test-provider-1", List.of("test-patient-1", "test-patient-2"), Collections.singletonList(ResourceType.Patient), null, OffsetDateTime.now(ZoneOffset.UTC), null);
-        var secondJobID = queue.createJob(orgID, "test-provider-1", List.of("test-patient-1", "test-patient-2"), Collections.singletonList(ResourceType.Patient), null, OffsetDateTime.now(ZoneOffset.UTC), null);
+        var firstJobID = queue.createJob(orgID, "test-provider-1", List.of("test-patient-1", "test-patient-2"), Collections.singletonList(ResourceType.Patient), null, OffsetDateTime.now(ZoneOffset.UTC), null, true);
+        var secondJobID = queue.createJob(orgID, "test-provider-1", List.of("test-patient-1", "test-patient-2"), Collections.singletonList(ResourceType.Patient), null, OffsetDateTime.now(ZoneOffset.UTC), null, true);
         assertEquals(2, queue.queueSize(), "Should have 2 jobs");
 
         // Check the status of the job
@@ -167,7 +167,7 @@ class QueueTest {
                 List.of("test-patient-1", "test-patient-2"),
                 Arrays.asList(ResourceType.Patient, ResourceType.ExplanationOfBenefit),
                 null,
-                OffsetDateTime.now(ZoneOffset.UTC), null);
+                OffsetDateTime.now(ZoneOffset.UTC), null, true);
 
         // Retrieve the job with both resources
         final var workBatch = queue.claimBatch(aggregatorID).get();
@@ -209,7 +209,7 @@ class QueueTest {
                 List.of("test-patient-1", "test-patient-2"),
                 Arrays.asList(ResourceType.Patient, ResourceType.ExplanationOfBenefit),
                 transactionTime,
-                transactionTime, null);
+                transactionTime, null, true);
 
         // Check that the Job has a empty queue
         final Optional<JobQueueBatch> job = queue.getJobBatches(jobId).stream().findFirst();
@@ -230,7 +230,8 @@ class QueueTest {
                 Collections.singletonList(ResourceType.ExplanationOfBenefit),
                 null,
                 OffsetDateTime.now(ZoneOffset.UTC),
-                null);
+                null,
+                true);
 
         // Set the aggregatorID to something random so it gets claimed incorrectly
         jobBatch.setAggregatorIDForTesting(UUID.randomUUID());
