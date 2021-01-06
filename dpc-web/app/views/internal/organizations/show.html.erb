@@ -71,30 +71,33 @@
         <div class="ds-u-margin-bottom--2" data-test="org-tags">
           <h2 class="box__heading">Tags</h2>
           <% if @organization.taggings.count == 0 %>
-            <p>No tags</p>
+            <p>No tags have been assigned to <%= @organization.name %>.</p>
           <% else %>
             <% @organization.taggings.each do |tagging| %>
-
-              <span class="site-pills__item site-pills__item--small">
-                <%= tagging.tag_name %>
-
-                <%= link_to(internal_tagging_url(tagging), class: "site-pills__item__button", method: :delete, data: {test: "delete-tag-#{tagging.id}"}) do %>
-                  <svg class="icon" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                    <use xlink:href="/assets/solid.svg#times"></use>
-                  </svg>
+              <%= link_to(internal_tagging_url(tagging), class: "site-pills__item__button dashboard__pills--delete", method: :delete, data: {test: "delete-tag-#{tagging.id}"}) do %>
+                <span class="site-pills__item site-pills__item--small">
+                  <%= tagging.tag_name %>
                 </span>
-              <%end%>
+              <% end %>
             <% end %>
           <% end %>
         </div>
 
         <div>
-          <%= form_for Tagging.new, url: internal_taggings_path, html: { method: :post } do |f| %>
-            <%= f.label :tag_id, "New tag", class: "ds-c-label ds-u-margin-top--0" %>
-            <%= f.collection_select :tag_id, available_tags(@organization), :id, :name, { include_blank: true }, class: "ds-c-field drop-down" %>
-            <%= f.hidden_field :taggable_id, value: @organization.id %>
-            <%= f.hidden_field :taggable_type, value: 'Organization' %>
-            <%= f.submit "Add tag", class: "ds-c-button ds-u-margin-top--1", data: { test: "add-tag-submit" } %>
+          <div class="ds-c-label ds-u-margin-top--0">New tag</div>
+          <% if @tags.count == 0 %>
+            <p>There are no tags available.</p>
+          <% else %>
+            <% @tags.each do |tag| %>
+              <div class="site-pills__item__button dashboard__pills--add">
+                <%= form_for Tagging.new, url: internal_taggings_path, html: { method: :post } do |f| %>
+                  <%= f.hidden_field :tag_id, value: tag.id %>
+                  <%= f.hidden_field :taggable_id, value: @organization.id %>
+                  <%= f.hidden_field :taggable_type, value: 'Organization' %>
+                  <%= f.submit tag.name, class: "site-pills__item site-pills__item--small" %>
+                <% end %>
+              </div>
+            <% end %>
           <% end %>
         </div>
       </div>
