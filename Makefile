@@ -35,6 +35,10 @@ start-app: secure-envs
 start-local: secure-envs
 	@docker-compose -f docker-compose.yml -f docker-compose-local.yml up start_api_dependencies
 
+.PHONY: start-local-api
+start-local-api: secure-envs start-local
+	@docker-compose -f docker-compose.yml -f docker-compose-local.yml up start_api
+
 .PHONY: ci-app
 ci-app: docker-base secure-envs
 	@./dpc-test.sh
