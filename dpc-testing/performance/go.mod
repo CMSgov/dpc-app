@@ -10,6 +10,7 @@ require (
 	github.com/joeljunstrom/go-luhn v0.0.0-20190413165225-1e071b33b576
 	github.com/mailru/easyjson v0.7.6 // indirect
 	github.com/streadway/quantile v0.0.0-20150917103942-b0c588724d25 // indirect
+	github.com/stretchr/testify v1.3.0
 	github.com/tsenart/vegeta v12.7.0+incompatible
 	github.com/zach-klippenstein/goregen v0.0.0-20160303162051-795b5e3961ea
 )
