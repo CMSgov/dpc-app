@@ -61,7 +61,6 @@ public class TokenResource extends AbstractTokenResource {
     // This will be removed as part of DPC-747
     private static final String DEFAULT_ACCESS_SCOPE = "system/*.*";
     private static final Logger logger = LoggerFactory.getLogger(TokenResource.class);
-    private static final String ORG_NOT_FOUND = "Cannot find Organization: %s";
     private static final String INVALID_JWT_MSG = "Invalid JWT";
 
     private final TokenDAO dao;
@@ -162,7 +161,7 @@ public class TokenResource extends AbstractTokenResource {
         try {
             persisted = this.dao.persistToken(tokenEntity);
         } catch (NoResultException e) {
-            throw new WebApplicationException(String.format(ORG_NOT_FOUND, organizationID), Response.Status.NOT_FOUND);
+            throw new WebApplicationException(String.format("Cannot find Organization: %s", organizationID), Response.Status.NOT_FOUND);
         }
 
         persisted.setToken(new String(this.bakery.serializeMacaroon(macaroon, true), StandardCharsets.UTF_8));
@@ -346,6 +345,7 @@ public class TokenResource extends AbstractTokenResource {
         return defaultExpiration;
     }
 
+    @SuppressWarnings("JdkObsolete") // Date class is used by Jwt
     private void handleJWTClaims(UUID organizationID, Jws<Claims> claims) {
         // Issuer and Sub must be present and identical
         final String issuer = getClaimIfPresent("issuer", claims.getBody().getIssuer());
