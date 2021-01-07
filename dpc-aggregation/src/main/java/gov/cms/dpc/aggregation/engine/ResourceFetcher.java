@@ -219,6 +219,7 @@ class ResourceFetcher {
      *
      * @return a date range for this job
      */
+    @SuppressWarnings("JdkObsolete") // Date class is used by HAPI FHIR DateRangeParam
     private DateRangeParam formLastUpdatedParam() {
         // Note: FHIR bulk spec says that since is exclusive and transactionTime is inclusive
         // It is also says that all resources should not have lastUpdated after the transactionTime.
@@ -237,6 +238,7 @@ class ResourceFetcher {
      *
      * @param bundle to check
      */
+    @SuppressWarnings("JdkObsolete") // Date class is used by FHIR stu3 Meta model
     private void checkBundleTransactionTime(Bundle bundle) {
         if (bundle.getMeta() == null || bundle.getMeta().getLastUpdated() == null) return;
         final var bfdTransactionTime = bundle.getMeta().getLastUpdated().toInstant().atOffset(ZoneOffset.UTC);
