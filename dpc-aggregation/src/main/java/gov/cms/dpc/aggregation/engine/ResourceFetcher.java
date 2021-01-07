@@ -25,12 +25,12 @@ import java.util.*;
  */
 class ResourceFetcher {
     private static final Logger logger = LoggerFactory.getLogger(ResourceFetcher.class);
-    private BlueButtonClient blueButtonClient;
-    private UUID jobID;
-    private UUID batchID;
-    private ResourceType resourceType;
-    private OffsetDateTime since;
-    private OffsetDateTime transactionTime;
+    private final BlueButtonClient blueButtonClient;
+    private final UUID jobID;
+    private final UUID batchID;
+    private final ResourceType resourceType;
+    private final OffsetDateTime since;
+    private final OffsetDateTime transactionTime;
 
     /**
      * Create a context for fetching FHIR resources
@@ -60,7 +60,7 @@ class ResourceFetcher {
      * a OperationOutcome resource is used.
      *
      * @param mbi to use
-     * @param headers
+     * @param headers headers
      * @return a flow with all the resources for specific patient
      */
     Flowable<List<Resource>> fetchResources(String mbi, Map<String, String> headers) {
@@ -243,10 +243,8 @@ class ResourceFetcher {
         if (bundle.getMeta() == null || bundle.getMeta().getLastUpdated() == null) return;
         final var bfdTransactionTime = bundle.getMeta().getLastUpdated().toInstant().atOffset(ZoneOffset.UTC);
         if (bfdTransactionTime.isBefore(transactionTime)) {
-            /**
-             * See BFD's RFC0004 for a discussion on why this type error may occur.
-             * Note: Retrying the job after a delay may fix this problem.
-             */
+           // See BFD's RFC0004 for a discussion on why this type error may occur.
+           // Note: Retrying the job after a delay may fix this problem.
             logger.error("Failing the job for a BFD transaction time regression: BFD time {}, Job time {}",
                     bfdTransactionTime,
                     transactionTime);
