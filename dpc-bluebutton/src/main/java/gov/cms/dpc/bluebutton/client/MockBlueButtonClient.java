@@ -56,7 +56,6 @@ public class MockBlueButtonClient implements BlueButtonClient {
     public static final String MULTIPLE_RESULTS_MBI = "0SW4N00AA00";
     public static final OffsetDateTime BFD_TRANSACTION_TIME = OffsetDateTime.ofInstant(Instant.now().truncatedTo(ChronoUnit.MILLIS), ZoneOffset.UTC);
     public static final OffsetDateTime TEST_LAST_UPDATED = OffsetDateTime.parse("2020-01-01T00:00:00-05:00");
-    public static final DateRangeParam BFD_LAST_UPDATE_RANGE = new DateRangeParam().setUpperBoundInclusive(new Date());
 
     private final IParser parser;
 
@@ -102,6 +101,7 @@ public class MockBlueButtonClient implements BlueButtonClient {
     }
 
     @Override
+    @SuppressWarnings("JdkObsolete") // Date class is used by FHIR stu3 Meta model
     public Bundle requestNextBundleFromServer(Bundle bundle, Map<String, String> headers) throws ResourceNotFoundException {
         // This is code is very specific to the bb-test-data directory and its contents
         final var nextLink = bundle.getLink(Bundle.LINK_NEXT).getUrl();
@@ -131,7 +131,8 @@ public class MockBlueButtonClient implements BlueButtonClient {
     }
 
     @Override
-    public String hashMbi(String mbi) throws GeneralSecurityException {
+    @SuppressWarnings("JdkObsolete") // Date class is used by FHIR stu3 Meta model
+    public String hashMbi(String mbi) {
         return MBI_HASH_MAP.get(mbi);
     }
 
@@ -173,6 +174,7 @@ public class MockBlueButtonClient implements BlueButtonClient {
      * @param range to test
      * @return true iff date range matches
      */
+    @SuppressWarnings("JdkObsolete") // Date class is used by HAPI FHIR DateRangeParam
     private boolean isInDateRange(DateRangeParam range) {
         if (range == null) return true;
         final var upperBound = range.getUpperBoundAsInstant();
@@ -186,6 +188,7 @@ public class MockBlueButtonClient implements BlueButtonClient {
      *
      * @return a Bundle
      */
+    @SuppressWarnings("JdkObsolete") // Date class is used by FHIR stu3 Meta model
     private Bundle loadEmptyBundle() {
         try(InputStream sampleData = MockBlueButtonClient.class.getClassLoader().getResourceAsStream(SAMPLE_EMPTY_BUNDLE)) {
             final var bundle = parser.parseResource(Bundle.class, sampleData);
