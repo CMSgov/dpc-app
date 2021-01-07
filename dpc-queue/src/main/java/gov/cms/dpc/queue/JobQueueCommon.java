@@ -69,8 +69,4 @@ public abstract class JobQueueCommon implements IJobQueue {
                 createJobBatch(jobID, orgID, providerID, Collections.emptyList(), resourceTypes, since, transactionTime, null, true)
         );
     }
-
-    public int getBatchSize() {
-        return batchSize;
-    }
 }
