@@ -48,7 +48,12 @@
           </div>
           <div class="module-container__primary__footer">
             <div class="ds-u-color--gray">
-              Signed up: <%= user.created_at.strftime("%m/%d/%Y") %>
+              Signed up: <%= user.created_at.strftime("%m/%d/%Y") %><br />
+              <% if user.confirmed_at != nil %>
+                Confirmed
+              <% else %>
+                Not Confirmed
+              <% end %>
             </div>
             <div class="ds-u-color--gray module-container__notes-summary">
               <svg class="icon ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
