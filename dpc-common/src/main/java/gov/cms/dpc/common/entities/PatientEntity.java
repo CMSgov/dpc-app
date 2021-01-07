@@ -142,12 +142,14 @@ public class PatientEntity extends PersonEntity {
         return Objects.hash(getID(), beneficiaryID, mbiHash, dob, gender, organization, attributions);
     }
 
+    @SuppressWarnings("JdkObsolete") // Date class is used by FHIR stu3 Patient model
     public static LocalDate toLocalDate(Date date) {
         return date.toInstant()
                 .atZone(ZoneOffset.UTC)
                 .toLocalDate();
     }
 
+    @SuppressWarnings("JdkObsolete") // Date class is used by FHIR stu3 Patient model
     public static Date fromLocalDate(LocalDate date) {
         return Date.from(date.atStartOfDay().toInstant(ZoneOffset.UTC));
     }
