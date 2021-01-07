@@ -48,6 +48,7 @@ RSpec.feature 'updating users' do
 
   scenario 'adding and removing tags from a user' do
     red_tag = create(:tag, name: 'Red')
+    yellow_tag = create(:tag, name: 'Yellow')
     crabby = create(:user, first_name: 'Crab', last_name: 'Olsen', email: 'co@beach.com')
 
     visit internal_user_path(crabby)
@@ -57,29 +58,35 @@ RSpec.feature 'updating users' do
     end
 
     within('[data-test="new-tags"]') do
-      expect(page).to have_content('Red')
+      expect(page).to have_css("[data-test=\"add-tag-#{red_tag.id}\"]")
+      expect(page).to have_css("[data-test=\"add-tag-#{yellow_tag.id}\"]")
     end
 
-    # find("[data-test=\"add-tag-#{red_tag.id}\"]").click
+    find("[data-test=\"add-tag-#{red_tag.id}\"]").click
 
-    # within('[data-test="user-tags"]') do
-    #   expect(page).to have_content('Red')
-    # end
+    within('[data-test="user-tags"]') do
+      expect(page).to have_css("[data-test=\"delete-tag-#{red_tag.id}\"]")
+    end
 
-    # within('[data-test="new-tags"]') do
-    #   expect(page).to_not have_content('Red')
-    #   expect(page).to have_content('Yellow')
-    # end
+    within('[data-test="new-tags"]') do
+      expect(page).to_not have_css("[data-test=\"add-tag-#{red_tag.id}\"]")
+      expect(page).to have_css("[data-test=\"add-tag-#{yellow_tag.id}\"]")
+    end
 
-    # find("[data-test=\"add-tag-#{yellow_tag.id}\"]").click
+    find("[data-test=\"add-tag-#{yellow_tag.id}\"]").click
 
-    # within('[data-test="user-tags"]') do
-    #   expect(page).to have_content('Red')
-    #   expect(page).to have_content('Yellow')
-    # end
+    within('[data-test="user-tags"]') do
+      expect(page).to have_css("[data-test=\"delete-tag-#{red_tag.id}\"]")
+      expect(page).to have_css("[data-test=\"delete-tag-#{yellow_tag.id}\"]")
+    end
 
-    # tagging = crabby.taggings.find_by(tag_id: red_tag.id)
-    # find("[data-test=\"delete-tag-#{tagging.id}\"]").click
+    tagging = crabby.taggings.find_by(tag_id: red_tag.id)
+    find("[data-test=\"delete-tag-#{tagging.id}\"]").click
+
+    within('[data-test="user-tags"]') do
+      expect(page).to_not have_css("[data-test=\"delete-tag-#{red_tag.id}\"]")
+      expect(page).to have_css("[data-test=\"delete-tag-#{yellow_tag.id}\"]")
+    end
   end
 
   scenario 'assigning new organization from a user\'s requested organization' do

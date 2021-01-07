@@ -48,7 +48,7 @@
                     <%= f.hidden_field :tag_id, value: tag.id %>
                     <%= f.hidden_field :taggable_id, value: @user.id %>
                     <%= f.hidden_field :taggable_type, value: 'User' %>
-                    <%= f.submit tag.name, class: "site-pills__item site-pills__item--small" %>
+                    <%= f.submit tag.name, class: "site-pills__item site-pills__item--small", data: {test: "add-tag-#{tag.id}"} %>
                   <% end %>
                 </div>
               <% end %>
