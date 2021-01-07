@@ -38,20 +38,22 @@
 
       <div>
         <div class="ds-c-label ds-u-margin-top--0">New tag</div>
-        <% if @tags.count == 0 %>
-          <p>There are no tags available.</p>
-        <% else %>
-          <% @tags.each do |tag| %>
-            <div class="site-pills__item__button dashboard__pills--add">
-              <%= form_for Tagging.new, url: internal_taggings_path, html: { method: :post } do |f| %>
-                <%= f.hidden_field :tag_id, value: tag.id %>
-                <%= f.hidden_field :taggable_id, value: @user.id %>
-                <%= f.hidden_field :taggable_type, value: 'User' %>
-                <%= f.submit tag.name, class: "site-pills__item site-pills__item--small" %>
+          <div data-test="new-tags">
+            <% if @tags.count == 0 %>
+              <p>There are no tags available.</p>
+            <% else %>
+              <% @tags.each do |tag| %>
+                <div class="site-pills__item__button dashboard__pills--add">
+                  <%= form_for Tagging.new, url: internal_taggings_path, html: { method: :post } do |f| %>
+                    <%= f.hidden_field :tag_id, value: tag.id %>
+                    <%= f.hidden_field :taggable_id, value: @user.id %>
+                    <%= f.hidden_field :taggable_type, value: 'User' %>
+                    <%= f.submit tag.name, class: "site-pills__item site-pills__item--small" %>
+                  <% end %>
+                </div>
               <% end %>
-            </div>
-          <% end %>
-        <% end %>
+            <% end %>
+          </div>
       </div>
     </div>
 

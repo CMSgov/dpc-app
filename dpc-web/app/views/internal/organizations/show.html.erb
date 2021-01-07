@@ -94,7 +94,7 @@
                   <%= f.hidden_field :tag_id, value: tag.id %>
                   <%= f.hidden_field :taggable_id, value: @organization.id %>
                   <%= f.hidden_field :taggable_type, value: 'Organization' %>
-                  <%= f.submit tag.name, class: "site-pills__item site-pills__item--small" %>
+                  <%= f.submit tag.name, class: "site-pills__item site-pills__item--small", data: {test: "add-tag-#{tag.id}"} %>
                 <% end %>
               </div>
             <% end %>
