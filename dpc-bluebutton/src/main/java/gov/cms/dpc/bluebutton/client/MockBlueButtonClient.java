@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
-import java.security.GeneralSecurityException;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -143,6 +142,7 @@ public class MockBlueButtonClient implements BlueButtonClient {
      * @param beneId - CCW/BFD beneficiary ID of patient (https://bluebutton.cms.gov/resources/variables/bene_id)
      * @return FHIR Resource
      */
+    @SuppressWarnings("JdkObsolete") // Date class is used by FHIR stu3 Meta model
     private Bundle loadBundle(String pathPrefix, String beneId) {
         try(InputStream sampleData = loadResource(pathPrefix, beneId)) {
             final var bundle = parser.parseResource(Bundle.class, sampleData);
