@@ -325,7 +325,7 @@ public class TokenResource extends AbstractTokenResource {
         // Compute default expiration
         final OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
         final OffsetDateTime defaultExpiration = now.plus(this.policy.getExpirationPolicy().getExpirationOffset(), this.policy.getExpirationPolicy().getExpirationUnit());
-        final OffsetDateTime expiresBodyParam = token.isPresent() ? token.get().getExpiresAt() : null;
+        final OffsetDateTime expiresBodyParam = token.map(CreateTokenRequest::getExpiresAt).orElse(null);
 
         // If a custom expiration is supplied use it, unless it violates our default policy
         if (expiresQueryParam.isPresent() || expiresBodyParam!=null) {
