@@ -17,7 +17,7 @@ public abstract class JobQueueCommon implements IJobQueue {
 
     public abstract void submitJobBatches(List<JobQueueBatch> jobBatches);
 
-    public JobQueueCommon(int batchSize) {
+    protected JobQueueCommon(int batchSize) {
         this.batchSize = batchSize;
     }
 
