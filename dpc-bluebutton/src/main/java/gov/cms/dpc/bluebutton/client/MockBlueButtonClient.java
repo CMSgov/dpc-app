@@ -130,7 +130,6 @@ public class MockBlueButtonClient implements BlueButtonClient {
     }
 
     @Override
-    @SuppressWarnings("JdkObsolete") // Date class is used by FHIR stu3 Meta model
     public String hashMbi(String mbi) {
         return MBI_HASH_MAP.get(mbi);
     }
