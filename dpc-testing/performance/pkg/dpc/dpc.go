@@ -2,55 +2,75 @@
 package dpc
 
 import (
-	"crypto/rsa"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
-	"path/filepath"
+
+	"github.com/joeljunstrom/go-luhn"
+	regen "github.com/zach-klippenstein/goregen"
 )
 
+type Identifier struct {
+	System string `json:system`
+	Value  string `json:value`
+}
 type Resource struct {
 	ID          string `json:"id"`
 	ClientToken []byte `json:"token"`
 	AccessToken string `json:"access_token"`
 	Type        string `json:"resourceType"`
+	Identifier  []Identifier
 }
 
 // Pull `ids` out of a set of response bodies
 func unmarshalIDs(resps [][]byte) []string {
 	var IDs []string
-	for _, resp := range resps {
-		var result Resource
-		json.Unmarshal(resp, &result)
+	unmarshal(resps, func(result Resource) {
 		IDs = append(IDs, result.ID)
-	}
-
+	})
 	return IDs
+}
+
+// Pull `identifier` out of a set of response bodies
+func unmarshalIdentifiers(resps [][]byte, system string) []string {
+	var identifierValue []string
+	unmarshal(resps, func(result Resource) {
+		for _, i := range result.Identifier {
+			if i.System == system {
+				identifierValue = append(identifierValue, i.Value)
+			}
+		}
+	})
+	return identifierValue
 }
 
 // Pull `clientTokens` out of a set of response bodies
 func unmarshalClientTokens(resps [][]byte) [][]byte {
 	var clientTokens [][]byte
-	for _, resp := range resps {
-		var result Resource
-		json.Unmarshal(resp, &result)
+	unmarshal(resps, func(result Resource) {
 		clientTokens = append(clientTokens, result.ClientToken)
-	}
-
+	})
 	return clientTokens
 }
 
 // Pull `accessTokens` out of a set of response bodies
 func unmarshalAccessTokens(resps [][]byte) []string {
 	var accessTokens []string
+	unmarshal(resps, func(result Resource) {
+		accessTokens = append(accessTokens, result.AccessToken)
+	})
+	return accessTokens
+}
+
+func unmarshal(resps [][]byte, fn func(result Resource)) {
 	for _, resp := range resps {
 		var result Resource
-		json.Unmarshal(resp, &result)
-		accessTokens = append(accessTokens, result.AccessToken)
+		var err = json.Unmarshal(resp, &result)
+		if err != nil {
+			cleanAndPanic(err)
+		}
+		fn(result)
 	}
-
-	return accessTokens
 }
 
 const (
@@ -90,30 +110,15 @@ func cleanAndPanic(err error) {
 	panic(err)
 }
 
-func readBodies(pattern string) [][]byte {
-	filenames, err := filepath.Glob(pattern)
+func generateNPI() string {
+	luhnWithPrefix := luhn.GenerateWithPrefix(15, "808403")
+	return luhnWithPrefix[len(luhnWithPrefix)-10:]
+}
+
+func generateMBI() string {
+	mbi, err := regen.Generate("^[1-9][ac-hj-km-np-rt-yAC-HJ-KM-NP-RT-Y][ac-hj-km-np-rt-yAC-HJ-KM-NP-RT-Y0-9][0-9][ac-hj-km-np-rt-yAC-HJ-KM-NP-RT-Y][ac-hj-km-np-rt-yAC-HJ-KM-NP-RT-Y0-9][0-9][ac-hj-km-np-rt-yAC-HJ-KM-NP-RT-Y]{2}[0-9]{2}$")
 	if err != nil {
 		panic(err)
 	}
-
-	bodies := make([][]byte, 0)
-	for _, fname := range filenames {
-		body, err := ioutil.ReadFile(fname)
-		if err != nil {
-			panic(err)
-		}
-
-		bodies = append(bodies, body)
-	}
-
-	return bodies
-}
-
-func generateKeyBodies(n int, fn func() (string, *rsa.PrivateKey, string)) [][]byte {
-	var bodies [][]byte
-	for i := 0; i < n; i++ {
-		pubKeyStr, _, signature := fn()
-		bodies = append(bodies, []byte(fmt.Sprintf("{ \"key\": \"%s\", \"signature\": \"%s\"}", pubKeyStr, signature)))
-	}
-	return bodies
+	return mbi
 }
