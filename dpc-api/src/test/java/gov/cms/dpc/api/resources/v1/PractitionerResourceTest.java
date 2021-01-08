@@ -4,7 +4,9 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IReadExecutable;
+import ca.uhn.fhir.rest.gclient.IUpdateExecutable;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
+import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
 import gov.cms.dpc.api.TestOrganizationContext;
@@ -16,7 +18,10 @@ import gov.cms.dpc.testing.factories.FHIRPractitionerBuilder;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpHeaders;
 import org.eclipse.jetty.http.HttpStatus;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Parameters;
+import org.hl7.fhir.dstu3.model.Practitioner;
+import org.hl7.fhir.dstu3.model.ResourceType;
 import org.junit.jupiter.api.Test;
 
 import javax.ws.rs.HttpMethod;
@@ -28,6 +33,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
+import java.sql.Date;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -183,6 +189,31 @@ class PractitionerResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
+    public void testUpdatePractitionerNotImplemented() throws IOException {
+        IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
+        final IParser parser = ctx.newJsonParser();
+        APITestHelpers.setupPractitionerTest(client, parser);
+
+        // Grab a practitioner to update
+        final Bundle practitioners = client
+                .search()
+                .forResource(Practitioner.class)
+                .returnBundle(Bundle.class)
+                .encodedJson()
+                .execute();
+        final Practitioner practitioner = (Practitioner) practitioners.getEntryFirstRep().getResource();
+
+        practitioner.setBirthDate(Date.valueOf("1989-01-01"));
+        IUpdateExecutable update = client
+                .update()
+                .resource(practitioner)
+                .withId(practitioner.getId());
+
+        assertThrows(NotImplementedOperationException.class, update::execute);
+    }
+
+
+    @Test
     public void testPractitionerPathAuthorization() throws GeneralSecurityException, IOException, URISyntaxException {
         final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
         final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
@@ -209,19 +240,23 @@ class PractitionerResourceTest extends AbstractSecureApplicationTest {
         assertNotNull(APITestHelpers.getResourceById(orgBClient, Practitioner.class, orgBPractitioner.getIdElement().getIdPart()));
         assertThrows(AuthenticationException.class,
                 () -> APITestHelpers.getResourceById(orgBClient, Practitioner.class, orgAPractitioner.getIdElement().getIdPart())
-                ,"Expected auth exception when accessing another org's practitioner.");
+                , "Expected auth exception when accessing another org's practitioner.");
 
         //Test PUT /Practitioner/{id}
         assertThrows(AuthenticationException.class,
-                () ->   APITestHelpers.updateResource(orgBClient, orgAPractitioner.getIdElement().getIdPart(), orgAPractitioner)
-                ,"Expected auth exception when updating another org's practitioner.");
-        APITestHelpers.updateResource(orgAClient,orgAPractitioner.getIdElement().getIdPart(), orgAPractitioner);
-        APITestHelpers.updateResource(orgBClient,orgBPractitioner.getIdElement().getIdPart(), orgBPractitioner);
+                () -> APITestHelpers.updateResource(orgBClient, orgAPractitioner.getIdElement().getIdPart(), orgAPractitioner)
+                , "Expected auth exception when updating another org's practitioner.");
+        assertThrows(NotImplementedOperationException.class,
+                () -> APITestHelpers.updateResource(orgAClient, orgAPractitioner.getIdElement().getIdPart(), orgAPractitioner)
+                , "Expected Not Implemented exception when updating a practitioner.");
+        assertThrows(NotImplementedOperationException.class,
+                () -> APITestHelpers.updateResource(orgBClient, orgBPractitioner.getIdElement().getIdPart(), orgBPractitioner)
+                , "Expected Not Implemented exception when updating a practitioner.");
 
         //Test DELETE /Practitioner/{id}
         assertThrows(AuthenticationException.class,
-                () ->   APITestHelpers.deleteResourceById(orgBClient, ResourceType.Practitioner, orgAPractitioner.getIdElement().getIdPart())
-                ,"Expected auth exception when deleting another org's practitioner.");
+                () -> APITestHelpers.deleteResourceById(orgBClient, ResourceType.Practitioner, orgAPractitioner.getIdElement().getIdPart())
+                , "Expected auth exception when deleting another org's practitioner.");
 
         APITestHelpers.deleteResourceById(orgAClient, ResourceType.Practitioner, orgAPractitioner.getIdElement().getIdPart());
         APITestHelpers.deleteResourceById(orgBClient, ResourceType.Practitioner, orgBPractitioner.getIdElement().getIdPart());
@@ -244,15 +279,15 @@ class PractitionerResourceTest extends AbstractSecureApplicationTest {
         practitioner.getMeta().addTag(DPCIdentifierSystem.DPC.getSystem(), orgBContext.getOrgId(), "Organization ID");
         APITestHelpers.createResource(orgAClient, practitioner).getResource();
 
-        Bundle bundle = APITestHelpers.resourceSearch(orgBClient,ResourceType.Practitioner);
-        assertEquals(0,bundle.getTotal(), "Expected Org B to have 0 practitioners.");
+        Bundle bundle = APITestHelpers.resourceSearch(orgBClient, ResourceType.Practitioner);
+        assertEquals(0, bundle.getTotal(), "Expected Org B to have 0 practitioners.");
 
-        bundle = APITestHelpers.resourceSearch(orgAClient,ResourceType.Practitioner);
-        assertEquals(1,bundle.getTotal(), "Expected Org A to have 1 practitioner.");
+        bundle = APITestHelpers.resourceSearch(orgAClient, ResourceType.Practitioner);
+        assertEquals(1, bundle.getTotal(), "Expected Org A to have 1 practitioner.");
     }
 
     @Test
-    public void testRequestBodyForgeryOnUpdate() throws GeneralSecurityException, IOException, URISyntaxException {
+    public void testRequestBodyForgeryOnCreate() throws GeneralSecurityException, IOException, URISyntaxException {
         final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
         final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
         final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());
@@ -268,11 +303,11 @@ class PractitionerResourceTest extends AbstractSecureApplicationTest {
         practitioner.getMeta().addTag(DPCIdentifierSystem.DPC.getSystem(), orgBContext.getOrgId(), "Organization ID");
         APITestHelpers.createResource(orgAClient, practitioner).getResource();
 
-        Bundle bundle = APITestHelpers.resourceSearch(orgBClient,ResourceType.Practitioner);
-        assertEquals(0,bundle.getTotal(), "Expected Org B to have 0 practitioners.");
+        Bundle bundle = APITestHelpers.resourceSearch(orgBClient, ResourceType.Practitioner);
+        assertEquals(0, bundle.getTotal(), "Expected Org B to have 0 practitioners.");
 
-        bundle = APITestHelpers.resourceSearch(orgAClient,ResourceType.Practitioner);
-        assertEquals(1,bundle.getTotal(), "Expected Org A to have 1 practitioner.");
+        bundle = APITestHelpers.resourceSearch(orgAClient, ResourceType.Practitioner);
+        assertEquals(1, bundle.getTotal(), "Expected Org A to have 1 practitioner.");
     }
 
     @Test
@@ -321,12 +356,11 @@ class PractitionerResourceTest extends AbstractSecureApplicationTest {
                 .execute();
 
 
-
         //Test forgery during practitioner creation (Specify another org's id in the metadata tag)
-        Bundle result = APITestHelpers.resourceSearch(orgBClient,ResourceType.Practitioner);
-        assertEquals(0,result.getTotal(), "Expected Org B to have 0 practitioners.");
+        Bundle result = APITestHelpers.resourceSearch(orgBClient, ResourceType.Practitioner);
+        assertEquals(0, result.getTotal(), "Expected Org B to have 0 practitioners.");
 
-        result = APITestHelpers.resourceSearch(orgAClient,ResourceType.Practitioner);
-        assertEquals(4,result.getTotal(), "Expected Org A to have 1 practitioner.");
+        result = APITestHelpers.resourceSearch(orgAClient, ResourceType.Practitioner);
+        assertEquals(4, result.getTotal(), "Expected Org A to have 1 practitioner.");
     }
 }
