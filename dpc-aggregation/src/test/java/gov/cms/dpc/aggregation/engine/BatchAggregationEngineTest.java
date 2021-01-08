@@ -47,8 +47,6 @@ class BatchAggregationEngineTest {
     private static final String TEST_PROVIDER_ID = "1";
     private IJobQueue queue;
     private AggregationEngine engine;
-    private JobBatchProcessor jobBatchProcessor;
-    private Disposable subscribe;
     private LookBackService lookBackService;
 
     static private final FhirContext fhirContext = FhirContext.forDstu3();
@@ -71,10 +69,10 @@ class BatchAggregationEngineTest {
         queue = new MemoryBatchQueue(100);
         final var bbclient = Mockito.spy(new MockBlueButtonClient(fhirContext));
         lookBackService = Mockito.spy(EveryoneGetsDataLookBackServiceImpl.class);
-        jobBatchProcessor = Mockito.spy(new JobBatchProcessor(bbclient, fhirContext, metricRegistry, operationsConfig, lookBackService));
+        JobBatchProcessor jobBatchProcessor = Mockito.spy(new JobBatchProcessor(bbclient, fhirContext, metricRegistry, operationsConfig, lookBackService));
         engine = Mockito.spy(new AggregationEngine(aggregatorID, queue, operationsConfig, jobBatchProcessor));
         engine.queueRunning.set(true);
-        subscribe = Mockito.mock(Disposable.class);
+        Disposable subscribe = Mockito.mock(Disposable.class);
         doReturn(false).when(subscribe).isDisposed();
         engine.setSubscribe(subscribe);
     }

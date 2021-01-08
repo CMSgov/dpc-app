@@ -48,8 +48,6 @@ public class AggregationEngineHealthCheckTest {
     private IJobQueue queue;
     private BlueButtonClient bbclient;
     private AggregationEngine engine;
-    private JobBatchProcessor jobBatchProcessor;
-    private LookBackServiceImpl lookBackService;
 
     static private final FhirContext fhirContext = FhirContext.forDstu3();
     static private final MetricRegistry metricRegistry = new MetricRegistry();
@@ -69,8 +67,8 @@ public class AggregationEngineHealthCheckTest {
         queue = Mockito.spy(new MemoryBatchQueue(10));
         bbclient = Mockito.spy(new MockBlueButtonClient(fhirContext));
         var operationalConfig = new OperationsConfig(1000, exportPath, 500, YearMonth.of(2015, 3));
-        lookBackService = Mockito.spy(new LookBackServiceImpl(Mockito.mock(ProviderDAO.class), Mockito.mock(RosterDAO.class), Mockito.mock(OrganizationDAO.class), operationalConfig));
-        jobBatchProcessor = Mockito.spy(new JobBatchProcessor(bbclient, fhirContext, metricRegistry, operationalConfig, lookBackService));
+        LookBackServiceImpl lookBackService = Mockito.spy(new LookBackServiceImpl(Mockito.mock(ProviderDAO.class), Mockito.mock(RosterDAO.class), Mockito.mock(OrganizationDAO.class), operationalConfig));
+        JobBatchProcessor jobBatchProcessor = Mockito.spy(new JobBatchProcessor(bbclient, fhirContext, metricRegistry, operationalConfig, lookBackService));
         engine = Mockito.spy(new AggregationEngine(aggregatorID, queue, operationalConfig, jobBatchProcessor));
         AggregationEngine.setGlobalErrorHandler();
     }

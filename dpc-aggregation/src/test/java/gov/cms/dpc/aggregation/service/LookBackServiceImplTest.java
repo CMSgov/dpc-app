@@ -50,7 +50,7 @@ public class LookBackServiceImplTest {
 
     @BeforeEach
     public void beforeEach() {
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
         Config config = ConfigFactory.load("testing.conf").getConfig("dpc.aggregation");
         String exportPath = config.getString("exportPath");
         OperationsConfig operationsConfig = new OperationsConfig(10, exportPath, 3, YearMonth.now());
