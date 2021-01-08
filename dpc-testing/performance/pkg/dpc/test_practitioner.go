@@ -11,16 +11,13 @@ func (api *API) RunPractitionerTests() {
 	auth := api.SetUpOrgAuth()
 	defer api.DeleteOrg(auth.orgID)
 
-	bundleBodies := readBodies("../../src/main/resources/parameters/bundles/practitioners/practitioner-*.json")
-	bodies := readBodies("../../src/main/resources/practitioners/practitioner-*.json")
-
 	// POST /Practitioner/$validate
 	targeter.New(targeter.Config{
 		Method:      "POST",
 		BaseURL:     api.URL,
 		Endpoint:    endpoint + "/$validate",
 		AccessToken: auth.accessToken,
-		Bodies:      bundleBodies,
+		Generator:   templateBodyGenerator("./templates/practitioner-bundle-template.json", map[string]func() string{"{NPI}": generateNPI}),
 	}).Run(5, 2)
 
 	// POST /Practitioner
@@ -29,7 +26,7 @@ func (api *API) RunPractitionerTests() {
 		BaseURL:     api.URL,
 		Endpoint:    endpoint,
 		AccessToken: auth.accessToken,
-		Bodies:      bodies,
+		Generator:   templateBodyGenerator("./templates/practitioner-template.json", map[string]func() string{"{NPI}": generateNPI}),
 	}).Run(5, 2)
 
 	// Retrieve practitioner IDs which are required by the remaining tests
@@ -41,7 +38,7 @@ func (api *API) RunPractitionerTests() {
 		BaseURL:     api.URL,
 		Endpoint:    endpoint + "/$submit",
 		AccessToken: auth.accessToken,
-		Bodies:      bundleBodies,
+		Generator:   templateBodyGenerator("./templates/practitioner-bundle-template.json", map[string]func() string{"{NPI}": generateNPI}),
 	}).Run(5, 2)
 
 	// PUT /Practitioner/{id}
@@ -51,7 +48,7 @@ func (api *API) RunPractitionerTests() {
 		Endpoint:    endpoint,
 		AccessToken: auth.accessToken,
 		IDs:         pracIDs,
-		Bodies:      bodies,
+		Generator:   templateBodyGenerator("./templates/practitioner-template.json", map[string]func() string{"{NPI}": generateNPI}),
 	}).Run(5, 2)
 
 	// DELETE /Practitioner/{id}
