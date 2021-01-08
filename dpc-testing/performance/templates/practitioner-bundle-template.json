@@ -20,20 +20,12 @@
                 }
               ],
               "gender": "male",
-              "id": "0c527d2e-2e8a-4808-b11d-0fa06baf8254",
               "identifier": [
                 {
                   "system": "http://hl7.org/fhir/sid/us-npi",
-                  "value": "1234329724"
+                  "value": "{NPI}"
                 }
               ],
-              "meta": {
-                "profile": [
-                  "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-practitioner"
-                ],
-                "lastUpdated": "2019-04-09T12:25:36.450182+00:00",
-                "versionId": "MTU1NDgxMjczNjQ1MDE4MjAwMA"
-              },
               "name": [
                 {
                   "family": "Klocko335",
@@ -66,20 +58,12 @@
                 }
               ],
               "gender": "female",
-              "id": "3461C774-B48F-11E8-96F8-529269fb1459",
               "identifier": [
                 {
                   "system": "http://hl7.org/fhir/sid/us-npi",
-                  "value": "1232131239"
+                  "value": "{NPI}"
                 }
               ],
-              "meta": {
-                "lastUpdated": "2019-04-09T12:25:35.388143+00:00",
-                "versionId": "MTU1NDgxMjczNTM4ODE0MzAwMA",
-                "profile": [
-                  "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-practitioner"
-                ]
-              },
               "name": [
                 {
                   "family": "Stanton715",
@@ -114,20 +98,12 @@
                 }
               ],
               "gender": "female",
-              "id": "C74C008D-42F8-4ED9-BF88-CEE659C7F692",
               "identifier": [
                 {
                   "system": "http://hl7.org/fhir/sid/us-npi",
-                  "value": "1232125215"
+                  "value": "{NPI}"
                 }
               ],
-              "meta": {
-                "lastUpdated": "2019-04-09T12:25:33.265961+00:00",
-                "versionId": "MTU1NDgxMjczMzI2NTk2MTAwMA",
-                "profile": [
-                  "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-practitioner"
-                ]
-              },
               "name": [
                 {
                   "family": "Hoppe518",
@@ -162,20 +138,12 @@
                 }
               ],
               "gender": "male",
-              "id": "8D80925A-027E-43DD-8AED-9A501CC4CD91",
               "identifier": [
                 {
                   "system": "http://hl7.org/fhir/sid/us-npi",
-                  "value": "2323232225"
+                  "value": "{NPI}"
                 }
               ],
-              "meta": {
-                "lastUpdated": "2019-04-09T12:25:30.055125+00:00",
-                "versionId": "MTU1NDgxMjczMDA1NTEyNTAwMA",
-                "profile": [
-                  "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-practitioner"
-                ]
-              },
               "name": [
                 {
                   "family": "Holguín308",
