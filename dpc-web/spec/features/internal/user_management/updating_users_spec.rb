@@ -58,34 +58,34 @@ RSpec.feature 'updating users' do
     end
 
     within('[data-test="new-tags"]') do
-      expect(page).to have_css("[data-test=\"add-tag-#{red_tag.id}\"]")
-      expect(page).to have_css("[data-test=\"add-tag-#{yellow_tag.id}\"]")
+      expect(page).to have_css("[value=\"#{red_tag.name}\"]")
+      expect(page).to have_css("[value=\"#{yellow_tag.name}\"]")
     end
 
     find("[data-test=\"add-tag-#{red_tag.id}\"]").click
 
     within('[data-test="user-tags"]') do
-      expect(page).to have_css("[data-test=\"delete-tag-#{red_tag.id}\"]")
+      expect(page).to have_content(red_tag.name)
     end
 
     within('[data-test="new-tags"]') do
-      expect(page).to_not have_css("[data-test=\"add-tag-#{red_tag.id}\"]")
+      expect(page).to_not have_css("[value=\"#{red_tag.name}\"]")
       expect(page).to have_css("[data-test=\"add-tag-#{yellow_tag.id}\"]")
     end
 
     find("[data-test=\"add-tag-#{yellow_tag.id}\"]").click
 
     within('[data-test="user-tags"]') do
-      expect(page).to have_css("[data-test=\"delete-tag-#{red_tag.id}\"]")
-      expect(page).to have_css("[data-test=\"delete-tag-#{yellow_tag.id}\"]")
+      expect(page).to have_content(red_tag.name)
+      expect(page).to have_content(yellow_tag.name)
     end
 
     tagging = crabby.taggings.find_by(tag_id: red_tag.id)
     find("[data-test=\"delete-tag-#{tagging.id}\"]").click
 
     within('[data-test="user-tags"]') do
-      expect(page).to_not have_css("[data-test=\"delete-tag-#{red_tag.id}\"]")
-      expect(page).to have_css("[data-test=\"delete-tag-#{yellow_tag.id}\"]")
+      expect(page).to_not have_content(red_tag.name)
+      expect(page).to have_content(yellow_tag.name)
     end
   end
 
