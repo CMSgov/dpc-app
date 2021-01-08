@@ -3,10 +3,8 @@ package gov.cms.dpc.aggregation.service;
 import org.apache.commons.lang3.StringUtils;
 
 import java.time.YearMonth;
-import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -15,13 +13,13 @@ public class LookBackAnswer {
     private final String practitionerNPI;
     private final String organizationNPI;
     private final long withinMonths;
-    private final Date lookBackMonth;
+    private final YearMonth lookBackMonth;
 
     private final Set<String> eobProviderNPIs = new HashSet<>();
     private String eobOrganizationNPI;
-    private Date billingPeriodEndDate;
+    private YearMonth billingPeriodEndDate;
 
-    public LookBackAnswer(String practitionerNPI, String organizationNPI, long withinMonths, Date lookBackMonth) {
+    public LookBackAnswer(String practitionerNPI, String organizationNPI, long withinMonths, YearMonth lookBackMonth) {
         this.practitionerNPI = practitionerNPI;
         this.organizationNPI = organizationNPI;
         this.withinMonths = withinMonths;
@@ -38,7 +36,7 @@ public class LookBackAnswer {
         return this;
     }
 
-    public LookBackAnswer addEobBillingPeriod(Date billingPeriod) {
+    public LookBackAnswer addEobBillingPeriod(YearMonth billingPeriod) {
         billingPeriodEndDate = billingPeriod;
         return this;
     }
@@ -76,9 +74,7 @@ public class LookBackAnswer {
         return eobProviderNPIs.contains(practitionerNPI);
     }
 
-    private long getMonthsDifference(Date date1, Date date2) {
-        YearMonth m1 = YearMonth.from(date1.toInstant().atZone(ZoneOffset.UTC));
-        YearMonth m2 = YearMonth.from(date2.toInstant().atZone(ZoneOffset.UTC));
-        return ChronoUnit.MONTHS.between(m1, m2);
+    private long getMonthsDifference(YearMonth date1, YearMonth date2) {
+        return ChronoUnit.MONTHS.between(date1, date2);
     }
 }

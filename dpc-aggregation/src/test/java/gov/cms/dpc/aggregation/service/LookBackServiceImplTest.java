@@ -21,6 +21,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.time.OffsetDateTime;
+import java.time.YearMonth;
 import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.Optional;
@@ -29,10 +30,10 @@ import java.util.UUID;
 @ExtendWith(BufferedLoggerHandler.class)
 public class LookBackServiceImplTest {
 
-    private String providerNPI = NPIUtil.generateNPI();
-    private String careTeamNPI = NPIUtil.generateNPI();
-    private UUID orgID = UUID.randomUUID();
-    private String orgNPI = NPIUtil.generateNPI();
+    private final String providerNPI = NPIUtil.generateNPI();
+    private final String careTeamNPI = NPIUtil.generateNPI();
+    private final UUID orgID = UUID.randomUUID();
+    private final String orgNPI = NPIUtil.generateNPI();
 
 
     private LookBackServiceImpl lookBackService;
@@ -52,7 +53,7 @@ public class LookBackServiceImplTest {
         MockitoAnnotations.initMocks(this);
         Config config = ConfigFactory.load("testing.conf").getConfig("dpc.aggregation");
         String exportPath = config.getString("exportPath");
-        OperationsConfig operationsConfig = new OperationsConfig(10, exportPath, 3, new Date());
+        OperationsConfig operationsConfig = new OperationsConfig(10, exportPath, 3, YearMonth.now());
         lookBackService = new LookBackServiceImpl(providerDAO, rosterDAO, organizationDAO, operationsConfig);
         eob = new ExplanationOfBenefit();
         eob.setBillablePeriod(new Period());
