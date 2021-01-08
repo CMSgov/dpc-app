@@ -30,6 +30,7 @@ public class FHIRValidatorProvider implements Provider<FhirValidator> {
     private final ValidationSupportChain supportChain;
 
     @Inject
+    @SuppressWarnings("StaticAssignmentInConstructor") // Needed to eagerly init the validator
     public FHIRValidatorProvider(FhirContext ctx, FHIRValidationConfiguration config, ValidationSupportChain supportChain) {
         this.ctx = ctx;
         this.validationConfiguration = config;
