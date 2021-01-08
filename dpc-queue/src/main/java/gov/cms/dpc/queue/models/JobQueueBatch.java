@@ -157,6 +157,9 @@ public class JobQueueBatch implements Serializable {
     @Column(name = "requesting_ip")
     private String requestingIP;
 
+    @Column(name = "is_bulk")
+    private boolean isBulk;
+
     public JobQueueBatch() {
     }
 
@@ -166,7 +169,7 @@ public class JobQueueBatch implements Serializable {
                          List<String> patients,
                          List<ResourceType> resourceTypes,
                          OffsetDateTime since,
-                         OffsetDateTime transactionTime, String requestingIP) {
+                         OffsetDateTime transactionTime, String requestingIP, boolean isBulk) {
         this.batchID = UUID.randomUUID();
         this.jobID = jobID;
         this.orgID = orgID;
@@ -179,6 +182,7 @@ public class JobQueueBatch implements Serializable {
         this.submitTime = OffsetDateTime.now(ZoneOffset.UTC);
         this.jobQueueBatchFiles = new ArrayList<>();
         this.requestingIP = requestingIP;
+        this.isBulk = isBulk;
     }
 
     /**
@@ -276,8 +280,8 @@ public class JobQueueBatch implements Serializable {
         return requestingIP;
     }
 
-    public void setRequestingIP(String requestingIP) {
-        this.requestingIP = requestingIP;
+    public boolean isBulk() {
+        return isBulk;
     }
 
     public List<JobQueueBatchFile> getJobQueueBatchFiles() {
