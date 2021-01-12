@@ -44,14 +44,14 @@
         </button>
         <ul id="vendor-users" class="ds-c-vertical-nav__subnav" aria-hidden="false">
           <li class="ds-c-vertical-nav__item">
-            <%= link_to internal_users_path(org_status: "unassigned", org_type: "vendor"), onclick: "SideNav()", class: "ds-c-vertical-nav__label #{current_sidenav_class if unassigned_vendor_users_page?}" do %>
+            <%= link_to internal_users_path(org_status: "unassigned", org_type: "vendor"), class: "ds-c-vertical-nav__label #{current_sidenav_class if unassigned_vendor_users_page?}" do %>
               <span>
                 Unassigned users
               </span>
             <% end %>
           </li>
           <li class="ds-c-vertical-nav__item">
-            <%= link_to internal_users_path(org_status: "assigned", org_type: "vendor"), onclick: "SideNav()", class: "ds-c-vertical-nav__label #{current_sidenav_class if assigned_vendor_users_page?}" do %>
+            <%= link_to internal_users_path(org_status: "assigned", org_type: "vendor"), class: "ds-c-vertical-nav__label #{current_sidenav_class if assigned_vendor_users_page?}" do %>
               <span>
                 Assigned users
               </span>
