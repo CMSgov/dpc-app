@@ -11,16 +11,13 @@ func (api *API) RunPatientTests() {
 	auth := api.SetUpOrgAuth()
 	defer api.DeleteOrg(auth.orgID)
 
-	bundleBodies := readBodies("../../src/main/resources/parameters/bundles/patients/patient-*.json")
-	bodies := readBodies("../../src/main/resources/patients/patient-*.json")
-
 	// POST /Patient/$validate
 	targeter.New(targeter.Config{
 		Method:      "POST",
 		BaseURL:     api.URL,
 		Endpoint:    endpoint + "/$validate",
 		AccessToken: auth.accessToken,
-		Bodies:      bundleBodies,
+		Generator:   templateBodyGenerator("./templates/patient-bundle-template.json", map[string]func() string{"{MBI}": generateMBI}),
 	}).Run(5, 2)
 
 	// POST /Patient
@@ -29,7 +26,7 @@ func (api *API) RunPatientTests() {
 		BaseURL:     api.URL,
 		Endpoint:    endpoint,
 		AccessToken: auth.accessToken,
-		Bodies:      bodies,
+		Generator:   templateBodyGenerator("./templates/patient-template.json", map[string]func() string{"{MBI}": generateMBI}),
 	}).Run(5, 2)
 
 	// Retrieve patient IDs which are required by the remaining tests
@@ -41,7 +38,7 @@ func (api *API) RunPatientTests() {
 		BaseURL:     api.URL,
 		Endpoint:    endpoint + "/$submit",
 		AccessToken: auth.accessToken,
-		Bodies:      bundleBodies,
+		Generator:   templateBodyGenerator("./templates/patient-bundle-template.json", map[string]func() string{"{MBI}": generateMBI}),
 	}).Run(5, 2)
 
 	// PUT /Patient/{id}
@@ -51,7 +48,7 @@ func (api *API) RunPatientTests() {
 		Endpoint:    endpoint,
 		AccessToken: auth.accessToken,
 		IDs:         patientIDs,
-		Bodies:      bodies,
+		Generator:   byteArrayGenerator(resps),
 	}).Run(5, 2)
 
 	// DELETE /Patient/{id}

@@ -16,7 +16,7 @@
           "coding": [
             {
               "system": "http://hl7.org/fhir/sid/us-npi",
-              "code": "7860229203"
+              "code": "{NPI}"
             }
           ]
         }
