@@ -10,6 +10,10 @@ module Internal
       'ds-c-vertical-nav__label--current'
     end
 
+    def current_sidenav_aria_expanded
+      'true'
+    end
+
     def internal_users_header(count)
       user_type = if unassigned_provider_users_page?
                     ' unassigned provider'
