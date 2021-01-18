@@ -73,14 +73,15 @@ public class GroupResource extends AbstractGroupResource {
     })
     @Override
     public Response createRoster(Group attributionRoster) {
-        if (rosterSizeTooBig( config.getPatientLimit(), attributionRoster )) {
+        final UUID organizationID = UUID.fromString(FHIRExtractors.getOrganizationID(attributionRoster));
+        if (!config.getLookBackExemptOrgs().contains(organizationID.toString())
+                && rosterSizeTooBig( config.getPatientLimit(), attributionRoster )) {
             throw TOO_MANY_MEMBERS_EXCEPTION;
         }
 
         final String providerNPI = FHIRExtractors.getAttributedNPI(attributionRoster);
 
         // Check and see if a roster already exists for the provider
-        final UUID organizationID = UUID.fromString(FHIRExtractors.getOrganizationID(attributionRoster));
         final List<RosterEntity> entities = this.rosterDAO.findEntities(null, organizationID, providerNPI, null);
         if (!entities.isEmpty()) {
             final RosterEntity rosterEntity = entities.get(0);
@@ -173,10 +174,12 @@ public class GroupResource extends AbstractGroupResource {
             throw new WebApplicationException(NOT_FOUND_EXCEPTION, Response.Status.NOT_FOUND);
         }
 
-        if (rosterSizeTooBig(config.getPatientLimit(), groupUpdate)) {
+        final UUID organizationID = UUID.fromString(FHIRExtractors.getOrganizationID(groupUpdate));
+        if (!config.getLookBackExemptOrgs().contains(organizationID.toString())
+            && rosterSizeTooBig(config.getPatientLimit(), groupUpdate)) {
             throw TOO_MANY_MEMBERS_EXCEPTION;
         }
-        final UUID organizationID = UUID.fromString(FHIRExtractors.getOrganizationID(groupUpdate));
+
         verifyMembers(groupUpdate, organizationID);
 
         final RosterEntity rosterEntity = new RosterEntity();
@@ -224,12 +227,12 @@ public class GroupResource extends AbstractGroupResource {
         final RosterEntity rosterEntity = this.rosterDAO.getEntity(rosterID)
                 .orElseThrow(() -> NOT_FOUND_EXCEPTION);
 
-
-        if (rosterSizeTooBig(config.getPatientLimit(), converter.toFHIR(Group.class, rosterEntity), groupUpdate)) {
+        final UUID orgId = UUID.fromString(FHIRExtractors.getOrganizationID(groupUpdate));
+        if (!config.getLookBackExemptOrgs().contains(orgId.toString())
+                && rosterSizeTooBig(config.getPatientLimit(), converter.toFHIR(Group.class, rosterEntity), groupUpdate)) {
             throw TOO_MANY_MEMBERS_EXCEPTION;
         }
 
-        final UUID orgId = UUID.fromString(FHIRExtractors.getOrganizationID(groupUpdate));
 
         final OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
         // For each group member, check to see if the patient exists, if not, throw an exception
