@@ -21,7 +21,7 @@ func (api *API) RunPractitionerTests() {
 	}).Run(5, 2)
 
 	// POST /Practitioner
-	resps := targeter.New(targeter.Config{
+	resps, _ := targeter.New(targeter.Config{
 		Method:      "POST",
 		BaseURL:     api.URL,
 		Endpoint:    endpoint,

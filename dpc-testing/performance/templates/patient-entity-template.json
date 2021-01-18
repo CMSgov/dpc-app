@@ -1,0 +1,5 @@
+{
+    "entity": {
+        "reference": "Patient/{patientID}"
+    }
+}

@@ -6,21 +6,20 @@ import (
 	"github.com/CMSgov/dpc-app/dpc-testing/performance/pkg/dpc/targeter"
 )
 
-func (api *API) RunGroupTests() {
-	const endpoint = "Group"
+func (api *API) RunBFDLoadTest(orgUUID string, clientToken string, numOfPatients int, retries int) {
 
 	// Create organization (and delete at the end) and setup accesstoken
-	auth := api.SetUpOrgAuth()
+	auth := api.SetUpOrgAuthWith(orgUUID, clientToken)
 	defer api.DeleteOrg(auth.orgID)
 
-	// POST /Practitioner
+	// Create Practitioner
 	resps, _ := targeter.New(targeter.Config{
 		Method:      "POST",
 		BaseURL:     api.URL,
 		Endpoint:    "Practitioner",
 		AccessToken: auth.accessToken,
 		Generator:   templateBodyGenerator("./templates/practitioner-template.json", map[string]func() string{"{NPI}": generateNPI}),
-	}).Run(5, 2)
+	}).Run(1, 1)
 
 	pracIDs := unmarshalIDs(resps)
 
@@ -31,11 +30,23 @@ func (api *API) RunGroupTests() {
 
 	npis := unmarshalIdentifiers(resps, "http://hl7.org/fhir/sid/us-npi")
 
-	// POST /Group
+	// Create patients
 	resps, _ = targeter.New(targeter.Config{
 		Method:      "POST",
 		BaseURL:     api.URL,
-		Endpoint:    endpoint,
+		Endpoint:    "Patient",
+		AccessToken: auth.accessToken,
+		Generator:   templateBodyGenerator("./templates/patient-template.json", map[string]func() string{"{MBI}": generateMBIFromFile("./data/mbis.csv")}),
+	}).Run(1, numOfPatients)
+
+	// Retrieve patient IDs which are required by the remaining tests
+	patientIDs := unmarshalIDs(resps)
+
+	// Create Group with Patient References
+	resps, _ = targeter.New(targeter.Config{
+		Method:      "POST",
+		BaseURL:     api.URL,
+		Endpoint:    "Group",
 		AccessToken: auth.accessToken,
 		Headers: &targeter.Headers{
 			ContentType: FHIR,
@@ -44,52 +55,34 @@ func (api *API) RunGroupTests() {
 				"X-Provenance": xProvValues,
 			},
 		},
-		Generator: templateBodyGenerator("./templates/group-template.json", map[string]func() string{"{NPI}": targeter.GenStrs(npis)}),
-	}).Run(5, 2)
+		Generator: templateBodyGenerator("./templates/group-with-patients-template.json", map[string]func() string{"{NPI}": targeter.GenStrs(npis), "{patients}": generatePatientEntity(patientIDs)}),
+	}).Run(1, 1)
 
-	// Retrieve group IDs which are required by the remaining tests
+	// Retrieve Group ID
 	grpIDs := unmarshalIDs(resps)
 
-	// GET /Group
-	targeter.New(targeter.Config{
+	// Export Group
+	_, headers := targeter.New(targeter.Config{
 		Method:      "GET",
 		BaseURL:     api.URL,
-		Endpoint:    endpoint,
-		AccessToken: auth.accessToken,
-	}).Run(5, 2)
-
-	// GET /Group/{id}
-	targeter.New(targeter.Config{
-		Method:      "GET",
-		BaseURL:     api.URL,
-		Endpoint:    endpoint,
+		Endpoint:    "Group",
 		IDs:         grpIDs,
+		Operation:   "$export",
 		AccessToken: auth.accessToken,
-	}).Run(5, 2)
-
-	// PUT /Group/{id}
-	targeter.New(targeter.Config{
-		Method:   "PUT",
-		BaseURL:  api.URL,
-		Endpoint: endpoint,
 		Headers: &targeter.Headers{
 			ContentType: FHIR,
 			Accept:      FHIR,
 			Custom: map[string][]string{
-				"X-Provenance": xProvValues,
+				"Prefer": {"respond-async"},
 			},
 		},
-		Generator:   templateBodyGenerator("./templates/group-template.json", map[string]func() string{"{NPI}": targeter.GenStrs(npis)}),
-		IDs:         grpIDs,
-		AccessToken: auth.accessToken,
-	}).Run(5, 2)
+	}).Run(1, 1)
 
-	// DELETE /Group/{id}
-	targeter.New(targeter.Config{
-		Method:      "DELETE",
-		BaseURL:     api.URL,
-		Endpoint:    endpoint,
-		AccessToken: auth.accessToken,
-		IDs:         grpIDs,
-	}).Run(5, 2)
+	// Retrieve Job ID
+	// jobIDs := unmarshalIDs(resps)
+
+	fmt.Println("JOBID: " + headers[0].Get("Content-Location"))
+	// End test when Job is either failed or successful
+	api.CheckJobStatus(headers[0].Get("Content-Location"), auth.accessToken, retries)
+
 }

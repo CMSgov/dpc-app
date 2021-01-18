@@ -13,7 +13,7 @@ func (api *API) RunTokenTests() {
 	defer api.DeleteOrg(auth.orgID)
 
 	// POST /Token
-	resps := targeter.New(targeter.Config{
+	resps, _ := targeter.New(targeter.Config{
 		Method:      "POST",
 		BaseURL:     api.URL,
 		Endpoint:    endpoint,
@@ -45,7 +45,7 @@ func (api *API) RunTokenTests() {
 	}).Run(5, 5)
 
 	// POST /Token/auth
-	resps = targeter.New(targeter.Config{
+	resps, _ = targeter.New(targeter.Config{
 		Method:    "POST",
 		BaseURL:   api.URL,
 		Endpoint:  endpoint + "/auth",

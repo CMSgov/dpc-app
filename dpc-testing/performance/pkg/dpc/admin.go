@@ -11,6 +11,9 @@ type AdminAPI struct {
 }
 
 func (admin *AdminAPI) GetClientToken(orgIDs ...string) []byte {
+	if admin.URL == "" {
+		return []byte("")
+	}
 	reqURL := fmt.Sprintf("%s/generate-token", admin.URL)
 	if len(orgIDs) > 0 {
 		reqURL = fmt.Sprintf("%s?organization=%s", reqURL, orgIDs[0])
