@@ -51,8 +51,6 @@ public abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organ
 
     @Override
     public void filter(final ContainerRequestContext requestContext) {
-        MDC.clear();
-        MDC.put(MDCConstants.DPC_REQUEST_ID, UUID.randomUUID().toString());
         final UriInfo uriInfo = requestContext.getUriInfo();
         final String macaroon = MacaroonHelpers.extractMacaroonFromRequest(requestContext, unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
 
