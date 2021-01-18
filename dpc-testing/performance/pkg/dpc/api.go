@@ -31,7 +31,9 @@ func New(apiURL string, admin AdminAPI) *API {
 		URL:      apiURL,
 		AdminAPI: admin,
 	}
-	api.goldenMacaroon = admin.GetClientToken()
+	if (AdminAPI{}) != admin {
+		api.goldenMacaroon = admin.GetClientToken()
+	}
 
 	return &api
 }
