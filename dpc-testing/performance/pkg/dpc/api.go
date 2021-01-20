@@ -50,8 +50,8 @@ func (api *API) RefreshAccessToken(privateKey *rsa.PrivateKey, keyID string, cli
 	return accessToken
 }
 
-func (api *API) CreateOrg(orgID string) string {
-	orgBundle := templateBodyGenerator("./templates/organization-bundle-template.json", map[string]func() string{"{NPI}": generateNPI, "{ID}": func() string { return orgID }})
+func (api *API) CreateOrg(orgID string, file string) string {
+	orgBundle := templateBodyGenerator(file, map[string]func() string{"{NPI}": generateNPI, "{ID}": func() string { return orgID }})
 	buffer := bytes.NewBuffer(orgBundle())
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/Organization/$submit", api.URL), buffer)
 	if err != nil {
@@ -150,7 +150,7 @@ func (api *API) SetUpOrgAuth(orgIDs ...string) orgAuth {
 	if len(orgIDs) > 0 {
 		orgID = orgIDs[0]
 	} else {
-		orgID = api.CreateOrg(uuid.New().String())
+		orgID = api.CreateOrg(uuid.New().String(), "./templates/organization-bundle-template.json")
 	}
 	pubKeyStr, privateKey, signature := api.GenerateKeyPairAndSignature()
 	keyID := api.UploadKey(pubKeyStr, signature, orgID)

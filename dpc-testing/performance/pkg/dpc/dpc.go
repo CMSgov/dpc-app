@@ -149,10 +149,10 @@ func generateMBI() string {
 	return mbi
 }
 
-func generatePatientEntity(ids []string) func() string {
+func generatePatientEntity(ids []string, file string) func() string {
 	patients := make([]string, 0)
 	for i := 0; i < len(ids); i++ {
-		patient := string(templateBodyGenerator("./templates/patient-entity-template.json", map[string]func() string{"{patientID}": func() string { return ids[i] }})())
+		patient := string(templateBodyGenerator(file, map[string]func() string{"{patientID}": func() string { return ids[i] }})())
 		patients = append(patients, patient)
 	}
 	return func() string {
