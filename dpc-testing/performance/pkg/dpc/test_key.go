@@ -11,7 +11,7 @@ func (api *API) RunKeyTests() {
 	defer api.DeleteOrg(auth.orgID)
 
 	// POST /Key
-	resps := targeter.New(targeter.Config{
+	resps, _ := targeter.New(targeter.Config{
 		Method:      "POST",
 		BaseURL:     api.URL,
 		Endpoint:    endpoint,

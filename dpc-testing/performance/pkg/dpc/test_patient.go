@@ -21,7 +21,7 @@ func (api *API) RunPatientTests() {
 	}).Run(5, 2)
 
 	// POST /Patient
-	resps := targeter.New(targeter.Config{
+	resps, _ := targeter.New(targeter.Config{
 		Method:      "POST",
 		BaseURL:     api.URL,
 		Endpoint:    endpoint,

@@ -3,10 +3,11 @@ package targeter
 
 import (
 	"fmt"
+	"net/http"
 	"os"
 	"time"
 
-	vegeta "github.com/tsenart/vegeta/lib"
+	vegeta "github.com/tsenart/vegeta/v12/lib"
 )
 
 type Config struct {
@@ -15,6 +16,7 @@ type Config struct {
 	Endpoint    string // required
 	AccessToken string // required
 
+	Operation string   // optiona operation
 	ID        string   // optional id to use for GET/PUT/DELETE requests; Mutually exclusive with IDs
 	IDs       []string // optional ids to use for GET/PUT/DELETE requests; Mutually exclusive with ID
 	Generator func() []byte
@@ -51,7 +53,7 @@ func New(config Config) *Targeter {
 	}
 }
 
-func (dt *Targeter) Run(duration, frequency int) [][]byte {
+func (dt *Targeter) Run(duration, frequency int) ([][]byte, []http.Header) {
 	fmt.Printf("\nRunning performance test on %s...\n", dt.name())
 
 	d := time.Second * time.Duration(duration)
@@ -60,16 +62,18 @@ func (dt *Targeter) Run(duration, frequency int) [][]byte {
 	attacker := vegeta.NewAttacker(vegeta.Timeout(60 * time.Second))
 	var metrics vegeta.Metrics
 	var respBodies [][]byte
+	var headers []http.Header
 	for results := range attacker.Attack(dt.buildTarget, r, d, fmt.Sprintf("%dps:", r.Freq)) {
 		metrics.Add(results)
 		respBodies = append(respBodies, results.Body)
+		headers = append(headers, results.Headers)
 	}
 	metrics.Close()
 
 	reporter := vegeta.NewTextReporter(&metrics)
 	reporter.Report(os.Stdout)
 
-	return respBodies
+	return respBodies, headers
 }
 
 func (dt *Targeter) buildTarget(t *vegeta.Target) error {
@@ -88,6 +92,9 @@ func (dt *Targeter) nextURL() string {
 	if dt.IDs != nil || dt.ID != "" {
 		url = url + "/" + dt.nextID()
 	}
+	if dt.Operation != "" {
+		url = url + "/" + dt.Operation
+	}
 	return url
 }
 
@@ -97,7 +104,12 @@ func (dt *Targeter) name() string {
 	if dt.IDs != nil {
 		id = "{id}"
 	}
-	return fmt.Sprintf("%s %s/%s/%s", dt.Method, dt.BaseURL, dt.Endpoint, id)
+	if dt.Operation != "" {
+		return fmt.Sprintf("%s %s/%s/%s/%s", dt.Method, dt.BaseURL, dt.Endpoint, id, dt.Operation)
+	} else {
+		return fmt.Sprintf("%s %s/%s/%s", dt.Method, dt.BaseURL, dt.Endpoint, id)
+
+	}
 }
 
 // GenStrs general generator function that returns strings
@@ -105,11 +117,7 @@ func GenStrs(strs []string) func() string {
 	i := 0
 	n := len(strs)
 	return func() string {
-		if i >= n {
-			return ""
-		}
-
-		nextVal := strs[i]
+		nextVal := strs[i%n]
 		i++
 		return nextVal
 	}

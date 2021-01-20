@@ -2,6 +2,7 @@ package dpc
 
 import (
 	"bufio"
+	"context"
 	"crypto"
 	"crypto/rand"
 	"crypto/rsa"
@@ -16,6 +17,7 @@ import (
 	"strings"
 
 	dpcclient "github.com/CMSgov/dpc-app/dpcclient/lib"
+	retryablehttp "github.com/hashicorp/go-retryablehttp"
 )
 
 type API struct {
@@ -162,4 +164,24 @@ func (api *API) SetUpOrgAuth(orgIDs ...string) orgAuth {
 		keyID:       keyID,
 		privateKey:  privateKey,
 	}
+}
+
+func (api *API) CheckJobStatus(url string, accessToken string, retries int) int {
+	req, err := retryablehttp.NewRequest("GET", url, nil)
+	if err != nil {
+		cleanAndPanic(err)
+	}
+	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", accessToken))
+
+	retryClient := retryablehttp.NewClient()
+	retryClient.RetryMax = retries
+	retryClient.CheckRetry = func(ctx context.Context, resp *http.Response, err error) (bool, error) {
+		shouldRetry := resp.StatusCode == http.StatusAccepted
+		return shouldRetry, nil
+	}
+	resp, err := retryClient.Do(req)
+	if err != nil {
+		cleanAndPanic(err)
+	}
+	return resp.StatusCode
 }

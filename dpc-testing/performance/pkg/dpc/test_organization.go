@@ -8,7 +8,7 @@ func (api *API) RunOrgTests() {
 	const endpoint = "Organization"
 
 	// POST
-	resps := targeter.New(targeter.Config{
+	resps, _ := targeter.New(targeter.Config{
 		Method:      "POST",
 		BaseURL:     api.URL,
 		Endpoint:    endpoint + "/$submit",

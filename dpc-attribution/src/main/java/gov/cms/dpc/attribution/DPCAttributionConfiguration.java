@@ -53,6 +53,8 @@ public class DPCAttributionConfiguration extends TypesafeConfiguration implement
 
     private List<String> lookBackExemptOrgs;
 
+    private String testOrgID;
+
     @Override
     public DataSourceFactory getDatabase() {
         return database;
@@ -124,5 +126,9 @@ public class DPCAttributionConfiguration extends TypesafeConfiguration implement
 
     public void setLookBackExemptOrgs(List<String> lookBackExemptOrgs) {
         this.lookBackExemptOrgs = lookBackExemptOrgs;
+    }
+
+    public String getTestOrgID() {
+        return testOrgID;
     }
 }
