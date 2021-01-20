@@ -4,28 +4,40 @@ import (
 	"github.com/CMSgov/dpc-app/dpc-testing/performance/pkg/dpc/targeter"
 )
 
-func (api *API) RunLoadTest(orgID string, retries int) {
+func (api *API) RunLoad(orgID string, retries int) {
 
 	// Create organization (and delete at the end) and setup accesstoken
 	auth := api.SetUpOrgAuth(orgID)
-	defer api.DeleteOrg(auth.orgID)
+	// defer api.DeleteOrg(auth.orgID)
 
-	// Get Group
+	// Find Practitioner
 	resps, _ := targeter.New(targeter.Config{
 		Method:      "GET",
 		BaseURL:     api.URL,
-		Endpoint:    "Group",
+		Endpoint:    "Practitioner",
 		AccessToken: auth.accessToken,
 	}).Run(1, 1)
 
-	grpIDs := unmarshalIDs(resps)
+	bundles := unmarshalBundle(resps)
+	npi := bundles[0].Entry[0].Resource.Identifier[0].Value
+
+	// Find Group
+	resps, _ = targeter.New(targeter.Config{
+		Method:      "GET",
+		BaseURL:     api.URL,
+		Endpoint:    "Group?characteristic-value=attributed-to$" + npi,
+		AccessToken: auth.accessToken,
+	}).Run(1, 1)
+
+	bundles = unmarshalBundle(resps)
+	grpID := bundles[0].Entry[0].Resource.ID
 
 	// Export Group
 	_, headers := targeter.New(targeter.Config{
 		Method:      "GET",
 		BaseURL:     api.URL,
 		Endpoint:    "Group",
-		IDs:         grpIDs,
+		ID:          grpID,
 		Operation:   "$export",
 		AccessToken: auth.accessToken,
 		Headers: &targeter.Headers{

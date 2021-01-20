@@ -23,5 +23,5 @@ func main() {
 	defer dpc.DeleteDirs()
 
 	// Run Perfomance test files
-	api.RunLoadTest(orgID, retries)
+	api.RunLoad(orgID, retries)
 }

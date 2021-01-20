@@ -6,6 +6,7 @@ require (
 	github.com/CMSgov/dpc-app/dpcclient v0.0.0-20200916142145-e3d929a5e689
 	github.com/bmizerany/perks v0.0.0-20141205001514-d9a9656a3a4b // indirect
 	github.com/dgryski/go-gk v0.0.0-20200319235926-a69029f61654 // indirect
+	github.com/google/uuid v1.1.2
 	github.com/hashicorp/go-retryablehttp v0.6.8
 	github.com/influxdata/tdigest v0.0.1 // indirect
 	github.com/joeljunstrom/go-luhn v0.0.0-20190413165225-1e071b33b576

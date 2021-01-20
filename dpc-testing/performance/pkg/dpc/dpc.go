@@ -13,16 +13,26 @@ import (
 	regen "github.com/zach-klippenstein/goregen"
 )
 
+type Bundle struct {
+	Total int              `json:"total"`
+	Type  string           `json:"resourceType"`
+	Entry []ResourceHolder `json:"entry"`
+}
+
+type ResourceHolder struct {
+	Resource Resource `json:"resource"`
+}
+
 type Identifier struct {
 	System string `json:system`
 	Value  string `json:value`
 }
 type Resource struct {
-	ID          string `json:"id"`
-	ClientToken []byte `json:"token"`
-	AccessToken string `json:"access_token"`
-	Type        string `json:"resourceType"`
-	Identifier  []Identifier
+	ID          string       `json:"id"`
+	ClientToken []byte       `json:"token"`
+	AccessToken string       `json:"access_token"`
+	Type        string       `json:"resourceType"`
+	Identifier  []Identifier `json:"identifier"`
 }
 
 // Pull `ids` out of a set of response bodies
@@ -74,6 +84,19 @@ func unmarshal(resps [][]byte, fn func(result Resource)) {
 		}
 		fn(result)
 	}
+}
+
+func unmarshalBundle(resps [][]byte) []Bundle {
+	var bundles []Bundle
+	for _, resp := range resps {
+		var result Bundle
+		var err = json.Unmarshal(resp, &result)
+		if err != nil {
+			cleanAndPanic(err)
+		}
+		bundles = append(bundles, result)
+	}
+	return bundles
 }
 
 const (

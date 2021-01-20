@@ -2,6 +2,7 @@ package dpc
 
 import (
 	"github.com/CMSgov/dpc-app/dpc-testing/performance/pkg/dpc/targeter"
+	"github.com/google/uuid"
 )
 
 func (api *API) RunOrgTests() {
@@ -13,7 +14,7 @@ func (api *API) RunOrgTests() {
 		BaseURL:     api.URL,
 		Endpoint:    endpoint + "/$submit",
 		AccessToken: string(api.goldenMacaroon),
-		Generator:   templateBodyGenerator("./templates/organization-bundle-template.json", map[string]func() string{"{NPI}": generateNPI}),
+		Generator:   templateBodyGenerator("./templates/organization-bundle-template.json", map[string]func() string{"{NPI}": generateNPI, "{ID}": func() string { return uuid.New().String() }}),
 	}).Run(1, 1)
 
 	orgID := unmarshalIDs(resps)[0]

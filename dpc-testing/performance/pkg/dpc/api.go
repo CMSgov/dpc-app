@@ -1,7 +1,7 @@
 package dpc
 
 import (
-	"bufio"
+	"bytes"
 	"context"
 	"crypto"
 	"crypto/rand"
@@ -13,10 +13,10 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"os"
 	"strings"
 
 	dpcclient "github.com/CMSgov/dpc-app/dpcclient/lib"
+	"github.com/google/uuid"
 	retryablehttp "github.com/hashicorp/go-retryablehttp"
 )
 
@@ -50,11 +50,10 @@ func (api *API) RefreshAccessToken(privateKey *rsa.PrivateKey, keyID string, cli
 	return accessToken
 }
 
-func (api *API) CreateOrg() string {
-	orgBundleFile, _ := os.Open("../../src/main/resources/organization_bundle_parameters.json")
-	defer orgBundleFile.Close()
-	orgBundleReader := bufio.NewReader(orgBundleFile)
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/Organization/$submit", api.URL), orgBundleReader)
+func (api *API) CreateOrg(orgID string) string {
+	orgBundle := templateBodyGenerator("./templates/organization-bundle-template.json", map[string]func() string{"{NPI}": generateNPI, "{ID}": func() string { return orgID }})
+	buffer := bytes.NewBuffer(orgBundle())
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/Organization/$submit", api.URL), buffer)
 	if err != nil {
 		cleanAndPanic(err)
 	}
@@ -151,7 +150,7 @@ func (api *API) SetUpOrgAuth(orgIDs ...string) orgAuth {
 	if len(orgIDs) > 0 {
 		orgID = orgIDs[0]
 	} else {
-		orgID = api.CreateOrg()
+		orgID = api.CreateOrg(uuid.New().String())
 	}
 	pubKeyStr, privateKey, signature := api.GenerateKeyPairAndSignature()
 	keyID := api.UploadKey(pubKeyStr, signature, orgID)

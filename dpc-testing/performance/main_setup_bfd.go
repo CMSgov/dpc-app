@@ -12,7 +12,7 @@ func main() {
 
 	flag.StringVar(&apiURL, "api_url", "http://localhost:3002/v1", "Base URL of API")
 	flag.StringVar(&adminURL, "admin_url", "http://localhost:9903/tasks", "Base URL of admin tasks")
-	flag.StringVar(&orgID, "org_id", "", "Existing ORG ID to use to get the access token")
+	flag.StringVar(&orgID, "org_id", "", "org id to use for creation")
 	flag.IntVar(&numOfPatients, "num_of_patients", 3000, "The number of patients to create")
 	flag.Parse()
 

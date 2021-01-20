@@ -9,8 +9,8 @@ import (
 func (api *API) RunTestSetup(orgID string, numOfPatients int) {
 
 	// Create organization (and delete at the end) and setup accesstoken
-	auth := api.SetUpOrgAuth(orgID)
-	defer api.DeleteOrg(auth.orgID)
+	createdOrgID := api.CreateOrg(orgID)
+	auth := api.SetUpOrgAuth(createdOrgID)
 
 	// Create Practitioner
 	resps, _ := targeter.New(targeter.Config{

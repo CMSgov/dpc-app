@@ -9,6 +9,7 @@
         "entry": [
           {
             "resource": {
+              "id": "{ID}",
               "address": [
                 {
                   "use": "work",
