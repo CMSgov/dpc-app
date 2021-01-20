@@ -77,6 +77,12 @@ public class FHIRGroupBuilder {
         theGroup.setMeta(meta);
         return this;
     }
+
+    public FHIRGroupBuilder withUUID(){
+        theGroup.setId(UUID.randomUUID().toString());
+        return this;
+    }
+
 }
 
 
