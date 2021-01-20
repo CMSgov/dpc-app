@@ -7,12 +7,12 @@ import io.dropwizard.setup.Bootstrap;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
 
-import java.util.SortedMap;
+import java.util.NavigableMap;
 import java.util.TreeMap;
 
 public class AbstractCommandTree extends ConfiguredCommand<DPCAPIConfiguration> {
     private static final String COMMAND_NAME_ATTR = "subcommand";
-    private final SortedMap<String, Command> subcommands;
+    private final NavigableMap<String, Command> subcommands;
 
     protected AbstractCommandTree(String name, String description) {
         super(name, description);
