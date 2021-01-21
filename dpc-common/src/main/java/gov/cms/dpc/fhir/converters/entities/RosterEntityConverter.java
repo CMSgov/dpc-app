@@ -60,6 +60,7 @@ public class RosterEntityConverter implements FHIRConverter<Group, RosterEntity>
         return RosterEntity.class;
     }
 
+    @SuppressWarnings("JdkObsolete") // Date class is used by FHIR stu3 Period model
     private static Group.GroupMemberComponent buildComponent(AttributionRelationship relationship) {
         final IdType id = new IdType("Patient", relationship.getPatient().getID().toString());
         final Reference reference = new Reference(id);
