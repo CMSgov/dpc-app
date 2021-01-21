@@ -9,5 +9,8 @@ public final class MDCConstants {
     public static final String EOB_ID = "eobID";
     public static final String PROVIDER_NPI = "provider_npi";
     public static final String ORGANIZATION_ID = "organization_id";
+    public static final String PRACTITIONER_NPI = "practitioner_npi";
     public static final String TOKEN_ID = "token_id";
+    public static final String DPC_REQUEST_ID="request_id";
+
 }
