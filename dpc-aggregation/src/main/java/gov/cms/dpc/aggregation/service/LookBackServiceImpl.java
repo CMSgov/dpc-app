@@ -18,7 +18,12 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 import javax.inject.Inject;
-import java.util.*;
+import java.time.YearMonth;
+import java.time.ZoneId;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 
 import static gov.cms.dpc.common.MDCConstants.EOB_ID;
 
@@ -52,11 +57,13 @@ public class LookBackServiceImpl implements LookBackService {
 
     @Override
     @UnitOfWork(readOnly = true)
+    @SuppressWarnings("JdkObsolete") // Date class used by FHIR stu3 Period model
     public LookBackAnswer getLookBackAnswer(ExplanationOfBenefit explanationOfBenefit, UUID organizationUUID, String practitionerNPI, long withinMonth) {
         MDC.put(EOB_ID, explanationOfBenefit.getId());
-        Date billingPeriod = Optional.of(explanationOfBenefit)
+        YearMonth billingPeriod = Optional.of(explanationOfBenefit)
                 .map(ExplanationOfBenefit::getBillablePeriod)
                 .map(Period::getEnd)
+                .map(date -> YearMonth.from(date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()))
                 .orElse(null);
 
         String organizationID = organizationDAO.fetchOrganizationNPI(organizationUUID).orElse(null);

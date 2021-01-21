@@ -26,8 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.YearMonth;
 import java.util.Collections;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
@@ -49,11 +48,9 @@ public class AggregationEngineHealthCheckTest {
     private IJobQueue queue;
     private BlueButtonClient bbclient;
     private AggregationEngine engine;
-    private JobBatchProcessor jobBatchProcessor;
-    private LookBackServiceImpl lookBackService;
 
-    static private FhirContext fhirContext = FhirContext.forDstu3();
-    static private MetricRegistry metricRegistry = new MetricRegistry();
+    static private final FhirContext fhirContext = FhirContext.forDstu3();
+    static private final MetricRegistry metricRegistry = new MetricRegistry();
     static private String exportPath;
 
 
@@ -66,12 +63,12 @@ public class AggregationEngineHealthCheckTest {
     }
 
     @BeforeEach
-    void setupEach() throws ParseException {
+    void setupEach() {
         queue = Mockito.spy(new MemoryBatchQueue(10));
         bbclient = Mockito.spy(new MockBlueButtonClient(fhirContext));
-        var operationalConfig = new OperationsConfig(1000, exportPath, 500, new SimpleDateFormat("dd/MM/yyyy").parse("03/01/2015"));
-        lookBackService = Mockito.spy(new LookBackServiceImpl(Mockito.mock(ProviderDAO.class), Mockito.mock(RosterDAO.class), Mockito.mock(OrganizationDAO.class), operationalConfig));
-        jobBatchProcessor = Mockito.spy(new JobBatchProcessor(bbclient, fhirContext, metricRegistry, operationalConfig, lookBackService));
+        var operationalConfig = new OperationsConfig(1000, exportPath, 500, YearMonth.of(2015, 3));
+        LookBackServiceImpl lookBackService = Mockito.spy(new LookBackServiceImpl(Mockito.mock(ProviderDAO.class), Mockito.mock(RosterDAO.class), Mockito.mock(OrganizationDAO.class), operationalConfig));
+        JobBatchProcessor jobBatchProcessor = Mockito.spy(new JobBatchProcessor(bbclient, fhirContext, metricRegistry, operationalConfig, lookBackService));
         engine = Mockito.spy(new AggregationEngine(aggregatorID, queue, operationalConfig, jobBatchProcessor));
         AggregationEngine.setGlobalErrorHandler();
     }

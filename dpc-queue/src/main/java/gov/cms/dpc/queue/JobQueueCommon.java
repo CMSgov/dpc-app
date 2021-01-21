@@ -17,7 +17,7 @@ public abstract class JobQueueCommon implements IJobQueue {
 
     public abstract void submitJobBatches(List<JobQueueBatch> jobBatches);
 
-    public JobQueueCommon(int batchSize) {
+    protected JobQueueCommon(int batchSize) {
         this.batchSize = batchSize;
     }
 
@@ -68,9 +68,5 @@ public abstract class JobQueueCommon implements IJobQueue {
         return Collections.singletonList(
                 createJobBatch(jobID, orgID, providerID, Collections.emptyList(), resourceTypes, since, transactionTime, null, true)
         );
-    }
-
-    public int getBatchSize() {
-        return batchSize;
     }
 }

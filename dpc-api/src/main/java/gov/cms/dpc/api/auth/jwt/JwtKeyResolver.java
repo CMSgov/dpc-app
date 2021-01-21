@@ -45,7 +45,6 @@ public class JwtKeyResolver extends SigningKeyResolverAdapter {
 
         final UUID organizationID = getOrganizationID(claims.getIssuer());
         // Set the MDC values here, since it's the first time we actually know what the organization ID is
-        MDC.clear();
         MDC.put(MDCConstants.ORGANIZATION_ID, organizationID.toString());
 
         final PublicKeyEntity keyEntity;
