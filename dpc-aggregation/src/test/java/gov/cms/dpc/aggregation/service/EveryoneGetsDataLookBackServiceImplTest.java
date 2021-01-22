@@ -7,7 +7,7 @@ import java.util.UUID;
 
 public class EveryoneGetsDataLookBackServiceImplTest {
 
-    private LookBackService lookBackService = new EveryoneGetsDataLookBackServiceImpl();
+    private final LookBackService lookBackService = new EveryoneGetsDataLookBackServiceImpl();
 
     @Test
     public void alwaysReturnUUIDFromGetProviderIDFromRosterTest() {

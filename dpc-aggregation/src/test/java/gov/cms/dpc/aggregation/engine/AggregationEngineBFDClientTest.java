@@ -30,8 +30,8 @@ import org.mockito.Mockito;
 
 import java.nio.file.Path;
 import java.security.GeneralSecurityException;
+import java.time.YearMonth;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -56,7 +56,7 @@ public class AggregationEngineBFDClientTest {
     @BeforeEach
     public void setup() throws GeneralSecurityException {
         BlueButtonClient blueButtonClient = Mockito.spy(new BlueButtonClientImpl(bbClient, new BBClientConfiguration(), metricRegistry));
-        OperationsConfig config = new OperationsConfig(1000, tempDir.toString(), 1, 1, 1, new Date(), List.of(orgID.toString()));
+        OperationsConfig config = new OperationsConfig(1000, tempDir.toString(), 1, 1, 1, YearMonth.now(), List.of(orgID.toString()));
         JobBatchProcessor processor = new JobBatchProcessor(blueButtonClient, fhirContext, metricRegistry, config, lookBackService);
         queue = new MemoryBatchQueue(100);
         engine = new AggregationEngine(UUID.randomUUID(), queue, config, processor);
@@ -66,6 +66,7 @@ public class AggregationEngineBFDClientTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     void testHeadersPassedToBFDForBulkJob() {
         //Mock out the interactions of using IGenericClient to capture things
         IUntypedQuery<IBaseBundle> iUntypedQuery = Mockito.mock(IUntypedQuery.class);
@@ -101,6 +102,7 @@ public class AggregationEngineBFDClientTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     void testHeadersPassedToBFDForNonBulkJob() {
         //Mock out the interactions of using IGenericClient to capture things
         IUntypedQuery<IBaseBundle> iUntypedQuery = Mockito.mock(IUntypedQuery.class);

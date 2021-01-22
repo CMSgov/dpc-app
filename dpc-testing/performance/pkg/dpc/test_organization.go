@@ -13,7 +13,7 @@ func (api *API) RunOrgTests() {
 		BaseURL:     api.URL,
 		Endpoint:    endpoint + "/$submit",
 		AccessToken: string(api.goldenMacaroon),
-		Bodies:      readBodies("../../src/main/resources/organizations/base-organization.json"),
+		Generator:   templateBodyGenerator("./templates/organization-bundle-template.json", map[string]func() string{"{NPI}": generateNPI}),
 	}).Run(1, 1)
 
 	orgID := unmarshalIDs(resps)[0]
@@ -36,7 +36,7 @@ func (api *API) RunOrgTests() {
 		Endpoint:    endpoint,
 		ID:          orgID,
 		AccessToken: auth.accessToken,
-		Bodies:      readBodies("../../src/main/resources/organizations/organization-*.json"),
+		Generator:   templateBodyGenerator("./templates/organization-template.json", map[string]func() string{"{NPI}": generateNPI}),
 	}).Run(5, 2)
 
 	// DELETE
