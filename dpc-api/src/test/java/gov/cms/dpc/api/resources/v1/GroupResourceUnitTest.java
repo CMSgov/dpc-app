@@ -35,6 +35,8 @@ import java.util.UUID;
 import static gov.cms.dpc.api.resources.v1.GroupResource.SYNTHETIC_BENE_ID;
 import static gov.cms.dpc.fhir.FHIRMediaTypes.FHIR_JSON;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.times;
 
 public class GroupResourceUnitTest {
@@ -192,6 +194,10 @@ public class GroupResourceUnitTest {
         Group group = new Group();
         group.setId(groupId);
         group.addMember();
+        group.addCharacteristic().getCode().addCoding().setCode("attributed-to");
+        CodeableConcept codeableConcept = new CodeableConcept();
+        codeableConcept.addCoding().setSystem(DPCIdentifierSystem.NPPES.getSystem()).setCode(NPIUtil.generateNPI());
+        group.getCharacteristicFirstRep().setValue(codeableConcept);
 
         IReadExecutable<Group> readExec = Mockito.mock(IReadExecutable.class);
         Mockito.when(attributionClient.read().resource(Group.class).withId(new IdType("Group", groupId)).encodedJson()).thenReturn(readExec);
@@ -211,7 +217,10 @@ public class GroupResourceUnitTest {
 
         Mockito.when(bundleOperation.execute()).thenReturn(new Bundle());
         Meta bfdTransactionMeta = new Meta();
-        Mockito.when(mockBfdClient.requestPatientFromServer(SYNTHETIC_BENE_ID, null).getMeta()).thenReturn(bfdTransactionMeta);
+        Mockito.when(mockBfdClient.requestPatientFromServer(SYNTHETIC_BENE_ID, null, null).getMeta()).thenReturn(bfdTransactionMeta);
+
+        //Mock create job
+        Mockito.when(mockQueue.createJob(any(),any(),any(),any(),any(),any(),any(), anyBoolean())).thenReturn(UUID.randomUUID());
 
 
         //Past date with Z offset
@@ -246,6 +255,10 @@ public class GroupResourceUnitTest {
         Group group = new Group();
         group.setId(groupId);
         group.addMember();
+        group.addCharacteristic().getCode().addCoding().setCode("attributed-to");
+        CodeableConcept codeableConcept = new CodeableConcept();
+        codeableConcept.addCoding().setSystem(DPCIdentifierSystem.NPPES.getSystem()).setCode(NPIUtil.generateNPI());
+        group.getCharacteristicFirstRep().setValue(codeableConcept);
 
         IReadExecutable<Group> readExec = Mockito.mock(IReadExecutable.class);
         Mockito.when(attributionClient.read().resource(Group.class).withId(new IdType("Group", groupId)).encodedJson()).thenReturn(readExec);
@@ -264,7 +277,7 @@ public class GroupResourceUnitTest {
 
         Mockito.when(bundleOperation.execute()).thenReturn(new Bundle());
         Meta bfdTransactionMeta = new Meta();
-        Mockito.when(mockBfdClient.requestPatientFromServer(SYNTHETIC_BENE_ID, null).getMeta()).thenReturn(bfdTransactionMeta);
+        Mockito.when(mockBfdClient.requestPatientFromServer(SYNTHETIC_BENE_ID, null, null).getMeta()).thenReturn(bfdTransactionMeta);
 
         //Test a few seconds into the future
         WebApplicationException exception = Assertions.assertThrows(BadRequestException.class, () ->{
@@ -302,6 +315,10 @@ public class GroupResourceUnitTest {
         IReadExecutable<Group> readExec = Mockito.mock(IReadExecutable.class);
         Group fakeGroup = new Group();
         fakeGroup.getMember().add(new Group.GroupMemberComponent());
+        fakeGroup.addCharacteristic().getCode().addCoding().setCode("attributed-to");
+        CodeableConcept codeableConcept = new CodeableConcept();
+        codeableConcept.addCoding().setSystem(DPCIdentifierSystem.NPPES.getSystem()).setCode(NPIUtil.generateNPI());
+        fakeGroup.getCharacteristicFirstRep().setValue(codeableConcept);
         Mockito.when(attributionClient
                 .read()
                 .resource(Group.class)
@@ -329,8 +346,11 @@ public class GroupResourceUnitTest {
         Mockito.when(operationInput.execute())
                 .thenReturn(fakeBundle);
 
-        Mockito.when(mockBfdClient.requestPatientFromServer(Mockito.anyString(), Mockito.any()))
+        Mockito.when(mockBfdClient.requestPatientFromServer(Mockito.anyString(), Mockito.any(), Mockito.any()))
                 .thenReturn(new Bundle());
+
+        //Mock create job
+        Mockito.when(mockQueue.createJob(any(),any(),any(),any(),any(),any(),any(),anyBoolean())).thenReturn(UUID.randomUUID());
 
         Assertions.assertDoesNotThrow(() -> {
             resource.export(organizationPrincipal, "roster-id", "Coverage", FHIRMediaTypes.APPLICATION_NDJSON, "2017-01-01T00:00:00Z", "respond-async", request);

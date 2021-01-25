@@ -18,7 +18,6 @@ import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatchFile;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import io.reactivex.disposables.Disposable;
-import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.junit.jupiter.api.BeforeAll;
@@ -31,9 +30,11 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.time.YearMonth;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static gov.cms.dpc.aggregation.service.LookBackAnalyzer.*;
@@ -46,21 +47,19 @@ class BatchAggregationEngineTest {
     private static final String TEST_PROVIDER_ID = "1";
     private IJobQueue queue;
     private AggregationEngine engine;
-    private JobBatchProcessor jobBatchProcessor;
-    private Disposable subscribe;
     private LookBackService lookBackService;
 
-    static private FhirContext fhirContext = FhirContext.forDstu3();
-    static private MetricRegistry metricRegistry = new MetricRegistry();
+    static private final FhirContext fhirContext = FhirContext.forDstu3();
+    static private final MetricRegistry metricRegistry = new MetricRegistry();
     static private String exportPath;
     static private OperationsConfig operationsConfig;
 
     @BeforeAll
-    static void setupAll() throws ParseException {
+    static void setupAll() {
         fhirContext.setPerformanceOptions(PerformanceOptionsEnum.DEFERRED_MODEL_SCANNING);
         final var config = ConfigFactory.load("testing.conf").getConfig("dpc.aggregation");
         exportPath = config.getString("exportPath");
-        operationsConfig = new OperationsConfig(10, exportPath, 3, new SimpleDateFormat("dd/MM/yyyy").parse("03/01/2015"));
+        operationsConfig = new OperationsConfig(10, exportPath, 3, YearMonth.of(2015, 3));
         AggregationEngine.setGlobalErrorHandler();
         ContextUtils.prefetchResourceModels(fhirContext, JobQueueBatch.validResourceTypes);
     }
@@ -70,10 +69,10 @@ class BatchAggregationEngineTest {
         queue = new MemoryBatchQueue(100);
         final var bbclient = Mockito.spy(new MockBlueButtonClient(fhirContext));
         lookBackService = Mockito.spy(EveryoneGetsDataLookBackServiceImpl.class);
-        jobBatchProcessor = Mockito.spy(new JobBatchProcessor(bbclient, fhirContext, metricRegistry, operationsConfig, lookBackService));
+        JobBatchProcessor jobBatchProcessor = Mockito.spy(new JobBatchProcessor(bbclient, fhirContext, metricRegistry, operationsConfig, lookBackService));
         engine = Mockito.spy(new AggregationEngine(aggregatorID, queue, operationsConfig, jobBatchProcessor));
         engine.queueRunning.set(true);
-        subscribe = Mockito.mock(Disposable.class);
+        Disposable subscribe = Mockito.mock(Disposable.class);
         doReturn(false).when(subscribe).isDisposed();
         engine.setSubscribe(subscribe);
     }
@@ -93,7 +92,7 @@ class BatchAggregationEngineTest {
                 Collections.singletonList(ResourceType.ExplanationOfBenefit),
                 MockBlueButtonClient.TEST_LAST_UPDATED.minusSeconds(1),
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                null);
+                null, true);
 
         // Do the job
         queue.claimBatch(engine.getAggregatorID())
@@ -130,7 +129,7 @@ class BatchAggregationEngineTest {
                 JobQueueBatch.validResourceTypes,
                 MockBlueButtonClient.TEST_LAST_UPDATED.minusSeconds(1),
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                null);
+                null, true);
 
         // Do the job
         queue.claimBatch(engine.getAggregatorID())
@@ -172,7 +171,7 @@ class BatchAggregationEngineTest {
                 Collections.singletonList(ResourceType.ExplanationOfBenefit),
                 MockBlueButtonClient.TEST_LAST_UPDATED.minusSeconds(1),
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                null);
+                null, true);
 
         // Do the job
         queue.claimBatch(engine.getAggregatorID())
@@ -199,8 +198,8 @@ class BatchAggregationEngineTest {
         final var npi = NPIUtil.generateNPI();
 
         Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getPractitionerNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
-        Mockito.doReturn(new LookBackAnswer(npi, npi, 1, new Date())
-                .addEobBillingPeriod(DateUtils.addYears(new Date(), -1))
+        Mockito.doReturn(new LookBackAnswer(npi, npi, 1, YearMonth.now())
+                .addEobBillingPeriod(YearMonth.now().minusYears(1))
                 .addEobOrganization(npi)
                 .addEobProviders(List.of(npi))).when(lookBackService).getLookBackAnswer(Mockito.any(), Mockito.any(), Mockito.anyString(), Mockito.anyLong());
 
@@ -212,7 +211,7 @@ class BatchAggregationEngineTest {
                 Collections.singletonList(ResourceType.ExplanationOfBenefit),
                 MockBlueButtonClient.TEST_LAST_UPDATED.minusSeconds(1),
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                null);
+                null, true);
 
         // Do the job
         queue.claimBatch(engine.getAggregatorID())
@@ -242,8 +241,8 @@ class BatchAggregationEngineTest {
         final var npi = NPIUtil.generateNPI();
 
         Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getPractitionerNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
-        Mockito.doReturn(new LookBackAnswer(npi, npi, 1, new Date())
-                .addEobBillingPeriod(DateUtils.addYears(new Date(), -1))
+        Mockito.doReturn(new LookBackAnswer(npi, npi, 1, YearMonth.now())
+                .addEobBillingPeriod(YearMonth.now().minusYears(1))
                 .addEobOrganization(NPIUtil.generateNPI())
                 .addEobProviders(List.of(NPIUtil.generateNPI()))).when(lookBackService).getLookBackAnswer(Mockito.any(), Mockito.any(), Mockito.anyString(), Mockito.anyLong());
 
@@ -255,7 +254,7 @@ class BatchAggregationEngineTest {
                 Collections.singletonList(ResourceType.ExplanationOfBenefit),
                 MockBlueButtonClient.TEST_LAST_UPDATED.minusSeconds(1),
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                null);
+                null, true);
 
         // Do the job
         queue.claimBatch(engine.getAggregatorID())
@@ -285,8 +284,8 @@ class BatchAggregationEngineTest {
         final var npi = NPIUtil.generateNPI();
 
         Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getPractitionerNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
-        Mockito.doReturn(new LookBackAnswer(npi, npi, 1, new Date())
-                .addEobBillingPeriod(new Date())
+        Mockito.doReturn(new LookBackAnswer(npi, npi, 1, YearMonth.now())
+                .addEobBillingPeriod(YearMonth.now())
                 .addEobOrganization(NPIUtil.generateNPI())
                 .addEobProviders(List.of(NPIUtil.generateNPI()))).when(lookBackService).getLookBackAnswer(Mockito.any(), Mockito.any(), Mockito.anyString(), Mockito.anyLong());
 
@@ -298,7 +297,7 @@ class BatchAggregationEngineTest {
                 Collections.singletonList(ResourceType.ExplanationOfBenefit),
                 MockBlueButtonClient.TEST_LAST_UPDATED.minusSeconds(1),
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                null);
+                null, true);
 
         // Do the job
         queue.claimBatch(engine.getAggregatorID())
@@ -328,8 +327,8 @@ class BatchAggregationEngineTest {
         final var npi = NPIUtil.generateNPI();
 
         Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getPractitionerNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
-        Mockito.doReturn(new LookBackAnswer(npi, npi, 1, new Date())
-                .addEobBillingPeriod(new Date())
+        Mockito.doReturn(new LookBackAnswer(npi, npi, 1, YearMonth.now())
+                .addEobBillingPeriod(YearMonth.now())
                 .addEobOrganization(npi)
                 .addEobProviders(List.of(NPIUtil.generateNPI()))).when(lookBackService).getLookBackAnswer(Mockito.any(), Mockito.any(), Mockito.anyString(), Mockito.anyLong());
 
@@ -341,7 +340,7 @@ class BatchAggregationEngineTest {
                 Collections.singletonList(ResourceType.ExplanationOfBenefit),
                 MockBlueButtonClient.TEST_LAST_UPDATED.minusSeconds(1),
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                null);
+                null, true);
 
         // Do the job
         queue.claimBatch(engine.getAggregatorID())

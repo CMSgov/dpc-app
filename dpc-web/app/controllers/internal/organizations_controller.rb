@@ -56,6 +56,7 @@ module Internal
     def show
       @organization = Organization.find id_param
 
+      @tags = Tag.where.not(id: @organization.taggings.pluck(:tag_id))
       @users = user_filter
     end
 

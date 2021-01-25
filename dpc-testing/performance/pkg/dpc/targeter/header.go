@@ -18,7 +18,7 @@ func genHeaders(config Config) func() map[string][]string {
 
 	// Instantiate generator for each custom set of headers
 	for header, values := range config.Headers.Custom {
-		dh.Custom[header] = genStrs(values)
+		dh.Custom[header] = GenStrs(values)
 	}
 
 	// Each call to generator creates a fresh set of headers

@@ -73,9 +73,10 @@ public class APIHelpers {
      * Fetch the BFD database last update time. Use it as the transactionTime for a job.
      * @return transactionTime from the BFD service
      */
+    @SuppressWarnings("JdkObsolete") // Date class is used by FHIR stu3 Meta model
     public static OffsetDateTime fetchTransactionTime(BlueButtonClient bfdClient) {
         // Every bundle has transaction time after the Since RFC has beneficiary
-        final Meta meta = bfdClient.requestPatientFromServer(SYNTHETIC_BENE_ID, null).getMeta();
+        final Meta meta = bfdClient.requestPatientFromServer(SYNTHETIC_BENE_ID, null, null).getMeta();
         return Optional.ofNullable(meta.getLastUpdated())
                 .map(u -> u.toInstant().atOffset(ZoneOffset.UTC))
                 .orElse(OffsetDateTime.now(ZoneOffset.UTC));

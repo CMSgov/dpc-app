@@ -1,6 +1,6 @@
-function orgSearch() {
+function searchFunc() {
   var input, filter, ul, li, i, txtValue;
-  input = document.getElementById('orgSearchInput');
+  input = document.getElementById('searchInput');
   filter = input.value;
   filter = filter.toUpperCase();
   ul = document.getElementById('searchList');
