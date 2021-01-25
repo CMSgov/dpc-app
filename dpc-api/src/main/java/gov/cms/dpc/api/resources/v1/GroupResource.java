@@ -205,8 +205,10 @@ public class GroupResource extends AbstractGroupResource {
             @ApiImplicitParam(name = "X-Provenance", required = true, paramType = "header", type = "string", dataTypeClass = Provenance.class))
     @ApiResponses(@ApiResponse(code = 404, message = "Cannot find Roster with given ID"))
     @Override
-    public Group addRosterMembers(@Auth OrganizationPrincipal organizationPrincipal, @ApiParam(value = "Attribution roster ID") @PathParam("rosterID") UUID rosterID,
-                                  @ApiParam(hidden = true) @Valid @Profiled(profile = AttestationProfile.PROFILE_URI) @ProvenanceHeader Provenance rosterAttestation, Group groupUpdate) {
+    public Group addRosterMembers(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
+                                  @ApiParam(value = "Attribution roster ID") @PathParam("rosterID") UUID rosterID,
+                                  @ApiParam(hidden = true) @Valid @Profiled(profile = AttestationProfile.PROFILE_URI) @ProvenanceHeader Provenance rosterAttestation,
+                                  Group groupUpdate) {
         logAndVerifyAttestation(rosterAttestation, rosterID, groupUpdate);
         addOrganizationTag(groupUpdate, organizationPrincipal.getID().toString());
         return this.executeGroupOperation(rosterID, groupUpdate, "add");
@@ -270,8 +272,7 @@ public class GroupResource extends AbstractGroupResource {
     @ApiResponses(
             @ApiResponse(code = 202, message = "Export request has started", responseHeaders = @ResponseHeader(name = "Content-Location", description = "URL to query job status", response = UUID.class))
     )
-    public Response export(@ApiParam(hidden = true)
-                           @Auth OrganizationPrincipal organizationPrincipal,
+    public Response export(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
                            @ApiParam(value = "Provider ID", required = true)
                            @PathParam("rosterID") @NoHtml String rosterID,
                            @ApiParam(value = "List of FHIR resources to export", allowableValues = "ExplanationOfBenefits, Coverage, Patient")
