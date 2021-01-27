@@ -14,6 +14,9 @@ import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import javax.servlet.http.HttpServletRequest;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Provenance;
 
 import javax.ws.rs.core.Response;
 import java.util.UUID;
@@ -27,6 +30,9 @@ public class PatientResourceUnitTest {
 
     @Mock
     FhirValidator fhirValidator;
+
+    @Mock
+    HttpServletRequest request;
 
     PatientResource resource;
 
@@ -75,4 +81,32 @@ public class PatientResourceUnitTest {
 
         assertEquals(patient, result);
     }
+
+    // @Test
+    // public void testExportWithValidSinceParam(){
+    //     IReadExecutable<Patient> readExec = Mockito.mock(IReadExecutable.class);
+
+    //     UUID orgId = UUID.randomUUID();
+    //     Organization organization = new Organization();
+    //     organization.setId(orgId.toString());
+    //     OrganizationPrincipal organizationPrincipal = new OrganizationPrincipal(organization);
+
+    //     UUID patientId = UUID.randomUUID();
+    //     Patient patient = new Patient();
+    //     patient.setId(patientId.toString());
+
+    //     Mockito.when(attributionClient.read().resource(Patient.class).withId(patientId.toString()).encodedJson())
+    //             .thenReturn(readExec);
+
+    //     Mockito.when(readExec.execute()).thenReturn(patient);
+
+    //     String since = null;
+    //     // Provenance provenance = new Provenance();
+    //     Provenance provenance = new Provenance(null);
+
+    //     Patient result = resource.getPatient(patientId);
+    //     // Bundle bundle = resource.everything(organizationPrincipal, provenance, patientId, since, request);
+
+    //     assertEquals(patient, result);
+    // }
 }
