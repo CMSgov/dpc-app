@@ -511,10 +511,6 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
 
     }
 
-    public void testPatientEverything() {
-
-    }
-
     private IGenericClient generateClient(String orgID, String orgNPI, String keyLabel) throws IOException, URISyntaxException, GeneralSecurityException {
         final String macaroon = FHIRHelpers.registerOrganization(attrClient, parser, orgID, orgNPI, getAdminURL());
         final Pair<UUID, PrivateKey> uuidPrivateKeyPair = APIAuthHelpers.generateAndUploadKey(keyLabel, orgID, GOLDEN_MACAROON, getBaseURL());

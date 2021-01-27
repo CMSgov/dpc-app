@@ -15,8 +15,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import javax.servlet.http.HttpServletRequest;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Provenance;
 
 import javax.ws.rs.core.Response;
 import java.util.UUID;
