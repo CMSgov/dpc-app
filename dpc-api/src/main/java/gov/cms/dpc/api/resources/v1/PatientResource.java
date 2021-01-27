@@ -190,7 +190,6 @@ public class PatientResource extends AbstractPatientResource {
                              @ApiParam(value = "Patient resource ID", required = true) @PathParam("patientID") UUID patientId,
                              @QueryParam("_since") @NoHtml String sinceParam,
                              @Context HttpServletRequest request) {
-
         final Provenance.ProvenanceAgentComponent performer = FHIRExtractors.getProvenancePerformer(provenance);
         final UUID practitionerId = FHIRExtractors.getEntityUUID(performer.getOnBehalfOfReference().getReference());
         Practitioner practitioner = this.client

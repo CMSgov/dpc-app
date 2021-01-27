@@ -320,20 +320,6 @@ public class APITestHelpers {
                 .execute();
     }
 
-    // public static Bundle getPatientEverything(IGenericClient client, String patientId, String provenance, String since){
-    //     StringParam sinceParam = new StringParam(since);
-    //     return client
-    //             .operation()
-    //             .onInstance(new IdType("Patient", patientId))
-    //             .named("$everything")
-    //             // .withNoParameters(Parameters.class)
-    //             .withSearchParameter(Parameters.class, "_since", sinceParam)
-    //             .returnResourceType(Bundle.class)
-    //             .useHttpGet()
-    //             .withAdditionalHeader("X-Provenance", provenance)
-    //             .execute();
-    // }
-
     public static Bundle doGroupExport(IGenericClient client,String groupId, String provenance){
         return client
                 .operation()

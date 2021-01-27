@@ -412,7 +412,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
                 .operation()
                 .onInstance(new IdType("Patient", patientId))
                 .named("$everything")
-                .withSearchParameter(Parameters.class, "_since", new StringParam("sinceInvalid"))
+                .withSearchParameter(Parameters.class, "_since", new StringParam(sinceInvalid))
                 .returnResourceType(Bundle.class)
                 .useHttpGet()
                 .withAdditionalHeader("X-Provenance", generateProvenance(ORGANIZATION_ID, practitioner.getId()))
