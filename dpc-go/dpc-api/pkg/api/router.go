@@ -1,11 +1,11 @@
-package web
+package api
 
 import (
-    "net/http"
+	"net/http"
 
 	"github.com/go-chi/chi"
 
-	v2 "github.com/CMSgov/dpc/api/v2"
+	v2 "github.com/CMSgov/dpc/pkg/api/v2"
 )
 
 func NewDPCAPIRouter() http.Handler {
