@@ -109,6 +109,8 @@ public class AggregationEngine implements Runnable {
                 .doOnDispose(() -> {
                     MDC.remove(MDCConstants.JOB_ID);
                     MDC.remove(MDCConstants.JOB_BATCH_ID);
+                    MDC.remove(MDCConstants.ORGANIZATION_ID);
+                    MDC.remove(MDCConstants.PROVIDER_NPI);
                 })
                 .subscribe(
                         this::processJobBatch,
@@ -148,6 +150,7 @@ public class AggregationEngine implements Runnable {
         try {
             MDC.put(MDCConstants.JOB_ID, job.getJobID().toString());
             MDC.put(MDCConstants.JOB_BATCH_ID, job.getBatchID().toString());
+            MDC.put(MDCConstants.ORGANIZATION_ID, job.getOrgID().toString());
             logger.info("Processing job, exporting to: {}.", this.operationsConfig.getExportPath());
             logger.debug("Has {} attributed beneficiaries", job.getPatients().size());
 

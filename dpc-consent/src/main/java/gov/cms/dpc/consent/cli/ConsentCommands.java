@@ -7,12 +7,12 @@ import io.dropwizard.setup.Bootstrap;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
 
-import java.util.SortedMap;
+import java.util.NavigableMap;
 import java.util.TreeMap;
 
 public class ConsentCommands extends ConfiguredCommand<DPCConsentConfiguration> {
     private static final String COMMAND_NAME_ATTR = "subcommand";
-    private final SortedMap<String, ConsentCommand> subcommands = new TreeMap<>();
+    private final NavigableMap<String, ConsentCommand> subcommands = new TreeMap<>();
 
     public ConsentCommands() {
         super("consent", "Consent related commands");

@@ -4,9 +4,7 @@ import gov.cms.dpc.common.utils.NPIUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-import java.util.Date;
+import java.time.YearMonth;
 import java.util.List;
 
 public class LookBackAnswerTest {
@@ -17,29 +15,29 @@ public class LookBackAnswerTest {
     @Test
     public void testDateCriteria() {
         LookBackAnswer lookBackAnswer = new LookBackAnswer(null, null, 0, null)
-                .addEobBillingPeriod(new Date());
+                .addEobBillingPeriod(YearMonth.now());
 
         Assertions.assertFalse(lookBackAnswer.matchDateCriteria());
 
-        OffsetDateTime dateTime = OffsetDateTime.now(ZoneOffset.UTC).minusMonths(2);
-        lookBackAnswer = new LookBackAnswer(null, null, 0, new Date())
-                .addEobBillingPeriod(Date.from(dateTime.toInstant()));
+        YearMonth dateTime = YearMonth.now().minusMonths(2);
+        lookBackAnswer = new LookBackAnswer(null, null, 0, YearMonth.now())
+                .addEobBillingPeriod(dateTime);
 
         Assertions.assertEquals(2, lookBackAnswer.calculatedMonthDifference());
         Assertions.assertFalse(lookBackAnswer.matchDateCriteria());
 
-        lookBackAnswer = new LookBackAnswer(null, null, 1, new Date())
-                .addEobBillingPeriod(Date.from(dateTime.toInstant()));
+        lookBackAnswer = new LookBackAnswer(null, null, 1, YearMonth.now())
+                .addEobBillingPeriod(dateTime);
 
         Assertions.assertFalse(lookBackAnswer.matchDateCriteria());
 
-        lookBackAnswer = new LookBackAnswer(null, null, 2, new Date())
-                .addEobBillingPeriod(Date.from(dateTime.toInstant()));
+        lookBackAnswer = new LookBackAnswer(null, null, 2, YearMonth.now())
+                .addEobBillingPeriod(dateTime);
 
         Assertions.assertFalse(lookBackAnswer.matchDateCriteria());
 
-        lookBackAnswer = new LookBackAnswer(null, null, 3, new Date())
-                .addEobBillingPeriod(Date.from(dateTime.toInstant()));
+        lookBackAnswer = new LookBackAnswer(null, null, 3, YearMonth.now())
+                .addEobBillingPeriod(dateTime);
 
         Assertions.assertTrue(lookBackAnswer.matchDateCriteria());
 
