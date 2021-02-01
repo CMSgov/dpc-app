@@ -31,8 +31,7 @@ import org.mockito.Mockito;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.GeneralSecurityException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.YearMonth;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -49,12 +48,11 @@ class AggregationEngineTest {
     private BlueButtonClient bbclient;
     private IJobQueue queue;
     private AggregationEngine engine;
-    private JobBatchProcessor jobBatchProcessor;
     private Disposable subscribe;
     private LookBackService lookBackService;
 
-    static private FhirContext fhirContext = FhirContext.forDstu3();
-    static private MetricRegistry metricRegistry = new MetricRegistry();
+    static private final FhirContext fhirContext = FhirContext.forDstu3();
+    static private final MetricRegistry metricRegistry = new MetricRegistry();
     static private String exportPath;
 
     @BeforeAll
@@ -66,12 +64,12 @@ class AggregationEngineTest {
     }
 
     @BeforeEach
-    void setupEach() throws ParseException {
+    void setupEach() {
         queue = Mockito.spy(new MemoryBatchQueue(10));
         bbclient = Mockito.spy(new MockBlueButtonClient(fhirContext));
-        var operationalConfig = new OperationsConfig(1000, exportPath, 500, new SimpleDateFormat("dd/MM/yyyy").parse("03/01/2014"));
+        var operationalConfig = new OperationsConfig(1000, exportPath, 500, YearMonth.of(2014, 3));
         lookBackService = Mockito.spy(EveryoneGetsDataLookBackServiceImpl.class);
-        jobBatchProcessor = Mockito.spy(new JobBatchProcessor(bbclient, fhirContext, metricRegistry, operationalConfig, lookBackService));
+        JobBatchProcessor jobBatchProcessor = Mockito.spy(new JobBatchProcessor(bbclient, fhirContext, metricRegistry, operationalConfig, lookBackService));
         engine = Mockito.spy(new AggregationEngine(aggregatorID, queue, operationalConfig, jobBatchProcessor));
         engine.queueRunning.set(true);
         AggregationEngine.setGlobalErrorHandler();
@@ -152,8 +150,6 @@ class AggregationEngineTest {
      */
     @Test
     void processJobBatchException() throws InterruptedException {
-        final var orgID = UUID.randomUUID();
-
         doReturn(Optional.empty())
                 .doReturn(Optional.empty())
                 .doReturn(Optional.empty())

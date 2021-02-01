@@ -72,6 +72,7 @@ public class GroupResourceUnitTest {
 
         final Group group = FHIRGroupBuilder
                 .newBuild()
+                .withUUID()
                 .attributedTo(providerNpi)
                 .withPatients(patientBank.keySet().toArray(UUID[]::new))
                 .withOrgTag(orgId)

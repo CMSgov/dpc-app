@@ -29,6 +29,7 @@ public abstract class AbstractPatientResource {
 
     @POST
     public abstract Response submitPatient(OrganizationPrincipal organization, @Valid @Profiled(profile = PatientProfile.PROFILE_URI) Patient patient);
+
     @POST
     @Path("/$submit")
     public abstract Bundle bulkSubmitPatients(OrganizationPrincipal organization, Parameters params);

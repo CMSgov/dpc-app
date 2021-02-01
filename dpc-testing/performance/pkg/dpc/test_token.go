@@ -1,8 +1,6 @@
 package dpc
 
 import (
-	"net/url"
-
 	"github.com/CMSgov/dpc-app/dpc-testing/performance/pkg/dpc/targeter"
 	dpcclient "github.com/CMSgov/dpc-app/dpcclient/lib"
 )
@@ -20,7 +18,7 @@ func (api *API) RunTokenTests() {
 		BaseURL:     api.URL,
 		Endpoint:    endpoint,
 		AccessToken: auth.accessToken,
-		Bodies:      generateKeyBodies(25, api.GenerateKeyPairAndSignature),
+		Generator:   keyBodyGenerator(25, api.GenerateKeyPairAndSignature),
 		Headers:     &targeter.Headers{ContentType: JSON},
 	}).Run(5, 5)
 
@@ -39,20 +37,20 @@ func (api *API) RunTokenTests() {
 
 	// POST /Token/validate
 	targeter.New(targeter.Config{
-		Method:   "POST",
-		BaseURL:  api.URL,
-		Endpoint: endpoint + "/validate",
-		Bodies:   authTokens,
-		Headers:  &targeter.Headers{ContentType: Plain},
+		Method:    "POST",
+		BaseURL:   api.URL,
+		Endpoint:  endpoint + "/validate",
+		Generator: byteArrayGenerator(authTokens),
+		Headers:   &targeter.Headers{ContentType: Plain},
 	}).Run(5, 5)
 
 	// POST /Token/auth
 	resps = targeter.New(targeter.Config{
-		Method:   "POST",
-		BaseURL:  api.URL,
-		Endpoint: endpoint + "/auth",
-		Bodies:   generateAuthBodies(authTokens),
-		Headers:  &targeter.Headers{ContentType: Form},
+		Method:    "POST",
+		BaseURL:   api.URL,
+		Endpoint:  endpoint + "/auth",
+		Generator: authBodyGenerator(authTokens),
+		Headers:   &targeter.Headers{ContentType: Form},
 	}).Run(5, 5)
 
 	accessTokens := unmarshalAccessTokens(resps)
@@ -75,20 +73,4 @@ func (api *API) RunTokenTests() {
 		IDs:         clientTokenIDs,
 		Headers:     &targeter.Headers{},
 	}).Run(5, 5)
-}
-
-func generateAuthBodies(authTokens [][]byte) [][]byte {
-	var bodies [][]byte
-	for _, authToken := range authTokens {
-		bodies = append(bodies, []byte(
-			url.Values{
-				"scope":                 {"system/*.*"},
-				"grant_type":            {"client_credentials"},
-				"client_assertion_type": {"urn:ietf:params:oauth:client-assertion-type:jwt-bearer"},
-				"client_assertion":      {string(authToken)},
-			}.Encode()),
-		)
-	}
-
-	return bodies
 }

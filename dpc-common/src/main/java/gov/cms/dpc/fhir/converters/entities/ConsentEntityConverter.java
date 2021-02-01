@@ -136,6 +136,7 @@ public class ConsentEntityConverter {
         return mbi;
     }
 
+    @SuppressWarnings("JdkObsolete") // Date class is used by FHIR stu3 Consent model
     public static ConsentEntity fromFhir(Consent consent) {
         if (consent == null) {
             throw new WebApplicationException("No consent resource provided", Response.Status.BAD_REQUEST);
@@ -174,6 +175,7 @@ public class ConsentEntityConverter {
         return entity;
     }
 
+    @SuppressWarnings("JdkObsolete") // Date class is used by FHIR stu3 Consent model
     public static Consent toFhir(ConsentEntity consentEntity, String orgURL, String fhirURL) {
         Consent c = new Consent();
 
