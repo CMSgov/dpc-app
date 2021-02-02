@@ -30,7 +30,7 @@ RSpec.feature 'user resends confirmation instructions' do
   end
 
   context 'when incorrect email' do
-    scenario 'user does not send confirmation instructions' do
+    scenario 'user cannot request to resend confirmation' do
       visit new_user_confirmation_path
 
       fill_in 'user_email', with: 'not_a_real@email.com'
@@ -40,7 +40,7 @@ RSpec.feature 'user resends confirmation instructions' do
         Sidekiq::Worker.drain_all
       end.to change(ActionMailer::Base.deliveries, :count).by(0)
 
-      expect(page.body).to include('Resend confirmation instructions')
+      expect(page.body).to include('If your email address exists in our database, you will receive an email with instructions for how to confirm your email address in a few minutes.')
     end
   end
 
