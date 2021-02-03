@@ -111,13 +111,6 @@ services:
     command: sh -c "mvn test -Pintegration-tests -pl dpc-api -am -ntp"
     network_mode: host
 
-  bfd-test:
-    build:
-      context: .
-      dockerfile: docker/Dockerfiles/Dockerfile.test
-    env_file:
-      - ./ops/config/decrypted/local.env
-
 volumes:
   export-volume:
     driver: local
