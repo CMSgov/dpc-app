@@ -111,6 +111,7 @@ services:
     command: sh -c "mvn test -Pintegration-tests -pl dpc-api -am -ntp"
     network_mode: host
 
+
 volumes:
   export-volume:
     driver: local
