@@ -26,7 +26,6 @@ import javax.inject.Inject;
 import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 public class JobBatchProcessor {
     private static final Logger logger = LoggerFactory.getLogger(JobBatchProcessor.class);

@@ -2,6 +2,7 @@ package gov.cms.dpc.aggregation.service;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
+import org.apache.commons.compress.utils.Lists;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Consent;
 
@@ -20,16 +21,7 @@ public class ConsentServiceImpl implements ConsentService {
 
     @Override
     public Optional<List<ConsentResult>> getConsent(String mbi) {
-
-        final String mbiIdentifier = String.format("%s|%s", DPCIdentifierSystem.MBI.getSystem(), mbi);
-
-        final Bundle bundle = consentClient
-                .search()
-                .forResource(Consent.class)
-                .encodedJson()
-                .returnBundle(Bundle.class)
-                .where(Consent.PATIENT.hasId(mbiIdentifier))
-                .execute();
+        final Bundle bundle = doConsentSearch(mbi);
 
         if(bundle.getEntry().size()>0){
             List<ConsentResult> results = bundle.getEntry().stream().map(entryComponent -> {
@@ -44,6 +36,17 @@ public class ConsentServiceImpl implements ConsentService {
 
             return Optional.of(results);
         }
-        return Optional.empty();
+        return Optional.of(Lists.newArrayList());
+    }
+
+    private Bundle doConsentSearch(String mbi){
+        final String mbiIdentifier = String.format("%s|%s", DPCIdentifierSystem.MBI.getSystem(), mbi);
+        return consentClient
+                .search()
+                .forResource(Consent.class)
+                .encodedJson()
+                .returnBundle(Bundle.class)
+                .where(Consent.PATIENT.hasId(mbiIdentifier))
+                .execute();
     }
 }
