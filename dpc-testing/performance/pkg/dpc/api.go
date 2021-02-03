@@ -18,6 +18,7 @@ import (
 )
 
 type API struct {
+	publicURL      string
 	URL            string
 	goldenMacaroon []byte
 	AdminAPI
@@ -34,7 +35,11 @@ func New(apiURL string, admin AdminAPI) *API {
 }
 
 func (api *API) RefreshAccessToken(privateKey *rsa.PrivateKey, keyID string, clientToken []byte) string {
-	authToken, err := dpcclient.GenerateAuthToken(privateKey, keyID, clientToken, api.URL)
+	url := api.URL
+	if len(api.publicURL) > 0 {
+		url = api.publicURL
+	}
+	authToken, err := dpcclient.GenerateAuthToken(privateKey, keyID, clientToken, url)
 	if err != nil {
 		cleanAndPanic(err)
 	}
