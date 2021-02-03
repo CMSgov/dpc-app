@@ -115,6 +115,8 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfiles/Dockerfile.test
+    env_file:
+      - ./ops/config/decrypted/local.env
 
 volumes:
   export-volume:
