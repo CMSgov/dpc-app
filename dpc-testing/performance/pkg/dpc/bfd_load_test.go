@@ -13,7 +13,7 @@ import (
 	"github.com/google/uuid"
 )
 
-var apiURL, adminURL, orgID, dbURL, dbUser, dbPass, apiEnv string
+var apiURL, adminURL, orgID, dbURL, dbUser, dbPass, tokenEnv string
 var numOfPatients, numOfBatches int
 
 type JobQueueBatch struct {
@@ -31,13 +31,12 @@ type JobQueueBatch struct {
 }
 
 func TestMain(m *testing.M) {
+	flag.StringVar(&tokenEnv, "api_env", "dev", "The Token Environment")
 	flag.StringVar(&apiURL, "api_url", "http://localhost:3002/v1", "Base URL of API")
 	flag.StringVar(&adminURL, "admin_url", "http://localhost:9903/tasks", "Base URL of admin tasks")
-	flag.StringVar(&apiEnv, "my_little_env", "dev", "Environment")
 	flag.StringVar(&dbURL, "db_url", "localhost:5432", "The database url")
 	flag.StringVar(&dbUser, "db_user", "postgres", "The database username")
 	flag.StringVar(&dbPass, "db_pass", "dpc-safe", "The database password")
-
 	flag.IntVar(&numOfPatients, "num_of_patients", 10, "The number of patients to create")
 	flag.IntVar(&numOfBatches, "num_of_batches", 3, "Number of batches to create")
 
@@ -48,8 +47,8 @@ func TestMain(m *testing.M) {
 func BenchmarkExport(b *testing.B) {
 
 	api := New(apiURL, AdminAPI{URL: adminURL})
-	if len(apiEnv) > 0 {
-		api.publicURL = fmt.Sprintf("https://%s.dpc.cms.gov/api/v1", apiEnv)
+	if len(tokenEnv) > 0 {
+		api.publicURL = fmt.Sprintf("https://%s.dpc.cms.gov/api/v1", tokenEnv)
 	}
 
 	CreateDirs()
