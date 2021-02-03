@@ -13,7 +13,7 @@ import (
 	"github.com/google/uuid"
 )
 
-var apiURL, adminURL, orgID, dbURL, dbUser, dbPass, env string
+var apiURL, adminURL, orgID, dbURL, dbUser, dbPass, apiEnv string
 var numOfPatients, numOfBatches int
 
 type JobQueueBatch struct {
@@ -33,7 +33,7 @@ type JobQueueBatch struct {
 func TestMain(m *testing.M) {
 	flag.StringVar(&apiURL, "api_url", "http://localhost:3002/v1", "Base URL of API")
 	flag.StringVar(&adminURL, "admin_url", "http://localhost:9903/tasks", "Base URL of admin tasks")
-	flag.StringVar(&env, "api_env", "", "Environment")
+	flag.StringVar(&apiEnv, "api_env", "dev", "Environment")
 	flag.StringVar(&dbURL, "db_url", "localhost:5432", "The database url")
 	flag.StringVar(&dbUser, "db_user", "postgres", "The database username")
 	flag.StringVar(&dbPass, "db_pass", "dpc-safe", "The database password")
@@ -48,8 +48,8 @@ func TestMain(m *testing.M) {
 func BenchmarkExport(b *testing.B) {
 
 	api := New(apiURL, AdminAPI{URL: adminURL})
-	if len(env) > 0 {
-		api.publicURL = fmt.Sprintf("https://%s.dpc.cms.gov/api/v1", env)
+	if len(apiEnv) > 0 {
+		api.publicURL = fmt.Sprintf("https://%s.dpc.cms.gov/api/v1", apiEnv)
 	}
 
 	CreateDirs()
