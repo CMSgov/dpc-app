@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/CMSgov/dpc-app/dpc-testing/performance/pkg/dpc/targeter"
+	luhn "github.com/joeljunstrom/go-luhn"
 	regen "github.com/zach-klippenstein/goregen"
 )
 
