@@ -35,6 +35,11 @@ public class DPCAggregationConfiguration extends TypesafeConfiguration implement
     @JsonProperty("bbclient")
     private final BBClientConfiguration clientConfiguration = new BBClientConfiguration();
 
+    @Valid
+    @NotNull
+    @JsonProperty("consentServiceUrl")
+    private String consentServiceUrl;
+
     // The path to the folder that will contain the output files
     @NotEmpty
     private String exportPath;
@@ -120,6 +125,10 @@ public class DPCAggregationConfiguration extends TypesafeConfiguration implement
 
     public List<String> getLookBackExemptOrgs() {
         return lookBackExemptOrgs;
+    }
+
+    public String getConsentServiceUrl() {
+        return consentServiceUrl;
     }
 
     @SuppressWarnings("unused")
