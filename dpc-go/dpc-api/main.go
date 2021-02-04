@@ -22,6 +22,5 @@ func main() {
 	if port == "" {
 		port = "3000"
 	}
-	log.Info(fmt.Sprintf(":%s", port))
 	http.ListenAndServe(fmt.Sprintf(":%s", port), router)
 }
