@@ -29,9 +29,6 @@ public class PatientResourceUnitTest {
     @Mock
     FhirValidator fhirValidator;
 
-    @Mock
-    HttpServletRequest request;
-
     PatientResource resource;
 
     @BeforeEach
