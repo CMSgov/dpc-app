@@ -23,20 +23,17 @@ public class ConsentServiceImpl implements ConsentService {
     public Optional<List<ConsentResult>> getConsent(String mbi) {
         final Bundle bundle = doConsentSearch(mbi);
 
-        if(bundle.getEntry().size()>0){
-            List<ConsentResult> results = bundle.getEntry().stream().map(entryComponent -> {
-                Consent consent = (Consent) entryComponent.getResource();
-                ConsentResult consentResult = new ConsentResult();
-                consentResult.setActive(Consent.ConsentState.ACTIVE.equals(consent.getStatus()));
-                consentResult.setConsentDate(consent.getDateTime());
-                consentResult.setConsentId(consent.getId());
-                consentResult.setPolicyType(ConsentResult.PolicyType.fromPolicyUrl(consent.getPolicyRule()));
-                return consentResult;
-            }).collect(Collectors.toList());
+        List<ConsentResult> results = bundle.getEntry().stream().map(entryComponent -> {
+            Consent consent = (Consent) entryComponent.getResource();
+            ConsentResult consentResult = new ConsentResult();
+            consentResult.setActive(Consent.ConsentState.ACTIVE.equals(consent.getStatus()));
+            consentResult.setConsentDate(consent.getDateTime());
+            consentResult.setConsentId(consent.getId());
+            consentResult.setPolicyType(ConsentResult.PolicyType.fromPolicyUrl(consent.getPolicyRule()));
+            return consentResult;
+        }).collect(Collectors.toList());
 
-            return Optional.of(results);
-        }
-        return Optional.of(Lists.newArrayList());
+        return Optional.of(results);
     }
 
     private Bundle doConsentSearch(String mbi){
