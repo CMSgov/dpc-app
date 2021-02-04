@@ -2,7 +2,6 @@ package gov.cms.dpc.aggregation.service;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
-import org.apache.commons.compress.utils.Lists;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Consent;
 
