@@ -1,15 +1,11 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <title>DpcAdmin</title>
-    <%= csrf_meta_tags %>
-    <%= csp_meta_tag %>
+<html lang="en">
+  <%= render partial: 'shared/head' %>
+  <body class="ds-base ds-u-fill--gray-ultra-light">
+    <!-- nav -->
 
-    <%= stylesheet_link_tag 'application', media: 'all', 'data-turbolinks-track': 'reload' %>
-    <%= javascript_pack_tag 'application', 'data-turbolinks-track': 'reload' %>
-  </head>
+    <!-- main -->
 
-  <body>
     <%= yield %>
   </body>
 </html>
