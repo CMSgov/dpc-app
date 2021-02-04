@@ -4,9 +4,12 @@ package dpc
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"os"
+	"strings"
 
-	"github.com/joeljunstrom/go-luhn"
+	"github.com/CMSgov/dpc-app/dpc-testing/performance/pkg/dpc/targeter"
+	luhn "github.com/joeljunstrom/go-luhn"
 	regen "github.com/zach-klippenstein/goregen"
 )
 
@@ -121,4 +124,13 @@ func generateMBI() string {
 		panic(err)
 	}
 	return mbi
+}
+
+func generateMBIFromFile(file string) func() string {
+	body, err := ioutil.ReadFile(file)
+	if err != nil {
+		panic(err)
+	}
+	mbis := strings.Split(string(body), ",")
+	return targeter.GenStrs(mbis)
 }
