@@ -1,12 +1,27 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
+	"os"
 
 	api "github.com/CMSgov/dpc/pkg/api"
+
+	log "github.com/sirupsen/logrus"
 )
+
+func init() {
+	log.SetFormatter(&log.JSONFormatter{})
+	log.SetReportCaller(true)
+}
 
 func main() {
 	router := api.NewDPCAPIRouter()
-	http.ListenAndServe(":3000", router)
+
+	port := os.Getenv("API_PORT")
+	if port == "" {
+		port = "3000"
+	}
+	log.Info(fmt.Sprintf(":%s", port))
+	http.ListenAndServe(fmt.Sprintf(":%s", port), router)
 }
