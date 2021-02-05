@@ -6,8 +6,9 @@ import (
 	"os"
 	"time"
 
+	"go.uber.org/zap"
+
 	"github.com/samply/golang-fhir-models/fhir-models/fhir"
-	log "github.com/sirupsen/logrus"
 )
 
 func Metadata(w http.ResponseWriter, r *http.Request) {
@@ -51,7 +52,7 @@ func Metadata(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	if _, err = w.Write(b); err != nil {
-		log.Errorf("Failed to write data %s", err.Error())
+		zap.L().Error("Failed to write data", zap.Error(err))
 	}
 }
 
