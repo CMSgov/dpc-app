@@ -9,8 +9,8 @@ import (
 )
 
 type AttributionConfig struct {
-	url     string
-	retries int
+	URL     string
+	Retries int
 }
 
 // ResourceType of request
@@ -29,7 +29,7 @@ type AttributionClient struct {
 // NewAttribution creates new Attribution client
 func NewAttributionClient(config *AttributionConfig) *AttributionClient {
 	client := retryablehttp.NewClient()
-	client.RetryMax = config.retries
+	client.RetryMax = config.Retries
 	return &AttributionClient{
 		config:     config,
 		httpClient: client,
@@ -37,7 +37,7 @@ func NewAttributionClient(config *AttributionConfig) *AttributionClient {
 }
 
 func (attributionClient *AttributionClient) Get(resourceType ResourceType, id string) ([]byte, error) {
-	url := fmt.Sprintf("%s/%s/%s", attributionClient.config.url, resourceType, id)
+	url := fmt.Sprintf("%s/%s/%s", attributionClient.config.URL, resourceType, id)
 	req, err := retryablehttp.NewRequest("GET", url, nil)
 	if err != nil {
 		zap.L().Error("Failed to create request", zap.Error(err))
