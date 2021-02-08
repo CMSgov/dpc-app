@@ -6,11 +6,11 @@ import (
 )
 
 type Identifier struct {
-	Value  string
-	System string
+	Value  string `json:"value"`
+	System string `json:"system"`
 }
 
-type Resources struct {
+type Resource struct {
 	ID         string
 	Version    int
 	CreatedAt  time.Time
@@ -19,20 +19,20 @@ type Resources struct {
 	Identifier []Identifier
 }
 
-type Resource interface {
+type FhirResource interface {
 	VersionId() string
 	LastUpdated() string
 	ResourceType() string
 }
 
-func (o *Resources) ResourceType() string {
-	return o.Info["resourceType"].(string)
+func (r *Resource) ResourceType() string {
+	return r.Info["resourceType"].(string)
 }
 
-func (o *Resources) VersionId() string {
-	return strconv.Itoa(o.Version)
+func (r *Resource) VersionId() string {
+	return strconv.Itoa(r.Version)
 }
 
-func (o *Resources) LastUpdated() string {
-	return o.UpdatedAt.UTC().Format("2006-01-02T15:04:05.999-07:00")
+func (r *Resource) LastUpdated() string {
+	return r.UpdatedAt.UTC().Format("2006-01-02T15:04:05.999-07:00")
 }

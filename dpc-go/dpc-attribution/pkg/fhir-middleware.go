@@ -54,7 +54,7 @@ func FHIRMiddleware(next http.Handler) http.Handler {
 }
 
 func convertToFHIR(body []byte) ([]byte, error) {
-	var result model.Resources
+	var result model.Resource
 	if err := json.Unmarshal(body, &result); err != nil {
 		zap.L().Error("Failed to convert to FHIR model", zap.Error(err))
 		return nil, err

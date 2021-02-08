@@ -121,7 +121,7 @@ func (oc *OrganizationController) SaveOrganization(w http.ResponseWriter, r *htt
 }
 
 func (oc *OrganizationController) npiExists(b []byte) error {
-	var r model.Resources
+	var r model.Resource
 	err := json.Unmarshal(b, &r)
 	if err != nil {
 		return err
