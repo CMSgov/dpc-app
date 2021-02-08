@@ -30,43 +30,47 @@ func FHIRMiddleware(next http.Handler) http.Handler {
 		rw := &ResponseWriter{
 			ResponseWriter: w,
 			buf:            &bytes.Buffer{},
+			Status:         200,
 		}
 
 		next.ServeHTTP(rw, r)
-		b := rw.buf.Bytes()
 
-		if rw.Status == 200 {
-			var result model.Resources
-			if err := json.Unmarshal(b, &result); err != nil {
-				zap.L().Error("Failed to convert to FHIR model", zap.Error(err))
-				boom.Internal(w, err.Error())
-				return
-			}
-
-			fhirModel := result.Info
-			fhirModel["id"] = result.ID
-			meta := make(map[string]string)
-			meta["id"] = fmt.Sprintf("%s/%s", result.ResourceType(), result.ID)
-			meta["versionId"] = result.VersionId()
-			meta["lastUpdated"] = result.LastUpdated()
-			fhirModel["meta"] = meta
-
-			b, err := json.Marshal(fhirModel)
+		var b = rw.buf.Bytes()
+		if isSuccess(rw.Status) {
+			body, err := convertToFHIR(b)
+			b = body
 			if err != nil {
-				zap.L().Error("Failed to convert to FHIR model", zap.Error(err))
-				boom.Internal(w, err.Error())
-				return
-			}
-			if _, err := w.Write(b); err != nil {
-				zap.L().Error("Failed to write data", zap.Error(err))
-				boom.Internal(w, err.Error())
-			}
-		} else {
-			if _, err := w.Write(b); err != nil {
-				zap.L().Error("Failed to write data", zap.Error(err))
+				zap.L().Error("Failed to convert to fhir", zap.Error(err))
 				boom.Internal(w, err.Error())
 			}
 		}
 
+		if _, err := w.Write(b); err != nil {
+			zap.L().Error("Failed to write data", zap.Error(err))
+			boom.Internal(w, err.Error())
+		}
+
 	})
+}
+
+func convertToFHIR(body []byte) ([]byte, error) {
+	var result model.Resources
+	if err := json.Unmarshal(body, &result); err != nil {
+		zap.L().Error("Failed to convert to FHIR model", zap.Error(err))
+		return nil, err
+	}
+
+	fhirModel := result.Info
+	fhirModel["id"] = result.ID
+	meta := make(map[string]string)
+	meta["id"] = fmt.Sprintf("%s/%s", result.ResourceType(), result.ID)
+	meta["versionId"] = result.VersionId()
+	meta["lastUpdated"] = result.LastUpdated()
+	fhirModel["meta"] = meta
+
+	return json.Marshal(fhirModel)
+}
+
+func isSuccess(status int) bool {
+	return status >= http.StatusOK && status < http.StatusMultipleChoices
 }
