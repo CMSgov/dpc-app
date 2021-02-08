@@ -19,11 +19,15 @@ func GetDbConnection() *pg.DB {
 	if !found {
 		dbPass = "dpc-safe"
 	}
+	dbName, found := os.LookupEnv("ATTRIBUTION_DB_NAME")
+	if !found {
+		dbName = "dpc_attribution"
+	}
 	db := pg.Connect(&pg.Options{
 		Addr:     dbURL,
 		User:     dbUser,
 		Password: dbPass,
-		Database: "dpc_attribution",
+		Database: dbName,
 	})
 	db.AddQueryHook(pgdebug.DebugHook{
 		Verbose: false,
