@@ -28,13 +28,13 @@ class BaseSearch
 
   # General queries
   def apply_controller(scope)
-    if params[:controller] == 'internal/organizations'
+    if params[:controller] == 'organizations'
       scope = Organization.send(initial_scope)
 
       scope = apply_date_queries(scope, 'organizations')
       scope = apply_org_status(scope)
       scope = apply_org_keyword_search(scope)
-    elsif params[:controller] == 'internal/users'
+    elsif params[:controller] == 'users'
       scope = User.includes(organization_user_assignments: :organization).send(initial_scope)
 
       scope = apply_date_queries(scope, 'users')

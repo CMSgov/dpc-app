@@ -3,7 +3,7 @@
 
 <div class="ds-l-container ds-u-padding-x--0">
   <div>
-    <%= link_to internal_users_path, class: "utility-button" do %>
+    <%= link_to users_path, class: "utility-button" do %>
       <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
         <use xlink:href="/assets/solid.svg#arrow-left"></use>
       </svg>
@@ -27,7 +27,7 @@
           <p>No tags have been assigned to <%= @user.name %>.</p>
         <% else %>
           <% @user.taggings.each do |tagging| %>
-            <%= link_to(internal_tagging_url(tagging), class: "site-pills__item__button dashboard__pills--delete", method: :delete, data: {test: "delete-tag-#{tagging.id}"}) do %>
+            <%= link_to(tagging_url(tagging), class: "site-pills__item__button dashboard__pills--delete", method: :delete, data: {test: "delete-tag-#{tagging.id}"}) do %>
               <span class="site-pills__item site-pills__item--small">
                 <%= tagging.tag_name %>
               </span>
@@ -44,7 +44,7 @@
             <% else %>
               <% @tags.each do |tag| %>
                 <div class="site-pills__item__button dashboard__pills--add">
-                  <%= form_for Tagging.new, url: internal_taggings_path, html: { method: :post } do |f| %>
+                  <%= form_for Tagging.new, url: taggings_path, html: { method: :post } do |f| %>
                     <%= f.hidden_field :tag_id, value: tag.id %>
                     <%= f.hidden_field :taggable_id, value: @user.id %>
                     <%= f.hidden_field :taggable_type, value: 'User' %>
@@ -65,7 +65,7 @@
             <svg class="icon ds-u-margin-right--1 ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
               <use xlink:href="/assets/solid.svg#clinic-medical"></use>
             </svg>
-            <%= link_to org.name, internal_organization_path(org) %>
+            <%= link_to org.name, organization_path(org) %>
           </div>
 
           <div class="ds-u-margin-bottom--1">

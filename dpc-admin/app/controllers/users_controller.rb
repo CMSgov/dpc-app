@@ -9,7 +9,7 @@ class UsersController < ApplicationController
     results = BaseSearch.new(params: params, scope: params[:org_type]).results
     @tags = Tag.all
 
-    @users = results
+    @users = results.order('users.created_at DESC').page params[:page]
     render layout: 'table_index'
   end
 
@@ -28,7 +28,7 @@ class UsersController < ApplicationController
     @organizations = Organization.all
     if @user.update user_params
       flash[:notice] = 'User successfully updated.'
-      redirect_to internal_user_url(@user)
+      redirect_to user_url(@user)
     else
       flash[:alert] = "Please correct errors: #{model_error_string(@user)}"
       render :edit

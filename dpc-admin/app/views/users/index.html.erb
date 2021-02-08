@@ -6,16 +6,8 @@
   </div>
 
   <section class="ds-l-row--12 ds-l-md-col--9 ds-u-md-padding-left--2">
-    <%= link_to download_internal_users_path(format: :csv, users: @users.map(&:id)),  class: "utility-button" do %>
-      <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <use xlink:href="/assets/solid.svg#download"></use>
-      </svg>
-      Download CSV
-    <% end %>
-
-    <h1 class="ds-h1"><%= internal_users_header(@users.total_count) %></h1>
     <p class=""><%= page_entries_info @users %></p>
-    <%= form_tag internal_users_path, method: "get", class: "ds-u-display--flex" do %>
+    <%= form_tag users_path, method: "get", class: "ds-u-display--flex" do %>
       <%= hidden_field_tag :org_status, params[:org_status] %>
       <%= text_field_tag :keyword, params[:keyword], placeholder: "first name, last name, or email", class: "ds-c-field ds-u-margin--0" %>
       <%= submit_tag "Search", data: { test: 'users-keyword-search-submit' }, class: "ds-c-button ds-c-button--primary ds-u-margin-left--1" %>
@@ -38,7 +30,7 @@
           <%= user.id %>
         </div>
         <div class="module-container__primary">
-          <h2 class="module-container__heading"><%= link_to user.name, internal_user_path(user) %></h2>
+          <h2 class="module-container__heading"><%= link_to user.name, user_path(user) %></h2>
           <div class="site-pills ds-u-margin--0 ds-u-padding-x--2">
           <% user.taggings.each do |tagging| %>
             <span class="site-pills__item site-pills__item--small">
