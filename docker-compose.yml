@@ -22,7 +22,6 @@ services:
       - ./ops/config/decrypted/local.env
     environment:
       - ENV=local
-      - consentServiceUrl="http://consent:3600/v1/Consent/"
       - USE_BFD_MOCK=${USE_BFD_MOCK:-true}
       - JACOCO=${REPORT_COVERAGE}
     depends_on:
