@@ -10,7 +10,7 @@ func GetNPI(fhirModel []byte) (string, error) {
 }
 
 func GetIdentifier(fhirModel []byte, system string) (string, error) {
-	var r model.Resource
+	var r model.IdentifierResource
 	err := json.Unmarshal(fhirModel, &r)
 	if err != nil {
 		return "", err

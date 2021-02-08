@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/CMSgov/dpc/attribution/pkg/model"
+	"github.com/CMSgov/dpc/api/pkg/model"
 	"github.com/darahayes/go-boom"
 	"go.uber.org/zap"
 	"net/http"

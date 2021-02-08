@@ -52,8 +52,6 @@ func (oc *OrganizationController) GetOrganization(w http.ResponseWriter, r *http
 		return
 	}
 
-	zap.L().Info("Hello")
-
 	//Call database and get stuff
 	org := &orm.Organization{ID: organizationID}
 	err := oc.db.Model(org).WherePK().Select()

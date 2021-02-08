@@ -22,9 +22,9 @@ func NewDPCAPIRouter() http.Handler {
 		r.Route("/Organization", func(r chi.Router) {
 			r.Route("/{organizationID}", func(r chi.Router) {
 				r.Use(v2.OrganizationCtx)
-				r.Get("/", c.GetOrganization)
+				r.With(FHIRMiddleware).Get("/", c.GetOrganization)
 			})
-			r.Post("/", c.CreateOrganization)
+			r.With(FHIRMiddleware).Post("/", c.CreateOrganization)
 		})
 	})
 

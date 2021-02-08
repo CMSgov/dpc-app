@@ -58,21 +58,8 @@ func (organizationController *OrganizationController) GetOrganization(w http.Res
 		return
 	}
 
-	if err = isValidOrganization(resp); err != nil {
-		zap.L().Error("Organization is not a properly formed FHIR object", zap.Error(err))
-		fhirror.ServerIssue(w, http.StatusNotFound, "Failed to find organization")
-		return
-	}
-
-	o, err := unmarshalMarshal(resp)
-	if err != nil {
-		zap.L().Error("Could not convert to fhir byte array", zap.Error(err))
-		fhirror.ServerIssue(w, http.StatusNotFound, "Failed to find organization")
-		return
-	}
-
 	w.Header().Set("Content-Type", "application/json")
-	if _, err = w.Write(o); err != nil {
+	if _, err = w.Write(resp); err != nil {
 		zap.L().Error("Failed to write data to response", zap.Error(err))
 		fhirror.ServerIssue(w, http.StatusNotFound, "Failed to find organization")
 	}
@@ -93,34 +80,14 @@ func (organizationController *OrganizationController) CreateOrganization(w http.
 		return
 	}
 
-	o, err := unmarshalMarshal(resp)
-	if err != nil {
-		zap.L().Error("Could not convert to fhir byte array", zap.Error(err))
-		fhirror.ServerIssue(w, http.StatusUnprocessableEntity, "Failed to save organization")
-		return
-	}
-
 	w.Header().Set("Content-Type", "application/json")
-	if _, err = w.Write(o); err != nil {
+	if _, err = w.Write(resp); err != nil {
 		zap.L().Error("Failed to write data to response", zap.Error(err))
 		fhirror.ServerIssue(w, http.StatusUnprocessableEntity, "Failed to save organization")
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
 
-//Unmarshal and marshall using fhir library to get the json keys in a good order
-//doesn't matter as it only makes the json prettier
-func unmarshalMarshal(resp []byte) ([]byte, error) {
-	o, err := fhir.UnmarshalOrganization(resp)
-	if err != nil {
-		return nil, err
-	}
-	b, err := o.MarshalJSON()
-	if err != nil {
-		return nil, err
-	}
-	return b, nil
-}
 func isValidOrganization(org []byte) error {
 	_, err := fhir.UnmarshalOrganization(org)
 	if err != nil {
