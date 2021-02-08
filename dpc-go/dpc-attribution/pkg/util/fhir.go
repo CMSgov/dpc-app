@@ -1,17 +1,25 @@
 package util
 
-import "github.com/CMSgov/dpc/attribution/pkg/model"
+import (
+	"encoding/json"
+	"github.com/CMSgov/dpc/attribution/pkg/model"
+)
 
-func GetNPI(identifiers []model.Identifier) string {
-	return GetIdentifier(identifiers, "http://hl7.org/fhir/sid/us-npi")
+func GetNPI(fhirModel []byte) (string, error) {
+	return GetIdentifier(fhirModel, "http://hl7.org/fhir/sid/us-npi")
 }
 
-func GetIdentifier(identifiers []model.Identifier, system string) string {
+func GetIdentifier(fhirModel []byte, system string) (string, error) {
+	var r model.Resource
+	err := json.Unmarshal(fhirModel, &r)
+	if err != nil {
+		return "", err
+	}
 	vsf := make([]model.Identifier, 0)
-	for _, v := range identifiers {
+	for _, v := range r.Identifier {
 		if v.System == system {
 			vsf = append(vsf, v)
 		}
 	}
-	return vsf[0].Value
+	return vsf[0].Value, nil
 }

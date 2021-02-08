@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/CMSgov/dpc/attribution/pkg/model"
 	"github.com/CMSgov/dpc/attribution/pkg/orm"
 	"github.com/CMSgov/dpc/attribution/pkg/util"
 	"github.com/darahayes/go-boom"
@@ -121,12 +120,10 @@ func (oc *OrganizationController) SaveOrganization(w http.ResponseWriter, r *htt
 }
 
 func (oc *OrganizationController) npiExists(b []byte) error {
-	var r model.Resource
-	err := json.Unmarshal(b, &r)
+	npi, err := util.GetNPI(b)
 	if err != nil {
 		return err
 	}
-	npi := util.GetNPI(r.Identifier)
 	count, err := oc.db.Model((*orm.Organization)(nil)).Where("info @> '{\"identifier\": [{\"value\": ?}]}'", pg.Ident(npi)).Count()
 	if err != nil {
 		return err
