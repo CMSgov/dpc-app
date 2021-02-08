@@ -1,35 +1,30 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
+	"gopkg.in/yaml.v2"
+	"io/ioutil"
 	"net/http"
 	"os"
 
-	attribution "github.com/CMSgov/dpc/pkg/attribution"
+	attribution "github.com/CMSgov/dpc/attribution/pkg"
 
 	"go.uber.org/zap"
 )
 
 func init() {
-	rawJSON := []byte(`{
-	  "level": "info",
-	  "encoding": "json",
-	  "outputPaths": ["stdout"],
-	  "errorOutputPaths": ["stderr"],
-	  "encoderConfig": {
-	    "messageKey": "message",
-	    "levelKey": "level",
-	    "levelEncoder": "lowercase",
-        "timeEncoder": "iso8601",
-        "timeKey": "timestamp",
-        "callerEncoder": "short",
-        "callerKey": "caller"
-	  }
-	}`)
+	lcfgfile, found := os.LookupEnv("API_LOG_CONFIG")
+	if !found {
+		lcfgfile = "logconfig.yml"
+	}
+
+	lcfg, err := ioutil.ReadFile(lcfgfile)
+	if err != nil {
+		panic(err)
+	}
 
 	var cfg zap.Config
-	if err := json.Unmarshal(rawJSON, &cfg); err != nil {
+	if err := yaml.Unmarshal(lcfg, &cfg); err != nil {
 		panic(err)
 	}
 	logger, err := cfg.Build()
