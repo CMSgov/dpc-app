@@ -24,7 +24,7 @@ func (l httpClientLogger) Info(msg string, keysAndValues ...interface{}) {
 }
 
 func (l httpClientLogger) Debug(msg string, keysAndValues ...interface{}) {
-	l.l.Info(msg, fields(keysAndValues)...)
+	l.l.Debug(msg, fields(keysAndValues)...)
 }
 
 func (l httpClientLogger) Warn(msg string, keysAndValues ...interface{}) {

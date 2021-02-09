@@ -1,4 +1,4 @@
-level: info
+level: debug
 encoding: json
 outputPaths:
   - "stdout"
