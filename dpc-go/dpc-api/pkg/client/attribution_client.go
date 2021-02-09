@@ -30,6 +30,7 @@ type AttributionClient struct {
 func NewAttributionClient(config *AttributionConfig) *AttributionClient {
 	client := retryablehttp.NewClient()
 	client.RetryMax = config.Retries
+	client.Logger = newLogger(*zap.L())
 	return &AttributionClient{
 		config:     config,
 		httpClient: client,
