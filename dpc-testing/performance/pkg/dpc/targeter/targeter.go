@@ -105,11 +105,7 @@ func GenStrs(strs []string) func() string {
 	i := 0
 	n := len(strs)
 	return func() string {
-		if i >= n {
-			return ""
-		}
-
-		nextVal := strs[i]
+		nextVal := strs[i%n]
 		i++
 		return nextVal
 	}

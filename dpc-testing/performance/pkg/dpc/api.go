@@ -1,7 +1,7 @@
 package dpc
 
 import (
-	"bufio"
+	"bytes"
 	"crypto"
 	"crypto/rand"
 	"crypto/rsa"
@@ -12,13 +12,13 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"os"
 	"strings"
 
 	dpcclient "github.com/CMSgov/dpc-app/dpcclient/lib"
 )
 
 type API struct {
+	publicURL      string
 	URL            string
 	goldenMacaroon []byte
 	AdminAPI
@@ -35,7 +35,11 @@ func New(apiURL string, admin AdminAPI) *API {
 }
 
 func (api *API) RefreshAccessToken(privateKey *rsa.PrivateKey, keyID string, clientToken []byte) string {
-	authToken, err := dpcclient.GenerateAuthToken(privateKey, keyID, clientToken, api.URL)
+	url := api.URL
+	if len(api.publicURL) > 0 {
+		url = api.publicURL
+	}
+	authToken, err := dpcclient.GenerateAuthToken(privateKey, keyID, clientToken, url)
 	if err != nil {
 		cleanAndPanic(err)
 	}
@@ -48,11 +52,10 @@ func (api *API) RefreshAccessToken(privateKey *rsa.PrivateKey, keyID string, cli
 	return accessToken
 }
 
-func (api *API) CreateOrg() string {
-	orgBundleFile, _ := os.Open("../../src/main/resources/organization_bundle_parameters.json")
-	defer orgBundleFile.Close()
-	orgBundleReader := bufio.NewReader(orgBundleFile)
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/Organization/$submit", api.URL), orgBundleReader)
+func (api *API) CreateOrgWithTemplate(fp string) string {
+	orgBundle := templateBodyGenerator(fp, map[string]func() string{"{NPI}": generateNPI})
+	buffer := bytes.NewBuffer(orgBundle())
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/Organization/$submit", api.URL), buffer)
 	if err != nil {
 		cleanAndPanic(err)
 	}
@@ -70,6 +73,10 @@ func (api *API) CreateOrg() string {
 		cleanAndPanic(errors.New(string(orgResp)))
 	}
 	return result.ID
+}
+
+func (api *API) CreateOrg() string {
+	return api.CreateOrgWithTemplate("./templates/organization-bundle-template.json")
 }
 
 func (api *API) GenerateKeyPairAndSignature() (string, *rsa.PrivateKey, string) {
