@@ -31,12 +31,6 @@ import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
-import java.time.OffsetDateTime;
-import org.apache.commons.lang3.StringUtils;
-import java.time.format.DateTimeParseException;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
