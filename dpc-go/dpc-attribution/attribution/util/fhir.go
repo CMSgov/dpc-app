@@ -2,7 +2,7 @@ package util
 
 import (
 	"encoding/json"
-	"github.com/CMSgov/dpc/attribution/pkg/model"
+	"github.com/CMSgov/dpc/attribution/model"
 )
 
 func GetNPI(fhirModel []byte) (string, error) {

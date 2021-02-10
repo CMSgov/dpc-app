@@ -2,16 +2,17 @@ package v2
 
 import (
 	"context"
-	"github.com/CMSgov/dpc/api/pkg/fhirror"
+	"github.com/CMSgov/dpc/api/fhirror"
+	"github.com/CMSgov/dpc/api/logger"
 	"github.com/pkg/errors"
 	"github.com/samply/golang-fhir-models/fhir-models/fhir"
+	"go.uber.org/zap"
 	"io/ioutil"
 	"net/http"
 
 	"github.com/go-chi/chi"
-	"go.uber.org/zap"
 
-	"github.com/CMSgov/dpc/api/pkg/client"
+	"github.com/CMSgov/dpc/api/client"
 )
 
 type contextKey string
@@ -45,46 +46,48 @@ func NewOrganizationController(config *client.AttributionConfig) *OrganizationCo
 
 func (organizationController *OrganizationController) GetOrganization(w http.ResponseWriter, r *http.Request) {
 	organizationID, ok := r.Context().Value(contextKeyOrganization).(string)
+	log := logger.WithContext(r.Context())
 	if !ok {
-		zap.L().Error("Failed to extract the organization id from the context")
-		fhirror.BusinessViolation(w, http.StatusBadRequest, "Failed to extract organization id from url, please check the url")
+		log.Error("Failed to extract the organization id from the context")
+		fhirror.BusinessViolation(w, r.Context(), http.StatusBadRequest, "Failed to extract organization id from url, please check the url")
 		return
 	}
 
-	resp, err := organizationController.attributionClient.Get(client.Organization, organizationID)
+	resp, err := organizationController.attributionClient.Get(r.Context(), client.Organization, organizationID)
 	if err != nil {
-		zap.L().Error("Failed to get the org from attribution", zap.Error(err))
-		fhirror.ServerIssue(w, http.StatusNotFound, "Failed to find organization")
+		log.Error("Failed to get the org from attribution", zap.Error(err))
+		fhirror.ServerIssue(w, r.Context(), http.StatusNotFound, "Failed to find organization")
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
+	//w.Header().Set("Content-Type", "application/fhir+json")
 	if _, err = w.Write(resp); err != nil {
-		zap.L().Error("Failed to write data to response", zap.Error(err))
-		fhirror.ServerIssue(w, http.StatusNotFound, "Failed to find organization")
+		log.Error("Failed to write data to response", zap.Error(err))
+		fhirror.ServerIssue(w, r.Context(), http.StatusNotFound, "Failed to find organization")
 	}
 }
 
 func (organizationController *OrganizationController) CreateOrganization(w http.ResponseWriter, r *http.Request) {
 	body, _ := ioutil.ReadAll(r.Body)
+	log := logger.WithContext(r.Context())
+
 	if err := isValidOrganization(body); err != nil {
-		zap.L().Error("Organization is not valid in request")
-		fhirror.BusinessViolation(w, http.StatusBadRequest, "Not a valid organization")
+		log.Error("Organization is not valid in request")
+		fhirror.BusinessViolation(w, r.Context(), http.StatusBadRequest, "Not a valid organization")
 		return
 	}
 
-	resp, err := organizationController.attributionClient.Post(client.Organization, body)
+	resp, err := organizationController.attributionClient.Post(r.Context(), client.Organization, body)
 	if err != nil {
-		zap.L().Error("Failed to save the org to attribution", zap.Error(err))
-		fhirror.ServerIssue(w, http.StatusUnprocessableEntity, "Failed to save the organization")
+		log.Error("Failed to save the org to attribution", zap.Error(err))
+		fhirror.ServerIssue(w, r.Context(), http.StatusUnprocessableEntity, "Failed to save the organization")
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
+	//w.Header().Set("Content-Type", "application/fhir+json")
 	if _, err = w.Write(resp); err != nil {
-		zap.L().Error("Failed to write data to response", zap.Error(err))
-		fhirror.ServerIssue(w, http.StatusUnprocessableEntity, "Failed to save organization")
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Error("Failed to write data to response", zap.Error(err))
+		fhirror.ServerIssue(w, r.Context(), http.StatusUnprocessableEntity, "Failed to save organization")
 	}
 }
 

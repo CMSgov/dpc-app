@@ -2,41 +2,26 @@ package main
 
 import (
 	"fmt"
-	"gopkg.in/yaml.v2"
-	"io/ioutil"
+	"github.com/CMSgov/dpc/api/client"
+	v2 "github.com/CMSgov/dpc/api/v2"
 	"net/http"
 	"os"
 
-	api "github.com/CMSgov/dpc/api/pkg"
-
-	"go.uber.org/zap"
+	"github.com/CMSgov/dpc/api"
 )
 
-func init() {
-	lcfgfile, found := os.LookupEnv("API_LOG_CONFIG")
-	if !found {
-		lcfgfile = "logconfig.yml"
-	}
-
-	lcfg, err := ioutil.ReadFile(lcfgfile)
-	if err != nil {
-		panic(err)
-	}
-
-	var cfg zap.Config
-	if err := yaml.Unmarshal(lcfg, &cfg); err != nil {
-		panic(err)
-	}
-	logger, err := cfg.Build()
-	if err != nil {
-		panic(err)
-	}
-	zap.ReplaceGlobals(logger)
-	defer logger.Sync()
-}
-
 func main() {
-	router := api.NewDPCAPIRouter()
+	attributionURL, found := os.LookupEnv("ATTRIBUTION_URL")
+	if !found {
+		attributionURL = "http://localhost:3001"
+	}
+
+	c := v2.NewOrganizationController(&client.AttributionConfig{
+		URL:     attributionURL,
+		Retries: 3,
+	})
+
+	router := api.NewDPCAPIRouter(c)
 
 	port := os.Getenv("API_PORT")
 	if port == "" {

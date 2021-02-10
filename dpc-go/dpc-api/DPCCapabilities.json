@@ -1,0 +1,36 @@
+{
+  "resourceType": "CapabilityStatement",
+  "description": "This Capability Statement defines the available resource, endpoints and operations supported by the Data @ the Point of Care Application.",
+  "id": "dpc-capabilities",
+  "status": "draft",
+  "date": "2021",
+  "publisher": "Centers for Medicare and Medicaid Services",
+  "kind": "instance",
+  "software": {
+    "name": "Data @ Point of Care API"
+  },
+  "fhirVersion": "4.0.1",
+  "acceptUnknown": "extensions",
+  "format": [
+    "application/json",
+    "application/fhir+json"
+  ],
+  "rest": [
+    {
+      "mode": "server",
+      "security": {
+        "cors": true
+      },
+      "resource": [
+        {
+          "type": "Organization",
+          "interaction": [
+            {
+              "code": "read"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

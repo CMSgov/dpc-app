@@ -1,14 +1,17 @@
-package pkg
+package api
 
 import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/CMSgov/dpc/api/pkg/model"
+	"github.com/CMSgov/dpc/api/logger"
+	"github.com/CMSgov/dpc/api/model"
 	"github.com/darahayes/go-boom"
 	"go.uber.org/zap"
 	"net/http"
 )
+
+var log *zap.Logger
 
 type ResponseWriter struct {
 	http.ResponseWriter
@@ -27,6 +30,7 @@ func (rw *ResponseWriter) WriteHeader(status int) {
 
 func FHIRMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log = logger.WithContext(r.Context())
 		rw := &ResponseWriter{
 			ResponseWriter: w,
 			buf:            &bytes.Buffer{},
@@ -40,13 +44,13 @@ func FHIRMiddleware(next http.Handler) http.Handler {
 			body, err := convertToFHIR(b)
 			b = body
 			if err != nil {
-				zap.L().Error("Failed to convert to fhir", zap.Error(err))
+				log.Error("Failed to convert to fhir", zap.Error(err))
 				boom.Internal(w, err.Error())
 			}
 		}
 
 		if _, err := w.Write(b); err != nil {
-			zap.L().Error("Failed to write data", zap.Error(err))
+			log.Error("Failed to write data", zap.Error(err))
 			boom.Internal(w, err.Error())
 		}
 
@@ -56,7 +60,7 @@ func FHIRMiddleware(next http.Handler) http.Handler {
 func convertToFHIR(body []byte) ([]byte, error) {
 	var result model.Resource
 	if err := json.Unmarshal(body, &result); err != nil {
-		zap.L().Error("Failed to convert to FHIR model", zap.Error(err))
+		log.Error("Failed to convert to FHIR model", zap.Error(err))
 		return nil, err
 	}
 

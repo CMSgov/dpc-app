@@ -1,7 +1,10 @@
 package client
 
 import (
+	"context"
 	"fmt"
+	"github.com/CMSgov/dpc/api/logger"
+	"github.com/go-chi/chi/middleware"
 	"github.com/hashicorp/go-retryablehttp"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
@@ -30,24 +33,27 @@ type AttributionClient struct {
 func NewAttributionClient(config *AttributionConfig) *AttributionClient {
 	client := retryablehttp.NewClient()
 	client.RetryMax = config.Retries
-	client.Logger = newLogger(*zap.L())
 	return &AttributionClient{
 		config:     config,
 		httpClient: client,
 	}
 }
 
-func (attributionClient *AttributionClient) Get(resourceType ResourceType, id string) ([]byte, error) {
-	url := fmt.Sprintf("%s/%s/%s", attributionClient.config.URL, resourceType, id)
+func (ac *AttributionClient) Get(ctx context.Context, resourceType ResourceType, id string) ([]byte, error) {
+	log := logger.WithContext(ctx)
+	ac.httpClient.Logger = newLogger(*log)
+
+	url := fmt.Sprintf("%s/%s/%s", ac.config.URL, resourceType, id)
 	req, err := retryablehttp.NewRequest("GET", url, nil)
 	if err != nil {
-		zap.L().Error("Failed to create request", zap.Error(err))
+		log.Error("Failed to create request", zap.Error(err))
 		return nil, errors.Errorf("Failed to retrieve resource %s/%s", resourceType, id)
 	}
 
-	resp, err := attributionClient.httpClient.Do(req)
+	req.Header.Add(middleware.RequestIDHeader, ctx.Value(middleware.RequestIDKey).(string))
+	resp, err := ac.httpClient.Do(req)
 	if err != nil {
-		zap.L().Error("Failed to send request", zap.Error(err))
+		log.Error("Failed to send request", zap.Error(err))
 		return nil, errors.Errorf("Failed to retrieve resource %s/%s", resourceType, id)
 	}
 
@@ -58,29 +64,33 @@ func (attributionClient *AttributionClient) Get(resourceType ResourceType, id st
 	defer func() {
 		err := resp.Body.Close()
 		if err != nil {
-			zap.L().Error("Failed to close response body", zap.Error(err))
+			log.Error("Failed to close response body", zap.Error(err))
 		}
 	}()
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		zap.L().Error("Failed to read the response body", zap.Error(err))
+		log.Error("Failed to read the response body", zap.Error(err))
 		return nil, errors.Errorf("Failed to retrieve resource %s/%s", resourceType, id)
 	}
 	return body, nil
 }
 
-func (attributionClient *AttributionClient) Post(resourceType ResourceType, organization []byte) ([]byte, error) {
-	url := fmt.Sprintf("%s/%s", attributionClient.config.URL, resourceType)
+func (ac *AttributionClient) Post(ctx context.Context, resourceType ResourceType, organization []byte) ([]byte, error) {
+	log := logger.WithContext(ctx)
+	ac.httpClient.Logger = newLogger(*log)
+
+	url := fmt.Sprintf("%s/%s", ac.config.URL, resourceType)
 	req, err := retryablehttp.NewRequest("POST", url, organization)
 	if err != nil {
-		zap.L().Error("Failed to create request", zap.Error(err))
+		log.Error("Failed to create request", zap.Error(err))
 		return nil, errors.Errorf("Failed to save resource %s", resourceType)
 	}
 
-	resp, err := attributionClient.httpClient.Do(req)
+	req.Header.Add(middleware.RequestIDHeader, ctx.Value(middleware.RequestIDKey).(string))
+	resp, err := ac.httpClient.Do(req)
 	if err != nil {
-		zap.L().Error("Failed to send request", zap.Error(err))
+		log.Error("Failed to send request", zap.Error(err))
 		return nil, errors.Errorf("Failed to save resource %s", resourceType)
 	}
 
@@ -91,13 +101,13 @@ func (attributionClient *AttributionClient) Post(resourceType ResourceType, orga
 	defer func() {
 		err := resp.Body.Close()
 		if err != nil {
-			zap.L().Error("Failed to close response body", zap.Error(err))
+			log.Error("Failed to close response body", zap.Error(err))
 		}
 	}()
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		zap.L().Error("Failed to read the response body", zap.Error(err))
+		log.Error("Failed to read the response body", zap.Error(err))
 		return nil, errors.Errorf("Failed to save resource %s", resourceType)
 	}
 	return body, nil

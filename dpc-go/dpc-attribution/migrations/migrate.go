@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/CMSgov/dpc/attribution/pkg/orm"
+	"github.com/CMSgov/dpc/attribution/orm"
 	"github.com/go-pg/migrations/v8"
 
 	"os"

@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	models "github.com/CMSgov/dpc/attribution/pkg/orm"
+	models "github.com/CMSgov/dpc/attribution/orm"
 	"github.com/go-pg/migrations/v8"
 	"github.com/go-pg/pg/v10/orm"
 )
