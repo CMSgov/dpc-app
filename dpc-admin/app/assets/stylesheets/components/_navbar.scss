@@ -1,7 +1,7 @@
 .site-logo,
 .site-logo:visited {
   align-items: center;
-  color: #112E51;
+  color: $color-primary-darkest;
   display: flex;
   flex-shrink: 0;
   font-size: 16px;
@@ -9,7 +9,7 @@
   text-decoration: none;
   width: 15rem;
 
-  @media (min-width: 411px) {
+  @media (min-width: $width-sm) {
     font-size: 21px;
     width: 20rem;
   }
@@ -18,7 +18,7 @@
     margin-right: 8px;
     width: 16px;
 
-    @media (min-width: 411px) {
+    @media (min-width: $width-sm) {
       width: 32px;
     }
   }
