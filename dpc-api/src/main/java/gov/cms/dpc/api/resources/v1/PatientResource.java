@@ -222,21 +222,6 @@ public class PatientResource extends AbstractPatientResource {
         throw new WebApplicationException(HttpStatus.INTERNAL_SERVER_ERROR_500);
     }
 
-    private OffsetDateTime handleSinceQueryParam(String sinceParam) {
-        if (!StringUtils.isBlank(sinceParam)) {
-            try{
-                OffsetDateTime sinceDate = OffsetDateTime.parse(sinceParam, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-                if (sinceDate.isAfter(OffsetDateTime.now(ZoneId.systemDefault()))) {
-                    throw new BadRequestException("'_since' query parameter cannot be a future date");
-                }
-                return sinceDate;
-            }catch (DateTimeParseException e){
-                throw new BadRequestException("_since parameter `"+e.getParsedString()+"` could not be parsed at index "+e.getErrorIndex());
-            }
-        }
-        return null;
-    }
-
     @DELETE
     @FHIR
     @Path("/{patientID}")
