@@ -9,6 +9,7 @@ gem 'dotenv-rails', groups: [:development, :test]
 gem 'puma', '~> 4.1'
 gem 'redis', '~> 4.0'
 gem 'luhnacy', '~> 0.2.1'
+gem 'omniauth-rails_csrf_protection', '~> 0.1'
 gem 'webpacker', '~> 4.0'
 gem 'turbolinks', '~> 5'
 gem 'jbuilder', '~> 2.7'
@@ -19,6 +20,9 @@ gem 'pg', '>= 0.18', '< 2.0'
 gem 'devise'
 gem 'devise-async'
 gem 'devise-security'
+gem 'omniauth-github'
+gem 'omniauth-oktaoauth'
+gem 'octokit' # can be removed once we move past github omniauth
 gem 'redis-namespace'
 gem 'kaminari'
 

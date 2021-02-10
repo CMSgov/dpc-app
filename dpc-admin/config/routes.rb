@@ -1,4 +1,9 @@
 Rails.application.routes.draw do
+  devise_for :internal_users, path: 'internal', controllers: {
+    sessions: "auth/sessions",
+    omniauth_callbacks: "auth/omniauth_callbacks"
+  }
+
   resources :users, only: [:index, :show, :edit, :update, :destroy] do
     collection { get :download }
   end

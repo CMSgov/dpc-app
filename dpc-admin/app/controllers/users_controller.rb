@@ -3,7 +3,7 @@
 require 'csv'
 
 class UsersController < ApplicationController
-  # before_action :authenticate_internal_user!
+  before_action :authenticate_internal_user!
 
   def index
     results = BaseSearch.new(params: params, scope: params[:org_type]).results
