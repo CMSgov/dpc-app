@@ -26,8 +26,7 @@ func Metadata(w http.ResponseWriter, r *http.Request) {
 
 	capabilitiesFile, found := os.LookupEnv("CAPABILITIES_FILE")
 	if !found {
-		pwd, _ := os.Getwd()
-		capabilitiesFile = pwd + "/DPCCapabilities.json"
+		capabilitiesFile = "DPCCapabilities.json"
 	}
 
 	b, err := ioutil.ReadFile(capabilitiesFile)
