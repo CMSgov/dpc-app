@@ -6,8 +6,13 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import ca.uhn.fhir.rest.gclient.IReadExecutable;
 import ca.uhn.fhir.rest.gclient.IUpdateExecutable;
+import ca.uhn.fhir.rest.param.StringParam;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.OffsetDateTime;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
@@ -274,7 +279,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
         final String patientId = FHIRExtractors.getEntityUUID(patient.getId()).toString();
 
         // Patient without Group should still return data
-        Bundle result = client
+        Bundle resultNoSince = client
                 .operation()
                 .onInstance(new IdType("Patient", patientId))
                 .named("$everything")
@@ -284,7 +289,61 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
                 .withAdditionalHeader("X-Provenance", generateProvenance(ORGANIZATION_ID, practitioner.getId()))
                 .execute();
 
-        assertEquals(64, result.getTotal(), "Should have 64 entries in Bundle");
+        assertEquals(64, resultNoSince.getTotal(), "Should have 64 entries in Bundle");
+        
+        // Request with a blank since parameter should still return data
+        Bundle resultEmptySince = client
+                .operation()
+                .onInstance(new IdType("Patient", patientId))
+                .named("$everything")
+                .withSearchParameter(Parameters.class, "_since", new StringParam(""))
+                .returnResourceType(Bundle.class)
+                .useHttpGet()
+                .withAdditionalHeader("X-Provenance", generateProvenance(ORGANIZATION_ID, practitioner.getId()))
+                .execute();
+
+        assertEquals(64, resultEmptySince.getTotal(), "Should have 64 entries in Bundle");
+        
+        // Request with an invalid since parameter should throw an error
+        assertThrows(InvalidRequestException.class, () -> {
+            client
+                    .operation()
+                    .onInstance(new IdType("Patient", patientId))
+                    .named("$everything")
+                    .withSearchParameter(Parameters.class, "_since", new StringParam("foo"))
+                    .returnResourceType(Bundle.class)
+                    .useHttpGet()
+                    .withAdditionalHeader("X-Provenance", generateProvenance(ORGANIZATION_ID, practitioner.getId()))
+                    .execute();
+        });
+
+        // Request with a since parameter in the future should throw an error
+        String sinceInvalid = OffsetDateTime.now(ZoneId.of("America/Puerto_Rico")).plusDays(10).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+        assertThrows(InvalidRequestException.class, () -> {
+        client
+                .operation()
+                .onInstance(new IdType("Patient", patientId))
+                .named("$everything")
+                .withSearchParameter(Parameters.class, "_since", new StringParam(sinceInvalid))
+                .returnResourceType(Bundle.class)
+                .useHttpGet()
+                .withAdditionalHeader("X-Provenance", generateProvenance(ORGANIZATION_ID, practitioner.getId()))
+                .execute();
+        });
+        
+        // Request with a valid since parameter should return data
+        String sinceValid = OffsetDateTime.now(ZoneId.of("America/Puerto_Rico")).minusSeconds(5).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+        Bundle resultValidSince = client
+                .operation()
+                .onInstance(new IdType("Patient", patientId))
+                .named("$everything")
+                .withSearchParameter(Parameters.class, "_since", new StringParam(sinceValid))
+                .returnResourceType(Bundle.class)
+                .useHttpGet()
+                .withAdditionalHeader("X-Provenance", generateProvenance(ORGANIZATION_ID, practitioner.getId()))
+                .execute();
+
+        assertEquals(0, resultValidSince.getTotal(), "Should have 0 entries in Bundle");
     }
 
     @Test
@@ -310,7 +369,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
                 .encodedJson()
                 .execute();
 
-        Bundle result = client
+        Bundle resultNoSince = client
                 .operation()
                 .onInstance(new IdType("Patient", patientId))
                 .named("$everything")
@@ -320,11 +379,64 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
                 .withAdditionalHeader("X-Provenance", generateProvenance(ORGANIZATION_ID, practitioner.getId()))
                 .execute();
 
-        assertEquals(64, result.getTotal(), "Should have 64 entries in Bundle");
-        for (Bundle.BundleEntryComponent bec : result.getEntry()) {
+        assertEquals(64, resultNoSince.getTotal(), "Should have 64 entries in Bundle");
+        for (Bundle.BundleEntryComponent bec : resultNoSince.getEntry()) {
             List<ResourceType> resourceTypes = List.of(ResourceType.Coverage, ResourceType.ExplanationOfBenefit, ResourceType.Patient);
             assertTrue(resourceTypes.contains(bec.getResource().getResourceType()), "Resource type should be Coverage, EOB, or Patient");
         }
+
+        Bundle resultEmptySince = client
+                .operation()
+                .onInstance(new IdType("Patient", patientId))
+                .named("$everything")
+                .withSearchParameter(Parameters.class, "_since", new StringParam(""))
+                .returnResourceType(Bundle.class)
+                .useHttpGet()
+                .withAdditionalHeader("X-Provenance", generateProvenance(ORGANIZATION_ID, practitioner.getId()))
+                .execute();
+
+        assertEquals(64, resultEmptySince.getTotal(), "Should have 64 entries in Bundle");
+
+        assertThrows(InvalidRequestException.class, () -> {
+        client
+                .operation()
+                .onInstance(new IdType("Patient", patientId))
+                .named("$everything")
+                .withSearchParameter(Parameters.class, "_since", new StringParam("foo"))
+                .returnResourceType(Bundle.class)
+                .useHttpGet()
+                .withAdditionalHeader("X-Provenance", generateProvenance(ORGANIZATION_ID, practitioner.getId()))
+                .execute();
+
+        });
+
+        String sinceInvalid = OffsetDateTime.now(ZoneId.of("America/Puerto_Rico")).plusDays(10).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+        assertThrows(InvalidRequestException.class, () -> {
+        client
+                .operation()
+                .onInstance(new IdType("Patient", patientId))
+                .named("$everything")
+                .withSearchParameter(Parameters.class, "_since", new StringParam(sinceInvalid))
+                .returnResourceType(Bundle.class)
+                .useHttpGet()
+                .withAdditionalHeader("X-Provenance", generateProvenance(ORGANIZATION_ID, practitioner.getId()))
+                .execute();
+
+        });
+
+        // Request with a valid since parameter should return data
+        String sinceValid = OffsetDateTime.now(ZoneId.of("America/Puerto_Rico")).minusSeconds(5).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+        Bundle resultValidSince = client
+                .operation()
+                .onInstance(new IdType("Patient", patientId))
+                .named("$everything")
+                .withSearchParameter(Parameters.class, "_since", new StringParam(sinceValid))
+                .returnResourceType(Bundle.class)
+                .useHttpGet()
+                .withAdditionalHeader("X-Provenance", generateProvenance(ORGANIZATION_ID, practitioner.getId()))
+                .execute();
+
+        assertEquals(0, resultValidSince.getTotal(), "Should have 0 entries in Bundle");
     }
 
     @Test

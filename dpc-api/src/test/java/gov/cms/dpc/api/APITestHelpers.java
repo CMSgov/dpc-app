@@ -8,6 +8,7 @@ import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.gclient.ICreateTyped;
 import ca.uhn.fhir.rest.gclient.IUpdateExecutable;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
 import com.typesafe.config.ConfigFactory;
@@ -315,7 +316,7 @@ public class APITestHelpers {
        return updateResource(client, id,resource, Maps.newHashMap());
     }
 
-    public static Bundle getPatientEverything(IGenericClient client,String patientId, String provenance){
+    public static Bundle getPatientEverything(IGenericClient client, String patientId, String provenance){
         return client
                 .operation()
                 .onInstance(new IdType("Patient", patientId))
