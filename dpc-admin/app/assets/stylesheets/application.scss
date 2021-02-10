@@ -13,3 +13,10 @@
  *= require_tree .
  *= require_self
  */
+
+@import '@cmsgov/design-system-core/src/index';
+@import '@cmsgov/design-system-layout/src/index';
+
+@import "base/base";
+@import "components/footer";
+@import "components/navbar";

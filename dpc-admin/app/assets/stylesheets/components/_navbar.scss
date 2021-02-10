@@ -1,0 +1,25 @@
+.site-logo,
+.site-logo:visited {
+  align-items: center;
+  color: #112E51;
+  display: flex;
+  flex-shrink: 0;
+  font-size: 16px;
+  font-weight: 700;
+  text-decoration: none;
+  width: 15rem;
+
+  @media (min-width: 411px) {
+    font-size: 21px;
+    width: 20rem;
+  }
+
+  img {
+    margin-right: 8px;
+    width: 16px;
+
+    @media (min-width: 411px) {
+      width: 32px;
+    }
+  }
+}
