@@ -86,7 +86,7 @@ public class SmokeTest extends AbstractJavaSamplerClient {
             logger.info("Post Test Cleanup. Deleting organization: {} host: {}", organizationID, apiHost);
             deleteOrg(organizationID,client);
         } catch (Exception e) {
-            logger.error(String.format("Cannot delete organization: {}", organizationID, e));
+            logger.error("Cannot delete organization: {}", organizationID, e);
             System.exit(1);
         }
         super.teardownTest(context);
@@ -109,7 +109,7 @@ public class SmokeTest extends AbstractJavaSamplerClient {
 
         Bundle providerBundle = submitPractitionerBundle(exportClient,smokeTestSampler);
         Map<String, Reference> patientReferences = submitPatientBundle(exportClient,smokeTestSampler);
-        submitRosters(exportClient,smokeTestSampler, providerBundle, patientReferences);
+        submitRosters(exportClient, providerBundle, patientReferences);
         exportDataAndHandleResults(exportClient,providerBundle,clientToken,keyTuple);
 
         smokeTestSampler.setSuccessful(true);
@@ -151,14 +151,12 @@ public class SmokeTest extends AbstractJavaSamplerClient {
         }
     }
 
-    private void submitRosters(IGenericClient client, SampleResult parentSampler, Bundle providerBundle, Map<String, Reference> patientReferences){
+    private void submitRosters(IGenericClient client,Bundle providerBundle, Map<String, Reference> patientReferences){
         logger.debug("Uploading roster");
         try {
             ClientUtils.createAndUploadRosters(seedFileLoc, providerBundle, client, UUID.fromString(organizationID), patientReferences);
         } catch (Exception e) {
             throw new IllegalStateException("Cannot upload roster", e);
-        }finally {
-
         }
     }
 
