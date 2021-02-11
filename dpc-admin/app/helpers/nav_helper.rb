@@ -26,12 +26,12 @@ module NavHelper
 
   def orgs_header(count)
     org_type = if vendor_organizations_page?
-                  ' vendor'
-                elsif provider_organizations_page?
-                  ' provider'
-                else
-                  ''
-                end
+                 ' vendor'
+               elsif provider_organizations_page?
+                 ' provider'
+               else
+                 ''
+               end
     ('Viewing ' + content_tag(:strong, count) + org_type + ' organization' + plural_suffix(count)).html_safe
   end
 
