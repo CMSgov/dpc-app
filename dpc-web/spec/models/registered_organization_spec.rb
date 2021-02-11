@@ -59,7 +59,7 @@ RSpec.describe RegisteredOrganization, type: :model do
 
       context 'successful API response' do
         it 'updates attributes and notifies users' do
-          allow(ENV).to receive(:[]).with('ENV').and_return('prod-sbx').and_call_original?
+          allow(ENV).to receive(:[]).with('ENV').and_return('prod-sbx')
 
           stub_api_client(
             message: :create_organization,
@@ -100,6 +100,11 @@ RSpec.describe RegisteredOrganization, type: :model do
     end
 
     describe '#notify_users_of_sandbox_access' do
+      before do
+        # stub default value
+        allow(ENV).to receive(:[]).and_call_original
+      end
+
       context 'when sandbox' do
         it 'tells organization to notify users' do
           allow(ENV).to receive(:[]).with('ENV').and_return('prod-sbx')
@@ -111,13 +116,17 @@ RSpec.describe RegisteredOrganization, type: :model do
         end
       end
 
-      context 'when production', skip_db_cleaner: true do
+      context 'when production' do
         it 'does not tell organization to notify users' do
           allow(ENV).to receive(:[]).with('ENV').and_return('production')
           stub_api_client(message: :create_organization, success: true, response: default_org_creation_response)
           expect_any_instance_of(Organization).not_to receive(:notify_users_of_sandbox_access)
 
           create(:registered_organization)
+
+          # DatabaseCleaner prohibits running DatabaseCleaner.clean to run in `production` env.
+          # So the ENV call has to, once again, return test
+          allow(ENV).to receive(:[]).with('ENV').and_return('test')
         end
       end
     end
