@@ -33,6 +33,13 @@ aria-controls="topnav-wrap" aria-label="Close menu">
       <li class="topnav__item">
         <%= link_to "Frequently Asked Questions", root_path, class: "topnav__link" %>
       </li>
+
+      <li class="topnav__item">
+        <a class="topnav__link" href="<%= destroy_internal_user_session_path %>"
+            id="sign-out" data-method="delete" data-test="internal-user-signout">
+            Sign out
+        </a>
+      </li>
     </ul>
   </div>
   <% end %>
