@@ -28,17 +28,19 @@ RSpec.describe BaseSearch do
   end
 
   describe '#organization-results' do
-    let!(:organization) { create(:organization, created_at: 5.days.ago) }
-    let!(:old_organization) { create(:organization, created_at: 10.days.ago) }
-    let!(:new_organization) { create(:organization, created_at: Time.now) }
+    let!(:first) { create(:organization, created_at: 5.days.ago) }
+    let!(:second) { create(:organization, created_at: 10.days.ago) }
+    let!(:third) { create(:organization, created_at: Time.now) }
 
     context 'no scope' do
       it 'returns all organization matching params' do
+        # binding.pry
+
         params = {
           controller: 'internal/organizations',
         }
 
-        expect(BaseSearch.new(params: params).results).to match_array([organization, old_organization, new_organization])
+        expect(BaseSearch.new(params: params).results).to match_array([first, second, third])
       end
     end
 
@@ -51,7 +53,7 @@ RSpec.describe BaseSearch do
           }
   
   
-          expect(BaseSearch.new(params: params).results).to match_array([organization, new_organization])
+          expect(BaseSearch.new(params: params).results).to match_array([first, third])
         end
       end
 
@@ -63,7 +65,7 @@ RSpec.describe BaseSearch do
           }
   
   
-          expect(BaseSearch.new(params: params).results).to match_array([old_organization])
+          expect(BaseSearch.new(params: params).results).to match_array([second])
         end
       end
     end
