@@ -59,7 +59,7 @@ RSpec.configure do |config|
   # It's recommended to use append_after to ensure DatabaseCleaner.clean
   # runs after the after-test cleanup capybara/rspec installs. Particularly
   # on js tests.
-  config.before(:each) do |spec|
+  config.append_after(:each) do |spec|
     unless spec.metadata[:skip_db_cleaner]
       DatabaseCleaner.clean
     end
