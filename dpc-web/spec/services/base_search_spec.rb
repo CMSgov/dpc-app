@@ -34,8 +34,6 @@ RSpec.describe BaseSearch do
 
     context 'no scope' do
       it 'returns all organization matching params' do
-        # binding.pry
-
         params = {
           controller: 'internal/organizations',
         }
@@ -51,8 +49,7 @@ RSpec.describe BaseSearch do
             controller: 'internal/organizations',
             created_after: 7.days.ago
           }
-  
-  
+
           expect(BaseSearch.new(params: params).results).to match_array([first_org, third_org])
         end
       end
@@ -63,8 +60,7 @@ RSpec.describe BaseSearch do
             controller: 'internal/organizations',
             created_before: 7.days.ago
           }
-  
-  
+
           expect(BaseSearch.new(params: params).results).to match_array([second_org])
         end
       end
