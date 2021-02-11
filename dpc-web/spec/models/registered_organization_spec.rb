@@ -59,7 +59,7 @@ RSpec.describe RegisteredOrganization, type: :model do
 
       context 'successful API response' do
         it 'updates attributes and notifies users' do
-          allow(ENV).to receive(:[]).with('ENV').and_return('prod-sbx').and_call_original?
+          allow(ENV).to receive(:[]).with('ENV').and_return('prod-sbx')
 
           stub_api_client(
             message: :create_organization,
