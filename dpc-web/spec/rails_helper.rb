@@ -48,22 +48,14 @@ RSpec.configure do |config|
   config.before(:each) { DatabaseCleaner.strategy = :transaction }
   config.before(:each, js: true) { DatabaseCleaner.strategy = :truncation }
 
-  config.before(:each) do |spec|
-    unless spec.metadata[:skip_db_cleaner]
-      DatabaseCleaner.start
-    end
-  end
+  config.before(:each) { DatabaseCleaner.start }
 
   config.after(:each, type: :feature) { Warden.test_reset! }
 
   # It's recommended to use append_after to ensure DatabaseCleaner.clean
   # runs after the after-test cleanup capybara/rspec installs. Particularly
   # on js tests.
-  config.append_after(:each) do |spec|
-    unless spec.metadata[:skip_db_cleaner]
-      DatabaseCleaner.clean
-    end
-  end
+  config.append_after(:each) { DatabaseCleaner.clean }
 
   config.infer_spec_type_from_file_location!
   config.filter_rails_from_backtrace!
