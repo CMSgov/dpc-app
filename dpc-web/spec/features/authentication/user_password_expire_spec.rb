@@ -12,7 +12,7 @@ RSpec.feature 'user password expires after 2 months' do
     fill_in 'user_password', with: '12345ABCDEfghi!'
     find('[data-test="submit"]').click
 
-    expect(page.body).to include('Renew Your Password')
+    expect(page.body).to include('Renew your password')
     expect(page.body).to include('15 characters minimum')
     expect(page.body).to include('1 lowercase letter')
     expect(page.body).to include('1 uppercase letter')
