@@ -37,6 +37,11 @@ RSpec.describe RegisteredOrganization, type: :model do
 
   describe 'callbacks' do
     describe '#create_api_organization' do
+      before do
+        # stub default value
+        allow(ENV).to receive(:[]).and_call_original
+      end
+
       it 'invokes APIClient and returns the response body' do
         api_client = stub_api_client(
           message: :create_organization,
@@ -106,7 +111,7 @@ RSpec.describe RegisteredOrganization, type: :model do
         end
       end
 
-      context 'when production' do
+      context 'when production', skip_db_cleaner: true do
         it 'does not tell organization to notify users' do
           allow(ENV).to receive(:[]).with('ENV').and_return('production')
           stub_api_client(message: :create_organization, success: true, response: default_org_creation_response)
