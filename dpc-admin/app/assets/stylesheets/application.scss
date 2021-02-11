@@ -14,10 +14,12 @@
  * require_self
  */
 
+// @import 'normalize.css/normalize';
 @import '@cmsgov/design-system-core/src/index';
 @import '@cmsgov/design-system-layout/src/index';
 
-@import "base/base";
 @import "base/variables";
+@import "base/base";
+@import "components/cards";
 @import "components/footer";
 @import "components/navbar";

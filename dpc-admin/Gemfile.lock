@@ -2,7 +2,7 @@ GEM
   remote: https://rubygems.org/
   specs:
     actioncable (6.0.3.4)
-      actionpack (= 6.0.3.4)
+      actionpack (>= 6.1.2.1)
       nio4r (~> 2.0)
       websocket-driver (>= 0.6.1)
     actionmailbox (6.0.3.4)

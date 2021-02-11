@@ -1,5 +1,14 @@
 // Breakpoints
-$width-nav: 1020px;
+$width-nav: 1080px;
+
+// Colors
+$color-gray-ultra-light: #f6f6f6;
+
+// Focus
+$focus-outline:  5px solid $color-gold-light;
+
+// Replace US WDS font stacks with HealthCare.gov font stacks
+$font-mono: 'Roboto Mono', monospace;
 
 // Z-indexes
 $z-index-nav:     8000;
