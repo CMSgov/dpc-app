@@ -30,7 +30,7 @@ func (suite *MetadataControllerTestSuite) TestMetadata() {
 
 	w := httptest.NewRecorder()
 
-	suite.meta.Get(w, req)
+	suite.meta.Read(w, req)
 
 	res := w.Result()
 

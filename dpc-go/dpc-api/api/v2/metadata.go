@@ -22,7 +22,7 @@ func NewMetadataController(capabilitiesFile string) *MetadataController {
 	}
 }
 
-func (mc *MetadataController) Get(w http.ResponseWriter, r *http.Request) {
+func (mc *MetadataController) Read(w http.ResponseWriter, r *http.Request) {
 	const dateFormat = "2006-01-02"
 	dt := time.Now()
 	log := logger.WithContext(r.Context())

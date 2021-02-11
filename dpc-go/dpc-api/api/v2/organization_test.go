@@ -104,7 +104,7 @@ func (suite *OrganizationControllerTestSuite) TestGetOrganizationErrorInClient()
 
 	w := httptest.NewRecorder()
 
-	suite.org.Get(w, req)
+	suite.org.Read(w, req)
 
 	res := w.Result()
 
@@ -141,7 +141,7 @@ func (suite *OrganizationControllerTestSuite) TestGetOrganization() {
 
 	w := httptest.NewRecorder()
 
-	suite.org.Get(w, req)
+	suite.org.Read(w, req)
 
 	res := w.Result()
 

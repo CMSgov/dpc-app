@@ -4,9 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/CMSgov/dpc/api/fhirror"
 	"github.com/CMSgov/dpc/api/logger"
 	"github.com/CMSgov/dpc/api/model"
-	"github.com/darahayes/go-boom"
+	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"net/http"
 )
@@ -37,7 +38,7 @@ func FHIRContentType(next http.Handler) http.Handler {
 		}
 		next.ServeHTTP(rw, r)
 		if isSuccess(rw.Status) {
-			rw.Header().Set("Content-Type", "application/fhir+json")
+			rw.Header().Set("Content-Type", "application/fhir+json; charset=UTF-8")
 		}
 	})
 }
@@ -58,14 +59,15 @@ func FHIRModel(next http.Handler) http.Handler {
 			body, err := convertToFHIR(b)
 			b = body
 			if err != nil {
-				log.Error("Failed to convert to fhir", zap.Error(err))
-				boom.Internal(w, err.Error())
+				log.Error(err.Error(), zap.Error(err))
+				fhirror.GenericServerIssue(rw, r.Context())
+				return
 			}
 		}
 
 		if _, err := w.Write(b); err != nil {
 			log.Error("Failed to write data", zap.Error(err))
-			boom.Internal(w, err.Error())
+			fhirror.GenericServerIssue(rw, r.Context())
 		}
 
 	})
@@ -74,11 +76,13 @@ func FHIRModel(next http.Handler) http.Handler {
 func convertToFHIR(body []byte) ([]byte, error) {
 	var result model.Resource
 	if err := json.Unmarshal(body, &result); err != nil {
-		log.Error("Failed to convert to FHIR model", zap.Error(err))
 		return nil, err
 	}
 
 	fhirModel := result.Info
+	if fhirModel == nil {
+		return nil, errors.New("Malformed fhir model")
+	}
 	fhirModel["id"] = result.ID
 	meta := make(map[string]string)
 	meta["id"] = fmt.Sprintf("%s/%s", result.ResourceType(), result.ID)

@@ -9,6 +9,10 @@ import (
 	"net/http"
 )
 
+func GenericServerIssue(w http.ResponseWriter, ctx context.Context) {
+	fhirError(w, ctx, http.StatusInternalServerError, fhir.IssueSeverityError, fhir.IssueTypeException, "Internal Server Error")
+}
+
 func ServerIssue(w http.ResponseWriter, ctx context.Context, statusCode int, message string) {
 	fhirError(w, ctx, statusCode, fhir.IssueSeverityError, fhir.IssueTypeException, message)
 }

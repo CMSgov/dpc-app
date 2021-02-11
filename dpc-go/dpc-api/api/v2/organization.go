@@ -37,7 +37,7 @@ func NewOrganizationController(ac client.Client) *OrganizationController {
 	}
 }
 
-func (oc *OrganizationController) Get(w http.ResponseWriter, r *http.Request) {
+func (oc *OrganizationController) Read(w http.ResponseWriter, r *http.Request) {
 	organizationID, ok := r.Context().Value(ContextKeyOrganization).(string)
 	log := logger.WithContext(r.Context())
 	if !ok {
