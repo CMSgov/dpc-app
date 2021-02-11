@@ -12,7 +12,17 @@ import (
 	"github.com/samply/golang-fhir-models/fhir-models/fhir"
 )
 
-func Metadata(w http.ResponseWriter, r *http.Request) {
+type MetadataController struct {
+	capabilitiesFile string
+}
+
+func NewMetadataController(capabilitiesFile string) *MetadataController {
+	return &MetadataController{
+		capabilitiesFile,
+	}
+}
+
+func (mc *MetadataController) Get(w http.ResponseWriter, r *http.Request) {
 	const dateFormat = "2006-01-02"
 	dt := time.Now()
 	log := logger.WithContext(r.Context())
@@ -24,12 +34,7 @@ func Metadata(w http.ResponseWriter, r *http.Request) {
 
 	version := os.Getenv("VERSION")
 
-	capabilitiesFile, found := os.LookupEnv("CAPABILITIES_FILE")
-	if !found {
-		capabilitiesFile = "DPCCapabilities.json"
-	}
-
-	b, err := ioutil.ReadFile(capabilitiesFile)
+	b, err := ioutil.ReadFile(mc.capabilitiesFile)
 	if err != nil {
 		log.Error("Failed to read capabilities file", zap.Error(err))
 		fhirror.ServerIssue(w, r.Context(), http.StatusInternalServerError, "Failed to get capabilites")
@@ -53,7 +58,7 @@ func Metadata(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json")
 	if _, err = w.Write(b); err != nil {
 		log.Error("Failed to write data", zap.Error(err))
 		fhirror.ServerIssue(w, r.Context(), http.StatusInternalServerError, "Failed to get capabilites")

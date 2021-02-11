@@ -10,7 +10,6 @@
     "name": "Data @ Point of Care API"
   },
   "fhirVersion": "4.0.1",
-  "acceptUnknown": "extensions",
   "format": [
     "application/json",
     "application/fhir+json"

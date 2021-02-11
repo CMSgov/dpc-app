@@ -2,12 +2,12 @@ package main
 
 import (
 	"fmt"
+	"github.com/CMSgov/dpc/api"
 	"github.com/CMSgov/dpc/api/client"
-	v2 "github.com/CMSgov/dpc/api/v2"
+	"github.com/CMSgov/dpc/api/v2"
 	"net/http"
 	"os"
-
-	"github.com/CMSgov/dpc/api"
+	"strconv"
 )
 
 func main() {
@@ -16,12 +16,27 @@ func main() {
 		attributionURL = "http://localhost:3001"
 	}
 
-	c := v2.NewOrganizationController(&client.AttributionConfig{
+	retries := os.Getenv("ATTRIBUTION_RETRIES")
+	r, err := strconv.Atoi(retries)
+	if err != nil {
+		r = 3
+	}
+
+	attributionClient := client.NewAttributionClient(&client.AttributionConfig{
 		URL:     attributionURL,
-		Retries: 3,
+		Retries: r,
 	})
 
-	router := api.NewDPCAPIRouter(c)
+	c := v2.NewOrganizationController(attributionClient)
+
+	capabilitiesFile, found := os.LookupEnv("CAPABILITIES_FILE")
+	if !found {
+		capabilitiesFile = "DPCCapabilities.json"
+	}
+
+	m := v2.NewMetadataController(capabilitiesFile)
+
+	router := api.NewDPCAPIRouter(c, m)
 
 	port := os.Getenv("API_PORT")
 	if port == "" {

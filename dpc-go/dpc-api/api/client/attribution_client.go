@@ -23,13 +23,16 @@ const (
 	Organization ResourceType = "Organization"
 )
 
-// AttributionClient to make calls to Attribution service
+type Client interface {
+	Get(ctx context.Context, resourceType ResourceType, id string) ([]byte, error)
+	Post(ctx context.Context, resourceType ResourceType, organization []byte) ([]byte, error)
+}
+
 type AttributionClient struct {
 	config     *AttributionConfig
 	httpClient *retryablehttp.Client
 }
 
-// NewAttribution creates new Attribution client
 func NewAttributionClient(config *AttributionConfig) *AttributionClient {
 	client := retryablehttp.NewClient()
 	client.RetryMax = config.Retries
