@@ -535,7 +535,7 @@ DEPENDENCIES
   pry
   pry-nav
   puma (~> 4.3)
-  rails (~> 6.0.3)
+  rails (~> 6.0.3.5)
   rails-controller-testing
   redis (~> 4.0)
   redis-namespace
