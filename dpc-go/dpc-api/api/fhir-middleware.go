@@ -57,12 +57,12 @@ func FHIRModel(next http.Handler) http.Handler {
 		var b = rw.buf.Bytes()
 		if isSuccess(rw.Status) {
 			body, err := convertToFHIR(b)
-			b = body
 			if err != nil {
 				log.Error(err.Error(), zap.Error(err))
 				fhirror.GenericServerIssue(rw, r.Context())
 				return
 			}
+			b = body
 		}
 
 		if _, err := w.Write(b); err != nil {
