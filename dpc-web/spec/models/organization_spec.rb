@@ -15,6 +15,9 @@ RSpec.describe Organization, type: :model do
 
       describe '#fake_npi' do
         it 'creates fake npi' do
+          # stub default value
+          allow(ENV).to receive(:[]).and_call_original
+
           org = create(:organization, npi: nil)
           org.assign_id
           expect(org.npi).to be_present
@@ -22,6 +25,9 @@ RSpec.describe Organization, type: :model do
         end
 
         it 'does sets npi if nil' do
+          # stub default value
+          allow(ENV).to receive(:[]).and_call_original
+
           org = create(:organization, npi: nil)
           org.assign_id
           expect(org.npi).to be_present
@@ -29,6 +35,9 @@ RSpec.describe Organization, type: :model do
         end
 
         it 'does not set npi if present' do
+          # stub default value
+          allow(ENV).to receive(:[]).and_call_original
+
           npi = LuhnacyLib.generate_npi
 
           org = create(:organization, npi: npi)
