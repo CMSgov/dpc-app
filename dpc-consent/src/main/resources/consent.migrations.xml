@@ -58,7 +58,4 @@
             <column name="source_code" type="VARCHAR"/>
         </addColumn>
     </changeSet>
-    <changeSet id="remove-custodian" author="sal">
-        <dropColumn tableName="CONSENT" columnName="custodian"></dropColumn>
-    </changeSet>
 </databaseChangeLog>
