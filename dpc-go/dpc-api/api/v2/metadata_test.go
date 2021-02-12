@@ -34,7 +34,6 @@ func (suite *MetadataControllerTestSuite) TestMetadata() {
 
 	res := w.Result()
 
-	assert.Equal(suite.T(), "application/json", res.Header.Get("Content-Type"))
 	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
 
 	resp, _ := ioutil.ReadAll(res.Body)

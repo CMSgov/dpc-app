@@ -53,7 +53,6 @@ func (oc *OrganizationController) Read(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
 	if _, err = w.Write(resp); err != nil {
 		log.Error("Failed to write data to response", zap.Error(err))
 		fhirror.ServerIssue(w, r.Context(), http.StatusNotFound, "Failed to find organization")
@@ -77,7 +76,6 @@ func (oc *OrganizationController) Create(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
 	if _, err = w.Write(resp); err != nil {
 		log.Error("Failed to write data to response", zap.Error(err))
 		fhirror.ServerIssue(w, r.Context(), http.StatusUnprocessableEntity, "Failed to save organization")

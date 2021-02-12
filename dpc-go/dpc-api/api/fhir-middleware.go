@@ -29,20 +29,6 @@ func (rw *ResponseWriter) WriteHeader(status int) {
 	rw.ResponseWriter.WriteHeader(status)
 }
 
-func FHIRContentType(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		rw := &ResponseWriter{
-			ResponseWriter: w,
-			buf:            &bytes.Buffer{},
-			Status:         200,
-		}
-		next.ServeHTTP(rw, r)
-		if isSuccess(rw.Status) {
-			rw.Header().Set("Content-Type", "application/fhir+json; charset=UTF-8")
-		}
-	})
-}
-
 func FHIRModel(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log = logger.WithContext(r.Context())

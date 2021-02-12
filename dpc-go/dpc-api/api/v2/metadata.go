@@ -58,7 +58,6 @@ func (mc *MetadataController) Read(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
 	if _, err = w.Write(b); err != nil {
 		log.Error("Failed to write data", zap.Error(err))
 		fhirror.ServerIssue(w, r.Context(), http.StatusInternalServerError, "Failed to get capabilites")

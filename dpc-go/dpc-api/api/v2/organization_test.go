@@ -108,7 +108,6 @@ func (suite *OrganizationControllerTestSuite) TestGetOrganizationErrorInClient()
 
 	res := w.Result()
 
-	assert.Equal(suite.T(), "application/fhir+json; charset=UTF-8", res.Header.Get("Content-Type"))
 	assert.Equal(suite.T(), http.StatusNotFound, res.StatusCode)
 
 	resp, _ := ioutil.ReadAll(res.Body)
@@ -145,7 +144,6 @@ func (suite *OrganizationControllerTestSuite) TestGetOrganization() {
 
 	res := w.Result()
 
-	assert.Equal(suite.T(), "application/json", res.Header.Get("Content-Type"))
 	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
 
 	resp, _ := ioutil.ReadAll(res.Body)
@@ -171,7 +169,6 @@ func (suite *OrganizationControllerTestSuite) TestPostOrganizationErrorInClient(
 
 	res := w.Result()
 
-	assert.Equal(suite.T(), "application/fhir+json; charset=UTF-8", res.Header.Get("Content-Type"))
 	assert.Equal(suite.T(), http.StatusUnprocessableEntity, res.StatusCode)
 
 	resp, _ := ioutil.ReadAll(res.Body)
@@ -207,7 +204,6 @@ func (suite *OrganizationControllerTestSuite) TestPostOrganizationBadJsonOrg() {
 
 	res := w.Result()
 
-	assert.Equal(suite.T(), "application/fhir+json; charset=UTF-8", res.Header.Get("Content-Type"))
 	assert.Equal(suite.T(), http.StatusBadRequest, res.StatusCode)
 
 	resp, _ := ioutil.ReadAll(res.Body)
@@ -244,7 +240,6 @@ func (suite *OrganizationControllerTestSuite) TestPostOrganization() {
 
 	res := w.Result()
 
-	assert.Equal(suite.T(), "application/json", res.Header.Get("Content-Type"))
 	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
 
 	resp, _ := ioutil.ReadAll(res.Body)

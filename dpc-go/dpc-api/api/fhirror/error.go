@@ -41,7 +41,6 @@ func fhirError(w http.ResponseWriter, ctx context.Context, statusCode int, sever
 		boom.Internal(w, message)
 	}
 
-	w.Header().Set("Content-Type", "application/fhir+json; charset=UTF-8")
 	w.WriteHeader(statusCode)
 	if _, err := w.Write(b); err != nil {
 		boom.Internal(w, err.Error())
