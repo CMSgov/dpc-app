@@ -11,12 +11,12 @@ type Identifier struct {
 }
 
 type Resource struct {
-	ID         string
-	Version    int
-	CreatedAt  time.Time
-	UpdatedAt  time.Time
-	Info       map[string]interface{}
-	Identifier []Identifier
+	ID         string                 `json:"id"`
+	Version    int                    `json:"version"`
+	CreatedAt  time.Time              `json:"created_at"`
+	UpdatedAt  time.Time              `json:"updated_at"`
+	Info       map[string]interface{} `json:"info"`
+	Identifier []Identifier           `json:"identifier"`
 }
 
 type FhirResource interface {

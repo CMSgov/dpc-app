@@ -3,6 +3,7 @@ package util
 import (
 	"encoding/json"
 	"github.com/CMSgov/dpc/attribution/model"
+	"github.com/pkg/errors"
 )
 
 func GetNPI(fhirModel []byte) (string, error) {
@@ -10,7 +11,7 @@ func GetNPI(fhirModel []byte) (string, error) {
 }
 
 func GetIdentifier(fhirModel []byte, system string) (string, error) {
-	var r model.IdentifierResource
+	var r model.IdentifierContainer
 	err := json.Unmarshal(fhirModel, &r)
 	if err != nil {
 		return "", err
@@ -20,6 +21,9 @@ func GetIdentifier(fhirModel []byte, system string) (string, error) {
 		if v.System == system {
 			vsf = append(vsf, v)
 		}
+	}
+	if len(vsf) == 0 {
+		return "", errors.New("No identifiers")
 	}
 	return vsf[0].Value, nil
 }

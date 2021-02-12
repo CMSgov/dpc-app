@@ -8,16 +8,15 @@ import (
 	v2 "github.com/CMSgov/dpc/attribution/v2"
 )
 
-func NewDPCAttributionRouter() http.Handler {
+func NewDPCAttributionRouter(o v2.Service) http.Handler {
 	r := chi.NewRouter()
-	c := v2.NewOrganizationController()
-	r.With(middleware.RequestID).Route("/", func(r chi.Router) {
+	r.With(middleware.RequestID, middleware.SetHeader("Content-Type", "application/json; charset=UTF-8")).Route("/", func(r chi.Router) {
 		r.Route("/Organization", func(r chi.Router) {
 			r.Route("/{organizationID}", func(r chi.Router) {
 				r.Use(v2.OrganizationCtx)
-				r.Get("/", c.GetOrganization)
+				r.Get("/", o.Get)
 			})
-			r.Post("/", c.SaveOrganization)
+			r.Post("/", o.Save)
 		})
 	})
 

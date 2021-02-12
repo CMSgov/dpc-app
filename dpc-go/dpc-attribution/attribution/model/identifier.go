@@ -5,6 +5,6 @@ type Identifier struct {
 	System string `json:"system"`
 }
 
-type IdentifierResource struct {
-	Identifier []Identifier
+type IdentifierContainer struct {
+	Identifier []Identifier `json:"identifier"`
 }

@@ -17,19 +17,24 @@ func init() {
 		lcfgfile = "logconfig.yml"
 	}
 
-	lcfg, err := ioutil.ReadFile(lcfgfile)
-	if err != nil {
-		panic(err)
+	var cfg zap.Config
+	lcfg, _ := ioutil.ReadFile(lcfgfile)
+
+	if lcfg != nil {
+		if err := yaml.Unmarshal(lcfg, &cfg); err != nil {
+			panic(err)
+		}
+		logger, _ = cfg.Build()
 	}
 
-	var cfg zap.Config
-	if err := yaml.Unmarshal(lcfg, &cfg); err != nil {
-		panic(err)
+	if logger == nil {
+		l, err := zap.NewProduction()
+		if err != nil {
+			panic(err)
+		}
+		logger = l
 	}
-	logger, err = cfg.Build()
-	if err != nil {
-		panic(err)
-	}
+
 	defer logger.Sync()
 }
 

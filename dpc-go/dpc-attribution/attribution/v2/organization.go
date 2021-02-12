@@ -6,57 +6,46 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/CMSgov/dpc/attribution/logger"
-	"github.com/CMSgov/dpc/attribution/orm"
-	"github.com/CMSgov/dpc/attribution/util"
+	"github.com/CMSgov/dpc/attribution/repository"
 	"github.com/darahayes/go-boom"
 	"github.com/go-chi/chi"
-	"github.com/go-pg/pg/v10"
-	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"io/ioutil"
 	"net/http"
 )
 
-type contextKey string
+type contextKey int
 
-func (c contextKey) String() string {
-	return string(c)
-}
-
-var (
-	contextKeyOrganization = contextKey("organization")
-)
+const ContextKeyOrganization contextKey = iota
 
 func OrganizationCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		organizationID := chi.URLParam(r, "organizationID")
-		ctx := context.WithValue(r.Context(), contextKeyOrganization, organizationID)
+		ctx := context.WithValue(r.Context(), ContextKeyOrganization, organizationID)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
 
-type OrganizationController struct {
-	db *pg.DB
+type OrganizationService struct {
+	repo repository.OrganizationRepo
 }
 
-func NewOrganizationController() *OrganizationController {
-	return &OrganizationController{
-		db: orm.GetDbConnection(),
+func NewOrganizationService(repo repository.OrganizationRepo) *OrganizationService {
+	return &OrganizationService{
+		repo,
 	}
 }
 
-func (oc *OrganizationController) GetOrganization(w http.ResponseWriter, r *http.Request) {
+func (os *OrganizationService) Get(w http.ResponseWriter, r *http.Request) {
 	log := logger.WithContext(r.Context())
-	organizationID, ok := r.Context().Value(contextKeyOrganization).(string)
+	organizationID, ok := r.Context().Value(ContextKeyOrganization).(string)
 	if !ok {
 		log.Error("Failed to extract organization id from context")
 		boom.BadData(w, "Could not get organization id")
 		return
 	}
 
-	//Call database and get stuff
-	org := &orm.Organization{ID: organizationID}
-	err := oc.db.Model(org).WherePK().Select()
+	org, err := os.repo.FindByID(r.Context(), organizationID)
 	if err != nil {
 		log.Error(fmt.Sprintf("Failed to retrieve organization"), zap.Error(err))
 		boom.NotFound(w, err.Error())
@@ -70,39 +59,21 @@ func (oc *OrganizationController) GetOrganization(w http.ResponseWriter, r *http
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	if _, err := w.Write(orgBytes.Bytes()); err != nil {
 		log.Error(fmt.Sprintf("Failed to write organization to response for organization"), zap.Error(err))
 		boom.Internal(w, err.Error())
 	}
 }
 
-func (oc *OrganizationController) SaveOrganization(w http.ResponseWriter, r *http.Request) {
+func (os *OrganizationService) Save(w http.ResponseWriter, r *http.Request) {
 	log := logger.WithContext(r.Context())
 	body, _ := ioutil.ReadAll(r.Body)
 
-	err := oc.npiExists(body)
-	if err != nil {
-		log.Error("NPI already exists", zap.Error(err))
-		boom.BadRequest(w, err.Error())
-		return
-	}
-
-	var result map[string]interface{}
-	if err := json.Unmarshal(body, &result); err != nil {
-		log.Error("Failed to unmarshal organization", zap.Error(err))
-		boom.Internal(w, err.Error())
-		return
-	}
-
-	org := &orm.Organization{
-		Info: result,
-	}
-
-	_, err = oc.db.Model(org).Insert()
+	org, err := os.repo.Create(r.Context(), body)
 	if err != nil {
 		log.Error("Failed to create organization", zap.Error(err))
-		boom.Internal(w, err.Error())
+		boom.BadData(w, err)
 		return
 	}
 
@@ -113,24 +84,9 @@ func (oc *OrganizationController) SaveOrganization(w http.ResponseWriter, r *htt
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	if _, err := w.Write(orgBytes.Bytes()); err != nil {
 		log.Error(fmt.Sprintf("Failed to write organization to response for organization"), zap.Error(err))
 		boom.Internal(w, err.Error())
 	}
-}
-
-func (oc *OrganizationController) npiExists(b []byte) error {
-	npi, err := util.GetNPI(b)
-	if err != nil {
-		return err
-	}
-	count, err := oc.db.Model((*orm.Organization)(nil)).Where("info @> '{\"identifier\": [{\"value\": ?}]}'", pg.Ident(npi)).Count()
-	if err != nil {
-		return err
-	}
-	if count != 0 {
-		return errors.New("NPI already exists")
-	}
-	return nil
 }
