@@ -37,6 +37,11 @@ RSpec.describe RegisteredOrganization, type: :model do
 
   describe 'callbacks' do
     describe '#create_api_organization' do
+      before do
+        # stub default value
+        allow(ENV).to receive(:[]).and_call_original
+      end
+
       it 'invokes APIClient and returns the response body' do
         api_client = stub_api_client(
           message: :create_organization,
@@ -95,6 +100,11 @@ RSpec.describe RegisteredOrganization, type: :model do
     end
 
     describe '#notify_users_of_sandbox_access' do
+      before do
+        # stub default value
+        allow(ENV).to receive(:[]).and_call_original
+      end
+
       context 'when sandbox' do
         it 'tells organization to notify users' do
           allow(ENV).to receive(:[]).with('ENV').and_return('prod-sbx')
@@ -113,6 +123,10 @@ RSpec.describe RegisteredOrganization, type: :model do
           expect_any_instance_of(Organization).not_to receive(:notify_users_of_sandbox_access)
 
           create(:registered_organization)
+
+          # DatabaseCleaner prohibits running DatabaseCleaner.clean to run in `production` env.
+          # So the ENV call has to, once again, return test
+          allow(ENV).to receive(:[]).with('ENV').and_return('test')
         end
       end
     end
