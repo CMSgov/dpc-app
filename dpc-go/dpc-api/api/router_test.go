@@ -64,11 +64,19 @@ type MockController struct {
 	mock.Mock
 }
 
+func (c *MockController) Update(w http.ResponseWriter, r *http.Request) {
+	c.Called(w, r)
+}
+
 func (c *MockController) Read(w http.ResponseWriter, r *http.Request) {
 	c.Called(w, r)
 }
 
 func (c *MockController) Create(w http.ResponseWriter, r *http.Request) {
+	c.Called(w, r)
+}
+
+func (c *MockController) Delete(w http.ResponseWriter, r *http.Request) {
 	c.Called(w, r)
 }
 
@@ -151,4 +159,50 @@ func (suite *RouterTestSuite) TestOrganizationPostRoutes() {
 	assert.Equal(suite.T(), "application/fhir+json; charset=UTF-8", res.Header.Get("Content-Type"))
 	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
 
+}
+
+func (suite *RouterTestSuite) TestOrganizationDeleteRoutes() {
+	mockMeta := new(MockController)
+	mockOrg := new(MockController)
+
+	mockOrg.On("Delete", mock.Anything, mock.Anything).Once().Run(func(arg mock.Arguments) {
+		w := arg.Get(0).(http.ResponseWriter)
+		w.WriteHeader(http.StatusNoContent)
+	})
+
+	router := suite.r(mockOrg, mockMeta)
+	ts := httptest.NewServer(router)
+
+	req, _ := http.NewRequest("DELETE", fmt.Sprintf("%s/%s", ts.URL, "v2/Organization/12345"), nil)
+	res, _ := http.DefaultClient.Do(req)
+
+	assert.Equal(suite.T(), "application/fhir+json; charset=UTF-8", res.Header.Get("Content-Type"))
+	assert.Equal(suite.T(), http.StatusNoContent, res.StatusCode)
+}
+
+func (suite *RouterTestSuite) TestOrganizationPutRoutes() {
+	mockMeta := new(MockController)
+	mockOrg := new(MockController)
+
+	var orgID string
+	mockOrg.On("Update", mock.Anything, mock.Anything).Once().Run(func(arg mock.Arguments) {
+		r := arg.Get(1).(*http.Request)
+		orgID = r.Context().Value(v2.ContextKeyOrganization).(string)
+		w := arg.Get(0).(http.ResponseWriter)
+		w.Write([]byte(orgjson))
+	})
+
+	router := suite.r(mockOrg, mockMeta)
+	ts := httptest.NewServer(router)
+
+	var m = make(map[string]interface{})
+	_ = json.Unmarshal([]byte(orgjson), &m)
+	b, _ := json.Marshal(m["Info"])
+	r := bytes.NewReader(b)
+	req, _ := http.NewRequest("PUT", fmt.Sprintf("%s/%s", ts.URL, "v2/Organization/12345"), r)
+	res, _ := http.DefaultClient.Do(req)
+
+	assert.Equal(suite.T(), "application/fhir+json; charset=UTF-8", res.Header.Get("Content-Type"))
+	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
+	assert.Equal(suite.T(), "12345", orgID)
 }

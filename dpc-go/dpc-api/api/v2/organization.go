@@ -12,7 +12,6 @@ import (
 	"github.com/go-chi/chi"
 
 	"github.com/CMSgov/dpc/api/client"
-
 	"github.com/google/fhir/go/jsonformat"
 )
 
@@ -71,6 +70,55 @@ func (oc *OrganizationController) Create(w http.ResponseWriter, r *http.Request)
 	}
 
 	resp, err := oc.ac.Post(r.Context(), client.Organization, body)
+	if err != nil {
+		log.Error("Failed to save the org to attribution", zap.Error(err))
+		fhirror.ServerIssue(w, r.Context(), http.StatusUnprocessableEntity, "Failed to save the organization")
+		return
+	}
+
+	if _, err = w.Write(resp); err != nil {
+		log.Error("Failed to write data to response", zap.Error(err))
+		fhirror.ServerIssue(w, r.Context(), http.StatusUnprocessableEntity, "Failed to save organization")
+	}
+}
+
+func (oc *OrganizationController) Delete(w http.ResponseWriter, r *http.Request) {
+	organizationID, ok := r.Context().Value(ContextKeyOrganization).(string)
+	log := logger.WithContext(r.Context())
+	if !ok {
+		log.Error("Failed to extract the organization id from the context")
+		fhirror.BusinessViolation(w, r.Context(), http.StatusBadRequest, "Failed to extract organization id from url, please check the url")
+		return
+	}
+
+	err := oc.ac.Delete(r.Context(), client.Organization, organizationID)
+	if err != nil {
+		log.Error("Failed to save the org to attribution", zap.Error(err))
+		fhirror.ServerIssue(w, r.Context(), http.StatusUnprocessableEntity, "Failed to save the organization")
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func (oc *OrganizationController) Update(w http.ResponseWriter, r *http.Request) {
+	log := logger.WithContext(r.Context())
+	organizationID, ok := r.Context().Value(ContextKeyOrganization).(string)
+	if !ok {
+		log.Error("Failed to extract the organization id from the context")
+		fhirror.BusinessViolation(w, r.Context(), http.StatusBadRequest, "Failed to extract organization id from url, please check the url")
+		return
+	}
+
+	body, _ := ioutil.ReadAll(r.Body)
+
+	if err := isValidOrganization(body); err != nil {
+		log.Error("Organization is not valid in request", zap.Error(err))
+		fhirror.BusinessViolation(w, r.Context(), http.StatusBadRequest, "Not a valid organization")
+		return
+	}
+
+	resp, err := oc.ac.Put(r.Context(), client.Organization, organizationID, body)
 	if err != nil {
 		log.Error("Failed to save the org to attribution", zap.Error(err))
 		fhirror.ServerIssue(w, r.Context(), http.StatusUnprocessableEntity, "Failed to save the organization")

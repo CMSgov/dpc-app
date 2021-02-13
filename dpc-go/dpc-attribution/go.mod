@@ -9,6 +9,7 @@ require (
 	github.com/darahayes/go-boom v0.0.0-20200826120415-fa5cb724143a
 	github.com/go-chi/chi v1.5.1
 	github.com/gofrs/uuid v4.0.0+incompatible // indirect
+	github.com/google/uuid v1.2.0
 	github.com/huandu/go-sqlbuilder v1.11.0
 	github.com/jackc/fake v0.0.0-20150926172116-812a484cc733 // indirect
 	github.com/jackc/pgx v3.6.2+incompatible
@@ -16,7 +17,6 @@ require (
 	github.com/lib/pq v1.9.0 // indirect
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/pkg/errors v0.8.1
-	github.com/samply/golang-fhir-models/fhir-models v0.2.0
 	github.com/shopspring/decimal v1.2.0 // indirect
 	github.com/stretchr/testify v1.6.1
 	go.uber.org/zap v1.16.0

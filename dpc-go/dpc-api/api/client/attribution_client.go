@@ -26,6 +26,8 @@ const (
 type Client interface {
 	Get(ctx context.Context, resourceType ResourceType, id string) ([]byte, error)
 	Post(ctx context.Context, resourceType ResourceType, body []byte) ([]byte, error)
+	Delete(ctx context.Context, resourceType ResourceType, id string) error
+	Put(ctx context.Context, resourceType ResourceType, id string, body []byte) ([]byte, error)
 }
 
 type AttributionClient struct {
@@ -112,6 +114,75 @@ func (ac *AttributionClient) Post(ctx context.Context, resourceType ResourceType
 	if err != nil {
 		log.Error("Failed to read the response body", zap.Error(err))
 		return nil, errors.Errorf("Failed to save resource %s", resourceType)
+	}
+	return b, nil
+}
+
+func (ac *AttributionClient) Delete(ctx context.Context, resourceType ResourceType, id string) error {
+	log := logger.WithContext(ctx)
+	ac.httpClient.Logger = newLogger(*log)
+
+	url := fmt.Sprintf("%s/%s/%s", ac.config.URL, resourceType, id)
+	req, err := retryablehttp.NewRequest("DELETE", url, nil)
+	if err != nil {
+		log.Error("Failed to create request", zap.Error(err))
+		return errors.Errorf("Failed to delete resource %s/%s", resourceType, id)
+	}
+
+	req.Header.Add(middleware.RequestIDHeader, ctx.Value(middleware.RequestIDKey).(string))
+	resp, err := ac.httpClient.Do(req)
+	if err != nil {
+		log.Error("Failed to send request", zap.Error(err))
+		return errors.Errorf("Failed to delete resource %s/%s", resourceType, id)
+	}
+
+	if resp.StatusCode < 200 || resp.StatusCode > 299 {
+		return errors.Errorf("Failed to delete resource %s/%s", resourceType, id)
+	}
+
+	defer func() {
+		err := resp.Body.Close()
+		if err != nil {
+			log.Error("Failed to close response body", zap.Error(err))
+		}
+	}()
+
+	return nil
+}
+
+func (ac *AttributionClient) Put(ctx context.Context, resourceType ResourceType, id string, body []byte) ([]byte, error) {
+	log := logger.WithContext(ctx)
+	ac.httpClient.Logger = newLogger(*log)
+
+	url := fmt.Sprintf("%s/%s/%s", ac.config.URL, resourceType, id)
+	req, err := retryablehttp.NewRequest("PUT", url, body)
+	if err != nil {
+		log.Error("Failed to create request", zap.Error(err))
+		return nil, errors.Errorf("Failed to update resource %s", resourceType)
+	}
+
+	req.Header.Add(middleware.RequestIDHeader, ctx.Value(middleware.RequestIDKey).(string))
+	resp, err := ac.httpClient.Do(req)
+	if err != nil {
+		log.Error("Failed to send request", zap.Error(err))
+		return nil, errors.Errorf("Failed to update resource %s", resourceType)
+	}
+
+	if resp.StatusCode < 200 || resp.StatusCode > 299 {
+		return nil, errors.Errorf("Failed to update resource %s", resourceType)
+	}
+
+	defer func() {
+		err := resp.Body.Close()
+		if err != nil {
+			log.Error("Failed to close response body", zap.Error(err))
+		}
+	}()
+
+	b, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Error("Failed to read the response body", zap.Error(err))
+		return nil, errors.Errorf("Failed to update resource %s", resourceType)
 	}
 	return b, nil
 }
