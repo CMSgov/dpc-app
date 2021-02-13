@@ -1,9 +1,10 @@
 package v2
 
 import (
+	"bytes"
 	"context"
-	"github.com/CMSgov/dpc/api/apitest"
 	"encoding/json"
+	"github.com/CMSgov/dpc/api/apitest"
 	"github.com/CMSgov/dpc/api/client"
 	"github.com/go-chi/chi/middleware"
 	"github.com/kinbiko/jsonassert"
@@ -101,7 +102,7 @@ func (suite *OrganizationControllerTestSuite) TestReadOrganizationErrorInClient(
 func (suite *OrganizationControllerTestSuite) TestReadOrganization() {
 	ja := jsonassert.New(suite.T())
 
-	suite.mac.On("Get", mock.Anything, mock.Anything, mock.Anything).Return(apitest.AttributionResponse(), nil)
+	suite.mac.On("Get", mock.Anything, mock.Anything, mock.Anything).Return(apitest.AttributionOrgResponse(), nil)
 
 	req := httptest.NewRequest(http.MethodGet, "http://example.com/foo", nil)
 	ctx := req.Context()
@@ -118,7 +119,7 @@ func (suite *OrganizationControllerTestSuite) TestReadOrganization() {
 
 	resp, _ := ioutil.ReadAll(res.Body)
 
-	ja.Assertf(string(resp), string(apitest.AttributionResponse()))
+	ja.Assertf(string(resp), string(apitest.AttributionOrgResponse()))
 
 }
 
@@ -194,28 +195,33 @@ func (suite *OrganizationControllerTestSuite) TestCreateOrganizationBadJsonOrg()
 }
 
 func (suite *OrganizationControllerTestSuite) TestCreateOrganization() {
-	suite.mac.On("Post", mock.Anything, mock.Anything, mock.Anything).Return(apitest.AttributionResponse(), nil)
+	suite.mac.On("Post", mock.Anything, mock.Anything, mock.Anything).Return(apitest.AttributionOrgResponse(), nil)
 
 	ja := jsonassert.New(suite.T())
 	req := httptest.NewRequest(http.MethodPost, "http://example.com/foo", strings.NewReader(apitest.Orgjson))
 
 	w := httptest.NewRecorder()
-
 	suite.org.Create(w, req)
-
 	res := w.Result()
 
 	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
 
 	resp, _ := ioutil.ReadAll(res.Body)
+	ja.Assertf(string(resp), string(apitest.AttributionOrgResponse()))
 
-	ja.Assertf(string(resp), string(apitest.AttributionResponse()))
+	req = httptest.NewRequest(http.MethodPost, "http://example.com/foo", bytes.NewReader(malformOrg()))
+
+	w = httptest.NewRecorder()
+	suite.org.Create(w, req)
+	res = w.Result()
+
+	assert.Equal(suite.T(), http.StatusBadRequest, res.StatusCode)
 }
 
 func (suite *OrganizationControllerTestSuite) TestDeleteOrganization() {
 	suite.mac.On("Delete", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 
-	req := httptest.NewRequest("DELETE", "http://example.com/foo/12345", nil)
+	req := httptest.NewRequest(http.MethodDelete, "http://example.com/foo/12345", nil)
 
 	w := httptest.NewRecorder()
 	suite.org.Delete(w, req)
@@ -235,7 +241,7 @@ func (suite *OrganizationControllerTestSuite) TestDeleteOrganization() {
 }
 
 func (suite *OrganizationControllerTestSuite) TestUpdateOrganizationErrors() {
-	req := httptest.NewRequest("PUT", "http://example.com/foo", strings.NewReader(orgjson))
+	req := httptest.NewRequest(http.MethodPut, "http://example.com/foo", strings.NewReader(apitest.Orgjson))
 
 	w := httptest.NewRecorder()
 	suite.org.Update(w, req)
@@ -247,7 +253,7 @@ func (suite *OrganizationControllerTestSuite) TestUpdateOrganizationErrors() {
 	ctx = context.WithValue(ctx, ContextKeyOrganization, "12345")
 	req = req.WithContext(ctx)
 
-	badReq := httptest.NewRequest("PUT", "http://example.com/foo", bytes.NewReader(malformOrg()))
+	badReq := httptest.NewRequest(http.MethodPut, "http://example.com/foo", bytes.NewReader(malformOrg()))
 	w = httptest.NewRecorder()
 	suite.org.Update(w, badReq)
 	res = w.Result()
@@ -264,12 +270,13 @@ func (suite *OrganizationControllerTestSuite) TestUpdateOrganizationErrors() {
 
 func (suite *OrganizationControllerTestSuite) TestUpdateOrganization() {
 	ja := jsonassert.New(suite.T())
-	req := httptest.NewRequest("PUT", "http://example.com/foo", strings.NewReader(orgjson))
+	req := httptest.NewRequest(http.MethodPut, "http://example.com/foo", strings.NewReader(apitest.Orgjson))
 	ctx := req.Context()
 	ctx = context.WithValue(ctx, ContextKeyOrganization, "12345")
 	req = req.WithContext(ctx)
+	ar := apitest.AttributionOrgResponse()
 
-	suite.mac.On("Put", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return([]byte(orgjson), nil).Once()
+	suite.mac.On("Put", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(ar, nil).Once()
 	w := httptest.NewRecorder()
 	suite.org.Update(w, req)
 	res := w.Result()
@@ -277,12 +284,12 @@ func (suite *OrganizationControllerTestSuite) TestUpdateOrganization() {
 	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
 
 	resp, _ := ioutil.ReadAll(res.Body)
-	ja.Assertf(string(resp), orgjson)
+	ja.Assertf(string(resp), string(ar))
 }
 
 func malformOrg() []byte {
 	var org map[string]interface{}
-	_ = json.Unmarshal([]byte(orgjson), &org)
+	_ = json.Unmarshal([]byte(apitest.Orgjson), &org)
 	org["resourceType"] = "trash"
 	b, _ := json.Marshal(org)
 	return b

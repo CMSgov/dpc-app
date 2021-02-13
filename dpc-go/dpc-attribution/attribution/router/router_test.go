@@ -121,7 +121,7 @@ func (suite *RouterTestSuite) TestOrganizationDeleteRoute() {
 	router := suite.r(mockOrg)
 	ts := httptest.NewServer(router)
 
-	req, _ := http.NewRequest("DELETE", fmt.Sprintf("%s/%s", ts.URL, "Organization/12345"), nil)
+	req, _ := http.NewRequest(http.MethodDelete, fmt.Sprintf("%s/%s", ts.URL, "Organization/12345"), nil)
 	res, _ := http.DefaultClient.Do(req)
 
 	assert.Equal(suite.T(), http.StatusNoContent, res.StatusCode)
@@ -140,7 +140,7 @@ func (suite *RouterTestSuite) TestOrganizationPutRoute() {
 	router := suite.r(mockOrg)
 	ts := httptest.NewServer(router)
 
-	req, _ := http.NewRequest("PUT", fmt.Sprintf("%s/%s", ts.URL, "Organization/12345"), nil)
+	req, _ := http.NewRequest(http.MethodPut, fmt.Sprintf("%s/%s", ts.URL, "Organization/12345"), nil)
 	res, _ := http.DefaultClient.Do(req)
 
 	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)

@@ -24,7 +24,7 @@ func TestFHIRMiddlewareTestSuite(t *testing.T) {
 
 func (suite *FHIRMiddlewareTestSuite) TestFHIRModel() {
 	nextHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Write(apitest.AttributionResponse())
+		w.Write(apitest.AttributionOrgResponse())
 	})
 
 	req := httptest.NewRequest(http.MethodGet, "http://www.your-domain.com", nil)

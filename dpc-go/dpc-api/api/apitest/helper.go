@@ -48,12 +48,16 @@ const Orgjson = `{
     ]
   }`
 
-func AttributionResponse() []byte {
+func AttributionOrgResponse() []byte {
+	return AttributionResponse(Orgjson)
+}
+
+func AttributionResponse(fhir string) []byte {
 	r := model.Resource{}
 	_ = faker.FakeData(&r)
 
 	var v map[string]interface{}
-	_ = json.Unmarshal([]byte(Orgjson), &v)
+	_ = json.Unmarshal([]byte(fhir), &v)
 	r.Info = v
 	b, _ := json.Marshal(r)
 	return b
