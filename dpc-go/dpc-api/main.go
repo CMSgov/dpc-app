@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/CMSgov/dpc/api"
 	"github.com/CMSgov/dpc/api/client"
+	"github.com/CMSgov/dpc/api/router"
 	"github.com/CMSgov/dpc/api/v2"
 	"net/http"
 	"os"
@@ -36,7 +36,7 @@ func main() {
 
 	m := v2.NewMetadataController(capabilitiesFile)
 
-	router := api.NewDPCAPIRouter(c, m)
+	router := router.NewDPCAPIRouter(c, m)
 
 	port := os.Getenv("API_PORT")
 	if port == "" {

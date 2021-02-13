@@ -3,11 +3,10 @@ package main
 import (
 	"fmt"
 	"github.com/CMSgov/dpc/attribution/repository"
+	router2 "github.com/CMSgov/dpc/attribution/router"
 	v2 "github.com/CMSgov/dpc/attribution/v2"
 	"net/http"
 	"os"
-
-	"github.com/CMSgov/dpc/attribution"
 )
 
 func main() {
@@ -16,7 +15,7 @@ func main() {
 
 	defer r.Close()
 
-	router := attribution.NewDPCAttributionRouter(c)
+	router := router2.NewDPCAttributionRouter(c)
 
 	port := os.Getenv("ATTRIBUTION_PORT")
 	if port == "" {
