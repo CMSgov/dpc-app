@@ -25,7 +25,7 @@ const (
 
 type Client interface {
 	Get(ctx context.Context, resourceType ResourceType, id string) ([]byte, error)
-	Post(ctx context.Context, resourceType ResourceType, organization []byte) ([]byte, error)
+	Post(ctx context.Context, resourceType ResourceType, body []byte) ([]byte, error)
 }
 
 type AttributionClient struct {
@@ -79,12 +79,12 @@ func (ac *AttributionClient) Get(ctx context.Context, resourceType ResourceType,
 	return body, nil
 }
 
-func (ac *AttributionClient) Post(ctx context.Context, resourceType ResourceType, organization []byte) ([]byte, error) {
+func (ac *AttributionClient) Post(ctx context.Context, resourceType ResourceType, body []byte) ([]byte, error) {
 	log := logger.WithContext(ctx)
 	ac.httpClient.Logger = newLogger(*log)
 
 	url := fmt.Sprintf("%s/%s", ac.config.URL, resourceType)
-	req, err := retryablehttp.NewRequest("POST", url, organization)
+	req, err := retryablehttp.NewRequest("POST", url, body)
 	if err != nil {
 		log.Error("Failed to create request", zap.Error(err))
 		return nil, errors.Errorf("Failed to save resource %s", resourceType)
@@ -108,10 +108,10 @@ func (ac *AttributionClient) Post(ctx context.Context, resourceType ResourceType
 		}
 	}()
 
-	body, err := ioutil.ReadAll(resp.Body)
+	b, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.Error("Failed to read the response body", zap.Error(err))
 		return nil, errors.Errorf("Failed to save resource %s", resourceType)
 	}
-	return body, nil
+	return b, nil
 }

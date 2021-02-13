@@ -5,7 +5,6 @@ import (
 	"github.com/CMSgov/dpc/api/fhirror"
 	"github.com/CMSgov/dpc/api/logger"
 	"github.com/pkg/errors"
-	"github.com/samply/golang-fhir-models/fhir-models/fhir"
 	"go.uber.org/zap"
 	"io/ioutil"
 	"net/http"
@@ -13,6 +12,8 @@ import (
 	"github.com/go-chi/chi"
 
 	"github.com/CMSgov/dpc/api/client"
+
+	"github.com/google/fhir/go/jsonformat"
 )
 
 type contextKey int
@@ -83,7 +84,8 @@ func (oc *OrganizationController) Create(w http.ResponseWriter, r *http.Request)
 }
 
 func isValidOrganization(org []byte) error {
-	_, err := fhir.UnmarshalOrganization(org)
+	unmarshaller, _ := jsonformat.NewUnmarshaller("UTC", jsonformat.R4)
+	_, err := unmarshaller.UnmarshalR4(org)
 	if err != nil {
 		return errors.New("Organization is not a properly formed FHIR object")
 	}
