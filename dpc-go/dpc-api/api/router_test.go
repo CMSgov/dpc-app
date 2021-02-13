@@ -1,23 +1,22 @@
 package api
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/CMSgov/dpc/api/model"
 	v2 "github.com/CMSgov/dpc/api/v2"
+	"github.com/bxcodec/faker"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 )
 
 const orgjson = `{
-  "ID": "12345",
-  "VersionId": "0",
-  "LastUpdated": "2017-01-01T00:00:00.000Z",
-  "Info": {
     "resourceType": "Organization",
     "identifier": [
       {
@@ -57,8 +56,7 @@ const orgjson = `{
         "country": "US"
       }
     ]
-  }
-}`
+  }`
 
 type MockController struct {
 	mock.Mock
@@ -106,7 +104,7 @@ func (suite *RouterTestSuite) TestOrganizationGetRoutes() {
 
 	mockOrg.On("Read", mock.Anything, mock.Anything).Once().Run(func(arg mock.Arguments) {
 		w := arg.Get(0).(http.ResponseWriter)
-		w.Write([]byte(orgjson))
+		w.Write(attributionResponse())
 	})
 
 	router := suite.r(mockOrg, mockMeta)
@@ -117,16 +115,10 @@ func (suite *RouterTestSuite) TestOrganizationGetRoutes() {
 	assert.Equal(suite.T(), "application/fhir+json; charset=UTF-8", res.Header.Get("Content-Type"))
 	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
 
-	mockOrg.On("Read", mock.Anything, mock.Anything).Once().Run(func(arg mock.Arguments) {
-		w := arg.Get(0).(http.ResponseWriter)
-		w.Write([]byte("{}"))
-	})
-
-	res, _ = http.Get(fmt.Sprintf("%s/%s", ts.URL, "v2/Organization/1234"))
-
-	assert.Equal(suite.T(), "application/fhir+json; charset=UTF-8", res.Header.Get("Content-Type"))
-	assert.Equal(suite.T(), http.StatusInternalServerError, res.StatusCode)
-
+	b, _ := ioutil.ReadAll(res.Body)
+	var v map[string]interface{}
+	_ = json.Unmarshal(b, &v)
+	assert.Nil(suite.T(), v["info"])
 }
 
 func (suite *RouterTestSuite) TestOrganizationPostRoutes() {
@@ -135,20 +127,30 @@ func (suite *RouterTestSuite) TestOrganizationPostRoutes() {
 
 	mockOrg.On("Create", mock.Anything, mock.Anything).Once().Run(func(arg mock.Arguments) {
 		w := arg.Get(0).(http.ResponseWriter)
-		w.Write([]byte(orgjson))
+		w.Write(attributionResponse())
 	})
 
 	router := suite.r(mockOrg, mockMeta)
 	ts := httptest.NewServer(router)
 
-	var m = make(map[string]interface{})
-	_ = json.Unmarshal([]byte(orgjson), &m)
-
-	b, _ := json.Marshal(m["Info"])
-	r := bytes.NewReader(b)
-	res, _ := http.Post(fmt.Sprintf("%s/%s", ts.URL, "v2/Organization"), "application/fhir+json", r)
+	res, _ := http.Post(fmt.Sprintf("%s/%s", ts.URL, "v2/Organization"), "application/fhir+json", strings.NewReader(orgjson))
 
 	assert.Equal(suite.T(), "application/fhir+json; charset=UTF-8", res.Header.Get("Content-Type"))
 	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
 
+	b, _ := ioutil.ReadAll(res.Body)
+	var v map[string]interface{}
+	_ = json.Unmarshal(b, &v)
+	assert.Nil(suite.T(), v["info"])
+}
+
+func attributionResponse() []byte {
+	r := model.Resource{}
+	_ = faker.FakeData(&r)
+
+	var v map[string]interface{}
+	_ = json.Unmarshal([]byte(orgjson), &v)
+	r.Info = v
+	b, _ := json.Marshal(r)
+	return b
 }

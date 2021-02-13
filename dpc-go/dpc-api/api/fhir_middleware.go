@@ -45,15 +45,13 @@ func FHIRModel(next http.Handler) http.Handler {
 			body, err := convertToFHIR(b)
 			if err != nil {
 				log.Error(err.Error(), zap.Error(err))
-				fhirror.GenericServerIssue(rw, r.Context())
+				fhirror.GenericServerIssue(w, r.Context())
 				return
 			}
-			b = body
-		}
-
-		if _, err := w.Write(b); err != nil {
-			log.Error("Failed to write data", zap.Error(err))
-			fhirror.GenericServerIssue(rw, r.Context())
+			if _, err := w.Write(body); err != nil {
+				log.Error("Failed to write data", zap.Error(err))
+				fhirror.GenericServerIssue(w, r.Context())
+			}
 		}
 
 	})
