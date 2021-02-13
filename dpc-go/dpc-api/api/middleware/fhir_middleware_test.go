@@ -1,6 +1,7 @@
-package api
+package middleware
 
 import (
+	"github.com/CMSgov/dpc/api/apitest"
 	"github.com/kinbiko/jsonassert"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
@@ -23,7 +24,7 @@ func TestFHIRMiddlewareTestSuite(t *testing.T) {
 
 func (suite *FHIRMiddlewareTestSuite) TestFHIRModel() {
 	nextHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Write(attributionResponse())
+		w.Write(apitest.AttributionResponse())
 	})
 
 	req := httptest.NewRequest(http.MethodGet, "http://www.your-domain.com", nil)

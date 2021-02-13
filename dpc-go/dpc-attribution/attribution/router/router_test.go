@@ -1,12 +1,12 @@
-package attribution
+package router
 
 import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/CMSgov/dpc/attribution/attributiontest"
 	"github.com/CMSgov/dpc/attribution/model"
 	v2 "github.com/CMSgov/dpc/attribution/v2"
-	"github.com/bxcodec/faker"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
@@ -15,53 +15,6 @@ import (
 	"net/http/httptest"
 	"testing"
 )
-
-const orgjson = `{
-  "ID": "12345",
-  "VersionId": "0",
-  "LastUpdated": "2017-01-01T00:00:00.000Z",
-  "Info": {
-    "resourceType": "Organization",
-    "identifier": [
-      {
-        "system": "http://hl7.org/fhir/sid/us-npi",
-        "value": "2111111119"
-      }
-    ],
-    "type": [
-      {
-        "coding": [
-          {
-            "system": "http://terminology.hl7.org/CodeSystem/organization-type",
-            "code": "prov",
-            "display": "Healthcare Provider"
-          }
-        ],
-        "text": "Healthcare Provider"
-      }
-    ],
-    "name": "BETH ISRAEL DEACONESS HOSPITAL - PLYMOUTH",
-    "telecom": [
-      {
-        "system": "phone",
-        "value": "5087462000"
-      }
-    ],
-    "address": [
-      {
-        "use": "work",
-        "type": "both",
-        "line": [
-          "275 SANDWICH STREET"
-        ],
-        "city": "PLYMOUTH",
-        "state": "MA",
-        "postalCode": "02360",
-        "country": "US"
-      }
-    ]
-  }
-}`
 
 type MockService struct {
 	mock.Mock
@@ -83,12 +36,7 @@ type RouterTestSuite struct {
 
 func (suite *RouterTestSuite) SetupTest() {
 	suite.r = NewDPCAttributionRouter
-	o := model.Organization{}
-	_ = faker.FakeData(&o)
-	var i model.Info
-	_ = json.Unmarshal([]byte(orgjson), &i)
-	o.Info = i
-	suite.fakeOrg = &o
+	suite.fakeOrg = attributiontest.OrgResponse()
 }
 
 func TestRouterTestSuite(t *testing.T) {
@@ -137,7 +85,7 @@ func (suite *RouterTestSuite) TestOrganizationPostRoutes() {
 	ts := httptest.NewServer(router)
 
 	var m = make(map[string]interface{})
-	_ = json.Unmarshal([]byte(orgjson), &m)
+	_ = json.Unmarshal([]byte(attributiontest.Orgjson), &m)
 
 	b, _ := json.Marshal(m["Info"])
 	r := bytes.NewReader(b)

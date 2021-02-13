@@ -1,11 +1,10 @@
-package api
+package router
 
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/CMSgov/dpc/api/model"
+	"github.com/CMSgov/dpc/api/apitest"
 	v2 "github.com/CMSgov/dpc/api/v2"
-	"github.com/bxcodec/faker"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
@@ -15,48 +14,6 @@ import (
 	"strings"
 	"testing"
 )
-
-const orgjson = `{
-    "resourceType": "Organization",
-    "identifier": [
-      {
-        "system": "http://hl7.org/fhir/sid/us-npi",
-        "value": "2111111119"
-      }
-    ],
-    "type": [
-      {
-        "coding": [
-          {
-            "system": "http://terminology.hl7.org/CodeSystem/organization-type",
-            "code": "prov",
-            "display": "Healthcare Provider"
-          }
-        ],
-        "text": "Healthcare Provider"
-      }
-    ],
-    "name": "BETH ISRAEL DEACONESS HOSPITAL - PLYMOUTH",
-    "telecom": [
-      {
-        "system": "phone",
-        "value": "5087462000"
-      }
-    ],
-    "address": [
-      {
-        "use": "work",
-        "type": "both",
-        "line": [
-          "275 SANDWICH STREET"
-        ],
-        "city": "PLYMOUTH",
-        "state": "MA",
-        "postalCode": "02360",
-        "country": "US"
-      }
-    ]
-  }`
 
 type MockController struct {
 	mock.Mock
@@ -104,7 +61,7 @@ func (suite *RouterTestSuite) TestOrganizationGetRoutes() {
 
 	mockOrg.On("Read", mock.Anything, mock.Anything).Once().Run(func(arg mock.Arguments) {
 		w := arg.Get(0).(http.ResponseWriter)
-		w.Write(attributionResponse())
+		w.Write(apitest.AttributionResponse())
 	})
 
 	router := suite.r(mockOrg, mockMeta)
@@ -127,13 +84,13 @@ func (suite *RouterTestSuite) TestOrganizationPostRoutes() {
 
 	mockOrg.On("Create", mock.Anything, mock.Anything).Once().Run(func(arg mock.Arguments) {
 		w := arg.Get(0).(http.ResponseWriter)
-		w.Write(attributionResponse())
+		w.Write(apitest.AttributionResponse())
 	})
 
 	router := suite.r(mockOrg, mockMeta)
 	ts := httptest.NewServer(router)
 
-	res, _ := http.Post(fmt.Sprintf("%s/%s", ts.URL, "v2/Organization"), "application/fhir+json", strings.NewReader(orgjson))
+	res, _ := http.Post(fmt.Sprintf("%s/%s", ts.URL, "v2/Organization"), "application/fhir+json", strings.NewReader(apitest.Orgjson))
 
 	assert.Equal(suite.T(), "application/fhir+json; charset=UTF-8", res.Header.Get("Content-Type"))
 	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
@@ -142,15 +99,4 @@ func (suite *RouterTestSuite) TestOrganizationPostRoutes() {
 	var v map[string]interface{}
 	_ = json.Unmarshal(b, &v)
 	assert.Nil(suite.T(), v["info"])
-}
-
-func attributionResponse() []byte {
-	r := model.Resource{}
-	_ = faker.FakeData(&r)
-
-	var v map[string]interface{}
-	_ = json.Unmarshal([]byte(orgjson), &v)
-	r.Info = v
-	b, _ := json.Marshal(r)
-	return b
 }

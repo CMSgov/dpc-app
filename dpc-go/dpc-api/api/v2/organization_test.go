@@ -1,8 +1,8 @@
 package v2
 
 import (
-	"bytes"
 	"context"
+	"github.com/CMSgov/dpc/api/apitest"
 	"github.com/CMSgov/dpc/api/client"
 	"github.com/go-chi/chi/middleware"
 	"github.com/kinbiko/jsonassert"
@@ -13,50 +13,9 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 )
-
-const orgjson = `{
-    "resourceType": "Organization",
-    "identifier": [
-        {
-            "system": "http://hl7.org/fhir/sid/us-npi",
-            "value": "2111111119"
-        }
-    ],
-    "type": [
-        {
-            "coding": [
-                {
-                    "system": "http://terminology.hl7.org/CodeSystem/organization-type",
-                    "code": "prov",
-                    "display": "Healthcare Provider"
-                }
-            ],
-            "text": "Healthcare Provider"
-        }
-    ],
-    "name": "BETH ISRAEL DEACONESS HOSPITAL - PLYMOUTH",
-    "telecom": [
-        {
-            "system": "phone",
-            "value": "5087462000"
-        }
-    ],
-    "address": [
-        {
-            "use": "work",
-            "type": "both",
-            "line": [
-                "275 SANDWICH STREET"
-            ],
-            "city": "PLYMOUTH",
-            "state": "MA",
-            "postalCode": "02360",
-            "country": "US"
-        }
-    ]
-}`
 
 type MockAttributionClient struct {
 	mock.Mock
@@ -131,9 +90,9 @@ func (suite *OrganizationControllerTestSuite) TestGetOrganizationErrorInClient()
 func (suite *OrganizationControllerTestSuite) TestGetOrganization() {
 	ja := jsonassert.New(suite.T())
 
-	suite.mac.On("Get", mock.Anything, mock.Anything, mock.Anything).Return([]byte(orgjson), nil)
+	suite.mac.On("Get", mock.Anything, mock.Anything, mock.Anything).Return(apitest.AttributionResponse(), nil)
 
-	req := httptest.NewRequest("GET", "http://example.com/foo", nil)
+	req := httptest.NewRequest(http.MethodGet, "http://example.com/foo", nil)
 	ctx := req.Context()
 	ctx = context.WithValue(ctx, ContextKeyOrganization, "12345")
 	req = req.WithContext(ctx)
@@ -148,7 +107,7 @@ func (suite *OrganizationControllerTestSuite) TestGetOrganization() {
 
 	resp, _ := ioutil.ReadAll(res.Body)
 
-	ja.Assertf(string(resp), orgjson)
+	ja.Assertf(string(resp), string(apitest.AttributionResponse()))
 
 }
 
@@ -157,8 +116,7 @@ func (suite *OrganizationControllerTestSuite) TestPostOrganizationErrorInClient(
 
 	ja := jsonassert.New(suite.T())
 
-	b := bytes.NewBuffer([]byte(orgjson))
-	req := httptest.NewRequest("POST", "http://example.com/foo", b)
+	req := httptest.NewRequest(http.MethodPost, "http://example.com/foo", strings.NewReader(apitest.Orgjson))
 	ctx := req.Context()
 	ctx = context.WithValue(ctx, middleware.RequestIDKey, "12345")
 	req = req.WithContext(ctx)
@@ -193,7 +151,7 @@ func (suite *OrganizationControllerTestSuite) TestPostOrganizationErrorInClient(
 func (suite *OrganizationControllerTestSuite) TestPostOrganizationBadJsonOrg() {
 	ja := jsonassert.New(suite.T())
 
-	req := httptest.NewRequest("POST", "http://example.com/foo", nil)
+	req := httptest.NewRequest(http.MethodPost, "http://example.com/foo", nil)
 	ctx := req.Context()
 	ctx = context.WithValue(ctx, middleware.RequestIDKey, "12345")
 	req = req.WithContext(ctx)
@@ -225,14 +183,10 @@ func (suite *OrganizationControllerTestSuite) TestPostOrganizationBadJsonOrg() {
 }
 
 func (suite *OrganizationControllerTestSuite) TestPostOrganization() {
-	suite.mac.On("Post", mock.Anything, mock.Anything, mock.Anything).Return([]byte(orgjson), nil)
+	suite.mac.On("Post", mock.Anything, mock.Anything, mock.Anything).Return(apitest.AttributionResponse(), nil)
 
 	ja := jsonassert.New(suite.T())
-	b := bytes.NewBuffer([]byte(orgjson))
-	req := httptest.NewRequest("POST", "http://example.com/foo", b)
-	ctx := req.Context()
-	ctx = context.WithValue(ctx, middleware.RequestIDKey, "12345")
-	req = req.WithContext(ctx)
+	req := httptest.NewRequest(http.MethodPost, "http://example.com/foo", strings.NewReader(apitest.Orgjson))
 
 	w := httptest.NewRecorder()
 
@@ -244,5 +198,5 @@ func (suite *OrganizationControllerTestSuite) TestPostOrganization() {
 
 	resp, _ := ioutil.ReadAll(res.Body)
 
-	ja.Assertf(string(resp), orgjson)
+	ja.Assertf(string(resp), string(apitest.AttributionResponse()))
 }

@@ -1,4 +1,4 @@
-package api
+package middleware
 
 import (
 	"bytes"
@@ -48,10 +48,11 @@ func FHIRModel(next http.Handler) http.Handler {
 				fhirror.GenericServerIssue(w, r.Context())
 				return
 			}
-			if _, err := w.Write(body); err != nil {
-				log.Error("Failed to write data", zap.Error(err))
-				fhirror.GenericServerIssue(w, r.Context())
-			}
+			b = body
+		}
+		if _, err := w.Write(b); err != nil {
+			log.Error("Failed to write data", zap.Error(err))
+			fhirror.GenericServerIssue(w, r.Context())
 		}
 
 	})
