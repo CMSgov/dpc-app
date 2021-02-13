@@ -1,15 +1,16 @@
 package api
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	v2 "github.com/CMSgov/dpc/api/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 )
 
@@ -125,6 +126,11 @@ func (suite *RouterTestSuite) TestOrganizationGetRoutes() {
 	assert.Equal(suite.T(), "application/fhir+json; charset=UTF-8", res.Header.Get("Content-Type"))
 	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
 
+	b, _ := ioutil.ReadAll(res.Body)
+	var v map[string]interface{}
+	_ = json.Unmarshal(b, &v)
+	assert.Nil(suite.T(), v["Info"])
+
 	mockOrg.On("Read", mock.Anything, mock.Anything).Once().Run(func(arg mock.Arguments) {
 		w := arg.Get(0).(http.ResponseWriter)
 		w.Write([]byte("{}"))
@@ -149,15 +155,15 @@ func (suite *RouterTestSuite) TestOrganizationPostRoutes() {
 	router := suite.r(mockOrg, mockMeta)
 	ts := httptest.NewServer(router)
 
-	var m = make(map[string]interface{})
-	_ = json.Unmarshal([]byte(orgjson), &m)
-
-	b, _ := json.Marshal(m["Info"])
-	r := bytes.NewReader(b)
-	res, _ := http.Post(fmt.Sprintf("%s/%s", ts.URL, "v2/Organization"), "application/fhir+json", r)
+	res, _ := http.Post(fmt.Sprintf("%s/%s", ts.URL, "v2/Organization"), "application/fhir+json", strings.NewReader(orgjson))
 
 	assert.Equal(suite.T(), "application/fhir+json; charset=UTF-8", res.Header.Get("Content-Type"))
 	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
+
+	b, _ := ioutil.ReadAll(res.Body)
+	var v map[string]interface{}
+	_ = json.Unmarshal(b, &v)
+	assert.Nil(suite.T(), v["Info"])
 
 }
 
@@ -195,14 +201,15 @@ func (suite *RouterTestSuite) TestOrganizationPutRoutes() {
 	router := suite.r(mockOrg, mockMeta)
 	ts := httptest.NewServer(router)
 
-	var m = make(map[string]interface{})
-	_ = json.Unmarshal([]byte(orgjson), &m)
-	b, _ := json.Marshal(m["Info"])
-	r := bytes.NewReader(b)
-	req, _ := http.NewRequest("PUT", fmt.Sprintf("%s/%s", ts.URL, "v2/Organization/12345"), r)
+	req, _ := http.NewRequest("PUT", fmt.Sprintf("%s/%s", ts.URL, "v2/Organization/12345"), strings.NewReader(orgjson))
 	res, _ := http.DefaultClient.Do(req)
 
 	assert.Equal(suite.T(), "application/fhir+json; charset=UTF-8", res.Header.Get("Content-Type"))
 	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
 	assert.Equal(suite.T(), "12345", orgID)
+
+	b, _ := ioutil.ReadAll(res.Body)
+	var v map[string]interface{}
+	_ = json.Unmarshal(b, &v)
+	assert.Nil(suite.T(), v["Info"])
 }

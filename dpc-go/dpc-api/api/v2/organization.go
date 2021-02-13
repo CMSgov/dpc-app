@@ -120,14 +120,14 @@ func (oc *OrganizationController) Update(w http.ResponseWriter, r *http.Request)
 
 	resp, err := oc.ac.Put(r.Context(), client.Organization, organizationID, body)
 	if err != nil {
-		log.Error("Failed to save the org to attribution", zap.Error(err))
-		fhirror.ServerIssue(w, r.Context(), http.StatusUnprocessableEntity, "Failed to save the organization")
+		log.Error("Failed to update the org to attribution", zap.Error(err))
+		fhirror.ServerIssue(w, r.Context(), http.StatusUnprocessableEntity, "Failed to update the organization")
 		return
 	}
 
 	if _, err = w.Write(resp); err != nil {
 		log.Error("Failed to write data to response", zap.Error(err))
-		fhirror.ServerIssue(w, r.Context(), http.StatusUnprocessableEntity, "Failed to save organization")
+		fhirror.ServerIssue(w, r.Context(), http.StatusUnprocessableEntity, "Failed to update organization")
 	}
 }
 
