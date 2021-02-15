@@ -7,6 +7,7 @@ import (
 	"github.com/CMSgov/dpc/attribution/attributiontest"
 	"github.com/CMSgov/dpc/attribution/model"
 	v2 "github.com/CMSgov/dpc/attribution/v2"
+	"github.com/darahayes/go-boom"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
@@ -62,13 +63,13 @@ func (suite *RouterTestSuite) TestOrganizationGetRoutes() {
 
 	mockOrg.On("Get", mock.Anything, mock.Anything).Once().Run(func(arg mock.Arguments) {
 		w := arg.Get(0).(http.ResponseWriter)
-		w.Write([]byte("{}"))
+		boom.Internal(w)
 	})
 
 	res, _ = http.Get(fmt.Sprintf("%s/%s", ts.URL, "Organization/1234"))
 
 	assert.Equal(suite.T(), "application/json; charset=UTF-8", res.Header.Get("Content-Type"))
-	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
+	assert.Equal(suite.T(), http.StatusInternalServerError, res.StatusCode)
 
 }
 
@@ -84,20 +85,26 @@ func (suite *RouterTestSuite) TestOrganizationPostRoutes() {
 	router := suite.r(mockOrg)
 	ts := httptest.NewServer(router)
 
-	var m = make(map[string]interface{})
-	_ = json.Unmarshal([]byte(attributiontest.Orgjson), &m)
+	b, _ := json.Marshal(suite.fakeOrg)
 
-	b, _ := json.Marshal(m["Info"])
-	r := bytes.NewReader(b)
-	res, _ := http.Post(fmt.Sprintf("%s/%s", ts.URL, "Organization"), "application/json", r)
-
-	assert.Equal(suite.T(), "application/json; charset=UTF-8", res.Header.Get("Content-Type"))
-	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
-
+	res, _ := http.Post(fmt.Sprintf("%s/%s", ts.URL, "Organization"), "application/json", bytes.NewReader(b))
 	body, _ := ioutil.ReadAll(res.Body)
 	var actual *model.Organization
 	_ = json.Unmarshal(body, &actual)
 
+	assert.Equal(suite.T(), "application/json; charset=UTF-8", res.Header.Get("Content-Type"))
+	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
+
 	assert.Equal(suite.T(), suite.fakeOrg.ID, actual.ID)
+
+	mockOrg.On("Save", mock.Anything, mock.Anything).Once().Run(func(arg mock.Arguments) {
+		w := arg.Get(0).(http.ResponseWriter)
+		boom.Internal(w)
+	})
+
+	res, _ = http.Post(fmt.Sprintf("%s/%s", ts.URL, "Organization"), "application/json", bytes.NewReader(b))
+
+	assert.Equal(suite.T(), "application/json; charset=UTF-8", res.Header.Get("Content-Type"))
+	assert.Equal(suite.T(), http.StatusInternalServerError, res.StatusCode)
 
 }
