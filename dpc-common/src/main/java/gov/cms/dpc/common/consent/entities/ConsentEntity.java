@@ -91,9 +91,6 @@ public class ConsentEntity implements Serializable {
     @UpdateTimestamp
     private OffsetDateTime updatedAt;
 
-    @Column(name = "custodian", columnDefinition = "uuid")
-    private UUID custodian;
-
     @Column(name = "source_code")
     private String sourceCode;
 
@@ -180,10 +177,6 @@ public class ConsentEntity implements Serializable {
     public void setUpdatedAt(OffsetDateTime updatedAt) {
         this.updatedAt = updatedAt;
     }
-
-    public UUID getCustodian() { return custodian; }
-
-    public void setCustodian(UUID custodian) { this.custodian = custodian; }
 
     public String getSourceCode() { return sourceCode; }
 

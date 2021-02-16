@@ -45,7 +45,7 @@ public class ConsentResourceUnitTest {
     private static final GrizzlyWebTestContainerFactory testContainer = new GrizzlyWebTestContainerFactory();
 
     public static final ResourceExtension resource = ResourceExtension.builder()
-            .addResource(new ConsentResource(mockedDAO, "http://test-url", "http://test-org-url"))
+            .addResource(new ConsentResource(mockedDAO, "http://test-org-url"))
             .setTestContainerFactory(testContainer)
             .build();
 
