@@ -55,5 +55,13 @@ ENV=prod-sbx
 ### The Database
 The database is shared with the Ruby on Rails Web app (found in `dpc-app/dpc-web`). If you already set up the database for the web app, you will only need to run `rake db:migrate`. If you have not set up the database run: `rails db:create db:migrate db:seed`.
 
+## Running Admin App
+Once the database and credentials are set up, run `rails s` or `rails server`. The app should be live at `http://localhost:3000/`.
+
+## Running Admin App with Web App
+To run the Admin App and Web App simultaneously, follow the above instructions to spin up the Admin app. Then in another terminal window, redirect to `dpc-app/dpc-web` and follow the instructions for that application.
+
+The Web app will automatically run on `http://localhost:3500/`.
+
 # Testing
 To test the rails app, run `rspec spec` in the terminal.
