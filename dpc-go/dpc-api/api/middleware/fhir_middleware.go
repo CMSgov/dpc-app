@@ -40,7 +40,7 @@ func FHIRModel(next http.Handler) http.Handler {
 
 		next.ServeHTTP(rw, r)
 
-		var b = rw.buf.Bytes()
+		b := rw.buf.Bytes()
 		if isSuccess(rw.Status) {
 			body, err := convertToFHIR(b)
 			if err != nil {

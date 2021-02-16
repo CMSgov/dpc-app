@@ -40,7 +40,7 @@ func (or *OrganizationRepository) FindByID(ctx context.Context, id string) (*mod
 	q, args := sb.Build()
 
 	org := new(model.Organization)
-	var orgStruct = sqlbuilder.NewStruct(new(model.Organization))
+	orgStruct := sqlbuilder.NewStruct(new(model.Organization))
 	if err := or.db.QueryRowContext(ctx, q, args...).Scan(orgStruct.Addr(&org)...); err != nil {
 		return nil, err
 	}
@@ -83,7 +83,7 @@ func (or *OrganizationRepository) Create(ctx context.Context, body []byte) (*mod
 	q, args = ib.Build()
 
 	org := new(model.Organization)
-	var orgStruct = sqlbuilder.NewStruct(new(model.Organization))
+	orgStruct := sqlbuilder.NewStruct(new(model.Organization))
 	if err := or.db.QueryRowContext(ctx, q, args...).Scan(orgStruct.Addr(&org)...); err != nil {
 		return nil, err
 	}
