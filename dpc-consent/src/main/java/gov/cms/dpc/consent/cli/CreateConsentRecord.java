@@ -23,14 +23,11 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.Optional;
-import java.util.UUID;
 
 import static gov.cms.dpc.consent.dao.tables.Consent.CONSENT;
 
 /**
- * CreateConsentRecord adds a consent record for a specific beneficiary to the consent database. While most consent
- * records are recorded through our consent ETL process, we want to be ready to create single consent records on
- * demand where the custodian can be an external organization or DPC.
+ * CreateConsentRecord adds a consent record for a specific beneficiary to the consent database.
  * <p>
  * The command takes the following arguments:
  * <ul>
@@ -38,7 +35,6 @@ import static gov.cms.dpc.consent.dao.tables.Consent.CONSENT;
  * <li>-i, --in - indicates this is in an optin event</li>
  * <li>-o, --out - indicates this is an optout event</li>
  * <li>-d, --date - (required) sets the effective date of the record</li>
- * <li>--org - (optional) if provided, must be an organization uuid known to DPC</li>
  * </ul>
  */
 public class CreateConsentRecord extends ConsentCommand {
@@ -66,10 +62,6 @@ public class CreateConsentRecord extends ConsentCommand {
                 .dest("effective-date")
                 .help("effective date of this record (e.g., 2019-11-20)");
 
-        subparser.addArgument("--org")
-                .required(false)
-                .dest("org-uuid")
-                .help("DPC UUID of an external org that originated this record");
 
         addInOrOutGroup(subparser);
     }
@@ -96,32 +88,20 @@ public class CreateConsentRecord extends ConsentCommand {
         final LocalDate effectiveDate = LocalDate.parse(namespace.getString("effective-date"));
         final String inOrOut = namespace.getString(IN_OR_OUT_ARG);
 
-        final String orgUuid = namespace.getString("org-uuid");
-        if (orgUuid != null && !orgUuid.isBlank()) {
-            //noinspection ResultOfMethodCallIgnored
-            UUID.fromString(orgUuid);
-            // using UUID conversion to verify the UUID provided is valid; will throw IllegalArgumentException if invalid
-        }
-
         // TODO verify mbi / org exist in DPC attribution
 
         logger.info(
-                String.format("Creating %s consent entry for patient %s, custodian is %s, effective %s",
-                        inOrOut, mbi, orgUuid == null ? "DPC" : orgUuid, effectiveDate));
+                String.format("Creating %s consent entry for patient %s, effective %s",
+                        inOrOut, mbi, effectiveDate));
 
         ConsentEntity ce = ConsentEntity.defaultConsentEntity(Optional.empty(), Optional.empty(), Optional.of(mbi));
         ce.setEffectiveDate(effectiveDate);
         ce.setPolicyCode(inOrOut);
 
-        if (orgUuid != null && !orgUuid.isBlank()) {
-            ce.setCustodian(UUID.fromString(orgUuid));
-        }
-
         saveEntity(bootstrap, dpcConsentConfiguration, ce);
 
-        String custodian = ce.getCustodian() == null ? ce.getSourceCode() : ce.getCustodian().toString();
-        logger.info(String.format("Created %s consent entry for patient %s, custodial entity is %s, effective %s",
-                ce.getPolicyCode(), ce.getMbi(), custodian, ce.getEffectiveDate()));
+        logger.info(String.format("Created %s consent entry for patient %s, effective %s",
+                ce.getPolicyCode(), ce.getMbi(), ce.getEffectiveDate()));
     }
 
     private void saveEntity(Bootstrap<DPCConsentConfiguration> bootstrap, DPCConsentConfiguration dpcConsentConfiguration, ConsentEntity entity) throws DataAccessException, SQLException {

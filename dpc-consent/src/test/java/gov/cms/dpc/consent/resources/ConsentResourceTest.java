@@ -55,9 +55,6 @@ class ConsentResourceTest extends AbstractConsentTest {
         Date date = Date.from(Instant.now());
         consent.setDateTime(date);
 
-        Reference orgRef = new Reference("Organization/" + UUID.randomUUID().toString());
-        consent.setOrganization(List.of(orgRef));
-
         String policyUrl = "http://hl7.org/fhir/ConsentPolicy/opt-out";
         consent.setPolicyRule(policyUrl);
 
@@ -92,9 +89,6 @@ class ConsentResourceTest extends AbstractConsentTest {
 
         Date date = Date.from(Instant.now());
         consent.setDateTime(date);
-
-        Reference orgRef = new Reference("Organization/" + UUID.randomUUID().toString());
-        consent.setOrganization(List.of(orgRef));
 
         String policyUrl = "http://hl7.org/fhir/ConsentPolicy/opt-out";
         consent.setPolicyRule(policyUrl);
@@ -225,9 +219,6 @@ class ConsentResourceTest extends AbstractConsentTest {
 
         Date date = Date.from(Instant.now());
         consent.setDateTime(date);
-
-        Reference orgRef = new Reference("Organization/" + UUID.randomUUID().toString());
-        consent.setOrganization(List.of(orgRef));
 
         String policyUrl = "http://hl7.org/fhir/ConsentPolicy/opt-in";
         consent.setPolicyRule(policyUrl);
