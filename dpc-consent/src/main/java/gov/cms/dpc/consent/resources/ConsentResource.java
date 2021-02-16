@@ -32,13 +32,11 @@ public class ConsentResource {
 
     private final ConsentDAO dao;
     private final String fhirReferenceURL;
-    private final String consentOrganizationURL;
 
     @Inject
-    ConsentResource(ConsentDAO dao, @Named("fhirReferenceURL") String fhirReferenceURL, @Named("consentOrganizationURL") String consentOrganizationURL) {
+    ConsentResource(ConsentDAO dao, @Named("fhirReferenceURL") String fhirReferenceURL) {
         this.dao = dao;
         this.fhirReferenceURL = fhirReferenceURL;
-        this.consentOrganizationURL = consentOrganizationURL;
     }
 
     @POST
@@ -50,7 +48,7 @@ public class ConsentResource {
     public Response create(@ApiParam(value = "Consent resource") Consent consent) {
         ConsentEntity entity = ConsentEntityConverter.fromFhir(consent);
         entity = dao.persistConsent(entity);
-        Consent result = ConsentEntityConverter.toFhir(entity, consentOrganizationURL, fhirReferenceURL);
+        Consent result = ConsentEntityConverter.toFhir(entity, fhirReferenceURL);
         return Response.status(Response.Status.CREATED).entity(result).build();
     }
 
@@ -97,7 +95,7 @@ public class ConsentResource {
 
         return entities
                 .stream()
-                .map(e -> ConsentEntityConverter.toFhir(e, consentOrganizationURL, fhirReferenceURL))
+                .map(e -> ConsentEntityConverter.toFhir(e, fhirReferenceURL))
                 .collect(Collectors.toList());
     }
 
@@ -115,7 +113,7 @@ public class ConsentResource {
                 new WebApplicationException("invalid consent resource id value", HttpStatus.NOT_FOUND_404)
         );
 
-        return ConsentEntityConverter.toFhir(consentEntity, consentOrganizationURL, fhirReferenceURL);
+        return ConsentEntityConverter.toFhir(consentEntity, fhirReferenceURL);
     }
 
     @PUT
@@ -130,7 +128,7 @@ public class ConsentResource {
         consent.setId(consentId.toString());
         ConsentEntity entity = ConsentEntityConverter.fromFhir(consent);
         entity = this.dao.persistConsent(entity);
-        return ConsentEntityConverter.toFhir(entity, consentOrganizationURL, fhirReferenceURL);
+        return ConsentEntityConverter.toFhir(entity, fhirReferenceURL);
     }
 
     private List<ConsentEntity> getEntitiesByPatient(Identifier patientIdentifier) {
