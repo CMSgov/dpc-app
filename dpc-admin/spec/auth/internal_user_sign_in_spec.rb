@@ -37,7 +37,7 @@ RSpec.feature 'internal user signs in' do
       end
 
       scenario 'creates new internal user' do
-        binding.pry
+        # binding.pry
         OmniAuth.config.mock_auth[:github] = OmniAuth::AuthHash.new(
           provider: 'github',
           uid: '123545',
