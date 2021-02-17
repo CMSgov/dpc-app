@@ -18,7 +18,7 @@ import java.util.UUID;
 
 @FHIR
 @Path("/Group")
-public abstract class AbstractGroupResource {
+public abstract class AbstractGroupResource extends AbstractResourceWithSince {
 
     protected AbstractGroupResource() {
         // Not used
