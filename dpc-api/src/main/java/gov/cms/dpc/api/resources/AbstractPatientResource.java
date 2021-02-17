@@ -18,7 +18,7 @@ import java.util.UUID;
 
 @Path("/Patient")
 @FHIR
-public abstract class AbstractPatientResource {
+public abstract class AbstractPatientResource extends AbstractResourceWithSince {
 
     protected AbstractPatientResource() {
         // Not used
