@@ -4,6 +4,7 @@ import com.github.nitram509.jmacaroons.Macaroon;
 import gov.cms.dpc.api.entities.PublicKeyEntity;
 import gov.cms.dpc.api.exceptions.PublicKeyException;
 import gov.cms.dpc.api.jdbi.PublicKeyDAO;
+import gov.cms.dpc.common.MDCConstants;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.macaroons.MacaroonCaveat;
 import io.jsonwebtoken.Claims;
@@ -44,8 +45,7 @@ public class JwtKeyResolver extends SigningKeyResolverAdapter {
 
         final UUID organizationID = getOrganizationID(claims.getIssuer());
         // Set the MDC values here, since it's the first time we actually know what the organization ID is
-        MDC.clear();
-        MDC.put("organization_id", organizationID.toString());
+        MDC.put(MDCConstants.ORGANIZATION_ID, organizationID.toString());
 
         final PublicKeyEntity keyEntity;
         try {

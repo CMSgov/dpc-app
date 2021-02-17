@@ -14,24 +14,26 @@ import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
-import java.util.Date;
+import java.time.YearMonth;
+import java.time.ZoneId;
+import java.util.List;
 
 public class DPCAggregationConfiguration extends TypesafeConfiguration implements BlueButtonBundleConfiguration, IDPCDatabase, IDPCQueueDatabase, DPCQueueConfig {
 
     @Valid
     @NotNull
     @JsonProperty("database")
-    private DataSourceFactory database = new DataSourceFactory();
+    private final DataSourceFactory database = new DataSourceFactory();
 
     @Valid
     @NotNull
     @JsonProperty("queuedb")
-    private DataSourceFactory queueDatabase = new DataSourceFactory();
+    private final DataSourceFactory queueDatabase = new DataSourceFactory();
 
     @Valid
     @NotNull
     @JsonProperty("bbclient")
-    private BBClientConfiguration clientConfiguration = new BBClientConfiguration();
+    private final BBClientConfiguration clientConfiguration = new BBClientConfiguration();
 
     // The path to the folder that will contain the output files
     @NotEmpty
@@ -45,20 +47,23 @@ public class DPCAggregationConfiguration extends TypesafeConfiguration implement
     // The max number of resources that we will place into a single file
     @Min(10)
     @Max(100000) // Keep files under a GB
-    private int resourcesPerFileCount = 10000;
+    private final int resourcesPerFileCount = 10000;
 
     // How often in milliseconds to check the queue for new batches
     @Min(50)
-    private int pollingFrequency = 500;
+    private final int pollingFrequency = 500;
 
     @Min(1)
-    private int jobTimeoutInSeconds = 5;
+    private final int jobTimeoutInSeconds = 5;
 
     @Min(-1)
+    @SuppressWarnings("unused")
     private int lookBackMonths;
 
+    private List<String> lookBackExemptOrgs;
+
     @NotNull
-    private Date lookBackDate = new Date();
+    private final YearMonth lookBackDate = YearMonth.now(ZoneId.systemDefault());
 
     @Override
     public DataSourceFactory getDatabase() {
@@ -82,6 +87,7 @@ public class DPCAggregationConfiguration extends TypesafeConfiguration implement
         return retryCount;
     }
 
+    @SuppressWarnings("unused")
     public void setRetryCount(Integer retryCount) {
         this.retryCount = retryCount;
     }
@@ -108,9 +114,16 @@ public class DPCAggregationConfiguration extends TypesafeConfiguration implement
         return lookBackMonths;
     }
 
-    public Date getLookBackDate() {
+    public YearMonth getLookBackDate() {
         return lookBackDate;
     }
 
+    public List<String> getLookBackExemptOrgs() {
+        return lookBackExemptOrgs;
+    }
 
+    @SuppressWarnings("unused")
+    public void setLookBackExemptOrgs(List<String> lookBackExemptOrgs) {
+        this.lookBackExemptOrgs = lookBackExemptOrgs;
+    }
 }

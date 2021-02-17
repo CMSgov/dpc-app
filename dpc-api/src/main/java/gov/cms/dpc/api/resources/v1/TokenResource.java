@@ -4,6 +4,7 @@ import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import com.github.nitram509.jmacaroons.Macaroon;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
+import gov.cms.dpc.api.auth.annotations.Authorizer;
 import gov.cms.dpc.api.auth.annotations.Public;
 import gov.cms.dpc.api.auth.jwt.IJTICache;
 import gov.cms.dpc.api.auth.jwt.ValidatingKeyResolver;
@@ -60,7 +61,6 @@ public class TokenResource extends AbstractTokenResource {
     // This will be removed as part of DPC-747
     private static final String DEFAULT_ACCESS_SCOPE = "system/*.*";
     private static final Logger logger = LoggerFactory.getLogger(TokenResource.class);
-    private static final String ORG_NOT_FOUND = "Cannot find Organization: %s";
     private static final String INVALID_JWT_MSG = "Invalid JWT";
 
     private final TokenDAO dao;
@@ -90,6 +90,7 @@ public class TokenResource extends AbstractTokenResource {
     @UnitOfWork
     @Timed
     @ExceptionMetered
+    @Authorizer
     @ApiOperation(value = "Fetch client tokens", notes = "Method to retrieve the client tokens associated to the given Organization.")
     @ApiResponses(value = @ApiResponse(code = 404, message = "Could not find Organization"))
     public CollectionResponse<TokenEntity> getOrganizationTokens(
@@ -102,6 +103,7 @@ public class TokenResource extends AbstractTokenResource {
     @UnitOfWork
     @Timed
     @ExceptionMetered
+    @Authorizer
     @ApiOperation(value = "Fetch client token", notes = "Method to retrieve metadata for a specific access token")
     @ApiResponses(value = @ApiResponse(code = 404, message = "Could not find Token", response = OperationOutcome.class))
     @Override
@@ -120,6 +122,7 @@ public class TokenResource extends AbstractTokenResource {
     @UnitOfWork
     @Timed
     @ExceptionMetered
+    @Authorizer
     @ApiOperation(value = "Create authentication token", notes = "Create a new authentication token for the given Organization (identified by Resource ID)." +
             "<p>" +
             "Token supports a custom human-readable label via the `label` query param as well as a custom expiration period via the `expiration` param." +
@@ -158,7 +161,7 @@ public class TokenResource extends AbstractTokenResource {
         try {
             persisted = this.dao.persistToken(tokenEntity);
         } catch (NoResultException e) {
-            throw new WebApplicationException(String.format(ORG_NOT_FOUND, organizationID), Response.Status.NOT_FOUND);
+            throw new WebApplicationException(String.format("Cannot find Organization: %s", organizationID), Response.Status.NOT_FOUND);
         }
 
         persisted.setToken(new String(this.bakery.serializeMacaroon(macaroon, true), StandardCharsets.UTF_8));
@@ -172,6 +175,7 @@ public class TokenResource extends AbstractTokenResource {
     @UnitOfWork
     @Timed
     @ExceptionMetered
+    @Authorizer
     @ApiOperation(value = "Delete authentication token", notes = "Delete the specified authentication token for the given Organization (identified by Resource ID)")
     @ApiResponses({@ApiResponse(code = 204, message = "Successfully deleted token"), @ApiResponse(code = 404, message = "Unable to find token with given id")})
     public Response deleteOrganizationToken(
@@ -321,7 +325,7 @@ public class TokenResource extends AbstractTokenResource {
         // Compute default expiration
         final OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
         final OffsetDateTime defaultExpiration = now.plus(this.policy.getExpirationPolicy().getExpirationOffset(), this.policy.getExpirationPolicy().getExpirationUnit());
-        final OffsetDateTime expiresBodyParam = token.isPresent() ? token.get().getExpiresAt() : null;
+        final OffsetDateTime expiresBodyParam = token.map(CreateTokenRequest::getExpiresAt).orElse(null);
 
         // If a custom expiration is supplied use it, unless it violates our default policy
         if (expiresQueryParam.isPresent() || expiresBodyParam!=null) {
@@ -341,6 +345,7 @@ public class TokenResource extends AbstractTokenResource {
         return defaultExpiration;
     }
 
+    @SuppressWarnings("JdkObsolete") // Date class is used by Jwt
     private void handleJWTClaims(UUID organizationID, Jws<Claims> claims) {
         // Issuer and Sub must be present and identical
         final String issuer = getClaimIfPresent("issuer", claims.getBody().getIssuer());

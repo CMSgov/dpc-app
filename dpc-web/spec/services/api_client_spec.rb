@@ -1,9 +1,12 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
+require './lib/luhnacy_lib/luhnacy_lib'
 
 RSpec.describe APIClient do
-  let!(:org) { create(:organization, npi: '1111111111') }
+  include OrganizationsHelper
+
+  let!(:org) { create(:organization, npi: LuhnacyLib.generate_npi) }
   let!(:registered_org) { build(:registered_organization, organization: org) }
   let!(:fhir_endpoint) do
     build(

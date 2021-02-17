@@ -1,18 +1,20 @@
 package gov.cms.dpc.aggregation.engine;
 
-import java.util.Date;
+import java.time.YearMonth;
+import java.util.List;
 
 /**
  * Holds configuration information for the operations of {@link gov.cms.dpc.aggregation.engine.AggregationEngine}.
  */
 public class OperationsConfig {
 
-    private int retryCount;
-    private int resourcesPerFileCount;
-    private String exportPath;
-    private int pollingFrequency;
+    private final int retryCount;
+    private final int resourcesPerFileCount;
+    private final String exportPath;
+    private final int pollingFrequency;
     private int lookBackMonths;
-    private Date lookBackDate;
+    private final YearMonth lookBackDate;
+    private List<String> lookBackExemptOrgs;
 
     public OperationsConfig(
             int resourcesPerFileCount,
@@ -20,7 +22,8 @@ public class OperationsConfig {
             int retryCount,
             int pollingFrequency,
             int lookBackMonths,
-            Date lookBackDate
+            YearMonth lookBackDate,
+            List<String> lookBackExemptOrgs
     ) {
         this.retryCount = retryCount;
         this.resourcesPerFileCount = resourcesPerFileCount;
@@ -28,13 +31,14 @@ public class OperationsConfig {
         this.pollingFrequency = pollingFrequency;
         this.lookBackMonths = lookBackMonths;
         this.lookBackDate = lookBackDate;
+        this.lookBackExemptOrgs = lookBackExemptOrgs;
     }
 
     public OperationsConfig(
             int resourcesPerFileCount,
             String exportPath,
             int pollingFrequency,
-            Date lookBackDate
+            YearMonth lookBackDate
     ) {
         this.retryCount = 3;
         this.resourcesPerFileCount = resourcesPerFileCount;
@@ -43,6 +47,7 @@ public class OperationsConfig {
         this.lookBackDate = lookBackDate;
     }
 
+    @SuppressWarnings("unused")
     public int getRetryCount() {
         return retryCount;
     }
@@ -63,7 +68,9 @@ public class OperationsConfig {
         return lookBackMonths;
     }
 
-    public Date getLookBackDate() {
+    public YearMonth getLookBackDate() {
         return lookBackDate;
     }
+
+    public List<String> getLookBackExemptOrgs() { return lookBackExemptOrgs; }
 }

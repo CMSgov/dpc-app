@@ -22,6 +22,7 @@ services:
       - ./ops/config/decrypted/local.env
     environment:
       - ENV=local
+      - USE_BFD_MOCK=${USE_BFD_MOCK:-true}
       - JACOCO=${REPORT_COVERAGE}
     depends_on:
       - db
@@ -107,7 +108,7 @@ services:
       - export-volume:/tmp
       - ./:/usr/src/mymaven
     working_dir: /usr/src/mymaven
-    command: sh -c "mvn test -Pintegration-tests -pl dpc-api -am"
+    command: sh -c "mvn test -Pintegration-tests -pl dpc-api -am -ntp"
     network_mode: host
 
 

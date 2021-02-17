@@ -6,10 +6,10 @@ import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.Profiled;
 import gov.cms.dpc.fhir.validations.profiles.AttestationProfile;
 import gov.cms.dpc.fhir.validations.profiles.PatientProfile;
-import io.dropwizard.auth.Auth;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
@@ -29,9 +29,10 @@ public abstract class AbstractPatientResource {
 
     @POST
     public abstract Response submitPatient(OrganizationPrincipal organization, @Valid @Profiled(profile = PatientProfile.PROFILE_URI) Patient patient);
+
     @POST
     @Path("/$submit")
-    public abstract Bundle bulkSubmitPatients(@Auth OrganizationPrincipal organization, Parameters params);
+    public abstract Bundle bulkSubmitPatients(OrganizationPrincipal organization, Parameters params);
 
     @GET
     @Path("/{patientID}")
@@ -39,7 +40,11 @@ public abstract class AbstractPatientResource {
 
     @GET
     @Path("/{patientID}/$everything")
-    public abstract Resource everything(OrganizationPrincipal organization, @Valid @Profiled(profile = AttestationProfile.PROFILE_URI) Provenance attestation, UUID patientId);
+    public abstract Resource everything(OrganizationPrincipal organization,
+                                        @Valid @Profiled(profile = AttestationProfile.PROFILE_URI) Provenance attestation,
+                                        UUID patientId, 
+                                        @QueryParam("_since") @NoHtml String since,
+                                        HttpServletRequest request);
 
     @DELETE
     @Path("/{patientID}")

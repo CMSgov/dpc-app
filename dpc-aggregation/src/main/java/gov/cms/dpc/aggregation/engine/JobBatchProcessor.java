@@ -3,10 +3,13 @@ package gov.cms.dpc.aggregation.engine;
 import ca.uhn.fhir.context.FhirContext;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
+import com.google.common.net.HttpHeaders;
 import gov.cms.dpc.aggregation.service.LookBackAnalyzer;
 import gov.cms.dpc.aggregation.service.LookBackAnswer;
 import gov.cms.dpc.aggregation.service.LookBackService;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
+import gov.cms.dpc.common.Constants;
+import gov.cms.dpc.common.MDCConstants;
 import gov.cms.dpc.common.utils.MetricMaker;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.models.JobQueueBatch;
@@ -18,12 +21,11 @@ import org.hl7.fhir.dstu3.model.ResourceType;
 import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import javax.inject.Inject;
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class JobBatchProcessor {
@@ -59,21 +61,36 @@ public class JobBatchProcessor {
      * @return A list of batch files {@link JobQueueBatchFile}
      */
     public List<JobQueueBatchFile> processJobBatchPartial(UUID aggregatorID, IJobQueue queue, JobQueueBatch job, String patientID) {
-        List<LookBackAnswer> answers = getAnswers(job, patientID);
+    Flowable<Resource> flowable;
+    if(isLookBackExempt(job.getOrgID())){
+        logger.info("Skipping lookBack for org: {}", job.getOrgID().toString());
+        flowable = Flowable.fromIterable(job.getResourceTypes())
+                .flatMap(r -> fetchResource(job, patientID, r, job.getSince().orElse(null)));
+    }else{
+        List<LookBackAnswer> answers = getLookBackAnswers(job, patientID);
         boolean matched = answers.stream()
                 .anyMatch(a -> a.matchDateCriteria() && (a.orgNPIMatchAnyEobNPIs() || a.practitionerNPIMatchAnyEobNPIs()));
-
-        Flowable<Resource> flowable = matched ?
+        flowable = matched?
                 Flowable.fromIterable(job.getResourceTypes())
                         .flatMap(r -> fetchResource(job, patientID, r, job.getSince().orElse(null)))
                 :
-                Flowable.just(LookBackAnalyzer.analyze(answers, patientID));
+          Flowable.just(LookBackAnalyzer.analyze(answers, patientID));
+    }
+
 
         final var results = writeResource(job, flowable)
                 .toList()
                 .blockingGet();
         queue.completePartialBatch(job, aggregatorID);
         return results;
+    }
+
+    private boolean isLookBackExempt(UUID orgId) {
+        List<String> exemptOrgs = operationsConfig.getLookBackExemptOrgs();
+        if(exemptOrgs!=null){
+           return exemptOrgs.contains(orgId.toString());
+        }
+        return false;
     }
 
     /**
@@ -93,16 +110,30 @@ public class JobBatchProcessor {
                 resourceType,
                 since,
                 job.getTransactionTime());
-        return fetcher.fetchResources(patientID)
+        return fetcher.fetchResources(patientID, buildHeaders(job))
                 .flatMap(Flowable::fromIterable);
     }
 
-    private List<LookBackAnswer> getAnswers(JobQueueBatch job, String patientId) {
+    private Map<String, String> buildHeaders(JobQueueBatch job) {
+        Map<String, String> headers = new HashMap<>();
+        headers.put(HttpHeaders.X_FORWARDED_FOR, job.getRequestingIP());
+        headers.put(Constants.BFD_ORIGINAL_QUERY_ID_HEADER, job.getJobID().toString());
+        if (job.isBulk()) {
+            headers.put(Constants.BULK_JOB_ID_HEADER, job.getJobID().toString());
+            headers.put(Constants.BULK_CLIENT_ID_HEADER, job.getProviderID());
+        } else {
+            headers.put(Constants.DPC_CLIENT_ID_HEADER, job.getProviderID());
+        }
+        return headers;
+    }
+
+    private List<LookBackAnswer> getLookBackAnswers(JobQueueBatch job, String patientId) {
         List<LookBackAnswer> result = new ArrayList<>();
         //job.getProviderID is really not providerID, it is the rosterID, see createJob in GroupResource export for confirmation
         //patientId here is the patient MBI
         final String practitionerNPI = lookBackService.getPractitionerNPIFromRoster(job.getOrgID(), job.getProviderID(), patientId);
         if (practitionerNPI != null) {
+            MDC.put(MDCConstants.PROVIDER_NPI, practitionerNPI);
             Flowable<Resource> flowable = fetchResource(job, patientId, ResourceType.ExplanationOfBenefit, null);
             result = flowable
                     .filter(resource -> ResourceType.ExplanationOfBenefit == resource.getResourceType())
@@ -173,4 +204,5 @@ public class JobBatchProcessor {
     private Meter getMeter(ResourceType resourceType) {
         return ResourceType.OperationOutcome == resourceType ? operationalOutcomeMeter : resourceMeter;
     }
+
 }

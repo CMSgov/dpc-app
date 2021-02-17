@@ -27,6 +27,8 @@ module DpcWebsite
   class Application < Rails::Application
     # Check for STATIC_SITE_URL environment variable
     ENV['STATIC_SITE_URL'].present? ? ENV['STATIC_SITE_URL'] : ENV['STATIC_SITE_URL'] = 'https://dpc.cms.gov'
+    config.autoload_paths << Rails.root.join('lib')
+    config.autoload_paths << Rails.root.join('lib/luhnacy_lib')
 
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 5.2

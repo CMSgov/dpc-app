@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
-import java.security.GeneralSecurityException;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -56,7 +55,6 @@ public class MockBlueButtonClient implements BlueButtonClient {
     public static final String MULTIPLE_RESULTS_MBI = "0SW4N00AA00";
     public static final OffsetDateTime BFD_TRANSACTION_TIME = OffsetDateTime.ofInstant(Instant.now().truncatedTo(ChronoUnit.MILLIS), ZoneOffset.UTC);
     public static final OffsetDateTime TEST_LAST_UPDATED = OffsetDateTime.parse("2020-01-01T00:00:00-05:00");
-    public static final DateRangeParam BFD_LAST_UPDATE_RANGE = new DateRangeParam().setUpperBoundInclusive(new Date());
 
     private final IParser parser;
 
@@ -66,12 +64,12 @@ public class MockBlueButtonClient implements BlueButtonClient {
     }
 
     @Override
-    public Bundle requestPatientFromServerByMbi(String mbi) throws ResourceNotFoundException {
-        return loadBundle(SAMPLE_PATIENT_PATH_PREFIX, MBI_BENE_ID_MAP.get(mbi));
+    public Bundle requestPatientFromServerByMbi(String mbi, Map<String, String> headers) throws ResourceNotFoundException {
+        return loadBundle(SAMPLE_PATIENT_PATH_PREFIX, MBI_BENE_ID_MAP.getOrDefault(mbi,""));
     }
 
     @Override
-    public Bundle requestPatientFromServer(String beneId, DateRangeParam lastUpdated) throws ResourceNotFoundException {
+    public Bundle requestPatientFromServer(String beneId, DateRangeParam lastUpdated, Map<String, String> headers) throws ResourceNotFoundException {
         return isInDateRange(lastUpdated) ?
                 loadBundle(SAMPLE_PATIENT_PATH_PREFIX, beneId) :
                 loadEmptyBundle();
@@ -79,7 +77,7 @@ public class MockBlueButtonClient implements BlueButtonClient {
 
 
     @Override
-    public Bundle requestPatientFromServerByMbiHash(String mbiHash) throws ResourceNotFoundException {
+    public Bundle requestPatientFromServerByMbiHash(String mbiHash, Map<String, String> headers) throws ResourceNotFoundException {
         String mbi = MBI_HASH_MAP.values().stream()
                 .filter(h -> h.equals(mbiHash))
                 .findFirst()
@@ -88,21 +86,22 @@ public class MockBlueButtonClient implements BlueButtonClient {
     }
 
     @Override
-    public Bundle requestEOBFromServer(String beneId, DateRangeParam lastUpdated) throws ResourceNotFoundException {
+    public Bundle requestEOBFromServer(String beneId, DateRangeParam lastUpdated, Map<String, String> headers) throws ResourceNotFoundException {
         return isInDateRange(lastUpdated) ?
                 loadBundle(SAMPLE_EOB_PATH_PREFIX, beneId) :
                 loadEmptyBundle();
     }
 
     @Override
-    public Bundle requestCoverageFromServer(String beneId, DateRangeParam lastUpdated) throws ResourceNotFoundException {
+    public Bundle requestCoverageFromServer(String beneId, DateRangeParam lastUpdated, Map<String, String> headers) throws ResourceNotFoundException {
         return isInDateRange(lastUpdated) ?
                 loadBundle(SAMPLE_COVERAGE_PATH_PREFIX, beneId) :
                 loadEmptyBundle();
     }
 
     @Override
-    public Bundle requestNextBundleFromServer(Bundle bundle) throws ResourceNotFoundException {
+    @SuppressWarnings("JdkObsolete") // Date class is used by FHIR stu3 Meta model
+    public Bundle requestNextBundleFromServer(Bundle bundle, Map<String, String> headers) throws ResourceNotFoundException {
         // This is code is very specific to the bb-test-data directory and its contents
         final var nextLink = bundle.getLink(Bundle.LINK_NEXT).getUrl();
         final var nextUrl = URI.create(nextLink);
@@ -131,7 +130,7 @@ public class MockBlueButtonClient implements BlueButtonClient {
     }
 
     @Override
-    public String hashMbi(String mbi) throws GeneralSecurityException {
+    public String hashMbi(String mbi) {
         return MBI_HASH_MAP.get(mbi);
     }
 
@@ -142,6 +141,7 @@ public class MockBlueButtonClient implements BlueButtonClient {
      * @param beneId - CCW/BFD beneficiary ID of patient (https://bluebutton.cms.gov/resources/variables/bene_id)
      * @return FHIR Resource
      */
+    @SuppressWarnings("JdkObsolete") // Date class is used by FHIR stu3 Meta model
     private Bundle loadBundle(String pathPrefix, String beneId) {
         try(InputStream sampleData = loadResource(pathPrefix, beneId)) {
             final var bundle = parser.parseResource(Bundle.class, sampleData);
@@ -173,6 +173,7 @@ public class MockBlueButtonClient implements BlueButtonClient {
      * @param range to test
      * @return true iff date range matches
      */
+    @SuppressWarnings("JdkObsolete") // Date class is used by HAPI FHIR DateRangeParam
     private boolean isInDateRange(DateRangeParam range) {
         if (range == null) return true;
         final var upperBound = range.getUpperBoundAsInstant();
@@ -186,6 +187,7 @@ public class MockBlueButtonClient implements BlueButtonClient {
      *
      * @return a Bundle
      */
+    @SuppressWarnings("JdkObsolete") // Date class is used by FHIR stu3 Meta model
     private Bundle loadEmptyBundle() {
         try(InputStream sampleData = MockBlueButtonClient.class.getClassLoader().getResourceAsStream(SAMPLE_EMPTY_BUNDLE)) {
             final var bundle = parser.parseResource(Bundle.class, sampleData);

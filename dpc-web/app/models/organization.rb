@@ -1,7 +1,11 @@
 # frozen_string_literal: true
 
+require './lib/luhnacy_lib/luhnacy_lib'
+
 class Organization < ApplicationRecord
+  include OrganizationsHelper
   include OrganizationTypable
+  include Taggable
 
   has_many :taggings, as: :taggable
   has_many :tags, through: :taggings
@@ -20,6 +24,7 @@ class Organization < ApplicationRecord
   accepts_nested_attributes_for :address, reject_if: :all_blank
 
   before_save :assign_id, if: -> { prod_sbx? }
+  before_save :npi_valid?
 
   after_update :update_registered_organization
 
@@ -50,11 +55,17 @@ class Organization < ApplicationRecord
   def assign_id
     return true if npi.present?
 
-    self.npi = generate_npi
+    self.npi = LuhnacyLib.generate_npi
   end
 
   def notify_users_of_sandbox_access
     organization_user_assignments.each(&:send_organization_sandbox_email)
+  end
+
+  def npi_valid?
+    return if npi.blank?
+
+    validate_npi
   end
 
   def prod_sbx?
@@ -78,9 +89,11 @@ end
 
 private
 
-def generate_npi
-  loop do
-    npi = Luhnacy.generate(15, prefix: '808403')[-10..-1]
-    break npi unless Organization.where(npi: npi).exists?
-  end
+def validate_npi
+  npi = '80840' + self.npi
+
+  return if LuhnacyLib.validate_npi(npi)
+
+  errors.add :npi, 'must be valid.'
+  throw(:abort)
 end

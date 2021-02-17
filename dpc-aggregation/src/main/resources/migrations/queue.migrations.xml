@@ -85,5 +85,23 @@
             </column>
         </addColumn>
     </changeSet>
+
+    <changeSet id="add-requesting-ip" author="hkxb">
+        <addColumn tableName="JOB_QUEUE_BATCH">
+            <column name="requesting_ip" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="add-bulk-indicator" author="hkxb">
+        <addColumn tableName="JOB_QUEUE_BATCH">
+            <column defaultValueBoolean="false"
+                    name="is_bulk"
+                    type="boolean"/>
+        </addColumn>
+    </changeSet>
+
+
     
 </databaseChangeLog>

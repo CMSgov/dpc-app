@@ -3,6 +3,7 @@ package gov.cms.dpc.api.resources.v1;
 import gov.cms.dpc.api.auth.annotations.Public;
 import gov.cms.dpc.api.core.Capabilities;
 import gov.cms.dpc.api.resources.*;
+import gov.cms.dpc.common.annotations.APIV1;
 import gov.cms.dpc.common.utils.PropertiesProvider;
 import io.swagger.annotations.*;
 import org.hl7.fhir.dstu3.model.CapabilityStatement;
@@ -30,7 +31,7 @@ public class BaseResource extends AbstractBaseResource {
     private final AbstractPractitionerResource pr;
     private final AbstractDefinitionResource sdr;
     private final PropertiesProvider pp;
-
+    private final String baseURL;
     @Inject
     public BaseResource(KeyResource kr,
                         TokenResource tr,
@@ -41,7 +42,8 @@ public class BaseResource extends AbstractBaseResource {
                         OrganizationResource or,
                         PatientResource par,
                         PractitionerResource pr,
-                        DefinitionResource sdr) {
+                        DefinitionResource sdr,
+                        @APIV1 String baseURL) {
         this.kr = kr;
         this.tr = tr;
         this.gr = gr;
@@ -53,6 +55,7 @@ public class BaseResource extends AbstractBaseResource {
         this.pr = pr;
         this.sdr = sdr;
         this.pp = new PropertiesProvider();
+        this.baseURL = baseURL;
     }
 
     @Override
@@ -73,7 +76,7 @@ public class BaseResource extends AbstractBaseResource {
     @ApiOperation(value = "Get FHIR Metadata", notes = "Returns the FHIR Capabilities statement for the application", response = CapabilityStatement.class)
     @ApiResponses(@ApiResponse(code = 200, message = "Successful operation", examples = @Example(@ExampleProperty(value = ""))))
     public CapabilityStatement metadata() {
-        return Capabilities.getCapabilities();
+        return Capabilities.getCapabilities(baseURL);
     }
 
     @Override

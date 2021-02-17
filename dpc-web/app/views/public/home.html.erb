@@ -1,0 +1,123 @@
+<main id="main">
+  <section class="site-block site-block--alt">
+    <div class="ds-l-container">
+      <div class="site-block-header">
+        <h2 class="site-block-header__heading">How does Data at the Point of Care reduce your burden and help you improve care?</h2>
+      </div>
+      <div class="ds-l-row ds-u-margin-top--5">
+        <div class="ds-l-col--12 ds-l-md-col--4 benefit-prop">
+          <div class="benefit-prop__img-wrap">
+            <%= image_tag("provider-calendar.svg", alt: "") %>
+          </div>
+          <div class="benefit-prop__body">
+            <h3>Reveals the claims history of your new patients</h3>
+            <p>Avoid having to rely on paper, faxes, or the patient’s memory to know past diagnoses, procedures, and medications.</p>
+          </div>
+        </div>
+        <div class="ds-l-col--12 ds-l-md-col--4 benefit-prop">
+          <div class="benefit-prop__img-wrap">
+            <%= image_tag("provider-conversation.svg", alt: "") %>
+          </div>
+          <div class="benefit-prop__body">
+            <h3>Lets you see the care that patients are receiving from a variety of sources</h3>
+            <p>Learn about visits to other clinics, new diagnoses and medications, completed procedures and preventive items, and urgent care, hospital, or ER visits.</p>
+          </div>
+        </div>
+        <div class="ds-l-col--12 ds-l-md-col--4 benefit-prop">
+          <div class="benefit-prop__img-wrap">
+            <%= image_tag("provider-medications.svg", alt: "") %>
+          </div>
+          <div class="benefit-prop__body">
+            <h3>Gives insight into your patients' medication history</h3>
+            <p>View medications that were filled at the pharmacy to learn about possible gaps in medication history.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="site-block">
+    <div class="ds-l-container">
+      <div class="site-block-header">
+        <h2 class="site-block-header__heading">How does Data at the Point of Care improve <em>the patient</em> experience and give them better care? </h2>
+      </div>
+      <div class="ds-l-row ds-u-margin-top--5">
+        <div class="ds-l-col--12 ds-l-md-col--4 benefit-prop">
+          <div class="benefit-prop__img-wrap">
+            <%= image_tag("patient-documents.svg", alt: "") %>
+          </div>
+          <div class="benefit-prop__body">
+            <h3>Reduces their frustration and documentation</h3>
+            <p>Patient-provided details on past medical history can be supplemented with claims data.</p>
+          </div>
+        </div>
+        <div class="ds-l-col--12 ds-l-md-col--4 benefit-prop">
+          <div class="benefit-prop__img-wrap">
+            <%= image_tag("patient-clock.svg", alt: "") %>
+          </div>
+          <div class="benefit-prop__body">
+            <h3>Gives them more time to focus on their current needs</h3>
+            <p>Patients get more of your time to focus on their concerns and issues instead of spending time searching for information.</p>
+          </div>
+        </div>
+        <div class="ds-l-col--12 ds-l-md-col--4 benefit-prop">
+          <div class="benefit-prop__img-wrap">
+            <%= image_tag("patient-teamwork.svg", alt: "") %>
+          </div>
+          <div class="benefit-prop__body">
+            <h3>Keeps the entire provider team on the same page</h3  >
+            <p>Patients receive better coordination between their providers because the whole team has a full picture of their care.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="site-block" id="about-the-pilot">
+    <div class="ds-l-container">
+      <div class="site-block-header">
+        <h2 class="site-block-header__heading">About the pilot</h2>
+        <div class="site-block-header__description">
+          <p>Data at the Point of Care (DPC) is a pilot API program that enables healthcare providers to deliver high quality care directly to Medicare beneficiaries by making a patient's Medicare claims data available to the provider for treatment needs. DPC’s pilot phase enables CMS to better understand how FHIR standards may be leveraged to grant healthcare providers timely, standardized claims history data for the Medicare beneficiaries in their care</p>
+          <p>Provider organizations and vendors are encouraged to <%= link_to "test the API", docs_path %> and its capabilities using synthetic claims data in our sandbox environment before requesting access to production data. The DPC team welcomes feedback from sandbox and production partners, which will inform the design of the API as a system best suited for the needs of healthcare providers to directly impact the quality of beneficiary care.</p>
+          <p>Learn more about the production pilot and how to join the Production Pilot Onboarding Queue in our <%= link_to "FAQ", faq_path %>s.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="billboard">
+    <div class="ds-l-container">
+      <div class="billboard__content">
+        <h2 class="billboard__heading">Join the community!</h2>
+        <div>
+        <% unless user_signed_in? %>
+          <%= link_to new_registration_path(User), :class => "ds-c-button ds-c-button--primary ds-c-button--big ds-u-margin-right--2" do %>
+            <svg class="ds-u-margin-right--1" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <use xlink:href="/assets/solid.svg#key"></use>
+            </svg>Request access
+          <% end %>
+        <% end %>
+        <%= link_to "https://groups.google.com/d/forum/dpc-api", :class => "ds-c-button ds-c-button--inverse ds-c-button--inverse--alt ds-c-button--big" do %>
+          Join Google Group
+        <% end %>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="ds-c-dialog-wrap" aria-labelledby="dialog-title" aria-hidden="true" role="dialog" id="filter-modal">
+  <div class="ds-c-dialog ds-c-dialog--full ds-u-fill--base" role="document">
+    <header class="ds-c-dialog__header" role="banner">
+      <button class="ds-c-button ds-c-button--transparent ds-c-dialog__close ds-u-color--white" aria-label="Close modal dialog">Close</button>
+    </header>
+
+
+      <style>.codegena{position:relative;width:100%;height:0;padding-bottom:56.27198%;}.codegena iframe{position:absolute;top:0;left:0;width:100%;height:100%;}</style><div class="codegena"><iframe width='500' height='294' src="https://www.youtube.com/embed/zIwphPlI9RA?&theme=dark&autohide=2&modestbranding=1&rel=0&iv_load_policy=3&showinfo=0&showtitle=0"frameborder="0"></iframe></div>
+
+      <button class="ds-c-button ds-c-button--transparent ds-c-dialog__close ds-u-color--white ds-u-visibility--screen-reader" aria-label="Close modal dialog">Close</button>
+
+
+  </div>
+</div>

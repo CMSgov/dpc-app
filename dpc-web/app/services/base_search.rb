@@ -42,6 +42,8 @@ class BaseSearch
       scope = apply_user_queries(scope)
     end
 
+    scope = apply_tag_queries(scope)
+
     scope
   end
 
@@ -66,6 +68,14 @@ class BaseSearch
 
     if params[:organization_type].present?
       scope = scope.where(organization_type: params[:organization_type])
+    end
+
+    scope
+  end
+
+  def apply_tag_queries(scope)
+    if params[:tags].present?
+      scope = scope.with_tags(params[:tags].values)
     end
 
     scope

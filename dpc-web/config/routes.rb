@@ -54,6 +54,7 @@ Rails.application.routes.draw do
   match '/download_jwt_tool', to: 'application#download_jwt_tool', as: 'download_jwt_tool', via: :post
   match '/download_prac_json', to: 'application#download_prac_json', as: 'download_prac_json', via: :post
   match '/download_pt_json', to: 'application#download_pt_json', as: 'download_pt_json', via: :post
+  match '/download_postman_collection', to: 'application#download_postman', as: 'download_postman', via: :post
 
   match '/faq', to: redirect("#{ENV['STATIC_SITE_URL']}/faq"), via: :get
   match '/terms-of-service', to: redirect("#{ENV['STATIC_SITE_URL']}/terms-of-service"), via: :get

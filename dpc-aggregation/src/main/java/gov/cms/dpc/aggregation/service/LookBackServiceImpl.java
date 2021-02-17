@@ -2,6 +2,7 @@ package gov.cms.dpc.aggregation.service;
 
 import com.google.common.base.Joiner;
 import gov.cms.dpc.aggregation.dao.OrganizationDAO;
+import gov.cms.dpc.aggregation.dao.ProviderDAO;
 import gov.cms.dpc.aggregation.dao.RosterDAO;
 import gov.cms.dpc.aggregation.engine.OperationsConfig;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
@@ -17,7 +18,12 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 import javax.inject.Inject;
-import java.util.*;
+import java.time.YearMonth;
+import java.time.ZoneId;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 
 import static gov.cms.dpc.common.MDCConstants.EOB_ID;
 
@@ -25,12 +31,14 @@ public class LookBackServiceImpl implements LookBackService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LookBackService.class);
 
+    private final ProviderDAO providerDAO;
     private final RosterDAO rosterDAO;
     private final OrganizationDAO organizationDAO;
     private final OperationsConfig operationsConfig;
 
     @Inject
-    public LookBackServiceImpl(RosterDAO rosterDAO, OrganizationDAO organizationDAO, OperationsConfig operationsConfig) {
+    public LookBackServiceImpl(ProviderDAO providerDAO, RosterDAO rosterDAO, OrganizationDAO organizationDAO, OperationsConfig operationsConfig) {
+        this.providerDAO = providerDAO;
         this.rosterDAO = rosterDAO;
         this.organizationDAO = organizationDAO;
         this.operationsConfig = operationsConfig;
@@ -40,16 +48,22 @@ public class LookBackServiceImpl implements LookBackService {
     @UnitOfWork(readOnly = true)
     public String getPractitionerNPIFromRoster(UUID orgUUID, String providerOrRosterID, String patientMBI) {
         //Expect only one roster for the parameters, otherwise return null
-        return rosterDAO.retrieveProviderNPIFromRoster(orgUUID, UUID.fromString(providerOrRosterID), patientMBI).orElse(null);
+        String npiFromRosterID = rosterDAO.retrieveProviderNPIFromRoster(orgUUID, UUID.fromString(providerOrRosterID), patientMBI).orElse(null);
+        if (npiFromRosterID == null) {
+            return providerDAO.fetchProviderNPI(UUID.fromString(providerOrRosterID), orgUUID).orElse(null);
+        }
+        return npiFromRosterID;
     }
 
     @Override
     @UnitOfWork(readOnly = true)
+    @SuppressWarnings("JdkObsolete") // Date class used by FHIR stu3 Period model
     public LookBackAnswer getLookBackAnswer(ExplanationOfBenefit explanationOfBenefit, UUID organizationUUID, String practitionerNPI, long withinMonth) {
         MDC.put(EOB_ID, explanationOfBenefit.getId());
-        Date billingPeriod = Optional.of(explanationOfBenefit)
+        YearMonth billingPeriod = Optional.of(explanationOfBenefit)
                 .map(ExplanationOfBenefit::getBillablePeriod)
                 .map(Period::getEnd)
+                .map(date -> YearMonth.from(date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()))
                 .orElse(null);
 
         String organizationID = organizationDAO.fetchOrganizationNPI(organizationUUID).orElse(null);

@@ -7,6 +7,7 @@ import com.google.inject.Provides;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import com.typesafe.config.Config;
 import gov.cms.dpc.aggregation.dao.OrganizationDAO;
+import gov.cms.dpc.aggregation.dao.ProviderDAO;
 import gov.cms.dpc.aggregation.dao.RosterDAO;
 import gov.cms.dpc.aggregation.engine.AggregationEngine;
 import gov.cms.dpc.aggregation.engine.JobBatchProcessor;
@@ -35,6 +36,7 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
         binder.bind(AggregationEngine.class);
         binder.bind(AggregationManager.class).asEagerSingleton();
         binder.bind(JobBatchProcessor.class);
+        binder.bind(ProviderDAO.class);
         binder.bind(RosterDAO.class);
         binder.bind(OrganizationDAO.class);
 
@@ -82,7 +84,8 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
                 config.getRetryCount(),
                 config.getPollingFrequency(),
                 config.getLookBackMonths(),
-                config.getLookBackDate()
+                config.getLookBackDate(),
+                config.getLookBackExemptOrgs()
         );
     }
 
@@ -93,13 +96,13 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
     }
 
     @Provides
-    LookBackService provideLookBackService(DPCManagedSessionFactory sessionFactory, RosterDAO rosterDAO, OrganizationDAO organizationDAO, OperationsConfig operationsConfig) {
+    LookBackService provideLookBackService(DPCManagedSessionFactory sessionFactory, ProviderDAO providerDAO, RosterDAO rosterDAO, OrganizationDAO organizationDAO, OperationsConfig operationsConfig) {
         //Configuring to skip look back when look back months is less than 0
         if (operationsConfig.getLookBackMonths() < 0) {
             return new EveryoneGetsDataLookBackServiceImpl();
         }
         return new UnitOfWorkAwareProxyFactory("roster", sessionFactory.getSessionFactory()).create(LookBackServiceImpl.class,
-                new Class<?>[]{RosterDAO.class, OrganizationDAO.class, OperationsConfig.class},
-                new Object[]{rosterDAO, organizationDAO, operationsConfig});
+                new Class<?>[]{ProviderDAO.class, RosterDAO.class, OrganizationDAO.class, OperationsConfig.class},
+                new Object[]{providerDAO, rosterDAO, organizationDAO, operationsConfig});
     }
 }

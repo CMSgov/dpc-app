@@ -6,6 +6,7 @@ module Internal
 
     def index
       results = BaseSearch.new(params: params, scope: params[:org_type]).results
+      @tags = Tag.all
 
       @organizations = org_page_params(results)
       render layout: 'table_index'
@@ -55,6 +56,7 @@ module Internal
     def show
       @organization = Organization.find id_param
 
+      @tags = Tag.where.not(id: @organization.taggings.pluck(:tag_id))
       @users = user_filter
     end
 

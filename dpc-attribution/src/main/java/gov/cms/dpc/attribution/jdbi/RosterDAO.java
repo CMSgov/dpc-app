@@ -28,7 +28,7 @@ public class RosterDAO extends AbstractDAO<RosterEntity> {
         return Optional.ofNullable(this.get(rosterID));
     }
 
-    public List<RosterEntity> findEntities(UUID organizationID, String providerNPI, String patientReference) {
+    public List<RosterEntity> findEntities(UUID resourceID, UUID organizationID, String providerNPI, String patientReference) {
 
         // Build a selection query to get records from the database
         final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
@@ -43,6 +43,10 @@ public class RosterDAO extends AbstractDAO<RosterEntity> {
                 .equal(root.join(RosterEntity_.MANAGING_ORGANIZATION)
                                 .get(OrganizationEntity_.ID),
                         organizationID));
+
+        if (resourceID != null) {
+            predicates.add(builder.equal(root.get(RosterEntity_.id), resourceID));
+        }
 
         if (providerNPI != null) {
             predicates.add(builder.equal(root.get(RosterEntity_.ATTRIBUTED_PROVIDER).get(ProviderEntity_.PROVIDER_NP_I), providerNPI));

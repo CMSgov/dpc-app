@@ -18,22 +18,19 @@ import org.slf4j.MDC;
 import java.security.GeneralSecurityException;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * A resource fetcher will fetch resources of particular type from passed {@link BlueButtonClient}
  */
 class ResourceFetcher {
     private static final Logger logger = LoggerFactory.getLogger(ResourceFetcher.class);
-    private BlueButtonClient blueButtonClient;
-    private UUID jobID;
-    private UUID batchID;
-    private ResourceType resourceType;
-    private OffsetDateTime since;
-    private OffsetDateTime transactionTime;
+    private final BlueButtonClient blueButtonClient;
+    private final UUID jobID;
+    private final UUID batchID;
+    private final ResourceType resourceType;
+    private final OffsetDateTime since;
+    private final OffsetDateTime transactionTime;
 
     /**
      * Create a context for fetching FHIR resources
@@ -63,14 +60,15 @@ class ResourceFetcher {
      * a OperationOutcome resource is used.
      *
      * @param mbi to use
+     * @param headers headers
      * @return a flow with all the resources for specific patient
      */
-    Flowable<List<Resource>> fetchResources(String mbi) {
+    Flowable<List<Resource>> fetchResources(String mbi, Map<String, String> headers) {
         return Flowable.fromCallable(() -> {
             String fetchId = UUID.randomUUID().toString();
             logger.debug("Fetching first {} from BlueButton for {}", resourceType.toString(), fetchId);
-            final Bundle firstFetched = fetchFirst(mbi);
-            return fetchAllBundles(firstFetched, fetchId);
+            final Bundle firstFetched = fetchFirst(mbi, headers);
+            return fetchAllBundles(firstFetched, fetchId, headers);
         })
                 .onErrorResumeNext((Throwable error) -> handleError(mbi, error));
     }
@@ -82,7 +80,7 @@ class ResourceFetcher {
      * @param firstBundle of resources. Included in the result list
      * @return a list of all the resources in the first bundle and all next bundles
      */
-    private List<Resource> fetchAllBundles(Bundle firstBundle, String fetchId) {
+    private List<Resource> fetchAllBundles(Bundle firstBundle, String fetchId,  Map<String, String> headers) {
         final var resources = new ArrayList<Resource>();
         checkBundleTransactionTime(firstBundle);
         addResources(resources, firstBundle);
@@ -91,7 +89,7 @@ class ResourceFetcher {
         var bundle = firstBundle;
         while (bundle.getLink(Bundle.LINK_NEXT) != null) {
             logger.debug("Fetching next bundle {} from BlueButton for {}", resourceType.toString(), fetchId);
-            bundle = blueButtonClient.requestNextBundleFromServer(bundle);
+            bundle = blueButtonClient.requestNextBundleFromServer(bundle, headers);
             checkBundleTransactionTime(bundle);
             addResources(resources, bundle);
         }
@@ -124,8 +122,8 @@ class ResourceFetcher {
      * @param mbi of the resource to fetch
      * @return the first bundle of resources
      */
-    private Bundle fetchFirst(String mbi) {
-        Patient patient = fetchPatient(mbi);
+    private Bundle fetchFirst(String mbi, Map<String, String> headers) {
+        Patient patient = fetchPatient(mbi, headers);
         patient.getIdentifier().stream()
                 .filter(i -> i.getSystem().equals(DPCIdentifierSystem.MBI_HASH.getSystem()))
                 .findFirst()
@@ -135,20 +133,20 @@ class ResourceFetcher {
         final var lastUpdated = formLastUpdatedParam();
         switch (resourceType) {
             case Patient:
-                return blueButtonClient.requestPatientFromServer(beneId, lastUpdated);
+                return blueButtonClient.requestPatientFromServer(beneId, lastUpdated, headers);
             case ExplanationOfBenefit:
-                return blueButtonClient.requestEOBFromServer(beneId, lastUpdated);
+                return blueButtonClient.requestEOBFromServer(beneId, lastUpdated, headers);
             case Coverage:
-                return blueButtonClient.requestCoverageFromServer(beneId, lastUpdated);
+                return blueButtonClient.requestCoverageFromServer(beneId, lastUpdated, headers);
             default:
                 throw new JobQueueFailure(jobID, batchID, "Unexpected resource type: " + resourceType.toString());
         }
     }
 
-    private Patient fetchPatient(String mbi) {
+    private Patient fetchPatient(String mbi, Map<String, String> headers) {
         Bundle patients;
         try {
-            patients = blueButtonClient.requestPatientFromServerByMbi(mbi);
+            patients = blueButtonClient.requestPatientFromServerByMbi(mbi, headers);
         } catch (GeneralSecurityException e) {
             logger.error("Failed to retrieve Patient", e);
             throw new ResourceNotFoundException("Failed to retrieve Patient");
@@ -221,6 +219,7 @@ class ResourceFetcher {
      *
      * @return a date range for this job
      */
+    @SuppressWarnings("JdkObsolete") // Date class is used by HAPI FHIR DateRangeParam
     private DateRangeParam formLastUpdatedParam() {
         // Note: FHIR bulk spec says that since is exclusive and transactionTime is inclusive
         // It is also says that all resources should not have lastUpdated after the transactionTime.
@@ -239,14 +238,13 @@ class ResourceFetcher {
      *
      * @param bundle to check
      */
+    @SuppressWarnings("JdkObsolete") // Date class is used by FHIR stu3 Meta model
     private void checkBundleTransactionTime(Bundle bundle) {
         if (bundle.getMeta() == null || bundle.getMeta().getLastUpdated() == null) return;
         final var bfdTransactionTime = bundle.getMeta().getLastUpdated().toInstant().atOffset(ZoneOffset.UTC);
         if (bfdTransactionTime.isBefore(transactionTime)) {
-            /**
-             * See BFD's RFC0004 for a discussion on why this type error may occur.
-             * Note: Retrying the job after a delay may fix this problem.
-             */
+           // See BFD's RFC0004 for a discussion on why this type error may occur.
+           // Note: Retrying the job after a delay may fix this problem.
             logger.error("Failing the job for a BFD transaction time regression: BFD time {}, Job time {}",
                     bfdTransactionTime,
                     transactionTime);

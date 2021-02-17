@@ -1,9 +1,11 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
+require './lib/luhnacy_lib/luhnacy_lib'
 
 RSpec.describe Organization, type: :model do
   include APIClientSupport
+  include OrganizationsHelper
 
   describe 'callbacks' do
     describe '#ENV=prod-sbx' do
@@ -27,9 +29,11 @@ RSpec.describe Organization, type: :model do
         end
 
         it 'does not set npi if present' do
-          org = create(:organization, npi: '111111')
+          npi = LuhnacyLib.generate_npi
+
+          org = create(:organization, npi: npi)
           org.assign_id
-          expect(org.npi).to eq('111111')
+          expect(org.npi).to eq(npi)
         end
       end
     end
@@ -42,16 +46,18 @@ RSpec.describe Organization, type: :model do
     end
 
     it 'does not replace non-blank values' do
-      org = create(:organization, npi: '1234567890')
-      expect(org.npi).to eq('1234567890')
+      npi = LuhnacyLib.generate_npi
+      org = create(:organization, npi: npi)
+      expect(org.npi).to eq(npi)
     end
   end
 
   describe '#registered_organization?' do
     context 'when organization is a provider' do
       it 'returns true if org has a registered org and an npi' do
+        npi = LuhnacyLib.generate_npi
         stub_api_client(message: :create_organization, success: true, response: default_org_creation_response)
-        org = create(:organization, :api_enabled, organization_type: 'primary_care_clinic', npi: '1010101010')
+        org = create(:organization, :api_enabled, organization_type: 'primary_care_clinic', npi: npi)
 
         expect(org.registered_organization).to be_present
       end

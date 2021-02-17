@@ -14,6 +14,7 @@ import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import javax.servlet.http.HttpServletRequest;
 
 import javax.ws.rs.core.Response;
 import java.util.UUID;
