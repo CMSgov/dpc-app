@@ -148,8 +148,8 @@ func (suite *OrganizationRepositoryTestSuite) TestCreate() {
 
 func (suite *OrganizationRepositoryTestSuite) TestDelete() {
 	db, mock := newMock()
+	defer db.Close()
 	repo := NewOrganizationRepo(db)
-	defer repo.Close()
 	ctx := context.Background()
 
 	expectedQuery := "DELETE FROM organization WHERE id = \\$1"
@@ -168,8 +168,8 @@ func (suite *OrganizationRepositoryTestSuite) TestDelete() {
 
 func (suite *OrganizationRepositoryTestSuite) TestUpdate() {
 	db, mock := newMock()
+	defer db.Close()
 	repo := NewOrganizationRepo(db)
-	defer repo.Close()
 	ctx := context.Background()
 	b, _ := json.Marshal(suite.fakeOrg.Info)
 
@@ -194,8 +194,8 @@ func (suite *OrganizationRepositoryTestSuite) TestUpdate() {
 
 func (suite *OrganizationRepositoryTestSuite) TestUpdateError() {
 	db, mock := newMock()
+	defer db.Close()
 	repo := NewOrganizationRepo(db)
-	defer repo.Close()
 	ctx := context.Background()
 	b, _ := json.Marshal(suite.fakeOrg.Info)
 
