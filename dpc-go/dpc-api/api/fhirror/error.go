@@ -17,6 +17,10 @@ func ServerIssue(w http.ResponseWriter, ctx context.Context, statusCode int, mes
 	fhirError(w, ctx, statusCode, fhir.IssueSeverityError, fhir.IssueTypeException, message)
 }
 
+func NotFound(w http.ResponseWriter, ctx context.Context, message string) {
+	fhirError(w, ctx, http.StatusNotFound, fhir.IssueSeverityWarning, fhir.IssueTypeNotFound, message)
+}
+
 func BusinessViolation(w http.ResponseWriter, ctx context.Context, statusCode int, message string) {
 	fhirError(w, ctx, statusCode, fhir.IssueSeverityWarning, fhir.IssueTypeBusinessRule, message)
 }
