@@ -8,6 +8,7 @@ import (
 	"github.com/CMSgov/dpc/attribution/model"
 	v2 "github.com/CMSgov/dpc/attribution/v2"
 	"github.com/darahayes/go-boom"
+	"github.com/go-chi/chi/middleware"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
@@ -55,7 +56,10 @@ func TestRouterTestSuite(t *testing.T) {
 func (suite *RouterTestSuite) TestOrganizationGetRoute() {
 	mockOrg := new(MockService)
 
+	var capturedRequestId string
 	mockOrg.On("Get", mock.Anything, mock.Anything).Once().Run(func(arg mock.Arguments) {
+		r := arg.Get(1).(*http.Request)
+		capturedRequestId = r.Header.Get(middleware.RequestIDHeader)
 		w := arg.Get(0).(http.ResponseWriter)
 		b, _ := json.Marshal(suite.fakeOrg)
 		w.Write(b)
@@ -64,27 +68,38 @@ func (suite *RouterTestSuite) TestOrganizationGetRoute() {
 	router := suite.r(mockOrg)
 	ts := httptest.NewServer(router)
 
-	res, _ := http.Get(fmt.Sprintf("%s/%s", ts.URL, "Organization/1234"))
+	//res, _ := http.Get(fmt.Sprintf("%s/%s", ts.URL, "Organization/1234"))
+	req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/%s", ts.URL, "Organization/1234"), nil)
+	req.Header.Set(middleware.RequestIDHeader, "54321")
+	res, _ := http.DefaultClient.Do(req)
 
 	assert.Equal(suite.T(), "application/json; charset=UTF-8", res.Header.Get("Content-Type"))
 	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
+	assert.Equal(suite.T(), "54321", capturedRequestId)
 
 	mockOrg.On("Get", mock.Anything, mock.Anything).Once().Run(func(arg mock.Arguments) {
+		r := arg.Get(1).(*http.Request)
+		capturedRequestId = r.Header.Get(middleware.RequestIDHeader)
 		w := arg.Get(0).(http.ResponseWriter)
 		boom.Internal(w)
 	})
 
-	res, _ = http.Get(fmt.Sprintf("%s/%s", ts.URL, "Organization/1234"))
+	req, _ = http.NewRequest(http.MethodGet, fmt.Sprintf("%s/%s", ts.URL, "Organization/1234"), nil)
+	req.Header.Set(middleware.RequestIDHeader, "54321")
+	res, _ = http.DefaultClient.Do(req)
 
 	assert.Equal(suite.T(), "application/json; charset=UTF-8", res.Header.Get("Content-Type"))
 	assert.Equal(suite.T(), http.StatusInternalServerError, res.StatusCode)
-
+	assert.Equal(suite.T(), "54321", capturedRequestId)
 }
 
 func (suite *RouterTestSuite) TestOrganizationPostRoute() {
 	mockOrg := new(MockService)
 
+	var capturedRequestId string
 	mockOrg.On("Post", mock.Anything, mock.Anything).Once().Run(func(arg mock.Arguments) {
+		r := arg.Get(1).(*http.Request)
+		capturedRequestId = r.Header.Get(middleware.RequestIDHeader)
 		w := arg.Get(0).(http.ResponseWriter)
 		b, _ := json.Marshal(suite.fakeOrg)
 		w.Write(b)
@@ -95,7 +110,9 @@ func (suite *RouterTestSuite) TestOrganizationPostRoute() {
 
 	b, _ := json.Marshal(suite.fakeOrg)
 
-	res, _ := http.Post(fmt.Sprintf("%s/%s", ts.URL, "Organization"), "application/json", bytes.NewReader(b))
+	req, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/%s", ts.URL, "Organization"), bytes.NewReader(b))
+	req.Header.Set(middleware.RequestIDHeader, "54321")
+	res, _ := http.DefaultClient.Do(req)
 	body, _ := ioutil.ReadAll(res.Body)
 	var actual *model.Organization
 	_ = json.Unmarshal(body, &actual)
@@ -103,17 +120,22 @@ func (suite *RouterTestSuite) TestOrganizationPostRoute() {
 	assert.Equal(suite.T(), "application/json; charset=UTF-8", res.Header.Get("Content-Type"))
 	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
 	assert.Equal(suite.T(), suite.fakeOrg.ID, actual.ID)
+	assert.Equal(suite.T(), "54321", capturedRequestId)
 
 	mockOrg.On("Post", mock.Anything, mock.Anything).Once().Run(func(arg mock.Arguments) {
+		r := arg.Get(1).(*http.Request)
+		capturedRequestId = r.Header.Get(middleware.RequestIDHeader)
 		w := arg.Get(0).(http.ResponseWriter)
 		boom.Internal(w)
 	})
 
-	res, _ = http.Post(fmt.Sprintf("%s/%s", ts.URL, "Organization"), "application/json", bytes.NewReader(b))
+	req, _ = http.NewRequest(http.MethodPost, fmt.Sprintf("%s/%s", ts.URL, "Organization"), bytes.NewReader(b))
+	req.Header.Set(middleware.RequestIDHeader, "54321")
+	res, _ = http.DefaultClient.Do(req)
 
 	assert.Equal(suite.T(), "application/json; charset=UTF-8", res.Header.Get("Content-Type"))
 	assert.Equal(suite.T(), http.StatusInternalServerError, res.StatusCode)
-
+	assert.Equal(suite.T(), "54321", capturedRequestId)
 }
 
 func (suite *RouterTestSuite) TestOrganizationDeleteRoute() {
