@@ -156,7 +156,6 @@ func (suite *RouterTestSuite) TestOrganizationPostRoutes() {
 	req.Header.Set("Content-Type", "application/fhir+json")
 	req.Header.Set(middleware.RequestIDHeader, "54321")
 	res, _ := http.DefaultClient.Do(req)
-	//res, _ := http.Post(fmt.Sprintf("%s/%s", ts.URL, "v2/Organization"), "application/fhir+json", strings.NewReader(apitest.Orgjson))
 
 	b, _ := ioutil.ReadAll(res.Body)
 	var v map[string]interface{}
