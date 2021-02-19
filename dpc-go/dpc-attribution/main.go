@@ -10,10 +10,11 @@ import (
 )
 
 func main() {
-	r := repository.NewOrganizationRepo(repository.GetDbConnection())
-	c := v2.NewOrganizationService(r)
+	db := repository.GetDbConnection()
+	defer db.Close()
 
-	defer r.Close()
+	r := repository.NewOrganizationRepo(db)
+	c := v2.NewOrganizationService(r)
 
 	router := router2.NewDPCAttributionRouter(c)
 
