@@ -29,11 +29,11 @@ type Client interface {
 }
 
 type AttributionClient struct {
-	config     *AttributionConfig
+	config     AttributionConfig
 	httpClient *retryablehttp.Client
 }
 
-func NewAttributionClient(config *AttributionConfig) *AttributionClient {
+func NewAttributionClient(config AttributionConfig) *AttributionClient {
 	client := retryablehttp.NewClient()
 	client.RetryMax = config.Retries
 	return &AttributionClient{
