@@ -42,8 +42,8 @@ func TestOrganizationRepositoryTestSuite(t *testing.T) {
 
 func (suite *OrganizationRepositoryTestSuite) TestFindByID() {
 	db, mock := newMock()
+	defer db.Close()
 	repo := NewOrganizationRepo(db)
-	defer repo.Close()
 	ctx := context.Background()
 
 	expectedQuery := "SELECT id, version, created_at, updated_at, info FROM organization WHERE id = \\$1"
@@ -60,8 +60,8 @@ func (suite *OrganizationRepositoryTestSuite) TestFindByID() {
 
 func (suite *OrganizationRepositoryTestSuite) TestFindByIDError() {
 	db, mock := newMock()
+	defer db.Close()
 	repo := NewOrganizationRepo(db)
-	defer repo.Close()
 	ctx := context.Background()
 
 	expectedQuery := "SELECT id, version, created_at, updated_at, info FROM organization WHERE id = \\$1"
@@ -77,8 +77,8 @@ func (suite *OrganizationRepositoryTestSuite) TestFindByIDError() {
 
 func (suite *OrganizationRepositoryTestSuite) TestCreateErrorExistingNPI() {
 	db, mock := newMock()
+	defer db.Close()
 	repo := NewOrganizationRepo(db)
-	defer repo.Close()
 	ctx := context.Background()
 
 	expectedCountQuery := "SELECT COUNT\\(\\*\\) as c FROM organization WHERE info @> '{\"identifier\": [{\"value\": \"?\"}]}"
@@ -96,8 +96,8 @@ func (suite *OrganizationRepositoryTestSuite) TestCreateErrorExistingNPI() {
 
 func (suite *OrganizationRepositoryTestSuite) TestCreateErrorInRepo() {
 	db, mock := newMock()
+	defer db.Close()
 	repo := NewOrganizationRepo(db)
-	defer repo.Close()
 	ctx := context.Background()
 
 	expectedCountQuery := "SELECT COUNT\\(\\*\\) AS c FROM organization WHERE info @> '{\"identifier\": \\[{\"value\": \"\\d*\"}\\]}'"
@@ -121,8 +121,8 @@ func (suite *OrganizationRepositoryTestSuite) TestCreateErrorInRepo() {
 
 func (suite *OrganizationRepositoryTestSuite) TestCreate() {
 	db, mock := newMock()
+	defer db.Close()
 	repo := NewOrganizationRepo(db)
-	defer repo.Close()
 	ctx := context.Background()
 
 	expectedCountQuery := "SELECT COUNT\\(\\*\\) AS c FROM organization WHERE info @> '{\"identifier\": \\[{\"value\": \"\\d*\"}\\]}'"
