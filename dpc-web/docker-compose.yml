@@ -38,7 +38,7 @@ services:
       - DB_PASS=dpc-safe
       - DATABASE_CLEANER_ALLOW_REMOTE_DATABASE_URL=true
     ports:
-      - "3000:3000"
+      - "3500:3500"
     depends_on:
       - db
       - redis
