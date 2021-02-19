@@ -108,7 +108,7 @@ func (suite *OrganizationRepositoryTestSuite) TestCreateErrorInRepo() {
 
 	mock.ExpectQuery(expectedCountQuery).WillReturnRows(rows)
 
-	expectedInsertQuery := "INSERT INTO organization \\(info\\) VALUES \\(\\$1\\) returning \\*"
+	expectedInsertQuery := "INSERT INTO organization \\(info\\) VALUES \\(\\$1\\) returning id, version, created_at, updated_at, info"
 
 	rows = sqlmock.NewRows([]string{"id", "version", "created_at", "updated_at", "info"})
 
@@ -180,7 +180,7 @@ func (suite *OrganizationRepositoryTestSuite) TestUpdate() {
 
 	mock.ExpectQuery(expectedCountQuery).WillReturnRows(rows)
 
-	expectedUpdatedQuery := "UPDATE organization SET version = version \\+ 1, info = \\$1, updated_at = now\\(\\) WHERE id = \\$2 returning \\*"
+	expectedUpdatedQuery := "UPDATE organization SET version = version \\+ 1, info = \\$1, updated_at = now\\(\\) WHERE id = \\$2 returning id, version, created_at, updated_at, info"
 
 	rows = sqlmock.NewRows([]string{"id", "version", "created_at", "updated_at", "info"}).
 		AddRow(suite.fakeOrg.ID, suite.fakeOrg.Version, suite.fakeOrg.CreatedAt, suite.fakeOrg.UpdatedAt, suite.fakeOrg.Info)
@@ -200,7 +200,7 @@ func (suite *OrganizationRepositoryTestSuite) TestUpdateError() {
 	b, _ := json.Marshal(suite.fakeOrg.Info)
 
 	expectedCountQuery := "SELECT COUNT\\(\\*\\) AS c FROM organization WHERE info @> '{\"identifier\": \\[{\"value\": \"\\d*\"}\\]}' AND id <> \\$1"
-	expectedUpdatedQuery := "UPDATE organization SET version = version \\+ 1, info = \\$1, updated_at = now\\(\\) WHERE id = \\$2 returning \\*"
+	expectedUpdatedQuery := "UPDATE organization SET version = version \\+ 1, info = \\$1, updated_at = now\\(\\) WHERE id = \\$2 returning id, version, created_at, updated_at, info"
 
 	rows := sqlmock.NewRows([]string{"count"}).
 		AddRow(1)

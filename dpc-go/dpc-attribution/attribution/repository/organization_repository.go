@@ -139,7 +139,7 @@ func (or *OrganizationRepository) Update(ctx context.Context, id string, body []
 		ub.Assign("updated_at", sqlbuilder.Raw("now()")),
 	)
 	ub.Where(ub.Equal("id", id))
-	ub.SQL("returning *")
+	ub.SQL("returning id, version, created_at, updated_at, info")
 	q, args = ub.Build()
 
 	org := new(model.Organization)
