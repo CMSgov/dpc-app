@@ -3,24 +3,31 @@ package main
 import (
 	"fmt"
 	"github.com/CMSgov/dpc/attribution/repository"
-	router2 "github.com/CMSgov/dpc/attribution/router"
+	"github.com/CMSgov/dpc/attribution/router"
 	v2 "github.com/CMSgov/dpc/attribution/v2"
+	"log"
 	"net/http"
 	"os"
 )
 
 func main() {
 	db := repository.GetDbConnection()
-	defer db.Close()
+	defer func() {
+		if err := db.Close(); err != nil {
+			log.Fatal(err)
+		}
+	}()
 
 	r := repository.NewOrganizationRepo(db)
 	c := v2.NewOrganizationService(r)
 
-	router := router2.NewDPCAttributionRouter(c)
+	attributionRouter := router.NewDPCAttributionRouter(c)
 
 	port := os.Getenv("ATTRIBUTION_PORT")
 	if port == "" {
 		port = "3001"
 	}
-	http.ListenAndServe(fmt.Sprintf(":%s", port), router)
+	if err := http.ListenAndServe(fmt.Sprintf(":%s", port), attributionRouter); err != nil {
+		log.Fatal(err)
+	}
 }

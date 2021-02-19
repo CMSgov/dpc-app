@@ -5,6 +5,7 @@ import (
 	"github.com/CMSgov/dpc/api/client"
 	"github.com/CMSgov/dpc/api/router"
 	"github.com/CMSgov/dpc/api/v2"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -36,11 +37,13 @@ func main() {
 
 	m := v2.NewMetadataController(capabilitiesFile)
 
-	router := router.NewDPCAPIRouter(c, m)
+	apiRouter := router.NewDPCAPIRouter(c, m)
 
 	port := os.Getenv("API_PORT")
 	if port == "" {
 		port = "3000"
 	}
-	http.ListenAndServe(fmt.Sprintf(":%s", port), router)
+	if err := http.ListenAndServe(fmt.Sprintf(":%s", port), apiRouter); err != nil {
+		log.Fatal(err)
+	}
 }
