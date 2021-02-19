@@ -6,6 +6,7 @@ import (
 	"github.com/CMSgov/dpc/api/apitest"
 	"github.com/CMSgov/dpc/api/fhirror"
 	v2 "github.com/CMSgov/dpc/api/v2"
+	"github.com/go-chi/chi/middleware"
 	"github.com/kinbiko/jsonassert"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -54,7 +55,10 @@ func (suite *RouterTestSuite) TestErrorHandling() {
 
 	router := suite.r(mockOrg, mockMeta)
 	ts := httptest.NewServer(router)
-	res, _ := http.Get(fmt.Sprintf("%s/%s", ts.URL, "v2/Organization/12345"))
+
+	req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/%s", ts.URL, "v2/Organization/12345"), nil)
+	req.Header.Set(middleware.RequestIDHeader, "54321")
+	res, _ := http.DefaultClient.Do(req)
 
 	assert.Equal(suite.T(), "application/fhir+json; charset=UTF-8", res.Header.Get("Content-Type"))
 	assert.Equal(suite.T(), http.StatusInternalServerError, res.StatusCode)
@@ -71,7 +75,7 @@ func (suite *RouterTestSuite) TestErrorHandling() {
           "details": {
             "text": "Internal Server Error"
           },
-          "diagnostics": "<<PRESENCE>>"
+          "diagnostics": "54321"
         }
       ],
       "resourceType": "OperationOutcome"
@@ -97,7 +101,10 @@ func (suite *RouterTestSuite) TestOrganizationGetRoutes() {
 	mockMeta := new(MockController)
 	mockOrg := new(MockController)
 
+	var capturedRequestID string
 	mockOrg.On("Read", mock.Anything, mock.Anything).Once().Run(func(arg mock.Arguments) {
+		r := arg.Get(1).(*http.Request)
+		capturedRequestID = r.Header.Get(middleware.RequestIDHeader)
 		w := arg.Get(0).(http.ResponseWriter)
 		w.Write(apitest.AttributionResponse())
 	})
@@ -105,16 +112,20 @@ func (suite *RouterTestSuite) TestOrganizationGetRoutes() {
 	router := suite.r(mockOrg, mockMeta)
 	ts := httptest.NewServer(router)
 
-	res, _ := http.Get(fmt.Sprintf("%s/%s", ts.URL, "v2/Organization/1234"))
-
-	assert.Equal(suite.T(), "application/fhir+json; charset=UTF-8", res.Header.Get("Content-Type"))
-	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
+	req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/%s", ts.URL, "v2/Organization/12345"), nil)
+	req.Header.Set(middleware.RequestIDHeader, "54321")
+	res, _ := http.DefaultClient.Do(req)
 
 	b, _ := ioutil.ReadAll(res.Body)
 	var v map[string]interface{}
 	_ = json.Unmarshal(b, &v)
-	assert.Nil(suite.T(), v["info"])
-	assert.NotNil(suite.T(), v["resourceType"])
+
+	assert.Equal(suite.T(), "application/fhir+json; charset=UTF-8", res.Header.Get("Content-Type"))
+	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
+	assert.Equal(suite.T(), "54321", capturedRequestID)
+	assert.NotNil(suite.T(), v)
+	assert.NotContains(suite.T(), v, "info")
+	assert.Contains(suite.T(), v, "resourceType")
 	assert.Equal(suite.T(), v["resourceType"], "Organization")
 }
 
@@ -122,7 +133,10 @@ func (suite *RouterTestSuite) TestOrganizationPostRoutes() {
 	mockMeta := new(MockController)
 	mockOrg := new(MockController)
 
+	var capturedRequestID string
 	mockOrg.On("Create", mock.Anything, mock.Anything).Once().Run(func(arg mock.Arguments) {
+		r := arg.Get(1).(*http.Request)
+		capturedRequestID = r.Header.Get(middleware.RequestIDHeader)
 		w := arg.Get(0).(http.ResponseWriter)
 		w.Write(apitest.AttributionResponse())
 	})
@@ -130,15 +144,21 @@ func (suite *RouterTestSuite) TestOrganizationPostRoutes() {
 	router := suite.r(mockOrg, mockMeta)
 	ts := httptest.NewServer(router)
 
-	res, _ := http.Post(fmt.Sprintf("%s/%s", ts.URL, "v2/Organization"), "application/fhir+json", strings.NewReader(apitest.Orgjson))
-
-	assert.Equal(suite.T(), "application/fhir+json; charset=UTF-8", res.Header.Get("Content-Type"))
-	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
+	req, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/%s", ts.URL, "v2/Organization"), strings.NewReader(apitest.Orgjson))
+	req.Header.Set("Content-Type", "application/fhir+json")
+	req.Header.Set(middleware.RequestIDHeader, "54321")
+	res, _ := http.DefaultClient.Do(req)
+	//res, _ := http.Post(fmt.Sprintf("%s/%s", ts.URL, "v2/Organization"), "application/fhir+json", strings.NewReader(apitest.Orgjson))
 
 	b, _ := ioutil.ReadAll(res.Body)
 	var v map[string]interface{}
 	_ = json.Unmarshal(b, &v)
-	assert.Nil(suite.T(), v["info"])
-	assert.NotNil(suite.T(), v["resourceType"])
+
+	assert.Equal(suite.T(), "application/fhir+json; charset=UTF-8", res.Header.Get("Content-Type"))
+	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
+	assert.Equal(suite.T(), "54321", capturedRequestID)
+	assert.NotNil(suite.T(), v)
+	assert.NotContains(suite.T(), v, "info")
+	assert.Contains(suite.T(), v, "resourceType")
 	assert.Equal(suite.T(), v["resourceType"], "Organization")
 }

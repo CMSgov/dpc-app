@@ -8,24 +8,24 @@ import (
 
 type Info map[string]interface{}
 
-func (p Info) Value() (driver.Value, error) {
-	j, err := json.Marshal(p)
-	return j, err
+func (i Info) Value() (driver.Value, error) {
+	info, err := json.Marshal(i)
+	return info, err
 }
 
-func (p *Info) Scan(src interface{}) error {
+func (i *Info) Scan(src interface{}) error {
 	source, ok := src.([]byte)
 	if !ok {
 		return errors.New("Type assertion .([]byte) failed.")
 	}
 
-	var i interface{}
-	err := json.Unmarshal(source, &i)
+	var info interface{}
+	err := json.Unmarshal(source, &info)
 	if err != nil {
 		return err
 	}
 
-	*p, ok = i.(map[string]interface{})
+	*i, ok = info.(map[string]interface{})
 	if !ok {
 		return errors.New("Type assertion .(map[string]interface{}) failed.")
 	}
