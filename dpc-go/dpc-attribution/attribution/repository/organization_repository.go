@@ -28,10 +28,6 @@ func NewOrganizationRepo(db *sql.DB) *OrganizationRepository {
 	}
 }
 
-func (or *OrganizationRepository) Close() {
-	or.db.Close()
-}
-
 func (or *OrganizationRepository) FindByID(ctx context.Context, id string) (*model.Organization, error) {
 	sb := sqlFlavor.NewSelectBuilder()
 	sb.Select("id", "version", "created_at", "updated_at", "info")
