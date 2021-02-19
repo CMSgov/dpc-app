@@ -102,10 +102,9 @@ func (suite *RouterTestSuite) TestOrganizationPostRoute() {
 
 	assert.Equal(suite.T(), "application/json; charset=UTF-8", res.Header.Get("Content-Type"))
 	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
-
 	assert.Equal(suite.T(), suite.fakeOrg.ID, actual.ID)
 
-	mockOrg.On("Save", mock.Anything, mock.Anything).Once().Run(func(arg mock.Arguments) {
+	mockOrg.On("Post", mock.Anything, mock.Anything).Once().Run(func(arg mock.Arguments) {
 		w := arg.Get(0).(http.ResponseWriter)
 		boom.Internal(w)
 	})
