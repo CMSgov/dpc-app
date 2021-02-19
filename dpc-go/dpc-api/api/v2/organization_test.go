@@ -75,8 +75,8 @@ func (suite *OrganizationControllerTestSuite) TestGetOrganizationErrorInClient()
     {
         "issue": [
             {
-                "severity": "error",
-                "code": "Exception",
+                "severity": "warning",
+                "code": "Not Found",
                 "details": {
                     "text": "Failed to find organization"
                 },

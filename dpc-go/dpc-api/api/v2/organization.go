@@ -50,13 +50,13 @@ func (oc *OrganizationController) Read(w http.ResponseWriter, r *http.Request) {
 	resp, err := oc.ac.Get(r.Context(), client.Organization, organizationID)
 	if err != nil {
 		log.Error("Failed to get the org from attribution", zap.Error(err))
-		fhirror.ServerIssue(w, r.Context(), http.StatusNotFound, "Failed to find organization")
+		fhirror.NotFound(w, r.Context(), "Failed to find organization")
 		return
 	}
 
 	if _, err = w.Write(resp); err != nil {
 		log.Error("Failed to write data to response", zap.Error(err))
-		fhirror.ServerIssue(w, r.Context(), http.StatusNotFound, "Failed to find organization")
+		fhirror.NotFound(w, r.Context(), "Failed to find organization")
 	}
 }
 
