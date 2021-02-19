@@ -60,7 +60,6 @@ func (suite *RouterTestSuite) TestOrganizationGetRoutes() {
 	router := suite.r(mockOrg)
 	ts := httptest.NewServer(router)
 
-	//res, _ := http.Get(fmt.Sprintf("%s/%s", ts.URL, "Organization/1234"))
 	req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/%s", ts.URL, "Organization/1234"), nil)
 	req.Header.Set(middleware.RequestIDHeader, "54321")
 	res, _ := http.DefaultClient.Do(req)
