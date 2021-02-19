@@ -19,7 +19,7 @@ func TestFhirTestSuite(t *testing.T) {
 
 func (suite *FhirTestSuite) TestIdentityParsing() {
 
-	var idjson = `{
+	idjson := `{
         "identifier": [
         {
             "system": "http://hl7.org/fhir/sid/us-npi",

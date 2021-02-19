@@ -22,7 +22,7 @@ func main() {
 		r = 3
 	}
 
-	attributionClient := client.NewAttributionClient(&client.AttributionConfig{
+	attributionClient := client.NewAttributionClient(client.AttributionConfig{
 		URL:     attributionURL,
 		Retries: r,
 	})

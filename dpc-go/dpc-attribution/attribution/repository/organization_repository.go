@@ -36,13 +36,13 @@ func (or *OrganizationRepository) Close() {
 
 func (or *OrganizationRepository) FindByID(ctx context.Context, id string) (*model.Organization, error) {
 	sb := sqlFlavor.NewSelectBuilder()
-	sb.Select("*")
+	sb.Select("id", "version", "created_at", "updated_at", "info")
 	sb.From("organization")
 	sb.Where(sb.Equal("id", id))
 	q, args := sb.Build()
 
 	org := new(model.Organization)
-	var orgStruct = sqlbuilder.NewStruct(new(model.Organization))
+	orgStruct := sqlbuilder.NewStruct(new(model.Organization)).For(sqlFlavor)
 	if err := or.db.QueryRowContext(ctx, q, args...).Scan(orgStruct.Addr(&org)...); err != nil {
 		return nil, err
 	}
@@ -80,12 +80,12 @@ func (or *OrganizationRepository) Create(ctx context.Context, body []byte) (*mod
 	ib.InsertInto("organization")
 	ib.Cols("info")
 	ib.Values(info)
-	ib.SQL("returning *")
+	ib.SQL("returning id, version, created_at, updated_at, info")
 
 	q, args = ib.Build()
 
 	org := new(model.Organization)
-	var orgStruct = sqlbuilder.NewStruct(new(model.Organization))
+	orgStruct := sqlbuilder.NewStruct(new(model.Organization)).For(sqlFlavor)
 	if err := or.db.QueryRowContext(ctx, q, args...).Scan(orgStruct.Addr(&org)...); err != nil {
 		return nil, err
 	}

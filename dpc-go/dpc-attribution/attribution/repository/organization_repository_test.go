@@ -47,7 +47,7 @@ func (suite *OrganizationRepositoryTestSuite) TestFindByID() {
 	defer repo.Close()
 	ctx := context.Background()
 
-	expectedQuery := "SELECT \\* FROM organization WHERE id = \\$1"
+	expectedQuery := "SELECT id, version, created_at, updated_at, info FROM organization WHERE id = \\$1"
 
 	rows := sqlmock.NewRows([]string{"id", "version", "created_at", "updated_at", "info"}).
 		AddRow(suite.fakeOrg.ID, suite.fakeOrg.Version, suite.fakeOrg.CreatedAt, suite.fakeOrg.UpdatedAt, suite.fakeOrg.Info)
@@ -65,7 +65,7 @@ func (suite *OrganizationRepositoryTestSuite) TestFindByIDError() {
 	defer repo.Close()
 	ctx := context.Background()
 
-	expectedQuery := "SELECT \\* FROM organization WHERE id = \\$1"
+	expectedQuery := "SELECT id, version, created_at, updated_at, info FROM organization WHERE id = \\$1"
 
 	rows := sqlmock.NewRows([]string{"id", "version", "created_at", "updated_at", "info"})
 
@@ -133,7 +133,7 @@ func (suite *OrganizationRepositoryTestSuite) TestCreate() {
 
 	mock.ExpectQuery(expectedCountQuery).WillReturnRows(rows)
 
-	expectedInsertQuery := "INSERT INTO organization \\(info\\) VALUES \\(\\$1\\) returning \\*"
+	expectedInsertQuery := "INSERT INTO organization \\(info\\) VALUES \\(\\$1\\) returning id, version, created_at, updated_at, info"
 
 	rows = sqlmock.NewRows([]string{"id", "version", "created_at", "updated_at", "info"}).
 		AddRow(suite.fakeOrg.ID, suite.fakeOrg.Version, suite.fakeOrg.CreatedAt, suite.fakeOrg.UpdatedAt, suite.fakeOrg.Info)
