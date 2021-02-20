@@ -12,8 +12,6 @@ import (
 	"net/http"
 )
 
-var log *zap.Logger
-
 type ResponseWriter struct {
 	http.ResponseWriter
 	buf    *bytes.Buffer
@@ -31,7 +29,7 @@ func (rw *ResponseWriter) WriteHeader(status int) {
 
 func FHIRModel(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log = logger.WithContext(r.Context())
+		log := logger.WithContext(r.Context())
 		rw := &ResponseWriter{
 			ResponseWriter: w,
 			buf:            &bytes.Buffer{},
