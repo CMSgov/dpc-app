@@ -15,6 +15,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 )
 
@@ -140,7 +141,10 @@ func (suite *RouterTestSuite) TestOrganizationPostRoute() {
 func (suite *RouterTestSuite) TestOrganizationDeleteRoute() {
 	mockOrg := new(MockService)
 
+	var capturedRequestId string
 	mockOrg.On("Delete", mock.Anything, mock.Anything).Once().Run(func(arg mock.Arguments) {
+		r := arg.Get(1).(*http.Request)
+		capturedRequestId = r.Header.Get(middleware.RequestIDHeader)
 		w := arg.Get(0).(http.ResponseWriter)
 		w.WriteHeader(http.StatusNoContent)
 	})
@@ -149,16 +153,21 @@ func (suite *RouterTestSuite) TestOrganizationDeleteRoute() {
 	ts := httptest.NewServer(router)
 
 	req, _ := http.NewRequest(http.MethodDelete, fmt.Sprintf("%s/%s", ts.URL, "Organization/12345"), nil)
+	req.Header.Set(middleware.RequestIDHeader, "54321")
 	res, _ := http.DefaultClient.Do(req)
 
 	assert.Equal(suite.T(), http.StatusNoContent, res.StatusCode)
+	assert.Equal(suite.T(), "54321", capturedRequestId)
 
 }
 
 func (suite *RouterTestSuite) TestOrganizationPutRoute() {
 	mockOrg := new(MockService)
 
+	var capturedRequestId string
 	mockOrg.On("Put", mock.Anything, mock.Anything).Once().Run(func(arg mock.Arguments) {
+		r := arg.Get(1).(*http.Request)
+		capturedRequestId = r.Header.Get(middleware.RequestIDHeader)
 		w := arg.Get(0).(http.ResponseWriter)
 		b, _ := json.Marshal(suite.fakeOrg)
 		w.Write(b)
@@ -167,15 +176,15 @@ func (suite *RouterTestSuite) TestOrganizationPutRoute() {
 	router := suite.r(mockOrg)
 	ts := httptest.NewServer(router)
 
-	req, _ := http.NewRequest(http.MethodPut, fmt.Sprintf("%s/%s", ts.URL, "Organization/12345"), nil)
+	req, _ := http.NewRequest(http.MethodPut, fmt.Sprintf("%s/%s", ts.URL, "Organization/12345"), strings.NewReader(attributiontest.Orgjson))
+	req.Header.Set(middleware.RequestIDHeader, "54321")
 	res, _ := http.DefaultClient.Do(req)
-
-	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
 
 	body, _ := ioutil.ReadAll(res.Body)
 	var actual *model.Organization
 	_ = json.Unmarshal(body, &actual)
 
+	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
 	assert.Equal(suite.T(), suite.fakeOrg.ID, actual.ID)
-
+	assert.Equal(suite.T(), "54321", capturedRequestId)
 }
