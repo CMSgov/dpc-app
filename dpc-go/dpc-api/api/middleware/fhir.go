@@ -36,22 +36,23 @@ func FHIRModel(next http.Handler) http.Handler {
 			Status:         200,
 		}
 
-		next.ServeHTTP(rw, r)
-
-		b := rw.buf.Bytes()
-		if isSuccess(rw.Status) {
-			body, err := convertToFHIR(b)
-			if err != nil {
-				log.Error(err.Error(), zap.Error(err))
-				fhirror.GenericServerIssue(w, r.Context())
-				return
+		defer func() {
+			b := rw.buf.Bytes()
+			if isSuccess(rw.Status) {
+				body, err := convertToFHIR(b)
+				if err != nil {
+					log.Error(err.Error(), zap.Error(err))
+					fhirror.GenericServerIssue(w, r.Context())
+					return
+				}
+				b = body
 			}
-			b = body
-		}
-		if _, err := w.Write(b); err != nil {
-			log.Error("Failed to write data", zap.Error(err))
-			fhirror.GenericServerIssue(w, r.Context())
-		}
+			if _, err := w.Write(b); err != nil {
+				log.Error("Failed to write data", zap.Error(err))
+				fhirror.GenericServerIssue(w, r.Context())
+			}
+		}()
+		next.ServeHTTP(rw, r)
 
 	})
 }

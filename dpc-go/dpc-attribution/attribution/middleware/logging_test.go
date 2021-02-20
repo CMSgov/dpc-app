@@ -40,8 +40,7 @@ func (suite *LoggingTestSuite) TestLogging() {
 
 	assert.Len(suite.T(), le, 2)
 	assert.Contains(suite.T(), le[0].Entry.Message, "Starting request")
-	assert.Len(suite.T(), le[0].Context, 3)
-	assert.ElementsMatch(suite.T(), firstLogContextKeys, []string{"rqId", "request-uri", "from"})
+	assert.ElementsMatch(suite.T(), firstLogContextKeys, []string{"rqId", "request-uri", "from", "method"})
 	assert.ElementsMatch(suite.T(), secondLogContextKeys, []string{"rqId", "response-code", "bytes"})
 
 }

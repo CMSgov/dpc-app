@@ -32,13 +32,16 @@ func requestLog(r *http.Request) {
 	if r.TLS != nil {
 		scheme = "https"
 	}
-	log.Info("Starting request", zap.String("request-uri", fmt.Sprintf("%s://%s%s %s\" ", scheme, r.Host, r.RequestURI, r.Proto)),
-		zap.String("from", r.RemoteAddr))
-
+	log.Info("Starting request",
+		zap.String("request-uri", fmt.Sprintf("%s://%s%s %s\" ", scheme, r.Host, r.RequestURI, r.Proto)),
+		zap.String("from", r.RemoteAddr),
+		zap.String("method", r.Method))
 }
 
 func responseLog(ww middleware.WrapResponseWriter, r *http.Request) {
 	log := logger.WithContext(r.Context())
-	log.Info("Finishing request", zap.Int("response-code", ww.Status()), zap.Any("bytes", ww.BytesWritten()))
+	log.Info("Finishing request",
+		zap.Int("response-code", ww.Status()),
+		zap.Any("bytes", ww.BytesWritten()))
 
 }
