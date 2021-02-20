@@ -2,14 +2,17 @@ package logger
 
 import (
 	"context"
-	"github.com/go-chi/chi/middleware"
 	"go.uber.org/zap"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
 )
 
-var logger *zap.Logger
+type loggerKeyType int
+
+const LoggerKey loggerKeyType = iota
+
+var Logger *zap.Logger
 
 func init() {
 	lcfgfile, found := os.LookupEnv("API_LOG_CONFIG")
@@ -24,26 +27,33 @@ func init() {
 		if err := yaml.Unmarshal(lcfg, &cfg); err != nil {
 			panic(err)
 		}
-		logger, _ = cfg.Build()
+		Logger, _ = cfg.Build()
 	}
 
-	if logger == nil {
+	if Logger == nil {
 		l, err := zap.NewProduction()
 		if err != nil {
 			panic(err)
 		}
-		logger = l
+		Logger = l
 	}
 
-	defer logger.Sync()
+	defer Logger.Sync()
+}
+
+func NewContext(ctx context.Context, fields ...zap.Field) context.Context {
+	return context.WithValue(ctx, LoggerKey, WithContext(ctx).With(fields...))
 }
 
 func WithContext(ctx context.Context) *zap.Logger {
-	newLogger := logger
-	if ctx != nil {
-		if ctxRqId, ok := ctx.Value(middleware.RequestIDKey).(string); ok {
-			newLogger = newLogger.With(zap.String("rqId", ctxRqId))
-		}
+	if ctx == nil {
+		return Logger
 	}
-	return newLogger
+
+	if ctxlogger, ok := ctx.Value(LoggerKey).(*zap.Logger); ok {
+		return ctxlogger
+	} else {
+		return Logger
+	}
+
 }
