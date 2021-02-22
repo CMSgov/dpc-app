@@ -14,3 +14,39 @@
     text-decoration: underline;
   }
 }
+
+.utility-button,
+.utility-button:visited {
+  align-items: center;
+  background: $color-gray-lightest;
+  border: 1px solid $color-gray-light;
+  border-radius: 3px;
+  color: $color-gray-dark;
+  display: inline-flex;
+  font-size: $h6-font-size;
+  font-weight: $font-bold;
+  margin: 0 0 $spacer-2 0;
+  padding: $spacer-1;
+  text-decoration: none;
+
+  &:hover,
+  &:focus {
+    border-color: $color-gray-dark;
+    color: $color-gray-dark;
+  }
+
+  svg {
+    margin-right: $spacer-1;
+    max-width: 1.2em;
+    max-height: 1.2em;
+    display: inline;
+    fill: currentColor;
+  }
+}
+
+.button__container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
