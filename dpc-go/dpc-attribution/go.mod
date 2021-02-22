@@ -1,4 +1,4 @@
-module github.com/CMSgov/dpc
+module github.com/CMSgov/dpc/attribution
 
 go 1.15
 
