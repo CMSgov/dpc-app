@@ -1,4 +1,4 @@
-module github.com/CMSgov/dpc
+module github.com/CMSgov/dpc/api
 
 go 1.15
 
