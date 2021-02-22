@@ -38,9 +38,6 @@ class User < ApplicationRecord
   validates :city, presence: true
   validates :state, inclusion: { in: Address::STATES.keys.map(&:to_s) }
   validates :zip, format: { with: /\A\d{5}(?:\-\d{4})?\z/ }
-  validates :agree_to_terms, inclusion: {
-    in: [true], message: 'you must agree to the terms of service to create an account'
-  }
 
   scope :assigned, -> do
     left_joins(:organization_user_assignments).where('organization_user_assignments.id IS NOT NULL')
