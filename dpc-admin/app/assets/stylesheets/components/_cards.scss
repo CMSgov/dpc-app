@@ -16,9 +16,55 @@
   box-shadow: 0px 0px 50px rgba(0,0,0,0.5);
 }
 
+// Icons
+
 .icon {
   max-width: 17px;
   max-height: 15px;
   display: inline;
   fill: currentColor;
+}
+
+// Card modules on portal dashboard
+.module-container {
+  background-color: $color-white;
+  border: 1px solid $color-gray-light;
+  border-radius: 3px;
+  display: flex;
+  flex-direction: column;
+  margin: $spacer-2 0;
+
+  @media (min-width: $width-sm) {
+    flex-direction: row;
+  }
+}
+
+.module-container__id {
+  background-color: $color-gray-dark;
+  color: $color-white;
+  padding: $spacer-1 $spacer-2;
+
+  @media (min-width: $width-sm) {
+    background-color: $color-gray-lightest;
+    color: $color-gray;
+    padding: $spacer-2;
+  }
+}
+
+.module-container__primary {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+
+  @media (min-width: $width-sm) {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+}
+
+.module-container__secondary {
+  @media (min-width: $width-sm) {
+    border-left: 1px solid $color-gray-light;
+    flex: .61803398875;
+  }
 }
