@@ -17,7 +17,7 @@ RSpec.feature 'user resets password' do
       end.to change(ActionMailer::Base.deliveries, :count).by(1)
 
       last_delivery = ActionMailer::Base.deliveries.last
-      reset_link = last_delivery.body.raw_source.match(%r{href="http:\/\/localhost:3000(?<path>.+?)">})[:path]
+      reset_link = last_delivery.body.raw_source.match(%r{href="http:\/\/localhost:3500(?<path>.+?)">})[:path]
 
       visit reset_link
 
@@ -41,7 +41,7 @@ RSpec.feature 'user resets password' do
       end.to change(ActionMailer::Base.deliveries, :count).by(1)
 
       last_delivery = ActionMailer::Base.deliveries.last
-      reset_link = last_delivery.body.raw_source.match(%r{href="http:\/\/localhost:3000(?<path>.+?)">})[:path]
+      reset_link = last_delivery.body.raw_source.match(%r{href="http:\/\/localhost:3500(?<path>.+?)">})[:path]
 
       visit reset_link
 
