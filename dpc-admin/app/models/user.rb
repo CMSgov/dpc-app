@@ -11,8 +11,6 @@ class User < ApplicationRecord
   has_many :organization_user_assignments, dependent: :destroy
   has_many :organizations, through: :organization_user_assignments
 
-  before_save :requested_num_providers_to_zero_if_blank
-
   # Include default devise modules. Others available are:
   # :confirmable, :lockable,
   # :trackable, and :omniauthable, :recoverable,
@@ -20,24 +18,11 @@ class User < ApplicationRecord
   #        :validatable, :trackable, :registerable,
   #        :timeoutable, :recoverable, :confirmable,
   #        :password_expirable, :password_archivable
-
   enum requested_organization_type: ORGANIZATION_TYPES
 
   validates :requested_organization_type, inclusion: { in: ORGANIZATION_TYPES.keys }
   validates :email, presence: true
   validates :last_name, :first_name, presence: true
-  validates :requested_organization, presence: true
-  validates :requested_num_providers, numericality: { only_integer: true, greater_than_or_equal_to: 0,
-                                                      allow_nil: true },
-                                      if: -> { health_it_vendor? },
-                                      on: :create
-  validates :requested_num_providers, numericality: { only_integer: true, greater_than: 0 },
-                                      unless: -> { health_it_vendor? },
-                                      on: :create
-  validates :address_1, presence: true
-  validates :city, presence: true
-  validates :state, inclusion: { in: Address::STATES.keys.map(&:to_s) }
-  validates :zip, format: { with: /\A\d{5}(?:\-\d{4})?\z/ }
 
   scope :assigned, -> do
     left_joins(:organization_user_assignments).where('organization_user_assignments.id IS NOT NULL')
@@ -120,11 +105,5 @@ class User < ApplicationRecord
 
   def unassigned?
     organization_user_assignments.count.zero?
-  end
-
-  private
-
-  def requested_num_providers_to_zero_if_blank
-    self.requested_num_providers = 0 if requested_num_providers.blank?
   end
 end
