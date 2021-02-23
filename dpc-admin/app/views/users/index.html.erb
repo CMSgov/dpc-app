@@ -6,6 +6,14 @@
   </div>
 
   <section class="ds-l-row--12 ds-l-md-col--9 ds-u-md-padding-left--2">
+    <%= link_to download_users_path(format: :csv, users: @users.map(&:id)),  class: "utility-button" do %>
+      <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <use xlink:href="/assets/solid.svg#download"></use>
+      </svg>
+      Download CSV
+    <% end %>
+
+  <section class="ds-l-row--12 ds-l-md-col--9 ds-u-md-padding-left--2">
     <p class=""><%= page_entries_info @users %></p>
     <%= form_tag users_path, method: "get", class: "ds-u-display--flex" do %>
       <%= hidden_field_tag :org_status, params[:org_status] %>
