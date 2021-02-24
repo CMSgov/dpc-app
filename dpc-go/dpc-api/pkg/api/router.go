@@ -5,6 +5,7 @@ import (
 
 	"github.com/go-chi/chi"
 
+	auth "github.com/CMSgov/dpc/auth"
 	v2 "github.com/CMSgov/dpc/pkg/api/v2"
 )
 
@@ -16,4 +17,8 @@ func NewDPCAPIRouter() http.Handler {
 	})
 
 	return r
+}
+
+func NewAuthRouter() http.Handler {
+	return auth.NewAuthRouter(SecurityHeader, ConnectionClose)
 }
