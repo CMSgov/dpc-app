@@ -38,7 +38,7 @@ import static org.mockito.Mockito.times;
 
 @SuppressWarnings("unchecked")
 @ExtendWith(BufferedLoggerHandler.class)
-public class ClientTokenTests {
+public class GenerateClientTokenTests {
 
     private TokenResource tokenResource = Mockito.mock(TokenResource.class);
     private static MacaroonBakery bakery = Mockito.mock(MacaroonBakery.class);
@@ -50,7 +50,7 @@ public class ClientTokenTests {
     private final DeleteToken dct;
     private final ObjectMapper mapper;
 
-    ClientTokenTests() {
+    GenerateClientTokenTests() {
         this.gct = new GenerateClientTokens(bakery, tokenResource);
         this.lct = new ListClientTokens(tokenResource);
         this.dct = new DeleteToken(tokenResource);
@@ -111,6 +111,24 @@ public class ClientTokenTests {
             Mockito.verify(bakery, never()).createMacaroon(eq(Collections.emptyList()));
             Mockito.verify(tokenResource, times(1)).createOrganizationToken(Mockito.isNotNull(), Mockito.isNull(), tokenLabelCaptor.capture(), eq(Optional.empty()));
             assertEquals(tokenLabel, tokenLabelCaptor.getValue(), "Should have correct label");
+        }
+    }
+
+    @Test
+    void testTokenCreationWithMissingExpirationValue() throws IOException {
+        TokenEntity response = new TokenEntity();
+        response.setToken("random test token");
+        Mockito.when(tokenResource.createOrganizationToken(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(response);
+
+        final UUID id = UUID.randomUUID();
+        final Organization org = new Organization();
+        org.setId(id.toString());
+
+        final ImmutableMultimap<String, String> map = ImmutableMultimap.of("organization", id.toString(), "expiration", "");
+        try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+            gct.execute(map, new PrintWriter(new OutputStreamWriter(bos)));
+            Mockito.verify(bakery, never()).createMacaroon(eq(Collections.emptyList()));
+            Mockito.verify(tokenResource, times(1)).createOrganizationToken(Mockito.isNotNull(), Mockito.isNull(), tokenLabelCaptor.capture(), eq(Optional.empty()));
         }
     }
 
