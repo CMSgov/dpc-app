@@ -10,6 +10,8 @@ import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.List;
 
@@ -33,9 +35,39 @@ public class FHIRRequestFilterTest {
     }
 
     @Test
-    void testMissingAcceptsHeader() {
+    void testMissingAcceptsHeaderForExport() throws URISyntaxException {
+        final MultivaluedMap headerMap = Mockito.mock(MultivaluedMap.class);
+        Mockito.when(headerMap.get(HttpHeaders.CONTENT_TYPE)).thenReturn(Collections.singletonList(FHIRMediaTypes.FHIR_JSON));
         final ContainerRequestContext request = Mockito.mock(ContainerRequestContext.class);
+        request.setRequestUri(new URI("http://localhost:3002/v1/Group/1234567890/$export?_type=Patient"));
+        Mockito.when(request.getAcceptableMediaTypes()).thenReturn(null);
+        Mockito.when(request.getHeaders()).thenReturn(headerMap);
+
+        final WebApplicationException exception = assertThrows(WebApplicationException.class, () -> filter.filter(request));
+        assertEquals(Response.SC_BAD_REQUEST, exception.getResponse().getStatus(), "Should have 400 error");
+    }
+
+    @Test
+    void testIncorrectAcceptsHeaderForExport() throws URISyntaxException {
+        final MultivaluedMap headerMap = Mockito.mock(MultivaluedMap.class);
+        Mockito.when(headerMap.get(HttpHeaders.CONTENT_TYPE)).thenReturn(Collections.singletonList(FHIRMediaTypes.FHIR_JSON));
+        final ContainerRequestContext request = Mockito.mock(ContainerRequestContext.class);
+        request.setRequestUri(new URI("http://localhost:3002/v1/Group/1234567890/$export?_type=Patient"));
         Mockito.when(request.getAcceptableMediaTypes()).thenReturn(Collections.singletonList(MediaType.APPLICATION_JSON_TYPE));
+        Mockito.when(request.getHeaders()).thenReturn(headerMap);
+
+        final WebApplicationException exception = assertThrows(WebApplicationException.class, () -> filter.filter(request));
+        assertEquals(Response.SC_UNSUPPORTED_MEDIA_TYPE, exception.getResponse().getStatus(), "Should have 415 error");
+    }
+
+    @Test
+    void testWildcardAcceptsHeaderForExport() throws URISyntaxException {
+        final MultivaluedMap headerMap = Mockito.mock(MultivaluedMap.class);
+        Mockito.when(headerMap.get(HttpHeaders.CONTENT_TYPE)).thenReturn(Collections.singletonList(FHIRMediaTypes.FHIR_JSON));
+        final ContainerRequestContext request = Mockito.mock(ContainerRequestContext.class);
+        request.setRequestUri(new URI("http://localhost:3002/v1/Group/1234567890/$export?_type=Patient"));
+        Mockito.when(request.getAcceptableMediaTypes()).thenReturn(Collections.singletonList(MediaType.WILDCARD_TYPE));
+        Mockito.when(request.getHeaders()).thenReturn(headerMap);
 
         final WebApplicationException exception = assertThrows(WebApplicationException.class, () -> filter.filter(request));
         assertEquals(Response.SC_UNSUPPORTED_MEDIA_TYPE, exception.getResponse().getStatus(), "Should have 415 error");
@@ -54,8 +86,11 @@ public class FHIRRequestFilterTest {
 
     @Test
     void testNullAcceptsHeader() {
+        final MultivaluedMap headerMap = Mockito.mock(MultivaluedMap.class);
+        Mockito.when(headerMap.get(HttpHeaders.CONTENT_TYPE)).thenReturn(Collections.singletonList(FHIRMediaTypes.FHIR_JSON));
         final ContainerRequestContext request = Mockito.mock(ContainerRequestContext.class);
         Mockito.when(request.getAcceptableMediaTypes()).thenReturn(null);
+        Mockito.when(request.getHeaders()).thenReturn(headerMap);
 
         final WebApplicationException exception = assertThrows(WebApplicationException.class, () -> filter.filter(request));
         assertEquals(Response.SC_UNSUPPORTED_MEDIA_TYPE, exception.getResponse().getStatus(), "Should have 415 error");
