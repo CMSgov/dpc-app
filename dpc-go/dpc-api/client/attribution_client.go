@@ -16,7 +16,6 @@ type AttributionConfig struct {
 	Retries int
 }
 
-// ResourceType of request
 type ResourceType string
 
 const (

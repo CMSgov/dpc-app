@@ -24,7 +24,7 @@ func TestFHIRMiddlewareTestSuite(t *testing.T) {
 
 func (suite *FHIRMiddlewareTestSuite) TestFHIRModel() {
 	nextHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Write(apitest.AttributionResponse())
+		_, _ = w.Write(apitest.AttributionResponse())
 	})
 
 	req := httptest.NewRequest(http.MethodGet, "http://www.your-domain.com", nil)
@@ -83,7 +83,7 @@ func (suite *FHIRMiddlewareTestSuite) TestFHIRModel() {
 
 func (suite *FHIRMiddlewareTestSuite) TestFHIRModelError() {
 	nextHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("{}"))
+		_, _ = w.Write([]byte("{}"))
 	})
 
 	req := httptest.NewRequest(http.MethodGet, "http://www.your-domain.com", nil)

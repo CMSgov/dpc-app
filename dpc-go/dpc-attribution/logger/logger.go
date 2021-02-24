@@ -37,8 +37,6 @@ func init() {
 		}
 		Logger = l
 	}
-
-	defer Logger.Sync()
 }
 
 func NewContext(ctx context.Context, fields ...zap.Field) context.Context {
