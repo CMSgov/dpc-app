@@ -28,9 +28,13 @@ public class FHIRRequestFilter implements ContainerRequestFilter {
     }
 
     private void checkAccepts(ContainerRequestContext requestContext) {
-        final List<MediaType> contentHeader = requestContext.getAcceptableMediaTypes();
+        final List<MediaType> acceptHeaders = requestContext.getAcceptableMediaTypes();
 
-        if (contentHeader == null || !shortCircuitBooleanCheck(contentHeader, FHIRMediaTypes::isFHIRContent)) {
+        if (requestContext.getUriInfo().getRequestUri().toString().contains("$export") && acceptHeaders == null) {
+            throw new WebApplicationException("`Accept:` header is required.", Response.SC_BAD_REQUEST);
+        }
+
+        if (!shortCircuitBooleanCheck(acceptHeaders, FHIRMediaTypes::isFHIRContent) || acceptHeaders.contains(MediaType.WILDCARD_TYPE)) {
             throw new WebApplicationException("`Accept:` header must specify valid FHIR content type", Response.SC_UNSUPPORTED_MEDIA_TYPE);
         }
     }
