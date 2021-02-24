@@ -11,7 +11,6 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriInfo;
-import java.awt.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collections;
@@ -94,7 +93,7 @@ public class FHIRRequestFilterTest {
         Mockito.when(request.getHeaders()).thenReturn(headerMap);
 
         final WebApplicationException exception = assertThrows(WebApplicationException.class, () -> filter.filter(request));
-        assertEquals(Response.SC_UNSUPPORTED_MEDIA_TYPE, exception.getResponse().getStatus(), "Should have 415 error");
+        assertEquals(Response.SC_BAD_REQUEST, exception.getResponse().getStatus(), "Should have 400 error");
     }
 
     @Test
