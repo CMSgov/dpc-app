@@ -15,7 +15,7 @@
 
     <h1 class="ds-u-font-size--title ds-u-font-weight--normal ds-u-margin--0"><%= @user.name %></h1>
     <div>
-      <%= link_to "Edit user", edit_internal_user_url(@user), class: "ds-c-button ds-c-button--primary" %>
+      <%= link_to "Edit user", edit_user_url(@user), class: "ds-c-button ds-c-button--primary" %>
     </div>
   </section>
 
@@ -93,7 +93,7 @@
         <% end %>
       <% else %>
         <p class="ds-u-color--muted">You have not assigned an organization to this person yet.</p>
-        <%= link_to "Assign an organization", edit_internal_user_url, class: "ds-c-button", data: { test: 'assign-org-link' } %>
+        <%= link_to "Assign an organization", edit_user_url, class: "ds-c-button", data: { test: 'assign-org-link' } %>
       <% end %>
     </div>
   </section>
@@ -164,7 +164,7 @@
   </section>
 
   <div class="button__container">
-    <%= form_for @user, url: internal_user_path(@user), data: { confirm: 'Are you sure you want to delete the user\'s account?' }, html: { method: :delete } do |f| %>
+    <%= form_for @user, url: user_path(@user), data: { confirm: 'Are you sure you want to delete the user\'s account?' }, html: { method: :delete } do |f| %>
       <%= f.submit "Delete user account", class:"ds-c-button ds-c-button--danger", data: { test: "delete-user-account" } %>
     <% end %>
   </div>
