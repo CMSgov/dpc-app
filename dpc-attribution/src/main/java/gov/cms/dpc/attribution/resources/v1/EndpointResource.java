@@ -11,12 +11,7 @@ import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.converters.FHIREntityConverter;
 import io.dropwizard.hibernate.UnitOfWork;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
 import org.eclipse.jetty.http.HttpStatus;
-import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Endpoint;
 
 import javax.inject.Inject;
@@ -27,7 +22,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-@Api(value = "Endpoint")
 public class EndpointResource extends AbstractEndpointResource {
 
     private final EndpointDAO endpointDAO;
@@ -46,7 +40,6 @@ public class EndpointResource extends AbstractEndpointResource {
     @Timed
     @ExceptionMetered
     @UnitOfWork
-    @ApiOperation(value = "Create an Endpoint", notes = "Create an Endpoint resource")
     @Override
     public Response createEndpoint(@NotNull Endpoint endpoint) {
         EndpointEntity entity = endpointDAO.persistEndpoint(converter.fromFHIR(EndpointEntity.class, endpoint));
@@ -58,7 +51,6 @@ public class EndpointResource extends AbstractEndpointResource {
     @Timed
     @ExceptionMetered
     @UnitOfWork
-    @ApiOperation(value = "Search Endpoints", notes = "Search for Endpoints associated to the given Organization", response = Bundle.class)
     @Override
     public List<Endpoint> searchEndpoints(@NotNull @QueryParam("organization") String organizationID, @QueryParam("_id") String resourceId) {
         final UUID orgUUID = FHIRExtractors.getEntityUUID(organizationID);
@@ -81,8 +73,6 @@ public class EndpointResource extends AbstractEndpointResource {
     @Timed
     @ExceptionMetered
     @UnitOfWork
-    @ApiOperation(value = "Fetch endpoint", notes = "Fetch a specific Endpoint by resource ID")
-    @ApiResponses(@ApiResponse(code = 404, message = "Cannot find Endpoint"))
     @Override
     public Endpoint fetchEndpoint(@NotNull @PathParam("endpointID") UUID endpointID) {
         final EndpointEntity endpoint = this.endpointDAO.fetchEndpoint(endpointID)
@@ -97,8 +87,6 @@ public class EndpointResource extends AbstractEndpointResource {
     @Timed
     @ExceptionMetered
     @UnitOfWork
-    @ApiOperation(value = "Update an Endpoint", notes = "Update an Endpoint resource")
-    @ApiResponses(value = {@ApiResponse(code = 404, message = "Cannot find Endpoint")})
     @Override
     public Endpoint updateEndpoint(@NotNull @PathParam("endpointID") UUID endpointID, @NotNull Endpoint endpoint) {
         EndpointEntity updatedEntity = this.endpointDAO.persistEndpoint(converter.fromFHIR(EndpointEntity.class, endpoint));
@@ -111,11 +99,6 @@ public class EndpointResource extends AbstractEndpointResource {
     @Timed
     @ExceptionMetered
     @UnitOfWork
-    @ApiOperation(value = "Delete an Endpoint", notes = "Delete an Endpoint resource")
-    @ApiResponses(value = {
-            @ApiResponse(code = 404, message = "Cannot find Endpoint"),
-            @ApiResponse(code = 422, message = "Endpoint cannot be deleted")
-    })
     @Override
     public Response deleteEndpoint(@NotNull @PathParam("endpointID") UUID endpointID) {
         final EndpointEntity endpoint = this.endpointDAO.fetchEndpoint(endpointID)
