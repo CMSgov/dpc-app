@@ -21,6 +21,10 @@
 @import "base/0_font-faces.scss";
 @import "base/0_variables";
 @import "base/1_base";
+@import "components/boxes";
+@import "components/buttons";
 @import "components/cards";
+@import "components/dashboard";
+@import "components/fields";
 @import "components/footer";
 @import "components/navbar";
