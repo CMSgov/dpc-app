@@ -16,7 +16,7 @@ type MetadataControllerTestSuite struct {
 }
 
 func (suite *MetadataControllerTestSuite) SetupTest() {
-	suite.meta = NewMetadataController("../../DPCCapabilities.json")
+	suite.meta = NewMetadataController("../DPCCapabilities.json")
 }
 
 func TestMetadataControllerTestSuite(t *testing.T) {
