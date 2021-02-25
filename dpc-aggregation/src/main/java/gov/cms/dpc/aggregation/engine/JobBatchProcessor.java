@@ -9,6 +9,7 @@ import gov.cms.dpc.aggregation.service.LookBackAnswer;
 import gov.cms.dpc.aggregation.service.LookBackService;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.common.Constants;
+import gov.cms.dpc.common.MDCConstants;
 import gov.cms.dpc.common.utils.MetricMaker;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.models.JobQueueBatch;
@@ -20,6 +21,7 @@ import org.hl7.fhir.dstu3.model.ResourceType;
 import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import javax.inject.Inject;
 import java.time.OffsetDateTime;
@@ -131,6 +133,7 @@ public class JobBatchProcessor {
         //patientId here is the patient MBI
         final String practitionerNPI = lookBackService.getPractitionerNPIFromRoster(job.getOrgID(), job.getProviderID(), patientId);
         if (practitionerNPI != null) {
+            MDC.put(MDCConstants.PROVIDER_NPI, practitionerNPI);
             Flowable<Resource> flowable = fetchResource(job, patientId, ResourceType.ExplanationOfBenefit, null);
             result = flowable
                     .filter(resource -> ResourceType.ExplanationOfBenefit == resource.getResourceType())

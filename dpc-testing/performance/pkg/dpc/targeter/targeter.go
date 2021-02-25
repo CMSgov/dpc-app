@@ -15,10 +15,9 @@ type Config struct {
 	Endpoint    string // required
 	AccessToken string // required
 
-	ID     string   // optional id to use for GET/PUT/DELETE requests; Mutually exclusive with IDs
-	IDs    []string // optional ids to use for GET/PUT/DELETE requests; Mutually exclusive with ID
-	Body   []byte   // optional body for request; Mutually exclusive with Bodies
-	Bodies [][]byte // optional bodies for requests; Mutually exclusive with Body
+	ID        string   // optional id to use for GET/PUT/DELETE requests; Mutually exclusive with IDs
+	IDs       []string // optional ids to use for GET/PUT/DELETE requests; Mutually exclusive with ID
+	Generator func() []byte
 
 	Headers *Headers
 }
@@ -36,9 +35,6 @@ func New(config Config) *Targeter {
 		panic("Cannot set both `ID` and `IDs` for Targeter")
 	}
 
-	if config.Body != nil && config.Bodies != nil {
-		panic("Cannot set both `Body` and `Bodies` for Targeter")
-	}
 	// If no Headers are passed, default to fhir json types
 	if config.Headers == nil {
 		config.Headers = &Headers{
@@ -104,16 +100,12 @@ func (dt *Targeter) name() string {
 	return fmt.Sprintf("%s %s/%s/%s", dt.Method, dt.BaseURL, dt.Endpoint, id)
 }
 
-// genStrs general generator function that returns strings
-func genStrs(strs []string) func() string {
+// GenStrs general generator function that returns strings
+func GenStrs(strs []string) func() string {
 	i := 0
 	n := len(strs)
 	return func() string {
-		if i >= n {
-			return ""
-		}
-
-		nextVal := strs[i]
+		nextVal := strs[i%n]
 		i++
 		return nextVal
 	}
@@ -126,24 +118,14 @@ func genIDs(config Config) func() string {
 		return func() string { return config.ID }
 	}
 
-	return genStrs(config.IDs)
+	return GenStrs(config.IDs)
 }
 
 // genBodies produces a closure that returns successive request bodies from all files matching the pattern
 func genBodies(config Config) func() []byte {
-	// If `Body` is present it has precedence over `BodyFilePattern`
-	if config.Body != nil {
-		return func() []byte { return config.Body }
-	}
-
-	n := len(config.Bodies)
-	if n == 0 {
+	if config.Generator == nil {
 		return func() []byte { return []byte{} }
 	}
-	i := 0
-	return func() []byte {
-		body := config.Bodies[i%n]
-		i++
-		return body
-	}
+
+	return config.Generator
 }

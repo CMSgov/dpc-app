@@ -60,7 +60,7 @@ public abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organ
         if (!authenticated) {
             throw new WebApplicationException(dpc401handler.buildResponse(BEARER_PREFIX, realm));
         }
-        logger.info("resource_requested={}, method={}",uriInfo.getPath(),requestContext.getMethod());
+        logger.info("event_type=request-received, resource_requested={}, method={}",uriInfo.getPath(),requestContext.getMethod());
     }
 
     private DPCAuthCredentials validateMacaroon(String macaroon, UriInfo uriInfo) {
@@ -79,7 +79,7 @@ public abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organ
         final UUID orgID = extractOrgIDFromMacaroon(m1);
 
         // Now that we have the organization_id, set it in the logging context
-        MDC.clear();
+
         MDC.put(MDCConstants.ORGANIZATION_ID, orgID.toString());
         MDC.put(MDCConstants.TOKEN_ID, m1.get(0).identifier);
 

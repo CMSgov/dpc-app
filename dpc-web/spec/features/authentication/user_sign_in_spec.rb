@@ -52,7 +52,7 @@ RSpec.feature 'user signs in' do
 
     expect(email).to include('Confirm my account')
 
-    confirmation_link = last_delivery.body.raw_source.match(%r{href="http:\/\/localhost:3000(?<path>.+?)">})[:path]
+    confirmation_link = last_delivery.body.raw_source.match(%r{href="http:\/\/localhost:3500(?<path>.+?)">})[:path]
 
     visit confirmation_link
 

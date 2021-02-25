@@ -20,6 +20,7 @@ public class PatientEntityConverter implements FHIRConverter<Patient, PatientEnt
     }
 
     @Override
+    @SuppressWarnings("JdkObsolete") // Date class is used by FHIR stu3 Patient model
     public PatientEntity fromFHIR(FHIREntityConverter converter, Patient resource) {
         final PatientEntity patient = new PatientEntity();
         patient.setDob(PatientEntity.toLocalDate(resource.getBirthDate()));
@@ -49,6 +50,7 @@ public class PatientEntityConverter implements FHIRConverter<Patient, PatientEnt
     }
 
     @Override
+    @SuppressWarnings("JdkObsolete") // Date class is used by FHIR stu3 Patient model
     public Patient toFHIR(FHIREntityConverter converter, PatientEntity entity) {
         final Patient patient = new Patient();
 

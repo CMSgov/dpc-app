@@ -18,7 +18,7 @@ import java.util.UUID;
 
 @Path("/Patient")
 @FHIR
-public abstract class AbstractPatientResource {
+public abstract class AbstractPatientResource extends AbstractResourceWithSince {
 
     protected AbstractPatientResource() {
         // Not used
@@ -29,6 +29,7 @@ public abstract class AbstractPatientResource {
 
     @POST
     public abstract Response submitPatient(OrganizationPrincipal organization, @Valid @Profiled(profile = PatientProfile.PROFILE_URI) Patient patient);
+
     @POST
     @Path("/$submit")
     public abstract Bundle bulkSubmitPatients(OrganizationPrincipal organization, Parameters params);
@@ -39,7 +40,11 @@ public abstract class AbstractPatientResource {
 
     @GET
     @Path("/{patientID}/$everything")
-    public abstract Resource everything(OrganizationPrincipal organization, @Valid @Profiled(profile = AttestationProfile.PROFILE_URI) Provenance attestation, UUID patientId, HttpServletRequest request);
+    public abstract Resource everything(OrganizationPrincipal organization,
+                                        @Valid @Profiled(profile = AttestationProfile.PROFILE_URI) Provenance attestation,
+                                        UUID patientId, 
+                                        @QueryParam("_since") @NoHtml String since,
+                                        HttpServletRequest request);
 
     @DELETE
     @Path("/{patientID}")

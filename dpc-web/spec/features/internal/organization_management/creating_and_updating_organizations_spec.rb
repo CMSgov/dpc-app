@@ -200,26 +200,23 @@ RSpec.feature 'creating and updating organizations' do
   end
 
   scenario 'adding and removing tags from an organization' do
-    org = create(:organization)
-
     cat_tag = create(:tag, name: 'Cat')
-    create(:tag, name: 'Dog')
+    dog_tag = create(:tag, name: 'Dog')
+    org = create(:organization)
 
     visit internal_organization_path(org)
 
     within('[data-test="org-tags"]') do
-      expect(page).to have_content('No tags')
+      expect(page).to have_content("No tags have been assigned to #{org.name}")
     end
 
-    select 'Cat', from: 'tagging_tag_id'
-    find('[data-test="add-tag-submit"]').click
+    find("[data-test=\"add-tag-#{cat_tag.id}\"]").click
 
     within('[data-test="org-tags"]') do
       expect(page).to have_content('Cat')
     end
 
-    select 'Dog', from: 'tagging_tag_id'
-    find('[data-test="add-tag-submit"]').click
+    find("[data-test=\"add-tag-#{dog_tag.id}\"]").click
 
     within('[data-test="org-tags"]') do
       expect(page).to have_content('Cat')

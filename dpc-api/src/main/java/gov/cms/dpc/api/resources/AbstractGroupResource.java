@@ -18,7 +18,7 @@ import java.util.UUID;
 
 @FHIR
 @Path("/Group")
-public abstract class AbstractGroupResource {
+public abstract class AbstractGroupResource extends AbstractResourceWithSince {
 
     protected AbstractGroupResource() {
         // Not used
@@ -53,10 +53,10 @@ public abstract class AbstractGroupResource {
     @Path("/{rosterID}/$export")
     @GET
     public abstract Response export(OrganizationPrincipal organizationPrincipal,
-                                    @PathParam("rosterID") @NoHtml String rosterID,
-                                    @QueryParam("_type") @NoHtml String resourceTypes,
-                                    @QueryParam("_outputFormat") @NoHtml String outputFormat,
-                                    @QueryParam("_since") @NoHtml String since,
-                                    @HeaderParam("Prefer") @Valid String Prefer,
+                                    @NoHtml String rosterID,
+                                    @NoHtml String resourceTypes,
+                                    @NoHtml String outputFormat,
+                                    @NoHtml String since,
+                                    @Valid String Prefer,
                                     HttpServletRequest httpServletRequest);
 }
