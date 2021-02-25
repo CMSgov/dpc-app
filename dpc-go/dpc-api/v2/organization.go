@@ -73,7 +73,7 @@ func (oc *OrganizationController) Create(w http.ResponseWriter, r *http.Request)
 	resp, err := oc.ac.Post(r.Context(), client.Organization, body)
 	if err != nil {
 		log.Error("Failed to save the org to attribution", zap.Error(err))
-		fhirror.ServerIssue(w, r.Context(), http.StatusUnprocessableEntity, "Failed to save the organization")
+		fhirror.ServerIssue(w, r.Context(), http.StatusUnprocessableEntity, "Failed to save organization")
 		return
 	}
 
