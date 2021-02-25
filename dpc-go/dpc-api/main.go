@@ -1,12 +1,13 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"github.com/CMSgov/dpc/api/client"
 	"github.com/CMSgov/dpc/api/logger"
 	"github.com/CMSgov/dpc/api/router"
 	"github.com/CMSgov/dpc/api/v2"
-	"log"
+	"go.uber.org/zap"
 	"net/http"
 	"os"
 	"strconv"
@@ -46,6 +47,6 @@ func main() {
 		port = "3000"
 	}
 	if err := http.ListenAndServe(fmt.Sprintf(":%s", port), apiRouter); err != nil {
-		log.Fatal(err)
+		logger.WithContext(context.Background()).Fatal("Failed to start server", zap.Error(err))
 	}
 }
