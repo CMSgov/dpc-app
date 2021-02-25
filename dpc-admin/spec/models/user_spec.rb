@@ -26,40 +26,40 @@ RSpec.describe User, type: :model do
       end
     end
 
-    # it 'generates CSV of only selected users' do
-    #   user1 = create(:user, id: 50000, first_name: 'Clarissa', last_name: 'Dalloway', email: 'cd@example.com',
-    #     requested_organization: 'Amalgamated Lint', requested_organization_type: 'primary_care_clinic',
-    #     address_1: '1234 Shut the Door Ave.', address_2: 'Ste 1000', city: 'Pecoima',
-    #     state: 'AZ', zip: '12345', agree_to_terms: true, requested_num_providers: 5,
-    #     created_at: '2019-10-15 18:29:35 UTC', updated_at: '2019-10-15 18:29:35 UTC')
-    #   user2 = create(:user, id: 50001, first_name: 'Spongebob', last_name: 'Squarepants', email: 'spbob@example.com',
-    #     requested_organization: 'Amalgamated Lint', requested_organization_type: 'primary_care_clinic',
-    #     address_1: '1234 Bikini Bottom.', address_2: 'Ste 1000', city: 'Pecoima',
-    #     state: 'AZ', zip: '12345', agree_to_terms: true, requested_num_providers: 5,
-    #     created_at: '2019-10-16 18:29:35 UTC', updated_at: '2019-10-16 18:29:35 UTC')
-    #   tag = create(:tag, name: "Wolf")
-    #   user1.tags << tag
+    it 'generates CSV of only selected users' do
+      user1 = create(:user, id: 50000, first_name: 'Clarissa', last_name: 'Dalloway', email: 'cd@example.com',
+        requested_organization: 'Amalgamated Lint', requested_organization_type: 'primary_care_clinic',
+        address_1: '1234 Shut the Door Ave.', address_2: 'Ste 1000', city: 'Pecoima',
+        state: 'AZ', zip: '12345', agree_to_terms: true, requested_num_providers: 5,
+        created_at: '2019-10-15 18:29:35 UTC', updated_at: '2019-10-15 18:29:35 UTC')
+      user2 = create(:user, id: 50001, first_name: 'Spongebob', last_name: 'Squarepants', email: 'spbob@example.com',
+        requested_organization: 'Amalgamated Lint', requested_organization_type: 'primary_care_clinic',
+        address_1: '1234 Bikini Bottom.', address_2: 'Ste 1000', city: 'Pecoima',
+        state: 'AZ', zip: '12345', agree_to_terms: true, requested_num_providers: 5,
+        created_at: '2019-10-16 18:29:35 UTC', updated_at: '2019-10-16 18:29:35 UTC')
+      tag = create(:tag, name: "Wolf")
+      user1.tags << tag
 
-    #   fixture_csv_content = File.read('spec/fixtures/users.csv')
-    #   FakeFS.with_fresh do
-    #     expect(User.to_csv([50000])).to eq(fixture_csv_content)
-    #   end
-    # end
+      fixture_csv_content = File.read('spec/fixtures/users.csv')
+      FakeFS.with_fresh do
+        expect(User.to_csv([50000])).to eq(fixture_csv_content)
+      end
+    end
   
-    # it 'escapes the html for the correct attributes' do
-    #   user = create(:user, id: 50000, first_name: '?name=<script>Clarissa</script>', last_name: 'Dalloway', email: 'cd@example.com',
-    #                 requested_organization: 'Amalgamated Lint', requested_organization_type: 'primary_care_clinic',
-    #                 address_1: '1234 Shut the Door Ave.', address_2: 'Ste 1000', city: 'Pecoima',
-    #                 state: 'AZ', zip: '12345', agree_to_terms: true, requested_num_providers: 5,
-    #                 created_at: '2019-10-15 18:29:35 UTC', updated_at: '2019-10-15 18:29:35 UTC')
-    #   tag = create(:tag, name: "Wolf")
-    #   user.tags << tag
+    it 'escapes the html for the correct attributes' do
+      user = create(:user, id: 50000, first_name: '?name=<script>Clarissa</script>', last_name: 'Dalloway', email: 'cd@example.com',
+                    requested_organization: 'Amalgamated Lint', requested_organization_type: 'primary_care_clinic',
+                    address_1: '1234 Shut the Door Ave.', address_2: 'Ste 1000', city: 'Pecoima',
+                    state: 'AZ', zip: '12345', agree_to_terms: true, requested_num_providers: 5,
+                    created_at: '2019-10-15 18:29:35 UTC', updated_at: '2019-10-15 18:29:35 UTC')
+      tag = create(:tag, name: "Wolf")
+      user.tags << tag
   
-    #   fixture_csv_content = File.read('spec/fixtures/users_html_escaped.csv')
-    #   FakeFS.with_fresh do
-    #     expect(User.to_csv([50000])).to eq(fixture_csv_content)
-    #   end
-    # end
+      fixture_csv_content = File.read('spec/fixtures/users_html_escaped.csv')
+      FakeFS.with_fresh do
+        expect(User.to_csv([50000])).to eq(fixture_csv_content)
+      end
+    end
   end
 
   describe '#last_name' do
