@@ -17,7 +17,7 @@ func TestBusinessViolation(t *testing.T) {
 	c := context.WithValue(context.Background(), middleware.RequestIDKey, "testRequest")
 	ja := jsonassert.New(t)
 
-	BusinessViolation(w, c, http.StatusOK, "test")
+	BusinessViolation(c, w, http.StatusOK, "test")
 
 	resp := w.Result()
 	body, _ := ioutil.ReadAll(resp.Body)
@@ -43,7 +43,7 @@ func TestServerIssue(t *testing.T) {
 	c := context.WithValue(context.Background(), middleware.RequestIDKey, "testRequest")
 	ja := jsonassert.New(t)
 
-	ServerIssue(w, c, http.StatusOK, "test")
+	ServerIssue(c, w, http.StatusOK, "test")
 
 	resp := w.Result()
 	body, _ := ioutil.ReadAll(resp.Body)

@@ -9,6 +9,10 @@ import (
 	v2 "github.com/CMSgov/dpc/attribution/v2"
 )
 
+/*
+   NewDPCAttributionRouter
+   function to build the attribution router
+*/
 func NewDPCAttributionRouter(o v2.Service) http.Handler {
 	r := chi.NewRouter()
 	r.Use(middleware2.Logging())

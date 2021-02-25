@@ -75,7 +75,7 @@ func (suite *OrganizationRepositoryTestSuite) TestFindByIDError() {
 	assert.Empty(suite.T(), org)
 }
 
-func (suite *OrganizationRepositoryTestSuite) TestCreateErrorExistingNPI() {
+func (suite *OrganizationRepositoryTestSuite) TestInsertErrorExistingNPI() {
 	db, mock := newMock()
 	defer db.Close()
 	repo := NewOrganizationRepo(db)
@@ -89,12 +89,12 @@ func (suite *OrganizationRepositoryTestSuite) TestCreateErrorExistingNPI() {
 	mock.ExpectQuery(expectedCountQuery).WillReturnRows(rows)
 
 	b, _ := json.Marshal(suite.fakeOrg.Info)
-	org, err := repo.Create(ctx, b)
+	org, err := repo.Insert(ctx, b)
 	assert.Nil(suite.T(), org)
 	assert.Error(suite.T(), err)
 }
 
-func (suite *OrganizationRepositoryTestSuite) TestCreateErrorInRepo() {
+func (suite *OrganizationRepositoryTestSuite) TestInsertErrorInRepo() {
 	db, mock := newMock()
 	defer db.Close()
 	repo := NewOrganizationRepo(db)
@@ -114,12 +114,12 @@ func (suite *OrganizationRepositoryTestSuite) TestCreateErrorInRepo() {
 	mock.ExpectQuery(expectedInsertQuery).WithArgs(suite.fakeOrg.Info).WillReturnRows(rows)
 
 	b, _ := json.Marshal(suite.fakeOrg.Info)
-	org, err := repo.Create(ctx, b)
+	org, err := repo.Insert(ctx, b)
 	assert.Error(suite.T(), err)
 	assert.Empty(suite.T(), org)
 }
 
-func (suite *OrganizationRepositoryTestSuite) TestCreate() {
+func (suite *OrganizationRepositoryTestSuite) TestInsert() {
 	db, mock := newMock()
 	defer db.Close()
 	repo := NewOrganizationRepo(db)
@@ -140,7 +140,7 @@ func (suite *OrganizationRepositoryTestSuite) TestCreate() {
 	mock.ExpectQuery(expectedInsertQuery).WithArgs(suite.fakeOrg.Info).WillReturnRows(rows)
 
 	b, _ := json.Marshal(suite.fakeOrg.Info)
-	org, err := repo.Create(ctx, b)
+	org, err := repo.Insert(ctx, b)
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), suite.fakeOrg.ID, org.ID)
 }

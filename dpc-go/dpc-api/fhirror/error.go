@@ -9,31 +9,47 @@ import (
 	"net/http"
 )
 
-func GenericServerIssue(w http.ResponseWriter, ctx context.Context) {
-	fhirError(w, ctx, http.StatusInternalServerError, fhir.IssueSeverityError, fhir.IssueTypeException, "Internal Server Error")
+/*
+   GenericServerIssue
+   Write a generic 500 server error OperationOutcome to the response
+*/
+func GenericServerIssue(ctx context.Context, w http.ResponseWriter) {
+	fhirError(ctx, w, http.StatusInternalServerError, fhir.IssueSeverityError, fhir.IssueTypeException, "Internal Server Error")
 }
 
-func ServerIssue(w http.ResponseWriter, ctx context.Context, statusCode int, message string) {
-	fhirError(w, ctx, statusCode, fhir.IssueSeverityError, fhir.IssueTypeException, message)
+/*
+   ServerIssue
+   Write a generic Error/Exception OperationOutcome to the response
+*/
+func ServerIssue(ctx context.Context, w http.ResponseWriter, statusCode int, message string) {
+	fhirError(ctx, w, statusCode, fhir.IssueSeverityError, fhir.IssueTypeException, message)
 }
 
-func NotFound(w http.ResponseWriter, ctx context.Context, message string) {
-	fhirError(w, ctx, http.StatusNotFound, fhir.IssueSeverityWarning, fhir.IssueTypeNotFound, message)
+/*
+   NotFound
+   Write a specific not found OperationOutcome to the response
+*/
+func NotFound(ctx context.Context, w http.ResponseWriter, message string) {
+	fhirError(ctx, w, http.StatusNotFound, fhir.IssueSeverityWarning, fhir.IssueTypeNotFound, message)
 }
 
-func BusinessViolation(w http.ResponseWriter, ctx context.Context, statusCode int, message string) {
-	fhirError(w, ctx, statusCode, fhir.IssueSeverityWarning, fhir.IssueTypeBusinessRule, message)
+/*
+   BusinessViolation
+   Write a generic business rule OperationOutcome to the response
+*/
+func BusinessViolation(ctx context.Context, w http.ResponseWriter, statusCode int, message string) {
+	fhirError(ctx, w, statusCode, fhir.IssueSeverityWarning, fhir.IssueTypeBusinessRule, message)
 }
 
-func fhirError(w http.ResponseWriter, ctx context.Context, statusCode int, severity fhir.IssueSeverity, code fhir.IssueType, message string) {
+func fhirError(ctx context.Context, w http.ResponseWriter, statusCode int, severity fhir.IssueSeverity, code fhir.IssueType, message string) {
 
-	rqId := fmt.Sprintf("%s", ctx.Value(middleware.RequestIDKey))
+	rqID := fmt.Sprintf("%s", ctx.Value(middleware.RequestIDKey))
 	o := fhir.OperationOutcome{
 		Issue: []fhir.OperationOutcomeIssue{
 			{
 				Severity:    severity,
 				Code:        code,
-				Diagnostics: &rqId,
+				Diagnostics: &rqID,
 				Details: &fhir.CodeableConcept{
 					Text: &message,
 				},

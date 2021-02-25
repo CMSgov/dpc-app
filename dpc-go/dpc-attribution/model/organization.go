@@ -4,6 +4,7 @@ import (
 	"time"
 )
 
+// Organization is a struct that models the organization table
 type Organization struct {
 	ID        string    `db:"id" json:"id"`
 	Version   int       `db:"version" json:"version"`

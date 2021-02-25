@@ -22,10 +22,10 @@ func TestLoggingTestSuite(t *testing.T) {
 
 func (suite *LoggingTestSuite) TestLogging() {
 	core, logs := observer.New(zap.InfoLevel)
-	logger.Logger = zap.New(core)
+	logger.SetLogger(zap.New(core))
 
 	nextHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("hello"))
+		_, _ = w.Write([]byte("hello"))
 	})
 
 	req := httptest.NewRequest(http.MethodGet, "http://www.your-domain.com", nil)

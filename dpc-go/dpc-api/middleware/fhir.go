@@ -12,25 +12,42 @@ import (
 	"net/http"
 )
 
-type ResponseWriter struct {
+/*
+   responseWriter has the ability to store the bytes written to be later retrieved
+*/
+type responseWriter struct {
 	http.ResponseWriter
 	buf    *bytes.Buffer
 	Status int
 }
 
-func (rw *ResponseWriter) Write(p []byte) (int, error) {
+/*
+   Write
+   function to implement the http.ResponseWriter interface
+*/
+func (rw *responseWriter) Write(p []byte) (int, error) {
 	return rw.buf.Write(p)
 }
 
-func (rw *ResponseWriter) WriteHeader(status int) {
+/*
+   WriteHeader
+   function that wraps the underlying http.ResponseWriter to hold the status
+*/
+func (rw *responseWriter) WriteHeader(status int) {
 	rw.Status = status
 	rw.ResponseWriter.WriteHeader(status)
 }
 
+/*
+   FHIRModel
+   function that intercepts the bytes being returned from the response
+   if the response is successful, then the expected data is in the format of
+   model.Resource where this will convert it into the appropriate FHIR object
+*/
 func FHIRModel(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log := logger.WithContext(r.Context())
-		rw := &ResponseWriter{
+		rw := &responseWriter{
 			ResponseWriter: w,
 			buf:            &bytes.Buffer{},
 			Status:         200,
@@ -42,14 +59,14 @@ func FHIRModel(next http.Handler) http.Handler {
 				body, err := convertToFHIR(b)
 				if err != nil {
 					log.Error(err.Error(), zap.Error(err))
-					fhirror.GenericServerIssue(w, r.Context())
+					fhirror.GenericServerIssue(r.Context(), w)
 					return
 				}
 				b = body
 			}
 			if _, err := w.Write(b); err != nil {
 				log.Error("Failed to write data", zap.Error(err))
-				fhirror.GenericServerIssue(w, r.Context())
+				fhirror.GenericServerIssue(r.Context(), w)
 			}
 		}()
 		next.ServeHTTP(rw, r)

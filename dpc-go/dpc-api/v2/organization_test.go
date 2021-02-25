@@ -33,7 +33,7 @@ func (ac *MockAttributionClient) Post(ctx context.Context, resourceType client.R
 
 type OrganizationControllerTestSuite struct {
 	suite.Suite
-	org *OrganizationController
+	org *organizationController
 	mac *MockAttributionClient
 }
 
@@ -138,7 +138,7 @@ func (suite *OrganizationControllerTestSuite) TestPostOrganizationErrorInClient(
                 "severity": "error",
                 "code": "Exception",
                 "details": {
-                    "text": "Failed to save the organization"
+                    "text": "Failed to save organization"
                 },
                 "diagnostics": "12345"
             }

@@ -16,8 +16,13 @@ import (
 
 type contextKey int
 
+// ContextKeyOrganization is the key in the context to retrieve the organizationID
 const ContextKeyOrganization contextKey = iota
 
+/*
+   OrganizationCtx
+   middleware to extract the organizationID from the chi url param and set it into the request context
+*/
 func OrganizationCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		organizationID := chi.URLParam(r, "organizationID")
@@ -26,17 +31,26 @@ func OrganizationCtx(next http.Handler) http.Handler {
 	})
 }
 
-type OrganizationService struct {
+type organizationService struct {
 	repo repository.OrganizationRepo
 }
 
-func NewOrganizationService(repo repository.OrganizationRepo) *OrganizationService {
-	return &OrganizationService{
+/*
+   NewOrganizationService
+   function that creates a organization service and returns it's reference
+
+*/
+func NewOrganizationService(repo repository.OrganizationRepo) *organizationService {
+	return &organizationService{
 		repo,
 	}
 }
 
-func (os *OrganizationService) Get(w http.ResponseWriter, r *http.Request) {
+/*
+   Get
+   function that get the organization from the database by id and logs any errors before returning a generic error
+*/
+func (os *organizationService) Get(w http.ResponseWriter, r *http.Request) {
 	log := logger.WithContext(r.Context())
 	organizationID, ok := r.Context().Value(ContextKeyOrganization).(string)
 	if !ok {
@@ -65,11 +79,15 @@ func (os *OrganizationService) Get(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (os *OrganizationService) Save(w http.ResponseWriter, r *http.Request) {
+/*
+   Save
+   function that saves the organization to the database and logs any errors before returning a generic error
+*/
+func (os *organizationService) Save(w http.ResponseWriter, r *http.Request) {
 	log := logger.WithContext(r.Context())
 	body, _ := ioutil.ReadAll(r.Body)
 
-	org, err := os.repo.Create(r.Context(), body)
+	org, err := os.repo.Insert(r.Context(), body)
 	if err != nil {
 		log.Error("Failed to create organization", zap.Error(err))
 		boom.BadData(w, err)

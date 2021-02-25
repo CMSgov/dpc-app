@@ -50,7 +50,7 @@ func (suite *RouterTestSuite) TestErrorHandling() {
 	mockOrg.On("Read", mock.Anything, mock.Anything).Once().Run(func(arg mock.Arguments) {
 		w := arg.Get(0).(http.ResponseWriter)
 		r := arg.Get(1).(*http.Request)
-		fhirror.GenericServerIssue(w, r.Context())
+		fhirror.GenericServerIssue(r.Context(), w)
 	})
 
 	router := suite.r(mockOrg, mockMeta)
@@ -129,7 +129,7 @@ func (suite *RouterTestSuite) TestOrganizationGetRoutes() {
 	assert.Equal(suite.T(), v["resourceType"], "Organization")
 }
 
-func (suite *RouterTestSuite) TestOrganizationPostRoutes() {
+func (suite *RouterTestSuite) TestOrganizationPostRoute() {
 	mockMeta := new(MockController)
 	mockOrg := new(MockController)
 

@@ -13,8 +13,11 @@ import (
 )
 
 func main() {
-	defer logger.Logger.Sync()
 	ctx := context.Background()
+	defer func() {
+		err := logger.SyncLogger()
+		logger.WithContext(ctx).Fatal("Failed to start server", zap.Error(err))
+	}()
 	db := repository.GetDbConnection()
 	defer func() {
 		if err := db.Close(); err != nil {

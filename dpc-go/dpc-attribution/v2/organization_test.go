@@ -20,7 +20,7 @@ type MockRepo struct {
 	mock.Mock
 }
 
-func (m *MockRepo) Create(ctx context.Context, body []byte) (*model.Organization, error) {
+func (m *MockRepo) Insert(ctx context.Context, body []byte) (*model.Organization, error) {
 	args := m.Called(ctx, body)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
@@ -109,7 +109,7 @@ func (suite *OrganizationServiceTestSuite) TestSave() {
 
 	o := model.Organization{}
 	_ = faker.FakeData(&o)
-	mr.On("Create", mock.Anything, mock.Anything).Return(&o, nil)
+	mr.On("Insert", mock.Anything, mock.Anything).Return(&o, nil)
 
 	req := httptest.NewRequest("POST", "http://example.com/foo", nil)
 
@@ -132,7 +132,7 @@ func (suite *OrganizationServiceTestSuite) TestSaveRepoError() {
 	mr := new(MockRepo)
 	os := NewOrganizationService(mr)
 
-	mr.On("Create", mock.Anything, mock.Anything).Return(nil, errors.New("error"))
+	mr.On("Insert", mock.Anything, mock.Anything).Return(nil, errors.New("error"))
 
 	req := httptest.NewRequest("POST", "http://example.com/foo", nil)
 

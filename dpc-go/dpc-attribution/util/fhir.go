@@ -2,21 +2,39 @@ package util
 
 import (
 	"encoding/json"
-	"github.com/CMSgov/dpc/attribution/model"
 	"github.com/pkg/errors"
 )
 
+type identifier struct {
+	Value  string `json:"value"`
+	System string `json:"system"`
+}
+
+// IdentifierContainer is a struct that holds identifiers
+// This is only used for the purpose of unmarshalling
+type IdentifierContainer struct {
+	Identifier []identifier `json:"identifier"`
+}
+
+/*
+   GetNPI
+   function that returns the identifier value associated with the npi system
+*/
 func GetNPI(fhirModel []byte) (string, error) {
 	return GetIdentifier(fhirModel, "http://hl7.org/fhir/sid/us-npi")
 }
 
+/*
+   GetIdentifier
+   function that returns the identifier value associated with the system
+*/
 func GetIdentifier(fhirModel []byte, system string) (string, error) {
-	var r model.IdentifierContainer
+	var r IdentifierContainer
 	err := json.Unmarshal(fhirModel, &r)
 	if err != nil {
 		return "", err
 	}
-	vsf := make([]model.Identifier, 0)
+	vsf := make([]identifier, 0)
 	for _, v := range r.Identifier {
 		if v.System == system {
 			vsf = append(vsf, v)
