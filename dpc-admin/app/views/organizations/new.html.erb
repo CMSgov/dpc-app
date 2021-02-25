@@ -10,8 +10,8 @@
 
   <section class="box">
     <div class="box__content">
-      <%= form_for @organization, url: internal_organizations_path do |f| %>
-        <%= render 'internal/organizations/fields', f: f, locals: { button_label: "Create organization"}%>
+      <%= form_for @organization, url: organizations_path do |f| %>
+        <%= render 'organizations/fields', f: f, locals: { button_label: "Create organization"}%>
       <% end %>
     </div>
   </section>
