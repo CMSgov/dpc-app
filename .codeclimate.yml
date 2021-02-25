@@ -24,6 +24,11 @@ checks:
   # Disabled because IntelliJ generates suspicious equals/hashcode methods.
   identical-code:
     enabled: false
+  # Re-enable similar-code and return-statements after moving Golang services to new repos
+  similar-code:
+    enabled: false
+  return-statements:
+    enabled: false
 plugins:
   git-legal:
     enabled: true
@@ -40,3 +45,11 @@ plugins:
     channel: rubocop-0-83
     config:
       file: "dpc-web/.rubocop.yml"
+  # Bookmarking to enable govet when issue fixed with false dependency errors
+  govet:
+    enabled: false
+  gofmt:
+    enabled: true
+  golint:
+    enabled: true
+
