@@ -94,7 +94,7 @@ RSpec.feature 'updating users' do
   #                          address_1: '55 Euphoria Dr', address_2: '#1', city: 'Blytheville',
   #                          state: 'CO', zip: '80313', requested_num_providers: 999)
 
-  #   visit internal_user_path(crabby)
+  #   visit user_path(crabby)
 
   #   find('[data-test="assign-org-link"]').click
 
@@ -138,7 +138,7 @@ RSpec.feature 'updating users' do
   #   crabby = create(:user, first_name: 'Crab', last_name: 'Olsen', email: 'co@beach.com')
   #   org = create(:organization)
 
-  #   visit edit_internal_user_path(crabby)
+  #   visit edit_user_path(crabby)
 
   #   expect(page.body).to have_content('Crab Olsen')
 
@@ -166,7 +166,7 @@ RSpec.feature 'updating users' do
   #   allow(mailer).to receive(:organization_sandbox_email).and_return(mailer)
   #   allow(mailer).to receive(:deliver_later)
 
-  #   visit edit_internal_user_path(crabby)
+  #   visit edit_user_path(crabby)
 
   #   expect(page.body).to have_content('Crab Olsen')
 
