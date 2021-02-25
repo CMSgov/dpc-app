@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/CMSgov/dpc/attribution/logger"
 	"github.com/CMSgov/dpc/attribution/repository"
 	"github.com/CMSgov/dpc/attribution/router"
 	v2 "github.com/CMSgov/dpc/attribution/v2"
@@ -11,6 +12,7 @@ import (
 )
 
 func main() {
+	defer logger.Logger.Sync()
 	db := repository.GetDbConnection()
 	defer func() {
 		if err := db.Close(); err != nil {

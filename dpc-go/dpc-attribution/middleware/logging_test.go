@@ -25,7 +25,7 @@ func (suite *LoggingTestSuite) TestLogging() {
 	logger.Logger = zap.New(core)
 
 	nextHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("hello"))
+		_, _ = w.Write([]byte("hello"))
 	})
 
 	req := httptest.NewRequest(http.MethodGet, "http://www.your-domain.com", nil)

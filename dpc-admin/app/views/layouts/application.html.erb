@@ -3,25 +3,10 @@
 
   <%= render partial: 'shared/head' %>
 
-  <body class="ds-base ds-u-fill--gray-ultra-light <% if content_for?(:banner_title) %>ds-u-fill--white<% end %>">
+  <body class="ds-base">
     <!-- nav -->
     <%= render partial: 'shared/navbar' %>
-
-    <% if content_for?(:banner_title) %>
-    <header class="page-header">
-      <div class="ds-l-container">
-        <h1 class="page-header__heading">
-          <%= content_for?(:banner_title) ? yield(:banner_title) : yield(:title) %>
-        </h1>
-        <%= render :partial =>  yield(:tabs_set) rescue nil %>
-      </div>
-    </header>
-    <% else %>
     <div class="header-seperator"></div>
-    <% end %>
-
-
-
 
     <%= render partial: 'shared/alerts', locals: { notice: flash[:notice], alert: flash[:alert] } %>
 

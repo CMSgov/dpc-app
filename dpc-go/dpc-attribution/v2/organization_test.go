@@ -106,7 +106,6 @@ func (suite *OrganizationServiceTestSuite) TestGet() {
 
 	res := w.Result()
 
-	assert.Equal(suite.T(), "application/json; charset=UTF-8", res.Header.Get("Content-Type"))
 	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
 
 	resp, _ := ioutil.ReadAll(res.Body)
@@ -132,7 +131,6 @@ func (suite *OrganizationServiceTestSuite) TestPost() {
 
 	res := w.Result()
 
-	assert.Equal(suite.T(), "application/json; charset=UTF-8", res.Header.Get("Content-Type"))
 	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
 
 	resp, _ := ioutil.ReadAll(res.Body)
@@ -141,7 +139,7 @@ func (suite *OrganizationServiceTestSuite) TestPost() {
 	ja.Assertf(string(resp), string(b))
 }
 
-func (suite *OrganizationServiceTestSuite) TestPostRepoError() {
+func (suite *OrganizationServiceTestSuite) TestSaveRepoError() {
 	ja := jsonassert.New(suite.T())
 	mr := new(MockRepo)
 	os := NewOrganizationService(mr)
@@ -156,7 +154,6 @@ func (suite *OrganizationServiceTestSuite) TestPostRepoError() {
 
 	res := w.Result()
 
-	assert.Equal(suite.T(), "application/json; charset=UTF-8", res.Header.Get("Content-Type"))
 	assert.Equal(suite.T(), http.StatusUnprocessableEntity, res.StatusCode)
 
 	resp, _ := ioutil.ReadAll(res.Body)

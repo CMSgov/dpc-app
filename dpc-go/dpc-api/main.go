@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/CMSgov/dpc/api/client"
+	"github.com/CMSgov/dpc/api/logger"
 	"github.com/CMSgov/dpc/api/router"
 	"github.com/CMSgov/dpc/api/v2"
 	"log"
@@ -12,6 +13,7 @@ import (
 )
 
 func main() {
+	defer logger.Logger.Sync()
 	attributionURL, found := os.LookupEnv("ATTRIBUTION_URL")
 	if !found {
 		attributionURL = "http://localhost:3001"

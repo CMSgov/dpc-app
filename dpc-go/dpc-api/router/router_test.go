@@ -114,7 +114,7 @@ func (suite *RouterTestSuite) TestOrganizationGetRoutes() {
 		r := arg.Get(1).(*http.Request)
 		capturedRequestID = r.Header.Get(middleware.RequestIDHeader)
 		w := arg.Get(0).(http.ResponseWriter)
-		w.Write(apitest.AttributionOrgResponse())
+		_, _ = w.Write(apitest.AttributionOrgResponse())
 	})
 
 	router := suite.r(mockOrg, mockMeta)
@@ -146,7 +146,7 @@ func (suite *RouterTestSuite) TestOrganizationPostRoutes() {
 		r := arg.Get(1).(*http.Request)
 		capturedRequestID = r.Header.Get(middleware.RequestIDHeader)
 		w := arg.Get(0).(http.ResponseWriter)
-		w.Write(apitest.AttributionOrgResponse())
+		_, _ = w.Write(apitest.AttributionOrgResponse())
 	})
 
 	router := suite.r(mockOrg, mockMeta)

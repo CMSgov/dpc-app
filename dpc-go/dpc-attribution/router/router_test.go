@@ -63,7 +63,7 @@ func (suite *RouterTestSuite) TestOrganizationGetRoute() {
 		capturedRequestId = r.Header.Get(middleware.RequestIDHeader)
 		w := arg.Get(0).(http.ResponseWriter)
 		b, _ := json.Marshal(suite.fakeOrg)
-		w.Write(b)
+		_, _ = w.Write(b)
 	})
 
 	router := suite.r(mockOrg)
@@ -102,7 +102,7 @@ func (suite *RouterTestSuite) TestOrganizationPostRoute() {
 		capturedRequestId = r.Header.Get(middleware.RequestIDHeader)
 		w := arg.Get(0).(http.ResponseWriter)
 		b, _ := json.Marshal(suite.fakeOrg)
-		w.Write(b)
+		_, _ = w.Write(b)
 	})
 
 	router := suite.r(mockOrg)
