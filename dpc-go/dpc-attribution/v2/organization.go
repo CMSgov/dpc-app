@@ -59,7 +59,6 @@ func (os *OrganizationService) Get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	if _, err := w.Write(orgBytes.Bytes()); err != nil {
 		log.Error(fmt.Sprintf("Failed to write organization to response for organization"), zap.Error(err))
 		boom.Internal(w, err.Error())
@@ -84,7 +83,6 @@ func (os *OrganizationService) Save(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	if _, err := w.Write(orgBytes.Bytes()); err != nil {
 		log.Error(fmt.Sprintf("Failed to write organization to response for organization"), zap.Error(err))
 		boom.Internal(w, err.Error())
