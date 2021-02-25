@@ -1,5 +1,5 @@
 
-    <%= form_for @user, url: internal_user_path(@user), html: { method: :put } do |f| %>
+    <%= form_for @user, url: user_path(@user), html: { method: :put } do |f| %>
 
     <fieldset class="ds-l-row field-group">
       <div class="ds-l-col--9 field-group__fields">
@@ -126,7 +126,7 @@
 
       <div class="ds-l-col--9 field-group__fields ds-u-border--0">
         <%= f.submit "Update user", class: "ds-c-button ds-c-button--primary", data: { test: "user-form-submit" } %>
-        <%= link_to "Cancel", internal_user_path(@user), class: "ds-c-button ds-c-button--transparent" %>
+        <%= link_to "Cancel", user_path(@user), class: "ds-c-button ds-c-button--transparent" %>
       </div>
 
     <% end %>

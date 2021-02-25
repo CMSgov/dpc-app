@@ -10,7 +10,6 @@ import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.converters.FHIREntityConverter;
 import gov.cms.dpc.fhir.converters.exceptions.FHIRConverterException;
 import io.dropwizard.hibernate.UnitOfWork;
-import io.swagger.annotations.*;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Identifier;
@@ -26,7 +25,6 @@ import java.util.stream.Collectors;
 
 import static gov.cms.dpc.attribution.utils.RESTUtils.bulkResourceHandler;
 
-@Api(value = "Patient")
 public class PatientResource extends AbstractPatientResource {
 
     private static final WebApplicationException NOT_FOUND_EXCEPTION = new WebApplicationException("Cannot find patient with given ID", Response.Status.NOT_FOUND);
@@ -42,16 +40,10 @@ public class PatientResource extends AbstractPatientResource {
     @GET
     @FHIR
     @UnitOfWork
-    @ApiOperation(value = "Search for Patients", notes = "Search for Patient records, optionally restricting by associated organization." +
-            "<p>Must provide ONE OF organization ID, patient MBI, or Patient Resource ID to search for", response = Bundle.class)
-    @ApiResponses(@ApiResponse(code = 400, message = "Must have Organization ID or Patient MBI in order to search"))
     @Override
     public List<Patient> searchPatients(
-            @ApiParam(value = "Patient resource ID")
             @QueryParam("_id") UUID resourceID,
-            @ApiParam(value = "Patient MBI")
             @QueryParam("identifier") String patientMBI,
-            @ApiParam(value = "Organization ID")
             @QueryParam("organization") String organizationReference) {
         if (patientMBI == null && organizationReference == null && resourceID == null) {
             throw new WebApplicationException("Must have one of Patient Identifier, Organization Resource ID, or Patient Resource ID", Response.Status.BAD_REQUEST);
@@ -80,11 +72,9 @@ public class PatientResource extends AbstractPatientResource {
     @GET
     @Path("/{patientID}")
     @FHIR
-    @ApiOperation(value = "Fetch Patient", notes = "Fetch specific Patient record, irrespective of managing organization.")
-    @ApiResponses(@ApiResponse(code = 404, message = "Cannot find Patient with given ID"))
     @UnitOfWork
     @Override
-    public Patient getPatient(@ApiParam(value = "Patient resource ID", required = true) @PathParam("patientID") UUID patientID) {
+    public Patient getPatient(@PathParam("patientID") UUID patientID) {
         final PatientEntity patientEntity = this.dao.getPatient(patientID)
                 .orElseThrow(() ->
                         new WebApplicationException("Cannot find patient with given ID", Response.Status.NOT_FOUND));
@@ -95,12 +85,6 @@ public class PatientResource extends AbstractPatientResource {
     @POST
     @FHIR
     @UnitOfWork
-    @ApiOperation(value = "Create Patient", notes = "Create a Patient record associated to the Organization listed in the *ManagingOrganization* field. " +
-            "If a patient record already exists, a `200` status is returned, along with the existing record.")
-    @ApiResponses(value = {
-            @ApiResponse(code = 201, message = "Successfully created Patient"),
-            @ApiResponse(code = 200, message = "Patient already exists")
-    })
     @Override
     public Response createPatient(Patient patient) {
         try {
@@ -131,7 +115,6 @@ public class PatientResource extends AbstractPatientResource {
     @Path("/$submit")
     @FHIR
     @UnitOfWork
-    @ApiOperation(value = "Bulk submit Patient resources", notes = "FHIR operation for submitting a Bundle of Patient resources, which will be associated to the given Organization.", response = Bundle.class)
     @BundleReturnProperties(bundleType = Bundle.BundleType.COLLECTION)
     @Override
     public List<Patient> bulkSubmitPatients(Parameters params) {
@@ -142,10 +125,8 @@ public class PatientResource extends AbstractPatientResource {
     @Path("/{patientID}")
     @FHIR
     @UnitOfWork
-    @ApiOperation(value = "Delete Patient", notes = "Remove specific Patient record")
-    @ApiResponses(@ApiResponse(code = 404, message = "Unable to find Patient to delete"))
     @Override
-    public Response deletePatient(@ApiParam(value = "Patient resource ID", required = true) @PathParam("patientID") UUID patientID) {
+    public Response deletePatient(@PathParam("patientID") UUID patientID) {
         final boolean found = this.dao.deletePatient(patientID);
 
         if (!found) {
@@ -159,14 +140,8 @@ public class PatientResource extends AbstractPatientResource {
     @Path("/{patientID}")
     @FHIR
     @UnitOfWork
-    @ApiOperation(value = "Update Patient record", notes = "Update specific Patient record." +
-            "<p>Currently, this method only allows for updating of the Patient first/last name, and BirthDate.")
-    @ApiResponses({
-            @ApiResponse(code = 404, message = "Unable to find Patient to update"),
-            @ApiResponse(code = 422, message = "Submitted resource is not a valid Patient")
-    })
     @Override
-    public Response updatePatient(@ApiParam(value = "Patient resource ID", required = true) @PathParam("patientID") UUID patientID, Patient patient) {
+    public Response updatePatient(@PathParam("patientID") UUID patientID, Patient patient) {
         try {
             final PatientEntity patientEntity = this.dao.updatePatient(patientID, this.converter.fromFHIR(PatientEntity.class, patient));
 
