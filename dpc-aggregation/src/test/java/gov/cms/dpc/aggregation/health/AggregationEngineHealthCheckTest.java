@@ -10,6 +10,7 @@ import gov.cms.dpc.aggregation.dao.RosterDAO;
 import gov.cms.dpc.aggregation.engine.AggregationEngine;
 import gov.cms.dpc.aggregation.engine.JobBatchProcessor;
 import gov.cms.dpc.aggregation.engine.OperationsConfig;
+import gov.cms.dpc.aggregation.service.ConsentService;
 import gov.cms.dpc.aggregation.service.LookBackServiceImpl;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
@@ -48,6 +49,7 @@ public class AggregationEngineHealthCheckTest {
     private IJobQueue queue;
     private BlueButtonClient bbclient;
     private AggregationEngine engine;
+    private ConsentService consentService;
 
     static private final FhirContext fhirContext = FhirContext.forDstu3();
     static private final MetricRegistry metricRegistry = new MetricRegistry();
@@ -68,7 +70,7 @@ public class AggregationEngineHealthCheckTest {
         bbclient = Mockito.spy(new MockBlueButtonClient(fhirContext));
         var operationalConfig = new OperationsConfig(1000, exportPath, 500, YearMonth.of(2015, 3));
         LookBackServiceImpl lookBackService = Mockito.spy(new LookBackServiceImpl(Mockito.mock(ProviderDAO.class), Mockito.mock(RosterDAO.class), Mockito.mock(OrganizationDAO.class), operationalConfig));
-        JobBatchProcessor jobBatchProcessor = Mockito.spy(new JobBatchProcessor(bbclient, fhirContext, metricRegistry, operationalConfig, lookBackService));
+        JobBatchProcessor jobBatchProcessor = Mockito.spy(new JobBatchProcessor(bbclient, fhirContext, metricRegistry, operationalConfig, lookBackService, consentService));
         engine = Mockito.spy(new AggregationEngine(aggregatorID, queue, operationalConfig, jobBatchProcessor));
         AggregationEngine.setGlobalErrorHandler();
     }

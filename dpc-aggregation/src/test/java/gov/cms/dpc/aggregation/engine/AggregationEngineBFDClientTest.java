@@ -7,6 +7,8 @@ import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.IUntypedQuery;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.net.HttpHeaders;
+import gov.cms.dpc.aggregation.service.ConsentResult;
+import gov.cms.dpc.aggregation.service.ConsentService;
 import gov.cms.dpc.aggregation.service.LookBackService;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.bluebutton.client.BlueButtonClientImpl;
@@ -18,6 +20,7 @@ import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.MemoryBatchQueue;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import org.assertj.core.api.Assertions;
+import org.assertj.core.util.Lists;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -31,9 +34,7 @@ import org.mockito.Mockito;
 import java.nio.file.Path;
 import java.security.GeneralSecurityException;
 import java.time.YearMonth;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -48,6 +49,7 @@ public class AggregationEngineBFDClientTest {
 
     private final IGenericClient bbClient = Mockito.mock(IGenericClient.class);
     private final LookBackService lookBackService = Mockito.mock(LookBackService.class);
+    private final ConsentService mockConsentService = Mockito.mock(ConsentService.class);
 
     private AggregationEngine engine;
     private IJobQueue queue;
@@ -57,12 +59,18 @@ public class AggregationEngineBFDClientTest {
     public void setup() throws GeneralSecurityException {
         BlueButtonClient blueButtonClient = Mockito.spy(new BlueButtonClientImpl(bbClient, new BBClientConfiguration(), metricRegistry));
         OperationsConfig config = new OperationsConfig(1000, tempDir.toString(), 1, 1, 1, YearMonth.now(), List.of(orgID.toString()));
-        JobBatchProcessor processor = new JobBatchProcessor(blueButtonClient, fhirContext, metricRegistry, config, lookBackService);
+        JobBatchProcessor processor = new JobBatchProcessor(blueButtonClient, fhirContext, metricRegistry, config, lookBackService, mockConsentService);
         queue = new MemoryBatchQueue(100);
         engine = new AggregationEngine(UUID.randomUUID(), queue, config, processor);
         engine.queueRunning.set(true);
 
         Mockito.when(blueButtonClient.hashMbi(Mockito.anyString())).thenReturn(MockBlueButtonClient.MBI_HASH_MAP.get(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0)));
+        ConsentResult consentResult = new ConsentResult();
+        consentResult.setConsentDate(new Date());
+        consentResult.setActive(true);
+        consentResult.setPolicyType(ConsentResult.PolicyType.OPT_IN);
+        consentResult.setConsentId(UUID.randomUUID().toString());
+        Mockito.when(mockConsentService.getConsent(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0))).thenReturn(Optional.of(Lists.list(consentResult)));
     }
 
     @Test
