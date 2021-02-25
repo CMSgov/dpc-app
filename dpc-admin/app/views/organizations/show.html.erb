@@ -3,7 +3,7 @@
 
 <div class="ds-l-container ds-u-padding-x--0">
   <div>
-    <%= link_to internal_organizations_path, class: "utility-button" do %>
+    <%= link_to organizations_path, class: "utility-button" do %>
       <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
         <use xlink:href="/assets/solid.svg#arrow-left"></use>
       </svg>
@@ -15,7 +15,7 @@
   <section class="ds-u-display--flex ds-u-justify-content--between ds-u-align-items--center">
     <h1 class="ds-u-font-size--title ds-u-font-weight--normal ds-u-margin--0"><%=  @organization.name %></h1>
     <div>
-      <%= link_to "Edit organization", edit_internal_organization_url(@organization), class: "ds-c-button ds-c-button--primary", data: { test: "edit-link" } %>
+      <%= link_to "Edit organization", edit_organization_url(@organization), class: "ds-c-button ds-c-button--primary", data: { test: "edit-link" } %>
     </div>
   </section>
 
@@ -74,7 +74,7 @@
             <p>No tags have been assigned to <%= @organization.name %>.</p>
           <% else %>
             <% @organization.taggings.each do |tagging| %>
-              <%= link_to(internal_tagging_url(tagging), class: "site-pills__item__button dashboard__pills--delete", method: :delete, data: {test: "delete-tag-#{tagging.id}"}) do %>
+              <%= link_to(tagging_url(tagging), class: "site-pills__item__button dashboard__pills--delete", method: :delete, data: {test: "delete-tag-#{tagging.id}"}) do %>
                 <span class="site-pills__item site-pills__item--small">
                   <%= tagging.tag_name %>
                 </span>
@@ -90,7 +90,7 @@
           <% else %>
             <% @tags.each do |tag| %>
               <div class="site-pills__item__button dashboard__pills--add">
-                <%= form_for Tagging.new, url: internal_taggings_path, html: { method: :post } do |f| %>
+                <%= form_for Tagging.new, url: taggings_path, html: { method: :post } do |f| %>
                   <%= f.hidden_field :tag_id, value: tag.id %>
                   <%= f.hidden_field :taggable_id, value: @organization.id %>
                   <%= f.hidden_field :taggable_type, value: 'Organization' %>
@@ -148,11 +148,11 @@
           Status: <%= @organization.registered_organization.fhir_endpoint.status.titleize %>
         </div>
 
-        <%= link_to "Edit", edit_internal_organization_registered_organization_path(
+        <%= link_to "Edit", edit_organization_registered_organization_path(
           organization_id: @organization.id,
           id: @organization.registered_organization.id
           ) %>
-        <%= link_to "Disable Organization", internal_organization_registered_organization_enable_or_disable_url(
+        <%= link_to "Disable Organization", organization_registered_organization_enable_or_disable_url(
           registered_organization_id: @organization.registered_organization.id,
           organization_id: @organization.id), data: { test: 'disable-org' } %>
       <% else %>
@@ -160,11 +160,11 @@
         <p class="ds-text--lead ds-u-measure--wide ds-u-margin-top--2">Users cannot create client tokens or add public keys until the organization is enabled in the API.</p>
         <% if @organization.reg_org.nil? %>
           <%= link_to 'Enable Organization',
-                      new_internal_organization_registered_organization_path(organization_id: @organization.id),
+                      new_organization_registered_organization_path(organization_id: @organization.id),
                       data: { test: 'enable-org' } %>
         <% else %>
           <%= link_to 'Enable Organization',
-                      internal_organization_registered_organization_enable_or_disable_url(
+                      organization_registered_organization_enable_or_disable_url(
                         registered_organization_id: @organization.registered_organization.id,
                         organization_id: @organization.id),
                       data: { test: 'enable-org' } %>
@@ -219,11 +219,11 @@
           </div>
           <div class="module-container__primary">
             <h2 class="module-container__heading">
-              <%= link_to user.name, internal_user_url(user) %>
+              <%= link_to user.name, user_url(user) %>
             </h2>
           </div>
           <div class="module-container__button">
-            <%= form_for @organization, url: internal_organization_add_or_delete_url(@organization, user), method: :delete do |f| %>
+            <%= form_for @organization, url: organization_add_or_delete_url(@organization, user), method: :delete do |f| %>
               <%= f.hidden_field :id, value: user.id %>
               <%= f.submit "Remove", class: "ds-c-button ds-c-button--danger" %>
             <% end %>
@@ -235,6 +235,6 @@
 
 <section class="ds-u-margin--2">
   <div class="ds-l-row ds-u-justify-content--center">
-    <%= link_to "Delete organization", internal_organization_url(@organization), data: { confirm: 'Deleting this organization will not delete the organization, client tokens, or public keys in the API.' }, method: :delete, class: "ds-u-color--error ds-u-text-align--center" %>
+    <%= link_to "Delete organization", organization_url(@organization), data: { confirm: 'Deleting this organization will not delete the organization, client tokens, or public keys in the API.' }, method: :delete, class: "ds-u-color--error ds-u-text-align--center" %>
   </div>
 </section>
