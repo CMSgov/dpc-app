@@ -3,6 +3,7 @@ package gov.cms.dpc.api.resources.v1;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import ca.uhn.fhir.rest.gclient.IReadExecutable;
 import ca.uhn.fhir.rest.gclient.IUpdateExecutable;
 import ca.uhn.fhir.rest.param.StringParam;
@@ -10,6 +11,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.OffsetDateTime;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import gov.cms.dpc.api.APITestHelpers;
@@ -42,6 +44,7 @@ import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
 import java.sql.Date;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -60,6 +63,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
 
     final IParser parser = ctx.newJsonParser();
     final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
+    final IGenericClient consentClient = APITestHelpers.buildConsentClient(ctx);
 
     PatientResourceTest() {
         // Not used
@@ -436,6 +440,33 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
+    @Order(8)
+    void testPatientEverythingForOptedOutPatient() throws IOException, URISyntaxException, GeneralSecurityException {
+        IGenericClient client = generateClient(ORGANIZATION_ID, ORGANIZATION_NPI, "patient-everything-key-3");
+        APITestHelpers.setupPractitionerTest(client, parser);
+
+        String mbi = MockBlueButtonClient.TEST_PATIENT_MBIS.get(3);
+        Patient patient = fetchPatient(client, mbi);
+        Practitioner practitioner = fetchPractitionerByNPI(client, "1234329724");
+        final String patientId = FHIRExtractors.getEntityUUID(patient.getId()).toString();
+
+        optOutPatient(mbi);
+
+        IOperationUntypedWithInput<Bundle> getEverythingOperation = client
+                .operation()
+                .onInstance(new IdType("Patient", patientId))
+                .named("$everything")
+                .withNoParameters(Parameters.class)
+                .returnResourceType(Bundle.class)
+                .useHttpGet()
+                .withAdditionalHeader("X-Provenance", generateProvenance(ORGANIZATION_ID, practitioner.getId()));
+
+
+        InternalErrorException exception = assertThrows(InternalErrorException.class, () -> getEverythingOperation.execute(), "Expected Internal server error when retrieving opted out patient.");
+        assertTrue(exception.getResponseBody().contains("\"text\":\"Data not available for opted out patient\""), "Incorrect or missing operation outcome in response body.");
+    }
+
+    @Test
     public void tesGetPatientByUUID() throws GeneralSecurityException, IOException, URISyntaxException {
         final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
         final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
@@ -557,6 +588,34 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
                 .encodedJson()
                 .execute();
         return (Practitioner) methodOutcome.getResource();
+    }
+
+    private void optOutPatient(String mbi){
+        Consent consent = new Consent();
+        consent.setStatus(Consent.ConsentState.ACTIVE);
+
+        Coding categoryCoding = new Coding("http://loinc.org","64292-6", null);
+        CodeableConcept category = new CodeableConcept();
+        category.setCoding(List.of(categoryCoding));
+        consent.setCategory(List.of(category));
+
+        String patientRefPath = "/Patient?identity=|"+mbi;
+        consent.setPatient(new Reference("http://api.url" + patientRefPath));
+
+        java.util.Date date = java.util.Date.from(Instant.now());
+        consent.setDateTime(date);
+
+        Reference orgRef = new Reference("Organization/" + UUID.randomUUID().toString());
+        consent.setOrganization(List.of(orgRef));
+
+        String policyUrl = "http://hl7.org/fhir/ConsentPolicy/opt-out";
+        consent.setPolicyRule(policyUrl);
+
+       consentClient
+                .create()
+                .resource(consent)
+                .encodedJson()
+                .execute();
     }
 
 }
