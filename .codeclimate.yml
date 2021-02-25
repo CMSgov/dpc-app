@@ -45,8 +45,9 @@ plugins:
     channel: rubocop-0-83
     config:
       file: "dpc-web/.rubocop.yml"
+  # Bookmarking to enable govet when issue fixed with false dependency errors
   govet:
-    enabled: true
+    enabled: false
   gofmt:
     enabled: true
   golint:
