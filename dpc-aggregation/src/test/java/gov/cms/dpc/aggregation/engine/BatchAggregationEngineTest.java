@@ -4,9 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.PerformanceOptionsEnum;
 import com.codahale.metrics.MetricRegistry;
 import com.typesafe.config.ConfigFactory;
-import gov.cms.dpc.aggregation.service.EveryoneGetsDataLookBackServiceImpl;
-import gov.cms.dpc.aggregation.service.LookBackAnswer;
-import gov.cms.dpc.aggregation.service.LookBackService;
+import gov.cms.dpc.aggregation.service.*;
 import gov.cms.dpc.aggregation.util.AggregationUtils;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
 import gov.cms.dpc.common.utils.NPIUtil;
@@ -18,6 +16,7 @@ import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatchFile;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import io.reactivex.disposables.Disposable;
+import org.assertj.core.util.Lists;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.junit.jupiter.api.BeforeAll;
@@ -31,10 +30,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.YearMonth;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static gov.cms.dpc.aggregation.service.LookBackAnalyzer.*;
@@ -48,6 +44,7 @@ class BatchAggregationEngineTest {
     private IJobQueue queue;
     private AggregationEngine engine;
     private LookBackService lookBackService;
+    private ConsentService consentService;
 
     static private final FhirContext fhirContext = FhirContext.forDstu3();
     static private final MetricRegistry metricRegistry = new MetricRegistry();
@@ -62,19 +59,33 @@ class BatchAggregationEngineTest {
         operationsConfig = new OperationsConfig(10, exportPath, 3, YearMonth.of(2015, 3));
         AggregationEngine.setGlobalErrorHandler();
         ContextUtils.prefetchResourceModels(fhirContext, JobQueueBatch.validResourceTypes);
+
+        ConsentResult consentResult = new ConsentResult();
+        consentResult.setConsentDate(new Date());
+        consentResult.setActive(true);
+        consentResult.setPolicyType(ConsentResult.PolicyType.OPT_IN);
+        consentResult.setConsentId(UUID.randomUUID().toString());
     }
 
     @BeforeEach
     void setupEach() {
+        consentService = Mockito.mock(ConsentService.class);
         queue = new MemoryBatchQueue(100);
         final var bbclient = Mockito.spy(new MockBlueButtonClient(fhirContext));
         lookBackService = Mockito.spy(EveryoneGetsDataLookBackServiceImpl.class);
-        JobBatchProcessor jobBatchProcessor = Mockito.spy(new JobBatchProcessor(bbclient, fhirContext, metricRegistry, operationsConfig, lookBackService));
+        JobBatchProcessor jobBatchProcessor = Mockito.spy(new JobBatchProcessor(bbclient, fhirContext, metricRegistry, operationsConfig, lookBackService, consentService));
         engine = Mockito.spy(new AggregationEngine(aggregatorID, queue, operationsConfig, jobBatchProcessor));
         engine.queueRunning.set(true);
         Disposable subscribe = Mockito.mock(Disposable.class);
         doReturn(false).when(subscribe).isDisposed();
         engine.setSubscribe(subscribe);
+
+        ConsentResult consentResult = new ConsentResult();
+        consentResult.setConsentDate(new Date());
+        consentResult.setActive(true);
+        consentResult.setPolicyType(ConsentResult.PolicyType.OPT_IN);
+        consentResult.setConsentId(UUID.randomUUID().toString());
+        MockBlueButtonClient.TEST_PATIENT_MBIS.forEach(mbi -> Mockito.when(consentService.getConsent(mbi)).thenReturn(Optional.of(Lists.list(consentResult))));
     }
 
     /**
