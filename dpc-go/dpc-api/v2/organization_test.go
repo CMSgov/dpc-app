@@ -202,6 +202,7 @@ func (suite *OrganizationControllerTestSuite) TestCreateOrganization() {
 
 	w := httptest.NewRecorder()
 	suite.org.Create(w, req)
+
 	res := w.Result()
 
 	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)

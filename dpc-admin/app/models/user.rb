@@ -21,7 +21,7 @@ class User < ApplicationRecord
   enum requested_organization_type: ORGANIZATION_TYPES
 
   validates :requested_organization_type, inclusion: { in: ORGANIZATION_TYPES.keys }
-  validates :email, presence: true
+  validates :email, presence: true, domain_exists: true
   validates :last_name, :first_name, presence: true
 
   scope :assigned, -> do
