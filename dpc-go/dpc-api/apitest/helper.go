@@ -49,13 +49,18 @@ const Orgjson = `{
     ]
   }`
 
+// AttributionOrgResponse provides a sample organization response that mimics what attribution service returns for testing purposes
+func AttributionOrgResponse() []byte {
+	return AttributionResponse(Orgjson)
+}
+
 // AttributionResponse provides a sample response that mimics what attribution service returns for testing purposes
-func AttributionResponse() []byte {
+func AttributionResponse(fhir string) []byte {
 	r := model.Resource{}
 	_ = faker.FakeData(&r)
 
 	var v map[string]interface{}
-	_ = json.Unmarshal([]byte(Orgjson), &v)
+	_ = json.Unmarshal([]byte(fhir), &v)
 	r.Info = v
 	b, _ := json.Marshal(r)
 	return b

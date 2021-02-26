@@ -20,6 +20,8 @@ func NewDPCAPIRouter(oc v2.Controller, mc v2.ReadController) http.Handler {
 			r.Route("/{organizationID}", func(r chi.Router) {
 				r.Use(v2.OrganizationCtx)
 				r.With(middleware2.FHIRModel).Get("/", oc.Read)
+				r.Delete("/", oc.Delete)
+				r.With(middleware2.FHIRModel).Put("/", oc.Update)
 			})
 			r.With(middleware2.FHIRModel).Post("/", oc.Create)
 		})
