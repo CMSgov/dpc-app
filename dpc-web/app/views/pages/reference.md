@@ -1854,9 +1854,13 @@ Additional instructions and details can be found within the description of each 
 
 ## Patient/$everything
 
-Patient/<span style="color: #046B99;">{id}</span>/$everything is an endpoint that allows users to retrieve all resources about a Patient using their Medicare Beneficiary Identifier (MBI), represented as {id} in the request. Included in the resources will be the Patient, Coverage, and ExplanationOfBenefit resources for one patient’s historical data from the last seven years, combined into a Bundle. It is a synchronous download, so it differs from the Group $export operation in that it does not create a job that needs to be monitored or data files to download. The response body will contain the Bundle.
+Patient/<span style="color: #046B99;">{id}</span>/$everything is an endpoint that allows users to retrieve all resources about a Patient using their DPC internal ID (UUID), represented as {id} in the request. Included in the resources will be the Patient, Coverage, and ExplanationOfBenefit resources for one patient’s historical data from the last seven years, combined into a Bundle. It is a synchronous download, so it differs from the Group $export operation in that it does not create a job that needs to be monitored or data files to download. The response body will contain the Bundle.
 
-The request requires an `X-Provenance` header for attestation ([see example](example-attestation-for-x-provenance-header)).
+If you only have the Medicare Beneficiary Identifier (MBI) of the patient, you can retrieve the DPC internal ID by first making a GET request for that specific patient as the UUID is returned in that response. See [List a Specific Patient](#list-a-specific-patient) for details.
+
+A [Patient](#add-a-patient) record must already exist in the DPC database to successfully complete your Patient/$everything request; however, the patient does not need to belong to a group.
+
+This request requires an X-Provenance header for attestation ([see example](#example-attestation-for-x-provenance-header)).
 
 Learn more about the HL7 FHIR Specification for:
 

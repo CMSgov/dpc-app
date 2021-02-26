@@ -182,8 +182,8 @@ public class PatientResource extends AbstractPatientResource {
     public Bundle everything(@ApiParam(hidden = true) @Auth OrganizationPrincipal organization,
                              @Valid @Profiled(profile = AttestationProfile.PROFILE_URI) @ProvenanceHeader Provenance provenance,
                              @ApiParam(value = "Patient resource ID", required = true) @PathParam("patientID") UUID patientId,
+                             @QueryParam("_since") @NoHtml String sinceParam,
                              @Context HttpServletRequest request) {
-
         final Provenance.ProvenanceAgentComponent performer = FHIRExtractors.getProvenancePerformer(provenance);
         final UUID practitionerId = FHIRExtractors.getEntityUUID(performer.getOnBehalfOfReference().getReference());
         Practitioner practitioner = this.client
@@ -198,11 +198,12 @@ public class PatientResource extends AbstractPatientResource {
         }
 
         final Patient patient = getPatient(patientId);
+        final var since = handleSinceQueryParam(sinceParam);
         final String patientMbi = FHIRExtractors.getPatientMBI(patient);
         final UUID orgId = organization.getID();
 
         final String requestingIP = APIHelpers.fetchRequestingIP(request);
-        Resource result = dataService.retrieveData(orgId, practitionerId, List.of(patientMbi), APIHelpers.fetchTransactionTime(bfdClient),
+        Resource result = dataService.retrieveData(orgId, practitionerId, List.of(patientMbi), since, APIHelpers.fetchTransactionTime(bfdClient),
                 requestingIP, ResourceType.Patient, ResourceType.ExplanationOfBenefit, ResourceType.Coverage);
         if (ResourceType.Bundle.equals(result.getResourceType())) {
             return (Bundle) result;

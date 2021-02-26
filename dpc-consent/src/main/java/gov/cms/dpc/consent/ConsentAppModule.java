@@ -23,8 +23,4 @@ class ConsentAppModule extends DropwizardAwareModule<DPCConsentConfiguration> {
     @Provides
     @Named("fhirReferenceURL")
     public String provideFhirReferenceURL() { return getConfiguration().getFhirReferenceURL(); }
-
-    @Provides
-    @Named("consentOrganizationURL")
-    public String provideConsentOrganizationURL() { return getConfiguration().getConsentOrganizationURL(); }
 }

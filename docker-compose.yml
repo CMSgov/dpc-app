@@ -26,6 +26,7 @@ services:
       - JACOCO=${REPORT_COVERAGE}
     depends_on:
       - db
+      - consent
     volumes:
       - export-volume:/app/data
       - ./jacocoReport/dpc-aggregation:/jacoco-report
