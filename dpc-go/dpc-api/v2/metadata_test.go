@@ -12,7 +12,7 @@ import (
 
 type MetadataControllerTestSuite struct {
 	suite.Suite
-	meta *metadataController
+	meta *MetadataController
 }
 
 func (suite *MetadataControllerTestSuite) SetupTest() {

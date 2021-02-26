@@ -33,7 +33,7 @@ func (ac *MockAttributionClient) Post(ctx context.Context, resourceType client.R
 
 type OrganizationControllerTestSuite struct {
 	suite.Suite
-	org *organizationController
+	org *OrganizationController
 	mac *MockAttributionClient
 }
 
