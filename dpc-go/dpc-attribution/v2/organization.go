@@ -35,21 +35,14 @@ type organizationService struct {
 	repo repository.OrganizationRepo
 }
 
-/*
-   NewOrganizationService
-   function that creates a organization service and returns it's reference
-
-*/
+// NewOrganizationService function that creates a organization service and returns it's reference
 func NewOrganizationService(repo repository.OrganizationRepo) *organizationService {
 	return &organizationService{
 		repo,
 	}
 }
 
-/*
-   Get
-   function that get the organization from the database by id and logs any errors before returning a generic error
-*/
+// Get function that get the organization from the database by id and logs any errors before returning a generic error
 func (os *organizationService) Get(w http.ResponseWriter, r *http.Request) {
 	log := logger.WithContext(r.Context())
 	organizationID, ok := r.Context().Value(ContextKeyOrganization).(string)
@@ -79,10 +72,7 @@ func (os *organizationService) Get(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-/*
-   Save
-   function that saves the organization to the database and logs any errors before returning a generic error
-*/
+// Save function that saves the organization to the database and logs any errors before returning a generic error
 func (os *organizationService) Save(w http.ResponseWriter, r *http.Request) {
 	log := logger.WithContext(r.Context())
 	body, _ := ioutil.ReadAll(r.Body)

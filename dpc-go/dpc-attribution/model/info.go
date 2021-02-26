@@ -9,19 +9,13 @@ import (
 // Info is a type used to model the jsonb column in the organization table
 type Info map[string]interface{}
 
-/*
-   Value
-   function used by the db to convert the Info map into jsonb
-*/
+// Value function used by the db to convert the Info map into jsonb
 func (i Info) Value() (driver.Value, error) {
 	info, err := json.Marshal(i)
 	return info, err
 }
 
-/*
-   Scan
-   function used by the db Scan to convert the db row into Info type
-*/
+// Scan function used by the db Scan to convert the db row into Info type
 func (i *Info) Scan(src interface{}) error {
 	source, ok := src.([]byte)
 	if !ok {

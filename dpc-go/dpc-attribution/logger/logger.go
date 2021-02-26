@@ -41,31 +41,22 @@ func init() {
 	}
 }
 
-/*
-   SetLogger
-   function to allow the ability to override the logger
-*/
+// SetLogger function to allow the ability to override the logger
 func SetLogger(l *zap.Logger) {
 	logger = l
 }
 
+// SyncLogger function calls zap logger sync
 func SyncLogger() error {
 	return logger.Sync()
 }
 
-/*
-   NewContext
-   function to create a context that holds a zap logger with zap fields
-*/
+// NewContext function to create a context that holds a zap logger with zap fields
 func NewContext(ctx context.Context, fields ...zap.Field) context.Context {
 	return context.WithValue(ctx, LoggerKey, WithContext(ctx).With(fields...))
 }
 
-/*
-   WithContext
-   function to retrieve the logger from the context if in the context or return the logger if not found in
-   the context
-*/
+// WithContext function to retrieve the logger from the context if in the context or return the logger if not found in the context
 func WithContext(ctx context.Context) *zap.Logger {
 	if ctx == nil {
 		return logger

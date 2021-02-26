@@ -91,10 +91,7 @@ func (ac *AttributionClient) Get(ctx context.Context, resourceType ResourceType,
 	return body, nil
 }
 
-/*
-   Post
-   A function to enable communication with attribution service via Post
-*/
+// Post A function to enable communication with attribution service via Post
 func (ac *AttributionClient) Post(ctx context.Context, resourceType ResourceType, body []byte) ([]byte, error) {
 	log := logger.WithContext(ctx)
 	ac.httpClient.Logger = newLogger(*log)

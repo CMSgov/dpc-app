@@ -21,10 +21,7 @@ type contextKey int
 // ContextKeyOrganization is the key in the context to retrieve the organizationID
 const ContextKeyOrganization contextKey = iota
 
-/*
-   OrganizationCtx
-   middleware to extract the organizationID from the chi url param and set it into the request context
-*/
+// OrganizationCtx middleware to extract the organizationID from the chi url param and set it into the request context
 func OrganizationCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		organizationID := chi.URLParam(r, "organizationID")
@@ -37,21 +34,14 @@ type organizationController struct {
 	ac client.Client
 }
 
-/*
-   NewOrganizationController
-   function that creates a organization controller and returns it's reference
-
-*/
+// NewOrganizationController function that creates a organization controller and returns it's reference
 func NewOrganizationController(ac client.Client) *organizationController {
 	return &organizationController{
 		ac,
 	}
 }
 
-/*
-   Read
-   function that calls attribution service via get to return the organization specified by organizationID
-*/
+// Read function that calls attribution service via get to return the organization specified by organizationID
 func (oc *organizationController) Read(w http.ResponseWriter, r *http.Request) {
 	organizationID, ok := r.Context().Value(ContextKeyOrganization).(string)
 	log := logger.WithContext(r.Context())
@@ -74,10 +64,7 @@ func (oc *organizationController) Read(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-/*
-   Create
-   function that calls attribution service via post to save an organization into attribution service
-*/
+// Create function that calls attribution service via post to save an organization into attribution service
 func (oc *organizationController) Create(w http.ResponseWriter, r *http.Request) {
 	body, _ := ioutil.ReadAll(r.Body)
 	log := logger.WithContext(r.Context())

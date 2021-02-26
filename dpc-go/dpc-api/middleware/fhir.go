@@ -12,38 +12,26 @@ import (
 	"net/http"
 )
 
-/*
-   responseWriter has the ability to store the bytes written to be later retrieved
-*/
 type responseWriter struct {
 	http.ResponseWriter
 	buf    *bytes.Buffer
 	Status int
 }
 
-/*
-   Write
-   function to implement the http.ResponseWriter interface
-*/
+// Write function to implement the http.ResponseWriter interface
 func (rw *responseWriter) Write(p []byte) (int, error) {
 	return rw.buf.Write(p)
 }
 
-/*
-   WriteHeader
-   function that wraps the underlying http.ResponseWriter to hold the status
-*/
+// WriteHeader function that wraps the underlying http.ResponseWriter to hold the status
 func (rw *responseWriter) WriteHeader(status int) {
 	rw.Status = status
 	rw.ResponseWriter.WriteHeader(status)
 }
 
-/*
-   FHIRModel
-   function that intercepts the bytes being returned from the response
-   if the response is successful, then the expected data is in the format of
-   model.Resource where this will convert it into the appropriate FHIR object
-*/
+// FHIRModel function that intercepts the bytes being returned from the response
+// if the response is successful, then the expected data is in the format of
+// model.Resource where this will convert it into the appropriate FHIR object
 func FHIRModel(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log := logger.WithContext(r.Context())

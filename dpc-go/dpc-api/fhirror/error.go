@@ -9,34 +9,22 @@ import (
 	"net/http"
 )
 
-/*
-   GenericServerIssue
-   Write a generic 500 server error OperationOutcome to the response
-*/
+// GenericServerIssue Write a generic 500 server error OperationOutcome to the response
 func GenericServerIssue(ctx context.Context, w http.ResponseWriter) {
 	fhirError(ctx, w, http.StatusInternalServerError, fhir.IssueSeverityError, fhir.IssueTypeException, "Internal Server Error")
 }
 
-/*
-   ServerIssue
-   Write a generic Error/Exception OperationOutcome to the response
-*/
+// ServerIssue Write a generic Error/Exception OperationOutcome to the response
 func ServerIssue(ctx context.Context, w http.ResponseWriter, statusCode int, message string) {
 	fhirError(ctx, w, statusCode, fhir.IssueSeverityError, fhir.IssueTypeException, message)
 }
 
-/*
-   NotFound
-   Write a specific not found OperationOutcome to the response
-*/
+// NotFound Write a specific not found OperationOutcome to the response
 func NotFound(ctx context.Context, w http.ResponseWriter, message string) {
 	fhirError(ctx, w, http.StatusNotFound, fhir.IssueSeverityWarning, fhir.IssueTypeNotFound, message)
 }
 
-/*
-   BusinessViolation
-   Write a generic business rule OperationOutcome to the response
-*/
+// BusinessViolation Write a generic business rule OperationOutcome to the response
 func BusinessViolation(ctx context.Context, w http.ResponseWriter, statusCode int, message string) {
 	fhirError(ctx, w, statusCode, fhir.IssueSeverityWarning, fhir.IssueTypeBusinessRule, message)
 }

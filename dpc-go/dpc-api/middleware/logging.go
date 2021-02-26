@@ -9,11 +9,8 @@ import (
 	"net/http"
 )
 
-/*
-   Logging
-   function to return a chain of predefined middleware (chi.RequestID & custom request/response logging)
-   This middleware wil ensure the logs contain the rqId (correlation) and logs the beginning and end of the request
-*/
+// Logging function to return a chain of predefined middleware (chi.RequestID & custom request/response logging)
+// This middleware wil ensure the logs contain the rqId (correlation) and logs the beginning and end of the request
 func Logging() func(next http.Handler) http.Handler {
 	lh := func(next http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {

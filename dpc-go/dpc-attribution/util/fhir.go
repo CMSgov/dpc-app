@@ -16,18 +16,12 @@ type IdentifierContainer struct {
 	Identifier []identifier `json:"identifier"`
 }
 
-/*
-   GetNPI
-   function that returns the identifier value associated with the npi system
-*/
+// GetNPI function that returns the identifier value associated with the npi system
 func GetNPI(fhirModel []byte) (string, error) {
 	return GetIdentifier(fhirModel, "http://hl7.org/fhir/sid/us-npi")
 }
 
-/*
-   GetIdentifier
-   function that returns the identifier value associated with the system
-*/
+// GetIdentifier function that returns the identifier value associated with the system
 func GetIdentifier(fhirModel []byte, system string) (string, error) {
 	var r IdentifierContainer
 	err := json.Unmarshal(fhirModel, &r)

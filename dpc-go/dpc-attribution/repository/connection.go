@@ -11,10 +11,7 @@ import (
 	"os"
 )
 
-/*
-   GetDbConnection
-   function that sets up the db connection and returns the db struct
-*/
+// GetDbConnection function that sets up the db connection and returns the db struct
 func GetDbConnection() *sql.DB {
 	log := logger.WithContext(context.Background())
 	dbURL, found := os.LookupEnv("ATTRIBUTION_DB_URL")

@@ -23,21 +23,14 @@ type organizationRepository struct {
 	db *sql.DB
 }
 
-/*
-   NewOrganizationRepo
-   function that creates a organizationRepository and returns it's reference
-
-*/
+// NewOrganizationRepo function that creates a organizationRepository and returns it's reference
 func NewOrganizationRepo(db *sql.DB) *organizationRepository {
 	return &organizationRepository{
 		db,
 	}
 }
 
-/*
-   FindByID
-   function that searches the database for the organizaiton that matches the id
-*/
+// FindByID function that searches the database for the organizaiton that matches the id
 func (or *organizationRepository) FindByID(ctx context.Context, id string) (*model.Organization, error) {
 	sb := sqlFlavor.NewSelectBuilder()
 	sb.Select("id", "version", "created_at", "updated_at", "info")
@@ -53,10 +46,7 @@ func (or *organizationRepository) FindByID(ctx context.Context, id string) (*mod
 	return org, nil
 }
 
-/*
-   Insert
-   function that saves the fhir model into the database and returns the model.Organization
-*/
+// Insert function that saves the fhir model into the database and returns the model.Organization
 func (or *organizationRepository) Insert(ctx context.Context, body []byte) (*model.Organization, error) {
 
 	var info model.Info

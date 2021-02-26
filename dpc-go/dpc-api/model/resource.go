@@ -14,26 +14,17 @@ type Resource struct {
 	updatedAt time.Time
 }
 
-/*
-   ResourceType
-   function to return the resource type of the underlying fhir model
-*/
+// ResourceType function to return the resource type of the underlying fhir model
 func (r *Resource) ResourceType() string {
 	return r.Info["resourceType"].(string)
 }
 
-/*
-   VersionId
-   function to return the version id as a string
-*/
+// VersionId function to return the version id as a string
 func (r *Resource) VersionId() string {
 	return strconv.Itoa(r.version)
 }
 
-/*
-   LastUpdated
-   function to return the updatedAt field from attribution into a fhir date time format
-*/
+// LastUpdated function to return the updatedAt field from attribution into a fhir date time format
 func (r *Resource) LastUpdated() string {
 	return r.updatedAt.UTC().Format("2006-01-02T15:04:05.999-07:00")
 }
