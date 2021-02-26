@@ -1,9 +1,12 @@
 package gov.cms.dpc.aggregation;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Binder;
 import com.google.inject.Provides;
+import com.google.inject.name.Named;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import com.typesafe.config.Config;
 import gov.cms.dpc.aggregation.dao.OrganizationDAO;
@@ -12,19 +15,21 @@ import gov.cms.dpc.aggregation.dao.RosterDAO;
 import gov.cms.dpc.aggregation.engine.AggregationEngine;
 import gov.cms.dpc.aggregation.engine.JobBatchProcessor;
 import gov.cms.dpc.aggregation.engine.OperationsConfig;
-import gov.cms.dpc.aggregation.service.EveryoneGetsDataLookBackServiceImpl;
-import gov.cms.dpc.aggregation.service.LookBackService;
-import gov.cms.dpc.aggregation.service.LookBackServiceImpl;
+import gov.cms.dpc.aggregation.service.*;
 import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.common.annotations.JobTimeout;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
 import gov.cms.dpc.fhir.hapi.ContextUtils;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Singleton;
 
 public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationConfiguration> {
+
+    private static final Logger logger = LoggerFactory.getLogger(AggregationAppModule.class);
 
 
     AggregationAppModule() {
@@ -104,5 +109,20 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
         return new UnitOfWorkAwareProxyFactory("roster", sessionFactory.getSessionFactory()).create(LookBackServiceImpl.class,
                 new Class<?>[]{ProviderDAO.class, RosterDAO.class, OrganizationDAO.class, OperationsConfig.class},
                 new Object[]{providerDAO, rosterDAO, organizationDAO, operationsConfig});
+    }
+
+    @Provides
+    @Singleton
+    @Named("consentClient")
+    public IGenericClient provideConsentClient(FhirContext ctx) {
+        logger.info("Connecting to consent server at {}.", getConfiguration().getConsentServiceUrl());
+        ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
+        IGenericClient client = ctx.newRestfulGenericClient(getConfiguration().getConsentServiceUrl());
+        return client;
+    }
+
+    @Provides
+    ConsentService provideConsentService(@Named("consentClient") IGenericClient consentClient) {
+        return new ConsentServiceImpl(consentClient);
     }
 }
