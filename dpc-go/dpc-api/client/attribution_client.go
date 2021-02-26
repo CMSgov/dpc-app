@@ -9,6 +9,7 @@ import (
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"io/ioutil"
+	"net/http"
 )
 
 // AttributionConfig is a struct to hold configuration info for retryablehttp client
@@ -55,7 +56,7 @@ func (ac *AttributionClient) Get(ctx context.Context, resourceType ResourceType,
 	ac.httpClient.Logger = newLogger(*log)
 
 	url := fmt.Sprintf("%s/%s/%s", ac.config.URL, resourceType, id)
-	req, err := retryablehttp.NewRequest("GET", url, nil)
+	req, err := retryablehttp.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		log.Error("Failed to create request", zap.Error(err))
 		return nil, errors.Errorf("Failed to retrieve resource %s/%s", resourceType, id)
@@ -93,7 +94,7 @@ func (ac *AttributionClient) Post(ctx context.Context, resourceType ResourceType
 	ac.httpClient.Logger = newLogger(*log)
 
 	url := fmt.Sprintf("%s/%s", ac.config.URL, resourceType)
-	req, err := retryablehttp.NewRequest("POST", url, body)
+	req, err := retryablehttp.NewRequest(http.MethodPost, url, body)
 	if err != nil {
 		log.Error("Failed to create request", zap.Error(err))
 		return nil, errors.Errorf("Failed to save resource %s", resourceType)
@@ -125,12 +126,13 @@ func (ac *AttributionClient) Post(ctx context.Context, resourceType ResourceType
 	return b, nil
 }
 
+// Delete A function to enable communication with attribution service via DELETE
 func (ac *AttributionClient) Delete(ctx context.Context, resourceType ResourceType, id string) error {
 	log := logger.WithContext(ctx)
 	ac.httpClient.Logger = newLogger(*log)
 
 	url := fmt.Sprintf("%s/%s/%s", ac.config.URL, resourceType, id)
-	req, err := retryablehttp.NewRequest("DELETE", url, nil)
+	req, err := retryablehttp.NewRequest(http.MethodDelete, url, nil)
 	if err != nil {
 		log.Error("Failed to create request", zap.Error(err))
 		return errors.Errorf("Failed to delete resource %s/%s", resourceType, id)
@@ -157,12 +159,13 @@ func (ac *AttributionClient) Delete(ctx context.Context, resourceType ResourceTy
 	return nil
 }
 
+// Put A function to enable communication with attribution service via Put
 func (ac *AttributionClient) Put(ctx context.Context, resourceType ResourceType, id string, body []byte) ([]byte, error) {
 	log := logger.WithContext(ctx)
 	ac.httpClient.Logger = newLogger(*log)
 
 	url := fmt.Sprintf("%s/%s/%s", ac.config.URL, resourceType, id)
-	req, err := retryablehttp.NewRequest("PUT", url, body)
+	req, err := retryablehttp.NewRequest(http.MethodPut, url, body)
 	if err != nil {
 		log.Error("Failed to create request", zap.Error(err))
 		return nil, errors.Errorf("Failed to update resource %s", resourceType)
