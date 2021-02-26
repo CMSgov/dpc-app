@@ -33,7 +33,7 @@ func NewOrganizationRepo(db *sql.DB) *OrganizationRepository {
 	}
 }
 
-// FindByID function that searches the database for the organizaiton that matches the id
+// FindByID function that searches the database for the organization that matches the id
 func (or *OrganizationRepository) FindByID(ctx context.Context, id string) (*model.Organization, error) {
 	sb := sqlFlavor.NewSelectBuilder()
 	sb.Select("id", "version", "created_at", "updated_at", "info")
