@@ -38,10 +38,6 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import java.net.URI;
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -340,21 +336,6 @@ public class GroupResource extends AbstractGroupResource {
             resources.add(foundResourceType.get());
         }
         return resources;
-    }
-
-    private OffsetDateTime handleSinceQueryParam(String sinceParam) {
-        if (!StringUtils.isBlank(sinceParam)) {
-            try {
-                OffsetDateTime sinceDate = OffsetDateTime.parse(sinceParam, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-                if (sinceDate.isAfter(OffsetDateTime.now(ZoneId.systemDefault()))) {
-                    throw new BadRequestException("'_since' query parameter cannot be a future date");
-                }
-                return sinceDate;
-            } catch (DateTimeParseException e) {
-                throw new BadRequestException("_since parameter `" + e.getParsedString() + "` could not be parsed at index " + e.getErrorIndex());
-            }
-        }
-        return null;
     }
 
     /**

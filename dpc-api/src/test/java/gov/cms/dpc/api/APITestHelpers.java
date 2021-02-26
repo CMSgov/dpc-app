@@ -8,6 +8,7 @@ import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.gclient.ICreateTyped;
 import ca.uhn.fhir.rest.gclient.IUpdateExecutable;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
 import com.typesafe.config.ConfigFactory;
@@ -20,10 +21,12 @@ import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.DefaultFHIRExceptionHandl
 import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.HAPIExceptionHandler;
 import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.JerseyExceptionHandler;
 import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.PersistenceExceptionHandler;
+import gov.cms.dpc.fhir.hapi.ContextUtils;
 import gov.cms.dpc.fhir.validations.DPCProfileSupport;
 import gov.cms.dpc.fhir.validations.ProfileValidator;
 import gov.cms.dpc.fhir.validations.dropwizard.FHIRValidatorProvider;
 import gov.cms.dpc.fhir.validations.dropwizard.InjectingConstraintValidatorFactory;
+import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.testing.factories.FHIRPatientBuilder;
 import gov.cms.dpc.testing.factories.FHIRPractitionerBuilder;
 import io.dropwizard.auth.AuthValueFactoryProvider;
@@ -56,6 +59,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class APITestHelpers {
     private static final String ATTRIBUTION_URL = "http://localhost:3500/v1";
+    private static final String CONSENT_URL = "http://localhost:3600/v1";
     public static final String ORGANIZATION_ID = "46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0";
     private static final String ATTRIBUTION_TRUNCATE_TASK = "http://localhost:9902/tasks/truncate";
     public static String BASE_URL = "https://dpc.cms.gov/api";
@@ -90,6 +94,12 @@ public class APITestHelpers {
         client.registerInterceptor(loggingInterceptor);
 
         return client;
+    }
+
+    public static IGenericClient buildConsentClient(FhirContext ctx){
+        ContextUtils.prefetchResourceModels(ctx, JobQueueBatch.validResourceTypes);
+        ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
+        return ctx.newRestfulGenericClient(CONSENT_URL);
     }
 
     public static void setupPractitionerTest(IGenericClient client, IParser parser) throws IOException {
@@ -306,7 +316,7 @@ public class APITestHelpers {
        return updateResource(client, id,resource, Maps.newHashMap());
     }
 
-    public static Bundle getPatientEverything(IGenericClient client,String patientId, String provenance){
+    public static Bundle getPatientEverything(IGenericClient client, String patientId, String provenance){
         return client
                 .operation()
                 .onInstance(new IdType("Patient", patientId))
