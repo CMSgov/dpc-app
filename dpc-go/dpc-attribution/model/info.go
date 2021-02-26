@@ -19,7 +19,7 @@ func (i Info) Value() (driver.Value, error) {
 func (i *Info) Scan(src interface{}) error {
 	source, ok := src.([]byte)
 	if !ok {
-		return errors.New("Type assertion .([]byte) failed.")
+		return errors.New("type assertion .([]byte) failed.")
 	}
 
 	var info interface{}
@@ -30,7 +30,7 @@ func (i *Info) Scan(src interface{}) error {
 
 	*i, ok = info.(map[string]interface{})
 	if !ok {
-		return errors.New("Type assertion .(map[string]interface{}) failed.")
+		return errors.New("type assertion .(map[string]interface{}) failed.")
 	}
 
 	return nil

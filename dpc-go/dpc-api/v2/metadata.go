@@ -12,19 +12,20 @@ import (
 	"github.com/samply/golang-fhir-models/fhir-models/fhir"
 )
 
-type metadataController struct {
+// MetadataController is a struct that defines what the controller has
+type MetadataController struct {
 	capabilitiesFile string
 }
 
 // NewMetadataController function that creates a metadata controller and returns it's reference
-func NewMetadataController(capabilitiesFile string) *metadataController {
-	return &metadataController{
+func NewMetadataController(capabilitiesFile string) *MetadataController {
+	return &MetadataController{
 		capabilitiesFile,
 	}
 }
 
 // Read function to read the capability statement from metadata controller
-func (mc *metadataController) Read(w http.ResponseWriter, r *http.Request) {
+func (mc *MetadataController) Read(w http.ResponseWriter, r *http.Request) {
 	const dateFormat = "2006-01-02"
 	dt := time.Now()
 	log := logger.WithContext(r.Context())

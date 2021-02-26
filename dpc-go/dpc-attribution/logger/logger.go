@@ -64,8 +64,6 @@ func WithContext(ctx context.Context) *zap.Logger {
 
 	if ctxlogger, ok := ctx.Value(LoggerKey).(*zap.Logger); ok {
 		return ctxlogger
-	} else {
-		return logger
 	}
-
+	return logger
 }

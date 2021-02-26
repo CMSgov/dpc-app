@@ -75,7 +75,7 @@ func convertToFHIR(body []byte) ([]byte, error) {
 	fhirModel["id"] = result.ID
 	meta := make(map[string]string)
 	meta["id"] = fmt.Sprintf("%s/%s", result.ResourceType(), result.ID)
-	meta["versionId"] = result.VersionId()
+	meta["versionId"] = result.VersionID()
 	meta["lastUpdated"] = result.LastUpdated()
 	fhirModel["meta"] = meta
 

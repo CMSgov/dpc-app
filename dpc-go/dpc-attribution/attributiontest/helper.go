@@ -49,7 +49,7 @@ const Orgjson = `{
     ]
   }`
 
-// AttributionResponse provides a sample response that mimics what attribution service returns for testing purposes
+// OrgResponse provides a sample response that mimics what attribution service returns for testing purposes
 func OrgResponse() *model.Organization {
 	o := model.Organization{}
 	_ = faker.FakeData(&o)

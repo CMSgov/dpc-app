@@ -30,19 +30,20 @@ func OrganizationCtx(next http.Handler) http.Handler {
 	})
 }
 
-type organizationController struct {
+// OrganizationController is a struct that defines what the controller has
+type OrganizationController struct {
 	ac client.Client
 }
 
 // NewOrganizationController function that creates a organization controller and returns it's reference
-func NewOrganizationController(ac client.Client) *organizationController {
-	return &organizationController{
+func NewOrganizationController(ac client.Client) *OrganizationController {
+	return &OrganizationController{
 		ac,
 	}
 }
 
 // Read function that calls attribution service via get to return the organization specified by organizationID
-func (oc *organizationController) Read(w http.ResponseWriter, r *http.Request) {
+func (oc *OrganizationController) Read(w http.ResponseWriter, r *http.Request) {
 	organizationID, ok := r.Context().Value(ContextKeyOrganization).(string)
 	log := logger.WithContext(r.Context())
 	if !ok {
@@ -65,7 +66,7 @@ func (oc *organizationController) Read(w http.ResponseWriter, r *http.Request) {
 }
 
 // Create function that calls attribution service via post to save an organization into attribution service
-func (oc *organizationController) Create(w http.ResponseWriter, r *http.Request) {
+func (oc *OrganizationController) Create(w http.ResponseWriter, r *http.Request) {
 	body, _ := ioutil.ReadAll(r.Body)
 	log := logger.WithContext(r.Context())
 

@@ -19,8 +19,8 @@ func (r *Resource) ResourceType() string {
 	return r.Info["resourceType"].(string)
 }
 
-// VersionId function to return the version id as a string
-func (r *Resource) VersionId() string {
+// VersionID function to return the version id as a string
+func (r *Resource) VersionID() string {
 	return strconv.Itoa(r.version)
 }
 

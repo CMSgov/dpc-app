@@ -19,10 +19,7 @@ type contextKey int
 // ContextKeyOrganization is the key in the context to retrieve the organizationID
 const ContextKeyOrganization contextKey = iota
 
-/*
-   OrganizationCtx
-   middleware to extract the organizationID from the chi url param and set it into the request context
-*/
+// OrganizationCtx middleware to extract the organizationID from the chi url param and set it into the request context
 func OrganizationCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		organizationID := chi.URLParam(r, "organizationID")
@@ -31,19 +28,20 @@ func OrganizationCtx(next http.Handler) http.Handler {
 	})
 }
 
-type organizationService struct {
+// OrganizationService is a struct that defines what the service has
+type OrganizationService struct {
 	repo repository.OrganizationRepo
 }
 
 // NewOrganizationService function that creates a organization service and returns it's reference
-func NewOrganizationService(repo repository.OrganizationRepo) *organizationService {
-	return &organizationService{
+func NewOrganizationService(repo repository.OrganizationRepo) *OrganizationService {
+	return &OrganizationService{
 		repo,
 	}
 }
 
 // Get function that get the organization from the database by id and logs any errors before returning a generic error
-func (os *organizationService) Get(w http.ResponseWriter, r *http.Request) {
+func (os *OrganizationService) Get(w http.ResponseWriter, r *http.Request) {
 	log := logger.WithContext(r.Context())
 	organizationID, ok := r.Context().Value(ContextKeyOrganization).(string)
 	if !ok {
@@ -73,7 +71,7 @@ func (os *organizationService) Get(w http.ResponseWriter, r *http.Request) {
 }
 
 // Save function that saves the organization to the database and logs any errors before returning a generic error
-func (os *organizationService) Save(w http.ResponseWriter, r *http.Request) {
+func (os *OrganizationService) Save(w http.ResponseWriter, r *http.Request) {
 	log := logger.WithContext(r.Context())
 	body, _ := ioutil.ReadAll(r.Body)
 
