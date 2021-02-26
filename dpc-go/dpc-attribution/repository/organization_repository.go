@@ -94,6 +94,7 @@ func (or *OrganizationRepository) Insert(ctx context.Context, body []byte) (*mod
 	return org, nil
 }
 
+// DeleteByID function that deletes from the database the organization that matches the id
 func (or *OrganizationRepository) DeleteByID(ctx context.Context, id string) error {
 	db := sqlFlavor.NewDeleteBuilder()
 	db.DeleteFrom("organization")
@@ -105,6 +106,7 @@ func (or *OrganizationRepository) DeleteByID(ctx context.Context, id string) err
 	return err
 }
 
+// Update function that updates from the database the organization that matches the id
 func (or *OrganizationRepository) Update(ctx context.Context, id string, body []byte) (*model.Organization, error) {
 
 	var info model.Info

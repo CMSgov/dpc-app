@@ -72,7 +72,7 @@ func (os *OrganizationService) Get(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// Save function that saves the organization to the database and logs any errors before returning a generic error
+// Post function that saves the organization to the database and logs any errors before returning a generic error
 func (os *OrganizationService) Post(w http.ResponseWriter, r *http.Request) {
 	log := logger.WithContext(r.Context())
 	body, _ := ioutil.ReadAll(r.Body)
@@ -97,6 +97,7 @@ func (os *OrganizationService) Post(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// Delete function that deletes the organization to the database and logs any errors before returning a generic error
 func (os *OrganizationService) Delete(w http.ResponseWriter, r *http.Request) {
 	log := logger.WithContext(r.Context())
 	organizationID, ok := r.Context().Value(ContextKeyOrganization).(string)
@@ -118,6 +119,7 @@ func (os *OrganizationService) Delete(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
+// Put function that updates the organization in the database and logs any errors before returning a generic error
 func (os *OrganizationService) Put(w http.ResponseWriter, r *http.Request) {
 	log := logger.WithContext(r.Context())
 	organizationID, ok := r.Context().Value(ContextKeyOrganization).(string)

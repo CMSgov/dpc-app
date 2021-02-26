@@ -20,10 +20,12 @@ type CreateController interface {
 	Create(w http.ResponseWriter, r *http.Request)
 }
 
+// DeleteController is an interface for deleting
 type DeleteController interface {
 	Delete(w http.ResponseWriter, r *http.Request)
 }
 
+// UpdateController is an interface for updating
 type UpdateController interface {
 	Update(w http.ResponseWriter, r *http.Request)
 }
