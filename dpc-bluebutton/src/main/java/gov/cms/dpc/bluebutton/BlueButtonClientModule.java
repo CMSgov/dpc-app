@@ -59,8 +59,11 @@ public class BlueButtonClientModule<T extends Configuration & BlueButtonBundleCo
             this.bbClientConfiguration = getConfiguration().getBlueButtonConfiguration();
         }
 
-        binder.bind(BlueButtonHealthCheck.class);
-
+        final boolean healthCheckEnabled = this.bbClientConfiguration.isRegisterHealthCheck();
+        if(healthCheckEnabled){
+            binder.bind(BlueButtonHealthCheck.class);
+        }
+        logger.info("Blue Button health checks are {}.", healthCheckEnabled ? "enabled" : "disabled");
     }
 
     @Provides

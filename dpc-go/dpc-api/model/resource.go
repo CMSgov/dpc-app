@@ -5,34 +5,26 @@ import (
 	"time"
 )
 
-type Identifier struct {
-	Value  string `json:"value"`
-	System string `json:"system"`
-}
-
+// Resource is struct for json marshalling of the attribution response
+// with the only fields that a FHIR output cares about
 type Resource struct {
-	ID         string                 `json:"id"`
-	Version    int                    `json:"version"`
-	CreatedAt  time.Time              `json:"created_at"`
-	UpdatedAt  time.Time              `json:"updated_at"`
-	Info       map[string]interface{} `json:"info"`
-	Identifier []Identifier           `json:"identifier"`
+	ID        string                 `json:"id"`
+	Info      map[string]interface{} `json:"info"`
+	version   int
+	updatedAt time.Time
 }
 
-type FhirResource interface {
-	VersionId() string
-	LastUpdated() string
-	ResourceType() string
-}
-
+// ResourceType function to return the resource type of the underlying fhir model
 func (r *Resource) ResourceType() string {
 	return r.Info["resourceType"].(string)
 }
 
-func (r *Resource) VersionId() string {
-	return strconv.Itoa(r.Version)
+// VersionID function to return the version id as a string
+func (r *Resource) VersionID() string {
+	return strconv.Itoa(r.version)
 }
 
+// LastUpdated function to return the updatedAt field from attribution into a fhir date time format
 func (r *Resource) LastUpdated() string {
-	return r.UpdatedAt.UTC().Format("2006-01-02T15:04:05.999-07:00")
+	return r.updatedAt.UTC().Format("2006-01-02T15:04:05.999-07:00")
 }

@@ -11,17 +11,21 @@ import (
 	"io/ioutil"
 )
 
+// AttributionConfig is a struct to hold configuration info for retryablehttp client
 type AttributionConfig struct {
 	URL     string
 	Retries int
 }
 
+// ResourceType is a type to be used when making requests to different endpoints in attribution service
 type ResourceType string
 
+// Contains the different ResourceType for calls to attribution
 const (
 	Organization ResourceType = "Organization"
 )
 
+// Client interface for testing purposes
 type Client interface {
 	Get(ctx context.Context, resourceType ResourceType, id string) ([]byte, error)
 	Post(ctx context.Context, resourceType ResourceType, body []byte) ([]byte, error)
@@ -29,11 +33,13 @@ type Client interface {
 	Put(ctx context.Context, resourceType ResourceType, id string, body []byte) ([]byte, error)
 }
 
+// AttributionClient is a struct to hold the retryablehttp client and configs
 type AttributionClient struct {
 	config     AttributionConfig
 	httpClient *retryablehttp.Client
 }
 
+// NewAttributionClient initializes the retryable client and returns a reference to the attribution cleint
 func NewAttributionClient(config AttributionConfig) *AttributionClient {
 	client := retryablehttp.NewClient()
 	client.RetryMax = config.Retries
@@ -43,6 +49,7 @@ func NewAttributionClient(config AttributionConfig) *AttributionClient {
 	}
 }
 
+// Get A function to enable communication with attribution service via GET
 func (ac *AttributionClient) Get(ctx context.Context, resourceType ResourceType, id string) ([]byte, error) {
 	log := logger.WithContext(ctx)
 	ac.httpClient.Logger = newLogger(*log)
@@ -80,6 +87,7 @@ func (ac *AttributionClient) Get(ctx context.Context, resourceType ResourceType,
 	return body, nil
 }
 
+// Post A function to enable communication with attribution service via Post
 func (ac *AttributionClient) Post(ctx context.Context, resourceType ResourceType, body []byte) ([]byte, error) {
 	log := logger.WithContext(ctx)
 	ac.httpClient.Logger = newLogger(*log)

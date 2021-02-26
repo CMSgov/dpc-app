@@ -6,6 +6,7 @@ import (
 	"github.com/bxcodec/faker"
 )
 
+// Orgjson is a json string for testing purposes
 const Orgjson = `{
     "resourceType": "Organization",
     "identifier": [
@@ -48,6 +49,7 @@ const Orgjson = `{
     ]
   }`
 
+// OrgResponse provides a sample response that mimics what attribution service returns for testing purposes
 func OrgResponse() *model.Organization {
 	o := model.Organization{}
 	_ = faker.FakeData(&o)

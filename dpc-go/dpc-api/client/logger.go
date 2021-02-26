@@ -15,18 +15,22 @@ func newLogger(log zap.Logger) *httpClientLogger {
 	}
 }
 
+// Error function to fulfill retryablehttp logger interface
 func (l httpClientLogger) Error(msg string, keysAndValues ...interface{}) {
 	l.l.Error(msg, fields(keysAndValues)...)
 }
 
+// Info function to fulfill retryablehttp logger interface
 func (l httpClientLogger) Info(msg string, keysAndValues ...interface{}) {
 	l.l.Info(msg, fields(keysAndValues)...)
 }
 
+// Debug function to fulfill retryablehttp logger interface
 func (l httpClientLogger) Debug(msg string, keysAndValues ...interface{}) {
 	l.l.Debug(msg, fields(keysAndValues)...)
 }
 
+// Warn function to fulfill retryablehttp logger interface
 func (l httpClientLogger) Warn(msg string, keysAndValues ...interface{}) {
 	l.l.Warn(msg, fields(keysAndValues)...)
 }

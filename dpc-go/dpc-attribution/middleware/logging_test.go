@@ -22,7 +22,7 @@ func TestLoggingTestSuite(t *testing.T) {
 
 func (suite *LoggingTestSuite) TestLogging() {
 	core, logs := observer.New(zap.InfoLevel)
-	logger.Logger = zap.New(core)
+	logger.SetLogger(zap.New(core))
 
 	nextHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write([]byte("hello"))

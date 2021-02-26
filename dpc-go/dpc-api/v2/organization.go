@@ -17,8 +17,10 @@ import (
 
 type contextKey int
 
+// ContextKeyOrganization is the key in the context to retrieve the organizationID
 const ContextKeyOrganization contextKey = iota
 
+// OrganizationCtx middleware to extract the organizationID from the chi url param and set it into the request context
 func OrganizationCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		organizationID := chi.URLParam(r, "organizationID")
@@ -27,58 +29,62 @@ func OrganizationCtx(next http.Handler) http.Handler {
 	})
 }
 
+// OrganizationController is a struct that defines what the controller has
 type OrganizationController struct {
 	ac client.Client
 }
 
+// NewOrganizationController function that creates a organization controller and returns it's reference
 func NewOrganizationController(ac client.Client) *OrganizationController {
 	return &OrganizationController{
 		ac,
 	}
 }
 
+// Read function that calls attribution service via get to return the organization specified by organizationID
 func (oc *OrganizationController) Read(w http.ResponseWriter, r *http.Request) {
 	organizationID, ok := r.Context().Value(ContextKeyOrganization).(string)
 	log := logger.WithContext(r.Context())
 	if !ok {
 		log.Error("Failed to extract the organization id from the context")
-		fhirror.BusinessViolation(w, r.Context(), http.StatusBadRequest, "Failed to extract organization id from url, please check the url")
+		fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "Failed to extract organization id from url, please check the url")
 		return
 	}
 
 	resp, err := oc.ac.Get(r.Context(), client.Organization, organizationID)
 	if err != nil {
 		log.Error("Failed to get the org from attribution", zap.Error(err))
-		fhirror.NotFound(w, r.Context(), "Failed to find organization")
+		fhirror.NotFound(r.Context(), w, "Failed to find organization")
 		return
 	}
 
 	if _, err = w.Write(resp); err != nil {
 		log.Error("Failed to write data to response", zap.Error(err))
-		fhirror.NotFound(w, r.Context(), "Failed to find organization")
+		fhirror.NotFound(r.Context(), w, "Failed to find organization")
 	}
 }
 
+// Create function that calls attribution service via post to save an organization into attribution service
 func (oc *OrganizationController) Create(w http.ResponseWriter, r *http.Request) {
 	body, _ := ioutil.ReadAll(r.Body)
 	log := logger.WithContext(r.Context())
 
 	if err := isValidOrganization(body); err != nil {
 		log.Error("Organization is not valid in request", zap.Error(err))
-		fhirror.BusinessViolation(w, r.Context(), http.StatusBadRequest, "Not a valid organization")
+		fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "Not a valid organization")
 		return
 	}
 
 	resp, err := oc.ac.Post(r.Context(), client.Organization, body)
 	if err != nil {
 		log.Error("Failed to save the org to attribution", zap.Error(err))
-		fhirror.ServerIssue(w, r.Context(), http.StatusUnprocessableEntity, "Failed to save the organization")
+		fhirror.ServerIssue(r.Context(), w, http.StatusUnprocessableEntity, "Failed to save organization")
 		return
 	}
 
 	if _, err = w.Write(resp); err != nil {
 		log.Error("Failed to write data to response", zap.Error(err))
-		fhirror.ServerIssue(w, r.Context(), http.StatusUnprocessableEntity, "Failed to save organization")
+		fhirror.ServerIssue(r.Context(), w, http.StatusUnprocessableEntity, "Failed to save organization")
 	}
 }
 

@@ -14,6 +14,9 @@ public class BBClientConfiguration {
     @JsonProperty("healthcheck")
     private String healthcheckName = "BlueButtonHealthCheck";
 
+    @JsonProperty("registerHealthCheck")
+    private boolean registerHealthCheck = false;
+
     @NotEmpty
     private String serverBaseUrl;
 
@@ -66,6 +69,15 @@ public class BBClientConfiguration {
 
     public void setHealthcheckName(String healthcheckName) {
         this.healthcheckName = healthcheckName;
+    }
+
+
+    public boolean isRegisterHealthCheck() {
+        return registerHealthCheck;
+    }
+
+    public void setRegisterHealthCheck(boolean registerHealthCheck) {
+        this.registerHealthCheck = registerHealthCheck;
     }
 
     public String getBfdHashPepper() { return bfdHashPepper; }

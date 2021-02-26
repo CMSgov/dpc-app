@@ -150,7 +150,7 @@ func (suite *OrganizationControllerTestSuite) TestCreateOrganizationErrorInClien
                 "severity": "error",
                 "code": "Exception",
                 "details": {
-                    "text": "Failed to save the organization"
+                    "text": "Failed to save organization"
                 },
                 "diagnostics": "12345"
             }

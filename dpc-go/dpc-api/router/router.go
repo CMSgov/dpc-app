@@ -9,6 +9,7 @@ import (
 	"github.com/go-chi/chi"
 )
 
+// NewDPCAPIRouter function that builds the router using chi
 func NewDPCAPIRouter(oc v2.Controller, mc v2.ReadController) http.Handler {
 	r := chi.NewRouter()
 	r.Use(middleware2.Logging())

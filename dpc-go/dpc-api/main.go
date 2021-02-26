@@ -1,19 +1,24 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"github.com/CMSgov/dpc/api/client"
 	"github.com/CMSgov/dpc/api/logger"
 	"github.com/CMSgov/dpc/api/router"
 	"github.com/CMSgov/dpc/api/v2"
-	"log"
+	"go.uber.org/zap"
 	"net/http"
 	"os"
 	"strconv"
 )
 
 func main() {
-	defer logger.Logger.Sync()
+	ctx := context.Background()
+	defer func() {
+		err := logger.SyncLogger()
+		logger.WithContext(ctx).Fatal("Failed to start server", zap.Error(err))
+	}()
 	attributionURL, found := os.LookupEnv("ATTRIBUTION_URL")
 	if !found {
 		attributionURL = "http://localhost:3001"
@@ -46,6 +51,6 @@ func main() {
 		port = "3000"
 	}
 	if err := http.ListenAndServe(fmt.Sprintf(":%s", port), apiRouter); err != nil {
-		log.Fatal(err)
+		logger.WithContext(ctx).Fatal("Failed to start server", zap.Error(err))
 	}
 }

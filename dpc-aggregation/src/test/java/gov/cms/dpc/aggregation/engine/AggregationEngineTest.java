@@ -6,6 +6,8 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import com.codahale.metrics.MetricRegistry;
 import com.typesafe.config.ConfigFactory;
 import gov.cms.dpc.aggregation.health.AggregationEngineHealthCheck;
+import gov.cms.dpc.aggregation.service.ConsentResult;
+import gov.cms.dpc.aggregation.service.ConsentService;
 import gov.cms.dpc.aggregation.service.EveryoneGetsDataLookBackServiceImpl;
 import gov.cms.dpc.aggregation.service.LookBackService;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
@@ -18,6 +20,7 @@ import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import io.reactivex.disposables.Disposable;
+import org.assertj.core.util.Lists;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.junit.Assert;
@@ -50,6 +53,7 @@ class AggregationEngineTest {
     private AggregationEngine engine;
     private Disposable subscribe;
     private LookBackService lookBackService;
+    private ConsentService mockConsentService;
 
     static private final FhirContext fhirContext = FhirContext.forDstu3();
     static private final MetricRegistry metricRegistry = new MetricRegistry();
@@ -65,11 +69,20 @@ class AggregationEngineTest {
 
     @BeforeEach
     void setupEach() {
+        mockConsentService = Mockito.mock(ConsentService.class);
+        ConsentResult consentResult = new ConsentResult();
+        consentResult.setConsentDate(new Date());
+        consentResult.setActive(true);
+        consentResult.setPolicyType(ConsentResult.PolicyType.OPT_IN);
+        consentResult.setConsentId(UUID.randomUUID().toString());
+        Mockito.when(mockConsentService.getConsent(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0))).thenReturn(Optional.of(Lists.list(consentResult)));
+        Mockito.when(mockConsentService.getConsent(MockBlueButtonClient.TEST_PATIENT_MBIS.get(1))).thenReturn(Optional.of(Lists.list(consentResult)));
+
         queue = Mockito.spy(new MemoryBatchQueue(10));
         bbclient = Mockito.spy(new MockBlueButtonClient(fhirContext));
         var operationalConfig = new OperationsConfig(1000, exportPath, 500, YearMonth.of(2014, 3));
         lookBackService = Mockito.spy(EveryoneGetsDataLookBackServiceImpl.class);
-        JobBatchProcessor jobBatchProcessor = Mockito.spy(new JobBatchProcessor(bbclient, fhirContext, metricRegistry, operationalConfig, lookBackService));
+        JobBatchProcessor jobBatchProcessor = Mockito.spy(new JobBatchProcessor(bbclient, fhirContext, metricRegistry, operationalConfig, lookBackService, mockConsentService));
         engine = Mockito.spy(new AggregationEngine(aggregatorID, queue, operationalConfig, jobBatchProcessor));
         engine.queueRunning.set(true);
         AggregationEngine.setGlobalErrorHandler();
@@ -599,6 +612,12 @@ class AggregationEngineTest {
 
     private void testWithThrowable(Throwable throwable) throws GeneralSecurityException {
         Mockito.reset(bbclient);
+        ConsentResult consentResult = new ConsentResult();
+        consentResult.setConsentDate(new Date());
+        consentResult.setActive(true);
+        consentResult.setPolicyType(ConsentResult.PolicyType.OPT_IN);
+        consentResult.setConsentId(UUID.randomUUID().toString());
+        Mockito.when(mockConsentService.getConsent("1")).thenReturn(Optional.of(Lists.list(consentResult)));
         // Override throwing an error on fetching a patient
         Mockito.doThrow(throwable).when(bbclient).requestPatientFromServer(Mockito.anyString(), Mockito.any(DateRangeParam.class), anyMap());
 
