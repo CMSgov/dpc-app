@@ -23,9 +23,11 @@ gem 'devise-security'
 gem 'omniauth-github'
 gem 'omniauth-oktaoauth'
 gem 'octokit' # can be removed once we move past github omniauth
+gem 'fhir_client'
 gem 'redis-namespace'
 gem 'kaminari'
 gem 'active_model_serializers'
+gem 'macaroons'
 gem 'truemail'
 
 group :development, :test do
