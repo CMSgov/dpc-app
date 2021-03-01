@@ -10,10 +10,10 @@
 
 
 <ul class="ds-c-vertical-nav">
-  <li class="ds-c-vertical-nav__item usa-accordion">
-    <button class="usa-accordion__button ds-c-vertical-nav__label ds-c-vertical-nav__label--parent <%= current_sidenav_class if users_page? %>" aria-controls="nav-users-main" aria-expanded="true">
+  <li>
+    <h3>
       Users
-    </button>
+    </h3>
     <ul id="nav-users-main" class="ds-c-vertical-nav__subnav">
       <li class="ds-c-vertical-nav__item">
         <%= link_to "All", users_path(org_type: 'all'), class: "ds-c-vertical-nav__label #{current_sidenav_class if all_users_page?}" %>
