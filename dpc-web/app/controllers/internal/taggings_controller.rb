@@ -11,7 +11,8 @@ module Internal
       else
         flash[:alert] = "Tag could not be added. Errors:#{model_error_string(@tagging)}"
       end
-      redirect_back(fallback_location: taggable_path)
+
+      redirect_to taggable_path
     end
 
     def destroy
@@ -21,14 +22,18 @@ module Internal
       else
         flash[:alert] = "Tag could not be removed. Errors:#{model_error_string(@tagging)}"
       end
-      redirect_back(fallback_location: taggable_path)
+
+      redirect_to taggable_path
     end
 
     private
 
-    # Right now only users are taggable
     def taggable_path
-      internal_user_path(id: @tagging.taggable_id)
+      if @tagging.taggable_type == 'User'
+        internal_user_path(id: @tagging.taggable_id)
+      elsif @tagging.taggable_type == 'Organization'
+        internal_organization_path(id: @tagging.taggable_id)
+      end
     end
 
     def tagging_params

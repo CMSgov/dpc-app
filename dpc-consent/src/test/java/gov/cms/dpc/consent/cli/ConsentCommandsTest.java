@@ -105,15 +105,6 @@ class ConsentCommandsTest {
     }
 
     @Test
-    final void detectsInvalidUUID() throws Exception {
-        final boolean t5 = cli.run("consent", "create", "-p", "tA-mbi", "-d", "2019-11-22", "-i", "--org", "1", "--host", "http://localhost:3500/v1");
-        assertAll(() -> assertFalse(t5, "Should have failed"),
-                () -> assertEquals("", stdOut.toString(), "Should not have output"),
-                () -> assertNotEquals("", stdErr.toString(), "Should have errors"),
-                () -> assertTrue(stdErr.toString().contains("java.lang.IllegalArgumentException"), "Should have date parsing error"));
-    }
-
-    @Test
     final void createDefaultOptInRecord() throws Exception {
         final boolean t2 = cli.run("consent", "create", "-p", "t2-mbi", "-d", "2019-11-22", "-i", "--host", "http://localhost:3500/v1");
         assertAll(() -> assertTrue(t2, "Should have succeeded"),
@@ -124,13 +115,6 @@ class ConsentCommandsTest {
     final void createDefaultOptOutRecord() throws Exception {
         final boolean t3 = cli.run("consent", "create", "-p", "t3-mbi", "-d", "2019-11-23", "-o", "--host", "http://localhost:3500/v1");
         assertAll(() -> assertTrue(t3, "Should have succeeded"),
-                () -> assertEquals("", stdErr.toString(), "Should not have errors"));
-    }
-
-    @Test
-    final void createExternalOrgRecord() throws Exception {
-        final boolean t4 = cli.run("consent", "create", "-p", "t4-mbi", "-d", "2019-11-24", "-i", "--org", "46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0", "--host", "http://localhost:3500/v1");
-        assertAll(() -> assertTrue(t4, "Should have succeeded"),
                 () -> assertEquals("", stdErr.toString(), "Should not have errors"));
     }
 }

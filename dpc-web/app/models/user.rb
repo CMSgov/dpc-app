@@ -4,6 +4,8 @@ require 'csv'
 
 class User < ApplicationRecord
   include OrganizationTypable
+  include Taggable
+
   has_many :taggings, as: :taggable
   has_many :tags, through: :taggings
   has_many :organization_user_assignments, dependent: :destroy
@@ -81,19 +83,28 @@ class User < ApplicationRecord
   end
 
   ATTRS = %w[id first_name last_name email requested_organization requested_organization_type
-             address_1 address_2 city state zip agree_to_terms requested_num_providers created_at updated_at].freeze
+             address_1 address_2 city state zip agree_to_terms requested_num_providers created_at
+             updated_at tags].freeze
 
   # html escape these fields for XSS protection
-  ESCAPED_ATTRS = %w[first_name last_name requested_organization address_1 address_2 city].freeze
+  ESCAPED_ATTRS = %w[first_name last_name requested_organization address_1 address_2 city tags].freeze
 
-  def self.to_csv
+  def self.to_csv(user_ids)
+    users = User.find(user_ids)
     CSV.generate(headers: true) do |csv|
       csv << ATTRS
-      all.each do |user|
+      users.each do |user|
         attributes = user.attributes
+        attributes['tags'] = user.tags.map(&:name)
         escaped_attributes = attributes.map do |k, v|
           if ESCAPED_ATTRS.include? k
             v = ERB::Util.html_escape(v)
+
+            if k == 'tags'
+              v.gsub!('&quot;', '')
+              v.delete!('[')
+              v.delete!(']')
+            end
           end
 
           [k, v]
@@ -120,10 +131,12 @@ class User < ApplicationRecord
   def password_complexity
     return if password.nil?
 
-    return if password =~ /(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@\#\$\&*])/
+    password_regex = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@\#\$\&*\-])/
+
+    return if password.match? password_regex
 
     errors.add :password, 'must include at least one number, one lowercase letter,
-                           one uppercase letter, and one special character (!@#$&*)'
+                           one uppercase letter, and one special character (!@#$&*-)'
   end
 
   def requested_num_providers_to_zero_if_blank

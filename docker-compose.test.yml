@@ -1,0 +1,10 @@
+version: '3'
+
+services:
+
+  bfd-test:
+    build:
+      context: .
+      dockerfile: docker/Dockerfiles/Dockerfile.test
+    env_file:
+      - ./ops/config/decrypted/local.env

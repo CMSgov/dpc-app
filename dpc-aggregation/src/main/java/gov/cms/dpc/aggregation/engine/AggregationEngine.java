@@ -1,21 +1,15 @@
 package gov.cms.dpc.aggregation.engine;
 
 import com.newrelic.api.agent.Trace;
-import gov.cms.dpc.aggregation.service.LookBackService;
 import gov.cms.dpc.aggregation.util.AggregationUtils;
 import gov.cms.dpc.common.MDCConstants;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.annotations.AggregatorID;
 import gov.cms.dpc.queue.models.JobQueueBatch;
-import io.reactivex.Flowable;
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.exceptions.UndeliverableException;
 import io.reactivex.plugins.RxJavaPlugins;
-import org.apache.commons.lang3.tuple.Pair;
-import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
-import org.hl7.fhir.dstu3.model.Resource;
-import org.hl7.fhir.dstu3.model.ResourceType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -23,7 +17,6 @@ import org.slf4j.MDC;
 import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -42,7 +35,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class AggregationEngine implements Runnable {
     private static final Logger logger = LoggerFactory.getLogger(AggregationEngine.class);
 
-    private final LookBackService lookBackService;
     private final UUID aggregatorID;
     private final IJobQueue queue;
     private final OperationsConfig operationsConfig;
@@ -61,15 +53,13 @@ public class AggregationEngine implements Runnable {
      * @param aggregatorID      - The ID of the current working aggregator
      * @param queue             - {@link IJobQueue} that will direct the work done
      * @param operationsConfig  - The {@link OperationsConfig} to use for writing the output files
-     * @param lookBackService   - {@link LookBackService} that will check if request is able to be processed
      * @param jobBatchProcessor - {@link JobBatchProcessor} contains all the job processing logic
      */
     @Inject
-    public AggregationEngine(@AggregatorID UUID aggregatorID, IJobQueue queue, OperationsConfig operationsConfig, LookBackService lookBackService, JobBatchProcessor jobBatchProcessor) {
+    public AggregationEngine(@AggregatorID UUID aggregatorID, IJobQueue queue, OperationsConfig operationsConfig, JobBatchProcessor jobBatchProcessor) {
         this.aggregatorID = aggregatorID;
         this.queue = queue;
         this.operationsConfig = operationsConfig;
-        this.lookBackService = lookBackService;
         this.jobBatchProcessor = jobBatchProcessor;
     }
 
@@ -116,6 +106,12 @@ public class AggregationEngine implements Runnable {
                 .retry()
                 .filter(Optional::isPresent)
                 .map(Optional::get)
+                .doOnDispose(() -> {
+                    MDC.remove(MDCConstants.JOB_ID);
+                    MDC.remove(MDCConstants.JOB_BATCH_ID);
+                    MDC.remove(MDCConstants.ORGANIZATION_ID);
+                    MDC.remove(MDCConstants.PROVIDER_NPI);
+                })
                 .subscribe(
                         this::processJobBatch,
                         this::onError,
@@ -154,6 +150,7 @@ public class AggregationEngine implements Runnable {
         try {
             MDC.put(MDCConstants.JOB_ID, job.getJobID().toString());
             MDC.put(MDCConstants.JOB_BATCH_ID, job.getBatchID().toString());
+            MDC.put(MDCConstants.ORGANIZATION_ID, job.getOrgID().toString());
             logger.info("Processing job, exporting to: {}.", this.operationsConfig.getExportPath());
             logger.debug("Has {} attributed beneficiaries", job.getPatients().size());
 
@@ -186,30 +183,13 @@ public class AggregationEngine implements Runnable {
     }
 
     private Optional<String> processPatient(JobQueueBatch job, String patientId) {
-        if (isValidLookBack(job, patientId)) {
-            jobBatchProcessor.processJobBatchPartial(aggregatorID, queue, job, patientId);
-        }
+        jobBatchProcessor.processJobBatchPartial(aggregatorID, queue, job, patientId);
+
         // Stop processing when no patients or early shutdown
         return this.isRunning() ? job.fetchNextPatient(aggregatorID) : Optional.empty();
     }
 
-    private boolean isValidLookBack(JobQueueBatch job, String patientId) {
-        boolean result = false;
-        //job.getProviderID is really not providerID, it is the rosterID, see createJob in GroupResource export for confirmation
-        //patientId here is the patient MBI
-        final String providerNPI = lookBackService.getProviderNPIFromRoster(job.getOrgID(), job.getProviderID(), patientId);
-        if (providerNPI != null) {
-            Pair<Flowable<List<Resource>>, ResourceType> pair = jobBatchProcessor.fetchResource(job, patientId, ResourceType.ExplanationOfBenefit, null);
-            Boolean hasClaims = pair.getLeft()
-                    .flatMap(Flowable::fromIterable)
-                    .filter(resource -> pair.getRight() == resource.getResourceType())
-                    .any(resource -> lookBackService.hasClaimWithin((ExplanationOfBenefit) resource, job.getOrgID(), providerNPI, operationsConfig.getLookBackMonths()))
-                    .onErrorReturn((error) -> false)
-                    .blockingGet();
-            result = Boolean.TRUE.equals(hasClaims);
-        }
-        return result;
-    }
+
 
     private void calculateFileMetadata(JobQueueBatch job) {
         job.getJobQueueBatchFiles()

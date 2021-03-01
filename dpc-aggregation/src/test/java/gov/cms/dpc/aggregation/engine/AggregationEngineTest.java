@@ -6,6 +6,9 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import com.codahale.metrics.MetricRegistry;
 import com.typesafe.config.ConfigFactory;
 import gov.cms.dpc.aggregation.health.AggregationEngineHealthCheck;
+import gov.cms.dpc.aggregation.service.ConsentResult;
+import gov.cms.dpc.aggregation.service.ConsentService;
+import gov.cms.dpc.aggregation.service.EveryoneGetsDataLookBackServiceImpl;
 import gov.cms.dpc.aggregation.service.LookBackService;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
@@ -17,6 +20,7 @@ import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import io.reactivex.disposables.Disposable;
+import org.assertj.core.util.Lists;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.junit.Assert;
@@ -30,8 +34,7 @@ import org.mockito.Mockito;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.GeneralSecurityException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.YearMonth;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -48,12 +51,12 @@ class AggregationEngineTest {
     private BlueButtonClient bbclient;
     private IJobQueue queue;
     private AggregationEngine engine;
-    private JobBatchProcessor jobBatchProcessor;
     private Disposable subscribe;
     private LookBackService lookBackService;
+    private ConsentService mockConsentService;
 
-    static private FhirContext fhirContext = FhirContext.forDstu3();
-    static private MetricRegistry metricRegistry = new MetricRegistry();
+    static private final FhirContext fhirContext = FhirContext.forDstu3();
+    static private final MetricRegistry metricRegistry = new MetricRegistry();
     static private String exportPath;
 
     @BeforeAll
@@ -65,13 +68,22 @@ class AggregationEngineTest {
     }
 
     @BeforeEach
-    void setupEach() throws ParseException {
+    void setupEach() {
+        mockConsentService = Mockito.mock(ConsentService.class);
+        ConsentResult consentResult = new ConsentResult();
+        consentResult.setConsentDate(new Date());
+        consentResult.setActive(true);
+        consentResult.setPolicyType(ConsentResult.PolicyType.OPT_IN);
+        consentResult.setConsentId(UUID.randomUUID().toString());
+        Mockito.when(mockConsentService.getConsent(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0))).thenReturn(Optional.of(Lists.list(consentResult)));
+        Mockito.when(mockConsentService.getConsent(MockBlueButtonClient.TEST_PATIENT_MBIS.get(1))).thenReturn(Optional.of(Lists.list(consentResult)));
+
         queue = Mockito.spy(new MemoryBatchQueue(10));
         bbclient = Mockito.spy(new MockBlueButtonClient(fhirContext));
-        var operationalConfig = new OperationsConfig(1000, exportPath, 500, new SimpleDateFormat("dd/MM/yyyy").parse("03/01/2014"));
-        lookBackService = Mockito.spy(LookBackService.class);
-        jobBatchProcessor = Mockito.spy(new JobBatchProcessor(bbclient, fhirContext, metricRegistry, operationalConfig));
-        engine = Mockito.spy(new AggregationEngine(aggregatorID, queue, operationalConfig, lookBackService, jobBatchProcessor));
+        var operationalConfig = new OperationsConfig(1000, exportPath, 500, YearMonth.of(2014, 3));
+        lookBackService = Mockito.spy(EveryoneGetsDataLookBackServiceImpl.class);
+        JobBatchProcessor jobBatchProcessor = Mockito.spy(new JobBatchProcessor(bbclient, fhirContext, metricRegistry, operationalConfig, lookBackService, mockConsentService));
+        engine = Mockito.spy(new AggregationEngine(aggregatorID, queue, operationalConfig, jobBatchProcessor));
         engine.queueRunning.set(true);
         AggregationEngine.setGlobalErrorHandler();
         subscribe = Mockito.mock(Disposable.class);
@@ -84,7 +96,7 @@ class AggregationEngineTest {
      */
     @Test
     void mockBlueButtonClientTest() {
-        Bundle patient = bbclient.requestPatientFromServer(MockBlueButtonClient.MBI_BENE_ID_MAP.get(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0)), null);
+        Bundle patient = bbclient.requestPatientFromServer(MockBlueButtonClient.MBI_BENE_ID_MAP.get(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0)), null, null);
         assertNotNull(patient);
     }
 
@@ -93,8 +105,7 @@ class AggregationEngineTest {
      */
     @Test
     void claimBatchException() throws InterruptedException {
-        Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getProviderNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
-        Mockito.doReturn(true).when(lookBackService).hasClaimWithin(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyLong());
+        Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getPractitionerNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
 
         final var orgID = UUID.randomUUID();
 
@@ -105,8 +116,8 @@ class AggregationEngineTest {
                 Collections.singletonList(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0)),
                 Collections.singletonList(ResourceType.Patient),
                 null,
-                MockBlueButtonClient.BFD_TRANSACTION_TIME
-        );
+                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                null, true);
 
         // Throw a failure on the first poll, then be successful
         JobQueueFailure ex = new JobQueueFailure("Any failure");
@@ -152,8 +163,6 @@ class AggregationEngineTest {
      */
     @Test
     void processJobBatchException() throws InterruptedException {
-        final var orgID = UUID.randomUUID();
-
         doReturn(Optional.empty())
                 .doReturn(Optional.empty())
                 .doReturn(Optional.empty())
@@ -190,8 +199,7 @@ class AggregationEngineTest {
      */
     @Test
     void simpleJobTest() {
-        Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getProviderNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
-        Mockito.doReturn(true).when(lookBackService).hasClaimWithin(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyLong());
+        Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getPractitionerNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
 
         final var orgID = UUID.randomUUID();
 
@@ -202,8 +210,8 @@ class AggregationEngineTest {
                 Collections.singletonList(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0)),
                 Collections.singletonList(ResourceType.Patient),
                 null,
-                MockBlueButtonClient.BFD_TRANSACTION_TIME
-        );
+                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                null, true);
 
         // Work the batch
         queue.claimBatch(engine.getAggregatorID())
@@ -233,8 +241,8 @@ class AggregationEngineTest {
                 Collections.singletonList(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0)),
                 Collections.singletonList(ResourceType.Patient),
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                MockBlueButtonClient.BFD_TRANSACTION_TIME
-        );
+                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                null, true);
 
         // Work the batch
         queue.claimBatch(engine.getAggregatorID())
@@ -254,8 +262,7 @@ class AggregationEngineTest {
      */
     @Test
     void multipleFileJobTest() {
-        Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getProviderNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
-        Mockito.doReturn(true).when(lookBackService).hasClaimWithin(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyLong());
+        Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getPractitionerNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
 
         final var orgID = UUID.randomUUID();
         final List<String> mbis = List.of(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0), MockBlueButtonClient.TEST_PATIENT_MBIS.get(1));
@@ -267,8 +274,8 @@ class AggregationEngineTest {
                 mbis,
                 JobQueueBatch.validResourceTypes,
                 null,
-                MockBlueButtonClient.BFD_TRANSACTION_TIME
-        );
+                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                null, true);
 
         // Work the batch
         queue.claimBatch(engine.getAggregatorID())
@@ -297,8 +304,8 @@ class AggregationEngineTest {
                 Arrays.asList("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11"),
                 JobQueueBatch.validResourceTypes,
                 null,
-                MockBlueButtonClient.BFD_TRANSACTION_TIME
-        );
+                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                null, true);
 
         // Assert the queue size
         assertEquals(2, queue.queueSize());
@@ -310,8 +317,7 @@ class AggregationEngineTest {
      */
     @Test
     void pauseJobTest() {
-        Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getProviderNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
-        Mockito.doReturn(true).when(lookBackService).hasClaimWithin(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyLong());
+        Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getPractitionerNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
 
         final var orgID = UUID.randomUUID();
         final List<String> mbis = List.of(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0), MockBlueButtonClient.TEST_PATIENT_MBIS.get(1));
@@ -323,8 +329,8 @@ class AggregationEngineTest {
                 mbis,
                 JobQueueBatch.validResourceTypes,
                 null,
-                MockBlueButtonClient.BFD_TRANSACTION_TIME
-        );
+                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                null, true);
 
         // Work the batch
         engine.stop();
@@ -352,8 +358,7 @@ class AggregationEngineTest {
      */
     @Test
     void appendBatchFileTest() {
-        Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getProviderNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
-        Mockito.doReturn(true).when(lookBackService).hasClaimWithin(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyLong());
+        Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getPractitionerNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
 
         final var orgID = UUID.randomUUID();
         final List<String> mbis = List.of(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0), MockBlueButtonClient.TEST_PATIENT_MBIS.get(1));
@@ -365,8 +370,8 @@ class AggregationEngineTest {
                 mbis,
                 Collections.singletonList(ResourceType.Patient),
                 null,
-                MockBlueButtonClient.BFD_TRANSACTION_TIME
-        );
+                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                null, true);
 
         // Work the batch
         queue.claimBatch(engine.getAggregatorID())
@@ -401,8 +406,8 @@ class AggregationEngineTest {
                 List.of(),
                 Collections.singletonList(ResourceType.Patient),
                 null,
-                MockBlueButtonClient.BFD_TRANSACTION_TIME
-        );
+                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                null, true);
 
         // Work the batch
         queue.claimBatch(engine.getAggregatorID())
@@ -424,8 +429,7 @@ class AggregationEngineTest {
      */
     @Test
     void badJobTest() {
-        Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getProviderNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
-        Mockito.doReturn(true).when(lookBackService).hasClaimWithin(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyLong());
+        Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getPractitionerNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
 
         final var orgID = UUID.randomUUID();
         final List<String> mbis = List.of(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0), MockBlueButtonClient.TEST_PATIENT_MBIS.get(1));
@@ -437,8 +441,8 @@ class AggregationEngineTest {
                 mbis,
                 Collections.singletonList(ResourceType.Schedule),
                 null,
-                MockBlueButtonClient.BFD_TRANSACTION_TIME
-        );
+                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                null, true);
 
         // Work the batch
         queue.claimBatch(engine.getAggregatorID())
@@ -454,8 +458,7 @@ class AggregationEngineTest {
      */
     @Test
     void badJobTestWithFailBatchException() {
-        Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getProviderNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
-        Mockito.doReturn(true).when(lookBackService).hasClaimWithin(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyLong());
+        Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getPractitionerNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
 
         final var orgID = UUID.randomUUID();
         final List<String> mbis = List.of(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0), MockBlueButtonClient.TEST_PATIENT_MBIS.get(1));
@@ -467,8 +470,8 @@ class AggregationEngineTest {
                 mbis,
                 Collections.singletonList(ResourceType.Schedule),
                 null,
-                MockBlueButtonClient.BFD_TRANSACTION_TIME
-        );
+                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                null, true);
 
         // Throw an exception when failing the batch
         Exception e = new RuntimeException("Failed to mark batch as failed");
@@ -491,9 +494,8 @@ class AggregationEngineTest {
     void badPatientIDTest() throws GeneralSecurityException {
         final var orgID = UUID.randomUUID();
 
-        Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getProviderNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
-        Mockito.doReturn(null).when(lookBackService).getProviderNPIFromRoster(orgID, TEST_PROVIDER_ID, "-1");
-        Mockito.doReturn(true).when(lookBackService).hasClaimWithin(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyLong());
+        Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getPractitionerNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
+        Mockito.doReturn(null).when(lookBackService).getPractitionerNPIFromRoster(orgID, TEST_PROVIDER_ID, "-1");
 
         final List<String> mbis = List.of(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0), MockBlueButtonClient.TEST_PATIENT_MBIS.get(1), "-1");
         assertEquals(3, mbis.size());
@@ -506,8 +508,8 @@ class AggregationEngineTest {
                 mbis,
                 List.of(ResourceType.ExplanationOfBenefit, ResourceType.Patient),
                 null,
-                MockBlueButtonClient.BFD_TRANSACTION_TIME
-        );
+                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                null, true);
 
         // Work the batch
         queue.claimBatch(engine.getAggregatorID())
@@ -520,8 +522,8 @@ class AggregationEngineTest {
         // Check that the bad ID was called 3 times
         ArgumentCaptor<String> idCaptor = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<DateRangeParam> lastUpdatedCaptor = ArgumentCaptor.forClass(DateRangeParam.class);
-        Mockito.verify(bbclient, atLeastOnce()).requestPatientFromServerByMbi(idCaptor.capture());
-        Mockito.verify(bbclient, atLeastOnce()).requestEOBFromServer(idCaptor.capture(), lastUpdatedCaptor.capture());
+        Mockito.verify(bbclient, atLeastOnce()).requestPatientFromServerByMbi(idCaptor.capture(), anyMap());
+        Mockito.verify(bbclient, atLeastOnce()).requestEOBFromServer(idCaptor.capture(), lastUpdatedCaptor.capture(), anyMap());
         var values = idCaptor.getAllValues();
         assertEquals(0,
                 values.stream().filter(value -> value.equals("-1")).count(),
@@ -532,15 +534,14 @@ class AggregationEngineTest {
         final var actual = queue.getJobBatches(jobID).stream().findFirst().get();
         var expectedErrorPath = ResourceWriter.formOutputFilePath(exportPath, actual.getBatchID(), ResourceType.OperationOutcome, 0);
         assertAll(() -> assertEquals(JobStatus.COMPLETED, actual.getStatus()),
-                () -> assertEquals(2, actual.getJobQueueBatchFiles().size(), "expected 2 (= 2 good patient ids and 1 bad patient id never made past lookback)"),
-                () -> assertTrue(actual.getJobQueueFile(ResourceType.OperationOutcome).isEmpty(), "bad patient id never makes past lookback"),
-                () -> assertFalse(Files.exists(Path.of(expectedErrorPath)), "expected an error file"));
+                () -> assertEquals(3, actual.getJobQueueBatchFiles().size(), "expected 3 (2 good patient ids and 1 bad patient id that failed lookback)"),
+                () -> assertFalse(actual.getJobQueueFile(ResourceType.OperationOutcome).isEmpty(), "bad patient id fails lookback"),
+                () -> assertTrue(Files.exists(Path.of(expectedErrorPath)), "expected an error file"));
     }
 
     @Test
     void multiplePatientsMatchTest() {
-        Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getProviderNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
-        Mockito.doReturn(true).when(lookBackService).hasClaimWithin(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyLong());
+        Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getPractitionerNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
 
         final List<String> mbis = Collections.singletonList(MockBlueButtonClient.MULTIPLE_RESULTS_MBI);
 
@@ -552,8 +553,8 @@ class AggregationEngineTest {
                 mbis,
                 List.of(ResourceType.ExplanationOfBenefit, ResourceType.Patient),
                 null,
-                MockBlueButtonClient.BFD_TRANSACTION_TIME
-        );
+                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                null, true);
 
         queue.claimBatch(engine.getAggregatorID())
                 .ifPresent(engine::processJobBatch);
@@ -565,15 +566,14 @@ class AggregationEngineTest {
         final var actual = queue.getJobBatches(jobID).stream().findFirst().get();
         var expectedErrorPath = ResourceWriter.formOutputFilePath(exportPath, actual.getBatchID(), ResourceType.OperationOutcome, 0);
         assertAll(() -> assertEquals(JobStatus.COMPLETED, actual.getStatus()),
-                () -> assertEquals(0, actual.getJobQueueBatchFiles().size(), "Should be no files because it never made it past lookback"),
-                () -> assertTrue(actual.getJobQueueFile(ResourceType.OperationOutcome).isEmpty(), "Should be no files because it never made it past lookback"),
-                () -> assertFalse(Files.exists(Path.of(expectedErrorPath)), "Error file should not exist"));
+                () -> assertEquals(1, actual.getJobQueueBatchFiles().size(), "Should be one error file for lookback failure"),
+                () -> assertFalse(actual.getJobQueueFile(ResourceType.OperationOutcome).isEmpty(), "Should be one error for lookback failure"),
+                () -> assertTrue(Files.exists(Path.of(expectedErrorPath)), "Error file should not exist"));
     }
 
     @Test
     void testBlueButtonException() throws GeneralSecurityException {
-        Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getProviderNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
-        Mockito.doReturn(true).when(lookBackService).hasClaimWithin(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyLong());
+        Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getPractitionerNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
 
         // Test generic runtime exception
         testWithThrowable(new RuntimeException("Error!!!!"));
@@ -597,8 +597,8 @@ class AggregationEngineTest {
                 Collections.singletonList("1"),
                 Collections.singletonList(ResourceType.Patient),
                 null,
-                MockBlueButtonClient.BFD_TRANSACTION_TIME
-        );
+                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                null, true);
 
         AggregationEngineHealthCheck healthCheck = new AggregationEngineHealthCheck(engine);
         Assert.assertTrue(healthCheck.check().isHealthy());
@@ -612,8 +612,14 @@ class AggregationEngineTest {
 
     private void testWithThrowable(Throwable throwable) throws GeneralSecurityException {
         Mockito.reset(bbclient);
+        ConsentResult consentResult = new ConsentResult();
+        consentResult.setConsentDate(new Date());
+        consentResult.setActive(true);
+        consentResult.setPolicyType(ConsentResult.PolicyType.OPT_IN);
+        consentResult.setConsentId(UUID.randomUUID().toString());
+        Mockito.when(mockConsentService.getConsent("1")).thenReturn(Optional.of(Lists.list(consentResult)));
         // Override throwing an error on fetching a patient
-        Mockito.doThrow(throwable).when(bbclient).requestPatientFromServer(Mockito.anyString(), Mockito.any(DateRangeParam.class));
+        Mockito.doThrow(throwable).when(bbclient).requestPatientFromServer(Mockito.anyString(), Mockito.any(DateRangeParam.class), anyMap());
 
         final var orgID = UUID.randomUUID();
 
@@ -624,8 +630,8 @@ class AggregationEngineTest {
                 Collections.singletonList("1"),
                 Collections.singletonList(ResourceType.Patient),
                 null,
-                MockBlueButtonClient.BFD_TRANSACTION_TIME
-        );
+                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                null, true);
 
         // Work the batch
         queue.claimBatch(engine.getAggregatorID())
@@ -637,7 +643,7 @@ class AggregationEngineTest {
 
         // Check that the bad ID was called 3 times
         ArgumentCaptor<String> idCaptor = ArgumentCaptor.forClass(String.class);
-        Mockito.verify(bbclient, atLeastOnce()).requestPatientFromServerByMbi(idCaptor.capture());
+        Mockito.verify(bbclient, atLeastOnce()).requestPatientFromServerByMbi(idCaptor.capture(), anyMap());
         assertEquals(1, idCaptor.getAllValues().stream().filter(value -> value.equals("1")).count(), "Should have been called once to get the patient, but with errors instead");
 
         // Look at the result. It should have one error, but be successful otherwise.
@@ -645,8 +651,8 @@ class AggregationEngineTest {
         final var actual = queue.getJobBatches(jobID).stream().findFirst().get();
         var expectedErrorPath = ResourceWriter.formOutputFilePath(exportPath, actual.getBatchID(), ResourceType.OperationOutcome, 0);
         assertAll(() -> assertEquals(JobStatus.COMPLETED, actual.getStatus()),
-                () -> assertEquals(0, actual.getJobQueueBatchFiles().size(), "expected just a operational outcome"),
-                () -> assertTrue(actual.getJobQueueFile(ResourceType.OperationOutcome).isEmpty(), "expected 1 bad patient fetch"),
-                () -> assertFalse(Files.exists(Path.of(expectedErrorPath)), "expected an error file"));
+                () -> assertEquals(1, actual.getJobQueueBatchFiles().size(), "expected just a operational outcome"),
+                () -> assertFalse(actual.getJobQueueFile(ResourceType.OperationOutcome).isEmpty(), "expected 1 bad patient fetch"),
+                () -> assertTrue(Files.exists(Path.of(expectedErrorPath)), "expected an error file"));
     }
 }

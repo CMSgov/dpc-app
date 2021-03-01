@@ -1,3 +1,18 @@
+<div id="hero__banner">
+  <div class="banner-content">
+    <div class="banner-text__container">
+      <div class="banner-text__title">
+        Join the Production Pilot Onboarding Queue!
+      </div>
+      <div class="banner-text__content">
+        For more information, please review the <%= link_to "FAQs", faq_path %> about production access.
+      </div>
+    </div>
+    <div class="banner-btn__container">
+      <a href="https://airtable.com/shr3m3BL3IWY5hYnm" rel="noopener noreferrer" target="_blank" class="sign_up_btn">Apply Now</a>
+    </div>
+  </div>
+</div>
 <div class="hero">
   <div class="ds-l-container">
     <div class="hero__container">
@@ -10,24 +25,22 @@
           </div>
 
         </div>
-        <div class="ds-u-margin-top--7">
+        <div id="hero_button__container" class="ds-u-margin-top--7">
           <% unless user_signed_in? %>
           <a id="request_access" href="<%= new_user_registration_path %>" class="ds-c-button ds-c-button--big ds-c-button--success">
             <svg class="ds-u-margin-right--1" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" >
             <use xlink:href="/assets/solid.svg#key"></use>
           </svg>
-          Request access</a>
+          Request sandbox access</a>
           <% end %>
 
           <%= link_to "https://groups.google.com/d/forum/dpc-api", :class => "ds-c-button ds-c-button--inverse ds-c-button--inverse--alt ds-c-button--big" do %>
             Join Google Group
           <% end %>
 
-
-
         </div>
 
-        <p class="ds-u-margin-top--5">Note: Data at the Point of Care is currently a pilot program that only supports access to synthetic data for testing. <a href="#about-the-pilot">Learn more</a></p>
+        <p class="ds-u-margin-top--5">Start your Data at the Point of Care journey by getting acquainted with the API using synthetic data. When you're ready, <%= link_to "review the requirements", faq_path %> for production pilot access and <a href="https://airtable.com/shr3m3BL3IWY5hYnm" rel="noopener noreferrer" target="_blank">sign up to join our queue</a>.</p>
       </div>
       <div class="hero__image-container">
         <%= image_tag("hero-heart.svg", class: "hero__image", alt: "") %>

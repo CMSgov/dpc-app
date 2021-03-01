@@ -96,10 +96,16 @@ public class ClientUtils {
      * @param patientReferences - {@link Map} of patient's associated to a given provider
      * @throws IOException - throws if unable to read the file
      */
-    private static void createRosterSubmission(IGenericClient client, InputStream resource, UUID organizationID, Map<String, Reference> patientReferences) throws IOException {
+    private static void createRosterSubmission(IGenericClient client, InputStream resource, Bundle providerBundle, UUID organizationID, Map<String, Reference> patientReferences) throws IOException {
         final FhirContext ctx = FhirContext.forDstu3();
 
         final Map<String, List<Pair<String, String>>> providerMap = SeedProcessor.extractProviderMap(resource);
+        final Map<String, String> providerNPIUUIDMap = providerBundle
+                .getEntry()
+                .stream()
+                .map(Bundle.BundleEntryComponent::getResource)
+                .map(Practitioner.class::cast)
+                .collect(Collectors.toMap(FHIRExtractors::getProviderNPI, p -> FHIRExtractors.getEntityUUID(p.getId()).toString()));
 
         // Find the entry for the given key (yes, I know this is bad)
         providerMap
@@ -108,7 +114,7 @@ public class ClientUtils {
                     final Group attributionRoster = SeedProcessor.generateAttributionGroup(providerRoster, organizationID, patientReferences);
 
                     // Create the attestation
-                    final Provenance provenance = createAttestation(organizationID, providerRoster.getKey());
+                    final Provenance provenance = createAttestation(organizationID, providerNPIUUIDMap.get(providerRoster.getKey()));
 
                     // Now, submit the bundle
                     client
@@ -159,7 +165,7 @@ public class ClientUtils {
                         responseBody = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
                         jobResponse = mapper.readValue(responseBody, JobCompletionModel.class);
                     } catch (JsonParseException e) {
-                        logger.error(String.format("Failed to parse job status response: %s", responseBody));
+                        logger.error("Failed to parse job status response: {}", responseBody);
                         throw e;
                     }
                 }
@@ -212,7 +218,7 @@ public class ClientUtils {
 
         // Get the headers and check the status
         final String exportURL = headers.get("content-location").get(0);
-        logger.info(String.format("Export job started. Progress URL: %s%n", exportURL));
+        logger.info("Export job started. Progress URL: {}", exportURL);
 
         // Poll the job until it's done
         return awaitExportResponse(exportURL, "Checking job status", client, overrideURL);
@@ -235,11 +241,14 @@ public class ClientUtils {
         try {
             final File file = fetchExportedFiles(entry.getUrl(), client);
             System.out.println(String.format("Downloaded file to: %s", file.getPath()));
+            if(file.length() == 0){
+                throw new IllegalStateException(String.format("Downloaded file was empty. file path:  %s", file.getPath()));
+            }
         } catch (IOException e) {
             throw new RuntimeException("Cannot output file", e);
         }
     }
-
+    
     private static JobCompletionModel jobCompletionLambda(IGenericClient exportClient, CloseableHttpClient client, Group group, String overrideURL) {
         final IOperationUntypedWithInput<Parameters> exportOperation = createExportOperation(exportClient, group.getId());
         try {
@@ -294,28 +303,20 @@ public class ClientUtils {
         return patientReferences;
     }
 
-    static List<String> submitPractitioners(String providerBundleFilename, Class<?> baseClass, FhirContext ctx, IGenericClient exportClient) throws IOException {
+    static Bundle submitPractitioners(String providerBundleFilename, Class<?> baseClass, FhirContext ctx, IGenericClient exportClient) throws IOException {
         final Bundle providerBundle;
 
         System.out.println("Submitting practitioners");
         providerBundle = bundleSubmitter(baseClass, Practitioner.class, providerBundleFilename, ctx.newJsonParser(), exportClient);
 
-        // Get the provider NPIs
-        return providerBundle
-                .getEntry()
-                .stream()
-                .map(Bundle.BundleEntryComponent::getResource)
-                .map(resource -> (Practitioner) resource)
-                .map(FHIRExtractors::getProviderNPI)
-                .collect(Collectors.toList());
+        return providerBundle;
     }
 
-    static void createAndUploadRosters(String seedsFile, IGenericClient client, UUID organizationID, Map<String, Reference> patientReferences) throws IOException {
+    static void createAndUploadRosters(String seedsFile, Bundle providerBundle, IGenericClient client, UUID organizationID, Map<String, Reference> patientReferences) throws IOException {
         // Read the provider bundle from the given file
         try (InputStream resource = new FileInputStream(new File(seedsFile))) {
-            // Now, submit the bundle
             System.out.println("Uploading Patient roster");
-            createRosterSubmission(client, resource, organizationID, patientReferences);
+            createRosterSubmission(client, resource, providerBundle, organizationID, patientReferences);
         }
     }
 

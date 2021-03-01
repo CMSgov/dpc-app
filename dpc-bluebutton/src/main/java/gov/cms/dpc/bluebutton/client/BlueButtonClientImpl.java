@@ -9,6 +9,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.inject.name.Named;
 import gov.cms.dpc.bluebutton.config.BBClientConfiguration;
+import gov.cms.dpc.common.Constants;
 import gov.cms.dpc.common.utils.MetricMaker;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import org.apache.commons.lang3.StringUtils;
@@ -72,45 +73,52 @@ public class BlueButtonClientImpl implements BlueButtonClient {
      * Queries Blue Button server for patient data
      *
      * @param beneId The requested patient's ID
+     * @param headers
      * @return {@link Patient} A FHIR Patient resource
      * @throws ResourceNotFoundException when no such patient with the provided ID exists
      */
     @Override
-    public Bundle requestPatientFromServer(String beneId, DateRangeParam lastUpdated) throws ResourceNotFoundException {
+    public Bundle requestPatientFromServer(String beneId, DateRangeParam lastUpdated, Map<String, String> headers) throws ResourceNotFoundException {
         logger.debug("Attempting to fetch patient ID {} from baseURL: {}", beneId, client.getServerBase());
         ICriterion<ReferenceClientParam> criterion = new ReferenceClientParam(Patient.SP_RES_ID).hasId(beneId);
         return instrumentCall(REQUEST_EOB_METRIC, () ->
-                fetchBundle(Patient.class, Collections.singletonList(criterion), beneId, lastUpdated));
+                fetchBundle(Patient.class, Collections.singletonList(criterion), beneId, lastUpdated, headers));
     }
 
     /**
      * Hashes MBI and queries Blue Button server for patient data.
      *
      * @param mbi The MBI
+     * @param headers
      * @return {@link Bundle} A FHIR Bundle of Patient resources
      */
     @Override
-    public Bundle requestPatientFromServerByMbi(String mbi) throws ResourceNotFoundException, GeneralSecurityException {
-        String mbiHash = hashMbi(mbi);
-        return requestPatientFromServerByMbiHash(mbiHash);
+    public Bundle requestPatientFromServerByMbi(String mbi, Map<String, String> headers) throws ResourceNotFoundException, GeneralSecurityException {
+        String mbiHash = hashMbi(mbi.toUpperCase());
+        return requestPatientFromServerByMbiHash(mbiHash, headers);
     }
 
     /**
      * Queries Blue Button server for patient data by hashed Medicare Beneficiary Identifier (MBI).
      *
      * @param mbiHash The hashed MBI
+     * @param headers
      * @return {@link Bundle} A FHIR Bundle of Patient resources
      */
     @Override
-    public Bundle requestPatientFromServerByMbiHash(String mbiHash) throws ResourceNotFoundException {
-        logger.debug("Attempting to fetch patient with MBI hash {} from baseURL: {}", mbiHash, client.getServerBase());
-        return instrumentCall(REQUEST_PATIENT_METRIC, () -> client
-                .search()
-                .forResource(Patient.class)
-                .where(Patient.IDENTIFIER.exactly().systemAndIdentifier(DPCIdentifierSystem.MBI_HASH.getSystem(), mbiHash))
-                .withAdditionalHeader("IncludeIdentifiers", "mbi")
-                .returnBundle(Bundle.class)
-                .execute());
+    public Bundle requestPatientFromServerByMbiHash(String mbiHash, Map<String, String> headers) throws ResourceNotFoundException {
+        logger.info("Attempting to fetch patient with MBI hash {} from baseURL: {}", mbiHash, client.getServerBase());
+        return instrumentCall(REQUEST_PATIENT_METRIC, () -> {
+            IQuery<IBaseBundle> query = client
+                    .search()
+                    .forResource(Patient.class)
+                    .where(Patient.IDENTIFIER.exactly().systemAndIdentifier(DPCIdentifierSystem.MBI_HASH.getSystem(), mbiHash));
+            addBFDHeaders(query, headers);
+            return query
+                    .returnBundle(Bundle.class)
+                    .execute();
+
+        });
     }
 
     /**
@@ -127,11 +135,12 @@ public class BlueButtonClientImpl implements BlueButtonClient {
      *  that contain no EoBs.
      *
      * @param beneId The requested patient's ID
+     * @param headers
      * @return {@link Bundle} Containing a number (possibly 0) of {@link ExplanationOfBenefit} objects
      * @throws ResourceNotFoundException when the requested patient does not exist
      */
     @Override
-    public Bundle requestEOBFromServer(String beneId, DateRangeParam lastUpdated) {
+    public Bundle requestEOBFromServer(String beneId, DateRangeParam lastUpdated, Map<String, String> headers) {
         logger.debug("Attempting to fetch EOBs for patient ID {} from baseURL: {}", beneId, client.getServerBase());
 
         List<ICriterion<? extends IParam>> criteria = new ArrayList<ICriterion<? extends IParam>>();
@@ -142,7 +151,8 @@ public class BlueButtonClientImpl implements BlueButtonClient {
                 fetchBundle(ExplanationOfBenefit.class,
                         criteria,
                         beneId,
-                        lastUpdated));
+                        lastUpdated,
+                        headers));
     }
 
     /**
@@ -159,22 +169,23 @@ public class BlueButtonClientImpl implements BlueButtonClient {
      *  that contain no coverage records.
      *
      * @param beneId The requested patient's ID
+     * @param headers
      * @return {@link Bundle} Containing a number (possibly 0) of {@link ExplanationOfBenefit} objects
      * @throws ResourceNotFoundException when the requested patient does not exist
      */
     @Override
-    public Bundle requestCoverageFromServer(String beneId, DateRangeParam lastUpdated) throws ResourceNotFoundException {
+    public Bundle requestCoverageFromServer(String beneId, DateRangeParam lastUpdated, Map<String, String> headers) throws ResourceNotFoundException {
         logger.debug("Attempting to fetch Coverage for patient ID {} from baseURL: {}", beneId, client.getServerBase());
 
         List<ICriterion<? extends IParam>> criteria = new ArrayList<ICriterion<? extends IParam>>();
         criteria.add(Coverage.BENEFICIARY.hasId(formBeneficiaryID(beneId)));
 
         return instrumentCall(REQUEST_COVERAGE_METRIC, () ->
-                fetchBundle(Coverage.class, criteria, beneId, lastUpdated));
+                fetchBundle(Coverage.class, criteria, beneId, lastUpdated, headers));
     }
 
     @Override
-    public Bundle requestNextBundleFromServer(Bundle bundle) throws ResourceNotFoundException {
+    public Bundle requestNextBundleFromServer(Bundle bundle, Map<String, String> headers) throws ResourceNotFoundException {
         return instrumentCall(REQUEST_NEXT_METRIC, () -> {
             var nextURL = bundle.getLink(Bundle.LINK_NEXT).getUrl();
             logger.debug("Attempting to fetch next bundle from url: {}", nextURL);
@@ -225,7 +236,8 @@ public class BlueButtonClientImpl implements BlueButtonClient {
     private <T extends IBaseResource> Bundle fetchBundle(Class<T> resourceClass,
                                                          List<ICriterion<? extends IParam>> criteria,
                                                          String patientID,
-                                                         DateRangeParam lastUpdated) {
+                                                         DateRangeParam lastUpdated,
+                                                         Map<String, String> headers) {
         IQuery<IBaseBundle> query = client.search()
                 .forResource(resourceClass)
                 .where(criteria.get(0));
@@ -234,12 +246,13 @@ public class BlueButtonClientImpl implements BlueButtonClient {
             query = query.and(criterion);
         }
 
-        final Bundle bundle = query
+        IQuery<Bundle> iQuery = query
                 .count(config.getResourcesCount())
                 .lastUpdated(lastUpdated)
-                .returnBundle(Bundle.class)
-                .withAdditionalHeader("IncludeIdentifiers", "mbi")
-                .execute();
+                .returnBundle(Bundle.class);
+        addBFDHeaders(query, headers);
+
+        final Bundle bundle = iQuery.execute();
 
         // Case where patientID does not exist at all
         if(!bundle.hasEntry() && lastUpdated == null) {
@@ -267,5 +280,17 @@ public class BlueButtonClientImpl implements BlueButtonClient {
         } finally {
             timerContext.stop();
         }
+    }
+
+    private void addBFDHeaders(IQuery<?> query, Map<String, String> headers) {
+        query.withAdditionalHeader(Constants.INCLUDE_IDENTIFIERS_HEADER, "mbi");
+        if (headers != null) {
+            headers.entrySet().stream()
+                    .filter(e -> StringUtils.isNotBlank(e.getValue()))
+                    .forEach(e -> {
+                        query.withAdditionalHeader(e.getKey(), e.getValue());
+                    });
+        }
+
     }
 }

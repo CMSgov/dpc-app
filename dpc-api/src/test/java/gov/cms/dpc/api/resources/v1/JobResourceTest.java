@@ -16,13 +16,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import javax.ws.rs.core.Response;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(BufferedLoggerHandler.class)
 public class JobResourceTest {
@@ -62,7 +62,7 @@ public class JobResourceTest {
                 List.of(TEST_PATIENT_ID),
                 JobQueueBatch.validResourceTypes,
                 null,
-                OffsetDateTime.now(ZoneOffset.UTC));
+                OffsetDateTime.now(ZoneOffset.UTC), null, true);
 
         // Test the response
         final var resource = new JobResource(queue, TEST_BASEURL);
@@ -86,7 +86,7 @@ public class JobResourceTest {
                 List.of(TEST_PATIENT_ID, TEST_PATIENT_ID),
                 JobQueueBatch.validResourceTypes,
                 null,
-                OffsetDateTime.now(ZoneOffset.UTC));
+                OffsetDateTime.now(ZoneOffset.UTC), null, true);
         final var runningJob = queue.claimBatch(AGGREGATOR_ID);
         runningJob.get().fetchNextPatient(AGGREGATOR_ID);
         queue.completePartialBatch(runningJob.get(), AGGREGATOR_ID);
@@ -113,7 +113,7 @@ public class JobResourceTest {
                 List.of(TEST_PATIENT_ID),
                 JobQueueBatch.validResourceTypes,
                 null,
-                OffsetDateTime.now(ZoneOffset.UTC));
+                OffsetDateTime.now(ZoneOffset.UTC), null, true);
         queue.claimBatch(AGGREGATOR_ID);
 
         final var runningJob = queue.getJobBatches(jobID).get(0);
@@ -128,6 +128,10 @@ public class JobResourceTest {
         final var resource = new JobResource(queue, TEST_BASEURL);
         final Response response = resource.checkJobStatus(organizationPrincipal, jobID.toString());
         assertAll(() -> assertEquals(HttpStatus.OK_200, response.getStatus()));
+
+        var expires = ZonedDateTime.parse(response.getHeaderString("Expires"), JobResource.HTTP_DATE_FORMAT);
+        assertAll(() -> assertTrue(expires.isAfter(ZonedDateTime.now().plusHours(23))),
+                () -> assertTrue(expires.isBefore(ZonedDateTime.now().plusHours(25))));
 
         // Test the completion model
         final var completion = (JobCompletionModel) response.getEntity();
@@ -154,7 +158,7 @@ public class JobResourceTest {
                 List.of(TEST_PATIENT_ID),
                 JobQueueBatch.validResourceTypes,
                 null,
-                OffsetDateTime.now(ZoneOffset.UTC));
+                OffsetDateTime.now(ZoneOffset.UTC), null, true);
         queue.claimBatch(AGGREGATOR_ID);
 
         final var runningJob = queue.getJobBatches(jobID).get(0);
@@ -192,7 +196,7 @@ public class JobResourceTest {
                 List.of(TEST_PATIENT_ID),
                 JobQueueBatch.validResourceTypes,
                 null,
-                OffsetDateTime.now(ZoneOffset.UTC));
+                OffsetDateTime.now(ZoneOffset.UTC), null, true);
         queue.claimBatch(AGGREGATOR_ID);
 
         final var runningJob = queue.getJobBatches(jobID).get(0);
@@ -202,6 +206,42 @@ public class JobResourceTest {
         final var resource = new JobResource(queue, TEST_BASEURL);
         final Response response = resource.checkJobStatus(organizationPrincipal, jobID.toString());
         assertAll(() -> assertEquals(HttpStatus.INTERNAL_SERVER_ERROR_500, response.getStatus()));
+    }
+
+    @Test
+    public void testExpiredJob() {
+        final var organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
+        final var orgID = FHIRExtractors.getEntityUUID(organizationPrincipal.getOrganization().getId());
+        final var queue = new MemoryBatchQueue(1);
+
+        final UUID jobId = queue.createJob(orgID,
+                TEST_PROVIDER_ID,
+                List.of(TEST_PATIENT_ID, "2", "3"),
+                JobQueueBatch.validResourceTypes,
+                null,
+                OffsetDateTime.now(ZoneOffset.UTC), null, true);
+
+        List<JobQueueBatch> batches = queue.getJobBatches(jobId);
+        OffsetDateTime timeAgo = OffsetDateTime.now().minusHours(24);
+        for (JobQueueBatch batch : batches) {
+            queue.claimBatch(AGGREGATOR_ID);
+            batch.fetchNextPatient(AGGREGATOR_ID);
+            batch.addJobQueueFile(ResourceType.OperationOutcome, 0, 1);
+            queue.completeBatch(batch, AGGREGATOR_ID);
+            timeAgo = timeAgo.minusMinutes(5);
+            batch.setCompleteTime(timeAgo);
+        }
+
+        final var resource = new JobResource(queue, TEST_BASEURL);
+        var response = resource.checkJobStatus(organizationPrincipal, jobId.toString());
+        assertEquals(HttpStatus.GONE_410, response.getStatus());
+
+        for (JobQueueBatch batch : batches) {
+            batch.setCompleteTime(OffsetDateTime.now().minusHours(23));
+        }
+
+        response = resource.checkJobStatus(organizationPrincipal, jobId.toString());
+        assertEquals(HttpStatus.OK_200, response.getStatus());
     }
 
     /**
@@ -221,7 +261,7 @@ public class JobResourceTest {
                 List.of(TEST_PATIENT_ID),
                 JobQueueBatch.validResourceTypes,
                 null,
-                OffsetDateTime.now(ZoneOffset.UTC));
+                OffsetDateTime.now(ZoneOffset.UTC), null, true);
         queue.claimBatch(AGGREGATOR_ID);
 
         final var runningJob = queue.getJobBatches(jobID).get(0);
@@ -276,7 +316,7 @@ public class JobResourceTest {
                 Collections.emptyList(),
                 Collections.emptyList(),
                 null,
-                OffsetDateTime.now());
+                OffsetDateTime.now(), null, true);
         final var aggregatorId = UUID.randomUUID();
         batch.setRunningStatus(aggregatorId);
         batch.setCompletedStatus(aggregatorId);

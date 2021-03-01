@@ -13,9 +13,11 @@
 //= require svg4everybody
 //= require add-user-search
 //= require accordions
+//= require character-count
 //= require copy-text
 //= require password-check
 //= require rails-ujs
+//= require tag-selector
 //= require activestorage
 //= require_tree ./utils
 //= require_tree .

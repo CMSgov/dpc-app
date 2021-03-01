@@ -1,21 +1,12 @@
 # frozen_string_literal: true
 
 module ApplicationHelper
-  def production_api_access_enabled?
-    ENV.fetch('PROD_API_ACCESS_ENABLED', 'false') == 'true'
-  end
-
   def title(page_title)
     content_for(:title) { page_title }
   end
 
   def banner_title(banner_title)
     content_for(:banner_title) { banner_title }
-  end
-
-  def syntax_highlight(text)
-    html = HighlightSource.render(text)
-    html.html_safe
   end
 
   def current_class?(test_path)

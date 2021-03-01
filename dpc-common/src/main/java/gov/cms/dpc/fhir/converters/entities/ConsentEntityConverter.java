@@ -15,7 +15,6 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -114,18 +113,6 @@ public class ConsentEntityConverter {
         return coding.getCode();
     }
 
-    private static UUID organizationsToCustodianUUID(List<Reference> orgRefs) {
-        if (orgRefs == null || orgRefs.size() != 1) {
-            throw new WebApplicationException("Must include one organization", HttpStatus.UNPROCESSABLE_ENTITY_422);
-        }
-
-        Reference orgRef = orgRefs.get(0);
-        if (StringUtils.isBlank(orgRef.getReference())) {
-            throw new WebApplicationException("Organization must include reference", HttpStatus.UNPROCESSABLE_ENTITY_422);
-        }
-        return FHIRExtractors.getEntityUUID(orgRef.getReference());
-    }
-
     private static String mbiFromPatientReference(String patientRefStr) {
         String mbi = "";
         Pattern patientIdPattern = Pattern.compile("/Patient\\?identity=\\|(?<mbi>\\d[a-zA-Z][a-zA-Z0-9]\\d[a-zA-Z][a-zA-Z0-9]\\d[a-zA-Z]{2}\\d{2})");
@@ -136,6 +123,7 @@ public class ConsentEntityConverter {
         return mbi;
     }
 
+    @SuppressWarnings("JdkObsolete") // Date class is used by FHIR stu3 Consent model
     public static ConsentEntity fromFhir(Consent consent) {
         if (consent == null) {
             throw new WebApplicationException("No consent resource provided", Response.Status.BAD_REQUEST);
@@ -167,14 +155,13 @@ public class ConsentEntityConverter {
         Date dateTime = consent.getDateTime();
         LocalDate date = dateTime != null ? dateTime.toInstant().atOffset(ZoneOffset.UTC).toLocalDate() : LocalDate.now(ZoneOffset.UTC);
         entity.setEffectiveDate(date);
-
-        entity.setCustodian(organizationsToCustodianUUID(consent.getOrganization()));
         entity.setPolicyCode(policyUriToCode(consent.getPolicyRule()));
 
         return entity;
     }
 
-    public static Consent toFhir(ConsentEntity consentEntity, String orgURL, String fhirURL) {
+    @SuppressWarnings("JdkObsolete") // Date class is used by FHIR stu3 Consent model
+    public static Consent toFhir(ConsentEntity consentEntity, String fhirURL) {
         Consent c = new Consent();
 
         c.setId(consentEntity.getId().toString());
@@ -193,12 +180,6 @@ public class ConsentEntityConverter {
         // for the moment, we're not extending r3 to include it
 
         c.setCategory(category(consentEntity.getLoincCode()));
-
-        if (consentEntity.getCustodian() == null) {
-            c.setOrganization(List.of(new Reference().setReference(orgURL).setDisplay("Data at the Point of Care")));
-        } else {
-            c.setOrganization(List.of(new Reference(new IdType("Organization", consentEntity.getCustodian().toString()))));
-        }
 
         return c;
     }

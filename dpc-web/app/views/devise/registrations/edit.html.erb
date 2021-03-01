@@ -87,8 +87,9 @@
 
           <div class="field">
             <%= f.label :password, class: "ds-c-label" %> <i>(leave blank if you don't want to change it)</i><br />
+
             <div class="password-check-list">
-              Password must contain at least:
+              Password must contain at least:<br />
               <div id="password-char-set" class="invalid">
                 <%= @minimum_password_length %> characters minimum
               </div>
@@ -102,7 +103,7 @@
                 1 number
               </div>
               <div id="password-special-set" class="invalid">
-                1 special character
+                1 special character (!@#$&*-)
               </div>
             </div>
             <%= f.password_field :password, autocomplete: "new-password", class: "ds-c-field", onkeyup: "passwordCheck('user_password')" %>
@@ -112,7 +113,7 @@
             <%= f.label :password_confirmation, class: "ds-c-label" %>
             <div class="password-check-list">
               <div id="password-confirm-set" class="invalid">
-                Confirm password above
+                Confirm password
               </div>
             </div>
             <%= f.password_field :password_confirmation, autocomplete: "new-password", class: "ds-c-field", onkeyup: "passwordCheck('user_password_confirmation')" %>

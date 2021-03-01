@@ -2,10 +2,13 @@ package gov.cms.dpc.api;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.validation.SingleValidationMessage;
+import com.google.common.net.HttpHeaders;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
@@ -61,6 +64,7 @@ public class APIHelpers {
             newMeta.addTag(orgTag);
             resource.setMeta(newMeta);
         } else {
+            meta.getTag().removeIf(coding -> DPCIdentifierSystem.DPC.getSystem().equalsIgnoreCase(coding.getSystem().trim()));
             meta.addTag(orgTag);
         }
     }
@@ -69,11 +73,24 @@ public class APIHelpers {
      * Fetch the BFD database last update time. Use it as the transactionTime for a job.
      * @return transactionTime from the BFD service
      */
+    @SuppressWarnings("JdkObsolete") // Date class is used by FHIR stu3 Meta model
     public static OffsetDateTime fetchTransactionTime(BlueButtonClient bfdClient) {
         // Every bundle has transaction time after the Since RFC has beneficiary
-        final Meta meta = bfdClient.requestPatientFromServer(SYNTHETIC_BENE_ID, null).getMeta();
+        final Meta meta = bfdClient.requestPatientFromServer(SYNTHETIC_BENE_ID, null, null).getMeta();
         return Optional.ofNullable(meta.getLastUpdated())
                 .map(u -> u.toInstant().atOffset(ZoneOffset.UTC))
                 .orElse(OffsetDateTime.now(ZoneOffset.UTC));
+    }
+
+    public static String fetchRequestingIP(HttpServletRequest request) {
+        if (request == null) {
+            return null;
+        }
+        //If client uses the forwarded for header, respect that, otherwise use the requester's ip address
+        String ipAddress = request.getHeader(HttpHeaders.X_FORWARDED_FOR);
+        if (StringUtils.isBlank(ipAddress)) {
+            ipAddress = request.getRemoteAddr();
+        }
+        return ipAddress;
     }
 }

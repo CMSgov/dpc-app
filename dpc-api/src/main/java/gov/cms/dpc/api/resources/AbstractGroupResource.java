@@ -10,6 +10,7 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Group;
 import org.hl7.fhir.dstu3.model.Provenance;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
@@ -17,7 +18,7 @@ import java.util.UUID;
 
 @FHIR
 @Path("/Group")
-public abstract class AbstractGroupResource {
+public abstract class AbstractGroupResource extends AbstractResourceWithSince {
 
     protected AbstractGroupResource() {
         // Not used
@@ -35,11 +36,11 @@ public abstract class AbstractGroupResource {
 
     @PUT
     @Path("/{rosterID}")
-    public abstract Group updateRoster(UUID rosterID, @Valid @Profiled(profile = AttestationProfile.PROFILE_URI) Provenance rosterAttestation, Group rosterUpdate);
+    public abstract Group updateRoster(OrganizationPrincipal security, UUID rosterID, @Valid @Profiled(profile = AttestationProfile.PROFILE_URI) Provenance rosterAttestation, Group rosterUpdate);
 
     @POST
     @Path("/{rosterID}/$add")
-    public abstract Group addRosterMembers(UUID rosterID, @Valid @Profiled(profile = AttestationProfile.PROFILE_URI) Provenance rosterAttestation, Group groupUpdate);
+    public abstract Group addRosterMembers(OrganizationPrincipal organizationPrincipal, UUID rosterID, @Valid @Profiled(profile = AttestationProfile.PROFILE_URI) Provenance rosterAttestation, Group rosterUpdate);
 
     @POST
     @Path("/{rosterID}/$remove")
@@ -52,9 +53,10 @@ public abstract class AbstractGroupResource {
     @Path("/{rosterID}/$export")
     @GET
     public abstract Response export(OrganizationPrincipal organizationPrincipal,
-                                    @PathParam("rosterID") @NoHtml String rosterID,
-                                    @QueryParam("_type") @NoHtml String resourceTypes,
-                                    @QueryParam("_outputFormat") @NoHtml String outputFormat,
-                                    @QueryParam("_since") @NoHtml String since,
-                                    @HeaderParam("Prefer") @Valid String Prefer);
+                                    @NoHtml String rosterID,
+                                    @NoHtml String resourceTypes,
+                                    @NoHtml String outputFormat,
+                                    @NoHtml String since,
+                                    @Valid String Prefer,
+                                    HttpServletRequest httpServletRequest);
 }

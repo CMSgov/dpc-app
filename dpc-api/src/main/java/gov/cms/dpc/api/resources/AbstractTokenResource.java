@@ -3,11 +3,13 @@ package gov.cms.dpc.api.resources;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.entities.TokenEntity;
 import gov.cms.dpc.api.models.CollectionResponse;
+import gov.cms.dpc.api.models.CreateTokenRequest;
 import gov.cms.dpc.api.models.JWTAuthResponse;
 import gov.cms.dpc.common.annotations.NoHtml;
 import io.dropwizard.jersey.jsr310.OffsetDateTimeParam;
 import org.hibernate.validator.constraints.NotEmpty;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -40,22 +42,26 @@ public abstract class AbstractTokenResource {
      * Create authentication token for {@link org.hl7.fhir.dstu3.model.Organization}.
      * This token is designed to be long-lived and delegatable.
      *
-     * @param principal  - {@link OrganizationPrincipal} supplied by auth handler
-     * @param label      - {@link Optional} {@link String} to use as token label
-     * @param expiration - {@link Optional} {@link OffsetDateTime} to use for token expiration
+     * @param principal   - {@link OrganizationPrincipal} supplied by auth handler
+     * @param label       - {@link Optional} {@link String} to use as token label
+     * @param expiration  - {@link Optional} {@link OffsetDateTime} to use for token expiration
+     * @param requestBody - {@link CreateTokenRequest} model representing token resource. Token fields take precedence over query parameters.
      * @return - {@link String} base64 (URL) encoded token
      */
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     @POST
-    public abstract TokenEntity createOrganizationToken(OrganizationPrincipal principal, @NoHtml String label, Optional<OffsetDateTimeParam> expiration);
+    public abstract TokenEntity createOrganizationToken(OrganizationPrincipal principal, @Valid CreateTokenRequest requestBody, @NoHtml String label, Optional<OffsetDateTimeParam> expiration);
 
     @GET
     @Path("/{tokenID}")
-    public abstract TokenEntity getOrganizationToken(OrganizationPrincipal principal, @PathParam("tokenID") @NotNull UUID tokenID);
+    public abstract TokenEntity getOrganizationToken(OrganizationPrincipal principal, @NotNull UUID tokenID);
 
     @POST
     @Path("/auth")
-    public abstract JWTAuthResponse authorizeJWT(@NoHtml @NotEmpty(message = "Scope is required") String scope, @NoHtml @NotEmpty(message = "Grant type is required") String grantType, @NoHtml @NotEmpty(message = "Assertion type is required") String clientAssertionType, @NoHtml @NotEmpty(message = "Assertion is required") String jwtBody);
+    public abstract JWTAuthResponse authorizeJWT(@NoHtml @NotEmpty(message = "Scope is required") String scope,
+                                                 @NoHtml @NotEmpty(message = "Grant type is required") String grantType,
+                                                 @NoHtml @NotEmpty(message = "Assertion type is required") String clientAssertionType,
+                                                 @NoHtml @NotEmpty(message = "Assertion is required") String jwtBody);
 
     @GET
     @Path("/validate")
@@ -63,5 +69,5 @@ public abstract class AbstractTokenResource {
 
     @DELETE
     @Path("/{tokenID}")
-    public abstract Response deleteOrganizationToken(OrganizationPrincipal organizationPrincipal, @NotNull @PathParam("tokenID") UUID tokenID);
+    public abstract Response deleteOrganizationToken(OrganizationPrincipal organizationPrincipal, @NotNull UUID tokenID);
 }

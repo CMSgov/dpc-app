@@ -4,9 +4,10 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.PerformanceOptionsEnum;
 import com.codahale.metrics.MetricRegistry;
 import com.typesafe.config.ConfigFactory;
-import gov.cms.dpc.aggregation.service.LookBackService;
+import gov.cms.dpc.aggregation.service.*;
 import gov.cms.dpc.aggregation.util.AggregationUtils;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
+import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.hapi.ContextUtils;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.JobStatus;
@@ -15,6 +16,8 @@ import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatchFile;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import io.reactivex.disposables.Disposable;
+import org.assertj.core.util.Lists;
+import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,16 +26,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.UUID;
+import java.time.YearMonth;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import static gov.cms.dpc.aggregation.service.LookBackAnalyzer.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.doReturn;
 
@@ -42,36 +43,49 @@ class BatchAggregationEngineTest {
     private static final String TEST_PROVIDER_ID = "1";
     private IJobQueue queue;
     private AggregationEngine engine;
-    private JobBatchProcessor jobBatchProcessor;
-    private Disposable subscribe;
     private LookBackService lookBackService;
+    private ConsentService consentService;
 
-    static private FhirContext fhirContext = FhirContext.forDstu3();
-    static private MetricRegistry metricRegistry = new MetricRegistry();
+    static private final FhirContext fhirContext = FhirContext.forDstu3();
+    static private final MetricRegistry metricRegistry = new MetricRegistry();
     static private String exportPath;
     static private OperationsConfig operationsConfig;
 
     @BeforeAll
-    static void setupAll() throws ParseException {
+    static void setupAll() {
         fhirContext.setPerformanceOptions(PerformanceOptionsEnum.DEFERRED_MODEL_SCANNING);
         final var config = ConfigFactory.load("testing.conf").getConfig("dpc.aggregation");
         exportPath = config.getString("exportPath");
-        operationsConfig = new OperationsConfig(10, exportPath, 3, new SimpleDateFormat("dd/MM/yyyy").parse("03/01/2015"));
+        operationsConfig = new OperationsConfig(10, exportPath, 3, YearMonth.of(2015, 3));
         AggregationEngine.setGlobalErrorHandler();
         ContextUtils.prefetchResourceModels(fhirContext, JobQueueBatch.validResourceTypes);
+
+        ConsentResult consentResult = new ConsentResult();
+        consentResult.setConsentDate(new Date());
+        consentResult.setActive(true);
+        consentResult.setPolicyType(ConsentResult.PolicyType.OPT_IN);
+        consentResult.setConsentId(UUID.randomUUID().toString());
     }
 
     @BeforeEach
     void setupEach() {
+        consentService = Mockito.mock(ConsentService.class);
         queue = new MemoryBatchQueue(100);
         final var bbclient = Mockito.spy(new MockBlueButtonClient(fhirContext));
-        lookBackService = Mockito.spy(LookBackService.class);
-        jobBatchProcessor = Mockito.spy(new JobBatchProcessor(bbclient, fhirContext, metricRegistry, operationsConfig));
-        engine = Mockito.spy(new AggregationEngine(aggregatorID, queue, operationsConfig, lookBackService, jobBatchProcessor));
+        lookBackService = Mockito.spy(EveryoneGetsDataLookBackServiceImpl.class);
+        JobBatchProcessor jobBatchProcessor = Mockito.spy(new JobBatchProcessor(bbclient, fhirContext, metricRegistry, operationsConfig, lookBackService, consentService));
+        engine = Mockito.spy(new AggregationEngine(aggregatorID, queue, operationsConfig, jobBatchProcessor));
         engine.queueRunning.set(true);
-        subscribe = Mockito.mock(Disposable.class);
+        Disposable subscribe = Mockito.mock(Disposable.class);
         doReturn(false).when(subscribe).isDisposed();
         engine.setSubscribe(subscribe);
+
+        ConsentResult consentResult = new ConsentResult();
+        consentResult.setConsentDate(new Date());
+        consentResult.setActive(true);
+        consentResult.setPolicyType(ConsentResult.PolicyType.OPT_IN);
+        consentResult.setConsentId(UUID.randomUUID().toString());
+        MockBlueButtonClient.TEST_PATIENT_MBIS.forEach(mbi -> Mockito.when(consentService.getConsent(mbi)).thenReturn(Optional.of(Lists.list(consentResult))));
     }
 
     /**
@@ -79,8 +93,7 @@ class BatchAggregationEngineTest {
      */
     @Test
     void largeJobTestSingleResource() {
-        Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getProviderNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
-        Mockito.doReturn(true).when(lookBackService).hasClaimWithin(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyLong());
+        Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getPractitionerNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
         // Make a simple job with one resource type
         final var orgID = UUID.randomUUID();
         final var jobID = queue.createJob(
@@ -89,8 +102,8 @@ class BatchAggregationEngineTest {
                 Collections.singletonList(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0)),
                 Collections.singletonList(ResourceType.ExplanationOfBenefit),
                 MockBlueButtonClient.TEST_LAST_UPDATED.minusSeconds(1),
-                MockBlueButtonClient.BFD_TRANSACTION_TIME
-        );
+                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                null, true);
 
         // Do the job
         queue.claimBatch(engine.getAggregatorID())
@@ -116,7 +129,7 @@ class BatchAggregationEngineTest {
      */
     @Test
     void largeJobTest() {
-        Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getProviderNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
+        Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getPractitionerNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
 
         // Make a simple job with one resource type
         final var orgID = UUID.randomUUID();
@@ -126,8 +139,8 @@ class BatchAggregationEngineTest {
                 MockBlueButtonClient.TEST_PATIENT_MBIS,
                 JobQueueBatch.validResourceTypes,
                 MockBlueButtonClient.TEST_LAST_UPDATED.minusSeconds(1),
-                MockBlueButtonClient.BFD_TRANSACTION_TIME
-        );
+                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                null, true);
 
         // Do the job
         queue.claimBatch(engine.getAggregatorID())
@@ -158,9 +171,8 @@ class BatchAggregationEngineTest {
     void largeJobWithBadPatientTest() {
         final var orgID = UUID.randomUUID();
 
-        Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getProviderNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
-        Mockito.doReturn(null).when(lookBackService).getProviderNPIFromRoster(orgID,TEST_PROVIDER_ID, null);
-        Mockito.doReturn(true).when(lookBackService).hasClaimWithin(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyLong());
+        Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getPractitionerNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
+        Mockito.doReturn(null).when(lookBackService).getPractitionerNPIFromRoster(orgID,TEST_PROVIDER_ID, null);
 
         // Make a simple job with one resource type
         final var jobID = queue.createJob(
@@ -169,8 +181,177 @@ class BatchAggregationEngineTest {
                 MockBlueButtonClient.TEST_PATIENT_WITH_BAD_IDS,
                 Collections.singletonList(ResourceType.ExplanationOfBenefit),
                 MockBlueButtonClient.TEST_LAST_UPDATED.minusSeconds(1),
-                MockBlueButtonClient.BFD_TRANSACTION_TIME
-        );
+                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                null, true);
+
+        // Do the job
+        queue.claimBatch(engine.getAggregatorID())
+                .ifPresent(engine::processJobBatch);
+
+        // Look at the result
+        final var completeJob = queue.getJobBatches(jobID).stream().findFirst().orElseThrow();
+        assertEquals(JobStatus.COMPLETED, completeJob.getStatus());
+        assertAll(
+                () -> assertEquals(5, completeJob.getJobQueueBatchFiles().size(), String.format("Unexpected JobModel: %s", completeJob.toString())),
+                () -> assertTrue(completeJob.getJobQueueFile(ResourceType.ExplanationOfBenefit).isPresent(), "Expect a EOB"),
+                () -> assertFalse(completeJob.getJobQueueFile(ResourceType.OperationOutcome).isEmpty(), "Expect an error"));
+
+        // Look at the output files
+        final var outputFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), ResourceType.ExplanationOfBenefit, 0);
+        assertTrue(Files.exists(Path.of(outputFilePath)));
+        final var errorFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), ResourceType.OperationOutcome, 0);
+        assertTrue(Files.exists(Path.of(errorFilePath)), "expect error file for failed patient");
+    }
+
+    @Test
+    void lookBackDateCriteriaMismatch() throws IOException {
+        final var orgID = UUID.randomUUID();
+        final var npi = NPIUtil.generateNPI();
+
+        Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getPractitionerNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
+        Mockito.doReturn(new LookBackAnswer(npi, npi, 1, YearMonth.now())
+                .addEobBillingPeriod(YearMonth.now().minusYears(1))
+                .addEobOrganization(npi)
+                .addEobProviders(List.of(npi))).when(lookBackService).getLookBackAnswer(Mockito.any(), Mockito.any(), Mockito.anyString(), Mockito.anyLong());
+
+        // Make a simple job with one resource type
+        final var jobID = queue.createJob(
+                orgID,
+                TEST_PROVIDER_ID,
+                MockBlueButtonClient.TEST_PATIENT_MBIS.subList(0,1),
+                Collections.singletonList(ResourceType.ExplanationOfBenefit),
+                MockBlueButtonClient.TEST_LAST_UPDATED.minusSeconds(1),
+                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                null, true);
+
+        // Do the job
+        queue.claimBatch(engine.getAggregatorID())
+                .ifPresent(engine::processJobBatch);
+
+        // Look at the result
+        final var completeJob = queue.getJobBatches(jobID).stream().findFirst().orElseThrow();
+        assertEquals(JobStatus.COMPLETED, completeJob.getStatus());
+        assertAll(
+                () -> assertEquals(1, completeJob.getJobQueueBatchFiles().size(), String.format("Unexpected JobModel: %s", completeJob.toString())),
+                () -> assertFalse(completeJob.getJobQueueFile(ResourceType.ExplanationOfBenefit).isPresent(), "Expect a EOB"),
+                () -> assertTrue(completeJob.getJobQueueFile(ResourceType.OperationOutcome).isPresent(), "Expect an error"));
+
+        // Look at the output files
+        final var outputFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), ResourceType.ExplanationOfBenefit, 0);
+        assertFalse(Files.exists(Path.of(outputFilePath)));
+        final var errorFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), ResourceType.OperationOutcome, 0);
+        assertTrue(Files.exists(Path.of(errorFilePath)), "expect error file for failed patient");
+        String operationOutcome = Files.readString(Path.of(errorFilePath));
+        OperationOutcome o = FhirContext.forDstu3().newJsonParser().parseResource(OperationOutcome.class, operationOutcome);
+        assertEquals(NO_DATE_MATCH_DETAIL, o.getIssueFirstRep().getDetails().getText());
+    }
+
+    @Test
+    void lookBackAllCriteriaMismatch() throws IOException {
+        final var orgID = UUID.randomUUID();
+        final var npi = NPIUtil.generateNPI();
+
+        Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getPractitionerNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
+        Mockito.doReturn(new LookBackAnswer(npi, npi, 1, YearMonth.now())
+                .addEobBillingPeriod(YearMonth.now().minusYears(1))
+                .addEobOrganization(NPIUtil.generateNPI())
+                .addEobProviders(List.of(NPIUtil.generateNPI()))).when(lookBackService).getLookBackAnswer(Mockito.any(), Mockito.any(), Mockito.anyString(), Mockito.anyLong());
+
+        // Make a simple job with one resource type
+        final var jobID = queue.createJob(
+                orgID,
+                TEST_PROVIDER_ID,
+                MockBlueButtonClient.TEST_PATIENT_MBIS.subList(0,1),
+                Collections.singletonList(ResourceType.ExplanationOfBenefit),
+                MockBlueButtonClient.TEST_LAST_UPDATED.minusSeconds(1),
+                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                null, true);
+
+        // Do the job
+        queue.claimBatch(engine.getAggregatorID())
+                .ifPresent(engine::processJobBatch);
+
+        // Look at the result
+        final var completeJob = queue.getJobBatches(jobID).stream().findFirst().orElseThrow();
+        assertEquals(JobStatus.COMPLETED, completeJob.getStatus());
+        assertAll(
+                () -> assertEquals(1, completeJob.getJobQueueBatchFiles().size(), String.format("Unexpected JobModel: %s", completeJob.toString())),
+                () -> assertFalse(completeJob.getJobQueueFile(ResourceType.ExplanationOfBenefit).isPresent(), "Expect a EOB"),
+                () -> assertTrue(completeJob.getJobQueueFile(ResourceType.OperationOutcome).isPresent(), "Expect an error"));
+
+        // Look at the output files
+        final var outputFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), ResourceType.ExplanationOfBenefit, 0);
+        assertFalse(Files.exists(Path.of(outputFilePath)));
+        final var errorFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), ResourceType.OperationOutcome, 0);
+        assertTrue(Files.exists(Path.of(errorFilePath)), "expect error file for failed patient");
+        String operationOutcome = Files.readString(Path.of(errorFilePath));
+        OperationOutcome o = FhirContext.forDstu3().newJsonParser().parseResource(OperationOutcome.class, operationOutcome);
+        assertEquals(NO_MATCHES_DETAIL, o.getIssueFirstRep().getDetails().getText());
+    }
+
+    @Test
+    void lookBackNpiCriteriaMismatch() throws IOException {
+        final var orgID = UUID.randomUUID();
+        final var npi = NPIUtil.generateNPI();
+
+        Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getPractitionerNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
+        Mockito.doReturn(new LookBackAnswer(npi, npi, 1, YearMonth.now())
+                .addEobBillingPeriod(YearMonth.now())
+                .addEobOrganization(NPIUtil.generateNPI())
+                .addEobProviders(List.of(NPIUtil.generateNPI()))).when(lookBackService).getLookBackAnswer(Mockito.any(), Mockito.any(), Mockito.anyString(), Mockito.anyLong());
+
+        // Make a simple job with one resource type
+        final var jobID = queue.createJob(
+                orgID,
+                TEST_PROVIDER_ID,
+                MockBlueButtonClient.TEST_PATIENT_MBIS.subList(0,1),
+                Collections.singletonList(ResourceType.ExplanationOfBenefit),
+                MockBlueButtonClient.TEST_LAST_UPDATED.minusSeconds(1),
+                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                null, true);
+
+        // Do the job
+        queue.claimBatch(engine.getAggregatorID())
+                .ifPresent(engine::processJobBatch);
+
+        // Look at the result
+        final var completeJob = queue.getJobBatches(jobID).stream().findFirst().orElseThrow();
+        assertEquals(JobStatus.COMPLETED, completeJob.getStatus());
+        assertAll(
+                () -> assertEquals(1, completeJob.getJobQueueBatchFiles().size(), String.format("Unexpected JobModel: %s", completeJob.toString())),
+                () -> assertFalse(completeJob.getJobQueueFile(ResourceType.ExplanationOfBenefit).isPresent(), "Expect a EOB"),
+                () -> assertTrue(completeJob.getJobQueueFile(ResourceType.OperationOutcome).isPresent(), "Expect an error"));
+
+        // Look at the output files
+        final var outputFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), ResourceType.ExplanationOfBenefit, 0);
+        assertFalse(Files.exists(Path.of(outputFilePath)));
+        final var errorFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), ResourceType.OperationOutcome, 0);
+        assertTrue(Files.exists(Path.of(errorFilePath)), "expect error file for failed patient");
+        String operationOutcome = Files.readString(Path.of(errorFilePath));
+        OperationOutcome o = FhirContext.forDstu3().newJsonParser().parseResource(OperationOutcome.class, operationOutcome);
+        assertEquals(NO_NPI_MATCH_DETAIL, o.getIssueFirstRep().getDetails().getText());
+    }
+
+    @Test
+    void lookBackNpiCriteriaMatch() {
+        final var orgID = UUID.randomUUID();
+        final var npi = NPIUtil.generateNPI();
+
+        Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getPractitionerNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
+        Mockito.doReturn(new LookBackAnswer(npi, npi, 1, YearMonth.now())
+                .addEobBillingPeriod(YearMonth.now())
+                .addEobOrganization(npi)
+                .addEobProviders(List.of(NPIUtil.generateNPI()))).when(lookBackService).getLookBackAnswer(Mockito.any(), Mockito.any(), Mockito.anyString(), Mockito.anyLong());
+
+        // Make a simple job with one resource type
+        final var jobID = queue.createJob(
+                orgID,
+                TEST_PROVIDER_ID,
+                MockBlueButtonClient.TEST_PATIENT_MBIS.subList(0,1),
+                Collections.singletonList(ResourceType.ExplanationOfBenefit),
+                MockBlueButtonClient.TEST_LAST_UPDATED.minusSeconds(1),
+                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                null, true);
 
         // Do the job
         queue.claimBatch(engine.getAggregatorID())
@@ -182,12 +363,12 @@ class BatchAggregationEngineTest {
         assertAll(
                 () -> assertEquals(4, completeJob.getJobQueueBatchFiles().size(), String.format("Unexpected JobModel: %s", completeJob.toString())),
                 () -> assertTrue(completeJob.getJobQueueFile(ResourceType.ExplanationOfBenefit).isPresent(), "Expect a EOB"),
-                () -> assertTrue(completeJob.getJobQueueFile(ResourceType.OperationOutcome).isEmpty(), "Expect an error"));
+                () -> assertFalse(completeJob.getJobQueueFile(ResourceType.OperationOutcome).isPresent(), "Expect an error"));
 
         // Look at the output files
         final var outputFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), ResourceType.ExplanationOfBenefit, 0);
         assertTrue(Files.exists(Path.of(outputFilePath)));
         final var errorFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), ResourceType.OperationOutcome, 0);
-        assertFalse(Files.exists(Path.of(errorFilePath)), "expect no error file");
+        assertFalse(Files.exists(Path.of(errorFilePath)), "expect error file for failed patient");
     }
 }

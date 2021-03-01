@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "df021205-c00a-43c1-b327-553ff95a0fe1",
+		"_postman_id": "5f37b58d-b843-4110-a54d-ed39f9d52460",
 		"name": "EndToEndRequestTest",
 		"description": "This test is an example of an end to end set of API requests to submit a roster and export patient data. Each element in the 'item' list is a single request.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -15,7 +15,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "d20f48b5-e251-47e2-8807-03bc9edf21d7",
+								"id": "d8fdc0a8-8995-49fb-99ef-ede01a59a9bb",
 								"exec": [
 									"// Status should be 201",
 									"pm.test(\"Status is 201\", function () {",
@@ -81,7 +81,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "84e24f62-ac2f-4895-806d-90b32fd24c9e",
+								"id": "babe61be-8f50-4537-b89b-ce1264e6116a",
 								"exec": [
 									"pm.test(\"Status is 201 Created\", function () {",
 									"    pm.expect(pm.response.code).equals(201);",
@@ -128,7 +128,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "524f7746-8121-4563-a134-1e062e14ae4d",
+								"id": "9c0ae7d2-9bda-4fb0-941e-eb7672f29527",
 								"exec": [
 									"pm.test(\"Status is OK\", function () {",
 									"    pm.response.to.be.ok;",
@@ -172,7 +172,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "e608aed2-c479-41fa-865b-1c66edd63aa3",
+								"id": "8da99989-edf5-454a-b652-41190250e54a",
 								"exec": [
 									"pm.test(\"Status is 201\", function () {",
 									"    pm.response.to.have.status(201);",
@@ -241,7 +241,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "8064037b-3c73-4019-bdf3-0f665c0dcdf1",
+								"id": "af3eadcb-8d41-42f4-8c35-5085f5f36107",
 								"exec": [
 									"// Status should be 200",
 									"pm.test(\"Status is 200\", function () {",
@@ -308,7 +308,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "48795c9c-7ee1-4ba8-8512-6e37a7ee7a49",
+								"id": "2ba5d71e-9d01-49ad-a8da-b025559876ee",
 								"exec": [
 									"// Status should be 200",
 									"pm.test(\"Status is 200\", function () {",
@@ -377,7 +377,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "5a45e0b9-af07-4c64-9fd3-16f4877f9b89",
+								"id": "dbf32e16-501c-403b-9f10-20279261ec7e",
 								"exec": [
 									"// Status should be 201",
 									"pm.test(\"Status is 201\", function () {",
@@ -412,7 +412,7 @@
 						{
 							"listen": "prerequest",
 							"script": {
-								"id": "1af7fc14-0bdd-478a-bfd7-a6e0cead266d",
+								"id": "6bd6440e-6358-4cc0-be87-7b4efdde1229",
 								"exec": [
 									"var group = {",
 									"  \"resourceType\": \"Group\",",
@@ -535,7 +535,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "3d67a3c8-d3c5-4ca5-850b-5d7a48ee396e",
+								"id": "6e41af2f-41ae-4ab4-b9e4-f427ac77e138",
 								"exec": [
 									"// Status should be 200",
 									"pm.test(\"Status is 200\", function () {",
@@ -555,7 +555,12 @@
 									"    pm.expect(response.total).to.equal(1);",
 									"",
 									"    pm.globals.set(\"single_patient_id\", \"Patient/\" + response.entry[0].resource.id);",
-									"})"
+									"})",
+                                    "pm.test(\"Result should have MBI as uppercase\", function() {",
+                                    "    var response = pm.response.json();",
+                                    "    var mbiIdentifier = response.entry[0].resource.identifier.filter(identifier => identifier.system == \"http://hl7.org/fhir/sid/us-mbi\")[0]",
+                                    "    pm.expect(mbiIdentifier.value).to.equal(\"1SQ3F00AA00\");",
+                                    "})"
 								],
 								"type": "text/javascript"
 							}
@@ -565,7 +570,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://{{hostname}}:{{api_port}}/v1/Patient?identifier=1SQ3F00AA00",
+							"raw": "http://{{hostname}}:{{api_port}}/v1/Patient?identifier=1sQ3f00aa00",
 							"protocol": "http",
 							"host": [
 								"{{hostname}}"
@@ -578,7 +583,7 @@
 							"query": [
 								{
 									"key": "identifier",
-									"value": "1SQ3F00AA00"
+									"value": "1sQ3f00Aa00"
 								}
 							]
 						},
@@ -592,7 +597,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "4ab264d5-ed98-47dd-9f78-c0e63feb133b",
+								"id": "23bda94f-2589-4dcf-a8b3-044166cbaf7d",
 								"exec": [
 									"// Status should be 200",
 									"pm.test(\"Status is 200\", function () {",
@@ -651,7 +656,7 @@
 						{
 							"listen": "prerequest",
 							"script": {
-								"id": "c0e1b44e-9099-4083-ac5e-06aba318543f",
+								"id": "523fe412-b2e8-42c0-9313-cc273c0f2d78",
 								"exec": [
 									"var group = JSON.parse(pm.globals.get(\"attribution_group\"));",
 									"var patientID = pm.globals.get(\"single_patient_id\");",
@@ -674,7 +679,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "2c2d4869-aafa-4e5f-80ac-b6f8a8318dc0",
+								"id": "6e8e1f2e-1d04-4a0f-a22d-5fd6927f418d",
 								"exec": [
 									"// Status should be 200",
 									"pm.test(\"Status is 200\", function () {",
@@ -741,7 +746,7 @@
 						{
 							"listen": "prerequest",
 							"script": {
-								"id": "9facf58c-0dcd-4c73-a3ad-0fa80048a851",
+								"id": "4699b19e-dca5-4d57-8a69-6b584fefd5e6",
 								"exec": [
 									"// Build the attestation header",
 									"var attestation = {",
@@ -782,7 +787,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "94547b23-330a-4b46-a1d5-bd4f4c4e7164",
+								"id": "d4682837-eefc-4626-a39f-45c7cc077e70",
 								"exec": [
 									"// Status should be 400",
 									"pm.test(\"Status is 400\", function () {",
@@ -859,7 +864,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "d05846e2-02ec-464c-ad71-65ea76894679",
+								"id": "61dbf88e-b949-4874-9d7f-05bd0e3e6b8b",
 								"exec": [
 									"// Status should be 202",
 									"pm.test(\"Status is 202\", function () {",
@@ -884,7 +889,7 @@
 						{
 							"listen": "prerequest",
 							"script": {
-								"id": "c717d23c-2870-4a91-8135-35ce86c2b482",
+								"id": "279ee4c2-d9ff-41c8-b268-ef16ca3f013f",
 								"exec": [
 									"console.log(\"Group:\", pm.environment.get(\"attribution_group\"));"
 								],
@@ -930,7 +935,7 @@
 						{
 							"listen": "prerequest",
 							"script": {
-								"id": "7a2207f3-efe4-4fb1-8184-e9317476095b",
+								"id": "24d1aaf5-f6a5-489e-91e7-421d2f3fc168",
 								"exec": [
 									"// Wait between pings",
 									"setTimeout(function() {}, 1000);"
@@ -941,7 +946,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "5a165b1c-6876-44a5-8453-a4c9b5840c9a",
+								"id": "e4840a33-8d36-4d7a-9af4-bb562b62f451",
 								"exec": [
 									"if (pm.response.code == 200) {",
 									"    // Response should have FHIR Content-Type",
@@ -951,10 +956,10 @@
 									"    ",
 									"    // If response code is 200, check the response and load the urls.",
 									"    pm.test(\"Patient, EOB, and Coverage resources; one error file\", function() {",
-									"        pm.expect(pm.response.json().error).to.have.lengthOf(0);",
+									"        pm.expect(pm.response.json().error).to.have.lengthOf(1);",
 									"        pm.expect(pm.response.json().output).to.have.lengthOf(3);",
 									"        ",
-									"        // Order of the output types is not guarenteed",
+									"        // Order of the output types is not guaranteed",
 									"        var outputTypes = pm.response.json().output.map((elem) => elem.type);",
 									"        pm.expect(outputTypes).to.include(\"Patient\");",
 									"        pm.expect(outputTypes).to.include(\"Coverage\");",
@@ -994,6 +999,23 @@
 									"        pm.expect(coverage.extension[1].url).to.equal(\"https://dpc.cms.gov/file_length\");",
 									"        pm.expect(coverage.extension[1].valueDecimal).to.exist;",
 									"        pm.environment.set(\"coverage\", coverage);",
+									"",
+									"        // OperationOutcome",
+									"        var operationOutcome = pm.response.json().error.filter((elem) => elem.type == \"OperationOutcome\")[0]; ",
+									"        pm.expect(operationOutcome.count).to.equal(1);",
+									"        pm.expect(Object.keys(operationOutcome.extension[0]).length).to.equal(2);",
+									"        pm.expect(operationOutcome.extension[0].url).to.equal(\"https://dpc.cms.gov/checksum\");",
+									"        pm.expect(operationOutcome.extension[0].valueString).to.exist;",
+									"        pm.expect(Object.keys(operationOutcome.extension[1]).length).to.equal(2);",
+									"        pm.expect(operationOutcome.extension[1].url).to.equal(\"https://dpc.cms.gov/file_length\");",
+									"        pm.expect(operationOutcome.extension[1].valueDecimal).to.exist;",
+									"        pm.environment.set(\"operationOutcome\", operationOutcome);",
+									"",
+									"        var expiresHeader = pm.response.headers.get(\"Expires\");",
+									"        pm.expect(expiresHeader).to.exist;",
+									"        var expiresInHrs = (Date.parse(expiresHeader) - Date.now())/3600000;",
+									"        pm.expect(expiresInHrs).to.be.above(23);",
+									"        pm.expect(expiresInHrs).to.be.below(24);",
 									"    });",
 									"} else {",
 									"    // If response code is not 200, it should be 202. Assert that, and retry.",
@@ -1026,7 +1048,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "1a72410f-a0e0-414c-a922-6afc137ca145",
+								"id": "3a2dbd63-1fc3-4880-81f0-5f218fad957e",
 								"exec": [
 									"require('crypto-js')",
 									"",
@@ -1063,7 +1085,7 @@
 						{
 							"listen": "prerequest",
 							"script": {
-								"id": "befdd9de-99be-488f-87b0-31fb3b1f818f",
+								"id": "58cd062d-719d-4a54-964a-4c971f464baf",
 								"exec": [
 									"pm.environment.set(\"patient_url\", pm.environment.get(\"patient\").url)"
 								],
@@ -1090,7 +1112,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "3f8626e1-827f-4738-80eb-480674a06618",
+								"id": "1ff19a39-1917-4d23-9fc0-1e80b624a267",
 								"exec": [
 									"// Response should have FHIR Content-Type",
 									"pm.test(\"Content-type is application/fhir+ndjson\", function() {",
@@ -1115,7 +1137,7 @@
 						{
 							"listen": "prerequest",
 							"script": {
-								"id": "0b36739e-fd94-43d6-b585-b47d14436d3d",
+								"id": "28686923-a654-4d56-a3a1-e4e1830eec70",
 								"exec": [
 									"pm.environment.set(\"eob_url\", pm.environment.get(\"eob\").url)"
 								],
@@ -1142,7 +1164,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "2ad8997c-8da4-41ef-ad55-c25e1a649a94",
+								"id": "7a7b2436-1612-405a-98ba-592d6c125da6",
 								"exec": [
 									"// Response should have FHIR Content-Type",
 									"pm.test(\"Content-type is application/fhir+ndjson\", function() {",
@@ -1176,7 +1198,7 @@
 						{
 							"listen": "prerequest",
 							"script": {
-								"id": "0f77a7bd-fd9f-4cca-9ea4-02974fb84720",
+								"id": "82a59df8-453e-4b12-9c53-e550917f7cfd",
 								"exec": [
 									"pm.environment.set(\"coverage_url\", pm.environment.get(\"coverage\").url)"
 								],
@@ -1198,12 +1220,75 @@
 					"response": []
 				},
 				{
+					"name": "Operation Outcome data",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "25ec9c81-b59c-4524-adb0-05c5633b2033",
+								"exec": [
+									"// Response should have FHIR Content-Type",
+									"pm.test(\"Content-type is application/fhir+ndjson\", function() {",
+									"   pm.response.to.have.header(\"Content-Type\", \"application/fhir+ndjson\"); ",
+									"});",
+									"",
+									"// There should be 1 operation outcome.",
+									"pm.test(\"OperationOutcome data correct\", function() {",
+									"    var responseOutput = pm.response.text();",
+									"    var responseLines = responseOutput.trim().split('\\n');",
+									"    pm.expect(responseLines).to.have.lengthOf(1);",
+									"    var operationOutcomeItem = JSON.parse(responseLines[0]);",
+									"    pm.expect(operationOutcomeItem.resourceType).to.equal(\"OperationOutcome\");",
+									"    pm.expect(operationOutcomeItem.issue).to.have.lengthOf(1);",
+									"    var issue = operationOutcomeItem.issue[0];",
+									"    pm.expect(issue.details.text).to.equal(\"DPC couldn't find any claims for this MBI; unable to demonstrate relationship with provider or organization\");",
+									"    pm.expect(issue.location).to.include('0S80C00AA00');",
+									"});",
+									"",
+									"// Verify sha256 checksum",
+									"pm.test(\"Checksum should match\", function() {",
+									"    var output = pm.environment.get(\"operationOutcome\")",
+									"    var responseOutput = pm.response.text();",
+									"    ",
+									"    var checksum  = CryptoJS.SHA256(responseOutput);",
+									"    pm.expect(\"sha256:\" + checksum).to.equal(output.extension[0].valueString)",
+									"    ",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "694e2fcf-c720-4e1c-90f6-10783dd62dcc",
+								"exec": [
+									"pm.environment.set(\"operationOutcome_url\", pm.environment.get(\"operationOutcome\").url)"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{operationOutcome_url}}",
+							"host": [
+								"{{operationOutcome_url}}"
+							]
+						},
+						"description": "The coverage data url comes from the response to the job in the previous request. It is in ndjson, which is a set of JSON responses, one per line. Each line contains the JSON data for one coverage."
+					},
+					"response": []
+				},
+				{
 					"name": "Request Partial Range",
 					"event": [
 						{
 							"listen": "test",
 							"script": {
-								"id": "0147765a-3211-4300-88a0-873ddb2a382b",
+								"id": "b66bb3d3-b465-40f1-a0fa-507816ff7619",
 								"exec": [
 									"// Response should have FHIR Content-Type",
 									"pm.test(\"Content-type is application/fhir+ndjson\", function() {",
@@ -1248,7 +1333,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "36a4c38c-a2ff-4436-bd3a-991f9d87f122",
+								"id": "595d8c8f-6ae2-408d-a1eb-0001ac956230",
 								"exec": [
 									"// Response should be 304",
 									"pm.test('Response should be not-modified', function() {",
@@ -1291,7 +1376,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "4f4ecdc1-0b54-498b-af77-514fabcaf34e",
+								"id": "a3294ca5-5c4b-4fa3-ab92-d41efa02544a",
 								"exec": [
 									"// Status should be 202",
 									"pm.test(\"Status is 202\", function () {",
@@ -1316,7 +1401,7 @@
 						{
 							"listen": "prerequest",
 							"script": {
-								"id": "a89b4b2e-979e-4a7e-b84f-bb4a13f206a1",
+								"id": "5257c1e2-c5e5-4d41-8515-7d10fcc620a1",
 								"exec": [
 									"console.log(\"Group:\", pm.environment.get(\"attribution_group\"));",
 									"pm.environment.set(\"since_timestamp\", new Date().toISOString());"
@@ -1376,7 +1461,7 @@
 						{
 							"listen": "prerequest",
 							"script": {
-								"id": "a1aaa954-4935-4a45-a922-001e3e5d8603",
+								"id": "fe048bde-8074-4ea0-9342-a4070239da67",
 								"exec": [
 									"// Wait between pings",
 									"setTimeout(function() {}, 1000);"
@@ -1387,7 +1472,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "fb5a1ec8-d19f-4e7d-8208-34ba4bef55e7",
+								"id": "5535235a-e239-48c2-b3b6-7339ef0662de",
 								"exec": [
 									"if (pm.response.code == 200) {",
 									"    // Response should have FHIR Content-Type",
@@ -1431,7 +1516,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "933dff96-fdef-4d05-8e23-315dadc37ac2",
+								"id": "99ef66da-7460-4665-8ea2-8b9a1aa37a37",
 								"exec": [
 									"pm.test(\"Status code should be 200\", function () {",
 									"    pm.response.to.have.status(200);",
@@ -1440,6 +1525,13 @@
 									"pm.test(\"Response should be a Bundle\", function() {",
 									"    var response = pm.response.json();",
 									"    pm.expect(response.resourceType).to.equal(\"Bundle\");",
+									"    var entries = response.entry;",
+									"    var patients = entries.filter(e => e.resource.resourceType === \"Patient\");",
+									"    pm.expect(patients.length).to.equal(1);",
+									"    var coverage = entries.filter(e => e.resource.resourceType === \"Coverage\");",
+									"    pm.expect(coverage.length).to.equal(4);",
+									"    var eob = entries.filter(e => e.resource.resourceType === \"ExplanationOfBenefit\");",
+									"    pm.expect(eob.length).to.equal(10);",
 									"});"
 								],
 								"type": "text/javascript"
@@ -1448,7 +1540,7 @@
 						{
 							"listen": "prerequest",
 							"script": {
-								"id": "4447fb96-7a76-4a71-b5a7-3fa66016a6eb",
+								"id": "c08deedf-8b27-48b4-bc92-af78e031ccac",
 								"exec": [
 									""
 								],
@@ -1495,7 +1587,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "5a719af5-c2ea-4924-88d7-f905523fa99a",
+								"id": "b7dde0db-98b3-439e-91a7-e571952e2bd8",
 								"exec": [
 									"pm.test(\"Status is 415\", function () {",
 									"    pm.response.to.have.status(415);",
@@ -1548,7 +1640,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "806f5f1d-bf0b-43ee-9bc8-4cadf281f454",
+								"id": "3ae43670-a11e-4cac-9ebc-a8f1b39d3c04",
 								"exec": [
 									"pm.test(\"Status is OK\", function () {",
 									"    pm.response.to.be.ok;",
@@ -1605,7 +1697,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "0ed8b9a3-bec2-4eb6-98b2-c24b9d19bbf5",
+								"id": "2f4e8c5f-db7b-4525-b138-bd1ffa23e83a",
 								"exec": [
 									"pm.test(\"Status is OK\", function () {",
 									"    pm.response.to.be.ok;",
@@ -1660,7 +1752,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "07b38e0b-ad22-4ed1-ac8f-dd56d66e36c8",
+								"id": "4f043b01-671d-4778-9867-42cd5f0ac1c8",
 								"exec": [
 									"pm.test(\"Status is 422\", function () {",
 									"    pm.response.to.have.status(422);",
@@ -1711,7 +1803,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "ab5d2c53-cc43-46ad-94d2-13724b7c7bca",
+								"id": "e3bf1f3c-1426-4e9b-9d1e-c26ba2c54951",
 								"exec": [
 									"pm.test(\"Status is 200\", function () {",
 									"    pm.response.to.have.status(200);",
@@ -1779,7 +1871,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "547377c7-b14a-49fa-87b2-f4b3e77605a5",
+								"id": "51fbe1c8-6368-4756-9426-338d5054412f",
 								"exec": [
 									"// Status should be 200",
 									"pm.test(\"Status is 200\", function () {",
@@ -1856,7 +1948,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "74e7e7d8-96f5-4637-88e5-083a4901ad60",
+								"id": "0f1c1e51-dd2f-4132-bb79-78be81153ccc",
 								"exec": [
 									"// Status should be 200",
 									"pm.test(\"Status is 200\", function () {",
@@ -1916,7 +2008,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "6f850276-d46b-4ffd-af9e-c505012b7203",
+								"id": "4abbb99c-f712-46cd-bbc6-2fb7cf35d0db",
 								"exec": [
 									"// Status should be 200",
 									"pm.test(\"Status is 200\", function () {",
@@ -1952,7 +2044,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "ad6f283f-bb9b-4432-b8aa-96d1264cdf38",
+								"id": "64d427a6-f028-49de-a753-6c4de2a643e9",
 								"exec": [
 									"pm.test(\"Bundle should be empty\", function() {",
 									"    var response = pm.response.json();",
@@ -1997,7 +2089,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "af991418-08c6-49f5-806f-4088c3218449",
+								"id": "723d3de9-12ef-49a0-8036-b31184d227b6",
 								"exec": [
 									"pm.test(\"Status is OK\", function () {",
 									"    pm.response.to.be.ok;",
@@ -2042,7 +2134,7 @@
 		{
 			"listen": "prerequest",
 			"script": {
-				"id": "51b7df23-3d6f-4405-b324-5407416bdc39",
+				"id": "bc44ce8b-485d-4072-9691-e17ad5417f7b",
 				"type": "text/javascript",
 				"exec": [
 					""
@@ -2052,7 +2144,7 @@
 		{
 			"listen": "test",
 			"script": {
-				"id": "f88b6af6-58b9-4d0f-b4be-229ac01afcc4",
+				"id": "60ad4542-25e7-4f05-95da-0ecbcde8a1aa",
 				"type": "text/javascript",
 				"exec": [
 					""

@@ -20,7 +20,7 @@
   <section class="ds-l-container ds-u-margin-bottom--4 ds-u-font-size--small">
     <div class="ds-l-row">
       <div class="ds-l-col--6 ds-l-md-col--3 step step_1">
-        <%= image_tag("private-key-image.svg", alt: "") %>
+        <%= image_tag("private_key.svg", alt: "A picture of a locked lock with a key hole") %>
         <h4>1. Generate a private key</h4>
         <div>
           Use the command invocation:<br />
@@ -39,7 +39,7 @@
         <p><b><span class="ds-u-color--error">IMPORTANT!</span> The contents of your private key (private.pem file) should be treated as sensitive/secret information.</b> Take care in the handling and storage of this information as it is essential to the security of your connection with DPC.</p>
       </div>
       <div class="ds-l-col--6 ds-l-md-col--3 step_2">
-        <%= image_tag("public-key-image.svg", alt: "") %>
+        <%= image_tag("public-key-image.svg", alt: "A picture of a key") %>
         <h4>2. Generate a public key</h4>
         <div>
           Use the command invocation:<br />
@@ -59,17 +59,16 @@
       </div>
       <div class="ds-l-col--6 ds-l-md-col--3 step_3">
         <%= image_tag("create-sig-image.svg", alt: "") %>
-        <h4>3. Create public key signature</h4>
+        <h4>3a. Create public key snippet</h4>
 
         <div class="download_btn_container">
           <div class="download_btn_form">
             <%= button_to 'DOWNLOAD', download_snippet_path, class: "ds-u-padding--1 ds-c-button--primary ds-u-font-weight--bold download_btn" %>
           </div>
           <div class="ds-u-padding--1 download_btn_description">
-            snippet.txt file to create signature
+            snippet.txt file to create snippet
           </div>
         </div>
-
 
         <div>
           Use the command invocation:<br />
@@ -91,10 +90,8 @@
         <div class="confirm-msg">
           <span id="confirm-sig-snippet" style="display: hidden;"></span>
         </div>
-      </div>
-      <div class="ds-l-col--6 ds-l-md-col--3 step_4">
-        <%= image_tag("verify-sig-image.svg", alt: "") %>
-        <h4>4. Verify public key signature</h4>
+
+        <h4>3b. Verify public key snippet</h4>
 
         <div>
           Use the command invocation:<br />
@@ -118,8 +115,13 @@
         </div>
 
         <p class="ds-u-font-weight--bold">Results <u>must</u> confirm <span class="ds-u-color--success">Verified Ok</span></p>
+      </div>
+      <div class="ds-l-col--6 ds-l-md-col--3 step_4">
+        <%= image_tag("verified-pk-sig.svg", alt: "") %>
 
         <div>
+          <h4>4. Generate a <em>verified</em> public key signature</h4>
+
           Use the command invocation:<br />
           <div class="code-block ds-u-truncate">
             <code>
@@ -170,7 +172,8 @@
         <div class="pk-grid-cell pk-form-field" id="label-form">
           <div class="field ds-u-margin-y--5">
             <%= label_tag :label, "Label", class: "ds-c-label" %>
-            <%= text_field_tag :label, params[:label], class: "ds-c-field" %>
+            <%= text_field_tag :label, params[:label], class: "ds-c-field", onkeyup: "characterCount('label',25,'pubkey-char-count')" %>
+            <span class="char-count ds-u-color--gray ds-u-font-weight--normal" id="pubkey-char-count">(0/25)</span>
           </div>
         </div>
         <div class="pk-grid-cell pk-instruction" id="key-inst">

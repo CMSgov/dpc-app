@@ -1,5 +1,8 @@
 version: '3'
 
+volumes:
+  coverage:
+
 services:
 
   redis:
@@ -25,6 +28,8 @@ services:
       context: ..
       dockerfile: dpc-web/Dockerfile
     image: dpc-web:latest
+    volumes:
+      - "./coverage:/dpc-web/coverage"
     environment:
       - REDIS_URL=redis://redis:6379/1
       - DATABASE_URL=postgresql://db/dpc-website_development
@@ -33,7 +38,7 @@ services:
       - DB_PASS=dpc-safe
       - DATABASE_CLEANER_ALLOW_REMOTE_DATABASE_URL=true
     ports:
-      - "3000:3000"
+      - "3500:3500"
     depends_on:
       - db
       - redis

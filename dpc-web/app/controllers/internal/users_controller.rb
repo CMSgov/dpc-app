@@ -8,6 +8,7 @@ module Internal
 
     def index
       results = BaseSearch.new(params: params, scope: params[:org_type]).results
+      @tags = Tag.all
 
       @users = results.order('users.created_at DESC').page params[:page]
       render layout: 'table_index'
@@ -15,6 +16,7 @@ module Internal
 
     def show
       @user = User.find(id_param)
+      @tags = Tag.where.not(id: @user.taggings.pluck(:tag_id))
     end
 
     def edit
@@ -47,9 +49,16 @@ module Internal
     end
 
     def download
-      respond_to do |format|
-        filename = "users-#{Time.now.strftime('%Y%m%dT%H%M')}.csv"
-        format.csv { send_data User.all.to_csv, filename: filename }
+      user_ids = params[:users]
+
+      if user_ids.blank?
+        flash[:alert] = 'CSV file could not be compiled. No users were found.'
+        redirect_to root_path
+      else
+        respond_to do |format|
+          filename = "users-#{Time.now.strftime('%Y%m%dT%H%M')}.csv"
+          format.csv { send_data User.to_csv(user_ids), filename: filename }
+        end
       end
     end
 

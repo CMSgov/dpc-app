@@ -18,6 +18,7 @@ import gov.cms.dpc.api.AbstractSecureApplicationTest;
 import gov.cms.dpc.api.entities.PublicKeyEntity;
 import gov.cms.dpc.api.entities.TokenEntity;
 import gov.cms.dpc.api.models.CollectionResponse;
+import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.helpers.FHIRHelpers;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.testing.APIAuthHelpers;
@@ -45,7 +46,6 @@ import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.GeneralSecurityException;
-import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.util.UUID;
 
@@ -110,6 +110,22 @@ class OrganizationResourceTest extends AbstractSecureApplicationTest {
 
     @Test
     void testOrganizationFetch() {
+        final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
+
+        final Bundle organizations = client
+                .search()
+                .forResource(Organization.class)
+                .returnBundle(Bundle.class)
+                .encodedJson()
+                .execute();
+
+        assertEquals(1, organizations.getTotal(), "Should only have 1 organization");
+        assertNotNull(organizations.getEntry().get(0), "Should have organization");
+        assertEquals(ORGANIZATION_ID, FHIRExtractors.getEntityUUID(organizations.getEntryFirstRep().getResource().getId()).toString(), "Organization ID should match token org ID");
+    }
+
+    @Test
+    void testOrganizationFetchById() {
 
         final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
 

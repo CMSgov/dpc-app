@@ -10,6 +10,7 @@ import javax.persistence.NoResultException;
 import javax.persistence.criteria.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public class RosterDAO extends AbstractDAO<RosterEntity> {
@@ -21,12 +22,12 @@ public class RosterDAO extends AbstractDAO<RosterEntity> {
 
     /**
      * Retrieves the ProviderID from the roster by orgID, patientMBI and either rosterID or providerID
-     * @param organizationID        The organizationID
-     * @param providerOrRosterID    Either a rosterID or the providerID
-     * @param patientMBI            The patient MBI
+     * @param organizationID     The organizationID
+     * @param providerOrRosterID Either a rosterID or the providerID
+     * @param patientMBI         The patient MBI
      * @return the provider ID for that roster
      */
-    public String retrieveProviderNPIFromRoster(UUID organizationID, UUID providerOrRosterID, String patientMBI) {
+    public Optional<String> retrieveProviderNPIFromRoster(UUID organizationID, UUID providerOrRosterID, String patientMBI) {
         // Build a selection query to get records from the database
         final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
         final CriteriaQuery<String> query = builder.createQuery(String.class);
@@ -46,9 +47,9 @@ public class RosterDAO extends AbstractDAO<RosterEntity> {
 
         Query<String> q = currentSession().createQuery(query);
         try {
-            return q.getSingleResult();
-        } catch(NoResultException e) {
-            return null;
+            return Optional.ofNullable(q.getSingleResult());
+        } catch (NoResultException e) {
+            return Optional.empty();
         }
     }
 
@@ -59,10 +60,7 @@ public class RosterDAO extends AbstractDAO<RosterEntity> {
 
     private Predicate providerOrRosterIDPredicate(CriteriaBuilder builder, Root<RosterEntity> root, UUID providerOrRosterID) {
         //Group Export passes in the rosterID as the jobBatch providerID
-        final Predicate rosterIDPredicate = builder.equal(root.get(RosterEntity_.ID), providerOrRosterID);
-        //DataService passes in the providerID as the jobBatch providerID
-        final Predicate providerIDPredicate = builder.equal(root.get(RosterEntity_.ATTRIBUTED_PROVIDER).get(ProviderEntity_.ID), providerOrRosterID);
-        return builder.or(rosterIDPredicate, providerIDPredicate);
+        return builder.equal(root.get(RosterEntity_.ID), providerOrRosterID);
     }
 
     private Predicate mbiPredicate(CriteriaBuilder builder, Root<RosterEntity> root, String patientMBI) {

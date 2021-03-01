@@ -47,37 +47,45 @@ RSpec.feature 'updating users' do
   end
 
   scenario 'adding and removing tags from a user' do
-    crabby = create(:user, first_name: 'Crab', last_name: 'Olsen', email: 'co@beach.com')
-
     red_tag = create(:tag, name: 'Red')
-    create(:tag, name: 'Yellow')
+    yellow_tag = create(:tag, name: 'Yellow')
+    crabby = create(:user, first_name: 'Crab', last_name: 'Olsen', email: 'co@beach.com')
 
     visit internal_user_path(crabby)
 
     within('[data-test="user-tags"]') do
-      expect(page).to have_content('No tags')
+      expect(page).to have_content("No tags have been assigned to #{crabby.name}.")
     end
 
-    select 'Red', from: 'tagging_tag_id'
-    find('[data-test="add-tag-submit"]').click
-
-    within('[data-test="user-tags"]') do
-      expect(page).to have_content('Red')
+    within('[data-test="new-tags"]') do
+      expect(page).to have_css("[value=\"#{red_tag.name}\"]")
+      expect(page).to have_css("[value=\"#{yellow_tag.name}\"]")
     end
 
-    select 'Yellow', from: 'tagging_tag_id'
-    find('[data-test="add-tag-submit"]').click
+    find("[data-test=\"add-tag-#{red_tag.id}\"]").click
 
     within('[data-test="user-tags"]') do
-      expect(page).to have_content('Red')
-      expect(page).to have_content('Yellow')
+      expect(page).to have_content(red_tag.name)
+    end
+
+    within('[data-test="new-tags"]') do
+      expect(page).to_not have_css("[value=\"#{red_tag.name}\"]")
+      expect(page).to have_css("[data-test=\"add-tag-#{yellow_tag.id}\"]")
+    end
+
+    find("[data-test=\"add-tag-#{yellow_tag.id}\"]").click
+
+    within('[data-test="user-tags"]') do
+      expect(page).to have_content(red_tag.name)
+      expect(page).to have_content(yellow_tag.name)
     end
 
     tagging = crabby.taggings.find_by(tag_id: red_tag.id)
     find("[data-test=\"delete-tag-#{tagging.id}\"]").click
 
     within('[data-test="user-tags"]') do
-      expect(page).to have_content('Yellow')
+      expect(page).to_not have_content(red_tag.name)
+      expect(page).to have_content(yellow_tag.name)
     end
   end
 
@@ -135,7 +143,7 @@ RSpec.feature 'updating users' do
 
     expect(page.body).to have_content('Crab Olsen')
 
-    fill_in 'orgSearchInput', with: org.name
+    fill_in 'searchInput', with: org.name
     find('[data-test="org-select"]', visible: false).click
 
     expect(page).to have_content(org.name)
@@ -143,6 +151,7 @@ RSpec.feature 'updating users' do
   end
 
   scenario 'sending sandbox email to user added to a sandbox org' do
+    allow(ENV).to receive(:[]).and_call_original
     allow(ENV).to receive(:[]).with('ENV').and_return('prod-sbx')
 
     stub_api_client(
@@ -151,7 +160,7 @@ RSpec.feature 'updating users' do
       response: default_org_creation_response
     )
     crabby = create(:user, first_name: 'Crab', last_name: 'Olsen', email: 'co@beach.com')
-    org = create(:organization, :api_enabled)
+    create(:organization, :api_enabled)
 
     mailer = double(UserMailer)
     allow(UserMailer).to receive(:with).with(user: crabby, vendor: false).and_return(mailer)

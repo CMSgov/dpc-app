@@ -3,10 +3,14 @@ package gov.cms.dpc.api.resources.v1;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
+import gov.cms.dpc.api.auth.annotations.Authorizer;
 import gov.cms.dpc.api.core.FileManager;
 import gov.cms.dpc.api.models.RangeHeader;
 import gov.cms.dpc.api.resources.AbstractDataResource;
 import gov.cms.dpc.common.annotations.NoHtml;
+import gov.cms.dpc.queue.IJobQueue;
+import gov.cms.dpc.queue.JobStatus;
+import gov.cms.dpc.queue.models.JobQueueBatch;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.*;
 import org.apache.commons.io.IOUtils;
@@ -27,7 +31,10 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static gov.cms.dpc.fhir.dropwizard.filters.StreamingContentSizeFilter.X_CONTENT_LENGTH;
 
@@ -43,16 +50,19 @@ public class DataResource extends AbstractDataResource {
     private static final String ACCEPTED_RANGE_VALUE = "bytes";
 
     private final FileManager manager;
+    private final IJobQueue queue;
 
     @Inject
-    public DataResource(FileManager manager) {
+    public DataResource(FileManager manager, IJobQueue queue) {
         this.manager = manager;
+        this.queue = queue;
     }
 
     @Path("/{fileID}.ndjson")
     @HEAD
     @Timed
     @ExceptionMetered
+    @Authorizer
     @ApiOperation(value = "Metadata for downloading output files.", notes = "Retrieve the metadata for a corresponding `GET` request to download ndjson formatted output files from the server.")
     @ApiResponses({
             @ApiResponse(code = HttpStatus.OK_200, message = "File of newline-delimited JSON FHIR objects", responseHeaders = {
@@ -63,6 +73,7 @@ public class DataResource extends AbstractDataResource {
             }),
             @ApiResponse(code = HttpStatus.NOT_MODIFIED_304, message = "No newer files available"),
             @ApiResponse(code = HttpStatus.UNAUTHORIZED_401, message = "Not authorized to download file"),
+            @ApiResponse(code = HttpStatus.GONE_410, message = "File has expired"),
             @ApiResponse(code = HttpStatus.INTERNAL_SERVER_ERROR_500, message = "An error occurred", response = OperationOutcome.class)
     })
     @Override
@@ -95,6 +106,7 @@ public class DataResource extends AbstractDataResource {
     @GET
     @Timed
     @ExceptionMetered
+    @Authorizer
     @ApiOperation(value = "Download output files.", notes = "Download ndjson formatted output files from the server. " +
             "This endpoint supports returning partial results when the `" + HttpHeaders.RANGE + "` header is provided. " +
             "<p>This endpoint will return a `" + HttpStatus.NOT_MODIFIED_304 + "` response if the `"
@@ -129,6 +141,17 @@ public class DataResource extends AbstractDataResource {
                                            @NoHtml String fileID) {
 
         final FileManager.FilePointer filePointer = this.manager.getFile(organizationPrincipal.getID(), fileID);
+
+        // If job is expired, the files should no longer be accessible
+        List<JobQueueBatch> batches = queue.getJobBatches(filePointer.getJobID());
+        Set<JobStatus> jobStatusSet = batches.stream().map(JobQueueBatch::getStatus).collect(Collectors.toSet());
+        if (jobStatusSet.size() == 1 && jobStatusSet.contains(JobStatus.COMPLETED)) {
+            OffsetDateTime lastCompleteTime = JobResource.getLatestBatchCompleteTime(batches);
+
+            if (lastCompleteTime.isBefore(OffsetDateTime.now(ZoneOffset.UTC).minusHours(JobResource.JOB_EXPIRATION_HOURS))) {
+                return Response.status(Response.Status.GONE).build();
+            }
+        }
 
         // If we're provided a file checksum, verify it matches, if so, return a 304
         if (returnCachedValue(filePointer, fileChecksum, modifiedHeader)) {

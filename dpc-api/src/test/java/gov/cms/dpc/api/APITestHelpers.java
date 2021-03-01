@@ -2,14 +2,18 @@ package gov.cms.dpc.api;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
+import ca.uhn.fhir.rest.gclient.ICreateTyped;
+import ca.uhn.fhir.rest.gclient.IUpdateExecutable;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Maps;
 import com.typesafe.config.ConfigFactory;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.exceptions.JsonParseExceptionMapper;
-import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration;
 import gov.cms.dpc.fhir.dropwizard.handlers.BundleHandler;
 import gov.cms.dpc.fhir.dropwizard.handlers.FHIRHandler;
@@ -17,10 +21,15 @@ import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.DefaultFHIRExceptionHandl
 import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.HAPIExceptionHandler;
 import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.JerseyExceptionHandler;
 import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.PersistenceExceptionHandler;
+import gov.cms.dpc.fhir.hapi.ContextUtils;
 import gov.cms.dpc.fhir.validations.DPCProfileSupport;
 import gov.cms.dpc.fhir.validations.ProfileValidator;
 import gov.cms.dpc.fhir.validations.dropwizard.FHIRValidatorProvider;
 import gov.cms.dpc.fhir.validations.dropwizard.InjectingConstraintValidatorFactory;
+import gov.cms.dpc.queue.models.JobQueueBatch;
+import gov.cms.dpc.testing.factories.FHIRPatientBuilder;
+import gov.cms.dpc.testing.factories.FHIRPractitionerBuilder;
+import io.dropwizard.auth.AuthValueFactoryProvider;
 import io.dropwizard.testing.DropwizardTestSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -33,19 +42,24 @@ import org.glassfish.jersey.test.grizzly.GrizzlyWebTestContainerFactory;
 import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.dstu3.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.codesystems.V3RoleClass;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import javax.validation.Validation;
 import javax.validation.Validator;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Date;
-import java.util.List;
-import java.util.Set;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class APITestHelpers {
     private static final String ATTRIBUTION_URL = "http://localhost:3500/v1";
+    private static final String CONSENT_URL = "http://localhost:3600/v1";
     public static final String ORGANIZATION_ID = "46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0";
     private static final String ATTRIBUTION_TRUNCATE_TASK = "http://localhost:9902/tasks/truncate";
     public static String BASE_URL = "https://dpc.cms.gov/api";
@@ -80,6 +94,12 @@ public class APITestHelpers {
         client.registerInterceptor(loggingInterceptor);
 
         return client;
+    }
+
+    public static IGenericClient buildConsentClient(FhirContext ctx){
+        ContextUtils.prefetchResourceModels(ctx, JobQueueBatch.validResourceTypes);
+        ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
+        return ctx.newRestfulGenericClient(CONSENT_URL);
     }
 
     public static void setupPractitionerTest(IGenericClient client, IParser parser) throws IOException {
@@ -133,7 +153,8 @@ public class APITestHelpers {
                 .addProvider(PersistenceExceptionHandler.class)
                 .addProvider(HAPIExceptionHandler.class)
                 .addProvider(DefaultFHIRExceptionHandler.class)
-                .addProvider(JsonParseExceptionMapper.class);
+                .addProvider(JsonParseExceptionMapper.class)
+                .addProvider(new AuthValueFactoryProvider.Binder<>(OrganizationPrincipal.class));
 
         // Optionally enable validation
         if (validation) {
@@ -200,31 +221,122 @@ public class APITestHelpers {
     }
 
     public static Practitioner createPractitionerResource(String npi, String orgID) {
-        final Practitioner practitioner = new Practitioner();
-        practitioner.addIdentifier().setValue(npi).setSystem(DPCIdentifierSystem.NPPES.getSystem());
-        practitioner.addName()
-                .setFamily("Practitioner").addGiven("Test");
-
-        // Meta data which includes the Org we're using
-        final Meta meta = new Meta();
-        meta.addTag(DPCIdentifierSystem.DPC.getSystem(), orgID, "OrganizationID");
-        practitioner.setMeta(meta);
-
-        return practitioner;
+        return FHIRPractitionerBuilder.newBuilder()
+                .withNpi(npi)
+                .withOrgTag(orgID)
+                .withName("Test", "Practitioner")
+                .build();
     }
 
     public static Patient createPatientResource(String mbi, String organizationID) {
-        final Patient patient = new Patient();
-        patient.addIdentifier()
-                .setSystem(DPCIdentifierSystem.MBI.getSystem())
-                .setValue(mbi);
-
-        patient.addName().setFamily("Patient").addGiven("Test");
-        patient.setBirthDate(Date.valueOf("1990-01-01"));
-        patient.setGender(Enumerations.AdministrativeGender.OTHER);
-        patient.setManagingOrganization(new Reference(new IdType("Organization", organizationID)));
-
-        return patient;
+        return FHIRPatientBuilder.newBuild()
+                .withMbi(mbi)
+                .withBirthDate("1990-01-01")
+                .withName("Test", "Patient")
+                .withGender(Enumerations.AdministrativeGender.OTHER)
+                .managedBy(organizationID)
+                .build();
     }
 
+    public static Provenance createProvenance(String orgId, String practitionerId, List<String> patientIds){
+        final Coding reasonCoding = new Coding().setSystem("http://hl7.org/fhir/v3/ActReason").setCode("TREAT");
+
+        final Coding roleCode = new Coding()
+                .setSystem(V3RoleClass.AGNT.getSystem())
+                .setCode(V3RoleClass.AGNT.toCode());
+
+        final CodeableConcept roleConcept = new CodeableConcept().addCoding(roleCode);
+        final Provenance.ProvenanceAgentComponent component = new Provenance.ProvenanceAgentComponent()
+                .setRole(Collections.singletonList(roleConcept))
+                .setWho(new Reference(new IdType("Organization", orgId)))
+                .setOnBehalfOf(new Reference(practitionerId));
+
+        final Provenance provenance = new Provenance()
+                .setRecorded(Date.valueOf(Instant.now().atZone(ZoneOffset.UTC).toLocalDate()))
+                .setReason(Collections.singletonList(reasonCoding))
+                .addAgent(component);
+
+        for(String patientId:patientIds){
+            provenance.addTarget(new Reference(patientId));
+        }
+        return provenance;
+    }
+
+    public static MethodOutcome createResource(IGenericClient client, IBaseResource resource, Map<String,String> extraHeaders){
+        ICreateTyped iCreateTyped = client.create()
+                .resource(resource)
+                .encodedJson();
+
+        extraHeaders.entrySet().forEach(entry -> iCreateTyped.withAdditionalHeader(entry.getKey(),entry.getValue()));
+        return iCreateTyped.execute();
+    }
+
+    public static MethodOutcome createResource(IGenericClient client, IBaseResource resource){
+        return createResource(client,resource, Maps.newHashMap());
+    }
+
+    public  static <T extends IBaseResource> T getResourceById(IGenericClient client, Class<T> clazz, String resourceId){
+       return client.read()
+                .resource(clazz)
+                .withId(resourceId).encodedJson().execute();
+    }
+
+    public  static Bundle resourceSearch(IGenericClient client, ResourceType resourceType, Map<String,List<String>> searchParams){
+        return client
+                .search()
+                .forResource(resourceType.name())
+                .whereMap(searchParams)
+                .returnBundle(Bundle.class)
+                .encodedJson()
+                .execute();
+    }
+
+    public  static Bundle resourceSearch(IGenericClient client, ResourceType resourceType){
+        return resourceSearch(client,resourceType, Maps.newHashMap());
+    }
+
+    public static IBaseOperationOutcome deleteResourceById(IGenericClient client, ResourceType resourceType, String resourceId){
+        return client.delete()
+                .resourceById(resourceType.name(), resourceId)
+                .execute();
+    }
+
+    public static MethodOutcome updateResource(IGenericClient client, String id, IBaseResource resource, Map<String,String> extraHeaders){
+        IUpdateExecutable executable = client
+                .update()
+                .resource(resource)
+                .withId(id)
+                .encodedJson();
+
+        extraHeaders.entrySet().forEach(entry -> executable.withAdditionalHeader(entry.getKey(),entry.getValue()));
+       return executable.execute();
+    }
+
+    public static MethodOutcome updateResource(IGenericClient client, String id, IBaseResource resource){
+       return updateResource(client, id,resource, Maps.newHashMap());
+    }
+
+    public static Bundle getPatientEverything(IGenericClient client, String patientId, String provenance){
+        return client
+                .operation()
+                .onInstance(new IdType("Patient", patientId))
+                .named("$everything")
+                .withNoParameters(Parameters.class)
+                .returnResourceType(Bundle.class)
+                .useHttpGet()
+                .withAdditionalHeader("X-Provenance", provenance)
+                .execute();
+    }
+
+    public static Bundle doGroupExport(IGenericClient client,String groupId, String provenance){
+        return client
+                .operation()
+                .onInstance(new IdType("Group", groupId))
+                .named("$export")
+                .withNoParameters(Parameters.class)
+                .returnResourceType(Bundle.class)
+                .useHttpGet()
+                .withAdditionalHeader("X-Provenance", provenance)
+                .execute();
+    }
 }

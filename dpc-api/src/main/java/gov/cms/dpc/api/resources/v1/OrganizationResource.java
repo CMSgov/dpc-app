@@ -5,7 +5,9 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import com.google.inject.name.Named;
+import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.AdminOperation;
+import gov.cms.dpc.api.auth.annotations.Authorizer;
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.jdbi.PublicKeyDAO;
 import gov.cms.dpc.api.jdbi.TokenDAO;
@@ -14,6 +16,7 @@ import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.FHIRParameter;
 import gov.cms.dpc.fhir.annotations.Profiled;
 import gov.cms.dpc.fhir.validations.profiles.OrganizationProfile;
+import io.dropwizard.auth.Auth;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.swagger.annotations.*;
 import org.hl7.fhir.dstu3.model.*;
@@ -67,6 +70,32 @@ public class OrganizationResource extends AbstractOrganizationResource {
                 .execute();
     }
 
+    @GET
+    @FHIR
+    @Timed
+    @ExceptionMetered
+    @Authorizer
+    @ApiOperation(value = "Get organization details",
+            notes = "FHIR endpoint which returns the Organization resource that is currently registered with the application.",
+            authorizations = @Authorization(value = "access_token"))
+    @ApiResponses(value = {
+            @ApiResponse(code = 401, message = "An organization is only allowed to see their own Organization resource")})
+    public Bundle orgSearch(@ApiParam(hidden = true) @Auth OrganizationPrincipal organization) {
+        Bundle orgBundle = new Bundle();
+
+        Organization org = this.client
+                .read()
+                .resource(Organization.class)
+                .withId(organization.getID().toString())
+                .encodedJson()
+                .execute();
+
+        orgBundle.addEntry().setResource(org);
+        orgBundle.setType(Bundle.BundleType.COLLECTION);
+        orgBundle.setTotal(orgBundle.getEntry().size());
+        return orgBundle;
+    }
+
     @Override
     @GET
     @Path("/{organizationID}")
@@ -74,7 +103,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
     @Timed
     @ExceptionMetered
     @PathAuthorizer(type = ResourceType.Organization, pathParam = "organizationID")
-    @ApiOperation(value = "Get organization details",
+    @ApiOperation(value = "Get organization details by UUID",
             notes = "FHIR endpoint which returns the Organization resource that is currently registered with the application.",
             authorizations = @Authorization(value = "access_token"))
     @ApiResponses(value = {

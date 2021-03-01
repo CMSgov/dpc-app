@@ -8,7 +8,9 @@ import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.entities.TokenEntity;
 import gov.cms.dpc.api.resources.v1.TokenResource;
 import gov.cms.dpc.macaroons.MacaroonBakery;
+import io.dropwizard.jersey.jsr310.OffsetDateTimeParam;
 import io.dropwizard.servlets.tasks.Task;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +42,8 @@ public class GenerateClientTokens extends Task {
 
     @Override
     public void execute(ImmutableMultimap<String, String> parameters, PrintWriter output) {
-
+        final ImmutableCollection<String> expirationCollection = parameters.get("expiration");
+        final ImmutableCollection<String> labelCollection = parameters.get("label");
         final ImmutableCollection<String> organizationCollection = parameters.get("organization");
         if (organizationCollection.isEmpty()) {
             logger.warn("CREATING UNRESTRICTED MACAROON. ENSURE THIS IS OK");
@@ -50,11 +53,16 @@ public class GenerateClientTokens extends Task {
             final String organization = organizationCollection.asList().get(0);
             final Organization orgResource = new Organization();
             orgResource.setId(organization);
+            final String tokenLabel = labelCollection.isEmpty() ? null : labelCollection.asList().get(0);
+            Optional<OffsetDateTimeParam> expiration = Optional.empty();
+            if(!expirationCollection.isEmpty() && !StringUtils.isBlank(expirationCollection.asList().get(0))){
+                expiration = Optional.of(new OffsetDateTimeParam(expirationCollection.asList().get(0)));
+            }
             final TokenEntity tokenResponse = this.resource
                     .createOrganizationToken(
-                            new OrganizationPrincipal(orgResource),
-                            null,
-                            Optional.empty());
+                            new OrganizationPrincipal(orgResource), null,
+                            tokenLabel,
+                            expiration);
 
             output.write(tokenResponse.getToken());
         }

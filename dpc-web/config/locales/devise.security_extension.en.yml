@@ -1,7 +1,7 @@
 en:
   errors:
     messages:
-      taken_in_past: 'cannot be a password you have used in the past.'
+      taken_in_past: 'was used previously.'
       equal_to_current_password: 'must be different than the current password.'
       password_complexity:
         digit:

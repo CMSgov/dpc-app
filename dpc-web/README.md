@@ -157,6 +157,16 @@ When you're done, shut down the server with the following command (this also des
 docker-compose down
 ```
 
+**Note:** The web app defaults to `http://localhost:3500/`.
+
+# Run Web App and Admin App simultaneously
+After starting the web app, follow instructions to set up the admin app in `dpc-app/dpc-admin` in another terminal window. Follow set up directions for that application and in the second terminal window run: `rails s` or `rails server`.
+
+# Testing
+To test the rails app, run `rspec spec` in the terminal.
+
+To test the JWT generator, run `npm test` in the terminal.
+
 # Production
 
 When running in production, the Docker Compose database should not be used. RDS should be used instead. Additionally, the following environment variable should be used to set production mode: `RAILS_ENV=production`.

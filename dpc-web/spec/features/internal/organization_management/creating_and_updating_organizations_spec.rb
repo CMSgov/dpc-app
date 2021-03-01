@@ -1,9 +1,12 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
+require './lib/luhnacy_lib/luhnacy_lib'
+
 
 RSpec.feature 'creating and updating organizations' do
   include APIClientSupport
+  include OrganizationsHelper
 
   let!(:internal_user) { create :internal_user }
 
@@ -12,6 +15,9 @@ RSpec.feature 'creating and updating organizations' do
   end
 
   scenario 'successfully creating and updating an organization\'s attributes' do
+    npi1 = LuhnacyLib.generate_npi
+    npi2 = LuhnacyLib.generate_npi
+
     visit new_internal_organization_path
 
     fill_in 'organization_name', with: 'Good Health'
@@ -27,7 +33,7 @@ RSpec.feature 'creating and updating organizations' do
     fill_in 'organization_address_attributes_zip', with: '29601'
 
     fill_in 'organization_vendor', visible: false, with: 'Cool EMR Vendor'
-    fill_in 'organization_npi', visible: false, with: '555ttt444'
+    fill_in 'organization_npi', visible: false, with: npi1
 
     find('[data-test="form-submit"]').click
 
@@ -42,14 +48,14 @@ RSpec.feature 'creating and updating organizations' do
     find('[data-test="edit-link"]').click
 
     fill_in 'organization_name', with: 'Health Revisited'
-    fill_in 'organization_npi', visible: false, with: '9987966711'
+    fill_in 'organization_npi', visible: false, with: npi2
     select 'Multispecialty Clinic', from: 'organization_organization_type'
     fill_in 'organization_address_attributes_street', with: '50 River St'
     find('[data-test="form-submit"]').click
 
     expect(page).not_to have_css('[data-test="form-submit"]')
     expect(page.body).to have_content('Health Revisited')
-    expect(page.body).to have_content('9987966711')
+    expect(page.body).to have_content(npi2)
     expect(page.body).to have_content('Multispecialty Clinic')
     expect(page.body).to have_content('50 River St')
   end
@@ -65,6 +71,26 @@ RSpec.feature 'creating and updating organizations' do
 
     # Still on edit page
     expect(page).to have_css('[data-test="form-submit"]')
+  end
+
+  scenario 'adding an invalid npi' do
+    org = create(:organization, npi: nil)
+
+    visit edit_internal_organization_path(org)
+    fill_in 'organization_npi', visible: false, with: '12345678'
+    find('[data-test="form-submit"]').click
+
+    expect(page).to have_content('Organization could not be updated: Npi must be valid.')
+  end
+
+  scenario 'adding a valid npi' do
+    org = create(:organization, npi: nil)
+
+    visit edit_internal_organization_path(org)
+    fill_in 'organization_npi', visible: false, with: LuhnacyLib.generate_npi
+    find('[data-test="form-submit"]').click
+
+    expect(page).to have_content('Organization updated.')
   end
 
   scenario 'enabling API access successfully' do
@@ -97,7 +123,7 @@ RSpec.feature 'creating and updating organizations' do
     expect(page).to have_content('API ID')
   end
 
-  scenario 'updating an API enabled organization' do
+  scenario 'updating an API enabled organization successfully' do
     stub = stub_api_client(
       message: :create_organization,
       success: true,
@@ -127,7 +153,26 @@ RSpec.feature 'creating and updating organizations' do
     expect(api_client).to have_received(:update_organization).with(reg_org)
   end
 
-  scenario 'disabling sandbox access successfully' do
+  scenario 'updating an API enabled organization without npi unsuccessfully' do
+    stub_api_client(message: :create_organization, success: false, response: { 'issues' => ['Bad Request'] })
+
+    org = create(:organization, name: 'Good Health', npi: nil)
+
+    visit internal_organization_path(org)
+    find('[data-test="enable-org"]').click
+
+
+    expect(page).to have_css('[data-test="new-reg-org"]')
+    fill_in 'registered_organization_fhir_endpoint_attributes_name', with: 'Test Sandbox Endpoint'
+    select 'Test', from: 'registered_organization_fhir_endpoint_attributes_status'
+    fill_in 'registered_organization_fhir_endpoint_attributes_uri', with: 'https://example.com'
+    find('[data-test="form-submit"]').click
+
+    expect(page).to have_css('[data-test="new-reg-org"]')
+    expect(page).to have_content('Organization NPI missing. NPI required to register in API.')
+  end
+
+  scenario 'disabling API access successfully' do
     stub = stub_api_client(
       message: :create_organization,
       success: true,
@@ -152,6 +197,39 @@ RSpec.feature 'creating and updating organizations' do
     reg_org = Organization.find(org.id).reg_org
     expect(reg_org.enabled).to eq(false)
     expect(page).to have_content('API access disabled')
+  end
+
+  scenario 'adding and removing tags from an organization' do
+    cat_tag = create(:tag, name: 'Cat')
+    dog_tag = create(:tag, name: 'Dog')
+    org = create(:organization)
+
+    visit internal_organization_path(org)
+
+    within('[data-test="org-tags"]') do
+      expect(page).to have_content("No tags have been assigned to #{org.name}")
+    end
+
+    find("[data-test=\"add-tag-#{cat_tag.id}\"]").click
+
+    within('[data-test="org-tags"]') do
+      expect(page).to have_content('Cat')
+    end
+
+    find("[data-test=\"add-tag-#{dog_tag.id}\"]").click
+
+    within('[data-test="org-tags"]') do
+      expect(page).to have_content('Cat')
+      expect(page).to have_content('Dog')
+    end
+
+    tagging = org.taggings.find_by(tag_id: cat_tag.id)
+    find("[data-test=\"delete-tag-#{tagging.id}\"]").click
+
+    within('[data-test="org-tags"]') do
+      expect(page).not_to have_content('Cat')
+      expect(page).to have_content('Dog')
+    end
   end
 
   def stub_sandbox_notification_mailer(org, users=[])

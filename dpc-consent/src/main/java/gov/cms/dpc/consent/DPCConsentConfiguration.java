@@ -35,9 +35,6 @@ public class DPCConsentConfiguration extends TypesafeConfiguration implements ID
     @NotEmpty
     private String fhirReferenceURL;
 
-    @NotEmpty
-    private String consentOrganizationURL;
-
     @Override
     public DataSourceFactory getConsentDatabase() {
         return consentDatabase;
@@ -67,13 +64,5 @@ public class DPCConsentConfiguration extends TypesafeConfiguration implements ID
 
     public void setFhirReferenceURL(String fhirReferenceURL) {
         this.fhirReferenceURL = fhirReferenceURL;
-    }
-
-    public String getConsentOrganizationURL() {
-        return consentOrganizationURL;
-    }
-
-    public void setConsentOrganizationURL(String consentOrganizationURL) {
-        this.consentOrganizationURL = consentOrganizationURL;
     }
 }

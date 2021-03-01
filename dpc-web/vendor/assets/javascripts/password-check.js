@@ -2,13 +2,13 @@ function passwordCheck(checkType) {
   var passwordInput = document.getElementById("user_password"),
       passwordConfirm = document.getElementById("user_password_confirmation"),
       inputValue = passwordInput.value,
-      confirmInput = passwordConfirm.value;
+      confirmInputValue = passwordConfirm.value;
 
-  if (checkType == 'user_password') {
+  if (checkType == "user_password") {
     complexCheck(inputValue);
-    confirmMatch(inputValue, confirmInput);
-  } else if (checkType == 'user_password_confirmation') {
-    confirmMatch(inputValue, confirmInput);
+    confirmMatch(inputValue, confirmInputValue);
+  } else if (checkType == "user_password_confirmation") {
+    confirmMatch(inputValue, confirmInputValue);
   } else {
     console.error();
   }
@@ -18,7 +18,7 @@ function complexCheck(inputValue) {
   var lowerCase = /[a-z]/g,
       upperCase = /[A-Z]/g,
       number = /[0-9]/g,
-      specialChar = /[!@#$&*]/g;
+      specialChar = /[!@#$&*-]/g;
 
   // Validates character count
   if (inputValue.length >= 15) {
@@ -50,14 +50,14 @@ function complexCheck(inputValue) {
 
   // Validates special characters
   if (inputValue.match(specialChar)) {
-    validCheck('password-special-set');
+    validCheck('password-special-set')
   } else {
-    invalidCheck('password-special-set');
+    invalidCheck('password-special-set')
   }
 }
 
-function confirmMatch(inputValue, confirmInput) {
-  if (inputValue == confirmInput && confirmInput.length > 0) {
+function confirmMatch(input, confirm) {
+  if (input == confirm && confirm.length > 0) {
     validCheck('password-confirm-set');
   } else {
     invalidCheck('password-confirm-set');
@@ -65,15 +65,15 @@ function confirmMatch(inputValue, confirmInput) {
 }
 
 function validCheck(id) {
-  var id = document.getElementById(id);
+  var element = document.getElementById(id);
 
-  id.classList.remove("invalid");
-  id.classList.add("valid");
+  element.classList.remove('invalid');
+  element.classList.add('valid');
 }
 
 function invalidCheck(id) {
-  var id = document.getElementById(id);
+  var element = document.getElementById(id);
 
-  id.classList.remove("valid");
-  id.classList.add("invalid");
+  element.classList.remove('valid');
+  element.classList.add('invalid');
 }

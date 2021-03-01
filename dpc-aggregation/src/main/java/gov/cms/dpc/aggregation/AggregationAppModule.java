@@ -1,29 +1,35 @@
 package gov.cms.dpc.aggregation;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Binder;
 import com.google.inject.Provides;
+import com.google.inject.name.Named;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import com.typesafe.config.Config;
 import gov.cms.dpc.aggregation.dao.OrganizationDAO;
+import gov.cms.dpc.aggregation.dao.ProviderDAO;
 import gov.cms.dpc.aggregation.dao.RosterDAO;
 import gov.cms.dpc.aggregation.engine.AggregationEngine;
 import gov.cms.dpc.aggregation.engine.JobBatchProcessor;
 import gov.cms.dpc.aggregation.engine.OperationsConfig;
-import gov.cms.dpc.aggregation.service.EveryoneGetsDataLookBackServiceImpl;
-import gov.cms.dpc.aggregation.service.LookBackService;
-import gov.cms.dpc.aggregation.service.LookBackServiceImpl;
+import gov.cms.dpc.aggregation.service.*;
 import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.common.annotations.JobTimeout;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
 import gov.cms.dpc.fhir.hapi.ContextUtils;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Singleton;
 
 public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationConfiguration> {
+
+    private static final Logger logger = LoggerFactory.getLogger(AggregationAppModule.class);
 
 
     AggregationAppModule() {
@@ -35,6 +41,7 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
         binder.bind(AggregationEngine.class);
         binder.bind(AggregationManager.class).asEagerSingleton();
         binder.bind(JobBatchProcessor.class);
+        binder.bind(ProviderDAO.class);
         binder.bind(RosterDAO.class);
         binder.bind(OrganizationDAO.class);
 
@@ -82,7 +89,8 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
                 config.getRetryCount(),
                 config.getPollingFrequency(),
                 config.getLookBackMonths(),
-                config.getLookBackDate()
+                config.getLookBackDate(),
+                config.getLookBackExemptOrgs()
         );
     }
 
@@ -93,13 +101,28 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
     }
 
     @Provides
-    LookBackService provideLookBackService(DPCManagedSessionFactory sessionFactory, RosterDAO rosterDAO, OrganizationDAO organizationDAO, OperationsConfig operationsConfig) {
+    LookBackService provideLookBackService(DPCManagedSessionFactory sessionFactory, ProviderDAO providerDAO, RosterDAO rosterDAO, OrganizationDAO organizationDAO, OperationsConfig operationsConfig) {
         //Configuring to skip look back when look back months is less than 0
         if (operationsConfig.getLookBackMonths() < 0) {
             return new EveryoneGetsDataLookBackServiceImpl();
         }
         return new UnitOfWorkAwareProxyFactory("roster", sessionFactory.getSessionFactory()).create(LookBackServiceImpl.class,
-                new Class<?>[]{RosterDAO.class, OrganizationDAO.class, OperationsConfig.class},
-                new Object[]{rosterDAO, organizationDAO, operationsConfig});
+                new Class<?>[]{ProviderDAO.class, RosterDAO.class, OrganizationDAO.class, OperationsConfig.class},
+                new Object[]{providerDAO, rosterDAO, organizationDAO, operationsConfig});
+    }
+
+    @Provides
+    @Singleton
+    @Named("consentClient")
+    public IGenericClient provideConsentClient(FhirContext ctx) {
+        logger.info("Connecting to consent server at {}.", getConfiguration().getConsentServiceUrl());
+        ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
+        IGenericClient client = ctx.newRestfulGenericClient(getConfiguration().getConsentServiceUrl());
+        return client;
+    }
+
+    @Provides
+    ConsentService provideConsentService(@Named("consentClient") IGenericClient consentClient) {
+        return new ConsentServiceImpl(consentClient);
     }
 }
