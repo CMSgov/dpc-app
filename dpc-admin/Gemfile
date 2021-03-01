@@ -25,6 +25,7 @@ gem 'omniauth-oktaoauth'
 gem 'octokit' # can be removed once we move past github omniauth
 gem 'redis-namespace'
 gem 'kaminari'
+gem 'active_model_serializers'
 gem 'truemail'
 
 group :development, :test do
