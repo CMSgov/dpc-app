@@ -44,54 +44,54 @@ module NavHelper
   end
 
   def users_page?
-    current_page?(controller: 'users')
+    current_page?({ controller: 'users' })
   end
 
   def provider_users_page?
-    current_page?(controller: 'users', org_type: 'provider')
+    current_page?({ controller: 'users', org_type: 'provider' })
   end
 
   def vendor_users_page?
-    current_page?(controller: 'users', org_type: 'vendor')
+    current_page?({ controller: 'users', org_type: 'vendor' })
   end
 
   def organizations_page?
-    current_page?(controller: 'organizations')
+    current_page?({ controller: 'organizations' })
   end
 
   def tags_page?
-    current_page?(controller: 'tags')
+    current_page?({ controller: 'tags' })
   end
 
   def all_users_page?
-    current_page?(controller: 'users', org_type: 'all')
+    current_page?({ controller: 'users', org_type: 'all' })
   end
 
   def unassigned_vendor_users_page?
-    current_page?(controller: 'users', org_type: 'vendor', org_status: 'unassigned')
+    current_page?({ controller: 'users', org_type: 'vendor', org_status: 'unassigned' })
   end
 
   def assigned_vendor_users_page?
-    current_page?(controller: 'users', org_type: 'vendor', org_status: 'assigned')
+    current_page?({ controller: 'users', org_type: 'vendor', org_status: 'assigned' })
   end
 
   def unassigned_provider_users_page?
-    current_page?(controller: 'users', org_type: 'provider', org_status: 'unassigned')
+    current_page?({ controller: 'users', org_type: 'provider', org_status: 'unassigned' })
   end
 
   def assigned_provider_users_page?
-    current_page?(controller: 'users', org_type: 'provider', org_status: 'assigned')
+    current_page?({ controller: 'users', org_type: 'provider', org_status: 'assigned' })
   end
 
   def all_organizations_page?
-    current_page?(controller: 'organizations', org_type: 'all')
+    current_page?({ controller: 'organizations', org_type: 'all' })
   end
 
   def vendor_organizations_page?
-    current_page?(controller: 'organizations', org_type: 'vendor')
+    current_page?({ controller: 'organizations', org_type: 'vendor' })
   end
 
   def provider_organizations_page?
-    current_page?(controller: 'organizations', org_type: 'provider')
+    current_page?({ controller: 'organizations', org_type: 'provider' })
   end
 end
