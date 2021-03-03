@@ -10,8 +10,8 @@ import (
 type Resource struct {
 	ID        string                 `json:"id"`
 	Info      map[string]interface{} `json:"info"`
-	version   int
-	updatedAt time.Time
+	Version   int                    `json:"version"`
+	UpdatedAt time.Time              `json:"updated_at"`
 }
 
 // ResourceType function to return the resource type of the underlying fhir model
@@ -21,10 +21,10 @@ func (r *Resource) ResourceType() string {
 
 // VersionID function to return the version id as a string
 func (r *Resource) VersionID() string {
-	return strconv.Itoa(r.version)
+	return strconv.Itoa(r.Version)
 }
 
 // LastUpdated function to return the updatedAt field from attribution into a fhir date time format
 func (r *Resource) LastUpdated() string {
-	return r.updatedAt.UTC().Format("2006-01-02T15:04:05.999-07:00")
+	return r.UpdatedAt.UTC().Format("2006-01-02T15:04:05.999-07:00")
 }
