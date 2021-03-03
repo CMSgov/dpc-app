@@ -7,19 +7,18 @@ import com.google.common.collect.Maps;
 import io.dropwizard.logging.json.EventAttribute;
 import io.dropwizard.logging.json.layout.JsonFormatter;
 import io.dropwizard.logging.json.layout.TimestampFormatter;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.MockitoAnnotations;
 
 import java.util.*;
 
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class DPCJsonLayoutTest {
+
+public class DPCJsonLayoutUnitTest {
 
     private DPCJsonLayout dpcJsonLayout;
 
@@ -38,8 +37,9 @@ public class DPCJsonLayoutTest {
     @Mock
     private ThrowableHandlingConverter throwableHandlingConverter;
 
-    @Before
+    @BeforeEach
     public void setup() {
+        MockitoAnnotations.initMocks(this);
         dpcJsonLayout = new DPCJsonLayout(jsonFormatter,
                 timestampFormatter,
                 throwableHandlingConverter,
@@ -58,12 +58,12 @@ public class DPCJsonLayoutTest {
         String message = "hello I'm not parsable";
         when(loggingEvent.getFormattedMessage()).thenReturn(message);
         Map<String, Object> map = dpcJsonLayout.toJsonMap(loggingEvent);
-        Assert.assertEquals(message, map.get("message"));
+        assertEquals(message, map.get("message"));
 
         message = "key1=value2, key2=value2, key3NoVal";
         when(loggingEvent.getFormattedMessage()).thenReturn(message);
         map = dpcJsonLayout.toJsonMap(loggingEvent);
-        Assert.assertEquals(message, map.get("message"));
+        assertEquals(message, map.get("message"));
     }
 
     @Test
@@ -72,9 +72,9 @@ public class DPCJsonLayoutTest {
 
         when(loggingEvent.getFormattedMessage()).thenReturn(message);
         Map<String, Object> map = dpcJsonLayout.toJsonMap(loggingEvent);
-        Assert.assertFalse(map.containsKey("message"));
-        Assert.assertEquals("value1", map.get("key1"));
-        Assert.assertEquals("value2", map.get("key2"));
+        assertFalse(map.containsKey("message"));
+        assertEquals("value1", map.get("key1"));
+        assertEquals("value2", map.get("key2"));
     }
 
     @Test
@@ -82,8 +82,8 @@ public class DPCJsonLayoutTest {
         String message = "billingPeriodDate=Thu Jul 01 00:00:00 UTC 1999, lookBackDate=Thu Aug 27 00:43:30 UTC 2020, monthsDifference=253, eobProvider=null, eobCareTeamProviders=999999999999;9999999999, jobProvider=1232125215, eobOrganization=9999999999, jobOrganization=5808156785, withinLimit=false, eobProviderMatch=false, eobOrganizationMatch=false";
         when(loggingEvent.getFormattedMessage()).thenReturn(message);
         Map<String, Object> map = dpcJsonLayout.toJsonMap(loggingEvent);
-        Assert.assertFalse(map.containsKey("message"));
-        Assert.assertEquals("999999999999;9999999999", map.get("eobCareTeamProviders"));
+        assertFalse(map.containsKey("message"));
+        assertEquals("999999999999;9999999999", map.get("eobCareTeamProviders"));
     }
 
     @Test
@@ -106,7 +106,7 @@ public class DPCJsonLayoutTest {
             final String expectedMaskedMessage = entry.getValue();
             when(loggingEvent.getFormattedMessage()).thenReturn(unMaskedMessage);
             Map<String, Object> map = dpcJsonLayout.toJsonMap(loggingEvent);
-            Assert.assertEquals(expectedMaskedMessage, map.get("message"));
+            assertEquals(expectedMaskedMessage, map.get("message"));
         });
     }
 
@@ -116,9 +116,9 @@ public class DPCJsonLayoutTest {
 
         when(loggingEvent.getFormattedMessage()).thenReturn(message);
         Map<String, Object> map = dpcJsonLayout.toJsonMap(loggingEvent);
-        Assert.assertFalse(map.containsKey("message"));
-        Assert.assertEquals("value1", map.get("key1"));
-        Assert.assertEquals("***MBI?***", map.get("key2"));
-        Assert.assertEquals("value3", map.get("key3"));
+        assertFalse(map.containsKey("message"));
+        assertEquals("value1", map.get("key1"));
+        assertEquals("***MBI?***", map.get("key2"));
+        assertEquals("value3", map.get("key3"));
     }
 }
