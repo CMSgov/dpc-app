@@ -21,7 +21,7 @@ func init() {
 
 	var cfg zap.Config
 	if lc != nil {
-		var lcb bytes.Buffer // Stand-in for a network connection
+		var lcb bytes.Buffer
 		err := json.NewEncoder(&lcb).Encode(lc)
 		if err != nil {
 			panic(err)
