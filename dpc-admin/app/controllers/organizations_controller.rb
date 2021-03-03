@@ -15,8 +15,8 @@ class OrganizationsController < ApplicationController
     if user_id_params[:user_id].present?
       user = User.find user_id_params[:user_id]
       @organization = Organization.new name: user.requested_organization,
-                                        organization_type: user.requested_organization_type,
-                                        num_providers: user.requested_num_providers
+                                       organization_type: user.requested_organization_type,
+                                       num_providers: user.requested_num_providers
 
       @organization.build_address street: user.address_1,
                                   street_2: user.address_2,
