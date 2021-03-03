@@ -11,6 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class DPCJsonLayout extends EventJsonLayout {
@@ -18,6 +19,8 @@ public class DPCJsonLayout extends EventJsonLayout {
     private static final String MESSAGE = "message";
     private static final String KEY_VALUE_SEPARATOR = "=";
     private static final String ENTRY_SEPARATOR = ",";
+    private static final Pattern MBI_PATTERN = Pattern.compile("\\d[a-zA-Z][a-zA-Z0-9]\\d[a-zA-Z][a-zA-Z0-9]\\d[a-zA-Z]{2}\\d{2}");
+    private static final String MBI_MASK = "***MBI?***";
 
     public DPCJsonLayout(JsonFormatter jsonFormatter, TimestampFormatter timestampFormatter, ThrowableHandlingConverter throwableProxyConverter, Set<EventAttribute> includes, Map<String, String> customFieldNames, Map<String, Object> additionalFields, Set<String> includesMdcKeys, boolean flattenMdc) {
         super(jsonFormatter, timestampFormatter, throwableProxyConverter, includes, customFieldNames, additionalFields, includesMdcKeys, flattenMdc);
@@ -26,16 +29,15 @@ public class DPCJsonLayout extends EventJsonLayout {
     @Override
     protected Map<String, Object> toJsonMap(ILoggingEvent event) {
         Map<String, Object> map = super.toJsonMap(event);
-        parseJsonMessageIfPossible(map, event);
+        if(map.containsKey(MESSAGE)){
+            String maskedMessage = maskMBI(event.getFormattedMessage());
+            map.put(MESSAGE, maskedMessage);
+            parseJsonMessageIfPossible(map, maskedMessage);
+        }
         return map;
     }
 
-    private void parseJsonMessageIfPossible(Map<String, Object> map, ILoggingEvent event) {
-        if (!map.containsKey(MESSAGE)) {
-            return;
-        }
-
-        String message = event.getFormattedMessage();
+    private void parseJsonMessageIfPossible(Map<String, Object> map,  String message) {
         try {
             Map<String, String> mappedMessage = splitToMap(message);
             map.remove(MESSAGE);
@@ -54,4 +56,11 @@ public class DPCJsonLayout extends EventJsonLayout {
                 ));
     }
 
+    private String maskMBI(String unMaskedMessage) {
+        try {
+            return MBI_PATTERN.matcher(unMaskedMessage).replaceAll(MBI_MASK);
+        } catch (Exception e) {
+            return unMaskedMessage;
+        }
+    }
 }
