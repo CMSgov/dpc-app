@@ -9,15 +9,19 @@ import (
 
 var config viper.Viper
 
-func NewConfig(dir ...string) {
-	config = *viper.New()
-	config.AddConfigPath("../configs")
+func addPaths(dir ...string) {
 	if len(dir) > 0 {
 		for _, v := range dir {
 			config.AddConfigPath(v)
 		}
 	}
+}
 
+// NewConfig function sets up the viper config and optionally can pass in a list of different directories to search for configs
+func NewConfig(dir ...string) {
+	config = *viper.New()
+	addPaths(dir...)
+	config.AddConfigPath("../configs")
 	config.SetConfigName("base")
 	config.SetConfigType("yml")
 	config.AutomaticEnv()

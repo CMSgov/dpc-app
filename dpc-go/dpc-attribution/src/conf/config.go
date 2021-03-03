@@ -9,15 +9,19 @@ import (
 
 var config viper.Viper
 
-func NewConfig(dir ...string) {
-	config = *viper.New()
-	config.AddConfigPath("../configs")
+func addPaths(dir ...string) {
 	if len(dir) > 0 {
 		for _, v := range dir {
 			config.AddConfigPath(v)
 		}
 	}
+}
 
+// NewConfig function sets up the viper config and optionally can pass in a list of different directories to search for configs
+func NewConfig(dir ...string) {
+	config = *viper.New()
+	addPaths(dir...)
+	config.AddConfigPath("../configs")
 	config.SetConfigName("base")
 	config.SetConfigType("yml")
 	config.AutomaticEnv()
@@ -45,6 +49,8 @@ func NewConfig(dir ...string) {
 	}
 }
 
+// GetAsString is a function to retrieve the value from the viper config as a string
+// allowing to also pass in a default value
 func GetAsString(key string, dv ...string) string {
 	val := config.GetString(key)
 	if val == "" && len(dv) > 0 {
@@ -53,6 +59,7 @@ func GetAsString(key string, dv ...string) string {
 	return val
 }
 
+// Get is a function to retrieve the value from the viper config as an interface{}
 func Get(key string) interface{} {
 	return config.Get(key)
 }
