@@ -3,42 +3,54 @@ package gov.cms.dpc.aggregation.service;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.StringType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
 public final class LookBackAnalyzer {
 
-    public static final String NO_DATA_FOR_LOOK_BACK_DETAIL = "DPC couldn't find any claims for this MBI; unable to demonstrate relationship with provider or organization";
-    public static final String NO_NPI_MATCH_DETAIL = "DPC couldn't find a claim for this MBI from an NPI in this organization";
-    public static final String NO_MATCHES_DETAIL = "DPC couldn't find a claim for this MBI related to an NPI in this organization, or within the past 18 months";
-    public static final String NO_DATE_MATCH_DETAIL = "DPC couldn't find a claim within the past 18 months for this MBI from an NPI in this organization";
+    private static final Logger logger = LoggerFactory.getLogger(LookBackAnalyzer.class);
 
     private LookBackAnalyzer() {
     }
 
     public static OperationOutcome analyze(List<LookBackAnswer> answers, String patientID) {
         final var patientLocation = List.of(new StringType("Patient"), new StringType("id"), new StringType(patientID));
+
+        final var failReason = analyze(answers);
         final var outcome = new OperationOutcome();
-        final var detail = answers.isEmpty() ? NO_DATA_FOR_LOOK_BACK_DETAIL : analyze(answers);
         outcome.addIssue()
                 .setSeverity(OperationOutcome.IssueSeverity.ERROR)
                 .setCode(OperationOutcome.IssueType.EXCEPTION)
-                .setDetails(new CodeableConcept().setText(detail))
+                .setDetails(new CodeableConcept().setText(failReason.detail))
                 .setLocation(patientLocation);
+
+        logger.info("dpcMetric=lookBackBreakdown,failReason={}",failReason.name());
         return outcome;
     }
 
-    private static String analyze(List<LookBackAnswer> answers) {
-        boolean matchDateCriteria = answers.parallelStream().allMatch(LookBackAnswer::matchDateCriteria);
+    private static FailReason analyze(List<LookBackAnswer> answers) {
         boolean matchOrganizationNPI = answers.parallelStream().allMatch(LookBackAnswer::orgNPIMatchAnyEobNPIs);
         boolean matchProviderNPI = answers.parallelStream().allMatch(LookBackAnswer::practitionerNPIMatchAnyEobNPIs);
-
-        if (matchDateCriteria && !matchOrganizationNPI && !matchProviderNPI) {
-            return NO_NPI_MATCH_DETAIL;
-        } else if (!matchDateCriteria && !matchOrganizationNPI && !matchProviderNPI) {
-            return NO_MATCHES_DETAIL;
+        if (answers.isEmpty()){
+            return FailReason.NO_DATA;
+        } else if (!matchOrganizationNPI || !matchProviderNPI) {
+            return FailReason.NO_NPI_MATCH;
         } else {
-            return NO_DATE_MATCH_DETAIL;
+            return FailReason.NO_DATE_MATCH;
+        }
+    }
+
+    public enum FailReason {
+        NO_DATA("DPC couldn't find any claims for this MBI; unable to demonstrate relationship with provider or organization"),
+        NO_NPI_MATCH("DPC couldn't find a claim for this MBI from an NPI in this organization"),
+        NO_DATE_MATCH("DPC couldn't find a claim within the past 18 months for this MBI from an NPI in this organization");
+
+        public final String detail;
+
+        FailReason(String detail) {
+            this.detail = detail;
         }
     }
 }
