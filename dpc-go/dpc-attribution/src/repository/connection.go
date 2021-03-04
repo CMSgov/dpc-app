@@ -3,21 +3,18 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"github.com/CMSgov/dpc/attribution/conf"
 	"github.com/CMSgov/dpc/attribution/logger"
 	"github.com/jackc/pgx"
 	"github.com/jackc/pgx/log/zapadapter"
 	"github.com/jackc/pgx/stdlib"
 	"go.uber.org/zap"
-	"os"
 )
 
 // GetDbConnection function that sets up the db connection and returns the db struct
 func GetDbConnection() *sql.DB {
 	log := logger.WithContext(context.Background())
-	dbURL, found := os.LookupEnv("ATTRIBUTION_DB_URL")
-	if !found {
-		dbURL = "postgresql://postgres:dpc-safe@localhost:5432/dpc_attribution"
-	}
+	dbURL := conf.GetAsString("db.url")
 	dc := stdlib.DriverConfig{
 		ConnConfig: pgx.ConnConfig{
 			Logger:   zapadapter.NewLogger(log),
