@@ -9,6 +9,7 @@ import (
 	"github.com/CMSgov/dpc/api/model"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
+	"io/ioutil"
 	"net/http"
 )
 
@@ -29,11 +30,35 @@ func (rw *responseWriter) WriteHeader(status int) {
 	rw.ResponseWriter.WriteHeader(status)
 }
 
+// FHIRFilter function that intercepts the request and modifies it before sending it further down the chain
+func FHIRFilter(next http.Handler) http.Handler {
+	fn := func(w http.ResponseWriter, r *http.Request) {
+		log := logger.WithContext(r.Context())
+		defer func() {
+			_ = r.Body.Close()
+		}()
+		body, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			log.Error("Failed to read the request body", zap.Error(err))
+			fhirror.GenericServerIssue(r.Context(), w)
+		}
+
+		newBody, err := Filter(r.Context(), body)
+		if err != nil {
+			log.Error("Failed to filter request body", zap.Error(err))
+			fhirror.GenericServerIssue(r.Context(), w)
+		}
+		r.Body = ioutil.NopCloser(bytes.NewBuffer(newBody))
+		next.ServeHTTP(w, r)
+	}
+	return http.HandlerFunc(fn)
+}
+
 // FHIRModel function that intercepts the bytes being returned from the response
 // if the response is successful, then the expected data is in the format of
 // model.Resource where this will convert it into the appropriate FHIR object
 func FHIRModel(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	fn := func(w http.ResponseWriter, r *http.Request) {
 		log := logger.WithContext(r.Context())
 		rw := &responseWriter{
 			ResponseWriter: w,
@@ -56,7 +81,8 @@ func FHIRModel(next http.Handler) http.Handler {
 			log.Error("Failed to write data", zap.Error(err))
 			fhirror.GenericServerIssue(r.Context(), w)
 		}
-	})
+	}
+	return http.HandlerFunc(fn)
 }
 
 func convertToFHIR(body []byte) ([]byte, error) {
