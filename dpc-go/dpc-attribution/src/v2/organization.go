@@ -50,8 +50,6 @@ func (os *OrganizationService) Get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Info(fmt.Sprintf("Retriving organization with id %s", organizationID))
-
 	org, err := os.repo.FindByID(r.Context(), organizationID)
 	if err != nil {
 		log.Error(fmt.Sprintf("Failed to retrieve organization"), zap.Error(err))
@@ -107,8 +105,6 @@ func (os *OrganizationService) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Info(fmt.Sprintf("Deleting organization with id %s", organizationID))
-
 	err := os.repo.DeleteByID(r.Context(), organizationID)
 	if err != nil {
 		log.Error(fmt.Sprintf("Failed to find organization to delete"), zap.Error(err))
@@ -130,8 +126,6 @@ func (os *OrganizationService) Put(w http.ResponseWriter, r *http.Request) {
 	}
 
 	body, _ := ioutil.ReadAll(r.Body)
-
-	log.Info(fmt.Sprintf("Updating organization %s", organizationID))
 
 	org, err := os.repo.Update(r.Context(), organizationID, body)
 	if err != nil {
