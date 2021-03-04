@@ -75,7 +75,7 @@ public class JobBatchProcessor {
             logger.info("Skipping lookBack for org: {}", job.getOrgID().toString());
 
             //TODO REMOVED THIS BEFORE MERGING!
-            int randIndex = (int)Math.random() * (0 - OutcomeReason.values().length + 1) + 0;
+            int randIndex = (int)Math.random() * (OutcomeReason.values().length  - 0 + 1) + 0;
             OutcomeReason randReason = OutcomeReason.values()[randIndex];
             logger.info("dpcMetric=OperationOutcomeReason,failReason={}",randReason.name());
             //END TODO
