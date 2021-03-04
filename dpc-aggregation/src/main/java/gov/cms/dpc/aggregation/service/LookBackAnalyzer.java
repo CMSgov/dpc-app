@@ -1,5 +1,6 @@
 package gov.cms.dpc.aggregation.service;
 
+import gov.cms.dpc.aggregation.engine.OutcomeReason;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.StringType;
@@ -26,31 +27,21 @@ public final class LookBackAnalyzer {
                 .setDetails(new CodeableConcept().setText(failReason.detail))
                 .setLocation(patientLocation);
 
-        logger.info("dpcMetric=lookBackBreakdown,failReason={}",failReason.name());
+        logger.info("dpcMetric=OperationOutcomeReason,failReason={}",failReason.name());
         return outcome;
     }
 
-    private static FailReason analyze(List<LookBackAnswer> answers) {
+    private static OutcomeReason analyze(List<LookBackAnswer> answers) {
         boolean matchOrganizationNPI = answers.parallelStream().allMatch(LookBackAnswer::orgNPIMatchAnyEobNPIs);
         boolean matchProviderNPI = answers.parallelStream().allMatch(LookBackAnswer::practitionerNPIMatchAnyEobNPIs);
         if (answers.isEmpty()){
-            return FailReason.NO_DATA;
+            return OutcomeReason.LOOK_BACK_NO_DATA;
         } else if (!matchOrganizationNPI || !matchProviderNPI) {
-            return FailReason.NO_NPI_MATCH;
+            return OutcomeReason.LOOK_BACK_NO_NPI_MATCH;
         } else {
-            return FailReason.NO_DATE_MATCH;
+            return OutcomeReason.LOOK_BACK_NO_DATE_MATCH;
         }
     }
 
-    public enum FailReason {
-        NO_DATA("DPC couldn't find any claims for this MBI; unable to demonstrate relationship with provider or organization"),
-        NO_NPI_MATCH("DPC couldn't find a claim for this MBI from an NPI in this organization"),
-        NO_DATE_MATCH("DPC couldn't find a claim within the past 18 months for this MBI from an NPI in this organization");
 
-        public final String detail;
-
-        FailReason(String detail) {
-            this.detail = detail;
-        }
-    }
 }

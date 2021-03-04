@@ -69,9 +69,17 @@ public class JobBatchProcessor {
             flowable = Flowable.just(consentResult.getRight().get());
         }
         else if(isOptedOut(consentResult.getLeft())){
-            flowable = Flowable.just(buildOperationOutcome(patientID, IssueSeverity.WARNING,IssueType.SUPPRESSED,"Data not available for opted out patient"));
+            logger.info("dpcMetric=OperationOutcomeReason,failReason={}", OutcomeReason.CONSENT_OPTED_OUT.name());
+            flowable = Flowable.just(buildOperationOutcome(patientID, IssueSeverity.WARNING,IssueType.SUPPRESSED,OutcomeReason.CONSENT_OPTED_OUT.detail));
         }else if(isLookBackExempt(job.getOrgID())){
             logger.info("Skipping lookBack for org: {}", job.getOrgID().toString());
+
+            //TODO REMOVED THIS BEFORE MERGING!
+            int randIndex = (int)Math.random() * (0 - OutcomeReason.values().length + 1) + 0;
+            OutcomeReason randReason = OutcomeReason.values()[randIndex];
+            logger.info("dpcMetric=OperationOutcomeReason,failReason={}",randReason.name());
+            //END TODO
+
             flowable = Flowable.fromIterable(job.getResourceTypes())
                     .flatMap(r -> fetchResource(job, patientID, r, job.getSince().orElse(null)));
         }else{
@@ -216,8 +224,9 @@ public class JobBatchProcessor {
             return Pair.of(consentService.getConsent(patientId),Optional.empty());
         }catch (Exception e){
             logger.error("Unable to retrieve consent from consent service.", e);
-            OperationOutcome operationOutcome = buildOperationOutcome(patientId,IssueSeverity.ERROR,IssueType.EXCEPTION,"Unable to retrieve patient data due to internal error");
-            return Pair.of(Optional.empty(), Optional.of(operationOutcome) );
+            logger.info("dpcMetric=OperationOutcomeReason,failReason={}", OutcomeReason.INTERNAL_ERROR.name());
+            OperationOutcome operationOutcome = buildOperationOutcome(patientId,IssueSeverity.ERROR,IssueType.EXCEPTION,OutcomeReason.INTERNAL_ERROR.detail);
+            return Pair.of(Optional.empty(), Optional.of(operationOutcome));
         }
     }
 
