@@ -10,7 +10,7 @@ env:
 jobs:
   build-api:
     name: "Build and Test API"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v1
@@ -31,7 +31,7 @@ jobs:
 
   build-web:
     name: "Build and Test Website"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v1
