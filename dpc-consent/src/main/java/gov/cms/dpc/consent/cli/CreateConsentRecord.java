@@ -90,18 +90,13 @@ public class CreateConsentRecord extends ConsentCommand {
 
         // TODO verify mbi / org exist in DPC attribution
 
-        logger.info(
-                String.format("Creating %s consent entry for patient %s, effective %s",
-                        inOrOut, mbi, effectiveDate));
-
         ConsentEntity ce = ConsentEntity.defaultConsentEntity(Optional.empty(), Optional.empty(), Optional.of(mbi));
         ce.setEffectiveDate(effectiveDate);
         ce.setPolicyCode(inOrOut);
 
         saveEntity(bootstrap, dpcConsentConfiguration, ce);
 
-        logger.info(String.format("Created %s consent entry for patient %s, effective %s",
-                ce.getPolicyCode(), ce.getMbi(), ce.getEffectiveDate()));
+        logger.info("Created {} consent entry. Consent entry id: {}, effective {}",ce.getPolicyCode(), ce.getId().toString(), ce.getEffectiveDate());
     }
 
     private void saveEntity(Bootstrap<DPCConsentConfiguration> bootstrap, DPCConsentConfiguration dpcConsentConfiguration, ConsentEntity entity) throws DataAccessException, SQLException {
