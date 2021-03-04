@@ -92,7 +92,7 @@ class RegisteredOrganization < ApplicationRecord
   private
 
   def api_service
-    @api_service ||= APIClient.new
+    @api_service ||= ApiClient.new
   end
 
   def api_error(action, msg)
