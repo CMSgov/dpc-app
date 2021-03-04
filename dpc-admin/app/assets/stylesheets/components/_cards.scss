@@ -39,6 +39,10 @@
   }
 }
 
+.module-container__button {
+  padding: $spacer-1 $spacer-2;
+}
+
 .module-container__id {
   background-color: $color-gray-dark;
   color: $color-white;
@@ -118,4 +122,17 @@
   background-color: $color-success-alt-lightest;
   color: $color-success;
   font-weight: $font-bold;
+}
+
+.module-list-container {
+  border: 1px solid $color-gray-lighter;
+  list-style: none;
+  max-width: 850px;
+  max-height: 500px;
+  overflow: auto;
+  padding: 0;
+
+  ul {
+    padding: 0;
+  }
 }
