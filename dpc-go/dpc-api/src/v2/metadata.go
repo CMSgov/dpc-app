@@ -1,12 +1,12 @@
 package v2
 
 import (
+	"github.com/CMSgov/dpc/api/conf"
 	"github.com/CMSgov/dpc/api/fhirror"
 	"github.com/CMSgov/dpc/api/logger"
 	"go.uber.org/zap"
 	"io/ioutil"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/samply/golang-fhir-models/fhir-models/fhir"
@@ -30,12 +30,8 @@ func (mc *MetadataController) Read(w http.ResponseWriter, r *http.Request) {
 	dt := time.Now()
 	log := logger.WithContext(r.Context())
 
-	releaseDate, found := os.LookupEnv("RELEASE_DATE")
-	if !found {
-		releaseDate = dt.Format(dateFormat)
-	}
-
-	version := os.Getenv("VERSION")
+	releaseDate := conf.GetAsString("capabilities.release-date", dt.Format(dateFormat))
+	version := conf.GetAsString("capabilities.version")
 
 	b, err := ioutil.ReadFile(mc.capabilitiesFile)
 	if err != nil {
