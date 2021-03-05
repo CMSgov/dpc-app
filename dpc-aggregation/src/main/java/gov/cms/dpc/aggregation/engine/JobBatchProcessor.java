@@ -74,13 +74,14 @@ public class JobBatchProcessor {
             flowable = Flowable.just(AggregationUtils.toOperationOutcome(OutcomeReason.CONSENT_OPTED_OUT, patientID));
         }else if(isLookBackExempt(job.getOrgID())){
             logger.info("Skipping lookBack for org: {}", job.getOrgID().toString());
+            MDC.put(MDCConstants.IS_SMOKE_TEST_ORG, "true");
 
             //TODO REMOVED THIS BEFORE MERGING!
-            Random rand = new Random();
-            int randIndex = rand.nextInt(OutcomeReason.values().length+1-0) + 0;
-            if(randIndex<OutcomeReason.values().length){
-                failReason = OutcomeReason.values()[randIndex];
-            }
+//            Random rand = new Random();
+//            int randIndex = rand.nextInt(OutcomeReason.values().length+1-0) + 0;
+//            if(randIndex<OutcomeReason.values().length){
+//                failReason = OutcomeReason.values()[randIndex];
+//            }
             //END TODO
 
             flowable = Flowable.fromIterable(job.getResourceTypes())
