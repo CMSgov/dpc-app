@@ -15,24 +15,24 @@ type resourceType struct {
 }
 
 type organization struct {
-	Identifier []fhir.Identifier      `json:"identifier"`
-	Name       string                 `json:"name"`
-	Address    []fhir.Address         `json:"address"`
-	Type       []fhir.CodeableConcept `json:"type"`
+	Identifier []fhir.Identifier      `json:"identifier,omitempty"`
+	Name       *string                `json:"name,omitempty"`
+	Address    []fhir.Address         `json:"address,omitempty"`
+	Type       []fhir.CodeableConcept `json:"type,omitempty"`
 	resourceType
 }
 
 type patient struct {
-	Identifier []fhir.Identifier         `json:"identifier"`
-	Name       []fhir.HumanName          `json:"name"`
-	Gender     fhir.AdministrativeGender `json:"gender"`
-	BirthDate  string                    `json:"birthDate"`
+	Identifier []fhir.Identifier          `json:"identifier,omitempty"`
+	Name       []fhir.HumanName           `json:"name,omitempty"`
+	Gender     *fhir.AdministrativeGender `json:"gender,omitempty"`
+	BirthDate  *string                    `json:"birthDate,omitempty"`
 	resourceType
 }
 
 type practitioner struct {
-	Identifier []fhir.Identifier `json:"identifier"`
-	Name       []fhir.HumanName  `json:"name"`
+	Identifier []fhir.Identifier `json:"identifier,omitempty"`
+	Name       []fhir.HumanName  `json:"name,omitempty"`
 	resourceType
 }
 
