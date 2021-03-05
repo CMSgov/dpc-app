@@ -87,7 +87,7 @@ public class JobBatchProcessor {
                 flowable = Flowable.just(AggregationUtils.toOperationOutcome(failReason, patientID));
             }
         }
-        logger.info("dpcMetric=DataExportResult,dataRetrieved={},failReason={}",failReason==null,failReason==null ? "":failReason.name());
+        logger.info("dpcMetric=DataExportResult,dataRetrieved={},failReason={}",failReason==null,failReason==null ? "NA":failReason.name());
 
         final var results = writeResource(job, flowable)
                 .toList()
