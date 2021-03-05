@@ -34,6 +34,13 @@ func (rw *responseWriter) WriteHeader(status int) {
 func FHIRFilter(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		log := logger.WithContext(r.Context())
+
+		method := r.Method
+		if method != http.MethodPut && method != http.MethodPost {
+			next.ServeHTTP(w, r)
+			return
+		}
+
 		defer func() {
 			_ = r.Body.Close()
 		}()
@@ -41,12 +48,14 @@ func FHIRFilter(next http.Handler) http.Handler {
 		if err != nil {
 			log.Error("Failed to read the request body", zap.Error(err))
 			fhirror.GenericServerIssue(r.Context(), w)
+			return
 		}
 
 		newBody, err := Filter(r.Context(), body)
 		if err != nil {
 			log.Error("Failed to filter request body", zap.Error(err))
 			fhirror.GenericServerIssue(r.Context(), w)
+			return
 		}
 		r.Body = ioutil.NopCloser(bytes.NewBuffer(newBody))
 		next.ServeHTTP(w, r)
