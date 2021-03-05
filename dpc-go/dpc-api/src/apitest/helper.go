@@ -6,7 +6,7 @@ import (
 	"github.com/bxcodec/faker"
 )
 
-// Orgjson is a json string for testing purposes
+// Orgjson is a organization json string for testing purposes
 const Orgjson = `{
   "resourceType": "Organization",
   "identifier": [
@@ -101,6 +101,7 @@ const Orgjson = `{
   ]
 }`
 
+// Practitionerjson is a practitioner json string for testing purposes
 const Practitionerjson = `{
   "resourceType": "Practitioner",
   "id": "f001",
@@ -164,6 +165,7 @@ const Practitionerjson = `{
   "birthDate": "1975-12-07"
 }`
 
+// Patientjson is a patient json string for testing purposes
 const Patientjson = `{
   "resourceType": "Patient",
   "id": "f001",
