@@ -3,7 +3,6 @@ package v2
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"github.com/CMSgov/dpc/api/apitest"
 	"github.com/CMSgov/dpc/api/client"
 	"github.com/go-chi/chi/middleware"
@@ -210,7 +209,7 @@ func (suite *OrganizationControllerTestSuite) TestCreateOrganization() {
 	resp, _ := ioutil.ReadAll(res.Body)
 	ja.Assertf(string(resp), string(apitest.AttributionOrgResponse()))
 
-	req = httptest.NewRequest(http.MethodPost, "http://example.com/foo", bytes.NewReader(malformOrg()))
+	req = httptest.NewRequest(http.MethodPost, "http://example.com/foo", bytes.NewReader(apitest.MalformedOrg()))
 
 	w = httptest.NewRecorder()
 	suite.org.Create(w, req)
@@ -254,7 +253,7 @@ func (suite *OrganizationControllerTestSuite) TestUpdateOrganizationErrors() {
 	ctx = context.WithValue(ctx, ContextKeyOrganization, "12345")
 	req = req.WithContext(ctx)
 
-	badReq := httptest.NewRequest(http.MethodPut, "http://example.com/foo", bytes.NewReader(malformOrg()))
+	badReq := httptest.NewRequest(http.MethodPut, "http://example.com/foo", bytes.NewReader(apitest.MalformedOrg()))
 	w = httptest.NewRecorder()
 	suite.org.Update(w, badReq)
 	res = w.Result()
@@ -286,12 +285,4 @@ func (suite *OrganizationControllerTestSuite) TestUpdateOrganization() {
 
 	resp, _ := ioutil.ReadAll(res.Body)
 	ja.Assertf(string(resp), string(ar))
-}
-
-func malformOrg() []byte {
-	var org map[string]interface{}
-	_ = json.Unmarshal([]byte(apitest.Orgjson), &org)
-	org["resourceType"] = "trash"
-	b, _ := json.Marshal(org)
-	return b
 }
