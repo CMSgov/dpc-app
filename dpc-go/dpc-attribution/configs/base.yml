@@ -1,5 +1,5 @@
 db:
-  url: postgresql://postgres:dpc-safe@localhost:5432/dpc_attribution
+  url: postgresql://postgres:dpc-safe@localhost:5432/dpc_attribution_v2
 
 port: 3001
 
