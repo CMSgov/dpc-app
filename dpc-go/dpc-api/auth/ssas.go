@@ -6,10 +6,22 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 
-	// "github.com/CMSgov/bcda-app/bcda/models"
 	"github.com/CMSgov/dpc/auth/client"
 )
+
+var logger *logrus.Logger
+
+type CommonClaims struct {
+	ClientID string   `json:"cid,omitempty"`
+	SystemID string   `json:"sys,omitempty"`
+	Data     string   `json:"dat,omitempty"`
+	Scopes   []string `json:"scp,omitempty"`
+	ACOID    string   `json:"aco,omitempty"`
+	UUID     string   `json:"id,omitempty"`
+	jwt.StandardClaims
+}
 
 type Credentials struct {
 	ClientID     string
@@ -24,7 +36,7 @@ type SSASPlugin struct {
 }
 
 // validates that SSASPlugin implements the interface
-var _ Provider = SSASPlugin{}
+// var _ Provider = SSASPlugin{}
 
 // RegisterSystemWithIPs adds a software client for the ACO identified by localID.
 // func (s SSASPlugin) RegisterSystem(localID, publicKey, groupID string, ips ...string) (Credentials, error) {
@@ -107,6 +119,8 @@ func (s SSASPlugin) RevokeSystemCredentials(ssasID string) error {
 
 // MakeAccessToken mints an access token for the given credentials.
 func (s SSASPlugin) MakeAccessToken(credentials Credentials) (string, error) {
+	logger.Print(credentials.ClientID)
+	logger.Print(credentials.ClientSecret)
 	ts, err := s.client.GetToken(client.Credentials{ClientID: credentials.ClientID, ClientSecret: credentials.ClientSecret})
 	if err != nil {
 		logger.Errorf("Failed to get token; %s", err.Error())
@@ -171,15 +185,16 @@ func (s SSASPlugin) RevokeAccessToken(tokenString string) error {
 
 // AuthorizeAccess asserts that a base64 encoded token string is valid for accessing the BCDA API.
 func (s SSASPlugin) AuthorizeAccess(tokenString string) error {
-	tknEvent := event{op: "AuthorizeAccess"}
-	operationStarted(tknEvent)
+	// tknEvent := event{op: "AuthorizeAccess"}
+	// operationStarted(tknEvent)
 	t, err := s.VerifyToken(tokenString)
 	if err != nil {
-		tknEvent.help = fmt.Sprintf("VerifyToken failed in AuthorizeAccess; %s", err.Error())
-		operationFailed(tknEvent)
+		// tknEvent.help = fmt.Sprintf("VerifyToken failed in AuthorizeAccess; %s", err.Error())
+		// operationFailed(tknEvent)
 		return err
 	}
-	claims, ok := t.Claims.(*CommonClaims)
+	// claims, ok := t.Claims.(*CommonClaims)
+	_, ok := t.Claims.(*CommonClaims)
 	if !ok {
 		return errors.New("invalid ssas claims")
 	}
@@ -189,7 +204,7 @@ func (s SSASPlugin) AuthorizeAccess(tokenString string) error {
 	// 	return err
 	// }
 
-	operationSucceeded(tknEvent)
+	// operationSucceeded(tknEvent)
 	return nil
 }
 

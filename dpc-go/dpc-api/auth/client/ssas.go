@@ -14,7 +14,6 @@ import (
 	"strings"
 	"time"
 
-	// "github.com/CMSgov/dpc-app/dpc-go/dpc-api/config"
 	"github.com/CMSgov/dpc/config"
 
 	"github.com/pkg/errors"
@@ -44,7 +43,8 @@ func init() {
 	ssasLogger = logrus.New()
 	ssasLogger.Formatter = &logrus.JSONFormatter{}
 	ssasLogger.SetReportCaller(true)
-	filePath := config.GetEnv("BCDA_SSAS_LOG")
+	// filePath := config.GetEnv("BCDA_SSAS_LOG")
+	filePath := "./log"
 
 	/* #nosec -- 0640 permissions required for Splunk ingestion */
 	file, err := os.OpenFile(filepath.Clean(filePath), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0640)
@@ -75,7 +75,8 @@ func NewSSASClient() (*SSASClient, error) {
 		timeout = 500
 	}
 
-	ssasURL := config.GetEnv("SSAS_URL")
+	// ssasURL := config.GetEnv("SSAS_URL", "http://ssas:3004")
+	ssasURL := "localhost:3004"
 	if ssasURL == "" {
 		return nil, errors.New("SSAS client could not be created: no URL provided")
 	}
@@ -308,14 +309,16 @@ func (c *SSASClient) RevokeAccessToken(tokenID string) error {
 	return nil
 }
 
-// GetToken POSTs to the public SSAS /token endpoint to get an access token for a BCDA client
+// GetToken POSTs to the public SSAS /token endpoint to get an access token for a DPC client
 func (c *SSASClient) GetToken(credentials Credentials) ([]byte, error) {
-	public := config.GetEnv("SSAS_PUBLIC_URL")
+	// public := config.GetEnv("SSAS_PUBLIC_URL", "http://ssas:3003")
+	public := "http://localhost:3103"
 	url := fmt.Sprintf("%s/token", public)
 	req, err := http.NewRequest("POST", url, nil)
 	if err != nil {
 		return nil, errors.Wrap(err, "bad request structure")
 	}
+	ssasLogger.Print(req.URL)
 	req.SetBasicAuth(credentials.ClientID, credentials.ClientSecret)
 
 	resp, err := c.Do(req)

@@ -12,7 +12,9 @@ func GetAuthToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := GetProvider().MakeAccessToken(Credentials{ClientID: clientId, ClientSecret: secret})
+	plugin := SSASPlugin{}
+
+	token, err := plugin.MakeAccessToken(Credentials{ClientID: clientId, ClientSecret: secret})
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 		return
