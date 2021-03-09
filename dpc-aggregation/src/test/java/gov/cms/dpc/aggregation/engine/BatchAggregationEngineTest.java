@@ -243,7 +243,7 @@ class BatchAggregationEngineTest {
         assertTrue(Files.exists(Path.of(errorFilePath)), "expect error file for failed patient");
         String operationOutcome = Files.readString(Path.of(errorFilePath));
         OperationOutcome o = FhirContext.forDstu3().newJsonParser().parseResource(OperationOutcome.class, operationOutcome);
-        assertEquals(NO_DATE_MATCH_DETAIL, o.getIssueFirstRep().getDetails().getText());
+        assertEquals(OutcomeReason.LOOK_BACK_NO_DATE_MATCH.detail, o.getIssueFirstRep().getDetails().getText());
     }
 
     @Test
@@ -286,7 +286,7 @@ class BatchAggregationEngineTest {
         assertTrue(Files.exists(Path.of(errorFilePath)), "expect error file for failed patient");
         String operationOutcome = Files.readString(Path.of(errorFilePath));
         OperationOutcome o = FhirContext.forDstu3().newJsonParser().parseResource(OperationOutcome.class, operationOutcome);
-        assertEquals(NO_MATCHES_DETAIL, o.getIssueFirstRep().getDetails().getText());
+        assertEquals(OutcomeReason.LOOK_BACK_NO_NPI_MATCH.detail, o.getIssueFirstRep().getDetails().getText());
     }
 
     @Test
@@ -329,7 +329,7 @@ class BatchAggregationEngineTest {
         assertTrue(Files.exists(Path.of(errorFilePath)), "expect error file for failed patient");
         String operationOutcome = Files.readString(Path.of(errorFilePath));
         OperationOutcome o = FhirContext.forDstu3().newJsonParser().parseResource(OperationOutcome.class, operationOutcome);
-        assertEquals(NO_NPI_MATCH_DETAIL, o.getIssueFirstRep().getDetails().getText());
+        assertEquals(OutcomeReason.LOOK_BACK_NO_NPI_MATCH.detail, o.getIssueFirstRep().getDetails().getText());
     }
 
     @Test
