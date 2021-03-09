@@ -1,0 +1,20 @@
+db:
+  url: postgresql://postgres:dpc-safe@localhost:5432/dpc_attribution_v2
+
+port: 3001
+
+log:
+  level: info
+  encoding: json
+  outputPaths:
+    - "stdout"
+  errorOutputPaths:
+    - "stderr"
+  encoderConfig:
+    messageKey: "message"
+    levelKey: "level"
+    levelEncoder: "lowercase"
+    timeEncoder: "iso8601"
+    timeKey: "timestamp"
+    callerEncoder: "short"
+    callerKey: "caller"
