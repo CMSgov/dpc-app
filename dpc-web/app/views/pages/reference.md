@@ -6,7 +6,7 @@ Welcome to the Data at the Point of Care pilot API program! This documentation c
 Welcome to the Data at the Point of Care pilot API program!
 
 ## Step One: Request Access
-Any Fee-for-Service provider or Health IT vendor may [request access](https://dpc.cms.gov/users/sign_up) to the sandbox environment and obtain synthetic data by signing-up for an account in the DPC Portal. You will receive a confirmation email from CMS upon account creation. 
+Any Fee-for-Service provider or Health IT vendor may [request access](https://sandbox.dpc.cms.gov/users/sign_up) to the sandbox environment and obtain synthetic data by signing-up for an account in the DPC Portal. You will receive a confirmation email from CMS upon account creation. 
 
 Once your account has been assigned to an organization, you will be notified with a second email, which will include next steps and an invite to join our [Google Group](https://groups.google.com/g/dpc-api) community. At this time, you may log in to the DPC Portal at [https://dpc.cms.gov](https://dpc.cms.gov) to create your first client token and start your journey with the Data at the Point of Care pilot API!
 
@@ -34,7 +34,7 @@ Client tokens help monitor who is accessing the API through your account. A clie
 
 Your first client token must be created through the DPC Portal. After successfully accessing the API, you may choose to add client tokens through the API or continue using the DPC Portal.
 
-1. **Log in to your account in the [DPC Portal](https://dpc.cms.gov/users/sign_in)** and select <span class="button-ex">+ New Token</span>
+1. **Log in to your account in the [DPC Portal](https://sandbox.dpc.cms.gov/users/sign_in)** and select <span class="button-ex">+ New Token</span>
 2. **Add a Label:** Title your token with a recognizable name that includes the environment for which you are requesting access
 3. Click "Create Token" to generate your client token
 
