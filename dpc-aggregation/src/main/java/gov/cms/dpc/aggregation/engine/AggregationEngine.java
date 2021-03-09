@@ -111,6 +111,8 @@ public class AggregationEngine implements Runnable {
                     MDC.remove(MDCConstants.JOB_BATCH_ID);
                     MDC.remove(MDCConstants.ORGANIZATION_ID);
                     MDC.remove(MDCConstants.PROVIDER_NPI);
+                    MDC.remove(MDCConstants.IS_SMOKE_TEST_ORG);
+
                 })
                 .subscribe(
                         this::processJobBatch,

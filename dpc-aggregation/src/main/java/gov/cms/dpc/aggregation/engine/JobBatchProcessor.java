@@ -5,6 +5,7 @@ import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.net.HttpHeaders;
 import gov.cms.dpc.aggregation.service.*;
+import gov.cms.dpc.aggregation.util.AggregationUtils;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.common.Constants;
 import gov.cms.dpc.common.MDCConstants;
@@ -15,8 +16,6 @@ import gov.cms.dpc.queue.models.JobQueueBatchFile;
 import io.reactivex.Flowable;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.dstu3.model.*;
-import org.hl7.fhir.dstu3.model.OperationOutcome.IssueSeverity;
-import org.hl7.fhir.dstu3.model.OperationOutcome.IssueType;
 import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,16 +61,20 @@ public class JobBatchProcessor {
      * @return A list of batch files {@link JobQueueBatchFile}
      */
     public List<JobQueueBatchFile> processJobBatchPartial(UUID aggregatorID, IJobQueue queue, JobQueueBatch job, String patientID) {
+        OutcomeReason failReason = null;
         final Pair<Optional<List<ConsentResult>>,Optional<OperationOutcome>> consentResult = getConsent(patientID);
 
         Flowable<Resource> flowable;
         if(consentResult.getRight().isPresent()){
             flowable = Flowable.just(consentResult.getRight().get());
+            failReason = OutcomeReason.INTERNAL_ERROR;
         }
         else if(isOptedOut(consentResult.getLeft())){
-            flowable = Flowable.just(buildOperationOutcome(patientID, IssueSeverity.WARNING,IssueType.SUPPRESSED,"Data not available for opted out patient"));
+            failReason = OutcomeReason.CONSENT_OPTED_OUT;
+            flowable = Flowable.just(AggregationUtils.toOperationOutcome(OutcomeReason.CONSENT_OPTED_OUT, patientID));
         }else if(isLookBackExempt(job.getOrgID())){
             logger.info("Skipping lookBack for org: {}", job.getOrgID().toString());
+            MDC.put(MDCConstants.IS_SMOKE_TEST_ORG, "true");
             flowable = Flowable.fromIterable(job.getResourceTypes())
                     .flatMap(r -> fetchResource(job, patientID, r, job.getSince().orElse(null)));
         }else{
@@ -80,9 +83,11 @@ public class JobBatchProcessor {
                 flowable = Flowable.fromIterable(job.getResourceTypes())
                         .flatMap(r -> fetchResource(job, patientID, r, job.getSince().orElse(null)));
             }else{
-                flowable = Flowable.just(LookBackAnalyzer.analyze(answers, patientID));
+                failReason = LookBackAnalyzer.analyze(answers);
+                flowable = Flowable.just(AggregationUtils.toOperationOutcome(failReason, patientID));
             }
         }
+        logger.info("dpcMetric=DataExportResult,dataRetrieved={},failReason={}",failReason==null,failReason==null ? "NA":failReason.name());
 
         final var results = writeResource(job, flowable)
                 .toList()
@@ -216,8 +221,8 @@ public class JobBatchProcessor {
             return Pair.of(consentService.getConsent(patientId),Optional.empty());
         }catch (Exception e){
             logger.error("Unable to retrieve consent from consent service.", e);
-            OperationOutcome operationOutcome = buildOperationOutcome(patientId,IssueSeverity.ERROR,IssueType.EXCEPTION,"Unable to retrieve patient data due to internal error");
-            return Pair.of(Optional.empty(), Optional.of(operationOutcome) );
+            OperationOutcome operationOutcome = AggregationUtils.toOperationOutcome(OutcomeReason.INTERNAL_ERROR, patientId);
+            return Pair.of(Optional.empty(), Optional.of(operationOutcome));
         }
     }
 
@@ -233,17 +238,6 @@ public class JobBatchProcessor {
             return optOutCount > 0;
         }
         return true;
-    }
-
-    private OperationOutcome buildOperationOutcome(String mbi, IssueSeverity severity, IssueType issueType, String text){
-        final var patientLocation = List.of(new StringType("Patient"), new StringType("id"), new StringType(mbi));
-        final var outcome = new OperationOutcome();
-        outcome.addIssue()
-                .setSeverity(severity)
-                .setCode(issueType)
-                .setDetails(new CodeableConcept().setText(text))
-                .setLocation(patientLocation);
-        return outcome;
     }
 
     private boolean passesLookBack(List<LookBackAnswer> answers){

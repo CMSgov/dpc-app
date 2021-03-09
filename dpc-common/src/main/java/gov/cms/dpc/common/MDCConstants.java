@@ -12,5 +12,6 @@ public final class MDCConstants {
     public static final String PRACTITIONER_NPI = "practitioner_npi";
     public static final String TOKEN_ID = "token_id";
     public static final String DPC_REQUEST_ID="request_id";
+    public static final String IS_SMOKE_TEST_ORG = "is_smoke_test";
 
 }
