@@ -3,7 +3,7 @@
 require 'rails_helper'
 
 RSpec.feature 'user password expires after 2 months' do
-  let(:user) { create :user, password: '12345ABCDEfghi!', password_confirmation: '12345ABCDEfghi!', password_changed_at: 2.months.ago }
+  let(:user) { create :user, password: '12345ABCDEfghi!', password_confirmation: '12345ABCDEfghi!', password_changed_at: 61.days.ago }
 
   # scenario 'user signs in after password expires' do
   #   visit new_user_session_path
