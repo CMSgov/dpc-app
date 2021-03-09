@@ -166,7 +166,7 @@
             <dependency>
                 <groupId>com.typesafe</groupId>
                 <artifactId>config</artifactId>
-                <version>1.4.0</version>
+                <version>1.4.1</version>
             </dependency>
             <dependency>
                 <groupId>${typesafe.config.groupID}</groupId>
@@ -177,7 +177,7 @@
             <dependency>
                 <groupId>org.hibernate</groupId>
                 <artifactId>hibernate-core</artifactId>
-                <version>5.4.27.Final</version>
+                <version>5.4.28.Final</version>
             </dependency>
             <dependency>
                 <groupId>org.postgresql</groupId>

@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/CMSgov/dpc/api/fhirror"
 	"github.com/CMSgov/dpc/api/logger"
-	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"io/ioutil"
 	"net/http"
@@ -143,7 +142,7 @@ func isValidOrganization(org []byte) error {
 	unmarshaller, _ := jsonformat.NewUnmarshaller("UTC", jsonformat.R4)
 	_, err := unmarshaller.UnmarshalR4(org)
 	if err != nil {
-		return errors.New("Organization is not a properly formed FHIR object")
+		return err
 	}
 	return nil
 }
