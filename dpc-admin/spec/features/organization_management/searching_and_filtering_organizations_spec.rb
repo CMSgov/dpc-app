@@ -14,7 +14,7 @@ RSpec.feature 'searching and filtering organizations' do
     create(:organization, name: 'Fishy Health')
     create(:organization, name: 'Unrelated Specialty Doc')
 
-    visit internal_organizations_path
+    visit organizations_path
 
     expect(page.body).to have_content('Crabby Health')
     expect(page.body).to have_content('Fishy Health')
@@ -57,7 +57,7 @@ RSpec.feature 'searching and filtering organizations' do
 
     tag_id = '#tags_' + tag2.id.to_s
 
-    visit internal_organizations_path
+    visit organizations_path
 
     expect(page.body).to have_content('Spongebob')
     expect(page.body).to have_content('Fairly Odd Parents')
