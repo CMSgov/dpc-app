@@ -59,6 +59,7 @@ group :test do
   # Adds support for Capybara system testing and selenium driver
   gem 'capybara', '>= 2.15'
   gem 'climate_control'
+  gem 'rails-controller-testing'
   gem 'selenium-webdriver'
   gem 'fakefs', require: 'fakefs/safe'
   gem 'fakeredis'
