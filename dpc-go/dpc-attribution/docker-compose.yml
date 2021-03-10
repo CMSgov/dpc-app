@@ -5,7 +5,7 @@ services:
     image: postgres
     command: postgres
     environment:
-      - POSTGRES_MULTIPLE_DATABASES=dpc_attribution_v2
+      - POSTGRES_MULTIPLE_DATABASES=dpc_attribution
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=dpc-safe
     ports:
@@ -16,7 +16,7 @@ services:
     image: migrate/migrate
     depends_on:
       - db
-    command: -path=/migrations/ -database postgres://postgres:dpc-safe@db:5432/dpc_attribution_v2?sslmode=disable up
+    command: -path=/migrations/ -database postgres://postgres:dpc-safe@db:5432/dpc_attribution?sslmode=disable up
     volumes:
       - ./migrator/migrations:/migrations
   attribution:
@@ -26,5 +26,5 @@ services:
     depends_on:
       - migrator
     environment:
-      - DPC_DB_URL=postgresql://postgres:dpc-safe@db:5432/dpc_attribution_v2
+      - DPC_DB_URL=postgresql://postgres:dpc-safe@db:5432/dpc_attribution
       - DPC_PORT=3001
