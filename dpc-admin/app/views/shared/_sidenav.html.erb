@@ -28,14 +28,14 @@
           <li class="ds-c-vertical-nav__item">
             <%= link_to users_path(org_status: "unassigned", org_type: "provider"), class: "ds-c-vertical-nav__label #{current_sidenav_class if unassigned_provider_users_page?}" do %>
               <span>
-                Unassigned users
+                Unassigned providers
               </span>
             <% end %>
           </li>
           <li class="ds-c-vertical-nav__item">
             <%= link_to users_path(org_status: "assigned", org_type: "provider"), class: "ds-c-vertical-nav__label #{current_sidenav_class if assigned_provider_users_page?}" do %>
               <span>
-                Assigned users
+                Assigned providers
               </span>
             <% end %>
           </li>
@@ -50,14 +50,14 @@
           <li class="ds-c-vertical-nav__item">
             <%= link_to users_path(org_status: "unassigned", org_type: "vendor"), class: "ds-c-vertical-nav__label #{current_sidenav_class if unassigned_vendor_users_page?}" do %>
               <span>
-                Unassigned users
+                Unassigned vendors
               </span>
             <% end %>
           </li>
           <li class="ds-c-vertical-nav__item">
             <%= link_to users_path(org_status: "assigned", org_type: "vendor"), class: "ds-c-vertical-nav__label #{current_sidenav_class if assigned_vendor_users_page?}" do %>
               <span>
-                Assigned users
+                Assigned vendors
               </span>
             <% end %>
           </li>
