@@ -45,11 +45,34 @@
   }
 }
 
+.site-pills__item--medium {
+  align-items: center;
+  display: inline-flex;
+  font-size: 15px;
+  justify-content: center;
+  margin: $spacer-2 / 4;
+  padding: .8em 1.3em;
+  text-transform: none;
+
+  @media (min-width: $width-md) {
+    font-size: 15px;
+  }
+
+  @media (min-width: $width-lg) {
+    font-size: 15px;
+  }
+}
+
 .site-pills__item__button {
   color: rgba($color-primary-alt-darkest, .5);
   display: inline-block;
   margin: 5px 0 0 $spacer-1;
   text-decoration: none;
+}
+
+.site-pills__item--inverse {
+  background-color: $color-primary-alt-darkest;
+  color: $color-white;
 }
 
 .dashboard__pills--delete span.site-pills__item--small:hover{
