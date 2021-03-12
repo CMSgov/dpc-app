@@ -1,0 +1,102 @@
+.site-pills {
+  list-style: none;
+  margin: $spacer-2 $spacer-2 $spacer-2 0;
+  padding: 0;
+}
+
+.site-pills__item {
+  background-color: $color-primary-alt-lightest;
+  border-radius: 50px;
+  color: $color-primary-alt-darkest;
+  display: inline-block;
+  font-weight: $font-bold;
+  font-size: 12px;
+  margin: $spacer-1 / 2;
+  padding: 1em 2em;
+  text-transform: uppercase;
+
+  @media (min-width: $width-md) {
+    font-size: 14px;
+  }
+
+  @media (min-width: $width-lg) {
+    font-size: $base-font-size;
+  }
+
+  &:first-child {
+    margin-left: 0;
+  }
+}
+
+.site-pills__item--small {
+  align-items: center;
+  display: inline-flex;
+  font-size: 12px;
+  margin: $spacer-1 / 4;
+  padding: .5em 1em;
+  text-transform: none;
+
+  @media (min-width: $width-md) {
+    font-size: 12px;
+  }
+
+  @media (min-width: $width-lg) {
+    font-size: 12px;
+  }
+}
+
+.site-pills__item--medium {
+  align-items: center;
+  display: inline-flex;
+  font-size: 15px;
+  justify-content: center;
+  margin: $spacer-2 / 4;
+  padding: .8em 1.3em;
+  text-transform: none;
+
+  @media (min-width: $width-md) {
+    font-size: 15px;
+  }
+
+  @media (min-width: $width-lg) {
+    font-size: 15px;
+  }
+}
+
+.site-pills__item__button {
+  color: rgba($color-primary-alt-darkest, .5);
+  display: inline-block;
+  margin: 5px 0 0 $spacer-1;
+  text-decoration: none;
+}
+
+.site-pills__item--inverse {
+  background-color: $color-primary-alt-darkest;
+  color: $color-white;
+}
+
+.dashboard__pills--delete span.site-pills__item--small:hover{
+  background-color: $color-error-lighter;
+  color: $color-error-darkest;
+  text-decoration: none;
+}
+
+.dashboard__pills--delete:hover span.site-pills__item--small:before {
+  content: "✖\00a0";
+  cursor: pointer;
+}
+
+.dashboard__pills--add {
+  .site-pills__item--small {
+    border: 0px !important;
+  }
+
+  .site-pills__item--small:hover {
+    background-color: $color-success-lightest;
+    color: $color-success-darkest;
+  }
+}
+
+.dashboard__pills--add:hover input.site-pills__item--small:before {
+  content: "+";
+}
