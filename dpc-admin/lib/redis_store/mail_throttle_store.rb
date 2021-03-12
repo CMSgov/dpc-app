@@ -16,6 +16,7 @@ module RedisStore
     end
 
     def can_email?(key)
+      binding.pry
       return false if get_value(key) >= @limit
 
       increment(key)
