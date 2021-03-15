@@ -13,7 +13,7 @@
       Download CSV
     <% end %>
 
-  <section class="ds-l-row--12 ds-l-md-col--9 ds-u-md-padding-left--2">
+  <section class="ds-l-row--12 ds-l-md-col--12 ds-u-md-padding-left--2">
     <p class=""><%= page_entries_info @users %></p>
     <%= form_tag users_path, method: "get", class: "ds-u-display--flex" do %>
       <%= hidden_field_tag :org_status, params[:org_status] %>

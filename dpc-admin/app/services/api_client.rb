@@ -37,6 +37,24 @@ class ApiClient
     get_request(uri_string, delegated_macaroon(reg_org_api_id))
   end
 
+  def create_public_key(reg_org_api_id, params: {})
+    uri_string = base_url + '/Key'
+
+    json = {
+      key: params[:public_key],
+      signature: params[:snippet_signature]
+    }.to_json
+
+    post_text_request(
+      uri_string,
+      json,
+      { label: params[:label] },
+      delegated_macaroon(reg_org_api_id)
+    )
+
+    self
+  end
+
   def get_public_keys(reg_org_api_id)
     uri_string = base_url + '/Key'
     get_request(uri_string, delegated_macaroon(reg_org_api_id))
