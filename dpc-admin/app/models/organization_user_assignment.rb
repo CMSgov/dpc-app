@@ -15,7 +15,6 @@ class OrganizationUserAssignment < ApplicationRecord
     return unless organization.prod_sbx? && organization.registered_organization.present?
 
     mail_throttle_store = RedisStore::MailThrottleStore.new
-    binding.pry
 
     if mail_throttle_store.can_email? user.email
       UserMailer
