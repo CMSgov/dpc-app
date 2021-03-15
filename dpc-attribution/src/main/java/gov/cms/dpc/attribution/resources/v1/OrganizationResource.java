@@ -13,10 +13,12 @@ import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.FHIRParameter;
 import gov.cms.dpc.fhir.converters.FHIREntityConverter;
 import io.dropwizard.hibernate.UnitOfWork;
-import io.swagger.annotations.*;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jetty.http.HttpStatus;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Endpoint;
+import org.hl7.fhir.dstu3.model.Organization;
+import org.hl7.fhir.dstu3.model.ResourceType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +33,6 @@ import java.util.stream.Collectors;
 
 import static gov.cms.dpc.attribution.utils.RESTUtils.parseTokenTag;
 
-@Api(value = "Organization")
 public class OrganizationResource extends AbstractOrganizationResource {
 
     private static final Logger logger = LoggerFactory.getLogger(OrganizationResource.class);
@@ -54,10 +55,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
     @GET
     @FHIR
     @UnitOfWork
-    @ApiOperation(value = "Search for an Organization",
-            notes = "FHIR Endpoint to find an Organization resource based on the given Identifier.", response = Bundle.class)
     public List<Organization> searchOrganizations(
-            @ApiParam(value = "NPI of Organization")
             @QueryParam("identifier") String identifier) {
 
         if (identifier == null) {
@@ -80,11 +78,6 @@ public class OrganizationResource extends AbstractOrganizationResource {
     @UnitOfWork
     @Timed
     @ExceptionMetered
-    @ApiOperation(value = "Create Organization", notes = "FHIR endpoint that accepts a Bundle resource containing an Organization and a list of Endpoint resources to register with the application")
-    @ApiResponses(value = {
-            @ApiResponse(code = 422, message = "Must provide a single Organization resource to register", response = OperationOutcome.class),
-            @ApiResponse(code = 201, message = "Organization was successfully registered")
-    })
     public Response submitOrganization(@FHIRParameter(name = "resource") Bundle transactionBundle) {
 
         final Optional<Organization> optOrganization = transactionBundle
@@ -99,7 +92,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
         }
 
         Organization organization = optOrganization.get();
-        if(StringUtils.isBlank(organization.getId())){
+        if (StringUtils.isBlank(organization.getId())) {
             organization.setId(generateNewOrgId());
         }
         final OrganizationEntity entity = this.converter.fromFHIR(OrganizationEntity.class, organization);
@@ -121,10 +114,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
     @FHIR
     @UnitOfWork
     @Override
-    @ApiOperation(value = "Fetch organization", notes = "FHIR endpoint to fetch an Organization with the given Resource ID")
-    @ApiResponses(value = @ApiResponse(code = 404, message = "Could not find Organization", response = OperationOutcome.class))
     public Organization getOrganization(
-            @ApiParam(value = "Organization resource ID", required = true)
             @PathParam("organizationID") UUID organizationID) {
         final Optional<OrganizationEntity> orgOptional = this.dao.fetchOrganization(organizationID);
         final OrganizationEntity organizationEntity = orgOptional.orElseThrow(() -> new WebApplicationException(String.format("Cannot find organization '%s'", organizationID), Response.Status.NOT_FOUND));
@@ -135,13 +125,8 @@ public class OrganizationResource extends AbstractOrganizationResource {
     @Path("/{organizationID}")
     @FHIR
     @UnitOfWork
-    @ApiOperation(value = "Update Organization record", notes = "Update specific Organization record.")
-    @ApiResponses(value = {
-            @ApiResponse(code = 404, message = "Unable to find Organization to update"),
-            @ApiResponse(code = 422, message = "The provided Organization bundle is invalid")
-    })
     @Override
-    public Response updateOrganization(@ApiParam(value = "Organization resource ID", required = true) @PathParam("organizationID") UUID organizationID, Organization organization) {
+    public Response updateOrganization(@PathParam("organizationID") UUID organizationID, Organization organization) {
         try {
             OrganizationEntity orgEntity = this.converter.fromFHIR(OrganizationEntity.class, organization);
             Organization original = getOrganization(organizationID);
@@ -164,11 +149,8 @@ public class OrganizationResource extends AbstractOrganizationResource {
     @Path("/{organizationID}")
     @FHIR
     @UnitOfWork
-    @ApiOperation(value = "Delete organization", notes = "FHIR endpoint to delete an Organization with the given Resource ID." +
-            "<p>This also drops ALL resources associated to the given entity.")
-    @ApiResponses(value = @ApiResponse(code = 404, message = "Could not find Organization", response = OperationOutcome.class))
     @Override
-    public Response deleteOrganization(@ApiParam(value = "Organization resource ID", required = true) @PathParam("organizationID") UUID organizationID) {
+    public Response deleteOrganization(@PathParam("organizationID") UUID organizationID) {
         final OrganizationEntity organizationEntity = this.dao.fetchOrganization(organizationID)
                 .orElseThrow(() -> new WebApplicationException("Cannot find organization.", Response.Status.NOT_FOUND));
 
@@ -186,12 +168,12 @@ public class OrganizationResource extends AbstractOrganizationResource {
                 .collect(Collectors.toList());
     }
 
-    private String generateNewOrgId(){
+    private String generateNewOrgId() {
         final List<String> prohibitedIds = config.getLookBackExemptOrgs();
         String orgId;
-        do{
+        do {
             orgId = uuidSupplier.get().toString();
-        }while(prohibitedIds!=null && prohibitedIds.contains(orgId));
+        } while (prohibitedIds != null && prohibitedIds.contains(orgId));
         return orgId;
     }
 }

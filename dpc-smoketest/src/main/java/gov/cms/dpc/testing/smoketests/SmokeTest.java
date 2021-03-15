@@ -145,7 +145,7 @@ public class SmokeTest extends AbstractJavaSamplerClient {
                     .map(FHIRExtractors::getProviderNPI)
                     .collect(Collectors.toList());
 
-            ClientUtils.handleExportJob(exportClient, providerNPIs, httpClient, apiAdminUrl);
+            ClientUtils.handleExportJob(exportClient, providerNPIs, httpClient, apiHost);
         } catch (IOException e) {
             throw new IllegalStateException("Somehow, could not monitor export response", e);
         }

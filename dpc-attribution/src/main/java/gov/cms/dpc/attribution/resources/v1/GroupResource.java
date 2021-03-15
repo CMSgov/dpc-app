@@ -19,10 +19,8 @@ import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.FHIRParameter;
 import gov.cms.dpc.fhir.converters.FHIREntityConverter;
 import io.dropwizard.hibernate.UnitOfWork;
-import io.swagger.annotations.*;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.validator.constraints.NotEmpty;
-import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Group;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Patient;
@@ -39,7 +37,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-@Api(value = "Group")
 public class GroupResource extends AbstractGroupResource {
 
     private static final Logger logger = LoggerFactory.getLogger(GroupResource.class);
@@ -66,14 +63,9 @@ public class GroupResource extends AbstractGroupResource {
     @POST
     @FHIR
     @UnitOfWork
-    @ApiOperation(value = "Create Attribution Roster", notes = "FHIR endpoint to create an Attribution roster (Group resource) associated to the provider listed in the in the Group characteristics.")
-    @ApiResponses(value = {
-            @ApiResponse(code = 201, message = "Successfully created Roster"),
-            @ApiResponse(code = 200, message = "Roster already exists")
-    })
     @Override
     public Response createRoster(Group attributionRoster) {
-        if (rosterSizeTooBig( config.getPatientLimit(), attributionRoster )) {
+        if (rosterSizeTooBig(config.getPatientLimit(), attributionRoster)) {
             throw TOO_MANY_MEMBERS_EXCEPTION;
         }
 
@@ -105,17 +97,10 @@ public class GroupResource extends AbstractGroupResource {
     @GET
     @FHIR
     @UnitOfWork
-    @ApiOperation(value = "Search for attribution rosters", notes = "FHIR endpoint to search for Attribution Rosters." +
-            "<p> You can search for Groups associated to a given provider (via the Provider NPI) and groups for which a patient is a member of (by the Patient resource ID)",
-            response = Bundle.class)
     @Override
-    public List<Group> rosterSearch(@ApiParam(value = "Group resource UUID")
-                                    @QueryParam(Group.SP_RES_ID) UUID rosterID,
-                                    @ApiParam(value = "Organization ID")
+    public List<Group> rosterSearch(@QueryParam(Group.SP_RES_ID) UUID rosterID,
                                     @NotEmpty @QueryParam("_tag") String organizationToken,
-                                    @ApiParam(value = "Provider NPI")
                                     @QueryParam(Group.SP_CHARACTERISTIC_VALUE) String providerNPI,
-                                    @ApiParam(value = "Patient ID")
                                     @QueryParam(Group.SP_MEMBER) String patientID) {
 
         final String providerIDPart;
@@ -136,12 +121,8 @@ public class GroupResource extends AbstractGroupResource {
     @Path("/{rosterID}/$patients")
     @FHIR
     @UnitOfWork
-    @ApiOperation(value = "Get attributed patient IDs", notes = "FHIR endpoint to retrieve the Patient MBIs for roster entities." +
-            "<p> This is an operation optimized for returning only the MBIs for the Patient resources linked to the Roster. " +
-            "It returns empty Patient resources with only the MBI added as an identifier.", response = Bundle.class)
-    @ApiResponses(@ApiResponse(code = 404, message = "Cannot find attribution roster"))
     @Override
-    public List<Patient> getAttributedPatients(@NotNull @PathParam("rosterID") UUID rosterID, @ApiParam(name = "active", value = "Return only active patients", defaultValue = "false") @QueryParam(value = "active") boolean activeOnly) {
+    public List<Patient> getAttributedPatients(@NotNull @PathParam("rosterID") UUID rosterID, @QueryParam(value = "active") boolean activeOnly) {
         if (!this.rosterDAO.rosterExists(rosterID)) {
             throw new WebApplicationException(NOT_FOUND_EXCEPTION, Response.Status.NOT_FOUND);
         }
@@ -165,8 +146,6 @@ public class GroupResource extends AbstractGroupResource {
     @Path("/{rosterID}")
     @FHIR
     @UnitOfWork
-    @ApiOperation(value = "Update roster", notes = "FHIR endpoint to update the given Group resource with members to add or remove.")
-    @ApiResponses(@ApiResponse(code = 404, message = "Cannot find attribution roster"))
     @Override
     public Group replaceRoster(@PathParam("rosterID") UUID rosterID, Group groupUpdate) {
         if (!this.rosterDAO.rosterExists(rosterID)) {
@@ -210,11 +189,6 @@ public class GroupResource extends AbstractGroupResource {
     @Path("/{rosterID}/$add")
     @FHIR
     @UnitOfWork
-    @ApiOperation(value = "Add roster members", notes = "FHIR endpoint to update the given Group resource by adding the members included in the supplied Group.")
-    @ApiResponses(value = {
-            @ApiResponse(code = 404, message = "Cannot find attribution roster"),
-            @ApiResponse(code = 400, message = "Unable to add patient to roster")
-    })
     @Override
     public Group addRosterMembers(@PathParam("rosterID") UUID rosterID, @FHIRParameter Group groupUpdate) {
         if (!this.rosterDAO.rosterExists(rosterID)) {
@@ -242,8 +216,8 @@ public class GroupResource extends AbstractGroupResource {
                 .map(entity -> {
                     final UUID patientID = UUID.fromString(new IdType(entity.getReference()).getIdPart());
                     List<PatientEntity> patientEntities = this.patientDAO.patientSearch(patientID, null, orgId);
-                    if(patientEntities == null || patientEntities.isEmpty()){
-                       throw  new WebApplicationException(String.format("Cannot find patient with ID %s", patientID.toString()), Response.Status.BAD_REQUEST);
+                    if (patientEntities == null || patientEntities.isEmpty()) {
+                        throw new WebApplicationException(String.format("Cannot find patient with ID %s", patientID.toString()), Response.Status.BAD_REQUEST);
                     }
                     return patientEntities.get(0);
                 })
@@ -272,11 +246,6 @@ public class GroupResource extends AbstractGroupResource {
     @Path("/{rosterID}/$remove")
     @FHIR
     @UnitOfWork
-    @ApiOperation(value = "Remove roster members", notes = "FHIR endpoint to update the given Group resource by removing the members included in the supplied Group.")
-    @ApiResponses(value = {
-            @ApiResponse(code = 404, message = "Cannot find attribution roster"),
-            @ApiResponse(code = 400, message = "Cannot find attribution relationship to remove")
-    })
     @Override
     public Group removeRosterMembers(@PathParam("rosterID") UUID rosterID, @FHIRParameter Group groupUpdate) {
         if (!this.rosterDAO.rosterExists(rosterID)) {
@@ -310,8 +279,6 @@ public class GroupResource extends AbstractGroupResource {
     @Path("/{rosterID}")
     @FHIR
     @UnitOfWork
-    @ApiOperation(value = "Delete roster", notes = "FHIR Endpoint to delete attribution roster")
-    @ApiResponses(@ApiResponse(code = 404, message = "Cannot find attribution roster"))
     @Override
     public Response deleteRoster(@PathParam("rosterID") UUID rosterID) {
         final RosterEntity rosterEntity = this.rosterDAO.getEntity(rosterID)
@@ -327,14 +294,8 @@ public class GroupResource extends AbstractGroupResource {
     @UnitOfWork
     @Timed
     @ExceptionMetered
-    @ApiOperation(value = "Get attributed patients", notes = "Returns a list of Patient MBIs that are attributed to the given Provider.")
-    @ApiResponses(value = {
-            @ApiResponse(code = 500, message = "Internal server error that prevented the service from looking up the attributed patients"),
-            @ApiResponse(code = 404, message = "No provider exists with the given NPI")
-    })
     @Override
     public Group getRoster(
-            @ApiParam(value = "Provider NPI", required = true)
             @PathParam("rosterID") UUID rosterID) {
         logger.debug("API request to retrieve attributed patients for {}", rosterID);
 
@@ -364,12 +325,12 @@ public class GroupResource extends AbstractGroupResource {
         return Pair.of(leftID, rightID);
     }
 
-    private void verifyMembers(Group group, UUID orgId){
-        for (Group.GroupMemberComponent member : group.getMember()){
+    private void verifyMembers(Group group, UUID orgId) {
+        for (Group.GroupMemberComponent member : group.getMember()) {
             final UUID patientID = UUID.fromString(new IdType(member.getEntity().getReference()).getIdPart());
             List<PatientEntity> patientEntities = patientDAO.patientSearch(patientID, null, orgId);
-            if(patientEntities.isEmpty()){
-                throw  new WebApplicationException(String.format("Cannot find patient with ID %s", patientID.toString()), Response.Status.BAD_REQUEST);
+            if (patientEntities.isEmpty()) {
+                throw new WebApplicationException(String.format("Cannot find patient with ID %s", patientID.toString()), Response.Status.BAD_REQUEST);
             }
         }
     }

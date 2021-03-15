@@ -258,6 +258,12 @@
   }
 }
 
+// Header separator
+.header-seperator {
+  background-color: $color-gray-dark;
+  padding: $spacer-1;
+}
+
 
 // Animations
 @keyframes slidein-left {
@@ -268,4 +274,10 @@
   to {
     transform: translateX(0);
   }
+}
+
+// Side nav
+
+.ds-c-vertical-nav__subnav {
+  list-style-type: none !important;
 }

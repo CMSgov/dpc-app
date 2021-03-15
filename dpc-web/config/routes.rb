@@ -41,12 +41,13 @@ Rails.application.routes.draw do
     resources :public_keys, only: [:new, :create]
   end
 
+  devise_scope :user do
+    root to: "devise/sessions#new"
+  end
 
-  root to: 'public#home'
+  match '/home', to: redirect("#{ENV['STATIC_SITE_URL']}"), via: :get
 
-  match '/home', to: 'public#home', via: :get
-
-  match '/docs', to: 'pages#reference', via: :get
+  match '/docs', to: redirect("#{ENV['STATIC_SITE_URL']}/docs"), via: :get
 
   # downloadable files
   match '/download_snippet', to: 'public_keys#download_snippet', as: 'download_snippet', via: :post
@@ -55,10 +56,8 @@ Rails.application.routes.draw do
   match '/download_pt_json', to: 'application#download_pt_json', as: 'download_pt_json', via: :post
   match '/download_postman_collection', to: 'application#download_postman', as: 'download_postman', via: :post
 
-  # match '/docs/guide', to: 'pages#guide', via: :get
-  match '/faq', to: 'pages#faq', via: :get
-  match '/support', to: 'pages#support', via: :get
-  match '/terms-of-service', to: 'pages#terms_of_service', via: :get
+  match '/faq', to: redirect("#{ENV['STATIC_SITE_URL']}/faq"), via: :get
+  match '/terms-of-service', to: redirect("#{ENV['STATIC_SITE_URL']}/terms-of-service"), via: :get
 
   if Rails.env.development?
     require 'sidekiq/web'

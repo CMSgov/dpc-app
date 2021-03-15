@@ -34,8 +34,8 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <dropwizard.version>1.3.25</dropwizard.version>
-        <junit.jupiter.version>5.7.0</junit.jupiter.version>
+        <dropwizard.version>1.3.29</dropwizard.version>
+        <junit.jupiter.version>5.7.1</junit.jupiter.version>
         <slf4j.version>1.7.30</slf4j.version>
         <!--Custom group IDs for pulling dependencies from JitPack-->
         <jitpack.groupID>com.github.nickrobison-usds</jitpack.groupID>
@@ -49,7 +49,7 @@
         <timestamp>${maven.build.timestamp}</timestamp>
         <jacoco.version>0.8.5</jacoco.version>
         <jooq.version>3.13.4</jooq.version>
-        <bouncey.version>1.67</bouncey.version>
+        <bouncey.version>1.68</bouncey.version>
         <pitest.version>1.5.1</pitest.version>
         <newrelic.agent.version>5.14.0</newrelic.agent.version>
         <newrelic.agent.type>zip</newrelic.agent.type>
@@ -166,7 +166,7 @@
             <dependency>
                 <groupId>com.typesafe</groupId>
                 <artifactId>config</artifactId>
-                <version>1.4.0</version>
+                <version>1.4.1</version>
             </dependency>
             <dependency>
                 <groupId>${typesafe.config.groupID}</groupId>
@@ -177,7 +177,7 @@
             <dependency>
                 <groupId>org.hibernate</groupId>
                 <artifactId>hibernate-core</artifactId>
-                <version>5.4.26.Final</version>
+                <version>5.4.28.Final</version>
             </dependency>
             <dependency>
                 <groupId>org.postgresql</groupId>
@@ -192,7 +192,7 @@
             <dependency>
                 <groupId>com.google.inject</groupId>
                 <artifactId>guice</artifactId>
-                <version>4.2.3</version>
+                <version>5.0.1</version>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>

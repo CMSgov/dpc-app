@@ -4,9 +4,8 @@ import ca.uhn.fhir.context.FhirContext;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.net.HttpHeaders;
-import gov.cms.dpc.aggregation.service.LookBackAnalyzer;
-import gov.cms.dpc.aggregation.service.LookBackAnswer;
-import gov.cms.dpc.aggregation.service.LookBackService;
+import gov.cms.dpc.aggregation.service.*;
+import gov.cms.dpc.aggregation.util.AggregationUtils;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.common.Constants;
 import gov.cms.dpc.common.MDCConstants;
@@ -15,9 +14,8 @@ import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatchFile;
 import io.reactivex.Flowable;
-import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
-import org.hl7.fhir.dstu3.model.Resource;
-import org.hl7.fhir.dstu3.model.ResourceType;
+import org.apache.commons.lang3.tuple.Pair;
+import org.hl7.fhir.dstu3.model.*;
 import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,13 +35,15 @@ public class JobBatchProcessor {
     private final Meter resourceMeter;
     private final Meter operationalOutcomeMeter;
     private final LookBackService lookBackService;
+    private final ConsentService consentService;
 
     @Inject
-    public JobBatchProcessor(BlueButtonClient bbclient, FhirContext fhirContext, MetricRegistry metricRegistry, OperationsConfig operationsConfig, LookBackService lookBackService) {
+    public JobBatchProcessor(BlueButtonClient bbclient, FhirContext fhirContext, MetricRegistry metricRegistry, OperationsConfig operationsConfig, LookBackService lookBackService, ConsentService consentService) {
         this.bbclient = bbclient;
         this.fhirContext = fhirContext;
         this.operationsConfig = operationsConfig;
         this.lookBackService = lookBackService;
+        this.consentService = consentService;
 
         // Metrics
         final var metricFactory = new MetricMaker(metricRegistry, JobBatchProcessor.class);
@@ -61,22 +61,33 @@ public class JobBatchProcessor {
      * @return A list of batch files {@link JobQueueBatchFile}
      */
     public List<JobQueueBatchFile> processJobBatchPartial(UUID aggregatorID, IJobQueue queue, JobQueueBatch job, String patientID) {
-    Flowable<Resource> flowable;
-    if(isLookBackExempt(job.getOrgID())){
-        logger.info("Skipping lookBack for org: {}", job.getOrgID().toString());
-        flowable = Flowable.fromIterable(job.getResourceTypes())
-                .flatMap(r -> fetchResource(job, patientID, r, job.getSince().orElse(null)));
-    }else{
-        List<LookBackAnswer> answers = getLookBackAnswers(job, patientID);
-        boolean matched = answers.stream()
-                .anyMatch(a -> a.matchDateCriteria() && (a.orgNPIMatchAnyEobNPIs() || a.practitionerNPIMatchAnyEobNPIs()));
-        flowable = matched?
-                Flowable.fromIterable(job.getResourceTypes())
-                        .flatMap(r -> fetchResource(job, patientID, r, job.getSince().orElse(null)))
-                :
-          Flowable.just(LookBackAnalyzer.analyze(answers, patientID));
-    }
+        OutcomeReason failReason = null;
+        final Pair<Optional<List<ConsentResult>>,Optional<OperationOutcome>> consentResult = getConsent(patientID);
 
+        Flowable<Resource> flowable;
+        if(consentResult.getRight().isPresent()){
+            flowable = Flowable.just(consentResult.getRight().get());
+            failReason = OutcomeReason.INTERNAL_ERROR;
+        }
+        else if(isOptedOut(consentResult.getLeft())){
+            failReason = OutcomeReason.CONSENT_OPTED_OUT;
+            flowable = Flowable.just(AggregationUtils.toOperationOutcome(OutcomeReason.CONSENT_OPTED_OUT, patientID));
+        }else if(isLookBackExempt(job.getOrgID())){
+            logger.info("Skipping lookBack for org: {}", job.getOrgID().toString());
+            MDC.put(MDCConstants.IS_SMOKE_TEST_ORG, "true");
+            flowable = Flowable.fromIterable(job.getResourceTypes())
+                    .flatMap(r -> fetchResource(job, patientID, r, job.getSince().orElse(null)));
+        }else{
+            List<LookBackAnswer> answers = getLookBackAnswers(job, patientID);
+            if(passesLookBack(answers)){
+                flowable = Flowable.fromIterable(job.getResourceTypes())
+                        .flatMap(r -> fetchResource(job, patientID, r, job.getSince().orElse(null)));
+            }else{
+                failReason = LookBackAnalyzer.analyze(answers);
+                flowable = Flowable.just(AggregationUtils.toOperationOutcome(failReason, patientID));
+            }
+        }
+        logger.info("dpcMetric=DataExportResult,dataRetrieved={},failReason={}",failReason==null,failReason==null ? "NA":failReason.name());
 
         final var results = writeResource(job, flowable)
                 .toList()
@@ -205,4 +216,32 @@ public class JobBatchProcessor {
         return ResourceType.OperationOutcome == resourceType ? operationalOutcomeMeter : resourceMeter;
     }
 
+    private Pair<Optional<List<ConsentResult>>,Optional<OperationOutcome>> getConsent(String patientId){
+        try {
+            return Pair.of(consentService.getConsent(patientId),Optional.empty());
+        }catch (Exception e){
+            logger.error("Unable to retrieve consent from consent service.", e);
+            OperationOutcome operationOutcome = AggregationUtils.toOperationOutcome(OutcomeReason.INTERNAL_ERROR, patientId);
+            return Pair.of(Optional.empty(), Optional.of(operationOutcome));
+        }
+    }
+
+    private boolean isOptedOut(Optional<List<ConsentResult>> consentResultsOptional){
+        if(consentResultsOptional.isPresent()){
+            final List<ConsentResult> consentResults = consentResultsOptional.get();
+            long optOutCount = consentResults.stream().filter(consentResult -> {
+                final boolean isActive = consentResult.isActive();
+                final boolean isOptOut = ConsentResult.PolicyType.OPT_OUT.equals(consentResult.getPolicyType());
+                final boolean isFutureConsent = consentResult.getConsentDate().after(new Date());
+                return isActive && isOptOut && !isFutureConsent;
+            }).count();
+            return optOutCount > 0;
+        }
+        return true;
+    }
+
+    private boolean passesLookBack(List<LookBackAnswer> answers){
+       return answers.stream()
+                .anyMatch(a -> a.matchDateCriteria() && (a.orgNPIMatchAnyEobNPIs() || a.practitionerNPIMatchAnyEobNPIs()));
+    }
 }

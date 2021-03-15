@@ -1,0 +1,26 @@
+
+port: 3000
+attribution-client:
+  url: http://localhost:3001
+  retries: 3
+
+capabilities:
+  base: "DPCCapabilities.json"
+  version: "1.0"
+  release-date: "03-01-2021"
+
+log:
+  level: info
+  encoding: json
+  outputPaths:
+    - "stdout"
+  errorOutputPaths:
+    - "stderr"
+  encoderConfig:
+    messageKey: "message"
+    levelKey: "level"
+    levelEncoder: "lowercase"
+    timeEncoder: "iso8601"
+    timeKey: "timestamp"
+    callerEncoder: "short"
+    callerKey: "caller"

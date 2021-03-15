@@ -1,0 +1,21 @@
+.field-group {
+  box-sizing: border-box;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+}
+
+.field-group__fields {
+  border-bottom: 1px solid $color-gray-light;
+  margin: 0 0 $spacer-2 0;
+  padding: 0 0 $spacer-4 0;
+}
+
+.field-group__heading {
+  font-size: $h4-font-size;
+  font-weight: $font-bold;
+  margin: 0;
+  padding: $spacer-2 0;
+}
