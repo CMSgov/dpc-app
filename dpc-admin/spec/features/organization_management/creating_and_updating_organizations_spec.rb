@@ -109,7 +109,7 @@ RSpec.feature 'creating and updating organizations' do
     org.users << crabby
     org.users << fishy
 
-    # mailer = stub_sandbox_notification_mailer(org, [crabby, fishy])
+    mailer = stub_sandbox_notification_mailer(org, [crabby, fishy])
 
     visit organization_path(org)
     find('[data-test="enable-org"]').click
