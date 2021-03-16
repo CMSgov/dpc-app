@@ -109,7 +109,7 @@ RSpec.feature 'creating and updating organizations' do
     org.users << crabby
     org.users << fishy
 
-    # mailer = stub_sandbox_notification_mailer(org, [crabby, fishy])
+    mailer = stub_sandbox_notification_mailer(org, [crabby, fishy])
 
     visit organization_path(org)
     find('[data-test="enable-org"]').click
@@ -199,47 +199,47 @@ RSpec.feature 'creating and updating organizations' do
     expect(page).to have_content('API access disabled')
   end
 
-  # scenario 'adding and removing tags from an organization' do
-  #   cat_tag = create(:tag, name: 'Cat')
-  #   dog_tag = create(:tag, name: 'Dog')
-  #   org = create(:organization)
+  scenario 'adding and removing tags from an organization' do
+    cat_tag = create(:tag, name: 'Cat')
+    dog_tag = create(:tag, name: 'Dog')
+    org = create(:organization)
 
-  #   visit organization_path(org)
+    visit organization_path(org)
 
-  #   within('[data-test="org-tags"]') do
-  #     expect(page).to have_content("No tags have been assigned to #{org.name}")
-  #   end
+    within('[data-test="org-tags"]') do
+      expect(page).to have_content("No tags have been assigned to #{org.name}")
+    end
 
-  #   find("[data-test=\"add-tag-#{cat_tag.id}\"]").click
+    find("[data-test=\"add-tag-#{cat_tag.id}\"]").click
 
-  #   within('[data-test="org-tags"]') do
-  #     expect(page).to have_content('Cat')
-  #   end
+    within('[data-test="org-tags"]') do
+      expect(page).to have_content('Cat')
+    end
 
-  #   find("[data-test=\"add-tag-#{dog_tag.id}\"]").click
+    find("[data-test=\"add-tag-#{dog_tag.id}\"]").click
 
-  #   within('[data-test="org-tags"]') do
-  #     expect(page).to have_content('Cat')
-  #     expect(page).to have_content('Dog')
-  #   end
+    within('[data-test="org-tags"]') do
+      expect(page).to have_content('Cat')
+      expect(page).to have_content('Dog')
+    end
 
-  #   tagging = org.taggings.find_by(tag_id: cat_tag.id)
-  #   find("[data-test=\"delete-tag-#{tagging.id}\"]").click
+    tagging = org.taggings.find_by(tag_id: cat_tag.id)
+    find("[data-test=\"delete-tag-#{tagging.id}\"]").click
 
-  #   within('[data-test="org-tags"]') do
-  #     expect(page).not_to have_content('Cat')
-  #     expect(page).to have_content('Dog')
-  #   end
-  # end
+    within('[data-test="org-tags"]') do
+      expect(page).not_to have_content('Cat')
+      expect(page).to have_content('Dog')
+    end
+  end
 
-  # def stub_sandbox_notification_mailer(org, users=[])
-  #   mailer = double(UserMailer)
-  #   users.each do |user|
-  #     allow(UserMailer).to receive(:with).with(user: user, vendor: org.health_it_vendor?).and_return(mailer)
-  #   end
+  def stub_sandbox_notification_mailer(org, users=[])
+    mailer = double(UserMailer)
+    users.each do |user|
+      allow(UserMailer).to receive(:with).with(user: user, vendor: org.health_it_vendor?).and_return(mailer)
+    end
 
-  #   allow(mailer).to receive(:organization_sandbox_email).and_return(mailer)
-  #   allow(mailer).to receive(:deliver_later)
-  #   mailer
-  # end
+    allow(mailer).to receive(:organization_sandbox_email).and_return(mailer)
+    allow(mailer).to receive(:deliver_later)
+    mailer
+  end
 end
