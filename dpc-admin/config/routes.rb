@@ -21,4 +21,9 @@ Rails.application.routes.draw do
   resources :tags, only: [:index, :create, :destroy]
 
   root to: 'users#index', via: :get
+
+  if Rails.env.development?
+    require 'sidekiq/web'
+    mount Sidekiq::Web, at: '/sidekiq'
+  end
 end

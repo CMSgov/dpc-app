@@ -18,6 +18,8 @@
 !/log/.keep
 !/tmp/.keep
 
+dump.rdb
+
 # Ignore pidfiles, but keep the directory.
 /tmp/pids/*
 !/tmp/pids/
