@@ -29,6 +29,6 @@ if [ "$1" == "sidekiq" ]; then
   if [[ -n "$JACOCO" ]]; then
     bundle exec sidekiq -q default -q mailers
   else
-    bundle exec sidekiq -q default -q mailers 2>&1 | tee -a /var/log/dpc-web-$(hostname)-sidekiq.log
+    bundle exec sidekiq -q default -q mailers 2>&1 | tee -a /var/log/dpc-admin-$(hostname)-sidekiq.log
   fi
 fi

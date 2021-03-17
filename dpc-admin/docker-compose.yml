@@ -23,7 +23,7 @@ services:
       - redis
     command: db:5432
 
-  web:
+  admin:
     build:
       context: ..
       dockerfile: dpc-admin/Dockerfile
