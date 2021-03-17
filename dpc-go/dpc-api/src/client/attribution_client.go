@@ -24,6 +24,7 @@ type ResourceType string
 // Contains the different ResourceType for calls to attribution
 const (
 	Organization ResourceType = "Organization"
+	Practitioner ResourceType = "Practitioner"
 )
 
 // Client interface for testing purposes

@@ -33,7 +33,7 @@ type OrganizationController struct {
 	ac client.Client
 }
 
-// NewOrganizationController function that creates a organization controller and returns it's reference
+// NewOrganizationController function that creates an organization controller and returns its reference
 func NewOrganizationController(ac client.Client) *OrganizationController {
 	return &OrganizationController{
 		ac,

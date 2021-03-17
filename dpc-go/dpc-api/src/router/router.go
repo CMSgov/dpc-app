@@ -10,10 +10,11 @@ import (
 )
 
 // NewDPCAPIRouter function that builds the router using chi
-func NewDPCAPIRouter(oc v2.Controller, mc v2.ReadController) http.Handler {
+func NewDPCAPIRouter(mc v2.ReadController, oc v2.Controller, pc v2.Controller) http.Handler {
 	r := chi.NewRouter()
 	r.Use(middleware2.Logging())
 	r.Use(middleware.SetHeader("Content-Type", "application/fhir+json; charset=UTF-8"))
+	r.Use(middleware2.OrgHeader)
 	r.Route("/v2", func(r chi.Router) {
 		r.Get("/metadata", mc.Read)
 		r.Route("/Organization", func(r chi.Router) {
@@ -24,6 +25,13 @@ func NewDPCAPIRouter(oc v2.Controller, mc v2.ReadController) http.Handler {
 				r.With(middleware2.FHIRFilter, middleware2.FHIRModel).Put("/", oc.Update)
 			})
 			r.With(middleware2.FHIRFilter, middleware2.FHIRModel).Post("/", oc.Create)
+		})
+		r.Route("/Practitioner", func(r chi.Router) {
+			r.Route("/{practitionerID}", func(r chi.Router) {
+				r.Use(v2.PractitionerCtx)
+				r.With(middleware2.FHIRModel).Get("/", pc.Read)
+			})
+			r.With(middleware2.FHIRFilter, middleware2.FHIRModel).Post("/", pc.Create)
 		})
 	})
 

@@ -27,9 +27,11 @@ func main() {
 	}()
 
 	r := repository.NewOrganizationRepo(db)
+	pr := repository.NewPractitionerRepo(db)
 	c := v2.NewOrganizationService(r)
+	ps := v2.NewPractitionerService(pr)
 
-	attributionRouter := router.NewDPCAttributionRouter(c)
+	attributionRouter := router.NewDPCAttributionRouter(c, ps)
 
 	port := conf.GetAsString("port", "3001")
 	if err := http.ListenAndServe(fmt.Sprintf(":%s", port), attributionRouter); err != nil {
