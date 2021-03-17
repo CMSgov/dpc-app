@@ -1,10 +1,16 @@
 package router
 
 import (
-	middleware2 "github.com/CMSgov/dpc/api/middleware"
-	"github.com/CMSgov/dpc/api/v2"
-	"github.com/go-chi/chi/middleware"
 	"net/http"
+
+	// "github.com/CMSgov/bcda-app/bcda/auth"
+	// "github.com/CMSgov/bcda-app/bcda/logging"
+
+	"github.com/CMSgov/dpc/api/auth"
+	middleware2 "github.com/CMSgov/dpc/api/middleware"
+	"github.com/go-chi/chi/middleware"
+
+	v2 "github.com/CMSgov/dpc/api/v2"
 
 	"github.com/go-chi/chi"
 )
@@ -28,4 +34,9 @@ func NewDPCAPIRouter(oc v2.Controller, mc v2.ReadController) http.Handler {
 	})
 
 	return r
+}
+
+func NewAuthRouter() http.Handler {
+	// return auth.NewAuthRouter(logging.NewStructuredLogger())
+	return auth.NewAuthRouter()
 }
