@@ -34,6 +34,7 @@ func main() {
 	attributionRouter := router.NewDPCAttributionRouter(c, ps)
 
 	port := conf.GetAsString("port", "3001")
+	fmt.Println("Attribution running on port", port)
 	if err := http.ListenAndServe(fmt.Sprintf(":%s", port), attributionRouter); err != nil {
 		logger.WithContext(ctx).Fatal("Failed to start server", zap.Error(err))
 	}
