@@ -3,14 +3,10 @@ package router
 import (
 	"net/http"
 
-	// "github.com/CMSgov/bcda-app/bcda/auth"
-	// "github.com/CMSgov/bcda-app/bcda/logging"
-
 	"github.com/CMSgov/dpc/api/auth"
 	middleware2 "github.com/CMSgov/dpc/api/middleware"
-	"github.com/go-chi/chi/middleware"
-
 	v2 "github.com/CMSgov/dpc/api/v2"
+	"github.com/go-chi/chi/middleware"
 
 	"github.com/go-chi/chi"
 )
