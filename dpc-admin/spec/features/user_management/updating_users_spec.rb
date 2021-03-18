@@ -148,7 +148,7 @@ RSpec.feature 'updating users' do
     expect(page).to have_content(org.name)
     expect(page).to have_content('User has been successfully added to the organization.')
   end
-
+ 
   scenario 'sending sandbox email to user added to a sandbox org' do
     allow(ENV).to receive(:[]).and_call_original
     allow(ENV).to receive(:[]).with('ENV').and_return('prod-sbx')
