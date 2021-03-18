@@ -21,7 +21,7 @@ RUN bundle exec bundle audit update && bundle exec bundle audit check --ignore C
 
 # Copy the code, test the app, and build the assets pipeline
 COPY /dpc-admin /dpc-admin
-RUN RAILS_ENV=production SECRET_KEY_BASE=dummy bundle exec rake assets:precompile
+RUN RAILS_ENV=production SECRET_KEY_BASE=dummy bundle exec rake assets:precompile --trace
 
 # Clean up from the build
 RUN rm -rf /usr/local/bundle/cache/*.gem && \
@@ -32,7 +32,7 @@ RUN rm -rf /usr/local/bundle/cache/*.gem && \
 FROM ruby:2.7.1-alpine
 
 # Install app dependencies
-RUN apk add --no-cache postgresql-client nodejs tzdata
+RUN apk add --no-cache postgresql-client nodejs tzdata libsodium-dev
 
 # Set the working directory
 RUN mkdir /dpc-admin
