@@ -296,7 +296,9 @@ public class GroupResource extends AbstractGroupResource {
         final var transactionTime = APIHelpers.fetchTransactionTime(bfdClient);
         final var requestingIP = APIHelpers.fetchRequestingIP(request);
         final UUID jobID = this.queue.createJob(orgID, rosterID, attributedPatients, resources, since, transactionTime, requestingIP, true);
-
+        final int totalPatients = attributedPatients==null ? 0 : attributedPatients.size();
+        final String resourcesRequested = resources.stream().map(rt -> rt.getPath()).filter(rtName -> rtName != null).collect(Collectors.joining(";"));
+        logger.info("dpcMetric=jobCreated,jobId={},orgId={},groupId={},totalPatients={},resourcesRequested={}",jobID,orgID,rosterID,totalPatients,resourcesRequested);
         return Response.status(Response.Status.ACCEPTED)
                 .contentLocation(URI.create(this.baseURL + "/Jobs/" + jobID)).build();
     }
