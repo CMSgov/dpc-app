@@ -318,10 +318,16 @@ func (c *SSASClient) GetToken(credentials Credentials) ([]byte, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "bad request structure")
 	}
+	ssasLogger.Print("request")
 	ssasLogger.Print(req.URL)
 	req.SetBasicAuth(credentials.ClientID, credentials.ClientSecret)
+	ssasLogger.Print("set auth")
 
 	resp, err := c.Do(req)
+
+	ssasLogger.Print("response")
+	ssasLogger.Print(resp)
+	ssasLogger.Print(err)
 	if err != nil {
 		return nil, errors.Wrap(err, "token request failed")
 	}

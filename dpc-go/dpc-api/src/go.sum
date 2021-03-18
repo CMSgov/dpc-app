@@ -34,6 +34,8 @@ github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym
 github.com/BurntSushi/xgbutil v0.0.0-20160919175755-f7c97cef3b4e/go.mod h1:uw9h2sd4WWHOPdJ13MQpwK5qYWKYDumDqxWWIknEQ+k=
 github.com/CMSgov/bcda-app v0.0.0-20210316185420-c0c33bb32b9b h1:lgPyOOIeWLyrCaP+DgZwbjROIazSJVeEWduSdHTFfjE=
 github.com/CMSgov/bcda-app v0.0.0-20210316185420-c0c33bb32b9b/go.mod h1:iCGb9fxse74+PpRn4tAPm+V2InuLZgGoXoiYseScM00=
+github.com/CMSgov/bcda-app v0.0.0-20210317172541-8056fef1bb46 h1:5phHgZt683ur3kTRXc4vUHiLcHIsFiq+X1L8vYqxjpc=
+github.com/CMSgov/bcda-app v0.0.0-20210317172541-8056fef1bb46/go.mod h1:iCGb9fxse74+PpRn4tAPm+V2InuLZgGoXoiYseScM00=
 github.com/DATA-DOG/go-sqlmock v1.5.0/go.mod h1:f/Ixk793poVmq4qj/V1dPUg2JEAKC73Q5eFN3EC/SaM=
 github.com/DataDog/datadog-go v2.2.0+incompatible/go.mod h1:LButxg5PwREeZtORoXG3tL4fMGNddJ+vMq1mwgfaqoQ=
 github.com/GeertJohan/go.incremental v1.0.0/go.mod h1:6fAjUhbVuX1KcMD3c8TEgVUqmo4seqhv0i0kdATSkM0=
@@ -73,6 +75,7 @@ github.com/bazelbuild/rules_go v0.24.5/go.mod h1:MC23Dc/wkXEyk3Wpq6lCqz0ZAYOZDw2
 github.com/beorn7/perks v0.0.0-20180321164747-3a771d992973/go.mod h1:Dwedo/Wpr24TaqPxmxbtue+5NUziq4I4S80YR8gNf3Q=
 github.com/beorn7/perks v1.0.0/go.mod h1:KWe93zE9D1o94FZ5RNwFwVgaQK1VOXiVxmqh+CedLV8=
 github.com/beorn7/perks v1.0.1/go.mod h1:G2ZrVWU2WbWT9wwq4/hrbKbnv/1ERSJQ0ibhJ6rlkpw=
+github.com/bgentry/que-go v1.0.1 h1:M/cEPOU66X/YewE1rD1IdHjfM79jClXl0BHNWiF+l44=
 github.com/bgentry/que-go v1.0.1/go.mod h1:brRADvWrR9WUT5E5NxTHwLhPmuhKHWbrRudSun7H6ZU=
 github.com/bgentry/speakeasy v0.1.0/go.mod h1:+zsyZBPWlz7T6j88CTgSN5bM796AkVf0kBD4zp0CCIs=
 github.com/bketelsen/crypt v0.0.3-0.20200106085610-5cbc8cc4026c/go.mod h1:MKsuJmJgSg28kpZDP6UIiPt0e0Oz0kqKNGyRaWEPv84=

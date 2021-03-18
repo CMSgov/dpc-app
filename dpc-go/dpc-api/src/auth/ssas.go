@@ -3,6 +3,9 @@ package auth
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"os"
+	"path/filepath"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/pkg/errors"
@@ -33,6 +36,23 @@ type Credentials struct {
 type SSASPlugin struct {
 	client *client.SSASClient
 	// repository models.Repository
+}
+
+func init() {
+	logger = logrus.New()
+	logger.Formatter = &logrus.JSONFormatter{}
+	logger.SetReportCaller(true)
+	// filePath := config.GetEnv("BCDA_SSAS_LOG")
+	filePath := "./log"
+
+	/* #nosec -- 0640 permissions required for Splunk ingestion */
+	file, err := os.OpenFile(filepath.Clean(filePath), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0640)
+
+	if err == nil {
+		logger.SetOutput(file)
+	} else {
+		logger.Info("Failed to open SSAS log file; using default stderr")
+	}
 }
 
 // validates that SSASPlugin implements the interface
@@ -121,11 +141,42 @@ func (s SSASPlugin) RevokeSystemCredentials(ssasID string) error {
 func (s SSASPlugin) MakeAccessToken(credentials Credentials) (string, error) {
 	logger.Print(credentials.ClientID)
 	logger.Print(credentials.ClientSecret)
-	ts, err := s.client.GetToken(client.Credentials{ClientID: credentials.ClientID, ClientSecret: credentials.ClientSecret})
+	// ts, err := s.client.GetToken(client.Credentials{ClientID: credentials.ClientID, ClientSecret: credentials.ClientSecret})
+	publicURL := "http://localhost:3103"
+	url := fmt.Sprintf("%s/token", publicURL)
+
+	req, err := http.NewRequest("POST", url, nil)
 	if err != nil {
-		logger.Errorf("Failed to get token; %s", err.Error())
 		return "", err
 	}
+
+	req.SetBasicAuth(credentials.ClientID, credentials.ClientSecret)
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return "", errors.Wrap(err, "token request failed")
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("token request failed; %v", resp.StatusCode)
+	}
+
+	type TokenResponse struct {
+		AccessToken string `json:"access_token"`
+		TokenType   string `json:"token_type"`
+	}
+
+	var t = TokenResponse{}
+	if err = json.NewDecoder(resp.Body).Decode(&t); err != nil {
+		return "", errors.Wrap(err, "could not decode token response")
+	}
+
+	// if err != nil {
+	// 	// logger.Error("Failed to get token; %s", err.Error())
+	// 	return "", err
+	// }
+
+	ts := []byte(t.AccessToken)
 
 	return string(ts), nil
 }
@@ -134,7 +185,7 @@ func (s SSASPlugin) MakeAccessToken(credentials Credentials) (string, error) {
 func (s SSASPlugin) RevokeAccessToken(tokenString string) error {
 	err := s.client.RevokeAccessToken(tokenString)
 	if err != nil {
-		logger.Errorf("Failed to revoke token; %s", err.Error())
+		// logger.Errorf("Failed to revoke token; %s", err.Error())
 		return err
 	}
 

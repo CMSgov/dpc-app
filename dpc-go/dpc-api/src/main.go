@@ -9,6 +9,7 @@ import (
 	"github.com/CMSgov/dpc/api/conf"
 	"github.com/CMSgov/dpc/api/logger"
 	"github.com/CMSgov/dpc/api/router"
+	v2 "github.com/CMSgov/dpc/api/v2"
 	"go.uber.org/zap"
 )
 
@@ -35,7 +36,7 @@ func main() {
 	m := v2.NewMetadataController(capabilitiesFile)
 
 	apiRouter := router.NewDPCAPIRouter(c, m)
-	authRouter := router.NewAuthRouter()
+	// authRouter := router.NewAuthRouter()
 
 	port := conf.GetAsString("port", "3000")
 	if err := http.ListenAndServe(fmt.Sprintf(":%s", port), apiRouter); err != nil {
