@@ -5,7 +5,6 @@ require 'rails_helper'
 RSpec.describe OrganizationsHelper, type: :helper do
   describe '#organization_types_for_select' do
     it 'formats types into an array with titleization' do
-      # binding.pry
       expect(helper.organization_types_for_select).to eq(
         [
           ["Primary Care Clinic", "primary_care_clinic"],

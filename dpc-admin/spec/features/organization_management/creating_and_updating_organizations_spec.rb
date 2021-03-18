@@ -109,7 +109,7 @@ RSpec.feature 'creating and updating organizations' do
     org.users << crabby
     org.users << fishy
 
-    # mailer = stub_sandbox_notification_mailer(org, [crabby, fishy])
+    mailer = stub_sandbox_notification_mailer(org, [crabby, fishy])
 
     visit organization_path(org)
     find('[data-test="enable-org"]').click
@@ -232,14 +232,14 @@ RSpec.feature 'creating and updating organizations' do
     end
   end
 
-  # def stub_sandbox_notification_mailer(org, users=[])
-  #   mailer = double(UserMailer)
-  #   users.each do |user|
-  #     allow(UserMailer).to receive(:with).with(user: user, vendor: org.health_it_vendor?).and_return(mailer)
-  #   end
+  def stub_sandbox_notification_mailer(org, users=[])
+    mailer = double(UserMailer)
+    users.each do |user|
+      allow(UserMailer).to receive(:with).with(user: user, vendor: org.health_it_vendor?).and_return(mailer)
+    end
 
-  #   allow(mailer).to receive(:organization_sandbox_email).and_return(mailer)
-  #   allow(mailer).to receive(:deliver_later)
-  #   mailer
-  # end
+    allow(mailer).to receive(:organization_sandbox_email).and_return(mailer)
+    allow(mailer).to receive(:deliver_later)
+    mailer
+  end
 end

@@ -3,6 +3,7 @@
 require 'rails_helper'
 
 RSpec.feature 'updating users' do
+  include ApiClientSupport
   let!(:internal_user) { create :internal_user }
 
   before(:each) do
@@ -147,31 +148,31 @@ RSpec.feature 'updating users' do
     expect(page).to have_content(org.name)
     expect(page).to have_content('User has been successfully added to the organization.')
   end
+ 
+  scenario 'sending sandbox email to user added to a sandbox org' do
+    allow(ENV).to receive(:[]).and_call_original
+    allow(ENV).to receive(:[]).with('ENV').and_return('prod-sbx')
 
-  # scenario 'sending sandbox email to user added to a sandbox org' do
-  #   allow(ENV).to receive(:[]).and_call_original
-  #   allow(ENV).to receive(:[]).with('ENV').and_return('prod-sbx')
+    stub_api_client(
+      message: :create_organization,
+      success: true,
+      response: default_org_creation_response
+    )
+    crabby = create(:user, first_name: 'Crab', last_name: 'Olsen', email: 'co@beach.com')
+    create(:organization, :api_enabled)
 
-  #   stub_api_client(
-  #     message: :create_organization,
-  #     success: true,
-  #     response: default_org_creation_response
-  #   )
-  #   crabby = create(:user, first_name: 'Crab', last_name: 'Olsen', email: 'co@beach.com')
-  #   create(:organization, :api_enabled)
+    mailer = double(UserMailer)
+    allow(UserMailer).to receive(:with).with(user: crabby, vendor: false).and_return(mailer)
+    allow(mailer).to receive(:organization_sandbox_email).and_return(mailer)
+    allow(mailer).to receive(:deliver_later)
 
-  #   mailer = double(UserMailer)
-  #   allow(UserMailer).to receive(:with).with(user: crabby, vendor: false).and_return(mailer)
-  #   allow(mailer).to receive(:organization_sandbox_email).and_return(mailer)
-  #   allow(mailer).to receive(:deliver_later)
+    visit edit_user_path(crabby)
 
-  #   visit edit_user_path(crabby)
+    expect(page.body).to have_content('Crab Olsen')
 
-  #   expect(page.body).to have_content('Crab Olsen')
+    find('[data-test="org-select"]', visible: false).click
 
-  #   find('[data-test="org-select"]', visible: false).click
-
-  #   expect(page).not_to have_css('[data-test="user-form-submit"]')
-  #   expect(mailer).to have_received(:organization_sandbox_email).once
-  # end
+    expect(page).not_to have_css('[data-test="user-form-submit"]')
+    expect(mailer).to have_received(:organization_sandbox_email).once
+  end
 end

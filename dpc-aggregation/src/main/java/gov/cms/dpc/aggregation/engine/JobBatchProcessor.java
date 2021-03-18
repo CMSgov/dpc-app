@@ -14,6 +14,7 @@ import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatchFile;
 import io.reactivex.Flowable;
+import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.dstu3.model.*;
 import org.reactivestreams.Publisher;
@@ -25,6 +26,7 @@ import javax.inject.Inject;
 import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 public class JobBatchProcessor {
     private static final Logger logger = LoggerFactory.getLogger(JobBatchProcessor.class);
@@ -61,6 +63,7 @@ public class JobBatchProcessor {
      * @return A list of batch files {@link JobQueueBatchFile}
      */
     public List<JobQueueBatchFile> processJobBatchPartial(UUID aggregatorID, IJobQueue queue, JobQueueBatch job, String patientID) {
+        StopWatch stopWatch = StopWatch.createStarted();
         OutcomeReason failReason = null;
         final Pair<Optional<List<ConsentResult>>,Optional<OperationOutcome>> consentResult = getConsent(patientID);
 
@@ -87,12 +90,16 @@ public class JobBatchProcessor {
                 flowable = Flowable.just(AggregationUtils.toOperationOutcome(failReason, patientID));
             }
         }
-        logger.info("dpcMetric=DataExportResult,dataRetrieved={},failReason={}",failReason==null,failReason==null ? "NA":failReason.name());
 
         final var results = writeResource(job, flowable)
                 .toList()
                 .blockingGet();
         queue.completePartialBatch(job, aggregatorID);
+
+        final String resourcesRequested = job.getResourceTypes().stream().map(rt -> rt.getPath()).filter(rtName -> rtName != null).collect(Collectors.joining(";"));
+        final String failReasonLabel = failReason==null ? "NA":failReason.name();
+        stopWatch.stop();
+        logger.info("dpcMetric=DataExportResult,dataRetrieved={},failReason={},resourcesRequested={},duration={}",failReason==null,failReasonLabel,resourcesRequested,stopWatch.getTime());
         return results;
     }
 
