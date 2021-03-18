@@ -21,7 +21,7 @@ RUN bundle exec bundle audit update && bundle exec bundle audit check --ignore C
 
 # Copy the code, test the app, and build the assets pipeline
 COPY /dpc-admin /dpc-admin
-RUN RAILS_ENV=production SECRET_KEY_BASE=dummy bundle exec rake assets:precompile --trace
+RUN RAILS_ENV=production WEBPACKER_NODE_MODULES_BIN_PATH="node_modules/.bin" SECRET_KEY_BASE=dummy bundle exec rake assets:precompile --trace
 
 # Clean up from the build
 RUN rm -rf /usr/local/bundle/cache/*.gem && \
