@@ -29,14 +29,6 @@ func NewDPCAPIRouter(oc v2.Controller, mc v2.ReadController) http.Handler {
 		})
 	})
 	r.Post("/auth/token", auth.GetAuthToken)
-	// r.With(ParseToken, RequireTokenAuth, CheckBlacklist).Get("/auth/welcome", Welcome)
 	r.Get("/auth/welcome", auth.Welcome)
-	// r.Route(auth.NewAuthRouter())
-
 	return r
-}
-
-func NewAuthRouter() http.Handler {
-	// return auth.NewAuthRouter(logging.NewStructuredLogger())
-	return auth.NewAuthRouter()
 }
