@@ -18,5 +18,5 @@ Sidekiq.configure_server do |config|
 end
 
 Sidekiq.configure_client do |config|
-  config.redis = { url: "#{ENV.fetch('REDIS_URL', 'redis://localhost')}:6379/1", namespace: "sidekiq-web-app" }
+  config.redis = { url: "#{ENV.fetch('REDIS_URL', 'redis://localhost')}:6379/1", namespace: "sidekiq-admin-app" }
 end
