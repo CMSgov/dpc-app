@@ -112,6 +112,8 @@ public class AggregationEngine implements Runnable {
                     MDC.remove(MDCConstants.ORGANIZATION_ID);
                     MDC.remove(MDCConstants.PROVIDER_NPI);
                     MDC.remove(MDCConstants.IS_SMOKE_TEST_ORG);
+                    MDC.remove(MDCConstants.IS_BULK);
+
 
                 })
                 .subscribe(
@@ -153,6 +155,8 @@ public class AggregationEngine implements Runnable {
             MDC.put(MDCConstants.JOB_ID, job.getJobID().toString());
             MDC.put(MDCConstants.JOB_BATCH_ID, job.getBatchID().toString());
             MDC.put(MDCConstants.ORGANIZATION_ID, job.getOrgID().toString());
+            MDC.put(MDCConstants.IS_BULK, Boolean.toString(job.isBulk()));
+
             logger.info("Processing job, exporting to: {}.", this.operationsConfig.getExportPath());
             logger.debug("Has {} attributed beneficiaries", job.getPatients().size());
 
