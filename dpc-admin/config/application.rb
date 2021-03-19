@@ -8,7 +8,7 @@ Bundler.require(*Rails.groups)
 
 module Admin
   class Application < Rails::Application
-    #Dump and read as sql
+    # Dump and read as sql
     config.active_record.schema_format = :sql
 
     # Initialize configuration defaults for originally generated Rails version.
