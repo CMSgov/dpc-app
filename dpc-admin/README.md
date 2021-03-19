@@ -65,3 +65,15 @@ The Web app will automatically run on `http://localhost:3500/`.
 
 # Testing
 To test the rails app, run `rspec spec` in the terminal.
+
+# Running as docker container
+docker-compose build
+(Pass in GITHUB related env stuff found in your .env TODO: auto include .env stuff TODO: Do not merge this long comment)
+docker-compose up
+
+Setting up db it up: 
+docker exec -it WEB_ADMIN_CONTAINER /bash
+rake db:create
+rake db:schema:load 
+
+TODO clean it up ^^
