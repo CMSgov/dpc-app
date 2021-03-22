@@ -47,6 +47,10 @@ ci-app: docker-base secure-envs
 ci-web:
 	@./dpc-web-test.sh
 
+.PHONY: ci-admin
+ci-admin:
+	@./dpc-admin-test.sh
+
 .PHONY: smoke
 smoke:
 	@mvn clean package -DskipTests -Djib.skip=True -pl dpc-smoketest -am -ntp
