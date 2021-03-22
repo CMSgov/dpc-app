@@ -10,6 +10,7 @@ gem 'puma', '~> 4.1'
 gem 'redis', '~> 4.0'
 gem 'luhnacy', '~> 0.2.1'
 gem 'omniauth-rails_csrf_protection', '~> 0.1'
+gem 'sidekiq', '~> 6.1'
 gem 'webpacker', '~> 4.0'
 gem 'turbolinks', '~> 5'
 gem 'jbuilder', '~> 2.7'
@@ -24,6 +25,7 @@ gem 'omniauth-github'
 gem 'omniauth-oktaoauth'
 gem 'octokit' # can be removed once we move past github omniauth
 gem 'fhir_client'
+gem 'sidekiq_alive'
 gem 'redis-namespace'
 gem 'kaminari'
 gem 'active_model_serializers'
@@ -53,6 +55,8 @@ group :development do
   # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
   gem 'spring'
   gem 'spring-watcher-listen', '~> 2.0.0'
+
+  gem 'letter_opener'
 end
 
 group :test do
