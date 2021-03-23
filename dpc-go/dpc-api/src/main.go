@@ -28,13 +28,15 @@ func main() {
 		Retries: retries,
 	})
 
-	c := v2.NewOrganizationController(attributionClient)
+	orgCtlr := v2.NewOrganizationController(attributionClient)
 
 	capabilitiesFile := conf.GetAsString("capabilities.base")
 
 	m := v2.NewMetadataController(capabilitiesFile)
 
-	apiRouter := router.NewDPCAPIRouter(c, m)
+	groupCtlr := v2.NewGroupController(attributionClient)
+
+	apiRouter := router.NewDPCAPIRouter(orgCtlr, m, groupCtlr)
 
 	port := conf.GetAsString("port", "3000")
 	if err := http.ListenAndServe(fmt.Sprintf(":%s", port), apiRouter); err != nil {

@@ -3,6 +3,7 @@ package v2
 import (
 	"context"
 	"encoding/json"
+	"github.com/CMSgov/dpc/attribution/middleware"
 	"github.com/CMSgov/dpc/attribution/model"
 	"github.com/bxcodec/faker"
 	"github.com/kinbiko/jsonassert"
@@ -64,7 +65,7 @@ func (suite *OrganizationServiceTestSuite) TestGetRepoError() {
 
 	req := httptest.NewRequest("GET", "http://example.com/foo", nil)
 	ctx := req.Context()
-	ctx = context.WithValue(ctx, ContextKeyOrganization, "12345")
+	ctx = context.WithValue(ctx, middleware.ContextKeyOrganization, "12345")
 	req = req.WithContext(ctx)
 
 	w := httptest.NewRecorder()
@@ -97,7 +98,7 @@ func (suite *OrganizationServiceTestSuite) TestGet() {
 
 	req := httptest.NewRequest("GET", "http://example.com/foo", nil)
 	ctx := req.Context()
-	ctx = context.WithValue(ctx, ContextKeyOrganization, "12345")
+	ctx = context.WithValue(ctx, middleware.ContextKeyOrganization, "12345")
 	req = req.WithContext(ctx)
 
 	w := httptest.NewRecorder()
@@ -172,7 +173,7 @@ func (suite *OrganizationServiceTestSuite) TestDelete() {
 
 	req := httptest.NewRequest("POST", "http://example.com/foo", nil)
 	ctx := req.Context()
-	ctx = context.WithValue(ctx, ContextKeyOrganization, "12345")
+	ctx = context.WithValue(ctx, middleware.ContextKeyOrganization, "12345")
 	req = req.WithContext(ctx)
 	w := httptest.NewRecorder()
 
@@ -213,7 +214,7 @@ func (suite *OrganizationServiceTestSuite) TestPut() {
 	assert.Equal(suite.T(), http.StatusBadRequest, res.StatusCode)
 
 	ctx := req.Context()
-	ctx = context.WithValue(ctx, ContextKeyOrganization, "12345")
+	ctx = context.WithValue(ctx, middleware.ContextKeyOrganization, "12345")
 	req = req.WithContext(ctx)
 
 	w = httptest.NewRecorder()

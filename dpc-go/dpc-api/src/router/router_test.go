@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/CMSgov/dpc/api/apitest"
 	"github.com/CMSgov/dpc/api/fhirror"
-	v2 "github.com/CMSgov/dpc/api/v2"
+	middleware2 "github.com/CMSgov/dpc/api/middleware"
 	"github.com/go-chi/chi/middleware"
 	"github.com/kinbiko/jsonassert"
 	"github.com/stretchr/testify/assert"
@@ -40,11 +40,17 @@ func (c *MockController) Delete(w http.ResponseWriter, r *http.Request) {
 
 type RouterTestSuite struct {
 	suite.Suite
-	r func(oc v2.Controller, mc v2.ReadController) http.Handler
+	router    http.Handler
+	mockOrg   *MockController
+	mockMeta  *MockController
+	mockGroup *MockController
 }
 
 func (suite *RouterTestSuite) SetupTest() {
-	suite.r = NewDPCAPIRouter
+	suite.mockOrg = &MockController{}
+	suite.mockMeta = &MockController{}
+	suite.mockGroup = &MockController{}
+	suite.router = NewDPCAPIRouter(suite.mockOrg, suite.mockMeta, suite.mockGroup)
 }
 
 func TestRouterTestSuite(t *testing.T) {
@@ -52,17 +58,14 @@ func TestRouterTestSuite(t *testing.T) {
 }
 
 func (suite *RouterTestSuite) TestErrorHandling() {
-	mockMeta := new(MockController)
-	mockOrg := new(MockController)
 
-	mockOrg.On("Read", mock.Anything, mock.Anything).Once().Run(func(arg mock.Arguments) {
+	suite.mockOrg.On("Read", mock.Anything, mock.Anything).Once().Run(func(arg mock.Arguments) {
 		w := arg.Get(0).(http.ResponseWriter)
 		r := arg.Get(1).(*http.Request)
 		fhirror.GenericServerIssue(r.Context(), w)
 	})
 
-	router := suite.r(mockOrg, mockMeta)
-	ts := httptest.NewServer(router)
+	ts := httptest.NewServer(suite.router)
 
 	req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/%s", ts.URL, "v2/Organization/12345"), nil)
 	req.Header.Set(middleware.RequestIDHeader, "54321")
@@ -91,13 +94,9 @@ func (suite *RouterTestSuite) TestErrorHandling() {
 }
 
 func (suite *RouterTestSuite) TestMetadataRoute() {
-	mockMeta := new(MockController)
-	mockOrg := new(MockController)
+	suite.mockMeta.On("Read", mock.Anything, mock.Anything).Once()
 
-	mockMeta.On("Read", mock.Anything, mock.Anything).Once()
-
-	router := suite.r(mockOrg, mockMeta)
-	ts := httptest.NewServer(router)
+	ts := httptest.NewServer(suite.router)
 
 	res, _ := http.Get(fmt.Sprintf("%s/%s", ts.URL, "v2/metadata"))
 
@@ -106,19 +105,15 @@ func (suite *RouterTestSuite) TestMetadataRoute() {
 }
 
 func (suite *RouterTestSuite) TestOrganizationGetRoutes() {
-	mockMeta := new(MockController)
-	mockOrg := new(MockController)
-
 	var capturedRequestID string
-	mockOrg.On("Read", mock.Anything, mock.Anything).Once().Run(func(arg mock.Arguments) {
+	suite.mockOrg.On("Read", mock.Anything, mock.Anything).Once().Run(func(arg mock.Arguments) {
 		r := arg.Get(1).(*http.Request)
 		capturedRequestID = r.Header.Get(middleware.RequestIDHeader)
 		w := arg.Get(0).(http.ResponseWriter)
 		_, _ = w.Write(apitest.AttributionOrgResponse())
 	})
 
-	router := suite.r(mockOrg, mockMeta)
-	ts := httptest.NewServer(router)
+	ts := httptest.NewServer(suite.router)
 
 	req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/%s", ts.URL, "v2/Organization/12345"), nil)
 	req.Header.Set(middleware.RequestIDHeader, "54321")
@@ -138,19 +133,15 @@ func (suite *RouterTestSuite) TestOrganizationGetRoutes() {
 }
 
 func (suite *RouterTestSuite) TestOrganizationPostRoute() {
-	mockMeta := new(MockController)
-	mockOrg := new(MockController)
-
 	var capturedRequestID string
-	mockOrg.On("Create", mock.Anything, mock.Anything).Once().Run(func(arg mock.Arguments) {
+	suite.mockOrg.On("Create", mock.Anything, mock.Anything).Once().Run(func(arg mock.Arguments) {
 		r := arg.Get(1).(*http.Request)
 		capturedRequestID = r.Header.Get(middleware.RequestIDHeader)
 		w := arg.Get(0).(http.ResponseWriter)
 		_, _ = w.Write(apitest.AttributionOrgResponse())
 	})
 
-	router := suite.r(mockOrg, mockMeta)
-	ts := httptest.NewServer(router)
+	ts := httptest.NewServer(suite.router)
 
 	req, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/%s", ts.URL, "v2/Organization"), strings.NewReader(apitest.Orgjson))
 	req.Header.Set("Content-Type", "application/fhir+json")
@@ -171,19 +162,15 @@ func (suite *RouterTestSuite) TestOrganizationPostRoute() {
 }
 
 func (suite *RouterTestSuite) TestOrganizationDeleteRoutes() {
-	mockMeta := new(MockController)
-	mockOrg := new(MockController)
-
 	var capturedRequestID string
-	mockOrg.On("Delete", mock.Anything, mock.Anything).Once().Run(func(arg mock.Arguments) {
+	suite.mockOrg.On("Delete", mock.Anything, mock.Anything).Once().Run(func(arg mock.Arguments) {
 		r := arg.Get(1).(*http.Request)
 		capturedRequestID = r.Header.Get(middleware.RequestIDHeader)
 		w := arg.Get(0).(http.ResponseWriter)
 		w.WriteHeader(http.StatusNoContent)
 	})
 
-	router := suite.r(mockOrg, mockMeta)
-	ts := httptest.NewServer(router)
+	ts := httptest.NewServer(suite.router)
 
 	req, _ := http.NewRequest("DELETE", fmt.Sprintf("%s/%s", ts.URL, "v2/Organization/12345"), nil)
 	req.Header.Set(middleware.RequestIDHeader, "54321")
@@ -198,21 +185,17 @@ func (suite *RouterTestSuite) TestOrganizationDeleteRoutes() {
 }
 
 func (suite *RouterTestSuite) TestOrganizationPutRoutes() {
-	mockMeta := new(MockController)
-	mockOrg := new(MockController)
-
 	var orgID string
 	var capturedRequestID string
-	mockOrg.On("Update", mock.Anything, mock.Anything).Once().Run(func(arg mock.Arguments) {
+	suite.mockOrg.On("Update", mock.Anything, mock.Anything).Once().Run(func(arg mock.Arguments) {
 		r := arg.Get(1).(*http.Request)
-		orgID = r.Context().Value(v2.ContextKeyOrganization).(string)
+		orgID = r.Context().Value(middleware2.ContextKeyOrganization).(string)
 		capturedRequestID = r.Header.Get(middleware.RequestIDHeader)
 		w := arg.Get(0).(http.ResponseWriter)
-		w.Write(apitest.AttributionOrgResponse())
+		_, _ = w.Write(apitest.AttributionOrgResponse())
 	})
 
-	router := suite.r(mockOrg, mockMeta)
-	ts := httptest.NewServer(router)
+	ts := httptest.NewServer(suite.router)
 
 	req, _ := http.NewRequest(http.MethodPut, fmt.Sprintf("%s/%s", ts.URL, "v2/Organization/12345"), strings.NewReader(apitest.Orgjson))
 	req.Header.Set(middleware.RequestIDHeader, "54321")

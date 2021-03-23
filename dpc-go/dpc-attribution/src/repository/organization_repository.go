@@ -11,8 +11,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-const sqlFlavor = sqlbuilder.PostgreSQL
-
 // OrganizationRepo is an interface for test mocking purposes
 type OrganizationRepo interface {
 	Insert(ctx context.Context, body []byte) (*model.Organization, error)
