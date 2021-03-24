@@ -72,7 +72,7 @@ docker-compose build
 docker-compose up
 
 Setting up db it up: 
-docker exec -it WEB_ADMIN_CONTAINER /bash
+docker exec -it WEB_ADMIN_CONTAINER /bin/sh
 rake db:create
 rake db:schema:load 
 
