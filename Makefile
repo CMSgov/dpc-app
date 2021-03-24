@@ -25,6 +25,10 @@ ig/publish: ${IG_PUBLISHER}
 website:
 	@docker build -f dpc-web/Dockerfile . -t dpc-web
 
+.PHONY: admin
+admin:
+	@docker build -f dpc-admin/Dockerfile . -t dpc-admin
+
 .PHONY: start-app
 start-app: secure-envs
 	@docker-compose up start_core_dependencies
@@ -42,8 +46,8 @@ start-local-api: secure-envs start-local
 .PHONY: start-portals
 start-portals:
 	@docker-compose -f docker-compose.portals.yml up start_core_dependencies
-	@docker-compose -f docker-compose.portals.yml up start_web start_web_sidekiq
-	@docker-compose -f docker-compose.portals.yml up start_admin start_admin_sidekiq
+	@docker-compose -f docker-compose.portals.yml up start_web
+	@docker-compose -f docker-compose.portals.yml up start_admin
 	@docker ps
 
 .PHONY: start-dpc
@@ -52,8 +56,8 @@ start-dpc: secure-envs
 	@USE_BFD_MOCK=false docker-compose -f docker-compose.all.yml up start_api_dependencies
 	@docker-compose -f docker-compose.all.yml up start_api
 	@docker-compose -f docker-compose.all.yml up start_core_dependencies
-	@docker-compose -f docker-compose.all.yml up start_web start_web_sidekiq
-	@docker-compose -f docker-compose.all.yml up start_admin dpc-admin/.env start_admin_sidekiq
+	@docker-compose -f docker-compose.all.yml up start_web
+    @docker-compose -f docker-compose.all.yml up start_admin
 	@docker ps
 
 .PHONY: down-dpc
@@ -77,6 +81,10 @@ ci-web:
 .PHONY: ci-admin
 ci-admin:
 	@./dpc-admin-test.sh
+
+.PHONY: ci-portals
+ci-portals:
+	@./dpc-portals-test.sh
 
 .PHONY: smoke
 smoke:

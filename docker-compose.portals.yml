@@ -37,6 +37,7 @@ services:
     depends_on:
       - db
       - redis
+      - web_sidekiq
 
   web_sidekiq:
     volumes:
@@ -76,6 +77,7 @@ services:
     depends_on:
       - db
       - redis
+      - admin_sidekiq
 
   admin_sidekiq:
     volumes:
@@ -113,15 +115,3 @@ services:
     depends_on:
       - dpc_admin
     command: dpc_admin:3000
-
-  start_admin_sidekiq:
-    image: dadarek/wait-for-dependencies
-    depends_on:
-      - admin_sidekiq
-    command: admin_sidekiq:7433
-
-  start_web_sidekiq:
-    image: dadarek/wait-for-dependencies
-    depends_on:
-      - web_sidekiq
-    command: web_sidekiq:7433
