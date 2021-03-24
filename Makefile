@@ -50,6 +50,16 @@ start-portals:
 	@docker-compose -f docker-compose.portals.yml up start_admin
 	@docker ps
 
+.PHONY: down-portals
+down-portals:
+	@docker-compose -f docker-compose.portals.yml down
+	@docker ps
+
+.PHONY: stop-portals
+stop-portals:
+	@docker-compose -f docker-compose.portals.yml stop
+	@docker ps
+
 .PHONY: start-dpc
 start-dpc: secure-envs
 	@docker-compose -f docker-compose.all.yml up start_core_dependencies
@@ -57,7 +67,7 @@ start-dpc: secure-envs
 	@docker-compose -f docker-compose.all.yml up start_api
 	@docker-compose -f docker-compose.all.yml up start_core_dependencies
 	@docker-compose -f docker-compose.all.yml up start_web
-    @docker-compose -f docker-compose.all.yml up start_admin
+	@docker-compose -f docker-compose.all.yml up start_admin
 	@docker ps
 
 .PHONY: down-dpc
@@ -74,13 +84,10 @@ stop-dpc:
 ci-app: docker-base secure-envs
 	@./dpc-test.sh
 
+#Depicated TODO remove once make ci-portals is completely working.
 .PHONY: ci-web
 ci-web:
 	@./dpc-web-test.sh
-
-.PHONY: ci-admin
-ci-admin:
-	@./dpc-admin-test.sh
 
 .PHONY: ci-portals
 ci-portals:
@@ -124,4 +131,3 @@ maven-config:
 .PHONE: unit-tests
 unit-tests:
 	@bash ./dpc-unit-test.sh
-

@@ -67,18 +67,26 @@ The Web app will automatically run on `http://localhost:3500/`.
 To test the rails app, run `rspec spec` in the terminal.
 
 # Running as docker container
-docker-compose build
-(Pass in GITHUB related env stuff found in your .env TODO: auto include .env stuff TODO: Do not merge this long comment)
-docker-compose up
+Navigate to /dpc-app
 
-Setting up db it up: 
-docker exec -it WEB_ADMIN_CONTAINER /bin/sh
-rake db:create
-rake db:schema:load 
-
-TODO clean it up ^^
-
-
-In dpc-app run:
-docker-compose -f docker-compose.portals.yml build
+To build and start DPC Admin and Web portals run: 
+```
+make ci-portals
 make start-portals
+```
+
+DPC Admin: localhost:3000\
+Admin Sidekiq Console: localhost:3000/sidekiq\
+Admin Letter Opener: localhost:3000/letter_opener
+
+DPC Web: localhost:9000\
+Admin Sidekiq Console: localhost:3900/sidekiq\
+Admin Letter Opener: localhost:3900/letter_opener
+
+Port mappings can be changed in:\
+`docker-compose.portals.yml`
+
+Helpful make commands:\
+`make start-portals` : Starts Web,Admin,Redis,Sidekiqs,and db\
+`make stop-portals` : Stops Web,Admin,Redis,Sidekiqs,and db\
+`make down-portals` : Removes Web,Admin,Redis,Sidekiqs,db and docker network.
