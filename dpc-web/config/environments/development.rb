@@ -12,8 +12,6 @@ Rails.application.configure do
   # Show full error reports.
   config.consider_all_requests_local = true
 
-  config.redis_host = 'localhost'
-
   # Enable/disable caching. By default caching is disabled.
   # Run rails dev:cache to toggle caching.
   if Rails.root.join('tmp', 'caching-dev.txt').exist?
@@ -41,7 +39,7 @@ Rails.application.configure do
 
   # By default we use letter_opener to render the email in a browser
   # rather than send them:
-  config.action_mailer.delivery_method = :letter_opener
+  config.action_mailer.delivery_method = :letter_opener_web
 
   # For sending emails locally:
   # config.action_mailer.delivery_method = :smtp

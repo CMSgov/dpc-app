@@ -39,6 +39,23 @@ start-local: secure-envs
 start-local-api: secure-envs start-local
 	@docker-compose -f docker-compose.yml -f docker-compose-local.yml up start_api
 
+.PHONY: start-portals
+start-portals:
+	@docker-compose -f docker-compose.portals.yml up start_core_dependencies
+	@docker-compose -f docker-compose.portals.yml up start_web start_web_sidekiq
+	@docker-compose -f docker-compose.portals.yml up start_admin start_admin_sidekiq
+	@docker ps
+
+.PHONY: start-dpc
+start-dpc: secure-envs
+	@docker-compose -f docker-compose.all.yml up start_core_dependencies
+	@USE_BFD_MOCK=false docker-compose -f docker-compose.all.yml up start_api_dependencies
+	@docker-compose -f docker-compose.all.yml up start_api
+	@docker-compose -f docker-compose.all.yml up start_core_dependencies
+	@docker-compose -f docker-compose.all.yml up start_web start_web_sidekiq
+	@docker-compose -f docker-compose.all.yml up start_admin start_admin_sidekiq
+	@docker ps
+
 .PHONY: ci-app
 ci-app: docker-base secure-envs
 	@./dpc-test.sh
