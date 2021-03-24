@@ -101,10 +101,9 @@
 
 .usa-accordion__button:hover {
   color: $color-primary-darkest;
-}
-
-.usa-accordion__button:active {
-  color: $color-primary-darkest;
+  background-color: $color-warn-lighter;
+  color: $color-gray-dark;
+  text-decoration: none;
 }
 
 .usa-accordion__button:visited {
@@ -112,16 +111,11 @@
 }
 
 .usa-accordion__button:active {
+  color: $color-primary-darkest;
   background-color:transparent;
   -webkit-box-shadow:none;
           box-shadow:none;
   text-decoration:underline;
-}
-
-.usa-accordion__button:hover {
-  background-color: $color-warn-lighter;
-  color: $color-gray-dark;
-  text-decoration: none;
 }
 
 .usa-accordion__button[aria-expanded=false] {
