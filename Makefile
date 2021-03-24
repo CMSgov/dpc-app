@@ -53,7 +53,17 @@ start-dpc: secure-envs
 	@docker-compose -f docker-compose.all.yml up start_api
 	@docker-compose -f docker-compose.all.yml up start_core_dependencies
 	@docker-compose -f docker-compose.all.yml up start_web start_web_sidekiq
-	@docker-compose -f docker-compose.all.yml up start_admin start_admin_sidekiq
+	@docker-compose -f docker-compose.all.yml up start_admin dpc-admin/.env start_admin_sidekiq
+	@docker ps
+
+.PHONY: down-dpc
+down-dpc: 
+	@docker-compose -f docker-compose.all.yml down
+	@docker ps
+
+.PHONY: stop-dpc
+stop-dpc: 
+	@docker-compose -f docker-compose.all.yml stop
 	@docker ps
 
 .PHONY: ci-app

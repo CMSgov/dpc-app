@@ -158,6 +158,7 @@ services:
       - ./tmp/letter_opener/admin:/dpc-admin/tmp/letter_opener
 
     environment:
+      - API_METADATA_URL=http://api:3002/v1
       - REDIS_URL=redis://redis
       - DATABASE_URL=postgresql://db/dpc-website_development
       - TEST_DATABASE_URL=postgresql://db/dpc-website_test
