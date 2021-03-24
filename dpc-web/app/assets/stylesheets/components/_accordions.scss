@@ -82,7 +82,6 @@
   border-radius:0;
   -webkit-box-shadow: none;
           box-shadow: none;
-  font-weight: normal;
   margin: 0;
   text-align: left;
   background-image: url(minus.svg), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
@@ -94,7 +93,7 @@
   color: $color-primary-darkest;
   cursor: pointer;
   display: inline-block;
-  font-weight: bold;
+  font-weight: 700;
   padding: 1rem 3.5rem 1rem 1.25rem;
   text-decoration: none;
   width: 100%;
