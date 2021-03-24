@@ -16,12 +16,17 @@
         <title>Data at the Point of Care</title>
 
     <style type="text/css">
+    body{
+      margin: 0 auto;
+    }
     p{
       margin:10px 0;
       padding:0;
     }
     table{
       border-collapse:collapse;
+      mso-table-lspace:0pt;
+      mso-table-rspace:0pt;
     }
     h1,h2,h3,h4,h5,h6{
       display:block;
@@ -48,10 +53,6 @@
     }
     img{
       -ms-interpolation-mode:bicubic;
-    }
-    table{
-      mso-table-lspace:0pt;
-      mso-table-rspace:0pt;
     }
     .ReadMsgBody{
       width:100%;
@@ -91,6 +92,7 @@
     }
     .templateContainer{
       max-width:600px !important;
+      /*@editable*/border:0;
     }
     a.mcnButton{
       display:block;
@@ -124,22 +126,11 @@
       /*@editable*/border-top:0;
     }
   /*
-  @tab Page
-  @section Email Border
-  @tip Set the border for your email.
-  */
-    .templateContainer{
-      /*@editable*/border:0;
-    }
-  /*
-  @tab Page
-  @section Heading 1
-  @tip Set the styling for all first-level headings in your emails. These should be the largest of your headings.
   @style heading 1
   */
     h1{
       /*@editable*/color:#202020;
-      /*@editable*/font-family:Helvetica;
+      /*@editable*/font-family: Arial, Helvetica, sans-serif;
       /*@editable*/font-size:26px;
       /*@editable*/font-style:normal;
       /*@editable*/font-weight:bold;
@@ -155,7 +146,7 @@
   */
     h2{
       /*@editable*/color:#202020;
-      /*@editable*/font-family:Helvetica;
+      /*@editable*/font-family: Arial, Helvetica, sans-serif;
       /*@editable*/font-size:22px;
       /*@editable*/font-style:normal;
       /*@editable*/font-weight:bold;
@@ -171,7 +162,7 @@
   */
     h3{
       /*@editable*/color:#202020;
-      /*@editable*/font-family:Helvetica;
+      /*@editable*/font-family: Arial, Helvetica, sans-serif;
       /*@editable*/font-size:20px;
       /*@editable*/font-style:normal;
       /*@editable*/font-weight:bold;
@@ -187,7 +178,7 @@
   */
     h4{
       /*@editable*/color:#202020;
-      /*@editable*/font-family:Helvetica;
+      /*@editable*/font-family: Arial, Helvetica, sans-serif;
       /*@editable*/font-size:18px;
       /*@editable*/font-style:normal;
       /*@editable*/font-weight:bold;
@@ -218,7 +209,7 @@
   */
     #templatePreheader .mcnTextContent,#templatePreheader .mcnTextContent p{
       /*@editable*/color:#656565;
-      /*@editable*/font-family:Helvetica;
+      /*@editable*/font-family:Arial, Helvetica, sans-serif;
       /*@editable*/font-size:10px;
       /*@editable*/line-height:100%;
       /*@editable*/text-align:left;
@@ -256,7 +247,7 @@
   */
     #templateHeader .mcnTextContent,#templateHeader .mcnTextContent p{
       /*@editable*/color:#393939;
-      /*@editable*/font-family:Helvetica;
+      /*@editable*/font-family: Arial, Helvetica, sans-serif;
       /*@editable*/font-size:16px;
       /*@editable*/line-height:150%;
       /*@editable*/text-align:left;
@@ -294,7 +285,7 @@
   */
     #templateBody .mcnTextContent,#templateBody .mcnTextContent p{
       /*@editable*/color:#393939;
-      /*@editable*/font-family:Helvetica;
+      /*@editable*/font-family: Arial, Helvetica, sans-serif;
       /*@editable*/font-size:16px;
       /*@editable*/line-height:150%;
       /*@editable*/text-align:left;
@@ -332,7 +323,7 @@
   */
     #templateFooter .mcnTextContent,#templateFooter .mcnTextContent p{
       /*@editable*/color:#b9d8dc;
-      /*@editable*/font-family:Helvetica;
+      /*@editable*/font-family: Arial, Helvetica, sans-serif;
       /*@editable*/font-size:12px;
       /*@editable*/line-height:150%;
       /*@editable*/text-align:center;
@@ -552,7 +543,6 @@
 }</style>
 </head>
   <body>
-    <center>
       <table align="center" border="0" cellpadding="0" cellspacing="0" height="100%" width="100%" id="bodyTable">
         <tr>
           <td align="center" valign="top" id="bodyCell">
@@ -745,6 +735,5 @@
     </td>
           </tr>
       </table>
-    </center>
   </body>
   </html>
