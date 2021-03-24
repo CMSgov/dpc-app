@@ -77,3 +77,8 @@ rake db:create
 rake db:schema:load 
 
 TODO clean it up ^^
+
+
+In dpc-app run:
+docker-compose -f docker-compose.portals.yml build
+make start-portals
