@@ -8,13 +8,6 @@ if [ -f tmp/pids/server.pid ]; then
 fi
 
 if [ "$1" == "admin" ]; then
-  # Run the database migrations
-  echo "Migrating the database..."
-  bundle exec rails db:migrate
-
-  # Seed the database
-  # This step is not needed, as there is no database seed data yet
-
   # Start the database service (and make accessible outside the Docker container)
   echo "Starting Rails server..."
   if [[ -n "$JACOCO" ]]; then
