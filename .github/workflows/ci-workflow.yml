@@ -30,7 +30,7 @@ jobs:
           make smoke
 
   build-web:
-    name: "Build and Test Website"
+    name: "Build and Test DPC Web Portal"
     runs-on: ubuntu-18.04
     steps:
       - name: "Checkout code"
@@ -38,3 +38,13 @@ jobs:
       - name: "Website Build"
         run: |
           make ci-web
+
+  build-admin:
+    name: "Build and Test DPC Admin Portal"
+    runs-on: ubuntu-18.04
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@v1
+      - name: "DPC Admin Portal Build"
+        run: |
+          make ci-admin
