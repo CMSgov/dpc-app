@@ -89,10 +89,6 @@ ci-app: docker-base secure-envs
 ci-web:
 	@./dpc-web-test.sh
 
-.PHONY: ci-admin
-ci-admin:
-	@./dpc-admin-test.sh
-
 .PHONY: ci-portals
 ci-portals:
 	@./dpc-portals-test.sh
