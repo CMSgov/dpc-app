@@ -20,16 +20,30 @@ func main() {
 		logger.WithContext(ctx).Fatal("Failed to start server", zap.Error(err))
 	}()
 	db := repository.GetDbConnection()
+	attrDbV1 := repository.GetAttributionV1DbConnection()
+	queueDbV1 := repository.GetQueueDbConnection()
 	defer func() {
 		if err := db.Close(); err != nil {
 			logger.WithContext(ctx).Fatal("Failed to close db connection", zap.Error(err))
 		}
+		if err := attrDbV1.Close(); err != nil {
+			logger.WithContext(ctx).Fatal("Failed to close attribution v1 db connection", zap.Error(err))
+		}
+		if err := queueDbV1.Close(); err != nil {
+			logger.WithContext(ctx).Fatal("Failed to close queue v1 db connection", zap.Error(err))
+		}
 	}()
 
-	r := repository.NewOrganizationRepo(db)
-	c := v2.NewOrganizationService(r)
+	or := repository.NewOrganizationRepo(db)
+	os := v2.NewOrganizationService(or)
 
-	attributionRouter := router.NewDPCAttributionRouter(c)
+	gr := repository.NewGroupRepo(attrDbV1)
+	pr := repository.NewPatientRepo(attrDbV1)
+	jr := repository.NewJobRepo(queueDbV1)
+	gs := v2.NewGroupService(gr, pr, jr)
+
+
+	attributionRouter := router.NewDPCAttributionRouter(os, gs)
 
 	port := conf.GetAsString("port", "3001")
 	if err := http.ListenAndServe(fmt.Sprintf(":%s", port), attributionRouter); err != nil {

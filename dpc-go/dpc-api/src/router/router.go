@@ -14,6 +14,7 @@ func NewDPCAPIRouter(oc v2.Controller, mc v2.ReadController) http.Handler {
 	r := chi.NewRouter()
 	r.Use(middleware2.Logging())
 	r.Use(middleware.SetHeader("Content-Type", "application/fhir+json; charset=UTF-8"))
+	r.Use(middleware2.OrgHeader)
 	r.Route("/v2", func(r chi.Router) {
 		r.Get("/metadata", mc.Read)
 		r.Route("/Organization", func(r chi.Router) {
