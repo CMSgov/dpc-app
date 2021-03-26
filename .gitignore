@@ -48,3 +48,5 @@ smoke.out
 ops/config/decrypted/*
 !ops/config/decrypted/README.md
 .mvn/
+/tmp/letter_opener/admin/*
+/tmp/letter_opener/web/*
