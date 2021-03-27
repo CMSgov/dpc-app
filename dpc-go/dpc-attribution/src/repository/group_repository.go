@@ -4,8 +4,11 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"github.com/CMSgov/dpc/attribution/logger"
+	"github.com/CMSgov/dpc/attribution/middleware"
 	"github.com/CMSgov/dpc/attribution/model"
 	"github.com/huandu/go-sqlbuilder"
+	"github.com/pkg/errors"
 )
 
 // GroupRepo is an interface for test mocking purposes
@@ -27,6 +30,12 @@ func NewGroupRepo(db *sql.DB) *GroupRepository {
 
 // Insert function that saves the fhir model into the database and returns the model.Group
 func (or *GroupRepository) Insert(ctx context.Context, body []byte) (*model.Group, error) {
+	log := logger.WithContext(ctx)
+	organizationID, ok := ctx.Value(middleware.ContextKeyOrganization).(string)
+	if !ok {
+		log.Error("Failed to extract organization id from context")
+		return nil, errors.New("Failed to extract organization id from context")
+	}
 
 	var info model.Info
 	if err := json.Unmarshal(body, &info); err != nil {
@@ -35,9 +44,9 @@ func (or *GroupRepository) Insert(ctx context.Context, body []byte) (*model.Grou
 
 	ib := sqlFlavor.NewInsertBuilder()
 	ib.InsertInto(`"group"`)
-	ib.Cols("info")
-	ib.Values(info)
-	ib.SQL("returning id, version, created_at, updated_at, info")
+	ib.Cols("info", "organization_id")
+	ib.Values(info, organizationID)
+	ib.SQL("returning id, version, created_at, updated_at, info, organization_id")
 
 	q, args := ib.Build()
 

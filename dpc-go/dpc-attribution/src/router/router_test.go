@@ -51,9 +51,11 @@ func (suite *RouterTestSuite) SetupTest() {
 	suite.router = NewDPCAttributionRouter(suite.mockOrg, suite.mockGroup)
 }
 
-func (suite *RouterTestSuite) do(httpMethod string, route string, body io.Reader) *http.Response {
+func (suite *RouterTestSuite) do(httpMethod string, route string, body io.Reader, headers map[string]string) *http.Response {
 	req := httptest.NewRequest(httpMethod, route, body)
-	req.Header.Set(middleware2.OrgHeader, "1234")
+	for k, v := range headers {
+		req.Header.Set(k, v)
+	}
 	rr := httptest.NewRecorder()
 	suite.router.ServeHTTP(rr, req)
 	return rr.Result()
@@ -67,7 +69,7 @@ func (suite *RouterTestSuite) TestOrganizationGetRoute() {
 		assert.Equal(suite.T(), "1234", r.Context().Value(middleware2.ContextKeyOrganization))
 	})
 
-	res := suite.do(http.MethodGet, "/Organization/1234", nil)
+	res := suite.do(http.MethodGet, "/Organization/1234", nil, nil)
 	assert.Equal(suite.T(), "application/json; charset=UTF-8", res.Header.Get("Content-Type"))
 	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
 
@@ -76,11 +78,11 @@ func (suite *RouterTestSuite) TestOrganizationGetRoute() {
 		boom.Internal(w)
 	})
 
-	res = suite.do(http.MethodGet, "/Organization/1234", nil)
+	res = suite.do(http.MethodGet, "/Organization/1234", nil, nil)
 	assert.Equal(suite.T(), "application/json; charset=UTF-8", res.Header.Get("Content-Type"))
 	assert.Equal(suite.T(), http.StatusInternalServerError, res.StatusCode)
 
-	res = suite.do(http.MethodGet, "/Organization", strings.NewReader(attributiontest.Orgjson))
+	res = suite.do(http.MethodGet, "/Organization", strings.NewReader(attributiontest.Orgjson), nil)
 	assert.Equal(suite.T(), http.StatusMethodNotAllowed, res.StatusCode)
 }
 
@@ -92,7 +94,7 @@ func (suite *RouterTestSuite) TestOrganizationPostRoute() {
 		assert.Nil(suite.T(), r.Context().Value(middleware2.ContextKeyOrganization))
 	})
 
-	res := suite.do(http.MethodPost, "/Organization", strings.NewReader(attributiontest.Orgjson))
+	res := suite.do(http.MethodPost, "/Organization", strings.NewReader(attributiontest.Orgjson), nil)
 	assert.Equal(suite.T(), "application/json; charset=UTF-8", res.Header.Get("Content-Type"))
 	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
 	assert.NotEqual(suite.T(), res.Body, http.NoBody)
@@ -104,11 +106,11 @@ func (suite *RouterTestSuite) TestOrganizationPostRoute() {
 		assert.Nil(suite.T(), r.Context().Value(middleware2.ContextKeyOrganization))
 	})
 
-	res = suite.do(http.MethodPost, "/Organization", strings.NewReader(attributiontest.Orgjson))
+	res = suite.do(http.MethodPost, "/Organization", strings.NewReader(attributiontest.Orgjson), nil)
 	assert.Equal(suite.T(), "application/json; charset=UTF-8", res.Header.Get("Content-Type"))
 	assert.Equal(suite.T(), http.StatusInternalServerError, res.StatusCode)
 
-	res = suite.do(http.MethodPost, "/Organization/1234", strings.NewReader(attributiontest.Orgjson))
+	res = suite.do(http.MethodPost, "/Organization/1234", strings.NewReader(attributiontest.Orgjson), nil)
 	assert.Equal(suite.T(), http.StatusMethodNotAllowed, res.StatusCode)
 }
 
@@ -120,10 +122,10 @@ func (suite *RouterTestSuite) TestOrganizationDeleteRoute() {
 		assert.Equal(suite.T(), "1234", r.Context().Value(middleware2.ContextKeyOrganization))
 	})
 
-	res := suite.do(http.MethodDelete, "/Organization/1234", nil)
+	res := suite.do(http.MethodDelete, "/Organization/1234", nil, nil)
 	assert.Equal(suite.T(), http.StatusNoContent, res.StatusCode)
 
-	res = suite.do(http.MethodDelete, "/Organization", strings.NewReader(attributiontest.Orgjson))
+	res = suite.do(http.MethodDelete, "/Organization", strings.NewReader(attributiontest.Orgjson), nil)
 	assert.Equal(suite.T(), http.StatusMethodNotAllowed, res.StatusCode)
 }
 
@@ -135,11 +137,39 @@ func (suite *RouterTestSuite) TestOrganizationPutRoute() {
 		assert.Equal(suite.T(), "1234", r.Context().Value(middleware2.ContextKeyOrganization))
 	})
 
-	res := suite.do(http.MethodPut, "/Organization/1234", strings.NewReader(attributiontest.Orgjson))
+	res := suite.do(http.MethodPut, "/Organization/1234", strings.NewReader(attributiontest.Orgjson), nil)
 	assert.Equal(suite.T(), "application/json; charset=UTF-8", res.Header.Get("Content-Type"))
 	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
 	assert.NotEqual(suite.T(), res.Body, http.NoBody)
 
-	res = suite.do(http.MethodPut, "/Organization", strings.NewReader(attributiontest.Orgjson))
+	res = suite.do(http.MethodPut, "/Organization", strings.NewReader(attributiontest.Orgjson), nil)
 	assert.Equal(suite.T(), http.StatusMethodNotAllowed, res.StatusCode)
+}
+
+func (suite *RouterTestSuite) TestGroupPostRoute() {
+	suite.mockGroup.On("Post", mock.Anything, mock.Anything).Once().Run(func(arg mock.Arguments) {
+		w := arg.Get(0).(http.ResponseWriter)
+		_, _ = w.Write([]byte(attributiontest.Groupjson))
+		r := arg.Get(1).(*http.Request)
+		assert.Equal(suite.T(), "12345", r.Context().Value(middleware2.ContextKeyOrganization))
+	})
+
+	res := suite.do(http.MethodPost, "/Group", strings.NewReader(attributiontest.Groupjson), map[string]string{middleware2.OrgHeader: "12345"})
+	assert.Equal(suite.T(), "application/json; charset=UTF-8", res.Header.Get("Content-Type"))
+	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
+	assert.NotEqual(suite.T(), res.Body, http.NoBody)
+
+	suite.mockGroup.On("Post", mock.Anything, mock.Anything).Once().Run(func(arg mock.Arguments) {
+		w := arg.Get(0).(http.ResponseWriter)
+		boom.Internal(w)
+		r := arg.Get(1).(*http.Request)
+		assert.Equal(suite.T(), "12345", r.Context().Value(middleware2.ContextKeyOrganization))
+	})
+
+	res = suite.do(http.MethodPost, "/Group", strings.NewReader(attributiontest.Groupjson), map[string]string{middleware2.OrgHeader: "12345"})
+	assert.Equal(suite.T(), "application/json; charset=UTF-8", res.Header.Get("Content-Type"))
+	assert.Equal(suite.T(), http.StatusInternalServerError, res.StatusCode)
+
+	res = suite.do(http.MethodPost, "/Group/1234", strings.NewReader(attributiontest.Groupjson), map[string]string{middleware2.OrgHeader: "12345"})
+	assert.Equal(suite.T(), http.StatusNotFound, res.StatusCode)
 }

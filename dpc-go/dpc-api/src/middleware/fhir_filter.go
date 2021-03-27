@@ -5,44 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/CMSgov/dpc/api/logger"
+	"github.com/CMSgov/dpc/api/model"
 	"github.com/pkg/errors"
-	"github.com/samply/golang-fhir-models/fhir-models/fhir"
 	"strings"
 )
-
-type resourceType struct {
-	ResourceType string `json:"resourceType"`
-}
-
-type organization struct {
-	Identifier []fhir.Identifier      `json:"identifier,omitempty"`
-	Name       *string                `json:"name,omitempty"`
-	Address    []fhir.Address         `json:"address,omitempty"`
-	Type       []fhir.CodeableConcept `json:"type,omitempty"`
-	resourceType
-}
-
-type Group struct {
-	Type           fhir.GroupType             `json:"type"`
-	Actual         bool                       `bson:"actual" json:"actual"`
-	Name           *string                    `json:"name,omitempty"`
-	ManagingEntity *fhir.Reference            `json:"managingEntity,omitempty"`
-	Characteristic []fhir.GroupCharacteristic `json:"characteristic,omitempty"`
-	Member         []GroupMember              `json:"member,omitempty"`
-	resourceType
-}
-
-type GroupMember struct {
-	Entity    *fhir.Reference `json:"entity"`
-	Period    *fhir.Period    `json:"period,omitempty"`
-	Inactive  *bool           `json:"inactive,omitempty"`
-	Extension []extension     `json:"extension,omitempty"`
-}
-
-type extension struct {
-	Url            string          `json:"url"`
-	ValueReference *fhir.Reference `json:"valueReference"`
-}
 
 var filters = map[string]func([]byte) ([]byte, error){
 	"organization": filterOrganization,
@@ -65,7 +31,7 @@ func Filter(ctx context.Context, body []byte) ([]byte, error) {
 }
 
 func getResourceType(body []byte) (string, error) {
-	var result resourceType
+	var result model.ResourceType
 	if err := json.Unmarshal(body, &result); err != nil {
 		return "", err
 	}
@@ -73,7 +39,7 @@ func getResourceType(body []byte) (string, error) {
 }
 
 func filterOrganization(body []byte) ([]byte, error) {
-	var organization organization
+	var organization model.Organization
 	if err := json.Unmarshal(body, &organization); err != nil {
 		return nil, err
 	}
@@ -81,7 +47,7 @@ func filterOrganization(body []byte) ([]byte, error) {
 }
 
 func filterGroup(body []byte) ([]byte, error) {
-	var group Group
+	var group model.Group
 	if err := json.Unmarshal(body, &group); err != nil {
 		return nil, err
 	}

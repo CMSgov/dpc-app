@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/CMSgov/dpc/attribution/attributiontest"
+	"github.com/CMSgov/dpc/attribution/middleware"
 	"github.com/CMSgov/dpc/attribution/model"
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/bxcodec/faker"
@@ -52,14 +53,14 @@ func (suite *GroupRepositoryTestSuite) TestInsert() {
 	db, mock := newMock()
 	defer db.Close()
 	repo := NewGroupRepo(db)
-	ctx := context.Background()
+	ctx := context.WithValue(context.Background(), middleware.ContextKeyOrganization, "12345")
 
-	expectedInsertQuery := `INSERT INTO "group" \(info\) VALUES \(\$1\) returning id, version, created_at, updated_at, info`
+	expectedInsertQuery := `INSERT INTO "group" \(info, organization_id\) VALUES \(\$1, \$2\) returning id, version, created_at, updated_at, info, organization_id`
 
-	rows := sqlmock.NewRows([]string{"id", "version", "created_at", "updated_at", "info"}).
-		AddRow(suite.fakeGrp.ID, suite.fakeGrp.Version, suite.fakeGrp.CreatedAt, suite.fakeGrp.UpdatedAt, suite.fakeGrp.Info)
+	rows := sqlmock.NewRows([]string{"id", "version", "created_at", "updated_at", "info", "organization_id"}).
+		AddRow(suite.fakeGrp.ID, suite.fakeGrp.Version, suite.fakeGrp.CreatedAt, suite.fakeGrp.UpdatedAt, suite.fakeGrp.Info, suite.fakeGrp.OrganizationID)
 
-	mock.ExpectQuery(expectedInsertQuery).WithArgs(suite.fakeGrp.Info).WillReturnRows(rows)
+	mock.ExpectQuery(expectedInsertQuery).WithArgs(suite.fakeGrp.Info, "12345").WillReturnRows(rows)
 
 	b, _ := json.Marshal(suite.fakeGrp.Info)
 	org, err := repo.Insert(ctx, b)

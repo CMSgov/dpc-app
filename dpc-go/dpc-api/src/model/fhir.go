@@ -1,0 +1,41 @@
+package model
+
+import "github.com/samply/golang-fhir-models/fhir-models/fhir"
+
+// ResourceType is a reusable struct to include the resourceTypes in the below structs
+type ResourceType struct {
+	ResourceType string `json:"resourceType"`
+}
+
+// Organization is a struct that represents the filtered down fhir.Organization
+type Organization struct {
+	Identifier []fhir.Identifier      `json:"identifier,omitempty"`
+	Name       *string                `json:"name,omitempty"`
+	Address    []fhir.Address         `json:"address,omitempty"`
+	Type       []fhir.CodeableConcept `json:"type,omitempty"`
+	ResourceType
+}
+
+// Group is a struct that represents the filtered down fhir.Group
+type Group struct {
+	Type           fhir.GroupType             `json:"type"`
+	Actual         bool                       `bson:"actual" json:"actual"`
+	Name           *string                    `json:"name,omitempty"`
+	Characteristic []fhir.GroupCharacteristic `json:"characteristic,omitempty"`
+	Member         []GroupMember              `json:"member,omitempty"`
+	ResourceType
+}
+
+// GroupMember is a struct that represent the filtered down fhir.GroupMember
+type GroupMember struct {
+	Entity    *fhir.Reference `json:"entity"`
+	Period    *fhir.Period    `json:"period,omitempty"`
+	Inactive  *bool           `json:"inactive,omitempty"`
+	Extension []Extension     `json:"extension,omitempty"`
+}
+
+// Extension is a struct that represents the DaVinci structure definition
+type Extension struct {
+	Url            string          `json:"url"`
+	ValueReference *fhir.Reference `json:"valueReference"`
+}

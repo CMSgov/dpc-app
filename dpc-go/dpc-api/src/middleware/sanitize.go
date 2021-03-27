@@ -13,6 +13,7 @@ import (
 	"github.com/microcosm-cc/bluemonday"
 )
 
+// Sanitize is a middleware that html sanitizes the request body
 func Sanitize(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		if r.Body == http.NoBody {

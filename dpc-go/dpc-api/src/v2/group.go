@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"github.com/CMSgov/dpc/api/fhirror"
 	"github.com/CMSgov/dpc/api/logger"
-	middleware2 "github.com/CMSgov/dpc/api/middleware"
+	"github.com/CMSgov/dpc/api/model"
 	"github.com/google/fhir/go/jsonformat"
 	"github.com/pkg/errors"
 	"github.com/samply/golang-fhir-models/fhir-models/fhir"
@@ -59,7 +59,7 @@ func isValidGroup(group []byte) error {
 		return err
 	}
 
-	var groupStruct middleware2.Group
+	var groupStruct model.Group
 	if err := json.Unmarshal(group, &groupStruct); err != nil {
 		return err
 	}
@@ -82,7 +82,7 @@ func isValidGroup(group []byte) error {
 	return nil
 }
 
-func findPractitionerExtension(member middleware2.GroupMember) *fhir.Reference {
+func findPractitionerExtension(member model.GroupMember) *fhir.Reference {
 	for _, e := range member.Extension {
 		if e.Url == "http://hl7.org/fhir/us/davinci-atr/StructureDefinition/ext-attributedProvider" {
 			return e.ValueReference

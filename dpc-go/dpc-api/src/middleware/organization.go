@@ -8,6 +8,7 @@ import (
 	"net/http"
 )
 
+// OrgHeader is used in place of a auth token until SSAS is implemented
 const OrgHeader string = "X-ORG"
 
 type contextKey int

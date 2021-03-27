@@ -2,7 +2,7 @@ package v2
 
 import "net/http"
 
-// Service is an interface for testing to be able to mock the services
+// Service is an interface for testing to be able to mock the services in the router test
 type Service interface {
 	PostService
 	Get(w http.ResponseWriter, r *http.Request)
@@ -10,6 +10,7 @@ type Service interface {
 	Put(w http.ResponseWriter, r *http.Request)
 }
 
+// PostService is an interface for testing to be able to mock the services in the router test
 type PostService interface {
 	Post(w http.ResponseWriter, r *http.Request)
 }
