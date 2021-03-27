@@ -1,14 +1,18 @@
 package v2
 
 import (
+	"encoding/json"
 	"github.com/CMSgov/dpc/api/fhirror"
 	"github.com/CMSgov/dpc/api/logger"
+	middleware2 "github.com/CMSgov/dpc/api/middleware"
+	"github.com/google/fhir/go/jsonformat"
+	"github.com/pkg/errors"
+	"github.com/samply/golang-fhir-models/fhir-models/fhir"
 	"go.uber.org/zap"
 	"io/ioutil"
 	"net/http"
 
 	"github.com/CMSgov/dpc/api/client"
-	"github.com/google/fhir/go/jsonformat"
 )
 
 // GroupController is a struct that defines what the controller has
@@ -41,19 +45,48 @@ func (oc *GroupController) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if _, err = w.Write(resp); err != nil {
+	if _, err := w.Write(resp); err != nil {
 		log.Error("Failed to write data to response", zap.Error(err))
 		fhirror.ServerIssue(r.Context(), w, http.StatusUnprocessableEntity, "Failed to save group")
 	}
+
 }
 
 func isValidGroup(group []byte) error {
 	unmarshaller, _ := jsonformat.NewUnmarshaller("UTC", jsonformat.R4)
-	_, err := unmarshaller.UnmarshalR4(group)
-
-	//need to check structure here, i.e members are patient resources with mbi and managing practitioner
+	_, err := unmarshaller.Unmarshal(group)
 	if err != nil {
 		return err
+	}
+
+	var groupStruct middleware2.Group
+	if err := json.Unmarshal(group, &groupStruct); err != nil {
+		return err
+	}
+
+	for _, m := range groupStruct.Member {
+		pracRef := findPractitionerExtension(m)
+		if pracRef == nil ||
+			pracRef.Identifier == nil ||
+			*pracRef.Type != "Practitioner" {
+			return errors.New("Should contain a provider identifier")
+		}
+		patientRef := m.Entity
+		if patientRef == nil ||
+			patientRef.Identifier == nil ||
+			*patientRef.Type != "Patient" {
+			return errors.New("Should contain a patient identifier")
+		}
+	}
+
+	return nil
+}
+
+func findPractitionerExtension(member middleware2.GroupMember) *fhir.Reference {
+	for _, e := range member.Extension {
+		if e.Url == "http://hl7.org/fhir/us/davinci-atr/StructureDefinition/ext-attributedProvider" {
+			return e.ValueReference
+		}
 	}
 	return nil
 }

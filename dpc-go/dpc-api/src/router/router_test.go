@@ -213,3 +213,33 @@ func (suite *RouterTestSuite) TestOrganizationPutRoutes() {
 	assert.Contains(suite.T(), v, "resourceType")
 	assert.Equal(suite.T(), v["resourceType"], "Organization")
 }
+
+func (suite *RouterTestSuite) TestGroupPostRoute() {
+	var capturedRequestID string
+	suite.mockGroup.On("Create", mock.Anything, mock.Anything).Once().Run(func(arg mock.Arguments) {
+		r := arg.Get(1).(*http.Request)
+		capturedRequestID = r.Header.Get(middleware.RequestIDHeader)
+		w := arg.Get(0).(http.ResponseWriter)
+		_, _ = w.Write(apitest.AttributionResponse(apitest.Groupjson))
+	})
+
+	ts := httptest.NewServer(suite.router)
+
+	req, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/%s", ts.URL, "v2/Group"), strings.NewReader(apitest.Groupjson))
+	req.Header.Set("Content-Type", "application/fhir+json")
+	req.Header.Set(middleware.RequestIDHeader, "54321")
+	req.Header.Set(middleware2.OrgHeader, "12345")
+	res, _ := http.DefaultClient.Do(req)
+
+	b, _ := ioutil.ReadAll(res.Body)
+	var v map[string]interface{}
+	_ = json.Unmarshal(b, &v)
+
+	assert.Equal(suite.T(), "application/fhir+json; charset=UTF-8", res.Header.Get("Content-Type"))
+	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
+	assert.Equal(suite.T(), "54321", capturedRequestID)
+	assert.NotNil(suite.T(), v)
+	assert.NotContains(suite.T(), v, "info")
+	assert.Contains(suite.T(), v, "resourceType")
+	assert.Equal(suite.T(), v["resourceType"], "Group")
+}

@@ -28,7 +28,7 @@ func NewDPCAPIRouter(oc v2.Controller, mc v2.ReadController, gc v2.CreateControl
 		})
 		r.Route("/Group", func(r chi.Router) {
 			r.Use(middleware2.AuthCtx)
-			r.Post("/", gc.Create)
+			r.With(middleware2.FHIRFilter, middleware2.FHIRModel).Post("/", gc.Create)
 		})
 	})
 

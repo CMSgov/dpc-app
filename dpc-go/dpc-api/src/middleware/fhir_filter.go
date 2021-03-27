@@ -22,24 +22,31 @@ type organization struct {
 	resourceType
 }
 
-type patient struct {
-	Identifier []fhir.Identifier          `json:"identifier,omitempty"`
-	Name       []fhir.HumanName           `json:"name,omitempty"`
-	Gender     *fhir.AdministrativeGender `json:"gender,omitempty"`
-	BirthDate  *string                    `json:"birthDate,omitempty"`
+type Group struct {
+	Type           fhir.GroupType             `json:"type"`
+	Actual         bool                       `bson:"actual" json:"actual"`
+	Name           *string                    `json:"name,omitempty"`
+	ManagingEntity *fhir.Reference            `json:"managingEntity,omitempty"`
+	Characteristic []fhir.GroupCharacteristic `json:"characteristic,omitempty"`
+	Member         []GroupMember              `json:"member,omitempty"`
 	resourceType
 }
 
-type practitioner struct {
-	Identifier []fhir.Identifier `json:"identifier,omitempty"`
-	Name       []fhir.HumanName  `json:"name,omitempty"`
-	resourceType
+type GroupMember struct {
+	Entity    *fhir.Reference `json:"entity"`
+	Period    *fhir.Period    `json:"period,omitempty"`
+	Inactive  *bool           `json:"inactive,omitempty"`
+	Extension []extension     `json:"extension,omitempty"`
+}
+
+type extension struct {
+	Url            string          `json:"url"`
+	ValueReference *fhir.Reference `json:"valueReference"`
 }
 
 var filters = map[string]func([]byte) ([]byte, error){
 	"organization": filterOrganization,
-	"patient":      filterPatient,
-	"practitioner": filterPractitioner,
+	"group":        filterGroup,
 }
 
 // Filter is a function that filters out all FHIR fields that aren't explicitly whitelisted
@@ -73,18 +80,10 @@ func filterOrganization(body []byte) ([]byte, error) {
 	return json.Marshal(organization)
 }
 
-func filterPatient(body []byte) ([]byte, error) {
-	var patient patient
-	if err := json.Unmarshal(body, &patient); err != nil {
+func filterGroup(body []byte) ([]byte, error) {
+	var group Group
+	if err := json.Unmarshal(body, &group); err != nil {
 		return nil, err
 	}
-	return json.Marshal(patient)
-}
-
-func filterPractitioner(body []byte) ([]byte, error) {
-	var practitioner practitioner
-	if err := json.Unmarshal(body, &practitioner); err != nil {
-		return nil, err
-	}
-	return json.Marshal(practitioner)
+	return json.Marshal(group)
 }

@@ -101,186 +101,100 @@ const Orgjson = `{
   ]
 }`
 
-// Practitionerjson is a practitioner json string for testing purposes
-const Practitionerjson = `{
-  "resourceType": "Practitioner",
-  "id": "f001",
-  "text": {
-    "status": "generated",
-    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p><b>Generated Narrative with Details</b></p><p><b>id</b>: f001</p><p><b>identifier</b>: 938273695 (OFFICIAL), 129IDH4OP733 (USUAL)</p><p><b>name</b>: Eric van den broek (OFFICIAL)</p><p><b>telecom</b>: ph: 0205568263(WORK), E.M.vandenbroek@bmc.nl(WORK), fax: 0205664440(WORK)</p><p><b>address</b>: Galapagosweg 91 Den Burg 9105 PZ NLD (WORK)</p><p><b>gender</b>: male</p><p><b>birthDate</b>: 07/12/1975</p></div>"
+// Groupjson is a group json string for testing purposes
+const Groupjson = `
+{
+  "resourceType": "Group",
+  "id": "fullexample",
+  "meta": {
+    "versionId": "1",
+    "lastUpdated": "2019-06-06T03:04:12.348-04:00"
   },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/us/davinci-atr/StructureDefinition/ext-contractValidityPeriod",
+      "valuePeriod": {
+        "start": "2020-07-25",
+        "end": "2021-06-24"
+      }
+    }
+  ],
   "identifier": [
     {
       "use": "official",
-      "system": "urn:oid:2.16.528.1.1007.3.1",
-      "value": "938273695"
+      "type": {
+        "coding": [
+          {
+            "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code": "NPI",
+            "display": "National Provider Identifier"
+          }
+        ]
+      },
+      "system": "https://sitenv.org",
+      "value": "1316206220"
     },
-    {
-      "use": "usual",
-      "system": "urn:oid:2.16.840.1.113883.2.4.6.3",
-      "value": "129IDH4OP733"
-    }
-  ],
-  "name": [
     {
       "use": "official",
-      "family": "van den broek",
-      "given": [
-        "Eric"
-      ],
-      "suffix": [
-        "MD"
-      ]
-    }
-  ],
-  "telecom": [
-    {
-      "system": "phone",
-      "value": "0205568263",
-      "use": "work"
-    },
-    {
-      "system": "email",
-      "value": "E.M.vandenbroek@bmc.nl",
-      "use": "work"
-    },
-    {
-      "system": "fax",
-      "value": "0205664440",
-      "use": "work"
-    }
-  ],
-  "address": [
-    {
-      "use": "work",
-      "line": [
-        "Galapagosweg 91"
-      ],
-      "city": "Den Burg",
-      "postalCode": "9105 PZ",
-      "country": "NLD"
-    }
-  ],
-  "gender": "male",
-  "birthDate": "1975-12-07"
-}`
-
-// Patientjson is a patient json string for testing purposes
-const Patientjson = `{
-  "resourceType": "Patient",
-  "id": "f001",
-  "text": {
-    "status": "generated",
-    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p><b>Generated Narrative with Details</b></p><p><b>id</b>: f001</p><p><b>identifier</b>: 738472983 (USUAL), ?? (USUAL)</p><p><b>active</b>: true</p><p><b>name</b>: Pieter van de Heuvel </p><p><b>telecom</b>: ph: 0648352638(MOBILE), p.heuvel@gmail.com(HOME)</p><p><b>gender</b>: male</p><p><b>birthDate</b>: 17/11/1944</p><p><b>deceased</b>: false</p><p><b>address</b>: Van Egmondkade 23 Amsterdam 1024 RJ NLD (HOME)</p><p><b>maritalStatus</b>: Getrouwd <span>(Details : {http://terminology.hl7.org/CodeSystem/v3-MaritalStatus code 'M' = 'Married', given as 'Married'})</span></p><p><b>multipleBirth</b>: true</p><h3>Contacts</h3><table><tr><td>-</td><td><b>Relationship</b></td><td><b>Name</b></td><td><b>Telecom</b></td></tr><tr><td>*</td><td>Emergency Contact <span>(Details : {http://terminology.hl7.org/CodeSystem/v2-0131 code 'C' = 'Emergency Contact)</span></td><td>Sarah Abels </td><td>ph: 0690383372(MOBILE)</td></tr></table><h3>Communications</h3><table><tr><td>-</td><td><b>Language</b></td><td><b>Preferred</b></td></tr><tr><td>*</td><td>Nederlands <span>(Details : {urn:ietf:bcp:47 code 'nl' = 'Dutch', given as 'Dutch'})</span></td><td>true</td></tr></table><p><b>managingOrganization</b>: <a>Burgers University Medical Centre</a></p></div>"
-  },
-  "identifier": [
-    {
-      "use": "usual",
-      "system": "urn:oid:2.16.840.1.113883.2.4.6.3",
-      "value": "738472983"
-    },
-    {
-      "use": "usual",
-      "system": "urn:oid:2.16.840.1.113883.2.4.6.3"
+      "type": {
+        "coding": [
+          {
+            "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code": "TAX",
+            "display": "Tax ID Number"
+          }
+        ]
+      },
+      "system": "https://sitenv.org",
+      "value": "789456231"
     }
   ],
   "active": true,
-  "name": [
-    {
-      "use": "usual",
-      "family": "van de Heuvel",
-      "given": [
-        "Pieter"
-      ],
-      "suffix": [
-        "MSc"
-      ]
-    }
-  ],
-  "telecom": [
-    {
-      "system": "phone",
-      "value": "0648352638",
-      "use": "mobile"
-    },
-    {
-      "system": "email",
-      "value": "p.heuvel@gmail.com",
-      "use": "home"
-    }
-  ],
-  "gender": "male",
-  "birthDate": "1944-11-17",
-  "deceasedBoolean": false,
-  "address": [
-    {
-      "use": "home",
-      "line": [
-        "Van Egmondkade 23"
-      ],
-      "city": "Amsterdam",
-      "postalCode": "1024 RJ",
-      "country": "NLD"
-    }
-  ],
-  "maritalStatus": {
-    "coding": [
-      {
-        "system": "http://terminology.hl7.org/CodeSystem/v3-MaritalStatus",
-        "code": "M",
-        "display": "Married"
-      }
-    ],
-    "text": "Getrouwd"
+  "type": "person",
+  "actual": true,
+  "name": "Test Group 3",
+  "managingEntity": {
+    "reference": "Organization/1",
+    "display": "Healthcare related organization"
   },
-  "multipleBirthBoolean": true,
-  "contact": [
+  "member": [
     {
-      "relationship": [
+      "extension": [
         {
-          "coding": [
-            {
-              "system": "http://terminology.hl7.org/CodeSystem/v2-0131",
-              "code": "C"
+          "url": "http://hl7.org/fhir/us/davinci-atr/StructureDefinition/ext-changeType",
+          "valueCode": "add"
+        },
+        {
+          "url": "http://hl7.org/fhir/us/davinci-atr/StructureDefinition/ext-coverageReference",
+          "valueReference": {
+            "reference": "Coverage/1"
+          }
+        },
+        {
+          "url": "http://hl7.org/fhir/us/davinci-atr/StructureDefinition/ext-attributedProvider",
+          "valueReference": {
+            "type": "Practitioner",
+            "identifier": {
+                "system": "http://hl7.org/fhir/sid/us-npi",
+                "value": "9941339108"
             }
-          ]
+          }
         }
       ],
-      "name": {
-        "use": "usual",
-        "family": "Abels",
-        "given": [
-          "Sarah"
-        ]
-      },
-      "telecom": [
-        {
-          "system": "phone",
-          "value": "0690383372",
-          "use": "mobile"
+      "entity": {
+        "type": "Patient",
+        "identifier": {
+            "value": "2SW4N00AA00",
+            "system": "http://hl7.org/fhir/sid/us-mbi"
         }
-      ]
-    }
-  ],
-  "communication": [
-    {
-      "language": {
-        "coding": [
-          {
-            "system": "urn:ietf:bcp:47",
-            "code": "nl",
-            "display": "Dutch"
-          }
-        ],
-        "text": "Nederlands"
       },
-      "preferred": true
+      "period": {
+        "start": "2014-10-08",
+        "end": "2020-10-08"
+      },
+      "inactive": false
     }
-  ],
-  "managingOrganization": {
-    "reference": "Organization/f001",
-    "display": "Burgers University Medical Centre"
-  }
+  ]
 }`
 
 // AttributionOrgResponse provides a sample organization response that mimics what attribution service returns for testing purposes

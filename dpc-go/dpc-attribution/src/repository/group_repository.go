@@ -34,7 +34,7 @@ func (or *GroupRepository) Insert(ctx context.Context, body []byte) (*model.Grou
 	}
 
 	ib := sqlFlavor.NewInsertBuilder()
-	ib.InsertInto("group")
+	ib.InsertInto(`"group"`)
 	ib.Cols("info")
 	ib.Values(info)
 	ib.SQL("returning id, version, created_at, updated_at, info")

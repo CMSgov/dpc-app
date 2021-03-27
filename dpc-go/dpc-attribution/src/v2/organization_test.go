@@ -17,18 +17,18 @@ import (
 	"testing"
 )
 
-type MockRepo struct {
+type MockOrgRepo struct {
 	mock.Mock
 }
 
-func (m *MockRepo) Insert(ctx context.Context, body []byte) (*model.Organization, error) {
+func (m *MockOrgRepo) Insert(ctx context.Context, body []byte) (*model.Organization, error) {
 	args := m.Called(ctx, body)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
 	return args.Get(0).(*model.Organization), args.Error(1)
 }
-func (m *MockRepo) FindByID(ctx context.Context, id string) (*model.Organization, error) {
+func (m *MockOrgRepo) FindByID(ctx context.Context, id string) (*model.Organization, error) {
 	args := m.Called(ctx, id)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
@@ -36,11 +36,11 @@ func (m *MockRepo) FindByID(ctx context.Context, id string) (*model.Organization
 	return args.Get(0).(*model.Organization), args.Error(1)
 }
 
-func (m *MockRepo) DeleteByID(ctx context.Context, id string) error {
+func (m *MockOrgRepo) DeleteByID(ctx context.Context, id string) error {
 	args := m.Called(ctx, id)
 	return args.Error(0)
 }
-func (m *MockRepo) Update(ctx context.Context, id string, body []byte) (*model.Organization, error) {
+func (m *MockOrgRepo) Update(ctx context.Context, id string, body []byte) (*model.Organization, error) {
 	args := m.Called(ctx, id, body)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
@@ -50,18 +50,23 @@ func (m *MockRepo) Update(ctx context.Context, id string, body []byte) (*model.O
 
 type OrganizationServiceTestSuite struct {
 	suite.Suite
+	repo    *MockOrgRepo
+	service *OrganizationService
 }
 
 func TestOrganizationServiceTestSuite(t *testing.T) {
 	suite.Run(t, new(OrganizationServiceTestSuite))
 }
 
+func (suite *OrganizationServiceTestSuite) SetupTest() {
+	suite.repo = &MockOrgRepo{}
+	suite.service = NewOrganizationService(suite.repo)
+}
+
 func (suite *OrganizationServiceTestSuite) TestGetRepoError() {
 	ja := jsonassert.New(suite.T())
-	mr := new(MockRepo)
-	os := NewOrganizationService(mr)
 
-	mr.On("FindByID", mock.Anything, mock.Anything).Return(nil, errors.New("error"))
+	suite.repo.On("FindByID", mock.Anything, mock.Anything).Return(nil, errors.New("error"))
 
 	req := httptest.NewRequest("GET", "http://example.com/foo", nil)
 	ctx := req.Context()
@@ -70,7 +75,7 @@ func (suite *OrganizationServiceTestSuite) TestGetRepoError() {
 
 	w := httptest.NewRecorder()
 
-	os.Get(w, req)
+	suite.service.Get(w, req)
 
 	res := w.Result()
 
@@ -89,12 +94,10 @@ func (suite *OrganizationServiceTestSuite) TestGetRepoError() {
 
 func (suite *OrganizationServiceTestSuite) TestGet() {
 	ja := jsonassert.New(suite.T())
-	mr := new(MockRepo)
-	os := NewOrganizationService(mr)
 
 	o := model.Organization{}
 	_ = faker.FakeData(&o)
-	mr.On("FindByID", mock.Anything, mock.Anything).Return(&o, nil)
+	suite.repo.On("FindByID", mock.Anything, mock.Anything).Return(&o, nil)
 
 	req := httptest.NewRequest("GET", "http://example.com/foo", nil)
 	ctx := req.Context()
@@ -103,7 +106,7 @@ func (suite *OrganizationServiceTestSuite) TestGet() {
 
 	w := httptest.NewRecorder()
 
-	os.Get(w, req)
+	suite.service.Get(w, req)
 
 	res := w.Result()
 
@@ -117,18 +120,16 @@ func (suite *OrganizationServiceTestSuite) TestGet() {
 
 func (suite *OrganizationServiceTestSuite) TestPost() {
 	ja := jsonassert.New(suite.T())
-	mr := new(MockRepo)
-	os := NewOrganizationService(mr)
 
 	o := model.Organization{}
 	_ = faker.FakeData(&o)
-	mr.On("Insert", mock.Anything, mock.Anything).Return(&o, nil)
+	suite.repo.On("Insert", mock.Anything, mock.Anything).Return(&o, nil)
 
 	req := httptest.NewRequest("POST", "http://example.com/foo", nil)
 
 	w := httptest.NewRecorder()
 
-	os.Post(w, req)
+	suite.service.Post(w, req)
 
 	res := w.Result()
 
@@ -142,16 +143,14 @@ func (suite *OrganizationServiceTestSuite) TestPost() {
 
 func (suite *OrganizationServiceTestSuite) TestSaveRepoError() {
 	ja := jsonassert.New(suite.T())
-	mr := new(MockRepo)
-	os := NewOrganizationService(mr)
 
-	mr.On("Insert", mock.Anything, mock.Anything).Return(nil, errors.New("error"))
+	suite.repo.On("Insert", mock.Anything, mock.Anything).Return(nil, errors.New("error"))
 
 	req := httptest.NewRequest("POST", "http://example.com/foo", nil)
 
 	w := httptest.NewRecorder()
 
-	os.Post(w, req)
+	suite.service.Post(w, req)
 
 	res := w.Result()
 
@@ -168,17 +167,14 @@ func (suite *OrganizationServiceTestSuite) TestSaveRepoError() {
 }
 
 func (suite *OrganizationServiceTestSuite) TestDelete() {
-	mr := new(MockRepo)
-	os := NewOrganizationService(mr)
-
 	req := httptest.NewRequest("POST", "http://example.com/foo", nil)
 	ctx := req.Context()
 	ctx = context.WithValue(ctx, middleware.ContextKeyOrganization, "12345")
 	req = req.WithContext(ctx)
 	w := httptest.NewRecorder()
 
-	mr.On("DeleteByID", mock.Anything, mock.Anything).Return(errors.New("error")).Once()
-	os.Delete(w, req)
+	suite.repo.On("DeleteByID", mock.Anything, mock.Anything).Return(errors.New("error")).Once()
+	suite.service.Delete(w, req)
 
 	res := w.Result()
 
@@ -188,8 +184,8 @@ func (suite *OrganizationServiceTestSuite) TestDelete() {
 
 	w = httptest.NewRecorder()
 
-	mr.On("DeleteByID", mock.Anything, mock.Anything).Return(nil).Once()
-	os.Delete(w, req)
+	suite.repo.On("DeleteByID", mock.Anything, mock.Anything).Return(nil).Once()
+	suite.service.Delete(w, req)
 
 	res = w.Result()
 
@@ -199,13 +195,11 @@ func (suite *OrganizationServiceTestSuite) TestDelete() {
 
 func (suite *OrganizationServiceTestSuite) TestPut() {
 	ja := jsonassert.New(suite.T())
-	mr := new(MockRepo)
-	os := NewOrganizationService(mr)
 
 	req := httptest.NewRequest("PUT", "http://example.com/foo", nil)
 	w := httptest.NewRecorder()
 
-	os.Put(w, req)
+	suite.service.Put(w, req)
 
 	res := w.Result()
 
@@ -219,8 +213,8 @@ func (suite *OrganizationServiceTestSuite) TestPut() {
 
 	w = httptest.NewRecorder()
 
-	mr.On("Update", mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.New("test")).Once()
-	os.Put(w, req)
+	suite.repo.On("Update", mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.New("test")).Once()
+	suite.service.Put(w, req)
 
 	res = w.Result()
 
@@ -232,8 +226,8 @@ func (suite *OrganizationServiceTestSuite) TestPut() {
 	_ = faker.FakeData(&o)
 	w = httptest.NewRecorder()
 
-	mr.On("Update", mock.Anything, mock.Anything, mock.Anything).Return(&o, nil).Once()
-	os.Put(w, req)
+	suite.repo.On("Update", mock.Anything, mock.Anything, mock.Anything).Return(&o, nil).Once()
+	suite.service.Put(w, req)
 
 	res = w.Result()
 
