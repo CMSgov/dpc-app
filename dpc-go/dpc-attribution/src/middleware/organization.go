@@ -14,7 +14,7 @@ type contextKey int
 // ContextKeyOrganization is the key in the context to retrieve the organizationID
 const ContextKeyOrganization contextKey = iota
 
-// OrgHeader
+// OrgHeader is the header to look for when api calls attribution with a organization id
 const OrgHeader string = "X-ORG"
 
 // OrganizationCtx middleware to extract the organizationID from the header and set it into the request context

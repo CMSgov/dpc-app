@@ -84,8 +84,9 @@ func isValidGroup(group []byte) error {
 
 func findPractitionerExtension(member model.GroupMember) *fhir.Reference {
 	for _, e := range member.Extension {
-		if e.Url == "http://hl7.org/fhir/us/davinci-atr/StructureDefinition/ext-attributedProvider" {
-			return e.ValueReference
+		vr := e.ValueReference
+		if vr != nil && vr.Type != nil && *vr.Type == "Practitioner" {
+			return vr
 		}
 	}
 	return nil

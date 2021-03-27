@@ -36,6 +36,6 @@ type GroupMember struct {
 
 // Extension is a struct that represents the DaVinci structure definition
 type Extension struct {
-	Url            string          `json:"url"`
+	URL            string          `json:"url"`
 	ValueReference *fhir.Reference `json:"valueReference"`
 }
