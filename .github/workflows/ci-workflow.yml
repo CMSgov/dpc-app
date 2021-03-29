@@ -35,6 +35,6 @@ jobs:
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v1
-      - name: "Portals Build"
+      - name: "Web Portals Build"
         run: |
           make ci-portals

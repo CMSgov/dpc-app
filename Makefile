@@ -45,49 +45,33 @@ start-local-api: secure-envs start-local
 
 .PHONY: start-portals
 start-portals:
-	@docker-compose -f docker-compose.portals.yml up start_core_dependencies
-	@docker-compose -f docker-compose.portals.yml up start_web
-	@docker-compose -f docker-compose.portals.yml up start_admin
+	@docker-compose -f docker-compose.yml -f docker-compose.portals.yml up start_core_dependencies
+	@docker-compose -f docker-compose.yml -f docker-compose.portals.yml up start_web
+	@docker-compose -f docker-compose.yml -f docker-compose.portals.yml up start_admin
 	@docker ps
 
 .PHONY: down-portals
 down-portals:
-	@docker-compose -f docker-compose.portals.yml down
-	@docker ps
-
-.PHONY: stop-portals
-stop-portals:
-	@docker-compose -f docker-compose.portals.yml stop
+	@docker-compose -f docker-compose.yml -f docker-compose.portals.yml down
 	@docker ps
 
 .PHONY: start-dpc
 start-dpc: secure-envs
-	@docker-compose -f docker-compose.all.yml up start_core_dependencies
-	@USE_BFD_MOCK=false docker-compose -f docker-compose.all.yml up start_api_dependencies
-	@docker-compose -f docker-compose.all.yml up start_api
-	@docker-compose -f docker-compose.all.yml up start_core_dependencies
-	@docker-compose -f docker-compose.all.yml up start_web
-	@docker-compose -f docker-compose.all.yml up start_admin
+	@docker-compose -f docker-compose.yml -f docker-compose.portals.yml up start_core_dependencies
+	@USE_BFD_MOCK=false docker-compose -f docker-compose.yml -f docker-compose.portals.yml up start_api_dependencies
+	@docker-compose -f docker-compose.yml -f docker-compose.portals.yml up start_api
+	@docker-compose -f docker-compose.yml -f docker-compose.portals.yml up start_web
+	@docker-compose -f docker-compose.yml -f docker-compose.portals.yml up start_admin
 	@docker ps
 
 .PHONY: down-dpc
 down-dpc: 
-	@docker-compose -f docker-compose.all.yml down
-	@docker ps
-
-.PHONY: stop-dpc
-stop-dpc: 
-	@docker-compose -f docker-compose.all.yml stop
+	@docker-compose -f docker-compose.yml -f docker-compose.portals.yml down
 	@docker ps
 
 .PHONY: ci-app
 ci-app: docker-base secure-envs
 	@./dpc-test.sh
-
-#Depicated TODO remove once make ci-portals is completely working.
-.PHONY: ci-web
-ci-web:
-	@./dpc-web-test.sh
 
 .PHONY: ci-portals
 ci-portals:
