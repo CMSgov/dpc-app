@@ -27,7 +27,7 @@ website:
 
 .PHONY: admin
 admin:
-	@docker build -f dpc-admin/Dockerfile . -t dpc-admin
+	@docker build -f dpc-admin/Dockerfile . -t dpc-web-admin
 
 .PHONY: start-app
 start-app: secure-envs
@@ -45,15 +45,14 @@ start-local-api: secure-envs start-local
 
 .PHONY: start-portals
 start-portals:
-	@docker-compose -f docker-compose.yml -f docker-compose.portals.yml up start_core_dependencies
-	@docker-compose -f docker-compose.yml -f docker-compose.portals.yml up start_web
-	@docker-compose -f docker-compose.yml -f docker-compose.portals.yml up start_admin
+	@docker-compose -p dpc-portals -f docker-compose.yml -f docker-compose.portals.yml up start_core_dependencies
+	@docker-compose -p dpc-portals -f docker-compose.yml -f docker-compose.portals.yml up start_web
+	@docker-compose -p dpc-portals -f docker-compose.yml -f docker-compose.portals.yml up start_admin
 	@docker ps
 
 .PHONY: down-portals
 down-portals:
-	@docker-compose -f docker-compose.yml -f docker-compose.portals.yml down
-	@docker ps
+	@docker-compose -p dpc-portals -f docker-compose.portals.yml down
 
 .PHONY: start-dpc
 start-dpc: secure-envs

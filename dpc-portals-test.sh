@@ -12,10 +12,10 @@ make website
 make admin
 
 # Run the tests
-docker-compose -f docker-compose.portals.yml up start_core_dependencies
-docker-compose -f docker-compose.portals.yml run --entrypoint "bundle exec rails db:create db:migrate RAILS_ENV=test" dpc_web
-docker-compose -f docker-compose.portals.yml run --entrypoint "bundle exec rails spec" dpc_web
-docker-compose -f docker-compose.portals.yml run --entrypoint "bundle exec rails spec" dpc_admin
+docker-compose -p dpc-portals -f docker-compose.portals.yml up start_core_dependencies
+docker-compose -p dpc-portals -f docker-compose.portals.yml run --entrypoint "bundle exec rails db:create db:migrate RAILS_ENV=test" dpc_web
+docker-compose -p dpc-portals -f docker-compose.portals.yml run --entrypoint "bundle exec rails spec" dpc_web
+docker-compose -p dpc-portals -f docker-compose.portals.yml run --entrypoint "bundle exec rails spec" dpc_admin
 
 echo "┌──────────────────────────────────────────┐"
 echo "│                                          │"
