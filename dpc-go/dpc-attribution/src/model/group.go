@@ -8,5 +8,5 @@ import (
 type Group struct {
 	ID             uuid.UUID `db:"id" json:"id"`
 	ProviderID     string    `db:"provider_id" json:"provider_id"`
-	OrganizationId uuid.UUID `db:"organization_id" json:"organization_id"`
+	OrganizationID uuid.UUID `db:"organization_id" json:"organization_id"`
 }

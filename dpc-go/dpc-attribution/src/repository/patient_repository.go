@@ -6,7 +6,7 @@ import (
 
 // PatientRepo is an interface for test mocking purposes
 type PatientRepo interface {
-	FindMBIsByGroupID(groupId string) ([]string, error)
+	FindMBIsByGroupID(groupID string) ([]string, error)
 }
 
 // PatientRepository is a struct that defines what the repository has
@@ -22,12 +22,12 @@ func NewPatientRepo(db *sql.DB) *PatientRepository {
 }
 
 // FindMBIsByGroupID function that searches the v1 attribution database for the patient MBIs for a given Group id
-func (pr *PatientRepository) FindMBIsByGroupID(groupId string) ([]string, error) {
+func (pr *PatientRepository) FindMBIsByGroupID(groupID string) ([]string, error) {
 	sb := sqlFlavor.NewSelectBuilder()
 	sb.Select("patients.beneficiary_id")
 	sb.From("rosters")
 	sb.Join("patients", "rosters.id = patients.roster_id")
-	sb.Where(sb.Equal("rosters.id", groupId))
+	sb.Where(sb.Equal("rosters.id", groupID))
 	q, args := sb.Build()
 
 	var (
