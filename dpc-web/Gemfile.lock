@@ -232,7 +232,7 @@ GEM
     mime-types (3.3.1)
       mime-types-data (~> 3.2015)
     mime-types-data (3.2020.1104)
-    mimemagic (0.3.9)
+    mimemagic (0.3.10)
       nokogiri (~> 1)
       rake
     mini_mime (1.0.2)
@@ -247,14 +247,14 @@ GEM
     newrelic_rpm (6.15.0)
     nio4r (2.5.5)
     nio4r (2.5.5-java)
-    nokogiri (1.11.1)
+    nokogiri (1.11.2)
       mini_portile2 (~> 2.5.0)
       racc (~> 1.4)
-    nokogiri (1.11.1-java)
+    nokogiri (1.11.2-java)
       racc (~> 1.4)
-    nokogiri (1.11.1-x64-mingw32)
+    nokogiri (1.11.2-x64-mingw32)
       racc (~> 1.4)
-    nokogiri (1.11.1-x86-mingw32)
+    nokogiri (1.11.2-x86-mingw32)
       racc (~> 1.4)
     oauth2 (1.4.4)
       faraday (>= 0.8, < 2.0)
@@ -559,7 +559,7 @@ DEPENDENCIES
   webmock
 
 RUBY VERSION
-   ruby 2.7.1p83
+   ruby 2.7.2p137
 
 BUNDLED WITH
    2.1.4
