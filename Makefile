@@ -1,11 +1,6 @@
-IG_PUBLISHER = ./.bin/org.hl7.fhir.publisher.jar
 REPORT_COVERAGE ?= false
 
 SMOKE_THREADS ?= 10
-
-${IG_PUBLISHER}:
-	-mkdir ./.bin
-	curl https://storage.googleapis.com/ig-build/org.hl7.fhir.publisher.jar -o ${IG_PUBLISHER}
 
 venv: venv/bin/activate
 
@@ -14,12 +9,6 @@ venv/bin/activate: requirements.txt
 	. venv/bin/activate; CRYPTOGRAPHY_DONT_BUILD_RUST=1 pip install -Ur requirements.txt
 	touch venv/bin/activate
 
-
-
-.PHONY: ig/publish
-ig/publish: ${IG_PUBLISHER}
-	@echo "Building Implementation Guide"
-	@java -jar ${IG_PUBLISHER} -ig ig/ig.json
 
 .PHONY: website
 website:
