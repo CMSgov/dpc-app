@@ -31,7 +31,7 @@ func (pr *PatientRepository) FindMBIsByGroupID(groupId string) ([]string, error)
 	q, args := sb.Build()
 
 	var (
-		MBIs []string
+		MBIs       []string
 		patientMBI string
 	)
 

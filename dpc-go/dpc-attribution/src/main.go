@@ -42,7 +42,6 @@ func main() {
 	jr := repository.NewJobRepo(queueDbV1)
 	gs := v2.NewGroupService(gr, pr, jr)
 
-
 	attributionRouter := router.NewDPCAttributionRouter(os, gs)
 
 	port := conf.GetAsString("port", "3001")
