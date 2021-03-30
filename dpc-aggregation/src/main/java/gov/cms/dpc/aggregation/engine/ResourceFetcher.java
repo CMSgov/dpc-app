@@ -248,7 +248,6 @@ class ResourceFetcher {
             logger.error("Failing the job for a BFD transaction time regression: BFD time {}, Job time {}",
                     bfdTransactionTime,
                     transactionTime);
-//            throw new JobQueueFailure("BFD's transaction time regression");
         }
     }
 }
