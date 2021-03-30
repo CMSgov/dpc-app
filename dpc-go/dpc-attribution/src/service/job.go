@@ -10,13 +10,13 @@ import (
 	v1 "github.com/CMSgov/dpc/attribution/service/v1"
 )
 
-// Job is an interface that defines what a Job does
-type Job interface {
+// JobService is an interface that defines what a JobService does
+type JobService interface {
 	Export(ctx context.Context, orgID string, groupID string) (string, error)
 }
 
 // NewJobService function that creates and returns a JobService
-func NewJobService(ctx context.Context) Job {
+func NewJobService(ctx context.Context) JobService {
 	log := logger.WithContext(ctx)
 	attrDbV1 := repository.GetAttributionV1DbConnection()
 	queueDbV1 := repository.GetQueueDbConnection()

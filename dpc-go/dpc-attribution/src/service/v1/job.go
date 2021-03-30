@@ -20,7 +20,7 @@ type JobServiceV1 struct {
 }
 
 // NewJobServiceV1 function that creates a job service and returns its reference
-func NewJobServiceV1(pr repository.PatientRepo, jr repository.JobRepo) service.Job {
+func NewJobServiceV1(pr repository.PatientRepo, jr repository.JobRepo) service.JobService {
 	return &JobServiceV1{
 		pr,
 		jr,
@@ -38,7 +38,6 @@ func (js *JobServiceV1) Export(ctx context.Context, groupID string, orgID string
 	// TODO: handle Type query param
 	// TODO: handle _since query param
 	// TODO: set requesting IP address
-	// TODO: return a job UUID from the create job func (start job)
 	batch := js.createNewJobBatch(orgID, patientMBIs)
 	jobID, err := js.jr.Insert(ctx, batch)
 	if err != nil {
@@ -49,16 +48,15 @@ func (js *JobServiceV1) Export(ctx context.Context, groupID string, orgID string
 
 func (js *JobServiceV1) createNewJobBatch(orgID string, patientMBIs []string) v1.JobQueueBatch {
 	return v1.JobQueueBatch{
-		nil,
-		orgID,
-		nil,
-		strings.Join(patientMBIs, ","),
-		nil,
-		nil,
-		nil,
-		0,
-		nil,
-		nil,
-		true,
+		JobID:           nil,
+		OrganizationID:  orgID,
+		ProviderID:      nil,
+		PatientMBIs:     strings.Join(patientMBIs, ","),
+		ResourceTypes:   nil,
+		Since:           nil,
+		TransactionTime: nil,
+		SubmitTime:      nil,
+		RequestingIP:    nil,
+		IsBulk:          true,
 	}
 }

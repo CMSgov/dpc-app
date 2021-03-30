@@ -25,11 +25,11 @@ func GroupCtx(next http.Handler) http.Handler {
 
 // GroupService is a struct that defines what the service has
 type GroupService struct {
-	js service.Job
+	js service.JobService
 }
 
 // NewGroupService function that creates a group service and returns its reference
-func NewGroupService(js service.Job) *GroupService {
+func NewGroupService(js service.JobService) *GroupService {
 	return &GroupService{
 		js,
 	}
