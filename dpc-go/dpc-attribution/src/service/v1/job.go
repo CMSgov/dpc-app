@@ -10,6 +10,7 @@ import (
 	"github.com/CMSgov/dpc/attribution/logger"
 	v1 "github.com/CMSgov/dpc/attribution/model/v1"
 	"github.com/CMSgov/dpc/attribution/repository"
+	"github.com/CMSgov/dpc/attribution/service"
 )
 
 // JobServiceV1 is a struct that defines what the service has
@@ -19,7 +20,7 @@ type JobServiceV1 struct {
 }
 
 // NewJobServiceV1 function that creates a job service and returns its reference
-func NewJobServiceV1(pr repository.PatientRepo, jr repository.JobRepo) *JobServiceV1 {
+func NewJobServiceV1(pr repository.PatientRepo, jr repository.JobRepo) service.Job {
 	return &JobServiceV1{
 		pr,
 		jr,
