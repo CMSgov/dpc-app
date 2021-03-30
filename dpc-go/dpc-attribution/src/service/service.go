@@ -1,4 +1,4 @@
-package v2
+package service
 
 import "net/http"
 
@@ -8,4 +8,5 @@ type Service interface {
 	Post(w http.ResponseWriter, r *http.Request)
 	Delete(w http.ResponseWriter, r *http.Request)
 	Put(w http.ResponseWriter, r *http.Request)
+	Export(writer http.ResponseWriter, request *http.Request)
 }

@@ -5,13 +5,15 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/CMSgov/dpc/attribution/logger"
-	"github.com/CMSgov/dpc/attribution/repository"
+	"io/ioutil"
+	"net/http"
+
 	"github.com/darahayes/go-boom"
 	"github.com/go-chi/chi"
 	"go.uber.org/zap"
-	"io/ioutil"
-	"net/http"
+
+	"github.com/CMSgov/dpc/attribution/logger"
+	"github.com/CMSgov/dpc/attribution/repository"
 )
 
 type contextKey int
@@ -146,4 +148,9 @@ func (os *OrganizationService) Put(w http.ResponseWriter, r *http.Request) {
 		log.Error(fmt.Sprintf("Failed to write organization to response for organization"), zap.Error(err))
 		boom.Internal(w, err.Error())
 	}
+}
+
+// Export function is not used for Organizations
+func (os *OrganizationService) Export(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusMethodNotAllowed)
 }

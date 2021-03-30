@@ -4,19 +4,21 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/CMSgov/dpc/attribution/attributiontest"
-	"github.com/CMSgov/dpc/attribution/model"
-	v2 "github.com/CMSgov/dpc/attribution/v2"
-	"github.com/darahayes/go-boom"
-	"github.com/go-chi/chi/middleware"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
-	"github.com/stretchr/testify/suite"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/darahayes/go-boom"
+	"github.com/go-chi/chi/middleware"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/suite"
+
+	"github.com/CMSgov/dpc/attribution/attributiontest"
+	"github.com/CMSgov/dpc/attribution/model/v2"
+	"github.com/CMSgov/dpc/attribution/service"
 )
 
 type MockService struct {
@@ -39,10 +41,14 @@ func (ms *MockService) Put(w http.ResponseWriter, r *http.Request) {
 	ms.Called(w, r)
 }
 
+func (ms *MockService) Export(w http.ResponseWriter, r *http.Request) {
+	ms.Called(w, r)
+}
+
 type RouterTestSuite struct {
 	suite.Suite
-	r       func(os v2.Service) http.Handler
-	fakeOrg *model.Organization
+	r       func(os service.Service, gs service.Service) http.Handler
+	fakeOrg *v2.Organization
 }
 
 func (suite *RouterTestSuite) SetupTest() {
@@ -56,6 +62,7 @@ func TestRouterTestSuite(t *testing.T) {
 
 func (suite *RouterTestSuite) TestOrganizationGetRoute() {
 	mockOrg := new(MockService)
+	mockGroup := new(MockService)
 
 	var capturedRequestId string
 	mockOrg.On("Get", mock.Anything, mock.Anything).Once().Run(func(arg mock.Arguments) {
@@ -66,7 +73,7 @@ func (suite *RouterTestSuite) TestOrganizationGetRoute() {
 		_, _ = w.Write(b)
 	})
 
-	router := suite.r(mockOrg)
+	router := suite.r(mockOrg, mockGroup)
 	ts := httptest.NewServer(router)
 
 	req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/%s", ts.URL, "Organization/1234"), nil)
@@ -95,6 +102,7 @@ func (suite *RouterTestSuite) TestOrganizationGetRoute() {
 
 func (suite *RouterTestSuite) TestOrganizationPostRoute() {
 	mockOrg := new(MockService)
+	mockGroup := new(MockService)
 
 	var capturedRequestId string
 	mockOrg.On("Post", mock.Anything, mock.Anything).Once().Run(func(arg mock.Arguments) {
@@ -105,7 +113,7 @@ func (suite *RouterTestSuite) TestOrganizationPostRoute() {
 		_, _ = w.Write(b)
 	})
 
-	router := suite.r(mockOrg)
+	router := suite.r(mockOrg, mockGroup)
 	ts := httptest.NewServer(router)
 
 	b, _ := json.Marshal(suite.fakeOrg)
@@ -114,7 +122,7 @@ func (suite *RouterTestSuite) TestOrganizationPostRoute() {
 	req.Header.Set(middleware.RequestIDHeader, "54321")
 	res, _ := http.DefaultClient.Do(req)
 	body, _ := ioutil.ReadAll(res.Body)
-	var actual *model.Organization
+	var actual *v2.Organization
 	_ = json.Unmarshal(body, &actual)
 
 	assert.Equal(suite.T(), "application/json; charset=UTF-8", res.Header.Get("Content-Type"))
@@ -140,6 +148,7 @@ func (suite *RouterTestSuite) TestOrganizationPostRoute() {
 
 func (suite *RouterTestSuite) TestOrganizationDeleteRoute() {
 	mockOrg := new(MockService)
+	mockGroup := new(MockService)
 
 	var capturedRequestId string
 	mockOrg.On("Delete", mock.Anything, mock.Anything).Once().Run(func(arg mock.Arguments) {
@@ -149,7 +158,7 @@ func (suite *RouterTestSuite) TestOrganizationDeleteRoute() {
 		w.WriteHeader(http.StatusNoContent)
 	})
 
-	router := suite.r(mockOrg)
+	router := suite.r(mockOrg, mockGroup)
 	ts := httptest.NewServer(router)
 
 	req, _ := http.NewRequest(http.MethodDelete, fmt.Sprintf("%s/%s", ts.URL, "Organization/12345"), nil)
@@ -163,6 +172,7 @@ func (suite *RouterTestSuite) TestOrganizationDeleteRoute() {
 
 func (suite *RouterTestSuite) TestOrganizationPutRoute() {
 	mockOrg := new(MockService)
+	mockGroup := new(MockService)
 
 	var capturedRequestId string
 	mockOrg.On("Put", mock.Anything, mock.Anything).Once().Run(func(arg mock.Arguments) {
@@ -173,7 +183,7 @@ func (suite *RouterTestSuite) TestOrganizationPutRoute() {
 		w.Write(b)
 	})
 
-	router := suite.r(mockOrg)
+	router := suite.r(mockOrg, mockGroup)
 	ts := httptest.NewServer(router)
 
 	req, _ := http.NewRequest(http.MethodPut, fmt.Sprintf("%s/%s", ts.URL, "Organization/12345"), strings.NewReader(attributiontest.Orgjson))
@@ -181,7 +191,7 @@ func (suite *RouterTestSuite) TestOrganizationPutRoute() {
 	res, _ := http.DefaultClient.Do(req)
 
 	body, _ := ioutil.ReadAll(res.Body)
-	var actual *model.Organization
+	var actual *v2.Organization
 	_ = json.Unmarshal(body, &actual)
 
 	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)

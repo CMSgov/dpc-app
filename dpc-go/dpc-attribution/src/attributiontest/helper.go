@@ -2,7 +2,9 @@ package attributiontest
 
 import (
 	"encoding/json"
-	"github.com/CMSgov/dpc/attribution/model"
+
+	"github.com/CMSgov/dpc/attribution/model/v2"
+
 	"github.com/bxcodec/faker"
 )
 
@@ -50,10 +52,10 @@ const Orgjson = `{
   }`
 
 // OrgResponse provides a sample response that mimics what attribution service returns for testing purposes
-func OrgResponse() *model.Organization {
-	o := model.Organization{}
+func OrgResponse() *v2.Organization {
+	o := v2.Organization{}
 	_ = faker.FakeData(&o)
-	var i model.Info
+	var i v2.Info
 	_ = json.Unmarshal([]byte(Orgjson), &i)
 	o.Info = i
 	return &o

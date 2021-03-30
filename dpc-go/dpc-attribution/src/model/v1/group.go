@@ -1,4 +1,4 @@
-package model
+package v1
 
 import (
 	uuid "github.com/jackc/pgx/pgtype/ext/gofrs-uuid"
@@ -8,5 +8,5 @@ import (
 type Group struct {
 	ID             uuid.UUID `db:"id" json:"id"`
 	ProviderID     string    `db:"provider_id" json:"provider_id"`
-	OrganizationID uuid.UUID `db:"organization_id" json:"organization_id"`
+	OrganizationID string    `db:"organization_id" json:"organization_id"`
 }

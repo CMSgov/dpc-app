@@ -1,4 +1,4 @@
-package model
+package v1
 
 import (
 	uuid "github.com/jackc/pgx/pgtype/ext/gofrs-uuid"

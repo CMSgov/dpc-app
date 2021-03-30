@@ -3,13 +3,16 @@ package main
 import (
 	"context"
 	"fmt"
+	"net/http"
+
+	"go.uber.org/zap"
+
 	"github.com/CMSgov/dpc/attribution/conf"
 	"github.com/CMSgov/dpc/attribution/logger"
 	"github.com/CMSgov/dpc/attribution/repository"
 	"github.com/CMSgov/dpc/attribution/router"
-	v2 "github.com/CMSgov/dpc/attribution/v2"
-	"go.uber.org/zap"
-	"net/http"
+	v1 "github.com/CMSgov/dpc/attribution/service/v1"
+	v2 "github.com/CMSgov/dpc/attribution/service/v2"
 )
 
 func main() {
@@ -37,10 +40,10 @@ func main() {
 	or := repository.NewOrganizationRepo(db)
 	os := v2.NewOrganizationService(or)
 
-	gr := repository.NewGroupRepo(attrDbV1)
 	pr := repository.NewPatientRepo(attrDbV1)
 	jr := repository.NewJobRepo(queueDbV1)
-	gs := v2.NewGroupService(gr, pr, jr)
+	js := v1.NewJobServiceV1(pr, jr)
+	gs := v2.NewGroupService(js)
 
 	attributionRouter := router.NewDPCAttributionRouter(os, gs)
 

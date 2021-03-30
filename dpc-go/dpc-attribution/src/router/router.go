@@ -1,16 +1,18 @@
 package router
 
 import (
-	"github.com/go-chi/chi"
-	"github.com/go-chi/chi/middleware"
 	"net/http"
 
+	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/middleware"
+
 	middleware2 "github.com/CMSgov/dpc/attribution/middleware"
-	v2 "github.com/CMSgov/dpc/attribution/v2"
+	"github.com/CMSgov/dpc/attribution/service"
+	v2 "github.com/CMSgov/dpc/attribution/service/v2"
 )
 
 // NewDPCAttributionRouter function to build the attribution router
-func NewDPCAttributionRouter(o v2.Service, g *v2.GroupService) http.Handler {
+func NewDPCAttributionRouter(o service.Service, g service.Service) http.Handler {
 	r := chi.NewRouter()
 	r.Use(middleware2.Logging())
 	r.Use(middleware.SetHeader("Content-Type", "application/json; charset=UTF-8"))
@@ -27,7 +29,6 @@ func NewDPCAttributionRouter(o v2.Service, g *v2.GroupService) http.Handler {
 		})
 		r.Route("/Group", func(r chi.Router) {
 			r.Use(v2.GroupCtx)
-			r.Get("/{groupID}", g.Get)
 			r.Get("/$export", g.Export)
 		})
 	})
