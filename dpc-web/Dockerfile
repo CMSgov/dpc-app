@@ -10,7 +10,7 @@ COPY / /dpc-app
 RUN make ig/publish
 
 
-FROM ruby:2.7.1-alpine AS ruby_builder
+FROM ruby:2.7.2-alpine AS ruby_builder
 
 # Install build dependencies
 RUN apk add --no-cache postgresql-dev && \
