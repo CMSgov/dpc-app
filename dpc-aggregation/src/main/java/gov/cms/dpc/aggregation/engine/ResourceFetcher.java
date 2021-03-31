@@ -243,12 +243,12 @@ class ResourceFetcher {
         if (bundle.getMeta() == null || bundle.getMeta().getLastUpdated() == null) return;
         final var bfdTransactionTime = bundle.getMeta().getLastUpdated().toInstant().atOffset(ZoneOffset.UTC);
         if (bfdTransactionTime.isBefore(transactionTime)) {
-           // See BFD's RFC0004 for a discussion on why this type error may occur.
-           // Note: Retrying the job after a delay may fix this problem.
-            logger.error("Failing the job for a BFD transaction time regression: BFD time {}, Job time {}",
+            // See BFD's RFC0004 for a discussion on why this type error may occur.
+            // Note: Retrying the job after a delay may fix this problem.
+            // monthly jira ticket reminder to check the progress of BFD time regression
+            logger.error("BFD transaction time regression found: BFD time {}, Job time {}",
                     bfdTransactionTime,
                     transactionTime);
-            throw new JobQueueFailure("BFD's transaction time regression");
         }
     }
 }
