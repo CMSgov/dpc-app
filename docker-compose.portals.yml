@@ -22,7 +22,7 @@ services:
       dockerfile: dpc-web/Dockerfile
     image: dpc-web:latest
     volumes:
-      - "./coverage:/dpc-web/coverage"
+      - "./dpc-web/coverage:/dpc-web/coverage"
       - ./tmp/letter_opener/web:/dpc-web/tmp/letter_opener
 
     environment:
@@ -62,7 +62,7 @@ services:
       dockerfile: dpc-admin/Dockerfile
     image: dpc-admin:latest
     volumes:
-      - "./coverage:/dpc-admin/coverage"
+      - "./dpc-admin/coverage:/dpc-admin/coverage"
       - ./tmp/letter_opener/admin:/dpc-admin/tmp/letter_opener
     environment:
       - REDIS_URL=redis://redis
