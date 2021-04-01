@@ -78,24 +78,25 @@ public class JobResourceTest {
     public void testRunningJob() {
         final var organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
         final var orgID = FHIRExtractors.getEntityUUID(organizationPrincipal.getOrganization().getId());
-        final var queue = new MemoryBatchQueue(100);
+        final var queue = new MemoryBatchQueue(1);
 
         // Setup a running job
         final var jobID = queue.createJob(orgID,
                 TEST_PROVIDER_ID,
-                List.of(TEST_PATIENT_ID, TEST_PATIENT_ID),
+                List.of(TEST_PATIENT_ID, TEST_PATIENT_ID, TEST_PATIENT_ID),
                 JobQueueBatch.validResourceTypes,
                 null,
                 OffsetDateTime.now(ZoneOffset.UTC), null, true);
         final var runningJob = queue.claimBatch(AGGREGATOR_ID);
         runningJob.get().fetchNextPatient(AGGREGATOR_ID);
         queue.completePartialBatch(runningJob.get(), AGGREGATOR_ID);
+        queue.completeBatch(runningJob.get(), AGGREGATOR_ID);
 
         // Test the response
         final var resource = new JobResource(queue, TEST_BASEURL);
         final Response response = resource.checkJobStatus(organizationPrincipal, jobID.toString());
         assertAll(() -> assertEquals(HttpStatus.ACCEPTED_202, response.getStatus()),
-                () -> assertEquals("RUNNING: 50.00%", response.getHeaderString("X-Progress")));
+                () -> assertEquals("RUNNING: 33.33%", response.getHeaderString("X-Progress")));
     }
 
     /**

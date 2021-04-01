@@ -34,7 +34,6 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
@@ -126,18 +125,13 @@ public class JobResource extends AbstractJobResource {
     private Response.ResponseBuilder buildJobStatusInProgress(Response.ResponseBuilder builder, List<JobQueueBatch> batches, Set<JobStatus> jobStatusSet) {
         String progress = "QUEUED: 0.00%";
 
-        if (jobStatusSet.contains(JobStatus.RUNNING)) {
-            AtomicInteger done = new AtomicInteger();
-            AtomicInteger total = new AtomicInteger();
-            batches.forEach(batch -> {
-                batch.getPatientIndex().ifPresent(value -> done.addAndGet(value + 1));
-                total.addAndGet(batch.getPatients().size());
-            });
-            progress = String.format("RUNNING: %.2f%%", total.get() > 0 ? (done.get() * 100.0f) / total.get() : 0f);
+        if (jobStatusSet.contains(JobStatus.RUNNING) || jobStatusSet.contains(JobStatus.COMPLETED)) {
+            final int processedPatients = batches.stream().mapToInt(b -> b.getPatientsProcessed()).sum();
+            final int totalPatients = batches.stream().mapToInt(b -> b.getPatients().size()).sum();
+            progress = String.format("RUNNING: %.2f%%", totalPatients > 0 ? (processedPatients * 100.0f) / totalPatients : 0f);
         }
 
-        return builder.header("X-Progress", progress)
-                .status(HttpStatus.ACCEPTED_202);
+        return builder.header("X-Progress", progress).status(HttpStatus.ACCEPTED_202);
     }
 
     /**
