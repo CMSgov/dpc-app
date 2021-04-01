@@ -531,7 +531,7 @@
 }</style>
 </head>
   <body>
-      <table border="0" height="100%" id="bodyTable">
+      <table border="0" height="100%" id="bodyTable" aria-label="Table Body">
         <tr>
           <td id="bodyCell">
             <!-- BEGIN TEMPLATE // -->
@@ -541,14 +541,14 @@
             <td style="width:600px;">
             <![endif]-->
             <table border="0" class="templateContainer">
-              <th>
+              <tr>
                 <td id="templatePreheader"><table border="0" class="mcnTextBlock" style="min-width:100%;">
                   <tbody class="mcnTextBlockOuter">
-                    <th>
+                    <tr>
                       <td class="mcnTextBlockInner" style="padding-top:9px;">
                         <!--[if mso]>
                         <table border="0" style="width:100%;">
-                        <th>
+                        <tr>
                         <![endif]-->
 
                         <!--[if mso]>
@@ -559,33 +559,33 @@
                         <![endif]-->
 
                         <!--[if mso]>
-                        </th>
+                        </tr>
                         </table>
                         <![endif]-->
                       </td>
-                    </th>
+                    </tr>
                   </tbody>
                 </table>
               </td>
-            </th>
+            </tr>
             <tr>
               <td id="templateHeader"><table border="0" class="mcnImageBlock" style="min-width:100%;">
                 <tbody class="mcnImageBlockOuter">
-                  <th>
+                  <tr>
                     <td style="padding:0px" class="mcnImageBlockInner">
                       <table border="0" class="mcnImageContentContainer" style="min-width:100%;">
                         <tbody>
-                          <th>
+                          <tr>
                             <td class="mcnImageContent" style="padding-right: 0px; padding-left: 0px; padding-top: 0; padding-bottom: 0; text-align:center;">
                               <a href="https://dpc.cms.gov/" rel="noopener noreferrer" title="" class="" target="_blank">
                                   <%= image_tag("mailer-header.png", alt: "", :align => "center", :width => "600", :style => "max-width:1200px; padding-bottom: 0; display: inline !important; vertical-align: bottom;", :class => "mcnImage") %>
                               </a>
                             </td>
-                         </th>
+                         </tr>
                        </tbody>
                      </table>
                     </td>
-                  </th>
+                  </tr>
                 </tbody>
               </table>
             </td>
@@ -662,10 +662,6 @@
                         </tr>
                       </tbody>
                     </table>
-                    <!--
-                    <td class="mcnDividerBlockInner" style="padding: 18px;">
-                    <hr class="mcnDividerContent" style="border-bottom-color:none; border-left-color:none; border-right-color:none; border-bottom-width:0; border-left-width:0; border-right-width:0; margin-top:0; margin-right:0; margin-bottom:0; margin-left:0;" />
-                    -->
                   </td>
                 </tr>
               </tbody>
