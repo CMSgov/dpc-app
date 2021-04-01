@@ -15,7 +15,6 @@ class RegisteredOrganization < ApplicationRecord
 
   validates :organization, presence: true
 
-  # TODO: refactor how this is saved
   def fhir_endpoint_id
     return unless api_endpoint_ref
 
