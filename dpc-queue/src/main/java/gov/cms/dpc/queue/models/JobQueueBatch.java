@@ -447,6 +447,16 @@ public class JobQueueBatch implements Serializable {
         }
     }
 
+    /**
+     * Retrieve the number of patients that have been processed.
+     */
+    public int getPatientsProcessed() {
+        if(JobStatus.COMPLETED.equals(status)){
+            return getPatients() == null ? 0 : getPatients().size();
+        }
+        return getPatientIndex().orElse(-1)+1;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
