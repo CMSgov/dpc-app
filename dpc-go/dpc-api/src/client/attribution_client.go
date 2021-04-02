@@ -3,14 +3,18 @@ package client
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
+	"net/http"
+
 	"github.com/CMSgov/dpc/api/logger"
 	middleware2 "github.com/CMSgov/dpc/api/middleware"
 	"github.com/go-chi/chi/middleware"
+
+	// "github.com/CMSgov/dpc/api/middleware"
+
 	"github.com/hashicorp/go-retryablehttp"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
-	"io/ioutil"
-	"net/http"
 )
 
 // AttributionConfig is a struct to hold configuration info for retryablehttp client
