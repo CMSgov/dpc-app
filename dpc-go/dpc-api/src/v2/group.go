@@ -65,7 +65,7 @@ func isValidGroup(group []byte) error {
 	}
 
 	for _, m := range groupStruct.Member {
-		pracRef := findPractitionerExtension(m)
+		pracRef := findPractitionerRef(m)
 		if pracRef == nil ||
 			pracRef.Identifier == nil ||
 			*pracRef.Type != "Practitioner" {
@@ -78,11 +78,12 @@ func isValidGroup(group []byte) error {
 			return errors.New("Should contain a patient identifier")
 		}
 	}
-
 	return nil
 }
 
-func findPractitionerExtension(member model.GroupMember) *fhir.Reference {
+// at this point there should only be one extension because of fhir_filter,
+// but going to leave this in to still search the extensions
+func findPractitionerRef(member model.GroupMember) *fhir.Reference {
 	for _, e := range member.Extension {
 		vr := e.ValueReference
 		if vr != nil && vr.Type != nil && *vr.Type == "Practitioner" {

@@ -197,6 +197,47 @@ const Groupjson = `
   ]
 }`
 
+// FilteredGroupjson is a group json string for testing purposes
+const FilteredGroupjson = `
+{
+  "resourceType": "Group",
+  "type": "person",
+  "actual": true,
+  "name": "Test Group 3",
+  "managingEntity": {
+    "reference": "Organization/1",
+    "display": "Healthcare related organization"
+  },
+  "member": [
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/us/davinci-atr/StructureDefinition/ext-attributedProvider",
+          "valueReference": {
+            "type": "Practitioner",
+            "identifier": {
+                "system": "http://hl7.org/fhir/sid/us-npi",
+                "value": "9941339108"
+            }
+          }
+        }
+      ],
+      "entity": {
+        "type": "Patient",
+        "identifier": {
+            "value": "2SW4N00AA00",
+            "system": "http://hl7.org/fhir/sid/us-mbi"
+        }
+      },
+      "period": {
+        "start": "2014-10-08",
+        "end": "2020-10-08"
+      },
+      "inactive": false
+    }
+  ]
+}`
+
 // AttributionOrgResponse provides a sample organization response that mimics what attribution service returns for testing purposes
 func AttributionOrgResponse() []byte {
 	return AttributionResponse(Orgjson)

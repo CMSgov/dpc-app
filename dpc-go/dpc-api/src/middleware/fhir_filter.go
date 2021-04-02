@@ -51,5 +51,23 @@ func filterGroup(body []byte) ([]byte, error) {
 	if err := json.Unmarshal(body, &group); err != nil {
 		return nil, err
 	}
+	for i := range group.Member {
+		prac := findPracExtension(group.Member[i])
+		if prac != nil {
+			group.Member[i].Extension = []model.Extension{*prac}
+		} else {
+			group.Member[i].Extension = make([]model.Extension, 0)
+		}
+	}
 	return json.Marshal(group)
+}
+
+func findPracExtension(member model.GroupMember) *model.Extension {
+	for _, e := range member.Extension {
+		vr := e.ValueReference
+		if vr != nil && vr.Type != nil && *vr.Type == "Practitioner" {
+			return &e
+		}
+	}
+	return nil
 }

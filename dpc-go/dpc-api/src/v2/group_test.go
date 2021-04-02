@@ -106,10 +106,10 @@ func (suite *GroupControllerTestSuite) TestCreateGroupBadJson() {
 }
 
 func (suite *GroupControllerTestSuite) TestCreateGroup() {
-	suite.mac.On("Post", mock.Anything, mock.Anything, mock.Anything).Return(apitest.AttributionResponse(apitest.Groupjson), nil)
+	suite.mac.On("Post", mock.Anything, mock.Anything, mock.Anything).Return(apitest.AttributionResponse(apitest.FilteredGroupjson), nil)
 
 	ja := jsonassert.New(suite.T())
-	req := httptest.NewRequest(http.MethodPost, "http://example.com/foo", strings.NewReader(apitest.Groupjson))
+	req := httptest.NewRequest(http.MethodPost, "http://example.com/foo", strings.NewReader(apitest.FilteredGroupjson))
 
 	w := httptest.NewRecorder()
 	suite.grp.Create(w, req)
@@ -119,7 +119,7 @@ func (suite *GroupControllerTestSuite) TestCreateGroup() {
 	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
 
 	resp, _ := ioutil.ReadAll(res.Body)
-	ja.Assertf(string(resp), string(apitest.AttributionResponse(apitest.Groupjson)))
+	ja.Assertf(string(resp), string(apitest.AttributionResponse(apitest.FilteredGroupjson)))
 
 	req = httptest.NewRequest(http.MethodPost, "http://example.com/foo", bytes.NewReader(apitest.MalformedOrg()))
 

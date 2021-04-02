@@ -44,6 +44,7 @@ func (suite *FHIRFilterTestSuite) TestFilteringGroup() {
 	assert.NotNil(suite.T(), p.Name)
 	for _, m := range p.Member {
 		assert.NotNil(suite.T(), m.Extension)
+		assert.Len(suite.T(), m.Extension, 1)
 		assert.NotNil(suite.T(), m.Entity)
 		assert.NotNil(suite.T(), m.Period)
 		assert.NotNil(suite.T(), m.Inactive)
