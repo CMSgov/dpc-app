@@ -1,10 +1,12 @@
 package router
 
 import (
-	middleware2 "github.com/CMSgov/dpc/api/middleware"
-	"github.com/CMSgov/dpc/api/v2"
-	"github.com/go-chi/chi/middleware"
 	"net/http"
+
+	"github.com/CMSgov/dpc/api/auth"
+	middleware2 "github.com/CMSgov/dpc/api/middleware"
+	v2 "github.com/CMSgov/dpc/api/v2"
+	"github.com/go-chi/chi/middleware"
 
 	"github.com/go-chi/chi"
 )
@@ -26,6 +28,7 @@ func NewDPCAPIRouter(oc v2.Controller, mc v2.ReadController) http.Handler {
 			r.With(middleware2.FHIRFilter, middleware2.FHIRModel).Post("/", oc.Create)
 		})
 	})
-
+	r.Post("/auth/token", auth.GetAuthToken)
+	r.Get("/auth/welcome", auth.Welcome)
 	return r
 }
