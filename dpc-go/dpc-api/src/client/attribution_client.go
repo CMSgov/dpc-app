@@ -69,7 +69,9 @@ func (ac *AttributionClient) Get(ctx context.Context, resourceType ResourceType,
 	}
 
 	req.Header.Add(middleware.RequestIDHeader, ctx.Value(middleware.RequestIDKey).(string))
-	req.Header.Add(middleware2.OrgHeader, ctx.Value(middleware2.ContextKeyOrganization).(string))
+	if ctx.Value(middleware2.ContextKeyOrganization) != nil {
+		req.Header.Add(middleware2.OrgHeader, ctx.Value(middleware2.ContextKeyOrganization).(string))
+	}
 	resp, err := ac.httpClient.Do(req)
 	if err != nil {
 		log.Error("Failed to send request", zap.Error(err))
@@ -108,7 +110,9 @@ func (ac *AttributionClient) Post(ctx context.Context, resourceType ResourceType
 	}
 
 	req.Header.Add(middleware.RequestIDHeader, ctx.Value(middleware.RequestIDKey).(string))
-	req.Header.Add(middleware2.OrgHeader, ctx.Value(middleware2.ContextKeyOrganization).(string))
+	if ctx.Value(middleware2.ContextKeyOrganization) != nil {
+		req.Header.Add(middleware2.OrgHeader, ctx.Value(middleware2.ContextKeyOrganization).(string))
+	}
 	resp, err := ac.httpClient.Do(req)
 	if err != nil {
 		log.Error("Failed to send request", zap.Error(err))
@@ -147,7 +151,9 @@ func (ac *AttributionClient) Delete(ctx context.Context, resourceType ResourceTy
 	}
 
 	req.Header.Add(middleware.RequestIDHeader, ctx.Value(middleware.RequestIDKey).(string))
-	req.Header.Add(middleware2.OrgHeader, ctx.Value(middleware2.ContextKeyOrganization).(string))
+	if ctx.Value(middleware2.ContextKeyOrganization) != nil {
+		req.Header.Add(middleware2.OrgHeader, ctx.Value(middleware2.ContextKeyOrganization).(string))
+	}
 	resp, err := ac.httpClient.Do(req)
 	if err != nil {
 		log.Error("Failed to send request", zap.Error(err))
@@ -181,7 +187,9 @@ func (ac *AttributionClient) Put(ctx context.Context, resourceType ResourceType,
 	}
 
 	req.Header.Add(middleware.RequestIDHeader, ctx.Value(middleware.RequestIDKey).(string))
-	req.Header.Add(middleware2.OrgHeader, ctx.Value(middleware2.ContextKeyOrganization).(string))
+	if ctx.Value(middleware2.ContextKeyOrganization) != nil {
+		req.Header.Add(middleware2.OrgHeader, ctx.Value(middleware2.ContextKeyOrganization).(string))
+	}
 	resp, err := ac.httpClient.Do(req)
 	if err != nil {
 		log.Error("Failed to send request", zap.Error(err))
