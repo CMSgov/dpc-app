@@ -10,6 +10,18 @@ module Internal
       'ds-c-vertical-nav__label--current'
     end
 
+    def internal_orgs
+      'internal/organizations'
+    end
+
+    def internal_users
+      'internal/users'
+    end
+
+    def internal_tags
+      'internal/tags'
+    end
+
     def internal_users_header(count)
       user_type = if unassigned_provider_users_page?
                     ' unassigned provider'
@@ -45,55 +57,55 @@ module Internal
     end
 
     def users_page?
-      current_page?(controller: 'internal/users')
+      current_page?(controller: internal_users)
     end
 
     def provider_users_page?
-      current_page?(controller: 'internal/users', org_type: 'provider')
+      current_page?(controller: internal_users, org_type: 'provider')
     end
 
     def vendor_users_page?
-      current_page?(controller: 'internal/users', org_type: 'vendor')
+      current_page?(controller: internal_users, org_type: 'vendor')
     end
 
     def organizations_page?
-      current_page?(controller: 'internal/organizations')
+      current_page?(controller: internal_orgs)
     end
 
     def tags_page?
-      current_page?(controller: 'internal/tags')
+      current_page?(controller: internal_tags)
     end
 
     def all_users_page?
-      current_page?(controller: 'internal/users', org_type: 'all')
+      current_page?(controller: internal_users, org_type: 'all')
     end
 
     def unassigned_vendor_users_page?
-      current_page?(controller: 'internal/users', org_type: 'vendor', org_status: 'unassigned')
+      current_page?(controller: internal_users, org_type: 'vendor', org_status: 'unassigned')
     end
 
     def assigned_vendor_users_page?
-      current_page?(controller: 'internal/users', org_type: 'vendor', org_status: 'assigned')
+      current_page?(controller: internal_users, org_type: 'vendor', org_status: 'assigned')
     end
 
     def unassigned_provider_users_page?
-      current_page?(controller: 'internal/users', org_type: 'provider', org_status: 'unassigned')
+      current_page?(controller: internal_users, org_type: 'provider', org_status: 'unassigned')
     end
 
     def assigned_provider_users_page?
-      current_page?(controller: 'internal/users', org_type: 'provider', org_status: 'assigned')
+      current_page?(controller: internal_users, org_type: 'provider', org_status: 'assigned')
     end
 
     def all_organizations_page?
-      current_page?(controller: 'internal/organizations', org_type: 'all')
+      current_page?(controller: internal_orgs, org_type: 'all')
     end
 
     def vendor_organizations_page?
-      current_page?(controller: 'internal/organizations', org_type: 'vendor')
+      current_page?(controller: internal_orgs, org_type: 'vendor')
     end
 
     def provider_organizations_page?
-      current_page?(controller: 'internal/organizations', org_type: 'provider')
+      current_page?(controller: internal_orgs, org_type: 'provider')
     end
   end
 end

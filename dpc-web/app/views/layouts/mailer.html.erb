@@ -1,5 +1,5 @@
 <!doctype html>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
     <head>
         <!-- NAME: 1 COLUMN -->
         <!--[if gte mso 15]>
@@ -16,12 +16,20 @@
         <title>Data at the Point of Care</title>
 
     <style type="text/css">
+    body{
+      margin: 0 auto;
+      height:100%;
+      padding:0;
+      width:100%;
+    }
     p{
       margin:10px 0;
       padding:0;
     }
     table{
       border-collapse:collapse;
+      mso-table-lspace:0pt;
+      mso-table-rspace:0pt;
     }
     h1,h2,h3,h4,h5,h6{
       display:block;
@@ -34,11 +42,12 @@
       outline:none;
       text-decoration:none;
     }
-    body,#bodyTable,#bodyCell{
+    #bodyTable {
       height:100%;
-      margin:0;
+      margin:0 auto;
       padding:0;
       width:100%;
+      background-color:#FAFAFA;
     }
     .mcnPreviewText{
       display:none !important;
@@ -48,10 +57,6 @@
     }
     img{
       -ms-interpolation-mode:bicubic;
-    }
-    table{
-      mso-table-lspace:0pt;
-      mso-table-rspace:0pt;
     }
     .ReadMsgBody{
       width:100%;
@@ -83,10 +88,15 @@
       line-height:inherit !important;
     }
     #bodyCell{
+      height:100%;
+      margin:0 auto;
+      width:100%;
       padding:10px;
     }
     .templateContainer{
       max-width:600px !important;
+      margin: 0 auto;
+      /*@editable*/border:0;
     }
     a.mcnButton{
       display:block;
@@ -104,38 +114,11 @@
       table-layout:fixed !important;
     }
   /*
-  @tab Page
-  @section Background Style
-  @tip Set the background color and top border for your email. You may want to choose colors that match your company's branding.
-  */
-    body,#bodyTable{
-      /*@editable*/background-color:#FAFAFA;
-    }
-  /*
-  @tab Page
-  @section Background Style
-  @tip Set the background color and top border for your email. You may want to choose colors that match your company's branding.
-  */
-    #bodyCell{
-      /*@editable*/border-top:0;
-    }
-  /*
-  @tab Page
-  @section Email Border
-  @tip Set the border for your email.
-  */
-    .templateContainer{
-      /*@editable*/border:0;
-    }
-  /*
-  @tab Page
-  @section Heading 1
-  @tip Set the styling for all first-level headings in your emails. These should be the largest of your headings.
   @style heading 1
   */
     h1{
       /*@editable*/color:#202020;
-      /*@editable*/font-family:Helvetica;
+      /*@editable*/font-family: Arial, Helvetica, sans-serif;
       /*@editable*/font-size:26px;
       /*@editable*/font-style:normal;
       /*@editable*/font-weight:bold;
@@ -151,7 +134,7 @@
   */
     h2{
       /*@editable*/color:#202020;
-      /*@editable*/font-family:Helvetica;
+      /*@editable*/font-family: Arial, Helvetica, sans-serif;
       /*@editable*/font-size:22px;
       /*@editable*/font-style:normal;
       /*@editable*/font-weight:bold;
@@ -167,7 +150,7 @@
   */
     h3{
       /*@editable*/color:#202020;
-      /*@editable*/font-family:Helvetica;
+      /*@editable*/font-family: Arial, Helvetica, sans-serif;
       /*@editable*/font-size:20px;
       /*@editable*/font-style:normal;
       /*@editable*/font-weight:bold;
@@ -183,7 +166,7 @@
   */
     h4{
       /*@editable*/color:#202020;
-      /*@editable*/font-family:Helvetica;
+      /*@editable*/font-family: Arial, Helvetica, sans-serif;
       /*@editable*/font-size:18px;
       /*@editable*/font-style:normal;
       /*@editable*/font-weight:bold;
@@ -214,7 +197,7 @@
   */
     #templatePreheader .mcnTextContent,#templatePreheader .mcnTextContent p{
       /*@editable*/color:#656565;
-      /*@editable*/font-family:Helvetica;
+      /*@editable*/font-family:Arial, Helvetica, sans-serif;
       /*@editable*/font-size:10px;
       /*@editable*/line-height:100%;
       /*@editable*/text-align:left;
@@ -252,7 +235,7 @@
   */
     #templateHeader .mcnTextContent,#templateHeader .mcnTextContent p{
       /*@editable*/color:#393939;
-      /*@editable*/font-family:Helvetica;
+      /*@editable*/font-family: Arial, Helvetica, sans-serif;
       /*@editable*/font-size:16px;
       /*@editable*/line-height:150%;
       /*@editable*/text-align:left;
@@ -290,7 +273,7 @@
   */
     #templateBody .mcnTextContent,#templateBody .mcnTextContent p{
       /*@editable*/color:#393939;
-      /*@editable*/font-family:Helvetica;
+      /*@editable*/font-family: Arial, Helvetica, sans-serif;
       /*@editable*/font-size:16px;
       /*@editable*/line-height:150%;
       /*@editable*/text-align:left;
@@ -328,7 +311,7 @@
   */
     #templateFooter .mcnTextContent,#templateFooter .mcnTextContent p{
       /*@editable*/color:#b9d8dc;
-      /*@editable*/font-family:Helvetica;
+      /*@editable*/font-family: Arial, Helvetica, sans-serif;
       /*@editable*/font-size:12px;
       /*@editable*/line-height:150%;
       /*@editable*/text-align:center;
@@ -548,29 +531,28 @@
 }</style>
 </head>
   <body>
-    <center>
-      <table align="center" border="0" cellpadding="0" cellspacing="0" height="100%" width="100%" id="bodyTable">
+      <table border="0" height="100%" id="bodyTable" aria-label="Table Body">
         <tr>
-          <td align="center" valign="top" id="bodyCell">
+          <td id="bodyCell">
             <!-- BEGIN TEMPLATE // -->
             <!--[if (gte mso 9)|(IE)]>
-            <table align="center" border="0" cellspacing="0" cellpadding="0" width="600" style="width:600px;">
+            <table border="0" style="width:600px;">
             <tr>
-            <td align="center" valign="top" width="600" style="width:600px;">
+            <td style="width:600px;">
             <![endif]-->
-            <table border="0" cellpadding="0" cellspacing="0" width="100%" class="templateContainer">
+            <table border="0" class="templateContainer">
               <tr>
-                <td valign="top" id="templatePreheader"><table border="0" cellpadding="0" cellspacing="0" width="100%" class="mcnTextBlock" style="min-width:100%;">
+                <td id="templatePreheader"><table border="0" class="mcnTextBlock" style="min-width:100%;">
                   <tbody class="mcnTextBlockOuter">
                     <tr>
-                      <td valign="top" class="mcnTextBlockInner" style="padding-top:9px;">
+                      <td class="mcnTextBlockInner" style="padding-top:9px;">
                         <!--[if mso]>
-                        <table align="left" border="0" cellspacing="0" cellpadding="0" width="100%" style="width:100%;">
+                        <table border="0" style="width:100%;">
                         <tr>
                         <![endif]-->
 
                         <!--[if mso]>
-                        <td valign="top" width="600" style="width:600px;">
+                        <td style="width:600px;">
                         <![endif]-->
                         <!--[if mso]>
                         </td>
@@ -587,15 +569,15 @@
               </td>
             </tr>
             <tr>
-              <td valign="top" id="templateHeader"><table border="0" cellpadding="0" cellspacing="0" width="100%" class="mcnImageBlock" style="min-width:100%;">
+              <td id="templateHeader"><table border="0" class="mcnImageBlock" style="min-width:100%;" aria-label="Main Content">
                 <tbody class="mcnImageBlockOuter">
                   <tr>
-                    <td valign="top" style="padding:0px" class="mcnImageBlockInner">
-                      <table align="left" width="100%" border="0" cellpadding="0" cellspacing="0" class="mcnImageContentContainer" style="min-width:100%;">
+                    <td style="padding:0px" class="mcnImageBlockInner">
+                      <table border="0" class="mcnImageContentContainer" style="min-width:100%;" aria-label="Banner link to Data at the Point of Care's website">
                         <tbody>
                           <tr>
-                            <td class="mcnImageContent" valign="top" style="padding-right: 0px; padding-left: 0px; padding-top: 0; padding-bottom: 0; text-align:center;">
-                              <a href="https://dpc.cms.gov/" rel="noopener noreferrer" title="" class="" target="_blank">
+                            <td class="mcnImageContent" style="padding-right: 0px; padding-left: 0px; padding-top: 0; padding-bottom: 0; text-align:center;">
+                              <a href="https://dpc.cms.gov/" rel="noopener noreferrer" title="Link to DPC Website" class="" target="_blank">
                                   <%= image_tag("mailer-header.png", alt: "", :align => "center", :width => "600", :style => "max-width:1200px; padding-bottom: 0; display: inline !important; vertical-align: bottom;", :class => "mcnImage") %>
                               </a>
                             </td>
@@ -609,27 +591,27 @@
             </td>
           </tr>
           <tr>
-            <td valign="top" id="templateBody" style="padding: 18px; font-family: 'Helvetica Neue', Helvetica, Arial; line-height: 1.5;">
+            <td id="templateBody" style="padding: 18px; font-family: sans-serif, 'Helvetica Neue', Helvetica, Arial; line-height: 1.5;">
               <%= yield %>
             </td>
           </tr>
           <tr>
-            <td valign="top" id="templateFooter"><table border="0" cellpadding="0" cellspacing="0" width="100%" class="mcnTextBlock" style="min-width:100%;">
+            <td id="templateFooter"><table border="0" class="mcnTextBlock" style="min-width:100%;">
               <tbody class="mcnTextBlockOuter">
                 <tr>
-                  <td valign="top" class="mcnTextBlockInner" style="padding-top:9px;">
+                  <td class="mcnTextBlockInner" style="padding-top:9px;">
                     <!--[if mso]>
-                    <table align="left" border="0" cellspacing="0" cellpadding="0" width="100%" style="width:100%;">
+                    <table border="0" style="width:100%;">
                     <tr>
                     <![endif]-->
 
                     <!--[if mso]>
-                    <td valign="top" width="300" style="width:300px;">
+                    <td style="width:300px;">
                     <![endif]-->
-                    <table align="left" border="0" cellpadding="0" cellspacing="0" style="max-width:300px;" width="100%" class="mcnTextContentContainer">
+                    <table border="0" style="max-width:300px;" class="mcnTextContentContainer">
                       <tbody>
                         <tr>
-                          <td valign="top" class="mcnTextContent" style="padding-top:0; padding-left:18px; padding-bottom:9px; padding-right:18px;">
+                          <td class="mcnTextContent" style="padding-top:0; padding-left:18px; padding-bottom:9px; padding-right:18px;">
                             <a href="https://groups.google.com/forum/#!forum/dpc-api">
                               <%= image_tag("mailer-google-group.png", alt: "", :height => "60", :width => "60", :style => "border: 0px; width: 60px; height: 60px; margin: 10px 0px 0px;") %>
                             </a><br>Google Group
@@ -642,12 +624,12 @@
                     <![endif]-->
 
                     <!--[if mso]>
-                    <td valign="top" width="300" style="width:300px;">
+                    <td style="width:300px;">
                     <![endif]-->
-                    <table align="left" border="0" cellpadding="0" cellspacing="0" style="max-width:300px;" width="100%" class="mcnTextContentContainer">
+                    <table border="0" style="max-width:300px;" class="mcnTextContentContainer">
                       <tbody>
                         <tr>
-                          <td valign="top" class="mcnTextContent" style="padding-top:0; padding-left:18px; padding-bottom:9px; padding-right:18px;">
+                          <td class="mcnTextContent" style="padding-top:0; padding-left:18px; padding-bottom:9px; padding-right:18px;">
                             <a href="https://dpc.cms.gov/">
                               <%= image_tag("mailer-website.png", alt: "", :height => "60", :width => "60", :style => "border: 0px; width: 60px; height: 60px; margin: 10px 0px 0px;") %></a>
                               <br>DPC Website
@@ -667,11 +649,11 @@
                 </tr>
               </tbody>
             </table>
-            <table border="0" cellpadding="0" cellspacing="0" width="100%" class="mcnDividerBlock" style="min-width:100%;">
+            <table border="0" class="mcnDividerBlock" style="min-width:100%;">
               <tbody class="mcnDividerBlockOuter">
                 <tr>
                   <td class="mcnDividerBlockInner" style="min-width: 100%; padding: 10px 18px 25px;">
-                    <table class="mcnDividerContent" border="0" cellpadding="0" cellspacing="0" width="100%" style="min-width: 100%;border-top: 1px solid #647F82;">
+                    <table class="mcnDividerContent" border="0" style="min-width: 100%;border-top: 1px solid #647F82;">
                       <tbody>
                         <tr>
                           <td>
@@ -680,30 +662,26 @@
                         </tr>
                       </tbody>
                     </table>
-                    <!--
-                    <td class="mcnDividerBlockInner" style="padding: 18px;">
-                    <hr class="mcnDividerContent" style="border-bottom-color:none; border-left-color:none; border-right-color:none; border-bottom-width:0; border-left-width:0; border-right-width:0; margin-top:0; margin-right:0; margin-bottom:0; margin-left:0;" />
-                    -->
                   </td>
                 </tr>
               </tbody>
             </table>
-            <table border="0" cellpadding="0" cellspacing="0" width="100%" class="mcnTextBlock" style="min-width:100%;">
+            <table border="0" class="mcnTextBlock" style="min-width:100%;">
               <tbody class="mcnTextBlockOuter">
                 <tr>
-                  <td valign="top" class="mcnTextBlockInner" style="padding-top:9px;">
+                  <td class="mcnTextBlockInner" style="padding-top:9px;">
                   <!--[if mso]>
-                  <table align="left" border="0" cellspacing="0" cellpadding="0" width="100%" style="width:100%;">
+                  <table border="0" style="width:100%;">
                   <tr>
                   <![endif]-->
 
                   <!--[if mso]>
-                  <td valign="top" width="600" style="width:600px;">
+                  <td style="width:600px;">
                   <![endif]-->
-                  <table align="left" border="0" cellpadding="0" cellspacing="0" style="max-width:100%; min-width:100%;" width="100%" class="mcnTextContentContainer">
+                  <table border="0" style="max-width:100%; min-width:100%;" class="mcnTextContentContainer">
                     <tbody>
                       <tr>
-                        <td valign="top" class="mcnTextContent" style="padding-top:0; padding-right:18px; padding-bottom:9px; padding-left:18px;">
+                        <td class="mcnTextContent" style="padding-top:0; padding-right:18px; padding-bottom:9px; padding-left:18px;">
                           <em>Copyright © 2019 Centers for Medicare and Medicaid Services, all rights reserved.</em><br>
                           <br>
                           <strong>Our mailing address is:</strong><br>
@@ -741,6 +719,5 @@
     </td>
           </tr>
       </table>
-    </center>
   </body>
   </html>
