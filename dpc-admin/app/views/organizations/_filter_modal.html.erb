@@ -5,11 +5,12 @@
       <button class="ds-c-button ds-c-button--transparent ds-c-dialog__close" aria-label="Close modal dialog">Close</button>
     </header>
 
-    <%= form_tag organizations_path, method: "get" do %>
+    <%= form_tag internal_organizations_path, method: "get" do %>
       <main role="main ds-text">
 
         <fieldset class="ds-l-row field-group">
-          <div class="ds-l-col--9 field-group__fields radio_buttons__container">
+          <legend class="field-group__heading ds-u-padding-y--1">API</legend>
+          <div class="ds-l-col--9 field-group__fields ds-u-padding-y--1 radio_buttons__container">
             <label class="container">Not enabled in API
               <%= radio_button_tag :registered_org, 'unregistered', class: 'ds-c-choice' %>
               <span class="checkmark"></span>
@@ -26,9 +27,10 @@
         </fieldset>
 
         <fieldset class="ds-l-row field-group">
-          <div class="ds-l-col--9 field-group__fields">
+          <legend class="field-group__heading ds-u-padding-y--1">Joined</legend>
+          <div class="ds-l-col--9 field-group__fields ds-u-padding-y--1">
             <div class="ds-u-display--flex ds-u-align-items--center">
-            <%= label_tag :created_after, 'Joined', class: "ds-c-label ds-u-margin-y--2 ds-u-margin-right--2" %>
+            <%= label_tag :created_after, 'Starting', class: "ds-c-label ds-u-margin-y--2 ds-u-margin-right--2" %>
             <%= date_field_tag :created_after, params[:created_after], class: "ds-c-field ds-c-field--medium" %>
             <span class="ds-u-display--inline-block ds-c-label ds-u-margin--2">thru</span>
             <%= date_field_tag :created_before, params[:created_before], class: "ds-c-field ds-c-field--medium" %>
@@ -39,22 +41,26 @@
         </fieldset>
 
         <fieldset class="ds-l-row field-group">
-          <div class="ds-l-col--9 field-group__fields">
-            <%= label_tag :organization_type, 'Organization type', class: "ds-c-label" %>
+          <legend class="field-group__heading ds-u-padding-y--1">Organization Type</legend>
+          <div class="ds-l-col--9 field-group__fields ds-u-padding-y--1">
             <%= select_tag(:organization_type, options_for_select(organization_types_for_select, params[:organization_type]), :class => 'ds-c-field drop-down', include_blank: 'All organization types') %>
           </div>
         </fieldset>
 
         <fieldset class="ds-l-row field-group">
-          <div class="ds-l-col--9 field-group__fields tag_list">
-            <%= label_tag :tag, 'Tags', class: "ds-c-label" %><br />
-            <% @tags.order('LOWER(name)').each_with_index do |t,i| %>
-              <div id="pill_<%= t.id %>" class="site-pills__item site-pills__item--medium tag_container" onclick="tagSelector('tags_<%= t.id %>', 'pill_<%= t.id %>')" >
-                <div style="display:none;">
-                  <%= check_box_tag "tags[#{t.id}]", t.name -%>
+          <legend class="field-group__heading ds-u-padding-y--1">Tags</legend>
+          <div class="ds-l-col--9 field-group__fields tag_list ds-u-padding-y--1">
+            <% if @tags.count == 0 %>
+              There are no tags available.
+            <% else %>
+              <% @tags.order('LOWER(name)').each_with_index do |t,i| %>
+                <div id="pill_<%= t.id %>" class="site-pills__item site-pills__item--medium tag_container" onclick="tagSelector('tags_<%= t.id %>', 'pill_<%= t.id %>')" >
+                  <div style="display:none;">
+                    <%= check_box_tag "tags[#{t.id}]", t.name -%>
+                  </div>
+                  <%= t.name %>
                 </div>
-                <%= t.name %>
-              </div>
+              <% end %>
             <% end %>
           </div>
         </fieldset>
