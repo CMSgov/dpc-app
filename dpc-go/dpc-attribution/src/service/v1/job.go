@@ -3,8 +3,10 @@ package service
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"strings"
 
+	"github.com/darahayes/go-boom"
 	"go.uber.org/zap"
 
 	"github.com/CMSgov/dpc/attribution/logger"
@@ -12,6 +14,11 @@ import (
 	"github.com/CMSgov/dpc/attribution/repository"
 	"github.com/CMSgov/dpc/attribution/service"
 )
+
+type contextKeyString string
+
+// ContextKeyIP is the key in the context to retrieve the requesting IP
+const ContextKeyIP contextKeyString = ""
 
 // JobServiceV1 is a struct that defines what the service has
 type JobServiceV1 struct {
@@ -35,9 +42,13 @@ func (js *JobServiceV1) Export(ctx context.Context, groupID string, orgID string
 		log.Error(fmt.Sprintf("Failed to fetch patients for group"), zap.Error(err))
 		return "", err
 	}
-	// TODO: handle Type query param
-	// TODO: handle _since query param
-	// TODO: set requesting IP address
+	requestingIP, ok := ctx.Value(ContextKeyIP).(string)
+	if !ok {
+		log.Error("Failed to extract group id from context")
+		boom.BadRequest(w, "Could not get group id")
+		return
+	}
+	// TODO: break patients into batches
 	batch := js.createNewJobBatch(orgID, patientMBIs)
 	jobID, err := js.jr.Insert(ctx, batch)
 	if err != nil {
