@@ -106,7 +106,8 @@ public class DistributedBatchQueueTest {
     private UUID buildStuckBatchScenario(UUID orgID) {
         // Add a job
         var jobID = queue.createJob(orgID,
-                "test-provider-1",
+                "123456789",
+                "987654321",
                 List.of("test-patient-1", "test-patient-2"),
                 Collections.singletonList(ResourceType.Patient),
                 null,

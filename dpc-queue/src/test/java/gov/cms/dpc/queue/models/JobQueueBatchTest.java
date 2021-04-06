@@ -23,7 +23,8 @@ public class JobQueueBatchTest {
 
     private static final UUID jobID = UUID.randomUUID();
     private static final UUID orgID = UUID.randomUUID();
-    private static final String providerID = "providerID";
+    private static final String orgNPI = "123456789";
+    private static final String providerNPI = "987654321";
     private static final List<ResourceType> resourceTypes = JobQueueBatch.validResourceTypes;
     private static final UUID aggregatorID = UUID.randomUUID();
     private static final List<String> patientList = List.of("1", "2", "3");
@@ -322,7 +323,7 @@ public class JobQueueBatchTest {
     }
 
     JobQueueBatch createJobQueueBatch() {
-        return new JobQueueBatch(jobID, orgID, providerID, patientList, resourceTypes, null, OffsetDateTime.now(ZoneOffset.UTC), null, true);
+        return new JobQueueBatch(jobID, orgID, orgNPI, providerNPI, patientList, resourceTypes, null, OffsetDateTime.now(ZoneOffset.UTC), null, true);
     }
 
 }
