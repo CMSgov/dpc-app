@@ -13,11 +13,6 @@
 !/log/.keep
 !/tmp/.keep
 
-# Ignore pidfiles, but keep the directory.
-/tmp/pids/*
-!/tmp/pids/
-!/tmp/pids/.keep
-
 # Ignore uploaded files in development.
 /storage/*
 !/storage/.keep
@@ -27,6 +22,7 @@
 
 # Ignore master key for decrypting credentials and more.
 /config/master.key
+/public/ig/**/*
 
 /public/packs
 /public/packs-test
