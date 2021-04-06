@@ -284,21 +284,28 @@ public class GroupResource extends AbstractGroupResource {
         // Check the parameters
         checkExportRequest(outputFormat, Prefer);
 
+        final Group group = fetchGroup(rosterID);
+
         // Get the attributed patients
-        final List<String> attributedPatients = fetchPatientMBIs(rosterID);
+        final List<String> attributedPatients = fetchPatientMBIs(group);
 
         // Generate a job ID and submit it to the queue
         final UUID orgID = FHIRExtractors.getEntityUUID(organizationPrincipal.getOrganization().getId());
+
+        // Grab org and provider NPIs
+        final String orgNPI = fetchOrganizationNPI(orgID.toString());
+        final String providerNPI = FHIRExtractors.getAttributedNPI(group);
 
         // Handle the _type query parameter
         final var resources = handleTypeQueryParam(resourceTypes);
         final var since = handleSinceQueryParam(sinceParam);
         final var transactionTime = APIHelpers.fetchTransactionTime(bfdClient);
         final var requestingIP = APIHelpers.fetchRequestingIP(request);
-        final UUID jobID = this.queue.createJob(orgID, rosterID, attributedPatients, resources, since, transactionTime, requestingIP, true);
-        final int totalPatients = attributedPatients==null ? 0 : attributedPatients.size();
-        final String resourcesRequested = resources.stream().map(rt -> rt.getPath()).filter(rtName -> rtName != null).collect(Collectors.joining(";"));
-        logger.info("dpcMetric=jobCreated,jobId={},orgId={},groupId={},totalPatients={},resourcesRequested={}",jobID,orgID,rosterID,totalPatients,resourcesRequested);
+
+        final UUID jobID = this.queue.createJob(orgID, orgNPI, providerNPI, attributedPatients, resources, since, transactionTime, requestingIP, true);
+        final int totalPatients = attributedPatients == null ? 0 : attributedPatients.size();
+        final String resourcesRequested = resources.stream().map(ResourceType::getPath).filter(Objects::nonNull).collect(Collectors.joining(";"));
+        logger.info("dpcMetric=jobCreated,jobId={},orgId={},groupId={},totalPatients={},resourcesRequested={}", jobID, orgID, rosterID, totalPatients, resourcesRequested);
         return Response.status(Response.Status.ACCEPTED)
                 .contentLocation(URI.create(this.baseURL + "/Jobs/" + jobID)).build();
     }
@@ -360,16 +367,8 @@ public class GroupResource extends AbstractGroupResource {
 
     }
 
-    private List<String> fetchPatientMBIs(String groupID) {
-
-        final Group attributionRoster = this.client
-                .read()
-                .resource(Group.class)
-                .withId(new IdType("Group", groupID))
-                .encodedJson()
-                .execute();
-
-        if (attributionRoster.getMember().isEmpty()) {
+    private List<String> fetchPatientMBIs(Group group) {
+        if (group.getMember().isEmpty()) {
             throw new WebApplicationException("Cannot perform export with no beneficiaries", Response.Status.NOT_ACCEPTABLE);
         }
 
@@ -379,7 +378,7 @@ public class GroupResource extends AbstractGroupResource {
         // Get the patients, along with their MBIs
         final Bundle patients = this.client
                 .operation()
-                .onInstance(new IdType(attributionRoster.getId()))
+                .onInstance(new IdType(group.getId()))
                 .named("patients")
                 .withParameters(parameters)
                 .returnResourceType(Bundle.class)
@@ -393,6 +392,25 @@ public class GroupResource extends AbstractGroupResource {
                 .map(entry -> (Patient) entry.getResource())
                 .map(FHIRExtractors::getPatientMBI)
                 .collect(Collectors.toList());
+    }
+
+    private String fetchOrganizationNPI(String orgID) {
+        Organization organization = this.client
+                .read()
+                .resource(Organization.class)
+                .withId(orgID)
+                .encodedJson()
+                .execute();
+        return FHIRExtractors.findMatchingIdentifier(organization.getIdentifier(), DPCIdentifierSystem.NPPES).getValue();
+    }
+
+    private Group fetchGroup(String groupID) {
+        return this.client
+                .read()
+                .resource(Group.class)
+                .withId(groupID)
+                .encodedJson()
+                .execute();
     }
 
     /**

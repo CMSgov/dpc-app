@@ -22,19 +22,19 @@ public abstract class JobQueueCommon implements IJobQueue {
     }
 
     @Override
-    public UUID createJob(UUID orgID, String providerID, List<String> patients, List<ResourceType> resourceTypes, OffsetDateTime since, OffsetDateTime transactionTime, String requestingIP, boolean isBulk) {
+    public UUID createJob(UUID orgID, String orgNPI, String providerNPI, List<String> patients, List<ResourceType> resourceTypes, OffsetDateTime since, OffsetDateTime transactionTime, String requestingIP, boolean isBulk) {
         final UUID jobID = UUID.randomUUID();
 
         List<JobQueueBatch> jobBatches;
         if (patients.isEmpty()) {
-            jobBatches = createEmptyBatch(jobID, orgID, providerID, resourceTypes, since, transactionTime);
+            jobBatches = createEmptyBatch(jobID, orgID, orgNPI, providerNPI, resourceTypes, since, transactionTime);
         } else if (since != null && !transactionTime.isAfter(since)) {
             // If the since request is after the BFD transactionTime, then result will always be an empty result set
-            jobBatches = createEmptyBatch(jobID, orgID, providerID, resourceTypes, since, transactionTime);
+            jobBatches = createEmptyBatch(jobID, orgID, orgNPI, providerNPI, resourceTypes, since, transactionTime);
         } else {
             jobBatches = Observable.fromIterable(patients)
                     .buffer(batchSize)
-                    .map(patientBatch -> this.createJobBatch(jobID, orgID, providerID, patientBatch, resourceTypes, since, transactionTime, requestingIP, isBulk))
+                    .map(patientBatch -> this.createJobBatch(jobID, orgID, orgNPI, providerNPI, patientBatch, resourceTypes, since, transactionTime, requestingIP, isBulk))
                     .toList()
                     .blockingGet();
         }
@@ -51,22 +51,24 @@ public abstract class JobQueueCommon implements IJobQueue {
 
     protected JobQueueBatch createJobBatch(UUID jobID,
                                            UUID orgID,
-                                           String providerID,
+                                           String orgNPI,
+                                           String providerNPI,
                                            List<String> patients,
                                            List<ResourceType> resourceTypes,
                                            OffsetDateTime since,
                                            OffsetDateTime transactionTime, String requestingIP, boolean isBulk) {
-        return new JobQueueBatch(jobID, orgID, providerID, patients, resourceTypes, since, transactionTime, requestingIP, isBulk);
+        return new JobQueueBatch(jobID, orgID, orgNPI, providerNPI, patients, resourceTypes, since, transactionTime, requestingIP, isBulk);
     }
 
     protected List<JobQueueBatch> createEmptyBatch(UUID jobID,
                                                    UUID orgID,
-                                                   String providerID,
+                                                   String orgNPI,
+                                                   String providerNPI,
                                                    List<ResourceType> resourceTypes,
                                                    OffsetDateTime since,
                                                    OffsetDateTime transactionTime) {
         return Collections.singletonList(
-                createJobBatch(jobID, orgID, providerID, Collections.emptyList(), resourceTypes, since, transactionTime, null, true)
+                createJobBatch(jobID, orgID, orgNPI, providerNPI, Collections.emptyList(), resourceTypes, since, transactionTime, null, true)
         );
     }
 }

@@ -18,18 +18,20 @@ public interface IJobQueue {
      * Create and submit a job into the queue. The job will be broken into batches, prioritized,
      * and set to the QUEUED status.
      *
-     * @param orgID         - The organization submitting the job
-     * @param providerID    - The provider submitting the job
-     * @param mbis          - The list of MBIs of patients to fetch data for
-     * @param resourceTypes - The resource types to fetch patient data for
-     * @param since         - The since parameter to use for the requests. May be null.
+     * @param orgID           - The organization submitting the job
+     * @param orgNPI          - The NPI of the organization submitting the job
+     * @param providerNPI     - The NPI of the provider submitting the job
+     * @param mbis            - The list of MBIs of patients to fetch data for
+     * @param resourceTypes   - The resource types to fetch patient data for
+     * @param since           - The since parameter to use for the requests. May be null.
      * @param transactionTime - The transactionTime of the job
-     * @param requestingIP
-     * @param isBulk
+     * @param requestingIP    - The IP address where the request came from
+     * @param isBulk          - Flag to indicate bulk request
      * @return The UUID of the created job
      */
     UUID createJob(UUID orgID,
-                   String providerID,
+                   String orgNPI,
+                   String providerNPI,
                    List<String> mbis,
                    List<ResourceType> resourceTypes,
                    OffsetDateTime since,
