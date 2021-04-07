@@ -1,8 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
   <%= render partial: 'shared/head' %>
 
-  <body>
+  <body class="ds-base">
+    <!-- nav -->
+    <%= render partial: 'shared/navbar' %>
+
+    <!-- content -->
     <%= yield %>
   </body>
 </html>

@@ -1,0 +1,84 @@
+.navbar {
+  align-items: center;
+  background-color: $color-white;
+  display: flex;
+  justify-content: space-between;
+  padding: $spacer-2;
+  position: relative;
+
+  @media (min-width: $width-sm) {
+    padding-left: $spacer-4;
+    padding-right: $spacer-4;
+  }
+}
+
+// Logo
+
+.site-logo,
+.site-logo:visited {
+  align-items: center;
+  color: $color-primary-darkest;
+  display: flex;
+  flex-shrink: 0;
+  font-size: $h5-font-size;
+  font-weight: $font-bold;
+  text-decoration: none;
+  width: 15rem;
+
+  @media (min-width: $width-sm) {
+    font-size: $h3-font-size;
+    width: 20rem;
+  }
+
+  img {
+    margin-right: $spacer-1;
+    width: $spacer-2;
+
+    @media (min-width: $width-sm) {
+      width: $spacer-4;
+    }
+  }
+}
+
+.site-logo-text:hover {
+  color: $color-primary;
+}
+
+// Nav Links
+
+.topnav-wrap {
+  display: none;
+  flex-direction: column;
+
+  &.is-visible {
+    animation: slidein-left 0.3s ease-in-out;
+    background-color: $color-white;
+    bottom: 0;
+    display: flex;
+    position: fixed;
+    height: 100%;
+    max-width: 360px;
+    right: 0;
+    top: 0;
+    transform: translateX(0);
+    width: 75%;
+    z-index: $z-index-flyout;
+
+    @media (min-width: $width-nav) {
+      background-color: transparent;
+      display: block;
+      position: static;
+      height: auto;
+      max-width: unset;
+      width: auto;
+    }
+  }
+
+  @media (min-width: $width-nav) {
+    background-color: transparent;
+    display: block;
+    position: static;
+    height: auto;
+    width: auto;
+  }
+}
