@@ -50,3 +50,4 @@ ops/config/decrypted/*
 .mvn/
 /tmp/letter_opener/admin/*
 /tmp/letter_opener/web/*
+/dpc-go/dpc-api/test_results/
