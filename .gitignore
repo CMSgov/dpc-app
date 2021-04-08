@@ -48,3 +48,4 @@ smoke.out
 ops/config/decrypted/*
 !ops/config/decrypted/README.md
 .mvn/
+/dpc-go/dpc-attribution/test_results/
