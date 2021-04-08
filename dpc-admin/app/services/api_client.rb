@@ -7,6 +7,10 @@ class ApiClient
     @base_url = ENV.fetch('API_METADATA_URL')
   end
 
+  def json_content
+    'application/json'
+  end
+
   def create_organization(org, fhir_endpoint: {})
     uri_string = base_url + '/Organization/$submit'
     json = OrganizationSubmitSerializer.new(org, fhir_endpoint: fhir_endpoint).to_json
@@ -117,7 +121,7 @@ class ApiClient
   def post_text_request(uri_string, json, query_params, token)
     uri = URI.parse uri_string
     uri.query = URI.encode_www_form(query_params)
-    text_headers = { 'Content-Type': 'application/json', 'Accept': 'application/json' }.merge(auth_header(token))
+    text_headers = { 'Content-Type': json_content, 'Accept': json_content }.merge(auth_header(token))
 
     request = Net::HTTP::Post.new(uri.request_uri, text_headers)
     request.body = json
@@ -149,7 +153,7 @@ class ApiClient
   end
 
   def headers(token)
-    { 'Content-Type': 'application/json', 'Accept': 'application/json' }.merge(auth_header(token))
+    { 'Content-Type': json_content, 'Accept': json_content }.merge(auth_header(token))
   end
 
   def fhir_headers(token)
