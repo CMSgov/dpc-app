@@ -23,7 +23,7 @@ if(typeof(close_mobile_nav_button) != 'undefined' && close_mobile_nav_button != 
     open_mobile_nav_button.focus();
     removeElementsByClass(overlay_class);
   });
-};
+}
 
 if(typeof(open_mobile_nav_button) != 'undefined' && open_mobile_nav_button != null){
   open_mobile_nav_button.addEventListener("click", function(e) {
@@ -39,4 +39,4 @@ if(typeof(open_mobile_nav_button) != 'undefined' && open_mobile_nav_button != nu
 
     trapFocus(mobile_nav);
   })
-};
+}
