@@ -1,0 +1,7 @@
+<head>
+  <title>
+    <%= content_for?(:title) ? yield(:title) : 'CMS.gov' %> | Data at the Point of Care
+  </title>
+  <%= favicon_link_tag asset_path('favicon.ico') %>
+  <%= stylesheet_link_tag 'application', media: 'all' %>
+</head>
