@@ -26,10 +26,13 @@ func main() {
 		}
 	}()
 
-	r := repository.NewOrganizationRepo(db)
-	c := v2.NewOrganizationService(r)
+	or := repository.NewOrganizationRepo(db)
+	os := v2.NewOrganizationService(or)
 
-	attributionRouter := router.NewDPCAttributionRouter(c)
+	gr := repository.NewGroupRepo(db)
+	gs := v2.NewGroupService(gr)
+
+	attributionRouter := router.NewDPCAttributionRouter(os, gs)
 
 	port := conf.GetAsString("port", "3001")
 	if err := http.ListenAndServe(fmt.Sprintf(":%s", port), attributionRouter); err != nil {

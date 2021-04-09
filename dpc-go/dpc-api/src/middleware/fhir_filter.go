@@ -5,41 +5,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/CMSgov/dpc/api/logger"
+	"github.com/CMSgov/dpc/api/model"
 	"github.com/pkg/errors"
-	"github.com/samply/golang-fhir-models/fhir-models/fhir"
 	"strings"
 )
 
-type resourceType struct {
-	ResourceType string `json:"resourceType"`
-}
-
-type organization struct {
-	Identifier []fhir.Identifier      `json:"identifier,omitempty"`
-	Name       *string                `json:"name,omitempty"`
-	Address    []fhir.Address         `json:"address,omitempty"`
-	Type       []fhir.CodeableConcept `json:"type,omitempty"`
-	resourceType
-}
-
-type patient struct {
-	Identifier []fhir.Identifier          `json:"identifier,omitempty"`
-	Name       []fhir.HumanName           `json:"name,omitempty"`
-	Gender     *fhir.AdministrativeGender `json:"gender,omitempty"`
-	BirthDate  *string                    `json:"birthDate,omitempty"`
-	resourceType
-}
-
-type practitioner struct {
-	Identifier []fhir.Identifier `json:"identifier,omitempty"`
-	Name       []fhir.HumanName  `json:"name,omitempty"`
-	resourceType
-}
-
 var filters = map[string]func([]byte) ([]byte, error){
 	"organization": filterOrganization,
-	"patient":      filterPatient,
-	"practitioner": filterPractitioner,
+	"group":        filterGroup,
 }
 
 // Filter is a function that filters out all FHIR fields that aren't explicitly whitelisted
@@ -58,7 +31,7 @@ func Filter(ctx context.Context, body []byte) ([]byte, error) {
 }
 
 func getResourceType(body []byte) (string, error) {
-	var result resourceType
+	var result model.ResourceType
 	if err := json.Unmarshal(body, &result); err != nil {
 		return "", err
 	}
@@ -66,25 +39,35 @@ func getResourceType(body []byte) (string, error) {
 }
 
 func filterOrganization(body []byte) ([]byte, error) {
-	var organization organization
+	var organization model.Organization
 	if err := json.Unmarshal(body, &organization); err != nil {
 		return nil, err
 	}
 	return json.Marshal(organization)
 }
 
-func filterPatient(body []byte) ([]byte, error) {
-	var patient patient
-	if err := json.Unmarshal(body, &patient); err != nil {
+func filterGroup(body []byte) ([]byte, error) {
+	var group model.Group
+	if err := json.Unmarshal(body, &group); err != nil {
 		return nil, err
 	}
-	return json.Marshal(patient)
+	for i := range group.Member {
+		prac := findPracExtension(group.Member[i])
+		if prac != nil {
+			group.Member[i].Extension = []model.Extension{*prac}
+		} else {
+			group.Member[i].Extension = make([]model.Extension, 0)
+		}
+	}
+	return json.Marshal(group)
 }
 
-func filterPractitioner(body []byte) ([]byte, error) {
-	var practitioner practitioner
-	if err := json.Unmarshal(body, &practitioner); err != nil {
-		return nil, err
+func findPracExtension(member model.GroupMember) *model.Extension {
+	for _, e := range member.Extension {
+		vr := e.ValueReference
+		if vr != nil && vr.Type != nil && *vr.Type == "Practitioner" {
+			return &e
+		}
 	}
-	return json.Marshal(practitioner)
+	return nil
 }

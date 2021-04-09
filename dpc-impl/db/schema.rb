@@ -41,5 +41,4 @@ ActiveRecord::Schema.define(version: 2021_04_09_181131) do
     t.index ["implementer"], name: "index_users_on_implementer"
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
-
 end
