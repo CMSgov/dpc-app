@@ -65,3 +65,28 @@ The Web app will automatically run on `http://localhost:3500/`.
 
 # Testing
 To test the rails app, run `rspec spec` in the terminal.
+
+# Running as docker container
+Navigate to /dpc-app
+
+To build and start DPC Admin and Web portals run: 
+```
+make ci-portals
+make start-portals
+```
+
+DPC Admin: localhost:3000\
+Admin Sidekiq Console: localhost:3000/sidekiq\
+Admin Letter Opener: localhost:3000/letter_opener
+
+DPC Web: localhost:9000\
+Admin Sidekiq Console: localhost:3900/sidekiq\
+Admin Letter Opener: localhost:3900/letter_opener
+
+Port mappings can be changed in:\
+`docker-compose.portals.yml`
+
+Helpful make commands:\
+`make start-portals` : Starts Web,Admin,Redis,Sidekiqs,and db\
+`make stop-portals` : Stops Web,Admin,Redis,Sidekiqs,and db\
+`make down-portals` : Removes Web,Admin,Redis,Sidekiqs,db and docker network.

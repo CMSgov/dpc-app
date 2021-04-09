@@ -25,6 +25,10 @@ ig/publish: ${IG_PUBLISHER}
 website:
 	@docker build -f dpc-web/Dockerfile . -t dpc-web
 
+.PHONY: admin
+admin:
+	@docker build -f dpc-admin/Dockerfile . -t dpc-web-admin
+
 .PHONY: start-app
 start-app: secure-envs
 	@docker-compose up start_core_dependencies
@@ -39,13 +43,38 @@ start-local: secure-envs
 start-local-api: secure-envs start-local
 	@docker-compose -f docker-compose.yml -f docker-compose-local.yml up start_api
 
+.PHONY: start-portals
+start-portals:
+	@docker-compose -p dpc-portals -f docker-compose.yml -f docker-compose.portals.yml up start_core_dependencies
+	@docker-compose -p dpc-portals -f docker-compose.yml -f docker-compose.portals.yml up start_web
+	@docker-compose -p dpc-portals -f docker-compose.yml -f docker-compose.portals.yml up start_admin
+	@docker ps
+
+.PHONY: down-portals
+down-portals:
+	@docker-compose -p dpc-portals -f docker-compose.portals.yml down
+
+.PHONY: start-dpc
+start-dpc: secure-envs
+	@docker-compose -f docker-compose.yml -f docker-compose.portals.yml up start_core_dependencies
+	@USE_BFD_MOCK=false docker-compose -f docker-compose.yml -f docker-compose.portals.yml up start_api_dependencies
+	@docker-compose -f docker-compose.yml -f docker-compose.portals.yml up start_api
+	@docker-compose -f docker-compose.yml -f docker-compose.portals.yml up start_web
+	@docker-compose -f docker-compose.yml -f docker-compose.portals.yml up start_admin
+	@docker ps
+
+.PHONY: down-dpc
+down-dpc: 
+	@docker-compose -f docker-compose.yml -f docker-compose.portals.yml down
+	@docker ps
+
 .PHONY: ci-app
 ci-app: docker-base secure-envs
 	@./dpc-test.sh
 
-.PHONY: ci-web
-ci-web:
-	@./dpc-web-test.sh
+.PHONY: ci-portals
+ci-portals:
+	@./dpc-portals-test.sh
 
 .PHONY: smoke
 smoke:
@@ -85,4 +114,3 @@ maven-config:
 .PHONE: unit-tests
 unit-tests:
 	@bash ./dpc-unit-test.sh
-
