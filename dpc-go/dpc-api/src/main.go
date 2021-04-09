@@ -29,13 +29,15 @@ func main() {
 		Retries: retries,
 	})
 
-	c := v2.NewOrganizationController(attributionClient)
+	orgCtlr := v2.NewOrganizationController(attributionClient)
 
 	capabilitiesFile := conf.GetAsString("capabilities.base")
 
 	m := v2.NewMetadataController(capabilitiesFile)
 
-	apiRouter := router.NewDPCAPIRouter(c, m)
+	groupCtlr := v2.NewGroupController(attributionClient)
+
+	apiRouter := router.NewDPCAPIRouter(orgCtlr, m, groupCtlr)
 	// authRouter := router.NewAuthRouter()
 
 	port := conf.GetAsString("port", "3000")

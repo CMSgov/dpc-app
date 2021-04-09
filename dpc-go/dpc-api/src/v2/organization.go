@@ -1,32 +1,16 @@
 package v2
 
 import (
-	"context"
 	"github.com/CMSgov/dpc/api/fhirror"
 	"github.com/CMSgov/dpc/api/logger"
+	"github.com/CMSgov/dpc/api/middleware"
 	"go.uber.org/zap"
 	"io/ioutil"
 	"net/http"
 
-	"github.com/go-chi/chi"
-
 	"github.com/CMSgov/dpc/api/client"
 	"github.com/google/fhir/go/jsonformat"
 )
-
-type contextKey int
-
-// ContextKeyOrganization is the key in the context to retrieve the organizationID
-const ContextKeyOrganization contextKey = iota
-
-// OrganizationCtx middleware to extract the organizationID from the chi url param and set it into the request context
-func OrganizationCtx(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		organizationID := chi.URLParam(r, "organizationID")
-		ctx := context.WithValue(r.Context(), ContextKeyOrganization, organizationID)
-		next.ServeHTTP(w, r.WithContext(ctx))
-	})
-}
 
 // OrganizationController is a struct that defines what the controller has
 type OrganizationController struct {
@@ -42,7 +26,7 @@ func NewOrganizationController(ac client.Client) *OrganizationController {
 
 // Read function that calls attribution service via get to return the organization specified by organizationID
 func (oc *OrganizationController) Read(w http.ResponseWriter, r *http.Request) {
-	organizationID, ok := r.Context().Value(ContextKeyOrganization).(string)
+	organizationID, ok := r.Context().Value(middleware.ContextKeyOrganization).(string)
 	log := logger.WithContext(r.Context())
 	if !ok {
 		log.Error("Failed to extract the organization id from the context")
@@ -89,7 +73,7 @@ func (oc *OrganizationController) Create(w http.ResponseWriter, r *http.Request)
 
 // Delete function that calls attribution service via delete to delete an organization from attribution services
 func (oc *OrganizationController) Delete(w http.ResponseWriter, r *http.Request) {
-	organizationID, ok := r.Context().Value(ContextKeyOrganization).(string)
+	organizationID, ok := r.Context().Value(middleware.ContextKeyOrganization).(string)
 	log := logger.WithContext(r.Context())
 	if !ok {
 		log.Error("Failed to extract the organization id from the context")
@@ -110,7 +94,7 @@ func (oc *OrganizationController) Delete(w http.ResponseWriter, r *http.Request)
 // Update function that calls attribution service via put to update an organization in attribution service
 func (oc *OrganizationController) Update(w http.ResponseWriter, r *http.Request) {
 	log := logger.WithContext(r.Context())
-	organizationID, ok := r.Context().Value(ContextKeyOrganization).(string)
+	organizationID, ok := r.Context().Value(middleware.ContextKeyOrganization).(string)
 	if !ok {
 		log.Error("Failed to extract the organization id from the context")
 		fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "Failed to extract organization id from url, please check the url")

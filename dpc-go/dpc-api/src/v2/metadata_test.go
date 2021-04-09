@@ -71,6 +71,20 @@ func (suite *MetadataControllerTestSuite) TestMetadata() {
                   "code": "read"
                 }
               ]
+            },
+            {
+              "type": "Group",
+              "interaction": [
+                {
+                  "code": "create"
+                }
+              ],
+              "operation": [
+                {
+                  "name": "export",
+                  "definition": "http://hl7.org/fhir/uv/bulkdata/OperationDefinition/group-export"
+                }
+              ]
             }
           ]
         }

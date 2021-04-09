@@ -49,6 +49,102 @@ const Orgjson = `{
     ]
   }`
 
+// Groupjson is a group json string for testing purposes
+const Groupjson = `
+{
+  "resourceType": "Group",
+  "id": "fullexample",
+  "meta": {
+    "versionId": "1",
+    "lastUpdated": "2019-06-06T03:04:12.348-04:00"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/us/davinci-atr/StructureDefinition/ext-contractValidityPeriod",
+      "valuePeriod": {
+        "start": "2020-07-25",
+        "end": "2021-06-24"
+      }
+    }
+  ],
+  "identifier": [
+    {
+      "use": "official",
+      "type": {
+        "coding": [
+          {
+            "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code": "NPI",
+            "display": "National Provider Identifier"
+          }
+        ]
+      },
+      "system": "https://sitenv.org",
+      "value": "1316206220"
+    },
+    {
+      "use": "official",
+      "type": {
+        "coding": [
+          {
+            "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code": "TAX",
+            "display": "Tax ID Number"
+          }
+        ]
+      },
+      "system": "https://sitenv.org",
+      "value": "789456231"
+    }
+  ],
+  "active": true,
+  "type": "person",
+  "actual": true,
+  "name": "Test Group 3",
+  "managingEntity": {
+    "reference": "Organization/1",
+    "display": "Healthcare related organization"
+  },
+  "member": [
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/us/davinci-atr/StructureDefinition/ext-changeType",
+          "valueCode": "add"
+        },
+        {
+          "url": "http://hl7.org/fhir/us/davinci-atr/StructureDefinition/ext-coverageReference",
+          "valueReference": {
+            "reference": "Coverage/1"
+          }
+        },
+        {
+          "url": "http://hl7.org/fhir/us/davinci-atr/StructureDefinition/ext-attributedProvider",
+          "valueReference": {
+            "type": "Practitioner",
+            "identifier": {
+                "system": "http://hl7.org/fhir/sid/us-npi",
+                "value": "9941339108"
+            }
+          }
+        }
+      ],
+      "entity": {
+        "type": "Patient",
+        "identifier": {
+            "value": "2SW4N00AA00",
+            "system": "http://hl7.org/fhir/sid/us-mbi"
+        }
+      },
+      "period": {
+        "start": "2014-10-08",
+        "end": "2020-10-08"
+      },
+      "inactive": false
+    }
+  ]
+}`
+
 // OrgResponse provides a sample response that mimics what attribution service returns for testing purposes
 func OrgResponse() *model.Organization {
 	o := model.Organization{}
