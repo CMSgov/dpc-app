@@ -7,12 +7,12 @@
         How to Generate a Public Key
       </div>
       <div class="ds-u-padding-left--3 public-key__intro-windows">
-        <b>Window users</b><br />
+        <strong>Window users</strong><br />
         If you are using Windows, you can use this link for downloading openSSL: <%= link_to 'https://wiki.openssl.org/index.php/Binaries', 'https://wiki.openssl.org/index.php/Binaries', target: '_blank' %>
       </div>
     </div>
     <div class="ds-u-padding-left--7 ds-u-padding-bottom--7 ds-u-font-style--italic public-key__files">
-      <b>Please ensure all files created from this page are stored in ONE folder.</b><br />
+      <strong>Please ensure all files created from this page are stored in ONE folder.</strong><br />
       (These include: private.pem, public.pem, snippet.txt, snippet.txt.sig, signature.sig)
     </div>
   </section>
@@ -36,7 +36,7 @@
             <span id="confirm-private-key"></span>
           </div>
         </div>
-        <p><b><span class="ds-u-color--error">IMPORTANT!</span> The contents of your private key (private.pem file) should be treated as sensitive/secret information.</b> Take care in the handling and storage of this information as it is essential to the security of your connection with DPC.</p>
+        <p><strong><span class="ds-u-color--error">IMPORTANT!</span> The contents of your private key (private.pem file) should be treated as sensitive/secret information.</strong> Take care in the handling and storage of this information as it is essential to the security of your connection with DPC.</p>
       </div>
       <div class="ds-l-col--6 ds-l-md-col--3 step_2">
         <%= image_tag("public-key-image.svg", alt: "A picture of a key") %>
@@ -55,7 +55,7 @@
             <span id="confirm-public-key"></span>
           </div>
         </div>
-        <p><b>Paste the contents</b> of this public.pem file into the ‘Public Key’ field below and proceed to creating your public key signature.</p>
+        <p><strong>Paste the contents</strong> of this public.pem file into the ‘Public Key’ field below and proceed to creating your public key signature.</p>
       </div>
       <div class="ds-l-col--6 ds-l-md-col--3 step_3">
         <%= image_tag("create-sig-image.svg", alt: "") %>
@@ -142,7 +142,7 @@
           </div>
         </div>
 
-        <p><b>Paste the contents</b> of this signature.sig file into the ‘Public Key Signature’ field below.</p>
+        <p><strong>Paste the contents</strong> of this signature.sig file into the ‘Public Key Signature’ field below.</p>
       </div>
     </div>
   </section>
@@ -164,7 +164,7 @@
             1.
           </div>
           <div class="pk-inst">
-            Add a <b>LABEL</b> for your public key that can be easily recognized in the future.
+            Add a <strong>LABEL</strong> for your public key that can be easily recognized in the future.
           </div>
         </div>
         <div class="pk-grid-cell pk-triangle">
@@ -181,7 +181,7 @@
             2.
           </div>
           <div class="pk-inst">
-            The <b>PUBLIC KEY</b> field <u>must include</u> the “BEGIN PUBLIC KEY” and “END PUBLIC KEY” tags from your public.pem file.<br />
+            The <strong>PUBLIC KEY</strong> field <u>must include</u> the “BEGIN PUBLIC KEY” and “END PUBLIC KEY” tags from your public.pem file.<br />
 
             <div class="pub-key-ex-container">
               <%= image_tag("pub-key-ex.svg", alt: "", class: "pub-key-ex") %>
@@ -201,7 +201,7 @@
             3.
           </div>
           <div class="pk-inst">
-            The public key signature (snippet.txt.sig file) <u>must yield</u> “Verified Ok” results in order to successfully generate the signature.sig file and paste its contents in the <b>PUBLIC KEY SIGNATURE</b> field.
+            The public key signature (snippet.txt.sig file) <u>must yield</u> “Verified Ok” results in order to successfully generate the signature.sig file and paste its contents in the <strong>PUBLIC KEY SIGNATURE</strong> field.
           </div>
         </div>
         <div class="pk-grid-cell pk-triangle">
@@ -213,7 +213,7 @@
           </div>
         </div>
         <div class="ds-u-font-style--italic ds-u-text-align--center ds-u-fill--primary-darkest ds-u-color--white pk-grid-cell" id="need-help">
-          <span class="ds-u-color--error"><b>Need Help?</b></span> See <b>DPC’s User Guide</b> for more information.
+          <span class="ds-u-color--error"><strong>Need Help?</strong></span> See <strong>DPC’s User Guide</strong> for more information.
         </div>
         <div class="pk-grid-cell pk-space">
         </div>

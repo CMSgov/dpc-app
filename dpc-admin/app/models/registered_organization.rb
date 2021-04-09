@@ -8,7 +8,6 @@ class RegisteredOrganization < ApplicationRecord
   after_create :notify_users_of_sandbox_access, if: -> { prod_sbx? }
   before_update :update_api_organization
   before_update :update_api_endpoint
-  # TODO: do we need to delete api endpoint too?
 
   delegate :name, :status, :uri, to: :fhir_endpoint, allow_nil: true, prefix: true
 
@@ -16,7 +15,6 @@ class RegisteredOrganization < ApplicationRecord
 
   validates :organization, presence: true
 
-  # TODO: refactor how this is saved
   def fhir_endpoint_id
     return unless api_endpoint_ref
 
