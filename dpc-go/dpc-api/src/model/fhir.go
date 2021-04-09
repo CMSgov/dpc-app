@@ -29,8 +29,6 @@ type Group struct {
 // GroupMember is a struct that represent the filtered down fhir.GroupMember
 type GroupMember struct {
 	Entity    *fhir.Reference `json:"entity"`
-	Period    *fhir.Period    `json:"period,omitempty"`
-	Inactive  *bool           `json:"inactive,omitempty"`
 	Extension []Extension     `json:"extension,omitempty"`
 }
 
