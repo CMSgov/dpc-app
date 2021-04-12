@@ -16,7 +16,7 @@ ActiveRecord::Schema.define(version: 2021_04_09_181131) do
   enable_extension "plpgsql"
 
   create_table "users", force: :cascade do |t|
-    t.string "fist_name", null: false
+    t.string "first_name", null: false
     t.string "last_name", null: false
     t.string "implementer", null: false
     t.boolean "agree_to_terms", null: false
@@ -41,4 +41,5 @@ ActiveRecord::Schema.define(version: 2021_04_09_181131) do
     t.index ["implementer"], name: "index_users_on_implementer"
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
+
 end

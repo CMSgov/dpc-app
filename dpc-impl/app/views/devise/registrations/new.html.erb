@@ -4,8 +4,23 @@
   <%= render "devise/shared/error_messages", resource: resource %>
 
   <div class="field">
+    <%= f.label :first_name %><br />
+    <%= f.text_field :first_name %>
+  </div>
+
+  <div class="field">
+    <%= f.label :last_name %><br />
+    <%= f.text_field :last_name %>
+  </div>
+
+  <div class="field">
     <%= f.label :email %><br />
     <%= f.email_field :email, autofocus: true, autocomplete: "email" %>
+  </div>
+
+  <div class="field">
+    <%= f.label 'Implementer Name' %><br />
+    <%= f.text_field :implementer %>
   </div>
 
   <div class="field">
@@ -19,6 +34,14 @@
   <div class="field">
     <%= f.label :password_confirmation %><br />
     <%= f.password_field :password_confirmation, autocomplete: "new-password" %>
+  </div>
+
+  <div class="field">
+    <%= f.check_box :agree_to_terms %>
+    <%= f.label :agree_to_terms do %>
+    <!-- TODO: link to TOS -->
+    I agree to the terms of service
+    <% end %>
   </div>
 
   <div class="actions">

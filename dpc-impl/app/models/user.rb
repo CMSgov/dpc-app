@@ -4,7 +4,7 @@ class User < ApplicationRecord
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable
   
-  validates :last_name, :first_name, :email, presence: true
+  validates :last_name, :first_name, :email, :implementer, presence: true
   validates :agree_to_terms, inclusion: {
     in: [true], message: 'you must agree to the terms of service to create an account'
   }

@@ -8,7 +8,7 @@ Rails.application.routes.draw do
   }
 
   authenticated :user do
-    root to: 'portal#show'
+    root to: 'portal#show', as: :authenticated_root, via: :get
   end
 
   match '/portal', to: 'portal#show', via: :get
