@@ -36,6 +36,10 @@ class ApplicationController < ActionController::Base
                       end
   end
 
+  def after_sign_out_path_for(resource)
+    request.referrer
+  end
+
   private
 
   def id_param
