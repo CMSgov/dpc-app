@@ -1,7 +1,11 @@
+inherit_from: .rubocop_todo.yml
+
 require:
   rubocop-performance
 
 AllCops:
+  NewCops: enable
+  TargetRubyVersion: 2.7
   Exclude:
     - 'app/channels/application_cable/**/*'
     - 'app/jobs/application_job.rb'
@@ -15,16 +19,16 @@ AllCops:
 Bundler/OrderedGems:
   Enabled: false
 
-Metrics/LineLength:
-  Max: 120
+# Layout/LineLength:
+#   Max: 120
 
 Metrics/BlockLength:
   Exclude:
     - 'spec/**/*'
 
-Metrics/MethodLength:
-  Max:
-    15
+# Metrics/MethodLength:
+#   Max:
+#     15
 
 Metrics/AbcSize:
   Max:
