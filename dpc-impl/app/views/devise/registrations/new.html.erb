@@ -42,9 +42,24 @@
 
         <div class="field">
           <%= f.label :password, class: "ds-c-label" %>
-          <% if @minimum_password_length %>
-          <em>(<%= @minimum_password_length %> characters minimum)</em>
-          <% end %>
+          <div class="password-check-list">
+            Password must contain at least:<br />
+            <div id="password-char-set" class="invalid">
+              <%= @minimum_password_length %> characters minimum
+            </div>
+            <div id="password-lower-set" class="invalid">
+              1 lowercase letter
+            </div>
+            <div id="password-upper-set" class="invalid">
+              1 uppercase letter
+            </div>
+            <div id="password-num-set" class="invalid">
+              1 number
+            </div>
+            <div id="password-special-set" class="invalid">
+              1 special character (!@#$&*-)
+            </div>
+          </div>
           <%= f.password_field :password, autocomplete: "new-password", class: "ds-c-field", onkeyup: "fieldBlankCheck('user_password', 'user_password_blank')" %>
           <div class="ds-u-color--error-dark" id="user_password_blank">
           </div>
@@ -52,6 +67,11 @@
 
         <div class="field">
           <%= f.label :password_confirmation, class: "ds-c-label" %>
+          <div class="password-check-list">
+            <div id="password-confirm-set" class="invalid">
+              Confirm password
+            </div>
+          </div>
           <%= f.password_field :password_confirmation, autocomplete: "new-password", class: "ds-c-field", onkeyup: "fieldBlankCheck('user_password_confirmation', 'user_password_confirmation_blank')" %>
           <div class="ds-u-color--error-dark" id="user_password_confirmation_blank">
           </div>
