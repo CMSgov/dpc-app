@@ -60,7 +60,7 @@
               1 special character (!@#$&*-)
             </div>
           </div>
-          <%= f.password_field :password, autocomplete: "new-password", class: "ds-c-field", onkeyup: "fieldBlankCheck('user_password', 'user_password_blank')" %>
+          <%= f.password_field :password, autocomplete: "new-password", class: "ds-c-field", onkeyup: "fieldBlankCheck('user_password', 'user_password_blank'); passwordCheck('user_password')" %>
           <div class="ds-u-color--error-dark" id="user_password_blank">
           </div>
         </div>
@@ -72,7 +72,7 @@
               Confirm password
             </div>
           </div>
-          <%= f.password_field :password_confirmation, autocomplete: "new-password", class: "ds-c-field", onkeyup: "fieldBlankCheck('user_password_confirmation', 'user_password_confirmation_blank')" %>
+          <%= f.password_field :password_confirmation, autocomplete: "new-password", class: "ds-c-field", onkeyup: "fieldBlankCheck('user_password_confirmation', 'user_password_confirmation_blank'); passwordCheck('user_password_confirmation')" %>
           <div class="ds-u-color--error-dark" id="user_password_confirmation_blank">
           </div>
         </div>
