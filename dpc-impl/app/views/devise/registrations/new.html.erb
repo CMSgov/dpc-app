@@ -8,23 +8,27 @@
 
         <h1 class="ds-u-margin-top--0">Request access</h1>
 
+        <div>
+          All fields are required to request access.
+        </div>
+
         <div class="field">
-          <%= f.label :first_name, class: "ds-c-label" %><br />
+          <%= f.label :first_name, class: "ds-c-label" %>
           <%= f.text_field :first_name, class: "ds-c-field" %>
         </div>
 
         <div class="field">
-          <%= f.label :last_name, class: "ds-c-label" %><br />
+          <%= f.label :last_name, class: "ds-c-label" %>
           <%= f.text_field :last_name, class: "ds-c-field" %>
         </div>
 
         <div class="field">
-          <%= f.label :email, class: "ds-c-label" %><br />
+          <%= f.label :email, class: "ds-c-label" %>
           <%= f.email_field :email, autofocus: true, autocomplete: "email", class: "ds-c-field" %>
         </div>
 
         <div class="field">
-          <%= f.label 'Implementer Name', class: "ds-c-label" %><br />
+          <%= f.label 'Implementer Name', class: "ds-c-label" %>
           <%= f.text_field :implementer, class: "ds-c-field" %>
         </div>
 
@@ -32,18 +36,18 @@
           <%= f.label :password, class: "ds-c-label" %>
           <% if @minimum_password_length %>
           <em>(<%= @minimum_password_length %> characters minimum)</em>
-          <% end %><br />
+          <% end %>
           <%= f.password_field :password, autocomplete: "new-password", class: "ds-c-field" %>
         </div>
 
         <div class="field">
-          <%= f.label :password_confirmation, class: "ds-c-label" %><br />
+          <%= f.label :password_confirmation, class: "ds-c-label" %>
           <%= f.password_field :password_confirmation, autocomplete: "new-password", class: "ds-c-field" %>
         </div>
 
-        <div class="field">
+        <div class="field tos-container">
           <%= f.check_box :agree_to_terms, class: 'ds-c-choice' %>
-          <%= f.label :agree_to_terms do %>
+          <%= f.label :agree_to_terms, class: 'tos' do %>
           <!-- TODO: link to TOS -->
           I agree to the terms of service
           <% end %>
@@ -64,5 +68,4 @@
       <%= render "devise/shared/links" %>
     </div>
   </div>
-  </div>
-
+</div>
