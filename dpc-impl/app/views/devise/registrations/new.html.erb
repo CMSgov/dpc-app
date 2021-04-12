@@ -14,22 +14,30 @@
 
         <div class="field">
           <%= f.label :first_name, class: "ds-c-label" %>
-          <%= f.text_field :first_name, class: "ds-c-field" %>
+          <%= f.text_field :first_name, class: "ds-c-field", onkeyup: "fieldBlankCheck('user_first_name', 'user_first_name_blank')" %>
+          <div class="ds-u-color--error-dark" id="user_first_name_blank">
+          </div>
         </div>
 
         <div class="field">
           <%= f.label :last_name, class: "ds-c-label" %>
-          <%= f.text_field :last_name, class: "ds-c-field" %>
+          <%= f.text_field :last_name, class: "ds-c-field", onkeyup: "fieldBlankCheck('user_last_name', 'user_last_name_blank')" %>
+          <div class="ds-u-color--error-dark" id="user_last_name_blank">
+          </div>
         </div>
 
         <div class="field">
           <%= f.label :email, class: "ds-c-label" %>
-          <%= f.email_field :email, autofocus: true, autocomplete: "email", class: "ds-c-field" %>
+          <%= f.email_field :email, autofocus: true, autocomplete: "email", class: "ds-c-field", onkeyup: "fieldBlankCheck('user_email', 'user_email_blank')" %>
+          <div class="ds-u-color--error-dark" id="user_email_blank">
+          </div>
         </div>
 
         <div class="field">
           <%= f.label 'Implementer Name', class: "ds-c-label" %>
-          <%= f.text_field :implementer, class: "ds-c-field" %>
+          <%= f.text_field :implementer, class: "ds-c-field", onkeyup: "fieldBlankCheck('user_implementer', 'user_implementer_blank')" %>
+          <div class="ds-u-color--error-dark" id="user_implementer_blank">
+          </div>
         </div>
 
         <div class="field">
@@ -37,12 +45,16 @@
           <% if @minimum_password_length %>
           <em>(<%= @minimum_password_length %> characters minimum)</em>
           <% end %>
-          <%= f.password_field :password, autocomplete: "new-password", class: "ds-c-field" %>
+          <%= f.password_field :password, autocomplete: "new-password", class: "ds-c-field", onkeyup: "fieldBlankCheck('user_password', 'user_password_blank')" %>
+          <div class="ds-u-color--error-dark" id="user_password_blank">
+          </div>
         </div>
 
         <div class="field">
           <%= f.label :password_confirmation, class: "ds-c-label" %>
-          <%= f.password_field :password_confirmation, autocomplete: "new-password", class: "ds-c-field" %>
+          <%= f.password_field :password_confirmation, autocomplete: "new-password", class: "ds-c-field", onkeyup: "fieldBlankCheck('user_password_confirmation', 'user_password_confirmation_blank')" %>
+          <div class="ds-u-color--error-dark" id="user_password_confirmation_blank">
+          </div>
         </div>
 
         <div class="field tos-container">
