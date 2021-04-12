@@ -1,52 +1,68 @@
-<h2>Sign up</h2>
+<% title "Request access" %>
 
-<%= form_for(resource, as: resource_name, url: registration_path(resource_name)) do |f| %>
-  <%= render "devise/shared/error_messages", resource: resource %>
+<div class="ds-l-row">
+  <div class="ds-l-col--12 ds-l-md-col--6 ds-u-margin-bottom--1 ds-u-margin-x--auto">
+    <div class="card card--border-top card--shadow">
+      <%= form_for(resource, as: resource_name, url: registration_path(resource_name)) do |f| %>
+        <%= render "devise/shared/error_messages", resource: resource %>
 
-  <div class="field">
-    <%= f.label :first_name %><br />
-    <%= f.text_field :first_name %>
+        <h1 class="ds-u-margin-top--0">Request access</h1>
+
+        <div class="field">
+          <%= f.label :first_name, class: "ds-c-label" %><br />
+          <%= f.text_field :first_name, class: "ds-c-field" %>
+        </div>
+
+        <div class="field">
+          <%= f.label :last_name, class: "ds-c-label" %><br />
+          <%= f.text_field :last_name, class: "ds-c-field" %>
+        </div>
+
+        <div class="field">
+          <%= f.label :email, class: "ds-c-label" %><br />
+          <%= f.email_field :email, autofocus: true, autocomplete: "email", class: "ds-c-field" %>
+        </div>
+
+        <div class="field">
+          <%= f.label 'Implementer Name', class: "ds-c-label" %><br />
+          <%= f.text_field :implementer, class: "ds-c-field" %>
+        </div>
+
+        <div class="field">
+          <%= f.label :password, class: "ds-c-label" %>
+          <% if @minimum_password_length %>
+          <em>(<%= @minimum_password_length %> characters minimum)</em>
+          <% end %><br />
+          <%= f.password_field :password, autocomplete: "new-password", class: "ds-c-field" %>
+        </div>
+
+        <div class="field">
+          <%= f.label :password_confirmation, class: "ds-c-label" %><br />
+          <%= f.password_field :password_confirmation, autocomplete: "new-password", class: "ds-c-field" %>
+        </div>
+
+        <div class="field">
+          <%= f.check_box :agree_to_terms, class: 'ds-c-choice' %>
+          <%= f.label :agree_to_terms do %>
+          <!-- TODO: link to TOS -->
+          I agree to the terms of service
+          <% end %>
+        </div>
+
+        <div class="actions">
+          <%= f.submit "Sign up", class: "ds-c-button ds-c-button--primary" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+
+<div class="ds-l-row">
+  <div class="ds-l-col--12 ds-l-md-col--6 ds-u-margin-x--auto">
+    <div class="card">
+      <%= render "devise/shared/links" %>
+    </div>
+  </div>
   </div>
 
-  <div class="field">
-    <%= f.label :last_name %><br />
-    <%= f.text_field :last_name %>
-  </div>
-
-  <div class="field">
-    <%= f.label :email %><br />
-    <%= f.email_field :email, autofocus: true, autocomplete: "email" %>
-  </div>
-
-  <div class="field">
-    <%= f.label 'Implementer Name' %><br />
-    <%= f.text_field :implementer %>
-  </div>
-
-  <div class="field">
-    <%= f.label :password %>
-    <% if @minimum_password_length %>
-    <em>(<%= @minimum_password_length %> characters minimum)</em>
-    <% end %><br />
-    <%= f.password_field :password, autocomplete: "new-password" %>
-  </div>
-
-  <div class="field">
-    <%= f.label :password_confirmation %><br />
-    <%= f.password_field :password_confirmation, autocomplete: "new-password" %>
-  </div>
-
-  <div class="field">
-    <%= f.check_box :agree_to_terms %>
-    <%= f.label :agree_to_terms do %>
-    <!-- TODO: link to TOS -->
-    I agree to the terms of service
-    <% end %>
-  </div>
-
-  <div class="actions">
-    <%= f.submit "Sign up" %>
-  </div>
-<% end %>
-
-<%= render "devise/shared/links" %>
