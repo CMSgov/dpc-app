@@ -2,8 +2,6 @@
 
 module Users
   class RegistrationsController < Devise::RegistrationsController
-    skip_before_action :check_user, except: %i[new create]
-
     # GET /resource/sign_up
     # def new
     #   super
