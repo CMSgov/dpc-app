@@ -10,7 +10,7 @@ RSpec.feature 'new user signs up for account' do
   end
 
   context 'when successful' do
-    scenario 'create an account and sign out' do
+    it 'creates an account and sign out' do
       fill_in :user_first_name, with: 'Samuel'
       fill_in :user_last_name, with: 'Vimes'
       fill_in :user_email, with: 'vimes@gmail.com'
@@ -30,7 +30,7 @@ RSpec.feature 'new user signs up for account' do
   end
 
   context 'when unsuccessful' do
-    scenario 'returns errors for missing fields' do
+    it 'returns errors for missing fields' do
       click_on('Sign up')
 
       expect(page).to have_content('8 errors prohibited this user from being saved:')
