@@ -214,6 +214,8 @@ GEM
       childprocess (>= 0.5, < 4.0)
       rubyzip (>= 1.2.2)
     semantic_range (3.0.0)
+    simpleidn (0.2.1)
+      unf (~> 0.1.4)
     spring (2.1.1)
     sprockets (4.0.2)
       concurrent-ruby (~> 1.0)
@@ -224,11 +226,16 @@ GEM
       sprockets (>= 3.0.0)
     thor (1.1.0)
     tilt (2.0.10)
+    truemail (2.3.2)
+      simpleidn (~> 0.2.1)
     turbolinks (5.2.1)
       turbolinks-source (~> 5.2)
     turbolinks-source (5.2.0)
     tzinfo (2.0.4)
       concurrent-ruby (~> 1.0)
+    unf (0.1.4)
+      unf_ext
+    unf_ext (0.0.7.7)
     warden (1.2.9)
       rack (>= 2.0.9)
     web-console (4.1.0)
@@ -280,6 +287,7 @@ DEPENDENCIES
   sass-rails (>= 6)
   selenium-webdriver
   spring
+  truemail
   turbolinks (~> 5)
   tzinfo-data
   web-console (>= 4.1.0)
