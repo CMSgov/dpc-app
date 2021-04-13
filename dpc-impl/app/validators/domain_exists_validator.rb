@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'mail'
-class DomainExistsValidator < ActiveModel::EachValidator
+class DomainExistsValidator < ActiveModel::EachValidator#add
   def validate_each(record, attribute, value)
     begin
       r = Truemail.validate(value).result.success
