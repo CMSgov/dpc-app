@@ -14,12 +14,9 @@ module DpcImpl
     # Add fonts to asset pipeline
     config.assets.paths << Rails.root.join("app", "assets", "fonts")
 
-    # Configuration for the application, engines, and railties goes here.
-    #
-    # These settings can be overridden in specific environments using the files
-    # in config/environments, which are processed later.
-    #
-    # config.time_zone = "Central Time (US & Canada)"
-    # config.eager_load_paths << Rails.root.join("extras")
+    # field_with_errors support, avoid that nasty line break on errors
+    config.action_view.field_error_proc = Proc.new { |html_tag, instance|
+      html_tag
+    }
   end
 end
