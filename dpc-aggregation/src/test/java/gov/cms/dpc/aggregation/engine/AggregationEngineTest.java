@@ -12,6 +12,7 @@ import gov.cms.dpc.aggregation.service.EveryoneGetsDataLookBackServiceImpl;
 import gov.cms.dpc.aggregation.service.LookBackService;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
+import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.hapi.ContextUtils;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.JobStatus;
@@ -47,7 +48,8 @@ import static org.mockito.Mockito.*;
 @ExtendWith(BufferedLoggerHandler.class)
 class AggregationEngineTest {
     private static final UUID aggregatorID = UUID.randomUUID();
-    private static final String TEST_PROVIDER_ID = "1";
+    private static final String TEST_ORG_NPI = NPIUtil.generateNPI();
+    private static final String TEST_PROVIDER_NPI = NPIUtil.generateNPI();
     private BlueButtonClient bbclient;
     private IJobQueue queue;
     private AggregationEngine engine;
@@ -105,14 +107,13 @@ class AggregationEngineTest {
      */
     @Test
     void claimBatchException() throws InterruptedException {
-        Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getPractitionerNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
-
         final var orgID = UUID.randomUUID();
 
         // Make a simple job with one resource type
         final var jobID = queue.createJob(
                 orgID,
-                TEST_PROVIDER_ID,
+                TEST_ORG_NPI,
+                TEST_PROVIDER_NPI,
                 Collections.singletonList(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0)),
                 Collections.singletonList(ResourceType.Patient),
                 null,
@@ -141,7 +142,7 @@ class AggregationEngineTest {
         engine.pollQueue();
 
         // Wait for the queue to finish processing before finishing the test
-        while ( engine.isRunning() ) {
+        while (engine.isRunning()) {
             Thread.sleep(100);
         }
 
@@ -187,7 +188,7 @@ class AggregationEngineTest {
         engine.pollQueue();
 
         // Wait for the queue to finish processing before finishing the test
-        while ( engine.isRunning() ) {
+        while (engine.isRunning()) {
             Thread.sleep(100);
         }
 
@@ -199,14 +200,13 @@ class AggregationEngineTest {
      */
     @Test
     void simpleJobTest() {
-        Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getPractitionerNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
-
         final var orgID = UUID.randomUUID();
 
         // Make a simple job with one resource type
         final var jobID = queue.createJob(
                 orgID,
-                TEST_PROVIDER_ID,
+                TEST_ORG_NPI,
+                TEST_PROVIDER_NPI,
                 Collections.singletonList(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0)),
                 Collections.singletonList(ResourceType.Patient),
                 null,
@@ -237,7 +237,8 @@ class AggregationEngineTest {
         // Make a simple job with one resource type
         final var jobID = queue.createJob(
                 orgID,
-                TEST_PROVIDER_ID,
+                TEST_ORG_NPI,
+                TEST_PROVIDER_NPI,
                 Collections.singletonList(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0)),
                 Collections.singletonList(ResourceType.Patient),
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
@@ -262,15 +263,14 @@ class AggregationEngineTest {
      */
     @Test
     void multipleFileJobTest() {
-        Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getPractitionerNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
-
         final var orgID = UUID.randomUUID();
         final List<String> mbis = List.of(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0), MockBlueButtonClient.TEST_PATIENT_MBIS.get(1));
 
         // build a job with multiple resource types
         final var jobID = queue.createJob(
                 orgID,
-                TEST_PROVIDER_ID,
+                TEST_ORG_NPI,
+                TEST_PROVIDER_NPI,
                 mbis,
                 JobQueueBatch.validResourceTypes,
                 null,
@@ -300,7 +300,8 @@ class AggregationEngineTest {
         // build a job with multiple resource types
         final var jobID = queue.createJob(
                 orgID,
-                TEST_PROVIDER_ID,
+                TEST_ORG_NPI,
+                TEST_PROVIDER_NPI,
                 Arrays.asList("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11"),
                 JobQueueBatch.validResourceTypes,
                 null,
@@ -317,15 +318,14 @@ class AggregationEngineTest {
      */
     @Test
     void pauseJobTest() {
-        Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getPractitionerNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
-
         final var orgID = UUID.randomUUID();
         final List<String> mbis = List.of(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0), MockBlueButtonClient.TEST_PATIENT_MBIS.get(1));
 
         // build a job with multiple resource types
         final var jobID = queue.createJob(
                 orgID,
-                TEST_PROVIDER_ID,
+                TEST_ORG_NPI,
+                TEST_PROVIDER_NPI,
                 mbis,
                 JobQueueBatch.validResourceTypes,
                 null,
@@ -358,15 +358,14 @@ class AggregationEngineTest {
      */
     @Test
     void appendBatchFileTest() {
-        Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getPractitionerNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
-
         final var orgID = UUID.randomUUID();
         final List<String> mbis = List.of(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0), MockBlueButtonClient.TEST_PATIENT_MBIS.get(1));
 
         // build a job with multiple resource types
         final var jobID = queue.createJob(
                 orgID,
-                TEST_PROVIDER_ID,
+                TEST_ORG_NPI,
+                TEST_PROVIDER_NPI,
                 mbis,
                 Collections.singletonList(ResourceType.Patient),
                 null,
@@ -387,7 +386,7 @@ class AggregationEngineTest {
         try {
             final String fileContents = Files.readString(Path.of(outputFilePath));
             assertEquals(mbis.size(), Arrays.stream(fileContents.split("\n")).count(), "Contains multiple patients in file output");
-        } catch ( Exception e ) {
+        } catch (Exception e) {
             Assert.fail("Failed to read output file");
         }
     }
@@ -402,7 +401,8 @@ class AggregationEngineTest {
         // Job with a unsupported resource type
         final var jobID = queue.createJob(
                 orgID,
-                TEST_PROVIDER_ID,
+                TEST_ORG_NPI,
+                TEST_PROVIDER_NPI,
                 List.of(),
                 Collections.singletonList(ResourceType.Patient),
                 null,
@@ -429,15 +429,14 @@ class AggregationEngineTest {
      */
     @Test
     void badJobTest() {
-        Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getPractitionerNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
-
         final var orgID = UUID.randomUUID();
         final List<String> mbis = List.of(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0), MockBlueButtonClient.TEST_PATIENT_MBIS.get(1));
 
         // Job with a unsupported resource type
         final var jobID = queue.createJob(
                 orgID,
-                TEST_PROVIDER_ID,
+                TEST_ORG_NPI,
+                TEST_PROVIDER_NPI,
                 mbis,
                 Collections.singletonList(ResourceType.Schedule),
                 null,
@@ -458,15 +457,14 @@ class AggregationEngineTest {
      */
     @Test
     void badJobTestWithFailBatchException() {
-        Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getPractitionerNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
-
         final var orgID = UUID.randomUUID();
         final List<String> mbis = List.of(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0), MockBlueButtonClient.TEST_PATIENT_MBIS.get(1));
 
         // Job with a unsupported resource type
         final var jobID = queue.createJob(
                 orgID,
-                TEST_PROVIDER_ID,
+                TEST_ORG_NPI,
+                TEST_PROVIDER_NPI,
                 mbis,
                 Collections.singletonList(ResourceType.Schedule),
                 null,
@@ -493,10 +491,6 @@ class AggregationEngineTest {
     @Test
     void badPatientIDTest() throws GeneralSecurityException {
         final var orgID = UUID.randomUUID();
-
-        Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getPractitionerNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
-        Mockito.doReturn(null).when(lookBackService).getPractitionerNPIFromRoster(orgID, TEST_PROVIDER_ID, "-1");
-
         final List<String> mbis = List.of(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0), MockBlueButtonClient.TEST_PATIENT_MBIS.get(1), "-1");
         assertEquals(3, mbis.size());
 
@@ -504,7 +498,8 @@ class AggregationEngineTest {
         // Make a simple job with one resource type
         final var jobID = queue.createJob(
                 orgID,
-                TEST_PROVIDER_ID,
+                TEST_ORG_NPI,
+                TEST_PROVIDER_NPI,
                 mbis,
                 List.of(ResourceType.ExplanationOfBenefit, ResourceType.Patient),
                 null,
@@ -541,15 +536,14 @@ class AggregationEngineTest {
 
     @Test
     void multiplePatientsMatchTest() {
-        Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getPractitionerNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
-
         final List<String> mbis = Collections.singletonList(MockBlueButtonClient.MULTIPLE_RESULTS_MBI);
 
         final var orgID = UUID.randomUUID();
 
         final var jobID = queue.createJob(
                 orgID,
-                TEST_PROVIDER_ID,
+                TEST_ORG_NPI,
+                TEST_PROVIDER_NPI,
                 mbis,
                 List.of(ResourceType.ExplanationOfBenefit, ResourceType.Patient),
                 null,
@@ -573,8 +567,6 @@ class AggregationEngineTest {
 
     @Test
     void testBlueButtonException() throws GeneralSecurityException {
-        Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getPractitionerNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
-
         // Test generic runtime exception
         testWithThrowable(new RuntimeException("Error!!!!"));
 
@@ -593,7 +585,8 @@ class AggregationEngineTest {
 
         queue.createJob(
                 orgID,
-                TEST_PROVIDER_ID,
+                TEST_ORG_NPI,
+                TEST_PROVIDER_NPI,
                 Collections.singletonList("1"),
                 Collections.singletonList(ResourceType.Patient),
                 null,
@@ -626,7 +619,8 @@ class AggregationEngineTest {
         // Make a simple job with one resource type
         final var jobID = queue.createJob(
                 orgID,
-                TEST_PROVIDER_ID,
+                TEST_ORG_NPI,
+                TEST_PROVIDER_NPI,
                 Collections.singletonList("1"),
                 Collections.singletonList(ResourceType.Patient),
                 null,

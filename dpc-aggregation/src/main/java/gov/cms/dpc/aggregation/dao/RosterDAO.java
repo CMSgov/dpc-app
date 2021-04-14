@@ -22,6 +22,7 @@ public class RosterDAO extends AbstractDAO<RosterEntity> {
 
     /**
      * Retrieves the ProviderID from the roster by orgID, patientMBI and either rosterID or providerID
+     *
      * @param organizationID     The organizationID
      * @param providerOrRosterID Either a rosterID or the providerID
      * @param patientMBI         The patient MBI
@@ -37,8 +38,6 @@ public class RosterDAO extends AbstractDAO<RosterEntity> {
         List<Predicate> predicates = new ArrayList<>();
         // Restrict by Organization via ID
         predicates.add(organizationPredicate(builder, root, organizationID));
-        // Restrict by Provider or Roster via ID
-        predicates.add(providerOrRosterIDPredicate(builder, root, providerOrRosterID));
         // Restrict by Patient via MBI
         predicates.add(mbiPredicate(builder, root, patientMBI));
 
@@ -56,11 +55,6 @@ public class RosterDAO extends AbstractDAO<RosterEntity> {
     private Predicate organizationPredicate(CriteriaBuilder builder, Root<RosterEntity> root, UUID organizationID) {
         // Always restrict by Organization
         return builder.equal(root.join(RosterEntity_.MANAGING_ORGANIZATION).get(OrganizationEntity_.ID), organizationID);
-    }
-
-    private Predicate providerOrRosterIDPredicate(CriteriaBuilder builder, Root<RosterEntity> root, UUID providerOrRosterID) {
-        //Group Export passes in the rosterID as the jobBatch providerID
-        return builder.equal(root.get(RosterEntity_.ID), providerOrRosterID);
     }
 
     private Predicate mbiPredicate(CriteriaBuilder builder, Root<RosterEntity> root, String patientMBI) {

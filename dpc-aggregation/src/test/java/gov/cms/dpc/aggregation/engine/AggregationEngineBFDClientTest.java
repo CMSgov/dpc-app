@@ -15,6 +15,7 @@ import gov.cms.dpc.bluebutton.client.BlueButtonClientImpl;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
 import gov.cms.dpc.bluebutton.config.BBClientConfiguration;
 import gov.cms.dpc.common.Constants;
+import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.MemoryBatchQueue;
@@ -54,6 +55,8 @@ public class AggregationEngineBFDClientTest {
     private AggregationEngine engine;
     private IJobQueue queue;
     private final UUID orgID = UUID.randomUUID();
+    private final String TEST_ORG_NPI = NPIUtil.generateNPI();
+    private final String TEST_PROVIDER_NPI = NPIUtil.generateNPI();
 
     @BeforeEach
     public void setup() throws GeneralSecurityException {
@@ -89,7 +92,8 @@ public class AggregationEngineBFDClientTest {
         UUID providerID = UUID.randomUUID();
         UUID jobID = queue.createJob(
                 orgID,
-                providerID.toString(),
+                TEST_ORG_NPI,
+                TEST_PROVIDER_NPI,
                 Collections.singletonList(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0)),
                 Collections.singletonList(ResourceType.Patient),
                 null,
@@ -104,7 +108,7 @@ public class AggregationEngineBFDClientTest {
         assertEquals(JobStatus.COMPLETED, completeJob.getStatus());
 
         Assertions.assertThat(headerKey.getAllValues()).containsExactlyInAnyOrder(Constants.INCLUDE_IDENTIFIERS_HEADER, Constants.BULK_CLIENT_ID_HEADER, Constants.BULK_JOB_ID_HEADER, HttpHeaders.X_FORWARDED_FOR, Constants.BFD_ORIGINAL_QUERY_ID_HEADER);
-        Assertions.assertThat(headerValue.getAllValues()).containsExactlyInAnyOrder("mbi", providerID.toString(), jobID.toString(), "127.0.0.1", jobID.toString());
+        Assertions.assertThat(headerValue.getAllValues()).containsExactlyInAnyOrder("mbi", TEST_PROVIDER_NPI, jobID.toString(), "127.0.0.1", jobID.toString());
 
         engine.stop();
     }
@@ -125,7 +129,8 @@ public class AggregationEngineBFDClientTest {
         UUID providerID = UUID.randomUUID();
         UUID jobID = queue.createJob(
                 orgID,
-                providerID.toString(),
+                TEST_ORG_NPI,
+                TEST_PROVIDER_NPI,
                 Collections.singletonList(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0)),
                 Collections.singletonList(ResourceType.Patient),
                 null,
@@ -140,7 +145,7 @@ public class AggregationEngineBFDClientTest {
         assertEquals(JobStatus.COMPLETED, completeJob.getStatus());
 
         Assertions.assertThat(headerKey.getAllValues()).containsExactlyInAnyOrder(Constants.INCLUDE_IDENTIFIERS_HEADER, Constants.DPC_CLIENT_ID_HEADER, HttpHeaders.X_FORWARDED_FOR, Constants.BFD_ORIGINAL_QUERY_ID_HEADER);
-        Assertions.assertThat(headerValue.getAllValues()).containsExactlyInAnyOrder("mbi", providerID.toString(), "127.0.0.1", jobID.toString());
+        Assertions.assertThat(headerValue.getAllValues()).containsExactlyInAnyOrder("mbi", TEST_PROVIDER_NPI, "127.0.0.1", jobID.toString());
 
         engine.stop();
     }

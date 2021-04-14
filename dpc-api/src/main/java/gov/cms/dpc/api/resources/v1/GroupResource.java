@@ -284,7 +284,7 @@ public class GroupResource extends AbstractGroupResource {
         // Check the parameters
         checkExportRequest(outputFormat, Prefer);
 
-        final Group group = fetchGroup(rosterID);
+        final Group group = fetchGroup(new IdType("Group", rosterID));
 
         // Get the attributed patients
         final List<String> attributedPatients = fetchPatientMBIs(group);
@@ -293,7 +293,7 @@ public class GroupResource extends AbstractGroupResource {
         final UUID orgID = FHIRExtractors.getEntityUUID(organizationPrincipal.getOrganization().getId());
 
         // Grab org and provider NPIs
-        final String orgNPI = fetchOrganizationNPI(orgID.toString());
+        final String orgNPI = fetchOrganizationNPI(new IdType("Organization", orgID.toString()));
         final String providerNPI = FHIRExtractors.getAttributedNPI(group);
 
         // Handle the _type query parameter
@@ -394,7 +394,7 @@ public class GroupResource extends AbstractGroupResource {
                 .collect(Collectors.toList());
     }
 
-    private String fetchOrganizationNPI(String orgID) {
+    private String fetchOrganizationNPI(IdType orgID) {
         Organization organization = this.client
                 .read()
                 .resource(Organization.class)
@@ -404,7 +404,7 @@ public class GroupResource extends AbstractGroupResource {
         return FHIRExtractors.findMatchingIdentifier(organization.getIdentifier(), DPCIdentifierSystem.NPPES).getValue();
     }
 
-    private Group fetchGroup(String groupID) {
+    private Group fetchGroup(IdType groupID) {
         return this.client
                 .read()
                 .resource(Group.class)
