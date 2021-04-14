@@ -14,8 +14,8 @@ Each migration consists of two files, an up file containing the new change (as a
 
 Example:  
 Assuming the last migration in the `/migrations` folder has an id of 41 a new migration could look like this:
-`42.ADD_EMAIL_COL.up.sql`  
-`42.ADD_EMAIL_COL.down.sql` 
+`42_ADD_EMAIL_COL.up.sql`  
+`42_ADD_EMAIL_COL.down.sql` 
 
 
 ####Running Migrations
