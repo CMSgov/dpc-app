@@ -7,15 +7,15 @@
     <!-- nav -->
     <%= render partial: 'shared/navbar' %>
 
-    <div class="header-seperator"></div>
-
-    <%= render partial: 'shared/alerts', locals: { notice: flash[:notice], alert: flash[:alert] } %>
-
     <!-- content -->
-    <section class="ds-l-container ds-u-padding-top--7 ds-u-margin-bottom--7" id="main">
-      <%= yield %>
+    <section class="ds-u-padding-y--7 ds-u-fill--primary-darkest" id="main">
+      <div class="ds-l-container">
+        <%= yield %>
+      </div>
     </section>
 
+
     <%= render partial: 'shared/footer' %>
+
   </body>
 </html>
