@@ -201,7 +201,13 @@ public class PatientResource extends AbstractPatientResource {
         final var since = handleSinceQueryParam(sinceParam);
         final String patientMbi = FHIRExtractors.getPatientMBI(patient);
         final UUID orgId = organization.getID();
-        final String orgNPI = FHIRExtractors.findMatchingIdentifier(organization.getOrganization().getIdentifier(), DPCIdentifierSystem.NPPES).getValue();
+        final Organization org = this.client
+                .read()
+                .resource(Organization.class)
+                .withId(orgId.toString())
+                .encodedJson()
+                .execute();
+        final String orgNPI = FHIRExtractors.findMatchingIdentifier(org.getIdentifier(), DPCIdentifierSystem.NPPES).getValue();
         final String practitionerNPI = FHIRExtractors.findMatchingIdentifier(practitioner.getIdentifier(), DPCIdentifierSystem.NPPES).getValue();
 
         final String requestingIP = APIHelpers.fetchRequestingIP(request);
