@@ -7,7 +7,7 @@ lint:
 	@echo "-------------- ATTRIBUTION LINTING STARTED --------------"
 	@golangci-lint run && echo "*********** ATTRIBUTION IS LINT FREE!! ***********" || echo "*********** LINTING FAILED!! ***********"
 	@echo "-------------- SECURITY SCAN STARTED --------------"
-	@cd src && gosec -fmt=json -out=../results.json ./... && cd ..
+	@cd src && gosec -fmt=json -out=../results.json ./...
 	@echo "*********** SECURITY SCAN RESULTS: ***********"
 	@cat results.json
 
