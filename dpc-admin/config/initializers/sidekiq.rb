@@ -14,9 +14,9 @@ Sidekiq.configure_server do |config|
 
   config.log_formatter = DPCJSON.new
 
-  config.redis = { url: "#{ENV.fetch('REDIS_URL', 'redis://localhost')}:6379/1" }
+  config.redis = { url: "#{ENV.fetch('REDIS_URL', 'redis://localhost')}:6379/1", namespace: 'sidekiq-admin-app' }
 end
 
 Sidekiq.configure_client do |config|
-  config.redis = { url: "#{ENV.fetch('REDIS_URL', 'redis://localhost')}:6379/1", namespace: "sidekiq-admin-app" }
+  config.redis = { url: "#{ENV.fetch('REDIS_URL', 'redis://localhost')}:6379/1", namespace: 'sidekiq-admin-app' }
 end

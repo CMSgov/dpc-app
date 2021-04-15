@@ -71,6 +71,9 @@ GEM
     bootsnap (1.7.3)
       msgpack (~> 1.0)
     builder (3.2.4)
+    bundler-audit (0.8.0)
+      bundler (>= 1.2.0, < 3)
+      thor (~> 1.0)
     byebug (11.1.3)
     capybara (3.35.3)
       addressable
@@ -117,6 +120,7 @@ GEM
       dotenv (= 2.7.6)
       railties (>= 3.2)
     erubi (1.10.0)
+    execjs (2.7.0)
     factory_bot (6.1.0)
       activesupport (>= 5.0.0)
     factory_bot_rails (6.1.0)
@@ -190,6 +194,11 @@ GEM
     listen (3.5.0)
       rb-fsevent (~> 0.10, >= 0.10.3)
       rb-inotify (~> 0.9, >= 0.9.10)
+    lograge (0.11.2)
+      actionpack (>= 4)
+      activesupport (>= 4)
+      railties (>= 4)
+      request_store (~> 1.0)
     loofah (2.9.0)
       crass (~> 1.0.2)
       nokogiri (>= 1.5.9)
@@ -396,6 +405,8 @@ GEM
     turbolinks-source (5.2.0)
     tzinfo (1.2.9)
       thread_safe (~> 0.1)
+    uglifier (4.2.0)
+      execjs (>= 0.3.0, < 3)
     unf (0.1.4)
       unf_ext
     unf_ext (0.0.7.7)
@@ -433,6 +444,7 @@ PLATFORMS
 DEPENDENCIES
   active_model_serializers
   bootsnap (>= 1.4.2)
+  bundler-audit
   byebug
   capybara (>= 2.15)
   climate_control
@@ -449,6 +461,7 @@ DEPENDENCIES
   kaminari
   letter_opener
   listen (~> 3.2)
+  lograge
   luhnacy (~> 0.2.1)
   macaroons
   octokit
@@ -461,6 +474,8 @@ DEPENDENCIES
   puma (~> 4.1)
   rails (~> 6.0.3, >= 6.0.3.6)
   rails-controller-testing
+  rbnacl
+  rbnacl-libsodium
   redis (~> 4.0)
   redis-namespace
   rspec-rails
@@ -476,6 +491,7 @@ DEPENDENCIES
   truemail
   turbolinks (~> 5)
   tzinfo-data
+  uglifier (>= 1.3.0)
   web-console (>= 3.3.0)
   webdrivers
   webmock

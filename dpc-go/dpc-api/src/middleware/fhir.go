@@ -111,6 +111,14 @@ func convertToFHIR(body []byte) ([]byte, error) {
 	meta["lastUpdated"] = result.LastUpdated()
 	fhirModel["meta"] = meta
 
+	//if we ever expand past storing just orgs and groups, this will need to change to be more flexible
+	//i.e groups store org in managingEntity, patients in managingOrganization, and practitioner in qualification.issuer
+	if result.OrganizationID != nil {
+		me := make(map[string]string)
+		me["reference"] = fmt.Sprintf("%s/%s", "Organization", *result.OrganizationID)
+		fhirModel["managingEntity"] = me
+	}
+
 	return json.Marshal(fhirModel)
 }
 
