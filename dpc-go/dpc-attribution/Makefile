@@ -12,4 +12,4 @@ lint:
 	@cat results.json
 
 .PHONY: test
-test:  unit-test lint
+test:  lint unit-test
