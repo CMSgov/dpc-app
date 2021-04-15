@@ -106,7 +106,6 @@
         <addColumn tableName="JOB_QUEUE_BATCH">
             <column name="organization_npi" type="VARCHAR(50)"/>
             <column name="provider_npi" type="VARCHAR(50)"/>
-            <column name="version" type="INTEGER"/>
         </addColumn>
     </changeSet>
 
