@@ -18,5 +18,7 @@ module DpcImpl
     config.action_view.field_error_proc = Proc.new { |html_tag, instance|
       html_tag
     }
+
+    config.to_prepare { Devise::Mailer.layout "mailer" }
   end
 end
