@@ -4,6 +4,7 @@ require:
   rubocop-performance
 
 AllCops:
+  NewCops: enable
   Exclude:
     - 'app/channels/application_cable/**/*'
     - 'app/jobs/application_job.rb'
@@ -13,20 +14,21 @@ AllCops:
     - 'config/**/*'
     - 'config.ru'
     - 'db/**/*'
+    - 'node_modules/**/*'
 
 Bundler/OrderedGems:
   Enabled: false
 
-Metrics/LineLength:
-  Max: 120
+# Layout/LineLength:
+#   Max: 120
 
 Metrics/BlockLength:
   Exclude:
     - 'spec/**/*'
 
-Metrics/MethodLength:
-  Max:
-    15
+# Metrics/MethodLength:
+#   Max:
+#     15
 
 Metrics/AbcSize:
   Max:
