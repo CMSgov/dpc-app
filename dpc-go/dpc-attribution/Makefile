@@ -4,8 +4,8 @@ unit-test:
 
 .PHONY: lint
 lint:
-	@echo "-------------- DPC-API LINTING STARTED --------------"
-	@cd src && golangci-lint run && echo "*********** DPC-API IS LINT FREE!! ***********" || echo "*********** LINTING FAILED!! ***********"
+	@echo "-------------- ATTRIBUTION LINTING STARTED --------------"
+	@cd src && golangci-lint run && echo "*********** ATTRIBUTION IS LINT FREE!! ***********" || echo "*********** LINTING FAILED!! ***********"
 	@echo "-------------- SECURITY SCAN STARTED --------------"
 	@cd src && gosec -fmt=json -out=../results.json ./...
 	@echo "*********** SECURITY SCAN RESULTS: ***********"
@@ -13,4 +13,3 @@ lint:
 
 .PHONY: test
 test:  lint unit-test
-
