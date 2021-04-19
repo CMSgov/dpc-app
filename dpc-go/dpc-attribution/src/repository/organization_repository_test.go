@@ -7,6 +7,8 @@ import (
 	"log"
 	"testing"
 
+	"github.com/DATA-DOG/go-sqlmock"
+
 	"github.com/CMSgov/dpc/attribution/attributiontest"
 	"github.com/CMSgov/dpc/attribution/model/v2"
 
