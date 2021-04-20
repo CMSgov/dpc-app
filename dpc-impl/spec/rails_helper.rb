@@ -28,6 +28,9 @@ rescue ActiveRecord::PendingMigrationError => e
   exit 1
 end
 
+require 'sidekiq/testing'
+Sidekiq::Testing.fake!
+
 RSpec.configure do |config|
   config.include FactoryBot::Syntax::Methods
   config.include Rails.application.routes.url_helpers

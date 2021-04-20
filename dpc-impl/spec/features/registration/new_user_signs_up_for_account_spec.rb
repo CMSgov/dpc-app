@@ -11,7 +11,7 @@ RSpec.feature 'new user signs up for account' do
   end
 
   context 'when successful' do
-    it 'creates an account and sign out' do
+    before(:each) do
       fill_in :user_first_name, with: 'Samuel'
       fill_in :user_last_name, with: 'Vimes'
       fill_in :user_email, with: 'vimes@gmail.com'
@@ -19,66 +19,84 @@ RSpec.feature 'new user signs up for account' do
       fill_in :user_password_confirmation, with: '3veryDay#P0tato'
       fill_in :user_implementer, with: 'Night Watch Clinic'
       check :user_agree_to_terms
-      click_on('Sign up')
 
+      click_on('Sign up')
+    end
+
+    scenario 'user sent a confirmation email with confirmation token' do
+      Sidekiq::Worker.drain_all
       expect(:confirmation_token).to be_present
 
-      ctoken = last_email.body.match(/confirmation_token=\w*/)
+      ctoken = last_email.body.match(/confirmation_token=[^"]*/)
 
       expect(ctoken).to be_present
-  
-      ctoken = last_email.body.match(/confirmation_token=\w*/)
+    end
+
+    scenario 'user clicks on confirmation link to navigate to portal' do
+      Sidekiq::Worker.drain_all
+      ctoken = last_email.body.match(/confirmation_token=[^"]*/)
 
       visit "/users/confirmation?#{ctoken}"
 
-      expect(page).to have_content('Samuel Vimes')
-
-      find('#sign-out', visible: false).click
-
-      expect(page).to have_content('Log in')
-      expect(page).to have_content('Request access')
+      expect(page).to have_http_status(200)
+      expect(page).to have_content('Welcome Samuel Vimes')
     end
   end
 
-  context 'when unsuccessful' do
-    it 'returns errors for missing fields' do
+  context 'when missing required fields on form' do
+    scenario 'returns to the log in page with error messages' do
       click_on('Sign up')
 
-      expect(page).to have_content('8 errors prohibited this user from being saved:')
       expect(page).to have_content("Email can't be blank")
       expect(page).to have_content("Password can't be blank")
       expect(page).to have_content("First name can't be blank")
       expect(page).to have_content("Last name can't be blank")
-      expect(page).to have_content('Email is invalid')
       expect(page).to have_content("Implementer can't be blank")
+      expect(page).to have_content('Email is invalid')
       expect(page).to have_content('Password must include at least one number, one lowercase letter, one uppercase letter, and one special character (!@#$&*-)')
       expect(page).to have_content('Agree to terms you must agree to the terms of service to create an account')
     end
+  end
 
-    scenario 'unverified user tries and fails to sign in' do
-      fill_in :user_first_name, with: 'Clarissa'
-      fill_in :user_last_name, with: 'Dalloway'
-      fill_in :user_email, with: 'clarissa@example.com'
-      fill_in :user_password, with: '1234567890'
-      fill_in :user_password_confirmation, with: '1234567890'
-      fill_in :user_requested_organization, with: 'London Health System'
-      select 'Primary Care Clinic', from: :user_requested_organization_type
-      fill_in :user_requested_num_providers, visible: false, with: '777'
-      fill_in :user_address_1, with: '1 Hampton Heath Drive'
-      fill_in :user_address_2, with: 'Suite 5'
-      fill_in :user_city, with: 'London'
-      select 'New York', from: :user_state
-      fill_in :user_zip, with: '10033'
+  context 'when using an email already registered' do
+    scenario 'returns to the sign in page with error' do
+      create(:user, email: 'vimes@gmail.com')
+
+      fill_in :user_first_name, with: 'Samuel'
+      fill_in :user_last_name, with: 'Vimes'
+      fill_in :user_email, with: 'vimes@gmail.com'
+      fill_in :user_password, with: '3veryDay#P0tato'
+      fill_in :user_password_confirmation, with: '3veryDay#P0tato'
+      fill_in :user_implementer, with: 'Night Watch Clinic'
       check :user_agree_to_terms
 
       click_on('Sign up')
+
+      expect(page).to have_content('Email has already been taken')
+    end
+  end
+
+  context 'when a user has not verified their email' do
+    scenario 'unverified user tries and fails to sign in' do
+      fill_in :user_first_name, with: 'Samuel'
+      fill_in :user_last_name, with: 'Vimes'
+      fill_in :user_email, with: 'vimes@gmail.com'
+      fill_in :user_password, with: '3veryDay#P0tato'
+      fill_in :user_password_confirmation, with: '3veryDay#P0tato'
+      fill_in :user_implementer, with: 'Night Watch Clinic'
+      check :user_agree_to_terms
+
+      click_on('Sign up')
+
+      Sidekiq::Worker.drain_all
 
       visit new_user_session_path
 
       last_user = User.last
 
       fill_in 'user_email', with: last_user.email
-      fill_in 'user_password', with: '1234567890'
+      fill_in 'user_password', with: '3veryDay#P0tato'
+
       find('[data-test="submit"]').click
 
       expect(last_user.confirmed_at).to be_nil
