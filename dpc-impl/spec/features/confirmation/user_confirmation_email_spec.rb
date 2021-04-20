@@ -14,7 +14,6 @@ RSpec.feature 'user resends confirmation instructions' do
       expect do
         find('input[data-test="submit"]').click
         Sidekiq::Worker.drain_all
-      # end.to change(ActionMailer::Base.deliveries, :count).by(2)
       end.to change(ActionMailer::Base.deliveries, :count).by(1)
 
       last_delivery = ActionMailer::Base.deliveries.last
@@ -63,7 +62,6 @@ RSpec.feature 'user resends confirmation instructions' do
       expect do
         find('input[data-test="submit"]').click
         Sidekiq::Worker.drain_all
-      # end.to change(ActionMailer::Base.deliveries, :count).by(2)
       end.to change(ActionMailer::Base.deliveries, :count).by(1)
 
       visit new_user_confirmation_path

@@ -23,6 +23,25 @@ RSpec.feature 'new user signs up for account' do
       click_on('Sign up')
     end
 
+    scenario 'the email entered in to our job queue' do
+      expect(ActionMailer::Base.deliveries.count).to eq(1)
+
+
+      visit new_user_session_path
+      click_link 'sign-up'
+      fill_in :user_first_name, with: 'Angua'
+      fill_in :user_last_name, with: 'Überwald'
+      fill_in :user_email, with: 'angua@gmail.com'
+      fill_in :user_password, with: '3veryDay#P0tato'
+      fill_in :user_password_confirmation, with: '3veryDay#P0tato'
+      fill_in :user_implementer, with: 'Night Watch Clinic'
+      check :user_agree_to_terms
+      
+      click_on('Sign up')
+
+      expect(ActionMailer::Base.deliveries.count).to eq(2)
+    end
+
     scenario 'user sent a confirmation email with confirmation token' do
       Sidekiq::Worker.drain_all
       expect(:confirmation_token).to be_present
