@@ -96,7 +96,7 @@ public class JobQueueBatch implements Serializable {
      */
     @Convert(converter = StringListConverter.class)
     @Column(name = "patients", columnDefinition = "text")
-    private List<String> patients;
+    List<String> patients;
 
     /**
      * The last processed patient index. Null indicates no patients have been processed yet.
