@@ -2,6 +2,7 @@ package gov.cms.dpc.api.resources.v1;
 
 import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.common.models.JobCompletionModel;
+import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.queue.MemoryBatchQueue;
 import gov.cms.dpc.queue.models.JobQueueBatch;
@@ -24,11 +25,14 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SuppressWarnings("OptionalGetWithoutIsPresent")
 @ExtendWith(BufferedLoggerHandler.class)
 public class JobResourceTest {
     static final UUID AGGREGATOR_ID = UUID.randomUUID();
-    static final String TEST_PROVIDER_ID = "1";
-    static final String TEST_PATIENT_ID = "1";
+    static final String TEST_PROVIDER_ID = UUID.randomUUID().toString();
+    static final String TEST_ORG_NPI = NPIUtil.generateNPI();
+    static final String TEST_PROVIDER_NPI = NPIUtil.generateNPI();
+    static final String TEST_PATIENT_ID = UUID.randomUUID().toString();
     static final String TEST_BASEURL = "http://localhost:8080";
     static final String OTHER_ORGANIZATION = "46ac7ad6-7487-4dd0-baa0-6e2c8cae76a1";
 
@@ -59,6 +63,8 @@ public class JobResourceTest {
         // Setup a queued job
         final var jobID = queue.createJob(orgID,
                 TEST_PROVIDER_ID,
+                TEST_ORG_NPI,
+                TEST_PROVIDER_NPI,
                 List.of(TEST_PATIENT_ID),
                 JobQueueBatch.validResourceTypes,
                 null,
@@ -83,6 +89,8 @@ public class JobResourceTest {
         // Setup a running job
         final var jobID = queue.createJob(orgID,
                 TEST_PROVIDER_ID,
+                TEST_ORG_NPI,
+                TEST_PROVIDER_NPI,
                 List.of(TEST_PATIENT_ID, TEST_PATIENT_ID, TEST_PATIENT_ID),
                 JobQueueBatch.validResourceTypes,
                 null,
@@ -111,6 +119,8 @@ public class JobResourceTest {
         // Setup a completed job
         final var jobID = queue.createJob(orgID,
                 TEST_PROVIDER_ID,
+                TEST_ORG_NPI,
+                TEST_PROVIDER_NPI,
                 List.of(TEST_PATIENT_ID),
                 JobQueueBatch.validResourceTypes,
                 null,
@@ -156,6 +166,8 @@ public class JobResourceTest {
         // Setup a completed job with one error
         final var jobID = queue.createJob(orgID,
                 TEST_PROVIDER_ID,
+                TEST_ORG_NPI,
+                TEST_PROVIDER_NPI,
                 List.of(TEST_PATIENT_ID),
                 JobQueueBatch.validResourceTypes,
                 null,
@@ -194,6 +206,8 @@ public class JobResourceTest {
         // Setup a failed job
         final var jobID = queue.createJob(orgID,
                 TEST_PROVIDER_ID,
+                TEST_ORG_NPI,
+                TEST_PROVIDER_NPI,
                 List.of(TEST_PATIENT_ID),
                 JobQueueBatch.validResourceTypes,
                 null,
@@ -217,6 +231,8 @@ public class JobResourceTest {
 
         final UUID jobId = queue.createJob(orgID,
                 TEST_PROVIDER_ID,
+                TEST_ORG_NPI,
+                TEST_PROVIDER_NPI,
                 List.of(TEST_PATIENT_ID, "2", "3"),
                 JobQueueBatch.validResourceTypes,
                 null,
@@ -259,6 +275,8 @@ public class JobResourceTest {
         // Setup a completed job
         final var jobID = queue.createJob(orgIDCorrect,
                 TEST_PROVIDER_ID,
+                TEST_ORG_NPI,
+                TEST_PROVIDER_NPI,
                 List.of(TEST_PATIENT_ID),
                 JobQueueBatch.validResourceTypes,
                 null,
@@ -313,7 +331,9 @@ public class JobResourceTest {
         final var batch = new JobQueueBatch(
                 UUID.randomUUID(),
                 UUID.randomUUID(),
-                "1",
+                TEST_PROVIDER_ID,
+                TEST_ORG_NPI,
+                TEST_PROVIDER_NPI,
                 Collections.emptyList(),
                 Collections.emptyList(),
                 null,

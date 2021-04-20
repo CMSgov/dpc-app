@@ -304,7 +304,7 @@ public class GroupResource extends AbstractGroupResource {
 
         final UUID jobID = this.queue.createJob(orgID, rosterID, orgNPI, providerNPI, attributedPatients, resources, since, transactionTime, requestingIP, true);
         final int totalPatients = attributedPatients == null ? 0 : attributedPatients.size();
-        final String resourcesRequested = resources.stream().map(rt -> rt.getPath()).filter(rtName -> rtName != null).collect(Collectors.joining(";"));
+        final String resourcesRequested = resources.stream().map(ResourceType::getPath).filter(Objects::nonNull).collect(Collectors.joining(";"));
         logger.info("dpcMetric=jobCreated,jobId={},orgId={},groupId={},totalPatients={},resourcesRequested={}", jobID, orgID, rosterID, totalPatients, resourcesRequested);
         return Response.status(Response.Status.ACCEPTED)
                 .contentLocation(URI.create(this.baseURL + "/Jobs/" + jobID)).build();

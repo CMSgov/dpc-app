@@ -14,6 +14,7 @@ import gov.cms.dpc.aggregation.service.ConsentService;
 import gov.cms.dpc.aggregation.service.LookBackServiceImpl;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
+import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.hapi.ContextUtils;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.MemoryBatchQueue;
@@ -43,7 +44,9 @@ import static org.mockito.ArgumentMatchers.anyMap;
  */
 @ExtendWith(BufferedLoggerHandler.class)
 public class AggregationEngineHealthCheckTest {
-    private static final String TEST_PROVIDER_ID = "1";
+    private static final String TEST_PROVIDER_ID = UUID.randomUUID().toString();
+    private static final String TEST_ORG_NPI = NPIUtil.generateNPI();
+    private static final String TEST_PROVIDER_NPI = NPIUtil.generateNPI();
     private static final UUID aggregatorID = UUID.randomUUID();
 
     private IJobQueue queue;
@@ -83,6 +86,8 @@ public class AggregationEngineHealthCheckTest {
         queue.createJob(
                 orgID,
                 TEST_PROVIDER_ID,
+                TEST_ORG_NPI,
+                TEST_PROVIDER_NPI,
                 Collections.singletonList("1"),
                 Collections.singletonList(ResourceType.Patient),
                 null,
@@ -110,6 +115,8 @@ public class AggregationEngineHealthCheckTest {
         queue.createJob(
                 orgID,
                 TEST_PROVIDER_ID,
+                TEST_ORG_NPI,
+                TEST_PROVIDER_NPI,
                 Collections.singletonList("1"),
                 Collections.singletonList(ResourceType.Patient),
                 null,
@@ -135,6 +142,8 @@ public class AggregationEngineHealthCheckTest {
         queue.createJob(
                 orgID,
                 TEST_PROVIDER_ID,
+                TEST_ORG_NPI,
+                TEST_PROVIDER_NPI,
                 Collections.singletonList("1"),
                 Collections.singletonList(ResourceType.Patient),
                 null,
@@ -163,6 +172,8 @@ public class AggregationEngineHealthCheckTest {
         queue.createJob(
                 orgID,
                 TEST_PROVIDER_ID,
+                TEST_ORG_NPI,
+                TEST_PROVIDER_NPI,
                 Collections.singletonList("1"),
                 Collections.singletonList(ResourceType.Patient),
                 null,

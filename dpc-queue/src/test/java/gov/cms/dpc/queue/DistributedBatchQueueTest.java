@@ -2,6 +2,7 @@ package gov.cms.dpc.queue;
 
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.dpc.common.hibernate.queue.DPCQueueManagedSessionFactory;
+import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.queue.exceptions.JobQueueUnhealthy;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
@@ -106,7 +107,9 @@ public class DistributedBatchQueueTest {
     private UUID buildStuckBatchScenario(UUID orgID) {
         // Add a job
         var jobID = queue.createJob(orgID,
-                "test-provider-1",
+                UUID.randomUUID().toString(),
+                NPIUtil.generateNPI(),
+                NPIUtil.generateNPI(),
                 List.of("test-patient-1", "test-patient-2"),
                 Collections.singletonList(ResourceType.Patient),
                 null,

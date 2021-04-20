@@ -33,14 +33,16 @@ import java.time.YearMonth;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static gov.cms.dpc.aggregation.service.LookBackAnalyzer.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.doReturn;
 
 @ExtendWith(BufferedLoggerHandler.class)
 class BatchAggregationEngineTest {
     private static final UUID aggregatorID = UUID.randomUUID();
-    private static final String TEST_PROVIDER_ID = "1";
+    private static final String TEST_PROVIDER_ID = UUID.randomUUID().toString();
+    private static final String TEST_ORG_NPI = NPIUtil.generateNPI();
+    private static final String TEST_PROVIDER_NPI = NPIUtil.generateNPI();
+
     private IJobQueue queue;
     private AggregationEngine engine;
     private LookBackService lookBackService;
@@ -99,6 +101,8 @@ class BatchAggregationEngineTest {
         final var jobID = queue.createJob(
                 orgID,
                 TEST_PROVIDER_ID,
+                TEST_ORG_NPI,
+                TEST_PROVIDER_NPI,
                 Collections.singletonList(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0)),
                 Collections.singletonList(ResourceType.ExplanationOfBenefit),
                 MockBlueButtonClient.TEST_LAST_UPDATED.minusSeconds(1),
@@ -136,6 +140,8 @@ class BatchAggregationEngineTest {
         final var jobID = queue.createJob(
                 orgID,
                 TEST_PROVIDER_ID,
+                TEST_ORG_NPI,
+                TEST_PROVIDER_NPI,
                 MockBlueButtonClient.TEST_PATIENT_MBIS,
                 JobQueueBatch.validResourceTypes,
                 MockBlueButtonClient.TEST_LAST_UPDATED.minusSeconds(1),
@@ -172,12 +178,14 @@ class BatchAggregationEngineTest {
         final var orgID = UUID.randomUUID();
 
         Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getPractitionerNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
-        Mockito.doReturn(null).when(lookBackService).getPractitionerNPIFromRoster(orgID,TEST_PROVIDER_ID, null);
+        Mockito.doReturn(null).when(lookBackService).getPractitionerNPIFromRoster(orgID, TEST_PROVIDER_ID, null);
 
         // Make a simple job with one resource type
         final var jobID = queue.createJob(
                 orgID,
                 TEST_PROVIDER_ID,
+                TEST_ORG_NPI,
+                TEST_PROVIDER_NPI,
                 MockBlueButtonClient.TEST_PATIENT_WITH_BAD_IDS,
                 Collections.singletonList(ResourceType.ExplanationOfBenefit),
                 MockBlueButtonClient.TEST_LAST_UPDATED.minusSeconds(1),
@@ -218,7 +226,9 @@ class BatchAggregationEngineTest {
         final var jobID = queue.createJob(
                 orgID,
                 TEST_PROVIDER_ID,
-                MockBlueButtonClient.TEST_PATIENT_MBIS.subList(0,1),
+                TEST_ORG_NPI,
+                TEST_PROVIDER_NPI,
+                MockBlueButtonClient.TEST_PATIENT_MBIS.subList(0, 1),
                 Collections.singletonList(ResourceType.ExplanationOfBenefit),
                 MockBlueButtonClient.TEST_LAST_UPDATED.minusSeconds(1),
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
@@ -261,7 +271,9 @@ class BatchAggregationEngineTest {
         final var jobID = queue.createJob(
                 orgID,
                 TEST_PROVIDER_ID,
-                MockBlueButtonClient.TEST_PATIENT_MBIS.subList(0,1),
+                TEST_ORG_NPI,
+                TEST_PROVIDER_NPI,
+                MockBlueButtonClient.TEST_PATIENT_MBIS.subList(0, 1),
                 Collections.singletonList(ResourceType.ExplanationOfBenefit),
                 MockBlueButtonClient.TEST_LAST_UPDATED.minusSeconds(1),
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
@@ -304,7 +316,9 @@ class BatchAggregationEngineTest {
         final var jobID = queue.createJob(
                 orgID,
                 TEST_PROVIDER_ID,
-                MockBlueButtonClient.TEST_PATIENT_MBIS.subList(0,1),
+                TEST_ORG_NPI,
+                TEST_PROVIDER_NPI,
+                MockBlueButtonClient.TEST_PATIENT_MBIS.subList(0, 1),
                 Collections.singletonList(ResourceType.ExplanationOfBenefit),
                 MockBlueButtonClient.TEST_LAST_UPDATED.minusSeconds(1),
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
@@ -347,7 +361,9 @@ class BatchAggregationEngineTest {
         final var jobID = queue.createJob(
                 orgID,
                 TEST_PROVIDER_ID,
-                MockBlueButtonClient.TEST_PATIENT_MBIS.subList(0,1),
+                TEST_ORG_NPI,
+                TEST_PROVIDER_NPI,
+                MockBlueButtonClient.TEST_PATIENT_MBIS.subList(0, 1),
                 Collections.singletonList(ResourceType.ExplanationOfBenefit),
                 MockBlueButtonClient.TEST_LAST_UPDATED.minusSeconds(1),
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
