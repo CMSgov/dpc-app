@@ -96,7 +96,7 @@ public class JobQueueBatch implements Serializable {
      */
     @Convert(converter = StringListConverter.class)
     @Column(name = "patients", columnDefinition = "text")
-    List<String> patients;
+    private List<String> patients;
 
     /**
      * The last processed patient index. Null indicates no patients have been processed yet.
@@ -415,9 +415,8 @@ public class JobQueueBatch implements Serializable {
     /**
      * Marks the job batch as failed.
      *
-     * @param aggregatorID - the current aggregator working the job
      */
-    public void setFailedStatus(UUID aggregatorID) {
+    public void setFailedStatus() {
         this.status = JobStatus.FAILED;
         this.aggregatorID = null;
         completeTime = OffsetDateTime.now(ZoneOffset.UTC);

@@ -207,7 +207,7 @@ public class JobQueueBatchTest {
         job.patientIndex = 2;
         job.getJobQueueBatchFiles().add(new JobQueueBatchFile());
 
-        job.setFailedStatus(aggregatorID);
+        job.setFailedStatus();
 
         assertEquals(JobStatus.FAILED, job.getStatus());
         assertFalse(job.getAggregatorID().isPresent());
@@ -225,7 +225,7 @@ public class JobQueueBatchTest {
         final var job = Mockito.spy(createJobQueueBatch());
         job.status = JobStatus.QUEUED;
 
-        job.setFailedStatus(aggregatorID);
+        job.setFailedStatus();
 
         assertEquals(JobStatus.FAILED, job.getStatus());
         assertFalse(job.getAggregatorID().isPresent());
@@ -239,7 +239,7 @@ public class JobQueueBatchTest {
     void testRestartBatch() {
         final var job = createJobQueueBatch();
         job.setRunningStatus(aggregatorID);
-        job.setFailedStatus(aggregatorID);
+        job.setFailedStatus();
 
         job.restartBatch();
 
