@@ -60,7 +60,7 @@ services:
     build:
       context: .
       dockerfile: dpc-admin/Dockerfile
-    image: dpc-admin:latest
+    image: dpc-web-admin:latest
     volumes:
       - "./dpc-admin/coverage:/dpc-admin/coverage"
       - ./tmp/letter_opener/admin:/dpc-admin/tmp/letter_opener
