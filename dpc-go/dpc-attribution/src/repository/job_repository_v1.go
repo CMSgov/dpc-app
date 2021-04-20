@@ -28,9 +28,9 @@ func NewJobRepo(db *sql.DB) *JobRepositoryV1 {
 func (jr *JobRepositoryV1) Insert(ctx context.Context, b v1.JobQueueBatch) (string, error) {
 	ib := sqlFlavor.NewInsertBuilder()
 	ib.InsertInto("job_queue_ batch")
-	ib.Cols("organization_id", "provider_id", "patients", "resource_types", "since",
+	ib.Cols("organization_id", "organization_npi", "provider_npi", "patients", "resource_types", "since",
 		"transaction_time", "status", "submit_time", "requesting_ip", "is_bulk")
-	ib.Values(b.OrganizationID, b.ProviderID, b.PatientMBIs, b.ResourceTypes, b.Since,
+	ib.Values(b.OrganizationID, b.OrganizationNPI, b.ProviderNPI, b.PatientMBIs, b.ResourceTypes, b.Since,
 		b.TransactionTime, b.Status, b.SubmitTime, b.RequestingIP, b.IsBulk)
 	ib.SQL("returning job_id")
 

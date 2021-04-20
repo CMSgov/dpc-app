@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"fmt"
-	"net/http"
 	"strings"
 
 	"github.com/darahayes/go-boom"
@@ -48,8 +47,12 @@ func (js *JobServiceV1) Export(ctx context.Context, groupID string, orgID string
 		boom.BadRequest(w, "Could not get group id")
 		return
 	}
+	// TODO: find orgNPI and providerNPI
 	// TODO: break patients into batches
-	batch := js.createNewJobBatch(orgID, patientMBIs)
+	// TODO: implement BFD client and get transactionTime
+	// TODO: handle since param
+	// TODO: handle resourceTypes
+	batch := js.createNewJobBatch(orgID, patientMBIs, requestingIP)
 	jobID, err := js.jr.Insert(ctx, batch)
 	if err != nil {
 		return "", err
@@ -57,17 +60,18 @@ func (js *JobServiceV1) Export(ctx context.Context, groupID string, orgID string
 	return jobID, nil
 }
 
-func (js *JobServiceV1) createNewJobBatch(orgID string, patientMBIs []string) v1.JobQueueBatch {
+func (js *JobServiceV1) createNewJobBatch(orgID string, orgNPI string, providerNPI string, patientMBIs []string, requestingIP string) v1.JobQueueBatch {
 	return v1.JobQueueBatch{
 		JobID:           nil,
 		OrganizationID:  orgID,
-		ProviderID:      nil,
+		OrganizationNPI: orgNPI,
+		ProviderNPI:     providerNPI,
 		PatientMBIs:     strings.Join(patientMBIs, ","),
 		ResourceTypes:   nil,
 		Since:           nil,
 		TransactionTime: nil,
 		SubmitTime:      nil,
-		RequestingIP:    nil,
+		RequestingIP:    requestingIP,
 		IsBulk:          true,
 	}
 }
