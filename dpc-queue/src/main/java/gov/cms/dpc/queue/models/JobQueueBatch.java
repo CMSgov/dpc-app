@@ -64,10 +64,22 @@ public class JobQueueBatch implements Serializable {
     private UUID orgID;
 
     /**
+     * The organization npi from the request
+     */
+    @Column(name = "organization_npi")
+    private String orgNPI;
+
+    /**
      * The provider-id from the request
      */
     @Column(name = "provider_id")
     private String providerID;
+
+    /**
+     * The provider npi from the request
+     */
+    @Column(name = "provider_npi")
+    private String providerNPI;
 
     /**
      * The current status of this job
@@ -166,6 +178,8 @@ public class JobQueueBatch implements Serializable {
     public JobQueueBatch(UUID jobID,
                          UUID orgID,
                          String providerID,
+                         String orgNPI,
+                         String providerNPI,
                          List<String> patients,
                          List<ResourceType> resourceTypes,
                          OffsetDateTime since,
@@ -173,6 +187,8 @@ public class JobQueueBatch implements Serializable {
         this.batchID = UUID.randomUUID();
         this.jobID = jobID;
         this.orgID = orgID;
+        this.orgNPI = orgNPI;
+        this.providerNPI = providerNPI;
         this.providerID = providerID;
         this.patients = patients;
         this.resourceTypes = resourceTypes;
@@ -216,8 +232,16 @@ public class JobQueueBatch implements Serializable {
         return orgID;
     }
 
+    public String getOrgNPI() {
+        return orgNPI;
+    }
+
     public String getProviderID() {
         return providerID;
+    }
+
+    public String getProviderNPI() {
+        return providerNPI;
     }
 
     public JobStatus getStatus() {
@@ -451,10 +475,10 @@ public class JobQueueBatch implements Serializable {
      * Retrieve the number of patients that have been processed.
      */
     public int getPatientsProcessed() {
-        if(JobStatus.COMPLETED.equals(status)){
+        if (JobStatus.COMPLETED.equals(status)) {
             return getPatients() == null ? 0 : getPatients().size();
         }
-        return getPatientIndex().orElse(-1)+1;
+        return getPatientIndex().orElse(-1) + 1;
     }
 
     @Override
@@ -492,7 +516,9 @@ public class JobQueueBatch implements Serializable {
                 .append(batchID)
                 .append(jobID)
                 .append(orgID)
+                .append(orgNPI)
                 .append(providerID)
+                .append(providerNPI)
                 .append(status)
                 .append(priority)
                 .append(patients)
@@ -514,7 +540,9 @@ public class JobQueueBatch implements Serializable {
                 "batchID=" + batchID +
                 ", jobID=" + jobID +
                 ", orgID=" + orgID +
+                ", orgNPI=" + orgNPI +
                 ", providerID='" + providerID + '\'' +
+                ", providerNPI=" + providerNPI +
                 ", status=" + status +
                 ", priority=" + priority +
                 ", patients=" + patients +

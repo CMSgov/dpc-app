@@ -201,9 +201,17 @@ public class PatientResource extends AbstractPatientResource {
         final var since = handleSinceQueryParam(sinceParam);
         final String patientMbi = FHIRExtractors.getPatientMBI(patient);
         final UUID orgId = organization.getID();
+        final Organization org = this.client
+                .read()
+                .resource(Organization.class)
+                .withId(orgId.toString())
+                .encodedJson()
+                .execute();
+        final String orgNPI = FHIRExtractors.findMatchingIdentifier(org.getIdentifier(), DPCIdentifierSystem.NPPES).getValue();
+        final String practitionerNPI = FHIRExtractors.findMatchingIdentifier(practitioner.getIdentifier(), DPCIdentifierSystem.NPPES).getValue();
 
         final String requestingIP = APIHelpers.fetchRequestingIP(request);
-        Resource result = dataService.retrieveData(orgId, practitionerId, List.of(patientMbi), since, APIHelpers.fetchTransactionTime(bfdClient),
+        Resource result = dataService.retrieveData(orgId, practitionerId, orgNPI, practitionerNPI, List.of(patientMbi), since, APIHelpers.fetchTransactionTime(bfdClient),
                 requestingIP, ResourceType.Patient, ResourceType.ExplanationOfBenefit, ResourceType.Coverage);
         if (ResourceType.Bundle.equals(result.getResourceType())) {
             return (Bundle) result;
