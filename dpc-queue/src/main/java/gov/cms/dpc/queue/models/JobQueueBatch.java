@@ -188,8 +188,6 @@ public class JobQueueBatch implements Serializable {
         this.orgID = orgID;
         this.orgNPI = orgNPI;
         this.providerNPI = providerNPI;
-        this.orgNPI = orgNPI;
-        this.providerNPI = providerNPI;
         this.patients = patients;
         this.resourceTypes = resourceTypes;
         this.since = since;
