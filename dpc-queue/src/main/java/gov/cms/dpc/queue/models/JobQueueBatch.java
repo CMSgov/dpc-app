@@ -64,7 +64,7 @@ public class JobQueueBatch implements Serializable {
     private UUID orgID;
 
     /**
-     * The oranization npi from the request
+     * The organization npi from the request
      */
     @Column(name = "organization_npi")
     private String orgNPI;
@@ -186,6 +186,8 @@ public class JobQueueBatch implements Serializable {
         this.batchID = UUID.randomUUID();
         this.jobID = jobID;
         this.orgID = orgID;
+        this.orgNPI = orgNPI;
+        this.providerNPI = providerNPI;
         this.orgNPI = orgNPI;
         this.providerNPI = providerNPI;
         this.patients = patients;

@@ -40,7 +40,8 @@ import static org.mockito.Mockito.doReturn;
 class BatchAggregationEngineTest {
     private static final UUID aggregatorID = UUID.randomUUID();
     private static final String TEST_ORG_NPI = NPIUtil.generateNPI();
-    private static final String TEST_PROVIDER_NPI = "1";
+    private static final String TEST_PROVIDER_NPI = NPIUtil.generateNPI();
+
     private IJobQueue queue;
     private AggregationEngine engine;
     private LookBackService lookBackService;

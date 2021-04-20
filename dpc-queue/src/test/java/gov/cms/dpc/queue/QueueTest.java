@@ -2,6 +2,7 @@ package gov.cms.dpc.queue;
 
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.dpc.common.hibernate.queue.DPCQueueManagedSessionFactory;
+import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatchFile;
@@ -36,10 +37,9 @@ class QueueTest {
     private final List<String> queues = List.of("memory", "distributed");
     private final UUID aggregatorID = UUID.randomUUID();
     private final UUID orgID = UUID.randomUUID();
-    private final String orgNPI = "123456789";
-    private final String providerNPI = "987654321";
+    private final String orgNPI = NPIUtil.generateNPI();
+    private final String providerNPI = NPIUtil.generateNPI();
     private final List<String> patientMBIs = List.of("test-patient-1", "test-patient-2");
-
 
     @TestFactory
     Stream<DynamicTest> testSource() {

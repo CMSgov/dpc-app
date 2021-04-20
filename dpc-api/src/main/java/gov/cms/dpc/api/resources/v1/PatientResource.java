@@ -295,6 +295,4 @@ public class PatientResource extends AbstractPatientResource {
             }
         }
     }
-
-
 }

@@ -182,7 +182,7 @@ public class GroupResourceUnitTest {
     }
 
     @Test
-    public void testExportWithValidSinceParam(){
+    public void testExportWithValidSinceParam() {
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
         organization.setId(orgId.toString());
@@ -249,7 +249,7 @@ public class GroupResourceUnitTest {
     }
 
     @Test
-    public void testExportWithInvalidTimes(){
+    public void testExportWithInvalidTimes() {
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
         organization.setId(orgId.toString());
@@ -293,18 +293,18 @@ public class GroupResourceUnitTest {
         when(mockBfdClient.requestPatientFromServer(SYNTHETIC_BENE_ID, null, null).getMeta()).thenReturn(bfdTransactionMeta);
 
         //Test a few seconds into the future
-        WebApplicationException exception = Assertions.assertThrows(BadRequestException.class, () ->{
-                String since =  OffsetDateTime.now(ZoneId.of("America/Puerto_Rico")).plusSeconds(10).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-                resource.export(organizationPrincipal, groupId, null, FHIRMediaTypes.NDJSON ,since, "respond-async", request);
-            });
+        WebApplicationException exception = Assertions.assertThrows(BadRequestException.class, () -> {
+            String since = OffsetDateTime.now(ZoneId.of("America/Puerto_Rico")).plusSeconds(10).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+            resource.export(organizationPrincipal, groupId, null, FHIRMediaTypes.NDJSON, since, "respond-async", request);
+        });
 
         assertEquals("'_since' query parameter cannot be a future date", exception.getMessage());
 
         //Test a few days into the future
         exception = Assertions.assertThrows(BadRequestException.class, () -> {
-                    final String since =  OffsetDateTime.now().plusDays(2).toString();
-                    resource.export(organizationPrincipal, groupId, null, FHIRMediaTypes.NDJSON, since, "respond-async", request);
-                });
+            final String since = OffsetDateTime.now().plusDays(2).toString();
+            resource.export(organizationPrincipal, groupId, null, FHIRMediaTypes.NDJSON, since, "respond-async", request);
+        });
 
         assertEquals("'_since' query parameter cannot be a future date", exception.getMessage());
 
@@ -318,6 +318,7 @@ public class GroupResourceUnitTest {
 
         verifyNoInteractions(request);
     }
+
     @Test
     public void testOutputFormatSetting() {
         UUID orgId = UUID.randomUUID();
@@ -348,7 +349,6 @@ public class GroupResourceUnitTest {
         IReadExecutable<Organization> readExec2 = mock(IReadExecutable.class);
         when(attributionClient.read().resource(Organization.class).withId(new IdType("Organization", orgId.toString())).encodedJson()).thenReturn(readExec2);
         when(readExec2.execute()).thenReturn(organization);
-
 
         IOperationUntypedWithInput<Bundle> operationInput = mock(IOperationUntypedWithInput.class);
         Patient fakePatient = new Patient();
@@ -385,11 +385,17 @@ public class GroupResourceUnitTest {
             resource.export(organizationPrincipal, "roster-id", "Coverage", FHIRMediaTypes.NDJSON, "2017-01-01T00:00:00Z", "respond-async", request);
         });
 
-        Assertions.assertThrows(BadRequestException.class, () -> resource.export(organizationPrincipal, "roster-id", "Coverage", FHIR_JSON, "2017-01-01T00:00:00Z", "respond-async", request));
+        Assertions.assertThrows(BadRequestException.class, () -> {
+            resource.export(organizationPrincipal, "roster-id", "Coverage", FHIR_JSON, "2017-01-01T00:00:00Z", "respond-async", request);
+        });
 
-        Assertions.assertThrows(BadRequestException.class, () -> resource.export(organizationPrincipal, "roster-id", "Coverage", null, "2017-01-01T00:00:00Z", "respond-async", request));
+        Assertions.assertThrows(BadRequestException.class, () -> {
+            resource.export(organizationPrincipal, "roster-id", "Coverage", null, "2017-01-01T00:00:00Z", "respond-async", request);
+        });
 
-        Assertions.assertThrows(BadRequestException.class, () -> resource.export(organizationPrincipal, "roster-id", "Coverage", "", "2017-01-01T00:00:00Z", "respond-async", request));
+        Assertions.assertThrows(BadRequestException.class, () -> {
+            resource.export(organizationPrincipal, "roster-id", "Coverage", "", "2017-01-01T00:00:00Z", "respond-async", request);
+        });
 
         //3 non bad requests
         verify(request, times(3)).getHeader(HttpHeaders.X_FORWARDED_FOR);

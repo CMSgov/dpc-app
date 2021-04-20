@@ -1,6 +1,7 @@
 package gov.cms.dpc.queue.service;
 
 import ca.uhn.fhir.context.FhirContext;
+import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.queue.MemoryBatchQueue;
 import gov.cms.dpc.queue.exceptions.DataRetrievalException;
 import gov.cms.dpc.queue.models.JobQueueBatch;
@@ -26,8 +27,9 @@ public class DataServiceTest {
 
     private final UUID aggregatorID = UUID.randomUUID();
     private final UUID orgID = UUID.randomUUID();
-    private final String orgNPI = "123456789";
-    private final String providerNPI = "987654321";
+    private final UUID patientID = UUID.randomUUID();
+    private final String orgNPI = NPIUtil.generateNPI();
+    private final String providerNPI = NPIUtil.generateNPI();
     private final String exportPath = "/tmp";
     private DataService dataService;
     private File tmpFile;
@@ -55,7 +57,6 @@ public class DataServiceTest {
 
     @Test
     public void whenGetJobBatchesThrowsException() {
-        UUID patientID = UUID.randomUUID();
         ResourceType resourceType = ResourceType.ExplanationOfBenefit;
 
         Mockito.doThrow(new RuntimeException("error")).when(queue).getJobBatches(Mockito.any(UUID.class));
@@ -64,8 +65,7 @@ public class DataServiceTest {
     }
 
     @Test
-    public void whenGetJobBatchesReturnsFailedJob() {
-        UUID patientID = UUID.randomUUID();
+    public void whenGetJobBatchesReturnsFailedJob() throws IllegalAccessException {
         ResourceType resourceType = ResourceType.ExplanationOfBenefit;
 
         workJob(true, resourceType);
@@ -73,8 +73,7 @@ public class DataServiceTest {
     }
 
     @Test
-    public void whenGetJobBatchesReturnsCompletedJobWithResourceType() {
-        UUID patientID = UUID.randomUUID();
+    public void whenGetJobBatchesReturnsCompletedJobWithResourceType() throws IllegalAccessException {
         ResourceType resourceType = ResourceType.ExplanationOfBenefit;
 
         workJob(false, resourceType);
@@ -93,9 +92,7 @@ public class DataServiceTest {
     }
 
     @Test
-    public void whenPassingInNoResourceTypes() {
-        UUID patientID = UUID.randomUUID();
-
+    public void whenPassingInNoResourceTypes() throws IllegalAccessException {
         workJob(false, ResourceType.ExplanationOfBenefit);
         Assertions.assertThrows(DataRetrievalException.class, () -> dataService.retrieveData(orgID, orgNPI, providerNPI, List.of(patientID.toString())));
     }
@@ -105,8 +102,7 @@ public class DataServiceTest {
         Mockito.doAnswer((mock) -> {
             Optional<JobQueueBatch> workBatch = queue.claimBatch(aggregatorID);
             while (workBatch.flatMap(batch -> batch.fetchNextPatient(aggregatorID)).isPresent()) {
-                queue.completePartialBatch(workBatch.get(),
-                        aggregatorID);
+                queue.completePartialBatch(workBatch.get(), aggregatorID);
             }
             if (failBatch) {
                 queue.failBatch(workBatch.get(), aggregatorID);
@@ -117,7 +113,5 @@ public class DataServiceTest {
             }
             return List.of(workBatch.get());
         }).when(queue).getJobBatches(Mockito.any());
-
     }
-
 }

@@ -1,5 +1,6 @@
 package gov.cms.dpc.queue.models;
 
+import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
@@ -23,10 +24,10 @@ public class JobQueueBatchTest {
 
     private static final UUID jobID = UUID.randomUUID();
     private static final UUID orgID = UUID.randomUUID();
-    private static final String orgNPI = "123456789";
-    private static final String providerNPI = "987654321";
     private static final List<ResourceType> resourceTypes = JobQueueBatch.validResourceTypes;
     private static final UUID aggregatorID = UUID.randomUUID();
+    private static final String orgNPI = NPIUtil.generateNPI();
+    private static final String providerNPI = NPIUtil.generateNPI();
     private static final List<String> patientList = List.of("1", "2", "3");
 
     @Test
@@ -110,7 +111,7 @@ public class JobQueueBatchTest {
         try {
             job.fetchNextPatient(aggregatorID);
             Assertions.fail();
-        } catch ( JobQueueFailure e ) {
+        } catch (JobQueueFailure e) {
             assertTrue(e.getMessage().contains("Cannot fetch next batch."));
         }
     }
@@ -135,7 +136,7 @@ public class JobQueueBatchTest {
         try {
             job.setPausedStatus(aggregatorID);
             Assertions.fail();
-        } catch ( JobQueueFailure e ) {
+        } catch (JobQueueFailure e) {
             assertTrue(e.getMessage().contains("Cannot pause batch."));
         }
     }
@@ -288,7 +289,7 @@ public class JobQueueBatchTest {
         try {
             job.verifyAggregatorID(aggregatorID);
             Assertions.fail();
-        } catch ( JobQueueFailure e ) {
+        } catch (JobQueueFailure e) {
             assertTrue(e.getMessage().contains("Cannot process a job owned by another aggregator."));
         }
     }

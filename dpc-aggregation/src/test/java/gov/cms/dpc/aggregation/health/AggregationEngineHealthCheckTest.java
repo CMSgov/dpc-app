@@ -42,7 +42,7 @@ import static org.mockito.ArgumentMatchers.anyMap;
 @ExtendWith(BufferedLoggerHandler.class)
 public class AggregationEngineHealthCheckTest {
     private static final String TEST_ORG_NPI = NPIUtil.generateNPI();
-    private static final String TEST_PROVIDER_NPI = "1";
+    private static final String TEST_PROVIDER_NPI = NPIUtil.generateNPI();
     private static final UUID aggregatorID = UUID.randomUUID();
 
     private IJobQueue queue;
