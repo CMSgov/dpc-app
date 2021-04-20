@@ -3,5 +3,5 @@
 require_relative 'config/environment'
 
 map ENV['RAILS_RELATIVE_URL_ROOT'] || '/' do
-  run MyApp::Application
+  run Rails.application
 end

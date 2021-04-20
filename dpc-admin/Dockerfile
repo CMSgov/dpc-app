@@ -25,7 +25,7 @@ COPY /dpc-admin /dpc-admin
 
 # TODO: Determine if we have to remove /bin/yarn
 RUN rm -rf /bin/yarn
-RUN RAILS_ENV=production WEBPACKER_NODE_MODULES_BIN_PATH="node_modules/.bin" SECRET_KEY_BASE=dummy bundle exec rake assets:precompile --trace
+RUN RAILS_RELATIVE_URL_ROOT="/admin" RAILS_ENV=production WEBPACKER_NODE_MODULES_BIN_PATH="node_modules/.bin" SECRET_KEY_BASE=dummy bundle exec rake assets:precompile --trace
 
 # Clean up from the build
 RUN rm -rf /usr/local/bundle/cache/*.gem && \
