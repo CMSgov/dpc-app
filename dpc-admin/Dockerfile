@@ -35,7 +35,7 @@ RUN rm -rf /usr/local/bundle/cache/*.gem && \
 FROM ruby:2.7.2-alpine
 
 # Install app dependencies
-RUN apk add --no-cache postgresql-client nodejs npm libsodium-dev &&\
+RUN apk add --no-cache postgresql-client nodejs libsodium-dev &&\
     apk add --no-cache --virtual build-deps npm tzdata
 
 # Set the working directory
