@@ -84,9 +84,9 @@ func (suite *FHIRMiddlewareTestSuite) TestFHIRFiltering() {
 		o, _ := fhir.UnmarshalOrganization(b)
 		assert.Nil(suite.T(), o.Contact)
 		assert.Nil(suite.T(), o.Telecom)
+		assert.Nil(suite.T(), o.Address)
 		assert.NotNil(suite.T(), o.Identifier)
 		assert.NotNil(suite.T(), o.Name)
-		assert.NotNil(suite.T(), o.Address)
 	})
 
 	req := httptest.NewRequest(http.MethodPost, "http://www.your-domain.com", strings.NewReader(apitest.Orgjson))
