@@ -7,6 +7,9 @@ if [ -f tmp/pids/server.pid ]; then
   rm tmp/pids/server.pid
 fi
 
+# precompile assets
+RAILS_ENV=production WEBPACKER_NODE_MODULES_BIN_PATH="node_modules/.bin" SECRET_KEY_BASE=dummy bundle exec rake assets:precompile --trace
+
 if [ "$1" == "admin" ]; then
   # Start the database service (and make accessible outside the Docker container)
   echo "Starting Rails server..."

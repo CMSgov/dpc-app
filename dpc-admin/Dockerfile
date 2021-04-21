@@ -25,7 +25,6 @@ COPY /dpc-admin /dpc-admin
 
 # TODO: Determine if we have to remove /bin/yarn
 RUN rm -rf /bin/yarn
-RUN RAILS_RELATIVE_URL_ROOT="/admin" RAILS_ENV=production WEBPACKER_NODE_MODULES_BIN_PATH="node_modules/.bin" SECRET_KEY_BASE=dummy bundle exec rake assets:precompile --trace
 
 # Clean up from the build
 RUN rm -rf /usr/local/bundle/cache/*.gem && \
@@ -36,7 +35,8 @@ RUN rm -rf /usr/local/bundle/cache/*.gem && \
 FROM ruby:2.7.2-alpine
 
 # Install app dependencies
-RUN apk add --no-cache postgresql-client nodejs tzdata libsodium-dev
+RUN apk add --no-cache postgresql-client nodejs npm libsodium-dev &&\
+    apk add --no-cache --virtual build-deps npm tzdata
 
 # Set the working directory
 RUN mkdir /dpc-admin
