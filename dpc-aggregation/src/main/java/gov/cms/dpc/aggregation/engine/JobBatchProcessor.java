@@ -63,9 +63,8 @@ public class JobBatchProcessor {
      * @param queue        the queue
      * @param job          the job to process
      * @param patientID    the current patient id to process
-     * @return A list of batch files {@link JobQueueBatchFile}
      */
-    public List<JobQueueBatchFile> processJobBatchPartial(UUID aggregatorID, IJobQueue queue, JobQueueBatch job, String patientID) {
+    public void processJobBatchPartial(UUID aggregatorID, IJobQueue queue, JobQueueBatch job, String patientID) {
         StopWatch stopWatch = StopWatch.createStarted();
         OutcomeReason failReason = null;
         final Pair<Optional<List<ConsentResult>>, Optional<OperationOutcome>> consentResult = getConsent(patientID);
@@ -93,16 +92,16 @@ public class JobBatchProcessor {
             }
         }
 
-        final var results = writeResource(job, flowable)
+        //noinspection ResultOfMethodCallIgnored
+        writeResource(job, flowable)
                 .toList()
                 .blockingGet();
         queue.completePartialBatch(job, aggregatorID);
 
-        final String resourcesRequested = job.getResourceTypes().stream().map(rt -> rt.getPath()).filter(rtName -> rtName != null).collect(Collectors.joining(";"));
+        final String resourcesRequested = job.getResourceTypes().stream().map(ResourceType::getPath).filter(Objects::nonNull).collect(Collectors.joining(";"));
         final String failReasonLabel = failReason == null ? "NA" : failReason.name();
         stopWatch.stop();
         logger.info("dpcMetric=DataExportResult,dataRetrieved={},failReason={},resourcesRequested={},duration={}", failReason == null, failReasonLabel, resourcesRequested, stopWatch.getTime());
-        return results;
     }
 
     private boolean isLookBackExempt(UUID orgId) {
@@ -234,6 +233,7 @@ public class JobBatchProcessor {
         }
     }
 
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private boolean isOptedOut(Optional<List<ConsentResult>> consentResultsOptional) {
         if (consentResultsOptional.isPresent()) {
             final List<ConsentResult> consentResults = consentResultsOptional.get();
