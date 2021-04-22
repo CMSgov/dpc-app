@@ -24,10 +24,10 @@ func (suite *FHIRFilterTestSuite) TestFilteringOrganization() {
 	assert.Nil(suite.T(), o.Telecom)
 	assert.Nil(suite.T(), o.Active)
 	assert.Nil(suite.T(), o.Text)
+	assert.Nil(suite.T(), o.Address)
 
 	assert.NotNil(suite.T(), o.Identifier)
 	assert.NotNil(suite.T(), o.Name)
-	assert.NotNil(suite.T(), o.Address)
 }
 
 func (suite *FHIRFilterTestSuite) TestFilteringGroup() {
