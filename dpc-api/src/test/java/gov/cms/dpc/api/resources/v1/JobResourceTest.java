@@ -144,6 +144,7 @@ public class JobResourceTest {
         final var completion = (JobCompletionModel) response.getEntity();
         assertAll(() -> assertEquals(JobQueueBatch.validResourceTypes.size(), completion.getOutput().size()),
                 () -> assertEquals(0, completion.getError().size()));
+        assertFalse(completion.getRequest().contains("null"));
         for (JobCompletionModel.OutputEntry entry : completion.getOutput()) {
             assertEquals(String.format("%s/Data/%s.ndjson", TEST_BASEURL, JobQueueBatchFile.formOutputFileName(runningJob.getBatchID(), entry.getType(), 0)), entry.getUrl());
         }
