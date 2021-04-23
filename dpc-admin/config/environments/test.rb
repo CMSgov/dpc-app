@@ -48,5 +48,5 @@ Rails.application.configure do
   # config.action_view.raise_on_missing_translations = true
 
   config.assets.prefix = '/admin_assets'
-  config.assets.paths << Rails.root.join("app", "assets", "fonts")
+  config.assets.paths << Rails.root.join('app', 'assets', 'fonts')
 end
