@@ -14,7 +14,6 @@ import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import javax.servlet.http.HttpServletRequest;
 
 import javax.ws.rs.core.Response;
 import java.util.UUID;
@@ -33,7 +32,7 @@ public class PatientResourceUnitTest {
 
     @BeforeEach
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
         resource = new PatientResource(attributionClient, fhirValidator, null, null);
     }
 
@@ -60,6 +59,7 @@ public class PatientResourceUnitTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void testGetPatient() {
         IReadExecutable<Patient> readExec = Mockito.mock(IReadExecutable.class);
 

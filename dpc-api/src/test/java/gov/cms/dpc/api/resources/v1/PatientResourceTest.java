@@ -7,9 +7,6 @@ import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import ca.uhn.fhir.rest.gclient.IReadExecutable;
 import ca.uhn.fhir.rest.gclient.IUpdateExecutable;
 import ca.uhn.fhir.rest.param.StringParam;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.time.OffsetDateTime;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -18,7 +15,6 @@ import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
 import gov.cms.dpc.api.TestOrganizationContext;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
-import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.common.utils.SeedProcessor;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;
@@ -45,6 +41,9 @@ import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
 import java.sql.Date;
 import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
 
@@ -270,12 +269,12 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     @Test
     @Order(6)
     void testPatientEverythingWithoutGroupFetchesData() throws IOException, URISyntaxException, GeneralSecurityException {
-        IGenericClient client = generateClient(ORGANIZATION_ID, ORGANIZATION_NPI, "patient-everything-key");
+        IGenericClient client = generateClient(ORGANIZATION_NPI, "patient-everything-key");
         APITestHelpers.setupPractitionerTest(client, parser);
 
         String mbi = MockBlueButtonClient.TEST_PATIENT_MBIS.get(2);
         Patient patient = fetchPatient(client, mbi);
-        Practitioner practitioner = fetchPractitionerByNPI(client, "1234329724");
+        Practitioner practitioner = fetchPractitionerByNPI(client);
         final String patientId = FHIRExtractors.getEntityUUID(patient.getId()).toString();
 
         // Patient without Group should still return data
@@ -305,22 +304,19 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
         assertEquals(64, resultEmptySince.getTotal(), "Should have 64 entries in Bundle");
         
         // Request with an invalid since parameter should throw an error
-        assertThrows(InvalidRequestException.class, () -> {
-            client
-                    .operation()
-                    .onInstance(new IdType("Patient", patientId))
-                    .named("$everything")
-                    .withSearchParameter(Parameters.class, "_since", new StringParam("foo"))
-                    .returnResourceType(Bundle.class)
-                    .useHttpGet()
-                    .withAdditionalHeader("X-Provenance", generateProvenance(ORGANIZATION_ID, practitioner.getId()))
-                    .execute();
-        });
+        assertThrows(InvalidRequestException.class, () -> client
+                .operation()
+                .onInstance(new IdType("Patient", patientId))
+                .named("$everything")
+                .withSearchParameter(Parameters.class, "_since", new StringParam("foo"))
+                .returnResourceType(Bundle.class)
+                .useHttpGet()
+                .withAdditionalHeader("X-Provenance", generateProvenance(ORGANIZATION_ID, practitioner.getId()))
+                .execute());
 
         // Request with a since parameter in the future should throw an error
         String sinceInvalid = OffsetDateTime.now(ZoneId.of("America/Puerto_Rico")).plusDays(10).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-        assertThrows(InvalidRequestException.class, () -> {
-        client
+        assertThrows(InvalidRequestException.class, () -> client
                 .operation()
                 .onInstance(new IdType("Patient", patientId))
                 .named("$everything")
@@ -328,8 +324,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
                 .returnResourceType(Bundle.class)
                 .useHttpGet()
                 .withAdditionalHeader("X-Provenance", generateProvenance(ORGANIZATION_ID, practitioner.getId()))
-                .execute();
-        });
+                .execute());
         
         // Request with a valid since parameter should return data
         String sinceValid = OffsetDateTime.now(ZoneId.of("America/Puerto_Rico")).minusSeconds(5).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
@@ -349,12 +344,12 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     @Test
     @Order(7)
     void testPatientEverythingWithGroupFetchesData() throws IOException, URISyntaxException, GeneralSecurityException {
-        IGenericClient client = generateClient(ORGANIZATION_ID, ORGANIZATION_NPI, "patient-everything-key-2");
+        IGenericClient client = generateClient(ORGANIZATION_NPI, "patient-everything-key-2");
         APITestHelpers.setupPractitionerTest(client, parser);
 
         String mbi = MockBlueButtonClient.TEST_PATIENT_MBIS.get(2);
         Patient patient = fetchPatient(client, mbi);
-        Practitioner practitioner = fetchPractitionerByNPI(client, "1234329724");
+        Practitioner practitioner = fetchPractitionerByNPI(client);
         final String patientId = FHIRExtractors.getEntityUUID(patient.getId()).toString();
 
         // Patient in Group should also return data
@@ -397,8 +392,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
 
         assertEquals(64, resultEmptySince.getTotal(), "Should have 64 entries in Bundle");
 
-        assertThrows(InvalidRequestException.class, () -> {
-        client
+        assertThrows(InvalidRequestException.class, () -> client
                 .operation()
                 .onInstance(new IdType("Patient", patientId))
                 .named("$everything")
@@ -406,13 +400,10 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
                 .returnResourceType(Bundle.class)
                 .useHttpGet()
                 .withAdditionalHeader("X-Provenance", generateProvenance(ORGANIZATION_ID, practitioner.getId()))
-                .execute();
-
-        });
+                .execute());
 
         String sinceInvalid = OffsetDateTime.now(ZoneId.of("America/Puerto_Rico")).plusDays(10).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-        assertThrows(InvalidRequestException.class, () -> {
-        client
+        assertThrows(InvalidRequestException.class, () -> client
                 .operation()
                 .onInstance(new IdType("Patient", patientId))
                 .named("$everything")
@@ -420,9 +411,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
                 .returnResourceType(Bundle.class)
                 .useHttpGet()
                 .withAdditionalHeader("X-Provenance", generateProvenance(ORGANIZATION_ID, practitioner.getId()))
-                .execute();
-
-        });
+                .execute());
 
         // Request with a valid since parameter should return data
         String sinceValid = OffsetDateTime.now(ZoneId.of("America/Puerto_Rico")).minusSeconds(5).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
@@ -442,12 +431,12 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     @Test
     @Order(8)
     void testPatientEverythingForOptedOutPatient() throws IOException, URISyntaxException, GeneralSecurityException {
-        IGenericClient client = generateClient(ORGANIZATION_ID, ORGANIZATION_NPI, "patient-everything-key-3");
+        IGenericClient client = generateClient(ORGANIZATION_NPI, "patient-everything-key-3");
         APITestHelpers.setupPractitionerTest(client, parser);
 
         String mbi = MockBlueButtonClient.TEST_PATIENT_MBIS.get(3);
         Patient patient = fetchPatient(client, mbi);
-        Practitioner practitioner = fetchPractitionerByNPI(client, "1234329724");
+        Practitioner practitioner = fetchPractitionerByNPI(client);
         final String patientId = FHIRExtractors.getEntityUUID(patient.getId()).toString();
 
         optOutPatient(mbi);
@@ -462,7 +451,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
                 .withAdditionalHeader("X-Provenance", generateProvenance(ORGANIZATION_ID, practitioner.getId()));
 
 
-        InternalErrorException exception = assertThrows(InternalErrorException.class, () -> getEverythingOperation.execute(), "Expected Internal server error when retrieving opted out patient.");
+        InternalErrorException exception = assertThrows(InternalErrorException.class, getEverythingOperation::execute, "Expected Internal server error when retrieving opted out patient.");
         assertTrue(exception.getResponseBody().contains("\"text\":\"Data not available for opted out patient\""), "Incorrect or missing operation outcome in response body.");
     }
 
@@ -542,9 +531,9 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
 
     }
 
-    private IGenericClient generateClient(String orgID, String orgNPI, String keyLabel) throws IOException, URISyntaxException, GeneralSecurityException {
-        final String macaroon = FHIRHelpers.registerOrganization(attrClient, parser, orgID, orgNPI, getAdminURL());
-        final Pair<UUID, PrivateKey> uuidPrivateKeyPair = APIAuthHelpers.generateAndUploadKey(keyLabel, orgID, GOLDEN_MACAROON, getBaseURL());
+    private IGenericClient generateClient(String orgNPI, String keyLabel) throws IOException, URISyntaxException, GeneralSecurityException {
+        final String macaroon = FHIRHelpers.registerOrganization(attrClient, parser, APITestHelpers.ORGANIZATION_ID, orgNPI, getAdminURL());
+        final Pair<UUID, PrivateKey> uuidPrivateKeyPair = APIAuthHelpers.generateAndUploadKey(keyLabel, APITestHelpers.ORGANIZATION_ID, GOLDEN_MACAROON, getBaseURL());
         return APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), macaroon, uuidPrivateKeyPair.getLeft(), uuidPrivateKeyPair.getRight(), false, true);
     }
 
@@ -570,24 +559,15 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
                 .execute();
     }
 
-    private Practitioner fetchPractitionerByNPI(IGenericClient client, String npi) {
+    private Practitioner fetchPractitionerByNPI(IGenericClient client) {
         Bundle practSearch = client
                 .search()
                 .forResource(Practitioner.class)
-                .where(Practitioner.IDENTIFIER.exactly().code(npi))
+                .where(Practitioner.IDENTIFIER.exactly().code("1234329724"))
                 .returnBundle(Bundle.class)
                 .encodedJson()
                 .execute();
         return (Practitioner) practSearch.getEntry().get(0).getResource();
-    }
-
-    private Practitioner createRandomPractitionerForOrg(IGenericClient client, String orgId) {
-        Practitioner practitioner = APITestHelpers.createPractitionerResource(NPIUtil.generateNPI(), orgId);
-        MethodOutcome methodOutcome = client.create()
-                .resource(practitioner)
-                .encodedJson()
-                .execute();
-        return (Practitioner) methodOutcome.getResource();
     }
 
     private void optOutPatient(String mbi){

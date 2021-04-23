@@ -118,7 +118,7 @@ class AggregationEngineTest {
                 Collections.singletonList(ResourceType.Patient),
                 null,
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                null, true);
+                null, null, true);
 
         // Throw a failure on the first poll, then be successful
         JobQueueFailure ex = new JobQueueFailure("Any failure");
@@ -211,7 +211,7 @@ class AggregationEngineTest {
                 Collections.singletonList(ResourceType.Patient),
                 null,
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                null, true);
+                null, null, true);
 
         // Work the batch
         queue.claimBatch(engine.getAggregatorID())
@@ -243,7 +243,7 @@ class AggregationEngineTest {
                 Collections.singletonList(ResourceType.Patient),
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                null, true);
+                null, null, true);
 
         // Work the batch
         queue.claimBatch(engine.getAggregatorID())
@@ -275,7 +275,7 @@ class AggregationEngineTest {
                 JobQueueBatch.validResourceTypes,
                 null,
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                null, true);
+                null, null, true);
 
         // Work the batch
         queue.claimBatch(engine.getAggregatorID())
@@ -306,7 +306,7 @@ class AggregationEngineTest {
                 JobQueueBatch.validResourceTypes,
                 null,
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                null, true);
+                null, null, true);
 
         // Assert the queue size
         assertEquals(2, queue.queueSize());
@@ -330,7 +330,7 @@ class AggregationEngineTest {
                 JobQueueBatch.validResourceTypes,
                 null,
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                null, true);
+                null, null, true);
 
         // Work the batch
         engine.stop();
@@ -370,7 +370,7 @@ class AggregationEngineTest {
                 Collections.singletonList(ResourceType.Patient),
                 null,
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                null, true);
+                null, null, true);
 
         // Work the batch
         queue.claimBatch(engine.getAggregatorID())
@@ -407,7 +407,7 @@ class AggregationEngineTest {
                 Collections.singletonList(ResourceType.Patient),
                 null,
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                null, true);
+                null, null, true);
 
         // Work the batch
         queue.claimBatch(engine.getAggregatorID())
@@ -441,7 +441,7 @@ class AggregationEngineTest {
                 Collections.singletonList(ResourceType.Schedule),
                 null,
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                null, true);
+                null, null, true);
 
         // Work the batch
         queue.claimBatch(engine.getAggregatorID())
@@ -469,7 +469,7 @@ class AggregationEngineTest {
                 Collections.singletonList(ResourceType.Schedule),
                 null,
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                null, true);
+                null, null, true);
 
         // Throw an exception when failing the batch
         Exception e = new RuntimeException("Failed to mark batch as failed");
@@ -504,7 +504,7 @@ class AggregationEngineTest {
                 List.of(ResourceType.ExplanationOfBenefit, ResourceType.Patient),
                 null,
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                null, true);
+                null, null, true);
 
         // Work the batch
         queue.claimBatch(engine.getAggregatorID())
@@ -548,7 +548,7 @@ class AggregationEngineTest {
                 List.of(ResourceType.ExplanationOfBenefit, ResourceType.Patient),
                 null,
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                null, true);
+                null, null, true);
 
         queue.claimBatch(engine.getAggregatorID())
                 .ifPresent(engine::processJobBatch);
@@ -591,7 +591,7 @@ class AggregationEngineTest {
                 Collections.singletonList(ResourceType.Patient),
                 null,
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                null, true);
+                null, null,  true);
 
         AggregationEngineHealthCheck healthCheck = new AggregationEngineHealthCheck(engine);
         Assert.assertTrue(healthCheck.check().isHealthy());
@@ -625,7 +625,7 @@ class AggregationEngineTest {
                 Collections.singletonList(ResourceType.Patient),
                 null,
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                null, true);
+                null, null, true);
 
         // Work the batch
         queue.claimBatch(engine.getAggregatorID())

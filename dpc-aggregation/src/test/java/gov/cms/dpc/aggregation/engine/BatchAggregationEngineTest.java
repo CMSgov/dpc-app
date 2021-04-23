@@ -104,7 +104,7 @@ class BatchAggregationEngineTest {
                 Collections.singletonList(ResourceType.ExplanationOfBenefit),
                 MockBlueButtonClient.TEST_LAST_UPDATED.minusSeconds(1),
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                null, true);
+                null, null, true);
 
         // Do the job
         queue.claimBatch(engine.getAggregatorID())
@@ -141,7 +141,7 @@ class BatchAggregationEngineTest {
                 JobQueueBatch.validResourceTypes,
                 MockBlueButtonClient.TEST_LAST_UPDATED.minusSeconds(1),
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                null, true);
+                null, null, true);
 
         // Do the job
         queue.claimBatch(engine.getAggregatorID())
@@ -181,7 +181,7 @@ class BatchAggregationEngineTest {
                 Collections.singletonList(ResourceType.ExplanationOfBenefit),
                 MockBlueButtonClient.TEST_LAST_UPDATED.minusSeconds(1),
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                null, true);
+                null, null, true);
 
         // Do the job
         queue.claimBatch(engine.getAggregatorID())
@@ -221,7 +221,7 @@ class BatchAggregationEngineTest {
                 Collections.singletonList(ResourceType.ExplanationOfBenefit),
                 MockBlueButtonClient.TEST_LAST_UPDATED.minusSeconds(1),
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                null, true);
+                null, null, true);
 
         // Do the job
         queue.claimBatch(engine.getAggregatorID())
@@ -264,7 +264,7 @@ class BatchAggregationEngineTest {
                 Collections.singletonList(ResourceType.ExplanationOfBenefit),
                 MockBlueButtonClient.TEST_LAST_UPDATED.minusSeconds(1),
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                null, true);
+                null, null, true);
 
         // Do the job
         queue.claimBatch(engine.getAggregatorID())
@@ -307,7 +307,7 @@ class BatchAggregationEngineTest {
                 Collections.singletonList(ResourceType.ExplanationOfBenefit),
                 MockBlueButtonClient.TEST_LAST_UPDATED.minusSeconds(1),
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                null, true);
+                null, null, true);
 
         // Do the job
         queue.claimBatch(engine.getAggregatorID())
@@ -350,7 +350,7 @@ class BatchAggregationEngineTest {
                 Collections.singletonList(ResourceType.ExplanationOfBenefit),
                 MockBlueButtonClient.TEST_LAST_UPDATED.minusSeconds(1),
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                null, true);
+                null, null, true);
 
         // Do the job
         queue.claimBatch(engine.getAggregatorID())
