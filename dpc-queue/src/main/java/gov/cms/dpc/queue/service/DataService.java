@@ -46,7 +46,7 @@ public class DataService {
     }
 
     public Resource retrieveData(UUID organizationId, UUID providerId, String orgNPI, String providerNPI, List<String> patientIds, ResourceType... resourceTypes) {
-        return retrieveData(organizationId, providerId, orgNPI, providerNPI, patientIds, null, OffsetDateTime.now(ZoneOffset.UTC), null, resourceTypes);
+        return retrieveData(organizationId, providerId, orgNPI, providerNPI, patientIds, null, OffsetDateTime.now(ZoneOffset.UTC), null, null, resourceTypes);
     }
 
     /**
@@ -60,6 +60,7 @@ public class DataService {
      * @param since           Retrieve data since this date
      * @param transactionTime BFD Transaction Time
      * @param requestingIP    IP Address of request
+     * @param requestUrl      URL of original request
      * @param resourceTypes   List of ResourceType data to retrieve
      * @return Resource
      */
@@ -70,8 +71,8 @@ public class DataService {
                                  List<String> patientMBIs,
                                  OffsetDateTime since,
                                  OffsetDateTime transactionTime,
-                                 String requestingIP, ResourceType... resourceTypes) {
-        UUID jobID = this.queue.createJob(organizationID, providerID.toString(), orgNPI, providerNPI, patientMBIs, List.of(resourceTypes), since, transactionTime, requestingIP, false);
+                                 String requestingIP, String requestUrl, ResourceType... resourceTypes) {
+        UUID jobID = this.queue.createJob(organizationID, providerID.toString(), orgNPI, providerNPI, patientMBIs, List.of(resourceTypes), since, transactionTime, requestingIP, requestUrl, false);
         LOGGER.info("Patient everything export job created with job_id={} _since={}", jobID.toString(), since);
 
         Optional<List<JobQueueBatch>> optionalBatches = waitForJobToComplete(jobID, organizationID, this.queue);

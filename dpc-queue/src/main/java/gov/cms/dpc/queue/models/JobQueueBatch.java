@@ -154,6 +154,12 @@ public class JobQueueBatch implements Serializable {
     protected OffsetDateTime completeTime;
 
     /**
+     * The url used when the job was started
+     */
+    @Column(name = "request_url", nullable = true)
+    protected String requestUrl;
+
+    /**
      * The list of job results
      * <p>
      * We need to use {@link FetchType#EAGER}, otherwise the session will close before we actually read the job results and the call will fail.
@@ -183,7 +189,10 @@ public class JobQueueBatch implements Serializable {
                          List<String> patients,
                          List<ResourceType> resourceTypes,
                          OffsetDateTime since,
-                         OffsetDateTime transactionTime, String requestingIP, boolean isBulk) {
+                         OffsetDateTime transactionTime,
+                         String requestingIP,
+                         String requestUrl,
+                         boolean isBulk) {
         this.batchID = UUID.randomUUID();
         this.jobID = jobID;
         this.orgID = orgID;
@@ -198,6 +207,7 @@ public class JobQueueBatch implements Serializable {
         this.submitTime = OffsetDateTime.now(ZoneOffset.UTC);
         this.jobQueueBatchFiles = new ArrayList<>();
         this.requestingIP = requestingIP;
+        this.requestUrl = requestUrl;
         this.isBulk = isBulk;
     }
 
@@ -302,6 +312,10 @@ public class JobQueueBatch implements Serializable {
 
     public String getRequestingIP() {
         return requestingIP;
+    }
+
+    public String getRequestUrl() {
+        return requestUrl;
     }
 
     public boolean isBulk() {
@@ -416,10 +430,8 @@ public class JobQueueBatch implements Serializable {
 
     /**
      * Marks the job batch as failed.
-     *
-     * @param aggregatorID - the current aggregator working the job
      */
-    public void setFailedStatus(UUID aggregatorID) {
+    public void setFailedStatus() {
         this.status = JobStatus.FAILED;
         this.aggregatorID = null;
         completeTime = OffsetDateTime.now(ZoneOffset.UTC);
@@ -493,6 +505,8 @@ public class JobQueueBatch implements Serializable {
                 .append(batchID, that.batchID)
                 .append(jobID, that.jobID)
                 .append(orgID, that.orgID)
+                .append(orgNPI, that.orgNPI)
+                .append(providerNPI, that.providerNPI)
                 .append(providerID, that.providerID)
                 .append(status, that.status)
                 .append(priority, that.priority)
@@ -506,6 +520,8 @@ public class JobQueueBatch implements Serializable {
                 .append(submitTime, that.submitTime)
                 .append(startTime, that.startTime)
                 .append(completeTime, that.completeTime)
+                .append(requestingIP, that.requestingIP)
+                .append(requestUrl, that.requestUrl)
                 .append(jobQueueBatchFiles, that.jobQueueBatchFiles)
                 .isEquals();
     }
@@ -531,6 +547,8 @@ public class JobQueueBatch implements Serializable {
                 .append(submitTime)
                 .append(startTime)
                 .append(completeTime)
+                .append(requestingIP)
+                .append(requestUrl)
                 .toHashCode();
     }
 
@@ -540,9 +558,9 @@ public class JobQueueBatch implements Serializable {
                 "batchID=" + batchID +
                 ", jobID=" + jobID +
                 ", orgID=" + orgID +
-                ", orgNPI=" + orgNPI +
+                ", orgNPI='" + orgNPI + '\'' +
                 ", providerID='" + providerID + '\'' +
-                ", providerNPI=" + providerNPI +
+                ", providerNPI='" + providerNPI + '\'' +
                 ", status=" + status +
                 ", priority=" + priority +
                 ", patients=" + patients +
@@ -555,6 +573,9 @@ public class JobQueueBatch implements Serializable {
                 ", submitTime=" + submitTime +
                 ", startTime=" + startTime +
                 ", completeTime=" + completeTime +
+                ", requestUrl='" + requestUrl + '\'' +
+                ", requestingIP='" + requestingIP + '\'' +
+                ", isBulk=" + isBulk +
                 '}';
     }
 }

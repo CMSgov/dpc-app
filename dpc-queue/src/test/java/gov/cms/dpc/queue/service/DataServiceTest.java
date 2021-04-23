@@ -62,23 +62,19 @@ public class DataServiceTest {
 
         Mockito.doThrow(new RuntimeException("error")).when(queue).getJobBatches(Mockito.any(UUID.class));
 
-        Assertions.assertThrows(DataRetrievalException.class, () -> {
-            dataService.retrieveData(orgID, providerID, orgNPI, providerNPI, List.of(patientID.toString()), resourceType);
-        });
+        Assertions.assertThrows(DataRetrievalException.class, () -> dataService.retrieveData(orgID, providerID, orgNPI, providerNPI, List.of(patientID.toString()), resourceType));
     }
 
     @Test
-    public void whenGetJobBatchesReturnsFailedJob() throws IllegalAccessException {
+    public void whenGetJobBatchesReturnsFailedJob() {
         ResourceType resourceType = ResourceType.ExplanationOfBenefit;
 
         workJob(true, resourceType);
-        Assertions.assertThrows(DataRetrievalException.class, () -> {
-            dataService.retrieveData(orgID, providerID, orgNPI, providerNPI, List.of(patientID.toString()), resourceType);
-        });
+        Assertions.assertThrows(DataRetrievalException.class, () -> dataService.retrieveData(orgID, providerID, orgNPI, providerNPI, List.of(patientID.toString()), resourceType));
     }
 
     @Test
-    public void whenGetJobBatchesReturnsCompletedJobWithResourceType() throws IllegalAccessException {
+    public void whenGetJobBatchesReturnsCompletedJobWithResourceType() {
         ResourceType resourceType = ResourceType.ExplanationOfBenefit;
 
         workJob(false, resourceType);
@@ -87,7 +83,7 @@ public class DataServiceTest {
     }
 
     @Test
-    public void whenGetJobBatchesReturnsCompletedJobWithOperationOutcome() throws IllegalAccessException {
+    public void whenGetJobBatchesReturnsCompletedJobWithOperationOutcome() {
         ResourceType resourceType = ResourceType.ExplanationOfBenefit;
 
         workJob(false, ResourceType.OperationOutcome);
@@ -96,15 +92,13 @@ public class DataServiceTest {
     }
 
     @Test
-    public void whenPassingInNoResourceTypes() throws IllegalAccessException {
+    public void whenPassingInNoResourceTypes() {
         workJob(false, ResourceType.ExplanationOfBenefit);
-        Assertions.assertThrows(DataRetrievalException.class, () -> {
-            dataService.retrieveData(orgID, providerID, orgNPI, providerNPI, List.of(patientID.toString()));
-        });
+        Assertions.assertThrows(DataRetrievalException.class, () -> dataService.retrieveData(orgID, providerID, orgNPI, providerNPI, List.of(patientID.toString())));
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")
-    private void workJob(boolean failBatch, ResourceType resourceType) throws IllegalAccessException {
+    private void workJob(boolean failBatch, ResourceType resourceType) {
         Mockito.doAnswer((mock) -> {
             Optional<JobQueueBatch> workBatch = queue.claimBatch(aggregatorID);
             while (workBatch.flatMap(batch -> batch.fetchNextPatient(aggregatorID)).isPresent()) {
@@ -119,7 +113,5 @@ public class DataServiceTest {
             }
             return List.of(workBatch.get());
         }).when(queue).getJobBatches(Mockito.any());
-
     }
-
 }

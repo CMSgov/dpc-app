@@ -126,7 +126,7 @@ public class JobResource extends AbstractJobResource {
         String progress = "QUEUED: 0.00%";
 
         if (jobStatusSet.contains(JobStatus.RUNNING) || jobStatusSet.contains(JobStatus.COMPLETED)) {
-            final int processedPatients = batches.stream().mapToInt(b -> b.getPatientsProcessed()).sum();
+            final int processedPatients = batches.stream().mapToInt(JobQueueBatch::getPatientsProcessed).sum();
             final int totalPatients = batches.stream().mapToInt(b -> b.getPatients().size()).sum();
             progress = String.format("RUNNING: %.2f%%", totalPatients > 0 ? (processedPatients * 100.0f) / totalPatients : 0f);
         }
@@ -228,6 +228,7 @@ public class JobResource extends AbstractJobResource {
                 new JobCompletionModel.FhirExtension(JobCompletionModel.COMPLETE_TIME_URL, completeTime));
     }
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
     public static OffsetDateTime getLatestBatchCompleteTime(List<JobQueueBatch> batches) {
         return batches.stream()
                 .filter(b -> b.getCompleteTime().isPresent())

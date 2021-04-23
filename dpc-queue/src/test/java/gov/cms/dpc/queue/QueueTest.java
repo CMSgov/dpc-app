@@ -93,8 +93,8 @@ class QueueTest {
 
     void testSimpleSubmissionCompletion(JobQueueCommon queue) {
         // Add a couple of jobs
-        var firstJobID = queue.createJob(orgID, providerID, orgNPI, providerNPI, patientMBIs, Collections.singletonList(ResourceType.Patient), null, OffsetDateTime.now(ZoneOffset.UTC), null, true);
-        var secondJobID = queue.createJob(orgID, providerID, orgNPI, providerNPI, patientMBIs, Collections.singletonList(ResourceType.Patient), null, OffsetDateTime.now(ZoneOffset.UTC), null, true);
+        var firstJobID = queue.createJob(orgID, providerID, orgNPI, providerNPI, patientMBIs, Collections.singletonList(ResourceType.Patient), null, OffsetDateTime.now(ZoneOffset.UTC), null, null, true);
+        var secondJobID = queue.createJob(orgID, providerID, orgNPI, providerNPI, patientMBIs, Collections.singletonList(ResourceType.Patient), null, OffsetDateTime.now(ZoneOffset.UTC), null, null, true);
         assertEquals(firstJobID.getClass(), UUID.class);
         assertEquals(secondJobID.getClass(), UUID.class);
         assertEquals(2, queue.queueSize(), "Should have 2 jobs");
@@ -173,8 +173,7 @@ class QueueTest {
                 patientMBIs,
                 Arrays.asList(ResourceType.Patient, ResourceType.ExplanationOfBenefit),
                 null,
-                OffsetDateTime.now(ZoneOffset.UTC), null, true);
-
+                OffsetDateTime.now(ZoneOffset.UTC), null, null, true);
         assertEquals(jobID.getClass(), UUID.class);
 
         // Retrieve the job with both resources
@@ -219,7 +218,7 @@ class QueueTest {
                 patientMBIs,
                 Arrays.asList(ResourceType.Patient, ResourceType.ExplanationOfBenefit),
                 transactionTime,
-                transactionTime, null, true);
+                transactionTime, null, null, true);
 
         // Check that the Job has a empty queue
         final Optional<JobQueueBatch> job = queue.getJobBatches(jobId).stream().findFirst();
@@ -242,6 +241,7 @@ class QueueTest {
                 Collections.singletonList(ResourceType.ExplanationOfBenefit),
                 null,
                 OffsetDateTime.now(ZoneOffset.UTC),
+                null,
                 null,
                 true);
 

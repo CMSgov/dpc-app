@@ -25,6 +25,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -56,9 +59,12 @@ public class GroupResourceUnitTest {
     GroupResource resource;
 
     @BeforeEach
-    public void setUp() {
+    public void setUp() throws URISyntaxException {
         MockitoAnnotations.openMocks(this);
-        resource = new GroupResource(mockQueue, attributionClient, null, mockBfdClient);
+        resource = new GroupResource(mockQueue, attributionClient, "http://localhost:3002/v1", mockBfdClient);
+        UriInfo mockUriInfo = mock(UriInfo.class);
+        resource.uriInfo = mockUriInfo;
+        when(mockUriInfo.getRequestUri()).thenReturn(new URI("http://localhost:3002/v1/Group/1234567890/$export"));
     }
 
     @Test
@@ -226,7 +232,7 @@ public class GroupResourceUnitTest {
         when(mockBfdClient.requestPatientFromServer(SYNTHETIC_BENE_ID, null, null).getMeta()).thenReturn(bfdTransactionMeta);
 
         //Mock create job
-        when(mockQueue.createJob(any(), any(), any(), any(), any(), any(), any(), any(), any(), anyBoolean())).thenReturn(UUID.randomUUID());
+        when(mockQueue.createJob(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), anyBoolean())).thenReturn(UUID.randomUUID());
 
 
         //Past date with Z offset
@@ -371,7 +377,7 @@ public class GroupResourceUnitTest {
                 .thenReturn(new Bundle());
 
         //Mock create job
-        when(mockQueue.createJob(any(), any(), any(), any(), any(), any(), any(), any(), any(), anyBoolean())).thenReturn(UUID.randomUUID());
+        when(mockQueue.createJob(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), anyBoolean())).thenReturn(UUID.randomUUID());
 
         Assertions.assertDoesNotThrow(() -> {
             resource.export(organizationPrincipal, "roster-id", "Coverage", FHIRMediaTypes.APPLICATION_NDJSON, "2017-01-01T00:00:00Z", "respond-async", request);
@@ -385,17 +391,11 @@ public class GroupResourceUnitTest {
             resource.export(organizationPrincipal, "roster-id", "Coverage", FHIRMediaTypes.NDJSON, "2017-01-01T00:00:00Z", "respond-async", request);
         });
 
-        Assertions.assertThrows(BadRequestException.class, () -> {
-            resource.export(organizationPrincipal, "roster-id", "Coverage", FHIR_JSON, "2017-01-01T00:00:00Z", "respond-async", request);
-        });
+        Assertions.assertThrows(BadRequestException.class, () -> resource.export(organizationPrincipal, "roster-id", "Coverage", FHIR_JSON, "2017-01-01T00:00:00Z", "respond-async", request));
 
-        Assertions.assertThrows(BadRequestException.class, () -> {
-            resource.export(organizationPrincipal, "roster-id", "Coverage", null, "2017-01-01T00:00:00Z", "respond-async", request);
-        });
+        Assertions.assertThrows(BadRequestException.class, () -> resource.export(organizationPrincipal, "roster-id", "Coverage", null, "2017-01-01T00:00:00Z", "respond-async", request));
 
-        Assertions.assertThrows(BadRequestException.class, () -> {
-            resource.export(organizationPrincipal, "roster-id", "Coverage", "", "2017-01-01T00:00:00Z", "respond-async", request);
-        });
+        Assertions.assertThrows(BadRequestException.class, () -> resource.export(organizationPrincipal, "roster-id", "Coverage", "", "2017-01-01T00:00:00Z", "respond-async", request));
 
         //3 non bad requests
         verify(request, times(3)).getHeader(HttpHeaders.X_FORWARDED_FOR);
