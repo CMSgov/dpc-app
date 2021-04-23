@@ -2,9 +2,10 @@
 
 Rails.application.routes.draw do
   devise_for :users, path: 'users', controllers: {
-    sessions: "users/sessions",
-    registrations: "users/registrations",
-    passwords: "users/passwords"
+    confirmations: 'confirmations',
+    sessions: 'users/sessions',
+    registrations: 'users/registrations',
+    passwords: 'users/passwords'
   }
 
   authenticated :user do
@@ -15,5 +16,10 @@ Rails.application.routes.draw do
 
   devise_scope :user do
     root to: "devise/sessions#new"
+  end
+
+  if Rails.env.development?
+    require 'sidekiq/web'
+    mount Sidekiq::Web, at: '/sidekiq'
   end
 end
