@@ -37,6 +37,7 @@ import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 import java.net.URI;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -60,6 +61,9 @@ public class GroupResource extends AbstractGroupResource {
     private final IGenericClient client;
     private final String baseURL;
     private final BlueButtonClient bfdClient;
+
+    @Context
+    UriInfo uriInfo;
 
     @Inject
     public GroupResource(IJobQueue queue, @Named("attribution") IGenericClient client, @APIV1 String baseURL, BlueButtonClient bfdClient) {
@@ -296,13 +300,15 @@ public class GroupResource extends AbstractGroupResource {
         final String orgNPI = fetchOrganizationNPI(new IdType("Organization", orgID.toString()));
         final String providerNPI = FHIRExtractors.getAttributedNPI(group);
 
-        // Handle the _type query parameter
+        // Handle the _type and since query parameters
         final var resources = handleTypeQueryParam(resourceTypes);
         final var since = handleSinceQueryParam(sinceParam);
+
         final var transactionTime = APIHelpers.fetchTransactionTime(bfdClient);
         final var requestingIP = APIHelpers.fetchRequestingIP(request);
+        final String requestUrl = uriInfo.getRequestUri().toString();
 
-        final UUID jobID = this.queue.createJob(orgID, orgNPI, providerNPI, attributedPatients, resources, since, transactionTime, requestingIP, true);
+        final UUID jobID = this.queue.createJob(orgID, orgNPI, providerNPI, attributedPatients, resources, since, transactionTime, requestingIP, requestUrl, true);
         final int totalPatients = attributedPatients == null ? 0 : attributedPatients.size();
         final String resourcesRequested = resources.stream().map(ResourceType::getPath).filter(Objects::nonNull).collect(Collectors.joining(";"));
         logger.info("dpcMetric=jobCreated,jobId={},orgId={},groupId={},totalPatients={},resourcesRequested={}", jobID, orgID, rosterID, totalPatients, resourcesRequested);
