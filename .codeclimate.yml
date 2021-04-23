@@ -15,7 +15,6 @@ exclude_patterns:
   - "**/vendor/"
   - "**/*_test.go"
   - "**/*.d.ts"
-  - "**/*.erb"
 checks:
   # IntelliJ generates suspicious equals/hashcode methods.
   # So we bump the complexity metric to 9, which should weed them out
@@ -45,7 +44,7 @@ plugins:
     enabled: true
     channel: rubocop-0-83
     config:
-      file: "dpc-web/.rubocop.yml"
+      file: "dpc-admin/.rubocop.yml"
   # Bookmarking to enable govet when issue fixed with false dependency errors
   govet:
     enabled: false
