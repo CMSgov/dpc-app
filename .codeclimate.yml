@@ -15,6 +15,7 @@ exclude_patterns:
   - "**/vendor/"
   - "**/*_test.go"
   - "**/*.d.ts"
+  - "**/*.erb"
 checks:
   # IntelliJ generates suspicious equals/hashcode methods.
   # So we bump the complexity metric to 9, which should weed them out
