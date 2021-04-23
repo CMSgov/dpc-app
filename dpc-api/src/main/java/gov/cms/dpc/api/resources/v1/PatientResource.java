@@ -215,7 +215,7 @@ public class PatientResource extends AbstractPatientResource {
         final String practitionerNPI = FHIRExtractors.findMatchingIdentifier(practitioner.getIdentifier(), DPCIdentifierSystem.NPPES).getValue();
 
         final String requestingIP = APIHelpers.fetchRequestingIP(request);
-        final String requestUrl = uriInfo.getRequestUri().toString();
+        final String requestUrl = APIHelpers.fetchRequestUrl(uriInfo);
         Resource result = dataService.retrieveData(orgId, orgNPI, practitionerNPI, List.of(patientMbi), since, APIHelpers.fetchTransactionTime(bfdClient),
                 requestingIP, requestUrl, ResourceType.Patient, ResourceType.ExplanationOfBenefit, ResourceType.Coverage);
         if (ResourceType.Bundle.equals(result.getResourceType())) {

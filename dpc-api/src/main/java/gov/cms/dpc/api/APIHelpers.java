@@ -9,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.core.UriInfo;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
@@ -92,5 +93,12 @@ public class APIHelpers {
             ipAddress = request.getRemoteAddr();
         }
         return ipAddress;
+    }
+
+    public static String fetchRequestUrl(UriInfo uriInfo) {
+        if (uriInfo == null) {
+            return null;
+        }
+        return uriInfo.getRequestUri().toString();
     }
 }

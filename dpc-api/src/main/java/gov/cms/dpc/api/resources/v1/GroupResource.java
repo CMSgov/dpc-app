@@ -306,7 +306,7 @@ public class GroupResource extends AbstractGroupResource {
 
         final var transactionTime = APIHelpers.fetchTransactionTime(bfdClient);
         final var requestingIP = APIHelpers.fetchRequestingIP(request);
-        final String requestUrl = uriInfo.getRequestUri().toString();
+        final String requestUrl = APIHelpers.fetchRequestUrl(uriInfo);
 
         final UUID jobID = this.queue.createJob(orgID, orgNPI, providerNPI, attributedPatients, resources, since, transactionTime, requestingIP, requestUrl, true);
         final int totalPatients = attributedPatients == null ? 0 : attributedPatients.size();
