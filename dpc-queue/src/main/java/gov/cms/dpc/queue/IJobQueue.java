@@ -26,6 +26,7 @@ public interface IJobQueue {
      * @param since           - The since parameter to use for the requests. May be null.
      * @param transactionTime - The transactionTime of the job
      * @param requestingIP    - The IP address where the request came from
+     * @param requestUrl      - The URL of the original request
      * @param isBulk          - Flag to indicate bulk request
      * @return The UUID of the created job
      */
@@ -35,7 +36,10 @@ public interface IJobQueue {
                    List<String> mbis,
                    List<ResourceType> resourceTypes,
                    OffsetDateTime since,
-                   OffsetDateTime transactionTime, String requestingIP, boolean isBulk);
+                   OffsetDateTime transactionTime,
+                   String requestingIP,
+                   String requestUrl,
+                   boolean isBulk);
 
     /**
      * Find a batch in the queue, regardless of job status. Does not alter the batch.
