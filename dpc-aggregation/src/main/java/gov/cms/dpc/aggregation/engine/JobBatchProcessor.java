@@ -63,8 +63,9 @@ public class JobBatchProcessor {
      * @param queue        the queue
      * @param job          the job to process
      * @param patientID    the current patient id to process
+     * @return A list of batch files {@link JobQueueBatchFile}
      */
-    public void processJobBatchPartial(UUID aggregatorID, IJobQueue queue, JobQueueBatch job, String patientID) {
+    public List<JobQueueBatchFile> processJobBatchPartial(UUID aggregatorID, IJobQueue queue, JobQueueBatch job, String patientID) {
         StopWatch stopWatch = StopWatch.createStarted();
         OutcomeReason failReason = null;
         final Pair<Optional<List<ConsentResult>>, Optional<OperationOutcome>> consentResult = getConsent(patientID);
@@ -92,8 +93,7 @@ public class JobBatchProcessor {
             }
         }
 
-        //noinspection ResultOfMethodCallIgnored
-        writeResource(job, flowable)
+        final var results = writeResource(job, flowable)
                 .toList()
                 .blockingGet();
         queue.completePartialBatch(job, aggregatorID);
@@ -102,6 +102,7 @@ public class JobBatchProcessor {
         final String failReasonLabel = failReason == null ? "NA" : failReason.name();
         stopWatch.stop();
         logger.info("dpcMetric=DataExportResult,dataRetrieved={},failReason={},resourcesRequested={},duration={}", failReason == null, failReasonLabel, resourcesRequested, stopWatch.getTime());
+        return results;
     }
 
     private boolean isLookBackExempt(UUID orgId) {
