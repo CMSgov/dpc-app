@@ -9,10 +9,8 @@ type ResourceType struct {
 
 // Organization is a struct that represents the filtered down fhir.Organization
 type Organization struct {
-	Identifier []fhir.Identifier      `json:"identifier,omitempty"`
-	Name       *string                `json:"name,omitempty"`
-	Address    []fhir.Address         `json:"address,omitempty"`
-	Type       []fhir.CodeableConcept `json:"type,omitempty"`
+	Identifier []fhir.Identifier `json:"identifier,omitempty"`
+	Name       *string           `json:"name,omitempty"`
 	ResourceType
 }
 
