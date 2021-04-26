@@ -37,7 +37,6 @@ import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 import java.net.URI;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -61,9 +60,6 @@ public class GroupResource extends AbstractGroupResource {
     private final IGenericClient client;
     private final String baseURL;
     private final BlueButtonClient bfdClient;
-
-    @Context
-    UriInfo uriInfo;
 
     @Inject
     public GroupResource(IJobQueue queue, @Named("attribution") IGenericClient client, @APIV1 String baseURL, BlueButtonClient bfdClient) {
@@ -306,7 +302,7 @@ public class GroupResource extends AbstractGroupResource {
 
         final var transactionTime = APIHelpers.fetchTransactionTime(bfdClient);
         final var requestingIP = APIHelpers.fetchRequestingIP(request);
-        final String requestUrl = APIHelpers.fetchRequestUrl(uriInfo);
+        final String requestUrl = APIHelpers.fetchRequestUrl(request);
 
         final UUID jobID = this.queue.createJob(orgID, orgNPI, providerNPI, attributedPatients, resources, since, transactionTime, requestingIP, requestUrl, true);
         final int totalPatients = attributedPatients == null ? 0 : attributedPatients.size();
