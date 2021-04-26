@@ -22,6 +22,7 @@ gem 'pg', '>= 0.18', '< 2.0'
 gem 'devise'
 gem 'devise-async'
 gem 'devise-security'
+gem 'health_check'
 gem 'omniauth-github'
 gem 'omniauth-oktaoauth'
 gem 'octokit' # can be removed once we move past github omniauth
