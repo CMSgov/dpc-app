@@ -25,9 +25,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -59,12 +56,9 @@ public class GroupResourceUnitTest {
     GroupResource resource;
 
     @BeforeEach
-    public void setUp() throws URISyntaxException {
+    public void setUp() {
         MockitoAnnotations.openMocks(this);
         resource = new GroupResource(mockQueue, attributionClient, "http://localhost:3002/v1", mockBfdClient);
-        UriInfo mockUriInfo = mock(UriInfo.class);
-        resource.uriInfo = mockUriInfo;
-        when(mockUriInfo.getRequestUri()).thenReturn(new URI("http://localhost:3002/v1/Group/1234567890/$export"));
     }
 
     @Test
@@ -234,6 +228,9 @@ public class GroupResourceUnitTest {
         //Mock create job
         when(mockQueue.createJob(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), anyBoolean())).thenReturn(UUID.randomUUID());
 
+        //Mock fetching request Url
+        when(request.getRequestURL()).thenReturn(new StringBuffer("http://localhost:3002/v1/Group/1234567890/$export"));
+
 
         //Past date with Z offset
         String since = "2020-05-26T16:43:01.780Z";
@@ -282,6 +279,9 @@ public class GroupResourceUnitTest {
         IReadExecutable<Organization> readExec2 = mock(IReadExecutable.class);
         when(attributionClient.read().resource(Organization.class).withId(new IdType("Organization", orgId.toString())).encodedJson()).thenReturn(readExec2);
         when(readExec2.execute()).thenReturn(organization);
+
+        //Mock fetching request Url
+        when(request.getRequestURL()).thenReturn(new StringBuffer("http://localhost:3002/v1/Group/1234567890/$export"));
 
         //Mock get bundle
         IOperationUntypedWithInput<Bundle> bundleOperation = mock(IOperationUntypedWithInput.class);
@@ -378,6 +378,9 @@ public class GroupResourceUnitTest {
 
         //Mock create job
         when(mockQueue.createJob(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), anyBoolean())).thenReturn(UUID.randomUUID());
+
+        //Mock fetching request Url
+        when(request.getRequestURL()).thenReturn(new StringBuffer("http://localhost:3002/v1/Group/1234567890/$export"));
 
         Assertions.assertDoesNotThrow(() -> {
             resource.export(organizationPrincipal, "roster-id", "Coverage", FHIRMediaTypes.APPLICATION_NDJSON, "2017-01-01T00:00:00Z", "respond-async", request);

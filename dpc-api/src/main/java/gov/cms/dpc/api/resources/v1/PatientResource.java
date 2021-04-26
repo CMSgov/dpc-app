@@ -37,7 +37,6 @@ import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -58,9 +57,6 @@ public class PatientResource extends AbstractPatientResource {
     private final FhirValidator validator;
     private final DataService dataService;
     private final BlueButtonClient bfdClient;
-
-    @Context
-    UriInfo uriInfo;
 
     @Inject
     public PatientResource(@Named("attribution") IGenericClient client, FhirValidator validator, DataService dataService, BlueButtonClient bfdClient) {
@@ -215,7 +211,7 @@ public class PatientResource extends AbstractPatientResource {
         final String practitionerNPI = FHIRExtractors.findMatchingIdentifier(practitioner.getIdentifier(), DPCIdentifierSystem.NPPES).getValue();
 
         final String requestingIP = APIHelpers.fetchRequestingIP(request);
-        final String requestUrl = APIHelpers.fetchRequestUrl(uriInfo);
+        final String requestUrl = APIHelpers.fetchRequestUrl(request);
         Resource result = dataService.retrieveData(orgId, practitionerId, orgNPI, practitionerNPI, List.of(patientMbi), since, APIHelpers.fetchTransactionTime(bfdClient),
                 requestingIP, requestUrl, ResourceType.Patient, ResourceType.ExplanationOfBenefit, ResourceType.Coverage);
         if (ResourceType.Bundle.equals(result.getResourceType())) {
