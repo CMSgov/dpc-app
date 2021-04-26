@@ -75,6 +75,10 @@
   width: 100%;
 }
 
+.usa-accordion__content {
+  padding: 1rem 1.25rem calc(1rem - 0.25rem) 1.25rem;
+}
+
 .topnav-wrap {
   display: none;
   flex-direction: column;
