@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require './lib/redis_store/mail_throttle_store'
+
 module Users
   class PasswordsController < Devise::PasswordsController
     # GET /resource/password/new
