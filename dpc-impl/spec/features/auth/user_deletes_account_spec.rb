@@ -6,7 +6,7 @@ RSpec.feature 'user deletes account' do
   let(:user) { create :user, password: '12345ABCDEfghi!', password_confirmation: '12345ABCDEfghi!' }
 
   before(:each) do
-    sign_in user, scope: :user
+    sign_in user
     visit edit_user_registration_path
   end
 
