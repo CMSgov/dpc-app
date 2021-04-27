@@ -55,5 +55,24 @@ RSpec.feature 'user edits profile' do
 
       expect(page.body).to have_content('Welcome Aleksander Keen')
     end
+
+    scenario 'user cannot update password with previously used password' do
+      old_password = '12345ABCDEfghi!'
+      new_password = '!@#abcd123EFG$%'
+
+      fill_in 'user_password', with: old_password
+      fill_in 'user_password_confirmation', with: old_password
+      fill_in 'user_current_password', with: old_password
+      find('[data-test="update-user-account"]').click
+
+      expect(page.body).to have_content('Password cannot match previously used password.')
+
+      fill_in 'user_password', with: new_password
+      fill_in 'user_password_confirmation', with: new_password
+      fill_in 'user_current_password', with: old_password
+      find('[data-test="update-user-account"]').click
+
+      expect(page.body).to have_content('Your account has been updated successfully, but since your password was changed, you need to sign in again')
+    end
   end
 end
