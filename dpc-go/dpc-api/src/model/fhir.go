@@ -16,11 +16,11 @@ type Organization struct {
 
 // Group is a struct that represents the filtered down fhir.Group
 type Group struct {
-	Type           fhir.GroupType             `json:"type"`
-	Actual         bool                       `bson:"actual" json:"actual"`
-	Name           *string                    `json:"name,omitempty"`
-	Characteristic []fhir.GroupCharacteristic `json:"characteristic,omitempty"`
-	Member         []GroupMember              `json:"member,omitempty"`
+	Type           fhir.GroupType  `json:"type"`
+	Actual         bool            `bson:"actual" json:"actual"`
+	Name           *string         `json:"name,omitempty"`
+	ManagingEntity *fhir.Reference `json:"managingEntity,omitempty"`
+	Member         []GroupMember   `json:"member,omitempty"`
 	ResourceType
 }
 

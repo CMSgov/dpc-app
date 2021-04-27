@@ -1,0 +1,218 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "description": "As patients move throughout the healthcare system, providers often struggle to gain and maintain a complete picture of their medical history.\n        Data at the Point of Care fills in the gaps with claims data to inform providers with secure, structured patient history, past procedures, medication adherence, and more.",
+    "version": "2.0.0",
+    "title": "Data at the Point of Care",
+    "license": {
+      "name": "Public Domain",
+      "url": "https://github.com/CMSgov/dpc-app/blob/master/LICENSE.md"
+    }
+  },
+  "tags": [
+    {
+      "name": "Metadata"
+    },
+    {
+      "name": "Group"
+    },
+    {
+      "name": "Organization"
+    }
+  ],
+  "servers": [
+    {
+      "url": "https://prod.dpc.cms.gov",
+      "description": "Production server"
+    }
+  ],
+  "paths": {
+    "/v2/metadata": {
+      "get": {
+        "tags": [
+          "Metadata"
+        ],
+        "summary": "Get FHIR Server Capability Statement",
+        "description": "Returns the FHIR Capabilities statement for DPC",
+        "operationId": "metadata",
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          }
+        }
+      }
+    },
+    "/v2/Organization/{organizationID}": {
+      "get": {
+        "tags": [
+          "Organization"
+        ],
+        "summary": "Read FHIR Organization Resource",
+        "description": "Returns the FHIR Organization Resource for the organizationID in DPC",
+        "operationId": "getOrganization",
+        "parameters": [
+          {
+            "description": "The UUID of the organization",
+            "schema": {
+              "type": "string"
+            },
+            "name": "organizationID",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          }
+        }
+      }
+    },
+    "/v2/Group/": {
+      "post": {
+        "tags": [
+          "Group"
+        ],
+        "summary": "Create FHIR Group Resource",
+        "description": "Create an attribution relationship of patients and practitioners",
+        "operationId": "postGroup",
+        "requestBody": {
+          "description": "attribution relationships in a form of a FHIR Group Resource",
+          "content": {
+            "application/fhir+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Group"
+              },
+              "examples": {
+                "group": {
+                  "summary": "Group Example",
+                  "value": {
+                    "resourceType": "Group",
+                    "type": "person",
+                    "actual": true,
+                    "name": "Test Group",
+                    "managingEntity": {
+                      "reference": "Organization/123-34242343-234234234",
+                      "display": "Healthcare related organization"
+                    },
+                    "member": [
+                      {
+                        "extension": [
+                          {
+                            "url": "http://hl7.org/fhir/us/davinci-atr/StructureDefinition/ext-attributedProvider",
+                            "valueReference": {
+                              "type": "Practitioner",
+                              "identifier": {
+                                "system": "http://hl7.org/fhir/sid/us-npi",
+                                "value": "9941339108"
+                              }
+                            }
+                          }
+                        ],
+                        "entity": {
+                          "type": "Patient",
+                          "identifier": {
+                            "value": "2B43243432",
+                            "system": "http://hl7.org/fhir/sid/us-mbi"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Reference": {
+        "type": "object",
+        "properties": {
+          "display": {
+            "type": "string"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "identifier": {
+            "$ref": "#/components/schemas/Identifier"
+          }
+        }
+      },
+      "Identifier": {
+        "type": "object",
+        "properties": {
+          "system": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        }
+      },
+      "Group": {
+        "type": "object",
+        "properties": {
+          "resourceType": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "actual": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "managingEntity": {
+            "$ref": "#/components/schemas/Reference"
+          },
+          "member": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Member"
+            }
+          }
+        }
+      },
+      "Member": {
+        "type": "object",
+        "properties": {
+          "extension": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Extension"
+            }
+          },
+          "entity": {
+            "$ref": "#/components/schemas/Reference"
+          }
+        }
+      },
+      "Extension": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "valueReference": {
+            "$ref": "#/components/schemas/Reference"
+          }
+        }
+      }
+    }
+  }
+}
