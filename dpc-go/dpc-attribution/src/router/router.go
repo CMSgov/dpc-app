@@ -10,7 +10,7 @@ import (
 )
 
 // NewDPCAttributionRouter function to build the attribution router
-func NewDPCAttributionRouter(o v2.Service, g v2.PostService) http.Handler {
+func NewDPCAttributionRouter(o v2.Service, g v2.PostService, impl v2.PostService) http.Handler {
 	r := chi.NewRouter()
 	r.Use(middleware2.Logging())
 	r.Use(middleware.SetHeader("Content-Type", "application/json; charset=UTF-8"))
@@ -28,6 +28,9 @@ func NewDPCAttributionRouter(o v2.Service, g v2.PostService) http.Handler {
 			r.Use(middleware2.AuthCtx)
 			r.Post("/", g.Post)
 		})
+        r.Route("/Implementor", func(r chi.Router) {
+            r.Post("/", impl.Post)
+        })
 	})
 
 	return r
