@@ -46,6 +46,39 @@
 
 // Nav Links
 
+.usa-accordion__button[aria-expanded=false] {
+  background-image: url(plus.svg), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+  background-image: url(plus.svg), linear-gradient(transparent, transparent);
+  background-repeat: no-repeat;
+  background-size: 1rem;
+}
+
+.usa-accordion__button {
+  border:0;
+  border-radius:0;
+  -webkit-box-shadow: none;
+          box-shadow: none;
+  margin: 0;
+  text-align: left;
+  background-image: url(minus.svg), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+  background-image: url(minus.svg), linear-gradient(transparent, transparent);
+  background-repeat: no-repeat;
+  background-color: $color-warn-lightest;
+  background-position: right 1.25rem center;
+  background-size: 1rem;
+  color: $color-primary-darkest;
+  cursor: pointer;
+  display: inline-block;
+  font-weight: 700;
+  padding: 1rem 3.5rem 1rem 1.25rem;
+  text-decoration: none;
+  width: 100%;
+}
+
+.usa-accordion__content {
+  padding: 1rem 1.25rem calc(1rem - 0.25rem) 1.25rem;
+}
+
 .topnav-wrap {
   display: none;
   flex-direction: column;
@@ -138,7 +171,6 @@
 }
 
 .topnav__item--buttons {
-  border: 0;
   margin-top: $spacer-3;
 
   @media (min-width: $width-nav) {
@@ -148,6 +180,7 @@
 
 .topnav__link,
 .topnav__link:visited {
+  border: 0;
   border-bottom: 2px solid $color-white;
   color: $color-primary-darkest;
   display: block;
@@ -182,6 +215,7 @@
 }
 
 .topnav__dropdown__link {
+  border: 0 !important;
   display: block;
   color: $color-base;
   font-size: $h5-font-size;
@@ -219,6 +253,8 @@
 
   @media (min-width: $width-nav) {
     background-image: url(angle-arrow-down.svg);
+    background-position: right 1rem center;
+    background-repeat: no-repeat;
     background-size: .7rem;
     margin-right: 0;
     padding-right: $spacer-5;
