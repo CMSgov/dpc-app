@@ -1,34 +1,18 @@
 package v2
 
 import (
-	"bytes"
-	"context"
-	"encoding/json"
-	"fmt"
-	"io/ioutil"
-	"net/http"
+    "bytes"
+    "encoding/json"
+    "fmt"
+    "io/ioutil"
+    "net/http"
 
-	"github.com/darahayes/go-boom"
-	"github.com/go-chi/chi"
-	"go.uber.org/zap"
-
-	"github.com/CMSgov/dpc/attribution/logger"
-	"github.com/CMSgov/dpc/attribution/repository"
+    "github.com/CMSgov/dpc/attribution/logger"
+    "github.com/CMSgov/dpc/attribution/middleware"
+    "github.com/CMSgov/dpc/attribution/repository"
+    "github.com/darahayes/go-boom"
+    "go.uber.org/zap"
 )
-
-type contextKey int
-
-// ContextKeyOrganization is the key in the context to retrieve the organizationID
-const ContextKeyOrganization contextKey = iota
-
-// OrganizationCtx middleware to extract the organizationID from the chi url param and set it into the request context
-func OrganizationCtx(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		organizationID := chi.URLParam(r, "organizationID")
-		ctx := context.WithValue(r.Context(), ContextKeyOrganization, organizationID)
-		next.ServeHTTP(w, r.WithContext(ctx))
-	})
-}
 
 // OrganizationService is a struct that defines what the service has
 type OrganizationService struct {
@@ -45,7 +29,7 @@ func NewOrganizationService(repo repository.OrganizationRepo) *OrganizationServi
 // Get function that get the organization from the database by id and logs any errors before returning a generic error
 func (os *OrganizationService) Get(w http.ResponseWriter, r *http.Request) {
 	log := logger.WithContext(r.Context())
-	organizationID, ok := r.Context().Value(ContextKeyOrganization).(string)
+	organizationID, ok := r.Context().Value(middleware.ContextKeyOrganization).(string)
 	if !ok {
 		log.Error("Failed to extract organization id from context")
 		boom.BadRequest(w, "Could not get organization id")
@@ -100,7 +84,7 @@ func (os *OrganizationService) Post(w http.ResponseWriter, r *http.Request) {
 // Delete function that deletes the organization to the database and logs any errors before returning a generic error
 func (os *OrganizationService) Delete(w http.ResponseWriter, r *http.Request) {
 	log := logger.WithContext(r.Context())
-	organizationID, ok := r.Context().Value(ContextKeyOrganization).(string)
+	organizationID, ok := r.Context().Value(middleware.ContextKeyOrganization).(string)
 	if !ok {
 		log.Error("Failed to extract organization id from context")
 		boom.BadRequest(w, "Could not get organization id")
@@ -120,7 +104,7 @@ func (os *OrganizationService) Delete(w http.ResponseWriter, r *http.Request) {
 // Put function that updates the organization in the database and logs any errors before returning a generic error
 func (os *OrganizationService) Put(w http.ResponseWriter, r *http.Request) {
 	log := logger.WithContext(r.Context())
-	organizationID, ok := r.Context().Value(ContextKeyOrganization).(string)
+	organizationID, ok := r.Context().Value(middleware.ContextKeyOrganization).(string)
 	if !ok {
 		log.Error("Failed to extract organization id from context")
 		boom.BadRequest(w, "Could not get organization id")

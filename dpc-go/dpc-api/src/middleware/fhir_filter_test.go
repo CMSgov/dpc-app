@@ -24,43 +24,33 @@ func (suite *FHIRFilterTestSuite) TestFilteringOrganization() {
 	assert.Nil(suite.T(), o.Telecom)
 	assert.Nil(suite.T(), o.Active)
 	assert.Nil(suite.T(), o.Text)
+	assert.Nil(suite.T(), o.Address)
 
 	assert.NotNil(suite.T(), o.Identifier)
 	assert.NotNil(suite.T(), o.Name)
-	assert.NotNil(suite.T(), o.Address)
 }
 
-func (suite *FHIRFilterTestSuite) TestFilteringPractitioner() {
-	b, _ := Filter(context.Background(), []byte(apitest.Practitionerjson))
-	p, _ := fhir.UnmarshalPractitioner(b)
-	assert.Nil(suite.T(), p.Telecom)
-	assert.Nil(suite.T(), p.Address)
-	assert.Nil(suite.T(), p.Gender)
-	assert.Nil(suite.T(), p.BirthDate)
-	assert.Nil(suite.T(), p.Active)
+func (suite *FHIRFilterTestSuite) TestFilteringGroup() {
+	b, _ := Filter(context.Background(), []byte(apitest.Groupjson))
+	p, _ := fhir.UnmarshalGroup(b)
+	assert.Nil(suite.T(), p.Meta)
 	assert.Nil(suite.T(), p.Text)
-
-	assert.NotNil(suite.T(), p.Identifier)
-	assert.NotNil(suite.T(), p.Name)
-}
-
-func (suite *FHIRFilterTestSuite) TestFilteringPatient() {
-	b, _ := Filter(context.Background(), []byte(apitest.Patientjson))
-	p, _ := fhir.UnmarshalPatient(b)
-	assert.Nil(suite.T(), p.Telecom)
-	assert.Nil(suite.T(), p.Address)
-	assert.Nil(suite.T(), p.Communication)
-	assert.Nil(suite.T(), p.ManagingOrganization)
-	assert.Nil(suite.T(), p.Contact)
-	assert.Nil(suite.T(), p.MaritalStatus)
-	assert.Nil(suite.T(), p.Telecom)
+	assert.Nil(suite.T(), p.Extension)
+	assert.Nil(suite.T(), p.Identifier)
 	assert.Nil(suite.T(), p.Active)
-	assert.Nil(suite.T(), p.Text)
+	assert.Nil(suite.T(), p.ManagingEntity)
 
-	assert.NotNil(suite.T(), p.Gender)
-	assert.NotNil(suite.T(), p.BirthDate)
-	assert.NotNil(suite.T(), p.Identifier)
+	assert.NotNil(suite.T(), p.Member)
 	assert.NotNil(suite.T(), p.Name)
+	for _, m := range p.Member {
+		assert.NotNil(suite.T(), m.Extension)
+		assert.Len(suite.T(), m.Extension, 1)
+		assert.NotNil(suite.T(), m.Entity)
+		assert.Nil(suite.T(), m.Period)
+		assert.Nil(suite.T(), m.Inactive)
+		assert.Nil(suite.T(), m.ModifierExtension)
+		assert.Nil(suite.T(), m.Id)
+	}
 }
 
 func (suite *FHIRFilterTestSuite) TestFilteringError() {

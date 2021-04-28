@@ -48,3 +48,8 @@ smoke.out
 ops/config/decrypted/*
 !ops/config/decrypted/README.md
 .mvn/
+
+/dpc-go/dpc-attribution/test_results/*
+/tmp/letter_opener/admin/*
+/tmp/letter_opener/web/*
+/dpc-go/dpc-api/test_results/*

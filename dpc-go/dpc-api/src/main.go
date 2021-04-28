@@ -3,13 +3,14 @@ package main
 import (
 	"context"
 	"fmt"
+	"net/http"
+
 	"github.com/CMSgov/dpc/api/client"
 	"github.com/CMSgov/dpc/api/conf"
 	"github.com/CMSgov/dpc/api/logger"
 	"github.com/CMSgov/dpc/api/router"
-	"github.com/CMSgov/dpc/api/v2"
+	v2 "github.com/CMSgov/dpc/api/v2"
 	"go.uber.org/zap"
-	"net/http"
 )
 
 func main() {
@@ -28,13 +29,16 @@ func main() {
 		Retries: retries,
 	})
 
-	c := v2.NewOrganizationController(attributionClient)
+	orgCtlr := v2.NewOrganizationController(attributionClient)
 
 	capabilitiesFile := conf.GetAsString("capabilities.base")
 
 	m := v2.NewMetadataController(capabilitiesFile)
 
-	apiRouter := router.NewDPCAPIRouter(c, m)
+	groupCtlr := v2.NewGroupController(attributionClient)
+
+	apiRouter := router.NewDPCAPIRouter(orgCtlr, m, groupCtlr)
+	// authRouter := router.NewAuthRouter()
 
 	port := conf.GetAsString("port", "3000")
 	if err := http.ListenAndServe(fmt.Sprintf(":%s", port), apiRouter); err != nil {

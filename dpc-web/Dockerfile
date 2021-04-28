@@ -10,10 +10,11 @@ COPY / /dpc-app
 RUN make ig/publish
 
 
-FROM ruby:2.7.1-alpine AS ruby_builder
+FROM ruby:2.7.2-alpine AS ruby_builder
 
 # Install build dependencies
 RUN apk add --no-cache postgresql-dev && \
+    apk add --no-cache shared-mime-info && \
     apk add --no-cache --virtual build-deps alpine-sdk npm tzdata
 
 # Set the working directory
@@ -41,7 +42,7 @@ RUN rm -rf /usr/local/bundle/cache/*.gem && \
     find /usr/local/bundle/gems/ -name "*.o" -delete
 
 
-FROM ruby:2.7.1-alpine
+FROM ruby:2.7.2-alpine
 
 # Install app dependencies
 RUN apk add --no-cache postgresql-client nodejs tzdata

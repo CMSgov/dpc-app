@@ -3,13 +3,18 @@ package client
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
+	"net/http"
+
 	"github.com/CMSgov/dpc/api/logger"
+	middleware2 "github.com/CMSgov/dpc/api/middleware"
 	"github.com/go-chi/chi/middleware"
+
+	// "github.com/CMSgov/dpc/api/middleware"
+
 	"github.com/hashicorp/go-retryablehttp"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
-	"io/ioutil"
-	"net/http"
 )
 
 // AttributionConfig is a struct to hold configuration info for retryablehttp client
@@ -24,6 +29,7 @@ type ResourceType string
 // Contains the different ResourceType for calls to attribution
 const (
 	Organization ResourceType = "Organization"
+	Group        ResourceType = "Group"
 )
 
 // Client interface for testing purposes
@@ -63,6 +69,9 @@ func (ac *AttributionClient) Get(ctx context.Context, resourceType ResourceType,
 	}
 
 	req.Header.Add(middleware.RequestIDHeader, ctx.Value(middleware.RequestIDKey).(string))
+	if ctx.Value(middleware2.ContextKeyOrganization) != nil {
+		req.Header.Add(middleware2.OrgHeader, ctx.Value(middleware2.ContextKeyOrganization).(string))
+	}
 	resp, err := ac.httpClient.Do(req)
 	if err != nil {
 		log.Error("Failed to send request", zap.Error(err))
@@ -101,6 +110,9 @@ func (ac *AttributionClient) Post(ctx context.Context, resourceType ResourceType
 	}
 
 	req.Header.Add(middleware.RequestIDHeader, ctx.Value(middleware.RequestIDKey).(string))
+	if ctx.Value(middleware2.ContextKeyOrganization) != nil {
+		req.Header.Add(middleware2.OrgHeader, ctx.Value(middleware2.ContextKeyOrganization).(string))
+	}
 	resp, err := ac.httpClient.Do(req)
 	if err != nil {
 		log.Error("Failed to send request", zap.Error(err))
@@ -139,6 +151,9 @@ func (ac *AttributionClient) Delete(ctx context.Context, resourceType ResourceTy
 	}
 
 	req.Header.Add(middleware.RequestIDHeader, ctx.Value(middleware.RequestIDKey).(string))
+	if ctx.Value(middleware2.ContextKeyOrganization) != nil {
+		req.Header.Add(middleware2.OrgHeader, ctx.Value(middleware2.ContextKeyOrganization).(string))
+	}
 	resp, err := ac.httpClient.Do(req)
 	if err != nil {
 		log.Error("Failed to send request", zap.Error(err))
@@ -172,6 +187,9 @@ func (ac *AttributionClient) Put(ctx context.Context, resourceType ResourceType,
 	}
 
 	req.Header.Add(middleware.RequestIDHeader, ctx.Value(middleware.RequestIDKey).(string))
+	if ctx.Value(middleware2.ContextKeyOrganization) != nil {
+		req.Header.Add(middleware2.OrgHeader, ctx.Value(middleware2.ContextKeyOrganization).(string))
+	}
 	resp, err := ac.httpClient.Do(req)
 	if err != nil {
 		log.Error("Failed to send request", zap.Error(err))

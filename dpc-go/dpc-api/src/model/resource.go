@@ -8,10 +8,11 @@ import (
 // Resource is struct for json marshalling of the attribution response
 // with the only fields that a FHIR output cares about
 type Resource struct {
-	ID        string                 `json:"id"`
-	Info      map[string]interface{} `json:"info"`
-	Version   int                    `json:"version"`
-	UpdatedAt time.Time              `json:"updated_at"`
+	ID             string                 `json:"id"`
+	Info           map[string]interface{} `json:"info"`
+	Version        int                    `json:"version"`
+	UpdatedAt      time.Time              `json:"updated_at"`
+	OrganizationID *string                `json:"organizationId,omitempty"`
 }
 
 // ResourceType function to return the resource type of the underlying fhir model

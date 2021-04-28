@@ -1,6 +1,8 @@
 package router
 
 import (
+	"github.com/CMSgov/dpc/attribution/attributiontest"
+	middleware2 "github.com/CMSgov/dpc/attribution/middleware"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -11,10 +13,14 @@ import (
 	"testing"
 
 	"github.com/darahayes/go-boom"
-	"github.com/go-chi/chi/middleware"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
+	"io"
+	"net/http"
+	"net/http/httptest"
+	"strings"
+	"testing"
 
 	"github.com/CMSgov/dpc/attribution/attributiontest"
 	"github.com/CMSgov/dpc/attribution/model/v2"
@@ -47,154 +53,140 @@ func (ms *MockService) Export(w http.ResponseWriter, r *http.Request) {
 
 type RouterTestSuite struct {
 	suite.Suite
-	r       func(os service.Service, gs service.Service) http.Handler
-	fakeOrg *v2.Organization
-}
-
-func (suite *RouterTestSuite) SetupTest() {
-	suite.r = NewDPCAttributionRouter
-	suite.fakeOrg = attributiontest.OrgResponse()
+    router    http.Handler
+    mockOrg   *MockService
+    mockGroup *MockService
 }
 
 func TestRouterTestSuite(t *testing.T) {
 	suite.Run(t, new(RouterTestSuite))
 }
 
-func (suite *RouterTestSuite) TestOrganizationGetRoute() {
-	mockOrg := new(MockService)
-	mockGroup := new(MockService)
+func (suite *RouterTestSuite) SetupTest() {
+	suite.mockOrg = &MockService{}
+	suite.mockGroup = &MockService{}
+	suite.router = NewDPCAttributionRouter(suite.mockOrg, suite.mockGroup)
+}
 
-	var capturedRequestId string
-	mockOrg.On("Get", mock.Anything, mock.Anything).Once().Run(func(arg mock.Arguments) {
+func (suite *RouterTestSuite) do(httpMethod string, route string, body io.Reader, headers map[string]string) *http.Response {
+	req := httptest.NewRequest(httpMethod, route, body)
+	for k, v := range headers {
+		req.Header.Set(k, v)
+	}
+	rr := httptest.NewRecorder()
+	suite.router.ServeHTTP(rr, req)
+	return rr.Result()
+}
+
+func (suite *RouterTestSuite) TestOrganizationGetRoute() {
+
+	suite.mockOrg.On("Get", mock.Anything, mock.Anything).Once().Run(func(arg mock.Arguments) {
+		_, _ = w.Write([]byte(attributiontest.Orgjson))
 		r := arg.Get(1).(*http.Request)
-		capturedRequestId = r.Header.Get(middleware.RequestIDHeader)
-		w := arg.Get(0).(http.ResponseWriter)
-		b, _ := json.Marshal(suite.fakeOrg)
-		_, _ = w.Write(b)
+		assert.Equal(suite.T(), "1234", r.Context().Value(middleware2.ContextKeyOrganization))
 	})
 
-	router := suite.r(mockOrg, mockGroup)
-	ts := httptest.NewServer(router)
-
-	req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/%s", ts.URL, "Organization/1234"), nil)
-	req.Header.Set(middleware.RequestIDHeader, "54321")
-	res, _ := http.DefaultClient.Do(req)
-
+	res := suite.do(http.MethodGet, "/Organization/1234", nil, nil)
 	assert.Equal(suite.T(), "application/json; charset=UTF-8", res.Header.Get("Content-Type"))
 	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
-	assert.Equal(suite.T(), "54321", capturedRequestId)
 
-	mockOrg.On("Get", mock.Anything, mock.Anything).Once().Run(func(arg mock.Arguments) {
-		r := arg.Get(1).(*http.Request)
-		capturedRequestId = r.Header.Get(middleware.RequestIDHeader)
+	suite.mockOrg.On("Get", mock.Anything, mock.Anything).Once().Run(func(arg mock.Arguments) {
 		w := arg.Get(0).(http.ResponseWriter)
 		boom.Internal(w)
 	})
 
-	req, _ = http.NewRequest(http.MethodGet, fmt.Sprintf("%s/%s", ts.URL, "Organization/1234"), nil)
-	req.Header.Set(middleware.RequestIDHeader, "54321")
-	res, _ = http.DefaultClient.Do(req)
-
+	res = suite.do(http.MethodGet, "/Organization/1234", nil, nil)
 	assert.Equal(suite.T(), "application/json; charset=UTF-8", res.Header.Get("Content-Type"))
 	assert.Equal(suite.T(), http.StatusInternalServerError, res.StatusCode)
-	assert.Equal(suite.T(), "54321", capturedRequestId)
+
+	res = suite.do(http.MethodGet, "/Organization", strings.NewReader(attributiontest.Orgjson), nil)
+	assert.Equal(suite.T(), http.StatusMethodNotAllowed, res.StatusCode)
 }
 
 func (suite *RouterTestSuite) TestOrganizationPostRoute() {
-	mockOrg := new(MockService)
-	mockGroup := new(MockService)
-
-	var capturedRequestId string
-	mockOrg.On("Post", mock.Anything, mock.Anything).Once().Run(func(arg mock.Arguments) {
-		r := arg.Get(1).(*http.Request)
-		capturedRequestId = r.Header.Get(middleware.RequestIDHeader)
+	suite.mockOrg.On("Post", mock.Anything, mock.Anything).Once().Run(func(arg mock.Arguments) {
 		w := arg.Get(0).(http.ResponseWriter)
-		b, _ := json.Marshal(suite.fakeOrg)
-		_, _ = w.Write(b)
+		_, _ = w.Write([]byte(attributiontest.Orgjson))
+		r := arg.Get(1).(*http.Request)
+		assert.Nil(suite.T(), r.Context().Value(middleware2.ContextKeyOrganization))
 	})
 
-	router := suite.r(mockOrg, mockGroup)
-	ts := httptest.NewServer(router)
-
-	b, _ := json.Marshal(suite.fakeOrg)
-
-	req, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/%s", ts.URL, "Organization"), bytes.NewReader(b))
-	req.Header.Set(middleware.RequestIDHeader, "54321")
-	res, _ := http.DefaultClient.Do(req)
-	body, _ := ioutil.ReadAll(res.Body)
-	var actual *v2.Organization
-	_ = json.Unmarshal(body, &actual)
-
+	res := suite.do(http.MethodPost, "/Organization", strings.NewReader(attributiontest.Orgjson), nil)
 	assert.Equal(suite.T(), "application/json; charset=UTF-8", res.Header.Get("Content-Type"))
 	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
-	assert.Equal(suite.T(), suite.fakeOrg.ID, actual.ID)
-	assert.Equal(suite.T(), "54321", capturedRequestId)
+	assert.NotEqual(suite.T(), res.Body, http.NoBody)
 
-	mockOrg.On("Post", mock.Anything, mock.Anything).Once().Run(func(arg mock.Arguments) {
-		r := arg.Get(1).(*http.Request)
-		capturedRequestId = r.Header.Get(middleware.RequestIDHeader)
+	suite.mockOrg.On("Post", mock.Anything, mock.Anything).Once().Run(func(arg mock.Arguments) {
 		w := arg.Get(0).(http.ResponseWriter)
 		boom.Internal(w)
+		r := arg.Get(1).(*http.Request)
+		assert.Nil(suite.T(), r.Context().Value(middleware2.ContextKeyOrganization))
 	})
 
-	req, _ = http.NewRequest(http.MethodPost, fmt.Sprintf("%s/%s", ts.URL, "Organization"), bytes.NewReader(b))
-	req.Header.Set(middleware.RequestIDHeader, "54321")
-	res, _ = http.DefaultClient.Do(req)
-
+	res = suite.do(http.MethodPost, "/Organization", strings.NewReader(attributiontest.Orgjson), nil)
 	assert.Equal(suite.T(), "application/json; charset=UTF-8", res.Header.Get("Content-Type"))
 	assert.Equal(suite.T(), http.StatusInternalServerError, res.StatusCode)
-	assert.Equal(suite.T(), "54321", capturedRequestId)
+
+	res = suite.do(http.MethodPost, "/Organization/1234", strings.NewReader(attributiontest.Orgjson), nil)
+	assert.Equal(suite.T(), http.StatusMethodNotAllowed, res.StatusCode)
 }
 
 func (suite *RouterTestSuite) TestOrganizationDeleteRoute() {
-	mockOrg := new(MockService)
-	mockGroup := new(MockService)
-
-	var capturedRequestId string
-	mockOrg.On("Delete", mock.Anything, mock.Anything).Once().Run(func(arg mock.Arguments) {
-		r := arg.Get(1).(*http.Request)
-		capturedRequestId = r.Header.Get(middleware.RequestIDHeader)
+	suite.mockOrg.On("Delete", mock.Anything, mock.Anything).Once().Run(func(arg mock.Arguments) {
 		w := arg.Get(0).(http.ResponseWriter)
 		w.WriteHeader(http.StatusNoContent)
+		r := arg.Get(1).(*http.Request)
+		assert.Equal(suite.T(), "1234", r.Context().Value(middleware2.ContextKeyOrganization))
 	})
 
-	router := suite.r(mockOrg, mockGroup)
-	ts := httptest.NewServer(router)
-
-	req, _ := http.NewRequest(http.MethodDelete, fmt.Sprintf("%s/%s", ts.URL, "Organization/12345"), nil)
-	req.Header.Set(middleware.RequestIDHeader, "54321")
-	res, _ := http.DefaultClient.Do(req)
-
+	res := suite.do(http.MethodDelete, "/Organization/1234", nil, nil)
 	assert.Equal(suite.T(), http.StatusNoContent, res.StatusCode)
-	assert.Equal(suite.T(), "54321", capturedRequestId)
 
+	res = suite.do(http.MethodDelete, "/Organization", strings.NewReader(attributiontest.Orgjson), nil)
+	assert.Equal(suite.T(), http.StatusMethodNotAllowed, res.StatusCode)
 }
 
 func (suite *RouterTestSuite) TestOrganizationPutRoute() {
-	mockOrg := new(MockService)
-	mockGroup := new(MockService)
-
-	var capturedRequestId string
-	mockOrg.On("Put", mock.Anything, mock.Anything).Once().Run(func(arg mock.Arguments) {
-		r := arg.Get(1).(*http.Request)
-		capturedRequestId = r.Header.Get(middleware.RequestIDHeader)
+	suite.mockOrg.On("Put", mock.Anything, mock.Anything).Once().Run(func(arg mock.Arguments) {
 		w := arg.Get(0).(http.ResponseWriter)
-		b, _ := json.Marshal(suite.fakeOrg)
-		w.Write(b)
+		_, _ = w.Write([]byte(attributiontest.Orgjson))
+		r := arg.Get(1).(*http.Request)
+		assert.Equal(suite.T(), "1234", r.Context().Value(middleware2.ContextKeyOrganization))
 	})
 
-	router := suite.r(mockOrg, mockGroup)
-	ts := httptest.NewServer(router)
-
-	req, _ := http.NewRequest(http.MethodPut, fmt.Sprintf("%s/%s", ts.URL, "Organization/12345"), strings.NewReader(attributiontest.Orgjson))
-	req.Header.Set(middleware.RequestIDHeader, "54321")
-	res, _ := http.DefaultClient.Do(req)
-
-	body, _ := ioutil.ReadAll(res.Body)
-	var actual *v2.Organization
-	_ = json.Unmarshal(body, &actual)
-
+	res := suite.do(http.MethodPut, "/Organization/1234", strings.NewReader(attributiontest.Orgjson), nil)
+	assert.Equal(suite.T(), "application/json; charset=UTF-8", res.Header.Get("Content-Type"))
 	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
-	assert.Equal(suite.T(), suite.fakeOrg.ID, actual.ID)
-	assert.Equal(suite.T(), "54321", capturedRequestId)
+	assert.NotEqual(suite.T(), res.Body, http.NoBody)
+
+	res = suite.do(http.MethodPut, "/Organization", strings.NewReader(attributiontest.Orgjson), nil)
+	assert.Equal(suite.T(), http.StatusMethodNotAllowed, res.StatusCode)
+}
+
+func (suite *RouterTestSuite) TestGroupPostRoute() {
+	suite.mockGroup.On("Post", mock.Anything, mock.Anything).Once().Run(func(arg mock.Arguments) {
+		w := arg.Get(0).(http.ResponseWriter)
+		_, _ = w.Write([]byte(attributiontest.Groupjson))
+		r := arg.Get(1).(*http.Request)
+		assert.Equal(suite.T(), "12345", r.Context().Value(middleware2.ContextKeyOrganization))
+	})
+
+	res := suite.do(http.MethodPost, "/Group", strings.NewReader(attributiontest.Groupjson), map[string]string{middleware2.OrgHeader: "12345"})
+	assert.Equal(suite.T(), "application/json; charset=UTF-8", res.Header.Get("Content-Type"))
+	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
+	assert.NotEqual(suite.T(), res.Body, http.NoBody)
+
+	suite.mockGroup.On("Post", mock.Anything, mock.Anything).Once().Run(func(arg mock.Arguments) {
+		w := arg.Get(0).(http.ResponseWriter)
+		boom.Internal(w)
+		r := arg.Get(1).(*http.Request)
+		assert.Equal(suite.T(), "12345", r.Context().Value(middleware2.ContextKeyOrganization))
+	})
+
+	res = suite.do(http.MethodPost, "/Group", strings.NewReader(attributiontest.Groupjson), map[string]string{middleware2.OrgHeader: "12345"})
+	assert.Equal(suite.T(), "application/json; charset=UTF-8", res.Header.Get("Content-Type"))
+	assert.Equal(suite.T(), http.StatusInternalServerError, res.StatusCode)
+
+	res = suite.do(http.MethodPost, "/Group/1234", strings.NewReader(attributiontest.Groupjson), map[string]string{middleware2.OrgHeader: "12345"})
+	assert.Equal(suite.T(), http.StatusNotFound, res.StatusCode)
 }

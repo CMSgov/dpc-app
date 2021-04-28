@@ -13,8 +13,6 @@ import (
 	"github.com/CMSgov/dpc/attribution/util"
 )
 
-const sqlFlavor = sqlbuilder.PostgreSQL
-
 // OrganizationRepo is an interface for test mocking purposes
 type OrganizationRepo interface {
 	Insert(ctx context.Context, body []byte) (*v2.Organization, error)

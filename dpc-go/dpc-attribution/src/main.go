@@ -34,7 +34,8 @@ func main() {
 	os := v2.NewOrganizationService(or)
 
 	js := service.NewJobService(ctx)
-	gs := v2.NewGroupService(js)
+    gr := repository.NewGroupRepo(db)
+	gs := v2.NewGroupService(gr, js)
 
 	attributionRouter := router.NewDPCAttributionRouter(os, gs)
 
