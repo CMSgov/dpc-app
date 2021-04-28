@@ -381,35 +381,29 @@
           "issue": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/Issue"
+              "type": "object",
+              "properties": {
+                "severity": {
+                  "type": "string"
+                },
+                "code": {
+                  "type": "string"
+                },
+                "details": {
+                  "type": "object",
+                  "properties": {
+                    "text": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "diagnostics": {
+                  "type": "string"
+                }
+              }
             }
           },
           "resourceType": {
-            "type": "string"
-          }
-        }
-      },
-      "Issue": {
-        "type": "object",
-        "properties": {
-          "severity": {
-            "type": "string"
-          },
-          "code": {
-            "type": "string"
-          },
-          "details": {
-            "$ref": "#/components/schemas/Details"
-          },
-          "diagnostics": {
-            "type": "string"
-          }
-        }
-      },
-      "Details": {
-        "type": "object",
-        "properties": {
-          "text": {
             "type": "string"
           }
         }
