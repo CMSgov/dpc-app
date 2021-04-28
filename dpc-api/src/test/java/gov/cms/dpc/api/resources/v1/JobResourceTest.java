@@ -2,6 +2,7 @@ package gov.cms.dpc.api.resources.v1;
 
 import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.common.models.JobCompletionModel;
+import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.queue.MemoryBatchQueue;
 import gov.cms.dpc.queue.models.JobQueueBatch;
@@ -24,12 +25,17 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SuppressWarnings("OptionalGetWithoutIsPresent")
 @ExtendWith(BufferedLoggerHandler.class)
 public class JobResourceTest {
     static final UUID AGGREGATOR_ID = UUID.randomUUID();
-    static final String TEST_PROVIDER_ID = "1";
-    static final String TEST_PATIENT_ID = "1";
+    static final String TEST_PROVIDER_ID = UUID.randomUUID().toString();
+    static final String TEST_ORG_NPI = NPIUtil.generateNPI();
+    static final String TEST_PROVIDER_NPI = NPIUtil.generateNPI();
+    static final String TEST_PATIENT_ID = UUID.randomUUID().toString();
     static final String TEST_BASEURL = "http://localhost:8080";
+    static final String TEST_JOB_URL = TEST_BASEURL + "/api/v1/Group/%s/$export";
+
     static final String OTHER_ORGANIZATION = "46ac7ad6-7487-4dd0-baa0-6e2c8cae76a1";
 
     /**
@@ -59,10 +65,12 @@ public class JobResourceTest {
         // Setup a queued job
         final var jobID = queue.createJob(orgID,
                 TEST_PROVIDER_ID,
+                TEST_ORG_NPI,
+                TEST_PROVIDER_NPI,
                 List.of(TEST_PATIENT_ID),
                 JobQueueBatch.validResourceTypes,
                 null,
-                OffsetDateTime.now(ZoneOffset.UTC), null, true);
+                OffsetDateTime.now(ZoneOffset.UTC), null, null, true);
 
         // Test the response
         final var resource = new JobResource(queue, TEST_BASEURL);
@@ -83,12 +91,14 @@ public class JobResourceTest {
         // Setup a running job
         final var jobID = queue.createJob(orgID,
                 TEST_PROVIDER_ID,
+                TEST_ORG_NPI,
+                TEST_PROVIDER_NPI,
                 List.of(TEST_PATIENT_ID, TEST_PATIENT_ID, TEST_PATIENT_ID),
                 JobQueueBatch.validResourceTypes,
                 null,
-                OffsetDateTime.now(ZoneOffset.UTC), null, true);
+                OffsetDateTime.now(ZoneOffset.UTC), null, null, true);
         final var runningJob = queue.claimBatch(AGGREGATOR_ID);
-        runningJob.get().fetchNextPatient(AGGREGATOR_ID);
+        runningJob.flatMap(job -> job.fetchNextPatient(AGGREGATOR_ID));
         queue.completePartialBatch(runningJob.get(), AGGREGATOR_ID);
         queue.completeBatch(runningJob.get(), AGGREGATOR_ID);
 
@@ -109,12 +119,16 @@ public class JobResourceTest {
         final var queue = new MemoryBatchQueue(100);
 
         // Setup a completed job
+        final var requestUrl = String.format(TEST_JOB_URL, UUID.randomUUID().toString());
         final var jobID = queue.createJob(orgID,
                 TEST_PROVIDER_ID,
+                TEST_ORG_NPI,
+                TEST_PROVIDER_NPI,
                 List.of(TEST_PATIENT_ID),
                 JobQueueBatch.validResourceTypes,
                 null,
-                OffsetDateTime.now(ZoneOffset.UTC), null, true);
+                OffsetDateTime.now(ZoneOffset.UTC), null,
+                requestUrl, true);
         queue.claimBatch(AGGREGATOR_ID);
 
         final var runningJob = queue.getJobBatches(jobID).get(0);
@@ -154,12 +168,16 @@ public class JobResourceTest {
         final var queue = new MemoryBatchQueue(100);
 
         // Setup a completed job with one error
+        final var requestUrl = String.format(TEST_JOB_URL, UUID.randomUUID().toString()) + "?since=2020-02-20T12:00:00.000-05:00";
+
         final var jobID = queue.createJob(orgID,
                 TEST_PROVIDER_ID,
+                TEST_ORG_NPI,
+                TEST_PROVIDER_NPI,
                 List.of(TEST_PATIENT_ID),
                 JobQueueBatch.validResourceTypes,
                 null,
-                OffsetDateTime.now(ZoneOffset.UTC), null, true);
+                OffsetDateTime.now(ZoneOffset.UTC), null, requestUrl, true);
         queue.claimBatch(AGGREGATOR_ID);
 
         final var runningJob = queue.getJobBatches(jobID).get(0);
@@ -194,10 +212,12 @@ public class JobResourceTest {
         // Setup a failed job
         final var jobID = queue.createJob(orgID,
                 TEST_PROVIDER_ID,
+                TEST_ORG_NPI,
+                TEST_PROVIDER_NPI,
                 List.of(TEST_PATIENT_ID),
                 JobQueueBatch.validResourceTypes,
                 null,
-                OffsetDateTime.now(ZoneOffset.UTC), null, true);
+                OffsetDateTime.now(ZoneOffset.UTC), null, null, true);
         queue.claimBatch(AGGREGATOR_ID);
 
         final var runningJob = queue.getJobBatches(jobID).get(0);
@@ -217,10 +237,12 @@ public class JobResourceTest {
 
         final UUID jobId = queue.createJob(orgID,
                 TEST_PROVIDER_ID,
+                TEST_ORG_NPI,
+                TEST_PROVIDER_NPI,
                 List.of(TEST_PATIENT_ID, "2", "3"),
                 JobQueueBatch.validResourceTypes,
                 null,
-                OffsetDateTime.now(ZoneOffset.UTC), null, true);
+                OffsetDateTime.now(ZoneOffset.UTC), null, null, true);
 
         List<JobQueueBatch> batches = queue.getJobBatches(jobId);
         OffsetDateTime timeAgo = OffsetDateTime.now().minusHours(24);
@@ -259,10 +281,12 @@ public class JobResourceTest {
         // Setup a completed job
         final var jobID = queue.createJob(orgIDCorrect,
                 TEST_PROVIDER_ID,
+                TEST_ORG_NPI,
+                TEST_PROVIDER_NPI,
                 List.of(TEST_PATIENT_ID),
                 JobQueueBatch.validResourceTypes,
                 null,
-                OffsetDateTime.now(ZoneOffset.UTC), null, true);
+                OffsetDateTime.now(ZoneOffset.UTC), null, null, true);
         queue.claimBatch(AGGREGATOR_ID);
 
         final var runningJob = queue.getJobBatches(jobID).get(0);
@@ -313,11 +337,13 @@ public class JobResourceTest {
         final var batch = new JobQueueBatch(
                 UUID.randomUUID(),
                 UUID.randomUUID(),
-                "1",
+                TEST_PROVIDER_ID,
+                TEST_ORG_NPI,
+                TEST_PROVIDER_NPI,
                 Collections.emptyList(),
                 Collections.emptyList(),
                 null,
-                OffsetDateTime.now(), null, true);
+                OffsetDateTime.now(), null, null, true);
         final var aggregatorId = UUID.randomUUID();
         batch.setRunningStatus(aggregatorId);
         batch.setCompletedStatus(aggregatorId);

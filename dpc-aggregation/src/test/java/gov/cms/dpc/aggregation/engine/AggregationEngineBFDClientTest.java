@@ -15,6 +15,7 @@ import gov.cms.dpc.bluebutton.client.BlueButtonClientImpl;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
 import gov.cms.dpc.bluebutton.config.BBClientConfiguration;
 import gov.cms.dpc.common.Constants;
+import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.MemoryBatchQueue;
@@ -54,6 +55,8 @@ public class AggregationEngineBFDClientTest {
     private AggregationEngine engine;
     private IJobQueue queue;
     private final UUID orgID = UUID.randomUUID();
+    private final String TEST_ORG_NPI = NPIUtil.generateNPI();
+    private final String TEST_PROVIDER_NPI = NPIUtil.generateNPI();
 
     @BeforeEach
     public void setup() throws GeneralSecurityException {
@@ -90,11 +93,14 @@ public class AggregationEngineBFDClientTest {
         UUID jobID = queue.createJob(
                 orgID,
                 providerID.toString(),
+                TEST_ORG_NPI,
+                TEST_PROVIDER_NPI,
                 Collections.singletonList(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0)),
                 Collections.singletonList(ResourceType.Patient),
                 null,
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
                 "127.0.0.1",
+                null,
                 true);
 
         engine.run();
@@ -126,11 +132,14 @@ public class AggregationEngineBFDClientTest {
         UUID jobID = queue.createJob(
                 orgID,
                 providerID.toString(),
+                TEST_ORG_NPI,
+                TEST_PROVIDER_NPI,
                 Collections.singletonList(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0)),
                 Collections.singletonList(ResourceType.Patient),
                 null,
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
                 "127.0.0.1",
+                null,
                 false);
 
         engine.run();
