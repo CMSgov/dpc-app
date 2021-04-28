@@ -12,6 +12,7 @@ import gov.cms.dpc.aggregation.service.EveryoneGetsDataLookBackServiceImpl;
 import gov.cms.dpc.aggregation.service.LookBackService;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
+import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.hapi.ContextUtils;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.JobStatus;
@@ -47,7 +48,9 @@ import static org.mockito.Mockito.*;
 @ExtendWith(BufferedLoggerHandler.class)
 class AggregationEngineTest {
     private static final UUID aggregatorID = UUID.randomUUID();
-    private static final String TEST_PROVIDER_ID = "1";
+    private static final String TEST_PROVIDER_ID = UUID.randomUUID().toString();
+    private static final String TEST_ORG_NPI = NPIUtil.generateNPI();
+    private static final String TEST_PROVIDER_NPI = NPIUtil.generateNPI();
     private BlueButtonClient bbclient;
     private IJobQueue queue;
     private AggregationEngine engine;
@@ -113,11 +116,13 @@ class AggregationEngineTest {
         final var jobID = queue.createJob(
                 orgID,
                 TEST_PROVIDER_ID,
+                TEST_ORG_NPI,
+                TEST_PROVIDER_NPI,
                 Collections.singletonList(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0)),
                 Collections.singletonList(ResourceType.Patient),
                 null,
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                null, true);
+                null, null, true);
 
         // Throw a failure on the first poll, then be successful
         JobQueueFailure ex = new JobQueueFailure("Any failure");
@@ -141,7 +146,7 @@ class AggregationEngineTest {
         engine.pollQueue();
 
         // Wait for the queue to finish processing before finishing the test
-        while ( engine.isRunning() ) {
+        while (engine.isRunning()) {
             Thread.sleep(100);
         }
 
@@ -187,7 +192,7 @@ class AggregationEngineTest {
         engine.pollQueue();
 
         // Wait for the queue to finish processing before finishing the test
-        while ( engine.isRunning() ) {
+        while (engine.isRunning()) {
             Thread.sleep(100);
         }
 
@@ -207,11 +212,13 @@ class AggregationEngineTest {
         final var jobID = queue.createJob(
                 orgID,
                 TEST_PROVIDER_ID,
+                TEST_ORG_NPI,
+                TEST_PROVIDER_NPI,
                 Collections.singletonList(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0)),
                 Collections.singletonList(ResourceType.Patient),
                 null,
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                null, true);
+                null, null, true);
 
         // Work the batch
         queue.claimBatch(engine.getAggregatorID())
@@ -238,11 +245,13 @@ class AggregationEngineTest {
         final var jobID = queue.createJob(
                 orgID,
                 TEST_PROVIDER_ID,
+                TEST_ORG_NPI,
+                TEST_PROVIDER_NPI,
                 Collections.singletonList(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0)),
                 Collections.singletonList(ResourceType.Patient),
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                null, true);
+                null, null, true);
 
         // Work the batch
         queue.claimBatch(engine.getAggregatorID())
@@ -271,11 +280,13 @@ class AggregationEngineTest {
         final var jobID = queue.createJob(
                 orgID,
                 TEST_PROVIDER_ID,
+                TEST_ORG_NPI,
+                TEST_PROVIDER_NPI,
                 mbis,
                 JobQueueBatch.validResourceTypes,
                 null,
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                null, true);
+                null, null, true);
 
         // Work the batch
         queue.claimBatch(engine.getAggregatorID())
@@ -301,11 +312,13 @@ class AggregationEngineTest {
         final var jobID = queue.createJob(
                 orgID,
                 TEST_PROVIDER_ID,
+                TEST_ORG_NPI,
+                TEST_PROVIDER_NPI,
                 Arrays.asList("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11"),
                 JobQueueBatch.validResourceTypes,
                 null,
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                null, true);
+                null, null, true);
 
         // Assert the queue size
         assertEquals(2, queue.queueSize());
@@ -326,11 +339,13 @@ class AggregationEngineTest {
         final var jobID = queue.createJob(
                 orgID,
                 TEST_PROVIDER_ID,
+                TEST_ORG_NPI,
+                TEST_PROVIDER_NPI,
                 mbis,
                 JobQueueBatch.validResourceTypes,
                 null,
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                null, true);
+                null, null, true);
 
         // Work the batch
         engine.stop();
@@ -367,11 +382,13 @@ class AggregationEngineTest {
         final var jobID = queue.createJob(
                 orgID,
                 TEST_PROVIDER_ID,
+                TEST_ORG_NPI,
+                TEST_PROVIDER_NPI,
                 mbis,
                 Collections.singletonList(ResourceType.Patient),
                 null,
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                null, true);
+                null, null, true);
 
         // Work the batch
         queue.claimBatch(engine.getAggregatorID())
@@ -387,7 +404,7 @@ class AggregationEngineTest {
         try {
             final String fileContents = Files.readString(Path.of(outputFilePath));
             assertEquals(mbis.size(), Arrays.stream(fileContents.split("\n")).count(), "Contains multiple patients in file output");
-        } catch ( Exception e ) {
+        } catch (Exception e) {
             Assert.fail("Failed to read output file");
         }
     }
@@ -403,11 +420,13 @@ class AggregationEngineTest {
         final var jobID = queue.createJob(
                 orgID,
                 TEST_PROVIDER_ID,
+                TEST_ORG_NPI,
+                TEST_PROVIDER_NPI,
                 List.of(),
                 Collections.singletonList(ResourceType.Patient),
                 null,
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                null, true);
+                null, null, true);
 
         // Work the batch
         queue.claimBatch(engine.getAggregatorID())
@@ -438,11 +457,13 @@ class AggregationEngineTest {
         final var jobID = queue.createJob(
                 orgID,
                 TEST_PROVIDER_ID,
+                TEST_ORG_NPI,
+                TEST_PROVIDER_NPI,
                 mbis,
                 Collections.singletonList(ResourceType.Schedule),
                 null,
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                null, true);
+                null, null, true);
 
         // Work the batch
         queue.claimBatch(engine.getAggregatorID())
@@ -467,11 +488,13 @@ class AggregationEngineTest {
         final var jobID = queue.createJob(
                 orgID,
                 TEST_PROVIDER_ID,
+                TEST_ORG_NPI,
+                TEST_PROVIDER_NPI,
                 mbis,
                 Collections.singletonList(ResourceType.Schedule),
                 null,
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                null, true);
+                null, null, true);
 
         // Throw an exception when failing the batch
         Exception e = new RuntimeException("Failed to mark batch as failed");
@@ -505,11 +528,13 @@ class AggregationEngineTest {
         final var jobID = queue.createJob(
                 orgID,
                 TEST_PROVIDER_ID,
+                TEST_ORG_NPI,
+                TEST_PROVIDER_NPI,
                 mbis,
                 List.of(ResourceType.ExplanationOfBenefit, ResourceType.Patient),
                 null,
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                null, true);
+                null, null, true);
 
         // Work the batch
         queue.claimBatch(engine.getAggregatorID())
@@ -550,11 +575,13 @@ class AggregationEngineTest {
         final var jobID = queue.createJob(
                 orgID,
                 TEST_PROVIDER_ID,
+                TEST_ORG_NPI,
+                TEST_PROVIDER_NPI,
                 mbis,
                 List.of(ResourceType.ExplanationOfBenefit, ResourceType.Patient),
                 null,
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                null, true);
+                null, null, true);
 
         queue.claimBatch(engine.getAggregatorID())
                 .ifPresent(engine::processJobBatch);
@@ -594,11 +621,13 @@ class AggregationEngineTest {
         queue.createJob(
                 orgID,
                 TEST_PROVIDER_ID,
+                TEST_ORG_NPI,
+                TEST_PROVIDER_NPI,
                 Collections.singletonList("1"),
                 Collections.singletonList(ResourceType.Patient),
                 null,
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                null, true);
+                null, null, true);
 
         AggregationEngineHealthCheck healthCheck = new AggregationEngineHealthCheck(engine);
         Assert.assertTrue(healthCheck.check().isHealthy());
@@ -627,11 +656,13 @@ class AggregationEngineTest {
         final var jobID = queue.createJob(
                 orgID,
                 TEST_PROVIDER_ID,
+                TEST_ORG_NPI,
+                TEST_PROVIDER_NPI,
                 Collections.singletonList("1"),
                 Collections.singletonList(ResourceType.Patient),
                 null,
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                null, true);
+                null, null, true);
 
         // Work the batch
         queue.claimBatch(engine.getAggregatorID())
