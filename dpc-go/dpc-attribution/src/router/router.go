@@ -28,9 +28,9 @@ func NewDPCAttributionRouter(o v2.Service, g v2.PostService, impl v2.PostService
 			r.Use(middleware2.AuthCtx)
 			r.Post("/", g.Post)
 		})
-        r.Route("/Implementor", func(r chi.Router) {
-            r.Post("/", impl.Post)
-        })
+		r.Route("/Implementor", func(r chi.Router) {
+			r.Post("/", impl.Post)
+		})
 	})
 
 	return r

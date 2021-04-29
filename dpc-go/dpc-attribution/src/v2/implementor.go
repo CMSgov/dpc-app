@@ -1,14 +1,14 @@
 package v2
 
 import (
-    "bytes"
-    "encoding/json"
-    "github.com/CMSgov/dpc/attribution/logger"
-    "github.com/CMSgov/dpc/attribution/repository"
-    "github.com/darahayes/go-boom"
-    "go.uber.org/zap"
-    "io/ioutil"
-    "net/http"
+	"bytes"
+	"encoding/json"
+	"github.com/CMSgov/dpc/attribution/logger"
+	"github.com/CMSgov/dpc/attribution/repository"
+	"github.com/darahayes/go-boom"
+	"go.uber.org/zap"
+	"io/ioutil"
+	"net/http"
 )
 
 // ImplementorService is a struct that defines what the service has
@@ -29,10 +29,10 @@ func (os *ImplementorService) Post(w http.ResponseWriter, r *http.Request) {
 	body, _ := ioutil.ReadAll(r.Body)
 
 	if len(body) == 0 {
-        log.Error("Failed to create implementor due to missing request body")
-        boom.BadData(w, "Missing request body")
-        return
-    }
+		log.Error("Failed to create implementor due to missing request body")
+		boom.BadData(w, "Missing request body")
+		return
+	}
 
 	implementor, err := os.repo.Insert(r.Context(), body)
 	if err != nil {

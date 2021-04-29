@@ -1,15 +1,15 @@
 package v2
 
 import (
-    "bytes"
-    "encoding/json"
-    "github.com/CMSgov/dpc/attribution/logger"
-    "github.com/CMSgov/dpc/attribution/middleware"
-    "github.com/CMSgov/dpc/attribution/repository"
-    "github.com/darahayes/go-boom"
-    "go.uber.org/zap"
-    "io/ioutil"
-    "net/http"
+	"bytes"
+	"encoding/json"
+	"github.com/CMSgov/dpc/attribution/logger"
+	"github.com/CMSgov/dpc/attribution/middleware"
+	"github.com/CMSgov/dpc/attribution/repository"
+	"github.com/darahayes/go-boom"
+	"go.uber.org/zap"
+	"io/ioutil"
+	"net/http"
 )
 
 // OrganizationService is a struct that defines what the service has
