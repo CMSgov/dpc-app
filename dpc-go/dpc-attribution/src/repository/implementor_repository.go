@@ -4,7 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
-	"github.com/CMSgov/dpc/attribution/model"
+    "fmt"
+    "github.com/CMSgov/dpc/attribution/model"
 	"github.com/huandu/go-sqlbuilder"
 )
 
@@ -47,6 +48,10 @@ func (or *ImplementorRepository) Insert(ctx context.Context, body []byte) (*mode
 	if err := json.Unmarshal(body, &implementorModel); err != nil {
 		return nil, err
 	}
+
+	if implementorModel.Name == "" {
+	    return nil, fmt.Errorf("missing required field: \"name\"")
+    }
 
 	ib := sqlFlavor.NewInsertBuilder()
 	ib.InsertInto("implementor")
