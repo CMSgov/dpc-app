@@ -97,6 +97,9 @@ GEM
       warden (~> 1.2.3)
     devise-security (0.15.0)
       devise (>= 4.3.0, < 5.0)
+    devise_invitable (2.0.5)
+      actionmailer (>= 5.0)
+      devise (>= 4.6)
     diff-lcs (1.4.4)
     dotenv (2.7.6)
     dotenv-rails (2.7.6)
@@ -292,6 +295,7 @@ DEPENDENCIES
   database_cleaner
   devise
   devise-security
+  devise_invitable (~> 2.0.0)
   dotenv-rails
   factory_bot_rails
   faker
