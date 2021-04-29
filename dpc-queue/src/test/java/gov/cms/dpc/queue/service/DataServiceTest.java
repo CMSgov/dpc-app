@@ -65,7 +65,7 @@ public class DataServiceTest {
     }
 
     @Test
-    public void whenGetJobBatchesReturnsFailedJob() throws IllegalAccessException {
+    public void whenGetJobBatchesReturnsFailedJob() {
         ResourceType resourceType = ResourceType.ExplanationOfBenefit;
 
         workJob(true, resourceType);
@@ -73,7 +73,7 @@ public class DataServiceTest {
     }
 
     @Test
-    public void whenGetJobBatchesReturnsCompletedJobWithResourceType() throws IllegalAccessException {
+    public void whenGetJobBatchesReturnsCompletedJobWithResourceType() {
         ResourceType resourceType = ResourceType.ExplanationOfBenefit;
 
         workJob(false, resourceType);
@@ -92,7 +92,7 @@ public class DataServiceTest {
     }
 
     @Test
-    public void whenPassingInNoResourceTypes() throws IllegalAccessException {
+    public void whenPassingInNoResourceTypes() {
         workJob(false, ResourceType.ExplanationOfBenefit);
         Assertions.assertThrows(DataRetrievalException.class, () -> dataService.retrieveData(orgID, orgNPI, providerNPI, List.of(patientID.toString())));
     }

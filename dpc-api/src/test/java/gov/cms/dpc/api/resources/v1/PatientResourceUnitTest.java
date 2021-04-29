@@ -55,7 +55,7 @@ public class PatientResourceUnitTest {
         Patient result = (Patient) response.getEntity();
 
         assertEquals(patient, result);
-        assertEquals("Organization/"+orgId, result.getManagingOrganization().getReference());
+        assertEquals("Organization/" + orgId, result.getManagingOrganization().getReference());
     }
 
     @Test

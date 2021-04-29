@@ -114,5 +114,5 @@
             <column name="request_url" type="VARCHAR(255)"/>
         </addColumn>
     </changeSet>
-    
+
 </databaseChangeLog>
