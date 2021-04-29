@@ -296,7 +296,7 @@ public class GroupResource extends AbstractGroupResource {
         final String orgNPI = fetchOrganizationNPI(new IdType("Organization", orgID.toString()));
         final String providerNPI = FHIRExtractors.getAttributedNPI(group);
 
-        // Handle the _type query parameter and since query parameters
+        // Handle the _type and since query parameters
         final var resources = handleTypeQueryParam(resourceTypes);
         final var since = handleSinceQueryParam(sinceParam);
 
@@ -304,7 +304,7 @@ public class GroupResource extends AbstractGroupResource {
         final var requestingIP = APIHelpers.fetchRequestingIP(request);
         final String requestUrl = APIHelpers.fetchRequestUrl(request);
 
-        final UUID jobID = this.queue.createJob(orgID, rosterID, orgNPI, providerNPI, attributedPatients, resources, since, transactionTime, requestingIP, requestUrl, true);
+        final UUID jobID = this.queue.createJob(orgID, orgNPI, providerNPI, attributedPatients, resources, since, transactionTime, requestingIP, requestUrl, true);
         final int totalPatients = attributedPatients == null ? 0 : attributedPatients.size();
         final String resourcesRequested = resources.stream().map(ResourceType::getPath).filter(Objects::nonNull).collect(Collectors.joining(";"));
         logger.info("dpcMetric=jobCreated,jobId={},orgId={},groupId={},totalPatients={},resourcesRequested={}", jobID, orgID, rosterID, totalPatients, resourcesRequested);

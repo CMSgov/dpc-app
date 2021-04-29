@@ -289,7 +289,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
                 .execute();
 
         assertEquals(64, resultNoSince.getTotal(), "Should have 64 entries in Bundle");
-
+        
         // Request with a blank since parameter should still return data
         Bundle resultEmptySince = client
                 .operation()
@@ -302,7 +302,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
                 .execute();
 
         assertEquals(64, resultEmptySince.getTotal(), "Should have 64 entries in Bundle");
-
+        
         // Request with an invalid since parameter should throw an error
         assertThrows(InvalidRequestException.class, () -> client
                 .operation()
@@ -325,7 +325,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
                 .useHttpGet()
                 .withAdditionalHeader("X-Provenance", generateProvenance(ORGANIZATION_ID, practitioner.getId()))
                 .execute());
-
+        
         // Request with a valid since parameter should return data
         String sinceValid = OffsetDateTime.now(ZoneId.of("America/Puerto_Rico")).minusSeconds(5).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
         Bundle resultValidSince = client
@@ -468,9 +468,9 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
         //Setup org B with a patient
         final Patient orgBPatient = (Patient) APITestHelpers.createResource(orgBClient, APITestHelpers.createPatientResource("4S41C00AA00", orgBContext.getOrgId())).getResource();
 
-        assertNotNull(APITestHelpers.getResourceById(orgAClient, Patient.class, orgAPatient.getId()), "Org should be able to retrieve their own patient.");
-        assertNotNull(APITestHelpers.getResourceById(orgBClient, Patient.class, orgBPatient.getId()), "Org should be able to retrieve their own patient.");
-        assertThrows(AuthenticationException.class, () -> APITestHelpers.getResourceById(orgAClient, Patient.class, orgBPatient.getId()), "Expected auth error when retrieving another org's patient.");
+        assertNotNull(APITestHelpers.getResourceById(orgAClient, Patient.class,orgAPatient.getId()), "Org should be able to retrieve their own patient.");
+        assertNotNull(APITestHelpers.getResourceById(orgBClient,Patient.class, orgBPatient.getId()), "Org should be able to retrieve their own patient.");
+        assertThrows(AuthenticationException.class, () -> APITestHelpers.getResourceById(orgAClient,Patient.class, orgBPatient.getId()), "Expected auth error when retrieving another org's patient.");
     }
 
     @Test
@@ -498,19 +498,19 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
         final Patient orgBPatient = (Patient) APITestHelpers.createResource(orgBClient, APITestHelpers.createPatientResource("4S41C00AA00", orgBContext.getOrgId())).getResource();
 
         //Test GET /Patient/{id}
-        APITestHelpers.getResourceById(orgAClient, Patient.class, orgAPatient.getIdElement().getIdPart());
-        APITestHelpers.getResourceById(orgBClient, Patient.class, orgBPatient.getIdElement().getIdPart());
-        assertThrows(AuthenticationException.class, () -> APITestHelpers.getResourceById(orgBClient, Patient.class, orgAPatient.getIdElement().getIdPart()), "Expected auth error when accessing another org's patient");
+        APITestHelpers.getResourceById(orgAClient,Patient.class,orgAPatient.getIdElement().getIdPart());
+        APITestHelpers.getResourceById(orgBClient,Patient.class,orgBPatient.getIdElement().getIdPart());
+        assertThrows(AuthenticationException.class, () -> APITestHelpers.getResourceById(orgBClient,Patient.class,orgAPatient.getIdElement().getIdPart()), "Expected auth error when accessing another org's patient");
 
         //Test PUT /Patient/{id}
-        APITestHelpers.updateResource(orgAClient, orgAPatient.getIdElement().getIdPart(), orgAPatient);
-        APITestHelpers.updateResource(orgBClient, orgBPatient.getIdElement().getIdPart(), orgBPatient);
-        assertThrows(AuthenticationException.class, () -> APITestHelpers.updateResource(orgBClient, orgAPatient.getIdElement().getIdPart(), orgAPatient), "Expected auth error when updating another org's patient");
+        APITestHelpers.updateResource(orgAClient,orgAPatient.getIdElement().getIdPart(),orgAPatient);
+        APITestHelpers.updateResource(orgBClient,orgBPatient.getIdElement().getIdPart(),orgBPatient);
+        assertThrows(AuthenticationException.class, () -> APITestHelpers.updateResource(orgBClient,orgAPatient.getIdElement().getIdPart(),orgAPatient), "Expected auth error when updating another org's patient");
 
         //Test PUT /Patient/{id}
-        APITestHelpers.updateResource(orgAClient, orgAPatient.getIdElement().getIdPart(), orgAPatient);
-        APITestHelpers.updateResource(orgBClient, orgBPatient.getIdElement().getIdPart(), orgBPatient);
-        assertThrows(AuthenticationException.class, () -> APITestHelpers.updateResource(orgBClient, orgAPatient.getIdElement().getIdPart(), orgAPatient), "Expected auth error when updating another org's patient");
+        APITestHelpers.updateResource(orgAClient,orgAPatient.getIdElement().getIdPart(),orgAPatient);
+        APITestHelpers.updateResource(orgBClient,orgBPatient.getIdElement().getIdPart(),orgBPatient);
+        assertThrows(AuthenticationException.class, () -> APITestHelpers.updateResource(orgBClient,orgAPatient.getIdElement().getIdPart(),orgAPatient), "Expected auth error when updating another org's patient");
 
 
         //Test Get /Patient/{id}/$everything
@@ -521,13 +521,13 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
                 .build();
         orgAPractitioner = (Practitioner) APITestHelpers.createResource(orgAClient, orgAPractitioner).getResource();
 
-        Bundle result = APITestHelpers.getPatientEverything(orgAClient, orgAPatient.getIdElement().getIdPart(), generateProvenance(orgAContext.getOrgId(), orgAPractitioner.getIdElement().getIdPart()));
-        assertEquals(64, result.getTotal(), "Should have 64 entries in Bundle");
+       Bundle result = APITestHelpers.getPatientEverything(orgAClient, orgAPatient.getIdElement().getIdPart(), generateProvenance(orgAContext.getOrgId(),orgAPractitioner.getIdElement().getIdPart()));
+       assertEquals(64, result.getTotal(), "Should have 64 entries in Bundle");
 
         final String orgAPractitionerId = orgAPractitioner.getIdElement().getIdPart();
-        assertThrows(AuthenticationException.class, () ->
-                        APITestHelpers.getPatientEverything(orgBClient, orgAPatient.getIdElement().getIdPart(), generateProvenance(orgAContext.getOrgId(), orgAPractitionerId))
-                , "Expected auth error when export another org's patient's data");
+       assertThrows(AuthenticationException.class, () ->
+               APITestHelpers.getPatientEverything(orgBClient, orgAPatient.getIdElement().getIdPart(), generateProvenance(orgAContext.getOrgId(), orgAPractitionerId))
+       , "Expected auth error when export another org's patient's data");
 
     }
 
@@ -542,7 +542,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     }
 
     private Bundle fetchPatients(IGenericClient client) {
-        return APITestHelpers.resourceSearch(client, ResourceType.Patient);
+        return APITestHelpers.resourceSearch(client,ResourceType.Patient);
     }
 
     private Patient fetchPatient(IGenericClient client, String mbi) {
@@ -570,16 +570,16 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
         return (Practitioner) practSearch.getEntry().get(0).getResource();
     }
 
-    private void optOutPatient(String mbi) {
+    private void optOutPatient(String mbi){
         Consent consent = new Consent();
         consent.setStatus(Consent.ConsentState.ACTIVE);
 
-        Coding categoryCoding = new Coding("http://loinc.org", "64292-6", null);
+        Coding categoryCoding = new Coding("http://loinc.org","64292-6", null);
         CodeableConcept category = new CodeableConcept();
         category.setCoding(List.of(categoryCoding));
         consent.setCategory(List.of(category));
 
-        String patientRefPath = "/Patient?identity=|" + mbi;
+        String patientRefPath = "/Patient?identity=|"+mbi;
         consent.setPatient(new Reference("http://api.url" + patientRefPath));
 
         java.util.Date date = java.util.Date.from(Instant.now());
@@ -591,7 +591,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
         String policyUrl = "http://hl7.org/fhir/ConsentPolicy/opt-out";
         consent.setPolicyRule(policyUrl);
 
-        consentClient
+       consentClient
                 .create()
                 .resource(consent)
                 .encodedJson()

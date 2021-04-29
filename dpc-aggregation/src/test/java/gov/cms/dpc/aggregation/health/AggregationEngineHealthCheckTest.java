@@ -4,9 +4,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import com.codahale.metrics.MetricRegistry;
 import com.typesafe.config.ConfigFactory;
-import gov.cms.dpc.aggregation.dao.OrganizationDAO;
-import gov.cms.dpc.aggregation.dao.ProviderDAO;
-import gov.cms.dpc.aggregation.dao.RosterDAO;
 import gov.cms.dpc.aggregation.engine.AggregationEngine;
 import gov.cms.dpc.aggregation.engine.JobBatchProcessor;
 import gov.cms.dpc.aggregation.engine.OperationsConfig;
@@ -44,7 +41,6 @@ import static org.mockito.ArgumentMatchers.anyMap;
  */
 @ExtendWith(BufferedLoggerHandler.class)
 public class AggregationEngineHealthCheckTest {
-    private static final String TEST_PROVIDER_ID = UUID.randomUUID().toString();
     private static final String TEST_ORG_NPI = NPIUtil.generateNPI();
     private static final String TEST_PROVIDER_NPI = NPIUtil.generateNPI();
     private static final UUID aggregatorID = UUID.randomUUID();
@@ -72,7 +68,7 @@ public class AggregationEngineHealthCheckTest {
         queue = Mockito.spy(new MemoryBatchQueue(10));
         bbclient = Mockito.spy(new MockBlueButtonClient(fhirContext));
         var operationalConfig = new OperationsConfig(1000, exportPath, 500, YearMonth.of(2015, 3));
-        LookBackServiceImpl lookBackService = Mockito.spy(new LookBackServiceImpl(Mockito.mock(ProviderDAO.class), Mockito.mock(RosterDAO.class), Mockito.mock(OrganizationDAO.class), operationalConfig));
+        LookBackServiceImpl lookBackService = Mockito.spy(new LookBackServiceImpl(operationalConfig));
         JobBatchProcessor jobBatchProcessor = Mockito.spy(new JobBatchProcessor(bbclient, fhirContext, metricRegistry, operationalConfig, lookBackService, consentService));
         engine = Mockito.spy(new AggregationEngine(aggregatorID, queue, operationalConfig, jobBatchProcessor));
         AggregationEngine.setGlobalErrorHandler();
@@ -85,7 +81,6 @@ public class AggregationEngineHealthCheckTest {
 
         queue.createJob(
                 orgID,
-                TEST_PROVIDER_ID,
                 TEST_ORG_NPI,
                 TEST_PROVIDER_NPI,
                 Collections.singletonList("1"),
@@ -114,7 +109,6 @@ public class AggregationEngineHealthCheckTest {
 
         queue.createJob(
                 orgID,
-                TEST_PROVIDER_ID,
                 TEST_ORG_NPI,
                 TEST_PROVIDER_NPI,
                 Collections.singletonList("1"),
@@ -141,7 +135,6 @@ public class AggregationEngineHealthCheckTest {
 
         queue.createJob(
                 orgID,
-                TEST_PROVIDER_ID,
                 TEST_ORG_NPI,
                 TEST_PROVIDER_NPI,
                 Collections.singletonList("1"),
@@ -171,7 +164,6 @@ public class AggregationEngineHealthCheckTest {
 
         queue.createJob(
                 orgID,
-                TEST_PROVIDER_ID,
                 TEST_ORG_NPI,
                 TEST_PROVIDER_NPI,
                 Collections.singletonList("1"),

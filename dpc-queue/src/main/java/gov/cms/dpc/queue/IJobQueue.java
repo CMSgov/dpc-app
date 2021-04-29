@@ -19,7 +19,6 @@ public interface IJobQueue {
      * and set to the QUEUED status.
      *
      * @param orgID           - The organization submitting the job
-     * @param providerID      - The UUID of provider submitting the job OR UUID of the roster
      * @param orgNPI          - The NPI of the organization submitting the job
      * @param providerNPI     - The NPI of the provider submitting the job
      * @param mbis            - The list of MBIs of patients to fetch data for
@@ -32,7 +31,6 @@ public interface IJobQueue {
      * @return The UUID of the created job
      */
     UUID createJob(UUID orgID,
-                   String providerID,
                    String orgNPI,
                    String providerNPI,
                    List<String> mbis,

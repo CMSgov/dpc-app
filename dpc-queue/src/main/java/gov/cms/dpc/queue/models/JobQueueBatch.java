@@ -183,7 +183,6 @@ public class JobQueueBatch implements Serializable {
 
     public JobQueueBatch(UUID jobID,
                          UUID orgID,
-                         String providerID,
                          String orgNPI,
                          String providerNPI,
                          List<String> patients,
@@ -198,7 +197,6 @@ public class JobQueueBatch implements Serializable {
         this.orgID = orgID;
         this.orgNPI = orgNPI;
         this.providerNPI = providerNPI;
-        this.providerID = providerID;
         this.patients = patients;
         this.resourceTypes = resourceTypes;
         this.since = since;
@@ -430,6 +428,7 @@ public class JobQueueBatch implements Serializable {
 
     /**
      * Marks the job batch as failed.
+     *
      */
     public void setFailedStatus() {
         this.status = JobStatus.FAILED;

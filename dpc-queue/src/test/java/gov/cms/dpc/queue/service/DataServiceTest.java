@@ -27,7 +27,6 @@ public class DataServiceTest {
 
     private final UUID aggregatorID = UUID.randomUUID();
     private final UUID orgID = UUID.randomUUID();
-    private final UUID providerID = UUID.randomUUID();
     private final UUID patientID = UUID.randomUUID();
     private final String orgNPI = NPIUtil.generateNPI();
     private final String providerNPI = NPIUtil.generateNPI();
@@ -62,7 +61,7 @@ public class DataServiceTest {
 
         Mockito.doThrow(new RuntimeException("error")).when(queue).getJobBatches(Mockito.any(UUID.class));
 
-        Assertions.assertThrows(DataRetrievalException.class, () -> dataService.retrieveData(orgID, providerID, orgNPI, providerNPI, List.of(patientID.toString()), resourceType));
+        Assertions.assertThrows(DataRetrievalException.class, () -> dataService.retrieveData(orgID, orgNPI, providerNPI, List.of(patientID.toString()), resourceType));
     }
 
     @Test
@@ -70,7 +69,7 @@ public class DataServiceTest {
         ResourceType resourceType = ResourceType.ExplanationOfBenefit;
 
         workJob(true, resourceType);
-        Assertions.assertThrows(DataRetrievalException.class, () -> dataService.retrieveData(orgID, providerID, orgNPI, providerNPI, List.of(patientID.toString()), resourceType));
+        Assertions.assertThrows(DataRetrievalException.class, () -> dataService.retrieveData(orgID, orgNPI, providerNPI, List.of(patientID.toString()), resourceType));
     }
 
     @Test
@@ -78,23 +77,24 @@ public class DataServiceTest {
         ResourceType resourceType = ResourceType.ExplanationOfBenefit;
 
         workJob(false, resourceType);
-        Resource resource = dataService.retrieveData(orgID, providerID, orgNPI, providerNPI, List.of(patientID.toString()), resourceType);
+        Resource resource = dataService.retrieveData(orgID, orgNPI, providerNPI, List.of(patientID.toString()), resourceType);
         Assertions.assertTrue(resource instanceof Bundle);
     }
 
     @Test
     public void whenGetJobBatchesReturnsCompletedJobWithOperationOutcome() {
+        UUID patientID = UUID.randomUUID();
         ResourceType resourceType = ResourceType.ExplanationOfBenefit;
 
         workJob(false, ResourceType.OperationOutcome);
-        Resource resource = dataService.retrieveData(orgID, providerID, orgNPI, providerNPI, List.of(patientID.toString()), resourceType);
+        Resource resource = dataService.retrieveData(orgID, orgNPI, providerNPI, List.of(patientID.toString()), resourceType);
         Assertions.assertTrue(resource instanceof OperationOutcome);
     }
 
     @Test
     public void whenPassingInNoResourceTypes() {
         workJob(false, ResourceType.ExplanationOfBenefit);
-        Assertions.assertThrows(DataRetrievalException.class, () -> dataService.retrieveData(orgID, providerID, orgNPI, providerNPI, List.of(patientID.toString())));
+        Assertions.assertThrows(DataRetrievalException.class, () -> dataService.retrieveData(orgID, orgNPI, providerNPI, List.of(patientID.toString())));
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")

@@ -9,7 +9,6 @@ import gov.cms.dpc.common.annotations.APIV1;
 import gov.cms.dpc.common.annotations.NoHtml;
 import gov.cms.dpc.common.models.JobCompletionModel;
 import gov.cms.dpc.fhir.FHIRExtractors;
-import gov.cms.dpc.fhir.FHIRFormatters;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
@@ -152,21 +151,9 @@ public class JobResource extends AbstractJobResource {
 
         JobQueueBatch firstBatch = batches.get(0);
 
-        final String resourceQueryParam = firstBatch.getResourceTypes().stream()
-                .map(ResourceType::toString)
-                .collect(Collectors.joining(GroupResource.LIST_DELIMITER));
-
-        final String sinceQueryParam = firstBatch.getSince()
-                .map(since -> "&_since=" + since.format(FHIRFormatters.INSTANT_FORMATTER))
-                .orElse("");
-
         final JobCompletionModel completionModel = new JobCompletionModel(
                 firstBatch.getTransactionTime(),
-                String.format("%s/Group/%s/$export?_type=%s%s",
-                        baseURL,
-                        firstBatch.getProviderID(),
-                        resourceQueryParam,
-                        sinceQueryParam),
+                firstBatch.getRequestUrl(),
                 formOutputList(batches, false),
                 formOutputList(batches, true),
                 buildJobExtension(batches));

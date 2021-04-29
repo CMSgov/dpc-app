@@ -140,30 +140,29 @@ public class JobBatchProcessor {
         headers.put(Constants.BFD_ORIGINAL_QUERY_ID_HEADER, job.getJobID().toString());
         if (job.isBulk()) {
             headers.put(Constants.BULK_JOB_ID_HEADER, job.getJobID().toString());
-            headers.put(Constants.BULK_CLIENT_ID_HEADER, job.getProviderID());
+            headers.put(Constants.BULK_CLIENT_ID_HEADER, job.getProviderNPI());
         } else {
-            headers.put(Constants.DPC_CLIENT_ID_HEADER, job.getProviderID());
+            headers.put(Constants.DPC_CLIENT_ID_HEADER, job.getProviderNPI());
         }
         return headers;
     }
 
     private List<LookBackAnswer> getLookBackAnswers(JobQueueBatch job, String patientId) {
         List<LookBackAnswer> result = new ArrayList<>();
-        //job.getProviderID is really not providerID, it is the rosterID, see createJob in GroupResource export for confirmation
-        //patientId here is the patient MBI
-        final String practitionerNPI = lookBackService.getPractitionerNPIFromRoster(job.getOrgID(), job.getProviderID(), patientId);
-        if (practitionerNPI != null) {
+        final String practitionerNPI = job.getProviderNPI();
+        final String organizationNPI = job.getOrgNPI();
+        if (practitionerNPI != null && organizationNPI != null) {
             MDC.put(MDCConstants.PROVIDER_NPI, practitionerNPI);
             Flowable<Resource> flowable = fetchResource(job, patientId, ResourceType.ExplanationOfBenefit, null);
             result = flowable
                     .filter(resource -> ResourceType.ExplanationOfBenefit == resource.getResourceType())
                     .map(ExplanationOfBenefit.class::cast)
-                    .map(resource -> lookBackService.getLookBackAnswer(resource, job.getOrgID(), practitionerNPI, operationsConfig.getLookBackMonths()))
+                    .map(resource -> lookBackService.getLookBackAnswer(resource, organizationNPI, practitionerNPI, operationsConfig.getLookBackMonths()))
                     .toList()
                     .doOnError(e -> new ArrayList<>())
                     .blockingGet();
         } else {
-            logger.error("couldn't get practitionerNPI from roster");
+            logger.error("couldn't get practitionerNPI and organizationNPI from job");
         }
         return result;
     }
