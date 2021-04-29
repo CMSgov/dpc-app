@@ -81,7 +81,7 @@ class FHIRSubmissionTest {
         mockFactory();
         mockClient();
         mockBfdClient();
-        doCallRealMethod().when(queue).createJob(Mockito.any(UUID.class), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyList(), Mockito.anyList(), Mockito.any(OffsetDateTime.class), Mockito.any(OffsetDateTime.class), Mockito.anyString(), Mockito.anyString(), Mockito.anyBoolean());
+        doCallRealMethod().when(queue).createJob(Mockito.any(UUID.class), Mockito.anyString(), Mockito.anyString(), Mockito.anyList(), Mockito.anyList(), Mockito.any(OffsetDateTime.class), Mockito.any(OffsetDateTime.class), Mockito.anyString(), Mockito.anyString(), Mockito.anyBoolean());
     }
 
     @Test
@@ -289,7 +289,6 @@ class FHIRSubmissionTest {
                 return group;
             }
         });
-
     }
 
     @SuppressWarnings("unchecked")
