@@ -39,7 +39,6 @@ import static org.mockito.Mockito.doReturn;
 @ExtendWith(BufferedLoggerHandler.class)
 class BatchAggregationEngineTest {
     private static final UUID aggregatorID = UUID.randomUUID();
-    private static final String TEST_PROVIDER_ID = UUID.randomUUID().toString();
     private static final String TEST_ORG_NPI = NPIUtil.generateNPI();
     private static final String TEST_PROVIDER_NPI = NPIUtil.generateNPI();
 
@@ -95,12 +94,10 @@ class BatchAggregationEngineTest {
      */
     @Test
     void largeJobTestSingleResource() {
-        Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getPractitionerNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
         // Make a simple job with one resource type
         final var orgID = UUID.randomUUID();
         final var jobID = queue.createJob(
                 orgID,
-                TEST_PROVIDER_ID,
                 TEST_ORG_NPI,
                 TEST_PROVIDER_NPI,
                 Collections.singletonList(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0)),
@@ -133,13 +130,11 @@ class BatchAggregationEngineTest {
      */
     @Test
     void largeJobTest() {
-        Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getPractitionerNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
 
         // Make a simple job with one resource type
         final var orgID = UUID.randomUUID();
         final var jobID = queue.createJob(
                 orgID,
-                TEST_PROVIDER_ID,
                 TEST_ORG_NPI,
                 TEST_PROVIDER_NPI,
                 MockBlueButtonClient.TEST_PATIENT_MBIS,
@@ -177,13 +172,9 @@ class BatchAggregationEngineTest {
     void largeJobWithBadPatientTest() {
         final var orgID = UUID.randomUUID();
 
-        Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getPractitionerNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
-        Mockito.doReturn(null).when(lookBackService).getPractitionerNPIFromRoster(orgID, TEST_PROVIDER_ID, null);
-
         // Make a simple job with one resource type
         final var jobID = queue.createJob(
                 orgID,
-                TEST_PROVIDER_ID,
                 TEST_ORG_NPI,
                 TEST_PROVIDER_NPI,
                 MockBlueButtonClient.TEST_PATIENT_WITH_BAD_IDS,
@@ -216,7 +207,6 @@ class BatchAggregationEngineTest {
         final var orgID = UUID.randomUUID();
         final var npi = NPIUtil.generateNPI();
 
-        Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getPractitionerNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
         Mockito.doReturn(new LookBackAnswer(npi, npi, 1, YearMonth.now())
                 .addEobBillingPeriod(YearMonth.now().minusYears(1))
                 .addEobOrganization(npi)
@@ -225,10 +215,9 @@ class BatchAggregationEngineTest {
         // Make a simple job with one resource type
         final var jobID = queue.createJob(
                 orgID,
-                TEST_PROVIDER_ID,
                 TEST_ORG_NPI,
                 TEST_PROVIDER_NPI,
-                MockBlueButtonClient.TEST_PATIENT_MBIS.subList(0, 1),
+                MockBlueButtonClient.TEST_PATIENT_MBIS.subList(0,1),
                 Collections.singletonList(ResourceType.ExplanationOfBenefit),
                 MockBlueButtonClient.TEST_LAST_UPDATED.minusSeconds(1),
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
@@ -261,7 +250,6 @@ class BatchAggregationEngineTest {
         final var orgID = UUID.randomUUID();
         final var npi = NPIUtil.generateNPI();
 
-        Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getPractitionerNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
         Mockito.doReturn(new LookBackAnswer(npi, npi, 1, YearMonth.now())
                 .addEobBillingPeriod(YearMonth.now().minusYears(1))
                 .addEobOrganization(NPIUtil.generateNPI())
@@ -270,10 +258,9 @@ class BatchAggregationEngineTest {
         // Make a simple job with one resource type
         final var jobID = queue.createJob(
                 orgID,
-                TEST_PROVIDER_ID,
                 TEST_ORG_NPI,
                 TEST_PROVIDER_NPI,
-                MockBlueButtonClient.TEST_PATIENT_MBIS.subList(0, 1),
+                MockBlueButtonClient.TEST_PATIENT_MBIS.subList(0,1),
                 Collections.singletonList(ResourceType.ExplanationOfBenefit),
                 MockBlueButtonClient.TEST_LAST_UPDATED.minusSeconds(1),
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
@@ -306,7 +293,6 @@ class BatchAggregationEngineTest {
         final var orgID = UUID.randomUUID();
         final var npi = NPIUtil.generateNPI();
 
-        Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getPractitionerNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
         Mockito.doReturn(new LookBackAnswer(npi, npi, 1, YearMonth.now())
                 .addEobBillingPeriod(YearMonth.now())
                 .addEobOrganization(NPIUtil.generateNPI())
@@ -315,10 +301,9 @@ class BatchAggregationEngineTest {
         // Make a simple job with one resource type
         final var jobID = queue.createJob(
                 orgID,
-                TEST_PROVIDER_ID,
                 TEST_ORG_NPI,
                 TEST_PROVIDER_NPI,
-                MockBlueButtonClient.TEST_PATIENT_MBIS.subList(0, 1),
+                MockBlueButtonClient.TEST_PATIENT_MBIS.subList(0,1),
                 Collections.singletonList(ResourceType.ExplanationOfBenefit),
                 MockBlueButtonClient.TEST_LAST_UPDATED.minusSeconds(1),
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
@@ -351,7 +336,6 @@ class BatchAggregationEngineTest {
         final var orgID = UUID.randomUUID();
         final var npi = NPIUtil.generateNPI();
 
-        Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getPractitionerNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
         Mockito.doReturn(new LookBackAnswer(npi, npi, 1, YearMonth.now())
                 .addEobBillingPeriod(YearMonth.now())
                 .addEobOrganization(npi)
@@ -360,10 +344,9 @@ class BatchAggregationEngineTest {
         // Make a simple job with one resource type
         final var jobID = queue.createJob(
                 orgID,
-                TEST_PROVIDER_ID,
                 TEST_ORG_NPI,
                 TEST_PROVIDER_NPI,
-                MockBlueButtonClient.TEST_PATIENT_MBIS.subList(0, 1),
+                MockBlueButtonClient.TEST_PATIENT_MBIS.subList(0,1),
                 Collections.singletonList(ResourceType.ExplanationOfBenefit),
                 MockBlueButtonClient.TEST_LAST_UPDATED.minusSeconds(1),
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,

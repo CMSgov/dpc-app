@@ -212,7 +212,7 @@ public class PatientResource extends AbstractPatientResource {
 
         final String requestingIP = APIHelpers.fetchRequestingIP(request);
         final String requestUrl = APIHelpers.fetchRequestUrl(request);
-        Resource result = dataService.retrieveData(orgId, practitionerId, orgNPI, practitionerNPI, List.of(patientMbi), since, APIHelpers.fetchTransactionTime(bfdClient),
+        Resource result = dataService.retrieveData(orgId, orgNPI, practitionerNPI, List.of(patientMbi), since, APIHelpers.fetchTransactionTime(bfdClient),
                 requestingIP, requestUrl, ResourceType.Patient, ResourceType.ExplanationOfBenefit, ResourceType.Coverage);
         if (ResourceType.Bundle.equals(result.getResourceType())) {
             return (Bundle) result;

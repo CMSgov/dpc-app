@@ -45,15 +45,14 @@ public class DataService {
         this.jobTimeoutInSeconds = jobTimeoutInSeconds;
     }
 
-    public Resource retrieveData(UUID organizationId, UUID providerId, String orgNPI, String providerNPI, List<String> patientIds, ResourceType... resourceTypes) {
-        return retrieveData(organizationId, providerId, orgNPI, providerNPI, patientIds, null, OffsetDateTime.now(ZoneOffset.UTC), null, null, resourceTypes);
+    public Resource retrieveData(UUID organizationId, String orgNPI, String providerNPI, List<String> patientIds, ResourceType... resourceTypes) {
+        return retrieveData(organizationId, orgNPI, providerNPI, patientIds, null, OffsetDateTime.now(ZoneOffset.UTC), null, null, resourceTypes);
     }
 
     /**
      * Retrieves data from BFD
      *
      * @param organizationID  UUID of organization
-     * @param providerID      UUID of provider
      * @param orgNPI          NPI of organization
      * @param providerNPI     NPI of provider
      * @param patientMBIs     List of patient String MBIs
@@ -65,14 +64,13 @@ public class DataService {
      * @return Resource
      */
     public Resource retrieveData(UUID organizationID,
-                                 UUID providerID,
                                  String orgNPI,
                                  String providerNPI,
                                  List<String> patientMBIs,
                                  OffsetDateTime since,
                                  OffsetDateTime transactionTime,
                                  String requestingIP, String requestUrl, ResourceType... resourceTypes) {
-        UUID jobID = this.queue.createJob(organizationID, providerID.toString(), orgNPI, providerNPI, patientMBIs, List.of(resourceTypes), since, transactionTime, requestingIP, requestUrl, false);
+        UUID jobID = this.queue.createJob(organizationID, orgNPI, providerNPI, patientMBIs, List.of(resourceTypes), since, transactionTime, requestingIP, requestUrl, false);
         LOGGER.info("Patient everything export job created with job_id={} _since={}", jobID.toString(), since);
 
         Optional<List<JobQueueBatch>> optionalBatches = waitForJobToComplete(jobID, organizationID, this.queue);
