@@ -3,7 +3,6 @@ package v2
 import (
     "bytes"
     "encoding/json"
-    "fmt"
     "github.com/CMSgov/dpc/attribution/logger"
     "github.com/CMSgov/dpc/attribution/repository"
     "github.com/darahayes/go-boom"
@@ -29,6 +28,12 @@ func (os *ImplementorService) Post(w http.ResponseWriter, r *http.Request) {
 	log := logger.WithContext(r.Context())
 	body, _ := ioutil.ReadAll(r.Body)
 
+	if len(body) == 0 {
+        log.Error("Failed to create implementor due to missing request body")
+        boom.BadData(w, "Missing request body")
+        return
+    }
+
 	implementor, err := os.repo.Insert(r.Context(), body)
 	if err != nil {
 		log.Error("Failed to create implementor", zap.Error(err))
@@ -38,13 +43,13 @@ func (os *ImplementorService) Post(w http.ResponseWriter, r *http.Request) {
 
 	implementorBytes := new(bytes.Buffer)
 	if err := json.NewEncoder(implementorBytes).Encode(implementor); err != nil {
-		log.Error(fmt.Sprintf("Failed to convert orm model to bytes for implementor"), zap.Error(err))
+		log.Error("Failed to convert orm model to bytes for implementor", zap.Error(err))
 		boom.Internal(w, err.Error())
 		return
 	}
 
 	if _, err := w.Write(implementorBytes.Bytes()); err != nil {
-		log.Error(fmt.Sprintf("Failed to write implementor to response"), zap.Error(err))
+		log.Error("Failed to write implementor to response", zap.Error(err))
 		boom.Internal(w, err.Error())
 	}
 }

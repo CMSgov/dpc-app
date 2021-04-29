@@ -145,6 +145,11 @@ const Groupjson = `
   ]
 }`
 
+// Implementorjson is an implementor json string for testing purposes
+const Implementorjson = `{
+  "name": "test-implementor"
+}`
+
 // OrgResponse provides a sample response that mimics what attribution service returns for testing purposes
 func OrgResponse() *model.Organization {
 	o := model.Organization{}
