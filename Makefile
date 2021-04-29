@@ -48,6 +48,7 @@ start-portals:
 	@docker-compose -p dpc-portals -f docker-compose.yml -f docker-compose.portals.yml up start_core_dependencies
 	@docker-compose -p dpc-portals -f docker-compose.yml -f docker-compose.portals.yml up start_web
 	@docker-compose -p dpc-portals -f docker-compose.yml -f docker-compose.portals.yml up start_admin
+	@docker-compose -p dpc-portals -f docker-compose.yml -f docker-compose.portals.yml up start_impl
 	@docker ps
 
 .PHONY: down-portals
