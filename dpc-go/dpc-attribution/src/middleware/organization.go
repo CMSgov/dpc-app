@@ -2,17 +2,18 @@ package middleware
 
 import (
 	"context"
+	"net/http"
+
 	"github.com/CMSgov/dpc/attribution/logger"
 	"github.com/darahayes/go-boom"
 	"github.com/go-chi/chi"
 	"github.com/pkg/errors"
-	"net/http"
 )
 
-type contextKey int
+type ContextKey int
 
 // ContextKeyOrganization is the key in the context to retrieve the organizationID
-const ContextKeyOrganization contextKey = iota
+const ContextKeyOrganization ContextKey = iota
 
 // OrgHeader is the header to look for when api calls attribution with a organization id
 const OrgHeader string = "X-ORG"

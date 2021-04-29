@@ -8,15 +8,15 @@ import (
 
 	middleware2 "github.com/CMSgov/dpc/attribution/middleware"
 	"github.com/CMSgov/dpc/attribution/service"
-	v2 "github.com/CMSgov/dpc/attribution/service/v2"
 )
 
 // NewDPCAttributionRouter function to build the attribution router
-func NewDPCAttributionRouter(o service.Service, g service.PostService) http.Handler {
+func NewDPCAttributionRouter(o service.Service, g service.Service) http.Handler {
 	r := chi.NewRouter()
 	r.Use(middleware2.Logging())
 	r.Use(middleware.SetHeader("Content-Type", "application/json; charset=UTF-8"))
-	r.Use(middleware2.OrgHeader)
+	r.Use(middleware2.AuthCtx)
+	r.Use(middleware2.RequestIPCtx)
 	r.Route("/", func(r chi.Router) {
 		r.Route("/Organization", func(r chi.Router) {
 			r.Route("/{organizationID}", func(r chi.Router) {
@@ -28,8 +28,7 @@ func NewDPCAttributionRouter(o service.Service, g service.PostService) http.Hand
 			r.Post("/", o.Post)
 		})
 		r.Route("/Group", func(r chi.Router) {
-			r.Use(middleware2.AuthCtx)
-            r.Use(v2.GroupCtx)
+            r.Use(middleware2.GroupCtx)
 			r.Post("/", g.Post)
             r.Get("/$export", g.Export)
 		})

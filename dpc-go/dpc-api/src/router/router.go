@@ -3,10 +3,11 @@ package router
 import (
 	"net/http"
 
+	"github.com/go-chi/chi/middleware"
+
 	"github.com/CMSgov/dpc/api/auth"
 	middleware2 "github.com/CMSgov/dpc/api/middleware"
 	v2 "github.com/CMSgov/dpc/api/v2"
-	"github.com/go-chi/chi/middleware"
 
 	"github.com/go-chi/chi"
 )
@@ -16,7 +17,6 @@ func NewDPCAPIRouter(oc v2.Controller, mc v2.ReadController, gc v2.CreateControl
 	r := chi.NewRouter()
 	r.Use(middleware2.Logging())
 	r.Use(middleware.SetHeader("Content-Type", "application/fhir+json; charset=UTF-8"))
-	r.Use(middleware2.OrgHeader)
 	r.Use(middleware2.Sanitize)
 	r.Route("/v2", func(r chi.Router) {
 		r.Get("/metadata", mc.Read)

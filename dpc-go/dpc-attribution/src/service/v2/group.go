@@ -1,83 +1,65 @@
 package v2
 
 import (
-	"context"
+	"bytes"
+	"encoding/json"
+	"io/ioutil"
 	"net/http"
 
+	"github.com/CMSgov/dpc/attribution/service"
 	"github.com/darahayes/go-boom"
-	"github.com/go-chi/chi"
+	"go.uber.org/zap"
 
 	"github.com/CMSgov/dpc/attribution/logger"
-	"github.com/CMSgov/dpc/attribution/service"
+	"github.com/CMSgov/dpc/attribution/repository"
 )
 
-// ContextKeyGroup is the key in the context to retrieve the groupID
-const ContextKeyGroup contextKey = iota
-
+// ContextKeyIP is the key in the context to store the requesting IP
 type contextKeyString string
 
-// ContextKeyIP is the key in the context to store the requesting IP
 const ContextKeyIP contextKeyString = ""
 
-// GroupCtx middleware to extract the groupID from the chi url param and set it into the request context
-func GroupCtx(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		groupID := chi.URLParam(r, "groupID")
-		ctx := context.WithValue(r.Context(), ContextKeyGroup, groupID)
-		next.ServeHTTP(w, r.WithContext(ctx))
-	})
-}
-
-//GroupService is a struct that defines what the service has
+// GroupService is a struct that defines what the service has
 type GroupService struct {
-	js service.JobService
+	repo repository.GroupRepo
+	js   service.JobService
 }
 
-// NewGroupService function that creates a group service and returns its reference
-func NewGroupService(js service.JobService) *GroupService {
+// NewGroupService function that creates a group service and returns it's reference
+func NewGroupService(repo repository.GroupRepo, js service.JobService) *GroupService {
 	return &GroupService{
+		repo,
 		js,
 	}
 }
 
-// Export function that starts an export job for a given Group ID
-func (gs *GroupService) Export(w http.ResponseWriter, r *http.Request) {
+// Post function that saves the group to the database and logs any errors before returning a generic error
+func (gs *GroupService) Post(w http.ResponseWriter, r *http.Request) {
 	log := logger.WithContext(r.Context())
-	groupID, ok := r.Context().Value(ContextKeyGroup).(string)
-	if !ok {
-		log.Error("Failed to extract group id from context")
-		boom.BadRequest(w, "Could not get group id")
-		return
-	}
-	orgID, ok := r.Context().Value(ContextKeyOrganization).(string)
-	if !ok {
-		log.Error("Failed to extract org id from context")
-		boom.BadRequest(w, "Could not get org id")
-		return
-	}
-	// TODO: handle Type query param add to ctx
-	// TODO: handle _since query param add to ctx
-	// TODO: handle transaction time
-	ctx := gs.setRequestingIP(r)
-	log.Info("Exporting data for group: {} _since: {}")
-	gs.js.Export(w http.ResponseWriter, ctx, orgID, groupID)
-}
+	body, _ := ioutil.ReadAll(r.Body)
 
-func (gs *GroupService) setRequestingIP(r *http.Request) context.Context {
-	ipAddress := r.Header.Get("X-Forwarded-For")
-	if ipAddress == "" {
-		ipAddress = r.RemoteAddr
+	group, err := gs.repo.Insert(r.Context(), body)
+	if err != nil {
+		log.Error("Failed to create group", zap.Error(err))
+		boom.BadData(w, err)
+		return
 	}
-	return context.WithValue(r.Context(), ContextKeyIP, ipAddress)
+
+	groupBytes := new(bytes.Buffer)
+	if err := json.NewEncoder(groupBytes).Encode(group); err != nil {
+		log.Error("Failed to convert orm model to bytes for group", zap.Error(err))
+		boom.Internal(w, err.Error())
+		return
+	}
+
+	if _, err := w.Write(groupBytes.Bytes()); err != nil {
+		log.Error("Failed to write group to response", zap.Error(err))
+		boom.Internal(w, err.Error())
+	}
 }
 
 // Get function is not currently used for v2.GroupService
 func (gs *GroupService) Get(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusMethodNotAllowed)
-}
-
-// Post function is not currently used for v2.GroupService
-func (gs *GroupService) Post(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusMethodNotAllowed)
 }
 
@@ -89,4 +71,10 @@ func (gs *GroupService) Delete(w http.ResponseWriter, r *http.Request) {
 // Put function is not currently used for v2.GroupService
 func (gs *GroupService) Put(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusMethodNotAllowed)
+}
+
+// Export function that starts an export job for a given Group ID
+func (gs *GroupService) Export(w http.ResponseWriter, r *http.Request) {
+	// TODO: Check v2 db for group id before doing v1 export
+	gs.js.Export(w, r)
 }

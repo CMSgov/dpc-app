@@ -3,35 +3,38 @@ package v2
 import (
 	"context"
 	"encoding/json"
-	"github.com/CMSgov/dpc/attribution/model"
+	"io/ioutil"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+
+	"github.com/CMSgov/dpc/attribution/model/v2"
+	serviceV1 "github.com/CMSgov/dpc/attribution/service/v1"
 	"github.com/bxcodec/faker"
 	"github.com/kinbiko/jsonassert"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
-	"io/ioutil"
-	"net/http"
-	"net/http/httptest"
-	"testing"
 )
 
 type MockGrpRepo struct {
 	mock.Mock
 }
 
-func (m *MockGrpRepo) Insert(ctx context.Context, body []byte) (*model.Group, error) {
+func (m *MockGrpRepo) Insert(ctx context.Context, body []byte) (*v2.Group, error) {
 	args := m.Called(ctx, body)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).(*model.Group), args.Error(1)
+	return args.Get(0).(*v2.Group), args.Error(1)
 }
 
 type GroupServiceTestSuite struct {
 	suite.Suite
 	repo    *MockGrpRepo
 	service *GroupService
+	js *serviceV1.JobServiceV1
 }
 
 func TestGroupServiceTestSuite(t *testing.T) {
@@ -40,13 +43,13 @@ func TestGroupServiceTestSuite(t *testing.T) {
 
 func (suite *GroupServiceTestSuite) SetupTest() {
 	suite.repo = &MockGrpRepo{}
-	suite.service = NewGroupService(suite.repo)
+	suite.service = NewGroupService(suite.repo, suite.js)
 }
 
 func (suite *GroupServiceTestSuite) TestPost() {
 	ja := jsonassert.New(suite.T())
 
-	o := model.Group{}
+	o := v2.Group{}
 	_ = faker.FakeData(&o)
 	suite.repo.On("Insert", mock.Anything, mock.Anything).Return(&o, nil)
 

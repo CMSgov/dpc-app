@@ -1,17 +1,16 @@
 package v2
 
 import (
-    "bytes"
-    "encoding/json"
-    "fmt"
-    "io/ioutil"
-    "net/http"
+	"bytes"
+	"encoding/json"
+	"io/ioutil"
+	"net/http"
 
-    "github.com/CMSgov/dpc/attribution/logger"
-    "github.com/CMSgov/dpc/attribution/middleware"
-    "github.com/CMSgov/dpc/attribution/repository"
-    "github.com/darahayes/go-boom"
-    "go.uber.org/zap"
+	"github.com/CMSgov/dpc/attribution/logger"
+	"github.com/CMSgov/dpc/attribution/middleware"
+	"github.com/CMSgov/dpc/attribution/repository"
+	"github.com/darahayes/go-boom"
+	"go.uber.org/zap"
 )
 
 // OrganizationService is a struct that defines what the service has
@@ -38,20 +37,20 @@ func (os *OrganizationService) Get(w http.ResponseWriter, r *http.Request) {
 
 	org, err := os.repo.FindByID(r.Context(), organizationID)
 	if err != nil {
-		log.Error(fmt.Sprintf("Failed to retrieve organization"), zap.Error(err))
+		log.Error("Failed to retrieve organization", zap.Error(err))
 		boom.NotFound(w, err.Error())
 		return
 	}
 
 	orgBytes := new(bytes.Buffer)
 	if err := json.NewEncoder(orgBytes).Encode(org); err != nil {
-		log.Error(fmt.Sprintf("Failed to convert orm model to bytes for organization"), zap.Error(err))
+		log.Error("Failed to convert orm model to bytes for organization", zap.Error(err))
 		boom.Internal(w, err.Error())
 		return
 	}
 
 	if _, err := w.Write(orgBytes.Bytes()); err != nil {
-		log.Error(fmt.Sprintf("Failed to write organization to response for organization"), zap.Error(err))
+		log.Error("Failed to write organization to response for organization", zap.Error(err))
 		boom.Internal(w, err.Error())
 	}
 }
@@ -70,13 +69,13 @@ func (os *OrganizationService) Post(w http.ResponseWriter, r *http.Request) {
 
 	orgBytes := new(bytes.Buffer)
 	if err := json.NewEncoder(orgBytes).Encode(org); err != nil {
-		log.Error(fmt.Sprintf("Failed to convert orm model to bytes for organization"), zap.Error(err))
+		log.Error("Failed to convert orm model to bytes for organization", zap.Error(err))
 		boom.Internal(w, err.Error())
 		return
 	}
 
 	if _, err := w.Write(orgBytes.Bytes()); err != nil {
-		log.Error(fmt.Sprintf("Failed to write organization to response for organization"), zap.Error(err))
+		log.Error("Failed to write organization to response for organization", zap.Error(err))
 		boom.Internal(w, err.Error())
 	}
 }
@@ -93,7 +92,7 @@ func (os *OrganizationService) Delete(w http.ResponseWriter, r *http.Request) {
 
 	err := os.repo.DeleteByID(r.Context(), organizationID)
 	if err != nil {
-		log.Error(fmt.Sprintf("Failed to find organization to delete"), zap.Error(err))
+		log.Error("Failed to find organization to delete", zap.Error(err))
 		boom.NotFound(w, err.Error())
 		return
 	}
@@ -122,14 +121,14 @@ func (os *OrganizationService) Put(w http.ResponseWriter, r *http.Request) {
 
 	orgBytes := new(bytes.Buffer)
 	if err := json.NewEncoder(orgBytes).Encode(org); err != nil {
-		log.Error(fmt.Sprintf("Failed to convert orm model to bytes for organization"), zap.Error(err))
+		log.Error("Failed to convert orm model to bytes for organization", zap.Error(err))
 		boom.Internal(w, err.Error())
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	if _, err := w.Write(orgBytes.Bytes()); err != nil {
-		log.Error(fmt.Sprintf("Failed to write organization to response for organization"), zap.Error(err))
+		log.Error("Failed to write organization to response for organization", zap.Error(err))
 		boom.Internal(w, err.Error())
 	}
 }

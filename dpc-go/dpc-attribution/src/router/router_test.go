@@ -1,21 +1,6 @@
 package router
 
 import (
-	"github.com/CMSgov/dpc/attribution/attributiontest"
-	middleware2 "github.com/CMSgov/dpc/attribution/middleware"
-	"bytes"
-	"encoding/json"
-	"fmt"
-	"io/ioutil"
-	"net/http"
-	"net/http/httptest"
-	"strings"
-	"testing"
-
-	"github.com/darahayes/go-boom"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
-	"github.com/stretchr/testify/suite"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -23,8 +8,12 @@ import (
 	"testing"
 
 	"github.com/CMSgov/dpc/attribution/attributiontest"
-	"github.com/CMSgov/dpc/attribution/model/v2"
-	"github.com/CMSgov/dpc/attribution/service"
+	middleware2 "github.com/CMSgov/dpc/attribution/middleware"
+
+	"github.com/darahayes/go-boom"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/suite"
 )
 
 type MockService struct {
@@ -53,9 +42,9 @@ func (ms *MockService) Export(w http.ResponseWriter, r *http.Request) {
 
 type RouterTestSuite struct {
 	suite.Suite
-    router    http.Handler
-    mockOrg   *MockService
-    mockGroup *MockService
+	router    http.Handler
+	mockOrg   *MockService
+	mockGroup *MockService
 }
 
 func TestRouterTestSuite(t *testing.T) {
@@ -81,6 +70,7 @@ func (suite *RouterTestSuite) do(httpMethod string, route string, body io.Reader
 func (suite *RouterTestSuite) TestOrganizationGetRoute() {
 
 	suite.mockOrg.On("Get", mock.Anything, mock.Anything).Once().Run(func(arg mock.Arguments) {
+		w := arg.Get(0).(http.ResponseWriter)
 		_, _ = w.Write([]byte(attributiontest.Orgjson))
 		r := arg.Get(1).(*http.Request)
 		assert.Equal(suite.T(), "1234", r.Context().Value(middleware2.ContextKeyOrganization))

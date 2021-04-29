@@ -1,53 +1,53 @@
 package v2
 
 import (
-    "context"
-    "encoding/json"
-    "io/ioutil"
-    "net/http"
-    "net/http/httptest"
-    "testing"
+	"context"
+	"encoding/json"
+	"io/ioutil"
+	"net/http"
+	"net/http/httptest"
+	"testing"
 
-    "github.com/CMSgov/dpc/attribution/middleware"
-    "github.com/CMSgov/dpc/attribution/model"
+	"github.com/CMSgov/dpc/attribution/middleware"
+	v2 "github.com/CMSgov/dpc/attribution/model/v2"
 
-    "github.com/bxcodec/faker"
-    "github.com/kinbiko/jsonassert"
-    "github.com/pkg/errors"
-    "github.com/stretchr/testify/assert"
-    "github.com/stretchr/testify/mock"
-    "github.com/stretchr/testify/suite"
+	"github.com/bxcodec/faker"
+	"github.com/kinbiko/jsonassert"
+	"github.com/pkg/errors"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/suite"
 )
 
 type MockOrgRepo struct {
 	mock.Mock
 }
 
-func (m *MockOrgRepo) Insert(ctx context.Context, body []byte) (*model.Organization, error) {
+func (m *MockOrgRepo) Insert(ctx context.Context, body []byte) (*v2.Organization, error) {
 	args := m.Called(ctx, body)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).(*model.Organization), args.Error(1)
+	return args.Get(0).(*v2.Organization), args.Error(1)
 }
-func (m *MockOrgRepo) FindByID(ctx context.Context, id string) (*model.Organization, error) {
+func (m *MockOrgRepo) FindByID(ctx context.Context, id string) (*v2.Organization, error) {
 	args := m.Called(ctx, id)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).(*model.Organization), args.Error(1)
+	return args.Get(0).(*v2.Organization), args.Error(1)
 }
 
 func (m *MockOrgRepo) DeleteByID(ctx context.Context, id string) error {
 	args := m.Called(ctx, id)
 	return args.Error(0)
 }
-func (m *MockOrgRepo) Update(ctx context.Context, id string, body []byte) (*model.Organization, error) {
+func (m *MockOrgRepo) Update(ctx context.Context, id string, body []byte) (*v2.Organization, error) {
 	args := m.Called(ctx, id, body)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).(*model.Organization), args.Error(1)
+	return args.Get(0).(*v2.Organization), args.Error(1)
 }
 
 type OrganizationServiceTestSuite struct {
@@ -97,7 +97,7 @@ func (suite *OrganizationServiceTestSuite) TestGetRepoError() {
 func (suite *OrganizationServiceTestSuite) TestGet() {
 	ja := jsonassert.New(suite.T())
 
-	o := model.Organization{}
+	o := v2.Organization{}
 	_ = faker.FakeData(&o)
 	suite.repo.On("FindByID", mock.Anything, mock.Anything).Return(&o, nil)
 
@@ -123,7 +123,7 @@ func (suite *OrganizationServiceTestSuite) TestGet() {
 func (suite *OrganizationServiceTestSuite) TestPost() {
 	ja := jsonassert.New(suite.T())
 
-	o := model.Organization{}
+	o := v2.Organization{}
 	_ = faker.FakeData(&o)
 	suite.repo.On("Insert", mock.Anything, mock.Anything).Return(&o, nil)
 
@@ -224,7 +224,7 @@ func (suite *OrganizationServiceTestSuite) TestPut() {
 	assert.Equal(suite.T(), "application/json; charset=UTF-8", res.Header.Get("Content-Type"))
 	assert.Equal(suite.T(), http.StatusUnprocessableEntity, res.StatusCode)
 
-	o := model.Organization{}
+	o := v2.Organization{}
 	_ = faker.FakeData(&o)
 	w = httptest.NewRecorder()
 

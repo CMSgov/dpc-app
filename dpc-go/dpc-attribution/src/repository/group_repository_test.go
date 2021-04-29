@@ -3,25 +3,27 @@ package repository
 import (
 	"context"
 	"encoding/json"
+	"testing"
+
 	"github.com/CMSgov/dpc/attribution/attributiontest"
 	"github.com/CMSgov/dpc/attribution/middleware"
-	"github.com/CMSgov/dpc/attribution/model"
+	"github.com/CMSgov/dpc/attribution/model/v2"
+
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/bxcodec/faker"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"testing"
 )
 
 type GroupRepositoryTestSuite struct {
 	suite.Suite
-	fakeGrp *model.Group
+	fakeGrp *v2.Group
 }
 
 func (suite *GroupRepositoryTestSuite) SetupTest() {
-	g := model.Group{}
+	g := v2.Group{}
 	_ = faker.FakeData(&g)
-	var i model.Info
+	var i v2.Info
 	_ = json.Unmarshal([]byte(attributiontest.Groupjson), &i)
 	g.Info = i
 	suite.fakeGrp = &g

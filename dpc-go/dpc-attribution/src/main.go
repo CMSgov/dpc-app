@@ -11,7 +11,7 @@ import (
 	"github.com/CMSgov/dpc/attribution/logger"
 	"github.com/CMSgov/dpc/attribution/repository"
 	"github.com/CMSgov/dpc/attribution/router"
-	"github.com/CMSgov/dpc/attribution/service"
+	v1 "github.com/CMSgov/dpc/attribution/service/v1"
 	v2 "github.com/CMSgov/dpc/attribution/service/v2"
 )
 
@@ -33,7 +33,7 @@ func main() {
 	or := repository.NewOrganizationRepo(db)
 	os := v2.NewOrganizationService(or)
 
-	js := service.NewJobService(ctx)
+	js := v1.NewJobService(ctx)
     gr := repository.NewGroupRepo(db)
 	gs := v2.NewGroupService(gr, js)
 

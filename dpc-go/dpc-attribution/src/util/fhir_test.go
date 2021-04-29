@@ -1,9 +1,10 @@
 package util
 
 import (
+	"testing"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"testing"
 )
 
 type FhirTestSuite struct {
@@ -42,8 +43,10 @@ func (suite *FhirTestSuite) TestIdentityParsing() {
 
 	npi, err = GetNPI([]byte("{}"))
 	assert.Error(suite.T(), err)
+	assert.Equal(suite.T(), nil, npi)
 
 	npi, err = GetIdentifier([]byte(idjson), "some-system")
 	assert.Error(suite.T(), err)
+	assert.Equal(suite.T(), nil, npi)
 
 }

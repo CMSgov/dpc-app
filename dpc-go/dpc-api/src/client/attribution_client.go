@@ -6,11 +6,10 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/CMSgov/dpc/api/logger"
-	middleware2 "github.com/CMSgov/dpc/api/middleware"
 	"github.com/go-chi/chi/middleware"
 
-	// "github.com/CMSgov/dpc/api/middleware"
+	"github.com/CMSgov/dpc/api/logger"
+	middleware2 "github.com/CMSgov/dpc/api/middleware"
 
 	"github.com/hashicorp/go-retryablehttp"
 	"github.com/pkg/errors"
