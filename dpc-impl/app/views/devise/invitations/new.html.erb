@@ -30,7 +30,6 @@
 
         <div class="actions ds-u-margin-top--6">
           <%= f.hidden_field :implementer, value: current_user.implementer %>
-          <%= f.hidden_field :invitation_created_at, value: DateTime.now %>
           <%= f.submit t("devise.invitations.new.submit_button"), class: "ds-c-button ds-c-button--primary" %>
         </div>
       <% end %>
