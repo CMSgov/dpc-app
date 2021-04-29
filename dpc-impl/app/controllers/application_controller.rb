@@ -8,14 +8,14 @@ class ApplicationController < ActionController::Base
     devise_parameter_sanitizer.permit(:sign_up) do |user|
       user.permit(
         :first_name, :last_name, :email, :implementer,
-        :password, :password_confirmation, :current_password, :agree_to_terms
+        :password, :password_confirmation, :current_password, :agree_to_terms, :invitation_sent_at
       )
     end
 
     devise_parameter_sanitizer.permit(:account_update) do |user|
       user.permit(
         :first_name, :last_name, :email, :implementer,
-        :password, :password_confirmation, :current_password, :agree_to_terms
+        :password, :password_confirmation, :current_password, :agree_to_terms, :invitation_sent_at
       )
     end
   end

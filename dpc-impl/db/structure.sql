@@ -105,7 +105,7 @@ CREATE TABLE public.users (
     first_name character varying NOT NULL,
     last_name character varying NOT NULL,
     implementer character varying NOT NULL,
-    agree_to_terms boolean NOT NULL,
+    agree_to_terms boolean,
     email character varying DEFAULT ''::character varying NOT NULL,
     encrypted_password character varying DEFAULT ''::character varying NOT NULL,
     reset_password_token character varying,

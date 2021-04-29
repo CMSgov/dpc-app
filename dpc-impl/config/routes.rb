@@ -3,6 +3,7 @@
 Rails.application.routes.draw do
   devise_for :users, path: 'users', controllers: {
     confirmations: 'confirmations',
+    invitations: 'users/invitations',
     sessions: 'users/sessions',
     registrations: 'users/registrations',
     passwords: 'users/passwords'
