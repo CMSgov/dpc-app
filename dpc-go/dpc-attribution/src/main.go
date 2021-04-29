@@ -32,8 +32,8 @@ func main() {
 	gr := repository.NewGroupRepo(db)
 	gs := v2.NewGroupService(gr)
 
-	ir := repository.NewImplementorRepo(db)
-	is := v2.NewImplementorService(ir)
+	ir := repository.NewImplementerRepo(db)
+	is := v2.NewImplementerService(ir)
 
 	attributionRouter := router.NewDPCAttributionRouter(os, gs, is)
 

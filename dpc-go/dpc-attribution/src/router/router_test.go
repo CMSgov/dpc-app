@@ -39,7 +39,7 @@ type RouterTestSuite struct {
 	router    http.Handler
 	mockOrg   *MockService
 	mockGroup *MockService
-	mockImplementor *MockService
+	mockImplementer *MockService
 }
 
 func TestRouterTestSuite(t *testing.T) {
@@ -49,7 +49,7 @@ func TestRouterTestSuite(t *testing.T) {
 func (suite *RouterTestSuite) SetupTest() {
 	suite.mockOrg = &MockService{}
 	suite.mockGroup = &MockService{}
-	suite.router = NewDPCAttributionRouter(suite.mockOrg, suite.mockGroup, suite.mockImplementor)
+	suite.router = NewDPCAttributionRouter(suite.mockOrg, suite.mockGroup, suite.mockImplementer)
 }
 
 func (suite *RouterTestSuite) do(httpMethod string, route string, body io.Reader, headers map[string]string) *http.Response {
