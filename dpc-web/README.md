@@ -93,9 +93,22 @@ DB_PASS=password
 DATABASE_URL=postgresql://localhost/dpc-website_development
 ```
 
-You also need to set the Github ENV variables to enable Github OAuth login for internal users:
+If you are using Okta for internal admin authentication, you also need to set the Okta ENV variables to enable Okta OAuth login for internal users:
 
 ```
+INTERNAL_AUTH_PROVIDER=oktaoauth
+OKTA_CLIENT_ID=
+OKTA_CLIENT_SECRET=
+OKTA_ISSUER=<Okta issuer base auth url>
+OKTA_AUTH_SERVER_ID=
+OKTA_ADMIN_ROLE=<Role Users must be apart of within Okta>
+OKTA_REDIRECT_URI="http://localhost:3000/internal/auth/oktaoauth/callback"
+```
+
+Otherwise use Github (legacy -- to be deprecated):
+
+```
+INTERNAL_AUTH_PROVIDER=github
 GITHUB_APP_ID=xxx
 GITHUB_APP_SECRET=yyy
 GITHUB_ORG_TEAM_ID=123

@@ -7,6 +7,8 @@
     <!-- nav -->
     <%= render partial: 'shared/navbar' %>
 
+    <%= render partial: 'shared/alerts', locals: { notice: flash[:notice], alert: flash[:alert] } %>
+
     <!-- content -->
     <section class="ds-u-padding-y--7 ds-u-fill--primary-darkest" id="main">
       <div class="ds-l-container">

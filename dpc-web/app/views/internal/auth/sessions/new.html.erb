@@ -4,8 +4,13 @@
   <div class="ds-l-col--12 ds-l-md-col--6 ds-u-margin-bottom--1 ds-u-margin-x--auto">
     <div class="card card--border-top card--shadow">
       <h1 class="ds-u-margin-top--0">Log in</h1>
-
-      <%= link_to "Sign in with Github", internal_user_github_omniauth_authorize_path, method: :post, data: { test: 'internal-user-sign-in-form' } %>
+      <p>
+        <% if InternalUser::OKTA_AUTH_ENABLED %>
+          <%= link_to "Sign in with Okta", internal_user_oktaoauth_omniauth_authorize_path, method: :post, data: { test: 'internal-user-sign-in-form' } %>
+        <% elsif InternalUser::GITHUB_AUTH_ENABLED %>
+          <%= link_to "Sign in with Github", internal_user_github_omniauth_authorize_path, method: :post, data: { test: 'internal-user-sign-in-form' } %>
+        <% end %>
+      </p>
     </div>
   </div>
 </div>

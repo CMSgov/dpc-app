@@ -6,7 +6,6 @@
       <%= render partial: 'shared/alerts', locals: { notice: flash[:notice], alert: flash[:alert] } %>
 
       <h1 class="ds-u-margin-top--0">Log in</h1>
-
       <%= form_for(resource, as: resource_name, url: session_path(resource_name), data: { test: 'user-sign-in-form' }) do |f| %>
         <div class="field">
           <%= f.label :email, class: "ds-c-label" %>
