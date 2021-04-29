@@ -71,6 +71,7 @@ public class APIHelpers {
 
     /**
      * Fetch the BFD database last update time. Use it as the transactionTime for a job.
+     *
      * @return transactionTime from the BFD service
      */
     @SuppressWarnings("JdkObsolete") // Date class is used by FHIR stu3 Meta model
@@ -92,5 +93,12 @@ public class APIHelpers {
             ipAddress = request.getRemoteAddr();
         }
         return ipAddress;
+    }
+
+    public static String fetchRequestUrl(HttpServletRequest request) {
+        if (request == null) {
+            return null;
+        }
+        return request.getQueryString() == null ? request.getRequestURL().toString() : request.getRequestURL().append(request.getQueryString()).toString();
     }
 }
