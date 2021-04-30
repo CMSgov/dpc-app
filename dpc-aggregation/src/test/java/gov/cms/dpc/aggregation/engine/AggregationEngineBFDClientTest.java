@@ -92,7 +92,6 @@ public class AggregationEngineBFDClientTest {
         UUID providerID = UUID.randomUUID();
         UUID jobID = queue.createJob(
                 orgID,
-                providerID.toString(),
                 TEST_ORG_NPI,
                 TEST_PROVIDER_NPI,
                 Collections.singletonList(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0)),
@@ -110,7 +109,7 @@ public class AggregationEngineBFDClientTest {
         assertEquals(JobStatus.COMPLETED, completeJob.getStatus());
 
         Assertions.assertThat(headerKey.getAllValues()).containsExactlyInAnyOrder(Constants.INCLUDE_IDENTIFIERS_HEADER, Constants.BULK_CLIENT_ID_HEADER, Constants.BULK_JOB_ID_HEADER, HttpHeaders.X_FORWARDED_FOR, Constants.BFD_ORIGINAL_QUERY_ID_HEADER);
-        Assertions.assertThat(headerValue.getAllValues()).containsExactlyInAnyOrder("mbi", providerID.toString(), jobID.toString(), "127.0.0.1", jobID.toString());
+        Assertions.assertThat(headerValue.getAllValues()).containsExactlyInAnyOrder("mbi", TEST_PROVIDER_NPI, jobID.toString(), "127.0.0.1", jobID.toString());
 
         engine.stop();
     }
@@ -131,7 +130,6 @@ public class AggregationEngineBFDClientTest {
         UUID providerID = UUID.randomUUID();
         UUID jobID = queue.createJob(
                 orgID,
-                providerID.toString(),
                 TEST_ORG_NPI,
                 TEST_PROVIDER_NPI,
                 Collections.singletonList(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0)),
@@ -149,7 +147,7 @@ public class AggregationEngineBFDClientTest {
         assertEquals(JobStatus.COMPLETED, completeJob.getStatus());
 
         Assertions.assertThat(headerKey.getAllValues()).containsExactlyInAnyOrder(Constants.INCLUDE_IDENTIFIERS_HEADER, Constants.DPC_CLIENT_ID_HEADER, HttpHeaders.X_FORWARDED_FOR, Constants.BFD_ORIGINAL_QUERY_ID_HEADER);
-        Assertions.assertThat(headerValue.getAllValues()).containsExactlyInAnyOrder("mbi", providerID.toString(), "127.0.0.1", jobID.toString());
+        Assertions.assertThat(headerValue.getAllValues()).containsExactlyInAnyOrder("mbi", TEST_PROVIDER_NPI, "127.0.0.1", jobID.toString());
 
         engine.stop();
     }

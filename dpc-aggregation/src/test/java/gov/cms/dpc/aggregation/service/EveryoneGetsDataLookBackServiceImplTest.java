@@ -1,23 +1,16 @@
 package gov.cms.dpc.aggregation.service;
 
+import gov.cms.dpc.common.utils.NPIUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
-import java.util.UUID;
 
 public class EveryoneGetsDataLookBackServiceImplTest {
 
     private final LookBackService lookBackService = new EveryoneGetsDataLookBackServiceImpl();
 
     @Test
-    public void alwaysReturnUUIDFromGetProviderIDFromRosterTest() {
-        String npi = lookBackService.getPractitionerNPIFromRoster(UUID.randomUUID(), UUID.randomUUID().toString(), UUID.randomUUID().toString());
-        Assertions.assertNotNull(npi);
-    }
-
-    @Test
     public void alwaysReturnTrueFromHasClaimWithin() {
-        LookBackAnswer result = lookBackService.getLookBackAnswer(null, UUID.randomUUID(), UUID.randomUUID().toString(), 0L);
+        LookBackAnswer result = lookBackService.getLookBackAnswer(null, NPIUtil.generateNPI(), NPIUtil.generateNPI(), 0L);
         Assertions.assertTrue(result.orgNPIMatchAnyEobNPIs());
         Assertions.assertTrue(result.practitionerMatchEob());
         Assertions.assertTrue(result.practitionerNPIMatchAnyEobNPIs());

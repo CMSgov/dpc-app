@@ -29,13 +29,11 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(BufferedLoggerHandler.class)
 public class JobResourceTest {
     static final UUID AGGREGATOR_ID = UUID.randomUUID();
-    static final String TEST_PROVIDER_ID = UUID.randomUUID().toString();
     static final String TEST_ORG_NPI = NPIUtil.generateNPI();
     static final String TEST_PROVIDER_NPI = NPIUtil.generateNPI();
     static final String TEST_PATIENT_ID = UUID.randomUUID().toString();
     static final String TEST_BASEURL = "http://localhost:8080";
     static final String TEST_JOB_URL = TEST_BASEURL + "/api/v1/Group/%s/$export";
-
     static final String OTHER_ORGANIZATION = "46ac7ad6-7487-4dd0-baa0-6e2c8cae76a1";
 
     /**
@@ -64,7 +62,6 @@ public class JobResourceTest {
 
         // Setup a queued job
         final var jobID = queue.createJob(orgID,
-                TEST_PROVIDER_ID,
                 TEST_ORG_NPI,
                 TEST_PROVIDER_NPI,
                 List.of(TEST_PATIENT_ID),
@@ -90,7 +87,6 @@ public class JobResourceTest {
 
         // Setup a running job
         final var jobID = queue.createJob(orgID,
-                TEST_PROVIDER_ID,
                 TEST_ORG_NPI,
                 TEST_PROVIDER_NPI,
                 List.of(TEST_PATIENT_ID, TEST_PATIENT_ID, TEST_PATIENT_ID),
@@ -121,7 +117,6 @@ public class JobResourceTest {
         // Setup a completed job
         final var requestUrl = String.format(TEST_JOB_URL, UUID.randomUUID().toString());
         final var jobID = queue.createJob(orgID,
-                TEST_PROVIDER_ID,
                 TEST_ORG_NPI,
                 TEST_PROVIDER_NPI,
                 List.of(TEST_PATIENT_ID),
@@ -152,6 +147,7 @@ public class JobResourceTest {
         final var completion = (JobCompletionModel) response.getEntity();
         assertAll(() -> assertEquals(JobQueueBatch.validResourceTypes.size(), completion.getOutput().size()),
                 () -> assertEquals(0, completion.getError().size()));
+        assertEquals(completion.getRequest(), requestUrl);
         for (JobCompletionModel.OutputEntry entry : completion.getOutput()) {
             assertEquals(String.format("%s/Data/%s.ndjson", TEST_BASEURL, JobQueueBatchFile.formOutputFileName(runningJob.getBatchID(), entry.getType(), 0)), entry.getUrl());
         }
@@ -169,9 +165,7 @@ public class JobResourceTest {
 
         // Setup a completed job with one error
         final var requestUrl = String.format(TEST_JOB_URL, UUID.randomUUID().toString()) + "?since=2020-02-20T12:00:00.000-05:00";
-
         final var jobID = queue.createJob(orgID,
-                TEST_PROVIDER_ID,
                 TEST_ORG_NPI,
                 TEST_PROVIDER_NPI,
                 List.of(TEST_PATIENT_ID),
@@ -195,6 +189,7 @@ public class JobResourceTest {
         final var completion = (JobCompletionModel) response.getEntity();
         assertAll(() -> assertEquals(0, completion.getOutput().size()),
                 () -> assertEquals(1, completion.getError().size()));
+        assertEquals(completion.getRequest(), requestUrl);
         JobCompletionModel.OutputEntry entry = completion.getError().get(0);
         assertEquals(ResourceType.OperationOutcome, entry.getType());
         assertEquals(String.format("%s/Data/%s.ndjson", TEST_BASEURL, JobQueueBatchFile.formOutputFileName(runningJob.getBatchID(), ResourceType.OperationOutcome, 0)), entry.getUrl());
@@ -211,7 +206,6 @@ public class JobResourceTest {
 
         // Setup a failed job
         final var jobID = queue.createJob(orgID,
-                TEST_PROVIDER_ID,
                 TEST_ORG_NPI,
                 TEST_PROVIDER_NPI,
                 List.of(TEST_PATIENT_ID),
@@ -236,7 +230,6 @@ public class JobResourceTest {
         final var queue = new MemoryBatchQueue(1);
 
         final UUID jobId = queue.createJob(orgID,
-                TEST_PROVIDER_ID,
                 TEST_ORG_NPI,
                 TEST_PROVIDER_NPI,
                 List.of(TEST_PATIENT_ID, "2", "3"),
@@ -280,7 +273,6 @@ public class JobResourceTest {
 
         // Setup a completed job
         final var jobID = queue.createJob(orgIDCorrect,
-                TEST_PROVIDER_ID,
                 TEST_ORG_NPI,
                 TEST_PROVIDER_NPI,
                 List.of(TEST_PATIENT_ID),
@@ -337,7 +329,6 @@ public class JobResourceTest {
         final var batch = new JobQueueBatch(
                 UUID.randomUUID(),
                 UUID.randomUUID(),
-                TEST_PROVIDER_ID,
                 TEST_ORG_NPI,
                 TEST_PROVIDER_NPI,
                 Collections.emptyList(),

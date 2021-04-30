@@ -150,7 +150,7 @@ class APIClient
 
     if use_ssl?
       http.use_ssl = true
-      http.verify_mode = OpenSSL::SSL::VERIFY_NONE unless verify_ssl_cert?
+      http.verify_mode = OpenSSL::SSL::VERIFY_PEER
     end
 
     response = http.request(request)
@@ -178,10 +178,6 @@ class APIClient
 
   def use_ssl?
     !(Rails.env.development? || Rails.env.test?)
-  end
-
-  def verify_ssl_cert?
-    ENV.fetch('VERIFY_SSL_CERT') != 'false'
   end
 
   def connection_error
