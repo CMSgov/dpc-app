@@ -128,7 +128,8 @@ CREATE TABLE public.users (
     invitation_limit integer,
     invited_by_type character varying,
     invited_by_id bigint,
-    invitations_count integer DEFAULT 0
+    invitations_count integer DEFAULT 0,
+    implementer_id character varying
 );
 
 
@@ -285,6 +286,7 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20210409181131'),
 ('20210423155520'),
 ('20210423155611'),
-('20210429133701');
+('20210429133701'),
+('20210430160219');
 
 
