@@ -9,7 +9,7 @@
   <section class="ds-l-row--12 ds-l-md-col--9 ds-u-md-padding-left--2">
     <%= link_to new_organization_path, class: "utility-button" do %>
       <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <use xlink:href="/assets/solid.svg#plus"></use>
+        <use xlink:href="/admin/assets/solid.svg#plus"></use>
       </svg>
       Create new organization
     <% end %>
@@ -25,7 +25,7 @@
 
     <button type="button" id="filter-modal-trigger" class="list-control-button" data-modal-show="filter-modal" data-test="filter-modal-trigger">
       <svg class="icon ds-u-margin-right--1" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <use xlink:href="/assets/solid.svg#filter"></use>
+        <use xlink:href="/admin/assets/solid.svg#filter"></use>
       </svg>
       Filter
     </button>
@@ -47,7 +47,7 @@
         <div class="module-container__secondary ds-u-padding--2">
           <% if org.reg_org.present? && org.reg_org.enabled == true %>
             <svg class="icon ds-u-margin-right--1" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <use xlink:href="/assets/solid.svg#database"></use>
+              <use xlink:href="/admin/assets/solid.svg#database"></use>
             </svg>
             Enabled in API
           <% end %>

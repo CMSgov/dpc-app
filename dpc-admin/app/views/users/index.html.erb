@@ -8,7 +8,7 @@
   <section class="ds-l-row--12 ds-l-md-col--9 ds-u-md-padding-left--2">
     <%= link_to download_users_path(format: :csv, users: @users.map(&:id)),  class: "utility-button" do %>
       <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <use xlink:href="/assets/solid.svg#download"></use>
+        <use xlink:href="/admin/assets/solid.svg#download"></use>
       </svg>
       Download CSV
     <% end %>
@@ -25,7 +25,7 @@
 
     <button type="button" id="filter-modal-trigger" class="list-control-button" data-modal-show="filter-modal" data-test="filter-modal-trigger">
       <svg class="icon ds-u-margin-right--1" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <use xlink:href="/assets/solid.svg#filter"></use>
+        <use xlink:href="/admin/assets/solid.svg#filter"></use>
       </svg>
       Filter
     </button>
@@ -57,7 +57,7 @@
             </div>
             <div class="ds-u-color--gray module-container__notes-summary">
               <svg class="icon ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <use xlink:href="/assets/solid.svg#sticky-note"></use>
+              <use xlink:href="/admin/assets/solid.svg#sticky-note"></use>
               </svg> <span aria-label="Notes">0</span>
             </div>
           </div>
@@ -68,17 +68,17 @@
           <div class="module-container__content-wrap">
             <div>
               <svg class="icon ds-u-margin-right--1 ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <use xlink:href="/assets/solid.svg#clinic-medical"></use>
+              <use xlink:href="/admin/assets/solid.svg#clinic-medical"></use>
               </svg>
               <%= user.primary_organization.name %> </div>
             <div>
               <svg class="icon ds-u-margin-right--1 ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <use xlink:href="/assets/solid.svg#shapes"></use>
+              <use xlink:href="/admin/assets/solid.svg#shapes"></use>
               </svg>
               <%= user.primary_organization.organization_type.titleize %></div>
             <div>
               <svg class="icon ds-u-margin-right--1 ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <use xlink:href="/assets/solid.svg#map-marker-alt"></use>
+              <use xlink:href="/admin/assets/solid.svg#map-marker-alt"></use>
               </svg>
               <%= user.primary_organization.address_city %>, <%= user.primary_organization.address_state %>
             </div>
@@ -88,17 +88,17 @@
             <div class="module-container__content-wrap">
               <div>
                 <svg class="icon ds-u-margin-right--1 ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <use xlink:href="/assets/solid.svg#clinic-medical"></use>
+                <use xlink:href="/admin/assets/solid.svg#clinic-medical"></use>
                 </svg>
                 <%= user.requested_organization %> </div>
               <div>
                 <svg class="icon ds-u-margin-right--1 ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <use xlink:href="/assets/solid.svg#shapes"></use>
+                <use xlink:href="/admin/assets/solid.svg#shapes"></use>
                 </svg>
                 <%= user.requested_organization_type.titleize %> </div>
               <div>
                 <svg class="icon ds-u-margin-right--1 ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <use xlink:href="/assets/solid.svg#map-marker-alt"></use>
+                <use xlink:href="/admin/assets/solid.svg#map-marker-alt"></use>
                 </svg>
                 <%= city_state(user) %>
               </div>
