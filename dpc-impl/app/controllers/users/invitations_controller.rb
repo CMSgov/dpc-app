@@ -10,6 +10,7 @@ module Users
     # POST /resource
     def create
       @user = User.new user_params
+
       if values_present?(@user) && valid_email?(@user.email) && unique_email?(@user.email)
         @user.invite!
         flash[:notice] = 'User invited.'
