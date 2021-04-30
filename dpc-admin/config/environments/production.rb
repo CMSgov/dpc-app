@@ -48,7 +48,7 @@ Rails.application.configure do
 
   # Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.
   config.force_ssl = true
-  config.ssl_options = { redirect: { exclude: -> request { request.path =~ /health_check/ } } }
+  config.ssl_options = { redirect: { exclude: -> request { request.path =~ /admin\/health_check/ } } }
 
   # Lograge config
   config.lograge.enabled = true

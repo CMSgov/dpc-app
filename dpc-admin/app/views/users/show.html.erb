@@ -5,7 +5,7 @@
   <div>
     <%= link_to users_path, class: "utility-button" do %>
       <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <use xlink:href="/assets/solid.svg#arrow-left"></use>
+        <use xlink:href="/admin/assets/solid.svg#arrow-left"></use>
       </svg>
       Go back
     <% end %>
@@ -63,21 +63,21 @@
         <% @user.organizations.each do |org| %>
           <div class="ds-u-margin-bottom--1">
             <svg class="icon ds-u-margin-right--1 ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <use xlink:href="/assets/solid.svg#clinic-medical"></use>
+              <use xlink:href="/admin/assets/solid.svg#clinic-medical"></use>
             </svg>
             <%= link_to org.name, organization_path(org) %>
           </div>
 
           <div class="ds-u-margin-bottom--1">
             <svg class="icon ds-u-margin-right--1 ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <use xlink:href="/assets/solid.svg#shapes"></use>
+              <use xlink:href="/admin/assets/solid.svg#shapes"></use>
             </svg>
             <%= org.organization_type.titleize %>
           </div>
 
           <div class="">
             <svg class="icon ds-u-margin-right--1 ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <use xlink:href="/assets/solid.svg#map-marker-alt"></use>
+              <use xlink:href="/admin/assets/solid.svg#map-marker-alt"></use>
             </svg>
             <%= org.address_street %>
           </div>
@@ -107,13 +107,13 @@
           <h3 class="box__subhead">Personal info</h3>
           <div class="ds-u-margin-bottom--1">
             <svg class="icon ds-u-margin-right--1 ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <use xlink:href="/assets/solid.svg#user-alt"></use>
+              <use xlink:href="/admin/assets/solid.svg#user-alt"></use>
             </svg>
             <%= @user.name %>
           </div>
           <div class="ds-u-margin-bottom--1">
             <svg class="icon ds-u-margin-right--1 ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <use xlink:href="/assets/solid.svg#envelope"></use>
+              <use xlink:href="/admin/assets/solid.svg#envelope"></use>
             </svg>
             <%= @user.email %>
           </div>
@@ -122,7 +122,7 @@
           <h3 class="box__subhead">Requested organization</h3>
           <div class="ds-u-margin-bottom--1">
             <svg class="icon ds-u-margin-right--1 ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <use xlink:href="/assets/solid.svg#clinic-medical"></use>
+              <use xlink:href="/admin/assets/solid.svg#clinic-medical"></use>
             </svg>
             <%= @user.requested_organization %>
           </div>
@@ -130,7 +130,7 @@
         <% unless @user.requested_organization_type == "health_it_vendor" %>
           <div class="ds-u-margin-bottom--1">
             <svg class="icon ds-u-margin-right--1 ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <use xlink:href="/assets/solid.svg#users"></use>
+              <use xlink:href="/admin/assets/solid.svg#users"></use>
             </svg>
             <%= @user.requested_num_providers %>
           </div>
@@ -138,14 +138,14 @@
 
         <div class="ds-u-margin-bottom--1">
           <svg class="icon ds-u-margin-right--1 ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <use xlink:href="/assets/solid.svg#shapes"></use>
+            <use xlink:href="/admin/assets/solid.svg#shapes"></use>
           </svg>
           <%= @user.requested_organization_type.titleize %>
         </div>
 
         <div>
           <svg class="icon ds-u-margin-right--1 ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <use xlink:href="/assets/solid.svg#map-marker-alt"></use>
+            <use xlink:href="/admin/assets/solid.svg#map-marker-alt"></use>
           </svg>
           <%= @user.address_1 %>
         </div>
