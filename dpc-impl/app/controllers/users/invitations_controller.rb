@@ -10,7 +10,7 @@ module Users
     # POST /resource
     def create
       @user = User.new user_params
-      if values_present?(@user) && valid_email?(@user.email)
+      if values_present?(@user) && valid_email?(@user.email) && unique_email?(@user.email)
         @user.invite!
         flash[:notice] = 'User invited.'
         redirect_to root_path
@@ -19,6 +19,9 @@ module Users
         redirect_to new_user_invitation_path
       elsif !valid_email?(@user.email)
         flash[:alert] = 'Email must be valid.'
+        redirect_to new_user_invitation_path
+      elsif !unique_email?(@user.email)
+        flash[:alert] = 'Email already exists in DPC.'
         redirect_to new_user_invitation_path
       else
         flash[:alert] = 'User was not able to be invited.'
@@ -48,6 +51,11 @@ module Users
     def values_present?(user)
       blank_string = ""
       [user.first_name, user.last_name, user.email].exclude?(blank_string)
+    end
+
+    def unique_email?(email)
+      pre_user = User.where(email: email).first
+      pre_user.blank?
     end
   end
 end
