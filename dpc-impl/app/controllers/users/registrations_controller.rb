@@ -2,6 +2,23 @@
 
 module Users
   class RegistrationsController < Devise::RegistrationsController
+    before_action :authenticate_user!
+
+    def destroy
+      @user = User.find(current_user.id)
+      if @user.destroy_with_password(user_params[:password_to_delete])
+        redirect_to root_url, notice: 'User account successfully deleted.'
+      else
+        render :edit, alert: 'Unable to delete user account.'
+      end
+    end
+
+    protected
+
+    def user_params
+      params.require(:user).permit(:password_to_delete)
+    end
+
     # GET /resource/sign_up
     # def new
     #   super

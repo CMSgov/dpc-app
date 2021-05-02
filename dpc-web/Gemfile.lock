@@ -377,7 +377,7 @@ GEM
       http-cookie (>= 1.0.2, < 2.0)
       mime-types (>= 1.16, < 4.0)
       netrc (~> 0.8)
-    rexml (3.2.4)
+    rexml (3.2.5)
     rspec-core (3.10.1)
       rspec-support (~> 3.10.0)
     rspec-expectations (3.10.1)
@@ -542,9 +542,10 @@ DEPENDENCIES
   rails-controller-testing
   redis (~> 4.0)
   redis-namespace
+  rexml (>= 3.2.5)
   rspec-rails
-  rubocop
-  rubocop-performance
+  rubocop (>= 1.12.0)
+  rubocop-performance (>= 1.10.2)
   sassc-rails (>= 2.1.2)
   selenium-webdriver
   sidekiq (~> 6.1)
@@ -557,7 +558,7 @@ DEPENDENCIES
   uglifier (>= 1.3.0)
   vcr
   web-console (>= 3.3.0)
-  webmock
+  webmock (>= 3.12.2)
 
 RUBY VERSION
    ruby 2.7.2p137

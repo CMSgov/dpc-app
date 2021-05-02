@@ -1,0 +1,27 @@
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-family: $font-sans;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+h1,
+h2,
+h3 {
+  color: $color-primary-darkest;
+}
+
+[contentEditable="true"]:focus,
+[href]:focus,
+[tabindex]:focus,
+button:not([disabled]):focus,
+iframe:focus,
+input:not([disabled]):focus,
+select:not([disabled]):focus,
+textarea:not([disabled]):focus {
+  outline: $focus-outline;
+  outline-offset: 2px;
+}

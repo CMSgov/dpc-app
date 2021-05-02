@@ -102,6 +102,17 @@
         </addColumn>
     </changeSet>
 
+    <changeSet id="add-org-and-provider-npi" author="jonfulk">
+        <addColumn tableName="JOB_QUEUE_BATCH">
+            <column name="organization_npi" type="VARCHAR(50)"/>
+            <column name="provider_npi" type="VARCHAR(50)"/>
+        </addColumn>
+    </changeSet>
 
-    
+    <changeSet id="add-request-url" author="jonfulk">
+        <addColumn tableName="JOB_QUEUE_BATCH">
+            <column name="request_url" type="VARCHAR(255)"/>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

@@ -212,7 +212,7 @@ public class DistributedBatchQueue extends JobQueueCommon {
                 batch.setRunningStatus(aggregatorID);
             } catch (Exception e) {
                 logger.error("Failed to mark job as running. Marking the job as failed", e);
-                batch.setFailedStatus(aggregatorID);
+                batch.setFailedStatus();
                 return Optional.empty();
             } finally {
                 session.merge(batch);
@@ -283,7 +283,7 @@ public class DistributedBatchQueue extends JobQueueCommon {
         try (final Session session = this.factory.openSession()) {
             final Transaction tx = session.beginTransaction();
             try {
-                job.setFailedStatus(aggregatorID);
+                job.setFailedStatus();
                 session.merge(job);
 
                 final var delay = Duration.between(job.getStartTime().orElseThrow(), job.getUpdateTime().orElseThrow());

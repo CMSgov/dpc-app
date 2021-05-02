@@ -72,7 +72,7 @@ public class MemoryBatchQueue extends JobQueueCommon {
                 first.get().setRunningStatus(aggregatorID);
             } catch (Exception e) {
                 logger.error("Failed to mark job as running. Marking the job as failed", e);
-                first.get().setFailedStatus(aggregatorID);
+                first.get().setFailedStatus();
                 return Optional.empty();
             }
         }
@@ -102,7 +102,7 @@ public class MemoryBatchQueue extends JobQueueCommon {
 
     @Override
     public synchronized void failBatch(JobQueueBatch job, UUID aggregatorID) {
-        job.setFailedStatus(aggregatorID);
+        job.setFailedStatus();
     }
 
     @Override

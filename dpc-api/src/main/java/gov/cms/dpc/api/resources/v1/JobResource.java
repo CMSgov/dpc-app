@@ -9,7 +9,6 @@ import gov.cms.dpc.common.annotations.APIV1;
 import gov.cms.dpc.common.annotations.NoHtml;
 import gov.cms.dpc.common.models.JobCompletionModel;
 import gov.cms.dpc.fhir.FHIRExtractors;
-import gov.cms.dpc.fhir.FHIRFormatters;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
@@ -126,7 +125,7 @@ public class JobResource extends AbstractJobResource {
         String progress = "QUEUED: 0.00%";
 
         if (jobStatusSet.contains(JobStatus.RUNNING) || jobStatusSet.contains(JobStatus.COMPLETED)) {
-            final int processedPatients = batches.stream().mapToInt(b -> b.getPatientsProcessed()).sum();
+            final int processedPatients = batches.stream().mapToInt(JobQueueBatch::getPatientsProcessed).sum();
             final int totalPatients = batches.stream().mapToInt(b -> b.getPatients().size()).sum();
             progress = String.format("RUNNING: %.2f%%", totalPatients > 0 ? (processedPatients * 100.0f) / totalPatients : 0f);
         }
@@ -152,21 +151,9 @@ public class JobResource extends AbstractJobResource {
 
         JobQueueBatch firstBatch = batches.get(0);
 
-        final String resourceQueryParam = firstBatch.getResourceTypes().stream()
-                .map(ResourceType::toString)
-                .collect(Collectors.joining(GroupResource.LIST_DELIMITER));
-
-        final String sinceQueryParam = firstBatch.getSince()
-                .map(since -> "&_since=" + since.format(FHIRFormatters.INSTANT_FORMATTER))
-                .orElse("");
-
         final JobCompletionModel completionModel = new JobCompletionModel(
                 firstBatch.getTransactionTime(),
-                String.format("%s/Group/%s/$export?_type=%s%s",
-                        baseURL,
-                        firstBatch.getProviderID(),
-                        resourceQueryParam,
-                        sinceQueryParam),
+                firstBatch.getRequestUrl(),
                 formOutputList(batches, false),
                 formOutputList(batches, true),
                 buildJobExtension(batches));
@@ -228,6 +215,7 @@ public class JobResource extends AbstractJobResource {
                 new JobCompletionModel.FhirExtension(JobCompletionModel.COMPLETE_TIME_URL, completeTime));
     }
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
     public static OffsetDateTime getLatestBatchCompleteTime(List<JobQueueBatch> batches) {
         return batches.stream()
                 .filter(b -> b.getCompleteTime().isPresent())

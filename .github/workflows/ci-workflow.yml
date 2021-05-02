@@ -10,7 +10,7 @@ env:
 jobs:
   build-api:
     name: "Build and Test API"
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v1
@@ -31,7 +31,7 @@ jobs:
 
   build-portals:
     name: "Build and Test DPC Web Portals"
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v1

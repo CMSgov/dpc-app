@@ -2,6 +2,7 @@ package gov.cms.dpc.queue;
 
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.dpc.common.hibernate.queue.DPCQueueManagedSessionFactory;
+import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatchFile;
@@ -33,9 +34,12 @@ class QueueTest {
 
     //    private JobQueue queue;
     private SessionFactory sessionFactory;
-    private List<String> queues = List.of("memory", "distributed");
+    private final List<String> queues = List.of("memory", "distributed");
     private final UUID aggregatorID = UUID.randomUUID();
-
+    private final UUID orgID = UUID.randomUUID();
+    private final String orgNPI = NPIUtil.generateNPI();
+    private final String providerNPI = NPIUtil.generateNPI();
+    private final List<String> patientMBIs = List.of("test-patient-1", "test-patient-2");
 
     @TestFactory
     Stream<DynamicTest> testSource() {
@@ -87,12 +91,11 @@ class QueueTest {
     }
 
     void testSimpleSubmissionCompletion(JobQueueCommon queue) {
-        // One organization id for both jobs
-        final UUID orgID = UUID.randomUUID();
-
         // Add a couple of jobs
-        var firstJobID = queue.createJob(orgID, "test-provider-1", List.of("test-patient-1", "test-patient-2"), Collections.singletonList(ResourceType.Patient), null, OffsetDateTime.now(ZoneOffset.UTC), null, true);
-        var secondJobID = queue.createJob(orgID, "test-provider-1", List.of("test-patient-1", "test-patient-2"), Collections.singletonList(ResourceType.Patient), null, OffsetDateTime.now(ZoneOffset.UTC), null, true);
+        var firstJobID = queue.createJob(orgID, orgNPI, providerNPI, patientMBIs, Collections.singletonList(ResourceType.Patient), null, OffsetDateTime.now(ZoneOffset.UTC), null, null,true);
+        var secondJobID = queue.createJob(orgID, orgNPI, providerNPI, patientMBIs, Collections.singletonList(ResourceType.Patient), null, OffsetDateTime.now(ZoneOffset.UTC), null, null,true);
+        assertEquals(firstJobID.getClass(), UUID.class);
+        assertEquals(secondJobID.getClass(), UUID.class);
         assertEquals(2, queue.queueSize(), "Should have 2 jobs");
 
         // Check the status of the job
@@ -161,14 +164,11 @@ class QueueTest {
 
     void testPatientAndEOBSubmission(JobQueueCommon queue) {
         // Add a job with a EOB resource
-        final var orgID = UUID.randomUUID();
-        final var jobID = queue.createJob(orgID,
-                "test-provider-1",
-                List.of("test-patient-1", "test-patient-2"),
+        final var jobID = queue.createJob(orgID, orgNPI, providerNPI, patientMBIs,
                 Arrays.asList(ResourceType.Patient, ResourceType.ExplanationOfBenefit),
                 null,
-                OffsetDateTime.now(ZoneOffset.UTC), null, true);
-
+                OffsetDateTime.now(ZoneOffset.UTC), null, null,true);
+        assertEquals(jobID.getClass(), UUID.class);
         // Retrieve the job with both resources
         final var workBatch = queue.claimBatch(aggregatorID).get();
         workBatch.addJobQueueFile(ResourceType.Patient, 0, 1);
@@ -204,12 +204,10 @@ class QueueTest {
 
     void testSinceEqualTransactionTime(JobQueueCommon queue) {
         final var transactionTime = OffsetDateTime.now(ZoneOffset.UTC);
-        final var jobId = queue.createJob(UUID.randomUUID(),
-                "test-provider-1",
-                List.of("test-patient-1", "test-patient-2"),
+        final var jobId = queue.createJob(orgID, orgNPI, providerNPI, patientMBIs,
                 Arrays.asList(ResourceType.Patient, ResourceType.ExplanationOfBenefit),
                 transactionTime,
-                transactionTime, null, true);
+                transactionTime, null, null,true);
 
         // Check that the Job has a empty queue
         final Optional<JobQueueBatch> job = queue.getJobBatches(jobId).stream().findFirst();
@@ -219,17 +217,18 @@ class QueueTest {
     }
 
     void testInvalidJobBatch(JobQueueCommon queue) {
-        final UUID orgID = UUID.randomUUID();
         final UUID jobID = UUID.randomUUID();
 
         final var jobBatch = new JobQueueBatch(
                 jobID,
                 orgID,
-                "test-provider-1",
-                Collections.singletonList("test-patient-1"),
+                orgNPI,
+                providerNPI,
+                patientMBIs,
                 Collections.singletonList(ResourceType.ExplanationOfBenefit),
                 null,
                 OffsetDateTime.now(ZoneOffset.UTC),
+                null,
                 null,
                 true);
 
