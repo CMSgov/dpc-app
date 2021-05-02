@@ -22,10 +22,6 @@
   ],
   "servers": [
     {
-      "url": "https://prod.dpc.cms.gov",
-      "description": "Production server"
-    },
-    {
       "url": "https://sandbox.dpc.cms.gov",
       "description": "Sandbox server"
     }
