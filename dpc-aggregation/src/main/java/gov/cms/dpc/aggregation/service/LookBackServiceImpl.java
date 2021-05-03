@@ -1,9 +1,6 @@
 package gov.cms.dpc.aggregation.service;
 
 import com.google.common.base.Joiner;
-import gov.cms.dpc.aggregation.dao.OrganizationDAO;
-import gov.cms.dpc.aggregation.dao.ProviderDAO;
-import gov.cms.dpc.aggregation.dao.RosterDAO;
 import gov.cms.dpc.aggregation.engine.OperationsConfig;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import io.dropwizard.hibernate.UnitOfWork;
@@ -23,7 +20,6 @@ import java.time.ZoneId;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 
 import static gov.cms.dpc.common.MDCConstants.EOB_ID;
 
@@ -31,34 +27,17 @@ public class LookBackServiceImpl implements LookBackService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LookBackService.class);
 
-    private final ProviderDAO providerDAO;
-    private final RosterDAO rosterDAO;
-    private final OrganizationDAO organizationDAO;
     private final OperationsConfig operationsConfig;
 
     @Inject
-    public LookBackServiceImpl(ProviderDAO providerDAO, RosterDAO rosterDAO, OrganizationDAO organizationDAO, OperationsConfig operationsConfig) {
-        this.providerDAO = providerDAO;
-        this.rosterDAO = rosterDAO;
-        this.organizationDAO = organizationDAO;
+    public LookBackServiceImpl(OperationsConfig operationsConfig) {
         this.operationsConfig = operationsConfig;
     }
 
     @Override
     @UnitOfWork(readOnly = true)
-    public String getPractitionerNPIFromRoster(UUID orgUUID, String providerOrRosterID, String patientMBI) {
-        //Expect only one roster for the parameters, otherwise return null
-        String npiFromRosterID = rosterDAO.retrieveProviderNPIFromRoster(orgUUID, UUID.fromString(providerOrRosterID), patientMBI).orElse(null);
-        if (npiFromRosterID == null) {
-            return providerDAO.fetchProviderNPI(UUID.fromString(providerOrRosterID), orgUUID).orElse(null);
-        }
-        return npiFromRosterID;
-    }
-
-    @Override
-    @UnitOfWork(readOnly = true)
     @SuppressWarnings("JdkObsolete") // Date class used by FHIR stu3 Period model
-    public LookBackAnswer getLookBackAnswer(ExplanationOfBenefit explanationOfBenefit, UUID organizationUUID, String practitionerNPI, long withinMonth) {
+    public LookBackAnswer getLookBackAnswer(ExplanationOfBenefit explanationOfBenefit, String organizationNPI, String practitionerNPI, long withinMonth) {
         MDC.put(EOB_ID, explanationOfBenefit.getId());
         YearMonth billingPeriod = Optional.of(explanationOfBenefit)
                 .map(ExplanationOfBenefit::getBillablePeriod)
@@ -66,9 +45,7 @@ public class LookBackServiceImpl implements LookBackService {
                 .map(date -> YearMonth.from(date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()))
                 .orElse(null);
 
-        String organizationID = organizationDAO.fetchOrganizationNPI(organizationUUID).orElse(null);
-
-        String eobOrganizationID = Optional.of(explanationOfBenefit)
+        String eobOrganizationNPI = Optional.of(explanationOfBenefit)
                 .map(ExplanationOfBenefit::getOrganization)
                 .map(Reference::getIdentifier)
                 .filter(i -> DPCIdentifierSystem.NPPES.getSystem().equals(i.getSystem()))
@@ -79,13 +56,13 @@ public class LookBackServiceImpl implements LookBackService {
         Set<String> allNPIs = new HashSet<>(npis.getRight());
         allNPIs.add(npis.getLeft());
 
-        LookBackAnswer lookBackAnswer = new LookBackAnswer(practitionerNPI, organizationID, withinMonth, operationsConfig.getLookBackDate())
+        LookBackAnswer lookBackAnswer = new LookBackAnswer(practitionerNPI, organizationNPI, withinMonth, operationsConfig.getLookBackDate())
                 .addEobBillingPeriod(billingPeriod)
-                .addEobOrganization(eobOrganizationID)
+                .addEobOrganization(eobOrganizationNPI)
                 .addEobProviders(allNPIs);
         LOGGER.trace("billingPeriodDate={}, lookBackDate={}, monthsDifference={}, eobProvider={}, eobCareTeamProviders={}, jobProvider={}, eobOrganization={}, jobOrganization={}, withinLimit={}, eobProviderMatch={}, eobOrganizationMatch={}",
-                billingPeriod, operationsConfig.getLookBackDate(), lookBackAnswer.calculatedMonthDifference(), npis.getLeft(), Joiner.on(";").join(npis.getRight()), practitionerNPI, eobOrganizationID,
-                organizationID, lookBackAnswer.matchDateCriteria(), lookBackAnswer.practitionerMatchEob(), lookBackAnswer.orgMatchEob());
+                billingPeriod, operationsConfig.getLookBackDate(), lookBackAnswer.calculatedMonthDifference(), npis.getLeft(), Joiner.on(";").join(npis.getRight()), practitionerNPI, eobOrganizationNPI,
+                organizationNPI, lookBackAnswer.matchDateCriteria(), lookBackAnswer.practitionerMatchEob(), lookBackAnswer.orgMatchEob());
 
         MDC.remove(EOB_ID);
         return lookBackAnswer;
