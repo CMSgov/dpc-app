@@ -11,6 +11,7 @@ module Users
     def create
       @user = User.new user_params
 
+      # TODO: Refactor
       if values_present?(@user) && valid_email?(@user.email) && unique_email?(@user.email)
         @user.invite!(current_user)
         flash[:notice] = 'User invited.'

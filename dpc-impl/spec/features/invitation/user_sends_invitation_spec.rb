@@ -6,7 +6,7 @@ RSpec.feature 'user sends invitation to DPC' do
   include MailerHelper
   let (:user) { create :user }
 
-  context 'when successful' do
+  context 'successful invite' do
     scenario 'user successfully sends invite' do
       sign_in user
       visit new_user_invitation_path
@@ -21,8 +21,9 @@ RSpec.feature 'user sends invitation to DPC' do
 
     scenario 'user accepts invitation and creates an account' do
       old_user = user
-      invited_user = User.invite!(first_name: 'Brook', last_name: 'York', email: 'brooklyn@gmail.com',
-                                  implementer: old_user.implementer, implementer_id: old_user.implementer_id)
+      invited_user = User.invite!(first_name: 'Brook', last_name: 'York',
+                                  email: 'brooklyn@gmail.com', implementer: old_user.implementer,
+                                  implementer_id: old_user.implementer_id, invited_by_id: old_user.id)
 
       itoken = invited_user.raw_invitation_token
 
@@ -37,10 +38,12 @@ RSpec.feature 'user sends invitation to DPC' do
 
       expect(page.body).to have_content('Your password was set successfully. You are now signed in.')
       expect(page.body).to have_content("Welcome #{invited_user.name}")
+      expect(invited_user.implementer_id).to match(old_user.implementer_id)
+      expect(invited_user.implementer).to match(old_user.implementer)
     end
   end
 
-  context 'when unsuccessful' do
+  context 'unsuccessful invite' do
     before(:each) do
       sign_in user
       visit new_user_invitation_path
@@ -75,6 +78,32 @@ RSpec.feature 'user sends invitation to DPC' do
       find('input[data-test="submit"]').click
 
       expect(page.body).to have_content('Email already exists in DPC.')
+    end
+  end
+
+  context 'implementer & implementer_id remain consistent' do
+    scenario 'invited user implenter matches inviter user implementer' do
+      old_user = create(:user)
+      invited_user = create(:user, invited_by_id: old_user.id)
+
+      invited_user.save
+
+      expect(invited_user.implementer).to eq(old_user.implementer)
+      expect(invited_user.implementer_id).to eq(old_user.implementer_id)
+
+      invited_user.implementer = 'Fake'
+      invited_user.implementer_id = '1'
+
+      invited_user.save
+
+      expect(invited_user.implementer).to eq(old_user.implementer)
+      expect(invited_user.implementer_id).to eq(old_user.implementer_id)
+    end
+  end
+
+  context 'successfully resend invite' do
+    scenario 'invited user requests new invite' do
+      user = create(:user, invitation_sent_at: DateTime.now, invitation_accepted_at: nil)
     end
   end
 end
