@@ -288,6 +288,9 @@ public class GroupResource extends AbstractGroupResource {
 
         // Get the attributed patients
         final List<String> attributedPatients = fetchPatientMBIs(group);
+        if (attributedPatients.isEmpty()) {
+            throw new WebApplicationException("No active attributed patients found for the group", HttpStatus.SC_NOT_ACCEPTABLE);
+        }
 
         // Generate a job ID and submit it to the queue
         final UUID orgID = FHIRExtractors.getEntityUUID(organizationPrincipal.getOrganization().getId());
