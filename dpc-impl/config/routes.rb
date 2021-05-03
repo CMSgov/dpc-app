@@ -13,6 +13,10 @@ Rails.application.routes.draw do
     root to: 'portal#show', as: :authenticated_root, via: :get
   end
 
+  resources :users do
+    match :email_divert, via: [:post]
+  end
+
   match '/portal', to: 'portal#show', via: :get
 
   devise_scope :user do
