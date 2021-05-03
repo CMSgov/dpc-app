@@ -12,7 +12,7 @@ module Users
       @user = User.new user_params
 
       if values_present?(@user) && valid_email?(@user.email) && unique_email?(@user.email)
-        @user.invite!
+        @user.invite!(current_user)
         flash[:notice] = 'User invited.'
         redirect_to root_path
       elsif !values_present?(@user)
@@ -51,7 +51,7 @@ module Users
 
     def values_present?(user)
       blank_string = ""
-      [user.first_name, user.last_name, user.email].exclude?(blank_string)
+      [user.first_name, user.last_name, user.email, user.implementer, user.implementer_id].exclude?(blank_string)
     end
 
     def unique_email?(email)
