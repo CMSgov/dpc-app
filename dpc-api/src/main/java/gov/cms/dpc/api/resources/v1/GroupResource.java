@@ -25,6 +25,7 @@ import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.*;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
@@ -288,7 +289,7 @@ public class GroupResource extends AbstractGroupResource {
 
         // Get the attributed patients
         final List<String> attributedPatients = fetchPatientMBIs(group);
-        if (attributedPatients.isEmpty()) {
+        if (CollectionUtils.isEmpty(attributedPatients)) {
             throw new WebApplicationException("No active attributed patients found for the group", HttpStatus.SC_NOT_ACCEPTABLE);
         }
 
