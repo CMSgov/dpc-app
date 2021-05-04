@@ -104,6 +104,17 @@ RSpec.feature 'user sends invitation to DPC' do
   context 'successfully resend invite' do
     scenario 'invited user requests new invite' do
       user = create(:user, invitation_sent_at: DateTime.now, invitation_accepted_at: nil)
+
+      visit new_user_confirmation_path
+
+      fill_in 'user_email', with: user.email
+      find('input[data-test="submit"]').click
+
+      last_delivery = ActionMailer::Base.deliveries.last
+
+      expect(last_delivery).not_to be_nil
+      expect(last_delivery.to).to include(user.email)
+      expect(last_delivery.subject).to include('Invitation instructions')
     end
   end
 end

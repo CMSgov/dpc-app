@@ -10,6 +10,7 @@ class ConfirmationsController < Devise::ConfirmationsController
 
     flash[:notice] = email_msg
 
+    # Resends correct email if user needs to confirm email or accept invitation
     if @user.present?
       if confirmation_sent?(@user) && user_unconfirmed?(@user)
         send_confirmation_instructions(@user)
@@ -33,7 +34,8 @@ class ConfirmationsController < Devise::ConfirmationsController
   end
 
   def email_msg
-    return 'If your email address exists in our database, you will receive an email with instructions for how to confirm your email address in a few minutes.'
+    return 'If your email address exists in our database, you will receive an email with instructions for 
+            how to confirm your email address in a few minutes.'
   end
 
   def find_user
@@ -77,6 +79,7 @@ class ConfirmationsController < Devise::ConfirmationsController
   end
 
   def user_params
-    params.require(:user).permit(:email, :confirmation_sent_at, :confirmed_at, :invitation_accepted_at, :invitation_sent_at )
+    params.require(:user).permit(:email, :confirmation_sent_at, :confirmed_at, :invitation_accepted_at, 
+                                 :invitation_sent_at )
   end
 end
