@@ -5,7 +5,7 @@
   <div>
     <%= link_to organizations_path, class: "utility-button" do %>
       <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <use xlink:href="/assets/solid.svg#arrow-left"></use>
+        <use xlink:href="/admin/assets/solid.svg#arrow-left"></use>
       </svg>
       Organizations index
     <% end %>
@@ -23,7 +23,7 @@
     <div class="ds-u-color--success">
       <% if @organization.reg_org.present? && @organization.reg_org.enabled == true %>
         <svg class="icon ds-u-margin-right--1" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <use xlink:href="/assets/solid.svg#database"></use>
+          <use xlink:href="/admin/assets/solid.svg#database"></use>
         </svg>
         Enabled in API
       <% end %>
@@ -36,19 +36,19 @@
 
       <div class="ds-u-margin-bottom--1">
         <svg class="icon ds-u-margin-right--1 ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <use xlink:href="/assets/solid.svg#user-alt"></use>
+          <use xlink:href="/admin/assets/solid.svg#user-alt"></use>
         </svg>
         <%= @organization.name %>
       </div>
       <div class="ds-u-margin-bottom--1">
         <svg class="icon ds-u-margin-right--1 ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <use xlink:href="/assets/solid.svg#envelope"></use>
+          <use xlink:href="/admin/assets/solid.svg#envelope"></use>
         </svg>
         <%= @organization.organization_type.titleize %>
       </div>
       <div class="ds-u-margin-bottom--1">
         <svg class="icon ds-u-margin-right--1 ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <use xlink:href="/assets/solid.svg#users"></use>
+          <use xlink:href="/admin/assets/solid.svg#users"></use>
         </svg>
         <%= @organization.num_providers %> providers
       </div>
