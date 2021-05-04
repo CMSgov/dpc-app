@@ -11,23 +11,12 @@ module Users
     def create
       @user = User.new user_params
 
-      # TODO: Refactor
-      if values_present?(@user) && valid_email?(@user.email) && unique_email?(@user.email)
+      if user_valid?(@user)
         @user.invite!(current_user)
         flash[:notice] = 'User invited.'
         redirect_to root_path
-      elsif !values_present?(@user)
-        flash[:alert] = 'All fields are required to invite a new user.'
+      else generate_errors(@user)
         redirect_to new_user_invitation_path
-      elsif !valid_email?(@user.email)
-        flash[:alert] = 'Email must be valid.'
-        redirect_to new_user_invitation_path
-      elsif !unique_email?(@user.email)
-        flash[:alert] = 'Email already exists in DPC.'
-        redirect_to new_user_invitation_path
-      else
-        flash[:alert] = 'User was not able to be invited.'
-        redirect_to root_path
       end
     end
 
@@ -39,8 +28,33 @@ module Users
       end
     end
 
+    def generate_errors(user)
+      flash[:alert] = 'User was not able to be invited.'
+
+      if !unique_email?(user.email)
+        flash[:alert] = 'User already has an account.'
+      end
+
+      if !valid_email?(user.email)
+        flash[:alert] = 'Email must be valid.'
+      end
+
+      if !values_present?(user)
+        flash[:alert] = 'All fields are required to invite a new user.'
+      end
+    end
+
+    def unique_email?(email)
+      pre_user = User.where(email: email).first
+      pre_user.blank?
+    end
+
     def user_params
       params.require(:user).permit(:first_name, :last_name, :email, :implementer, :implementer_id, :invitation_token, :password, :password_confirmation, :agree_to_terms)
+    end
+
+    def user_valid?(user)
+      unique_email?(user.email) && valid_email?(user.email) && values_present?(user)
     end
 
     def valid_email?(email)
@@ -53,11 +67,6 @@ module Users
     def values_present?(user)
       blank_string = ""
       [user.first_name, user.last_name, user.email, user.implementer, user.implementer_id].exclude?(blank_string)
-    end
-
-    def unique_email?(email)
-      pre_user = User.where(email: email).first
-      pre_user.blank?
     end
   end
 end

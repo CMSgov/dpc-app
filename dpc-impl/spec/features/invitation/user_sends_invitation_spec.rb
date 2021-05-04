@@ -77,7 +77,7 @@ RSpec.feature 'user sends invitation to DPC' do
       fill_in 'user_email', with: user1.email
       find('input[data-test="submit"]').click
 
-      expect(page.body).to have_content('Email already exists in DPC.')
+      expect(page.body).to have_content('User already has an account.')
     end
   end
 

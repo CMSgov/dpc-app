@@ -34,8 +34,7 @@ class ConfirmationsController < Devise::ConfirmationsController
   end
 
   def email_msg
-    return 'If your email address exists in our database, you will receive an email with instructions for 
-            how to confirm your email address in a few minutes.'
+    return 'If your email address exists in our database, you will receive an email with instructions for how to confirm your email address in a few minutes.'
   end
 
   def find_user
