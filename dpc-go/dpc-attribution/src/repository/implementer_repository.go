@@ -12,6 +12,7 @@ import (
 // ImplementerRepo is an interface for test mocking purposes
 type ImplementerRepo interface {
 	Insert(ctx context.Context, body []byte) (*model.Implementer, error)
+    FindByID(ctx context.Context, id string) (*model.Implementer, error)
 }
 
 // ImplementerRepository is a struct that defines what the repository has
