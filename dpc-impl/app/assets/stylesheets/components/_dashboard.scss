@@ -28,6 +28,27 @@
   margin: 0 10px 0 0;
 }
 
+#dash_client_list {
+  .client_card_container {
+    border: 1.5px solid $color-gray;
+    margin: 15px 0;
+    padding: 15px;
+  }
+
+  .client_name {
+    font-size: 32px;
+    margin-bottom: 10px;
+  }
+
+  .client_info {
+    font-weight: 700;
+  }
+
+  .client_status {
+    font-size: 14px;
+  }
+}
+
 #dash_nav_demo {
   background-color: $color-gray-lightest;
   display: flex;
@@ -63,7 +84,7 @@
   }
 }
 
-#dash_content_orgs_container {
+#dash_content_client_container {
   h2 {
     color: $color-gray;
     margin: 0;
@@ -83,7 +104,7 @@
     margin-right: 5px;
   }
 
-  #dash_content_orgs_container {
+  #dash_content_client_container {
     margin: 32px 0 0 0;
   }
 }

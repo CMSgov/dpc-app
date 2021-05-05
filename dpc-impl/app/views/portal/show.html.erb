@@ -12,6 +12,7 @@
 <div id="dashboard__content">
   <div id="dash_content_nav_container">
     <h4 class="ds-u-margin-y--1 ds-u-margin-left--1">Ready for Production?</h4>
+
     <div class="nav_box_container">
       <div class="nav_box" id="dash_nav_demo">
         <div>
@@ -33,12 +34,14 @@
           <li>HL7 Implementation Guide</li>
           <li>BB2.0 Implementation Guide</li>
         </ul>
-        <strong>Ask questions, collaborate, and share your experience with the DPC community!</strong>
+        <strong>Ask questions, collaborate, and share your experience with the DPC community!</strong><br />
         <%= link_to "Join Google Group", "https://groups.google.com/forum/#!forum/dpc-api", class:"ds-c-button ds-c-button--primary google-button", id: 'google-group-link' %>
       </div>
     </div>
   </div>
-  <div id="dash_content_orgs_container">
+
+  <div id="dash_content_client_container">
+
     <div class="dash_content_header">
       <h2>Client Organizations</h2>
       <div class="dash_header_buttons">
@@ -46,6 +49,40 @@
           Add New Client
         </button>
         <%= link_to "Edit", "#", class: 'dash-header-link' %>
+      </div>
+    </div>
+
+    <div id="dash_client_list">
+      <div class="client_card_container">
+        <div class="client_name">
+          Zesty Bee Clinic
+        </div>
+
+        <div class="client_info">
+          <div class="client_api_id">
+            ID: 90c2f6d2-70b5-4127-a23c-2a3cd6dc8c25
+          </div>
+
+          <div class="client_status">
+            Status: Sandbox
+          </div>
+        </div>
+      </div>
+
+      <div class="client_card_container">
+        <div class="client_name">
+          Peach Clean Hospital
+        </div>
+
+        <div class="client_info">
+          <div class="client_api_id">
+            ID: 5b52d6f7-9717-45b3-8937-c23fa6d09760
+          </div>
+
+          <div class="client_status">
+            Status: <span class="ds-u-color--success">Production</span>
+          </div>
+        </div>
       </div>
     </div>
   </div>
