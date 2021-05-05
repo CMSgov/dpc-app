@@ -14,11 +14,6 @@ import (
 	"github.com/CMSgov/dpc/attribution/repository"
 )
 
-// ContextKeyIP is the key in the context to store the requesting IP
-type contextKeyString string
-
-const ContextKeyIP contextKeyString = ""
-
 // GroupService is a struct that defines what the service has
 type GroupService struct {
 	repo repository.GroupRepo

@@ -16,7 +16,6 @@ func FetchValueFromContext(ctx context.Context, w http.ResponseWriter, key middl
 	if !ok {
 		log.Error("Failed to extract key from context")
 		boom.BadRequest(w,"Could not get value from context")
-		return ""
 	}
 	return keyValue
 }

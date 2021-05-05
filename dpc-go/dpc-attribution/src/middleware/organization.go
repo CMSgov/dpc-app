@@ -10,11 +10,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-type ContextKey int
-
-// ContextKeyOrganization is the key in the context to retrieve the organizationID
-const ContextKeyOrganization ContextKey = iota
-
 // OrgHeader is the header to look for when api calls attribution with a organization id
 const OrgHeader string = "X-ORG"
 

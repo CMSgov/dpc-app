@@ -9,7 +9,6 @@ import (
 	"strings"
 	"testing"
 
-	middleware3 "github.com/CMSgov/dpc/attribution/middleware"
 	"github.com/go-chi/chi/middleware"
 	"github.com/kinbiko/jsonassert"
 	"github.com/stretchr/testify/assert"
@@ -231,7 +230,7 @@ func (suite *RouterTestSuite) TestGroupPostRoute() {
 	req, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/%s", ts.URL, "v2/Group"), strings.NewReader(apitest.Groupjson))
 	req.Header.Set("Content-Type", "application/fhir+json")
 	req.Header.Set(middleware.RequestIDHeader, "54321")
-	req.Header.Set(middleware3.AuthCtx, "12345")
+	req.Header.Set(middleware2.OrgHeader, "12345")
 	res, _ := http.DefaultClient.Do(req)
 
 	b, _ := ioutil.ReadAll(res.Body)

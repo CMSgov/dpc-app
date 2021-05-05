@@ -73,6 +73,7 @@ func (js *JobServiceV1) Export(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// TODO: Get TransactionTime from BFD
 	// TODO: break patients into batches
 	batch := js.createNewJobBatch(orgID, groupNPIs, patientMBIs, requestingIP)
 

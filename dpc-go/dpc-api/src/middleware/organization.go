@@ -2,13 +2,14 @@ package middleware
 
 import (
 	"context"
+	"net/http"
+
 	"github.com/CMSgov/dpc/api/fhirror"
 	"github.com/CMSgov/dpc/api/logger"
 	"github.com/go-chi/chi"
-	"net/http"
 )
 
-// AuthCtx is used in place of a auth token until SSAS is implemented
+// OrgHeader is used in place of a auth token until SSAS is implemented
 const OrgHeader string = "X-ORG"
 
 type contextKey int
