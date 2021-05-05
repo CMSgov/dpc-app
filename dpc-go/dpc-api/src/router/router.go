@@ -14,7 +14,7 @@ import (
 func NewDPCAPIRouter(oc v2.Controller, mc v2.ReadController, gc v2.CreateController) http.Handler {
 	r := chi.NewRouter()
 	r.Use(middleware2.Logging())
-	FileServer(r, "/v2/swagger", http.Dir("../swaggerui"))
+	fileServer(r, "/v2/swagger", http.Dir("../swaggerui"))
 	r.
 		With(middleware2.Sanitize, middleware.SetHeader("Content-Type", "application/fhir+json; charset=UTF-8")).
 		Route("/v2", func(r chi.Router) {
@@ -38,7 +38,7 @@ func NewDPCAPIRouter(oc v2.Controller, mc v2.ReadController, gc v2.CreateControl
 	return r
 }
 
-func FileServer(r chi.Router, path string, root http.FileSystem) {
+func fileServer(r chi.Router, path string, root http.FileSystem) {
 	if strings.ContainsAny(path, "{}*") {
 		panic("FileServer does not permit URL parameters.")
 	}
