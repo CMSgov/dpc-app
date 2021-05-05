@@ -12,33 +12,41 @@
 <div id="dashboard__content">
   <div id="dash_content_nav_container">
     <h4 class="ds-u-margin-y--1 ds-u-margin-left--1">Ready for Production?</h4>
-    <div class="nav_box" id="dash_nav_demo">
-      <div>
-        Dragée topping muffin liquorice sweet roll lollipop toffee I love. Jelly-o liquorice marzipan sweet roll donut sweet.
+    <div class="nav_box_container">
+      <div class="nav_box" id="dash_nav_demo">
+        <div>
+          Dragée topping muffin liquorice sweet roll lollipop toffee I love. Jelly-o liquorice marzipan sweet roll donut sweet.
+        </div>
+        <div>
+          <h4>Schedule DPC demo:</h4>
+          <strong>password: dpcdemo2021</strong>
+          <button type="button" class="ds-c-button ds-c-button--primary">
+            Coming Soon
+          </button>
+        </div>
       </div>
-      <div>
-        <h4>Schedule DPC demo:</h4>
-        <strong>password: dpcdemo2021</strong>
-        <button type="button" class="ds-c-button ds-c-button--primary">
-          Coming Soon
-        </button>
+      <div class="nav_box" id="dash_nav_help">
+        <h2>Need Help?</h2>
+        <strong>Resources:</strong>
+        <ul>
+          <li>DPC's User Guide</li>
+          <li>HL7 Implementation Guide</li>
+          <li>BB2.0 Implementation Guide</li>
+        </ul>
+        <strong>Ask questions, collaborate, and share your experience with the DPC community!</strong>
+        <%= link_to "Join Google Group", "https://groups.google.com/forum/#!forum/dpc-api", class:"ds-c-button ds-c-button--primary google-button", id: 'google-group-link' %>
       </div>
-    </div>
-    <div class="nav_box" id="dash_nav_help">
-      <h2>Need Help?</h2>
-      <strong>Resources:</strong>
-      <ul>
-        <li>DPC's User Guide</li>
-        <li>HL7 Implementation Guide</li>
-        <li>BB2.0 Implementation Guide</li>
-      </ul>
-      <strong>Ask questions, collaborate, and share your experience with the DPC community!</strong>
-      <form action="https://groups.google.com/g/dpc-api">
-        <input type="Join Google Group" class="ds-c-button ds-c-button--primary google-button" value="Join Google Group" />
-      </form>
     </div>
   </div>
   <div id="dash_content_orgs_container">
-    Orgs
+    <div class="dash_content_header">
+      <h2>Client Organizations</h2>
+      <div class="dash_header_buttons">
+        <button type="button" class="ds-c-button ds-c-button--primary dash-header-link">
+          Add New Client
+        </button>
+        <%= link_to "Edit", "#", class: 'dash-header-link' %>
+      </div>
+    </div>
   </div>
 </div>
