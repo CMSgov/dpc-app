@@ -1,0 +1,63 @@
+#dashboard__content {
+  display: flex;
+  flex-direction: column;
+}
+
+.nav_box {
+  border: 1.5px solid $color-gray-light;
+  font-size: 12px;
+  padding: 10px 20px;
+  width: 245px;
+}
+
+#dash_nav_demo {
+  background-color: $color-gray-lightest;
+
+  h4 {
+    font-size: 14px;
+    margin: 10px 0 0 0;
+  }
+
+  button {
+    margin: 8px 0 5px 0;
+    width: 100% !important;
+  }
+}
+
+#dash_nav_help {
+  h2 {
+    margin: 0 0 10px 0;
+  }
+
+  ul {
+    list-style: none;
+    margin: 0 0 20px 0;
+    padding: 0;
+  }
+
+  .google-button {
+    font-size: 12px;
+    margin: 20px 0;
+    padding: 8px;
+  }
+}
+
+@media (min-width: $width-dash) {
+  #dashboard__content {
+    flex-direction: row;
+    flex-wrap: nowrap;
+  }
+
+  #dash_content_nav_container {
+    margin-right: 5%;
+    width: 33%;
+  }
+
+  #dash_nav_demo {
+    margin-bottom: 15px;
+  }
+
+  #dash_content_content_container {
+    flex-grow: 1;
+  }
+}
