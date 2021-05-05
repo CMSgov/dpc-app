@@ -17,6 +17,8 @@ type OrganizationRepo interface {
 	FindByID(ctx context.Context, id string) (*model.Organization, error)
 	DeleteByID(ctx context.Context, id string) error
 	Update(ctx context.Context, id string, body []byte) (*model.Organization, error)
+    FindByNPI(ctx context.Context, npi string) (*model.Organization, error)
+
 }
 
 // OrganizationRepository is a struct that defines what the repository has
@@ -150,4 +152,20 @@ func (or *OrganizationRepository) Update(ctx context.Context, id string, body []
 	}
 
 	return org, nil
+}
+
+// FindByNPI function that searches the database for the organization that matches the id
+func (or *OrganizationRepository) FindByNPI(ctx context.Context, npi string) (*model.Organization, error) {
+    sb := sqlFlavor.NewSelectBuilder()
+    sb.Select("id", "version", "created_at", "updated_at", "info")
+    sb.From("organization")
+    sb.Where(fmt.Sprintf("info @> '{\"identifier\": [{\"value\": \"%s\"}]}'", npi))
+    q, args := sb.Build()
+
+    org := new(model.Organization)
+    orgStruct := sqlbuilder.NewStruct(new(model.Organization)).For(sqlFlavor)
+    if err := or.db.QueryRowContext(ctx, q, args...).Scan(orgStruct.Addr(&org)...); err != nil {
+        return nil, err
+    }
+    return org, nil
 }

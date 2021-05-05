@@ -32,10 +32,13 @@ func main() {
 	gr := repository.NewGroupRepo(db)
 	gs := v2.NewGroupService(gr)
 
-	ir := repository.NewImplementorRepo(db)
-	is := v2.NewImplementorService(ir)
+	ir := repository.NewImplementerRepo(db)
+	is := v2.NewImplementerService(ir)
 
-	attributionRouter := router.NewDPCAttributionRouter(os, gs, is)
+    ior := repository.NewImplementerOrgRepo(db)
+	ios := v2.NewImplementerOrgService(ir, or, ior)
+
+	attributionRouter := router.NewDPCAttributionRouter(os, gs, is, ios)
 
 	port := conf.GetAsString("port", "3001")
 	fmt.Printf("Starting DPC-Attribution server on port %v ...\n", port)

@@ -9,63 +9,64 @@ import (
 	"github.com/huandu/go-sqlbuilder"
 )
 
-// ImplementorRepo is an interface for test mocking purposes
-type ImplementorRepo interface {
-	Insert(ctx context.Context, body []byte) (*model.Implementor, error)
+// ImplementerRepo is an interface for test mocking purposes
+type ImplementerRepo interface {
+	Insert(ctx context.Context, body []byte) (*model.Implementer, error)
+    FindByID(ctx context.Context, id string) (*model.Implementer, error)
 }
 
-// ImplementorRepository is a struct that defines what the repository has
-type ImplementorRepository struct {
+// ImplementerRepository is a struct that defines what the repository has
+type ImplementerRepository struct {
 	db *sql.DB
 }
 
-// NewImplementorRepo function that creates an implementorRepository and returns it's reference
-func NewImplementorRepo(db *sql.DB) *ImplementorRepository {
-	return &ImplementorRepository{
+// NewImplementerRepo function that creates an ImplementerRepository and returns it's reference
+func NewImplementerRepo(db *sql.DB) *ImplementerRepository {
+	return &ImplementerRepository{
 		db,
 	}
 }
 
-// FindByID function that searches the database for the implementor that matches the id
-func (or *ImplementorRepository) FindByID(ctx context.Context, id string) (*model.Implementor, error) {
+// FindByID function that searches the database for the Implementer that matches the id
+func (or *ImplementerRepository) FindByID(ctx context.Context, id string) (*model.Implementer, error) {
 	sb := sqlFlavor.NewSelectBuilder()
 	sb.Select("id", "name", "created_at", "updated_at", "deleted_at")
-	sb.From("implementor")
+	sb.From("implementer")
 	sb.Where(sb.Equal("id", id))
 	q, args := sb.Build()
 
-	implementor := new(model.Implementor)
-	implementorStruct := sqlbuilder.NewStruct(new(model.Implementor)).For(sqlFlavor)
-	if err := or.db.QueryRowContext(ctx, q, args...).Scan(implementorStruct.Addr(&implementor)...); err != nil {
+	Implementer := new(model.Implementer)
+	ImplementerStruct := sqlbuilder.NewStruct(new(model.Implementer)).For(sqlFlavor)
+	if err := or.db.QueryRowContext(ctx, q, args...).Scan(ImplementerStruct.Addr(&Implementer)...); err != nil {
 		return nil, err
 	}
-	return implementor, nil
+	return Implementer, nil
 }
 
-// Insert function that saves the implementor model into the database and returns the model.Implementor
-func (or *ImplementorRepository) Insert(ctx context.Context, body []byte) (*model.Implementor, error) {
-	var implementorModel model.Implementor
-	if err := json.Unmarshal(body, &implementorModel); err != nil {
+// Insert function that saves the Implementer model into the database and returns the model.Implementer
+func (or *ImplementerRepository) Insert(ctx context.Context, body []byte) (*model.Implementer, error) {
+	var ImplementerModel model.Implementer
+	if err := json.Unmarshal(body, &ImplementerModel); err != nil {
 		return nil, err
 	}
 
-	if implementorModel.Name == "" {
+	if ImplementerModel.Name == "" {
 		return nil, fmt.Errorf("missing required field: \"name\"")
 	}
 
 	ib := sqlFlavor.NewInsertBuilder()
-	ib.InsertInto("implementor")
+	ib.InsertInto("implementer")
 	ib.Cols("name")
-	ib.Values(implementorModel.Name)
+	ib.Values(ImplementerModel.Name)
 	ib.SQL("returning id, name, created_at, updated_at, deleted_at")
 
 	q, args := ib.Build()
 
-	implementor := new(model.Implementor)
-	implementorStruct := sqlbuilder.NewStruct(new(model.Implementor)).For(sqlFlavor)
-	if err := or.db.QueryRowContext(ctx, q, args...).Scan(implementorStruct.Addr(&implementor)...); err != nil {
+	implementer := new(model.Implementer)
+	implementerStruct := sqlbuilder.NewStruct(new(model.Implementer)).For(sqlFlavor)
+	if err := or.db.QueryRowContext(ctx, q, args...).Scan(implementerStruct.Addr(&implementer)...); err != nil {
 		return nil, err
 	}
 
-	return implementor, nil
+	return implementer, nil
 }

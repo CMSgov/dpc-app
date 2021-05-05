@@ -17,44 +17,44 @@ import (
 	"testing"
 )
 
-type MockImplementorRepo struct {
+type MockImplementerRepo struct {
 	mock.Mock
 }
 
-func (m *MockImplementorRepo) Insert(ctx context.Context, body []byte) (*model.Implementor, error) {
+func (m *MockImplementerRepo) Insert(ctx context.Context, body []byte) (*model.Implementer, error) {
 	args := m.Called(ctx, body)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).(*model.Implementor), args.Error(1)
+	return args.Get(0).(*model.Implementer), args.Error(1)
 }
-func (m *MockImplementorRepo) FindByID(ctx context.Context, id string) (*model.Implementor, error) {
+func (m *MockImplementerRepo) FindByID(ctx context.Context, id string) (*model.Implementer, error) {
 	args := m.Called(ctx, id)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).(*model.Implementor), args.Error(1)
+	return args.Get(0).(*model.Implementer), args.Error(1)
 }
 
-type ImplementorServiceTestSuite struct {
+type ImplementerServiceTestSuite struct {
 	suite.Suite
-	repo    *MockImplementorRepo
-	service *ImplementorService
+	repo    *MockImplementerRepo
+	service *ImplementerService
 }
 
-func TestImplementorServiceTestSuite(t *testing.T) {
-	suite.Run(t, new(ImplementorServiceTestSuite))
+func TestImplementerServiceTestSuite(t *testing.T) {
+	suite.Run(t, new(ImplementerServiceTestSuite))
 }
 
-func (suite *ImplementorServiceTestSuite) SetupTest() {
-	suite.repo = &MockImplementorRepo{}
-	suite.service = NewImplementorService(suite.repo)
+func (suite *ImplementerServiceTestSuite) SetupTest() {
+	suite.repo = &MockImplementerRepo{}
+	suite.service = NewImplementerService(suite.repo)
 }
 
-func (suite *ImplementorServiceTestSuite) TestPost() {
+func (suite *ImplementerServiceTestSuite) TestPost() {
 	ja := jsonassert.New(suite.T())
 
-	impl := model.Implementor{}
+	impl := model.Implementer{}
 	_ = faker.FakeData(&impl)
 	suite.repo.On("Insert", mock.Anything, mock.Anything).Return(&impl, nil)
 
@@ -74,7 +74,7 @@ func (suite *ImplementorServiceTestSuite) TestPost() {
 	ja.Assertf(string(resp), string(b))
 }
 
-func (suite *ImplementorServiceTestSuite) TestSaveRepoError() {
+func (suite *ImplementerServiceTestSuite) TestSaveRepoError() {
 	ja := jsonassert.New(suite.T())
 
 	suite.repo.On("Insert", mock.Anything, mock.Anything).Return(nil, errors.New("error"))

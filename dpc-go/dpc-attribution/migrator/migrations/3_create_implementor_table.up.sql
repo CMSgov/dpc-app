@@ -1,5 +1,5 @@
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
-CREATE TABLE "implementor" (
+CREATE TABLE "implementer" (
     id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
     name varchar(200) NOT NULL,
     created_at timestamp with time zone DEFAULT now(),

@@ -1,1 +1,1 @@
-DROP TABLE IF EXISTS "implementor";
+DROP TABLE IF EXISTS "Implementer";

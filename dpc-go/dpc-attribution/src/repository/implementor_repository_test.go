@@ -11,71 +11,71 @@ import (
 	"testing"
 )
 
-type ImplementorRepositoryTestSuite struct {
+type ImplementerRepositoryTestSuite struct {
 	suite.Suite
-	fakeImplementor *model.Implementor
+	fakeImplementer *model.Implementer
 }
 
-func (suite *ImplementorRepositoryTestSuite) SetupTest() {
-	i := model.Implementor{}
+func (suite *ImplementerRepositoryTestSuite) SetupTest() {
+	i := model.Implementer{}
 	_ = faker.FakeData(&i)
-	suite.fakeImplementor = &i
+	suite.fakeImplementer = &i
 }
 
-func TestImplementorRepositoryTestSuite(t *testing.T) {
-	suite.Run(t, new(ImplementorRepositoryTestSuite))
+func TestImplementerRepositoryTestSuite(t *testing.T) {
+	suite.Run(t, new(ImplementerRepositoryTestSuite))
 }
 
-func (suite *ImplementorRepositoryTestSuite) TestFindByID() {
+func (suite *ImplementerRepositoryTestSuite) TestFindByID() {
 	db, mock := newMock()
 	defer db.Close()
-	repo := NewImplementorRepo(db)
+	repo := NewImplementerRepo(db)
 	ctx := context.Background()
 
-	expectedQuery := "SELECT id, name, created_at, updated_at, deleted_at FROM implementor WHERE id = \\$1"
+	expectedQuery := "SELECT id, name, created_at, updated_at, deleted_at FROM Implementer WHERE id = \\$1"
 
 	rows := sqlmock.NewRows([]string{"id", "name", "created_at", "updated_at", "deleted_at"}).
-		AddRow(suite.fakeImplementor.ID, suite.fakeImplementor.Name, suite.fakeImplementor.CreatedAt, suite.fakeImplementor.UpdatedAt, nil)
+		AddRow(suite.fakeImplementer.ID, suite.fakeImplementer.Name, suite.fakeImplementer.CreatedAt, suite.fakeImplementer.UpdatedAt, nil)
 
-	mock.ExpectQuery(expectedQuery).WithArgs(suite.fakeImplementor.ID).WillReturnRows(rows)
+	mock.ExpectQuery(expectedQuery).WithArgs(suite.fakeImplementer.ID).WillReturnRows(rows)
 
-	implementor, err := repo.FindByID(ctx, suite.fakeImplementor.ID)
+	Implementer, err := repo.FindByID(ctx, suite.fakeImplementer.ID)
 	assert.NoError(suite.T(), err)
-	assert.Equal(suite.T(), suite.fakeImplementor.ID, implementor.ID)
+	assert.Equal(suite.T(), suite.fakeImplementer.ID, Implementer.ID)
 }
 
-func (suite *ImplementorRepositoryTestSuite) TestFindByIDError() {
+func (suite *ImplementerRepositoryTestSuite) TestFindByIDError() {
 	db, mock := newMock()
 	defer db.Close()
-	repo := NewImplementorRepo(db)
+	repo := NewImplementerRepo(db)
 	ctx := context.Background()
 
-	expectedQuery := "SELECT id, name, created_at, updated_at, deleted_at FROM implementor WHERE id = \\$1"
+	expectedQuery := "SELECT id, name, created_at, updated_at, deleted_at FROM Implementer WHERE id = \\$1"
 
 	rows := sqlmock.NewRows([]string{"id", "name", "created_at", "updated_at", "deleted_at"})
 
-	mock.ExpectQuery(expectedQuery).WithArgs(suite.fakeImplementor.ID).WillReturnRows(rows)
+	mock.ExpectQuery(expectedQuery).WithArgs(suite.fakeImplementer.ID).WillReturnRows(rows)
 
-	implementor, err := repo.FindByID(ctx, suite.fakeImplementor.ID)
+	Implementer, err := repo.FindByID(ctx, suite.fakeImplementer.ID)
 	assert.Error(suite.T(), err)
-	assert.Empty(suite.T(), implementor)
+	assert.Empty(suite.T(), Implementer)
 }
 
-func (suite *ImplementorRepositoryTestSuite) TestInsert() {
+func (suite *ImplementerRepositoryTestSuite) TestInsert() {
 	db, mock := newMock()
 	defer db.Close()
-	repo := NewImplementorRepo(db)
+	repo := NewImplementerRepo(db)
 	ctx := context.Background()
 
-	expectedInsertQuery := "INSERT INTO implementor \\(name\\) VALUES \\(\\$1\\) returning id, name, created_at, updated_at, deleted_at"
+	expectedInsertQuery := "INSERT INTO Implementer \\(name\\) VALUES \\(\\$1\\) returning id, name, created_at, updated_at, deleted_at"
 
 	rows := sqlmock.NewRows([]string{"id", "name", "created_at", "updated_at", "deleted_at"}).
-		AddRow(suite.fakeImplementor.ID, suite.fakeImplementor.Name, suite.fakeImplementor.CreatedAt, suite.fakeImplementor.UpdatedAt, nil)
+		AddRow(suite.fakeImplementer.ID, suite.fakeImplementer.Name, suite.fakeImplementer.CreatedAt, suite.fakeImplementer.UpdatedAt, nil)
 
-	mock.ExpectQuery(expectedInsertQuery).WithArgs(suite.fakeImplementor.Name).WillReturnRows(rows)
+	mock.ExpectQuery(expectedInsertQuery).WithArgs(suite.fakeImplementer.Name).WillReturnRows(rows)
 
-	b, _ := json.Marshal(suite.fakeImplementor)
-	implementor, err := repo.Insert(ctx, b)
+	b, _ := json.Marshal(suite.fakeImplementer)
+	Implementer, err := repo.Insert(ctx, b)
 	assert.NoError(suite.T(), err)
-	assert.Equal(suite.T(), suite.fakeImplementor.ID, implementor.ID)
+	assert.Equal(suite.T(), suite.fakeImplementer.ID, Implementer.ID)
 }
