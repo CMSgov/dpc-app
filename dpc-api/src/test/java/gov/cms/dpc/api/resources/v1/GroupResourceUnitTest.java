@@ -226,11 +226,10 @@ public class GroupResourceUnitTest {
         when(mockBfdClient.requestPatientFromServer(SYNTHETIC_BENE_ID, null, null).getMeta()).thenReturn(bfdTransactionMeta);
 
         //Mock create job
-        when(mockQueue.createJob(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), anyBoolean())).thenReturn(UUID.randomUUID());
+        when(mockQueue.createJob(any(), any(), any(), any(), any(), any(), any(), any(), any(), anyBoolean())).thenReturn(UUID.randomUUID());
 
         //Mock fetching request Url
         when(request.getRequestURL()).thenReturn(new StringBuffer("http://localhost:3002/v1/Group/1234567890/$export"));
-
 
         //Past date with Z offset
         String since = "2020-05-26T16:43:01.780Z";
@@ -377,7 +376,7 @@ public class GroupResourceUnitTest {
                 .thenReturn(new Bundle());
 
         //Mock create job
-        when(mockQueue.createJob(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), anyBoolean())).thenReturn(UUID.randomUUID());
+        when(mockQueue.createJob(any(), any(), any(), any(), any(), any(), any(), any(), any(), anyBoolean())).thenReturn(UUID.randomUUID());
 
         //Mock fetching request Url
         when(request.getRequestURL()).thenReturn(new StringBuffer("http://localhost:3002/v1/Group/1234567890/$export"));
