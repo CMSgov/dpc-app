@@ -43,6 +43,12 @@ aria-controls="topnav-wrap" aria-label="Close menu">
                 <% end %>
             </li>
             <li class="topnav__dropdown__item">
+              <%= link_to members_path, class: "topnav__dropdown__link",
+                  data: { test: 'dpc-registrations-profile-link' } do %>
+                  Members
+                <% end %>
+            </li>
+            <li class="topnav__dropdown__item">
               <a class="topnav__dropdown__link" href="<%= destroy_user_session_url %>"
                  id="sign-out" data-method="delete">
                  Sign out

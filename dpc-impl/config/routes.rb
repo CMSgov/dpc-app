@@ -14,6 +14,7 @@ Rails.application.routes.draw do
   end
 
   match '/portal', to: 'portal#show', via: :get
+  match '/members', to: 'portal#index', via: :get
 
   devise_scope :user do
     root to: "devise/sessions#new"
