@@ -221,7 +221,12 @@ public class GroupResourceUnitTest {
                 .useHttpGet()
                 .encodedJson()).thenReturn(bundleOperation);
 
-        when(bundleOperation.execute()).thenReturn(new Bundle());
+        Bundle patients = new Bundle();
+        patients.addEntry(new Bundle.BundleEntryComponent()
+                .setResource(new Patient()
+                        .setIdentifier(List.of(new Identifier()
+                                .setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("9S79A00AA00")))));
+        when(bundleOperation.execute()).thenReturn(patients);
         Meta bfdTransactionMeta = new Meta();
         when(mockBfdClient.requestPatientFromServer(SYNTHETIC_BENE_ID, null, null).getMeta()).thenReturn(bfdTransactionMeta);
 
@@ -293,7 +298,12 @@ public class GroupResourceUnitTest {
                 .useHttpGet()
                 .encodedJson()).thenReturn(bundleOperation);
 
-        when(bundleOperation.execute()).thenReturn(new Bundle());
+        Bundle patients = new Bundle();
+        patients.addEntry(new Bundle.BundleEntryComponent()
+                .setResource(new Patient()
+                        .setIdentifier(List.of(new Identifier()
+                                .setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("9S79A00AA00")))));
+        when(bundleOperation.execute()).thenReturn(patients);
         Meta bfdTransactionMeta = new Meta();
         when(mockBfdClient.requestPatientFromServer(SYNTHETIC_BENE_ID, null, null).getMeta()).thenReturn(bfdTransactionMeta);
 
@@ -402,6 +412,56 @@ public class GroupResourceUnitTest {
         //3 non bad requests
         verify(request, times(3)).getHeader(HttpHeaders.X_FORWARDED_FOR);
         verify(request, times(3)).getRemoteAddr();
+    }
+
+    @Test
+    public void testExportWithExpiredPatietn() {
+        UUID orgId = UUID.randomUUID();
+        Organization organization = new Organization();
+        organization.setId(orgId.toString());
+        Identifier identifier = new Identifier();
+        identifier.setSystem(DPCIdentifierSystem.NPPES.getSystem()).setValue(NPIUtil.generateNPI());
+        organization.setIdentifier(List.of(identifier));
+        OrganizationPrincipal organizationPrincipal = new OrganizationPrincipal(organization);
+
+        String groupId = "123456789";
+
+        //Mock Group
+        Group group = new Group();
+        group.setId(groupId);
+        group.addMember();
+        group.addCharacteristic().getCode().addCoding().setCode("attributed-to");
+        CodeableConcept codeableConcept = new CodeableConcept();
+        codeableConcept.addCoding().setSystem(DPCIdentifierSystem.NPPES.getSystem()).setCode(NPIUtil.generateNPI());
+        group.getCharacteristicFirstRep().setValue(codeableConcept);
+
+        IReadExecutable<Group> readExec = mock(IReadExecutable.class);
+        when(attributionClient.read().resource(Group.class).withId(new IdType("Group", groupId)).encodedJson()).thenReturn(readExec);
+        when(readExec.execute()).thenReturn(group);
+
+        IReadExecutable<Organization> readExec2 = mock(IReadExecutable.class);
+        when(attributionClient.read().resource(Organization.class).withId(new IdType("Organization", orgId.toString())).encodedJson()).thenReturn(readExec2);
+        when(readExec2.execute()).thenReturn(organization);
+
+        //Mock get bundle
+        IOperationUntypedWithInput<Bundle> bundleOperation = mock(IOperationUntypedWithInput.class);
+        when(attributionClient
+                .operation()
+                .onInstance(new IdType(groupId))
+                .named("patients")
+                .withParameters(any(Parameters.class))
+                .returnResourceType(Bundle.class)
+                .useHttpGet()
+                .encodedJson()).thenReturn(bundleOperation);
+
+
+        when(bundleOperation.execute()).thenReturn(new Bundle());
+
+        //Past date with Z offset
+        String since = "2020-05-26T16:43:01.780Z";
+        Assertions.assertThrows(WebApplicationException.class, () -> {
+            resource.export(organizationPrincipal, groupId, null, FHIRMediaTypes.NDJSON, since, "respond-async", request);
+        });
     }
 
 }

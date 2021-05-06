@@ -38,6 +38,7 @@ RSpec.feature 'user sends invitation to DPC' do
 
       expect(page.body).to have_content('Your password was set successfully. You are now signed in.')
       expect(page.body).to have_content("Welcome #{invited_user.name}")
+
       expect(invited_user.implementer_id).to match(old_user.implementer_id)
       expect(invited_user.implementer).to match(old_user.implementer)
     end
