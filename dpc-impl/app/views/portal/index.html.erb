@@ -1,13 +1,45 @@
-Members go here
+<div id="dashboard__title">
+  <h1 class="ds-text-heading--4xl ds-title">My Organization Profile</h1>
+  <h1 class="ds-text-heading--xl ds-h3 ds-u-margin-top--1">for Implementer <%= @user.implementer %></h1>
+</div>
 
-<ul>
-  <% @users_accepted.each do |ua| %>
-    <li><%= ua.first_name %></li>
-  <% end %>
-</ul>
+<div class="ds-u-margin-y--3">
+  Donut dragée sweet roll. Lemon drops pie cake macaroon. Tiramisu toffee liquorice sweet carrot cake chocolate cake cake lemon drops. Bear claw gummies ice cream. Jelly beans sweet pudding biscuit cake brownie biscuit apple pie. Sesame snaps wafer muffin oat cake chupa chups cotton candy jujubes soufflé. Carrot cake jelly lemon drops. Icing bonbon pastry cake croissant halvah fruitcake. Oat cake tootsie roll sugar plum tart dragée topping. Macaroon wafer cookie cookie sweet roll topping chocolate chocolate bar.
+</div>
 
-<ul>
-  <% @users_pending.each do |up| %>
-    <li><%= up.first_name %></li>
-  <% end %>
-</ul>
+<div class="member-list">
+  <h1 class="ds-text-heading--xl ds-h3 member-header">Current Users</h1>
+  <ul>
+    <li><%= @first_user.name %></li>
+    <% @users_accepted.each do |ua| %>
+      <li>
+        <div>
+          <%= ua.name %> 
+        </div>
+        <div class="invited-name-container">
+          (invited by <%= ua.invited_by(ua) %>)
+        </div>
+      </li>
+    <% end %>
+  </ul>
+</div>
+
+
+<div class="member-list">
+  <h1 class="ds-text-heading--xl ds-h3 member-header">Pending Invites</h1>
+  <ul>
+    <% @users_pending.each do |up| %>
+      <li>
+        <div>
+          <%= up.name %>
+        </div>
+        <div class="invited-name-container">
+          (invited by <%= up.invited_by(up) %>)
+        </div>
+      </li>
+    <% end %>
+  </ul>
+</div>
+
+
+  <h1 class="ds-text-heading--xl ds-h3 member-header">Invite your team!</h1>

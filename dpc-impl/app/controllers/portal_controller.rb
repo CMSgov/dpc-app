@@ -4,8 +4,12 @@ class PortalController < ApplicationController
   before_action :authenticate_user!
 
   def index
+    @user = current_user
+    @first_user = first_user
     @users_accepted = users_accepted
     @users_pending = users_pending
+
+    resource = :users
   end
 
   def show
@@ -16,6 +20,10 @@ class PortalController < ApplicationController
 
   def current_user_imp_id
     current_user.implementer_id
+  end
+
+  def first_user
+    User.where(implementer_id: current_user_imp_id, invitation_sent_at: nil).first
   end
 
   def users_accepted
