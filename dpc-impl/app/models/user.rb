@@ -1,12 +1,15 @@
 # frozen_string_literal: true
 
 class User < ApplicationRecord
+  before_save :assign_implementer_id
+
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
   devise :database_authenticatable, :registerable,
          :recoverable, :validatable,
          :trackable, :timeoutable, :confirmable,
-         :password_expirable, :password_archivable
+         :password_expirable, :password_archivable,
+         :invitable
 
   validates :first_name, :last_name, :implementer, presence: true
   validates :email, domain_exists: true
@@ -20,6 +23,11 @@ class User < ApplicationRecord
   end
 
   private
+
+  # TODO: remove after connecting to API
+  def assign_implementer_id
+    self.implementer_id = SecureRandom.uuid if implementer_id.blank?
+  end
 
   def password_complexity
     return if password.nil?
