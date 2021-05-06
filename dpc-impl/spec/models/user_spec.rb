@@ -54,4 +54,12 @@ RSpec.describe User, type: :model do
       expect(subject).to_not be_valid
     end
   end
+
+  describe 'before_creates' do
+    before { @user = User.invite! }
+    it 'run check_impl callback' do
+      expect(@user).to receive(:check_impl)
+      @user.run_callbacks(:create)
+    end
+  end
 end

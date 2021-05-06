@@ -81,26 +81,6 @@ RSpec.feature 'user sends invitation to DPC' do
     end
   end
 
-  context 'implementer & implementer_id remain consistent' do
-    scenario 'invited user implenter matches inviter user implementer' do
-      old_user = create(:user)
-      invited_user = create(:user, invited_by_id: old_user.id)
-
-      invited_user.save
-
-      expect(invited_user.implementer).to eq(old_user.implementer)
-      expect(invited_user.implementer_id).to eq(old_user.implementer_id)
-
-      invited_user.implementer = 'Fake'
-      invited_user.implementer_id = '1'
-
-      invited_user.save
-
-      expect(invited_user.implementer).to eq(old_user.implementer)
-      expect(invited_user.implementer_id).to eq(old_user.implementer_id)
-    end
-  end
-
   context 'successfully resend invite' do
     scenario 'invited user requests new invite' do
       user = create(:user, invitation_sent_at: DateTime.now, invitation_accepted_at: nil)

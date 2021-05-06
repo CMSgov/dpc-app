@@ -2,7 +2,7 @@
 
 class User < ApplicationRecord
   before_save :assign_implementer_id
-  before_save :check_impl
+  before_create :check_impl
 
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
