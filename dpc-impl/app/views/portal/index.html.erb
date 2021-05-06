@@ -1,2 +1,13 @@
 Members go here
 
+<ul>
+  <% @users_accepted.each do |ua| %>
+    <li><%= ua.first_name %></li>
+  <% end %>
+</ul>
+
+<ul>
+  <% @users_pending.each do |up| %>
+    <li><%= up.first_name %></li>
+  <% end %>
+</ul>
