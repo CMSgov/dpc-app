@@ -6,7 +6,7 @@ class DeviseCreateUsers < ActiveRecord::Migration[6.1]
       t.string :first_name, null: false
       t.string :last_name, null: false
       t.string :implementer, null: false
-      t.boolean :agree_to_terms, null: false
+      t.boolean :agree_to_terms
 
       ## Database authenticatable
       t.string :email,              null: false, default: ""
