@@ -9,6 +9,7 @@ FactoryBot.define do
 
     agree_to_terms { true }
 
+    confirmation_sent_at { DateTime.now }
     confirmed_at { DateTime.now }
 
     password { '12345ABCDEfghi!' }
