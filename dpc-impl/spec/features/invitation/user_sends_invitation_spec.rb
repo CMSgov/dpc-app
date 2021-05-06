@@ -6,7 +6,7 @@ RSpec.feature 'user sends invitation to DPC' do
   include MailerHelper
   let (:user) { create :user }
 
-  context 'when successful' do
+  context 'successful invite' do
     scenario 'user successfully sends invite' do
       sign_in user
       visit new_user_invitation_path
@@ -21,8 +21,9 @@ RSpec.feature 'user sends invitation to DPC' do
 
     scenario 'user accepts invitation and creates an account' do
       old_user = user
-      invited_user = User.invite!(first_name: 'Brook', last_name: 'York', email: 'brooklyn@gmail.com',
-                                  implementer: old_user.implementer, implementer_id: old_user.implementer_id)
+      invited_user = User.invite!(first_name: 'Brook', last_name: 'York',
+                                  email: 'brooklyn@gmail.com', implementer: old_user.implementer,
+                                  implementer_id: old_user.implementer_id, invited_by_id: old_user.id)
 
       itoken = invited_user.raw_invitation_token
 
@@ -37,10 +38,13 @@ RSpec.feature 'user sends invitation to DPC' do
 
       expect(page.body).to have_content('Your password was set successfully. You are now signed in.')
       expect(page.body).to have_content("Welcome #{invited_user.name}")
+
+      expect(invited_user.implementer_id).to match(old_user.implementer_id)
+      expect(invited_user.implementer).to match(old_user.implementer)
     end
   end
 
-  context 'when unsuccessful' do
+  context 'unsuccessful invite' do
     before(:each) do
       sign_in user
       visit new_user_invitation_path
@@ -74,7 +78,24 @@ RSpec.feature 'user sends invitation to DPC' do
       fill_in 'user_email', with: user1.email
       find('input[data-test="submit"]').click
 
-      expect(page.body).to have_content('Email already exists in DPC.')
+      expect(page.body).to have_content('User already has an account.')
+    end
+  end
+
+  context 'successfully resend invite' do
+    scenario 'invited user requests new invite' do
+      user = create(:user, invitation_sent_at: DateTime.now, invitation_accepted_at: nil)
+
+      visit new_user_confirmation_path
+
+      fill_in 'user_email', with: user.email
+      find('input[data-test="submit"]').click
+
+      last_delivery = ActionMailer::Base.deliveries.last
+
+      expect(last_delivery).not_to be_nil
+      expect(last_delivery.to).to include(user.email)
+      expect(last_delivery.subject).to include('Invitation instructions')
     end
   end
 end
