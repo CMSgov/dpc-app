@@ -44,12 +44,10 @@ class User < ApplicationRecord
 
     if user_id != invite_id
       @user.implementer_id = invite_id
-      @user.save
     end
 
     if user_imp != invite_imp
       @user.implementer = invite_imp
-      @user.save
     end
   end
 
