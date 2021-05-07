@@ -9,26 +9,21 @@ module Users
 
     # POST /resource
     def create
-      binding.pry
       @user = User.new user_params
 
       if values_present?(@user) && valid_email?(@user.email) && unique_email?(@user.email)
         @user.invite!(current_user)
         flash[:notice] = 'User invited.'
-        redirect_to root_path
       elsif !values_present?(@user)
         flash[:alert] = 'All fields are required to invite a new user.'
-        redirect_to new_user_invitation_path
       elsif !valid_email?(@user.email)
         flash[:alert] = 'Email must be valid.'
-        redirect_to new_user_invitation_path
       elsif !unique_email?(@user.email)
         flash[:alert] = 'Email already exists in DPC.'
-        redirect_to new_user_invitation_path
       else
         flash[:alert] = 'User was not able to be invited.'
-        redirect_to root_path
       end
+      redirect_to members_path
     end
 
     private
@@ -37,10 +32,6 @@ module Users
       devise_parameter_sanitizer.permit(:accept_invitation) do |u|
         u.permit(:invitation_token, :password, :password_confirmation, :agree_to_terms)
       end
-    end
-
-    def user_params
-      params.require(:user).permit(:first_name, :last_name, :email, :implementer, :implementer_id, :invitation_token, :password, :password_confirmation, :agree_to_terms)
     end
 
     def valid_email?(email)

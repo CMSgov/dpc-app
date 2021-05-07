@@ -1,3 +1,5 @@
+<% title "Team Members" %>
+
 <div id="dashboard__title">
   <h1 class="ds-text-heading--4xl ds-title">My Organization Profile</h1>
   <h1 class="ds-text-heading--xl ds-h3 ds-u-margin-top--1">for Implementer <%= @user.implementer %></h1>
@@ -16,9 +18,6 @@
         <div>
           <%= ua.name %> 
         </div>
-        <div class="invited-name-container">
-          (invited by <%= ua.invited_by(ua) %>)
-        </div>
       </li>
     <% end %>
   </ul>
@@ -33,9 +32,6 @@
         <div>
           <%= up.name %>
         </div>
-        <div class="invited-name-container">
-          (invited by <%= up.invited_by(up) %>)
-        </div>
       </li>
     <% end %>
   </ul>
@@ -43,3 +39,5 @@
 
 
   <h1 class="ds-text-heading--xl ds-h3 member-header">Invite your team!</h1>
+
+  <%= render partial: 'new_invite' %>

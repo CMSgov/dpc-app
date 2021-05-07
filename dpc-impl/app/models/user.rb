@@ -18,11 +18,6 @@ class User < ApplicationRecord
     in: [true], message: 'you must agree to the terms of service to create an account'
   }
 
-  def invited_by(u)
-    user = User.where(id: u.invited_by_id).first
-    return user.name
-  end
-
   def name
     "#{first_name} #{last_name}"
   end
