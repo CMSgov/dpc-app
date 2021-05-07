@@ -13,7 +13,9 @@
   <div class="member-list">
     <h1 class="ds-text-heading--xl ds-h3 member-header">Current Users</h1>
     <ul>
-      <li><%= @first_user.name %></li>
+      <% if @first_user.present? %>
+        <li><%= @first_user.name %></li>
+      <% end %>
       <% @users_accepted.each do |user| %>
         <li>
           <div>
