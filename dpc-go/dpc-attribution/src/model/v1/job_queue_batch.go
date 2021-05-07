@@ -3,7 +3,7 @@ package v1
 import (
 	"time"
 
-	uuid "github.com/jackc/pgx/pgtype/ext/gofrs-uuid"
+	"github.com/google/uuid"
 )
 
 // JobQueueBatch is a struct that models the v1 job_queue_batch table

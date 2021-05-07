@@ -9,6 +9,7 @@ require (
 	github.com/darahayes/go-boom v0.0.0-20200826120415-fa5cb724143a
 	github.com/go-chi/chi v1.5.1
 	github.com/gofrs/uuid v4.0.0+incompatible // indirect
+	github.com/google/uuid v1.2.0
 	github.com/huandu/go-sqlbuilder v1.11.0
 	github.com/jackc/fake v0.0.0-20150926172116-812a484cc733 // indirect
 	github.com/jackc/pgx v3.6.2+incompatible

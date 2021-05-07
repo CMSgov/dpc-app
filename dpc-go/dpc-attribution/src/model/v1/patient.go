@@ -1,7 +1,7 @@
 package v1
 
 import (
-	uuid "github.com/jackc/pgx/pgtype/ext/gofrs-uuid"
+	"github.com/google/uuid"
 )
 
 // Patient is a struct that models the v1 Patients table
