@@ -4,7 +4,7 @@
   "dependencies": {
     "@cmsgov/design-system-core": "^3.7.0",
     "@cmsgov/design-system-layout": "^3.7.0",
-    "jsrsasign": "^10.1.13",
+    "jsrsasign": "^10.2.0",
     "jsrsasign-util": "^1.0.0",
     "jwt-decode": "^2.2.0",
     "normalize.css": "^8.0.1",
