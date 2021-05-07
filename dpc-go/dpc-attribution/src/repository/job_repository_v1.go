@@ -3,15 +3,19 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"strings"
+	"time"
 
 	"github.com/CMSgov/dpc/attribution/model/v1"
+	"github.com/google/uuid"
 	"github.com/huandu/go-sqlbuilder"
 )
 
 // JobRepo is an interface for test mocking purposes
 type JobRepo interface {
-	Insert(ctx context.Context, batch v1.JobQueueBatch) (*v1.Job, error)
-	GetNPIs(ctx context.Context, groupID string) (*v1.GroupNPIs, error)
+	NewJobQueueBatch(orgID string, g v1.GroupNPIs, patientMBIs []string, priority int, tt time.Time, since time.Time, types string, requestingIP string) *v1.JobQueueBatch
+	Insert(ctx context.Context, batches []v1.JobQueueBatch) ([]v1.Job, error)
+	GetGroupNPIs(ctx context.Context, groupID string) (*v1.GroupNPIs, error)
 }
 
 // JobRepositoryV1 is a struct that defines what the repository has
@@ -26,29 +30,65 @@ func NewJobRepo(db *sql.DB) *JobRepositoryV1 {
 	}
 }
 
-// Insert function that saves a JobQueueBatch into the database and returns an error if there is one
-func (jr *JobRepositoryV1) Insert(ctx context.Context, b v1.JobQueueBatch) (*v1.Job, error) {
-	ib := sqlFlavor.NewInsertBuilder()
-	ib.InsertInto("job_queue_ batch")
-	ib.Cols("organization_id", "organization_npi", "provider_npi", "patients", "resource_types", "since",
-		"transaction_time", "status", "submit_time", "requesting_ip", "is_bulk")
-	ib.Values(b.OrganizationID, b.OrganizationNPI, b.ProviderNPI, b.PatientMBIs, b.ResourceTypes, b.Since,
-		b.TransactionTime, b.Status, b.SubmitTime, b.RequestingIP, b.IsBulk)
-	ib.SQL("returning job_id")
-
-	q, args := ib.Build()
-
-	job := new(v1.Job)
-	jobStruct := sqlbuilder.NewStruct(new(v1.Job)).For(sqlFlavor)
-	if err := jr.db.QueryRowContext(ctx, q, args...).Scan(jobStruct.Addr(&job)...); err != nil {
-		return nil, err
+// NewJobQueueBatch function that creates a new JobQueueBatch
+func (jr *JobRepositoryV1) NewJobQueueBatch(orgID string, g v1.GroupNPIs, patientMBIs []string, priority int, tt time.Time, since time.Time, types string, requestingIP string) *v1.JobQueueBatch {
+	return &v1.JobQueueBatch{
+		JobID:           uuid.New(),
+		OrganizationID:  orgID,
+		OrganizationNPI: g.OrgNPI,
+		ProviderNPI:     g.ProviderNPI,
+		PatientMBIs:     strings.Join(patientMBIs, ","),
+		ResourceTypes:   types,
+		Since:           since,
+		Priority:        priority,
+		Status:          0,
+		TransactionTime: tt,
+		RequestingIP:    requestingIP,
+		IsBulk:          true,
+		SubmitTime:      time.Now(),
 	}
-
-	return job, nil
 }
 
-// GetNPIs function returns an organization NPI and a provider NPI for a given group ID
-func (gr *JobRepositoryV1) GetNPIs(ctx context.Context, groupID string) (*v1.GroupNPIs, error) {
+// Insert function that saves a slice of JobQueueBatch's into the database and returns an error if there is one
+func (jr *JobRepositoryV1) Insert(ctx context.Context, batches []v1.JobQueueBatch) ([]v1.Job, error) {
+	ib := sqlFlavor.NewInsertBuilder()
+	ib.InsertInto("job_queue_ batch")
+	ib.Cols("job_id", "organization_id", "organization_npi", "provider_npi", "patients", "resource_types", "since",
+		"priority", "transaction_time", "status", "submit_time", "requesting_ip", "is_bulk")
+	var results []v1.Job
+	job := new(v1.Job)
+	for _, b := range batches {
+		ib.Values(b.JobID, b.OrganizationID, b.OrganizationNPI, b.ProviderNPI, b.PatientMBIs, b.ResourceTypes, b.Since,
+			b.Priority, b.TransactionTime, b.Status, b.SubmitTime, b.RequestingIP, b.IsBulk)
+		ib.SQL("returning job_id")
+
+		q, args := ib.Build()
+
+		jobStruct := sqlbuilder.NewStruct(*job).For(sqlFlavor)
+
+		// insert the batches within a single transaction
+		tx, err := jr.db.Begin()
+		if err != nil {
+			return nil, err
+		}
+		if err = tx.QueryRowContext(ctx, q, args...).Scan(jobStruct.Addr(&job)...); err != nil {
+			err = tx.Rollback()
+			if err != nil {
+				return nil, err
+			}
+			return nil, err
+		}
+		err = tx.Commit()
+		if err != nil {
+			return nil, err
+		}
+		results = append(results, *job)
+	}
+	return results, nil
+}
+
+// GetGroupNPIs function returns an organization NPI and a provider NPI for a given group ID
+func (jr *JobRepositoryV1) GetGroupNPIs(ctx context.Context, groupID string) (*v1.GroupNPIs, error) {
 	sb := sqlFlavor.NewSelectBuilder()
 	sb.Select("o.id_value, p.provider_id")
 	sb.From("rosters r")
@@ -59,7 +99,7 @@ func (gr *JobRepositoryV1) GetNPIs(ctx context.Context, groupID string) (*v1.Gro
 
 	row := new(v1.GroupNPIs)
 	rowStruct := sqlbuilder.NewStruct(new(v1.GroupNPIs)).For(sqlFlavor)
-	if err := gr.db.QueryRowContext(ctx, q, args...).Scan(rowStruct.Addr(&row)...); err != nil {
+	if err := jr.db.QueryRowContext(ctx, q, args...).Scan(rowStruct.Addr(&row)...); err != nil {
 		return nil, err
 	}
 

@@ -6,18 +6,17 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strings"
 	"time"
 
+	"github.com/CMSgov/dpc/attribution/conf"
+	v1 "github.com/CMSgov/dpc/attribution/model/v1"
 	"github.com/CMSgov/dpc/attribution/service"
 	"github.com/CMSgov/dpc/attribution/util"
 	"github.com/darahayes/go-boom"
-	uuid "github.com/jackc/pgx/pgtype/ext/gofrs-uuid"
 	"go.uber.org/zap"
 
 	"github.com/CMSgov/dpc/attribution/logger"
 	middleware2 "github.com/CMSgov/dpc/attribution/middleware"
-	modelV1 "github.com/CMSgov/dpc/attribution/model/v1"
 	"github.com/CMSgov/dpc/attribution/repository"
 )
 
@@ -60,55 +59,76 @@ func (js *JobServiceV1) Export(w http.ResponseWriter, r *http.Request) {
 	patientMBIs, err := js.pr.FindMBIsByGroupID(groupID)
 	if err != nil {
 		log.Error("Failed to fetch patients for group", zap.Error(err))
-		boom.BadRequest(w,"The group must contain active patients")
+		boom.BadRequest(w, "The group must contain active patients")
 		return
 	}
 
 	log.Info(fmt.Sprintf("Exporting data for group: %s _since: %s", groupID, ""))
 
-	groupNPIs, err := js.jr.GetNPIs(r.Context(), groupID)
+	groupNPIs, err := js.jr.GetGroupNPIs(r.Context(), groupID)
 	if err != nil {
 		log.Error("Failed to retrieve NPIs for Group", zap.Error(err))
 		boom.BadData(w, err)
 		return
 	}
 
-	// TODO: Get TransactionTime from BFD
-	// TODO: break patients into batches
-	batch := js.createNewJobBatch(orgID, groupNPIs, patientMBIs, requestingIP)
+	// TODO: Handle since param
+	since := time.Time{}
+	// TODO: Handle types param
+	types := "Patient,Coverage,ExplanationOfBenefit"
+	// TODO: Get TransactionTime from BFD (requires client)
+	tt := time.Time{}
 
-	jobID, err := js.jr.Insert(r.Context(), batch)
-	if err != nil {
-		log.Error("Failed to create job", zap.Error(err))
-		boom.BadData(w, err)
-		return
-	}
+	patientMBIBatches := batchPatientMBIs(patientMBIs, conf.GetAsInt("queue.batchSize", 100))
 
-	jobBytes := new(bytes.Buffer)
-	if err := json.NewEncoder(jobBytes).Encode(jobID); err != nil {
-		log.Error("Failed to convert orm model to bytes for job", zap.Error(err))
-		boom.Internal(w, err.Error())
-		return
-	}
-
-	if _, err := w.Write(jobBytes.Bytes()); err != nil {
-		log.Error("Failed to write job ID to response", zap.Error(err))
-		boom.Internal(w, err.Error())
+	for _, batch := range patientMBIBatches {
+		// Set the priority of a job batch
+		// Single patients will have first priority to support patient everything
+		priority := 5000
+		if len(batch) == 1 {
+			priority = 1000
+		}
+		jobQueueBatch := js.jr.NewJobQueueBatch(orgID, *groupNPIs, batch, priority, tt, since, types, requestingIP)
+		var batches []v1.JobQueueBatch
+		batches = append(batches, *jobQueueBatch)
+		results, err := js.jr.Insert(r.Context(), batches)
+		if err != nil || len(results) == 0 {
+			log.Error("Failed to create job", zap.Error(err))
+			boom.BadData(w, err)
+			return
+		}
+		firstBatch := results[0]
+		jobBytes := new(bytes.Buffer)
+		if err := json.NewEncoder(jobBytes).Encode(firstBatch); err != nil {
+			log.Error("Failed to convert orm model to bytes for job", zap.Error(err))
+			boom.Internal(w, err.Error())
+			return
+		}
+		if _, err := w.Write(jobBytes.Bytes()); err != nil {
+			log.Error("Failed to write job ID to response", zap.Error(err))
+			boom.Internal(w, err.Error())
+			return
+		}
+		log.Info(fmt.Sprint(
+			"dpcMetric=jobCreated,jobId={},orgId={},groupId={},totalPatients={},resourcesRequested={}",
+			firstBatch.ID,
+			orgID,
+			groupID,
+			len(batch),
+			types),
+		)
 	}
 }
 
-func (js *JobServiceV1) createNewJobBatch(orgID string, g *modelV1.GroupNPIs, patientMBIs []string, requestingIP string) modelV1.JobQueueBatch {
-	return modelV1.JobQueueBatch{
-		JobID:           uuid.UUID{},
-		OrganizationID:  orgID,
-		OrganizationNPI: g.OrgNPI,
-		ProviderNPI:     g.ProviderNPI,
-		PatientMBIs:     strings.Join(patientMBIs, ","),
-		ResourceTypes:   "",
-		Since:           time.Time{},
-		TransactionTime: time.Time{},
-		SubmitTime:      time.Time{},
-		RequestingIP:    requestingIP,
-		IsBulk:          true,
+func batchPatientMBIs(patientMBIs []string, batchSize int) [][]string {
+	var batches [][]string
+	for i := 0; i < len(patientMBIs); i += batchSize {
+		end := i + batchSize
+		// necessary check to avoid slicing beyond slice capacity
+		if end > len(patientMBIs) {
+			end = len(patientMBIs)
+		}
+		batches = append(batches, patientMBIs[i:end])
 	}
+	return batches
 }

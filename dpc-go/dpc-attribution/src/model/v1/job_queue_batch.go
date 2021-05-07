@@ -15,7 +15,8 @@ type JobQueueBatch struct {
 	PatientMBIs     string    `db:"patients" json:"patient_mbis"`
 	ResourceTypes   string    `db:"resource_types" json:"resource_types"`
 	Since           time.Time `db:"since" json:"since"`
-	TransactionTime time.Time `db:"transaction_time"`
+	TransactionTime time.Time `db:"transaction_time" json:"transaction_time"`
+	Priority        int       `db:"priority" json:"priority"`
 	Status          int       `db:"status" json:"status"`
 	SubmitTime      time.Time `db:"submit_time" json:"submit_time"`
 	RequestingIP    string    `db:"requesting_ip" json:"requesting_ip"`
