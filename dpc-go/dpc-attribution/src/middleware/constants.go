@@ -1,5 +1,6 @@
 package middleware
 
+// ContextKey is exported for use in helper method `FetchValueFromContext`
 type ContextKey int
 
 const (

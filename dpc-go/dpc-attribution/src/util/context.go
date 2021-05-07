@@ -9,6 +9,7 @@ import (
 	"github.com/darahayes/go-boom"
 )
 
+// FetchValueFromContext is a helper function for easily getting the value of a key from the context
 func FetchValueFromContext(ctx context.Context, w http.ResponseWriter, key middleware2.ContextKey) string {
 	log := logger.WithContext(ctx)
 
