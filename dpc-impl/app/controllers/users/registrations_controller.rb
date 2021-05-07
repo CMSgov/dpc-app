@@ -2,6 +2,8 @@
 
 module Users
   class RegistrationsController < Devise::RegistrationsController
+    before_action :authenticate_user!
+
     # GET /resource/sign_up
     # def new
     #   super
@@ -22,10 +24,20 @@ module Users
     #   super
     # end
 
-    # DELETE /resource
-    # def destroy
-    #   super
-    # end
+    def destroy
+      @user = User.find(current_user.id)
+      if @user.destroy_with_password(user_params[:password_to_delete])
+        redirect_to root_url, notice: 'User account successfully deleted.'
+      else
+        render :edit, alert: 'Unable to delete user account.'
+      end
+    end
+
+    protected
+
+    def user_params
+      params.require(:user).permit(:password_to_delete)
+    end
 
     # GET /resource/cancel
     # Forces the session data which is usually expired after sign

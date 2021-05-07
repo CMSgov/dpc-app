@@ -1,8 +1,13 @@
 // Breakpoints
-$width-nav: 1085px;
+$width-nav:  1085px;
+$width-dash-break: 850px;
+$width-dash-nav-break: 849px;
 
 // Colors
 $color-white: #fff;
+
+// Focus
+$focus-outline:  5px solid $color-gold-light;
 
 // Z-indexes
 $z-index-nav:     8000;

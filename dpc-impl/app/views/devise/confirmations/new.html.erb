@@ -10,7 +10,7 @@
 
         <div class="field">
           <%= f.label :email, class: "ds-c-label" %>
-          <%= f.email_field :email, autofocus: true, autocomplete: "email", value: (resource.pending_reconfirmation? ? resource.unconfirmed_email : resource.email), class: "ds-c-field" %>
+          <%= f.email_field :email, autofocus: true, autocomplete: "email", class: "ds-c-field" %>
         </div>
 
         <div class="actions ds-u-margin-top--3">

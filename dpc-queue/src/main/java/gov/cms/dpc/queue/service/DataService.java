@@ -32,43 +32,47 @@ public class DataService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DataService.class);
 
-    private IJobQueue queue;
-    private String exportPath;
-    private FhirContext fhirContext;
-    private int jobTimeoutInSeconds;
+    private final IJobQueue queue;
+    private final String exportPath;
+    private final FhirContext fhirContext;
+    private final int jobTimeoutInSeconds;
 
     @Inject
-    public DataService(IJobQueue queue, FhirContext fhirContext, @ExportPath String exportPath, @JobTimeout  int jobTimeoutInSeconds) {
+    public DataService(IJobQueue queue, FhirContext fhirContext, @ExportPath String exportPath, @JobTimeout int jobTimeoutInSeconds) {
         this.queue = queue;
         this.fhirContext = fhirContext;
         this.exportPath = exportPath;
         this.jobTimeoutInSeconds = jobTimeoutInSeconds;
     }
 
-    public Resource retrieveData(UUID organizationId, UUID providerId, List<String> patientIds, ResourceType... resourceTypes) {
-        return retrieveData(organizationId, providerId, patientIds, null, OffsetDateTime.now(ZoneOffset.UTC), null, resourceTypes);
+    public Resource retrieveData(UUID organizationId, String orgNPI, String providerNPI, List<String> patientIds, ResourceType... resourceTypes) {
+        return retrieveData(organizationId, orgNPI, providerNPI, patientIds, null, OffsetDateTime.now(ZoneOffset.UTC), null, null, resourceTypes);
     }
 
     /**
      * Retrieves data from BFD
-     * @param organizationID UUID of organization
-     * @param providerID UUID of provider
-     * @param patientMBIs List of patient String MBIs
-     * @param since
-     * @param transactionTime
-     * @param requestingIP
-     * @param resourceTypes List of ResourceType data to retrieve
+     *
+     * @param organizationID  UUID of organization
+     * @param orgNPI          NPI of organization
+     * @param providerNPI     NPI of provider
+     * @param patientMBIs     List of patient String MBIs
+     * @param since           Retrieve data since this date
+     * @param transactionTime BFD Transaction Time
+     * @param requestingIP    IP Address of request
+     * @param requestUrl      URL of original request
+     * @param resourceTypes   List of ResourceType data to retrieve
      * @return Resource
      */
     public Resource retrieveData(UUID organizationID,
-                                 UUID providerID,
+                                 String orgNPI,
+                                 String providerNPI,
                                  List<String> patientMBIs,
                                  OffsetDateTime since,
                                  OffsetDateTime transactionTime,
-                                 String requestingIP, ResourceType... resourceTypes) {
-        UUID jobID = this.queue.createJob(organizationID, providerID.toString(), patientMBIs, List.of(resourceTypes), since, transactionTime, requestingIP, false);
-        LOGGER.info("Patient everything export job created with job_id={} _since={}",jobID.toString(), since);
- 
+                                 String requestingIP, String requestUrl, ResourceType... resourceTypes) {
+        UUID jobID = this.queue.createJob(organizationID, orgNPI, providerNPI, patientMBIs, List.of(resourceTypes), since, transactionTime, requestingIP, requestUrl, false);
+        LOGGER.info("Patient everything export job created with job_id={} _since={}", jobID.toString(), since);
+
         Optional<List<JobQueueBatch>> optionalBatches = waitForJobToComplete(jobID, organizationID, this.queue);
 
         if (optionalBatches.isPresent()) {
@@ -156,7 +160,7 @@ public class DataService {
     }
 
     private Class<? extends Resource> getClassForResourceType(ResourceType resourceType) {
-        switch(resourceType) {
+        switch (resourceType) {
             case Coverage:
                 return Coverage.class;
             case ExplanationOfBenefit:

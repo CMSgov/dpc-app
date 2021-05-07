@@ -15,6 +15,7 @@ module Admin
     config.load_defaults 6.0
 
     # Add fonts to asset pipeline
+    config.assets.prefix = '/admin/assets'
     config.assets.paths << Rails.root.join("app", "assets", "fonts")
 
     # Settings in config/environments/* take precedence over those specified here.

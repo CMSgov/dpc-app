@@ -9,6 +9,7 @@ import gov.cms.dpc.api.auth.staticauth.StaticAuthenticator;
 import gov.cms.dpc.api.resources.v1.GroupResource;
 import gov.cms.dpc.api.resources.v1.JobResource;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
+import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.parameters.ProvenanceResourceFactoryProvider;
 import gov.cms.dpc.queue.IJobQueue;
@@ -53,20 +54,20 @@ class FHIRSubmissionTest {
     private static final String TEST_BASE_URL = "http://localhost:3002/v1";
     private static final UUID AGGREGATOR_ID = UUID.randomUUID();
     private static final IJobQueue queue = spy(MemoryBatchQueue.class);
-    private static IGenericClient client = mock(IGenericClient.class);
-    private static BlueButtonClient bfdClient = mock(BlueButtonClient.class);
-    private static IRead mockRead = mock(IRead.class);
-    private static IReadTyped mockTypedRead = mock(IReadTyped.class);
-    private static IReadExecutable mockExecutable = mock(IReadExecutable.class);
-    private static ProvenanceResourceFactoryProvider factory = mock(ProvenanceResourceFactoryProvider.class);
+    private static final IGenericClient client = mock(IGenericClient.class);
+    private static final BlueButtonClient bfdClient = mock(BlueButtonClient.class);
+    private static final IRead mockRead = mock(IRead.class);
+    private static final IReadTyped mockTypedRead = mock(IReadTyped.class);
+    private static final IReadExecutable mockExecutable = mock(IReadExecutable.class);
+    private static final ProvenanceResourceFactoryProvider factory = mock(ProvenanceResourceFactoryProvider.class);
 
     private static final AuthFilter<DPCAuthCredentials, OrganizationPrincipal> staticFilter = new StaticAuthFilter(new StaticAuthenticator());
     private static final GrizzlyWebTestContainerFactory testContainer = new GrizzlyWebTestContainerFactory();
 
     // Test data
-    private static List<String> testBeneficiaries = List.of("0Z00Z00ZZ01", "0Z00Z00ZZ02", "0Z00Z00ZZ03", "0Z00Z00ZZ04");
+    private static final List<String> testBeneficiaries = List.of("0Z00Z00ZZ01", "0Z00Z00ZZ02", "0Z00Z00ZZ03", "0Z00Z00ZZ04");
 
-    private ResourceExtension groupResource = ResourceExtension.builder()
+    private final ResourceExtension groupResource = ResourceExtension.builder()
             .addResource(new GroupResource(queue, client, TEST_BASE_URL, bfdClient))
             .addResource(new JobResource(queue, TEST_BASE_URL))
             .setTestContainerFactory(testContainer)
@@ -80,7 +81,7 @@ class FHIRSubmissionTest {
         mockFactory();
         mockClient();
         mockBfdClient();
-        doCallRealMethod().when(queue).createJob(Mockito.any(UUID.class), Mockito.anyString(), Mockito.anyList(), Mockito.anyList(), Mockito.any(OffsetDateTime.class), Mockito.any(OffsetDateTime.class), Mockito.anyString(), Mockito.anyBoolean());
+        doCallRealMethod().when(queue).createJob(Mockito.any(UUID.class), Mockito.anyString(), Mockito.anyString(), Mockito.anyList(), Mockito.anyList(), Mockito.any(OffsetDateTime.class), Mockito.any(OffsetDateTime.class), Mockito.anyString(), Mockito.anyString(), Mockito.anyBoolean());
     }
 
     @Test
@@ -101,7 +102,7 @@ class FHIRSubmissionTest {
         // Finish the job and check again
         assertEquals(1, queue.queueSize(), "Should have at least one job in queue");
         final var job = queue.claimBatch(AGGREGATOR_ID).orElseThrow(() -> new IllegalStateException("Should have a job"));
-        while ( job.fetchNextPatient(AGGREGATOR_ID).isPresent() ) {
+        while (job.fetchNextPatient(AGGREGATOR_ID).isPresent()) {
             queue.completePartialBatch(job, AGGREGATOR_ID);
         }
         queue.completeBatch(job, AGGREGATOR_ID);
@@ -235,18 +236,13 @@ class FHIRSubmissionTest {
         final IOperationUntypedWithInputAndPartialOutput<IBaseParameters> paramOp = mock(IOperationUntypedWithInputAndPartialOutput.class);
 
         Mockito.when(client.read()).thenReturn(mockRead);
-        Mockito.when(mockRead.resource(Group.class)).thenReturn(mockTypedRead);
-        Mockito.when(mockTypedRead.withId(Mockito.any(IdType.class))).thenReturn(mockExecutable);
-        Mockito.when(mockExecutable.encodedJson()).thenReturn(mockExecutable);
-        Mockito.when(mockExecutable.execute()).thenAnswer(answer -> {
-//            if (resourceCapture.getValue().equals(Bundle.class)) {
-//        } else{
-            final Group group = new Group();
-            group.setId("test-group-id");
-            group.addMember().setEntity(new Reference("Patient/test"));
-
-            return group;
-//            }
+        Mockito.when(mockRead.resource(Group.class)).thenAnswer(answer -> {
+            mockReadResource(Group.class);
+            return mockTypedRead;
+        });
+        Mockito.when(mockRead.resource(Organization.class)).thenAnswer(answer -> {
+            mockReadResource(Organization.class);
+            return mockTypedRead;
         });
 
         // Patient Operation
@@ -267,6 +263,31 @@ class FHIRSubmissionTest {
             });
 
             return bundle;
+        });
+    }
+
+    private static void mockReadResource(Class clazz) {
+        Mockito.when(mockTypedRead.withId(Mockito.any(IdType.class))).thenReturn(mockExecutable);
+        Mockito.when(mockExecutable.encodedJson()).thenReturn(mockExecutable);
+        Mockito.when(mockExecutable.execute()).thenAnswer(answer -> {
+            if (clazz.equals(Organization.class)) {
+                Organization organization = new Organization();
+                UUID orgId = UUID.randomUUID();
+                organization.setId(orgId.toString());
+                Identifier identifier = new Identifier();
+                identifier.setSystem(DPCIdentifierSystem.NPPES.getSystem()).setValue(NPIUtil.generateNPI());
+                organization.setIdentifier(List.of(identifier));
+                return organization;
+            } else {
+                final Group group = new Group();
+                group.setId("test-group-id");
+                group.addMember().setEntity(new Reference("Patient/test"));
+                group.addCharacteristic().getCode().addCoding().setCode("attributed-to");
+                CodeableConcept codeableConcept = new CodeableConcept();
+                codeableConcept.addCoding().setSystem(DPCIdentifierSystem.NPPES.getSystem()).setCode(NPIUtil.generateNPI());
+                group.getCharacteristicFirstRep().setValue(codeableConcept);
+                return group;
+            }
         });
     }
 

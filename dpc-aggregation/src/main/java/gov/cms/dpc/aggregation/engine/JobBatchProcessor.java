@@ -16,7 +16,10 @@ import gov.cms.dpc.queue.models.JobQueueBatchFile;
 import io.reactivex.Flowable;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.lang3.tuple.Pair;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
+import org.hl7.fhir.dstu3.model.OperationOutcome;
+import org.hl7.fhir.dstu3.model.Resource;
+import org.hl7.fhir.dstu3.model.ResourceType;
 import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,36 +59,35 @@ public class JobBatchProcessor {
     /**
      * Processes a partial of a job batch. Marks the partial as completed upon processing
      *
-     * @param aggregatorID  the current aggregatorID
-     * @param queue         the queue
-     * @param job           the job to process
-     * @param patientID     the current patient id to process
+     * @param aggregatorID the current aggregatorID
+     * @param queue        the queue
+     * @param job          the job to process
+     * @param patientID    the current patient id to process
      * @return A list of batch files {@link JobQueueBatchFile}
      */
     public List<JobQueueBatchFile> processJobBatchPartial(UUID aggregatorID, IJobQueue queue, JobQueueBatch job, String patientID) {
         StopWatch stopWatch = StopWatch.createStarted();
         OutcomeReason failReason = null;
-        final Pair<Optional<List<ConsentResult>>,Optional<OperationOutcome>> consentResult = getConsent(patientID);
+        final Pair<Optional<List<ConsentResult>>, Optional<OperationOutcome>> consentResult = getConsent(patientID);
 
         Flowable<Resource> flowable;
-        if(consentResult.getRight().isPresent()){
+        if (consentResult.getRight().isPresent()) {
             flowable = Flowable.just(consentResult.getRight().get());
             failReason = OutcomeReason.INTERNAL_ERROR;
-        }
-        else if(isOptedOut(consentResult.getLeft())){
+        } else if (isOptedOut(consentResult.getLeft())) {
             failReason = OutcomeReason.CONSENT_OPTED_OUT;
             flowable = Flowable.just(AggregationUtils.toOperationOutcome(OutcomeReason.CONSENT_OPTED_OUT, patientID));
-        }else if(isLookBackExempt(job.getOrgID())){
+        } else if (isLookBackExempt(job.getOrgID())) {
             logger.info("Skipping lookBack for org: {}", job.getOrgID().toString());
             MDC.put(MDCConstants.IS_SMOKE_TEST_ORG, "true");
             flowable = Flowable.fromIterable(job.getResourceTypes())
                     .flatMap(r -> fetchResource(job, patientID, r, job.getSince().orElse(null)));
-        }else{
+        } else {
             List<LookBackAnswer> answers = getLookBackAnswers(job, patientID);
-            if(passesLookBack(answers)){
+            if (passesLookBack(answers)) {
                 flowable = Flowable.fromIterable(job.getResourceTypes())
                         .flatMap(r -> fetchResource(job, patientID, r, job.getSince().orElse(null)));
-            }else{
+            } else {
                 failReason = LookBackAnalyzer.analyze(answers);
                 flowable = Flowable.just(AggregationUtils.toOperationOutcome(failReason, patientID));
             }
@@ -96,17 +98,17 @@ public class JobBatchProcessor {
                 .blockingGet();
         queue.completePartialBatch(job, aggregatorID);
 
-        final String resourcesRequested = job.getResourceTypes().stream().map(rt -> rt.getPath()).filter(rtName -> rtName != null).collect(Collectors.joining(";"));
-        final String failReasonLabel = failReason==null ? "NA":failReason.name();
+        final String resourcesRequested = job.getResourceTypes().stream().map(ResourceType::getPath).filter(Objects::nonNull).collect(Collectors.joining(";"));
+        final String failReasonLabel = failReason == null ? "NA" : failReason.name();
         stopWatch.stop();
-        logger.info("dpcMetric=DataExportResult,dataRetrieved={},failReason={},resourcesRequested={},duration={}",failReason==null,failReasonLabel,resourcesRequested,stopWatch.getTime());
+        logger.info("dpcMetric=DataExportResult,dataRetrieved={},failReason={},resourcesRequested={},duration={}", failReason == null, failReasonLabel, resourcesRequested, stopWatch.getTime());
         return results;
     }
 
     private boolean isLookBackExempt(UUID orgId) {
         List<String> exemptOrgs = operationsConfig.getLookBackExemptOrgs();
-        if(exemptOrgs!=null){
-           return exemptOrgs.contains(orgId.toString());
+        if (exemptOrgs != null) {
+            return exemptOrgs.contains(orgId.toString());
         }
         return false;
     }
@@ -138,30 +140,29 @@ public class JobBatchProcessor {
         headers.put(Constants.BFD_ORIGINAL_QUERY_ID_HEADER, job.getJobID().toString());
         if (job.isBulk()) {
             headers.put(Constants.BULK_JOB_ID_HEADER, job.getJobID().toString());
-            headers.put(Constants.BULK_CLIENT_ID_HEADER, job.getProviderID());
+            headers.put(Constants.BULK_CLIENT_ID_HEADER, job.getProviderNPI());
         } else {
-            headers.put(Constants.DPC_CLIENT_ID_HEADER, job.getProviderID());
+            headers.put(Constants.DPC_CLIENT_ID_HEADER, job.getProviderNPI());
         }
         return headers;
     }
 
     private List<LookBackAnswer> getLookBackAnswers(JobQueueBatch job, String patientId) {
         List<LookBackAnswer> result = new ArrayList<>();
-        //job.getProviderID is really not providerID, it is the rosterID, see createJob in GroupResource export for confirmation
-        //patientId here is the patient MBI
-        final String practitionerNPI = lookBackService.getPractitionerNPIFromRoster(job.getOrgID(), job.getProviderID(), patientId);
-        if (practitionerNPI != null) {
+        final String practitionerNPI = job.getProviderNPI();
+        final String organizationNPI = job.getOrgNPI();
+        if (practitionerNPI != null && organizationNPI != null) {
             MDC.put(MDCConstants.PROVIDER_NPI, practitionerNPI);
             Flowable<Resource> flowable = fetchResource(job, patientId, ResourceType.ExplanationOfBenefit, null);
             result = flowable
                     .filter(resource -> ResourceType.ExplanationOfBenefit == resource.getResourceType())
                     .map(ExplanationOfBenefit.class::cast)
-                    .map(resource -> lookBackService.getLookBackAnswer(resource, job.getOrgID(), practitionerNPI, operationsConfig.getLookBackMonths()))
+                    .map(resource -> lookBackService.getLookBackAnswer(resource, organizationNPI, practitionerNPI, operationsConfig.getLookBackMonths()))
                     .toList()
                     .doOnError(e -> new ArrayList<>())
                     .blockingGet();
         } else {
-            logger.error("couldn't get practitionerNPI from roster");
+            logger.error("couldn't get practitionerNPI and organizationNPI from job");
         }
         return result;
     }
@@ -223,18 +224,19 @@ public class JobBatchProcessor {
         return ResourceType.OperationOutcome == resourceType ? operationalOutcomeMeter : resourceMeter;
     }
 
-    private Pair<Optional<List<ConsentResult>>,Optional<OperationOutcome>> getConsent(String patientId){
+    private Pair<Optional<List<ConsentResult>>, Optional<OperationOutcome>> getConsent(String patientId) {
         try {
-            return Pair.of(consentService.getConsent(patientId),Optional.empty());
-        }catch (Exception e){
+            return Pair.of(consentService.getConsent(patientId), Optional.empty());
+        } catch (Exception e) {
             logger.error("Unable to retrieve consent from consent service.", e);
             OperationOutcome operationOutcome = AggregationUtils.toOperationOutcome(OutcomeReason.INTERNAL_ERROR, patientId);
             return Pair.of(Optional.empty(), Optional.of(operationOutcome));
         }
     }
 
-    private boolean isOptedOut(Optional<List<ConsentResult>> consentResultsOptional){
-        if(consentResultsOptional.isPresent()){
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    private boolean isOptedOut(Optional<List<ConsentResult>> consentResultsOptional) {
+        if (consentResultsOptional.isPresent()) {
             final List<ConsentResult> consentResults = consentResultsOptional.get();
             long optOutCount = consentResults.stream().filter(consentResult -> {
                 final boolean isActive = consentResult.isActive();
@@ -247,8 +249,8 @@ public class JobBatchProcessor {
         return true;
     }
 
-    private boolean passesLookBack(List<LookBackAnswer> answers){
-       return answers.stream()
+    private boolean passesLookBack(List<LookBackAnswer> answers) {
+        return answers.stream()
                 .anyMatch(a -> a.matchDateCriteria() && (a.orgNPIMatchAnyEobNPIs() || a.practitionerNPIMatchAnyEobNPIs()));
     }
 }

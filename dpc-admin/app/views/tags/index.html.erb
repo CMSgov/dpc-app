@@ -36,7 +36,7 @@
                       <span><%= tag.name %> <span class="ds-u-font-weight--normal">(0)</span></span>
                       <%= link_to(tag_url(tag), class: "site-pills__item__button", method: :delete, data: {test: "delete-tag-#{tag.id}"}) do %>
                         <svg class="icon" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                          <use xlink:href="/assets/solid.svg#times"></use>
+                          <use xlink:href="/admin/assets/solid.svg#times"></use>
                         </svg>
                       <% end %>
                     </span>
@@ -48,7 +48,7 @@
 
                       <%= link_to(tag_url(tag), class: "site-pills__item__button", method: :delete, data: { confirm: confirm_text(tag), test: "delete-tag-#{tag.id}" }) do %>
                         <svg class="icon" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                          <use xlink:href="/assets/solid.svg#times"></use>
+                          <use xlink:href="/admin/assets/solid.svg#times"></use>
                         </svg>
                       <% end %>
                     </span>

@@ -1,5 +1,6 @@
 package gov.cms.dpc.queue.models;
 
+import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
@@ -18,14 +19,16 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SuppressWarnings("OptionalGetWithoutIsPresent")
 @ExtendWith(BufferedLoggerHandler.class)
 public class JobQueueBatchTest {
 
     private static final UUID jobID = UUID.randomUUID();
     private static final UUID orgID = UUID.randomUUID();
-    private static final String providerID = "providerID";
     private static final List<ResourceType> resourceTypes = JobQueueBatch.validResourceTypes;
     private static final UUID aggregatorID = UUID.randomUUID();
+    private static final String orgNPI = NPIUtil.generateNPI();
+    private static final String providerNPI = NPIUtil.generateNPI();
     private static final List<String> patientList = List.of("1", "2", "3");
 
     @Test
@@ -109,7 +112,7 @@ public class JobQueueBatchTest {
         try {
             job.fetchNextPatient(aggregatorID);
             Assertions.fail();
-        } catch ( JobQueueFailure e ) {
+        } catch (JobQueueFailure e) {
             assertTrue(e.getMessage().contains("Cannot fetch next batch."));
         }
     }
@@ -134,7 +137,7 @@ public class JobQueueBatchTest {
         try {
             job.setPausedStatus(aggregatorID);
             Assertions.fail();
-        } catch ( JobQueueFailure e ) {
+        } catch (JobQueueFailure e) {
             assertTrue(e.getMessage().contains("Cannot pause batch."));
         }
     }
@@ -205,7 +208,7 @@ public class JobQueueBatchTest {
         job.patientIndex = 2;
         job.getJobQueueBatchFiles().add(new JobQueueBatchFile());
 
-        job.setFailedStatus(aggregatorID);
+        job.setFailedStatus();
 
         assertEquals(JobStatus.FAILED, job.getStatus());
         assertFalse(job.getAggregatorID().isPresent());
@@ -223,7 +226,7 @@ public class JobQueueBatchTest {
         final var job = Mockito.spy(createJobQueueBatch());
         job.status = JobStatus.QUEUED;
 
-        job.setFailedStatus(aggregatorID);
+        job.setFailedStatus();
 
         assertEquals(JobStatus.FAILED, job.getStatus());
         assertFalse(job.getAggregatorID().isPresent());
@@ -237,7 +240,7 @@ public class JobQueueBatchTest {
     void testRestartBatch() {
         final var job = createJobQueueBatch();
         job.setRunningStatus(aggregatorID);
-        job.setFailedStatus(aggregatorID);
+        job.setFailedStatus();
 
         job.restartBatch();
 
@@ -267,27 +270,27 @@ public class JobQueueBatchTest {
     }
 
     @Test
-    void testVerifyAggregatorID_NoneSet() throws Exception {
+    void testVerifyAggregatorID_NoneSet() {
         final var job = createJobQueueBatch();
         job.verifyAggregatorID(aggregatorID);
     }
 
     @Test
-    void testVerifyAggregatorID_Match() throws Exception {
+    void testVerifyAggregatorID_Match() {
         final var job = createJobQueueBatch();
         job.aggregatorID = aggregatorID;
         job.verifyAggregatorID(aggregatorID);
     }
 
     @Test
-    void testVerifyAggregatorID_InvalidMatch() throws Exception {
+    void testVerifyAggregatorID_InvalidMatch() {
         final var job = createJobQueueBatch();
         job.aggregatorID = UUID.randomUUID();
 
         try {
             job.verifyAggregatorID(aggregatorID);
             Assertions.fail();
-        } catch ( JobQueueFailure e ) {
+        } catch (JobQueueFailure e) {
             assertTrue(e.getMessage().contains("Cannot process a job owned by another aggregator."));
         }
     }
@@ -322,7 +325,7 @@ public class JobQueueBatchTest {
     }
 
     JobQueueBatch createJobQueueBatch() {
-        return new JobQueueBatch(jobID, orgID, providerID, patientList, resourceTypes, null, OffsetDateTime.now(ZoneOffset.UTC), null, true);
+        return new JobQueueBatch(jobID, orgID, orgNPI, providerNPI, patientList, resourceTypes, null, OffsetDateTime.now(ZoneOffset.UTC), null, null,true);
     }
 
 }

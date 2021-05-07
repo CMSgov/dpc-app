@@ -139,7 +139,7 @@ public class PatientResource extends AbstractPatientResource {
     public Bundle bulkSubmitPatients(@ApiParam(hidden = true) @Auth OrganizationPrincipal organization,
                                      @ApiParam Parameters params) {
         final Bundle patientBundle = (Bundle) params.getParameterFirstRep().getResource();
-        final Consumer<Patient> entryHandler = (patient) -> validateAndAddOrg(patient, organization.getOrganization().getId(), validator, PatientProfile.PROFILE_URI);
+        final Consumer<Patient> entryHandler = (patient) -> validateAndAddOrg(patient, organization.getOrganization().getId(), validator);
 
         return bulkResourceClient(Patient.class, client, entryHandler, patientBundle);
     }
@@ -201,10 +201,19 @@ public class PatientResource extends AbstractPatientResource {
         final var since = handleSinceQueryParam(sinceParam);
         final String patientMbi = FHIRExtractors.getPatientMBI(patient);
         final UUID orgId = organization.getID();
+        final Organization org = this.client
+                .read()
+                .resource(Organization.class)
+                .withId(orgId.toString())
+                .encodedJson()
+                .execute();
+        final String orgNPI = FHIRExtractors.findMatchingIdentifier(org.getIdentifier(), DPCIdentifierSystem.NPPES).getValue();
+        final String practitionerNPI = FHIRExtractors.findMatchingIdentifier(practitioner.getIdentifier(), DPCIdentifierSystem.NPPES).getValue();
 
         final String requestingIP = APIHelpers.fetchRequestingIP(request);
-        Resource result = dataService.retrieveData(orgId, practitionerId, List.of(patientMbi), since, APIHelpers.fetchTransactionTime(bfdClient),
-                requestingIP, ResourceType.Patient, ResourceType.ExplanationOfBenefit, ResourceType.Coverage);
+        final String requestUrl = APIHelpers.fetchRequestUrl(request);
+        Resource result = dataService.retrieveData(orgId, orgNPI, practitionerNPI, List.of(patientMbi), since, APIHelpers.fetchTransactionTime(bfdClient),
+                requestingIP, requestUrl, ResourceType.Patient, ResourceType.ExplanationOfBenefit, ResourceType.Coverage);
         if (ResourceType.Bundle.equals(result.getResourceType())) {
             return (Bundle) result;
         }
@@ -276,10 +285,10 @@ public class PatientResource extends AbstractPatientResource {
         return ValidationHelpers.validateAgainstProfile(this.validator, parameters, PatientProfile.PROFILE_URI);
     }
 
-    private static void validateAndAddOrg(Patient patient, String organizationID, FhirValidator validator, String profileURL) {
+    private static void validateAndAddOrg(Patient patient, String organizationID, FhirValidator validator) {
         // Set the Managing Org, since we need it for the validation
         patient.setManagingOrganization(new Reference(new IdType("Organization", organizationID)));
-        final ValidationResult result = validator.validateWithResult(patient, new ValidationOptions().addProfile(profileURL));
+        final ValidationResult result = validator.validateWithResult(patient, new ValidationOptions().addProfile(PatientProfile.PROFILE_URI));
         if (!result.isSuccessful()) {
             // Temporary until DPC-536 is merged in
             if (result.getMessages().get(0).getSeverity() != ResultSeverityEnum.INFORMATION) {

@@ -1,1 +1,83 @@
-Welcome <%= @user.name %>
+<% title "Home Page" %>
+
+<div id="dashboard__title">
+  <h1 class="ds-text-heading--4xl ds-title">DPC Account Home Page</h1>
+  <h1 class="ds-text-heading--xl ds-h3 ds-u-margin-top--1">for Implementer <%= @user.implementer %></h1>
+</div>
+
+<div class="ds-u-margin-y--4" id="dashboard__welcome">
+  Welcome <%= @user.name %>. Wafer candy danish topping tart topping sugar plum lemon drops cake. Dragée lollipop cookie toffee toffee tart soufflé cookie icing. Lemon drops marshmallow topping jelly liquorice sweet roll danish. Donut toffee chocolate chocolate bar icing jelly-o lollipop. Powder cake powder carrot cake oat cake liquorice sugar plum lemon drops jelly beans.
+</div>
+
+<div id="dashboard__content">
+  <div id="dash_content_nav_container">
+    <h4 class="ds-u-margin-y--1 ds-u-margin-left--1">Ready for Production?</h4>
+
+    <div class="nav_box_container">
+      <div class="nav_box" id="dash_nav_demo">
+        <div>
+          Dragée topping muffin liquorice sweet roll lollipop toffee I love. Jelly-o liquorice marzipan sweet roll donut sweet.
+        </div>
+        <div>
+          <h4>Schedule DPC demo:</h4>
+          <strong>password: dpcdemo2021</strong>
+          <button type="button" class="ds-c-button ds-c-button--primary">
+            Coming Soon
+          </button>
+        </div>
+      </div>
+      <div class="nav_box" id="dash_nav_help">
+        <h2>Need Help?</h2>
+        <strong>Resources:</strong>
+        <ul>
+          <li>DPC's User Guide</li>
+          <li>HL7 Implementation Guide</li>
+          <li>BB2.0 Implementation Guide</li>
+        </ul>
+        <strong>Ask questions, collaborate, and share your experience with the DPC community!</strong><br />
+        <%= link_to "Join Google Group", "https://groups.google.com/forum/#!forum/dpc-api", class:"ds-c-button ds-c-button--primary google-button", id: 'google-group-link' %>
+      </div>
+    </div>
+  </div>
+
+  <div id="dash_content_client_container">
+
+    <div class="dash_content_header">
+      <h2>Client Organizations</h2>
+    </div>
+
+    <div id="dash_client_list">
+      <div class="client_card_container">
+        <div class="client_name">
+          Zesty Bee Clinic
+        </div>
+
+        <div class="client_info">
+          <div class="client_api_id">
+            ID: 90c2f6d2-70b5-4127-a23c-2a3cd6dc8c25
+          </div>
+
+          <div class="client_status">
+            Status: Pending
+          </div>
+        </div>
+      </div>
+
+      <div class="client_card_container">
+        <div class="client_name">
+          Peach Clean Hospital
+        </div>
+
+        <div class="client_info">
+          <div class="client_api_id">
+            ID: 5b52d6f7-9717-45b3-8937-c23fa6d09760
+          </div>
+
+          <div class="client_status">
+            Status: <span class="ds-u-color--success">Accepted</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

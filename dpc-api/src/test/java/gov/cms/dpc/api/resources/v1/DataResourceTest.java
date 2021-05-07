@@ -51,8 +51,8 @@ import static org.junit.jupiter.api.Assertions.*;
 @SuppressWarnings("InnerClassMayBeStatic")
 class DataResourceTest {
 
-    private static FileManager manager = Mockito.mock(FileManager.class);
-    private static IJobQueue queue = Mockito.mock(IJobQueue.class);
+    private static final FileManager manager = Mockito.mock(FileManager.class);
+    private static final IJobQueue queue = Mockito.mock(IJobQueue.class);
     private static final ResourceExtension RESOURCE = buildDataResource();
 
     private DataResourceTest() {
@@ -87,7 +87,7 @@ class DataResourceTest {
     }
 
     @Test
-    void testFileFromExpiredJob() throws IOException {
+    void testFileFromExpiredJob() {
         UUID jobId = UUID.randomUUID();
 
         Mockito.when(manager.getFile(Mockito.any(), Mockito.anyString())).thenAnswer(answer -> {
@@ -98,7 +98,7 @@ class DataResourceTest {
         });
 
         UUID aggregatorId = UUID.randomUUID();
-        JobQueueBatch jobQueueBatch = new JobQueueBatch(jobId, null, null, Collections.emptyList(), null, null, null, null, true);
+        JobQueueBatch jobQueueBatch = new JobQueueBatch(jobId, null, null, null, Collections.emptyList(), null, null, null, null, null, true);
         jobQueueBatch.setRunningStatus(aggregatorId);
         jobQueueBatch.setCompletedStatus(aggregatorId);
         jobQueueBatch.setCompleteTime(OffsetDateTime.now().minusHours(25));
@@ -116,7 +116,7 @@ class DataResourceTest {
         final File tempPath = FileUtils.getTempDirectory();
         final File file = File.createTempFile("test", ".ndjson", tempPath);
         final int length = 4 * 1024 * 1024;
-        final String randomString = buildRandomString(length);
+        final String randomString = buildRandomString();
         FileUtils.write(file, randomString, StandardCharsets.UTF_8);
 
         Mockito.when(manager.getFile(Mockito.any(), Mockito.anyString())).thenReturn(new FileManager.FilePointer("", 0, UUID.randomUUID(), OffsetDateTime.now(ZoneOffset.UTC), file));
@@ -325,10 +325,10 @@ class DataResourceTest {
                         new StreamingContentSizeFilter()), false);
     }
 
-    private static String buildRandomString(long length) throws IOException {
+    private static String buildRandomString() throws IOException {
         Random rnd = new Random();
         try (StringWriter writer = new StringWriter()) {
-            for (int i = 0; i < length; i++) {
+            for (int i = 0; i < (long) 4194304; i++) {
                 char c = (char) (rnd.nextInt(26) + 'a');
                 writer.write(c);
             }

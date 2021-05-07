@@ -8,21 +8,21 @@
             <legend class="field-group__heading">Organization</legend>
             <div class="ds-u-margin-bottom--1">
               <svg class="icon ds-u-margin-right--1 ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <use xlink:href="/assets/solid.svg#clinic-medical"></use>
+                <use xlink:href="/admin/assets/solid.svg#clinic-medical"></use>
               </svg>
               <%= link_to @user.primary_organization.name, organization_path(@user.primary_organization) %>
             </div>
 
             <div class="ds-u-margin-bottom--1">
               <svg class="icon ds-u-margin-right--1 ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <use xlink:href="/assets/solid.svg#shapes"></use>
+                <use xlink:href="/admin/assets/solid.svg#shapes"></use>
               </svg>
               <%= @user.primary_organization.organization_type.titleize %>
             </div>
 
             <div class="">
               <svg class="icon ds-u-margin-right--1 ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <use xlink:href="/assets/solid.svg#map-marker-alt"></use>
+                <use xlink:href="/admin/assets/solid.svg#map-marker-alt"></use>
               </svg>
               <%= @user.primary_organization.address_street %>
             </div>
@@ -43,7 +43,7 @@
               <h2 class="ds-u-margin-top--0 ds-u-font-size--h4">This user originally requested</h2>
               <div class="ds-u-margin-bottom--1">
                 <svg class="icon ds-u-margin-right--1 ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                  <use xlink:href="/assets/solid.svg#clinic-medical"></use>
+                  <use xlink:href="/admin/assets/solid.svg#clinic-medical"></use>
                 </svg>
                 <%= @user.requested_organization %>
               </div>
@@ -51,7 +51,7 @@
               <% unless @user.requested_organization_type == "health_it_vendor" %>
                 <div class="ds-u-margin-bottom--1">
                   <svg class="icon ds-u-margin-right--1 ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                    <use xlink:href="/assets/solid.svg#users"></use>
+                    <use xlink:href="/admin/assets/solid.svg#users"></use>
                   </svg>
                   <%= @user.requested_num_providers %>
                 </div>
@@ -59,14 +59,14 @@
 
               <div class="ds-u-margin-bottom--1">
                 <svg class="icon ds-u-margin-right--1 ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                  <use xlink:href="/assets/solid.svg#shapes"></use>
+                  <use xlink:href="/admin/assets/solid.svg#shapes"></use>
                 </svg>
                 <%= @user.requested_organization_type.titleize %>
               </div>
 
               <div>
                 <svg class="icon ds-u-margin-right--1 ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                  <use xlink:href="/assets/solid.svg#map-marker-alt"></use>
+                  <use xlink:href="/admin/assets/solid.svg#map-marker-alt"></use>
                 </svg>
                 <%= @user.address_1 %>
               </div>
@@ -84,7 +84,7 @@
                   data: { test: 'convert-org-link' }, class: "ds-c-button ds-u-fill--white" do %>
                     Create an organization from this info
                     <svg class="icon ds-u-margin-left--1" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                      <use xlink:href="/assets/solid.svg#arrow-right"></use>
+                      <use xlink:href="/admin/assets/solid.svg#arrow-right"></use>
                     </svg>
 
                   <% end %>
