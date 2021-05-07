@@ -24,10 +24,6 @@ class PortalController < ApplicationController
     User.where(implementer_id: current_user_imp_id, invitation_sent_at: nil).first
   end
 
-  def invitation_sent_by(invited_by_id)
-    User.where(id: invited_by_id)
-  end
-
   def users_accepted
     User.invitation_accepted.where(implementer_id: current_user_imp_id)
   end

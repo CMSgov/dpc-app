@@ -14,9 +14,7 @@ module Users
       if user_valid?(@user)
         @user.invite!(current_user)
         flash[:notice] = 'User invited.'
-        redirect_to root_path
       else generate_errors(@user)
-        redirect_to new_user_invitation_path
       end
       redirect_to members_path and return
     end

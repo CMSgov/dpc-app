@@ -2,7 +2,6 @@
 
 class User < ApplicationRecord
   before_save :assign_implementer_id
-  before_create :check_impl
 
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
@@ -19,6 +18,11 @@ class User < ApplicationRecord
     in: [true], message: 'you must agree to the terms of service to create an account'
   }
 
+  def invited_by
+    user = User.where(id: self.invited_by_id).first
+    return user.name
+  end
+
   def name
     "#{first_name} #{last_name}"
   end
@@ -28,27 +32,6 @@ class User < ApplicationRecord
   # TODO: remove after connecting to API
   def assign_implementer_id
     self.implementer_id = SecureRandom.uuid if implementer_id.blank?
-  end
-
-  def check_impl
-    @host = self.invited_by_id
-
-    return if @host.nil?
-
-    @user = self
-    @invite = User.where(id: @host).first
-    user_id = @user.implementer_id
-    invite_id = @invite.implementer_id
-    user_imp = @user.implementer
-    invite_imp = @invite.implementer
-
-    if user_id != invite_id
-      @user.implementer_id = invite_id
-    end
-
-    if user_imp != invite_imp
-      @user.implementer = invite_imp
-    end
   end
 
   def password_complexity
