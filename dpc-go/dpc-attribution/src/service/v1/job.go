@@ -66,7 +66,7 @@ func (js *JobServiceV1) Export(w http.ResponseWriter, r *http.Request) {
 	log.Info(fmt.Sprintf("Exporting data for group: %s _since: %s", groupID, ""))
 
 	groupNPIs, err := js.jr.GetGroupNPIs(r.Context(), groupID)
-	if err != nil {
+	if err != nil || groupNPIs.OrgNPI == "" || groupNPIs.ProviderNPI == "" {
 		log.Error("Failed to retrieve NPIs for Group", zap.Error(err))
 		boom.BadData(w, err)
 		return
