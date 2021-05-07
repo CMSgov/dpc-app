@@ -34,7 +34,7 @@ type GroupServiceTestSuite struct {
 	suite.Suite
 	repo    *MockGrpRepo
 	service *GroupService
-	js *serviceV1.JobServiceV1
+	js      *serviceV1.JobServiceV1
 }
 
 func TestGroupServiceTestSuite(t *testing.T) {
