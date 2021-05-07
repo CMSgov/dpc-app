@@ -60,4 +60,4 @@ ops/config/decrypted/*
 
 # Ignore Go binaries
 /dpc-go/dpc-api/src/api
-/dpc-go/dpc-attribution/src/api
+/dpc-go/dpc-attribution/src/attribution
