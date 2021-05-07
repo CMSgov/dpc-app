@@ -58,7 +58,7 @@ func (suite *ImplementerServiceTestSuite) TestPost() {
 	_ = faker.FakeData(&impl)
 	suite.repo.On("Insert", mock.Anything, mock.Anything).Return(&impl, nil)
 
-	req := httptest.NewRequest("POST", "http://example.com/foo", strings.NewReader("{\"name\":\"test-name\"}"))
+	req := httptest.NewRequest("POST", "http://example.com/foo", strings.NewReader(`{"name":"test-name"}`))
 
 	w := httptest.NewRecorder()
 
