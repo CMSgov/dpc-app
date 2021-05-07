@@ -14,10 +14,10 @@
     <h1 class="ds-text-heading--xl ds-h3 member-header">Current Users</h1>
     <ul>
       <li><%= @first_user.name %></li>
-      <% @users_accepted.each do |ua| %>
+      <% @users_accepted.each do |user| %>
         <li>
           <div>
-            <%= ua.name %> 
+            <%= user.name %> 
           </div>
         </li>
       <% end %>
@@ -27,13 +27,13 @@
   <div class="member-list">
   <h1 class="ds-text-heading--xl ds-h3 member-header">Pending Invites</h1>
   <ul>
-    <% @users_pending.each do |up| %>
+    <% @users_pending.each do |user| %>
       <li>
         <div>
-          <%= up.name %> 
+          <%= user.name %> 
         </div>
         <div class="invited-name-container">
-          (invited by <%= up.invited_by %>)
+          (invited by <%= invited_by(user.invited_by_id) %>)
         </div>
       </li>
     <% end %>

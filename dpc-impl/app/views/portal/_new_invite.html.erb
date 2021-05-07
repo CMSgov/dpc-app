@@ -15,7 +15,7 @@
 
   <div class="field">
     <%= f.label :email, class: "ds-c-label" %>
-    <%= f.email_field :email, autofocus: true, autocomplete: "email", class: "ds-c-field", value: '', onkeyup: "fieldBlankCheck('user_email', 'user_email_blank')" %>
+    <%= f.email_field :email, autocomplete: "email", class: "ds-c-field", value: '', onkeyup: "fieldBlankCheck('user_email', 'user_email_blank')" %>
     <div class="ds-u-color--error-dark" id="user_email_blank">
     </div>
   </div>

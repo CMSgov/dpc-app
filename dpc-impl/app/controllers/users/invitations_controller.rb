@@ -16,7 +16,7 @@ module Users
         flash[:notice] = 'User invited.'
       else generate_errors(@user)
       end
-      redirect_to members_path and return
+      redirect_to members_path
     end
 
     private
