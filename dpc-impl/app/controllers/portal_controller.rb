@@ -8,8 +8,6 @@ class PortalController < ApplicationController
     @first_user = first_user
     @users_accepted = users_accepted
     @users_pending = users_pending
-
-    resource = :users
   end
 
   def show
@@ -24,6 +22,10 @@ class PortalController < ApplicationController
 
   def first_user
     User.where(implementer_id: current_user_imp_id, invitation_sent_at: nil).first
+  end
+
+  def invitation_sent_by(invited_by_id)
+    User.where(id: invited_by_id)
   end
 
   def users_accepted
