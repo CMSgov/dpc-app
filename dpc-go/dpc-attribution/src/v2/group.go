@@ -3,7 +3,6 @@ package v2
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"github.com/CMSgov/dpc/attribution/logger"
 	"github.com/CMSgov/dpc/attribution/repository"
 	"github.com/darahayes/go-boom"
@@ -38,13 +37,13 @@ func (os *GroupService) Post(w http.ResponseWriter, r *http.Request) {
 
 	groupBytes := new(bytes.Buffer)
 	if err := json.NewEncoder(groupBytes).Encode(group); err != nil {
-		log.Error(fmt.Sprintf("Failed to convert orm model to bytes for group"), zap.Error(err))
+		log.Error("Failed to convert orm model to bytes for group", zap.Error(err))
 		boom.Internal(w, err.Error())
 		return
 	}
 
 	if _, err := w.Write(groupBytes.Bytes()); err != nil {
-		log.Error(fmt.Sprintf("Failed to write group to response"), zap.Error(err))
+		log.Error("Failed to write group to response", zap.Error(err))
 		boom.Internal(w, err.Error())
 	}
 }
