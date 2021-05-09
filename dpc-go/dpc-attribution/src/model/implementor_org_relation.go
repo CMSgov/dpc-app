@@ -9,8 +9,8 @@ import (
 // ImplementerOrgRelation is a struct that models the Implementer_org_relation table
 type ImplementerOrgRelation struct {
 	ID              string       `db:"id" json:"id"`
-	Implementer_ID  string       `db:"id" json:"id"`
-	Organization_ID string       `db:"id" json:"id"`
+	Implementer_ID  string       `db:"implementer_id" json:"implementor_id"`
+	Organization_ID string       `db:"organization_id" json:"organization_id"`
 	CreatedAt       time.Time    `db:"created_at" json:"created_at"`
 	UpdatedAt       time.Time    `db:"updated_at" json:"updated_at"`
 	DeletedAt       sql.NullTime `db:"deleted_at" json:"deleted_at,omitempty"`

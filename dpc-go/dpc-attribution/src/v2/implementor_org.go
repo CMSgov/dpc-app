@@ -1,19 +1,19 @@
 package v2
 
 import (
-	"bytes"
-	"encoding/json"
-	"fmt"
-	"github.com/CMSgov/dpc/attribution/logger"
-	"github.com/CMSgov/dpc/attribution/middleware"
-	"github.com/CMSgov/dpc/attribution/model"
-	"github.com/CMSgov/dpc/attribution/repository"
-	"github.com/darahayes/go-boom"
-	"go.uber.org/zap"
-	"io/ioutil"
-	"net/http"
-	"strings"
-	"text/template"
+    "bytes"
+    "encoding/json"
+    "fmt"
+    "github.com/CMSgov/dpc/attribution/logger"
+    "github.com/CMSgov/dpc/attribution/middleware"
+    "github.com/CMSgov/dpc/attribution/model"
+    "github.com/CMSgov/dpc/attribution/repository"
+    "github.com/darahayes/go-boom"
+    "go.uber.org/zap"
+    "io/ioutil"
+    "net/http"
+    "strings"
+    "text/template"
 )
 
 // ImplementerOrgService is a struct that defines what the service has
@@ -21,12 +21,13 @@ type ImplementerOrgService struct {
 	implRepo   repository.ImplementerRepo
 	orgRepo    repository.OrganizationRepo
 	impOrgRepo repository.ImplementerOrgRepo
+	autoCreateOrg bool
 }
 
 // NewImplementerOrgService function that creates an ImplementerOrg service and returns it's reference
-func NewImplementerOrgService(implRepo repository.ImplementerRepo, orgRepo repository.OrganizationRepo, implOrgRepo repository.ImplementerOrgRepo) *ImplementerOrgService {
+func NewImplementerOrgService(implRepo repository.ImplementerRepo, orgRepo repository.OrganizationRepo, implOrgRepo repository.ImplementerOrgRepo, autoCreateOrg bool) *ImplementerOrgService {
 	return &ImplementerOrgService{
-		implRepo, orgRepo, implOrgRepo,
+		implRepo, orgRepo, implOrgRepo, autoCreateOrg,
 	}
 }
 
@@ -74,14 +75,20 @@ func (ios *ImplementerOrgService) Post(w http.ResponseWriter, r *http.Request) {
 
 	org, _ := ios.orgRepo.FindByNPI(r.Context(), reqStruct.Npi)
 	if org == nil {
-		log.Error("Organization not found, creating new org")
-		newOrg := buildFhirOrg(reqStruct.Npi, "New Organization")
-		org, err = ios.orgRepo.Insert(r.Context(), []byte(newOrg))
-		if err != nil {
-			log.Error("Failed to create new org", zap.Error(err))
-			boom.BadData(w, err)
-			return
-		}
+	    if ios.autoCreateOrg {
+            log.Error("Organization not found, creating new org")
+            newOrg := buildFhirOrg(reqStruct.Npi, "New Organization")
+            org, err = ios.orgRepo.Insert(r.Context(), []byte(newOrg))
+            if err != nil {
+                log.Error("Failed to create new org", zap.Error(err))
+                boom.BadData(w, err)
+                return
+            }
+        }else {
+            log.Error("organization with provided NPI not found", zap.Error(err))
+            boom.NotFound(w, err)
+            return
+        }
 	} else{
         rel, err := ios.impOrgRepo.FindRelation(r.Context(), implId, org.ID)
         if err != nil {

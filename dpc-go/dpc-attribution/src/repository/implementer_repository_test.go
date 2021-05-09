@@ -31,8 +31,7 @@ func (suite *ImplementerRepositoryTestSuite) TestFindByID() {
 	defer db.Close()
 	repo := NewImplementerRepo(db)
 	ctx := context.Background()
-
-	expectedQuery := "SELECT id, name, created_at, updated_at, deleted_at FROM Implementer WHERE id = \\$1"
+	expectedQuery := "SELECT id, name, created_at, updated_at, deleted_at FROM implementer WHERE id = \\$1"
 
 	rows := sqlmock.NewRows([]string{"id", "name", "created_at", "updated_at", "deleted_at"}).
 		AddRow(suite.fakeImplementer.ID, suite.fakeImplementer.Name, suite.fakeImplementer.CreatedAt, suite.fakeImplementer.UpdatedAt, nil)
@@ -67,7 +66,7 @@ func (suite *ImplementerRepositoryTestSuite) TestInsert() {
 	repo := NewImplementerRepo(db)
 	ctx := context.Background()
 
-	expectedInsertQuery := "INSERT INTO Implementer \\(name\\) VALUES \\(\\$1\\) returning id, name, created_at, updated_at, deleted_at"
+	expectedInsertQuery := "INSERT INTO implementer \\(name\\) VALUES \\(\\$1\\) returning id, name, created_at, updated_at, deleted_at"
 
 	rows := sqlmock.NewRows([]string{"id", "name", "created_at", "updated_at", "deleted_at"}).
 		AddRow(suite.fakeImplementer.ID, suite.fakeImplementer.Name, suite.fakeImplementer.CreatedAt, suite.fakeImplementer.UpdatedAt, nil)
@@ -75,7 +74,7 @@ func (suite *ImplementerRepositoryTestSuite) TestInsert() {
 	mock.ExpectQuery(expectedInsertQuery).WithArgs(suite.fakeImplementer.Name).WillReturnRows(rows)
 
 	b, _ := json.Marshal(suite.fakeImplementer)
-	Implementer, err := repo.Insert(ctx, b)
+	impl, err := repo.Insert(ctx, b)
 	assert.NoError(suite.T(), err)
-	assert.Equal(suite.T(), suite.fakeImplementer.ID, Implementer.ID)
+	assert.Equal(suite.T(), suite.fakeImplementer.ID, impl.ID)
 }
