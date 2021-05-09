@@ -1,0 +1,119 @@
+#dashboard__content {
+  display: flex;
+  flex-direction: column;
+}
+
+.nav_box {
+  border: 1.5px solid $color-gray-light;
+  font-size: 12px;
+  padding: 10px 20px;
+  width: 245px;
+}
+
+.dash_content_header {
+  border-bottom: 1px solid $color-gray-light;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+#dash_client_list {
+  .client_card_container {
+    border: 1.5px solid $color-gray;
+    margin: 15px 0;
+    padding: 15px;
+  }
+
+  .client_name {
+    font-size: 32px;
+    margin-bottom: 10px;
+  }
+
+  .client_info {
+    font-weight: 700;
+  }
+
+  .client_status {
+    font-size: 14px;
+  }
+}
+
+#dash_nav_demo {
+  background-color: $color-gray-lightest;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+
+  h4 {
+    font-size: 14px;
+    margin: 10px 0 0 0;
+  }
+
+  button {
+    margin: 8px 0 5px 0;
+    width: 100% !important;
+  }
+}
+
+#dash_nav_help {
+  h2 {
+    margin: 0 0 10px 0;
+  }
+
+  ul {
+    list-style: none;
+    margin: 0 0 20px 0;
+    padding: 0;
+  }
+
+  .google-button {
+    font-size: 12px;
+    margin: 20px 0;
+    padding: 8px;
+  }
+}
+
+#dash_content_client_container {
+  h2 {
+    color: $color-gray;
+    margin: 0;
+  }
+
+  width: 100%;
+}
+
+@media (max-width: $width-dash-nav-break) {
+  .nav_box_container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+  }
+
+  .nav_box_container > *:first-child {
+    margin-right: 5px;
+  }
+
+  #dash_content_client_container {
+    margin: 32px 0 0 0;
+  }
+}
+
+@media (min-width: $width-dash-break) {
+  #dashboard__content {
+    flex-direction: row;
+    flex-wrap: nowrap;
+  }
+
+  #dash_content_nav_container {
+    margin-right: 5%;
+    width: 33%;
+  }
+
+  #dash_nav_demo {
+    margin-bottom: 15px;
+  }
+
+  #dash_content_content_container {
+    flex-grow: 1;
+  }
+}
