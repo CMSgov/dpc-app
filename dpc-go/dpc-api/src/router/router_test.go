@@ -40,19 +40,29 @@ func (c *MockController) Delete(w http.ResponseWriter, r *http.Request) {
 	c.Called(w, r)
 }
 
+type MockFileController struct {
+	mock.Mock
+}
+
+func (mfc *MockFileController) GetFile(w http.ResponseWriter, r *http.Request) {
+	mfc.Called(w, r)
+}
+
 type RouterTestSuite struct {
 	suite.Suite
 	router    http.Handler
 	mockOrg   *MockController
 	mockMeta  *MockController
 	mockGroup *MockController
+	mockData  *MockFileController
 }
 
 func (suite *RouterTestSuite) SetupTest() {
 	suite.mockOrg = &MockController{}
 	suite.mockMeta = &MockController{}
 	suite.mockGroup = &MockController{}
-	suite.router = NewDPCAPIRouter(suite.mockOrg, suite.mockMeta, suite.mockGroup)
+	suite.mockData = &MockFileController{}
+	suite.router = NewDPCAPIRouter(suite.mockOrg, suite.mockMeta, suite.mockGroup, suite.mockData)
 }
 
 func TestRouterTestSuite(t *testing.T) {

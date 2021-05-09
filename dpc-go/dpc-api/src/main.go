@@ -37,7 +37,9 @@ func main() {
 
 	groupCtlr := v2.NewGroupController(attributionClient)
 
-	apiRouter := router.NewDPCAPIRouter(orgCtlr, m, groupCtlr)
+	dataCtlr := v2.NewDataController(attributionClient)
+
+	apiRouter := router.NewDPCAPIRouter(orgCtlr, m, groupCtlr, dataCtlr)
 	// authRouter := router.NewAuthRouter()
 
 	port := conf.GetAsString("port", "3000")

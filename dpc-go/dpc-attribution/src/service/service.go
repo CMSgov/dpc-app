@@ -10,3 +10,8 @@ type Service interface {
 	Put(w http.ResponseWriter, r *http.Request)
 	Export(writer http.ResponseWriter, request *http.Request)
 }
+
+// DataService is an interface for testing to be able to mock the services in the router test
+type DataService interface {
+	CheckFile(w http.ResponseWriter, r *http.Request)
+}

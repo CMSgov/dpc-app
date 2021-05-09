@@ -38,7 +38,7 @@ func (suite *FHIRFilterTestSuite) TestFilteringGroup() {
 	assert.Nil(suite.T(), p.Extension)
 	assert.Nil(suite.T(), p.Identifier)
 	assert.Nil(suite.T(), p.Active)
-	assert.Nil(suite.T(), p.ManagingEntity)
+	assert.NotNil(suite.T(), p.ManagingEntity)
 
 	assert.NotNil(suite.T(), p.Member)
 	assert.NotNil(suite.T(), p.Name)

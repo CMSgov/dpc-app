@@ -43,6 +43,11 @@ func (ac *MockAttributionClient) Put(ctx context.Context, resourceType client.Re
 	return args.Get(0).([]byte), args.Error(1)
 }
 
+func (ac *MockAttributionClient) Data(ctx context.Context, path string) ([]byte, error) {
+	args := ac.Called(ctx, path)
+	return args.Get(0).([]byte), args.Error(1)
+}
+
 type OrganizationControllerTestSuite struct {
 	suite.Suite
 	org *OrganizationController

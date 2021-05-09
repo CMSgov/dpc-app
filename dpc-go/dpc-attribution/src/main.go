@@ -36,8 +36,9 @@ func main() {
 	js := v1.NewJobService(ctx)
 	gr := repository.NewGroupRepo(db)
 	gs := v2.NewGroupService(gr, js)
+	ds := v1.NewDataService()
 
-	attributionRouter := router.NewDPCAttributionRouter(os, gs)
+	attributionRouter := router.NewDPCAttributionRouter(os, gs, ds)
 
 	port := conf.GetAsString("port", "3001")
 	if err := http.ListenAndServe(fmt.Sprintf(":%s", port), attributionRouter); err != nil {

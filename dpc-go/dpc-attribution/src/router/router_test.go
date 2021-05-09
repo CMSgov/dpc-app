@@ -40,11 +40,20 @@ func (ms *MockService) Export(w http.ResponseWriter, r *http.Request) {
 	ms.Called(w, r)
 }
 
+type MockDataService struct {
+	mock.Mock
+}
+
+func (mds *MockDataService) CheckFile(w http.ResponseWriter, r *http.Request) {
+	mds.Called(w, r)
+}
+
 type RouterTestSuite struct {
 	suite.Suite
 	router    http.Handler
 	mockOrg   *MockService
 	mockGroup *MockService
+	mockData  *MockDataService
 }
 
 func TestRouterTestSuite(t *testing.T) {
@@ -54,7 +63,8 @@ func TestRouterTestSuite(t *testing.T) {
 func (suite *RouterTestSuite) SetupTest() {
 	suite.mockOrg = &MockService{}
 	suite.mockGroup = &MockService{}
-	suite.router = NewDPCAttributionRouter(suite.mockOrg, suite.mockGroup)
+	suite.mockData = &MockDataService{}
+	suite.router = NewDPCAttributionRouter(suite.mockOrg, suite.mockGroup, suite.mockData)
 }
 
 func (suite *RouterTestSuite) do(httpMethod string, route string, body io.Reader, headers map[string]string) *http.Response {

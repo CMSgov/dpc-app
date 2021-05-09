@@ -3,6 +3,9 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"github.com/CMSgov/dpc/attribution/logger"
+	"github.com/pkg/errors"
+	"go.uber.org/zap"
 	"strings"
 	"time"
 
@@ -16,6 +19,7 @@ type JobRepo interface {
 	NewJobQueueBatch(orgID string, g v1.GroupNPIs, patientMBIs []string, priority int, tt time.Time, since time.Time, types string, requestingIP string) *v1.JobQueueBatch
 	Insert(ctx context.Context, batches []v1.JobQueueBatch) ([]v1.Job, error)
 	GetGroupNPIs(ctx context.Context, groupID string) (*v1.GroupNPIs, error)
+	IsFileValid(ctx context.Context, orgID string, fileName string) (*v1.FileInfo, error)
 }
 
 // JobRepositoryV1 is a struct that defines what the repository has
@@ -104,4 +108,62 @@ func (jr *JobRepositoryV1) GetGroupNPIs(ctx context.Context, groupID string) (*v
 	}
 
 	return row, nil
+}
+
+func (jr *JobRepositoryV1) IsFileValid(ctx context.Context, orgID string, fileName string) (*v1.FileInfo, error) {
+	log := logger.WithContext(ctx)
+
+	sb := sqlFlavor.NewSelectBuilder()
+	sb.Select("f.job_id, b.start_time, f.file_length, f.checksum")
+	sb.From("job_queue_batch_file f")
+	sb.JoinWithOption(sqlbuilder.LeftJoin, "job_queue_batch b", "b.job_id = f.job_id")
+	sb.Where(sb.Equal("f.file_name", fileName), sb.Equal("b.organization_id", orgID))
+	q, args := sb.Build()
+
+	var jobId string
+	var startTime *time.Time
+	var fileLength int
+	var checksum []byte
+	if err := jr.db.QueryRowContext(ctx, q, args...).Scan(&jobId, &startTime, &fileLength, &checksum); err != nil {
+		return nil, err
+	}
+
+	if startTime == nil {
+		return nil, errors.New("job batch for file doesn't have a valid start time")
+	}
+
+	sb = sqlFlavor.NewSelectBuilder()
+	sb.Select("status")
+	sb.From("job_queue_batch")
+	sb.Where(sb.Equal("job_id", jobId))
+	q, args = sb.Build()
+
+	rows, err := jr.db.Query(q, args...)
+	defer func() {
+		err := rows.Close()
+		if err != nil {
+			log.Warn("Failed to close rows", zap.Error(err))
+		}
+	}()
+
+	if err != nil {
+		return nil, err
+	}
+
+	statuses := make([]int, 0)
+	for rows.Next() {
+		var status int
+		if err := rows.Scan(&status); err != nil {
+			log.Warn("Failed to get status", zap.Error(err))
+		}
+		statuses = append(statuses, status)
+	}
+
+	for _, v := range statuses {
+		if v != 2 {
+			return nil, errors.New("Not all job batches are completed")
+		}
+	}
+
+	return &v1.FileInfo{FileName: fileName, FileLength: fileLength, FileCheckSum: checksum}, nil
 }

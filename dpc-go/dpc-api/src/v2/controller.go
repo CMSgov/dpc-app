@@ -29,3 +29,8 @@ type DeleteController interface {
 type UpdateController interface {
 	Update(w http.ResponseWriter, r *http.Request)
 }
+
+// FileController is an interface for getting a file
+type FileController interface {
+	GetFile(w http.ResponseWriter, r *http.Request)
+}

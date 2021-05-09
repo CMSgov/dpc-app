@@ -1,10 +1,9 @@
 package router
 
 import (
+	"github.com/go-chi/chi/middleware"
 	"net/http"
 	"strings"
-
-	"github.com/go-chi/chi/middleware"
 
 	"github.com/CMSgov/dpc/api/auth"
 	middleware2 "github.com/CMSgov/dpc/api/middleware"
@@ -14,28 +13,32 @@ import (
 )
 
 // NewDPCAPIRouter function that builds the router using chi
-func NewDPCAPIRouter(oc v2.Controller, mc v2.ReadController, gc v2.CreateController) http.Handler {
+func NewDPCAPIRouter(oc v2.Controller, mc v2.ReadController, gc v2.CreateController, dc v2.FileController) http.Handler {
 	r := chi.NewRouter()
 	r.Use(middleware2.Logging())
 	fileServer(r, "/v2/swagger", http.Dir("../swaggerui"))
-	r.
-		With(middleware2.Sanitize, middleware.SetHeader("Content-Type", "application/fhir+json; charset=UTF-8")).
-		Route("/v2", func(r chi.Router) {
-			r.Get("/metadata", mc.Read)
-			r.Route("/Organization", func(r chi.Router) {
-				r.Route("/{organizationID}", func(r chi.Router) {
-					r.Use(middleware2.OrganizationCtx)
-					r.With(middleware2.FHIRModel).Get("/", oc.Read)
-					r.Delete("/", oc.Delete)
-					r.With(middleware2.FHIRFilter, middleware2.FHIRModel).Put("/", oc.Update)
-				})
-				r.With(middleware2.FHIRFilter, middleware2.FHIRModel).Post("/", oc.Create)
+	r.With(middleware2.Sanitize).Route("/v2", func(r chi.Router) {
+		r.With(middleware.SetHeader("Content-Type", "application/fhir+json; charset=UTF-8")).Get("/metadata", mc.Read)
+		r.Route("/Organization", func(r chi.Router) {
+			r.Use(middleware.SetHeader("Content-Type", "application/fhir+json; charset=UTF-8"))
+			r.Route("/{organizationID}", func(r chi.Router) {
+				r.Use(middleware2.OrganizationCtx)
+				r.With(middleware2.FHIRModel).Get("/", oc.Read)
+				r.Delete("/", oc.Delete)
+				r.With(middleware2.FHIRFilter, middleware2.FHIRModel).Put("/", oc.Update)
 			})
-			r.Route("/Group", func(r chi.Router) {
-				r.Use(middleware2.AuthCtx)
-				r.With(middleware2.FHIRFilter, middleware2.FHIRModel).Post("/", gc.Create)
-			})
+			r.With(middleware2.FHIRFilter, middleware2.FHIRModel).Post("/", oc.Create)
 		})
+		r.Route("/Group", func(r chi.Router) {
+			r.Use(middleware.SetHeader("Content-Type", "application/fhir+json; charset=UTF-8"))
+			r.Use(middleware2.AuthCtx)
+			r.With(middleware2.FHIRFilter, middleware2.FHIRModel).Post("/", gc.Create)
+		})
+		r.Route("/Data", func(r chi.Router) {
+			r.Use(middleware2.AuthCtx)
+			r.With(middleware2.FileNameCtx).Get("/{fileName}", dc.GetFile)
+		})
+	})
 	r.Post("/auth/token", auth.GetAuthToken)
 	r.Get("/auth/welcome", auth.Welcome)
 	return r
