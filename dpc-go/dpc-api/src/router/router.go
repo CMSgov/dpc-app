@@ -14,7 +14,7 @@ import (
 )
 
 // NewDPCAPIRouter function that builds the router using chi
-func NewDPCAPIRouter(oc v2.Controller, mc v2.ReadController, gc v2.CreateController) http.Handler {
+func NewDPCAPIRouter(oc v2.Controller, mc v2.ReadController, gc v2.Controller) http.Handler {
 	r := chi.NewRouter()
 	r.Use(middleware2.Logging())
 	fileServer(r, "/v2/swagger", http.Dir("../swaggerui"))
@@ -34,6 +34,10 @@ func NewDPCAPIRouter(oc v2.Controller, mc v2.ReadController, gc v2.CreateControl
 			r.Route("/Group", func(r chi.Router) {
 				r.Use(middleware2.AuthCtx)
 				r.With(middleware2.FHIRFilter, middleware2.FHIRModel).Post("/", gc.Create)
+				r.Route("/{groupID}", func(r chi.Router) {
+					r.Use(middleware2.GroupCtx)
+					r.Get("/$export", gc.Export)
+				})
 			})
 		})
 	r.Post("/auth/token", auth.GetAuthToken)

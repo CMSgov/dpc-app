@@ -9,14 +9,6 @@ import (
 	"github.com/go-chi/chi"
 )
 
-// OrgHeader is used in place of a auth token until SSAS is implemented
-const OrgHeader string = "X-ORG"
-
-type contextKey int
-
-// ContextKeyOrganization is the key in the context to retrieve the organizationID
-const ContextKeyOrganization contextKey = iota
-
 // OrganizationCtx middleware to extract the organizationID from the chi url param and set it into the request context
 func OrganizationCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

@@ -2,6 +2,9 @@ package v2
 
 import (
 	"encoding/json"
+	"io/ioutil"
+	"net/http"
+
 	"github.com/CMSgov/dpc/api/fhirror"
 	"github.com/CMSgov/dpc/api/logger"
 	"github.com/CMSgov/dpc/api/model"
@@ -9,8 +12,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/samply/golang-fhir-models/fhir-models/fhir"
 	"go.uber.org/zap"
-	"io/ioutil"
-	"net/http"
 
 	"github.com/CMSgov/dpc/api/client"
 )
@@ -28,7 +29,7 @@ func NewGroupController(ac client.Client) *GroupController {
 }
 
 // Create function that calls attribution service via post to save an organization into attribution service
-func (oc *GroupController) Create(w http.ResponseWriter, r *http.Request) {
+func (gc *GroupController) Create(w http.ResponseWriter, r *http.Request) {
 	body, _ := ioutil.ReadAll(r.Body)
 	log := logger.WithContext(r.Context())
 
@@ -38,7 +39,7 @@ func (oc *GroupController) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp, err := oc.ac.Post(r.Context(), client.Group, body)
+	resp, err := gc.ac.Post(r.Context(), client.Group, body)
 	if err != nil {
 		log.Error("Failed to save the org to attribution", zap.Error(err))
 		fhirror.ServerIssue(r.Context(), w, http.StatusUnprocessableEntity, "Failed to save group")
@@ -50,6 +51,26 @@ func (oc *GroupController) Create(w http.ResponseWriter, r *http.Request) {
 		fhirror.ServerIssue(r.Context(), w, http.StatusUnprocessableEntity, "Failed to save group")
 	}
 
+}
+
+// Read function is not currently used for GroupController
+func (gc *GroupController) Read(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusMethodNotAllowed)
+}
+
+// Delete function is not currently used for GroupController
+func (gc *GroupController) Delete(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusMethodNotAllowed)
+}
+
+// Update function is not currently used for GroupController
+func (gc *GroupController) Update(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusMethodNotAllowed)
+}
+
+// Export function is not currently used for GroupController
+func (gc *GroupController) Export(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusMethodNotAllowed)
 }
 
 func isValidGroup(group []byte) error {
