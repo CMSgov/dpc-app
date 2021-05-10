@@ -14,9 +14,9 @@ import (
 func NewDPCAttributionRouter(o service.Service, g service.Service, impl service.Service) http.Handler {
 	r := chi.NewRouter()
 	r.Use(middleware2.Logging())
+	r.Use(middleware2.RequestIPCtx)
 	r.Use(middleware.SetHeader("Content-Type", "application/json; charset=UTF-8"))
 	r.Route("/", func(r chi.Router) {
-		r.Use(middleware2.RequestIPCtx)
 		r.Route("/Organization", func(r chi.Router) {
 			r.Route("/{organizationID}", func(r chi.Router) {
 				r.Use(middleware2.OrganizationCtx)

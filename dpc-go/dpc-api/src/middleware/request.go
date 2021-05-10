@@ -8,7 +8,7 @@ import (
 // RequestIPCtx middleware to extract the requesting IP address from the incoming request and set it into the request context
 func RequestIPCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ipAddress := r.Header.Get("X-Forwarded-For")
+		ipAddress := r.Header.Get(FwdHeader)
 		if ipAddress == "" {
 			ipAddress = r.RemoteAddr
 		}

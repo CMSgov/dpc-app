@@ -37,6 +37,7 @@ type Client interface {
 	Post(ctx context.Context, resourceType ResourceType, body []byte) ([]byte, error)
 	Delete(ctx context.Context, resourceType ResourceType, id string) error
 	Put(ctx context.Context, resourceType ResourceType, id string, body []byte) ([]byte, error)
+	Export(ctx context.Context, resourceType ResourceType, id string) ([]byte, error)
 }
 
 // AttributionClient is a struct to hold the retryablehttp client and configs
@@ -45,7 +46,7 @@ type AttributionClient struct {
 	httpClient *retryablehttp.Client
 }
 
-// NewAttributionClient initializes the retryable client and returns a reference to the attribution cleint
+// NewAttributionClient initializes the retryable client and returns a reference to the attribution client
 func NewAttributionClient(config AttributionConfig) *AttributionClient {
 	client := retryablehttp.NewClient()
 	client.RetryMax = config.Retries
@@ -92,6 +93,51 @@ func (ac *AttributionClient) Get(ctx context.Context, resourceType ResourceType,
 	if err != nil {
 		log.Error("Failed to read the response body", zap.Error(err))
 		return nil, errors.Errorf("Failed to retrieve resource %s/%s", resourceType, id)
+	}
+	return body, nil
+}
+
+// Export A function to enable starting a data export job via GET
+func (ac *AttributionClient) Export(ctx context.Context, resourceType ResourceType, id string) ([]byte, error) {
+	log := logger.WithContext(ctx)
+	ac.httpClient.Logger = newLogger(*log)
+
+	url := fmt.Sprintf("%s/%s/%s/$export", ac.config.URL, resourceType, id)
+	req, err := retryablehttp.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		log.Error("Failed to create request", zap.Error(err))
+		return nil, errors.Errorf("Failed to export data for %s", resourceType)
+	}
+
+	req.Header.Add(middleware.RequestIDHeader, ctx.Value(middleware.RequestIDKey).(string))
+	if ctx.Value(middleware2.ContextKeyRequestingIP) != nil {
+		req.Header.Add(middleware2.FwdHeader, ctx.Value(middleware2.ContextKeyRequestingIP).(string))
+	}
+	if ctx.Value(middleware2.ContextKeyOrganization) != nil {
+		req.Header.Add(middleware2.OrgHeader, ctx.Value(middleware2.ContextKeyOrganization).(string))
+	}
+
+	resp, err := ac.httpClient.Do(req)
+	if err != nil {
+		log.Error("Failed to send request", zap.Error(err))
+		return nil, errors.Errorf("Failed to start job for %s/%s", resourceType, id)
+	}
+
+	if resp.StatusCode < 200 || resp.StatusCode > 299 {
+		return nil, errors.Errorf("Failed to start job for %s/%s", resourceType, id)
+	}
+
+	defer func() {
+		err := resp.Body.Close()
+		if err != nil {
+			log.Error("Failed to close response body", zap.Error(err))
+		}
+	}()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Error("Failed to read the response body", zap.Error(err))
+		return nil, errors.Errorf("Failed to start job for %s/%s", resourceType, id)
 	}
 	return body, nil
 }

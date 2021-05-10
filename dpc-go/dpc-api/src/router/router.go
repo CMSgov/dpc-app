@@ -17,6 +17,7 @@ import (
 func NewDPCAPIRouter(oc v2.Controller, mc v2.ReadController, gc v2.Controller) http.Handler {
 	r := chi.NewRouter()
 	r.Use(middleware2.Logging())
+	r.Use(middleware2.RequestIPCtx)
 	fileServer(r, "/v2/swagger", http.Dir("../swaggerui"))
 	r.
 		With(middleware2.Sanitize, middleware.SetHeader("Content-Type", "application/fhir+json; charset=UTF-8")).
