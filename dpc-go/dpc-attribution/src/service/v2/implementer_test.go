@@ -3,6 +3,12 @@ package v2
 import (
 	"context"
 	"encoding/json"
+	"io/ioutil"
+	"net/http"
+	"net/http/httptest"
+	"strings"
+	"testing"
+
 	"github.com/CMSgov/dpc/attribution/model"
 	"github.com/bxcodec/faker"
 	"github.com/kinbiko/jsonassert"
@@ -10,11 +16,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
-	"io/ioutil"
-	"net/http"
-	"net/http/httptest"
-	"strings"
-	"testing"
 )
 
 type MockImplementerRepo struct {
@@ -79,7 +80,7 @@ func (suite *ImplementerServiceTestSuite) TestSaveRepoError() {
 
 	suite.repo.On("Insert", mock.Anything, mock.Anything).Return(nil, errors.New("error"))
 
-    req := httptest.NewRequest("POST", "http://example.com/foo", strings.NewReader("{\"name\":\"test-name\"}"))
+	req := httptest.NewRequest("POST", "http://example.com/foo", strings.NewReader("{\"name\":\"test-name\"}"))
 
 	w := httptest.NewRecorder()
 
