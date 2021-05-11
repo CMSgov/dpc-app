@@ -27,8 +27,8 @@ type JobServiceV1 struct {
 	jr repository.JobRepo
 }
 
-// exportRequest is a struct to hold all of the export request details
-type exportRequest struct {
+// ExportRequest is a struct to hold all of the export request details
+type ExportRequest struct {
 	orgID             string
 	groupID           string
 	groupNPIs         *v1.GroupNPIs
@@ -66,7 +66,7 @@ func NewJobService(ctx context.Context) service.JobService {
 func (js *JobServiceV1) Export(w http.ResponseWriter, r *http.Request) {
 	log := logger.WithContext(r.Context())
 	var batches []v1.JobQueueBatch
-	exportRequest, err := js.BuildExportRequest(r.Context(), w)
+	exportRequest, err := js.buildExportRequest(r.Context(), w)
 	if err != nil {
 		log.Error("Failed to create job", zap.Error(err))
 		boom.BadData(w, err)
@@ -116,9 +116,9 @@ func (js *JobServiceV1) Export(w http.ResponseWriter, r *http.Request) {
 	)
 }
 
-func (js *JobServiceV1) BuildExportRequest(ctx context.Context, w http.ResponseWriter) (*exportRequest, error) {
+func (js *JobServiceV1) buildExportRequest(ctx context.Context, w http.ResponseWriter) (*ExportRequest, error) {
 	log := logger.WithContext(ctx)
-	exportRequest := new(exportRequest)
+	exportRequest := new(ExportRequest)
 	exportRequest.groupID = util.FetchValueFromContext(ctx, w, middleware2.ContextKeyGroup)
 	exportRequest.orgID = util.FetchValueFromContext(ctx, w, middleware2.ContextKeyOrganization)
 	exportRequest.requestingIP = util.FetchValueFromContext(ctx, w, middleware2.ContextKeyRequestingIP)
