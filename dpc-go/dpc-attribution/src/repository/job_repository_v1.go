@@ -30,6 +30,7 @@ func NewJobRepo(db *sql.DB) *JobRepositoryV1 {
 	}
 }
 
+// BatchDetails is a struct to hold details for a JobQueueBatch
 type BatchDetails struct {
 	Priority     int
 	Tt           time.Time
