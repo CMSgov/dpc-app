@@ -13,8 +13,8 @@ import (
 
 // JobRepo is an interface for test mocking purposes
 type JobRepo interface {
-	NewJobQueueBatch(orgID string, g v1.GroupNPIs, patientMBIs []string, details BatchDetails) *v1.JobQueueBatch
-	Insert(ctx context.Context, batches []v1.JobQueueBatch) ([]v1.Job, error)
+	NewJobQueueBatch(orgID string, g *v1.GroupNPIs, patientMBIs []string, details BatchDetails) *v1.JobQueueBatch
+	Insert(ctx context.Context, batches []v1.JobQueueBatch) (*v1.Job, error)
 	GetGroupNPIs(ctx context.Context, groupID string) (*v1.GroupNPIs, error)
 }
 
@@ -34,13 +34,13 @@ func NewJobRepo(db *sql.DB) *JobRepositoryV1 {
 type BatchDetails struct {
 	Priority     int
 	Tt           time.Time
-	Since        time.Time
+	Since        sql.NullTime
 	Types        string
 	RequestingIP string
 }
 
 // NewJobQueueBatch function that creates a new JobQueueBatch
-func (jr *JobRepositoryV1) NewJobQueueBatch(orgID string, g v1.GroupNPIs, patientMBIs []string, details BatchDetails) *v1.JobQueueBatch {
+func (jr *JobRepositoryV1) NewJobQueueBatch(orgID string, g *v1.GroupNPIs, patientMBIs []string, details BatchDetails) *v1.JobQueueBatch {
 	return &v1.JobQueueBatch{
 		JobID:           uuid.New(),
 		OrganizationID:  orgID,
@@ -48,7 +48,7 @@ func (jr *JobRepositoryV1) NewJobQueueBatch(orgID string, g v1.GroupNPIs, patien
 		ProviderNPI:     g.ProviderNPI,
 		PatientMBIs:     strings.Join(patientMBIs, ","),
 		ResourceTypes:   details.Types,
-		Since:           sql.NullTime{},
+		Since:           details.Since,
 		Priority:        details.Priority,
 		Status:          0,
 		TransactionTime: details.Tt,
@@ -59,30 +59,28 @@ func (jr *JobRepositoryV1) NewJobQueueBatch(orgID string, g v1.GroupNPIs, patien
 }
 
 // Insert function that saves a slice of JobQueueBatch's into the database and returns an error if there is one
-func (jr *JobRepositoryV1) Insert(ctx context.Context, batches []v1.JobQueueBatch) ([]v1.Job, error) {
+func (jr *JobRepositoryV1) Insert(ctx context.Context, batches []v1.JobQueueBatch) (*v1.Job, error) {
+	var job *v1.Job
 	ib := sqlFlavor.NewInsertBuilder()
 	ib.InsertInto("job_queue_ batch")
 	ib.Cols("job_id", "organization_id", "organization_npi", "provider_npi", "patients", "resource_types", "since",
 		"priority", "transaction_time", "status", "submit_time", "requesting_ip", "is_bulk")
-	var results []v1.Job
-	job := new(v1.Job)
 	// insert the batches within a single transaction
 	tx, err := jr.db.Begin()
 	if err != nil {
-		return nil, err
+		return job, err
 	}
 	for _, b := range batches {
 		job, err = submitJob(ctx, tx, ib, b, job)
 		if err != nil {
 			return nil, err
 		}
-		results = append(results, *job)
 	}
 	err = tx.Commit()
 	if err != nil {
 		return nil, err
 	}
-	return results, nil
+	return job, nil
 }
 
 func submitJob(ctx context.Context, tx *sql.Tx, ib *sqlbuilder.InsertBuilder, b v1.JobQueueBatch, job *v1.Job) (*v1.Job, error) {
