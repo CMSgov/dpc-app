@@ -1,5 +1,8 @@
 require_relative "boot"
 
+# Enable stout syncing for Docker
+$stdout.sync = true
+
 require "rails/all"
 require "active_model/railtie"
 require "active_job/railtie"
