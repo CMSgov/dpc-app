@@ -11,6 +11,7 @@ import (
 type ImplementerOrgRepo interface {
 	Insert(ctx context.Context, implId string, orgId string, status model.ImplOrgStatus) (*model.ImplementerOrgRelation, error)
     FindRelation(ctx context.Context, implId string, orgId string) (*model.ImplementerOrgRelation, error)
+    FindManagedOrgs(ctx context.Context, implId string) ([]model.ImplementerOrgRelation, error)
 }
 
 // ImplementerOrgRepository is a struct that defines what the repository has
@@ -39,6 +40,35 @@ func (or *ImplementerOrgRepository) FindRelation(ctx context.Context, implemente
 		return nil, err
 	}
 	return ior, nil
+}
+
+
+// FindByID function that searches the database for the Implementer that matches the id
+func (or *ImplementerOrgRepository) FindMangedOrgs(ctx context.Context, implementer_id string) ([]model.ImplementerOrgRelation, error) {
+    sb := sqlFlavor.NewSelectBuilder()
+    sb.Select("id", "implementer_id", "organization_id","created_at", "updated_at", "deleted_at","status")
+    sb.From("implementer_org_relation")
+    sb.Where(sb.Equal("implementer_id", implementer_id))
+    q, args := sb.Build()
+
+
+    rows, err := or.db.QueryContext(ctx, q, args...)
+    if err != nil {
+        return nil, err
+    }
+
+    defer rows.Close()
+    result := make([]model.ImplementerOrgRelation, 0)
+    for rows.Next() {
+        ior := new(model.ImplementerOrgRelation)
+        iorStruct := sqlbuilder.NewStruct(new(model.ImplementerOrgRelation)).For(sqlFlavor)
+        err = rows.Scan(iorStruct.Addr(&ior)...)
+        if err != nil {
+           return nil, err
+        }
+        result = append(result, *ior)
+    }
+    return result, nil
 }
 
 // Insert function that saves the ImplementerOrgRelation model into the database and returns the model.ImplementerOrgRelation
