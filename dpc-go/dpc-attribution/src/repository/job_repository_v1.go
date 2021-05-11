@@ -48,7 +48,7 @@ func (jr *JobRepositoryV1) NewJobQueueBatch(orgID string, g v1.GroupNPIs, patien
 		ProviderNPI:     g.ProviderNPI,
 		PatientMBIs:     strings.Join(patientMBIs, ","),
 		ResourceTypes:   details.Types,
-		Since:           details.Since,
+		Since:           sql.NullTime{},
 		Priority:        details.Priority,
 		Status:          0,
 		TransactionTime: details.Tt,
@@ -66,34 +66,42 @@ func (jr *JobRepositoryV1) Insert(ctx context.Context, batches []v1.JobQueueBatc
 		"priority", "transaction_time", "status", "submit_time", "requesting_ip", "is_bulk")
 	var results []v1.Job
 	job := new(v1.Job)
+	// insert the batches within a single transaction
+	tx, err := jr.db.Begin()
+	if err != nil {
+		return nil, err
+	}
 	for _, b := range batches {
-		ib.Values(b.JobID, b.OrganizationID, b.OrganizationNPI, b.ProviderNPI, b.PatientMBIs, b.ResourceTypes, b.Since,
-			b.Priority, b.TransactionTime, b.Status, b.SubmitTime, b.RequestingIP, b.IsBulk)
-		ib.SQL("returning job_id")
-
-		q, args := ib.Build()
-
-		jobStruct := sqlbuilder.NewStruct(*job).For(sqlFlavor)
-
-		// insert the batches within a single transaction
-		tx, err := jr.db.Begin()
-		if err != nil {
-			return nil, err
-		}
-		if err = tx.QueryRowContext(ctx, q, args...).Scan(jobStruct.Addr(&job)...); err != nil {
-			err = tx.Rollback()
-			if err != nil {
-				return nil, err
-			}
-			return nil, err
-		}
-		err = tx.Commit()
+		job, err = submitJob(ctx, tx, ib, b, job)
 		if err != nil {
 			return nil, err
 		}
 		results = append(results, *job)
 	}
+	err = tx.Commit()
+	if err != nil {
+		return nil, err
+	}
 	return results, nil
+}
+
+func submitJob(ctx context.Context, tx *sql.Tx, ib *sqlbuilder.InsertBuilder, b v1.JobQueueBatch, job *v1.Job) (*v1.Job, error) {
+	ib.Values(b.JobID, b.OrganizationID, b.OrganizationNPI, b.ProviderNPI, b.PatientMBIs, b.ResourceTypes, b.Since,
+		b.Priority, b.TransactionTime, b.Status, b.SubmitTime, b.RequestingIP, b.IsBulk)
+	ib.SQL("returning job_id")
+
+	q, args := ib.Build()
+
+	jobStruct := sqlbuilder.NewStruct(*job).For(sqlFlavor)
+
+	if err := tx.QueryRowContext(ctx, q, args...).Scan(jobStruct.Addr(&job)...); err != nil {
+		err = tx.Rollback()
+		if err != nil {
+			return nil, err
+		}
+		return nil, err
+	}
+	return job, nil
 }
 
 // GetGroupNPIs function returns an organization NPI and a provider NPI for a given group ID
