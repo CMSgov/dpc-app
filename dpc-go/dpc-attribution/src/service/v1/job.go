@@ -81,14 +81,21 @@ func (js *JobServiceV1) Export(w http.ResponseWriter, r *http.Request) {
 
 	patientMBIBatches := batchPatientMBIs(patientMBIs, conf.GetAsInt("queue.batchSize", 100))
 
-	for _, batch := range patientMBIBatches {
-		// Set the priority of a job batch
+	for _, patients := range patientMBIBatches {
+		// Set the priority of a job patients
 		// Single patients will have first priority to support patient everything
 		priority := 5000
-		if len(batch) == 1 {
+		if len(patients) == 1 {
 			priority = 1000
 		}
-		jobQueueBatch := js.jr.NewJobQueueBatch(orgID, *groupNPIs, batch, priority, tt, since, types, requestingIP)
+		details := repository.BatchDetails{
+			Priority:     priority,
+			Tt:           tt,
+			Since:        since,
+			Types:        types,
+			RequestingIP: requestingIP,
+		}
+		jobQueueBatch := js.jr.NewJobQueueBatch(orgID, *groupNPIs, patients, details)
 		var batches []v1.JobQueueBatch
 		batches = append(batches, *jobQueueBatch)
 		results, err := js.jr.Insert(r.Context(), batches)
@@ -114,7 +121,7 @@ func (js *JobServiceV1) Export(w http.ResponseWriter, r *http.Request) {
 			firstBatch.ID,
 			orgID,
 			groupID,
-			len(batch),
+			len(patients),
 			types),
 		)
 	}

@@ -13,7 +13,7 @@ import (
 
 // JobRepo is an interface for test mocking purposes
 type JobRepo interface {
-	NewJobQueueBatch(orgID string, g v1.GroupNPIs, patientMBIs []string, priority int, tt time.Time, since time.Time, types string, requestingIP string) *v1.JobQueueBatch
+	NewJobQueueBatch(orgID string, g v1.GroupNPIs, patientMBIs []string, details BatchDetails) *v1.JobQueueBatch
 	Insert(ctx context.Context, batches []v1.JobQueueBatch) ([]v1.Job, error)
 	GetGroupNPIs(ctx context.Context, groupID string) (*v1.GroupNPIs, error)
 }
@@ -30,20 +30,28 @@ func NewJobRepo(db *sql.DB) *JobRepositoryV1 {
 	}
 }
 
+type BatchDetails struct {
+	Priority     int
+	Tt           time.Time
+	Since        time.Time
+	Types        string
+	RequestingIP string
+}
+
 // NewJobQueueBatch function that creates a new JobQueueBatch
-func (jr *JobRepositoryV1) NewJobQueueBatch(orgID string, g v1.GroupNPIs, patientMBIs []string, priority int, tt time.Time, since time.Time, types string, requestingIP string) *v1.JobQueueBatch {
+func (jr *JobRepositoryV1) NewJobQueueBatch(orgID string, g v1.GroupNPIs, patientMBIs []string, details BatchDetails) *v1.JobQueueBatch {
 	return &v1.JobQueueBatch{
 		JobID:           uuid.New(),
 		OrganizationID:  orgID,
 		OrganizationNPI: g.OrgNPI,
 		ProviderNPI:     g.ProviderNPI,
 		PatientMBIs:     strings.Join(patientMBIs, ","),
-		ResourceTypes:   types,
-		Since:           since,
-		Priority:        priority,
+		ResourceTypes:   details.Types,
+		Since:           details.Since,
+		Priority:        details.Priority,
 		Status:          0,
-		TransactionTime: tt,
-		RequestingIP:    requestingIP,
+		TransactionTime: details.Tt,
+		RequestingIP:    details.RequestingIP,
 		IsBulk:          true,
 		SubmitTime:      time.Now(),
 	}
