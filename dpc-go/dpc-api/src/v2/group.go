@@ -139,7 +139,7 @@ func isValidExport(ctx context.Context, w http.ResponseWriter, outputFormat stri
 	}
 	if headerPrefer == "" || StringUtils.IsEmpty(headerPrefer) {
 		log.Error("Missing Prefer header")
-		fhirror.BusinessViolation(ctx, w, http.StatusBadRequest, "The 'Prefer' header must be 'respond-async'")
+		fhirror.BusinessViolation(ctx, w, http.StatusBadRequest, "The 'Prefer' header is required and must be 'respond-async'")
 	}
 	if StringUtils.IsNotEmpty(headerPrefer) && headerPrefer != "respond-async" {
 		log.Error("Invalid Prefer header")
