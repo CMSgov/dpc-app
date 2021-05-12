@@ -79,7 +79,7 @@ func (suite *ImplementerOrgServiceTestSuite) TestPost() {
 
     req := httptest.NewRequest("POST", "http://example.com/foo",  strings.NewReader("{\"npi\":\"00001\"}"))
     ctx := req.Context()
-    ctx = context.WithValue(ctx, middleware.ContextKeyImplementer, implOrg.Implementer_ID)
+    ctx = context.WithValue(ctx, middleware.ContextKeyImplementer, implOrg.ImplementerID)
     req = req.WithContext(ctx)
 	w := httptest.NewRecorder()
 
@@ -112,7 +112,7 @@ func (suite *ImplementerOrgServiceTestSuite) TestSaveRepoError() {
 
     req := httptest.NewRequest("POST", "http://example.com/foo",  strings.NewReader("{\"npi\":\"00001\"}"))
     ctx := req.Context()
-    ctx = context.WithValue(ctx, middleware.ContextKeyImplementer, implOrg.Implementer_ID)
+    ctx = context.WithValue(ctx, middleware.ContextKeyImplementer, implOrg.ImplementerID)
     req = req.WithContext(ctx)
     w := httptest.NewRecorder()
 

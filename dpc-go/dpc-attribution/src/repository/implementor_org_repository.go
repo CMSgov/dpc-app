@@ -44,15 +44,15 @@ func (or *ImplementerOrgRepository) FindRelation(ctx context.Context, implemente
 // Insert function that saves the ImplementerOrgRelation model into the database and returns the model.ImplementerOrgRelation
 func (or *ImplementerOrgRepository) Insert(ctx context.Context, implId string, orgId string, status model.ImplOrgStatus) (*model.ImplementerOrgRelation, error) {
     implOrg := model.ImplementerOrgRelation{
-        Implementer_ID:  implId,
-        Organization_ID: orgId,
-        Status: status,
+        ImplementerID:  implId,
+        OrganizationID: orgId,
+        Status:         status,
     }
 
 	ib := sqlFlavor.NewInsertBuilder()
 	ib.InsertInto("implementer_org_relation")
 	ib.Cols("implementer_id", "organization_id", "status")
-	ib.Values(implOrg.Implementer_ID, implOrg.Organization_ID, implOrg.Status)
+	ib.Values(implOrg.ImplementerID, implOrg.OrganizationID, implOrg.Status)
 	ib.SQL("returning id, implementer_id, organization_id, created_at, updated_at, deleted_at, status")
 
 	q, args := ib.Build()
