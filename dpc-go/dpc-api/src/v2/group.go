@@ -92,7 +92,7 @@ func contentLocationHeader(id string, r *http.Request) string {
 	if r.TLS != nil {
 		scheme = "https"
 	}
-	return fmt.Sprintf(fmt.Sprintf("%s://%s/v2/Jobs/%s", scheme, r.Host, id))
+	return fmt.Sprintf("%s://%s/v2/Jobs/%s", scheme, r.Host, id)
 }
 
 // Read function is not currently used for GroupController
