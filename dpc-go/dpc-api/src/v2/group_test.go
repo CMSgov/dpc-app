@@ -133,7 +133,7 @@ func (suite *GroupControllerTestSuite) TestCreateGroup() {
 }
 
 func (suite *GroupControllerTestSuite) TestExportGroup() {
-	suite.mac.On("Export", mock.Anything, mock.Anything, mock.Anything).Return(apitest.AttributionResponse(apitest.JobJSON), nil)
+	suite.mac.On("Export", mock.Anything, mock.Anything, mock.Anything).Return(apitest.AttributionExportResponse(apitest.JobJSON), nil)
 
 	ja := jsonassert.New(suite.T())
 	req := httptest.NewRequest(http.MethodGet, "http://example.com/Group/9876/$export?_outputFormat=application/fhir%2Bndjson", nil)

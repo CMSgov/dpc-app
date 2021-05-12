@@ -262,6 +262,14 @@ func AttributionResponse(fhir string) []byte {
 	return b
 }
 
+// AttributionExportResponse provides a sample response that mimics what attribution service returns for testing purposes
+func AttributionExportResponse(job string) []byte {
+	var v map[string]interface{}
+	_ = json.Unmarshal([]byte(job), &v)
+	b, _ := json.Marshal(v)
+	return b
+}
+
 // MalformedOrg provides a convenience method to get a non valid fhir resource, in this case an org
 func MalformedOrg() []byte {
 	var org map[string]interface{}
