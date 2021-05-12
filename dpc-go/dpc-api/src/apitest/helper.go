@@ -2,6 +2,7 @@ package apitest
 
 import (
 	"encoding/json"
+
 	"github.com/CMSgov/dpc/api/model"
 	"github.com/bxcodec/faker"
 )
@@ -236,6 +237,11 @@ const FilteredGroupjson = `
       "inactive": false
     }
   ]
+}`
+
+// JobJSON is a Job json string for testing purposes
+const JobJSON = `{
+  "id": "test-export-job"
 }`
 
 // AttributionOrgResponse provides a sample organization response that mimics what attribution service returns for testing purposes
