@@ -185,7 +185,7 @@ func (suite *RouterTestSuite) TestGroupPostRoute() {
 func (suite *RouterTestSuite) TestGroupExportRoute() {
 	suite.mockGroup.On("Export", mock.Anything, mock.Anything).Once().Run(func(arg mock.Arguments) {
 		w := arg.Get(0).(http.ResponseWriter)
-		_, _ = w.Write([]byte(attributiontest.JobJson))
+		_, _ = w.Write([]byte(attributiontest.JobJSON))
 		r := arg.Get(1).(*http.Request)
 		assert.Equal(suite.T(), "12345", r.Context().Value(middleware2.ContextKeyOrganization))
 		assert.Equal(suite.T(), "9876", r.Context().Value(middleware2.ContextKeyGroup))

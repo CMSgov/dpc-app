@@ -152,8 +152,8 @@ const Implementerjson = `{
   "name": "test-Implementer"
 }`
 
-// JobJson is a Job json string for testing purposes
-const JobJson = `{
+// JobJSON is a Job json string for testing purposes
+const JobJSON = `{
   "id": "test-export-job"
 }`
 
