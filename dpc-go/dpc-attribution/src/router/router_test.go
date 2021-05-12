@@ -42,9 +42,9 @@ func (ms *MockService) Export(w http.ResponseWriter, r *http.Request) {
 
 type RouterTestSuite struct {
 	suite.Suite
-	router    http.Handler
-	mockOrg   *MockService
-	mockGroup *MockService
+	router          http.Handler
+	mockOrg         *MockService
+	mockGroup       *MockService
 	mockImplementer *MockService
 }
 
@@ -180,4 +180,20 @@ func (suite *RouterTestSuite) TestGroupPostRoute() {
 
 	res = suite.do(http.MethodPost, "/Group/1234", strings.NewReader(attributiontest.Groupjson), map[string]string{middleware2.OrgHeader: "12345"})
 	assert.Equal(suite.T(), http.StatusNotFound, res.StatusCode)
+}
+
+func (suite *RouterTestSuite) TestGroupExportRoute() {
+	suite.mockGroup.On("Export", mock.Anything, mock.Anything).Once().Run(func(arg mock.Arguments) {
+		w := arg.Get(0).(http.ResponseWriter)
+		_, _ = w.Write([]byte(attributiontest.JobJson))
+		r := arg.Get(1).(*http.Request)
+		assert.Equal(suite.T(), "12345", r.Context().Value(middleware2.ContextKeyOrganization))
+		assert.Equal(suite.T(), "9876", r.Context().Value(middleware2.ContextKeyGroup))
+		assert.Equal(suite.T(), r.RemoteAddr, r.Context().Value(middleware2.ContextKeyRequestingIP))
+	})
+
+	res := suite.do(http.MethodGet, "/Group/9876/$export", nil, map[string]string{middleware2.OrgHeader: "12345"})
+	assert.Equal(suite.T(), "application/json; charset=UTF-8", res.Header.Get("Content-Type"))
+	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
+	assert.NotEqual(suite.T(), res.Body, http.NoBody)
 }

@@ -152,6 +152,11 @@ const Implementerjson = `{
   "name": "test-Implementer"
 }`
 
+// JobJson is a Job json string for testing purposes
+const JobJson = `{
+  "id": "test-export-job"
+}`
+
 // OrgResponse provides a sample response that mimics what attribution service returns for testing purposes
 func OrgResponse() *v2.Organization {
 	o := v2.Organization{}
