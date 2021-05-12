@@ -6,5 +6,5 @@ import (
 
 // Job is a struct that models the v1 Rosters table
 type Job struct {
-	ID uuid.UUID `db:"job_id" json:"job_id"`
+	ID uuid.UUID `db:"job_id" json:"id"`
 }

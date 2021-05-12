@@ -3,6 +3,7 @@ package v2
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 
@@ -76,11 +77,13 @@ func (gc *GroupController) Export(w http.ResponseWriter, r *http.Request) {
 		fhirror.ServerIssue(r.Context(), w, http.StatusUnprocessableEntity, "Failed to start export job")
 		return
 	}
-
-	if _, err := w.Write(resp); err != nil {
-		log.Error("Failed to write data to response", zap.Error(err))
-		fhirror.ServerIssue(r.Context(), w, http.StatusUnprocessableEntity, "Failed to start export job")
+	var job model.Job
+	err = json.Unmarshal(resp, &job)
+	if err != nil {
+		return
 	}
+	w.Header().Set("Content-Location", fmt.Sprint("{}/Jobs/{}", r.URL.String(), job.ID))
+	w.WriteHeader(http.StatusAccepted)
 }
 
 // Read function is not currently used for GroupController
