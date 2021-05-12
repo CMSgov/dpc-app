@@ -57,7 +57,7 @@ func (gc *GroupController) Create(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// Export function is not currently used for GroupController
+// Export function that calls attribution service via get in order to start a job for data export
 func (gc *GroupController) Export(w http.ResponseWriter, r *http.Request) {
 	log := logger.WithContext(r.Context())
 	groupID, ok := r.Context().Value(middleware2.ContextKeyGroup).(string)
