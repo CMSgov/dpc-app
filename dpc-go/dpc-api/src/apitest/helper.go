@@ -263,9 +263,9 @@ func AttributionToFHIRResponse(fhir string) []byte {
 }
 
 // AttributionResponse provides a sample response that mimics what attribution service returns for testing purposes
-func AttributionResponse(job string) []byte {
+func AttributionResponse(data string) []byte {
 	var v map[string]interface{}
-	_ = json.Unmarshal([]byte(job), &v)
+	_ = json.Unmarshal([]byte(data), &v)
 	b, _ := json.Marshal(v)
 	return b
 }

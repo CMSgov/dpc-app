@@ -264,6 +264,7 @@ func (suite *GroupControllerTestSuite) TestExportGroupMissingOutputFormat() {
         "resourceType": "OperationOutcome"
     }`)
 }
+
 func (suite *GroupControllerTestSuite) TestExportGroupInvalidOutputFormat() {
 	suite.mac.On("Export", mock.Anything, mock.Anything, mock.Anything).Return(apitest.AttributionResponse(apitest.JobJSON), nil)
 
