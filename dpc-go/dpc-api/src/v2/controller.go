@@ -8,6 +8,7 @@ type Controller interface {
 	CreateController
 	DeleteController
 	UpdateController
+	ExportController
 }
 
 // ReadController is an interface for reading
@@ -28,6 +29,11 @@ type DeleteController interface {
 // UpdateController is an interface for updating
 type UpdateController interface {
 	Update(w http.ResponseWriter, r *http.Request)
+}
+
+// ExportController is an interface for exporting
+type ExportController interface {
+	Export(w http.ResponseWriter, r *http.Request)
 }
 
 // FileController is an interface for getting a file

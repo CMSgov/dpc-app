@@ -38,9 +38,13 @@ func main() {
 	gs := v2.NewGroupService(gr, js)
 	ds := v1.NewDataService()
 
-	attributionRouter := router.NewDPCAttributionRouter(os, gs, ds)
+	ir := repository.NewImplementerRepo(db)
+	is := v2.NewImplementerService(ir)
+
+	attributionRouter := router.NewDPCAttributionRouter(os, gs, is, ds)
 
 	port := conf.GetAsString("port", "3001")
+	fmt.Printf("Starting DPC-Attribution server on port %v ...\n", port)
 	if err := http.ListenAndServe(fmt.Sprintf(":%s", port), attributionRouter); err != nil {
 		logger.WithContext(ctx).Fatal("Failed to start server", zap.Error(err))
 	}

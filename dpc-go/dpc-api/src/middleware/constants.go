@@ -1,15 +1,20 @@
 package middleware
 
-// ContextKey is exported for use in helper method `FetchValueFromContext`
-type ContextKey int
+type contextKey int
 
 const (
 	// OrgHeader is used in place of a auth token until SSAS is implemented
 	OrgHeader string = "X-ORG"
 	// FwdHeader is used to pass on the requesting IP address to attribution
 	FwdHeader string = "X-Forwarded-For"
+	// FhirNdjson is an allowed output format strings for export requests
+	FhirNdjson string = "application/fhir+ndjson"
+	// ApplicationNdjson is an allowed output format strings for export requests
+	ApplicationNdjson string = "application/ndjson"
+	// Ndjson is an allowed output format strings for export requests
+	Ndjson string = "ndjson"
 	// ContextKeyOrganization is the key in the context to retrieve the organizationID
-	ContextKeyOrganization ContextKey = iota
+	ContextKeyOrganization contextKey = iota
 	// ContextKeyGroup is the key in the context to retrieve the groupID
 	ContextKeyGroup
 	// ContextKeyRequestingIP is the key in the context to retrieve the requesting IP address

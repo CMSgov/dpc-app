@@ -5,13 +5,13 @@ go 1.15
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/bxcodec/faker v2.0.1+incompatible
-	github.com/cockroachdb/apd v1.1.0 // indirect
 	github.com/darahayes/go-boom v0.0.0-20200826120415-fa5cb724143a
 	github.com/go-chi/chi v1.5.1
 	github.com/gofrs/uuid v4.0.0+incompatible // indirect
 	github.com/google/uuid v1.2.0
 	github.com/huandu/go-sqlbuilder v1.11.0
 	github.com/jackc/fake v0.0.0-20150926172116-812a484cc733 // indirect
+	github.com/jackc/pgtype v1.7.0
 	github.com/jackc/pgx v3.6.2+incompatible
 	github.com/kinbiko/jsonassert v1.0.1
 	github.com/lib/pq v1.9.0 // indirect
@@ -24,4 +24,5 @@ require (
 	golang.org/x/crypto v0.0.0-20201012173705-84dcc777aaee // indirect
 	golang.org/x/tools v0.0.0-20201224043029-2b0845dc783e // indirect
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
+	gopkg.in/guregu/null.v3 v3.5.0
 )

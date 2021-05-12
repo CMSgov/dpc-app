@@ -40,6 +40,10 @@ func (c *MockController) Delete(w http.ResponseWriter, r *http.Request) {
 	c.Called(w, r)
 }
 
+func (c *MockController) Export(w http.ResponseWriter, r *http.Request) {
+	c.Called(w, r)
+}
+
 type MockFileController struct {
 	mock.Mock
 }

@@ -2,11 +2,12 @@ package middleware
 
 import (
 	"context"
+	"testing"
+
 	"github.com/CMSgov/dpc/api/apitest"
 	"github.com/samply/golang-fhir-models/fhir-models/fhir"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"testing"
 )
 
 type FHIRFilterTestSuite struct {

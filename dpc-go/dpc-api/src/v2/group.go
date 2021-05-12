@@ -1,16 +1,20 @@
 package v2
 
 import (
+	"context"
 	"encoding/json"
+	"io/ioutil"
+	"net/http"
+
 	"github.com/CMSgov/dpc/api/fhirror"
 	"github.com/CMSgov/dpc/api/logger"
+	middleware2 "github.com/CMSgov/dpc/api/middleware"
 	"github.com/CMSgov/dpc/api/model"
 	"github.com/google/fhir/go/jsonformat"
 	"github.com/pkg/errors"
 	"github.com/samply/golang-fhir-models/fhir-models/fhir"
+	"github.com/sjsdfg/common-lang-in-go/StringUtils"
 	"go.uber.org/zap"
-	"io/ioutil"
-	"net/http"
 
 	"github.com/CMSgov/dpc/api/client"
 )
@@ -28,7 +32,7 @@ func NewGroupController(ac client.Client) *GroupController {
 }
 
 // Create function that calls attribution service via post to save an organization into attribution service
-func (oc *GroupController) Create(w http.ResponseWriter, r *http.Request) {
+func (gc *GroupController) Create(w http.ResponseWriter, r *http.Request) {
 	body, _ := ioutil.ReadAll(r.Body)
 	log := logger.WithContext(r.Context())
 
@@ -38,9 +42,9 @@ func (oc *GroupController) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp, err := oc.ac.Post(r.Context(), client.Group, body)
+	resp, err := gc.ac.Post(r.Context(), client.Group, body)
 	if err != nil {
-		log.Error("Failed to save the org to attribution", zap.Error(err))
+		log.Error("Failed to save the group to attribution", zap.Error(err))
 		fhirror.ServerIssue(r.Context(), w, http.StatusUnprocessableEntity, "Failed to save group")
 		return
 	}
@@ -50,6 +54,48 @@ func (oc *GroupController) Create(w http.ResponseWriter, r *http.Request) {
 		fhirror.ServerIssue(r.Context(), w, http.StatusUnprocessableEntity, "Failed to save group")
 	}
 
+}
+
+// Export function is not currently used for GroupController
+func (gc *GroupController) Export(w http.ResponseWriter, r *http.Request) {
+	log := logger.WithContext(r.Context())
+	groupID, ok := r.Context().Value(middleware2.ContextKeyGroup).(string)
+	if !ok {
+		log.Error("Failed to extract the group id from the context")
+		fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "Failed to extract group id from url, please check the url")
+		return
+	}
+
+	outputFormat := r.URL.Query().Get("_outputFormat")
+	if err := isValidExport(r.Context(), w, outputFormat, r.Header.Get("Prefer")); err != nil {
+		return
+	}
+	resp, err := gc.ac.Export(r.Context(), client.Group, groupID)
+	if err != nil {
+		log.Error("Failed to start the job in attribution", zap.Error(err))
+		fhirror.ServerIssue(r.Context(), w, http.StatusUnprocessableEntity, "Failed to start export job")
+		return
+	}
+
+	if _, err := w.Write(resp); err != nil {
+		log.Error("Failed to write data to response", zap.Error(err))
+		fhirror.ServerIssue(r.Context(), w, http.StatusUnprocessableEntity, "Failed to start export job")
+	}
+}
+
+// Read function is not currently used for GroupController
+func (gc *GroupController) Read(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusMethodNotAllowed)
+}
+
+// Delete function is not currently used for GroupController
+func (gc *GroupController) Delete(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusMethodNotAllowed)
+}
+
+// Update function is not currently used for GroupController
+func (gc *GroupController) Update(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusMethodNotAllowed)
 }
 
 func isValidGroup(group []byte) error {
@@ -77,6 +123,24 @@ func isValidGroup(group []byte) error {
 			*patientRef.Type != "Patient" {
 			return errors.New("Should contain a patient identifier")
 		}
+	}
+	return nil
+}
+
+func isValidExport(ctx context.Context, w http.ResponseWriter, outputFormat string, headerPrefer string) error {
+	log := logger.WithContext(ctx)
+	// _outputFormat only supports FhirNdjson, ApplicationNdjson, Ndjson
+	if !StringUtils.EqualsAnyIgnoreCase(outputFormat, middleware2.FhirNdjson, middleware2.ApplicationNdjson, middleware2.Ndjson) {
+		log.Error("Invalid outputFormat")
+		fhirror.BusinessViolation(ctx, w, http.StatusBadRequest, "'_outputFormat' query parameter must be 'application/fhir+ndjson', 'application/ndjson', or 'ndjson'")
+	}
+	if headerPrefer == "" || StringUtils.IsEmpty(headerPrefer) {
+		log.Error("Missing Prefer header")
+		fhirror.BusinessViolation(ctx, w, http.StatusBadRequest, "The 'Prefer' header must be 'respond-async'")
+	}
+	if StringUtils.IsNotEmpty(headerPrefer) && headerPrefer != "respond-async" {
+		log.Error("Invalid Prefer header")
+		fhirror.BusinessViolation(ctx, w, http.StatusBadRequest, "The 'Prefer' header must be 'respond-async'")
 	}
 	return nil
 }

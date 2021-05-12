@@ -11,12 +11,12 @@ import (
 )
 
 // NewDPCAttributionRouter function to build the attribution router
-func NewDPCAttributionRouter(o service.Service, g service.Service, d service.DataService) http.Handler {
+func NewDPCAttributionRouter(o service.Service, g service.Service, impl service.Service, d service.DataService) http.Handler {
 	r := chi.NewRouter()
 	r.Use(middleware2.Logging())
+	r.Use(middleware2.RequestIPCtx)
 	r.Use(middleware.SetHeader("Content-Type", "application/json; charset=UTF-8"))
 	r.Route("/", func(r chi.Router) {
-		r.Use(middleware2.RequestIPCtx)
 		r.Route("/Organization", func(r chi.Router) {
 			r.Route("/{organizationID}", func(r chi.Router) {
 				r.Use(middleware2.OrganizationCtx)
@@ -28,9 +28,14 @@ func NewDPCAttributionRouter(o service.Service, g service.Service, d service.Dat
 		})
 		r.Route("/Group", func(r chi.Router) {
 			r.Use(middleware2.AuthCtx)
-			r.Use(middleware2.GroupCtx)
 			r.Post("/", g.Post)
-			r.Get("/$export", g.Export)
+			r.Route("/{groupID}", func(r chi.Router) {
+				r.Use(middleware2.GroupCtx)
+				r.Get("/$export", g.Export)
+			})
+		})
+		r.Route("/Implementer", func(r chi.Router) {
+			r.Post("/", impl.Post)
 		})
 		r.Route("/Data", func(r chi.Router) {
 			r.Use(middleware2.AuthCtx)

@@ -10,9 +10,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-// OrgHeader is the header to look for when api calls attribution with a organization id
-const OrgHeader string = "X-ORG"
-
 // OrganizationCtx middleware to extract the organizationID from the header and set it into the request context
 func OrganizationCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

@@ -3,6 +3,12 @@ package v2
 import (
 	"bytes"
 	"context"
+	"io/ioutil"
+	"net/http"
+	"net/http/httptest"
+	"strings"
+	"testing"
+
 	"github.com/CMSgov/dpc/api/apitest"
 	"github.com/CMSgov/dpc/api/client"
 	middleware2 "github.com/CMSgov/dpc/api/middleware"
@@ -12,15 +18,15 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
-	"io/ioutil"
-	"net/http"
-	"net/http/httptest"
-	"strings"
-	"testing"
 )
 
 type MockAttributionClient struct {
 	mock.Mock
+}
+
+func (ac *MockAttributionClient) Export(ctx context.Context, resourceType client.ResourceType, id string) ([]byte, error) {
+	args := ac.Called(ctx, resourceType, id)
+	return args.Get(0).([]byte), args.Error(1)
 }
 
 func (ac *MockAttributionClient) Get(ctx context.Context, resourceType client.ResourceType, id string) ([]byte, error) {

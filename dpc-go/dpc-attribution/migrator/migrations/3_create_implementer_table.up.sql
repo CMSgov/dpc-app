@@ -1,8 +1,8 @@
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
-CREATE TABLE organization (
+CREATE TABLE "Implementer" (
     id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-    version bigint DEFAULT 0,
+    name varchar(200) NOT NULL,
     created_at timestamp with time zone DEFAULT now(),
     updated_at timestamp with time zone DEFAULT now(),
-    info jsonb NOT NULL
+    deleted_at timestamp with time zone
 );
