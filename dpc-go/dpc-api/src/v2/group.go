@@ -82,8 +82,17 @@ func (gc *GroupController) Export(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		return
 	}
-	w.Header().Set("Content-Location", fmt.Sprint("{}/Jobs/{}", r.URL.String(), job.ID))
+	contentLocation := contentLocationHeader(job.ID, r)
+	w.Header().Set("Content-Location", contentLocation)
 	w.WriteHeader(http.StatusAccepted)
+}
+
+func contentLocationHeader(id string, r *http.Request) string {
+	scheme := "http"
+	if r.TLS != nil {
+		scheme = "https"
+	}
+	return fmt.Sprintf(fmt.Sprintf("%s://%s/v2/Jobs/%s", scheme, r.Host, id))
 }
 
 // Read function is not currently used for GroupController
