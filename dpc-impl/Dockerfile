@@ -11,8 +11,10 @@ RUN mkdir /dpc-impl
 WORKDIR /dpc-impl
 
 # Copy over the files needed to fetch dependencies
-COPY /dpc-impl/Gemfile /dpc-impl/Gemfile.lock /dpc-impl/
-COPY /dpc-impl/package.json /dpc-impl/package-lock.json /dpc-impl/
+COPY Gemfile /dpc-impl/
+COPY Gemfile.lock /dpc-impl/
+COPY package.json /dpc-impl/
+COPY package-lock.json /dpc-impl/
 
 # Install the website dependencies
 RUN gem install bundler --no-document && bundle install && npm install
@@ -21,7 +23,7 @@ RUN gem install bundler --no-document && bundle install && npm install
 RUN bundle exec bundle audit update && bundle exec bundle audit check --ignore CVE-2015-9284
 
 # Copy the code, test the app, and build the assets pipeline
-COPY /dpc-impl /dpc-impl
+COPY . /dpc-impl
 
 # TODO: Determine if we have to remove /bin/yarn
 RUN rm -rf /bin/yarn
