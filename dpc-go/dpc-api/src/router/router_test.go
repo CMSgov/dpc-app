@@ -226,7 +226,7 @@ func (suite *RouterTestSuite) TestGroupPostRoute() {
 		r := arg.Get(1).(*http.Request)
 		capturedRequestID = r.Header.Get(middleware.RequestIDHeader)
 		w := arg.Get(0).(http.ResponseWriter)
-		_, _ = w.Write(apitest.AttributionResponse(apitest.Groupjson))
+		_, _ = w.Write(apitest.AttributionToFHIRResponse(apitest.Groupjson))
 	})
 
 	ts := httptest.NewServer(suite.router)

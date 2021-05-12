@@ -108,7 +108,7 @@ func (suite *GroupControllerTestSuite) TestCreateGroupBadJson() {
 }
 
 func (suite *GroupControllerTestSuite) TestCreateGroup() {
-	suite.mac.On("Post", mock.Anything, mock.Anything, mock.Anything).Return(apitest.AttributionResponse(apitest.FilteredGroupjson), nil)
+	suite.mac.On("Post", mock.Anything, mock.Anything, mock.Anything).Return(apitest.AttributionToFHIRResponse(apitest.FilteredGroupjson), nil)
 
 	ja := jsonassert.New(suite.T())
 	req := httptest.NewRequest(http.MethodPost, "http://example.com/foo", strings.NewReader(apitest.FilteredGroupjson))
@@ -121,7 +121,7 @@ func (suite *GroupControllerTestSuite) TestCreateGroup() {
 	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
 
 	resp, _ := ioutil.ReadAll(res.Body)
-	ja.Assertf(string(resp), string(apitest.AttributionResponse(apitest.FilteredGroupjson)))
+	ja.Assertf(string(resp), string(apitest.AttributionToFHIRResponse(apitest.FilteredGroupjson)))
 
 	req = httptest.NewRequest(http.MethodPost, "http://example.com/foo", bytes.NewReader(apitest.MalformedOrg()))
 
@@ -133,7 +133,7 @@ func (suite *GroupControllerTestSuite) TestCreateGroup() {
 }
 
 func (suite *GroupControllerTestSuite) TestExportGroup() {
-	suite.mac.On("Export", mock.Anything, mock.Anything, mock.Anything).Return(apitest.AttributionExportResponse(apitest.JobJSON), nil)
+	suite.mac.On("Export", mock.Anything, mock.Anything, mock.Anything).Return(apitest.AttributionResponse(apitest.JobJSON), nil)
 
 	ja := jsonassert.New(suite.T())
 	req := httptest.NewRequest(http.MethodGet, "http://example.com/Group/9876/$export?_outputFormat=application/fhir%2Bndjson", nil)

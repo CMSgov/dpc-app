@@ -246,11 +246,11 @@ const JobJSON = `{
 
 // AttributionOrgResponse provides a sample organization response that mimics what attribution service returns for testing purposes
 func AttributionOrgResponse() []byte {
-	return AttributionResponse(Orgjson)
+	return AttributionToFHIRResponse(Orgjson)
 }
 
-// AttributionResponse provides a sample response that mimics what attribution service returns for testing purposes
-func AttributionResponse(fhir string) []byte {
+// AttributionToFHIRResponse provides a sample response that mimics what attribution service returns for testing purposes
+func AttributionToFHIRResponse(fhir string) []byte {
 	r := model.Resource{}
 	_ = faker.FakeData(&r)
 	r.ID = faker.ID
@@ -262,8 +262,8 @@ func AttributionResponse(fhir string) []byte {
 	return b
 }
 
-// AttributionExportResponse provides a sample response that mimics what attribution service returns for testing purposes
-func AttributionExportResponse(job string) []byte {
+// AttributionResponse provides a sample response that mimics what attribution service returns for testing purposes
+func AttributionResponse(job string) []byte {
 	var v map[string]interface{}
 	_ = json.Unmarshal([]byte(job), &v)
 	b, _ := json.Marshal(v)
