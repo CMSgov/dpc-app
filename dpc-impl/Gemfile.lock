@@ -192,10 +192,6 @@ GEM
     rb-fsevent (0.10.4)
     rb-inotify (0.10.1)
       ffi (~> 1.0)
-    rbnacl (7.1.1)
-      ffi
-    rbnacl-libsodium (1.0.16)
-      rbnacl (>= 3.0.1)
     redis (4.2.5)
     redis-namespace (1.8.1)
       redis (>= 3.0.4)
@@ -316,8 +312,6 @@ DEPENDENCIES
   pry-nav
   puma (~> 5.0)
   rails (~> 6.1.3)
-  rbnacl
-  rbnacl-libsodium
   redis (~> 4.0)
   redis-namespace
   rspec-rails
