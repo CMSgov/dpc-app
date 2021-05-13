@@ -37,8 +37,8 @@ func NewImplementerOrgService(implRepo repository.ImplementerRepo, orgRepo repos
 func (ios *ImplementerOrgService) Post(w http.ResponseWriter, r *http.Request) {
 	log := logger.WithContext(r.Context())
 
-	implId := r.Context().Value(middleware.ContextKeyImplementer).(string)
-	impl, err := ios.implRepo.FindByID(r.Context(), implId)
+	implID := r.Context().Value(middleware.ContextKeyImplementer).(string)
+	impl, err := ios.implRepo.FindByID(r.Context(), implID)
 	if err != nil {
 		log.Error("Failed to retrieve Implementer", zap.Error(err))
 		boom.BadData(w, "Failed to retrieve Implementer")
@@ -91,7 +91,7 @@ func (ios *ImplementerOrgService) Post(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	} else {
-		rel, err := ios.impOrgRepo.FindRelation(r.Context(), implId, org.ID)
+		rel, err := ios.impOrgRepo.FindRelation(r.Context(), implID, org.ID)
 		if err != nil {
 			log.Error("unable to perform search for existing relation", zap.Error(err))
 			boom.BadImplementation(w, err)
@@ -106,7 +106,7 @@ func (ios *ImplementerOrgService) Post(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	ior, err := ios.impOrgRepo.Insert(r.Context(), implId, org.ID, model.Active)
+	ior, err := ios.impOrgRepo.Insert(r.Context(), implID, org.ID, model.Active)
 	if err != nil {
 		log.Error("Failed to create Implementer org relation", zap.Error(err))
 		boom.BadData(w, err)

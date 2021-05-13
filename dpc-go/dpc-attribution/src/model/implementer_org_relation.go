@@ -17,6 +17,7 @@ type ImplementerOrgRelation struct {
 	Status         ImplOrgStatus `db:"status" json:"status,omitempty"`
 }
 
+// MarshalJSON Json marshaller
 func (u *ImplementerOrgRelation) MarshalJSON() ([]byte, error) {
 	type Alias ImplementerOrgRelation
 	return json.Marshal(&struct {
