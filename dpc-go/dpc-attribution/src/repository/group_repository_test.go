@@ -46,9 +46,9 @@ func (suite *GroupRepositoryTestSuite) TestInsertErrorInRepo() {
 	mock.ExpectQuery(expectedInsertQuery).WithArgs(suite.fakeGrp.Info).WillReturnRows(rows)
 
 	b, _ := json.Marshal(suite.fakeGrp.Info)
-	org, err := repo.Insert(ctx, b)
+	group, err := repo.Insert(ctx, b)
 	assert.Error(suite.T(), err)
-	assert.Empty(suite.T(), org)
+	assert.Empty(suite.T(), group)
 }
 
 func (suite *GroupRepositoryTestSuite) TestInsert() {
@@ -65,7 +65,7 @@ func (suite *GroupRepositoryTestSuite) TestInsert() {
 	mock.ExpectQuery(expectedInsertQuery).WithArgs(suite.fakeGrp.Info, "12345").WillReturnRows(rows)
 
 	b, _ := json.Marshal(suite.fakeGrp.Info)
-	org, err := repo.Insert(ctx, b)
+	group, err := repo.Insert(ctx, b)
 	assert.NoError(suite.T(), err)
-	assert.Equal(suite.T(), suite.fakeGrp.ID, org.ID)
+	assert.Equal(suite.T(), suite.fakeGrp.ID, group.ID)
 }
