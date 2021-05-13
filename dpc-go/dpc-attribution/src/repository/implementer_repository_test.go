@@ -7,7 +7,7 @@ import (
 
 	"github.com/CMSgov/dpc/attribution/model/v2"
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/bxcodec/faker"
+	"github.com/bxcodec/faker/v3"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 )

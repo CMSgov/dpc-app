@@ -12,7 +12,7 @@ import (
 	"github.com/CMSgov/dpc/attribution/attributiontest"
 	"github.com/CMSgov/dpc/attribution/model/v2"
 
-	"github.com/bxcodec/faker"
+	"github.com/bxcodec/faker/v3"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"

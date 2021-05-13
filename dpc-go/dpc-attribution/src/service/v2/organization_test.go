@@ -11,7 +11,7 @@ import (
 	"github.com/CMSgov/dpc/attribution/middleware"
 	v2 "github.com/CMSgov/dpc/attribution/model/v2"
 
-	"github.com/bxcodec/faker"
+	"github.com/bxcodec/faker/v3"
 	"github.com/kinbiko/jsonassert"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"

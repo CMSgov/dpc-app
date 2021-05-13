@@ -10,7 +10,7 @@ import (
 
 	"github.com/CMSgov/dpc/attribution/model/v2"
 	serviceV1 "github.com/CMSgov/dpc/attribution/service/v1"
-	"github.com/bxcodec/faker"
+	"github.com/bxcodec/faker/v3"
 	"github.com/kinbiko/jsonassert"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"

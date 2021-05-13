@@ -5,7 +5,7 @@ import (
 
 	"github.com/CMSgov/dpc/attribution/model/v2"
 
-	"github.com/bxcodec/faker"
+	"github.com/bxcodec/faker/v3"
 )
 
 // Orgjson is a json string for testing purposes

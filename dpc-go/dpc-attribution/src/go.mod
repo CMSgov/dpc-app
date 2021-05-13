@@ -4,7 +4,7 @@ go 1.15
 
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.0
-	github.com/bxcodec/faker v2.0.1+incompatible
+	github.com/bxcodec/faker/v3 v3.6.0
 	github.com/cockroachdb/apd v1.1.0 // indirect
 	github.com/darahayes/go-boom v0.0.0-20200826120415-fa5cb724143a
 	github.com/fsnotify/fsnotify v1.4.9 // indirect

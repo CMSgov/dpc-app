@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"github.com/CMSgov/dpc/api/apitest"
-	"github.com/bxcodec/faker"
+	"github.com/bxcodec/faker/v3"
 	"github.com/kinbiko/jsonassert"
 	"github.com/samply/golang-fhir-models/fhir-models/fhir"
 	"github.com/stretchr/testify/assert"

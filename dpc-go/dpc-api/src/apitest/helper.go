@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 
 	"github.com/CMSgov/dpc/api/model"
-	"github.com/bxcodec/faker"
+	"github.com/bxcodec/faker/v3"
 )
 
 // Orgjson is a organization json string for testing purposes

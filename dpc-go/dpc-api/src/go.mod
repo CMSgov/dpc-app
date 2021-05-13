@@ -3,7 +3,7 @@ module github.com/CMSgov/dpc/api
 go 1.15
 
 require (
-	github.com/bxcodec/faker v2.0.1+incompatible
+	github.com/bxcodec/faker/v3 v3.6.0
 	github.com/darahayes/go-boom v0.0.0-20200826120415-fa5cb724143a
 	github.com/dgrijalva/jwt-go v3.2.1-0.20180309185540-3c771ce311b7+incompatible
 	github.com/go-chi/chi v1.5.1
