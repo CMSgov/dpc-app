@@ -211,10 +211,8 @@ func buildFhirOrg(npi string, name string) string {
 
 func (ios *ImplementerOrgService) Delete(w http.ResponseWriter, r *http.Request) {
     boom.NotImplemented(w, "Not Implemented")
-    return
 }
 
 func (ios *ImplementerOrgService) Put(w http.ResponseWriter, r *http.Request) {
     boom.NotImplemented(w, "Not Implemented")
-    return
 }

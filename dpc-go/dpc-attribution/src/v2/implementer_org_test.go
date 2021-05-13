@@ -36,6 +36,14 @@ func (m *MockImplementerOrgRepo) FindRelation(ctx context.Context, implId string
 	return args.Get(0).(*model.ImplementerOrgRelation), args.Error(1)
 }
 
+func (m *MockImplementerOrgRepo) FindManagedOrgs(ctx context.Context, implId string) ([]model.ImplementerOrgRelation, error) {
+    args := m.Called(ctx, implId)
+    if args.Get(0) == nil {
+        return nil, args.Error(1)
+    }
+    return args.Get(0).([]model.ImplementerOrgRelation), args.Error(1)
+}
+
 type ImplementerOrgServiceTestSuite struct {
 	suite.Suite
 	implRepo       *MockImplementerRepo
@@ -87,6 +95,41 @@ func (suite *ImplementerOrgServiceTestSuite) TestPost() {
 	res := w.Result()
 
 	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
+}
+
+func (suite *ImplementerOrgServiceTestSuite) TestGetOrgs() {
+
+    implOrg := model.ImplementerOrgRelation{}
+    _ = faker.FakeData(&implOrg)
+    implOrg.Status = model.Active
+
+    implOrg2 := model.ImplementerOrgRelation{}
+    _ = faker.FakeData(&implOrg)
+    implOrg.Status = model.Active
+
+    orgs := []model.ImplementerOrgRelation{implOrg, implOrg2}
+    suite.implOrgRepo.On("FindManagedOrgs", mock.Anything, mock.Anything).Return(orgs, nil)
+
+    impl := model.Implementer{}
+    _ = faker.FakeData(&impl)
+    suite.implRepo.On("FindByID", mock.Anything, mock.Anything).Return(&impl, nil)
+
+
+    req := httptest.NewRequest("GET", "http://example.com/foo",  strings.NewReader(""))
+    ctx := req.Context()
+    ctx = context.WithValue(ctx, middleware.ContextKeyImplementer, implOrg.ImplementerID)
+    req = req.WithContext(ctx)
+    w := httptest.NewRecorder()
+
+    suite.service.Get(w, req)
+    res := w.Result()
+
+    resp, _ := ioutil.ReadAll(res.Body)
+    respS := string(resp)
+
+    assert.Contains(suite.T(),respS,implOrg.OrganizationID)
+    assert.Contains(suite.T(),respS,implOrg2.OrganizationID)
+    assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
 }
 
 func (suite *ImplementerOrgServiceTestSuite) TestSaveRepoError() {
