@@ -130,6 +130,10 @@ GEM
       addressable (~> 2.7)
     letter_opener (1.7.0)
       launchy (~> 2.2)
+    letter_opener_web (1.4.0)
+      actionmailer (>= 3.2)
+      letter_opener (~> 1.0)
+      railties (>= 3.2)
     listen (3.5.1)
       rb-fsevent (~> 0.10, >= 0.10.3)
       rb-inotify (~> 0.9, >= 0.9.10)
@@ -306,6 +310,7 @@ DEPENDENCIES
   fakeredis
   jbuilder (~> 2.7)
   letter_opener
+  letter_opener_web (~> 1.0)
   listen (~> 3.3)
   pg (~> 1.1)
   pry

@@ -43,7 +43,7 @@ Rails.application.configure do
 
   # By default we use letter_opener to render the email in a browser
   # rather than send them:
-  config.action_mailer.delivery_method = :letter_opener
+  config.action_mailer.delivery_method = :letter_opener_web
 
   # Print deprecation notices to the Rails logger.
   config.active_support.deprecation = :log
