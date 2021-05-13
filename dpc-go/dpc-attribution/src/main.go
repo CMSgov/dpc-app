@@ -35,10 +35,10 @@ func main() {
 	ir := repository.NewImplementerRepo(db)
 	is := v2.NewImplementerService(ir)
 
-    ior := repository.NewImplementerOrgRepo(db)
-    autoCreateOrg := conf.GetAsString("autoCreateOrg", "false")
+	ior := repository.NewImplementerOrgRepo(db)
+	autoCreateOrg := conf.GetAsString("autoCreateOrg", "false")
 
-    ios := v2.NewImplementerOrgService(ir, or, ior, autoCreateOrg=="true")
+	ios := v2.NewImplementerOrgService(ir, or, ior, autoCreateOrg == "true")
 
 	attributionRouter := router.NewDPCAttributionRouter(os, gs, is, ios)
 
