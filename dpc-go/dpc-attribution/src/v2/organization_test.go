@@ -1,20 +1,20 @@
 package v2
 
 import (
-    "context"
-    "encoding/json"
-    "github.com/CMSgov/dpc/attribution/middleware"
-    "github.com/CMSgov/dpc/attribution/model"
-    "github.com/bxcodec/faker"
-    "github.com/kinbiko/jsonassert"
-    "github.com/pkg/errors"
-    "github.com/stretchr/testify/assert"
-    "github.com/stretchr/testify/mock"
-    "github.com/stretchr/testify/suite"
-    "io/ioutil"
-    "net/http"
-    "net/http/httptest"
-    "testing"
+	"context"
+	"encoding/json"
+	"github.com/CMSgov/dpc/attribution/middleware"
+	"github.com/CMSgov/dpc/attribution/model"
+	"github.com/bxcodec/faker"
+	"github.com/kinbiko/jsonassert"
+	"github.com/pkg/errors"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/suite"
+	"io/ioutil"
+	"net/http"
+	"net/http/httptest"
+	"testing"
 )
 
 type MockOrgRepo struct {
@@ -37,11 +37,11 @@ func (m *MockOrgRepo) FindByID(ctx context.Context, id string) (*model.Organizat
 }
 
 func (m *MockOrgRepo) FindByNPI(ctx context.Context, npi string) (*model.Organization, error) {
-    args := m.Called(ctx, npi)
-    if args.Get(0) == nil {
-        return nil, args.Error(1)
-    }
-    return args.Get(0).(*model.Organization), args.Error(1)
+	args := m.Called(ctx, npi)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*model.Organization), args.Error(1)
 }
 
 func (m *MockOrgRepo) DeleteByID(ctx context.Context, id string) error {

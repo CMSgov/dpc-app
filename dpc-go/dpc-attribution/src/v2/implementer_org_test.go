@@ -1,20 +1,20 @@
 package v2
 
 import (
-    "context"
-    "github.com/CMSgov/dpc/attribution/middleware"
-    "github.com/CMSgov/dpc/attribution/model"
-    "github.com/bxcodec/faker"
-    "github.com/kinbiko/jsonassert"
-    "github.com/pkg/errors"
-    "github.com/stretchr/testify/assert"
-    "github.com/stretchr/testify/mock"
-    "github.com/stretchr/testify/suite"
-    "io/ioutil"
-    "net/http"
-    "net/http/httptest"
-    "strings"
-    "testing"
+	"context"
+	"github.com/CMSgov/dpc/attribution/middleware"
+	"github.com/CMSgov/dpc/attribution/model"
+	"github.com/bxcodec/faker"
+	"github.com/kinbiko/jsonassert"
+	"github.com/pkg/errors"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/suite"
+	"io/ioutil"
+	"net/http"
+	"net/http/httptest"
+	"strings"
+	"testing"
 )
 
 type MockImplementerOrgRepo struct {
@@ -38,10 +38,10 @@ func (m *MockImplementerOrgRepo) FindRelation(ctx context.Context, implId string
 
 type ImplementerOrgServiceTestSuite struct {
 	suite.Suite
-	implRepo       *MockImplementerRepo
-    orgRepo        *MockOrgRepo
-    implOrgRepo    *MockImplementerOrgRepo
-    service *ImplementerOrgService
+	implRepo    *MockImplementerRepo
+	orgRepo     *MockOrgRepo
+	implOrgRepo *MockImplementerOrgRepo
+	service     *ImplementerOrgService
 }
 
 func TestImplementerOrgServiceTestSuite(t *testing.T) {
@@ -49,38 +49,37 @@ func TestImplementerOrgServiceTestSuite(t *testing.T) {
 }
 
 func (suite *ImplementerOrgServiceTestSuite) SetupTest() {
-    suite.implRepo = &MockImplementerRepo{}
-    suite.orgRepo = &MockOrgRepo{}
-    suite.implOrgRepo = &MockImplementerOrgRepo{}
-	suite.service = NewImplementerOrgService(suite.implRepo,suite.orgRepo,suite.implOrgRepo,true)
+	suite.implRepo = &MockImplementerRepo{}
+	suite.orgRepo = &MockOrgRepo{}
+	suite.implOrgRepo = &MockImplementerOrgRepo{}
+	suite.service = NewImplementerOrgService(suite.implRepo, suite.orgRepo, suite.implOrgRepo, true)
 }
 
 func (suite *ImplementerOrgServiceTestSuite) TestPost() {
-
 
 	implOrg := model.ImplementerOrgRelation{}
 	_ = faker.FakeData(&implOrg)
 	implOrg.Status = model.Active
 	suite.implOrgRepo.On("Insert", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(&implOrg, nil)
 
-    impl := model.Implementer{}
-    _ = faker.FakeData(&impl)
-    suite.implRepo.On("FindByID", mock.Anything, mock.Anything).Return(&impl, nil)
+	impl := model.Implementer{}
+	_ = faker.FakeData(&impl)
+	suite.implRepo.On("FindByID", mock.Anything, mock.Anything).Return(&impl, nil)
 
-    suite.orgRepo.On("FindByNPI", mock.Anything, mock.Anything).Return(nil, nil)
+	suite.orgRepo.On("FindByNPI", mock.Anything, mock.Anything).Return(nil, nil)
 
-    org := model.Organization{}
-    _ = faker.FakeData(&org)
-    suite.orgRepo.On("Insert", mock.Anything, mock.Anything).Return(&org, nil)
+	org := model.Organization{}
+	_ = faker.FakeData(&org)
+	suite.orgRepo.On("Insert", mock.Anything, mock.Anything).Return(&org, nil)
 
-    rel := model.ImplementerOrgRelation{}
-    _ = faker.FakeData(&rel)
-    suite.implOrgRepo.On("FindRelation", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
+	rel := model.ImplementerOrgRelation{}
+	_ = faker.FakeData(&rel)
+	suite.implOrgRepo.On("FindRelation", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
 
-    req := httptest.NewRequest("POST", "http://example.com/foo",  strings.NewReader("{\"npi\":\"00001\"}"))
-    ctx := req.Context()
-    ctx = context.WithValue(ctx, middleware.ContextKeyImplementer, implOrg.ImplementerID)
-    req = req.WithContext(ctx)
+	req := httptest.NewRequest("POST", "http://example.com/foo", strings.NewReader("{\"npi\":\"00001\"}"))
+	ctx := req.Context()
+	ctx = context.WithValue(ctx, middleware.ContextKeyImplementer, implOrg.ImplementerID)
+	req = req.WithContext(ctx)
 	w := httptest.NewRecorder()
 
 	suite.service.Post(w, req)
@@ -92,29 +91,28 @@ func (suite *ImplementerOrgServiceTestSuite) TestPost() {
 func (suite *ImplementerOrgServiceTestSuite) TestSaveRepoError() {
 	ja := jsonassert.New(suite.T())
 
-    implOrg := model.ImplementerOrgRelation{}
-    _ = faker.FakeData(&implOrg)
-    implOrg.Status = model.Active
-    suite.implOrgRepo.On("Insert", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.New("error"))
+	implOrg := model.ImplementerOrgRelation{}
+	_ = faker.FakeData(&implOrg)
+	implOrg.Status = model.Active
+	suite.implOrgRepo.On("Insert", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.New("error"))
 
-    impl := model.Implementer{}
-    _ = faker.FakeData(&impl)
-    suite.implRepo.On("FindByID", mock.Anything, mock.Anything).Return(&impl, nil)
+	impl := model.Implementer{}
+	_ = faker.FakeData(&impl)
+	suite.implRepo.On("FindByID", mock.Anything, mock.Anything).Return(&impl, nil)
 
-    org := model.Organization{}
-    _ = faker.FakeData(&org)
-    suite.orgRepo.On("FindByNPI", mock.Anything, mock.Anything).Return(&org, nil)
+	org := model.Organization{}
+	_ = faker.FakeData(&org)
+	suite.orgRepo.On("FindByNPI", mock.Anything, mock.Anything).Return(&org, nil)
 
+	rel := model.ImplementerOrgRelation{}
+	_ = faker.FakeData(&rel)
+	suite.implOrgRepo.On("FindRelation", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
 
-    rel := model.ImplementerOrgRelation{}
-    _ = faker.FakeData(&rel)
-    suite.implOrgRepo.On("FindRelation", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
-
-    req := httptest.NewRequest("POST", "http://example.com/foo",  strings.NewReader("{\"npi\":\"00001\"}"))
-    ctx := req.Context()
-    ctx = context.WithValue(ctx, middleware.ContextKeyImplementer, implOrg.ImplementerID)
-    req = req.WithContext(ctx)
-    w := httptest.NewRecorder()
+	req := httptest.NewRequest("POST", "http://example.com/foo", strings.NewReader("{\"npi\":\"00001\"}"))
+	ctx := req.Context()
+	ctx = context.WithValue(ctx, middleware.ContextKeyImplementer, implOrg.ImplementerID)
+	req = req.WithContext(ctx)
+	w := httptest.NewRecorder()
 
 	suite.service.Post(w, req)
 

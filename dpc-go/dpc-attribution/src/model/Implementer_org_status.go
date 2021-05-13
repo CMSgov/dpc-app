@@ -8,12 +8,11 @@ func (u *ImplOrgStatus) Scan(value interface{}) error { *u = ImplOrgStatus(value
 func (u ImplOrgStatus) Value() (driver.Value, error)  { return int64(u), nil }
 
 const (
-    Unknown ImplOrgStatus = iota
-    Pending
-    Active
+	Unknown ImplOrgStatus = iota
+	Pending
+	Active
 )
 
 func (d ImplOrgStatus) String() string {
-    return [...]string{"Unknown", "Pending", "Active"}[d]
+	return [...]string{"Unknown", "Pending", "Active"}[d]
 }
-
