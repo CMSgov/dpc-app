@@ -62,17 +62,26 @@ func (jr *JobRepositoryV1) NewJobQueueBatch(orgID string, g *v1.GroupNPIs, patie
 func (jr *JobRepositoryV1) Insert(ctx context.Context, batches []v1.JobQueueBatch) (*v1.Job, error) {
 	var results []*v1.Job
 	ib := sqlFlavor.NewInsertBuilder()
-	ib.InsertInto("job_queue_ batch")
+	ib.InsertInto("job_queue_batch")
 	ib.Cols("job_id", "organization_id", "organization_npi", "provider_npi", "patients", "resource_types", "since",
 		"priority", "transaction_time", "status", "submit_time", "requesting_ip", "is_bulk")
+	job := new(v1.Job)
 	// insert the batches within a single transaction
 	tx, err := jr.db.Begin()
 	if err != nil {
 		return nil, err
 	}
 	for _, b := range batches {
-		job, err := submitJob(ctx, tx, ib, b)
-		if err != nil {
+		ib.Values(b.JobID, b.OrganizationID, b.OrganizationNPI, b.ProviderNPI, b.PatientMBIs, b.ResourceTypes, b.Since,
+			b.Priority, b.TransactionTime, b.Status, b.SubmitTime, b.RequestingIP, b.IsBulk)
+		ib.SQL("returning job_id")
+		q, args := ib.Build()
+		jobStruct := sqlbuilder.NewStruct(job).For(sqlFlavor)
+		if err := tx.QueryRowContext(ctx, q, args...).Scan(jobStruct.Addr(&job)...); err != nil {
+			err = tx.Rollback()
+			if err != nil {
+				return nil, err
+			}
 			return nil, err
 		}
 		results = append(results, job)
@@ -82,26 +91,6 @@ func (jr *JobRepositoryV1) Insert(ctx context.Context, batches []v1.JobQueueBatc
 		return nil, err
 	}
 	return results[0], nil
-}
-
-func submitJob(ctx context.Context, tx *sql.Tx, ib *sqlbuilder.InsertBuilder, b v1.JobQueueBatch) (*v1.Job, error) {
-	var job = new(v1.Job)
-	ib.Values(b.JobID, b.OrganizationID, b.OrganizationNPI, b.ProviderNPI, b.PatientMBIs, b.ResourceTypes, b.Since,
-		b.Priority, b.TransactionTime, b.Status, b.SubmitTime, b.RequestingIP, b.IsBulk)
-	ib.SQL("returning job_id")
-
-	q, args := ib.Build()
-
-	jobStruct := sqlbuilder.NewStruct(*job).For(sqlFlavor)
-
-	if err := tx.QueryRowContext(ctx, q, args...).Scan(jobStruct.Addr(&job)...); err != nil {
-		err = tx.Rollback()
-		if err != nil {
-			return nil, err
-		}
-		return nil, err
-	}
-	return job, nil
 }
 
 // GetGroupNPIs function returns an organization NPI and a provider NPI for a given group ID
