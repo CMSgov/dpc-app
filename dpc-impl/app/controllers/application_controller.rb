@@ -45,4 +45,8 @@ class ApplicationController < ActionController::Base
   def id_param
     params.require(:id)
   end
+
+  def user_params
+    params.require(:user).permit(:first_name, :last_name, :email, :implementer, :implementer_id, :invitation_token, :password, :password_confirmation, :agree_to_terms)
+  end
 end

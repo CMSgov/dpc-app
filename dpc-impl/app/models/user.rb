@@ -19,17 +19,6 @@ class User < ApplicationRecord
     in: [true], message: 'you must agree to the terms of service to create an account'
   }
 
-  def name
-    "#{first_name} #{last_name}"
-  end
-
-  private
-
-  # TODO: remove after connecting to API
-  def assign_implementer_id
-    self.implementer_id = SecureRandom.uuid if implementer_id.blank?
-  end
-
   def check_impl
     @host = self.invited_by_id
 
@@ -49,6 +38,17 @@ class User < ApplicationRecord
     if user_imp != invite_imp
       @user.implementer = invite_imp
     end
+  end
+
+  def name
+    "#{first_name} #{last_name}"
+  end
+
+  private
+
+  # TODO: remove after connecting to API
+  def assign_implementer_id
+    self.implementer_id = SecureRandom.uuid if implementer_id.blank?
   end
 
   def password_complexity
