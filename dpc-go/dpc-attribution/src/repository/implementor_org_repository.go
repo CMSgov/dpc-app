@@ -42,12 +42,12 @@ func (or *ImplementerOrgRepository) FindRelation(ctx context.Context, implemente
 	return ior, nil
 }
 
-// FindByID function that searches the database for the Implementer that matches the id
-func (or *ImplementerOrgRepository) FindManagedOrgs(ctx context.Context, implementer_id string) ([]model.ImplementerOrgRelation, error) {
+// FindManagedOrgs function that searches the database for the orgs managed by an implementer
+func (or *ImplementerOrgRepository) FindManagedOrgs(ctx context.Context, implementerID string) ([]model.ImplementerOrgRelation, error) {
 	sb := sqlFlavor.NewSelectBuilder()
 	sb.Select("id", "implementer_id", "organization_id", "created_at", "updated_at", "deleted_at", "status")
 	sb.From("implementer_org_relation")
-	sb.Where(sb.Equal("implementer_id", implementer_id), sb.IsNull("deleted_at"))
+	sb.Where(sb.Equal("implementer_id", implementerID), sb.IsNull("deleted_at"))
 	q, args := sb.Build()
 
 	rows, err := or.db.QueryContext(ctx, q, args...)

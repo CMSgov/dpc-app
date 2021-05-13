@@ -128,46 +128,45 @@ func (ios *ImplementerOrgService) Post(w http.ResponseWriter, r *http.Request) {
 
 // Get function that get the organization from the database by id and logs any errors before returning a generic error
 func (ios *ImplementerOrgService) Get(w http.ResponseWriter, r *http.Request) {
-    log := logger.WithContext(r.Context())
+	log := logger.WithContext(r.Context())
 
-    implId := r.Context().Value(middleware.ContextKeyImplementer).(string)
-    impl, err := ios.implRepo.FindByID(r.Context(), implId)
-    if err != nil {
-        log.Error("Failed to retrieve Implementer")
-        boom.BadData(w, "Failed to retrieve Implementer")
-        return
-    }
+	implID := r.Context().Value(middleware.ContextKeyImplementer).(string)
+	impl, err := ios.implRepo.FindByID(r.Context(), implID)
+	if err != nil {
+		log.Error("Failed to retrieve Implementer")
+		boom.BadData(w, "Failed to retrieve Implementer")
+		return
+	}
 
-    if impl == nil {
-        log.Error("Implementer not found")
-        boom.NotFound(w, "Implementer not found")
-        return
-    }
+	if impl == nil {
+		log.Error("Implementer not found")
+		boom.NotFound(w, "Implementer not found")
+		return
+	}
 
-    relations, err := ios.impOrgRepo.FindManagedOrgs(r.Context(), implId)
-    if err != nil {
-        log.Error("Failed to retrieve ImplementerOrg relation")
-        boom.BadData(w, "Failed to retrieve ImplementerOrg relation")
-        return
-    }
+	relations, err := ios.impOrgRepo.FindManagedOrgs(r.Context(), implID)
+	if err != nil {
+		log.Error("Failed to retrieve ImplementerOrg relation")
+		boom.BadData(w, "Failed to retrieve ImplementerOrg relation")
+		return
+	}
 
-    iorBytes := new(bytes.Buffer)
-    if err := json.NewEncoder(iorBytes).Encode(relations); err != nil {
-        log.Error("Failed to convert orm model to bytes for Implementer org relation", zap.Error(err))
-        boom.Internal(w, err.Error())
-        return
-    }
+	iorBytes := new(bytes.Buffer)
+	if err := json.NewEncoder(iorBytes).Encode(relations); err != nil {
+		log.Error("Failed to convert orm model to bytes for Implementer org relation", zap.Error(err))
+		boom.Internal(w, err.Error())
+		return
+	}
 
-    if _, err := w.Write(iorBytes.Bytes()); err != nil {
-        log.Error("Failed to write Implementer org relation to response", zap.Error(err))
-        boom.Internal(w, err.Error())
-    }
+	if _, err := w.Write(iorBytes.Bytes()); err != nil {
+		log.Error("Failed to write Implementer org relation to response", zap.Error(err))
+		boom.Internal(w, err.Error())
+	}
 }
 
-
-func generateRandomOrgName() string{
-    adj := []string{"Academic","Aeronautical","Affable","Ambient","Arid","Attentive","Awesome","Blooming","Botanical","Brave","Caring","Colorful","Compassionate","Cromulent","Deft","Devoted","Diligent","Dynamic","Ecstatic","Eloquent","Fearless","Festive","First","Floral","Friendly","Generous","Gentle","Great","Gregarious","Huge","Intelligent","Jaunty","Jolly","Keen","Kind","Loyal","Mighty","Mobile","National","New","Noble","Orange","Polite","Protective","Purple","Quaint","Quirky","Quixotic","Rad","Radical","Rainbow","Regal","Shiny","Smart","Speedy","Square","Stunning","Surreal","Tangerine","Tenacious","Top","Tubular","Universal","Vigorous","Vivacious","Wise","Wry","Xenial","Xeric","Yellow","Zealous","Zesty"}
-    nouns := []string{"Agave","Alpaca","Arch","Aurora","Bees","Beetle","Begonia","Bicycle","Blueberry","Bottle","Bugle","Cacti","Capitol","Car","Castle","Cats","Centurion","Cheeseburger","Chili","Computers","Croissant","Cruiser","Cymbal","Daffodil","Echinacea","Elephant","Firework","Flag","Flamingo","Foot","Freesia","Gardenia","Gnu","Hazelnut","Heron","Himalaya","Hive","Holler","Honeysuckle","Ideas","Iguanadon","Ink","Isthmus","Jasmine","Kaftan","Kayak","Knees","Koala","Lake","Lamp","Lavender","Magnet","Milk","Mimosa","Moon","Mountain","Nasturtium","Natatorium","Needles","Nest","Newspaper","Newts","Ocelot","Orchid","Otters","Owl","Partners","Pear","Peony","Pepper","Pineapples","Pizza","Popcorn","Questions","Quicksilver","Ranuncula","Rattlesnake","Record","River","Robots","Rocket","Royal","Runner","Sailboat","Sasquatch","Snapdragon","Spaceship","Squid","Star","Succulent","Sushi","Tent","Thunbergia","Tortellini","Tractors","Treasure","Unicorn","Ursinia","Valley","Viola","Well","Whistle","Wine","Wisteria","Wombat","Xenon","Xeranthemum","Xylophone","Yarrow","Zebra","Zenith","Zinnia"}
+func generateRandomOrgName() string {
+	adj := []string{"Academic", "Aeronautical", "Affable", "Ambient", "Arid", "Attentive", "Awesome", "Blooming", "Botanical", "Brave", "Caring", "Colorful", "Compassionate", "Cromulent", "Deft", "Devoted", "Diligent", "Dynamic", "Ecstatic", "Eloquent", "Fearless", "Festive", "First", "Floral", "Friendly", "Generous", "Gentle", "Great", "Gregarious", "Huge", "Intelligent", "Jaunty", "Jolly", "Keen", "Kind", "Loyal", "Mighty", "Mobile", "National", "New", "Noble", "Orange", "Polite", "Protective", "Purple", "Quaint", "Quirky", "Quixotic", "Rad", "Radical", "Rainbow", "Regal", "Shiny", "Smart", "Speedy", "Square", "Stunning", "Surreal", "Tangerine", "Tenacious", "Top", "Tubular", "Universal", "Vigorous", "Vivacious", "Wise", "Wry", "Xenial", "Xeric", "Yellow", "Zealous", "Zesty"}
+	nouns := []string{"Agave", "Alpaca", "Arch", "Aurora", "Bees", "Beetle", "Begonia", "Bicycle", "Blueberry", "Bottle", "Bugle", "Cacti", "Capitol", "Car", "Castle", "Cats", "Centurion", "Cheeseburger", "Chili", "Computers", "Croissant", "Cruiser", "Cymbal", "Daffodil", "Echinacea", "Elephant", "Firework", "Flag", "Flamingo", "Foot", "Freesia", "Gardenia", "Gnu", "Hazelnut", "Heron", "Himalaya", "Hive", "Holler", "Honeysuckle", "Ideas", "Iguanadon", "Ink", "Isthmus", "Jasmine", "Kaftan", "Kayak", "Knees", "Koala", "Lake", "Lamp", "Lavender", "Magnet", "Milk", "Mimosa", "Moon", "Mountain", "Nasturtium", "Natatorium", "Needles", "Nest", "Newspaper", "Newts", "Ocelot", "Orchid", "Otters", "Owl", "Partners", "Pear", "Peony", "Pepper", "Pineapples", "Pizza", "Popcorn", "Questions", "Quicksilver", "Ranuncula", "Rattlesnake", "Record", "River", "Robots", "Rocket", "Royal", "Runner", "Sailboat", "Sasquatch", "Snapdragon", "Spaceship", "Squid", "Star", "Succulent", "Sushi", "Tent", "Thunbergia", "Tortellini", "Tractors", "Treasure", "Unicorn", "Ursinia", "Valley", "Viola", "Well", "Whistle", "Wine", "Wisteria", "Wombat", "Xenon", "Xeranthemum", "Xylophone", "Yarrow", "Zebra", "Zenith", "Zinnia"}
 
 	adjI, _ := rand.Int(rand.Reader, big.NewInt(int64(len(adj))))
 	nounI, _ := rand.Int(rand.Reader, big.NewInt(int64(len(adj))))
@@ -207,11 +206,12 @@ func buildFhirOrg(npi string, name string) string {
 	return b.String()
 }
 
-
+// Delete Delete relation (Not yet implemented)
 func (ios *ImplementerOrgService) Delete(w http.ResponseWriter, r *http.Request) {
-    boom.NotImplemented(w, "Not Implemented")
+	boom.NotImplemented(w, "Not Implemented")
 }
 
+// Put update relation (Not yet implemented)
 func (ios *ImplementerOrgService) Put(w http.ResponseWriter, r *http.Request) {
-    boom.NotImplemented(w, "Not Implemented")
+	boom.NotImplemented(w, "Not Implemented")
 }

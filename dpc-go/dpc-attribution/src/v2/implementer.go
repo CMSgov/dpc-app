@@ -1,14 +1,14 @@
 package v2
 
 import (
-    "bytes"
-    "encoding/json"
-    "github.com/CMSgov/dpc/attribution/logger"
-    "github.com/CMSgov/dpc/attribution/repository"
-    "github.com/darahayes/go-boom"
-    "go.uber.org/zap"
-    "io/ioutil"
-    "net/http"
+	"bytes"
+	"encoding/json"
+	"github.com/CMSgov/dpc/attribution/logger"
+	"github.com/CMSgov/dpc/attribution/repository"
+	"github.com/darahayes/go-boom"
+	"go.uber.org/zap"
+	"io/ioutil"
+	"net/http"
 )
 
 // ImplementerService is a struct that defines what the service has
@@ -53,4 +53,3 @@ func (os *ImplementerService) Post(w http.ResponseWriter, r *http.Request) {
 		boom.Internal(w, err.Error())
 	}
 }
-
