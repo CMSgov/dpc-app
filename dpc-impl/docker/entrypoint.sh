@@ -8,6 +8,10 @@ if [ -f tmp/pids/server.pid ]; then
 fi
 
 if [ "$1" == "impl" ]; then
+  # Run the database migrations
+  echo "Migrating the database..."
+  bundle exec rails db:migrate
+
   # Start the database service (and make accessible outside the Docker container)
   echo "Starting Rails server..."
   if [[ -n "$JACOCO" ]]; then

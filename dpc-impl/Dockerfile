@@ -27,7 +27,7 @@ COPY . /dpc-impl
 
 # TODO: Determine if we have to remove /bin/yarn
 RUN rm -rf /bin/yarn
-RUN RAILS_ENV=production WEBPACKER_NODE_MODULES_BIN_PATH="node_modules/.bin" SECRET_KEY_BASE=dummy bundle exec rake assets:precompile --trace
+RUN RAILS_ENV=production WEBPACKER_NODE_MODULES_BIN_PATH="node_modules/.bin" SECRET_KEY_BASE=dummy
 
 # Clean up from the build
 RUN rm -rf /usr/local/bundle/cache/*.gem && \
@@ -52,6 +52,7 @@ COPY --from=ruby_builder /usr/local/bundle/ /usr/local/bundle/
 COPY --from=ruby_builder /dpc-impl /dpc-impl
 
 # Declare the entrypoint shell script
+RUN chmod 555 /dpc-impl/docker/entrypoint.sh
 ENTRYPOINT ["./docker/entrypoint.sh"]
 
 # Default to running the rails server
