@@ -9,17 +9,17 @@ type ImplOrgStatus int64
 func (u *ImplOrgStatus) Scan(value interface{}) error { *u = ImplOrgStatus(value.(int64)); return nil }
 
 // Value db value converter
-func (u ImplOrgStatus) Value() (driver.Value, error)  { return int64(u), nil }
+func (u ImplOrgStatus) Value() (driver.Value, error) { return int64(u), nil }
 
 const (
-    // Unknown Zero value
+	// Unknown Zero value
 	Unknown ImplOrgStatus = iota
 
-    // Pending relation not yet active
-    Pending
+	// Pending relation not yet active
+	Pending
 
-    // Active Relation is active
-    Active
+	// Active Relation is active
+	Active
 )
 
 func (u ImplOrgStatus) String() string {
