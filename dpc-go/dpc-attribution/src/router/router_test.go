@@ -36,10 +36,10 @@ func (ms *MockService) Put(w http.ResponseWriter, r *http.Request) {
 
 type RouterTestSuite struct {
 	suite.Suite
-	router    http.Handler
-	mockOrg   *MockService
-	mockGroup *MockService
-	mockImplementer *MockService
+	router                http.Handler
+	mockOrg               *MockService
+	mockGroup             *MockService
+	mockImplementer       *MockService
 	mockImplementerOrgRel *MockService
 }
 
