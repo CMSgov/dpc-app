@@ -40,7 +40,7 @@ func (ios *ImplementerOrgService) Post(w http.ResponseWriter, r *http.Request) {
 	implId := r.Context().Value(middleware.ContextKeyImplementer).(string)
 	impl, err := ios.implRepo.FindByID(r.Context(), implId)
 	if err != nil {
-		log.Error("Failed to retrieve Implementer")
+		log.Error("Failed to retrieve Implementer", zap.Error(err))
 		boom.BadData(w, "Failed to retrieve Implementer")
 		return
 	}
