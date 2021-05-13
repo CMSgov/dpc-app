@@ -1,8 +1,9 @@
-package model
+package v2
 
 import (
-	"gopkg.in/guregu/null.v3"
 	"time"
+
+	"gopkg.in/guregu/null.v3"
 )
 
 // Implementer is a struct that models the Implementer table

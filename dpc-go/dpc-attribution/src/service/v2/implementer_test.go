@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/CMSgov/dpc/attribution/model"
+	"github.com/CMSgov/dpc/attribution/model/v2"
 	"github.com/bxcodec/faker"
 	"github.com/kinbiko/jsonassert"
 	"github.com/pkg/errors"
@@ -22,19 +22,19 @@ type MockImplementerRepo struct {
 	mock.Mock
 }
 
-func (m *MockImplementerRepo) Insert(ctx context.Context, body []byte) (*model.Implementer, error) {
+func (m *MockImplementerRepo) Insert(ctx context.Context, body []byte) (*v2.Implementer, error) {
 	args := m.Called(ctx, body)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).(*model.Implementer), args.Error(1)
+	return args.Get(0).(*v2.Implementer), args.Error(1)
 }
-func (m *MockImplementerRepo) FindByID(ctx context.Context, id string) (*model.Implementer, error) {
+func (m *MockImplementerRepo) FindByID(ctx context.Context, id string) (*v2.Implementer, error) {
 	args := m.Called(ctx, id)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).(*model.Implementer), args.Error(1)
+	return args.Get(0).(*v2.Implementer), args.Error(1)
 }
 
 type ImplementerServiceTestSuite struct {
@@ -55,7 +55,7 @@ func (suite *ImplementerServiceTestSuite) SetupTest() {
 func (suite *ImplementerServiceTestSuite) TestPost() {
 	ja := jsonassert.New(suite.T())
 
-	impl := model.Implementer{}
+	impl := v2.Implementer{}
 	_ = faker.FakeData(&impl)
 	suite.repo.On("Insert", mock.Anything, mock.Anything).Return(&impl, nil)
 
