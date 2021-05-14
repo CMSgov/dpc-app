@@ -1,0 +1,27 @@
+.member-list {
+  margin: 30px 0;
+
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  ul > li {
+    display: flex;
+    flex-direction: row;
+    margin: 15px 0;
+  }
+
+  li > *:first-child {
+    margin-right: 1rem;
+  }
+}
+
+.invited-name-container {
+  color: $color-gray-light;
+}
+
+.member-header {
+  border-bottom: 1px solid $color-gray-lighter;
+}
