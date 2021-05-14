@@ -2,6 +2,7 @@ package apitest
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/CMSgov/dpc/api/model"
 	"github.com/bxcodec/faker/v3"
@@ -252,12 +253,16 @@ func AttributionOrgResponse() []byte {
 // AttributionToFHIRResponse provides a sample response that mimics what attribution service returns for testing purposes
 func AttributionToFHIRResponse(fhir string) []byte {
 	r := model.Resource{}
-	_ = faker.FakeData(&r)
-	r.ID = faker.ID
+	err := faker.FakeData(&r)
+	if err != nil {
+		fmt.Printf("ERR %v\n", err)
+	}
 
 	var v map[string]interface{}
 	_ = json.Unmarshal([]byte(fhir), &v)
 	r.Info = v
+	// The value <<PRESENCE>> required for jsonassert checks
+	r.ID = "<<PRESENCE>>"
 	b, _ := json.Marshal(r)
 	return b
 }

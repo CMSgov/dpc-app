@@ -3,6 +3,7 @@ package v2
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -50,7 +51,10 @@ func (suite *GroupServiceTestSuite) TestPost() {
 	ja := jsonassert.New(suite.T())
 
 	o := v2.Group{}
-	_ = faker.FakeData(&o)
+	err := faker.FakeData(&o)
+	if err != nil {
+		fmt.Printf("ERR %v\n", err)
+	}
 	suite.repo.On("Insert", mock.Anything, mock.Anything).Return(&o, nil)
 
 	req := httptest.NewRequest("POST", "http://example.com/foo", nil)

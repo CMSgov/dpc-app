@@ -2,24 +2,29 @@ package repository
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	v1 "github.com/CMSgov/dpc/attribution/model/v1"
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/bxcodec/faker"
-	"github.com/pkg/errors"
+	"github.com/bxcodec/faker/v3"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 )
 
 type JobRepositoryV1TestSuite struct {
 	suite.Suite
-	fakeJQB v1.JobQueueBatch
+	fakeJQB     v1.JobQueueBatch
+	fakeNPIs    v1.GroupNPIs
+	fakeDetails BatchDetails
 }
 
 func (suite *JobRepositoryV1TestSuite) SetupTest() {
 	jqb := v1.JobQueueBatch{}
-	_ = faker.FakeData(jqb)
+	err := faker.FakeData(&jqb)
+	if err != nil {
+		fmt.Printf("ERR %v\n", err)
+	}
 	suite.fakeJQB = jqb
 
 }

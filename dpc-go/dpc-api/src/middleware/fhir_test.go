@@ -1,17 +1,17 @@
 package middleware
 
 import (
-	"github.com/CMSgov/dpc/api/apitest"
-	"github.com/bxcodec/faker/v3"
-	"github.com/kinbiko/jsonassert"
-	"github.com/samply/golang-fhir-models/fhir-models/fhir"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/suite"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/CMSgov/dpc/api/apitest"
+	"github.com/kinbiko/jsonassert"
+	"github.com/samply/golang-fhir-models/fhir-models/fhir"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
 )
 
 type FHIRMiddlewareTestSuite struct {
@@ -39,7 +39,7 @@ func (suite *FHIRMiddlewareTestSuite) TestFHIRModel() {
 	b, _ := ioutil.ReadAll(res.Body)
 
 	o, _ := fhir.UnmarshalOrganization(b)
-	assert.Equal(suite.T(), *o.Id, faker.ID)
+	assert.Equal(suite.T(), *o.Id, "<<PRESENCE>>")
 	assert.NotNil(suite.T(), o.Meta)
 	assert.NotNil(suite.T(), o.Meta.Id)
 	assert.NotNil(suite.T(), o.Meta.LastUpdated)

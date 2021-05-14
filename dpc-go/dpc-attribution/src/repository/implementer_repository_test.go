@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"testing"
 
 	"github.com/CMSgov/dpc/attribution/model/v2"
@@ -19,7 +20,10 @@ type ImplementerRepositoryTestSuite struct {
 
 func (suite *ImplementerRepositoryTestSuite) SetupTest() {
 	i := v2.Implementer{}
-	_ = faker.FakeData(&i)
+	err := faker.FakeData(&i)
+	if err != nil {
+		fmt.Printf("ERR %v\n", err)
+	}
 	suite.fakeImplementer = &i
 }
 

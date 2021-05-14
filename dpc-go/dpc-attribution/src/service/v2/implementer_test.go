@@ -3,6 +3,7 @@ package v2
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -56,7 +57,10 @@ func (suite *ImplementerServiceTestSuite) TestPost() {
 	ja := jsonassert.New(suite.T())
 
 	impl := v2.Implementer{}
-	_ = faker.FakeData(&impl)
+	err := faker.FakeData(&impl)
+	if err != nil {
+		fmt.Printf("ERR %v\n", err)
+	}
 	suite.repo.On("Insert", mock.Anything, mock.Anything).Return(&impl, nil)
 
 	req := httptest.NewRequest("POST", "http://example.com/foo", strings.NewReader(`{"name":"test-name"}`))

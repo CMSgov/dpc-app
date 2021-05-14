@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"testing"
 
 	"github.com/CMSgov/dpc/attribution/attributiontest"
@@ -22,7 +23,10 @@ type GroupRepositoryTestSuite struct {
 
 func (suite *GroupRepositoryTestSuite) SetupTest() {
 	g := v2.Group{}
-	_ = faker.FakeData(&g)
+	err := faker.FakeData(&g)
+	if err != nil {
+		fmt.Printf("ERR %v\n", err)
+	}
 	var i v2.Info
 	_ = json.Unmarshal([]byte(attributiontest.Groupjson), &i)
 	g.Info = i

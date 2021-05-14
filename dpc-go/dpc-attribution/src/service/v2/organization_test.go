@@ -3,6 +3,7 @@ package v2
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -98,7 +99,10 @@ func (suite *OrganizationServiceTestSuite) TestGet() {
 	ja := jsonassert.New(suite.T())
 
 	o := v2.Organization{}
-	_ = faker.FakeData(&o)
+	err := faker.FakeData(&o)
+	if err != nil {
+		fmt.Printf("ERR %v\n", err)
+	}
 	suite.repo.On("FindByID", mock.Anything, mock.Anything).Return(&o, nil)
 
 	req := httptest.NewRequest("GET", "http://example.com/foo", nil)
@@ -124,7 +128,10 @@ func (suite *OrganizationServiceTestSuite) TestPost() {
 	ja := jsonassert.New(suite.T())
 
 	o := v2.Organization{}
-	_ = faker.FakeData(&o)
+	err := faker.FakeData(&o)
+	if err != nil {
+		fmt.Printf("ERR %v\n", err)
+	}
 	suite.repo.On("Insert", mock.Anything, mock.Anything).Return(&o, nil)
 
 	req := httptest.NewRequest("POST", "http://example.com/foo", nil)
@@ -225,7 +232,10 @@ func (suite *OrganizationServiceTestSuite) TestPut() {
 	assert.Equal(suite.T(), http.StatusUnprocessableEntity, res.StatusCode)
 
 	o := v2.Organization{}
-	_ = faker.FakeData(&o)
+	err := faker.FakeData(&o)
+	if err != nil {
+		fmt.Printf("ERR %v\n", err)
+	}
 	w = httptest.NewRecorder()
 
 	suite.repo.On("Update", mock.Anything, mock.Anything, mock.Anything).Return(&o, nil).Once()
