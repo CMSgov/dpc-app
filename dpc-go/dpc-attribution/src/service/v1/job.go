@@ -94,8 +94,8 @@ func (js *JobServiceV1) Export(w http.ResponseWriter, r *http.Request) {
 		boom.Internal(w, err.Error())
 		return
 	}
-	log.Info(fmt.Sprint(
-		"dpcMetric=jobCreated,jobId={},orgId={},groupId={},totalPatients={},resourcesRequested={}",
+	log.Info(fmt.Sprintf(
+		"dpcMetric=jobCreated,jobId=%s,orgId=%s,groupId=%s,totalPatients=%x,resourcesRequested=%s",
 		job.ID,
 		exportRequest.orgID,
 		exportRequest.groupID,
