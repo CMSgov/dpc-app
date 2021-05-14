@@ -26,7 +26,7 @@ module Users
 
     def destroy
       @user = User.find(current_user.id)
-      if @user.destroy_with_password(user_params[:password_to_delete])
+      if @user.destroy_with_password(password_params[:password_to_delete])
         redirect_to root_url, notice: 'User account successfully deleted.'
       else
         render :edit, alert: 'Unable to delete user account.'
@@ -35,7 +35,7 @@ module Users
 
     protected
 
-    def user_params
+    def password_params
       params.require(:user).permit(:password_to_delete)
     end
 
