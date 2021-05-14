@@ -2,6 +2,7 @@ package v2
 
 import (
 	"context"
+	"encoding/json"
 	"github.com/CMSgov/dpc/attribution/middleware"
 	"github.com/CMSgov/dpc/attribution/model"
 	"github.com/bxcodec/faker"
@@ -106,12 +107,29 @@ func (suite *ImplementerOrgServiceTestSuite) TestGetOrgs() {
 	_ = faker.FakeData(&implOrg)
 	implOrg.Status = model.Active
 
-	orgs := []model.ImplementerOrgRelation{implOrg, implOrg2}
-	suite.implOrgRepo.On("FindManagedOrgs", mock.Anything, mock.Anything).Return(orgs, nil)
+	relations := []model.ImplementerOrgRelation{implOrg, implOrg2}
+	suite.implOrgRepo.On("FindManagedOrgs", mock.Anything, mock.Anything).Return(relations, nil)
 
 	impl := model.Implementer{}
 	_ = faker.FakeData(&impl)
 	suite.implRepo.On("FindByID", mock.Anything, mock.Anything).Return(&impl, nil)
+
+	org1 := model.Organization{}
+	inf1 := `{
+	"resourceType": "Organization",
+          "identifier": [
+               {
+                   "system": "http://hl7.org/fhir/sid/us-npi",
+                   "value": "00010"
+               }
+          ],
+          "name": "Some org name"}`
+	var org1Info model.Info
+	err := json.Unmarshal([]byte(inf1), &org1Info)
+	assert.NoError(suite.T(), err)
+	org1.Info = org1Info
+
+	suite.orgRepo.On("FindByID", mock.Anything, mock.Anything).Return(&org1, nil)
 
 	req := httptest.NewRequest("GET", "http://example.com/foo", strings.NewReader(""))
 	ctx := req.Context()

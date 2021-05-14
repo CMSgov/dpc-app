@@ -30,7 +30,7 @@ func NewImplementerOrgRepo(db *sql.DB) *ImplementerOrgRepository {
 func (or *ImplementerOrgRepository) FindRelation(ctx context.Context, implementerID string, orgID string) (*model.ImplementerOrgRelation, error) {
 	sb := sqlFlavor.NewSelectBuilder()
 	sb.Select("id", "implementer_id", "organization_id", "created_at", "updated_at", "deleted_at", "status")
-	sb.From("implementer_org_relation")
+	sb.From("implementer_org_relations")
 	sb.Where(sb.Equal("implementer_id", implementerID), sb.Equal("organization_id", orgID))
 	q, args := sb.Build()
 
@@ -46,7 +46,7 @@ func (or *ImplementerOrgRepository) FindRelation(ctx context.Context, implemente
 func (or *ImplementerOrgRepository) FindManagedOrgs(ctx context.Context, implementerID string) ([]model.ImplementerOrgRelation, error) {
 	sb := sqlFlavor.NewSelectBuilder()
 	sb.Select("id", "implementer_id", "organization_id", "created_at", "updated_at", "deleted_at", "status")
-	sb.From("implementer_org_relation")
+	sb.From("implementer_org_relations")
 	sb.Where(sb.Equal("implementer_id", implementerID), sb.IsNull("deleted_at"))
 	q, args := sb.Build()
 
@@ -78,7 +78,7 @@ func (or *ImplementerOrgRepository) Insert(ctx context.Context, implID string, o
 	}
 
 	ib := sqlFlavor.NewInsertBuilder()
-	ib.InsertInto("implementer_org_relation")
+	ib.InsertInto("implementer_org_relations")
 	ib.Cols("implementer_id", "organization_id", "status")
 	ib.Values(implOrg.ImplementerID, implOrg.OrganizationID, implOrg.Status)
 	ib.SQL("returning id, implementer_id, organization_id, created_at, updated_at, deleted_at, status")

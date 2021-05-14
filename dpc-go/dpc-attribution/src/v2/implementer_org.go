@@ -187,6 +187,9 @@ func (ios *ImplementerOrgService) toManagedOrgStructs(r *http.Request, relations
 		}
 
 		npi, err := util.GetNPI(orgBytes.Bytes())
+		if err != nil {
+			return nil, err
+		}
 		name := org.Info["name"].(string)
 		mo := model.ManagedOrg{
 			OrganizationID: rel.OrganizationID,
