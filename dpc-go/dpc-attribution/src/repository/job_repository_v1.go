@@ -42,7 +42,7 @@ type BatchDetails struct {
 // NewJobQueueBatch function that creates a new JobQueueBatch
 func (jr *JobRepositoryV1) NewJobQueueBatch(orgID string, g *v1.GroupNPIs, patientMBIs []string, details BatchDetails) *v1.JobQueueBatch {
 	return &v1.JobQueueBatch{
-		JobID:           uuid.New(),
+		JobID:           uuid.New().String(),
 		OrganizationID:  orgID,
 		OrganizationNPI: g.OrgNPI,
 		ProviderNPI:     g.ProviderNPI,
@@ -78,9 +78,9 @@ func (jr *JobRepositoryV1) Insert(ctx context.Context, batches []v1.JobQueueBatc
 		q, args := ib.Build()
 		jobStruct := sqlbuilder.NewStruct(job).For(sqlFlavor)
 		if err := tx.QueryRowContext(ctx, q, args...).Scan(jobStruct.Addr(&job)...); err != nil {
-			err = tx.Rollback()
-			if err != nil {
-				return nil, err
+			err2 := tx.Rollback()
+			if err2 != nil {
+				return nil, err2
 			}
 			return nil, err
 		}
