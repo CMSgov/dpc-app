@@ -42,21 +42,7 @@ type ExportRequest struct {
 }
 
 // NewJobService function that creates and returns a JobService
-func NewJobService(ctx context.Context) service.JobService {
-	log := logger.WithContext(ctx)
-	attrDbV1 := repository.GetAttributionV1DbConnection()
-	queueDbV1 := repository.GetQueueDbConnection()
-
-	defer func() {
-		if err := attrDbV1.Close(); err != nil {
-			log.Fatal("Failed to close attribution v1 db connection", zap.Error(err))
-		}
-		if err := queueDbV1.Close(); err != nil {
-			log.Fatal("Failed to close queue v1 db connection", zap.Error(err))
-		}
-	}()
-	pr := repository.NewPatientRepo(attrDbV1)
-	jr := repository.NewJobRepo(queueDbV1)
+func NewJobService(pr repository.PatientRepo, jr repository.JobRepo) service.JobService {
 	return &JobServiceV1{
 		pr,
 		jr,
