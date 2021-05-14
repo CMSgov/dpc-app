@@ -9,7 +9,8 @@ import (
 	"github.com/CMSgov/dpc/attribution/middleware"
 	"github.com/CMSgov/dpc/attribution/model"
 	"github.com/CMSgov/dpc/attribution/repository"
-	"github.com/darahayes/go-boom"
+    "github.com/CMSgov/dpc/attribution/util"
+    "github.com/darahayes/go-boom"
 	"go.uber.org/zap"
 	"io/ioutil"
 	"math/big"
@@ -151,18 +152,54 @@ func (ios *ImplementerOrgService) Get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	iorBytes := new(bytes.Buffer)
-	if err := json.NewEncoder(iorBytes).Encode(relations); err != nil {
+	mo, err := ios.toManagedOrgStructs(r,relations)
+    if err != nil {
+        log.Error("Failed to convert to managed org struct", zap.Error(err))
+        boom.BadImplementation(w, "Internal Error")
+        return
+    }
+
+	moBytes := new(bytes.Buffer)
+	if err := json.NewEncoder(moBytes).Encode(mo); err != nil {
 		log.Error("Failed to convert orm model to bytes for Implementer org relation", zap.Error(err))
 		boom.Internal(w, err.Error())
 		return
 	}
 
-	if _, err := w.Write(iorBytes.Bytes()); err != nil {
+	if _, err := w.Write(moBytes.Bytes()); err != nil {
 		log.Error("Failed to write Implementer org relation to response", zap.Error(err))
 		boom.Internal(w, err.Error())
 	}
 }
+
+func (ios *ImplementerOrgService) toManagedOrgStructs(r *http.Request,relations []model.ImplementerOrgRelation) ([]model.ManagedOrg, error){
+    result := make([]model.ManagedOrg, 0)
+
+    for _, rel := range relations {
+        org, err := ios.orgRepo.FindByID(r.Context(),rel.OrganizationID)
+        if err != nil{
+            return nil, err
+        }
+
+        orgBytes := new(bytes.Buffer)
+        if err := json.NewEncoder(orgBytes).Encode(org.Info); err != nil {
+            return nil, err
+        }
+
+        npi, err := util.GetNPI(orgBytes.Bytes())
+        name := org.Info["name"].(string)
+        mo := model.ManagedOrg{
+            OrganizationID: rel.OrganizationID,
+            Name: name,
+            Status: rel.Status.String(),
+            NPI: npi,
+        }
+
+        result = append(result, mo)
+    }
+    return result, nil
+}
+
 
 func generateRandomOrgName() string {
 	adj := []string{"Academic", "Aeronautical", "Affable", "Ambient", "Arid", "Attentive", "Awesome", "Blooming", "Botanical", "Brave", "Caring", "Colorful", "Compassionate", "Cromulent", "Deft", "Devoted", "Diligent", "Dynamic", "Ecstatic", "Eloquent", "Fearless", "Festive", "First", "Floral", "Friendly", "Generous", "Gentle", "Great", "Gregarious", "Huge", "Intelligent", "Jaunty", "Jolly", "Keen", "Kind", "Loyal", "Mighty", "Mobile", "National", "New", "Noble", "Orange", "Polite", "Protective", "Purple", "Quaint", "Quirky", "Quixotic", "Rad", "Radical", "Rainbow", "Regal", "Shiny", "Smart", "Speedy", "Square", "Stunning", "Surreal", "Tangerine", "Tenacious", "Top", "Tubular", "Universal", "Vigorous", "Vivacious", "Wise", "Wry", "Xenial", "Xeric", "Yellow", "Zealous", "Zesty"}
