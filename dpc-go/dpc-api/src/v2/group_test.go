@@ -11,6 +11,7 @@ import (
 
 	"github.com/CMSgov/dpc/api/apitest"
 	middleware2 "github.com/CMSgov/dpc/api/middleware"
+	"github.com/bxcodec/faker/v3"
 	"github.com/go-chi/chi/middleware"
 	"github.com/kinbiko/jsonassert"
 	"github.com/pkg/errors"
@@ -139,7 +140,9 @@ func (suite *GroupControllerTestSuite) TestExportGroup() {
 	req := httptest.NewRequest(http.MethodGet, "http://example.com/Group/9876/$export?_outputFormat=application/fhir%2Bndjson", nil)
 	ctx := req.Context()
 	ctx = context.WithValue(ctx, middleware2.ContextKeyOrganization, "12345")
-	ctx = context.WithValue(ctx, middleware2.ContextKeyGroup, "9876")
+	ctx = context.WithValue(ctx, middleware2.ContextKeyGroup, faker.UUIDHyphenated())
+	ctx = context.WithValue(ctx, middleware2.ContextKeyRequestURL, faker.URL())
+	ctx = context.WithValue(ctx, middleware2.ContextKeyRequestingIP, faker.IPv4())
 	req = req.WithContext(ctx)
 	req.Header.Set("Prefer", "respond-async")
 
@@ -162,7 +165,9 @@ func (suite *GroupControllerTestSuite) TestExportGroupMissingPreferHeader() {
 	req := httptest.NewRequest(http.MethodGet, "http://example.com/Group/9876/$export?_outputFormat=application/fhir%2Bndjson", nil)
 	ctx := req.Context()
 	ctx = context.WithValue(ctx, middleware2.ContextKeyOrganization, "12345")
-	ctx = context.WithValue(ctx, middleware2.ContextKeyGroup, "9876")
+	ctx = context.WithValue(ctx, middleware2.ContextKeyGroup, faker.UUIDHyphenated())
+	ctx = context.WithValue(ctx, middleware2.ContextKeyRequestURL, faker.URL())
+	ctx = context.WithValue(ctx, middleware2.ContextKeyRequestingIP, faker.IPv4())
 	ctx = context.WithValue(ctx, middleware.RequestIDKey, "12345")
 	req = req.WithContext(ctx)
 
@@ -198,7 +203,9 @@ func (suite *GroupControllerTestSuite) TestExportGroupInvalidPreferHeader() {
 	req := httptest.NewRequest(http.MethodGet, "http://example.com/Group/9876/$export?_outputFormat=application/fhir%2Bndjson", nil)
 	ctx := req.Context()
 	ctx = context.WithValue(ctx, middleware2.ContextKeyOrganization, "12345")
-	ctx = context.WithValue(ctx, middleware2.ContextKeyGroup, "9876")
+	ctx = context.WithValue(ctx, middleware2.ContextKeyGroup, faker.UUIDHyphenated())
+	ctx = context.WithValue(ctx, middleware2.ContextKeyRequestURL, faker.URL())
+	ctx = context.WithValue(ctx, middleware2.ContextKeyRequestingIP, faker.IPv4())
 	ctx = context.WithValue(ctx, middleware.RequestIDKey, "12345")
 	req = req.WithContext(ctx)
 	req.Header.Set("Prefer", "INVALID")
@@ -235,7 +242,9 @@ func (suite *GroupControllerTestSuite) TestExportGroupMissingOutputFormat() {
 	req := httptest.NewRequest(http.MethodGet, "http://example.com/Group/9876/$export", nil)
 	ctx := req.Context()
 	ctx = context.WithValue(ctx, middleware2.ContextKeyOrganization, "12345")
-	ctx = context.WithValue(ctx, middleware2.ContextKeyGroup, "9876")
+	ctx = context.WithValue(ctx, middleware2.ContextKeyGroup, faker.UUIDHyphenated())
+	ctx = context.WithValue(ctx, middleware2.ContextKeyRequestURL, faker.URL())
+	ctx = context.WithValue(ctx, middleware2.ContextKeyRequestingIP, faker.IPv4())
 	ctx = context.WithValue(ctx, middleware.RequestIDKey, "12345")
 	req = req.WithContext(ctx)
 	req.Header.Set("Prefer", "respond-async")
@@ -272,7 +281,9 @@ func (suite *GroupControllerTestSuite) TestExportGroupInvalidOutputFormat() {
 	req := httptest.NewRequest(http.MethodGet, "http://example.com/Group/9876/$export?_outputFormat=INVALID", nil)
 	ctx := req.Context()
 	ctx = context.WithValue(ctx, middleware2.ContextKeyOrganization, "12345")
-	ctx = context.WithValue(ctx, middleware2.ContextKeyGroup, "9876")
+	ctx = context.WithValue(ctx, middleware2.ContextKeyGroup, faker.UUIDHyphenated())
+	ctx = context.WithValue(ctx, middleware2.ContextKeyRequestURL, faker.URL())
+	ctx = context.WithValue(ctx, middleware2.ContextKeyRequestingIP, faker.IPv4())
 	ctx = context.WithValue(ctx, middleware.RequestIDKey, "12345")
 	req = req.WithContext(ctx)
 	req.Header.Set("Prefer", "respond-async")

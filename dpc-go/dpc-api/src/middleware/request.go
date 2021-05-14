@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 )
 
@@ -13,6 +14,18 @@ func RequestIPCtx(next http.Handler) http.Handler {
 			ipAddress = r.RemoteAddr
 		}
 		ctx := context.WithValue(r.Context(), ContextKeyRequestingIP, ipAddress)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+// RequestURLCtx middleware to extract the requesting URL from the incoming request and set it in the request context
+func RequestURLCtx(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		scheme := "http"
+		if r.TLS != nil {
+			scheme = "https"
+		}
+		ctx := context.WithValue(r.Context(), ContextKeyRequestURL, fmt.Sprintf("%s://%s%s %s\" ", scheme, r.Host, r.RequestURI, r.Proto))
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

@@ -19,5 +19,6 @@ type JobQueueBatch struct {
 	Status          int          `db:"status" json:"status" faker:"-"`
 	SubmitTime      time.Time    `db:"submit_time" json:"submit_time" faker:"-"`
 	RequestingIP    string       `db:"requesting_ip" json:"requesting_ip" faker:"ipv4"`
+	RequestUrl      string       `db:"request_url" json:"request_url" faker:"url"`
 	IsBulk          bool         `db:"is_bulk" json:"is_bulk" faker:"-"`
 }

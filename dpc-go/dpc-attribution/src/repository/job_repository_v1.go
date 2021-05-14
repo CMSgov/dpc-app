@@ -36,6 +36,7 @@ type BatchDetails struct {
 	Tt           time.Time
 	Since        sql.NullTime
 	Types        string
+	RequestURL   string
 	RequestingIP string
 }
 
@@ -52,6 +53,7 @@ func (jr *JobRepositoryV1) NewJobQueueBatch(orgID string, g *v1.GroupNPIs, patie
 		Priority:        details.Priority,
 		Status:          0,
 		TransactionTime: details.Tt,
+		RequestUrl:      details.RequestURL,
 		RequestingIP:    details.RequestingIP,
 		IsBulk:          true,
 		SubmitTime:      time.Now(),
@@ -64,7 +66,7 @@ func (jr *JobRepositoryV1) Insert(ctx context.Context, batches []v1.JobQueueBatc
 	ib := sqlFlavor.NewInsertBuilder()
 	ib.InsertInto("job_queue_batch")
 	ib.Cols("job_id", "organization_id", "organization_npi", "provider_npi", "patients", "resource_types", "since",
-		"priority", "transaction_time", "status", "submit_time", "requesting_ip", "is_bulk")
+		"priority", "transaction_time", "status", "submit_time", "request_url", "requesting_ip", "is_bulk")
 	job := new(v1.Job)
 	// insert the batches within a single transaction
 	tx, err := jr.db.Begin()
@@ -73,7 +75,7 @@ func (jr *JobRepositoryV1) Insert(ctx context.Context, batches []v1.JobQueueBatc
 	}
 	for _, b := range batches {
 		ib.Values(b.JobID, b.OrganizationID, b.OrganizationNPI, b.ProviderNPI, b.PatientMBIs, b.ResourceTypes, b.Since,
-			b.Priority, b.TransactionTime, b.Status, b.SubmitTime, b.RequestingIP, b.IsBulk)
+			b.Priority, b.TransactionTime, b.Status, b.SubmitTime, b.RequestUrl, b.RequestingIP, b.IsBulk)
 		ib.SQL("returning job_id")
 		q, args := ib.Build()
 		jobStruct := sqlbuilder.NewStruct(job).For(sqlFlavor)

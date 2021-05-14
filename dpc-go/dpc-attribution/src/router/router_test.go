@@ -189,6 +189,9 @@ func (suite *RouterTestSuite) TestGroupExportRoute() {
 		r := arg.Get(1).(*http.Request)
 		assert.Equal(suite.T(), "12345", r.Context().Value(middleware2.ContextKeyOrganization))
 		assert.Equal(suite.T(), "9876", r.Context().Value(middleware2.ContextKeyGroup))
+		assert.Equal(suite.T(), "9876", r.Context().Value(middleware2.ContextKeyRequestingIP))
+		assert.Equal(suite.T(), "9876", r.Context().Value(middleware2.ContextKeyRequestURL))
+
 		assert.Equal(suite.T(), r.RemoteAddr, r.Context().Value(middleware2.ContextKeyRequestingIP))
 	})
 

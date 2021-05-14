@@ -116,6 +116,9 @@ func (ac *AttributionClient) Export(ctx context.Context, resourceType ResourceTy
 	if ctx.Value(middleware2.ContextKeyOrganization) != nil {
 		req.Header.Add(middleware2.OrgHeader, ctx.Value(middleware2.ContextKeyOrganization).(string))
 	}
+	if ctx.Value(middleware2.ContextKeyRequestURL) != nil {
+		req.Header.Add(middleware2.RequestUrlHeader, ctx.Value(middleware2.ContextKeyRequestURL).(string))
+	}
 
 	resp, err := ac.httpClient.Do(req)
 	if err != nil {

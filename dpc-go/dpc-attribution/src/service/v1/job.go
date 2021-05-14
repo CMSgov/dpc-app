@@ -32,6 +32,7 @@ type ExportRequest struct {
 	orgID             string
 	groupID           string
 	groupNPIs         *v1.GroupNPIs
+	requestURL        string
 	requestingIP      string
 	since             sql.NullTime
 	tt                time.Time
@@ -84,6 +85,7 @@ func (js *JobServiceV1) Export(w http.ResponseWriter, r *http.Request) {
 			Tt:           exportRequest.tt,
 			Since:        exportRequest.since,
 			Types:        exportRequest.types,
+			RequestURL:   exportRequest.requestURL,
 			RequestingIP: exportRequest.requestingIP,
 		}
 		jobQueueBatch := js.jr.NewJobQueueBatch(exportRequest.orgID, exportRequest.groupNPIs, patients, details)
@@ -122,6 +124,7 @@ func (js *JobServiceV1) buildExportRequest(ctx context.Context, w http.ResponseW
 	exportRequest.groupID = util.FetchValueFromContext(ctx, w, middleware2.ContextKeyGroup)
 	exportRequest.orgID = util.FetchValueFromContext(ctx, w, middleware2.ContextKeyOrganization)
 	exportRequest.requestingIP = util.FetchValueFromContext(ctx, w, middleware2.ContextKeyRequestingIP)
+	exportRequest.requestURL = util.FetchValueFromContext(ctx, w, middleware2.ContextKeyRequestURL)
 	patientMBIs, err := js.pr.FindMBIsByGroupID(exportRequest.groupID)
 	if err != nil {
 		log.Error("Failed to fetch patients for group", zap.Error(err))
