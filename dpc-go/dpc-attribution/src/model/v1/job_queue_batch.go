@@ -9,9 +9,9 @@ import (
 type JobQueueBatch struct {
 	JobID           string       `db:"job_id" json:"job_id" faker:"uuid_hyphenated"`
 	OrganizationID  string       `db:"organization_id" json:"organization_id" faker:"uuid_hyphenated"`
-	OrganizationNPI string       `db:"organization_npi" json:"organization_npi" faker:"uuid_hyphenated"`
-	ProviderNPI     string       `db:"provider_npi" json:"provider_npi" faker:"uuid_hyphenated"`
-	PatientMBIs     string       `db:"patients" json:"patient_mbis" faker:"-"`
+	OrganizationNPI string       `db:"organization_npi" json:"organization_npi" faker:"uuid_digit"`
+	ProviderNPI     string       `db:"provider_npi" json:"provider_npi" faker:"uuid_digit"`
+	PatientMBIs     string       `db:"patients" json:"patient_mbis" faker:"uuid_digit"`
 	ResourceTypes   string       `db:"resource_types" json:"resource_types" faker:"word"`
 	Since           sql.NullTime `db:"since" json:"since" faker:"-"`
 	TransactionTime time.Time    `db:"transaction_time" json:"transaction_time" faker:"-"`
