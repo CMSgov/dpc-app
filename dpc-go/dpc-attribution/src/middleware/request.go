@@ -20,7 +20,7 @@ func RequestIPCtx(next http.Handler) http.Handler {
 // RequestURLCtx middleware to extract the requesting URL from the incoming request and set it in the request context
 func RequestURLCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		requestURL := r.Header.Get(RequestUrlHeader)
+		requestURL := r.Header.Get(RequestURLHeader)
 		if requestURL == "" {
 			requestURL = r.RequestURI
 		}

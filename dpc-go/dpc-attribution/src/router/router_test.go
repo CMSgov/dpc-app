@@ -195,7 +195,7 @@ func (suite *RouterTestSuite) TestGroupExportRoute() {
 		assert.Equal(suite.T(), r.RemoteAddr, r.Context().Value(middleware2.ContextKeyRequestingIP))
 	})
 
-	res := suite.do(http.MethodGet, "/Group/9876/$export", nil, map[string]string{middleware2.OrgHeader: "12345", middleware2.RequestUrlHeader: fakeUrl})
+	res := suite.do(http.MethodGet, "/Group/9876/$export", nil, map[string]string{middleware2.OrgHeader: "12345", middleware2.RequestURLHeader: fakeUrl})
 	assert.Equal(suite.T(), "application/json; charset=UTF-8", res.Header.Get("Content-Type"))
 	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
 	assert.NotEqual(suite.T(), res.Body, http.NoBody)

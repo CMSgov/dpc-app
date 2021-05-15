@@ -89,7 +89,7 @@ func (suite *JobRepositoryV1TestSuite) TestInsert() {
 		suite.fakeJQB.TransactionTime,
 		suite.fakeJQB.Status,
 		suite.fakeJQB.SubmitTime,
-		suite.fakeJQB.RequestUrl,
+		suite.fakeJQB.RequestURL,
 		suite.fakeJQB.RequestingIP,
 		suite.fakeJQB.IsBulk,
 	).WillReturnRows(rows)

@@ -6,10 +6,9 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/go-chi/chi/middleware"
-
 	"github.com/CMSgov/dpc/api/logger"
 	middleware2 "github.com/CMSgov/dpc/api/middleware"
+	"github.com/go-chi/chi/middleware"
 
 	"github.com/hashicorp/go-retryablehttp"
 	"github.com/pkg/errors"
@@ -109,16 +108,7 @@ func (ac *AttributionClient) Export(ctx context.Context, resourceType ResourceTy
 		return nil, errors.Errorf("Failed to export data for %s", resourceType)
 	}
 
-	req.Header.Add(middleware.RequestIDHeader, ctx.Value(middleware.RequestIDKey).(string))
-	if ctx.Value(middleware2.ContextKeyRequestingIP) != nil {
-		req.Header.Add(middleware2.FwdHeader, ctx.Value(middleware2.ContextKeyRequestingIP).(string))
-	}
-	if ctx.Value(middleware2.ContextKeyOrganization) != nil {
-		req.Header.Add(middleware2.OrgHeader, ctx.Value(middleware2.ContextKeyOrganization).(string))
-	}
-	if ctx.Value(middleware2.ContextKeyRequestURL) != nil {
-		req.Header.Add(middleware2.RequestUrlHeader, ctx.Value(middleware2.ContextKeyRequestURL).(string))
-	}
+	req = setExportRequestHeaders(ctx, req)
 
 	resp, err := ac.httpClient.Do(req)
 	if err != nil {
@@ -143,6 +133,20 @@ func (ac *AttributionClient) Export(ctx context.Context, resourceType ResourceTy
 		return nil, errors.Errorf("Failed to start job for %s/%s", resourceType, id)
 	}
 	return body, nil
+}
+
+func setExportRequestHeaders(ctx context.Context, req *retryablehttp.Request) *retryablehttp.Request {
+	req.Header.Add(middleware.RequestIDHeader, ctx.Value(middleware.RequestIDKey).(string))
+	if ctx.Value(middleware2.ContextKeyRequestingIP) != nil {
+		req.Header.Add(middleware2.FwdHeader, ctx.Value(middleware2.ContextKeyRequestingIP).(string))
+	}
+	if ctx.Value(middleware2.ContextKeyOrganization) != nil {
+		req.Header.Add(middleware2.OrgHeader, ctx.Value(middleware2.ContextKeyOrganization).(string))
+	}
+	if ctx.Value(middleware2.ContextKeyRequestURL) != nil {
+		req.Header.Add(middleware2.RequestURLHeader, ctx.Value(middleware2.ContextKeyRequestURL).(string))
+	}
+	return req
 }
 
 // Post A function to enable communication with attribution service via Post

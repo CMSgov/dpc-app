@@ -53,7 +53,7 @@ func (jr *JobRepositoryV1) NewJobQueueBatch(orgID string, g *v1.GroupNPIs, patie
 		Priority:        details.Priority,
 		Status:          0,
 		TransactionTime: details.Tt,
-		RequestUrl:      details.RequestURL,
+		RequestURL:      details.RequestURL,
 		RequestingIP:    details.RequestingIP,
 		IsBulk:          true,
 		SubmitTime:      time.Now(),
@@ -75,7 +75,7 @@ func (jr *JobRepositoryV1) Insert(ctx context.Context, batches []v1.JobQueueBatc
 	}
 	for _, b := range batches {
 		ib.Values(b.JobID, b.OrganizationID, b.OrganizationNPI, b.ProviderNPI, b.PatientMBIs, b.ResourceTypes, b.Since,
-			b.Priority, b.TransactionTime, b.Status, b.SubmitTime, b.RequestUrl, b.RequestingIP, b.IsBulk)
+			b.Priority, b.TransactionTime, b.Status, b.SubmitTime, b.RequestURL, b.RequestingIP, b.IsBulk)
 		ib.SQL("returning job_id")
 		q, args := ib.Build()
 		jobStruct := sqlbuilder.NewStruct(job).For(sqlFlavor)
