@@ -15,6 +15,7 @@ import (
 	"github.com/CMSgov/dpc/attribution/service"
 	"github.com/bxcodec/faker/v3"
 	"github.com/kinbiko/jsonassert"
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
@@ -62,6 +63,7 @@ type JobServiceV1TestSuite struct {
 	jr      *MockJobRepo
 	pr      *MockPatientRepo
 	service service.JobService
+	job     *v1.Job
 }
 
 func TestJobServiceV1TestSuite(t *testing.T) {
@@ -72,11 +74,6 @@ func (suite *JobServiceV1TestSuite) SetupTest() {
 	suite.jr = &MockJobRepo{}
 	suite.pr = &MockPatientRepo{}
 	suite.service = NewJobService(suite.pr, suite.jr)
-}
-
-func (suite *JobServiceV1TestSuite) TestExport() {
-	ja := jsonassert.New(suite.T())
-
 	m := []string{faker.UUIDDigit(), faker.UUIDDigit(), faker.UUIDDigit()}
 	g := v1.GroupNPIs{}
 	err := faker.FakeData(&g)
@@ -93,10 +90,42 @@ func (suite *JobServiceV1TestSuite) TestExport() {
 	if err != nil {
 		fmt.Printf("ERR %v\n", err)
 	}
+	suite.job = &j
 	suite.pr.On("FindMBIsByGroupID", mock.Anything).Return(m, nil)
 	suite.jr.On("GetGroupNPIs", mock.Anything, mock.Anything).Return(&g, nil)
 	suite.jr.On("NewJobQueueBatch", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(&jqb)
-	suite.jr.On("Insert", mock.Anything, mock.Anything).Return(&j, err)
+}
+
+func (suite *JobServiceV1TestSuite) TestExport() {
+	ja := jsonassert.New(suite.T())
+
+	suite.jr.On("Insert", mock.Anything, mock.Anything).Return(suite.job, nil)
+
+	req := httptest.NewRequest("GET", "http://example.com/v2/Group/9876/$export", nil)
+	ctx := req.Context()
+	ctx = context.WithValue(ctx, middleware2.ContextKeyOrganization, "12345")
+	ctx = context.WithValue(ctx, middleware2.ContextKeyGroup, faker.UUIDHyphenated())
+	ctx = context.WithValue(ctx, middleware2.ContextKeyRequestURL, faker.URL())
+	ctx = context.WithValue(ctx, middleware2.ContextKeyRequestingIP, faker.IPv4())
+	req = req.WithContext(ctx)
+
+	w := httptest.NewRecorder()
+	suite.service.Export(w, req)
+
+	res := w.Result()
+
+	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
+
+	resp, _ := ioutil.ReadAll(res.Body)
+
+	b, _ := json.Marshal(v1.Job{ID: suite.job.ID})
+	ja.Assertf(string(resp), string(b))
+}
+
+func (suite *JobServiceV1TestSuite) TestExportRepoError() {
+	ja := jsonassert.New(suite.T())
+
+	suite.jr.On("Insert", mock.Anything, mock.Anything).Return(nil, errors.New("error"))
 
 	req := httptest.NewRequest("GET", "http://example.com/v2/Group/9876/$export", nil)
 	ctx := req.Context()
@@ -112,14 +141,14 @@ func (suite *JobServiceV1TestSuite) TestExport() {
 
 	res := w.Result()
 
-	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
+	assert.Equal(suite.T(), http.StatusUnprocessableEntity, res.StatusCode)
 
 	resp, _ := ioutil.ReadAll(res.Body)
 
-	b, _ := json.Marshal(v1.Job{ID: j.ID})
-	ja.Assertf(string(resp), string(b))
-}
-
-func (suite *JobServiceV1TestSuite) TestExportError() {
-
+	ja.Assertf(string(resp), `
+	{
+        "error": "Unprocessable Entity",
+        "message": "error",
+        "statusCode": 422
+    }`)
 }
