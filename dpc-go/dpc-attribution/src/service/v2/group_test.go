@@ -57,7 +57,7 @@ func (suite *GroupServiceTestSuite) TestPost() {
 	}
 	suite.repo.On("Insert", mock.Anything, mock.Anything).Return(&o, nil)
 
-	req := httptest.NewRequest("POST", "http://example.com/foo", nil)
+	req := httptest.NewRequest(http.MethodPost, "http://example.com/foo", nil)
 
 	w := httptest.NewRecorder()
 
@@ -78,7 +78,7 @@ func (suite *GroupServiceTestSuite) TestPostRepoError() {
 
 	suite.repo.On("Insert", mock.Anything, mock.Anything).Return(nil, errors.New("error"))
 
-	req := httptest.NewRequest("POST", "http://example.com/foo", nil)
+	req := httptest.NewRequest(http.MethodPost, "http://example.com/foo", nil)
 
 	w := httptest.NewRecorder()
 
@@ -96,4 +96,28 @@ func (suite *GroupServiceTestSuite) TestPostRepoError() {
         "message": "error",
         "statusCode": 422
     }`)
+}
+
+func (suite *GroupServiceTestSuite) TestGetNotImplemented() {
+	req := httptest.NewRequest(http.MethodGet, "http://example.com/foo", nil)
+	w := httptest.NewRecorder()
+	suite.service.Get(w, req)
+	res := w.Result()
+	assert.Equal(suite.T(), http.StatusNotImplemented, res.StatusCode)
+}
+
+func (suite *GroupServiceTestSuite) TestDeleteNotImplemented() {
+	req := httptest.NewRequest(http.MethodDelete, "http://example.com/foo", nil)
+	w := httptest.NewRecorder()
+	suite.service.Delete(w, req)
+	res := w.Result()
+	assert.Equal(suite.T(), http.StatusNotImplemented, res.StatusCode)
+}
+
+func (suite *GroupServiceTestSuite) TestPutNotImplemented() {
+	req := httptest.NewRequest(http.MethodPut, "http://example.com/foo", nil)
+	w := httptest.NewRecorder()
+	suite.service.Put(w, req)
+	res := w.Result()
+	assert.Equal(suite.T(), http.StatusNotImplemented, res.StatusCode)
 }

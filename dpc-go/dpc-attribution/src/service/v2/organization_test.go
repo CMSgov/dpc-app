@@ -252,3 +252,11 @@ func (suite *OrganizationServiceTestSuite) TestPut() {
 	b, _ := json.Marshal(o)
 	ja.Assertf(string(resp), string(b))
 }
+
+func (suite *OrganizationServiceTestSuite) TestExportNotImplemented() {
+	req := httptest.NewRequest("GET", "http://example.com/foo", nil)
+	w := httptest.NewRecorder()
+	suite.service.Export(w, req)
+	res := w.Result()
+	assert.Equal(suite.T(), http.StatusNotImplemented, res.StatusCode)
+}

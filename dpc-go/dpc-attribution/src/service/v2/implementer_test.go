@@ -63,7 +63,7 @@ func (suite *ImplementerServiceTestSuite) TestPost() {
 	}
 	suite.repo.On("Insert", mock.Anything, mock.Anything).Return(&impl, nil)
 
-	req := httptest.NewRequest("POST", "http://example.com/foo", strings.NewReader(`{"name":"test-name"}`))
+	req := httptest.NewRequest(http.MethodPost, "http://example.com/foo", strings.NewReader(`{"name":"test-name"}`))
 
 	w := httptest.NewRecorder()
 
@@ -84,7 +84,7 @@ func (suite *ImplementerServiceTestSuite) TestSaveRepoError() {
 
 	suite.repo.On("Insert", mock.Anything, mock.Anything).Return(nil, errors.New("error"))
 
-	req := httptest.NewRequest("POST", "http://example.com/foo", strings.NewReader("{\"name\":\"test-name\"}"))
+	req := httptest.NewRequest(http.MethodPost, "http://example.com/foo", strings.NewReader("{\"name\":\"test-name\"}"))
 
 	w := httptest.NewRecorder()
 
@@ -102,4 +102,36 @@ func (suite *ImplementerServiceTestSuite) TestSaveRepoError() {
         "message": "error",
         "statusCode": 422
     }`)
+}
+
+func (suite *ImplementerServiceTestSuite) TestGetNotImplemented() {
+	req := httptest.NewRequest(http.MethodGet, "http://example.com/foo", nil)
+	w := httptest.NewRecorder()
+	suite.service.Get(w, req)
+	res := w.Result()
+	assert.Equal(suite.T(), http.StatusNotImplemented, res.StatusCode)
+}
+
+func (suite *ImplementerServiceTestSuite) TestDeleteNotImplemented() {
+	req := httptest.NewRequest(http.MethodDelete, "http://example.com/foo", nil)
+	w := httptest.NewRecorder()
+	suite.service.Delete(w, req)
+	res := w.Result()
+	assert.Equal(suite.T(), http.StatusNotImplemented, res.StatusCode)
+}
+
+func (suite *ImplementerServiceTestSuite) TestPutNotImplemented() {
+	req := httptest.NewRequest(http.MethodPut, "http://example.com/foo", nil)
+	w := httptest.NewRecorder()
+	suite.service.Put(w, req)
+	res := w.Result()
+	assert.Equal(suite.T(), http.StatusNotImplemented, res.StatusCode)
+}
+
+func (suite *ImplementerServiceTestSuite) TestExportNotImplemented() {
+	req := httptest.NewRequest(http.MethodGet, "http://example.com/foo", nil)
+	w := httptest.NewRecorder()
+	suite.service.Export(w, req)
+	res := w.Result()
+	assert.Equal(suite.T(), http.StatusNotImplemented, res.StatusCode)
 }

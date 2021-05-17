@@ -135,5 +135,5 @@ func (os *OrganizationService) Put(w http.ResponseWriter, r *http.Request) {
 
 // Export function is not used for Organizations
 func (os *OrganizationService) Export(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusMethodNotAllowed)
+	w.WriteHeader(http.StatusNotImplemented)
 }
