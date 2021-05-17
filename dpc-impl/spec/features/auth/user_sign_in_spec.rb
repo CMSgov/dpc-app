@@ -30,7 +30,7 @@ RSpec.feature 'user signs in' do
 
     last_delivery = ActionMailer::Base.deliveries.last
 
-    confirmation_link = last_delivery.body.raw_source.match(%r{href="http:\/\/localhost:3000(?<path>.+?)">})[:path]
+    confirmation_link = last_delivery.body.raw_source.match(%r{href="http:\/\/localhost:3001(?<path>.+?)">})[:path]
 
     visit confirmation_link
 
