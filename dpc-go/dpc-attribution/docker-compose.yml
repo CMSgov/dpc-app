@@ -25,6 +25,8 @@ services:
       dockerfile: docker/Dockerfiles/Dockerfile.attribution
     depends_on:
       - migrator
+    ports:
+      - "3001:3001"
     environment:
       - DPC_DB_URL=postgresql://postgres:dpc-safe@db:5432/dpc_attribution_v2
       - DPC_PORT=3001
