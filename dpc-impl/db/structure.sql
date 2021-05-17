@@ -121,6 +121,8 @@ CREATE TABLE public.users (
     confirmation_token character varying,
     confirmed_at timestamp without time zone,
     confirmation_sent_at timestamp without time zone,
+    last_activity_at timestamp without time zone,
+    expired_at timestamp without time zone,
     created_at timestamp(6) without time zone NOT NULL,
     updated_at timestamp(6) without time zone NOT NULL,
     invitation_token character varying,
