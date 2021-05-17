@@ -312,3 +312,27 @@ func (suite *GroupControllerTestSuite) TestExportGroupInvalidOutputFormat() {
         "resourceType": "OperationOutcome"
     }`)
 }
+
+func (suite *GroupControllerTestSuite) TestReadNotImplemented() {
+	req := httptest.NewRequest(http.MethodGet, "http://example.com/foo", nil)
+	w := httptest.NewRecorder()
+	suite.grp.Read(w, req)
+	res := w.Result()
+	assert.Equal(suite.T(), http.StatusNotImplemented, res.StatusCode)
+}
+
+func (suite *GroupControllerTestSuite) TestDeleteNotImplemented() {
+	req := httptest.NewRequest(http.MethodDelete, "http://example.com/foo", nil)
+	w := httptest.NewRecorder()
+	suite.grp.Delete(w, req)
+	res := w.Result()
+	assert.Equal(suite.T(), http.StatusNotImplemented, res.StatusCode)
+}
+
+func (suite *GroupControllerTestSuite) TestUpdateNotImplemented() {
+	req := httptest.NewRequest(http.MethodGet, "http://example.com/foo", nil)
+	w := httptest.NewRecorder()
+	suite.grp.Update(w, req)
+	res := w.Result()
+	assert.Equal(suite.T(), http.StatusNotImplemented, res.StatusCode)
+}

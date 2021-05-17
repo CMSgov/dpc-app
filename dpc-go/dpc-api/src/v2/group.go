@@ -98,19 +98,19 @@ func contentLocationHeader(id string, r *http.Request) string {
 // Read function is not currently used for GroupController
 //goland:noinspection GoUnusedParameter
 func (gc *GroupController) Read(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusMethodNotAllowed)
+	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Delete function is not currently used for GroupController
 //goland:noinspection GoUnusedParameter
 func (gc *GroupController) Delete(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusMethodNotAllowed)
+	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Update function is not currently used for GroupController
 //goland:noinspection GoUnusedParameter
 func (gc *GroupController) Update(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusMethodNotAllowed)
+	w.WriteHeader(http.StatusNotImplemented)
 }
 
 func isValidGroup(group []byte) error {

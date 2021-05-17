@@ -293,3 +293,11 @@ func (suite *OrganizationControllerTestSuite) TestUpdateOrganization() {
 	resp, _ := ioutil.ReadAll(res.Body)
 	ja.Assertf(string(resp), string(ar))
 }
+
+func (suite *OrganizationControllerTestSuite) TestExportNotImplemented() {
+	req := httptest.NewRequest(http.MethodGet, "http://example.com/foo", nil)
+	w := httptest.NewRecorder()
+	suite.org.Export(w, req)
+	res := w.Result()
+	assert.Equal(suite.T(), http.StatusNotImplemented, res.StatusCode)
+}
