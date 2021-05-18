@@ -33,7 +33,7 @@ services:
       - DB_PASS=dpc-safe
       - DATABASE_CLEANER_ALLOW_REMOTE_DATABASE_URL=true
     ports:
-      - "3001:3001"
+      - "4000:4000"
     depends_on:
       - db
       - redis
@@ -67,4 +67,4 @@ services:
     image: dadarek/wait-for-dependencies
     depends_on:
       - dpc_impl
-    command: dpc_impl:3001
+    command: dpc_impl:4000

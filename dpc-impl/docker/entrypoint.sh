@@ -15,9 +15,9 @@ if [ "$1" == "impl" ]; then
   # Start the database service (and make accessible outside the Docker container)
   echo "Starting Rails server..."
   if [[ -n "$JACOCO" ]]; then
-    bundle exec rails server -b 0.0.0.0 -p 3001
+    bundle exec rails server -b 0.0.0.0 -p 4000
   else
-    bundle exec rails server -b 0.0.0.0 -p 3001 2>&1 | tee -a /var/log/dpc-impl-$(hostname).log
+    bundle exec rails server -b 0.0.0.0 -p 4000 2>&1 | tee -a /var/log/dpc-impl-$(hostname).log
   fi
 fi
 
