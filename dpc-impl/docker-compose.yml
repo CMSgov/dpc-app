@@ -8,14 +8,6 @@ services:
   redis:
     image: redis:latest
 
-  db:
-    image: postgres:11
-    environment:
-      - POSTGRES_DB=dpc-impl_development
-      - POSTGRES_PASSWORD=dpc-safe
-    ports:
-      - "15432:5432"
-
   dpc_impl:
     build:
       context: .

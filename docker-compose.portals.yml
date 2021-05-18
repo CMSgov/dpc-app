@@ -97,6 +97,51 @@ services:
       - redis
       - db
 
+      version: '3'
+
+volumes:
+  coverage:
+
+  dpc_impl:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    image: dpc-impl:latest
+    volumes:
+      - "./coverage:/dpc-impl/coverage"
+      - ./tmp/letter_opener/impl:/dpc-impl/letter_opener
+
+    environment:
+      - REDIS_URL=redis://redis
+      - DATABASE_URL=postgresql://db/dpc-impl_development
+      - TEST_DATABASE_URL=postgresql://db/dpc-impl_test
+      - DB_USER=postgres
+      - DB_PASS=dpc-safe
+      - DATABASE_CLEANER_ALLOW_REMOTE_DATABASE_URL=true
+    ports:
+      - "4000:4000"
+    depends_on:
+      - db
+      - redis
+      - impl_sidekiq
+
+  impl_sidekiq:
+    volumes:
+      - ./tmp/letter_opener/impl:/dpc-impl/letter_opener
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    command: impl_sidekiq
+    image: dpc-impl-sidekiq:latest
+    environment:
+      - REDIS_URL=redis://redis
+      - DATABASE_URL=postgresql://db/dpc-impl_development
+      - DB_USER=postgresql
+      - DB_PASS=dpc-safe
+    depends_on:
+      - redis
+      - db
+
   # Starts up each service in the background
   start_core_dependencies:
     image: dadarek/wait-for-dependencies
@@ -116,3 +161,9 @@ services:
     depends_on:
       - dpc_admin
     command: dpc_admin:3000
+
+  start_impl:
+    image: dadarek/wait-for-dependencies
+    depends_on:
+      - dpc_impl
+    command: dpc_impl:4000
