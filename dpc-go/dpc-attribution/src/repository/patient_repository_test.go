@@ -25,13 +25,13 @@ func (suite *PatientRepositoryTest) TestFindMBIsByGroupID() {
 	groupID := faker.Word()
 	expectedMBIs := []string{faker.UUIDDigit(), faker.UUIDDigit(), faker.UUIDDigit()}
 
-	expectedInsertQuery := `SELECT patients.beneficiary_id FROM rosters JOIN attributions ON attributions.roster_id = rosters.id JOIN patients ON attributions.patient_id = patients.id WHERE rosters.id = \$1`
+	expectedInsertQuery := `SELECT patients.beneficiary_id FROM rosters JOIN attributions ON attributions.roster_id = rosters.id JOIN patients ON attributions.patient_id = patients.id WHERE rosters.id = \$1 AND attributions.inactive <> \$2`
 
 	rows := sqlmock.NewRows([]string{"beneficiary_id"}).
 		AddRow(expectedMBIs[0]).
 		AddRow(expectedMBIs[1]).
 		AddRow(expectedMBIs[2])
-	mock.ExpectQuery(expectedInsertQuery).WithArgs(groupID).WillReturnRows(rows)
+	mock.ExpectQuery(expectedInsertQuery).WithArgs(groupID, true).WillReturnRows(rows)
 	result, err := repo.FindMBIsByGroupID(groupID)
 	if err := mock.ExpectationsWereMet(); err != nil {
 		suite.T().Errorf("there were unfulfilled expectations: %s", err)

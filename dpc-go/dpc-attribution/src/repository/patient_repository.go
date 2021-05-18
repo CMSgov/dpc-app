@@ -28,7 +28,7 @@ func (pr *PatientRepository) FindMBIsByGroupID(groupID string) ([]string, error)
 	sb.From("rosters")
 	sb.Join("attributions", "attributions.roster_id = rosters.id")
 	sb.Join("patients", "attributions.patient_id = patients.id")
-	sb.Where(sb.Equal("rosters.id", groupID))
+	sb.Where(sb.Equal("rosters.id", groupID), sb.NotEqual("attributions.inactive", true))
 	q, args := sb.Build()
 
 	var (
