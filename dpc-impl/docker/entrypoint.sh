@@ -21,7 +21,7 @@ if [ "$1" == "impl" ]; then
   fi
 fi
 
-if [ "$1" == "sidekiq" ]; then
+if [ "$1" == "impl_sidekiq" ]; then
   # Start Sidekiq job processing
   if [[ -n "$JACOCO" ]]; then
     bundle exec sidekiq -q default -q mailers

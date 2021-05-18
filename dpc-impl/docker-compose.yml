@@ -22,7 +22,7 @@ services:
       dockerfile: ./Dockerfile
     image: dpc-impl:latest
     volumes:
-      - "./coverage:/dpce-impl/coverage"
+      - "./coverage:/dpc-impl/coverage"
       - ./tmp/letter_opener/impl:/dpc-impl/letter_opener
 
     environment:
