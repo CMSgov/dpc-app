@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/CMSgov/dpc/attribution/service"
 	"net/http"
 
 	"go.uber.org/zap"
@@ -33,10 +34,9 @@ func main() {
 	or := repository.NewOrganizationRepo(db)
 	os := v2.NewOrganizationService(or)
 
-	js := v1.NewJobService(ctx)
+	js, ds := createV1Services(logger.WithContext(ctx))
 	gr := repository.NewGroupRepo(db)
 	gs := v2.NewGroupService(gr, js)
-	ds := v1.NewDataService()
 
 	ir := repository.NewImplementerRepo(db)
 	is := v2.NewImplementerService(ir)
@@ -48,4 +48,21 @@ func main() {
 	if err := http.ListenAndServe(fmt.Sprintf(":%s", port), attributionRouter); err != nil {
 		logger.WithContext(ctx).Fatal("Failed to start server", zap.Error(err))
 	}
+}
+
+func createV1Services(log *zap.Logger) (service.JobService, service.DataService) {
+	attrDbV1 := repository.GetAttributionV1DbConnection()
+	queueDbV1 := repository.GetQueueDbConnection()
+
+	defer func() {
+		if err := attrDbV1.Close(); err != nil {
+			log.Fatal("Failed to close attribution v1 db connection", zap.Error(err))
+		}
+		if err := queueDbV1.Close(); err != nil {
+			log.Fatal("Failed to close queue v1 db connection", zap.Error(err))
+		}
+	}()
+	pr := repository.NewPatientRepo(attrDbV1)
+	jr := repository.NewJobRepo(queueDbV1)
+	return v1.NewJobService(pr, jr), v1.NewDataService(jr)
 }

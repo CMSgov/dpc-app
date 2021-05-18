@@ -15,15 +15,13 @@ type DataService struct {
 	jr repository.JobRepo
 }
 
-func NewDataService() *DataService {
-	queueDbV1 := repository.GetQueueDbConnection()
-	jr := repository.NewJobRepo(queueDbV1)
+func NewDataService(jr repository.JobRepo) *DataService {
 	return &DataService{
 		jr,
 	}
 }
 
-func (ds *DataService) CheckFile(w http.ResponseWriter, r *http.Request) {
+func (ds *DataService) GetFileInfo(w http.ResponseWriter, r *http.Request) {
 	log := logger.WithContext(r.Context())
 	fileName, ok := r.Context().Value(middleware.ContextKeyFileName).(string)
 	if !ok {

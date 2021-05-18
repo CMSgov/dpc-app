@@ -39,7 +39,7 @@ func NewDPCAttributionRouter(o service.Service, g service.Service, impl service.
 		})
 		r.Route("/Data", func(r chi.Router) {
 			r.Use(middleware2.AuthCtx)
-			r.With(middleware2.FileNameCtx).Get("/validityCheck/{fileName}", d.CheckFile)
+			r.With(middleware2.FileNameCtx).Get("/validityCheck/{fileName}", d.GetFileInfo)
 		})
 	})
 

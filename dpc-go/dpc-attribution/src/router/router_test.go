@@ -44,7 +44,7 @@ type MockDataService struct {
 	mock.Mock
 }
 
-func (mds *MockDataService) CheckFile(w http.ResponseWriter, r *http.Request) {
+func (mds *MockDataService) GetFileInfo(w http.ResponseWriter, r *http.Request) {
 	mds.Called(w, r)
 }
 
