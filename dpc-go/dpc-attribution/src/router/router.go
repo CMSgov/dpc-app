@@ -3,11 +3,10 @@ package router
 import (
 	"net/http"
 
-	"github.com/go-chi/chi"
-	"github.com/go-chi/chi/middleware"
-
 	middleware2 "github.com/CMSgov/dpc/attribution/middleware"
 	"github.com/CMSgov/dpc/attribution/service"
+	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/middleware"
 )
 
 // NewDPCAttributionRouter function to build the attribution router
