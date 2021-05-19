@@ -14,6 +14,7 @@ import (
 	"github.com/CMSgov/dpc/attribution/service"
 	"github.com/CMSgov/dpc/attribution/util"
 	"github.com/darahayes/go-boom"
+	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
 	"github.com/CMSgov/dpc/attribution/logger"
@@ -112,7 +113,10 @@ func (js *JobServiceV1) buildExportRequest(ctx context.Context, w http.ResponseW
 	exportRequest.requestingIP = util.FetchValueFromContext(ctx, w, middleware2.ContextKeyRequestingIP)
 	exportRequest.requestURL = util.FetchValueFromContext(ctx, w, middleware2.ContextKeyRequestURL)
 	patientMBIs, err := js.pr.FindMBIsByGroupID(exportRequest.groupID)
-	if err != nil {
+	if err != nil || len(patientMBIs) == 0 {
+		if err == nil {
+			err = errors.New("Failed to fetch patients for group")
+		}
 		log.Error("Failed to fetch patients for group", zap.Error(err))
 		boom.BadRequest(w, "The group must contain active patients")
 		return nil, err
