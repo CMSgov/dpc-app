@@ -11,7 +11,8 @@ services:
   db:
     image: postgres:11
     environment:
-      - POSTGRES_DB=dpc-website_development
+      - POSTGRES_MULTIPLE_DATABASES=dpc-website_development,dpc-impl_development
+      - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=dpc-safe
     ports:
       - "15432:5432"
