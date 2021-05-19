@@ -72,7 +72,6 @@ start-dpc: secure-envs
 .PHONY: down-dpc
 down-dpc: 
 	@docker-compose -f docker-compose.yml -f docker-compose.portals.yml down
-	@docker-compose -f docker-compose.yml -f dpc-impl/docker-compose.yml down
 	@docker ps
 
 .PHONY: ci-app

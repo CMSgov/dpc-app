@@ -97,19 +97,14 @@ services:
       - redis
       - db
 
-      version: '3'
-
-volumes:
-  coverage:
-
   dpc_impl:
     build:
       context: .
-      dockerfile: ./Dockerfile
+      dockerfile: dpc-impl/Dockerfile
     image: dpc-impl:latest
     volumes:
-      - "./coverage:/dpc-impl/coverage"
-      - ./tmp/letter_opener/impl:/dpc-impl/letter_opener
+      - "./dpc-impl/coverage:/dpc-impl/coverage"
+      - ./tmp/letter_opener/impl:/dpc-impl/tmp/letter_opener
 
     environment:
       - REDIS_URL=redis://redis
@@ -130,7 +125,7 @@ volumes:
       - ./tmp/letter_opener/impl:/dpc-impl/letter_opener
     build:
       context: .
-      dockerfile: ./Dockerfile
+      dockerfile: dpc-impl/Dockerfile
     command: impl_sidekiq
     image: dpc-impl-sidekiq:latest
     environment:
