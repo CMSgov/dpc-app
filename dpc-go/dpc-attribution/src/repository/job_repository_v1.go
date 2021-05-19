@@ -42,7 +42,6 @@ type BatchDetails struct {
 // NewJobQueueBatch function that creates a new JobQueueBatch
 func (jr *JobRepositoryV1) NewJobQueueBatch(orgID string, g *v1.GroupNPIs, patientMBIs []string, details BatchDetails) *v1.JobQueueBatch {
 	return &v1.JobQueueBatch{
-		JobID:           uuid.New().String(),
 		OrganizationID:  orgID,
 		OrganizationNPI: g.OrgNPI,
 		ProviderNPI:     g.ProviderNPI,
@@ -62,19 +61,20 @@ func (jr *JobRepositoryV1) NewJobQueueBatch(orgID string, g *v1.GroupNPIs, patie
 // Insert function that saves a slice of JobQueueBatch's into the database and returns an error if there is one
 func (jr *JobRepositoryV1) Insert(ctx context.Context, batches []v1.JobQueueBatch) (*v1.Job, error) {
 	var results []*v1.Job
-	ib := sqlFlavor.NewInsertBuilder()
-	ib.InsertInto("job_queue_batch")
-	ib.Cols("batch_id", "job_id", "organization_id", "organization_npi", "provider_npi", "patients", "resource_types", "since",
-		"priority", "transaction_time", "status", "submit_time", "request_url", "requesting_ip", "is_bulk")
 	job := new(v1.Job)
 	// insert the batches within a single transaction
 	tx, err := jr.db.Begin()
 	if err != nil {
 		return nil, err
 	}
+	jobID := uuid.New().String()
 	for _, b := range batches {
+		ib := sqlFlavor.NewInsertBuilder()
+		ib.InsertInto("job_queue_batch")
+		ib.Cols("batch_id", "job_id", "organization_id", "organization_npi", "provider_npi", "patients", "resource_types", "since",
+			"priority", "transaction_time", "status", "submit_time", "request_url", "requesting_ip", "is_bulk")
 		batchID := uuid.New().String()
-		ib.Values(batchID, b.JobID, b.OrganizationID, b.OrganizationNPI, b.ProviderNPI, b.PatientMBIs, b.ResourceTypes, b.Since,
+		ib.Values(batchID, jobID, b.OrganizationID, b.OrganizationNPI, b.ProviderNPI, b.PatientMBIs, b.ResourceTypes, b.Since,
 			b.Priority, b.TransactionTime, b.Status, b.SubmitTime, b.RequestURL, b.RequestingIP, b.IsBulk)
 		ib.SQL("returning job_id")
 		q, args := ib.Build()

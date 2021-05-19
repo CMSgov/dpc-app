@@ -7,7 +7,6 @@ import (
 
 // JobQueueBatch is a struct that models the v1 job_queue_batch table
 type JobQueueBatch struct {
-	JobID           string       `db:"job_id" json:"job_id" faker:"uuid_hyphenated"`
 	OrganizationID  string       `db:"organization_id" json:"organization_id" faker:"uuid_hyphenated"`
 	OrganizationNPI string       `db:"organization_npi" json:"organization_npi" faker:"uuid_digit"`
 	ProviderNPI     string       `db:"provider_npi" json:"provider_npi" faker:"uuid_digit"`
