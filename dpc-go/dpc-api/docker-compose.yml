@@ -7,5 +7,12 @@ services:
       dockerfile: docker/Dockerfiles/Dockerfile.api
     ports:
       - "3000:3000"
+    networks:
+      - proxynet
     environment:
       - DPC_PORT=3000
+
+networks:
+  proxynet:
+    external:
+      name: custom_network
