@@ -64,7 +64,7 @@ func (jr *JobRepositoryV1) Insert(ctx context.Context, batches []v1.JobQueueBatc
 	var results []*v1.Job
 	ib := sqlFlavor.NewInsertBuilder()
 	ib.InsertInto("job_queue_batch")
-	ib.Cols("job_id", "organization_id", "organization_npi", "provider_npi", "patients", "resource_types", "since",
+	ib.Cols("batch_id", "job_id", "organization_id", "organization_npi", "provider_npi", "patients", "resource_types", "since",
 		"priority", "transaction_time", "status", "submit_time", "request_url", "requesting_ip", "is_bulk")
 	job := new(v1.Job)
 	// insert the batches within a single transaction
@@ -73,7 +73,8 @@ func (jr *JobRepositoryV1) Insert(ctx context.Context, batches []v1.JobQueueBatc
 		return nil, err
 	}
 	for _, b := range batches {
-		ib.Values(b.JobID, b.OrganizationID, b.OrganizationNPI, b.ProviderNPI, b.PatientMBIs, b.ResourceTypes, b.Since,
+		batchID := uuid.New().String()
+		ib.Values(batchID, b.JobID, b.OrganizationID, b.OrganizationNPI, b.ProviderNPI, b.PatientMBIs, b.ResourceTypes, b.Since,
 			b.Priority, b.TransactionTime, b.Status, b.SubmitTime, b.RequestURL, b.RequestingIP, b.IsBulk)
 		ib.SQL("returning job_id")
 		q, args := ib.Build()

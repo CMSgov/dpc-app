@@ -70,13 +70,13 @@ func (suite *JobRepositoryV1TestSuite) TestInsert() {
 	ctx := context.Background()
 	batches := []v1.JobQueueBatch{suite.fakeJQB}
 
-	expectedInsertQuery := `INSERT INTO job_queue_batch \(job_id, organization_id, organization_npi, provider_npi, patients, resource_types, since, priority, transaction_time, status, submit_time,  request_url, requesting_ip, is_bulk\) VALUES \(\$1, \$2, \$3, \$4, \$5, \$6, \$7, \$8, \$9, \$10, \$11, \$12, \$13, \$14\) returning job_id`
+	expectedInsertQuery := `INSERT INTO job_queue_batch \(batch_id, job_id, organization_id, organization_npi, provider_npi, patients, resource_types, since, priority, transaction_time, status, submit_time,  request_url, requesting_ip, is_bulk\) VALUES \(\$1, \$2, \$3, \$4, \$5, \$6, \$7, \$8, \$9, \$10, \$11, \$12, \$13, \$14, \$15\) returning job_id`
 
 	rows := sqlmock.NewRows([]string{"job_id"}).
-		AddRow(suite.fakeJQB.JobID).
 		AddRow(suite.fakeJQB.JobID)
 	mock.ExpectBegin()
 	mock.ExpectQuery(expectedInsertQuery).WithArgs(
+		sqlmock.AnyArg(),
 		suite.fakeJQB.JobID,
 		suite.fakeJQB.OrganizationID,
 		suite.fakeJQB.OrganizationNPI,
