@@ -38,14 +38,6 @@ func (m *MockJobRepo) Insert(ctx context.Context, b []v1.JobQueueBatch) (*v1.Job
 	return args.Get(0).(*v1.Job), args.Error(1)
 }
 
-func (m *MockJobRepo) GetGroupNPIs(ctx context.Context, id string) (*v1.GroupNPIs, error) {
-	args := m.Called(ctx, id)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).(*v1.GroupNPIs), args.Error(1)
-}
-
 type MockPatientRepo struct {
 	mock.Mock
 }
@@ -56,6 +48,14 @@ func (m *MockPatientRepo) FindMBIsByGroupID(id string) ([]string, error) {
 		return nil, args.Error(1)
 	}
 	return args.Get(0).([]string), args.Error(1)
+}
+
+func (m *MockPatientRepo) GetGroupNPIs(ctx context.Context, id string) (*v1.GroupNPIs, error) {
+	args := m.Called(ctx, id)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*v1.GroupNPIs), args.Error(1)
 }
 
 type JobServiceV1TestSuite struct {
@@ -92,7 +92,7 @@ func (suite *JobServiceV1TestSuite) SetupTest() {
 	}
 	suite.job = &j
 	suite.pr.On("FindMBIsByGroupID", mock.Anything).Return(m, nil)
-	suite.jr.On("GetGroupNPIs", mock.Anything, mock.Anything).Return(&g, nil)
+	suite.pr.On("GetGroupNPIs", mock.Anything, mock.Anything).Return(&g, nil)
 	suite.jr.On("NewJobQueueBatch", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(&jqb)
 }
 

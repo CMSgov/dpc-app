@@ -126,7 +126,7 @@ func (js *JobServiceV1) buildExportRequest(ctx context.Context, w http.ResponseW
 	// TODO: Get TransactionTime from BFD (requires client)
 	exportRequest.tt = time.Time{}
 
-	groupNPIs, err := js.jr.GetGroupNPIs(ctx, exportRequest.groupID)
+	groupNPIs, err := js.pr.GetGroupNPIs(ctx, exportRequest.groupID)
 	if err != nil || groupNPIs.OrgNPI == "" || groupNPIs.ProviderNPI == "" {
 		log.Error("Failed to retrieve NPIs for Group", zap.Error(err))
 		boom.BadData(w, err)

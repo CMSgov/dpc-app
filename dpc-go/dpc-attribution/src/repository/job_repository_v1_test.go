@@ -8,7 +8,6 @@ import (
 	v1 "github.com/CMSgov/dpc/attribution/model/v1"
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/bxcodec/faker/v3"
-	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 )
@@ -100,40 +99,6 @@ func (suite *JobRepositoryV1TestSuite) TestInsert() {
 	}
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), suite.fakeJQB.JobID, job.ID)
-}
-
-func (suite *JobRepositoryV1TestSuite) TestGetGroupNPIsErrorInRepo() {
-	db, mock := newMock()
-	defer db.Close()
-	repo := NewJobRepo(db)
-	ctx := context.Background()
-	groupID := faker.Word()
-
-	expectedInsertQuery := `SELECT o.id_value, p.provider_id FROM rosters r JOIN organizations o ON r.organization_id = o.id JOIN providers p ON r.provider_id = p.id WHERE r.id = \$1`
-
-	mock.ExpectQuery(expectedInsertQuery).WithArgs().WillReturnError(errors.New("Not enough arguments"))
-	groupNPIs, err := repo.GetGroupNPIs(ctx, groupID)
-	if err2 := mock.ExpectationsWereMet(); err2 != nil {
-		suite.T().Errorf("there were unfulfilled expectations: %s", err2)
-	}
-	assert.Error(suite.T(), err)
-	assert.Empty(suite.T(), groupNPIs)
-}
-
-func (suite *JobRepositoryV1TestSuite) TestGetGroupNPIs() {
-	db, mock := newMock()
-	defer db.Close()
-	repo := NewJobRepo(db)
-	ctx := context.Background()
-	groupID := faker.WORD
-
-	expectedInsertQuery := `SELECT o.id_value, p.provider_id FROM rosters r JOIN organizations o ON r.organization_id = o.id JOIN providers p ON r.provider_id = p.id WHERE r.id = \$1`
-
-	rows := sqlmock.NewRows([]string{"organization_npi", "provider_npi"}).AddRow(suite.fakeNPIs.OrgNPI, suite.fakeNPIs.ProviderNPI)
-	mock.ExpectQuery(expectedInsertQuery).WithArgs(groupID).WillReturnRows(rows)
-	groupNPIs, err := repo.GetGroupNPIs(ctx, groupID)
-	assert.NoError(suite.T(), err)
-	assert.Equal(suite.T(), &suite.fakeNPIs, groupNPIs)
 }
 
 func (suite *JobRepositoryV1TestSuite) TestNewJobQueueBatch() {

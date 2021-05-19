@@ -15,7 +15,6 @@ import (
 type JobRepo interface {
 	NewJobQueueBatch(orgID string, g *v1.GroupNPIs, patientMBIs []string, details BatchDetails) *v1.JobQueueBatch
 	Insert(ctx context.Context, batches []v1.JobQueueBatch) (*v1.Job, error)
-	GetGroupNPIs(ctx context.Context, groupID string) (*v1.GroupNPIs, error)
 }
 
 // JobRepositoryV1 is a struct that defines what the repository has
@@ -93,23 +92,4 @@ func (jr *JobRepositoryV1) Insert(ctx context.Context, batches []v1.JobQueueBatc
 		return nil, err
 	}
 	return results[0], nil
-}
-
-// GetGroupNPIs function returns an organization NPI and a provider NPI for a given group ID
-func (jr *JobRepositoryV1) GetGroupNPIs(ctx context.Context, groupID string) (*v1.GroupNPIs, error) {
-	sb := sqlFlavor.NewSelectBuilder()
-	sb.Select("o.id_value, p.provider_id")
-	sb.From("rosters r")
-	sb.Join("organizations o", "r.organization_id = o.id")
-	sb.Join("providers p", "r.provider_id = p.id")
-	sb.Where(sb.Equal("r.id", groupID))
-	q, args := sb.Build()
-
-	row := new(v1.GroupNPIs)
-	rowStruct := sqlbuilder.NewStruct(new(v1.GroupNPIs)).For(sqlFlavor)
-	if err := jr.db.QueryRowContext(ctx, q, args...).Scan(rowStruct.Addr(&row)...); err != nil {
-		return nil, err
-	}
-
-	return row, nil
 }
