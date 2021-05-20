@@ -122,6 +122,8 @@ GEM
     globalid (0.4.2)
       activesupport (>= 4.2.0)
     hashdiff (1.0.1)
+    health_check (3.0.0)
+      railties (>= 5.0)
     i18n (1.8.10)
       concurrent-ruby (~> 1.0)
     jbuilder (2.11.2)
@@ -308,6 +310,7 @@ DEPENDENCIES
   factory_bot_rails
   faker
   fakeredis
+  health_check
   jbuilder (~> 2.7)
   letter_opener
   letter_opener_web (~> 1.0)
