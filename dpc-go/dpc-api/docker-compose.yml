@@ -15,4 +15,5 @@ services:
 
 networks:
   proxynet:
-    name: custom_network
+    external:
+      name: custom_network

@@ -132,7 +132,6 @@ services:
 
 networks:
   my-proxy-net:
-    external:
       name: custom_network
 
 
