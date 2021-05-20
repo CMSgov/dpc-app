@@ -7,7 +7,6 @@ import (
 	"github.com/CMSgov/dpc/attribution/service"
 	"net/http"
 
-	"github.com/CMSgov/dpc/attribution/service"
 	"go.uber.org/zap"
 
 	"github.com/CMSgov/dpc/attribution/conf"

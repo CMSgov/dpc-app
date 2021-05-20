@@ -49,7 +49,6 @@ func TestDataControllerTestSuite(t *testing.T) {
 
 func (suite *DataControllerTestSuite) TestGetFile() {
 	f := strings.TrimPrefix(strings.TrimSuffix(suite.file.Name(), filepath.Ext(suite.file.Name())), "/tmp/")
-	fmt.Println(f)
 	req := httptest.NewRequest(http.MethodGet, "http://blah.com", nil)
 	ctx := req.Context()
 	ctx = context.WithValue(ctx, middleware.ContextKeyFileName, f)

@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/CMSgov/dpc/attribution/middleware"
 	v1 "github.com/CMSgov/dpc/attribution/model/v1"
-	"github.com/CMSgov/dpc/attribution/repository"
 	"github.com/CMSgov/dpc/attribution/service"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -13,30 +12,6 @@ import (
 	"net/http/httptest"
 	"testing"
 )
-
-type MockJobRepo struct {
-	mock.Mock
-}
-
-func (jr *MockJobRepo) NewJobQueueBatch(orgID string, g *v1.GroupNPIs, patientMBIs []string, details repository.BatchDetails) *v1.JobQueueBatch {
-	args := jr.Called(orgID, g, patientMBIs, details)
-	return args.Get(0).(*v1.JobQueueBatch)
-}
-
-func (jr *MockJobRepo) Insert(ctx context.Context, batches []v1.JobQueueBatch) (*v1.Job, error) {
-	args := jr.Called(ctx, batches)
-	return args.Get(0).(*v1.Job), args.Error(1)
-}
-
-func (jr *MockJobRepo) GetGroupNPIs(ctx context.Context, groupID string) (*v1.GroupNPIs, error) {
-	args := jr.Called(ctx, groupID)
-	return args.Get(0).(*v1.GroupNPIs), args.Error(1)
-}
-
-func (jr *MockJobRepo) IsFileValid(ctx context.Context, orgID string, fileName string) (*v1.FileInfo, error) {
-	args := jr.Called(ctx, orgID, fileName)
-	return args.Get(0).(*v1.FileInfo), args.Error(1)
-}
 
 type DataServiceTestSuite struct {
 	suite.Suite
