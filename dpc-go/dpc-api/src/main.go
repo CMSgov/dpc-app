@@ -29,6 +29,11 @@ func main() {
 		Retries: retries,
 	})
 
+	dataClient := client.NewDataClient(client.DataConfig{
+		URL:     attributionURL,
+		Retries: retries,
+	})
+
 	orgCtlr := v2.NewOrganizationController(attributionClient)
 
 	capabilitiesFile := conf.GetAsString("capabilities.base")
@@ -37,7 +42,7 @@ func main() {
 
 	groupCtlr := v2.NewGroupController(attributionClient)
 
-	dataCtlr := v2.NewDataController(attributionClient)
+	dataCtlr := v2.NewDataController(dataClient)
 
 	apiRouter := router.NewDPCAPIRouter(orgCtlr, m, groupCtlr, dataCtlr)
 	// authRouter := router.NewAuthRouter()

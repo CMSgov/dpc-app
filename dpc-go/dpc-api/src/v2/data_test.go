@@ -19,10 +19,19 @@ import (
 	"testing"
 )
 
+type MockDataClient struct {
+	mock.Mock
+}
+
+func (ac *MockDataClient) Data(ctx context.Context, path string) ([]byte, error) {
+	args := ac.Called(ctx, path)
+	return args.Get(0).([]byte), args.Error(1)
+}
+
 type DataControllerTestSuite struct {
 	suite.Suite
 	data *DataController
-	mac  *MockAttributionClient
+	mdc  *MockDataClient
 	file *os.File
 }
 
@@ -34,9 +43,9 @@ func (suite *DataControllerTestSuite) SetupTest() {
 
 	suite.file = f
 	conf.NewConfig("../../configs")
-	mac := new(MockAttributionClient)
-	suite.mac = mac
-	suite.data = NewDataController(mac)
+	mdc := new(MockDataClient)
+	suite.mdc = mdc
+	suite.data = NewDataController(mdc)
 }
 
 func (suite *DataControllerTestSuite) TearDownTest() {
@@ -61,7 +70,7 @@ func (suite *DataControllerTestSuite) TestGetFile() {
 		FileCheckSum: nil,
 	}
 	b, _ := json.Marshal(fi)
-	suite.mac.On("Data", mock.Anything, mock.MatchedBy(func(key string) bool {
+	suite.mdc.On("Data", mock.Anything, mock.MatchedBy(func(key string) bool {
 		return key == fmt.Sprintf("validityCheck/%s", f)
 	})).Return(b, nil)
 

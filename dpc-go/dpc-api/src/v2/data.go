@@ -15,18 +15,18 @@ import (
 
 // DataController is a struct that defines what the controller has
 type DataController struct {
-	ac client.Client
+	c client.DataClient
 }
 
 // NewDataController function that creates a data controller and returns it's reference
-func NewDataController(ac client.Client) *DataController {
+func NewDataController(c client.DataClient) *DataController {
 	return &DataController{
-		ac,
+		c,
 	}
 }
 
 // GetFile function that calls attribution service via get to check valid file in attribution service and then returns the file
-func (oc *DataController) GetFile(w http.ResponseWriter, r *http.Request) {
+func (dc *DataController) GetFile(w http.ResponseWriter, r *http.Request) {
 	log := logger.WithContext(r.Context())
 
 	fileName, ok := r.Context().Value(middleware.ContextKeyFileName).(string)
@@ -37,7 +37,7 @@ func (oc *DataController) GetFile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//
-	b, err := oc.ac.Data(r.Context(), fmt.Sprintf("validityCheck/%s", fileName))
+	b, err := dc.c.Data(r.Context(), fmt.Sprintf("validityCheck/%s", fileName))
 	if err != nil {
 		log.Error(fmt.Sprintf("Failed to check if file %s is valid", fileName), zap.Error(err))
 		fhirror.ServerIssue(r.Context(), w, http.StatusNotFound, fmt.Sprintf("Failed to get file %s", fileName))

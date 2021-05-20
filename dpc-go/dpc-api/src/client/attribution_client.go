@@ -37,7 +37,6 @@ type Client interface {
 	Delete(ctx context.Context, resourceType ResourceType, id string) error
 	Put(ctx context.Context, resourceType ResourceType, id string, body []byte) ([]byte, error)
 	Export(ctx context.Context, resourceType ResourceType, id string) ([]byte, error)
-	Data(ctx context.Context, path string) ([]byte, error)
 }
 
 // AttributionClient is a struct to hold the retryablehttp client and configs
@@ -47,7 +46,7 @@ type AttributionClient struct {
 }
 
 // NewAttributionClient initializes the retryable client and returns a reference to the attribution client
-func NewAttributionClient(config AttributionConfig) *AttributionClient {
+func NewAttributionClient(config AttributionConfig) Client {
 	client := retryablehttp.NewClient()
 	client.RetryMax = config.Retries
 	return &AttributionClient{
@@ -266,46 +265,4 @@ func (ac *AttributionClient) Put(ctx context.Context, resourceType ResourceType,
 		return nil, errors.Errorf("Failed to update resource %s", resourceType)
 	}
 	return b, nil
-}
-
-// Data A function to enable communication with attribution service via the Data route
-func (ac *AttributionClient) Data(ctx context.Context, path string) ([]byte, error) {
-	log := logger.WithContext(ctx)
-	ac.httpClient.Logger = newLogger(*log)
-
-	url := fmt.Sprintf("%s/Data/%s", ac.config.URL, path)
-	req, err := retryablehttp.NewRequest(http.MethodGet, url, nil)
-	if err != nil {
-		log.Error("Failed to create request", zap.Error(err))
-		return nil, errors.Errorf("Failed to get data info %s", path)
-	}
-
-	req.Header.Add(middleware.RequestIDHeader, ctx.Value(middleware.RequestIDKey).(string))
-	if ctx.Value(middleware2.ContextKeyOrganization) != nil {
-		req.Header.Add(middleware2.OrgHeader, ctx.Value(middleware2.ContextKeyOrganization).(string))
-	}
-	resp, err := ac.httpClient.Do(req)
-	if err != nil {
-		log.Error("Failed to send request", zap.Error(err))
-		return nil, errors.Errorf("Failed to get data info %s", path)
-	}
-
-	if resp.StatusCode != 200 {
-		return nil, errors.Errorf("Failed to get data info %s", path)
-	}
-
-	defer func() {
-		err := resp.Body.Close()
-		if err != nil {
-			log.Error("Failed to close response body", zap.Error(err))
-		}
-	}()
-
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Error("Failed to read the response body", zap.Error(err))
-		return nil, errors.Errorf("Failed to retrieve data")
-	}
-	return body, nil
-
 }
