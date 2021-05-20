@@ -1,0 +1,76 @@
+version: '3'
+
+volumes:
+  coverage:
+
+services:
+
+  db:
+    image: postgres:11
+    command: postgres -c 'max_connections=250'
+    environment:
+      - POSTGRES_MULTIPLE_DATABASES=dpc_attribution,dpc_queue
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=dpc-safe
+    ports:
+      - "5432:5432"
+    networks:
+      - my-proxy-net
+    volumes:
+      - ./docker/postgres:/docker-entrypoint-initdb.d
+
+  aggregation:
+    image: ${ECR_HOST:-755619740999.dkr.ecr.us-east-1.amazonaws.com/dpc-aggregation}:latest
+    ports:
+      - "9901:9900"
+    env_file:
+      - ./ops/config/decrypted/local.env
+    environment:
+      - ENV=local
+      - USE_BFD_MOCK=${USE_BFD_MOCK:-true}
+      - JACOCO=${REPORT_COVERAGE}
+    depends_on:
+      - db
+      - consent
+    networks:
+      - my-proxy-net
+    volumes:
+      - export-volume:/app/data
+      - ./jacocoReport/dpc-aggregation:/jacoco-report
+
+  consent:
+    image: ${ECR_HOST:-755619740999.dkr.ecr.us-east-1.amazonaws.com/dpc-consent}:latest
+    depends_on:
+      - db
+    environment:
+      - ENV=local
+      - JACOCO=${REPORT_COVERAGE}
+    ports:
+      - "3600:3600"
+      - "9004:9900"
+    networks:
+      - my-proxy-net
+    volumes:
+      - ./jacocoReport/dpc-consent:/jacoco-report
+
+
+  # Starts up each service in the background
+  start_core_dependencies:
+    image: dadarek/wait-for-dependencies
+    depends_on:
+      - db
+    networks:
+      - my-proxy-net
+    command: db:5432
+
+  start_api_dependencies:
+    image: dadarek/wait-for-dependencies
+    depends_on:
+      - aggregation
+    networks:
+      - my-proxy-net
+    command: aggregation:9900
+
+networks:
+  my-proxy-net:
+      name: custom_network
