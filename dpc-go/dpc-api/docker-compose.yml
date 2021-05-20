@@ -11,6 +11,7 @@ services:
       - proxynet
     environment:
       - DPC_PORT=3000
+      - DPC_ATTRIBUTION-CLIENT_URL=http://dpc-attribution_attribution_1:3001
 
 networks:
   proxynet:

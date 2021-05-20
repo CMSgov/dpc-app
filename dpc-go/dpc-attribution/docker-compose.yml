@@ -35,6 +35,8 @@ services:
       - proxynet
     environment:
       - DPC_DB_URL=postgresql://postgres:dpc-safe@db2:5432/dpc_attribution_v2
+      - DPC_DB_URLV1=postgresql://postgres:dpc-safe@dpc-app_db_1:5432/dpc_attribution
+      - DPC_DB_QUEUEURL=postgresql://postgres:dpc-safe@dpc-app_db_1:5432/dpc_queue
       - DPC_PORT=3001
 networks:
   proxynet:

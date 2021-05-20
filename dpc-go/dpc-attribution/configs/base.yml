@@ -1,7 +1,7 @@
 db:
   url: postgresql://postgres:dpc-safe@localhost:5432/dpc_attribution_v2
-  urlV1: postgresql://postgres:dpc-safe@dpc-app_db_1:5432/dpc_attribution
-  queueUrl: postgresql://postgres:dpc-safe@dpc-app_db_1:5432/dpc_queue
+  urlV1: postgresql://postgres:dpc-safe@localhost:5432/dpc_attribution
+  queueUrl: postgresql://postgres:dpc-safe@localhost:5432/dpc_queue
 
 port: 3001
 
