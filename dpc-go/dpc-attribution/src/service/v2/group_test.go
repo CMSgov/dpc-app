@@ -3,6 +3,7 @@ package v2
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -10,7 +11,7 @@ import (
 
 	"github.com/CMSgov/dpc/attribution/model/v2"
 	serviceV1 "github.com/CMSgov/dpc/attribution/service/v1"
-	"github.com/bxcodec/faker"
+	"github.com/bxcodec/faker/v3"
 	"github.com/kinbiko/jsonassert"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
@@ -50,10 +51,13 @@ func (suite *GroupServiceTestSuite) TestPost() {
 	ja := jsonassert.New(suite.T())
 
 	o := v2.Group{}
-	_ = faker.FakeData(&o)
+	err := faker.FakeData(&o)
+	if err != nil {
+		fmt.Printf("ERR %v\n", err)
+	}
 	suite.repo.On("Insert", mock.Anything, mock.Anything).Return(&o, nil)
 
-	req := httptest.NewRequest("POST", "http://example.com/foo", nil)
+	req := httptest.NewRequest(http.MethodPost, "http://example.com/foo", nil)
 
 	w := httptest.NewRecorder()
 
@@ -74,7 +78,7 @@ func (suite *GroupServiceTestSuite) TestPostRepoError() {
 
 	suite.repo.On("Insert", mock.Anything, mock.Anything).Return(nil, errors.New("error"))
 
-	req := httptest.NewRequest("POST", "http://example.com/foo", nil)
+	req := httptest.NewRequest(http.MethodPost, "http://example.com/foo", nil)
 
 	w := httptest.NewRecorder()
 
@@ -92,4 +96,28 @@ func (suite *GroupServiceTestSuite) TestPostRepoError() {
         "message": "error",
         "statusCode": 422
     }`)
+}
+
+func (suite *GroupServiceTestSuite) TestGetNotImplemented() {
+	req := httptest.NewRequest(http.MethodGet, "http://example.com/foo", nil)
+	w := httptest.NewRecorder()
+	suite.service.Get(w, req)
+	res := w.Result()
+	assert.Equal(suite.T(), http.StatusNotImplemented, res.StatusCode)
+}
+
+func (suite *GroupServiceTestSuite) TestDeleteNotImplemented() {
+	req := httptest.NewRequest(http.MethodDelete, "http://example.com/foo", nil)
+	w := httptest.NewRecorder()
+	suite.service.Delete(w, req)
+	res := w.Result()
+	assert.Equal(suite.T(), http.StatusNotImplemented, res.StatusCode)
+}
+
+func (suite *GroupServiceTestSuite) TestPutNotImplemented() {
+	req := httptest.NewRequest(http.MethodPut, "http://example.com/foo", nil)
+	w := httptest.NewRecorder()
+	suite.service.Put(w, req)
+	res := w.Result()
+	assert.Equal(suite.T(), http.StatusNotImplemented, res.StatusCode)
 }

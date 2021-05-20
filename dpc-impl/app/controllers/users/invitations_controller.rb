@@ -14,10 +14,9 @@ module Users
       if user_valid?(@user)
         @user.invite!(current_user)
         flash[:notice] = 'User invited.'
-        redirect_to root_path
       else generate_errors(@user)
-        redirect_to new_user_invitation_path
       end
+      redirect_to members_path
     end
 
     private
@@ -56,7 +55,7 @@ module Users
     def user_valid?(user)
       unique_email?(user.email) && valid_email?(user.email) && values_present?(user)
     end
-
+ 
     def valid_email?(email)
       result = Truemail.validate(email, with: :mx)
       json = Truemail::Log::Serializer::ValidatorJson.call(result)

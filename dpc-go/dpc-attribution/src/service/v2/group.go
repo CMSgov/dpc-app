@@ -55,17 +55,17 @@ func (gs *GroupService) Post(w http.ResponseWriter, r *http.Request) {
 
 // Get function is not currently used for v2.GroupService
 func (gs *GroupService) Get(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusMethodNotAllowed)
+	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Delete function is not currently used for v2.GroupService
 func (gs *GroupService) Delete(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusMethodNotAllowed)
+	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Put function is not currently used for v2.GroupService
 func (gs *GroupService) Put(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusMethodNotAllowed)
+	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Export function that starts an export job for a given Group ID

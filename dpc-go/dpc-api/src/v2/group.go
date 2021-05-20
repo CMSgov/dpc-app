@@ -3,6 +3,7 @@ package v2
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 
@@ -56,7 +57,7 @@ func (gc *GroupController) Create(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// Export function is not currently used for GroupController
+// Export function that calls attribution service via get in order to start a job for data export
 func (gc *GroupController) Export(w http.ResponseWriter, r *http.Request) {
 	log := logger.WithContext(r.Context())
 	groupID, ok := r.Context().Value(middleware2.ContextKeyGroup).(string)
@@ -76,26 +77,40 @@ func (gc *GroupController) Export(w http.ResponseWriter, r *http.Request) {
 		fhirror.ServerIssue(r.Context(), w, http.StatusUnprocessableEntity, "Failed to start export job")
 		return
 	}
-
-	if _, err := w.Write(resp); err != nil {
-		log.Error("Failed to write data to response", zap.Error(err))
-		fhirror.ServerIssue(r.Context(), w, http.StatusUnprocessableEntity, "Failed to start export job")
+	var job model.Job
+	err = json.Unmarshal(resp, &job)
+	if err != nil {
+		return
 	}
+	contentLocation := contentLocationHeader(job.ID, r)
+	w.Header().Set("Content-Location", contentLocation)
+	w.WriteHeader(http.StatusAccepted)
+}
+
+func contentLocationHeader(id string, r *http.Request) string {
+	scheme := "http"
+	if r.TLS != nil {
+		scheme = "https"
+	}
+	return fmt.Sprintf("%s://%s/v2/Jobs/%s", scheme, r.Host, id)
 }
 
 // Read function is not currently used for GroupController
+//goland:noinspection GoUnusedParameter
 func (gc *GroupController) Read(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusMethodNotAllowed)
+	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Delete function is not currently used for GroupController
+//goland:noinspection GoUnusedParameter
 func (gc *GroupController) Delete(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusMethodNotAllowed)
+	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Update function is not currently used for GroupController
+//goland:noinspection GoUnusedParameter
 func (gc *GroupController) Update(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusMethodNotAllowed)
+	w.WriteHeader(http.StatusNotImplemented)
 }
 
 func isValidGroup(group []byte) error {
@@ -136,7 +151,7 @@ func isValidExport(ctx context.Context, w http.ResponseWriter, outputFormat stri
 	}
 	if headerPrefer == "" || StringUtils.IsEmpty(headerPrefer) {
 		log.Error("Missing Prefer header")
-		fhirror.BusinessViolation(ctx, w, http.StatusBadRequest, "The 'Prefer' header must be 'respond-async'")
+		fhirror.BusinessViolation(ctx, w, http.StatusBadRequest, "The 'Prefer' header is required and must be 'respond-async'")
 	}
 	if StringUtils.IsNotEmpty(headerPrefer) && headerPrefer != "respond-async" {
 		log.Error("Invalid Prefer header")

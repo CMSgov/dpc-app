@@ -125,7 +125,7 @@ func (oc *OrganizationController) Update(w http.ResponseWriter, r *http.Request)
 
 // Export function is not currently used for OrganizationController
 func (oc *OrganizationController) Export(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusMethodNotAllowed)
+	w.WriteHeader(http.StatusNotImplemented)
 }
 
 func isValidOrganization(org []byte) error {

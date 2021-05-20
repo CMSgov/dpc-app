@@ -15,6 +15,7 @@ import (
 	"github.com/CMSgov/dpc/attribution/service"
 	"github.com/CMSgov/dpc/attribution/util"
 	"github.com/darahayes/go-boom"
+	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
 	"github.com/CMSgov/dpc/attribution/logger"
@@ -32,6 +33,7 @@ type ExportRequest struct {
 	orgID             string
 	groupID           string
 	groupNPIs         *v1.GroupNPIs
+	requestURL        string
 	requestingIP      string
 	since             sql.NullTime
 	tt                time.Time
@@ -106,6 +108,7 @@ func (js *JobServiceV1) Export(w http.ResponseWriter, r *http.Request) {
 			Tt:           exportRequest.tt,
 			Since:        exportRequest.since,
 			Types:        exportRequest.types,
+			RequestURL:   exportRequest.requestURL,
 			RequestingIP: exportRequest.requestingIP,
 		}
 		jobQueueBatch := js.jr.NewJobQueueBatch(exportRequest.orgID, exportRequest.groupNPIs, patients, details)
@@ -128,8 +131,8 @@ func (js *JobServiceV1) Export(w http.ResponseWriter, r *http.Request) {
 		boom.Internal(w, err.Error())
 		return
 	}
-	log.Info(fmt.Sprint(
-		"dpcMetric=jobCreated,jobId={},orgId={},groupId={},totalPatients={},resourcesRequested={}",
+	log.Info(fmt.Sprintf(
+		"dpcMetric=jobCreated,jobId=%s,orgId=%s,groupId=%s,totalPatients=%x,resourcesRequested=%s",
 		job.ID,
 		exportRequest.orgID,
 		exportRequest.groupID,
@@ -141,11 +144,15 @@ func (js *JobServiceV1) Export(w http.ResponseWriter, r *http.Request) {
 func (js *JobServiceV1) buildExportRequest(ctx context.Context, w http.ResponseWriter) (*ExportRequest, error) {
 	log := logger.WithContext(ctx)
 	exportRequest := new(ExportRequest)
-	exportRequest.groupID = util.FetchValueFromContext(ctx, w, middleware.ContextKeyGroup)
-	exportRequest.orgID = util.FetchValueFromContext(ctx, w, middleware.ContextKeyOrganization)
-	exportRequest.requestingIP = util.FetchValueFromContext(ctx, w, middleware.ContextKeyRequestingIP)
+	exportRequest.groupID = util.FetchValueFromContext(ctx, w, middleware2.ContextKeyGroup)
+	exportRequest.orgID = util.FetchValueFromContext(ctx, w, middleware2.ContextKeyOrganization)
+	exportRequest.requestingIP = util.FetchValueFromContext(ctx, w, middleware2.ContextKeyRequestingIP)
+	exportRequest.requestURL = util.FetchValueFromContext(ctx, w, middleware2.ContextKeyRequestURL)
 	patientMBIs, err := js.pr.FindMBIsByGroupID(exportRequest.groupID)
-	if err != nil {
+	if err != nil || len(patientMBIs) == 0 {
+		if err == nil {
+			err = errors.New("Failed to fetch patients for group")
+		}
 		log.Error("Failed to fetch patients for group", zap.Error(err))
 		boom.BadRequest(w, "The group must contain active patients")
 		return nil, err
@@ -159,7 +166,7 @@ func (js *JobServiceV1) buildExportRequest(ctx context.Context, w http.ResponseW
 	// TODO: Get TransactionTime from BFD (requires client)
 	exportRequest.tt = time.Time{}
 
-	groupNPIs, err := js.jr.GetGroupNPIs(ctx, exportRequest.groupID)
+	groupNPIs, err := js.pr.GetGroupNPIs(ctx, exportRequest.groupID)
 	if err != nil || groupNPIs.OrgNPI == "" || groupNPIs.ProviderNPI == "" {
 		log.Error("Failed to retrieve NPIs for Group", zap.Error(err))
 		boom.BadData(w, err)

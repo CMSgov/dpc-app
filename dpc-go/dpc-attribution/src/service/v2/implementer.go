@@ -57,20 +57,20 @@ func (is *ImplementerService) Post(w http.ResponseWriter, r *http.Request) {
 
 // Get function is not currently used for ImplementerService
 func (is *ImplementerService) Get(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusMethodNotAllowed)
+	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Delete function is not currently used for ImplementerService
 func (is *ImplementerService) Delete(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusMethodNotAllowed)
+	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Put function is not currently used for ImplementerService
 func (is *ImplementerService) Put(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusMethodNotAllowed)
+	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Export function that starts an export job for a given Group ID
 func (is *ImplementerService) Export(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusMethodNotAllowed)
+	w.WriteHeader(http.StatusNotImplemented)
 }

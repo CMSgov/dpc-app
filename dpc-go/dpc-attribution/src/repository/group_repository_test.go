@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"testing"
 
 	"github.com/CMSgov/dpc/attribution/attributiontest"
@@ -10,7 +11,7 @@ import (
 	"github.com/CMSgov/dpc/attribution/model/v2"
 
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/bxcodec/faker"
+	"github.com/bxcodec/faker/v3"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 )
@@ -22,7 +23,10 @@ type GroupRepositoryTestSuite struct {
 
 func (suite *GroupRepositoryTestSuite) SetupTest() {
 	g := v2.Group{}
-	_ = faker.FakeData(&g)
+	err := faker.FakeData(&g)
+	if err != nil {
+		fmt.Printf("ERR %v\n", err)
+	}
 	var i v2.Info
 	_ = json.Unmarshal([]byte(attributiontest.Groupjson), &i)
 	g.Info = i
@@ -46,9 +50,9 @@ func (suite *GroupRepositoryTestSuite) TestInsertErrorInRepo() {
 	mock.ExpectQuery(expectedInsertQuery).WithArgs(suite.fakeGrp.Info).WillReturnRows(rows)
 
 	b, _ := json.Marshal(suite.fakeGrp.Info)
-	org, err := repo.Insert(ctx, b)
+	group, err := repo.Insert(ctx, b)
 	assert.Error(suite.T(), err)
-	assert.Empty(suite.T(), org)
+	assert.Empty(suite.T(), group)
 }
 
 func (suite *GroupRepositoryTestSuite) TestInsert() {
@@ -65,7 +69,7 @@ func (suite *GroupRepositoryTestSuite) TestInsert() {
 	mock.ExpectQuery(expectedInsertQuery).WithArgs(suite.fakeGrp.Info, "12345").WillReturnRows(rows)
 
 	b, _ := json.Marshal(suite.fakeGrp.Info)
-	org, err := repo.Insert(ctx, b)
+	group, err := repo.Insert(ctx, b)
 	assert.NoError(suite.T(), err)
-	assert.Equal(suite.T(), suite.fakeGrp.ID, org.ID)
+	assert.Equal(suite.T(), suite.fakeGrp.ID, group.ID)
 }

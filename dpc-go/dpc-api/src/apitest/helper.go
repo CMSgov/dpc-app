@@ -2,8 +2,10 @@ package apitest
 
 import (
 	"encoding/json"
+	"fmt"
+
 	"github.com/CMSgov/dpc/api/model"
-	"github.com/bxcodec/faker"
+	"github.com/bxcodec/faker/v3"
 )
 
 // Orgjson is a organization json string for testing purposes
@@ -238,21 +240,38 @@ const FilteredGroupjson = `
   ]
 }`
 
+// JobJSON is a Job json string for testing purposes
+const JobJSON = `{
+  "id": "test-export-job"
+}`
+
 // AttributionOrgResponse provides a sample organization response that mimics what attribution service returns for testing purposes
 func AttributionOrgResponse() []byte {
-	return AttributionResponse(Orgjson)
+	return AttributionToFHIRResponse(Orgjson)
 }
 
-// AttributionResponse provides a sample response that mimics what attribution service returns for testing purposes
-func AttributionResponse(fhir string) []byte {
+// AttributionToFHIRResponse provides a sample response that mimics what attribution service returns for testing purposes
+func AttributionToFHIRResponse(fhir string) []byte {
 	r := model.Resource{}
-	_ = faker.FakeData(&r)
-	r.ID = faker.ID
+	err := faker.FakeData(&r)
+	if err != nil {
+		fmt.Printf("ERR %v\n", err)
+	}
 
 	var v map[string]interface{}
 	_ = json.Unmarshal([]byte(fhir), &v)
 	r.Info = v
+	// The value <<PRESENCE>> required for jsonassert checks
+	r.ID = "<<PRESENCE>>"
 	b, _ := json.Marshal(r)
+	return b
+}
+
+// AttributionResponse provides a sample response that mimics what attribution service returns for testing purposes
+func AttributionResponse(data string) []byte {
+	var v map[string]interface{}
+	_ = json.Unmarshal([]byte(data), &v)
+	b, _ := json.Marshal(v)
 	return b
 }
 

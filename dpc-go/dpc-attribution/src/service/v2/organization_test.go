@@ -3,6 +3,7 @@ package v2
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -11,7 +12,7 @@ import (
 	"github.com/CMSgov/dpc/attribution/middleware"
 	v2 "github.com/CMSgov/dpc/attribution/model/v2"
 
-	"github.com/bxcodec/faker"
+	"github.com/bxcodec/faker/v3"
 	"github.com/kinbiko/jsonassert"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
@@ -98,7 +99,10 @@ func (suite *OrganizationServiceTestSuite) TestGet() {
 	ja := jsonassert.New(suite.T())
 
 	o := v2.Organization{}
-	_ = faker.FakeData(&o)
+	err := faker.FakeData(&o)
+	if err != nil {
+		fmt.Printf("ERR %v\n", err)
+	}
 	suite.repo.On("FindByID", mock.Anything, mock.Anything).Return(&o, nil)
 
 	req := httptest.NewRequest("GET", "http://example.com/foo", nil)
@@ -124,7 +128,10 @@ func (suite *OrganizationServiceTestSuite) TestPost() {
 	ja := jsonassert.New(suite.T())
 
 	o := v2.Organization{}
-	_ = faker.FakeData(&o)
+	err := faker.FakeData(&o)
+	if err != nil {
+		fmt.Printf("ERR %v\n", err)
+	}
 	suite.repo.On("Insert", mock.Anything, mock.Anything).Return(&o, nil)
 
 	req := httptest.NewRequest("POST", "http://example.com/foo", nil)
@@ -225,7 +232,10 @@ func (suite *OrganizationServiceTestSuite) TestPut() {
 	assert.Equal(suite.T(), http.StatusUnprocessableEntity, res.StatusCode)
 
 	o := v2.Organization{}
-	_ = faker.FakeData(&o)
+	err := faker.FakeData(&o)
+	if err != nil {
+		fmt.Printf("ERR %v\n", err)
+	}
 	w = httptest.NewRecorder()
 
 	suite.repo.On("Update", mock.Anything, mock.Anything, mock.Anything).Return(&o, nil).Once()
@@ -241,4 +251,12 @@ func (suite *OrganizationServiceTestSuite) TestPut() {
 
 	b, _ := json.Marshal(o)
 	ja.Assertf(string(resp), string(b))
+}
+
+func (suite *OrganizationServiceTestSuite) TestExportNotImplemented() {
+	req := httptest.NewRequest("GET", "http://example.com/foo", nil)
+	w := httptest.NewRecorder()
+	suite.service.Export(w, req)
+	res := w.Result()
+	assert.Equal(suite.T(), http.StatusNotImplemented, res.StatusCode)
 }

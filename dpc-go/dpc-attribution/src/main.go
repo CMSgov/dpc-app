@@ -2,10 +2,12 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"github.com/CMSgov/dpc/attribution/service"
 	"net/http"
 
+	"github.com/CMSgov/dpc/attribution/service"
 	"go.uber.org/zap"
 
 	"github.com/CMSgov/dpc/attribution/conf"
@@ -34,7 +36,19 @@ func main() {
 	or := repository.NewOrganizationRepo(db)
 	os := v2.NewOrganizationService(or)
 
-	js, ds := createV1Services(logger.WithContext(ctx))
+	// Create V1 services
+	attrDbV1 := repository.GetAttributionV1DbConnection()
+	queueDbV1 := repository.GetQueueDbConnection()
+	defer func() {
+		if err := attrDbV1.Close(); err != nil {
+			logger.WithContext(ctx).Fatal("Failed to close attribution v1 db connection", zap.Error(err))
+		}
+		if err := queueDbV1.Close(); err != nil {
+			logger.WithContext(ctx).Fatal("Failed to close queue v1 db connection", zap.Error(err))
+		}
+	}()
+	js, ds := createV1Services(attrDbV1, queueDbV1)
+
 	gr := repository.NewGroupRepo(db)
 	gs := v2.NewGroupService(gr, js)
 
@@ -50,18 +64,7 @@ func main() {
 	}
 }
 
-func createV1Services(log *zap.Logger) (service.JobService, service.DataService) {
-	attrDbV1 := repository.GetAttributionV1DbConnection()
-	queueDbV1 := repository.GetQueueDbConnection()
-
-	defer func() {
-		if err := attrDbV1.Close(); err != nil {
-			log.Fatal("Failed to close attribution v1 db connection", zap.Error(err))
-		}
-		if err := queueDbV1.Close(); err != nil {
-			log.Fatal("Failed to close queue v1 db connection", zap.Error(err))
-		}
-	}()
+func createV1Services(attrDbV1 *sql.DB, queueDbV1 *sql.DB) (service.JobService, service.DataService) {
 	pr := repository.NewPatientRepo(attrDbV1)
 	jr := repository.NewJobRepo(queueDbV1)
 	return v1.NewJobService(pr, jr), v1.NewDataService(jr)

@@ -9,7 +9,7 @@ RSpec.feature 'user sends invitation to DPC' do
   context 'successful invite' do
     scenario 'user successfully sends invite' do
       sign_in user
-      visit new_user_invitation_path
+      visit members_path
 
       fill_in 'user_first_name', with: 'Manny'
       fill_in 'user_last_name', with: 'York'
@@ -47,7 +47,7 @@ RSpec.feature 'user sends invitation to DPC' do
   context 'unsuccessful invite' do
     before(:each) do
       sign_in user
-      visit new_user_invitation_path
+      visit members_path
     end
 
     scenario 'user does not fill out the invite form correctly' do

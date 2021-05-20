@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"log"
 	"testing"
 
@@ -12,7 +13,7 @@ import (
 	"github.com/CMSgov/dpc/attribution/attributiontest"
 	"github.com/CMSgov/dpc/attribution/model/v2"
 
-	"github.com/bxcodec/faker"
+	"github.com/bxcodec/faker/v3"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
@@ -33,7 +34,10 @@ type OrganizationRepositoryTestSuite struct {
 
 func (suite *OrganizationRepositoryTestSuite) SetupTest() {
 	o := v2.Organization{}
-	_ = faker.FakeData(&o)
+	err := faker.FakeData(&o)
+	if err != nil {
+		fmt.Printf("ERR %v\n", err)
+	}
 	var i v2.Info
 	_ = json.Unmarshal([]byte(attributiontest.Orgjson), &i)
 	o.Info = i

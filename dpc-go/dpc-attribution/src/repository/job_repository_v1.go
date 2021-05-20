@@ -18,7 +18,6 @@ import (
 type JobRepo interface {
 	NewJobQueueBatch(orgID string, g *v1.GroupNPIs, patientMBIs []string, details BatchDetails) *v1.JobQueueBatch
 	Insert(ctx context.Context, batches []v1.JobQueueBatch) (*v1.Job, error)
-	GetGroupNPIs(ctx context.Context, groupID string) (*v1.GroupNPIs, error)
 	IsFileValid(ctx context.Context, orgID string, fileName string) (*v1.FileInfo, error)
 }
 
@@ -40,13 +39,13 @@ type BatchDetails struct {
 	Tt           time.Time
 	Since        sql.NullTime
 	Types        string
+	RequestURL   string
 	RequestingIP string
 }
 
 // NewJobQueueBatch function that creates a new JobQueueBatch
 func (jr *JobRepositoryV1) NewJobQueueBatch(orgID string, g *v1.GroupNPIs, patientMBIs []string, details BatchDetails) *v1.JobQueueBatch {
 	return &v1.JobQueueBatch{
-		JobID:           uuid.New(),
 		OrganizationID:  orgID,
 		OrganizationNPI: g.OrgNPI,
 		ProviderNPI:     g.ProviderNPI,
@@ -56,6 +55,7 @@ func (jr *JobRepositoryV1) NewJobQueueBatch(orgID string, g *v1.GroupNPIs, patie
 		Priority:        details.Priority,
 		Status:          0,
 		TransactionTime: details.Tt,
+		RequestURL:      details.RequestURL,
 		RequestingIP:    details.RequestingIP,
 		IsBulk:          true,
 		SubmitTime:      time.Now(),
@@ -65,18 +65,29 @@ func (jr *JobRepositoryV1) NewJobQueueBatch(orgID string, g *v1.GroupNPIs, patie
 // Insert function that saves a slice of JobQueueBatch's into the database and returns an error if there is one
 func (jr *JobRepositoryV1) Insert(ctx context.Context, batches []v1.JobQueueBatch) (*v1.Job, error) {
 	var results []*v1.Job
-	ib := sqlFlavor.NewInsertBuilder()
-	ib.InsertInto("job_queue_ batch")
-	ib.Cols("job_id", "organization_id", "organization_npi", "provider_npi", "patients", "resource_types", "since",
-		"priority", "transaction_time", "status", "submit_time", "requesting_ip", "is_bulk")
+	job := new(v1.Job)
 	// insert the batches within a single transaction
 	tx, err := jr.db.Begin()
 	if err != nil {
 		return nil, err
 	}
+	jobID := uuid.New().String()
 	for _, b := range batches {
-		job, err := submitJob(ctx, tx, ib, b)
-		if err != nil {
+		ib := sqlFlavor.NewInsertBuilder()
+		ib.InsertInto("job_queue_batch")
+		ib.Cols("batch_id", "job_id", "organization_id", "organization_npi", "provider_npi", "patients", "resource_types", "since",
+			"priority", "transaction_time", "status", "submit_time", "request_url", "requesting_ip", "is_bulk")
+		batchID := uuid.New().String()
+		ib.Values(batchID, jobID, b.OrganizationID, b.OrganizationNPI, b.ProviderNPI, b.PatientMBIs, b.ResourceTypes, b.Since,
+			b.Priority, b.TransactionTime, b.Status, b.SubmitTime, b.RequestURL, b.RequestingIP, b.IsBulk)
+		ib.SQL("returning job_id")
+		q, args := ib.Build()
+		jobStruct := sqlbuilder.NewStruct(job).For(sqlFlavor)
+		if err := tx.QueryRowContext(ctx, q, args...).Scan(jobStruct.Addr(&job)...); err != nil {
+			err2 := tx.Rollback()
+			if err2 != nil {
+				return nil, err2
+			}
 			return nil, err
 		}
 		results = append(results, job)
@@ -86,45 +97,6 @@ func (jr *JobRepositoryV1) Insert(ctx context.Context, batches []v1.JobQueueBatc
 		return nil, err
 	}
 	return results[0], nil
-}
-
-func submitJob(ctx context.Context, tx *sql.Tx, ib *sqlbuilder.InsertBuilder, b v1.JobQueueBatch) (*v1.Job, error) {
-	var job = new(v1.Job)
-	ib.Values(b.JobID, b.OrganizationID, b.OrganizationNPI, b.ProviderNPI, b.PatientMBIs, b.ResourceTypes, b.Since,
-		b.Priority, b.TransactionTime, b.Status, b.SubmitTime, b.RequestingIP, b.IsBulk)
-	ib.SQL("returning job_id")
-
-	q, args := ib.Build()
-
-	jobStruct := sqlbuilder.NewStruct(*job).For(sqlFlavor)
-
-	if err := tx.QueryRowContext(ctx, q, args...).Scan(jobStruct.Addr(&job)...); err != nil {
-		err = tx.Rollback()
-		if err != nil {
-			return nil, err
-		}
-		return nil, err
-	}
-	return job, nil
-}
-
-// GetGroupNPIs function returns an organization NPI and a provider NPI for a given group ID
-func (jr *JobRepositoryV1) GetGroupNPIs(ctx context.Context, groupID string) (*v1.GroupNPIs, error) {
-	sb := sqlFlavor.NewSelectBuilder()
-	sb.Select("o.id_value, p.provider_id")
-	sb.From("rosters r")
-	sb.Join("organizations o", "r.organization_id = o.id")
-	sb.Join("providers p", "r.provider_id = p.id")
-	sb.Where(sb.Equal("r.id", groupID))
-	q, args := sb.Build()
-
-	row := new(v1.GroupNPIs)
-	rowStruct := sqlbuilder.NewStruct(new(v1.GroupNPIs)).For(sqlFlavor)
-	if err := jr.db.QueryRowContext(ctx, q, args...).Scan(rowStruct.Addr(&row)...); err != nil {
-		return nil, err
-	}
-
-	return row, nil
 }
 
 func (jr *JobRepositoryV1) IsFileValid(ctx context.Context, orgID string, fileName string) (*v1.FileInfo, error) {

@@ -3,11 +3,10 @@ package router
 import (
 	"net/http"
 
-	"github.com/go-chi/chi"
-	"github.com/go-chi/chi/middleware"
-
 	middleware2 "github.com/CMSgov/dpc/attribution/middleware"
 	"github.com/CMSgov/dpc/attribution/service"
+	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/middleware"
 )
 
 // NewDPCAttributionRouter function to build the attribution router
@@ -30,6 +29,7 @@ func NewDPCAttributionRouter(o service.Service, g service.Service, impl service.
 			r.Use(middleware2.AuthCtx)
 			r.Post("/", g.Post)
 			r.Route("/{groupID}", func(r chi.Router) {
+				r.Use(middleware2.RequestURLCtx)
 				r.Use(middleware2.GroupCtx)
 				r.Get("/$export", g.Export)
 			})

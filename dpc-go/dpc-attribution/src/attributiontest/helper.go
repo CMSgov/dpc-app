@@ -2,10 +2,11 @@ package attributiontest
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/CMSgov/dpc/attribution/model/v2"
 
-	"github.com/bxcodec/faker"
+	"github.com/bxcodec/faker/v3"
 )
 
 // Orgjson is a json string for testing purposes
@@ -152,10 +153,18 @@ const Implementerjson = `{
   "name": "test-Implementer"
 }`
 
+// JobJSON is a Job json string for testing purposes
+const JobJSON = `{
+  "id": "test-export-job"
+}`
+
 // OrgResponse provides a sample response that mimics what attribution service returns for testing purposes
 func OrgResponse() *v2.Organization {
 	o := v2.Organization{}
-	_ = faker.FakeData(&o)
+	err := faker.FakeData(&o)
+	if err != nil {
+		fmt.Printf("ERR %v\n", err)
+	}
 	var i v2.Info
 	_ = json.Unmarshal([]byte(Orgjson), &i)
 	o.Info = i
