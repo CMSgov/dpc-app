@@ -29,6 +29,7 @@ module DpcImpl
     config.load_defaults 6.1
 
     # Add fonts to asset pipeline
+    config.assets.prefix = '/impl/assets'
     config.assets.paths << Rails.root.join("app", "assets", "fonts")
 
     # Don't generate system test files.
