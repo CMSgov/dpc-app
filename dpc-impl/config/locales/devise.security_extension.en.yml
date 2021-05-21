@@ -37,4 +37,4 @@ en:
         change_my_password: Change my password
     failure:
       session_limited: 'Your login credentials were used in another browser. Please sign in again to continue in this browser.'
-      expired: 'Your account has expired due to inactivity. Please contact the site administrator.'
+      expired: 'Your account has expired due to inactivity. To reactivate your account, please contact us at dpcinfo@cms.hhs.gov.'

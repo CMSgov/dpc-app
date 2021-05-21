@@ -7,7 +7,7 @@ ruby '2.7.2'
 
 # Anchored versions, do not bump without testing
 gem 'rails', '~> 6.0.3.7'
-gem 'puma', '~> 4.3', '>= 4.3.8'
+gem 'puma', '>= 5.3.1'
 gem 'redis', '~> 4.0'
 gem 'coffee-rails', '~> 5.0', '>= 5.0.0'
 gem 'kramdown', '~> 2.3', '>= 2.3.1'
