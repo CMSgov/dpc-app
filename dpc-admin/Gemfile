@@ -6,7 +6,7 @@ ruby '2.7.2'
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '~> 6.0.3', '>= 6.0.3.6'
 gem 'dotenv-rails', groups: [:development, :test]
-gem 'puma', '~> 4.1'
+gem 'puma', '~> 4.3.8'
 gem 'redis', '~> 4.0'
 gem 'luhnacy', '~> 0.2.1'
 gem 'omniauth-rails_csrf_protection', '~> 0.1'

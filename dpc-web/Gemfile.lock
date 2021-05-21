@@ -104,7 +104,7 @@ GEM
     crass (1.0.6)
     database_cleaner (2.0.1)
       database_cleaner-active_record (~> 2.0.0)
-    database_cleaner-active_record (2.0.0)
+    database_cleaner-active_record (2.0.1)
       activerecord (>= 5.a)
       database_cleaner-core (~> 2.0.0)
     database_cleaner-core (2.0.1)
@@ -121,7 +121,7 @@ GEM
     devise-security (0.16.0)
       devise (>= 4.3.0, < 5.0)
     diff-lcs (1.4.4)
-    docile (1.3.5)
+    docile (1.4.0)
     domain_name (0.5.20190701)
       unf (>= 0.0.5, < 1.0.0)
     dotenv (2.7.6)
@@ -129,14 +129,14 @@ GEM
       dotenv (= 2.7.6)
       railties (>= 3.2)
     erubi (1.10.0)
-    execjs (2.7.0)
-    factory_bot (6.1.0)
+    execjs (2.8.1)
+    factory_bot (6.2.0)
       activesupport (>= 5.0.0)
-    factory_bot_rails (6.1.0)
-      factory_bot (~> 6.1.0)
+    factory_bot_rails (6.2.0)
+      factory_bot (~> 6.2.0)
       railties (>= 5.0.0)
     fakefs (1.3.2)
-    faker (2.17.0)
+    faker (2.18.0)
       i18n (>= 1.6, < 2)
     fakeredis (0.8.0)
       redis (~> 4.1)
@@ -251,14 +251,14 @@ GEM
     newrelic_rpm (6.15.0)
     nio4r (2.5.7)
     nio4r (2.5.7-java)
-    nokogiri (1.11.3)
+    nokogiri (1.11.5)
       mini_portile2 (~> 2.5.0)
       racc (~> 1.4)
-    nokogiri (1.11.3-java)
+    nokogiri (1.11.5-java)
       racc (~> 1.4)
-    nokogiri (1.11.3-x64-mingw32)
+    nokogiri (1.11.5-x64-mingw32)
       racc (~> 1.4)
-    nokogiri (1.11.3-x86-mingw32)
+    nokogiri (1.11.5-x86-mingw32)
       racc (~> 1.4)
     oauth2 (1.4.7)
       faraday (>= 0.8, < 2.0)
@@ -301,9 +301,9 @@ GEM
     pry-nav (0.3.0)
       pry (>= 0.9.10, < 0.13.0)
     public_suffix (4.0.6)
-    puma (4.3.8)
+    puma (5.3.1)
       nio4r (~> 2.0)
-    puma (4.3.8-java)
+    puma (5.3.1-java)
       nio4r (~> 2.0)
     racc (1.5.2)
     racc (1.5.2-java)
@@ -342,7 +342,7 @@ GEM
       thor (>= 0.20.3, < 2.0)
     rainbow (3.0.0)
     rake (13.0.3)
-    rb-fsevent (0.10.4)
+    rb-fsevent (0.11.0)
     rb-inotify (0.10.1)
       ffi (~> 1.0)
     rbnacl (5.0.0)
@@ -399,7 +399,7 @@ GEM
       rspec-mocks (~> 3.10)
       rspec-support (~> 3.10)
     rspec-support (3.10.2)
-    rubocop (1.14.0)
+    rubocop (1.15.0)
       parallel (~> 1.10)
       parser (>= 3.0.0.0)
       rainbow (>= 2.2.2, < 4.0)
@@ -462,7 +462,7 @@ GEM
     thread_safe (0.3.6)
     thread_safe (0.3.6-java)
     tilt (2.0.10)
-    truemail (2.4.1)
+    truemail (2.4.2)
       simpleidn (~> 0.2.1)
     tzinfo (1.2.9)
       thread_safe (~> 0.1)
@@ -485,7 +485,7 @@ GEM
       activemodel (>= 6.0.0)
       bindex (>= 0.4.0)
       railties (>= 6.0.0)
-    webmock (3.12.2)
+    webmock (3.13.0)
       addressable (>= 2.3.6)
       crack (>= 0.3.2)
       hashdiff (>= 0.4.0, < 2.0.0)
@@ -506,48 +506,48 @@ PLATFORMS
   x86-mswin32
 
 DEPENDENCIES
-  active_model_serializers
+  active_model_serializers (>= 0.10.12)
   bootsnap (>= 1.1.0)
   brakeman
   bundler-audit
   byebug
-  capybara
+  capybara (>= 3.35.3)
   climate_control
-  coffee-rails (~> 5.0)
+  coffee-rails (~> 5.0, >= 5.0.0)
   database_cleaner
-  devise
-  devise-async
-  devise-security
-  dotenv-rails
-  factory_bot_rails
+  devise (>= 4.8.0)
+  devise-async (>= 1.0.0)
+  devise-security (>= 0.16.0)
+  dotenv-rails (>= 2.7.6)
+  factory_bot_rails (>= 6.1.0)
   fakefs
   faker
   fakeredis
-  fhir_client
-  health_check
-  kaminari
+  fhir_client (>= 4.0.6)
+  health_check (>= 3.0.0)
+  kaminari (>= 1.2.1)
   kramdown (~> 2.3, >= 2.3.1)
   letter_opener
-  letter_opener_web (~> 1.0)
+  letter_opener_web (~> 1.4, >= 1.4.0)
   listen (>= 3.0.5, < 3.3)
-  lograge
+  lograge (>= 0.11.2)
   luhnacy (~> 0.2.1)
   macaroons
   newrelic_rpm (~> 6.10)
   octokit
   omniauth-github
   omniauth-oktaoauth
-  omniauth-rails_csrf_protection (~> 0.1)
+  omniauth-rails_csrf_protection (~> 0.1, >= 0.1.2)
   pg (>= 0.18, < 2.0)
   pry
   pry-nav
-  puma (~> 4.3, >= 4.3.8)
-  rails (~> 6.0.3.6)
-  rails-controller-testing
+  puma (>= 5.3.1)
+  rails (~> 6.0.3.7)
+  rails-controller-testing (>= 1.0.5)
   redis (~> 4.0)
   redis-namespace
   rexml (>= 3.2.5)
-  rspec-rails
+  rspec-rails (>= 5.0.1)
   rubocop (>= 1.12.0)
   rubocop-performance (>= 1.10.2)
   sassc-rails (>= 2.1.2)
@@ -561,7 +561,7 @@ DEPENDENCIES
   tzinfo-data
   uglifier (>= 1.3.0)
   vcr
-  web-console (>= 3.3.0)
+  web-console (>= 4.1.0)
   webmock (>= 3.12.2)
 
 RUBY VERSION
