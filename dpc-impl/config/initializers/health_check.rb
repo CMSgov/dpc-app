@@ -1,7 +1,7 @@
 HealthCheck.setup do |config|
 
   # uri prefix (no leading slash)
-  config.uri = 'health_check'
+  config.uri = 'impl/health_check'
 
   # Text output upon success
   config.success = 'success'
