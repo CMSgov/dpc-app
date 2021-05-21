@@ -90,11 +90,11 @@ func (jr *JobRepositoryV1) Insert(ctx context.Context, batches []v1.JobQueueBatc
 		results = append(results, job)
 	}
 	err = tx.Commit()
-	if err != nil || len(results) == 0 {
-		if err == nil {
-			err = errors.New("unsuccessful insert")
-		}
+	if err != nil {
 		return nil, err
+	}
+	if len(results) == 0 {
+		return nil, errors.New("unsuccessful insert")
 	}
 	return results[0], nil
 }
