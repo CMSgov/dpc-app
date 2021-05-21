@@ -9,6 +9,7 @@ import (
 	"github.com/CMSgov/dpc/attribution/model/v1"
 	"github.com/google/uuid"
 	"github.com/huandu/go-sqlbuilder"
+	"github.com/pkg/errors"
 )
 
 // JobRepo is an interface for test mocking purposes
@@ -90,6 +91,9 @@ func (jr *JobRepositoryV1) Insert(ctx context.Context, batches []v1.JobQueueBatc
 	}
 	err = tx.Commit()
 	if err != nil || len(results) == 0 {
+		if err == nil {
+			err = errors.New("unsuccessful insert")
+		}
 		return nil, err
 	}
 	return results[0], nil
