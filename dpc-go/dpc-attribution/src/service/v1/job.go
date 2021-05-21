@@ -132,6 +132,9 @@ func (js *JobServiceV1) buildExportRequest(ctx context.Context, w http.ResponseW
 
 	groupNPIs, err := js.pr.GetGroupNPIs(ctx, exportRequest.groupID)
 	if err != nil || groupNPIs.OrgNPI == "" || groupNPIs.ProviderNPI == "" {
+		if err == nil {
+			err = errors.New("Failed to retrieve NPIs for Group")
+		}
 		log.Error("Failed to retrieve NPIs for Group", zap.Error(err))
 		boom.BadData(w, err)
 		return nil, err
