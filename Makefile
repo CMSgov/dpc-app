@@ -49,7 +49,7 @@ start-local-api: secure-envs start-local
 
 .PHONY: start-portals
 start-portals:
-	@docker-compose -p dpc-portals -f docker-compose.portals.yml up start_core_dependencies
+	@docker-compose -p dpc-portals -f docker-compose.yml -f docker-compose.portals.yml up start_core_dependencies
 	@docker-compose -p dpc-portals -f docker-compose.yml -f docker-compose.portals.yml up start_web
 	@docker-compose -p dpc-portals -f docker-compose.yml -f docker-compose.portals.yml up start_admin
 	@docker-compose -p dpc-portals -f docker-compose.yml -f docker-compose.portals.yml up start_impl
@@ -57,7 +57,7 @@ start-portals:
 
 .PHONY: down-portals
 down-portals:
-	@docker-compose -p dpc-portals -f docker-compose.portals.yml down
+	@docker-compose -p dpc-portals -f docker-compose.yml -f docker-compose.portals.yml down
 
 .PHONY: start-dpc
 start-dpc: secure-envs
