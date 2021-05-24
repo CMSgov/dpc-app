@@ -50,9 +50,9 @@ start-local-api: secure-envs start-local
 .PHONY: start-portals
 start-portals:
 	@docker-compose -p dpc-portals -f docker-compose.portals.yml up start_core_dependencies
-	@docker-compose -p dpc-portals -f docker-compose.portals.yml up start_web
-	@docker-compose -p dpc-portals -f docker-compose.portals.yml up start_admin
-	@docker-compose -p dpc-portals -f docker-compose.portals.yml up start_impl
+	@docker-compose -p dpc-portals -f docker-compose.yml -f docker-compose.portals.yml up start_web
+	@docker-compose -p dpc-portals -f docker-compose.yml -f docker-compose.portals.yml up start_admin
+	@docker-compose -p dpc-portals -f docker-compose.yml -f docker-compose.portals.yml up start_impl
 	@docker ps
 
 .PHONY: down-portals
@@ -64,9 +64,9 @@ start-dpc: secure-envs
 	@docker-compose -f docker-compose.yml -f docker-compose.portals.yml up start_core_dependencies
 	@USE_BFD_MOCK=false docker-compose -f docker-compose.yml -f docker-compose.portals.yml up start_api_dependencies
 	@docker-compose -f docker-compose.yml -f docker-compose.portals.yml up start_api
-	@docker-compose -f docker-compose.portals.yml up start_web
-	@docker-compose -f docker-compose.portals.yml up start_admin
-	@docker-compose -f docker-compose.portals.yml up start_impl
+	@docker-compose -f docker-compose.yml -f docker-compose.portals.yml up start_web
+	@docker-compose -f docker-compose.yml -f docker-compose.portals.yml up start_admin
+	@docker-compose -f docker-compose.yml -f docker-compose.portals.yml up start_impl
 	@docker ps
 
 .PHONY: down-dpc
