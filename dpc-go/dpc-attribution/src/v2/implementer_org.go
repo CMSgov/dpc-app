@@ -131,7 +131,7 @@ func generateRandomOrgName() string {
 	nouns := []string{"Agave", "Alpaca", "Arch", "Aurora", "Bees", "Beetle", "Begonia", "Bicycle", "Blueberry", "Bottle", "Bugle", "Cacti", "Capitol", "Car", "Castle", "Cats", "Centurion", "Cheeseburger", "Chili", "Computers", "Croissant", "Cruiser", "Cymbal", "Daffodil", "Echinacea", "Elephant", "Firework", "Flag", "Flamingo", "Foot", "Freesia", "Gardenia", "Gnu", "Hazelnut", "Heron", "Himalaya", "Hive", "Holler", "Honeysuckle", "Ideas", "Iguanadon", "Ink", "Isthmus", "Jasmine", "Kaftan", "Kayak", "Knees", "Koala", "Lake", "Lamp", "Lavender", "Magnet", "Milk", "Mimosa", "Moon", "Mountain", "Nasturtium", "Natatorium", "Needles", "Nest", "Newspaper", "Newts", "Ocelot", "Orchid", "Otters", "Owl", "Partners", "Pear", "Peony", "Pepper", "Pineapples", "Pizza", "Popcorn", "Questions", "Quicksilver", "Ranuncula", "Rattlesnake", "Record", "River", "Robots", "Rocket", "Royal", "Runner", "Sailboat", "Sasquatch", "Snapdragon", "Spaceship", "Squid", "Star", "Succulent", "Sushi", "Tent", "Thunbergia", "Tortellini", "Tractors", "Treasure", "Unicorn", "Ursinia", "Valley", "Viola", "Well", "Whistle", "Wine", "Wisteria", "Wombat", "Xenon", "Xeranthemum", "Xylophone", "Yarrow", "Zebra", "Zenith", "Zinnia"}
 
 	adjI, _ := rand.Int(rand.Reader, big.NewInt(int64(len(adj))))
-	nounI, _ := rand.Int(rand.Reader, big.NewInt(int64(len(adj))))
+	nounI, _ := rand.Int(rand.Reader, big.NewInt(int64(len(nouns))))
 
 	return fmt.Sprint(adj[adjI.Int64()], " ", nouns[nounI.Int64()], " Healthcare")
 }
