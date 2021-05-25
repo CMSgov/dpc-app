@@ -55,7 +55,7 @@ RSpec.feature 'new user signs up for account' do
       Sidekiq::Worker.drain_all
       ctoken = last_email.body.match(/confirmation_token=[^"]*/)
 
-      visit "/users/confirmation?#{ctoken}"
+      visit "/impl/users/confirmation?#{ctoken}"
 
       expect(page).to have_http_status(200)
       expect(page).to have_content('Welcome Samuel Vimes')
