@@ -78,9 +78,9 @@ start-v2: secure-envs
 
 .PHONY: down-v2
 down-v2:
-	@docker-compose -f dpc-go/dpc-attribution/docker-compose.yml down
-	@docker-compose -f dpc-go/dpc-api/docker-compose.yml down
-	@docker-compose -f docker-compose.yml -f docker-compose.v2.yml down
+	@docker-compose -p dpc-v2 -f docker-compose.yml -f dpc-go/dpc-attribution/docker-compose.yml down
+	@docker-compose -p dpc-v2 -f docker-compose.yml -f dpc-go/dpc-api/docker-compose.yml down
+	@docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.v2.yml down
 	@docker ps
 
 .PHONY: seed-db
