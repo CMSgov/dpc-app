@@ -47,6 +47,8 @@ class User < ApplicationRecord
     api_response = api_request.response_body
 
     if api_request.response_successful?
+      self[:implementer_id] = api_response['id']
+      api_response
     else
       action = 'registered'
       msg = api_simplify(api_response)
