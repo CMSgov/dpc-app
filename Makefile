@@ -79,7 +79,7 @@ ci-app: docker-base secure-envs
 	@./dpc-test.sh
 
 .PHONY: ci-portals
-ci-portals:
+ci-portals: secure-envs
 	@./dpc-portals-test.sh
 
 .PHONY: smoke
