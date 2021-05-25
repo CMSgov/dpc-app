@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 class User < ApplicationRecord
-  before_save :assign_implementer_id
+  # before_save :assign_implementer_id
+  before_create :create_api_imp
   before_create :check_impl
 
   # Include default devise modules. Others available are:
@@ -39,15 +40,26 @@ class User < ApplicationRecord
     end
   end
 
+  def create_api_imp
+    api_request = api_service.create_implementer(implementer)
+
+    api_response = api_request.response_body
+    binding.pry
+  end
+
   def name
     "#{first_name} #{last_name}"
   end
 
   private
 
-  # TODO: remove after connecting to API
-  def assign_implementer_id
-    self.implementer_id = SecureRandom.uuid if implementer_id.blank?
+  # # TODO: remove after connecting to API
+  # def assign_implementer_id
+  #   self.implementer_id = SecureRandom.uuid if implementer_id.blank?
+  # end
+
+  def api_service
+    @api_service ||= ApiClient.new
   end
 
   def password_complexity
