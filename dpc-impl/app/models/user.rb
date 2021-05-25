@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 class User < ApplicationRecord
-  # before_save :assign_implementer_id
+  include ApiErrorSimplify
+
   before_create :create_api_imp
   before_create :check_impl
 
@@ -44,7 +45,14 @@ class User < ApplicationRecord
     api_request = api_service.create_implementer(implementer)
 
     api_response = api_request.response_body
-    binding.pry
+
+    if api_request.response_successful?
+    else
+      action = 'registered'
+      msg = api_simplify(api_response)
+      api_error(action, msg)
+      throw(:abort)
+    end
   end
 
   def name
@@ -53,13 +61,12 @@ class User < ApplicationRecord
 
   private
 
-  # # TODO: remove after connecting to API
-  # def assign_implementer_id
-  #   self.implementer_id = SecureRandom.uuid if implementer_id.blank?
-  # end
-
   def api_service
     @api_service ||= ApiClient.new
+  end
+
+  def api_error(action, msg)
+    errors.add(:base, "couldn't be #{action} with DPC's API: #{msg}")
   end
 
   def password_complexity

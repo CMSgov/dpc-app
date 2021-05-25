@@ -14,6 +14,10 @@ class ApiClient
     self
   end
 
+  def response_successful?
+    (200...299).cover? @response_status
+  end
+
   private
 
   def connection_error
@@ -37,9 +41,5 @@ class ApiClient
     request.body = json
 
     http_request(request, uri)
-  end
-
-  def response_successful?
-    (200...299).cover? @response_status
   end
 end
