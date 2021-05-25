@@ -70,10 +70,10 @@ down-dpc:
 
 .PHONY: start-v2
 start-v2: secure-envs
-	@docker-compose -f docker-compose.yml -f docker-compose.v2.yml up start_core_dependencies
-	@docker-compose -f docker-compose.yml -f docker-compose.v2.yml up start_api_dependencies
-	@docker-compose -f dpc-go/dpc-attribution/docker-compose.yml up -d
-	@docker-compose -f dpc-go/dpc-api/docker-compose.yml up -d
+	@docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.v2.yml up start_core_dependencies
+	@docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.v2.yml up start_api_dependencies
+	@docker-compose -p dpc-v2 -f dpc-go/dpc-attribution/docker-compose.yml up -d
+	@docker-compose -p dpc-v2 -f dpc-go/dpc-api/docker-compose.yml up -d
 	@docker ps
 
 .PHONY: down-v2

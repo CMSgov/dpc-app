@@ -11,8 +11,6 @@ services:
       - POSTGRES_PASSWORD=dpc-safe
     ports:
       - "5432:5432"
-    networks:
-      - my-proxy-net
     volumes:
       - ./docker/postgres:/docker-entrypoint-initdb.d
 
@@ -29,8 +27,6 @@ services:
     depends_on:
       - db
       - consent
-    networks:
-      - my-proxy-net
     volumes:
       - export-volume:/app/data
       - ./jacocoReport/dpc-aggregation:/jacoco-report
@@ -45,8 +41,6 @@ services:
     ports:
       - "3500:8080"
       - "9902:9900"
-    networks:
-      - my-proxy-net
     volumes:
       - ./jacocoReport/dpc-attribution:/jacoco-report
 
@@ -55,8 +49,6 @@ services:
     ports:
       - "3002:3002"
       - "9903:9900"
-    networks:
-      - my-proxy-net
     env_file:
       - ./ops/config/decrypted/local.env
     environment:
@@ -81,8 +73,6 @@ services:
     ports:
       - "3600:3600"
       - "9004:9900"
-    networks:
-      - my-proxy-net
     volumes:
       - ./jacocoReport/dpc-consent:/jacoco-report
 
@@ -90,8 +80,6 @@ services:
     image: dadarek/wait-for-dependencies
     depends_on:
       - db
-    networks:
-      - my-proxy-net
     command: db:5432
 
   start_api_dependencies:
@@ -99,24 +87,18 @@ services:
     depends_on:
       - attribution
       - aggregation
-    networks:
-      - my-proxy-net
     command: attribution:8080 aggregation:9900
 
   start_api:
     image: dadarek/wait-for-dependencies
     depends_on:
       - api
-    networks:
-      - my-proxy-net
     command: api:3002
 
   start_consent:
     image: dadarek/wait-for-dependencies
     depends_on:
       - consent
-    networks:
-      - my-proxy-net
     command: consent:3600
 
   tests:
@@ -129,11 +111,6 @@ services:
     working_dir: /usr/src/mymaven
     command: sh -c "mvn test -Pintegration-tests -pl dpc-api -am -ntp"
     network_mode: host
-
-networks:
-  my-proxy-net:
-      name: custom_network
-
 
 volumes:
   export-volume:

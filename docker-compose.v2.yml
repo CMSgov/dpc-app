@@ -14,8 +14,6 @@ services:
       - POSTGRES_PASSWORD=dpc-safe
     ports:
       - "5432:5432"
-    networks:
-      - my-proxy-net
     volumes:
       - ./docker/postgres:/docker-entrypoint-initdb.d
 
@@ -32,8 +30,6 @@ services:
     depends_on:
       - db
       - consent
-    networks:
-      - my-proxy-net
     volumes:
       - export-volume:/app/data
       - ./jacocoReport/dpc-aggregation:/jacoco-report
@@ -48,8 +44,6 @@ services:
     ports:
       - "3600:3600"
       - "9004:9900"
-    networks:
-      - my-proxy-net
     volumes:
       - ./jacocoReport/dpc-consent:/jacoco-report
 
@@ -59,18 +53,10 @@ services:
     image: dadarek/wait-for-dependencies
     depends_on:
       - db
-    networks:
-      - my-proxy-net
     command: db:5432
 
   start_api_dependencies:
     image: dadarek/wait-for-dependencies
     depends_on:
       - aggregation
-    networks:
-      - my-proxy-net
     command: aggregation:9900
-
-networks:
-  my-proxy-net:
-      name: custom_network

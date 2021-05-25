@@ -10,8 +10,6 @@ services:
       - POSTGRES_PASSWORD=dpc-safe
     ports:
       - "5434:5432"
-    networks:
-      - proxynet
     volumes:
       - ./docker/postgres:/docker-entrypoint-initdb.d
   migrator:
@@ -21,8 +19,6 @@ services:
     command: -path=/migrations/ -database postgres://postgres:dpc-safe@db2:5432/dpc_attribution_v2?sslmode=disable up
     volumes:
       - ./migrator/migrations:/migrations
-    networks:
-      - proxynet
   attribution:
     build:
       context: .
@@ -31,14 +27,8 @@ services:
       - migrator
     ports:
       - "3001:3001"
-    networks:
-      - proxynet
     environment:
       - DPC_DB_URL=postgresql://postgres:dpc-safe@db2:5432/dpc_attribution_v2
       - DPC_DB_URLV1=postgresql://postgres:dpc-safe@dpc-app_db_1:5432/dpc_attribution
       - DPC_DB_QUEUEURL=postgresql://postgres:dpc-safe@dpc-app_db_1:5432/dpc_queue
       - DPC_PORT=3001
-networks:
-  proxynet:
-    external:
-      name: custom_network
