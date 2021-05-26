@@ -1,0 +1,52 @@
+package v1
+
+import "time"
+
+//TODO: This stuff is probably applicable to both v1 and v2, in future move to appropriate package
+
+// BatchRequest is a struct to hold details for job batches
+type BatchRequest struct {
+	Priority        int
+	Since           *time.Time
+	RequestURL      string
+	RequestingIP    string
+	OrganizationNPI string
+	ProviderNPI     string
+	PatientMBIs     string
+	IsBulk          bool
+	ResourceTypes   string
+	TransactionTime time.Time
+}
+
+type BatchAndFiles struct {
+	Batch *BatchInfo           `json:"batch"`
+	Files *[]JobQueueBatchFile `json:"files"`
+}
+
+type BatchInfo struct {
+	TotalPatients     int        `json:"totalPatients"`
+	PatientsProcessed int        `json:"patientsProcessed"`
+	PatientIndex      *int       `json:"patientIndex"`
+	Status            string     `json:"status"`
+	TransactionTime   time.Time  `json:"transactionTime"`
+	SubmitTime        time.Time  `json:"submitTime"`
+	CompleteTime      *time.Time `json:"completeTime"`
+	RequestURL        string     `json:"requestURL"`
+}
+
+func NewBatchInfo(batch *JobQueueBatch) *BatchInfo {
+	patientIndex := -1
+	if batch.PatientIndex.Valid {
+		patientIndex = int(batch.PatientIndex.Int64)
+	}
+	return &BatchInfo{
+		TotalPatients:     len(batch.PatientMBIs),
+		PatientsProcessed: batch.PatientsProcessed(),
+		PatientIndex:      &patientIndex,
+		Status:            string(batch.Status),
+		TransactionTime:   batch.TransactionTime,
+		SubmitTime:        batch.SubmitTime,
+		CompleteTime:      &batch.CompleteTime.Time,
+		RequestURL:        batch.RequestURL,
+	}
+}

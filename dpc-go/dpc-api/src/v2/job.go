@@ -1,0 +1,157 @@
+package v2
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"github.com/CMSgov/dpc/api/client"
+	"github.com/CMSgov/dpc/api/fhirror"
+	"github.com/CMSgov/dpc/api/logger"
+	"github.com/CMSgov/dpc/api/middleware"
+	"github.com/CMSgov/dpc/api/model"
+	"go.uber.org/zap"
+	"net/http"
+)
+
+// JobController is a struct that defines what the controller has
+type JobControllerImpl struct {
+	jc client.JobClient
+}
+
+// NewJobController function that creates a organization controller and returns it's reference
+func NewJobController(jc client.JobClient) JobController {
+	return &JobControllerImpl{
+		jc,
+	}
+}
+
+func (jc *JobControllerImpl) Status(w http.ResponseWriter, r *http.Request) {
+	log := logger.WithContext(r.Context())
+	jobID, ok := r.Context().Value(middleware.ContextKeyJobID).(string)
+	if !ok {
+		log.Error("Failed to extract the job id from the context")
+		fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "Failed to extract job id from url, please check the url")
+		return
+	}
+
+	b, err := jc.jc.Status(r.Context(), jobID)
+	if err != nil {
+		log.Error("Failed to get the job status", zap.Error(err))
+		fhirror.NotFound(r.Context(), w, "Failed to get job status")
+		return
+	}
+
+	var batches []model.BatchAndFiles
+	if err := json.Unmarshal(b, &batches); err != nil {
+		log.Error("Failed to unmarshal job data", zap.Error(err))
+		fhirror.NotFound(r.Context(), w, "Failed to get job status")
+		return
+	}
+
+	statuses := getStatus(batches)
+	if statuses["FAILED"] {
+		log.Error(fmt.Sprintf("Failed batches found in job %s", jobID))
+		fhirror.GenericServerIssue(r.Context(), w)
+		return
+	} else if statuses["RUNNING"] || statuses["QUEUED"] {
+		inProgress(w, batches)
+		return
+	} else if len(statuses) == 1 && statuses["COMPLETED"] {
+		complete(r.Context(), w, batches)
+		return
+	} else {
+		w.WriteHeader(202)
+		return
+	}
+
+}
+
+func complete(ctx context.Context, w http.ResponseWriter, batches []model.BatchAndFiles) {
+	files := make([]model.BatchFile, 0)
+	for _, b := range batches {
+		files = append(files, *b.Files...)
+	}
+
+	outputs := formOutputList(files, false)
+	errors := formOutputList(files, true)
+
+	jobExtension := make(map[string]interface{})
+	jobExtension["https://dpc.cms.gov/submit_time"] = batches[0].Batch.SubmitTime     //getEarliestSubmitTime(batches)
+	jobExtension["https://dpc.cms.gov/complete_time"] = batches[0].Batch.CompleteTime //getLatestCompleteTime(batches)
+
+	status := &model.Status{
+		TransactionTime:     batches[0].Batch.TransactionTime,
+		Request:             batches[0].Batch.RequestURL,
+		RequiresAccessToken: true,
+		Output:              outputs,
+		Error:               errors,
+		Extension:           jobExtension,
+	}
+
+	b, err := json.Marshal(status)
+	if err != nil {
+		fhirror.GenericServerIssue(ctx, w)
+		return
+	}
+
+	if _, err := w.Write(b); err != nil {
+		fhirror.GenericServerIssue(ctx, w)
+		return
+	}
+}
+
+func formOutputList(files []model.BatchFile, errorList bool) []model.Output {
+	var outputs = make([]model.Output, 0)
+	for _, f := range files {
+		resourceType := f.ResourceType
+
+		if errorList && resourceType == "OperationOutcome" {
+			output := model.Output{
+				Type: f.ResourceType,
+				URL:  fmt.Sprintf("%s/Data/%s.ndjson", "", f.FormOutputFileName()),
+			}
+			outputs = append(outputs, output)
+		} else if !errorList && resourceType != "OperationOutcome" {
+			output := model.Output{
+				Type:      f.ResourceType,
+				URL:       fmt.Sprintf("%s/Data/%s.ndjson", "", f.FormOutputFileName()),
+				Count:     f.Count,
+				Extension: fhirExtensions(f),
+			}
+			outputs = append(outputs, output)
+		}
+	}
+	return outputs
+}
+
+func fhirExtensions(f model.BatchFile) map[string]interface{} {
+	m := make(map[string]interface{})
+	m["https://dpc.cms.gov/checksum"] = f.Checksum
+	m["https://dpc.cms.gov/file_length"] = f.FileLength
+
+	return m
+}
+
+func inProgress(w http.ResponseWriter, batches []model.BatchAndFiles) {
+	progress := "QUEUED: 0.00%"
+	patientsProcessed := 0
+	totalPatients := 0
+	for _, b := range batches {
+		patientsProcessed += b.Batch.PatientsProcessed
+		totalPatients += b.Batch.TotalPatients
+	}
+	if totalPatients > 0 {
+		progress = fmt.Sprintf("RUNNING: %.2f%%", float32(patientsProcessed)/float32(totalPatients)*100.0)
+	}
+	w.Header().Add("X-Progress", progress)
+	w.WriteHeader(202)
+	return
+}
+
+func getStatus(batches []model.BatchAndFiles) map[string]bool {
+	statuses := make(map[string]bool)
+	for _, b := range batches {
+		statuses[b.Batch.Status] = true
+	}
+	return statuses
+}

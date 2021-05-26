@@ -1,17 +1,15 @@
 package service
 
 import (
-	"bytes"
-	"context"
-	"database/sql"
 	"encoding/json"
 	"fmt"
 	"github.com/CMSgov/dpc/attribution/middleware"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/CMSgov/dpc/attribution/conf"
-	v1 "github.com/CMSgov/dpc/attribution/model/v1"
+	"github.com/CMSgov/dpc/attribution/model/v1"
 	"github.com/CMSgov/dpc/attribution/service"
 	"github.com/CMSgov/dpc/attribution/util"
 	"github.com/darahayes/go-boom"
@@ -35,7 +33,7 @@ type ExportRequest struct {
 	groupNPIs         *v1.GroupNPIs
 	requestURL        string
 	requestingIP      string
-	since             sql.NullTime
+	since             *time.Time
 	tt                time.Time
 	types             string
 	patientMBIBatches [][]string
@@ -53,91 +51,153 @@ func NewJobService(pr repository.PatientRepo, jr repository.JobRepo) service.Job
 // Export function that starts an export job for a given Group ID using v1 db
 func (js *JobServiceV1) Export(w http.ResponseWriter, r *http.Request) {
 	log := logger.WithContext(r.Context())
-	var batches []v1.JobQueueBatch
-	exportRequest, err := js.buildExportRequest(r.Context(), w)
+
+	groupID := util.FetchValueFromContext(r.Context(), w, middleware.ContextKeyGroup)
+	orgID := util.FetchValueFromContext(r.Context(), w, middleware.ContextKeyOrganization)
+	types := "Patient,Coverage,ExplanationOfBenefit"
+	requestIP := r.Header.Get(middleware.FwdHeader)
+	requestURL := r.Header.Get(middleware.RequestURLHeader)
+
+	groupNPIs, err := js.pr.GetGroupNPIs(r.Context(), groupID)
+	if err != nil || groupNPIs.OrgNPI == "" || groupNPIs.ProviderNPI == "" {
+		if err == nil {
+			err = errors.New("Failed to retrieve NPIs for Group")
+		}
+		log.Error("Failed to retrieve NPIs for Group", zap.Error(err))
+		boom.BadData(w, err.Error())
+		return
+	}
+
+	patientMBIs, err := js.pr.FindMBIsByGroupID(groupID)
+	if err != nil {
+		log.Error("Failed to retrieve patients", zap.Error(err))
+		boom.BadData(w, err.Error())
+		return
+	}
+
+	if len(patientMBIs) == 0 {
+		log.Error("No patients to process")
+		boom.BadData(w, "No patients to process")
+		return
+	}
+
+	batches, err := buildBatches(nil, types, requestIP, requestURL, groupNPIs, patientMBIs)
+	if err != nil {
+		log.Error("Failed to build batches", zap.Error(err))
+		boom.BadData(w, err.Error())
+	}
+
+	job, err := js.jr.Insert(r.Context(), orgID, batches)
 	if err != nil {
 		log.Error("Failed to create job", zap.Error(err))
-		boom.BadData(w, err)
+		boom.BadData(w, err.Error())
 		return
 	}
-	for _, patients := range exportRequest.patientMBIBatches {
-		// Set the priority of a job patients
-		// Single patients will have first priority to support patient everything
-		priority := 5000
-		if len(patients) == 1 {
-			priority = 1000
-		}
-		details := repository.BatchDetails{
-			Priority:     priority,
-			Tt:           exportRequest.tt,
-			Since:        exportRequest.since,
-			Types:        exportRequest.types,
-			RequestURL:   exportRequest.requestURL,
-			RequestingIP: exportRequest.requestingIP,
-		}
-		jobQueueBatch := js.jr.NewJobQueueBatch(exportRequest.orgID, exportRequest.groupNPIs, patients, details)
-		batches = append(batches, *jobQueueBatch)
-	}
-	job, err := js.jr.Insert(r.Context(), batches)
-	if err != nil {
-		log.Error("Failed to create job", zap.Error(err))
-		boom.BadData(w, err)
-		return
-	}
-	jobBytes := new(bytes.Buffer)
-	if err := json.NewEncoder(jobBytes).Encode(job); err != nil {
-		log.Error("Failed to convert orm model to bytes for job", zap.Error(err))
-		boom.Internal(w, err.Error())
-		return
-	}
-	if _, err := w.Write(jobBytes.Bytes()); err != nil {
+
+	if _, err := w.Write([]byte(*job)); err != nil {
 		log.Error("Failed to write job ID to response", zap.Error(err))
 		boom.Internal(w, err.Error())
 		return
 	}
 	log.Info(fmt.Sprintf(
 		"dpcMetric=jobCreated,jobId=%s,orgId=%s,groupId=%s,totalPatients=%x,resourcesRequested=%s",
-		job.ID,
-		exportRequest.orgID,
-		exportRequest.groupID,
-		exportRequest.totalPatients,
-		exportRequest.types),
+		*job,
+		orgID,
+		groupID,
+		len(patientMBIs),
+		types),
 	)
 }
 
-func (js *JobServiceV1) buildExportRequest(ctx context.Context, w http.ResponseWriter) (*ExportRequest, error) {
-	log := logger.WithContext(ctx)
-	exportRequest := new(ExportRequest)
-	exportRequest.groupID = util.FetchValueFromContext(ctx, w, middleware.ContextKeyGroup)
-	exportRequest.orgID = util.FetchValueFromContext(ctx, w, middleware.ContextKeyOrganization)
-	exportRequest.requestingIP = util.FetchValueFromContext(ctx, w, middleware.ContextKeyRequestingIP)
-	exportRequest.requestURL = util.FetchValueFromContext(ctx, w, middleware.ContextKeyRequestURL)
-	patientMBIs, err := js.pr.FindMBIsByGroupID(exportRequest.groupID)
-	if err != nil || len(patientMBIs) == 0 {
-		if err == nil {
-			err = errors.New("Failed to fetch patients for group")
-		}
-		log.Error("Failed to fetch patients for group", zap.Error(err))
-		boom.BadRequest(w, "The group must contain active patients")
-		return nil, err
+func buildBatches(since *time.Time, types string, requestIP string, requestURL string, groupNPIs *v1.GroupNPIs, patientMBIs []string) ([]v1.BatchRequest, error) {
+	priority := 5000
+	if len(patientMBIs) == 1 {
+		priority = 1000
 	}
-	exportRequest.totalPatients = len(patientMBIs)
-	exportRequest.patientMBIBatches = batchPatientMBIs(patientMBIs, conf.GetAsInt("queue.batchSize", 100))
-	// TODO: Handle since param
-	exportRequest.since = sql.NullTime{}
-	// TODO: Handle types param
-	exportRequest.types = "Patient,Coverage,ExplanationOfBenefit"
-	// TODO: Get TransactionTime from BFD (requires client)
-	exportRequest.tt = time.Time{}
 
-	groupNPIs, err := js.pr.GetGroupNPIs(ctx, exportRequest.groupID)
-	if err != nil || groupNPIs.OrgNPI == "" || groupNPIs.ProviderNPI == "" {
-		log.Error("Failed to retrieve NPIs for Group", zap.Error(err))
-		boom.BadData(w, err)
-		return nil, err
+	patients := batchPatientMBIs(patientMBIs, conf.GetAsInt("queue.batchSize", 100))
+	batches := make([]v1.BatchRequest, len(patients))
+	for _, batchedPatients := range patients {
+		batch := new(v1.BatchRequest)
+		batch.RequestingIP = requestIP
+		batch.RequestURL = requestURL
+		batch.PatientMBIs = strings.Join(batchedPatients, ",")
+		batch.IsBulk = true
+		batch.ResourceTypes = types
+		batch.Since = since
+		batch.Priority = priority
+		batch.TransactionTime = time.Now() // need a bfd client to do this
+		batch.ProviderNPI = groupNPIs.ProviderNPI
+		batch.OrganizationNPI = groupNPIs.OrgNPI
 	}
-	exportRequest.groupNPIs = groupNPIs
-	return exportRequest, nil
+	return batches, nil
+}
+
+func (js *JobServiceV1) BatchAndFiles(w http.ResponseWriter, r *http.Request) {
+	log := logger.WithContext(r.Context())
+	orgID := util.FetchValueFromContext(r.Context(), w, middleware.ContextKeyOrganization)
+	jobID := util.FetchValueFromContext(r.Context(), w, middleware.ContextKeyJobID)
+
+	response := make([]v1.BatchAndFiles, 0)
+
+	batches, err := js.jr.FindBatchesByJobID(jobID, orgID)
+	if err != nil {
+		log.Error("Failed to find batches by job id", zap.Error(err))
+		boom.Internal(w, err.Error())
+		return
+	}
+
+	for _, b := range batches {
+		files, err := js.jr.FindBatchFilesByBatchID(b.BatchID)
+		if err != nil {
+			log.Error("Failed to retrieve batch files", zap.Error(err))
+			boom.Internal(w, err.Error())
+			return
+		}
+		bf := v1.BatchAndFiles{
+			Batch: v1.NewBatchInfo(&b),
+			Files: &files,
+		}
+		response = append(response, bf)
+	}
+
+	b, err := json.Marshal(response)
+	if err != nil {
+		log.Error("Failed to write json bytes", zap.Error(err))
+		boom.Internal(w, err.Error())
+	}
+
+	if _, err := w.Write(b); err != nil {
+		log.Error("Failed to write organization to response for organization", zap.Error(err))
+		boom.Internal(w, err.Error())
+	}
+
+	//statuses := getStatus(batches)
+	//if statuses[3] {
+	//	boom.Internal(w, r)
+	//	return
+	//} else if statuses[1] || statuses[0] {
+	//	inProgress(w, batches)
+	//	return
+	//} else if statuses[2] {
+	//	complete(w, batches)
+	//	return
+	//} else {
+	//	w.WriteHeader(202)
+	//	return
+	//}
+	//
+	////batchIDs := make([]string, 0)
+	////for _, s := range batches {
+	////	batchIDs = append(batchIDs, s.BatchID)
+	////}
+	////
+	////files, err := js.jr.FindBatchFilesByBatchID(r.Context(), batchIDs)
+	////
+	////if err != nil {
+	////	log.Error("Failed to find batch files", zap.Error(err))
+	////	boom.Internal(w, r)
+	////}
 }
 
 func batchPatientMBIs(patientMBIs []string, batchSize int) [][]string {

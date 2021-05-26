@@ -44,8 +44,13 @@ func main() {
 
 	dataCtlr := v2.NewDataController(dataClient)
 
-	apiRouter := router.NewDPCAPIRouter(orgCtlr, m, groupCtlr, dataCtlr)
-	// authRouter := router.NewAuthRouter()
+	jobClient := client.NewJobClient(client.JobConfig{
+		URL:     attributionURL,
+		Retries: retries,
+	})
+	jobCtlr := v2.NewJobController(jobClient)
+
+	apiRouter := router.NewDPCAPIRouter(orgCtlr, m, groupCtlr, dataCtlr, jobCtlr)
 
 	port := conf.GetAsString("port", "3000")
 	if err := http.ListenAndServe(fmt.Sprintf(":%s", port), apiRouter); err != nil {
