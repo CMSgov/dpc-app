@@ -102,6 +102,7 @@ func (jr *JobRepositoryV1) Insert(ctx context.Context, batches []v1.JobQueueBatc
 	return results[0], nil
 }
 
+// IsFileValid function checks if the file name along with the orgId is valid
 func (jr *JobRepositoryV1) IsFileValid(ctx context.Context, orgID string, fileName string) (*v1.FileInfo, error) {
 	log := logger.WithContext(ctx)
 
@@ -112,11 +113,11 @@ func (jr *JobRepositoryV1) IsFileValid(ctx context.Context, orgID string, fileNa
 	sb.Where(sb.Equal("f.file_name", fileName), sb.Equal("b.organization_id", orgID))
 	q, args := sb.Build()
 
-	var jobId string
+	var jobID string
 	var startTime *time.Time
 	var fileLength int
 	var checksum []byte
-	if err := jr.db.QueryRowContext(ctx, q, args...).Scan(&jobId, &startTime, &fileLength, &checksum); err != nil {
+	if err := jr.db.QueryRowContext(ctx, q, args...).Scan(&jobID, &startTime, &fileLength, &checksum); err != nil {
 		return nil, err
 	}
 
@@ -127,7 +128,7 @@ func (jr *JobRepositoryV1) IsFileValid(ctx context.Context, orgID string, fileNa
 	sb = sqlFlavor.NewSelectBuilder()
 	sb.Select("status")
 	sb.From("job_queue_batch")
-	sb.Where(sb.Equal("job_id", jobId))
+	sb.Where(sb.Equal("job_id", jobID))
 	q, args = sb.Build()
 
 	rows, err := jr.db.Query(q, args...)

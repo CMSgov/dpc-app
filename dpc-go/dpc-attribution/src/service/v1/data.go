@@ -11,16 +11,19 @@ import (
 	"net/http"
 )
 
+// DataService struct defines the class
 type DataService struct {
 	jr repository.JobRepo
 }
 
+// NewDataService creates a dataservice
 func NewDataService(jr repository.JobRepo) *DataService {
 	return &DataService{
 		jr,
 	}
 }
 
+// GetFileInfo gets the file info for a filename
 func (ds *DataService) GetFileInfo(w http.ResponseWriter, r *http.Request) {
 	log := logger.WithContext(r.Context())
 	fileName, ok := r.Context().Value(middleware.ContextKeyFileName).(string)

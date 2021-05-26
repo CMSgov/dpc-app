@@ -50,42 +50,6 @@ func NewJobService(pr repository.PatientRepo, jr repository.JobRepo) service.Job
 	}
 }
 
-func (js *JobServiceV1) GetFileInfo(w http.ResponseWriter, r *http.Request) {
-	log := logger.WithContext(r.Context())
-	fileName, ok := r.Context().Value(middleware.ContextKeyFileName).(string)
-	if !ok {
-		log.Error("Failed to extract file name from context")
-		boom.BadRequest(w, "Could not get file name in URL")
-		return
-	}
-
-	orgID, ok := r.Context().Value(middleware.ContextKeyOrganization).(string)
-	if !ok {
-		log.Error("Failed to extract organization ID from context")
-		boom.BadRequest(w, "Could not get organization ID")
-		return
-	}
-
-	fi, err := js.jr.IsFileValid(r.Context(), orgID, fileName)
-	if err != nil {
-		log.Error(fmt.Sprintf("File name: %s is not valid", fileName), zap.Error(err))
-		boom.BadRequest(w, "file name doesn't check out")
-		return
-	}
-
-	fiBytes := new(bytes.Buffer)
-	if err := json.NewEncoder(fiBytes).Encode(fi); err != nil {
-		log.Error("Failed to convert model to bytes for file info", zap.Error(err))
-		boom.Internal(w, err.Error())
-		return
-	}
-
-	if _, err := w.Write(fiBytes.Bytes()); err != nil {
-		log.Error("Failed to write file info to response", zap.Error(err))
-		boom.Internal(w, err.Error())
-	}
-}
-
 // Export function that starts an export job for a given Group ID using v1 db
 func (js *JobServiceV1) Export(w http.ResponseWriter, r *http.Request) {
 	log := logger.WithContext(r.Context())

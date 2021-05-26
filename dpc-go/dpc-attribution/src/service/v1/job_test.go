@@ -157,35 +157,3 @@ func (suite *JobServiceV1TestSuite) TestExportRepoError() {
         "statusCode": 422
     }`)
 }
-
-func (suite *JobServiceV1TestSuite) TestGetFileInfo() {
-	suite.jr.On("IsFileValid", mock.Anything, mock.MatchedBy(func(param string) bool {
-		return param == "12345"
-	}), mock.MatchedBy(func(param string) bool {
-		return param == "fileName"
-	})).Return(&v1.FileInfo{
-		FileName:     "fileName",
-		FileLength:   1234,
-		FileCheckSum: nil,
-	}, nil)
-
-	req := httptest.NewRequest("GET", "http://example.com/", nil)
-	ctx := req.Context()
-	ctx = context.WithValue(ctx, middleware2.ContextKeyOrganization, "12345")
-	ctx = context.WithValue(ctx, middleware2.ContextKeyFileName, "fileName")
-	req = req.WithContext(ctx)
-
-	w := httptest.NewRecorder()
-
-	suite.service.GetFileInfo(w, req)
-
-	res := w.Result()
-
-	b, _ := ioutil.ReadAll(res.Body)
-	var actual *v1.FileInfo
-	_ = json.Unmarshal(b, &actual)
-
-	assert.Equal(suite.T(), "fileName", actual.FileName)
-	assert.Equal(suite.T(), 1234, actual.FileLength)
-
-}
