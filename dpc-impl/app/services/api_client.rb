@@ -22,7 +22,7 @@ class ApiClient
 
   def connection_error
     Rails.logger.warn 'Could not connect to API'
-    @response = 500
+    @response_status = 500
     @response_body = { 'issue' => [{ 'details' => { 'text' => 'Connection error' }}]}
   end
 
@@ -31,8 +31,19 @@ class ApiClient
 
     response = http.request(request)
     @response_status = response.code.to_i
-    @response_body = response_successful? ? parsed_response(res) : response.body rescue Errno::ECONNREFUSED
-    connection_error
+
+    if response_successful?
+      @response_body = parsed_response(response)
+    else
+      @response_body = response.body rescue Errno::ECONNREFUSED
+      connection_error
+    end
+  end
+
+  def parsed_response(response)
+    return self if response.body.blank?
+
+    eval(response.body)
   end
 
   def post_request(uri_string, json)
