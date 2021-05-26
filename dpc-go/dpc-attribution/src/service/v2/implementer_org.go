@@ -27,18 +27,22 @@ type ImplementerOrgService struct {
 	autoCreateOrg bool
 }
 
+// Get function is not used for ImplementerOrgService
 func (ios *ImplementerOrgService) Get(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
+// Delete function is not used for ImplementerOrgService
 func (ios *ImplementerOrgService) Delete(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
+// Put function is not used for ImplementerOrgService
 func (ios *ImplementerOrgService) Put(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
+// Export function is not used for ImplementerOrgService
 func (ios *ImplementerOrgService) Export(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
