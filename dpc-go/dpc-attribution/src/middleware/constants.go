@@ -20,4 +20,6 @@ const (
 	ContextKeyRequestingIP
 	// ContextKeyFileName is the key in the context to retrieve the file name
 	ContextKeyFileName
+	// ContextKeyImplementer is the key in the context to retrieve the ImplementerID
+	ContextKeyImplementer
 )

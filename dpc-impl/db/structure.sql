@@ -11,8 +11,6 @@ SET row_security = off;
 
 SET default_tablespace = '';
 
-SET default_table_access_method = heap;
-
 --
 -- Name: ar_internal_metadata; Type: TABLE; Schema: public; Owner: -
 --
@@ -73,7 +71,9 @@ CREATE TABLE public.schema_migrations (
 
 CREATE TABLE public.the_resources (
     id bigint NOT NULL,
-    password_changed_at timestamp without time zone
+    password_changed_at timestamp without time zone,
+    last_activity_at timestamp without time zone,
+    expired_at timestamp without time zone
 );
 
 
@@ -119,6 +119,8 @@ CREATE TABLE public.users (
     confirmation_token character varying,
     confirmed_at timestamp without time zone,
     confirmation_sent_at timestamp without time zone,
+    last_activity_at timestamp without time zone,
+    expired_at timestamp without time zone,
     created_at timestamp(6) without time zone NOT NULL,
     updated_at timestamp(6) without time zone NOT NULL,
     invitation_token character varying,
@@ -218,6 +220,20 @@ ALTER TABLE ONLY public.users
 --
 
 CREATE INDEX index_password_archivable ON public.old_passwords USING btree (password_archivable_type, password_archivable_id);
+
+
+--
+-- Name: index_the_resources_on_expired_at; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_the_resources_on_expired_at ON public.the_resources USING btree (expired_at);
+
+
+--
+-- Name: index_the_resources_on_last_activity_at; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_the_resources_on_last_activity_at ON public.the_resources USING btree (last_activity_at);
 
 
 --

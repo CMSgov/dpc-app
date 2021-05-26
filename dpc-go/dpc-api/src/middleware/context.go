@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 
 	"github.com/CMSgov/dpc/api/fhirror"
@@ -42,10 +43,35 @@ func GroupCtx(next http.Handler) http.Handler {
 	})
 }
 
+// FileNameCtx middleware to extract the filename from the chi url param and set it into the request context
 func FileNameCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		groupID := chi.URLParam(r, "fileName")
 		ctx := context.WithValue(r.Context(), ContextKeyFileName, groupID)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+// RequestIPCtx middleware to extract the requesting IP address from the incoming request and set it into the request context
+func RequestIPCtx(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ipAddress := r.Header.Get(FwdHeader)
+		if ipAddress == "" {
+			ipAddress = r.RemoteAddr
+		}
+		ctx := context.WithValue(r.Context(), ContextKeyRequestingIP, ipAddress)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+// RequestURLCtx middleware to extract the requesting URL from the incoming request and set it in the request context
+func RequestURLCtx(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		scheme := "http"
+		if r.TLS != nil {
+			scheme = "https"
+		}
+		ctx := context.WithValue(r.Context(), ContextKeyRequestURL, fmt.Sprintf("%s://%s%s %s\" ", scheme, r.Host, r.RequestURI, r.Proto))
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

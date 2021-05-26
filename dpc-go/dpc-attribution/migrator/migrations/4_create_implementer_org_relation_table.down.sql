@@ -1,0 +1,1 @@
+DROP TABLE IF EXISTS "implementer_org_relation";

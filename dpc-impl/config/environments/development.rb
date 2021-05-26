@@ -43,7 +43,7 @@ Rails.application.configure do
 
   # By default we use letter_opener to render the email in a browser
   # rather than send them:
-  config.action_mailer.delivery_method = :letter_opener
+  config.action_mailer.delivery_method = :letter_opener_web
 
   # Print deprecation notices to the Rails logger.
   config.active_support.deprecation = :log
@@ -86,6 +86,6 @@ Rails.application.configure do
   # Uncomment if you wish to allow Action Cable access from any origin.
   # config.action_cable.disable_request_forgery_protection = true
   # Devise requires mailer
-  config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }
-  config.action_mailer.asset_host = 'http://localhost:3000'
+  config.action_mailer.default_url_options = { host: 'localhost', port: 4000 }
+  config.action_mailer.asset_host = 'http://localhost:4000'
 end

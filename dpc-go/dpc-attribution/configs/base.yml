@@ -4,6 +4,10 @@ db:
   queueUrl: postgresql://postgres:dpc-safe@localhost:5432/dpc_queue
 
 port: 3001
+AutoCreateOrg: "true"
+
+queue:
+  batchSize: 100
 
 queue:
   batchSize: 100
