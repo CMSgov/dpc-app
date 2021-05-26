@@ -3,7 +3,7 @@
 class User < ApplicationRecord
   include ApiErrorSimplify
 
-  before_create :create_api_imp
+  before_create :create_api_imp, if: -> { no_imp_id? }
   before_create :check_impl
 
   # Include default devise modules. Others available are:
@@ -55,6 +55,10 @@ class User < ApplicationRecord
       api_error(action, msg)
       throw(:abort)
     end
+  end
+
+  def no_imp_id?
+    implementer_id.blank?
   end
 
   def name
