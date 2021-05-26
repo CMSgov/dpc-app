@@ -4,13 +4,13 @@ services:
   migrator:
     image: migrate/migrate
     depends_on:
-      - db:
+      - db
     command: -path=/migrations/ -database postgres://postgres:dpc-safe@db:5432/dpc_attribution_v2?sslmode=disable up
     volumes:
       - ./migrator/migrations:/migrations
-  attribution:
+  attribution2:
     build:
-      context: .
+      context: dpc-go/dpc-attribution
       dockerfile: docker/Dockerfiles/Dockerfile.attribution
     depends_on:
       - migrator
@@ -18,6 +18,6 @@ services:
       - "3001:3001"
     environment:
       - DPC_DB_URL=postgresql://postgres:dpc-safe@db:5432/dpc_attribution_v2
-      - DPC_DB_URLV1=postgresql://postgres:dpc-safe@dpc-app_db_1:5432/dpc_attribution
-      - DPC_DB_QUEUEURL=postgresql://postgres:dpc-safe@dpc-app_db_1:5432/dpc_queue
+      - DPC_DB_URLV1=postgresql://postgres:dpc-safe@db:5432/dpc_attribution
+      - DPC_DB_QUEUEURL=postgresql://postgres:dpc-safe@db:5432/dpc_queue
       - DPC_PORT=3001
