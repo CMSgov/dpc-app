@@ -18,4 +18,6 @@ const (
 	ContextKeyGroup
 	// ContextKeyRequestingIP is the key in the context to retrieve the requesting IP address
 	ContextKeyRequestingIP
+	// ContextKeyImplementer is the key in the context to retrieve the ImplementerID
+	ContextKeyImplementer
 )
