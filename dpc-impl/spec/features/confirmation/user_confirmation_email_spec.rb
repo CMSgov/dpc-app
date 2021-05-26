@@ -23,7 +23,7 @@ RSpec.feature 'user resends confirmation instructions' do
 
       ctoken = email.raw_source.match(/confirmation_token=[^"]*/)
 
-      visit "/users/confirmation?#{ctoken}"
+      visit "/impl/users/confirmation?#{ctoken}"
 
       expect(page.body).to include("Welcome #{user.name}")
     end
