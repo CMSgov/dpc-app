@@ -39,12 +39,12 @@ func (m *MockOrgRepo) FindByID(ctx context.Context, id string) (*v2.Organization
 	return args.Get(0).(*v2.Organization), args.Error(1)
 }
 
-func (m *MockOrgRepo) FindByNPI(ctx context.Context, npi string) (*model.Organization, error) {
+func (m *MockOrgRepo) FindByNPI(ctx context.Context, npi string) (*v2.Organization, error) {
 	args := m.Called(ctx, npi)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).(*model.Organization), args.Error(1)
+	return args.Get(0).(*v2.Organization), args.Error(1)
 }
 
 func (m *MockOrgRepo) DeleteByID(ctx context.Context, id string) error {

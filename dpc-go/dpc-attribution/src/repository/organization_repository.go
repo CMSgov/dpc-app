@@ -156,15 +156,15 @@ func (or *OrganizationRepository) Update(ctx context.Context, id string, body []
 }
 
 // FindByNPI function that searches the database for the organization that matches the id
-func (or *OrganizationRepository) FindByNPI(ctx context.Context, npi string) (*model.Organization, error) {
+func (or *OrganizationRepository) FindByNPI(ctx context.Context, npi string) (*v2.Organization, error) {
 	sb := sqlFlavor.NewSelectBuilder()
 	sb.Select("id", "version", "created_at", "updated_at", "info")
 	sb.From("organization")
 	sb.Where(fmt.Sprintf("info @> '{\"identifier\": [{\"value\": \"%s\"}]}'", npi))
 	q, args := sb.Build()
 
-	org := new(model.Organization)
-	orgStruct := sqlbuilder.NewStruct(new(model.Organization)).For(sqlFlavor)
+	org := new(v2.Organization)
+	orgStruct := sqlbuilder.NewStruct(new(v2.Organization)).For(sqlFlavor)
 	if err := or.db.QueryRowContext(ctx, q, args...).Scan(orgStruct.Addr(&org)...); err != nil {
 		return nil, err
 	}

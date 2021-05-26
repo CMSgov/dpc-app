@@ -2,38 +2,40 @@ package v2
 
 import (
 	"context"
-	"github.com/CMSgov/dpc/attribution/middleware"
-	"github.com/CMSgov/dpc/attribution/model"
-	"github.com/bxcodec/faker"
-	"github.com/kinbiko/jsonassert"
-	"github.com/pkg/errors"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
-	"github.com/stretchr/testify/suite"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/CMSgov/dpc/attribution/middleware"
+	v2 "github.com/CMSgov/dpc/attribution/model/v2"
+	"github.com/bxcodec/faker/v3"
+	"github.com/kinbiko/jsonassert"
+	"github.com/pkg/errors"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/suite"
 )
 
 type MockImplementerOrgRepo struct {
 	mock.Mock
 }
 
-func (m *MockImplementerOrgRepo) Insert(ctx context.Context, implId string, orgId string, status model.ImplOrgStatus) (*model.ImplementerOrgRelation, error) {
+func (m *MockImplementerOrgRepo) Insert(ctx context.Context, implId string, orgId string, status v2.ImplOrgStatus) (*v2.ImplementerOrgRelation, error) {
 	args := m.Called(ctx, implId, orgId, status)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).(*model.ImplementerOrgRelation), args.Error(1)
+	return args.Get(0).(*v2.ImplementerOrgRelation), args.Error(1)
 }
-func (m *MockImplementerOrgRepo) FindRelation(ctx context.Context, implId string, orgId string) (*model.ImplementerOrgRelation, error) {
+func (m *MockImplementerOrgRepo) FindRelation(ctx context.Context, implId string, orgId string) (*v2.ImplementerOrgRelation, error) {
 	args := m.Called(ctx, implId, orgId)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).(*model.ImplementerOrgRelation), args.Error(1)
+	return args.Get(0).(*v2.ImplementerOrgRelation), args.Error(1)
 }
 
 type ImplementerOrgServiceTestSuite struct {

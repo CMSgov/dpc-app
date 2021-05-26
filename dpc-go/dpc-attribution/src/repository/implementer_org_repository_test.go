@@ -2,17 +2,19 @@ package repository
 
 import (
 	"context"
-	"github.com/CMSgov/dpc/attribution/model"
+	"fmt"
+	"testing"
+
+	"github.com/CMSgov/dpc/attribution/model/v2"
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/bxcodec/faker"
+	"github.com/bxcodec/faker/v3"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"testing"
 )
 
 type ImplementerOrgRepositoryTestSuite struct {
 	suite.Suite
-	fakeRel *model.ImplementerOrgRelation
+	fakeRel *v2.ImplementerOrgRelation
 }
 
 func (suite *ImplementerOrgRepositoryTestSuite) SetupTest() {
@@ -22,7 +24,7 @@ func (suite *ImplementerOrgRepositoryTestSuite) SetupTest() {
 		fmt.Printf("ERR %v\n", err)
 	}
 	suite.fakeRel = &i
-	suite.fakeRel.Status = model.Unknown
+	suite.fakeRel.Status = v2.Unknown
 }
 
 func TestImplementerOrgRepositoryTestSuite(t *testing.T) {
