@@ -36,10 +36,11 @@ func (ms *MockService) Put(w http.ResponseWriter, r *http.Request) {
 
 type RouterTestSuite struct {
 	suite.Suite
-	router    http.Handler
-	mockOrg   *MockService
-	mockGroup *MockService
-	mockImplementer *MockService
+	router                http.Handler
+	mockOrg               *MockService
+	mockGroup             *MockService
+	mockImplementer       *MockService
+	mockImplementerOrgRel *MockService
 }
 
 func TestRouterTestSuite(t *testing.T) {
@@ -49,7 +50,7 @@ func TestRouterTestSuite(t *testing.T) {
 func (suite *RouterTestSuite) SetupTest() {
 	suite.mockOrg = &MockService{}
 	suite.mockGroup = &MockService{}
-	suite.router = NewDPCAttributionRouter(suite.mockOrg, suite.mockGroup, suite.mockImplementer)
+	suite.router = NewDPCAttributionRouter(suite.mockOrg, suite.mockGroup, suite.mockImplementer, suite.mockImplementerOrgRel)
 }
 
 func (suite *RouterTestSuite) do(httpMethod string, route string, body io.Reader, headers map[string]string) *http.Response {
