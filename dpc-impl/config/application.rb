@@ -1,5 +1,8 @@
 require_relative "boot"
 
+# Enable stout syncing for Docker
+$stdout.sync = true
+
 require "rails/all"
 require "active_model/railtie"
 require "active_job/railtie"
@@ -19,10 +22,14 @@ module DpcImpl
     # ump and read as sql
     config.active_record.schema_format = :sql
 
+    # Check for STATIC_SITE_URL environment variable
+    ENV['STATIC_SITE_URL'].present? ? ENV['STATIC_SITE_URL'] : ENV['STATIC_SITE_URL'] = 'https://dpc.cms.gov'
+
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 6.1
 
     # Add fonts to asset pipeline
+    config.assets.prefix = '/impl/assets'
     config.assets.paths << Rails.root.join("app", "assets", "fonts")
 
     # Don't generate system test files.

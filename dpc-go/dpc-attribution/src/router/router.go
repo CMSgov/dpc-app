@@ -35,6 +35,7 @@ func NewDPCAttributionRouter(o v2.Service, g v2.PostService, impl v2.PostService
 				r.Get("/", implOrg.Get)
 				r.Delete("/", implOrg.Delete)
 				r.Put("/", implOrg.Put)
+
 			})
 			r.Post("/", impl.Post)
 		})
