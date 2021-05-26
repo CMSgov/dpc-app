@@ -7,7 +7,7 @@ services:
       - db
     command: -path=/migrations/ -database postgres://postgres:dpc-safe@db:5432/dpc_attribution_v2?sslmode=disable up
     volumes:
-      - ./migrator/migrations:/migrations
+      - ./dpc-go/dpc-attribution/migrator/migrations:/migrations
   attribution2:
     build:
       context: dpc-go/dpc-attribution
