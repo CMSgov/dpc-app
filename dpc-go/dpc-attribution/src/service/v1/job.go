@@ -26,20 +26,6 @@ type JobServiceV1 struct {
 	jr repository.JobRepo
 }
 
-// ExportRequest is a struct to hold all of the export request details
-type ExportRequest struct {
-	orgID             string
-	groupID           string
-	groupNPIs         *v1.GroupNPIs
-	requestURL        string
-	requestingIP      string
-	since             *time.Time
-	tt                time.Time
-	types             string
-	patientMBIBatches [][]string
-	totalPatients     int
-}
-
 // NewJobService function that creates and returns a JobService
 func NewJobService(pr repository.PatientRepo, jr repository.JobRepo) service.JobService {
 	return &JobServiceV1{
@@ -122,7 +108,7 @@ func buildBatches(since *time.Time, types string, requestIP string, requestURL s
 		batch.RequestingIP = requestIP
 		batch.RequestURL = requestURL
 		batch.PatientMBIs = strings.Join(batchedPatients, ",")
-		batch.IsBulk = true
+		batch.IsBulk = len(patientMBIs) > 1
 		batch.ResourceTypes = types
 		batch.Since = since
 		batch.Priority = priority
@@ -171,33 +157,6 @@ func (js *JobServiceV1) BatchAndFiles(w http.ResponseWriter, r *http.Request) {
 		log.Error("Failed to write organization to response for organization", zap.Error(err))
 		boom.Internal(w, err.Error())
 	}
-
-	//statuses := getStatus(batches)
-	//if statuses[3] {
-	//	boom.Internal(w, r)
-	//	return
-	//} else if statuses[1] || statuses[0] {
-	//	inProgress(w, batches)
-	//	return
-	//} else if statuses[2] {
-	//	complete(w, batches)
-	//	return
-	//} else {
-	//	w.WriteHeader(202)
-	//	return
-	//}
-	//
-	////batchIDs := make([]string, 0)
-	////for _, s := range batches {
-	////	batchIDs = append(batchIDs, s.BatchID)
-	////}
-	////
-	////files, err := js.jr.FindBatchFilesByBatchID(r.Context(), batchIDs)
-	////
-	////if err != nil {
-	////	log.Error("Failed to find batch files", zap.Error(err))
-	////	boom.Internal(w, r)
-	////}
 }
 
 func batchPatientMBIs(patientMBIs []string, batchSize int) [][]string {

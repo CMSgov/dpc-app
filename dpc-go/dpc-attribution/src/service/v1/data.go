@@ -6,6 +6,7 @@ import (
 	"github.com/CMSgov/dpc/attribution/logger"
 	"github.com/CMSgov/dpc/attribution/middleware"
 	"github.com/CMSgov/dpc/attribution/repository"
+	"github.com/CMSgov/dpc/attribution/util"
 	"github.com/darahayes/go-boom"
 	"go.uber.org/zap"
 	"net/http"
@@ -26,21 +27,10 @@ func NewDataService(jr repository.JobRepo) *DataService {
 // GetFileInfo gets the file info for a filename
 func (ds *DataService) GetFileInfo(w http.ResponseWriter, r *http.Request) {
 	log := logger.WithContext(r.Context())
-	fileName, ok := r.Context().Value(middleware.ContextKeyFileName).(string)
-	if !ok {
-		log.Error("Failed to extract file name from context")
-		boom.BadRequest(w, "Could not get file name in URL")
-		return
-	}
+	fileName := util.FetchValueFromContext(r.Context(), w, middleware.ContextKeyFileName)
+	orgID := util.FetchValueFromContext(r.Context(), w, middleware.ContextKeyOrganization)
 
-	orgID, ok := r.Context().Value(middleware.ContextKeyOrganization).(string)
-	if !ok {
-		log.Error("Failed to extract organization ID from context")
-		boom.BadRequest(w, "Could not get organization ID")
-		return
-	}
-
-	fi, err := ds.jr.IsFileValid(r.Context(), orgID, fileName)
+	fi, err := ds.jr.GetFileInfo(r.Context(), orgID, fileName)
 	if err != nil {
 		log.Error(fmt.Sprintf("File name: %s is not valid", fileName), zap.Error(err))
 		boom.BadRequest(w, "file name doesn't check out")

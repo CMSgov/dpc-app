@@ -44,7 +44,7 @@ func (suite *DataServiceTestSuite) TestGetFileInfo() {
 		FileLength:   0,
 		FileCheckSum: nil,
 	}
-	suite.jobRepo.On("IsFileValid", mock.Anything, mock.Anything, mock.MatchedBy(func(key string) bool {
+	suite.jobRepo.On("GetFileInfo", mock.Anything, mock.Anything, mock.MatchedBy(func(key string) bool {
 		return key == fileName
 	})).Return(&fi, nil)
 

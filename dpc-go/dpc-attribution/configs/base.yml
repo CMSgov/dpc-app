@@ -9,9 +9,6 @@ AutoCreateOrg: "true"
 queue:
   batchSize: 100
 
-queue:
-  batchSize: 100
-
 log:
   level: info
   encoding: json

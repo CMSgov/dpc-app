@@ -15,7 +15,7 @@ import (
 
 // JobRepo is an interface for test mocking purposes
 type JobRepo interface {
-	IsFileValid(ctx context.Context, orgID string, fileName string) (*v1.FileInfo, error)
+	GetFileInfo(ctx context.Context, orgID string, fileName string) (*v1.FileInfo, error)
 	Insert(ctx context.Context, orgID string, batches []v1.BatchRequest) (*string, error)
 	FindBatchesByJobID(id string, orgID string) ([]v1.JobQueueBatch, error)
 	FindBatchFilesByBatchID(id string) ([]v1.JobQueueBatchFile, error)
@@ -113,8 +113,8 @@ func (jr *JobRepositoryV1) FindBatchFilesByBatchID(id string) ([]v1.JobQueueBatc
 	return files, nil
 }
 
-// IsFileValid function checks if the file name along with the orgId is valid
-func (jr *JobRepositoryV1) IsFileValid(ctx context.Context, orgID string, fileName string) (*v1.FileInfo, error) {
+// GetFileInfo function checks if the file name along with the orgId is valid
+func (jr *JobRepositoryV1) GetFileInfo(ctx context.Context, orgID string, fileName string) (*v1.FileInfo, error) {
 	log := logger.WithContext(ctx)
 
 	sb := sqlFlavor.NewSelectBuilder()
@@ -154,17 +154,12 @@ func (jr *JobRepositoryV1) IsFileValid(ctx context.Context, orgID string, fileNa
 		return nil, err
 	}
 
-	statuses := make([]int, 0)
 	for rows.Next() {
 		var status int
 		if err := rows.Scan(&status); err != nil {
 			log.Warn("Failed to get status", zap.Error(err))
 		}
-		statuses = append(statuses, status)
-	}
-
-	for _, v := range statuses {
-		if v != 2 {
+		if status != 2 {
 			return nil, errors.New("Not all job batches are completed")
 		}
 	}
