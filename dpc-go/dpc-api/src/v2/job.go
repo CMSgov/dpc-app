@@ -11,6 +11,8 @@ import (
 	"github.com/CMSgov/dpc/api/model"
 	"go.uber.org/zap"
 	"net/http"
+	"sort"
+	"time"
 )
 
 // JobController is a struct that defines what the controller has
@@ -60,7 +62,7 @@ func (jc *JobControllerImpl) Status(w http.ResponseWriter, r *http.Request) {
 		complete(r.Context(), w, batches)
 		return
 	} else {
-		w.WriteHeader(202)
+		w.WriteHeader(http.StatusAccepted)
 		return
 	}
 
@@ -76,8 +78,8 @@ func complete(ctx context.Context, w http.ResponseWriter, batches []model.BatchA
 	errors := formOutputList(files, true)
 
 	jobExtension := make(map[string]interface{})
-	jobExtension["https://dpc.cms.gov/submit_time"] = batches[0].Batch.SubmitTime     //getEarliestSubmitTime(batches)
-	jobExtension["https://dpc.cms.gov/complete_time"] = batches[0].Batch.CompleteTime //getLatestCompleteTime(batches)
+	jobExtension["https://dpc.cms.gov/submit_time"] = getEarliestSubmitTime(batches)
+	jobExtension["https://dpc.cms.gov/complete_time"] = getLatestCompleteTime(batches)
 
 	status := &model.Status{
 		TransactionTime:     batches[0].Batch.TransactionTime,
@@ -98,6 +100,16 @@ func complete(ctx context.Context, w http.ResponseWriter, batches []model.BatchA
 		fhirror.GenericServerIssue(ctx, w)
 		return
 	}
+}
+
+func getEarliestSubmitTime(batches []model.BatchAndFiles) time.Time {
+	sort.Slice(batches, func(i, j int) bool { return batches[i].Batch.SubmitTime.Before(batches[j].Batch.SubmitTime) })
+	return batches[0].Batch.SubmitTime
+}
+
+func getLatestCompleteTime(batches []model.BatchAndFiles) time.Time {
+	sort.Slice(batches, func(i, j int) bool { return batches[i].Batch.CompleteTime.After(*batches[j].Batch.CompleteTime) })
+	return *batches[0].Batch.CompleteTime
 }
 
 func formOutputList(files []model.BatchFile, errorList bool) []model.Output {
