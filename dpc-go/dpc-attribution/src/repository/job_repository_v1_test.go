@@ -132,7 +132,7 @@ func (suite *JobRepositoryV1TestSuite) TestIsFileValid() {
 		AddRow(2)
 	mock.ExpectQuery(expectedStatusQuery).WithArgs("54321").WillReturnRows(rows)
 
-	fi, err := repo.IsFileValid(context.Background(), "12345", "fileName")
+	fi, err := repo.GetFileInfo(context.Background(), "12345", "fileName")
 
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), "fileName", fi.FileName)
@@ -152,7 +152,7 @@ func (suite *JobRepositoryV1TestSuite) TestIsFileValidIncompleteBatches() {
 		AddRow(2).AddRow(1)
 	mock.ExpectQuery(expectedStatusQuery).WithArgs("54321").WillReturnRows(rows)
 
-	_, err := repo.IsFileValid(context.Background(), "12345", "fileName")
+	_, err := repo.GetFileInfo(context.Background(), "12345", "fileName")
 
 	assert.Error(suite.T(), err, "Not all job batches are completed")
 }

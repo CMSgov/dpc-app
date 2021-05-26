@@ -18,7 +18,7 @@ import (
 type JobRepo interface {
 	NewJobQueueBatch(orgID string, g *v1.GroupNPIs, patientMBIs []string, details BatchDetails) *v1.JobQueueBatch
 	Insert(ctx context.Context, batches []v1.JobQueueBatch) (*v1.Job, error)
-	IsFileValid(ctx context.Context, orgID string, fileName string) (*v1.FileInfo, error)
+	GetFileInfo(ctx context.Context, orgID string, fileName string) (*v1.FileInfo, error)
 }
 
 // JobRepositoryV1 is a struct that defines what the repository has
@@ -102,8 +102,8 @@ func (jr *JobRepositoryV1) Insert(ctx context.Context, batches []v1.JobQueueBatc
 	return results[0], nil
 }
 
-// IsFileValid function checks if the file name along with the orgId is valid
-func (jr *JobRepositoryV1) IsFileValid(ctx context.Context, orgID string, fileName string) (*v1.FileInfo, error) {
+// GetFileInfo function checks if the file name along with the orgId is valid
+func (jr *JobRepositoryV1) GetFileInfo(ctx context.Context, orgID string, fileName string) (*v1.FileInfo, error) {
 	log := logger.WithContext(ctx)
 
 	sb := sqlFlavor.NewSelectBuilder()
