@@ -10,7 +10,7 @@ import (
 )
 
 // NewDPCAttributionRouter function to build the attribution router
-func NewDPCAttributionRouter(o service.Service, g service.Service, impl service.Service) http.Handler {
+func NewDPCAttributionRouter(o service.Service, g service.Service, impl service.Service, implOrg service.Service) http.Handler {
 	r := chi.NewRouter()
 	r.Use(middleware2.Logging())
 	r.Use(middleware2.RequestIPCtx)

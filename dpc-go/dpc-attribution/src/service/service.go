@@ -8,5 +8,5 @@ type Service interface {
 	Get(w http.ResponseWriter, r *http.Request)
 	Delete(w http.ResponseWriter, r *http.Request)
 	Put(w http.ResponseWriter, r *http.Request)
-	Export(writer http.ResponseWriter, request *http.Request)
+	Export(w http.ResponseWriter, r *http.Request)
 }

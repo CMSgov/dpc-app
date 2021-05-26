@@ -129,3 +129,35 @@ func (suite *ImplementerOrgServiceTestSuite) TestSaveRepoError() {
         "statusCode": 422
     }`)
 }
+
+func (suite *ImplementerOrgServiceTestSuite) TestGetNotImplemented() {
+	req := httptest.NewRequest(http.MethodGet, "http://example.com/foo", nil)
+	w := httptest.NewRecorder()
+	suite.service.Get(w, req)
+	res := w.Result()
+	assert.Equal(suite.T(), http.StatusNotImplemented, res.StatusCode)
+}
+
+func (suite *ImplementerOrgServiceTestSuite) TestDeleteNotImplemented() {
+	req := httptest.NewRequest(http.MethodDelete, "http://example.com/foo", nil)
+	w := httptest.NewRecorder()
+	suite.service.Delete(w, req)
+	res := w.Result()
+	assert.Equal(suite.T(), http.StatusNotImplemented, res.StatusCode)
+}
+
+func (suite *ImplementerOrgServiceTestSuite) TestPutNotImplemented() {
+	req := httptest.NewRequest(http.MethodPut, "http://example.com/foo", nil)
+	w := httptest.NewRecorder()
+	suite.service.Put(w, req)
+	res := w.Result()
+	assert.Equal(suite.T(), http.StatusNotImplemented, res.StatusCode)
+}
+
+func (suite *ImplementerOrgServiceTestSuite) TestExportNotImplemented() {
+	req := httptest.NewRequest(http.MethodGet, "http://example.com/foo", nil)
+	w := httptest.NewRecorder()
+	suite.service.Export(w, req)
+	res := w.Result()
+	assert.Equal(suite.T(), http.StatusNotImplemented, res.StatusCode)
+}
