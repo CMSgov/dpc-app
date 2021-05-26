@@ -105,6 +105,15 @@ docker-compose up {db,aggregation,attribution,api}
 By default, the Docker containers start with minimal authentication enabled, meaning that some functionality (such as extracting the organization_id from the access token) will not work as expected and always return the same value.
 This can be overriding during startup by setting the `AUTH_DISABLED=false` environment variable. 
 
+## Running DPC v2 via Docker
+
+In order to start up all required services for v2 of DPC locally, use the command `make start-v2`.
+
+To seed the database, use `make seed-db`. This will populate data in v1 version of the `dpc_attribution_db`.
+
+Conversely, to shut down DPC v2 locally, use `make down-v2` in order to gracefully shut down all running containers
+and remove the docker network.
+
 ## Manual JAR execution
 
 Alternatively, the individual services can be manually executing the `server` command for the various services.
@@ -148,7 +157,8 @@ By default, DPC initially starts with an empty attribution database, this means 
 
 In order to successfully test and demonstrate the application, there needs to be initial data loaded into the attribution database.
 We provide a small CSV [file](src/main/resources/test_associations.csv) which associates some fake providers with valid patients from the BlueButton sandbox.
-The database can be automatically migrated and seeded by running the following commands, before starting the Attribution service. 
+
+The database can be automatically migrated and seeded by running `make seed-db` or by using the following commands.
 
 ```bash
 java -jar dpc-attribution/target/dpc-attribution.jar db migrate
