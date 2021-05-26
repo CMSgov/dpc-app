@@ -143,17 +143,12 @@ func (jr *JobRepositoryV1) IsFileValid(ctx context.Context, orgID string, fileNa
 		return nil, err
 	}
 
-	statuses := make([]int, 0)
 	for rows.Next() {
 		var status int
 		if err := rows.Scan(&status); err != nil {
 			log.Warn("Failed to get status", zap.Error(err))
 		}
-		statuses = append(statuses, status)
-	}
-
-	for _, v := range statuses {
-		if v != 2 {
+		if status != 2 {
 			return nil, errors.New("Not all job batches are completed")
 		}
 	}
