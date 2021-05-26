@@ -5,5 +5,8 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfiles/Dockerfile.api
+    ports:
+      - "3000:3000"
     environment:
       - DPC_PORT=3000
+      - DPC_ATTRIBUTION-CLIENT_URL=http://attribution2:3001

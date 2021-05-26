@@ -1,10 +1,11 @@
 package conf
 
 import (
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/suite"
 	"os"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
 )
 
 type ConfigTestSuite struct {
@@ -36,6 +37,25 @@ func (suite *ConfigTestSuite) TestGetAsStringWithLocalOverride() {
 	NewConfig("../../configs", "./")
 	p := GetAsString("port")
 	assert.Equal(suite.T(), "6002", p)
+}
+
+func (suite *ConfigTestSuite) TestGetAsInt() {
+	NewConfig("../../configs")
+	p := GetAsInt("port")
+	assert.Equal(suite.T(), 3001, p)
+}
+
+func (suite *ConfigTestSuite) TestGetAsIntWithDefault() {
+	NewConfig("../../configs")
+	p := GetAsInt("ports", 5000)
+	assert.Equal(suite.T(), 5000, p)
+}
+
+func (suite *ConfigTestSuite) TestGetAsIntWithLocalOverride() {
+	_ = os.Setenv("ENV", "test")
+	NewConfig("../../configs", "./")
+	p := GetAsInt("port")
+	assert.Equal(suite.T(), 6002, p)
 }
 
 func (suite *ConfigTestSuite) TestGet() {

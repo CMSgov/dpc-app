@@ -29,6 +29,10 @@ website:
 admin:
 	@docker build -f dpc-admin/Dockerfile . -t dpc-web-admin
 
+.PHONY: impl
+impl:
+	@docker build -f dpc-impl/Dockerfile . -t dpc-impl
+
 .PHONY: start-app
 start-app: secure-envs
 	@docker-compose up start_core_dependencies
@@ -48,11 +52,12 @@ start-portals:
 	@docker-compose -p dpc-portals -f docker-compose.yml -f docker-compose.portals.yml up start_core_dependencies
 	@docker-compose -p dpc-portals -f docker-compose.yml -f docker-compose.portals.yml up start_web
 	@docker-compose -p dpc-portals -f docker-compose.yml -f docker-compose.portals.yml up start_admin
+	@docker-compose -p dpc-portals -f docker-compose.yml -f docker-compose.portals.yml up start_impl
 	@docker ps
 
 .PHONY: down-portals
 down-portals:
-	@docker-compose -p dpc-portals -f docker-compose.portals.yml down
+	@docker-compose -p dpc-portals -f docker-compose.yml -f docker-compose.portals.yml down
 
 .PHONY: start-dpc
 start-dpc: secure-envs
@@ -61,6 +66,7 @@ start-dpc: secure-envs
 	@docker-compose -f docker-compose.yml -f docker-compose.portals.yml up start_api
 	@docker-compose -f docker-compose.yml -f docker-compose.portals.yml up start_web
 	@docker-compose -f docker-compose.yml -f docker-compose.portals.yml up start_admin
+	@docker-compose -f docker-compose.yml -f docker-compose.portals.yml up start_impl
 	@docker ps
 
 .PHONY: down-dpc
@@ -68,12 +74,31 @@ down-dpc:
 	@docker-compose -f docker-compose.yml -f docker-compose.portals.yml down
 	@docker ps
 
+.PHONY: start-v2
+start-v2: secure-envs
+	@docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.v2.yml up start_core_dependencies
+	@docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.v2.yml up start_api_dependencies
+	@docker-compose -p dpc-v2 -f docker-compose.yml -f dpc-go/dpc-attribution/docker-compose.yml up -d attribution2
+	@docker-compose -p dpc-v2 -f dpc-go/dpc-api/docker-compose.yml up -d api
+	@docker ps
+
+.PHONY: down-v2
+down-v2:
+	@docker-compose -p dpc-v2 -f docker-compose.yml -f dpc-go/dpc-attribution/docker-compose.yml down
+	@docker-compose -p dpc-v2 -f dpc-go/dpc-api/docker-compose.yml down
+	@docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.v2.yml down
+	@docker ps
+
+.PHONY: seed-db
+seed-db:
+	@java -jar dpc-attribution/target/dpc-attribution.jar db migrate && java -jar dpc-attribution/target/dpc-attribution.jar seed
+
 .PHONY: ci-app
 ci-app: docker-base secure-envs
 	@./dpc-test.sh
 
 .PHONY: ci-portals
-ci-portals:
+ci-portals: secure-envs
 	@./dpc-portals-test.sh
 
 .PHONY: smoke

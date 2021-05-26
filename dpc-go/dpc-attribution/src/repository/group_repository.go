@@ -4,16 +4,18 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+
 	"github.com/CMSgov/dpc/attribution/logger"
 	"github.com/CMSgov/dpc/attribution/middleware"
-	"github.com/CMSgov/dpc/attribution/model"
+	"github.com/CMSgov/dpc/attribution/model/v2"
+
 	"github.com/huandu/go-sqlbuilder"
 	"github.com/pkg/errors"
 )
 
 // GroupRepo is an interface for test mocking purposes
 type GroupRepo interface {
-	Insert(ctx context.Context, body []byte) (*model.Group, error)
+	Insert(ctx context.Context, body []byte) (*v2.Group, error)
 }
 
 // GroupRepository is a struct that defines what the repository has
@@ -29,7 +31,7 @@ func NewGroupRepo(db *sql.DB) *GroupRepository {
 }
 
 // Insert function that saves the fhir model into the database and returns the model.Group
-func (or *GroupRepository) Insert(ctx context.Context, body []byte) (*model.Group, error) {
+func (gr *GroupRepository) Insert(ctx context.Context, body []byte) (*v2.Group, error) {
 	log := logger.WithContext(ctx)
 	organizationID, ok := ctx.Value(middleware.ContextKeyOrganization).(string)
 	if !ok {
@@ -37,7 +39,7 @@ func (or *GroupRepository) Insert(ctx context.Context, body []byte) (*model.Grou
 		return nil, errors.New("Failed to extract organization id from context")
 	}
 
-	var info model.Info
+	var info v2.Info
 	if err := json.Unmarshal(body, &info); err != nil {
 		return nil, err
 	}
@@ -50,9 +52,9 @@ func (or *GroupRepository) Insert(ctx context.Context, body []byte) (*model.Grou
 
 	q, args := ib.Build()
 
-	group := new(model.Group)
-	groupStruct := sqlbuilder.NewStruct(new(model.Group)).For(sqlFlavor)
-	if err := or.db.QueryRowContext(ctx, q, args...).Scan(groupStruct.Addr(&group)...); err != nil {
+	group := new(v2.Group)
+	groupStruct := sqlbuilder.NewStruct(new(v2.Group)).For(sqlFlavor)
+	if err := gr.db.QueryRowContext(ctx, q, args...).Scan(groupStruct.Addr(&group)...); err != nil {
 		return nil, err
 	}
 
