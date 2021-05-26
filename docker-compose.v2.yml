@@ -4,19 +4,6 @@ volumes:
   coverage:
 
 services:
-
-  db:
-    image: postgres:11
-    command: postgres -c 'max_connections=250'
-    environment:
-      - POSTGRES_MULTIPLE_DATABASES=dpc_attribution,dpc_queue
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=dpc-safe
-    ports:
-      - "5432:5432"
-    volumes:
-      - ./docker/postgres:/docker-entrypoint-initdb.d
-
   aggregation:
     image: ${ECR_HOST:-755619740999.dkr.ecr.us-east-1.amazonaws.com/dpc-aggregation}:latest
     ports:
