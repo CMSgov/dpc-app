@@ -3,14 +3,15 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"github.com/CMSgov/dpc/attribution/model"
+
+	"github.com/CMSgov/dpc/attribution/model/v2"
 	"github.com/huandu/go-sqlbuilder"
 )
 
 // ImplementerOrgRepo is an interface for test mocking purposes
 type ImplementerOrgRepo interface {
-	Insert(ctx context.Context, implID string, orgID string, status model.ImplOrgStatus) (*model.ImplementerOrgRelation, error)
-	FindRelation(ctx context.Context, implID string, orgID string) (*model.ImplementerOrgRelation, error)
+	Insert(ctx context.Context, implID string, orgID string, status v2.ImplOrgStatus) (*v2.ImplementerOrgRelation, error)
+	FindRelation(ctx context.Context, implID string, orgID string) (*v2.ImplementerOrgRelation, error)
 }
 
 // ImplementerOrgRepository is a struct that defines what the repository has
@@ -26,15 +27,15 @@ func NewImplementerOrgRepo(db *sql.DB) *ImplementerOrgRepository {
 }
 
 // FindRelation function that searches the database for the relationship based in org and implementer id
-func (or *ImplementerOrgRepository) FindRelation(ctx context.Context, implementerID string, orgID string) (*model.ImplementerOrgRelation, error) {
+func (or *ImplementerOrgRepository) FindRelation(ctx context.Context, implementerID string, orgID string) (*v2.ImplementerOrgRelation, error) {
 	sb := sqlFlavor.NewSelectBuilder()
 	sb.Select("id", "implementer_id", "organization_id", "created_at", "updated_at", "deleted_at", "status")
 	sb.From("implementer_org_relation")
 	sb.Where(sb.Equal("implementer_id", implementerID), sb.Equal("organization_id", orgID))
 	q, args := sb.Build()
 
-	ior := new(model.ImplementerOrgRelation)
-	iorStruct := sqlbuilder.NewStruct(new(model.ImplementerOrgRelation)).For(sqlFlavor)
+	ior := new(v2.ImplementerOrgRelation)
+	iorStruct := sqlbuilder.NewStruct(new(v2.ImplementerOrgRelation)).For(sqlFlavor)
 	if err := or.db.QueryRowContext(ctx, q, args...).Scan(iorStruct.Addr(&ior)...); err != nil {
 		return nil, err
 	}
@@ -42,8 +43,8 @@ func (or *ImplementerOrgRepository) FindRelation(ctx context.Context, implemente
 }
 
 // Insert function that saves the ImplementerOrgRelation model into the database and returns the model.ImplementerOrgRelation
-func (or *ImplementerOrgRepository) Insert(ctx context.Context, implID string, orgID string, status model.ImplOrgStatus) (*model.ImplementerOrgRelation, error) {
-	implOrg := model.ImplementerOrgRelation{
+func (or *ImplementerOrgRepository) Insert(ctx context.Context, implID string, orgID string, status v2.ImplOrgStatus) (*v2.ImplementerOrgRelation, error) {
+	implOrg := v2.ImplementerOrgRelation{
 		ImplementerID:  implID,
 		OrganizationID: orgID,
 		Status:         status,
@@ -57,8 +58,8 @@ func (or *ImplementerOrgRepository) Insert(ctx context.Context, implID string, o
 
 	q, args := ib.Build()
 
-	ior := new(model.ImplementerOrgRelation)
-	iorStruct := sqlbuilder.NewStruct(new(model.ImplementerOrgRelation)).For(sqlFlavor)
+	ior := new(v2.ImplementerOrgRelation)
+	iorStruct := sqlbuilder.NewStruct(new(v2.ImplementerOrgRelation)).For(sqlFlavor)
 	if err := or.db.QueryRowContext(ctx, q, args...).Scan(iorStruct.Addr(&ior)...); err != nil {
 		return nil, err
 	}

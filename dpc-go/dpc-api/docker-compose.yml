@@ -5,5 +5,7 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfiles/Dockerfile.api
+    ports:
+      - "3000:3000"
     environment:
       - DPC_PORT=3000

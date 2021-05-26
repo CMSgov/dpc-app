@@ -3,22 +3,27 @@ package repository
 import (
 	"context"
 	"encoding/json"
-	"github.com/CMSgov/dpc/attribution/model"
+	"fmt"
+	"testing"
+
+	"github.com/CMSgov/dpc/attribution/model/v2"
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/bxcodec/faker"
+	"github.com/bxcodec/faker/v3"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"testing"
 )
 
 type ImplementerRepositoryTestSuite struct {
 	suite.Suite
-	fakeImplementer *model.Implementer
+	fakeImplementer *v2.Implementer
 }
 
 func (suite *ImplementerRepositoryTestSuite) SetupTest() {
-	i := model.Implementer{}
-	_ = faker.FakeData(&i)
+	i := v2.Implementer{}
+	err := faker.FakeData(&i)
+	if err != nil {
+		fmt.Printf("ERR %v\n", err)
+	}
 	suite.fakeImplementer = &i
 }
 

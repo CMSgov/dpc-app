@@ -1,8 +1,9 @@
-package model
+package v2
 
 import (
 	"database/sql/driver"
 	"encoding/json"
+
 	"github.com/pkg/errors"
 )
 

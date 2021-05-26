@@ -2,19 +2,12 @@ package middleware
 
 import (
 	"context"
+	"net/http"
+
 	"github.com/CMSgov/dpc/api/fhirror"
 	"github.com/CMSgov/dpc/api/logger"
 	"github.com/go-chi/chi"
-	"net/http"
 )
-
-// OrgHeader is used in place of a auth token until SSAS is implemented
-const OrgHeader string = "X-ORG"
-
-type contextKey int
-
-// ContextKeyOrganization is the key in the context to retrieve the organizationID
-const ContextKeyOrganization contextKey = iota
 
 // OrganizationCtx middleware to extract the organizationID from the chi url param and set it into the request context
 func OrganizationCtx(next http.Handler) http.Handler {

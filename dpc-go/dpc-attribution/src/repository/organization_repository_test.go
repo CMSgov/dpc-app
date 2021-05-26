@@ -4,15 +4,19 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
-	"github.com/CMSgov/dpc/attribution/attributiontest"
-	"github.com/CMSgov/dpc/attribution/model"
+	"fmt"
+	"log"
+	"testing"
+
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/bxcodec/faker"
+
+	"github.com/CMSgov/dpc/attribution/attributiontest"
+	"github.com/CMSgov/dpc/attribution/model/v2"
+
+	"github.com/bxcodec/faker/v3"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"log"
-	"testing"
 )
 
 func newMock() (*sql.DB, sqlmock.Sqlmock) {
@@ -25,13 +29,16 @@ func newMock() (*sql.DB, sqlmock.Sqlmock) {
 
 type OrganizationRepositoryTestSuite struct {
 	suite.Suite
-	fakeOrg *model.Organization
+	fakeOrg *v2.Organization
 }
 
 func (suite *OrganizationRepositoryTestSuite) SetupTest() {
-	o := model.Organization{}
-	_ = faker.FakeData(&o)
-	var i model.Info
+	o := v2.Organization{}
+	err := faker.FakeData(&o)
+	if err != nil {
+		fmt.Printf("ERR %v\n", err)
+	}
+	var i v2.Info
 	_ = json.Unmarshal([]byte(attributiontest.Orgjson), &i)
 	o.Info = i
 	suite.fakeOrg = &o

@@ -2,11 +2,12 @@ package middleware
 
 import (
 	"context"
+	"testing"
+
 	"github.com/CMSgov/dpc/api/apitest"
 	"github.com/samply/golang-fhir-models/fhir-models/fhir"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"testing"
 )
 
 type FHIRFilterTestSuite struct {
@@ -38,7 +39,7 @@ func (suite *FHIRFilterTestSuite) TestFilteringGroup() {
 	assert.Nil(suite.T(), p.Extension)
 	assert.Nil(suite.T(), p.Identifier)
 	assert.Nil(suite.T(), p.Active)
-	assert.Nil(suite.T(), p.ManagingEntity)
+	assert.NotNil(suite.T(), p.ManagingEntity)
 
 	assert.NotNil(suite.T(), p.Member)
 	assert.NotNil(suite.T(), p.Name)

@@ -3,12 +3,13 @@ package v2
 import (
 	"bytes"
 	"encoding/json"
+	"io/ioutil"
+	"net/http"
+
 	"github.com/CMSgov/dpc/attribution/logger"
 	"github.com/CMSgov/dpc/attribution/repository"
 	"github.com/darahayes/go-boom"
 	"go.uber.org/zap"
-	"io/ioutil"
-	"net/http"
 )
 
 // ImplementerService is a struct that defines what the service has
@@ -24,7 +25,7 @@ func NewImplementerService(repo repository.ImplementerRepo) *ImplementerService 
 }
 
 // Post function that saves the Implementer to the database and logs any errors before returning a generic error
-func (os *ImplementerService) Post(w http.ResponseWriter, r *http.Request) {
+func (is *ImplementerService) Post(w http.ResponseWriter, r *http.Request) {
 	log := logger.WithContext(r.Context())
 	body, _ := ioutil.ReadAll(r.Body)
 
@@ -34,7 +35,7 @@ func (os *ImplementerService) Post(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	Implementer, err := os.repo.Insert(r.Context(), body)
+	Implementer, err := is.repo.Insert(r.Context(), body)
 	if err != nil {
 		log.Error("Failed to create Implementer", zap.Error(err))
 		boom.BadData(w, err)
@@ -52,4 +53,24 @@ func (os *ImplementerService) Post(w http.ResponseWriter, r *http.Request) {
 		log.Error("Failed to write Implementer to response", zap.Error(err))
 		boom.Internal(w, err.Error())
 	}
+}
+
+// Get function is not currently used for ImplementerService
+func (is *ImplementerService) Get(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Delete function is not currently used for ImplementerService
+func (is *ImplementerService) Delete(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Put function is not currently used for ImplementerService
+func (is *ImplementerService) Put(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Export function that starts an export job for a given Group ID
+func (is *ImplementerService) Export(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
 }

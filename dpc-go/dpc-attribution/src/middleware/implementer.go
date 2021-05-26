@@ -2,12 +2,10 @@ package middleware
 
 import (
 	"context"
-	"github.com/go-chi/chi"
 	"net/http"
-)
 
-// ContextKeyImplementer is the key in the context to retrieve the ImplementerID
-const ContextKeyImplementer contextKey = iota
+	"github.com/go-chi/chi"
+)
 
 // ImplementerCtx middleware to extract the ImplementerID from the chi url param and set it into the request context
 func ImplementerCtx(next http.Handler) http.Handler {

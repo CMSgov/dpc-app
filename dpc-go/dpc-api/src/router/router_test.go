@@ -3,19 +3,21 @@ package router
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/CMSgov/dpc/api/apitest"
-	"github.com/CMSgov/dpc/api/fhirror"
-	middleware2 "github.com/CMSgov/dpc/api/middleware"
-	"github.com/go-chi/chi/middleware"
-	"github.com/kinbiko/jsonassert"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
-	"github.com/stretchr/testify/suite"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/go-chi/chi/middleware"
+	"github.com/kinbiko/jsonassert"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/suite"
+
+	"github.com/CMSgov/dpc/api/apitest"
+	"github.com/CMSgov/dpc/api/fhirror"
+	middleware2 "github.com/CMSgov/dpc/api/middleware"
 )
 
 type MockController struct {
@@ -35,6 +37,10 @@ func (c *MockController) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *MockController) Delete(w http.ResponseWriter, r *http.Request) {
+	c.Called(w, r)
+}
+
+func (c *MockController) Export(w http.ResponseWriter, r *http.Request) {
 	c.Called(w, r)
 }
 
@@ -220,7 +226,7 @@ func (suite *RouterTestSuite) TestGroupPostRoute() {
 		r := arg.Get(1).(*http.Request)
 		capturedRequestID = r.Header.Get(middleware.RequestIDHeader)
 		w := arg.Get(0).(http.ResponseWriter)
-		_, _ = w.Write(apitest.AttributionResponse(apitest.Groupjson))
+		_, _ = w.Write(apitest.AttributionToFHIRResponse(apitest.Groupjson))
 	})
 
 	ts := httptest.NewServer(suite.router)
@@ -242,4 +248,33 @@ func (suite *RouterTestSuite) TestGroupPostRoute() {
 	assert.NotContains(suite.T(), v, "info")
 	assert.Contains(suite.T(), v, "resourceType")
 	assert.Equal(suite.T(), v["resourceType"], "Group")
+}
+
+func (suite *RouterTestSuite) TestGroupExportRoute() {
+	var capturedRequestID string
+	suite.mockGroup.On("Export", mock.Anything, mock.Anything).Once().Run(func(arg mock.Arguments) {
+		r := arg.Get(1).(*http.Request)
+		capturedRequestID = r.Header.Get(middleware.RequestIDHeader)
+		w := arg.Get(0).(http.ResponseWriter)
+		w.WriteHeader(http.StatusAccepted)
+	})
+
+	ts := httptest.NewServer(suite.router)
+
+	req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/%s", ts.URL, "v2/Group/9876/$export"), nil)
+	req.Header.Set("Content-Type", "application/fhir+json")
+	req.Header.Set("Prefer", "respond-async")
+	req.Header.Set(middleware.RequestIDHeader, "54321")
+	req.Header.Set(middleware2.OrgHeader, "12345")
+	res, _ := http.DefaultClient.Do(req)
+
+	b, _ := ioutil.ReadAll(res.Body)
+	var v map[string]interface{}
+	_ = json.Unmarshal(b, &v)
+
+	assert.Equal(suite.T(), "application/fhir+json; charset=UTF-8", res.Header.Get("Content-Type"))
+	assert.NotNil(suite.T(), res.Header.Get("Content-Location"))
+	assert.Equal(suite.T(), http.StatusAccepted, res.StatusCode)
+	assert.Equal(suite.T(), "54321", capturedRequestID)
+	assert.Nil(suite.T(), v)
 }
