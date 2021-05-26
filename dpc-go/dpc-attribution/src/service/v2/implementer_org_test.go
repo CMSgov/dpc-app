@@ -57,23 +57,35 @@ func (suite *ImplementerOrgServiceTestSuite) SetupTest() {
 
 func (suite *ImplementerOrgServiceTestSuite) TestPost() {
 
-	implOrg := model.ImplementerOrgRelation{}
-	_ = faker.FakeData(&implOrg)
-	implOrg.Status = model.Active
+	implOrg := v2.ImplementerOrgRelation{}
+	err := faker.FakeData(&implOrg)
+	if err != nil {
+		fmt.Printf("ERR %v\n", err)
+	}
+	implOrg.Status = v2.Active
 	suite.implOrgRepo.On("Insert", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(&implOrg, nil)
 
-	impl := model.Implementer{}
-	_ = faker.FakeData(&impl)
+	impl := v2.Implementer{}
+	err = faker.FakeData(&impl)
+	if err != nil {
+		fmt.Printf("ERR %v\n", err)
+	}
 	suite.implRepo.On("FindByID", mock.Anything, mock.Anything).Return(&impl, nil)
 
 	suite.orgRepo.On("FindByNPI", mock.Anything, mock.Anything).Return(nil, nil)
 
-	org := model.Organization{}
-	_ = faker.FakeData(&org)
+	org := v2.Organization{}
+	err = faker.FakeData(&org)
+	if err != nil {
+		fmt.Printf("ERR %v\n", err)
+	}
 	suite.orgRepo.On("Insert", mock.Anything, mock.Anything).Return(&org, nil)
 
-	rel := model.ImplementerOrgRelation{}
-	_ = faker.FakeData(&rel)
+	rel := v2.ImplementerOrgRelation{}
+	err = faker.FakeData(&rel)
+	if err != nil {
+		fmt.Printf("ERR %v\n", err)
+	}
 	suite.implOrgRepo.On("FindRelation", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
 
 	req := httptest.NewRequest("POST", "http://example.com/foo", strings.NewReader("{\"npi\":\"00001\"}"))
@@ -91,21 +103,33 @@ func (suite *ImplementerOrgServiceTestSuite) TestPost() {
 func (suite *ImplementerOrgServiceTestSuite) TestSaveRepoError() {
 	ja := jsonassert.New(suite.T())
 
-	implOrg := model.ImplementerOrgRelation{}
-	_ = faker.FakeData(&implOrg)
-	implOrg.Status = model.Active
+	implOrg := v2.ImplementerOrgRelation{}
+	err := faker.FakeData(&implOrg)
+	if err != nil {
+		fmt.Printf("ERR %v\n", err)
+	}
+	implOrg.Status = v2.Active
 	suite.implOrgRepo.On("Insert", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.New("error"))
 
-	impl := model.Implementer{}
-	_ = faker.FakeData(&impl)
+	impl := v2.Implementer{}
+	err = faker.FakeData(&impl)
+	if err != nil {
+		fmt.Printf("ERR %v\n", err)
+	}
 	suite.implRepo.On("FindByID", mock.Anything, mock.Anything).Return(&impl, nil)
 
-	org := model.Organization{}
-	_ = faker.FakeData(&org)
+	org := v2.Organization{}
+	err = faker.FakeData(&org)
+	if err != nil {
+		fmt.Printf("ERR %v\n", err)
+	}
 	suite.orgRepo.On("FindByNPI", mock.Anything, mock.Anything).Return(&org, nil)
 
-	rel := model.ImplementerOrgRelation{}
-	_ = faker.FakeData(&rel)
+	rel := v2.ImplementerOrgRelation{}
+	err = faker.FakeData(&rel)
+	if err != nil {
+		fmt.Printf("ERR %v\n", err)
+	}
 	suite.implOrgRepo.On("FindRelation", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
 
 	req := httptest.NewRequest("POST", "http://example.com/foo", strings.NewReader("{\"npi\":\"00001\"}"))

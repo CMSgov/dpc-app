@@ -16,8 +16,11 @@ type ImplementerOrgRepositoryTestSuite struct {
 }
 
 func (suite *ImplementerOrgRepositoryTestSuite) SetupTest() {
-	i := model.ImplementerOrgRelation{}
-	_ = faker.FakeData(&i)
+	i := v2.ImplementerOrgRelation{}
+	err := faker.FakeData(&i)
+	if err != nil {
+		fmt.Printf("ERR %v\n", err)
+	}
 	suite.fakeRel = &i
 	suite.fakeRel.Status = model.Unknown
 }
