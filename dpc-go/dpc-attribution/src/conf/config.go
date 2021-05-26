@@ -1,10 +1,11 @@
 package conf
 
 import (
-	"github.com/spf13/viper"
 	"log"
 	"os"
 	"strings"
+
+	"github.com/spf13/viper"
 )
 
 var config viper.Viper
@@ -54,6 +55,16 @@ func NewConfig(dir ...string) {
 func GetAsString(key string, dv ...string) string {
 	val := config.GetString(key)
 	if val == "" && len(dv) > 0 {
+		return dv[0]
+	}
+	return val
+}
+
+// GetAsInt is a function to retrieve the value from the viper config as an int
+// allowing to also pass in a default value
+func GetAsInt(key string, dv ...int) int {
+	val := config.GetInt(key)
+	if val == 0 && len(dv) > 0 {
 		return dv[0]
 	}
 	return val

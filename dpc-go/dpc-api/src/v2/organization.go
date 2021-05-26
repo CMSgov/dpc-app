@@ -1,12 +1,13 @@
 package v2
 
 import (
+	"io/ioutil"
+	"net/http"
+
 	"github.com/CMSgov/dpc/api/fhirror"
 	"github.com/CMSgov/dpc/api/logger"
 	"github.com/CMSgov/dpc/api/middleware"
 	"go.uber.org/zap"
-	"io/ioutil"
-	"net/http"
 
 	"github.com/CMSgov/dpc/api/client"
 	"github.com/google/fhir/go/jsonformat"
@@ -120,6 +121,11 @@ func (oc *OrganizationController) Update(w http.ResponseWriter, r *http.Request)
 		log.Error("Failed to write data to response", zap.Error(err))
 		fhirror.ServerIssue(r.Context(), w, http.StatusUnprocessableEntity, "Failed to update organization")
 	}
+}
+
+// Export function is not currently used for OrganizationController
+func (oc *OrganizationController) Export(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
 }
 
 func isValidOrganization(org []byte) error {
