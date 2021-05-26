@@ -27,7 +27,7 @@ RSpec.feature 'user sends invitation to DPC' do
 
       itoken = invited_user.raw_invitation_token
 
-      visit "/users/invitation/accept?invitation_token=#{itoken}"
+      visit "/impl/users/invitation/accept?invitation_token=#{itoken}"
 
       expect(page.body).to have_content('Set your password')
 
