@@ -1,27 +1,16 @@
 version: "3"
 
 services:
-  db:
-    image: postgres:11
-    command: postgres
-    environment:
-      - POSTGRES_MULTIPLE_DATABASES=dpc_attribution_v2
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=dpc-safe
-    ports:
-      - "5434:5432"
-    volumes:
-      - ./docker/postgres:/docker-entrypoint-initdb.d
   migrator:
     image: migrate/migrate
     depends_on:
       - db
     command: -path=/migrations/ -database postgres://postgres:dpc-safe@db:5432/dpc_attribution_v2?sslmode=disable up
     volumes:
-      - ./migrator/migrations:/migrations
-  attribution:
+      - ./dpc-go/dpc-attribution/migrator/migrations:/migrations
+  attribution2:
     build:
-      context: .
+      context: dpc-go/dpc-attribution
       dockerfile: docker/Dockerfiles/Dockerfile.attribution
     depends_on:
       - migrator
@@ -29,4 +18,6 @@ services:
       - "3001:3001"
     environment:
       - DPC_DB_URL=postgresql://postgres:dpc-safe@db:5432/dpc_attribution_v2
+      - DPC_DB_URLV1=postgresql://postgres:dpc-safe@db:5432/dpc_attribution
+      - DPC_DB_QUEUEURL=postgresql://postgres:dpc-safe@db:5432/dpc_queue
       - DPC_PORT=3001
