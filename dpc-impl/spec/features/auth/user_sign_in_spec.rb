@@ -3,9 +3,12 @@
 require 'rails_helper'
 
 RSpec.feature 'user signs in' do
-  let!(:user) { create :user, password: '12345ABCDEfghi!', password_confirmation: '12345ABCDEfghi!' }
+  include ApiClientSupport
 
   scenario 'when successful' do
+    stub_api_client(message: :create_implementer, success: true, response: default_imp_creation_response)
+    user = create(:user, password: '12345ABCDEfghi!', password_confirmation: '12345ABCDEfghi!')
+
     visit new_user_session_path
     fill_in 'user_email', with: user.email
     fill_in 'user_password', with: '12345ABCDEfghi!'
@@ -15,6 +18,7 @@ RSpec.feature 'user signs in' do
   end
 
   scenario 'user cannot sign in if account not confirmed' do
+    stub_api_client(message: :create_implementer, success: true, response: default_imp_creation_response)
     unconfirmed = create(:user, password: '12345ABCDEfghi!', password_confirmation: '12345ABCDEfghi!', confirmed_at: nil)
 
     visit new_user_session_path
