@@ -8,7 +8,7 @@ class ApiClient
   end
 
   def create_implementer(imp)
-    uri_string = base_url + 'Implementer'
+    uri_string = base_url + '/Implementer'
     json = {name: imp}.to_json
     post_request(uri_string, json)
     self
