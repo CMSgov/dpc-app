@@ -136,8 +136,6 @@ func (ios *ImplementerOrgService) findOrCreateOrg(r *http.Request, npi string, a
 				return nil, fmt.Errorf("internal server error")
 			}
 			return org, nil
-		} else {
-			return nil, nil
 		}
 	}
 	return org, nil
