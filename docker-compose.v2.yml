@@ -1,0 +1,49 @@
+version: '3'
+
+volumes:
+  coverage:
+
+services:
+  aggregation:
+    image: ${ECR_HOST:-755619740999.dkr.ecr.us-east-1.amazonaws.com/dpc-aggregation}:latest
+    ports:
+      - "9901:9900"
+    env_file:
+      - ./ops/config/decrypted/local.env
+    environment:
+      - ENV=local
+      - USE_BFD_MOCK=${USE_BFD_MOCK:-true}
+      - JACOCO=${REPORT_COVERAGE}
+    depends_on:
+      - db
+      - consent
+    volumes:
+      - export-volume:/app/data
+      - ./jacocoReport/dpc-aggregation:/jacoco-report
+
+  consent:
+    image: ${ECR_HOST:-755619740999.dkr.ecr.us-east-1.amazonaws.com/dpc-consent}:latest
+    depends_on:
+      - db
+    environment:
+      - ENV=local
+      - JACOCO=${REPORT_COVERAGE}
+    ports:
+      - "3600:3600"
+      - "9004:9900"
+    volumes:
+      - ./jacocoReport/dpc-consent:/jacoco-report
+
+
+  # Starts up each service in the background
+  start_core_dependencies:
+    image: dadarek/wait-for-dependencies
+    depends_on:
+      - db
+    command: db:5432
+
+  start_api_dependencies:
+    image: dadarek/wait-for-dependencies
+    depends_on:
+      - aggregation
+    command: aggregation:9900

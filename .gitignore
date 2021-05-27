@@ -49,7 +49,15 @@ ops/config/decrypted/*
 !ops/config/decrypted/README.md
 .mvn/
 
-/dpc-go/dpc-attribution/test_results/*
 /tmp/letter_opener/admin/*
 /tmp/letter_opener/web/*
-/dpc-go/dpc-api/test_results/*
+
+# Ignore Go unit test results
+dpc-go/dpc-api/results.json
+dpc-go/dpc-api/test_results/*
+dpc-go/dpc-attribution/results.json
+dpc-go/dpc-attribution/test_results/*
+
+# Ignore Go binaries
+dpc-go/dpc-api/src/api
+dpc-go/dpc-attribution/src/attribution

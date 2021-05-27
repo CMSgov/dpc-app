@@ -1,4 +1,4 @@
-package model
+package v2
 
 import "database/sql/driver"
 
@@ -11,6 +11,7 @@ func (u *ImplOrgStatus) Scan(value interface{}) error { *u = ImplOrgStatus(value
 // Value db value converter
 func (u ImplOrgStatus) Value() (driver.Value, error) { return int64(u), nil }
 
+//goland:noinspection GoUnusedConst
 const (
 	// Unknown Zero value
 	Unknown ImplOrgStatus = iota

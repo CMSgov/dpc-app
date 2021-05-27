@@ -1,19 +1,23 @@
 package router
 
 import (
+	"net/http"
+	"strings"
+
+	"github.com/go-chi/chi/middleware"
+
 	"github.com/CMSgov/dpc/api/auth"
 	middleware2 "github.com/CMSgov/dpc/api/middleware"
 	v2 "github.com/CMSgov/dpc/api/v2"
+
 	"github.com/go-chi/chi"
-	"github.com/go-chi/chi/middleware"
-	"net/http"
-	"strings"
 )
 
 // NewDPCAPIRouter function that builds the router using chi
-func NewDPCAPIRouter(oc v2.Controller, mc v2.ReadController, gc v2.CreateController) http.Handler {
+func NewDPCAPIRouter(oc v2.Controller, mc v2.ReadController, gc v2.Controller) http.Handler {
 	r := chi.NewRouter()
 	r.Use(middleware2.Logging())
+	r.Use(middleware2.RequestIPCtx)
 	fileServer(r, "/v2/swagger", http.Dir("../swaggerui"))
 	r.
 		With(middleware2.Sanitize, middleware.SetHeader("Content-Type", "application/fhir+json; charset=UTF-8")).
@@ -31,6 +35,11 @@ func NewDPCAPIRouter(oc v2.Controller, mc v2.ReadController, gc v2.CreateControl
 			r.Route("/Group", func(r chi.Router) {
 				r.Use(middleware2.AuthCtx)
 				r.With(middleware2.FHIRFilter, middleware2.FHIRModel).Post("/", gc.Create)
+				r.Route("/{groupID}", func(r chi.Router) {
+					r.Use(middleware2.RequestURLCtx)
+					r.Use(middleware2.GroupCtx)
+					r.Get("/$export", gc.Export)
+				})
 			})
 		})
 	r.Post("/auth/token", auth.GetAuthToken)

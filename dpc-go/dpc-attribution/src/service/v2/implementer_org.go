@@ -11,12 +11,13 @@ import (
 	"github.com/CMSgov/dpc/attribution/repository"
 	"github.com/CMSgov/dpc/attribution/util"
 	"github.com/darahayes/go-boom"
-	"go.uber.org/zap"
 	"io/ioutil"
 	"math/big"
 	"net/http"
 	"strings"
 	"text/template"
+	"github.com/CMSgov/dpc/attribution/model/v2"
+	"go.uber.org/zap"
 )
 
 // ImplementerOrgService is a struct that defines what the service has
@@ -25,6 +26,11 @@ type ImplementerOrgService struct {
 	orgRepo       repository.OrganizationRepo
 	impOrgRepo    repository.ImplementerOrgRepo
 	autoCreateOrg bool
+}
+
+// Export function is not used for ImplementerOrgService
+func (ios *ImplementerOrgService) Export(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // NewImplementerOrgService function that creates an ImplementerOrg service and returns it's reference
@@ -107,7 +113,7 @@ func (ios *ImplementerOrgService) Post(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	ior, err := ios.impOrgRepo.Insert(r.Context(), implID, org.ID, model.Active)
+	ior, err := ios.impOrgRepo.Insert(r.Context(), implID, org.ID, v2.Active)
 	if err != nil {
 		log.Error("Failed to create Implementer org relation", zap.Error(err))
 		boom.BadData(w, err)
@@ -172,7 +178,7 @@ func (ios *ImplementerOrgService) Get(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (ios *ImplementerOrgService) toManagedOrgStructs(r *http.Request, relations []model.ImplementerOrgRelation) ([]model.ManagedOrg, error) {
+func (ios *ImplementerOrgService) toManagedOrgStructs(r *http.Request, relations []v2.ImplementerOrgRelation) ([]model.ManagedOrg, error) {
 	result := make([]model.ManagedOrg, 0)
 
 	for _, rel := range relations {

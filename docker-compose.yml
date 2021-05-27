@@ -6,7 +6,7 @@ services:
     image: postgres:11
     command: postgres -c 'max_connections=250'
     environment:
-      - POSTGRES_MULTIPLE_DATABASES=dpc_attribution,dpc_queue,dpc_auth,dpc_consent,dpc-website_development,dpc-impl_development
+      - POSTGRES_MULTIPLE_DATABASES=dpc_attribution,dpc_queue,dpc_auth,dpc_consent,dpc-website_development,dpc-impl_development,dpc_attribution_v2
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=dpc-safe
     ports:
@@ -111,7 +111,6 @@ services:
     working_dir: /usr/src/mymaven
     command: sh -c "mvn test -Pintegration-tests -pl dpc-api -am -ntp"
     network_mode: host
-
 
 volumes:
   export-volume:

@@ -3,13 +3,14 @@ package v2
 import (
 	"bytes"
 	"encoding/json"
+	"io/ioutil"
+	"net/http"
+
 	"github.com/CMSgov/dpc/attribution/logger"
 	"github.com/CMSgov/dpc/attribution/middleware"
 	"github.com/CMSgov/dpc/attribution/repository"
 	"github.com/darahayes/go-boom"
 	"go.uber.org/zap"
-	"io/ioutil"
-	"net/http"
 )
 
 // OrganizationService is a struct that defines what the service has
@@ -130,4 +131,9 @@ func (os *OrganizationService) Put(w http.ResponseWriter, r *http.Request) {
 		log.Error("Failed to write organization to response for organization", zap.Error(err))
 		boom.Internal(w, err.Error())
 	}
+}
+
+// Export function is not used for Organizations
+func (os *OrganizationService) Export(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
 }
