@@ -93,9 +93,9 @@ func (suite *JobRepositoryV1TestSuite) TestInsert() {
 	).WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectCommit()
 	job, err := repo.Insert(ctx, "12345", batches)
-	//if err := mock.ExpectationsWereMet(); err != nil {
-	//	suite.T().Errorf("there were unfulfilled expectations: %s", err)
-	//}
+	if err := mock.ExpectationsWereMet(); err != nil {
+		suite.T().Errorf("there were unfulfilled expectations: %s", err)
+	}
 	assert.NoError(suite.T(), err)
 	assert.NotEmpty(suite.T(), job)
 }
@@ -137,13 +137,4 @@ func (suite *JobRepositoryV1TestSuite) TestIsFileValidIncompleteBatches() {
 	_, err := repo.GetFileInfo(context.Background(), "12345", "fileName")
 
 	assert.Error(suite.T(), err, "Not all job batches are completed")
-}
-
-func isJobQueueBatch(t interface{}) bool {
-	switch t.(type) {
-	case *v1.JobQueueBatch:
-		return true
-	default:
-		return false
-	}
 }

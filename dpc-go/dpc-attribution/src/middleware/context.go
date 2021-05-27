@@ -45,6 +45,7 @@ func OrganizationCtx(next http.Handler) http.Handler {
 	})
 }
 
+// JobCtx middleware to extract the jobID from the header and set it into the request context
 func JobCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		jobID := chi.URLParam(r, "jobID")
