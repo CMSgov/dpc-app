@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/CMSgov/dpc/api/client"
+	"github.com/CMSgov/dpc/api/conf"
 	"github.com/CMSgov/dpc/api/fhirror"
 	"github.com/CMSgov/dpc/api/logger"
 	"github.com/CMSgov/dpc/api/middleware"
@@ -69,17 +70,22 @@ func (jc *JobControllerImpl) Status(w http.ResponseWriter, r *http.Request) {
 }
 
 func complete(ctx context.Context, w http.ResponseWriter, batches []model.BatchAndFiles) {
+	latestCompleteTime := getLatestCompleteTime(batches)
+	if latestCompleteTime.Before(time.Now().Add(-time.Duration(24) * time.Hour)) {
+		w.WriteHeader(http.StatusGone)
+		return
+	}
+
 	files := make([]model.BatchFile, 0)
 	for _, b := range batches {
 		files = append(files, *b.Files...)
 	}
 
-	outputs := formOutputList(files, false)
-	errors := formOutputList(files, true)
+	outputs, errors := formOutputList(files)
 
 	jobExtension := make(map[string]interface{})
 	jobExtension["https://dpc.cms.gov/submit_time"] = getEarliestSubmitTime(batches)
-	jobExtension["https://dpc.cms.gov/complete_time"] = getLatestCompleteTime(batches)
+	jobExtension["https://dpc.cms.gov/complete_time"] = latestCompleteTime
 
 	status := &model.Status{
 		TransactionTime:     batches[0].Batch.TransactionTime,
@@ -96,6 +102,7 @@ func complete(ctx context.Context, w http.ResponseWriter, batches []model.BatchA
 		return
 	}
 
+	w.Header().Add("Expires", latestCompleteTime.Add(time.Duration(24)*time.Hour).Format(time.RFC1123))
 	if _, err := w.Write(b); err != nil {
 		fhirror.GenericServerIssue(ctx, w)
 		return
@@ -112,28 +119,24 @@ func getLatestCompleteTime(batches []model.BatchAndFiles) time.Time {
 	return *batches[0].Batch.CompleteTime
 }
 
-func formOutputList(files []model.BatchFile, errorList bool) []model.Output {
+func formOutputList(files []model.BatchFile) ([]model.Output, []model.Output) {
 	var outputs = make([]model.Output, 0)
+	var errors = make([]model.Output, 0)
 	for _, f := range files {
 		resourceType := f.ResourceType
-
-		if errorList && resourceType == "OperationOutcome" {
-			output := model.Output{
-				Type: f.ResourceType,
-				URL:  fmt.Sprintf("%s/Data/%s.ndjson", "", f.FormOutputFileName()),
-			}
-			outputs = append(outputs, output)
-		} else if !errorList && resourceType != "OperationOutcome" {
-			output := model.Output{
-				Type:      f.ResourceType,
-				URL:       fmt.Sprintf("%s/Data/%s.ndjson", "", f.FormOutputFileName()),
-				Count:     f.Count,
-				Extension: fhirExtensions(f),
-			}
+		output := model.Output{
+			Type: resourceType,
+			URL:  fmt.Sprintf("%s/Data/%s.ndjson", conf.GetAsString("apiPath", ""), f.FormOutputFileName()),
+		}
+		if resourceType == "OperationOutcome" {
+			errors = append(errors, output)
+		} else {
+			output.Count = f.Count
+			output.Extension = fhirExtensions(f)
 			outputs = append(outputs, output)
 		}
 	}
-	return outputs
+	return outputs, errors
 }
 
 func fhirExtensions(f model.BatchFile) map[string]interface{} {

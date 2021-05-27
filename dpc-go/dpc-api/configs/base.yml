@@ -11,6 +11,8 @@ capabilities:
 
 exportPath: "/tmp"
 
+apiPath: "localhost:3000/v2"
+
 log:
   level: info
   encoding: json
