@@ -7,8 +7,8 @@ import (
 
 // BatchAndFiles is a struct to hold batch and file info from running job
 type BatchAndFiles struct {
-	Batch *BatchInfo   `json:"batch"`
-	Files *[]BatchFile `json:"files"`
+	Batch BatchInfo   `json:"batch"`
+	Files []BatchFile `json:"files"`
 }
 
 // BatchInfo is a struct to hold batch information
