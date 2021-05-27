@@ -4,9 +4,9 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"github.com/CMSgov/dpc/attribution/service"
 	"net/http"
 
-	"github.com/CMSgov/dpc/attribution/service"
 	"go.uber.org/zap"
 
 	"github.com/CMSgov/dpc/attribution/conf"
@@ -46,7 +46,7 @@ func main() {
 			logger.WithContext(ctx).Fatal("Failed to close queue v1 db connection", zap.Error(err))
 		}
 	}()
-	js := createV1Services(attrDbV1, queueDbV1)
+	js, ds := createV1Services(attrDbV1, queueDbV1)
 
 	gr := repository.NewGroupRepo(db)
 	gs := v2.NewGroupService(gr, js)
@@ -59,7 +59,7 @@ func main() {
 
 	ios := v2.NewImplementerOrgService(ir, or, ior, autoCreateOrg == "true")
 
-	attributionRouter := router.NewDPCAttributionRouter(os, gs, is, ios)
+	attributionRouter := router.NewDPCAttributionRouter(os, gs, is, ios, ds)
 
 	port := conf.GetAsString("port", "3001")
 	fmt.Printf("Starting DPC-Attribution server on port %v ...\n", port)
@@ -68,8 +68,8 @@ func main() {
 	}
 }
 
-func createV1Services(attrDbV1 *sql.DB, queueDbV1 *sql.DB) service.JobService {
+func createV1Services(attrDbV1 *sql.DB, queueDbV1 *sql.DB) (service.JobService, service.DataService) {
 	pr := repository.NewPatientRepo(attrDbV1)
 	jr := repository.NewJobRepo(queueDbV1)
-	return v1.NewJobService(pr, jr)
+	return v1.NewJobService(pr, jr), v1.NewDataService(jr)
 }

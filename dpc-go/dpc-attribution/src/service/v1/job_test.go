@@ -38,6 +38,11 @@ func (m *MockJobRepo) Insert(ctx context.Context, b []v1.JobQueueBatch) (*v1.Job
 	return args.Get(0).(*v1.Job), args.Error(1)
 }
 
+func (m *MockJobRepo) GetFileInfo(ctx context.Context, orgID string, fileName string) (*v1.FileInfo, error) {
+	args := m.Called(ctx, orgID, fileName)
+	return args.Get(0).(*v1.FileInfo), args.Error(1)
+}
+
 type MockPatientRepo struct {
 	mock.Mock
 }
