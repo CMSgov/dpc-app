@@ -1,0 +1,173 @@
+version: '3'
+
+volumes:
+  coverage:
+
+services:
+  db:
+    image: postgres:11
+    command: postgres -c 'max_connections=250'
+    environment:
+      - POSTGRES_MULTIPLE_DATABASES=dpc_attribution,dpc_queue,dpc_auth,dpc_consent,dpc-website_development,dpc-impl_development,dpc_attribution_v2
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=dpc-safe
+    # ports:
+    #   - "5432:5432"
+    volumes:
+      - ./docker/postgres:/docker-entrypoint-initdb.d
+    networks:
+      - dpc-portals
+
+  redis:
+    image: redis:latest
+    networks:
+      - dpc-portals
+
+  dpc_web:
+    build:
+      context: .
+      dockerfile: dpc-web/Dockerfile
+    image: dpc-web:latest
+    volumes:
+      - "./dpc-web/coverage:/dpc-web/coverage"
+      - ./tmp/letter_opener/web:/dpc-web/tmp/letter_opener
+
+    environment:
+      - REDIS_URL=redis://redis
+      - DATABASE_URL=postgresql://db/dpc-website_development
+      - TEST_DATABASE_URL=postgresql://db/dpc-website_test
+      - DB_USER=postgres
+      - DB_PASS=dpc-safe
+      - DATABASE_CLEANER_ALLOW_REMOTE_DATABASE_URL=true
+    # ports:
+    #   - "3900:3500"
+    depends_on:
+      - db
+      - redis
+      - web_sidekiq
+    networks:
+      - dpc-portals
+
+  web_sidekiq:
+    volumes:
+      - ./tmp/letter_opener/web:/dpc-web/tmp/letter_opener
+    build:
+      context: .
+      dockerfile: dpc-web/Dockerfile
+    command: sidekiq
+    image: dpc-web-sidekiq:latest
+    environment:
+      - REDIS_URL=redis://redis
+      - DATABASE_URL=postgresql://db/dpc-website_development
+      - DB_USER=postgres
+      - DB_PASS=dpc-safe
+    depends_on:
+      - redis
+      - db
+    networks:
+      - dpc-portals
+
+  dpc_admin:
+    build:
+      context: .
+      dockerfile: dpc-admin/Dockerfile
+    image: dpc-web-admin:latest
+    volumes:
+      - "./dpc-admin/coverage:/dpc-admin/coverage"
+      - ./tmp/letter_opener/admin:/dpc-admin/tmp/letter_opener
+    environment:
+      - REDIS_URL=redis://redis
+      - GOLDEN_MACAROON=${GOLDEN_MACAROON}
+      - API_METADATA_URL=http://api:3002/v1
+      - DATABASE_URL=postgresql://db/dpc-website_development
+      - TEST_DATABASE_URL=postgresql://db/dpc-website_test
+      - DB_USER=postgres
+      - DB_PASS=dpc-safe
+      - DATABASE_CLEANER_ALLOW_REMOTE_DATABASE_URL=true
+    # ports:
+    #   - "3000:3000"
+    depends_on:
+      - db
+      - redis
+      - admin_sidekiq
+    networks:
+      - dpc-portals
+
+  admin_sidekiq:
+    volumes:
+      - ./tmp/letter_opener/admin:/dpc-admin/tmp/letter_opener
+    build:
+      context: .
+      dockerfile: dpc-admin/Dockerfile
+    command: sidekiq
+    image: dpc-admin-sidekiq:latest
+    environment:
+      - REDIS_URL=redis://redis
+      - DATABASE_URL=postgresql://db/dpc-website_development
+      - DB_USER=postgres
+      - DB_PASS=dpc-safe
+    depends_on:
+      - redis
+      - db
+    networks:
+      - dpc-portals
+
+  dpc_impl:
+    build:
+      context: .
+      dockerfile: dpc-impl/Dockerfile
+    image: dpc-impl:latest
+    volumes:
+      - "./dpc-impl/coverage:/dpc-impl/coverage"
+      - ./tmp/letter_opener/impl:/dpc-impl/tmp/letter_opener
+    networks:
+      - dpc-portals
+
+    environment:
+      - REDIS_URL=redis://redis
+      - DATABASE_URL=postgresql://db/dpc-impl_development
+      - TEST_DATABASE_URL=postgresql://db/dpc-impl_test
+      - DB_USER=postgres
+      - DB_PASS=dpc-safe
+      - DATABASE_CLEANER_ALLOW_REMOTE_DATABASE_URL=true
+    # ports:
+    #   - "4000:4000"
+    depends_on:
+      - db
+      - redis
+      - impl_sidekiq
+    networks:
+      - dpc-portals
+
+  impl_sidekiq:
+    volumes:
+      - ./tmp/letter_opener/impl:/dpc-impl/letter_opener
+    build:
+      context: .
+      dockerfile: dpc-impl/Dockerfile
+    command: impl_sidekiq
+    image: dpc-impl-sidekiq:latest
+    environment:
+      - REDIS_URL=redis://redis
+      - DATABASE_URL=postgresql://db/dpc-impl_development
+      - DB_USER=postgresql
+      - DB_PASS=dpc-safe
+    depends_on:
+      - redis
+      - db
+    networks:
+      - dpc-portals
+
+  # Starts up each service in the background
+  start_core_dependencies:
+    image: dadarek/wait-for-dependencies
+    depends_on:
+      - db
+      - redis
+    command: db:5432
+    networks:
+      - dpc-portals
+
+networks:
+  dpc-portals:
+    name: dpc-portals-network
