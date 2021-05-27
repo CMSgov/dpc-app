@@ -52,12 +52,6 @@ func (jc *JobControllerImpl) Status(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if len(batches) == 0 {
-		log.Error("no batches found")
-		fhirror.NotFound(r.Context(), w, "Failed to get job status")
-		return
-	}
-
 	statuses := getStatus(batches)
 	if statuses["FAILED"] {
 		log.Error(fmt.Sprintf("Failed batches found in job %s", jobID))
@@ -85,7 +79,7 @@ func complete(ctx context.Context, w http.ResponseWriter, batches []model.BatchA
 
 	files := make([]model.BatchFile, 0)
 	for _, b := range batches {
-		files = append(files, b.Files...)
+		files = append(files, *b.Files...)
 	}
 
 	outputs, errors := formOutputList(files)
