@@ -29,14 +29,13 @@ class ApiClient
   def http_request(request, uri)
     http = Net::HTTP.new(uri.host, uri.port)
 
-    response = http.request(request)
-    @response_status = response.code.to_i
-
-    if response_successful?
-      @response_body = parsed_response(response)
-    else
-      @response_body = response.body rescue Errno::ECONNREFUSED
+    begin
+      response = http.request(request)
+    rescue => e
       connection_error
+    else
+      @response_status = response.code.to_i
+      @response_body = parsed_response(response)
     end
   end
 

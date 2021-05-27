@@ -39,10 +39,21 @@ RSpec.describe ApiClient do
         http_stub = instance_double(Net::HTTP)
         allow(Net::HTTP).to receive(:new).and_return(http_stub)
         allow(http_stub).to receive(:request).and_raise(Errno::ECONNREFUSED)
-        
+
         api_client = ApiClient.new
-        
-        expect { api_client.create_implementer('Wayfarer') }.to raise_error(Errno::ECONNREFUSED)
+
+        api_client.create_implementer('Wayfarer')
+
+        expect(api_client.response_status).to eq(500)
+        expect(api_client.response_body).to eq(
+          {
+            'issue' => [{
+              'details' => {
+                'text' => 'Connection error'
+              }
+            }]
+          }
+        )
       end
     end
   end
