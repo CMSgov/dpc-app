@@ -8,6 +8,14 @@ services:
   redis:
     image: redis:latest
 
+  db:
+    image: postgres:11
+    environment:
+      - POSTGRES_MULTIPLE_DATABASES=dpc-website_development,dpc-impl_development
+      - POSTGRES_PASSWORD=dpc-safe
+    ports:
+      - "15432:5432"
+
   dpc_web:
     build:
       context: .
