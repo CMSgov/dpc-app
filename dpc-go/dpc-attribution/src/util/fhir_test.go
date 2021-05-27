@@ -40,9 +40,9 @@ func (suite *FhirTestSuite) TestIdentityParsing() {
 	assert.Nil(suite.T(), err)
 	assert.Equal(suite.T(), "46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0", id)
 
-	_ , err = GetNPI([]byte("{}"))
+	_, err = GetNPI([]byte("{}"))
 	assert.Error(suite.T(), err)
 
-	_ , err = GetIdentifier([]byte(idjson), "some-system")
+	_, err = GetIdentifier([]byte(idjson), "some-system")
 	assert.Error(suite.T(), err)
 }

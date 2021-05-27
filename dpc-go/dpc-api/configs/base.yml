@@ -9,6 +9,8 @@ capabilities:
   version: "1.0"
   release-date: "03-01-2021"
 
+exportPath: "/tmp"
+
 log:
   level: info
   encoding: json

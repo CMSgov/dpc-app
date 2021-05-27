@@ -9,15 +9,15 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-type OrganizationTestSuite struct {
+type ContextTestSuite struct {
 	suite.Suite
 }
 
-func TestOrganizationTestSuite(t *testing.T) {
-	suite.Run(t, new(OrganizationTestSuite))
+func TestContextTestSuite(t *testing.T) {
+	suite.Run(t, new(ContextTestSuite))
 }
 
-func (suite *OrganizationTestSuite) TestAuthCtxForbidden() {
+func (suite *ContextTestSuite) TestAuthCtxForbidden() {
 	req := httptest.NewRequest(http.MethodPost, "http://www.your-domain.com", nil)
 	res := httptest.NewRecorder()
 
@@ -29,7 +29,7 @@ func (suite *OrganizationTestSuite) TestAuthCtxForbidden() {
 	assert.Equal(suite.T(), http.StatusForbidden, r.StatusCode)
 }
 
-func (suite *OrganizationTestSuite) TestAuthCtxOK() {
+func (suite *ContextTestSuite) TestAuthCtxOK() {
 
 	req := httptest.NewRequest(http.MethodPost, "http://www.your-domain.com", nil)
 	req.Header.Set(OrgHeader, "12345")
