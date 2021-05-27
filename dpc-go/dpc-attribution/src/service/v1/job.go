@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"github.com/CMSgov/dpc/attribution/middleware"
 	"net/http"
 	"time"
 
@@ -18,7 +19,6 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/CMSgov/dpc/attribution/logger"
-	middleware2 "github.com/CMSgov/dpc/attribution/middleware"
 	"github.com/CMSgov/dpc/attribution/repository"
 )
 
@@ -108,10 +108,10 @@ func (js *JobServiceV1) Export(w http.ResponseWriter, r *http.Request) {
 func (js *JobServiceV1) buildExportRequest(ctx context.Context, w http.ResponseWriter) (*ExportRequest, error) {
 	log := logger.WithContext(ctx)
 	exportRequest := new(ExportRequest)
-	exportRequest.groupID = util.FetchValueFromContext(ctx, w, middleware2.ContextKeyGroup)
-	exportRequest.orgID = util.FetchValueFromContext(ctx, w, middleware2.ContextKeyOrganization)
-	exportRequest.requestingIP = util.FetchValueFromContext(ctx, w, middleware2.ContextKeyRequestingIP)
-	exportRequest.requestURL = util.FetchValueFromContext(ctx, w, middleware2.ContextKeyRequestURL)
+	exportRequest.groupID = util.FetchValueFromContext(ctx, w, middleware.ContextKeyGroup)
+	exportRequest.orgID = util.FetchValueFromContext(ctx, w, middleware.ContextKeyOrganization)
+	exportRequest.requestingIP = util.FetchValueFromContext(ctx, w, middleware.ContextKeyRequestingIP)
+	exportRequest.requestURL = util.FetchValueFromContext(ctx, w, middleware.ContextKeyRequestURL)
 	patientMBIs, err := js.pr.FindMBIsByGroupID(exportRequest.groupID)
 	if err != nil || len(patientMBIs) == 0 {
 		if err == nil {
