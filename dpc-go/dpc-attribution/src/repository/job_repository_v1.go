@@ -67,6 +67,7 @@ func (jr *JobRepositoryV1) Insert(ctx context.Context, orgID string, batches []v
 	return &jobID, nil
 }
 
+// FindBatchesByJobID function that returns the batches by job and org id
 func (jr *JobRepositoryV1) FindBatchesByJobID(id string, orgID string) ([]v1.JobQueueBatch, error) {
 	sb := sqlFlavor.NewSelectBuilder()
 	q, args := sb.Select("batch_id", "patients", "transaction_time", "status", "submit_time", "request_url", "patient_index", "complete_time").
@@ -90,6 +91,7 @@ func (jr *JobRepositoryV1) FindBatchesByJobID(id string, orgID string) ([]v1.Job
 	return batches, nil
 }
 
+// FindBatchFilesByBatchID function that returns the batch files by batch id
 func (jr *JobRepositoryV1) FindBatchFilesByBatchID(id string) ([]v1.JobQueueBatchFile, error) {
 	sb := sqlFlavor.NewSelectBuilder()
 	q, args := sb.Select("resource_type", "batch_id", "sequence", "file_name", "count", "checksum", "file_length").

@@ -42,7 +42,7 @@ func NewJobClient(config JobConfig) JobClient {
 	}
 }
 
-// Get A function to enable communication with attribution service via GET
+// Status function to get status from job service
 func (jc *JobClientImpl) Status(ctx context.Context, jobID string) ([]byte, error) {
 	log := logger.WithContext(ctx)
 	jc.httpClient.Logger = newLogger(*log)

@@ -18,11 +18,13 @@ type BatchRequest struct {
 	TransactionTime time.Time
 }
 
+// BatchAndFiles is a struct to hold batch and file info from running job
 type BatchAndFiles struct {
 	Batch *BatchInfo           `json:"batch"`
 	Files *[]JobQueueBatchFile `json:"files"`
 }
 
+// BatchInfo is a struct to hold batch information
 type BatchInfo struct {
 	TotalPatients     int        `json:"totalPatients"`
 	PatientsProcessed int        `json:"patientsProcessed"`
@@ -34,6 +36,7 @@ type BatchInfo struct {
 	RequestURL        string     `json:"requestURL"`
 }
 
+// NewBatchInfo is a function to construct a BatchInfo from JobQueueBatch
 func NewBatchInfo(batch *JobQueueBatch) *BatchInfo {
 	patientIndex := -1
 	if batch.PatientIndex.Valid {

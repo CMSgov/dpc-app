@@ -28,6 +28,7 @@ func NewJobController(jc client.JobClient) JobController {
 	}
 }
 
+// Status function that gets the job status according to FHIR Bulk Data
 func (jc *JobControllerImpl) Status(w http.ResponseWriter, r *http.Request) {
 	log := logger.WithContext(r.Context())
 	jobID, ok := r.Context().Value(middleware.ContextKeyJobID).(string)

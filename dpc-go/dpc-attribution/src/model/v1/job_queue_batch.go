@@ -24,6 +24,7 @@ type JobQueueBatch struct {
 	CompleteTime    sql.NullTime  `db:"complete_time" faker:"-"`
 }
 
+// Scan function to convert database status int to string
 func (st *statusType) Scan(value interface{}) error {
 	if bv, err := driver.Int32.ConvertValue(value); err == nil {
 		if v, ok := bv.(int64); ok {
@@ -34,11 +35,12 @@ func (st *statusType) Scan(value interface{}) error {
 	return errors.New("failed to scan resourceType")
 }
 
+// PatientsProcessed function is a helper to calculate the patients processed from patient index
 func (jqb *JobQueueBatch) PatientsProcessed() int {
 	results := 0
 	if jqb.Status == "COMPLETED" {
 		if jqb.PatientMBIs != "" {
-			results = len(jqb.Patients())
+			results = len(jqb.patients())
 		}
 	} else {
 		results = 0
@@ -49,6 +51,6 @@ func (jqb *JobQueueBatch) PatientsProcessed() int {
 	return results
 }
 
-func (jqb *JobQueueBatch) Patients() []string {
+func (jqb *JobQueueBatch) patients() []string {
 	return strings.Split(jqb.PatientMBIs, ",")
 }

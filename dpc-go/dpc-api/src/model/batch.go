@@ -5,11 +5,13 @@ import (
 	"time"
 )
 
+// BatchAndFiles is a struct to hold batch and file info from running job
 type BatchAndFiles struct {
 	Batch *BatchInfo   `json:"batch"`
 	Files *[]BatchFile `json:"files"`
 }
 
+// BatchInfo is a struct to hold batch information
 type BatchInfo struct {
 	TotalPatients     int        `json:"totalPatients"`
 	PatientsProcessed int        `json:"patientsProcessed"`
@@ -21,6 +23,7 @@ type BatchInfo struct {
 	RequestURL        string     `json:"requestURL"`
 }
 
+// BatchFile is a struct to hold batch file information
 type BatchFile struct {
 	ResourceType string `json:"resourceType"`
 	BatchID      string `json:"batchID"`
@@ -31,10 +34,12 @@ type BatchFile struct {
 	FileLength   int    `json:"fileLength"`
 }
 
+// FormOutputFileName is a helper function to construct the file name
 func (f *BatchFile) FormOutputFileName() string {
 	return fmt.Sprintf("%s-%d.%s", f.BatchID, f.Sequence, f.ResourceType)
 }
 
+// Output is a struct for holding job data for the job status
 type Output struct {
 	Type      string                 `json:"type"`
 	URL       string                 `json:"url"`
@@ -42,6 +47,7 @@ type Output struct {
 	Extension map[string]interface{} `json:"extension,omitempty"`
 }
 
+// Status is a struct for job status
 type Status struct {
 	TransactionTime     time.Time              `json:"transactionTime"`
 	Request             string                 `json:"request"`
