@@ -35,3 +35,8 @@ type UpdateController interface {
 type ExportController interface {
 	Export(w http.ResponseWriter, r *http.Request)
 }
+
+// FileController is an interface for getting a file
+type FileController interface {
+	GetFile(w http.ResponseWriter, r *http.Request)
+}

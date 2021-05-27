@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"testing"
+	"time"
 
 	v1 "github.com/CMSgov/dpc/attribution/model/v1"
 	"github.com/DATA-DOG/go-sqlmock"
@@ -115,6 +116,45 @@ func (suite *JobRepositoryV1TestSuite) TestNewJobQueueBatch() {
 	assert.Equal(suite.T(), suite.fakeDetails.Priority, result.Priority)
 	assert.Equal(suite.T(), suite.fakeDetails.RequestingIP, result.RequestingIP)
 	assert.Equal(suite.T(), suite.fakeDetails.Types, result.ResourceTypes)
+}
+
+func (suite *JobRepositoryV1TestSuite) TestIsFileValid() {
+	db, mock := newMock()
+	repo := NewJobRepo(db)
+
+	expectedQuery := `SELECT f.job_id, b.start_time, f.file_length, f.checksum FROM job_queue_batch_file f LEFT JOIN job_queue_batch b ON b.job_id = f.job_id WHERE f.file_name = \$1 AND b.organization_id = \$2`
+	rows := sqlmock.NewRows([]string{"job_id", "start_time", "file_length", "checksum"}).
+		AddRow("54321", time.Now(), 1, make([]byte, 5, 5))
+	mock.ExpectQuery(expectedQuery).WithArgs("fileName", "12345").WillReturnRows(rows)
+
+	expectedStatusQuery := `SELECT status FROM job_queue_batch WHERE job_id = \$1`
+	rows = sqlmock.NewRows([]string{"status"}).
+		AddRow(2)
+	mock.ExpectQuery(expectedStatusQuery).WithArgs("54321").WillReturnRows(rows)
+
+	fi, err := repo.GetFileInfo(context.Background(), "12345", "fileName")
+
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), "fileName", fi.FileName)
+}
+
+func (suite *JobRepositoryV1TestSuite) TestIsFileValidIncompleteBatches() {
+	db, mock := newMock()
+	repo := NewJobRepo(db)
+
+	expectedQuery := `SELECT f.job_id, b.start_time, f.file_length, f.checksum FROM job_queue_batch_file f LEFT JOIN job_queue_batch b ON b.job_id = f.job_id WHERE f.file_name = \$1 AND b.organization_id = \$2`
+	rows := sqlmock.NewRows([]string{"job_id", "start_time", "file_length", "checksum"}).
+		AddRow("54321", time.Now(), 1, make([]byte, 5, 5))
+	mock.ExpectQuery(expectedQuery).WithArgs("fileName", "12345").WillReturnRows(rows)
+
+	expectedStatusQuery := `SELECT status FROM job_queue_batch WHERE job_id = \$1`
+	rows = sqlmock.NewRows([]string{"status"}).
+		AddRow(2).AddRow(1)
+	mock.ExpectQuery(expectedStatusQuery).WithArgs("54321").WillReturnRows(rows)
+
+	_, err := repo.GetFileInfo(context.Background(), "12345", "fileName")
+
+	assert.Error(suite.T(), err, "Not all job batches are completed")
 }
 
 func isJobQueueBatch(t interface{}) bool {

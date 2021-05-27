@@ -10,7 +10,7 @@ import (
 )
 
 // NewDPCAttributionRouter function to build the attribution router
-func NewDPCAttributionRouter(o service.Service, g service.Service, impl service.Service, implOrg service.Service) http.Handler {
+func NewDPCAttributionRouter(o service.Service, g service.Service, impl service.Service, implOrg service.Service, d service.DataService) http.Handler {
 	r := chi.NewRouter()
 	r.Use(middleware2.Logging())
 	r.Use(middleware2.RequestIPCtx)
@@ -40,6 +40,10 @@ func NewDPCAttributionRouter(o service.Service, g service.Service, impl service.
 				r.Post("/", implOrg.Post)
 			})
 			r.Post("/", impl.Post)
+		})
+		r.Route("/Data", func(r chi.Router) {
+			r.Use(middleware2.AuthCtx)
+			r.With(middleware2.FileNameCtx).Get("/validityCheck/{fileName}", d.GetFileInfo)
 		})
 	})
 
