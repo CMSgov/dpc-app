@@ -32,7 +32,7 @@ func (or *ImplementerOrgRepository) FindRelation(ctx context.Context, implemente
 	sb := sqlFlavor.NewSelectBuilder()
 	sb.Select("id", "implementer_id", "organization_id", "created_at", "updated_at", "deleted_at", "status")
 	sb.From("implementer_org_relations")
-	sb.Where(sb.Equal("implementer_id", implementerID), sb.Equal("organization_id", orgID))
+	sb.Where(sb.Equal("implementer_id", implementerID), sb.Equal("organization_id", orgID), sb.IsNull("deleted_at"))
 	q, args := sb.Build()
 
 	ior := new(v2.ImplementerOrgRelation)

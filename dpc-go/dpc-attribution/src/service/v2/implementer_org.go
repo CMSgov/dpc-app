@@ -8,16 +8,16 @@ import (
 	"github.com/CMSgov/dpc/attribution/logger"
 	"github.com/CMSgov/dpc/attribution/middleware"
 	"github.com/CMSgov/dpc/attribution/model"
+	"github.com/CMSgov/dpc/attribution/model/v2"
 	"github.com/CMSgov/dpc/attribution/repository"
 	"github.com/CMSgov/dpc/attribution/util"
 	"github.com/darahayes/go-boom"
+	"go.uber.org/zap"
 	"io/ioutil"
 	"math/big"
 	"net/http"
 	"strings"
 	"text/template"
-	"github.com/CMSgov/dpc/attribution/model/v2"
-	"go.uber.org/zap"
 )
 
 // ImplementerOrgService is a struct that defines what the service has
@@ -81,38 +81,28 @@ func (ios *ImplementerOrgService) Post(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	org, _ := ios.orgRepo.FindByNPI(r.Context(), reqStruct.Npi)
-	if org == nil {
-		if ios.autoCreateOrg {
-			log.Error("Organization not found, creating new org")
-			newOrg := buildFhirOrg(reqStruct.Npi, generateRandomOrgName())
-			org, err = ios.orgRepo.Insert(r.Context(), []byte(newOrg))
-			if err != nil {
-				log.Error("Failed to create new org", zap.Error(err))
-				boom.BadData(w, err)
-				return
-			}
-		} else {
-			log.Error("organization with provided NPI not found", zap.Error(err))
-			boom.NotFound(w, err)
-			return
-		}
-	} else {
-		rel, err := ios.impOrgRepo.FindRelation(r.Context(), implID, org.ID)
-		if err != nil {
-			log.Error("unable to perform search for existing relation", zap.Error(err))
-			boom.BadImplementation(w, err)
-			return
-		}
-
-		//TODO determine if conflict error should be thrown, or re-activate
-		if rel != nil {
-			log.Error("relation already exists", zap.Error(err))
-			boom.Conflict(w, "relation already exists")
-			return
-		}
+	org, err := ios.findOrCreateOrg(r, reqStruct.Npi, ios.autoCreateOrg)
+	if err != nil {
+		log.Error("unable to look up or create organization", zap.Error(err))
+		boom.NotFound(w, err)
+		return
 	}
-
+	if org == nil {
+		log.Error("organization with provided NPI not found", zap.Error(err))
+		boom.NotFound(w, err)
+		return
+	}
+	rel, err := ios.impOrgRepo.FindRelation(r.Context(), implID, org.ID)
+	if err != nil {
+		log.Error("unable to perform search for existing relation", zap.Error(err))
+		boom.BadImplementation(w, err)
+		return
+	}
+	if rel != nil {
+		log.Error("relation already exists", zap.Error(err))
+		boom.Conflict(w, "relation already exists")
+		return
+	}
 	ior, err := ios.impOrgRepo.Insert(r.Context(), implID, org.ID, v2.Active)
 	if err != nil {
 		log.Error("Failed to create Implementer org relation", zap.Error(err))
@@ -131,6 +121,26 @@ func (ios *ImplementerOrgService) Post(w http.ResponseWriter, r *http.Request) {
 		log.Error("Failed to write Implementer org relation to response", zap.Error(err))
 		boom.Internal(w, err.Error())
 	}
+}
+
+func (ios *ImplementerOrgService) findOrCreateOrg(r *http.Request, npi string, autoCreate bool) (*v2.Organization, error) {
+	log := logger.WithContext(r.Context())
+	org, _ := ios.orgRepo.FindByNPI(r.Context(), npi)
+	if org == nil {
+		if autoCreate {
+			log.Error("Organization not found, creating new org")
+			newOrg := buildFhirOrg(npi, generateRandomOrgName())
+			org, err := ios.orgRepo.Insert(r.Context(), []byte(newOrg))
+			if err != nil {
+				log.Error("Failed to create new org", zap.Error(err))
+				return nil, fmt.Errorf("internal server error")
+			}
+			return org, nil
+		} else {
+			return nil, nil
+		}
+	}
+	return org, nil
 }
 
 // Get function that get the organization from the database by id and logs any errors before returning a generic error
