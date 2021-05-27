@@ -11,8 +11,6 @@ services:
       - POSTGRES_MULTIPLE_DATABASES=dpc_attribution,dpc_queue,dpc_auth,dpc_consent,dpc-website_development,dpc-impl_development,dpc_attribution_v2
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=dpc-safe
-    # ports:
-    #   - "5432:5432"
     volumes:
       - ./docker/postgres:/docker-entrypoint-initdb.d
     networks:
@@ -39,8 +37,6 @@ services:
       - DB_USER=postgres
       - DB_PASS=dpc-safe
       - DATABASE_CLEANER_ALLOW_REMOTE_DATABASE_URL=true
-    # ports:
-    #   - "3900:3500"
     depends_on:
       - db
       - redis
@@ -84,8 +80,6 @@ services:
       - DB_USER=postgres
       - DB_PASS=dpc-safe
       - DATABASE_CLEANER_ALLOW_REMOTE_DATABASE_URL=true
-    # ports:
-    #   - "3000:3000"
     depends_on:
       - db
       - redis
@@ -130,8 +124,6 @@ services:
       - DB_USER=postgres
       - DB_PASS=dpc-safe
       - DATABASE_CLEANER_ALLOW_REMOTE_DATABASE_URL=true
-    # ports:
-    #   - "4000:4000"
     depends_on:
       - db
       - redis
