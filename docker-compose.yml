@@ -9,8 +9,6 @@ services:
       - POSTGRES_MULTIPLE_DATABASES=dpc_attribution,dpc_queue,dpc_auth,dpc_consent,dpc-website_development,dpc-impl_development,dpc_attribution_v2
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=dpc-safe
-    ports:
-      - "5432:5432"
     volumes:
       - ./docker/postgres:/docker-entrypoint-initdb.d
 
