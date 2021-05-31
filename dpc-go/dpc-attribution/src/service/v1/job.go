@@ -120,7 +120,7 @@ func buildBatches(since *time.Time, types string, requestIP string, requestURL s
 }
 
 // BatchAndFiles function returns all the batches and it's files for a job
-func (js *JobServiceV1) BatchAndFiles(w http.ResponseWriter, r *http.Request) {
+func (js *JobServiceV1) BatchesAndFiles(w http.ResponseWriter, r *http.Request) {
 	log := logger.WithContext(r.Context())
 	orgID := util.FetchValueFromContext(r.Context(), w, middleware.ContextKeyOrganization)
 	jobID := util.FetchValueFromContext(r.Context(), w, middleware.ContextKeyJobID)
@@ -143,7 +143,7 @@ func (js *JobServiceV1) BatchAndFiles(w http.ResponseWriter, r *http.Request) {
 		}
 		bf := v1.BatchAndFiles{
 			Batch: v1.NewBatchInfo(&b),
-			Files: &files,
+			Files: files,
 		}
 		response = append(response, bf)
 	}

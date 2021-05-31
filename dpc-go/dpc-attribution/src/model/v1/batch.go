@@ -20,8 +20,8 @@ type BatchRequest struct {
 
 // BatchAndFiles is a struct to hold batch and file info from running job
 type BatchAndFiles struct {
-	Batch *BatchInfo           `json:"batch"`
-	Files *[]JobQueueBatchFile `json:"files"`
+	Batch *BatchInfo          `json:"batch"`
+	Files []JobQueueBatchFile `json:"files"`
 }
 
 // BatchInfo is a struct to hold batch information

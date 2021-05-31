@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"fmt"
+	"github.com/pkg/errors"
 	"testing"
 	"time"
 
@@ -137,4 +138,62 @@ func (suite *JobRepositoryV1TestSuite) TestIsFileValidIncompleteBatches() {
 	_, err := repo.GetFileInfo(context.Background(), "12345", "fileName")
 
 	assert.Error(suite.T(), err, "Not all job batches are completed")
+}
+
+func (suite *JobRepositoryV1TestSuite) TestFindBatchesByJobIDSQL() {
+	db, mock := newMock()
+	repo := NewJobRepo(db)
+	submitTime := time.Now()
+	completeTime := time.Now()
+
+	expectedQuery := `SELECT batch_id, patients, transaction_time, status, submit_time, request_url, patient_index, complete_time FROM job_queue_batch WHERE job_id = \$1 AND organization_id = \$2`
+	rows := sqlmock.NewRows([]string{"batch_id", "patients", "transaction_time", "status", "submit_time", "request_url", "patient_index", "complete_time"}).
+		AddRow(1, 1, time.Now(), 1, submitTime, "url", 0, completeTime)
+	mock.ExpectQuery(expectedQuery).WithArgs("12345", "54321").WillReturnRows(rows)
+
+	batches, err := repo.FindBatchesByJobID("12345", "54321")
+
+	assert.NoError(suite.T(), err)
+	assert.Len(suite.T(), batches, 1)
+}
+
+func (suite *JobRepositoryV1TestSuite) TestFindBatchesByJobIDSQLErrorHandling() {
+	db, mock := newMock()
+	repo := NewJobRepo(db)
+
+	expectedQuery := `SELECT batch_id, patients, transaction_time, status, submit_time, request_url, patient_index, complete_time FROM job_queue_batch WHERE job_id = \$1 AND organization_id = \$2`
+	mock.ExpectQuery(expectedQuery).WithArgs("12345", "54321").WillReturnError(errors.New("error"))
+
+	batches, err := repo.FindBatchesByJobID("12345", "54321")
+
+	assert.Errorf(suite.T(), err, "error")
+	assert.Nil(suite.T(), batches)
+}
+
+func (suite *JobRepositoryV1TestSuite) TestFindBatchFilesByBatchIDSQL() {
+	db, mock := newMock()
+	repo := NewJobRepo(db)
+
+	expectedQuery := `SELECT resource_type, batch_id, sequence, file_name, count, checksum, file_length FROM job_queue_batch_file WHERE batch_id = \$1`
+	rows := sqlmock.NewRows([]string{"resource_type", "batch_id", "sequence", "file_name", "count", "checksum", "file_length"}).
+		AddRow(77, 1, 0, "testFile", 1, []byte{}, 1234)
+	mock.ExpectQuery(expectedQuery).WithArgs("12345").WillReturnRows(rows)
+
+	files, err := repo.FindBatchFilesByBatchID("12345")
+
+	assert.NoError(suite.T(), err)
+	assert.Len(suite.T(), files, 1)
+}
+
+func (suite *JobRepositoryV1TestSuite) TestFindBatchFilesByBatchIDErrorHandling() {
+	db, mock := newMock()
+	repo := NewJobRepo(db)
+
+	expectedQuery := `SELECT resource_type, batch_id, sequence, file_name, count, checksum, file_length FROM job_queue_batch_file WHERE batch_id = \$1`
+	mock.ExpectQuery(expectedQuery).WithArgs("12345").WillReturnError(errors.New("error"))
+
+	files, err := repo.FindBatchFilesByBatchID("12345")
+
+	assert.Errorf(suite.T(), err, "error")
+	assert.Nil(suite.T(), files)
 }

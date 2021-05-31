@@ -53,7 +53,7 @@ type MockJobService struct {
 	mock.Mock
 }
 
-func (mjs *MockJobService) BatchAndFiles(w http.ResponseWriter, r *http.Request) {
+func (mjs *MockJobService) BatchesAndFiles(w http.ResponseWriter, r *http.Request) {
 	mjs.Called(w, r)
 }
 

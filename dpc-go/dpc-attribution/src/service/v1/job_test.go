@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -71,6 +72,7 @@ type JobServiceV1TestSuite struct {
 	jr      *MockJobRepo
 	pr      *MockPatientRepo
 	service service.JobService
+	jqb     *v1.JobQueueBatch
 }
 
 func TestJobServiceV1TestSuite(t *testing.T) {
@@ -93,9 +95,9 @@ func (suite *JobServiceV1TestSuite) SetupTest() {
 		fmt.Printf("ERR %v\n", err)
 	}
 
+	suite.jqb = &jqb
 	suite.pr.On("FindMBIsByGroupID", mock.Anything).Return(m, nil)
 	suite.pr.On("GetGroupNPIs", mock.Anything, mock.Anything).Return(&g, nil)
-	suite.jr.On("NewJobQueueBatch", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(&jqb)
 }
 
 func (suite *JobServiceV1TestSuite) TestExport() {
@@ -153,4 +155,44 @@ func (suite *JobServiceV1TestSuite) TestExportRepoError() {
         "message": "error",
         "statusCode": 422
     }`)
+}
+
+func (suite *JobServiceV1TestSuite) TestGetBatchesAndFiles() {
+	req := httptest.NewRequest("GET", "http://doesnotmatter.com", nil)
+	ctx := req.Context()
+	ctx = context.WithValue(ctx, middleware2.ContextKeyOrganization, "12345")
+	ctx = context.WithValue(ctx, middleware2.ContextKeyJobID, "54321")
+	req = req.WithContext(ctx)
+
+	suite.jr.On("FindBatchesByJobID", mock.MatchedBy(func(passedInJobID string) bool {
+		return passedInJobID == "54321"
+	}), mock.MatchedBy(func(passedInOrgID string) bool {
+		return passedInOrgID == "12345"
+	})).Return([]v1.JobQueueBatch{*suite.jqb}, nil)
+
+	suite.jr.On("FindBatchFilesByBatchID", mock.MatchedBy(func(passedInBatchID string) bool {
+		return passedInBatchID == suite.jqb.BatchID
+	})).Return([]v1.JobQueueBatchFile{
+		{
+			ResourceType: nil,
+			BatchID:      suite.jqb.BatchID,
+			Sequence:     0,
+			FileName:     "testFileName",
+			Count:        1,
+			Checksum:     nil,
+			FileLength:   1234,
+		},
+	}, nil)
+
+	w := httptest.NewRecorder()
+	suite.service.BatchesAndFiles(w, req)
+	res := w.Result()
+
+	resp, _ := ioutil.ReadAll(res.Body)
+	var batchesAndFiles []v1.BatchAndFiles
+	_ = json.Unmarshal(resp, &batchesAndFiles)
+
+	assert.NotNil(suite.T(), batchesAndFiles)
+	assert.Len(suite.T(), batchesAndFiles, 1)
+	assert.Equal(suite.T(), "testFileName", batchesAndFiles[0].Files[0].FileName)
 }
