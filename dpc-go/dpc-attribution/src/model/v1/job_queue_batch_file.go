@@ -9,6 +9,7 @@ import (
 type resourceType string
 type hexType string
 
+// JobQueueBatchFile is a struct that models the v1 job queue batch file table
 type JobQueueBatchFile struct {
 	ResourceType *resourceType `db:"resource_type" json:"resourceType"`
 	BatchID      string        `db:"batch_id" json:"batchID"`

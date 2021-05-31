@@ -16,7 +16,7 @@ import (
 	"time"
 )
 
-// JobController is a struct that defines what the controller has
+// JobControllerImpl is a struct that defines what the controller has
 type JobControllerImpl struct {
 	jc client.JobClient
 }
