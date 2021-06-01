@@ -75,3 +75,15 @@ func RequestURLCtx(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
+
+// ExportTypesParamCtx middleware to extract the export params _type and _since
+func ExportTypesParamCtx(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		types := r.URL.Query().Get("_type")
+		if types == "" {
+			types = AllResources
+		}
+		ctx := context.WithValue(r.Context(), ContextKeyResourceTypes, types)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}

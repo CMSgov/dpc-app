@@ -13,6 +13,8 @@ const (
 	FhirNdjson string = "application/fhir+ndjson"
 	// ApplicationNdjson is an allowed output format strings for export requests
 	ApplicationNdjson string = "application/ndjson"
+	// AllResources is the list of allowed resources for export
+	AllResources string = "Patient,Coverage,ExplanationOfBenefit"
 	// Ndjson is an allowed output format strings for export requests
 	Ndjson string = "ndjson"
 	// ContextKeyOrganization is the key in the context to retrieve the organizationID
@@ -25,4 +27,8 @@ const (
 	ContextKeyRequestingIP
 	// ContextKeyFileName is the key in the context to retrieve the file name
 	ContextKeyFileName
+	// ContextKeyResourceTypes is the key in the context to pass on the _types param values
+	ContextKeyResourceTypes
+	// ContextKeySince is the key in the context to pass on the _since param value
+	ContextKeySince
 )
