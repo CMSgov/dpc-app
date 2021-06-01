@@ -8,6 +8,10 @@ services:
   redis:
     image: redis:latest
 
+  db:
+    ports:
+      - "5434:5432"
+
   dpc_web:
     build:
       context: .
