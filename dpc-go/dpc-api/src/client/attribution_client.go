@@ -46,7 +46,7 @@ type AttributionClient struct {
 }
 
 // NewAttributionClient initializes the retryable client and returns a reference to the attribution client
-func NewAttributionClient(config AttributionConfig) *AttributionClient {
+func NewAttributionClient(config AttributionConfig) Client {
 	client := retryablehttp.NewClient()
 	client.RetryMax = config.Retries
 	return &AttributionClient{

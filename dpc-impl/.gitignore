@@ -34,4 +34,5 @@ yarn-debug.log*
 
 /coverage
 
-.env
+.env.development.local
+.env.test.local

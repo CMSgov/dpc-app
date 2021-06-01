@@ -8,6 +8,7 @@ WORKDIR /app/dpc-api
 # We want to populate the module cache based on the go.{mod,sum} files.
 COPY src/ .
 COPY configs ../configs
+COPY swaggerui ../swaggerui
 
 # Build the Go app
 RUN go build  -o ./bin/api .
