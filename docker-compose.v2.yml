@@ -4,6 +4,11 @@ volumes:
   coverage:
 
 services:
+
+  db:
+    ports:
+      - "5432:5432"
+
   aggregation:
     image: ${ECR_HOST:-755619740999.dkr.ecr.us-east-1.amazonaws.com/dpc-aggregation}:latest
     ports:
