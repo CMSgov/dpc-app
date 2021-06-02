@@ -3,13 +3,14 @@ package service
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
+
 	"github.com/CMSgov/dpc/attribution/logger"
 	"github.com/CMSgov/dpc/attribution/middleware"
 	"github.com/CMSgov/dpc/attribution/repository"
 	"github.com/CMSgov/dpc/attribution/util"
 	"github.com/darahayes/go-boom"
 	"go.uber.org/zap"
-	"net/http"
 )
 
 // DataService struct defines the class
@@ -39,7 +40,7 @@ func (ds *DataService) GetFileInfo(w http.ResponseWriter, r *http.Request) {
 
 	b, err := json.Marshal(fi)
 	if err != nil {
-		log.Error(fmt.Sprintf("FileInfo failed to marshal to bytes"), zap.Error(err))
+		log.Error("FileInfo failed to marshal to bytes", zap.Error(err))
 		boom.BadRequest(w, "file name doesn't check out")
 		return
 	}

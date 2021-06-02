@@ -124,7 +124,7 @@ func (suite *JobRepositoryV1TestSuite) TestIsFileValid() {
 
 	expectedQuery := `SELECT f.job_id, b.start_time, f.file_length, f.checksum FROM job_queue_batch_file f LEFT JOIN job_queue_batch b ON b.job_id = f.job_id WHERE f.file_name = \$1 AND b.organization_id = \$2`
 	rows := sqlmock.NewRows([]string{"job_id", "start_time", "file_length", "checksum"}).
-		AddRow("54321", time.Now(), 1, make([]byte, 5, 5))
+		AddRow("54321", time.Now(), 1, make([]byte, 5))
 	mock.ExpectQuery(expectedQuery).WithArgs("fileName", "12345").WillReturnRows(rows)
 
 	expectedStatusQuery := `SELECT status FROM job_queue_batch WHERE job_id = \$1`
@@ -144,7 +144,7 @@ func (suite *JobRepositoryV1TestSuite) TestIsFileValidIncompleteBatches() {
 
 	expectedQuery := `SELECT f.job_id, b.start_time, f.file_length, f.checksum FROM job_queue_batch_file f LEFT JOIN job_queue_batch b ON b.job_id = f.job_id WHERE f.file_name = \$1 AND b.organization_id = \$2`
 	rows := sqlmock.NewRows([]string{"job_id", "start_time", "file_length", "checksum"}).
-		AddRow("54321", time.Now(), 1, make([]byte, 5, 5))
+		AddRow("54321", time.Now(), 1, make([]byte, 5))
 	mock.ExpectQuery(expectedQuery).WithArgs("fileName", "12345").WillReturnRows(rows)
 
 	expectedStatusQuery := `SELECT status FROM job_queue_batch WHERE job_id = \$1`
