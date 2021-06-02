@@ -176,3 +176,33 @@ func (suite *ContextTestSuite) TestExportSinceParamDefault() {
 	e := ExportSinceParamCtx(nextHandler)
 	e.ServeHTTP(res, req)
 }
+
+func (suite *ContextTestSuite) TestExportSinceParamFuture() {
+	future := time.Now().Add(time.Hour * 3).Format(SinceLayout)
+	url := fmt.Sprintf("http://www.example.com/Group/some-id$export?_type=Coverage,ExplanationOfBenefit&_since=%s", future)
+	var since string
+	nextHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		since, _ = r.Context().Value(ContextKeySince).(string)
+	})
+
+	req := httptest.NewRequest(http.MethodGet, url, nil)
+	res := httptest.NewRecorder()
+
+	e := ExportSinceParamCtx(nextHandler)
+	e.ServeHTTP(res, req)
+	assert.Equal(suite.T(), "", since)
+}
+
+func (suite *ContextTestSuite) TestExportSinceParamInvalid() {
+	var since string
+	nextHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		since, _ = r.Context().Value(ContextKeySince).(string)
+	})
+
+	req := httptest.NewRequest(http.MethodGet, "http://www.example.com/Group/some-id$export?_type=Coverage,ExplanationOfBenefit&_since=foobar", nil)
+	res := httptest.NewRecorder()
+
+	e := ExportSinceParamCtx(nextHandler)
+	e.ServeHTTP(res, req)
+	assert.Equal(suite.T(), "", since)
+}
