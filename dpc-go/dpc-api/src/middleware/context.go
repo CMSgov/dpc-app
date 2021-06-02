@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/CMSgov/dpc/api/fhirror"
 	"github.com/CMSgov/dpc/api/logger"
@@ -86,7 +87,7 @@ func ExportTypesParamCtx(next http.Handler) http.Handler {
 			types = AllResources
 		}
 		if !validateTypes(types) {
-			log.Error("Invalid resource type")
+			log.Error(fmt.Sprintf("Invalid resource type: %s", types))
 			fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "Invalid resource type")
 			return
 		}
@@ -119,8 +120,29 @@ func isValidType(t string) bool {
 // ExportSinceParamCtx middleware to extract the export _since param
 func ExportSinceParamCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log := logger.WithContext(r.Context())
 		since := r.URL.Query().Get("_since")
+		valid, msg := validateSince(since)
+		if !valid {
+			log.Error(msg)
+			fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, msg)
+			return
+		}
 		ctx := context.WithValue(r.Context(), ContextKeySince, since)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
+}
+
+func validateSince(since string) (bool, string) {
+	if since == "" {
+		return true, ""
+	}
+	p, err := time.Parse(SinceLayout, since)
+	if err != nil {
+		return false, "Could not parse _since"
+	}
+	if p.After(time.Now()) {
+		return false, "_since cannot be a future date"
+	}
+	return true, ""
 }

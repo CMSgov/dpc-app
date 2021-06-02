@@ -21,6 +21,8 @@ const (
 	CoverageString string = "Coverage"
 	// AllResources is the list of allowed resources for export
 	AllResources string = "Patient,Coverage,ExplanationOfBenefit"
+	// SinceLayout is the time format for the since parameter
+	SinceLayout string = "2006-01-02T15:04:05-07:00"
 	// Ndjson is an allowed output format strings for export requests
 	Ndjson string = "ndjson"
 	// ContextKeyOrganization is the key in the context to retrieve the organizationID
