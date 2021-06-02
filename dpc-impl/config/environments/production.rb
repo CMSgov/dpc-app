@@ -49,9 +49,28 @@ Rails.application.configure do
   config.force_ssl = true
   config.ssl_options = { redirect: { exclude: -> request { request.path =~ /impl\/health_check/ } } }
 
+  # Lograge config
+  config.lograge.enabled = true
+
+  # This specifies to log in JSON format
+  config.lograge.formatter = Lograge::Formatters::Json.new
+
+  ## Disables log coloration
+  config.colorize_logging = false
+
+  # Log to a dedicated file
+  config.lograge.logger = ActiveSupport::Logger.new(STDOUT)
+
+  # This is useful if you want to log query parameters
+  config.lograge.custom_options = lambda do |event|
+    { :ddsource => 'ruby',
+      :params => event.payload[:params].reject { |k| %w(controller action).include? k }
+    }
+  end
+
   # Include generic and useful information about system operation, but avoid logging too much
   # information to avoid inadvertent exposure of personally identifiable information (PII).
-  config.log_level = :info
+  config.log_level = ENV["LOG_LEVEL"] || :info
 
   # Prepend all log lines with the following tags.
   config.log_tags = [ :request_id ]
