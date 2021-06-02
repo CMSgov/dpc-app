@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/CMSgov/dpc/api/fhirror"
 	"github.com/CMSgov/dpc/api/logger"
@@ -79,13 +80,40 @@ func RequestURLCtx(next http.Handler) http.Handler {
 // ExportTypesParamCtx middleware to extract the export _type param
 func ExportTypesParamCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log := logger.WithContext(r.Context())
 		types := r.URL.Query().Get("_type")
 		if types == "" {
 			types = AllResources
 		}
+		if !validateTypes(types) {
+			log.Error("Invalid resource type")
+			fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "Invalid resource type")
+			return
+		}
 		ctx := context.WithValue(r.Context(), ContextKeyResourceTypes, types)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
+}
+
+func validateTypes(types string) bool {
+	t := strings.Split(types, ",")
+	for _, s := range t {
+		if !isValidType(s) {
+			return false
+		}
+	}
+	return true
+}
+
+func isValidType(t string) bool {
+	switch t {
+	case
+		PatientString,
+		CoverageString,
+		EoBString:
+		return true
+	}
+	return false
 }
 
 // ExportSinceParamCtx middleware to extract the export _since param

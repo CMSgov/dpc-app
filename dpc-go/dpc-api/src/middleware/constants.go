@@ -13,6 +13,12 @@ const (
 	FhirNdjson string = "application/fhir+ndjson"
 	// ApplicationNdjson is an allowed output format strings for export requests
 	ApplicationNdjson string = "application/ndjson"
+	// PatientString is the string constant for Patient
+	PatientString string = "Patient"
+	// EoBString is the string constant for ExplanationOfBenefit
+	EoBString string = "ExplanationOfBenefit"
+	// CoverageString is the string constant for Coverage
+	CoverageString string = "Coverage"
 	// AllResources is the list of allowed resources for export
 	AllResources string = "Patient,Coverage,ExplanationOfBenefit"
 	// Ndjson is an allowed output format strings for export requests
