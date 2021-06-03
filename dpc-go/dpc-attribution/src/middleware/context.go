@@ -2,11 +2,12 @@ package middleware
 
 import (
 	"context"
+	"net/http"
+
 	"github.com/CMSgov/dpc/attribution/logger"
 	"github.com/darahayes/go-boom"
 	"github.com/go-chi/chi"
 	"github.com/pkg/errors"
-	"net/http"
 )
 
 // FileNameCtx middleware to extract the fileName from the chi url param and set it into the request context
@@ -80,6 +81,24 @@ func RequestURLCtx(next http.Handler) http.Handler {
 			requestURL = r.RequestURI
 		}
 		ctx := context.WithValue(r.Context(), ContextKeyRequestURL, requestURL)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+// ExportTypesParamCtx middleware to extract the export _type param
+func ExportTypesParamCtx(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		types := r.URL.Query().Get("_type")
+		ctx := context.WithValue(r.Context(), ContextKeyResourceTypes, types)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+// ExportSinceParamCtx middleware to extract the export _since param
+func ExportSinceParamCtx(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		since := r.URL.Query().Get("_since")
+		ctx := context.WithValue(r.Context(), ContextKeySince, since)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

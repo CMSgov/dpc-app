@@ -22,4 +22,8 @@ const (
 	ContextKeyFileName
 	// ContextKeyImplementer is the key in the context to retrieve the ImplementerID
 	ContextKeyImplementer
+	// ContextKeyResourceTypes is the key in the context to pass on the _types param values
+	ContextKeyResourceTypes
+	// ContextKeySince is the key in the context to pass on the _since param value
+	ContextKeySince
 )
