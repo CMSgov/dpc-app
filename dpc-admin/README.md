@@ -69,12 +69,6 @@ To test the rails app, run `rspec spec` in the terminal.
 # Running as docker container
 Navigate to /dpc-app
 
-To build and start DPC Admin, Web, and Impl portals run: 
-```
-make ci-portals
-make start-portals
-```
-
 DPC Admin: localhost:3000\
 Admin Sidekiq Console: localhost:3000/sidekiq\
 Admin Letter Opener: localhost:3000/letter_opener
