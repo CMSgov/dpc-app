@@ -10,10 +10,9 @@ import (
 )
 
 // NewDPCAttributionRouter function to build the attribution router
-func NewDPCAttributionRouter(o service.Service, g service.Service, impl service.Service, implOrg service.Service, d service.DataService) http.Handler {
+func NewDPCAttributionRouter(o service.Service, g service.Service, impl service.Service, implOrg service.Service, d service.DataService, js service.JobService) http.Handler {
 	r := chi.NewRouter()
 	r.Use(middleware2.Logging())
-	r.Use(middleware2.RequestIPCtx)
 	r.Use(middleware.SetHeader("Content-Type", "application/json; charset=UTF-8"))
 	r.Route("/", func(r chi.Router) {
 		r.Route("/Organization", func(r chi.Router) {
@@ -29,7 +28,6 @@ func NewDPCAttributionRouter(o service.Service, g service.Service, impl service.
 			r.Use(middleware2.AuthCtx)
 			r.Post("/", g.Post)
 			r.Route("/{groupID}", func(r chi.Router) {
-				r.Use(middleware2.RequestURLCtx)
 				r.Use(middleware2.GroupCtx)
 				r.Get("/$export", g.Export)
 			})
@@ -44,6 +42,10 @@ func NewDPCAttributionRouter(o service.Service, g service.Service, impl service.
 		r.Route("/Data", func(r chi.Router) {
 			r.Use(middleware2.AuthCtx)
 			r.With(middleware2.FileNameCtx).Get("/validityCheck/{fileName}", d.GetFileInfo)
+		})
+		r.Route("/Job", func(r chi.Router) {
+			r.Use(middleware2.AuthCtx)
+			r.With(middleware2.JobCtx).Get("/{jobID}", js.BatchesAndFiles)
 		})
 	})
 
