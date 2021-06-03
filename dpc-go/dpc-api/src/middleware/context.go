@@ -122,27 +122,27 @@ func ExportSinceParamCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log := logger.WithContext(r.Context())
 		since := r.URL.Query().Get("_since")
-		valid, msg := validateSince(since)
-		if !valid {
+		s, msg := validateSince(since)
+		if msg != "" {
 			log.Error(msg)
 			fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, msg)
 			return
 		}
-		ctx := context.WithValue(r.Context(), ContextKeySince, since)
+		ctx := context.WithValue(r.Context(), ContextKeySince, s)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
 
-func validateSince(since string) (bool, string) {
+func validateSince(since string) (string, string) {
 	if since == "" {
-		return true, ""
+		return "", ""
 	}
 	p, err := time.Parse(SinceLayout, since)
 	if err != nil {
-		return false, "Could not parse _since"
+		return "", "Could not parse _since"
 	}
 	if p.After(time.Now()) {
-		return false, "_since cannot be a future date"
+		return "", "_since cannot be a future date"
 	}
-	return true, ""
+	return p.Format(SinceLayout), ""
 }

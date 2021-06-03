@@ -25,7 +25,7 @@ func (suite *ContextTestSuite) TestExportTypesParam() {
 		types, _ = r.Context().Value(ContextKeyResourceTypes).(string)
 	})
 
-	req := httptest.NewRequest(http.MethodGet, "http://www.example.com/Group/some-id$export?_type=Coverage,ExplanationOfBenefit&_since=2012-01-02T12:12:12-00:00", nil)
+	req := httptest.NewRequest(http.MethodGet, "http://www.example.com/Group/some-id$export?_type=Coverage,ExplanationOfBenefit&_since=2012-01-02T12:12:12-05:00", nil)
 	res := httptest.NewRecorder()
 
 	e := ExportTypesParamCtx(nextHandler)
@@ -39,7 +39,7 @@ func (suite *ContextTestSuite) TestExportTypesParamDefault() {
 		types, _ = r.Context().Value(ContextKeyResourceTypes).(string)
 	})
 
-	req := httptest.NewRequest(http.MethodGet, "http://www.example.com/Group/some-id$export?_since=2012-01-02T12:12:12-00:00", nil)
+	req := httptest.NewRequest(http.MethodGet, "http://www.example.com/Group/some-id$export?_since=2012-01-02T12:12:12-05:00", nil)
 	res := httptest.NewRecorder()
 
 	e := ExportTypesParamCtx(nextHandler)
@@ -67,12 +67,12 @@ func (suite *ContextTestSuite) TestExportSinceParam() {
 		since, _ = r.Context().Value(ContextKeySince).(string)
 	})
 
-	req := httptest.NewRequest(http.MethodGet, "http://www.example.com/Group/some-id$export?_type=Coverage,ExplanationOfBenefit&_since=2012-01-02T12:12:12-00:00", nil)
+	req := httptest.NewRequest(http.MethodGet, "http://www.example.com/Group/some-id$export?_type=Coverage,ExplanationOfBenefit&_since=2012-01-02T12:12:12-05:00", nil)
 	res := httptest.NewRecorder()
 
 	e := ExportSinceParamCtx(nextHandler)
 	e.ServeHTTP(res, req)
-	assert.Equal(suite.T(), "2012-01-02T12:12:12-00:00", since)
+	assert.Equal(suite.T(), "2012-01-02T12:12:12-05:00", since)
 }
 
 func (suite *ContextTestSuite) TestExportSinceParamDefault() {
