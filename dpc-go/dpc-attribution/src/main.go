@@ -59,7 +59,7 @@ func main() {
 
 	ios := v2.NewImplementerOrgService(ir, or, ior, autoCreateOrg == "true")
 
-	attributionRouter := router.NewDPCAttributionRouter(os, gs, is, ios, ds)
+	attributionRouter := router.NewDPCAttributionRouter(os, gs, is, ios, ds, js)
 
 	port := conf.GetAsString("port", "3001")
 	fmt.Printf("Starting DPC-Attribution server on port %v ...\n", port)

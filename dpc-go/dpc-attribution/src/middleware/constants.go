@@ -22,6 +22,8 @@ const (
 	ContextKeyFileName
 	// ContextKeyImplementer is the key in the context to retrieve the ImplementerID
 	ContextKeyImplementer
+	// ContextKeyJobID is the key in the context to retrieve the JobID
+	ContextKeyJobID
 	// ContextKeyResourceTypes is the key in the context to pass on the _types param values
 	ContextKeyResourceTypes
 	// ContextKeySince is the key in the context to pass on the _since param value

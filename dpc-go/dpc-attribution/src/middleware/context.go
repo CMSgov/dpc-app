@@ -46,6 +46,15 @@ func OrganizationCtx(next http.Handler) http.Handler {
 	})
 }
 
+// JobCtx middleware to extract the jobID from the header and set it into the request context
+func JobCtx(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		jobID := chi.URLParam(r, "jobID")
+		ctx := context.WithValue(r.Context(), ContextKeyJobID, jobID)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
 // AuthCtx middleware is placeholder to get org id from token
 func AuthCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -57,30 +66,6 @@ func AuthCtx(next http.Handler) http.Handler {
 			return
 		}
 		ctx := context.WithValue(r.Context(), ContextKeyOrganization, organizationID)
-		next.ServeHTTP(w, r.WithContext(ctx))
-	})
-}
-
-// RequestIPCtx middleware to extract the requesting IP address from the incoming request and set it into the request context
-func RequestIPCtx(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ipAddress := r.Header.Get(FwdHeader)
-		if ipAddress == "" {
-			ipAddress = r.RemoteAddr
-		}
-		ctx := context.WithValue(r.Context(), ContextKeyRequestingIP, ipAddress)
-		next.ServeHTTP(w, r.WithContext(ctx))
-	})
-}
-
-// RequestURLCtx middleware to extract the requesting URL from the incoming request and set it in the request context
-func RequestURLCtx(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		requestURL := r.Header.Get(RequestURLHeader)
-		if requestURL == "" {
-			requestURL = r.RequestURI
-		}
-		ctx := context.WithValue(r.Context(), ContextKeyRequestURL, requestURL)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

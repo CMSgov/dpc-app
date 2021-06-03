@@ -35,6 +35,8 @@ const (
 	ContextKeyRequestingIP
 	// ContextKeyFileName is the key in the context to retrieve the file name
 	ContextKeyFileName
+	// ContextKeyJobID is the key in the context to retrieve the jobID
+	ContextKeyJobID
 	// ContextKeyResourceTypes is the key in the context to pass on the _types param values
 	ContextKeyResourceTypes
 	// ContextKeySince is the key in the context to pass on the _since param value
