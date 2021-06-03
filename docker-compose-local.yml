@@ -2,6 +2,10 @@ version: '3'
 
 services:
 
+  db:
+    ports:
+      - "5432:5432"
+
   aggregation:
     volumes:
       - /tmp:/app/data
