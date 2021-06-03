@@ -49,6 +49,18 @@ func (mds *MockDataService) GetFileInfo(w http.ResponseWriter, r *http.Request) 
 	mds.Called(w, r)
 }
 
+type MockJobService struct {
+	mock.Mock
+}
+
+func (mjs *MockJobService) BatchesAndFiles(w http.ResponseWriter, r *http.Request) {
+	mjs.Called(w, r)
+}
+
+func (mjs *MockJobService) Export(w http.ResponseWriter, r *http.Request) {
+	mjs.Called(w, r)
+}
+
 type RouterTestSuite struct {
 	suite.Suite
 	router                http.Handler
@@ -57,6 +69,7 @@ type RouterTestSuite struct {
 	mockImplementer       *MockService
 	mockImplementerOrgRel *MockService
 	mockData              *MockDataService
+	mockJob               *MockJobService
 }
 
 func TestRouterTestSuite(t *testing.T) {
@@ -67,7 +80,7 @@ func (suite *RouterTestSuite) SetupTest() {
 	suite.mockOrg = &MockService{}
 	suite.mockGroup = &MockService{}
 	suite.mockData = &MockDataService{}
-	suite.router = NewDPCAttributionRouter(suite.mockOrg, suite.mockGroup, suite.mockImplementer, suite.mockImplementerOrgRel, suite.mockData)
+	suite.router = NewDPCAttributionRouter(suite.mockOrg, suite.mockGroup, suite.mockImplementer, suite.mockImplementerOrgRel, suite.mockData, suite.mockJob)
 }
 
 func (suite *RouterTestSuite) do(httpMethod string, route string, body io.Reader, headers map[string]string) *http.Response {
@@ -196,17 +209,18 @@ func (suite *RouterTestSuite) TestGroupPostRoute() {
 
 func (suite *RouterTestSuite) TestGroupExportRoute() {
 	fakeUrl := faker.URL()
+	fakeIP := faker.IPv4()
 	suite.mockGroup.On("Export", mock.Anything, mock.Anything).Once().Run(func(arg mock.Arguments) {
 		w := arg.Get(0).(http.ResponseWriter)
 		_, _ = w.Write([]byte(attributiontest.JobJSON))
 		r := arg.Get(1).(*http.Request)
 		assert.Equal(suite.T(), "12345", r.Context().Value(middleware2.ContextKeyOrganization))
 		assert.Equal(suite.T(), "9876", r.Context().Value(middleware2.ContextKeyGroup))
-		assert.Equal(suite.T(), fakeUrl, r.Context().Value(middleware2.ContextKeyRequestURL))
-		assert.Equal(suite.T(), r.RemoteAddr, r.Context().Value(middleware2.ContextKeyRequestingIP))
+		assert.Equal(suite.T(), fakeUrl, r.Header.Get(middleware2.RequestURLHeader))
+		assert.Equal(suite.T(), fakeIP, r.Header.Get(middleware2.FwdHeader))
 	})
 
-	res := suite.do(http.MethodGet, "/Group/9876/$export", nil, map[string]string{middleware2.OrgHeader: "12345", middleware2.RequestURLHeader: fakeUrl})
+	res := suite.do(http.MethodGet, "/Group/9876/$export", nil, map[string]string{middleware2.OrgHeader: "12345", middleware2.RequestURLHeader: fakeUrl, middleware2.FwdHeader: fakeIP})
 	assert.Equal(suite.T(), "application/json; charset=UTF-8", res.Header.Get("Content-Type"))
 	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
 	assert.NotEqual(suite.T(), res.Body, http.NoBody)
