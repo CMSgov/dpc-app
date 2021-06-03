@@ -29,6 +29,8 @@ func NewDPCAttributionRouter(o service.Service, g service.Service, impl service.
 			r.Post("/", g.Post)
 			r.Route("/{groupID}", func(r chi.Router) {
 				r.Use(middleware2.GroupCtx)
+				r.Use(middleware2.ExportTypesParamCtx)
+				r.Use(middleware2.ExportSinceParamCtx)
 				r.Get("/$export", g.Export)
 			})
 		})
