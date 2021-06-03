@@ -17,22 +17,22 @@ docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.portals.yml up 
 docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.portals.yml run --entrypoint "bundle exec rails db:create db:migrate RAILS_ENV=test" dpc_web
 docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.portals.yml run --entrypoint "bundle exec rails db:create db:migrate RAILS_ENV=test" dpc_impl
 
-# # Run the tests
-# echo "┌─────────────────────────┐"
-# echo "│                         │"
-# echo "│  Running DPC Web Tests  │"
-# echo "│                         │"
-# echo "└─────────────────────────┘"
-# docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.portals.yml run --entrypoint "rubocop" dpc_web
-# docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.portals.yml run --entrypoint "bundle exec rails spec" dpc_web
+# Run the tests
+echo "┌─────────────────────────┐"
+echo "│                         │"
+echo "│  Running DPC Web Tests  │"
+echo "│                         │"
+echo "└─────────────────────────┘"
+docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.portals.yml run --entrypoint "rubocop" dpc_web
+docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.portals.yml run --entrypoint "bundle exec rails spec" dpc_web
 
-# echo "┌───────────────────────────┐"
-# echo "│                           │"
-# echo "│  Running DPC Admin Tests  │"
-# echo "│                           │"
-# echo "└───────────────────────────┘"
-# docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.portals.yml run --entrypoint "rubocop" dpc_admin
-# docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.portals.yml run --entrypoint "bundle exec rails spec" dpc_admin
+echo "┌───────────────────────────┐"
+echo "│                           │"
+echo "│  Running DPC Admin Tests  │"
+echo "│                           │"
+echo "└───────────────────────────┘"
+docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.portals.yml run --entrypoint "rubocop" dpc_admin
+docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.portals.yml run --entrypoint "bundle exec rails spec" dpc_admin
 
 echo "┌──────────────────────────┐"
 echo "│                          │"
