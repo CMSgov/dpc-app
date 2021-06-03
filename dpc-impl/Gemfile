@@ -13,7 +13,7 @@ gem 'webpacker', '~> 5.0'
 gem 'sidekiq', '~> 6.1'
 gem 'turbolinks', '~> 5'
 gem 'jbuilder', '~> 2.7'
-
+gem 'newrelic_rpm', '~> 6.10'
 gem 'bootsnap', '>= 1.4.4', require: false
 gem 'devise'
 gem 'devise_invitable', '~> 2.0.0'
@@ -22,7 +22,7 @@ gem 'health_check'
 gem 'truemail'
 gem 'sidekiq_alive'
 gem 'redis-namespace'
-
+gem 'lograge'
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'byebug', platforms: [:mri, :mingw, :x64_mingw]
