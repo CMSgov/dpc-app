@@ -6,7 +6,6 @@ import (
 	"github.com/CMSgov/dpc/attribution/logger"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
-	"strings"
 	"time"
 
 	"github.com/CMSgov/dpc/attribution/model/v1"
@@ -16,9 +15,10 @@ import (
 
 // JobRepo is an interface for test mocking purposes
 type JobRepo interface {
-	NewJobQueueBatch(orgID string, g *v1.GroupNPIs, patientMBIs []string, details BatchDetails) *v1.JobQueueBatch
-	Insert(ctx context.Context, batches []v1.JobQueueBatch) (*v1.Job, error)
 	GetFileInfo(ctx context.Context, orgID string, fileName string) (*v1.FileInfo, error)
+	Insert(ctx context.Context, orgID string, batches []v1.BatchRequest) (*string, error)
+	FindBatchesByJobID(id string, orgID string) ([]v1.JobQueueBatch, error)
+	FindBatchFilesByBatchID(id string) ([]v1.JobQueueBatchFile, error)
 }
 
 // JobRepositoryV1 is a struct that defines what the repository has
@@ -33,39 +33,9 @@ func NewJobRepo(db *sql.DB) *JobRepositoryV1 {
 	}
 }
 
-// BatchDetails is a struct to hold details for a JobQueueBatch
-type BatchDetails struct {
-	Priority     int
-	Tt           time.Time
-	Since        sql.NullTime
-	Types        string
-	RequestURL   string
-	RequestingIP string
-}
-
-// NewJobQueueBatch function that creates a new JobQueueBatch
-func (jr *JobRepositoryV1) NewJobQueueBatch(orgID string, g *v1.GroupNPIs, patientMBIs []string, details BatchDetails) *v1.JobQueueBatch {
-	return &v1.JobQueueBatch{
-		OrganizationID:  orgID,
-		OrganizationNPI: g.OrgNPI,
-		ProviderNPI:     g.ProviderNPI,
-		PatientMBIs:     strings.Join(patientMBIs, ","),
-		ResourceTypes:   details.Types,
-		Since:           details.Since,
-		Priority:        details.Priority,
-		Status:          0,
-		TransactionTime: details.Tt,
-		RequestURL:      details.RequestURL,
-		RequestingIP:    details.RequestingIP,
-		IsBulk:          true,
-		SubmitTime:      time.Now(),
-	}
-}
-
 // Insert function that saves a slice of JobQueueBatch's into the database and returns an error if there is one
-func (jr *JobRepositoryV1) Insert(ctx context.Context, batches []v1.JobQueueBatch) (*v1.Job, error) {
-	var results []*v1.Job
-	job := new(v1.Job)
+func (jr *JobRepositoryV1) Insert(ctx context.Context, orgID string, batches []v1.BatchRequest) (*string, error) {
+
 	// insert the batches within a single transaction
 	tx, err := jr.db.Begin()
 	if err != nil {
@@ -78,28 +48,71 @@ func (jr *JobRepositoryV1) Insert(ctx context.Context, batches []v1.JobQueueBatc
 		ib.Cols("batch_id", "job_id", "organization_id", "organization_npi", "provider_npi", "patients", "resource_types", "since",
 			"priority", "transaction_time", "status", "submit_time", "request_url", "requesting_ip", "is_bulk")
 		batchID := uuid.New().String()
-		ib.Values(batchID, jobID, b.OrganizationID, b.OrganizationNPI, b.ProviderNPI, b.PatientMBIs, b.ResourceTypes, b.Since,
-			b.Priority, b.TransactionTime, b.Status, b.SubmitTime, b.RequestURL, b.RequestingIP, b.IsBulk)
-		ib.SQL("returning job_id")
+		ib.Values(batchID, jobID, orgID, b.OrganizationNPI, b.ProviderNPI, b.PatientMBIs, b.ResourceTypes, b.Since,
+			b.Priority, b.TransactionTime, 0, time.Now(), b.RequestURL, b.RequestingIP, b.IsBulk)
 		q, args := ib.Build()
-		jobStruct := sqlbuilder.NewStruct(job).For(sqlFlavor)
-		if err := tx.QueryRowContext(ctx, q, args...).Scan(jobStruct.Addr(&job)...); err != nil {
-			err2 := tx.Rollback()
-			if err2 != nil {
-				return nil, err2
+		_, err := tx.ExecContext(ctx, q, args...)
+		if err != nil {
+			err = tx.Rollback()
+			if err != nil {
+				return nil, err
 			}
-			return nil, err
 		}
-		results = append(results, job)
 	}
 	err = tx.Commit()
 	if err != nil {
 		return nil, err
 	}
-	if len(results) == 0 {
-		return nil, errors.New("unsuccessful insert")
+
+	return &jobID, nil
+}
+
+// FindBatchesByJobID function that returns the batches by job and org id
+func (jr *JobRepositoryV1) FindBatchesByJobID(id string, orgID string) ([]v1.JobQueueBatch, error) {
+	sb := sqlFlavor.NewSelectBuilder()
+	q, args := sb.Select("batch_id", "patients", "transaction_time", "status", "submit_time", "request_url", "patient_index", "complete_time").
+		From("job_queue_batch").
+		Where(sb.Equal("job_id", id), sb.Equal("organization_id", orgID)).
+		Build()
+	r, err := jr.db.Query(q, args...)
+	if err != nil {
+		return nil, err
 	}
-	return results[0], nil
+
+	batches := make([]v1.JobQueueBatch, 0)
+	for r.Next() {
+		batch := new(v1.JobQueueBatch)
+		batchStruct := sqlbuilder.NewStruct(batch).For(sqlFlavor)
+		if err := r.Scan(batchStruct.Addr(&batch)...); err != nil {
+			return nil, err
+		}
+		batches = append(batches, *batch)
+	}
+	return batches, nil
+}
+
+// FindBatchFilesByBatchID function that returns the batch files by batch id
+func (jr *JobRepositoryV1) FindBatchFilesByBatchID(id string) ([]v1.JobQueueBatchFile, error) {
+	sb := sqlFlavor.NewSelectBuilder()
+	q, args := sb.Select("resource_type", "batch_id", "sequence", "file_name", "count", "checksum", "file_length").
+		From("job_queue_batch_file").
+		Where(sb.Equal("batch_id", id)).
+		Build()
+	r, err := jr.db.Query(q, args...)
+	if err != nil {
+		return nil, err
+	}
+
+	files := make([]v1.JobQueueBatchFile, 0)
+	for r.Next() {
+		file := new(v1.JobQueueBatchFile)
+		fileStruct := sqlbuilder.NewStruct(file).For(sqlFlavor)
+		if err := r.Scan(fileStruct.Addr(&file)...); err != nil {
+			return nil, err
+		}
+		files = append(files, *file)
+	}
+	return files, nil
 }
 
 // GetFileInfo function checks if the file name along with the orgId is valid
