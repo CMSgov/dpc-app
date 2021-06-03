@@ -77,12 +77,8 @@ func (gc *GroupController) Export(w http.ResponseWriter, r *http.Request) {
 		fhirror.ServerIssue(r.Context(), w, http.StatusUnprocessableEntity, "Failed to start export job")
 		return
 	}
-	var job model.Job
-	err = json.Unmarshal(resp, &job)
-	if err != nil {
-		return
-	}
-	contentLocation := contentLocationHeader(job.ID, r)
+
+	contentLocation := contentLocationHeader(string(resp), r)
 	w.Header().Set("Content-Location", contentLocation)
 	w.WriteHeader(http.StatusAccepted)
 }

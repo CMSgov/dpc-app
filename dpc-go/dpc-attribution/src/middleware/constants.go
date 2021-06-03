@@ -22,4 +22,6 @@ const (
 	ContextKeyFileName
 	// ContextKeyImplementer is the key in the context to retrieve the ImplementerID
 	ContextKeyImplementer
+	// ContextKeyJobID is the key in the context to retrieve the JobID
+	ContextKeyJobID
 )
