@@ -101,7 +101,7 @@ func (ac *AttributionClient) Export(ctx context.Context, resourceType ResourceTy
 	log := logger.WithContext(ctx)
 	ac.httpClient.Logger = newLogger(*log)
 
-	url := fmt.Sprintf("%s/%s/%s/$export", ac.config.URL, resourceType, id)
+	url := generateURL(ctx, ac.config.URL, resourceType, id)
 	req, err := retryablehttp.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		log.Error("Failed to create request", zap.Error(err))
@@ -147,6 +147,14 @@ func setExportRequestHeaders(ctx context.Context, req *retryablehttp.Request) *r
 		req.Header.Add(middleware2.RequestURLHeader, ctx.Value(middleware2.ContextKeyRequestURL).(string))
 	}
 	return req
+}
+
+func generateURL(ctx context.Context, baseURL string, resource ResourceType, id string) string {
+	params := fmt.Sprintf("?_type=%s", ctx.Value(middleware2.ContextKeyResourceTypes))
+	if ctx.Value(middleware2.ContextKeySince) != "" {
+		params = fmt.Sprintf("%s&_since=%s", params, ctx.Value(middleware2.ContextKeySince))
+	}
+	return fmt.Sprintf("%s/%s/%s/$export%s", baseURL, resource, id, params)
 }
 
 // Post A function to enable communication with attribution service via Post
