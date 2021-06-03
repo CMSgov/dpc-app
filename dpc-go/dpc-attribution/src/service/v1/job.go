@@ -6,9 +6,11 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"github.com/CMSgov/dpc/attribution/middleware"
 	"net/http"
+	"strings"
 	"time"
+
+	"github.com/CMSgov/dpc/attribution/middleware"
 
 	"github.com/CMSgov/dpc/attribution/conf"
 	v1 "github.com/CMSgov/dpc/attribution/model/v1"
@@ -101,7 +103,7 @@ func (js *JobServiceV1) Export(w http.ResponseWriter, r *http.Request) {
 		exportRequest.orgID,
 		exportRequest.groupID,
 		exportRequest.totalPatients,
-		exportRequest.types),
+		strings.Replace(exportRequest.types, ",", ";", -1)),
 	)
 }
 
