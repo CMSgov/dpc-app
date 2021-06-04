@@ -61,7 +61,7 @@ func (suite *ContextTestSuite) TestExportTypesParamInvalid() {
 	assert.Equal(suite.T(), "", types)
 }
 
-func (suite *ContextTestSuite) TestExportSinceParam() {
+func (suite *ContextTestSuite) TestExportSinceParamMinusTZ() {
 	var since string
 	nextHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		since, _ = r.Context().Value(ContextKeySince).(string)
@@ -73,6 +73,34 @@ func (suite *ContextTestSuite) TestExportSinceParam() {
 	e := ExportSinceParamCtx(nextHandler)
 	e.ServeHTTP(res, req)
 	assert.Equal(suite.T(), "2012-01-02T12:12:12-05:00", since)
+}
+
+func (suite *ContextTestSuite) TestExportSinceParamPlusTZ() {
+	var since string
+	nextHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		since, _ = r.Context().Value(ContextKeySince).(string)
+	})
+
+	req := httptest.NewRequest(http.MethodGet, "http://www.example.com/Group/some-id$export?_type=Coverage,ExplanationOfBenefit&_since=2012-01-02T12:12:12+05:00", nil)
+	res := httptest.NewRecorder()
+
+	e := ExportSinceParamCtx(nextHandler)
+	e.ServeHTTP(res, req)
+	assert.Equal(suite.T(), "", since)
+}
+
+func (suite *ContextTestSuite) TestExportSinceParamPlusTZEncoded() {
+	var since string
+	nextHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		since, _ = r.Context().Value(ContextKeySince).(string)
+	})
+
+	req := httptest.NewRequest(http.MethodGet, "http://www.example.com/Group/some-id$export?_type=Coverage,ExplanationOfBenefit&_since=2012-01-02T12:12:12%2b05:00", nil)
+	res := httptest.NewRecorder()
+
+	e := ExportSinceParamCtx(nextHandler)
+	e.ServeHTTP(res, req)
+	assert.Equal(suite.T(), "2012-01-02T12:12:12+05:00", since)
 }
 
 func (suite *ContextTestSuite) TestExportSinceParamDefault() {
