@@ -37,7 +37,7 @@ type BatchInfo struct {
 }
 
 // NewBatchInfo is a function to construct a BatchInfo from JobQueueBatch
-func NewBatchInfo(batch *JobQueueBatch) *BatchInfo {
+func NewBatchInfo(batch JobQueueBatch) *BatchInfo {
 	patientIndex := -1
 	if batch.PatientIndex.Valid {
 		patientIndex = int(batch.PatientIndex.Int64)

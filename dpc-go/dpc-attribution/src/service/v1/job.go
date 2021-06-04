@@ -143,7 +143,7 @@ func (js *JobServiceV1) BatchesAndFiles(w http.ResponseWriter, r *http.Request) 
 			return
 		}
 		bf := v1.BatchAndFiles{
-			Batch: v1.NewBatchInfo(&b),
+			Batch: v1.NewBatchInfo(b),
 			Files: files,
 		}
 		response = append(response, bf)
