@@ -1,6 +1,9 @@
 version: "3"
 
 services:
+  db:
+    ports:
+      - "5432:5432"
   migrator:
     build:
       context: dpc-go/dpc-attribution/migrator
