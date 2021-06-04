@@ -25,7 +25,7 @@ func (suite *ContextTestSuite) TestExportTypesParam() {
 		types, _ = r.Context().Value(ContextKeyResourceTypes).(string)
 	})
 
-	req := httptest.NewRequest(http.MethodGet, "http://www.example.com/Group/some-id$export?_type=Coverage,ExplanationOfBenefit&_since=2012-01-02T12:12:12-05:00", nil)
+	req := httptest.NewRequest(http.MethodGet, "http://www.example.com/Group/some-id/$export?_type=Coverage,ExplanationOfBenefit&_since=2012-01-02T12:12:12-05:00", nil)
 	res := httptest.NewRecorder()
 
 	e := ExportTypesParamCtx(nextHandler)
@@ -39,7 +39,7 @@ func (suite *ContextTestSuite) TestExportTypesParamDefault() {
 		types, _ = r.Context().Value(ContextKeyResourceTypes).(string)
 	})
 
-	req := httptest.NewRequest(http.MethodGet, "http://www.example.com/Group/some-id$export?_since=2012-01-02T12:12:12-05:00", nil)
+	req := httptest.NewRequest(http.MethodGet, "http://www.example.com/Group/some-id/$export?_since=2012-01-02T12:12:12-05:00", nil)
 	res := httptest.NewRecorder()
 
 	e := ExportTypesParamCtx(nextHandler)
@@ -53,7 +53,7 @@ func (suite *ContextTestSuite) TestExportTypesParamInvalid() {
 		types, _ = r.Context().Value(ContextKeyResourceTypes).(string)
 	})
 
-	req := httptest.NewRequest(http.MethodGet, "http://www.example.com/Group/some-id$export?_type=foobar", nil)
+	req := httptest.NewRequest(http.MethodGet, "http://www.example.com/Group/some-id/$export?_type=foobar", nil)
 	res := httptest.NewRecorder()
 
 	e := ExportTypesParamCtx(nextHandler)
@@ -67,7 +67,7 @@ func (suite *ContextTestSuite) TestExportSinceParamMinusTZ() {
 		since, _ = r.Context().Value(ContextKeySince).(string)
 	})
 
-	req := httptest.NewRequest(http.MethodGet, "http://www.example.com/Group/some-id$export?_type=Coverage,ExplanationOfBenefit&_since=2012-01-02T12:12:12-05:00", nil)
+	req := httptest.NewRequest(http.MethodGet, "http://www.example.com/Group/some-id/$export?_type=Coverage,ExplanationOfBenefit&_since=2012-01-02T12:12:12-05:00", nil)
 	res := httptest.NewRecorder()
 
 	e := ExportSinceParamCtx(nextHandler)
@@ -81,7 +81,7 @@ func (suite *ContextTestSuite) TestExportSinceParamPlusTZ() {
 		since, _ = r.Context().Value(ContextKeySince).(string)
 	})
 
-	req := httptest.NewRequest(http.MethodGet, "http://www.example.com/Group/some-id$export?_type=Coverage,ExplanationOfBenefit&_since=2012-01-02T12:12:12+05:00", nil)
+	req := httptest.NewRequest(http.MethodGet, "http://www.example.com/Group/some-id/$export?_type=Coverage,ExplanationOfBenefit&_since=2012-01-02T12:12:12+05:00", nil)
 	res := httptest.NewRecorder()
 
 	e := ExportSinceParamCtx(nextHandler)
@@ -95,7 +95,7 @@ func (suite *ContextTestSuite) TestExportSinceParamPlusTZEncoded() {
 		since, _ = r.Context().Value(ContextKeySince).(string)
 	})
 
-	req := httptest.NewRequest(http.MethodGet, "http://www.example.com/Group/some-id$export?_type=Coverage,ExplanationOfBenefit&_since=2012-01-02T12:12:12%2b05:00", nil)
+	req := httptest.NewRequest(http.MethodGet, "http://www.example.com/Group/some-id/$export?_type=Coverage,ExplanationOfBenefit&_since=2012-01-02T12:12:12%2b05:00", nil)
 	res := httptest.NewRecorder()
 
 	e := ExportSinceParamCtx(nextHandler)
@@ -109,7 +109,7 @@ func (suite *ContextTestSuite) TestExportSinceParamDefault() {
 		since, _ = r.Context().Value(ContextKeySince).(string)
 	})
 
-	req := httptest.NewRequest(http.MethodGet, "http://www.example.com/Group/some-id$export?_type=Coverage,ExplanationOfBenefit", nil)
+	req := httptest.NewRequest(http.MethodGet, "http://www.example.com/Group/some-id/$export?_type=Coverage,ExplanationOfBenefit", nil)
 	res := httptest.NewRecorder()
 
 	e := ExportSinceParamCtx(nextHandler)
@@ -119,7 +119,7 @@ func (suite *ContextTestSuite) TestExportSinceParamDefault() {
 
 func (suite *ContextTestSuite) TestExportSinceParamFuture() {
 	future := time.Now().Add(time.Hour * 3).Format(SinceLayout)
-	url := fmt.Sprintf("http://www.example.com/Group/some-id$export?_type=Coverage,ExplanationOfBenefit&_since=%s", future)
+	url := fmt.Sprintf("http://www.example.com/Group/some-id/$export?_type=Coverage,ExplanationOfBenefit&_since=%s", future)
 	var since string
 	nextHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		since, _ = r.Context().Value(ContextKeySince).(string)
@@ -139,7 +139,7 @@ func (suite *ContextTestSuite) TestExportSinceParamInvalid() {
 		since, _ = r.Context().Value(ContextKeySince).(string)
 	})
 
-	req := httptest.NewRequest(http.MethodGet, "http://www.example.com/Group/some-id$export?_type=Coverage,ExplanationOfBenefit&_since=foobar", nil)
+	req := httptest.NewRequest(http.MethodGet, "http://www.example.com/Group/some-id/$export?_type=Coverage,ExplanationOfBenefit&_since=foobar", nil)
 	res := httptest.NewRecorder()
 
 	e := ExportSinceParamCtx(nextHandler)
