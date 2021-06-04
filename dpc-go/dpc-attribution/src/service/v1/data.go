@@ -39,7 +39,7 @@ func (ds *DataService) GetFileInfo(w http.ResponseWriter, r *http.Request) {
 
 	b, err := json.Marshal(fi)
 	if err != nil {
-		log.Error(fmt.Sprintf("FileInfo failed to marshal to bytes"), zap.Error(err))
+		log.Error("FileInfo failed to marshal to bytes", zap.Error(err))
 		boom.BadRequest(w, "file name doesn't check out")
 		return
 	}
