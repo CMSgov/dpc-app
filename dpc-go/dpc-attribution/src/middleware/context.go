@@ -69,21 +69,3 @@ func AuthCtx(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
-
-// ExportTypesParamCtx middleware to extract the export _type param
-func ExportTypesParamCtx(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		types := r.URL.Query().Get("_type")
-		ctx := context.WithValue(r.Context(), ContextKeyResourceTypes, types)
-		next.ServeHTTP(w, r.WithContext(ctx))
-	})
-}
-
-// ExportSinceParamCtx middleware to extract the export _since param
-func ExportSinceParamCtx(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		since := r.URL.Query().Get("_since")
-		ctx := context.WithValue(r.Context(), ContextKeySince, since)
-		next.ServeHTTP(w, r.WithContext(ctx))
-	})
-}

@@ -10,22 +10,16 @@ const (
 	FwdHeader string = "X-Forwarded-For"
 	// RequestURLHeader is used to pass on the requestingUrl to attribution
 	RequestURLHeader string = "X-Request-Url"
+	// SinceLayout is the time format for the since parameter
+	SinceLayout string = "2006-01-02T15:04:05-07:00"
 	// ContextKeyOrganization is the key in the context to retrieve the organizationID
 	ContextKeyOrganization ContextKey = iota
-	// ContextKeyRequestURL is the key in the context to retrieve the requestURL
-	ContextKeyRequestURL
 	// ContextKeyGroup is the key in the context to retrieve the groupID
 	ContextKeyGroup
-	// ContextKeyRequestingIP is the key in the context to retrieve the requesting IP address
-	ContextKeyRequestingIP
 	// ContextKeyFileName is the key in the context to retrieve the file name
 	ContextKeyFileName
 	// ContextKeyImplementer is the key in the context to retrieve the ImplementerID
 	ContextKeyImplementer
 	// ContextKeyJobID is the key in the context to retrieve the JobID
 	ContextKeyJobID
-	// ContextKeyResourceTypes is the key in the context to pass on the _types param values
-	ContextKeyResourceTypes
-	// ContextKeySince is the key in the context to pass on the _since param value
-	ContextKeySince
 )

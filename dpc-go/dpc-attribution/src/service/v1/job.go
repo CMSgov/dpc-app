@@ -1,6 +1,7 @@
 package service
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -41,7 +42,14 @@ func (js *JobServiceV1) Export(w http.ResponseWriter, r *http.Request) {
 
 	groupID := util.FetchValueFromContext(r.Context(), w, middleware.ContextKeyGroup)
 	orgID := util.FetchValueFromContext(r.Context(), w, middleware.ContextKeyOrganization)
-	types := "Patient,Coverage,ExplanationOfBenefit"
+	types := r.URL.Query().Get("_type")
+	since, err := parseSinceParam(r.URL.Query().Get("_since"))
+	if err != nil {
+		err = errors.New("Failed to parse _since Param")
+		log.Error("Failed to parse _since param", zap.Error(err))
+		boom.BadData(w, err.Error())
+		return
+	}
 	requestIP := r.Header.Get(middleware.FwdHeader)
 	requestURL := r.Header.Get(middleware.RequestURLHeader)
 
@@ -68,7 +76,7 @@ func (js *JobServiceV1) Export(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	batches, err := buildBatches(nil, types, requestIP, requestURL, groupNPIs, patientMBIs)
+	batches, err := buildBatches(since, types, requestIP, requestURL, groupNPIs, patientMBIs)
 	if err != nil {
 		log.Error("Failed to build batches", zap.Error(err))
 		boom.BadData(w, err.Error())
@@ -96,7 +104,15 @@ func (js *JobServiceV1) Export(w http.ResponseWriter, r *http.Request) {
 	)
 }
 
-func buildBatches(since *time.Time, types string, requestIP string, requestURL string, groupNPIs *v1.GroupNPIs, patientMBIs []string) ([]v1.BatchRequest, error) {
+func parseSinceParam(since string) (*sql.NullTime, error) {
+	t, err := time.Parse(middleware.SinceLayout, since)
+	if err != nil {
+		return &sql.NullTime{Time: t}, nil
+	}
+	return &sql.NullTime{}, err
+}
+
+func buildBatches(since *sql.NullTime, types string, requestIP string, requestURL string, groupNPIs *v1.GroupNPIs, patientMBIs []string) ([]v1.BatchRequest, error) {
 	priority := 5000
 	if len(patientMBIs) == 1 {
 		priority = 1000
