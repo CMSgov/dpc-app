@@ -28,6 +28,16 @@ type JobServiceV1 struct {
 	jr repository.JobRepo
 }
 
+// ExportInfo is a struct containing details needed to export data
+type ExportInfo struct {
+	OrgID   string
+	GroupID string
+	Types   string
+	IP      string
+	URL     string
+	Since   *sql.NullTime
+}
+
 // NewJobService function that creates and returns a JobService
 func NewJobService(pr repository.PatientRepo, jr repository.JobRepo) service.JobService {
 	return &JobServiceV1{
@@ -39,21 +49,11 @@ func NewJobService(pr repository.PatientRepo, jr repository.JobRepo) service.Job
 // Export function that starts an export job for a given Group ID using v1 db
 func (js *JobServiceV1) Export(w http.ResponseWriter, r *http.Request) {
 	log := logger.WithContext(r.Context())
-
-	groupID := util.FetchValueFromContext(r.Context(), w, middleware.ContextKeyGroup)
-	orgID := util.FetchValueFromContext(r.Context(), w, middleware.ContextKeyOrganization)
-	types := r.URL.Query().Get("_type")
-	since, err := parseSinceParam(r.URL.Query().Get("_since"))
-	if err != nil {
-		err = errors.New("Failed to parse _since Param")
-		log.Error("Failed to parse _since param", zap.Error(err))
-		boom.BadData(w, err.Error())
+	ei := buildExportInfo(w, r)
+	if ei == nil {
 		return
 	}
-	requestIP := r.Header.Get(middleware.FwdHeader)
-	requestURL := r.Header.Get(middleware.RequestURLHeader)
-
-	groupNPIs, err := js.pr.GetGroupNPIs(r.Context(), groupID)
+	groupNPIs, err := js.pr.GetGroupNPIs(r.Context(), ei.GroupID)
 	if err != nil || groupNPIs.OrgNPI == "" || groupNPIs.ProviderNPI == "" {
 		if err == nil {
 			err = errors.New("Failed to retrieve NPIs for Group")
@@ -63,7 +63,7 @@ func (js *JobServiceV1) Export(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	patientMBIs, err := js.pr.FindMBIsByGroupID(groupID)
+	patientMBIs, err := js.pr.FindMBIsByGroupID(ei.GroupID)
 	if err != nil {
 		log.Error("Failed to retrieve patients", zap.Error(err))
 		boom.BadData(w, err.Error())
@@ -76,13 +76,13 @@ func (js *JobServiceV1) Export(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	batches, err := buildBatches(since, types, requestIP, requestURL, groupNPIs, patientMBIs)
+	batches, err := buildBatches(ei, groupNPIs, patientMBIs)
 	if err != nil {
 		log.Error("Failed to build batches", zap.Error(err))
 		boom.BadData(w, err.Error())
 	}
 
-	job, err := js.jr.Insert(r.Context(), orgID, batches)
+	job, err := js.jr.Insert(r.Context(), ei.OrgID, batches)
 	if err != nil {
 		log.Error("Failed to create job", zap.Error(err))
 		boom.BadData(w, err.Error())
@@ -97,11 +97,31 @@ func (js *JobServiceV1) Export(w http.ResponseWriter, r *http.Request) {
 	log.Info(fmt.Sprintf(
 		"dpcMetric=jobCreated,jobId=%s,orgId=%s,groupId=%s,totalPatients=%x,resourcesRequested=%s",
 		*job,
-		orgID,
-		groupID,
+		ei.OrgID,
+		ei.GroupID,
 		len(patientMBIs),
-		strings.ReplaceAll(types, ",", ";")),
+		strings.ReplaceAll(ei.Types, ",", ";")),
 	)
+}
+
+func buildExportInfo(w http.ResponseWriter, r *http.Request) *ExportInfo {
+	log := logger.WithContext(r.Context())
+	orgID := util.FetchValueFromContext(r.Context(), w, middleware.ContextKeyOrganization)
+	groupID := util.FetchValueFromContext(r.Context(), w, middleware.ContextKeyGroup)
+	types := r.URL.Query().Get("_type")
+	since, err := parseSinceParam(r.URL.Query().Get("_since"))
+	if err != nil {
+		err = errors.New("Failed to parse _since param")
+		log.Error("Failed to parse _since param", zap.Error(err))
+		boom.BadData(w, err.Error())
+		return nil
+	}
+	requestIP := r.Header.Get(middleware.FwdHeader)
+	requestURL := r.Header.Get(middleware.RequestURLHeader)
+	return &ExportInfo{
+		orgID, groupID, types, requestIP, requestURL, since,
+	}
+
 }
 
 func parseSinceParam(since string) (*sql.NullTime, error) {
@@ -112,7 +132,7 @@ func parseSinceParam(since string) (*sql.NullTime, error) {
 	return &sql.NullTime{}, err
 }
 
-func buildBatches(since *sql.NullTime, types string, requestIP string, requestURL string, groupNPIs *v1.GroupNPIs, patientMBIs []string) ([]v1.BatchRequest, error) {
+func buildBatches(ei *ExportInfo, groupNPIs *v1.GroupNPIs, patientMBIs []string) ([]v1.BatchRequest, error) {
 	priority := 5000
 	if len(patientMBIs) == 1 {
 		priority = 1000
@@ -122,12 +142,12 @@ func buildBatches(since *sql.NullTime, types string, requestIP string, requestUR
 	batches := make([]v1.BatchRequest, len(patients))
 	for _, batchedPatients := range patients {
 		batch := new(v1.BatchRequest)
-		batch.RequestingIP = requestIP
-		batch.RequestURL = requestURL
+		batch.RequestingIP = ei.IP
+		batch.RequestURL = ei.URL
 		batch.PatientMBIs = strings.Join(batchedPatients, ",")
 		batch.IsBulk = len(patientMBIs) > 1
-		batch.ResourceTypes = types
-		batch.Since = since
+		batch.ResourceTypes = ei.Types
+		batch.Since = ei.Since
 		batch.Priority = priority
 		batch.TransactionTime = time.Now() // need a bfd client to do this
 		batch.ProviderNPI = groupNPIs.ProviderNPI
