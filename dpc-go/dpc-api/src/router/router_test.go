@@ -52,6 +52,14 @@ func (mfc *MockFileController) GetFile(w http.ResponseWriter, r *http.Request) {
 	mfc.Called(w, r)
 }
 
+type MockJobController struct {
+	mock.Mock
+}
+
+func (mjc *MockJobController) Status(w http.ResponseWriter, r *http.Request) {
+	mjc.Called(w, r)
+}
+
 type RouterTestSuite struct {
 	suite.Suite
 	router    http.Handler
@@ -59,6 +67,7 @@ type RouterTestSuite struct {
 	mockMeta  *MockController
 	mockGroup *MockController
 	mockData  *MockFileController
+	mockJob   *MockJobController
 }
 
 func (suite *RouterTestSuite) SetupTest() {
@@ -66,7 +75,8 @@ func (suite *RouterTestSuite) SetupTest() {
 	suite.mockMeta = &MockController{}
 	suite.mockGroup = &MockController{}
 	suite.mockData = &MockFileController{}
-	suite.router = NewDPCAPIRouter(suite.mockOrg, suite.mockMeta, suite.mockGroup, suite.mockData)
+	suite.mockJob = &MockJobController{}
+	suite.router = NewDPCAPIRouter(suite.mockOrg, suite.mockMeta, suite.mockGroup, suite.mockData, suite.mockJob)
 }
 
 func TestRouterTestSuite(t *testing.T) {

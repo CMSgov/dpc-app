@@ -3,6 +3,7 @@ package v2
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -134,7 +135,8 @@ func (suite *GroupControllerTestSuite) TestCreateGroup() {
 }
 
 func (suite *GroupControllerTestSuite) TestExportGroup() {
-	suite.mac.On("Export", mock.Anything, mock.Anything, mock.Anything).Return(apitest.AttributionResponse(apitest.JobJSON), nil)
+	jobID := "test-export-job"
+	suite.mac.On("Export", mock.Anything, mock.Anything, mock.Anything).Return([]byte(jobID), nil)
 
 	ja := jsonassert.New(suite.T())
 	req := httptest.NewRequest(http.MethodGet, "http://example.com/Group/9876/$export?_outputFormat=application/fhir%2Bndjson", nil)
@@ -152,7 +154,7 @@ func (suite *GroupControllerTestSuite) TestExportGroup() {
 	res := w.Result()
 
 	assert.Equal(suite.T(), http.StatusAccepted, res.StatusCode)
-	assert.Equal(suite.T(), "http://example.com/v2/Jobs/test-export-job", res.Header.Get("Content-Location"))
+	assert.Equal(suite.T(), fmt.Sprintf("http://example.com/v2/Jobs/%s", jobID), res.Header.Get("Content-Location"))
 
 	resp, _ := ioutil.ReadAll(res.Body)
 	ja.Assertf(string(resp), "")
