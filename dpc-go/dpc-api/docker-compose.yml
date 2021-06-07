@@ -3,7 +3,7 @@ version: "3"
 services:
   api:
     build:
-      context: .
+      context: dpc-go/dpc-api
       dockerfile: docker/Dockerfiles/Dockerfile.api
     ports:
       - "3000:3000"
