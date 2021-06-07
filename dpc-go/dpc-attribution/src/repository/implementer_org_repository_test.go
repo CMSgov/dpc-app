@@ -36,7 +36,7 @@ func (suite *ImplementerOrgRepositoryTestSuite) TestFindRelation() {
 	defer db.Close()
 	repo := NewImplementerOrgRepo(db)
 	ctx := context.Background()
-	expectedQuery := "SELECT id, implementer_id, organization_id, created_at, updated_at, deleted_at, status FROM implementer_org_relation WHERE implementer_id = \\$1 AND organization_id = \\$2"
+	expectedQuery := "SELECT id, implementer_id, organization_id, created_at, updated_at, deleted_at, status FROM implementer_org_relations WHERE implementer_id = \\$1 AND organization_id = \\$2"
 
 	rows := sqlmock.NewRows([]string{"id", "implementer_id", "organization_id", "created_at", "updated_at", "deleted_at", "status"}).
 		AddRow(suite.fakeRel.ID, suite.fakeRel.ImplementerID, suite.fakeRel.OrganizationID, suite.fakeRel.CreatedAt, suite.fakeRel.UpdatedAt, nil, suite.fakeRel.Status)
@@ -48,13 +48,32 @@ func (suite *ImplementerOrgRepositoryTestSuite) TestFindRelation() {
 	assert.Equal(suite.T(), suite.fakeRel.ID, rel.ID)
 }
 
+func (suite *ImplementerOrgRepositoryTestSuite) TestFindManagedOrgs() {
+	db, mock := newMock()
+	defer db.Close()
+	repo := NewImplementerOrgRepo(db)
+	ctx := context.Background()
+	expectedQuery := "SELECT id, implementer_id, organization_id, created_at, updated_at, deleted_at, status FROM implementer_org_relations WHERE implementer_id = \\$1 AND deleted_at IS NULL"
+
+	rows := sqlmock.NewRows([]string{"id", "implementer_id", "organization_id", "created_at", "updated_at", "deleted_at", "status"}).
+		AddRow("00000000-0000-0000-0000-00000000000a", "00000000-0000-0000-0000-000000000001", "00000000-0000-0000-0000-000000000002", suite.fakeRel.CreatedAt, suite.fakeRel.UpdatedAt, nil, suite.fakeRel.Status).
+		AddRow("00000000-0000-0000-0000-00000000000b", "00000000-0000-0000-0000-000000000003", "00000000-0000-0000-0000-000000000004", suite.fakeRel.CreatedAt, suite.fakeRel.UpdatedAt, nil, suite.fakeRel.Status).
+		AddRow("00000000-0000-0000-0000-00000000000c", "00000000-0000-0000-0000-000000000005", "00000000-0000-0000-0000-000000000006", suite.fakeRel.CreatedAt, suite.fakeRel.UpdatedAt, nil, suite.fakeRel.Status)
+
+	mock.ExpectQuery(expectedQuery).WithArgs(suite.fakeRel.ImplementerID).WillReturnRows(rows)
+
+	orgs, err := repo.FindManagedOrgs(ctx, suite.fakeRel.ImplementerID)
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), 3, len(orgs))
+}
+
 func (suite *ImplementerOrgRepositoryTestSuite) TestFindNonExistentRelation() {
 	db, mock := newMock()
 	defer db.Close()
 	repo := NewImplementerOrgRepo(db)
 	ctx := context.Background()
 
-	expectedQuery := "SELECT id, implementer_id, organization_id, created_at, updated_at, deleted_at, status FROM implementer_org_relation WHERE implementer_id = \\$1 AND organization_id = \\$2"
+	expectedQuery := "SELECT id, implementer_id, organization_id, created_at, updated_at, deleted_at, status FROM implementer_org_relations WHERE implementer_id = \\$1 AND organization_id = \\$2"
 
 	rows := sqlmock.NewRows([]string{"id", "implementer_id", "organization_id", "created_at", "updated_at", "deleted_at", "status"})
 	//Did not add rows here, simulate missing record
@@ -72,7 +91,7 @@ func (suite *ImplementerOrgRepositoryTestSuite) TestInsert() {
 	repo := NewImplementerOrgRepo(db)
 	ctx := context.Background()
 
-	expectedInsertQuery := "INSERT INTO implementer_org_relation \\(implementer_id, organization_id, status\\) VALUES \\(\\$1, \\$2, \\$3\\) returning id, implementer_id, organization_id, created_at, updated_at, deleted_at, status"
+	expectedInsertQuery := "INSERT INTO implementer_org_relations \\(implementer_id, organization_id, status\\) VALUES \\(\\$1, \\$2, \\$3\\) returning id, implementer_id, organization_id, created_at, updated_at, deleted_at, status"
 
 	rows := sqlmock.NewRows([]string{"id", "implementer_id", "organization_id", "created_at", "updated_at", "deleted_at", "status"}).
 		AddRow(suite.fakeRel.ID, suite.fakeRel.ImplementerID, suite.fakeRel.OrganizationID, suite.fakeRel.CreatedAt, suite.fakeRel.UpdatedAt, nil, suite.fakeRel.Status)

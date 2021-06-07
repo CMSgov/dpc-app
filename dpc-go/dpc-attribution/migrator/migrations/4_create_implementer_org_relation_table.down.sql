@@ -1,1 +1,1 @@
-DROP TABLE IF EXISTS "implementer_org_relation";
+DROP TABLE IF EXISTS "implementer_org_relations";

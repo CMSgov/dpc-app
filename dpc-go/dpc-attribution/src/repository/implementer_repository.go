@@ -32,7 +32,7 @@ func NewImplementerRepo(db *sql.DB) *ImplementerRepository {
 func (or *ImplementerRepository) FindByID(ctx context.Context, id string) (*v2.Implementer, error) {
 	sb := sqlFlavor.NewSelectBuilder()
 	sb.Select("id", "name", "created_at", "updated_at", "deleted_at")
-	sb.From("implementer")
+	sb.From("implementers")
 	sb.Where(sb.Equal("id", id))
 	q, args := sb.Build()
 
@@ -56,7 +56,7 @@ func (or *ImplementerRepository) Insert(ctx context.Context, body []byte) (*v2.I
 	}
 
 	ib := sqlFlavor.NewInsertBuilder()
-	ib.InsertInto("implementer")
+	ib.InsertInto("implementers")
 	ib.Cols("name")
 	ib.Values(ImplementerModel.Name)
 	ib.SQL("returning id, name, created_at, updated_at, deleted_at")
