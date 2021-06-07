@@ -20,7 +20,7 @@ Assuming the last migration in the `/migrations` folder has an id of 41 a new mi
 
 ####Running Migrations
 1) Build the docker image (uses the `Dockerfile` found in this directory) that will be used to run the migration commands.
-`docker build -t migrator . -f docker/dockerfiles/Dockerfile.attribution`
+`docker build -t migrator .`
 
 *Note: The `Dockerfile` copies the files under /migrations to the image's own volume.*
 
