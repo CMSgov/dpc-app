@@ -14,6 +14,7 @@ require 'rspec/rails'
 require 'capybara/rails'
 require 'capybara/rspec'
 require 'support/chromedriver'
+require 'support/api_client_support'
 require 'webmock/rspec'
 
 # Dir[Rails.root.join('spec', 'support', '**', '*.rb')].each { |f| require f }
@@ -33,6 +34,10 @@ Sidekiq::Testing.fake!
 RSpec.configure do |config|
   config.include FactoryBot::Syntax::Methods
   config.include Rails.application.routes.url_helpers
+
+  config.before(:all, type: :request) do
+    WebMock.allow_net_connect!
+  end  
 
   # Devise test helpers
   config.include Devise::Test::ControllerHelpers, type: :controller

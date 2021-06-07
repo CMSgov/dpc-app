@@ -15,7 +15,7 @@ module Users
       if mail_throttle_store.can_email? email_param[:email]
         super
       else
-        redirect_to root_path
+        redirect_to new_user_session_path
       end
     end
 

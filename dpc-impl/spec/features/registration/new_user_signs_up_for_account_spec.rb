@@ -3,6 +3,7 @@
 require 'rails_helper'
 
 RSpec.feature 'new user signs up for account' do
+  include ApiClientSupport
   include MailerHelper
 
   before(:each) do
@@ -12,20 +13,22 @@ RSpec.feature 'new user signs up for account' do
 
   context 'when successful' do
     before(:each) do
+      stub_api_client(message: :create_implementer, success: true, response: default_imp_creation_response)
+
       fill_in :user_first_name, with: 'Samuel'
       fill_in :user_last_name, with: 'Vimes'
       fill_in :user_email, with: 'vimes@gmail.com'
       fill_in :user_password, with: '3veryDay#P0tato'
       fill_in :user_password_confirmation, with: '3veryDay#P0tato'
-      fill_in :user_implementer, with: 'Night Watch Clinic'
+      fill_in :user_implementer, with: 'Surreal Kayak'
       check :user_agree_to_terms
 
       click_on('Sign up')
     end
 
     scenario 'the email entered in to our job queue' do
-      expect(ActionMailer::Base.deliveries.count).to eq(1)
 
+      expect(ActionMailer::Base.deliveries.count).to eq(1)
 
       visit new_user_session_path
       click_link 'sign-up'
@@ -34,7 +37,7 @@ RSpec.feature 'new user signs up for account' do
       fill_in :user_email, with: 'angua@gmail.com'
       fill_in :user_password, with: '3veryDay#P0tato'
       fill_in :user_password_confirmation, with: '3veryDay#P0tato'
-      fill_in :user_implementer, with: 'Night Watch Clinic'
+      fill_in :user_implementer, with: 'Surreal Kayak'
       check :user_agree_to_terms
       
       click_on('Sign up')
@@ -78,6 +81,10 @@ RSpec.feature 'new user signs up for account' do
   end
 
   context 'when using an email already registered' do
+    before(:each) do
+      stub_api_client(message: :create_implementer, success: true, response: default_imp_creation_response)
+    end
+
     scenario 'returns to the sign in page with error' do
       create(:user, email: 'vimes@gmail.com')
 
@@ -86,7 +93,7 @@ RSpec.feature 'new user signs up for account' do
       fill_in :user_email, with: 'vimes@gmail.com'
       fill_in :user_password, with: '3veryDay#P0tato'
       fill_in :user_password_confirmation, with: '3veryDay#P0tato'
-      fill_in :user_implementer, with: 'Night Watch Clinic'
+      fill_in :user_implementer, with: 'Surreal Kayak'
       check :user_agree_to_terms
 
       click_on('Sign up')
@@ -97,12 +104,14 @@ RSpec.feature 'new user signs up for account' do
 
   context 'when a user has not verified their email' do
     scenario 'unverified user tries and fails to sign in' do
+      stub_api_client(message: :create_implementer, success: true, response: default_imp_creation_response)
+
       fill_in :user_first_name, with: 'Samuel'
       fill_in :user_last_name, with: 'Vimes'
       fill_in :user_email, with: 'vimes@gmail.com'
       fill_in :user_password, with: '3veryDay#P0tato'
       fill_in :user_password_confirmation, with: '3veryDay#P0tato'
-      fill_in :user_implementer, with: 'Night Watch Clinic'
+      fill_in :user_implementer, with: 'Surreal Kayak'
       check :user_agree_to_terms
 
       click_on('Sign up')
