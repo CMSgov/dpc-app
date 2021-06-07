@@ -1,24 +1,7 @@
-# README
+## .env Files
+To run locally, create two `.env` files:
+- `.env.development.local`
+- `.env.test.local`
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
-
-Things you may want to cover:
-
-* Ruby version
-
-* System dependencies
-
-* Configuration
-
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+## Tests
+To run tests, in your `.env.test.local` file add `API_METADATA_URL=http://dpc.example.com` in a line. This will ensure all API tests pass.

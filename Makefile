@@ -49,15 +49,15 @@ start-local-api: secure-envs start-local
 
 .PHONY: start-portals
 start-portals:
-	@docker-compose -p dpc-portals -f docker-compose.yml -f docker-compose.portals.yml up start_core_dependencies
-	@docker-compose -p dpc-portals -f docker-compose.yml -f docker-compose.portals.yml up start_web
-	@docker-compose -p dpc-portals -f docker-compose.yml -f docker-compose.portals.yml up start_admin
-	@docker-compose -p dpc-portals -f docker-compose.yml -f docker-compose.portals.yml up start_impl
+	@docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.portals.yml up start_core_dependencies
+	# @docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.portals.yml up start_web
+	# @docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.portals.yml up start_admin
+	@docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.portals.yml up start_impl
 	@docker ps
 
 .PHONY: down-portals
 down-portals:
-	@docker-compose -p dpc-portals -f docker-compose.yml -f docker-compose.portals.yml down
+	@docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.portals.yml down
 
 .PHONY: start-dpc
 start-dpc: secure-envs
@@ -78,7 +78,7 @@ down-dpc:
 start-v2: secure-envs
 	@docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.v2.yml up start_core_dependencies
 	@docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.v2.yml up start_api_dependencies
-	@docker-compose -p dpc-v2 -f docker-compose.yml -f dpc-go/dpc-attribution/docker-compose.yml up -d attribution2
+	@docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.v2.yml -f dpc-go/dpc-attribution/docker-compose.yml up -d attribution2
 	@docker-compose -p dpc-v2 -f dpc-go/dpc-api/docker-compose.yml up -d api
 	@docker ps
 
