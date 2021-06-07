@@ -2,6 +2,7 @@ package client
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -116,10 +117,6 @@ func (ac *AttributionClient) Export(ctx context.Context, resourceType ResourceTy
 		return nil, errors.Errorf("Failed to start job for %s/%s", resourceType, id)
 	}
 
-	if resp.StatusCode < 200 || resp.StatusCode > 299 {
-		return nil, errors.Errorf("Failed to start job for %s/%s", resourceType, id)
-	}
-
 	defer func() {
 		err := resp.Body.Close()
 		if err != nil {
@@ -132,7 +129,22 @@ func (ac *AttributionClient) Export(ctx context.Context, resourceType ResourceTy
 		log.Error("Failed to read the response body", zap.Error(err))
 		return nil, errors.Errorf("Failed to start job for %s/%s", resourceType, id)
 	}
+	errMsg := checkForErrorMsg(body)
+	if errMsg != "" {
+		return nil, errors.Errorf(errMsg)
+	}
+	if resp.StatusCode < 200 || resp.StatusCode > 299 {
+		return nil, errors.Errorf("Failed to start job for %s/%s", resourceType, id)
+	}
 	return body, nil
+}
+
+func checkForErrorMsg(body []byte) string {
+	var br struct {
+		Message string `json:"message"`
+	}
+	_ = json.Unmarshal(body, &br)
+	return br.Message
 }
 
 func setExportRequestHeaders(ctx context.Context, req *retryablehttp.Request) *retryablehttp.Request {
