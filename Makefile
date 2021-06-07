@@ -78,7 +78,7 @@ down-dpc:
 build-v2:
 	@docker-compose -f docker-compose.yml -f dpc-go/dpc-attribution/docker-compose.yml build migrator
 	@docker-compose -f docker-compose.yml -f dpc-go/dpc-attribution/docker-compose.yml build attribution2
-	@docker-compose -f docker-compose.yml -f dpc-go/dpc-api/docker-compose.yml build api
+	@docker-compose -f dpc-go/dpc-api/docker-compose.yml build api
 
 .PHONY: start-v2
 start-v2: secure-envs
