@@ -65,6 +65,16 @@ class User < ApplicationRecord
     "#{first_name} #{last_name}"
   end
 
+  def client_orgs
+    api_client = ApiClient.new
+    api_client.get_client_orgs(self.implementer_id)
+    if api_client.response_successful?
+      api_client.response_body['entities']
+    else
+      []
+    end
+  end
+
   private
 
   def api_service

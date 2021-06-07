@@ -14,6 +14,11 @@ class ApiClient
     self
   end
 
+  def get_client_orgs(imp_id)
+    uri_string = base_url + '/Implementer/' + imp_id + '/org'
+    binding.pry
+  end
+
   def response_successful?
     (200...299).cover? @response_status
   end

@@ -49,7 +49,9 @@
     </div>
 
     <div id="dash_client_list">
-      <div class="client_card_container">
+      <%= @user.client_orgs.count %>
+
+      <%# <div class="client_card_container">
         <div class="client_name">
           Zesty Bee Clinic
         </div>
@@ -79,7 +81,7 @@
             Status: <span class="ds-u-color--success">Accepted</span>
           </div>
         </div>
-      </div>
+      </div> %>
     </div>
   </div>
 </div>
