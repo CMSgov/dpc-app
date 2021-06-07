@@ -76,11 +76,7 @@ func (js *JobServiceV1) Export(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	batches, err := buildBatches(ei, groupNPIs, patientMBIs)
-	if err != nil {
-		log.Error("Failed to build batches", zap.Error(err))
-		boom.BadData(w, err.Error())
-	}
+	batches := buildBatches(ei, groupNPIs, patientMBIs)
 
 	job, err := js.jr.Insert(r.Context(), ei.OrgID, batches)
 	if err != nil {
@@ -132,28 +128,30 @@ func parseSinceParam(since string) (*sql.NullTime, error) {
 	return &sql.NullTime{}, err
 }
 
-func buildBatches(ei *ExportInfo, groupNPIs *v1.GroupNPIs, patientMBIs []string) ([]v1.BatchRequest, error) {
+func buildBatches(ei *ExportInfo, groupNPIs *v1.GroupNPIs, patientMBIs []string) []v1.BatchRequest {
 	priority := 5000
 	if len(patientMBIs) == 1 {
 		priority = 1000
 	}
 
-	patients := batchPatientMBIs(patientMBIs, conf.GetAsInt("queue.batchSize", 100))
-	batches := make([]v1.BatchRequest, len(patients))
-	for _, batchedPatients := range patients {
-		batch := new(v1.BatchRequest)
-		batch.RequestingIP = ei.IP
-		batch.RequestURL = ei.URL
-		batch.PatientMBIs = strings.Join(batchedPatients, ",")
-		batch.IsBulk = len(patientMBIs) > 1
-		batch.ResourceTypes = ei.Types
-		batch.Since = ei.Since
-		batch.Priority = priority
-		batch.TransactionTime = time.Now() // need a bfd client to do this
-		batch.ProviderNPI = groupNPIs.ProviderNPI
-		batch.OrganizationNPI = groupNPIs.OrgNPI
+	patientBatches := batchPatientMBIs(patientMBIs, conf.GetAsInt("queue.batchSize", 100))
+	batches := make([]v1.BatchRequest, len(patientBatches))
+	for _, batchedPatients := range patientBatches {
+		batch := v1.BatchRequest{
+			Priority:        priority,
+			Since:           ei.Since,
+			RequestURL:      ei.URL,
+			RequestingIP:    ei.IP,
+			OrganizationNPI: groupNPIs.OrgNPI,
+			ProviderNPI:     groupNPIs.ProviderNPI,
+			PatientMBIs:     strings.Join(batchedPatients, ","),
+			IsBulk:          len(patientMBIs) > 1,
+			ResourceTypes:   ei.Types,
+			TransactionTime: time.Now(), // need a bfd client to do this
+		}
+		batches = append(batches, batch)
 	}
-	return batches, nil
+	return batches
 }
 
 // BatchesAndFiles function returns all the batches and it's files for a job

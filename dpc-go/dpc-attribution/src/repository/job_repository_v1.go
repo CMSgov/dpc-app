@@ -3,10 +3,11 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"time"
+
 	"github.com/CMSgov/dpc/attribution/logger"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
-	"time"
 
 	"github.com/CMSgov/dpc/attribution/model/v1"
 	"github.com/google/uuid"
