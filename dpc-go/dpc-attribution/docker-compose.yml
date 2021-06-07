@@ -1,7 +1,6 @@
 version: "3"
 
 services:
-
   migrator:
     image: migrate/migrate
     depends_on:
