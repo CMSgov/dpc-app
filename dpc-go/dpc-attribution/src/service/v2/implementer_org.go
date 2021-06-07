@@ -5,18 +5,19 @@ import (
 	"crypto/rand"
 	"encoding/json"
 	"fmt"
+	"github.com/CMSgov/dpc/attribution/logger"
+	"github.com/CMSgov/dpc/attribution/middleware"
+	"github.com/CMSgov/dpc/attribution/model"
+	"github.com/CMSgov/dpc/attribution/model/v2"
+	"github.com/CMSgov/dpc/attribution/repository"
+	"github.com/CMSgov/dpc/attribution/util"
+	"github.com/darahayes/go-boom"
+	"go.uber.org/zap"
 	"io/ioutil"
 	"math/big"
 	"net/http"
 	"strings"
 	"text/template"
-
-	"github.com/CMSgov/dpc/attribution/logger"
-	"github.com/CMSgov/dpc/attribution/middleware"
-	"github.com/CMSgov/dpc/attribution/model/v2"
-	"github.com/CMSgov/dpc/attribution/repository"
-	"github.com/darahayes/go-boom"
-	"go.uber.org/zap"
 )
 
 // ImplementerOrgService is a struct that defines what the service has
@@ -25,21 +26,6 @@ type ImplementerOrgService struct {
 	orgRepo       repository.OrganizationRepo
 	impOrgRepo    repository.ImplementerOrgRepo
 	autoCreateOrg bool
-}
-
-// Get function is not used for ImplementerOrgService
-func (ios *ImplementerOrgService) Get(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
-// Delete function is not used for ImplementerOrgService
-func (ios *ImplementerOrgService) Delete(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
-// Put function is not used for ImplementerOrgService
-func (ios *ImplementerOrgService) Put(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Export function is not used for ImplementerOrgService
@@ -95,38 +81,28 @@ func (ios *ImplementerOrgService) Post(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	org, _ := ios.orgRepo.FindByNPI(r.Context(), reqStruct.Npi)
-	if org == nil {
-		if ios.autoCreateOrg {
-			log.Error("Organization not found, creating new org")
-			newOrg := buildFhirOrg(reqStruct.Npi, generateRandomOrgName())
-			org, err = ios.orgRepo.Insert(r.Context(), []byte(newOrg))
-			if err != nil {
-				log.Error("Failed to create new org", zap.Error(err))
-				boom.BadData(w, err)
-				return
-			}
-		} else {
-			log.Error("organization with provided NPI not found", zap.Error(err))
-			boom.NotFound(w, err)
-			return
-		}
-	} else {
-		rel, err := ios.impOrgRepo.FindRelation(r.Context(), implID, org.ID)
-		if err != nil {
-			log.Error("unable to perform search for existing relation", zap.Error(err))
-			boom.BadImplementation(w, err)
-			return
-		}
-
-		//TODO determine if conflict error should be thrown, or re-activate
-		if rel != nil {
-			log.Error("relation already exists", zap.Error(err))
-			boom.Conflict(w, "relation already exists")
-			return
-		}
+	org, err := ios.findOrCreateOrg(r, reqStruct.Npi, ios.autoCreateOrg)
+	if err != nil {
+		log.Error("unable to look up or create organization", zap.Error(err))
+		boom.NotFound(w, err)
+		return
 	}
-
+	if org == nil {
+		log.Error("organization with provided NPI not found", zap.Error(err))
+		boom.NotFound(w, err)
+		return
+	}
+	rel, err := ios.impOrgRepo.FindRelation(r.Context(), implID, org.ID)
+	if err != nil {
+		log.Error("unable to perform search for existing relation", zap.Error(err))
+		boom.BadImplementation(w, err)
+		return
+	}
+	if rel != nil {
+		log.Error("relation already exists", zap.Error(err))
+		boom.Conflict(w, "relation already exists")
+		return
+	}
 	ior, err := ios.impOrgRepo.Insert(r.Context(), implID, org.ID, v2.Active)
 	if err != nil {
 		log.Error("Failed to create Implementer org relation", zap.Error(err))
@@ -145,6 +121,100 @@ func (ios *ImplementerOrgService) Post(w http.ResponseWriter, r *http.Request) {
 		log.Error("Failed to write Implementer org relation to response", zap.Error(err))
 		boom.Internal(w, err.Error())
 	}
+}
+
+func (ios *ImplementerOrgService) findOrCreateOrg(r *http.Request, npi string, autoCreate bool) (*v2.Organization, error) {
+	log := logger.WithContext(r.Context())
+	org, _ := ios.orgRepo.FindByNPI(r.Context(), npi)
+	if org == nil {
+		if autoCreate {
+			log.Error("Organization not found, creating new org")
+			newOrg := buildFhirOrg(npi, generateRandomOrgName())
+			org, err := ios.orgRepo.Insert(r.Context(), []byte(newOrg))
+			if err != nil {
+				log.Error("Failed to create new org", zap.Error(err))
+				return nil, fmt.Errorf("internal server error")
+			}
+			return org, nil
+		}
+	}
+	return org, nil
+}
+
+// Get function that get the organization from the database by id and logs any errors before returning a generic error
+func (ios *ImplementerOrgService) Get(w http.ResponseWriter, r *http.Request) {
+	log := logger.WithContext(r.Context())
+
+	implID := r.Context().Value(middleware.ContextKeyImplementer).(string)
+	impl, err := ios.implRepo.FindByID(r.Context(), implID)
+	if err != nil {
+		log.Error("Failed to retrieve Implementer")
+		boom.BadData(w, "Failed to retrieve Implementer")
+		return
+	}
+
+	if impl == nil {
+		log.Error("Implementer not found")
+		boom.NotFound(w, "Implementer not found")
+		return
+	}
+
+	relations, err := ios.impOrgRepo.FindManagedOrgs(r.Context(), implID)
+	if err != nil {
+		log.Error("Failed to retrieve ImplementerOrg relation")
+		boom.BadData(w, "Failed to retrieve ImplementerOrg relation")
+		return
+	}
+
+	mo, err := ios.toManagedOrgStructs(r, relations)
+	if err != nil {
+		log.Error("Failed to convert to managed org struct", zap.Error(err))
+		boom.BadImplementation(w, "Internal Error")
+		return
+	}
+
+	moBytes := new(bytes.Buffer)
+	if err := json.NewEncoder(moBytes).Encode(mo); err != nil {
+		log.Error("Failed to convert orm model to bytes for Implementer org relation", zap.Error(err))
+		boom.Internal(w, err.Error())
+		return
+	}
+
+	if _, err := w.Write(moBytes.Bytes()); err != nil {
+		log.Error("Failed to write Implementer org relation to response", zap.Error(err))
+		boom.Internal(w, err.Error())
+	}
+}
+
+func (ios *ImplementerOrgService) toManagedOrgStructs(r *http.Request, relations []v2.ImplementerOrgRelation) ([]model.ManagedOrg, error) {
+	result := make([]model.ManagedOrg, 0)
+
+	for _, rel := range relations {
+		org, err := ios.orgRepo.FindByID(r.Context(), rel.OrganizationID)
+		if err != nil {
+			return nil, err
+		}
+
+		orgBytes := new(bytes.Buffer)
+		if err := json.NewEncoder(orgBytes).Encode(org.Info); err != nil {
+			return nil, err
+		}
+
+		npi, err := util.GetNPI(orgBytes.Bytes())
+		if err != nil {
+			return nil, err
+		}
+		name := org.Info["name"].(string)
+		mo := model.ManagedOrg{
+			OrganizationID: rel.OrganizationID,
+			Name:           name,
+			Status:         rel.Status.String(),
+			NPI:            npi,
+		}
+
+		result = append(result, mo)
+	}
+	return result, nil
 }
 
 func generateRandomOrgName() string {
@@ -187,4 +257,14 @@ func buildFhirOrg(npi string, name string) string {
 		panic(err)
 	}
 	return b.String()
+}
+
+// Delete relation (Not yet implemented)
+func (ios *ImplementerOrgService) Delete(w http.ResponseWriter, r *http.Request) {
+	boom.NotImplemented(w, "Not Implemented")
+}
+
+// Put update relation (Not yet implemented)
+func (ios *ImplementerOrgService) Put(w http.ResponseWriter, r *http.Request) {
+	boom.NotImplemented(w, "Not Implemented")
 }
