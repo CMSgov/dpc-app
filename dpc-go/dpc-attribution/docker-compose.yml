@@ -2,7 +2,9 @@ version: "3"
 
 services:
   migrator:
-    image: migrate/migrate
+    build:
+      context: dpc-go/dpc-attribution/migrator
+      dockerfile: Dockerfile
     depends_on:
       - db
     command: -path=/migrations/ -database postgres://postgres:dpc-safe@db:5432/dpc_attribution_v2?sslmode=disable up

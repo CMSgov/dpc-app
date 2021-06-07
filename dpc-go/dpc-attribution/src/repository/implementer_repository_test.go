@@ -74,7 +74,6 @@ func (suite *ImplementerRepositoryTestSuite) TestInsert() {
 
 	expectedInsertQuery := "INSERT INTO implementers \\(name\\) VALUES \\(\\$1\\) returning id, name, created_at, updated_at, deleted_at"
 
-
 	rows := sqlmock.NewRows([]string{"id", "name", "created_at", "updated_at", "deleted_at"}).
 		AddRow(suite.fakeImplementer.ID, suite.fakeImplementer.Name, suite.fakeImplementer.CreatedAt, suite.fakeImplementer.UpdatedAt, nil)
 
