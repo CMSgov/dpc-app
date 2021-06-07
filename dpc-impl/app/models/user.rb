@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 class User < ApplicationRecord
-  before_save :assign_implementer_id
+  include ApiErrorSimplify
+
+  before_create :create_api_imp, if: -> { no_imp_id? }
   before_create :check_impl
 
   # Include default devise modules. Others available are:
@@ -39,15 +41,38 @@ class User < ApplicationRecord
     end
   end
 
+  def create_api_imp
+    api_request = api_service.create_implementer(implementer)
+
+    api_response = api_request.response_body
+
+    if api_request.response_successful?
+      self.implementer_id = api_response[:id]
+      api_response
+    else
+      action = 'registered'
+      msg = api_simplify(api_response)
+      api_error(action, msg)
+      throw(:abort)
+    end
+  end
+
+  def no_imp_id?
+    implementer_id.blank?
+  end
+
   def name
     "#{first_name} #{last_name}"
   end
 
   private
 
-  # TODO: remove after connecting to API
-  def assign_implementer_id
-    self.implementer_id = SecureRandom.uuid if implementer_id.blank?
+  def api_service
+    @api_service ||= ApiClient.new
+  end
+
+  def api_error(action, msg)
+    errors.add(:base, "couldn't be #{action} with DPC's API: #{msg}")
   end
 
   def password_complexity

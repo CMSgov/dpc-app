@@ -7,6 +7,8 @@ FactoryBot.define do
     sequence(:first_name) { |n| "first_name_#{n}" }
     sequence(:implementer) { |n| "Enterprise_#{n}" }
 
+    implementer_id { SecureRandom.uuid }
+
     agree_to_terms { true }
 
     confirmation_sent_at { DateTime.now }
