@@ -8,10 +8,6 @@ services:
   redis:
     image: redis:latest
 
-  db:
-    ports:
-      - "5434:5432"
-
   dpc_web:
     build:
       context: .
@@ -103,6 +99,7 @@ services:
       - ./tmp/letter_opener/impl:/dpc-impl/tmp/letter_opener
 
     environment:
+      - API_METADATA_URL=http://dpc.example.com
       - REDIS_URL=redis://redis
       - DATABASE_URL=postgresql://db/dpc-impl_development
       - TEST_DATABASE_URL=postgresql://db/dpc-impl_test

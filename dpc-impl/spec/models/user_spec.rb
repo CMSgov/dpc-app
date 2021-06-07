@@ -3,11 +3,7 @@
 require 'rails_helper'
 
 RSpec.describe User, type: :model do
-  subject { create :user }
-
-  describe 'factory' do
-    it { is_expected.to be_valid }
-  end
+  include ApiClientSupport
 
   describe '#last_name' do
     it 'requires a last name' do
@@ -58,6 +54,7 @@ RSpec.describe User, type: :model do
   describe 'before_creates' do
     before { @user = User.invite! }
     it 'run check_impl callback' do
+      stub_api_client(message: :create_implementer, success: true, response: default_imp_creation_response)
       expect(@user).to receive(:check_impl)
       @user.run_callbacks(:create)
     end
