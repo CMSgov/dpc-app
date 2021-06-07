@@ -274,6 +274,7 @@ GEM
     unf (0.1.4)
       unf_ext
     unf_ext (0.0.7.7)
+    vcr (6.0.0)
     warden (1.2.9)
       rack (>= 2.0.9)
     web-console (4.1.0)
@@ -310,12 +311,12 @@ DEPENDENCIES
   bootsnap (>= 1.4.4)
   bundler-audit
   byebug
-  capybara (>= 3.26)
+  capybara (>= 3.35.3)
   database_cleaner
   devise
   devise-security
   devise_invitable (~> 2.0.0)
-  dotenv-rails
+  dotenv-rails (>= 2.7.6)
   factory_bot_rails
   faker
   fakeredis
@@ -342,6 +343,7 @@ DEPENDENCIES
   truemail
   turbolinks (~> 5)
   tzinfo-data
+  vcr
   web-console (>= 4.1.0)
   webdrivers
   webmock
