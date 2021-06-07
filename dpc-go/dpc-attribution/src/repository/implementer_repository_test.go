@@ -36,7 +36,8 @@ func (suite *ImplementerRepositoryTestSuite) TestFindByID() {
 	defer db.Close()
 	repo := NewImplementerRepo(db)
 	ctx := context.Background()
-	expectedQuery := "SELECT id, name, created_at, updated_at, deleted_at FROM implementer WHERE id = \\$1"
+
+	expectedQuery := "SELECT id, name, created_at, updated_at, deleted_at FROM implementers WHERE id = \\$1"
 
 	rows := sqlmock.NewRows([]string{"id", "name", "created_at", "updated_at", "deleted_at"}).
 		AddRow(suite.fakeImplementer.ID, suite.fakeImplementer.Name, suite.fakeImplementer.CreatedAt, suite.fakeImplementer.UpdatedAt, nil)
@@ -71,7 +72,8 @@ func (suite *ImplementerRepositoryTestSuite) TestInsert() {
 	repo := NewImplementerRepo(db)
 	ctx := context.Background()
 
-	expectedInsertQuery := "INSERT INTO implementer \\(name\\) VALUES \\(\\$1\\) returning id, name, created_at, updated_at, deleted_at"
+	expectedInsertQuery := "INSERT INTO implementers \\(name\\) VALUES \\(\\$1\\) returning id, name, created_at, updated_at, deleted_at"
+
 
 	rows := sqlmock.NewRows([]string{"id", "name", "created_at", "updated_at", "deleted_at"}).
 		AddRow(suite.fakeImplementer.ID, suite.fakeImplementer.Name, suite.fakeImplementer.CreatedAt, suite.fakeImplementer.UpdatedAt, nil)
