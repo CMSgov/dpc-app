@@ -43,11 +43,13 @@ class ApiClient
 
     begin
       response = http.request(request)
+      @response_status = response.code.to_i
     rescue => e
       connection_error
     else
-      @response_status = response.code.to_i
-      @response_body = parsed_response(response)
+      unless !response_successful?
+        @response_body = parsed_response(response)
+      end
     end
   end
 
