@@ -35,6 +35,10 @@ RSpec.configure do |config|
   config.include FactoryBot::Syntax::Methods
   config.include Rails.application.routes.url_helpers
 
+  config.before(:all, type: :request) do
+    WebMock.allow_net_connect!
+  end  
+
   # Devise test helpers
   config.include Devise::Test::ControllerHelpers, type: :controller
   config.include Devise::Test::ControllerHelpers, type: :view
