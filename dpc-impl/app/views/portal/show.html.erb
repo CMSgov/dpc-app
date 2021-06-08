@@ -63,7 +63,7 @@
             </div>
 
             <div class="client_status">
-              Status: <%= client[:status] %>
+              Status: <span class="<%= active_status_class if status_active?(client[:status]) %>"><%= client[:status] %></span>
             </div>
           </div>
         </div>

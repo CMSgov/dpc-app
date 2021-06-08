@@ -24,6 +24,10 @@
     padding: 15px;
   }
 
+  .client_card_container:nth-child(2n) {
+    background-color: $color-primary-alt-lightest;
+  }
+
   .client_name {
     font-size: 32px;
     margin-bottom: 10px;
@@ -35,6 +39,10 @@
 
   .client_status {
     font-size: 14px;
+  }
+
+  .active_status {
+    color: $color-success-dark;
   }
 }
 
