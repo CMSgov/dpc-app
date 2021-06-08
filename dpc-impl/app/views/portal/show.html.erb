@@ -51,37 +51,23 @@
     <div id="dash_client_list">
       <%= @user.client_orgs.count %>
 
-      <%# <div class="client_card_container">
-        <div class="client_name">
-          Zesty Bee Clinic
-        </div>
-
-        <div class="client_info">
-          <div class="client_api_id">
-            ID: 90c2f6d2-70b5-4127-a23c-2a3cd6dc8c25
+      <% @user.client_orgs.each_with_index do |client, index| %>
+        <div class="client_card_container">
+          <div class="client_name">
+            <%= client[:org_name] %>
           </div>
 
-          <div class="client_status">
-            Status: Pending
+          <div class="client_info">
+            <div class="client_api_id">
+              ID: <%= client[:org_id] %>
+            </div>
+
+            <div class="client_status">
+              Status: <%= client[:status] %>
+            </div>
           </div>
         </div>
-      </div>
-
-      <div class="client_card_container">
-        <div class="client_name">
-          Peach Clean Hospital
-        </div>
-
-        <div class="client_info">
-          <div class="client_api_id">
-            ID: 5b52d6f7-9717-45b3-8937-c23fa6d09760
-          </div>
-
-          <div class="client_status">
-            Status: <span class="ds-u-color--success">Accepted</span>
-          </div>
-        </div>
-      </div> %>
+      <% end %>
     </div>
   </div>
 </div>

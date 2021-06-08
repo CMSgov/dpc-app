@@ -16,7 +16,7 @@ class ApiClient
 
   def get_client_orgs(imp_id)
     uri_string = base_url + '/Implementer/' + imp_id + '/org'
-    binding.pry
+    get_request(uri_string)
   end
 
   def response_successful?
@@ -29,6 +29,13 @@ class ApiClient
     Rails.logger.warn 'Could not connect to API'
     @response_status = 500
     @response_body = { 'issue' => [{ 'details' => { 'text' => 'Connection error' }}]}
+  end
+
+  def get_request(uri_string)
+    uri = URI.parse uri_string
+    request = Net::HTTP::Get.new(uri.request_uri)
+
+    http_request(request, uri)
   end
 
   def http_request(request, uri)
