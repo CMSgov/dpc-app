@@ -57,4 +57,8 @@ RSpec.describe ApiClient do
       end
     end
   end
+
+  describe '#get_client_orgs' do
+    
+  end
 end
