@@ -74,11 +74,17 @@ down-dpc:
 	@docker-compose -f docker-compose.yml -f docker-compose.portals.yml down
 	@docker ps
 
+.PHONY: build-v2
+build-v2:
+	@docker-compose -f docker-compose.yml -f dpc-go/dpc-attribution/docker-compose.yml build migrator
+	@docker-compose -f docker-compose.yml -f dpc-go/dpc-attribution/docker-compose.yml build attribution2
+	@docker-compose -f dpc-go/dpc-api/docker-compose.yml build api
+
 .PHONY: start-v2
 start-v2: secure-envs
 	@docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.v2.yml up start_core_dependencies
 	@docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.v2.yml up start_api_dependencies
-	@docker-compose -p dpc-v2 -f docker-compose.yml -f dpc-go/dpc-attribution/docker-compose.yml up -d attribution2
+	@docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.v2.yml -f dpc-go/dpc-attribution/docker-compose.yml up -d attribution2
 	@docker-compose -p dpc-v2 -f dpc-go/dpc-api/docker-compose.yml up -d api
 	@docker ps
 
