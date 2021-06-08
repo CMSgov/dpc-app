@@ -69,7 +69,7 @@ class User < ApplicationRecord
     api_client = ApiClient.new
     api_client.get_client_orgs(self.implementer_id)
     if api_client.response_successful?
-      api_client.response_body
+      api_client.response_body.sort_by{|e| e[:created_at]}.reverse
     else
       []
     end

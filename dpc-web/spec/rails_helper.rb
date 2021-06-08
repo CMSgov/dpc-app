@@ -37,7 +37,7 @@ RSpec.configure do |config|
 
   config.before(:all, type: :request) do
     WebMock.allow_net_connect!
-  end  
+  end
 
   # Devise test helpers
   config.include Devise::Test::ControllerHelpers, type: :controller
