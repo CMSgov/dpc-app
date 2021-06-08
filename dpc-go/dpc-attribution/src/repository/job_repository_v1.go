@@ -52,12 +52,13 @@ func (jr *JobRepositoryV1) Insert(ctx context.Context, orgID string, batches []v
 		ib.Values(batchID, jobID, orgID, b.OrganizationNPI, b.ProviderNPI, b.PatientMBIs, b.ResourceTypes, b.Since,
 			b.Priority, b.TransactionTime, 0, time.Now(), b.RequestURL, b.RequestingIP, b.IsBulk)
 		q, args := ib.Build()
-		_, err := tx.ExecContext(ctx, q, args...)
+		_, err = tx.ExecContext(ctx, q, args...)
 		if err != nil {
-			err = tx.Rollback()
-			if err != nil {
-				return nil, err
+			err2 := tx.Rollback()
+			if err2 != nil {
+				return nil, err2
 			}
+			return nil, err
 		}
 	}
 	err = tx.Commit()
