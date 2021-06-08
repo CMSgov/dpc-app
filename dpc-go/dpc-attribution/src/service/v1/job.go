@@ -121,11 +121,14 @@ func buildExportInfo(w http.ResponseWriter, r *http.Request) *ExportInfo {
 }
 
 func parseSinceParam(since string) (*sql.NullTime, error) {
+	if since == "" {
+		return &sql.NullTime{}, nil
+	}
 	t, err := time.Parse(middleware.SinceLayout, since)
 	if err != nil {
-		return &sql.NullTime{Time: t}, nil
+		return nil, err
 	}
-	return &sql.NullTime{}, err
+	return &sql.NullTime{Time: t, Valid: true}, nil
 }
 
 func buildBatches(ei *ExportInfo, groupNPIs *v1.GroupNPIs, patientMBIs []string) []v1.BatchRequest {
@@ -135,7 +138,7 @@ func buildBatches(ei *ExportInfo, groupNPIs *v1.GroupNPIs, patientMBIs []string)
 	}
 
 	patientBatches := batchPatientMBIs(patientMBIs, conf.GetAsInt("queue.batchSize", 100))
-	batches := make([]v1.BatchRequest, len(patientBatches))
+	var batches []v1.BatchRequest
 	for _, batchedPatients := range patientBatches {
 		batch := v1.BatchRequest{
 			Priority:        priority,

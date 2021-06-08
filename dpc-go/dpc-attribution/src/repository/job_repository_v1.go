@@ -44,12 +44,13 @@ func (jr *JobRepositoryV1) Insert(ctx context.Context, orgID string, batches []v
 	}
 	jobID := uuid.New().String()
 	for _, b := range batches {
+		s, _ := b.Since.Value()
 		ib := sqlFlavor.NewInsertBuilder()
 		ib.InsertInto("job_queue_batch")
 		ib.Cols("batch_id", "job_id", "organization_id", "organization_npi", "provider_npi", "patients", "resource_types", "since",
 			"priority", "transaction_time", "status", "submit_time", "request_url", "requesting_ip", "is_bulk")
 		batchID := uuid.New().String()
-		ib.Values(batchID, jobID, orgID, b.OrganizationNPI, b.ProviderNPI, b.PatientMBIs, b.ResourceTypes, b.Since,
+		ib.Values(batchID, jobID, orgID, b.OrganizationNPI, b.ProviderNPI, b.PatientMBIs, b.ResourceTypes, s,
 			b.Priority, b.TransactionTime, 0, time.Now(), b.RequestURL, b.RequestingIP, b.IsBulk)
 		q, args := ib.Build()
 		_, err = tx.ExecContext(ctx, q, args...)
