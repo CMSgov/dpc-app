@@ -95,12 +95,11 @@ RSpec.describe ApiClient do
           .with(imp_id)
           .and_return(api_client)
         allow(api_client).to receive(:response_successful?).and_return(false)
-        allow(api_client).to receive(:response_body).and_return([])
+        allow(api_client).to receive(:response_body).and_return(error: 'Bad request')
 
         api_request = ApiClient.new
-        get_request = api_request.get_client_orgs(imp_id)
 
-        expect(get_request.response_body).to eq([])
+        expect(user.client_orgs).to eq(false)
       end
     end
   end

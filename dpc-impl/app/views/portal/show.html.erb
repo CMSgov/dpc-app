@@ -49,24 +49,29 @@
     </div>
 
     <div id="dash_client_list">
-      <%= @user.client_orgs.count %>
 
-      <% @user.client_orgs.each_with_index do |client, index| %>
-        <div class="client_card_container">
-          <div class="client_name">
-            <%= client[:org_name] %>
-          </div>
+      <% unless @user.client_orgs == false %>
+        <%= @user.client_orgs.count %>
 
-          <div class="client_info">
-            <div class="client_api_id">
-              ID: <%= client[:org_id] %>
+        <% @user.client_orgs.each_with_index do |client, index| %>
+          <div class="client_card_container">
+            <div class="client_name">
+              <%= client[:org_name] %>
             </div>
 
-            <div class="client_status">
-              Status: <span class="<%= active_status_class if status_active?(client[:status]) %>"><%= client[:status] %></span>
+            <div class="client_info">
+              <div class="client_api_id">
+                ID: <%= client[:org_id] %>
+              </div>
+
+              <div class="client_status">
+                Status: <span class="<%= active_status_class if status_active?(client[:status]) %>"><%= client[:status] %></span>
+              </div>
             </div>
           </div>
-        </div>
+        <% end %>
+      <% else %>
+        We were unable to connect to DPC due to an internal error.
       <% end %>
     </div>
   </div>
