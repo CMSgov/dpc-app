@@ -3,9 +3,21 @@
 require 'rails_helper'
 
 RSpec.feature 'user edits profile' do
+  include ApiClientSupport
+
   let(:user) { create :user, password: '12345ABCDEfghi!', password_confirmation: '12345ABCDEfghi!' }
 
   before(:each) do
+    stub_api_client(message: :create_implementer, success: true, response: default_imp_creation_response)
+
+    api_client = instance_double(ApiClient)
+    allow(ApiClient).to receive(:new).and_return(api_client)
+    allow(api_client).to receive(:get_client_orgs)
+      .with(user.implementer_id)
+      .and_return(api_client)
+    allow(api_client).to receive(:response_successful?).and_return(false)
+    allow(api_client).to receive(:response_body).and_return(nil)
+
     sign_in user
     visit edit_user_registration_path
   end

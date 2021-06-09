@@ -1,7 +1,7 @@
 <a class="ds-c-skip-nav" href="#main">Skip to main content</a>
 
 <nav class="navbar" id="navigation-bar">
-  <a class="site-logo" href="<%= "#{ENV['EXTERNAL_URL']}" %>">
+  <a class="site-logo" href="<%= "#{ENV.fetch('STATIC_SITE_URL')}" %>">
     <%= image_tag("top-nav-heart.svg", alt: "DPC logo - a yellow yeart with a bold navy blue outline") %> <span class="site-logo-text">Data at the Point of Care</span>
   </a>
 
@@ -20,7 +20,11 @@ aria-controls="topnav-wrap" aria-label="Close menu">
     </button>
     <ul class="topnav">
       <li class="topnav__item">
-        <%= link_to "Home", ENV.fetch('STATIC_SITE_URL'), class: "topnav__link"  %>
+        <% if user_signed_in? %>
+          <%= link_to "Home", root_path, class: "topnav__link"  %>
+        <% else %>
+          <%= link_to "Home", ENV.fetch('STATIC_SITE_URL'), class: "topnav__link"  %>
+        <% end %>
       </li>
 
       <li class="topnav__item">

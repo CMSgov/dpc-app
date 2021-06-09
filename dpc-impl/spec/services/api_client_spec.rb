@@ -57,4 +57,50 @@ RSpec.describe ApiClient do
       end
     end
   end
+
+  describe '#get_client_orgs' do
+    context 'successful API request' do
+      it 'responds with client_orgs array' do
+        user = create(:user)
+        imp_id = user.implementer_id
+
+        client_orgs = [{:org_id=>"040b5bca-9d88-4891-8bda-6ef8a71c4b8b",
+                        :org_name=>"Shiny Xenon Healthcare",
+                        :status=>"Active",
+                        :npi=>"4141690865"}]
+
+        api_client = instance_double(ApiClient)
+        allow(ApiClient).to receive(:new).and_return(api_client)
+        allow(api_client).to receive(:get_client_orgs)
+          .with(imp_id)
+          .and_return(api_client)
+        allow(api_client).to receive(:response_successful?).and_return(true)
+        allow(api_client).to receive(:response_body).and_return(client_orgs)
+
+        api_request = ApiClient.new
+        get_request = api_request.get_client_orgs(imp_id)
+
+        expect(get_request.response_body).to eq(client_orgs)
+      end
+    end
+
+    context 'failed API request' do
+      it 'responds with empty array' do
+        user = create(:user)
+        imp_id = user.implementer_id
+
+        api_client = instance_double(ApiClient)
+        allow(ApiClient).to receive(:new).and_return(api_client)
+        allow(api_client).to receive(:get_client_orgs)
+          .with(imp_id)
+          .and_return(api_client)
+        allow(api_client).to receive(:response_successful?).and_return(false)
+        allow(api_client).to receive(:response_body).and_return(error: 'Bad request')
+
+        api_request = ApiClient.new
+
+        expect(user.client_orgs).to eq(false)
+      end
+    end
+  end
 end

@@ -49,37 +49,35 @@
     </div>
 
     <div id="dash_client_list">
-      <div class="client_card_container">
-        <div class="client_name">
-          Zesty Bee Clinic
-        </div>
+      <% unless @user.client_orgs == false %>
+        <h1 class="ds-text-heading--xl ds-h4 ds-u-padding-top--1">
+          Total provider organizations: <%= @user.client_orgs.count %>
+        </h1>
 
-        <div class="client_info">
-          <div class="client_api_id">
-            ID: 90c2f6d2-70b5-4127-a23c-2a3cd6dc8c25
+        <% @user.client_orgs.each_with_index do |client, index| %>
+          <div class="client_card_container">
+            <div class="client_name">
+              <%= client[:org_name] %>
+            </div>
+
+            <div class="client_info">
+              <div class="client_api_id">
+                ID: <%= client[:org_id] %>
+              </div>
+
+              <div class="client_status">
+                Status: <span class="<%= active_status_class if status_active?(client[:status]) %>"><%= client[:status] %></span>
+              </div>
+            </div>
           </div>
-
-          <div class="client_status">
-            Status: Pending
-          </div>
-        </div>
-      </div>
-
-      <div class="client_card_container">
-        <div class="client_name">
-          Peach Clean Hospital
-        </div>
-
-        <div class="client_info">
-          <div class="client_api_id">
-            ID: 5b52d6f7-9717-45b3-8937-c23fa6d09760
-          </div>
-
-          <div class="client_status">
-            Status: <span class="ds-u-color--success">Accepted</span>
+        <% end %>
+      <% else %>
+        <div class="ds-c-alert ds-c-alert--warn ds-u-margin--5">
+          <div class="ds-c-alert__body">
+            <h2 class="ds-c-alert__heading">We were unable to connect to DPC due to an internal error.</h2>
           </div>
         </div>
-      </div>
+      <% end %>
     </div>
   </div>
 </div>
