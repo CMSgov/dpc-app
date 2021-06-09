@@ -14,6 +14,11 @@ class ApiClient
     self
   end
 
+  def get_client_orgs(imp_id)
+    uri_string = base_url + '/Implementer/' + imp_id + '/org'
+    get_request(uri_string)
+  end
+
   def response_successful?
     (200...299).cover? @response_status
   end
@@ -26,16 +31,25 @@ class ApiClient
     @response_body = { 'issue' => [{ 'details' => { 'text' => 'Connection error' }}]}
   end
 
+  def get_request(uri_string)
+    uri = URI.parse uri_string
+    request = Net::HTTP::Get.new(uri.request_uri)
+
+    http_request(request, uri)
+  end
+
   def http_request(request, uri)
     http = Net::HTTP.new(uri.host, uri.port)
 
     begin
       response = http.request(request)
+      @response_status = response.code.to_i
     rescue => e
       connection_error
     else
-      @response_status = response.code.to_i
-      @response_body = parsed_response(response)
+      unless !response_successful?
+        @response_body = parsed_response(response)
+      end
     end
   end
 
