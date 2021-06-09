@@ -49,9 +49,10 @@
     </div>
 
     <div id="dash_client_list">
-
       <% unless @user.client_orgs == false %>
-        <%= @user.client_orgs.count %>
+        <h1 class="ds-text-heading--xl ds-h4 ds-u-padding-top--1">
+          Total provider organizations: <%= @user.client_orgs.count %>
+        </h1>
 
         <% @user.client_orgs.each_with_index do |client, index| %>
           <div class="client_card_container">
@@ -71,7 +72,11 @@
           </div>
         <% end %>
       <% else %>
-        We were unable to connect to DPC due to an internal error.
+        <div class="ds-c-alert ds-c-alert--warn ds-u-margin--5">
+          <div class="ds-c-alert__body">
+            <h2 class="ds-c-alert__heading">We were unable to connect to DPC due to an internal error.</h2>
+          </div>
+        </div>
       <% end %>
     </div>
   </div>

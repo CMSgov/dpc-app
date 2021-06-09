@@ -24,7 +24,7 @@
     padding: 15px;
   }
 
-  .client_card_container:nth-child(2n) {
+  .client_card_container:hover {
     background-color: $color-primary-alt-lightest;
   }
 
