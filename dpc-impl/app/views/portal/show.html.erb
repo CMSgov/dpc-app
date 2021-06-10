@@ -49,12 +49,12 @@
     </div>
 
     <div id="dash_client_list">
-      <% unless @user.client_orgs == false %>
+      <% unless @user.provider_orgs == false %>
         <h1 class="ds-text-heading--xl ds-h4 ds-u-padding-top--1">
-          Total provider organizations: <%= @user.client_orgs.count %>
+          Total provider organizations: <%= @user.provider_orgs.count %>
         </h1>
 
-        <% @user.client_orgs.each_with_index do |client, index| %>
+        <% @user.provider_orgs.each_with_index do |client, index| %>
           <div class="client_card_container">
             <div class="client_name">
               <%= client[:org_name] %>
