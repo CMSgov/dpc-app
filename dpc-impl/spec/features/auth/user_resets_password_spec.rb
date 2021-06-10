@@ -13,7 +13,7 @@ RSpec.feature 'user resets password' do
 
       api_client = instance_double(ApiClient)
       allow(ApiClient).to receive(:new).and_return(api_client)
-      allow(api_client).to receive(:get_client_orgs)
+      allow(api_client).to receive(:get_provider_orgs)
         .with(user.implementer_id)
         .and_return(api_client)
       allow(api_client).to receive(:response_successful?).and_return(false)
