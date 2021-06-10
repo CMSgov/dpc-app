@@ -38,3 +38,6 @@
 /yarn-error.log
 yarn-debug.log*
 .yarn-integrity
+
+.env.development.local
+.env.test.local
