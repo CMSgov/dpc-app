@@ -1,0 +1,34 @@
+<a class="ds-c-skip-nav" href="#main">Skip to main content</a>
+
+<nav class="navbar" id="navigation-bar">
+  <a class="site-logo" href="<%= "#{ENV.fetch('STATIC_SITE_URL')}" %>">
+    <%= image_tag("top-nav-heart.svg", alt: "DPC logo - a yellow yeart with a bold navy blue outline") %> <span class="site-logo-text">Data at the Point of Care</span>
+  </a>
+
+  <button id="topnav__show-button" class="ds-c-button ds-c-button--transparent ds-c-button--big topnav__show-button" type="button" aria-controls="topnav-wrap" aria-label="Show menu">
+    <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <use xlink:href="/impl/assets/solid.svg#bars"></use>
+    </svg>
+  </button>
+
+  <div class="topnav-wrap" id="topnav-wrap">
+    <button id="topnav__close-button" class="ds-c-button ds-c-button--transparent ds-c-button--big topnav__close-button" type="button"
+aria-controls="topnav-wrap" aria-label="Close menu">
+      <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <use xlink:href="/impl/assets/solid.svg#times"></use>
+      </svg>
+    </button>
+    <ul class="topnav">
+      <li class="topnav__item">
+        <%= link_to "Home", ENV.fetch('STATIC_SITE_URL'), class: "topnav__link"  %>
+      </li>
+
+      <li class="topnav__item">
+        <%= link_to "Documentation", ENV.fetch('STATIC_SITE_URL') + 'docs', class: "topnav__link"  %>
+      </li>
+
+      <li class="topnav__item">
+        <%= link_to "Frequently Asked Questions", ENV.fetch('STATIC_SITE_URL') + 'faq', class: "topnav__link" %>
+      </li>
+  </div>
+</nav>

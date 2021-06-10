@@ -10,6 +10,11 @@
  * files in this directory. Styles in this file should be added after the last require_* statement.
  * It is generally better to create a new file per style scope.
  *
- *= require_tree .
  *= require_self
  */
+
+@import 'normalize.css/normalize';
+@import '@cmsgov/design-system/dist/scss/index';
+
+@import 'base/0_base';
+@import 'components/0_components';

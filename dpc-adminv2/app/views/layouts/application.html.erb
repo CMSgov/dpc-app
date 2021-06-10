@@ -3,7 +3,13 @@
 
   <%= render partial: 'shared/head' %>
 
-  <body>
+  <body class="ds-base">
+    <!-- nav -->
+    <%= render partial: 'shared/navbar' %>
+
+    <!-- main -->
     <%= yield %>
+
+    <!-- footer -->
   </body>
 </html>
