@@ -3,10 +3,22 @@
 require 'rails_helper'
 
 RSpec.feature 'user resends confirmation instructions' do
+  include ApiClientSupport
+
   let(:user) { create :user, confirmed_at: nil }
 
   context 'when successful' do
     scenario 'user resends confirmation instructions' do
+      stub_api_client(message: :create_implementer, success: true, response: default_imp_creation_response)
+
+      api_client = instance_double(ApiClient)
+      allow(ApiClient).to receive(:new).and_return(api_client)
+      allow(api_client).to receive(:get_client_orgs)
+        .with(user.implementer_id)
+        .and_return(api_client)
+      allow(api_client).to receive(:response_successful?).and_return(false)
+      allow(api_client).to receive(:response_body).and_return(nil)
+
       visit new_user_confirmation_path
 
       fill_in 'user_email', with: user.email
