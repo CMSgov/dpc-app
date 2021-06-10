@@ -7,9 +7,14 @@
     <!-- nav -->
     <%= render partial: 'shared/navbar' %>
 
+    <div class="header-seperator"></div>
+
     <!-- main -->
-    <%= yield %>
+    <section class="ds-l-container ds-u-padding-top--7 ds-u-margin-bottom--7" id="main">
+      <%= yield %>
+    </section>
 
     <!-- footer -->
+    <%= render partial: 'shared/footer' %>
   </body>
 </html>
