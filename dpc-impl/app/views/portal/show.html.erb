@@ -42,31 +42,31 @@
     </div>
   </div>
 
-  <div id="dash_content_client_container">
+  <div id="dash_content_provider_container">
 
     <div class="dash_content_header">
-      <h2>Client Organizations</h2>
+      <h2>Provider Organizations</h2>
     </div>
 
-    <div id="dash_client_list">
+    <div id="dash_provider_list">
       <% unless @user.provider_orgs == false %>
         <h1 class="ds-text-heading--xl ds-h4 ds-u-padding-top--1">
           Total provider organizations: <%= @user.provider_orgs.count %>
         </h1>
 
-        <% @user.provider_orgs.each_with_index do |client, index| %>
-          <div class="client_card_container">
-            <div class="client_name">
-              <%= client[:org_name] %>
+        <% @user.provider_orgs.each_with_index do |provider, index| %>
+          <div class="provider_card_container">
+            <div class="provider_name">
+              <%= provider[:org_name] %>
             </div>
 
-            <div class="client_info">
-              <div class="client_api_id">
-                ID: <%= client[:org_id] %>
+            <div class="provider_info">
+              <div class="provider_api_id">
+                ID: <%= provider[:org_id] %>
               </div>
 
-              <div class="client_status">
-                Status: <span class="<%= active_status_class if status_active?(client[:status]) %>"><%= client[:status] %></span>
+              <div class="provider_status">
+                Status: <span class="<%= active_status_class if status_active?(provider[:status]) %>"><%= provider[:status] %></span>
               </div>
             </div>
           </div>
