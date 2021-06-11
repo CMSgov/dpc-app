@@ -78,6 +78,7 @@ RSpec.feature 'new user signs up for account' do
       click_on('Sign up')
 
       expect(page).to have_content("Email can't be blank")
+      expect(page).to have_content("Email is invalid")
       expect(page).to have_content("Password can't be blank")
       expect(page).to have_content("First name can't be blank")
       expect(page).to have_content("Last name can't be blank")
