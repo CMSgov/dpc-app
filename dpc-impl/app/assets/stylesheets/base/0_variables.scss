@@ -12,3 +12,12 @@ $focus-outline:  5px solid $color-gold-light;
 // Z-indexes
 $z-index-nav:     8000;
 $z-index-flyout:  10000;
+
+// CMS variables
+.ds-c-alert--warn {
+  background-image: url(warning.svg) !important;
+}
+
+.ds-c-alert__heading {
+  color: #000 !important;
+}

@@ -3,10 +3,24 @@
 require 'rails_helper'
 
 RSpec.feature 'user sends invitation to DPC' do
+  include ApiClientSupport
   include MailerHelper
+
   let (:user) { create :user }
 
   context 'successful invite' do
+    before(:each) do
+      stub_api_client(message: :create_implementer, success: true, response: default_imp_creation_response)
+  
+      api_client = instance_double(ApiClient)
+      allow(ApiClient).to receive(:new).and_return(api_client)
+      allow(api_client).to receive(:get_client_orgs)
+        .with(user.implementer_id)
+        .and_return(api_client)
+      allow(api_client).to receive(:response_successful?).and_return(false)
+      allow(api_client).to receive(:response_body).and_return(nil)
+    end
+
     scenario 'user successfully sends invite' do
       sign_in user
       visit members_path
