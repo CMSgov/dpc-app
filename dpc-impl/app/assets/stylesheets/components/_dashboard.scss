@@ -17,27 +17,27 @@
   justify-content: space-between;
 }
 
-#dash_client_list {
-  .client_card_container {
+#dash_provider_list {
+  .provider_card_container {
     border: 1.5px solid $color-gray;
     margin: 15px 0;
     padding: 15px;
   }
 
-  .client_card_container:hover {
+  .provider_card_container:hover {
     background-color: $color-primary-alt-lightest;
   }
 
-  .client_name {
+  .provider_name {
     font-size: 32px;
     margin-bottom: 10px;
   }
 
-  .client_info {
+  .provider_info {
     font-weight: 700;
   }
 
-  .client_status {
+  .provider_status {
     font-size: 14px;
   }
 
@@ -81,7 +81,7 @@
   }
 }
 
-#dash_content_client_container {
+#dash_content_provider_container {
   h2 {
     color: $color-gray;
     margin: 0;
@@ -101,7 +101,7 @@
     margin-right: 5px;
   }
 
-  #dash_content_client_container {
+  #dash_content_provider_container {
     margin: 32px 0 0 0;
   }
 }
