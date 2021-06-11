@@ -13,7 +13,7 @@ class User < ApplicationRecord
          :timeoutable, :confirmable, :password_expirable,
          :password_archivable, :invitable, :expirable
 
-  validates :first_name, :last_name, :implementer, presence: true
+  validates :first_name, :last_name, :email, :implementer, presence: true
   validates :email, domain_exists: true
   validate :password_complexity
   validates :agree_to_terms, inclusion: {
