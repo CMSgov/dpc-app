@@ -2,7 +2,6 @@
 
 module Users
   class RegistrationsController < Devise::RegistrationsController
-
     def destroy
       if resource.destroy_with_password(user_params[:password_to_delete])
         Devise.sign_out_all_scopes ? sign_out : sign_out(resource_name)
