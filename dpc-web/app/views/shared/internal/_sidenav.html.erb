@@ -1,0 +1,86 @@
+<ul class="ds-c-vertical-nav">
+  <li class="ds-c-vertical-nav__item">
+
+  </li>
+  <li class="ds-c-vertical-nav__item">
+
+  </li>
+
+</ul>
+
+
+<ul class="ds-c-vertical-nav">
+  <li class="ds-c-vertical-nav__item usa-accordion">
+    <button class="usa-accordion__button ds-c-vertical-nav__label ds-c-vertical-nav__label--parent <%= current_sidenav_class if users_page? %>" aria-controls="nav-users-main" aria-expanded="true">
+      Users
+    </button>
+    <ul id="nav-users-main" class="ds-c-vertical-nav__subnav">
+      <li class="ds-c-vertical-nav__item">
+        <%= link_to "All", internal_users_path(org_type: 'all'), class: "ds-c-vertical-nav__label #{current_sidenav_class if all_users_page?}" %>
+      </li>
+      <li class="ds-c-vertical-nav__item usa-accordion">
+        <button class="usa-accordion__button ds-c-vertical-nav__label ds-c-vertical-nav__label--parent <%= current_sidenav_class if provider_users_page? %>" aria-controls="provider-users" aria-expanded="<%= true if unassigned_provider_users_page? || assigned_provider_users_page? %>">
+          Provider
+        </button>
+        <ul id="provider-users" class="ds-c-vertical-nav__subnav" aria-hidden="false">
+          <li class="ds-c-vertical-nav__item">
+            <%= link_to internal_users_path(org_status: "unassigned", org_type: "provider"), class: "ds-c-vertical-nav__label #{current_sidenav_class if unassigned_provider_users_page?}" do %>
+              <span>
+                Unassigned users
+              </span>
+            <% end %>
+          </li>
+          <li class="ds-c-vertical-nav__item">
+            <%= link_to internal_users_path(org_status: "assigned", org_type: "provider"), class: "ds-c-vertical-nav__label #{current_sidenav_class if assigned_provider_users_page?}" do %>
+              <span>
+                Assigned users
+              </span>
+            <% end %>
+          </li>
+        </ul>
+
+        <button class="usa-accordion__button ds-c-vertical-nav__label ds-c-vertical-nav__label--parent <%= current_sidenav_class if vendor_users_page? %>" aria-controls="vendor-users" aria-expanded="<%= true if unassigned_vendor_users_page? || assigned_vendor_users_page? %>">
+          Vendor
+        </button>
+        <ul id="vendor-users" class="ds-c-vertical-nav__subnav" aria-hidden="false">
+          <li class="ds-c-vertical-nav__item">
+            <%= link_to internal_users_path(org_status: "unassigned", org_type: "vendor"), class: "ds-c-vertical-nav__label #{current_sidenav_class if unassigned_vendor_users_page?}" do %>
+              <span>
+                Unassigned users
+              </span>
+            <% end %>
+          </li>
+          <li class="ds-c-vertical-nav__item">
+            <%= link_to internal_users_path(org_status: "assigned", org_type: "vendor"), class: "ds-c-vertical-nav__label #{current_sidenav_class if assigned_vendor_users_page?}" do %>
+              <span>
+                Assigned users
+              </span>
+            <% end %>
+          </li>
+        </ul>
+      </li>
+    </ul>
+
+    <li class="ds-c-vertical-nav__item usa-accordion">
+      <button class="usa-accordion__button ds-c-vertical-nav__label ds-c-vertical-nav__label--parent <%= current_sidenav_class if organizations_page? %>" aria-controls="nav-organizations-main" aria-expanded="true">
+        Organizations
+      </button>
+      <ul id="nav-organizations-main" class="ds-c-vertical-nav__subnav">
+        <li class="ds-c-vertical-nav__item">
+          <%= link_to "All", internal_organizations_path(org_type: "all"), class: "ds-c-vertical-nav__label #{current_sidenav_class if all_organizations_page?}" %>
+        </li>
+        <li class="ds-c-vertical-nav__item">
+          <%= link_to "Provider", internal_organizations_path(org_type: "provider"), class: "ds-c-vertical-nav__label #{current_sidenav_class if provider_organizations_page?}" %>
+        </li>
+        <li class="ds-c-vertical-nav__item">
+          <%= link_to "Vendor", internal_organizations_path(org_type: "vendor"), class: "ds-c-vertical-nav__label #{current_sidenav_class if vendor_organizations_page?}" %>
+        </li>
+      </ul>
+    </li>
+  </li>
+
+
+  <li class="ds-c-vertical-nav__item">
+    <%= link_to "Tags", internal_tags_path, class: "ds-c-vertical-nav__label #{current_sidenav_class if tags_page?}" %>
+  </li>
+</ul>

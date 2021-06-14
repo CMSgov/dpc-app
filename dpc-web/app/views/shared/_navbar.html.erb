@@ -55,6 +55,14 @@ aria-controls="topnav-wrap" aria-label="Close menu">
           </ul>
         </li>
 
+      <% elsif internal_user_signed_in? %>
+        <li class="topnav__item">
+          <a class="topnav__link" href="<%= destroy_internal_user_session_path %>"
+              id="sign-out" data-method="delete" data-test="internal-user-signout">
+              Sign out
+          </a>
+        </li>
+
       <% else %>
         <li class="topnav__item topnav__item--buttons ds-u-padding-right--1">
           <%= link_to "Log in", new_session_path(User), class: "ds-c-button", data: { test: "login-link" } %>
