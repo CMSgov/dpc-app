@@ -98,6 +98,47 @@ ALTER SEQUENCE public.fhir_endpoints_id_seq OWNED BY public.fhir_endpoints.id;
 
 
 --
+-- Name: internal_users; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.internal_users (
+    id bigint NOT NULL,
+    email character varying DEFAULT ''::character varying,
+    encrypted_password character varying DEFAULT ''::character varying NOT NULL,
+    sign_in_count integer DEFAULT 0 NOT NULL,
+    current_sign_in_at timestamp without time zone,
+    last_sign_in_at timestamp without time zone,
+    current_sign_in_ip inet,
+    last_sign_in_ip inet,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    provider character varying,
+    uid character varying,
+    name character varying,
+    github_nickname character varying
+);
+
+
+--
+-- Name: internal_users_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.internal_users_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: internal_users_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.internal_users_id_seq OWNED BY public.internal_users.id;
+
+
+--
 -- Name: old_passwords; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -402,6 +443,13 @@ ALTER TABLE ONLY public.fhir_endpoints ALTER COLUMN id SET DEFAULT nextval('publ
 
 
 --
+-- Name: internal_users id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.internal_users ALTER COLUMN id SET DEFAULT nextval('public.internal_users_id_seq'::regclass);
+
+
+--
 -- Name: old_passwords id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -479,6 +527,14 @@ ALTER TABLE ONLY public.ar_internal_metadata
 
 ALTER TABLE ONLY public.fhir_endpoints
     ADD CONSTRAINT fhir_endpoints_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: internal_users internal_users_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.internal_users
+    ADD CONSTRAINT internal_users_pkey PRIMARY KEY (id);
 
 
 --
@@ -568,6 +624,13 @@ CREATE INDEX index_fhir_endpoints_on_registered_organization_id ON public.fhir_e
 
 
 --
+-- Name: index_internal_users_on_uid_and_provider; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_internal_users_on_uid_and_provider ON public.internal_users USING btree (uid, provider);
+
+
+--
 -- Name: index_org_user_assignments_on_organization_id_and_user_id; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -651,7 +714,6 @@ CREATE UNIQUE INDEX index_users_on_reset_password_token ON public.users USING bt
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
-('0'),
 ('20190717172018'),
 ('20190718151153'),
 ('20190801183311'),
@@ -696,7 +758,6 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20200715203040'),
 ('20200909131201'),
 ('20200909150413'),
-('20200909153523'),
-('20210614153355');
+('20200909153523');
 
 
