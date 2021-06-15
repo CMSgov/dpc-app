@@ -10,10 +10,6 @@ Rails.application.routes.draw do
     root 'portal#show', as: :authenticated_root, via: :get
   end
 
-  authenticated :internal_user do
-    root 'internal/users#index', as: :authenticated_internal_root
-  end
-
   match '/portal', to: 'portal#show', via: :get
 
   resources :organizations, only: [:edit, :update] do
