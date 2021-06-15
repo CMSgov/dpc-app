@@ -3,8 +3,6 @@
 module Internal
   module Auth
     class OmniauthCallbacksController < Devise::OmniauthCallbacksController
-      include InternalUserDeviseHelper
-      include MultiModelLoginHelper
       # You should configure your model like this:
       # devise :omniauthable, omniauth_providers: [:twitter]
 
