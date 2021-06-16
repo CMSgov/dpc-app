@@ -4,6 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"sort"
+	"time"
+
 	"github.com/CMSgov/dpc/api/client"
 	"github.com/CMSgov/dpc/api/conf"
 	"github.com/CMSgov/dpc/api/fhirror"
@@ -11,9 +15,6 @@ import (
 	"github.com/CMSgov/dpc/api/middleware"
 	"github.com/CMSgov/dpc/api/model"
 	"go.uber.org/zap"
-	"net/http"
-	"sort"
-	"time"
 )
 
 // JobControllerImpl is a struct that defines what the controller has
@@ -161,7 +162,6 @@ func inProgress(w http.ResponseWriter, batches []model.BatchAndFiles) {
 	}
 	w.Header().Add("X-Progress", progress)
 	w.WriteHeader(202)
-	return
 }
 
 func getStatus(batches []model.BatchAndFiles) map[string]bool {
