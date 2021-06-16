@@ -4,8 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/CMSgov/dpc/attribution/model/v2"
-
+	v2 "github.com/CMSgov/dpc/attribution/model/v2"
 	"github.com/bxcodec/faker/v3"
 )
 
@@ -151,11 +150,6 @@ const Groupjson = `
 // Implementerjson is an Implementer json string for testing purposes
 const Implementerjson = `{
   "name": "test-Implementer"
-}`
-
-// JobJSON is a Job json string for testing purposes
-const JobJSON = `{
-  "id": "test-export-job"
 }`
 
 // OrgResponse provides a sample response that mimics what attribution service returns for testing purposes
