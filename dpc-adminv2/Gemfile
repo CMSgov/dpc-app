@@ -10,7 +10,6 @@ gem 'pg', '~> 1.1'
 gem 'puma', '~> 5.0'
 # Use SCSS for stylesheets
 gem 'sass-rails', '>= 6'
-gem 'omniauth-rails_csrf_protection', '~> 0.1'
 # Transpile app-like JavaScript. Read more: https://github.com/rails/webpacker
 gem 'webpacker', '~> 5.0'
 # Turbolinks makes navigating your web application faster. Read more: https://github.com/turbolinks/turbolinks
@@ -28,13 +27,6 @@ gem 'jbuilder', '~> 2.7'
 # Reduces boot times through caching; required in config/boot.rb
 gem 'bootsnap', '>= 1.4.4', require: false
 
-gem 'devise'
-gem 'devise-async'
-gem 'devise-security'
-gem 'omniauth-github'
-gem 'omniauth-oktaoauth'
-gem 'octokit' # can be removed once we move past github omniauth
-
 group :development, :test do
   gem 'byebug', platforms: [:mri, :mingw, :x64_mingw]
   gem 'pry'
@@ -42,7 +34,6 @@ group :development, :test do
   gem 'rspec-rails'
   gem 'database_cleaner'
   gem 'capybara', '>= 3.35.3'
-  gem 'climate_control'
   gem 'factory_bot_rails'
   gem 'faker'
   gem 'vcr'
@@ -57,9 +48,6 @@ group :development do
   gem 'listen', '~> 3.3'
   # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
   gem 'spring'
-
-  gem 'rubocop', require: false
-  gem 'rubocop-performance', require: false
 end
 
 group :test do
