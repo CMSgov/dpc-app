@@ -52,7 +52,7 @@ func (s *BfdTestSuite) SetupSuite() {
 	conf.NewConfig("../../configs")
 	conf.SetEnv(s.T(), "bfd.clientCertFile", "../shared_files/decrypted/bfd-dev-test-cert.pem")
 	conf.SetEnv(s.T(), "bfd.clientKeyFile", "../shared_files/decrypted/bfd-dev-test-key.pem")
-	conf.SetEnv(s.T(), "bfd.clientCAFile", "../shared_files/localhost.crt")
+	conf.SetEnv(s.T(), "bfd.clientCAFile", "../shared_files/decrypted/bfd-dev-test-ca-file.crt")
 	conf.SetEnv(s.T(), "bfd.requestRetryIntervalMS", "10")
 	conf.SetEnv(s.T(), "bfd.timeoutMS", "2000")
 }
