@@ -17,6 +17,8 @@
 !/log/.keep
 !/tmp/.keep
 
+dump.rdb
+
 # Ignore pidfiles, but keep the directory.
 /tmp/pids/*
 !/tmp/pids/
@@ -41,3 +43,5 @@ yarn-debug.log*
 
 .env.development.local
 .env.test.local
+
+coverage
