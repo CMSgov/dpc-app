@@ -62,7 +62,6 @@ GEM
       zeitwerk (~> 2.3)
     addressable (2.7.0)
       public_suffix (>= 2.0.2, < 5.0)
-    bcrypt (3.1.16)
     bindex (0.8.1)
     bootsnap (1.7.5)
       msgpack (~> 1.0)
@@ -82,7 +81,6 @@ GEM
     childprocess (3.0.0)
     coderay (1.1.3)
     concurrent-ruby (1.1.9)
-    connection_pool (2.2.5)
     crack (0.4.5)
       rexml
     crass (1.0.6)
@@ -92,17 +90,6 @@ GEM
       activerecord (>= 5.a)
       database_cleaner-core (~> 2.0.0)
     database_cleaner-core (2.0.1)
-    devise (4.8.0)
-      bcrypt (~> 3.0)
-      orm_adapter (~> 0.1)
-      railties (>= 4.1.0)
-      responders
-      warden (~> 1.2.3)
-    devise-security (0.16.0)
-      devise (>= 4.3.0, < 5.0)
-    devise_invitable (2.0.5)
-      actionmailer (>= 5.0)
-      devise (>= 4.6)
     diff-lcs (1.4.4)
     dotenv (2.7.6)
     dotenv-rails (2.7.6)
@@ -116,34 +103,17 @@ GEM
       railties (>= 5.0.0)
     faker (2.18.0)
       i18n (>= 1.6, < 2)
-    fakeredis (0.8.0)
-      redis (~> 4.1)
-    ffi (1.15.3)
+    ffi (1.15.1)
     globalid (0.4.2)
       activesupport (>= 4.2.0)
     hashdiff (1.0.1)
-    health_check (3.1.0)
-      railties (>= 5.0)
     i18n (1.8.10)
       concurrent-ruby (~> 1.0)
     jbuilder (2.11.2)
       activesupport (>= 5.0.0)
-    launchy (2.5.0)
-      addressable (~> 2.7)
-    letter_opener (1.7.0)
-      launchy (~> 2.2)
-    letter_opener_web (1.4.0)
-      actionmailer (>= 3.2)
-      letter_opener (~> 1.0)
-      railties (>= 3.2)
     listen (3.5.1)
       rb-fsevent (~> 0.10, >= 0.10.3)
       rb-inotify (~> 0.9, >= 0.9.10)
-    lograge (0.11.2)
-      actionpack (>= 4)
-      activesupport (>= 4)
-      railties (>= 4)
-      request_store (~> 1.0)
     loofah (2.10.0)
       crass (~> 1.0.2)
       nokogiri (>= 1.5.9)
@@ -154,13 +124,9 @@ GEM
     mini_mime (1.0.3)
     minitest (5.14.4)
     msgpack (1.4.2)
-    newrelic_rpm (6.15.0)
     nio4r (2.5.7)
     nokogiri (1.11.7-x86_64-darwin)
       racc (~> 1.4)
-    nokogiri (1.11.7-x86_64-linux)
-      racc (~> 1.4)
-    orm_adapter (0.5.0)
     pg (1.2.3)
     pry (0.12.2)
       coderay (~> 1.1.0)
@@ -206,15 +172,7 @@ GEM
     rb-fsevent (0.11.0)
     rb-inotify (0.10.1)
       ffi (~> 1.0)
-    redis (4.3.1)
-    redis-namespace (1.8.1)
-      redis (>= 3.0.4)
     regexp_parser (2.1.1)
-    request_store (1.5.0)
-      rack (>= 1.4)
-    responders (3.0.1)
-      actionpack (>= 5.0)
-      railties (>= 5.0)
     rexml (3.2.5)
     rspec-core (3.10.1)
       rspec-support (~> 3.10.0)
@@ -248,14 +206,6 @@ GEM
       childprocess (>= 0.5, < 4.0)
       rubyzip (>= 1.2.2)
     semantic_range (3.0.0)
-    sidekiq (6.2.1)
-      connection_pool (>= 2.2.2)
-      rack (~> 2.0)
-      redis (>= 4.2.0)
-    sidekiq_alive (2.0.6)
-      sidekiq
-    simpleidn (0.2.1)
-      unf (~> 0.1.4)
     spring (2.1.1)
     sprockets (4.0.2)
       concurrent-ruby (~> 1.0)
@@ -266,19 +216,12 @@ GEM
       sprockets (>= 3.0.0)
     thor (1.1.0)
     tilt (2.0.10)
-    truemail (2.4.3)
-      simpleidn (~> 0.2.1)
     turbolinks (5.2.1)
       turbolinks-source (~> 5.2)
     turbolinks-source (5.2.0)
     tzinfo (2.0.4)
       concurrent-ruby (~> 1.0)
-    unf (0.1.4)
-      unf_ext
-    unf_ext (0.0.7.7)
     vcr (6.0.0)
-    warden (1.2.9)
-      rack (>= 2.0.9)
     web-console (4.1.0)
       actionview (>= 6.0.0)
       activemodel (>= 6.0.0)
@@ -297,7 +240,7 @@ GEM
       rack-proxy (>= 0.6.1)
       railties (>= 5.2)
       semantic_range (>= 2.3.0)
-    websocket-driver (0.7.5)
+    websocket-driver (0.7.4)
       websocket-extensions (>= 0.1.0)
     websocket-extensions (0.1.5)
     xpath (3.2.0)
@@ -306,8 +249,6 @@ GEM
 
 PLATFORMS
   x86_64-darwin-18
-  x86_64-darwin-19
-  x86_64-linux-musl
 
 DEPENDENCIES
   bootsnap (>= 1.4.4)
@@ -315,34 +256,20 @@ DEPENDENCIES
   byebug
   capybara (>= 3.35.3)
   database_cleaner
-  devise
-  devise-security
-  devise_invitable (~> 2.0.0)
   dotenv-rails (>= 2.7.6)
   factory_bot_rails
   faker
-  fakeredis
-  health_check
   jbuilder (~> 2.7)
-  letter_opener
-  letter_opener_web (~> 1.0)
   listen (~> 3.3)
-  lograge
-  newrelic_rpm (~> 6.10)
   pg (~> 1.1)
   pry
   pry-nav
-  puma (>= 5.3.1)
-  rails (~> 6.1.3)
-  redis (~> 4.0)
-  redis-namespace
+  puma (~> 5.0)
+  rails (~> 6.1.3, >= 6.1.3.2)
   rspec-rails
   sass-rails (>= 6)
   selenium-webdriver
-  sidekiq (~> 6.1)
-  sidekiq_alive
   spring
-  truemail
   turbolinks (~> 5)
   tzinfo-data
   vcr
@@ -352,7 +279,7 @@ DEPENDENCIES
   webpacker (~> 5.0)
 
 RUBY VERSION
-   ruby 2.7.2p137
+   ruby 2.6.3p62
 
 BUNDLED WITH
-   2.2.19
+   2.2.4
