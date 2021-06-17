@@ -14,36 +14,6 @@ SET default_tablespace = '';
 SET default_table_access_method = heap;
 
 --
--- Name: admin_users; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.admin_users (
-    id bigint NOT NULL,
-    created_at timestamp(6) without time zone NOT NULL,
-    updated_at timestamp(6) without time zone NOT NULL
-);
-
-
---
--- Name: admin_users_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE public.admin_users_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: admin_users_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
---
-
-ALTER SEQUENCE public.admin_users_id_seq OWNED BY public.admin_users.id;
-
-
---
 -- Name: ar_internal_metadata; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -187,13 +157,6 @@ ALTER SEQUENCE public.users_id_seq OWNED BY public.users.id;
 
 
 --
--- Name: admin_users id; Type: DEFAULT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.admin_users ALTER COLUMN id SET DEFAULT nextval('public.admin_users_id_seq'::regclass);
-
-
---
 -- Name: old_passwords id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -212,14 +175,6 @@ ALTER TABLE ONLY public.the_resources ALTER COLUMN id SET DEFAULT nextval('publi
 --
 
 ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_id_seq'::regclass);
-
-
---
--- Name: admin_users admin_users_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.admin_users
-    ADD CONSTRAINT admin_users_pkey PRIMARY KEY (id);
 
 
 --
@@ -350,7 +305,6 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20210423155520'),
 ('20210423155611'),
 ('20210429133701'),
-('20210430160219'),
-('20210617191738');
+('20210430160219');
 
 
