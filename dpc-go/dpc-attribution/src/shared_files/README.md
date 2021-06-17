@@ -24,13 +24,13 @@ The files committed in the `shared_files/encrypted` directory hold secret inform
 
 ### Managing encrypted files
 
-- Temporarily decrypt files by running the following command from the repository root directory:
+- Temporarily decrypt files by running `make bfd-certs` from the repository root directory or by using the following command for each file:
 
 ```
-./ops/scripts/secrets --decrypt dpc-go/dpc-attribution/src/shared-files/encrypted/
+./ops/scripts/secrets --decrypt <filename>
 ```
 
-- While files are decrypted, copy the files in this directory to the sibling directory `shared_files/decrypted`
+- If not using the `make bfd-certs` command, after files are decrypted, copy the files in this directory to the sibling directory `shared_files/decrypted`
 - Encrypt changed files with:
 
 ```
