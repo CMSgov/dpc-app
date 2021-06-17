@@ -74,7 +74,7 @@ func (gc *GroupController) Export(w http.ResponseWriter, r *http.Request) {
 	resp, err := gc.ac.Export(r.Context(), client.Group, groupID)
 	if err != nil {
 		log.Error("Failed to start the job in attribution", zap.Error(err))
-		fhirror.ServerIssue(r.Context(), w, http.StatusUnprocessableEntity, "Failed to start export job")
+		fhirror.ServerIssue(r.Context(), w, http.StatusUnprocessableEntity, err.Error())
 		return
 	}
 

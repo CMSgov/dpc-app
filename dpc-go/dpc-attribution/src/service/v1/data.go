@@ -3,13 +3,14 @@ package service
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
+
 	"github.com/CMSgov/dpc/attribution/logger"
 	"github.com/CMSgov/dpc/attribution/middleware"
 	"github.com/CMSgov/dpc/attribution/repository"
 	"github.com/CMSgov/dpc/attribution/util"
 	"github.com/darahayes/go-boom"
 	"go.uber.org/zap"
-	"net/http"
 )
 
 // DataService struct defines the class

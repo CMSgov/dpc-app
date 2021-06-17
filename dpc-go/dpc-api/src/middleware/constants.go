@@ -13,6 +13,16 @@ const (
 	FhirNdjson string = "application/fhir+ndjson"
 	// ApplicationNdjson is an allowed output format strings for export requests
 	ApplicationNdjson string = "application/ndjson"
+	// PatientString is the string constant for Patient
+	PatientString string = "Patient"
+	// EoBString is the string constant for ExplanationOfBenefit
+	EoBString string = "ExplanationOfBenefit"
+	// CoverageString is the string constant for Coverage
+	CoverageString string = "Coverage"
+	// AllResources is the list of allowed resources for export
+	AllResources string = "Patient,Coverage,ExplanationOfBenefit"
+	// SinceLayout is the time format for the since parameter
+	SinceLayout string = "2006-01-02T15:04:05-07:00"
 	// Ndjson is an allowed output format strings for export requests
 	Ndjson string = "ndjson"
 	// ContextKeyOrganization is the key in the context to retrieve the organizationID
@@ -27,4 +37,8 @@ const (
 	ContextKeyFileName
 	// ContextKeyJobID is the key in the context to retrieve the jobID
 	ContextKeyJobID
+	// ContextKeyResourceTypes is the key in the context to pass on the _types param values
+	ContextKeyResourceTypes
+	// ContextKeySince is the key in the context to pass on the _since param value
+	ContextKeySince
 )
