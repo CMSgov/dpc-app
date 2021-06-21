@@ -34,7 +34,7 @@ aria-controls="topnav-wrap" aria-label="Close menu">
       <% unless (controller_name == "sessions" || controller_name == "registrations") %>
         <li class="topnav__item">
           <a class="topnav__link" href="<%= destroy_admin_session_path %>"
-              id="sign-out" data-method="delete" data-test="internal-user-signout">
+              id="sign-out" data-method="delete" data-test="admin-signout">
               Sign out
           </a>
         </li>
