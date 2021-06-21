@@ -9,7 +9,7 @@ class DeviseCreateAdmins < ActiveRecord::Migration[6.1]
       t.string :github_nickname
 
       ## Database authenticatable
-      t.string :email,              null: false, default: ""
+      t.string :email,              default: ""
       t.string :encrypted_password, null: false, default: ""
 
       ## Trackable

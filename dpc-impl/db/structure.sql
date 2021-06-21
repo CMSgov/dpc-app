@@ -23,7 +23,7 @@ CREATE TABLE public.admins (
     uid character varying,
     name character varying,
     github_nickname character varying,
-    email character varying DEFAULT ''::character varying NOT NULL,
+    email character varying DEFAULT ''::character varying,
     encrypted_password character varying DEFAULT ''::character varying NOT NULL,
     sign_in_count integer DEFAULT 0 NOT NULL,
     current_sign_in_at timestamp without time zone,
