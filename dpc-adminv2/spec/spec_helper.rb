@@ -1,23 +1,23 @@
 # frozen_string_literal: true
 
 # require 'fakeredis/rspec'
-# require 'simplecov'
+require 'simplecov'
 
-# SimpleCov.start 'rails' do
-#   track_files '**/{app,lib}/**/*.rb'
+SimpleCov.start 'rails' do
+  track_files '**/{app,lib}/**/*.rb'
 
-#   add_group 'Serializers', 'app/serializers'
-#   add_group 'Services', 'app/services'
-#   add_group 'Validators', 'app/validators'
+  add_group 'Serializers', 'app/serializers'
+  add_group 'Services', 'app/services'
+  add_group 'Validators', 'app/validators'
 
-#   add_filter 'app/jobs/application_job.rb'
-#   add_filter 'app/channels/application_cable/channel.rb'
-#   add_filter 'app/channels/application_cable/connection.rb'
-#   add_filter 'app/controllers/pages_controller.rb' # loads static content
+  add_filter 'app/jobs/application_job.rb'
+  add_filter 'app/channels/application_cable/channel.rb'
+  add_filter 'app/channels/application_cable/connection.rb'
+  add_filter 'app/controllers/pages_controller.rb' # loads static content
 
-#   SimpleCov.minimum_coverage 80
-#   SimpleCov.minimum_coverage_by_file 0
-# end
+  SimpleCov.minimum_coverage 80
+  SimpleCov.minimum_coverage_by_file 0
+end
 
 RSpec.configure do |config|
   config.expect_with :rspec do |expectations|
