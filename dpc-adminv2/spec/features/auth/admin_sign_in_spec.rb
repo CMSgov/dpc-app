@@ -18,6 +18,22 @@ RSpec.feature 'admin signs in' do
       before(:each) do
         github_client = double(Octokit::Client)
         allow(Octokit::Client).to receive(:new).and_return(github_client)
+        allow(github_client).to receive(:user_teams).and_return(
+          [
+            {
+              name: 'dpc-test',
+              id: '111222333',
+              slug: 'dpc-test',
+              privacy: 'closed',
+              url: 'https://api.github.com/teams/111222333',
+              organization: {
+                login: 'CMSgov',
+                id: '999888777',
+                url: 'https://api.github.com/orgs/CMSgov'
+              }
+            }
+          ]
+        )
       end
 
       scenario 'creates new admin' do
@@ -37,7 +53,6 @@ RSpec.feature 'admin signs in' do
         find('[data-test="admin-sign-in-form"]').click
 
         expect(page).to have_css('[data-test="admin-signout"]')
-        expect(page).to have_content('test@cms.hhs.gov')
       end
     end
   end
