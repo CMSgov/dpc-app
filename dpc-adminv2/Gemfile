@@ -26,6 +26,15 @@ gem 'jbuilder', '~> 2.7'
 
 # Reduces boot times through caching; required in config/boot.rb
 gem 'bootsnap', '>= 1.4.4', require: false
+gem 'health_check'
+
+gem 'omniauth-rails_csrf_protection', '~> 0.1'
+gem 'devise'
+gem 'devise-async'
+gem 'devise-security'
+gem 'omniauth-github'
+gem 'omniauth-oktaoauth'
+gem 'octokit' # can be removed once we move past github omniauth
 
 group :development, :test do
   gem 'byebug', platforms: [:mri, :mingw, :x64_mingw]
