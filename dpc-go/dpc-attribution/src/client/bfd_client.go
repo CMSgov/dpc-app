@@ -27,8 +27,6 @@ import (
 	"golang.org/x/crypto/pbkdf2"
 )
 
-//const syntheticBeneID = "-19990000000001"
-
 const (
 	clientIDHeader = "BULK-CLIENTID"
 	jobIDHeader    = "BULK-JOBID"
