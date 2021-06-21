@@ -48,11 +48,13 @@ func NewConfig(basePath string) BfdConfig {
 	}
 }
 
+// ClaimsWindow is the time frame for the claims window
 type ClaimsWindow struct {
 	LowerBound time.Time
 	UpperBound time.Time
 }
 
+// APIClient is an interface for the API Client
 type APIClient interface {
 	GetExplanationOfBenefit(patientID, jobID, cmsID, since string, transactionTime time.Time, claimsWindow ClaimsWindow) (*models.Bundle, error)
 	GetPatient(patientID, jobID, cmsID, since string, transactionTime time.Time) (*models.Bundle, error)
@@ -60,6 +62,7 @@ type APIClient interface {
 	GetPatientByIdentifierHash(hashedIdentifier string) (string, error)
 }
 
+// BfdClient is an interface for the BFD Client
 type BfdClient struct {
 	client fhir.Client
 
@@ -76,6 +79,7 @@ var _ APIClient = &BfdClient{}
 // Set Logger
 var log = logger.WithContext(context.Background())
 
+// NewBfdClient creates a new BFD Client
 func NewBfdClient(config BfdConfig) (*BfdClient, error) {
 	certFile := conf.GetAsString("bfd.clientCertFile")
 	keyFile := conf.GetAsString("bfd.clientKeyFile")
@@ -120,6 +124,7 @@ func NewBfdClient(config BfdConfig) (*BfdClient, error) {
 	return &BfdClient{client, maxTries, retryInterval, config.BfdServer, config.BfdBasePath}, nil
 }
 
+// GetPatient is a method to get patient data using a patient ID
 func (bfd *BfdClient) GetPatient(patientID, jobID, cmsID, since string, transactionTime time.Time) (*models.Bundle, error) {
 	header := make(http.Header)
 	header.Add("IncludeAddressFields", "true")
@@ -135,6 +140,7 @@ func (bfd *BfdClient) GetPatient(patientID, jobID, cmsID, since string, transact
 	return bfd.getBundleData(u, jobID, cmsID, header)
 }
 
+// GetPatientByIdentifierHash is a method to get patient data using a hashed MBI
 func (bfd *BfdClient) GetPatientByIdentifierHash(hashedIdentifier string) (string, error) {
 	params := GetDefaultParams()
 
@@ -149,6 +155,7 @@ func (bfd *BfdClient) GetPatientByIdentifierHash(hashedIdentifier string) (strin
 	return bfd.getRawData(u)
 }
 
+// GetCoverage is a method to get coverage data using a bene ID
 func (bfd *BfdClient) GetCoverage(beneficiaryID, jobID, cmsID, since string, transactionTime time.Time) (*models.Bundle, error) {
 	params := GetDefaultParams()
 	params.Set("beneficiary", beneficiaryID)
@@ -162,6 +169,7 @@ func (bfd *BfdClient) GetCoverage(beneficiaryID, jobID, cmsID, since string, tra
 	return bfd.getBundleData(u, jobID, cmsID, nil)
 }
 
+// GetExplanationOfBenefit is a method to get EOB data using a patient ID
 func (bfd *BfdClient) GetExplanationOfBenefit(patientID, jobID, cmsID, since string, transactionTime time.Time, claimsWindow ClaimsWindow) (*models.Bundle, error) {
 	// ServiceDate only uses yyyy-mm-dd
 	const svcDateFmt = "2006-01-02"
@@ -189,6 +197,7 @@ func (bfd *BfdClient) GetExplanationOfBenefit(patientID, jobID, cmsID, since str
 	return bfd.getBundleData(u, jobID, cmsID, header)
 }
 
+// GetMetadata is a method to get metadata from the BFD response
 func (bfd *BfdClient) GetMetadata() (string, error) {
 	u, err := bfd.getURL("metadata", GetDefaultParams())
 	if err != nil {
@@ -237,14 +246,8 @@ func (bfd *BfdClient) tryBundleRequest(u *url.URL, jobID, cmsID string, headers 
 			return err
 		}
 
-		for key, values := range headers {
-			for _, value := range values {
-				req.Header.Add(key, value)
-			}
-		}
-
 		queryID := uuid.New()
-		addRequestHeaders(req, queryID, jobID, cmsID)
+		addRequestHeaders(req, queryID, jobID, cmsID, headers)
 
 		result, nextURL, err = bfd.client.DoBundleRequest(req)
 		if err != nil {
@@ -278,7 +281,7 @@ func (bfd *BfdClient) getRawData(u *url.URL) (string, error) {
 			log.Error(err.Error())
 			return err
 		}
-		addRequestHeaders(req, uuid.New(), "", "")
+		addRequestHeaders(req, uuid.New(), "", "", nil)
 
 		result, err = bfd.client.DoRaw(req)
 		if err != nil {
@@ -309,7 +312,12 @@ func (bfd *BfdClient) getURL(path string, params url.Values) (*url.URL, error) {
 	return u, nil
 }
 
-func addRequestHeaders(req *http.Request, reqID uuid.UUID, jobID, cmsID string) {
+func addRequestHeaders(req *http.Request, reqID uuid.UUID, jobID, cmsID string, otherHeaders http.Header) {
+	for key, values := range otherHeaders {
+		for _, value := range values {
+			req.Header.Add(key, value)
+		}
+	}
 	// Info for BFD backend: https://jira.cms.gov/browse/BLUEBUTTON-483
 	req.Header.Add("BFD-OriginalQueryTimestamp", time.Now().String())
 	req.Header.Add("BFD-OriginalQueryId", reqID.String())
@@ -335,12 +343,14 @@ func addRequestHeaders(req *http.Request, reqID uuid.UUID, jobID, cmsID string) 
 
 }
 
+// GetDefaultParams is a method to get default params
 func GetDefaultParams() (params url.Values) {
 	params = url.Values{}
 	params.Set("_format", "application/fhir+json")
 	return params
 }
 
+// HashIdentifier is a method to decode a hashed MBI
 func HashIdentifier(toHash string) (hashedValue string) {
 	bfdPepper := conf.GetAsString("bfd.hashPepper")
 	bfdIter := conf.GetAsInt("bb.hashIter", 1000)

@@ -1,9 +1,10 @@
-// fhir package contains structs representing FHIR data.
+// Package fhir contains structs representing FHIR data.
 // These data models are a lighter weight definition contain certain fields needed for DPC
 package fhir
 
 import "time"
 
+// Resource models a FHIR resource
 type Resource struct {
 	ResourceType string `json:"resourceType"`
 	ID           string `json:"id"`
@@ -13,6 +14,7 @@ type Resource struct {
 	Total uint `json:"total"`
 }
 
+// Bundle models a FHIR bundle
 type Bundle struct {
 	Resource
 	Links []struct {
@@ -22,4 +24,5 @@ type Bundle struct {
 	Entries []BundleEntry `json:"entry"`
 }
 
+// BundleEntry models a FHIR bundle entry
 type BundleEntry map[string]interface{}
