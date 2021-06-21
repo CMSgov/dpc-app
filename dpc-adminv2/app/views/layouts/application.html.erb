@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <%= render partial: 'shared/head' %>
+
+  <body class="ds-base">
+    <!-- nav -->
+    <%= render partial: 'shared/navbar' %>
+
+    <div class="header-seperator"></div>
+
+    <!-- main -->
+    <section class="ds-l-container ds-u-padding-top--7 ds-u-margin-bottom--7" id="main">
+      <%= yield %>
+    </section>
+
+    <!-- footer -->
+    <%= render partial: 'shared/footer' %>
+  </body>
+</html>
