@@ -12,6 +12,7 @@ import (
 	models "github.com/CMSgov/dpc/attribution/model/fhir"
 )
 
+// Client provides interface for FHIR client
 type Client interface {
 	DoBundleRequest(req *http.Request) (bundle *models.Bundle, nextURL *url.URL, err error)
 
@@ -19,14 +20,12 @@ type Client interface {
 	DoRaw(req *http.Request) (string, error)
 }
 
-type BundleEntry map[string]interface{}
-
+// NewClient is used to create a new Client
 func NewClient(httpClient *http.Client, pageSize int) Client {
 	if pageSize == 0 {
 		return &singleClient{httpClient}
-	} else {
-		return &client{httpClient, strconv.Itoa(pageSize)}
 	}
+	return &client{httpClient, strconv.Itoa(pageSize)}
 }
 
 // singleClient ensures that entire bundle response is read in a single response (i.e. no paging)
