@@ -2,11 +2,12 @@ package middleware
 
 import (
 	"context"
+	"net/http"
+
 	"github.com/CMSgov/dpc/attribution/logger"
 	"github.com/darahayes/go-boom"
 	"github.com/go-chi/chi"
 	"github.com/pkg/errors"
-	"net/http"
 )
 
 // FileNameCtx middleware to extract the fileName from the chi url param and set it into the request context
