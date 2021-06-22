@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strings"
+	"time"
 
 	"github.com/CMSgov/dpc/api/fhirror"
 	"github.com/CMSgov/dpc/api/logger"
@@ -74,6 +76,75 @@ func RequestURLCtx(next http.Handler) http.Handler {
 		ctx := context.WithValue(r.Context(), ContextKeyRequestURL, fmt.Sprintf("%s://%s%s %s\" ", scheme, r.Host, r.RequestURI, r.Proto))
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
+}
+
+// ExportTypesParamCtx middleware to extract the export _type param
+func ExportTypesParamCtx(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log := logger.WithContext(r.Context())
+		types := r.URL.Query().Get("_type")
+		if types == "" {
+			types = AllResources
+		}
+		if !validateTypes(types) {
+			log.Error(fmt.Sprintf("Invalid resource type: %s", types))
+			fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "Invalid resource type")
+			return
+		}
+		ctx := context.WithValue(r.Context(), ContextKeyResourceTypes, types)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+func validateTypes(types string) bool {
+	t := strings.Split(types, ",")
+	for _, s := range t {
+		if !isValidType(s) {
+			return false
+		}
+	}
+	return true
+}
+
+func isValidType(t string) bool {
+	switch t {
+	case
+		PatientString,
+		CoverageString,
+		EoBString:
+		return true
+	}
+	return false
+}
+
+// ExportSinceParamCtx middleware to extract the export _since param
+func ExportSinceParamCtx(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log := logger.WithContext(r.Context())
+		since := r.URL.Query().Get("_since")
+		s, msg := validateSince(since)
+		if msg != "" {
+			log.Error(msg)
+			fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, msg)
+			return
+		}
+		ctx := context.WithValue(r.Context(), ContextKeySince, s)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+func validateSince(since string) (string, string) {
+	if since == "" {
+		return "", ""
+	}
+	p, err := time.Parse(SinceLayout, since)
+	if err != nil {
+		return "", "Could not parse _since"
+	}
+	if p.After(time.Now()) {
+		return "", "_since cannot be a future date"
+	}
+	return p.Format(SinceLayout), ""
 }
 
 // JobCtx middleware to extract the jobID from the chi url param and set it into the request context

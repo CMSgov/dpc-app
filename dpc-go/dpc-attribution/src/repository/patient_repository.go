@@ -6,6 +6,7 @@ import (
 
 	v1 "github.com/CMSgov/dpc/attribution/model/v1"
 	"github.com/huandu/go-sqlbuilder"
+	"github.com/pkg/errors"
 )
 
 // PatientRepo is an interface for test mocking purposes
@@ -67,7 +68,7 @@ func (pr *PatientRepository) GetGroupNPIs(ctx context.Context, groupID string) (
 	row := new(v1.GroupNPIs)
 	rowStruct := sqlbuilder.NewStruct(new(v1.GroupNPIs)).For(sqlFlavor)
 	if err := pr.db.QueryRowContext(ctx, q, args...).Scan(rowStruct.Addr(&row)...); err != nil {
-		return nil, err
+		return nil, errors.New("Could not find Group")
 	}
 	return row, nil
 }

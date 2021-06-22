@@ -1,13 +1,16 @@
 package v1
 
-import "time"
+import (
+	"database/sql"
+	"time"
+)
 
 //TODO: This stuff is probably applicable to both v1 and v2, in future move to appropriate package
 
 // BatchRequest is a struct to hold details for job batches
 type BatchRequest struct {
 	Priority        int
-	Since           *time.Time
+	Since           *sql.NullTime
 	RequestURL      string
 	RequestingIP    string
 	OrganizationNPI string
