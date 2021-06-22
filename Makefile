@@ -81,7 +81,6 @@ build-v2:
 	@docker-compose -f dpc-go/dpc-api/docker-compose.yml build api
 	@docker-compose -p dpc-v2 -f docker-compose.yml -f dpc-go/dpc-attribution/docker-compose.yml -f docker-compose.v2.yml build ssas
 
-
 .PHONY: start-v2
 start-v2: secure-envs
 	@docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.v2.yml up start_core_dependencies
