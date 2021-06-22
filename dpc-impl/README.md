@@ -1,5 +1,5 @@
 # DPC Implementer Portal README
-This is version 2 of the Data at the Point of Care (DPCv2) web app, specifically designed for implementers in the provider-implementer relationship. DPCv2 allows implementer users to invite users to their group, manage multiple provider organizations and their associated public keys and client tokens. There is an associated [admin portal](https://github.com/CMSgov/dpc-app/tree/master/dpc-adminv2) to manage users, implementers, and provider organizations and a [static site](https://github.com/CMSgov/dpc-static-site) for the public facing static pages.
+This is version 2 of the Data at the Point of Care (DPCv2) web app, specifically designed for implementers in the provider-implementer relationship. DPCv2 allows implementer users to invite users to their group, manage multiple provider organizations and their associated public keys and client tokens. There is an associated [admin portal](https://github.com/CMSgov/dpc-app/tree/master/dpc-adminv2) for managing users, implementers, and provider organizations and a [static site](https://github.com/CMSgov/dpc-static-site) for the public facing static pages.
 
 ## Before Installation
 DPCv2 is Ruby on Rails driven application with a PostgreSQL database. In order to run either this application or the admin portal, the following will need to be installed locally:
@@ -60,6 +60,9 @@ rails db:create db:migrate db:seed
 rails server
 ```
 
+**NOTE**\
+DPCv2 is operating on PostgreSQL v. 11. This may require you to delete the line `SET default_table_access_method = heap;` in the rails database.
+
 ## Run the Tests
 To run tests locally, add the following to `.env.test.local`:
 ```
@@ -81,7 +84,7 @@ Once local variables are set, navigate to `dpc-app/dpc-impl` and run `rspec spec
 `make stop-portals` : Stops web app, admin, impl, admin v2 portals; redis and sidekiq servers; database\
 `make down-portals` : Removes web app, admin, impl, admin v2 portals; redis and sidekiq servers; database; docker network
 
-### Default Ports
+## Default Ports
 **Shared:**
 Redis Server: `localhost:6379/1`
 
