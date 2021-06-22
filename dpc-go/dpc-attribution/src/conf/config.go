@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"testing"
 
 	"github.com/spf13/viper"
 )
@@ -73,4 +74,26 @@ func GetAsInt(key string, dv ...int) int {
 // Get is a function to retrieve the value from the viper config as an interface{}
 func Get(key string) interface{} {
 	return config.Get(key)
+}
+
+// SetEnv is a public function that adds key values into conf. This function should only be used
+// either in this package itself or testing. Protect parameter is type *testing.T, and it's there
+// to ensure developers knowingly use it in the appropriate circumstances.
+// This function will most likely become a private function in later versions of the package.
+func SetEnv(protect *testing.T, key string, value interface{}) {
+	config.Set(key, value)
+}
+
+type nullValue struct{}
+
+var null = nullValue{}
+
+// UnsetEnv is a public function that "unsets" a variable. Like SetEnv, this should only be used
+// either in this package itself or testing.
+// This function will most likely become a private function in later versions of the package.
+func UnsetEnv(protect *testing.T, key string) error {
+	config.Set(key, null)
+	// Unset environment variable too to ensure that viper does not attempt
+	// to retrieve it from the os.
+	return os.Unsetenv(key)
 }
