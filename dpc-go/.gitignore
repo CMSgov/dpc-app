@@ -1,3 +1,8 @@
 #Binary
 dpc-attribution/src/attribution
 dpc-api/src/api
+
+# secure info
+.vault_password
+dpc-attribution/src/shared_files/decrypted/*
+!dpc-attribution/src/shared_files/decrypted/README.md
