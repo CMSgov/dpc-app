@@ -11,6 +11,48 @@ SET row_security = off;
 
 SET default_tablespace = '';
 
+
+--
+-- Name: admins; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.admins (
+    id bigint NOT NULL,
+    provider character varying,
+    uid character varying,
+    name character varying,
+    github_nickname character varying,
+    email character varying DEFAULT ''::character varying,
+    encrypted_password character varying DEFAULT ''::character varying NOT NULL,
+    sign_in_count integer DEFAULT 0 NOT NULL,
+    current_sign_in_at timestamp without time zone,
+    last_sign_in_at timestamp without time zone,
+    current_sign_in_ip character varying,
+    last_sign_in_ip character varying,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: admins_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.admins_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: admins_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.admins_id_seq OWNED BY public.admins.id;
+
+
 --
 -- Name: ar_internal_metadata; Type: TABLE; Schema: public; Owner: -
 --
@@ -155,6 +197,13 @@ ALTER SEQUENCE public.users_id_seq OWNED BY public.users.id;
 
 
 --
+-- Name: admins id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.admins ALTER COLUMN id SET DEFAULT nextval('public.admins_id_seq'::regclass);
+
+
+--
 -- Name: old_passwords id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -173,6 +222,14 @@ ALTER TABLE ONLY public.the_resources ALTER COLUMN id SET DEFAULT nextval('publi
 --
 
 ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_id_seq'::regclass);
+
+
+--
+-- Name: admins admins_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.admins
+    ADD CONSTRAINT admins_pkey PRIMARY KEY (id);
 
 
 --
@@ -213,6 +270,13 @@ ALTER TABLE ONLY public.the_resources
 
 ALTER TABLE ONLY public.users
     ADD CONSTRAINT users_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: index_admins_on_uid_and_provider; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_admins_on_uid_and_provider ON public.admins USING btree (uid, provider);
 
 
 --
@@ -303,6 +367,7 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20210423155520'),
 ('20210423155611'),
 ('20210429133701'),
-('20210430160219');
+('20210430160219'),
+('20210617195159');
 
 
