@@ -7,25 +7,27 @@
       Total provider organizations: <%= @user.provider_orgs.count %>
     </h1>
 
-    <div id="searchList">
+    <ul id="searchList">
       <% @user.provider_orgs.each_with_index do |provider, index| %>
-        <div class="provider_card_container">
-          <div class="provider_name">
-            <%= provider[:org_name] %>
-          </div>
-
-          <div class="provider_info">
-            <div class="provider_api_id">
-              ID: <%= provider[:org_id] %>
+        <li>
+          <div class="provider_card_container">
+            <div class="provider_name">
+              <%= provider[:org_name] %>
             </div>
 
-            <div class="provider_status">
-              Status: <span class="<%= active_status_class if status_active?(provider[:status]) %>"><%= provider[:status] %></span>
+            <div class="provider_info">
+              <div class="provider_api_id">
+                ID: <%= provider[:org_id] %>
+              </div>
+
+              <div class="provider_status">
+                Status: <span class="<%= active_status_class if status_active?(provider[:status]) %>"><%= provider[:status] %></span>
+              </div>
             </div>
           </div>
-        </div>
+        </li>
       <% end %>
-    </div>
+    </ul>
   <% else %>
     <div class="ds-c-alert ds-c-alert--warn ds-u-margin--5">
       <div class="ds-c-alert__body">
