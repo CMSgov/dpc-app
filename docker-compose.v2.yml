@@ -39,6 +39,58 @@ services:
     volumes:
       - ./jacocoReport/dpc-consent:/jacoco-report
 
+  ssas:
+    build:
+      context: .
+      dockerfile: docker/Dockerfiles/Dockerfile.ssas
+      args:
+        VERSION: latest
+    image: bcda-ssas:latest
+    environment:
+      - DATABASE_URL=postgresql://postgres:dpc-safe@db:5432/bcda?sslmode=disable
+      - DEBUG=true
+      - ATO_PUBLIC_KEY_FILE=../shared_files/ATO_public.pem
+      - ATO_PRIVATE_KEY_FILE=../shared_files/ATO_private.pem
+      - HTTP_ONLY=true
+      - OKTA_CLIENT_ORGURL=https://cms-sandbox.oktapreview.com
+      - OKTA_EMAIL=shawn@bcda.aco-group.us
+      - OKTA_CLIENT_TOKEN=${OKTA_CLIENT_TOKEN}
+      - BCDA_AUTH_PROVIDER=${BCDA_AUTH_PROVIDER}
+      - OKTA_OAUTH_SERVER_ID=${OKTA_OAUTH_SERVER_ID}
+      - OKTA_CA_CERT_FINGERPRINT=${OKTA_CA_CERT_FINGERPRINT}
+      - OKTA_MFA_EMAIL=${OKTA_MFA_EMAIL}
+      - OKTA_MFA_USER_ID=${OKTA_MFA_USER_ID}
+      - OKTA_MFA_USER_PASSWORD=${OKTA_MFA_USER_PASSWORD}
+      - OKTA_MFA_SMS_FACTOR_ID=${OKTA_MFA_SMS_FACTOR_ID}
+      - BCDA_SSAS_CLIENT_ID=${BCDA_SSAS_CLIENT_ID}
+      - BCDA_SSAS_SECRET=${BCDA_SSAS_SECRET}
+      - SSAS_ADMIN_SIGNING_KEY_PATH=../shared_files/ssas/admin_test_signing_key.pem
+      - SSAS_PUBLIC_SIGNING_KEY_PATH=../shared_files/ssas/public_test_signing_key.pem
+      - SSAS_ADMIN_PORT=:3004
+      - SSAS_PUBLIC_PORT=:3003
+      - SSAS_HTTP_TO_HTTPS_PORT=:3005
+      - SSAS_READ_TIMEOUT=10
+      - SSAS_WRITE_TIMEOUT=20
+      - SSAS_IDLE_TIMEOUT=120
+      - SSAS_HASH_ITERATIONS=130000
+      - SSAS_HASH_KEY_LENGTH=64
+      - SSAS_HASH_SALT_SIZE=32
+      - SSAS_DEFAULT_SYSTEM_SCOPE=bcda-api
+      - SSAS_MFA_CHALLENGE_REQUEST_MILLISECONDS=0
+      - SSAS_MFA_TOKEN_TIMEOUT_MINUTES=60
+      - SSAS_MFA_PROVIDER=${SSAS_MFA_PROVIDER}
+      - SSAS_TOKEN_BLACKLIST_CACHE_CLEANUP_MINUTES=15
+      - SSAS_TOKEN_BLACKLIST_CACHE_TIMEOUT_MINUTES=1440
+      - SSAS_TOKEN_BLACKLIST_CACHE_REFRESH_MINUTES=5
+      - SSAS_CLIENT_ASSERTION_AUD=http://local.testing.cms.gov/api/v2/Token/auth
+    volumes:
+      - ./shared_files:/usr/local/shared_files
+    ports:
+      - "3103:3003"
+      - "3104:3004"
+      - "3105:3005"
+    depends_on:
+      - db
 
   # Starts up each service in the background
   start_core_dependencies:
@@ -51,4 +103,5 @@ services:
     image: dadarek/wait-for-dependencies
     depends_on:
       - aggregation
-    command: aggregation:9900
+      - ssas
+    command: aggregation:9900 ssas:3003 ssas:3004 ssas:3005
