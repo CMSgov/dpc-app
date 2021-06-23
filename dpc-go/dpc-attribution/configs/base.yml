@@ -6,6 +6,19 @@ db:
 port: 3001
 AutoCreateOrg: "true"
 
+bfd:
+  serverLocation: ""
+  clientCertFile: "../shared_files/decrypted/bfd-dev-test-cert.pem"
+  clientKeyFile: "../shared_files/decrypted/bfd-dev-test-key.pem"
+  clientCAFile: "../shared_files/decrypted/bfd-dev-test-ca-file.crt"
+  checkCert: ""
+  hashPepper: ""
+  hashIter: 0
+  clientPageSize: 0
+  timeoutMS: 0
+  requestMaxTries: 3
+  requestRetryIntervalMS: 1000
+
 queue:
   batchSize: 100
 
