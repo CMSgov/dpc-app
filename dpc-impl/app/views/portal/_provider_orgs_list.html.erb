@@ -1,11 +1,24 @@
 
 <div id="dash_provider_list">
   <% unless @user.provider_orgs == false %>
-    <input type="text" class="ds-c-field" id="searchInput" onkeyup="searchFunc()" placeholder="Search for provider org by name, uuid, or npi.">
 
-    <h1 class="ds-text-heading--xl ds-h4 ds-u-padding-top--1">
+    <h1 class="ds-text-heading--xl ds-h4 ds-u-margin-top--2">
       Total provider organizations: <%= @user.provider_orgs.count %>
     </h1>
+
+    <div class="ds-u-margin-y--4">
+      <h1 class="ds-text-heading--xl ds-h4">
+        Search Provider Organizations
+      </h1>
+
+      <div class="ds-u-margin-bottom--1">
+        Start typing and the organizations will automatically filter.
+      </div>
+
+      <input type="text" class="ds-c-field" id="searchInput" onkeyup="searchFunc()" placeholder="Search for provider org by name, uuid, or npi.">
+
+      <div class="ds-u-margin-top--2" id="searchCount"></div>
+    </div>
 
     <ul id="searchList">
       <% @user.provider_orgs.each_with_index do |provider, index| %>
