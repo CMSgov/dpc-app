@@ -111,6 +111,9 @@ func fetchTransactionTime() (time.Time, error) {
 	if err != nil {
 		return time.Time{}, err
 	}
+	if b.Meta.LastUpdated.Equal(time.Time{}) {
+		return time.Time{}, errors.New("No transaction time returned from BFD")
+	}
 	return b.Meta.LastUpdated, nil
 }
 
