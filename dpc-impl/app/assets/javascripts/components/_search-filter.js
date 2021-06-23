@@ -20,6 +20,10 @@ function searchFunc() {
     }
   }
 
+  countOrgs(liDisplayCount);
+}
+
+function countOrgs(liDisplayCount) {
   var numCount = document.getElementById('searchCount')
 
   if (liDisplayCount == 0) {
