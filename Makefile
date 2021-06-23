@@ -142,6 +142,12 @@ maven-config:
 	@: > ./.mvn/maven.config
 	@while read line;do echo "-D$${line} " >> ./.mvn/maven.config;done < ./ops/config/decrypted/local.env
 
-.PHONE: unit-tests
+.PHONY: unit-tests
 unit-tests:
 	@bash ./dpc-unit-test.sh
+
+.PHONY: bfd-certs
+bfd-certs:
+	@bash ops/scripts/secrets --decrypt dpc-go/dpc-attribution/src/shared_files/encrypted/bfd-dev-test-ca-file.crt | tail -n +2 > dpc-go/dpc-attribution/src/shared_files/decrypted/bfd-dev-test-ca-file.crt
+	@bash ops/scripts/secrets --decrypt dpc-go/dpc-attribution/src/shared_files/encrypted/bfd-dev-test-cert.pem | tail -n +2 > dpc-go/dpc-attribution/src/shared_files/decrypted/bfd-dev-test-cert.pem
+	@bash ops/scripts/secrets --decrypt dpc-go/dpc-attribution/src/shared_files/encrypted/bfd-dev-test-key.pem | tail -n +2 > dpc-go/dpc-attribution/src/shared_files/decrypted/bfd-dev-test-key.pem
