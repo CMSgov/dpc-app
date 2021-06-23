@@ -8,7 +8,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/CMSgov/dpc/attribution/client"
 	"github.com/CMSgov/dpc/attribution/middleware"
+	"github.com/google/uuid"
 
 	"github.com/CMSgov/dpc/attribution/conf"
 	"github.com/CMSgov/dpc/attribution/model/v1"
@@ -76,7 +78,14 @@ func (js *JobServiceV1) Export(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	batches := buildBatches(ei, groupNPIs, patientMBIs)
+	tt, err := fetchTransactionTime()
+	if err != nil {
+		log.Error("Failed to fetch Transaction Time from BFD", zap.Error(err))
+		boom.Internal(w, "Failed to start job.")
+		return
+	}
+
+	batches := buildBatches(ei, groupNPIs, patientMBIs, tt)
 
 	job, err := js.jr.Insert(r.Context(), ei.OrgID, batches)
 	if err != nil {
@@ -98,6 +107,18 @@ func (js *JobServiceV1) Export(w http.ResponseWriter, r *http.Request) {
 		len(patientMBIs),
 		strings.ReplaceAll(ei.Types, ",", ";")),
 	)
+}
+
+func fetchTransactionTime() (time.Time, error) {
+	bfd, err := client.NewBfdClient(client.NewConfig("/v1/fhir/"))
+	if err != nil {
+		return time.Time{}, err
+	}
+	b, err := bfd.GetPatient("FAKE_PATIENT", uuid.New().String(), uuid.New().String(), "", time.Now())
+	if err != nil {
+		return time.Time{}, err
+	}
+	return b.Meta.LastUpdated, nil
 }
 
 func buildExportInfo(w http.ResponseWriter, r *http.Request) *ExportInfo {
@@ -131,7 +152,7 @@ func parseSinceParam(since string) (*sql.NullTime, error) {
 	return &sql.NullTime{Time: t, Valid: true}, nil
 }
 
-func buildBatches(ei *ExportInfo, groupNPIs *v1.GroupNPIs, patientMBIs []string) []v1.BatchRequest {
+func buildBatches(ei *ExportInfo, groupNPIs *v1.GroupNPIs, patientMBIs []string, tt time.Time) []v1.BatchRequest {
 	priority := 5000
 	if len(patientMBIs) == 1 {
 		priority = 1000
@@ -150,7 +171,7 @@ func buildBatches(ei *ExportInfo, groupNPIs *v1.GroupNPIs, patientMBIs []string)
 			PatientMBIs:     strings.Join(batchedPatients, ","),
 			IsBulk:          len(patientMBIs) > 1,
 			ResourceTypes:   ei.Types,
-			TransactionTime: time.Now(), // need a bfd client to do this
+			TransactionTime: tt,
 		}
 		batches = append(batches, batch)
 	}
