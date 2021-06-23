@@ -157,25 +157,31 @@ func buildBatches(ei *ExportInfo, groupNPIs *v1.GroupNPIs, patientMBIs []string)
 	if len(patientMBIs) == 1 {
 		priority = 1000
 	}
-
 	patientBatches := batchPatientMBIs(patientMBIs, conf.GetAsInt("queue.batchSize", 100))
 	var batches []v1.BatchRequest
 	for _, batchedPatients := range patientBatches {
-		batch := v1.BatchRequest{
-			Priority:        priority,
-			Since:           ei.Since,
-			RequestURL:      ei.URL,
-			RequestingIP:    ei.IP,
-			OrganizationNPI: groupNPIs.OrgNPI,
-			ProviderNPI:     groupNPIs.ProviderNPI,
-			PatientMBIs:     strings.Join(batchedPatients, ","),
-			IsBulk:          len(patientMBIs) > 1,
-			ResourceTypes:   ei.Types,
-			TransactionTime: tt,
+		batch := createBatch(ei, groupNPIs, batchedPatients, len(patientMBIs) > 1)
+		batch.Priority = priority
+		if ei.Since.Valid && !tt.After(ei.Since.Time) {
+			batch.PatientMBIs = ""
 		}
+		batch.TransactionTime = tt
 		batches = append(batches, batch)
 	}
 	return batches, nil
+}
+
+func createBatch(ei *ExportInfo, g *v1.GroupNPIs, p []string, b bool) v1.BatchRequest {
+	return v1.BatchRequest{
+		Since:           ei.Since,
+		RequestURL:      ei.URL,
+		RequestingIP:    ei.IP,
+		OrganizationNPI: g.OrgNPI,
+		ProviderNPI:     g.ProviderNPI,
+		PatientMBIs:     strings.Join(p, ","),
+		IsBulk:          b,
+		ResourceTypes:   ei.Types,
+	}
 }
 
 // BatchesAndFiles function returns all the batches and it's files for a job
