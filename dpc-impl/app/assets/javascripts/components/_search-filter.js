@@ -21,16 +21,14 @@ function searchFunc() {
   }
 
   var numCount = document.getElementById('searchCount')
-  
+
   if (liDisplayCount == 0) {
     numCount.innerHTML = "There are no results that match your search query."
   } else if (liDisplayCount > 1) {
     numCount.innerHTML = "There are " + liDisplayCount + " results that match your search query."
-  } else {
+  } else if (liDisplayCount == 1) {
     numCount.innerHTML = "There is " + liDisplayCount + " result that matches your search query."
-  }
-
-  if (filter.length == 0) {
+  } else {
     numCount.innerHTML = ""
   }
 }
