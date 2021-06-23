@@ -64,36 +64,29 @@ func (js *JobServiceV1) Export(w http.ResponseWriter, r *http.Request) {
 		boom.BadData(w, err.Error())
 		return
 	}
-
 	patientMBIs, err := js.pr.FindMBIsByGroupID(ei.GroupID)
 	if err != nil {
 		log.Error("Failed to retrieve patients", zap.Error(err))
 		boom.BadData(w, err.Error())
 		return
 	}
-
 	if len(patientMBIs) == 0 {
 		log.Error("No patients to process")
 		boom.BadData(w, "No patients to process")
 		return
 	}
-
-	tt, err := fetchTransactionTime()
+	batches, err := buildBatches(ei, groupNPIs, patientMBIs)
 	if err != nil {
-		log.Error("Failed to fetch Transaction Time from BFD", zap.Error(err))
+		log.Error("Failed to build batches", zap.Error(err))
 		boom.Internal(w, "Failed to start job.")
 		return
 	}
-
-	batches := buildBatches(ei, groupNPIs, patientMBIs, tt)
-
 	job, err := js.jr.Insert(r.Context(), ei.OrgID, batches)
 	if err != nil {
 		log.Error("Failed to create job", zap.Error(err))
 		boom.BadData(w, err.Error())
 		return
 	}
-
 	if _, err := w.Write([]byte(*job)); err != nil {
 		log.Error("Failed to write job ID to response", zap.Error(err))
 		boom.Internal(w, err.Error())
@@ -152,7 +145,11 @@ func parseSinceParam(since string) (*sql.NullTime, error) {
 	return &sql.NullTime{Time: t, Valid: true}, nil
 }
 
-func buildBatches(ei *ExportInfo, groupNPIs *v1.GroupNPIs, patientMBIs []string, tt time.Time) []v1.BatchRequest {
+func buildBatches(ei *ExportInfo, groupNPIs *v1.GroupNPIs, patientMBIs []string) ([]v1.BatchRequest, error) {
+	tt, err := fetchTransactionTime()
+	if err != nil {
+		return nil, errors.New(fmt.Sprintf("Failed to fetch Transaction Time from BFD: %s", err.Error()))
+	}
 	priority := 5000
 	if len(patientMBIs) == 1 {
 		priority = 1000
@@ -175,7 +172,7 @@ func buildBatches(ei *ExportInfo, groupNPIs *v1.GroupNPIs, patientMBIs []string,
 		}
 		batches = append(batches, batch)
 	}
-	return batches
+	return batches, nil
 }
 
 // BatchesAndFiles function returns all the batches and it's files for a job
