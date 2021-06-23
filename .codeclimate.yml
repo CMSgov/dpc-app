@@ -20,7 +20,7 @@ checks:
   # So we bump the complexity metric to 9, which should weed them out
   method-complexity:
     config:
-      threshold: 9
+      threshold: 11
   # Disabled because IntelliJ generates suspicious equals/hashcode methods.
   identical-code:
     enabled: false
