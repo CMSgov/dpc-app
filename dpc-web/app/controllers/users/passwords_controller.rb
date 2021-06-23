@@ -4,7 +4,6 @@ require './lib/redis_store/mail_throttle_store'
 
 module Users
   class PasswordsController < Devise::PasswordsController
-    include MultiModelLoginHelper
     # GET /resource/password/new
     # def new
     #   super

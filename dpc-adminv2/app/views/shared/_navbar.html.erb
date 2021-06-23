@@ -30,5 +30,15 @@ aria-controls="topnav-wrap" aria-label="Close menu">
       <li class="topnav__item">
         <%= link_to "Frequently Asked Questions", ENV.fetch('STATIC_SITE_URL') + 'faq', class: "topnav__link" %>
       </li>
+
+      <% unless (controller_name == "sessions") %>
+        <li class="topnav__item">
+          <a class="topnav__link" href="<%= destroy_admin_session_path %>"
+              id="sign-out" data-method="delete" data-test="admin-signout">
+              Sign out
+          </a>
+        </li>
+      <% end %>
+    </ul>
   </div>
 </nav>

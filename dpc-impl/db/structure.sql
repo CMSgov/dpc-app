@@ -54,6 +54,47 @@ ALTER SEQUENCE public.admins_id_seq OWNED BY public.admins.id;
 
 
 --
+-- Name: admins; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.admins (
+    id bigint NOT NULL,
+    provider character varying,
+    uid character varying,
+    name character varying,
+    github_nickname character varying,
+    email character varying DEFAULT ''::character varying,
+    encrypted_password character varying DEFAULT ''::character varying NOT NULL,
+    sign_in_count integer DEFAULT 0 NOT NULL,
+    current_sign_in_at timestamp without time zone,
+    last_sign_in_at timestamp without time zone,
+    current_sign_in_ip character varying,
+    last_sign_in_ip character varying,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: admins_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.admins_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: admins_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.admins_id_seq OWNED BY public.admins.id;
+
+
+--
 -- Name: ar_internal_metadata; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -363,6 +404,7 @@ CREATE UNIQUE INDEX index_users_on_reset_password_token ON public.users USING bt
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('0'),
 ('20210409181131'),
 ('20210423155520'),
 ('20210423155611'),
