@@ -79,8 +79,9 @@ var log = logger.WithContext(context.Background())
 
 // NewBfdClient creates a new BFD Client
 func NewBfdClient(config BfdConfig) (*BfdClient, error) {
-	certFile := conf.GetAsString("bfd.clientCertFile")
-	keyFile := conf.GetAsString("bfd.clientKeyFile")
+	decryptedDir := conf.GetAsString("DecryptedDir")
+	certFile := fmt.Sprintf("%s%s", decryptedDir, conf.GetAsString("bfd.clientCertFile"))
+	keyFile := fmt.Sprintf("%s%s", decryptedDir, conf.GetAsString("bfd.clientKeyFile"))
 	pageSize := conf.GetAsInt("bfd.clientPageSize", 0)
 	cert, err := tls.LoadX509KeyPair(certFile, keyFile)
 	if err != nil {
@@ -90,7 +91,7 @@ func NewBfdClient(config BfdConfig) (*BfdClient, error) {
 	tlsConfig := &tls.Config{Certificates: []tls.Certificate{cert}, MinVersion: tls.VersionTLS12}
 
 	if strings.ToLower(conf.GetAsString("bfd.checkCert")) != "false" {
-		caFile := conf.GetAsString("bfd.clientCAFile")
+		caFile := fmt.Sprintf("%s%s", decryptedDir, conf.GetAsString("bfd.clientCAFile"))
 		caCert, err := ioutil.ReadFile(filepath.Clean(caFile))
 		if err != nil {
 			return nil, errors.Wrap(err, "could not read CA file")

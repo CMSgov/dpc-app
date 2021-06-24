@@ -29,6 +29,8 @@ const (
 	oldJobIDHeader    = "DPC-CMSID"
 )
 
+var decryptedDir string
+
 type BfdTestSuite struct {
 	suite.Suite
 }
@@ -50,11 +52,9 @@ var (
 
 func (s *BfdTestSuite) SetupSuite() {
 	conf.NewConfig("../../configs")
-	conf.SetEnv(s.T(), "bfd.clientCertFile", "../shared_files/decrypted/bfd-dev-test-cert.pem")
-	conf.SetEnv(s.T(), "bfd.clientKeyFile", "../shared_files/decrypted/bfd-dev-test-key.pem")
-	conf.SetEnv(s.T(), "bfd.clientCAFile", "../shared_files/decrypted/bfd-dev-test-ca-file.crt")
 	conf.SetEnv(s.T(), "bfd.requestRetryIntervalMS", "10")
 	conf.SetEnv(s.T(), "bfd.timeoutMS", "2000")
+	decryptedDir = conf.GetAsString("DecryptedDir")
 }
 
 func (s *BfdRequestTestSuite) SetupSuite() {
@@ -93,14 +93,14 @@ func (s *BfdTestSuite) TestNewBfdClientNoCertFile() {
 	assert := assert.New(s.T())
 
 	_ = conf.UnsetEnv(s.T(), "bfd.clientCertFile")
-	bbc, err := client.NewBfdClient(client.NewConfig(""))
+	bbc, err := client.NewBfdClient(client.NewConfig("../../configs"))
 	assert.Nil(bbc)
-	assert.EqualError(err, "could not load BFD keypair: open : no such file or directory")
+	assert.EqualError(err, fmt.Sprintf("could not load BFD keypair: read %s: is a directory", decryptedDir))
 
 	conf.SetEnv(s.T(), "bfd.clientCertFile", "foo.pem")
-	bbc, err = client.NewBfdClient(client.NewConfig(""))
+	bbc, err = client.NewBfdClient(client.NewConfig("../../configs"))
 	assert.Nil(bbc)
-	assert.EqualError(err, "could not load BFD keypair: open foo.pem: no such file or directory")
+	assert.EqualError(err, fmt.Sprintf("could not load BFD keypair: open %sfoo.pem: no such file or directory", decryptedDir))
 }
 
 func (s *BfdTestSuite) TestNewBfdClientInvalidCertFile() {
@@ -110,12 +110,12 @@ func (s *BfdTestSuite) TestNewBfdClientInvalidCertFile() {
 	assert := assert.New(s.T())
 
 	conf.SetEnv(s.T(), "bfd.clientCertFile", "testdata/emptyFile.pem")
-	bbc, err := client.NewBfdClient(client.NewConfig(""))
+	bbc, err := client.NewBfdClient(client.NewConfig("../../configs"))
 	assert.Nil(bbc)
 	assert.EqualError(err, "could not load BFD keypair: tls: failed to find any PEM data in certificate input")
 
 	conf.SetEnv(s.T(), "bfd.clientCertFile", "testdata/badPublic.pem")
-	bbc, err = client.NewBfdClient(client.NewConfig(""))
+	bbc, err = client.NewBfdClient(client.NewConfig("../../configs"))
 	assert.Nil(bbc)
 	assert.EqualError(err, "could not load BFD keypair: tls: failed to find any PEM data in certificate input")
 }
@@ -127,14 +127,14 @@ func (s *BfdTestSuite) TestNewBfdClientNoKeyFile() {
 	assert := assert.New(s.T())
 
 	_ = conf.UnsetEnv(s.T(), "bfd.clientKeyFile")
-	bbc, err := client.NewBfdClient(client.NewConfig(""))
+	bbc, err := client.NewBfdClient(client.NewConfig("../../configs"))
 	assert.Nil(bbc)
-	assert.EqualError(err, "could not load BFD keypair: open : no such file or directory")
+	assert.EqualError(err, fmt.Sprintf("could not load BFD keypair: read %s: is a directory", decryptedDir))
 
 	conf.SetEnv(s.T(), "bfd.clientKeyFile", "foo.pem")
-	bbc, err = client.NewBfdClient(client.NewConfig(""))
+	bbc, err = client.NewBfdClient(client.NewConfig("../../configs"))
 	assert.Nil(bbc)
-	assert.EqualError(err, "could not load BFD keypair: open foo.pem: no such file or directory")
+	assert.EqualError(err, fmt.Sprintf("could not load BFD keypair: open %sfoo.pem: no such file or directory", decryptedDir))
 }
 
 func (s *BfdTestSuite) TestNewBfdClientInvalidKeyFile() {
@@ -144,12 +144,12 @@ func (s *BfdTestSuite) TestNewBfdClientInvalidKeyFile() {
 	assert := assert.New(s.T())
 
 	conf.SetEnv(s.T(), "bfd.clientKeyFile", "testdata/emptyFile.pem")
-	bbc, err := client.NewBfdClient(client.NewConfig(""))
+	bbc, err := client.NewBfdClient(client.NewConfig("../../configs"))
 	assert.Nil(bbc)
 	assert.EqualError(err, "could not load BFD keypair: tls: failed to find any PEM data in key input")
 
 	conf.SetEnv(s.T(), "bfd.clientKeyFile", "testdata/badPublic.pem")
-	bbc, err = client.NewBfdClient(client.NewConfig(""))
+	bbc, err = client.NewBfdClient(client.NewConfig("../../configs"))
 	assert.Nil(bbc)
 	assert.EqualError(err, "could not load BFD keypair: tls: failed to find any PEM data in key input")
 }
@@ -166,14 +166,14 @@ func (s *BfdTestSuite) TestNewBfdClientNoCAFile() {
 
 	_ = conf.UnsetEnv(s.T(), "bfd.clientCAFile")
 	_ = conf.UnsetEnv(s.T(), "bfd.checkCert")
-	bbc, err := client.NewBfdClient(client.NewConfig(""))
+	bbc, err := client.NewBfdClient(client.NewConfig("../../configs"))
 	assert.Nil(bbc)
-	assert.EqualError(err, "could not read CA file: read .: is a directory")
+	assert.EqualError(err, fmt.Sprintf("could not read CA file: read %s: is a directory", strings.TrimRight(decryptedDir, "/")))
 
 	conf.SetEnv(s.T(), "bfd.clientCAFile", "foo.pem")
-	bbc, err = client.NewBfdClient(client.NewConfig(""))
+	bbc, err = client.NewBfdClient(client.NewConfig("../../configs"))
 	assert.Nil(bbc)
-	assert.EqualError(err, "could not read CA file: open foo.pem: no such file or directory")
+	assert.EqualError(err, fmt.Sprintf("could not read CA file: open %sfoo.pem: no such file or directory", decryptedDir))
 }
 
 func (s *BfdTestSuite) TestNewBfdClientInvalidCAFile() {
@@ -193,7 +193,7 @@ func (s *BfdTestSuite) TestNewBfdClientInvalidCAFile() {
 	assert.EqualError(err, "could not append CA certificate(s)")
 
 	conf.SetEnv(s.T(), "bfd.clientCAFile", "testdata/badPublic.pem")
-	bbc, err = client.NewBfdClient(client.NewConfig(""))
+	bbc, err = client.NewBfdClient(client.NewConfig("../../configs"))
 	assert.Nil(bbc)
 	assert.EqualError(err, "could not append CA certificate(s)")
 }

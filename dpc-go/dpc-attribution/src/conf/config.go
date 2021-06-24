@@ -3,6 +3,8 @@ package conf
 import (
 	"log"
 	"os"
+	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -49,6 +51,7 @@ func NewConfig(dir ...string) {
 			log.Fatalf("Failed to merge additional config %s", err)
 		}
 	}
+	config.SetDefault("DecryptedDir", getDecryptedDir())
 }
 
 // GetAsString is a function to retrieve the value from the viper config as a string
@@ -96,4 +99,12 @@ func UnsetEnv(protect *testing.T, key string) error {
 	// Unset environment variable too to ensure that viper does not attempt
 	// to retrieve it from the os.
 	return os.Unsetenv(key)
+}
+
+func getDecryptedDir() string {
+	var (
+		_, b, _, _ = runtime.Caller(0)
+		basePath   = filepath.Dir(b)
+	)
+	return strings.Replace(basePath, "conf", "shared_files/decrypted/", 1)
 }
