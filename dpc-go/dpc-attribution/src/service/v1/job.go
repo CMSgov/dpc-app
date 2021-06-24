@@ -8,7 +8,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/CMSgov/dpc/attribution/client"
 	"github.com/CMSgov/dpc/attribution/middleware"
+	"github.com/google/uuid"
 
 	"github.com/CMSgov/dpc/attribution/conf"
 	"github.com/CMSgov/dpc/attribution/model/v1"
@@ -62,29 +64,29 @@ func (js *JobServiceV1) Export(w http.ResponseWriter, r *http.Request) {
 		boom.BadData(w, err.Error())
 		return
 	}
-
 	patientMBIs, err := js.pr.FindMBIsByGroupID(ei.GroupID)
 	if err != nil {
 		log.Error("Failed to retrieve patients", zap.Error(err))
 		boom.BadData(w, err.Error())
 		return
 	}
-
 	if len(patientMBIs) == 0 {
 		log.Error("No patients to process")
 		boom.BadData(w, "No patients to process")
 		return
 	}
-
-	batches := buildBatches(ei, groupNPIs, patientMBIs)
-
+	batches, err := buildBatches(ei, groupNPIs, patientMBIs)
+	if err != nil {
+		log.Error("Failed to build batches", zap.Error(err))
+		boom.Internal(w, "Failed to start job.")
+		return
+	}
 	job, err := js.jr.Insert(r.Context(), ei.OrgID, batches)
 	if err != nil {
 		log.Error("Failed to create job", zap.Error(err))
 		boom.BadData(w, err.Error())
 		return
 	}
-
 	if _, err := w.Write([]byte(*job)); err != nil {
 		log.Error("Failed to write job ID to response", zap.Error(err))
 		boom.Internal(w, err.Error())
@@ -98,6 +100,21 @@ func (js *JobServiceV1) Export(w http.ResponseWriter, r *http.Request) {
 		len(patientMBIs),
 		strings.ReplaceAll(ei.Types, ",", ";")),
 	)
+}
+
+func fetchTransactionTime() (time.Time, error) {
+	bfd, err := client.NewBfdClient(client.NewConfig("/v1/fhir/"))
+	if err != nil {
+		return time.Time{}, err
+	}
+	b, err := bfd.GetPatient("FAKE_PATIENT", uuid.New().String(), uuid.New().String(), "", time.Now())
+	if err != nil {
+		return time.Time{}, err
+	}
+	if b.Meta.LastUpdated.Equal(time.Time{}) {
+		return time.Time{}, errors.New("No transaction time returned from BFD")
+	}
+	return b.Meta.LastUpdated, nil
 }
 
 func buildExportInfo(w http.ResponseWriter, r *http.Request) *ExportInfo {
@@ -131,30 +148,40 @@ func parseSinceParam(since string) (*sql.NullTime, error) {
 	return &sql.NullTime{Time: t, Valid: true}, nil
 }
 
-func buildBatches(ei *ExportInfo, groupNPIs *v1.GroupNPIs, patientMBIs []string) []v1.BatchRequest {
+func buildBatches(ei *ExportInfo, groupNPIs *v1.GroupNPIs, patientMBIs []string) ([]v1.BatchRequest, error) {
+	tt, err := fetchTransactionTime()
+	if err != nil {
+		return nil, errors.New(fmt.Sprintf("Failed to fetch Transaction Time from BFD: %s", err.Error()))
+	}
 	priority := 5000
 	if len(patientMBIs) == 1 {
 		priority = 1000
 	}
-
 	patientBatches := batchPatientMBIs(patientMBIs, conf.GetAsInt("queue.batchSize", 100))
 	var batches []v1.BatchRequest
 	for _, batchedPatients := range patientBatches {
-		batch := v1.BatchRequest{
-			Priority:        priority,
-			Since:           ei.Since,
-			RequestURL:      ei.URL,
-			RequestingIP:    ei.IP,
-			OrganizationNPI: groupNPIs.OrgNPI,
-			ProviderNPI:     groupNPIs.ProviderNPI,
-			PatientMBIs:     strings.Join(batchedPatients, ","),
-			IsBulk:          len(patientMBIs) > 1,
-			ResourceTypes:   ei.Types,
-			TransactionTime: time.Now(), // need a bfd client to do this
+		batch := createBatch(ei, groupNPIs, batchedPatients, len(patientMBIs) > 1)
+		batch.Priority = priority
+		if ei.Since.Valid && !tt.After(ei.Since.Time) {
+			batch.PatientMBIs = ""
 		}
+		batch.TransactionTime = tt
 		batches = append(batches, batch)
 	}
-	return batches
+	return batches, nil
+}
+
+func createBatch(ei *ExportInfo, g *v1.GroupNPIs, p []string, b bool) v1.BatchRequest {
+	return v1.BatchRequest{
+		Since:           ei.Since,
+		RequestURL:      ei.URL,
+		RequestingIP:    ei.IP,
+		OrganizationNPI: g.OrgNPI,
+		ProviderNPI:     g.ProviderNPI,
+		PatientMBIs:     strings.Join(p, ","),
+		IsBulk:          b,
+		ResourceTypes:   ei.Types,
+	}
 }
 
 // BatchesAndFiles function returns all the batches and it's files for a job
