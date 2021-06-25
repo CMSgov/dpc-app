@@ -50,7 +50,9 @@ func main() {
 	})
 	jobCtlr := v2.NewJobController(jobClient)
 
-	apiRouter := router.NewDPCAPIRouter(orgCtlr, m, groupCtlr, dataCtlr, jobCtlr)
+	implCtlr := v2.NewImplementerController(attributionClient)
+
+	apiRouter := router.NewDPCAPIRouter(orgCtlr, m, groupCtlr, dataCtlr, jobCtlr, implCtlr)
 
 	port := conf.GetAsString("port", "3000")
 	if err := http.ListenAndServe(fmt.Sprintf(":%s", port), apiRouter); err != nil {
