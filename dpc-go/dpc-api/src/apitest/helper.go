@@ -250,10 +250,6 @@ const ImplJSON = `{
     "name": "foo"
 }`
 
-const ImplEmptyNameJson = `{
-    "name": ""
-}`
-
 // AttributionOrgResponse provides a sample organization response that mimics what attribution service returns for testing purposes
 func AttributionOrgResponse() []byte {
 	return AttributionToFHIRResponse(Orgjson)
