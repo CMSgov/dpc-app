@@ -9,6 +9,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/CMSgov/dpc/attribution/conf"
 	middleware2 "github.com/CMSgov/dpc/attribution/middleware"
 	"github.com/CMSgov/dpc/attribution/model/v1"
 	"github.com/CMSgov/dpc/attribution/service"
@@ -80,6 +81,7 @@ func TestJobServiceV1TestSuite(t *testing.T) {
 }
 
 func (suite *JobServiceV1TestSuite) SetupTest() {
+	conf.NewConfig("../../../configs")
 	suite.jr = &MockJobRepo{}
 	suite.pr = &MockPatientRepo{}
 	suite.service = NewJobService(suite.pr, suite.jr)
