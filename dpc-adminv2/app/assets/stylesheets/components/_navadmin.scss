@@ -21,6 +21,35 @@
   }
 }
 
+#filter-container {
+  display: flex;
+  flex-direction: row;
+  font-weight: 700;
+  justify-content: space-between;
+  padding: 5px 10px;
+
+  .buttons-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 40%;
+  }
+}
+
+.cvs_button {
+  background-color: $color-primary;
+  border: 1px solid $color-primary;
+  color: $color-white;
+  font-weight: 400;
+  padding: 2px 5px;
+  text-decoration: none;
+}
+
+.cvs_button:hover {
+  background-color: $color-white;
+  color: $color-primary;
+}
+
 .navadmin--current {
   border-bottom: 2px solid $color-primary;
   color: $color-primary !important;
