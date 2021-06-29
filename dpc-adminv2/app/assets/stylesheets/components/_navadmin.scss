@@ -21,6 +21,11 @@
   }
 }
 
+.navadmin--current {
+  border-bottom: 2px solid $color-primary;
+  color: $color-primary !important;
+}
+
 #navadmin-container {
   padding: 10px;
 }

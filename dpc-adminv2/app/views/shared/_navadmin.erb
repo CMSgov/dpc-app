@@ -5,13 +5,13 @@
 <div id="navadmin-container">
   <ul class="navadmin">
     <li class="navadmin__item">
-      <%= link_to "Implementers", root_path, class: "navadmin__link" %>
+      <%= link_to "Implementers", root_path, class: "navadmin__link #{current_navadmin_class if implementers_page? || home_page?}" %>
     </li>
     <li class="navadmin__item">
-      <%= link_to "Users", users_path, class: "navadmin__link" %>
+      <%= link_to "Users", users_path, class: "navadmin__link #{current_navadmin_class if users_page?}" %>
     </li>
     <li class="navadmin__item">
-      <%= link_to "Providers", provider_orgs_path, class: "navadmin__link" %>
+      <%= link_to "Providers", provider_orgs_path, class: "navadmin__link #{current_navadmin_class if provider_orgs_page?}" %>
     </li>
   </ul>
 </div>
