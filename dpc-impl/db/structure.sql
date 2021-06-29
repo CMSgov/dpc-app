@@ -11,7 +11,6 @@ SET row_security = off;
 
 SET default_tablespace = '';
 
-
 --
 -- Name: admins; Type: TABLE; Schema: public; Owner: -
 --
