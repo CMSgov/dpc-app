@@ -362,7 +362,6 @@ CREATE UNIQUE INDEX index_users_on_reset_password_token ON public.users USING bt
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
-('0'),
 ('20210409181131'),
 ('20210423155520'),
 ('20210423155611'),

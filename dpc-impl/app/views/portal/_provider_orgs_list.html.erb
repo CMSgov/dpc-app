@@ -1,0 +1,55 @@
+
+<div id="dash_provider_list">
+  <% unless @user.provider_orgs == false %>
+
+    <h1 class="ds-text-heading--xl ds-h4 ds-u-margin-top--2">
+      Total provider organizations: <%= @user.provider_orgs.count %>
+    </h1>
+
+    <div class="ds-u-margin-y--4">
+      <h1 class="ds-text-heading--xl ds-h4">
+        Search Provider Organizations
+      </h1>
+
+      <div class="ds-u-margin-bottom--1">
+        Start typing and the organizations will automatically filter.
+      </div>
+
+      <input type="text" class="ds-c-field" id="searchInput" onkeyup="searchFunc()" placeholder="Search for provider org by name, uuid, or npi.">
+
+      <div class="ds-u-margin-top--2" id="searchCount"></div>
+    </div>
+
+    <ul id="searchList">
+      <% @user.provider_orgs.each_with_index do |provider, index| %>
+        <li>
+          <div class="provider_card_container">
+            <div class="provider_name">
+              <%= provider[:org_name] %>
+            </div>
+
+            <div class="provider_info">
+              <div class="provider_npi">
+                NPI: <%= provider[:npi] %>
+              </div>
+
+              <div class="provider_api_id">
+                ID: <%= provider[:org_id] %>
+              </div>
+
+              <div class="provider_status">
+                Status: <span class="<%= active_status_class if status_active?(provider[:status]) %>"><%= provider[:status] %></span>
+              </div>
+            </div>
+          </div>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <div class="ds-c-alert ds-c-alert--warn ds-u-margin--5">
+      <div class="ds-c-alert__body">
+        <h2 class="ds-c-alert__heading">We were unable to connect to DPC due to an internal error.</h2>
+      </div>
+    </div>
+  <% end %>
+</div>
