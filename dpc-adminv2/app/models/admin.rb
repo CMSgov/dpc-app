@@ -7,10 +7,6 @@ class Admin < ApplicationRecord
          :trackable, :timeoutable,
          :omniauthable, omniauth_providers: %i[github]
 
-  def name
-    self.email || self.name
-  end
-
   def self.from_omniauth(auth)
     where(provider: auth.provider, uid: auth.uid).first_or_create do |user|
       user.email = auth.info.email
