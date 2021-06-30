@@ -1,0 +1,15 @@
+.dashboard {
+  display: flex;
+  flex-flow: column;
+}
+
+.card_list {
+  border: $color-gray-light 1px solid;
+  margin: 25px 0;
+  padding: 10px;
+}
+
+.card_container {
+  border: $color-gray-light 1px solid;
+  padding: 20px 40px;
+}
