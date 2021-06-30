@@ -32,19 +32,28 @@
 
   <div class="card_list" id="user-list">
     <% @users.each do |user| %>
-      <div class="card_container">
-        <div class="card_title">
+      <%= link_to user_path(user), class: "card_container" do %>
+        <div class="card_title ds-text-heading--3xl ds-u-margin-bottom--1">
           <%= user.name %>
         </div>
-        <div class="card_details">
+        <div class="card_details flex-sp-btwn">
           <div>
-            <%= user.email %>
+            <div class="ds-text-heading--lg ds-u-margin--1">
+              <%= user.email %>
+            </div>
+            <div class="ds-text-heading--lg ds-u-margin--1">
+              Implementer <%= user.implementer %>
+            </div>
           </div>
           <div>
-            Implementer <%= user.implementer %>
+            <% if user.confirmed_at == nil %>
+              Uncomfirmed
+            <% else %>
+              Confirmed
+            <% end %>
           </div>
         </div>
-      </div>
+      <% end %>
     <% end %>
   </div>
 </div>

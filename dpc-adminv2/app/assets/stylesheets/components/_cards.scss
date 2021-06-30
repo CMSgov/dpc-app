@@ -6,10 +6,22 @@
 .card_list {
   border: $color-gray-light 1px solid;
   margin: 25px 0;
-  padding: 10px;
+  padding: 20px;
 }
 
 .card_container {
+  background-color: $color-gray-lightest;
   border: $color-gray-light 1px solid;
+  display: flex;
+  flex-flow: column;
   padding: 20px 40px;
+}
+
+.card_container + .card_container {
+  margin-top: 20px;
+}
+
+.card_container:hover {
+  background-color: $color-primary-alt-light;
+  cursor: pointer;
 }
