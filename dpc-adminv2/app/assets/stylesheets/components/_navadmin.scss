@@ -50,6 +50,17 @@
   color: $color-primary;
 }
 
+.filter-button {
+  background: none;
+  border: 0;
+  color: $color-base;
+  cursor: pointer;
+}
+
+.filter-button:hover {
+  text-decoration: underline;
+}
+
 .navadmin--current {
   border-bottom: 2px solid $color-primary;
   color: $color-primary !important;
