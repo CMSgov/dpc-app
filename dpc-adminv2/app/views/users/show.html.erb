@@ -1,1 +1,47 @@
-<%= @user.name %>
+<div id="index-link-container">
+  <%= link_to users_path, class: 'btn_to_index flex-sp-btwn' do %>
+    <svg class="icon" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <use xlink:href="/adminv2/assets/solid.svg#arrow-left"></use>
+    </svg>
+    <div>
+      User Index
+    </div>
+  <% end %>
+</div>
+
+<div class="ds-u-margin-y--7 flex-sp-btwn">
+  <div>
+    <h1 class="ds-text-heading--3xl"><%= @user.name %></h1>
+    <div class="ds-u-margin-y--2">
+      <%= @user.email %>
+    </div>
+    <div>
+      <%= link_to "Reset User Password", "#"%>
+    </div>
+    <div>
+      <%= link_to "Pause User Access", "#"%>
+    </div>
+  </div>
+  <div>
+    <%= link_to "Edit", "#" %>
+  </div>
+</div>
+
+<div>
+  <h1 class="ds-text-heading--2xl assigned-header">Assigned to:</h1>
+
+  <%= link_to "#", class: "card_container" do %>
+    <div class="card_title ds-text-heading--3xl ds-u-margin-bottom--1">
+      <%= @user.implementer %>
+    </div>
+    <div class="ds-text-heading--lg ds-u-margin--1">
+      UUID: <%= @user.implementer_id %>
+    </div>
+  <% end %>
+</div>
+
+<div class="ds-u-margin-top--6">
+  <%= form_for @user, url: user_path(@user), data: { confirm: "Are you sure you want to delete the user's account?" }, html: { method: :delete } do |f| %>
+    <%= f.submit "Delete User", class:"ds-c-button ds-c-button--danger", data: { test: "delete-user-account" } %>
+  <% end %>
+</div>

@@ -6,15 +6,23 @@
 .card_list {
   border: $color-gray-light 1px solid;
   margin: 25px 0;
-  padding: 20px;
+  max-height: 80vh;
+  overflow: auto;
+  padding: 10px;
 }
 
 .card_container {
   background-color: $color-gray-lightest;
   border: $color-gray-light 1px solid;
+  color: $color-base;
   display: flex;
   flex-flow: column;
-  padding: 20px 40px;
+  padding: 10px 25px;
+  text-decoration: none;
+}
+
+.card_container:visited {
+  color: $color-base;
 }
 
 .card_container + .card_container {
@@ -23,5 +31,6 @@
 
 .card_container:hover {
   background-color: $color-primary-alt-light;
+  color: $color-base;
   cursor: pointer;
 }
