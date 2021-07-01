@@ -36,6 +36,8 @@ gem 'omniauth-github'
 gem 'omniauth-oktaoauth'
 gem 'octokit' # can be removed once we move past github omniauth
 
+gem 'truemail'
+
 group :development, :test do
   gem 'byebug', platforms: [:mri, :mingw, :x64_mingw]
   gem 'pry'
