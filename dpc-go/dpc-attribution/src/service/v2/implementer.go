@@ -3,6 +3,9 @@ package v2
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
+	"github.com/CMSgov/dpc/attribution/middleware"
+	v2 "github.com/CMSgov/dpc/attribution/model/v2"
 	"io/ioutil"
 	"net/http"
 
@@ -67,7 +70,64 @@ func (is *ImplementerService) Delete(w http.ResponseWriter, r *http.Request) {
 
 // Put function is not currently used for ImplementerService
 func (is *ImplementerService) Put(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusNotImplemented)
+	log := logger.WithContext(r.Context())
+	implID, ok := r.Context().Value(middleware.ContextKeyImplementer).(string)
+	if !ok {
+		log.Error("Failed to extract implementer id from context")
+		boom.Internal(w, "Internal error")
+		return
+	}
+
+	impl, err := is.repo.FindByID(r.Context(), implID)
+	if err != nil {
+		log.Error("Failed to update Implementer", zap.Error(err))
+		boom.Internal(w, "Internal server error")
+		return
+	}
+	if impl == nil {
+		log.Error(fmt.Sprintf("Implementer not found, id: %s", implID))
+		boom.NotFound(w, "Implementer not found")
+		return
+	}
+	body, _ := ioutil.ReadAll(r.Body)
+
+	if len(body) == 0 {
+		log.Error("Failed to update Implementer due to missing request body")
+		boom.BadData(w, "Missing request body")
+		return
+	}
+
+	var ImplementerModel v2.Implementer
+	if err := json.Unmarshal(body, &ImplementerModel); err != nil {
+		log.Error("Failed to unmarshal implementer", zap.Error(err))
+		boom.Internal(w, err.Error())
+		return
+	}
+
+	if ImplementerModel.Name == "" {
+		log.Error("Failed to update implementer due to missing name in body")
+		boom.BadData(w, "Missing name in body")
+		return
+	}
+
+	implementer, err := is.repo.Update(r.Context(), implID, body)
+	if err != nil {
+		log.Error("Failed to update Implementer", zap.Error(err))
+		boom.BadData(w, err)
+		return
+	}
+
+	ImplementerBytes := new(bytes.Buffer)
+	if err := json.NewEncoder(ImplementerBytes).Encode(implementer); err != nil {
+		log.Error("Failed to convert orm model to bytes for implementer", zap.Error(err))
+		boom.Internal(w, err.Error())
+		return
+	}
+
+	if _, err := w.Write(ImplementerBytes.Bytes()); err != nil {
+		log.Error("Failed to write implementer to response", zap.Error(err))
+		boom.Internal(w, err.Error())
+	}
 }
 
 // Export function that starts an export job for a given Group ID

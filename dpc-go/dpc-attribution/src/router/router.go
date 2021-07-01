@@ -33,14 +33,22 @@ func NewDPCAttributionRouter(o service.Service, g service.Service, impl service.
 			})
 		})
 		r.Route("/Implementer", func(r chi.Router) {
+			r.Post("/", impl.Post)
+			r.Route("/{implementerID}", func(r chi.Router) {
+				r.Use(middleware2.ImplementerCtx)
+				r.Put("/", impl.Put)
+			})
 			r.Route("/{implementerID}/org", func(r chi.Router) {
 				r.Use(middleware2.ImplementerCtx)
 				r.Post("/", implOrg.Post)
 				r.Get("/", implOrg.Get)
 				r.Delete("/", implOrg.Delete)
 				r.Put("/", implOrg.Put)
+				r.Route("/{organizationID}", func(r chi.Router) {
+					r.Use(middleware2.OrganizationCtx)
+					r.Put("/", implOrg.Put)
+				})
 			})
-			r.Post("/", impl.Post)
 		})
 		r.Route("/Data", func(r chi.Router) {
 			r.Use(middleware2.AuthCtx)
