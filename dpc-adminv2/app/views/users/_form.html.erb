@@ -12,9 +12,9 @@
       <%= f.label :email, class: "ds-c-label ds-u-margin-top--0" %>
       <%= f.text_field :email, class: "ds-c-field" %>
     </div>
-    <div class="ds-l-col--9 field-group__fields ds-u-border--0">
+    <div class="field-group__fields ds-u-border--0 ds-u-margin-top--3">
       <%= f.submit "Update user", class: "ds-c-button ds-c-button--primary", data: { test: "user-form-submit" } %>
-      <%= link_to "Cancel", user_path(@user), class: "ds-c-button ds-c-button--transparent" %>
+      <%= link_to "Cancel", class: "ds-c-button ds-c-button--transparent", onclick: "formToggle('cancel')" %>
     </div>
   <% end %>
 </div>

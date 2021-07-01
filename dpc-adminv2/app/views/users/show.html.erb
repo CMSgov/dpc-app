@@ -9,7 +9,7 @@
   <% end %>
 </div>
 
-<div class="ds-u-margin-y--7 flex-sp-btwn">
+<div class="ds-u-margin-y--7 flex-sp-btwn" id="user-info">
   <div>
     <h1 class="ds-text-heading--3xl"><%= @user.name %></h1>
     <div class="ds-u-margin-y--2">
@@ -23,11 +23,13 @@
     </div>
   </div>
   <div>
-    <%= link_to "Edit User", "#" %>
+    <button class="ds-c-button ds-c-button--primary" onclick="formToggle('edit')">
+      Edit User
+    </button>
   </div>
 </div>
 
-<div>
+<div id="user-edit-form" style="display:none">
   <%= render 'users/form' %>
 </div>
 
