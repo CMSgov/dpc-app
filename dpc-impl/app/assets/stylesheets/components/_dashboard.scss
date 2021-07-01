@@ -18,6 +18,12 @@
 }
 
 #dash_provider_list {
+  ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+  }
+
   .provider_card_container {
     border: 1.5px solid $color-gray;
     margin: 15px 0;
