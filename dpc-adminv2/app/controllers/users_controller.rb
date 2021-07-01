@@ -11,6 +11,16 @@ class UsersController < ApplicationController
     @user = User.find(id_param)
   end
 
+  def update
+    @user = User.find(id_param)
+    if @user.update user_params
+      flash[:notice] = 'User successfully updated.'
+    else
+      flash[:alert] = "Please correct errors: #{model_error_string(@user)}"
+    end
+    redirect_to user_url(@user)
+  end
+
   def destroy
     @user = User.find(id_param)
     @user.destroy
@@ -22,5 +32,11 @@ class UsersController < ApplicationController
       flash[:alert] = 'Unable to delete user.'
       render user_path(@user)
     end
+  end
+
+  private
+
+  def user_params
+    params.require(:user).permit(:first_name, :last_name, :email)
   end
 end

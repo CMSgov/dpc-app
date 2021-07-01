@@ -1,0 +1,20 @@
+<div class="ds-u-margin-y--7 flex-sp-btwn">
+  <%= form_for @user, url: user_path(@user), html: { method: :put } do |f| %>
+    <div class="field">
+      <%= f.label :first_name, class: "ds-c-label ds-u-margin-top--0" %>
+      <%= f.text_field :first_name, class: "ds-c-field" %>
+    </div>
+    <div class="field">
+      <%= f.label :last_name, class: "ds-c-label ds-u-margin-top--0" %>
+      <%= f.text_field :last_name, class: "ds-c-field" %>
+    </div>
+    <div class="field">
+      <%= f.label :email, class: "ds-c-label ds-u-margin-top--0" %>
+      <%= f.text_field :email, class: "ds-c-field" %>
+    </div>
+    <div class="ds-l-col--9 field-group__fields ds-u-border--0">
+      <%= f.submit "Update user", class: "ds-c-button ds-c-button--primary", data: { test: "user-form-submit" } %>
+      <%= link_to "Cancel", user_path(@user), class: "ds-c-button ds-c-button--transparent" %>
+    </div>
+  <% end %>
+</div>
