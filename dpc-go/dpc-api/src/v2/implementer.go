@@ -21,7 +21,7 @@ func NewImplementerController(ac client.Client) *ImplementerController {
 	}
 }
 
-// Create function is not currently used for ImplementerController
+// Create function is used for creating a new implementor by proxying request to dpc attribution
 //goland:noinspection GoUnusedParameter
 func (ic *ImplementerController) Create(w http.ResponseWriter, r *http.Request) {
 	body, _ := ioutil.ReadAll(r.Body)
