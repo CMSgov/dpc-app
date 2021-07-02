@@ -1,10 +1,14 @@
 
 <div id="dash_provider_list">
   <% unless @user.provider_orgs == false %>
-
-    <h1 class="ds-text-heading--xl ds-h4 ds-u-margin-top--2">
-      Total provider organizations: <%= @user.provider_orgs.count %>
-    </h1>
+    <div>
+      <div class="ds-text-heading--xl ds-h4 ds-u-margin-top--2">
+        <%= @user.provider_orgs.count %> provider organizations
+      </div>
+      <div>
+        <%= link_to "Add New Provider Org", new_provider_org_path %>
+      </div>
+    </div>
 
     <div class="ds-u-margin-y--4">
       <h1 class="ds-text-heading--xl ds-h4">
