@@ -5,6 +5,18 @@ Rails.application.routes.draw do
       omniauth_callbacks: 'auth/omniauth_callbacks'
     }
 
+    resources :users, path: '/u', only: [:index, :show, :edit, :update, :destroy] do
+      collection { get :download }
+    end
+
+    resources :implementers, path: '/imp', only: [:index, :show] do
+      collection { get :download }
+    end
+
+    resources :provider_orgs, path: '/po', only: [:index, :show] do
+      collection { get :download }
+    end
+
     root to: 'implementers#index', via: :get
 
   end

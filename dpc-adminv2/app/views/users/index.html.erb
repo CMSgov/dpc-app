@@ -1,0 +1,59 @@
+<div class="dashboard">
+  <%= render partial: 'shared/navadmin' %>
+
+  <div id="filter-container">
+    <div>
+      <%= @users.count %> Users
+    </div>
+
+    <div class="buttons-container">
+      <div>
+        <%= link_to download_implementers_path, class: "cvs_button" do %>
+          Download CSV
+        <% end %>
+      </div>
+      <div>
+        <button type="button" class="filter-button">
+          <svg class="icon ds-u-margin-right--1" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <use xlink:href="/adminv2/assets/solid.svg#filter"></use>
+          </svg>
+          Filter
+        </button>
+      </div>
+      <div>
+        <select>
+          <option value="recently-added">
+            Recently Added
+          </option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="card_list" id="user-list">
+    <% @users.each do |user| %>
+      <%= link_to user_path(user), class: "card_container" do %>
+        <div class="card_title ds-text-heading--3xl ds-u-margin-bottom--1">
+          <%= user.name %>
+        </div>
+        <div class="card_details flex-sp-btwn">
+          <div>
+            <div class="ds-text-heading--lg ds-u-margin--1">
+              <%= user.email %>
+            </div>
+            <div class="ds-text-heading--lg ds-u-margin--1">
+              Implementer <%= user.implementer %>
+            </div>
+          </div>
+          <div>
+            <% if user.confirmed_at == nil %>
+              Uncomfirmed
+            <% else %>
+              Confirmed
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+</div>

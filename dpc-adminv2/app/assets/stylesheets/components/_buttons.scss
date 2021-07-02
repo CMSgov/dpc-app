@@ -1,0 +1,22 @@
+.btn_to_index {
+  background-color: $color-gray-lightest;
+  border: 1px solid $color-gray;
+  color: $color-base;
+  font-weight: 700;
+  padding: 8px 20px;
+  text-decoration: none;
+  width: 125px;
+
+  .icon {
+    margin: 4px 0;
+  }
+}
+
+.btn_to_index:hover, .btn_to_index:visited {
+  color: $color-base;
+}
+
+.btn_to_index:hover {
+  background-color: $color-base;
+  color: $color-white;
+}
