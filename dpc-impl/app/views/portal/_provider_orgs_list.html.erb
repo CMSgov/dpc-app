@@ -1,12 +1,12 @@
 
 <div id="dash_provider_list">
   <% unless @user.provider_orgs == false %>
-    <div>
+    <div class="flex-sp-btwn">
       <div class="ds-text-heading--xl ds-h4 ds-u-margin-top--2">
         <%= @user.provider_orgs.count %> provider organizations
       </div>
       <div>
-        <%= link_to "Add New Provider Org", new_provider_org_path %>
+        <%= link_to "Add New Provider Org", new_provider_org_path, class: "ds-c-button ds-c-button--primary ds-u-margin-top--1" %>
       </div>
     </div>
 
