@@ -29,6 +29,7 @@ type ResourceType string
 const (
 	Organization ResourceType = "Organization"
 	Group        ResourceType = "Group"
+	Implementer  ResourceType = "Implementer"
 )
 
 // Client interface for testing purposes
