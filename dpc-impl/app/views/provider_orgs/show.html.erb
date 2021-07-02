@@ -12,5 +12,8 @@
 </div>
 
 <div>
-  Providers go here
+  <% unless @user.provider_orgs == false %>
+  <% else %>
+    <%= render partial: 'shared/connection-error' %>
+  <% end %>
 </div>
