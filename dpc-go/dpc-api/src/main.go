@@ -52,7 +52,9 @@ func main() {
 
 	implCtlr := v2.NewImplementerController(attributionClient)
 
-	apiRouter := router.NewDPCAPIRouter(orgCtlr, m, groupCtlr, dataCtlr, jobCtlr, implCtlr)
+	implOrgCtlr := v2.NewImplementerOrgController(attributionClient)
+
+	apiRouter := router.NewDPCAPIRouter(orgCtlr, m, groupCtlr, dataCtlr, jobCtlr, implCtlr, implOrgCtlr)
 
 	port := conf.GetAsString("port", "3000")
 	if err := http.ListenAndServe(fmt.Sprintf(":%s", port), apiRouter); err != nil {

@@ -27,9 +27,10 @@ type ResourceType string
 
 // Contains the different ResourceType for calls to attribution
 const (
-	Organization ResourceType = "Organization"
-	Group        ResourceType = "Group"
-	Implementer  ResourceType = "Implementer"
+	Organization   ResourceType = "Organization"
+	Group          ResourceType = "Group"
+	Implementer    ResourceType = "Implementer"
+	ImplementerOrg ResourceType = "ImplementerOrg"
 )
 
 // Client interface for testing purposes
