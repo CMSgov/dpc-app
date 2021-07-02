@@ -3,9 +3,9 @@
 class ProviderOrgsController < ApplicationController
   before_action :authenticate_user!
 
-  def new
+  def show
+    @user = current_user
   end
 
-  def create
-  end
+  private
 end
