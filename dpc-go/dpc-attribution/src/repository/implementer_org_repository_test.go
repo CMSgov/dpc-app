@@ -48,9 +48,6 @@ func (suite *ImplementerOrgRepositoryTestSuite) TestFindRelation() {
 	assert.Equal(suite.T(), suite.fakeRel.ID, rel.ID)
 }
 
-//SELECT id, implementer_id, organization_id, created_at, updated_at, deleted_at, status, COALESCE\(ssas_system_id, ''\) FROM implementer_org_relations WHERE implementer_id = $1 AND deleted_at IS NULL
-//SELECT id, implementer_id, organization_id, created_at, updated_at, deleted_at, status, COALESCE\(ssas_system_id, ''\) FROM implementer_org_relations WHERE implementer_id = $1 AND deleted_at IS NULL
-
 func (suite *ImplementerOrgRepositoryTestSuite) TestFindManagedOrgs() {
 	db, mock := newMock()
 	defer db.Close()
