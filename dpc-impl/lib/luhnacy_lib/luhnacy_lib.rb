@@ -2,10 +2,7 @@
 
 module LuhnacyLib
   def self.generate_npi
-    loop do
-      npi = Luhnacy.generate(15, prefix: '808403')[-10..-1]
-      break npi unless Organization.where(npi: npi).exists?
-    end
+    Luhnacy.generate(15, prefix: '808403')[-10..-1]
   end
 
   def self.validate_npi(npi)
