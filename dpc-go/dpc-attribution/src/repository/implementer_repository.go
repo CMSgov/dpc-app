@@ -32,7 +32,7 @@ func NewImplementerRepo(db *sql.DB) *ImplementerRepository {
 // FindByID function that searches the database for the Implementer that matches the id
 func (or *ImplementerRepository) FindByID(ctx context.Context, id string) (*v2.Implementer, error) {
 	sb := sqlFlavor.NewSelectBuilder()
-	sb.Select("id", "name", "ssas_group_id", "created_at", "updated_at", "deleted_at")
+	sb.Select("id", "name", "COALESCE(ssas_group_id, '')", "created_at", "updated_at", "deleted_at")
 	sb.From("implementers")
 	sb.Where(sb.Equal("id", id))
 	q, args := sb.Build()
@@ -67,7 +67,7 @@ func (or *ImplementerRepository) Update(ctx context.Context, id string, body []b
 		"updated_at = NOW()",
 	)
 	ub.Where(ub.Equal("id", id), ub.IsNull("deleted_at"))
-	ub.SQL("returning id, name, ssas_group_id, created_at, updated_at, deleted_at")
+	ub.SQL("returning id, name, COALESCE(ssas_group_id, ''), created_at, updated_at, deleted_at")
 	q, args := ub.Build()
 
 	Implementer := new(v2.Implementer)
@@ -94,7 +94,7 @@ func (or *ImplementerRepository) Insert(ctx context.Context, body []byte) (*v2.I
 	ib.InsertInto("implementers")
 	ib.Cols("name", "ssas_group_id")
 	ib.Values(ImplementerModel.Name, ImplementerModel.SsasGroupID)
-	ib.SQL("returning id, name, ssas_group_id, created_at, updated_at, deleted_at")
+	ib.SQL("returning id, name, COALESCE(ssas_group_id, ''), created_at, updated_at, deleted_at")
 
 	q, args := ib.Build()
 

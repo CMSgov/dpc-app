@@ -141,7 +141,7 @@ func (ios *ImplementerOrgService) findOrCreateOrg(r *http.Request, npi string, a
 	return org, nil
 }
 
-// Get function that get the organization from the database by id and logs any errors before returning a generic error
+// Get function that gets the organizations belonging to a specified implementer
 func (ios *ImplementerOrgService) Get(w http.ResponseWriter, r *http.Request) {
 	log := logger.WithContext(r.Context())
 
@@ -210,6 +210,7 @@ func (ios *ImplementerOrgService) toManagedOrgStructs(r *http.Request, relations
 			Name:           name,
 			Status:         rel.Status.String(),
 			NPI:            npi,
+			SsasSystemID:   rel.SsasSystemID,
 		}
 
 		result = append(result, mo)

@@ -37,7 +37,7 @@ func (suite *ImplementerRepositoryTestSuite) TestFindByID() {
 	repo := NewImplementerRepo(db)
 	ctx := context.Background()
 
-	expectedQuery := "SELECT id, name, ssas_group_id, created_at, updated_at, deleted_at FROM implementers WHERE id = \\$1"
+	expectedQuery := "SELECT id, name, COALESCE\\(ssas_group_id, ''\\), created_at, updated_at, deleted_at FROM implementers WHERE id = \\$1"
 
 	rows := sqlmock.NewRows([]string{"id", "name", "ssas_group_id", "created_at", "updated_at", "deleted_at"}).
 		AddRow(suite.fakeImplementer.ID, suite.fakeImplementer.SsasGroupID, suite.fakeImplementer.Name, suite.fakeImplementer.CreatedAt, suite.fakeImplementer.UpdatedAt, nil)
@@ -72,7 +72,7 @@ func (suite *ImplementerRepositoryTestSuite) TestInsert() {
 	repo := NewImplementerRepo(db)
 	ctx := context.Background()
 
-	expectedInsertQuery := "INSERT INTO implementers \\(name, ssas_group_id\\) VALUES \\(\\$1, \\$2\\) returning id, name, ssas_group_id, created_at, updated_at, deleted_at"
+	expectedInsertQuery := "INSERT INTO implementers \\(name, ssas_group_id\\) VALUES \\(\\$1, \\$2\\) returning id, name, COALESCE\\(ssas_group_id, ''\\), created_at, updated_at, deleted_at"
 
 	rows := sqlmock.NewRows([]string{"id", "name", "ssas_group_id", "created_at", "updated_at", "deleted_at"}).
 		AddRow(suite.fakeImplementer.ID, suite.fakeImplementer.Name, suite.fakeImplementer.SsasGroupID, suite.fakeImplementer.CreatedAt, suite.fakeImplementer.UpdatedAt, nil)
@@ -91,7 +91,7 @@ func (suite *ImplementerRepositoryTestSuite) TestUpdate() {
 	repo := NewImplementerRepo(db)
 	ctx := context.Background()
 
-	expectedInsertQuery := "UPDATE implementers SET name = \\$1, ssas_group_id = \\$2, updated_at = NOW\\(\\) WHERE id = \\$3 AND deleted_at IS NULL returning id, name, ssas_group_id, created_at, updated_at, deleted_at"
+	expectedInsertQuery := "UPDATE implementers SET name = \\$1, ssas_group_id = \\$2, updated_at = NOW\\(\\) WHERE id = \\$3 AND deleted_at IS NULL returning id, name, COALESCE\\(ssas_group_id, ''\\), created_at, updated_at, deleted_at"
 
 	rows := sqlmock.NewRows([]string{"id", "name", "ssas_group_id", "created_at", "updated_at", "deleted_at"}).
 		AddRow(suite.fakeImplementer.ID, suite.fakeImplementer.Name, suite.fakeImplementer.SsasGroupID, suite.fakeImplementer.CreatedAt, suite.fakeImplementer.UpdatedAt, nil)
