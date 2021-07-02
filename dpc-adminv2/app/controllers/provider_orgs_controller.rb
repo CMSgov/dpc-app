@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ImplementersController < ApplicationController
+class ProviderOrgsController < ApplicationController
   before_action :authenticate_admin!
 
   def index

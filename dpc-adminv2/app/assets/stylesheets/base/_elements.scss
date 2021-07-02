@@ -26,3 +26,9 @@ textarea:not([disabled]):focus {
   outline: $focus-outline;
   outline-offset: 2px;
 }
+
+ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
