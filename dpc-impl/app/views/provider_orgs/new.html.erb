@@ -1,3 +1,5 @@
+<% title "Add Provider Org" %>
+
 <div>
   <%= link_to root_path, class: 'btn_to_home flex-sp-btwn' do %>
     <svg class="icon" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -11,6 +13,13 @@
 
 <div id="new_provider_form_container">
   <% unless @user.provider_orgs == false %>
+    <%= form_with url: provider_orgs_path, method: :create do |f| %>
+      <div class="field">
+        <%= f.label :porg_npi, "NPI:", class: "ds-c-label" %>
+        <%= f.text_field :porg_npi, class: "ds-c-field", value: "NPI", disabled: true %>
+        <%= f.submit "Add Provider Organization", class: "ds-c-button ds-c-button--primary" %>
+      </div>
+    <% end %>
   <% else %>
     <%= render partial: 'shared/connection-error' %>
   <% end %>

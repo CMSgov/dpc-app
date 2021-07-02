@@ -147,6 +147,7 @@ GEM
     loofah (2.10.0)
       crass (~> 1.0.2)
       nokogiri (>= 1.5.9)
+    luhnacy (0.2.2)
     mail (2.7.1)
       mini_mime (>= 0.1.1)
     marcel (1.0.1)
@@ -328,6 +329,7 @@ DEPENDENCIES
   letter_opener_web (~> 1.0)
   listen (~> 3.3)
   lograge
+  luhnacy (~> 0.2.1)
   newrelic_rpm (~> 6.10)
   pg (~> 1.1)
   pry
