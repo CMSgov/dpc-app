@@ -74,10 +74,9 @@ func (is *ImplementerService) Put(w http.ResponseWriter, r *http.Request) {
 	implID, ok := r.Context().Value(middleware.ContextKeyImplementer).(string)
 	if !ok {
 		log.Error("Failed to extract implementer id from context")
-		boom.Internal(w, "Internal error")
+		boom.Internal(w, "Internal server error")
 		return
 	}
-
 	impl, err := is.repo.FindByID(r.Context(), implID)
 	if err != nil {
 		log.Error("Failed to update Implementer", zap.Error(err))
@@ -90,7 +89,6 @@ func (is *ImplementerService) Put(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	body, _ := ioutil.ReadAll(r.Body)
-
 	if len(body) == 0 {
 		log.Error("Failed to update Implementer due to missing request body")
 		boom.BadData(w, "Missing request body")

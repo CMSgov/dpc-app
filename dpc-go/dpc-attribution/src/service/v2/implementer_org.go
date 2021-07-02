@@ -286,7 +286,7 @@ func (ios *ImplementerOrgService) Put(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var updateReq = struct {
-		SsasSystemId string `json:"ssas_system_id"`
+		SsasSystemID string `json:"ssas_system_id"`
 	}{}
 	err = json.Unmarshal(body, &updateReq)
 	if err != nil {
@@ -295,7 +295,7 @@ func (ios *ImplementerOrgService) Put(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	relation, err := ios.impOrgRepo.Update(r.Context(), implID, orgID, updateReq.SsasSystemId)
+	relation, err := ios.impOrgRepo.Update(r.Context(), implID, orgID, updateReq.SsasSystemID)
 	if err != nil {
 		log.Error("Failed to update implementer/org relation", zap.Error(err))
 		boom.Internal(w, "Internal server error")
