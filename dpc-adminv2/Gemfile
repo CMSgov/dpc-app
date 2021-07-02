@@ -36,6 +36,8 @@ gem 'omniauth-github'
 gem 'omniauth-oktaoauth'
 gem 'octokit' # can be removed once we move past github omniauth
 
+gem 'truemail'
+
 group :development, :test do
   gem 'byebug', platforms: [:mri, :mingw, :x64_mingw]
   gem 'pry'
@@ -65,6 +67,7 @@ group :test do
   # Easy installation and use of web drivers to run system tests with browsers
   gem 'webdrivers'
   gem 'climate_control'
+  gem 'rails-controller-testing'
 end
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem

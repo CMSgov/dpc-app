@@ -9,6 +9,8 @@
 
     <div class="header-seperator"></div>
 
+    <%= render partial: 'shared/alerts', locals: { notice: flash[:notice], alert: flash[:alert] } %>
+
     <!-- main -->
     <section class="ds-l-container ds-u-padding-top--7 ds-u-margin-bottom--7" id="main">
       <%= yield %>

@@ -13,7 +13,7 @@ require 'rspec/rails'
 # Add additional requires below this line. Rails is not loaded until this point!
 require 'capybara/rails'
 require 'capybara/rspec'
-require 'support/chromedriver'
+# require 'support/chromedriver'
 # require 'support/api_client_support'
 require 'webmock/rspec'
 
