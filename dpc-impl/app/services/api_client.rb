@@ -16,7 +16,7 @@ class ApiClient
 
   def create_provider_org(imp_id, npi)
     uri_string = base_url + '/Implementer/' + imp_id + '/org'
-    json = {npi: npi}.json
+    json = {npi: npi}.to_json
     post_request(uri_string, json)
     self
   end

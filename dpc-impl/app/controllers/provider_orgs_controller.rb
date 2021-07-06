@@ -9,12 +9,30 @@ class ProviderOrgsController < ApplicationController
   end
 
   def add
-    binding.pry
+    @npi = provider_org_param[:npi]
+
+    api_request = api_service.create_provider_org(imp_id, @npi)
+
+    if api_request.response_successful?
+      flash[:notice] = 'Provider Organization added.'
+      redirect_to root_path
+    else
+      flash[:alert] = 'Unable to add Provider Organization.'
+      throw(:abort)
+    end
   end
 
   private
 
-  def provider_org_params
+  def api_service
+    @api_service ||= ApiClient.new
+  end
+
+  def imp_id
+    current_user.implementer_id
+  end
+
+  def provider_org_param
     params.require(:provider_org).permit(:npi)
   end
 end
