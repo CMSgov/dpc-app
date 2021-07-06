@@ -21,8 +21,10 @@ class ProviderOrgsController < ApplicationController
       flash[:notice] = 'Provider Organization added.'
       redirect_to root_path
     else
-      flash[:alert] = 'Unable to add Provider Organization.'
-      throw(:abort)
+      binding.pry
+      msg = api_request.response_body
+      flash[:alert] = "Provider Organization could not be added: #{msg}"
+      redirect_to provider_orgs_path
     end
   end
 

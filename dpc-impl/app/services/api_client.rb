@@ -56,6 +56,8 @@ class ApiClient
     else
       unless !response_successful?
         @response_body = parsed_response(response)
+      else
+        @response_body = response.body
       end
     end
   end
