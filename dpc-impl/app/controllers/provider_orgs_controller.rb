@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require './lib/luhnacy_lib/luhnacy_lib'
+
 class ProviderOrgsController < ApplicationController
   before_action :authenticate_user!
 
@@ -12,6 +14,8 @@ class ProviderOrgsController < ApplicationController
     @npi = provider_org_param[:npi]
 
     api_request = api_service.create_provider_org(imp_id, @npi)
+
+    return npi_error unless npi_valid?(@npi)
 
     if api_request.response_successful?
       flash[:notice] = 'Provider Organization added.'
@@ -34,5 +38,15 @@ class ProviderOrgsController < ApplicationController
 
   def provider_org_param
     params.require(:provider_org).permit(:npi)
+  end
+
+  def npi_error
+    flash[:alert] = 'NPI must be valid.'
+    redirect_to provider_orgs_path
+  end
+
+  def npi_valid?(npi)
+    npi = '80840' + npi
+    LuhnacyLib.validate_npi(npi)
   end
 end
