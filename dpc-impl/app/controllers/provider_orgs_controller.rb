@@ -7,7 +7,7 @@ class ProviderOrgsController < ApplicationController
 
   def show
     @user = current_user
-    @add_path = add_provider_orgs_url
+    @npi = generate_npi
   end
 
   def add

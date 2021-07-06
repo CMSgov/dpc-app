@@ -11,11 +11,12 @@
   <% end %>
 </div>
 
-<div>
+<div class="form_container">
   <% unless @user.provider_orgs == false %>
+    <h1 class="ds-u-margin-top--0">Add Provider Organization</h1>
     <%= form_for :provider_org, url: add_provider_orgs_url do |f| %>
       <%= f.label :npi, "NPI", class: "ds-c-label" %>
-      <%= f.text_field :npi, class: "ds-c-field" %>
+      <%= f.text_field :npi, class: "ds-c-field ds-u-margin-bottom--3 read-only", value: @npi, readonly: true %>
       <%= f.submit "Add Provider Organization", class: "ds-c-button ds-c-button--primary", data: { test: "porg-form-submit" } %>
     <% end %>
   <% else %>
