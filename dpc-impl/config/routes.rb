@@ -14,7 +14,7 @@ Rails.application.routes.draw do
       root to: 'portal#show', as: :authenticated_root, via: :get
     end
 
-    resource :provider_orgs, path: '/provider_org', only: [:show] do
+    resource :provider_orgs, path: '/provider_org', only: [:new, :show] do
       match :add, via: [:post]
     end
 

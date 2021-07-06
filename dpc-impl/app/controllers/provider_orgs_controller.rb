@@ -5,7 +5,7 @@ require './lib/luhnacy_lib/luhnacy_lib'
 class ProviderOrgsController < ApplicationController
   before_action :authenticate_user!
 
-  def show
+  def new
     @user = current_user
     @npi = generate_npi
   end
@@ -24,7 +24,7 @@ class ProviderOrgsController < ApplicationController
       binding.pry
       msg = api_request.response_body
       flash[:alert] = "Provider Organization could not be added: #{msg}"
-      redirect_to provider_orgs_path
+      redirect_to new_provider_orgs_path
     end
   end
 
