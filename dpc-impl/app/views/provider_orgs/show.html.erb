@@ -13,6 +13,11 @@
 
 <div>
   <% unless @user.provider_orgs == false %>
+    <%= form_for :provider_org, url: add_provider_orgs_url do |f| %>
+      <%= f.label :npi, "NPI", class: "ds-c-label" %>
+      <%= f.text_field :npi, class: "ds-c-field" %>
+      <%= f.submit "Add Provider Organization", class: "ds-c-button ds-c-button--primary", data: { test: "porg-form-submit" } %>
+    <% end %>
   <% else %>
     <%= render partial: 'shared/connection-error' %>
   <% end %>
