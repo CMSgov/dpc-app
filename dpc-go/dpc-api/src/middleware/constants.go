@@ -31,7 +31,9 @@ const (
 	ContextKeyRequestURL
 	// ContextKeyGroup is the key in the context to retrieve the groupID
 	ContextKeyGroup
-	// ContextKeyRequestingIP is the key in the context to retrieve the requesting IP address
+    // ContextKeyImplementer is the key in the context to retrieve the ImplementerID
+    ContextKeyImplementer
+    // ContextKeyRequestingIP is the key in the context to retrieve the requesting IP address
 	ContextKeyRequestingIP
 	// ContextKeyFileName is the key in the context to retrieve the file name
 	ContextKeyFileName
