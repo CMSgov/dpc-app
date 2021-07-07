@@ -48,7 +48,7 @@ func (ios *ImplementerOrgService) Post(w http.ResponseWriter, r *http.Request) {
 	impl, err := ios.implRepo.FindByID(r.Context(), implID)
 	if err != nil {
 		log.Error("Failed to retrieve Implementer", zap.Error(err))
-		boom.BadData(w, "Failed to retrieve Implementer")
+		boom.NotFound(w, "Implementer not found")
 		return
 	}
 
@@ -77,7 +77,7 @@ func (ios *ImplementerOrgService) Post(w http.ResponseWriter, r *http.Request) {
 
 	if reqStruct.Npi == "" {
 		log.Error("missing npi", zap.Error(fmt.Errorf("missing npi in request body")))
-		boom.BadData(w, err)
+		boom.BadData(w, "Missing npi in request body")
 		return
 	}
 
@@ -141,7 +141,7 @@ func (ios *ImplementerOrgService) findOrCreateOrg(r *http.Request, npi string, a
 	return org, nil
 }
 
-// Get function that get the organization from the database by id and logs any errors before returning a generic error
+// Get function that gets the organizations belonging to a specified implementer
 func (ios *ImplementerOrgService) Get(w http.ResponseWriter, r *http.Request) {
 	log := logger.WithContext(r.Context())
 
@@ -210,6 +210,7 @@ func (ios *ImplementerOrgService) toManagedOrgStructs(r *http.Request, relations
 			Name:           name,
 			Status:         rel.Status.String(),
 			NPI:            npi,
+			SsasSystemID:   rel.SsasSystemID,
 		}
 
 		result = append(result, mo)
@@ -266,5 +267,51 @@ func (ios *ImplementerOrgService) Delete(w http.ResponseWriter, r *http.Request)
 
 // Put update relation (Not yet implemented)
 func (ios *ImplementerOrgService) Put(w http.ResponseWriter, r *http.Request) {
-	boom.NotImplemented(w, "Not Implemented")
+	log := logger.WithContext(r.Context())
+
+	implID := r.Context().Value(middleware.ContextKeyImplementer).(string)
+	orgID := r.Context().Value(middleware.ContextKeyOrganization).(string)
+
+	_, err := ios.impOrgRepo.FindRelation(r.Context(), implID, orgID)
+	if err != nil {
+		log.Error("Failed to retrieve implementer/org relation", zap.Error(err))
+		boom.NotFound(w, "Relation not found")
+		return
+	}
+
+	body, _ := ioutil.ReadAll(r.Body)
+	if len(body) == 0 {
+		log.Error("Failed to update implementer/org relation due to missing request body")
+		boom.BadData(w, "Missing request body")
+		return
+	}
+
+	var updateReq = struct {
+		SsasSystemID string `json:"ssas_system_id"`
+	}{}
+	err = json.Unmarshal(body, &updateReq)
+	if err != nil {
+		log.Error("Failed to parse body", zap.Error(err))
+		boom.BadData(w, err)
+		return
+	}
+
+	relation, err := ios.impOrgRepo.Update(r.Context(), implID, orgID, updateReq.SsasSystemID)
+	if err != nil {
+		log.Error("Failed to update implementer/org relation", zap.Error(err))
+		boom.Internal(w, "Internal server error")
+		return
+	}
+
+	relBytes := new(bytes.Buffer)
+	if err := json.NewEncoder(relBytes).Encode(relation); err != nil {
+		log.Error("Failed to convert orm model to bytes for implementer/org relation", zap.Error(err))
+		boom.Internal(w, err.Error())
+		return
+	}
+
+	if _, err := w.Write(relBytes.Bytes()); err != nil {
+		log.Error("Failed to write Implementer org relation to response", zap.Error(err))
+		boom.Internal(w, err.Error())
+	}
 }

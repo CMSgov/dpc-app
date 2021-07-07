@@ -46,6 +46,14 @@ func (m *MockImplementerOrgRepo) FindManagedOrgs(ctx context.Context, implId str
 	return args.Get(0).([]v2.ImplementerOrgRelation), args.Error(1)
 }
 
+func (m *MockImplementerOrgRepo) Update(ctx context.Context, implId string, orgId string, sysId string) (*v2.ImplementerOrgRelation, error) {
+	args := m.Called(ctx, implId, orgId, sysId)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*v2.ImplementerOrgRelation), args.Error(1)
+}
+
 type ImplementerOrgServiceTestSuite struct {
 	suite.Suite
 	implRepo    *MockImplementerRepo
@@ -219,14 +227,6 @@ func (suite *ImplementerOrgServiceTestSuite) TestDeleteNotImplemented() {
 	req := httptest.NewRequest(http.MethodDelete, "http://example.com/foo", nil)
 	w := httptest.NewRecorder()
 	suite.service.Delete(w, req)
-	res := w.Result()
-	assert.Equal(suite.T(), http.StatusNotImplemented, res.StatusCode)
-}
-
-func (suite *ImplementerOrgServiceTestSuite) TestPutNotImplemented() {
-	req := httptest.NewRequest(http.MethodPut, "http://example.com/foo", nil)
-	w := httptest.NewRecorder()
-	suite.service.Put(w, req)
 	res := w.Result()
 	assert.Equal(suite.T(), http.StatusNotImplemented, res.StatusCode)
 }
