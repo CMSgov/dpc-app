@@ -22,21 +22,22 @@ RSpec.describe ProviderOrgsController, type: :controller do
   end
 
   describe 'GET #add' do
+    before(:each) do
+      stub_api_client(message: :create_implementer, success: true, response: default_imp_creation_response)
+
+      user = create(:user)
+
+      sign_in user
+    end
+
     context 'authenticated user' do
-      it 'returns 200 http response' do
-        stub_api_client(message: :create_implementer, success: true, response: default_imp_creation_response)
-
-        user = create(:user)
+      it 'returns 200' do
         npi = LuhnacyLib.generate_npi
+        stub_api_client(message: :create_provider_org, success: true, response: default_provider_org_response)
 
-        sign_in user
+        post :add, params: { provider_org: { npi: npi } }
 
-        stub = stub_api_client(
-          message: :create_provider_org,
-          success: true,
-          response: default_provider_org_response
-        )
-        allow(stub).to receive(:response_body)
+        expect(controller.flash[:notice]).to eq("Provider Organization added.")
       end
     end
   end
