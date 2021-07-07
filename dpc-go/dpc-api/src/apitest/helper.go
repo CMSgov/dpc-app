@@ -250,6 +250,11 @@ const ImplJSON = `{
     "name": "foo"
 }`
 
+// ImplOrgJSON is an Implementer/Org JSON string for testing purposes
+const ImplOrgJSON = `{
+    "npi": "0123456789"
+}`
+
 // AttributionOrgResponse provides a sample organization response that mimics what attribution service returns for testing purposes
 func AttributionOrgResponse() []byte {
 	return AttributionToFHIRResponse(Orgjson)

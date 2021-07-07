@@ -24,6 +24,11 @@ type MockAttributionClient struct {
 	mock.Mock
 }
 
+func (ac *MockAttributionClient) CreateImplOrg(ctx context.Context, body []byte) ([]byte, error) {
+   args := ac.Called(ctx, body)
+   return args.Get(0).([]byte), args.Error(1)
+}
+
 func (ac *MockAttributionClient) Export(ctx context.Context, resourceType client.ResourceType, id string) ([]byte, error) {
 	args := ac.Called(ctx, resourceType, id)
 	return args.Get(0).([]byte), args.Error(1)
