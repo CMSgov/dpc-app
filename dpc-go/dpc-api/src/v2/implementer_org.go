@@ -32,7 +32,7 @@ func (ioc *ImplementerOrgController) Create(w http.ResponseWriter, r *http.Reque
         return
     }
 
-    resp, err := ioc.ac.Post(r.Context(), client.ImplementerOrg, body)
+    resp, err := ioc.ac.CreateImplOrg(r.Context(), body)
     if err != nil {
         log.Error("Failed to save the implementer/org relationship to attribution", zap.Error(err))
         fhirror.ServerIssue(r.Context(), w, http.StatusInternalServerError, "Failed to save implementer/org relationship")

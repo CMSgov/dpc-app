@@ -27,10 +27,9 @@ type ResourceType string
 
 // Contains the different ResourceType for calls to attribution
 const (
-	Organization   ResourceType = "Organization"
-	Group          ResourceType = "Group"
-	Implementer    ResourceType = "Implementer"
-	ImplementerOrg ResourceType = "ImplementerOrg"
+	Organization ResourceType = "Organization"
+	Group        ResourceType = "Group"
+	Implementer  ResourceType = "Implementer"
 )
 
 // Client interface for testing purposes
@@ -40,6 +39,7 @@ type Client interface {
 	Delete(ctx context.Context, resourceType ResourceType, id string) error
 	Put(ctx context.Context, resourceType ResourceType, id string, body []byte) ([]byte, error)
 	Export(ctx context.Context, resourceType ResourceType, id string) ([]byte, error)
+	CreateImplOrg(ctx context.Context, body []byte) ([]byte, error)
 }
 
 // AttributionClient is a struct to hold the retryablehttp client and configs
@@ -56,6 +56,53 @@ func NewAttributionClient(config AttributionConfig) Client {
 		config:     config,
 		httpClient: client,
 	}
+}
+
+func (ac *AttributionClient) CreateImplOrg(ctx context.Context, body []byte) ([]byte, error) {
+	log := logger.WithContext(ctx)
+	ac.httpClient.Logger = newLogger(*log)
+
+	implID, ok := ctx.Value(middleware2.ContextKeyImplementer).(string)
+	if !ok {
+		log.Error("Failed to extract the implementer id from the context")
+		return nil, errors.Errorf("Failed to extract the implementer id from the context")
+	}
+
+	url := fmt.Sprintf("%s/Implementer/%s/org", ac.config.URL, implID)
+	req, err := retryablehttp.NewRequest(http.MethodPost, url, body)
+	if err != nil {
+		log.Error("Failed to create request", zap.Error(err))
+		return nil, errors.Errorf("Failed to create request")
+	}
+
+	req.Header.Add(middleware.RequestIDHeader, ctx.Value(middleware.RequestIDKey).(string))
+	if ctx.Value(middleware2.ContextKeyOrganization) != nil {
+		req.Header.Add(middleware2.OrgHeader, ctx.Value(middleware2.ContextKeyOrganization).(string))
+	}
+	resp, err := ac.httpClient.Do(req)
+	if err != nil {
+		log.Error("Failed to send request", zap.Error(err))
+		return nil, errors.Errorf("Failed to send request")
+	}
+
+	if resp.StatusCode < 200 || resp.StatusCode > 299 {
+		log.Error(fmt.Sprintf("Failed to send request. Status code %d", resp.StatusCode))
+		return nil, errors.Errorf("Failed to save resource")
+	}
+
+	defer func() {
+		err := resp.Body.Close()
+		if err != nil {
+			log.Error("Failed to close response body", zap.Error(err))
+		}
+	}()
+
+	b, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Error("Failed to read the response body", zap.Error(err))
+		return nil, errors.Errorf("Failed to save resource")
+	}
+	return b, nil
 }
 
 // Get A function to enable communication with attribution service via GET
