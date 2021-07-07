@@ -15,6 +15,7 @@ type ImplementerOrgRelation struct {
 	UpdatedAt      time.Time     `db:"updated_at" json:"updated_at" faker:"-"`
 	DeletedAt      sql.NullTime  `db:"deleted_at" json:"-" faker:"-"`
 	Status         ImplOrgStatus `db:"status" json:"status,omitempty" faker:"-"`
+	SsasSystemID   string        `db:"ssas_system_id" json:"ssas_system_id,omitempty" faker:"-"`
 }
 
 // MarshalJSON Json marshaller
