@@ -7,6 +7,10 @@
 
       <h1 class="ds-u-margin-top--0">Log in</h1>
 
+      <div>
+        <strong>This sandbox experience is designed for developers.</strong> If you are a healthcare provider interested in learning more about DPC, please see our Information for Providers for more information.
+      </div>
+
       <%= form_for(resource, as: resource_name, url: session_path(resource_name), data: { test: 'user-sign-in-form' }) do |f| %>
         <div class="field">
           <%= f.label :email, class: "ds-c-label" %>
