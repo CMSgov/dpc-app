@@ -6,4 +6,5 @@ type ManagedOrg struct {
 	Name           string `db:"name" json:"org_name"`
 	Status         string `db:"created_at" json:"status"`
 	NPI            string `db:"updated_at" json:"npi"`
+	SsasSystemID   string `db:"ssas_system_id" json:"ssas_system_id"`
 }
