@@ -58,6 +58,7 @@ func NewAttributionClient(config AttributionConfig) Client {
 	}
 }
 
+// CreateImplOrg is a function to create an Implementer/Organization relation via attribution service
 func (ac *AttributionClient) CreateImplOrg(ctx context.Context, body []byte) ([]byte, error) {
 	log := logger.WithContext(ctx)
 	ac.httpClient.Logger = newLogger(*log)
