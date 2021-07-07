@@ -6,7 +6,7 @@
         <%= @user.provider_orgs.count %> provider organizations
       </div>
       <div>
-        <%= link_to "Add New Provider Org", new_provider_orgs_path, class: "ds-c-button ds-c-button--primary ds-u-margin-top--1" %>
+        <%= link_to "Add New Provider Org", new_provider_orgs_path, class: "ds-c-button ds-c-button--primary ds-u-margin-top--1", data: { test: "add-provider-org-test" } %>
       </div>
     </div>
 
