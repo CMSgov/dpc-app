@@ -14,13 +14,13 @@ import (
 )
 
 type RouterControllers struct {
-    Org v2.Controller
-    Metadata v2.ReadController
-    Group v2.Controller
-    Data v2.FileController
-    Job v2.JobController
-    Impl v2.Controller
-    ImplOrg v2.Controller
+	Org      v2.Controller
+	Metadata v2.ReadController
+	Group    v2.Controller
+	Data     v2.FileController
+	Job      v2.JobController
+	Impl     v2.Controller
+	ImplOrg  v2.Controller
 }
 
 // NewDPCAPIRouter function that builds the router using chi
