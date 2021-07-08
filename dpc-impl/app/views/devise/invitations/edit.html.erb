@@ -4,7 +4,22 @@
   <div class="ds-l-col--12 ds-l-md-col--6 ds-u-margin-bottom--1 ds-u-margin-x--auto">
     <div class="card card--border-top card--shadow">
     
-    <h1><%= t "devise.invitations.edit.header" %></h1>
+    <h1 class="ds-u-margin-bottom--0">Hello <%= resource.first_name %> <%= resource.last_name %>!</h1>
+    <h3 class="ds-u-margin-top--0">from Implementer <%= resource.implementer %></h3>
+
+    <div>
+      A member from your team has invited you to create an account in the DPC sandbox portal. You may begin testing in the sandbox environment after creating a password for your account.
+    </div>
+
+    <div class="ds-u-margin-y--3" id="invited-email">
+      <strong>Email:</strong> <%= resource.email %>
+    </div>
+
+    <div class="ds-c-alert ds-c-alert--warn-no-icon">
+      <div class="ds-u-color--gray">
+        <strong>This email is your username to log into DPC.</strong> You may change this at any time via your User Profile settings after account creation. Please create a password and agree to the terms of service below to log in.
+      </div>
+    </div>
 
     <%= form_for(resource, as: resource_name, url: invitation_path(resource_name), html: { method: :put }) do |f| %>
       <%= render "devise/shared/error_messages", resource: resource %>
