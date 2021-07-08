@@ -30,7 +30,7 @@ gem 'omniauth-oktaoauth'
 gem 'fhir_client', '>= 4.0.6'
 gem 'sidekiq_alive'
 gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
-gem 'octokit' # can be removed once we move past github omniauth
+gem 'octokit' , '>= 4.21.0' # can be removed once we move past github omniauth
 gem 'kaminari', '>= 1.2.1'
 gem 'active_model_serializers', '>= 0.10.12'
 gem 'macaroons'
@@ -49,7 +49,7 @@ group :development, :test do
   # Version 0.18 has a breaking change for sonarqube
   gem 'simplecov', '<= 0.17'
   gem 'vcr'
-  gem 'webmock', '>= 3.12.2'
+  gem 'webmock', '>= 3.13.0'
   gem 'bundler-audit'
   gem 'brakeman'
   gem 'dotenv-rails', '>= 2.7.6'
@@ -72,7 +72,7 @@ group :development do
   gem 'rubocop', '>= 1.12.0', require: false
   gem 'rubocop-performance', '>= 1.10.2', require: false
 
-  gem 'letter_opener'
+  gem 'letter_opener', '>= 1.7.0'
 
   gem 'letter_opener_web', '~> 1.4', '>= 1.4.0'
 end
