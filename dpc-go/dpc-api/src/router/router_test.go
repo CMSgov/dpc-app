@@ -62,12 +62,14 @@ func (mjc *MockJobController) Status(w http.ResponseWriter, r *http.Request) {
 
 type RouterTestSuite struct {
 	suite.Suite
-	router    http.Handler
-	mockOrg   *MockController
-	mockMeta  *MockController
-	mockGroup *MockController
-	mockData  *MockFileController
-	mockJob   *MockJobController
+	router      http.Handler
+	mockOrg     *MockController
+	mockMeta    *MockController
+	mockGroup   *MockController
+	mockData    *MockFileController
+	mockJob     *MockJobController
+	mockImpl    *MockController
+	mockImplOrg *MockController
 }
 
 func (suite *RouterTestSuite) SetupTest() {
@@ -76,7 +78,20 @@ func (suite *RouterTestSuite) SetupTest() {
 	suite.mockGroup = &MockController{}
 	suite.mockData = &MockFileController{}
 	suite.mockJob = &MockJobController{}
-	suite.router = NewDPCAPIRouter(suite.mockOrg, suite.mockMeta, suite.mockGroup, suite.mockData, suite.mockJob)
+	suite.mockImpl = &MockController{}
+	suite.mockImplOrg = &MockController{}
+
+	mockRC := RouterControllers{
+		Org:      suite.mockOrg,
+		Metadata: suite.mockMeta,
+		Group:    suite.mockGroup,
+		Data:     suite.mockData,
+		Job:      suite.mockJob,
+		Impl:     suite.mockImpl,
+		ImplOrg:  suite.mockImplOrg,
+	}
+
+	suite.router = NewDPCAPIRouter(mockRC)
 }
 
 func TestRouterTestSuite(t *testing.T) {
