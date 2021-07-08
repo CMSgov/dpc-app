@@ -32,8 +32,9 @@ func TestImplementerOrgControllerTestSuite(t *testing.T) {
 }
 
 func (suite *ImplementerOrgControllerTestSuite) TestCreateImplementerOrg() {
-	suite.mac.On("CreateImplOrg", mock.Anything, mock.Anything).Return(apitest.AttributionToFHIRResponse(apitest.ImplOrgJSON), nil)
-	req := httptest.NewRequest(http.MethodPost, "http://example.com/foo", strings.NewReader(apitest.ImplOrgJSON))
+	testNPI := apitest.ImplOrgJSON()
+    suite.mac.On("CreateImplOrg", mock.Anything, mock.Anything).Return(apitest.AttributionToFHIRResponse(testNPI), nil)
+	req := httptest.NewRequest(http.MethodPost, "http://example.com/foo", strings.NewReader(testNPI))
 	ctx := req.Context()
 	ctx = context.WithValue(ctx, middleware.RequestIDKey, "12345")
 	req = req.WithContext(ctx)
