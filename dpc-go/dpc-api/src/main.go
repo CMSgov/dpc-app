@@ -34,23 +34,24 @@ func main() {
 		Retries: retries,
 	})
 
-	orgCtlr := v2.NewOrganizationController(attributionClient)
-
 	capabilitiesFile := conf.GetAsString("capabilities.base")
-
-	m := v2.NewMetadataController(capabilitiesFile)
-
-	groupCtlr := v2.NewGroupController(attributionClient)
-
-	dataCtlr := v2.NewDataController(dataClient)
 
 	jobClient := client.NewJobClient(client.JobConfig{
 		URL:     attributionURL,
 		Retries: retries,
 	})
-	jobCtlr := v2.NewJobController(jobClient)
 
-	apiRouter := router.NewDPCAPIRouter(orgCtlr, m, groupCtlr, dataCtlr, jobCtlr)
+	controllers := router.Controllers{
+		Org:      v2.NewOrganizationController(attributionClient),
+		Metadata: v2.NewMetadataController(capabilitiesFile),
+		Group:    v2.NewGroupController(attributionClient),
+		Data:     v2.NewDataController(dataClient),
+		Job:      v2.NewJobController(jobClient),
+		Impl:     v2.NewImplementerController(attributionClient),
+		ImplOrg:  v2.NewImplementerOrgController(attributionClient),
+	}
+
+	apiRouter := router.NewDPCAPIRouter(controllers)
 
 	port := conf.GetAsString("port", "3000")
 	if err := http.ListenAndServe(fmt.Sprintf(":%s", port), apiRouter); err != nil {
