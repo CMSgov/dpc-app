@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require './lib/luhnacy_lib/luhnacy_lib'
+
 class User < ApplicationRecord
   include ApiErrorSimplify
 
@@ -73,6 +75,10 @@ class User < ApplicationRecord
     else
       false
     end
+  end
+
+  def assign_npi
+    LuhnacyLib.generate_npi
   end
 
   private
