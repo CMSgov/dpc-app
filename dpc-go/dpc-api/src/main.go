@@ -41,7 +41,7 @@ func main() {
 		Retries: retries,
 	})
 
-	controllers := router.RouterControllers{
+	controllers := router.Controllers{
 		Org:      v2.NewOrganizationController(attributionClient),
 		Metadata: v2.NewMetadataController(capabilitiesFile),
 		Group:    v2.NewGroupController(attributionClient),
