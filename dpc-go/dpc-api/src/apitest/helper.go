@@ -6,7 +6,7 @@ import (
 
 	"github.com/CMSgov/dpc/api/model"
 	"github.com/bxcodec/faker/v3"
-    luhn "github.com/joeljunstrom/go-luhn"
+	luhn "github.com/joeljunstrom/go-luhn"
 )
 
 // Orgjson is a organization json string for testing purposes
@@ -253,20 +253,20 @@ const ImplJSON = `{
 
 // ImplOrgJSON creates an Implementer/Org JSON string for testing purposes
 func ImplOrgJSON() string {
-    type NPIJSON struct {
-       Npi string `json:"npi"`
-    }
+	type NPIJSON struct {
+		Npi string `json:"npi"`
+	}
 
-    npi := GenerateNPI()
+	npi := GenerateNPI()
 
-    testNPI := NPIJSON{
-       Npi: npi,
-    }
+	testNPI := NPIJSON{
+		Npi: npi,
+	}
 
-    var jsonData []byte
-    jsonData, _ = json.Marshal(testNPI)
+	var jsonData []byte
+	jsonData, _ = json.Marshal(testNPI)
 
-    return string(jsonData)
+	return string(jsonData)
 }
 
 // AttributionOrgResponse provides a sample organization response that mimics what attribution service returns for testing purposes
@@ -310,6 +310,6 @@ func MalformedOrg() []byte {
 
 // GenerateNPI creates a placeholder NPI number for testing purposes
 func GenerateNPI() string {
-    luhnWithPrefix := luhn.GenerateWithPrefix(15, "808403")
-    return luhnWithPrefix[len(luhnWithPrefix)-10:]
+	luhnWithPrefix := luhn.GenerateWithPrefix(15, "808403")
+	return luhnWithPrefix[len(luhnWithPrefix)-10:]
 }
