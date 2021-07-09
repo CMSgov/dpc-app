@@ -263,7 +263,30 @@
             </dependency>
             <dependency>
                 <groupId>${hapi.fhir.groupID}</groupId>
+                <artifactId>org.hl7.fhir.dstu3</artifactId>
+                <version>${hapi.fhir.version}</version>
+                <scope>compile</scope>
+            </dependency>
+            <dependency>
+                <groupId>${hapi.fhir.groupID}</groupId>
+                <artifactId>org.hl7.fhir.r4</artifactId>
+                <version>${hapi.fhir.version}</version>
+                <scope>compile</scope>
+            </dependency>
+            <dependency>
+                <groupId>${hapi.fhir.groupID}</groupId>
+                <artifactId>hapi-fhir-validation</artifactId>
+                <version>${hapi.fhir.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${hapi.fhir.groupID}</groupId>
                 <artifactId>hapi-fhir-validation-resources-dstu3</artifactId>
+                <version>${hapi.fhir.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>${hapi.fhir.groupID}</groupId>
+                <artifactId>hapi-fhir-validation-resources-r4</artifactId>
                 <version>${hapi.fhir.version}</version>
                 <scope>test</scope>
             </dependency>

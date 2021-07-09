@@ -1,0 +1,50 @@
+<Bundle xmlns="http://hl7.org/fhir">
+    <id value="eb3894fc-ca04-44d4-adab-a9fb0a6f1976"/>
+    <meta>
+        <lastUpdated value="2020-01-01T00:01:23.456-04:00"/>
+    </meta>
+    <type value="searchset"/>
+    <total value="1"/>
+    <link>
+        <relation value="self"/>
+        <url value="http://localhost:8083/v1/fhir/Patient?identifier=https://bluebutton.cms.gov/resources/identifier/mbi-hash|abadf57ff8dc94610ca0d479feadb1743c9cd3c77caf1eafde5719a154379fb6"/>
+    </link>
+    <entry>
+        <resource>
+            <Patient xmlns="http://hl7.org/fhir">
+                <id value="-20140000008325"/>
+                <meta>
+                    <lastUpdated value="2020-01-01T00:00:00-05:00"></lastUpdated>
+                </meta>
+                <extension url="https://bluebutton.cms.gov/resources/variables/race">
+                    <valueCoding>
+                        <system value="https://bluebutton.cms.gov/resources/variables/race"/>
+                        <code value="1"/>
+                        <display value="White"/>
+                    </valueCoding>
+                </extension>
+                <identifier>
+                    <system value="https://bluebutton.cms.gov/resources/variables/bene_id"/>
+                    <value value="-20140000008325"/>
+                </identifier>
+                <identifier>
+                    <system value="https://bluebutton.cms.gov/resources/identifier/mbi-hash"/>
+                    <value value="abadf57ff8dc94610ca0d479feadb1743c9cd3c77caf1eafde5719a154379fb6"/>
+                </identifier>
+                <name>
+                    <use value="usual"/>
+                    <family value="Doe"/>
+                    <given value="Jane"/>
+                    <given value="X"/>
+                </name>
+                <gender value="unknown"/>
+                <birthDate value="2014-06-01"/>
+                <address>
+                    <district value="999"/>
+                    <state value="15"/>
+                    <postalCode value="99999"/>
+                </address>
+            </Patient>
+        </resource>
+    </entry>
+</Bundle>
