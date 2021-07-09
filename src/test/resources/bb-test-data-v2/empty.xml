@@ -1,0 +1,20 @@
+<Bundle xmlns="http://hl7.org/fhir">
+    <id value="6c56f8c4-a4d4-4232-94d3-0d4f0ac2e324"></id>
+    <meta>
+        <lastUpdated value="2021-06-08T01:55:08.681+00:00"></lastUpdated>
+    </meta>
+    <type value="searchset"></type>
+    <total value="0"></total>
+    <link>
+        <relation value="first"></relation>
+        <url value="https://prod-sbx.bfd.cms.gov/v2/fhir/Coverage?_pretty=true&amp;_format=xml&amp;startIndex=0&amp;_count=10&amp;beneficiary=Patient%2F20140000009893"></url>
+    </link>
+    <link>
+        <relation value="last"></relation>
+        <url value="https://prod-sbx.bfd.cms.gov/v2/fhir/Coverage?_pretty=true&amp;_format=xml&amp;startIndex=0&amp;_count=10&amp;beneficiary=Patient%2F20140000009893"></url>
+    </link>
+    <link>
+        <relation value="self"></relation>
+        <url value="https://prod-sbx.bfd.cms.gov/v2/fhir/Coverage/?_count=10&amp;_format=xml&amp;_pretty=true&amp;beneficiary=Patient%2F20140000009893&amp;startIndex=0"></url>
+    </link>
+</Bundle>

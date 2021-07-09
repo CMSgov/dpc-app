@@ -1,0 +1,143 @@
+<Bundle xmlns="http://hl7.org/fhir">
+    <id value="1de2a02c-b115-4525-9325-f6a1548f449d"></id>
+    <meta>
+        <lastUpdated value="2019-05-25T23:45:16.962-04:00"></lastUpdated>
+    </meta>
+    <type value="searchset"></type>
+    <total value="3"></total>
+    <link>
+        <relation value="self"></relation>
+        <url value="https://sandbox.bluebutton.cms.gov/v1/fhir/Coverage/?_format=application%2Fjson%2Bfhir&amp;beneficiary=Patient%2F20140000009893&amp;_count=10&amp;startIndex=0"></url>
+    </link>
+    <entry>
+        <fullUrl value="https://sandbox.bluebutton.cms.gov/v1/fhir/Coverage/part-a-20140000009893"></fullUrl>
+        <resource>
+            <Coverage xmlns="http://hl7.org/fhir">
+                <id value="part-a-20140000009893"></id>
+                <meta>
+                    <lastUpdated value="2020-01-01T00:00:00-05:00"></lastUpdated>
+                </meta>
+                <extension url="https://bluebutton.cms.gov/resources/variables/ms_cd">
+                    <valueCoding>
+                        <system value="https://bluebutton.cms.gov/resources/variables/ms_cd"></system>
+                        <code value="10"></code>
+                        <display value="Aged without end-stage renal disease (ESRD)"></display>
+                    </valueCoding>
+                </extension>
+                <extension url="https://bluebutton.cms.gov/resources/variables/orec">
+                    <valueCoding>
+                        <system value="https://bluebutton.cms.gov/resources/variables/orec"></system>
+                        <code value="0"></code>
+                        <display value="Old age and survivor’s insurance (OASI)"></display>
+                    </valueCoding>
+                </extension>
+                <extension url="https://bluebutton.cms.gov/resources/variables/crec">
+                    <valueCoding>
+                        <system value="https://bluebutton.cms.gov/resources/variables/crec"></system>
+                        <code value="0"></code>
+                        <display value="Old age and survivor’s insurance (OASI)"></display>
+                    </valueCoding>
+                </extension>
+                <extension url="https://bluebutton.cms.gov/resources/variables/esrd_ind">
+                    <valueCoding>
+                        <system value="https://bluebutton.cms.gov/resources/variables/esrd_ind"></system>
+                        <code value="0"></code>
+                        <display value="the beneficiary does not have ESRD"></display>
+                    </valueCoding>
+                </extension>
+                <extension url="https://bluebutton.cms.gov/resources/variables/a_trm_cd">
+                    <valueCoding>
+                        <system value="https://bluebutton.cms.gov/resources/variables/a_trm_cd"></system>
+                        <code value="0"></code>
+                        <display value="Not Terminated"></display>
+                    </valueCoding>
+                </extension>
+                <status value="active"></status>
+                <type>
+                    <coding>
+                        <system value="Medicare"></system>
+                        <code value="Part A"></code>
+                    </coding>
+                </type>
+                <beneficiary>
+                    <reference value="Patient/20140000009893"></reference>
+                </beneficiary>
+                <grouping>
+                    <subGroup value="Medicare"></subGroup>
+                    <subPlan value="Part A"></subPlan>
+                </grouping>
+            </Coverage>
+        </resource>
+    </entry>
+    <entry>
+        <fullUrl value="https://sandbox.bluebutton.cms.gov/v1/fhir/Coverage/part-b-20140000009893"></fullUrl>
+        <resource>
+            <Coverage xmlns="http://hl7.org/fhir">
+                <id value="part-b-20140000009893"></id>
+                <meta>
+                    <lastUpdated value="2020-01-01T00:00:00-05:00"></lastUpdated>
+                </meta>
+                <extension url="https://bluebutton.cms.gov/resources/variables/ms_cd">
+                    <valueCoding>
+                        <system value="https://bluebutton.cms.gov/resources/variables/ms_cd"></system>
+                        <code value="10"></code>
+                        <display value="Aged without end-stage renal disease (ESRD)"></display>
+                    </valueCoding>
+                </extension>
+                <extension url="https://bluebutton.cms.gov/resources/variables/b_trm_cd">
+                    <valueCoding>
+                        <system value="https://bluebutton.cms.gov/resources/variables/b_trm_cd"></system>
+                        <code value="0"></code>
+                        <display value="Not Terminated"></display>
+                    </valueCoding>
+                </extension>
+                <status value="active"></status>
+                <type>
+                    <coding>
+                        <system value="Medicare"></system>
+                        <code value="Part B"></code>
+                    </coding>
+                </type>
+                <beneficiary>
+                    <reference value="Patient/20140000009893"></reference>
+                </beneficiary>
+                <grouping>
+                    <subGroup value="Medicare"></subGroup>
+                    <subPlan value="Part B"></subPlan>
+                </grouping>
+            </Coverage>
+        </resource>
+    </entry>
+    <entry>
+        <fullUrl value="https://sandbox.bluebutton.cms.gov/v1/fhir/Coverage/part-d-20140000009893"></fullUrl>
+        <resource>
+            <Coverage xmlns="http://hl7.org/fhir">
+                <id value="part-d-20140000009893"></id>
+                <meta>
+                    <lastUpdated value="2020-01-01T00:00:00-05:00"></lastUpdated>
+                </meta>
+                <extension url="https://bluebutton.cms.gov/resources/variables/ms_cd">
+                    <valueCoding>
+                        <system value="https://bluebutton.cms.gov/resources/variables/ms_cd"></system>
+                        <code value="10"></code>
+                        <display value="Aged without end-stage renal disease (ESRD)"></display>
+                    </valueCoding>
+                </extension>
+                <status value="active"></status>
+                <type>
+                    <coding>
+                        <system value="Medicare"></system>
+                        <code value="Part D"></code>
+                    </coding>
+                </type>
+                <beneficiary>
+                    <reference value="Patient/20140000009893"></reference>
+                </beneficiary>
+                <grouping>
+                    <subGroup value="Medicare"></subGroup>
+                    <subPlan value="Part D"></subPlan>
+                </grouping>
+            </Coverage>
+        </resource>
+    </entry>
+</Bundle>
