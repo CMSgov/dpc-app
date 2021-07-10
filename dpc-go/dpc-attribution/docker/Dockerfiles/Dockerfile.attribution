@@ -4,8 +4,6 @@ WORKDIR /app/dpc-attribution
 COPY src/ .
 COPY configs ../configs
 RUN go build  -o ./bin/attribution .
-EXPOSE 8080
-CMD ["./bin/attribution"]
 
 FROM golang:1.15-alpine3.12
 RUN apk update upgrade
