@@ -1,19 +1,19 @@
-FROM golang:1.15-alpine3.12
-
+FROM golang:1.15-alpine3.12 AS builder
 RUN apk add --no-cache git
-
-# Set the Current Working Directory inside the container
 WORKDIR /app/dpc-attribution
-
-# We want to populate the module cache based on the go.{mod,sum} files.
 COPY src/ .
 COPY configs ../configs
-
-# Build the Go app
 RUN go build  -o ./bin/attribution .
-
-# This container exposes port 8080 to the outside world
 EXPOSE 8080
-
-# Run the binary program produced by `go install`
 CMD ["./bin/attribution"]
+
+FROM golang:1.15-alpine3.12
+RUN apk update upgrade
+RUN apk --no-cache add ca-certificates aws-cli curl
+WORKDIR /app/dpc-attribution
+COPY --from=builder /app/configs ../configs
+COPY --from=builder /app/dpc-attribution/bin/attribution ./bin/attribution
+EXPOSE 8080
+CMD ["./bin/attribution"]
+
+
