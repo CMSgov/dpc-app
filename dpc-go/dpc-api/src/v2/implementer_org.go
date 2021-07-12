@@ -1,7 +1,8 @@
 package v2
 
 import (
-	"github.com/CMSgov/dpc/api/client"
+    "encoding/json"
+    "github.com/CMSgov/dpc/api/client"
 	"github.com/CMSgov/dpc/api/fhirror"
 	"github.com/CMSgov/dpc/api/logger"
 	"go.uber.org/zap"
@@ -39,9 +40,16 @@ func (ioc *ImplementerOrgController) Create(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	if _, err := w.Write(resp); err != nil {
+	b, _ := json.Marshal(resp)
+    if err != nil {
+        log.Error("Failed to convert implementer/org to bytes", zap.Error(err))
+        fhirror.ServerIssue(r.Context(), w, http.StatusInternalServerError, "Internal server error")
+        return
+    }
+
+	if _, err := w.Write(b); err != nil {
 		log.Error("Failed to write data to response", zap.Error(err))
-		fhirror.ServerIssue(r.Context(), w, http.StatusInternalServerError, "Failed to save implementer/org relationship")
+		fhirror.ServerIssue(r.Context(), w, http.StatusInternalServerError, "Internal server error")
 	}
 }
 

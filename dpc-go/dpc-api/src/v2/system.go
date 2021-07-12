@@ -40,8 +40,14 @@ func (sc *SSASController) CreateSystem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	mOrg, err := sc.getManagedOrg(r, implementorID, organizationID)
-	if err != nil || "Active" != mOrg.Status {
+	found, mOrg, err := sc.getManagedOrg(r, implementorID, organizationID)
+	if err != nil {
+		log.Error("Failed to retrieve implementer's managed orgs", zap.Error(err))
+		boom.Internal(w, w, http.StatusInternalServerError, "Internal Server Error")
+		return
+	}
+
+	if !found || "Active" != mOrg.Status {
 		log.Error("could not create system for inactive or missing relation")
 		fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "Implementor/Org relation is not active")
 		return
@@ -116,17 +122,17 @@ func (sc *SSASController) createSsasSystem(r *http.Request, implID string, orgID
 	return sc.ssasClient.CreateSystem(r.Context(), req)
 }
 
-func (sc *SSASController) getManagedOrg(r *http.Request, implID string, orgID string) (client.ManagedOrg, error) {
+func (sc *SSASController) getManagedOrg(r *http.Request, implID string, orgID string) (bool, client.ManagedOrg, error) {
 	orgs, err := sc.attrClient.GetManagedOrgs(r.Context(), implID)
 	if err != nil {
-		return client.ManagedOrg{}, err
+		return false, client.ManagedOrg{}, err
 	}
 	for _, org := range orgs {
 		if org.OrgID == orgID {
-			return org, nil
+			return true, org, nil
 		}
 	}
-	return client.ManagedOrg{}, errors.New("relation not found")
+	return false, client.ManagedOrg{}, errors.New("relation not found")
 }
 
 func (sc *SSASController) getGroupID(r *http.Request, implID string) (string, error) {
@@ -140,10 +146,6 @@ func (sc *SSASController) getGroupID(r *http.Request, implID string) (string, er
 		return "", err
 	}
 	return v["ssas_group_id"].(string), nil
-}
-
-func (sc *SSASController) saveSystemID(implID string, orgID string, systemId string) error {
-	return nil
 }
 
 type ProxyCreateSystemRequest struct {

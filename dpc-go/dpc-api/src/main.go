@@ -39,12 +39,12 @@ func main() {
 		Retries: attrRetries,
 	})
 
-    ssasClient := client.NewSsasHttpClient(client.SsasHttpClientConfig{
-        URL:          conf.GetAsString("ssas-client.url"),
-        Retries:      conf.GetAsInt("ssas-client.attrRetries", 3),
-        ClientID:     conf.GetAsString("ssas-client.client-id"),
-        ClientSecret: conf.GetAsString("ssas-client.client-secret"),
-    })
+	ssasClient := client.NewSsasHttpClient(client.SsasHttpClientConfig{
+		URL:          conf.GetAsString("ssas-client.url"),
+		Retries:      conf.GetAsInt("ssas-client.attrRetries", 3),
+		ClientID:     conf.GetAsString("ssas-client.client-id"),
+		ClientSecret: conf.GetAsString("ssas-client.client-secret"),
+	})
 
 	controllers := router.Controllers{
 		Org:      v2.NewOrganizationController(attributionClient),
@@ -52,11 +52,10 @@ func main() {
 		Group:    v2.NewGroupController(attributionClient),
 		Data:     v2.NewDataController(dataClient),
 		Job:      v2.NewJobController(jobClient),
-		Impl:     v2.NewImplementerController(attributionClient,ssasClient),
+		Impl:     v2.NewImplementerController(attributionClient, ssasClient),
 		ImplOrg:  v2.NewImplementerOrgController(attributionClient),
-		Ssas: v2.NewSSASController(ssasClient, attributionClient),
+		Ssas:     v2.NewSSASController(ssasClient, attributionClient),
 	}
-
 
 	apiRouter := router.NewDPCAPIRouter(controllers)
 

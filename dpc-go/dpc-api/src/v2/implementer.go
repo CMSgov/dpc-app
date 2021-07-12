@@ -111,7 +111,7 @@ func (ic *ImplementerController) Update(w http.ResponseWriter, r *http.Request) 
 }
 
 type ImplementerResource struct {
-	ID          string `json:"id"`
-	Name        string `json:"name"`
-	SsasGroupId string `json:"ssas_group_id,omitempty"`
+	ID          string `json:"id" faker:"uuid_hyphenated"`
+	Name        string `json:"name" faker:"word"`
+	SsasGroupId string `json:"ssas_group_id,omitempty" faker:"word"`
 }

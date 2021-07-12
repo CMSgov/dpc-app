@@ -138,8 +138,8 @@ type CreateGroupRequest struct {
 }
 
 type CreateGroupResponse struct {
-	ID      int    `json:"id"`
-	GroupID string `json:"group_id"`
+	ID      int    `json:"id" faker:"oneof: 15, 27, 61, 42, 100"`
+	GroupID string `json:"group_id" faker:"uuid_hyphenated"`
 }
 
 type CreateSystemRequest struct {

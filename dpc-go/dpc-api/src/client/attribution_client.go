@@ -34,20 +34,20 @@ const (
 )
 
 type ImplementerOrg struct {
-	ID            string `json:"id"`
-	OrgID         string `json:"org_id"`
-	ImplementerID string `json:"implementer_id"`
-	SsasSystemID  string `json:"ssas_system_id"`
-	Status        string `json:"status"`
+	ID            string `json:"id" faker:"uuid_hyphenated"`
+	OrgID         string `json:"org_id" faker:"uuid_hyphenated"`
+	ImplementerID string `json:"implementer_id" faker:"uuid_hyphenated"`
+	SsasSystemID  string `json:"ssas_system_id" faker:"-"`
+	Status        string `json:"status" faker:"oneof:Active"`
+	Npi           string `json:"npi" faker:"-"`
 }
 
 type ManagedOrg struct {
-	OrgName string `json:"org_name"`
-	OrgID   string `json:"org_id"`
-	Npi     string `json:"npi"`
-	Status  string `json:"status"`
-    SsasSystemID  string `json:"ssas_system_id"`
-
+	OrgName      string `json:"org_name" faker:"word"`
+	OrgID        string `json:"org_id" faker:"uuid_hyphenated"`
+	Npi          string `json:"npi" faker:"-"`
+	Status       string `json:"status" faker:"oneof:Active"`
+	SsasSystemID string `json:"ssas_system_id" faker:"-"`
 }
 
 // Client interface for testing purposes
@@ -59,7 +59,7 @@ type Client interface {
 	Export(ctx context.Context, resourceType ResourceType, id string) ([]byte, error)
 	UpdateImplementerOrg(ctx context.Context, implID string, orgID string, rel ImplementerOrg) (ImplementerOrg, error)
 	GetManagedOrgs(ctx context.Context, implID string) ([]ManagedOrg, error)
-	CreateImplOrg(ctx context.Context, body []byte) ([]byte, error)
+	CreateImplOrg(ctx context.Context, body []byte) (ImplementerOrg, error)
 }
 
 // AttributionClient is a struct to hold the retryablehttp client and configs
@@ -79,21 +79,21 @@ func NewAttributionClient(config AttributionConfig) Client {
 }
 
 // CreateImplOrg is a function to create an Implementer/Organization relation via attribution service
-func (ac *AttributionClient) CreateImplOrg(ctx context.Context, body []byte) ([]byte, error) {
+func (ac *AttributionClient) CreateImplOrg(ctx context.Context, body []byte) (ImplementerOrg, error) {
 	log := logger.WithContext(ctx)
 	ac.httpClient.Logger = newLogger(*log)
 
 	implID, ok := ctx.Value(middleware2.ContextKeyImplementer).(string)
 	if !ok {
 		log.Error("Failed to extract the implementer id from the context")
-		return nil, errors.Errorf("Failed to extract the implementer id from the context")
+		return ImplementerOrg{}, errors.Errorf("Failed to extract the implementer id from the context")
 	}
 
 	url := fmt.Sprintf("%s/Implementer/%s/org", ac.config.URL, implID)
 	req, err := retryablehttp.NewRequest(http.MethodPost, url, body)
 	if err != nil {
 		log.Error("Failed to create request", zap.Error(err))
-		return nil, errors.Errorf("Failed to create request")
+		return ImplementerOrg{}, errors.Errorf("Failed to create request")
 	}
 
 	req.Header.Add(middleware.RequestIDHeader, ctx.Value(middleware.RequestIDKey).(string))
@@ -103,12 +103,12 @@ func (ac *AttributionClient) CreateImplOrg(ctx context.Context, body []byte) ([]
 	resp, err := ac.httpClient.Do(req)
 	if err != nil {
 		log.Error("Failed to send request", zap.Error(err))
-		return nil, errors.Errorf("Failed to send request")
+		return ImplementerOrg{}, errors.Errorf("Failed to send request")
 	}
 
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
 		log.Error(fmt.Sprintf("Failed to send request. Status code %d", resp.StatusCode))
-		return nil, errors.Errorf("Failed to save resource")
+		return ImplementerOrg{}, errors.Errorf("Failed to save resource")
 	}
 
 	defer func() {
@@ -118,12 +118,13 @@ func (ac *AttributionClient) CreateImplOrg(ctx context.Context, body []byte) ([]
 		}
 	}()
 
-	b, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Error("Failed to read the response body", zap.Error(err))
-		return nil, errors.Errorf("Failed to save resource")
+	implOrg := ImplementerOrg{}
+	if err := json.NewDecoder(resp.Body).Decode(&implOrg); err != nil {
+		log.Error("Failed to convert bytes to ImplementerOrg model", zap.Error(err))
+		return ImplementerOrg{}, errors.Errorf("Failed to update implementerOrg relation")
 	}
-	return b, nil
+
+	return implOrg, nil
 }
 
 // Get A function to enable communication with attribution service via GET
