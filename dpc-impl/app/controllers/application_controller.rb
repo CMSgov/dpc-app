@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require './lib/luhnacy_lib/luhnacy_lib'
+
 class ApplicationController < ActionController::Base
   protect_from_forgery
   before_action :configure_permitted_parameters, if: :devise_controller?
@@ -41,6 +43,10 @@ class ApplicationController < ActionController::Base
   end
 
   private
+
+  def generate_npi
+    LuhnacyLib.generate_npi
+  end
 
   def id_param
     params.require(:id)
