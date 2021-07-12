@@ -1,9 +1,13 @@
 package v2
 
 import (
+	"bytes"
+	"encoding/json"
+	"fmt"
 	"github.com/CMSgov/dpc/api/client"
 	"github.com/CMSgov/dpc/api/fhirror"
 	"github.com/CMSgov/dpc/api/logger"
+	"github.com/google/uuid"
 	"go.uber.org/zap"
 	"io/ioutil"
 	"net/http"
@@ -12,12 +16,13 @@ import (
 // ImplementerController is a struct that defines what the controller has
 type ImplementerController struct {
 	ac client.Client
+	sc client.SsasClient
 }
 
 // NewImplementerController function that creates an implementer and returns its reference
-func NewImplementerController(ac client.Client) *ImplementerController {
+func NewImplementerController(ac client.Client, sc client.SsasClient) *ImplementerController {
 	return &ImplementerController{
-		ac,
+		ac, sc,
 	}
 }
 
@@ -33,16 +38,51 @@ func (ic *ImplementerController) Create(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	resp, err := ic.ac.Post(r.Context(), client.Implementer, body)
+	resBytes, err := ic.ac.Post(r.Context(), client.Implementer, body)
 	if err != nil {
 		log.Error("Failed to save the implementer to attribution", zap.Error(err))
 		fhirror.ServerIssue(r.Context(), w, http.StatusInternalServerError, "Failed to save implementer")
 		return
 	}
+	impl := ImplementerResource{}
+	if err := json.NewDecoder(bytes.NewReader(resBytes)).Decode(&impl); err != nil {
+		log.Error("Failed to convert attribution response bytes to CreateImplAttrResponse model", zap.Error(err))
+		fhirror.ServerIssue(r.Context(), w, http.StatusInternalServerError, "Failed to create implementer")
+		return
+	}
 
-	if _, err := w.Write(resp); err != nil {
-		log.Error("Failed to write data to response", zap.Error(err))
+	req := client.CreateGroupRequest{
+		Name:    impl.Name,
+		GroupID: uuid.New().String(),
+		XData:   fmt.Sprintf("{\"implementerID\": \"%s\"}", impl.ID),
+	}
+
+	gResp, err := ic.sc.CreateGroup(r.Context(), req)
+	if err != nil {
+		//TODO we will need to add aditional logic to handle rollbacks
+		log.Error("Failed to create ssas group", zap.Error(err))
+		fhirror.ServerIssue(r.Context(), w, 500, "Failed to create implementer")
+		return
+	}
+
+	//Update implementer with ssas group
+	impl.SsasGroupId = gResp.GroupID
+	reqBytes, err := json.Marshal(impl)
+	if err != nil {
+		log.Error("Failed to convert Implementer model to bytes", zap.Error(err))
+		fhirror.ServerIssue(r.Context(), w, http.StatusInternalServerError, "Failed to create implementer")
+		return
+	}
+
+	if resBytes, err = ic.ac.Put(r.Context(), client.Implementer, impl.ID, reqBytes); err != nil {
+		log.Error("Failed to save the implementer to attribution", zap.Error(err))
 		fhirror.ServerIssue(r.Context(), w, http.StatusInternalServerError, "Failed to save implementer")
+		return
+	}
+
+	if _, err := w.Write(resBytes); err != nil {
+		log.Error("Failed to write data to response", zap.Error(err))
+		fhirror.ServerIssue(r.Context(), w, http.StatusInternalServerError, "Failed to create implementer")
 	}
 }
 
@@ -68,4 +108,10 @@ func (ic *ImplementerController) Delete(w http.ResponseWriter, r *http.Request) 
 //goland:noinspection GoUnusedParameter
 func (ic *ImplementerController) Update(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
+}
+
+type ImplementerResource struct {
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	SsasGroupId string `json:"ssas_group_id,omitempty"`
 }

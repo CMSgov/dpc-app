@@ -14,7 +14,7 @@ import (
 )
 
 // NewDPCAPIRouter function that builds the router using chi
-func NewDPCAPIRouter(oc v2.Controller, mc v2.ReadController, gc v2.Controller, dc v2.FileController, jc v2.JobController, ic v2.Controller) http.Handler {
+func NewDPCAPIRouter(oc v2.Controller, mc v2.ReadController, gc v2.Controller, dc v2.FileController, jc v2.JobController, ssasController v2.AuthController, ic v2.Controller) http.Handler {
 	r := chi.NewRouter()
 	r.Use(middleware2.Logging())
 	r.Use(middleware2.RequestIPCtx)
@@ -56,6 +56,9 @@ func NewDPCAPIRouter(oc v2.Controller, mc v2.ReadController, gc v2.Controller, d
 			r.Route("/Data", func(r chi.Router) {
 				r.Use(middleware2.AuthCtx)
 				r.With(middleware2.FileNameCtx).Get("/{fileName}", dc.GetFile)
+			})
+			r.Route("/Implementer/{implID}/Org/{orgID}/system", func(r chi.Router) {
+				r.With(middleware2.ImplementorIDCtx).With(middleware2.OrganizationIDCtx).Post("/", ssasController.CreateSystem)
 			})
 		})
 	r.Post("/auth/token", auth.GetAuthToken)

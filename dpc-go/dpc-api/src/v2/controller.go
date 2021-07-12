@@ -45,3 +45,8 @@ type JobController interface {
 type FileController interface {
 	GetFile(w http.ResponseWriter, r *http.Request)
 }
+
+// AuthController is an interface for reading
+type AuthController interface {
+    CreateSystem(w http.ResponseWriter, r *http.Request)
+}

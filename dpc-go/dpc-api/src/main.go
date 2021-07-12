@@ -22,37 +22,37 @@ func main() {
 	}()
 	attributionURL := conf.GetAsString("attribution-client.url")
 
-	retries := conf.GetAsInt("attribution-client.retries", 3)
+	attrRetries := conf.GetAsInt("attribution-client.retries", 3)
 
 	attributionClient := client.NewAttributionClient(client.AttributionConfig{
 		URL:     attributionURL,
-		Retries: retries,
+		Retries: attrRetries,
 	})
 
 	dataClient := client.NewDataClient(client.DataConfig{
 		URL:     attributionURL,
-		Retries: retries,
+		Retries: attrRetries,
 	})
-
-	orgCtlr := v2.NewOrganizationController(attributionClient)
-
-	capabilitiesFile := conf.GetAsString("capabilities.base")
-
-	m := v2.NewMetadataController(capabilitiesFile)
-
-	groupCtlr := v2.NewGroupController(attributionClient)
-
-	dataCtlr := v2.NewDataController(dataClient)
 
 	jobClient := client.NewJobClient(client.JobConfig{
 		URL:     attributionURL,
-		Retries: retries,
+		Retries: attrRetries,
 	})
-	jobCtlr := v2.NewJobController(jobClient)
 
-	implCtlr := v2.NewImplementerController(attributionClient)
-
-	apiRouter := router.NewDPCAPIRouter(orgCtlr, m, groupCtlr, dataCtlr, jobCtlr, implCtlr)
+	ssasClient := client.NewSsasHttpClient(client.SsasHttpClientConfig{
+		URL:          conf.GetAsString("ssas-client.url"),
+		Retries:      conf.GetAsInt("ssas-client.attrRetries", 3),
+		ClientID:     conf.GetAsString("ssas-client.client-id"),
+		ClientSecret: conf.GetAsString("ssas-client.client-secret"),
+	})
+	orgCtrl := v2.NewOrganizationController(attributionClient)
+	metaCtrl := v2.NewMetadataController(conf.GetAsString("capabilities.base"))
+	groupCtrl := v2.NewGroupController(attributionClient)
+	dataCtrl := v2.NewDataController(dataClient)
+	jobCtrl := v2.NewJobController(jobClient)
+	ssasCtrl := v2.NewSSASController(ssasClient, attributionClient)
+	implCtlr := v2.NewImplementerController(attributionClient, ssasClient)
+	apiRouter := router.NewDPCAPIRouter(orgCtrl, metaCtrl, groupCtrl, dataCtrl, jobCtrl, ssasCtrl, implCtlr)
 
 	port := conf.GetAsString("port", "3000")
 	if err := http.ListenAndServe(fmt.Sprintf(":%s", port), apiRouter); err != nil {

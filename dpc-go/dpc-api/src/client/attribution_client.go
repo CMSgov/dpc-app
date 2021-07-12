@@ -1,6 +1,7 @@
 package client
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -32,6 +33,23 @@ const (
 	Implementer  ResourceType = "Implementer"
 )
 
+type ImplementerOrg struct {
+	ID            string `json:"id"`
+	OrgID         string `json:"org_id"`
+	ImplementerID string `json:"implementer_id"`
+	SsasSystemID  string `json:"ssas_system_id"`
+	Status        string `json:"status"`
+}
+
+type ManagedOrg struct {
+	OrgName string `json:"org_name"`
+	OrgID   string `json:"org_id"`
+	Npi     string `json:"npi"`
+	Status  string `json:"status"`
+    SsasSystemID  string `json:"ssas_system_id"`
+
+}
+
 // Client interface for testing purposes
 type Client interface {
 	Get(ctx context.Context, resourceType ResourceType, id string) ([]byte, error)
@@ -39,6 +57,8 @@ type Client interface {
 	Delete(ctx context.Context, resourceType ResourceType, id string) error
 	Put(ctx context.Context, resourceType ResourceType, id string, body []byte) ([]byte, error)
 	Export(ctx context.Context, resourceType ResourceType, id string) ([]byte, error)
+	UpdateImplementerOrg(ctx context.Context, implID string, orgID string, rel ImplementerOrg) (ImplementerOrg, error)
+	GetManagedOrgs(ctx context.Context, implID string) ([]ManagedOrg, error)
 }
 
 // AttributionClient is a struct to hold the retryablehttp client and configs
@@ -63,10 +83,17 @@ func (ac *AttributionClient) Get(ctx context.Context, resourceType ResourceType,
 	ac.httpClient.Logger = newLogger(*log)
 
 	url := fmt.Sprintf("%s/%s/%s", ac.config.URL, resourceType, id)
+	return ac.doGet(ctx, url)
+}
+
+func (ac *AttributionClient) doGet(ctx context.Context, url string) ([]byte, error) {
+	log := logger.WithContext(ctx)
+	ac.httpClient.Logger = newLogger(*log)
+
 	req, err := retryablehttp.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		log.Error("Failed to create request", zap.Error(err))
-		return nil, errors.Errorf("Failed to retrieve resource %s/%s", resourceType, id)
+		return nil, errors.Errorf("Failed to retrieve resource %s", url)
 	}
 
 	req.Header.Add(middleware.RequestIDHeader, ctx.Value(middleware.RequestIDKey).(string))
@@ -76,11 +103,13 @@ func (ac *AttributionClient) Get(ctx context.Context, resourceType ResourceType,
 	resp, err := ac.httpClient.Do(req)
 	if err != nil {
 		log.Error("Failed to send request", zap.Error(err))
-		return nil, errors.Errorf("Failed to retrieve resource %s/%s", resourceType, id)
+		return nil, errors.Errorf("Failed to retrieve resource %s", url)
 	}
 
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
-		return nil, errors.Errorf("Failed to retrieve resource %s/%s", resourceType, id)
+		body, _ := ioutil.ReadAll(resp.Body)
+		println(string(body))
+		return nil, errors.Errorf("Failed to retrieve resource %s", url)
 	}
 
 	defer func() {
@@ -93,7 +122,7 @@ func (ac *AttributionClient) Get(ctx context.Context, resourceType ResourceType,
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.Error("Failed to read the response body", zap.Error(err))
-		return nil, errors.Errorf("Failed to retrieve resource %s/%s", resourceType, id)
+		return nil, errors.Errorf("Failed to retrieve resource %s", url)
 	}
 	return body, nil
 }
@@ -253,10 +282,57 @@ func (ac *AttributionClient) Put(ctx context.Context, resourceType ResourceType,
 	ac.httpClient.Logger = newLogger(*log)
 
 	url := fmt.Sprintf("%s/%s/%s", ac.config.URL, resourceType, id)
+	return ac.doPut(ctx, url, body)
+}
+
+func (ac *AttributionClient) UpdateImplementerOrg(ctx context.Context, implID string, orgID string, rel ImplementerOrg) (ImplementerOrg, error) {
+	log := logger.WithContext(ctx)
+	reqBytes := new(bytes.Buffer)
+	if err := json.NewEncoder(reqBytes).Encode(rel); err != nil {
+		log.Error("Failed to convert model to bytes", zap.Error(err))
+		return ImplementerOrg{}, errors.Errorf("Failed to update implementerOrg relation")
+	}
+	url := fmt.Sprintf("%s/Implementer/%s/org/%s", ac.config.URL, implID, orgID)
+
+	resBytes, err := ac.doPut(ctx, url, reqBytes.Bytes())
+	if err != nil {
+		log.Error("Update ImplementerOrg request failed", zap.Error(err))
+		return ImplementerOrg{}, errors.Errorf("Failed to update implementerOrg relation")
+	}
+	resp := ImplementerOrg{}
+	if err := json.NewDecoder(bytes.NewReader(resBytes)).Decode(&resp); err != nil {
+		log.Error("Failed to convert bytes to ImplementerOrg model", zap.Error(err))
+		return ImplementerOrg{}, errors.Errorf("Failed to update implementerOrg relation")
+	}
+	return resp, nil
+}
+
+func (ac *AttributionClient) GetManagedOrgs(ctx context.Context, implID string) ([]ManagedOrg, error) {
+	log := logger.WithContext(ctx)
+
+	url := fmt.Sprintf("%s/Implementer/%s/org", ac.config.URL, implID)
+
+	resBytes, err := ac.doGet(ctx, url)
+	if err != nil {
+		log.Error("Get implementerOrg relation failed", zap.Error(err))
+		return []ManagedOrg{}, errors.Errorf("Failed to update implementerOrg relation")
+	}
+	resp := []ManagedOrg{}
+	if err := json.NewDecoder(bytes.NewReader(resBytes)).Decode(&resp); err != nil {
+		log.Error("Failed to convert bytes to ImplementerOrg model", zap.Error(err))
+		return []ManagedOrg{}, errors.Errorf("Failed to get implementerOrg relation")
+	}
+	return resp, nil
+}
+
+func (ac *AttributionClient) doPut(ctx context.Context, url string, body []byte) ([]byte, error) {
+	log := logger.WithContext(ctx)
+	ac.httpClient.Logger = newLogger(*log)
+
 	req, err := retryablehttp.NewRequest(http.MethodPut, url, body)
 	if err != nil {
 		log.Error("Failed to create request", zap.Error(err))
-		return nil, errors.Errorf("Failed to update resource %s", resourceType)
+		return nil, errors.Errorf("Failed to update resource")
 	}
 
 	req.Header.Add(middleware.RequestIDHeader, ctx.Value(middleware.RequestIDKey).(string))
@@ -266,11 +342,11 @@ func (ac *AttributionClient) Put(ctx context.Context, resourceType ResourceType,
 	resp, err := ac.httpClient.Do(req)
 	if err != nil {
 		log.Error("Failed to send request", zap.Error(err))
-		return nil, errors.Errorf("Failed to update resource %s", resourceType)
+		return nil, errors.Errorf("Failed to update resource")
 	}
 
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
-		return nil, errors.Errorf("Failed to update resource %s", resourceType)
+		return nil, errors.Errorf("Failed to update resource")
 	}
 
 	defer func() {
@@ -283,7 +359,7 @@ func (ac *AttributionClient) Put(ctx context.Context, resourceType ResourceType,
 	b, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.Error("Failed to read the response body", zap.Error(err))
-		return nil, errors.Errorf("Failed to update resource %s", resourceType)
+		return nil, errors.Errorf("Failed to update resource")
 	}
 	return b, nil
 }
