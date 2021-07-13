@@ -2,17 +2,18 @@ package v2
 
 import (
 	"context"
+	"io/ioutil"
+	"net/http"
+	"net/http/httptest"
+	"strings"
+	"testing"
+
 	"github.com/CMSgov/dpc/api/apitest"
 	"github.com/go-chi/chi/middleware"
 	"github.com/kinbiko/jsonassert"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
-	"io/ioutil"
-	"net/http"
-	"net/http/httptest"
-	"strings"
-	"testing"
 )
 
 type ImplementerOrgControllerTestSuite struct {

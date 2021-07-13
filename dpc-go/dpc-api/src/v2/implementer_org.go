@@ -1,12 +1,13 @@
 package v2
 
 import (
+	"io/ioutil"
+	"net/http"
+
 	"github.com/CMSgov/dpc/api/client"
 	"github.com/CMSgov/dpc/api/fhirror"
 	"github.com/CMSgov/dpc/api/logger"
 	"go.uber.org/zap"
-	"io/ioutil"
-	"net/http"
 )
 
 // ImplementerOrgController is a struct that defines what the controller has

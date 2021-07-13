@@ -30,8 +30,8 @@ func (ac *MockAttributionClient) CreateImplOrg(ctx context.Context, body []byte)
 }
 
 func (ac *MockAttributionClient) GetImplOrg(ctx context.Context, resourceType client.ResourceType) ([]byte, error) {
-    args := ac.Called(ctx, resourceType)
-    return args.Get(0).([]byte), args.Error(1)
+	args := ac.Called(ctx, resourceType)
+	return args.Get(0).([]byte), args.Error(1)
 }
 
 func (ac *MockAttributionClient) Export(ctx context.Context, resourceType client.ResourceType, id string) ([]byte, error) {
