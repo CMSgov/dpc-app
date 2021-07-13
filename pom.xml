@@ -36,13 +36,13 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <dropwizard.version>1.3.29</dropwizard.version>
         <junit.jupiter.version>5.7.2</junit.jupiter.version>
-        <slf4j.version>1.7.30</slf4j.version>
+        <slf4j.version>1.7.31</slf4j.version>
         <!--Custom group IDs for pulling dependencies from JitPack-->
         <jitpack.groupID>com.github.nickrobison-usds</jitpack.groupID>
         <typesafe.config.groupID>${jitpack.groupID}</typesafe.config.groupID>
         <hapi.fhir.groupID>ca.uhn.hapi.fhir</hapi.fhir.groupID>
         <hapi.fhir.version>4.2.0</hapi.fhir.version>
-        <pgsql.version>42.2.21.jre7</pgsql.version>
+        <pgsql.version>42.2.22.jre7</pgsql.version>
         <java.version>11</java.version>
         <jib.container.appRoot>/app</jib.container.appRoot>
         <jib.ecr.root>755619740999.dkr.ecr.us-east-1.amazonaws.com</jib.ecr.root>
