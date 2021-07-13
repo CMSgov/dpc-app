@@ -60,12 +60,12 @@ public class BlueButtonClientModuleV2<T extends Configuration & BlueButtonBundle
     }
 
     @Provides
-    public BlueButtonClientV2 provideBlueButtonClient(@Named("bbclientV2") IGenericClient fhirRestClientV2, MetricRegistry registry) {
+    public BlueButtonClientV2 provideBlueButtonClientR4(@Named("bbclientR4") IGenericClient fhirRestClientV2, MetricRegistry registry) {
         return bbClientConfigurationV2.isUseBfdMock() ? new MockBlueButtonClientV2(fhirRestClientV2.getFhirContext()) : new BlueButtonClientV2Impl(fhirRestClientV2, this.bbClientConfigurationV2, registry);
     }
 
     @Provides
-    @Named("bbclientV2")
+    @Named("bbclientR4")
     public IGenericClient provideFhirRestClientV2(@Named("fhirContextR4") FhirContext fhirContextR4, HttpClient httpClient) {
         fhirContextR4.getRestfulClientFactory().setHttpClient(httpClient);
 

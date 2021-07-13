@@ -39,7 +39,7 @@ public class DPCAggregationConfiguration extends TypesafeConfiguration implement
 
     @Valid
     @NotNull
-    @JsonProperty("bbclientV2")
+    @JsonProperty("bbclientR4")
     private final BBClientConfigurationV2 clientConfigurationV2 = new BBClientConfigurationV2();
 
     @Valid

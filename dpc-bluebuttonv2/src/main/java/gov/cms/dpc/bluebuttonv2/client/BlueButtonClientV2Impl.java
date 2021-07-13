@@ -56,7 +56,7 @@ public class BlueButtonClientV2Impl implements BlueButtonClientV2 {
         return "Patient/" + fromPatientID;
     }
 
-    public BlueButtonClientV2Impl(@Named("bbclientV2") IGenericClient client, BBClientConfigurationV2 config, MetricRegistry metricRegistry) {
+    public BlueButtonClientV2Impl(@Named("bbclientR4") IGenericClient client, BBClientConfigurationV2 config, MetricRegistry metricRegistry) {
         this.client = client;
         this.config = config;
         final var metricMaker = new MetricMaker(metricRegistry, BlueButtonClientV2Impl.class);
