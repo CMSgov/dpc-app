@@ -112,6 +112,12 @@ func (ac *AttributionClient) GetImplOrg(ctx context.Context, resourceType Resour
 	log := logger.WithContext(ctx)
 	ac.httpClient.Logger = newLogger(*log)
 
+	if resourceType != ResourceType(Implementer) {
+	    msg := "Must call GetImplOrg() with Implementer resource type"
+        log.Error(msg)
+        return nil, errors.Errorf(msg)
+    }
+
 	implID, ok := ctx.Value(middleware2.ContextKeyImplementer).(string)
 	if !ok {
 		log.Error("Failed to extract the implementer id from the context")
@@ -136,7 +142,7 @@ func (ac *AttributionClient) GetImplOrg(ctx context.Context, resourceType Resour
 	}
 
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
-		log.Error(fmt.Sprintf("Failed to send request. Status code %d", resp.StatusCode))
+		log.Error(fmt.Sprintf("Failed to get organizations for implementer %s. Status code %d", implID, resp.StatusCode))
 		return nil, errors.Errorf("Failed to retrieve resource")
 	}
 
