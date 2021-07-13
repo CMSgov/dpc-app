@@ -14,6 +14,13 @@ class ApiClient
     self
   end
 
+  def create_provider_org(imp_id, npi)
+    uri_string = base_url + '/Implementer/' + imp_id + '/org'
+    json = {npi: npi}.to_json
+    post_request(uri_string, json)
+    self
+  end
+
   def get_provider_orgs(imp_id)
     uri_string = base_url + '/Implementer/' + imp_id + '/org'
     get_request(uri_string)
@@ -49,6 +56,8 @@ class ApiClient
     else
       unless !response_successful?
         @response_body = parsed_response(response)
+      else
+        @response_body = response.body
       end
     end
   end
