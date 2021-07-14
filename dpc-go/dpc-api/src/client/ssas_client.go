@@ -26,12 +26,14 @@ type SsasHttpClientConfig struct {
 const (
 	PostV2SystemEndpoint string = "v2/system"
 	PostV2GroupEndpoint  string = "v2/group"
+	PostV2AuthenticateToken string = "v2/Token"
 )
 
 // SsasClient interface for testing purposes
 type SsasClient interface {
 	CreateSystem(ctx context.Context, request CreateSystemRequest) (CreateSystemResponse, error)
 	CreateGroup(ctx context.Context, request CreateGroupRequest) (CreateGroupResponse, error)
+	Authenticate(ctx context.Context, request []byte) ([]byte, error)
 }
 
 // SsasHTTPClient is a struct to hold the retryable http client and configs
@@ -131,6 +133,18 @@ func (sc *SsasHTTPClient) doPost(ctx context.Context, url string, reqBytes []byt
 		return nil, errors.Errorf("Failed to save system")
 	}
 	return b, nil
+}
+
+func (sc *SsasHTTPClient) Authenticate(ctx context.Context, reqBytes []byte) ([]byte, error) {
+	log := logger.WithContext(ctx)
+	url := fmt.Sprintf("%s/%s", sc.config.URL, PostV2AuthenticateToken)
+
+	resBytes, err := sc.doPost(ctx, url, reqBytes)
+	if err != nil {
+		log.Error("Token authentication failed", zap.Error(err))
+		return nil, errors.Errorf("Failed to authenticate token")
+	}
+	return resBytes, nil
 }
 
 // CreateGroupRequest struct to model a ssas request to create a group

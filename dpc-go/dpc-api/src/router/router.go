@@ -78,7 +78,7 @@ func NewDPCAPIRouter(rc Controllers) http.Handler {
 				r.With(middleware2.ImplementorIDCtx).With(middleware2.OrganizationIDCtx).Post("/", rc.Ssas.CreateSystem)
 			})
 		})
-	r.Post("/auth/token", auth.GetAuthToken)
+	r.Post("/Token/auth", rc.Ssas.GetAuthToken)
 	r.Get("/auth/welcome", auth.Welcome)
 	return r
 }
