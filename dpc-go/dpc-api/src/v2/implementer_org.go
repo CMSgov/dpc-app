@@ -50,7 +50,7 @@ func (ioc *ImplementerOrgController) Create(w http.ResponseWriter, r *http.Reque
 func (ioc *ImplementerOrgController) Read(w http.ResponseWriter, r *http.Request) {
 	log := logger.WithContext(r.Context())
 
-	resp, err := ioc.ac.GetImplOrg(r.Context(), client.Implementer)
+	resp, err := ioc.ac.GetImplOrg(r.Context())
 	if err != nil {
 		log.Error("Failed to get the implementer organization(s) from attribution", zap.Error(err))
 		fhirror.NotFound(r.Context(), w, "Failed to find implementer organization(s)")

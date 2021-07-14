@@ -29,8 +29,8 @@ func (ac *MockAttributionClient) CreateImplOrg(ctx context.Context, body []byte)
 	return args.Get(0).([]byte), args.Error(1)
 }
 
-func (ac *MockAttributionClient) GetImplOrg(ctx context.Context, resourceType client.ResourceType) ([]byte, error) {
-	args := ac.Called(ctx, resourceType)
+func (ac *MockAttributionClient) GetImplOrg(ctx context.Context) ([]byte, error) {
+	args := ac.Called(ctx)
 	return args.Get(0).([]byte), args.Error(1)
 }
 
