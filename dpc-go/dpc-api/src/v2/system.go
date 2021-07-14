@@ -28,7 +28,7 @@ func NewSSASController(ssasClient client.SsasClient, attrClient client.Client) *
 	}
 }
 
-// function that calls SSAS to create a new system
+// CreateSystem function that calls SSAS to create a new system
 func (sc *SSASController) CreateSystem(w http.ResponseWriter, r *http.Request) {
 	log := logger.WithContext(r.Context())
 	implementorID, _ := r.Context().Value(middleware.ContextKeyImplementor).(string)
@@ -87,7 +87,7 @@ func (sc *SSASController) CreateSystem(w http.ResponseWriter, r *http.Request) {
 
 	proxyResp := ProxyCreateSystemResponse{}
 	proxyResp.ClientName = ssasResp.ClientName
-	proxyResp.ClientId = ssasResp.ClientID
+	proxyResp.ClientID = ssasResp.ClientID
 	proxyResp.ClientToken = ssasResp.ClientToken
 	proxyResp.ExpiresAt = ssasResp.ExpiresAt
 	proxyResp.IPs = ssasResp.IPs
@@ -106,6 +106,7 @@ func (sc *SSASController) CreateSystem(w http.ResponseWriter, r *http.Request) {
 	}
 	//TODO: once all DELETE endpoints are available (in ssas & attribution) we need to implement rollback logic for failure scenarios.
 }
+
 func (sc *SSASController) createSsasSystem(r *http.Request, implID string, orgID string, proxyReq ProxyCreateSystemRequest) (client.CreateSystemResponse, error) {
 	groupID, err := sc.getGroupID(r, implID)
 	if err != nil {
@@ -148,14 +149,16 @@ func (sc *SSASController) getGroupID(r *http.Request, implID string) (string, er
 	return v["ssas_group_id"].(string), nil
 }
 
+// ProxyCreateSystemRequest struct that models a proxy request to create a new system
 type ProxyCreateSystemRequest struct {
 	ClientName string   `json:"client_name"`
 	PublicKey  string   `json:"public_key"`
 	IPs        []string `json:"ips"`
 }
 
+// ProxyCreateSystemResponse struct that models a proxy response to create a new system
 type ProxyCreateSystemResponse struct {
-	ClientId    string   `json:"client_id"`
+	ClientID    string   `json:"client_id"`
 	ClientName  string   `json:"client_name"`
 	IPs         []string `json:"ips"`
 	ClientToken string   `json:"client_token"`

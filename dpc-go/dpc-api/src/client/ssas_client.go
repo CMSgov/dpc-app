@@ -14,7 +14,7 @@ import (
 	"go.uber.org/zap"
 )
 
-// Ssas is a struct to hold configuration info for retryablehttp client
+// SsasHttpClientConfig is a struct to hold configuration info for retryable http client
 type SsasHttpClientConfig struct {
 	URL          string
 	Retries      int
@@ -28,14 +28,14 @@ const (
 	PostV2GroupEndpoint  string = "v2/group"
 )
 
-// Client interface for testing purposes
+// SsasClient interface for testing purposes
 type SsasClient interface {
 	CreateSystem(ctx context.Context, request CreateSystemRequest) (CreateSystemResponse, error)
 	CreateGroup(ctx context.Context, request CreateGroupRequest) (CreateGroupResponse, error)
 }
 
-// SsasHttpClient is a struct to hold the retryable http client and configs
-type SsasHttpClient struct {
+// SsasHTTPClient is a struct to hold the retryable http client and configs
+type SsasHTTPClient struct {
 	config     SsasHttpClientConfig
 	httpClient *retryablehttp.Client
 }
@@ -44,13 +44,14 @@ type SsasHttpClient struct {
 func NewSsasHttpClient(config SsasHttpClientConfig) SsasClient {
 	client := retryablehttp.NewClient()
 	client.RetryMax = config.Retries
-	return &SsasHttpClient{
+	return &SsasHTTPClient{
 		config:     config,
 		httpClient: client,
 	}
 }
 
-func (sc *SsasHttpClient) CreateSystem(ctx context.Context, request CreateSystemRequest) (CreateSystemResponse, error) {
+// CreateSystem function to create a new ssas system
+func (sc *SsasHTTPClient) CreateSystem(ctx context.Context, request CreateSystemRequest) (CreateSystemResponse, error) {
 	log := logger.WithContext(ctx)
 	reqBytes := new(bytes.Buffer)
 	if err := json.NewEncoder(reqBytes).Encode(request); err != nil {
@@ -72,7 +73,8 @@ func (sc *SsasHttpClient) CreateSystem(ctx context.Context, request CreateSystem
 	return resp, nil
 }
 
-func (sc *SsasHttpClient) CreateGroup(ctx context.Context, request CreateGroupRequest) (CreateGroupResponse, error) {
+// CreateGroup function to create a new ssas group
+func (sc *SsasHTTPClient) CreateGroup(ctx context.Context, request CreateGroupRequest) (CreateGroupResponse, error) {
 	log := logger.WithContext(ctx)
 	reqBytes := new(bytes.Buffer)
 	if err := json.NewEncoder(reqBytes).Encode(request); err != nil {
@@ -94,7 +96,7 @@ func (sc *SsasHttpClient) CreateGroup(ctx context.Context, request CreateGroupRe
 	return resp, nil
 }
 
-func (sc *SsasHttpClient) doPost(ctx context.Context, url string, reqBytes []byte) ([]byte, error) {
+func (sc *SsasHTTPClient) doPost(ctx context.Context, url string, reqBytes []byte) ([]byte, error) {
 	log := logger.WithContext(ctx)
 	sc.httpClient.Logger = newLogger(*log)
 
@@ -131,17 +133,20 @@ func (sc *SsasHttpClient) doPost(ctx context.Context, url string, reqBytes []byt
 	return b, nil
 }
 
+// CreateGroupRequest struct to model a ssas request to create a group
 type CreateGroupRequest struct {
 	Name    string `json:"name"`
 	GroupID string `json:"group_id"`
 	XData   string `json:"xdata"`
 }
 
+// CreateGroupResponse struct to model a ssas response to create a group
 type CreateGroupResponse struct {
 	ID      int    `json:"id" faker:"oneof: 15, 27, 61, 42, 100"`
 	GroupID string `json:"group_id" faker:"uuid_hyphenated"`
 }
 
+// CreateSystemRequest struct to model a ssas request to create a system
 type CreateSystemRequest struct {
 	ClientName string   `json:"client_name"`
 	GroupID    string   `json:"group_id"`
@@ -151,6 +156,7 @@ type CreateSystemRequest struct {
 	XData      string   `json:"xdata,omitempty"`
 }
 
+// CreateSystemResponse struct to model a ssas response to create a system
 type CreateSystemResponse struct {
 	SystemID    string   `json:"system_id"`
 	ClientName  string   `json:"client_name"`

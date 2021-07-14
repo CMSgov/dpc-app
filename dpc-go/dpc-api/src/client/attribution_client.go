@@ -33,6 +33,7 @@ const (
 	Implementer  ResourceType = "Implementer"
 )
 
+// ImplementerOrg struct representing an ImplementerOrg relation
 type ImplementerOrg struct {
 	ID            string `json:"id" faker:"uuid_hyphenated"`
 	OrgID         string `json:"org_id" faker:"uuid_hyphenated"`
@@ -42,6 +43,7 @@ type ImplementerOrg struct {
 	Npi           string `json:"npi" faker:"-"`
 }
 
+// ManagedOrg struct representing an org managed by an implementer
 type ManagedOrg struct {
 	OrgName      string `json:"org_name" faker:"word"`
 	OrgID        string `json:"org_id" faker:"uuid_hyphenated"`
@@ -333,6 +335,7 @@ func (ac *AttributionClient) Put(ctx context.Context, resourceType ResourceType,
 	return ac.doPut(ctx, url, body)
 }
 
+// UpdateImplementerOrg function to update a specific implementer/org relation
 func (ac *AttributionClient) UpdateImplementerOrg(ctx context.Context, implID string, orgID string, rel ImplementerOrg) (ImplementerOrg, error) {
 	log := logger.WithContext(ctx)
 	reqBytes := new(bytes.Buffer)
@@ -355,6 +358,7 @@ func (ac *AttributionClient) UpdateImplementerOrg(ctx context.Context, implID st
 	return resp, nil
 }
 
+// GetManagedOrgs function to retrieve lists or orgs managed by an implementer
 func (ac *AttributionClient) GetManagedOrgs(ctx context.Context, implID string) ([]ManagedOrg, error) {
 	log := logger.WithContext(ctx)
 

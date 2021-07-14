@@ -307,6 +307,7 @@ func GenerateNPI() string {
 	return luhnWithPrefix[len(luhnWithPrefix)-10:]
 }
 
+// ToBytes converts an interface to bytes
 func ToBytes(a interface{}) []byte {
 	b, err := json.Marshal(a)
 	if err != nil {

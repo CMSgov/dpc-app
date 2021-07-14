@@ -22,7 +22,7 @@ type Controllers struct {
 	Job      v2.JobController
 	Impl     v2.Controller
 	ImplOrg  v2.Controller
-    Ssas v2.AuthController
+	Ssas     v2.AuthController
 }
 
 // NewDPCAPIRouter function that builds the router using chi
