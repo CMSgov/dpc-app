@@ -18,6 +18,11 @@ $z-index-flyout:  10000;
   background-image: url(warning.svg) !important;
 }
 
+.ds-c-alert--warn-no-icon {
+  background-color: $color-warn-lightest;
+  border-color: $color-warn-light;
+}
+
 .ds-c-alert__heading {
   color: #000 !important;
 }
