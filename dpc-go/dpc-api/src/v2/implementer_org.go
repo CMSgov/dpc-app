@@ -1,13 +1,13 @@
 package v2
 
 import (
-    "encoding/json"
-    "github.com/CMSgov/dpc/api/client"
+  "encoding/json"
+  "github.com/CMSgov/dpc/api/client"
+	"io/ioutil"
+	"net/http"
 	"github.com/CMSgov/dpc/api/fhirror"
 	"github.com/CMSgov/dpc/api/logger"
 	"go.uber.org/zap"
-	"io/ioutil"
-	"net/http"
 )
 
 // ImplementerOrgController is a struct that defines what the controller has
@@ -53,15 +53,26 @@ func (ioc *ImplementerOrgController) Create(w http.ResponseWriter, r *http.Reque
 	}
 }
 
+// Read calls attribution service via GET to return the Organizations associated with an Implementer
+func (ioc *ImplementerOrgController) Read(w http.ResponseWriter, r *http.Request) {
+	log := logger.WithContext(r.Context())
+
+	resp, err := ioc.ac.GetImplOrg(r.Context())
+	if err != nil {
+		log.Error("Failed to get the implementer organization(s) from attribution", zap.Error(err))
+		fhirror.NotFound(r.Context(), w, "Failed to find implementer organization(s)")
+		return
+	}
+
+	if _, err = w.Write(resp); err != nil {
+		log.Error("Failed to write data to response", zap.Error(err))
+		fhirror.NotFound(r.Context(), w, "Failed to find implementer organization(s)")
+	}
+}
+
 // Export function is not currently used for ImplementerOrgController
 //goland:noinspection GoUnusedParameter
 func (ioc *ImplementerOrgController) Export(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
-// Read function is not currently used for ImplementerOrgController
-//goland:noinspection GoUnusedParameter
-func (ioc *ImplementerOrgController) Read(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 

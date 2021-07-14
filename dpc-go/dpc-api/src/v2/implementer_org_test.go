@@ -1,20 +1,21 @@
 package v2
 
 import (
-    "context"
-    "github.com/CMSgov/dpc/api/apitest"
-    "github.com/CMSgov/dpc/api/client"
-    "github.com/bxcodec/faker/v3"
-    "github.com/go-chi/chi/middleware"
-    "github.com/kinbiko/jsonassert"
-    "github.com/stretchr/testify/assert"
-    "github.com/stretchr/testify/mock"
-    "github.com/stretchr/testify/suite"
-    "io/ioutil"
-    "net/http"
-    "net/http/httptest"
-    "strings"
-    "testing"
+  "github.com/CMSgov/dpc/api/client"
+  "github.com/bxcodec/faker/v3"
+	"context"
+	"io/ioutil"
+	"net/http"
+	"net/http/httptest"
+	"strings"
+	"testing"
+
+	"github.com/CMSgov/dpc/api/apitest"
+	"github.com/go-chi/chi/middleware"
+	"github.com/kinbiko/jsonassert"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/suite"
 )
 
 type ImplementerOrgControllerTestSuite struct {
@@ -34,13 +35,13 @@ func TestImplementerOrgControllerTestSuite(t *testing.T) {
 }
 
 func (suite *ImplementerOrgControllerTestSuite) TestCreateImplementerOrg() {
-    //Mock impl creation
-    createImplOrgResp := client.ImplementerOrg{}
-    faker.FakeData(&createImplOrgResp)
-    createImplOrgResp.Npi = apitest.GenerateNPI()
-    suite.mac.On("CreateImplOrg", mock.Anything, mock.Anything).Return(createImplOrgResp, nil)
+  //Mock impl creation
+  createImplOrgResp := client.ImplementerOrg{}
+  faker.FakeData(&createImplOrgResp)
+  createImplOrgResp.Npi = apitest.GenerateNPI()
+  suite.mac.On("CreateImplOrg", mock.Anything, mock.Anything).Return(createImplOrgResp, nil)
 
-    req := httptest.NewRequest(http.MethodPost, "http://example.com/foo", strings.NewReader(apitest.ImplOrgJSON()))
+  req := httptest.NewRequest(http.MethodPost, "http://example.com/foo", strings.NewReader(apitest.ImplOrgJSON()))
 	ctx := req.Context()
 	ctx = context.WithValue(ctx, middleware.RequestIDKey, "12345")
 	req = req.WithContext(ctx)
@@ -82,4 +83,19 @@ func (suite *ImplementerOrgControllerTestSuite) TestCreateImplementerOrgMissingB
           "resourceType": "OperationOutcome"
       }
   `)
+}
+
+func (suite *ImplementerOrgControllerTestSuite) TestGetImplementerOrg() {
+	suite.mac.On("GetImplOrg", mock.Anything, mock.Anything).Return(apitest.AttributionToFHIRResponse(apitest.GetImplOrgJSON), nil)
+
+	req := httptest.NewRequest(http.MethodGet, "http://example.com/foo", nil)
+	ctx := req.Context()
+	ctx = context.WithValue(ctx, middleware.RequestIDKey, "12345")
+	req = req.WithContext(ctx)
+	w := httptest.NewRecorder()
+
+	suite.implOrg.Read(w, req)
+	res := w.Result()
+
+	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
 }

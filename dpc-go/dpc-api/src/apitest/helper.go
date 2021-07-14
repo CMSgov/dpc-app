@@ -251,6 +251,17 @@ const ImplJSON = `{
     "name": "foo"
 }`
 
+// GetImplOrgJSON is an Implementer Organization JSON string for testing purposes
+const GetImplOrgJSON = `[
+    {
+        "org_id": "5c3934c0-6c7e-42e1-b50f-2086b801680b",
+        "org_name": "Huge Xylophone Healthcare",
+        "status": "Active",
+        "npi": "0123456789",
+        "ssas_system_id": ""
+    }
+]`
+
 // ImplOrgJSON creates an Implementer/Org JSON string for testing purposes
 func ImplOrgJSON() string {
 	body := struct {
