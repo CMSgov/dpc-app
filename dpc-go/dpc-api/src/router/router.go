@@ -13,8 +13,19 @@ import (
 	"github.com/go-chi/chi"
 )
 
+// Controllers collects the various controllers needed for the DPC API router
+type Controllers struct {
+	Org      v2.Controller
+	Metadata v2.ReadController
+	Group    v2.Controller
+	Data     v2.FileController
+	Job      v2.JobController
+	Impl     v2.Controller
+	ImplOrg  v2.Controller
+}
+
 // NewDPCAPIRouter function that builds the router using chi
-func NewDPCAPIRouter(oc v2.Controller, mc v2.ReadController, gc v2.Controller, dc v2.FileController, jc v2.JobController, ic v2.Controller) http.Handler {
+func NewDPCAPIRouter(rc Controllers) http.Handler {
 	r := chi.NewRouter()
 	r.Use(middleware2.Logging())
 	r.Use(middleware2.RequestIPCtx)
@@ -23,39 +34,44 @@ func NewDPCAPIRouter(oc v2.Controller, mc v2.ReadController, gc v2.Controller, d
 		With(middleware2.Sanitize).
 		Route("/v2", func(r chi.Router) {
 			r.Use(middleware.SetHeader("Content-Type", "application/fhir+json; charset=UTF-8"))
-			r.Get("/metadata", mc.Read)
+			r.Get("/metadata", rc.Metadata.Read)
 			r.Route("/Organization", func(r chi.Router) {
 				r.Route("/{organizationID}", func(r chi.Router) {
 					r.Use(middleware2.OrganizationCtx)
-					r.With(middleware2.FHIRModel).Get("/", oc.Read)
-					r.Delete("/", oc.Delete)
-					r.With(middleware2.FHIRFilter, middleware2.FHIRModel).Put("/", oc.Update)
+					r.With(middleware2.FHIRModel).Get("/", rc.Org.Read)
+					r.Delete("/", rc.Org.Delete)
+					r.With(middleware2.FHIRFilter, middleware2.FHIRModel).Put("/", rc.Org.Update)
 				})
-				r.With(middleware2.FHIRFilter, middleware2.FHIRModel).Post("/", oc.Create)
+				r.With(middleware2.FHIRFilter, middleware2.FHIRModel).Post("/", rc.Org.Create)
 			})
 			r.Route("/Group", func(r chi.Router) {
 				r.Use(middleware2.AuthCtx)
-				r.With(middleware2.FHIRFilter, middleware2.FHIRModel).Post("/", gc.Create)
+				r.With(middleware2.FHIRFilter, middleware2.FHIRModel).Post("/", rc.Group.Create)
 				r.Route("/{groupID}", func(r chi.Router) {
 					r.Use(middleware2.RequestURLCtx)
 					r.Use(middleware2.GroupCtx)
 					r.Use(middleware2.ExportTypesParamCtx)
 					r.Use(middleware2.ExportSinceParamCtx)
-					r.Get("/$export", gc.Export)
+					r.Get("/$export", rc.Group.Export)
 				})
 			})
 			r.Route("/Implementer", func(r chi.Router) {
 				r.Use(middleware2.AuthCtx)
-				r.Post("/", ic.Create)
+				r.Post("/", rc.Impl.Create)
+				r.Route("/{implementerID}/org", func(r chi.Router) {
+					r.Use(middleware2.ImplementerCtx)
+					r.Get("/", rc.ImplOrg.Read)
+					r.Post("/", rc.ImplOrg.Create)
+				})
 			})
 			r.Route("/Jobs", func(r chi.Router) {
 				r.Use(middleware.SetHeader("Content-Type", "application/json; charset=UTF-8"))
 				r.Use(middleware2.AuthCtx)
-				r.With(middleware2.JobCtx).Get("/{jobID}", jc.Status)
+				r.With(middleware2.JobCtx).Get("/{jobID}", rc.Job.Status)
 			})
 			r.Route("/Data", func(r chi.Router) {
 				r.Use(middleware2.AuthCtx)
-				r.With(middleware2.FileNameCtx).Get("/{fileName}", dc.GetFile)
+				r.With(middleware2.FileNameCtx).Get("/{fileName}", rc.Data.GetFile)
 			})
 		})
 	r.Post("/auth/token", auth.GetAuthToken)
