@@ -264,19 +264,12 @@ const GetImplOrgJSON = `[
 
 // ImplOrgJSON creates an Implementer/Org JSON string for testing purposes
 func ImplOrgJSON() string {
-	type NPIJSON struct {
+	body := struct {
 		Npi string `json:"npi"`
+	}{
+		Npi: GenerateNPI(),
 	}
-
-	npi := GenerateNPI()
-
-	testNPI := NPIJSON{
-		Npi: npi,
-	}
-
-	var jsonData []byte
-	jsonData, _ = json.Marshal(testNPI)
-
+	jsonData, _ := json.Marshal(body)
 	return string(jsonData)
 }
 
@@ -323,4 +316,13 @@ func MalformedOrg() []byte {
 func GenerateNPI() string {
 	luhnWithPrefix := luhn.GenerateWithPrefix(15, "808403")
 	return luhnWithPrefix[len(luhnWithPrefix)-10:]
+}
+
+// ToBytes converts an interface to bytes
+func ToBytes(a interface{}) []byte {
+	b, err := json.Marshal(a)
+	if err != nil {
+		fmt.Println(err)
+	}
+	return b
 }

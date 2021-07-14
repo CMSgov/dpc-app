@@ -1,6 +1,8 @@
 package v2
 
 import (
+  "github.com/CMSgov/dpc/api/client"
+  "github.com/bxcodec/faker/v3"
 	"context"
 	"io/ioutil"
 	"net/http"
@@ -33,9 +35,13 @@ func TestImplementerOrgControllerTestSuite(t *testing.T) {
 }
 
 func (suite *ImplementerOrgControllerTestSuite) TestCreateImplementerOrg() {
-	testNPI := apitest.ImplOrgJSON()
-	suite.mac.On("CreateImplOrg", mock.Anything, mock.Anything).Return(apitest.AttributionToFHIRResponse(testNPI), nil)
-	req := httptest.NewRequest(http.MethodPost, "http://example.com/foo", strings.NewReader(testNPI))
+  //Mock impl creation
+  createImplOrgResp := client.ImplementerOrg{}
+  faker.FakeData(&createImplOrgResp)
+  createImplOrgResp.Npi = apitest.GenerateNPI()
+  suite.mac.On("CreateImplOrg", mock.Anything, mock.Anything).Return(createImplOrgResp, nil)
+
+  req := httptest.NewRequest(http.MethodPost, "http://example.com/foo", strings.NewReader(apitest.ImplOrgJSON()))
 	ctx := req.Context()
 	ctx = context.WithValue(ctx, middleware.RequestIDKey, "12345")
 	req = req.WithContext(ctx)

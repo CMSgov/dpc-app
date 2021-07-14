@@ -60,7 +60,36 @@ func (is *ImplementerService) Post(w http.ResponseWriter, r *http.Request) {
 
 // Get function is not currently used for ImplementerService
 func (is *ImplementerService) Get(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusNotImplemented)
+	log := logger.WithContext(r.Context())
+	implID, ok := r.Context().Value(middleware.ContextKeyImplementer).(string)
+	if !ok {
+		log.Error("Failed to extract implementer id from context")
+		boom.Internal(w, "Internal server error")
+		return
+	}
+	impl, err := is.repo.FindByID(r.Context(), implID)
+	if err != nil {
+		log.Error("Failed to get Implementer", zap.Error(err))
+		boom.Internal(w, "Internal server error")
+		return
+	}
+	if impl == nil {
+		log.Error(fmt.Sprintf("Implementer not found, id: %s", implID))
+		boom.NotFound(w, "Implementer not found")
+		return
+	}
+
+	bytes := new(bytes.Buffer)
+	if err := json.NewEncoder(bytes).Encode(impl); err != nil {
+		log.Error("Failed to convert orm model to bytes for implementer", zap.Error(err))
+		boom.Internal(w, err.Error())
+		return
+	}
+
+	if _, err := w.Write(bytes.Bytes()); err != nil {
+		log.Error("Failed to write implementer to response", zap.Error(err))
+		boom.Internal(w, err.Error())
+	}
 }
 
 // Delete function is not currently used for ImplementerService
