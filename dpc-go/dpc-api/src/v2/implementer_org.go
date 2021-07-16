@@ -1,13 +1,13 @@
 package v2
 
 import (
-  "encoding/json"
-  "github.com/CMSgov/dpc/api/client"
-	"io/ioutil"
-	"net/http"
+	"encoding/json"
+	"github.com/CMSgov/dpc/api/client"
 	"github.com/CMSgov/dpc/api/fhirror"
 	"github.com/CMSgov/dpc/api/logger"
 	"go.uber.org/zap"
+	"io/ioutil"
+	"net/http"
 )
 
 // ImplementerOrgController is a struct that defines what the controller has
@@ -41,11 +41,11 @@ func (ioc *ImplementerOrgController) Create(w http.ResponseWriter, r *http.Reque
 	}
 
 	b, _ := json.Marshal(resp)
-    if err != nil {
-        log.Error("Failed to convert implementer/org to bytes", zap.Error(err))
-        fhirror.ServerIssue(r.Context(), w, http.StatusInternalServerError, "Internal server error")
-        return
-    }
+	if err != nil {
+		log.Error("Failed to convert implementer/org to bytes", zap.Error(err))
+		fhirror.ServerIssue(r.Context(), w, http.StatusInternalServerError, "Internal server error")
+		return
+	}
 
 	if _, err := w.Write(b); err != nil {
 		log.Error("Failed to write data to response", zap.Error(err))

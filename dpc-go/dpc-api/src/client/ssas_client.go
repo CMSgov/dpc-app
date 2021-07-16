@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	v2 "github.com/CMSgov/dpc/api/v2"
 	"io/ioutil"
 	"net/http"
 
@@ -26,12 +27,15 @@ type SsasHttpClientConfig struct {
 const (
 	PostV2SystemEndpoint string = "v2/system"
 	PostV2GroupEndpoint  string = "v2/group"
+	V2KeyEndpoint        string = "v2/system/key"
 )
 
 // SsasClient interface for testing purposes
 type SsasClient interface {
 	CreateSystem(ctx context.Context, request CreateSystemRequest) (CreateSystemResponse, error)
 	CreateGroup(ctx context.Context, request CreateGroupRequest) (CreateGroupResponse, error)
+	AddPublicKey(ctx context.Context, systemID string, request v2.ProxyPublicKeyRequest) (map[string]string, error)
+	DeletePublicKey(ctx context.Context, systemID string, keyID string) error
 }
 
 // SsasHTTPClient is a struct to hold the retryable http client and configs
@@ -48,6 +52,46 @@ func NewSsasHttpClient(config SsasHttpClientConfig) SsasClient {
 		config:     config,
 		httpClient: client,
 	}
+}
+
+func (sc *SsasHTTPClient) DeletePublicKey(ctx context.Context, systemID string, keyID string) error {
+	log := logger.WithContext(ctx)
+
+	url := fmt.Sprintf("%s/%s/%s/%s/%s", sc.config.URL, PostV2SystemEndpoint, systemID, V2KeyEndpoint, keyID)
+
+	resBytes, err := sc.doDelete(ctx, url)
+	if err != nil {
+		log.Error("Create ssas system request failed", zap.Error(err))
+		return errors.Errorf("Failed to create ssas system")
+	}
+	var resp map[string]string
+	if err := json.NewDecoder(bytes.NewReader(resBytes)).Decode(&resp); err != nil {
+		log.Error("Failed to convert ssas response bytes to CreateGroupResponse model", zap.Error(err))
+		return errors.Errorf("Failed to create ssas system")
+	}
+	return nil
+}
+
+func (sc *SsasHTTPClient) AddPublicKey(ctx context.Context, systemID string, request v2.ProxyPublicKeyRequest) (map[string]string, error) {
+	log := logger.WithContext(ctx)
+	reqBytes := new(bytes.Buffer)
+	if err := json.NewEncoder(reqBytes).Encode(request); err != nil {
+		log.Error("Failed to convert model to bytes", zap.Error(err))
+		return nil, errors.Errorf("Failed to create ssas system")
+	}
+	url := fmt.Sprintf("%s/%s/%s/%s", sc.config.URL, PostV2SystemEndpoint, systemID, V2KeyEndpoint)
+
+	resBytes, err := sc.doPost(ctx, url, reqBytes.Bytes())
+	if err != nil {
+		log.Error("Create ssas system request failed", zap.Error(err))
+		return nil, errors.Errorf("Failed to create ssas system")
+	}
+	var resp map[string]string
+	if err := json.NewDecoder(bytes.NewReader(resBytes)).Decode(&resp); err != nil {
+		log.Error("Failed to convert ssas response bytes to CreateGroupResponse model", zap.Error(err))
+		return nil, errors.Errorf("Failed to create ssas system")
+	}
+	return resp, nil
 }
 
 // CreateSystem function to create a new ssas system
@@ -101,6 +145,43 @@ func (sc *SsasHTTPClient) doPost(ctx context.Context, url string, reqBytes []byt
 	sc.httpClient.Logger = newLogger(*log)
 
 	req, err := retryablehttp.NewRequest(http.MethodPost, url, reqBytes)
+	if err != nil {
+		log.Error("Failed to create request", zap.Error(err))
+		return nil, errors.Errorf("Failed to create ssas group")
+	}
+	req.SetBasicAuth(sc.config.ClientID, sc.config.ClientSecret)
+	resp, err := sc.httpClient.Do(req)
+	if err != nil {
+		log.Error("Failed to send request", zap.Error(err))
+		return nil, errors.Errorf("Failed to create ssas group")
+	}
+
+	if resp.StatusCode < 200 || resp.StatusCode > 299 {
+		b, _ := ioutil.ReadAll(resp.Body)
+		body := string(b[:])
+		return nil, errors.Errorf(body)
+	}
+
+	defer func() {
+		err := resp.Body.Close()
+		if err != nil {
+			log.Error("Failed to close response body", zap.Error(err))
+		}
+	}()
+
+	b, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Error("Failed to read the response body", zap.Error(err))
+		return nil, errors.Errorf("Failed to save system")
+	}
+	return b, nil
+}
+
+func (sc *SsasHTTPClient) doDelete(ctx context.Context, url string) ([]byte, error) {
+	log := logger.WithContext(ctx)
+	sc.httpClient.Logger = newLogger(*log)
+
+	req, err := retryablehttp.NewRequest(http.MethodDelete, url, nil)
 	if err != nil {
 		log.Error("Failed to create request", zap.Error(err))
 		return nil, errors.Errorf("Failed to create ssas group")

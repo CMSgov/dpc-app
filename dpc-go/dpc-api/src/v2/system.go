@@ -9,6 +9,7 @@ import (
 	"github.com/CMSgov/dpc/api/logger"
 	"github.com/CMSgov/dpc/api/middleware"
 	"github.com/darahayes/go-boom"
+	"github.com/go-chi/chi"
 	"go.uber.org/zap"
 	"net/http"
 
@@ -25,6 +26,105 @@ type SSASController struct {
 func NewSSASController(ssasClient client.SsasClient, attrClient client.Client) *SSASController {
 	return &SSASController{
 		ssasClient, attrClient,
+	}
+}
+
+func (sc *SSASController) DeleteKey(w http.ResponseWriter, r *http.Request) {
+	log := logger.WithContext(r.Context())
+	implementorID, _ := r.Context().Value(middleware.ContextKeyImplementor).(string)
+	organizationID, _ := r.Context().Value(middleware.ContextKeyOrganization).(string)
+	keyID := chi.URLParam(r, "keyID")
+
+	if implementorID == "" || organizationID == "" || keyID == "" {
+		log.Error(fmt.Sprintf("Failed to extract one or more path parameters. ImplID: %s, OrgID: %s, KeyID: %s ", implementorID, organizationID, keyID))
+		fhirror.GenericServerIssue(r.Context(), w)
+		return
+	}
+
+	found, mOrg, err := sc.getManagedOrg(r, implementorID, organizationID)
+	if err != nil {
+		log.Error("Failed to retrieve implementer's managed orgs", zap.Error(err))
+		fhirror.GenericServerIssue(r.Context(), w)
+		return
+	}
+
+	if !found || "Active" != mOrg.Status {
+		log.Error("Could not find active org")
+		fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "Implementor/Org relation is not active")
+		return
+	}
+
+	if mOrg.SsasSystemID == "" {
+		log.Error(fmt.Sprintf("realation with implementerID: %s and organizationID: %s is not tied to a system", implementorID, organizationID))
+		fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "a system was not found for this implementer/org relationship")
+		return
+	}
+
+	err = sc.ssasClient.DeletePublicKey(r.Context(), mOrg.SsasSystemID, keyID)
+	if err != nil {
+		log.Error("Failed to add key", zap.Error(err))
+		fhirror.ServerIssue(r.Context(), w, 500, "Failed to add key")
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func (sc *SSASController) AddKey(w http.ResponseWriter, r *http.Request) {
+	log := logger.WithContext(r.Context())
+	implementorID, _ := r.Context().Value(middleware.ContextKeyImplementor).(string)
+	organizationID, _ := r.Context().Value(middleware.ContextKeyOrganization).(string)
+
+	if implementorID == "" || organizationID == "" {
+		log.Error(fmt.Sprintf("Failed to extract one or more path parameters. ImplID: %s ,OrgID: %s ", implementorID, organizationID))
+		fhirror.GenericServerIssue(r.Context(), w)
+		return
+	}
+
+	found, mOrg, err := sc.getManagedOrg(r, implementorID, organizationID)
+	if err != nil {
+		log.Error("Failed to retrieve implementer's managed orgs", zap.Error(err))
+		fhirror.GenericServerIssue(r.Context(), w)
+		return
+	}
+
+	if !found || "Active" != mOrg.Status {
+		log.Error("Could not find active org")
+		fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "Implementor/Org relation is not active")
+		return
+	}
+
+	if mOrg.SsasSystemID == "" {
+		log.Error(fmt.Sprintf("realation with implementerID: %s and organizationID: %s is not tied to a system", implementorID, organizationID))
+		fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "a system was not found for this implementer/org relationship")
+		return
+	}
+
+	proxyReq := ProxyPublicKeyRequest{}
+	if err := json.NewDecoder(r.Body).Decode(&proxyReq); err != nil {
+		log.Error(err.Error())
+		fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "Failed to parse request body")
+		return
+	}
+
+	ssasResp, err := sc.ssasClient.AddPublicKey(r.Context(), mOrg.SsasSystemID, proxyReq)
+	if err != nil {
+		log.Error("Failed to add key", zap.Error(err))
+		fhirror.ServerIssue(r.Context(), w, 500, "Failed to add key")
+		return
+	}
+
+	b, err := json.Marshal(ssasResp)
+	if err != nil {
+		log.Error("Failed to unmarshal", zap.Error(err))
+		fhirror.GenericServerIssue(r.Context(), w)
+		return
+	}
+
+	if _, err := w.Write(b); err != nil {
+		log.Error("Failed to write data to response", zap.Error(err))
+		fhirror.GenericServerIssue(r.Context(), w)
+		return
 	}
 }
 
@@ -163,4 +263,9 @@ type ProxyCreateSystemResponse struct {
 	IPs         []string `json:"ips"`
 	ClientToken string   `json:"client_token"`
 	ExpiresAt   string   `json:"expires_at"`
+}
+
+type ProxyPublicKeyRequest struct {
+	PublicKey string `json:"public_key"`
+	Signature string `json:"signature"`
 }

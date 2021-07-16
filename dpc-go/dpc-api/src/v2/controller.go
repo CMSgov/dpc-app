@@ -49,4 +49,6 @@ type FileController interface {
 // AuthController is an interface for reading
 type AuthController interface {
 	CreateSystem(w http.ResponseWriter, r *http.Request)
+	AddKey(w http.ResponseWriter, r *http.Request)
+	DeleteKey(w http.ResponseWriter, r *http.Request)
 }
