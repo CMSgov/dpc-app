@@ -63,11 +63,11 @@ func FileNameCtx(next http.Handler) http.Handler {
 	})
 }
 
-// ImplementorIDCtx middleware to extract the implementor id from the chi url param and set it into the request context
-func ImplementorIDCtx(next http.Handler) http.Handler {
+// ImplementerIDCtx middleware to extract the implementor id from the chi url param and set it into the request context
+func ImplementerIDCtx(next http.Handler) http.Handler {
     return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
         id := chi.URLParam(r, "implID")
-        ctx := context.WithValue(r.Context(), ContextKeyImplementor, id)
+        ctx := context.WithValue(r.Context(), ContextKeyImplementer, id)
         next.ServeHTTP(w, r.WithContext(ctx))
     })
 }
