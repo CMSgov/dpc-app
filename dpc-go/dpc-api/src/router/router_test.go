@@ -60,6 +60,22 @@ func (mjc *MockJobController) Status(w http.ResponseWriter, r *http.Request) {
 	mjc.Called(w, r)
 }
 
+type MockSsasController struct {
+	mock.Mock
+}
+
+func (mjc *MockSsasController) CreateSystem(w http.ResponseWriter, r *http.Request) {
+	mjc.Called(w, r)
+}
+
+func (mjc *MockSsasController) AddKey(w http.ResponseWriter, r *http.Request) {
+	mjc.Called(w, r)
+}
+
+func (mjc *MockSsasController) DeleteKey(w http.ResponseWriter, r *http.Request) {
+	mjc.Called(w, r)
+}
+
 type RouterTestSuite struct {
 	suite.Suite
 	router      http.Handler
@@ -70,6 +86,7 @@ type RouterTestSuite struct {
 	mockJob     *MockJobController
 	mockImpl    *MockController
 	mockImplOrg *MockController
+	mockSsas    *MockSsasController
 }
 
 func (suite *RouterTestSuite) SetupTest() {
@@ -80,6 +97,7 @@ func (suite *RouterTestSuite) SetupTest() {
 	suite.mockJob = &MockJobController{}
 	suite.mockImpl = &MockController{}
 	suite.mockImplOrg = &MockController{}
+	suite.mockSsas = &MockSsasController{}
 
 	mockRC := Controllers{
 		Org:      suite.mockOrg,
@@ -89,6 +107,7 @@ func (suite *RouterTestSuite) SetupTest() {
 		Job:      suite.mockJob,
 		Impl:     suite.mockImpl,
 		ImplOrg:  suite.mockImplOrg,
+		Ssas:     suite.mockSsas,
 	}
 
 	suite.router = NewDPCAPIRouter(mockRC)
@@ -312,4 +331,19 @@ func (suite *RouterTestSuite) TestGroupExportRoute() {
 	assert.Equal(suite.T(), http.StatusAccepted, res.StatusCode)
 	assert.Equal(suite.T(), "54321", capturedRequestID)
 	assert.Nil(suite.T(), v)
+}
+
+func (suite *RouterTestSuite) TestPostSystemProxyRoute() {
+	suite.mockSsas.On("CreateSystem", mock.Anything, mock.Anything).Once().Run(func(arg mock.Arguments) {
+		w := arg.Get(0).(http.ResponseWriter)
+		w.WriteHeader(http.StatusOK)
+	})
+
+	ts := httptest.NewServer(suite.router)
+
+	req, _ := http.NewRequest("POST", fmt.Sprintf("%s/%s", ts.URL, "v2/Implementer/12345/Org/123/system"), strings.NewReader("{}"))
+	req.Header.Set("Content-Type", "application/json")
+	res, err := http.DefaultClient.Do(req)
+	fmt.Println(err)
+	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
 }

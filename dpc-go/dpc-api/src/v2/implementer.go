@@ -66,7 +66,7 @@ func (ic *ImplementerController) Create(w http.ResponseWriter, r *http.Request) 
 	}
 
 	//Update implementer with ssas group
-	impl.SsasGroupId = gResp.GroupID
+	impl.SsasGroupID = gResp.GroupID
 	reqBytes, err := json.Marshal(impl)
 	if err != nil {
 		log.Error("Failed to convert Implementer model to bytes", zap.Error(err))
@@ -110,8 +110,9 @@ func (ic *ImplementerController) Update(w http.ResponseWriter, r *http.Request) 
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
+// ImplementerResource struct that models an attribution implementer
 type ImplementerResource struct {
 	ID          string `json:"id" faker:"uuid_hyphenated"`
 	Name        string `json:"name" faker:"word"`
-	SsasGroupId string `json:"ssas_group_id,omitempty" faker:"word"`
+	SsasGroupID string `json:"ssas_group_id,omitempty" faker:"word"`
 }

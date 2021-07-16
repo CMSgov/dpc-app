@@ -39,7 +39,7 @@ func main() {
 		Retries: attrRetries,
 	})
 
-	ssasClient := client.NewSsasHttpClient(client.SsasHttpClientConfig{
+	ssasClient := client.NewSsasHTTPClient(client.SsasHttpClientConfig{
 		URL:          conf.GetAsString("ssas-client.url"),
 		Retries:      conf.GetAsInt("ssas-client.attrRetries", 3),
 		ClientID:     conf.GetAsString("ssas-client.client-id"),

@@ -22,7 +22,7 @@ type Controllers struct {
 	Job      v2.JobController
 	Impl     v2.Controller
 	ImplOrg  v2.Controller
-	Ssas     v2.AuthController
+	Ssas     v2.SsasController
 }
 
 // NewDPCAPIRouter function that builds the router using chi
@@ -63,9 +63,9 @@ func NewDPCAPIRouter(rc Controllers) http.Handler {
 					r.Use(middleware2.ImplementerCtx)
 					r.Get("/", rc.ImplOrg.Read)
 					r.Post("/", rc.ImplOrg.Create)
-					r.Route("/{orgID}", func(r chi.Router) {
-						r.With(middleware2.ImplementorIDCtx, middleware2.OrganizationIDCtx).Post("/key", rc.Ssas.AddKey)
-						r.With(middleware2.ImplementorIDCtx, middleware2.OrganizationIDCtx).Post("/key/{keyID}", rc.Ssas.DeleteKey)
+					r.Route("/{organizationID}", func(r chi.Router) {
+						r.With(middleware2.ImplementerCtx, middleware2.OrganizationCtx).Post("/key", rc.Ssas.AddKey)
+						r.With(middleware2.ImplementerCtx, middleware2.OrganizationCtx).Post("/key/{keyID}", rc.Ssas.DeleteKey)
 					})
 				})
 			})
@@ -78,8 +78,8 @@ func NewDPCAPIRouter(rc Controllers) http.Handler {
 				r.Use(middleware2.AuthCtx)
 				r.With(middleware2.FileNameCtx).Get("/{fileName}", rc.Data.GetFile)
 			})
-			r.Route("/Implementer/{implID}/Org/{orgID}/system", func(r chi.Router) {
-				r.With(middleware2.ImplementorIDCtx).With(middleware2.OrganizationIDCtx).Post("/", rc.Ssas.CreateSystem)
+			r.Route("/Implementer/{implementerID}/Org/{organizationID}/system", func(r chi.Router) {
+				r.With(middleware2.ImplementerCtx).With(middleware2.OrganizationCtx).Post("/", rc.Ssas.CreateSystem)
 			})
 		})
 	r.Post("/auth/token", auth.GetAuthToken)

@@ -5,7 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	v2 "github.com/CMSgov/dpc/api/v2"
+	"github.com/CMSgov/dpc/api/model"
 	"io/ioutil"
 	"net/http"
 
@@ -34,7 +34,7 @@ const (
 type SsasClient interface {
 	CreateSystem(ctx context.Context, request CreateSystemRequest) (CreateSystemResponse, error)
 	CreateGroup(ctx context.Context, request CreateGroupRequest) (CreateGroupResponse, error)
-	AddPublicKey(ctx context.Context, systemID string, request v2.ProxyPublicKeyRequest) (map[string]string, error)
+	AddPublicKey(ctx context.Context, systemID string, request model.ProxyPublicKeyRequest) (map[string]string, error)
 	DeletePublicKey(ctx context.Context, systemID string, keyID string) error
 }
 
@@ -44,8 +44,8 @@ type SsasHTTPClient struct {
 	httpClient *retryablehttp.Client
 }
 
-// NewSsasHttpClient initializes the retryable client and returns a reference to the ssas client
-func NewSsasHttpClient(config SsasHttpClientConfig) SsasClient {
+// NewSsasHTTPClient initializes the retryable client and returns a reference to the ssas client
+func NewSsasHTTPClient(config SsasHttpClientConfig) SsasClient {
 	client := retryablehttp.NewClient()
 	client.RetryMax = config.Retries
 	return &SsasHTTPClient{
@@ -72,7 +72,7 @@ func (sc *SsasHTTPClient) DeletePublicKey(ctx context.Context, systemID string, 
 	return nil
 }
 
-func (sc *SsasHTTPClient) AddPublicKey(ctx context.Context, systemID string, request v2.ProxyPublicKeyRequest) (map[string]string, error) {
+func (sc *SsasHTTPClient) AddPublicKey(ctx context.Context, systemID string, request model.ProxyPublicKeyRequest) (map[string]string, error) {
 	log := logger.WithContext(ctx)
 	reqBytes := new(bytes.Buffer)
 	if err := json.NewEncoder(reqBytes).Encode(request); err != nil {

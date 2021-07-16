@@ -43,6 +43,4 @@ const (
 	ContextKeyResourceTypes
 	// ContextKeySince is the key in the context to pass on the _since param value
 	ContextKeySince
-	// ContextKeyImplementor is the key in the context to pass on the implementor path param value
-	ContextKeyImplementor
 )

@@ -8,6 +8,7 @@ import (
 	"github.com/CMSgov/dpc/api/fhirror"
 	"github.com/CMSgov/dpc/api/logger"
 	"github.com/CMSgov/dpc/api/middleware"
+	"github.com/CMSgov/dpc/api/model"
 	"github.com/darahayes/go-boom"
 	"github.com/go-chi/chi"
 	"go.uber.org/zap"
@@ -31,7 +32,7 @@ func NewSSASController(ssasClient client.SsasClient, attrClient client.Client) *
 
 func (sc *SSASController) DeleteKey(w http.ResponseWriter, r *http.Request) {
 	log := logger.WithContext(r.Context())
-	implementorID, _ := r.Context().Value(middleware.ContextKeyImplementor).(string)
+	implementorID, _ := r.Context().Value(middleware.ContextKeyImplementer).(string)
 	organizationID, _ := r.Context().Value(middleware.ContextKeyOrganization).(string)
 	keyID := chi.URLParam(r, "keyID")
 
@@ -72,7 +73,7 @@ func (sc *SSASController) DeleteKey(w http.ResponseWriter, r *http.Request) {
 
 func (sc *SSASController) AddKey(w http.ResponseWriter, r *http.Request) {
 	log := logger.WithContext(r.Context())
-	implementorID, _ := r.Context().Value(middleware.ContextKeyImplementor).(string)
+	implementorID, _ := r.Context().Value(middleware.ContextKeyImplementer).(string)
 	organizationID, _ := r.Context().Value(middleware.ContextKeyOrganization).(string)
 
 	if implementorID == "" || organizationID == "" {
@@ -100,7 +101,7 @@ func (sc *SSASController) AddKey(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	proxyReq := ProxyPublicKeyRequest{}
+	proxyReq := model.ProxyPublicKeyRequest{}
 	if err := json.NewDecoder(r.Body).Decode(&proxyReq); err != nil {
 		log.Error(err.Error())
 		fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "Failed to parse request body")
@@ -131,16 +132,16 @@ func (sc *SSASController) AddKey(w http.ResponseWriter, r *http.Request) {
 // CreateSystem function that calls SSAS to create a new system
 func (sc *SSASController) CreateSystem(w http.ResponseWriter, r *http.Request) {
 	log := logger.WithContext(r.Context())
-	implementorID, _ := r.Context().Value(middleware.ContextKeyImplementor).(string)
+	implementerID, _ := r.Context().Value(middleware.ContextKeyImplementer).(string)
 	organizationID, _ := r.Context().Value(middleware.ContextKeyOrganization).(string)
 
-	if implementorID == "" || organizationID == "" {
-		log.Error(fmt.Sprintf("Failed to extract one or more path parameters. ImplID: %s ,OrgID: %s ", implementorID, organizationID))
+	if implementerID == "" || organizationID == "" {
+		log.Error(fmt.Sprintf("Failed to extract one or more path parameters. ImplID: %s ,OrgID: %s ", implementerID, organizationID))
 		boom.Internal(w, w, http.StatusInternalServerError, "Internal Server Error")
 		return
 	}
 
-	found, mOrg, err := sc.getManagedOrg(r, implementorID, organizationID)
+	found, mOrg, err := sc.getManagedOrg(r, implementerID, organizationID)
 	if err != nil {
 		log.Error("Failed to retrieve implementer's managed orgs", zap.Error(err))
 		boom.Internal(w, w, http.StatusInternalServerError, "Internal Server Error")
@@ -154,7 +155,7 @@ func (sc *SSASController) CreateSystem(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if mOrg.SsasSystemID != "" {
-		log.Error(fmt.Sprintf("realation with implementerID: %s and organizationID: %s already has a system", implementorID, organizationID))
+		log.Error(fmt.Sprintf("realation with implementerID: %s and organizationID: %s already has a system", implementerID, organizationID))
 		fhirror.BusinessViolation(r.Context(), w, http.StatusConflict, "a system for this implementer/org relation already exists")
 		return
 	}
@@ -166,7 +167,7 @@ func (sc *SSASController) CreateSystem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ssasResp, err := sc.createSsasSystem(r, implementorID, organizationID, proxyReq)
+	ssasResp, err := sc.createSsasSystem(r, implementerID, organizationID, proxyReq)
 	if err != nil {
 		log.Error("Failed to create system", zap.Error(err))
 		fhirror.ServerIssue(r.Context(), w, 500, "Failed to create system")
@@ -174,11 +175,11 @@ func (sc *SSASController) CreateSystem(w http.ResponseWriter, r *http.Request) {
 	}
 	uRel := client.ImplementerOrg{
 		OrgID:         organizationID,
-		ImplementerID: implementorID,
+		ImplementerID: implementerID,
 		SsasSystemID:  ssasResp.SystemID,
 		Status:        "Active",
 	}
-	_, err = sc.attrClient.UpdateImplementerOrg(r.Context(), implementorID, organizationID, uRel)
+	_, err = sc.attrClient.UpdateImplementerOrg(r.Context(), implementerID, organizationID, uRel)
 	if err != nil {
 		log.Error("Failed to update implementer org relation", zap.Error(err))
 		fhirror.ServerIssue(r.Context(), w, 500, "Failed to create system")
@@ -263,9 +264,4 @@ type ProxyCreateSystemResponse struct {
 	IPs         []string `json:"ips"`
 	ClientToken string   `json:"client_token"`
 	ExpiresAt   string   `json:"expires_at"`
-}
-
-type ProxyPublicKeyRequest struct {
-	PublicKey string `json:"public_key"`
-	Signature string `json:"signature"`
 }

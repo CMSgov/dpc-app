@@ -3,6 +3,7 @@ package v2
 import (
 	"bytes"
 	"context"
+	"github.com/CMSgov/dpc/api/model"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -87,6 +88,16 @@ func (mc MockSsasClient) CreateSystem(ctx context.Context, request client.Create
 func (mc MockSsasClient) CreateGroup(ctx context.Context, request client.CreateGroupRequest) (client.CreateGroupResponse, error) {
 	args := mc.Called(ctx, request)
 	return args.Get(0).(client.CreateGroupResponse), args.Error(1)
+}
+
+func (mc MockSsasClient) AddPublicKey(ctx context.Context, systemID string, request model.ProxyPublicKeyRequest) (map[string]string, error) {
+	args := mc.Called(ctx, systemID, request)
+	return args.Get(0).(map[string]string), args.Error(1)
+}
+
+func (mc MockSsasClient) DeletePublicKey(ctx context.Context, systemID string, keyID string) error {
+	args := mc.Called(ctx, systemID, keyID)
+	return args.Error(0)
 }
 
 type OrganizationControllerTestSuite struct {
