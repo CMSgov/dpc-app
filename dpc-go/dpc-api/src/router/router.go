@@ -22,6 +22,7 @@ type Controllers struct {
 	Job      v2.JobController
 	Impl     v2.Controller
 	ImplOrg  v2.Controller
+	Ssas     v2.AuthController
 }
 
 // NewDPCAPIRouter function that builds the router using chi
@@ -72,6 +73,9 @@ func NewDPCAPIRouter(rc Controllers) http.Handler {
 			r.Route("/Data", func(r chi.Router) {
 				r.Use(middleware2.AuthCtx)
 				r.With(middleware2.FileNameCtx).Get("/{fileName}", rc.Data.GetFile)
+			})
+			r.Route("/Implementer/{implID}/Org/{orgID}/system", func(r chi.Router) {
+				r.With(middleware2.ImplementorIDCtx).With(middleware2.OrganizationIDCtx).Post("/", rc.Ssas.CreateSystem)
 			})
 		})
 	r.Post("/auth/token", auth.GetAuthToken)

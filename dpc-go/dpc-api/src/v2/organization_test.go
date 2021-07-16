@@ -24,9 +24,19 @@ type MockAttributionClient struct {
 	mock.Mock
 }
 
-func (ac *MockAttributionClient) CreateImplOrg(ctx context.Context, body []byte) ([]byte, error) {
+func (ac *MockAttributionClient) UpdateImplementerOrg(ctx context.Context, implID string, orgID string, rel client.ImplementerOrg) (client.ImplementerOrg, error) {
+	args := ac.Called(ctx, implID, orgID, rel)
+	return args.Get(0).(client.ImplementerOrg), args.Error(1)
+}
+
+func (ac *MockAttributionClient) GetManagedOrgs(ctx context.Context, implID string) ([]client.ManagedOrg, error) {
+	args := ac.Called(ctx, implID)
+	return args.Get(0).([]client.ManagedOrg), args.Error(1)
+}
+
+func (ac *MockAttributionClient) CreateImplOrg(ctx context.Context, body []byte) (client.ImplementerOrg, error) {
 	args := ac.Called(ctx, body)
-	return args.Get(0).([]byte), args.Error(1)
+	return args.Get(0).(client.ImplementerOrg), args.Error(1)
 }
 
 func (ac *MockAttributionClient) GetImplOrg(ctx context.Context) ([]byte, error) {
@@ -62,6 +72,21 @@ func (ac *MockAttributionClient) Put(ctx context.Context, resourceType client.Re
 func (ac *MockAttributionClient) Data(ctx context.Context, path string) ([]byte, error) {
 	args := ac.Called(ctx, path)
 	return args.Get(0).([]byte), args.Error(1)
+}
+
+//TODO This mock (and attributionClient mock) should be moved to a more common place.
+type MockSsasClient struct {
+	mock.Mock
+}
+
+func (mc MockSsasClient) CreateSystem(ctx context.Context, request client.CreateSystemRequest) (client.CreateSystemResponse, error) {
+	args := mc.Called(ctx, request)
+	return args.Get(0).(client.CreateSystemResponse), args.Error(1)
+}
+
+func (mc MockSsasClient) CreateGroup(ctx context.Context, request client.CreateGroupRequest) (client.CreateGroupResponse, error) {
+	args := mc.Called(ctx, request)
+	return args.Get(0).(client.CreateGroupResponse), args.Error(1)
 }
 
 type OrganizationControllerTestSuite struct {
