@@ -13,5 +13,4 @@ WORKDIR /app/dpc-api
 COPY --from=builder /app/configs ../configs
 COPY --from=builder /app/swaggerui ../swaggerui
 COPY --from=builder /app/dpc-api/bin/api ./bin/api
-EXPOSE 8080
 CMD ["./bin/api"]

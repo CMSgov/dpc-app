@@ -7,6 +7,7 @@ import (
 	"github.com/CMSgov/dpc/attribution/service"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
+	"github.com/go-chi/render"
 )
 
 // NewDPCAttributionRouter function to build the attribution router
@@ -15,6 +16,7 @@ func NewDPCAttributionRouter(o service.Service, g service.Service, impl service.
 	r.Use(middleware2.Logging())
 	r.Use(middleware.SetHeader("Content-Type", "application/json; charset=UTF-8"))
 	r.Route("/", func(r chi.Router) {
+		r.Get("/_health", getHealthCheck)
 		r.Route("/Organization", func(r chi.Router) {
 			r.Route("/{organizationID}", func(r chi.Router) {
 				r.Use(middleware2.OrganizationCtx)
@@ -61,4 +63,11 @@ func NewDPCAttributionRouter(o service.Service, g service.Service, impl service.
 	})
 
 	return r
+}
+
+func getHealthCheck(w http.ResponseWriter, r *http.Request) {
+	m := make(map[string]string)
+	m["database"] = "ok"
+	w.WriteHeader(http.StatusOK)
+	render.JSON(w, r, m)
 }
