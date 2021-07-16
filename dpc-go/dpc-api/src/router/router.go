@@ -74,8 +74,8 @@ func NewDPCAPIRouter(rc Controllers) http.Handler {
 				r.Use(middleware2.AuthCtx)
 				r.With(middleware2.FileNameCtx).Get("/{fileName}", rc.Data.GetFile)
 			})
-			r.Route("/Implementer/{implID}/Org/{orgID}/system", func(r chi.Router) {
-				r.With(middleware2.ImplementerIDCtx).With(middleware2.OrganizationIDCtx).Post("/", rc.Ssas.CreateSystem)
+			r.Route("/Implementer/{implementerID}/Org/{organizationID}/system", func(r chi.Router) {
+				r.With(middleware2.ImplementerCtx).With(middleware2.OrganizationCtx).Post("/", rc.Ssas.CreateSystem)
 			})
 		})
 	r.Post("/auth/token", auth.GetAuthToken)

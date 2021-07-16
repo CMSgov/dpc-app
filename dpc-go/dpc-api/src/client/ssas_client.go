@@ -40,8 +40,8 @@ type SsasHTTPClient struct {
 	httpClient *retryablehttp.Client
 }
 
-// NewSsasHttpClient initializes the retryable client and returns a reference to the ssas client
-func NewSsasHttpClient(config SsasHttpClientConfig) SsasClient {
+// NewSsasHTTPClient initializes the retryable client and returns a reference to the ssas client
+func NewSsasHTTPClient(config SsasHttpClientConfig) SsasClient {
 	client := retryablehttp.NewClient()
 	client.RetryMax = config.Retries
 	return &SsasHTTPClient{

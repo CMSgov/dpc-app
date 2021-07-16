@@ -74,7 +74,7 @@ func (suite *ImplementerControllerTestSuite) TestCreateImplementer() {
     //Mock impl creation
     createImplResp := ImplementerResource{}
     faker.FakeData(&createImplResp)
-    createImplResp.SsasGroupId = ""
+    createImplResp.SsasGroupID = ""
     suite.mac.On("Post", mock.Anything, mock.Anything, mock.Anything).Return(apitest.ToBytes(createImplResp), nil)
 
     //Mock group creation
@@ -85,7 +85,7 @@ func (suite *ImplementerControllerTestSuite) TestCreateImplementer() {
     updateImplResp := ImplementerResource{
         ID:          createImplResp.ID,
         Name:        createImplResp.Name,
-        SsasGroupId: createGroupResp.GroupID,
+        SsasGroupID: createGroupResp.GroupID,
     }
     suite.mac.On("Put", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(apitest.ToBytes(updateImplResp), nil)
 
