@@ -43,7 +43,7 @@ RSpec.feature 'user sends invitation to DPC' do
 
       visit "/impl/users/invitation/accept?invitation_token=#{itoken}"
 
-      expect(page.body).to have_content('Set your password')
+      expect(page.body).to have_content('A member from your team has invited you to create an account in the DPC sandbox portal.')
 
       fill_in :user_password, with: 'Br00k1yn53^3R100!'
       fill_in :user_password_confirmation, with: 'Br00k1yn53^3R100!'
