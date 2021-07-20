@@ -60,6 +60,7 @@ func NewDPCAPIRouter(rc Controllers) http.Handler {
 				r.Post("/", rc.Impl.Create)
 				r.Route("/{implementerID}/org", func(r chi.Router) {
 					r.Use(middleware2.ImplementerCtx)
+					r.Get("/", rc.ImplOrg.Read)
 					r.Post("/", rc.ImplOrg.Create)
 				})
 			})
