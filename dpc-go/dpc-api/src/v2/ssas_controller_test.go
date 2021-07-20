@@ -38,8 +38,76 @@ func TestSsasControllerTestSuite(t *testing.T) {
 
 func (suite *SsasControllerTestSuite) TestCreateSystem() {
 
-	ja := jsonassert.New(suite.T())
+	req, _ := suite.SetupHappyPathMocks()
 
+	//Do request
+	w := httptest.NewRecorder()
+	suite.sc.CreateSystem(w, req)
+	res := w.Result()
+
+	ja := jsonassert.New(suite.T())
+	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
+	resp, _ := ioutil.ReadAll(res.Body)
+	ja.Assertf(string(resp), `
+    {
+        "client_id":"c001",
+        "client_name":"Test Org",
+        "ips":["ip-1", "ip-2"],
+        "client_token":"client-token",
+        "expires_at":"expiration"
+    }`)
+}
+
+func (suite *SsasControllerTestSuite) TestCreateDuplicateSystem() {
+	req, _ := suite.SetupHappyPathMocks()
+
+	//Mock client calls
+	managedOrg := client.ProviderOrg{
+		OrgName:      "Test Org",
+		OrgID:        "abc",
+		Npi:          "npi-1",
+		Status:       "Active",
+		SsasSystemID: "42",
+	}
+	orgs := make([]client.ProviderOrg, 1)
+	orgs[0] = managedOrg
+	findExpectedCall(suite.mac.ExpectedCalls, "GetProviderOrgs").Return(orgs, nil)
+
+	//Do request
+	w := httptest.NewRecorder()
+	suite.sc.CreateSystem(w, req)
+	res := w.Result()
+
+	assert.Equal(suite.T(), http.StatusConflict, res.StatusCode)
+}
+
+func (suite *SsasControllerTestSuite) TestCreateSystemForInactiveRelation() {
+
+	req, _ := suite.SetupHappyPathMocks()
+
+	//Mock client calls
+	managedOrg := client.ProviderOrg{
+		OrgName:      "Test Org",
+		OrgID:        "abc",
+		Npi:          "npi-1",
+		Status:       "Inactive",
+		SsasSystemID: "",
+	}
+	orgs := make([]client.ProviderOrg, 1)
+	orgs[0] = managedOrg
+	findExpectedCall(suite.mac.ExpectedCalls, "GetProviderOrgs").Return(orgs, nil)
+
+	//Do request
+	w := httptest.NewRecorder()
+	suite.sc.CreateSystem(w, req)
+	res := w.Result()
+	resp, _ := ioutil.ReadAll(res.Body)
+
+	assert.Equal(suite.T(), http.StatusBadRequest, res.StatusCode)
+	assert.Contains(suite.T(), string(resp), "Implementor/Org relation is not active")
+}
+
+func (suite *SsasControllerTestSuite) SetupHappyPathMocks() (*http.Request, context.Context) {
 	//Setup request
 	reqBody := `{
         "client_name" : "Test Client",
@@ -53,19 +121,18 @@ func (suite *SsasControllerTestSuite) TestCreateSystem() {
 	ctx = req.Context()
 	ctx = context.WithValue(ctx, middleware2.ContextKeyOrganization, "abc")
 	req = req.WithContext(ctx)
-	w := httptest.NewRecorder()
 
 	//Mock client calls
-	managedOrg := client.ManagedOrg{
+	managedOrg := client.ProviderOrg{
 		OrgName:      "Test Org",
 		OrgID:        "abc",
 		Npi:          "npi-1",
 		Status:       "Active",
 		SsasSystemID: "",
 	}
-	orgs := make([]client.ManagedOrg, 1)
+	orgs := make([]client.ProviderOrg, 1)
 	orgs[0] = managedOrg
-	suite.mac.On("GetManagedOrgs", mock.Anything, mock.Anything).Return(orgs, nil)
+	suite.mac.On("GetProviderOrgs", mock.Anything, mock.Anything).Return(orgs, nil)
 	suite.mac.On("Get", mock.Anything, mock.Anything, mock.Anything).Return([]byte(`{"ssas_group_id":"0001"}`), nil)
 
 	ips := make([]string, 2)
@@ -85,92 +152,16 @@ func (suite *SsasControllerTestSuite) TestCreateSystem() {
 		IPs:         ips,
 	}
 	suite.msc.On("CreateSystem", mock.Anything, mock.Anything).Return(ssasResp, nil)
-	suite.mac.On("UpdateImplementerOrg", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(client.ImplementerOrg{}, nil)
+	suite.mac.On("UpdateImplOrg", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(client.ImplementerOrg{}, nil)
 
-	//Do request
-	suite.sc.CreateSystem(w, req)
-	res := w.Result()
-
-	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
-	resp, _ := ioutil.ReadAll(res.Body)
-	ja.Assertf(string(resp), `
-    {
-        "client_id":"c001",
-        "client_name":"Test Org",
-        "ips":["ip-1", "ip-2"],
-        "client_token":"client-token",
-        "expires_at":"expiration"
-    }`)
+	return req, ctx
 }
 
-func (suite *SsasControllerTestSuite) TestCreateDuplicateSystem() {
-	//Setup request
-	reqBody := `{
-        "client_name" : "Test Client",
-        "public_key" : "public key",
-        "ips" : ["ip-1","ip-2"]
-    }`
-	req := httptest.NewRequest("Post", "http://localohost/v2/Implementer/123/Org/abc/Systemfoo", strings.NewReader(reqBody))
-	ctx := req.Context()
-	ctx = context.WithValue(ctx, middleware2.ContextKeyImplementer, "123")
-	req = req.WithContext(ctx)
-	ctx = req.Context()
-	ctx = context.WithValue(ctx, middleware2.ContextKeyOrganization, "abc")
-	req = req.WithContext(ctx)
-	w := httptest.NewRecorder()
-
-	//Mock client calls
-	managedOrg := client.ManagedOrg{
-		OrgName:      "Test Org",
-		OrgID:        "abc",
-		Npi:          "npi-1",
-		Status:       "Active",
-		SsasSystemID: "42",
+func findExpectedCall(calls []*mock.Call, methodName string) *mock.Call {
+	for _, c := range calls {
+		if c.Method == methodName {
+			return c
+		}
 	}
-	orgs := make([]client.ManagedOrg, 1)
-	orgs[0] = managedOrg
-	suite.mac.On("GetManagedOrgs", mock.Anything, mock.Anything).Return(orgs, nil)
-
-	//Do request
-	suite.sc.CreateSystem(w, req)
-	res := w.Result()
-
-	assert.Equal(suite.T(), http.StatusConflict, res.StatusCode)
-}
-
-func (suite *SsasControllerTestSuite) TestCreateSystemForInactiveRelation() {
-	//Setup request
-	reqBody := `{
-        "client_name" : "Test Client",
-        "public_key" : "public key",
-        "ips" : ["ip-1","ip-2"]
-    }`
-	req := httptest.NewRequest("Post", "http://localohost/v2/Implementer/123/Org/abc/Systemfoo", strings.NewReader(reqBody))
-	ctx := req.Context()
-	ctx = context.WithValue(ctx, middleware2.ContextKeyImplementer, "123")
-	req = req.WithContext(ctx)
-	ctx = req.Context()
-	ctx = context.WithValue(ctx, middleware2.ContextKeyOrganization, "abc")
-	req = req.WithContext(ctx)
-	w := httptest.NewRecorder()
-
-	//Mock client calls
-	managedOrg := client.ManagedOrg{
-		OrgName:      "Test Org",
-		OrgID:        "abc",
-		Npi:          "npi-1",
-		Status:       "Inactive",
-		SsasSystemID: "",
-	}
-	orgs := make([]client.ManagedOrg, 1)
-	orgs[0] = managedOrg
-	suite.mac.On("GetManagedOrgs", mock.Anything, mock.Anything).Return(orgs, nil)
-
-	//Do request
-	suite.sc.CreateSystem(w, req)
-	res := w.Result()
-	resp, _ := ioutil.ReadAll(res.Body)
-
-	assert.Equal(suite.T(), http.StatusBadRequest, res.StatusCode)
-	assert.Contains(suite.T(), string(resp), "Implementor/Org relation is not active")
+	return nil
 }

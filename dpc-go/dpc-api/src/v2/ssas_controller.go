@@ -179,7 +179,8 @@ func (sc *SSASController) CreateSystem(w http.ResponseWriter, r *http.Request) {
 		SsasSystemID:  ssasResp.SystemID,
 		Status:        "Active",
 	}
-	_, err = sc.attrClient.UpdateImplementerOrg(r.Context(), implementerID, organizationID, uRel)
+	_, err = sc.attrClient.UpdateImplOrg(r.Context(), implementerID, organizationID, uRel)
+	_, err = sc.attrClient.UpdateImplOrg(r.Context(), implementerID, organizationID, uRel)
 	if err != nil {
 		log.Error("Failed to update implementer org relation", zap.Error(err))
 		fhirror.ServerIssue(r.Context(), w, 500, "Failed to create system")
@@ -224,17 +225,17 @@ func (sc *SSASController) createSsasSystem(r *http.Request, implID string, orgID
 	return sc.ssasClient.CreateSystem(r.Context(), req)
 }
 
-func (sc *SSASController) getManagedOrg(r *http.Request, implID string, orgID string) (bool, client.ManagedOrg, error) {
-	orgs, err := sc.attrClient.GetManagedOrgs(r.Context(), implID)
+func (sc *SSASController) getManagedOrg(r *http.Request, implID string, orgID string) (bool, client.ProviderOrg, error) {
+	orgs, err := sc.attrClient.GetProviderOrgs(r.Context(), implID)
 	if err != nil {
-		return false, client.ManagedOrg{}, err
+		return false, client.ProviderOrg{}, err
 	}
 	for _, org := range orgs {
 		if org.OrgID == orgID {
 			return true, org, nil
 		}
 	}
-	return false, client.ManagedOrg{}, errors.New("relation not found")
+	return false, client.ProviderOrg{}, errors.New("relation not found")
 }
 
 func (sc *SSASController) getGroupID(r *http.Request, implID string) (string, error) {
