@@ -45,3 +45,8 @@ type JobController interface {
 type FileController interface {
 	GetFile(w http.ResponseWriter, r *http.Request)
 }
+
+// SsasController is an interface for reading
+type SsasController interface {
+	CreateSystem(w http.ResponseWriter, r *http.Request)
+}
