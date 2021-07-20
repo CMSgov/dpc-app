@@ -1,4 +1,4 @@
-package gov.cms.dpc.bluebuttonv2.client;
+package gov.cms.dpc.bluebutton.clientV2;
 
 import io.dropwizard.lifecycle.Managed;
 

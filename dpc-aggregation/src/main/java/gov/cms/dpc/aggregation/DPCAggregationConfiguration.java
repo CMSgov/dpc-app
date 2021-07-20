@@ -3,9 +3,7 @@ package gov.cms.dpc.aggregation;
 import ca.mestevens.java.configuration.TypesafeConfiguration;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import gov.cms.dpc.bluebutton.config.BBClientConfiguration;
-import gov.cms.dpc.bluebuttonv2.config.BBClientConfigurationV2;
 import gov.cms.dpc.bluebutton.config.BlueButtonBundleConfiguration;
-import gov.cms.dpc.bluebuttonv2.config.BlueButtonBundleConfigurationV2;
 import gov.cms.dpc.common.hibernate.attribution.IDPCDatabase;
 import gov.cms.dpc.common.hibernate.queue.IDPCQueueDatabase;
 import gov.cms.dpc.queue.DPCQueueConfig;
@@ -20,7 +18,7 @@ import java.time.YearMonth;
 import java.time.ZoneId;
 import java.util.List;
 
-public class DPCAggregationConfiguration extends TypesafeConfiguration implements BlueButtonBundleConfiguration, BlueButtonBundleConfigurationV2, IDPCDatabase, IDPCQueueDatabase, DPCQueueConfig {
+public class DPCAggregationConfiguration extends TypesafeConfiguration implements BlueButtonBundleConfiguration, IDPCDatabase, IDPCQueueDatabase, DPCQueueConfig {
 
     @Valid
     @NotNull
@@ -40,7 +38,7 @@ public class DPCAggregationConfiguration extends TypesafeConfiguration implement
     @Valid
     @NotNull
     @JsonProperty("bbclientR4")
-    private final BBClientConfigurationV2 clientConfigurationV2 = new BBClientConfigurationV2();
+    private final BBClientConfiguration clientConfigurationV2 = new BBClientConfiguration();
 
     @Valid
     @NotNull
@@ -111,11 +109,6 @@ public class DPCAggregationConfiguration extends TypesafeConfiguration implement
     @Override
     public BBClientConfiguration getBlueButtonConfiguration() {
         return this.clientConfiguration;
-    }
-
-    @Override
-    public BBClientConfigurationV2 getBlueButtonConfigurationV2() {
-        return this.clientConfigurationV2;
     }
 
     @Override

@@ -10,6 +10,9 @@ import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.bluebutton.client.BlueButtonClientImpl;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
+import gov.cms.dpc.bluebutton.clientV2.BlueButtonClientV2;
+import gov.cms.dpc.bluebutton.clientV2.BlueButtonClientV2Impl;
+import gov.cms.dpc.bluebutton.clientV2.MockBlueButtonClientV2;
 import gov.cms.dpc.bluebutton.config.BBClientConfiguration;
 import gov.cms.dpc.bluebutton.config.BlueButtonBundleConfiguration;
 import gov.cms.dpc.bluebutton.exceptions.BlueButtonClientSetupException;
@@ -72,8 +75,21 @@ public class BlueButtonClientModule<T extends Configuration & BlueButtonBundleCo
     }
 
     @Provides
+    public BlueButtonClientV2 provideBlueButtonClientR4(@Named("bbclientR4") IGenericClient fhirRestClient, MetricRegistry registry) {
+        return bbClientConfiguration.isUseBfdMock() ? new MockBlueButtonClientV2(fhirRestClient.getFhirContext()) : new BlueButtonClientV2Impl(fhirRestClient, this.bbClientConfiguration, registry);
+    }
+
+    @Provides
     @Named("bbclient")
     public IGenericClient provideFhirRestClient(FhirContext fhirContext, HttpClient httpClient) {
+        fhirContext.getRestfulClientFactory().setHttpClient(httpClient);
+
+        return fhirContext.newRestfulGenericClient(this.bbClientConfiguration.getServerBaseUrl());
+    }
+
+    @Provides
+    @Named("bbclientR4")
+    public IGenericClient provideFhirRestClientR4(@Named("fhirContextR4") FhirContext fhirContext, HttpClient httpClient) {
         fhirContext.getRestfulClientFactory().setHttpClient(httpClient);
 
         return fhirContext.newRestfulGenericClient(this.bbClientConfiguration.getServerBaseUrl());

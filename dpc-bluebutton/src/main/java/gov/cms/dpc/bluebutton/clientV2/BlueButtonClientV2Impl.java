@@ -1,4 +1,4 @@
-package gov.cms.dpc.bluebuttonv2.client;
+package gov.cms.dpc.bluebutton.clientV2;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.*;
@@ -8,7 +8,7 @@ import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.inject.name.Named;
-import gov.cms.dpc.bluebuttonv2.config.BBClientConfigurationV2;
+import gov.cms.dpc.bluebutton.config.BBClientConfiguration;
 import gov.cms.dpc.common.Constants;
 import gov.cms.dpc.common.utils.MetricMaker;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
@@ -45,7 +45,7 @@ public class BlueButtonClientV2Impl implements BlueButtonClientV2 {
     private static final Logger logger = LoggerFactory.getLogger(BlueButtonClientV2Impl.class);
 
     private IGenericClient client;
-    private BBClientConfigurationV2 config;
+    private BBClientConfiguration config;
     private Map<String, Timer> timers;
     private Map<String, Meter> exceptionMeters;
     private static final String HASH_ALGORITHM = "PBKDF2WithHmacSHA256";
@@ -56,7 +56,7 @@ public class BlueButtonClientV2Impl implements BlueButtonClientV2 {
         return "Patient/" + fromPatientID;
     }
 
-    public BlueButtonClientV2Impl(@Named("bbclientR4") IGenericClient client, BBClientConfigurationV2 config, MetricRegistry metricRegistry) {
+    public BlueButtonClientV2Impl(@Named("bbclientR4") IGenericClient client, BBClientConfiguration config, MetricRegistry metricRegistry) {
         this.client = client;
         this.config = config;
         final var metricMaker = new MetricMaker(metricRegistry, BlueButtonClientV2Impl.class);

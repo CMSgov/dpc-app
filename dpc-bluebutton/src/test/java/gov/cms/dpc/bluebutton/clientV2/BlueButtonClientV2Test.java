@@ -1,4 +1,4 @@
-package gov.cms.dpc.bluebuttonv2.client;
+package gov.cms.dpc.bluebutton.clientV2;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -9,8 +9,8 @@ import com.google.inject.Stage;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigRenderOptions;
-import gov.cms.dpc.bluebuttonv2.BlueButtonClientModuleV2;
-import gov.cms.dpc.bluebuttonv2.config.BBClientConfigurationV2;
+import gov.cms.dpc.bluebutton.BlueButtonClientModule;
+import gov.cms.dpc.bluebutton.config.BBClientConfiguration;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import org.eclipse.jetty.http.HttpStatus;
@@ -65,7 +65,7 @@ class BlueButtonClientV2Test {
     @BeforeAll
     static void setupBlueButtonClient() throws IOException {
         conf = getTestConfig();
-        final Injector injector = Guice.createInjector(Stage.DEVELOPMENT, new TestModule(), new BlueButtonClientModuleV2<>(getClientConfig()));
+        final Injector injector = Guice.createInjector(Stage.DEVELOPMENT, new TestModule(), new BlueButtonClientModule<>(getClientConfig()));
         bbc = injector.getInstance(BlueButtonClientV2.class);
 
         mockServer = ClientAndServer.startClientAndServer(8083);
@@ -326,11 +326,11 @@ class BlueButtonClientV2Test {
                 );
     }
 
-    private static BBClientConfigurationV2 getClientConfig() {
-        final String options = getTestConfig().getConfig("bbclient").root().render(ConfigRenderOptions.concise());
+    private static BBClientConfiguration getClientConfig() {
+        final String options = getTestConfig().getConfig("bbclientR4").root().render(ConfigRenderOptions.concise());
 
         try {
-            return new ObjectMapper().readValue(options, BBClientConfigurationV2.class);
+            return new ObjectMapper().readValue(options, BBClientConfiguration.class);
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
