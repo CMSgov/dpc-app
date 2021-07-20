@@ -58,7 +58,7 @@ func (is *ImplementerService) Post(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// Get function is not currently used for ImplementerService
+// Get function used to retrieve an implementer by implementerID
 func (is *ImplementerService) Get(w http.ResponseWriter, r *http.Request) {
 	log := logger.WithContext(r.Context())
 	implID, ok := r.Context().Value(middleware.ContextKeyImplementer).(string)

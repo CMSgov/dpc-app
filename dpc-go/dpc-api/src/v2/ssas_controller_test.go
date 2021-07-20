@@ -56,16 +56,16 @@ func (suite *SsasControllerTestSuite) TestCreateSystem() {
 	w := httptest.NewRecorder()
 
 	//Mock client calls
-	managedOrg := client.ManagedOrg{
+	managedOrg := client.ProviderOrg{
 		OrgName:      "Test Org",
 		OrgID:        "abc",
 		Npi:          "npi-1",
 		Status:       "Active",
 		SsasSystemID: "",
 	}
-	orgs := make([]client.ManagedOrg, 1)
+	orgs := make([]client.ProviderOrg, 1)
 	orgs[0] = managedOrg
-	suite.mac.On("GetManagedOrgs", mock.Anything, mock.Anything).Return(orgs, nil)
+	suite.mac.On("GetProviderOrgs", mock.Anything, mock.Anything).Return(orgs, nil)
 	suite.mac.On("Get", mock.Anything, mock.Anything, mock.Anything).Return([]byte(`{"ssas_group_id":"0001"}`), nil)
 
 	ips := make([]string, 2)
@@ -85,7 +85,7 @@ func (suite *SsasControllerTestSuite) TestCreateSystem() {
 		IPs:         ips,
 	}
 	suite.msc.On("CreateSystem", mock.Anything, mock.Anything).Return(ssasResp, nil)
-	suite.mac.On("UpdateImplementerOrg", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(client.ImplementerOrg{}, nil)
+	suite.mac.On("UpdateImplOrg", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(client.ImplementerOrg{}, nil)
 
 	//Do request
 	suite.sc.CreateSystem(w, req)
@@ -120,16 +120,16 @@ func (suite *SsasControllerTestSuite) TestCreateDuplicateSystem() {
 	w := httptest.NewRecorder()
 
 	//Mock client calls
-	managedOrg := client.ManagedOrg{
+	managedOrg := client.ProviderOrg{
 		OrgName:      "Test Org",
 		OrgID:        "abc",
 		Npi:          "npi-1",
 		Status:       "Active",
 		SsasSystemID: "42",
 	}
-	orgs := make([]client.ManagedOrg, 1)
+	orgs := make([]client.ProviderOrg, 1)
 	orgs[0] = managedOrg
-	suite.mac.On("GetManagedOrgs", mock.Anything, mock.Anything).Return(orgs, nil)
+	suite.mac.On("GetProviderOrgs", mock.Anything, mock.Anything).Return(orgs, nil)
 
 	//Do request
 	suite.sc.CreateSystem(w, req)
@@ -155,16 +155,16 @@ func (suite *SsasControllerTestSuite) TestCreateSystemForInactiveRelation() {
 	w := httptest.NewRecorder()
 
 	//Mock client calls
-	managedOrg := client.ManagedOrg{
+	managedOrg := client.ProviderOrg{
 		OrgName:      "Test Org",
 		OrgID:        "abc",
 		Npi:          "npi-1",
 		Status:       "Inactive",
 		SsasSystemID: "",
 	}
-	orgs := make([]client.ManagedOrg, 1)
+	orgs := make([]client.ProviderOrg, 1)
 	orgs[0] = managedOrg
-	suite.mac.On("GetManagedOrgs", mock.Anything, mock.Anything).Return(orgs, nil)
+	suite.mac.On("GetProviderOrgs", mock.Anything, mock.Anything).Return(orgs, nil)
 
 	//Do request
 	suite.sc.CreateSystem(w, req)

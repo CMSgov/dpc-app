@@ -43,8 +43,8 @@ type ImplementerOrg struct {
 	Npi           string `json:"npi" faker:"-"`
 }
 
-// ManagedOrg struct representing an org managed by an implementer
-type ManagedOrg struct {
+// ProviderOrg struct representing an org managed by an implementer
+type ProviderOrg struct {
 	OrgName      string `json:"org_name" faker:"word"`
 	OrgID        string `json:"org_id" faker:"uuid_hyphenated"`
 	Npi          string `json:"npi" faker:"-"`
@@ -59,8 +59,8 @@ type Client interface {
 	Delete(ctx context.Context, resourceType ResourceType, id string) error
 	Put(ctx context.Context, resourceType ResourceType, id string, body []byte) ([]byte, error)
 	Export(ctx context.Context, resourceType ResourceType, id string) ([]byte, error)
-	UpdateImplementerOrg(ctx context.Context, implID string, orgID string, rel ImplementerOrg) (ImplementerOrg, error)
-	GetManagedOrgs(ctx context.Context, implID string) ([]ManagedOrg, error)
+	UpdateImplOrg(ctx context.Context, implID string, orgID string, rel ImplementerOrg) (ImplementerOrg, error)
+	GetProviderOrgs(ctx context.Context, implID string) ([]ProviderOrg, error)
 	CreateImplOrg(ctx context.Context, body []byte) (ImplementerOrg, error)
 	GetImplOrg(ctx context.Context) ([]byte, error)
 }
@@ -384,44 +384,44 @@ func (ac *AttributionClient) Put(ctx context.Context, resourceType ResourceType,
 	return ac.doPut(ctx, url, body)
 }
 
-// UpdateImplementerOrg function to update a specific implementer/org relation
-func (ac *AttributionClient) UpdateImplementerOrg(ctx context.Context, implID string, orgID string, rel ImplementerOrg) (ImplementerOrg, error) {
+// UpdateImplOrg function to update a specific implementer/org relation
+func (ac *AttributionClient) UpdateImplOrg(ctx context.Context, implID string, orgID string, rel ImplementerOrg) (ImplementerOrg, error) {
 	log := logger.WithContext(ctx)
 	reqBytes := new(bytes.Buffer)
 	if err := json.NewEncoder(reqBytes).Encode(rel); err != nil {
-		log.Error("Failed to convert model to bytes", zap.Error(err))
+		log.Error(fmt.Sprintf("Failed to convert model to bytes, ImplID: %s OrgID: %s", implID, orgID), zap.Error(err))
 		return ImplementerOrg{}, errors.Errorf("Failed to update implementerOrg relation")
 	}
 	url := fmt.Sprintf("%s/Implementer/%s/org/%s", ac.config.URL, implID, orgID)
 
 	resBytes, err := ac.doPut(ctx, url, reqBytes.Bytes())
 	if err != nil {
-		log.Error("Update ImplementerOrg request failed", zap.Error(err))
+		log.Error(fmt.Sprintf("Update ImplementerOrg request failed, ImplID: %s OrgID: %s", implID, orgID), zap.Error(err))
 		return ImplementerOrg{}, errors.Errorf("Failed to update implementerOrg relation")
 	}
 	resp := ImplementerOrg{}
 	if err := json.NewDecoder(bytes.NewReader(resBytes)).Decode(&resp); err != nil {
-		log.Error("Failed to convert bytes to ImplementerOrg model", zap.Error(err))
+		log.Error(fmt.Sprintf("Failed to convert bytes to ImplementerOrg model during update, ImplID: %s OrgID: %s", implID, orgID), zap.Error(err))
 		return ImplementerOrg{}, errors.Errorf("Failed to update implementerOrg relation")
 	}
 	return resp, nil
 }
 
-// GetManagedOrgs function to retrieve lists or orgs managed by an implementer
-func (ac *AttributionClient) GetManagedOrgs(ctx context.Context, implID string) ([]ManagedOrg, error) {
+// GetProviderOrgs function to retrieve lists or orgs managed by an implementer
+func (ac *AttributionClient) GetProviderOrgs(ctx context.Context, implID string) ([]ProviderOrg, error) {
 	log := logger.WithContext(ctx)
 
 	url := fmt.Sprintf("%s/Implementer/%s/org", ac.config.URL, implID)
 
 	resBytes, err := ac.doGet(ctx, url)
 	if err != nil {
-		log.Error("Get implementerOrg relation failed", zap.Error(err))
-		return []ManagedOrg{}, errors.Errorf("Failed to update implementerOrg relation")
+		log.Error(fmt.Sprintf("Get implementerOrg relation failed, ImplID: %s", implID), zap.Error(err))
+		return []ProviderOrg{}, errors.Errorf("Failed to update implementerOrg relation")
 	}
-	resp := []ManagedOrg{}
+	resp := []ProviderOrg{}
 	if err := json.NewDecoder(bytes.NewReader(resBytes)).Decode(&resp); err != nil {
-		log.Error("Failed to convert bytes to ImplementerOrg model", zap.Error(err))
-		return []ManagedOrg{}, errors.Errorf("Failed to get implementerOrg relation")
+		log.Error(fmt.Sprintf("Failed to convert bytes to ImplementerOrg model, ImplID: %s", implID), zap.Error(err))
+		return []ProviderOrg{}, errors.Errorf("Failed to get implementerOrg relation")
 	}
 	return resp, nil
 }
