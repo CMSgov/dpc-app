@@ -54,6 +54,7 @@ func NewSsasHTTPClient(config SsasHTTPClientConfig) SsasClient {
 	}
 }
 
+// DeletePublicKey function to delete a public key from ssas system
 func (sc *SsasHTTPClient) DeletePublicKey(ctx context.Context, systemID string, keyID string) error {
 	log := logger.WithContext(ctx)
 
@@ -72,6 +73,7 @@ func (sc *SsasHTTPClient) DeletePublicKey(ctx context.Context, systemID string, 
 	return nil
 }
 
+// AddPublicKey function to add a public key to ssas system
 func (sc *SsasHTTPClient) AddPublicKey(ctx context.Context, systemID string, request model.ProxyPublicKeyRequest) (map[string]string, error) {
 	log := logger.WithContext(ctx)
 	reqBytes := new(bytes.Buffer)

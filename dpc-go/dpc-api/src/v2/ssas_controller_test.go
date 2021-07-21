@@ -38,7 +38,7 @@ func TestSsasControllerTestSuite(t *testing.T) {
 
 func (suite *SsasControllerTestSuite) TestCreateSystem() {
 
-	req, _ := suite.SetupHappyPathMocks()
+	req, _ := suite.SetupHappyPathMocks(false)
 
 	//Do request
 	w := httptest.NewRecorder()
@@ -59,7 +59,7 @@ func (suite *SsasControllerTestSuite) TestCreateSystem() {
 }
 
 func (suite *SsasControllerTestSuite) TestCreateDuplicateSystem() {
-	req, _ := suite.SetupHappyPathMocks()
+	req, _ := suite.SetupHappyPathMocks(false)
 
 	//Mock client calls
 	managedOrg := client.ProviderOrg{
@@ -83,7 +83,7 @@ func (suite *SsasControllerTestSuite) TestCreateDuplicateSystem() {
 
 func (suite *SsasControllerTestSuite) TestCreateSystemForInactiveRelation() {
 
-	req, _ := suite.SetupHappyPathMocks()
+	req, _ := suite.SetupHappyPathMocks(false)
 
 	//Mock client calls
 	managedOrg := client.ProviderOrg{
@@ -107,7 +107,59 @@ func (suite *SsasControllerTestSuite) TestCreateSystemForInactiveRelation() {
 	assert.Contains(suite.T(), string(resp), "Implementor/Org relation is not active")
 }
 
-func (suite *SsasControllerTestSuite) SetupHappyPathMocks() (*http.Request, context.Context) {
+func (suite *SsasControllerTestSuite) TestAddKey() {
+	req, _ := suite.SetupHappyPathMocks(true)
+
+	//Do request
+	w := httptest.NewRecorder()
+	suite.sc.AddKey(w, req)
+	res := w.Result()
+
+	ja := jsonassert.New(suite.T())
+	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
+	resp, _ := ioutil.ReadAll(res.Body)
+	ja.Assertf(string(resp), `
+    {
+        "client_id":"c001",
+        "public_key":"public-key",
+        "id":"public-key001"
+    }`)
+}
+
+func (suite *SsasControllerTestSuite) TestAddKeySystemIDNotLinked() {
+	req, _ := suite.SetupHappyPathMocks(false)
+
+	//Do request
+	w := httptest.NewRecorder()
+	suite.sc.AddKey(w, req)
+	res := w.Result()
+
+	assert.Equal(suite.T(), http.StatusBadRequest, res.StatusCode)
+}
+
+func (suite *SsasControllerTestSuite) TestDeleteKey() {
+	req, _ := suite.SetupHappyPathMocks(true)
+
+	//Do request
+	w := httptest.NewRecorder()
+	suite.sc.DeleteKey(w, req)
+	res := w.Result()
+
+	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
+}
+
+func (suite *SsasControllerTestSuite) TestDeleteKeySystemIDNotLinked() {
+	req, _ := suite.SetupHappyPathMocks(false)
+
+	//Do request
+	w := httptest.NewRecorder()
+	suite.sc.DeleteKey(w, req)
+	res := w.Result()
+
+	assert.Equal(suite.T(), http.StatusBadRequest, res.StatusCode)
+}
+
+func (suite *SsasControllerTestSuite) SetupHappyPathMocks(withSystemID bool) (*http.Request, context.Context) {
 	//Setup request
 	reqBody := `{
         "client_name" : "Test Client",
@@ -121,6 +173,9 @@ func (suite *SsasControllerTestSuite) SetupHappyPathMocks() (*http.Request, cont
 	ctx = req.Context()
 	ctx = context.WithValue(ctx, middleware2.ContextKeyOrganization, "abc")
 	req = req.WithContext(ctx)
+	ctx = req.Context()
+	ctx = context.WithValue(ctx, middleware2.ContextKeyKeyID, "321")
+	req = req.WithContext(ctx)
 
 	//Mock client calls
 	managedOrg := client.ProviderOrg{
@@ -129,6 +184,9 @@ func (suite *SsasControllerTestSuite) SetupHappyPathMocks() (*http.Request, cont
 		Npi:          "npi-1",
 		Status:       "Active",
 		SsasSystemID: "",
+	}
+	if withSystemID {
+		managedOrg.SsasSystemID = "sys-id-1"
 	}
 	orgs := make([]client.ProviderOrg, 1)
 	orgs[0] = managedOrg
@@ -151,8 +209,16 @@ func (suite *SsasControllerTestSuite) SetupHappyPathMocks() (*http.Request, cont
 		XData:       "xdata",
 		IPs:         ips,
 	}
+
+	ssasKeyResp := make(map[string]string)
+	ssasKeyResp["client_id"] = "c001"
+	ssasKeyResp["public_key"] = "public-key"
+	ssasKeyResp["id"] = "public-key001"
+
 	suite.msc.On("CreateSystem", mock.Anything, mock.Anything).Return(ssasResp, nil)
 	suite.mac.On("UpdateImplOrg", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(client.ImplementerOrg{}, nil)
+	suite.msc.On("AddPublicKey", mock.Anything, mock.Anything, mock.Anything).Return(ssasKeyResp, nil)
+	suite.msc.On("DeletePublicKey", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 
 	return req, ctx
 }

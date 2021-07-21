@@ -10,7 +10,6 @@ import (
 	"github.com/CMSgov/dpc/api/middleware"
 	"github.com/CMSgov/dpc/api/model"
 	"github.com/darahayes/go-boom"
-	"github.com/go-chi/chi"
 	"go.uber.org/zap"
 	"net/http"
 
@@ -30,11 +29,12 @@ func NewSSASController(ssasClient client.SsasClient, attrClient client.Client) *
 	}
 }
 
+// DeleteKey function to delete a public key from ssas system
 func (sc *SSASController) DeleteKey(w http.ResponseWriter, r *http.Request) {
 	log := logger.WithContext(r.Context())
 	implementorID, _ := r.Context().Value(middleware.ContextKeyImplementer).(string)
 	organizationID, _ := r.Context().Value(middleware.ContextKeyOrganization).(string)
-	keyID := chi.URLParam(r, "keyID")
+	keyID, _ := r.Context().Value(middleware.ContextKeyKeyID).(string)
 
 	if implementorID == "" || organizationID == "" || keyID == "" {
 		log.Error(fmt.Sprintf("Failed to extract one or more path parameters. ImplID: %s, OrgID: %s, KeyID: %s ", implementorID, organizationID, keyID))
@@ -71,6 +71,7 @@ func (sc *SSASController) DeleteKey(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
+// AddKey function to add a public key to ssas system
 func (sc *SSASController) AddKey(w http.ResponseWriter, r *http.Request) {
 	log := logger.WithContext(r.Context())
 	implementorID, _ := r.Context().Value(middleware.ContextKeyImplementer).(string)
