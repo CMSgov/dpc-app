@@ -63,8 +63,8 @@ func (sc *SSASController) DeleteKey(w http.ResponseWriter, r *http.Request) {
 
 	err = sc.ssasClient.DeletePublicKey(r.Context(), mOrg.SsasSystemID, keyID)
 	if err != nil {
-		log.Error("Failed to add key", zap.Error(err))
-		fhirror.ServerIssue(r.Context(), w, 500, "Failed to add key")
+		log.Error("Failed to delete key", zap.Error(err))
+		fhirror.ServerIssue(r.Context(), w, 500, "Failed to delete key")
 		return
 	}
 

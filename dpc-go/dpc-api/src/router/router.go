@@ -64,8 +64,8 @@ func NewDPCAPIRouter(rc Controllers) http.Handler {
 					r.Get("/", rc.ImplOrg.Read)
 					r.Post("/", rc.ImplOrg.Create)
 					r.Route("/{organizationID}", func(r chi.Router) {
-						r.With(middleware2.ImplementerCtx, middleware2.OrganizationCtx).Post("/key", rc.Ssas.AddKey)
-						r.With(middleware2.ImplementerCtx, middleware2.OrganizationCtx, middleware2.PublicKeyCtx).Post("/key/{keyID}", rc.Ssas.DeleteKey)
+						r.With(middleware2.OrganizationCtx).Post("/key", rc.Ssas.AddKey)
+						r.With(middleware2.OrganizationCtx, middleware2.PublicKeyCtx).Post("/key/{keyID}", rc.Ssas.DeleteKey)
 					})
 				})
 			})

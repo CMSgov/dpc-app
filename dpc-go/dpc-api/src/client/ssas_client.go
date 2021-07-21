@@ -62,13 +62,13 @@ func (sc *SsasHTTPClient) DeletePublicKey(ctx context.Context, systemID string, 
 
 	resBytes, err := sc.doDelete(ctx, url)
 	if err != nil {
-		log.Error("Create ssas system request failed", zap.Error(err))
-		return errors.Errorf("Failed to create ssas system")
+		log.Error("Delete public key failed", zap.Error(err))
+		return err
 	}
 	var resp map[string]string
 	if err := json.NewDecoder(bytes.NewReader(resBytes)).Decode(&resp); err != nil {
-		log.Error("Failed to convert ssas response bytes to CreateGroupResponse model", zap.Error(err))
-		return errors.Errorf("Failed to create ssas system")
+		log.Error("Failed to convert ssas response bytes to map model", zap.Error(err))
+		return err
 	}
 	return nil
 }
@@ -79,19 +79,19 @@ func (sc *SsasHTTPClient) AddPublicKey(ctx context.Context, systemID string, req
 	reqBytes := new(bytes.Buffer)
 	if err := json.NewEncoder(reqBytes).Encode(request); err != nil {
 		log.Error("Failed to convert model to bytes", zap.Error(err))
-		return nil, errors.Errorf("Failed to create ssas system")
+		return nil, err
 	}
 	url := fmt.Sprintf("%s/%s/%s/%s", sc.config.URL, PostV2SystemEndpoint, systemID, V2KeyEndpoint)
 
 	resBytes, err := sc.doPost(ctx, url, reqBytes.Bytes())
 	if err != nil {
-		log.Error("Create ssas system request failed", zap.Error(err))
-		return nil, errors.Errorf("Failed to create ssas system")
+		log.Error("Add public key failed", zap.Error(err))
+		return nil, err
 	}
 	var resp map[string]string
 	if err := json.NewDecoder(bytes.NewReader(resBytes)).Decode(&resp); err != nil {
-		log.Error("Failed to convert ssas response bytes to CreateGroupResponse model", zap.Error(err))
-		return nil, errors.Errorf("Failed to create ssas system")
+		log.Error("Failed to convert ssas response bytes to map model", zap.Error(err))
+		return nil, err
 	}
 	return resp, nil
 }

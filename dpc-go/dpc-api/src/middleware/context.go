@@ -168,8 +168,8 @@ func JobCtx(next http.Handler) http.Handler {
 // PublicKeyCtx middleware to extract the keyID from the chi url param and set it into the request context
 func PublicKeyCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		jobID := chi.URLParam(r, "keyID")
-		ctx := context.WithValue(r.Context(), ContextKeyKeyID, jobID)
+		keyID := chi.URLParam(r, "keyID")
+		ctx := context.WithValue(r.Context(), ContextKeyKeyID, keyID)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
