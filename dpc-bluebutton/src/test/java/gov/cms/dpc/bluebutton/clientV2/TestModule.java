@@ -24,10 +24,10 @@ public class TestModule extends AbstractModule {
         return ConfigFactory.load("test.application.conf").getConfig("dpc.aggregation");
     }
 
-    @Provides
-    @Named("fhirContextR4")
-    @Singleton
-    FhirContext provideFhirContextR4() {
-        return FhirContext.forR4();
-    }
+//    @Provides
+//    @Named("fhirContextR4")
+//    @Singleton
+//    FhirContext provideFhirContextR4() {
+//        return FhirContext.forR4();
+//    }
 }

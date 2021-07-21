@@ -5,6 +5,7 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Binder;
 import com.google.inject.Provides;
+import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
@@ -93,6 +94,13 @@ public class BlueButtonClientModule<T extends Configuration & BlueButtonBundleCo
         fhirContext.getRestfulClientFactory().setHttpClient(httpClient);
 
         return fhirContext.newRestfulGenericClient(this.bbClientConfiguration.getServerBaseUrl());
+    }
+
+    @Provides
+    @Singleton
+    @Named("fhirContextR4")
+    public FhirContext provideR4Context() {
+        return FhirContext.forR4();
     }
 
     @Provides
