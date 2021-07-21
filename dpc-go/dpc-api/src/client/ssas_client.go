@@ -60,12 +60,12 @@ func (sc *SsasHTTPClient) GetSystem(ctx context.Context, systemID string) (GetSy
 	resBytes, err := sc.doGet(ctx, url)
 	if err != nil {
 		log.Error("Get ssas system request failed", zap.Error(err))
-		return GetSystemResponse{}, errors.Errorf("Failed to get ssas system")
+		return GetSystemResponse{}, err
 	}
 	resp := GetSystemResponse{}
 	if err := json.NewDecoder(bytes.NewReader(resBytes)).Decode(&resp); err != nil {
-		log.Error("Failed to convert ssas response bytes to CreateSystemResponse model", zap.Error(err))
-		return GetSystemResponse{}, errors.Errorf("Failed to get ssas system")
+		log.Error("Failed to convert ssas response bytes to GetSystemResponse model", zap.Error(err))
+		return GetSystemResponse{}, err
 	}
 	return resp, nil
 }
