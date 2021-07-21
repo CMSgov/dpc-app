@@ -116,27 +116,11 @@
         <!--        Validations use the R4 validator, even for STU3 resources-->
         <dependency>
             <groupId>${hapi.fhir.groupID}</groupId>
-            <artifactId>hapi-fhir-structures-dstu3</artifactId>
-            <version>${hapi.fhir.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${hapi.fhir.groupID}</groupId>
             <artifactId>hapi-fhir-structures-r4</artifactId>
-            <version>${hapi.fhir.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${hapi.fhir.groupID}</groupId>
-            <artifactId>hapi-fhir-validation</artifactId>
-            <version>${hapi.fhir.version}</version>
         </dependency>
         <dependency>
             <groupId>${hapi.fhir.groupID}</groupId>
             <artifactId>hapi-fhir-validation-resources-dstu3</artifactId>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>${hapi.fhir.groupID}</groupId>
-            <artifactId>hapi-fhir-validation-resources-r4</artifactId>
             <scope>compile</scope>
         </dependency>
         <dependency>
@@ -169,7 +153,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-		</dependency>
+        </dependency>
         <dependency>
             <groupId>com.newrelic.agent.java</groupId>
             <artifactId>newrelic-java</artifactId>

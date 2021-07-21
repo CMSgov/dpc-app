@@ -32,10 +32,6 @@
             <artifactId>hapi-fhir-structures-dstu3</artifactId>
         </dependency>
         <dependency>
-            <groupId>${hapi.fhir.groupID}</groupId>
-            <artifactId>hapi-fhir-structures-r4</artifactId>
-        </dependency>
-        <dependency>
             <groupId>javax.ws.rs</groupId>
             <artifactId>javax.ws.rs-api</artifactId>
         </dependency>
@@ -84,12 +80,12 @@
         <!--        Validations use the R4 validator, even for STU3 resources-->
         <dependency>
             <groupId>${hapi.fhir.groupID}</groupId>
-            <artifactId>hapi-fhir-validation-resources-dstu3</artifactId>
+            <artifactId>hapi-fhir-structures-r4</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>${hapi.fhir.groupID}</groupId>
-            <artifactId>hapi-fhir-validation-resources-r4</artifactId>
+            <artifactId>hapi-fhir-validation-resources-dstu3</artifactId>
             <scope>provided</scope>
         </dependency>
         <!--        We need the HTTP Client for the helper class, but it can be provided-->

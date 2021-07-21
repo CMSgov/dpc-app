@@ -76,14 +76,14 @@
             <groupId>${hapi.fhir.groupID}</groupId>
             <artifactId>hapi-fhir-client</artifactId>
         </dependency>
-        <dependency>
-            <groupId>${hapi.fhir.groupID}</groupId>
-            <artifactId>hapi-fhir-structures-dstu3</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>${hapi.fhir.groupID}</groupId>
-            <artifactId>hapi-fhir-structures-r4</artifactId>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>${hapi.fhir.groupID}</groupId>-->
+<!--            <artifactId>hapi-fhir-structures-dstu3</artifactId>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>${hapi.fhir.groupID}</groupId>-->
+<!--            <artifactId>hapi-fhir-structures-r4</artifactId>-->
+<!--        </dependency>-->
         <!--Testing dependencies-->
         <dependency>
             <groupId>io.dropwizard</groupId>
