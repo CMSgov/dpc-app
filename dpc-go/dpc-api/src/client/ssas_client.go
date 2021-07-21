@@ -24,8 +24,8 @@ type SsasHttpClientConfig struct {
 
 // Contains the different ResourceType for calls to attribution
 const (
-	PostV2SystemEndpoint string = "v2/system"
-	PostV2GroupEndpoint  string = "v2/group"
+	PostV2SystemEndpoint    string = "v2/system"
+	PostV2GroupEndpoint     string = "v2/group"
 	PostV2AuthenticateToken string = "v2/Token"
 )
 

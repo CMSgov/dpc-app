@@ -110,6 +110,7 @@ func (ic *ImplementerController) Update(w http.ResponseWriter, r *http.Request) 
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
+// ImplementerResource struct that models an attribution implementer
 type ImplementerResource struct {
 	ID          string `json:"id" faker:"uuid_hyphenated"`
 	Name        string `json:"name" faker:"word"`

@@ -389,19 +389,19 @@ func (ac *AttributionClient) UpdateImplementerOrg(ctx context.Context, implID st
 	log := logger.WithContext(ctx)
 	reqBytes := new(bytes.Buffer)
 	if err := json.NewEncoder(reqBytes).Encode(rel); err != nil {
-		log.Error("Failed to convert model to bytes", zap.Error(err))
+		log.Error(fmt.Sprintf("Failed to convert model to bytes, ImplID: %s OrgID: %s", implID, orgID), zap.Error(err))
 		return ImplementerOrg{}, errors.Errorf("Failed to update implementerOrg relation")
 	}
 	url := fmt.Sprintf("%s/Implementer/%s/org/%s", ac.config.URL, implID, orgID)
 
 	resBytes, err := ac.doPut(ctx, url, reqBytes.Bytes())
 	if err != nil {
-		log.Error("Update ImplementerOrg request failed", zap.Error(err))
+		log.Error(fmt.Sprintf("Update ImplementerOrg request failed, ImplID: %s OrgID: %s", implID, orgID), zap.Error(err))
 		return ImplementerOrg{}, errors.Errorf("Failed to update implementerOrg relation")
 	}
 	resp := ImplementerOrg{}
 	if err := json.NewDecoder(bytes.NewReader(resBytes)).Decode(&resp); err != nil {
-		log.Error("Failed to convert bytes to ImplementerOrg model", zap.Error(err))
+		log.Error(fmt.Sprintf("Failed to convert bytes to ImplementerOrg model during update, ImplID: %s OrgID: %s", implID, orgID), zap.Error(err))
 		return ImplementerOrg{}, errors.Errorf("Failed to update implementerOrg relation")
 	}
 	return resp, nil
@@ -415,12 +415,12 @@ func (ac *AttributionClient) GetManagedOrgs(ctx context.Context, implID string) 
 
 	resBytes, err := ac.doGet(ctx, url)
 	if err != nil {
-		log.Error("Get implementerOrg relation failed", zap.Error(err))
+		log.Error(fmt.Sprintf("Get implementerOrg relation failed, ImplID: %s", implID), zap.Error(err))
 		return []ManagedOrg{}, errors.Errorf("Failed to update implementerOrg relation")
 	}
 	resp := []ManagedOrg{}
 	if err := json.NewDecoder(bytes.NewReader(resBytes)).Decode(&resp); err != nil {
-		log.Error("Failed to convert bytes to ImplementerOrg model", zap.Error(err))
+		log.Error(fmt.Sprintf("Failed to convert bytes to ImplementerOrg model, ImplID: %s", implID), zap.Error(err))
 		return []ManagedOrg{}, errors.Errorf("Failed to get implementerOrg relation")
 	}
 	return resp, nil
