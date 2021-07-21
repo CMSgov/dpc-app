@@ -77,6 +77,7 @@ public class AbstractSecureApplicationTest {
     @BeforeAll
     public static void setup() throws Exception {
         APITestHelpers.setupApplication(APPLICATION);
+        // Context needed to build attribution client
         ctx = FhirContext.forDstu3();
         // Register a test organization for us
         // First, create a Golden macaroon for admin uses
@@ -92,7 +93,8 @@ public class AbstractSecureApplicationTest {
 
     @BeforeEach
     public void eachSetup() throws IOException {
-
+        // Need to reset context to STU3 each time
+        ctx = FhirContext.forDstu3();
         // Check health
         APITestHelpers.checkHealth(APPLICATION);
     }
