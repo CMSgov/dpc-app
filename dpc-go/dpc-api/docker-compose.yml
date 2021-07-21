@@ -3,6 +3,7 @@ version: "3"
 services:
   api:
     build:
+      image: ${ECR_HOST:-755619740999.dkr.ecr.us-east-1.amazonaws.com/dpc-api-go}:latest
       context: .
       dockerfile: docker/Dockerfiles/Dockerfile.api
     ports:

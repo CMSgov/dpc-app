@@ -12,6 +12,7 @@ services:
       - ./dpc-go/dpc-attribution/migrator/migrations:/migrations
   attribution2:
     build:
+      image: ${ECR_HOST:-755619740999.dkr.ecr.us-east-1.amazonaws.com/dpc-attribution-go}:latest
       context: dpc-go/dpc-attribution
       dockerfile: docker/Dockerfiles/Dockerfile.attribution
     depends_on:
