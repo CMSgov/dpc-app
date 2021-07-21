@@ -32,6 +32,7 @@ const (
 type SsasClient interface {
 	CreateSystem(ctx context.Context, request CreateSystemRequest) (CreateSystemResponse, error)
 	CreateGroup(ctx context.Context, request CreateGroupRequest) (CreateGroupResponse, error)
+	GetSystem(ctx context.Context, systemID string) (GetSystemResponse, error)
 }
 
 // SsasHTTPClient is a struct to hold the retryable http client and configs
@@ -48,6 +49,25 @@ func NewSsasHTTPClient(config SsasHTTPClientConfig) SsasClient {
 		config:     config,
 		httpClient: client,
 	}
+}
+
+// GetSystem function to get a ssas system
+func (sc *SsasHTTPClient) GetSystem(ctx context.Context, systemID string) (GetSystemResponse, error) {
+	log := logger.WithContext(ctx)
+
+	url := fmt.Sprintf("%s/%s/%s", sc.config.URL, PostV2SystemEndpoint, systemID)
+
+	resBytes, err := sc.doGet(ctx, url)
+	if err != nil {
+		log.Error("Get ssas system request failed", zap.Error(err))
+		return GetSystemResponse{}, errors.Errorf("Failed to get ssas system")
+	}
+	resp := GetSystemResponse{}
+	if err := json.NewDecoder(bytes.NewReader(resBytes)).Decode(&resp); err != nil {
+		log.Error("Failed to convert ssas response bytes to CreateSystemResponse model", zap.Error(err))
+		return GetSystemResponse{}, errors.Errorf("Failed to get ssas system")
+	}
+	return resp, nil
 }
 
 // CreateSystem function to create a new ssas system
@@ -133,6 +153,43 @@ func (sc *SsasHTTPClient) doPost(ctx context.Context, url string, reqBytes []byt
 	return b, nil
 }
 
+func (sc *SsasHTTPClient) doGet(ctx context.Context, url string) ([]byte, error) {
+	log := logger.WithContext(ctx)
+	sc.httpClient.Logger = newLogger(*log)
+
+	req, err := retryablehttp.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		log.Error("Failed to create request", zap.Error(err))
+		return nil, err
+	}
+	req.SetBasicAuth(sc.config.ClientID, sc.config.ClientSecret)
+	resp, err := sc.httpClient.Do(req)
+	if err != nil {
+		log.Error("Failed to send request", zap.Error(err))
+		return nil, err
+	}
+
+	if resp.StatusCode < 200 || resp.StatusCode > 299 {
+		b, _ := ioutil.ReadAll(resp.Body)
+		body := string(b[:])
+		return nil, errors.Errorf(body)
+	}
+
+	defer func() {
+		err := resp.Body.Close()
+		if err != nil {
+			log.Error("Failed to close response body", zap.Error(err))
+		}
+	}()
+
+	b, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Error("Failed to read the response body", zap.Error(err))
+		return nil, err
+	}
+	return b, nil
+}
+
 // CreateGroupRequest struct to model a ssas request to create a group
 type CreateGroupRequest struct {
 	Name    string `json:"name"`
@@ -169,4 +226,19 @@ type CreateSystemResponse struct {
 	ClientToken string   `json:"client_token"`
 	ExpiresAt   string   `json:"expires_at"`
 	XData       string   `json:"xdata,omitempty"`
+}
+
+// GetSystemResponse struct to model a ssas response to get a system
+type GetSystemResponse struct {
+	GID          string              `json:"g_id"`
+	GroupID      string              `json:"group_id"`
+	ClientID     string              `json:"client_id"`
+	SoftwareID   string              `json:"software_id"`
+	ClientName   string              `json:"client_name"`
+	APIScope     string              `json:"api_scope"`
+	XData        string              `json:"x_data"`
+	LastTokenAt  string              `json:"last_token_at"`
+	PublicKeys   []map[string]string `json:"public_keys"`
+	IPs          []map[string]string `json:"ips"`
+	ClientTokens []map[string]string `json:"client_tokens"`
 }
