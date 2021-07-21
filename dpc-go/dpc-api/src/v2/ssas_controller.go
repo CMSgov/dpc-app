@@ -225,6 +225,7 @@ type ProxyCreateSystemResponse struct {
 	ExpiresAt   string   `json:"expires_at"`
 }
 
+// ProxyGetSystemResponse struct that models a proxy response to get a system
 type ProxyGetSystemResponse struct {
 	ClientID     string              `json:"client_id"`
 	ClientName   string              `json:"client_name"`
