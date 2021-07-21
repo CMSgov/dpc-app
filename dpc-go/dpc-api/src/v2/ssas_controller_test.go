@@ -38,7 +38,7 @@ func TestSsasControllerTestSuite(t *testing.T) {
 
 func (suite *SsasControllerTestSuite) TestCreateSystem() {
 
-	req, _ := suite.SetupHappyPathMocks(false)
+	req, _ := suite.SetupHappyPathMocks()
 
 	//Do request
 	w := httptest.NewRecorder()
@@ -59,7 +59,7 @@ func (suite *SsasControllerTestSuite) TestCreateSystem() {
 }
 
 func (suite *SsasControllerTestSuite) TestCreateDuplicateSystem() {
-	req, _ := suite.SetupHappyPathMocks(false)
+	req, _ := suite.SetupHappyPathMocks()
 
 	//Mock client calls
 	managedOrg := client.ProviderOrg{
@@ -83,7 +83,7 @@ func (suite *SsasControllerTestSuite) TestCreateDuplicateSystem() {
 
 func (suite *SsasControllerTestSuite) TestCreateSystemForInactiveRelation() {
 
-	req, _ := suite.SetupHappyPathMocks(false)
+	req, _ := suite.SetupHappyPathMocks()
 
 	//Mock client calls
 	managedOrg := client.ProviderOrg{
@@ -109,7 +109,19 @@ func (suite *SsasControllerTestSuite) TestCreateSystemForInactiveRelation() {
 
 func (suite *SsasControllerTestSuite) TestGetSystem() {
 
-	req, _ := suite.SetupHappyPathMocks(true)
+	req, _ := suite.SetupHappyPathMocks()
+
+	//Mock client calls
+	managedOrg := client.ProviderOrg{
+		OrgName:      "Test Org",
+		OrgID:        "abc",
+		Npi:          "npi-1",
+		Status:       "Active",
+		SsasSystemID: "system-id-1",
+	}
+	orgs := make([]client.ProviderOrg, 1)
+	orgs[0] = managedOrg
+	findExpectedCall(suite.mac.ExpectedCalls, "GetProviderOrgs").Return(orgs, nil)
 
 	//Do request
 	w := httptest.NewRecorder()
@@ -150,7 +162,7 @@ func (suite *SsasControllerTestSuite) TestGetSystem() {
 }
 
 func (suite *SsasControllerTestSuite) TestGetWhenSystemIDNotLinked() {
-	req, _ := suite.SetupHappyPathMocks(false)
+	req, _ := suite.SetupHappyPathMocks()
 
 	//Do request
 	w := httptest.NewRecorder()
@@ -160,7 +172,7 @@ func (suite *SsasControllerTestSuite) TestGetWhenSystemIDNotLinked() {
 	assert.Equal(suite.T(), http.StatusBadRequest, res.StatusCode)
 }
 
-func (suite *SsasControllerTestSuite) SetupHappyPathMocks(withSystemID bool) (*http.Request, context.Context) {
+func (suite *SsasControllerTestSuite) SetupHappyPathMocks() (*http.Request, context.Context) {
 	//Setup request
 	reqBody := `{
         "client_name" : "Test Client",
@@ -183,9 +195,7 @@ func (suite *SsasControllerTestSuite) SetupHappyPathMocks(withSystemID bool) (*h
 		Status:       "Active",
 		SsasSystemID: "",
 	}
-	if withSystemID {
-		managedOrg.SsasSystemID = "sys-id-1"
-	}
+
 	orgs := make([]client.ProviderOrg, 1)
 	orgs[0] = managedOrg
 	suite.mac.On("GetProviderOrgs", mock.Anything, mock.Anything).Return(orgs, nil)
