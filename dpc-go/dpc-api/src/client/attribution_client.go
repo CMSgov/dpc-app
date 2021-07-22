@@ -3,14 +3,15 @@ package client
 import (
 	"bytes"
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"net/http"
-
 	"github.com/CMSgov/dpc/api/logger"
 	middleware2 "github.com/CMSgov/dpc/api/middleware"
 	"github.com/go-chi/chi/middleware"
+	"io/ioutil"
+	"net/http"
 
 	"github.com/hashicorp/go-retryablehttp"
 	"github.com/pkg/errors"
@@ -19,8 +20,10 @@ import (
 
 // AttributionConfig is a struct to hold configuration info for retryablehttp client
 type AttributionConfig struct {
-	URL     string
-	Retries int
+	URL        string
+	Retries    int
+	CACertPool *x509.CertPool
+	Cert       tls.Certificate
 }
 
 // ResourceType is a type to be used when making requests to different endpoints in attribution service
@@ -75,6 +78,16 @@ type AttributionClient struct {
 func NewAttributionClient(config AttributionConfig) Client {
 	client := retryablehttp.NewClient()
 	client.RetryMax = config.Retries
+
+	if len(config.Cert.Certificate) != 0 && config.CACertPool != nil {
+		client.HTTPClient.Transport = &http.Transport{
+			TLSClientConfig: &tls.Config{
+				RootCAs:      config.CACertPool,
+				Certificates: []tls.Certificate{config.Cert},
+			},
+		}
+	}
+
 	return &AttributionClient{
 		config:     config,
 		httpClient: client,

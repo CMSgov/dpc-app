@@ -2,8 +2,11 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/CMSgov/dpc/api/client"
 	"github.com/CMSgov/dpc/api/conf"
@@ -24,9 +27,13 @@ func main() {
 
 	attrRetries := conf.GetAsInt("attribution-client.retries", 3)
 
+	caPool, crt := getAttrCertificates(ctx)
+
 	attributionClient := client.NewAttributionClient(client.AttributionConfig{
-		URL:     attributionURL,
-		Retries: attrRetries,
+		URL:        attributionURL,
+		Retries:    attrRetries,
+		CACertPool: caPool,
+		Cert:       crt,
 	})
 
 	dataClient := client.NewDataClient(client.DataConfig{
@@ -60,7 +67,43 @@ func main() {
 	apiRouter := router.NewDPCAPIRouter(controllers)
 
 	port := conf.GetAsString("port", "3000")
+	fmt.Printf("Starting DPC-API server on port %v ...\n", port)
 	if err := http.ListenAndServe(fmt.Sprintf(":%s", port), apiRouter); err != nil {
 		logger.WithContext(ctx).Fatal("Failed to start server", zap.Error(err))
 	}
+}
+
+func getAttrCertificates(ctx context.Context) (*x509.CertPool, tls.Certificate) {
+	caStr := strings.ReplaceAll(conf.GetAsString("ATTRIBUTION_CLIENT_CA_CERT"), "\\n", "\n")
+	crtStr := strings.ReplaceAll(conf.GetAsString("ATTRIBUTION_CLIENT_CERT"), "\\n", "\n")
+	keyStr := strings.ReplaceAll(conf.GetAsString("ATTRIBUTION_CLIENT_CERT_KEY"), "\\n", "\n")
+
+	if caStr == "" {
+		logger.WithContext(ctx).Warn("Missing server ca cert, env variable ATTRIBUTION_CLIENT_CA_CERT is required when using MTLS")
+	}
+
+	if crtStr == "" {
+		logger.WithContext(ctx).Warn("Missing server cert, env variable ATTRIBUTION_CLIENT_CERT is required when using MTLS")
+	}
+
+	if keyStr == "" {
+		logger.WithContext(ctx).Warn("Missing server cert key, env variable ATTRIBUTION_CLIENT_CERT_KEY is required when using MTLS")
+	}
+
+	if caStr == "" || crtStr == "" || keyStr == "" {
+		return nil, tls.Certificate{}
+	}
+
+	certPool := x509.NewCertPool()
+	ok := certPool.AppendCertsFromPEM([]byte(caStr))
+	if !ok {
+		logger.WithContext(ctx).Fatal("Failed to parse server CA cert")
+	}
+
+	crt, err := tls.X509KeyPair([]byte(crtStr), []byte(keyStr))
+	if err != nil {
+		logger.WithContext(ctx).Fatal("Failed to parse server cert/key par", zap.Error(err))
+	}
+
+	return certPool, crt
 }
