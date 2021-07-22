@@ -16,6 +16,7 @@ Rails.application.routes.draw do
 
     resource :provider_orgs, path: '/provider_org', only: [:new, :show] do
       match :add, via: [:post]
+      match :get, via: [:get, :show]
     end
 
     match '/members', to: 'portal#index', via: :get

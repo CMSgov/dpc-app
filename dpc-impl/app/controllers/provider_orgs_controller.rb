@@ -27,6 +27,14 @@ class ProviderOrgsController < ApplicationController
     end
   end
 
+  def get
+    @org_id = params[:org_id]
+
+    api_request = api_service.get_organization(@org_id)
+
+    binding.pry
+  end
+
   private
 
   def api_service

@@ -21,6 +21,11 @@ class ApiClient
     self
   end
 
+  def get_organization(org_id)
+    uri_string = base_url + '/Organization/' + org_id
+    get_request(uri_string)
+  end
+
   def get_provider_orgs(imp_id)
     uri_string = base_url + '/Implementer/' + imp_id + '/org'
     get_request(uri_string)
