@@ -40,7 +40,7 @@ func (sc *SSASController) CreateSystem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	found, mOrg, err := sc.getManagedOrg(r, implementerID, organizationID)
+	found, mOrg, err := sc.getProviderOrg(r, implementerID, organizationID)
 	if err != nil {
 		log.Error("Failed to retrieve implementer's managed orgs", zap.Error(err))
 		boom.Internal(w, w, http.StatusInternalServerError, "Internal Server Error")
@@ -78,7 +78,7 @@ func (sc *SSASController) CreateSystem(w http.ResponseWriter, r *http.Request) {
 		SsasSystemID:  ssasResp.SystemID,
 		Status:        "Active",
 	}
-	_, err = sc.attrClient.UpdateImplOrg(r.Context(), implementerID, organizationID, uRel)
+	_, err = sc.attrClient.UpdateImplementerOrg(r.Context(), implementerID, organizationID, uRel)
 	if err != nil {
 		log.Error("Failed to update implementer org relation", zap.Error(err))
 		fhirror.ServerIssue(r.Context(), w, 500, "Failed to create system")
@@ -123,7 +123,7 @@ func (sc *SSASController) createSsasSystem(r *http.Request, implID string, orgID
 	return sc.ssasClient.CreateSystem(r.Context(), req)
 }
 
-func (sc *SSASController) getManagedOrg(r *http.Request, implID string, orgID string) (bool, client.ProviderOrg, error) {
+func (sc *SSASController) getProviderOrg(r *http.Request, implID string, orgID string) (bool, client.ProviderOrg, error) {
 	orgs, err := sc.attrClient.GetProviderOrgs(r.Context(), implID)
 	if err != nil {
 		return false, client.ProviderOrg{}, err

@@ -29,9 +29,9 @@ func (ac *MockAttributionClient) UpdateImplementerOrg(ctx context.Context, implI
 	return args.Get(0).(client.ImplementerOrg), args.Error(1)
 }
 
-func (ac *MockAttributionClient) GetManagedOrgs(ctx context.Context, implID string) ([]client.ManagedOrg, error) {
+func (ac *MockAttributionClient) GetProviderOrgs(ctx context.Context, implID string) ([]client.ProviderOrg, error) {
 	args := ac.Called(ctx, implID)
-	return args.Get(0).([]client.ManagedOrg), args.Error(1)
+	return args.Get(0).([]client.ProviderOrg), args.Error(1)
 }
 
 func (ac *MockAttributionClient) CreateImplOrg(ctx context.Context, body []byte) (client.ImplementerOrg, error) {
