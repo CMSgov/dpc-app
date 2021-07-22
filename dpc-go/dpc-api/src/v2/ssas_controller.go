@@ -10,7 +10,8 @@ import (
 	"github.com/CMSgov/dpc/api/middleware"
 	"github.com/darahayes/go-boom"
 	"go.uber.org/zap"
-	"net/http"
+    "io/ioutil"
+    "net/http"
 
 	"github.com/CMSgov/dpc/api/client"
 )
@@ -147,6 +148,30 @@ func (sc *SSASController) getGroupID(r *http.Request, implID string) (string, er
 		return "", err
 	}
 	return v["ssas_group_id"].(string), nil
+}
+
+func (ic *SSASController) GetAuthToken(w http.ResponseWriter, r *http.Request) {
+    body, _ := ioutil.ReadAll(r.Body)
+    log := logger.WithContext(r.Context())
+
+    if len(body) == 0 {
+        log.Error("Body is empty")
+        fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "Body is required")
+        return
+    }
+
+    // TODO: May need to bring up error codes for more specific errors for troubleshooting
+    resBytes, err := ic.ssasClient.Authenticate(r.Context(), body)
+    if err != nil {
+        log.Error("Failed to authenticate", zap.Error(err))
+        fhirror.ServerIssue(r.Context(), w, http.StatusInternalServerError, "Failed to authenticate token")
+        return
+    }
+
+    if _, err := w.Write(resBytes); err != nil {
+        log.Error("Failed to write data to response", zap.Error(err))
+        fhirror.ServerIssue(r.Context(), w, http.StatusInternalServerError, "Failed to authenticate token")
+    }
 }
 
 // ProxyCreateSystemRequest struct that models a proxy request to create a new system
