@@ -8,3 +8,5 @@ extraction:
     index:
       filters:
         - exclude: ig
+  go:
+    index:
