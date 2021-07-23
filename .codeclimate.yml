@@ -40,9 +40,8 @@ plugins:
     enabled: true
     config:
       app_path: dpc-web
-  # Bookmarking to enable govet when issue fixed with false dependency errors
   govet:
-    enabled: false
+    enabled: true
   gofmt:
     enabled: true
   golint:
