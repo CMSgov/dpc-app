@@ -267,12 +267,6 @@
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>${hapi.fhir.groupID}</groupId>
-                <artifactId>hapi-fhir-validation-resources-r4</artifactId>
-                <version>${hapi.fhir.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
                 <groupId>com.helger</groupId>
                 <artifactId>ph-schematron</artifactId>
                 <version>5.3.0</version>
