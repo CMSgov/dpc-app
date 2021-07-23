@@ -10,3 +10,5 @@ extraction:
         - exclude: ig
   go:
     index:
+      build_command:
+        - make
