@@ -1,8 +1,8 @@
 <% title @org_info[:name] %>
 
-<div id="dashboard__title">
+<div class="ds-u-margin-bottom--6" id="dashboard__title">
   <h1 class="ds-text-heading--4xl ds-title"><%= @org_info[:name] %></h1>
-  <div class="ds-u-margin-bottom--6">
+  <div>
     <div>
       <strong>Org ID:</strong> <%= @org[:id] %>
     </div>
@@ -13,8 +13,13 @@
       <strong>Organization Status: <span class="<%= active_status_class if status_active?(@status) %>"><%= @status %></span></strong>
     </div>
   </div>
+</div>
 
-  <div id="dashboard__content">
+<div id="dashboard__content">
+  <div id="dash_content_nav_container">
     <%= render partial: 'shared/need-help' %>
+  </div>
+
+  <div id="dash_content">
   </div>
 </div>
