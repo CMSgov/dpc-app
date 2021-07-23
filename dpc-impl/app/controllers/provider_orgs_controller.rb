@@ -10,6 +10,19 @@ class ProviderOrgsController < ApplicationController
     @npi = generate_npi
   end
 
+  def show
+    @org_id = params[:org_id]
+
+    api_request = api_service.get_organization(@org_id)
+
+    if api_request[:id].present? && api_request[:id] == @org_id
+      @org = api_request
+    else
+      flash[:alert] = "We were unable to connect to DPC due to an internal error. Please try again at a later time."
+      redirect_to portal_path
+    end
+  end
+
   def add
     @npi = provider_org_param[:npi]
 
@@ -25,14 +38,6 @@ class ProviderOrgsController < ApplicationController
       flash[:alert] = "Provider Organization could not be added: #{msg}"
       redirect_to new_provider_orgs_path
     end
-  end
-
-  def get
-    @org_id = params[:org_id]
-
-    api_request = api_service.get_organization(@org_id)
-
-    binding.pry
   end
 
   private
