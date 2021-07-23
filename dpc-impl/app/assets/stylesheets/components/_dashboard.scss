@@ -40,6 +40,12 @@
     background-color: $color-primary-alt-lightest;
   }
 
+  .provider-link, .provider-link:visited {
+    color: $color-base;
+    text-decoration: none !important;
+  }
+
+
   .provider_name {
     font-size: 32px;
     margin-bottom: 10px;

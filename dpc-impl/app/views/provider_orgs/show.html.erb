@@ -1,6 +1,8 @@
-<div id="provider-org-page">
-  <h1><%= @org_info[:name] %></h1>
-  <div>
+<% title @org_info[:name] %>
+
+<div id="dashboard__title">
+  <h1 class="ds-text-heading--4xl ds-title"><%= @org_info[:name] %></h1>
+  <div class="ds-u-margin-bottom--6">
     <div>
       <strong>Org ID:</strong> <%= @org[:id] %>
     </div>
