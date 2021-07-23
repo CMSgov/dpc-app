@@ -37,6 +37,7 @@ func NewDPCAttributionRouter(o service.Service, g service.Service, impl service.
 			r.Route("/{implementerID}", func(r chi.Router) {
 				r.Use(middleware2.ImplementerCtx)
 				r.Put("/", impl.Put)
+				r.Get("/", impl.Get)
 			})
 			r.Route("/{implementerID}/org", func(r chi.Router) {
 				r.Use(middleware2.ImplementerCtx)
