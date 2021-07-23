@@ -1,0 +1,18 @@
+<div id="provider-org-page">
+  <h1><%= @org_info[:name] %></h1>
+  <div>
+    <div>
+      <strong>Org ID:</strong> <%= @org[:id] %>
+    </div>
+    <div>
+      <strong>Provider NPI:</strong> <%= @npi %>
+    </div>
+    <div>
+      <strong>Organization Status: <span class="<%= active_status_class if status_active?(@status) %>"><%= @status %></span></strong>
+    </div>
+  </div>
+
+  <div id="dashboard__content">
+    <%= render partial: 'shared/need-help' %>
+  </div>
+</div>

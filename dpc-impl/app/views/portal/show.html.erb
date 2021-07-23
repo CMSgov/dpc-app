@@ -13,21 +13,7 @@
 </div>
 
 <div id="dashboard__content">
-  <div id="dash_content_nav_container">
-    <div class="nav_box_container">
-      <div class="nav_box" id="dash_nav_help">
-        <h2>Need Help?</h2>
-        <strong>Resources:</strong>
-        <ul>
-          <li>DPC's User Guide</li>
-          <li>HL7 Implementation Guide</li>
-          <li>BB2.0 Implementation Guide</li>
-        </ul>
-        <strong>Ask questions, collaborate, and share your experience with the DPC community!</strong><br />
-        <%= link_to "Join Google Group", "https://groups.google.com/forum/#!forum/dpc-api", class:"ds-c-button ds-c-button--primary google-button", id: 'google-group-link', target: '_blank' %>
-      </div>
-    </div>
-  </div>
+  <%= render partial: 'shared/need-help' %>
 
   <div id="dash_content_provider_container">
 

@@ -13,6 +13,10 @@ $focus-outline:  5px solid $color-gold-light;
 $z-index-nav:     8000;
 $z-index-flyout:  10000;
 
+.active_status {
+  color: $color-success-dark;
+}
+
 // CMS variables
 .ds-c-alert--warn {
   background-image: url(warning.svg) !important;

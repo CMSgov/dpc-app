@@ -17,6 +17,9 @@ class ProviderOrgsController < ApplicationController
 
     if api_request[:id].present? && api_request[:id] == @org_id
       @org = api_request
+      @org_info = @org[:info]
+      @npi = org_npi(@org_info)
+      @status = org_status(@npi)
     else
       flash[:alert] = "We were unable to connect to DPC due to an internal error. Please try again at a later time."
       redirect_to portal_path
@@ -48,6 +51,19 @@ class ProviderOrgsController < ApplicationController
 
   def imp_id
     current_user.implementer_id
+  end
+
+  def org_npi(org)
+    hash = org[:identifier].first
+    return hash[:value]
+  end
+
+  def org_status(npi)
+    @npi = npi
+    @orgs = current_user.provider_orgs
+    org = @orgs.select { |org| org[:npi] == @npi }
+
+    return org.first[:status]
   end
 
   def provider_org_param
