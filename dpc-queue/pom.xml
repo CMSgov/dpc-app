@@ -69,19 +69,6 @@
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>${hapi.fhir.groupID}</groupId>-->
-<!--            <artifactId>org.hl7.fhir.dstu3</artifactId>-->
-<!--            <version>${hapi.fhir.version}</version>-->
-<!--            <scope>compile</scope>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>${hapi.fhir.groupID}</groupId>-->
-<!--            <artifactId>org.hl7.fhir.r4</artifactId>-->
-<!--            <version>${hapi.fhir.version}</version>-->
-<!--            <scope>compile</scope>-->
-<!--        </dependency>-->
-
     </dependencies>
 
     <build>

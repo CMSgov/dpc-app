@@ -48,14 +48,6 @@
             <artifactId>hapi-fhir-client</artifactId>
             <version>${hapi.fhir.version}</version>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>${hapi.fhir.groupID}</groupId>-->
-<!--            <artifactId>hapi-fhir-structures-dstu3</artifactId>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>${hapi.fhir.groupID}</groupId>-->
-<!--            <artifactId>hapi-fhir-structures-r4</artifactId>-->
-<!--        </dependency>-->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>

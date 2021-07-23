@@ -43,10 +43,6 @@
             <groupId>${hapi.fhir.groupID}</groupId>
             <artifactId>hapi-fhir-structures-dstu3</artifactId>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>${hapi.fhir.groupID}</groupId>-->
-<!--            <artifactId>hapi-fhir-structures-r4</artifactId>-->
-<!--        </dependency>-->
         <dependency>
             <groupId>io.dropwizard</groupId>
             <artifactId>dropwizard-testing</artifactId>
