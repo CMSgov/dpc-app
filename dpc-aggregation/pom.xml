@@ -14,7 +14,7 @@
 
     <properties>
         <mainClass>gov.cms.dpc.aggregation.DPCAggregationService</mainClass>
-        <resilience4j.version>1.7.0</resilience4j.version>
+        <resilience4j.version>1.7.1</resilience4j.version>
     </properties>
 
     <dependencies>
