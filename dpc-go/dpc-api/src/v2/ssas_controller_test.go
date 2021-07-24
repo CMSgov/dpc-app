@@ -140,6 +140,11 @@ func (suite *SsasControllerTestSuite) TestGetSystem() {
           "creation_date": "creation",
           "id": "public-key-1",
           "key": "public-key"
+        },
+        {
+          "creation_date": "creation",
+          "id": "public-key-2",
+          "key": "public-key2"
         }
       ],
       "ips": [
@@ -147,6 +152,11 @@ func (suite *SsasControllerTestSuite) TestGetSystem() {
           "creation_date": "creation",
           "id": "ip-1",
           "ip": "ip"
+        },
+        {
+          "creation_date": "creation",
+          "id": "ip-2",
+          "ip": "ip2"
         }
       ],
       "client_tokens": [
@@ -156,6 +166,13 @@ func (suite *SsasControllerTestSuite) TestGetSystem() {
           "id": "public-key-1",
           "label": "my-client-token",
           "uuid": "uuid"
+        },
+        {
+          "creation_date": "creation",
+          "expires_at": "expiration",
+          "id": "public-key-2",
+          "label": "my-client-token2",
+          "uuid": "uuid2"
         }
       ]
     }`)
@@ -227,9 +244,9 @@ func (suite *SsasControllerTestSuite) SetupHappyPathMocks() (*http.Request, cont
 		APIScope:     "api-scope",
 		XData:        "xdata",
 		LastTokenAt:  "lastToken",
-		PublicKeys:   []map[string]string{{"key": "public-key", "id": "public-key-1", "creation_date": "creation"}},
-		IPs:          []map[string]string{{"ip": "ip", "id": "ip-1", "creation_date": "creation"}},
-		ClientTokens: []map[string]string{{"label": "my-client-token", "id": "public-key-1", "creation_date": "creation", "uuid": "uuid", "expires_at": "expiration"}},
+		PublicKeys:   []map[string]string{{"key": "public-key", "id": "public-key-1", "creation_date": "creation"}, {"key": "public-key2", "id": "public-key-2", "creation_date": "creation"}},
+		IPs:          []map[string]string{{"ip": "ip", "id": "ip-1", "creation_date": "creation"}, {"ip": "ip2", "id": "ip-2", "creation_date": "creation"}},
+		ClientTokens: []map[string]string{{"label": "my-client-token", "id": "public-key-1", "creation_date": "creation", "uuid": "uuid", "expires_at": "expiration"}, {"label": "my-client-token2", "id": "public-key-2", "creation_date": "creation", "uuid": "uuid2", "expires_at": "expiration"}},
 	}
 	suite.msc.On("CreateSystem", mock.Anything, mock.Anything).Return(ssasResp, nil)
 	suite.mac.On("UpdateImplOrg", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(client.ImplementerOrg{}, nil)

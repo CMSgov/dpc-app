@@ -59,7 +59,7 @@ func (sc *SsasHTTPClient) GetSystem(ctx context.Context, systemID string) (GetSy
 
 	resBytes, err := sc.doGet(ctx, url)
 	if err != nil {
-		log.Error("Get SSAS system request failed", zap.Error(err))
+		log.Error("Get ssas system request failed", zap.Error(err))
 		return GetSystemResponse{}, err
 	}
 	resp := GetSystemResponse{}
