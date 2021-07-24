@@ -27,7 +27,7 @@ type SsasHTTPClientConfig struct {
 const (
 	PostV2SystemEndpoint string = "v2/system"
 	PostV2GroupEndpoint  string = "v2/group"
-	V2KeyEndpoint        string = "v2/system/key"
+	V2KeyEndpoint        string = "key"
 )
 
 // SsasClient interface for testing purposes
@@ -60,14 +60,9 @@ func (sc *SsasHTTPClient) DeletePublicKey(ctx context.Context, systemID string, 
 
 	url := fmt.Sprintf("%s/%s/%s/%s/%s", sc.config.URL, PostV2SystemEndpoint, systemID, V2KeyEndpoint, keyID)
 
-	resBytes, err := sc.doDelete(ctx, url)
+	err := sc.doDelete(ctx, url)
 	if err != nil {
 		log.Error("Delete public key failed", zap.Error(err))
-		return err
-	}
-	var resp map[string]string
-	if err := json.NewDecoder(bytes.NewReader(resBytes)).Decode(&resp); err != nil {
-		log.Error("Failed to convert ssas response bytes to map model", zap.Error(err))
 		return err
 	}
 	return nil
@@ -179,26 +174,26 @@ func (sc *SsasHTTPClient) doPost(ctx context.Context, url string, reqBytes []byt
 	return b, nil
 }
 
-func (sc *SsasHTTPClient) doDelete(ctx context.Context, url string) ([]byte, error) {
+func (sc *SsasHTTPClient) doDelete(ctx context.Context, url string) error {
 	log := logger.WithContext(ctx)
 	sc.httpClient.Logger = newLogger(*log)
 
 	req, err := retryablehttp.NewRequest(http.MethodDelete, url, nil)
 	if err != nil {
 		log.Error("Failed to create request", zap.Error(err))
-		return nil, errors.Errorf("Failed to create ssas group")
+		return errors.Errorf("Failed to create ssas group")
 	}
 	req.SetBasicAuth(sc.config.ClientID, sc.config.ClientSecret)
 	resp, err := sc.httpClient.Do(req)
 	if err != nil {
 		log.Error("Failed to send request", zap.Error(err))
-		return nil, errors.Errorf("Failed to create ssas group")
+		return errors.Errorf("Failed to create ssas group")
 	}
 
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
 		b, _ := ioutil.ReadAll(resp.Body)
 		body := string(b[:])
-		return nil, errors.Errorf(body)
+		return errors.Errorf(body)
 	}
 
 	defer func() {
@@ -208,12 +203,7 @@ func (sc *SsasHTTPClient) doDelete(ctx context.Context, url string) ([]byte, err
 		}
 	}()
 
-	b, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Error("Failed to read the response body", zap.Error(err))
-		return nil, errors.Errorf("Failed to save system")
-	}
-	return b, nil
+	return nil
 }
 
 // CreateGroupRequest struct to model a ssas request to create a group

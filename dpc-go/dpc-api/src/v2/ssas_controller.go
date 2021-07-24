@@ -32,17 +32,17 @@ func NewSSASController(ssasClient client.SsasClient, attrClient client.Client) *
 // DeleteKey function to delete a public key from ssas system
 func (sc *SSASController) DeleteKey(w http.ResponseWriter, r *http.Request) {
 	log := logger.WithContext(r.Context())
-	implementorID, _ := r.Context().Value(middleware.ContextKeyImplementer).(string)
+	implementerID, _ := r.Context().Value(middleware.ContextKeyImplementer).(string)
 	organizationID, _ := r.Context().Value(middleware.ContextKeyOrganization).(string)
 	keyID, _ := r.Context().Value(middleware.ContextKeyKeyID).(string)
 
-	if implementorID == "" || organizationID == "" || keyID == "" {
-		log.Error(fmt.Sprintf("Failed to extract one or more path parameters. ImplID: %s, OrgID: %s, KeyID: %s ", implementorID, organizationID, keyID))
+	if implementerID == "" || organizationID == "" || keyID == "" {
+		log.Error(fmt.Sprintf("Failed to extract one or more path parameters. ImplID: %s, OrgID: %s, KeyID: %s ", implementerID, organizationID, keyID))
 		fhirror.GenericServerIssue(r.Context(), w)
 		return
 	}
 
-	found, mOrg, err := sc.getManagedOrg(r, implementorID, organizationID)
+	found, mOrg, err := sc.getManagedOrg(r, implementerID, organizationID)
 	if err != nil {
 		log.Error("Failed to retrieve implementer's managed orgs", zap.Error(err))
 		fhirror.GenericServerIssue(r.Context(), w)
@@ -51,12 +51,12 @@ func (sc *SSASController) DeleteKey(w http.ResponseWriter, r *http.Request) {
 
 	if !found || "Active" != mOrg.Status {
 		log.Error("Could not find active org")
-		fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "Implementor/Org relation is not active")
+		fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "ImplementerID/Org relation is not active")
 		return
 	}
 
 	if mOrg.SsasSystemID == "" {
-		log.Error(fmt.Sprintf("realation with implementerID: %s and organizationID: %s is not tied to a system", implementorID, organizationID))
+		log.Error(fmt.Sprintf("relation with implementerID: %s and organizationID: %s is not tied to a system", implementerID, organizationID))
 		fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "a system was not found for this implementer/org relationship")
 		return
 	}
@@ -74,16 +74,16 @@ func (sc *SSASController) DeleteKey(w http.ResponseWriter, r *http.Request) {
 // AddKey function to add a public key to ssas system
 func (sc *SSASController) AddKey(w http.ResponseWriter, r *http.Request) {
 	log := logger.WithContext(r.Context())
-	implementorID, _ := r.Context().Value(middleware.ContextKeyImplementer).(string)
+	implementerID, _ := r.Context().Value(middleware.ContextKeyImplementer).(string)
 	organizationID, _ := r.Context().Value(middleware.ContextKeyOrganization).(string)
 
-	if implementorID == "" || organizationID == "" {
-		log.Error(fmt.Sprintf("Failed to extract one or more path parameters. ImplID: %s ,OrgID: %s ", implementorID, organizationID))
+	if implementerID == "" || organizationID == "" {
+		log.Error(fmt.Sprintf("Failed to extract one or more path parameters. ImplID: %s ,OrgID: %s ", implementerID, organizationID))
 		fhirror.GenericServerIssue(r.Context(), w)
 		return
 	}
 
-	found, mOrg, err := sc.getManagedOrg(r, implementorID, organizationID)
+	found, mOrg, err := sc.getManagedOrg(r, implementerID, organizationID)
 	if err != nil {
 		log.Error("Failed to retrieve implementer's managed orgs", zap.Error(err))
 		fhirror.GenericServerIssue(r.Context(), w)
@@ -92,12 +92,12 @@ func (sc *SSASController) AddKey(w http.ResponseWriter, r *http.Request) {
 
 	if !found || "Active" != mOrg.Status {
 		log.Error("Could not find active org")
-		fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "Implementor/Org relation is not active")
+		fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "Implementer/Org relation is not active")
 		return
 	}
 
 	if mOrg.SsasSystemID == "" {
-		log.Error(fmt.Sprintf("realation with implementerID: %s and organizationID: %s is not tied to a system", implementorID, organizationID))
+		log.Error(fmt.Sprintf("relation with implementerID: %s and organizationID: %s is not tied to a system", implementerID, organizationID))
 		fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "a system was not found for this implementer/org relationship")
 		return
 	}
@@ -151,7 +151,7 @@ func (sc *SSASController) CreateSystem(w http.ResponseWriter, r *http.Request) {
 
 	if !found || "Active" != mOrg.Status {
 		log.Error("could not create system for inactive or missing relation")
-		fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "Implementor/Org relation is not active")
+		fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "Implementer/Org relation is not active")
 		return
 	}
 
