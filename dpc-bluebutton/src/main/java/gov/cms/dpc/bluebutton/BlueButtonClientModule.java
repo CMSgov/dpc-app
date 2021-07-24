@@ -5,20 +5,21 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Binder;
 import com.google.inject.Provides;
-import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+import com.google.inject.name.Names;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.bluebutton.client.BlueButtonClientImpl;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
 import gov.cms.dpc.bluebutton.clientV2.BlueButtonClientV2;
-import gov.cms.dpc.bluebutton.clientV2.BlueButtonClientV2Impl;
-import gov.cms.dpc.bluebutton.clientV2.MockBlueButtonClientV2;
+import gov.cms.dpc.bluebutton.clientV2.BlueButtonClientV2Provider;
+import gov.cms.dpc.bluebutton.clientV2.R4ClientProvider;
 import gov.cms.dpc.bluebutton.config.BBClientConfiguration;
 import gov.cms.dpc.bluebutton.config.BlueButtonBundleConfiguration;
 import gov.cms.dpc.bluebutton.exceptions.BlueButtonClientSetupException;
 import gov.cms.dpc.bluebutton.health.BlueButtonHealthCheck;
 import io.dropwizard.Configuration;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
@@ -67,6 +68,16 @@ public class BlueButtonClientModule<T extends Configuration & BlueButtonBundleCo
         if(healthCheckEnabled){
             binder.bind(BlueButtonHealthCheck.class);
         }
+
+        final BBClientConfiguration.R4Configuration r4Configuration = this.bbClientConfiguration.getR4Configuration();
+        if (r4Configuration != null && StringUtils.isNotEmpty(r4Configuration.getServerBaseUrl())) {
+            R4ClientProvider client = new R4ClientProvider(r4Configuration.getServerBaseUrl());
+            binder.requestInjection(client);
+            binder.bind(IGenericClient.class).annotatedWith(Names.named("bbclientR4")).toProvider(client).asEagerSingleton();
+            BlueButtonClientV2Provider blueButtonClientV2Provider = new BlueButtonClientV2Provider(this.bbClientConfiguration);
+            binder.requestInjection(blueButtonClientV2Provider);
+            binder.bind(BlueButtonClientV2.class).toProvider(blueButtonClientV2Provider).asEagerSingleton();
+        }
         logger.info("Blue Button health checks are {}.", healthCheckEnabled ? "enabled" : "disabled");
     }
 
@@ -76,31 +87,11 @@ public class BlueButtonClientModule<T extends Configuration & BlueButtonBundleCo
     }
 
     @Provides
-    public BlueButtonClientV2 provideBlueButtonClientR4(@Named("bbclientR4") IGenericClient fhirRestClient, MetricRegistry registry) {
-        return bbClientConfiguration.isUseBfdMock() ? new MockBlueButtonClientV2(fhirRestClient.getFhirContext()) : new BlueButtonClientV2Impl(fhirRestClient, this.bbClientConfiguration, registry);
-    }
-
-    @Provides
     @Named("bbclient")
     public IGenericClient provideFhirRestClient(FhirContext fhirContext, HttpClient httpClient) {
         fhirContext.getRestfulClientFactory().setHttpClient(httpClient);
 
         return fhirContext.newRestfulGenericClient(this.bbClientConfiguration.getServerBaseUrl());
-    }
-
-    @Provides
-    @Named("bbclientR4")
-    public IGenericClient provideFhirRestClientR4(@Named("fhirContextR4") FhirContext fhirContext, HttpClient httpClient) {
-        fhirContext.getRestfulClientFactory().setHttpClient(httpClient);
-
-        return fhirContext.newRestfulGenericClient(this.bbClientConfiguration.getServerBaseUrl());
-    }
-
-    @Provides
-    @Singleton
-    @Named("fhirContextR4")
-    public FhirContext provideR4Context() {
-        return FhirContext.forR4();
     }
 
     @Provides

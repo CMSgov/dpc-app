@@ -92,6 +92,7 @@ public class AbstractSecureApplicationTest {
 
     @BeforeEach
     public void eachSetup() throws IOException {
+
         // Check health
         APITestHelpers.checkHealth(APPLICATION);
     }

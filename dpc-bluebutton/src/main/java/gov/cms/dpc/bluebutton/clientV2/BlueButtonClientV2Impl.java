@@ -7,16 +7,15 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
-import com.google.inject.name.Named;
 import gov.cms.dpc.bluebutton.config.BBClientConfiguration;
 import gov.cms.dpc.common.Constants;
 import gov.cms.dpc.common.utils.MetricMaker;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.util.encoders.Hex;
-import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,7 +55,7 @@ public class BlueButtonClientV2Impl implements BlueButtonClientV2 {
         return "Patient/" + fromPatientID;
     }
 
-    public BlueButtonClientV2Impl(@Named("bbclientR4") IGenericClient client, BBClientConfiguration config, MetricRegistry metricRegistry) {
+    public BlueButtonClientV2Impl(IGenericClient client, BBClientConfiguration config, MetricRegistry metricRegistry) {
         this.client = client;
         this.config = config;
         final var metricMaker = new MetricMaker(metricRegistry, BlueButtonClientV2Impl.class);

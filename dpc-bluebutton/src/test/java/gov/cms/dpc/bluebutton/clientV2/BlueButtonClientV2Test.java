@@ -327,7 +327,7 @@ class BlueButtonClientV2Test {
     }
 
     private static BBClientConfiguration getClientConfig() {
-        final String options = getTestConfig().getConfig("bbclientR4").root().render(ConfigRenderOptions.concise());
+        final String options = getTestConfig().getConfig("bbclient").root().render(ConfigRenderOptions.concise());
 
         try {
             return new ObjectMapper().readValue(options, BBClientConfiguration.class);
@@ -337,7 +337,7 @@ class BlueButtonClientV2Test {
     }
 
     private static Config getTestConfig() {
-        return ConfigFactory.load("test.application.conf");
+        return ConfigFactory.load("testv2.application.conf");
     }
 
     private static String getRawXML(String path) throws IOException {

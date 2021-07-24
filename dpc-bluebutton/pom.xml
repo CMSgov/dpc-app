@@ -34,6 +34,7 @@
         <dependency>
             <groupId>${hapi.fhir.groupID}</groupId>
             <artifactId>hapi-fhir-structures-r4</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.hubspot.dropwizard</groupId>
