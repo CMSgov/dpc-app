@@ -181,7 +181,6 @@ func (sc *SSASController) CreateSystem(w http.ResponseWriter, r *http.Request) {
 		Status:        "Active",
 	}
 	_, err = sc.attrClient.UpdateImplOrg(r.Context(), implementerID, organizationID, uRel)
-	_, err = sc.attrClient.UpdateImplOrg(r.Context(), implementerID, organizationID, uRel)
 	if err != nil {
 		log.Error("Failed to update implementer org relation", zap.Error(err))
 		fhirror.ServerIssue(r.Context(), w, 500, "Failed to create system")
