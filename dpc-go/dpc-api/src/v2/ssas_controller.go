@@ -49,7 +49,7 @@ func (sc *SSASController) GetSystem(w http.ResponseWriter, r *http.Request) {
 
 	if !found || "Active" != mOrg.Status {
 		log.Error("could not create system for inactive or missing relation")
-		fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "Implementor/Org relation is not active")
+		fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "Implementer/Org relation is not active")
 		return
 	}
 
@@ -109,7 +109,7 @@ func (sc *SSASController) CreateSystem(w http.ResponseWriter, r *http.Request) {
 
 	if !found || "Active" != mOrg.Status {
 		log.Error("could not create system for inactive or missing relation")
-		fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "Implementor/Org relation is not active")
+		fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "Implementer/Org relation is not active")
 		return
 	}
 

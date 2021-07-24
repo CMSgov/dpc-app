@@ -104,7 +104,7 @@ func (suite *SsasControllerTestSuite) TestCreateSystemForInactiveRelation() {
 	resp, _ := ioutil.ReadAll(res.Body)
 
 	assert.Equal(suite.T(), http.StatusBadRequest, res.StatusCode)
-	assert.Contains(suite.T(), string(resp), "Implementor/Org relation is not active")
+	assert.Contains(suite.T(), string(resp), "Implementer/Org relation is not active")
 }
 
 func (suite *SsasControllerTestSuite) TestGetSystem() {
