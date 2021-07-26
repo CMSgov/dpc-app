@@ -73,13 +73,13 @@ func (suite *ImplementerControllerTestSuite) TestCreateImplementerBadJson() {
 func (suite *ImplementerControllerTestSuite) TestCreateImplementer() {
     //Mock impl creation
     createImplResp := ImplementerResource{}
-    faker.FakeData(&createImplResp)
+    _ = faker.FakeData(&createImplResp)
     createImplResp.SsasGroupID = ""
     suite.mac.On("Post", mock.Anything, mock.Anything, mock.Anything).Return(apitest.ToBytes(createImplResp), nil)
 
     //Mock group creation
     createGroupResp := client.CreateGroupResponse{}
-    faker.FakeData(&createGroupResp)
+    _ = faker.FakeData(&createGroupResp)
     suite.msc.On("CreateGroup", mock.Anything, mock.Anything).Return(createGroupResp, nil)
     //Mock impl update
     updateImplResp := ImplementerResource{
@@ -99,7 +99,7 @@ func (suite *ImplementerControllerTestSuite) TestCreateImplementer() {
 	suite.impl.Create(w, req)
 	res := w.Result()
     var v map[string]interface{}
-	json.NewDecoder(res.Body).Decode(&v)
+	_ = json.NewDecoder(res.Body).Decode(&v)
 
 	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
 	assert.Equal(suite.T(),v["name"], createImplResp.Name)
