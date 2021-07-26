@@ -68,6 +68,10 @@ func (mjc *MockSsasController) CreateSystem(w http.ResponseWriter, r *http.Reque
 	mjc.Called(w, r)
 }
 
+func (mjc *MockSsasController) GetSystem(w http.ResponseWriter, r *http.Request) {
+	mjc.Called(w, r)
+}
+
 type RouterTestSuite struct {
 	suite.Suite
 	router      http.Handler
