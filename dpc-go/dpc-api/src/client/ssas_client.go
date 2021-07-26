@@ -187,7 +187,7 @@ func (sc *SsasHTTPClient) doDelete(ctx context.Context, url string) error {
 	resp, err := sc.httpClient.Do(req)
 	if err != nil {
 		log.Error("Failed to send request", zap.Error(err))
-		return errors.Errorf("Failed to create ssas group")
+		return errors.Errorf("Failed to delete resource")
 	}
 
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
