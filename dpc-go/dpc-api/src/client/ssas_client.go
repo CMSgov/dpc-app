@@ -64,7 +64,7 @@ func (sc *SsasHTTPClient) GetSystem(ctx context.Context, systemID string) (GetSy
 	}
 	resp := GetSystemResponse{}
 	if err := json.NewDecoder(bytes.NewReader(resBytes)).Decode(&resp); err != nil {
-		log.Error("Failed to convert ssas response bytes to GetSystemResponse model", zap.Error(err))
+		log.Error("Failed to convert SSAS response bytes to GetSystemResponse model", zap.Error(err))
 		return GetSystemResponse{}, err
 	}
 	return resp, nil
