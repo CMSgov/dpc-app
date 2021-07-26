@@ -23,8 +23,6 @@ func buildAdminRoutes(oc v2.Controller, ic v2.Controller, ioc v2.Controller, sc 
 		r.Route("/Organization", func(r chi.Router) {
 			r.Route("/{organizationID}", func(r chi.Router) {
 				r.Use(middleware2.OrganizationCtx)
-				//TODO Shouldn't org/:id be public?
-				r.With(middleware2.FHIRModel).Get("/", oc.Read)
 				r.Delete("/", oc.Delete)
 				r.With(middleware2.FHIRFilter, middleware2.FHIRModel).Put("/", oc.Update)
 			})
@@ -41,14 +39,13 @@ func buildAdminRoutes(oc v2.Controller, ic v2.Controller, ioc v2.Controller, sc 
 			})
 		})
 		//IMPLEMENTER ORG
-		//TODO figure out how to make routes case insensitive and add this route as a sub-route of Implementer
 		r.Route("/Implementer/{implementerID}/Org/{organizationID}/system", func(r chi.Router) {
 			r.With(middleware2.ImplementerCtx).With(middleware2.OrganizationCtx).Post("/", sc.CreateSystem)
 		})
 	})
 	return r
 }
-
+// NewAdminServer configures clients, builds ADMIN routes, and creates a server.
 func NewAdminServer() *service.Server {
 	attrClient := client.NewAttributionClient(client.AttributionConfig{
 		URL:     conf.GetAsString("attribution-client.url"),

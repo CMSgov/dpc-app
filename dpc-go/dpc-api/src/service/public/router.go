@@ -13,7 +13,7 @@ import (
 	"strings"
 )
 
-func buildPublicRoutes(mc v2.ReadController, gc v2.Controller, dc v2.FileController, jc v2.JobController) http.Handler {
+func buildPublicRoutes(oc v2.Controller, mc v2.ReadController, gc v2.Controller, dc v2.FileController, jc v2.JobController) http.Handler {
 	r := chi.NewRouter()
 	r.Use(middleware2.Logging())
 	r.Use(middleware2.RequestIPCtx)
@@ -22,13 +22,12 @@ func buildPublicRoutes(mc v2.ReadController, gc v2.Controller, dc v2.FileControl
 		r.Use(middleware.SetHeader("Content-Type", "application/fhir+json; charset=UTF-8"))
 		r.Get("/metadata", mc.Read)
 
-		//TODO Tech spec mentions this route is only for the admin server, double check that its accurate.
-		//r.Route("/Organization", func(r chi.Router) {
-		//	r.Route("/{organizationID}", func(r chi.Router) {
-		//		r.Use(middleware2.OrganizationCtx)
-		//		r.With(middleware2.FHIRModel).Get("/", rc.Org.Read)
-		//	})
-		//})
+		r.Route("/Organization", func(r chi.Router) {
+			r.Route("/{organizationID}", func(r chi.Router) {
+				r.Use(middleware2.OrganizationCtx)
+				r.With(middleware2.FHIRModel).Get("/", oc.Read)
+			})
+		})
 		r.Route("/Group", func(r chi.Router) {
 			r.Use(middleware2.AuthCtx)
 			r.With(middleware2.FHIRFilter, middleware2.FHIRModel).Post("/", gc.Create)
@@ -54,6 +53,7 @@ func buildPublicRoutes(mc v2.ReadController, gc v2.Controller, dc v2.FileControl
 	return r
 }
 
+// NewPublicServer configures clients, builds ADMIN routes, and creates a server.
 func NewPublicServer() *service.Server {
 	attrClient := client.NewAttributionClient(client.AttributionConfig{
 		URL:     conf.GetAsString("attribution-client.url"),
@@ -70,12 +70,13 @@ func NewPublicServer() *service.Server {
 	})
 
 	port := conf.GetAsInt("PUBLIC_PORT", 3000)
+	oc := v2.NewOrganizationController(attrClient)
 	mc := v2.NewMetadataController(conf.GetAsString("capabilities.base"))
 	gc := v2.NewGroupController(attrClient)
 	dc := v2.NewDataController(dataClient)
 	jc := v2.NewJobController(jobClient)
 
-	r := buildPublicRoutes(mc, gc, dc, jc)
+	r := buildPublicRoutes(oc, mc, gc, dc, jc)
 	return service.NewServer("DPC-API Public Server", port, true, r)
 
 }

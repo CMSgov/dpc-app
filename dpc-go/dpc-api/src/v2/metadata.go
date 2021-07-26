@@ -53,8 +53,8 @@ func (mc *MetadataController) Read(w http.ResponseWriter, r *http.Request) {
 
 	b, err = statement.MarshalJSON()
 	if err != nil {
-        log.Error("Failed to JSON marshal fhir capabilities statement", zap.Error(err))
-        fhirror.ServerIssue(r.Context(), w, http.StatusInternalServerError, "Failed to get capabilities")
+		log.Error("Failed to JSON marshal fhir capabilities statement", zap.Error(err))
+		fhirror.ServerIssue(r.Context(), w, http.StatusInternalServerError, "Failed to get capabilities")
 		return
 	}
 
