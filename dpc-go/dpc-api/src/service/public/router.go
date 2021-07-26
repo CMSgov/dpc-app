@@ -13,7 +13,7 @@ import (
 	"strings"
 )
 
-func buildPublicRoutes(cont Controllers) http.Handler {
+func buildPublicRoutes(cont controllers) http.Handler {
 	r := chi.NewRouter()
 	r.Use(middleware2.Logging())
 	r.Use(middleware2.RequestIPCtx)
@@ -78,13 +78,13 @@ func NewPublicServer() *service.Server {
 
 	port := conf.GetAsInt("PUBLIC_PORT", 3000)
 
-	controllers := Controllers{
-	    Org: v2.NewOrganizationController(attrClient),
-	    Metadata:  v2.NewMetadataController(conf.GetAsString("capabilities.base")),
-	    Group: v2.NewGroupController(attrClient),
-        Data: v2.NewDataController(dataClient),
-        Job: v2.NewJobController(jobClient),
-    }
+	controllers := controllers{
+		Org:      v2.NewOrganizationController(attrClient),
+		Metadata: v2.NewMetadataController(conf.GetAsString("capabilities.base")),
+		Group:    v2.NewGroupController(attrClient),
+		Data:     v2.NewDataController(dataClient),
+		Job:      v2.NewJobController(jobClient),
+	}
 
 	r := buildPublicRoutes(controllers)
 	return service.NewServer("DPC-API Public Server", port, true, r)
@@ -109,10 +109,10 @@ func fileServer(r chi.Router, path string, root http.FileSystem) {
 	})
 }
 
-type Controllers struct {
-    Org      v2.Controller
-    Metadata v2.ReadController
-    Group    v2.Controller
-    Data     v2.FileController
-    Job      v2.JobController
+type controllers struct {
+	Org      v2.Controller
+	Metadata v2.ReadController
+	Group    v2.Controller
+	Data     v2.FileController
+	Job      v2.JobController
 }

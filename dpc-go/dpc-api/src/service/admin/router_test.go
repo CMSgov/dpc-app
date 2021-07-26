@@ -84,7 +84,7 @@ func (suite *RouterTestSuite) SetupTest() {
 	suite.mockImplOrg = &MockController{}
 	suite.mockSsas = &MockSsasController{}
 
-	c := Controllers{
+	c := controllers{
 		Org:     suite.mockOrg,
 		Impl:    suite.mockImpl,
 		ImplOrg: suite.mockImplOrg,

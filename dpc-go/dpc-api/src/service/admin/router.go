@@ -12,7 +12,7 @@ import (
 	"net/http"
 )
 
-func buildAdminRoutes(c Controllers) http.Handler {
+func buildAdminRoutes(c controllers) http.Handler {
 	r := chi.NewRouter()
 	r.Use(middleware2.Logging())
 	r.Use(middleware2.RequestIPCtx)
@@ -23,7 +23,7 @@ func buildAdminRoutes(c Controllers) http.Handler {
 		r.Route("/Organization", func(r chi.Router) {
 			r.Route("/{organizationID}", func(r chi.Router) {
 				r.Use(middleware2.OrganizationCtx)
-                r.With(middleware2.FHIRModel).Get("/", c.Org.Read)
+				r.With(middleware2.FHIRModel).Get("/", c.Org.Read)
 				r.Delete("/", c.Org.Delete)
 				r.With(middleware2.FHIRFilter, middleware2.FHIRModel).Put("/", c.Org.Update)
 			})
@@ -63,7 +63,7 @@ func NewAdminServer() *service.Server {
 
 	port := conf.GetAsInt("ADMIN_PORT", 3011)
 
-	controllers := Controllers{
+	controllers := controllers{
 		Org:     v2.NewOrganizationController(attrClient),
 		Impl:    v2.NewImplementerController(attrClient, ssasClient),
 		ImplOrg: v2.NewImplementerOrgController(attrClient),
@@ -74,7 +74,7 @@ func NewAdminServer() *service.Server {
 	return service.NewServer("DPC-API Admin Server", port, true, r)
 }
 
-type Controllers struct {
+type controllers struct {
 	Org     v2.Controller
 	Impl    v2.Controller
 	ImplOrg v2.Controller

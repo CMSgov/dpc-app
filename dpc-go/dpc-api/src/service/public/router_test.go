@@ -82,7 +82,7 @@ func (suite *RouterTestSuite) SetupTest() {
 	suite.mockData = &MockFileController{}
 	suite.mockJob = &MockJobController{}
 
-	c := Controllers{
+	c := controllers{
 		Org:      suite.mockOrg,
 		Metadata: suite.mockMeta,
 		Group:    suite.mockGroup,

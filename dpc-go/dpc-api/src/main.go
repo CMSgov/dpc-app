@@ -37,8 +37,21 @@ func startServers(ctx context.Context, ps *service.Server, as *service.Server) {
 	wg := new(sync.WaitGroup)
 	wg.Add(2)
 
-	go func() { ps.Serve(ctx); wg.Done() }()
-	go func() { as.Serve(ctx); wg.Done() }()
+	go func() {
+		err := ps.Serve(ctx)
+		if err != nil {
+			log.Fatal(err)
+		}
+		wg.Done()
+	}()
+
+	go func() {
+		err := as.Serve(ctx)
+		if err != nil {
+			log.Fatal(err)
+		}
+		wg.Done()
+	}()
 
 	wg.Wait()
 }
