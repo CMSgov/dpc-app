@@ -49,6 +49,7 @@ type FileController interface {
 // SsasController is an interface for reading
 type SsasController interface {
 	CreateSystem(w http.ResponseWriter, r *http.Request)
+	GetSystem(w http.ResponseWriter, r *http.Request)
 	AddKey(w http.ResponseWriter, r *http.Request)
 	DeleteKey(w http.ResponseWriter, r *http.Request)
 }

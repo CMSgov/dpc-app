@@ -89,6 +89,11 @@ func (mc MockSsasClient) CreateGroup(ctx context.Context, request client.CreateG
 	return args.Get(0).(client.CreateGroupResponse), args.Error(1)
 }
 
+func (mc MockSsasClient) GetSystem(ctx context.Context, systemID string) (client.GetSystemResponse, error) {
+	args := mc.Called(ctx, systemID)
+	return args.Get(0).(client.GetSystemResponse), args.Error(1)
+}
+
 func (mc MockSsasClient) AddPublicKey(ctx context.Context, systemID string, request model.ProxyPublicKeyRequest) (map[string]string, error) {
 	args := mc.Called(ctx, systemID, request)
 	return args.Get(0).(map[string]string), args.Error(1)
