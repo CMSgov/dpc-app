@@ -26,7 +26,7 @@ type SsasHttpClientConfig struct {
 const (
 	PostV2SystemEndpoint    string = "v2/system"
 	PostV2GroupEndpoint     string = "v2/group"
-	PostV2AuthenticateToken string = "v2/Token"
+	PostV2AuthenticateToken string = "v2/token"
 )
 
 // SsasClient interface for testing purposes
