@@ -62,7 +62,7 @@ func (sc *SsasHTTPClient) CreateSystem(ctx context.Context, request CreateSystem
 	}
 	url := fmt.Sprintf("%s/%s", sc.config.URL, PostV2SystemEndpoint)
 
-	resBytes, err := sc.doPost(ctx, url, reqBytes.Bytes())
+	resBytes, err := sc.doPost(ctx, url, reqBytes.Bytes(), nil)
 	if err != nil {
 		log.Error("Create ssas system request failed", zap.Error(err))
 		return CreateSystemResponse{}, errors.Errorf("Failed to create ssas system")
@@ -85,7 +85,7 @@ func (sc *SsasHTTPClient) CreateGroup(ctx context.Context, request CreateGroupRe
 	}
 	url := fmt.Sprintf("%s/%s", sc.config.URL, PostV2GroupEndpoint)
 
-	resBytes, err := sc.doPost(ctx, url, reqBytes.Bytes())
+	resBytes, err := sc.doPost(ctx, url, reqBytes.Bytes(), nil)
 	if err != nil {
 		log.Error("Create ssas group request failed", zap.Error(err))
 		return CreateGroupResponse{}, errors.Errorf("Failed to create ssas group")
@@ -98,7 +98,7 @@ func (sc *SsasHTTPClient) CreateGroup(ctx context.Context, request CreateGroupRe
 	return resp, nil
 }
 
-func (sc *SsasHTTPClient) doPost(ctx context.Context, url string, reqBytes []byte) ([]byte, error) {
+func (sc *SsasHTTPClient) doPost(ctx context.Context, url string, reqBytes []byte, headers map[string]string) ([]byte, error) {
 	log := logger.WithContext(ctx)
 	sc.httpClient.Logger = newLogger(*log)
 
@@ -107,6 +107,11 @@ func (sc *SsasHTTPClient) doPost(ctx context.Context, url string, reqBytes []byt
 		log.Error("Failed to create request", zap.Error(err))
 		return nil, errors.Errorf("Failed to create ssas group")
 	}
+	if headers != nil {
+        for k,v := range headers {
+            req.Header.Set(k, v)
+        }
+    }
 	req.SetBasicAuth(sc.config.ClientID, sc.config.ClientSecret)
 	resp, err := sc.httpClient.Do(req)
 	if err != nil {
@@ -116,7 +121,7 @@ func (sc *SsasHTTPClient) doPost(ctx context.Context, url string, reqBytes []byt
 
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
 		b, _ := ioutil.ReadAll(resp.Body)
-		body := string(b[:])
+		body := string(b)
 		return nil, errors.Errorf(body)
 	}
 
@@ -139,7 +144,11 @@ func (sc *SsasHTTPClient) Authenticate(ctx context.Context, reqBytes []byte) ([]
 	log := logger.WithContext(ctx)
 	url := fmt.Sprintf("%s/%s", sc.config.URL, PostV2AuthenticateToken)
 
-	resBytes, err := sc.doPost(ctx, url, reqBytes)
+	headers := make(map[string]string, 2)
+	headers["Content-Type"] = "application/x-www-form-urlencoded"
+	headers["Accept"] = "application/json"
+
+	resBytes, err := sc.doPost(ctx, url, reqBytes, headers)
 	if err != nil {
 		log.Error("Token authentication failed", zap.Error(err))
 		return nil, errors.Errorf("Failed to authenticate token")
