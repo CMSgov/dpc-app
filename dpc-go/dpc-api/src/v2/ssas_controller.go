@@ -1,19 +1,19 @@
 package v2
 
 import (
-    "bytes"
-    "encoding/json"
-    "errors"
-    "fmt"
-    "github.com/CMSgov/dpc/api/fhirror"
-    "github.com/CMSgov/dpc/api/logger"
-    "github.com/CMSgov/dpc/api/middleware"
-    "github.com/darahayes/go-boom"
-    "go.uber.org/zap"
-    "io/ioutil"
-    "net/http"
+	"bytes"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"github.com/CMSgov/dpc/api/fhirror"
+	"github.com/CMSgov/dpc/api/logger"
+	"github.com/CMSgov/dpc/api/middleware"
+	"github.com/darahayes/go-boom"
+	"go.uber.org/zap"
+	"io/ioutil"
+	"net/http"
 
-    "github.com/CMSgov/dpc/api/client"
+	"github.com/CMSgov/dpc/api/client"
 )
 
 // SSASController is a struct that defines what the controller has
@@ -110,27 +110,27 @@ func (sc *SSASController) CreateSystem(w http.ResponseWriter, r *http.Request) {
 
 // GetAuthToken proxies a request to get an auth token from the SSAS service
 func (sc *SSASController) GetAuthToken(w http.ResponseWriter, r *http.Request) {
-    body, _ := ioutil.ReadAll(r.Body)
-    log := logger.WithContext(r.Context())
+	body, _ := ioutil.ReadAll(r.Body)
+	log := logger.WithContext(r.Context())
 
-    if len(body) == 0 {
-        log.Error("Body is empty")
-        fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "Body is required")
-        return
-    }
+	if len(body) == 0 {
+		log.Error("Body is empty")
+		fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "Body is required")
+		return
+	}
 
-    // TODO: May need to bring up error codes for more specific errors for troubleshooting
-    resBytes, err := sc.ssasClient.Authenticate(r.Context(), body)
-    if err != nil {
-        log.Error("Failed to authenticate", zap.Error(err))
-        fhirror.ServerIssue(r.Context(), w, http.StatusInternalServerError, "Failed to authenticate token")
-        return
-    }
+	// TODO: May need to bring up error codes for more specific errors for troubleshooting
+	resBytes, err := sc.ssasClient.Authenticate(r.Context(), body)
+	if err != nil {
+		log.Error("Failed to authenticate", zap.Error(err))
+		fhirror.ServerIssue(r.Context(), w, http.StatusInternalServerError, "Failed to authenticate token")
+		return
+	}
 
-    if _, err := w.Write(resBytes); err != nil {
-        log.Error("Failed to write data to response", zap.Error(err))
-        fhirror.ServerIssue(r.Context(), w, http.StatusInternalServerError, "Failed to authenticate token")
-    }
+	if _, err := w.Write(resBytes); err != nil {
+		log.Error("Failed to write data to response", zap.Error(err))
+		fhirror.ServerIssue(r.Context(), w, http.StatusInternalServerError, "Failed to authenticate token")
+	}
 }
 
 func (sc *SSASController) createSsasSystem(r *http.Request, implID string, orgID string, proxyReq ProxyCreateSystemRequest) (client.CreateSystemResponse, error) {
