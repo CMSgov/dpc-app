@@ -238,13 +238,13 @@ func (sc *SsasHTTPClient) doDelete(ctx context.Context, url string) error {
 	req, err := retryablehttp.NewRequest(http.MethodDelete, url, nil)
 	if err != nil {
 		log.Error("Failed to create request", zap.Error(err))
-		return errors.Errorf("Failed to create ssas group")
+		return errors.Errorf("Failed to delete resource")
 	}
 	req.SetBasicAuth(sc.config.ClientID, sc.config.ClientSecret)
 	resp, err := sc.httpClient.Do(req)
 	if err != nil {
 		log.Error("Failed to send request", zap.Error(err))
-		return errors.Errorf("Failed to create ssas group")
+		return errors.Errorf("Failed to delete resource")
 	}
 
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
