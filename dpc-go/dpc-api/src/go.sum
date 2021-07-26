@@ -470,6 +470,8 @@ github.com/sirupsen/logrus v1.2.0/go.mod h1:LxeOpSwHxABJmUn/MG1IvRgCAasNZTLOkJPx
 github.com/sirupsen/logrus v1.4.2/go.mod h1:tLMulIdttU9McNUspp0xgXVQah82FyeX6MwdIuYE2rE=
 github.com/sjsdfg/common-lang-in-go v0.3.2 h1:1zC0vzD+Fz583PLJ9S8S8/eUoVAQCzqq09wtTYwATHo=
 github.com/sjsdfg/common-lang-in-go v0.3.2/go.mod h1:UiqoBfLkUYXy+KQzaHoZ+MoQ7Bl2PFGkdCSKc2y46Kw=
+github.com/sjsdfg/common-lang-in-go v0.4.4 h1:Y3ohabAkXmMHr55ExPpKR8Q8dJagBjazNO0op2kNLNg=
+github.com/sjsdfg/common-lang-in-go v0.4.4/go.mod h1:GSXbNPeD2bs1EM8G1nvFtgBkujTl0cO0KbHeihWbuQU=
 github.com/smartystreets/assertions v0.0.0-20180927180507-b2de0cb4f26d/go.mod h1:OnSkiWE9lh6wB0YB77sQom3nweQdgAjqCqsofrRNTgc=
 github.com/smartystreets/assertions v0.0.0-20190116191733-b6c0e53d7304 h1:Jpy1PXuP99tXNrhbq2BaPz9B+jNAvH1JPQQpG/9GCXY=
 github.com/smartystreets/assertions v0.0.0-20190116191733-b6c0e53d7304/go.mod h1:OnSkiWE9lh6wB0YB77sQom3nweQdgAjqCqsofrRNTgc=

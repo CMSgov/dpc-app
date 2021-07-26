@@ -141,11 +141,11 @@ func isValidGroup(group []byte) error {
 func isValidExport(ctx context.Context, w http.ResponseWriter, outputFormat string, headerPrefer string) error {
 	log := logger.WithContext(ctx)
 	// _outputFormat only supports FhirNdjson, ApplicationNdjson, Ndjson
-	if !StringUtils.EqualsAnyIgnoreCase(outputFormat, middleware2.FhirNdjson, middleware2.ApplicationNdjson, middleware2.Ndjson) {
+	if StringUtils.EqualsNoneIgnoreCase(outputFormat, middleware2.FhirNdjson, middleware2.ApplicationNdjson, middleware2.Ndjson) {
 		log.Error("Invalid outputFormat")
 		fhirror.BusinessViolation(ctx, w, http.StatusBadRequest, "'_outputFormat' query parameter must be 'application/fhir+ndjson', 'application/ndjson', or 'ndjson'")
 	}
-	if headerPrefer == "" || StringUtils.IsEmpty(headerPrefer) {
+	if StringUtils.IsEmpty(headerPrefer) {
 		log.Error("Missing Prefer header")
 		fhirror.BusinessViolation(ctx, w, http.StatusBadRequest, "The 'Prefer' header is required and must be 'respond-async'")
 	}
