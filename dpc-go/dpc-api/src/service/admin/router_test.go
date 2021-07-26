@@ -78,12 +78,20 @@ type RouterTestSuite struct {
 }
 
 func (suite *RouterTestSuite) SetupTest() {
+
 	suite.mockOrg = &MockController{}
 	suite.mockImpl = &MockController{}
 	suite.mockImplOrg = &MockController{}
 	suite.mockSsas = &MockSsasController{}
 
-	suite.router = buildAdminRoutes(suite.mockOrg, suite.mockImpl, suite.mockImplOrg, suite.mockSsas)
+	c := Controllers{
+		Org:     suite.mockOrg,
+		Impl:    suite.mockImpl,
+		ImplOrg: suite.mockImplOrg,
+		Ssas:    suite.mockSsas,
+	}
+
+	suite.router = buildAdminRoutes(c)
 }
 
 func TestRouterTestSuite(t *testing.T) {
@@ -221,4 +229,32 @@ func (suite *RouterTestSuite) TestPostSystemProxyRoute() {
 	res, err := http.DefaultClient.Do(req)
 	fmt.Println(err)
 	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
+}
+
+func (suite *RouterTestSuite) TestOrganizationGetRoutes() {
+	var capturedRequestID string
+	suite.mockOrg.On("Read", mock.Anything, mock.Anything).Once().Run(func(arg mock.Arguments) {
+		r := arg.Get(1).(*http.Request)
+		capturedRequestID = r.Header.Get(middleware.RequestIDHeader)
+		w := arg.Get(0).(http.ResponseWriter)
+		_, _ = w.Write(apitest.AttributionOrgResponse())
+	})
+
+	ts := httptest.NewServer(suite.router)
+
+	req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/%s", ts.URL, "v2/Organization/12345"), nil)
+	req.Header.Set(middleware.RequestIDHeader, "54321")
+	res, _ := http.DefaultClient.Do(req)
+
+	b, _ := ioutil.ReadAll(res.Body)
+	var v map[string]interface{}
+	_ = json.Unmarshal(b, &v)
+
+	assert.Equal(suite.T(), "application/fhir+json; charset=UTF-8", res.Header.Get("Content-Type"))
+	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
+	assert.Equal(suite.T(), "54321", capturedRequestID)
+	assert.NotNil(suite.T(), v)
+	assert.NotContains(suite.T(), v, "info")
+	assert.Contains(suite.T(), v, "resourceType")
+	assert.Equal(suite.T(), v["resourceType"], "Organization")
 }

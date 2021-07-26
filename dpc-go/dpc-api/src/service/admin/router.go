@@ -12,7 +12,7 @@ import (
 	"net/http"
 )
 
-func buildAdminRoutes(oc v2.Controller, ic v2.Controller, ioc v2.Controller, sc v2.SsasController) http.Handler {
+func buildAdminRoutes(c Controllers) http.Handler {
 	r := chi.NewRouter()
 	r.Use(middleware2.Logging())
 	r.Use(middleware2.RequestIPCtx)
@@ -23,28 +23,30 @@ func buildAdminRoutes(oc v2.Controller, ic v2.Controller, ioc v2.Controller, sc 
 		r.Route("/Organization", func(r chi.Router) {
 			r.Route("/{organizationID}", func(r chi.Router) {
 				r.Use(middleware2.OrganizationCtx)
-				r.Delete("/", oc.Delete)
-				r.With(middleware2.FHIRFilter, middleware2.FHIRModel).Put("/", oc.Update)
+                r.With(middleware2.FHIRModel).Get("/", c.Org.Read)
+				r.Delete("/", c.Org.Delete)
+				r.With(middleware2.FHIRFilter, middleware2.FHIRModel).Put("/", c.Org.Update)
 			})
-			r.With(middleware2.FHIRFilter, middleware2.FHIRModel).Post("/", oc.Create)
+			r.With(middleware2.FHIRFilter, middleware2.FHIRModel).Post("/", c.Org.Create)
 		})
 
 		//IMPLEMENTER Routes
 		r.Route("/Implementer", func(r chi.Router) {
-			r.Post("/", ic.Create)
+			r.Post("/", c.Impl.Create)
 			r.Route("/{implementerID}/org", func(r chi.Router) {
 				r.Use(middleware2.ImplementerCtx)
-				r.Get("/", ic.Read)
-				r.Post("/", ioc.Create)
+				r.Get("/", c.Impl.Read)
+				r.Post("/", c.Impl.Create)
 			})
 		})
 		//IMPLEMENTER ORG
 		r.Route("/Implementer/{implementerID}/Org/{organizationID}/system", func(r chi.Router) {
-			r.With(middleware2.ImplementerCtx).With(middleware2.OrganizationCtx).Post("/", sc.CreateSystem)
+			r.With(middleware2.ImplementerCtx).With(middleware2.OrganizationCtx).Post("/", c.Ssas.CreateSystem)
 		})
 	})
 	return r
 }
+
 // NewAdminServer configures clients, builds ADMIN routes, and creates a server.
 func NewAdminServer() *service.Server {
 	attrClient := client.NewAttributionClient(client.AttributionConfig{
@@ -60,10 +62,21 @@ func NewAdminServer() *service.Server {
 	})
 
 	port := conf.GetAsInt("ADMIN_PORT", 3011)
-	oc := v2.NewOrganizationController(attrClient)
-	ic := v2.NewImplementerController(attrClient, ssasClient)
-	ioc := v2.NewImplementerOrgController(attrClient)
-	sc := v2.NewSSASController(ssasClient, attrClient)
-	r := buildAdminRoutes(oc, ic, ioc, sc)
+
+	controllers := Controllers{
+		Org:     v2.NewOrganizationController(attrClient),
+		Impl:    v2.NewImplementerController(attrClient, ssasClient),
+		ImplOrg: v2.NewImplementerOrgController(attrClient),
+		Ssas:    v2.NewSSASController(ssasClient, attrClient),
+	}
+
+	r := buildAdminRoutes(controllers)
 	return service.NewServer("DPC-API Admin Server", port, true, r)
+}
+
+type Controllers struct {
+	Org     v2.Controller
+	Impl    v2.Controller
+	ImplOrg v2.Controller
+	Ssas    v2.SsasController
 }

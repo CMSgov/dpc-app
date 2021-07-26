@@ -13,40 +13,47 @@ import (
 	"strings"
 )
 
-func buildPublicRoutes(oc v2.Controller, mc v2.ReadController, gc v2.Controller, dc v2.FileController, jc v2.JobController) http.Handler {
+func buildPublicRoutes(cont Controllers) http.Handler {
 	r := chi.NewRouter()
 	r.Use(middleware2.Logging())
 	r.Use(middleware2.RequestIPCtx)
 	fileServer(r, "/v2/swagger", http.Dir("../swaggerui"))
 	r.With(middleware2.Sanitize).Route("/v2", func(r chi.Router) {
 		r.Use(middleware.SetHeader("Content-Type", "application/fhir+json; charset=UTF-8"))
-		r.Get("/metadata", mc.Read)
+		r.Get("/metadata", cont.Metadata.Read)
 
+		//ORGANIZATION
 		r.Route("/Organization", func(r chi.Router) {
 			r.Route("/{organizationID}", func(r chi.Router) {
 				r.Use(middleware2.OrganizationCtx)
-				r.With(middleware2.FHIRModel).Get("/", oc.Read)
+				r.With(middleware2.FHIRModel).Get("/", cont.Org.Read)
 			})
 		})
+
+		//GROUP
 		r.Route("/Group", func(r chi.Router) {
 			r.Use(middleware2.AuthCtx)
-			r.With(middleware2.FHIRFilter, middleware2.FHIRModel).Post("/", gc.Create)
+			r.With(middleware2.FHIRFilter, middleware2.FHIRModel).Post("/", cont.Org.Create)
 			r.Route("/{groupID}", func(r chi.Router) {
 				r.Use(middleware2.RequestURLCtx)
 				r.Use(middleware2.GroupCtx)
 				r.Use(middleware2.ExportTypesParamCtx)
 				r.Use(middleware2.ExportSinceParamCtx)
-				r.Get("/$export", gc.Export)
+				r.Get("/$export", cont.Group.Export)
 			})
 		})
+
+		//JOBS
 		r.Route("/Jobs", func(r chi.Router) {
 			r.Use(middleware.SetHeader("Content-Type", "application/json; charset=UTF-8"))
 			r.Use(middleware2.AuthCtx)
-			r.With(middleware2.JobCtx).Get("/{jobID}", jc.Status)
+			r.With(middleware2.JobCtx).Get("/{jobID}", cont.Job.Status)
 		})
+
+		//DATA
 		r.Route("/Data", func(r chi.Router) {
 			r.Use(middleware2.AuthCtx)
-			r.With(middleware2.FileNameCtx).Get("/{fileName}", dc.GetFile)
+			r.With(middleware2.FileNameCtx).Get("/{fileName}", cont.Data.GetFile)
 		})
 	})
 	r.Post("/auth/token", auth.GetAuthToken)
@@ -70,13 +77,16 @@ func NewPublicServer() *service.Server {
 	})
 
 	port := conf.GetAsInt("PUBLIC_PORT", 3000)
-	oc := v2.NewOrganizationController(attrClient)
-	mc := v2.NewMetadataController(conf.GetAsString("capabilities.base"))
-	gc := v2.NewGroupController(attrClient)
-	dc := v2.NewDataController(dataClient)
-	jc := v2.NewJobController(jobClient)
 
-	r := buildPublicRoutes(oc, mc, gc, dc, jc)
+	controllers := Controllers{
+	    Org: v2.NewOrganizationController(attrClient),
+	    Metadata:  v2.NewMetadataController(conf.GetAsString("capabilities.base")),
+	    Group: v2.NewGroupController(attrClient),
+        Data: v2.NewDataController(dataClient),
+        Job: v2.NewJobController(jobClient),
+    }
+
+	r := buildPublicRoutes(controllers)
 	return service.NewServer("DPC-API Public Server", port, true, r)
 
 }
@@ -97,4 +107,12 @@ func fileServer(r chi.Router, path string, root http.FileSystem) {
 	r.Get(path, func(w http.ResponseWriter, r *http.Request) {
 		fs.ServeHTTP(w, r)
 	})
+}
+
+type Controllers struct {
+    Org      v2.Controller
+    Metadata v2.ReadController
+    Group    v2.Controller
+    Data     v2.FileController
+    Job      v2.JobController
 }

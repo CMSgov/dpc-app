@@ -82,7 +82,15 @@ func (suite *RouterTestSuite) SetupTest() {
 	suite.mockData = &MockFileController{}
 	suite.mockJob = &MockJobController{}
 
-	suite.router = buildPublicRoutes(suite.mockOrg, suite.mockMeta, suite.mockGroup, suite.mockData, suite.mockJob)
+	c := Controllers{
+		Org:      suite.mockOrg,
+		Metadata: suite.mockMeta,
+		Group:    suite.mockGroup,
+		Data:     suite.mockData,
+		Job:      suite.mockJob,
+	}
+
+	suite.router = buildPublicRoutes(c)
 }
 
 func TestRouterTestSuite(t *testing.T) {
