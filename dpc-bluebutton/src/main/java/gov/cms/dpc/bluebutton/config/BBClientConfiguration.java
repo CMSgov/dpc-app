@@ -133,6 +133,7 @@ public class BBClientConfiguration {
         private String serverBaseUrl;
 
         public R4Configuration() {
+            // Not used
         }
 
         public String getServerBaseUrl() {
