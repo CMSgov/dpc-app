@@ -14,8 +14,8 @@ import (
 	"go.uber.org/zap"
 )
 
-// SsasHttpClientConfig is a struct to hold configuration info for retryable http client
-type SsasHttpClientConfig struct {
+// SsasHTTPClientConfig is a struct to hold configuration info for retryable http client
+type SsasHTTPClientConfig struct {
 	URL          string
 	Retries      int
 	ClientID     string
@@ -38,12 +38,12 @@ type SsasClient interface {
 
 // SsasHTTPClient is a struct to hold the retryable http client and configs
 type SsasHTTPClient struct {
-	config     SsasHttpClientConfig
+	config     SsasHTTPClientConfig
 	httpClient *retryablehttp.Client
 }
 
-// NewSsasHttpClient initializes the retryable client and returns a reference to the ssas client
-func NewSsasHttpClient(config SsasHttpClientConfig) SsasClient {
+// NewSsasHTTPClient initializes the retryable client and returns a reference to the ssas client
+func NewSsasHTTPClient(config SsasHTTPClientConfig) SsasClient {
 	client := retryablehttp.NewClient()
 	client.RetryMax = config.Retries
 	return &SsasHTTPClient{
@@ -140,6 +140,7 @@ func (sc *SsasHTTPClient) doPost(ctx context.Context, url string, reqBytes []byt
 	return b, nil
 }
 
+// Authenticate proxies a request to authenticate the token
 func (sc *SsasHTTPClient) Authenticate(ctx context.Context, reqBytes []byte) ([]byte, error) {
 	log := logger.WithContext(ctx)
 	url := fmt.Sprintf("%s/%s", sc.config.URL, PostV2AuthenticateToken)
