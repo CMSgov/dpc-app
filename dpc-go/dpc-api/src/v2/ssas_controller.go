@@ -28,6 +28,94 @@ func NewSSASController(ssasClient client.SsasClient, attrClient client.Client) *
 	}
 }
 
+// AddToken function that calls SSAS to get a system
+func (sc *SSASController) CreateToken(w http.ResponseWriter, r *http.Request) {
+	log := logger.WithContext(r.Context())
+	implementerID, _ := r.Context().Value(middleware.ContextKeyImplementer).(string)
+	organizationID, _ := r.Context().Value(middleware.ContextKeyOrganization).(string)
+
+	if implementerID == "" || organizationID == "" {
+		log.Error(fmt.Sprintf("Failed to extract one or more path parameters. ImplID: %s ,OrgID: %s ", implementerID, organizationID))
+		fhirror.GenericServerIssue(r.Context(), w)
+		return
+	}
+
+	found, mOrg, err := sc.getManagedOrg(r, implementerID, organizationID)
+	if err != nil {
+		log.Error("Failed to retrieve implementer's managed orgs", zap.Error(err))
+		fhirror.GenericServerIssue(r.Context(), w)
+		return
+	}
+
+	if !found || "Active" != mOrg.Status {
+		log.Error("Could not find active org")
+		fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "Implementer/Org relation is not active")
+		return
+	}
+
+	if mOrg.SsasSystemID == "" {
+		log.Error(fmt.Sprintf("relation with implementerID: %s and organizationID: %s is not tied to a system", implementerID, organizationID))
+		fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "a system was not found for this implementer/org relationship")
+		return
+	}
+
+	label := r.URL.Query().Get("label")
+	token, err := sc.ssasClient.CreateToken(r.Context(), mOrg.SsasSystemID, label)
+	if err != nil {
+		log.Error("Failed to create token", zap.Error(err))
+		fhirror.ServerIssue(r.Context(), w, 500, "Failed to create token")
+		return
+	}
+
+	if _, err := w.Write([]byte(token)); err != nil {
+		log.Error("Failed to write data to response", zap.Error(err))
+		fhirror.GenericServerIssue(r.Context(), w)
+		return
+	}
+}
+
+// DeleteToken function that calls SSAS to get a system
+func (sc *SSASController) DeleteToken(w http.ResponseWriter, r *http.Request) {
+	log := logger.WithContext(r.Context())
+	implementerID, _ := r.Context().Value(middleware.ContextKeyImplementer).(string)
+	organizationID, _ := r.Context().Value(middleware.ContextKeyOrganization).(string)
+	tokenID, _ := r.Context().Value(middleware.ContextKeyTokenID).(string)
+
+	if implementerID == "" || organizationID == "" {
+		log.Error(fmt.Sprintf("Failed to extract one or more path parameters. ImplID: %s ,OrgID: %s ", implementerID, organizationID))
+		fhirror.GenericServerIssue(r.Context(), w)
+		return
+	}
+
+	found, mOrg, err := sc.getManagedOrg(r, implementerID, organizationID)
+	if err != nil {
+		log.Error("Failed to retrieve implementer's managed orgs", zap.Error(err))
+		fhirror.GenericServerIssue(r.Context(), w)
+		return
+	}
+
+	if !found || "Active" != mOrg.Status {
+		log.Error("Could not find active org")
+		fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "Implementer/Org relation is not active")
+		return
+	}
+
+	if mOrg.SsasSystemID == "" {
+		log.Error(fmt.Sprintf("relation with implementerID: %s and organizationID: %s is not tied to a system", implementerID, organizationID))
+		fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "a system was not found for this implementer/org relationship")
+		return
+	}
+
+	err = sc.ssasClient.DeleteToken(r.Context(), mOrg.SsasSystemID, tokenID)
+	if err != nil {
+		log.Error("Failed to delete token", zap.Error(err))
+		fhirror.ServerIssue(r.Context(), w, 500, "Failed to delete token")
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
 // GetSystem function that calls SSAS to get a system
 func (sc *SSASController) GetSystem(w http.ResponseWriter, r *http.Request) {
 	log := logger.WithContext(r.Context())

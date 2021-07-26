@@ -93,6 +93,16 @@ func (mc MockSsasClient) GetSystem(ctx context.Context, systemID string) (client
 	return args.Get(0).(client.GetSystemResponse), args.Error(1)
 }
 
+func (mc MockSsasClient) CreateToken(ctx context.Context, systemID string, label string) (string, error) {
+	args := mc.Called(ctx, systemID, label)
+	return args.Get(0).(string), args.Error(1)
+}
+
+func (mc MockSsasClient) DeleteToken(ctx context.Context, systemID string, tokenID string) error {
+	args := mc.Called(ctx, systemID, tokenID)
+	return args.Error(0)
+}
+
 type OrganizationControllerTestSuite struct {
 	suite.Suite
 	org *OrganizationController

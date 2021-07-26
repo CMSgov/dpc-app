@@ -63,6 +63,9 @@ func NewDPCAPIRouter(rc Controllers) http.Handler {
 					r.Use(middleware2.ImplementerCtx)
 					r.Get("/", rc.ImplOrg.Read)
 					r.Post("/", rc.ImplOrg.Create)
+					r.With(middleware2.OrganizationCtx).Post("/{organizationID}/token", rc.Ssas.CreateToken)
+					r.With(middleware2.OrganizationCtx, middleware2.TokenCtx).Delete("/{organizationID}/token/{tokenID}", rc.Ssas.DeleteToken)
+
 				})
 			})
 			r.Route("/Jobs", func(r chi.Router) {
