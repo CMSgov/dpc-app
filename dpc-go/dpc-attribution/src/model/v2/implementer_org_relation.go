@@ -18,6 +18,7 @@ type ImplementerOrgRelation struct {
 	SsasSystemID   string        `db:"ssas_system_id" json:"ssas_system_id,omitempty" faker:"-"`
 }
 
+// ImplementorOrgOutput is a struct for output from attribution
 type ImplementorOrgOutput struct {
 	ImplementerOrgRelation
 	NPI string `json:"npi"`
