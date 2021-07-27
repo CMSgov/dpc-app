@@ -40,7 +40,7 @@ func main() {
 	})
 
 	ssasClient := client.NewSsasHTTPClient(client.SsasHTTPClientConfig{
-	    PublicURL:    conf.GetAsString("ssas-client.public-url"),
+		PublicURL:    conf.GetAsString("ssas-client.public-url"),
 		AdminURL:     conf.GetAsString("ssas-client.admin-url"),
 		Retries:      conf.GetAsInt("ssas-client.attrRetries", 3),
 		ClientID:     conf.GetAsString("ssas-client.client-id"),
