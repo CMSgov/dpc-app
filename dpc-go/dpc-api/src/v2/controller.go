@@ -50,4 +50,5 @@ type FileController interface {
 type AuthController interface {
 	CreateSystem(w http.ResponseWriter, r *http.Request)
 	GetAuthToken(w http.ResponseWriter, r *http.Request)
+	GetSystem(w http.ResponseWriter, r *http.Request)
 }

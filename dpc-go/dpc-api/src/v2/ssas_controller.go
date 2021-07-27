@@ -29,6 +29,66 @@ func NewSSASController(ssasClient client.SsasClient, attrClient client.Client) *
 	}
 }
 
+// GetSystem function that calls SSAS to get a system
+func (sc *SSASController) GetSystem(w http.ResponseWriter, r *http.Request) {
+	log := logger.WithContext(r.Context())
+	implementerID, _ := r.Context().Value(middleware.ContextKeyImplementer).(string)
+	organizationID, _ := r.Context().Value(middleware.ContextKeyOrganization).(string)
+
+	if implementerID == "" || organizationID == "" {
+		log.Error(fmt.Sprintf("Failed to extract one or more path parameters. ImplID: %s ,OrgID: %s ", implementerID, organizationID))
+		boom.Internal(w, w, http.StatusInternalServerError, "Internal Server Error")
+		return
+	}
+
+	found, mOrg, err := sc.getManagedOrg(r, implementerID, organizationID)
+	if err != nil {
+		log.Error("Failed to retrieve implementer's managed orgs", zap.Error(err))
+		boom.Internal(w, w, http.StatusInternalServerError, "Internal Server Error")
+		return
+	}
+
+	if !found || "Active" != mOrg.Status {
+		log.Error("could not create system for inactive or missing relation")
+		fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "Implementer/Org relation is not active")
+		return
+	}
+
+	if mOrg.SsasSystemID == "" {
+		log.Error(fmt.Sprintf("realation with implementerID: %s and organizationID: %s is not tied to a system", implementerID, organizationID))
+		fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "a system was not found for this implementer/org relationship")
+		return
+	}
+
+	ssasResp, err := sc.ssasClient.GetSystem(r.Context(), mOrg.SsasSystemID)
+	if err != nil {
+		log.Error("Failed to get system", zap.Error(err))
+		fhirror.ServerIssue(r.Context(), w, 500, "Failed to get system")
+		return
+	}
+
+	proxyResp := ProxyGetSystemResponse{}
+	proxyResp.ClientName = ssasResp.ClientName
+	proxyResp.ClientID = ssasResp.ClientID
+	proxyResp.ClientTokens = ssasResp.ClientTokens
+	proxyResp.PublicKeys = ssasResp.PublicKeys
+	proxyResp.IPs = ssasResp.IPs
+
+	respBytes, err := json.Marshal(proxyResp)
+	if err != nil {
+		log.Error("Failed convert ssas ProxyGetSystemResponse to bytes", zap.Error(err))
+		fhirror.ServerIssue(r.Context(), w, 500, "Failed to get system")
+		return
+	}
+
+	if _, err := w.Write(respBytes); err != nil {
+		log.Error("Failed to write data to response", zap.Error(err))
+		fhirror.ServerIssue(r.Context(), w, http.StatusInternalServerError, "Failed to get system")
+		return
+	}
+
+}
+
 // CreateSystem function that calls SSAS to create a new system
 func (sc *SSASController) CreateSystem(w http.ResponseWriter, r *http.Request) {
 	log := logger.WithContext(r.Context())
@@ -50,7 +110,7 @@ func (sc *SSASController) CreateSystem(w http.ResponseWriter, r *http.Request) {
 
 	if !found || "Active" != mOrg.Status {
 		log.Error("could not create system for inactive or missing relation")
-		fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "Implementor/Org relation is not active")
+		fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "Implementer/Org relation is not active")
 		return
 	}
 
@@ -189,4 +249,13 @@ type ProxyCreateSystemResponse struct {
 	IPs         []string `json:"ips"`
 	ClientToken string   `json:"client_token"`
 	ExpiresAt   string   `json:"expires_at"`
+}
+
+// ProxyGetSystemResponse struct that models a proxy response to get a system
+type ProxyGetSystemResponse struct {
+	ClientID     string              `json:"client_id"`
+	ClientName   string              `json:"client_name"`
+	PublicKeys   []map[string]string `json:"public_keys"`
+	IPs          []map[string]string `json:"ips"`
+	ClientTokens []map[string]string `json:"client_tokens"`
 }

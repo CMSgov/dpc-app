@@ -94,6 +94,11 @@ func (mc MockSsasClient) Authenticate(ctx context.Context, request []byte) ([]by
 	return args.Get(0).([]byte), args.Error(1)
 }
 
+func (mc MockSsasClient) GetSystem(ctx context.Context, systemID string) (client.GetSystemResponse, error) {
+	args := mc.Called(ctx, systemID)
+	return args.Get(0).(client.GetSystemResponse), args.Error(1)
+}
+
 type OrganizationControllerTestSuite struct {
 	suite.Suite
 	org *OrganizationController
