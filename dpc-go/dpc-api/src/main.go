@@ -60,6 +60,7 @@ func main() {
 	apiRouter := router.NewDPCAPIRouter(controllers)
 
 	port := conf.GetAsString("port", "3000")
+	fmt.Printf("Starting DPC-API server on port %v ...\n", port)
 	if err := http.ListenAndServe(fmt.Sprintf(":%s", port), apiRouter); err != nil {
 		logger.WithContext(ctx).Fatal("Failed to start server", zap.Error(err))
 	}
