@@ -7,6 +7,7 @@ import com.typesafe.config.ConfigFactory;
 import gov.cms.dpc.aggregation.service.*;
 import gov.cms.dpc.aggregation.util.AggregationUtils;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
+import gov.cms.dpc.bluebutton.clientV2.MockBlueButtonClientV2;
 import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.hapi.ContextUtils;
 import gov.cms.dpc.queue.IJobQueue;
@@ -48,6 +49,7 @@ class BatchAggregationEngineTest {
     private ConsentService consentService;
 
     static private final FhirContext fhirContext = FhirContext.forDstu3();
+    static private final FhirContext fhirContextR4 = FhirContext.forR4();
     static private final MetricRegistry metricRegistry = new MetricRegistry();
     static private String exportPath;
     static private OperationsConfig operationsConfig;
@@ -55,6 +57,7 @@ class BatchAggregationEngineTest {
     @BeforeAll
     static void setupAll() {
         fhirContext.setPerformanceOptions(PerformanceOptionsEnum.DEFERRED_MODEL_SCANNING);
+        fhirContextR4.setPerformanceOptions(PerformanceOptionsEnum.DEFERRED_MODEL_SCANNING);
         final var config = ConfigFactory.load("testing.conf").getConfig("dpc.aggregation");
         exportPath = config.getString("exportPath");
         operationsConfig = new OperationsConfig(10, exportPath, 3, YearMonth.of(2015, 3));
@@ -73,8 +76,9 @@ class BatchAggregationEngineTest {
         consentService = Mockito.mock(ConsentService.class);
         queue = new MemoryBatchQueue(100);
         final var bbclient = Mockito.spy(new MockBlueButtonClient(fhirContext));
+        final var bbclientV2 = Mockito.spy(new MockBlueButtonClientV2(fhirContextR4));
         lookBackService = Mockito.spy(EveryoneGetsDataLookBackServiceImpl.class);
-        JobBatchProcessor jobBatchProcessor = Mockito.spy(new JobBatchProcessor(bbclient, fhirContext, metricRegistry, operationsConfig, lookBackService, consentService));
+        JobBatchProcessor jobBatchProcessor = Mockito.spy(new JobBatchProcessor(bbclient, bbclientV2, fhirContext, metricRegistry, operationsConfig, lookBackService, consentService));
         engine = Mockito.spy(new AggregationEngine(aggregatorID, queue, operationsConfig, jobBatchProcessor));
         engine.queueRunning.set(true);
         Disposable subscribe = Mockito.mock(Disposable.class);
