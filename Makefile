@@ -79,7 +79,7 @@ build-v2:
 	@docker-compose -p dpc-v2 -f docker-compose.yml -f dpc-go/dpc-attribution/docker-compose.yml build migrator
 	@docker-compose -p dpc-v2 -f docker-compose.yml -f dpc-go/dpc-attribution/docker-compose.yml build attribution2
 	@docker-compose -p dpc-v2 -f dpc-go/dpc-api/docker-compose.yml build api
-	@docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.v2.yml -f docker-compose.ssas-migrate.yml build --no-cache ssas-migrate
+	@docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.v2.yml build --no-cache ssas-migrate
 	@docker-compose -p dpc-v2 -f docker-compose.yml -f dpc-go/dpc-attribution/docker-compose.yml -f docker-compose.v2.yml build ssas
 
 .PHONY: start-v2
