@@ -40,7 +40,8 @@ func main() {
 	})
 
 	ssasClient := client.NewSsasHTTPClient(client.SsasHTTPClientConfig{
-		URL:          conf.GetAsString("ssas-client.url"),
+		PublicURL:    conf.GetAsString("ssas-client.public-url"),
+		AdminURL:     conf.GetAsString("ssas-client.admin-url"),
 		Retries:      conf.GetAsInt("ssas-client.attrRetries", 3),
 		ClientID:     conf.GetAsString("ssas-client.client-id"),
 		ClientSecret: conf.GetAsString("ssas-client.client-secret"),
@@ -60,6 +61,7 @@ func main() {
 	apiRouter := router.NewDPCAPIRouter(controllers)
 
 	port := conf.GetAsString("port", "3000")
+	fmt.Printf("Starting DPC-API server on port %v ...\n", port)
 	if err := http.ListenAndServe(fmt.Sprintf(":%s", port), apiRouter); err != nil {
 		logger.WithContext(ctx).Fatal("Failed to start server", zap.Error(err))
 	}
