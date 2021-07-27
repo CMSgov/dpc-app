@@ -28,7 +28,7 @@ func NewSSASController(ssasClient client.SsasClient, attrClient client.Client) *
 	}
 }
 
-// AddToken function that calls SSAS to get a system
+// CreateToken function that calls SSAS to get a system
 func (sc *SSASController) CreateToken(w http.ResponseWriter, r *http.Request) {
 	log := logger.WithContext(r.Context())
 	implementerID, _ := r.Context().Value(middleware.ContextKeyImplementer).(string)

@@ -53,6 +53,7 @@ func NewSsasHTTPClient(config SsasHTTPClientConfig) SsasClient {
 	}
 }
 
+// CreateToken function to create a token for ssas system
 func (sc *SsasHTTPClient) CreateToken(ctx context.Context, systemID string, label string) (string, error) {
 	log := logger.WithContext(ctx)
 
@@ -78,6 +79,7 @@ func (sc *SsasHTTPClient) CreateToken(ctx context.Context, systemID string, labe
 	return token, nil
 }
 
+// DeleteToken function to delete a token from ssas system
 func (sc *SsasHTTPClient) DeleteToken(ctx context.Context, systemID string, tokenID string) error {
 	log := logger.WithContext(ctx)
 
