@@ -57,6 +57,17 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
 
     @Provides
     @Singleton
+    @Named("fhirContextR4")
+    public FhirContext provideR4Context() {
+        final var fhirContext = FhirContext.forR4();
+
+        // Setup the context with model scans (avoids doing this on the fetch threads and perhaps multithreaded bug)
+        ContextUtils.prefetchResourceModels(fhirContext, JobQueueBatch.validResourceTypes);
+        return fhirContext;
+    }
+
+    @Provides
+    @Singleton
     MetricRegistry provideMetricRegistry() {
         return getEnvironment().metrics();
     }
