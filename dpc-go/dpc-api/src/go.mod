@@ -1,6 +1,6 @@
 module github.com/CMSgov/dpc/api
 
-go 1.16
+go 1.15
 
 require (
 	github.com/bxcodec/faker/v3 v3.6.0
