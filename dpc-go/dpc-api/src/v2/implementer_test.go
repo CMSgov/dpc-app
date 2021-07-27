@@ -2,12 +2,12 @@ package v2
 
 import (
 	"context"
-    "encoding/json"
-    "github.com/CMSgov/dpc/api/apitest"
-    "github.com/CMSgov/dpc/api/client"
-    "github.com/bxcodec/faker/v3"
-    "github.com/go-chi/chi/middleware"
-    "github.com/kinbiko/jsonassert"
+	"encoding/json"
+	"github.com/CMSgov/dpc/api/apitest"
+	"github.com/CMSgov/dpc/api/client"
+	"github.com/bxcodec/faker/v3"
+	"github.com/go-chi/chi/middleware"
+	"github.com/kinbiko/jsonassert"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
@@ -22,12 +22,12 @@ type ImplementerControllerTestSuite struct {
 	suite.Suite
 	impl *ImplementerController
 	mac  *MockAttributionClient
-	msc *MockSsasClient
+	msc  *MockSsasClient
 }
 
 func (suite *ImplementerControllerTestSuite) SetupTest() {
 	mac := new(MockAttributionClient)
-    msc := new(MockSsasClient)
+	msc := new(MockSsasClient)
 	suite.mac = mac
 	suite.msc = msc
 	suite.impl = NewImplementerController(mac, msc)
@@ -89,8 +89,7 @@ func (suite *ImplementerControllerTestSuite) TestCreateImplementer() {
     }
     suite.mac.On("Put", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(apitest.ToBytes(updateImplResp), nil)
 
-
-    req := httptest.NewRequest(http.MethodPost, "http://example.com/foo", strings.NewReader(apitest.ImplJSON))
+	req := httptest.NewRequest(http.MethodPost, "http://example.com/foo", strings.NewReader(apitest.ImplJSON))
 	ctx := req.Context()
 	ctx = context.WithValue(ctx, middleware.RequestIDKey, "12345")
 	req = req.WithContext(ctx)
@@ -102,6 +101,6 @@ func (suite *ImplementerControllerTestSuite) TestCreateImplementer() {
 	_ = json.NewDecoder(res.Body).Decode(&v)
 
 	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
-	assert.Equal(suite.T(),v["name"], createImplResp.Name)
-    assert.Equal(suite.T(),v["id"], createImplResp.ID)
+	assert.Equal(suite.T(), v["name"], createImplResp.Name)
+	assert.Equal(suite.T(), v["id"], createImplResp.ID)
 }

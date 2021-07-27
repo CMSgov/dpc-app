@@ -88,6 +88,11 @@ func (mc *MockSsasClient) CreateGroup(ctx context.Context, request client.Create
 	return args.Get(0).(client.CreateGroupResponse), args.Error(1)
 }
 
+func (mc MockSsasClient) GetSystem(ctx context.Context, systemID string) (client.GetSystemResponse, error) {
+	args := mc.Called(ctx, systemID)
+	return args.Get(0).(client.GetSystemResponse), args.Error(1)
+}
+
 type OrganizationControllerTestSuite struct {
 	suite.Suite
 	org *OrganizationController

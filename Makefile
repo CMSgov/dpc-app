@@ -101,6 +101,10 @@ load-ssas-fixtures:
 	@docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.v2.yml run --rm ssas-migrate -database "postgres://postgres:dpc-safe@db:5432/bcda?sslmode=disable" -path /go/src/github.com/CMSgov/bcda-ssas-app/db/migrations up
 	@docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.v2.yml run ssas --add-fixture-data
 
+.PHONY: ssas-creds
+ssas-creds:
+	@./make_ssas_creds.sh
+
 .PHONY: seed-db
 seed-db:
 	@java -jar dpc-attribution/target/dpc-attribution.jar db migrate && java -jar dpc-attribution/target/dpc-attribution.jar seed
