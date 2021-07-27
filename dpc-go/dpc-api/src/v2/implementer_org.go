@@ -40,7 +40,7 @@ func (ioc *ImplementerOrgController) Create(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	b, _ := json.Marshal(resp)
+	b, err := json.Marshal(resp)
 	if err != nil {
 		log.Error("Failed to convert implementer/org to bytes", zap.Error(err))
 		fhirror.ServerIssue(r.Context(), w, http.StatusInternalServerError, "Internal server error")

@@ -110,15 +110,19 @@ func (ios *ImplementerOrgService) Post(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	iorBytes := new(bytes.Buffer)
-	if err := json.NewEncoder(iorBytes).Encode(ior); err != nil {
-		log.Error("Failed to convert orm model to bytes for Implementer org relation", zap.Error(err))
+	output := v2.ImplementorOrgOutput{
+		ImplementerOrgRelation: *ior,
+		NPI:                    reqStruct.Npi,
+	}
+	b, err := output.MarshalJSON()
+	if err != nil {
+		log.Error("Failed to convert orm model to bytes for Implementer org output", zap.Error(err))
 		boom.Internal(w, err.Error())
 		return
 	}
 
-	if _, err := w.Write(iorBytes.Bytes()); err != nil {
-		log.Error("Failed to write Implementer org relation to response", zap.Error(err))
+	if _, err := w.Write(b); err != nil {
+		log.Error("Failed to write Implementer org output to response", zap.Error(err))
 		boom.Internal(w, err.Error())
 	}
 }
