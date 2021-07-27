@@ -42,6 +42,7 @@ func buildAdminRoutes(c controllers) http.Handler {
 		//IMPLEMENTER ORG
 		r.Route("/Implementer/{implementerID}/Org/{organizationID}/system", func(r chi.Router) {
 			r.With(middleware2.ImplementerCtx).With(middleware2.OrganizationCtx).Post("/", c.Ssas.CreateSystem)
+			r.With(middleware2.ImplementerCtx, middleware2.OrganizationCtx).Get("/", c.Ssas.GetSystem)
 		})
 	})
 	return r
