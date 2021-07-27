@@ -77,6 +77,32 @@ RSpec.feature 'adding provider organization' do
       expect(page.body).to have_content("DPC Account Home Page")
       expect(page.body).to have_content("Provider Organization added.")
     end
+
+    scenario 'view provider org page' do
+      stub_api_client(message: :create_implementer, success: true, response: default_imp_creation_response)
+
+      user = create(:user)
+
+      sign_in user
+
+      api_client = instance_double(ApiClient)
+      allow(ApiClient).to receive(:new).and_return(api_client)
+      allow(api_client).to receive(:get_provider_orgs)
+        .with(user.implementer_id)
+        .and_return(api_client)
+      allow(api_client).to receive(:response_successful?).and_return(true)
+      allow(api_client).to receive(:response_body).and_return([])
+
+      visit root_path
+
+      find('[data-test="add-provider-org-test"]').click
+
+      allow(api_client).to receive(:create_provider_org)
+        .with(user.implementer_id, npi)
+        .and_return(api_client)
+
+      binding.pry
+    end
   end
 
   describe 'could not connect to API' do
