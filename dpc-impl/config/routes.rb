@@ -18,6 +18,8 @@ Rails.application.routes.draw do
       match :add, via: [:post]
     end
 
+    resources :client_tokens, only: [:new, :create, :destroy]
+
     match '/members', to: 'portal#index', via: :get
     match '/portal', to: 'portal#show', via: :get
 
