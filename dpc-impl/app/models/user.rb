@@ -53,7 +53,7 @@ class User < ApplicationRecord
       api_response
     else
       action = 'registered'
-      msg = api_simplify(api_response)
+      msg = api_response
       api_error(action, msg)
       throw(:abort)
     end

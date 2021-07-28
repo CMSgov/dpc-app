@@ -13,13 +13,16 @@ class ProviderOrgsController < ApplicationController
   def show
     @org_id = params[:org_id]
 
-    api_request = api_service.get_organization(@org_id)
-
-    if api_request[:id].present? && api_request[:id] == @org_id
-      @org = api_request
+    org_api_request = api_service.get_organization(@org_id)
+    
+    if org_api_request[:id].present? && org_api_request[:id] == @org_id
+      @org = org_api_request
       @org_info = @org[:identifier]
       @npi = org_npi(@org_info)
       @status = org_status(@npi)
+
+      @client_tokens = get_client_tokens(imp_id, @org_id)
+      @public_keys = get_public_keys(imp_id, @org_id)
     else
       flash[:alert] = "We were unable to connect to DPC due to an internal error. Please try again at a later time."
       redirect_to portal_path
@@ -49,34 +52,48 @@ class ProviderOrgsController < ApplicationController
     @api_service ||= ApiClient.new
   end
 
+  def get_client_tokens(imp_id, org_id)
+    api_req = tokens_keys_api_req(imp_id, org_id)
+    return api_req[:client_tokens]
+  end
+
+  def get_public_keys(imp_id, org_id)
+    api_req = tokens_keys_api_req(imp_id, org_id)
+    return api_req[:public_keys]
+  end
+  
   def imp_id
     current_user.implementer_id
   end
-
+  
   def org_npi(org)
     hash = org.first
     return hash[:value]
   end
-
+  
   def org_status(npi)
     @npi = npi
     @orgs = current_user.provider_orgs
     org = @orgs.select { |org| org[:npi] == @npi }
-
+    
     return org.first[:status]
   end
-
+  
   def provider_org_param
     params.require(:provider_org).permit(:npi)
   end
-
+  
   def npi_error
     flash[:alert] = 'NPI must be valid.'
     redirect_to provider_orgs_path
   end
-
+  
   def npi_valid?(npi)
     npi = '80840' + npi
     LuhnacyLib.validate_npi(npi)
+  end
+
+  def tokens_keys_api_req(imp_id, org_id)
+    api_service.get_tokens_keys(imp_id, org_id)
   end
 end
