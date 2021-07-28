@@ -17,7 +17,7 @@ class ProviderOrgsController < ApplicationController
 
     if api_request[:id].present? && api_request[:id] == @org_id
       @org = api_request
-      @org_info = @org[:info]
+      @org_info = @org[:identifier]
       @npi = org_npi(@org_info)
       @status = org_status(@npi)
     else
@@ -54,7 +54,7 @@ class ProviderOrgsController < ApplicationController
   end
 
   def org_npi(org)
-    hash = org[:identifier].first
+    hash = org.first
     return hash[:value]
   end
 

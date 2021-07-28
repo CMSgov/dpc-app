@@ -7,6 +7,7 @@ module ApiErrorSimplify
 
   def api_simplify(err)
     issue = err["issue"]
+    binding.pry
     details = issue.pop
     err = details["details"]["text"]
     return err
