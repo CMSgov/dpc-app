@@ -56,7 +56,7 @@ func buildPublicRoutes(cont controllers) http.Handler {
 		})
 
 		//SSAS
-		r.Post("/Token/auth", cont.SSAS.GetAuthToken)
+		r.Post("/Token/auth", cont.Ssas.GetAuthToken)
 	})
 	return r
 }
@@ -116,5 +116,5 @@ type controllers struct {
 	Group    v2.Controller
 	Data     v2.FileController
 	Job      v2.JobController
-	SSAS     v2.SSASController
+	Ssas     v2.AuthController
 }
