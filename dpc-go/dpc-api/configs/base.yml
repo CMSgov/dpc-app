@@ -5,10 +5,9 @@ attribution-client:
   retries: 3
 
 capabilities:
-  base: "DPCCapabilities.json"
+  base: "../DPCCapabilities.json"
   version: "1.0"
   release-date: "03-01-2021"
-
 exportPath: "/tmp"
 
 apiPath: "localhost:3000/v2"

@@ -3,7 +3,6 @@ package v2
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/CMSgov/dpc/api/fhirror"
 	"github.com/CMSgov/dpc/api/logger"
@@ -295,7 +294,7 @@ func (sc *SSASController) getManagedOrg(r *http.Request, implID string, orgID st
 			return true, org, nil
 		}
 	}
-	return false, client.ProviderOrg{}, errors.New("relation not found")
+	return false, client.ProviderOrg{}, nil
 }
 
 func (sc *SSASController) getGroupID(r *http.Request, implID string) (string, error) {
