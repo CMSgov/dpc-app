@@ -51,9 +51,13 @@ func buildAdminRoutes(c controllers) http.Handler {
 
 // NewAdminServer configures clients, builds ADMIN routes, and creates a server.
 func NewAdminServer(ctx context.Context) *service.Server {
-	attrClient := client.NewAttributionClient(client.AttributionConfig{
+
+	attrClient := client.NewAttributionClient(ctx, client.AttributionConfig{
 		URL:     conf.GetAsString("attribution-client.url"),
 		Retries: conf.GetAsInt("attribution-client.retries", 3),
+		CACert:  conf.GetAsString("ATTRIBUTION_CLIENT_CA_CERT"),
+		Cert:    conf.GetAsString("ATTRIBUTION_CLIENT_CERT"),
+		CertKey: conf.GetAsString("ATTRIBUTION_CLIENT_CERT_KEY"),
 	})
 
 	ssasClient := client.NewSsasHTTPClient(client.SsasHTTPClientConfig{

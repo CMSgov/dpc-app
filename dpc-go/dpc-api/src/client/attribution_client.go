@@ -12,6 +12,7 @@ import (
 	"github.com/go-chi/chi/middleware"
 	"io/ioutil"
 	"net/http"
+	"strings"
 
 	"github.com/hashicorp/go-retryablehttp"
 	"github.com/pkg/errors"
@@ -20,10 +21,11 @@ import (
 
 // AttributionConfig is a struct to hold configuration info for retryablehttp client
 type AttributionConfig struct {
-	URL        string
-	Retries    int
-	CACertPool *x509.CertPool
-	Cert       tls.Certificate
+	URL     string
+	Retries int
+	CACert  string
+	Cert    string
+	CertKey string
 }
 
 // ResourceType is a type to be used when making requests to different endpoints in attribution service
@@ -75,15 +77,16 @@ type AttributionClient struct {
 }
 
 // NewAttributionClient initializes the retryable client and returns a reference to the attribution client
-func NewAttributionClient(config AttributionConfig) Client {
+func NewAttributionClient(ctx context.Context, config AttributionConfig) Client {
 	client := retryablehttp.NewClient()
 	client.RetryMax = config.Retries
+	caPool, cert := getAttrCertificates(ctx, config.CACert, config.Cert, config.CertKey)
 
-	if len(config.Cert.Certificate) != 0 && config.CACertPool != nil {
+	if len(cert.Certificate) != 0 && caPool != nil {
 		client.HTTPClient.Transport = &http.Transport{
 			TLSClientConfig: &tls.Config{
-				RootCAs:      config.CACertPool,
-				Certificates: []tls.Certificate{config.Cert},
+				RootCAs:      caPool,
+				Certificates: []tls.Certificate{cert},
 			},
 		}
 	}
@@ -92,6 +95,30 @@ func NewAttributionClient(config AttributionConfig) Client {
 		config:     config,
 		httpClient: client,
 	}
+}
+
+func getAttrCertificates(ctx context.Context, caCert string, cert string, certKey string) (*x509.CertPool, tls.Certificate) {
+	caStr := strings.ReplaceAll(caCert, "\\n", "\n")
+	crtStr := strings.ReplaceAll(cert, "\\n", "\n")
+	keyStr := strings.ReplaceAll(certKey, "\\n", "\n")
+
+	if caStr == "" || crtStr == "" || keyStr == "" {
+		logger.WithContext(ctx).Warn("Missing one of: ATTRIBUTION_CLIENT_CA_CERT, ATTRIBUTION_CLIENT_CERT, ATTRIBUTION_CLIENT_CERT_KEY")
+		return nil, tls.Certificate{}
+	}
+
+	certPool := x509.NewCertPool()
+	ok := certPool.AppendCertsFromPEM([]byte(caStr))
+	if !ok {
+		logger.WithContext(ctx).Fatal("Failed to parse server CA cert")
+	}
+
+	crt, err := tls.X509KeyPair([]byte(crtStr), []byte(keyStr))
+	if err != nil {
+		logger.WithContext(ctx).Fatal("Failed to parse server cert/key par", zap.Error(err))
+	}
+
+	return certPool, crt
 }
 
 // CreateImplOrg is a function to create an Implementer/Organization relation via attribution service

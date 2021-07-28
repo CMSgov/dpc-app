@@ -2,18 +2,14 @@ package public
 
 import (
 	"context"
-	"crypto/tls"
-	"crypto/x509"
 	"github.com/CMSgov/dpc/api/auth"
 	"github.com/CMSgov/dpc/api/client"
 	"github.com/CMSgov/dpc/api/conf"
-	"github.com/CMSgov/dpc/api/logger"
 	middleware2 "github.com/CMSgov/dpc/api/middleware"
 	"github.com/CMSgov/dpc/api/service"
 	v2 "github.com/CMSgov/dpc/api/v2"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
-	"go.uber.org/zap"
 	"net/http"
 	"strings"
 )
@@ -67,13 +63,13 @@ func buildPublicRoutes(cont controllers) http.Handler {
 
 // NewPublicServer configures clients, builds ADMIN routes, and creates a server.
 func NewPublicServer(ctx context.Context) *service.Server {
-	caPool, crt := getAttrCertificates(ctx)
 
-	attrClient := client.NewAttributionClient(client.AttributionConfig{
-		URL:        conf.GetAsString("attribution-client.url"),
-		Retries:    conf.GetAsInt("attribution-client.retries", 3),
-		CACertPool: caPool,
-		Cert:       crt,
+	attrClient := client.NewAttributionClient(ctx, client.AttributionConfig{
+		URL:     conf.GetAsString("attribution-client.url"),
+		Retries: conf.GetAsInt("attribution-client.retries", 3),
+		CACert:  conf.GetAsString("ATTRIBUTION_CLIENT_CA_CERT"),
+		Cert:    conf.GetAsString("ATTRIBUTION_CLIENT_CERT"),
+		CertKey: conf.GetAsString("ATTRIBUTION_CLIENT_CERT_KEY"),
 	})
 	dataClient := client.NewDataClient(client.DataConfig{
 		URL:     conf.GetAsString("attribution-client.url"),
@@ -124,28 +120,4 @@ type controllers struct {
 	Group    v2.Controller
 	Data     v2.FileController
 	Job      v2.JobController
-}
-
-func getAttrCertificates(ctx context.Context) (*x509.CertPool, tls.Certificate) {
-	caStr := strings.ReplaceAll(conf.GetAsString("ATTRIBUTION_CLIENT_CA_CERT"), "\\n", "\n")
-	crtStr := strings.ReplaceAll(conf.GetAsString("ATTRIBUTION_CLIENT_CERT"), "\\n", "\n")
-	keyStr := strings.ReplaceAll(conf.GetAsString("ATTRIBUTION_CLIENT_CERT_KEY"), "\\n", "\n")
-
-	if caStr == "" || crtStr == "" || keyStr == "" {
-		logger.WithContext(ctx).Warn("Missing one of: ATTRIBUTION_CLIENT_CA_CERT, ATTRIBUTION_CLIENT_CERT, ATTRIBUTION_CLIENT_CERT_KEY")
-		return nil, tls.Certificate{}
-	}
-
-	certPool := x509.NewCertPool()
-	ok := certPool.AppendCertsFromPEM([]byte(caStr))
-	if !ok {
-		logger.WithContext(ctx).Fatal("Failed to parse server CA cert")
-	}
-
-	crt, err := tls.X509KeyPair([]byte(crtStr), []byte(keyStr))
-	if err != nil {
-		logger.WithContext(ctx).Fatal("Failed to parse server cert/key par", zap.Error(err))
-	}
-
-	return certPool, crt
 }

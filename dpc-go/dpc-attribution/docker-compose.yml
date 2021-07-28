@@ -24,3 +24,6 @@ services:
       - DPC_DB_URLV1=postgresql://postgres:dpc-safe@db:5432/dpc_attribution
       - DPC_DB_QUEUEURL=postgresql://postgres:dpc-safe@db:5432/dpc_queue
       - DPC_PORT=3001
+      - DPC_CA_CERT=?
+      - DPC_SERT_CERT=?
+      - DPC_SERT_KEY_CERT=?
