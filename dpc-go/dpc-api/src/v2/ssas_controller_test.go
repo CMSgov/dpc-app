@@ -104,7 +104,89 @@ func (suite *SsasControllerTestSuite) TestCreateSystemForInactiveRelation() {
 	resp, _ := ioutil.ReadAll(res.Body)
 
 	assert.Equal(suite.T(), http.StatusBadRequest, res.StatusCode)
-	assert.Contains(suite.T(), string(resp), "Implementor/Org relation is not active")
+	assert.Contains(suite.T(), string(resp), "Implementer/Org relation is not active")
+}
+
+func (suite *SsasControllerTestSuite) TestGetSystem() {
+
+	req, _ := suite.SetupHappyPathMocks()
+
+	//Mock client calls
+	managedOrg := client.ProviderOrg{
+		OrgName:      "Test Org",
+		OrgID:        "abc",
+		Npi:          "npi-1",
+		Status:       "Active",
+		SsasSystemID: "system-id-1",
+	}
+	orgs := make([]client.ProviderOrg, 1)
+	orgs[0] = managedOrg
+	findExpectedCall(suite.mac.ExpectedCalls, "GetProviderOrgs").Return(orgs, nil)
+
+	//Do request
+	w := httptest.NewRecorder()
+	suite.sc.GetSystem(w, req)
+	res := w.Result()
+
+	ja := jsonassert.New(suite.T())
+	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
+	resp, _ := ioutil.ReadAll(res.Body)
+	ja.Assertf(string(resp), `
+    {
+      "client_id": "c001",
+      "client_name": "Test Org",
+      "public_keys": [
+        {
+          "creation_date": "creation",
+          "id": "public-key-1",
+          "key": "public-key"
+        },
+        {
+          "creation_date": "creation",
+          "id": "public-key-2",
+          "key": "public-key2"
+        }
+      ],
+      "ips": [
+        {
+          "creation_date": "creation",
+          "id": "ip-1",
+          "ip": "ip"
+        },
+        {
+          "creation_date": "creation",
+          "id": "ip-2",
+          "ip": "ip2"
+        }
+      ],
+      "client_tokens": [
+        {
+          "creation_date": "creation",
+          "expires_at": "expiration",
+          "id": "public-key-1",
+          "label": "my-client-token",
+          "uuid": "uuid"
+        },
+        {
+          "creation_date": "creation",
+          "expires_at": "expiration",
+          "id": "public-key-2",
+          "label": "my-client-token2",
+          "uuid": "uuid2"
+        }
+      ]
+    }`)
+}
+
+func (suite *SsasControllerTestSuite) TestGetWhenSystemIDNotLinked() {
+	req, _ := suite.SetupHappyPathMocks()
+
+	//Do request
+	w := httptest.NewRecorder()
+	suite.sc.GetSystem(w, req)
+	res := w.Result()
+
+	assert.Equal(suite.T(), http.StatusBadRequest, res.StatusCode)
 }
 
 func (suite *SsasControllerTestSuite) SetupHappyPathMocks() (*http.Request, context.Context) {
@@ -130,6 +212,7 @@ func (suite *SsasControllerTestSuite) SetupHappyPathMocks() (*http.Request, cont
 		Status:       "Active",
 		SsasSystemID: "",
 	}
+
 	orgs := make([]client.ProviderOrg, 1)
 	orgs[0] = managedOrg
 	suite.mac.On("GetProviderOrgs", mock.Anything, mock.Anything).Return(orgs, nil)
@@ -151,8 +234,23 @@ func (suite *SsasControllerTestSuite) SetupHappyPathMocks() (*http.Request, cont
 		XData:       "xdata",
 		IPs:         ips,
 	}
+
+	ssasGetResp := client.GetSystemResponse{
+		GID:          "01",
+		GroupID:      "0001",
+		ClientID:     "c001",
+		SoftwareID:   "software-id",
+		ClientName:   "Test Org",
+		APIScope:     "api-scope",
+		XData:        "xdata",
+		LastTokenAt:  "lastToken",
+		PublicKeys:   []map[string]string{{"key": "public-key", "id": "public-key-1", "creation_date": "creation"}, {"key": "public-key2", "id": "public-key-2", "creation_date": "creation"}},
+		IPs:          []map[string]string{{"ip": "ip", "id": "ip-1", "creation_date": "creation"}, {"ip": "ip2", "id": "ip-2", "creation_date": "creation"}},
+		ClientTokens: []map[string]string{{"label": "my-client-token", "id": "public-key-1", "creation_date": "creation", "uuid": "uuid", "expires_at": "expiration"}, {"label": "my-client-token2", "id": "public-key-2", "creation_date": "creation", "uuid": "uuid2", "expires_at": "expiration"}},
+	}
 	suite.msc.On("CreateSystem", mock.Anything, mock.Anything).Return(ssasResp, nil)
 	suite.mac.On("UpdateImplOrg", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(client.ImplementerOrg{}, nil)
+	suite.msc.On("GetSystem", mock.Anything, mock.Anything).Return(ssasGetResp, nil)
 
 	return req, ctx
 }

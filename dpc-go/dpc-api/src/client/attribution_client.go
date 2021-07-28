@@ -154,7 +154,7 @@ func (ac *AttributionClient) GetImplOrg(ctx context.Context) ([]byte, error) {
 		return nil, errors.Errorf("Failed to extract the implementer id from the context")
 	}
 
-	url := fmt.Sprintf("%s/implementer/%s/org", ac.config.URL, implID)
+	url := fmt.Sprintf("%s/Implementer/%s/org", ac.config.URL, implID)
 	req, err := retryablehttp.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		log.Error("Failed to create request", zap.Error(err))
