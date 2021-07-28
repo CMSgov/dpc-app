@@ -228,6 +228,19 @@ public class JobQueueBatch implements Serializable {
         }
     }
 
+
+    /**
+     * Is the job for v1 or v2 based on the request url.
+     *
+     * @return True if request url contains `/v2/`
+     */
+    public Boolean isV2() {
+        if (requestUrl == null) {
+            return false;
+        }
+        return requestUrl.contains("/v2/");
+    }
+
     public UUID getBatchID() {
         return batchID;
     }
