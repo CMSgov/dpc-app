@@ -16,7 +16,8 @@ import (
 
 // SsasHTTPClientConfig is a struct to hold configuration info for retryable http client
 type SsasHTTPClientConfig struct {
-	URL          string
+	PublicURL    string
+	AdminURL     string
 	Retries      int
 	ClientID     string
 	ClientSecret string
@@ -57,7 +58,7 @@ func NewSsasHTTPClient(config SsasHTTPClientConfig) SsasClient {
 func (sc *SsasHTTPClient) CreateToken(ctx context.Context, systemID string, label string) (string, error) {
 	log := logger.WithContext(ctx)
 
-	url := fmt.Sprintf("%s/%s/%s/token", sc.config.URL, PostV2SystemEndpoint, systemID)
+	url := fmt.Sprintf("%s/%s/%s/token", sc.config.AdminURL, PostV2SystemEndpoint, systemID)
 
 	resBytes, err := sc.doPost(ctx, url, []byte(fmt.Sprintf(`{"label": "%s"}`, label)))
 	if err != nil {
@@ -83,7 +84,7 @@ func (sc *SsasHTTPClient) CreateToken(ctx context.Context, systemID string, labe
 func (sc *SsasHTTPClient) DeleteToken(ctx context.Context, systemID string, tokenID string) error {
 	log := logger.WithContext(ctx)
 
-	url := fmt.Sprintf("%s/%s/%s/token/%s", sc.config.URL, PostV2SystemEndpoint, systemID, tokenID)
+	url := fmt.Sprintf("%s/%s/%s/token/%s", sc.config.AdminURL, PostV2SystemEndpoint, systemID, tokenID)
 
 	err := sc.doDelete(ctx, url)
 	if err != nil {
@@ -97,7 +98,7 @@ func (sc *SsasHTTPClient) DeleteToken(ctx context.Context, systemID string, toke
 func (sc *SsasHTTPClient) GetSystem(ctx context.Context, systemID string) (GetSystemResponse, error) {
 	log := logger.WithContext(ctx)
 
-	url := fmt.Sprintf("%s/%s/%s", sc.config.URL, PostV2SystemEndpoint, systemID)
+	url := fmt.Sprintf("%s/%s/%s", sc.config.AdminURL, PostV2SystemEndpoint, systemID)
 
 	resBytes, err := sc.doGet(ctx, url)
 	if err != nil {
@@ -120,7 +121,7 @@ func (sc *SsasHTTPClient) CreateSystem(ctx context.Context, request CreateSystem
 		log.Error("Failed to convert model to bytes", zap.Error(err))
 		return CreateSystemResponse{}, errors.Errorf("Failed to create ssas system")
 	}
-	url := fmt.Sprintf("%s/%s", sc.config.URL, PostV2SystemEndpoint)
+	url := fmt.Sprintf("%s/%s", sc.config.AdminURL, PostV2SystemEndpoint)
 
 	resBytes, err := sc.doPost(ctx, url, reqBytes.Bytes())
 	if err != nil {
@@ -143,7 +144,7 @@ func (sc *SsasHTTPClient) CreateGroup(ctx context.Context, request CreateGroupRe
 		log.Error("Failed to convert model to bytes", zap.Error(err))
 		return CreateGroupResponse{}, errors.Errorf("Failed to create ssas group")
 	}
-	url := fmt.Sprintf("%s/%s", sc.config.URL, PostV2GroupEndpoint)
+	url := fmt.Sprintf("%s/%s", sc.config.AdminURL, PostV2GroupEndpoint)
 
 	resBytes, err := sc.doPost(ctx, url, reqBytes.Bytes())
 	if err != nil {

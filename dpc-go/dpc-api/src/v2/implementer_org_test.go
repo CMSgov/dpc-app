@@ -37,7 +37,7 @@ func TestImplementerOrgControllerTestSuite(t *testing.T) {
 func (suite *ImplementerOrgControllerTestSuite) TestCreateImplementerOrg() {
 	//Mock impl creation
 	createImplOrgResp := client.ImplementerOrg{}
-	faker.FakeData(&createImplOrgResp)
+	_ = faker.FakeData(&createImplOrgResp)
 	createImplOrgResp.Npi = apitest.GenerateNPI()
 	suite.mac.On("CreateImplOrg", mock.Anything, mock.Anything).Return(createImplOrgResp, nil)
 
