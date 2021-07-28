@@ -1,6 +1,10 @@
 <% title @org[:name] %>
 
 <div class="ds-u-margin-bottom--6" id="dashboard__title">
+  <div>
+    <%= link_to "Back to Portal", root_path %>
+  </div>
+
   <h1 class="ds-text-heading--4xl ds-title"><%= @org[:name] %></h1>
   <div>
     <div>
@@ -28,6 +32,23 @@
       <% if @client_tokens.count.zero? %>
         There are currently no client token associated with this provider organization.
       <% else %>
+        <ul class="list">
+          <% @client_tokens.each do |token| %>
+            <li class="list_item">
+              <div class="item_info">
+                <div class="item_label">
+                  <%= token[:label] %>
+                </div>
+                <div>
+                  Created: <%= token[:creation_date] %>
+                </div>
+                <div>
+                  Expires: <%= token[:expires_at] %>
+                </div>
+              </div>
+            </li>
+          <% end %>
+        </ul>
       <% end %>
     </div>
 
@@ -38,6 +59,23 @@
       <% if @public_keys.count.zero? %>
         There are currently no public keys associated with this provider organization.
       <% else %>
+        <ul class="list">
+          <% @public_keys.each do |key| %>
+            <li class="list_item">
+              <div class="item_info">
+                <div class="item_label">
+                  <%= key[:label] %>
+                </div>
+                <div>
+                  Created: <%= key[:creation_date] %>
+                </div>
+                <div>
+                  Expires: <%= key[:expires_at] %>
+                </div>
+              </div>
+            </li>
+          <% end %>
+        </ul>
       <% end %>
     </div>
   </div>

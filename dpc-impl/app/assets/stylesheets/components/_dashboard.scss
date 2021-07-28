@@ -66,6 +66,7 @@
 
 .porg_container {
   border: 1px solid $color-gray-light;
+  color: $color-gray;
   padding: 20px;
   width: 100%;
 
@@ -78,6 +79,17 @@
       color: $color-gray;
       margin: 0;
     }
+  }
+
+  ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .item_label {
+    color: $color-base;
+    font-weight: 700;
   }
 }
 
