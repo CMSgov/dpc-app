@@ -5,7 +5,6 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"database/sql"
-	"errors"
 	"fmt"
 	"github.com/CMSgov/dpc/attribution/conf"
 	"github.com/CMSgov/dpc/attribution/logger"
@@ -128,7 +127,7 @@ func getClientValidator(helloInfo *tls.ClientHelloInfo, cerPool *x509.CertPool) 
 				return nil
 			}
 		}
-		return errors.New(fmt.Sprintf("Client's SAN does not contain required name: %s ", reqName))
+		return fmt.Errorf("client's SAN does not contain required name: %s", reqName)
 	}
 }
 
