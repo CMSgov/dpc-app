@@ -94,7 +94,7 @@ func NewPublicServer() *service.Server {
 		Group:    v2.NewGroupController(attrClient),
 		Data:     v2.NewDataController(dataClient),
 		Job:      v2.NewJobController(jobClient),
-		Ssas:    v2.NewSSASController(ssasClient, attrClient),
+		Ssas:     v2.NewSSASController(ssasClient, attrClient),
 	}
 
 	r := buildPublicRoutes(controllers)
