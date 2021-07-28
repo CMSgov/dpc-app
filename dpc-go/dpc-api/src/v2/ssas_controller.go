@@ -40,7 +40,7 @@ func (sc *SSASController) GetSystem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	found, mOrg, err := sc.getManagedOrg(r, implementerID, organizationID)
+	found, mOrg, err := sc.getProviderOrg(r, implementerID, organizationID)
 	if err != nil {
 		log.Error("Failed to retrieve implementer's managed orgs", zap.Error(err))
 		boom.Internal(w, w, http.StatusInternalServerError, "Internal Server Error")
