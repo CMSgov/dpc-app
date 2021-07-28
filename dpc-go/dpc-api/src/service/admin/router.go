@@ -46,8 +46,8 @@ func buildAdminRoutes(c controllers) http.Handler {
 		})
 
 		r.Route("/Implementer/{implementerID}/Org/{organizationID}", func(r chi.Router) {
-			r.With(middleware2.OrganizationCtx).Post("/key", c.Ssas.AddKey)
-			r.With(middleware2.OrganizationCtx, middleware2.PublicKeyCtx).Delete("/key/{keyID}", c.Ssas.DeleteKey)
+			r.With(middleware2.ImplementerCtx, middleware2.OrganizationCtx).Post("/key", c.Ssas.AddKey)
+			r.With(middleware2.ImplementerCtx, middleware2.OrganizationCtx, middleware2.PublicKeyCtx).Delete("/key/{keyID}", c.Ssas.DeleteKey)
 		})
 	})
 	return r
