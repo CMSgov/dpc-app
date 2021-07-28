@@ -9,6 +9,7 @@ import (
 	"github.com/CMSgov/dpc/api/middleware"
 	"github.com/darahayes/go-boom"
 	"go.uber.org/zap"
+	"io/ioutil"
 	"net/http"
 
 	"github.com/CMSgov/dpc/api/client"
@@ -58,8 +59,25 @@ func (sc *SSASController) CreateToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	label := r.URL.Query().Get("label")
-	token, err := sc.ssasClient.CreateToken(r.Context(), mOrg.SsasSystemID, label)
+	b, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		log.Error("Failed to read body", zap.Error(err))
+		fhirror.ServerIssue(r.Context(), w, 500, "Failed to create token")
+		return
+	}
+
+	var resp TokenCreateRequest
+	if err := json.Unmarshal(b, &resp); err != nil {
+		log.Error("Failed to unmarshal response", zap.Error(err))
+		fhirror.ServerIssue(r.Context(), w, 500, "Failed to create token")
+		return
+	}
+
+	if resp.label == "" {
+		resp.label = fmt.Sprintf("Initial %s token", mOrg.OrgName)
+	}
+
+	token, err := sc.ssasClient.CreateToken(r.Context(), mOrg.SsasSystemID, resp.label)
 	if err != nil {
 		log.Error("Failed to create token", zap.Error(err))
 		fhirror.ServerIssue(r.Context(), w, 500, "Failed to create token")
@@ -319,4 +337,8 @@ type ProxyGetSystemResponse struct {
 	PublicKeys   []map[string]string `json:"public_keys"`
 	IPs          []map[string]string `json:"ips"`
 	ClientTokens []map[string]string `json:"client_tokens"`
+}
+
+type TokenCreateRequest struct {
+	label string `json:"label"`
 }
