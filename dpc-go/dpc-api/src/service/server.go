@@ -74,7 +74,7 @@ func (s *Server) Serve(ctx context.Context) error {
 }
 
 func getClientValidator(helloInfo *tls.ClientHelloInfo, cerPool *x509.CertPool) func([][]byte, [][]*x509.Certificate) error {
-	reqName := conf.GetAsString("TLS_REQUIRED_ALT_NAME", "attribution.user.dpc.cms.gov")
+	reqName := conf.GetAsString("TLS_REQUIRED_ALT_NAME", "api.user.dpc.cms.gov")
 	return func(rawCerts [][]byte, verifiedChains [][]*x509.Certificate) error {
 		for _, n := range verifiedChains[0][0].DNSNames {
 			if n == reqName {
