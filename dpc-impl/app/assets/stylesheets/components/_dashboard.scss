@@ -10,6 +10,10 @@
   width: 220px;
 }
 
+#dash_content {
+  width: 100%;
+}
+
 .dash_content_header {
   border-bottom: 1px solid $color-gray-light;
   display: flex;
@@ -58,6 +62,27 @@
   .provider_status {
     font-size: 14px;
   }
+}
+
+.porg_container {
+  border: 1px solid $color-gray-light;
+  padding: 20px;
+  width: 100%;
+
+  .header-container {
+    border-bottom: 1px solid $color-gray-lighter;
+    margin-bottom: 18px;
+    padding-bottom: 4px;
+
+    h2 {
+      color: $color-gray;
+      margin: 0;
+    }
+  }
+}
+
+.porg_container + .porg_container {
+  margin-top: 36px;
 }
 
 #dash_nav_demo {

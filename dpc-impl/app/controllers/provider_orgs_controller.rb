@@ -17,8 +17,7 @@ class ProviderOrgsController < ApplicationController
     
     if org_api_request[:id].present? && org_api_request[:id] == @org_id
       @org = org_api_request
-      @org_info = @org[:identifier]
-      @npi = org_npi(@org_info)
+      @npi = org_npi(@org[:identifier])
       @status = org_status(@npi)
 
       @client_tokens = get_client_tokens(imp_id, @org_id)
@@ -54,12 +53,22 @@ class ProviderOrgsController < ApplicationController
 
   def get_client_tokens(imp_id, org_id)
     api_req = tokens_keys_api_req(imp_id, org_id)
-    return api_req[:client_tokens]
+
+    if api_req.class == Hash
+      return api_req[:client_tokens]
+    else
+      return []
+    end
   end
 
   def get_public_keys(imp_id, org_id)
     api_req = tokens_keys_api_req(imp_id, org_id)
-    return api_req[:public_keys]
+
+    if api_req.class == Hash
+      return api_req[:public_keys]
+    else
+      return []
+    end
   end
   
   def imp_id

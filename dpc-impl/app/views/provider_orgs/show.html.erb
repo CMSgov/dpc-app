@@ -21,5 +21,24 @@
   </div>
 
   <div id="dash_content">
+    <div class="porg_container" id="client_tokens_container">
+      <div class="header-container">
+        <h2>Client Tokens</h2>
+      </div>
+      <% if @client_tokens.count.zero? %>
+        There are currently no client token associated with this provider organization.
+      <% else %>
+      <% end %>
+    </div>
+
+    <div class="porg_container" id="public_keys_container">
+      <div class="header-container">
+        <h2>Public Keys</h2>
+      </div>
+      <% if @public_keys.count.zero? %>
+        There are currently no public keys associated with this provider organization.
+      <% else %>
+      <% end %>
+    </div>
   </div>
 </div>
