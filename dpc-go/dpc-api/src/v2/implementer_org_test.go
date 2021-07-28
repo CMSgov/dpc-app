@@ -35,11 +35,11 @@ func TestImplementerOrgControllerTestSuite(t *testing.T) {
 }
 
 func (suite *ImplementerOrgControllerTestSuite) TestCreateImplementerOrg() {
-  //Mock impl creation
-  createImplOrgResp := client.ImplementerOrg{}
-  _ = faker.FakeData(&createImplOrgResp)
-  createImplOrgResp.Npi = apitest.GenerateNPI()
-  suite.mac.On("CreateImplOrg", mock.Anything, mock.Anything).Return(createImplOrgResp, nil)
+	//Mock impl creation
+	createImplOrgResp := client.ImplementerOrg{}
+	_ = faker.FakeData(&createImplOrgResp)
+	createImplOrgResp.Npi = apitest.GenerateNPI()
+	suite.mac.On("CreateImplOrg", mock.Anything, mock.Anything).Return(createImplOrgResp, nil)
 
 	req := httptest.NewRequest(http.MethodPost, "http://example.com/foo", strings.NewReader(apitest.ImplOrgJSON()))
 	ctx := req.Context()
