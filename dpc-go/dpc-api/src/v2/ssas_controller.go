@@ -73,11 +73,11 @@ func (sc *SSASController) CreateToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if resp.label == "" {
-		resp.label = fmt.Sprintf("Initial %s token", mOrg.OrgName)
+	if resp.Label == "" {
+		resp.Label = fmt.Sprintf("Initial %s token", mOrg.OrgName)
 	}
 
-	token, err := sc.ssasClient.CreateToken(r.Context(), mOrg.SsasSystemID, resp.label)
+	token, err := sc.ssasClient.CreateToken(r.Context(), mOrg.SsasSystemID, resp.Label)
 	if err != nil {
 		log.Error("Failed to create token", zap.Error(err))
 		fhirror.ServerIssue(r.Context(), w, 500, "Failed to create token")
@@ -339,6 +339,7 @@ type ProxyGetSystemResponse struct {
 	ClientTokens []map[string]string `json:"client_tokens"`
 }
 
+// TokenCreateRequest struct that models the creat request for a token
 type TokenCreateRequest struct {
-	label string `json:"label"`
+	Label string `json:"label"`
 }
