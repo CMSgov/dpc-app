@@ -164,7 +164,7 @@ func (sc *SsasHTTPClient) doPost(ctx context.Context, url string, reqBytes []byt
 // Authenticate proxies a request to authenticate the token
 func (sc *SsasHTTPClient) Authenticate(ctx context.Context, reqBytes []byte) ([]byte, error) {
 	log := logger.WithContext(ctx)
-	url := fmt.Sprintf("%s/%s", sc.config.URL, PostV2AuthenticateToken)
+	url := fmt.Sprintf("%s/%s", sc.config.PublicURL, PostV2AuthenticateToken)
 
 	headers := make(map[string]string, 2)
 	headers["Content-Type"] = "application/x-www-form-urlencoded"

@@ -67,6 +67,7 @@ func NewPublicServer() *service.Server {
 		URL:     conf.GetAsString("attribution-client.url"),
 		Retries: conf.GetAsInt("attribution-client.retries", 3),
 	})
+
 	dataClient := client.NewDataClient(client.DataConfig{
 		URL:     conf.GetAsString("attribution-client.url"),
 		Retries: conf.GetAsInt("attribution-client.retries", 3),
@@ -77,6 +78,14 @@ func NewPublicServer() *service.Server {
 		Retries: conf.GetAsInt("attribution-client.retries", 3),
 	})
 
+	ssasClient := client.NewSsasHTTPClient(client.SsasHTTPClientConfig{
+		PublicURL:    conf.GetAsString("ssas-client.public-url"),
+		AdminURL:     conf.GetAsString("ssas-client.admin-url"),
+		Retries:      conf.GetAsInt("ssas-client.attrRetries", 3),
+		ClientID:     conf.GetAsString("ssas-client.client-id"),
+		ClientSecret: conf.GetAsString("ssas-client.client-secret"),
+	})
+
 	port := conf.GetAsInt("PUBLIC_PORT", 3000)
 
 	controllers := controllers{
@@ -85,6 +94,7 @@ func NewPublicServer() *service.Server {
 		Group:    v2.NewGroupController(attrClient),
 		Data:     v2.NewDataController(dataClient),
 		Job:      v2.NewJobController(jobClient),
+		Ssas:    v2.NewSSASController(ssasClient, attrClient),
 	}
 
 	r := buildPublicRoutes(controllers)
