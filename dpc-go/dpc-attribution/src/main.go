@@ -121,9 +121,8 @@ func createV1Services(attrDbV1 *sql.DB, queueDbV1 *sql.DB) (service.JobService, 
 }
 
 func getClientValidator(helloInfo *tls.ClientHelloInfo, cerPool *x509.CertPool) func([][]byte, [][]*x509.Certificate) error {
+	reqName := conf.GetAsString("TLS_REQUIRED_ALT_NAME", "attribution.user.dpc.cms.gov")
 	return func(rawCerts [][]byte, verifiedChains [][]*x509.Certificate) error {
-		//TODO make this configurable
-	    reqName := "attribution.user.dpc.cms.gov"
 		for _, n := range verifiedChains[0][0].DNSNames {
 			if n == reqName {
 				return nil
@@ -138,16 +137,8 @@ func getServerCertificates(ctx context.Context) (*x509.CertPool, tls.Certificate
 	crtStr := strings.ReplaceAll(conf.GetAsString("SERVER_CERT"), "\\n", "\n")
 	keyStr := strings.ReplaceAll(conf.GetAsString("SERVER_CERT_KEY"), "\\n", "\n")
 
-	if caStr == "" {
-		logger.WithContext(ctx).Fatal("Missing server ca cert, env variable CA_CERT is required")
-	}
-
-	if crtStr == "" {
-		logger.WithContext(ctx).Fatal("Missing server cert, env variable SERVER_CERT is required")
-	}
-
-	if keyStr == "" {
-		logger.WithContext(ctx).Fatal("Missing server cert key, env variable SERVER_CERT_KEY is required")
+	if caStr == "" || crtStr == "" || keyStr == "" {
+		logger.WithContext(ctx).Fatal("One of the following required environment variables is missing: DPC_CA_CERT, DPC_SERVER_CERT, DPC_SERVER_CERT_KEY")
 	}
 
 	certPool := x509.NewCertPool()
