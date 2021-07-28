@@ -5,20 +5,18 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"database/sql"
+	"errors"
 	"fmt"
-	"github.com/CMSgov/dpc/attribution/service"
-	"net/http"
-	"strings"
-	"time"
-
-	"go.uber.org/zap"
-
 	"github.com/CMSgov/dpc/attribution/conf"
 	"github.com/CMSgov/dpc/attribution/logger"
 	"github.com/CMSgov/dpc/attribution/repository"
 	"github.com/CMSgov/dpc/attribution/router"
+	"github.com/CMSgov/dpc/attribution/service"
 	v1 "github.com/CMSgov/dpc/attribution/service/v1"
 	v2 "github.com/CMSgov/dpc/attribution/service/v2"
+	"go.uber.org/zap"
+	"net/http"
+	"strings"
 )
 
 func main() {
@@ -124,18 +122,14 @@ func createV1Services(attrDbV1 *sql.DB, queueDbV1 *sql.DB) (service.JobService, 
 
 func getClientValidator(helloInfo *tls.ClientHelloInfo, cerPool *x509.CertPool) func([][]byte, [][]*x509.Certificate) error {
 	return func(rawCerts [][]byte, verifiedChains [][]*x509.Certificate) error {
-		//Taken from src/crypto/tls/handshake_server.go
-		rAdd := helloInfo.Conn.RemoteAddr().String()
-		host := rAdd[:strings.LastIndex(rAdd, ":")]
-		opts := x509.VerifyOptions{
-			Roots:         cerPool,
-			CurrentTime:   time.Now(),
-			Intermediates: x509.NewCertPool(),
-			KeyUsages:     []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth},
-			DNSName:       host,
+		//TODO make this configurable
+	    reqName := "attribution.user.dpc.cms.gov"
+		for _, n := range verifiedChains[0][0].DNSNames {
+			if n == reqName {
+				return nil
+			}
 		}
-		_, err := verifiedChains[0][0].Verify(opts)
-		return err
+		return errors.New(fmt.Sprintf("Client's SAN does not contain required name: %s ", reqName))
 	}
 }
 
@@ -166,6 +160,5 @@ func getServerCertificates(ctx context.Context) (*x509.CertPool, tls.Certificate
 	if err != nil {
 		logger.WithContext(ctx).Fatal("Failed to parse server cert/key par", zap.Error(err))
 	}
-
 	return certPool, crt
 }
