@@ -83,6 +83,13 @@ services:
     depends_on:
       - db
 
+  ssas-migrate:
+    build:
+      context: .
+      args:
+        VERSION: latest
+      dockerfile: docker/Dockerfiles/Dockerfile.ssas-migrate
+
   # Starts up each service in the background
   start_core_dependencies:
     image: dadarek/wait-for-dependencies

@@ -78,12 +78,12 @@ type MockSsasClient struct {
 	mock.Mock
 }
 
-func (mc MockSsasClient) CreateSystem(ctx context.Context, request client.CreateSystemRequest) (client.CreateSystemResponse, error) {
+func (mc *MockSsasClient) CreateSystem(ctx context.Context, request client.CreateSystemRequest) (client.CreateSystemResponse, error) {
 	args := mc.Called(ctx, request)
 	return args.Get(0).(client.CreateSystemResponse), args.Error(1)
 }
 
-func (mc MockSsasClient) CreateGroup(ctx context.Context, request client.CreateGroupRequest) (client.CreateGroupResponse, error) {
+func (mc *MockSsasClient) CreateGroup(ctx context.Context, request client.CreateGroupRequest) (client.CreateGroupResponse, error) {
 	args := mc.Called(ctx, request)
 	return args.Get(0).(client.CreateGroupResponse), args.Error(1)
 }
