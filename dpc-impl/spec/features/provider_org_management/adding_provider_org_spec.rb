@@ -91,17 +91,19 @@ RSpec.feature 'adding provider organization' do
         .with(user.implementer_id)
         .and_return(api_client)
       allow(api_client).to receive(:response_successful?).and_return(true)
-      allow(api_client).to receive(:response_body).and_return([])
+      allow(api_client).to receive(:response_body).and_return(default_provider_orgs_list)
 
       visit root_path
 
-      find('[data-test="add-provider-org-test"]').click
-
-      allow(api_client).to receive(:create_provider_org)
-        .with(user.implementer_id, npi)
-        .and_return(api_client)
-
+      uuid = first('.provider-link').text().scan(/(?<=ID: )([\w-]+)/).first.first
       binding.pry
+      allow(api_client).to receive(:get_organization)
+        .with(uuid)
+        .and_return(api_client)
+      allow(api_client).to receive(:response_successful?).and_return(true)
+      allow(api_client).to receive(:response_body).and_return(default_single_provider_org)
+
+      first('.provider-link').click
     end
   end
 

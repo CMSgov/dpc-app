@@ -14,8 +14,8 @@ module ApiClientSupport
     {
       'id' => '923a4f7b-eade-494a-8ca4-7a685edacfad',
       'name' => 'Surreal Kayak',
-      'created_at' => 00000,
-      'updated_at' => 00000
+      'created_at' => DateTime.now,
+      'updated_at' => DateTime.now
     }
   end
 
@@ -26,5 +26,43 @@ module ApiClientSupport
      :organization_id=>"587ed9cf-6bd6-4860-9de3-077277b2c824",
      :created_at=>"2021-07-06T17:46:59.365253Z",
      :updated_at=>"2021-07-06T17:46:59.365253Z"}
+  end
+
+  def default_provider_orgs_list
+    [
+      {
+          "org_id": "28f3a00d-d714-44df-8844-7ec792adcd88",
+          "org_name": "Festive Kaftan Healthcare",
+          "status": "Active",
+          "npi": "3092016294",
+          "ssas_system_id": ""
+      },
+      {
+          "org_id": "6c9a5685-7cbe-42f1-9668-f139e67654ea",
+          "org_name": "Gregarious Capitol Healthcare",
+          "status": "Active",
+          "npi": "3718986623",
+          "ssas_system_id": ""
+      }
+    ]
+  end
+
+  def default_single_provider_org
+    {
+      "id": "6c9a5685-7cbe-42f1-9668-f139e67654ea",
+      "version": 0,
+      "created_at": "2021-07-26T15:02:07.737969Z",
+      "updated_at": "2021-07-26T15:02:07.737969Z",
+      "info": {
+          "identifier": [
+              {
+                  "system": "http://hl7.org/fhir/sid/us-npi",
+                  "value": "3718986623"
+              }
+          ],
+          "name": "Gregarious Capitol Healthcare",
+          "resourceType": "Organization"
+      }
+    }
   end
 end
