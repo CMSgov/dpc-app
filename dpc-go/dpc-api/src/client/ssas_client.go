@@ -34,6 +34,8 @@ type SsasClient interface {
 	CreateSystem(ctx context.Context, request CreateSystemRequest) (CreateSystemResponse, error)
 	CreateGroup(ctx context.Context, request CreateGroupRequest) (CreateGroupResponse, error)
 	GetSystem(ctx context.Context, systemID string) (GetSystemResponse, error)
+	CreateToken(ctx context.Context, systemID string, label string) (string, error)
+	DeleteToken(ctx context.Context, systemID string, tokenID string) error
 }
 
 // SsasHTTPClient is a struct to hold the retryable http client and configs
@@ -50,6 +52,46 @@ func NewSsasHTTPClient(config SsasHTTPClientConfig) SsasClient {
 		config:     config,
 		httpClient: client,
 	}
+}
+
+// CreateToken function to create a token for ssas system
+func (sc *SsasHTTPClient) CreateToken(ctx context.Context, systemID string, label string) (string, error) {
+	log := logger.WithContext(ctx)
+
+	url := fmt.Sprintf("%s/%s/%s/token", sc.config.AdminURL, PostV2SystemEndpoint, systemID)
+
+	resBytes, err := sc.doPost(ctx, url, []byte(fmt.Sprintf(`{"label": "%s"}`, label)))
+	if err != nil {
+		log.Error("Create token failed", zap.Error(err))
+		return "", err
+	}
+	var resp map[string]string
+	if err := json.NewDecoder(bytes.NewReader(resBytes)).Decode(&resp); err != nil {
+		log.Error("Failed to convert ssas response bytes to map model", zap.Error(err))
+		return "", err
+	}
+
+	token := resp["Token"]
+	if token == "" {
+		log.Error("No token property found")
+		return "", errors.Errorf("Failed to create token")
+	}
+
+	return token, nil
+}
+
+// DeleteToken function to delete a token from ssas system
+func (sc *SsasHTTPClient) DeleteToken(ctx context.Context, systemID string, tokenID string) error {
+	log := logger.WithContext(ctx)
+
+	url := fmt.Sprintf("%s/%s/%s/token/%s", sc.config.AdminURL, PostV2SystemEndpoint, systemID, tokenID)
+
+	err := sc.doDelete(ctx, url)
+	if err != nil {
+		log.Error("Delete token failed", zap.Error(err))
+		return err
+	}
+	return nil
 }
 
 // GetSystem function to get a ssas system
@@ -115,6 +157,38 @@ func (sc *SsasHTTPClient) CreateGroup(ctx context.Context, request CreateGroupRe
 		return CreateGroupResponse{}, errors.Errorf("Failed to create ssas group")
 	}
 	return resp, nil
+}
+
+func (sc *SsasHTTPClient) doDelete(ctx context.Context, url string) error {
+	log := logger.WithContext(ctx)
+	sc.httpClient.Logger = newLogger(*log)
+
+	req, err := retryablehttp.NewRequest(http.MethodDelete, url, nil)
+	if err != nil {
+		log.Error("Failed to create request", zap.Error(err))
+		return errors.Errorf("Failed to delete resource")
+	}
+	req.SetBasicAuth(sc.config.ClientID, sc.config.ClientSecret)
+	resp, err := sc.httpClient.Do(req)
+	if err != nil {
+		log.Error("Failed to send request", zap.Error(err))
+		return errors.Errorf("Failed to delete resource")
+	}
+
+	if resp.StatusCode < 200 || resp.StatusCode > 299 {
+		b, _ := ioutil.ReadAll(resp.Body)
+		body := string(b[:])
+		return errors.Errorf(body)
+	}
+
+	defer func() {
+		err := resp.Body.Close()
+		if err != nil {
+			log.Error("Failed to close response body", zap.Error(err))
+		}
+	}()
+
+	return nil
 }
 
 func (sc *SsasHTTPClient) doPost(ctx context.Context, url string, reqBytes []byte) ([]byte, error) {
