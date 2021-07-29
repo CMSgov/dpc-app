@@ -15,6 +15,7 @@ import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
 import gov.cms.dpc.bluebutton.clientV2.BlueButtonClientV2;
 import gov.cms.dpc.bluebutton.clientV2.MockBlueButtonClientV2;
 import gov.cms.dpc.common.utils.NPIUtil;
+import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.hapi.ContextUtils;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.JobStatus;
@@ -25,7 +26,6 @@ import gov.cms.dpc.testing.BufferedLoggerHandler;
 import io.reactivex.disposables.Disposable;
 import org.assertj.core.util.Lists;
 import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.ResourceType;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -120,7 +120,7 @@ class AggregationEngineTest {
                 TEST_ORG_NPI,
                 TEST_PROVIDER_NPI,
                 Collections.singletonList(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0)),
-                Collections.singletonList(ResourceType.Patient),
+                Collections.singletonList(DPCResourceType.Patient),
                 null,
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
                 null, null, true);
@@ -158,9 +158,9 @@ class AggregationEngineTest {
         final var completeJob = queue.getJobBatches(jobID).stream().findFirst().orElseThrow();
         assertEquals(JobStatus.COMPLETED, completeJob.getStatus());
         assertEquals(1000, completeJob.getPriority());
-        final var outputFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), ResourceType.Patient, 0);
+        final var outputFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), DPCResourceType.Patient, 0);
         assertTrue(Files.exists(Path.of(outputFilePath)));
-        final var errorFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), ResourceType.OperationOutcome, 0);
+        final var errorFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), DPCResourceType.OperationOutcome, 0);
         assertFalse(Files.exists(Path.of(errorFilePath)), "expect no error file");
     }
 
@@ -213,7 +213,7 @@ class AggregationEngineTest {
                 TEST_ORG_NPI,
                 TEST_PROVIDER_NPI,
                 Collections.singletonList(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0)),
-                Collections.singletonList(ResourceType.Patient),
+                Collections.singletonList(DPCResourceType.Patient),
                 null,
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
                 null, null, true);
@@ -226,9 +226,9 @@ class AggregationEngineTest {
         final var completeJob = queue.getJobBatches(jobID).stream().findFirst().orElseThrow();
         assertEquals(JobStatus.COMPLETED, completeJob.getStatus());
         assertEquals(1000, completeJob.getPriority());
-        final var outputFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), ResourceType.Patient, 0);
+        final var outputFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), DPCResourceType.Patient, 0);
         assertTrue(Files.exists(Path.of(outputFilePath)));
-        final var errorFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), ResourceType.OperationOutcome, 0);
+        final var errorFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), DPCResourceType.OperationOutcome, 0);
         assertFalse(Files.exists(Path.of(errorFilePath)), "expect no error file");
     }
 
@@ -245,7 +245,7 @@ class AggregationEngineTest {
                 TEST_ORG_NPI,
                 TEST_PROVIDER_NPI,
                 Collections.singletonList(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0)),
-                Collections.singletonList(ResourceType.Patient),
+                Collections.singletonList(DPCResourceType.Patient),
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
                 null, null, true);
@@ -257,9 +257,9 @@ class AggregationEngineTest {
         // Look at the result. Should be not have any output file.
         final var completeJob = queue.getJobBatches(jobID).stream().findFirst().orElseThrow();
         assertEquals(JobStatus.COMPLETED, completeJob.getStatus());
-        final var outputFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), ResourceType.Patient, 0);
+        final var outputFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), DPCResourceType.Patient, 0);
         assertFalse(Files.exists(Path.of(outputFilePath)));
-        final var errorFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), ResourceType.OperationOutcome, 0);
+        final var errorFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), DPCResourceType.OperationOutcome, 0);
         assertFalse(Files.exists(Path.of(errorFilePath)), "expect no error file");
     }
 
@@ -372,7 +372,7 @@ class AggregationEngineTest {
                 TEST_ORG_NPI,
                 TEST_PROVIDER_NPI,
                 mbis,
-                Collections.singletonList(ResourceType.Patient),
+                Collections.singletonList(DPCResourceType.Patient),
                 null,
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
                 null, null, true);
@@ -386,7 +386,7 @@ class AggregationEngineTest {
                 () -> assertTrue(queue.getJobBatches(jobID).stream().findFirst().isPresent()),
                 () -> assertEquals(JobStatus.COMPLETED, queue.getJobBatches(jobID).stream().findFirst().get().getStatus())
         );
-        var outputFilePath = ResourceWriter.formOutputFilePath(exportPath, queue.getJobBatches(jobID).stream().findFirst().get().getBatchID(), ResourceType.Patient, 0);
+        var outputFilePath = ResourceWriter.formOutputFilePath(exportPath, queue.getJobBatches(jobID).stream().findFirst().get().getBatchID(), DPCResourceType.Patient, 0);
         assertTrue(Files.exists(Path.of(outputFilePath)));
         try {
             final String fileContents = Files.readString(Path.of(outputFilePath));
@@ -409,7 +409,7 @@ class AggregationEngineTest {
                 TEST_ORG_NPI,
                 TEST_PROVIDER_NPI,
                 List.of(),
-                Collections.singletonList(ResourceType.Patient),
+                Collections.singletonList(DPCResourceType.Patient),
                 null,
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
                 null, null, true);
@@ -423,8 +423,8 @@ class AggregationEngineTest {
         queue.getJobBatches(jobID).stream().findFirst().ifPresent(retrievedJob -> {
             assertEquals(JobStatus.COMPLETED, retrievedJob.getStatus());
             assertEquals(0, retrievedJob.getJobQueueBatchFiles().size());
-            assertFalse(Files.exists(Path.of(ResourceWriter.formOutputFilePath(exportPath, retrievedJob.getBatchID(), ResourceType.Patient, 0))));
-            assertFalse(Files.exists(Path.of(ResourceWriter.formOutputFilePath(exportPath, retrievedJob.getBatchID(), ResourceType.OperationOutcome, 0))));
+            assertFalse(Files.exists(Path.of(ResourceWriter.formOutputFilePath(exportPath, retrievedJob.getBatchID(), DPCResourceType.Patient, 0))));
+            assertFalse(Files.exists(Path.of(ResourceWriter.formOutputFilePath(exportPath, retrievedJob.getBatchID(), DPCResourceType.OperationOutcome, 0))));
         });
     }
 
@@ -443,7 +443,7 @@ class AggregationEngineTest {
                 TEST_ORG_NPI,
                 TEST_PROVIDER_NPI,
                 mbis,
-                Collections.singletonList(ResourceType.Schedule),
+                Collections.singletonList(DPCResourceType.Schedule),
                 null,
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
                 null, null, true);
@@ -471,7 +471,7 @@ class AggregationEngineTest {
                 TEST_ORG_NPI,
                 TEST_PROVIDER_NPI,
                 mbis,
-                Collections.singletonList(ResourceType.Schedule),
+                Collections.singletonList(DPCResourceType.Schedule),
                 null,
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
                 null, null, true);
@@ -506,7 +506,7 @@ class AggregationEngineTest {
                 TEST_ORG_NPI,
                 TEST_PROVIDER_NPI,
                 mbis,
-                List.of(ResourceType.ExplanationOfBenefit, ResourceType.Patient),
+                List.of(DPCResourceType.ExplanationOfBenefit, DPCResourceType.Patient),
                 null,
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
                 null, null, true);
@@ -532,10 +532,10 @@ class AggregationEngineTest {
         // Look at the result. It should have one error, but be successful otherwise.
         assertTrue(queue.getJobBatches(jobID).stream().findFirst().isPresent());
         final var actual = queue.getJobBatches(jobID).stream().findFirst().get();
-        var expectedErrorPath = ResourceWriter.formOutputFilePath(exportPath, actual.getBatchID(), ResourceType.OperationOutcome, 0);
+        var expectedErrorPath = ResourceWriter.formOutputFilePath(exportPath, actual.getBatchID(), DPCResourceType.OperationOutcome, 0);
         assertAll(() -> assertEquals(JobStatus.COMPLETED, actual.getStatus()),
                 () -> assertEquals(3, actual.getJobQueueBatchFiles().size(), "expected 3 (2 good patient ids and 1 bad patient id that failed lookback)"),
-                () -> assertFalse(actual.getJobQueueFile(ResourceType.OperationOutcome).isEmpty(), "bad patient id fails lookback"),
+                () -> assertFalse(actual.getJobQueueFile(DPCResourceType.OperationOutcome).isEmpty(), "bad patient id fails lookback"),
                 () -> assertTrue(Files.exists(Path.of(expectedErrorPath)), "expected an error file"));
     }
 
@@ -550,7 +550,7 @@ class AggregationEngineTest {
                 TEST_ORG_NPI,
                 TEST_PROVIDER_NPI,
                 mbis,
-                List.of(ResourceType.ExplanationOfBenefit, ResourceType.Patient),
+                List.of(DPCResourceType.ExplanationOfBenefit, DPCResourceType.Patient),
                 null,
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
                 null, null, true);
@@ -563,10 +563,10 @@ class AggregationEngineTest {
 
         assertTrue(queue.getJobBatches(jobID).stream().findFirst().isPresent());
         final var actual = queue.getJobBatches(jobID).stream().findFirst().get();
-        var expectedErrorPath = ResourceWriter.formOutputFilePath(exportPath, actual.getBatchID(), ResourceType.OperationOutcome, 0);
+        var expectedErrorPath = ResourceWriter.formOutputFilePath(exportPath, actual.getBatchID(), DPCResourceType.OperationOutcome, 0);
         assertAll(() -> assertEquals(JobStatus.COMPLETED, actual.getStatus()),
                 () -> assertEquals(1, actual.getJobQueueBatchFiles().size(), "Should be one error file for lookback failure"),
-                () -> assertFalse(actual.getJobQueueFile(ResourceType.OperationOutcome).isEmpty(), "Should be one error for lookback failure"),
+                () -> assertFalse(actual.getJobQueueFile(DPCResourceType.OperationOutcome).isEmpty(), "Should be one error for lookback failure"),
                 () -> assertTrue(Files.exists(Path.of(expectedErrorPath)), "Error file should not exist"));
     }
 
@@ -593,7 +593,7 @@ class AggregationEngineTest {
                 TEST_ORG_NPI,
                 TEST_PROVIDER_NPI,
                 Collections.singletonList("1"),
-                Collections.singletonList(ResourceType.Patient),
+                Collections.singletonList(DPCResourceType.Patient),
                 null,
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
                 null, null,  true);
@@ -627,7 +627,7 @@ class AggregationEngineTest {
                 TEST_ORG_NPI,
                 TEST_PROVIDER_NPI,
                 Collections.singletonList("1"),
-                Collections.singletonList(ResourceType.Patient),
+                Collections.singletonList(DPCResourceType.Patient),
                 null,
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
                 null, null, true);
@@ -648,10 +648,10 @@ class AggregationEngineTest {
         // Look at the result. It should have one error, but be successful otherwise.
         assertTrue(queue.getJobBatches(jobID).stream().findFirst().isPresent());
         final var actual = queue.getJobBatches(jobID).stream().findFirst().get();
-        var expectedErrorPath = ResourceWriter.formOutputFilePath(exportPath, actual.getBatchID(), ResourceType.OperationOutcome, 0);
+        var expectedErrorPath = ResourceWriter.formOutputFilePath(exportPath, actual.getBatchID(), DPCResourceType.OperationOutcome, 0);
         assertAll(() -> assertEquals(JobStatus.COMPLETED, actual.getStatus()),
                 () -> assertEquals(1, actual.getJobQueueBatchFiles().size(), "expected just a operational outcome"),
-                () -> assertFalse(actual.getJobQueueFile(ResourceType.OperationOutcome).isEmpty(), "expected 1 bad patient fetch"),
+                () -> assertFalse(actual.getJobQueueFile(DPCResourceType.OperationOutcome).isEmpty(), "expected 1 bad patient fetch"),
                 () -> assertTrue(Files.exists(Path.of(expectedErrorPath)), "expected an error file"));
     }
 }

@@ -14,12 +14,12 @@ import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
 import gov.cms.dpc.bluebutton.clientV2.BlueButtonClientV2;
 import gov.cms.dpc.bluebutton.clientV2.MockBlueButtonClientV2;
 import gov.cms.dpc.common.utils.NPIUtil;
+import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.hapi.ContextUtils;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.MemoryBatchQueue;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
-import org.hl7.fhir.dstu3.model.ResourceType;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -89,7 +89,7 @@ public class AggregationEngineHealthCheckTest {
                 TEST_ORG_NPI,
                 TEST_PROVIDER_NPI,
                 Collections.singletonList("1"),
-                Collections.singletonList(ResourceType.Patient),
+                Collections.singletonList(DPCResourceType.Patient),
                 null,
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
                 null, null, true);
@@ -117,7 +117,7 @@ public class AggregationEngineHealthCheckTest {
                 TEST_ORG_NPI,
                 TEST_PROVIDER_NPI,
                 Collections.singletonList("1"),
-                Collections.singletonList(ResourceType.Patient),
+                Collections.singletonList(DPCResourceType.Patient),
                 null,
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
                 null, null, true);
@@ -143,7 +143,7 @@ public class AggregationEngineHealthCheckTest {
                 TEST_ORG_NPI,
                 TEST_PROVIDER_NPI,
                 Collections.singletonList("1"),
-                Collections.singletonList(ResourceType.Patient),
+                Collections.singletonList(DPCResourceType.Patient),
                 null,
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
                 null, null, true);
@@ -172,7 +172,7 @@ public class AggregationEngineHealthCheckTest {
                 TEST_ORG_NPI,
                 TEST_PROVIDER_NPI,
                 Collections.singletonList("1"),
-                Collections.singletonList(ResourceType.Patient),
+                Collections.singletonList(DPCResourceType.Patient),
                 null,
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
                 null, null, true);

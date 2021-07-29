@@ -12,9 +12,13 @@ import com.typesafe.config.ConfigRenderOptions;
 import gov.cms.dpc.bluebutton.BlueButtonClientModule;
 import gov.cms.dpc.bluebutton.config.BBClientConfiguration;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
+import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import org.eclipse.jetty.http.HttpStatus;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CapabilityStatement;
+import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -152,9 +156,9 @@ class BlueButtonClientV2Test {
         Bundle ret = bbc.requestPatientFromServer(TEST_PATIENT_ID, TEST_LAST_UPDATED, null);
         // Verify that the bundle has one
         assertNotNull(ret, "The demo Patient object returned from BlueButtonClient should not be null");
-        assertEquals(ResourceType.Bundle, ret.getResourceType());
+        assertEquals(DPCResourceType.Bundle.getPath(), ret.getResourceType().getPath());
         assertEquals(1, ret.getEntry().size());
-        assertEquals(ResourceType.Patient, ret.getEntry().get(0).getResource().getResourceType());
+        assertEquals(DPCResourceType.Patient.getPath(), ret.getEntry().get(0).getResource().getResourceType().getPath());
         final var patient = (Patient) ret.getEntry().get(0).getResource();
 
         String patientDataCorrupted = "The demo Patient object data differs from what is expected";
@@ -170,9 +174,9 @@ class BlueButtonClientV2Test {
         Bundle ret = bbc.requestPatientFromServer(TEST_PATIENT_ID, null, null);
         // Verify that the bundle has one
         assertNotNull(ret, "The demo Patient object returned from BlueButtonClient should not be null");
-        assertEquals(ResourceType.Bundle, ret.getResourceType());
+        assertEquals(DPCResourceType.Bundle.getPath(), ret.getResourceType().getPath());
         assertEquals(1, ret.getEntry().size());
-        assertEquals(ResourceType.Patient, ret.getEntry().get(0).getResource().getResourceType());
+        assertEquals(DPCResourceType.Patient.getPath(), ret.getEntry().get(0).getResource().getResourceType().getPath());
     }
 
     @Test
@@ -180,9 +184,9 @@ class BlueButtonClientV2Test {
         Bundle ret = bbc.requestPatientFromServer(TEST_PATIENT_ID, TEST_LAST_UPDATED, null);
         // Verify that the bundle has one
         assertNotNull(ret, "The demo Patient object returned from BlueButtonClient should not be null");
-        assertEquals(ResourceType.Bundle, ret.getResourceType());
+        assertEquals(DPCResourceType.Bundle.getPath(), ret.getResourceType().getPath());
         assertEquals(1, ret.getEntry().size());
-        assertEquals(ResourceType.Patient, ret.getEntry().get(0).getResource().getResourceType());
+        assertEquals(DPCResourceType.Patient.getPath(), ret.getEntry().get(0).getResource().getResourceType().getPath());
     }
 
     @Test
@@ -235,8 +239,8 @@ class BlueButtonClientV2Test {
         Bundle response = bbc.requestEOBFromServer(TEST_PATIENT_ID, TEST_LAST_UPDATED, null);
 
         response.getEntry().forEach((entry) -> assertEquals(
-                entry.getResource().getResourceType(),
-                ResourceType.ExplanationOfBenefit,
+                entry.getResource().getResourceType().getPath(),
+                DPCResourceType.ExplanationOfBenefit.getPath(),
                 "EOB bundles returned by the BlueButton client should only contain EOB objects"
         ));
     }

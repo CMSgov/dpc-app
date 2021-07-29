@@ -9,6 +9,7 @@ import gov.cms.dpc.aggregation.util.AggregationUtils;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
 import gov.cms.dpc.bluebutton.clientV2.MockBlueButtonClientV2;
 import gov.cms.dpc.common.utils.NPIUtil;
+import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.hapi.ContextUtils;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.JobStatus;
@@ -19,7 +20,6 @@ import gov.cms.dpc.testing.BufferedLoggerHandler;
 import io.reactivex.disposables.Disposable;
 import org.assertj.core.util.Lists;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
-import org.hl7.fhir.dstu3.model.ResourceType;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -105,7 +105,7 @@ class BatchAggregationEngineTest {
                 TEST_ORG_NPI,
                 TEST_PROVIDER_NPI,
                 Collections.singletonList(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0)),
-                Collections.singletonList(ResourceType.ExplanationOfBenefit),
+                Collections.singletonList(DPCResourceType.ExplanationOfBenefit),
                 MockBlueButtonClient.TEST_LAST_UPDATED.minusSeconds(1),
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
                 null, null, true);
@@ -123,9 +123,9 @@ class BatchAggregationEngineTest {
                 () -> assertEquals(2, sorted.get(3).getCount()));
 
         // Look at the output files
-        final var outputFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), ResourceType.ExplanationOfBenefit, 0);
+        final var outputFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), DPCResourceType.ExplanationOfBenefit, 0);
         assertTrue(Files.exists(Path.of(outputFilePath)));
-        final var errorFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), ResourceType.OperationOutcome, 0);
+        final var errorFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), DPCResourceType.OperationOutcome, 0);
         assertFalse(Files.exists(Path.of(errorFilePath)), "expect no error file");
     }
 
@@ -165,7 +165,7 @@ class BatchAggregationEngineTest {
                             () -> assertEquals(file.length(), batchFile.getFileLength(), "Should have matching file length"));
                 });
 
-        final var errorFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), ResourceType.OperationOutcome, 0);
+        final var errorFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), DPCResourceType.OperationOutcome, 0);
         assertFalse(Files.exists(Path.of(errorFilePath)), "expect no error file");
     }
 
@@ -182,7 +182,7 @@ class BatchAggregationEngineTest {
                 TEST_ORG_NPI,
                 TEST_PROVIDER_NPI,
                 MockBlueButtonClient.TEST_PATIENT_WITH_BAD_IDS,
-                Collections.singletonList(ResourceType.ExplanationOfBenefit),
+                Collections.singletonList(DPCResourceType.ExplanationOfBenefit),
                 MockBlueButtonClient.TEST_LAST_UPDATED.minusSeconds(1),
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
                 null, null, true);
@@ -196,13 +196,13 @@ class BatchAggregationEngineTest {
         assertEquals(JobStatus.COMPLETED, completeJob.getStatus());
         assertAll(
                 () -> assertEquals(5, completeJob.getJobQueueBatchFiles().size(), String.format("Unexpected JobModel: %s", completeJob.toString())),
-                () -> assertTrue(completeJob.getJobQueueFile(ResourceType.ExplanationOfBenefit).isPresent(), "Expect a EOB"),
-                () -> assertFalse(completeJob.getJobQueueFile(ResourceType.OperationOutcome).isEmpty(), "Expect an error"));
+                () -> assertTrue(completeJob.getJobQueueFile(DPCResourceType.ExplanationOfBenefit).isPresent(), "Expect a EOB"),
+                () -> assertFalse(completeJob.getJobQueueFile(DPCResourceType.OperationOutcome).isEmpty(), "Expect an error"));
 
         // Look at the output files
-        final var outputFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), ResourceType.ExplanationOfBenefit, 0);
+        final var outputFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), DPCResourceType.ExplanationOfBenefit, 0);
         assertTrue(Files.exists(Path.of(outputFilePath)));
-        final var errorFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), ResourceType.OperationOutcome, 0);
+        final var errorFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), DPCResourceType.OperationOutcome, 0);
         assertTrue(Files.exists(Path.of(errorFilePath)), "expect error file for failed patient");
     }
 
@@ -222,7 +222,7 @@ class BatchAggregationEngineTest {
                 TEST_ORG_NPI,
                 TEST_PROVIDER_NPI,
                 MockBlueButtonClient.TEST_PATIENT_MBIS.subList(0,1),
-                Collections.singletonList(ResourceType.ExplanationOfBenefit),
+                Collections.singletonList(DPCResourceType.ExplanationOfBenefit),
                 MockBlueButtonClient.TEST_LAST_UPDATED.minusSeconds(1),
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
                 null, null, true);
@@ -236,13 +236,13 @@ class BatchAggregationEngineTest {
         assertEquals(JobStatus.COMPLETED, completeJob.getStatus());
         assertAll(
                 () -> assertEquals(1, completeJob.getJobQueueBatchFiles().size(), String.format("Unexpected JobModel: %s", completeJob.toString())),
-                () -> assertFalse(completeJob.getJobQueueFile(ResourceType.ExplanationOfBenefit).isPresent(), "Expect a EOB"),
-                () -> assertTrue(completeJob.getJobQueueFile(ResourceType.OperationOutcome).isPresent(), "Expect an error"));
+                () -> assertFalse(completeJob.getJobQueueFile(DPCResourceType.ExplanationOfBenefit).isPresent(), "Expect a EOB"),
+                () -> assertTrue(completeJob.getJobQueueFile(DPCResourceType.OperationOutcome).isPresent(), "Expect an error"));
 
         // Look at the output files
-        final var outputFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), ResourceType.ExplanationOfBenefit, 0);
+        final var outputFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), DPCResourceType.ExplanationOfBenefit, 0);
         assertFalse(Files.exists(Path.of(outputFilePath)));
-        final var errorFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), ResourceType.OperationOutcome, 0);
+        final var errorFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), DPCResourceType.OperationOutcome, 0);
         assertTrue(Files.exists(Path.of(errorFilePath)), "expect error file for failed patient");
         String operationOutcome = Files.readString(Path.of(errorFilePath));
         OperationOutcome o = FhirContext.forDstu3().newJsonParser().parseResource(OperationOutcome.class, operationOutcome);
@@ -265,7 +265,7 @@ class BatchAggregationEngineTest {
                 TEST_ORG_NPI,
                 TEST_PROVIDER_NPI,
                 MockBlueButtonClient.TEST_PATIENT_MBIS.subList(0,1),
-                Collections.singletonList(ResourceType.ExplanationOfBenefit),
+                Collections.singletonList(DPCResourceType.ExplanationOfBenefit),
                 MockBlueButtonClient.TEST_LAST_UPDATED.minusSeconds(1),
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
                 null, null, true);
@@ -279,13 +279,13 @@ class BatchAggregationEngineTest {
         assertEquals(JobStatus.COMPLETED, completeJob.getStatus());
         assertAll(
                 () -> assertEquals(1, completeJob.getJobQueueBatchFiles().size(), String.format("Unexpected JobModel: %s", completeJob.toString())),
-                () -> assertFalse(completeJob.getJobQueueFile(ResourceType.ExplanationOfBenefit).isPresent(), "Expect a EOB"),
-                () -> assertTrue(completeJob.getJobQueueFile(ResourceType.OperationOutcome).isPresent(), "Expect an error"));
+                () -> assertFalse(completeJob.getJobQueueFile(DPCResourceType.ExplanationOfBenefit).isPresent(), "Expect a EOB"),
+                () -> assertTrue(completeJob.getJobQueueFile(DPCResourceType.OperationOutcome).isPresent(), "Expect an error"));
 
         // Look at the output files
-        final var outputFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), ResourceType.ExplanationOfBenefit, 0);
+        final var outputFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), DPCResourceType.ExplanationOfBenefit, 0);
         assertFalse(Files.exists(Path.of(outputFilePath)));
-        final var errorFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), ResourceType.OperationOutcome, 0);
+        final var errorFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), DPCResourceType.OperationOutcome, 0);
         assertTrue(Files.exists(Path.of(errorFilePath)), "expect error file for failed patient");
         String operationOutcome = Files.readString(Path.of(errorFilePath));
         OperationOutcome o = FhirContext.forDstu3().newJsonParser().parseResource(OperationOutcome.class, operationOutcome);
@@ -308,7 +308,7 @@ class BatchAggregationEngineTest {
                 TEST_ORG_NPI,
                 TEST_PROVIDER_NPI,
                 MockBlueButtonClient.TEST_PATIENT_MBIS.subList(0,1),
-                Collections.singletonList(ResourceType.ExplanationOfBenefit),
+                Collections.singletonList(DPCResourceType.ExplanationOfBenefit),
                 MockBlueButtonClient.TEST_LAST_UPDATED.minusSeconds(1),
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
                 null, null, true);
@@ -322,13 +322,13 @@ class BatchAggregationEngineTest {
         assertEquals(JobStatus.COMPLETED, completeJob.getStatus());
         assertAll(
                 () -> assertEquals(1, completeJob.getJobQueueBatchFiles().size(), String.format("Unexpected JobModel: %s", completeJob.toString())),
-                () -> assertFalse(completeJob.getJobQueueFile(ResourceType.ExplanationOfBenefit).isPresent(), "Expect a EOB"),
-                () -> assertTrue(completeJob.getJobQueueFile(ResourceType.OperationOutcome).isPresent(), "Expect an error"));
+                () -> assertFalse(completeJob.getJobQueueFile(DPCResourceType.ExplanationOfBenefit).isPresent(), "Expect a EOB"),
+                () -> assertTrue(completeJob.getJobQueueFile(DPCResourceType.OperationOutcome).isPresent(), "Expect an error"));
 
         // Look at the output files
-        final var outputFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), ResourceType.ExplanationOfBenefit, 0);
+        final var outputFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), DPCResourceType.ExplanationOfBenefit, 0);
         assertFalse(Files.exists(Path.of(outputFilePath)));
-        final var errorFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), ResourceType.OperationOutcome, 0);
+        final var errorFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), DPCResourceType.OperationOutcome, 0);
         assertTrue(Files.exists(Path.of(errorFilePath)), "expect error file for failed patient");
         String operationOutcome = Files.readString(Path.of(errorFilePath));
         OperationOutcome o = FhirContext.forDstu3().newJsonParser().parseResource(OperationOutcome.class, operationOutcome);
@@ -351,7 +351,7 @@ class BatchAggregationEngineTest {
                 TEST_ORG_NPI,
                 TEST_PROVIDER_NPI,
                 MockBlueButtonClient.TEST_PATIENT_MBIS.subList(0,1),
-                Collections.singletonList(ResourceType.ExplanationOfBenefit),
+                Collections.singletonList(DPCResourceType.ExplanationOfBenefit),
                 MockBlueButtonClient.TEST_LAST_UPDATED.minusSeconds(1),
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
                 null, null, true);
@@ -365,13 +365,13 @@ class BatchAggregationEngineTest {
         assertEquals(JobStatus.COMPLETED, completeJob.getStatus());
         assertAll(
                 () -> assertEquals(4, completeJob.getJobQueueBatchFiles().size(), String.format("Unexpected JobModel: %s", completeJob.toString())),
-                () -> assertTrue(completeJob.getJobQueueFile(ResourceType.ExplanationOfBenefit).isPresent(), "Expect a EOB"),
-                () -> assertFalse(completeJob.getJobQueueFile(ResourceType.OperationOutcome).isPresent(), "Expect an error"));
+                () -> assertTrue(completeJob.getJobQueueFile(DPCResourceType.ExplanationOfBenefit).isPresent(), "Expect a EOB"),
+                () -> assertFalse(completeJob.getJobQueueFile(DPCResourceType.OperationOutcome).isPresent(), "Expect an error"));
 
         // Look at the output files
-        final var outputFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), ResourceType.ExplanationOfBenefit, 0);
+        final var outputFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), DPCResourceType.ExplanationOfBenefit, 0);
         assertTrue(Files.exists(Path.of(outputFilePath)));
-        final var errorFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), ResourceType.OperationOutcome, 0);
+        final var errorFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), DPCResourceType.OperationOutcome, 0);
         assertFalse(Files.exists(Path.of(errorFilePath)), "expect error file for failed patient");
     }
 }

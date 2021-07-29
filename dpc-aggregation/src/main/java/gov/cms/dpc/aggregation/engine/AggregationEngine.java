@@ -190,6 +190,9 @@ public class AggregationEngine implements Runnable {
     }
 
     private Optional<String> processPatient(JobQueueBatch job, String patientId) {
+//        if (job.isV2()) {
+//            // do v2 processing here
+//        }
         jobBatchProcessor.processJobBatchPartial(aggregatorID, queue, job, patientId);
 
         // Stop processing when no patients or early shutdown

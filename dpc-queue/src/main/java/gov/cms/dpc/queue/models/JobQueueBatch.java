@@ -1,12 +1,12 @@
 package gov.cms.dpc.queue.models;
 
 import gov.cms.dpc.common.converters.hibernate.StringListConverter;
+import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.converters.ResourceTypeListConverter;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.hl7.fhir.dstu3.model.ResourceType;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -28,10 +28,10 @@ public class JobQueueBatch implements Serializable {
     /**
      * The list of resource type supported by DCP
      */
-    public static final List<ResourceType> validResourceTypes = List.of(
-            ResourceType.Patient,
-            ResourceType.ExplanationOfBenefit,
-            ResourceType.Coverage
+    public static final List<DPCResourceType> validResourceTypes = List.of(
+            DPCResourceType.Patient,
+            DPCResourceType.ExplanationOfBenefit,
+            DPCResourceType.Coverage
     );
 
     /**
@@ -40,7 +40,7 @@ public class JobQueueBatch implements Serializable {
      * @param type - {@code true} resource is supported by DPC. {@code false} resource is not supported by DPC.
      * @return True iff the passed in type is valid f
      */
-    public static Boolean isValidResourceType(ResourceType type) {
+    public static Boolean isValidResourceType(DPCResourceType type) {
         return validResourceTypes.contains(type);
     }
 
@@ -109,7 +109,7 @@ public class JobQueueBatch implements Serializable {
      */
     @Convert(converter = ResourceTypeListConverter.class)
     @Column(name = "resource_types")
-    private List<ResourceType> resourceTypes;
+    private List<DPCResourceType> resourceTypes;
 
     /**
      * The since parameter from the export request
@@ -186,7 +186,7 @@ public class JobQueueBatch implements Serializable {
                          String orgNPI,
                          String providerNPI,
                          List<String> patients,
-                         List<ResourceType> resourceTypes,
+                         List<DPCResourceType> resourceTypes,
                          OffsetDateTime since,
                          OffsetDateTime transactionTime,
                          String requestingIP,
@@ -281,7 +281,7 @@ public class JobQueueBatch implements Serializable {
         return Optional.ofNullable(patientIndex);
     }
 
-    public List<ResourceType> getResourceTypes() {
+    public List<DPCResourceType> getResourceTypes() {
         return resourceTypes;
     }
 
@@ -337,7 +337,7 @@ public class JobQueueBatch implements Serializable {
         return jobQueueBatchFiles;
     }
 
-    public Optional<JobQueueBatchFile> getJobQueueFile(ResourceType forResourceType) {
+    public Optional<JobQueueBatchFile> getJobQueueFile(DPCResourceType forResourceType) {
         return jobQueueBatchFiles.stream().filter(result -> result.getResourceType().equals(forResourceType)).findFirst();
     }
 
@@ -345,13 +345,13 @@ public class JobQueueBatch implements Serializable {
         return jobQueueBatchFiles.stream().filter(result -> result.getFileName().equals(fileName)).findFirst();
     }
 
-    public synchronized Optional<JobQueueBatchFile> getJobQueueFileLatest(ResourceType forResourceType) {
+    public synchronized Optional<JobQueueBatchFile> getJobQueueFileLatest(DPCResourceType forResourceType) {
         return jobQueueBatchFiles.stream()
                 .filter(result -> result.getResourceType().equals(forResourceType))
                 .max(Comparator.comparingInt(JobQueueBatchFile::getSequence));
     }
 
-    public synchronized JobQueueBatchFile addJobQueueFile(ResourceType resourceType, int sequence, int batchSize) {
+    public synchronized JobQueueBatchFile addJobQueueFile(DPCResourceType resourceType, int sequence, int batchSize) {
         Optional<JobQueueBatchFile> existingFile = this.getJobQueueFile(JobQueueBatchFile.formOutputFileName(batchID, resourceType, sequence));
 
         if (existingFile.isPresent()) {

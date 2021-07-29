@@ -25,7 +25,7 @@ import gov.cms.dpc.testing.BufferedLoggerHandler;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.util.Lists;
 import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.dstu3.model.ResourceType;
+import gov.cms.dpc.fhir.DPCResourceType;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -99,7 +99,7 @@ public class AggregationEngineBFDClientTest {
                 TEST_ORG_NPI,
                 TEST_PROVIDER_NPI,
                 Collections.singletonList(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0)),
-                Collections.singletonList(ResourceType.Patient),
+                Collections.singletonList(DPCResourceType.Patient),
                 null,
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
                 "127.0.0.1",
@@ -131,13 +131,12 @@ public class AggregationEngineBFDClientTest {
         ArgumentCaptor<String> headerValue = ArgumentCaptor.forClass(String.class);
         Mockito.when(iQuery.withAdditionalHeader(headerKey.capture(), headerValue.capture())).thenReturn(iQuery);
 
-        UUID providerID = UUID.randomUUID();
         UUID jobID = queue.createJob(
                 orgID,
                 TEST_ORG_NPI,
                 TEST_PROVIDER_NPI,
                 Collections.singletonList(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0)),
-                Collections.singletonList(ResourceType.Patient),
+                Collections.singletonList(DPCResourceType.Patient),
                 null,
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
                 "127.0.0.1",

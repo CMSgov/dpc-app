@@ -11,6 +11,7 @@ import gov.cms.dpc.api.resources.v1.JobResource;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
+import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.parameters.ProvenanceResourceFactoryProvider;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.MemoryBatchQueue;
@@ -120,7 +121,7 @@ class FHIRSubmissionTest {
         // A request with parameters ...
         final WebTarget target = groupResource
                 .target("/v1/Group/1/$export")
-                .queryParam("_type", ResourceType.Patient);
+                .queryParam("_type", DPCResourceType.Patient);
         final Response response = target.request()
                 .accept(FHIR_JSON).header(PREFER_HEADER, PREFER_RESPOND_ASYNC)
                 .get();
@@ -132,7 +133,7 @@ class FHIRSubmissionTest {
         assertTrue(job.isPresent());
         final var resources = job.get().getResourceTypes();
         assertAll(() -> assertEquals(resources.size(), 1),
-                () -> assertTrue(resources.contains(ResourceType.Patient)));
+                () -> assertTrue(resources.contains(DPCResourceType.Patient)));
     }
 
     /**
@@ -143,7 +144,7 @@ class FHIRSubmissionTest {
         // A request with parameters ...
         final WebTarget target = groupResource
                 .target("/v1/Group/1/$export")
-                .queryParam("_type", String.format("%s,%s", ResourceType.Patient, ResourceType.ExplanationOfBenefit));
+                .queryParam("_type", String.format("%s,%s", DPCResourceType.Patient, DPCResourceType.ExplanationOfBenefit));
         final Response response = target.request()
                 .accept(FHIR_JSON).header(PREFER_HEADER, PREFER_RESPOND_ASYNC)
                 .get();
@@ -155,8 +156,8 @@ class FHIRSubmissionTest {
         assertTrue(job.isPresent());
         var resources = job.get().getResourceTypes();
         assertAll(() -> assertEquals(2, resources.size()),
-                () -> assertTrue(resources.contains(ResourceType.Patient)),
-                () -> assertTrue(resources.contains(ResourceType.ExplanationOfBenefit)));
+                () -> assertTrue(resources.contains(DPCResourceType.Patient)),
+                () -> assertTrue(resources.contains(DPCResourceType.ExplanationOfBenefit)));
     }
 
     @Test
@@ -164,7 +165,7 @@ class FHIRSubmissionTest {
         // A request with parameters ...
         final WebTarget target = groupResource
                 .target("/v1/Group/1/$export")
-                .queryParam("_type", String.format("%s,%s,%s", ResourceType.Patient, ResourceType.ExplanationOfBenefit, ResourceType.Coverage));
+                .queryParam("_type", String.format("%s,%s,%s", DPCResourceType.Patient, DPCResourceType.ExplanationOfBenefit, DPCResourceType.Coverage));
         final Response response = target.request()
                 .accept(FHIR_JSON).header(PREFER_HEADER, PREFER_RESPOND_ASYNC)
                 .get();
@@ -176,9 +177,9 @@ class FHIRSubmissionTest {
         assertTrue(job.isPresent());
         var resources = job.get().getResourceTypes();
         assertAll(() -> assertEquals(3, resources.size()),
-                () -> assertTrue(resources.contains(ResourceType.Patient)),
-                () -> assertTrue(resources.contains(ResourceType.Coverage)),
-                () -> assertTrue(resources.contains(ResourceType.ExplanationOfBenefit)));
+                () -> assertTrue(resources.contains(DPCResourceType.Patient)),
+                () -> assertTrue(resources.contains(DPCResourceType.Coverage)),
+                () -> assertTrue(resources.contains(DPCResourceType.ExplanationOfBenefit)));
     }
 
     /**
