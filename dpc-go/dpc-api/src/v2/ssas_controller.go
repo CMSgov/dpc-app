@@ -7,6 +7,7 @@ import (
 	"github.com/CMSgov/dpc/api/fhirror"
 	"github.com/CMSgov/dpc/api/logger"
 	"github.com/CMSgov/dpc/api/middleware"
+	"github.com/CMSgov/dpc/api/model"
 	"github.com/darahayes/go-boom"
 	"go.uber.org/zap"
 	"io/ioutil"
@@ -191,6 +192,107 @@ func (sc *SSASController) GetSystem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+}
+
+// DeleteKey function to delete a public key from ssas system
+func (sc *SSASController) DeleteKey(w http.ResponseWriter, r *http.Request) {
+	log := logger.WithContext(r.Context())
+	implementerID, _ := r.Context().Value(middleware.ContextKeyImplementer).(string)
+	organizationID, _ := r.Context().Value(middleware.ContextKeyOrganization).(string)
+	keyID, _ := r.Context().Value(middleware.ContextKeyKeyID).(string)
+
+	if implementerID == "" || organizationID == "" || keyID == "" {
+		log.Error(fmt.Sprintf("Failed to extract one or more path parameters. ImplID: %s, OrgID: %s, KeyID: %s ", implementerID, organizationID, keyID))
+		fhirror.GenericServerIssue(r.Context(), w)
+		return
+	}
+
+	found, mOrg, err := sc.getManagedOrg(r, implementerID, organizationID)
+	if err != nil {
+		log.Error("Failed to retrieve implementer's managed orgs", zap.Error(err))
+		fhirror.GenericServerIssue(r.Context(), w)
+		return
+	}
+
+	if !found || "Active" != mOrg.Status {
+		log.Error("Could not find active org")
+		fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "ImplementerID/Org relation is not active")
+		return
+	}
+
+	if mOrg.SsasSystemID == "" {
+		log.Error(fmt.Sprintf("relation with implementerID: %s and organizationID: %s is not tied to a system", implementerID, organizationID))
+		fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "a system was not found for this implementer/org relationship")
+		return
+	}
+
+	err = sc.ssasClient.DeletePublicKey(r.Context(), mOrg.SsasSystemID, keyID)
+	if err != nil {
+		log.Error("Failed to delete key", zap.Error(err))
+		fhirror.ServerIssue(r.Context(), w, http.StatusInternalServerError, "Failed to delete key")
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+// AddKey function to add a public key to ssas system
+func (sc *SSASController) AddKey(w http.ResponseWriter, r *http.Request) {
+	log := logger.WithContext(r.Context())
+	implementerID, _ := r.Context().Value(middleware.ContextKeyImplementer).(string)
+	organizationID, _ := r.Context().Value(middleware.ContextKeyOrganization).(string)
+
+	if implementerID == "" || organizationID == "" {
+		log.Error(fmt.Sprintf("Failed to extract one or more path parameters. ImplID: %s ,OrgID: %s ", implementerID, organizationID))
+		fhirror.GenericServerIssue(r.Context(), w)
+		return
+	}
+
+	found, mOrg, err := sc.getManagedOrg(r, implementerID, organizationID)
+	if err != nil {
+		log.Error("Failed to retrieve implementer's managed orgs", zap.Error(err))
+		fhirror.GenericServerIssue(r.Context(), w)
+		return
+	}
+
+	if !found || "Active" != mOrg.Status {
+		log.Error("Could not find active org")
+		fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "Implementer/Org relation is not active")
+		return
+	}
+
+	if mOrg.SsasSystemID == "" {
+		log.Error(fmt.Sprintf("relation with implementerID: %s and organizationID: %s is not tied to a system", implementerID, organizationID))
+		fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "a system was not found for this implementer/org relationship")
+		return
+	}
+
+	proxyReq := model.ProxyPublicKeyRequest{}
+	if err := json.NewDecoder(r.Body).Decode(&proxyReq); err != nil {
+		log.Error(err.Error())
+		fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "Failed to parse request body")
+		return
+	}
+
+	ssasResp, err := sc.ssasClient.AddPublicKey(r.Context(), mOrg.SsasSystemID, proxyReq)
+	if err != nil {
+		log.Error("Failed to add key", zap.Error(err))
+		fhirror.ServerIssue(r.Context(), w, 500, "Failed to add key")
+		return
+	}
+
+	b, err := json.Marshal(ssasResp)
+	if err != nil {
+		log.Error("Failed to unmarshal", zap.Error(err))
+		fhirror.GenericServerIssue(r.Context(), w)
+		return
+	}
+
+	if _, err := w.Write(b); err != nil {
+		log.Error("Failed to write data to response", zap.Error(err))
+		fhirror.GenericServerIssue(r.Context(), w)
+		return
+	}
 }
 
 // CreateSystem function that calls SSAS to create a new system
