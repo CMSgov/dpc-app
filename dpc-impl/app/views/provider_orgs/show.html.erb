@@ -40,8 +40,11 @@
     </div>
 
     <div class="porg_container" id="public_keys_container">
-      <div class="header-container">
+      <div class="header-container flex-row-spc-btwn">
         <h2>Public Keys</h2>
+        <div>
+          <%= link_to "Upload New Key", new_public_key_url(org_id: @org_id), class: "ds-c-button ds-c-button--primary" %>
+        </div>
       </div>
       <% if @public_keys.count.zero? %>
         There are currently no public keys associated with this provider organization.
