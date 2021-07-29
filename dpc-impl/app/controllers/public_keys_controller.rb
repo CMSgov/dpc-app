@@ -13,4 +13,6 @@ class PublicKeysController < ApplicationController
 
   def index
   end
+
+  private
 end

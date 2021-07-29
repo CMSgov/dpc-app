@@ -47,10 +47,6 @@ class ProviderOrgsController < ApplicationController
 
   private
 
-  def api_service
-    @api_service ||= ApiClient.new
-  end
-
   def get_client_tokens(imp_id, org_id)
     api_req = tokens_keys_api_req(imp_id, org_id)
 
@@ -70,11 +66,7 @@ class ProviderOrgsController < ApplicationController
       return []
     end
   end
-  
-  def imp_id
-    current_user.implementer_id
-  end
-  
+
   def org_npi(org)
     hash = org.first
     return hash[:value]
