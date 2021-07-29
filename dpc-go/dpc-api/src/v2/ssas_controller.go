@@ -274,6 +274,12 @@ func (sc *SSASController) AddKey(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if proxyReq.Signature == "" {
+		log.Error(fmt.Sprintf("Signature is required when adding a public key"))
+		fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "Signature is required when adding a public key")
+		return
+	}
+
 	ssasResp, err := sc.ssasClient.AddPublicKey(r.Context(), mOrg.SsasSystemID, proxyReq)
 	if err != nil {
 		log.Error("Failed to add key", zap.Error(err))
@@ -330,6 +336,12 @@ func (sc *SSASController) CreateSystem(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewDecoder(r.Body).Decode(&proxyReq); err != nil {
 		log.Error(err.Error())
 		fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "Failed to parse request body")
+		return
+	}
+
+	if proxyReq.Signature == "" {
+		log.Error(fmt.Sprintf("Signature is required when adding a public key"))
+		fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "Signature is required when adding a public key")
 		return
 	}
 
@@ -420,6 +432,7 @@ func (sc *SSASController) getGroupID(r *http.Request, implID string) (string, er
 type ProxyCreateSystemRequest struct {
 	ClientName string   `json:"client_name"`
 	PublicKey  string   `json:"public_key"`
+	Signature  string   `json:"signature"`
 	IPs        []string `json:"ips"`
 }
 
