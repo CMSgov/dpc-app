@@ -2,7 +2,7 @@
 
 <div class="ds-u-margin-bottom--6" id="dashboard__title">
   <div>
-    <%= link_to "Back to Portal", root_path %>
+    <%= link_to "Back to Portal", root_path, class: "ds-c-button" %>
   </div>
 
   <h1 class="ds-text-heading--4xl ds-title"><%= @org[:name] %></h1>
@@ -26,8 +26,11 @@
 
   <div id="dash_content">
     <div class="porg_container" id="client_tokens_container">
-      <div class="header-container">
+      <div class="header-container flex-row-spc-btwn">
         <h2>Client Tokens</h2>
+        <div>
+          <%= link_to "Add New Token", new_client_token_url(org_id: @org_id), class: "ds-c-button ds-c-button--primary" %>
+        </div>
       </div>
       <% if @client_tokens.count.zero? %>
         There are currently no client token associated with this provider organization.

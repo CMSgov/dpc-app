@@ -13,8 +13,16 @@ $focus-outline:  5px solid $color-gold-light;
 $z-index-nav:     8000;
 $z-index-flyout:  10000;
 
+// Status
 .active_status {
   color: $color-success-dark;
+}
+
+// Flex
+.flex-row-spc-btwn {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
 }
 
 // CMS variables
