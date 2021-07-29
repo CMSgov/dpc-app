@@ -7,7 +7,6 @@ import com.google.common.net.HttpHeaders;
 import gov.cms.dpc.aggregation.service.*;
 import gov.cms.dpc.aggregation.util.AggregationUtils;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
-import gov.cms.dpc.bluebutton.clientV2.BlueButtonClientV2;
 import gov.cms.dpc.common.Constants;
 import gov.cms.dpc.common.MDCConstants;
 import gov.cms.dpc.common.utils.MetricMaker;
@@ -36,7 +35,6 @@ public class JobBatchProcessor {
     private static final Logger logger = LoggerFactory.getLogger(JobBatchProcessor.class);
 
     private final BlueButtonClient bbclient;
-    private final BlueButtonClientV2 bbclientV2;
     private final OperationsConfig operationsConfig;
     private final FhirContext fhirContext;
     private final Meter resourceMeter;
@@ -45,9 +43,8 @@ public class JobBatchProcessor {
     private final ConsentService consentService;
 
     @Inject
-    public JobBatchProcessor(BlueButtonClient bbclient, BlueButtonClientV2 bbclientV2, FhirContext fhirContext, MetricRegistry metricRegistry, OperationsConfig operationsConfig, LookBackService lookBackService, ConsentService consentService) {
+    public JobBatchProcessor(BlueButtonClient bbclient, FhirContext fhirContext, MetricRegistry metricRegistry, OperationsConfig operationsConfig, LookBackService lookBackService, ConsentService consentService) {
         this.bbclient = bbclient;
-        this.bbclientV2 = bbclientV2;
         this.fhirContext = fhirContext;
         this.operationsConfig = operationsConfig;
         this.lookBackService = lookBackService;

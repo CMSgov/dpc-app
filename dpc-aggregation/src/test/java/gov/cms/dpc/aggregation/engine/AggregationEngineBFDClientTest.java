@@ -13,8 +13,6 @@ import gov.cms.dpc.aggregation.service.LookBackService;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.bluebutton.client.BlueButtonClientImpl;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
-import gov.cms.dpc.bluebutton.clientV2.BlueButtonClientV2;
-import gov.cms.dpc.bluebutton.clientV2.BlueButtonClientV2Impl;
 import gov.cms.dpc.bluebutton.config.BBClientConfiguration;
 import gov.cms.dpc.common.Constants;
 import gov.cms.dpc.common.utils.NPIUtil;
@@ -51,7 +49,6 @@ public class AggregationEngineBFDClientTest {
     private static final MetricRegistry metricRegistry = new MetricRegistry();
 
     private final IGenericClient bbClient = Mockito.mock(IGenericClient.class);
-    private final IGenericClient bbClientV2 = Mockito.mock(IGenericClient.class);
     private final LookBackService lookBackService = Mockito.mock(LookBackService.class);
     private final ConsentService mockConsentService = Mockito.mock(ConsentService.class);
 
@@ -64,9 +61,8 @@ public class AggregationEngineBFDClientTest {
     @BeforeEach
     public void setup() throws GeneralSecurityException {
         BlueButtonClient blueButtonClient = Mockito.spy(new BlueButtonClientImpl(bbClient, new BBClientConfiguration(), metricRegistry));
-        BlueButtonClientV2 blueButtonClientV2 = Mockito.spy(new BlueButtonClientV2Impl(bbClientV2, new BBClientConfiguration(), metricRegistry));
         OperationsConfig config = new OperationsConfig(1000, tempDir.toString(), 1, 1, 1, YearMonth.now(), List.of(orgID.toString()));
-        JobBatchProcessor processor = new JobBatchProcessor(blueButtonClient, blueButtonClientV2, fhirContext, metricRegistry, config, lookBackService, mockConsentService);
+        JobBatchProcessor processor = new JobBatchProcessor(blueButtonClient, fhirContext, metricRegistry, config, lookBackService, mockConsentService);
         queue = new MemoryBatchQueue(100);
         engine = new AggregationEngine(UUID.randomUUID(), queue, config, processor);
         engine.queueRunning.set(true);
