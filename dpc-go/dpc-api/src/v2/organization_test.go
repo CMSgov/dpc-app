@@ -3,6 +3,7 @@ package v2
 import (
 	"bytes"
 	"context"
+	"github.com/CMSgov/dpc/api/model"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -100,6 +101,16 @@ func (mc MockSsasClient) CreateToken(ctx context.Context, systemID string, label
 
 func (mc MockSsasClient) DeleteToken(ctx context.Context, systemID string, tokenID string) error {
 	args := mc.Called(ctx, systemID, tokenID)
+	return args.Error(0)
+}
+
+func (mc MockSsasClient) AddPublicKey(ctx context.Context, systemID string, request model.ProxyPublicKeyRequest) (map[string]string, error) {
+	args := mc.Called(ctx, systemID, request)
+	return args.Get(0).(map[string]string), args.Error(1)
+}
+
+func (mc MockSsasClient) DeletePublicKey(ctx context.Context, systemID string, keyID string) error {
+	args := mc.Called(ctx, systemID, keyID)
 	return args.Error(0)
 }
 
