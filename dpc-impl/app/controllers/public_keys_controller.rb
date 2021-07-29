@@ -6,4 +6,7 @@ class PublicKeysController < ApplicationController
   def new
     @org_id = params[:org_id]
   end
+
+  def index
+  end
 end

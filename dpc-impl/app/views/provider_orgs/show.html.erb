@@ -25,48 +25,29 @@
   </div>
 
   <div id="dash_content">
-    <div class="porg_container" id="client_tokens_container">
-      <div class="header-container flex-row-spc-btwn">
-        <h2>Client Tokens</h2>
-        <div>
-          <%= link_to "Add New Token", new_client_token_url(org_id: @org_id), class: "ds-c-button ds-c-button--primary" %>
-        </div>
-      </div>
-      <% if @client_tokens.count.zero? %>
-        There are currently no client token associated with this provider organization.
-      <% else %>
-        <%= render 'client_token_list' %>
-      <% end %>
-    </div>
 
-    <div class="porg_container" id="public_keys_container">
-      <div class="header-container flex-row-spc-btwn">
-        <h2>Public Keys</h2>
-        <div>
-          <%= link_to "Upload New Key", new_public_key_url(org_id: @org_id), class: "ds-c-button ds-c-button--primary" %>
+    <% if @public_keys.count.zero? %>
+      <%= link_to "How to Create Public Key & Signature", public_key_faq_path %>
+    <% else %>
+      <div class="porg_container" id="client_tokens_container">
+        <div class="header-container flex-row-spc-btwn">
+          <h2>Client Tokens</h2>
+          <div>
+            <%= link_to "Add New Token", new_client_token_url(org_id: @org_id), class: "ds-c-button ds-c-button--primary" %>
+          </div>
         </div>
+        <%= render 'client_token_list' %>
       </div>
-      <% if @public_keys.count.zero? %>
-        There are currently no public keys associated with this provider organization.
-      <% else %>
-        <ul class="list">
-          <% @public_keys.each do |key| %>
-            <li class="list_item">
-              <div class="item_info">
-                <div class="item_label">
-                  <%= key[:label] %>
-                </div>
-                <div>
-                  Created: <%= key[:creation_date] %>
-                </div>
-                <div>
-                  Expires: <%= key[:expires_at] %>
-                </div>
-              </div>
-            </li>
-          <% end %>
-        </ul>
-      <% end %>
+
+      <div class="porg_container" id="public_keys_container">
+        <div class="header-container flex-row-spc-btwn">
+          <h2>Public Keys</h2>
+          <div>
+            <%= link_to "Upload New Key", new_public_key_url(org_id: @org_id), class: "ds-c-button ds-c-button--primary" %>
+          </div>
+        </div>
+          <%= render 'public_key_list' %>
+      </div>
     </div>
-  </div>
+  <% end %>
 </div>

@@ -23,6 +23,7 @@ Rails.application.routes.draw do
 
     match '/members', to: 'portal#index', via: :get
     match '/portal', to: 'portal#show', via: :get
+    match '/public-key-faq', to: 'public_keys#index', via: :get
 
     devise_scope :user do
       root to: "devise/sessions#new"

@@ -1,0 +1,17 @@
+<ul class="list">
+  <% @public_keys.each do |key| %>
+    <li class="list_item">
+      <div class="item_info">
+        <div class="item_label">
+          <%= key[:label] %>
+        </div>
+        <div>
+          Created: <%= key[:creation_date] %>
+        </div>
+        <div>
+          Expires: <%= key[:expires_at] %>
+        </div>
+      </div>
+    </li>
+  <% end %>
+</ul>
