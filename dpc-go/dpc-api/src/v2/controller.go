@@ -52,4 +52,6 @@ type SsasController interface {
 	GetSystem(w http.ResponseWriter, r *http.Request)
 	CreateToken(w http.ResponseWriter, r *http.Request)
 	DeleteToken(w http.ResponseWriter, r *http.Request)
+	AddKey(w http.ResponseWriter, r *http.Request)
+	DeleteKey(w http.ResponseWriter, r *http.Request)
 }

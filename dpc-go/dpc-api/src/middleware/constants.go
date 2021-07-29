@@ -45,4 +45,6 @@ const (
 	ContextKeySince
 	// ContextKeyTokenID is the key in the context to pass on the tokenID param value
 	ContextKeyTokenID
+	// ContextKeyKeyID is the key in the context to pass on the keyID param value
+	ContextKeyKeyID
 )
