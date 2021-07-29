@@ -165,6 +165,15 @@ func JobCtx(next http.Handler) http.Handler {
 	})
 }
 
+// TokenCtx middleware to extract the tokenID from the chi url param and set it into the request context
+func TokenCtx(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		tokenID := chi.URLParam(r, "tokenID")
+		ctx := context.WithValue(r.Context(), ContextKeyTokenID, tokenID)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
 // PublicKeyCtx middleware to extract the keyID from the chi url param and set it into the request context
 func PublicKeyCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

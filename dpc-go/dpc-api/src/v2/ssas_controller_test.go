@@ -189,6 +189,76 @@ func (suite *SsasControllerTestSuite) TestGetWhenSystemIDNotLinked() {
 	assert.Equal(suite.T(), http.StatusBadRequest, res.StatusCode)
 }
 
+func (suite *SsasControllerTestSuite) TestCreateToken() {
+	req, _ := suite.SetupHappyPathMocks()
+
+	//Mock client calls
+	managedOrg := client.ProviderOrg{
+		OrgName:      "Test Org",
+		OrgID:        "abc",
+		Npi:          "npi-1",
+		Status:       "Active",
+		SsasSystemID: "system-id-1",
+	}
+	orgs := make([]client.ProviderOrg, 1)
+	orgs[0] = managedOrg
+	findExpectedCall(suite.mac.ExpectedCalls, "GetProviderOrgs").Return(orgs, nil)
+
+	//Do request
+	w := httptest.NewRecorder()
+	suite.sc.CreateToken(w, req)
+	res := w.Result()
+
+	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
+	resp, _ := ioutil.ReadAll(res.Body)
+	assert.Equal(suite.T(), "token", string(resp))
+}
+
+func (suite *SsasControllerTestSuite) TestCreateTokenSystemIDNotLinked() {
+	req, _ := suite.SetupHappyPathMocks()
+
+	//Do request
+	w := httptest.NewRecorder()
+	suite.sc.CreateToken(w, req)
+	res := w.Result()
+
+	assert.Equal(suite.T(), http.StatusBadRequest, res.StatusCode)
+}
+
+func (suite *SsasControllerTestSuite) TestDeleteToken() {
+	req, _ := suite.SetupHappyPathMocks()
+
+	//Mock client calls
+	managedOrg := client.ProviderOrg{
+		OrgName:      "Test Org",
+		OrgID:        "abc",
+		Npi:          "npi-1",
+		Status:       "Active",
+		SsasSystemID: "system-id-1",
+	}
+	orgs := make([]client.ProviderOrg, 1)
+	orgs[0] = managedOrg
+	findExpectedCall(suite.mac.ExpectedCalls, "GetProviderOrgs").Return(orgs, nil)
+
+	//Do request
+	w := httptest.NewRecorder()
+	suite.sc.DeleteToken(w, req)
+	res := w.Result()
+
+	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
+}
+
+func (suite *SsasControllerTestSuite) TestDeleteTokenSystemIDNotLinked() {
+	req, _ := suite.SetupHappyPathMocks()
+
+	//Do request
+	w := httptest.NewRecorder()
+	suite.sc.DeleteToken(w, req)
+	res := w.Result()
+
+	assert.Equal(suite.T(), http.StatusBadRequest, res.StatusCode)
+}
+
 func (suite *SsasControllerTestSuite) TestAddKey() {
 	req, _ := suite.SetupHappyPathMocks()
 
@@ -336,6 +406,8 @@ func (suite *SsasControllerTestSuite) SetupHappyPathMocks() (*http.Request, cont
 	suite.msc.On("CreateSystem", mock.Anything, mock.Anything).Return(ssasResp, nil)
 	suite.mac.On("UpdateImplOrg", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(client.ImplementerOrg{}, nil)
 	suite.msc.On("GetSystem", mock.Anything, mock.Anything).Return(ssasGetResp, nil)
+	suite.msc.On("CreateToken", mock.Anything, mock.Anything, mock.Anything).Return("token", nil)
+	suite.msc.On("DeleteToken", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 	suite.msc.On("AddPublicKey", mock.Anything, mock.Anything, mock.Anything).Return(ssasKeyResp, nil)
 	suite.msc.On("DeletePublicKey", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 

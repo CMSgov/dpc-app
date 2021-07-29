@@ -94,6 +94,16 @@ func (mc MockSsasClient) GetSystem(ctx context.Context, systemID string) (client
 	return args.Get(0).(client.GetSystemResponse), args.Error(1)
 }
 
+func (mc MockSsasClient) CreateToken(ctx context.Context, systemID string, label string) (string, error) {
+	args := mc.Called(ctx, systemID, label)
+	return args.Get(0).(string), args.Error(1)
+}
+
+func (mc MockSsasClient) DeleteToken(ctx context.Context, systemID string, tokenID string) error {
+	args := mc.Called(ctx, systemID, tokenID)
+	return args.Error(0)
+}
+
 func (mc MockSsasClient) AddPublicKey(ctx context.Context, systemID string, request model.ProxyPublicKeyRequest) (map[string]string, error) {
 	args := mc.Called(ctx, systemID, request)
 	return args.Get(0).(map[string]string), args.Error(1)
