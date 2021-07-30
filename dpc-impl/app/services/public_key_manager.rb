@@ -9,7 +9,7 @@ class PublicKeyManager
     @errors = []
   end
 
-  def create_public_key(public_key:, label:, signature:)
+  def create_public_key(public_key:, signature:)
     public_key = strip_carriage_returns(public_key)
     signature = strip_carriage_returns(signature)
 
@@ -20,11 +20,10 @@ class PublicKeyManager
 
     api_client = ApiClient.new
     api_client.create_public_key(@imp_id, @org_id,
-                                 params: { label: label,
-                                           public_key: public_key,
+                                 params: { public_key: public_key,
                                            signature: signature })
 
-    return api_response
+    return api_response(api_client)
   end
 
   def create_system(org_name:, public_key:, signature:)

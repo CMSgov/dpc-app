@@ -78,33 +78,33 @@ RSpec.feature 'adding provider organization' do
       expect(page.body).to have_content("Provider Organization added.")
     end
 
-    scenario 'view provider org page' do
-      stub_api_client(message: :create_implementer, success: true, response: default_imp_creation_response)
+    # scenario 'view provider org page' do
+    #   stub_api_client(message: :create_implementer, success: true, response: default_imp_creation_response)
 
-      user = create(:user)
+    #   user = create(:user)
 
-      sign_in user
+    #   sign_in user
 
-      api_client = instance_double(ApiClient)
-      allow(ApiClient).to receive(:new).and_return(api_client)
-      allow(api_client).to receive(:get_provider_orgs)
-        .with(user.implementer_id)
-        .and_return(api_client)
-      allow(api_client).to receive(:response_successful?).and_return(true)
-      allow(api_client).to receive(:response_body).and_return(default_provider_orgs_list)
+    #   api_client = instance_double(ApiClient)
+    #   allow(ApiClient).to receive(:new).and_return(api_client)
+    #   allow(api_client).to receive(:get_provider_orgs)
+    #     .with(user.implementer_id)
+    #     .and_return(api_client)
+    #   allow(api_client).to receive(:response_successful?).and_return(true)
+    #   allow(api_client).to receive(:response_body).and_return(default_provider_orgs_list)
 
-      visit root_path
+    #   visit root_path
 
-      uuid = first('.provider-link').text().scan(/(?<=ID: )([\w-]+)/).first.first
-      binding.pry
-      allow(api_client).to receive(:get_organization)
-        .with(uuid)
-        .and_return(api_client)
-      allow(api_client).to receive(:response_successful?).and_return(true)
-      allow(api_client).to receive(:response_body).and_return(default_single_provider_org)
+    #   uuid = first('.provider-link').text().scan(/(?<=ID: )([\w-]+)/).first.first
+    #   binding.pry
+    #   allow(api_client).to receive(:get_organization)
+    #     .with(uuid)
+    #     .and_return(api_client)
+    #   allow(api_client).to receive(:response_successful?).and_return(true)
+    #   allow(api_client).to receive(:response_body).and_return(default_single_provider_org)
 
-      first('.provider-link').click
-    end
+    #   first('.provider-link').click
+    # end
   end
 
   describe 'could not connect to API' do

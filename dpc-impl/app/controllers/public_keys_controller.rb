@@ -5,6 +5,7 @@ class PublicKeysController < ApplicationController
 
   def new
     @org_id = org_id
+    @public_keys = get_public_keys(imp_id, @org_id)
   end
 
   def create
@@ -20,7 +21,10 @@ class PublicKeysController < ApplicationController
         signature: params[:signature]
       )
     else
-      create_public_key(manager, params)
+      new_public_key = manager.create_public_key(
+        public_key: params[:public_key],
+        signature: params[:signature]
+      )
     end
 
     if new_public_key[:response]
@@ -39,9 +43,18 @@ class PublicKeysController < ApplicationController
   def create_public_key(manager, params)
     new_public_key = manager.create_public_key(
       public_key: params[:public_key],
-      label: params[:label],
       signature: params[:signature]
     )
+  end
+
+  def get_public_keys(imp_id, org_id)
+    api_req = tokens_keys_api_req(imp_id, org_id)
+
+    if api_req.class == Hash
+      return api_req[:public_keys]
+    else
+      return []
+    end
   end
 
   def org_id
@@ -50,5 +63,9 @@ class PublicKeysController < ApplicationController
 
   def org_name_present?(params)
     params[:org_name].present?
+  end
+
+  def tokens_keys_api_req(imp_id, org_id)
+    api_service.get_tokens_keys(imp_id, org_id)
   end
 end
