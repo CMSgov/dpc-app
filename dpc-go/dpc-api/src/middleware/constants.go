@@ -45,4 +45,8 @@ const (
 	ContextKeySince
 	// ContextKeyImplementor is the key in the context to pass on the implementor path param value
 	ContextKeyImplementor
+	// ContextKeyTokenID is the key in the context to pass on the tokenID param value
+	ContextKeyTokenID
+	// ContextKeyKeyID is the key in the context to pass on the keyID param value
+	ContextKeyKeyID
 )

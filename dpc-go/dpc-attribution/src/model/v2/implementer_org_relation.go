@@ -25,6 +25,18 @@ type ImplementorOrgOutput struct {
 }
 
 // MarshalJSON Json marshaller
+func (u *ImplementerOrgRelation) MarshalJSON() ([]byte, error) {
+	type Alias ImplementerOrgRelation
+	return json.Marshal(&struct {
+		Status string `json:"status"`
+		*Alias
+	}{
+		Status: u.Status.String(),
+		Alias:  (*Alias)(u),
+	})
+}
+
+// MarshalJSON Json marshaller
 func (u *ImplementorOrgOutput) MarshalJSON() ([]byte, error) {
 	type Alias ImplementorOrgOutput
 	return json.Marshal(&struct {
