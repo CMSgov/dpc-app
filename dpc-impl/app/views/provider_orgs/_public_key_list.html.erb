@@ -1,12 +1,28 @@
 <ul class="list">
-  <% @public_keys.each do |key| %>
-    <li class="list_item">
+  <% @public_keys.each_with_index do |key, index| %>
+    <li class="list_item flex-row-spc-btwn">
       <div class="item_info">
         <div class="item_id">
           ID: <%= key[:id] %>
         </div>
         <div>
           Created: <%= key[:creation_date] %>
+        </div>
+      </div>
+
+      <div class="credential__delete usa-accordion">
+        <button id="button<%= index +1 %>" class="usa-accordion__button credential__delete_button" aria-expanded="false" aria-controls="collapse<%= index +1 %>">
+          X
+        </button>
+        <div id="collapse<%= index +1 %>" class="credential__btn_container usa-accordion__content">
+          <div class="credential__text">
+            Delete Public Key?
+          </div>
+          <div class="credential__actions">
+            <button class="credential__cancel_btn" onclick="collapseButtons('button<%= index +1 %>', 'collapse<%= index +1 %>')">
+              Cancel
+            </button>
+          </div>
         </div>
       </div>
     </li>

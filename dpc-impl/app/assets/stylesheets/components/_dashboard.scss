@@ -87,6 +87,10 @@
     padding: 0;
   }
 
+  .list_item + .list_item {
+    margin-top: 22px;
+  }
+
   .item_id, .item_label {
     color: $color-base;
     font-weight: 700;
