@@ -60,6 +60,11 @@ class ApplicationController < ActionController::Base
     @api_service ||= ApiClient.new
   end
 
+  def render_error(msg, org)
+    flash[:alert] = msg
+    redirect_to provider_orgs_path(org_id: org)
+  end
+
   def user_params
     params.require(:user).permit(:first_name, :last_name, :email, :implementer, :implementer_id, :invitation_token, :password, :password_confirmation, :agree_to_terms)
   end

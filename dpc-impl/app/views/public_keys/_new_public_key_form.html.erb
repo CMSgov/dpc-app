@@ -1,10 +1,12 @@
 <%= link_to "How to Create Public Key & Signature", public_key_faq_path %>
 
 <%= form_tag public_keys_url(org_id: @org_id), method: :post do |f| %>
-  <div class="field ds-u-margin-y--3">
-    <%= label_tag :label, "Label", class: "ds-c-label" %>
-    <%= text_field_tag :label, params[:label], class: "ds-c-field" %>
-  </div>
+  <% unless @public_keys.count.zero? %>
+    <div class="field ds-u-margin-y--3">
+      <%= label_tag :label, "Label", class: "ds-c-label" %>
+      <%= text_field_tag :label, params[:label], class: "ds-c-field" %>
+    </div>
+  <% end %>
   <div class="field ds-u-margin-y--3">
     <%= label_tag :public_key, "Public Key", class: "ds-c-label" %>
     <%= text_area_tag :public_key, params[:label], class: "ds-c-field" %>
