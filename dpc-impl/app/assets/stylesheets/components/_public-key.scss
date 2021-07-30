@@ -15,7 +15,6 @@
 .copy-btn__container {
   display: flex;
   flex-direction: row;
-  justify-content: flex-end;
   padding: 3px;
 
   img {
@@ -33,7 +32,6 @@
 .confirm-msg {
   display: flex;
   flex-direction: row;
-  justify-content: flex-end;
 }
 
 .confirm-success {
@@ -46,4 +44,52 @@
 
 .confirm-unsuccess {
   color: $color-error-dark;
+}
+
+.download_btn_container {
+  border: 1px solid $color-gray;
+  margin: 0 auto 15px;
+  max-width: 190px;
+  position: relative;
+  text-align: center;
+
+  .download_btn_description {
+    border-top: 1px solid $color-gray;
+    font-size: 12px;
+  }
+
+  .download_btn_form {
+
+    .button_to {
+      display: flex;
+      flex-direction: row;
+      width: 100%;
+    }
+
+    .download_btn {
+      display: block;
+      flex-grow: 1;
+    }
+  }
+}
+
+.tooltip {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip .tooltiptext {
+  background-color: $color-gray-lightest;
+  border: 1px solid $color-black;
+  color: $color-black;
+  padding: 5px;
+
+  position: absolute;
+  visibility: hidden;
+  width: 150px;
+  z-index: 1;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
 }

@@ -1,8 +1,15 @@
 <% title @org[:name] %>
 
 <div class="ds-u-margin-bottom--6" id="dashboard__title">
-  <div>
-    <%= link_to "Back to Portal", root_path, class: "ds-c-button" %>
+  <div class="ds-u-margin-bottom--3">
+    <%= link_to root_path, class: 'btn_to_home flex-sp-btwn' do %>
+      <svg class="icon" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <use xlink:href="/impl/assets/solid.svg#arrow-left"></use>
+      </svg>
+      <div>
+        Back to Portal
+      </div>
+    <% end %>
   </div>
 
   <h1 class="ds-text-heading--4xl ds-title"><%= @org[:name] %></h1>

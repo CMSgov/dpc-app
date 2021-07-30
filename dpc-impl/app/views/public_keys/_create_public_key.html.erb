@@ -1,6 +1,6 @@
 <div class="usa-accordion usa-accordion--bordered" role="region" id="create-public-key-instructions">
   <h2 class="usa-accordion__heading" id="accordion__public-key-instructions">
-    <button class="usa-accordion__button" aria-expanded="true" aria-controls="a1">
+    <button class="usa-accordion__button" aria-expanded="false" aria-controls="a1">
       How to Generate a Public Key and Signature
     </button>
   </h2>
@@ -57,14 +57,14 @@
     </div>
 
     <div class="step ds-u-padding-bottom--3">
-      <h4>3a. Create public key snippet</h4>
+      <h4>3a. Create public key signature</h4>
 
       <div class="download_btn_container">
         <div class="download_btn_form">
           <%= button_to 'DOWNLOAD', download_snippet_path, class: "ds-u-padding--1 ds-c-button--primary ds-u-font-weight--bold download_btn" %>
         </div>
         <div class="ds-u-padding--1 download_btn_description">
-          snippet.txt file to create snippet
+          snippet.txt file to create signature
         </div>
       </div>
 
@@ -89,7 +89,7 @@
         <span id="confirm-sig-snippet" style="display: hidden;"></span>
       </div>
 
-      <h4>3b. Verify public key snippet</h4>
+      <h4>3b. Verify public key signature</h4>
 
         <div>
           Use the command invocation:<br />
