@@ -44,7 +44,9 @@ class PublicKeysController < ApplicationController
 
     manager = PublicKeyManager.new(imp_id: imp_id, org_id: @org_id)
 
-    if manager.delete_public_key(id: @key_id)
+    if manager.delete_public_key(@key_id)
+      flash[:notice] = 'Public key sucessfully deleted'
+      redirect_to provider_orgs_path(org_id: @org_id)
     else
       render_error('Public key could not be deleted.', @org_id)
     end

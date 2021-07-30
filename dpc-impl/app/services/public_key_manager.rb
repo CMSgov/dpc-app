@@ -44,8 +44,9 @@ class PublicKeyManager
     return api_response(api_client)
   end
 
-  def delete_public_key(params)
-    
+  def delete_public_key(key_id)
+    api_client = ApiClient.new
+    api_client.delete_public_key(@imp_id, @org_id, key_id)
   end
 
   def invalid_encoding?(key_string)

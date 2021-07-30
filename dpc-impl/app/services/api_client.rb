@@ -33,8 +33,9 @@ class ApiClient
     post_request(uri_string, json)
   end
 
-  def delete_public_key()
-    binding.pry
+  def delete_public_key(imp_id, org_id, key_id)
+    uri_string = base_url + '/Implementer/' + imp_id + '/Org/' + org_id + '/key/' + key_id
+    delete_request(uri_string)
   end
 
   def get_tokens_keys(imp_id, provider_org_id)
@@ -62,6 +63,13 @@ class ApiClient
     Rails.logger.warn 'Could not connect to API'
     @response_status = 500
     @response_body = { 'issue' => [{ 'details' => { 'text' => 'Connection error' }}]}
+  end
+
+  def delete_request(uri_string)
+    uri = URI.parse uri_string
+    request = Net::HTTP::Delete.new(uri.request_uri)
+
+    http_request(request, uri)
   end
 
   def get_request(uri_string)
