@@ -26,7 +26,9 @@ class ApiClient
   end
 
   def create_system(imp_id, org_id, params: {})
-    binding.pry
+    uri_string = base_url + '/Implementer/' + imp_id + '/Org/' + org_id + '/system'
+    json = params.to_json
+    post_request(uri_string, json)
   end
 
   def get_tokens_keys(imp_id, provider_org_id)

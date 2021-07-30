@@ -38,11 +38,11 @@ class PublicKeyManager
 
     api_client = ApiClient.new
     api_client.create_system(@imp_id, @org_id,
-                             params: { org_name: org_name,
+                             params: { client_name: org_name + " System",
                                        public_key: public_key,
-                                      snippet_signature: snippet_signature }
+                                       snippet_signature: snippet_signature })
 
-    return api_response
+    return api_response(api_client)
   end
 
   def invalid_encoding?(key_string)
@@ -59,7 +59,7 @@ class PublicKeyManager
     true
   end
 
-  def api_response
+  def api_response(api_client)
     { response: api_client.response_successful?,
       message: api_client.response_body }
   end
