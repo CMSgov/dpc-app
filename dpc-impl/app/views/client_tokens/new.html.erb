@@ -1,6 +1,16 @@
 <% title "New Client Token" %>
 
-
 <div class="ds-l-container ds-u-padding-x--0">
   <h1 class="ds-u-font-size--title ds-u-font-weight--normal ds-u-margin--0">Create a new client token</h1>
+
+  <%= form_tag client_tokens_path(org_id: @org_id), method: :post do %>
+
+    <div class="field">
+      <%= label_tag :label, "Label", class: "ds-c-label" %>
+      <%= text_field_tag :label, params[:label], class: "ds-c-field", maxlength: "25"  %>
+      <p class="ds-c-field__hint">Choose a descriptive name to make your token easily identifiable to you.</p>
+    </div>
+
+    <%= submit_tag "Create token", class: "ds-c-button ds-c-button--primary", data: { test: "form-submit" } %>
+  <% end %>
 </div>
