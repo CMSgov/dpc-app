@@ -1,0 +1,39 @@
+<div class="usa-accordion usa-accordion--bordered" role="region" id="create-public-key-instructions">
+  <h2 class="usa-accordion__heading" id="accordion__public-key-instructions">
+    <button class="usa-accordion__button" aria-expanded="true" aria-controls="a1">
+      How to Generate a Public Key and Signature
+    </button>
+  </h2>
+  <div id="a1" class="usa-accordion__content public_key_instructions">
+    <div class="ds-u-padding-left--3 public-key__intro-windows">
+      <strong>Window users</strong><br />
+      If you are using Windows, you can use this link for downloading openSSL: <%= link_to 'https://wiki.openssl.org/index.php/Binaries', 'https://wiki.openssl.org/index.php/Binaries', target: '_blank' %>
+    </div>
+
+    <div class="ds-u-margin-y--6 ds-c-alert ds-c-alert--warn">
+      <div class="ds-c-alert__body">
+        <h2 class="ds-c-alert__heading">Please ensure all files created from this page are stored in ONE folder.</h2>
+        <p class="ds-c-alert__text">
+          (These include: private.pem, public.pem, snippet.txt, snippet.txt.sig, signature.sig)
+        </p>
+      </div>
+    </div>
+
+    <div class="step">
+      <h4>1. Generate a private key</h4>
+      <div>
+        Use the command invocation:<br />
+        <div class="code-block ds-u-truncate">
+          <code>
+            <span id="private-key">openssl genrsa -out private.pem 4096</span>
+          </code>
+        </div>
+        <div class="copy-btn__container">
+          <button onclick="copyText('private-key')" class="copy-btn ds-c-button--primary">Copy</button>
+        </div>
+        <div class="confirm-msg">
+          <span id="confirm-private-key"></span>
+        </div>
+    </div>
+  </div>
+</div>
