@@ -12,7 +12,7 @@ class PublicKeysController < ApplicationController
     return render_error('Required values missing.', @org_id) if missing_key
 
     manager = PublicKeyManager.new(imp_id: imp_id, org_id: @org_id)
-    binding.pry
+
     new_public_key = manager.create_public_key(
       org_name: params[:org_name],
       label: params[:label],
@@ -29,15 +29,5 @@ class PublicKeysController < ApplicationController
   end
 
   def index
-  end
-
-  private
-
-  def missing_key
-    params[:public_key].blank?
-  end
-
-  def org_id
-    params[:org_id]
   end
 end

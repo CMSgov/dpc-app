@@ -60,6 +60,14 @@ class ApplicationController < ActionController::Base
     @api_service ||= ApiClient.new
   end
 
+  def org_id
+    params[:org_id]
+  end
+
+  def missing_key
+    params[:public_key].blank?
+  end
+
   def render_error(msg, org)
     flash[:alert] = msg
     redirect_to provider_orgs_path(org_id: org)
