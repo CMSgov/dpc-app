@@ -2,14 +2,11 @@
   <% @public_keys.each do |key| %>
     <li class="list_item">
       <div class="item_info">
-        <div class="item_label">
-          <%= key[:label] %>
+        <div class="item_id">
+          ID: <%= key[:id] %>
         </div>
         <div>
           Created: <%= key[:creation_date] %>
-        </div>
-        <div>
-          Expires: <%= key[:expires_at] %>
         </div>
       </div>
     </li>

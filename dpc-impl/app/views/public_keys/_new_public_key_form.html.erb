@@ -1,12 +1,7 @@
 <%= link_to "How to Create Public Key & Signature", public_key_faq_path %>
 
 <%= form_tag public_keys_url(org_id: @org_id), method: :post do |f| %>
-  <% unless @public_keys.count.zero? %>
-    <div class="field ds-u-margin-y--3">
-      <%= label_tag :label, "Label", class: "ds-c-label" %>
-      <%= text_field_tag :label, params[:label], class: "ds-c-field" %>
-    </div>
-  <% else %>
+  <% if @public_keys.count.zero? %>
     <%= hidden_field_tag :org_name, @org[:name] %>
     <%= hidden_field_tag :ips, [] %>
   <% end %>
