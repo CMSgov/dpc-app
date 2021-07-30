@@ -20,6 +20,7 @@ Rails.application.routes.draw do
 
     resources :client_tokens, only: [:new, :create, :destroy]
     resources :public_keys, only: [:new, :create, :destroy]
+    resources :systems, only: [:create]
 
     match '/members', to: 'portal#index', via: :get
     match '/portal', to: 'portal#show', via: :get
