@@ -19,7 +19,7 @@
       </div>
     </div>
 
-    <div class="step">
+    <div class="step ds-u-padding-bottom--3">
       <h4>1. Generate a private key</h4>
       <div>
         Use the command invocation:<br />
@@ -34,6 +34,111 @@
         <div class="confirm-msg">
           <span id="confirm-private-key"></span>
         </div>
+      </div>
+    </div>
+
+    <div class="step ds-u-padding-bottom--3">
+      <h4>2. Generate a public key</h4>
+      <div>
+        Use the command invocation:<br />
+        <div class="code-block ds-u-truncate">
+          <code>
+            <span id="public-key">openssl rsa -in private.pem -outform PEM -pubout -out public.pem</span>
+          </code>
+        </div>
+        <div class="copy-btn__container">
+          <button onclick="copyText('public-key')" class="copy-btn ds-c-button--primary">Copy</button>
+        </div>
+        <div class="confirm-msg">
+          <span id="confirm-public-key"></span>
+        </div>
+      <p><strong>Paste the contents</strong> of this public.pem file into the ‘Public Key’ field below and proceed to creating your public key signature.</p>
+      </div>
+    </div>
+
+    <div class="step ds-u-padding-bottom--3">
+      <h4>3a. Create public key snippet</h4>
+
+      <div class="download_btn_container">
+        <div class="download_btn_form">
+          <%= button_to 'DOWNLOAD', download_snippet_path, class: "ds-u-padding--1 ds-c-button--primary ds-u-font-weight--bold download_btn" %>
+        </div>
+        <div class="ds-u-padding--1 download_btn_description">
+          snippet.txt file to create snippet
+        </div>
+      </div>
+
+      <div>
+        Use the command invocation:<br />
+        <div class="code-block ds-u-truncate">
+          <code>
+            <span id="sig-snippet">openssl dgst -sign private.pem -sha256 -out snippet.txt.sig snippet.txt</span>
+          </code>
+        </div>
+      </div>
+      <div class="copy-btn__container">
+        <div class="tooltip">
+          <%= image_tag("information.svg", alt: "") %><br />
+          <span class="tooltiptext">This command signs the downloaded snippet.txt file with your private key to create a signed public key signature in binary format. (snippet.txt.sig)</span>
+        </div>
+        <div>
+          <button onclick="copyText('sig-snippet')"  class="copy-btn ds-c-button--primary">Copy</button>
+        </div>
+      </div>
+      <div class="confirm-msg">
+        <span id="confirm-sig-snippet" style="display: hidden;"></span>
+      </div>
+
+      <h4>3b. Verify public key snippet</h4>
+
+        <div>
+          Use the command invocation:<br />
+          <div class="code-block ds-u-truncate">
+            <code>
+              <span id="verify-sig">openssl dgst -verify public.pem -sha256 -signature snippet.txt.sig snippet.txt</span>
+            </code>
+          </div>
+          <div class="copy-btn__container">
+            <div class="tooltip">
+              <%= image_tag("information.svg", alt: "") %><br />
+              <span class="tooltiptext">This command verifies the snippet.txt.sig file.</span>
+            </div>
+            <div>
+              <button onclick="copyText('verify-sig')" class="copy-btn ds-c-button--primary">Copy</button>
+            </div>
+          </div>
+          <div class="confirm-msg">
+            <span id="confirm-verify-sig" style="display: hidden;"></span>
+          </div>
+        </div>
+
+        <p class="ds-u-font-weight--bold">Results <u>must</u> confirm <span class="ds-u-color--success">Verified Ok</span></p>
+      </div>
+
+      <div class="step">
+        <h4>4. Generate a <em>verified</em> public key signature</h4>
+
+        Use the command invocation:<br />
+        <div class="code-block ds-u-truncate">
+          <code>
+            <span id="b64">openssl base64 -in snippet.txt.sig -out signature.sig</span>
+          </code>
+        </div>
+        <div class="copy-btn__container">
+          <div class="tooltip">
+            <%= image_tag("information.svg", alt: "") %><br />
+            <span class="tooltiptext">This command creates your verified public key signature into a human-readable format that can be pasted below. (signature.txt)</span>
+          </div>
+          <div>
+            <button onclick="copyText('b64')" class="copy-btn ds-c-button--primary">Copy</button>
+          </div>
+        </div>
+        <div class="confirm-msg">
+          <span id="confirm-b64"></span>
+        </div>
+
+        <p><strong>Paste the contents</strong> of this signature.sig file into the ‘Public Key Signature’ field below.</p>
+      </div>
     </div>
   </div>
 </div>

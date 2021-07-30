@@ -1,5 +1,49 @@
 .public_key_instructions {
   .step + .step {
-    border-top: 1px solid $color-gray;
+    border-top: 1px solid $color-gray-light;
   }
+}
+
+.code-block {
+  background-color: $color-white;
+  border: 1px solid $color-gray-dark;
+  color: $color-gray-dark;
+  max-width: 100%;
+  padding: 2px;
+}
+
+.copy-btn__container {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  padding: 3px;
+
+  img {
+    margin: 1px 0;
+    max-height: 22px;
+  }
+
+  .copy-btn {
+    border-radius: 15px;
+    font-weight: 700;
+    margin: 2px 0;
+  }
+}
+
+.confirm-msg {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+}
+
+.confirm-success {
+  background-color: $color-success-lightest;
+  color: $color-success;
+  font-weight: 700;
+  padding: 2px 10px;
+  text-align: center;
+}
+
+.confirm-unsuccess {
+  color: $color-error-dark;
 }
