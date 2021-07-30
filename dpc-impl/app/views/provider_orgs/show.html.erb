@@ -27,6 +27,7 @@
   <div id="dash_content">
 
     <% if @public_keys.count.zero? %>
+      <h2>Create the Initial Token for <%= @org[:name] %></h2>
       <%= render partial: 'public_keys/new_public_key_form', org_name: @org[:name] %>
     <% else %>
       <div class="porg_container" id="client_tokens_container">

@@ -15,8 +15,8 @@
     <%= text_area_tag :public_key, params[:label], class: "ds-c-field" %>
   </div>
   <div class="field ds-u-margin-y--3">
-    <%= label_tag :snippet_signature, "Signature Snippet", class: "ds-c-label" %>
-    <%= text_area_tag :snippet_signature, params[:label], class: "ds-c-field" %>
+    <%= label_tag :signature, "Signature Snippet", class: "ds-c-label" %>
+    <%= text_area_tag :signature, params[:label], class: "ds-c-field" %>
   </div>
   <div>
     <%= submit_tag "Add key", class: "ds-c-button ds-c-button--primary key-subitbtn", data: { test: "form-submit" } %>

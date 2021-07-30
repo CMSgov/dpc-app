@@ -9,9 +9,9 @@ class PublicKeyManager
     @errors = []
   end
 
-  def create_public_key(public_key:, label:, snippet_signature:)
+  def create_public_key(public_key:, label:, signature:)
     public_key = strip_carriage_returns(public_key)
-    snippet_signature = strip_carriage_returns(snippet_signature)
+    signature = strip_carriage_returns(signature)
 
     if invalid_encoding?(public_key)
       return { response: false,
@@ -22,14 +22,14 @@ class PublicKeyManager
     api_client.create_public_key(@imp_id, @org_id,
                                  params: { label: label,
                                            public_key: public_key,
-                                           snippet_signature: snippet_signature })
+                                           signature: signature })
 
     return api_response
   end
 
-  def create_system(org_name:, public_key:, snippet_signature:)
+  def create_system(org_name:, public_key:, signature:)
     public_key = strip_carriage_returns(public_key)
-    snippet_signature = strip_carriage_returns(snippet_signature)
+    signature = strip_carriage_returns(signature)
 
     if invalid_encoding?(public_key)
       return { response: false,
@@ -40,7 +40,7 @@ class PublicKeyManager
     api_client.create_system(@imp_id, @org_id,
                              params: { client_name: org_name + " System",
                                        public_key: public_key,
-                                       snippet_signature: snippet_signature })
+                                       signature: signature })
 
     return api_response(api_client)
   end

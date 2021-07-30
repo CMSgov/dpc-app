@@ -9,7 +9,7 @@ class PublicKeysController < ApplicationController
 
   def create
     @org_id = org_id
-    return render_error('Required values missing.', org_id: @org_id) if missing_key
+    return render_error('Required values missing.', @org_id) if missing_key
 
     manager = PublicKeyManager.new(imp_id: imp_id, org_id: @org_id)
 
@@ -17,17 +17,18 @@ class PublicKeysController < ApplicationController
       new_public_key = manager.create_system(
         org_name: params[:org_name],
         public_key: params[:public_key],
-        snippet_signature: params[:snippet_signature]
+        signature: params[:signature]
       )
-      binding.pry
     else
       create_public_key(manager, params)
     end
 
     if new_public_key[:response]
+      redirect_to provider_orgs_path(org_id: @org_id)
     else
       render_error(new_public_key[:message], @org_id)
     end
+
   end
 
   def index
@@ -39,7 +40,7 @@ class PublicKeysController < ApplicationController
     new_public_key = manager.create_public_key(
       public_key: params[:public_key],
       label: params[:label],
-      snippet_signature: params[:snippet_signature]
+      signature: params[:signature]
     )
   end
 
