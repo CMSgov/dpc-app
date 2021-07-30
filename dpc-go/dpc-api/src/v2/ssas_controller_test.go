@@ -340,6 +340,7 @@ func (suite *SsasControllerTestSuite) SetupHappyPathMocks() (*http.Request, cont
 	reqBody := `{
         "client_name" : "Test Client",
         "public_key" : "public key",
+        "signature" : "signature",
         "ips" : ["ip-1","ip-2"]
     }`
 	req := httptest.NewRequest("Post", "http://localohost/v2/Implementer/123/Org/abc/Systemfoo", strings.NewReader(reqBody))
