@@ -11,15 +11,15 @@
       </div>
 
       <div class="credential__delete usa-accordion">
-        <button id="button<%= index +1 %>" class="usa-accordion__button credential__delete_button" aria-expanded="false" aria-controls="collapse<%= index +1 %>">
+        <button id="button<%= index +1 %>" class="usa-accordion__button credential__delete_button" aria-expanded="false" aria-controls="collapse_key<%= index +1 %>">
           X
         </button>
-        <div id="collapse<%= index +1 %>" class="credential__btn_container usa-accordion__content">
+        <div id="collapse_key<%= index +1 %>" class="credential__btn_container usa-accordion__content">
           <div class="credential__text">
             Delete Public Key?
           </div>
           <div class="credential__actions">
-            <button class="credential__cancel_btn" onclick="collapseButtons('button<%= index +1 %>', 'collapse<%= index +1 %>')">
+            <button class="credential__cancel_btn" onclick="collapseButtons('button<%= index +1 %>', 'collapse_key<%= index +1 %>')">
               Cancel
             </button>
             <%= button_to "Delete", public_key_path(id: key[:id], org_id: @org_id), method: :delete, class: "ds-c-button ds-c-button--danger ds-u-float--right" %>

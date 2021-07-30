@@ -22,6 +22,8 @@ class ClientTokensController < ApplicationController
   end
 
   def destroy
+    @org_id = org_id
+    @token_id = params[:id]
   end
 
   private
