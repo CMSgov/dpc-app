@@ -7,6 +7,7 @@ import com.typesafe.config.ConfigFactory;
 import gov.cms.dpc.aggregation.service.*;
 import gov.cms.dpc.aggregation.util.AggregationUtils;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
+import gov.cms.dpc.bluebutton.clientV2.MockBlueButtonClientV2;
 import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.hapi.ContextUtils;
@@ -48,6 +49,7 @@ class BatchAggregationEngineTest {
     private ConsentService consentService;
 
     static private final FhirContext fhirContext = FhirContext.forDstu3();
+    static private final FhirContext fhirContextR4 = FhirContext.forR4();
     static private final MetricRegistry metricRegistry = new MetricRegistry();
     static private String exportPath;
     static private OperationsConfig operationsConfig;
@@ -73,9 +75,11 @@ class BatchAggregationEngineTest {
         consentService = Mockito.mock(ConsentService.class);
         queue = new MemoryBatchQueue(100);
         final var bbclient = Mockito.spy(new MockBlueButtonClient(fhirContext));
+        final var bbclientV2 = Mockito.spy(new MockBlueButtonClientV2(fhirContextR4));
         lookBackService = Mockito.spy(EveryoneGetsDataLookBackServiceImpl.class);
         JobBatchProcessor jobBatchProcessor = Mockito.spy(new JobBatchProcessor(bbclient, fhirContext, metricRegistry, operationsConfig, lookBackService, consentService));
-        engine = Mockito.spy(new AggregationEngine(aggregatorID, queue, operationsConfig, jobBatchProcessor));
+        JobBatchProcessorV2 jobBatchProcessorV2 = Mockito.spy(new JobBatchProcessorV2(bbclientV2, fhirContextR4, metricRegistry, operationsConfig, consentService));
+        engine = Mockito.spy(new AggregationEngine(aggregatorID, queue, operationsConfig, jobBatchProcessor, jobBatchProcessorV2));
         engine.queueRunning.set(true);
         Disposable subscribe = Mockito.mock(Disposable.class);
         doReturn(false).when(subscribe).isDisposed();
