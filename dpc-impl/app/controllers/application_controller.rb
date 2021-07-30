@@ -60,10 +60,6 @@ class ApplicationController < ActionController::Base
     @api_service ||= ApiClient.new
   end
 
-  def org_id
-    params[:org_id]
-  end
-
   def missing_key
     params[:public_key].blank?
   end

@@ -30,4 +30,10 @@ class PublicKeysController < ApplicationController
 
   def index
   end
+
+  private
+
+  def org_id
+    params[:org_id]
+  end
 end
