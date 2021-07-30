@@ -44,6 +44,10 @@ class PublicKeyManager
     return api_response(api_client)
   end
 
+  def delete_public_key(params)
+    
+  end
+
   def invalid_encoding?(key_string)
     key = OpenSSL::PKey::RSA.new(key_string)
     if key.private?

@@ -33,6 +33,10 @@ class ApiClient
     post_request(uri_string, json)
   end
 
+  def delete_public_key()
+    binding.pry
+  end
+
   def get_tokens_keys(imp_id, provider_org_id)
     uri_string = base_url + '/Implementer/' + imp_id + '/Org/' + provider_org_id + '/system'
     get_request(uri_string)

@@ -38,6 +38,18 @@ class PublicKeysController < ApplicationController
   def index
   end
 
+  def destroy
+    @org_id = org_id
+    @key_id = params[:id]
+
+    manager = PublicKeyManager.new(imp_id: imp_id, org_id: @org_id)
+
+    if manager.delete_public_key(id: @key_id)
+    else
+      render_error('Public key could not be deleted.', @org_id)
+    end
+  end
+
   private
 
   def create_public_key(manager, params)
