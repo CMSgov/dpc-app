@@ -186,6 +186,12 @@ func (sc *SSASController) GetAuthToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if len(resBytes) <= 0 {
+		log.Error("No token returned from SSAS")
+		fhirror.ServerIssue(r.Context(), w, http.StatusInternalServerError, "No token returned from SSAS")
+		return
+	}
+
 	if _, err := w.Write(resBytes); err != nil {
 		log.Error("Failed to write data to response", zap.Error(err))
 		fhirror.ServerIssue(r.Context(), w, http.StatusInternalServerError, "Failed to authenticate token")
