@@ -39,6 +39,11 @@ class ApiClient
     post_request(uri_string, json)
   end
 
+  def delete_client_token(imp_id, org_id, token_id)
+    uri_string = base_url + '/Implementer/' + imp_id + '/Org/' + org_id + '/token/' + token_id
+    delete_request(uri_string)
+  end
+
   def delete_public_key(imp_id, org_id, key_id)
     uri_string = base_url + '/Implementer/' + imp_id + '/Org/' + org_id + '/key/' + key_id
     delete_request(uri_string)
