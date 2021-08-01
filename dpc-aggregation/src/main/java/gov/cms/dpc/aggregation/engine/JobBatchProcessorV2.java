@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.net.HttpHeaders;
+import com.google.inject.name.Named;
 import gov.cms.dpc.aggregation.service.ConsentResult;
 import gov.cms.dpc.aggregation.service.ConsentService;
 import gov.cms.dpc.aggregation.util.AggregationUtils;
@@ -40,7 +41,7 @@ public class JobBatchProcessorV2 {
     private final ConsentService consentService;
 
     @Inject
-    public JobBatchProcessorV2(BlueButtonClientV2 bbclientV2, FhirContext fhirContext, MetricRegistry metricRegistry, OperationsConfig operationsConfig, ConsentService consentService) {
+    public JobBatchProcessorV2(BlueButtonClientV2 bbclientV2, @Named("fhirContextR4") FhirContext fhirContext, MetricRegistry metricRegistry, OperationsConfig operationsConfig, ConsentService consentService) {
         this.bbclientV2 = bbclientV2;
         this.fhirContext = fhirContext;
         this.operationsConfig = operationsConfig;

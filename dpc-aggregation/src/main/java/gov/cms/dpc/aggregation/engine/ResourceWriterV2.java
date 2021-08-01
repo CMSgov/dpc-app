@@ -1,6 +1,7 @@
 package gov.cms.dpc.aggregation.engine;
 
 import ca.uhn.fhir.context.FhirContext;
+import com.google.inject.name.Named;
 import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.queue.models.JobQueueBatch;
@@ -25,7 +26,7 @@ class ResourceWriterV2 {
     private static final Logger logger = LoggerFactory.getLogger(ResourceWriterV2.class);
     private static final char DELIM = '\n';
 
-    private final FhirContext fhirContext;
+    private final @Named("fhirContextR4") FhirContext fhirContext;
     private final OperationsConfig config;
     private final JobQueueBatch job;
     private final DPCResourceType resourceType;
@@ -48,7 +49,7 @@ class ResourceWriterV2 {
      * @param resourceType - the resource type to fetch
      * @param config - config to use for the engine
      */
-    ResourceWriterV2(FhirContext fhirContext,
+    ResourceWriterV2(@Named("fhirContextR4") FhirContext fhirContext,
                      JobQueueBatch job,
                      DPCResourceType resourceType,
                      OperationsConfig config) {
