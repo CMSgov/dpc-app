@@ -24,3 +24,5 @@ services:
       - DPC_DB_URLV1=postgresql://postgres:dpc-safe@db:5432/dpc_attribution
       - DPC_DB_QUEUEURL=postgresql://postgres:dpc-safe@db:5432/dpc_queue
       - DPC_PORT=3001
+    volumes:
+      - ./dpc-go/dpc-attribution/src/shared_files/decrypted:/decrypted
