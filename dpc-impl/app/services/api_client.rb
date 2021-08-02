@@ -110,7 +110,13 @@ class ApiClient
   def parsed_response(response)
     return self if response.body.blank?
 
-    eval(response.body)
+    begin
+      !!JSON.parse(response.body)
+    rescue
+      return response.body
+    else
+      eval(response.body)
+    end
   end
 
   def post_request(uri_string, json)
