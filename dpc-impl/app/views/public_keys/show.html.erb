@@ -1,0 +1,28 @@
+<% title "Initial Token" %>
+
+<div class="ds-l-container ds-u-padding-x--0">
+  <h1 class="ds-u-font-size--title ds-u-font-weight--normal ds-u-margin--0">Success! Here is your new client token.</h1>
+  <section class="box">
+    <div class="box__content">
+      <div class="ds-c-alert ds-u-margin-bottom--7">
+        <div class="ds-c-alert__body">
+          <h2 class="ds-c-alert__heading">Copy or download your token right now! You won’t be able to see it again.</h2>
+        </div>
+      </div>
+      <h2 class="box__heading ds-u-margin-bottom--0">Initial Token</h2>
+      <div class="ds-u-margin-y--5">
+        <label for="token" class="ds-c-label ds-u-font-size--h3">Your token</label>
+          <textarea id="token" class="ds-c-field ds-c-field--copy" rows="9" readonly="readonly"><%= @client_token %></textarea>
+      </div>
+    </div>
+  </section>
+  <div>
+    <%= link_to provider_orgs_path(org_id: @org_id), class: "ds-c-button ds-c-button--primary", data: { test: 'porg-link' } do %>
+      Back to Organization
+      <svg class="icon ds-u-margin-left--1" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <use xlink:href="/assets/solid.svg#arrow-right"></use>
+      </svg>
+    <% end %>
+  </div>
+</div>
+

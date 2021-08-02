@@ -29,7 +29,8 @@ class PublicKeysController < ApplicationController
     end
 
     if new_public_key[:response]
-      redirect_to provider_orgs_path(org_id: @org_id)
+      @client_token = new_public_key[:message][:client_token]
+      render :show
     else
       render_error(new_public_key[:message], @org_id)
     end

@@ -24,6 +24,10 @@ class ClientTokensController < ApplicationController
     end
   end
 
+  def show
+    @client_token = params[:client_token]
+  end
+
   def destroy
     @org_id = org_id
     @token_id = params[:id]
