@@ -1,8 +1,4 @@
 <div>
-  <div class="ds-u-margin-bottom--4">
-    <%= render partial: 'public_keys/create_public_key' %>
-  </div>
-
   <div>
     <%= form_tag public_keys_url(org_id: @org_id), method: :post do |f| %>
       <% if @public_keys.count.zero? %>
@@ -20,5 +16,9 @@
         <%= submit_tag "Add key", class: "ds-c-button ds-c-button--primary key-subitbtn", data: { test: "form-submit" } %>
       </div>
     <% end %>
+  </div>
+
+  <div class="ds-u-margin-top--4">
+    <%= render partial: 'public_keys/create_public_key' %>
   </div>
 </div>
