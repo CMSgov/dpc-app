@@ -401,7 +401,7 @@ func (sc *SSASController) GetAuthToken(w http.ResponseWriter, r *http.Request) {
 	resBytes, err := sc.ssasClient.Authenticate(r.Context(), body)
 	if err != nil {
 		log.Error("Failed to authenticate", zap.Error(err))
-		fhirror.ServerIssue(r.Context(), w, http.StatusInternalServerError, "Failed to authenticate token")
+		fhirror.ServerIssue(r.Context(), w, http.StatusInternalServerError, fmt.Sprintf("Failed to authenticate token: %s", err))
 		return
 	}
 

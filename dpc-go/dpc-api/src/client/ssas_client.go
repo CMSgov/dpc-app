@@ -287,7 +287,7 @@ func (sc *SsasHTTPClient) Authenticate(ctx context.Context, reqBytes []byte) ([]
 	resBytes, err := sc.doPost(ctx, url, reqBytes, headers)
 	if err != nil {
 		log.Error("Token authentication failed", zap.Error(err))
-		return nil, errors.Errorf("Failed to authenticate token")
+		return nil, errors.Errorf("Failed to authenticate token: %s", err)
 	}
 	return resBytes, nil
 }
