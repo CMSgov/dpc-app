@@ -41,7 +41,7 @@ func (sc *SSASController) CreateToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	found, mOrg, err := sc.getManagedOrg(r, implementerID, organizationID)
+	found, mOrg, err := sc.getProviderOrg(r, implementerID, organizationID)
 	if err != nil {
 		log.Error("Failed to retrieve implementer's managed orgs", zap.Error(err))
 		fhirror.GenericServerIssue(r.Context(), w)
@@ -105,7 +105,7 @@ func (sc *SSASController) DeleteToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	found, mOrg, err := sc.getManagedOrg(r, implementerID, organizationID)
+	found, mOrg, err := sc.getProviderOrg(r, implementerID, organizationID)
 	if err != nil {
 		log.Error("Failed to retrieve implementer's managed orgs", zap.Error(err))
 		fhirror.GenericServerIssue(r.Context(), w)
@@ -207,7 +207,7 @@ func (sc *SSASController) DeleteKey(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	found, mOrg, err := sc.getManagedOrg(r, implementerID, organizationID)
+	found, mOrg, err := sc.getProviderOrg(r, implementerID, organizationID)
 	if err != nil {
 		log.Error("Failed to retrieve implementer's managed orgs", zap.Error(err))
 		fhirror.GenericServerIssue(r.Context(), w)
@@ -248,7 +248,7 @@ func (sc *SSASController) AddKey(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	found, mOrg, err := sc.getManagedOrg(r, implementerID, organizationID)
+	found, mOrg, err := sc.getProviderOrg(r, implementerID, organizationID)
 	if err != nil {
 		log.Error("Failed to retrieve implementer's managed orgs", zap.Error(err))
 		fhirror.GenericServerIssue(r.Context(), w)
