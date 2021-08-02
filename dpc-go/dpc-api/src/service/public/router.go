@@ -120,6 +120,7 @@ func fileServer(r chi.Router, path string, root http.FileSystem) {
 type controllers struct {
 	Org      v2.Controller
 	Metadata v2.ReadController
+	Health   v2.Controller
 	Group    v2.Controller
 	Data     v2.FileController
 	Job      v2.JobController

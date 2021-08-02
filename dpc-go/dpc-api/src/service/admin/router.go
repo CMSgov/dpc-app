@@ -94,6 +94,7 @@ func NewAdminServer() *service.Server {
 
 type controllers struct {
 	Org     v2.Controller
+	Health  v2.Controller
 	Impl    v2.Controller
 	ImplOrg v2.Controller
 	Ssas    v2.SsasController

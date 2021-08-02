@@ -67,17 +67,19 @@ func (mjc *MockSsasController) CreateSystem(w http.ResponseWriter, r *http.Reque
 
 type RouterTestSuite struct {
 	suite.Suite
-	router    http.Handler
-	mockOrg   *MockController
-	mockMeta  *MockController
-	mockGroup *MockController
-	mockData  *MockFileController
-	mockJob   *MockJobController
+	router     http.Handler
+	mockOrg    *MockController
+	mockMeta   *MockController
+	mockHealth *MockController
+	mockGroup  *MockController
+	mockData   *MockFileController
+	mockJob    *MockJobController
 }
 
 func (suite *RouterTestSuite) SetupTest() {
 	suite.mockOrg = &MockController{}
 	suite.mockMeta = &MockController{}
+	suite.mockHealth = &MockController{}
 	suite.mockGroup = &MockController{}
 	suite.mockData = &MockFileController{}
 	suite.mockJob = &MockJobController{}
@@ -85,6 +87,7 @@ func (suite *RouterTestSuite) SetupTest() {
 	c := controllers{
 		Org:      suite.mockOrg,
 		Metadata: suite.mockMeta,
+		Health:   suite.mockHealth,
 		Group:    suite.mockGroup,
 		Data:     suite.mockData,
 		Job:      suite.mockJob,
@@ -103,6 +106,17 @@ func (suite *RouterTestSuite) TestMetadataRoute() {
 	ts := httptest.NewServer(suite.router)
 
 	res, _ := http.Get(fmt.Sprintf("%s/%s", ts.URL, "v2/metadata"))
+
+	assert.Equal(suite.T(), "application/fhir+json; charset=UTF-8", res.Header.Get("Content-Type"))
+	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
+}
+
+func (suite *RouterTestSuite) TestHealthRoute() {
+	suite.mockHealth.On("Read", mock.Anything, mock.Anything).Once()
+
+	ts := httptest.NewServer(suite.router)
+
+	res, _ := http.Get(fmt.Sprintf("%s/%s", ts.URL, "v2/_health"))
 
 	assert.Equal(suite.T(), "application/fhir+json; charset=UTF-8", res.Header.Get("Content-Type"))
 	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
