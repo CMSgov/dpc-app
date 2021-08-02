@@ -19,5 +19,7 @@ class ClientTokenManager
   end
 
   def delete_client_token(token_id)
+    api_client = ApiClient.new
+    api_client.delete_client_token(@imp_id, @org_id, token_id[:id])
   end
 end

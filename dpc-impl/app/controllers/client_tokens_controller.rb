@@ -25,21 +25,20 @@ class ClientTokensController < ApplicationController
   end
 
   def destroy
+    @org_id = org_id
+    @token_id = params[:id]
+
+    manager = ClientTokenManager.new(imp_id: imp_id, org_id: @org_id)
+
+    if manager.delete_client_token(id: @token_id)
+      flash[:notice] = 'Client token successfully deleted.'
+      redirect_to provider_orgs_path(org_id: @org_id)
+    else
+      render_error 'Client token could not be deleted.'
+    end
   end
 
   private
-
-  def get_client_token(manager)
-    instance_variables.each do |ivar_name|
-      binding.pry
-      if instance_variable_get(ivar_name) == manager
-        return ivar_name.to_s.sub(/^@/, '') # change '@something' to 'something'
-      end
-    end
-  
-    # return nil if no match was found
-    nil 
-  end
 
   def org_id
     params[:org_id]

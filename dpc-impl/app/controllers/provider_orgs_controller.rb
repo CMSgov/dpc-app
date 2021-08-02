@@ -71,7 +71,7 @@ class ProviderOrgsController < ApplicationController
     hash = org.first
     return hash[:value]
   end
-  
+
   def org_status(npi)
     @npi = npi
     @orgs = current_user.provider_orgs
@@ -83,12 +83,12 @@ class ProviderOrgsController < ApplicationController
   def provider_org_param
     params.require(:provider_org).permit(:npi)
   end
-  
+
   def npi_error
     flash[:alert] = 'NPI must be valid.'
     redirect_to provider_orgs_path
   end
-  
+
   def npi_valid?(npi)
     npi = '80840' + npi
     LuhnacyLib.validate_npi(npi)

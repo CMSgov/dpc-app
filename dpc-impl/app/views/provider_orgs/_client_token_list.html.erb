@@ -25,7 +25,7 @@
             <button class="credential__cancel_btn" onclick="collapseButtons('button<%= index +1 %>', 'collapse_token<%= index +1 %>')">
               Cancel
             </button>
-            <%= button_to "Delete", client_token_path(id: token[:id], org_id: @org_id), method: :delete, class: "ds-c-button ds-c-button--danger ds-u-float--right" %>
+            <%= button_to "Delete", client_token_path(id: token[:uuid], org_id: @org_id), method: :delete, class: "ds-c-button ds-c-button--danger ds-u-float--right" %>
           </div>
         </div>
       </div>
