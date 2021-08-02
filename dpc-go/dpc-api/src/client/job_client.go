@@ -86,6 +86,7 @@ func (jc *JobClientImpl) Status(ctx context.Context, jobID string) ([]byte, erro
 	return body, nil
 }
 
+// Export function to export data for patients
 func (jc *JobClientImpl) Export(ctx context.Context, request model.ExportRequest) ([]byte, error) {
 	log := logger.WithContext(ctx)
 	jc.httpClient.Logger = newLogger(*log)

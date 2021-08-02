@@ -79,17 +79,11 @@ func (js JobServiceV1) Export(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	since, err := parseSinceParam(er.Since)
-	if err != nil {
-		log.Error("Failed to parse since", zap.Error(err))
-		boom.BadData(w, err.Error())
-		return
-	}
-
 	url := r.Header.Get(middleware.RequestURLHeader)
 	ip := r.Header.Get(middleware.FwdHeader)
-	batches, err := js.buildV1Batches(er, npi, url, ip, since)
+	batches, err := js.buildV1Batches(er, npi, url, ip)
 	if err != nil {
+		log.Error("Failed to build v1 batches", zap.Error(err))
 		boom.Internal(w, err.Error())
 		return
 	}
@@ -168,10 +162,15 @@ func (js *JobServiceV1) BatchesAndFiles(w http.ResponseWriter, r *http.Request) 
 	}
 }
 
-func (js *JobServiceV1) buildV1Batches(er v1.ExportRequest, orgNPI string, url string, ip string, since *sql.NullTime) ([]v1.BatchRequest, error) {
+func (js *JobServiceV1) buildV1Batches(er v1.ExportRequest, orgNPI string, url string, ip string) ([]v1.BatchRequest, error) {
 	priority := 5000
 	if len(er.MBIs) == 1 {
 		priority = 1000
+	}
+
+	since, err := parseSinceParam(er.Since)
+	if err != nil {
+		return nil, errors.Wrap(err, "Failed to parse since")
 	}
 
 	tt, err := js.fetchTransactionTime()
