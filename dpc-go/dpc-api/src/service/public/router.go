@@ -23,7 +23,12 @@ func buildPublicRoutes(cont controllers) http.Handler {
 	r.With(middleware2.Sanitize).Route("/v2", func(r chi.Router) {
 		r.Use(middleware.SetHeader("Content-Type", "application/fhir+json; charset=UTF-8"))
 		r.Get("/metadata", cont.Metadata.Read)
-		r.Get("/_health", getHealthCheck)
+		r.Get("/_health", func(w http.ResponseWriter, r *http.Request) {
+			m := make(map[string]string)
+			m["database"] = "ok"
+			w.WriteHeader(http.StatusOK)
+			render.JSON(w, r, m)
+		})
 
 		//ORGANIZATION
 		r.Route("/Organization", func(r chi.Router) {
@@ -92,13 +97,6 @@ func NewPublicServer() *service.Server {
 	r := buildPublicRoutes(controllers)
 	return service.NewServer("DPC-API Public Server", port, true, r)
 
-}
-
-func getHealthCheck(w http.ResponseWriter, r *http.Request) {
-	m := make(map[string]string)
-	m["database"] = "ok"
-	w.WriteHeader(http.StatusOK)
-	render.JSON(w, r, m)
 }
 
 func fileServer(r chi.Router, path string, root http.FileSystem) {

@@ -6,10 +6,12 @@ import (
 	middleware2 "github.com/CMSgov/dpc/api/middleware"
 	"github.com/CMSgov/dpc/api/service"
 	"github.com/go-chi/chi"
+	"github.com/go-chi/render"
+
+	"net/http"
 
 	v2 "github.com/CMSgov/dpc/api/v2"
 	"github.com/go-chi/chi/middleware"
-	"net/http"
 )
 
 func buildAdminRoutes(c controllers) http.Handler {
@@ -18,6 +20,12 @@ func buildAdminRoutes(c controllers) http.Handler {
 	r.Use(middleware2.RequestIPCtx)
 	r.With(middleware2.Sanitize).Route("/v2", func(r chi.Router) {
 		r.Use(middleware.SetHeader("Content-Type", "application/fhir+json; charset=UTF-8"))
+		r.Get("/_health", func(w http.ResponseWriter, r *http.Request) {
+			m := make(map[string]string)
+			m["database"] = "ok"
+			w.WriteHeader(http.StatusOK)
+			render.JSON(w, r, m)
+		})
 
 		//ORGANIZATION Routes
 		r.Route("/Organization", func(r chi.Router) {
