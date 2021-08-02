@@ -6,7 +6,10 @@ import (
 	"github.com/pkg/errors"
 )
 
+// ResourceType represents a resource type
 type ResourceType string
+
+// HexType represents the hex checksum
 type HexType string
 
 // JobQueueBatchFile is a struct that models the v1 job queue batch file table
