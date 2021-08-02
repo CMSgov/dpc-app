@@ -3,7 +3,6 @@ RUN apk add --no-cache git
 WORKDIR /app/dpc-attribution
 COPY src/ .
 COPY configs ../configs
-COPY shared_files/decrypted ../shared_files/decrypted
 RUN go build  -o ./bin/attribution .
 
 FROM golang:1.15-alpine3.12
