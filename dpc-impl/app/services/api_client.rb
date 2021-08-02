@@ -33,9 +33,9 @@ class ApiClient
     post_request(uri_string, json)
   end
 
-  def create_system(imp_id, org_id, label)
+  def create_system(imp_id, org_id, params: {})
     uri_string = base_url + '/Implementer/' + imp_id + '/Org/' + org_id + '/system'
-    json = label.to_json
+    json = params.to_json
     post_request(uri_string, json)
   end
 

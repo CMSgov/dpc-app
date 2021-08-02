@@ -1,7 +1,7 @@
 <div>
   <div>
     <%= form_tag public_keys_url(org_id: @org_id), method: :post do |f| %>
-      <% if @public_keys.count.zero? %>
+      <% if @public_keys.count.zero? && @client_tokens.count.zero? %>
         <%= hidden_field_tag :org_name, @org[:name] %>
       <% end %>
       <div class="field ds-u-margin-y--3">
@@ -9,7 +9,7 @@
         <%= text_area_tag :public_key, params[:label], class: "ds-c-field" %>
       </div>
       <div class="field ds-u-margin-y--3">
-        <%= label_tag :signature, "Signature Snippet", class: "ds-c-label" %>
+        <%= label_tag :signature, "Signature", class: "ds-c-label" %>
         <%= text_area_tag :signature, params[:label], class: "ds-c-field" %>
       </div>
       <div>

@@ -5,6 +5,7 @@ class PublicKeysController < ApplicationController
 
   def new
     @org_id = org_id
+    @client_tokens = get_client_tokens(imp_id, @org_id)
     @public_keys = get_public_keys(imp_id, @org_id)
   end
 
@@ -57,6 +58,16 @@ class PublicKeysController < ApplicationController
   end
 
   private
+
+  def get_client_tokens(imp_id, org_id)
+    api_req = tokens_keys_api_req(imp_id, org_id)
+
+    if api_req.class == Hash
+      return api_req[:client_tokens]
+    else
+      return []
+    end
+  end
 
   def create_public_key(manager, params)
     new_public_key = manager.create_public_key(
