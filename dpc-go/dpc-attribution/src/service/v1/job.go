@@ -48,7 +48,7 @@ func NewJobService(jr v1Repo.JobRepo, or repository.OrganizationRepo, bfdClient 
 }
 
 // Export function that starts an export job for a given Group ID using v1 db
-func (js JobServiceV1) Export(w http.ResponseWriter, r *http.Request) {
+func (js *JobServiceV1) Export(w http.ResponseWriter, r *http.Request) {
 	log := logger.WithContext(r.Context())
 	orgID := util.FetchValueFromContext(r.Context(), w, middleware.ContextKeyOrganization)
 	org, err := js.or.FindByID(r.Context(), orgID)
@@ -110,7 +110,7 @@ func (js JobServiceV1) Export(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (js JobServiceV1) fetchTransactionTime() (*time.Time, error) {
+func (js *JobServiceV1) fetchTransactionTime() (*time.Time, error) {
 	b, err := js.bfdClient.GetPatient("FAKE_PATIENT", uuid.New().String(), uuid.New().String(), "", time.Now())
 	if err != nil {
 		return nil, err
