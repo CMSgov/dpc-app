@@ -16,8 +16,8 @@
     </div>
   </section>
   <div>
-    <%= link_to portal_path, class: "ds-c-button ds-c-button--primary", data: { test: 'portal-link' } do %>
-      Go to portal
+    <%= link_to provider_orgs_path(org_id: @org_id), class: "ds-c-button ds-c-button--primary", data: { test: 'porg-link' } do %>
+      Back to Organization
       <svg class="icon ds-u-margin-left--1" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
         <use xlink:href="/assets/solid.svg#arrow-right"></use>
       </svg>

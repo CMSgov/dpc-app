@@ -11,7 +11,7 @@ class ClientTokenManager
 
   def create_client_token(label: nil)
     api_client = ApiClient.new
-    api_client.create_client_token(@imp_id, @org_id, params: { label: label })
+    api_client.create_client_token(@imp_id, @org_id, {label: label})
 
     @client_token = api_client.response_body
 
