@@ -1,11 +1,11 @@
-package v2
+package service
 
 import (
 	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/CMSgov/dpc/attribution/middleware"
-	v2 "github.com/CMSgov/dpc/attribution/model/v2"
+	v2 "github.com/CMSgov/dpc/attribution/model"
 	"io/ioutil"
 	"net/http"
 

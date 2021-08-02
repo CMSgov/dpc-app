@@ -1,0 +1,9 @@
+bfd:
+  serverLocation: ""
+  clientCertFile: "../../shared_files/decrypted/bfd-dev-test-cert.pem"
+  clientKeyFile: "../../shared_files/decrypted/bfd-dev-test-key.pem"
+  clientCAFile: "../../shared_files/decrypted/bfd-dev-test-ca-file.crt"
+  requestRetryIntervalMS: 10
+  timeoutMS: 2000
+
+port: 6002

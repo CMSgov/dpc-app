@@ -1,12 +1,12 @@
-package v2
+package service
 
 import (
 	"bytes"
 	"encoding/json"
+	v1 "github.com/CMSgov/dpc/attribution/service/v1"
 	"io/ioutil"
 	"net/http"
 
-	"github.com/CMSgov/dpc/attribution/service"
 	"github.com/darahayes/go-boom"
 	"go.uber.org/zap"
 
@@ -17,11 +17,11 @@ import (
 // GroupService is a struct that defines what the service has
 type GroupService struct {
 	repo repository.GroupRepo
-	js   service.JobService
+	js   v1.JobService
 }
 
 // NewGroupService function that creates a group service and returns it's reference
-func NewGroupService(repo repository.GroupRepo, js service.JobService) *GroupService {
+func NewGroupService(repo repository.GroupRepo, js v1.JobService) *GroupService {
 	return &GroupService{
 		repo,
 		js,
@@ -66,10 +66,4 @@ func (gs *GroupService) Delete(w http.ResponseWriter, r *http.Request) {
 // Put function is not currently used for v2.GroupService
 func (gs *GroupService) Put(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
-}
-
-// Export function that starts an export job for a given Group ID
-func (gs *GroupService) Export(w http.ResponseWriter, r *http.Request) {
-	// TODO: Check v2 db for group id before doing v1 export
-	gs.js.Export(w, r)
 }

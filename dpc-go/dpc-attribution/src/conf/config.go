@@ -106,5 +106,5 @@ func getDecryptedDir() string {
 		_, b, _, _ = runtime.Caller(0)
 		basePath   = filepath.Dir(b)
 	)
-	return strings.Replace(basePath, "conf", "shared_files/decrypted/", 1)
+	return strings.Replace(basePath, "conf", "../shared_files/decrypted/", 1)
 }

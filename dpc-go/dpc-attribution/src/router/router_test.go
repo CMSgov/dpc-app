@@ -80,6 +80,7 @@ func (suite *RouterTestSuite) SetupTest() {
 	suite.mockOrg = &MockService{}
 	suite.mockGroup = &MockService{}
 	suite.mockData = &MockDataService{}
+	suite.mockJob = &MockJobService{}
 	suite.router = NewDPCAttributionRouter(suite.mockOrg, suite.mockGroup, suite.mockImplementer, suite.mockImplementerOrgRel, suite.mockData, suite.mockJob)
 }
 
@@ -210,7 +211,7 @@ func (suite *RouterTestSuite) TestGroupPostRoute() {
 func (suite *RouterTestSuite) TestGroupExportRoute() {
 	fakeUrl := faker.URL()
 	fakeIP := faker.IPv4()
-	suite.mockGroup.On("Export", mock.Anything, mock.Anything).Once().Run(func(arg mock.Arguments) {
+	suite.mockJob.On("Export", mock.Anything, mock.Anything).Once().Run(func(arg mock.Arguments) {
 		w := arg.Get(0).(http.ResponseWriter)
 		_, _ = w.Write([]byte(faker.UUIDDigit()))
 		r := arg.Get(1).(*http.Request)

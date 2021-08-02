@@ -1,9 +1,11 @@
-package repository
+package v1
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"github.com/pkg/errors"
+	"log"
 	"testing"
 	"time"
 
@@ -14,10 +16,18 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
+func newMock() (*sql.DB, sqlmock.Sqlmock) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		log.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+	return db, mock
+}
+
 type JobRepositoryV1TestSuite struct {
 	suite.Suite
 	fakeBatch   v1.BatchRequest
-	fakeNPIs    v1.GroupNPIs
+	fakeNPIs    v1.ProviderOrg
 	fakeDetails v1.BatchRequest
 }
 
@@ -29,7 +39,7 @@ func (suite *JobRepositoryV1TestSuite) SetupTest() {
 	}
 	suite.fakeBatch = jqb
 
-	npis := v1.GroupNPIs{}
+	npis := v1.ProviderOrg{}
 	err = faker.FakeData(&npis)
 	if err != nil {
 		fmt.Printf("ERR %v\n", err)
