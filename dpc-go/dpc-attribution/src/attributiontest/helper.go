@@ -164,10 +164,3 @@ func OrgResponse() *model.Organization {
 	o.Info = i
 	return &o
 }
-
-// GetTestInfo is a helper func that returns fhir json as a model.Info
-func GetTestInfo(data string) model.Info {
-	var r model.Info
-	_ = json.Unmarshal([]byte(data), &r)
-	return r
-}

@@ -81,7 +81,7 @@ func NewPublicServer() *service.Server {
 	controllers := controllers{
 		Org:      v2.NewOrganizationController(attrClient),
 		Metadata: v2.NewMetadataController(conf.GetAsString("capabilities.base")),
-		Group:    v2.NewGroupController(attrClient),
+		Group:    v2.NewGroupController(attrClient, jobClient),
 		Data:     v2.NewDataController(dataClient),
 		Job:      v2.NewJobController(jobClient),
 	}

@@ -5,5 +5,6 @@ bfd:
   clientCAFile: "../../shared_files/decrypted/bfd-dev-test-ca-file.crt"
   requestRetryIntervalMS: 10
   timeoutMS: 2000
+  checkCert: "false"
 
 port: 6002

@@ -16,45 +16,9 @@ type identifiersContainer struct {
 	Identifier []identifier `json:"identifier"`
 }
 
-type identifierContainer struct {
-	Identifier identifier `json:"identifier"`
-}
-
 // GetNPI function that returns the identifier value associated with the npi system
 func GetNPI(fhirModel []byte) (string, error) {
 	return GetIdentifier(fhirModel, "http://hl7.org/fhir/sid/us-npi")
-}
-
-// GetReferenceNPI function that returns the identifier value associated with the npi system
-func GetReferenceNPI(reference interface{}) (string, error) {
-	b, err := json.Marshal(reference)
-	if err != nil {
-		return "", err
-	}
-
-	return getReferenceIdentifier(b, "http://hl7.org/fhir/sid/us-npi")
-}
-
-// GetReferenceMBI function that returns the identifier value associated with the mbi system
-func GetReferenceMBI(reference interface{}) (string, error) {
-	b, err := json.Marshal(reference)
-	if err != nil {
-		return "", err
-	}
-
-	return getReferenceIdentifier(b, "http://hl7.org/fhir/sid/us-mbi")
-}
-
-func getReferenceIdentifier(b []byte, system string) (string, error) {
-	var r identifierContainer
-	err := json.Unmarshal(b, &r)
-	if err != nil {
-		return "", err
-	}
-	if r.Identifier.System != system {
-		return "", errors.Errorf("Reference does not contain system of %s", system)
-	}
-	return r.Identifier.Value, nil
 }
 
 // GetIdentifier function that returns the identifier value associated with the system

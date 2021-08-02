@@ -30,7 +30,7 @@ func NewDPCAttributionRouter(o service.Service, g service.Service, impl service.
 			r.Post("/", g.Post)
 			r.Route("/{groupID}", func(r chi.Router) {
 				r.Use(middleware2.GroupCtx)
-				r.Get("/$export", js.Export) //Go away once shared job service
+				r.Get("/", g.Get)
 			})
 		})
 		r.Route("/Implementer", func(r chi.Router) {
@@ -63,6 +63,7 @@ func NewDPCAttributionRouter(o service.Service, g service.Service, impl service.
 		r.Route("/Job", func(r chi.Router) {
 			r.Use(middleware2.AuthCtx)
 			r.With(middleware2.JobCtx).Get("/{jobID}", js.BatchesAndFiles)
+			r.Post("/", js.Export)
 		})
 	})
 

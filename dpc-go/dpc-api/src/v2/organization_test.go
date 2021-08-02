@@ -45,11 +45,6 @@ func (ac *MockAttributionClient) GetImplOrg(ctx context.Context) ([]byte, error)
 	return args.Get(0).([]byte), args.Error(1)
 }
 
-func (ac *MockAttributionClient) Export(ctx context.Context, resourceType client.ResourceType, id string) ([]byte, error) {
-	args := ac.Called(ctx, resourceType, id)
-	return args.Get(0).([]byte), args.Error(1)
-}
-
 func (ac *MockAttributionClient) Get(ctx context.Context, resourceType client.ResourceType, id string) ([]byte, error) {
 	args := ac.Called(ctx, resourceType, id)
 	return args.Get(0).([]byte), args.Error(1)
@@ -67,11 +62,6 @@ func (ac *MockAttributionClient) Delete(ctx context.Context, resourceType client
 
 func (ac *MockAttributionClient) Put(ctx context.Context, resourceType client.ResourceType, id string, body []byte) ([]byte, error) {
 	args := ac.Called(ctx, resourceType, id, body)
-	return args.Get(0).([]byte), args.Error(1)
-}
-
-func (ac *MockAttributionClient) Data(ctx context.Context, path string) ([]byte, error) {
-	args := ac.Called(ctx, path)
 	return args.Get(0).([]byte), args.Error(1)
 }
 

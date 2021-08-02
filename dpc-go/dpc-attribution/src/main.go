@@ -51,7 +51,7 @@ func main() {
 	}
 
 	gr := repository.NewGroupRepo(db)
-	js, ds := createJobServices(queueDbV1, or, gr, bfdClient)
+	js, ds := createJobServices(queueDbV1, or, bfdClient)
 	gs := service.NewGroupService(gr, js)
 
 	ir := repository.NewImplementerRepo(db)
@@ -71,7 +71,7 @@ func main() {
 	}
 }
 
-func createJobServices(queueDbV1 *sql.DB, or repository.OrganizationRepo, gr repository.GroupRepo, client client.APIClient) (v1.JobService, v1.DataService) {
+func createJobServices(queueDbV1 *sql.DB, or repository.OrganizationRepo, client client.APIClient) (v1.JobService, v1.DataService) {
 	jr := v1Repo.NewJobRepo(queueDbV1)
-	return v1.NewJobService(jr, or, gr, client), v1.NewDataService(jr)
+	return v1.NewJobService(jr, or, client), v1.NewDataService(jr)
 }

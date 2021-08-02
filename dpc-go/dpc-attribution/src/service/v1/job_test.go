@@ -1,9 +1,9 @@
 package service
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
 	"github.com/CMSgov/dpc/attribution/attributiontest"
 	"github.com/CMSgov/dpc/attribution/client"
 	v2 "github.com/CMSgov/dpc/attribution/model"
@@ -12,6 +12,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/CMSgov/dpc/attribution/conf"
 	middleware2 "github.com/CMSgov/dpc/attribution/middleware"
@@ -49,26 +50,6 @@ func (m *MockJobRepo) FindBatchFilesByBatchID(id string) ([]v1.JobQueueBatchFile
 func (m *MockJobRepo) GetFileInfo(ctx context.Context, orgID string, fileName string) (*v1.FileInfo, error) {
 	args := m.Called(ctx, orgID, fileName)
 	return args.Get(0).(*v1.FileInfo), args.Error(1)
-}
-
-type MockGrpRepo struct {
-	mock.Mock
-}
-
-func (m *MockGrpRepo) Insert(ctx context.Context, body []byte) (*v2.Group, error) {
-	args := m.Called(ctx, body)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).(*v2.Group), args.Error(1)
-}
-
-func (m *MockGrpRepo) FindByID(ctx context.Context, id string) (*v2.Group, error) {
-	args := m.Called(ctx, id)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).(*v2.Group), args.Error(1)
 }
 
 type MockOrgRepo struct {
@@ -114,7 +95,6 @@ type JobServiceV1TestSuite struct {
 	suite.Suite
 	jr      *MockJobRepo
 	or      *MockOrgRepo
-	gr      *MockGrpRepo
 	service JobService
 	client  *client.MockBfdClient
 }
@@ -131,21 +111,11 @@ func (suite *JobServiceV1TestSuite) SetupTest() {
 	conf.NewConfig("../../../configs")
 	suite.jr = &MockJobRepo{}
 	suite.or = &MockOrgRepo{}
-	suite.gr = &MockGrpRepo{}
 	suite.client = &client.MockBfdClient{}
 	suite.client.BasePath = "../../client/"
-	suite.service = NewJobService(suite.jr, suite.or, suite.gr, suite.client)
+	suite.service = NewJobService(suite.jr, suite.or, suite.client)
 
-	var grp v2.Group
-	_ = faker.FakeData(&grp)
-	grp.Info = attributiontest.GetTestInfo(attributiontest.Groupjson)
-	suite.gr.On("FindByID", mock.Anything, mock.Anything).Return(&grp, nil)
-
-	var org v2.Organization
-	_ = faker.FakeData(&org)
-	org.Info = attributiontest.GetTestInfo(attributiontest.Orgjson)
-	suite.or.On("FindByID", mock.Anything, mock.Anything).Return(&org, nil)
-
+	suite.or.On("FindByID", mock.Anything, mock.Anything).Return(attributiontest.OrgResponse(), nil)
 	suite.client.On("GetPatient", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).
 		Return(suite.client.GetBundleData("Patient", "12345"))
 }
@@ -156,10 +126,20 @@ func (suite *JobServiceV1TestSuite) TestExport() {
 	id := "12345"
 	suite.jr.On("Insert", mock.Anything, mock.Anything, mock.Anything).Return(&id, nil)
 
-	req := httptest.NewRequest("GET", "http://example.com/v2/Group/9876/$export", nil)
+	exportRequest := v1.ExportRequest{
+		GroupID:      faker.UUIDHyphenated(),
+		OutputFormat: "",
+		Since:        time.Now().Format(middleware2.SinceLayout),
+		Type:         "Patient,Coverage,ExplanationOfBenefits",
+		MBIs:         []string{faker.UUIDDigit(), faker.UUIDDigit()},
+		ProviderNPI:  faker.UUIDHyphenated(),
+	}
+
+	b, _ := json.Marshal(exportRequest)
+
+	req := httptest.NewRequest(http.MethodPost, "http://example.com/v2/Job", bytes.NewReader(b))
 	ctx := req.Context()
 	ctx = context.WithValue(ctx, middleware2.ContextKeyOrganization, "12345")
-	ctx = context.WithValue(ctx, middleware2.ContextKeyGroup, faker.UUIDHyphenated())
 	req.Header.Set(middleware2.FwdHeader, faker.IPv4())
 	req.Header.Set(middleware2.RequestURLHeader, faker.URL())
 	req = req.WithContext(ctx)
@@ -173,7 +153,7 @@ func (suite *JobServiceV1TestSuite) TestExport() {
 
 	resp, _ := ioutil.ReadAll(res.Body)
 
-	ja.Assertf(string(resp), fmt.Sprintf(`{"jobIDs":["%s"]}`, id))
+	ja.Assertf(string(resp), id)
 }
 
 func (suite *JobServiceV1TestSuite) TestExportRepoError() {
@@ -181,10 +161,20 @@ func (suite *JobServiceV1TestSuite) TestExportRepoError() {
 
 	suite.jr.On("Insert", mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.New("error"))
 
-	req := httptest.NewRequest("GET", "http://example.com/v2/Group/9876/$export", nil)
+	exportRequest := v1.ExportRequest{
+		GroupID:      faker.UUIDHyphenated(),
+		OutputFormat: "",
+		Since:        time.Now().Format(middleware2.SinceLayout),
+		Type:         "Patient,Coverage,ExplanationOfBenefits",
+		MBIs:         []string{faker.UUIDDigit(), faker.UUIDDigit()},
+		ProviderNPI:  faker.UUIDHyphenated(),
+	}
+
+	b, _ := json.Marshal(exportRequest)
+
+	req := httptest.NewRequest("GET", "http://example.com/v2/Group/9876/$export", bytes.NewReader(b))
 	ctx := req.Context()
 	ctx = context.WithValue(ctx, middleware2.ContextKeyOrganization, "12345")
-	ctx = context.WithValue(ctx, middleware2.ContextKeyGroup, faker.UUIDHyphenated())
 	req.Header.Set(middleware2.FwdHeader, faker.IPv4())
 	req.Header.Set(middleware2.RequestURLHeader, faker.URL())
 	req = req.WithContext(ctx)
@@ -195,11 +185,16 @@ func (suite *JobServiceV1TestSuite) TestExportRepoError() {
 
 	res := w.Result()
 
-	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
+	assert.Equal(suite.T(), http.StatusUnprocessableEntity, res.StatusCode)
 
 	resp, _ := ioutil.ReadAll(res.Body)
 
-	ja.Assertf(string(resp), fmt.Sprintf(`{"jobIDs":[]}`))
+	ja.Assertf(string(resp), `
+	{
+        "error": "Unprocessable Entity",
+        "message": "error",
+        "statusCode": 422
+    }`)
 }
 
 func (suite *JobServiceV1TestSuite) TestGetBatchesAndFiles() {
