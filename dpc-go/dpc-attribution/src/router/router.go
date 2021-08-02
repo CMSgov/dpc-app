@@ -57,13 +57,17 @@ func NewDPCAttributionRouter(o service.Service, g service.Service, impl service.
 			r.Use(middleware2.AuthCtx)
 			r.With(middleware2.FileNameCtx).Get("/validityCheck/{fileName}", d.GetFileInfo)
 		})
-		r.Route("/Job", func(r chi.Router) {
-			r.Use(middleware2.AuthCtx)
-			r.With(middleware2.JobCtx).Get("/{jobID}", js.BatchesAndFiles)
-		})
+		r.Route("/Job", setJobRoutes(js))
 	})
 
 	return r
+}
+
+func setJobRoutes(js service.JobService) func(r chi.Router) {
+	return func(r chi.Router) {
+		r.Use(middleware2.AuthCtx)
+		r.With(middleware2.JobCtx).Get("/{jobID}", js.BatchesAndFiles)
+	}
 }
 
 func getHealthCheck(w http.ResponseWriter, r *http.Request) {
