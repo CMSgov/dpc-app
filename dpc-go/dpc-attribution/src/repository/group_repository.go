@@ -62,6 +62,7 @@ func (gr *GroupRepository) Insert(ctx context.Context, body []byte) (*model.Grou
 	return group, nil
 }
 
+// FindByID function that finds a group by id
 func (gr *GroupRepository) FindByID(ctx context.Context, id string) (*model.Group, error) {
 	log := logger.WithContext(ctx)
 	organizationID, ok := ctx.Value(middleware.ContextKeyOrganization).(string)
