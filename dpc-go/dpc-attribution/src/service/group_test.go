@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/CMSgov/dpc/attribution/attributiontest"
+	middleware2 "github.com/CMSgov/dpc/attribution/middleware"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -106,12 +108,48 @@ func (suite *GroupServiceTestSuite) TestPostRepoError() {
     }`)
 }
 
-func (suite *GroupServiceTestSuite) TestGetNotImplemented() {
+func (suite *GroupServiceTestSuite) TestGet() {
+	g := attributiontest.GroupResponse()
+	suite.repo.On("FindByID", mock.Anything, mock.MatchedBy(func(groupID string) bool {
+		return groupID == "54321"
+	})).Return(g, nil)
+
 	req := httptest.NewRequest(http.MethodGet, "http://example.com/foo", nil)
+	ctx := req.Context()
+	ctx = context.WithValue(ctx, middleware2.ContextKeyGroup, "54321")
+	req = req.WithContext(ctx)
+
 	w := httptest.NewRecorder()
 	suite.service.Get(w, req)
 	res := w.Result()
-	assert.Equal(suite.T(), http.StatusNotImplemented, res.StatusCode)
+
+	b, _ := ioutil.ReadAll(res.Body)
+	assert.NotNil(suite.T(), b)
+}
+
+func (suite *GroupServiceTestSuite) TestGetError() {
+	ja := jsonassert.New(suite.T())
+	suite.repo.On("FindByID", mock.Anything, mock.MatchedBy(func(groupID string) bool {
+		return groupID == "54321"
+	})).Return(nil, errors.New("error"))
+
+	req := httptest.NewRequest(http.MethodGet, "http://example.com/foo", nil)
+	ctx := req.Context()
+	ctx = context.WithValue(ctx, middleware2.ContextKeyGroup, "54321")
+	req = req.WithContext(ctx)
+
+	w := httptest.NewRecorder()
+	suite.service.Get(w, req)
+	res := w.Result()
+
+	b, _ := ioutil.ReadAll(res.Body)
+	assert.Equal(suite.T(), http.StatusUnprocessableEntity, res.StatusCode)
+	ja.Assertf(string(b), `
+    {
+        "error": "Unprocessable Entity",
+        "message": "error",
+        "statusCode": 422
+    }`)
 }
 
 func (suite *GroupServiceTestSuite) TestDeleteNotImplemented() {

@@ -164,3 +164,16 @@ func OrgResponse() *model.Organization {
 	o.Info = i
 	return &o
 }
+
+// GroupResponse provides a sample response that mimics what attribution service returns for testing purposes
+func GroupResponse() *model.Group {
+	o := model.Group{}
+	err := faker.FakeData(&o)
+	if err != nil {
+		fmt.Printf("ERR %v\n", err)
+	}
+	var i model.Info
+	_ = json.Unmarshal([]byte(Groupjson), &i)
+	o.Info = i
+	return &o
+}
