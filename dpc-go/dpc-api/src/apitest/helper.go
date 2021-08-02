@@ -262,6 +262,7 @@ const GetImplOrgJSON = `[
     }
 ]`
 
+// GetBatchAndFilesJSON is an status example from attribution
 const GetBatchAndFilesJSON = `[
   {
     "batch": {
