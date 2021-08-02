@@ -27,7 +27,6 @@ func newMock() (*sql.DB, sqlmock.Sqlmock) {
 type JobRepositoryV1TestSuite struct {
 	suite.Suite
 	fakeBatch   v1.BatchRequest
-	fakeNPIs    v1.ProviderOrg
 	fakeDetails v1.BatchRequest
 }
 
@@ -38,13 +37,6 @@ func (suite *JobRepositoryV1TestSuite) SetupTest() {
 		fmt.Printf("ERR %v\n", err)
 	}
 	suite.fakeBatch = jqb
-
-	npis := v1.ProviderOrg{}
-	err = faker.FakeData(&npis)
-	if err != nil {
-		fmt.Printf("ERR %v\n", err)
-	}
-	suite.fakeNPIs = npis
 
 	deets := v1.BatchRequest{}
 	err = faker.FakeData(&deets)

@@ -39,7 +39,7 @@ type JobServiceV1 struct {
 }
 
 // NewJobService function that creates and returns a JobService
-func NewJobService(jr v1Repo.JobRepo, or repository.OrganizationRepo, bfdClient client.APIClient) *JobServiceV1 {
+func NewJobService(jr v1Repo.JobRepo, or repository.OrganizationRepo, bfdClient client.APIClient) JobService {
 	return &JobServiceV1{
 		jr,
 		or,

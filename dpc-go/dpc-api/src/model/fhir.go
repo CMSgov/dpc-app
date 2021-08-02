@@ -52,7 +52,7 @@ type Attribution struct {
 }
 
 // GetAttributionInfo is a func that gets the attribution relationships contained in the group
-func (g Group) GetAttributionInfo() ([]Attribution, error) {
+func (g *Group) GetAttributionInfo() ([]Attribution, error) {
 	npis := make([]Attribution, 0)
 	for _, m := range g.Member {
 		prac := m.FindPractitionerRef()
@@ -76,7 +76,7 @@ func (g Group) GetAttributionInfo() ([]Attribution, error) {
 }
 
 // FindPractitionerRef is a func that gets the practitioner preference from the group members
-func (member GroupMember) FindPractitionerRef() *fhir.Reference {
+func (member *GroupMember) FindPractitionerRef() *fhir.Reference {
 	for _, e := range member.Extension {
 		vr := e.ValueReference
 		if vr != nil && vr.Type != nil && *vr.Type == "Practitioner" {
