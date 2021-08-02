@@ -2,7 +2,10 @@ package v2
 
 import (
 	"context"
+	"encoding/json"
 	"github.com/CMSgov/dpc/api/apitest"
+	"github.com/CMSgov/dpc/api/client"
+	"github.com/bxcodec/faker/v3"
 	"github.com/go-chi/chi/middleware"
 	"github.com/kinbiko/jsonassert"
 	"github.com/stretchr/testify/assert"
@@ -19,12 +22,15 @@ type ImplementerControllerTestSuite struct {
 	suite.Suite
 	impl *ImplementerController
 	mac  *MockAttributionClient
+	msc  *MockSsasClient
 }
 
 func (suite *ImplementerControllerTestSuite) SetupTest() {
 	mac := new(MockAttributionClient)
+	msc := new(MockSsasClient)
 	suite.mac = mac
-	suite.impl = NewImplementerController(mac)
+	suite.msc = msc
+	suite.impl = NewImplementerController(mac, msc)
 }
 
 func TestImplementerControllerTestSuite(t *testing.T) {
@@ -65,7 +71,23 @@ func (suite *ImplementerControllerTestSuite) TestCreateImplementerBadJson() {
 }
 
 func (suite *ImplementerControllerTestSuite) TestCreateImplementer() {
-	suite.mac.On("Post", mock.Anything, mock.Anything, mock.Anything).Return(apitest.AttributionToFHIRResponse(apitest.ImplJSON), nil)
+	//Mock impl creation
+	createImplResp := ImplementerResource{}
+	_ = faker.FakeData(&createImplResp)
+	createImplResp.SsasGroupID = ""
+	suite.mac.On("Post", mock.Anything, mock.Anything, mock.Anything).Return(apitest.ToBytes(createImplResp), nil)
+
+	//Mock group creation
+	createGroupResp := client.CreateGroupResponse{}
+	_ = faker.FakeData(&createGroupResp)
+	suite.msc.On("CreateGroup", mock.Anything, mock.Anything).Return(createGroupResp, nil)
+	//Mock impl update
+	updateImplResp := ImplementerResource{
+		ID:          createImplResp.ID,
+		Name:        createImplResp.Name,
+		SsasGroupID: createGroupResp.GroupID,
+	}
+	suite.mac.On("Put", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(apitest.ToBytes(updateImplResp), nil)
 
 	req := httptest.NewRequest(http.MethodPost, "http://example.com/foo", strings.NewReader(apitest.ImplJSON))
 	ctx := req.Context()
@@ -75,6 +97,10 @@ func (suite *ImplementerControllerTestSuite) TestCreateImplementer() {
 	w := httptest.NewRecorder()
 	suite.impl.Create(w, req)
 	res := w.Result()
+	var v map[string]interface{}
+	_ = json.NewDecoder(res.Body).Decode(&v)
 
 	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
+	assert.Equal(suite.T(), v["name"], createImplResp.Name)
+	assert.Equal(suite.T(), v["id"], createImplResp.ID)
 }

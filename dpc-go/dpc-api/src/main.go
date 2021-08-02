@@ -2,15 +2,14 @@ package main
 
 import (
 	"context"
-	"fmt"
-	"net/http"
-
-	"github.com/CMSgov/dpc/api/client"
 	"github.com/CMSgov/dpc/api/conf"
 	"github.com/CMSgov/dpc/api/logger"
-	"github.com/CMSgov/dpc/api/router"
-	v2 "github.com/CMSgov/dpc/api/v2"
+	"github.com/CMSgov/dpc/api/service"
+	"github.com/CMSgov/dpc/api/service/admin"
+	"github.com/CMSgov/dpc/api/service/public"
 	"go.uber.org/zap"
+	"log"
+	"sync"
 )
 
 func main() {
@@ -20,41 +19,39 @@ func main() {
 		err := logger.SyncLogger()
 		logger.WithContext(ctx).Fatal("Failed to start server", zap.Error(err))
 	}()
-	attributionURL := conf.GetAsString("attribution-client.url")
 
-	retries := conf.GetAsInt("attribution-client.retries", 3)
-
-	attributionClient := client.NewAttributionClient(client.AttributionConfig{
-		URL:     attributionURL,
-		Retries: retries,
-	})
-
-	dataClient := client.NewDataClient(client.DataConfig{
-		URL:     attributionURL,
-		Retries: retries,
-	})
-
-	capabilitiesFile := conf.GetAsString("capabilities.base")
-
-	jobClient := client.NewJobClient(client.JobConfig{
-		URL:     attributionURL,
-		Retries: retries,
-	})
-
-	controllers := router.Controllers{
-		Org:      v2.NewOrganizationController(attributionClient),
-		Metadata: v2.NewMetadataController(capabilitiesFile),
-		Group:    v2.NewGroupController(attributionClient),
-		Data:     v2.NewDataController(dataClient),
-		Job:      v2.NewJobController(jobClient),
-		Impl:     v2.NewImplementerController(attributionClient),
-		ImplOrg:  v2.NewImplementerOrgController(attributionClient),
+	ps := public.NewPublicServer()
+	if ps == nil {
+		log.Fatal("Could not create public server")
 	}
 
-	apiRouter := router.NewDPCAPIRouter(controllers)
-
-	port := conf.GetAsString("port", "3000")
-	if err := http.ListenAndServe(fmt.Sprintf(":%s", port), apiRouter); err != nil {
-		logger.WithContext(ctx).Fatal("Failed to start server", zap.Error(err))
+	as := admin.NewAdminServer()
+	if as == nil {
+		log.Fatal("Could not create admin server")
 	}
+
+	startServers(ctx, ps, as)
+}
+
+func startServers(ctx context.Context, ps *service.Server, as *service.Server) {
+	wg := new(sync.WaitGroup)
+	wg.Add(2)
+
+	go func() {
+		err := ps.Serve(ctx)
+		if err != nil {
+			log.Fatal(err)
+		}
+		wg.Done()
+	}()
+
+	go func() {
+		err := as.Serve(ctx)
+		if err != nil {
+			log.Fatal(err)
+		}
+		wg.Done()
+	}()
+
+	wg.Wait()
 }

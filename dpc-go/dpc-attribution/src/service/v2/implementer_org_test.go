@@ -115,7 +115,32 @@ func (suite *ImplementerOrgServiceTestSuite) TestPost() {
 	suite.service.Post(w, req)
 	res := w.Result()
 
+	b, _ := ioutil.ReadAll(res.Body)
+
+	var response map[string]string
+	_ = json.Unmarshal(b, &response)
+
 	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
+	assert.Equal(suite.T(), "Active", response["status"])
+	assert.NotNil(suite.T(), response["org_id"])
+
+	req = httptest.NewRequest("POST", "http://example.com/foo", strings.NewReader("{\"npi\":\"00001\"}"))
+	ctx = req.Context()
+	ctx = context.WithValue(ctx, middleware.ContextKeyImplementer, implOrg.ImplementerID)
+	req = req.WithContext(ctx)
+	ctx = context.WithValue(ctx, middleware.ContextKeyOrganization, response["org_id"])
+	req = req.WithContext(ctx)
+	w = httptest.NewRecorder()
+
+	rel.Status = v2.Active
+	suite.implOrgRepo.On("Update", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(&rel, nil)
+
+	suite.service.Put(w, req)
+
+	res = w.Result()
+	b, _ = ioutil.ReadAll(res.Body)
+	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
+	assert.Equal(suite.T(), "Active", response["status"])
 }
 
 func (suite *ImplementerOrgServiceTestSuite) TestGetOrgs() {

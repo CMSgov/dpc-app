@@ -3,6 +3,7 @@ package v2
 import (
 	"bytes"
 	"context"
+	"github.com/CMSgov/dpc/api/model"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -24,9 +25,19 @@ type MockAttributionClient struct {
 	mock.Mock
 }
 
-func (ac *MockAttributionClient) CreateImplOrg(ctx context.Context, body []byte) ([]byte, error) {
+func (ac *MockAttributionClient) UpdateImplOrg(ctx context.Context, implID string, orgID string, rel client.ImplementerOrg) (client.ImplementerOrg, error) {
+	args := ac.Called(ctx, implID, orgID, rel)
+	return args.Get(0).(client.ImplementerOrg), args.Error(1)
+}
+
+func (ac *MockAttributionClient) GetProviderOrgs(ctx context.Context, implID string) ([]client.ProviderOrg, error) {
+	args := ac.Called(ctx, implID)
+	return args.Get(0).([]client.ProviderOrg), args.Error(1)
+}
+
+func (ac *MockAttributionClient) CreateImplOrg(ctx context.Context, body []byte) (client.ImplementerOrg, error) {
 	args := ac.Called(ctx, body)
-	return args.Get(0).([]byte), args.Error(1)
+	return args.Get(0).(client.ImplementerOrg), args.Error(1)
 }
 
 func (ac *MockAttributionClient) GetImplOrg(ctx context.Context) ([]byte, error) {
@@ -62,6 +73,45 @@ func (ac *MockAttributionClient) Put(ctx context.Context, resourceType client.Re
 func (ac *MockAttributionClient) Data(ctx context.Context, path string) ([]byte, error) {
 	args := ac.Called(ctx, path)
 	return args.Get(0).([]byte), args.Error(1)
+}
+
+type MockSsasClient struct {
+	mock.Mock
+}
+
+func (mc *MockSsasClient) CreateSystem(ctx context.Context, request client.CreateSystemRequest) (client.CreateSystemResponse, error) {
+	args := mc.Called(ctx, request)
+	return args.Get(0).(client.CreateSystemResponse), args.Error(1)
+}
+
+func (mc *MockSsasClient) CreateGroup(ctx context.Context, request client.CreateGroupRequest) (client.CreateGroupResponse, error) {
+	args := mc.Called(ctx, request)
+	return args.Get(0).(client.CreateGroupResponse), args.Error(1)
+}
+
+func (mc MockSsasClient) GetSystem(ctx context.Context, systemID string) (client.GetSystemResponse, error) {
+	args := mc.Called(ctx, systemID)
+	return args.Get(0).(client.GetSystemResponse), args.Error(1)
+}
+
+func (mc MockSsasClient) CreateToken(ctx context.Context, systemID string, label string) (string, error) {
+	args := mc.Called(ctx, systemID, label)
+	return args.Get(0).(string), args.Error(1)
+}
+
+func (mc MockSsasClient) DeleteToken(ctx context.Context, systemID string, tokenID string) error {
+	args := mc.Called(ctx, systemID, tokenID)
+	return args.Error(0)
+}
+
+func (mc MockSsasClient) AddPublicKey(ctx context.Context, systemID string, request model.ProxyPublicKeyRequest) (map[string]string, error) {
+	args := mc.Called(ctx, systemID, request)
+	return args.Get(0).(map[string]string), args.Error(1)
+}
+
+func (mc MockSsasClient) DeletePublicKey(ctx context.Context, systemID string, keyID string) error {
+	args := mc.Called(ctx, systemID, keyID)
+	return args.Error(0)
 }
 
 type OrganizationControllerTestSuite struct {

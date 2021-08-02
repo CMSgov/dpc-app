@@ -76,17 +76,18 @@ down-dpc:
 
 .PHONY: build-v2
 build-v2:
-	@docker-compose -f docker-compose.yml -f dpc-go/dpc-attribution/docker-compose.yml build migrator
-	@docker-compose -f docker-compose.yml -f dpc-go/dpc-attribution/docker-compose.yml build attribution2
-	@docker-compose -f dpc-go/dpc-api/docker-compose.yml build api
-	@docker-compose -f docker-compose.yml -f dpc-go/dpc-attribution/docker-compose.yml -f docker-compose.v2.yml build ssas
+	@docker-compose -p dpc-v2 -f docker-compose.yml -f dpc-go/dpc-attribution/docker-compose.yml build migrator
+	@docker-compose -p dpc-v2 -f docker-compose.yml -f dpc-go/dpc-attribution/docker-compose.yml build attribution2
+	@docker-compose -p dpc-v2 -f dpc-go/dpc-api/docker-compose.yml build api
+	@docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.v2.yml build --no-cache ssas-migrate
+	@docker-compose -p dpc-v2 -f docker-compose.yml -f dpc-go/dpc-attribution/docker-compose.yml -f docker-compose.v2.yml build ssas
 
 .PHONY: start-v2
 start-v2: secure-envs
 	@docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.v2.yml up start_core_dependencies
 	@docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.v2.yml up start_api_dependencies
-	@docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.v2.yml -f dpc-go/dpc-attribution/docker-compose.yml up -d attribution2
-	@docker-compose -p dpc-v2 -f dpc-go/dpc-api/docker-compose.yml up -d api
+	@docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.v2.yml -f dpc-go/dpc-attribution/docker-compose.yml up -d --build attribution2
+	@docker-compose -p dpc-v2 -f dpc-go/dpc-api/docker-compose.yml up -d --build api
 	@docker ps
 
 .PHONY: down-v2
@@ -97,8 +98,12 @@ down-v2:
 
 .PHONY: load-ssas-fixtures
 load-ssas-fixtures:
-	docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.v2.yml -f docker-compose.ssas-migrate.yml run --rm ssas-migrate -database "postgres://postgres:dpc-safe@db:5432/bcda?sslmode=disable" -path /go/src/github.com/CMSgov/bcda-ssas-app/db/migrations up
-	docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.v2.yml run ssas --add-fixture-data
+	@docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.v2.yml run --rm ssas-migrate -database "postgres://postgres:dpc-safe@db:5432/bcda?sslmode=disable" -path /go/src/github.com/CMSgov/bcda-ssas-app/db/migrations up
+	@docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.v2.yml run ssas --add-fixture-data
+
+.PHONY: ssas-creds
+ssas-creds:
+	@./make_ssas_creds.sh
 
 .PHONY: seed-db
 seed-db:
