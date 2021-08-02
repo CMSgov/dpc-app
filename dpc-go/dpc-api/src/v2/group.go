@@ -113,12 +113,9 @@ func (gc *GroupController) Export(w http.ResponseWriter, r *http.Request) {
 }
 
 func (gc *GroupController) startExports(r *http.Request, groupID string, attr []model.Attribution) (string, error) {
-	since, ok := r.Context().Value(middleware2.ContextKeySince).(string)
+	since, _ := r.Context().Value(middleware2.ContextKeySince).(string)
+	types, _ := r.Context().Value(middleware2.ContextKeyResourceTypes).(string)
 
-	types, ok := r.Context().Value(middleware2.ContextKeyResourceTypes).(string)
-	if !ok {
-		return "", errors.New("Failed to extract resource types from url, please check the url")
-	}
 	providers := make([]string, 0)
 	patients := make([]string, 0)
 	for _, a := range attr {

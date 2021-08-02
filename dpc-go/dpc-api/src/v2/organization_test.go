@@ -80,32 +80,32 @@ func (mc *MockSsasClient) CreateGroup(ctx context.Context, request client.Create
 	return args.Get(0).(client.CreateGroupResponse), args.Error(1)
 }
 
-func (mc MockSsasClient) Authenticate(ctx context.Context, request []byte) ([]byte, error) {
+func (mc *MockSsasClient) Authenticate(ctx context.Context, request []byte) ([]byte, error) {
 	args := mc.Called(ctx, request)
 	return args.Get(0).([]byte), args.Error(1)
 }
 
-func (mc MockSsasClient) GetSystem(ctx context.Context, systemID string) (client.GetSystemResponse, error) {
+func (mc *MockSsasClient) GetSystem(ctx context.Context, systemID string) (client.GetSystemResponse, error) {
 	args := mc.Called(ctx, systemID)
 	return args.Get(0).(client.GetSystemResponse), args.Error(1)
 }
 
-func (mc MockSsasClient) CreateToken(ctx context.Context, systemID string, label string) (string, error) {
+func (mc *MockSsasClient) CreateToken(ctx context.Context, systemID string, label string) (string, error) {
 	args := mc.Called(ctx, systemID, label)
 	return args.Get(0).(string), args.Error(1)
 }
 
-func (mc MockSsasClient) DeleteToken(ctx context.Context, systemID string, tokenID string) error {
+func (mc *MockSsasClient) DeleteToken(ctx context.Context, systemID string, tokenID string) error {
 	args := mc.Called(ctx, systemID, tokenID)
 	return args.Error(0)
 }
 
-func (mc MockSsasClient) AddPublicKey(ctx context.Context, systemID string, request model.ProxyPublicKeyRequest) (map[string]string, error) {
+func (mc *MockSsasClient) AddPublicKey(ctx context.Context, systemID string, request model.ProxyPublicKeyRequest) (map[string]string, error) {
 	args := mc.Called(ctx, systemID, request)
 	return args.Get(0).(map[string]string), args.Error(1)
 }
 
-func (mc MockSsasClient) DeletePublicKey(ctx context.Context, systemID string, keyID string) error {
+func (mc *MockSsasClient) DeletePublicKey(ctx context.Context, systemID string, keyID string) error {
 	args := mc.Called(ctx, systemID, keyID)
 	return args.Error(0)
 }

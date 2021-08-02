@@ -139,6 +139,8 @@ func (suite *ImplementerOrgServiceTestSuite) TestPost() {
 
 	res = w.Result()
 	b, _ = ioutil.ReadAll(res.Body)
+	_ = json.Unmarshal(b, &response)
+
 	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
 	assert.Equal(suite.T(), "Active", response["status"])
 }

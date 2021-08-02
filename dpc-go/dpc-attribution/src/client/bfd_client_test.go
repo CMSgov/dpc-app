@@ -100,12 +100,12 @@ func (s *BfdTestSuite) TestNewBfdClientNoCertFile() {
 	_ = conf.UnsetEnv(s.T(), "bfd.clientCertFile")
 	bbc, err := client.NewBfdClient(client.NewConfig("basePath"))
 	assert.Nil(bbc)
-	assert.EqualError(err, fmt.Sprintf("could not load BFD keypair: open : no such file or directory"))
+	assert.EqualError(err, "could not load BFD keypair: open : no such file or directory")
 
 	conf.SetEnv(s.T(), "bfd.clientCertFile", "foo.pem")
 	bbc, err = client.NewBfdClient(client.NewConfig("basePath"))
 	assert.Nil(bbc)
-	assert.EqualError(err, fmt.Sprintf("could not load BFD keypair: open foo.pem: no such file or directory"))
+	assert.EqualError(err, "could not load BFD keypair: open foo.pem: no such file or directory")
 }
 
 func (s *BfdTestSuite) TestNewBfdClientInvalidCertFile() {
@@ -134,12 +134,12 @@ func (s *BfdTestSuite) TestNewBfdClientNoKeyFile() {
 	_ = conf.UnsetEnv(s.T(), "bfd.clientKeyFile")
 	bbc, err := client.NewBfdClient(client.NewConfig("basePath"))
 	assert.Nil(bbc)
-	assert.EqualError(err, fmt.Sprintf("could not load BFD keypair: open : no such file or directory"))
+	assert.EqualError(err, "could not load BFD keypair: open : no such file or directory")
 
 	conf.SetEnv(s.T(), "bfd.clientKeyFile", "foo.pem")
 	bbc, err = client.NewBfdClient(client.NewConfig("basePath"))
 	assert.Nil(bbc)
-	assert.EqualError(err, fmt.Sprintf("could not load BFD keypair: open foo.pem: no such file or directory"))
+	assert.EqualError(err, "could not load BFD keypair: open foo.pem: no such file or directory")
 }
 
 func (s *BfdTestSuite) TestNewBfdClientInvalidKeyFile() {
@@ -173,12 +173,12 @@ func (s *BfdTestSuite) TestNewBfdClientNoCAFile() {
 	_ = conf.UnsetEnv(s.T(), "bfd.checkCert")
 	bbc, err := client.NewBfdClient(client.NewConfig("basePath"))
 	assert.Nil(bbc)
-	assert.EqualError(err, fmt.Sprintf("could not read CA file: read .: is a directory"))
+	assert.EqualError(err, "could not read CA file: read .: is a directory")
 
 	conf.SetEnv(s.T(), "bfd.clientCAFile", "foo.pem")
 	bbc, err = client.NewBfdClient(client.NewConfig("basePath"))
 	assert.Nil(bbc)
-	assert.EqualError(err, fmt.Sprintf("could not read CA file: open foo.pem: no such file or directory"))
+	assert.EqualError(err, "could not read CA file: open foo.pem: no such file or directory")
 }
 
 func (s *BfdTestSuite) TestNewBfdClientInvalidCAFile() {

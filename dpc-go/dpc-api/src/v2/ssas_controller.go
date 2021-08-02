@@ -275,7 +275,7 @@ func (sc *SSASController) AddKey(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if proxyReq.Signature == "" {
-		log.Error(fmt.Sprintf("Signature is required when adding a public key"))
+		log.Error("Signature is required when adding a public key")
 		fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "Signature is required when adding a public key")
 		return
 	}
@@ -340,7 +340,7 @@ func (sc *SSASController) CreateSystem(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if proxyReq.Signature == "" {
-		log.Error(fmt.Sprintf("Signature is required when creating a systemy"))
+		log.Error("Signature is required when creating a system")
 		fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "Signature is required when creating a system")
 		return
 	}
