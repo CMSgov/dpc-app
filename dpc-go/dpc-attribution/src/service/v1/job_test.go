@@ -207,6 +207,8 @@ func (suite *JobServiceV1TestSuite) TestGetBatchesAndFiles() {
 	ctx = context.WithValue(ctx, middleware2.ContextKeyJobID, "54321")
 	req = req.WithContext(ctx)
 
+	r := v1.ResourceType("Patient")
+	c := v1.HexType("ad09ae2eee0a5111508b072cb8c3eaca49f342df82b7c456bcd04df7612283e77f04f0d55e89a5a235f6636a3a9180169b890f6a3078e200fd9a1ca1574885767ffa30ddf94bc374464cf8c6f1da72c8")
 	suite.jr.On("FindBatchesByJobID", mock.MatchedBy(func(passedInJobID string) bool {
 		return passedInJobID == "54321"
 	}), mock.MatchedBy(func(passedInOrgID string) bool {
@@ -217,12 +219,12 @@ func (suite *JobServiceV1TestSuite) TestGetBatchesAndFiles() {
 		return passedInBatchID == jqb.BatchID
 	})).Return([]v1.JobQueueBatchFile{
 		{
-			ResourceType: nil,
+			ResourceType: &r,
 			BatchID:      jqb.BatchID,
 			Sequence:     0,
 			FileName:     "testFileName",
 			Count:        1,
-			Checksum:     nil,
+			Checksum:     &c,
 			FileLength:   1234,
 		},
 	}, nil)

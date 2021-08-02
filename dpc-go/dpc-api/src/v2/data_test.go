@@ -57,7 +57,7 @@ func TestDataControllerTestSuite(t *testing.T) {
 }
 
 func (suite *DataControllerTestSuite) TestGetFile() {
-	f := strings.TrimPrefix(strings.TrimSuffix(suite.file.Name(), filepath.Ext(suite.file.Name())), "/tmp/")
+	f := strings.TrimPrefix(suite.file.Name(), "/tmp/")
 	req := httptest.NewRequest(http.MethodGet, "http://blah.com", nil)
 	ctx := req.Context()
 	ctx = context.WithValue(ctx, middleware.ContextKeyFileName, f)
@@ -65,13 +65,14 @@ func (suite *DataControllerTestSuite) TestGetFile() {
 	w := httptest.NewRecorder()
 
 	fi := model.FileInfo{
-		FileName:     f,
+		FileName:     f[:len(f)-len(filepath.Ext(f))],
 		FileLength:   0,
 		FileCheckSum: nil,
 	}
 	b, _ := json.Marshal(fi)
 	suite.mdc.On("Data", mock.Anything, mock.MatchedBy(func(key string) bool {
-		return key == fmt.Sprintf("validityCheck/%s", f)
+		fileName := f[:len(f)-len(filepath.Ext(f))]
+		return key == fmt.Sprintf("validityCheck/%s", fileName)
 	})).Return(b, nil)
 
 	suite.data.GetFile(w, req)
@@ -81,5 +82,5 @@ func (suite *DataControllerTestSuite) TestGetFile() {
 	b, _ = ioutil.ReadAll(resp.Body)
 
 	assert.Equal(suite.T(), "hello", string(b))
-	assert.Equal(suite.T(), resp.Header.Get("Content-Disposition"), fmt.Sprintf("attachment; filename=\"%s.ndjson\"", f))
+	assert.Equal(suite.T(), resp.Header.Get("Content-Disposition"), fmt.Sprintf("attachment; filename=\"%s\"", f))
 }

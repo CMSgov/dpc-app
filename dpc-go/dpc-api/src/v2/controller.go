@@ -46,9 +46,10 @@ type FileController interface {
 	GetFile(w http.ResponseWriter, r *http.Request)
 }
 
-// SsasController is an interface for reading
-type SsasController interface {
+// AuthController is an interface for reading
+type AuthController interface {
 	CreateSystem(w http.ResponseWriter, r *http.Request)
+	GetAuthToken(w http.ResponseWriter, r *http.Request)
 	GetSystem(w http.ResponseWriter, r *http.Request)
 	CreateToken(w http.ResponseWriter, r *http.Request)
 	DeleteToken(w http.ResponseWriter, r *http.Request)

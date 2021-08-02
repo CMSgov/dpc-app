@@ -58,7 +58,7 @@ type Client interface {
 	Post(ctx context.Context, resourceType ResourceType, body []byte) ([]byte, error)
 	Delete(ctx context.Context, resourceType ResourceType, id string) error
 	Put(ctx context.Context, resourceType ResourceType, id string, body []byte) ([]byte, error)
-	UpdateImplOrg(ctx context.Context, implID string, orgID string, rel ImplementerOrg) (ImplementerOrg, error)
+	UpdateImplementerOrg(ctx context.Context, implID string, orgID string, rel ImplementerOrg) (ImplementerOrg, error)
 	GetProviderOrgs(ctx context.Context, implID string) ([]ProviderOrg, error)
 	CreateImplOrg(ctx context.Context, body []byte) (ImplementerOrg, error)
 	GetImplOrg(ctx context.Context) ([]byte, error)
@@ -311,8 +311,8 @@ func (ac *AttributionClient) Put(ctx context.Context, resourceType ResourceType,
 	return ac.doPut(ctx, url, body)
 }
 
-// UpdateImplOrg function to update a specific implementer/org relation
-func (ac *AttributionClient) UpdateImplOrg(ctx context.Context, implID string, orgID string, rel ImplementerOrg) (ImplementerOrg, error) {
+// UpdateImplementerOrg function to update a specific implementer/org relation
+func (ac *AttributionClient) UpdateImplementerOrg(ctx context.Context, implID string, orgID string, rel ImplementerOrg) (ImplementerOrg, error) {
 	log := logger.WithContext(ctx)
 	reqBytes := new(bytes.Buffer)
 	if err := json.NewEncoder(reqBytes).Encode(rel); err != nil {
