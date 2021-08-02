@@ -43,11 +43,13 @@ type Extension struct {
 	ValueReference *Reference `json:"valueReference"`
 }
 
+// Reference is a struct that represents a Reference
 type Reference struct {
 	Type       string      `json:"type"`
 	Identifier interface{} `json:"identifier"`
 }
 
+// GetAttributionInfo is a func that gets the attribution relationships contained in the group
 func (g Group) GetAttributionInfo() ([]Attribution, error) {
 	i := g.Info
 	b, err := json.Marshal(i)

@@ -25,6 +25,7 @@ func GetNPI(fhirModel []byte) (string, error) {
 	return GetIdentifier(fhirModel, "http://hl7.org/fhir/sid/us-npi")
 }
 
+// GetReferenceNPI function that returns the identifier value associated with the npi system
 func GetReferenceNPI(reference interface{}) (string, error) {
 	b, err := json.Marshal(reference)
 	if err != nil {
@@ -34,6 +35,7 @@ func GetReferenceNPI(reference interface{}) (string, error) {
 	return getReferenceIdentifier(b, "http://hl7.org/fhir/sid/us-npi")
 }
 
+// GetReferenceMBI function that returns the identifier value associated with the mbi system
 func GetReferenceMBI(reference interface{}) (string, error) {
 	b, err := json.Marshal(reference)
 	if err != nil {

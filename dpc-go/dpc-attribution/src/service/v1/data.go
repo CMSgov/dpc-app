@@ -18,7 +18,7 @@ type DataService interface {
 	GetFileInfo(w http.ResponseWriter, r *http.Request)
 }
 
-// DataService struct defines the class
+// DataServiceV1 struct defines the class
 type DataServiceV1 struct {
 	jr v1.JobRepo
 }
