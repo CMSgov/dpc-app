@@ -3,7 +3,9 @@ package v2
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/CMSgov/dpc/api/apitest"
+	"github.com/CMSgov/dpc/api/conf"
 	middleware2 "github.com/CMSgov/dpc/api/middleware"
 	"github.com/CMSgov/dpc/api/model"
 	"github.com/go-chi/chi/middleware"
@@ -68,15 +70,17 @@ func (suite *JobControllerTestSuite) TestGetStatus() {
 
 	res := w.Result()
 
+	apiPath := conf.GetAsString("apiPath")
+
 	b, _ = ioutil.ReadAll(res.Body)
-	ja.Assertf(string(b), `{
+	ja.Assertf(string(b), fmt.Sprintf(`{
   "transactionTime": "<<PRESENCE>>",
   "request": "http://pfSbNLv.info/",
   "requiresAccessToken": true,
   "output": [
     {
       "type": "Patient",
-      "url": "/Data/f9185824-c835-421d-81f9-ec2b1ee609af-0.Patient.ndjson",
+      "url": "%s/Data/f9185824-c835-421d-81f9-ec2b1ee609af-0.patient.ndjson",
       "count": 1,
       "extension": [
         {
@@ -101,5 +105,5 @@ func (suite *JobControllerTestSuite) TestGetStatus() {
       "valueDateTime": "<<PRESENCE>>"
     }
   ]
-}`)
+}`, apiPath))
 }

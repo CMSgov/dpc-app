@@ -65,7 +65,7 @@ func (sc *SsasHTTPClient) CreateToken(ctx context.Context, systemID string, labe
 
 	url := fmt.Sprintf("%s/%s/%s/token", sc.config.AdminURL, PostV2SystemEndpoint, systemID)
 
-	resBytes, err := sc.doPost(ctx, url, []byte(fmt.Sprintf(`{"label": "%s"}`, label)))
+	resBytes, err := sc.doPost(ctx, url, []byte(fmt.Sprintf(`{"label": "%s"}`, label)), nil)
 	if err != nil {
 		log.Error("Create token failed", zap.Error(err))
 		return "", err
@@ -142,7 +142,7 @@ func (sc *SsasHTTPClient) AddPublicKey(ctx context.Context, systemID string, req
 	}
 	url := fmt.Sprintf("%s/%s/%s/key", sc.config.AdminURL, PostV2SystemEndpoint, systemID)
 
-	resBytes, err := sc.doPost(ctx, url, reqBytes.Bytes())
+	resBytes, err := sc.doPost(ctx, url, reqBytes.Bytes(), nil)
 	if err != nil {
 		log.Error("Add public key failed", zap.Error(err))
 		return nil, err

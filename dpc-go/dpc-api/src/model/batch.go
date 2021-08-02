@@ -2,6 +2,7 @@ package model
 
 import (
 	"fmt"
+	"strings"
 	"time"
 )
 
@@ -36,7 +37,7 @@ type BatchFile struct {
 
 // FormOutputFileName is a helper function to construct the file name
 func (f *BatchFile) FormOutputFileName() string {
-	return fmt.Sprintf("%s-%d.%s", f.BatchID, f.Sequence, f.ResourceType)
+	return fmt.Sprintf("%s-%d.%s", f.BatchID, f.Sequence, strings.ToLower(f.ResourceType))
 }
 
 // Output is a struct for holding job data for the job status
