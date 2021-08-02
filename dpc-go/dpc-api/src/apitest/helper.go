@@ -262,6 +262,32 @@ const GetImplOrgJSON = `[
     }
 ]`
 
+const GetBatchAndFilesJSON = `[
+  {
+    "batch": {
+      "totalPatients": 32,
+      "patientsProcessed": 32,
+      "patientIndex": 31,
+      "status": "COMPLETED",
+      "transactionTime": "2021-08-02T00:00:00Z",
+      "submitTime": "2021-08-02T00:00:00Z",
+      "completeTime": "2021-08-02T00:00:00Z",
+      "requestURL": "http://pfSbNLv.info/"
+    },
+    "files": [
+      {
+        "resourceType": "Patient",
+        "batchID": "f9185824-c835-421d-81f9-ec2b1ee609af",
+        "sequence": 0,
+        "fileName": "testFileName",
+        "count": 1,
+        "checksum": "ad09ae2eee0a5111508b072cb8c3eaca49f342df82b7c456bcd04df7612283e77f04f0d55e89a5a235f6636a3a9180169b890f6a3078e200fd9a1ca1574885767ffa30ddf94bc374464cf8c6f1da72c8",
+        "fileLength": 1234
+      }
+    ]
+  }
+]`
+
 // ImplOrgJSON creates an Implementer/Org JSON string for testing purposes
 func ImplOrgJSON() string {
 	body := struct {
