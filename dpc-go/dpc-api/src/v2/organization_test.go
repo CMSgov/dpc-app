@@ -25,7 +25,7 @@ type MockAttributionClient struct {
 	mock.Mock
 }
 
-func (ac *MockAttributionClient) UpdateImplOrg(ctx context.Context, implID string, orgID string, rel client.ImplementerOrg) (client.ImplementerOrg, error) {
+func (ac *MockAttributionClient) UpdateImplementerOrg(ctx context.Context, implID string, orgID string, rel client.ImplementerOrg) (client.ImplementerOrg, error) {
 	args := ac.Called(ctx, implID, orgID, rel)
 	return args.Get(0).(client.ImplementerOrg), args.Error(1)
 }
@@ -75,6 +75,7 @@ func (ac *MockAttributionClient) Data(ctx context.Context, path string) ([]byte,
 	return args.Get(0).([]byte), args.Error(1)
 }
 
+//TODO This mock (and attributionClient mock) should be moved to a more common place.
 type MockSsasClient struct {
 	mock.Mock
 }
@@ -87,6 +88,11 @@ func (mc *MockSsasClient) CreateSystem(ctx context.Context, request client.Creat
 func (mc *MockSsasClient) CreateGroup(ctx context.Context, request client.CreateGroupRequest) (client.CreateGroupResponse, error) {
 	args := mc.Called(ctx, request)
 	return args.Get(0).(client.CreateGroupResponse), args.Error(1)
+}
+
+func (mc MockSsasClient) Authenticate(ctx context.Context, request []byte) ([]byte, error) {
+	args := mc.Called(ctx, request)
+	return args.Get(0).([]byte), args.Error(1)
 }
 
 func (mc MockSsasClient) GetSystem(ctx context.Context, systemID string) (client.GetSystemResponse, error) {

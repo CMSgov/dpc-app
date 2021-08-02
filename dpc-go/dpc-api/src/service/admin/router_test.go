@@ -72,6 +72,10 @@ func (mjc *MockSsasController) GetSystem(w http.ResponseWriter, r *http.Request)
 	mjc.Called(w, r)
 }
 
+func (mjc *MockSsasController) GetAuthToken(w http.ResponseWriter, r *http.Request) {
+	mjc.Called(w, r)
+}
+
 func (mjc *MockSsasController) CreateToken(w http.ResponseWriter, r *http.Request) {
 	mjc.Called(w, r)
 }
