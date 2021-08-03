@@ -3,8 +3,6 @@
 require './lib/luhnacy_lib/luhnacy_lib'
 
 class User < ApplicationRecord
-  include ApiErrorSimplify
-
   before_create :create_api_imp, if: -> { no_imp_id? }
   before_create :check_impl
 
