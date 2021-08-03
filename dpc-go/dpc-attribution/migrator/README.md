@@ -25,7 +25,7 @@ Assuming the last migration in the `/migrations` folder has an id of 41 a new mi
 *Note: The `Dockerfile` copies the files under /migrations to the image's own volume.*
 
 2) Run the migrations: 
- `docker run --network host migrator -path=/migrations/ -database=postgres://postgres:dpc-safe@localhost:5432/dpc_attribution_v2?sslmode=disable up`
+ `docker run --network host migrator -path=/migrations/ -database 'postgres://postgres:dpc-safe@localhost:5432/dpc_attribution_v2?sslmode=disable' up`
  
 3) Rollback a migration: 
   `docker run --network host migrator -path=/migrations/ -database=postgres://postgres:dpc-safe@localhost:5432/dpc_attribution_v2?sslmode=disable down 4`
