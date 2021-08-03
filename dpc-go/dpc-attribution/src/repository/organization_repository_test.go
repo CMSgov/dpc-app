@@ -11,7 +11,7 @@ import (
 	"github.com/DATA-DOG/go-sqlmock"
 
 	"github.com/CMSgov/dpc/attribution/attributiontest"
-	"github.com/CMSgov/dpc/attribution/model/v2"
+	"github.com/CMSgov/dpc/attribution/model"
 
 	"github.com/bxcodec/faker/v3"
 	"github.com/pkg/errors"
@@ -29,16 +29,16 @@ func newMock() (*sql.DB, sqlmock.Sqlmock) {
 
 type OrganizationRepositoryTestSuite struct {
 	suite.Suite
-	fakeOrg *v2.Organization
+	fakeOrg *model.Organization
 }
 
 func (suite *OrganizationRepositoryTestSuite) SetupTest() {
-	o := v2.Organization{}
+	o := model.Organization{}
 	err := faker.FakeData(&o)
 	if err != nil {
 		fmt.Printf("ERR %v\n", err)
 	}
-	var i v2.Info
+	var i model.Info
 	_ = json.Unmarshal([]byte(attributiontest.Orgjson), &i)
 	o.Info = i
 	suite.fakeOrg = &o

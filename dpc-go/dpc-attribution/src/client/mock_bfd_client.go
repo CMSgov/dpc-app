@@ -15,8 +15,9 @@ import (
 // MockBfdClient is for mocking the BFD Client
 type MockBfdClient struct {
 	mock.Mock
-	HICN *string
-	MBI  *string
+	HICN     *string
+	MBI      *string
+	BasePath string
 }
 
 // GetExplanationOfBenefit is used for testing
@@ -51,12 +52,9 @@ func (bfd *MockBfdClient) GetCoverage(beneficiaryID, jobID, cmsID, since string,
 // This is private in the real function and should remain so, but in the test client it makes maintenance easier to expose it.
 func (bfd *MockBfdClient) GetData(endpoint, patientID string) (string, error) {
 	var fData []byte
-	fData, err := ioutil.ReadFile(filepath.Join("testdata/synthetic_beneficiary_data/", filepath.Clean(endpoint)))
+	fData, err := ioutil.ReadFile(filepath.Join(bfd.BasePath, "testdata/synthetic_beneficiary_data/", filepath.Clean(endpoint)))
 	if err != nil {
-		fData, err = ioutil.ReadFile(filepath.Join("../testdata/synthetic_beneficiary_data/", filepath.Clean(endpoint)))
-		if err != nil {
-			return "", err
-		}
+		return "", err
 	}
 	cleanData := strings.Replace(string(fData), "20000000000001", patientID, -1)
 	if bfd.MBI != nil {

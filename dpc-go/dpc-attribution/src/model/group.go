@@ -1,6 +1,8 @@
-package v2
+package model
 
-import "time"
+import (
+	"time"
+)
 
 // Group is a struct that models the group table
 type Group struct {

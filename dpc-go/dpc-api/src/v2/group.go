@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strings"
 
 	"github.com/CMSgov/dpc/api/fhirror"
 	"github.com/CMSgov/dpc/api/logger"
@@ -13,7 +14,6 @@ import (
 	"github.com/CMSgov/dpc/api/model"
 	"github.com/google/fhir/go/jsonformat"
 	"github.com/pkg/errors"
-	"github.com/samply/golang-fhir-models/fhir-models/fhir"
 	"github.com/sjsdfg/common-lang-in-go/StringUtils"
 	"go.uber.org/zap"
 
@@ -23,12 +23,14 @@ import (
 // GroupController is a struct that defines what the controller has
 type GroupController struct {
 	ac client.Client
+	jc client.JobClient
 }
 
 // NewGroupController function that creates a organization controller and returns it's reference
-func NewGroupController(ac client.Client) *GroupController {
+func NewGroupController(ac client.Client, jc client.JobClient) *GroupController {
 	return &GroupController{
 		ac,
+		jc,
 	}
 }
 
@@ -67,20 +69,73 @@ func (gc *GroupController) Export(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	b, err := gc.ac.Get(r.Context(), client.Group, groupID)
+	if err != nil {
+		log.Error("Failed to get the group")
+		fhirror.NotFound(r.Context(), w, "Failed to find the group")
+		return
+	}
+
 	outputFormat := r.URL.Query().Get("_outputFormat")
 	if err := isValidExport(r.Context(), w, outputFormat, r.Header.Get("Prefer")); err != nil {
 		return
 	}
-	resp, err := gc.ac.Export(r.Context(), client.Group, groupID)
-	if err != nil {
-		log.Error("Failed to start the job in attribution", zap.Error(err))
-		fhirror.ServerIssue(r.Context(), w, http.StatusUnprocessableEntity, err.Error())
+
+	var groupContainer model.GroupContainer
+	if err := json.Unmarshal(b, &groupContainer); err != nil {
+		log.Error("Failed to convert group to struct")
+		fhirror.GenericServerIssue(r.Context(), w)
 		return
 	}
 
-	contentLocation := contentLocationHeader(string(resp), r)
+	if groupContainer.ID != groupID {
+		log.Error("Group id from attribution does not match the requested group id")
+		fhirror.GenericServerIssue(r.Context(), w)
+		return
+	}
+
+	attr, err := groupContainer.Info.GetAttributionInfo()
+	if err != nil {
+		log.Error("Failed to get attribution info")
+		fhirror.GenericServerIssue(r.Context(), w)
+		return
+	}
+
+	job, err := gc.startExports(r, groupContainer.ID, attr)
+	if err != nil {
+		log.Error("Failed to start export", zap.Error(err))
+		fhirror.GenericServerIssue(r.Context(), w)
+		return
+	}
+	contentLocation := contentLocationHeader(job, r)
 	w.Header().Set("Content-Location", contentLocation)
 	w.WriteHeader(http.StatusAccepted)
+}
+
+func (gc *GroupController) startExports(r *http.Request, groupID string, attr []model.Attribution) (string, error) {
+	since, _ := r.Context().Value(middleware2.ContextKeySince).(string)
+	types, _ := r.Context().Value(middleware2.ContextKeyResourceTypes).(string)
+
+	providers := make([]string, 0)
+	patients := make([]string, 0)
+	for _, a := range attr {
+		providers = append(providers, a.ProviderNPI)
+		patients = append(patients, a.PatientMBI)
+	}
+
+	er := model.ExportRequest{
+		OutputFormat: r.URL.Query().Get("_outputFormat"),
+		Since:        since,
+		Type:         types,
+		MBIs:         patients,
+		ProviderNPI:  strings.Join(providers, ","),
+		GroupID:      groupID,
+	}
+	b, err := gc.jc.Export(r.Context(), er)
+	if err != nil {
+		return "", err
+	}
+	return string(b), nil
 }
 
 func contentLocationHeader(id string, r *http.Request) string {
@@ -122,7 +177,7 @@ func isValidGroup(group []byte) error {
 	}
 
 	for _, m := range groupStruct.Member {
-		pracRef := findPractitionerRef(m)
+		pracRef := m.FindPractitionerRef()
 		if pracRef == nil ||
 			pracRef.Identifier == nil ||
 			*pracRef.Type != "Practitioner" {
@@ -152,18 +207,6 @@ func isValidExport(ctx context.Context, w http.ResponseWriter, outputFormat stri
 	if StringUtils.IsNotEmpty(headerPrefer) && headerPrefer != "respond-async" {
 		log.Error("Invalid Prefer header")
 		fhirror.BusinessViolation(ctx, w, http.StatusBadRequest, "The 'Prefer' header must be 'respond-async'")
-	}
-	return nil
-}
-
-// at this point there should only be one extension because of fhir_filter,
-// but going to leave this in to still search the extensions
-func findPractitionerRef(member model.GroupMember) *fhir.Reference {
-	for _, e := range member.Extension {
-		vr := e.ValueReference
-		if vr != nil && vr.Type != nil && *vr.Type == "Practitioner" {
-			return vr
-		}
 	}
 	return nil
 }

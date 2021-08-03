@@ -1,7 +1,9 @@
 package router
 
 import (
+	"github.com/bxcodec/faker/v3"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -9,8 +11,6 @@ import (
 
 	"github.com/CMSgov/dpc/attribution/attributiontest"
 	middleware2 "github.com/CMSgov/dpc/attribution/middleware"
-	"github.com/bxcodec/faker/v3"
-
 	"github.com/darahayes/go-boom"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -80,6 +80,7 @@ func (suite *RouterTestSuite) SetupTest() {
 	suite.mockOrg = &MockService{}
 	suite.mockGroup = &MockService{}
 	suite.mockData = &MockDataService{}
+	suite.mockJob = &MockJobService{}
 	suite.router = NewDPCAttributionRouter(suite.mockOrg, suite.mockGroup, suite.mockImplementer, suite.mockImplementerOrgRel, suite.mockData, suite.mockJob)
 }
 
@@ -202,26 +203,24 @@ func (suite *RouterTestSuite) TestGroupPostRoute() {
 	res = suite.do(http.MethodPost, "/Group", strings.NewReader(attributiontest.Groupjson), map[string]string{middleware2.OrgHeader: "12345"})
 	assert.Equal(suite.T(), "application/json; charset=UTF-8", res.Header.Get("Content-Type"))
 	assert.Equal(suite.T(), http.StatusInternalServerError, res.StatusCode)
-
-	res = suite.do(http.MethodPost, "/Group/1234", strings.NewReader(attributiontest.Groupjson), map[string]string{middleware2.OrgHeader: "12345"})
-	assert.Equal(suite.T(), http.StatusNotFound, res.StatusCode)
 }
 
 func (suite *RouterTestSuite) TestGroupExportRoute() {
 	fakeUrl := faker.URL()
 	fakeIP := faker.IPv4()
-	suite.mockGroup.On("Export", mock.Anything, mock.Anything).Once().Run(func(arg mock.Arguments) {
+	fakeJobID := faker.UUIDDigit()
+	suite.mockJob.On("Export", mock.Anything, mock.Anything).Once().Run(func(arg mock.Arguments) {
 		w := arg.Get(0).(http.ResponseWriter)
-		_, _ = w.Write([]byte(faker.UUIDDigit()))
+		_, _ = w.Write([]byte(fakeJobID))
 		r := arg.Get(1).(*http.Request)
 		assert.Equal(suite.T(), "12345", r.Context().Value(middleware2.ContextKeyOrganization))
-		assert.Equal(suite.T(), "9876", r.Context().Value(middleware2.ContextKeyGroup))
 		assert.Equal(suite.T(), fakeUrl, r.Header.Get(middleware2.RequestURLHeader))
 		assert.Equal(suite.T(), fakeIP, r.Header.Get(middleware2.FwdHeader))
 	})
 
-	res := suite.do(http.MethodGet, "/Group/9876/$export", nil, map[string]string{middleware2.OrgHeader: "12345", middleware2.RequestURLHeader: fakeUrl, middleware2.FwdHeader: fakeIP})
+	res := suite.do(http.MethodPost, "/Job", nil, map[string]string{middleware2.OrgHeader: "12345", middleware2.RequestURLHeader: fakeUrl, middleware2.FwdHeader: fakeIP})
 	assert.Equal(suite.T(), "application/json; charset=UTF-8", res.Header.Get("Content-Type"))
 	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
-	assert.NotEqual(suite.T(), res.Body, http.NoBody)
+	b, _ := ioutil.ReadAll(res.Body)
+	assert.Equal(suite.T(), string(b), fakeJobID)
 }
