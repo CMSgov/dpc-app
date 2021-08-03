@@ -28,6 +28,11 @@ func (ac *MockJobClient) Status(ctx context.Context, jobID string) ([]byte, erro
 	return args.Get(0).([]byte), args.Error(1)
 }
 
+func (mc *MockJobClient) Export(ctx context.Context, request model.ExportRequest) ([]byte, error) {
+	args := mc.Called(ctx, request)
+	return args.Get(0).([]byte), args.Error(1)
+}
+
 type JobControllerTestSuite struct {
 	suite.Suite
 	job JobController

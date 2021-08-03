@@ -12,7 +12,7 @@ type identifier struct {
 
 // IdentifierContainer is a struct that holds identifiers
 // This is only used for the purpose of unmarshalling
-type IdentifierContainer struct {
+type identifiersContainer struct {
 	Identifier []identifier `json:"identifier"`
 }
 
@@ -23,7 +23,7 @@ func GetNPI(fhirModel []byte) (string, error) {
 
 // GetIdentifier function that returns the identifier value associated with the system
 func GetIdentifier(fhirModel []byte, system string) (string, error) {
-	var r IdentifierContainer
+	var r identifiersContainer
 	err := json.Unmarshal(fhirModel, &r)
 	if err != nil {
 		return "", err
