@@ -85,9 +85,9 @@ func complete(ctx context.Context, w http.ResponseWriter, batches []model.BatchA
 
 	outputs, errors := formOutputList(files)
 
-	jobExtension := make(map[string]interface{})
-	jobExtension["https://dpc.cms.gov/submit_time"] = getEarliestSubmitTime(batches)
-	jobExtension["https://dpc.cms.gov/complete_time"] = latestCompleteTime
+	jobExtension := make([]map[string]interface{}, 0)
+	jobExtension = append(jobExtension, map[string]interface{}{"url": "https://dpc.cms.gov/submit_time", "valueDateTime": getEarliestSubmitTime(batches)})
+	jobExtension = append(jobExtension, map[string]interface{}{"url": "https://dpc.cms.gov/complete_time", "valueDateTime": latestCompleteTime})
 
 	status := &model.Status{
 		TransactionTime:     batches[0].Batch.TransactionTime,
@@ -141,11 +141,10 @@ func formOutputList(files []model.BatchFile) ([]model.Output, []model.Output) {
 	return outputs, errors
 }
 
-func fhirExtensions(f model.BatchFile) map[string]interface{} {
-	m := make(map[string]interface{})
-	m["https://dpc.cms.gov/checksum"] = f.Checksum
-	m["https://dpc.cms.gov/file_length"] = f.FileLength
-
+func fhirExtensions(f model.BatchFile) []map[string]interface{} {
+	m := make([]map[string]interface{}, 0)
+	m = append(m, map[string]interface{}{"url": "https://dpc.cms.gov/checksum", "valueString": f.Checksum})
+	m = append(m, map[string]interface{}{"url": "https://dpc.cms.gov/file_length", "valueDecimal": f.FileLength})
 	return m
 }
 
