@@ -207,6 +207,7 @@ func PublicKeyCtx(next http.Handler) http.Handler {
 	})
 }
 
+// ProvenanceHeaderValidator middleware to require and validate a provenance header
 func ProvenanceHeaderValidator(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log := logger.WithContext(r.Context())
