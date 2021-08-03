@@ -70,7 +70,7 @@ public class SharedMethods {
                 .getEntry()
                 .stream()
                 .map(Bundle.BundleEntryComponent::getResource)
-                .filter(resource -> resource.getResourceType().getPath().toLowerCase() == DPCResourceType.Patient.getPath())
+                .filter(resource -> resource.getResourceType().getPath().equals(DPCResourceType.Patient.getPath()))
                 .map(resource -> (Patient) resource)
                 .forEach(patient -> {
                     final MethodOutcome created = client
