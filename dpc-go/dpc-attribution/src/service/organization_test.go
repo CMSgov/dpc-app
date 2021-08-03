@@ -1,4 +1,4 @@
-package v2
+package service
 
 import (
 	"context"
@@ -10,7 +10,7 @@ import (
 	"testing"
 
 	"github.com/CMSgov/dpc/attribution/middleware"
-	v2 "github.com/CMSgov/dpc/attribution/model/v2"
+	v2 "github.com/CMSgov/dpc/attribution/model"
 
 	"github.com/bxcodec/faker/v3"
 	"github.com/kinbiko/jsonassert"

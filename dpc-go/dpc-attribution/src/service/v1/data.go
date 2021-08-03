@@ -7,26 +7,31 @@ import (
 
 	"github.com/CMSgov/dpc/attribution/logger"
 	"github.com/CMSgov/dpc/attribution/middleware"
-	"github.com/CMSgov/dpc/attribution/repository"
+	"github.com/CMSgov/dpc/attribution/repository/v1"
 	"github.com/CMSgov/dpc/attribution/util"
 	"github.com/darahayes/go-boom"
 	"go.uber.org/zap"
 )
 
-// DataService struct defines the class
-type DataService struct {
-	jr repository.JobRepo
+// DataService is an interface for testing to be able to mock the services in the router test
+type DataService interface {
+	GetFileInfo(w http.ResponseWriter, r *http.Request)
+}
+
+// DataServiceV1 struct defines the class
+type DataServiceV1 struct {
+	jr v1.JobRepo
 }
 
 // NewDataService creates a dataservice
-func NewDataService(jr repository.JobRepo) *DataService {
-	return &DataService{
+func NewDataService(jr v1.JobRepo) DataService {
+	return &DataServiceV1{
 		jr,
 	}
 }
 
 // GetFileInfo gets the file info for a filename
-func (ds *DataService) GetFileInfo(w http.ResponseWriter, r *http.Request) {
+func (ds *DataServiceV1) GetFileInfo(w http.ResponseWriter, r *http.Request) {
 	log := logger.WithContext(r.Context())
 	fileName := util.FetchValueFromContext(r.Context(), w, middleware.ContextKeyFileName)
 	orgID := util.FetchValueFromContext(r.Context(), w, middleware.ContextKeyOrganization)

@@ -13,3 +13,9 @@ lint:
 
 .PHONY: test
 test:  lint unit-test
+
+.PHONY: bfd-certs
+bfd-certs:
+	@bash ops/scripts/secrets --decrypt shared_files/encrypted/bfd-dev-test-ca-file.crt | tail -n +2 > shared_files/decrypted/bfd-dev-test-ca-file.crt
+	@bash ops/scripts/secrets --decrypt shared_files/encrypted/bfd-dev-test-cert.pem | tail -n +2 > shared_files/decrypted/bfd-dev-test-cert.pem
+	@bash ops/scripts/secrets --decrypt shared_files/encrypted/bfd-dev-test-key.pem | tail -n +2 > shared_files/decrypted/bfd-dev-test-key.pem

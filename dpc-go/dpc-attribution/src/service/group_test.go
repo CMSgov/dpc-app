@@ -1,15 +1,17 @@
-package v2
+package service
 
 import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/CMSgov/dpc/attribution/attributiontest"
+	middleware2 "github.com/CMSgov/dpc/attribution/middleware"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	"github.com/CMSgov/dpc/attribution/model/v2"
+	"github.com/CMSgov/dpc/attribution/model"
 	serviceV1 "github.com/CMSgov/dpc/attribution/service/v1"
 	"github.com/bxcodec/faker/v3"
 	"github.com/kinbiko/jsonassert"
@@ -23,12 +25,20 @@ type MockGrpRepo struct {
 	mock.Mock
 }
 
-func (m *MockGrpRepo) Insert(ctx context.Context, body []byte) (*v2.Group, error) {
+func (m *MockGrpRepo) Insert(ctx context.Context, body []byte) (*model.Group, error) {
 	args := m.Called(ctx, body)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).(*v2.Group), args.Error(1)
+	return args.Get(0).(*model.Group), args.Error(1)
+}
+
+func (m *MockGrpRepo) FindByID(ctx context.Context, id string) (*model.Group, error) {
+	args := m.Called(ctx, id)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*model.Group), args.Error(1)
 }
 
 type GroupServiceTestSuite struct {
@@ -50,7 +60,7 @@ func (suite *GroupServiceTestSuite) SetupTest() {
 func (suite *GroupServiceTestSuite) TestPost() {
 	ja := jsonassert.New(suite.T())
 
-	o := v2.Group{}
+	o := model.Group{}
 	err := faker.FakeData(&o)
 	if err != nil {
 		fmt.Printf("ERR %v\n", err)
@@ -98,12 +108,48 @@ func (suite *GroupServiceTestSuite) TestPostRepoError() {
     }`)
 }
 
-func (suite *GroupServiceTestSuite) TestGetNotImplemented() {
+func (suite *GroupServiceTestSuite) TestGet() {
+	g := attributiontest.GroupResponse()
+	suite.repo.On("FindByID", mock.Anything, mock.MatchedBy(func(groupID string) bool {
+		return groupID == "54321"
+	})).Return(g, nil)
+
 	req := httptest.NewRequest(http.MethodGet, "http://example.com/foo", nil)
+	ctx := req.Context()
+	ctx = context.WithValue(ctx, middleware2.ContextKeyGroup, "54321")
+	req = req.WithContext(ctx)
+
 	w := httptest.NewRecorder()
 	suite.service.Get(w, req)
 	res := w.Result()
-	assert.Equal(suite.T(), http.StatusNotImplemented, res.StatusCode)
+
+	b, _ := ioutil.ReadAll(res.Body)
+	assert.NotNil(suite.T(), b)
+}
+
+func (suite *GroupServiceTestSuite) TestGetError() {
+	ja := jsonassert.New(suite.T())
+	suite.repo.On("FindByID", mock.Anything, mock.MatchedBy(func(groupID string) bool {
+		return groupID == "54321"
+	})).Return(nil, errors.New("error"))
+
+	req := httptest.NewRequest(http.MethodGet, "http://example.com/foo", nil)
+	ctx := req.Context()
+	ctx = context.WithValue(ctx, middleware2.ContextKeyGroup, "54321")
+	req = req.WithContext(ctx)
+
+	w := httptest.NewRecorder()
+	suite.service.Get(w, req)
+	res := w.Result()
+
+	b, _ := ioutil.ReadAll(res.Body)
+	assert.Equal(suite.T(), http.StatusUnprocessableEntity, res.StatusCode)
+	ja.Assertf(string(b), `
+    {
+        "error": "Unprocessable Entity",
+        "message": "error",
+        "statusCode": 422
+    }`)
 }
 
 func (suite *GroupServiceTestSuite) TestDeleteNotImplemented() {
