@@ -88,8 +88,6 @@ start-v2: secure-envs
 	@docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.v2.yml up start_api_dependencies
 	@docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.v2.yml -f dpc-go/dpc-attribution/docker-compose.yml up -d --build attribution2
 	@docker-compose -p dpc-v2 -f dpc-go/dpc-api/docker-compose.yml up -d --build api
-	# auto-migrate and seed v1 db
-	@make seed-db
 	@docker ps
 
 .PHONY: down-v2
