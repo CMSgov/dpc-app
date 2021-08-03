@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/CMSgov/dpc/attribution/model/v2"
+	"github.com/CMSgov/dpc/attribution/model"
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/bxcodec/faker/v3"
 	"github.com/stretchr/testify/assert"
@@ -14,17 +14,17 @@ import (
 
 type ImplementerOrgRepositoryTestSuite struct {
 	suite.Suite
-	fakeRel *v2.ImplementerOrgRelation
+	fakeRel *model.ImplementerOrgRelation
 }
 
 func (suite *ImplementerOrgRepositoryTestSuite) SetupTest() {
-	i := v2.ImplementerOrgRelation{}
+	i := model.ImplementerOrgRelation{}
 	err := faker.FakeData(&i)
 	if err != nil {
 		fmt.Printf("ERR %v\n", err)
 	}
 	suite.fakeRel = &i
-	suite.fakeRel.Status = v2.Unknown
+	suite.fakeRel.Status = model.Unknown
 }
 
 func TestImplementerOrgRepositoryTestSuite(t *testing.T) {

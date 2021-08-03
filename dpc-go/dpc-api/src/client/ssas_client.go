@@ -242,11 +242,11 @@ func (sc *SsasHTTPClient) doPost(ctx context.Context, url string, reqBytes []byt
 		log.Error("Failed to create request", zap.Error(err))
 		return nil, errors.Errorf("Failed to create ssas group")
 	}
-	if headers != nil {
-		for k, v := range headers {
-			req.Header.Set(k, v)
-		}
+
+	for k, v := range headers {
+		req.Header.Set(k, v)
 	}
+
 	req.SetBasicAuth(sc.config.ClientID, sc.config.ClientSecret)
 	resp, err := sc.httpClient.Do(req)
 	if err != nil {

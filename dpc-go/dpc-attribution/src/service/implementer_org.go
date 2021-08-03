@@ -1,4 +1,4 @@
-package v2
+package service
 
 import (
 	"bytes"
@@ -8,7 +8,6 @@ import (
 	"github.com/CMSgov/dpc/attribution/logger"
 	"github.com/CMSgov/dpc/attribution/middleware"
 	"github.com/CMSgov/dpc/attribution/model"
-	"github.com/CMSgov/dpc/attribution/model/v2"
 	"github.com/CMSgov/dpc/attribution/repository"
 	"github.com/CMSgov/dpc/attribution/util"
 	"github.com/darahayes/go-boom"
@@ -103,14 +102,14 @@ func (ios *ImplementerOrgService) Post(w http.ResponseWriter, r *http.Request) {
 		boom.Conflict(w, "relation already exists")
 		return
 	}
-	ior, err := ios.impOrgRepo.Insert(r.Context(), implID, org.ID, v2.Active)
+	ior, err := ios.impOrgRepo.Insert(r.Context(), implID, org.ID, model.Active)
 	if err != nil {
 		log.Error("Failed to create Implementer org relation", zap.Error(err))
 		boom.BadData(w, err)
 		return
 	}
 
-	output := v2.ImplementorOrgOutput{
+	output := model.ImplementorOrgOutput{
 		ImplementerOrgRelation: *ior,
 		NPI:                    reqStruct.Npi,
 	}
@@ -127,7 +126,7 @@ func (ios *ImplementerOrgService) Post(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (ios *ImplementerOrgService) findOrCreateOrg(r *http.Request, npi string, autoCreate bool) (*v2.Organization, error) {
+func (ios *ImplementerOrgService) findOrCreateOrg(r *http.Request, npi string, autoCreate bool) (*model.Organization, error) {
 	log := logger.WithContext(r.Context())
 	org, _ := ios.orgRepo.FindByNPI(r.Context(), npi)
 	if org == nil {
@@ -190,7 +189,7 @@ func (ios *ImplementerOrgService) Get(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (ios *ImplementerOrgService) toManagedOrgStructs(r *http.Request, relations []v2.ImplementerOrgRelation) ([]model.ManagedOrg, error) {
+func (ios *ImplementerOrgService) toManagedOrgStructs(r *http.Request, relations []model.ImplementerOrgRelation) ([]model.ManagedOrg, error) {
 	result := make([]model.ManagedOrg, 0)
 
 	for _, rel := range relations {
