@@ -10,7 +10,7 @@ import gov.cms.dpc.bluebutton.config.BBClientConfiguration;
 
 public class BlueButtonClientV2Provider implements Provider<BlueButtonClientV2> {
 
-    private FhirContext fhirContext;
+    private @Named("fhirContextR4") FhirContext fhirContext;
     private IGenericClient client;
     private BBClientConfiguration config;
     private MetricRegistry metricRegistry;
