@@ -37,10 +37,3 @@ yarn-debug.log*
 
 .env.development.local
 .env.test.local
-
-
-# REMOVE BEFORE MERGE
-public.pem
-private.pem
-signature.sig
-snippet.txt.sig
