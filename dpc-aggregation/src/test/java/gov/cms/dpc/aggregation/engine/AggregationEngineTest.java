@@ -104,8 +104,12 @@ class AggregationEngineTest {
      */
     @Test
     void mockBlueButtonClientTest() {
-        Bundle patient = bbclient.requestPatientFromServer(MockBlueButtonClient.MBI_BENE_ID_MAP.get(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0)), null, null);
+        var patientMBI = MockBlueButtonClient.MBI_BENE_ID_MAP.get(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0));
+        Bundle patient = bbclient.requestPatientFromServer(patientMBI, null, null);
         assertNotNull(patient);
+        // add test for v2 client
+        org.hl7.fhir.r4.model.Bundle patientV2 = bbclientV2.requestPatientFromServer(patientMBI, null, null);
+        assertNotNull(patientV2);
     }
 
     /**
