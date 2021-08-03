@@ -3,16 +3,16 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"github.com/CMSgov/dpc/attribution/model/v2"
+	"github.com/CMSgov/dpc/attribution/model"
 	"github.com/huandu/go-sqlbuilder"
 )
 
 // ImplementerOrgRepo is an interface for test mocking purposes
 type ImplementerOrgRepo interface {
-	Insert(ctx context.Context, implID string, orgID string, status v2.ImplOrgStatus) (*v2.ImplementerOrgRelation, error)
-	FindRelation(ctx context.Context, implID string, orgID string) (*v2.ImplementerOrgRelation, error)
-	FindManagedOrgs(ctx context.Context, implID string) ([]v2.ImplementerOrgRelation, error)
-	Update(ctx context.Context, implID string, orgID string, sysID string) (*v2.ImplementerOrgRelation, error)
+	Insert(ctx context.Context, implID string, orgID string, status model.ImplOrgStatus) (*model.ImplementerOrgRelation, error)
+	FindRelation(ctx context.Context, implID string, orgID string) (*model.ImplementerOrgRelation, error)
+	FindManagedOrgs(ctx context.Context, implID string) ([]model.ImplementerOrgRelation, error)
+	Update(ctx context.Context, implID string, orgID string, sysID string) (*model.ImplementerOrgRelation, error)
 }
 
 // ImplementerOrgRepository is a struct that defines what the repository has
@@ -28,15 +28,15 @@ func NewImplementerOrgRepo(db *sql.DB) *ImplementerOrgRepository {
 }
 
 // FindRelation function that searches the database for the relationship based in org and implementer id
-func (or *ImplementerOrgRepository) FindRelation(ctx context.Context, implementerID string, orgID string) (*v2.ImplementerOrgRelation, error) {
+func (or *ImplementerOrgRepository) FindRelation(ctx context.Context, implementerID string, orgID string) (*model.ImplementerOrgRelation, error) {
 	sb := sqlFlavor.NewSelectBuilder()
 	sb.Select("id", "implementer_id", "organization_id", "created_at", "updated_at", "deleted_at", "status", "COALESCE(ssas_system_id, '')")
 	sb.From("implementer_org_relations")
 	sb.Where(sb.Equal("implementer_id", implementerID), sb.Equal("organization_id", orgID), sb.IsNull("deleted_at"))
 	q, args := sb.Build()
 
-	ior := new(v2.ImplementerOrgRelation)
-	iorStruct := sqlbuilder.NewStruct(new(v2.ImplementerOrgRelation)).For(sqlFlavor)
+	ior := new(model.ImplementerOrgRelation)
+	iorStruct := sqlbuilder.NewStruct(new(model.ImplementerOrgRelation)).For(sqlFlavor)
 	if err := or.db.QueryRowContext(ctx, q, args...).Scan(iorStruct.Addr(&ior)...); err != nil {
 		if err.Error() == "sql: no rows in result set" {
 			return nil, nil
@@ -47,7 +47,7 @@ func (or *ImplementerOrgRepository) FindRelation(ctx context.Context, implemente
 }
 
 // FindManagedOrgs function that searches the database for the orgs managed by an implementer
-func (or *ImplementerOrgRepository) FindManagedOrgs(ctx context.Context, implementerID string) ([]v2.ImplementerOrgRelation, error) {
+func (or *ImplementerOrgRepository) FindManagedOrgs(ctx context.Context, implementerID string) ([]model.ImplementerOrgRelation, error) {
 	sb := sqlFlavor.NewSelectBuilder()
 	sb.Select("id", "implementer_id", "organization_id", "created_at", "updated_at", "deleted_at", "status", "COALESCE(ssas_system_id, '')")
 	sb.From("implementer_org_relations")
@@ -60,10 +60,10 @@ func (or *ImplementerOrgRepository) FindManagedOrgs(ctx context.Context, impleme
 	}
 
 	defer rows.Close()
-	result := make([]v2.ImplementerOrgRelation, 0)
+	result := make([]model.ImplementerOrgRelation, 0)
 	for rows.Next() {
-		ior := new(v2.ImplementerOrgRelation)
-		iorStruct := sqlbuilder.NewStruct(new(v2.ImplementerOrgRelation)).For(sqlFlavor)
+		ior := new(model.ImplementerOrgRelation)
+		iorStruct := sqlbuilder.NewStruct(new(model.ImplementerOrgRelation)).For(sqlFlavor)
 		err = rows.Scan(iorStruct.Addr(&ior)...)
 		if err != nil {
 			return nil, err
@@ -74,8 +74,8 @@ func (or *ImplementerOrgRepository) FindManagedOrgs(ctx context.Context, impleme
 }
 
 // Insert function that saves the ImplementerOrgRelation model into the database and returns the v2.ImplementerOrgRelation
-func (or *ImplementerOrgRepository) Insert(ctx context.Context, implID string, orgID string, status v2.ImplOrgStatus) (*v2.ImplementerOrgRelation, error) {
-	implOrg := v2.ImplementerOrgRelation{
+func (or *ImplementerOrgRepository) Insert(ctx context.Context, implID string, orgID string, status model.ImplOrgStatus) (*model.ImplementerOrgRelation, error) {
+	implOrg := model.ImplementerOrgRelation{
 		ImplementerID:  implID,
 		OrganizationID: orgID,
 		Status:         status,
@@ -89,8 +89,8 @@ func (or *ImplementerOrgRepository) Insert(ctx context.Context, implID string, o
 
 	q, args := ib.Build()
 
-	ior := new(v2.ImplementerOrgRelation)
-	iorStruct := sqlbuilder.NewStruct(new(v2.ImplementerOrgRelation)).For(sqlFlavor)
+	ior := new(model.ImplementerOrgRelation)
+	iorStruct := sqlbuilder.NewStruct(new(model.ImplementerOrgRelation)).For(sqlFlavor)
 	if err := or.db.QueryRowContext(ctx, q, args...).Scan(iorStruct.Addr(&ior)...); err != nil {
 		return nil, err
 	}
@@ -99,7 +99,7 @@ func (or *ImplementerOrgRepository) Insert(ctx context.Context, implID string, o
 }
 
 // Update function that updates the ImplementerOrgRelation model and returns the v2.ImplementerOrgRelation
-func (or *ImplementerOrgRepository) Update(ctx context.Context, implID string, orgID string, sysID string) (*v2.ImplementerOrgRelation, error) {
+func (or *ImplementerOrgRepository) Update(ctx context.Context, implID string, orgID string, sysID string) (*model.ImplementerOrgRelation, error) {
 	ub := sqlFlavor.NewUpdateBuilder()
 	ub.Update("implementer_org_relations")
 	ub.Set(
@@ -110,8 +110,8 @@ func (or *ImplementerOrgRepository) Update(ctx context.Context, implID string, o
 	ub.SQL("returning id, implementer_id, organization_id, created_at, updated_at, deleted_at, status, COALESCE(ssas_system_id, '')")
 	q, args := ub.Build()
 
-	relation := new(v2.ImplementerOrgRelation)
-	iorStruct := sqlbuilder.NewStruct(new(v2.ImplementerOrgRelation)).For(sqlFlavor)
+	relation := new(model.ImplementerOrgRelation)
+	iorStruct := sqlbuilder.NewStruct(new(model.ImplementerOrgRelation)).For(sqlFlavor)
 	if err := or.db.QueryRowContext(ctx, q, args...).Scan(iorStruct.Addr(&relation)...); err != nil {
 		return nil, err
 	}

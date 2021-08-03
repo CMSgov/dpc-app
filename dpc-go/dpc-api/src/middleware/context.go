@@ -63,6 +63,24 @@ func FileNameCtx(next http.Handler) http.Handler {
 	})
 }
 
+// ImplementorIDCtx middleware to extract the implementor id from the chi url param and set it into the request context
+func ImplementorIDCtx(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		id := chi.URLParam(r, "implID")
+		ctx := context.WithValue(r.Context(), ContextKeyImplementor, id)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+// OrganizationIDCtx middleware to extract the organization id from the chi url param and set it into the request context
+func OrganizationIDCtx(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		id := chi.URLParam(r, "orgID")
+		ctx := context.WithValue(r.Context(), ContextKeyOrganization, id)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
 // RequestIPCtx middleware to extract the requesting IP address from the incoming request and set it into the request context
 func RequestIPCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -82,7 +100,7 @@ func RequestURLCtx(next http.Handler) http.Handler {
 		if r.TLS != nil {
 			scheme = "https"
 		}
-		ctx := context.WithValue(r.Context(), ContextKeyRequestURL, fmt.Sprintf("%s://%s%s %s\" ", scheme, r.Host, r.RequestURI, r.Proto))
+		ctx := context.WithValue(r.Context(), ContextKeyRequestURL, fmt.Sprintf("%s://%s%s", scheme, r.Host, r.RequestURI))
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
@@ -161,6 +179,24 @@ func JobCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		jobID := chi.URLParam(r, "jobID")
 		ctx := context.WithValue(r.Context(), ContextKeyJobID, jobID)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+// TokenCtx middleware to extract the tokenID from the chi url param and set it into the request context
+func TokenCtx(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		tokenID := chi.URLParam(r, "tokenID")
+		ctx := context.WithValue(r.Context(), ContextKeyTokenID, tokenID)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+// PublicKeyCtx middleware to extract the keyID from the chi url param and set it into the request context
+func PublicKeyCtx(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		keyID := chi.URLParam(r, "keyID")
+		ctx := context.WithValue(r.Context(), ContextKeyKeyID, keyID)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

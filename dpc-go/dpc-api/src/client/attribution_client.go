@@ -63,8 +63,7 @@ type Client interface {
 	Post(ctx context.Context, resourceType ResourceType, body []byte) ([]byte, error)
 	Delete(ctx context.Context, resourceType ResourceType, id string) error
 	Put(ctx context.Context, resourceType ResourceType, id string, body []byte) ([]byte, error)
-	Export(ctx context.Context, resourceType ResourceType, id string) ([]byte, error)
-	UpdateImplOrg(ctx context.Context, implID string, orgID string, rel ImplementerOrg) (ImplementerOrg, error)
+	UpdateImplementerOrg(ctx context.Context, implID string, orgID string, rel ImplementerOrg) (ImplementerOrg, error)
 	GetProviderOrgs(ctx context.Context, implID string) ([]ProviderOrg, error)
 	CreateImplOrg(ctx context.Context, body []byte) (ImplementerOrg, error)
 	GetImplOrg(ctx context.Context) ([]byte, error)
@@ -266,78 +265,6 @@ func (ac *AttributionClient) doGet(ctx context.Context, url string) ([]byte, err
 	return body, nil
 }
 
-// Export A function to enable starting a data export job via GET
-func (ac *AttributionClient) Export(ctx context.Context, resourceType ResourceType, id string) ([]byte, error) {
-	log := logger.WithContext(ctx)
-	ac.httpClient.Logger = newLogger(*log)
-
-	url := generateURL(ctx, ac.config.URL, resourceType, id)
-	req, err := retryablehttp.NewRequest(http.MethodGet, url, nil)
-	if err != nil {
-		log.Error("Failed to create request", zap.Error(err))
-		return nil, errors.Errorf("Failed to export data for %s", resourceType)
-	}
-
-	req = setExportRequestHeaders(ctx, req)
-
-	resp, err := ac.httpClient.Do(req)
-	if err != nil {
-		log.Error("Failed to send request", zap.Error(err))
-		return nil, errors.Errorf("Failed to start job for %s/%s", resourceType, id)
-	}
-
-	defer func() {
-		err := resp.Body.Close()
-		if err != nil {
-			log.Error("Failed to close response body", zap.Error(err))
-		}
-	}()
-
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Error("Failed to read the response body", zap.Error(err))
-		return nil, errors.Errorf("Failed to start job for %s/%s", resourceType, id)
-	}
-	errMsg := checkForErrorMsg(body)
-	if errMsg != "" {
-		return nil, errors.Errorf(errMsg)
-	}
-	if resp.StatusCode < 200 || resp.StatusCode > 299 {
-		return nil, errors.Errorf("Failed to start job for %s/%s", resourceType, id)
-	}
-	return body, nil
-}
-
-func checkForErrorMsg(body []byte) string {
-	var br struct {
-		Message string `json:"message"`
-	}
-	_ = json.Unmarshal(body, &br)
-	return br.Message
-}
-
-func setExportRequestHeaders(ctx context.Context, req *retryablehttp.Request) *retryablehttp.Request {
-	req.Header.Add(middleware.RequestIDHeader, ctx.Value(middleware.RequestIDKey).(string))
-	if ctx.Value(middleware2.ContextKeyRequestingIP) != nil {
-		req.Header.Add(middleware2.FwdHeader, ctx.Value(middleware2.ContextKeyRequestingIP).(string))
-	}
-	if ctx.Value(middleware2.ContextKeyOrganization) != nil {
-		req.Header.Add(middleware2.OrgHeader, ctx.Value(middleware2.ContextKeyOrganization).(string))
-	}
-	if ctx.Value(middleware2.ContextKeyRequestURL) != nil {
-		req.Header.Add(middleware2.RequestURLHeader, ctx.Value(middleware2.ContextKeyRequestURL).(string))
-	}
-	return req
-}
-
-func generateURL(ctx context.Context, baseURL string, resource ResourceType, id string) string {
-	params := fmt.Sprintf("?_type=%s", ctx.Value(middleware2.ContextKeyResourceTypes))
-	if ctx.Value(middleware2.ContextKeySince) != "" {
-		params = fmt.Sprintf("%s&_since=%s", params, ctx.Value(middleware2.ContextKeySince))
-	}
-	return fmt.Sprintf("%s/%s/%s/$export%s", baseURL, resource, id, params)
-}
-
 // Post A function to enable communication with attribution service via Post
 func (ac *AttributionClient) Post(ctx context.Context, resourceType ResourceType, body []byte) ([]byte, error) {
 	log := logger.WithContext(ctx)
@@ -424,8 +351,8 @@ func (ac *AttributionClient) Put(ctx context.Context, resourceType ResourceType,
 	return ac.doPut(ctx, url, body)
 }
 
-// UpdateImplOrg function to update a specific implementer/org relation
-func (ac *AttributionClient) UpdateImplOrg(ctx context.Context, implID string, orgID string, rel ImplementerOrg) (ImplementerOrg, error) {
+// UpdateImplementerOrg function to update a specific implementer/org relation
+func (ac *AttributionClient) UpdateImplementerOrg(ctx context.Context, implID string, orgID string, rel ImplementerOrg) (ImplementerOrg, error) {
 	log := logger.WithContext(ctx)
 	reqBytes := new(bytes.Buffer)
 	if err := json.NewEncoder(reqBytes).Encode(rel); err != nil {

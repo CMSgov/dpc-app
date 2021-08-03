@@ -1,11 +1,11 @@
-package v2
+package service
 
 import (
 	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/CMSgov/dpc/attribution/middleware"
-	v2 "github.com/CMSgov/dpc/attribution/model/v2"
+	"github.com/CMSgov/dpc/attribution/model"
 	"github.com/bxcodec/faker/v3"
 	"github.com/kinbiko/jsonassert"
 	"github.com/pkg/errors"
@@ -23,35 +23,35 @@ type MockImplementerOrgRepo struct {
 	mock.Mock
 }
 
-func (m *MockImplementerOrgRepo) Insert(ctx context.Context, implId string, orgId string, status v2.ImplOrgStatus) (*v2.ImplementerOrgRelation, error) {
+func (m *MockImplementerOrgRepo) Insert(ctx context.Context, implId string, orgId string, status model.ImplOrgStatus) (*model.ImplementerOrgRelation, error) {
 	args := m.Called(ctx, implId, orgId, status)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).(*v2.ImplementerOrgRelation), args.Error(1)
+	return args.Get(0).(*model.ImplementerOrgRelation), args.Error(1)
 }
-func (m *MockImplementerOrgRepo) FindRelation(ctx context.Context, implId string, orgId string) (*v2.ImplementerOrgRelation, error) {
+func (m *MockImplementerOrgRepo) FindRelation(ctx context.Context, implId string, orgId string) (*model.ImplementerOrgRelation, error) {
 	args := m.Called(ctx, implId, orgId)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).(*v2.ImplementerOrgRelation), args.Error(1)
+	return args.Get(0).(*model.ImplementerOrgRelation), args.Error(1)
 }
 
-func (m *MockImplementerOrgRepo) FindManagedOrgs(ctx context.Context, implId string) ([]v2.ImplementerOrgRelation, error) {
+func (m *MockImplementerOrgRepo) FindManagedOrgs(ctx context.Context, implId string) ([]model.ImplementerOrgRelation, error) {
 	args := m.Called(ctx, implId)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).([]v2.ImplementerOrgRelation), args.Error(1)
+	return args.Get(0).([]model.ImplementerOrgRelation), args.Error(1)
 }
 
-func (m *MockImplementerOrgRepo) Update(ctx context.Context, implId string, orgId string, sysId string) (*v2.ImplementerOrgRelation, error) {
+func (m *MockImplementerOrgRepo) Update(ctx context.Context, implId string, orgId string, sysId string) (*model.ImplementerOrgRelation, error) {
 	args := m.Called(ctx, implId, orgId, sysId)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).(*v2.ImplementerOrgRelation), args.Error(1)
+	return args.Get(0).(*model.ImplementerOrgRelation), args.Error(1)
 }
 
 type ImplementerOrgServiceTestSuite struct {
@@ -75,15 +75,15 @@ func (suite *ImplementerOrgServiceTestSuite) SetupTest() {
 
 func (suite *ImplementerOrgServiceTestSuite) TestPost() {
 
-	implOrg := v2.ImplementerOrgRelation{}
+	implOrg := model.ImplementerOrgRelation{}
 	err := faker.FakeData(&implOrg)
 	if err != nil {
 		fmt.Printf("ERR %v\n", err)
 	}
-	implOrg.Status = v2.Active
+	implOrg.Status = model.Active
 	suite.implOrgRepo.On("Insert", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(&implOrg, nil)
 
-	impl := v2.Implementer{}
+	impl := model.Implementer{}
 	err = faker.FakeData(&impl)
 	if err != nil {
 		fmt.Printf("ERR %v\n", err)
@@ -92,14 +92,14 @@ func (suite *ImplementerOrgServiceTestSuite) TestPost() {
 
 	suite.orgRepo.On("FindByNPI", mock.Anything, mock.Anything).Return(nil, nil)
 
-	org := v2.Organization{}
+	org := model.Organization{}
 	err = faker.FakeData(&org)
 	if err != nil {
 		fmt.Printf("ERR %v\n", err)
 	}
 	suite.orgRepo.On("Insert", mock.Anything, mock.Anything).Return(&org, nil)
 
-	rel := v2.ImplementerOrgRelation{}
+	rel := model.ImplementerOrgRelation{}
 	err = faker.FakeData(&rel)
 	if err != nil {
 		fmt.Printf("ERR %v\n", err)
@@ -115,27 +115,54 @@ func (suite *ImplementerOrgServiceTestSuite) TestPost() {
 	suite.service.Post(w, req)
 	res := w.Result()
 
+	b, _ := ioutil.ReadAll(res.Body)
+
+	var response map[string]string
+	_ = json.Unmarshal(b, &response)
+
 	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
+	assert.Equal(suite.T(), "Active", response["status"])
+	assert.NotNil(suite.T(), response["org_id"])
+
+	req = httptest.NewRequest("POST", "http://example.com/foo", strings.NewReader("{\"npi\":\"00001\"}"))
+	ctx = req.Context()
+	ctx = context.WithValue(ctx, middleware.ContextKeyImplementer, implOrg.ImplementerID)
+	req = req.WithContext(ctx)
+	ctx = context.WithValue(ctx, middleware.ContextKeyOrganization, response["org_id"])
+	req = req.WithContext(ctx)
+	w = httptest.NewRecorder()
+
+	rel.Status = model.Active
+	suite.implOrgRepo.On("Update", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(&rel, nil)
+
+	suite.service.Put(w, req)
+
+	res = w.Result()
+	b, _ = ioutil.ReadAll(res.Body)
+	_ = json.Unmarshal(b, &response)
+
+	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
+	assert.Equal(suite.T(), "Active", response["status"])
 }
 
 func (suite *ImplementerOrgServiceTestSuite) TestGetOrgs() {
 
-	implOrg := v2.ImplementerOrgRelation{}
+	implOrg := model.ImplementerOrgRelation{}
 	_ = faker.FakeData(&implOrg)
-	implOrg.Status = v2.Active
+	implOrg.Status = model.Active
 
-	implOrg2 := v2.ImplementerOrgRelation{}
+	implOrg2 := model.ImplementerOrgRelation{}
 	_ = faker.FakeData(&implOrg)
-	implOrg.Status = v2.Active
+	implOrg.Status = model.Active
 
-	relations := []v2.ImplementerOrgRelation{implOrg, implOrg2}
+	relations := []model.ImplementerOrgRelation{implOrg, implOrg2}
 	suite.implOrgRepo.On("FindManagedOrgs", mock.Anything, mock.Anything).Return(relations, nil)
 
-	impl := v2.Implementer{}
+	impl := model.Implementer{}
 	_ = faker.FakeData(&impl)
 	suite.implRepo.On("FindByID", mock.Anything, mock.Anything).Return(&impl, nil)
 
-	org1 := v2.Organization{}
+	org1 := model.Organization{}
 	inf1 := `{
 	"resourceType": "Organization",
           "identifier": [
@@ -145,7 +172,7 @@ func (suite *ImplementerOrgServiceTestSuite) TestGetOrgs() {
                }
           ],
           "name": "Some org name"}`
-	var org1Info v2.Info
+	var org1Info model.Info
 	err := json.Unmarshal([]byte(inf1), &org1Info)
 	assert.NoError(suite.T(), err)
 	org1.Info = org1Info
@@ -172,29 +199,29 @@ func (suite *ImplementerOrgServiceTestSuite) TestGetOrgs() {
 func (suite *ImplementerOrgServiceTestSuite) TestSaveRepoError() {
 	ja := jsonassert.New(suite.T())
 
-	implOrg := v2.ImplementerOrgRelation{}
+	implOrg := model.ImplementerOrgRelation{}
 	err := faker.FakeData(&implOrg)
 	if err != nil {
 		fmt.Printf("ERR %v\n", err)
 	}
-	implOrg.Status = v2.Active
+	implOrg.Status = model.Active
 	suite.implOrgRepo.On("Insert", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.New("error"))
 
-	impl := v2.Implementer{}
+	impl := model.Implementer{}
 	err = faker.FakeData(&impl)
 	if err != nil {
 		fmt.Printf("ERR %v\n", err)
 	}
 	suite.implRepo.On("FindByID", mock.Anything, mock.Anything).Return(&impl, nil)
 
-	org := v2.Organization{}
+	org := model.Organization{}
 	err = faker.FakeData(&org)
 	if err != nil {
 		fmt.Printf("ERR %v\n", err)
 	}
 	suite.orgRepo.On("FindByNPI", mock.Anything, mock.Anything).Return(&org, nil)
 
-	rel := v2.ImplementerOrgRelation{}
+	rel := model.ImplementerOrgRelation{}
 	err = faker.FakeData(&rel)
 	if err != nil {
 		fmt.Printf("ERR %v\n", err)

@@ -6,15 +6,20 @@ import (
 	"crypto/x509"
 	"database/sql"
 	"fmt"
+	"github.com/CMSgov/dpc/attribution/client"
+	"github.com/CMSgov/dpc/attribution/service"
+	"net/http"
+
+	"go.uber.org/zap"
 	"github.com/CMSgov/dpc/attribution/conf"
 	"github.com/CMSgov/dpc/attribution/logger"
+	v1Repo "github.com/CMSgov/dpc/attribution/repository/v1"
+
 	"github.com/CMSgov/dpc/attribution/repository"
 	"github.com/CMSgov/dpc/attribution/router"
 	"github.com/CMSgov/dpc/attribution/service"
 	v1 "github.com/CMSgov/dpc/attribution/service/v1"
 	v2 "github.com/CMSgov/dpc/attribution/service/v2"
-	"go.uber.org/zap"
-	"net/http"
 	"strings"
 )
 
@@ -34,31 +39,32 @@ func main() {
 	}()
 
 	or := repository.NewOrganizationRepo(db)
-	os := v2.NewOrganizationService(or)
+	os := service.NewOrganizationService(or)
 
 	// Create V1 services
-	attrDbV1 := repository.GetAttributionV1DbConnection()
-	queueDbV1 := repository.GetQueueDbConnection()
+	queueDbV1 := v1Repo.GetQueueDbConnection()
 	defer func() {
-		if err := attrDbV1.Close(); err != nil {
-			logger.WithContext(ctx).Fatal("Failed to close attribution v1 db connection", zap.Error(err))
-		}
 		if err := queueDbV1.Close(); err != nil {
 			logger.WithContext(ctx).Fatal("Failed to close queue v1 db connection", zap.Error(err))
 		}
 	}()
-	js, ds := createV1Services(attrDbV1, queueDbV1)
+
+	bfdClient, err := client.NewBfdClient(client.NewConfig("/v2/fhir/"))
+	if err != nil {
+		logger.WithContext(ctx).Fatal("Failed to create BFD client", zap.Error(err))
+	}
 
 	gr := repository.NewGroupRepo(db)
-	gs := v2.NewGroupService(gr, js)
+	js, ds := createJobServices(queueDbV1, or, bfdClient)
+	gs := service.NewGroupService(gr, js)
 
 	ir := repository.NewImplementerRepo(db)
-	is := v2.NewImplementerService(ir)
+	is := service.NewImplementerService(ir)
 
 	ior := repository.NewImplementerOrgRepo(db)
 	autoCreateOrg := conf.GetAsString("autoCreateOrg", "false")
 
-	ios := v2.NewImplementerOrgService(ir, or, ior, autoCreateOrg == "true")
+	ios := service.NewImplementerOrgService(ir, or, ior, autoCreateOrg == "true")
 
 	attributionRouter := router.NewDPCAttributionRouter(os, gs, is, ios, ds, js)
 	port := conf.GetAsString("port", "3001")
@@ -113,10 +119,9 @@ func startSecureServer(ctx context.Context, port string, handler http.Handler) {
 	}
 }
 
-func createV1Services(attrDbV1 *sql.DB, queueDbV1 *sql.DB) (service.JobService, service.DataService) {
-	pr := repository.NewPatientRepo(attrDbV1)
-	jr := repository.NewJobRepo(queueDbV1)
-	return v1.NewJobService(pr, jr), v1.NewDataService(jr)
+func createJobServices(queueDbV1 *sql.DB, or repository.OrganizationRepo, client client.APIClient) (v1.JobService, v1.DataService) {
+	jr := v1Repo.NewJobRepo(queueDbV1)
+	return v1.NewJobService(jr, or, client), v1.NewDataService(jr)
 }
 
 func getClientValidator(helloInfo *tls.ClientHelloInfo, cerPool *x509.CertPool) func([][]byte, [][]*x509.Certificate) error {
