@@ -41,9 +41,11 @@ RSpec.feature 'adding provider organization' do
   end
 
   describe 'successful API request' do
-    scenario 'adding provider org' do
+    before(:each) do
       stub_api_client(message: :create_implementer, success: true, response: default_imp_creation_response)
+    end
 
+    scenario 'adding provider org' do
       user = create(:user)
 
       sign_in user
@@ -78,37 +80,37 @@ RSpec.feature 'adding provider organization' do
       expect(page.body).to have_content("Provider Organization added.")
     end
 
-    # scenario 'view provider org page' do
-    #   stub_api_client(message: :create_implementer, success: true, response: default_imp_creation_response)
+    scenario 'view list of provider orgs and provider org page' do
+      user = create(:user)
 
-    #   user = create(:user)
+      sign_in user
 
-    #   sign_in user
+      api_client = instance_double(ApiClient)
+      allow(ApiClient).to receive(:new).and_return(api_client)
+      allow(api_client).to receive(:get_provider_orgs)
+        .with(user.implementer_id)
+        .and_return(api_client)
+      allow(api_client).to receive(:response_successful?).and_return(true)
+      allow(api_client).to receive(:response_body).and_return(default_provider_orgs_list)
 
-    #   api_client = instance_double(ApiClient)
-    #   allow(ApiClient).to receive(:new).and_return(api_client)
-    #   allow(api_client).to receive(:get_provider_orgs)
-    #     .with(user.implementer_id)
-    #     .and_return(api_client)
-    #   allow(api_client).to receive(:response_successful?).and_return(true)
-    #   allow(api_client).to receive(:response_body).and_return(default_provider_orgs_list)
+      visit root_path
 
-    #   visit root_path
+      first_org = default_provider_orgs_list.first
+      second_org = default_provider_orgs_list.second
+      third_org = default_provider_orgs_list.third
 
-    #   uuid = first('.provider-link').text().scan(/(?<=ID: )([\w-]+)/).first.first
-    #   binding.pry
-    #   allow(api_client).to receive(:get_organization)
-    #     .with(uuid)
-    #     .and_return(api_client)
-    #   allow(api_client).to receive(:response_successful?).and_return(true)
-    #   allow(api_client).to receive(:response_body).and_return(default_single_provider_org)
+      expect(page.body).to have_content(first_org[:org_name])
+      expect(page.body).to have_content(second_org[:org_name])
+      expect(page.body).to have_content(third_org[:org_name])
 
-    #   first('.provider-link').click
-    # end
+      # stub = stub_api_client(message: :get_organization, success: true, response: default_get_provider_org_response)
+
+      # find("[data-test=\"porg_#{first_org[:npi]}\"]").click
+    end
   end
 
   describe 'could not connect to API' do
-    scenario 'unable to add new provider org' do
+    scenario 'unable to add new or view existing provider org' do
       stub_api_client(message: :create_implementer, success: true, response: default_imp_creation_response)
 
       user = create(:user)

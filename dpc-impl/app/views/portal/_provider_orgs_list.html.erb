@@ -25,7 +25,7 @@
     </div>
 
     <ul id="searchList">
-      <% @user.provider_orgs.each do |provider| %>
+      <% @user.provider_orgs.each_with_index do |provider| %>
         <li>
           <%= link_to provider_orgs_path(org_id: provider[:org_id]), class: "provider-link", data: {test: "porg_#{provider[:npi]}"} do  %>
             <div class="provider_card_container">
