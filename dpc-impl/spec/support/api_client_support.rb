@@ -29,14 +29,14 @@ module ApiClientSupport
   end
 
   def default_get_provider_org_response
-    {:id=>"58bb33bd-8c5a-4ff9-8113-0a8996b9c11e",
-     :identifier=>[{:system=>"http://hl7.org/fhir/sid/us-npi", :value=>"3103929527"}],
-     :meta=>
-      {:id=>"Organization/58bb33bd-8c5a-4ff9-8113-0a8996b9c11e",
-       :lastUpdated=>"2021-08-02T19:01:28.878+00:00",
-       :versionId=>"0"},
-     :name=>"Purple Elephant Healthcare",
-     :resourceType=>"Organization"}
+    {'id' =>'58bb33bd-8c5a-4ff9-8113-0a8996b9c11e',
+     'identifier' => [{'system' => 'http://hl7.org/fhir/sid/us-npi', 'value' => '3103929527'}],
+     'meta' =>
+      {'id' => 'Organization/58bb33bd-8c5a-4ff9-8113-0a8996b9c11e',
+       'lastUpdated' => '2021-08-02T19:01:28.878+00:00',
+       'versionId' => '0'},
+     'name' => 'Purple Elephant Healthcare',
+     'resourceType' =>'Organization'}
   end
 
   def default_provider_orgs_list
@@ -57,24 +57,5 @@ module ApiClientSupport
        "npi": "3718986623",
        "ssas_system_id": ""}
     ]
-  end
-
-  def default_single_provider_org
-    {
-      "id": "6c9a5685-7cbe-42f1-9668-f139e67654ea",
-      "version": 0,
-      "created_at": "2021-07-26T15:02:07.737969Z",
-      "updated_at": "2021-07-26T15:02:07.737969Z",
-      "info": {
-          "identifier": [
-              {
-                  "system": "http://hl7.org/fhir/sid/us-npi",
-                  "value": "3718986623"
-              }
-          ],
-          "name": "Gregarious Capitol Healthcare",
-          "resourceType": "Organization"
-      }
-    }
   end
 end

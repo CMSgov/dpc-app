@@ -80,7 +80,7 @@ RSpec.feature 'adding provider organization' do
       expect(page.body).to have_content("Provider Organization added.")
     end
 
-    scenario 'view list of provider orgs and provider org page' do
+    scenario 'view list of provider orgs' do
       user = create(:user)
 
       sign_in user
@@ -102,10 +102,6 @@ RSpec.feature 'adding provider organization' do
       expect(page.body).to have_content(first_org[:org_name])
       expect(page.body).to have_content(second_org[:org_name])
       expect(page.body).to have_content(third_org[:org_name])
-
-      # stub = stub_api_client(message: :get_organization, success: true, response: default_get_provider_org_response)
-
-      # find("[data-test=\"porg_#{first_org[:npi]}\"]").click
     end
   end
 
