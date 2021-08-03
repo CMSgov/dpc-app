@@ -2,6 +2,7 @@ package model
 
 import (
 	"fmt"
+	"strings"
 	"time"
 )
 
@@ -36,23 +37,23 @@ type BatchFile struct {
 
 // FormOutputFileName is a helper function to construct the file name
 func (f *BatchFile) FormOutputFileName() string {
-	return fmt.Sprintf("%s-%d.%s", f.BatchID, f.Sequence, f.ResourceType)
+	return fmt.Sprintf("%s-%d.%s", f.BatchID, f.Sequence, strings.ToLower(f.ResourceType))
 }
 
 // Output is a struct for holding job data for the job status
 type Output struct {
-	Type      string                 `json:"type"`
-	URL       string                 `json:"url"`
-	Count     int                    `json:"count,omitempty"`
-	Extension map[string]interface{} `json:"extension,omitempty"`
+	Type      string                   `json:"type"`
+	URL       string                   `json:"url"`
+	Count     int                      `json:"count,omitempty"`
+	Extension []map[string]interface{} `json:"extension,omitempty"`
 }
 
 // Status is a struct for job status
 type Status struct {
-	TransactionTime     time.Time              `json:"transactionTime"`
-	Request             string                 `json:"request"`
-	RequiresAccessToken bool                   `json:"requiresAccessToken"`
-	Output              []Output               `json:"output"`
-	Error               []Output               `json:"error"`
-	Extension           map[string]interface{} `json:"extension"`
+	TransactionTime     time.Time                `json:"transactionTime"`
+	Request             string                   `json:"request"`
+	RequiresAccessToken bool                     `json:"requiresAccessToken"`
+	Output              []Output                 `json:"output"`
+	Error               []Output                 `json:"error"`
+	Extension           []map[string]interface{} `json:"extension"`
 }

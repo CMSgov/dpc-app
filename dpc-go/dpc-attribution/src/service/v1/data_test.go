@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/CMSgov/dpc/attribution/middleware"
 	v1 "github.com/CMSgov/dpc/attribution/model/v1"
-	"github.com/CMSgov/dpc/attribution/service"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
@@ -16,7 +15,7 @@ import (
 type DataServiceTestSuite struct {
 	suite.Suite
 	jobRepo *MockJobRepo
-	service service.DataService
+	service DataService
 }
 
 func TestDataServiceTestSuite(t *testing.T) {

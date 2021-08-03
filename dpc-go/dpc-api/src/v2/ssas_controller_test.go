@@ -405,7 +405,7 @@ func (suite *SsasControllerTestSuite) SetupHappyPathMocks() (*http.Request, cont
 	ssasKeyResp["id"] = "public-key001"
 
 	suite.msc.On("CreateSystem", mock.Anything, mock.Anything).Return(ssasResp, nil)
-	suite.mac.On("UpdateImplOrg", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(client.ImplementerOrg{}, nil)
+	suite.mac.On("UpdateImplementerOrg", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(client.ImplementerOrg{}, nil)
 	suite.msc.On("GetSystem", mock.Anything, mock.Anything).Return(ssasGetResp, nil)
 	suite.msc.On("CreateToken", mock.Anything, mock.Anything, mock.Anything).Return("token", nil)
 	suite.msc.On("DeleteToken", mock.Anything, mock.Anything, mock.Anything).Return(nil)

@@ -4,6 +4,9 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"github.com/CMSgov/dpc/attribution/conf"
+	"github.com/CMSgov/dpc/attribution/repository"
+	"io/ioutil"
 	"net/http"
 	"strings"
 	"time"
@@ -12,176 +15,110 @@ import (
 	"github.com/CMSgov/dpc/attribution/middleware"
 	"github.com/google/uuid"
 
-	"github.com/CMSgov/dpc/attribution/conf"
 	"github.com/CMSgov/dpc/attribution/model/v1"
-	"github.com/CMSgov/dpc/attribution/service"
 	"github.com/CMSgov/dpc/attribution/util"
 	"github.com/darahayes/go-boom"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
 	"github.com/CMSgov/dpc/attribution/logger"
-	"github.com/CMSgov/dpc/attribution/repository"
+	v1Repo "github.com/CMSgov/dpc/attribution/repository/v1"
 )
+
+// JobService is an interface that defines what a JobService does
+type JobService interface {
+	Export(w http.ResponseWriter, r *http.Request)
+	BatchesAndFiles(w http.ResponseWriter, r *http.Request)
+}
 
 // JobServiceV1 is a struct that defines what the service has
 type JobServiceV1 struct {
-	pr repository.PatientRepo
-	jr repository.JobRepo
-}
-
-// ExportInfo is a struct containing details needed to export data
-type ExportInfo struct {
-	OrgID   string
-	GroupID string
-	Types   string
-	IP      string
-	URL     string
-	Since   *sql.NullTime
+	jr        v1Repo.JobRepo
+	or        repository.OrganizationRepo
+	bfdClient client.APIClient
 }
 
 // NewJobService function that creates and returns a JobService
-func NewJobService(pr repository.PatientRepo, jr repository.JobRepo) service.JobService {
+func NewJobService(jr v1Repo.JobRepo, or repository.OrganizationRepo, bfdClient client.APIClient) JobService {
 	return &JobServiceV1{
-		pr,
 		jr,
+		or,
+		bfdClient,
 	}
 }
 
 // Export function that starts an export job for a given Group ID using v1 db
 func (js *JobServiceV1) Export(w http.ResponseWriter, r *http.Request) {
 	log := logger.WithContext(r.Context())
-	ei := buildExportInfo(w, r)
-	if ei == nil {
-		return
-	}
-	groupNPIs, err := js.pr.GetGroupNPIs(r.Context(), ei.GroupID)
-	if err != nil || groupNPIs.OrgNPI == "" || groupNPIs.ProviderNPI == "" {
-		if err == nil {
-			err = errors.New("Failed to retrieve NPIs for Group")
-		}
-		log.Error("Failed to retrieve NPIs for Group", zap.Error(err))
-		boom.BadData(w, err.Error())
-		return
-	}
-	patientMBIs, err := js.pr.FindMBIsByGroupID(ei.GroupID)
+	orgID := util.FetchValueFromContext(r.Context(), w, middleware.ContextKeyOrganization)
+	org, err := js.or.FindByID(r.Context(), orgID)
 	if err != nil {
-		log.Error("Failed to retrieve patients", zap.Error(err))
-		boom.BadData(w, err.Error())
+		log.Error("Failed to get org", zap.Error(err))
+		boom.Internal(w, err.Error())
 		return
 	}
-	if len(patientMBIs) == 0 {
-		log.Error("No patients to process")
-		boom.BadData(w, "No patients to process")
-		return
-	}
-	batches, err := buildBatches(ei, groupNPIs, patientMBIs)
+
+	npi, err := org.GetNPI()
 	if err != nil {
-		log.Error("Failed to build batches", zap.Error(err))
-		boom.Internal(w, "Failed to start job.")
+		log.Error("Failed to get NPI", zap.Error(err))
+		boom.Internal(w, err.Error())
 		return
 	}
-	job, err := js.jr.Insert(r.Context(), ei.OrgID, batches)
+
+	var er v1.ExportRequest
+	b, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		log.Error("Failed to read request", zap.Error(err))
+		boom.Internal(w, err.Error())
+		return
+	}
+
+	if err := json.Unmarshal(b, &er); err != nil {
+		log.Error("Failed to parse request", zap.Error(err))
+		boom.Internal(w, err.Error())
+		return
+	}
+
+	url := r.Header.Get(middleware.RequestURLHeader)
+	ip := r.Header.Get(middleware.FwdHeader)
+	batches, err := js.buildV1Batches(er, npi, url, ip)
+	if err != nil {
+		log.Error("Failed to build v1 batches", zap.Error(err))
+		boom.Internal(w, err.Error())
+		return
+	}
+	job, err := js.jr.Insert(r.Context(), orgID, batches)
 	if err != nil {
 		log.Error("Failed to create job", zap.Error(err))
 		boom.BadData(w, err.Error())
 		return
 	}
+
+	log.Info(fmt.Sprintf(
+		"dpcMetric=jobCreated,jobId=%s,orgId=%s,groupId=%s,totalPatients=%x,resourcesRequested=%s",
+		*job,
+		orgID,
+		er.GroupID,
+		len(er.MBIs),
+		strings.ReplaceAll(er.Type, ",", ";")),
+	)
+
 	if _, err := w.Write([]byte(*job)); err != nil {
 		log.Error("Failed to write job ID to response", zap.Error(err))
 		boom.Internal(w, err.Error())
 		return
 	}
-	log.Info(fmt.Sprintf(
-		"dpcMetric=jobCreated,jobId=%s,orgId=%s,groupId=%s,totalPatients=%x,resourcesRequested=%s",
-		*job,
-		ei.OrgID,
-		ei.GroupID,
-		len(patientMBIs),
-		strings.ReplaceAll(ei.Types, ",", ";")),
-	)
 }
 
-func fetchTransactionTime() (time.Time, error) {
-	bfd, err := client.NewBfdClient(client.NewConfig("/v1/fhir/"))
-	if err != nil {
-		return time.Time{}, err
-	}
-	b, err := bfd.GetPatient("FAKE_PATIENT", uuid.New().String(), uuid.New().String(), "", time.Now())
-	if err != nil {
-		return time.Time{}, err
-	}
-	if b.Meta.LastUpdated.Equal(time.Time{}) {
-		return time.Time{}, errors.New("No transaction time returned from BFD")
-	}
-	return b.Meta.LastUpdated, nil
-}
-
-func buildExportInfo(w http.ResponseWriter, r *http.Request) *ExportInfo {
-	log := logger.WithContext(r.Context())
-	orgID := util.FetchValueFromContext(r.Context(), w, middleware.ContextKeyOrganization)
-	groupID := util.FetchValueFromContext(r.Context(), w, middleware.ContextKeyGroup)
-	types := r.URL.Query().Get("_type")
-	since, err := parseSinceParam(r.URL.Query().Get("_since"))
-	if err != nil {
-		err = errors.New("Failed to parse _since param")
-		log.Error("Failed to parse _since param", zap.Error(err))
-		boom.BadData(w, err.Error())
-		return nil
-	}
-	requestIP := r.Header.Get(middleware.FwdHeader)
-	requestURL := r.Header.Get(middleware.RequestURLHeader)
-	return &ExportInfo{
-		orgID, groupID, types, requestIP, requestURL, since,
-	}
-
-}
-
-func parseSinceParam(since string) (*sql.NullTime, error) {
-	if since == "" {
-		return &sql.NullTime{}, nil
-	}
-	t, err := time.Parse(middleware.SinceLayout, since)
+func (js *JobServiceV1) fetchTransactionTime() (*time.Time, error) {
+	b, err := js.bfdClient.GetPatient("FAKE_PATIENT", uuid.New().String(), uuid.New().String(), "", time.Now())
 	if err != nil {
 		return nil, err
 	}
-	return &sql.NullTime{Time: t, Valid: true}, nil
-}
-
-func buildBatches(ei *ExportInfo, groupNPIs *v1.GroupNPIs, patientMBIs []string) ([]v1.BatchRequest, error) {
-	tt, err := fetchTransactionTime()
-	if err != nil {
-		return nil, errors.New(fmt.Sprintf("Failed to fetch Transaction Time from BFD: %s", err.Error()))
+	if b.Meta.LastUpdated.Equal(time.Time{}) {
+		return nil, errors.New("No transaction time returned from BFD")
 	}
-	priority := 5000
-	if len(patientMBIs) == 1 {
-		priority = 1000
-	}
-	patientBatches := batchPatientMBIs(patientMBIs, conf.GetAsInt("queue.batchSize", 100))
-	var batches []v1.BatchRequest
-	for _, batchedPatients := range patientBatches {
-		batch := createBatch(ei, groupNPIs, batchedPatients, len(patientMBIs) > 1)
-		batch.Priority = priority
-		if ei.Since.Valid && !tt.After(ei.Since.Time) {
-			batch.PatientMBIs = ""
-		}
-		batch.TransactionTime = tt
-		batches = append(batches, batch)
-	}
-	return batches, nil
-}
-
-func createBatch(ei *ExportInfo, g *v1.GroupNPIs, p []string, b bool) v1.BatchRequest {
-	return v1.BatchRequest{
-		Since:           ei.Since,
-		RequestURL:      ei.URL,
-		RequestingIP:    ei.IP,
-		OrganizationNPI: g.OrgNPI,
-		ProviderNPI:     g.ProviderNPI,
-		PatientMBIs:     strings.Join(p, ","),
-		IsBulk:          b,
-		ResourceTypes:   ei.Types,
-	}
+	return &b.Resource.Meta.LastUpdated, nil
 }
 
 // BatchesAndFiles function returns all the batches and it's files for a job
@@ -225,6 +162,45 @@ func (js *JobServiceV1) BatchesAndFiles(w http.ResponseWriter, r *http.Request) 
 	}
 }
 
+func (js *JobServiceV1) buildV1Batches(er v1.ExportRequest, orgNPI string, url string, ip string) ([]v1.BatchRequest, error) {
+	priority := 5000
+	if len(er.MBIs) == 1 {
+		priority = 1000
+	}
+
+	since, err := parseSinceParam(er.Since)
+	if err != nil {
+		return nil, errors.Wrap(err, "Failed to parse since")
+	}
+
+	tt, err := js.fetchTransactionTime()
+	if err != nil {
+		return nil, errors.Errorf("Failed to fetch Transaction Time from BFD: %s", err.Error())
+	}
+
+	patientBatches := batchPatientMBIs(er.MBIs, conf.GetAsInt("queue.batchSize", 100))
+	var batches []v1.BatchRequest
+	for _, batchedPatients := range patientBatches {
+		batch := v1.BatchRequest{
+			Since:           since,
+			RequestURL:      url,
+			RequestingIP:    ip,
+			OrganizationNPI: orgNPI,
+			ProviderNPI:     er.ProviderNPI,
+			PatientMBIs:     strings.Join(batchedPatients, ","),
+			IsBulk:          len(batchedPatients) > 1,
+			ResourceTypes:   er.Type,
+		}
+		batch.Priority = priority
+		if since.Valid && !tt.After(since.Time) {
+			batch.PatientMBIs = ""
+		}
+		batch.TransactionTime = *tt
+		batches = append(batches, batch)
+	}
+	return batches, nil
+}
+
 func batchPatientMBIs(patientMBIs []string, batchSize int) [][]string {
 	var batches [][]string
 	for i := 0; i < len(patientMBIs); i += batchSize {
@@ -236,4 +212,15 @@ func batchPatientMBIs(patientMBIs []string, batchSize int) [][]string {
 		batches = append(batches, patientMBIs[i:end])
 	}
 	return batches
+}
+
+func parseSinceParam(since string) (*sql.NullTime, error) {
+	if since == "" {
+		return &sql.NullTime{}, nil
+	}
+	t, err := time.Parse(middleware.SinceLayout, since)
+	if err != nil {
+		return nil, err
+	}
+	return &sql.NullTime{Time: t, Valid: true}, nil
 }

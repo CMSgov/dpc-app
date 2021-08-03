@@ -44,22 +44,6 @@ func (c *MockController) Export(w http.ResponseWriter, r *http.Request) {
 	c.Called(w, r)
 }
 
-type MockFileController struct {
-	mock.Mock
-}
-
-func (mfc *MockFileController) GetFile(w http.ResponseWriter, r *http.Request) {
-	mfc.Called(w, r)
-}
-
-type MockJobController struct {
-	mock.Mock
-}
-
-func (mjc *MockJobController) Status(w http.ResponseWriter, r *http.Request) {
-	mjc.Called(w, r)
-}
-
 type MockSsasController struct {
 	mock.Mock
 }

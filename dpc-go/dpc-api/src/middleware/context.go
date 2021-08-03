@@ -100,7 +100,7 @@ func RequestURLCtx(next http.Handler) http.Handler {
 		if r.TLS != nil {
 			scheme = "https"
 		}
-		ctx := context.WithValue(r.Context(), ContextKeyRequestURL, fmt.Sprintf("%s://%s%s %s\" ", scheme, r.Host, r.RequestURI, r.Proto))
+		ctx := context.WithValue(r.Context(), ContextKeyRequestURL, fmt.Sprintf("%s://%s%s", scheme, r.Host, r.RequestURI))
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
