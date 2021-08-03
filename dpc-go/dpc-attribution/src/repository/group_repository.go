@@ -73,7 +73,7 @@ func (gr *GroupRepository) FindByID(ctx context.Context, id string) (*model.Grou
 
 	sb := sqlFlavor.NewSelectBuilder()
 	sb.Select("id, version, created_at, updated_at, info, organization_id")
-	sb.From("group")
+	sb.From(`"group"`)
 	sb.Where(sb.Equal("organization_id", organizationID), sb.Equal("id", id))
 
 	q, args := sb.Build()

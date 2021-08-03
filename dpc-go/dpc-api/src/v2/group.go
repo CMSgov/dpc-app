@@ -103,8 +103,8 @@ func (gc *GroupController) Export(w http.ResponseWriter, r *http.Request) {
 
 	job, err := gc.startExports(r, groupContainer.ID, attr)
 	if err != nil {
-		log.Error("Failed to get attribution info")
-		fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, err.Error())
+		log.Error("Failed to start export", zap.Error(err))
+		fhirror.GenericServerIssue(r.Context(), w)
 		return
 	}
 	contentLocation := contentLocationHeader(job, r)

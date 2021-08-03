@@ -91,24 +91,27 @@ func (jc *JobClientImpl) Export(ctx context.Context, request model.ExportRequest
 	log := logger.WithContext(ctx)
 	jc.httpClient.Logger = newLogger(*log)
 
-	url := fmt.Sprintf("%s/Job/export", jc.config.URL)
-	req, err := retryablehttp.NewRequest(http.MethodPost, url, request)
+	requestBytes, err := json.Marshal(request)
+	if err != nil {
+		log.Error("Failed to convert request into bytes", zap.Error(err))
+		return nil, errors.Wrap(err, "Failed to export")
+	}
+
+	url := fmt.Sprintf("%s/Job", jc.config.URL)
+	req, err := retryablehttp.NewRequest(http.MethodPost, url, requestBytes)
 	if err != nil {
 		log.Error("Failed to create request", zap.Error(err))
-		return nil, errors.Errorf("Failed to export")
+		return nil, errors.Wrap(err, "Failed to export")
 	}
 
 	req.Header.Add(middleware.RequestIDHeader, ctx.Value(middleware.RequestIDKey).(string))
-	if ctx.Value(middleware2.ContextKeyOrganization) != nil {
-		req.Header.Add(middleware2.OrgHeader, ctx.Value(middleware2.ContextKeyOrganization).(string))
-	}
 
 	setExportRequestHeaders(ctx, req)
 
 	resp, err := jc.httpClient.Do(req)
 	if err != nil {
 		log.Error("Failed to send request", zap.Error(err))
-		return nil, errors.Errorf("Failed to export")
+		return nil, errors.Wrap(err, "Failed to export")
 	}
 
 	defer func() {
@@ -121,7 +124,7 @@ func (jc *JobClientImpl) Export(ctx context.Context, request model.ExportRequest
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.Error("Failed to read the response body", zap.Error(err))
-		return nil, errors.Errorf("Failed to export")
+		return nil, errors.Wrap(err, "Failed to export")
 	}
 
 	errMsg := checkForErrorMsg(body)

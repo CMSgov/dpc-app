@@ -80,7 +80,7 @@ func (suite *GroupRepositoryTestSuite) TestFindByID() {
 	repo := NewGroupRepo(db)
 	ctx := context.WithValue(context.Background(), middleware.ContextKeyOrganization, "12345")
 
-	expectedSelectQuery := `SELECT id, version, created_at, updated_at, info, organization_id FROM group WHERE organization_id = \$1 AND id = \$2`
+	expectedSelectQuery := `SELECT id, version, created_at, updated_at, info, organization_id FROM "group" WHERE organization_id = \$1 AND id = \$2`
 
 	rows := sqlmock.NewRows([]string{"id", "version", "created_at", "updated_at", "info", "organization_id"}).
 		AddRow(suite.fakeGrp.ID, suite.fakeGrp.Version, suite.fakeGrp.CreatedAt, suite.fakeGrp.UpdatedAt, suite.fakeGrp.Info, suite.fakeGrp.OrganizationID)
