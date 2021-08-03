@@ -133,7 +133,7 @@ func (gc *GroupController) startExports(r *http.Request, groupID string, attr []
 	}
 	b, err := gc.jc.Export(r.Context(), er)
 	if err != nil {
-		return "", errors.New("Failed to export")
+		return "", err
 	}
 	return string(b), nil
 }
