@@ -3,6 +3,7 @@ package middleware
 import (
 	"context"
 	"fmt"
+	"github.com/CMSgov/dpc/api/conf"
 	"github.com/pkg/errors"
 	"github.com/samply/golang-fhir-models/fhir-models/fhir"
 	"github.com/sjsdfg/common-lang-in-go/StringUtils"
@@ -227,8 +228,10 @@ func ProvenanceHeaderValidator(next http.Handler) http.Handler {
 			fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "Recorded timestamp invalid")
 			return
 		}
+
+		provenanceHourDiff := conf.GetAsInt("provenance-hour-diff", 24)
 		diff := time.Now().Sub(t)
-		if diff.Hours() > 24 {
+		if diff.Hours() > float64(provenanceHourDiff) {
 			log.Error("Recorded timestamp invalid")
 			fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "Recorded timestamp invalid")
 			return
