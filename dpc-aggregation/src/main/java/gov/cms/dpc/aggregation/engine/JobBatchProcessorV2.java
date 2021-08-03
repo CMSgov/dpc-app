@@ -74,10 +74,11 @@ public class JobBatchProcessorV2 {
         } else if (isOptedOut(consentResult.getLeft())) {
             failReason = OutcomeReason.CONSENT_OPTED_OUT;
             flowable = Flowable.just(AggregationUtils.toOperationOutcomeV2(OutcomeReason.CONSENT_OPTED_OUT, patientID));
-        }
-        logger.info("Skipping lookBack for org: {}", job.getOrgID().toString());
+        } else {
+            logger.info("Skipping lookBack for V2 job: {}", job.getOrgID().toString());
             flowable = Flowable.fromIterable(job.getResourceTypes())
                     .flatMap(r -> fetchResource(job, patientID, r, job.getSince().orElse(null)));
+        }
 
         final var results = writeResource(job, flowable)
                 .toList()

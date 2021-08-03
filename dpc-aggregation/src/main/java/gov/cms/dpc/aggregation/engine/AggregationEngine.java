@@ -195,7 +195,9 @@ public class AggregationEngine implements Runnable {
         if (job.isV2()) {
             jobBatchProcessorV2.processJobBatchPartial(aggregatorID, queue, job, patientId);
         }
-        jobBatchProcessor.processJobBatchPartial(aggregatorID, queue, job, patientId);
+        else {
+            jobBatchProcessor.processJobBatchPartial(aggregatorID, queue, job, patientId);
+        }
 
         // Stop processing when no patients or early shutdown
         return this.isRunning() ? job.fetchNextPatient(aggregatorID) : Optional.empty();
