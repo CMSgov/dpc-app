@@ -5,11 +5,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/CMSgov/dpc/api/constants"
 	"io/ioutil"
 	"net/http"
 
 	"github.com/CMSgov/dpc/api/logger"
-	middleware2 "github.com/CMSgov/dpc/api/middleware"
 	"github.com/go-chi/chi/middleware"
 
 	"github.com/hashicorp/go-retryablehttp"
@@ -85,7 +85,7 @@ func (ac *AttributionClient) CreateImplOrg(ctx context.Context, body []byte) (Im
 	log := logger.WithContext(ctx)
 	ac.httpClient.Logger = newLogger(*log)
 
-	implID, ok := ctx.Value(middleware2.ContextKeyImplementer).(string)
+	implID, ok := ctx.Value(constants.ContextKeyImplementer).(string)
 	if !ok {
 		log.Error("Failed to extract the implementer id from the context")
 		return ImplementerOrg{}, errors.Errorf("Failed to extract the implementer id from the context")
@@ -99,8 +99,8 @@ func (ac *AttributionClient) CreateImplOrg(ctx context.Context, body []byte) (Im
 	}
 
 	req.Header.Add(middleware.RequestIDHeader, ctx.Value(middleware.RequestIDKey).(string))
-	if ctx.Value(middleware2.ContextKeyOrganization) != nil {
-		req.Header.Add(middleware2.OrgHeader, ctx.Value(middleware2.ContextKeyOrganization).(string))
+	if ctx.Value(constants.ContextKeyOrganization) != nil {
+		req.Header.Add(constants.OrgHeader, ctx.Value(constants.ContextKeyOrganization).(string))
 	}
 	resp, err := ac.httpClient.Do(req)
 	if err != nil {
@@ -134,7 +134,7 @@ func (ac *AttributionClient) GetImplOrg(ctx context.Context) ([]byte, error) {
 	log := logger.WithContext(ctx)
 	ac.httpClient.Logger = newLogger(*log)
 
-	implID, ok := ctx.Value(middleware2.ContextKeyImplementer).(string)
+	implID, ok := ctx.Value(constants.ContextKeyImplementer).(string)
 	if !ok {
 		log.Error("Failed to extract the implementer id from the context")
 		return nil, errors.Errorf("Failed to extract the implementer id from the context")
@@ -148,8 +148,8 @@ func (ac *AttributionClient) GetImplOrg(ctx context.Context) ([]byte, error) {
 	}
 
 	req.Header.Add(middleware.RequestIDHeader, ctx.Value(middleware.RequestIDKey).(string))
-	if ctx.Value(middleware2.ContextKeyOrganization) != nil {
-		req.Header.Add(middleware2.OrgHeader, ctx.Value(middleware2.ContextKeyOrganization).(string))
+	if ctx.Value(constants.ContextKeyOrganization) != nil {
+		req.Header.Add(constants.OrgHeader, ctx.Value(constants.ContextKeyOrganization).(string))
 	}
 	resp, err := ac.httpClient.Do(req)
 	if err != nil {
@@ -197,8 +197,8 @@ func (ac *AttributionClient) doGet(ctx context.Context, url string) ([]byte, err
 	}
 
 	req.Header.Add(middleware.RequestIDHeader, ctx.Value(middleware.RequestIDKey).(string))
-	if ctx.Value(middleware2.ContextKeyOrganization) != nil {
-		req.Header.Add(middleware2.OrgHeader, ctx.Value(middleware2.ContextKeyOrganization).(string))
+	if ctx.Value(constants.ContextKeyOrganization) != nil {
+		req.Header.Add(constants.OrgHeader, ctx.Value(constants.ContextKeyOrganization).(string))
 	}
 	resp, err := ac.httpClient.Do(req)
 	if err != nil {
@@ -238,8 +238,8 @@ func (ac *AttributionClient) Post(ctx context.Context, resourceType ResourceType
 	}
 
 	req.Header.Add(middleware.RequestIDHeader, ctx.Value(middleware.RequestIDKey).(string))
-	if ctx.Value(middleware2.ContextKeyOrganization) != nil {
-		req.Header.Add(middleware2.OrgHeader, ctx.Value(middleware2.ContextKeyOrganization).(string))
+	if ctx.Value(constants.ContextKeyOrganization) != nil {
+		req.Header.Add(constants.OrgHeader, ctx.Value(constants.ContextKeyOrganization).(string))
 	}
 	resp, err := ac.httpClient.Do(req)
 	if err != nil {
@@ -279,8 +279,8 @@ func (ac *AttributionClient) Delete(ctx context.Context, resourceType ResourceTy
 	}
 
 	req.Header.Add(middleware.RequestIDHeader, ctx.Value(middleware.RequestIDKey).(string))
-	if ctx.Value(middleware2.ContextKeyOrganization) != nil {
-		req.Header.Add(middleware2.OrgHeader, ctx.Value(middleware2.ContextKeyOrganization).(string))
+	if ctx.Value(constants.ContextKeyOrganization) != nil {
+		req.Header.Add(constants.OrgHeader, ctx.Value(constants.ContextKeyOrganization).(string))
 	}
 	resp, err := ac.httpClient.Do(req)
 	if err != nil {
@@ -364,8 +364,8 @@ func (ac *AttributionClient) doPut(ctx context.Context, url string, body []byte)
 	}
 
 	req.Header.Add(middleware.RequestIDHeader, ctx.Value(middleware.RequestIDKey).(string))
-	if ctx.Value(middleware2.ContextKeyOrganization) != nil {
-		req.Header.Add(middleware2.OrgHeader, ctx.Value(middleware2.ContextKeyOrganization).(string))
+	if ctx.Value(constants.ContextKeyOrganization) != nil {
+		req.Header.Add(constants.OrgHeader, ctx.Value(constants.ContextKeyOrganization).(string))
 	}
 	resp, err := ac.httpClient.Do(req)
 	if err != nil {

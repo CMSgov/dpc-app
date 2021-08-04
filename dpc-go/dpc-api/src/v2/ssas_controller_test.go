@@ -2,6 +2,7 @@ package v2
 
 import (
 	"context"
+	"github.com/CMSgov/dpc/api/constants"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -9,7 +10,6 @@ import (
 	"testing"
 
 	"github.com/CMSgov/dpc/api/client"
-	middleware2 "github.com/CMSgov/dpc/api/middleware"
 	"github.com/kinbiko/jsonassert"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -345,13 +345,13 @@ func (suite *SsasControllerTestSuite) SetupHappyPathMocks() (*http.Request, cont
     }`
 	req := httptest.NewRequest("Post", "http://localohost/v2/Implementer/123/Org/abc/Systemfoo", strings.NewReader(reqBody))
 	ctx := req.Context()
-	ctx = context.WithValue(ctx, middleware2.ContextKeyImplementer, "123")
+	ctx = context.WithValue(ctx, constants.ContextKeyImplementer, "123")
 	req = req.WithContext(ctx)
 	ctx = req.Context()
-	ctx = context.WithValue(ctx, middleware2.ContextKeyOrganization, "abc")
+	ctx = context.WithValue(ctx, constants.ContextKeyOrganization, "abc")
 	req = req.WithContext(ctx)
 	ctx = req.Context()
-	ctx = context.WithValue(ctx, middleware2.ContextKeyKeyID, "321")
+	ctx = context.WithValue(ctx, constants.ContextKeyKeyID, "321")
 	req = req.WithContext(ctx)
 
 	//Mock client calls

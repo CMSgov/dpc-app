@@ -3,6 +3,7 @@ package public
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/CMSgov/dpc/api/constants"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -14,8 +15,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
-
-	middleware2 "github.com/CMSgov/dpc/api/middleware"
 )
 
 type MockController struct {
@@ -151,7 +150,7 @@ func (suite *RouterTestSuite) TestGroupExportRoute() {
 	req.Header.Set("Content-Type", "application/fhir+json")
 	req.Header.Set("Prefer", "respond-async")
 	req.Header.Set(middleware.RequestIDHeader, "54321")
-	req.Header.Set(middleware2.OrgHeader, "12345")
+	req.Header.Set(constants.OrgHeader, "12345")
 	res, _ := http.DefaultClient.Do(req)
 
 	b, _ := ioutil.ReadAll(res.Body)

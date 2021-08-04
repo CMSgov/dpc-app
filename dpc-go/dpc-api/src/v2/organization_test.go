@@ -12,7 +12,7 @@ import (
 
 	"github.com/CMSgov/dpc/api/apitest"
 	"github.com/CMSgov/dpc/api/client"
-	middleware2 "github.com/CMSgov/dpc/api/middleware"
+	"github.com/CMSgov/dpc/api/constants"
 	"github.com/go-chi/chi/middleware"
 	"github.com/kinbiko/jsonassert"
 	"github.com/pkg/errors"
@@ -134,7 +134,7 @@ func (suite *OrganizationControllerTestSuite) TestReadOrganizationErrorInClient(
 
 	req := httptest.NewRequest("GET", "http://example.com/foo", nil)
 	ctx := req.Context()
-	ctx = context.WithValue(ctx, middleware2.ContextKeyOrganization, "12345")
+	ctx = context.WithValue(ctx, constants.ContextKeyOrganization, "12345")
 	req = req.WithContext(ctx)
 	ctx = req.Context()
 	ctx = context.WithValue(ctx, middleware.RequestIDKey, "12345")
@@ -173,7 +173,7 @@ func (suite *OrganizationControllerTestSuite) TestReadOrganization() {
 
 	req := httptest.NewRequest(http.MethodGet, "http://example.com/foo", nil)
 	ctx := req.Context()
-	ctx = context.WithValue(ctx, middleware2.ContextKeyOrganization, "12345")
+	ctx = context.WithValue(ctx, constants.ContextKeyOrganization, "12345")
 	req = req.WithContext(ctx)
 
 	w := httptest.NewRecorder()
@@ -298,7 +298,7 @@ func (suite *OrganizationControllerTestSuite) TestDeleteOrganization() {
 	assert.Equal(suite.T(), http.StatusBadRequest, res.StatusCode)
 
 	ctx := req.Context()
-	ctx = context.WithValue(ctx, middleware2.ContextKeyOrganization, "12345")
+	ctx = context.WithValue(ctx, constants.ContextKeyOrganization, "12345")
 	req = req.WithContext(ctx)
 
 	w = httptest.NewRecorder()
@@ -318,7 +318,7 @@ func (suite *OrganizationControllerTestSuite) TestUpdateOrganizationErrors() {
 	assert.Equal(suite.T(), http.StatusBadRequest, res.StatusCode)
 
 	ctx := req.Context()
-	ctx = context.WithValue(ctx, middleware2.ContextKeyOrganization, "12345")
+	ctx = context.WithValue(ctx, constants.ContextKeyOrganization, "12345")
 	req = req.WithContext(ctx)
 
 	badReq := httptest.NewRequest(http.MethodPut, "http://example.com/foo", bytes.NewReader(apitest.MalformedOrg()))
@@ -340,7 +340,7 @@ func (suite *OrganizationControllerTestSuite) TestUpdateOrganization() {
 	ja := jsonassert.New(suite.T())
 	req := httptest.NewRequest(http.MethodPut, "http://example.com/foo", strings.NewReader(apitest.Orgjson))
 	ctx := req.Context()
-	ctx = context.WithValue(ctx, middleware2.ContextKeyOrganization, "12345")
+	ctx = context.WithValue(ctx, constants.ContextKeyOrganization, "12345")
 	req = req.WithContext(ctx)
 	ar := apitest.AttributionOrgResponse()
 

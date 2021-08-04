@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/CMSgov/dpc/api/constants"
 	"github.com/CMSgov/dpc/api/model"
 	"io/ioutil"
 	"net/http"
@@ -13,7 +14,6 @@ import (
 	"testing"
 
 	"github.com/CMSgov/dpc/api/apitest"
-	middleware2 "github.com/CMSgov/dpc/api/middleware"
 	"github.com/bxcodec/faker/v3"
 	"github.com/go-chi/chi/middleware"
 	"github.com/kinbiko/jsonassert"
@@ -151,11 +151,11 @@ func (suite *GroupControllerTestSuite) TestExportGroup() {
 	ja := jsonassert.New(suite.T())
 	req := httptest.NewRequest(http.MethodGet, "http://example.com/Group/9876/$export?_outputFormat=application/fhir%2Bndjson", nil)
 	ctx := req.Context()
-	ctx = context.WithValue(ctx, middleware2.ContextKeyOrganization, "12345")
-	ctx = context.WithValue(ctx, middleware2.ContextKeyGroup, r.ID)
-	ctx = context.WithValue(ctx, middleware2.ContextKeyRequestURL, faker.URL())
-	ctx = context.WithValue(ctx, middleware2.ContextKeyRequestingIP, faker.IPv4())
-	ctx = context.WithValue(ctx, middleware2.ContextKeyResourceTypes, middleware2.AllResources)
+	ctx = context.WithValue(ctx, constants.ContextKeyOrganization, "12345")
+	ctx = context.WithValue(ctx, constants.ContextKeyGroup, r.ID)
+	ctx = context.WithValue(ctx, constants.ContextKeyRequestURL, faker.URL())
+	ctx = context.WithValue(ctx, constants.ContextKeyRequestingIP, faker.IPv4())
+	ctx = context.WithValue(ctx, constants.ContextKeyResourceTypes, constants.AllResources)
 	req = req.WithContext(ctx)
 	req.Header.Set("Prefer", "respond-async")
 
@@ -182,12 +182,12 @@ func (suite *GroupControllerTestSuite) TestExportGroupMissingPreferHeader() {
 	ja := jsonassert.New(suite.T())
 	req := httptest.NewRequest(http.MethodGet, "http://example.com/Group/9876/$export?_outputFormat=application/fhir%2Bndjson", nil)
 	ctx := req.Context()
-	ctx = context.WithValue(ctx, middleware2.ContextKeyOrganization, "12345")
-	ctx = context.WithValue(ctx, middleware2.ContextKeyGroup, r.ID)
-	ctx = context.WithValue(ctx, middleware2.ContextKeyRequestURL, faker.URL())
-	ctx = context.WithValue(ctx, middleware2.ContextKeyRequestingIP, faker.IPv4())
+	ctx = context.WithValue(ctx, constants.ContextKeyOrganization, "12345")
+	ctx = context.WithValue(ctx, constants.ContextKeyGroup, r.ID)
+	ctx = context.WithValue(ctx, constants.ContextKeyRequestURL, faker.URL())
+	ctx = context.WithValue(ctx, constants.ContextKeyRequestingIP, faker.IPv4())
 	ctx = context.WithValue(ctx, middleware.RequestIDKey, "12345")
-	ctx = context.WithValue(ctx, middleware2.ContextKeyResourceTypes, middleware2.AllResources)
+	ctx = context.WithValue(ctx, constants.ContextKeyResourceTypes, constants.AllResources)
 	req = req.WithContext(ctx)
 
 	w := httptest.NewRecorder()
@@ -226,12 +226,12 @@ func (suite *GroupControllerTestSuite) TestExportGroupInvalidPreferHeader() {
 	ja := jsonassert.New(suite.T())
 	req := httptest.NewRequest(http.MethodGet, "http://example.com/Group/9876/$export?_outputFormat=application/fhir%2Bndjson", nil)
 	ctx := req.Context()
-	ctx = context.WithValue(ctx, middleware2.ContextKeyOrganization, "12345")
-	ctx = context.WithValue(ctx, middleware2.ContextKeyGroup, r.ID)
-	ctx = context.WithValue(ctx, middleware2.ContextKeyRequestURL, faker.URL())
-	ctx = context.WithValue(ctx, middleware2.ContextKeyRequestingIP, faker.IPv4())
+	ctx = context.WithValue(ctx, constants.ContextKeyOrganization, "12345")
+	ctx = context.WithValue(ctx, constants.ContextKeyGroup, r.ID)
+	ctx = context.WithValue(ctx, constants.ContextKeyRequestURL, faker.URL())
+	ctx = context.WithValue(ctx, constants.ContextKeyRequestingIP, faker.IPv4())
 	ctx = context.WithValue(ctx, middleware.RequestIDKey, "12345")
-	ctx = context.WithValue(ctx, middleware2.ContextKeyResourceTypes, middleware2.AllResources)
+	ctx = context.WithValue(ctx, constants.ContextKeyResourceTypes, constants.AllResources)
 	req = req.WithContext(ctx)
 	req.Header.Set("Prefer", "INVALID")
 
@@ -271,12 +271,12 @@ func (suite *GroupControllerTestSuite) TestExportGroupMissingOutputFormat() {
 	ja := jsonassert.New(suite.T())
 	req := httptest.NewRequest(http.MethodGet, "http://example.com/Group/9876/$export", nil)
 	ctx := req.Context()
-	ctx = context.WithValue(ctx, middleware2.ContextKeyOrganization, "12345")
-	ctx = context.WithValue(ctx, middleware2.ContextKeyGroup, r.ID)
-	ctx = context.WithValue(ctx, middleware2.ContextKeyRequestURL, faker.URL())
-	ctx = context.WithValue(ctx, middleware2.ContextKeyRequestingIP, faker.IPv4())
+	ctx = context.WithValue(ctx, constants.ContextKeyOrganization, "12345")
+	ctx = context.WithValue(ctx, constants.ContextKeyGroup, r.ID)
+	ctx = context.WithValue(ctx, constants.ContextKeyRequestURL, faker.URL())
+	ctx = context.WithValue(ctx, constants.ContextKeyRequestingIP, faker.IPv4())
 	ctx = context.WithValue(ctx, middleware.RequestIDKey, "12345")
-	ctx = context.WithValue(ctx, middleware2.ContextKeyResourceTypes, middleware2.AllResources)
+	ctx = context.WithValue(ctx, constants.ContextKeyResourceTypes, constants.AllResources)
 	req = req.WithContext(ctx)
 	req.Header.Set("Prefer", "respond-async")
 
@@ -316,12 +316,12 @@ func (suite *GroupControllerTestSuite) TestExportGroupInvalidOutputFormat() {
 	ja := jsonassert.New(suite.T())
 	req := httptest.NewRequest(http.MethodGet, "http://example.com/Group/9876/$export?_outputFormat=INVALID", nil)
 	ctx := req.Context()
-	ctx = context.WithValue(ctx, middleware2.ContextKeyOrganization, "12345")
-	ctx = context.WithValue(ctx, middleware2.ContextKeyGroup, r.ID)
-	ctx = context.WithValue(ctx, middleware2.ContextKeyRequestURL, faker.URL())
-	ctx = context.WithValue(ctx, middleware2.ContextKeyRequestingIP, faker.IPv4())
+	ctx = context.WithValue(ctx, constants.ContextKeyOrganization, "12345")
+	ctx = context.WithValue(ctx, constants.ContextKeyGroup, r.ID)
+	ctx = context.WithValue(ctx, constants.ContextKeyRequestURL, faker.URL())
+	ctx = context.WithValue(ctx, constants.ContextKeyRequestingIP, faker.IPv4())
 	ctx = context.WithValue(ctx, middleware.RequestIDKey, "12345")
-	ctx = context.WithValue(ctx, middleware2.ContextKeyResourceTypes, middleware2.AllResources)
+	ctx = context.WithValue(ctx, constants.ContextKeyResourceTypes, constants.AllResources)
 	req = req.WithContext(ctx)
 	req.Header.Set("Prefer", "respond-async")
 

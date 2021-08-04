@@ -3,6 +3,7 @@ package middleware
 import (
 	"context"
 	"fmt"
+	"github.com/CMSgov/dpc/api/constants"
 	"net/http"
 	"strings"
 	"time"
@@ -16,7 +17,7 @@ import (
 func OrganizationCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		organizationID := chi.URLParam(r, "organizationID")
-		ctx := context.WithValue(r.Context(), ContextKeyOrganization, organizationID)
+		ctx := context.WithValue(r.Context(), constants.ContextKeyOrganization, organizationID)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
@@ -40,7 +41,7 @@ func AuthCtx(next http.Handler) http.Handler {
 func GroupCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		groupID := chi.URLParam(r, "groupID")
-		ctx := context.WithValue(r.Context(), ContextKeyGroup, groupID)
+		ctx := context.WithValue(r.Context(), constants.ContextKeyGroup, groupID)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
@@ -49,7 +50,7 @@ func GroupCtx(next http.Handler) http.Handler {
 func ImplementerCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ImplementerID := chi.URLParam(r, "implementerID")
-		ctx := context.WithValue(r.Context(), ContextKeyImplementer, ImplementerID)
+		ctx := context.WithValue(r.Context(), constants.ContextKeyImplementer, ImplementerID)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
@@ -58,7 +59,7 @@ func ImplementerCtx(next http.Handler) http.Handler {
 func FileNameCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		groupID := chi.URLParam(r, "fileName")
-		ctx := context.WithValue(r.Context(), ContextKeyFileName, groupID)
+		ctx := context.WithValue(r.Context(), constants.ContextKeyFileName, groupID)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
@@ -67,7 +68,7 @@ func FileNameCtx(next http.Handler) http.Handler {
 func ImplementorIDCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		id := chi.URLParam(r, "implID")
-		ctx := context.WithValue(r.Context(), ContextKeyImplementor, id)
+		ctx := context.WithValue(r.Context(), constants.ContextKeyImplementor, id)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
@@ -76,7 +77,7 @@ func ImplementorIDCtx(next http.Handler) http.Handler {
 func OrganizationIDCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		id := chi.URLParam(r, "orgID")
-		ctx := context.WithValue(r.Context(), ContextKeyOrganization, id)
+		ctx := context.WithValue(r.Context(), constants.ContextKeyOrganization, id)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
@@ -84,11 +85,11 @@ func OrganizationIDCtx(next http.Handler) http.Handler {
 // RequestIPCtx middleware to extract the requesting IP address from the incoming request and set it into the request context
 func RequestIPCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ipAddress := r.Header.Get(FwdHeader)
+		ipAddress := r.Header.Get(constants.FwdHeader)
 		if ipAddress == "" {
 			ipAddress = r.RemoteAddr
 		}
-		ctx := context.WithValue(r.Context(), ContextKeyRequestingIP, ipAddress)
+		ctx := context.WithValue(r.Context(), constants.ContextKeyRequestingIP, ipAddress)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
@@ -100,7 +101,7 @@ func RequestURLCtx(next http.Handler) http.Handler {
 		if r.TLS != nil {
 			scheme = "https"
 		}
-		ctx := context.WithValue(r.Context(), ContextKeyRequestURL, fmt.Sprintf("%s://%s%s", scheme, r.Host, r.RequestURI))
+		ctx := context.WithValue(r.Context(), constants.ContextKeyRequestURL, fmt.Sprintf("%s://%s%s", scheme, r.Host, r.RequestURI))
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
@@ -111,14 +112,14 @@ func ExportTypesParamCtx(next http.Handler) http.Handler {
 		log := logger.WithContext(r.Context())
 		types := r.URL.Query().Get("_type")
 		if types == "" {
-			types = AllResources
+			types = constants.AllResources
 		}
 		if !validateTypes(types) {
 			log.Error(fmt.Sprintf("Invalid resource type: %s", types))
 			fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "Invalid resource type")
 			return
 		}
-		ctx := context.WithValue(r.Context(), ContextKeyResourceTypes, types)
+		ctx := context.WithValue(r.Context(), constants.ContextKeyResourceTypes, types)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
@@ -136,9 +137,9 @@ func validateTypes(types string) bool {
 func isValidType(t string) bool {
 	switch t {
 	case
-		PatientString,
-		CoverageString,
-		EoBString:
+		constants.PatientString,
+		constants.CoverageString,
+		constants.EoBString:
 		return true
 	}
 	return false
@@ -155,7 +156,7 @@ func ExportSinceParamCtx(next http.Handler) http.Handler {
 			fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, msg)
 			return
 		}
-		ctx := context.WithValue(r.Context(), ContextKeySince, s)
+		ctx := context.WithValue(r.Context(), constants.ContextKeySince, s)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
@@ -164,21 +165,21 @@ func validateSince(since string) (string, string) {
 	if since == "" {
 		return "", ""
 	}
-	p, err := time.Parse(SinceLayout, since)
+	p, err := time.Parse(constants.SinceLayout, since)
 	if err != nil {
 		return "", "Could not parse _since"
 	}
 	if p.After(time.Now()) {
 		return "", "_since cannot be a future date"
 	}
-	return p.Format(SinceLayout), ""
+	return p.Format(constants.SinceLayout), ""
 }
 
 // JobCtx middleware to extract the jobID from the chi url param and set it into the request context
 func JobCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		jobID := chi.URLParam(r, "jobID")
-		ctx := context.WithValue(r.Context(), ContextKeyJobID, jobID)
+		ctx := context.WithValue(r.Context(), constants.ContextKeyJobID, jobID)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
@@ -187,7 +188,7 @@ func JobCtx(next http.Handler) http.Handler {
 func TokenCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		tokenID := chi.URLParam(r, "tokenID")
-		ctx := context.WithValue(r.Context(), ContextKeyTokenID, tokenID)
+		ctx := context.WithValue(r.Context(), constants.ContextKeyTokenID, tokenID)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
@@ -196,7 +197,7 @@ func TokenCtx(next http.Handler) http.Handler {
 func PublicKeyCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		keyID := chi.URLParam(r, "keyID")
-		ctx := context.WithValue(r.Context(), ContextKeyKeyID, keyID)
+		ctx := context.WithValue(r.Context(), constants.ContextKeyKeyID, keyID)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
