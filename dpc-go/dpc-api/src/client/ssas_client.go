@@ -293,6 +293,7 @@ func (sc *SsasHTTPClient) Authenticate(ctx context.Context, reqBytes []byte) ([]
 	return resBytes, nil
 }
 
+// ValidateAccessToken validates with access token with SSAS and returns the org ID
 func (sc *SsasHTTPClient) ValidateAccessToken(ctx context.Context, token string) (string, error) {
 	log := logger.WithContext(ctx)
 	url := fmt.Sprintf("%s/%s", sc.config.PublicURL, TokenInfoEndpoint)
