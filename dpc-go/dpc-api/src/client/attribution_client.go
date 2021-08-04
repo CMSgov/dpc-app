@@ -86,6 +86,7 @@ func NewAttributionClient(ctx context.Context, config AttributionConfig) Client 
 			TLSClientConfig: &tls.Config{
 				RootCAs:      caPool,
 				Certificates: []tls.Certificate{cert},
+				MinVersion:   tls.VersionTLS12,
 			},
 		}
 	}
@@ -102,7 +103,7 @@ func getAttrCertificates(ctx context.Context, caCert string, cert string, certKe
 	keyStr := strings.ReplaceAll(certKey, "\\n", "\n")
 
 	if caStr == "" || crtStr == "" || keyStr == "" {
-		logger.WithContext(ctx).Warn("Missing one of: ATTRIBUTION_CLIENT_CA_CERT, ATTRIBUTION_CLIENT_CERT, ATTRIBUTION_CLIENT_CERT_KEY")
+		logger.WithContext(ctx).Warn("Missing one of: CA_CERT, ATTRIBUTION_CERT, ATTRIBUTION_CERT_KEY")
 		return nil, tls.Certificate{}
 	}
 
