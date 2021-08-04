@@ -231,8 +231,9 @@ func ProvenanceHeaderValidator(next http.Handler) http.Handler {
 		}
 
 		provenanceHourDiff := conf.GetAsInt("provenance-hour-diff", 24)
-		diff := time.Now().Sub(t)
-		if diff.Hours() > float64(provenanceHourDiff) {
+		now := time.Now()
+		diff := now.Sub(t)
+		if diff.Hours() > float64(provenanceHourDiff) || t.After(now) {
 			log.Error(fmt.Sprintf("Recorded timestamp invalid because it's outside the %d hr window", provenanceHourDiff))
 			fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, fmt.Sprintf("Recorded timestamp invalid because it's outside the %d hr window", provenanceHourDiff))
 			return
@@ -278,7 +279,8 @@ func ProvenanceHeaderValidator(next http.Handler) http.Handler {
 		}
 
 		log.Info(fmt.Sprintf("Provenance header: %s", provenanceHeaderStr))
-		next.ServeHTTP(w, r)
+		ctx := context.WithValue(r.Context(), ContextKeyProvenanceHeader, provenanceHeaderStr)
+		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 
 }

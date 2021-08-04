@@ -51,4 +51,6 @@ const (
 	ContextKeyTokenID
 	// ContextKeyKeyID is the key in the context to pass on the keyID param value
 	ContextKeyKeyID
+	// ContextKeyProvenanceHeader is the key in the context to pass on the provenance header
+	ContextKeyProvenanceHeader
 )
