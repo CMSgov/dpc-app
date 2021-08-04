@@ -14,7 +14,7 @@ class ClientTokensController < ApplicationController
 
     manager = ClientTokenManager.new(imp_id: imp_id, org_id: @org_id)
 
-    if label.present? && manager.create_client_token(label: @label)
+    if label.present? && manager.create_client_token(label: label)
       @client_token = manager.client_token
       render :show
     else
