@@ -47,7 +47,7 @@ func (gr *GroupRepository) Insert(ctx context.Context, body []byte) (*model.Grou
 	}
 
 	sb := sqlFlavor.NewSelectBuilder()
-	sb.Select(sb.As("COUNT(*)", "c"))
+	sb.Select(sb.As("COUNT(id)", "c"))
 	sb.From(`"group"`)
 	sb.Where(sb.Equal("organization_id", organizationID))
 	q, args := sb.Build()
