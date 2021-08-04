@@ -1,0 +1,20 @@
+Welcome <%= @user.name %>!
+
+Thank you for registering for the Data at the Point of Care (DPC) portal!
+
+Confirm account: <%= confirmation_url(@resource, confirmation_token: @token) %>
+
+What's next?
+
+After confirming your account, you can begin to test the DPC API and build your solution in sandbox using synthetic data. For more information, review our documentation (https://dpc.cms.gov/docsV1) and Github page (https://github.com/CMSgov/dpc-app/blob/master/src/main/resources/README.md). 
+
+When you are ready to demonstrate your DPC solution with our team and get access to production data, you may apply to join the production pilot onboarding queue (https://airtable.com/shr3m3BL3IWY5hYnm). For more information, visit our About the Pilot page (https://dpc.cms.gov/pilot).
+
+Comments? Questions?
+
+If you have any questions or would like to share feedback, please reach out through our Google Group (https://groups.google.com/g/dpc-api). If you require immediate assistance with registration or logging in, please email us directly at DPCINFO@cms.hhs.gov. 
+
+We look forward to hearing about your experiences and learning about your innovative ways to serve Medicare beneficiaries.
+
+Sincerely,
+The Data at the Point of Care (DPC) Team
