@@ -10,15 +10,15 @@ class ClientTokensController < ApplicationController
 
   def create
     @org_id = org_id
-    @label = params[:label]
+    label = params[:label]
 
     manager = ClientTokenManager.new(imp_id: imp_id, org_id: @org_id)
 
-    if params_present?(@label) && manager.create_client_token(label: @label)
+    if label.present? && manager.create_client_token(label: @label)
       @client_token = manager.client_token
       render :show
     else
-      return render_error 'Label required.' unless params_present?
+      return render_error('Label required.', @org_id) unless label.present?
 
       render_error 'Client token could not be created.'
     end
@@ -46,9 +46,5 @@ class ClientTokensController < ApplicationController
 
   def org_id
     params[:org_id]
-  end
-
-  def params_present?(label)
-    label.present?
   end
 end
