@@ -24,11 +24,11 @@ import java.util.Map;
 
 public class MockBlueButtonClientV2 implements BlueButtonClientV2 {
 
-    private static final String SAMPLE_EOB_PATH_PREFIX = "bb-test-data/eob/";
-    private static final String SAMPLE_PATIENT_PATH_PREFIX = "bb-test-data/patient/";
-    private static final String SAMPLE_COVERAGE_PATH_PREFIX = "bb-test-data/coverage/";
-    private static final String SAMPLE_METADATA_PATH_PREFIX = "bb-test-data/";
-    private static final String SAMPLE_EMPTY_BUNDLE = "bb-test-data/empty.xml";
+    private static final String SAMPLE_EOB_PATH_PREFIX = "bb-test-data-v2/eob/";
+    private static final String SAMPLE_PATIENT_PATH_PREFIX = "bb-test-data-v2/patient/";
+    private static final String SAMPLE_COVERAGE_PATH_PREFIX = "bb-test-data-v2/coverage/";
+    private static final String SAMPLE_METADATA_PATH_PREFIX = "bb-test-data-v2/";
+    private static final String SAMPLE_EMPTY_BUNDLE = "bb-test-data-v2/empty.xml";
 
     public static final List<String> TEST_PATIENT_MBIS = List.of("2SW4N00AA00", "4SP0P00AA00", "3S58A00AA00", "4S58A00AA00", "5S58A00AA00", "1SQ3F00AA00");
     public static final Map<String, String> MBI_BENE_ID_MAP = Map.of(
