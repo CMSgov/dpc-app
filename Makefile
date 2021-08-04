@@ -11,7 +11,7 @@ venv: venv/bin/activate
 
 venv/bin/activate: requirements.txt
 	test -d venv || virtualenv venv
-	. venv/bin/activate; CRYPTOGRAPHY_DONT_BUILD_RUST=1 pip install -Ur requirements.txt
+	. venv/bin/activate; pip install -Ur requirements.txt
 	touch venv/bin/activate
 
 
