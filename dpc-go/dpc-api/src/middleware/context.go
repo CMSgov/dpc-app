@@ -3,7 +3,9 @@ package middleware
 import (
 	"context"
 	"fmt"
+	"github.com/CMSgov/dpc/api/client"
 	"github.com/CMSgov/dpc/api/constants"
+	"go.uber.org/zap"
 	"net/http"
 	"strings"
 	"time"
@@ -23,18 +25,42 @@ func OrganizationCtx(next http.Handler) http.Handler {
 }
 
 // AuthCtx middleware is placeholder to get org id from token until we do SSAS
-func AuthCtx(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log := logger.WithContext(r.Context())
-		organizationID := r.Header.Get(OrgHeader)
-		if organizationID == "" {
-			log.Error("Missing auth token")
-			fhirror.ServerIssue(r.Context(), w, http.StatusForbidden, "Missing auth token")
-			return
+func AuthCtx(ssasClient client.SsasClient) func(next http.Handler) http.Handler {
+	// Return context with organizationID
+	return func(next http.Handler) http.Handler {
+		//return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fn := func(w http.ResponseWriter, r *http.Request) {
+			log := logger.WithContext(r.Context())
+
+			// Extract access token from authorization header:
+			reqToken := r.Header.Get("Authorization")
+			if len(reqToken) <= 0 {
+				log.Error("Missing access token")
+				fhirror.ServerIssue(r.Context(), w, http.StatusForbidden, "Missing access token")
+				return
+			}
+			bearerTokenParts := strings.Split(reqToken, "Bearer ")
+			bearerToken := bearerTokenParts[1]
+			if len(bearerToken) <= 0 {
+				log.Error("Missing access token")
+				fhirror.ServerIssue(r.Context(), w, http.StatusForbidden, "Missing access token")
+				return
+			}
+
+			orgID, err := ssasClient.ValidateAccessToken(r.Context(), bearerToken)
+
+			if err != nil {
+				log.Error("Invalid access token", zap.Error(err))
+				fhirror.ServerIssue(r.Context(), w, http.StatusForbidden, "Invalid access token")
+				return
+			}
+
+			ctx := context.WithValue(r.Context(), constants.ContextKeyOrganization, orgID)
+			next.ServeHTTP(w, r.WithContext(ctx))
 		}
-		ctx := context.WithValue(r.Context(), ContextKeyOrganization, organizationID)
-		next.ServeHTTP(w, r.WithContext(ctx))
-	})
+
+		return http.HandlerFunc(fn)
+	}
 }
 
 // GroupCtx middleware to extract the groupID from the chi url param and set it into the request context
