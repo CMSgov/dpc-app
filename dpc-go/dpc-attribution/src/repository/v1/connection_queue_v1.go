@@ -1,15 +1,18 @@
-package repository
+package v1
 
 import (
 	"context"
 	"database/sql"
 	"github.com/CMSgov/dpc/attribution/conf"
 	"github.com/CMSgov/dpc/attribution/logger"
+	"github.com/huandu/go-sqlbuilder"
 	"github.com/jackc/pgx"
 	"github.com/jackc/pgx/log/zapadapter"
 	"github.com/jackc/pgx/stdlib"
 	"go.uber.org/zap"
 )
+
+const sqlFlavor = sqlbuilder.PostgreSQL
 
 // GetQueueDbConnection function that sets up the dpc_attribution v1 db connection and returns the db struct
 func GetQueueDbConnection() *sql.DB {

@@ -1,4 +1,4 @@
-package v2
+package model
 
 import (
 	"database/sql"
@@ -22,6 +22,18 @@ type ImplementerOrgRelation struct {
 type ImplementorOrgOutput struct {
 	ImplementerOrgRelation
 	NPI string `json:"npi"`
+}
+
+// MarshalJSON Json marshaller
+func (u *ImplementerOrgRelation) MarshalJSON() ([]byte, error) {
+	type Alias ImplementerOrgRelation
+	return json.Marshal(&struct {
+		Status string `json:"status"`
+		*Alias
+	}{
+		Status: u.Status.String(),
+		Alias:  (*Alias)(u),
+	})
 }
 
 // MarshalJSON Json marshaller

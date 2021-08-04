@@ -1,4 +1,4 @@
-package v2
+package service
 
 import (
 	"context"
@@ -11,7 +11,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/CMSgov/dpc/attribution/model/v2"
+	"github.com/CMSgov/dpc/attribution/model"
 	"github.com/bxcodec/faker/v3"
 	"github.com/kinbiko/jsonassert"
 	"github.com/pkg/errors"
@@ -24,26 +24,26 @@ type MockImplementerRepo struct {
 	mock.Mock
 }
 
-func (m *MockImplementerRepo) Insert(ctx context.Context, body []byte) (*v2.Implementer, error) {
+func (m *MockImplementerRepo) Insert(ctx context.Context, body []byte) (*model.Implementer, error) {
 	args := m.Called(ctx, body)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).(*v2.Implementer), args.Error(1)
+	return args.Get(0).(*model.Implementer), args.Error(1)
 }
-func (m *MockImplementerRepo) Update(ctx context.Context, id string, body []byte) (*v2.Implementer, error) {
+func (m *MockImplementerRepo) Update(ctx context.Context, id string, body []byte) (*model.Implementer, error) {
 	args := m.Called(ctx, id, body)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).(*v2.Implementer), args.Error(1)
+	return args.Get(0).(*model.Implementer), args.Error(1)
 }
-func (m *MockImplementerRepo) FindByID(ctx context.Context, id string) (*v2.Implementer, error) {
+func (m *MockImplementerRepo) FindByID(ctx context.Context, id string) (*model.Implementer, error) {
 	args := m.Called(ctx, id)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).(*v2.Implementer), args.Error(1)
+	return args.Get(0).(*model.Implementer), args.Error(1)
 }
 
 type ImplementerServiceTestSuite struct {
@@ -64,7 +64,7 @@ func (suite *ImplementerServiceTestSuite) SetupTest() {
 func (suite *ImplementerServiceTestSuite) TestPost() {
 	ja := jsonassert.New(suite.T())
 
-	impl := v2.Implementer{}
+	impl := model.Implementer{}
 	err := faker.FakeData(&impl)
 	if err != nil {
 		fmt.Printf("ERR %v\n", err)
@@ -90,12 +90,12 @@ func (suite *ImplementerServiceTestSuite) TestPost() {
 func (suite *ImplementerServiceTestSuite) TestPut() {
 	ja := jsonassert.New(suite.T())
 
-	impl := v2.Implementer{}
+	impl := model.Implementer{}
 	err := faker.FakeData(&impl)
 	if err != nil {
 		fmt.Printf("ERR %v\n", err)
 	}
-	implUpdated := v2.Implementer{}
+	implUpdated := model.Implementer{}
 	err = faker.FakeData(&impl)
 	if err != nil {
 		fmt.Printf("ERR %v\n", err)
@@ -121,7 +121,7 @@ func (suite *ImplementerServiceTestSuite) TestPut() {
 }
 
 func (suite *ImplementerServiceTestSuite) TestUpdateWithoutName() {
-	impl := v2.Implementer{}
+	impl := model.Implementer{}
 	err := faker.FakeData(&impl)
 	if err != nil {
 		fmt.Printf("ERR %v\n", err)
@@ -144,7 +144,7 @@ func (suite *ImplementerServiceTestSuite) TestUpdateWithoutName() {
 }
 
 func (suite *ImplementerServiceTestSuite) TestUpdateNotFound() {
-	impl := v2.Implementer{}
+	impl := model.Implementer{}
 	err := faker.FakeData(&impl)
 	if err != nil {
 		fmt.Printf("ERR %v\n", err)

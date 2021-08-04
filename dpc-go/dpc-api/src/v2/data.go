@@ -11,6 +11,7 @@ import (
 	"github.com/CMSgov/dpc/api/model"
 	"go.uber.org/zap"
 	"net/http"
+	"path/filepath"
 )
 
 // DataController is a struct that defines what the controller has
@@ -36,8 +37,7 @@ func (dc *DataController) GetFile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//
-	b, err := dc.c.Data(r.Context(), fmt.Sprintf("validityCheck/%s", fileName))
+	b, err := dc.c.Data(r.Context(), fmt.Sprintf("validityCheck/%s", fileName[:len(fileName)-len(filepath.Ext(fileName))]))
 	if err != nil {
 		log.Error(fmt.Sprintf("Failed to check if file %s is valid", fileName), zap.Error(err))
 		fhirror.ServerIssue(r.Context(), w, http.StatusNotFound, fmt.Sprintf("Failed to get file %s", fileName))

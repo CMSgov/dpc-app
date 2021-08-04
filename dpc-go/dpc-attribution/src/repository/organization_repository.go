@@ -9,17 +9,17 @@ import (
 	"github.com/huandu/go-sqlbuilder"
 	"github.com/pkg/errors"
 
-	"github.com/CMSgov/dpc/attribution/model/v2"
+	"github.com/CMSgov/dpc/attribution/model"
 	"github.com/CMSgov/dpc/attribution/util"
 )
 
 // OrganizationRepo is an interface for test mocking purposes
 type OrganizationRepo interface {
-	Insert(ctx context.Context, body []byte) (*v2.Organization, error)
-	FindByID(ctx context.Context, id string) (*v2.Organization, error)
+	Insert(ctx context.Context, body []byte) (*model.Organization, error)
+	FindByID(ctx context.Context, id string) (*model.Organization, error)
 	DeleteByID(ctx context.Context, id string) error
-	Update(ctx context.Context, id string, body []byte) (*v2.Organization, error)
-	FindByNPI(ctx context.Context, npi string) (*v2.Organization, error)
+	Update(ctx context.Context, id string, body []byte) (*model.Organization, error)
+	FindByNPI(ctx context.Context, npi string) (*model.Organization, error)
 }
 
 // OrganizationRepository is a struct that defines what the repository has
@@ -28,22 +28,22 @@ type OrganizationRepository struct {
 }
 
 // NewOrganizationRepo function that creates a organizationRepository and returns it's reference
-func NewOrganizationRepo(db *sql.DB) *OrganizationRepository {
+func NewOrganizationRepo(db *sql.DB) OrganizationRepo {
 	return &OrganizationRepository{
 		db,
 	}
 }
 
 // FindByID function that searches the database for the organization that matches the id
-func (or *OrganizationRepository) FindByID(ctx context.Context, id string) (*v2.Organization, error) {
+func (or *OrganizationRepository) FindByID(ctx context.Context, id string) (*model.Organization, error) {
 	sb := sqlFlavor.NewSelectBuilder()
 	sb.Select("id", "version", "created_at", "updated_at", "info")
 	sb.From("organization")
 	sb.Where(sb.Equal("id", id))
 	q, args := sb.Build()
 
-	org := new(v2.Organization)
-	orgStruct := sqlbuilder.NewStruct(new(v2.Organization)).For(sqlFlavor)
+	org := new(model.Organization)
+	orgStruct := sqlbuilder.NewStruct(new(model.Organization)).For(sqlFlavor)
 	if err := or.db.QueryRowContext(ctx, q, args...).Scan(orgStruct.Addr(&org)...); err != nil {
 		return nil, err
 	}
@@ -51,9 +51,9 @@ func (or *OrganizationRepository) FindByID(ctx context.Context, id string) (*v2.
 }
 
 // Insert function that saves the fhir model into the database and returns the model.Organization
-func (or *OrganizationRepository) Insert(ctx context.Context, body []byte) (*v2.Organization, error) {
+func (or *OrganizationRepository) Insert(ctx context.Context, body []byte) (*model.Organization, error) {
 
-	var info v2.Info
+	var info model.Info
 	if err := json.Unmarshal(body, &info); err != nil {
 		return nil, err
 	}
@@ -86,8 +86,8 @@ func (or *OrganizationRepository) Insert(ctx context.Context, body []byte) (*v2.
 
 	q, args = ib.Build()
 
-	org := new(v2.Organization)
-	orgStruct := sqlbuilder.NewStruct(new(v2.Organization)).For(sqlFlavor)
+	org := new(model.Organization)
+	orgStruct := sqlbuilder.NewStruct(new(model.Organization)).For(sqlFlavor)
 	if err := or.db.QueryRowContext(ctx, q, args...).Scan(orgStruct.Addr(&org)...); err != nil {
 		return nil, err
 	}
@@ -108,9 +108,9 @@ func (or *OrganizationRepository) DeleteByID(ctx context.Context, id string) err
 }
 
 // Update function that updates from the database the organization that matches the id
-func (or *OrganizationRepository) Update(ctx context.Context, id string, body []byte) (*v2.Organization, error) {
+func (or *OrganizationRepository) Update(ctx context.Context, id string, body []byte) (*model.Organization, error) {
 
-	var info v2.Info
+	var info model.Info
 	if err := json.Unmarshal(body, &info); err != nil {
 		return nil, err
 	}
@@ -146,8 +146,8 @@ func (or *OrganizationRepository) Update(ctx context.Context, id string, body []
 	ub.SQL("returning id, version, created_at, updated_at, info")
 	q, args = ub.Build()
 
-	org := new(v2.Organization)
-	var orgStruct = sqlbuilder.NewStruct(new(v2.Organization))
+	org := new(model.Organization)
+	var orgStruct = sqlbuilder.NewStruct(new(model.Organization))
 	if err := or.db.QueryRowContext(ctx, q, args...).Scan(orgStruct.Addr(&org)...); err != nil {
 		return nil, err
 	}
@@ -156,15 +156,15 @@ func (or *OrganizationRepository) Update(ctx context.Context, id string, body []
 }
 
 // FindByNPI function that searches the database for the organization that matches the id
-func (or *OrganizationRepository) FindByNPI(ctx context.Context, npi string) (*v2.Organization, error) {
+func (or *OrganizationRepository) FindByNPI(ctx context.Context, npi string) (*model.Organization, error) {
 	sb := sqlFlavor.NewSelectBuilder()
 	sb.Select("id", "version", "created_at", "updated_at", "info")
 	sb.From("organization")
 	sb.Where(fmt.Sprintf("info @> '{\"identifier\": [{\"value\": \"%s\"}]}'", npi))
 	q, args := sb.Build()
 
-	org := new(v2.Organization)
-	orgStruct := sqlbuilder.NewStruct(new(v2.Organization)).For(sqlFlavor)
+	org := new(model.Organization)
+	orgStruct := sqlbuilder.NewStruct(new(model.Organization)).For(sqlFlavor)
 	if err := or.db.QueryRowContext(ctx, q, args...).Scan(orgStruct.Addr(&org)...); err != nil {
 		return nil, err
 	}

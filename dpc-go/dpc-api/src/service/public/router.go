@@ -1,7 +1,6 @@
 package public
 
 import (
-	"github.com/CMSgov/dpc/api/auth"
 	"github.com/CMSgov/dpc/api/client"
 	"github.com/CMSgov/dpc/api/conf"
 	middleware2 "github.com/CMSgov/dpc/api/middleware"
@@ -55,8 +54,10 @@ func buildPublicRoutes(cont controllers) http.Handler {
 			r.Use(middleware2.AuthCtx)
 			r.With(middleware2.FileNameCtx).Get("/{fileName}", cont.Data.GetFile)
 		})
+
+		//SSAS
+		r.Post("/Token/auth", cont.Ssas.GetAuthToken)
 	})
-	r.Post("/auth/token", auth.GetAuthToken)
 	return r
 }
 
@@ -66,6 +67,7 @@ func NewPublicServer() *service.Server {
 		URL:     conf.GetAsString("attribution-client.url"),
 		Retries: conf.GetAsInt("attribution-client.retries", 3),
 	})
+
 	dataClient := client.NewDataClient(client.DataConfig{
 		URL:     conf.GetAsString("attribution-client.url"),
 		Retries: conf.GetAsInt("attribution-client.retries", 3),
@@ -76,14 +78,23 @@ func NewPublicServer() *service.Server {
 		Retries: conf.GetAsInt("attribution-client.retries", 3),
 	})
 
+	ssasClient := client.NewSsasHTTPClient(client.SsasHTTPClientConfig{
+		PublicURL:    conf.GetAsString("ssas-client.public-url"),
+		AdminURL:     conf.GetAsString("ssas-client.admin-url"),
+		Retries:      conf.GetAsInt("ssas-client.attrRetries", 3),
+		ClientID:     conf.GetAsString("ssas-client.client-id"),
+		ClientSecret: conf.GetAsString("ssas-client.client-secret"),
+	})
+
 	port := conf.GetAsInt("PUBLIC_PORT", 3000)
 
 	controllers := controllers{
 		Org:      v2.NewOrganizationController(attrClient),
 		Metadata: v2.NewMetadataController(conf.GetAsString("capabilities.base")),
-		Group:    v2.NewGroupController(attrClient),
+		Group:    v2.NewGroupController(attrClient, jobClient),
 		Data:     v2.NewDataController(dataClient),
 		Job:      v2.NewJobController(jobClient),
+		Ssas:     v2.NewSSASController(ssasClient, attrClient),
 	}
 
 	r := buildPublicRoutes(controllers)
@@ -115,4 +126,5 @@ type controllers struct {
 	Group    v2.Controller
 	Data     v2.FileController
 	Job      v2.JobController
+	Ssas     v2.AuthController
 }
