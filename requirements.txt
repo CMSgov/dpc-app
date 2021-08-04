@@ -1,4 +1,1 @@
-wheel
-setuptools
-Cython
 bzt
