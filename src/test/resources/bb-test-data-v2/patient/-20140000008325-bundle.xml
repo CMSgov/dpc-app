@@ -1,49 +1,156 @@
 <Bundle xmlns="http://hl7.org/fhir">
-    <id value="eb3894fc-ca04-44d4-adab-a9fb0a6f1976"/>
+    <id value="958ed22b-b563-45d2-a7b4-158871cdc207" />
     <meta>
-        <lastUpdated value="2020-01-01T00:01:23.456-04:00"/>
+        <lastUpdated value="2021-06-08T01:55:08.681+00:00" />
     </meta>
-    <type value="searchset"/>
-    <total value="1"/>
+    <type value="searchset" />
+    <total value="1" />
     <link>
-        <relation value="self"/>
-        <url value="http://localhost:8083/v1/fhir/Patient?identifier=https://bluebutton.cms.gov/resources/identifier/mbi-hash|abadf57ff8dc94610ca0d479feadb1743c9cd3c77caf1eafde5719a154379fb6"/>
+        <relation value="self" />
+        <url value="https://prod-sbx.bfd.cms.gov/v2/fhir/Patient?_format=xml&amp;_pretty=true&amp;identifier=https%3A%2F%2Fbluebutton.cms.gov%2Fresources%2Fidentifier%2Fmbi-hash%7Cabadf57ff8dc94610ca0d479feadb1743c9cd3c77caf1eafde5719a154379fb6" />
     </link>
     <entry>
         <resource>
             <Patient xmlns="http://hl7.org/fhir">
-                <id value="-20140000008325"/>
+                <id value="-20140000008325" />
                 <extension url="https://bluebutton.cms.gov/resources/variables/race">
                     <valueCoding>
-                        <system value="https://bluebutton.cms.gov/resources/variables/race"/>
-                        <code value="1"/>
-                        <display value="White"/>
+                        <system value="https://bluebutton.cms.gov/resources/variables/race" />
+                        <code value="1" />
+                        <display value="White" />
+                    </valueCoding>
+                </extension>
+                <extension url="http://hl7.org/fhir/us/core/StructureDefinition/us-core-race">
+                    <extension url="ombCategory">
+                        <valueCoding>
+                            <system value="http://terminology.hl7.org/CodeSystem/v3-NullFlavor" />
+                            <code value="UNK" />
+                            <display value="Unknown" />
+                        </valueCoding>
+                    </extension>
+                    <extension url="text">
+                        <valueString value="Unknown" />
+                    </extension>
+                </extension>
+                <extension url="https://bluebutton.cms.gov/resources/variables/rfrnc_yr">
+                    <valueDate value="0003" />
+                </extension>
+                <extension url="https://bluebutton.cms.gov/resources/variables/dual_01">
+                    <valueCoding>
+                        <system value="https://bluebutton.cms.gov/resources/variables/dual_01" />
+                        <code value="AA" />
+                    </valueCoding>
+                </extension>
+                <extension url="https://bluebutton.cms.gov/resources/variables/dual_02">
+                    <valueCoding>
+                        <system value="https://bluebutton.cms.gov/resources/variables/dual_02" />
+                        <code value="AA" />
+                    </valueCoding>
+                </extension>
+                <extension url="https://bluebutton.cms.gov/resources/variables/dual_03">
+                    <valueCoding>
+                        <system value="https://bluebutton.cms.gov/resources/variables/dual_03" />
+                        <code value="AA" />
+                    </valueCoding>
+                </extension>
+                <extension url="https://bluebutton.cms.gov/resources/variables/dual_04">
+                    <valueCoding>
+                        <system value="https://bluebutton.cms.gov/resources/variables/dual_04" />
+                        <code value="AA" />
+                    </valueCoding>
+                </extension>
+                <extension url="https://bluebutton.cms.gov/resources/variables/dual_05">
+                    <valueCoding>
+                        <system value="https://bluebutton.cms.gov/resources/variables/dual_05" />
+                        <code value="AA" />
+                    </valueCoding>
+                </extension>
+                <extension url="https://bluebutton.cms.gov/resources/variables/dual_06">
+                    <valueCoding>
+                        <system value="https://bluebutton.cms.gov/resources/variables/dual_06" />
+                        <code value="AA" />
+                    </valueCoding>
+                </extension>
+                <extension url="https://bluebutton.cms.gov/resources/variables/dual_07">
+                    <valueCoding>
+                        <system value="https://bluebutton.cms.gov/resources/variables/dual_07" />
+                        <code value="AA" />
+                    </valueCoding>
+                </extension>
+                <extension url="https://bluebutton.cms.gov/resources/variables/dual_08">
+                    <valueCoding>
+                        <system value="https://bluebutton.cms.gov/resources/variables/dual_08" />
+                        <code value="AA" />
+                    </valueCoding>
+                </extension>
+                <extension url="https://bluebutton.cms.gov/resources/variables/dual_09">
+                    <valueCoding>
+                        <system value="https://bluebutton.cms.gov/resources/variables/dual_09" />
+                        <code value="AA" />
+                    </valueCoding>
+                </extension>
+                <extension url="https://bluebutton.cms.gov/resources/variables/dual_10">
+                    <valueCoding>
+                        <system value="https://bluebutton.cms.gov/resources/variables/dual_10" />
+                        <code value="AA" />
+                    </valueCoding>
+                </extension>
+                <extension url="https://bluebutton.cms.gov/resources/variables/dual_11">
+                    <valueCoding>
+                        <system value="https://bluebutton.cms.gov/resources/variables/dual_11" />
+                        <code value="AA" />
+                    </valueCoding>
+                </extension>
+                <extension url="https://bluebutton.cms.gov/resources/variables/dual_12">
+                    <valueCoding>
+                        <system value="https://bluebutton.cms.gov/resources/variables/dual_12" />
+                        <code value="AA" />
                     </valueCoding>
                 </extension>
                 <identifier>
-                    <system value="https://bluebutton.cms.gov/resources/variables/bene_id"/>
-                    <value value="-20140000008325"/>
+                    <type>
+                        <coding>
+                            <system value="http://terminology.hl7.org/CodeSystem/v2-0203" />
+                            <code value="MB" />
+                            <display value="Member Number" />
+                        </coding>
+                    </type>
+                    <system value="https://bluebutton.cms.gov/resources/variables/bene_id" />
+                    <value value="-20140000008325" />
                 </identifier>
                 <identifier>
-                    <system value="https://bluebutton.cms.gov/resources/identifier/hicn-hash"/>
-                    <value value="ee78989d1d9ba0b98f3cfbd52479f10c7631679c17563186f70fbef038cc9536"/>
-                </identifier>
-                <identifier>
-                    <system value="https://bluebutton.cms.gov/resources/identifier/mbi-hash"/>
-                    <value value="abadf57ff8dc94610ca0d479feadb1743c9cd3c77caf1eafde5719a154379fb6"/>
+                    <type>
+                        <coding>
+                            <extension url="https://bluebutton.cms.gov/resources/codesystem/identifier-currency">
+                                <valueCoding>
+                                    <system value="https://bluebutton.cms.gov/resources/codesystem/identifier-currency" />
+                                    <code value="current" />
+                                    <display value="Current" />
+                                </valueCoding>
+                            </extension>
+                            <system value="http://terminology.hl7.org/CodeSystem/v2-0203" />
+                            <code value="MC" />
+                            <display value="Patient's Medicare number" />
+                        </coding>
+                    </type>
+                    <system value="http://hl7.org/fhir/sid/us-mbi" />
+                    <value value="2SW4N00AA00" />
+                    <period>
+                        <start value="2020-01-01" />
+                    </period>
                 </identifier>
                 <name>
-                    <use value="usual"/>
-                    <family value="Doe"/>
-                    <given value="Jane"/>
-                    <given value="X"/>
+                    <use value="usual" />
+                    <family value="Doe" />
+                    <given value="Jane" />
+                    <given value="X" />
                 </name>
-                <gender value="unknown"/>
-                <birthDate value="2014-06-01"/>
+                <gender value="female" />
+                <birthDate value="2014-06-01" />
+                <deceasedDateTime value="1981-03-17" />
                 <address>
-                    <district value="999"/>
-                    <state value="15"/>
-                    <postalCode value="99999"/>
+                    <state value="15" />
+                    <postalCode value="99999" />
                 </address>
             </Patient>
         </resource>
