@@ -11,10 +11,8 @@ venv: venv/bin/activate
 
 venv/bin/activate: requirements.txt
 	test -d venv || virtualenv venv
-	. venv/bin/activate; CRYPTOGRAPHY_DONT_BUILD_RUST=1 pip install -Ur requirements.txt
+	. venv/bin/activate
 	touch venv/bin/activate
-
-
 
 .PHONY: ig/publish
 ig/publish: ${IG_PUBLISHER}
@@ -125,7 +123,7 @@ smoke:
 smoke/local: venv smoke
 	@echo "Running Smoke Tests against Local env"
 	@read -p "`echo '\n=====\nThe Smoke Tests require an authenticated environment!\nVerify your local API environment has \"authenticationDisabled = false\" or these tests will fail.\n=====\n\nPress ENTER to run the tests...'`"
-	. venv/bin/activate; bzt src/test/local.smoke_test.yml
+	. venv/bin/activate; pip install -Ur requirements.txt; bzt src/test/local.smoke_test.yml
 
 .PHONY: smoke/remote
 smoke/remote: venv smoke
