@@ -81,7 +81,7 @@ func NewAdminServer() *service.Server {
 	}
 
 	r := buildAdminRoutes(controllers)
-	return service.NewServer("DPC-API Admin Server", port, true, r)
+	return service.NewServer("DPC-API Admin Server", port, false, r)
 }
 
 type controllers struct {

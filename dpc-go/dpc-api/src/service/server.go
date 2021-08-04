@@ -67,31 +67,35 @@ func (s *Server) Serve(ctx context.Context) error {
 		},
 	}
 
-	if err := s.server.ListenAndServeTLS("", ""); err != nil {
+    fmt.Printf("Starting secure %s on port %d\n", s.name, s.port)
+    if err := s.server.ListenAndServeTLS("", ""); err != nil {
 		logger.WithContext(ctx).Fatal(fmt.Sprintf("Failed to start secure server: %s", s.name), zap.Error(err))
 	}
 	return nil
 }
 
 func getClientValidator(helloInfo *tls.ClientHelloInfo, cerPool *x509.CertPool) func([][]byte, [][]*x509.Certificate) error {
-	reqName := conf.GetAsString("TLS_REQUIRED_ALT_NAME", "api.user.dpc.cms.gov")
+	acS := conf.GetAsString("ALLOWED_CLIENTS", "local.portal.dpc.cms.gov")
+	allowed := strings.Split(acS, ",")
 	return func(rawCerts [][]byte, verifiedChains [][]*x509.Certificate) error {
-		for _, n := range verifiedChains[0][0].DNSNames {
-			if n == reqName {
-				return nil
+		for _, dnsN := range verifiedChains[0][0].DNSNames {
+			for _, n := range allowed {
+				if n == dnsN {
+					return nil
+				}
 			}
 		}
-		return fmt.Errorf("client's SAN does not contain required name: %s", reqName)
+		return fmt.Errorf("client's SAN does not contain one of the allowed alt name. Allowed: %s", allowed)
 	}
 }
 
 func getServerCertificates(ctx context.Context) (*x509.CertPool, tls.Certificate) {
 	caStr := strings.ReplaceAll(conf.GetAsString("CA_CERT"), "\\n", "\n")
-	crtStr := strings.ReplaceAll(conf.GetAsString("SERVER_CERT"), "\\n", "\n")
-	keyStr := strings.ReplaceAll(conf.GetAsString("SERVER_CERT_KEY"), "\\n", "\n")
+	crtStr := strings.ReplaceAll(conf.GetAsString("CERT"), "\\n", "\n")
+	keyStr := strings.ReplaceAll(conf.GetAsString("CERT_KEY"), "\\n", "\n")
 
 	if caStr == "" || crtStr == "" || keyStr == "" {
-		logger.WithContext(ctx).Fatal("One of the following required environment variables is missing: DPC_CA_CERT, DPC_SERVER_CERT, DPC_SERVER_CERT_KEY")
+		logger.WithContext(ctx).Fatal("One of the following required environment variables is missing: DPC_CA_CERT, DPC_CERT, DPC_CERT_KEY")
 	}
 
 	certPool := x509.NewCertPool()
