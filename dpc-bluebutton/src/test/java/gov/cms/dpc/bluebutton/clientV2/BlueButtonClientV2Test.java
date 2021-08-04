@@ -163,7 +163,7 @@ class BlueButtonClientV2Test {
 
         String patientDataCorrupted = "The demo Patient object data differs from what is expected";
         assertEquals(patient.getBirthDate(), java.sql.Date.valueOf("2014-06-01"), patientDataCorrupted);
-        assertEquals(patient.getGender().getDisplay(), "Unknown", patientDataCorrupted);
+        assertEquals(patient.getGender().getDisplay(), "Female", patientDataCorrupted);
         assertEquals(patient.getName().size(), 1, patientDataCorrupted);
         assertEquals(patient.getName().get(0).getFamily(), "Doe", patientDataCorrupted);
         assertEquals(patient.getName().get(0).getGiven().get(0).toString(), "Jane", patientDataCorrupted);
@@ -200,7 +200,7 @@ class BlueButtonClientV2Test {
 
         String patientDataCorrupted = "The demo Patient object data differs from what is expected";
         assertEquals(pt.getBirthDate(), java.sql.Date.valueOf("2014-06-01"), patientDataCorrupted);
-        assertEquals(pt.getGender().getDisplay(), "Unknown", patientDataCorrupted);
+        assertEquals(pt.getGender().getDisplay(), "Female", patientDataCorrupted);
         assertEquals(pt.getName().size(), 1, patientDataCorrupted);
         assertEquals(pt.getName().get(0).getFamily(), "Doe", patientDataCorrupted);
         assertEquals(pt.getName().get(0).getGiven().get(0).toString(), "Jane", patientDataCorrupted);
@@ -250,7 +250,7 @@ class BlueButtonClientV2Test {
         final Bundle response = bbc.requestCoverageFromServer(TEST_PATIENT_ID, TEST_LAST_UPDATED, null);
 
         assertNotNull(response, "The demo patient should have a non-null Coverage bundle");
-        assertEquals(3, response.getTotal(), "The demo patient should have exactly 3 Coverage");
+        assertEquals(4, response.getTotal(), "The demo patient should have exactly 3 Coverage");
     }
 
     @Test
