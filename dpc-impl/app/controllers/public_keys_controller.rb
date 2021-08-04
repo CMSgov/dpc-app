@@ -28,9 +28,12 @@ class PublicKeysController < ApplicationController
       )
     end
 
-    if new_public_key[:response]
+    if org_name_present?(params) && new_public_key[:response]
       @client_token = new_public_key[:message][:client_token]
       render :show
+    elsif new_public_key[:response]
+      flash[:notice] = 'Public key sucessfully uploaded.'
+      redirect_to provider_orgs_path(org_id: @org_id)
     else
       render_error(new_public_key[:message], @org_id)
     end
