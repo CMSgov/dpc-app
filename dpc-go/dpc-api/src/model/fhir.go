@@ -75,12 +75,23 @@ func (g *Group) GetAttributionInfo() ([]Attribution, error) {
 	return npis, nil
 }
 
-// FindPractitionerRef is a func that gets the practitioner preference from the group members
+// FindPractitionerRef is a func that gets the practitioner reference from the group members
 func (member *GroupMember) FindPractitionerRef() *fhir.Reference {
 	for _, e := range member.Extension {
 		vr := e.ValueReference
 		if vr != nil && vr.Type != nil && *vr.Type == "Practitioner" {
 			return vr
+		}
+	}
+	return nil
+}
+
+// FindPractitionerExtension is a func that gets the practitioner extension from the group members
+func (member *GroupMember) FindPractitionerExtension() *Extension {
+	for _, e := range member.Extension {
+		vr := e.ValueReference
+		if vr != nil && vr.Type != nil && *vr.Type == "Practitioner" {
+			return &e
 		}
 	}
 	return nil

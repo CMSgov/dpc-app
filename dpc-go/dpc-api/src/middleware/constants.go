@@ -25,6 +25,8 @@ const (
 	SinceLayout string = "2006-01-02T15:04:05-07:00"
 	// Ndjson is an allowed output format strings for export requests
 	Ndjson string = "ndjson"
+	// ProvenanceHeader is the provenance header
+	ProvenanceHeader string = "X-Provenance"
 	// ContextKeyOrganization is the key in the context to retrieve the organizationID
 	ContextKeyOrganization contextKey = iota
 	// ContextKeyRequestURL is the key in the context to retrieve the requestURL
@@ -49,4 +51,6 @@ const (
 	ContextKeyTokenID
 	// ContextKeyKeyID is the key in the context to pass on the keyID param value
 	ContextKeyKeyID
+	// ContextKeyProvenanceHeader is the key in the context to pass on the provenance header
+	ContextKeyProvenanceHeader
 )

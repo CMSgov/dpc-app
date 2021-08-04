@@ -32,7 +32,7 @@ func buildPublicRoutes(cont controllers) http.Handler {
 		//GROUP
 		r.Route("/Group", func(r chi.Router) {
 			r.Use(middleware2.AuthCtx)
-			r.With(middleware2.FHIRFilter, middleware2.FHIRModel).Post("/", cont.Group.Create)
+			r.With(middleware2.ProvenanceHeaderValidator, middleware2.FHIRFilter, middleware2.FHIRModel).Post("/", cont.Group.Create)
 			r.Route("/{groupID}", func(r chi.Router) {
 				r.Use(middleware2.RequestURLCtx)
 				r.Use(middleware2.GroupCtx)
