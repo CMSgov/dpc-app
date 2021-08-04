@@ -41,7 +41,7 @@ func (sc *SSASController) CreateToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	found, mOrg, err := sc.getManagedOrg(r, implementerID, organizationID)
+	found, mOrg, err := sc.getProviderOrg(r, implementerID, organizationID)
 	if err != nil {
 		log.Error("Failed to retrieve implementer's managed orgs", zap.Error(err))
 		fhirror.GenericServerIssue(r.Context(), w)
@@ -105,7 +105,7 @@ func (sc *SSASController) DeleteToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	found, mOrg, err := sc.getManagedOrg(r, implementerID, organizationID)
+	found, mOrg, err := sc.getProviderOrg(r, implementerID, organizationID)
 	if err != nil {
 		log.Error("Failed to retrieve implementer's managed orgs", zap.Error(err))
 		fhirror.GenericServerIssue(r.Context(), w)
@@ -146,7 +146,7 @@ func (sc *SSASController) GetSystem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	found, mOrg, err := sc.getManagedOrg(r, implementerID, organizationID)
+	found, mOrg, err := sc.getProviderOrg(r, implementerID, organizationID)
 	if err != nil {
 		log.Error("Failed to retrieve implementer's managed orgs", zap.Error(err))
 		boom.Internal(w, w, http.StatusInternalServerError, "Internal Server Error")
@@ -207,7 +207,7 @@ func (sc *SSASController) DeleteKey(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	found, mOrg, err := sc.getManagedOrg(r, implementerID, organizationID)
+	found, mOrg, err := sc.getProviderOrg(r, implementerID, organizationID)
 	if err != nil {
 		log.Error("Failed to retrieve implementer's managed orgs", zap.Error(err))
 		fhirror.GenericServerIssue(r.Context(), w)
@@ -248,7 +248,7 @@ func (sc *SSASController) AddKey(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	found, mOrg, err := sc.getManagedOrg(r, implementerID, organizationID)
+	found, mOrg, err := sc.getProviderOrg(r, implementerID, organizationID)
 	if err != nil {
 		log.Error("Failed to retrieve implementer's managed orgs", zap.Error(err))
 		fhirror.GenericServerIssue(r.Context(), w)
@@ -275,7 +275,7 @@ func (sc *SSASController) AddKey(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if proxyReq.Signature == "" {
-		log.Error(fmt.Sprintf("Signature is required when adding a public key"))
+		log.Error("Signature is required when adding a public key")
 		fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "Signature is required when adding a public key")
 		return
 	}
@@ -313,7 +313,7 @@ func (sc *SSASController) CreateSystem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	found, mOrg, err := sc.getManagedOrg(r, implementerID, organizationID)
+	found, mOrg, err := sc.getProviderOrg(r, implementerID, organizationID)
 	if err != nil {
 		log.Error("Failed to retrieve implementer's managed orgs", zap.Error(err))
 		boom.Internal(w, w, http.StatusInternalServerError, "Internal Server Error")
@@ -340,7 +340,7 @@ func (sc *SSASController) CreateSystem(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if proxyReq.Signature == "" {
-		log.Error(fmt.Sprintf("Signature is required when creating a systemy"))
+		log.Error("Signature is required when creating a system")
 		fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "Signature is required when creating a system")
 		return
 	}
@@ -357,7 +357,7 @@ func (sc *SSASController) CreateSystem(w http.ResponseWriter, r *http.Request) {
 		SsasSystemID:  ssasResp.SystemID,
 		Status:        "Active",
 	}
-	_, err = sc.attrClient.UpdateImplOrg(r.Context(), implementerID, organizationID, uRel)
+	_, err = sc.attrClient.UpdateImplementerOrg(r.Context(), implementerID, organizationID, uRel)
 	if err != nil {
 		log.Error("Failed to update implementer org relation", zap.Error(err))
 		fhirror.ServerIssue(r.Context(), w, 500, "Failed to create system")
@@ -386,6 +386,37 @@ func (sc *SSASController) CreateSystem(w http.ResponseWriter, r *http.Request) {
 	//TODO: once all DELETE endpoints are available (in ssas & attribution) we need to implement rollback logic for failure scenarios.
 }
 
+// GetAuthToken proxies a request to get an auth token from the SSAS service
+func (sc *SSASController) GetAuthToken(w http.ResponseWriter, r *http.Request) {
+	body, _ := ioutil.ReadAll(r.Body)
+	log := logger.WithContext(r.Context())
+
+	if len(body) == 0 {
+		log.Error("Body is empty")
+		fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "Body is required")
+		return
+	}
+
+	// TODO: May need to bring up error codes for more specific errors for troubleshooting
+	resBytes, err := sc.ssasClient.Authenticate(r.Context(), body)
+	if err != nil {
+		log.Error("Failed to authenticate", zap.Error(err))
+		fhirror.ServerIssue(r.Context(), w, http.StatusInternalServerError, fmt.Sprintf("Failed to authenticate token: %s", err))
+		return
+	}
+
+	if len(resBytes) <= 0 {
+		log.Error("No token returned from SSAS")
+		fhirror.ServerIssue(r.Context(), w, http.StatusInternalServerError, "No token returned from SSAS")
+		return
+	}
+
+	if _, err := w.Write(resBytes); err != nil {
+		log.Error("Failed to write data to response", zap.Error(err))
+		fhirror.ServerIssue(r.Context(), w, http.StatusInternalServerError, "Failed to authenticate token")
+	}
+}
+
 func (sc *SSASController) createSsasSystem(r *http.Request, implID string, orgID string, proxyReq ProxyCreateSystemRequest) (client.CreateSystemResponse, error) {
 	groupID, err := sc.getGroupID(r, implID)
 	if err != nil {
@@ -402,7 +433,7 @@ func (sc *SSASController) createSsasSystem(r *http.Request, implID string, orgID
 	return sc.ssasClient.CreateSystem(r.Context(), req)
 }
 
-func (sc *SSASController) getManagedOrg(r *http.Request, implID string, orgID string) (bool, client.ProviderOrg, error) {
+func (sc *SSASController) getProviderOrg(r *http.Request, implID string, orgID string) (bool, client.ProviderOrg, error) {
 	orgs, err := sc.attrClient.GetProviderOrgs(r.Context(), implID)
 	if err != nil {
 		return false, client.ProviderOrg{}, err

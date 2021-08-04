@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/CMSgov/dpc/api/apitest"
@@ -61,7 +62,31 @@ type MockSsasController struct {
 	mock.Mock
 }
 
+func (mjc *MockSsasController) GetSystem(w http.ResponseWriter, r *http.Request) {
+	mjc.Called(w, r)
+}
+
 func (mjc *MockSsasController) CreateSystem(w http.ResponseWriter, r *http.Request) {
+	mjc.Called(w, r)
+}
+
+func (mjc *MockSsasController) GetAuthToken(w http.ResponseWriter, r *http.Request) {
+	mjc.Called(w, r)
+}
+
+func (mjc *MockSsasController) CreateToken(w http.ResponseWriter, r *http.Request) {
+	mjc.Called(w, r)
+}
+
+func (mjc *MockSsasController) DeleteToken(w http.ResponseWriter, r *http.Request) {
+	mjc.Called(w, r)
+}
+
+func (mjc *MockSsasController) AddKey(w http.ResponseWriter, r *http.Request) {
+	mjc.Called(w, r)
+}
+
+func (mjc *MockSsasController) DeleteKey(w http.ResponseWriter, r *http.Request) {
 	mjc.Called(w, r)
 }
 
@@ -69,11 +94,12 @@ type RouterTestSuite struct {
 	suite.Suite
 	router     http.Handler
 	mockOrg    *MockController
-	mockMeta   *MockController
 	mockHealth *MockController
+	mockMeta   *MockController
 	mockGroup  *MockController
 	mockData   *MockFileController
 	mockJob    *MockJobController
+	mockSsas   *MockSsasController
 }
 
 func (suite *RouterTestSuite) SetupTest() {
@@ -83,6 +109,7 @@ func (suite *RouterTestSuite) SetupTest() {
 	suite.mockGroup = &MockController{}
 	suite.mockData = &MockFileController{}
 	suite.mockJob = &MockJobController{}
+	suite.mockSsas = &MockSsasController{}
 
 	c := controllers{
 		Org:      suite.mockOrg,
@@ -91,6 +118,7 @@ func (suite *RouterTestSuite) SetupTest() {
 		Group:    suite.mockGroup,
 		Data:     suite.mockData,
 		Job:      suite.mockJob,
+		Ssas:     suite.mockSsas,
 	}
 
 	suite.router = buildPublicRoutes(c)
@@ -177,4 +205,19 @@ func (suite *RouterTestSuite) TestOrganizationGetRoutes() {
 	assert.NotContains(suite.T(), v, "info")
 	assert.Contains(suite.T(), v, "resourceType")
 	assert.Equal(suite.T(), v["resourceType"], "Organization")
+}
+
+func (suite *RouterTestSuite) TestGetAuthTokenProxyRoute() {
+	suite.mockSsas.On("GetAuthToken", mock.Anything, mock.Anything).Once().Run(func(arg mock.Arguments) {
+		w := arg.Get(0).(http.ResponseWriter)
+		w.WriteHeader(http.StatusOK)
+	})
+
+	ts := httptest.NewServer(suite.router)
+
+	req, _ := http.NewRequest("POST", fmt.Sprintf("%s/%s", ts.URL, "v2/Token/auth"), strings.NewReader("{}"))
+	req.Header.Set("Content-Type", "application/json")
+	res, err := http.DefaultClient.Do(req)
+	fmt.Println(err)
+	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
 }

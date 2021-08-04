@@ -1,6 +1,7 @@
 package router
 
 import (
+	v1 "github.com/CMSgov/dpc/attribution/service/v1"
 	"net/http"
 
 	middleware2 "github.com/CMSgov/dpc/attribution/middleware"
@@ -11,7 +12,7 @@ import (
 )
 
 // NewDPCAttributionRouter function to build the attribution router
-func NewDPCAttributionRouter(o service.Service, g service.Service, impl service.Service, implOrg service.Service, d service.DataService, js service.JobService) http.Handler {
+func NewDPCAttributionRouter(o service.Service, g service.Service, impl service.Service, implOrg service.Service, d v1.DataService, js v1.JobService) http.Handler {
 	r := chi.NewRouter()
 	r.Use(middleware2.Logging())
 	r.Use(middleware.SetHeader("Content-Type", "application/json; charset=UTF-8"))
@@ -31,7 +32,7 @@ func NewDPCAttributionRouter(o service.Service, g service.Service, impl service.
 			r.Post("/", g.Post)
 			r.Route("/{groupID}", func(r chi.Router) {
 				r.Use(middleware2.GroupCtx)
-				r.Get("/$export", g.Export)
+				r.Get("/", g.Get)
 			})
 		})
 		r.Route("/Implementer", func(r chi.Router) {
@@ -53,13 +54,18 @@ func NewDPCAttributionRouter(o service.Service, g service.Service, impl service.
 				})
 			})
 		})
+
+		//Go away once shared job service
 		r.Route("/Data", func(r chi.Router) {
 			r.Use(middleware2.AuthCtx)
 			r.With(middleware2.FileNameCtx).Get("/validityCheck/{fileName}", d.GetFileInfo)
 		})
+
+		//Go away once shared job service
 		r.Route("/Job", func(r chi.Router) {
 			r.Use(middleware2.AuthCtx)
 			r.With(middleware2.JobCtx).Get("/{jobID}", js.BatchesAndFiles)
+			r.Post("/", js.Export)
 		})
 	})
 
