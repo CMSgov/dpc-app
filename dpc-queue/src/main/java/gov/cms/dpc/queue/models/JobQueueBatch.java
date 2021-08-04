@@ -238,7 +238,7 @@ public class JobQueueBatch implements Serializable {
         if (requestUrl == null) {
             return false;
         }
-        return requestUrl.contains("/v2/");
+        return requestUrl.toLowerCase().contains("/v2/");
     }
 
     public UUID getBatchID() {
