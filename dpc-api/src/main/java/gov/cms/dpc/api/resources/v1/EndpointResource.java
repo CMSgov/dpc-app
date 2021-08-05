@@ -9,6 +9,7 @@ import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.Authorizer;
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.resources.AbstractEndpointResource;
+import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.Profiled;
 import gov.cms.dpc.fhir.helpers.FHIRHelpers;
@@ -16,7 +17,10 @@ import gov.cms.dpc.fhir.validations.profiles.EndpointProfile;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.*;
 import org.eclipse.jetty.http.HttpStatus;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Endpoint;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Reference;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
@@ -84,7 +88,7 @@ public class EndpointResource extends AbstractEndpointResource {
 
     @GET
     @Path("/{endpointID}")
-    @PathAuthorizer(type = ResourceType.Endpoint, pathParam = "endpointID")
+    @PathAuthorizer(type = DPCResourceType.Endpoint, pathParam = "endpointID")
     @FHIR
     @Timed
     @ExceptionMetered
@@ -102,7 +106,7 @@ public class EndpointResource extends AbstractEndpointResource {
 
     @PUT
     @Path("/{endpointID}")
-    @PathAuthorizer(type = ResourceType.Endpoint, pathParam = "endpointID")
+    @PathAuthorizer(type = DPCResourceType.Endpoint, pathParam = "endpointID")
     @FHIR
     @Timed
     @ExceptionMetered
@@ -132,7 +136,7 @@ public class EndpointResource extends AbstractEndpointResource {
 
     @DELETE
     @Path("/{endpointID}")
-    @PathAuthorizer(type = ResourceType.Endpoint, pathParam = "endpointID")
+    @PathAuthorizer(type = DPCResourceType.Endpoint, pathParam = "endpointID")
     @FHIR
     @Timed
     @ExceptionMetered
