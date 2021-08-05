@@ -7,6 +7,12 @@ class ApiClient
     @base_url = ENV.fetch('API_METADATA_URL')
   end
 
+  def create_client_token(imp_id, org_id, label)
+    uri_string = base_url + '/Implementer/' + imp_id + '/Org/' + org_id + '/token'
+    json = label.to_json
+    post_request(uri_string, json)
+  end
+
   def create_implementer(imp)
     uri_string = base_url + '/Implementer'
     json = {name: imp}.to_json
@@ -19,6 +25,38 @@ class ApiClient
     json = {npi: npi}.to_json
     post_request(uri_string, json)
     self
+  end
+
+  def create_public_key(imp_id, org_id, params: {})
+    uri_string = base_url + '/Implementer/' + imp_id + '/Org/' + org_id + '/key'
+    json = params.to_json
+    post_request(uri_string, json)
+  end
+
+  def create_system(imp_id, org_id, params: {})
+    uri_string = base_url + '/Implementer/' + imp_id + '/Org/' + org_id + '/system'
+    json = params.to_json
+    post_request(uri_string, json)
+  end
+
+  def delete_client_token(imp_id, org_id, token_id)
+    uri_string = base_url + '/Implementer/' + imp_id + '/Org/' + org_id + '/token/' + token_id
+    delete_request(uri_string)
+  end
+
+  def delete_public_key(imp_id, org_id, key_id)
+    uri_string = base_url + '/Implementer/' + imp_id + '/Org/' + org_id + '/key/' + key_id
+    delete_request(uri_string)
+  end
+
+  def get_tokens_keys(imp_id, provider_org_id)
+    uri_string = base_url + '/Implementer/' + imp_id + '/Org/' + provider_org_id + '/system'
+    get_request(uri_string)
+  end
+
+  def get_organization(org_id)
+    uri_string = base_url + '/Organization/' + org_id
+    get_request(uri_string)
   end
 
   def get_provider_orgs(imp_id)
@@ -36,6 +74,13 @@ class ApiClient
     Rails.logger.warn 'Could not connect to API'
     @response_status = 500
     @response_body = { 'issue' => [{ 'details' => { 'text' => 'Connection error' }}]}
+  end
+
+  def delete_request(uri_string)
+    uri = URI.parse uri_string
+    request = Net::HTTP::Delete.new(uri.request_uri)
+
+    http_request(request, uri)
   end
 
   def get_request(uri_string)
@@ -65,7 +110,13 @@ class ApiClient
   def parsed_response(response)
     return self if response.body.blank?
 
-    eval(response.body)
+    begin
+      !!JSON.parse(response.body)
+    rescue
+      return response.body
+    else
+      eval(response.body)
+    end
   end
 
   def post_request(uri_string, json)

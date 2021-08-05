@@ -18,12 +18,18 @@ Rails.application.routes.draw do
       match :add, via: [:post]
     end
 
+    resources :client_tokens, only: [:new, :create, :show, :destroy]
+    resources :public_keys, only: [:new, :create, :destroy]
+
     match '/members', to: 'portal#index', via: :get
     match '/portal', to: 'portal#show', via: :get
 
     devise_scope :user do
       root to: "devise/sessions#new"
     end
+
+  # downloadable files
+  match '/download_snippet', to: 'public_keys#download_snippet', as: 'download_snippet', via: :post
 
     if Rails.env.development?
       require 'sidekiq/web'
