@@ -8,6 +8,7 @@ import gov.cms.dpc.api.resources.AbstractJobResource;
 import gov.cms.dpc.common.annotations.APIV1;
 import gov.cms.dpc.common.annotations.NoHtml;
 import gov.cms.dpc.common.models.JobCompletionModel;
+import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.JobStatus;
@@ -18,7 +19,6 @@ import io.dropwizard.auth.Auth;
 import io.swagger.annotations.*;
 import org.bouncycastle.util.encoders.Hex;
 import org.eclipse.jetty.http.HttpStatus;
-import org.hl7.fhir.dstu3.model.ResourceType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -179,7 +179,7 @@ public class JobResource extends AbstractJobResource {
                         result.getResourceType(),
                         String.format("%s/Data/%s.ndjson", this.baseURL, JobQueueBatchFile.formOutputFileName(result.getBatchID(), result.getResourceType(), result.getSequence())),
                         result.getCount(), buildOutputEntryExtension(result)))
-                .filter(entry -> (entry.getType() == ResourceType.OperationOutcome ^ !forOperationalOutcomes)
+                .filter(entry -> (entry.getType() == DPCResourceType.OperationOutcome ^ !forOperationalOutcomes)
                         && entry.getCount() > 0)
                 .collect(Collectors.toList());
     }
