@@ -22,7 +22,7 @@ func buildAdminRoutes(c controllers) http.Handler {
 		r.Use(middleware.SetHeader("Content-Type", "application/fhir+json; charset=UTF-8"))
 		r.Get("/_health", func(w http.ResponseWriter, r *http.Request) {
 			m := make(map[string]string)
-			m["database"] = "ok"
+			m["api"] = "ok"
 			w.WriteHeader(http.StatusOK)
 			render.JSON(w, r, m)
 		})

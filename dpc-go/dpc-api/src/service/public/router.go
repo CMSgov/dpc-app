@@ -24,7 +24,7 @@ func buildPublicRoutes(cont controllers) http.Handler {
 		r.Get("/metadata", cont.Metadata.Read)
 		r.Get("/_health", func(w http.ResponseWriter, r *http.Request) {
 			m := make(map[string]string)
-			m["database"] = "ok"
+			m["api"] = "ok"
 			w.WriteHeader(http.StatusOK)
 			render.JSON(w, r, m)
 		})
