@@ -2,8 +2,6 @@ package public
 
 import (
 	"context"
-	"net/http"
-	"strings"
 	"github.com/CMSgov/dpc/api/client"
 	"github.com/CMSgov/dpc/api/conf"
 	middleware2 "github.com/CMSgov/dpc/api/middleware"
@@ -12,6 +10,8 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/render"
+	"net/http"
+	"strings"
 )
 
 func buildPublicRoutes(cont controllers) http.Handler {
