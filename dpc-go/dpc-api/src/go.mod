@@ -7,6 +7,7 @@ require (
 	github.com/darahayes/go-boom v0.0.0-20200826120415-fa5cb724143a
 	github.com/dgrijalva/jwt-go v3.2.1-0.20180309185540-3c771ce311b7+incompatible
 	github.com/go-chi/chi v1.5.1
+	github.com/go-chi/render v1.0.1
 	github.com/google/fhir/go v0.0.0-20210120234235-b7cfb32dc82f
 	github.com/google/uuid v1.1.1
 	github.com/hashicorp/go-retryablehttp v0.6.8

@@ -80,6 +80,7 @@ type RouterTestSuite struct {
 	suite.Suite
 	router      http.Handler
 	mockOrg     *MockController
+	mockHealth  *MockController
 	mockImpl    *MockController
 	mockImplOrg *MockController
 	mockSsas    *MockSsasController
@@ -88,12 +89,14 @@ type RouterTestSuite struct {
 func (suite *RouterTestSuite) SetupTest() {
 
 	suite.mockOrg = &MockController{}
+	suite.mockHealth = &MockController{}
 	suite.mockImpl = &MockController{}
 	suite.mockImplOrg = &MockController{}
 	suite.mockSsas = &MockSsasController{}
 
 	c := controllers{
 		Org:     suite.mockOrg,
+		Health:  suite.mockHealth,
 		Impl:    suite.mockImpl,
 		ImplOrg: suite.mockImplOrg,
 		Ssas:    suite.mockSsas,
@@ -104,6 +107,17 @@ func (suite *RouterTestSuite) SetupTest() {
 
 func TestRouterTestSuite(t *testing.T) {
 	suite.Run(t, new(RouterTestSuite))
+}
+
+func (suite *RouterTestSuite) TestHealthRoute() {
+	suite.mockHealth.On("Read", mock.Anything, mock.Anything).Once()
+
+	ts := httptest.NewServer(suite.router)
+
+	res, _ := http.Get(fmt.Sprintf("%s/%s", ts.URL, "v2/_health"))
+
+	assert.Equal(suite.T(), "application/fhir+json; charset=UTF-8", res.Header.Get("Content-Type"))
+	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
 }
 
 func (suite *RouterTestSuite) TestErrorHandling() {
