@@ -2,6 +2,8 @@ package public
 
 import (
 	"context"
+	"net/http"
+	"strings"
 	"github.com/CMSgov/dpc/api/client"
 	"github.com/CMSgov/dpc/api/conf"
 	middleware2 "github.com/CMSgov/dpc/api/middleware"
@@ -9,8 +11,7 @@ import (
 	v2 "github.com/CMSgov/dpc/api/v2"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
-	"net/http"
-	"strings"
+	"github.com/go-chi/render"
 )
 
 func buildPublicRoutes(cont controllers) http.Handler {
@@ -21,6 +22,12 @@ func buildPublicRoutes(cont controllers) http.Handler {
 	r.With(middleware2.Sanitize).Route("/v2", func(r chi.Router) {
 		r.Use(middleware.SetHeader("Content-Type", "application/fhir+json; charset=UTF-8"))
 		r.Get("/metadata", cont.Metadata.Read)
+		r.Get("/_health", func(w http.ResponseWriter, r *http.Request) {
+			m := make(map[string]string)
+			m["api"] = "ok"
+			w.WriteHeader(http.StatusOK)
+			render.JSON(w, r, m)
+		})
 
 		//ORGANIZATION
 		r.Route("/Organization", func(r chi.Router) {
@@ -128,6 +135,7 @@ func fileServer(r chi.Router, path string, root http.FileSystem) {
 type controllers struct {
 	Org      v2.Controller
 	Metadata v2.ReadController
+	Health   v2.Controller
 	Group    v2.Controller
 	Data     v2.FileController
 	Job      v2.JobController
