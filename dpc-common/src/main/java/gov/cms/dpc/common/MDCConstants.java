@@ -14,4 +14,5 @@ public final class MDCConstants {
     public static final String DPC_REQUEST_ID="request_id";
     public static final String IS_SMOKE_TEST_ORG = "is_smoke_test";
     public static final String IS_BULK = "is_bulk";
+    public static final String IS_V2 = "is_v2";
 }

@@ -13,6 +13,7 @@ import gov.cms.dpc.api.TestOrganizationContext;
 import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.common.utils.SeedProcessor;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
+import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.testing.APIAuthHelpers;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
@@ -26,6 +27,7 @@ import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+
 import javax.ws.rs.HttpMethod;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -517,7 +519,7 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
         createAndSubmitGroup(orgBContext.getOrgId(), orgBPractitioner, orgBClient, Lists.emptyList());
 
         Bundle results = orgAClient.search()
-                .forResource(ResourceType.Group.toString())
+                .forResource(DPCResourceType.Group.toString())
                 .returnBundle(Bundle.class)
                 .encodedJson()
                 .execute();
