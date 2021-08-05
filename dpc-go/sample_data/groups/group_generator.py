@@ -63,11 +63,11 @@ def create_group(n):
 
 
 def generate_random_npi():
-    return randint(10**(9),  (10**10)-1)
+    return str(randint(10**(9),  (10**10)-1))
 
 
 def output_group(group, npi):
-    filename = "group-" + str(npi) + ".json"
+    filename = "group-" + npi + ".json"
     with open(filename,  "w") as write_file:
         json.dump(group,  write_file,  indent=2)
     print("Done: ",  filename, "\n")

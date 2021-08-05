@@ -67,9 +67,9 @@ Done:  group-1730899835.json
 ### Output
 Examples of this script's output can be found in this directory under the following filenames:
 ```
-group-9211362525-3patients.json
-group-8248449264-10patients.json
-group-2424721656-50patients.json
-group-5748985131-200patients.json
-group-3746063730-3000patients.json
+group-3-patients.json
+group-10-patients.json
+group-50-patients.json
+group-200-patients.json
+group-3000-patients.json
 ```
