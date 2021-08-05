@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"database/sql"
+	b64 "encoding/base64"
 	"fmt"
 	"github.com/CMSgov/dpc/attribution/client"
 	"net/http"
@@ -139,12 +140,25 @@ func getClientValidator(helloInfo *tls.ClientHelloInfo, cerPool *x509.CertPool) 
 }
 
 func getServerCertificates(ctx context.Context) (*x509.CertPool, tls.Certificate) {
-	caStr := strings.ReplaceAll(conf.GetAsString("CA_CERT"), "\\n", "\n")
-	crtStr := strings.ReplaceAll(conf.GetAsString("CERT"), "\\n", "\n")
-	keyStr := strings.ReplaceAll(conf.GetAsString("CERT_KEY"), "\\n", "\n")
+	caB, err := b64.StdEncoding.DecodeString(conf.GetAsString("CA_CERT"))
+	if err != nil {
+		logger.WithContext(ctx).Fatal("Could not base64 decode DPC_CA_CERT", zap.Error(err))
+	}
+	crtB, err := b64.StdEncoding.DecodeString(conf.GetAsString("CERT"))
+	if err != nil {
+		logger.WithContext(ctx).Fatal("Could not base64 decode DPC_CERT", zap.Error(err))
+	}
+	keyB, err := b64.StdEncoding.DecodeString(conf.GetAsString("CERT_KEY"))
+	if err != nil {
+		logger.WithContext(ctx).Fatal("Could not base64 decode DPC_CA_KEY", zap.Error(err))
+	}
+
+	caStr := string(caB)
+	crtStr := string(crtB)
+	keyStr := string(keyB)
 
 	if caStr == "" || crtStr == "" || keyStr == "" {
-		logger.WithContext(ctx).Fatal("One of the following required environment variables is missing: DPC_CA_CERT, DPC_SERVER_CERT, DPC_SERVER_CERT_KEY")
+		logger.WithContext(ctx).Fatal("One of the following required environment variables is missing or not base64 encoded: DPC_CA_CERT, DPC_CERT, DPC_CERT_KEY")
 	}
 
 	certPool := x509.NewCertPool()
