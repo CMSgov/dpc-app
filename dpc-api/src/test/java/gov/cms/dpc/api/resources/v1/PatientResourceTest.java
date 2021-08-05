@@ -17,6 +17,7 @@ import gov.cms.dpc.api.TestOrganizationContext;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
 import gov.cms.dpc.common.utils.SeedProcessor;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
+import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.helpers.FHIRHelpers;
 import gov.cms.dpc.testing.APIAuthHelpers;
@@ -46,6 +47,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
 import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_NPI;
@@ -376,8 +378,8 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
 
         assertEquals(64, resultNoSince.getTotal(), "Should have 64 entries in Bundle");
         for (Bundle.BundleEntryComponent bec : resultNoSince.getEntry()) {
-            List<ResourceType> resourceTypes = List.of(ResourceType.Coverage, ResourceType.ExplanationOfBenefit, ResourceType.Patient);
-            assertTrue(resourceTypes.contains(bec.getResource().getResourceType()), "Resource type should be Coverage, EOB, or Patient");
+            List<DPCResourceType> resourceTypes = List.of(DPCResourceType.Coverage, DPCResourceType.ExplanationOfBenefit, DPCResourceType.Patient);
+            assertTrue(resourceTypes.stream().map(Enum::toString).collect(Collectors.toList()).contains(bec.getResource().getResourceType().toString()), "Resource type should be Coverage, EOB, or Patient");
         }
 
         Bundle resultEmptySince = client
@@ -483,8 +485,8 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
         //Setup org B with a patient
         final Patient orgBPatient = (Patient) APITestHelpers.createResource(orgBClient, APITestHelpers.createPatientResource("4S41C00AA00", orgBContext.getOrgId())).getResource();
 
-        assertThrows(AuthenticationException.class, () -> APITestHelpers.deleteResourceById(orgAClient, ResourceType.Patient, orgBPatient.getIdElement().getIdPart()), "Expected auth error when deleting another org's patient.");
-        APITestHelpers.deleteResourceById(orgBClient, ResourceType.Patient, orgBPatient.getIdElement().getIdPart());
+        assertThrows(AuthenticationException.class, () -> APITestHelpers.deleteResourceById(orgAClient, DPCResourceType.Patient, orgBPatient.getIdElement().getIdPart()), "Expected auth error when deleting another org's patient.");
+        APITestHelpers.deleteResourceById(orgBClient, DPCResourceType.Patient, orgBPatient.getIdElement().getIdPart());
     }
 
     @Test
@@ -542,7 +544,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     }
 
     private Bundle fetchPatients(IGenericClient client) {
-        return APITestHelpers.resourceSearch(client,ResourceType.Patient);
+        return APITestHelpers.resourceSearch(client,DPCResourceType.Patient);
     }
 
     private Patient fetchPatient(IGenericClient client, String mbi) {

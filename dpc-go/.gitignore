@@ -7,3 +7,5 @@ dpc-api/src/api
 dpc-attribution/src/shared_files/decrypted/*
 !dpc-attribution/src/shared_files/decrypted/README.md
 !dpc-attribution/src/shared_files/decrypted/testdata
+dpc-attribution/shared_files/decrypted/*
+!dpc-attribution/shared_files/decrypted/README.md
