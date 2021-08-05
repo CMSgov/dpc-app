@@ -67,8 +67,8 @@ func (s *Server) Serve(ctx context.Context) error {
 		},
 	}
 
-    fmt.Printf("Starting secure %s on port %d\n", s.name, s.port)
-    if err := s.server.ListenAndServeTLS("", ""); err != nil {
+	fmt.Printf("Starting secure %s on port %d\n", s.name, s.port)
+	if err := s.server.ListenAndServeTLS("", ""); err != nil {
 		logger.WithContext(ctx).Fatal(fmt.Sprintf("Failed to start secure server: %s", s.name), zap.Error(err))
 	}
 	return nil
