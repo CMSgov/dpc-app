@@ -246,10 +246,9 @@ class ResourceFetcherV2 {
         if (bfdTransactionTime.isBefore(transactionTime)) {
            // See BFD's RFC0004 for a discussion on why this type error may occur.
            // Note: Retrying the job after a delay may fix this problem.
-            logger.error("Failing the job for a BFD transaction time regression: BFD time {}, Job time {}",
+            logger.warn("Warning: BFD transaction time regression: BFD time {}, Job time {}",
                     bfdTransactionTime,
                     transactionTime);
-            throw new JobQueueFailure("BFD's transaction time regression");
         }
     }
 }
