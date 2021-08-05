@@ -1,6 +1,7 @@
 package gov.cms.dpc.fhir.dropwizard.handlers;
 
 import ca.uhn.fhir.context.FhirContext;
+import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
 import gov.cms.dpc.fhir.annotations.BundleReturnProperties;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
@@ -96,7 +97,7 @@ public class BundleHandlerTest {
                 .getEntry()
                 .stream()
                 .map(Bundle.BundleEntryComponent::getResource)
-                .filter(r -> r.getResourceType().equals(ResourceType.Patient))
+                .filter(r -> r.getResourceType().getPath().equals(DPCResourceType.Patient.getPath()))
                 .map(r -> (Patient) r)
                 .findAny()
                 .orElseThrow(() -> new IllegalStateException("Could not find patient"));
@@ -108,7 +109,7 @@ public class BundleHandlerTest {
                 .getEntry()
                 .stream()
                 .map(Bundle.BundleEntryComponent::getResource)
-                .filter(r -> r.getResourceType().equals(ResourceType.Practitioner))
+                .filter(r -> r.getResourceType().getPath().equals(DPCResourceType.Practitioner.getPath()))
                 .map(r -> (Practitioner) r)
                 .findAny()
                 .orElseThrow(() -> new IllegalStateException("Could not find practitioner"));

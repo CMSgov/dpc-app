@@ -1,11 +1,11 @@
 package gov.cms.dpc.aggregation.engine;
 
 import ca.uhn.fhir.context.FhirContext;
+import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatchFile;
 import org.hl7.fhir.dstu3.model.Resource;
-import org.hl7.fhir.dstu3.model.ResourceType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,16 +28,16 @@ class ResourceWriter {
     private FhirContext fhirContext;
     private OperationsConfig config;
     private JobQueueBatch job;
-    private ResourceType resourceType;
+    private DPCResourceType resourceType;
 
     /**
      * Form the full file name of an output file
      * @param batchID      - {@link UUID} ID of the batch job
-     * @param resourceType - {@link ResourceType} to append to filename
+     * @param resourceType - {@link DPCResourceType} to append to filename
      * @param sequence     - batch sequence number
      * @return return the path
      */
-    static String formOutputFilePath(String exportPath, UUID batchID, ResourceType resourceType, int sequence) {
+    static String formOutputFilePath(String exportPath, UUID batchID, DPCResourceType resourceType, int sequence) {
         return String.format("%s/%s.ndjson", exportPath, JobQueueBatchFile.formOutputFileName(batchID, resourceType, sequence));
     }
 
@@ -50,7 +50,7 @@ class ResourceWriter {
      */
     ResourceWriter(FhirContext fhirContext,
                     JobQueueBatch job,
-                    ResourceType resourceType,
+                    DPCResourceType resourceType,
                     OperationsConfig config) {
         this.fhirContext = fhirContext;
         this.config = config;
@@ -61,7 +61,7 @@ class ResourceWriter {
     /**
      * @return The resourceType of this resource
      */
-    ResourceType getResourceType() {
+    DPCResourceType getResourceType() {
         return resourceType;
     }
 

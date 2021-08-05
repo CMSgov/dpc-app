@@ -1,7 +1,7 @@
 package gov.cms.dpc.fhir.hapi;
 
 import ca.uhn.fhir.context.FhirContext;
-import org.hl7.fhir.dstu3.model.ResourceType;
+import gov.cms.dpc.fhir.DPCResourceType;
 
 import java.util.List;
 
@@ -19,7 +19,7 @@ public class ContextUtils {
      * @param context to prime
      * @param resourcesTypes that are used
      */
-    public static void prefetchResourceModels(FhirContext context, List<ResourceType> resourcesTypes) {
+    public static void prefetchResourceModels(FhirContext context, List<DPCResourceType> resourcesTypes) {
         context.getResourceDefinition("OperationOutcome");
         context.getResourceDefinition("Bundle");
         for(var resourceType: resourcesTypes) {
