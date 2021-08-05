@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import gov.cms.dpc.common.converters.jackson.OffsetDateTimeToStringConverter;
-import org.hl7.fhir.dstu3.model.ResourceType;
+import gov.cms.dpc.fhir.DPCResourceType;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -27,7 +27,7 @@ public class JobCompletionModel {
         /**
          * the FHIR resource type that is contained in the file
          */
-        private ResourceType type;
+        private DPCResourceType type;
 
         /**
          * the path to the file
@@ -48,7 +48,7 @@ public class JobCompletionModel {
             // Jackson required
         }
 
-        public OutputEntry(ResourceType type, String url, Integer count, List<FhirExtension> extension) {
+        public OutputEntry(DPCResourceType type, String url, Integer count, List<FhirExtension> extension) {
             this.type = type;
             this.url = url;
             this.count = count;
@@ -59,7 +59,7 @@ public class JobCompletionModel {
             return url;
         }
 
-        public ResourceType getType() {
+        public DPCResourceType getType() {
             return type;
         }
 

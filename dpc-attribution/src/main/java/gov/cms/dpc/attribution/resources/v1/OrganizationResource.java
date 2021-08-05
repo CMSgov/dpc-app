@@ -8,6 +8,7 @@ import gov.cms.dpc.attribution.jdbi.OrganizationDAO;
 import gov.cms.dpc.attribution.resources.AbstractOrganizationResource;
 import gov.cms.dpc.common.entities.EndpointEntity;
 import gov.cms.dpc.common.entities.OrganizationEntity;
+import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.FHIRParameter;
@@ -18,7 +19,6 @@ import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Endpoint;
 import org.hl7.fhir.dstu3.model.Organization;
-import org.hl7.fhir.dstu3.model.ResourceType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,7 +83,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
         final Optional<Organization> optOrganization = transactionBundle
                 .getEntry()
                 .stream()
-                .filter(entry -> entry.hasResource() && entry.getResource().getResourceType() == ResourceType.Organization)
+                .filter(entry -> entry.hasResource() && entry.getResource().getResourceType().getPath().equals(DPCResourceType.Organization.getPath()))
                 .map(entry -> (Organization) entry.getResource())
                 .findFirst();
 
@@ -162,7 +162,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
         return transactionBundle
                 .getEntry()
                 .stream()
-                .filter(entry -> entry.hasResource() && entry.getResource().getResourceType() == ResourceType.Endpoint)
+                .filter(entry -> entry.hasResource() && entry.getResource().getResourceType().getPath().equals(DPCResourceType.Endpoint.getPath()))
                 .map(entry -> (Endpoint) entry.getResource())
                 .map(e -> this.converter.fromFHIR(EndpointEntity.class, e))
                 .collect(Collectors.toList());

@@ -1,9 +1,9 @@
 package gov.cms.dpc.queue;
 
+import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import io.reactivex.Observable;
-import org.hl7.fhir.dstu3.model.ResourceType;
 
 import java.time.OffsetDateTime;
 import java.util.Collections;
@@ -22,7 +22,7 @@ public abstract class JobQueueCommon implements IJobQueue {
     }
 
     @Override
-    public UUID createJob(UUID orgID, String orgNPI, String providerNPI, List<String> patients, List<ResourceType> resourceTypes,
+    public UUID createJob(UUID orgID, String orgNPI, String providerNPI, List<String> patients, List<DPCResourceType> resourceTypes,
                           OffsetDateTime since, OffsetDateTime transactionTime, String requestingIP, String requestUrl, boolean isBulk) {
         final UUID jobID = UUID.randomUUID();
 
@@ -56,7 +56,7 @@ public abstract class JobQueueCommon implements IJobQueue {
                                            String orgNPI,
                                            String providerNPI,
                                            List<String> patients,
-                                           List<ResourceType> resourceTypes,
+                                           List<DPCResourceType> resourceTypes,
                                            OffsetDateTime since,
                                            OffsetDateTime transactionTime,
                                            String requestingIP,
@@ -69,7 +69,7 @@ public abstract class JobQueueCommon implements IJobQueue {
                                                    UUID orgID,
                                                    String orgNPI,
                                                    String providerNPI,
-                                                   List<ResourceType> resourceTypes,
+                                                   List<DPCResourceType> resourceTypes,
                                                    OffsetDateTime since,
                                                    OffsetDateTime transactionTime) {
         return Collections.singletonList(

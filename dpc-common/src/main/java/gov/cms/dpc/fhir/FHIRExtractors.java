@@ -70,7 +70,7 @@ public class FHIRExtractors {
     /**
      * Extracts the UUID from the ID of a given resource.
      * <p>
-     * The ID could be in one of two forms: 1. {ResourceType}/{identifier}. 2. {identifier}
+     * The ID could be in one of two forms: 1. {DPCResourceType}/{identifier}. 2. {identifier}
      * In the first case, we need to strip off the Resource Type and then encode to {@link UUID}.
      * In the second, we can try to encode directly.
      *

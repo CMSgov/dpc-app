@@ -41,6 +41,12 @@ public class BBClientConfiguration {
 
     private boolean useBfdMock = false;
 
+    private R4Configuration r4Configuration;
+
+    public R4Configuration getR4Configuration() {
+        return r4Configuration;
+    }
+
     public TimeoutConfiguration getTimeouts() {
         return timeouts;
     }
@@ -123,6 +129,17 @@ public class BBClientConfiguration {
         }
     }
 
+    public static class R4Configuration {
+        private String serverBaseUrl;
+
+        public R4Configuration() {
+            // Not used
+        }
+
+        public String getServerBaseUrl() {
+            return serverBaseUrl;
+        }
+    }
     public static class KeystoreConfiguration {
 
         @NotEmpty
