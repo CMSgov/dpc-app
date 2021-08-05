@@ -29,7 +29,7 @@ func OrganizationCtx(next http.Handler) http.Handler {
 	})
 }
 
-// AuthCtx middleware is placeholder to get org id from token until we do SSAS
+// AuthCtx middleware gets the organization ID from the access token
 func AuthCtx(ssasClient client.SsasClient) func(next http.Handler) http.Handler {
 	// Return context with organizationID
 	return func(next http.Handler) http.Handler {
