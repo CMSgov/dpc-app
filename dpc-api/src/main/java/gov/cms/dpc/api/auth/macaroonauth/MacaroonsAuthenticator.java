@@ -5,10 +5,10 @@ import com.google.inject.name.Named;
 import gov.cms.dpc.api.auth.DPCAuthCredentials;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
+import gov.cms.dpc.fhir.DPCResourceType;
 import io.dropwizard.auth.Authenticator;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Organization;
-import org.hl7.fhir.dstu3.model.ResourceType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +42,7 @@ public class MacaroonsAuthenticator implements Authenticator<DPCAuthCredentials,
         }
 
         // If we're an organization, we just check the org ID against the path value and see if it matches
-        if (credentials.getPathAuthorizer().type() == ResourceType.Organization) {
+        if (credentials.getPathAuthorizer().type() == DPCResourceType.Organization) {
             return validateOrganization(principal, credentials);
         }
 
@@ -54,7 +54,7 @@ public class MacaroonsAuthenticator implements Authenticator<DPCAuthCredentials,
 
         // Special handling of Group resources, which use tags instead of resource properties.
         // TODO: Remove with DPC-552
-        if (credentials.getPathAuthorizer().type() == ResourceType.Group) {
+        if (credentials.getPathAuthorizer().type() == DPCResourceType.Group) {
             searchParams.put("_tag", Collections.singletonList(String.format("%s|%s", DPCIdentifierSystem.DPC.getSystem(), credentials.getOrganization().getId())));
         }
         final Bundle bundle = this.client

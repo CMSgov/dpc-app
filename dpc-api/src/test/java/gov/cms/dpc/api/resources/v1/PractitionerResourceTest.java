@@ -12,6 +12,7 @@ import gov.cms.dpc.api.AbstractSecureApplicationTest;
 import gov.cms.dpc.api.TestOrganizationContext;
 import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
+import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.helpers.FHIRHelpers;
 import gov.cms.dpc.testing.APIAuthHelpers;
 import gov.cms.dpc.testing.factories.FHIRPractitionerBuilder;
@@ -21,7 +22,6 @@ import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Practitioner;
-import org.hl7.fhir.dstu3.model.ResourceType;
 import org.junit.jupiter.api.Test;
 
 import javax.ws.rs.HttpMethod;
@@ -255,11 +255,11 @@ class PractitionerResourceTest extends AbstractSecureApplicationTest {
 
         //Test DELETE /Practitioner/{id}
         assertThrows(AuthenticationException.class,
-                () -> APITestHelpers.deleteResourceById(orgBClient, ResourceType.Practitioner, orgAPractitioner.getIdElement().getIdPart())
+                () -> APITestHelpers.deleteResourceById(orgBClient, DPCResourceType.Practitioner, orgAPractitioner.getIdElement().getIdPart())
                 , "Expected auth exception when deleting another org's practitioner.");
 
-        APITestHelpers.deleteResourceById(orgAClient, ResourceType.Practitioner, orgAPractitioner.getIdElement().getIdPart());
-        APITestHelpers.deleteResourceById(orgBClient, ResourceType.Practitioner, orgBPractitioner.getIdElement().getIdPart());
+        APITestHelpers.deleteResourceById(orgAClient, DPCResourceType.Practitioner, orgAPractitioner.getIdElement().getIdPart());
+        APITestHelpers.deleteResourceById(orgBClient, DPCResourceType.Practitioner, orgBPractitioner.getIdElement().getIdPart());
     }
 
     @Test
@@ -279,10 +279,10 @@ class PractitionerResourceTest extends AbstractSecureApplicationTest {
         practitioner.getMeta().addTag(DPCIdentifierSystem.DPC.getSystem(), orgBContext.getOrgId(), "Organization ID");
         APITestHelpers.createResource(orgAClient, practitioner).getResource();
 
-        Bundle bundle = APITestHelpers.resourceSearch(orgBClient, ResourceType.Practitioner);
+        Bundle bundle = APITestHelpers.resourceSearch(orgBClient, DPCResourceType.Practitioner);
         assertEquals(0, bundle.getTotal(), "Expected Org B to have 0 practitioners.");
 
-        bundle = APITestHelpers.resourceSearch(orgAClient, ResourceType.Practitioner);
+        bundle = APITestHelpers.resourceSearch(orgAClient, DPCResourceType.Practitioner);
         assertEquals(1, bundle.getTotal(), "Expected Org A to have 1 practitioner.");
     }
 
@@ -303,10 +303,10 @@ class PractitionerResourceTest extends AbstractSecureApplicationTest {
         practitioner.getMeta().addTag(DPCIdentifierSystem.DPC.getSystem(), orgBContext.getOrgId(), "Organization ID");
         APITestHelpers.createResource(orgAClient, practitioner).getResource();
 
-        Bundle bundle = APITestHelpers.resourceSearch(orgBClient, ResourceType.Practitioner);
+        Bundle bundle = APITestHelpers.resourceSearch(orgBClient, DPCResourceType.Practitioner);
         assertEquals(0, bundle.getTotal(), "Expected Org B to have 0 practitioners.");
 
-        bundle = APITestHelpers.resourceSearch(orgAClient, ResourceType.Practitioner);
+        bundle = APITestHelpers.resourceSearch(orgAClient, DPCResourceType.Practitioner);
         assertEquals(1, bundle.getTotal(), "Expected Org A to have 1 practitioner.");
     }
 
@@ -357,10 +357,10 @@ class PractitionerResourceTest extends AbstractSecureApplicationTest {
 
 
         //Test forgery during practitioner creation (Specify another org's id in the metadata tag)
-        Bundle result = APITestHelpers.resourceSearch(orgBClient, ResourceType.Practitioner);
+        Bundle result = APITestHelpers.resourceSearch(orgBClient, DPCResourceType.Practitioner);
         assertEquals(0, result.getTotal(), "Expected Org B to have 0 practitioners.");
 
-        result = APITestHelpers.resourceSearch(orgAClient, ResourceType.Practitioner);
+        result = APITestHelpers.resourceSearch(orgAClient, DPCResourceType.Practitioner);
         assertEquals(4, result.getTotal(), "Expected Org A to have 1 practitioner.");
     }
 }
