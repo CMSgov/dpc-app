@@ -13,6 +13,7 @@ import gov.cms.dpc.api.auth.annotations.Authorizer;
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.resources.AbstractPractitionerResource;
 import gov.cms.dpc.common.annotations.NoHtml;
+import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.Profiled;
 import gov.cms.dpc.fhir.validations.ValidationHelpers;
@@ -90,7 +91,7 @@ public class PractitionerResource extends AbstractPractitionerResource {
     @GET
     @FHIR
     @Path("/{providerID}")
-    @PathAuthorizer(type = ResourceType.Practitioner, pathParam = "providerID")
+    @PathAuthorizer(type = DPCResourceType.Practitioner, pathParam = "providerID")
     @Timed
     @ExceptionMetered
     @ApiOperation(value = "Fetch provider", notes = "FHIR endpoint to fetch a specific Practitioner resource." +
@@ -154,7 +155,7 @@ public class PractitionerResource extends AbstractPractitionerResource {
 
     @DELETE
     @Path("/{providerID}")
-    @PathAuthorizer(type = ResourceType.Practitioner, pathParam = "providerID")
+    @PathAuthorizer(type = DPCResourceType.Practitioner, pathParam = "providerID")
     @FHIR
     @Timed
     @ExceptionMetered
@@ -175,7 +176,7 @@ public class PractitionerResource extends AbstractPractitionerResource {
 
     @PUT
     @Path("/{providerID}")
-    @PathAuthorizer(type = ResourceType.Practitioner, pathParam = "providerID")
+    @PathAuthorizer(type = DPCResourceType.Practitioner, pathParam = "providerID")
     @FHIR
     @Timed
     @ExceptionMetered

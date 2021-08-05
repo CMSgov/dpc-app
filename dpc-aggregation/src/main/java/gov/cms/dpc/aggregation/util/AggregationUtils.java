@@ -33,4 +33,16 @@ public final class AggregationUtils {
                 .setLocation(patientLocation);
         return outcome;
     }
+
+    public static org.hl7.fhir.r4.model.OperationOutcome toOperationOutcomeV2(OutcomeReason failReason, String patientID) {
+        final var patientLocation = List.of(new org.hl7.fhir.r4.model.StringType("Patient"),
+                new org.hl7.fhir.r4.model.StringType("id"), new org.hl7.fhir.r4.model.StringType(patientID));
+        final var outcome = new org.hl7.fhir.r4.model.OperationOutcome();
+        outcome.addIssue()
+                .setSeverity(org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity.ERROR)
+                .setCode(org.hl7.fhir.r4.model.OperationOutcome.IssueType.EXCEPTION)
+                .setDetails(new org.hl7.fhir.r4.model.CodeableConcept().setText(failReason.detail))
+                .setLocation(patientLocation);
+        return outcome;
+    }
 }

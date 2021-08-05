@@ -1,6 +1,6 @@
 package gov.cms.dpc.queue.models;
 
-import org.hl7.fhir.dstu3.model.ResourceType;
+import gov.cms.dpc.fhir.DPCResourceType;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
@@ -26,7 +26,7 @@ public class JobQueueBatchFile implements Serializable {
         private UUID batchID;
 
         @Column(name = "resource_type")
-        private ResourceType resourceType;
+        private DPCResourceType resourceType;
 
         @Column(name = "sequence")
         private int sequence;
@@ -34,7 +34,7 @@ public class JobQueueBatchFile implements Serializable {
         public JobQueueBatchFileID() {
         }
 
-        public JobQueueBatchFileID(UUID batchID, ResourceType resourceType, int sequence) {
+        public JobQueueBatchFileID(UUID batchID, DPCResourceType resourceType, int sequence) {
             this.batchID = batchID;
             this.resourceType = resourceType;
             this.sequence = sequence;
@@ -44,7 +44,7 @@ public class JobQueueBatchFile implements Serializable {
             return batchID;
         }
 
-        public ResourceType getResourceType() {
+        public DPCResourceType getResourceType() {
             return resourceType;
         }
 
@@ -85,7 +85,7 @@ public class JobQueueBatchFile implements Serializable {
      * @param sequence     - the sequence
      * @return a file name
      */
-    public static String formOutputFileName(UUID batchID, ResourceType resourceType, int sequence) {
+    public static String formOutputFileName(UUID batchID, DPCResourceType resourceType, int sequence) {
         return String.format("%s-%s.%s", batchID.toString(), sequence, resourceType.getPath());
     }
 
@@ -111,7 +111,7 @@ public class JobQueueBatchFile implements Serializable {
         // for hibernate
     }
 
-    public JobQueueBatchFile(UUID jobID, UUID batchID, ResourceType resourceType, int sequence, int count) {
+    public JobQueueBatchFile(UUID jobID, UUID batchID, DPCResourceType resourceType, int sequence, int count) {
         this.jobQueueBatchFileID = new JobQueueBatchFileID(batchID, resourceType, sequence);
         this.jobID = jobID;
         this.fileName = formOutputFileName(batchID, resourceType, sequence);
@@ -130,7 +130,7 @@ public class JobQueueBatchFile implements Serializable {
         return jobID;
     }
 
-    public ResourceType getResourceType() {
+    public DPCResourceType getResourceType() {
         return jobQueueBatchFileID.getResourceType();
     }
 

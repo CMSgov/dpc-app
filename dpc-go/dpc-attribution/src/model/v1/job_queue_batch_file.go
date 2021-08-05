@@ -3,6 +3,7 @@ package v1
 import (
 	"database/sql/driver"
 	"encoding/hex"
+
 	"github.com/pkg/errors"
 )
 
@@ -43,4 +44,4 @@ func (ht *HexType) Scan(value interface{}) error {
 	return nil
 }
 
-var resourceMap = map[int]string{77: "OperationOutcome", 46: "ExplanationOfBenefit", 27: "Coverage", 80: "Patient"}
+var resourceMap = map[int]string{5: "OperationOutcome", 3: "ExplanationOfBenefit", 1: "Coverage", 7: "Patient"}
