@@ -1,8 +1,9 @@
 package router
 
 import (
-	v1 "github.com/CMSgov/dpc/attribution/service/v1"
 	"net/http"
+
+	v1 "github.com/CMSgov/dpc/attribution/service/v1"
 
 	middleware2 "github.com/CMSgov/dpc/attribution/middleware"
 	"github.com/CMSgov/dpc/attribution/service"
@@ -74,7 +75,7 @@ func NewDPCAttributionRouter(o service.Service, g service.Service, impl service.
 
 func getHealthCheck(w http.ResponseWriter, r *http.Request) {
 	m := make(map[string]string)
-	m["database"] = "ok"
+	m["api"] = "ok"
 	w.WriteHeader(http.StatusOK)
 	render.JSON(w, r, m)
 }
