@@ -11,6 +11,7 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
 import gov.cms.dpc.api.TestOrganizationContext;
+import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.testing.APIAuthHelpers;
 import gov.cms.dpc.testing.OrganizationHelpers;
@@ -22,7 +23,9 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.Test;
 
 import javax.ws.rs.HttpMethod;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -116,7 +119,7 @@ public class EndpointResourceTest extends AbstractSecureApplicationTest {
         assertTrue(result.getTotal() > 0);
         for (Bundle.BundleEntryComponent component : result.getEntry()) {
             Resource resource = component.getResource();
-            assertEquals(ResourceType.Endpoint, resource.getResourceType());
+            assertEquals(DPCResourceType.Endpoint.getPath(), resource.getResourceType().getPath());
             Endpoint endpoint = (Endpoint) resource;
             assertEquals(APITestHelpers.ORGANIZATION_ID, FHIRExtractors.getEntityUUID(endpoint.getManagingOrganization().getReference()).toString());
         }

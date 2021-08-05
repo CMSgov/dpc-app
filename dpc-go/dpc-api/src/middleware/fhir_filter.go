@@ -52,7 +52,7 @@ func filterGroup(body []byte) ([]byte, error) {
 		return nil, err
 	}
 	for i := range group.Member {
-		prac := findPracExtension(group.Member[i])
+		prac := group.Member[i].FindPractitionerExtension()
 		if prac != nil {
 			group.Member[i].Extension = []model.Extension{*prac}
 		} else {
@@ -60,14 +60,4 @@ func filterGroup(body []byte) ([]byte, error) {
 		}
 	}
 	return json.Marshal(group)
-}
-
-func findPracExtension(member model.GroupMember) *model.Extension {
-	for _, e := range member.Extension {
-		vr := e.ValueReference
-		if vr != nil && vr.Type != nil && *vr.Type == "Practitioner" {
-			return &e
-		}
-	}
-	return nil
 }

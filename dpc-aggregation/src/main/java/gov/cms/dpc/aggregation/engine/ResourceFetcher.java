@@ -7,6 +7,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.common.MDCConstants;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
+import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import io.reactivex.Flowable;
 import org.hl7.fhir.dstu3.model.*;
@@ -28,7 +29,7 @@ class ResourceFetcher {
     private final BlueButtonClient blueButtonClient;
     private final UUID jobID;
     private final UUID batchID;
-    private final ResourceType resourceType;
+    private final DPCResourceType resourceType;
     private final OffsetDateTime since;
     private final OffsetDateTime transactionTime;
 
@@ -44,7 +45,7 @@ class ResourceFetcher {
     ResourceFetcher(BlueButtonClient blueButtonClient,
                     UUID jobID,
                     UUID batchID,
-                    ResourceType resourceType,
+                    DPCResourceType resourceType,
                     OffsetDateTime since,
                     OffsetDateTime transactionTime) {
         this.blueButtonClient = blueButtonClient;
@@ -180,7 +181,7 @@ class ResourceFetcher {
     private void addResources(ArrayList<Resource> resources, Bundle bundle) {
         bundle.getEntry().forEach((entry) -> {
             final var resource = entry.getResource();
-            if (resource.getResourceType() != resourceType) {
+            if (resource.getResourceType().getPath() != resourceType.getPath()) {
                 throw new DataFormatException(String.format("Unexpected resource type: got %s expected: %s", resource.getResourceType().toString(), resourceType.toString()));
             }
             resources.add(resource);

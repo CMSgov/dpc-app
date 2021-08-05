@@ -6,6 +6,8 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfiles/Dockerfile.api
+    volumes:
+      - /tmp:/tmp
     ports:
       - "3000:3000"
       - "3011:3011"
