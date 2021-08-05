@@ -61,3 +61,7 @@ dpc-go/dpc-attribution/test_results/*
 # Ignore Go binaries
 dpc-go/dpc-api/src/api
 dpc-go/dpc-attribution/src/attribution
+
+#BFD Certs
+dpc-go/dpc-attribution/shared_files/decrypted/*
+!dpc-go/dpc-attribution/shared_files/decrypted/README.md
