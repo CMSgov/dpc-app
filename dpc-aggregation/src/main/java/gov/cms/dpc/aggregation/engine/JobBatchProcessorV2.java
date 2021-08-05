@@ -119,9 +119,9 @@ public class JobBatchProcessorV2 {
         headers.put(Constants.BFD_ORIGINAL_QUERY_ID_HEADER, job.getJobID().toString());
         if (job.isBulk()) {
             headers.put(Constants.BULK_JOB_ID_HEADER, job.getJobID().toString());
-            headers.put(Constants.BULK_CLIENT_ID_HEADER, job.getProviderNPI());
+            headers.put(Constants.BULK_CLIENT_ID_HEADER, job.getRequestUrl());
         } else {
-            headers.put(Constants.DPC_CLIENT_ID_HEADER, job.getProviderNPI());
+            headers.put(Constants.DPC_CLIENT_ID_HEADER, job.getRequestUrl());
         }
         return headers;
     }
