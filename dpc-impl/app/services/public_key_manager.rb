@@ -49,6 +49,7 @@ class PublicKeyManager
     api_client.delete_public_key(@imp_id, @org_id, key_id)
   end
 
+  # TODO: Will need to be able to accept elliptical keys
   def invalid_encoding?(key_string)
     key = OpenSSL::PKey::RSA.new(key_string)
     if key.private?
