@@ -11,6 +11,7 @@ import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import com.typesafe.config.Config;
 import gov.cms.dpc.aggregation.engine.AggregationEngine;
 import gov.cms.dpc.aggregation.engine.JobBatchProcessor;
+import gov.cms.dpc.aggregation.engine.JobBatchProcessorV2;
 import gov.cms.dpc.aggregation.engine.OperationsConfig;
 import gov.cms.dpc.aggregation.service.*;
 import gov.cms.dpc.common.annotations.ExportPath;
@@ -37,6 +38,7 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
         binder.bind(AggregationEngine.class);
         binder.bind(AggregationManager.class).asEagerSingleton();
         binder.bind(JobBatchProcessor.class);
+        binder.bind(JobBatchProcessorV2.class);
 
         // Healthchecks
         // Additional health-checks can be added here
@@ -49,6 +51,17 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
     @Singleton
     public FhirContext provideSTU3Context() {
         final var fhirContext = FhirContext.forDstu3();
+
+        // Setup the context with model scans (avoids doing this on the fetch threads and perhaps multithreaded bug)
+        ContextUtils.prefetchResourceModels(fhirContext, JobQueueBatch.validResourceTypes);
+        return fhirContext;
+    }
+
+    @Provides
+    @Singleton
+    @Named("fhirContextR4")
+    public FhirContext provideR4Context() {
+        final var fhirContext = FhirContext.forR4();
 
         // Setup the context with model scans (avoids doing this on the fetch threads and perhaps multithreaded bug)
         ContextUtils.prefetchResourceModels(fhirContext, JobQueueBatch.validResourceTypes);

@@ -9,6 +9,7 @@ require (
 	github.com/cockroachdb/apd v1.1.0 // indirect
 	github.com/darahayes/go-boom v0.0.0-20200826120415-fa5cb724143a
 	github.com/go-chi/chi v4.0.3-0.20190508141739-08c92af09aaf+incompatible
+	github.com/go-chi/render v1.0.1
 	github.com/gofrs/uuid v4.0.0+incompatible // indirect
 	github.com/google/uuid v1.2.0
 	github.com/huandu/go-sqlbuilder v1.12.1

@@ -3,6 +3,7 @@ package gov.cms.dpc.queue;
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.dpc.common.hibernate.queue.DPCQueueManagedSessionFactory;
 import gov.cms.dpc.common.utils.NPIUtil;
+import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatchFile;
@@ -12,7 +13,6 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
-import org.hl7.fhir.dstu3.model.ResourceType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DynamicTest;
@@ -92,8 +92,8 @@ class QueueTest {
 
     void testSimpleSubmissionCompletion(JobQueueCommon queue) {
         // Add a couple of jobs
-        var firstJobID = queue.createJob(orgID, orgNPI, providerNPI, patientMBIs, Collections.singletonList(ResourceType.Patient), null, OffsetDateTime.now(ZoneOffset.UTC), null, null,true);
-        var secondJobID = queue.createJob(orgID, orgNPI, providerNPI, patientMBIs, Collections.singletonList(ResourceType.Patient), null, OffsetDateTime.now(ZoneOffset.UTC), null, null,true);
+        var firstJobID = queue.createJob(orgID, orgNPI, providerNPI, patientMBIs, Collections.singletonList(DPCResourceType.Patient), null, OffsetDateTime.now(ZoneOffset.UTC), null, null,true);
+        var secondJobID = queue.createJob(orgID, orgNPI, providerNPI, patientMBIs, Collections.singletonList(DPCResourceType.Patient), null, OffsetDateTime.now(ZoneOffset.UTC), null, null,true);
         assertEquals(firstJobID.getClass(), UUID.class);
         assertEquals(secondJobID.getClass(), UUID.class);
         assertEquals(2, queue.queueSize(), "Should have 2 jobs");
@@ -117,7 +117,7 @@ class QueueTest {
         while (workBatch.get().fetchNextPatient(aggregatorID).isPresent()) {
             queue.completePartialBatch(workBatch.get(), aggregatorID);
         }
-        workBatch.get().addJobQueueFile(ResourceType.Patient, 0, 1);
+        workBatch.get().addJobQueueFile(DPCResourceType.Patient, 0, 1);
         queue.completeBatch(workBatch.get(), aggregatorID);
 
         // Check that the status is COMPLETED and with JobResults
@@ -126,14 +126,14 @@ class QueueTest {
         completedOptional.ifPresent(completedJob -> {
             assertEquals(JobStatus.COMPLETED, completedJob.getStatus());
             assertEquals(1, completedJob.getJobQueueBatchFiles().size());
-            assertTrue(completedJob.getJobQueueFile(ResourceType.Patient).isPresent());
+            assertTrue(completedJob.getJobQueueFile(DPCResourceType.Patient).isPresent());
         });
 
         // Verify we can match the batches correctly
-        final String fileName = completedOptional.get().getJobQueueFile(ResourceType.Patient).get().getFileName();
+        final String fileName = completedOptional.get().getJobQueueFile(DPCResourceType.Patient).get().getFileName();
         final Optional<JobQueueBatchFile> jobBatchFile = queue.getJobBatchFile(orgID, fileName);
         assertAll(() -> assertTrue(jobBatchFile.isPresent(), "Should have batch file"),
-                () -> assertEquals(ResourceType.Patient, jobBatchFile.get().getResourceType(), "Should be a patient resource"));
+                () -> assertEquals(DPCResourceType.Patient, jobBatchFile.get().getResourceType(), "Should be a patient resource"));
 
         // Try with bad file ID and Org ID
         assertFalse(queue.getJobBatchFile(orgID, "not a real file").isPresent(), "Should not find file");
@@ -149,7 +149,7 @@ class QueueTest {
 
         // Fail the second job and check its status
         final var secondBatch = workBatch.get();
-        workBatch.get().addJobQueueFile(ResourceType.Patient, 0, 1);
+        workBatch.get().addJobQueueFile(DPCResourceType.Patient, 0, 1);
         queue.failBatch(secondBatch, aggregatorID);
 
         // Check its persisted status
@@ -165,14 +165,14 @@ class QueueTest {
     void testPatientAndEOBSubmission(JobQueueCommon queue) {
         // Add a job with a EOB resource
         final var jobID = queue.createJob(orgID, orgNPI, providerNPI, patientMBIs,
-                Arrays.asList(ResourceType.Patient, ResourceType.ExplanationOfBenefit),
+                Arrays.asList(DPCResourceType.Patient, DPCResourceType.ExplanationOfBenefit),
                 null,
                 OffsetDateTime.now(ZoneOffset.UTC), null, null,true);
         assertEquals(jobID.getClass(), UUID.class);
         // Retrieve the job with both resources
         final var workBatch = queue.claimBatch(aggregatorID).get();
-        workBatch.addJobQueueFile(ResourceType.Patient, 0, 1);
-        workBatch.addJobQueueFile(ResourceType.ExplanationOfBenefit, 0, 1);
+        workBatch.addJobQueueFile(DPCResourceType.Patient, 0, 1);
+        workBatch.addJobQueueFile(DPCResourceType.ExplanationOfBenefit, 0, 1);
 
         // Complete job
         while (workBatch.fetchNextPatient(aggregatorID).isPresent()) {
@@ -186,7 +186,7 @@ class QueueTest {
         actualBatch.ifPresent(batch -> {
             assertEquals(JobStatus.COMPLETED, batch.getStatus());
             assertEquals(2, batch.getJobQueueBatchFiles().size());
-            assertEquals(1, batch.getJobQueueFile(ResourceType.Patient).orElseThrow().getCount());
+            assertEquals(1, batch.getJobQueueFile(DPCResourceType.Patient).orElseThrow().getCount());
         });
     }
 
@@ -205,7 +205,7 @@ class QueueTest {
     void testSinceEqualTransactionTime(JobQueueCommon queue) {
         final var transactionTime = OffsetDateTime.now(ZoneOffset.UTC);
         final var jobId = queue.createJob(orgID, orgNPI, providerNPI, patientMBIs,
-                Arrays.asList(ResourceType.Patient, ResourceType.ExplanationOfBenefit),
+                Arrays.asList(DPCResourceType.Patient, DPCResourceType.ExplanationOfBenefit),
                 transactionTime,
                 transactionTime, null, null,true);
 
@@ -225,7 +225,7 @@ class QueueTest {
                 orgNPI,
                 providerNPI,
                 patientMBIs,
-                Collections.singletonList(ResourceType.ExplanationOfBenefit),
+                Collections.singletonList(DPCResourceType.ExplanationOfBenefit),
                 null,
                 OffsetDateTime.now(ZoneOffset.UTC),
                 null,
