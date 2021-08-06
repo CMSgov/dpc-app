@@ -129,12 +129,14 @@ func (suite *GroupControllerTestSuite) TestCreateGroup() {
 
 	resp, _ := ioutil.ReadAll(res.Body)
 	ja.Assertf(string(resp), string(apitest.AttributionToFHIRResponse(apitest.FilteredGroupjson)))
+}
 
-	req = httptest.NewRequest(http.MethodPost, "http://example.com/foo", bytes.NewReader(apitest.MalformedOrg()))
+func (suite *GroupControllerTestSuite) TestCreateMalformedGroup() {
+	req := httptest.NewRequest(http.MethodPost, "http://example.com/foo", bytes.NewReader(apitest.MalformedOrg()))
 
-	w = httptest.NewRecorder()
+	w := httptest.NewRecorder()
 	suite.grp.Create(w, req)
-	res = w.Result()
+	res := w.Result()
 
 	assert.Equal(suite.T(), http.StatusBadRequest, res.StatusCode)
 }
@@ -268,7 +270,6 @@ func (suite *GroupControllerTestSuite) TestExportGroupMissingOutputFormat() {
 	suite.mjc.On("Export", mock.Anything, mock.Anything).Return(apitest.AttributionResponse(apitest.JobJSON), nil)
 	suite.mac.On("Get", mock.Anything, mock.Anything, mock.Anything).Return(ab, nil)
 
-	ja := jsonassert.New(suite.T())
 	req := httptest.NewRequest(http.MethodGet, "http://example.com/Group/9876/$export", nil)
 	ctx := req.Context()
 	ctx = context.WithValue(ctx, constants.ContextKeyOrganization, "12345")
@@ -285,24 +286,7 @@ func (suite *GroupControllerTestSuite) TestExportGroupMissingOutputFormat() {
 
 	res := w.Result()
 
-	assert.Equal(suite.T(), http.StatusBadRequest, res.StatusCode)
-
-	resp, _ := ioutil.ReadAll(res.Body)
-
-	ja.Assertf(string(resp), `
-    {
-        "issue": [
-            {
-                "severity": "warning",
-                "code": "Business Rule Violation",
-                "details": {
-                    "text": "'_outputFormat' query parameter must be 'application/fhir+ndjson', 'application/ndjson', or 'ndjson'"
-                },
-                "diagnostics": "12345"
-            }
-        ],
-        "resourceType": "OperationOutcome"
-    }`)
+	assert.Equal(suite.T(), http.StatusAccepted, res.StatusCode)
 }
 
 func (suite *GroupControllerTestSuite) TestExportGroupInvalidOutputFormat() {

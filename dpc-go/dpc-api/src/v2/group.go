@@ -195,6 +195,9 @@ func isValidGroup(group []byte) error {
 
 func isValidExport(ctx context.Context, w http.ResponseWriter, outputFormat string, headerPrefer string) error {
 	log := logger.WithContext(ctx)
+	if StringUtils.IsBlank(outputFormat) {
+		outputFormat = constants.FhirNdjson
+	}
 	// _outputFormat only supports FhirNdjson, ApplicationNdjson, Ndjson
 	if !StringUtils.EqualsAnyIgnoreCase(outputFormat, constants.FhirNdjson, constants.ApplicationNdjson, constants.Ndjson) {
 		log.Error("Invalid outputFormat")
