@@ -10,6 +10,7 @@ import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.common.Constants;
 import gov.cms.dpc.common.MDCConstants;
 import gov.cms.dpc.common.utils.MetricMaker;
+import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatchFile;
@@ -19,7 +20,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Resource;
-import org.hl7.fhir.dstu3.model.ResourceType;
 import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -98,7 +98,7 @@ public class JobBatchProcessor {
                 .blockingGet();
         queue.completePartialBatch(job, aggregatorID);
 
-        final String resourcesRequested = job.getResourceTypes().stream().map(ResourceType::getPath).filter(Objects::nonNull).collect(Collectors.joining(";"));
+        final String resourcesRequested = job.getResourceTypes().stream().map(DPCResourceType::getPath).filter(Objects::nonNull).collect(Collectors.joining(";"));
         final String failReasonLabel = failReason == null ? "NA" : failReason.name();
         stopWatch.stop();
         logger.info("dpcMetric=DataExportResult,dataRetrieved={},failReason={},resourcesRequested={},duration={}", failReason == null, failReasonLabel, resourcesRequested, stopWatch.getTime());
@@ -122,7 +122,7 @@ public class JobBatchProcessor {
      * @param since        the since date
      * @return A flowable and resourceType the user requested
      */
-    private Flowable<Resource> fetchResource(JobQueueBatch job, String patientID, ResourceType resourceType, OffsetDateTime since) {
+    private Flowable<Resource> fetchResource(JobQueueBatch job, String patientID, DPCResourceType resourceType, OffsetDateTime since) {
         // Make this flow hot (ie. only called once) when multiple subscribers attach
         final var fetcher = new ResourceFetcher(bbclient,
                 job.getJobID(),
@@ -153,9 +153,9 @@ public class JobBatchProcessor {
         final String organizationNPI = job.getOrgNPI();
         if (practitionerNPI != null && organizationNPI != null) {
             MDC.put(MDCConstants.PROVIDER_NPI, practitionerNPI);
-            Flowable<Resource> flowable = fetchResource(job, patientId, ResourceType.ExplanationOfBenefit, null);
+            Flowable<Resource> flowable = fetchResource(job, patientId, DPCResourceType.ExplanationOfBenefit, null);
             result = flowable
-                    .filter(resource -> ResourceType.ExplanationOfBenefit == resource.getResourceType())
+                    .filter(resource -> Objects.requireNonNull(DPCResourceType.ExplanationOfBenefit.getPath()).equals(resource.getResourceType().getPath()))
                     .map(ExplanationOfBenefit.class::cast)
                     .map(resource -> lookBackService.getLookBackAnswer(resource, organizationNPI, practitionerNPI, operationsConfig.getLookBackMonths()))
                     .toList()
@@ -173,11 +173,12 @@ public class JobBatchProcessor {
                     final var resourceCount = new AtomicInteger();
                     final var sequenceCount = new AtomicInteger();
                     final var resourceType = groupedByResourceFlow.getKey();
-                    job.getJobQueueFileLatest(resourceType).ifPresent(file -> {
+                    final var dpcResourceType = DPCResourceType.valueOf(resourceType != null ? resourceType.toString() : null);
+                    job.getJobQueueFileLatest(dpcResourceType).ifPresent(file -> {
                         resourceCount.set(file.getCount());
                         sequenceCount.set(file.getSequence());
                     });
-                    final var writer = new ResourceWriter(fhirContext, job, resourceType, operationsConfig);
+                    final var writer = new ResourceWriter(fhirContext, job, dpcResourceType, operationsConfig);
                     return groupedByResourceFlow.compose((upstream) -> bufferAndWrite(upstream, writer, resourceCount, sequenceCount));
                 });
     }
@@ -192,7 +193,7 @@ public class JobBatchProcessor {
      * @return a transformed flow
      */
     private Publisher<JobQueueBatchFile> bufferAndWrite(Flowable<Resource> upstream, ResourceWriter writer, AtomicInteger resourceCount, AtomicInteger sequenceCount) {
-        final Flowable<Resource> filteredUpstream = upstream.filter(r -> r.getResourceType() == writer.getResourceType());
+        final Flowable<Resource> filteredUpstream = upstream.filter(r -> r.getResourceType().getPath().equals(writer.getResourceType().getPath()));
         final var connectableMixedFlow = filteredUpstream.publish().autoConnect(2);
 
         var resourcesInCurrentFileCount = resourceCount.getAndSet(0);
@@ -220,8 +221,8 @@ public class JobBatchProcessor {
                 .map(batch -> writer.writeBatch(sequenceCount, batch));
     }
 
-    private Meter getMeter(ResourceType resourceType) {
-        return ResourceType.OperationOutcome == resourceType ? operationalOutcomeMeter : resourceMeter;
+    private Meter getMeter(DPCResourceType resourceType) {
+        return DPCResourceType.OperationOutcome == resourceType ? operationalOutcomeMeter : resourceMeter;
     }
 
     private Pair<Optional<List<ConsentResult>>, Optional<OperationOutcome>> getConsent(String patientId) {

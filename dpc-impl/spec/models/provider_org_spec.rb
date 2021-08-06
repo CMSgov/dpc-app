@@ -41,7 +41,7 @@ RSpec.feature 'adding provider organization' do
   end
 
   describe 'successful API request' do
-    scenario 'adding provider org' do
+    scenario 'view list of provider orgs' do
       stub_api_client(message: :create_implementer, success: true, response: default_imp_creation_response)
 
       user = create(:user)
@@ -54,33 +54,22 @@ RSpec.feature 'adding provider organization' do
         .with(user.implementer_id)
         .and_return(api_client)
       allow(api_client).to receive(:response_successful?).and_return(true)
-      allow(api_client).to receive(:response_body).and_return([])
+      allow(api_client).to receive(:response_body).and_return(default_provider_orgs_list)
 
       visit root_path
 
-      find('[data-test="add-provider-org-test"]').click
-  
-      expect(page.body).to have_content("Add Provider Organization")
+      first_org = default_provider_orgs_list.first
+      second_org = default_provider_orgs_list.second
+      third_org = default_provider_orgs_list.third
 
-      npi = find_field('provider_org_npi').value
-
-      npi_check = LuhnacyLib.validate_npi('80840' + npi)
-
-      expect(npi_check).to eq(true)
-
-      allow(api_client).to receive(:create_provider_org)
-        .with(user.implementer_id, npi)
-        .and_return(api_client)
-
-      find('[data-test="porg-form-submit"]').click
-
-      expect(page.body).to have_content("DPC Account Home Page")
-      expect(page.body).to have_content("Provider Organization added.")
+      expect(page.body).to have_content(first_org[:org_name])
+      expect(page.body).to have_content(second_org[:org_name])
+      expect(page.body).to have_content(third_org[:org_name])
     end
   end
 
   describe 'could not connect to API' do
-    scenario 'unable to add new provider org' do
+    scenario 'unable to add new or view existing provider org' do
       stub_api_client(message: :create_implementer, success: true, response: default_imp_creation_response)
 
       user = create(:user)

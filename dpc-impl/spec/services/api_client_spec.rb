@@ -24,12 +24,7 @@ RSpec.describe ApiClient do
 
         expect(api_client.response_status).to eq(200)
         expect(api_client.response_body).to eq(
-          {
-            'id': '923a4f7b-eade-494a-8ca4-7a685edacfad',
-            'name': 'Wayfarer',
-            'created_at': 00000,
-            'updated_at': 00000
-          }
+          "{'id': '923a4f7b-eade-494a-8ca4-7a685edacfad','name': 'Wayfarer','created_at': 00000,'updated_at': 00000}"
         )
       end
     end

@@ -1,11 +1,11 @@
 package gov.cms.dpc.attribution.cli;
 
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
+import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.converters.FHIRResourceConverter;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Meta;
 import org.hl7.fhir.dstu3.model.Resource;
-import org.hl7.fhir.dstu3.model.ResourceType;
 
 import java.util.List;
 import java.util.UUID;
@@ -23,7 +23,7 @@ public class BundleParser {
                 .getEntry()
                 .stream()
                 .filter(Bundle.BundleEntryComponent::hasResource)
-                .filter(entry -> entry.getResource().getResourceType() == ResourceType.fromCode(clazz.getSimpleName()))
+                .filter(entry -> entry.getResource().getResourceType().getPath().equals(DPCResourceType.fromCode(clazz.getSimpleName()).getPath()))
                 .map(entry -> clazz.cast(entry.getResource()))
                 .peek(resource -> {
                     final Meta meta = new Meta();

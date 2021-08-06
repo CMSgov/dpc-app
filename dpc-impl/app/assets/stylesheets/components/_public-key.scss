@@ -1,0 +1,95 @@
+.public_key_instructions {
+  .step + .step {
+    border-top: 1px solid $color-gray-light;
+  }
+}
+
+.code-block {
+  background-color: $color-white;
+  border: 1px solid $color-gray-dark;
+  color: $color-gray-dark;
+  max-width: 100%;
+  padding: 2px;
+}
+
+.copy-btn__container {
+  display: flex;
+  flex-direction: row;
+  padding: 3px;
+
+  img {
+    margin: 1px 0;
+    max-height: 22px;
+  }
+
+  .copy-btn {
+    border-radius: 15px;
+    font-weight: 700;
+    margin: 2px 0;
+  }
+}
+
+.confirm-msg {
+  display: flex;
+  flex-direction: row;
+}
+
+.confirm-success {
+  background-color: $color-success-lightest;
+  color: $color-success;
+  font-weight: 700;
+  padding: 2px 10px;
+  text-align: center;
+}
+
+.confirm-unsuccess {
+  color: $color-error-dark;
+}
+
+.download_btn_container {
+  border: 1px solid $color-gray;
+  margin: 0 auto 15px;
+  max-width: 190px;
+  position: relative;
+  text-align: center;
+
+  .download_btn_description {
+    border-top: 1px solid $color-gray;
+    font-size: 12px;
+  }
+
+  .download_btn_form {
+
+    .button_to {
+      display: flex;
+      flex-direction: row;
+      width: 100%;
+    }
+
+    .download_btn {
+      display: block;
+      flex-grow: 1;
+    }
+  }
+}
+
+.tooltip {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip .tooltiptext {
+  background-color: $color-gray-lightest;
+  border: 1px solid $color-black;
+  color: $color-black;
+  padding: 5px;
+
+  position: absolute;
+  visibility: hidden;
+  width: 150px;
+  z-index: 1;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+}

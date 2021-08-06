@@ -8,12 +8,12 @@ import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.gclient.ICreateTyped;
 import ca.uhn.fhir.rest.gclient.IUpdateExecutable;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
 import com.typesafe.config.ConfigFactory;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.exceptions.JsonParseExceptionMapper;
+import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration;
 import gov.cms.dpc.fhir.dropwizard.handlers.BundleHandler;
 import gov.cms.dpc.fhir.dropwizard.handlers.FHIRHandler;
@@ -53,7 +53,10 @@ import java.io.InputStream;
 import java.sql.Date;
 import java.time.Instant;
 import java.time.ZoneOffset;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -281,7 +284,7 @@ public class APITestHelpers {
                 .withId(resourceId).encodedJson().execute();
     }
 
-    public  static Bundle resourceSearch(IGenericClient client, ResourceType resourceType, Map<String,List<String>> searchParams){
+    public  static Bundle resourceSearch(IGenericClient client, DPCResourceType resourceType, Map<String,List<String>> searchParams){
         return client
                 .search()
                 .forResource(resourceType.name())
@@ -291,11 +294,11 @@ public class APITestHelpers {
                 .execute();
     }
 
-    public  static Bundle resourceSearch(IGenericClient client, ResourceType resourceType){
+    public  static Bundle resourceSearch(IGenericClient client, DPCResourceType resourceType){
         return resourceSearch(client,resourceType, Maps.newHashMap());
     }
 
-    public static IBaseOperationOutcome deleteResourceById(IGenericClient client, ResourceType resourceType, String resourceId){
+    public static IBaseOperationOutcome deleteResourceById(IGenericClient client, DPCResourceType resourceType, String resourceId){
         return client.delete()
                 .resourceById(resourceType.name(), resourceId)
                 .execute();
