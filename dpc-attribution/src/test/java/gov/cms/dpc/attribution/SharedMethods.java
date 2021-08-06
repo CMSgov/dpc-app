@@ -4,6 +4,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.ICreateTyped;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
+import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import org.hl7.fhir.dstu3.model.*;
 
@@ -69,7 +70,7 @@ public class SharedMethods {
                 .getEntry()
                 .stream()
                 .map(Bundle.BundleEntryComponent::getResource)
-                .filter(resource -> resource.getResourceType() == ResourceType.Patient)
+                .filter(resource -> resource.getResourceType().getPath().equals(DPCResourceType.Patient.getPath()))
                 .map(resource -> (Patient) resource)
                 .forEach(patient -> {
                     final MethodOutcome created = client

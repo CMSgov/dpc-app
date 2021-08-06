@@ -17,6 +17,7 @@ import gov.cms.dpc.api.resources.AbstractPatientResource;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.common.annotations.NoHtml;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
+import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.Profiled;
@@ -148,7 +149,7 @@ public class PatientResource extends AbstractPatientResource {
     @GET
     @FHIR
     @Path("/{patientID}")
-    @PathAuthorizer(type = ResourceType.Patient, pathParam = "patientID")
+    @PathAuthorizer(type = DPCResourceType.Patient, pathParam = "patientID")
     @Timed
     @ExceptionMetered
     @ApiOperation(value = "Fetch Patient", notes = "Fetch specific Patient record.")
@@ -166,7 +167,7 @@ public class PatientResource extends AbstractPatientResource {
     @GET
     @FHIR
     @Path("/{patientID}/$everything")
-    @PathAuthorizer(type = ResourceType.Patient, pathParam = "patientID")
+    @PathAuthorizer(type = DPCResourceType.Patient, pathParam = "patientID")
     @Timed
     @ExceptionMetered
     @ApiImplicitParams(
@@ -213,11 +214,11 @@ public class PatientResource extends AbstractPatientResource {
         final String requestingIP = APIHelpers.fetchRequestingIP(request);
         final String requestUrl = APIHelpers.fetchRequestUrl(request);
         Resource result = dataService.retrieveData(orgId, orgNPI, practitionerNPI, List.of(patientMbi), since, APIHelpers.fetchTransactionTime(bfdClient),
-                requestingIP, requestUrl, ResourceType.Patient, ResourceType.ExplanationOfBenefit, ResourceType.Coverage);
-        if (ResourceType.Bundle.equals(result.getResourceType())) {
+                requestingIP, requestUrl, DPCResourceType.Patient, DPCResourceType.ExplanationOfBenefit, DPCResourceType.Coverage);
+        if (DPCResourceType.Bundle.getPath().equals(result.getResourceType().getPath())) {
             return (Bundle) result;
         }
-        if (ResourceType.OperationOutcome.equals(result.getResourceType())) {
+        if (DPCResourceType.OperationOutcome.getPath().equals(result.getResourceType().getPath())) {
             OperationOutcome resultOp = (OperationOutcome) result;
             throw new WebApplicationException(resultOp.getIssueFirstRep().getDetails().getText());
         }
@@ -228,7 +229,7 @@ public class PatientResource extends AbstractPatientResource {
     @DELETE
     @FHIR
     @Path("/{patientID}")
-    @PathAuthorizer(type = ResourceType.Patient, pathParam = "patientID")
+    @PathAuthorizer(type = DPCResourceType.Patient, pathParam = "patientID")
     @Timed
     @ExceptionMetered
     @ApiOperation(value = "Delete Patient", notes = "Remove specific Patient record")
@@ -246,7 +247,7 @@ public class PatientResource extends AbstractPatientResource {
 
     @PUT
     @Path("/{patientID}")
-    @PathAuthorizer(type = ResourceType.Patient, pathParam = "patientID")
+    @PathAuthorizer(type = DPCResourceType.Patient, pathParam = "patientID")
     @FHIR
     @Timed
     @ExceptionMetered

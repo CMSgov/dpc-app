@@ -1,0 +1,933 @@
+<Bundle xmlns="http://hl7.org/fhir">
+    <id value="4821ff32-2c37-4ed7-8429-1c156110f30f" />
+    <meta>
+        <lastUpdated value="2021-06-08T01:55:08.681+00:00" />
+    </meta>
+    <type value="searchset" />
+    <total value="1" />
+    <link>
+        <relation value="self" />
+        <url value="https://prod-sbx.bfd.cms.gov/v2/fhir/ExplanationOfBenefit?_excludeSAMHSA=true&amp;_format=xml&amp;_pretty=true&amp;patient=-20140000009893" />
+    </link>
+    <entry>
+        <resource>
+            <ExplanationOfBenefit xmlns="http://hl7.org/fhir">
+                <id value="carrier--20920812471" />
+                <meta>
+                    <lastUpdated value="2021-06-08T01:52:52.615+00:00" />
+                    <profile value="http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Professional-NonClinician" />
+                </meta>
+                <extension url="https://bluebutton.cms.gov/resources/variables/nch_near_line_rec_ident_cd">
+                    <valueCoding>
+                        <system value="https://bluebutton.cms.gov/resources/variables/nch_near_line_rec_ident_cd" />
+                        <code value="O" />
+                        <display value="Part B physician/supplier claim record (processed by local carriers; can include DMEPOS services)" />
+                    </valueCoding>
+                </extension>
+                <extension url="https://bluebutton.cms.gov/resources/variables/carr_num">
+                    <valueIdentifier>
+                        <system value="https://bluebutton.cms.gov/resources/variables/carr_num" />
+                        <value value="99999" />
+                    </valueIdentifier>
+                </extension>
+                <extension url="https://bluebutton.cms.gov/resources/variables/carr_clm_cntl_num">
+                    <valueIdentifier>
+                        <system value="https://bluebutton.cms.gov/resources/variables/carr_clm_cntl_num" />
+                        <value value="00000000000000000000000" />
+                    </valueIdentifier>
+                </extension>
+                <extension url="https://bluebutton.cms.gov/resources/variables/carr_clm_pmt_dnl_cd">
+                    <valueCoding>
+                        <system value="https://bluebutton.cms.gov/resources/variables/carr_clm_pmt_dnl_cd" />
+                        <code value="1" />
+                        <display value="Physician/supplier" />
+                    </valueCoding>
+                </extension>
+                <extension url="https://bluebutton.cms.gov/resources/variables/asgmntcd">
+                    <valueCoding>
+                        <system value="https://bluebutton.cms.gov/resources/variables/asgmntcd" />
+                        <code value="A" />
+                        <display value="Assigned claim" />
+                    </valueCoding>
+                </extension>
+                <extension url="https://bluebutton.cms.gov/resources/variables/clm_clncl_tril_num">
+                    <valueIdentifier>
+                        <system value="https://bluebutton.cms.gov/resources/variables/clm_clncl_tril_num" />
+                        <value value="99999999" />
+                    </valueIdentifier>
+                </extension>
+                <extension url="https://bluebutton.cms.gov/resources/variables/carr_clm_entry_cd">
+                    <valueCoding>
+                        <system value="https://bluebutton.cms.gov/resources/variables/carr_clm_entry_cd" />
+                        <code value="1" />
+                        <display value="Original debit; void of original debit (If CLM_DISP_CD = 3, code 1 means voided original debit)" />
+                    </valueCoding>
+                </extension>
+                <identifier>
+                    <type>
+                        <coding>
+                            <system value="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType" />
+                            <code value="uc" />
+                            <display value="Unique Claim ID" />
+                        </coding>
+                    </type>
+                    <system value="https://bluebutton.cms.gov/resources/variables/clm_id" />
+                    <value value="-20920812471" />
+                </identifier>
+                <identifier>
+                    <type>
+                        <coding>
+                            <system value="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType" />
+                            <code value="uc" />
+                            <display value="Unique Claim ID" />
+                        </coding>
+                    </type>
+                    <system value="https://bluebutton.cms.gov/resources/identifier/claim-group" />
+                    <value value="-11664694926" />
+                </identifier>
+                <status value="active" />
+                <type>
+                    <coding>
+                        <system value="https://bluebutton.cms.gov/resources/variables/nch_clm_type_cd" />
+                        <code value="71" />
+                        <display value="Local carrier non-durable medical equipment, prosthetics, orthotics, and supplies (DMEPOS) claim" />
+                    </coding>
+                    <coding>
+                        <system value="https://bluebutton.cms.gov/resources/codesystem/eob-type" />
+                        <code value="CARRIER" />
+                    </coding>
+                    <coding>
+                        <system value="http://terminology.hl7.org/CodeSystem/claim-type" />
+                        <code value="professional" />
+                        <display value="Professional" />
+                    </coding>
+                </type>
+                <use value="claim" />
+                <patient>
+                    <reference value="Patient/-20140000009893" />
+                </patient>
+                <billablePeriod>
+                    <start value="2014-03-01" />
+                    <end value="2014-03-01" />
+                </billablePeriod>
+                <created value="2021-07-06T18:21:04+00:00" />
+                <insurer>
+                    <identifier>
+                        <value value="CMS" />
+                    </identifier>
+                </insurer>
+                <referral>
+                    <identifier>
+                        <type>
+                            <coding>
+                                <system value="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType" />
+                                <code value="npi" />
+                                <display value="National Provider Identifier" />
+                            </coding>
+                        </type>
+                        <value value="999999999999" />
+                    </identifier>
+                </referral>
+                <outcome value="complete" />
+                <disposition value="01" />
+                <careTeam>
+                    <sequence value="1" />
+                    <provider>
+                        <identifier>
+                            <type>
+                                <coding>
+                                    <system value="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType" />
+                                    <code value="npi" />
+                                    <display value="National Provider Identifier" />
+                                </coding>
+                            </type>
+                            <value value="999999999999" />
+                        </identifier>
+                    </provider>
+                    <role>
+                        <coding>
+                            <system value="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole" />
+                            <code value="referring" />
+                            <display value="Referring" />
+                        </coding>
+                    </role>
+                </careTeam>
+                <careTeam>
+                    <sequence value="2" />
+                    <provider>
+                        <identifier>
+                            <type>
+                                <coding>
+                                    <system value="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType" />
+                                    <code value="npi" />
+                                    <display value="National Provider Identifier" />
+                                </coding>
+                            </type>
+                            <value value="99999999999999" />
+                        </identifier>
+                    </provider>
+                    <role>
+                        <coding>
+                            <system value="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole" />
+                            <code value="referring" />
+                            <display value="Referring" />
+                        </coding>
+                    </role>
+                </careTeam>
+                <careTeam>
+                    <extension url="https://bluebutton.cms.gov/resources/variables/carr_line_prvdr_type_cd">
+                        <valueCoding>
+                            <system value="https://bluebutton.cms.gov/resources/variables/carr_line_prvdr_type_cd" />
+                            <code value="1" />
+                        </valueCoding>
+                    </extension>
+                    <extension url="https://bluebutton.cms.gov/resources/variables/prtcptng_ind_cd">
+                        <valueCoding>
+                            <system value="https://bluebutton.cms.gov/resources/variables/prtcptng_ind_cd" />
+                            <code value="2" />
+                            <display value="All or some covered and allowed expenses applied to deductible Participating" />
+                        </valueCoding>
+                    </extension>
+                    <sequence value="3" />
+                    <provider>
+                        <identifier>
+                            <type>
+                                <coding>
+                                    <system value="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType" />
+                                    <code value="npi" />
+                                    <display value="National Provider Identifier" />
+                                </coding>
+                            </type>
+                            <value value="999999999999" />
+                        </identifier>
+                    </provider>
+                    <responsible value="true" />
+                    <role>
+                        <coding>
+                            <system value="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole" />
+                            <code value="performing" />
+                            <display value="Performing provider" />
+                        </coding>
+                    </role>
+                    <qualification>
+                        <coding>
+                            <system value="https://bluebutton.cms.gov/resources/variables/prvdr_spclty" />
+                            <code value="999" />
+                        </coding>
+                    </qualification>
+                </careTeam>
+                <careTeam>
+                    <extension url="https://bluebutton.cms.gov/resources/variables/carr_line_prvdr_type_cd">
+                        <valueCoding>
+                            <system value="https://bluebutton.cms.gov/resources/variables/carr_line_prvdr_type_cd" />
+                            <code value="1" />
+                        </valueCoding>
+                    </extension>
+                    <extension url="https://bluebutton.cms.gov/resources/variables/prtcptng_ind_cd">
+                        <valueCoding>
+                            <system value="https://bluebutton.cms.gov/resources/variables/prtcptng_ind_cd" />
+                            <code value="2" />
+                            <display value="All or some covered and allowed expenses applied to deductible Participating" />
+                        </valueCoding>
+                    </extension>
+                    <sequence value="4" />
+                    <provider>
+                        <identifier>
+                            <type>
+                                <coding>
+                                    <system value="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType" />
+                                    <code value="npi" />
+                                    <display value="National Provider Identifier" />
+                                </coding>
+                            </type>
+                            <value value="999999999999" />
+                        </identifier>
+                    </provider>
+                    <responsible value="true" />
+                    <role>
+                        <coding>
+                            <system value="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole" />
+                            <code value="performing" />
+                            <display value="Performing provider" />
+                        </coding>
+                    </role>
+                    <qualification>
+                        <coding>
+                            <system value="https://bluebutton.cms.gov/resources/variables/prvdr_spclty" />
+                            <code value="999" />
+                        </coding>
+                    </qualification>
+                </careTeam>
+                <supportingInfo>
+                    <sequence value="1" />
+                    <category>
+                        <coding>
+                            <system value="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType" />
+                            <code value="clmrecvddate" />
+                            <display value="Claim Received Date" />
+                        </coding>
+                        <coding>
+                            <system value="https://bluebutton.cms.gov/resources/codesystem/information" />
+                            <code value="https://bluebutton.cms.gov/resources/variables/nch_wkly_proc_dt" />
+                            <display value="NCH Weekly Claim Processing Date" />
+                        </coding>
+                    </category>
+                    <timingDate value="2014-06-27" />
+                </supportingInfo>
+                <diagnosis>
+                    <sequence value="1" />
+                    <diagnosisCodeableConcept>
+                        <coding>
+                            <system value="http://hl7.org/fhir/sid/icd-9-cm" />
+                            <code value="37515" />
+                            <display value="TEAR FILM INSUFFIC NOS" />
+                        </coding>
+                    </diagnosisCodeableConcept>
+                    <type>
+                        <coding>
+                            <system value="http://terminology.hl7.org/CodeSystem/ex-diagnosistype" />
+                            <code value="principal" />
+                            <display value="principal" />
+                        </coding>
+                    </type>
+                </diagnosis>
+                <diagnosis>
+                    <sequence value="2" />
+                    <diagnosisCodeableConcept>
+                        <coding>
+                            <system value="http://hl7.org/fhir/sid/icd-9-cm" />
+                            <code value="37924" />
+                            <display value="VITREOUS OPACITIES NEC" />
+                        </coding>
+                    </diagnosisCodeableConcept>
+                    <type>
+                        <coding>
+                            <system value="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType" />
+                            <code value="secondary" />
+                            <display value="Secondary" />
+                        </coding>
+                    </type>
+                </diagnosis>
+                <diagnosis>
+                    <sequence value="3" />
+                    <diagnosisCodeableConcept>
+                        <coding>
+                            <system value="http://hl7.org/fhir/sid/icd-9-cm" />
+                            <code value="9999999" />
+                        </coding>
+                    </diagnosisCodeableConcept>
+                    <type>
+                        <coding>
+                            <system value="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType" />
+                            <code value="secondary" />
+                            <display value="Secondary" />
+                        </coding>
+                    </type>
+                </diagnosis>
+                <insurance>
+                    <coverage>
+                        <reference value="Coverage/part-b--20140000009893" />
+                    </coverage>
+                </insurance>
+                <item>
+                    <extension url="https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt">
+                        <valueQuantity>
+                            <value value="1" />
+                        </valueQuantity>
+                    </extension>
+                    <extension url="https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt">
+                        <valueCoding>
+                            <system value="https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt" />
+                            <code value="3" />
+                        </valueCoding>
+                    </extension>
+                    <extension url="https://bluebutton.cms.gov/resources/variables/betos_cd">
+                        <valueCoding>
+                            <system value="https://bluebutton.cms.gov/resources/variables/betos_cd" />
+                            <code value="M5C" />
+                            <display value="Specialist - ophthalmology" />
+                        </valueCoding>
+                    </extension>
+                    <extension url="https://bluebutton.cms.gov/resources/variables/line_prcsg_ind_cd">
+                        <valueCoding>
+                            <system value="https://bluebutton.cms.gov/resources/variables/line_prcsg_ind_cd" />
+                            <code value="A" />
+                            <display value="Allowed" />
+                        </valueCoding>
+                    </extension>
+                    <extension url="https://bluebutton.cms.gov/resources/variables/line_service_deductible">
+                        <valueCoding>
+                            <system value="https://bluebutton.cms.gov/resources/variables/line_service_deductible" />
+                            <code value="0" />
+                            <display value="Service Subject to Deductible" />
+                        </valueCoding>
+                    </extension>
+                    <sequence value="1" />
+                    <careTeamSequence value="3" />
+                    <diagnosisSequence value="3" />
+                    <category>
+                        <coding>
+                            <system value="https://bluebutton.cms.gov/resources/variables/line_cms_type_srvc_cd" />
+                            <code value="1" />
+                            <display value="Medical care" />
+                        </coding>
+                    </category>
+                    <productOrService>
+                        <coding>
+                            <system value="https://bluebutton.cms.gov/resources/codesystem/hcpcs" />
+                            <code value="92014" />
+                        </coding>
+                    </productOrService>
+                    <servicedPeriod>
+                        <start value="2014-03-01" />
+                        <end value="2014-03-01" />
+                    </servicedPeriod>
+                    <locationCodeableConcept>
+                        <extension url="https://bluebutton.cms.gov/resources/variables/prvdr_state_cd">
+                            <valueCoding>
+                                <system value="https://bluebutton.cms.gov/resources/variables/prvdr_state_cd" />
+                                <code value="99" />
+                                <display value="With 000 county code is American Samoa; otherwise unknown" />
+                            </valueCoding>
+                        </extension>
+                        <extension url="https://bluebutton.cms.gov/resources/variables/prvdr_zip">
+                            <valueCoding>
+                                <system value="https://bluebutton.cms.gov/resources/variables/prvdr_zip" />
+                                <code value="999999999" />
+                            </valueCoding>
+                        </extension>
+                        <extension url="https://bluebutton.cms.gov/resources/variables/carr_line_prcng_lclty_cd">
+                            <valueCoding>
+                                <system value="https://bluebutton.cms.gov/resources/variables/carr_line_prcng_lclty_cd" />
+                                <code value="99" />
+                            </valueCoding>
+                        </extension>
+                        <coding>
+                            <system value="https://bluebutton.cms.gov/resources/variables/line_place_of_srvc_cd" />
+                            <code value="99" />
+                            <display value="Other Place of Service. Other place of service not identified above." />
+                        </coding>
+                    </locationCodeableConcept>
+                    <quantity>
+                        <value value="1" />
+                    </quantity>
+                    <adjudication>
+                        <category>
+                            <coding>
+                                <system value="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator" />
+                                <code value="denialreason" />
+                                <display value="Denial Reason" />
+                            </coding>
+                        </category>
+                        <reason>
+                            <coding>
+                                <system value="https://bluebutton.cms.gov/resources/variables/carr_line_rdcd_pmt_phys_astn_c" />
+                                <code value="0" />
+                                <display value="N/A" />
+                            </coding>
+                        </reason>
+                    </adjudication>
+                    <adjudication>
+                        <extension url="https://bluebutton.cms.gov/resources/variables/line_pmt_80_100_cd">
+                            <valueCoding>
+                                <system value="https://bluebutton.cms.gov/resources/variables/line_pmt_80_100_cd" />
+                                <code value="0" />
+                                <display value="80%" />
+                            </valueCoding>
+                        </extension>
+                        <category>
+                            <coding>
+                                <system value="http://terminology.hl7.org/CodeSystem/adjudication" />
+                                <code value="benefit" />
+                                <display value="Benefit Amount" />
+                            </coding>
+                            <coding>
+                                <system value="https://bluebutton.cms.gov/resources/codesystem/adjudication" />
+                                <code value="https://bluebutton.cms.gov/resources/variables/line_nch_pmt_amt" />
+                                <display value="Line NCH Medicare Payment Amount" />
+                            </coding>
+                        </category>
+                        <amount>
+                            <value value="80.00" />
+                            <currency value="USD" />
+                        </amount>
+                    </adjudication>
+                    <adjudication>
+                        <category>
+                            <coding>
+                                <system value="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication" />
+                                <code value="paidtopatient" />
+                                <display value="Paid to patient" />
+                            </coding>
+                            <coding>
+                                <system value="https://bluebutton.cms.gov/resources/codesystem/adjudication" />
+                                <code value="https://bluebutton.cms.gov/resources/variables/line_bene_pmt_amt" />
+                                <display value="Line Payment Amount to Beneficiary" />
+                            </coding>
+                        </category>
+                        <amount>
+                            <value value="0.00" />
+                            <currency value="USD" />
+                        </amount>
+                    </adjudication>
+                    <adjudication>
+                        <category>
+                            <coding>
+                                <system value="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication" />
+                                <code value="paidtoprovider" />
+                                <display value="Paid to provider" />
+                            </coding>
+                            <coding>
+                                <system value="https://bluebutton.cms.gov/resources/codesystem/adjudication" />
+                                <code value="https://bluebutton.cms.gov/resources/variables/line_prvdr_pmt_amt" />
+                                <display value="Line Provider Payment Amount" />
+                            </coding>
+                        </category>
+                        <amount>
+                            <value value="80.00" />
+                            <currency value="USD" />
+                        </amount>
+                    </adjudication>
+                    <adjudication>
+                        <category>
+                            <coding>
+                                <system value="http://terminology.hl7.org/CodeSystem/adjudication" />
+                                <code value="deductible" />
+                                <display value="Deductible" />
+                            </coding>
+                            <coding>
+                                <system value="https://bluebutton.cms.gov/resources/codesystem/adjudication" />
+                                <code value="https://bluebutton.cms.gov/resources/variables/line_bene_ptb_ddctbl_amt" />
+                                <display value="Line Beneficiary Part B Deductible Amount" />
+                            </coding>
+                        </category>
+                        <amount>
+                            <value value="50.00" />
+                            <currency value="USD" />
+                        </amount>
+                    </adjudication>
+                    <adjudication>
+                        <category>
+                            <coding>
+                                <system value="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication" />
+                                <code value="priorpayerpaid" />
+                                <display value="Prior payer paid" />
+                            </coding>
+                            <coding>
+                                <system value="https://bluebutton.cms.gov/resources/codesystem/adjudication" />
+                                <code value="https://bluebutton.cms.gov/resources/variables/line_bene_prmry_pyr_pd_amt" />
+                                <display value="Line Primary Payer (if not Medicare) Paid Amount" />
+                            </coding>
+                        </category>
+                        <amount>
+                            <value value="0.00" />
+                            <currency value="USD" />
+                        </amount>
+                    </adjudication>
+                    <adjudication>
+                        <category>
+                            <coding>
+                                <system value="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication" />
+                                <code value="coinsurance" />
+                                <display value="Co-insurance" />
+                            </coding>
+                            <coding>
+                                <system value="https://bluebutton.cms.gov/resources/codesystem/adjudication" />
+                                <code value="https://bluebutton.cms.gov/resources/variables/line_coinsrnc_amt" />
+                                <display value="Line Beneficiary Coinsurance Amount" />
+                            </coding>
+                        </category>
+                        <amount>
+                            <value value="20.00" />
+                            <currency value="USD" />
+                        </amount>
+                    </adjudication>
+                    <adjudication>
+                        <category>
+                            <coding>
+                                <system value="http://terminology.hl7.org/CodeSystem/adjudication" />
+                                <code value="submitted" />
+                                <display value="Submitted Amount" />
+                            </coding>
+                            <coding>
+                                <system value="https://bluebutton.cms.gov/resources/codesystem/adjudication" />
+                                <code value="https://bluebutton.cms.gov/resources/variables/line_sbmtd_chrg_amt" />
+                                <display value="Line Submitted Charge Amount" />
+                            </coding>
+                        </category>
+                        <amount>
+                            <value value="150.00" />
+                            <currency value="USD" />
+                        </amount>
+                    </adjudication>
+                    <adjudication>
+                        <category>
+                            <coding>
+                                <system value="http://terminology.hl7.org/CodeSystem/adjudication" />
+                                <code value="eligible" />
+                                <display value="Eligible Amount" />
+                            </coding>
+                            <coding>
+                                <system value="https://bluebutton.cms.gov/resources/codesystem/adjudication" />
+                                <code value="https://bluebutton.cms.gov/resources/variables/line_alowd_chrg_amt" />
+                                <display value="Line Allowed Charge Amount" />
+                            </coding>
+                        </category>
+                        <amount>
+                            <value value="150.00" />
+                            <currency value="USD" />
+                        </amount>
+                    </adjudication>
+                </item>
+                <item>
+                    <extension url="https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt">
+                        <valueQuantity>
+                            <value value="1" />
+                        </valueQuantity>
+                    </extension>
+                    <extension url="https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt">
+                        <valueCoding>
+                            <system value="https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt" />
+                            <code value="3" />
+                        </valueCoding>
+                    </extension>
+                    <extension url="https://bluebutton.cms.gov/resources/variables/betos_cd">
+                        <valueCoding>
+                            <system value="https://bluebutton.cms.gov/resources/variables/betos_cd" />
+                            <code value="M5C" />
+                            <display value="Specialist - ophthalmology" />
+                        </valueCoding>
+                    </extension>
+                    <extension url="https://bluebutton.cms.gov/resources/variables/line_prcsg_ind_cd">
+                        <valueCoding>
+                            <system value="https://bluebutton.cms.gov/resources/variables/line_prcsg_ind_cd" />
+                            <code value="A" />
+                            <display value="Allowed" />
+                        </valueCoding>
+                    </extension>
+                    <extension url="https://bluebutton.cms.gov/resources/variables/line_service_deductible">
+                        <valueCoding>
+                            <system value="https://bluebutton.cms.gov/resources/variables/line_service_deductible" />
+                            <code value="0" />
+                            <display value="Service Subject to Deductible" />
+                        </valueCoding>
+                    </extension>
+                    <sequence value="2" />
+                    <careTeamSequence value="4" />
+                    <diagnosisSequence value="3" />
+                    <category>
+                        <coding>
+                            <system value="https://bluebutton.cms.gov/resources/variables/line_cms_type_srvc_cd" />
+                            <code value="Q" />
+                            <display value="Vision items or services" />
+                        </coding>
+                    </category>
+                    <productOrService>
+                        <coding>
+                            <system value="https://bluebutton.cms.gov/resources/codesystem/hcpcs" />
+                            <code value="92250" />
+                        </coding>
+                    </productOrService>
+                    <servicedPeriod>
+                        <start value="2014-03-01" />
+                        <end value="2014-03-01" />
+                    </servicedPeriod>
+                    <locationCodeableConcept>
+                        <extension url="https://bluebutton.cms.gov/resources/variables/prvdr_state_cd">
+                            <valueCoding>
+                                <system value="https://bluebutton.cms.gov/resources/variables/prvdr_state_cd" />
+                                <code value="99" />
+                                <display value="With 000 county code is American Samoa; otherwise unknown" />
+                            </valueCoding>
+                        </extension>
+                        <extension url="https://bluebutton.cms.gov/resources/variables/prvdr_zip">
+                            <valueCoding>
+                                <system value="https://bluebutton.cms.gov/resources/variables/prvdr_zip" />
+                                <code value="999999999" />
+                            </valueCoding>
+                        </extension>
+                        <extension url="https://bluebutton.cms.gov/resources/variables/carr_line_prcng_lclty_cd">
+                            <valueCoding>
+                                <system value="https://bluebutton.cms.gov/resources/variables/carr_line_prcng_lclty_cd" />
+                                <code value="99" />
+                            </valueCoding>
+                        </extension>
+                        <coding>
+                            <system value="https://bluebutton.cms.gov/resources/variables/line_place_of_srvc_cd" />
+                            <code value="99" />
+                            <display value="Other Place of Service. Other place of service not identified above." />
+                        </coding>
+                    </locationCodeableConcept>
+                    <quantity>
+                        <value value="1" />
+                    </quantity>
+                    <adjudication>
+                        <category>
+                            <coding>
+                                <system value="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator" />
+                                <code value="denialreason" />
+                                <display value="Denial Reason" />
+                            </coding>
+                        </category>
+                        <reason>
+                            <coding>
+                                <system value="https://bluebutton.cms.gov/resources/variables/carr_line_rdcd_pmt_phys_astn_c" />
+                                <code value="0" />
+                                <display value="N/A" />
+                            </coding>
+                        </reason>
+                    </adjudication>
+                    <adjudication>
+                        <extension url="https://bluebutton.cms.gov/resources/variables/line_pmt_80_100_cd">
+                            <valueCoding>
+                                <system value="https://bluebutton.cms.gov/resources/variables/line_pmt_80_100_cd" />
+                                <code value="0" />
+                                <display value="80%" />
+                            </valueCoding>
+                        </extension>
+                        <category>
+                            <coding>
+                                <system value="http://terminology.hl7.org/CodeSystem/adjudication" />
+                                <code value="benefit" />
+                                <display value="Benefit Amount" />
+                            </coding>
+                            <coding>
+                                <system value="https://bluebutton.cms.gov/resources/codesystem/adjudication" />
+                                <code value="https://bluebutton.cms.gov/resources/variables/line_nch_pmt_amt" />
+                                <display value="Line NCH Medicare Payment Amount" />
+                            </coding>
+                        </category>
+                        <amount>
+                            <value value="70.00" />
+                            <currency value="USD" />
+                        </amount>
+                    </adjudication>
+                    <adjudication>
+                        <category>
+                            <coding>
+                                <system value="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication" />
+                                <code value="paidtopatient" />
+                                <display value="Paid to patient" />
+                            </coding>
+                            <coding>
+                                <system value="https://bluebutton.cms.gov/resources/codesystem/adjudication" />
+                                <code value="https://bluebutton.cms.gov/resources/variables/line_bene_pmt_amt" />
+                                <display value="Line Payment Amount to Beneficiary" />
+                            </coding>
+                        </category>
+                        <amount>
+                            <value value="0.00" />
+                            <currency value="USD" />
+                        </amount>
+                    </adjudication>
+                    <adjudication>
+                        <category>
+                            <coding>
+                                <system value="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication" />
+                                <code value="paidtoprovider" />
+                                <display value="Paid to provider" />
+                            </coding>
+                            <coding>
+                                <system value="https://bluebutton.cms.gov/resources/codesystem/adjudication" />
+                                <code value="https://bluebutton.cms.gov/resources/variables/line_prvdr_pmt_amt" />
+                                <display value="Line Provider Payment Amount" />
+                            </coding>
+                        </category>
+                        <amount>
+                            <value value="70.00" />
+                            <currency value="USD" />
+                        </amount>
+                    </adjudication>
+                    <adjudication>
+                        <category>
+                            <coding>
+                                <system value="http://terminology.hl7.org/CodeSystem/adjudication" />
+                                <code value="deductible" />
+                                <display value="Deductible" />
+                            </coding>
+                            <coding>
+                                <system value="https://bluebutton.cms.gov/resources/codesystem/adjudication" />
+                                <code value="https://bluebutton.cms.gov/resources/variables/line_bene_ptb_ddctbl_amt" />
+                                <display value="Line Beneficiary Part B Deductible Amount" />
+                            </coding>
+                        </category>
+                        <amount>
+                            <value value="0.00" />
+                            <currency value="USD" />
+                        </amount>
+                    </adjudication>
+                    <adjudication>
+                        <category>
+                            <coding>
+                                <system value="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication" />
+                                <code value="priorpayerpaid" />
+                                <display value="Prior payer paid" />
+                            </coding>
+                            <coding>
+                                <system value="https://bluebutton.cms.gov/resources/codesystem/adjudication" />
+                                <code value="https://bluebutton.cms.gov/resources/variables/line_bene_prmry_pyr_pd_amt" />
+                                <display value="Line Primary Payer (if not Medicare) Paid Amount" />
+                            </coding>
+                        </category>
+                        <amount>
+                            <value value="0.00" />
+                            <currency value="USD" />
+                        </amount>
+                    </adjudication>
+                    <adjudication>
+                        <category>
+                            <coding>
+                                <system value="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication" />
+                                <code value="coinsurance" />
+                                <display value="Co-insurance" />
+                            </coding>
+                            <coding>
+                                <system value="https://bluebutton.cms.gov/resources/codesystem/adjudication" />
+                                <code value="https://bluebutton.cms.gov/resources/variables/line_coinsrnc_amt" />
+                                <display value="Line Beneficiary Coinsurance Amount" />
+                            </coding>
+                        </category>
+                        <amount>
+                            <value value="20.00" />
+                            <currency value="USD" />
+                        </amount>
+                    </adjudication>
+                    <adjudication>
+                        <category>
+                            <coding>
+                                <system value="http://terminology.hl7.org/CodeSystem/adjudication" />
+                                <code value="submitted" />
+                                <display value="Submitted Amount" />
+                            </coding>
+                            <coding>
+                                <system value="https://bluebutton.cms.gov/resources/codesystem/adjudication" />
+                                <code value="https://bluebutton.cms.gov/resources/variables/line_sbmtd_chrg_amt" />
+                                <display value="Line Submitted Charge Amount" />
+                            </coding>
+                        </category>
+                        <amount>
+                            <value value="200.00" />
+                            <currency value="USD" />
+                        </amount>
+                    </adjudication>
+                    <adjudication>
+                        <category>
+                            <coding>
+                                <system value="http://terminology.hl7.org/CodeSystem/adjudication" />
+                                <code value="eligible" />
+                                <display value="Eligible Amount" />
+                            </coding>
+                            <coding>
+                                <system value="https://bluebutton.cms.gov/resources/codesystem/adjudication" />
+                                <code value="https://bluebutton.cms.gov/resources/variables/line_alowd_chrg_amt" />
+                                <display value="Line Allowed Charge Amount" />
+                            </coding>
+                        </category>
+                        <amount>
+                            <value value="200.00" />
+                            <currency value="USD" />
+                        </amount>
+                    </adjudication>
+                </item>
+                <total>
+                    <category>
+                        <coding>
+                            <system value="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication" />
+                            <code value="priorpayerpaid" />
+                            <display value="Prior payer paid" />
+                        </coding>
+                        <coding>
+                            <system value="https://bluebutton.cms.gov/resources/codesystem/adjudication" />
+                            <code value="https://bluebutton.cms.gov/resources/variables/clm_tot_chrg_amt" />
+                            <display value="Claim Total Charge Amount" />
+                        </coding>
+                    </category>
+                    <amount>
+                        <value value="0.00" />
+                        <currency value="USD" />
+                    </amount>
+                </total>
+                <payment>
+                    <amount>
+                        <value value="150.00" />
+                        <currency value="USD" />
+                    </amount>
+                </payment>
+                <benefitBalance>
+                    <category>
+                        <coding>
+                            <system value="http://terminology.hl7.org/CodeSystem/ex-benefitcategory" />
+                            <code value="1" />
+                            <display value="Medical Care" />
+                        </coding>
+                    </category>
+                    <financial>
+                        <type>
+                            <coding>
+                                <system value="https://bluebutton.cms.gov/resources/codesystem/benefit-balance" />
+                                <code value="https://bluebutton.cms.gov/resources/variables/carr_clm_cash_ddctbl_apld_amt" />
+                                <display value="Carrier Claim Cash Deductible Applied Amount (sum of all line-level deductible amounts)" />
+                            </coding>
+                        </type>
+                        <usedMoney>
+                            <value value="50.00" />
+                            <currency value="USD" />
+                        </usedMoney>
+                    </financial>
+                    <financial>
+                        <type>
+                            <coding>
+                                <system value="https://bluebutton.cms.gov/resources/codesystem/benefit-balance" />
+                                <code value="https://bluebutton.cms.gov/resources/variables/nch_clm_prvdr_pmt_amt" />
+                                <display value="NCH Claim Provider Payment Amount" />
+                            </coding>
+                        </type>
+                        <usedMoney>
+                            <value value="150.00" />
+                            <currency value="USD" />
+                        </usedMoney>
+                    </financial>
+                    <financial>
+                        <type>
+                            <coding>
+                                <system value="https://bluebutton.cms.gov/resources/codesystem/benefit-balance" />
+                                <code value="https://bluebutton.cms.gov/resources/variables/nch_clm_bene_pmt_amt" />
+                                <display value="NCH Claim Payment Amount to Beneficiary" />
+                            </coding>
+                        </type>
+                        <usedMoney>
+                            <value value="0.00" />
+                            <currency value="USD" />
+                        </usedMoney>
+                    </financial>
+                    <financial>
+                        <type>
+                            <coding>
+                                <system value="https://bluebutton.cms.gov/resources/codesystem/benefit-balance" />
+                                <code value="https://bluebutton.cms.gov/resources/variables/nch_carr_clm_sbmtd_chrg_amt" />
+                                <display value="NCH Carrier Claim Submitted Charge Amount (sum of all line-level submitted charges)" />
+                            </coding>
+                        </type>
+                        <usedMoney>
+                            <value value="350.00" />
+                            <currency value="USD" />
+                        </usedMoney>
+                    </financial>
+                    <financial>
+                        <type>
+                            <coding>
+                                <system value="https://bluebutton.cms.gov/resources/codesystem/benefit-balance" />
+                                <code value="https://bluebutton.cms.gov/resources/variables/nch_carr_clm_alowd_amt" />
+                                <display value="NCH Carrier Claim Allowed Charge Amount (sum of all line-level allowed charges)" />
+                            </coding>
+                        </type>
+                        <usedMoney>
+                            <value value="250.00" />
+                            <currency value="USD" />
+                        </usedMoney>
+                    </financial>
+                </benefitBalance>
+            </ExplanationOfBenefit>
+        </resource>
+    </entry>
+</Bundle>
