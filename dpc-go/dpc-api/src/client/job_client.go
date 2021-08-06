@@ -4,8 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/CMSgov/dpc/api/constants"
 	"github.com/CMSgov/dpc/api/logger"
-	middleware2 "github.com/CMSgov/dpc/api/middleware"
 	"github.com/CMSgov/dpc/api/model"
 	"github.com/go-chi/chi/middleware"
 	"github.com/pkg/errors"
@@ -58,8 +58,8 @@ func (jc *JobClientImpl) Status(ctx context.Context, jobID string) ([]byte, erro
 	}
 
 	req.Header.Add(middleware.RequestIDHeader, ctx.Value(middleware.RequestIDKey).(string))
-	if ctx.Value(middleware2.ContextKeyOrganization) != nil {
-		req.Header.Add(middleware2.OrgHeader, ctx.Value(middleware2.ContextKeyOrganization).(string))
+	if ctx.Value(constants.ContextKeyOrganization) != nil {
+		req.Header.Add(constants.OrgHeader, ctx.Value(constants.ContextKeyOrganization).(string))
 	}
 	resp, err := jc.httpClient.Do(req)
 	if err != nil {
@@ -148,14 +148,14 @@ func checkForErrorMsg(body []byte) string {
 
 func setExportRequestHeaders(ctx context.Context, req *retryablehttp.Request) *retryablehttp.Request {
 	req.Header.Add(middleware.RequestIDHeader, ctx.Value(middleware.RequestIDKey).(string))
-	if ctx.Value(middleware2.ContextKeyRequestingIP) != nil {
-		req.Header.Add(middleware2.FwdHeader, ctx.Value(middleware2.ContextKeyRequestingIP).(string))
+	if ctx.Value(constants.ContextKeyRequestingIP) != nil {
+		req.Header.Add(constants.FwdHeader, ctx.Value(constants.ContextKeyRequestingIP).(string))
 	}
-	if ctx.Value(middleware2.ContextKeyOrganization) != nil {
-		req.Header.Add(middleware2.OrgHeader, ctx.Value(middleware2.ContextKeyOrganization).(string))
+	if ctx.Value(constants.ContextKeyOrganization) != nil {
+		req.Header.Add(constants.OrgHeader, ctx.Value(constants.ContextKeyOrganization).(string))
 	}
-	if ctx.Value(middleware2.ContextKeyRequestURL) != nil {
-		req.Header.Add(middleware2.RequestURLHeader, ctx.Value(middleware2.ContextKeyRequestURL).(string))
+	if ctx.Value(constants.ContextKeyRequestURL) != nil {
+		req.Header.Add(constants.RequestURLHeader, ctx.Value(constants.ContextKeyRequestURL).(string))
 	}
 	return req
 }

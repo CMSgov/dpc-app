@@ -30,7 +30,7 @@ func buildAdminRoutes(c controllers) http.Handler {
 		//ORGANIZATION Routes
 		r.Route("/Organization", func(r chi.Router) {
 			r.Route("/{organizationID}", func(r chi.Router) {
-				r.Use(middleware2.OrganizationCtx)
+				r.Use(middleware2.AdminOrganizationCtx)
 				r.With(middleware2.FHIRModel).Get("/", c.Org.Read)
 				r.Delete("/", c.Org.Delete)
 				r.With(middleware2.FHIRFilter, middleware2.FHIRModel).Put("/", c.Org.Update)
@@ -49,15 +49,15 @@ func buildAdminRoutes(c controllers) http.Handler {
 		})
 		//IMPLEMENTER ORG
 		r.Route("/Implementer/{implementerID}/Org/{organizationID}/system", func(r chi.Router) {
-			r.With(middleware2.ImplementerCtx).With(middleware2.OrganizationCtx).Post("/", c.Ssas.CreateSystem)
-			r.With(middleware2.ImplementerCtx, middleware2.OrganizationCtx).Get("/", c.Ssas.GetSystem)
+			r.With(middleware2.ImplementerCtx).With(middleware2.AdminOrganizationCtx).Post("/", c.Ssas.CreateSystem)
+			r.With(middleware2.ImplementerCtx, middleware2.AdminOrganizationCtx).Get("/", c.Ssas.GetSystem)
 		})
 
 		r.Route("/Implementer/{implementerID}/Org/{organizationID}", func(r chi.Router) {
-			r.With(middleware2.ImplementerCtx, middleware2.OrganizationCtx).Post("/token", c.Ssas.CreateToken)
-			r.With(middleware2.ImplementerCtx, middleware2.OrganizationCtx, middleware2.TokenCtx).Delete("/token/{tokenID}", c.Ssas.DeleteToken)
-			r.With(middleware2.ImplementerCtx, middleware2.OrganizationCtx).Post("/key", c.Ssas.AddKey)
-			r.With(middleware2.ImplementerCtx, middleware2.OrganizationCtx, middleware2.PublicKeyCtx).Delete("/key/{keyID}", c.Ssas.DeleteKey)
+			r.With(middleware2.ImplementerCtx, middleware2.AdminOrganizationCtx).Post("/token", c.Ssas.CreateToken)
+			r.With(middleware2.ImplementerCtx, middleware2.AdminOrganizationCtx, middleware2.TokenCtx).Delete("/token/{tokenID}", c.Ssas.DeleteToken)
+			r.With(middleware2.ImplementerCtx, middleware2.AdminOrganizationCtx).Post("/key", c.Ssas.AddKey)
+			r.With(middleware2.ImplementerCtx, middleware2.AdminOrganizationCtx, middleware2.PublicKeyCtx).Delete("/key/{keyID}", c.Ssas.DeleteKey)
 		})
 
 	})

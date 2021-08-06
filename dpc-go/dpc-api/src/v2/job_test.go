@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/CMSgov/dpc/api/apitest"
 	"github.com/CMSgov/dpc/api/conf"
-	middleware2 "github.com/CMSgov/dpc/api/middleware"
+	"github.com/CMSgov/dpc/api/constants"
 	"github.com/CMSgov/dpc/api/model"
 	"github.com/go-chi/chi/middleware"
 	"github.com/kinbiko/jsonassert"
@@ -66,7 +66,7 @@ func (suite *JobControllerTestSuite) TestGetStatus() {
 	req := httptest.NewRequest(http.MethodGet, "http://example.com/foo", nil)
 	ctx := req.Context()
 	ctx = context.WithValue(ctx, middleware.RequestIDKey, "12345")
-	ctx = context.WithValue(ctx, middleware2.ContextKeyJobID, "54321")
+	ctx = context.WithValue(ctx, constants.ContextKeyJobID, "54321")
 	req = req.WithContext(ctx)
 
 	w := httptest.NewRecorder()

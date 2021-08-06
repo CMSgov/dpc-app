@@ -3,7 +3,9 @@ package middleware
 import (
 	"context"
 	"fmt"
+	"github.com/CMSgov/dpc/api/client"
 	"github.com/CMSgov/dpc/api/conf"
+	"github.com/CMSgov/dpc/api/constants"
 	"github.com/pkg/errors"
 	"github.com/samply/golang-fhir-models/fhir-models/fhir"
 	"github.com/sjsdfg/common-lang-in-go/StringUtils"
@@ -18,35 +20,73 @@ import (
 	"github.com/go-chi/chi"
 )
 
-// OrganizationCtx middleware to extract the organizationID from the chi url param and set it into the request context
-func OrganizationCtx(next http.Handler) http.Handler {
+// AdminOrganizationCtx middleware to extract the organizationID from the chi url param and set it into the request context
+func AdminOrganizationCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		organizationID := chi.URLParam(r, "organizationID")
-		ctx := context.WithValue(r.Context(), ContextKeyOrganization, organizationID)
+		ctx := context.WithValue(r.Context(), constants.ContextKeyOrganization, organizationID)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
 
-// AuthCtx middleware is placeholder to get org id from token until we do SSAS
-func AuthCtx(next http.Handler) http.Handler {
+// OrganizationCtx middleware to extract the organizationID from the chi url param and set it into the request context
+func OrganizationCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log := logger.WithContext(r.Context())
-		organizationID := r.Header.Get(OrgHeader)
-		if organizationID == "" {
-			log.Error("Missing auth token")
-			fhirror.ServerIssue(r.Context(), w, http.StatusForbidden, "Missing auth token")
+		authOrgID := r.Context().Value(constants.ContextKeyOrganization).(string)
+		organizationID := chi.URLParam(r, "organizationID")
+		if !StringUtils.EqualIgnoreCase(authOrgID, organizationID) {
+			fhirror.BusinessViolation(r.Context(), w, http.StatusUnauthorized, "Not Allowed")
 			return
 		}
-		ctx := context.WithValue(r.Context(), ContextKeyOrganization, organizationID)
+		ctx := context.WithValue(r.Context(), constants.ContextKeyOrganization, authOrgID)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
+}
+
+// AuthCtx middleware gets the organization ID from the access token
+func AuthCtx(ssasClient client.SsasClient) func(next http.Handler) http.Handler {
+	// Return context with organizationID
+	return func(next http.Handler) http.Handler {
+		//return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fn := func(w http.ResponseWriter, r *http.Request) {
+			log := logger.WithContext(r.Context())
+
+			// Extract access token from authorization header:
+			reqToken := r.Header.Get("Authorization")
+			if len(reqToken) <= 0 {
+				log.Error("Missing access token")
+				fhirror.ServerIssue(r.Context(), w, http.StatusForbidden, "Missing access token")
+				return
+			}
+			bearerTokenParts := strings.Split(reqToken, "Bearer ")
+			bearerToken := bearerTokenParts[1]
+			if len(bearerToken) <= 0 {
+				log.Error("Missing access token")
+				fhirror.ServerIssue(r.Context(), w, http.StatusForbidden, "Missing access token")
+				return
+			}
+
+			orgID, err := ssasClient.ValidateAccessToken(r.Context(), bearerToken)
+
+			if err != nil {
+				log.Error("Invalid access token", zap.Error(err))
+				fhirror.ServerIssue(r.Context(), w, http.StatusForbidden, "Invalid access token")
+				return
+			}
+
+			ctx := context.WithValue(r.Context(), constants.ContextKeyOrganization, orgID)
+			next.ServeHTTP(w, r.WithContext(ctx))
+		}
+
+		return http.HandlerFunc(fn)
+	}
 }
 
 // GroupCtx middleware to extract the groupID from the chi url param and set it into the request context
 func GroupCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		groupID := chi.URLParam(r, "groupID")
-		ctx := context.WithValue(r.Context(), ContextKeyGroup, groupID)
+		ctx := context.WithValue(r.Context(), constants.ContextKeyGroup, groupID)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
@@ -55,7 +95,7 @@ func GroupCtx(next http.Handler) http.Handler {
 func ImplementerCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ImplementerID := chi.URLParam(r, "implementerID")
-		ctx := context.WithValue(r.Context(), ContextKeyImplementer, ImplementerID)
+		ctx := context.WithValue(r.Context(), constants.ContextKeyImplementer, ImplementerID)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
@@ -64,7 +104,7 @@ func ImplementerCtx(next http.Handler) http.Handler {
 func FileNameCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		groupID := chi.URLParam(r, "fileName")
-		ctx := context.WithValue(r.Context(), ContextKeyFileName, groupID)
+		ctx := context.WithValue(r.Context(), constants.ContextKeyFileName, groupID)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
@@ -73,7 +113,7 @@ func FileNameCtx(next http.Handler) http.Handler {
 func ImplementorIDCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		id := chi.URLParam(r, "implID")
-		ctx := context.WithValue(r.Context(), ContextKeyImplementor, id)
+		ctx := context.WithValue(r.Context(), constants.ContextKeyImplementor, id)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
@@ -82,7 +122,7 @@ func ImplementorIDCtx(next http.Handler) http.Handler {
 func OrganizationIDCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		id := chi.URLParam(r, "orgID")
-		ctx := context.WithValue(r.Context(), ContextKeyOrganization, id)
+		ctx := context.WithValue(r.Context(), constants.ContextKeyOrganization, id)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
@@ -90,11 +130,11 @@ func OrganizationIDCtx(next http.Handler) http.Handler {
 // RequestIPCtx middleware to extract the requesting IP address from the incoming request and set it into the request context
 func RequestIPCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ipAddress := r.Header.Get(FwdHeader)
+		ipAddress := r.Header.Get(constants.FwdHeader)
 		if ipAddress == "" {
 			ipAddress = r.RemoteAddr
 		}
-		ctx := context.WithValue(r.Context(), ContextKeyRequestingIP, ipAddress)
+		ctx := context.WithValue(r.Context(), constants.ContextKeyRequestingIP, ipAddress)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
@@ -106,7 +146,7 @@ func RequestURLCtx(next http.Handler) http.Handler {
 		if r.TLS != nil {
 			scheme = "https"
 		}
-		ctx := context.WithValue(r.Context(), ContextKeyRequestURL, fmt.Sprintf("%s://%s%s", scheme, r.Host, r.RequestURI))
+		ctx := context.WithValue(r.Context(), constants.ContextKeyRequestURL, fmt.Sprintf("%s://%s%s", scheme, r.Host, r.RequestURI))
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
@@ -117,14 +157,14 @@ func ExportTypesParamCtx(next http.Handler) http.Handler {
 		log := logger.WithContext(r.Context())
 		types := r.URL.Query().Get("_type")
 		if types == "" {
-			types = AllResources
+			types = constants.AllResources
 		}
 		if !validateTypes(types) {
 			log.Error(fmt.Sprintf("Invalid resource type: %s", types))
 			fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "Invalid resource type")
 			return
 		}
-		ctx := context.WithValue(r.Context(), ContextKeyResourceTypes, types)
+		ctx := context.WithValue(r.Context(), constants.ContextKeyResourceTypes, types)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
@@ -142,9 +182,9 @@ func validateTypes(types string) bool {
 func isValidType(t string) bool {
 	switch t {
 	case
-		PatientString,
-		CoverageString,
-		EoBString:
+		constants.PatientString,
+		constants.CoverageString,
+		constants.EoBString:
 		return true
 	}
 	return false
@@ -161,7 +201,7 @@ func ExportSinceParamCtx(next http.Handler) http.Handler {
 			fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, msg)
 			return
 		}
-		ctx := context.WithValue(r.Context(), ContextKeySince, s)
+		ctx := context.WithValue(r.Context(), constants.ContextKeySince, s)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
@@ -170,21 +210,21 @@ func validateSince(since string) (string, string) {
 	if since == "" {
 		return "", ""
 	}
-	p, err := time.Parse(SinceLayout, since)
+	p, err := time.Parse(constants.SinceLayout, since)
 	if err != nil {
 		return "", "Could not parse _since"
 	}
 	if p.After(time.Now()) {
 		return "", "_since cannot be a future date"
 	}
-	return p.Format(SinceLayout), ""
+	return p.Format(constants.SinceLayout), ""
 }
 
 // JobCtx middleware to extract the jobID from the chi url param and set it into the request context
 func JobCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		jobID := chi.URLParam(r, "jobID")
-		ctx := context.WithValue(r.Context(), ContextKeyJobID, jobID)
+		ctx := context.WithValue(r.Context(), constants.ContextKeyJobID, jobID)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
@@ -193,7 +233,7 @@ func JobCtx(next http.Handler) http.Handler {
 func TokenCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		tokenID := chi.URLParam(r, "tokenID")
-		ctx := context.WithValue(r.Context(), ContextKeyTokenID, tokenID)
+		ctx := context.WithValue(r.Context(), constants.ContextKeyTokenID, tokenID)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
@@ -202,7 +242,7 @@ func TokenCtx(next http.Handler) http.Handler {
 func PublicKeyCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		keyID := chi.URLParam(r, "keyID")
-		ctx := context.WithValue(r.Context(), ContextKeyKeyID, keyID)
+		ctx := context.WithValue(r.Context(), constants.ContextKeyKeyID, keyID)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
@@ -211,7 +251,7 @@ func PublicKeyCtx(next http.Handler) http.Handler {
 func ProvenanceHeaderValidator(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log := logger.WithContext(r.Context())
-		provenanceHeaderStr := r.Header.Get(ProvenanceHeader)
+		provenanceHeaderStr := r.Header.Get(constants.ProvenanceHeader)
 		if StringUtils.IsEmpty(provenanceHeaderStr) {
 			log.Error("Provenance header is missing")
 			fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "Provenance header is required")
@@ -264,7 +304,7 @@ func ProvenanceHeaderValidator(next http.Handler) http.Handler {
 			return
 		}
 
-		authOrg, ok := r.Context().Value(ContextKeyOrganization).(string)
+		authOrg, ok := r.Context().Value(constants.ContextKeyOrganization).(string)
 		if !ok {
 			log.Error("Auth org not found")
 			fhirror.GenericServerIssue(r.Context(), w)
@@ -279,7 +319,7 @@ func ProvenanceHeaderValidator(next http.Handler) http.Handler {
 		}
 
 		log.Info(fmt.Sprintf("Provenance header: %s", provenanceHeaderStr))
-		ctx := context.WithValue(r.Context(), ContextKeyProvenanceHeader, provenanceHeaderStr)
+		ctx := context.WithValue(r.Context(), constants.ContextKeyProvenanceHeader, provenanceHeaderStr)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 
@@ -297,7 +337,7 @@ func reSubMatchMap(r *regexp.Regexp, str string) map[string]string {
 }
 
 func parseTime(input string) (time.Time, error) {
-	formats := []string{SinceLayout, "2006-01-02T15:04:05Z"}
+	formats := []string{constants.SinceLayout, "2006-01-02T15:04:05Z"}
 	for _, format := range formats {
 		t, err := time.Parse(format, input)
 		if err == nil {

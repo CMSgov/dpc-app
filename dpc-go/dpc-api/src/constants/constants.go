@@ -1,4 +1,4 @@
-package middleware
+package constants
 
 type contextKey int
 

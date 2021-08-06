@@ -3,6 +3,7 @@ package admin
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/CMSgov/dpc/api/constants"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -17,7 +18,6 @@ import (
 
 	"github.com/CMSgov/dpc/api/apitest"
 	"github.com/CMSgov/dpc/api/fhirror"
-	middleware2 "github.com/CMSgov/dpc/api/middleware"
 )
 
 type MockController struct {
@@ -213,7 +213,7 @@ func (suite *RouterTestSuite) TestOrganizationPutRoutes() {
 	var capturedRequestID string
 	suite.mockOrg.On("Update", mock.Anything, mock.Anything).Once().Run(func(arg mock.Arguments) {
 		r := arg.Get(1).(*http.Request)
-		orgID = r.Context().Value(middleware2.ContextKeyOrganization).(string)
+		orgID = r.Context().Value(constants.ContextKeyOrganization).(string)
 		capturedRequestID = r.Header.Get(middleware.RequestIDHeader)
 		w := arg.Get(0).(http.ResponseWriter)
 		_, _ = w.Write(apitest.AttributionOrgResponse())
