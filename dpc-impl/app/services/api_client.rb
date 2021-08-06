@@ -92,10 +92,14 @@ class ApiClient
 
   def http_request(request, uri)
     http = Net::HTTP.new(uri.host, uri.port)
-    http.use_ssl = true
-    http.cert = OpenSSL::X509::Certificate.new(Base64.decode64(ENV.fetch('DPC_PORTAL_CERT')))
-    http.ca_file = 'ca.crt'
-    http.key = OpenSSL::PKey::RSA.new(Base64.decode64(ENV.fetch('DPC_PORTAL_KEY')))
+
+    if use_ssl?
+      http.use_ssl = true
+      http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+      http.cert = OpenSSL::X509::Certificate.new(Base64.decode64(ENV.fetch('DPC_PORTAL_CERT')))
+      http.ca_file = 'ca.crt'
+      http.key = OpenSSL::PKey::RSA.new(Base64.decode64(ENV.fetch('DPC_PORTAL_KEY')))
+    end
 
     begin
       response = http.request(request)
@@ -129,5 +133,9 @@ class ApiClient
     request.body = json
 
     http_request(request, uri)
+  end
+
+  def use_ssl?
+    !Rails.env.test?
   end
 end
