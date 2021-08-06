@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"go.uber.org/zap"
 
 	"github.com/CMSgov/dpc/attribution/logger"
 	"github.com/CMSgov/dpc/attribution/middleware"
@@ -45,13 +46,25 @@ func (gr *GroupRepository) Insert(ctx context.Context, body []byte) (*model.Grou
 		return nil, err
 	}
 
+	sb := sqlFlavor.NewSelectBuilder()
+	sb.Select(sb.As("COUNT(id)", "c"))
+	sb.From(`"group"`)
+	sb.Where(sb.Equal("organization_id", organizationID))
+	q, args := sb.Build()
+
+	var count int
+	if err := gr.db.QueryRowContext(ctx, q, args...).Scan(&count); err != nil {
+		log.Warn("Failed to get the count for the number of groups for the organization", zap.Error(err))
+		count = 0
+	}
+
 	ib := sqlFlavor.NewInsertBuilder()
 	ib.InsertInto(`"group"`)
-	ib.Cols("info", "organization_id")
-	ib.Values(info, organizationID)
+	ib.Cols("info", "organization_id", "version")
+	ib.Values(info, organizationID, count)
 	ib.SQL("returning id, version, created_at, updated_at, info, organization_id")
 
-	q, args := ib.Build()
+	q, args = ib.Build()
 
 	group := new(model.Group)
 	groupStruct := sqlbuilder.NewStruct(new(model.Group)).For(sqlFlavor)
