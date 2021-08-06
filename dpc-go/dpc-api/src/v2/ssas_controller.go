@@ -4,14 +4,16 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"net/http"
+
+	"io/ioutil"
+
 	"github.com/CMSgov/dpc/api/fhirror"
 	"github.com/CMSgov/dpc/api/logger"
 	"github.com/CMSgov/dpc/api/middleware"
 	"github.com/CMSgov/dpc/api/model"
 	"github.com/darahayes/go-boom"
 	"go.uber.org/zap"
-	"io/ioutil"
-	"net/http"
 
 	"github.com/CMSgov/dpc/api/client"
 )
@@ -471,7 +473,7 @@ type ProxyCreateSystemRequest struct {
 type ProxyCreateSystemResponse struct {
 	ClientID    string   `json:"client_id"`
 	ClientName  string   `json:"client_name"`
-	IPs         []string `json:"ips"`
+	IPs         []string `json:"ips,omitempty"`
 	ClientToken string   `json:"client_token"`
 	ExpiresAt   string   `json:"expires_at"`
 }
