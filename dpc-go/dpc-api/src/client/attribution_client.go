@@ -5,18 +5,17 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
+	b64 "encoding/base64"
 	"encoding/json"
 	"fmt"
 	"github.com/CMSgov/dpc/api/logger"
 	middleware2 "github.com/CMSgov/dpc/api/middleware"
 	"github.com/go-chi/chi/middleware"
-	"io/ioutil"
-	"net/http"
-	"strings"
-
 	"github.com/hashicorp/go-retryablehttp"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
+	"io/ioutil"
+	"net/http"
 )
 
 // AttributionConfig is a struct to hold configuration info for retryablehttp client
@@ -98,14 +97,27 @@ func NewAttributionClient(ctx context.Context, config AttributionConfig) Client 
 }
 
 func getAttrCertificates(ctx context.Context, caCert string, cert string, certKey string) (*x509.CertPool, tls.Certificate) {
-	caStr := strings.ReplaceAll(caCert, "\\n", "\n")
-	crtStr := strings.ReplaceAll(cert, "\\n", "\n")
-	keyStr := strings.ReplaceAll(certKey, "\\n", "\n")
-
-	if caStr == "" || crtStr == "" || keyStr == "" {
+	if caCert == "" || cert == "" || certKey == "" {
 		logger.WithContext(ctx).Warn("Missing one of: CA_CERT, ATTRIBUTION_CERT, ATTRIBUTION_CERT_KEY")
 		return nil, tls.Certificate{}
 	}
+
+	caB, err := b64.StdEncoding.DecodeString(caCert)
+	if err != nil {
+		logger.WithContext(ctx).Fatal("Could not base64 decode DPC_CA_CERT", zap.Error(err))
+	}
+	crtB, err := b64.StdEncoding.DecodeString(cert)
+	if err != nil {
+		logger.WithContext(ctx).Fatal("Could not base64 decode DPC_CERT", zap.Error(err))
+	}
+	keyB, err := b64.StdEncoding.DecodeString(certKey)
+	if err != nil {
+		logger.WithContext(ctx).Fatal("Could not base64 decode DPC_CA_KEY", zap.Error(err))
+	}
+
+	caStr := string(caB)
+	crtStr := string(crtB)
+	keyStr := string(keyB)
 
 	certPool := x509.NewCertPool()
 	ok := certPool.AppendCertsFromPEM([]byte(caStr))
