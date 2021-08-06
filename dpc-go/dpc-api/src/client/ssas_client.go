@@ -314,7 +314,7 @@ func (sc *SsasHTTPClient) ValidateAccessToken(ctx context.Context, token string)
 		return "", errors.Errorf("Failed to authenticate token: %s", err)
 	}
 
-	response := make(map[string]interface{}, 0)
+	response := make(map[string]interface{})
 
 	err = json.Unmarshal(resBytes, &response)
 	if err != nil {
@@ -330,7 +330,7 @@ func (sc *SsasHTTPClient) ValidateAccessToken(ctx context.Context, token string)
 
 	orgID := response["system_data"].(string)
 
-	o := make(map[string]string, 0)
+	o := make(map[string]string)
 
 	err = json.Unmarshal([]byte(orgID), &o)
 	if err != nil {

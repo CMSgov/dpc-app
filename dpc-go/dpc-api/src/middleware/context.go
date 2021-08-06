@@ -20,11 +20,25 @@ import (
 	"github.com/go-chi/chi"
 )
 
-// OrganizationCtx middleware to extract the organizationID from the chi url param and set it into the request context
-func OrganizationCtx(next http.Handler) http.Handler {
+// AdminOrganizationCtx middleware to extract the organizationID from the chi url param and set it into the request context
+func AdminOrganizationCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		organizationID := chi.URLParam(r, "organizationID")
 		ctx := context.WithValue(r.Context(), constants.ContextKeyOrganization, organizationID)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+// OrganizationCtx middleware to extract the organizationID from the chi url param and set it into the request context
+func OrganizationCtx(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		authOrgID := r.Context().Value(constants.ContextKeyOrganization).(string)
+		organizationID := chi.URLParam(r, "organizationID")
+		if !StringUtils.EqualIgnoreCase(authOrgID, organizationID) {
+			fhirror.BusinessViolation(r.Context(), w, http.StatusUnauthorized, "Not Allowed")
+			return
+		}
+		ctx := context.WithValue(r.Context(), constants.ContextKeyOrganization, authOrgID)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

@@ -1,9 +1,12 @@
 package public
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/CMSgov/dpc/api/client"
 	"github.com/CMSgov/dpc/api/constants"
+	"github.com/CMSgov/dpc/api/model"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -16,6 +19,55 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 )
+
+type MockSsasClient struct {
+	mock.Mock
+}
+
+func (mc *MockSsasClient) CreateSystem(ctx context.Context, request client.CreateSystemRequest) (client.CreateSystemResponse, error) {
+	args := mc.Called(ctx, request)
+	return args.Get(0).(client.CreateSystemResponse), args.Error(1)
+}
+
+func (mc *MockSsasClient) CreateGroup(ctx context.Context, request client.CreateGroupRequest) (client.CreateGroupResponse, error) {
+	args := mc.Called(ctx, request)
+	return args.Get(0).(client.CreateGroupResponse), args.Error(1)
+}
+
+func (mc *MockSsasClient) Authenticate(ctx context.Context, request []byte) ([]byte, error) {
+	args := mc.Called(ctx, request)
+	return args.Get(0).([]byte), args.Error(1)
+}
+
+func (mc *MockSsasClient) GetSystem(ctx context.Context, systemID string) (client.GetSystemResponse, error) {
+	args := mc.Called(ctx, systemID)
+	return args.Get(0).(client.GetSystemResponse), args.Error(1)
+}
+
+func (mc *MockSsasClient) CreateToken(ctx context.Context, systemID string, label string) (string, error) {
+	args := mc.Called(ctx, systemID, label)
+	return args.Get(0).(string), args.Error(1)
+}
+
+func (mc *MockSsasClient) DeleteToken(ctx context.Context, systemID string, tokenID string) error {
+	args := mc.Called(ctx, systemID, tokenID)
+	return args.Error(0)
+}
+
+func (mc *MockSsasClient) AddPublicKey(ctx context.Context, systemID string, request model.ProxyPublicKeyRequest) (map[string]string, error) {
+	args := mc.Called(ctx, systemID, request)
+	return args.Get(0).(map[string]string), args.Error(1)
+}
+
+func (mc *MockSsasClient) DeletePublicKey(ctx context.Context, systemID string, keyID string) error {
+	args := mc.Called(ctx, systemID, keyID)
+	return args.Error(0)
+}
+
+func (mc *MockSsasClient) ValidateAccessToken(ctx context.Context, token string) (string, error) {
+	args := mc.Called(ctx, token)
+	return args.Get(0).(string), args.Error(1)
+}
 
 type MockController struct {
 	mock.Mock
@@ -91,14 +143,15 @@ func (mjc *MockSsasController) DeleteKey(w http.ResponseWriter, r *http.Request)
 
 type RouterTestSuite struct {
 	suite.Suite
-	router     http.Handler
-	mockOrg    *MockController
-	mockHealth *MockController
-	mockMeta   *MockController
-	mockGroup  *MockController
-	mockData   *MockFileController
-	mockJob    *MockJobController
-	mockSsas   *MockSsasController
+	router         http.Handler
+	mockOrg        *MockController
+	mockHealth     *MockController
+	mockMeta       *MockController
+	mockGroup      *MockController
+	mockData       *MockFileController
+	mockJob        *MockJobController
+	mockSsas       *MockSsasController
+	mockSassClient *MockSsasClient
 }
 
 func (suite *RouterTestSuite) SetupTest() {
@@ -109,6 +162,7 @@ func (suite *RouterTestSuite) SetupTest() {
 	suite.mockData = &MockFileController{}
 	suite.mockJob = &MockJobController{}
 	suite.mockSsas = &MockSsasController{}
+	suite.mockSassClient = &MockSsasClient{}
 
 	c := controllers{
 		Org:      suite.mockOrg,
@@ -120,7 +174,7 @@ func (suite *RouterTestSuite) SetupTest() {
 		Ssas:     suite.mockSsas,
 	}
 
-	suite.router = buildPublicRoutes(c)
+	suite.router = buildPublicRoutes(c, suite.mockSassClient)
 }
 
 func TestRouterTestSuite(t *testing.T) {
@@ -158,9 +212,13 @@ func (suite *RouterTestSuite) TestGroupExportRoute() {
 		w.WriteHeader(http.StatusAccepted)
 	})
 
+	suite.mockSassClient.On("ValidateAccessToken", mock.Anything, mock.Anything).Return("12345", nil)
+
 	ts := httptest.NewServer(suite.router)
 
 	req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/%s", ts.URL, "v2/Group/9876/$export"), nil)
+	req.Header.Add("Authorization", "Bearer hello")
+
 	req.Header.Set("Content-Type", "application/fhir+json")
 	req.Header.Set("Prefer", "respond-async")
 	req.Header.Set(middleware.RequestIDHeader, "54321")
@@ -187,9 +245,13 @@ func (suite *RouterTestSuite) TestOrganizationGetRoutes() {
 		_, _ = w.Write(apitest.AttributionOrgResponse())
 	})
 
+	suite.mockSassClient.On("ValidateAccessToken", mock.Anything, mock.Anything).Return("12345", nil)
+
 	ts := httptest.NewServer(suite.router)
 
 	req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/%s", ts.URL, "v2/Organization/12345"), nil)
+	req.Header.Add("Authorization", "Bearer hello")
+
 	req.Header.Set(middleware.RequestIDHeader, "54321")
 	res, _ := http.DefaultClient.Do(req)
 
