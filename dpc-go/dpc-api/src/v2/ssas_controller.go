@@ -5,13 +5,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/CMSgov/dpc/api/constants"
-	"net/http"
-	"io/ioutil"
 	"github.com/CMSgov/dpc/api/fhirror"
 	"github.com/CMSgov/dpc/api/logger"
 	"github.com/CMSgov/dpc/api/model"
 	"github.com/darahayes/go-boom"
 	"go.uber.org/zap"
+	"io/ioutil"
+	"net/http"
 
 	"github.com/CMSgov/dpc/api/client"
 )
