@@ -192,59 +192,6 @@
 			"name": "Organization",
 			"item": [
 				{
-					"name": "Create Organization | POST /Organization",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"var jsonData = JSON.parse(responseBody);",
-									"var orgID = jsonData['id']",
-									"if (orgID) {",
-									"    pm.environment.set(\"organization_id\", orgID)",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{access_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"resourceType\": \"Organization\",\n  \"identifier\": [\n    {\n      \"use\": \"official\",\n      \"system\": \"http://hl7.org/fhir/sid/us-npi\",\n      \"value\": \"34234324\"\n    },\n    {\n      \"use\": \"usual\",\n      \"system\": \"urn:oid:2.16.840.1.113883.2.4.6.1\",\n      \"value\": \"17-0112278\"\n    }\n  ],\n  \"name\": \"Burgers University Medical Center\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{api_admin_base}}/v2/Organization/",
-							"host": [
-								"{{api_admin_base}}"
-							],
-							"path": [
-								"v2",
-								"Organization",
-								""
-							]
-						}
-					},
-					"response": []
-				},
-				{
 					"name": "Get Organization | GET /Organization/:id",
 					"request": {
 						"auth": {
