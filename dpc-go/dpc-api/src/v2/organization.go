@@ -1,12 +1,12 @@
 package v2
 
 import (
+	"github.com/CMSgov/dpc/api/constants"
 	"io/ioutil"
 	"net/http"
 
 	"github.com/CMSgov/dpc/api/fhirror"
 	"github.com/CMSgov/dpc/api/logger"
-	"github.com/CMSgov/dpc/api/middleware"
 	"go.uber.org/zap"
 
 	"github.com/CMSgov/dpc/api/client"
@@ -27,7 +27,7 @@ func NewOrganizationController(ac client.Client) *OrganizationController {
 
 // Read function that calls attribution service via get to return the organization specified by organizationID
 func (oc *OrganizationController) Read(w http.ResponseWriter, r *http.Request) {
-	organizationID, ok := r.Context().Value(middleware.ContextKeyOrganization).(string)
+	organizationID, ok := r.Context().Value(constants.ContextKeyOrganization).(string)
 	log := logger.WithContext(r.Context())
 	if !ok {
 		log.Error("Failed to extract the organization id from the context")
@@ -74,7 +74,7 @@ func (oc *OrganizationController) Create(w http.ResponseWriter, r *http.Request)
 
 // Delete function that calls attribution service via delete to delete an organization from attribution services
 func (oc *OrganizationController) Delete(w http.ResponseWriter, r *http.Request) {
-	organizationID, ok := r.Context().Value(middleware.ContextKeyOrganization).(string)
+	organizationID, ok := r.Context().Value(constants.ContextKeyOrganization).(string)
 	log := logger.WithContext(r.Context())
 	if !ok {
 		log.Error("Failed to extract the organization id from the context")
@@ -95,7 +95,7 @@ func (oc *OrganizationController) Delete(w http.ResponseWriter, r *http.Request)
 // Update function that calls attribution service via put to update an organization in attribution service
 func (oc *OrganizationController) Update(w http.ResponseWriter, r *http.Request) {
 	log := logger.WithContext(r.Context())
-	organizationID, ok := r.Context().Value(middleware.ContextKeyOrganization).(string)
+	organizationID, ok := r.Context().Value(constants.ContextKeyOrganization).(string)
 	if !ok {
 		log.Error("Failed to extract the organization id from the context")
 		fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "Failed to extract organization id from url, please check the url")

@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"github.com/CMSgov/dpc/api/client"
 	"github.com/CMSgov/dpc/api/conf"
+	"github.com/CMSgov/dpc/api/constants"
 	"github.com/CMSgov/dpc/api/fhirror"
 	"github.com/CMSgov/dpc/api/logger"
-	"github.com/CMSgov/dpc/api/middleware"
 	"github.com/CMSgov/dpc/api/model"
 	"go.uber.org/zap"
 	"net/http"
@@ -30,7 +30,7 @@ func NewDataController(c client.DataClient) *DataController {
 func (dc *DataController) GetFile(w http.ResponseWriter, r *http.Request) {
 	log := logger.WithContext(r.Context())
 
-	fileName, ok := r.Context().Value(middleware.ContextKeyFileName).(string)
+	fileName, ok := r.Context().Value(constants.ContextKeyFileName).(string)
 	if !ok {
 		log.Error("Failed to extract file name from context")
 		fhirror.GenericServerIssue(r.Context(), w)

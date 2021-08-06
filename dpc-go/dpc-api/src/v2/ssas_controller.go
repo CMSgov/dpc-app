@@ -4,16 +4,14 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"net/http"
-
-	"io/ioutil"
-
+	"github.com/CMSgov/dpc/api/constants"
 	"github.com/CMSgov/dpc/api/fhirror"
 	"github.com/CMSgov/dpc/api/logger"
-	"github.com/CMSgov/dpc/api/middleware"
 	"github.com/CMSgov/dpc/api/model"
 	"github.com/darahayes/go-boom"
 	"go.uber.org/zap"
+	"io/ioutil"
+	"net/http"
 
 	"github.com/CMSgov/dpc/api/client"
 )
@@ -34,8 +32,8 @@ func NewSSASController(ssasClient client.SsasClient, attrClient client.Client) *
 // CreateToken function that calls SSAS to get a system
 func (sc *SSASController) CreateToken(w http.ResponseWriter, r *http.Request) {
 	log := logger.WithContext(r.Context())
-	implementerID, _ := r.Context().Value(middleware.ContextKeyImplementer).(string)
-	organizationID, _ := r.Context().Value(middleware.ContextKeyOrganization).(string)
+	implementerID, _ := r.Context().Value(constants.ContextKeyImplementer).(string)
+	organizationID, _ := r.Context().Value(constants.ContextKeyOrganization).(string)
 
 	if implementerID == "" || organizationID == "" {
 		log.Error(fmt.Sprintf("Failed to extract one or more path parameters. ImplID: %s ,OrgID: %s ", implementerID, organizationID))
@@ -97,9 +95,9 @@ func (sc *SSASController) CreateToken(w http.ResponseWriter, r *http.Request) {
 // DeleteToken function that calls SSAS to get a system
 func (sc *SSASController) DeleteToken(w http.ResponseWriter, r *http.Request) {
 	log := logger.WithContext(r.Context())
-	implementerID, _ := r.Context().Value(middleware.ContextKeyImplementer).(string)
-	organizationID, _ := r.Context().Value(middleware.ContextKeyOrganization).(string)
-	tokenID, _ := r.Context().Value(middleware.ContextKeyTokenID).(string)
+	implementerID, _ := r.Context().Value(constants.ContextKeyImplementer).(string)
+	organizationID, _ := r.Context().Value(constants.ContextKeyOrganization).(string)
+	tokenID, _ := r.Context().Value(constants.ContextKeyTokenID).(string)
 
 	if implementerID == "" || organizationID == "" {
 		log.Error(fmt.Sprintf("Failed to extract one or more path parameters. ImplID: %s ,OrgID: %s ", implementerID, organizationID))
@@ -139,8 +137,8 @@ func (sc *SSASController) DeleteToken(w http.ResponseWriter, r *http.Request) {
 // GetSystem function that calls SSAS to get a system
 func (sc *SSASController) GetSystem(w http.ResponseWriter, r *http.Request) {
 	log := logger.WithContext(r.Context())
-	implementerID, _ := r.Context().Value(middleware.ContextKeyImplementer).(string)
-	organizationID, _ := r.Context().Value(middleware.ContextKeyOrganization).(string)
+	implementerID, _ := r.Context().Value(constants.ContextKeyImplementer).(string)
+	organizationID, _ := r.Context().Value(constants.ContextKeyOrganization).(string)
 
 	if implementerID == "" || organizationID == "" {
 		log.Error(fmt.Sprintf("Failed to extract one or more path parameters. ImplID: %s ,OrgID: %s ", implementerID, organizationID))
@@ -199,9 +197,9 @@ func (sc *SSASController) GetSystem(w http.ResponseWriter, r *http.Request) {
 // DeleteKey function to delete a public key from ssas system
 func (sc *SSASController) DeleteKey(w http.ResponseWriter, r *http.Request) {
 	log := logger.WithContext(r.Context())
-	implementerID, _ := r.Context().Value(middleware.ContextKeyImplementer).(string)
-	organizationID, _ := r.Context().Value(middleware.ContextKeyOrganization).(string)
-	keyID, _ := r.Context().Value(middleware.ContextKeyKeyID).(string)
+	implementerID, _ := r.Context().Value(constants.ContextKeyImplementer).(string)
+	organizationID, _ := r.Context().Value(constants.ContextKeyOrganization).(string)
+	keyID, _ := r.Context().Value(constants.ContextKeyKeyID).(string)
 
 	if implementerID == "" || organizationID == "" || keyID == "" {
 		log.Error(fmt.Sprintf("Failed to extract one or more path parameters. ImplID: %s, OrgID: %s, KeyID: %s ", implementerID, organizationID, keyID))
@@ -241,8 +239,8 @@ func (sc *SSASController) DeleteKey(w http.ResponseWriter, r *http.Request) {
 // AddKey function to add a public key to ssas system
 func (sc *SSASController) AddKey(w http.ResponseWriter, r *http.Request) {
 	log := logger.WithContext(r.Context())
-	implementerID, _ := r.Context().Value(middleware.ContextKeyImplementer).(string)
-	organizationID, _ := r.Context().Value(middleware.ContextKeyOrganization).(string)
+	implementerID, _ := r.Context().Value(constants.ContextKeyImplementer).(string)
+	organizationID, _ := r.Context().Value(constants.ContextKeyOrganization).(string)
 
 	if implementerID == "" || organizationID == "" {
 		log.Error(fmt.Sprintf("Failed to extract one or more path parameters. ImplID: %s ,OrgID: %s ", implementerID, organizationID))
@@ -306,8 +304,8 @@ func (sc *SSASController) AddKey(w http.ResponseWriter, r *http.Request) {
 // CreateSystem function that calls SSAS to create a new system
 func (sc *SSASController) CreateSystem(w http.ResponseWriter, r *http.Request) {
 	log := logger.WithContext(r.Context())
-	implementerID, _ := r.Context().Value(middleware.ContextKeyImplementer).(string)
-	organizationID, _ := r.Context().Value(middleware.ContextKeyOrganization).(string)
+	implementerID, _ := r.Context().Value(constants.ContextKeyImplementer).(string)
+	organizationID, _ := r.Context().Value(constants.ContextKeyOrganization).(string)
 
 	if implementerID == "" || organizationID == "" {
 		log.Error(fmt.Sprintf("Failed to extract one or more path parameters. ImplID: %s ,OrgID: %s ", implementerID, organizationID))
