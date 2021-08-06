@@ -97,7 +97,7 @@ class ApiClient
       http.use_ssl = true
       http.verify_mode = OpenSSL::SSL::VERIFY_PEER
       http.cert = OpenSSL::X509::Certificate.new(Base64.decode64(ENV.fetch('DPC_PORTAL_CERT')))
-      http.ca_file = 'ca.crt'
+      http.ca_file = ENV.fetch('DPC_CA_CERT')
       http.key = OpenSSL::PKey::RSA.new(Base64.decode64(ENV.fetch('DPC_PORTAL_KEY')))
     end
 
@@ -136,6 +136,6 @@ class ApiClient
   end
 
   def use_ssl?
-    !Rails.env.test?
+    !(Rails.env.development? || Rails.env.test?)
   end
 end
