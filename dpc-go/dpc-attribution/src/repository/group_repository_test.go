@@ -61,12 +61,18 @@ func (suite *GroupRepositoryTestSuite) TestInsert() {
 	repo := NewGroupRepo(db)
 	ctx := context.WithValue(context.Background(), middleware.ContextKeyOrganization, "12345")
 
-	expectedInsertQuery := `INSERT INTO "group" \(info, organization_id\) VALUES \(\$1, \$2\) returning id, version, created_at, updated_at, info, organization_id`
+	expectedCountQuery := `SELECT COUNT\(id\) AS c FROM "group" WHERE organization_id = \$1`
+	rows := sqlmock.NewRows([]string{"count"}).
+		AddRow(0)
 
-	rows := sqlmock.NewRows([]string{"id", "version", "created_at", "updated_at", "info", "organization_id"}).
+	mock.ExpectQuery(expectedCountQuery).WillReturnRows(rows)
+
+	expectedInsertQuery := `INSERT INTO "group" \(info, organization_id, version\) VALUES \(\$1, \$2, \$3\) returning id, version, created_at, updated_at, info, organization_id`
+
+	rows = sqlmock.NewRows([]string{"id", "version", "created_at", "updated_at", "info", "organization_id"}).
 		AddRow(suite.fakeGrp.ID, suite.fakeGrp.Version, suite.fakeGrp.CreatedAt, suite.fakeGrp.UpdatedAt, suite.fakeGrp.Info, suite.fakeGrp.OrganizationID)
 
-	mock.ExpectQuery(expectedInsertQuery).WithArgs(suite.fakeGrp.Info, "12345").WillReturnRows(rows)
+	mock.ExpectQuery(expectedInsertQuery).WithArgs(suite.fakeGrp.Info, "12345", 0).WillReturnRows(rows)
 
 	b, _ := json.Marshal(suite.fakeGrp.Info)
 	group, err := repo.Insert(ctx, b)
