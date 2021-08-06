@@ -4,13 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/CMSgov/dpc/api/constants"
 	"io/ioutil"
 	"net/http"
 	"strings"
 
 	"github.com/CMSgov/dpc/api/fhirror"
 	"github.com/CMSgov/dpc/api/logger"
-	middleware2 "github.com/CMSgov/dpc/api/middleware"
 	"github.com/CMSgov/dpc/api/model"
 	"github.com/google/fhir/go/jsonformat"
 	"github.com/pkg/errors"
@@ -62,7 +62,7 @@ func (gc *GroupController) Create(w http.ResponseWriter, r *http.Request) {
 // Export function that calls attribution service via get in order to start a job for data export
 func (gc *GroupController) Export(w http.ResponseWriter, r *http.Request) {
 	log := logger.WithContext(r.Context())
-	groupID, ok := r.Context().Value(middleware2.ContextKeyGroup).(string)
+	groupID, ok := r.Context().Value(constants.ContextKeyGroup).(string)
 	if !ok {
 		log.Error("Failed to extract the group id from the context")
 		fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "Failed to extract group id from url, please check the url")
@@ -113,8 +113,8 @@ func (gc *GroupController) Export(w http.ResponseWriter, r *http.Request) {
 }
 
 func (gc *GroupController) startExports(r *http.Request, groupID string, attr []model.Attribution) (string, error) {
-	since, _ := r.Context().Value(middleware2.ContextKeySince).(string)
-	types, _ := r.Context().Value(middleware2.ContextKeyResourceTypes).(string)
+	since, _ := r.Context().Value(constants.ContextKeySince).(string)
+	types, _ := r.Context().Value(constants.ContextKeyResourceTypes).(string)
 
 	providers := make([]string, 0)
 	patients := make([]string, 0)
@@ -196,10 +196,10 @@ func isValidGroup(group []byte) error {
 func isValidExport(ctx context.Context, w http.ResponseWriter, outputFormat string, headerPrefer string) error {
 	log := logger.WithContext(ctx)
 	if StringUtils.IsBlank(outputFormat) {
-		outputFormat = middleware2.FhirNdjson
+		outputFormat = constants.FhirNdjson
 	}
 	// _outputFormat only supports FhirNdjson, ApplicationNdjson, Ndjson
-	if !StringUtils.EqualsAnyIgnoreCase(outputFormat, middleware2.FhirNdjson, middleware2.ApplicationNdjson, middleware2.Ndjson) {
+	if !StringUtils.EqualsAnyIgnoreCase(outputFormat, constants.FhirNdjson, constants.ApplicationNdjson, constants.Ndjson) {
 		log.Error("Invalid outputFormat")
 		fhirror.BusinessViolation(ctx, w, http.StatusBadRequest, "'_outputFormat' query parameter must be 'application/fhir+ndjson', 'application/ndjson', or 'ndjson'")
 	}

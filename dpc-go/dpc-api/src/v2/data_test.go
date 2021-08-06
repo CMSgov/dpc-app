@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/CMSgov/dpc/api/conf"
-	"github.com/CMSgov/dpc/api/middleware"
+	"github.com/CMSgov/dpc/api/constants"
 	"github.com/CMSgov/dpc/api/model"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -60,7 +60,7 @@ func (suite *DataControllerTestSuite) TestGetFile() {
 	f := strings.TrimPrefix(suite.file.Name(), "/tmp/")
 	req := httptest.NewRequest(http.MethodGet, "http://blah.com", nil)
 	ctx := req.Context()
-	ctx = context.WithValue(ctx, middleware.ContextKeyFileName, f)
+	ctx = context.WithValue(ctx, constants.ContextKeyFileName, f)
 	req = req.WithContext(ctx)
 	w := httptest.NewRecorder()
 
