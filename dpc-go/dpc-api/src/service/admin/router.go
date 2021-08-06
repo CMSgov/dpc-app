@@ -89,7 +89,8 @@ func NewAdminServer() *service.Server {
 	}
 
 	r := buildAdminRoutes(controllers)
-	return service.NewServer("DPC-API Admin Server", port, false, r)
+	authDisabled := conf.GetAsString("AUTH_DISABLED", "false") == "true"
+	return service.NewServer("DPC-API Admin Server", port, authDisabled, r)
 }
 
 type controllers struct {
