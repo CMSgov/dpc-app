@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "5af0c332-316c-4b11-bca4-38e2a2a0b91a",
+		"_postman_id": "d313d3bd-04e6-4d4b-9a03-437f3bce76fc",
 		"name": "DPC V2 Functional Tests",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -9,7 +9,7 @@
 			"name": "Admin",
 			"item": [
 				{
-					"name": "Organzation",
+					"name": "Organization",
 					"item": [
 						{
 							"name": "API Admin - Successful Org Creation | POST /v2/Organization",
@@ -1108,7 +1108,7 @@
 			]
 		},
 		{
-			"name": "Pubic",
+			"name": "Public",
 			"item": [
 				{
 					"name": "Group",
@@ -1214,6 +1214,210 @@
 										""
 									]
 								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "FHIR Bulk Data",
+					"item": [
+						{
+							"name": "Start export job for Group",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 202\", function () {",
+											"    pm.response.to.have.status(202);",
+											"});",
+											"",
+											"var location = postman.getResponseHeader(\"Content-Location\");",
+											"",
+											"postman.setEnvironmentVariable(\"job-id\", location.substr(location.indexOf(\"Jobs/\")+5));"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true,
+								"disabledSystemHeaders": {
+									"accept": true
+								}
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "X-Org",
+										"type": "text",
+										"value": "{{organization_id}}"
+									},
+									{
+										"key": "Prefer",
+										"value": "respond-async",
+										"type": "text"
+									},
+									{
+										"key": "Accept",
+										"value": "application/fhir+json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{api_admin_protocol}}://{{api_admin_host}}:{{api_public_port}}/v2/Group/{{group_id}}/$export?_outputFormat=application/ndjson",
+									"protocol": "{{api_admin_protocol}}",
+									"host": [
+										"{{api_admin_host}}"
+									],
+									"port": "{{api_public_port}}",
+									"path": [
+										"v2",
+										"Group",
+										"{{group_id}}",
+										"$export"
+									],
+									"query": [
+										{
+											"key": "_outputFormat",
+											"value": "application/ndjson"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Retrieve Job Status",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"var data = JSON.parse(responseBody);",
+											"var dataType = data.output.length > 0 ? data.output[0].type.toLowerCase() : data.error[0].type.toLowerCase();",
+											"var url = data.output.length > 0 ? data.output[0].url : data.error[0].url;",
+											"",
+											"function getFileName() {",
+											"    return url.substr(url.indexOf(\"Data/\")+5, url.indexOf(dataType) - url.indexOf(\"Data/\")-6) + \".\" + dataType + \".ndjson\";",
+											"}",
+											"",
+											"pm.environment.set(\"ndjson_file\", getFileName());",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true,
+								"disabledSystemHeaders": {
+									"accept": true
+								}
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "X-Org",
+										"type": "text",
+										"value": "{{organization_id}}"
+									},
+									{
+										"key": "Accept",
+										"value": "application/fhir+json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{api_admin_protocol}}://{{api_admin_host}}:{{api_public_port}}/v2/Jobs/{{job-id}}",
+									"protocol": "{{api_admin_protocol}}",
+									"host": [
+										"{{api_admin_host}}"
+									],
+									"port": "{{api_public_port}}",
+									"path": [
+										"v2",
+										"Jobs",
+										"{{job-id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Download Patient Data Export File",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disabledSystemHeaders": {
+									"accept": true
+								}
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "X-Org",
+										"value": "{{organization_id}}",
+										"type": "text"
+									},
+									{
+										"key": "Accept",
+										"value": "application/fhir+json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{api_admin_protocol}}://{{api_admin_host}}:{{api_public_port}}/v2/Data/{{ndjson_file}}",
+									"protocol": "{{api_admin_protocol}}",
+									"host": [
+										"{{api_admin_host}}"
+									],
+									"port": "{{api_public_port}}",
+									"path": [
+										"v2",
+										"Data",
+										"{{ndjson_file}}"
+									]
+								},
+								"description": "Download patient data details from ndjson file.\n\nRequires that you first have a group that includes a patient, that you start a data export job using `_type=Patient`, and that you run the `Status/URL of Data Export Job` request to save the patient filename. Finally, this request uses that patient filename to retrieve the actual data.\n\nPREREQUESITES:\n- `patient_file`, which comes from `Status/URL of Data Export Job`"
 							},
 							"response": []
 						}
