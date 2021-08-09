@@ -58,6 +58,9 @@ dpc-go/dpc-api/test_results/*
 dpc-go/dpc-attribution/results.json
 dpc-go/dpc-attribution/test_results/*
 
+# Ignore decrypted files
+dpc-go/dpc-attribution/shared_files/decrypted/*
+
 # Ignore Go binaries
 dpc-go/dpc-api/src/api
 dpc-go/dpc-attribution/src/attribution

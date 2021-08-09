@@ -14,7 +14,7 @@ import (
 	"strings"
 )
 
-func buildPublicRoutes(cont controllers) http.Handler {
+func buildPublicRoutes(cont controllers, ssasClient client.SsasClient) http.Handler {
 	r := chi.NewRouter()
 	r.Use(middleware2.Logging())
 	r.Use(middleware2.RequestIPCtx)
@@ -31,6 +31,7 @@ func buildPublicRoutes(cont controllers) http.Handler {
 
 		//ORGANIZATION
 		r.Route("/Organization", func(r chi.Router) {
+			r.Use(middleware2.AuthCtx(ssasClient))
 			r.Route("/{organizationID}", func(r chi.Router) {
 				r.Use(middleware2.OrganizationCtx)
 				r.With(middleware2.FHIRModel).Get("/", cont.Org.Read)
@@ -39,7 +40,7 @@ func buildPublicRoutes(cont controllers) http.Handler {
 
 		//GROUP
 		r.Route("/Group", func(r chi.Router) {
-			r.Use(middleware2.AuthCtx)
+			r.Use(middleware2.AuthCtx(ssasClient))
 			r.With(middleware2.ProvenanceHeaderValidator, middleware2.FHIRFilter, middleware2.FHIRModel).Post("/", cont.Group.Create)
 			r.Route("/{groupID}", func(r chi.Router) {
 				r.Use(middleware2.RequestURLCtx)
@@ -53,13 +54,13 @@ func buildPublicRoutes(cont controllers) http.Handler {
 		//JOBS
 		r.Route("/Jobs", func(r chi.Router) {
 			r.Use(middleware.SetHeader("Content-Type", "application/json; charset=UTF-8"))
-			r.Use(middleware2.AuthCtx)
+			r.Use(middleware2.AuthCtx(ssasClient))
 			r.With(middleware2.JobCtx).Get("/{jobID}", cont.Job.Status)
 		})
 
 		//DATA
 		r.Route("/Data", func(r chi.Router) {
-			r.Use(middleware2.AuthCtx)
+			r.Use(middleware2.AuthCtx(ssasClient))
 			r.With(middleware2.FileNameCtx).Get("/{fileName}", cont.Data.GetFile)
 		})
 
@@ -109,7 +110,7 @@ func NewPublicServer(ctx context.Context) *service.Server {
 		Ssas:     v2.NewSSASController(ssasClient, attrClient),
 	}
 
-	r := buildPublicRoutes(controllers)
+	r := buildPublicRoutes(controllers, ssasClient)
 	return service.NewServer("DPC-API Public Server", port, true, r)
 
 }

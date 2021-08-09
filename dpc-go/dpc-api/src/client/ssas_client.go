@@ -5,14 +5,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/CMSgov/dpc/api/model"
-	"io/ioutil"
-	"net/http"
-
 	"github.com/CMSgov/dpc/api/logger"
+	"github.com/CMSgov/dpc/api/model"
 	"github.com/hashicorp/go-retryablehttp"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
+	"io/ioutil"
+	"net/http"
 )
 
 // SsasHTTPClientConfig is a struct to hold configuration info for retryable http client
@@ -29,6 +28,7 @@ const (
 	PostV2SystemEndpoint    string = "v2/system"
 	PostV2GroupEndpoint     string = "v2/group"
 	PostV2AuthenticateToken string = "v2/token"
+	TokenInfoEndpoint       string = "v2/token_info"
 )
 
 // SsasClient interface for testing purposes
@@ -41,6 +41,7 @@ type SsasClient interface {
 	DeleteToken(ctx context.Context, systemID string, tokenID string) error
 	AddPublicKey(ctx context.Context, systemID string, request model.ProxyPublicKeyRequest) (map[string]string, error)
 	DeletePublicKey(ctx context.Context, systemID string, keyID string) error
+	ValidateAccessToken(ctx context.Context, token string) (string, error)
 }
 
 // SsasHTTPClient is a struct to hold the retryable http client and configs
@@ -290,6 +291,59 @@ func (sc *SsasHTTPClient) Authenticate(ctx context.Context, reqBytes []byte) ([]
 		return nil, errors.Errorf("Failed to authenticate token: %s", err)
 	}
 	return resBytes, nil
+}
+
+// ValidateAccessToken validates with access token with SSAS and returns the org ID
+func (sc *SsasHTTPClient) ValidateAccessToken(ctx context.Context, token string) (string, error) {
+	log := logger.WithContext(ctx)
+	url := fmt.Sprintf("%s/%s", sc.config.PublicURL, TokenInfoEndpoint)
+
+	body := map[string]string{
+		"token": token,
+	}
+
+	reqBytes, err := json.Marshal(body)
+	if err != nil {
+		log.Error("Token authentication failed", zap.Error(err))
+		return "", errors.Errorf("Failed to authenticate token: %s", err)
+	}
+
+	resBytes, err := sc.doPost(ctx, url, reqBytes, nil)
+	if err != nil {
+		log.Error("Token authentication failed", zap.Error(err))
+		return "", errors.Errorf("Failed to authenticate token: %s", err)
+	}
+
+	response := make(map[string]interface{})
+
+	err = json.Unmarshal(resBytes, &response)
+	if err != nil {
+		log.Error("Unable to parse response", zap.Error(err))
+		return "", errors.Errorf("Failed to authenticate token: %s", err)
+	}
+
+	valid := response["valid"].(bool)
+	if !valid {
+		log.Error("Invalid access token")
+		return "", errors.Errorf("Invalid access token")
+	}
+
+	orgID := response["system_data"].(string)
+
+	o := make(map[string]string)
+
+	err = json.Unmarshal([]byte(orgID), &o)
+	if err != nil {
+		log.Error("No organization ID provided", zap.Error(err))
+		return "", errors.Errorf("Invalid access token")
+	}
+
+	if o["organizationID"] == "" {
+		log.Error("No organization ID provided")
+		return "", errors.Errorf("Invalid access token")
+	}
+
+	return o["organizationID"], nil
 }
 
 func (sc *SsasHTTPClient) doGet(ctx context.Context, url string) ([]byte, error) {

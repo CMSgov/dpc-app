@@ -48,7 +48,7 @@ func (gr *GroupRepository) Insert(ctx context.Context, body []byte) (*model.Grou
 
 	sb := sqlFlavor.NewSelectBuilder()
 	sb.Select(sb.As("COUNT(id)", "c"))
-	sb.From(`"group"`)
+	sb.From(`"groups"`)
 	sb.Where(sb.Equal("organization_id", organizationID))
 	q, args := sb.Build()
 
@@ -59,7 +59,7 @@ func (gr *GroupRepository) Insert(ctx context.Context, body []byte) (*model.Grou
 	}
 
 	ib := sqlFlavor.NewInsertBuilder()
-	ib.InsertInto(`"group"`)
+	ib.InsertInto(`"groups"`)
 	ib.Cols("info", "organization_id", "version")
 	ib.Values(info, organizationID, count)
 	ib.SQL("returning id, version, created_at, updated_at, info, organization_id")
@@ -86,7 +86,7 @@ func (gr *GroupRepository) FindByID(ctx context.Context, id string) (*model.Grou
 
 	sb := sqlFlavor.NewSelectBuilder()
 	sb.Select("id, version, created_at, updated_at, info, organization_id")
-	sb.From(`"group"`)
+	sb.From(`"groups"`)
 	sb.Where(sb.Equal("organization_id", organizationID), sb.Equal("id", id))
 
 	q, args := sb.Build()

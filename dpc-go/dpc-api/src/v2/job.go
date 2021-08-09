@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/CMSgov/dpc/api/constants"
 	"net/http"
 	"sort"
 	"time"
@@ -12,7 +13,6 @@ import (
 	"github.com/CMSgov/dpc/api/conf"
 	"github.com/CMSgov/dpc/api/fhirror"
 	"github.com/CMSgov/dpc/api/logger"
-	"github.com/CMSgov/dpc/api/middleware"
 	"github.com/CMSgov/dpc/api/model"
 	"go.uber.org/zap"
 )
@@ -32,7 +32,7 @@ func NewJobController(jc client.JobClient) JobController {
 // Status function that gets the job status according to FHIR Bulk Data
 func (jc *JobControllerImpl) Status(w http.ResponseWriter, r *http.Request) {
 	log := logger.WithContext(r.Context())
-	jobID, ok := r.Context().Value(middleware.ContextKeyJobID).(string)
+	jobID, ok := r.Context().Value(constants.ContextKeyJobID).(string)
 	if !ok {
 		log.Error("Failed to extract the job id from the context")
 		fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "Failed to extract job id from url, please check the url")
