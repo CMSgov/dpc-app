@@ -109,24 +109,6 @@ func FileNameCtx(next http.Handler) http.Handler {
 	})
 }
 
-// ImplementorIDCtx middleware to extract the implementor id from the chi url param and set it into the request context
-func ImplementorIDCtx(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		id := chi.URLParam(r, "implID")
-		ctx := context.WithValue(r.Context(), constants.ContextKeyImplementor, id)
-		next.ServeHTTP(w, r.WithContext(ctx))
-	})
-}
-
-// OrganizationIDCtx middleware to extract the organization id from the chi url param and set it into the request context
-func OrganizationIDCtx(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		id := chi.URLParam(r, "orgID")
-		ctx := context.WithValue(r.Context(), constants.ContextKeyOrganization, id)
-		next.ServeHTTP(w, r.WithContext(ctx))
-	})
-}
-
 // RequestIPCtx middleware to extract the requesting IP address from the incoming request and set it into the request context
 func RequestIPCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
