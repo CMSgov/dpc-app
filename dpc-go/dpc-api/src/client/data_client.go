@@ -3,8 +3,8 @@ package client
 import (
 	"context"
 	"fmt"
+	"github.com/CMSgov/dpc/api/constants"
 	"github.com/CMSgov/dpc/api/logger"
-	middleware2 "github.com/CMSgov/dpc/api/middleware"
 	"github.com/go-chi/chi/middleware"
 	"github.com/hashicorp/go-retryablehttp"
 	"github.com/pkg/errors"
@@ -53,8 +53,8 @@ func (ac *DataClientImpl) Data(ctx context.Context, path string) ([]byte, error)
 	}
 
 	req.Header.Add(middleware.RequestIDHeader, ctx.Value(middleware.RequestIDKey).(string))
-	if ctx.Value(middleware2.ContextKeyOrganization) != nil {
-		req.Header.Add(middleware2.OrgHeader, ctx.Value(middleware2.ContextKeyOrganization).(string))
+	if ctx.Value(constants.ContextKeyOrganization) != nil {
+		req.Header.Add(constants.OrgHeader, ctx.Value(constants.ContextKeyOrganization).(string))
 	}
 	resp, err := ac.httpClient.Do(req)
 	if err != nil {
