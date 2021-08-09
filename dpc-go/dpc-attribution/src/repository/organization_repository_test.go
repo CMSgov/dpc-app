@@ -79,7 +79,7 @@ func (suite *OrganizationRepositoryTestSuite) TestFindByIDError() {
 	mock.ExpectQuery(expectedQuery).WithArgs(suite.fakeOrg.ID).WillReturnRows(rows)
 
 	org, err := repo.FindByID(ctx, suite.fakeOrg.ID)
-	assert.Error(suite.T(), err, "sql: no rows in result set")
+	assert.EqualError(suite.T(), err, "sql: no rows in result set")
 	assert.Empty(suite.T(), org)
 }
 
@@ -99,7 +99,7 @@ func (suite *OrganizationRepositoryTestSuite) TestInsertErrorExistingNPI() {
 	b, _ := json.Marshal(suite.fakeOrg.Info)
 	org, err := repo.Insert(ctx, b)
 	assert.Nil(suite.T(), org)
-	assert.Error(suite.T(), err, "organization with npi already exists")
+	assert.EqualError(suite.T(), err, "organization with npi already exists")
 	assert.Error(suite.T(), err)
 }
 
@@ -124,7 +124,7 @@ func (suite *OrganizationRepositoryTestSuite) TestInsertErrorInRepo() {
 
 	b, _ := json.Marshal(suite.fakeOrg.Info)
 	org, err := repo.Insert(ctx, b)
-	assert.Error(suite.T(), err, "error")
+	assert.EqualError(suite.T(), err, "error")
 	assert.Empty(suite.T(), org)
 }
 
@@ -216,7 +216,7 @@ func (suite *OrganizationRepositoryTestSuite) TestUpdateError() {
 	mock.ExpectQuery(expectedCountQuery).WillReturnRows(rows)
 
 	org, err := repo.Update(ctx, suite.fakeOrg.ID, b)
-	assert.Error(suite.T(), err)
+	assert.EqualError(suite.T(), err, "organization with npi already exists")
 	assert.Empty(suite.T(), org)
 
 	rows = sqlmock.NewRows([]string{"count"}).
@@ -227,6 +227,6 @@ func (suite *OrganizationRepositoryTestSuite) TestUpdateError() {
 	mock.ExpectQuery(expectedUpdatedQuery).WithArgs(suite.fakeOrg.Info, suite.fakeOrg.ID).WillReturnError(errors.New("error"))
 
 	org, err = repo.Update(ctx, suite.fakeOrg.ID, b)
-	assert.Error(suite.T(), err, "error")
+	assert.EqualError(suite.T(), err, "error")
 	assert.Empty(suite.T(), org)
 }
