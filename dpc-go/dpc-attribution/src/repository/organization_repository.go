@@ -38,7 +38,7 @@ func NewOrganizationRepo(db *sql.DB) OrganizationRepo {
 func (or *OrganizationRepository) FindByID(ctx context.Context, id string) (*model.Organization, error) {
 	sb := sqlFlavor.NewSelectBuilder()
 	sb.Select("id", "version", "created_at", "updated_at", "info")
-	sb.From("organization")
+	sb.From("organizations")
 	sb.Where(sb.Equal("id", id))
 	q, args := sb.Build()
 
@@ -65,7 +65,7 @@ func (or *OrganizationRepository) Insert(ctx context.Context, body []byte) (*mod
 
 	sb := sqlFlavor.NewSelectBuilder()
 	sb.Select(sb.As("COUNT(*)", "c"))
-	sb.From("organization")
+	sb.From("organizations")
 	sb.Where(fmt.Sprintf("info @> '{\"identifier\": [{\"value\": \"%s\"}]}'", npi))
 	q, args := sb.Build()
 
@@ -79,7 +79,7 @@ func (or *OrganizationRepository) Insert(ctx context.Context, body []byte) (*mod
 	}
 
 	ib := sqlFlavor.NewInsertBuilder()
-	ib.InsertInto("organization")
+	ib.InsertInto("organizations")
 	ib.Cols("info")
 	ib.Values(info)
 	ib.SQL("returning id, version, created_at, updated_at, info")
@@ -98,7 +98,7 @@ func (or *OrganizationRepository) Insert(ctx context.Context, body []byte) (*mod
 // DeleteByID function that deletes from the database the organization that matches the id
 func (or *OrganizationRepository) DeleteByID(ctx context.Context, id string) error {
 	db := sqlFlavor.NewDeleteBuilder()
-	db.DeleteFrom("organization")
+	db.DeleteFrom("organizations")
 	db.Where(db.Equal("id", id))
 
 	q, args := db.Build()
@@ -122,7 +122,7 @@ func (or *OrganizationRepository) Update(ctx context.Context, id string, body []
 
 	sb := sqlFlavor.NewSelectBuilder()
 	sb.Select(sb.As("COUNT(*)", "c"))
-	sb.From("organization")
+	sb.From("organizations")
 	sb.Where(fmt.Sprintf("info @> '{\"identifier\": [{\"value\": \"%s\"}]}'", npi), sb.NotEqual("id", id))
 
 	q, args := sb.Build()
@@ -137,7 +137,7 @@ func (or *OrganizationRepository) Update(ctx context.Context, id string, body []
 	}
 
 	ub := sqlFlavor.NewUpdateBuilder()
-	ub.Update("organization").Set(
+	ub.Update("organizations").Set(
 		ub.Incr("version"),
 		ub.Assign("info", info),
 		ub.Assign("updated_at", sqlbuilder.Raw("now()")),
@@ -159,7 +159,7 @@ func (or *OrganizationRepository) Update(ctx context.Context, id string, body []
 func (or *OrganizationRepository) FindByNPI(ctx context.Context, npi string) (*model.Organization, error) {
 	sb := sqlFlavor.NewSelectBuilder()
 	sb.Select("id", "version", "created_at", "updated_at", "info")
-	sb.From("organization")
+	sb.From("organizations")
 	sb.Where(fmt.Sprintf("info @> '{\"identifier\": [{\"value\": \"%s\"}]}'", npi))
 	q, args := sb.Build()
 

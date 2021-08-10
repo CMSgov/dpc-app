@@ -41,17 +41,17 @@ func (suite *GroupRepositoryTestSuite) TestInsertErrorInRepo() {
 	db, mock := newMock()
 	defer db.Close()
 	repo := NewGroupRepo(db)
-	ctx := context.Background()
+	ctx := context.WithValue(context.Background(), middleware.ContextKeyOrganization, "12345")
 
-	expectedInsertQuery := `INSERT INTO group \(info\) VALUES \(\$1\) returning id, version, created_at, updated_at, info`
+	expectedInsertQuery := `INSERT INTO "groups" \(info, organization_id, version\) VALUES \(\$1, \$2, \$3\) returning id, version, created_at, updated_at, info, organization_id`
 
 	rows := sqlmock.NewRows([]string{"id", "version", "created_at", "updated_at", "info"})
 
-	mock.ExpectQuery(expectedInsertQuery).WithArgs(suite.fakeGrp.Info).WillReturnRows(rows)
+	mock.ExpectQuery(expectedInsertQuery).WithArgs(suite.fakeGrp.Info, "12345", 0).WillReturnRows(rows)
 
 	b, _ := json.Marshal(suite.fakeGrp.Info)
 	group, err := repo.Insert(ctx, b)
-	assert.Error(suite.T(), err)
+	assert.EqualError(suite.T(), err, "sql: no rows in result set")
 	assert.Empty(suite.T(), group)
 }
 
@@ -61,13 +61,13 @@ func (suite *GroupRepositoryTestSuite) TestInsert() {
 	repo := NewGroupRepo(db)
 	ctx := context.WithValue(context.Background(), middleware.ContextKeyOrganization, "12345")
 
-	expectedCountQuery := `SELECT COUNT\(id\) AS c FROM "group" WHERE organization_id = \$1`
+	expectedCountQuery := `SELECT COUNT\(id\) AS c FROM "groups" WHERE organization_id = \$1`
 	rows := sqlmock.NewRows([]string{"count"}).
 		AddRow(0)
 
 	mock.ExpectQuery(expectedCountQuery).WillReturnRows(rows)
 
-	expectedInsertQuery := `INSERT INTO "group" \(info, organization_id, version\) VALUES \(\$1, \$2, \$3\) returning id, version, created_at, updated_at, info, organization_id`
+	expectedInsertQuery := `INSERT INTO "groups" \(info, organization_id, version\) VALUES \(\$1, \$2, \$3\) returning id, version, created_at, updated_at, info, organization_id`
 
 	rows = sqlmock.NewRows([]string{"id", "version", "created_at", "updated_at", "info", "organization_id"}).
 		AddRow(suite.fakeGrp.ID, suite.fakeGrp.Version, suite.fakeGrp.CreatedAt, suite.fakeGrp.UpdatedAt, suite.fakeGrp.Info, suite.fakeGrp.OrganizationID)
@@ -86,7 +86,7 @@ func (suite *GroupRepositoryTestSuite) TestFindByID() {
 	repo := NewGroupRepo(db)
 	ctx := context.WithValue(context.Background(), middleware.ContextKeyOrganization, "12345")
 
-	expectedSelectQuery := `SELECT id, version, created_at, updated_at, info, organization_id FROM "group" WHERE organization_id = \$1 AND id = \$2`
+	expectedSelectQuery := `SELECT id, version, created_at, updated_at, info, organization_id FROM "groups" WHERE organization_id = \$1 AND id = \$2`
 
 	rows := sqlmock.NewRows([]string{"id", "version", "created_at", "updated_at", "info", "organization_id"}).
 		AddRow(suite.fakeGrp.ID, suite.fakeGrp.Version, suite.fakeGrp.CreatedAt, suite.fakeGrp.UpdatedAt, suite.fakeGrp.Info, suite.fakeGrp.OrganizationID)
