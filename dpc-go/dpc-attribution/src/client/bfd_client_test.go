@@ -183,7 +183,7 @@ func (s *BfdTestSuite) TestNewBfdClientInvalidB64KeyFile() {
 	conf.SetEnv(s.T(), "bfd.clientkey", "")
 	bbc, err = client.NewBfdClient(client.NewConfig("basePath"))
 	assert.Nil(bbc)
-	assert.EqualError(err, "only one of (DPC_BFD_CLIENTCERT , DPC_BFD_CLIENTKEY) was provided. Both or none are required.")
+	assert.EqualError(err, "only one of (DPC_BFD_CLIENTCERT , DPC_BFD_CLIENTKEY) was provided. Both or none are required")
 }
 
 func (s *BfdTestSuite) TestNewBfdClientInvalidB64ClientFile() {
@@ -206,7 +206,7 @@ func (s *BfdTestSuite) TestNewBfdClientInvalidB64ClientFile() {
 	conf.SetEnv(s.T(), "bfd.clientkey", "")
 	bbc, err = client.NewBfdClient(client.NewConfig("basePath"))
 	assert.Nil(bbc)
-	assert.EqualError(err, "only one of (DPC_BFD_CLIENTCERT , DPC_BFD_CLIENTKEY) was provided. Both or none are required.")
+	assert.EqualError(err, "only one of (DPC_BFD_CLIENTCERT , DPC_BFD_CLIENTKEY) was provided. Both or none are required")
 }
 
 func (s *BfdTestSuite) TestNewBfdClientInvalidB64CAFile() {
@@ -231,7 +231,7 @@ func (s *BfdTestSuite) TestNewBfdClientInvalidB64CAFile() {
 	conf.SetEnv(s.T(), "bfd.clientkey", "")
 	bbc, err = client.NewBfdClient(client.NewConfig("basePath"))
 	assert.Nil(bbc)
-	assert.EqualError(err, "only one of (DPC_BFD_CLIENTCERT , DPC_BFD_CLIENTKEY) was provided. Both or none are required.")
+	assert.EqualError(err, "only one of (DPC_BFD_CLIENTCERT , DPC_BFD_CLIENTKEY) was provided. Both or none are required")
 }
 
 func (s *BfdTestSuite) TestNewBfdClientNoCAFile() {

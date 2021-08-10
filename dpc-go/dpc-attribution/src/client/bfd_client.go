@@ -118,11 +118,11 @@ func NewBfdClient(config BfdConfig) (*BfdClient, error) {
 }
 
 func getClientCert() (tls.Certificate, error) {
-	hasB64 := StringUtils.IsNotBlank(conf.GetAsString("BFD.CLIENTCERT")) || StringUtils.IsNotBlank(conf.GetAsString("BFD.CLIENTKEY"))
+	hasB64 := StringUtils.IsNotBlank(conf.GetAsString("bfd.clientCert")) || StringUtils.IsNotBlank(conf.GetAsString("bfd.clientKey"))
 	hasFilePaths := StringUtils.IsNotBlank(conf.GetAsString("bfd.clientCertFile")) || StringUtils.IsNotBlank(conf.GetAsString("bfd.clientKeyFile"))
 
 	if hasB64 {
-		if StringUtils.IsBlank(conf.GetAsString("BFD.CLIENTCERT")) || StringUtils.IsBlank(conf.GetAsString("BFD.CLIENTKEY")) {
+		if StringUtils.IsBlank(conf.GetAsString("bfd.clientCert")) || StringUtils.IsBlank(conf.GetAsString("bfd.clientKey")) {
 			return tls.Certificate{}, errors.New("only one of (DPC_BFD_CLIENTCERT , DPC_BFD_CLIENTKEY) was provided. Both or none are required")
 		}
 		log.Info("Using BFD clients certs found in env variables (DPC_BFD_CLIENTCERT , DPC_BFD_CLIENTKEY)")
@@ -131,7 +131,7 @@ func getClientCert() (tls.Certificate, error) {
 		log.Info("Using BFD clients certs file paths")
 		return getClientCertFromFiles()
 	} else {
-		return tls.Certificate{}, errors.New("missing Base64 BFD Certs (DPC_BFD_CLIENTCERT , DPC_BFD_CLIENTKEY) or BFD Cert file paths (DPC_bfd_clientCertFile , DPC_bfd_clientKeyFile)")
+		return tls.Certificate{}, errors.New("missing Base64 BFD Certs (DPC_BFD_CLIENTCERT , DPC_BFD_CLIENTKEY) or BFD Cert file paths (DPC_BFD_CLIENTCERTFILE , DPC_BFD_CLIENTKEYFILE)")
 	}
 }
 
@@ -176,7 +176,7 @@ func getClientCertFromFiles() (tls.Certificate, error) {
 }
 
 func getCAPoolFromEnv() (*x509.CertPool, error) {
-	caB, err := b64.StdEncoding.DecodeString(conf.GetAsString("BFD.CA"))
+	caB, err := b64.StdEncoding.DecodeString(conf.GetAsString("bfd.ca"))
 	if err != nil {
 		return nil, errors.New("could not base64 decode BFD CA cert")
 	}
@@ -191,11 +191,11 @@ func getCAPoolFromEnv() (*x509.CertPool, error) {
 }
 
 func getClientCertFromEnv() (tls.Certificate, error) {
-	crtB, err := b64.StdEncoding.DecodeString(conf.GetAsString("BFD.CLIENTCERT"))
+	crtB, err := b64.StdEncoding.DecodeString(conf.GetAsString("bfd.clientCert"))
 	if err != nil {
 		return tls.Certificate{}, errors.Wrap(err, "could not base64 decode BFD cert")
 	}
-	keyB, err := b64.StdEncoding.DecodeString(conf.GetAsString("BFD.CLIENTKEY"))
+	keyB, err := b64.StdEncoding.DecodeString(conf.GetAsString("bfd.clientKey"))
 	if err != nil {
 		return tls.Certificate{}, errors.Wrap(err, "could not base64 decode BFD cert key")
 	}
