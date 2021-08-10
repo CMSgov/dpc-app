@@ -123,7 +123,7 @@ func getClientCert() (tls.Certificate, error) {
 
 	if hasB64 {
 		if StringUtils.IsBlank(conf.GetAsString("BFD.CLIENTCERT")) || StringUtils.IsBlank(conf.GetAsString("BFD.CLIENTKEY")) {
-			return tls.Certificate{}, errors.New("only one of (DPC_BFD_CLIENTCERT , DPC_BFD_CLIENTKEY) was provided. Both or none are required.")
+			return tls.Certificate{}, errors.New("only one of (DPC_BFD_CLIENTCERT , DPC_BFD_CLIENTKEY) was provided. Both or none are required")
 		}
 		log.Info("Using BFD clients certs found in env variables (DPC_BFD_CLIENTCERT , DPC_BFD_CLIENTKEY)")
 		return getClientCertFromEnv()
