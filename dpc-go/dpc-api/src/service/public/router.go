@@ -18,8 +18,8 @@ func buildPublicRoutes(cont controllers, ssasClient client.SsasClient) http.Hand
 	r := chi.NewRouter()
 	r.Use(middleware2.Logging())
 	r.Use(middleware2.RequestIPCtx)
-	fileServer(r, "/v2/swagger", http.Dir("../swaggerui"))
-	r.With(middleware2.Sanitize).Route("/v2", func(r chi.Router) {
+	fileServer(r, "/api/v2/swagger", http.Dir("../swaggerui"))
+	r.With(middleware2.Sanitize).Route("/api/v2", func(r chi.Router) {
 		r.Use(middleware.SetHeader("Content-Type", "application/fhir+json; charset=UTF-8"))
 		r.Get("/metadata", cont.Metadata.Read)
 		r.Get("/_health", func(w http.ResponseWriter, r *http.Request) {
