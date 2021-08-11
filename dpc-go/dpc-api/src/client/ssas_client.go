@@ -5,13 +5,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"net/http"
+
 	"github.com/CMSgov/dpc/api/logger"
 	"github.com/CMSgov/dpc/api/model"
 	"github.com/hashicorp/go-retryablehttp"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
-	"io/ioutil"
-	"net/http"
 )
 
 // SsasHTTPClientConfig is a struct to hold configuration info for retryable http client
@@ -28,7 +29,8 @@ const (
 	PostV2SystemEndpoint    string = "v2/system"
 	PostV2GroupEndpoint     string = "v2/group"
 	PostV2AuthenticateToken string = "v2/token"
-	TokenInfoEndpoint       string = "v2/token_info"
+	/* #nosec */
+	TokenInfoEndpoint string = "v2/token_info"
 )
 
 // SsasClient interface for testing purposes
