@@ -3,12 +3,13 @@ package admin
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/CMSgov/dpc/api/constants"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/CMSgov/dpc/api/constants"
 
 	"github.com/go-chi/chi/middleware"
 	"github.com/kinbiko/jsonassert"
@@ -114,7 +115,7 @@ func (suite *RouterTestSuite) TestHealthRoute() {
 
 	ts := httptest.NewServer(suite.router)
 
-	res, _ := http.Get(fmt.Sprintf("%s/%s", ts.URL, "v2/_health"))
+	res, _ := http.Get(fmt.Sprintf("%s/%s", ts.URL, "api/v2/_health"))
 
 	assert.Equal(suite.T(), "application/fhir+json; charset=UTF-8", res.Header.Get("Content-Type"))
 	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
@@ -130,7 +131,7 @@ func (suite *RouterTestSuite) TestErrorHandling() {
 
 	ts := httptest.NewServer(suite.router)
 
-	req, _ := http.NewRequest(http.MethodDelete, fmt.Sprintf("%s/%s", ts.URL, "v2/Organization/12345"), nil)
+	req, _ := http.NewRequest(http.MethodDelete, fmt.Sprintf("%s/%s", ts.URL, "api/v2/Organization/12345"), nil)
 	req.Header.Set(middleware.RequestIDHeader, "54321")
 	res, _ := http.DefaultClient.Do(req)
 
@@ -167,7 +168,7 @@ func (suite *RouterTestSuite) TestOrganizationPostRoute() {
 
 	ts := httptest.NewServer(suite.router)
 
-	req, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/%s", ts.URL, "v2/Organization"), strings.NewReader(apitest.Orgjson))
+	req, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/%s", ts.URL, "api/v2/Organization"), strings.NewReader(apitest.Orgjson))
 	req.Header.Set("Content-Type", "application/fhir+json")
 	req.Header.Set(middleware.RequestIDHeader, "54321")
 	res, _ := http.DefaultClient.Do(req)
@@ -196,7 +197,7 @@ func (suite *RouterTestSuite) TestOrganizationDeleteRoutes() {
 
 	ts := httptest.NewServer(suite.router)
 
-	req, _ := http.NewRequest("DELETE", fmt.Sprintf("%s/%s", ts.URL, "v2/Organization/12345"), nil)
+	req, _ := http.NewRequest("DELETE", fmt.Sprintf("%s/%s", ts.URL, "api/v2/Organization/12345"), nil)
 	req.Header.Set(middleware.RequestIDHeader, "54321")
 	res, _ := http.DefaultClient.Do(req)
 
@@ -221,7 +222,7 @@ func (suite *RouterTestSuite) TestOrganizationPutRoutes() {
 
 	ts := httptest.NewServer(suite.router)
 
-	req, _ := http.NewRequest(http.MethodPut, fmt.Sprintf("%s/%s", ts.URL, "v2/Organization/12345"), strings.NewReader(apitest.Orgjson))
+	req, _ := http.NewRequest(http.MethodPut, fmt.Sprintf("%s/%s", ts.URL, "api/v2/Organization/12345"), strings.NewReader(apitest.Orgjson))
 	req.Header.Set(middleware.RequestIDHeader, "54321")
 	res, _ := http.DefaultClient.Do(req)
 
@@ -246,7 +247,7 @@ func (suite *RouterTestSuite) TestPostSystemProxyRoute() {
 
 	ts := httptest.NewServer(suite.router)
 
-	req, _ := http.NewRequest("POST", fmt.Sprintf("%s/%s", ts.URL, "v2/Implementer/12345/Org/123/system"), strings.NewReader("{}"))
+	req, _ := http.NewRequest("POST", fmt.Sprintf("%s/%s", ts.URL, "api/v2/Implementer/12345/Org/123/system"), strings.NewReader("{}"))
 	req.Header.Set("Content-Type", "application/json")
 	res, err := http.DefaultClient.Do(req)
 	fmt.Println(err)
@@ -264,7 +265,7 @@ func (suite *RouterTestSuite) TestOrganizationGetRoutes() {
 
 	ts := httptest.NewServer(suite.router)
 
-	req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/%s", ts.URL, "v2/Organization/12345"), nil)
+	req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/%s", ts.URL, "api/v2/Organization/12345"), nil)
 	req.Header.Set(middleware.RequestIDHeader, "54321")
 	res, _ := http.DefaultClient.Do(req)
 

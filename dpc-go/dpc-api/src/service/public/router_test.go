@@ -4,14 +4,15 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/CMSgov/dpc/api/client"
-	"github.com/CMSgov/dpc/api/constants"
-	"github.com/CMSgov/dpc/api/model"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/CMSgov/dpc/api/client"
+	"github.com/CMSgov/dpc/api/constants"
+	"github.com/CMSgov/dpc/api/model"
 
 	"github.com/CMSgov/dpc/api/apitest"
 	"github.com/go-chi/chi/middleware"
@@ -186,7 +187,7 @@ func (suite *RouterTestSuite) TestMetadataRoute() {
 
 	ts := httptest.NewServer(suite.router)
 
-	res, _ := http.Get(fmt.Sprintf("%s/%s", ts.URL, "v2/metadata"))
+	res, _ := http.Get(fmt.Sprintf("%s/%s", ts.URL, "api/v2/metadata"))
 
 	assert.Equal(suite.T(), "application/fhir+json; charset=UTF-8", res.Header.Get("Content-Type"))
 	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
@@ -197,7 +198,7 @@ func (suite *RouterTestSuite) TestHealthRoute() {
 
 	ts := httptest.NewServer(suite.router)
 
-	res, _ := http.Get(fmt.Sprintf("%s/%s", ts.URL, "v2/_health"))
+	res, _ := http.Get(fmt.Sprintf("%s/%s", ts.URL, "api/v2/_health"))
 
 	assert.Equal(suite.T(), "application/fhir+json; charset=UTF-8", res.Header.Get("Content-Type"))
 	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
@@ -216,7 +217,7 @@ func (suite *RouterTestSuite) TestGroupExportRoute() {
 
 	ts := httptest.NewServer(suite.router)
 
-	req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/%s", ts.URL, "v2/Group/9876/$export"), nil)
+	req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/%s", ts.URL, "api/v2/Group/9876/$export"), nil)
 	req.Header.Add("Authorization", "Bearer hello")
 
 	req.Header.Set("Content-Type", "application/fhir+json")
@@ -249,7 +250,7 @@ func (suite *RouterTestSuite) TestOrganizationGetRoutes() {
 
 	ts := httptest.NewServer(suite.router)
 
-	req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/%s", ts.URL, "v2/Organization/12345"), nil)
+	req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/%s", ts.URL, "api/v2/Organization/12345"), nil)
 	req.Header.Add("Authorization", "Bearer hello")
 
 	req.Header.Set(middleware.RequestIDHeader, "54321")
@@ -276,7 +277,7 @@ func (suite *RouterTestSuite) TestGetAuthTokenProxyRoute() {
 
 	ts := httptest.NewServer(suite.router)
 
-	req, _ := http.NewRequest("POST", fmt.Sprintf("%s/%s", ts.URL, "v2/Token/auth"), strings.NewReader("{}"))
+	req, _ := http.NewRequest("POST", fmt.Sprintf("%s/%s", ts.URL, "api/v2/Token/auth"), strings.NewReader("{}"))
 	req.Header.Set("Content-Type", "application/json")
 	res, err := http.DefaultClient.Do(req)
 	fmt.Println(err)
