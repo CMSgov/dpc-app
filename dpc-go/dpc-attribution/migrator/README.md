@@ -33,4 +33,4 @@ Assuming the last migration in the `/migrations` folder has an id of 41 a new mi
     * *You may roll back a specific migration by specifying the id*
   
 ####Checking Schema Version
-The table `shema_migrations` contains the most recent migration and its status.
+The table `schema_migrations` contains the most recent migration and its status.
