@@ -5,12 +5,17 @@ COPY src/ .
 COPY configs ../configs
 RUN go build  -o ./bin/attribution .
 
+FROM migrate/migrate AS migrator
+WORKDIR /usr/local/bin
+
 FROM golang:1.15-alpine3.12
 RUN apk update upgrade
 RUN apk --no-cache add ca-certificates aws-cli curl
 WORKDIR /app/dpc-attribution
 COPY --from=builder /app/configs ../configs
 COPY --from=builder /app/dpc-attribution/bin/attribution ./bin/attribution
-CMD ["./bin/attribution"]
+COPY docker/Dockerfiles/entrypoint.sh entrypoint.sh
+COPY --from=migrator migrate migrate
+COPY migrator/migrations migrations
 
-
+CMD ["./entrypoint.sh"]

@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "d313d3bd-04e6-4d4b-9a03-437f3bce76fc",
+		"_postman_id": "f8738712-b93b-48b4-811f-ab8323268e4e",
 		"name": "DPC V2 Functional Tests",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -51,13 +51,14 @@
 									}
 								},
 								"url": {
-									"raw": "{{api_admin_protocol}}://{{api_admin_host}}:{{api_admin_port}}/v2/Organization/",
+									"raw": "{{api_admin_protocol}}://{{api_admin_host}}:{{api_admin_port}}/api/v2/Organization/",
 									"protocol": "{{api_admin_protocol}}",
 									"host": [
 										"{{api_admin_host}}"
 									],
 									"port": "{{api_admin_port}}",
 									"path": [
+										"api",
 										"v2",
 										"Organization",
 										""
@@ -105,13 +106,14 @@
 									}
 								},
 								"url": {
-									"raw": "{{api_admin_protocol}}://{{api_admin_host}}:{{api_admin_port}}/v2/Organization/",
+									"raw": "{{api_admin_protocol}}://{{api_admin_host}}:{{api_admin_port}}/api/v2/Organization/",
 									"protocol": "{{api_admin_protocol}}",
 									"host": [
 										"{{api_admin_host}}"
 									],
 									"port": "{{api_admin_port}}",
 									"path": [
+										"api",
 										"v2",
 										"Organization",
 										""
@@ -150,13 +152,14 @@
 									}
 								],
 								"url": {
-									"raw": "{{api_admin_protocol}}://{{api_admin_host}}:{{api_admin_port}}/v2/Organization/{{organization_id}}",
+									"raw": "{{api_admin_protocol}}://{{api_admin_host}}:{{api_admin_port}}/api/v2/Organization/{{organization_id}}",
 									"protocol": "{{api_admin_protocol}}",
 									"host": [
 										"{{api_admin_host}}"
 									],
 									"port": "{{api_admin_port}}",
 									"path": [
+										"api",
 										"v2",
 										"Organization",
 										"{{organization_id}}"
@@ -195,13 +198,14 @@
 									}
 								],
 								"url": {
-									"raw": "{{api_admin_protocol}}://{{api_admin_host}}:{{api_admin_port}}/v2/Organization/00000000-5671-473f-b3fe-ed5a0551a2d7",
+									"raw": "{{api_admin_protocol}}://{{api_admin_host}}:{{api_admin_port}}/api/v2/Organization/00000000-5671-473f-b3fe-ed5a0551a2d7",
 									"protocol": "{{api_admin_protocol}}",
 									"host": [
 										"{{api_admin_host}}"
 									],
 									"port": "{{api_admin_port}}",
 									"path": [
+										"api",
 										"v2",
 										"Organization",
 										"00000000-5671-473f-b3fe-ed5a0551a2d7"
@@ -235,13 +239,14 @@
 									}
 								],
 								"url": {
-									"raw": "{{api_admin_protocol}}://{{api_admin_host}}:{{api_admin_port}}/v2/Organization/{{organization_id}}",
+									"raw": "{{api_admin_protocol}}://{{api_admin_host}}:{{api_admin_port}}/api/v2/Organization/{{organization_id}}",
 									"protocol": "{{api_admin_protocol}}",
 									"host": [
 										"{{api_admin_host}}"
 									],
 									"port": "{{api_admin_port}}",
 									"path": [
+										"api",
 										"v2",
 										"Organization",
 										"{{organization_id}}"
@@ -280,13 +285,14 @@
 									}
 								],
 								"url": {
-									"raw": "{{api_admin_protocol}}://{{api_admin_host}}:{{api_admin_port}}/v2/Organization/{{organization_id}}",
+									"raw": "{{api_admin_protocol}}://{{api_admin_host}}:{{api_admin_port}}/api/v2/Organization/{{organization_id}}",
 									"protocol": "{{api_admin_protocol}}",
 									"host": [
 										"{{api_admin_host}}"
 									],
 									"port": "{{api_admin_port}}",
 									"path": [
+										"api",
 										"v2",
 										"Organization",
 										"{{organization_id}}"
@@ -348,13 +354,14 @@
 									}
 								},
 								"url": {
-									"raw": "{{api_admin_protocol}}://{{api_admin_host}}:{{api_admin_port}}/v2/Implementer",
+									"raw": "{{api_admin_protocol}}://{{api_admin_host}}:{{api_admin_port}}/api/v2/Implementer",
 									"protocol": "{{api_admin_protocol}}",
 									"host": [
 										"{{api_admin_host}}"
 									],
 									"port": "{{api_admin_port}}",
 									"path": [
+										"api",
 										"v2",
 										"Implementer"
 									]
@@ -399,13 +406,14 @@
 									}
 								},
 								"url": {
-									"raw": "{{api_admin_protocol}}://{{api_admin_host}}:{{api_admin_port}}/v2/Implementer/{{implementer_id}}/org",
+									"raw": "{{api_admin_protocol}}://{{api_admin_host}}:{{api_admin_port}}/api/v2/Implementer/{{implementer_id}}/org",
 									"protocol": "{{api_admin_protocol}}",
 									"host": [
 										"{{api_admin_host}}"
 									],
 									"port": "{{api_admin_port}}",
 									"path": [
+										"api",
 										"v2",
 										"Implementer",
 										"{{implementer_id}}",
@@ -480,13 +488,14 @@
 									}
 								},
 								"url": {
-									"raw": "{{api_admin_protocol}}://{{api_admin_host}}:{{api_admin_port}}/v2/Implementer/{{implementer_id}}/org",
+									"raw": "{{api_admin_protocol}}://{{api_admin_host}}:{{api_admin_port}}/api/v2/Implementer/{{implementer_id}}/org",
 									"protocol": "{{api_admin_protocol}}",
 									"host": [
 										"{{api_admin_host}}"
 									],
 									"port": "{{api_admin_port}}",
 									"path": [
+										"api",
 										"v2",
 										"Implementer",
 										"{{implementer_id}}",
@@ -531,13 +540,14 @@
 									}
 								},
 								"url": {
-									"raw": "{{api_admin_protocol}}://{{api_admin_host}}:{{api_admin_port}}/v2/Implementer/{{implementer_id}}/org",
+									"raw": "{{api_admin_protocol}}://{{api_admin_host}}:{{api_admin_port}}/api/v2/Implementer/{{implementer_id}}/org",
 									"protocol": "{{api_admin_protocol}}",
 									"host": [
 										"{{api_admin_host}}"
 									],
 									"port": "{{api_admin_port}}",
 									"path": [
+										"api",
 										"v2",
 										"Implementer",
 										"{{implementer_id}}",
@@ -612,13 +622,14 @@
 									}
 								},
 								"url": {
-									"raw": "{{api_admin_protocol}}://{{api_admin_host}}:{{api_admin_port}}/v2/Implementer/{{implementer_id}}/org",
+									"raw": "{{api_admin_protocol}}://{{api_admin_host}}:{{api_admin_port}}/api/v2/Implementer/{{implementer_id}}/org",
 									"protocol": "{{api_admin_protocol}}",
 									"host": [
 										"{{api_admin_host}}"
 									],
 									"port": "{{api_admin_port}}",
 									"path": [
+										"api",
 										"v2",
 										"Implementer",
 										"{{implementer_id}}",
@@ -678,13 +689,14 @@
 									}
 								},
 								"url": {
-									"raw": "{{api_admin_protocol}}://{{api_admin_host}}:{{api_admin_port}}/v2/Implementer",
+									"raw": "{{api_admin_protocol}}://{{api_admin_host}}:{{api_admin_port}}/api/v2/Implementer",
 									"protocol": "{{api_admin_protocol}}",
 									"host": [
 										"{{api_admin_host}}"
 									],
 									"port": "{{api_admin_port}}",
 									"path": [
+										"api",
 										"v2",
 										"Implementer"
 									]
@@ -758,13 +770,14 @@
 									}
 								},
 								"url": {
-									"raw": "{{api_admin_protocol}}://{{api_admin_host}}:{{api_admin_port}}/v2/Implementer/{{implementer_id}}/org",
+									"raw": "{{api_admin_protocol}}://{{api_admin_host}}:{{api_admin_port}}/api/v2/Implementer/{{implementer_id}}/org",
 									"protocol": "{{api_admin_protocol}}",
 									"host": [
 										"{{api_admin_host}}"
 									],
 									"port": "{{api_admin_port}}",
 									"path": [
+										"api",
 										"v2",
 										"Implementer",
 										"{{implementer_id}}",
@@ -834,13 +847,14 @@
 									}
 								},
 								"url": {
-									"raw": "{{api_admin_protocol}}://{{api_admin_host}}:{{api_admin_port}}/v2/Implementer/{{implementer_id}}/Org/{{organization_id}}/system",
+									"raw": "{{api_admin_protocol}}://{{api_admin_host}}:{{api_admin_port}}/api/v2/Implementer/{{implementer_id}}/Org/{{organization_id}}/system",
 									"protocol": "{{api_admin_protocol}}",
 									"host": [
 										"{{api_admin_host}}"
 									],
 									"port": "{{api_admin_port}}",
 									"path": [
+										"api",
 										"v2",
 										"Implementer",
 										"{{implementer_id}}",
@@ -919,13 +933,14 @@
 									}
 								},
 								"url": {
-									"raw": "{{api_admin_protocol}}://{{api_admin_host}}:{{api_admin_port}}/v2/Implementer/{{implementer_id}}/Org/{{organization_id}}/system",
+									"raw": "{{api_admin_protocol}}://{{api_admin_host}}:{{api_admin_port}}/api/v2/Implementer/{{implementer_id}}/Org/{{organization_id}}/system",
 									"protocol": "{{api_admin_protocol}}",
 									"host": [
 										"{{api_admin_host}}"
 									],
 									"port": "{{api_admin_port}}",
 									"path": [
+										"api",
 										"v2",
 										"Implementer",
 										"{{implementer_id}}",
@@ -976,13 +991,14 @@
 									}
 								},
 								"url": {
-									"raw": "{{api_admin_protocol}}://{{api_admin_host}}:{{api_admin_port}}/v2/Implementer/{{implementer_id}}/Org/123456-fake-1234/system",
+									"raw": "{{api_admin_protocol}}://{{api_admin_host}}:{{api_admin_port}}/api/v2/Implementer/{{implementer_id}}/Org/123456-fake-1234/system",
 									"protocol": "{{api_admin_protocol}}",
 									"host": [
 										"{{api_admin_host}}"
 									],
 									"port": "{{api_admin_port}}",
 									"path": [
+										"api",
 										"v2",
 										"Implementer",
 										"{{implementer_id}}",
@@ -1028,13 +1044,14 @@
 									}
 								},
 								"url": {
-									"raw": "{{api_admin_protocol}}://{{api_admin_host}}:{{api_admin_port}}/v2/Implementer/{{implementer_id}}/Org/0fe60651-1634-4d43-9f39-b4d34651f21d/system",
+									"raw": "{{api_admin_protocol}}://{{api_admin_host}}:{{api_admin_port}}/api/v2/Implementer/{{implementer_id}}/Org/0fe60651-1634-4d43-9f39-b4d34651f21d/system",
 									"protocol": "{{api_admin_protocol}}",
 									"host": [
 										"{{api_admin_host}}"
 									],
 									"port": "{{api_admin_port}}",
 									"path": [
+										"api",
 										"v2",
 										"Implementer",
 										"{{implementer_id}}",
@@ -1085,13 +1102,14 @@
 									}
 								},
 								"url": {
-									"raw": "{{api_admin_protocol}}://{{api_admin_host}}:{{api_admin_port}}/v2/Implementer/{{implementer_id}}/Org/0fe60651-1634-4d43-9f39-b4d34651f21d/system",
+									"raw": "{{api_admin_protocol}}://{{api_admin_host}}:{{api_admin_port}}/api/v2/Implementer/{{implementer_id}}/Org/0fe60651-1634-4d43-9f39-b4d34651f21d/system",
 									"protocol": "{{api_admin_protocol}}",
 									"host": [
 										"{{api_admin_host}}"
 									],
 									"port": "{{api_admin_port}}",
 									"path": [
+										"api",
 										"v2",
 										"Implementer",
 										"{{implementer_id}}",
@@ -1147,13 +1165,14 @@
 									}
 								},
 								"url": {
-									"raw": "{{api_admin_protocol}}://{{api_admin_host}}:{{api_admin_port}}/v2/Organization/",
+									"raw": "{{api_admin_protocol}}://{{api_admin_host}}:{{api_admin_port}}/api/v2/Organization/",
 									"protocol": "{{api_admin_protocol}}",
 									"host": [
 										"{{api_admin_host}}"
 									],
 									"port": "{{api_admin_port}}",
 									"path": [
+										"api",
 										"v2",
 										"Organization",
 										""
@@ -1202,13 +1221,14 @@
 									}
 								},
 								"url": {
-									"raw": "{{api_admin_protocol}}://{{api_admin_host}}:{{api_public_port}}/v2/Group/",
+									"raw": "{{api_admin_protocol}}://{{api_admin_host}}:{{api_public_port}}/api/v2/Group/",
 									"protocol": "{{api_admin_protocol}}",
 									"host": [
 										"{{api_admin_host}}"
 									],
 									"port": "{{api_public_port}}",
 									"path": [
+										"api",
 										"v2",
 										"Group",
 										""
@@ -1276,13 +1296,14 @@
 									}
 								},
 								"url": {
-									"raw": "{{api_admin_protocol}}://{{api_admin_host}}:{{api_public_port}}/v2/Group/{{group_id}}/$export?_outputFormat=application/ndjson",
+									"raw": "{{api_admin_protocol}}://{{api_admin_host}}:{{api_public_port}}/api/v2/Group/{{group_id}}/$export?_outputFormat=application/ndjson",
 									"protocol": "{{api_admin_protocol}}",
 									"host": [
 										"{{api_admin_host}}"
 									],
 									"port": "{{api_public_port}}",
 									"path": [
+										"api",
 										"v2",
 										"Group",
 										"{{group_id}}",
@@ -1354,13 +1375,14 @@
 									}
 								},
 								"url": {
-									"raw": "{{api_admin_protocol}}://{{api_admin_host}}:{{api_public_port}}/v2/Jobs/{{job-id}}",
+									"raw": "{{api_admin_protocol}}://{{api_admin_host}}:{{api_public_port}}/api/v2/Jobs/{{job-id}}",
 									"protocol": "{{api_admin_protocol}}",
 									"host": [
 										"{{api_admin_host}}"
 									],
 									"port": "{{api_public_port}}",
 									"path": [
+										"api",
 										"v2",
 										"Jobs",
 										"{{job-id}}"
@@ -1405,13 +1427,14 @@
 									}
 								],
 								"url": {
-									"raw": "{{api_admin_protocol}}://{{api_admin_host}}:{{api_public_port}}/v2/Data/{{ndjson_file}}",
+									"raw": "{{api_admin_protocol}}://{{api_admin_host}}:{{api_public_port}}/api/v2/Data/{{ndjson_file}}",
 									"protocol": "{{api_admin_protocol}}",
 									"host": [
 										"{{api_admin_host}}"
 									],
 									"port": "{{api_public_port}}",
 									"path": [
+										"api",
 										"v2",
 										"Data",
 										"{{ndjson_file}}"
