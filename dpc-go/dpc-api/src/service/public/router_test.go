@@ -65,7 +65,7 @@ func (mc *MockSsasClient) DeletePublicKey(ctx context.Context, systemID string, 
 	return args.Error(0)
 }
 
-func (mc *MockSsasClient) ValidateAccessToken(ctx context.Context, token string) (string, error) {
+func (mc *MockSsasClient) GetOrgIDFromToken(ctx context.Context, token string) (string, error) {
 	args := mc.Called(ctx, token)
 	return args.Get(0).(string), args.Error(1)
 }
@@ -213,7 +213,7 @@ func (suite *RouterTestSuite) TestGroupExportRoute() {
 		w.WriteHeader(http.StatusAccepted)
 	})
 
-	suite.mockSassClient.On("ValidateAccessToken", mock.Anything, mock.Anything).Return("12345", nil)
+	suite.mockSassClient.On("GetOrgIDFromToken", mock.Anything, mock.Anything).Return("12345", nil)
 
 	ts := httptest.NewServer(suite.router)
 
@@ -246,7 +246,7 @@ func (suite *RouterTestSuite) TestOrganizationGetRoutes() {
 		_, _ = w.Write(apitest.AttributionOrgResponse())
 	})
 
-	suite.mockSassClient.On("ValidateAccessToken", mock.Anything, mock.Anything).Return("12345", nil)
+	suite.mockSassClient.On("GetOrgIDFromToken", mock.Anything, mock.Anything).Return("12345", nil)
 
 	ts := httptest.NewServer(suite.router)
 

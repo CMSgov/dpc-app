@@ -43,7 +43,7 @@ type SsasClient interface {
 	DeleteToken(ctx context.Context, systemID string, tokenID string) error
 	AddPublicKey(ctx context.Context, systemID string, request model.ProxyPublicKeyRequest) (map[string]string, error)
 	DeletePublicKey(ctx context.Context, systemID string, keyID string) error
-	ValidateAccessToken(ctx context.Context, token string) (string, error)
+	GetOrgIDFromToken(ctx context.Context, token string) (string, error)
 }
 
 // SsasHTTPClient is a struct to hold the retryable http client and configs
@@ -296,7 +296,7 @@ func (sc *SsasHTTPClient) Authenticate(ctx context.Context, reqBytes []byte) ([]
 }
 
 // ValidateAccessToken validates with access token with SSAS and returns the org ID
-func (sc *SsasHTTPClient) ValidateAccessToken(ctx context.Context, token string) (string, error) {
+func (sc *SsasHTTPClient) GetOrgIDFromToken(ctx context.Context, token string) (string, error) {
 	log := logger.WithContext(ctx)
 	url := fmt.Sprintf("%s/%s", sc.config.PublicURL, TokenInfoEndpoint)
 

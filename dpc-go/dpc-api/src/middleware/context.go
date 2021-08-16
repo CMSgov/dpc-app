@@ -66,7 +66,7 @@ func AuthCtx(ssasClient client.SsasClient) func(next http.Handler) http.Handler 
 				return
 			}
 
-			orgID, err := ssasClient.ValidateAccessToken(r.Context(), bearerToken)
+			orgID, err := ssasClient.GetOrgIDFromToken(r.Context(), bearerToken)
 
 			if err != nil {
 				log.Error("Invalid access token", zap.Error(err))
