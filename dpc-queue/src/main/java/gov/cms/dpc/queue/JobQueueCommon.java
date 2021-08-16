@@ -52,7 +52,7 @@ public abstract class JobQueueCommon implements IJobQueue {
 
     private int determinePriority(int patientCount, boolean isSmoke){
         if (isSmoke){
-            return 500;
+            return 1500;
         }else if (patientCount == 1){
             return 1000;
         }else{
