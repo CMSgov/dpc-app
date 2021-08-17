@@ -31,6 +31,7 @@ func NewPatientController(jc client.JobClient) *PatientController {
 	}
 }
 
+// Export is the patient everything function that uses v1 job to synchronously get data
 func (pc *PatientController) Export(w http.ResponseWriter, r *http.Request) {
 	log := logger.WithContext(r.Context())
 	mbi, _ := r.Context().Value(constants.ContextKeyMBI).(string)
