@@ -29,6 +29,16 @@ func buildPublicRoutes(cont controllers, ssasClient client.SsasClient) http.Hand
 			render.JSON(w, r, m)
 		})
 
+		//PATIENT
+		r.Route("/Patient", func(r chi.Router) {
+			r.Use(middleware2.AuthCtx(ssasClient))
+			r.Use(middleware2.RequestURLCtx)
+			r.Use(middleware2.ExportTypesParamCtx)
+			r.Use(middleware2.ExportSinceParamCtx)
+			r.Use(middleware2.MBICtx)
+			r.Get("/$everything", cont.Patient.Export)
+		})
+
 		//ORGANIZATION
 		r.Route("/Organization", func(r chi.Router) {
 			r.Use(middleware2.AuthCtx(ssasClient))
@@ -104,6 +114,7 @@ func NewPublicServer() *service.Server {
 		Data:     v2.NewDataController(dataClient),
 		Job:      v2.NewJobController(jobClient),
 		Ssas:     v2.NewSSASController(ssasClient, attrClient),
+		Patient:  v2.NewPatientController(jobClient),
 	}
 
 	r := buildPublicRoutes(controllers, ssasClient)
@@ -137,4 +148,5 @@ type controllers struct {
 	Data     v2.FileController
 	Job      v2.JobController
 	Ssas     v2.AuthController
+	Patient  v2.ExportController
 }

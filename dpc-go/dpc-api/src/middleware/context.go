@@ -307,6 +307,23 @@ func ProvenanceHeaderValidator(next http.Handler) http.Handler {
 
 }
 
+func MBICtx(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		system := r.Header.Get(constants.FHIRIdentifierSystemHeader)
+		if !StringUtils.Equal(system, "http://hl7.org/fhir/sid/us-mbi") {
+			fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "invalid mbi system identifier in header")
+			return
+		}
+		mbi := r.Header.Get(constants.FHIRIdentifierValueHeader)
+		if StringUtils.IsEmpty(mbi) {
+			fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "invalid mbi value in header")
+			return
+		}
+		ctx := context.WithValue(r.Context(), constants.ContextKeyMBI, mbi)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
 func reSubMatchMap(r *regexp.Regexp, str string) map[string]string {
 	match := r.FindStringSubmatch(str)
 	subMatchMap := make(map[string]string)
