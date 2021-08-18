@@ -4,10 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/CMSgov/dpc/api/constants"
 	"io/ioutil"
 	"net/http"
 	"strings"
+
+	"github.com/CMSgov/dpc/api/constants"
 
 	"github.com/CMSgov/dpc/api/fhirror"
 	"github.com/CMSgov/dpc/api/logger"
@@ -199,11 +200,11 @@ func isValidExport(ctx context.Context, w http.ResponseWriter, outputFormat stri
 		outputFormat = constants.FhirNdjson
 	}
 	// _outputFormat only supports FhirNdjson, ApplicationNdjson, Ndjson
-	if !StringUtils.EqualsAnyIgnoreCase(outputFormat, constants.FhirNdjson, constants.ApplicationNdjson, constants.Ndjson) {
+	if StringUtils.EqualsNoneIgnoreCase(outputFormat, constants.FhirNdjson, constants.ApplicationNdjson, constants.Ndjson) {
 		log.Error("Invalid outputFormat")
 		fhirror.BusinessViolation(ctx, w, http.StatusBadRequest, "'_outputFormat' query parameter must be 'application/fhir+ndjson', 'application/ndjson', or 'ndjson'")
 	}
-	if headerPrefer == "" || StringUtils.IsEmpty(headerPrefer) {
+	if StringUtils.IsEmpty(headerPrefer) {
 		log.Error("Missing Prefer header")
 		fhirror.BusinessViolation(ctx, w, http.StatusBadRequest, "The 'Prefer' header is required and must be 'respond-async'")
 	}
