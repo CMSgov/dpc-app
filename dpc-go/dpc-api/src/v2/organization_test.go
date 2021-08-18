@@ -115,6 +115,11 @@ func (mc *MockSsasClient) GetOrgIDFromToken(ctx context.Context, token string) (
 	return args.Get(0).(string), args.Error(1)
 }
 
+func (mc *MockSsasClient) ValidateToken(ctx context.Context, request []byte) ([]byte, error) {
+	args := mc.Called(ctx, request)
+	return args.Get(0).([]byte), args.Error(1)
+}
+
 type OrganizationControllerTestSuite struct {
 	suite.Suite
 	org *OrganizationController

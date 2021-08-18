@@ -30,7 +30,8 @@ const (
 	PostV2GroupEndpoint     string = "v2/group"
 	PostV2AuthenticateToken string = "v2/token"
 	/* #nosec */
-	TokenInfoEndpoint string = "v2/token_info"
+	TokenInfoEndpoint   string = "v2/token_info"
+	PostV2ValidateToken string = "v2/introspect"
 )
 
 // SsasClient interface for testing purposes
@@ -44,6 +45,7 @@ type SsasClient interface {
 	AddPublicKey(ctx context.Context, systemID string, request model.ProxyPublicKeyRequest) (map[string]string, error)
 	DeletePublicKey(ctx context.Context, systemID string, keyID string) error
 	GetOrgIDFromToken(ctx context.Context, token string) (string, error)
+	ValidateToken(ctx context.Context, reqBytes []byte) ([]byte, error)
 }
 
 // SsasHTTPClient is a struct to hold the retryable http client and configs
@@ -202,6 +204,23 @@ func (sc *SsasHTTPClient) CreateGroup(ctx context.Context, request CreateGroupRe
 		return CreateGroupResponse{}, errors.Errorf("Failed to create ssas group")
 	}
 	return resp, nil
+}
+
+// ValidateToken proxies a request to SSAS to determine if a token is valid
+func (sc *SsasHTTPClient) ValidateToken(ctx context.Context, reqBytes []byte) ([]byte, error) {
+	log := logger.WithContext(ctx)
+	url := fmt.Sprintf("%s/%s", sc.config.PublicURL, PostV2ValidateToken)
+
+	headers := make(map[string]string, 2)
+	headers["Content-Type"] = "application/x-www-form-urlencoded"
+	headers["Accept"] = "application/json"
+
+	resBytes, err := sc.doPost(ctx, url, reqBytes, headers)
+	if err != nil {
+		log.Error("Token authentication failed", zap.Error(err))
+		return nil, errors.Errorf("Failed to authenticate token: %s", err)
+	}
+	return resBytes, nil
 }
 
 func (sc *SsasHTTPClient) doDelete(ctx context.Context, url string) error {
