@@ -101,18 +101,21 @@ func (gc *GroupController) Export(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	job, err := gc.startExports(r, groupContainer.ID, attr)
+	request := CreateExportRequest(r, groupContainer.ID, attr)
+	jobResponse, err := gc.jc.Export(r.Context(), request)
+
 	if err != nil {
 		log.Error("Failed to start export", zap.Error(err))
 		fhirror.GenericServerIssue(r.Context(), w)
 		return
 	}
-	contentLocation := contentLocationHeader(job, r)
+	contentLocation := contentLocationHeader(string(jobResponse), r)
 	w.Header().Set("Content-Location", contentLocation)
 	w.WriteHeader(http.StatusAccepted)
 }
 
-func (gc *GroupController) startExports(r *http.Request, groupID string, attr []model.Attribution) (string, error) {
+// CreateExportRequest creates an export request
+func CreateExportRequest(r *http.Request, groupID string, attr []model.Attribution) model.ExportRequest {
 	since, _ := r.Context().Value(constants.ContextKeySince).(string)
 	types, _ := r.Context().Value(constants.ContextKeyResourceTypes).(string)
 
@@ -131,11 +134,7 @@ func (gc *GroupController) startExports(r *http.Request, groupID string, attr []
 		ProviderNPI:  strings.Join(providers, ","),
 		GroupID:      groupID,
 	}
-	b, err := gc.jc.Export(r.Context(), er)
-	if err != nil {
-		return "", err
-	}
-	return string(b), nil
+	return er
 }
 
 func contentLocationHeader(id string, r *http.Request) string {
