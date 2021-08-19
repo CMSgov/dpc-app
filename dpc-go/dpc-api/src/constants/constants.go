@@ -27,6 +27,10 @@ const (
 	Ndjson string = "ndjson"
 	// ProvenanceHeader is the provenance header
 	ProvenanceHeader string = "X-Provenance"
+	// FHIRIdentifierSystemHeader is the mbi identifier system
+	FHIRIdentifierSystemHeader string = "identifier-system"
+	// FHIRIdentifierValueHeader is the mbi identifier system
+	FHIRIdentifierValueHeader string = "identifier-value"
 	// ContextKeyOrganization is the key in the context to retrieve the organizationID
 	ContextKeyOrganization contextKey = iota
 	// ContextKeyRequestURL is the key in the context to retrieve the requestURL
@@ -53,4 +57,6 @@ const (
 	ContextKeyKeyID
 	// ContextKeyProvenanceHeader is the key in the context to pass on the provenance header
 	ContextKeyProvenanceHeader
+	// ContextKeyMBI is the key in the context to pass on the mbi header value
+	ContextKeyMBI
 )
