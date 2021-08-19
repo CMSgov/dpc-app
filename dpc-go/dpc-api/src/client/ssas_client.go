@@ -404,6 +404,7 @@ type CreateSystemRequest struct {
 	GroupID    string   `json:"group_id"`
 	Scope      string   `json:"scope"`
 	PublicKey  string   `json:"public_key"`
+	Signature  string   `json:"signature"`
 	IPs        []string `json:"ips"`
 	XData      string   `json:"xdata,omitempty"`
 }
