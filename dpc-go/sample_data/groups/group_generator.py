@@ -98,4 +98,9 @@ else:
         if arg == "0" or arg.startswith("-"):
             print("Groups must have at least 1 member. Skipping", arg, "\n")
             continue
+        try:
+            n = int(arg)
+        except:
+            print("Please provide a number between 1 and 10,000. Skipping", arg, "\n")
+            continue
         create_group(int(arg))
