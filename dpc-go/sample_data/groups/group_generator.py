@@ -103,4 +103,4 @@ else:
         except:
             print("Please provide a number between 1 and 10,000. Skipping", arg, "\n")
             continue
-        create_group(int(arg))
+        create_group(n)
