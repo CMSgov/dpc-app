@@ -95,4 +95,7 @@ if len(sys.argv) == 1:
 else:
     args = [arg.strip(',') for arg in sys.argv[1:]]
     for arg in args:
+        if arg == "0" or arg.startswith("-"):
+            print("Groups must have at least 1 member. Skipping", arg, "\n\n")
+            continue
         create_group(int(arg))
