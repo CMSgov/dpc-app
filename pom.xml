@@ -324,6 +324,11 @@
             <version>${pitest.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.apache.velocity</groupId>
+            <artifactId>velocity-engine-core</artifactId>
+            <version>2.3</version>
+        </dependency>
     </dependencies>
 
     <profiles>
