@@ -230,81 +230,111 @@ func PublicKeyCtx(next http.Handler) http.Handler {
 }
 
 // ProvenanceHeaderValidator middleware to require and validate a provenance header
-func ProvenanceHeaderValidator(next http.Handler) http.Handler {
+func ProvenanceHeaderValidator(hasProvider bool) func(next http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			log := logger.WithContext(r.Context())
+			provenanceHeaderStr := r.Header.Get(constants.ProvenanceHeader)
+			if StringUtils.IsEmpty(provenanceHeaderStr) {
+				log.Error("Provenance header is missing")
+				fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "Provenance header is required")
+				return
+			}
+			ph, err := fhir.UnmarshalProvenance([]byte(provenanceHeaderStr))
+			if err != nil {
+				log.Error("Could not unmarshal provenance header", zap.Error(err))
+				fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "Could not parse provenance header")
+				return
+			}
+			t, err := parseTime(ph.Recorded)
+			if err != nil {
+				log.Error("Could not extract recorded timestamp", zap.Error(err))
+				fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "Recorded timestamp invalid")
+				return
+			}
+
+			provenanceHourDiff := conf.GetAsInt("provenance-hour-diff", 24)
+			now := time.Now()
+			diff := now.Sub(t)
+			if diff.Hours() > float64(provenanceHourDiff) || t.After(now) {
+				log.Error(fmt.Sprintf("Recorded timestamp invalid because it's outside the %d hr window", provenanceHourDiff))
+				fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, fmt.Sprintf("Recorded timestamp invalid because it's outside the %d hr window", provenanceHourDiff))
+				return
+			}
+
+			cc := ph.Reason
+			if len(cc) != 1 || len(cc[0].Coding) != 1 ||
+				!StringUtils.EqualIgnoreCase(StringUtils.GetPtrValueWithDefault(cc[0].Coding[0].System, ""), "http://hl7.org/fhir/v3/ActReason") ||
+				!StringUtils.EqualIgnoreCase(StringUtils.GetPtrValueWithDefault(cc[0].Coding[0].Code, ""), "TREAT") {
+				log.Error("Invalid reason")
+				fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "Invalid reason")
+				return
+			}
+
+			ag := ph.Agent
+			if len(ag) != 1 || len(ag[0].Role) != 1 || len(ag[0].Role[0].Coding) != 1 ||
+				!StringUtils.EqualIgnoreCase(StringUtils.GetPtrValueWithDefault(ag[0].Role[0].Coding[0].System, ""), "http://hl7.org/fhir/v3/RoleClass") ||
+				!StringUtils.EqualIgnoreCase(StringUtils.GetPtrValueWithDefault(ag[0].Role[0].Coding[0].Code, ""), "AGNT") {
+				log.Error("Invalid role")
+				fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "Invalid role")
+				return
+			}
+
+			if hasProvider {
+				if ag[0].OnBehalfOf == nil || ag[0].OnBehalfOf.Identifier == nil ||
+					!StringUtils.Equal(StringUtils.GetPtrValue(ag[0].OnBehalfOf.Type), "Practitioner") ||
+					!StringUtils.Equal(StringUtils.GetPtrValue(ag[0].OnBehalfOf.Identifier.System), "http://hl7.org/fhir/sid/us-npi") ||
+					StringUtils.IsBlank(StringUtils.GetPtrValue(ag[0].OnBehalfOf.Identifier.Value)) {
+					log.Error("Invalid practitioner")
+					fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "Invalid practitioner")
+					return
+				}
+			}
+
+			regex, _ := regexp.Compile("Organization/(?P<org>[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12})")
+			if len(ag) != 1 || ag[0].Who.Reference == nil || !regex.MatchString(StringUtils.GetPtrValue(ag[0].Who.Reference)) {
+				log.Error("Invalid who reference")
+				fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "Invalid who reference")
+				return
+			}
+
+			authOrg, ok := r.Context().Value(constants.ContextKeyOrganization).(string)
+			if !ok {
+				log.Error("Auth org not found")
+				fhirror.GenericServerIssue(r.Context(), w)
+				return
+			}
+
+			provenanceOrg := reSubMatchMap(regex, *ag[0].Who.Reference)["org"]
+			if !StringUtils.EqualIgnoreCase(authOrg, provenanceOrg) {
+				log.Error("Auth org and provenance org don't match")
+				fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "Org in Provenance not valid")
+				return
+			}
+
+			log.Info(fmt.Sprintf("Provenance header: %s", provenanceHeaderStr))
+			ctx := context.WithValue(r.Context(), constants.ContextKeyProvenanceHeader, provenanceHeaderStr)
+			next.ServeHTTP(w, r.WithContext(ctx))
+		})
+	}
+}
+
+// MBICtx middleware to validate the headers and extract the mbi value
+func MBICtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log := logger.WithContext(r.Context())
-		provenanceHeaderStr := r.Header.Get(constants.ProvenanceHeader)
-		if StringUtils.IsEmpty(provenanceHeaderStr) {
-			log.Error("Provenance header is missing")
-			fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "Provenance header is required")
+		system := r.Header.Get(constants.FHIRIdentifierSystemHeader)
+		if !StringUtils.Equal(system, "http://hl7.org/fhir/sid/us-mbi") {
+			fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "invalid mbi system identifier in header")
 			return
 		}
-		ph, err := fhir.UnmarshalProvenance([]byte(provenanceHeaderStr))
-		if err != nil {
-			log.Error("Could not unmarshal provenance header", zap.Error(err))
-			fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "Could not parse provenance header")
+		mbi := r.Header.Get(constants.FHIRIdentifierValueHeader)
+		if StringUtils.IsEmpty(mbi) {
+			fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "invalid mbi value in header")
 			return
 		}
-		t, err := parseTime(ph.Recorded)
-		if err != nil {
-			log.Error("Could not extract recorded timestamp", zap.Error(err))
-			fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "Recorded timestamp invalid")
-			return
-		}
-
-		provenanceHourDiff := conf.GetAsInt("provenance-hour-diff", 24)
-		now := time.Now()
-		diff := now.Sub(t)
-		if diff.Hours() > float64(provenanceHourDiff) || t.After(now) {
-			log.Error(fmt.Sprintf("Recorded timestamp invalid because it's outside the %d hr window", provenanceHourDiff))
-			fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, fmt.Sprintf("Recorded timestamp invalid because it's outside the %d hr window", provenanceHourDiff))
-			return
-		}
-
-		cc := ph.Reason
-		if len(cc) != 1 || len(cc[0].Coding) != 1 ||
-			!StringUtils.EqualIgnoreCase(StringUtils.GetPtrValueWithDefault(cc[0].Coding[0].System, ""), "http://hl7.org/fhir/v3/ActReason") ||
-			!StringUtils.EqualIgnoreCase(StringUtils.GetPtrValueWithDefault(cc[0].Coding[0].Code, ""), "TREAT") {
-			log.Error("Invalid reason")
-			fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "Invalid reason")
-			return
-		}
-
-		ag := ph.Agent
-		if len(ag) != 1 || len(ag[0].Role) != 1 || len(ag[0].Role[0].Coding) != 1 ||
-			!StringUtils.EqualIgnoreCase(StringUtils.GetPtrValueWithDefault(ag[0].Role[0].Coding[0].System, ""), "http://hl7.org/fhir/v3/RoleClass") ||
-			!StringUtils.EqualIgnoreCase(StringUtils.GetPtrValueWithDefault(ag[0].Role[0].Coding[0].Code, ""), "AGNT") {
-			log.Error("Invalid role")
-			fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "Invalid role")
-			return
-		}
-
-		regex, _ := regexp.Compile("Organization/(?P<org>[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12})")
-		if len(ag) != 1 || ag[0].Who.Reference == nil || !regex.MatchString(StringUtils.GetPtrValue(ag[0].Who.Reference)) {
-			log.Error("Invalid who reference")
-			fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "Invalid who reference")
-			return
-		}
-
-		authOrg, ok := r.Context().Value(constants.ContextKeyOrganization).(string)
-		if !ok {
-			log.Error("Auth org not found")
-			fhirror.GenericServerIssue(r.Context(), w)
-			return
-		}
-
-		provenanceOrg := reSubMatchMap(regex, *ag[0].Who.Reference)["org"]
-		if !StringUtils.EqualIgnoreCase(authOrg, provenanceOrg) {
-			log.Error("Auth org and provenance org don't match")
-			fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "Org in Provenance not valid")
-			return
-		}
-
-		log.Info(fmt.Sprintf("Provenance header: %s", provenanceHeaderStr))
-		ctx := context.WithValue(r.Context(), constants.ContextKeyProvenanceHeader, provenanceHeaderStr)
+		ctx := context.WithValue(r.Context(), constants.ContextKeyMBI, mbi)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
-
 }
 
 func reSubMatchMap(r *regexp.Regexp, str string) map[string]string {
