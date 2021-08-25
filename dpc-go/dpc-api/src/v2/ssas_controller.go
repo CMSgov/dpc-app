@@ -427,6 +427,7 @@ func (sc *SSASController) createSsasSystem(r *http.Request, implID string, orgID
 		ClientName: proxyReq.ClientName,
 		GroupID:    groupID,
 		PublicKey:  proxyReq.PublicKey,
+		Signature:  proxyReq.Signature,
 		IPs:        proxyReq.IPs,
 		XData:      fmt.Sprintf("{\"organizationID\": \"%s\"}", orgID),
 	}

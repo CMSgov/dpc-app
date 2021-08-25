@@ -7,7 +7,8 @@
 
     <div class="field">
       <%= label_tag :label, "Label", class: "ds-c-label" %>
-      <%= text_field_tag :label, params[:label], class: "ds-c-field", maxlength: "25"  %>
+      <span class="char-count ds-u-color--gray ds-u-font-weight--normal" id="pubkey-char-count">(0/25)</span>
+      <%= text_field_tag :label, params[:label], class: "ds-c-field", maxlength: "25", onkeyup: "characterCount('label',25,'pubkey-char-count')"  %>
       <p class="ds-c-field__hint">Choose a descriptive name to make your token easily identifiable to you.</p>
     </div>
 

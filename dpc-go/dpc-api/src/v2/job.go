@@ -53,7 +53,7 @@ func (jc *JobControllerImpl) Status(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	statuses := getStatus(batches)
+	statuses := GetStatus(batches)
 	if statuses["FAILED"] {
 		log.Error(fmt.Sprintf("Failed batches found in job %s", jobID))
 		fhirror.GenericServerIssue(r.Context(), w)
@@ -163,7 +163,8 @@ func inProgress(w http.ResponseWriter, batches []model.BatchAndFiles) {
 	w.WriteHeader(202)
 }
 
-func getStatus(batches []model.BatchAndFiles) map[string]bool {
+// GetStatus function returns a set of statues of the batches
+func GetStatus(batches []model.BatchAndFiles) map[string]bool {
 	statuses := make(map[string]bool)
 	for _, b := range batches {
 		statuses[b.Batch.Status] = true
