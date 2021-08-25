@@ -4,7 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/CMSgov/dpc/api/constants"
+    "github.com/CMSgov/dpc/api/conf"
+    "github.com/CMSgov/dpc/api/constants"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -109,7 +110,7 @@ func (gc *GroupController) Export(w http.ResponseWriter, r *http.Request) {
 		fhirror.GenericServerIssue(r.Context(), w)
 		return
 	}
-	contentLocation := contentLocationHeader(string(jobResponse), r)
+	contentLocation := contentLocationHeader(string(jobResponse))
 	w.Header().Set("Content-Location", contentLocation)
 	w.WriteHeader(http.StatusAccepted)
 }
@@ -137,12 +138,8 @@ func CreateExportRequest(r *http.Request, groupID string, attr []model.Attributi
 	return er
 }
 
-func contentLocationHeader(id string, r *http.Request) string {
-	scheme := "http"
-	if r.TLS != nil {
-		scheme = "https"
-	}
-	return fmt.Sprintf("%s://%s/v2/Jobs/%s", scheme, r.Host, id)
+func contentLocationHeader(id string) string {
+	return fmt.Sprintf("%s/Jobs/%s", conf.GetAsString("apiPath", ""), id)
 }
 
 // Read function is not currently used for GroupController

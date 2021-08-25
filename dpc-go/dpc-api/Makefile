@@ -14,3 +14,6 @@ lint:
 .PHONY: test
 test:  lint unit-test
 
+.PHONY: smoke
+smoke:
+	@docker-compose -f docker-compose.test.yml run --rm smoke_test test/smoke/api_smoke_tests.postman_collection.json -e test/smoke/local.postman_environment.json

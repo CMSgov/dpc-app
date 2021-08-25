@@ -54,7 +54,8 @@ func (suite *SsasControllerTestSuite) TestCreateSystem() {
         "client_name":"Test Org",
         "ips":["ip-1", "ip-2"],
         "client_token":"client-token",
-        "expires_at":"expiration"
+        "expires_at":"expiration",
+        "public_key_id":"publicKeyId"
     }`)
 }
 
@@ -382,6 +383,7 @@ func (suite *SsasControllerTestSuite) SetupHappyPathMocks() (*http.Request, cont
 		ClientToken: "client-token",
 		ExpiresAt:   "expiration",
 		XData:       "xdata",
+        PublicKeyID: "publicKeyId",
 		IPs:         ips,
 	}
 
