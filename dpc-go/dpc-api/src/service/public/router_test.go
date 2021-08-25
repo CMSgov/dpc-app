@@ -142,6 +142,14 @@ func (mjc *MockSsasController) DeleteKey(w http.ResponseWriter, r *http.Request)
 	mjc.Called(w, r)
 }
 
+type MockExportController struct {
+	mock.Mock
+}
+
+func (mec *MockExportController) Export(w http.ResponseWriter, r *http.Request) {
+	mec.Called(w, r)
+}
+
 type RouterTestSuite struct {
 	suite.Suite
 	router         http.Handler
@@ -153,6 +161,7 @@ type RouterTestSuite struct {
 	mockJob        *MockJobController
 	mockSsas       *MockSsasController
 	mockSassClient *MockSsasClient
+	mockPatient    *MockExportController
 }
 
 func (suite *RouterTestSuite) SetupTest() {
@@ -164,6 +173,7 @@ func (suite *RouterTestSuite) SetupTest() {
 	suite.mockJob = &MockJobController{}
 	suite.mockSsas = &MockSsasController{}
 	suite.mockSassClient = &MockSsasClient{}
+	suite.mockPatient = &MockExportController{}
 
 	c := controllers{
 		Org:      suite.mockOrg,
@@ -173,6 +183,7 @@ func (suite *RouterTestSuite) SetupTest() {
 		Data:     suite.mockData,
 		Job:      suite.mockJob,
 		Ssas:     suite.mockSsas,
+		Patient:  suite.mockPatient,
 	}
 
 	suite.router = buildPublicRoutes(c, suite.mockSassClient)
