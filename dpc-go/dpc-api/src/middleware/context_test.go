@@ -308,3 +308,46 @@ func (suite *ContextTestSuite) TestProvenanceHeader() {
 	assert.NotZero(suite.T(), header)
 
 }
+
+func (suite *ContextTestSuite) TestMBIContext() {
+	var mbi string
+	nextHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		mbi, _ = r.Context().Value(constants.ContextKeyMBI).(string)
+	})
+
+	req := httptest.NewRequest(http.MethodGet, "http://www.example.com/doesnotmatter", nil)
+	res := httptest.NewRecorder()
+
+	e := MBICtx(nextHandler)
+	e.ServeHTTP(res, req)
+
+	assert.Equal(suite.T(), http.StatusBadRequest, res.Code)
+
+	req = httptest.NewRequest(http.MethodGet, "http://www.example.com/doesnotmatter", nil)
+	req.Header.Add(constants.FHIRIdentifierSystemHeader, "my-system")
+	res = httptest.NewRecorder()
+
+	e = MBICtx(nextHandler)
+	e.ServeHTTP(res, req)
+
+	assert.Equal(suite.T(), http.StatusBadRequest, res.Code)
+
+	req = httptest.NewRequest(http.MethodGet, "http://www.example.com/doesnotmatter", nil)
+	req.Header.Add(constants.FHIRIdentifierSystemHeader, "http://hl7.org/fhir/sid/us-mbi")
+	res = httptest.NewRecorder()
+
+	e = MBICtx(nextHandler)
+	e.ServeHTTP(res, req)
+
+	assert.Equal(suite.T(), http.StatusBadRequest, res.Code)
+
+	req = httptest.NewRequest(http.MethodGet, "http://www.example.com/doesnotmatter", nil)
+	req.Header.Add(constants.FHIRIdentifierSystemHeader, "http://hl7.org/fhir/sid/us-mbi")
+	req.Header.Add(constants.FHIRIdentifierValueHeader, "mbi")
+	res = httptest.NewRecorder()
+
+	e = MBICtx(nextHandler)
+	e.ServeHTTP(res, req)
+
+	assert.Equal(suite.T(), "mbi", mbi)
+}
