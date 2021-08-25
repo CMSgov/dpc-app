@@ -6,7 +6,7 @@
     "@cmsgov/design-system-layout": "^3.7.0",
     "@rails/actioncable": "^6.0.0",
     "@rails/activestorage": "^6.0.0",
-    "@rails/ujs": "^6.0.0",
+    "@rails/ujs": "^6.1.4",
     "@rails/webpacker": "4.3.0",
     "normalize.css": "^8.0.1",
     "svg4everybody": "^2.1.9",
