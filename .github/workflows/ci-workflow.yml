@@ -35,6 +35,10 @@ jobs:
      steps:
        - name: "Checkout code"
          uses: actions/checkout@v1
+       - name: golangci-lint
+         uses: golangci/golangci-lint-action@v2
+         with:
+           version: v1.29
        - name: "API Build"
          run: |
            make test-v2
