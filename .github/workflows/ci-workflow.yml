@@ -30,18 +30,22 @@ jobs:
           make smoke
 
   build-api-v2:
-     name: "Build and Test API V2"
-     runs-on: ubuntu-latest
-     steps:
-       - name: "Checkout code"
-         uses: actions/checkout@v1
-       - name: golangci-lint
-         uses: golangci/golangci-lint-action@v2
-         with:
-           version: v1.29
-       - name: "API Build"
-         run: |
-           make test-v2
+    name: "Build and Test API V2"
+    runs-on: ubuntu-latest
+    steps:
+     - name: "Checkout code"
+       uses: actions/checkout@v1
+     - name: "Run all tests"
+         run: docker-compose -f "docker-compose.v2-test.yml" up v2-api-test
+
+  build-attribution-v2:
+    name: "Build and Test Attribution V2"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@v1
+      - name: "Run all tests"
+          run: docker-compose -f "docker-compose.v2-test.yml" up v2-attribution-test
 
   build-portals:
     name: "Build and Test DPC Web Portals"
