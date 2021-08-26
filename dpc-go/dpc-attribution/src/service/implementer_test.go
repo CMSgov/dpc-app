@@ -1,22 +1,23 @@
 package service
 
 import (
-    "context"
-    "encoding/json"
-    "fmt"
-    "github.com/CMSgov/dpc/attribution/middleware"
-    "io/ioutil"
-    "net/http"
-    "net/http/httptest"
-    "strings"
-    "testing"
+	"context"
+	"encoding/json"
+	"fmt"
+	"github.com/CMSgov/dpc/attribution/middleware"
+	"github.com/bxcodec/faker/v3"
+	"io/ioutil"
+	"net/http"
+	"net/http/httptest"
+	"strings"
+	"testing"
 
-    "github.com/CMSgov/dpc/attribution/model"
-    "github.com/kinbiko/jsonassert"
-    "github.com/pkg/errors"
-    "github.com/stretchr/testify/assert"
-    "github.com/stretchr/testify/mock"
-    "github.com/stretchr/testify/suite"
+	"github.com/CMSgov/dpc/attribution/model"
+	"github.com/kinbiko/jsonassert"
+	"github.com/pkg/errors"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/suite"
 )
 
 type MockImplementerRepo struct {
