@@ -29,6 +29,16 @@ jobs:
         run: |
           make smoke
 
+  build-api-v2:
+     name: "Build and Test API V2"
+     runs-on: ubuntu-latest
+     steps:
+       - name: "Checkout code"
+         uses: actions/checkout@v1
+       - name: "API Build"
+         run: |
+           make test-v2
+
   build-portals:
     name: "Build and Test DPC Web Portals"
     runs-on: ubuntu-latest

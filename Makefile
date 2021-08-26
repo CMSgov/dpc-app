@@ -158,3 +158,9 @@ bfd-certs:
 	@bash ops/scripts/secrets --decrypt dpc-go/dpc-attribution/shared_files/encrypted/bfd-dev-test-ca-file.crt | tail -n +2 > dpc-go/dpc-attribution/shared_files/decrypted/bfd-dev-test-ca-file.crt
 	@bash ops/scripts/secrets --decrypt dpc-go/dpc-attribution/shared_files/encrypted/bfd-dev-test-cert.pem | tail -n +2 > dpc-go/dpc-attribution/shared_files/decrypted/bfd-dev-test-cert.pem
 	@bash ops/scripts/secrets --decrypt dpc-go/dpc-attribution/shared_files/encrypted/bfd-dev-test-key.pem | tail -n +2 > dpc-go/dpc-attribution/shared_files/decrypted/bfd-dev-test-key.pem
+
+CODE_DIR = ./dpc-go/dpc-api
+.PHONY: test-v2
+test-v2:
+	$(MAKE) -C ./dpc-go/dpc-api test
+	$(MAKE) -C ./dpc-go/dpc-attribution test
