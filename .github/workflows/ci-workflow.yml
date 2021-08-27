@@ -34,22 +34,40 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: "Checkout code"
-        uses: actions/checkout@v1
+        uses: actions/checkout@v2
+      - name: "golangci-lint"
+        uses: golangci/golangci-lint-action@v2
+        with:
+          version: latest
+          working-directory: dpc-go/dpc-api
+      - name: Setup gotestsum
+        uses: autero1/action-gotestsum@v0.1.0
+        with:
+          gotestsum_version: 0.4.1
       - name: "Run all tests"
         run: |
           cd dpc-go/dpc-api
-          make test-docker
+          gotestsum --debug -- -p 1 -race ./... -coverprofile
 
   build-attribution-v2:
     name: "Build and Test Attribution V2"
     runs-on: ubuntu-latest
     steps:
       - name: "Checkout code"
-        uses: actions/checkout@v1
+          uses: actions/checkout@v2
+      - name: "golangci-lint"
+        uses: golangci/golangci-lint-action@v2
+        with:
+          version: latest
+          working-directory: dpc-go/dpc-api
+      - name: Setup gotestsum
+        uses: autero1/action-gotestsum@v0.1.0
+        with:
+          gotestsum_version: 0.4.1
       - name: "Run all tests"
         run: |
           cd dpc-go/dpc-attribution
-          make test-docker
+          gotestsum --debug -- -p 1 -race ./... -coverprofile
 
   build-portals:
     name: "Build and Test DPC Web Portals"
