@@ -52,7 +52,7 @@ func (pc *PatientController) Export(w http.ResponseWriter, r *http.Request) {
 
 	bf := make([]model.BatchFile, 0)
 	for _, b := range batches {
-                bf = append(bf, *b.Files...)
+		bf = append(bf, *b.Files...)
 	}
 
 	var resp []byte
