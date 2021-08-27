@@ -44,7 +44,7 @@ jobs:
       - name: Setup gotestsum
         uses: autero1/action-gotestsum@v0.1.0
         with:
-          gotestsum_version: 0.4.1
+          gotestsum_version: 1.7.0
       - name: "Run all tests"
         run: gotestsum --debug -- -p 1 -race ./... -coverprofile
         working-directory: ./dpc-go/dpc-api/src
@@ -64,7 +64,7 @@ jobs:
       - name: Setup gotestsum
         uses: autero1/action-gotestsum@v0.1.0
         with:
-          gotestsum_version: 0.4.1
+          gotestsum_version: 1.7.0
       - name: "Run all tests"
         run: gotestsum --debug -- -p 1 -race ./... -coverprofile
         working-directory: ./dpc-go/dpc-attribution/src
