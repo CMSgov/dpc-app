@@ -10,4 +10,4 @@ services:
       - ./shared_files/decrypted/local.env
     command: sh -c "make test"
     volumes:
-      - ./shared_files/decrypted:/go/dpc-atribution/shared_files/decrypted
+      - ./shared_files/decrypted:/go/dpc-attribution/shared_files/decrypted
