@@ -59,7 +59,7 @@ jobs:
         uses: golangci/golangci-lint-action@v2
         with:
           version: latest
-          working-directory: dpc-go/dpc-api/src
+          working-directory: dpc-go/dpc-attribution/src
           args: --timeout 5m
       - name: Setup gotestsum
         uses: autero1/action-gotestsum@v0.1.0
