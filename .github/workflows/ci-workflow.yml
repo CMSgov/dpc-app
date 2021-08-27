@@ -38,28 +38,29 @@ jobs:
       - name: Run all tests
         run: |
           make test-docker
+          echo $?
         working-directory: dpc-go/dpc-api
 
-  build-attribution-v2:
-    name: "Build and Test Attribution V2"
-    runs-on: ubuntu-latest
-    steps:
-      - name: "Checkout code"
-        uses: actions/checkout@v2
-      - name: Prepare to decrypt secrets
-        run: |
-          echo $VAULT_PW > dpc-go/dpc-attribution/.vault_password
-      - name: Run all tests
-        run: |
-          make test-docker
-        working-directory: dpc-go/dpc-attribution
+  # build-attribution-v2:
+  #   name: "Build and Test Attribution V2"
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: "Checkout code"
+  #       uses: actions/checkout@v2
+  #     - name: Prepare to decrypt secrets
+  #       run: |
+  #         echo $VAULT_PW > dpc-go/dpc-attribution/.vault_password
+  #     - name: Run all tests
+  #       run: |
+  #         make test-docker
+  #       working-directory: dpc-go/dpc-attribution
 
-  build-portals:
-    name: "Build and Test DPC Web Portals"
-    runs-on: ubuntu-latest
-    steps:
-      - name: "Checkout code"
-        uses: actions/checkout@v1
-      - name: "Web Portals Build"
-        run: |
-          make ci-portals
+  # build-portals:
+  #   name: "Build and Test DPC Web Portals"
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: "Checkout code"
+  #       uses: actions/checkout@v1
+  #     - name: "Web Portals Build"
+  #       run: |
+  #         make ci-portals
