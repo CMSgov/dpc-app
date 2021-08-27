@@ -12,7 +12,9 @@ lint:
 	@cat results.json
 
 .PHONY: test
-test:  lint unit-test
+test:
+	$(MAKE) lint
+	$(MAKE) unit-test
 
 .PHONY: test-docker
 test-docker:
