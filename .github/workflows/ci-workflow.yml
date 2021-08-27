@@ -46,9 +46,8 @@ jobs:
         with:
           gotestsum_version: 0.4.1
       - name: "Run all tests"
-        run: |
-          cd dpc-go/dpc-api/src
-          gotestsum --debug -- -p 1 -race ./... -coverprofile
+        run: gotestsum --debug -- -p 1 -race ./... -coverprofile
+        working-directory: ./dpc-go/dpc-api/src
 
   build-attribution-v2:
     name: "Build and Test Attribution V2"
@@ -67,9 +66,8 @@ jobs:
         with:
           gotestsum_version: 0.4.1
       - name: "Run all tests"
-        run: |
-          cd dpc-go/dpc-attribution/src
-          gotestsum --debug -- -p 1 -race ./... -coverprofile
+        run: gotestsum --debug -- -p 1 -race ./... -coverprofile
+        working-directory: ./dpc-go/dpc-attribution/src
 
   build-portals:
     name: "Build and Test DPC Web Portals"
