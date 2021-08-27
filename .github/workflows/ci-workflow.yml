@@ -40,6 +40,7 @@ jobs:
         with:
           version: latest
           working-directory: dpc-go/dpc-api/src
+          args: --timeout 300
       - name: Setup gotestsum
         uses: autero1/action-gotestsum@v0.1.0
         with:
@@ -60,6 +61,7 @@ jobs:
         with:
           version: latest
           working-directory: dpc-go/dpc-api/src
+          args: --timeout 300
       - name: Setup gotestsum
         uses: autero1/action-gotestsum@v0.1.0
         with:
