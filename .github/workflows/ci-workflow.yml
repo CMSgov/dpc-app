@@ -8,26 +8,26 @@ env:
   CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
 
 jobs:
-  # build-api:
-  #   name: "Build and Test API"
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: "Checkout code"
-  #       uses: actions/checkout@v1
-  #     - name: "Set up JDK 11"
-  #       uses: actions/setup-java@v1
-  #       with:
-  #         java-version: "11"
-  #     - name: "Set up Python 3.8.1"
-  #       uses: actions/setup-python@v2
-  #       with:
-  #         python-version: "3.8.1"
-  #     - name: "API Build"
-  #       run: |
-  #         make ci-app
-  #     - name: "Smoke Test"
-  #       run: |
-  #         make smoke
+  build-api:
+    name: "Build and Test API"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@v1
+      - name: "Set up JDK 11"
+        uses: actions/setup-java@v1
+        with:
+          java-version: "11"
+      - name: "Set up Python 3.8.1"
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.8.1"
+      - name: "API Build"
+        run: |
+          make ci-app
+      - name: "Smoke Test"
+        run: |
+          make smoke
 
   build-api-v2:
     name: "Build and Test API V2"
@@ -41,26 +41,26 @@ jobs:
           echo $?
         working-directory: dpc-go/dpc-api
 
-  # build-attribution-v2:
-  #   name: "Build and Test Attribution V2"
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: "Checkout code"
-  #       uses: actions/checkout@v2
-  #     - name: Prepare to decrypt secrets
-  #       run: |
-  #         echo $VAULT_PW > dpc-go/dpc-attribution/.vault_password
-  #     - name: Run all tests
-  #       run: |
-  #         make test-docker
-  #       working-directory: dpc-go/dpc-attribution
+  build-attribution-v2:
+    name: "Build and Test Attribution V2"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@v2
+      - name: Prepare to decrypt secrets
+        run: |
+          echo $VAULT_PW > dpc-go/dpc-attribution/.vault_password
+      - name: Run all tests
+        run: |
+          make test-docker
+        working-directory: dpc-go/dpc-attribution
 
-  # build-portals:
-  #   name: "Build and Test DPC Web Portals"
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: "Checkout code"
-  #       uses: actions/checkout@v1
-  #     - name: "Web Portals Build"
-  #       run: |
-  #         make ci-portals
+  build-portals:
+    name: "Build and Test DPC Web Portals"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@v1
+      - name: "Web Portals Build"
+        run: |
+          make ci-portals
