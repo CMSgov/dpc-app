@@ -43,6 +43,7 @@ func (suite *LoggingTestSuite) TestLogging() {
 	assert.ElementsMatch(suite.T(), firstLogContextKeys, []string{"rqId", "request-uri", "from", "method"})
 	assert.ElementsMatch(suite.T(), secondLogContextKeys, []string{"rqId", "response-code", "bytes"})
 
+    assert.True(suite.T(), false) // TODO: Delete me! This is to create a failing test for GHA
 }
 
 func getContextKeys(fields []zapcore.Field) []string {
