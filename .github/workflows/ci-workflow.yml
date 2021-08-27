@@ -36,7 +36,7 @@ jobs:
       - name: "Checkout code"
         uses: actions/checkout@v1
       - name: "Run all tests"
-        run: docker-compose -f "docker-compose.v2-test.yml" up v2-api-test
+        run: make -c ./dpc-go/dpc-api test-docker
 
   build-attribution-v2:
     name: "Build and Test Attribution V2"
@@ -45,7 +45,7 @@ jobs:
       - name: "Checkout code"
         uses: actions/checkout@v1
       - name: "Run all tests"
-        run: docker-compose -f "docker-compose.v2-test.yml" up v2-attribution-test
+        run: make -c ./dpc-go/dpc-attribution test-docker
 
   build-portals:
     name: "Build and Test DPC Web Portals"

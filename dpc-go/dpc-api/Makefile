@@ -14,3 +14,7 @@ lint:
 .PHONY: test
 test:  lint unit-test
 
+.PHONY: test-docker
+test-docker:
+	@docker-compose -f ./docker-compose.test.yml up --build run-test
+

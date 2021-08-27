@@ -12,10 +12,15 @@ lint:
 	@cat results.json
 
 .PHONY: test
-test:  lint unit-test
+test: lint unit-test
 
 .PHONY: bfd-certs
 bfd-certs:
+	@bash ops/scripts/secrets --decrypt shared_files/encrypted/local.env | tail -n +2 > shared_files/decrypted/local.env
 	@bash ops/scripts/secrets --decrypt shared_files/encrypted/bfd-dev-test-ca-file.crt | tail -n +2 > shared_files/decrypted/bfd-dev-test-ca-file.crt
 	@bash ops/scripts/secrets --decrypt shared_files/encrypted/bfd-dev-test-cert.pem | tail -n +2 > shared_files/decrypted/bfd-dev-test-cert.pem
 	@bash ops/scripts/secrets --decrypt shared_files/encrypted/bfd-dev-test-key.pem | tail -n +2 > shared_files/decrypted/bfd-dev-test-key.pem
+
+.PHONY: test-docker
+test-docker: bfd-certs
+	@docker-compose -f ./docker-compose.test.yml up --build run-test
