@@ -9,5 +9,3 @@ services:
     env_file:
       - ./shared_files/decrypted/local.env
     command: sh -c "make test"
-    volumes:
-      - ./shared_files/decrypted:/go/dpc-api/shared_files/decrypted
