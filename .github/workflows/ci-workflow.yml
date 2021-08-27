@@ -36,7 +36,9 @@ jobs:
       - name: "Checkout code"
         uses: actions/checkout@v1
       - name: "Run all tests"
-        run: make -c ./dpc-go/dpc-api test-docker
+        run: |
+          cd dpc-go/dpc-api
+          make test-docker
 
   build-attribution-v2:
     name: "Build and Test Attribution V2"
@@ -45,7 +47,9 @@ jobs:
       - name: "Checkout code"
         uses: actions/checkout@v1
       - name: "Run all tests"
-        run: make -c ./dpc-go/dpc-attribution test-docker
+        run: |
+          cd dpc-go/dpc-attribution
+          make test-docker
 
   build-portals:
     name: "Build and Test DPC Web Portals"
