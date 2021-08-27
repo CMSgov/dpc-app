@@ -39,14 +39,14 @@ jobs:
         uses: golangci/golangci-lint-action@v2
         with:
           version: latest
-          working-directory: dpc-go/dpc-api
+          working-directory: dpc-go/dpc-api/src
       - name: Setup gotestsum
         uses: autero1/action-gotestsum@v0.1.0
         with:
           gotestsum_version: 0.4.1
       - name: "Run all tests"
         run: |
-          cd dpc-go/dpc-api
+          cd dpc-go/dpc-api/src
           gotestsum --debug -- -p 1 -race ./... -coverprofile
 
   build-attribution-v2:
@@ -59,14 +59,14 @@ jobs:
         uses: golangci/golangci-lint-action@v2
         with:
           version: latest
-          working-directory: dpc-go/dpc-api
+          working-directory: dpc-go/dpc-api/src
       - name: Setup gotestsum
         uses: autero1/action-gotestsum@v0.1.0
         with:
           gotestsum_version: 0.4.1
       - name: "Run all tests"
         run: |
-          cd dpc-go/dpc-attribution
+          cd dpc-go/dpc-attribution/src
           gotestsum --debug -- -p 1 -race ./... -coverprofile
 
   build-portals:
