@@ -38,7 +38,6 @@ jobs:
       - name: Run all tests
         run: |
           make test-docker
-          echo $?
         working-directory: dpc-go/dpc-api
 
   build-attribution-v2:
