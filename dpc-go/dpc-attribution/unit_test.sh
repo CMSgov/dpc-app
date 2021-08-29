@@ -10,7 +10,7 @@ mkdir -p test_results/${timestamp}
 mkdir -p test_results/latest
 
 cd src
-echo -e "-------------- DPC-API LINTING STARTED --------------"
+echo -e "-------------- DPC-ATTRIBUTION LINTING STARTED --------------"
 golangci-lint --timeout 5m run echo "*********** DPC-API IS LINT FREE!! ***********" || echo -e "*********** LINTING FAILED!! ***********"
 echo -e "-------------- SECURITY SCAN STARTED --------------"
 gosec -fmt=json -out=../results.json ./...
