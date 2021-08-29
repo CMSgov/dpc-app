@@ -16,3 +16,4 @@ bfd-certs:
 .PHONY: test-docker
 test-docker: bfd-certs
 	@docker-compose -f ./docker-compose.test.yml up --build run-test
+	@docker-compose -f ./docker-compose.test.yml up --exit-code-from run-test
