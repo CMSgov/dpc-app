@@ -314,7 +314,7 @@ func AttributionToFHIRResponse(fhir string) []byte {
 	}
 
 	var v map[string]interface{}
-	json.Unmarshal([]byte(fhir), &v)
+	_ = json.Unmarshal([]byte(fhir), &v)
 	r.Info = v
 	// The value <<PRESENCE>> required for jsonassert checks
 	r.ID = "<<PRESENCE>>"
