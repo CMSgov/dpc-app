@@ -1,5 +1,30 @@
 <p>Welcome <%= @user.name %>!</p>
 
-<p>You can confirm your account email through the link below:</p>
+<p>Thank you for registering for the Data at the Point of Care (DPC) portal!</p>
 
 <p><%= link_to 'Confirm my account', confirmation_url(@resource, confirmation_token: @token) %></p>
+
+<h2>What's next?</h2>
+
+<p>
+After confirming your account, you can begin to test the DPC API and build your solution in sandbox using synthetic data. For more information, review our <a href="https://dpc.cms.gov/docsV2" target="_blank" rel="noopener noreferrer">documentation</a> and <a href="https://github.com/CMSgov/dpc-app/blob/master/src/main/resources/README.md" target="_blank" rel="noopener noreferrer">Github page</a>. 
+</p>
+
+<p>
+When you are ready to demonstrate your DPC solution with our team and get access to production data, you may <a href="https://airtable.com/shr3m3BL3IWY5hYnm" target="_blank" rel="noopener noreferrer">apply to join</a> the production pilot onboarding queue. For more information, visit our <a href="https://dpc.cms.gov/pilot" target="_blank" rel="noopener noreferrer">About the Pilot page</a>.
+</p>
+
+<h2>Comments? Questions?</h2>
+
+<p>
+If you have any questions or would like to share feedback, please reach out through our <a href="https://groups.google.com/g/dpc-api" target="_blank" rel="noopener noreferrer">Google Group</a>. If you require immediate assistance with registration or logging in, please email us directly at <a href="DPCINFO@cms.hhs.gov">DPCINFO@cms.hhs.gov</a>. 
+</p>
+
+<p>
+We look forward to hearing about your experiences and learning about your innovative ways to serve Medicare beneficiaries.
+</p>
+
+<p>
+Sincerely,<br />
+The Data at the Point of Care (DPC) Team
+</p>
