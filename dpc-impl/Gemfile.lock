@@ -261,6 +261,10 @@ GEM
       redis (>= 4.2.0)
     sidekiq_alive (2.1.2)
       sidekiq
+    simplecov (0.17.0)
+      docile (~> 1.1)
+      json (>= 1.8, < 3)
+      simplecov-html (~> 0.10.0)
     simpleidn (0.2.1)
       unf (~> 0.1.4)
     spring (2.1.1)
