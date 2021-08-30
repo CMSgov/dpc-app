@@ -17,7 +17,7 @@ func TestConfigTestSuite(t *testing.T) {
 }
 
 func (suite *ConfigTestSuite) TearDownTest() {
-	_ = os.Unsetenv("ENV")
+	os.Unsetenv("ENV")
 }
 
 func (suite *ConfigTestSuite) TestGetAsString() {
