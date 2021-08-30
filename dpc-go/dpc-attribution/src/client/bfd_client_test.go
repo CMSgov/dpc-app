@@ -58,7 +58,7 @@ func (s *BfdTestSuite) SetupSuite() {
 }
 
 func (s *BfdTestSuite) TearDownSuite() {
-	_ = os.Unsetenv("ENV")
+	os.Unsetenv("ENV")
 }
 
 func (s *BfdRequestTestSuite) SetupSuite() {
@@ -72,7 +72,7 @@ func (s *BfdRequestTestSuite) SetupSuite() {
 }
 
 func (s *BfdRequestTestSuite) TearDownSuite() {
-	_ = os.Unsetenv("ENV")
+	os.Unsetenv("ENV")
 }
 
 func (s *BfdRequestTestSuite) BeforeTest(suiteName, testName string) {
@@ -101,7 +101,7 @@ func (s *BfdTestSuite) TestNewBfdClientNoCertFile() {
 
 	assert := assert.New(s.T())
 
-	_ = conf.UnsetEnv(s.T(), "bfd.clientCertFile")
+	conf.UnsetEnv(s.T(), "bfd.clientCertFile")
 	bbc, err := client.NewBfdClient(client.NewConfig("basePath"))
 	assert.Nil(bbc)
 	assert.EqualError(err, "failed to load BFD cert/key pair from file: open : no such file or directory")
@@ -135,7 +135,7 @@ func (s *BfdTestSuite) TestNewBfdClientNoKeyFile() {
 
 	assert := assert.New(s.T())
 
-	_ = conf.UnsetEnv(s.T(), "bfd.clientKeyFile")
+	conf.UnsetEnv(s.T(), "bfd.clientKeyFile")
 	bbc, err := client.NewBfdClient(client.NewConfig("basePath"))
 	assert.Nil(bbc)
 	assert.EqualError(err, "failed to load BFD cert/key pair from file: open : no such file or directory")
@@ -244,8 +244,8 @@ func (s *BfdTestSuite) TestNewBfdClientNoCAFile() {
 
 	assert := assert.New(s.T())
 
-	_ = conf.UnsetEnv(s.T(), "bfd.clientCAFile")
-	_ = conf.UnsetEnv(s.T(), "bfd.checkCert")
+	conf.UnsetEnv(s.T(), "bfd.clientCAFile")
+	conf.UnsetEnv(s.T(), "bfd.checkCert")
 	bbc, err := client.NewBfdClient(client.NewConfig("basePath"))
 	assert.Nil(bbc)
 	assert.EqualError(err, "could not retrieve BFD CA cert pool: missing Base64 BFD CA cert (DPC_BFD_CA) or BFD CA file path (DPC_bfd_clientCAFile)")
@@ -267,7 +267,7 @@ func (s *BfdTestSuite) TestNewBfdClientInvalidCAFile() {
 	assert := assert.New(s.T())
 
 	conf.SetEnv(s.T(), "bfd.clientCAFile", "testdata/emptyFile.pem")
-	_ = conf.UnsetEnv(s.T(), "bfd.checkCert")
+	conf.UnsetEnv(s.T(), "bfd.checkCert")
 	bbc, err := client.NewBfdClient(client.NewConfig(""))
 	assert.Nil(bbc)
 	assert.EqualError(err, "could not retrieve BFD CA cert pool: could not append CA certificate(s)")
