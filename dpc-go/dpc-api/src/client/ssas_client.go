@@ -31,6 +31,7 @@ const (
 	PostV2AuthenticateToken string = "v2/token"
 	/* #nosec */
 	TokenInfoEndpoint   string = "v2/token_info"
+	/* #nosec */
 	PostV2ValidateToken string = "v2/introspect"
 )
 
