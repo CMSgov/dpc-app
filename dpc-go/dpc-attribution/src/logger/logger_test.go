@@ -29,7 +29,7 @@ func (suite *LoggerTestSuite) TestLogging() {
 	le := logs.All()
 	firstLogContextKeys := getContextKeys(le[0].Context)
 
-	assert.Len(suite.T(), le, 1)
+	assert.Len(suite.T(), le, 2)
 	assert.Contains(suite.T(), le[0].Entry.Message, "Hello")
 	assert.ElementsMatch(suite.T(), firstLogContextKeys, []string{"foo"})
 }
