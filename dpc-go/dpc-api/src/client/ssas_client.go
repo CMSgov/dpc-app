@@ -30,7 +30,7 @@ const (
 	PostV2GroupEndpoint     string = "v2/group"
 	PostV2AuthenticateToken string = "v2/token"
 	/* #nosec */
-	TokenInfoEndpoint   string = "v2/token_info"
+	TokenInfoEndpoint string = "v2/token_info"
 	/* #nosec */
 	PostV2ValidateToken string = "v2/introspect"
 )
