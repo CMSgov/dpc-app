@@ -42,7 +42,6 @@ func (suite *LoggingTestSuite) TestLogging() {
 	assert.Contains(suite.T(), le[0].Entry.Message, "Starting request")
 	assert.ElementsMatch(suite.T(), firstLogContextKeys, []string{"rqId", "request-uri", "from", "method"})
 	assert.ElementsMatch(suite.T(), secondLogContextKeys, []string{"rqId", "response-code", "bytes"})
-
 }
 
 func getContextKeys(fields []zapcore.Field) []string {
