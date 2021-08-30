@@ -77,6 +77,10 @@ func (mjc *MockSsasController) DeleteKey(w http.ResponseWriter, r *http.Request)
 	mjc.Called(w, r)
 }
 
+func (mjc *MockSsasController) ValidateToken(w http.ResponseWriter, r *http.Request) {
+	mjc.Called(w, r)
+}
+
 type RouterTestSuite struct {
 	suite.Suite
 	router      http.Handler
