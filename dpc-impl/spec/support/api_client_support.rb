@@ -28,8 +28,16 @@ module ApiClientSupport
      :npi=>"7619918395"}
   end
 
-  def default_create_system_response
-    
+  def default_public_keys_list
+    [{:creation_date=>"2020-08-26T13:50:12.506347Z",
+      :id=>"1",
+      :key=>"Key1"},
+     {:creation_date=>"2020-08-27T15:01:17.361496Z",
+      :id=>"2",
+      :key=>"Key2"},
+      {:creation_date=>"2020-08-28T15:01:17.361496Z",
+       :id=>"3",
+       :key=>"Key3"}]
   end
 
   def default_get_provider_org_response
