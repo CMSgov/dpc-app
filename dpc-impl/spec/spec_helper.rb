@@ -15,8 +15,8 @@ SimpleCov.start 'rails' do
   add_filter 'app/channels/application_cable/connection.rb'
   add_filter 'app/controllers/pages_controller.rb' # loads static content
 
-  SimpleCov.minimum_coverage 90
-  SimpleCov.minimum_coverage_by_file 80
+  SimpleCov.minimum_coverage 50
+  SimpleCov.minimum_coverage_by_file 0
 end
 
 RSpec.configure do |config|
