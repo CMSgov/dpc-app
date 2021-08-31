@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/CMSgov/dpc/attribution/middleware"
+	"github.com/bxcodec/faker/v3"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -12,7 +13,6 @@ import (
 	"testing"
 
 	"github.com/CMSgov/dpc/attribution/model"
-	"github.com/bxcodec/faker/v3"
 	"github.com/kinbiko/jsonassert"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
