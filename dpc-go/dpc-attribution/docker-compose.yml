@@ -8,8 +8,6 @@ services:
       dockerfile: docker/Dockerfiles/Dockerfile.attribution
     ports:
       - "3001:3001"
-    volumes:
-      - ./dpc-go/dpc-attribution/shared_files/decrypted:/app/shared_files/decrypted
     environment:
       - DPC_DB_URL=postgresql://postgres:dpc-safe@db:5432/dpc_attribution_v2
       - DPC_DB_URLV1=postgresql://postgres:dpc-safe@db:5432/dpc_attribution

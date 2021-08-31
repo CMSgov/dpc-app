@@ -9,4 +9,8 @@ dpc-attribution/src/shared_files/decrypted/*
 !dpc-attribution/src/shared_files/decrypted/testdata
 /dpc-api/cert/*
 dpc-attribution/shared_files/decrypted/*
+<<<<<<< HEAD
 !dpc-attribution/shared_files/decrypted/README.md
+=======
+!dpc-attribution/shared_files/decrypted/README.md
+>>>>>>> sg/dpc-1438-authenticate-web-app-requests
