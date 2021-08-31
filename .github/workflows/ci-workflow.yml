@@ -6,6 +6,7 @@ env:
   VAULT_PW: ${{ secrets.VAULT_PW }}
   REPORT_COVERAGE: true
   CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+  CA_CERT: ${{ secrets.CA_CERT }}
 
 jobs:
   build-api:
