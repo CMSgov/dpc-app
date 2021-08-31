@@ -38,16 +38,21 @@ RSpec.describe PublicKeysController, type: :controller do
       allow(stub).to receive(:response_body).and_return(default_add_provider_org_response)
     end
 
-    # context 'create system' do
-    #   post :create, params: {
-    #     org_name: 'Intergalatic Pizza',
-    #     public_key: file_fixture('stubbed_key.pem').read,
-    #     signature: file_fixture('stubbed_signature.pem').read
-    #   }
-    # end
+    context 'when missing a public key param' do
+      it 'renders a relevant error' do
+        post :create, params: {
+          org_name: 'Intergalatic Pizza',
+          public_key: '',
+          signature: ''
+        }
+
+        expect(controller.flash[:alert])
+          .to include('Required values missing.')
+      end
+    end
   end
 
-  describe 'GET #download_snippet' do
+  describe 'GET #destroy' do
     let!(:user) { create(:user) }
 
     before(:each) do
@@ -58,7 +63,20 @@ RSpec.describe PublicKeysController, type: :controller do
         success: true, 
         response: default_add_provider_org_response
       )
-      allow(stub).to receive(:response_body).and_return(default_add_provider_org_response)
+      allow(stub).to receive(:response_body).and_return(default_add_provider_org_response) 
+    end
+
+    context 'successful API call' do
+      it 'returns http success' do
+      end
+    end
+  end
+
+  describe 'GET #download_snippet' do
+    let!(:user) { create(:user) }
+
+    before(:each) do
+      sign_in user
     end
 
     context 'when the snippet is requested' do
