@@ -46,8 +46,7 @@ RSpec.describe PublicKeysController, type: :controller do
           signature: ''
         }
 
-        expect(controller.flash[:alert])
-          .to include('Required values missing.')
+        expect(controller.flash[:alert]).to include('Required values missing.')
       end
     end
   end
@@ -73,6 +72,16 @@ RSpec.describe PublicKeysController, type: :controller do
         get :destroy, params: { id: 1 }
         expect(response.location).to include(request.host + root_path)
         expect(response).to have_http_status(:found)
+      end
+    end
+
+    context 'unsuccessful API' do
+      it 'renders flash notice' do
+        allow(@stub).to receive(:delete_public_key).and_return(false)
+
+        get :destroy, params: { id: 1 }
+
+        expect(controller.flash[:alert]).to include('Public key could not be deleted.')
       end
     end
   end
