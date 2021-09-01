@@ -31,12 +31,29 @@ RSpec.describe PublicKeysController, type: :controller do
     before(:each) do
       sign_in user
 
-      stub = stub_api_client(
+      @stub = stub_api_client(
         message: :create_provider_org, 
         success: true, 
         response: default_add_provider_org_response
       )
-      allow(stub).to receive(:response_body).and_return(default_add_provider_org_response)
+      allow(@stub).to receive(:response_body).and_return(default_add_provider_org_response)
+    end
+
+    context 'successfully creates system' do
+      it 'returns http success' do
+        allow(@stub).to receive(:create_system)
+          .and_return(default_add_provider_org_response[:org_id],
+                      file_fixture('stubbed_token.pem').read,
+                      {:params=>{:client_name=>"Intergalatic Pizza System", :public_key=>file_fixture('stubbed_key.pem').read}})
+
+        post :create, params: {
+          org_name: 'Intergalatic Pizza',
+          public_key: file_fixture('stubbed_key.pem').read,
+          signature: file_fixture('stubbed_signature.pem').read
+        }
+
+        expect(response).to have_http_status(:success)
+      end
     end
 
     context 'when missing a public key param' do
