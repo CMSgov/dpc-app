@@ -11,3 +11,4 @@ services:
     command: sh -c "make test"
     volumes:
       - ./shared_files/decrypted:/go/dpc-attribution/shared_files/decrypted
+      - ./attribution_test_results:/go/dpc-attribution/test_results
