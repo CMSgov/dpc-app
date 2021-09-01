@@ -160,6 +160,7 @@ GEM
     marcel (1.0.1)
     method_source (0.9.2)
     mini_mime (1.1.1)
+    mini_portile2 (2.6.1)
     minitest (5.14.4)
     msgpack (1.4.2)
     multi_json (1.15.0)
@@ -167,6 +168,7 @@ GEM
     multipart-post (2.1.1)
     nio4r (2.5.8)
     nokogiri (1.12.3-x86_64-darwin)
+      mini_portile2 (~> 2.6.1)
       racc (~> 1.4)
     oauth2 (1.4.7)
       faraday (>= 0.8, < 2.0)
@@ -339,6 +341,7 @@ GEM
     zeitwerk (2.4.2)
 
 PLATFORMS
+  ruby
   x86_64-darwin-18
   x86_64-darwin-19
 
@@ -349,27 +352,27 @@ DEPENDENCIES
   capybara (>= 3.35.3)
   climate_control
   database_cleaner
-  devise
-  devise-async
-  devise-security
+  devise (>= 4.8.0)
+  devise-async (>= 1.0.0)
+  devise-security (>= 0.16.0)
   dotenv-rails (>= 2.7.6)
-  factory_bot_rails
+  factory_bot_rails (>= 6.2.0)
   faker
-  health_check
+  health_check (>= 3.1.0)
   jbuilder (~> 2.7)
   listen (~> 3.3)
   octokit
   omniauth-github
   omniauth-oktaoauth
-  omniauth-rails_csrf_protection (~> 0.1)
+  omniauth-rails_csrf_protection (~> 0.1, >= 0.1.2)
   pg (~> 1.1)
   pry
   pry-nav
   puma (~> 5.0)
-  rails (~> 6.1.3, >= 6.1.3.2)
-  rails-controller-testing
-  rspec-rails
-  sass-rails (>= 6)
+  rails (~> 6.1.4, >= 6.1.4.1)
+  rails-controller-testing (>= 1.0.5)
+  rspec-rails (>= 5.0.1)
+  sass-rails (>= 6.0.0)
   selenium-webdriver
   simplecov (<= 0.17)
   spring
@@ -380,10 +383,10 @@ DEPENDENCIES
   web-console (>= 4.1.0)
   webdrivers
   webmock
-  webpacker (~> 5.0)
+  webpacker (~> 5.4, >= 5.4.0)
 
 RUBY VERSION
    ruby 2.7.2p137
 
 BUNDLED WITH
-   2.2.4
+   2.1.4
