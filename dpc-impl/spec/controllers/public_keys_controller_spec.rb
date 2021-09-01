@@ -19,6 +19,7 @@ RSpec.describe PublicKeysController, type: :controller do
         )
         allow(stub).to receive(:response_body).and_return(default_add_provider_org_response)
 
+        render_template(:new)
         expect(response).to have_http_status(:success)
       end
     end
