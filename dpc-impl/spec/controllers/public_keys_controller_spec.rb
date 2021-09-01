@@ -93,7 +93,7 @@ RSpec.describe PublicKeysController, type: :controller do
       end
     end
 
-    context 'unsuccessful API' do
+    context 'cannot delete public key' do
       it 'renders flash notice' do
         allow(@stub).to receive(:delete_public_key).and_return(false)
 

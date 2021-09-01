@@ -84,5 +84,15 @@ RSpec.describe ClientTokensController, type: :controller do
         expect(response).to have_http_status(:found)
       end
     end
+
+    context 'cannot delete client token' do
+      it 'renders flash notice' do
+        allow(@stub).to receive(:delete_client_token).and_return(false)
+
+        get :destroy, params: { id: 1 }
+
+        expect(controller.flash[:alert]).to include('Client token could not be deleted.')
+      end
+    end
   end
 end
