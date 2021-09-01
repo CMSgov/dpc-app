@@ -62,4 +62,27 @@ RSpec.describe ClientTokensController, type: :controller do
       end
     end
   end
+
+  describe 'GET #destroy' do
+    before(:each) do
+      sign_in user
+
+      @stub = stub_api_client(
+        message: :create_provider_org, 
+        success: true, 
+        response: default_add_provider_org_response
+      )
+      allow(@stub).to receive(:response_body).and_return(default_add_provider_org_response)
+    end
+
+    context 'successfully deletes client token' do
+      it 'returns http success' do
+        allow(@stub).to receive(:delete_client_token).and_return(true)
+
+        get :destroy, params: { id: 1 }
+        expect(response.location).to include(request.host + root_path)
+        expect(response).to have_http_status(:found)
+      end
+    end
+  end
 end

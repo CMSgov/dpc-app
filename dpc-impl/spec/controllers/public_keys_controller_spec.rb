@@ -83,7 +83,7 @@ RSpec.describe PublicKeysController, type: :controller do
       allow(@stub).to receive(:response_body).and_return(default_add_provider_org_response)
     end
 
-    context 'successful API call' do
+    context 'successfully deletes public key' do
       it 'returns http success' do
         allow(@stub).to receive(:delete_public_key).and_return(true)
 
