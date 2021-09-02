@@ -118,7 +118,7 @@ func (suite *OrganizationRepositoryTestSuite) TestInsertErrorInRepo() {
 
 	expectedInsertQuery := `INSERT INTO organizations \(info\) VALUES \(\$1\) returning id, version, created_at, updated_at, info`
 
-	rows = sqlmock.NewRows([]string{"id", "version", "created_at", "updated_at", "info"})
+	_ = sqlmock.NewRows([]string{"id", "version", "created_at", "updated_at", "info"})
 
 	mock.ExpectQuery(expectedInsertQuery).WithArgs(suite.fakeOrg.Info).WillReturnError(errors.New("error"))
 

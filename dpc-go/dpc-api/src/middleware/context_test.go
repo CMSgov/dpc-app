@@ -163,7 +163,7 @@ func (suite *ContextTestSuite) TestProvenanceHeader() {
 	req.Header.Set(constants.ProvenanceHeader, fmt.Sprintf("{\"resourceType\":\"Provenance\",\"recorded\":\"%s\",\"reason\":[{\"coding\":[{\"system\":\"http://hl7.org/fhir/v3/ActReason\",\"code\":\"TREAT\"}]}],\"agent\":[{\"role\":[{\"coding\":[{\"system\":\"http://hl7.org/fhir/v3/RoleClass\",\"code\":\"AGNT\"}]}],\"who\":{\"reference\":\"Organization/c5a40867-011a-43f9-996e-aa92207fbbe2\"}}]}", t))
 	res := httptest.NewRecorder()
 
-	e := ProvenanceHeaderValidator(nextHandler)
+	e := ProvenanceHeaderValidator(false)(nextHandler)
 	e.ServeHTTP(res, req)
 	body, _ := ioutil.ReadAll(res.Body)
 	ja.Assertf(string(body), `{
@@ -185,7 +185,7 @@ func (suite *ContextTestSuite) TestProvenanceHeader() {
 	req.Header.Set(constants.ProvenanceHeader, fmt.Sprintf("{\"resourceType\":\"Provenance\",\"recorded\":\"%s\",\"reason\":[{\"coding\":[{\"system\":\"http://hl7.org/fhir/v3/ActReason\",\"code\":\"TREAT\"}]}],\"agent\":[{\"role\":[{\"coding\":[{\"system\":\"http://hl7.org/fhir/v3/RoleClass\",\"code\":\"AGNT\"}]}],\"who\":{\"reference\":\"Organization/c5a40867-011a-43f9-996e-aa92207fbbe2\"}}]}", t))
 	res = httptest.NewRecorder()
 
-	e = ProvenanceHeaderValidator(nextHandler)
+	e = ProvenanceHeaderValidator(false)(nextHandler)
 	e.ServeHTTP(res, req)
 	body, _ = ioutil.ReadAll(res.Body)
 	ja.Assertf(string(body), `{
@@ -207,7 +207,7 @@ func (suite *ContextTestSuite) TestProvenanceHeader() {
 	req.Header.Set(constants.ProvenanceHeader, fmt.Sprintf("{\"resourceType\":\"Provenance\",\"recorded\":\"%s\",\"reason\":[{\"coding\":[{\"system\":\"http://hl7.org/fhir/v3/ActReason\",\"code\":\"MEET\"}]}],\"agent\":[{\"role\":[{\"coding\":[{\"system\":\"http://hl7.org/fhir/v3/RoleClass\",\"code\":\"AGNT\"}]}],\"who\":{\"reference\":\"Organization/c5a40867-011a-43f9-996e-aa92207fbbe2\"}}]}", t))
 	res = httptest.NewRecorder()
 
-	e = ProvenanceHeaderValidator(nextHandler)
+	e = ProvenanceHeaderValidator(false)(nextHandler)
 	e.ServeHTTP(res, req)
 	body, _ = ioutil.ReadAll(res.Body)
 	ja.Assertf(string(body), `{
@@ -229,7 +229,7 @@ func (suite *ContextTestSuite) TestProvenanceHeader() {
 	req.Header.Set(constants.ProvenanceHeader, fmt.Sprintf("{\"resourceType\":\"Provenance\",\"recorded\":\"%s\",\"reason\":[{\"coding\":[{\"system\":\"http://hl7.org/fhir/v3/ActReason\",\"code\":\"TREAT\"}]}],\"agent\":[{\"role\":[{\"coding\":[{\"system\":\"http://hl7.org/fhir/v3/RoleClass\",\"code\":\"AGENNT\"}]}],\"who\":{\"reference\":\"Organization/c5a40867-011a-43f9-996e-aa92207fbbe2\"}}]}", t))
 	res = httptest.NewRecorder()
 
-	e = ProvenanceHeaderValidator(nextHandler)
+	e = ProvenanceHeaderValidator(false)(nextHandler)
 	e.ServeHTTP(res, req)
 	body, _ = ioutil.ReadAll(res.Body)
 	ja.Assertf(string(body), `{
@@ -251,7 +251,7 @@ func (suite *ContextTestSuite) TestProvenanceHeader() {
 	req.Header.Set(constants.ProvenanceHeader, fmt.Sprintf("{\"resourceType\":\"Provenance\",\"recorded\":\"%s\",\"reason\":[{\"coding\":[{\"system\":\"http://hl7.org/fhir/v3/ActReason\",\"code\":\"TREAT\"}]}],\"agent\":[{\"role\":[{\"coding\":[{\"system\":\"http://hl7.org/fhir/v3/RoleClass\",\"code\":\"AGNT\"}]}],\"who\":{\"reference\":\"Organizations/c5a40867-011a-43f9-996e-aa92207fbbe2\"}}]}", t))
 	res = httptest.NewRecorder()
 
-	e = ProvenanceHeaderValidator(nextHandler)
+	e = ProvenanceHeaderValidator(false)(nextHandler)
 	e.ServeHTTP(res, req)
 	body, _ = ioutil.ReadAll(res.Body)
 	ja.Assertf(string(body), `{
@@ -276,7 +276,7 @@ func (suite *ContextTestSuite) TestProvenanceHeader() {
 	ctx = context.WithValue(ctx, constants.ContextKeyOrganization, "blah blah blah")
 	req = req.WithContext(ctx)
 
-	e = ProvenanceHeaderValidator(nextHandler)
+	e = ProvenanceHeaderValidator(false)(nextHandler)
 	e.ServeHTTP(res, req)
 	body, _ = ioutil.ReadAll(res.Body)
 	ja.Assertf(string(body), `{
@@ -301,10 +301,53 @@ func (suite *ContextTestSuite) TestProvenanceHeader() {
 	ctx = context.WithValue(ctx, constants.ContextKeyOrganization, "c5a40867-011a-43f9-996e-aa92207fbbe2")
 	req = req.WithContext(ctx)
 
-	e = ProvenanceHeaderValidator(nextHandler)
+	e = ProvenanceHeaderValidator(false)(nextHandler)
 	e.ServeHTTP(res, req)
 	body, _ = ioutil.ReadAll(res.Body)
 	assert.True(suite.T(), len(body) == 0)
 	assert.NotZero(suite.T(), header)
 
+}
+
+func (suite *ContextTestSuite) TestMBIContext() {
+	var mbi string
+	nextHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		mbi, _ = r.Context().Value(constants.ContextKeyMBI).(string)
+	})
+
+	req := httptest.NewRequest(http.MethodGet, "http://www.example.com/doesnotmatter", nil)
+	res := httptest.NewRecorder()
+
+	e := MBICtx(nextHandler)
+	e.ServeHTTP(res, req)
+
+	assert.Equal(suite.T(), http.StatusBadRequest, res.Code)
+
+	req = httptest.NewRequest(http.MethodGet, "http://www.example.com/doesnotmatter", nil)
+	req.Header.Add(constants.FHIRIdentifierSystemHeader, "my-system")
+	res = httptest.NewRecorder()
+
+	e = MBICtx(nextHandler)
+	e.ServeHTTP(res, req)
+
+	assert.Equal(suite.T(), http.StatusBadRequest, res.Code)
+
+	req = httptest.NewRequest(http.MethodGet, "http://www.example.com/doesnotmatter", nil)
+	req.Header.Add(constants.FHIRIdentifierSystemHeader, "http://hl7.org/fhir/sid/us-mbi")
+	res = httptest.NewRecorder()
+
+	e = MBICtx(nextHandler)
+	e.ServeHTTP(res, req)
+
+	assert.Equal(suite.T(), http.StatusBadRequest, res.Code)
+
+	req = httptest.NewRequest(http.MethodGet, "http://www.example.com/doesnotmatter", nil)
+	req.Header.Add(constants.FHIRIdentifierSystemHeader, "http://hl7.org/fhir/sid/us-mbi")
+	req.Header.Add(constants.FHIRIdentifierValueHeader, "mbi")
+	res = httptest.NewRecorder()
+
+	e = MBICtx(nextHandler)
+	e.ServeHTTP(res, req)
+
+	assert.Equal(suite.T(), "mbi", mbi)
 }

@@ -19,7 +19,7 @@ func buildAdminRoutes(c controllers) http.Handler {
 	r := chi.NewRouter()
 	r.Use(middleware2.Logging())
 	r.Use(middleware2.RequestIPCtx)
-	r.With(middleware2.Sanitize).Route("/v2", func(r chi.Router) {
+	r.With(middleware2.Sanitize).Route("/api/v2", func(r chi.Router) {
 		r.Use(middleware.SetHeader("Content-Type", "application/fhir+json; charset=UTF-8"))
 		r.Get("/_health", func(w http.ResponseWriter, r *http.Request) {
 			m := make(map[string]string)

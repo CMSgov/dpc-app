@@ -4,10 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/CMSgov/dpc/api/constants"
 	"io/ioutil"
 	"net/http"
 	"strings"
+
+	"github.com/CMSgov/dpc/api/constants"
 
 	"github.com/CMSgov/dpc/api/fhirror"
 	"github.com/CMSgov/dpc/api/logger"
@@ -101,18 +102,21 @@ func (gc *GroupController) Export(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	job, err := gc.startExports(r, groupContainer.ID, attr)
+	request := CreateExportRequest(r, groupContainer.ID, attr)
+	jobResponse, err := gc.jc.Export(r.Context(), request)
+
 	if err != nil {
 		log.Error("Failed to start export", zap.Error(err))
 		fhirror.GenericServerIssue(r.Context(), w)
 		return
 	}
-	contentLocation := contentLocationHeader(job, r)
+	contentLocation := contentLocationHeader(string(jobResponse), r)
 	w.Header().Set("Content-Location", contentLocation)
 	w.WriteHeader(http.StatusAccepted)
 }
 
-func (gc *GroupController) startExports(r *http.Request, groupID string, attr []model.Attribution) (string, error) {
+// CreateExportRequest creates an export request
+func CreateExportRequest(r *http.Request, groupID string, attr []model.Attribution) model.ExportRequest {
 	since, _ := r.Context().Value(constants.ContextKeySince).(string)
 	types, _ := r.Context().Value(constants.ContextKeyResourceTypes).(string)
 
@@ -131,11 +135,7 @@ func (gc *GroupController) startExports(r *http.Request, groupID string, attr []
 		ProviderNPI:  strings.Join(providers, ","),
 		GroupID:      groupID,
 	}
-	b, err := gc.jc.Export(r.Context(), er)
-	if err != nil {
-		return "", err
-	}
-	return string(b), nil
+	return er
 }
 
 func contentLocationHeader(id string, r *http.Request) string {
@@ -199,11 +199,11 @@ func isValidExport(ctx context.Context, w http.ResponseWriter, outputFormat stri
 		outputFormat = constants.FhirNdjson
 	}
 	// _outputFormat only supports FhirNdjson, ApplicationNdjson, Ndjson
-	if !StringUtils.EqualsAnyIgnoreCase(outputFormat, constants.FhirNdjson, constants.ApplicationNdjson, constants.Ndjson) {
+	if StringUtils.EqualsNoneIgnoreCase(outputFormat, constants.FhirNdjson, constants.ApplicationNdjson, constants.Ndjson) {
 		log.Error("Invalid outputFormat")
 		fhirror.BusinessViolation(ctx, w, http.StatusBadRequest, "'_outputFormat' query parameter must be 'application/fhir+ndjson', 'application/ndjson', or 'ndjson'")
 	}
-	if headerPrefer == "" || StringUtils.IsEmpty(headerPrefer) {
+	if StringUtils.IsEmpty(headerPrefer) {
 		log.Error("Missing Prefer header")
 		fhirror.BusinessViolation(ctx, w, http.StatusBadRequest, "The 'Prefer' header is required and must be 'respond-async'")
 	}
