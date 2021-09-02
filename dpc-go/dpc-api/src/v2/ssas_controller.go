@@ -371,6 +371,7 @@ func (sc *SSASController) CreateSystem(w http.ResponseWriter, r *http.Request) {
 	proxyResp.ClientToken = ssasResp.ClientToken
 	proxyResp.ExpiresAt = ssasResp.ExpiresAt
 	proxyResp.IPs = ssasResp.IPs
+	proxyResp.PublicKeyID = ssasResp.PublicKeyID
 
 	respBytes, err := json.Marshal(proxyResp)
 	if err != nil {
@@ -477,6 +478,7 @@ type ProxyCreateSystemResponse struct {
 	IPs         []string `json:"ips,omitempty"`
 	ClientToken string   `json:"client_token"`
 	ExpiresAt   string   `json:"expires_at"`
+	PublicKeyID string   `json:"public_key_id"`
 }
 
 // ProxyGetSystemResponse struct that models a proxy response to get a system

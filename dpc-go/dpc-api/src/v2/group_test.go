@@ -167,7 +167,7 @@ func (suite *GroupControllerTestSuite) TestExportGroup() {
 	res := w.Result()
 
 	assert.Equal(suite.T(), http.StatusAccepted, res.StatusCode)
-	assert.Equal(suite.T(), fmt.Sprintf("http://example.com/v2/Jobs/%s", jobID), res.Header.Get("Content-Location"))
+	assert.Equal(suite.T(), fmt.Sprintf("localhost:3000/api/v2/Jobs/%s", jobID), res.Header.Get("Content-Location"))
 
 	resp, _ := ioutil.ReadAll(res.Body)
 	ja.Assertf(string(resp), "")
