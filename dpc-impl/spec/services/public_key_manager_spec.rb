@@ -5,7 +5,6 @@ require 'rails_helper'
 RSpec.describe PublicKeyManager do
 
   describe '#create_system' do
-
     before(:each) do
       user = create(:user)
       @imp_id = user.implementer_id
@@ -23,10 +22,10 @@ RSpec.describe PublicKeyManager do
           .and_return(api_client)
         allow(api_client).to receive(:response_successful?).and_return(true)
         allow(api_client).to receive(:response_body).and_return({:client_id=>@org_id,
-          :client_name=>"Org Name",
-          :client_token=>
+         :client_name=>"Org Name",
+         :client_token=>
             "MDAxN2xvY2F0aW9uIGxvY2FsaG9zdAowMDM0aWRlbnRpZmllciA5OWQ4M2M1YS1mMmRiLTRlYmEtODhkZS1jYmM3OTY0ZTA3MzEKMDAyOGNpZCBleHBpcmF0aW9uPTIwMjItMDgtMjZUMTk6MjA6MzNaCjAwMTRjaWQgc3lzdGVtX2lkPTUKMDA2MGNpZCBncm91cF9kYXRhPWV5SnBiWEJzWlcxbGJuUmxja2xFSWpvZ0lqTXdNRGhpWkRnMExUTTBaR010TkRKaE1TMDRZekE0TFRobFkyWmtPRFpsTnpOa1lTSjkKMDA2NWNpZCBzeXN0ZW1fZGF0YT1leUp2Y21kaGJtbDZZWFJwYjI1SlJDSTZJQ0psTldOaE1EQmhOQzA1TWpGakxUUTBZMkV0WVRGa1l5MDRPVE01WkRnMllXSXhORElpZlE9PQowMDJmc2lnbmF0dXJlIKqGYQCp1rzCOhceuAY/0CU1pVdcYQZbG79FfEwT66CNCg==",
-          :expires_at=>"2022-08-26T19:20:33.4611672Z"})
+         :expires_at=>"2022-08-26T19:20:33.4611672Z"})
 
         manager = PublicKeyManager.new(imp_id: @imp_id, org_id: @org_id)
 
