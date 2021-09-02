@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/CMSgov/dpc/attribution/middleware"
+	"github.com/bxcodec/faker/v3"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -12,7 +13,6 @@ import (
 	"testing"
 
 	"github.com/CMSgov/dpc/attribution/model"
-	"github.com/bxcodec/faker/v3"
 	"github.com/kinbiko/jsonassert"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
@@ -192,29 +192,29 @@ func (suite *ImplementerServiceTestSuite) TestSaveRepoError() {
 }
 
 func (suite *ImplementerServiceTestSuite) TestGetNotImplemented() {
-    ja := jsonassert.New(suite.T())
+	ja := jsonassert.New(suite.T())
 
-    impl := model.Implementer{}
-    err := faker.FakeData(&impl)
-    if err != nil {
-        fmt.Printf("ERR %v\n", err)
-    }
-    suite.repo.On("FindByID", mock.Anything, mock.Anything).Return(&impl, nil)
+	impl := model.Implementer{}
+	err := faker.FakeData(&impl)
+	if err != nil {
+		fmt.Printf("ERR %v\n", err)
+	}
+	suite.repo.On("FindByID", mock.Anything, mock.Anything).Return(&impl, nil)
 
-    //Send update request
-    req := httptest.NewRequest(http.MethodGet, "http://example.com/Implementer/123456789", nil)
-    ctx := req.Context()
-    ctx = context.WithValue(ctx, middleware.ContextKeyImplementer, "123456789")
-    req = req.WithContext(ctx)
-    w := httptest.NewRecorder()
-    suite.service.Get(w, req)
+	//Send update request
+	req := httptest.NewRequest(http.MethodGet, "http://example.com/Implementer/123456789", nil)
+	ctx := req.Context()
+	ctx = context.WithValue(ctx, middleware.ContextKeyImplementer, "123456789")
+	req = req.WithContext(ctx)
+	w := httptest.NewRecorder()
+	suite.service.Get(w, req)
 
-    res := w.Result()
-    assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
-    resp, _ := ioutil.ReadAll(res.Body)
+	res := w.Result()
+	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
+	resp, _ := ioutil.ReadAll(res.Body)
 
-    b, _ := json.Marshal(impl)
-    ja.Assertf(string(resp), string(b))
+	b, _ := json.Marshal(impl)
+	ja.Assertf(string(resp), string(b))
 }
 
 func (suite *ImplementerServiceTestSuite) TestDeleteNotImplemented() {

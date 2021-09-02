@@ -112,7 +112,7 @@ public class DistributedBatchQueueTest {
                 List.of("test-patient-1", "test-patient-2"),
                 Collections.singletonList(DPCResourceType.Patient),
                 null,
-                OffsetDateTime.now(ZoneOffset.UTC), null, null,true);
+                OffsetDateTime.now(ZoneOffset.UTC), null, null,true, false);
 
         // Work the job
         Optional<JobQueueBatch> workBatch = queue.claimBatch(aggregatorID);

@@ -7,6 +7,7 @@ import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import com.google.inject.name.Named;
 import gov.cms.dpc.api.APIHelpers;
+import gov.cms.dpc.api.DPCAPIConfiguration;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.Authorizer;
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
@@ -62,13 +63,15 @@ public class GroupResource extends AbstractGroupResource {
     private final IGenericClient client;
     private final String baseURL;
     private final BlueButtonClient bfdClient;
+    private final DPCAPIConfiguration config;
 
     @Inject
-    public GroupResource(IJobQueue queue, @Named("attribution") IGenericClient client, @APIV1 String baseURL, BlueButtonClient bfdClient) {
+    public GroupResource(IJobQueue queue, @Named("attribution") IGenericClient client, @APIV1 String baseURL, BlueButtonClient bfdClient, DPCAPIConfiguration config) {
         this.queue = queue;
         this.client = client;
         this.baseURL = baseURL;
         this.bfdClient = bfdClient;
+        this.config = config;
     }
 
     @POST
@@ -309,7 +312,8 @@ public class GroupResource extends AbstractGroupResource {
         final var requestingIP = APIHelpers.fetchRequestingIP(request);
         final String requestUrl = APIHelpers.fetchRequestUrl(request);
 
-        final UUID jobID = this.queue.createJob(orgID, orgNPI, providerNPI, attributedPatients, resources, since, transactionTime, requestingIP, requestUrl, true);
+        final boolean isSmoke = config.getLookBackExemptOrgs().contains(orgID.toString());
+        final UUID jobID = this.queue.createJob(orgID, orgNPI, providerNPI, attributedPatients, resources, since, transactionTime, requestingIP, requestUrl, true, isSmoke);
         final int totalPatients = attributedPatients == null ? 0 : attributedPatients.size();
         final String resourcesRequested = resources.stream().map(DPCResourceType::getPath).filter(Objects::nonNull).collect(Collectors.joining(";"));
         logger.info("dpcMetric=jobCreated,jobId={},orgId={},groupId={},totalPatients={},resourcesRequested={}", jobID, orgID, rosterID, totalPatients, resourcesRequested);
