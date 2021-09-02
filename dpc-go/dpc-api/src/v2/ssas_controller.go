@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/CMSgov/dpc/api/conf"
 	"github.com/CMSgov/dpc/api/constants"
 	"github.com/CMSgov/dpc/api/fhirror"
 	"github.com/CMSgov/dpc/api/logger"
@@ -424,6 +425,7 @@ func (sc *SSASController) createSsasSystem(r *http.Request, implID string, orgID
 	}
 
 	req := client.CreateSystemRequest{
+		Scope:      conf.GetAsString("apiScope", constants.APIScope),
 		ClientName: proxyReq.ClientName,
 		GroupID:    groupID,
 		PublicKey:  proxyReq.PublicKey,

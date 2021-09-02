@@ -31,6 +31,8 @@ const (
 	FHIRIdentifierSystemHeader string = "identifier-system"
 	// FHIRIdentifierValueHeader is the mbi identifier system
 	FHIRIdentifierValueHeader string = "identifier-value"
+	// APIScope is the api scope of this application
+	APIScope string = "dpcv2-api"
 	// ContextKeyOrganization is the key in the context to retrieve the organizationID
 	ContextKeyOrganization contextKey = iota
 	// ContextKeyRequestURL is the key in the context to retrieve the requestURL
