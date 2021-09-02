@@ -28,6 +28,7 @@ public interface IJobQueue {
      * @param requestingIP    - The IP address where the request came from
      * @param requestUrl      - The URL of the original request
      * @param isBulk          - Flag to indicate bulk request
+     * @param isSmoke         - Flag to indicate smoke test request
      * @return The UUID of the created job
      */
     UUID createJob(UUID orgID,
@@ -39,7 +40,8 @@ public interface IJobQueue {
                    OffsetDateTime transactionTime,
                    String requestingIP,
                    String requestUrl,
-                   boolean isBulk);
+                   boolean isBulk,
+                   boolean isSmoke);
 
     /**
      * Find a batch in the queue, regardless of job status. Does not alter the batch.
