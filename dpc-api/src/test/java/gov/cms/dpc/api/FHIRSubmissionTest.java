@@ -69,7 +69,7 @@ class FHIRSubmissionTest {
     private static final List<String> testBeneficiaries = List.of("0Z00Z00ZZ01", "0Z00Z00ZZ02", "0Z00Z00ZZ03", "0Z00Z00ZZ04");
 
     private final ResourceExtension groupResource = ResourceExtension.builder()
-            .addResource(new GroupResource(queue, client, TEST_BASE_URL, bfdClient))
+            .addResource(new GroupResource(queue, client, TEST_BASE_URL, bfdClient, new DPCAPIConfiguration()))
             .addResource(new JobResource(queue, TEST_BASE_URL))
             .setTestContainerFactory(testContainer)
             .addProvider(staticFilter)
@@ -82,7 +82,7 @@ class FHIRSubmissionTest {
         mockFactory();
         mockClient();
         mockBfdClient();
-        doCallRealMethod().when(queue).createJob(Mockito.any(UUID.class), Mockito.anyString(), Mockito.anyString(), Mockito.anyList(), Mockito.anyList(), Mockito.any(OffsetDateTime.class), Mockito.any(OffsetDateTime.class), Mockito.anyString(), Mockito.anyString(), Mockito.anyBoolean());
+        doCallRealMethod().when(queue).createJob(Mockito.any(UUID.class), Mockito.anyString(), Mockito.anyString(), Mockito.anyList(), Mockito.anyList(), Mockito.any(OffsetDateTime.class), Mockito.any(OffsetDateTime.class), Mockito.anyString(), Mockito.anyString(), Mockito.anyBoolean(), Mockito.anyBoolean());
     }
 
     @Test
