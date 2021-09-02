@@ -92,8 +92,8 @@ class QueueTest {
 
     void testSimpleSubmissionCompletion(JobQueueCommon queue) {
         // Add a couple of jobs
-        var firstJobID = queue.createJob(orgID, orgNPI, providerNPI, patientMBIs, Collections.singletonList(DPCResourceType.Patient), null, OffsetDateTime.now(ZoneOffset.UTC), null, null,true);
-        var secondJobID = queue.createJob(orgID, orgNPI, providerNPI, patientMBIs, Collections.singletonList(DPCResourceType.Patient), null, OffsetDateTime.now(ZoneOffset.UTC), null, null,true);
+        var firstJobID = queue.createJob(orgID, orgNPI, providerNPI, patientMBIs, Collections.singletonList(DPCResourceType.Patient), null, OffsetDateTime.now(ZoneOffset.UTC), null, null,true, false);
+        var secondJobID = queue.createJob(orgID, orgNPI, providerNPI, patientMBIs, Collections.singletonList(DPCResourceType.Patient), null, OffsetDateTime.now(ZoneOffset.UTC), null, null,true, false);
         assertEquals(firstJobID.getClass(), UUID.class);
         assertEquals(secondJobID.getClass(), UUID.class);
         assertEquals(2, queue.queueSize(), "Should have 2 jobs");
@@ -167,7 +167,7 @@ class QueueTest {
         final var jobID = queue.createJob(orgID, orgNPI, providerNPI, patientMBIs,
                 Arrays.asList(DPCResourceType.Patient, DPCResourceType.ExplanationOfBenefit),
                 null,
-                OffsetDateTime.now(ZoneOffset.UTC), null, null,true);
+                OffsetDateTime.now(ZoneOffset.UTC), null, null,true, false);
         assertEquals(jobID.getClass(), UUID.class);
         // Retrieve the job with both resources
         final var workBatch = queue.claimBatch(aggregatorID).get();
@@ -207,7 +207,7 @@ class QueueTest {
         final var jobId = queue.createJob(orgID, orgNPI, providerNPI, patientMBIs,
                 Arrays.asList(DPCResourceType.Patient, DPCResourceType.ExplanationOfBenefit),
                 transactionTime,
-                transactionTime, null, null,true);
+                transactionTime, null, null,true, false);
 
         // Check that the Job has a empty queue
         final Optional<JobQueueBatch> job = queue.getJobBatches(jobId).stream().findFirst();

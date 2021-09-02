@@ -106,7 +106,8 @@ public class AggregationEngineBFDClientTest {
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
                 "127.0.0.1",
                 null,
-                true);
+                true,
+                false);
 
         engine.run();
 
@@ -143,6 +144,7 @@ public class AggregationEngineBFDClientTest {
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
                 "127.0.0.1",
                 null,
+                false,
                 false);
 
         engine.run();
