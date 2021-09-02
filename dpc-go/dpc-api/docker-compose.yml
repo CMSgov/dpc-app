@@ -19,3 +19,4 @@ services:
       - DPC_SSAS-CLIENT_PUBLIC-URL=http://ssas:3003
       - DPC_SSAS-CLIENT_CLIENT-ID=31e029ef-0e97-47f8-873c-0e8b7e7f99bf
       - DPC_SSAS-CLIENT_CLIENT-SECRET=
+      - DPC_APISCOPE=dpcv2-api
