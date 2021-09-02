@@ -17,7 +17,7 @@ capabilities:
 exportPath: "/tmp"
 jobTimeoutInSeconds: 30
 
-apiPath: "localhost:3000/v2"
+apiPath: "localhost:3000/api/v2"
 
 log:
   level: info
