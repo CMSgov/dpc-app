@@ -5,6 +5,7 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import gov.cms.dpc.api.APITestHelpers;
+import gov.cms.dpc.api.DPCAPIConfiguration;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.fhir.FHIRExtractors;
@@ -49,7 +50,7 @@ public class AttestationUnitTests {
         final IJobQueue mockQueue = Mockito.mock(IJobQueue.class);
         final IGenericClient mockClient = Mockito.mock(IGenericClient.class);
         final BlueButtonClient mockBfdClient = Mockito.mock(BlueButtonClient.class);
-        groupResource = new GroupResource(mockQueue, mockClient, "http://local.test", mockBfdClient);
+        groupResource = new GroupResource(mockQueue, mockClient, "http://local.test", mockBfdClient, new DPCAPIConfiguration());
     }
 
     @BeforeEach
