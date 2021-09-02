@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/CMSgov/dpc/api/client"
+	"github.com/CMSgov/dpc/api/conf"
 	"github.com/CMSgov/dpc/api/constants"
 	"github.com/CMSgov/dpc/api/fhirror"
 	"github.com/CMSgov/dpc/api/logger"
@@ -369,6 +370,7 @@ func (sc *SSASController) CreateSystem(w http.ResponseWriter, r *http.Request) {
 	proxyResp.ClientToken = ssasResp.ClientToken
 	proxyResp.ExpiresAt = ssasResp.ExpiresAt
 	proxyResp.IPs = ssasResp.IPs
+	proxyResp.PublicKeyID = ssasResp.PublicKeyID
 
 	respBytes, err := json.Marshal(proxyResp)
 	if err != nil {
@@ -448,6 +450,7 @@ func (sc *SSASController) createSsasSystem(r *http.Request, implID string, orgID
 	}
 
 	req := client.CreateSystemRequest{
+		Scope:      conf.GetAsString("apiScope", constants.APIScope),
 		ClientName: proxyReq.ClientName,
 		GroupID:    groupID,
 		PublicKey:  proxyReq.PublicKey,
@@ -499,6 +502,7 @@ type ProxyCreateSystemResponse struct {
 	IPs         []string `json:"ips,omitempty"`
 	ClientToken string   `json:"client_token"`
 	ExpiresAt   string   `json:"expires_at"`
+	PublicKeyID string   `json:"public_key_id"`
 }
 
 // ProxyGetSystemResponse struct that models a proxy response to get a system

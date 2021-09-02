@@ -111,7 +111,7 @@ class BatchAggregationEngineTest {
                 Collections.singletonList(DPCResourceType.ExplanationOfBenefit),
                 MockBlueButtonClient.TEST_LAST_UPDATED.minusSeconds(1),
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                null, null, true);
+                null, null, true, false);
 
         // Do the job
         queue.claimBatch(engine.getAggregatorID())
@@ -148,7 +148,7 @@ class BatchAggregationEngineTest {
                 JobQueueBatch.validResourceTypes,
                 MockBlueButtonClient.TEST_LAST_UPDATED.minusSeconds(1),
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                null, null, true);
+                null, null, true, false);
 
         // Do the job
         queue.claimBatch(engine.getAggregatorID())
@@ -188,7 +188,7 @@ class BatchAggregationEngineTest {
                 Collections.singletonList(DPCResourceType.ExplanationOfBenefit),
                 MockBlueButtonClient.TEST_LAST_UPDATED.minusSeconds(1),
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                null, null, true);
+                null, null, true, false);
 
         // Do the job
         queue.claimBatch(engine.getAggregatorID())
@@ -224,7 +224,7 @@ class BatchAggregationEngineTest {
                 Collections.singletonList(DPCResourceType.ExplanationOfBenefit),
                 MockBlueButtonClientV2.TEST_LAST_UPDATED.minusSeconds(1),
                 MockBlueButtonClientV2.BFD_TRANSACTION_TIME,
-                null, "http:example.org/v2/Group/id/$export", true);
+                null, "http:example.org/v2/Group/id/$export", true, false);
 
         // Do the job
         queue.claimBatch(engine.getAggregatorID())
@@ -261,7 +261,7 @@ class BatchAggregationEngineTest {
                 Collections.singletonList(DPCResourceType.ExplanationOfBenefit),
                 MockBlueButtonClientV2.TEST_LAST_UPDATED.minusSeconds(1),
                 MockBlueButtonClientV2.BFD_TRANSACTION_TIME,
-                null, "http:example.org/v2/Group/id/$export", true);
+                null, "http:example.org/v2/Group/id/$export", true, false);
 
         // Do the job
         queue.claimBatch(engine.getAggregatorID())
@@ -301,7 +301,7 @@ class BatchAggregationEngineTest {
                 Collections.singletonList(DPCResourceType.ExplanationOfBenefit),
                 MockBlueButtonClient.TEST_LAST_UPDATED.minusSeconds(1),
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                null, null, true);
+                null, null, true, false);
 
         // Do the job
         queue.claimBatch(engine.getAggregatorID())
@@ -344,7 +344,7 @@ class BatchAggregationEngineTest {
                 Collections.singletonList(DPCResourceType.ExplanationOfBenefit),
                 MockBlueButtonClient.TEST_LAST_UPDATED.minusSeconds(1),
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                null, null, true);
+                null, null, true, false);
 
         // Do the job
         queue.claimBatch(engine.getAggregatorID())
@@ -387,7 +387,7 @@ class BatchAggregationEngineTest {
                 Collections.singletonList(DPCResourceType.ExplanationOfBenefit),
                 MockBlueButtonClient.TEST_LAST_UPDATED.minusSeconds(1),
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                null, null, true);
+                null, null, true, false);
 
         // Do the job
         queue.claimBatch(engine.getAggregatorID())
@@ -430,7 +430,7 @@ class BatchAggregationEngineTest {
                 Collections.singletonList(DPCResourceType.ExplanationOfBenefit),
                 MockBlueButtonClient.TEST_LAST_UPDATED.minusSeconds(1),
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                null, null, true);
+                null, null, true, false);
 
         // Do the job
         queue.claimBatch(engine.getAggregatorID())
