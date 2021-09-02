@@ -7,6 +7,7 @@ import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import ca.uhn.fhir.rest.gclient.IReadExecutable;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.google.common.net.HttpHeaders;
+import gov.cms.dpc.api.DPCAPIConfiguration;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.common.utils.NPIUtil;
@@ -28,6 +29,7 @@ import javax.ws.rs.core.Response;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
@@ -50,6 +52,8 @@ public class GroupResourceUnitTest {
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     IJobQueue mockQueue;
 
+    DPCAPIConfiguration config = new DPCAPIConfiguration();
+
     @Mock
     HttpServletRequest request;
 
@@ -58,7 +62,8 @@ public class GroupResourceUnitTest {
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
-        resource = new GroupResource(mockQueue, attributionClient, "http://localhost:3002/v1", mockBfdClient);
+        config.setLookBackExemptOrgs(new LinkedList<>());
+        resource = new GroupResource(mockQueue, attributionClient, "http://localhost:3002/v1", mockBfdClient, config);
     }
 
     @Test
@@ -231,7 +236,7 @@ public class GroupResourceUnitTest {
         when(mockBfdClient.requestPatientFromServer(SYNTHETIC_BENE_ID, null, null).getMeta()).thenReturn(bfdTransactionMeta);
 
         //Mock create job
-        when(mockQueue.createJob(any(), any(), any(), any(), any(), any(), any(), any(), any(), anyBoolean())).thenReturn(UUID.randomUUID());
+        when(mockQueue.createJob(any(), any(), any(), any(), any(), any(), any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(UUID.randomUUID());
 
         //Mock fetching request Url
         when(request.getRequestURL()).thenReturn(new StringBuffer("http://localhost:3002/v1/Group/1234567890/$export"));
@@ -386,7 +391,7 @@ public class GroupResourceUnitTest {
                 .thenReturn(new Bundle());
 
         //Mock create job
-        when(mockQueue.createJob(any(), any(), any(), any(), any(), any(), any(), any(), any(), anyBoolean())).thenReturn(UUID.randomUUID());
+        when(mockQueue.createJob(any(), any(), any(), any(), any(), any(), any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(UUID.randomUUID());
 
         //Mock fetching request Url
         when(request.getRequestURL()).thenReturn(new StringBuffer("http://localhost:3002/v1/Group/1234567890/$export"));
