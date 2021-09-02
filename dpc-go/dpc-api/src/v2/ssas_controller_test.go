@@ -383,7 +383,7 @@ func (suite *SsasControllerTestSuite) SetupHappyPathMocks() (*http.Request, cont
 		ClientToken: "client-token",
 		ExpiresAt:   "expiration",
 		XData:       "xdata",
-        PublicKeyID: "publicKeyId",
+		PublicKeyID: "publicKeyId",
 		IPs:         ips,
 	}
 
