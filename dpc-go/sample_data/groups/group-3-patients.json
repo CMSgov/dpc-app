@@ -1,0 +1,75 @@
+{
+  "resourceType": "Group",
+  "type": "person",
+  "actual": true,
+  "name": "Test Group",
+  "managingEntity": {
+    "reference": "Organization/1",
+    "display": "Healthcare related organization"
+  },
+  "member": [
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/us/davinci-atr/StructureDefinition/ext-attributedProvider",
+          "valueReference": {
+            "type": "Practitioner",
+            "identifier": {
+              "system": "http://hl7.org/fhir/sid/us-npi",
+              "value": "9802464122"
+            }
+          }
+        }
+      ],
+      "entity": {
+        "type": "Patient",
+        "identifier": {
+          "system": "http://hl7.org/fhir/sid/us-mbi",
+          "value": "1S00E00EM87"
+        }
+      }
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/us/davinci-atr/StructureDefinition/ext-attributedProvider",
+          "valueReference": {
+            "type": "Practitioner",
+            "identifier": {
+              "system": "http://hl7.org/fhir/sid/us-npi",
+              "value": "9802464122"
+            }
+          }
+        }
+      ],
+      "entity": {
+        "type": "Patient",
+        "identifier": {
+          "system": "http://hl7.org/fhir/sid/us-mbi",
+          "value": "1S00E00FT85"
+        }
+      }
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/us/davinci-atr/StructureDefinition/ext-attributedProvider",
+          "valueReference": {
+            "type": "Practitioner",
+            "identifier": {
+              "system": "http://hl7.org/fhir/sid/us-npi",
+              "value": "9802464122"
+            }
+          }
+        }
+      ],
+      "entity": {
+        "type": "Patient",
+        "identifier": {
+          "system": "http://hl7.org/fhir/sid/us-mbi",
+          "value": "1S00E00CU61"
+        }
+      }
+    }
+  ]
+}

@@ -7,6 +7,7 @@ import (
 	"crypto/x509"
 	"encoding/hex"
 	"fmt"
+	"github.com/sjsdfg/common-lang-in-go/StringUtils"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -14,6 +15,7 @@ import (
 	"strings"
 	"time"
 
+	b64 "encoding/base64"
 	"github.com/CMSgov/dpc/attribution/client/fhir"
 	"github.com/CMSgov/dpc/attribution/conf"
 	"github.com/CMSgov/dpc/attribution/logger"
@@ -79,28 +81,20 @@ var log = logger.WithContext(context.Background())
 
 // NewBfdClient creates a new BFD Client
 func NewBfdClient(config BfdConfig) (*BfdClient, error) {
-	decryptedDir := conf.GetAsString("DecryptedDir")
-	certFile := fmt.Sprintf("%s%s", decryptedDir, conf.GetAsString("bfd.clientCertFile"))
-	keyFile := fmt.Sprintf("%s%s", decryptedDir, conf.GetAsString("bfd.clientKeyFile"))
 	pageSize := conf.GetAsInt("bfd.clientPageSize", 0)
-	cert, err := tls.LoadX509KeyPair(certFile, keyFile)
+	cert, err := getClientCert()
 	if err != nil {
-		return nil, errors.Wrap(err, "could not load BFD keypair")
+		return nil, err
 	}
 
 	tlsConfig := &tls.Config{Certificates: []tls.Certificate{cert}, MinVersion: tls.VersionTLS12}
 
 	if strings.ToLower(conf.GetAsString("bfd.checkCert")) != "false" {
-		caFile := fmt.Sprintf("%s%s", decryptedDir, conf.GetAsString("bfd.clientCAFile"))
-		caCert, err := ioutil.ReadFile(filepath.Clean(caFile))
+		caPool, err := getCaCertPool()
 		if err != nil {
-			return nil, errors.Wrap(err, "could not read CA file")
+			return nil, errors.Wrap(err, "could not retrieve BFD CA cert pool")
 		}
-		caCertPool := x509.NewCertPool()
-		if ok := caCertPool.AppendCertsFromPEM(caCert); !ok {
-			return nil, errors.New("could not append CA certificate(s)")
-		}
-		tlsConfig.RootCAs = caCertPool
+		tlsConfig.RootCAs = caPool
 	} else {
 		tlsConfig.InsecureSkipVerify = true
 		log.Warn("BFD certificate check disabled")
@@ -121,6 +115,100 @@ func NewBfdClient(config BfdConfig) (*BfdClient, error) {
 	maxTries := uint64(conf.GetAsInt("bfd.requestMaxTries", 3))
 	retryInterval := time.Duration(conf.GetAsInt("bfd.requestRetryIntervalMS", 1000)) * time.Millisecond
 	return &BfdClient{client, maxTries, retryInterval, config.BfdServer, config.BfdBasePath}, nil
+}
+
+func getClientCert() (tls.Certificate, error) {
+	hasB64 := StringUtils.IsNotBlank(conf.GetAsString("bfd.clientCert")) || StringUtils.IsNotBlank(conf.GetAsString("bfd.clientKey"))
+	hasFilePaths := StringUtils.IsNotBlank(conf.GetAsString("bfd.clientCertFile")) || StringUtils.IsNotBlank(conf.GetAsString("bfd.clientKeyFile"))
+
+	if hasB64 {
+		if StringUtils.IsBlank(conf.GetAsString("bfd.clientCert")) || StringUtils.IsBlank(conf.GetAsString("bfd.clientKey")) {
+			return tls.Certificate{}, errors.New("only one of (DPC_BFD_CLIENTCERT , DPC_BFD_CLIENTKEY) was provided. Both or none are required")
+		}
+		log.Info("Using BFD clients certs found in env variables (DPC_BFD_CLIENTCERT , DPC_BFD_CLIENTKEY)")
+		return getClientCertFromEnv()
+	} else if hasFilePaths {
+		log.Info("Using BFD clients certs file paths")
+		return getClientCertFromFiles()
+	} else {
+		return tls.Certificate{}, errors.New("missing Base64 BFD Certs (DPC_BFD_CLIENTCERT , DPC_BFD_CLIENTKEY) or BFD Cert file paths (DPC_BFD_CLIENTCERTFILE , DPC_BFD_CLIENTKEYFILE)")
+	}
+}
+
+func getCaCertPool() (*x509.CertPool, error) {
+	hasB64 := StringUtils.IsNotBlank(conf.GetAsString("BFD.CA"))
+	hasFilePath := StringUtils.IsNotBlank(conf.GetAsString("bfd.clientCAFile"))
+
+	if hasB64 {
+		log.Info("Using BFD CA cert found in env variables (DPC_BFD_CA)")
+		return getCAPoolFromEnv()
+	} else if hasFilePath {
+		log.Info("Using BFD CA cert file path")
+		return getCAPoolFromFile()
+	} else {
+		return nil, errors.New("missing Base64 BFD CA cert (DPC_BFD_CA) or BFD CA file path (DPC_bfd_clientCAFile)")
+	}
+}
+
+// getCAPoolFromFile retrieves the bfd ca file from a local path
+func getCAPoolFromFile() (*x509.CertPool, error) {
+	caFile := conf.GetAsString("bfd.clientCAFile")
+	caCert, err := ioutil.ReadFile(filepath.Clean(caFile))
+	if err != nil {
+		return nil, errors.Wrap(err, "could not read BFD CA file")
+	}
+	caCertPool := x509.NewCertPool()
+	if ok := caCertPool.AppendCertsFromPEM(caCert); !ok {
+		return nil, errors.New("could not append CA certificate(s)")
+	}
+	return caCertPool, nil
+}
+
+func getClientCertFromFiles() (tls.Certificate, error) {
+	certFile := conf.GetAsString("bfd.clientCertFile")
+	keyFile := conf.GetAsString("bfd.clientKeyFile")
+
+	cert, err := tls.LoadX509KeyPair(certFile, keyFile)
+	if err != nil {
+		return tls.Certificate{}, errors.Wrap(err, "failed to load BFD cert/key pair from file")
+	}
+	return cert, nil
+}
+
+func getCAPoolFromEnv() (*x509.CertPool, error) {
+	caB, err := b64.StdEncoding.DecodeString(conf.GetAsString("bfd.ca"))
+	if err != nil {
+		return nil, errors.New("could not base64 decode BFD CA cert")
+	}
+
+	caCertStr := string(caB)
+	certPool := x509.NewCertPool()
+	ok := certPool.AppendCertsFromPEM([]byte(caCertStr))
+	if !ok {
+		return nil, errors.New("failed to parse BFD ca cert")
+	}
+	return certPool, nil
+}
+
+func getClientCertFromEnv() (tls.Certificate, error) {
+	crtB, err := b64.StdEncoding.DecodeString(conf.GetAsString("bfd.clientCert"))
+	if err != nil {
+		return tls.Certificate{}, errors.Wrap(err, "could not base64 decode BFD cert")
+	}
+	keyB, err := b64.StdEncoding.DecodeString(conf.GetAsString("bfd.clientKey"))
+	if err != nil {
+		return tls.Certificate{}, errors.Wrap(err, "could not base64 decode BFD cert key")
+	}
+
+	clCertStr := string(crtB)
+	clKeyStr := string(keyB)
+
+	crt, err := tls.X509KeyPair([]byte(clCertStr), []byte(clKeyStr))
+	if err != nil {
+		return tls.Certificate{}, errors.Wrap(err, "failed to parse BFD cert/key pair from env vars.")
+	}
+
+	return crt, nil
 }
 
 // GetPatient is a method to get patient data using a patient ID

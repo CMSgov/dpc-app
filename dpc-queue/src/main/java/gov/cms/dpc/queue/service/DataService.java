@@ -3,6 +3,7 @@ package gov.cms.dpc.queue.service;
 import ca.uhn.fhir.context.FhirContext;
 import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.common.annotations.JobTimeout;
+import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.exceptions.DataRetrievalException;
@@ -45,7 +46,7 @@ public class DataService {
         this.jobTimeoutInSeconds = jobTimeoutInSeconds;
     }
 
-    public Resource retrieveData(UUID organizationId, String orgNPI, String providerNPI, List<String> patientIds, ResourceType... resourceTypes) {
+    public Resource retrieveData(UUID organizationId, String orgNPI, String providerNPI, List<String> patientIds, DPCResourceType... resourceTypes) {
         return retrieveData(organizationId, orgNPI, providerNPI, patientIds, null, OffsetDateTime.now(ZoneOffset.UTC), null, null, resourceTypes);
     }
 
@@ -60,7 +61,7 @@ public class DataService {
      * @param transactionTime BFD Transaction Time
      * @param requestingIP    IP Address of request
      * @param requestUrl      URL of original request
-     * @param resourceTypes   List of ResourceType data to retrieve
+     * @param resourceTypes   List of DPCResourceType data to retrieve
      * @return Resource
      */
     public Resource retrieveData(UUID organizationID,
@@ -69,8 +70,8 @@ public class DataService {
                                  List<String> patientMBIs,
                                  OffsetDateTime since,
                                  OffsetDateTime transactionTime,
-                                 String requestingIP, String requestUrl, ResourceType... resourceTypes) {
-        UUID jobID = this.queue.createJob(organizationID, orgNPI, providerNPI, patientMBIs, List.of(resourceTypes), since, transactionTime, requestingIP, requestUrl, false);
+                                 String requestingIP, String requestUrl, DPCResourceType... resourceTypes) {
+        UUID jobID = this.queue.createJob(organizationID, orgNPI, providerNPI, patientMBIs, List.of(resourceTypes), since, transactionTime, requestingIP, requestUrl, false, false);
         LOGGER.info("Patient everything export job created with job_id={} _since={}", jobID.toString(), since);
 
         Optional<List<JobQueueBatch>> optionalBatches = waitForJobToComplete(jobID, organizationID, this.queue);
@@ -78,7 +79,7 @@ public class DataService {
         if (optionalBatches.isPresent()) {
             List<JobQueueBatch> batches = optionalBatches.get();
             List<JobQueueBatchFile> files = batches.stream().map(JobQueueBatch::getJobQueueBatchFiles).flatMap(List::stream).collect(Collectors.toList());
-            if (files.size() == 1 && files.get(0).getResourceType() == ResourceType.OperationOutcome) {
+            if (files.size() == 1 && files.get(0).getResourceType() == DPCResourceType.OperationOutcome) {
                 return assembleOperationOutcome(batches);
             } else {
                 return assembleBundleFromBatches(batches, List.of(resourceTypes));
@@ -136,7 +137,7 @@ public class DataService {
         }
     }
 
-    private Bundle assembleBundleFromBatches(List<JobQueueBatch> batches, List<ResourceType> resourceTypes) {
+    private Bundle assembleBundleFromBatches(List<JobQueueBatch> batches, List<DPCResourceType> resourceTypes) {
         if (resourceTypes == null || resourceTypes.isEmpty()) {
             throw new DataRetrievalException("Need to pass in resource types");
         }
@@ -159,7 +160,7 @@ public class DataService {
         return bundle.setTotal(bundle.getEntry().size());
     }
 
-    private Class<? extends Resource> getClassForResourceType(ResourceType resourceType) {
+    private Class<? extends Resource> getClassForResourceType(DPCResourceType resourceType) {
         switch (resourceType) {
             case Coverage:
                 return Coverage.class;
@@ -187,7 +188,7 @@ public class DataService {
     private OperationOutcome assembleOperationOutcome(List<JobQueueBatch> batches) {
         // There is only ever 1 OperationOutcome file
         final Optional<JobQueueBatchFile> batchFile = batches.stream()
-                .map(b -> b.getJobQueueFileLatest(ResourceType.OperationOutcome))
+                .map(b -> b.getJobQueueFileLatest(DPCResourceType.OperationOutcome))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .findFirst();

@@ -1,0 +1,250 @@
+{
+	"info": {
+		"_postman_id": "fd2454f3-c671-40b9-b710-b2d4e16aaff6",
+		"name": "DPC V2 - Developer's Edition",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Group",
+			"item": [
+				{
+					"name": "Create Group | POST /Group",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var date = new Date().toJSON();",
+									"var org = pm.environment.get(\"organization_id\");",
+									"var provenance_header  = `{\"resourceType\":\"Provenance\",\"recorded\":\"${date}\",\"reason\":[{\"coding\":[{\"system\":\"http://hl7.org/fhir/v3/ActReason\",\"code\":\"TREAT\"}]}],\"agent\":[{\"role\":[{\"coding\":[{\"system\":\"http://hl7.org/fhir/v3/RoleClass\",\"code\":\"AGNT\"}]}],\"who\":{\"reference\":\"Organization/${org}\"}}]}`",
+									"pm.environment.set(\"provenance_header\", \"\")",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = JSON.parse(responseBody);",
+									"var groupID = jsonData['id']",
+									"if (groupID) {",
+									"    pm.environment.set(\"group_id\", groupID)",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Provenance",
+								"value": "{{provenance_header}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"resourceType\": \"Group\",\n  \"type\": \"person\",\n  \"actual\": true,\n  \"name\": \"Sandbox Group\",\n  \"member\": [\n    {\n      \"extension\": [\n        {\n          \"url\": \"http://hl7.org/fhir/us/davinci-atr/StructureDefinition/ext-attributedProvider\",\n          \"valueReference\": {\n            \"type\": \"Practitioner\",\n            \"identifier\": {\n                \"system\": \"http://hl7.org/fhir/sid/us-npi\",\n                \"value\": \"9941339108\"\n            }\n          }\n        }\n      ],\n      \"entity\": {\n        \"type\": \"Patient\",\n        \"identifier\": {\n            \"value\": \"2SW4N00AA00\",\n            \"system\": \"http://hl7.org/fhir/sid/us-mbi\"\n        }\n      }\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api_public_base}}/api/v2/Group",
+							"host": [
+								"{{api_public_base}}"
+							],
+							"path": [
+								"api",
+								"v2",
+								"Group"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Export Group | GET /Group/:id/$export",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const location = pm.response.headers.get(\"Content-Location\");",
+									"pm.environment.set(\"job_status_location\", location)"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Prefer",
+								"value": "respond-async",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{api_public_base}}/api/v2/Group/{{group_id}}/$export?_outputFormat=ndjson",
+							"host": [
+								"{{api_public_base}}"
+							],
+							"path": [
+								"api",
+								"v2",
+								"Group",
+								"{{group_id}}",
+								"$export"
+							],
+							"query": [
+								{
+									"key": "_outputFormat",
+									"value": "ndjson"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Job Status | GET /Jobs/:id",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{job_status_location}}",
+							"host": [
+								"{{job_status_location}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Data | GET /Data/:file-name",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_public_base}}/api/v2/Data/",
+							"host": [
+								"{{api_public_base}}"
+							],
+							"path": [
+								"api",
+								"v2",
+								"Data",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Organization",
+			"item": [
+				{
+					"name": "Get Organization | GET /Organization/:id",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_public_base}}/api/v2/Organization/{{organization_id}}",
+							"host": [
+								"{{api_public_base}}"
+							],
+							"path": [
+								"api",
+								"v2",
+								"Organization",
+								"{{organization_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}

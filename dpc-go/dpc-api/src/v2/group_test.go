@@ -3,7 +3,10 @@ package v2
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
+	"github.com/CMSgov/dpc/api/constants"
+	"github.com/CMSgov/dpc/api/model"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -11,7 +14,6 @@ import (
 	"testing"
 
 	"github.com/CMSgov/dpc/api/apitest"
-	middleware2 "github.com/CMSgov/dpc/api/middleware"
 	"github.com/bxcodec/faker/v3"
 	"github.com/go-chi/chi/middleware"
 	"github.com/kinbiko/jsonassert"
@@ -25,12 +27,15 @@ type GroupControllerTestSuite struct {
 	suite.Suite
 	grp *GroupController
 	mac *MockAttributionClient
+	mjc *MockJobClient
 }
 
 func (suite *GroupControllerTestSuite) SetupTest() {
 	mac := new(MockAttributionClient)
+	mjc := new(MockJobClient)
 	suite.mac = mac
-	suite.grp = NewGroupController(mac)
+	suite.mjc = mjc
+	suite.grp = NewGroupController(mac, mjc)
 
 }
 
@@ -124,27 +129,35 @@ func (suite *GroupControllerTestSuite) TestCreateGroup() {
 
 	resp, _ := ioutil.ReadAll(res.Body)
 	ja.Assertf(string(resp), string(apitest.AttributionToFHIRResponse(apitest.FilteredGroupjson)))
+}
 
-	req = httptest.NewRequest(http.MethodPost, "http://example.com/foo", bytes.NewReader(apitest.MalformedOrg()))
+func (suite *GroupControllerTestSuite) TestCreateMalformedGroup() {
+	req := httptest.NewRequest(http.MethodPost, "http://example.com/foo", bytes.NewReader(apitest.MalformedOrg()))
 
-	w = httptest.NewRecorder()
+	w := httptest.NewRecorder()
 	suite.grp.Create(w, req)
-	res = w.Result()
+	res := w.Result()
 
 	assert.Equal(suite.T(), http.StatusBadRequest, res.StatusCode)
 }
 
 func (suite *GroupControllerTestSuite) TestExportGroup() {
 	jobID := "test-export-job"
-	suite.mac.On("Export", mock.Anything, mock.Anything, mock.Anything).Return([]byte(jobID), nil)
+	ab := apitest.AttributionToFHIRResponse(apitest.FilteredGroupjson)
+	var r model.Resource
+	_ = json.Unmarshal(ab, &r)
+
+	suite.mjc.On("Export", mock.Anything, mock.Anything).Return([]byte(jobID), nil)
+	suite.mac.On("Get", mock.Anything, mock.Anything, mock.Anything).Return(ab, nil)
 
 	ja := jsonassert.New(suite.T())
 	req := httptest.NewRequest(http.MethodGet, "http://example.com/Group/9876/$export?_outputFormat=application/fhir%2Bndjson", nil)
 	ctx := req.Context()
-	ctx = context.WithValue(ctx, middleware2.ContextKeyOrganization, "12345")
-	ctx = context.WithValue(ctx, middleware2.ContextKeyGroup, faker.UUIDHyphenated())
-	ctx = context.WithValue(ctx, middleware2.ContextKeyRequestURL, faker.URL())
-	ctx = context.WithValue(ctx, middleware2.ContextKeyRequestingIP, faker.IPv4())
+	ctx = context.WithValue(ctx, constants.ContextKeyOrganization, "12345")
+	ctx = context.WithValue(ctx, constants.ContextKeyGroup, r.ID)
+	ctx = context.WithValue(ctx, constants.ContextKeyRequestURL, faker.URL())
+	ctx = context.WithValue(ctx, constants.ContextKeyRequestingIP, faker.IPv4())
+	ctx = context.WithValue(ctx, constants.ContextKeyResourceTypes, constants.AllResources)
 	req = req.WithContext(ctx)
 	req.Header.Set("Prefer", "respond-async")
 
@@ -154,23 +167,29 @@ func (suite *GroupControllerTestSuite) TestExportGroup() {
 	res := w.Result()
 
 	assert.Equal(suite.T(), http.StatusAccepted, res.StatusCode)
-	assert.Equal(suite.T(), fmt.Sprintf("http://example.com/v2/Jobs/%s", jobID), res.Header.Get("Content-Location"))
+	assert.Equal(suite.T(), fmt.Sprintf("localhost:3000/api/v2/Jobs/%s", jobID), res.Header.Get("Content-Location"))
 
 	resp, _ := ioutil.ReadAll(res.Body)
 	ja.Assertf(string(resp), "")
 }
 
 func (suite *GroupControllerTestSuite) TestExportGroupMissingPreferHeader() {
-	suite.mac.On("Export", mock.Anything, mock.Anything, mock.Anything).Return(apitest.AttributionResponse(apitest.JobJSON), nil)
+	ab := apitest.AttributionToFHIRResponse(apitest.FilteredGroupjson)
+	var r model.Resource
+	_ = json.Unmarshal(ab, &r)
+
+	suite.mjc.On("Export", mock.Anything, mock.Anything).Return(apitest.AttributionResponse(apitest.JobJSON), nil)
+	suite.mac.On("Get", mock.Anything, mock.Anything, mock.Anything).Return(ab, nil)
 
 	ja := jsonassert.New(suite.T())
 	req := httptest.NewRequest(http.MethodGet, "http://example.com/Group/9876/$export?_outputFormat=application/fhir%2Bndjson", nil)
 	ctx := req.Context()
-	ctx = context.WithValue(ctx, middleware2.ContextKeyOrganization, "12345")
-	ctx = context.WithValue(ctx, middleware2.ContextKeyGroup, faker.UUIDHyphenated())
-	ctx = context.WithValue(ctx, middleware2.ContextKeyRequestURL, faker.URL())
-	ctx = context.WithValue(ctx, middleware2.ContextKeyRequestingIP, faker.IPv4())
+	ctx = context.WithValue(ctx, constants.ContextKeyOrganization, "12345")
+	ctx = context.WithValue(ctx, constants.ContextKeyGroup, r.ID)
+	ctx = context.WithValue(ctx, constants.ContextKeyRequestURL, faker.URL())
+	ctx = context.WithValue(ctx, constants.ContextKeyRequestingIP, faker.IPv4())
 	ctx = context.WithValue(ctx, middleware.RequestIDKey, "12345")
+	ctx = context.WithValue(ctx, constants.ContextKeyResourceTypes, constants.AllResources)
 	req = req.WithContext(ctx)
 
 	w := httptest.NewRecorder()
@@ -199,16 +218,22 @@ func (suite *GroupControllerTestSuite) TestExportGroupMissingPreferHeader() {
 }
 
 func (suite *GroupControllerTestSuite) TestExportGroupInvalidPreferHeader() {
-	suite.mac.On("Export", mock.Anything, mock.Anything, mock.Anything).Return(apitest.AttributionResponse(apitest.JobJSON), nil)
+	ab := apitest.AttributionToFHIRResponse(apitest.FilteredGroupjson)
+	var r model.Resource
+	_ = json.Unmarshal(ab, &r)
+
+	suite.mjc.On("Export", mock.Anything, mock.Anything).Return(apitest.AttributionResponse(apitest.JobJSON), nil)
+	suite.mac.On("Get", mock.Anything, mock.Anything, mock.Anything).Return(ab, nil)
 
 	ja := jsonassert.New(suite.T())
 	req := httptest.NewRequest(http.MethodGet, "http://example.com/Group/9876/$export?_outputFormat=application/fhir%2Bndjson", nil)
 	ctx := req.Context()
-	ctx = context.WithValue(ctx, middleware2.ContextKeyOrganization, "12345")
-	ctx = context.WithValue(ctx, middleware2.ContextKeyGroup, faker.UUIDHyphenated())
-	ctx = context.WithValue(ctx, middleware2.ContextKeyRequestURL, faker.URL())
-	ctx = context.WithValue(ctx, middleware2.ContextKeyRequestingIP, faker.IPv4())
+	ctx = context.WithValue(ctx, constants.ContextKeyOrganization, "12345")
+	ctx = context.WithValue(ctx, constants.ContextKeyGroup, r.ID)
+	ctx = context.WithValue(ctx, constants.ContextKeyRequestURL, faker.URL())
+	ctx = context.WithValue(ctx, constants.ContextKeyRequestingIP, faker.IPv4())
 	ctx = context.WithValue(ctx, middleware.RequestIDKey, "12345")
+	ctx = context.WithValue(ctx, constants.ContextKeyResourceTypes, constants.AllResources)
 	req = req.WithContext(ctx)
 	req.Header.Set("Prefer", "INVALID")
 
@@ -238,16 +263,21 @@ func (suite *GroupControllerTestSuite) TestExportGroupInvalidPreferHeader() {
 }
 
 func (suite *GroupControllerTestSuite) TestExportGroupMissingOutputFormat() {
-	suite.mac.On("Export", mock.Anything, mock.Anything, mock.Anything).Return(apitest.AttributionResponse(apitest.JobJSON), nil)
+	ab := apitest.AttributionToFHIRResponse(apitest.FilteredGroupjson)
+	var r model.Resource
+	_ = json.Unmarshal(ab, &r)
 
-	ja := jsonassert.New(suite.T())
+	suite.mjc.On("Export", mock.Anything, mock.Anything).Return(apitest.AttributionResponse(apitest.JobJSON), nil)
+	suite.mac.On("Get", mock.Anything, mock.Anything, mock.Anything).Return(ab, nil)
+
 	req := httptest.NewRequest(http.MethodGet, "http://example.com/Group/9876/$export", nil)
 	ctx := req.Context()
-	ctx = context.WithValue(ctx, middleware2.ContextKeyOrganization, "12345")
-	ctx = context.WithValue(ctx, middleware2.ContextKeyGroup, faker.UUIDHyphenated())
-	ctx = context.WithValue(ctx, middleware2.ContextKeyRequestURL, faker.URL())
-	ctx = context.WithValue(ctx, middleware2.ContextKeyRequestingIP, faker.IPv4())
+	ctx = context.WithValue(ctx, constants.ContextKeyOrganization, "12345")
+	ctx = context.WithValue(ctx, constants.ContextKeyGroup, r.ID)
+	ctx = context.WithValue(ctx, constants.ContextKeyRequestURL, faker.URL())
+	ctx = context.WithValue(ctx, constants.ContextKeyRequestingIP, faker.IPv4())
 	ctx = context.WithValue(ctx, middleware.RequestIDKey, "12345")
+	ctx = context.WithValue(ctx, constants.ContextKeyResourceTypes, constants.AllResources)
 	req = req.WithContext(ctx)
 	req.Header.Set("Prefer", "respond-async")
 
@@ -256,37 +286,26 @@ func (suite *GroupControllerTestSuite) TestExportGroupMissingOutputFormat() {
 
 	res := w.Result()
 
-	assert.Equal(suite.T(), http.StatusBadRequest, res.StatusCode)
-
-	resp, _ := ioutil.ReadAll(res.Body)
-
-	ja.Assertf(string(resp), `
-    {
-        "issue": [
-            {
-                "severity": "warning",
-                "code": "Business Rule Violation",
-                "details": {
-                    "text": "'_outputFormat' query parameter must be 'application/fhir+ndjson', 'application/ndjson', or 'ndjson'"
-                },
-                "diagnostics": "12345"
-            }
-        ],
-        "resourceType": "OperationOutcome"
-    }`)
+	assert.Equal(suite.T(), http.StatusAccepted, res.StatusCode)
 }
 
 func (suite *GroupControllerTestSuite) TestExportGroupInvalidOutputFormat() {
-	suite.mac.On("Export", mock.Anything, mock.Anything, mock.Anything).Return(apitest.AttributionResponse(apitest.JobJSON), nil)
+	ab := apitest.AttributionToFHIRResponse(apitest.FilteredGroupjson)
+	var r model.Resource
+	_ = json.Unmarshal(ab, &r)
+
+	suite.mjc.On("Export", mock.Anything, mock.Anything).Return(apitest.AttributionResponse(apitest.JobJSON), nil)
+	suite.mac.On("Get", mock.Anything, mock.Anything, mock.Anything).Return(ab, nil)
 
 	ja := jsonassert.New(suite.T())
 	req := httptest.NewRequest(http.MethodGet, "http://example.com/Group/9876/$export?_outputFormat=INVALID", nil)
 	ctx := req.Context()
-	ctx = context.WithValue(ctx, middleware2.ContextKeyOrganization, "12345")
-	ctx = context.WithValue(ctx, middleware2.ContextKeyGroup, faker.UUIDHyphenated())
-	ctx = context.WithValue(ctx, middleware2.ContextKeyRequestURL, faker.URL())
-	ctx = context.WithValue(ctx, middleware2.ContextKeyRequestingIP, faker.IPv4())
+	ctx = context.WithValue(ctx, constants.ContextKeyOrganization, "12345")
+	ctx = context.WithValue(ctx, constants.ContextKeyGroup, r.ID)
+	ctx = context.WithValue(ctx, constants.ContextKeyRequestURL, faker.URL())
+	ctx = context.WithValue(ctx, constants.ContextKeyRequestingIP, faker.IPv4())
 	ctx = context.WithValue(ctx, middleware.RequestIDKey, "12345")
+	ctx = context.WithValue(ctx, constants.ContextKeyResourceTypes, constants.AllResources)
 	req = req.WithContext(ctx)
 	req.Header.Set("Prefer", "respond-async")
 

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/CMSgov/dpc/api/constants"
 	"net/http"
 	"sort"
 	"time"
@@ -12,7 +13,6 @@ import (
 	"github.com/CMSgov/dpc/api/conf"
 	"github.com/CMSgov/dpc/api/fhirror"
 	"github.com/CMSgov/dpc/api/logger"
-	"github.com/CMSgov/dpc/api/middleware"
 	"github.com/CMSgov/dpc/api/model"
 	"go.uber.org/zap"
 )
@@ -32,7 +32,7 @@ func NewJobController(jc client.JobClient) JobController {
 // Status function that gets the job status according to FHIR Bulk Data
 func (jc *JobControllerImpl) Status(w http.ResponseWriter, r *http.Request) {
 	log := logger.WithContext(r.Context())
-	jobID, ok := r.Context().Value(middleware.ContextKeyJobID).(string)
+	jobID, ok := r.Context().Value(constants.ContextKeyJobID).(string)
 	if !ok {
 		log.Error("Failed to extract the job id from the context")
 		fhirror.BusinessViolation(r.Context(), w, http.StatusBadRequest, "Failed to extract job id from url, please check the url")
@@ -53,7 +53,7 @@ func (jc *JobControllerImpl) Status(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	statuses := getStatus(batches)
+	statuses := GetStatus(batches)
 	if statuses["FAILED"] {
 		log.Error(fmt.Sprintf("Failed batches found in job %s", jobID))
 		fhirror.GenericServerIssue(r.Context(), w)
@@ -85,9 +85,9 @@ func complete(ctx context.Context, w http.ResponseWriter, batches []model.BatchA
 
 	outputs, errors := formOutputList(files)
 
-	jobExtension := make(map[string]interface{})
-	jobExtension["https://dpc.cms.gov/submit_time"] = getEarliestSubmitTime(batches)
-	jobExtension["https://dpc.cms.gov/complete_time"] = latestCompleteTime
+	jobExtension := make([]map[string]interface{}, 0)
+	jobExtension = append(jobExtension, map[string]interface{}{"url": "https://dpc.cms.gov/submit_time", "valueDateTime": getEarliestSubmitTime(batches)})
+	jobExtension = append(jobExtension, map[string]interface{}{"url": "https://dpc.cms.gov/complete_time", "valueDateTime": latestCompleteTime})
 
 	status := &model.Status{
 		TransactionTime:     batches[0].Batch.TransactionTime,
@@ -141,11 +141,10 @@ func formOutputList(files []model.BatchFile) ([]model.Output, []model.Output) {
 	return outputs, errors
 }
 
-func fhirExtensions(f model.BatchFile) map[string]interface{} {
-	m := make(map[string]interface{})
-	m["https://dpc.cms.gov/checksum"] = f.Checksum
-	m["https://dpc.cms.gov/file_length"] = f.FileLength
-
+func fhirExtensions(f model.BatchFile) []map[string]interface{} {
+	m := make([]map[string]interface{}, 0)
+	m = append(m, map[string]interface{}{"url": "https://dpc.cms.gov/checksum", "valueString": f.Checksum})
+	m = append(m, map[string]interface{}{"url": "https://dpc.cms.gov/file_length", "valueDecimal": f.FileLength})
 	return m
 }
 
@@ -164,7 +163,8 @@ func inProgress(w http.ResponseWriter, batches []model.BatchAndFiles) {
 	w.WriteHeader(202)
 }
 
-func getStatus(batches []model.BatchAndFiles) map[string]bool {
+// GetStatus function returns a set of statues of the batches
+func GetStatus(batches []model.BatchAndFiles) map[string]bool {
 	statuses := make(map[string]bool)
 	for _, b := range batches {
 		statuses[b.Batch.Status] = true

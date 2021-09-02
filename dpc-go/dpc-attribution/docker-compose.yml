@@ -1,22 +1,11 @@
 version: "3"
 
 services:
-  migrator:
-    build:
-      context: dpc-go/dpc-attribution/migrator
-      dockerfile: Dockerfile
-    depends_on:
-      - db
-    command: -path=/migrations/ -database postgres://postgres:dpc-safe@db:5432/dpc_attribution_v2?sslmode=disable up
-    volumes:
-      - ./dpc-go/dpc-attribution/migrator/migrations:/migrations
   attribution2:
     image: ${ECR_HOST:-755619740999.dkr.ecr.us-east-1.amazonaws.com/dpc-attribution-go}:latest
     build:
       context: dpc-go/dpc-attribution
       dockerfile: docker/Dockerfiles/Dockerfile.attribution
-    depends_on:
-      - migrator
     ports:
       - "3001:3001"
     environment:
@@ -24,3 +13,5 @@ services:
       - DPC_DB_URLV1=postgresql://postgres:dpc-safe@db:5432/dpc_attribution
       - DPC_DB_QUEUEURL=postgresql://postgres:dpc-safe@db:5432/dpc_queue
       - DPC_PORT=3001
+    volumes:
+      - ./dpc-go/dpc-attribution/shared_files/decrypted:/app/shared_files/decrypted

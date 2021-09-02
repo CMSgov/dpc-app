@@ -5,10 +5,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/CMSgov/dpc/api/conf"
+	"github.com/CMSgov/dpc/api/constants"
+	"github.com/sjsdfg/common-lang-in-go/StringUtils"
 	"io/ioutil"
 	"net/http"
 
 	"github.com/CMSgov/dpc/api/logger"
+	"github.com/CMSgov/dpc/api/model"
 	"github.com/hashicorp/go-retryablehttp"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
@@ -25,15 +29,24 @@ type SsasHTTPClientConfig struct {
 
 // Contains the different ResourceType for calls to attribution
 const (
-	PostV2SystemEndpoint string = "v2/system"
-	PostV2GroupEndpoint  string = "v2/group"
+	PostV2SystemEndpoint    string = "v2/system"
+	PostV2GroupEndpoint     string = "v2/group"
+	PostV2AuthenticateToken string = "v2/token"
+	/* #nosec */
+	TokenInfoEndpoint string = "v2/token_info"
 )
 
 // SsasClient interface for testing purposes
 type SsasClient interface {
 	CreateSystem(ctx context.Context, request CreateSystemRequest) (CreateSystemResponse, error)
 	CreateGroup(ctx context.Context, request CreateGroupRequest) (CreateGroupResponse, error)
+	Authenticate(ctx context.Context, request []byte) ([]byte, error)
 	GetSystem(ctx context.Context, systemID string) (GetSystemResponse, error)
+	CreateToken(ctx context.Context, systemID string, label string) (string, error)
+	DeleteToken(ctx context.Context, systemID string, tokenID string) error
+	AddPublicKey(ctx context.Context, systemID string, request model.ProxyPublicKeyRequest) (map[string]string, error)
+	DeletePublicKey(ctx context.Context, systemID string, keyID string) error
+	ValidateAccessToken(ctx context.Context, token string) (string, error)
 }
 
 // SsasHTTPClient is a struct to hold the retryable http client and configs
@@ -50,6 +63,46 @@ func NewSsasHTTPClient(config SsasHTTPClientConfig) SsasClient {
 		config:     config,
 		httpClient: client,
 	}
+}
+
+// CreateToken function to create a token for ssas system
+func (sc *SsasHTTPClient) CreateToken(ctx context.Context, systemID string, label string) (string, error) {
+	log := logger.WithContext(ctx)
+
+	url := fmt.Sprintf("%s/%s/%s/token", sc.config.AdminURL, PostV2SystemEndpoint, systemID)
+
+	resBytes, err := sc.doPost(ctx, url, []byte(fmt.Sprintf(`{"label": "%s"}`, label)), nil)
+	if err != nil {
+		log.Error("Create token failed", zap.Error(err))
+		return "", err
+	}
+	var resp map[string]string
+	if err := json.NewDecoder(bytes.NewReader(resBytes)).Decode(&resp); err != nil {
+		log.Error("Failed to convert ssas response bytes to map model", zap.Error(err))
+		return "", err
+	}
+
+	token := resp["Token"]
+	if token == "" {
+		log.Error("No token property found")
+		return "", errors.Errorf("Failed to create token")
+	}
+
+	return token, nil
+}
+
+// DeleteToken function to delete a token from ssas system
+func (sc *SsasHTTPClient) DeleteToken(ctx context.Context, systemID string, tokenID string) error {
+	log := logger.WithContext(ctx)
+
+	url := fmt.Sprintf("%s/%s/%s/token/%s", sc.config.AdminURL, PostV2SystemEndpoint, systemID, tokenID)
+
+	err := sc.doDelete(ctx, url)
+	if err != nil {
+		log.Error("Delete token failed", zap.Error(err))
+		return err
+	}
+	return nil
 }
 
 // GetSystem function to get a ssas system
@@ -71,6 +124,43 @@ func (sc *SsasHTTPClient) GetSystem(ctx context.Context, systemID string) (GetSy
 	return resp, nil
 }
 
+// DeletePublicKey function to delete a public key from ssas system
+func (sc *SsasHTTPClient) DeletePublicKey(ctx context.Context, systemID string, keyID string) error {
+	log := logger.WithContext(ctx)
+
+	url := fmt.Sprintf("%s/%s/%s/key/%s", sc.config.AdminURL, PostV2SystemEndpoint, systemID, keyID)
+
+	err := sc.doDelete(ctx, url)
+	if err != nil {
+		log.Error("Delete public key failed", zap.Error(err))
+		return err
+	}
+	return nil
+}
+
+// AddPublicKey function to add a public key to ssas system
+func (sc *SsasHTTPClient) AddPublicKey(ctx context.Context, systemID string, request model.ProxyPublicKeyRequest) (map[string]string, error) {
+	log := logger.WithContext(ctx)
+	reqBytes := new(bytes.Buffer)
+	if err := json.NewEncoder(reqBytes).Encode(request); err != nil {
+		log.Error("Failed to convert model to bytes", zap.Error(err))
+		return nil, err
+	}
+	url := fmt.Sprintf("%s/%s/%s/key", sc.config.AdminURL, PostV2SystemEndpoint, systemID)
+
+	resBytes, err := sc.doPost(ctx, url, reqBytes.Bytes(), nil)
+	if err != nil {
+		log.Error("Add public key failed", zap.Error(err))
+		return nil, err
+	}
+	var resp map[string]string
+	if err := json.NewDecoder(bytes.NewReader(resBytes)).Decode(&resp); err != nil {
+		log.Error("Failed to convert ssas response bytes to map model", zap.Error(err))
+		return nil, err
+	}
+	return resp, nil
+}
+
 // CreateSystem function to create a new ssas system
 func (sc *SsasHTTPClient) CreateSystem(ctx context.Context, request CreateSystemRequest) (CreateSystemResponse, error) {
 	log := logger.WithContext(ctx)
@@ -81,7 +171,7 @@ func (sc *SsasHTTPClient) CreateSystem(ctx context.Context, request CreateSystem
 	}
 	url := fmt.Sprintf("%s/%s", sc.config.AdminURL, PostV2SystemEndpoint)
 
-	resBytes, err := sc.doPost(ctx, url, reqBytes.Bytes())
+	resBytes, err := sc.doPost(ctx, url, reqBytes.Bytes(), nil)
 	if err != nil {
 		log.Error("Create ssas system request failed", zap.Error(err))
 		return CreateSystemResponse{}, errors.Errorf("Failed to create ssas system")
@@ -104,7 +194,7 @@ func (sc *SsasHTTPClient) CreateGroup(ctx context.Context, request CreateGroupRe
 	}
 	url := fmt.Sprintf("%s/%s", sc.config.AdminURL, PostV2GroupEndpoint)
 
-	resBytes, err := sc.doPost(ctx, url, reqBytes.Bytes())
+	resBytes, err := sc.doPost(ctx, url, reqBytes.Bytes(), nil)
 	if err != nil {
 		log.Error("Create ssas group request failed", zap.Error(err))
 		return CreateGroupResponse{}, errors.Errorf("Failed to create ssas group")
@@ -117,7 +207,39 @@ func (sc *SsasHTTPClient) CreateGroup(ctx context.Context, request CreateGroupRe
 	return resp, nil
 }
 
-func (sc *SsasHTTPClient) doPost(ctx context.Context, url string, reqBytes []byte) ([]byte, error) {
+func (sc *SsasHTTPClient) doDelete(ctx context.Context, url string) error {
+	log := logger.WithContext(ctx)
+	sc.httpClient.Logger = newLogger(*log)
+
+	req, err := retryablehttp.NewRequest(http.MethodDelete, url, nil)
+	if err != nil {
+		log.Error("Failed to create request", zap.Error(err))
+		return errors.Errorf("Failed to delete resource")
+	}
+	req.SetBasicAuth(sc.config.ClientID, sc.config.ClientSecret)
+	resp, err := sc.httpClient.Do(req)
+	if err != nil {
+		log.Error("Failed to send request", zap.Error(err))
+		return errors.Errorf("Failed to delete resource")
+	}
+
+	if resp.StatusCode < 200 || resp.StatusCode > 299 {
+		b, _ := ioutil.ReadAll(resp.Body)
+		body := string(b[:])
+		return errors.Errorf(body)
+	}
+
+	defer func() {
+		err := resp.Body.Close()
+		if err != nil {
+			log.Error("Failed to close response body", zap.Error(err))
+		}
+	}()
+
+	return nil
+}
+
+func (sc *SsasHTTPClient) doPost(ctx context.Context, url string, reqBytes []byte, headers map[string]string) ([]byte, error) {
 	log := logger.WithContext(ctx)
 	sc.httpClient.Logger = newLogger(*log)
 
@@ -126,6 +248,11 @@ func (sc *SsasHTTPClient) doPost(ctx context.Context, url string, reqBytes []byt
 		log.Error("Failed to create request", zap.Error(err))
 		return nil, errors.Errorf("Failed to create ssas group")
 	}
+
+	for k, v := range headers {
+		req.Header.Set(k, v)
+	}
+
 	req.SetBasicAuth(sc.config.ClientID, sc.config.ClientSecret)
 	resp, err := sc.httpClient.Do(req)
 	if err != nil {
@@ -135,7 +262,7 @@ func (sc *SsasHTTPClient) doPost(ctx context.Context, url string, reqBytes []byt
 
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
 		b, _ := ioutil.ReadAll(resp.Body)
-		body := string(b[:])
+		body := string(b)
 		return nil, errors.Errorf(body)
 	}
 
@@ -152,6 +279,82 @@ func (sc *SsasHTTPClient) doPost(ctx context.Context, url string, reqBytes []byt
 		return nil, errors.Errorf("Failed to save system")
 	}
 	return b, nil
+}
+
+// Authenticate proxies a request to authenticate the token
+func (sc *SsasHTTPClient) Authenticate(ctx context.Context, reqBytes []byte) ([]byte, error) {
+	log := logger.WithContext(ctx)
+	url := fmt.Sprintf("%s/%s", sc.config.PublicURL, PostV2AuthenticateToken)
+
+	headers := make(map[string]string, 2)
+	headers["Content-Type"] = "application/x-www-form-urlencoded"
+	headers["Accept"] = "application/json"
+
+	resBytes, err := sc.doPost(ctx, url, reqBytes, headers)
+	if err != nil {
+		log.Error("Token authentication failed", zap.Error(err))
+		return nil, errors.Errorf("Failed to authenticate token: %s", err)
+	}
+	return resBytes, nil
+}
+
+// ValidateAccessToken validates with access token with SSAS and returns the org ID
+func (sc *SsasHTTPClient) ValidateAccessToken(ctx context.Context, token string) (string, error) {
+	log := logger.WithContext(ctx)
+	url := fmt.Sprintf("%s/%s", sc.config.PublicURL, TokenInfoEndpoint)
+
+	body := map[string]string{
+		"token": token,
+	}
+
+	reqBytes, err := json.Marshal(body)
+	if err != nil {
+		log.Error("Token authentication failed", zap.Error(err))
+		return "", errors.Errorf("Failed to authenticate token: %s", err)
+	}
+
+	resBytes, err := sc.doPost(ctx, url, reqBytes, nil)
+	if err != nil {
+		log.Error("Token authentication failed", zap.Error(err))
+		return "", errors.Errorf("Failed to authenticate token: %s", err)
+	}
+
+	response := make(map[string]interface{})
+
+	err = json.Unmarshal(resBytes, &response)
+	if err != nil {
+		log.Error("Unable to parse response", zap.Error(err))
+		return "", errors.Errorf("Failed to authenticate token: %s", err)
+	}
+
+	valid := response["valid"].(bool)
+	if !valid {
+		log.Error("Invalid access token")
+		return "", errors.New("Invalid access token")
+	}
+
+	scope := response["scope"].(string)
+	if !StringUtils.EqualIgnoreCase(scope, conf.GetAsString("apiScope", constants.APIScope)) {
+		log.Error(fmt.Sprintf("Scope does not match what is given for application: %s", scope))
+		return "", errors.Errorf("Scope does not match what is given for application: %s", scope)
+	}
+
+	orgID := response["system_data"].(string)
+
+	o := make(map[string]string)
+
+	err = json.Unmarshal([]byte(orgID), &o)
+	if err != nil {
+		log.Error("No organization ID provided", zap.Error(err))
+		return "", errors.Errorf("Invalid access token")
+	}
+
+	if o["organizationID"] == "" {
+		log.Error("No organization ID provided")
+		return "", errors.Errorf("Invalid access token")
+	}
+
+	return o["organizationID"], nil
 }
 
 func (sc *SsasHTTPClient) doGet(ctx context.Context, url string) ([]byte, error) {
@@ -210,6 +413,7 @@ type CreateSystemRequest struct {
 	GroupID    string   `json:"group_id"`
 	Scope      string   `json:"scope"`
 	PublicKey  string   `json:"public_key"`
+	Signature  string   `json:"signature"`
 	IPs        []string `json:"ips"`
 	XData      string   `json:"xdata,omitempty"`
 }
@@ -227,6 +431,7 @@ type CreateSystemResponse struct {
 	ClientToken string   `json:"client_token"`
 	ExpiresAt   string   `json:"expires_at"`
 	XData       string   `json:"xdata,omitempty"`
+	PublicKeyID string   `json:"public_key_id,omitempty"`
 }
 
 // GetSystemResponse struct to model a ssas response to get a system

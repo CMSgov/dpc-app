@@ -7,6 +7,7 @@ import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import com.google.inject.name.Named;
 import gov.cms.dpc.api.APIHelpers;
+import gov.cms.dpc.api.DPCAPIConfiguration;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.Authorizer;
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
@@ -15,6 +16,7 @@ import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.common.annotations.APIV1;
 import gov.cms.dpc.common.annotations.NoHtml;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
+import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.FHIRAsync;
@@ -61,13 +63,15 @@ public class GroupResource extends AbstractGroupResource {
     private final IGenericClient client;
     private final String baseURL;
     private final BlueButtonClient bfdClient;
+    private final DPCAPIConfiguration config;
 
     @Inject
-    public GroupResource(IJobQueue queue, @Named("attribution") IGenericClient client, @APIV1 String baseURL, BlueButtonClient bfdClient) {
+    public GroupResource(IJobQueue queue, @Named("attribution") IGenericClient client, @APIV1 String baseURL, BlueButtonClient bfdClient, DPCAPIConfiguration config) {
         this.queue = queue;
         this.client = client;
         this.baseURL = baseURL;
         this.bfdClient = bfdClient;
+        this.config = config;
     }
 
     @POST
@@ -142,7 +146,7 @@ public class GroupResource extends AbstractGroupResource {
     @GET
     @FHIR
     @Path("/{rosterID}")
-    @PathAuthorizer(type = ResourceType.Group, pathParam = "rosterID")
+    @PathAuthorizer(type = DPCResourceType.Group, pathParam = "rosterID")
     @Timed
     @ExceptionMetered
     @ApiOperation(value = "Fetch Attribution Roster", notes = "Fetch specific Attribution roster.")
@@ -159,7 +163,7 @@ public class GroupResource extends AbstractGroupResource {
 
     @PUT
     @Path("/{rosterID}")
-    @PathAuthorizer(type = ResourceType.Group, pathParam = "rosterID")
+    @PathAuthorizer(type = DPCResourceType.Group, pathParam = "rosterID")
     @FHIR
     @Timed
     @ExceptionMetered
@@ -193,7 +197,7 @@ public class GroupResource extends AbstractGroupResource {
 
     @POST
     @Path("/{rosterID}/$add")
-    @PathAuthorizer(type = ResourceType.Group, pathParam = "rosterID")
+    @PathAuthorizer(type = DPCResourceType.Group, pathParam = "rosterID")
     @FHIR
     @Timed
     @ExceptionMetered
@@ -213,7 +217,7 @@ public class GroupResource extends AbstractGroupResource {
 
     @POST
     @Path("/{rosterID}/$remove")
-    @PathAuthorizer(type = ResourceType.Group, pathParam = "rosterID")
+    @PathAuthorizer(type = DPCResourceType.Group, pathParam = "rosterID")
     @FHIR
     @Timed
     @ExceptionMetered
@@ -228,7 +232,7 @@ public class GroupResource extends AbstractGroupResource {
     @DELETE
     @FHIR
     @Path("/{rosterID}")
-    @PathAuthorizer(type = ResourceType.Group, pathParam = "rosterID")
+    @PathAuthorizer(type = DPCResourceType.Group, pathParam = "rosterID")
     @Timed
     @ExceptionMetered
     @ApiOperation(value = "Delete Attribution Group", notes = "Remove specific Attribution Group")
@@ -250,7 +254,7 @@ public class GroupResource extends AbstractGroupResource {
      * The `Content-Location` header contains the URI to call when checking job status. On failure, return an {@link OperationOutcome}.
      *
      * @param rosterID      {@link String} ID of provider to retrieve data for
-     * @param resourceTypes - {@link String} of comma separated values corresponding to FHIR {@link ResourceType}
+     * @param resourceTypes - {@link String} of comma separated values corresponding to FHIR {@link DPCResourceType}
      * @param outputFormat  - Optional outputFormats parameter
      * @param sinceParam    - Optional since parameter
      * @return - {@link OperationOutcome} specifying whether or not the request was successful.
@@ -258,7 +262,7 @@ public class GroupResource extends AbstractGroupResource {
     @Override
     @GET // Need this here, since we're using a path param
     @Path("/{rosterID}/$export")
-    @PathAuthorizer(type = ResourceType.Group, pathParam = "rosterID")
+    @PathAuthorizer(type = DPCResourceType.Group, pathParam = "rosterID")
     @Timed
     @ExceptionMetered
     @FHIRAsync
@@ -308,9 +312,10 @@ public class GroupResource extends AbstractGroupResource {
         final var requestingIP = APIHelpers.fetchRequestingIP(request);
         final String requestUrl = APIHelpers.fetchRequestUrl(request);
 
-        final UUID jobID = this.queue.createJob(orgID, orgNPI, providerNPI, attributedPatients, resources, since, transactionTime, requestingIP, requestUrl, true);
+        final boolean isSmoke = config.getLookBackExemptOrgs().contains(orgID.toString());
+        final UUID jobID = this.queue.createJob(orgID, orgNPI, providerNPI, attributedPatients, resources, since, transactionTime, requestingIP, requestUrl, true, isSmoke);
         final int totalPatients = attributedPatients == null ? 0 : attributedPatients.size();
-        final String resourcesRequested = resources.stream().map(ResourceType::getPath).filter(Objects::nonNull).collect(Collectors.joining(";"));
+        final String resourcesRequested = resources.stream().map(DPCResourceType::getPath).filter(Objects::nonNull).collect(Collectors.joining(";"));
         logger.info("dpcMetric=jobCreated,jobId={},orgId={},groupId={},totalPatients={},resourcesRequested={}", jobID, orgID, rosterID, totalPatients, resourcesRequested);
         return Response.status(Response.Status.ACCEPTED)
                 .contentLocation(URI.create(this.baseURL + "/Jobs/" + jobID)).build();
@@ -333,16 +338,16 @@ public class GroupResource extends AbstractGroupResource {
      * Convert the '_types' {@link QueryParam} to a list of resources to add to the job. Handle the empty case,
      * by returning all valid resource types.
      *
-     * @param resourcesListParam - {@link String} of comma separated values corresponding to FHIR {@link ResourceType}s
-     * @return - A list of {@link ResourceType} to return for this request.
+     * @param resourcesListParam - {@link String} of comma separated values corresponding to FHIR {@link DPCResourceType}s
+     * @return - A list of {@link DPCResourceType} to return for this request.
      */
-    private List<ResourceType> handleTypeQueryParam(String resourcesListParam) {
+    private List<DPCResourceType> handleTypeQueryParam(String resourcesListParam) {
         // If the query param is omitted, the FHIR spec states that all resources should be returned
         if (resourcesListParam == null || resourcesListParam.isEmpty()) {
             return JobQueueBatch.validResourceTypes;
         }
 
-        final var resources = new ArrayList<ResourceType>();
+        final var resources = new ArrayList<DPCResourceType>();
         for (String queryResource : resourcesListParam.split(LIST_DELIMITER, -1)) {
             final var foundResourceType = matchResourceType(queryResource);
             if (foundResourceType.isEmpty()) {
@@ -477,12 +482,12 @@ public class GroupResource extends AbstractGroupResource {
     }
 
     /**
-     * Convert a single resource type in a query param into a {@link ResourceType}.
+     * Convert a single resource type in a query param into a {@link DPCResourceType}.
      *
      * @param queryResourceType - The text from the query param
-     * @return If match is found a {@link ResourceType}
+     * @return If match is found a {@link DPCResourceType}
      */
-    private static Optional<ResourceType> matchResourceType(String queryResourceType) {
+    private static Optional<DPCResourceType> matchResourceType(String queryResourceType) {
         final var canonical = queryResourceType.trim().toUpperCase();
         // Implementation Note: resourceTypeMap is a small list <3 so hashing isn't faster
         return JobQueueBatch.validResourceTypes.stream()

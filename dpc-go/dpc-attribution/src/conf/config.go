@@ -94,11 +94,12 @@ var null = nullValue{}
 // UnsetEnv is a public function that "unsets" a variable. Like SetEnv, this should only be used
 // either in this package itself or testing.
 // This function will most likely become a private function in later versions of the package.
-func UnsetEnv(protect *testing.T, key string) error {
+func UnsetEnv(protect *testing.T, key string) {
 	config.Set(key, null)
 	// Unset environment variable too to ensure that viper does not attempt
 	// to retrieve it from the os.
-	return os.Unsetenv(key)
+	// Error values are not useful here, as the work has been done above
+	_ = os.Unsetenv(key)
 }
 
 func getDecryptedDir() string {
@@ -106,5 +107,5 @@ func getDecryptedDir() string {
 		_, b, _, _ = runtime.Caller(0)
 		basePath   = filepath.Dir(b)
 	)
-	return strings.Replace(basePath, "conf", "shared_files/decrypted/", 1)
+	return strings.Replace(basePath, "conf", "../shared_files/decrypted/", 1)
 }

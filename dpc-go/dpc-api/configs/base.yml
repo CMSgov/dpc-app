@@ -4,14 +4,20 @@ attribution-client:
   url: http://localhost:3001
   retries: 3
 
+ssas-client:
+  client-id:  ""
+  client-secret: ""
+  public-url: http://localhost:3103
+  admin-url: http://localhost:3104
+
 capabilities:
-  base: "DPCCapabilities.json"
+  base: "../DPCCapabilities.json"
   version: "1.0"
   release-date: "03-01-2021"
-
 exportPath: "/tmp"
+jobTimeoutInSeconds: 30
 
-apiPath: "localhost:3000/v2"
+apiPath: "localhost:3000/api/v2"
 
 log:
   level: info

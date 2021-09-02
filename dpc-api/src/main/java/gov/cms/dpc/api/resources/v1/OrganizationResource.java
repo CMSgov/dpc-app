@@ -12,6 +12,7 @@ import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.jdbi.PublicKeyDAO;
 import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.api.resources.AbstractOrganizationResource;
+import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.FHIRParameter;
 import gov.cms.dpc.fhir.annotations.Profiled;
@@ -102,7 +103,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
     @FHIR
     @Timed
     @ExceptionMetered
-    @PathAuthorizer(type = ResourceType.Organization, pathParam = "organizationID")
+    @PathAuthorizer(type = DPCResourceType.Organization, pathParam = "organizationID")
     @ApiOperation(value = "Get organization details by UUID",
             notes = "FHIR endpoint which returns the Organization resource that is currently registered with the application.",
             authorizations = @Authorization(value = "access_token"))
@@ -154,7 +155,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
 
     @PUT
     @Path("/{organizationID}")
-    @PathAuthorizer(type = ResourceType.Organization, pathParam = "organizationID")
+    @PathAuthorizer(type = DPCResourceType.Organization, pathParam = "organizationID")
     @FHIR
     @Timed
     @ExceptionMetered
@@ -190,7 +191,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
                 .stream()
                 .filter(Bundle.BundleEntryComponent::hasResource)
                 .map(Bundle.BundleEntryComponent::getResource)
-                .filter(resource -> resource.getResourceType().equals(ResourceType.Organization))
+                .filter(resource -> resource.getResourceType().getPath().equals(DPCResourceType.Organization.getPath()))
                 .findAny()
                 .orElseThrow(() -> new WebApplicationException("Bundle must include Organization", Response.Status.BAD_REQUEST));
 
@@ -201,7 +202,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
                 .stream()
                 .filter(Bundle.BundleEntryComponent::hasResource)
                 .map(Bundle.BundleEntryComponent::getResource)
-                .filter(resource -> resource.getResourceType().equals(ResourceType.Endpoint))
+                .filter(resource -> resource.getResourceType().getPath().equals(DPCResourceType.Endpoint.getPath()))
                 .collect(Collectors.toList());
 
         if (endpoints.isEmpty()) {

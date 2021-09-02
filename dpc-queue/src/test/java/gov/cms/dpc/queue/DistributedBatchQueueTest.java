@@ -3,6 +3,7 @@ package gov.cms.dpc.queue;
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.dpc.common.hibernate.queue.DPCQueueManagedSessionFactory;
 import gov.cms.dpc.common.utils.NPIUtil;
+import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.queue.exceptions.JobQueueUnhealthy;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
@@ -11,7 +12,6 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
-import org.hl7.fhir.dstu3.model.ResourceType;
 import org.junit.Assert;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -110,9 +110,9 @@ public class DistributedBatchQueueTest {
                 NPIUtil.generateNPI(),
                 NPIUtil.generateNPI(),
                 List.of("test-patient-1", "test-patient-2"),
-                Collections.singletonList(ResourceType.Patient),
+                Collections.singletonList(DPCResourceType.Patient),
                 null,
-                OffsetDateTime.now(ZoneOffset.UTC), null, null,true);
+                OffsetDateTime.now(ZoneOffset.UTC), null, null,true, false);
 
         // Work the job
         Optional<JobQueueBatch> workBatch = queue.claimBatch(aggregatorID);
@@ -120,7 +120,7 @@ public class DistributedBatchQueueTest {
         final UUID firstBatchID = workBatch.orElseThrow().getBatchID();
 
         // Add a file on the batch
-        workBatch.get().addJobQueueFile(ResourceType.Patient, 0, 1);
+        workBatch.get().addJobQueueFile(DPCResourceType.Patient, 0, 1);
         queue.completePartialBatch(workBatch.get(), aggregatorID);
 
         // Check that the persisted job is RUNNING
@@ -129,7 +129,7 @@ public class DistributedBatchQueueTest {
         runningJobOptional.ifPresent(runningJob -> {
             assertEquals(JobStatus.RUNNING, runningJob.getStatus(), "Should be in the RUNNING state");
             assertEquals(1, runningJob.getJobQueueBatchFiles().size(), "Should have 1 file on the running job");
-            assertTrue(runningJob.getJobQueueFile(ResourceType.Patient).isPresent(), "Should have a patient job file");
+            assertTrue(runningJob.getJobQueueFile(DPCResourceType.Patient).isPresent(), "Should have a patient job file");
         });
 
         // Simulate a stuck job by modifying the update_time

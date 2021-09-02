@@ -13,6 +13,8 @@ import gov.cms.dpc.aggregation.service.LookBackService;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.bluebutton.client.BlueButtonClientImpl;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
+import gov.cms.dpc.bluebutton.clientV2.BlueButtonClientV2;
+import gov.cms.dpc.bluebutton.clientV2.BlueButtonClientV2Impl;
 import gov.cms.dpc.bluebutton.config.BBClientConfiguration;
 import gov.cms.dpc.common.Constants;
 import gov.cms.dpc.common.utils.NPIUtil;
@@ -23,7 +25,7 @@ import gov.cms.dpc.testing.BufferedLoggerHandler;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.util.Lists;
 import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.dstu3.model.ResourceType;
+import gov.cms.dpc.fhir.DPCResourceType;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -46,9 +48,11 @@ public class AggregationEngineBFDClientTest {
     Path tempDir;
 
     private static final FhirContext fhirContext = FhirContext.forDstu3();
+    private static final FhirContext fhirContextR4 = FhirContext.forR4();
     private static final MetricRegistry metricRegistry = new MetricRegistry();
 
     private final IGenericClient bbClient = Mockito.mock(IGenericClient.class);
+    private final IGenericClient bbClientV2 = Mockito.mock(IGenericClient.class);
     private final LookBackService lookBackService = Mockito.mock(LookBackService.class);
     private final ConsentService mockConsentService = Mockito.mock(ConsentService.class);
 
@@ -61,10 +65,12 @@ public class AggregationEngineBFDClientTest {
     @BeforeEach
     public void setup() throws GeneralSecurityException {
         BlueButtonClient blueButtonClient = Mockito.spy(new BlueButtonClientImpl(bbClient, new BBClientConfiguration(), metricRegistry));
+        BlueButtonClientV2 blueButtonClientV2 = Mockito.spy(new BlueButtonClientV2Impl(bbClientV2, new BBClientConfiguration(), metricRegistry));
         OperationsConfig config = new OperationsConfig(1000, tempDir.toString(), 1, 1, 1, YearMonth.now(), List.of(orgID.toString()));
         JobBatchProcessor processor = new JobBatchProcessor(blueButtonClient, fhirContext, metricRegistry, config, lookBackService, mockConsentService);
+        JobBatchProcessorV2 processorV2 = new JobBatchProcessorV2(blueButtonClientV2, fhirContextR4, metricRegistry, config, mockConsentService);
         queue = new MemoryBatchQueue(100);
-        engine = new AggregationEngine(UUID.randomUUID(), queue, config, processor);
+        engine = new AggregationEngine(UUID.randomUUID(), queue, config, processor, processorV2);
         engine.queueRunning.set(true);
 
         Mockito.when(blueButtonClient.hashMbi(Mockito.anyString())).thenReturn(MockBlueButtonClient.MBI_HASH_MAP.get(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0)));
@@ -95,12 +101,13 @@ public class AggregationEngineBFDClientTest {
                 TEST_ORG_NPI,
                 TEST_PROVIDER_NPI,
                 Collections.singletonList(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0)),
-                Collections.singletonList(ResourceType.Patient),
+                Collections.singletonList(DPCResourceType.Patient),
                 null,
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
                 "127.0.0.1",
                 null,
-                true);
+                true,
+                false);
 
         engine.run();
 
@@ -127,17 +134,17 @@ public class AggregationEngineBFDClientTest {
         ArgumentCaptor<String> headerValue = ArgumentCaptor.forClass(String.class);
         Mockito.when(iQuery.withAdditionalHeader(headerKey.capture(), headerValue.capture())).thenReturn(iQuery);
 
-        UUID providerID = UUID.randomUUID();
         UUID jobID = queue.createJob(
                 orgID,
                 TEST_ORG_NPI,
                 TEST_PROVIDER_NPI,
                 Collections.singletonList(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0)),
-                Collections.singletonList(ResourceType.Patient),
+                Collections.singletonList(DPCResourceType.Patient),
                 null,
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
                 "127.0.0.1",
                 null,
+                false,
                 false);
 
         engine.run();

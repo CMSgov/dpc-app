@@ -11,7 +11,7 @@ import (
 	"github.com/DATA-DOG/go-sqlmock"
 
 	"github.com/CMSgov/dpc/attribution/attributiontest"
-	"github.com/CMSgov/dpc/attribution/model/v2"
+	"github.com/CMSgov/dpc/attribution/model"
 
 	"github.com/bxcodec/faker/v3"
 	"github.com/pkg/errors"
@@ -29,16 +29,16 @@ func newMock() (*sql.DB, sqlmock.Sqlmock) {
 
 type OrganizationRepositoryTestSuite struct {
 	suite.Suite
-	fakeOrg *v2.Organization
+	fakeOrg *model.Organization
 }
 
 func (suite *OrganizationRepositoryTestSuite) SetupTest() {
-	o := v2.Organization{}
+	o := model.Organization{}
 	err := faker.FakeData(&o)
 	if err != nil {
 		fmt.Printf("ERR %v\n", err)
 	}
-	var i v2.Info
+	var i model.Info
 	_ = json.Unmarshal([]byte(attributiontest.Orgjson), &i)
 	o.Info = i
 	suite.fakeOrg = &o
@@ -54,7 +54,7 @@ func (suite *OrganizationRepositoryTestSuite) TestFindByID() {
 	repo := NewOrganizationRepo(db)
 	ctx := context.Background()
 
-	expectedQuery := "SELECT id, version, created_at, updated_at, info FROM organization WHERE id = \\$1"
+	expectedQuery := `SELECT id, version, created_at, updated_at, info FROM organizations WHERE id = \$1`
 
 	rows := sqlmock.NewRows([]string{"id", "version", "created_at", "updated_at", "info"}).
 		AddRow(suite.fakeOrg.ID, suite.fakeOrg.Version, suite.fakeOrg.CreatedAt, suite.fakeOrg.UpdatedAt, suite.fakeOrg.Info)
@@ -72,14 +72,14 @@ func (suite *OrganizationRepositoryTestSuite) TestFindByIDError() {
 	repo := NewOrganizationRepo(db)
 	ctx := context.Background()
 
-	expectedQuery := "SELECT id, version, created_at, updated_at, info FROM organization WHERE id = \\$1"
+	expectedQuery := `SELECT id, version, created_at, updated_at, info FROM organizations WHERE id = \$1`
 
 	rows := sqlmock.NewRows([]string{"id", "version", "created_at", "updated_at", "info"})
 
 	mock.ExpectQuery(expectedQuery).WithArgs(suite.fakeOrg.ID).WillReturnRows(rows)
 
 	org, err := repo.FindByID(ctx, suite.fakeOrg.ID)
-	assert.Error(suite.T(), err)
+	assert.EqualError(suite.T(), err, "sql: no rows in result set")
 	assert.Empty(suite.T(), org)
 }
 
@@ -89,7 +89,7 @@ func (suite *OrganizationRepositoryTestSuite) TestInsertErrorExistingNPI() {
 	repo := NewOrganizationRepo(db)
 	ctx := context.Background()
 
-	expectedCountQuery := "SELECT COUNT\\(\\*\\) as c FROM organization WHERE info @> '{\"identifier\": [{\"value\": \"?\"}]}"
+	expectedCountQuery := `SELECT COUNT\(\*\) AS c FROM organizations WHERE info @> '{"identifier": \[{"value": "\d*"}\]}'`
 
 	rows := sqlmock.NewRows([]string{"count"}).
 		AddRow(1)
@@ -99,6 +99,7 @@ func (suite *OrganizationRepositoryTestSuite) TestInsertErrorExistingNPI() {
 	b, _ := json.Marshal(suite.fakeOrg.Info)
 	org, err := repo.Insert(ctx, b)
 	assert.Nil(suite.T(), org)
+	assert.EqualError(suite.T(), err, "organization with npi already exists")
 	assert.Error(suite.T(), err)
 }
 
@@ -108,22 +109,22 @@ func (suite *OrganizationRepositoryTestSuite) TestInsertErrorInRepo() {
 	repo := NewOrganizationRepo(db)
 	ctx := context.Background()
 
-	expectedCountQuery := "SELECT COUNT\\(\\*\\) AS c FROM organization WHERE info @> '{\"identifier\": \\[{\"value\": \"\\d*\"}\\]}'"
+	expectedCountQuery := `SELECT COUNT\(\*\) AS c FROM organizations WHERE info @> '{"identifier": \[{"value": "\d*"}\]}'`
 
 	rows := sqlmock.NewRows([]string{"count"}).
 		AddRow(0)
 
 	mock.ExpectQuery(expectedCountQuery).WillReturnRows(rows)
 
-	expectedInsertQuery := "INSERT INTO organization \\(info\\) VALUES \\(\\$1\\) returning id, version, created_at, updated_at, info"
+	expectedInsertQuery := `INSERT INTO organizations \(info\) VALUES \(\$1\) returning id, version, created_at, updated_at, info`
 
-	rows = sqlmock.NewRows([]string{"id", "version", "created_at", "updated_at", "info"})
+	_ = sqlmock.NewRows([]string{"id", "version", "created_at", "updated_at", "info"})
 
-	mock.ExpectQuery(expectedInsertQuery).WithArgs(suite.fakeOrg.Info).WillReturnRows(rows)
+	mock.ExpectQuery(expectedInsertQuery).WithArgs(suite.fakeOrg.Info).WillReturnError(errors.New("error"))
 
 	b, _ := json.Marshal(suite.fakeOrg.Info)
 	org, err := repo.Insert(ctx, b)
-	assert.Error(suite.T(), err)
+	assert.EqualError(suite.T(), err, "error")
 	assert.Empty(suite.T(), org)
 }
 
@@ -133,14 +134,14 @@ func (suite *OrganizationRepositoryTestSuite) TestInsert() {
 	repo := NewOrganizationRepo(db)
 	ctx := context.Background()
 
-	expectedCountQuery := "SELECT COUNT\\(\\*\\) AS c FROM organization WHERE info @> '{\"identifier\": \\[{\"value\": \"\\d*\"}\\]}'"
+	expectedCountQuery := `SELECT COUNT\(\*\) AS c FROM organizations WHERE info @> '{"identifier": \[{"value": "\d*"}\]}'`
 
 	rows := sqlmock.NewRows([]string{"count"}).
 		AddRow(0)
 
 	mock.ExpectQuery(expectedCountQuery).WillReturnRows(rows)
 
-	expectedInsertQuery := "INSERT INTO organization \\(info\\) VALUES \\(\\$1\\) returning id, version, created_at, updated_at, info"
+	expectedInsertQuery := `INSERT INTO organizations \(info\) VALUES \(\$1\) returning id, version, created_at, updated_at, info`
 
 	rows = sqlmock.NewRows([]string{"id", "version", "created_at", "updated_at", "info"}).
 		AddRow(suite.fakeOrg.ID, suite.fakeOrg.Version, suite.fakeOrg.CreatedAt, suite.fakeOrg.UpdatedAt, suite.fakeOrg.Info)
@@ -159,7 +160,7 @@ func (suite *OrganizationRepositoryTestSuite) TestDelete() {
 	repo := NewOrganizationRepo(db)
 	ctx := context.Background()
 
-	expectedQuery := "DELETE FROM organization WHERE id = \\$1"
+	expectedQuery := `DELETE FROM organizations WHERE id = \$1`
 
 	mock.ExpectExec(expectedQuery).WithArgs(suite.fakeOrg.ID).WillReturnError(errors.New("test"))
 
@@ -180,14 +181,14 @@ func (suite *OrganizationRepositoryTestSuite) TestUpdate() {
 	ctx := context.Background()
 	b, _ := json.Marshal(suite.fakeOrg.Info)
 
-	expectedCountQuery := "SELECT COUNT\\(\\*\\) AS c FROM organization WHERE info @> '{\"identifier\": \\[{\"value\": \"\\d*\"}\\]}' AND id <> \\$1"
+	expectedCountQuery := `SELECT COUNT\(\*\) AS c FROM organizations WHERE info @> '{"identifier": \[{"value": "\d*"}\]}' AND id <> \$1`
 
 	rows := sqlmock.NewRows([]string{"count"}).
 		AddRow(0)
 
 	mock.ExpectQuery(expectedCountQuery).WillReturnRows(rows)
 
-	expectedUpdatedQuery := "UPDATE organization SET version = version \\+ 1, info = \\$1, updated_at = now\\(\\) WHERE id = \\$2 returning id, version, created_at, updated_at, info"
+	expectedUpdatedQuery := `UPDATE organizations SET version = version \+ 1, info = \$1, updated_at = now\(\) WHERE id = \$2 returning id, version, created_at, updated_at, info`
 
 	rows = sqlmock.NewRows([]string{"id", "version", "created_at", "updated_at", "info"}).
 		AddRow(suite.fakeOrg.ID, suite.fakeOrg.Version, suite.fakeOrg.CreatedAt, suite.fakeOrg.UpdatedAt, suite.fakeOrg.Info)
@@ -206,8 +207,8 @@ func (suite *OrganizationRepositoryTestSuite) TestUpdateError() {
 	ctx := context.Background()
 	b, _ := json.Marshal(suite.fakeOrg.Info)
 
-	expectedCountQuery := "SELECT COUNT\\(\\*\\) AS c FROM organization WHERE info @> '{\"identifier\": \\[{\"value\": \"\\d*\"}\\]}' AND id <> \\$1"
-	expectedUpdatedQuery := "UPDATE organization SET version = version \\+ 1, info = \\$1, updated_at = now\\(\\) WHERE id = \\$2 returning id, version, created_at, updated_at, info"
+	expectedCountQuery := `SELECT COUNT\(\*\) AS c FROM organizations WHERE info @> '{"identifier": \[{"value": "\d*"}\]}' AND id <> \$1`
+	expectedUpdatedQuery := `UPDATE organizations SET version = version \+ 1, info = \$1, updated_at = now\(\) WHERE id = \$2 returning id, version, created_at, updated_at, info`
 
 	rows := sqlmock.NewRows([]string{"count"}).
 		AddRow(1)
@@ -215,7 +216,7 @@ func (suite *OrganizationRepositoryTestSuite) TestUpdateError() {
 	mock.ExpectQuery(expectedCountQuery).WillReturnRows(rows)
 
 	org, err := repo.Update(ctx, suite.fakeOrg.ID, b)
-	assert.Error(suite.T(), err)
+	assert.EqualError(suite.T(), err, "organization with npi already exists")
 	assert.Empty(suite.T(), org)
 
 	rows = sqlmock.NewRows([]string{"count"}).
@@ -226,6 +227,6 @@ func (suite *OrganizationRepositoryTestSuite) TestUpdateError() {
 	mock.ExpectQuery(expectedUpdatedQuery).WithArgs(suite.fakeOrg.Info, suite.fakeOrg.ID).WillReturnError(errors.New("error"))
 
 	org, err = repo.Update(ctx, suite.fakeOrg.ID, b)
-	assert.Error(suite.T(), err)
+	assert.EqualError(suite.T(), err, "error")
 	assert.Empty(suite.T(), org)
 }

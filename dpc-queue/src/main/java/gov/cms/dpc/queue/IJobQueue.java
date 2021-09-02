@@ -1,8 +1,8 @@
 package gov.cms.dpc.queue;
 
+import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatchFile;
-import org.hl7.fhir.dstu3.model.ResourceType;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -28,18 +28,20 @@ public interface IJobQueue {
      * @param requestingIP    - The IP address where the request came from
      * @param requestUrl      - The URL of the original request
      * @param isBulk          - Flag to indicate bulk request
+     * @param isSmoke         - Flag to indicate smoke test request
      * @return The UUID of the created job
      */
     UUID createJob(UUID orgID,
                    String orgNPI,
                    String providerNPI,
                    List<String> mbis,
-                   List<ResourceType> resourceTypes,
+                   List<DPCResourceType> resourceTypes,
                    OffsetDateTime since,
                    OffsetDateTime transactionTime,
                    String requestingIP,
                    String requestUrl,
-                   boolean isBulk);
+                   boolean isBulk,
+                   boolean isSmoke);
 
     /**
      * Find a batch in the queue, regardless of job status. Does not alter the batch.

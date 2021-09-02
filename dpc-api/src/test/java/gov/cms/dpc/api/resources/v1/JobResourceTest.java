@@ -3,6 +3,7 @@ package gov.cms.dpc.api.resources.v1;
 import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.common.models.JobCompletionModel;
 import gov.cms.dpc.common.utils.NPIUtil;
+import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.queue.MemoryBatchQueue;
 import gov.cms.dpc.queue.models.JobQueueBatch;
@@ -10,7 +11,6 @@ import gov.cms.dpc.queue.models.JobQueueBatchFile;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import org.bouncycastle.util.encoders.Hex;
 import org.eclipse.jetty.http.HttpStatus;
-import org.hl7.fhir.dstu3.model.ResourceType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -67,7 +67,7 @@ public class JobResourceTest {
                 List.of(TEST_PATIENT_ID),
                 JobQueueBatch.validResourceTypes,
                 null,
-                OffsetDateTime.now(ZoneOffset.UTC), null, null, true);
+                OffsetDateTime.now(ZoneOffset.UTC), null, null, true, false);
 
         // Test the response
         final var resource = new JobResource(queue, TEST_BASEURL);
@@ -92,7 +92,7 @@ public class JobResourceTest {
                 List.of(TEST_PATIENT_ID, TEST_PATIENT_ID, TEST_PATIENT_ID),
                 JobQueueBatch.validResourceTypes,
                 null,
-                OffsetDateTime.now(ZoneOffset.UTC), null, null, true);
+                OffsetDateTime.now(ZoneOffset.UTC), null, null, true, false);
         final var runningJob = queue.claimBatch(AGGREGATOR_ID);
         runningJob.flatMap(job -> job.fetchNextPatient(AGGREGATOR_ID));
         queue.completePartialBatch(runningJob.get(), AGGREGATOR_ID);
@@ -123,7 +123,7 @@ public class JobResourceTest {
                 JobQueueBatch.validResourceTypes,
                 null,
                 OffsetDateTime.now(ZoneOffset.UTC), null,
-                requestUrl, true);
+                requestUrl, true, false);
         queue.claimBatch(AGGREGATOR_ID);
 
         final var runningJob = queue.getJobBatches(jobID).get(0);
@@ -171,12 +171,12 @@ public class JobResourceTest {
                 List.of(TEST_PATIENT_ID),
                 JobQueueBatch.validResourceTypes,
                 null,
-                OffsetDateTime.now(ZoneOffset.UTC), null, requestUrl, true);
+                OffsetDateTime.now(ZoneOffset.UTC), null, requestUrl, true, false);
         queue.claimBatch(AGGREGATOR_ID);
 
         final var runningJob = queue.getJobBatches(jobID).get(0);
         runningJob.fetchNextPatient(AGGREGATOR_ID);
-        runningJob.addJobQueueFile(ResourceType.OperationOutcome, 0, 1);
+        runningJob.addJobQueueFile(DPCResourceType.OperationOutcome, 0, 1);
 
         queue.completeBatch(runningJob, AGGREGATOR_ID);
 
@@ -191,8 +191,8 @@ public class JobResourceTest {
                 () -> assertEquals(1, completion.getError().size()));
         assertEquals(completion.getRequest(), requestUrl);
         JobCompletionModel.OutputEntry entry = completion.getError().get(0);
-        assertEquals(ResourceType.OperationOutcome, entry.getType());
-        assertEquals(String.format("%s/Data/%s.ndjson", TEST_BASEURL, JobQueueBatchFile.formOutputFileName(runningJob.getBatchID(), ResourceType.OperationOutcome, 0)), entry.getUrl());
+        assertEquals(DPCResourceType.OperationOutcome, entry.getType());
+        assertEquals(String.format("%s/Data/%s.ndjson", TEST_BASEURL, JobQueueBatchFile.formOutputFileName(runningJob.getBatchID(), DPCResourceType.OperationOutcome, 0)), entry.getUrl());
     }
 
     /**
@@ -211,7 +211,7 @@ public class JobResourceTest {
                 List.of(TEST_PATIENT_ID),
                 JobQueueBatch.validResourceTypes,
                 null,
-                OffsetDateTime.now(ZoneOffset.UTC), null, null, true);
+                OffsetDateTime.now(ZoneOffset.UTC), null, null, true, false);
         queue.claimBatch(AGGREGATOR_ID);
 
         final var runningJob = queue.getJobBatches(jobID).get(0);
@@ -235,14 +235,14 @@ public class JobResourceTest {
                 List.of(TEST_PATIENT_ID, "2", "3"),
                 JobQueueBatch.validResourceTypes,
                 null,
-                OffsetDateTime.now(ZoneOffset.UTC), null, null, true);
+                OffsetDateTime.now(ZoneOffset.UTC), null, null, true, false);
 
         List<JobQueueBatch> batches = queue.getJobBatches(jobId);
         OffsetDateTime timeAgo = OffsetDateTime.now().minusHours(24);
         for (JobQueueBatch batch : batches) {
             queue.claimBatch(AGGREGATOR_ID);
             batch.fetchNextPatient(AGGREGATOR_ID);
-            batch.addJobQueueFile(ResourceType.OperationOutcome, 0, 1);
+            batch.addJobQueueFile(DPCResourceType.OperationOutcome, 0, 1);
             queue.completeBatch(batch, AGGREGATOR_ID);
             timeAgo = timeAgo.minusMinutes(5);
             batch.setCompleteTime(timeAgo);
@@ -278,7 +278,7 @@ public class JobResourceTest {
                 List.of(TEST_PATIENT_ID),
                 JobQueueBatch.validResourceTypes,
                 null,
-                OffsetDateTime.now(ZoneOffset.UTC), null, null, true);
+                OffsetDateTime.now(ZoneOffset.UTC), null, null, true, false);
         queue.claimBatch(AGGREGATOR_ID);
 
         final var runningJob = queue.getJobBatches(jobID).get(0);
@@ -313,7 +313,7 @@ public class JobResourceTest {
     @Test
     public void testBuildOutputEntryExtension() {
         final var resource = new JobResource(null, "");
-        final var file = new JobQueueBatchFile(UUID.randomUUID(), UUID.fromString("f1e518f5-4977-47c6-971b-7eeaf1b433e8"), ResourceType.Patient, 0, 11);
+        final var file = new JobQueueBatchFile(UUID.randomUUID(), UUID.fromString("f1e518f5-4977-47c6-971b-7eeaf1b433e8"), DPCResourceType.Patient, 0, 11);
         file.setChecksum(Hex.decode("9d251cea787379c603af13f90c26a9b2a4fbb1e029793ae0f688c5631cdb6a1b"));
         file.setFileLength(7202L);
         List<JobCompletionModel.FhirExtension> extension = resource.buildOutputEntryExtension(file);

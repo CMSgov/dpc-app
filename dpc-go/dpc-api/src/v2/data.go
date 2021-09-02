@@ -5,12 +5,13 @@ import (
 	"fmt"
 	"github.com/CMSgov/dpc/api/client"
 	"github.com/CMSgov/dpc/api/conf"
+	"github.com/CMSgov/dpc/api/constants"
 	"github.com/CMSgov/dpc/api/fhirror"
 	"github.com/CMSgov/dpc/api/logger"
-	"github.com/CMSgov/dpc/api/middleware"
 	"github.com/CMSgov/dpc/api/model"
 	"go.uber.org/zap"
 	"net/http"
+	"path/filepath"
 )
 
 // DataController is a struct that defines what the controller has
@@ -29,15 +30,14 @@ func NewDataController(c client.DataClient) *DataController {
 func (dc *DataController) GetFile(w http.ResponseWriter, r *http.Request) {
 	log := logger.WithContext(r.Context())
 
-	fileName, ok := r.Context().Value(middleware.ContextKeyFileName).(string)
+	fileName, ok := r.Context().Value(constants.ContextKeyFileName).(string)
 	if !ok {
 		log.Error("Failed to extract file name from context")
 		fhirror.GenericServerIssue(r.Context(), w)
 		return
 	}
 
-	//
-	b, err := dc.c.Data(r.Context(), fmt.Sprintf("validityCheck/%s", fileName))
+	b, err := dc.c.Data(r.Context(), fmt.Sprintf("validityCheck/%s", fileName[:len(fileName)-len(filepath.Ext(fileName))]))
 	if err != nil {
 		log.Error(fmt.Sprintf("Failed to check if file %s is valid", fileName), zap.Error(err))
 		fhirror.ServerIssue(r.Context(), w, http.StatusNotFound, fmt.Sprintf("Failed to get file %s", fileName))
