@@ -431,6 +431,7 @@ type CreateSystemResponse struct {
 	ClientToken string   `json:"client_token"`
 	ExpiresAt   string   `json:"expires_at"`
 	XData       string   `json:"xdata,omitempty"`
+	PublicKeyID string   `json:"public_key_id,omitempty"`
 }
 
 // GetSystemResponse struct to model a ssas response to get a system
