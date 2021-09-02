@@ -396,6 +396,7 @@ DEPENDENCIES
   selenium-webdriver
   sidekiq (~> 6.1)
   sidekiq_alive
+  simplecov (<= 0.17)
   spring
   truemail
   turbolinks (~> 5)
