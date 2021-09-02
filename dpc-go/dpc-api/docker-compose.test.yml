@@ -6,4 +6,6 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfiles/Dockerfile.test
+    volumes:
+      - ./api_test_results:/go/dpc-api/test_results
     command: sh -c "make test"
