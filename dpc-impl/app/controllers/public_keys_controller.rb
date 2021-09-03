@@ -27,9 +27,9 @@ class PublicKeysController < ApplicationController
         signature: params[:signature]
       )
     end
-    binding.pry
+
     if org_name_present?(params) && new_public_key[:response]
-      @client_token = new_public_key[:message][:client_token]
+      @client_token = new_public_key[:message]['client_token']
       render :show
     elsif new_public_key[:response]
       flash[:notice] = 'Public key sucessfully uploaded.'
