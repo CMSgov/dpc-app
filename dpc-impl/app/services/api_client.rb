@@ -115,7 +115,7 @@ class ApiClient
     rescue
       return response.body
     else
-      eval(response.body)
+      JSON.parse(response.body)
     end
   end
 
