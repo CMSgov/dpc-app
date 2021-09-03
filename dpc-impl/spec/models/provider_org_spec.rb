@@ -62,9 +62,9 @@ RSpec.feature 'adding provider organization' do
       second_org = default_provider_orgs_list.second
       third_org = default_provider_orgs_list.third
 
-      expect(page.body).to have_content(first_org[:org_name])
-      expect(page.body).to have_content(second_org[:org_name])
-      expect(page.body).to have_content(third_org[:org_name])
+      expect(page.body).to have_content(first_org['org_name'])
+      expect(page.body).to have_content(second_org['org_name'])
+      expect(page.body).to have_content(third_org['org_name'])
     end
   end
 

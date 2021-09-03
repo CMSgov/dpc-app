@@ -67,7 +67,7 @@ class PublicKeysController < ApplicationController
     api_req = tokens_keys_api_req(imp_id, org_id)
 
     if api_req.class == Hash
-      return api_req[:client_tokens]
+      return api_req['client_tokens']
     else
       return []
     end
@@ -84,7 +84,7 @@ class PublicKeysController < ApplicationController
     api_req = tokens_keys_api_req(imp_id, org_id)
 
     if api_req.class == Hash
-      return api_req[:public_keys]
+      return api_req['public_keys']
     else
       return []
     end
