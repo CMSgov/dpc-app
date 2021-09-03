@@ -15,7 +15,7 @@ class ProviderOrgsController < ApplicationController
 
     org_api_request = api_service.get_organization(@org_id)
 
-    if org_api_request[:id].present? && org_api_request[:id] == @org_id
+    if org_api_request['id'].present? && org_api_request['id'] == @org_id
       @org = org_api_request
       @npi = org_npi(@org['identifier'])
       @status = org_status(@npi)
