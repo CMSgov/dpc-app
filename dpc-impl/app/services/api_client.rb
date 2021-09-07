@@ -113,6 +113,9 @@ class ApiClient
     begin
       !!JSON.parse(response.body)
     rescue
+      # Returns client token
+      # TODO: have client token return as JSON object for consistency
+      # so the rescue can return an error message
       return response.body
     else
       JSON.parse(response.body)
