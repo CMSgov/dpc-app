@@ -68,7 +68,7 @@ test:
   password: '<%= ENV.fetch("DB_PASS", nil) %>'
 
   url: <%= ENV.fetch("TEST_DATABASE_URL", "postgresql://localhost/dpc-impl_test") %>
-
+  # port: 5434
 # As with config/credentials.yml, you never want to store sensitive information,
 # like your database password, in your source code. If your source code is
 # ever seen by anyone, they now have access to your database.

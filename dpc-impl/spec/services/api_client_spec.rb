@@ -98,4 +98,36 @@ RSpec.describe ApiClient do
       end
     end
   end
+
+  describe '#create_provider_org' do
+    context 'successful API request' do
+      it 'returns 200 with org info' do
+        imp_id = 'dbc4de2c-988d-4ef2-a264-db07fd7672c6'
+        npi = '5350364407'
+        uri_string = "http://dpc.example.com/Implementer/" + imp_id + "/org"
+
+        stub_request(:post, uri_string).
+          with(
+            body: "{\"npi\":\"5350364407\"}"
+          ).to_return(
+            status: 200, 
+            body: "{'id': 'dbc4de2c-988d-4ef2-a264-db07fd7672c6',"\
+                  "'org_id': '72b8ffe4-8966-4a15-86c8-1faae680057d',"\
+                  "'implementer_id': '3008bd84-34dc-42a1-8c08-8ecfd86e73da',"\
+                  "'ssas_system_id': '4',"\
+                  "'status': 'Active',"\
+                  "'npi': '5350364407'}"
+          )
+
+        api_client = ApiClient.new
+
+        api_client.create_provider_org(imp_id,npi)
+
+        expect(api_client.response_status).to eq(200)
+        expect(api_client.response_body).to eq(
+          "{'id': 'dbc4de2c-988d-4ef2-a264-db07fd7672c6','org_id': '72b8ffe4-8966-4a15-86c8-1faae680057d','implementer_id': '3008bd84-34dc-42a1-8c08-8ecfd86e73da','ssas_system_id': '4','status': 'Active','npi': '5350364407'}"
+        )
+      end
+    end
+  end
 end
