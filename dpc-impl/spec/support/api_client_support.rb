@@ -28,6 +28,18 @@ module ApiClientSupport
      'updated_at':"2021-07-06T17:46:59.365253Z"}
   end
 
+  def default_public_keys_list
+    [{:creation_date=>"2020-08-26T13:50:12.506347Z",
+      :id=>"1",
+      :key=>"Key1"},
+     {:creation_date=>"2020-08-27T15:01:17.361496Z",
+      :id=>"2",
+      :key=>"Key2"},
+      {:creation_date=>"2020-08-28T15:01:17.361496Z",
+       :id=>"3",
+       :key=>"Key3"}]
+  end
+
   def default_get_provider_org_response
     {'id' =>'58bb33bd-8c5a-4ff9-8113-0a8996b9c11e',
      'identifier' => [{'system' => 'http://hl7.org/fhir/sid/us-npi', 'value' => '3103929527'}],
