@@ -19,5 +19,9 @@ Rails.application.routes.draw do
 
     root to: 'implementers#index', via: :get
 
+    if Rails.env.development?
+      require 'sidekiq/web'
+      mount Sidekiq::Web, at: '/sidekiq'
+    end
   end
 end
