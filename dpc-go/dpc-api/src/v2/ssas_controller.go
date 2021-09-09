@@ -433,7 +433,7 @@ func (sc *SSASController) ValidateToken(w http.ResponseWriter, r *http.Request) 
 	resBytes, err := sc.ssasClient.ValidateToken(r.Context(), body)
 	if err != nil {
 		log.Error("Failed to validate token", zap.Error(err))
-		fhirror.ServerIssue(r.Context(), w, http.StatusInternalServerError, fmt.Sprintf("Failed to validate token: %s", err))
+		fhirror.ServerIssue(r.Context(), w, http.StatusBadRequest, fmt.Sprintf("Failed to validate token: %s", err))
 		return
 	}
 
