@@ -12,6 +12,7 @@ echo "└───────────────────────�
 make website
 make admin
 make impl
+make adminv2
 
 # Prepare the environment 
 docker-compose -p start-v2-portals -f docker-compose.yml -f docker-compose.portals.yml up start_core_dependencies
