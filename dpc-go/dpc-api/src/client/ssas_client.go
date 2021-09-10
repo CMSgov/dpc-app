@@ -5,6 +5,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/CMSgov/dpc/api/conf"
+	"github.com/CMSgov/dpc/api/constants"
+	"github.com/sjsdfg/common-lang-in-go/StringUtils"
 	"io/ioutil"
 	"net/http"
 
@@ -327,7 +330,13 @@ func (sc *SsasHTTPClient) ValidateAccessToken(ctx context.Context, token string)
 	valid := response["valid"].(bool)
 	if !valid {
 		log.Error("Invalid access token")
-		return "", errors.Errorf("Invalid access token")
+		return "", errors.New("Invalid access token")
+	}
+
+	scope := response["scope"].(string)
+	if !StringUtils.EqualIgnoreCase(scope, conf.GetAsString("apiScope", constants.APIScope)) {
+		log.Error(fmt.Sprintf("Scope does not match what is given for application: %s", scope))
+		return "", errors.Errorf("Scope does not match what is given for application: %s", scope)
 	}
 
 	orgID := response["system_data"].(string)
@@ -422,6 +431,7 @@ type CreateSystemResponse struct {
 	ClientToken string   `json:"client_token"`
 	ExpiresAt   string   `json:"expires_at"`
 	XData       string   `json:"xdata,omitempty"`
+	PublicKeyID string   `json:"public_key_id,omitempty"`
 }
 
 // GetSystemResponse struct to model a ssas response to get a system

@@ -1,6 +1,14 @@
 version: '3'
 
 services:
+  smoke_test:
+    build:
+      context: .
+      dockerfile: docker/Dockerfiles/Dockerfile.smoke_test
+    volumes:
+      - .:/go/src/github.com/CMSgov/dpc-api
+
+services:
 
   run-test:
     build:
