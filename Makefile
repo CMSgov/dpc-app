@@ -19,20 +19,14 @@ ig/publish: ${IG_PUBLISHER}
 	@echo "Building Implementation Guide"
 	@java -jar ${IG_PUBLISHER} -ig ig/ig.json
 
-.PHONY: website
-website:
+.PHONY: build-web-v1
+web_apps:
 	@docker build -f dpc-web/Dockerfile . -t dpc-web
-
-.PHONY: admin
-admin:
 	@docker build -f dpc-admin/Dockerfile . -t dpc-web-admin
 
-.PHONY: impl
-impl:
+.PHONY: build-web-v2
+impl_apps:
 	@docker build -f dpc-impl/Dockerfile . -t dpc-impl
-
-.PHONY: adminv2
-adminv2:
 	@docker build -f dpc-adminv2/Dockerfile . -t dpc-adminv2
 
 .PHONY: start-app
@@ -49,11 +43,16 @@ start-local: secure-envs
 start-local-api: secure-envs start-local
 	@docker-compose -f docker-compose.yml -f docker-compose-local.yml up start_api
 
-.PHONY: start-portals
-start-portals:
+.PHONY: start-portals-v1
+start-portals-v1:
 	@docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.portals.yml up start_core_dependencies
 	@docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.portals.yml up start_web
 	@docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.portals.yml up start_admin
+	@docker ps
+
+.PHONY: start-portals-v2
+start-portals-v2:
+	@docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.portals.yml up start_core_dependencies
 	@docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.portals.yml up start_impl
 	@docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.portals.yml up start_adminv2
 	@docker ps
