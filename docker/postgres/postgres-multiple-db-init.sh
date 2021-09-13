@@ -27,7 +27,8 @@ if [ -n "$POSTGRES_MULTIPLE_DATABASES" ]; then
 	for db in $(echo $POSTGRES_MULTIPLE_DATABASES | tr ',' ' '); do
 		create_user_and_database $db
 		if [ $db = "dpc_attribution_v2" ]; then
-			enable_extension $db pgcyrpto
+			enable_extension $db "pgcrypto"
+		fi
 	done
 	echo "Multiple databases created"
 fi
