@@ -31,7 +31,6 @@ RUN rm -rf /usr/local/bundle/cache/*.gem && \
     find /usr/local/bundle/gems/ -name "*.c" -delete && \
     find /usr/local/bundle/gems/ -name "*.o" -delete
 
-
 FROM ruby:2.7.2-alpine
 
 # Install app dependencies
