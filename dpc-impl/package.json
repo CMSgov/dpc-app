@@ -9,6 +9,7 @@
     "@rails/ujs": "^6.0.0",
     "@rails/webpacker": "5.4.0",
     "normalize.css": "^8.0.1",
+    "ssri": "^6.0.2",
     "svg4everybody": "^2.1.9",
     "turbolinks": "^5.2.0"
   },
