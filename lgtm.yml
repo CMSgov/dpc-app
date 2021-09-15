@@ -11,7 +11,7 @@ extraction:
   go:
     before_index:
       - "export GO111MODULE=on"
-      - "export GOPRIVATE=github.com/CMSGov/dpc-app/dpc-go/dpc-api/*, github.com/CMSGov/dpc-app/dpc-go/dpc-attribution/*"
+      - "export GOPRIVATE=github.com/CMSgov/dpc*"
       - "export GOFLAGS=-mod=vendor"
     index:
       build_command: "make"
