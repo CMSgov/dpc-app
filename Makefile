@@ -31,6 +31,10 @@ admin:
 impl:
 	@docker build -f dpc-impl/Dockerfile . -t dpc-impl
 
+.PHONY: adminv2
+adminv2:
+	@docker build -f dpc-adminv2/Dockerfile . -t dpc-adminv2
+
 .PHONY: start-app
 start-app: secure-envs
 	@docker-compose up start_core_dependencies
@@ -48,9 +52,10 @@ start-local-api: secure-envs start-local
 .PHONY: start-portals
 start-portals:
 	@docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.portals.yml up start_core_dependencies
-	# @docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.portals.yml up start_web
-	# @docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.portals.yml up start_admin
+	@docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.portals.yml up start_web
+	@docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.portals.yml up start_admin
 	@docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.portals.yml up start_impl
+	@docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.portals.yml up start_adminv2
 	@docker ps
 
 .PHONY: down-portals
