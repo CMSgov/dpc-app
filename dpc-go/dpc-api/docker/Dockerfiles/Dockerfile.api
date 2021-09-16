@@ -15,6 +15,7 @@ COPY --from=builder /app/configs ../configs
 COPY --from=builder /app/swaggerui ../swaggerui
 COPY --from=builder /app/DPCCapabilities.json ../DPCCapabilities.json
 COPY --from=builder /app/dpc-api/bin/api ./bin/api
+COPY docker/Dockerfiles/entrypoint.sh entrypoint.sh
 EXPOSE 8080
 EXPOSE 3000
 EXPOSE 3011
