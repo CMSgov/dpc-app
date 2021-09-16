@@ -77,6 +77,7 @@ func buildPublicRoutes(cont controllers, ssasClient client.SsasClient) http.Hand
 
 		//SSAS
 		r.Post("/Token/auth", cont.Ssas.GetAuthToken)
+		r.Post("/Token/validate", cont.Ssas.ValidateToken)
 	})
 	return r
 }
