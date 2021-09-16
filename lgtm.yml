@@ -14,4 +14,4 @@ extraction:
       - "export GOPRIVATE=github.com/CMSgov/dpc*"
       - "export GOFLAGS=-mod=vendor"
     index:
-      build_command: "cd dpc-go/dpc-attribution/src; go build; cd ../../dpc-api/src; go build"
+      build_command: "go build"
