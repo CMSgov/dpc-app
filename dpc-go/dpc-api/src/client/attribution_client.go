@@ -98,21 +98,21 @@ func NewAttributionClient(ctx context.Context, config AttributionConfig) Client 
 
 func getAttrCertificates(ctx context.Context, caCert string, cert string, certKey string) (*x509.CertPool, tls.Certificate) {
 	if caCert == "" || cert == "" || certKey == "" {
-		logger.WithContext(ctx).Warn("Missing one of: CA_CERT, ATTRIBUTION_CERT, ATTRIBUTION_CERT_KEY")
+		logger.WithContext(ctx).Warn("Missing one of: DPC_ATTR_CA_CERT, DPC_ATTR_CERT, DPC_ATTR_CERT_KEY")
 		return nil, tls.Certificate{}
 	}
 
 	caB, err := b64.StdEncoding.DecodeString(caCert)
 	if err != nil {
-		logger.WithContext(ctx).Fatal("Could not base64 decode DPC_CA_CERT", zap.Error(err))
+		logger.WithContext(ctx).Fatal("Could not base64 decode DPC_ATTR_CA_CERT", zap.Error(err))
 	}
 	crtB, err := b64.StdEncoding.DecodeString(cert)
 	if err != nil {
-		logger.WithContext(ctx).Fatal("Could not base64 decode DPC_CERT", zap.Error(err))
+		logger.WithContext(ctx).Fatal("Could not base64 decode DPC_ATTR_CERT", zap.Error(err))
 	}
 	keyB, err := b64.StdEncoding.DecodeString(certKey)
 	if err != nil {
-		logger.WithContext(ctx).Fatal("Could not base64 decode DPC_CA_KEY", zap.Error(err))
+		logger.WithContext(ctx).Fatal("Could not base64 decode DPC_ATTR_CERT_KEY", zap.Error(err))
 	}
 
 	caStr := string(caB)
@@ -122,7 +122,7 @@ func getAttrCertificates(ctx context.Context, caCert string, cert string, certKe
 	certPool := x509.NewCertPool()
 	ok := certPool.AppendCertsFromPEM([]byte(caStr))
 	if !ok {
-		logger.WithContext(ctx).Fatal("Failed to parse server CA cert")
+		logger.WithContext(ctx).Fatal("Failed to parse attribution client cert")
 	}
 
 	crt, err := tls.X509KeyPair([]byte(crtStr), []byte(keyStr))

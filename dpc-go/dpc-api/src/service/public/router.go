@@ -87,9 +87,9 @@ func NewPublicServer(ctx context.Context) *service.Server {
 	attrClient := client.NewAttributionClient(ctx, client.AttributionConfig{
 		URL:     conf.GetAsString("attribution-client.url"),
 		Retries: conf.GetAsInt("attribution-client.retries", 3),
-		CACert:  conf.GetAsString("CA_CERT"),
-		Cert:    conf.GetAsString("CERT"),
-		CertKey: conf.GetAsString("CERT_KEY"),
+		CACert:  conf.GetAsString("ATTR_CA_CERT"),
+		Cert:    conf.GetAsString("ATTR_CERT"),
+		CertKey: conf.GetAsString("ATTR_CERT_KEY"),
 	})
 
 	dataClient := client.NewDataClient(client.DataConfig{
