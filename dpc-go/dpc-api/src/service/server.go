@@ -1,17 +1,16 @@
 package service
 
 import (
-	"context"
-	"crypto/tls"
-	"crypto/x509"
-	b64 "encoding/base64"
-	"fmt"
-	"github.com/CMSgov/dpc/api/conf"
-	"github.com/CMSgov/dpc/api/logger"
-	"go.uber.org/zap"
-	"net/http"
-	"strings"
-	"time"
+    "context"
+    "crypto/tls"
+    "crypto/x509"
+    b64 "encoding/base64"
+    "fmt"
+    "github.com/CMSgov/dpc/api/conf"
+    "github.com/CMSgov/dpc/api/logger"
+    "go.uber.org/zap"
+    "net/http"
+    "time"
 )
 
 // Server wrapper struct for an http server.
@@ -62,7 +61,6 @@ func (s *Server) Serve(ctx context.Context) error {
 				MinVersion:            tls.VersionTLS12,
 				ClientAuth:            tls.RequireAndVerifyClientCert,
 				ClientCAs:             caPool,
-				VerifyPeerCertificate: getClientValidator(hi, caPool),
 			}
 			return serverConf, nil
 		},
@@ -75,48 +73,30 @@ func (s *Server) Serve(ctx context.Context) error {
 	return nil
 }
 
-func getClientValidator(helloInfo *tls.ClientHelloInfo, cerPool *x509.CertPool) func([][]byte, [][]*x509.Certificate) error {
-	acS := conf.GetAsString("ALLOWED_CLIENTS", "local.portal.dpc.cms.gov")
-	allowed := strings.Split(acS, ",")
-	return func(rawCerts [][]byte, verifiedChains [][]*x509.Certificate) error {
-		for _, dnsN := range verifiedChains[0][0].DNSNames {
-			for _, n := range allowed {
-				if n == dnsN {
-					return nil
-				}
-			}
-		}
-		return fmt.Errorf("client's SAN does not contain one of the allowed alt name. Allowed: %s", allowed)
-	}
-}
-
 func getServerCertificates(ctx context.Context) (*x509.CertPool, tls.Certificate) {
-	caB, err := b64.StdEncoding.DecodeString(conf.GetAsString("CA_CERT"))
-	if err != nil {
-		logger.WithContext(ctx).Fatal("Could not base64 decode DPC_CA_CERT", zap.Error(err))
-	}
 	crtB, err := b64.StdEncoding.DecodeString(conf.GetAsString("CERT"))
 	if err != nil {
 		logger.WithContext(ctx).Fatal("Could not base64 decode DPC_CERT", zap.Error(err))
 	}
 	keyB, err := b64.StdEncoding.DecodeString(conf.GetAsString("CERT_KEY"))
 	if err != nil {
-		logger.WithContext(ctx).Fatal("Could not base64 decode DPC_CA_KEY", zap.Error(err))
+		logger.WithContext(ctx).Fatal("Could not base64 decode DPC_CERT_KEY", zap.Error(err))
 	}
 
-	caStr := string(caB)
 	crtStr := string(crtB)
 	keyStr := string(keyB)
 
-	if caStr == "" || crtStr == "" || keyStr == "" {
-		logger.WithContext(ctx).Fatal("One of the following required environment variables is missing: DPC_CA_CERT, DPC_CERT, DPC_CERT_KEY")
+	if crtStr == "" || keyStr == "" {
+		logger.WithContext(ctx).Fatal("One of the following required environment variables is missing: DPC_CERT, DPC_CERT_KEY")
 	}
 
+	// We are signing the client certificates with the api server certificates, so it is acting as a CA cert,
+	// so it must be added to the CA Pool
 	certPool := x509.NewCertPool()
-	ok := certPool.AppendCertsFromPEM([]byte(caStr))
-	if !ok {
-		logger.WithContext(ctx).Fatal("Failed to parse server CA cert")
-	}
+    ok := certPool.AppendCertsFromPEM([]byte(crtStr))
+    if !ok {
+        logger.WithContext(ctx).Fatal("Failed to parse server cert")
+    }
 
 	crt, err := tls.X509KeyPair([]byte(crtStr), []byte(keyStr))
 	if err != nil {
