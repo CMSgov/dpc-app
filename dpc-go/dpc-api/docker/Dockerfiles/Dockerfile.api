@@ -18,4 +18,4 @@ COPY --from=builder /app/dpc-api/bin/api ./bin/api
 EXPOSE 8080
 EXPOSE 3000
 EXPOSE 3011
-CMD ["./bin/api"]
+CMD ["./bin/api 2>&1 | tee -a /var/log/dpc-api-go-$(hostname).log"]
