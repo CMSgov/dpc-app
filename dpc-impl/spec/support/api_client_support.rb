@@ -20,12 +20,24 @@ module ApiClientSupport
   end
 
   def default_add_provider_org_response
-    {:status=>"Active",
-     :id=>"2e449356-903f-4dbe-9a32-9a45d08c26a9",
-     :implementer_id=>"923a4f7b-eade-494a-8ca4-7a685edacfad",
-     :organization_id=>"587ed9cf-6bd6-4860-9de3-077277b2c824",
-     :created_at=>"2021-07-06T17:46:59.365253Z",
-     :updated_at=>"2021-07-06T17:46:59.365253Z"}
+    {'status':"Active",
+     'id':"2e449356-903f-4dbe-9a32-9a45d08c26a9",
+     'implementer_id':"923a4f7b-eade-494a-8ca4-7a685edacfad",
+     'organization_id':"587ed9cf-6bd6-4860-9de3-077277b2c824",
+     'created_at':"2021-07-06T17:46:59.365253Z",
+     'updated_at':"2021-07-06T17:46:59.365253Z"}
+  end
+
+  def default_public_keys_list
+    [{:creation_date=>"2020-08-26T13:50:12.506347Z",
+      :id=>"1",
+      :key=>"Key1"},
+     {:creation_date=>"2020-08-27T15:01:17.361496Z",
+      :id=>"2",
+      :key=>"Key2"},
+      {:creation_date=>"2020-08-28T15:01:17.361496Z",
+       :id=>"3",
+       :key=>"Key3"}]
   end
 
   def default_get_provider_org_response
