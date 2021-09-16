@@ -1,4 +1,3 @@
-CREATE EXTENSION IF NOT EXISTS pgcrypto;
 CREATE TABLE "implementers" (
     id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
     name varchar(200) NOT NULL,

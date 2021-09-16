@@ -34,6 +34,8 @@ const (
 	PostV2AuthenticateToken string = "v2/token"
 	/* #nosec */
 	TokenInfoEndpoint string = "v2/token_info"
+	/* #nosec */
+	PostV2ValidateToken string = "v2/introspect"
 )
 
 // SsasClient interface for testing purposes
@@ -46,7 +48,8 @@ type SsasClient interface {
 	DeleteToken(ctx context.Context, systemID string, tokenID string) error
 	AddPublicKey(ctx context.Context, systemID string, request model.ProxyPublicKeyRequest) (map[string]string, error)
 	DeletePublicKey(ctx context.Context, systemID string, keyID string) error
-	ValidateAccessToken(ctx context.Context, token string) (string, error)
+	GetOrgIDFromToken(ctx context.Context, token string) (string, error)
+	ValidateToken(ctx context.Context, reqBytes []byte) ([]byte, error)
 }
 
 // SsasHTTPClient is a struct to hold the retryable http client and configs
@@ -205,6 +208,76 @@ func (sc *SsasHTTPClient) CreateGroup(ctx context.Context, request CreateGroupRe
 		return CreateGroupResponse{}, errors.Errorf("Failed to create ssas group")
 	}
 	return resp, nil
+}
+
+// GetOrgIDFromToken validates with access token with SSAS and returns the org ID
+func (sc *SsasHTTPClient) GetOrgIDFromToken(ctx context.Context, token string) (string, error) {
+	log := logger.WithContext(ctx)
+	url := fmt.Sprintf("%s/%s", sc.config.PublicURL, TokenInfoEndpoint)
+
+	body := map[string]string{
+		"token": token,
+	}
+
+	reqBytes, err := json.Marshal(body)
+	if err != nil {
+		log.Error("Token authentication failed", zap.Error(err))
+		return "", errors.Errorf("Failed to authenticate token: %s", err)
+	}
+
+	resBytes, err := sc.doPost(ctx, url, reqBytes, nil)
+	if err != nil {
+		log.Error("Token authentication failed", zap.Error(err))
+		return "", errors.Errorf("Failed to authenticate token: %s", err)
+	}
+
+	response := make(map[string]interface{})
+
+	err = json.Unmarshal(resBytes, &response)
+	if err != nil {
+		log.Error("Unable to parse response", zap.Error(err))
+		return "", errors.Errorf("Failed to authenticate token: %s", err)
+	}
+
+	valid := response["valid"].(bool)
+	if !valid {
+		log.Error("Invalid access token")
+		return "", errors.Errorf("Invalid access token")
+	}
+
+	orgID := response["system_data"].(string)
+
+	o := make(map[string]string)
+
+	err = json.Unmarshal([]byte(orgID), &o)
+	if err != nil {
+		log.Error("No organization ID provided", zap.Error(err))
+		return "", errors.Errorf("Invalid access token")
+	}
+
+	if o["organizationID"] == "" {
+		log.Error("No organization ID provided")
+		return "", errors.Errorf("Invalid access token")
+	}
+
+	return o["organizationID"], nil
+}
+
+// ValidateToken proxies a request to SSAS to determine if a token is valid
+func (sc *SsasHTTPClient) ValidateToken(ctx context.Context, reqBytes []byte) ([]byte, error) {
+	log := logger.WithContext(ctx)
+	url := fmt.Sprintf("%s/%s", sc.config.PublicURL, PostV2ValidateToken)
+
+	headers := make(map[string]string, 2)
+	headers["Content-Type"] = "application/x-www-form-urlencoded"
+	headers["Accept"] = "application/json"
+
+	resBytes, err := sc.doPost(ctx, url, reqBytes, headers)
+	if err != nil {
+		log.Error("Token authentication failed", zap.Error(err))
+		return nil, errors.Errorf("Failed to authenticate token: %s", err)
+	}
+	return resBytes, nil
 }
 
 func (sc *SsasHTTPClient) doDelete(ctx context.Context, url string) error {

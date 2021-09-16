@@ -1,16 +1,18 @@
 #!/bin/bash
 set -e
 
-echo "┌──────────────────────────────────┐"
-echo "│                                  │"
-echo "│ Running Web, Admin, & Impl Tests │"
-echo "│                                  │"
-echo "└──────────────────────────────────┘"
+echo "┌───────────────────────┐"
+echo "│                       │"
+echo "│ Running Web, Admin,   |"
+echo "| Impl, & AdminV2 Tests │"
+echo "│                       │"
+echo "└───────────────────────┘"
 
 # Build the container
 make website
 make admin
 make impl
+make adminv2
 
 # Prepare the environment 
 docker-compose -p start-v2-portals -f docker-compose.yml -f docker-compose.portals.yml up start_core_dependencies
@@ -40,6 +42,13 @@ echo "│  Running DPC Impl Tests  │"
 echo "│                          │"
 echo "└──────────────────────────┘"
 docker-compose -p start-v2-portals -f docker-compose.yml -f docker-compose.portals.yml run --entrypoint "bundle exec rails spec" dpc_impl
+
+echo "┌─────────────────────────────┐"
+echo "│                             │"
+echo "│  Running DPC AdminV2 Tests  │"
+echo "│                             │"
+echo "└─────────────────────────────┘"
+docker-compose -p start-v2-portals -f docker-compose.yml -f docker-compose.portals.yml run --entrypoint "bundle exec rails spec" dpc_adminv2
 
 echo "┌──────────────────────────────────────────┐"
 echo "│                                          │"
