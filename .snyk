@@ -1,5 +1,5 @@
 # Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
-version: v1.14.1
+version: v1.22.1
 # ignores vulnerabilities until expiry date; change duration by modifying expiry date
 ignore:
   SNYK-JS-LODASH-590103:
@@ -128,4 +128,9 @@ ignore:
     - newman > postman-runtime > postman-url-encoder > postman-collection > sanitize-html:
         reason: Affects tests only
         expires: '2021-01-14T20:54:26.492Z'
+  SNYK-JAVA-IONETTY-564897:
+    - '*':
+        reason: not using the vulnerable version
+        expires: 2022-10-15T15:32:25.097Z
+        created: 2021-09-15T15:32:25.107Z
 patch: {}
