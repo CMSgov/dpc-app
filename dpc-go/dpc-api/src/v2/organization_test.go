@@ -110,9 +110,14 @@ func (mc *MockSsasClient) DeletePublicKey(ctx context.Context, systemID string, 
 	return args.Error(0)
 }
 
-func (mc *MockSsasClient) ValidateAccessToken(ctx context.Context, token string) (string, error) {
+func (mc *MockSsasClient) GetOrgIDFromToken(ctx context.Context, token string) (string, error) {
 	args := mc.Called(ctx, token)
 	return args.Get(0).(string), args.Error(1)
+}
+
+func (mc *MockSsasClient) ValidateToken(ctx context.Context, request []byte) ([]byte, error) {
+	args := mc.Called(ctx, request)
+	return args.Get(0).([]byte), args.Error(1)
 }
 
 type OrganizationControllerTestSuite struct {

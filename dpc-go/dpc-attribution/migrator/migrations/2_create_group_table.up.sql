@@ -1,5 +1,3 @@
-CREATE EXTENSION IF NOT EXISTS pgcrypto;
-
 CREATE TABLE "group" (
     id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
     organization_id uuid NOT NULL,
