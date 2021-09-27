@@ -6,10 +6,10 @@
           <%= token['label'] %>
         </div>
         <div>
-          Created: <%= token['creation_date'] %>
+          Created: <%= token['creation_date'].to_s(:long) %>
         </div>
         <div>
-          Expires: <%= token['expires_at'] %>
+          Expires: <%= token['expires_at'].to_s(:long) %>
         </div>
       </div>
 
