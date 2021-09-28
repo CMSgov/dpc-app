@@ -12,7 +12,7 @@ bfd:
   clientKeyFile: "../shared_files/decrypted/bfd-dev-test-key.pem"
   clientCAFile: "../shared_files/decrypted/bfd-dev-test-ca-file.crt"
   checkCert: ""
-  hashPepper: ""
+  hashPepper: "hashpeppergoeshere"
   hashIter: 0
   clientPageSize: 0
   timeoutMS: 0

@@ -55,4 +55,5 @@ type AuthController interface {
 	DeleteToken(w http.ResponseWriter, r *http.Request)
 	AddKey(w http.ResponseWriter, r *http.Request)
 	DeleteKey(w http.ResponseWriter, r *http.Request)
+	ValidateToken(w http.ResponseWriter, r *http.Request)
 }

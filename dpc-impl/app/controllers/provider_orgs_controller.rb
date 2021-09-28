@@ -15,9 +15,9 @@ class ProviderOrgsController < ApplicationController
 
     org_api_request = api_service.get_organization(@org_id)
 
-    if org_api_request[:id].present? && org_api_request[:id] == @org_id
+    if org_api_request['id'].present? && org_api_request['id'] == @org_id
       @org = org_api_request
-      @npi = org_npi(@org[:identifier])
+      @npi = org_npi(@org['identifier'])
       @status = org_status(@npi)
 
       @client_tokens = get_client_tokens(imp_id, @org_id)
@@ -51,7 +51,7 @@ class ProviderOrgsController < ApplicationController
     api_req = tokens_keys_api_req(imp_id, org_id)
 
     if api_req.class == Hash
-      return api_req[:client_tokens]
+      return api_req['client_tokens']
     else
       return []
     end
@@ -61,7 +61,7 @@ class ProviderOrgsController < ApplicationController
     api_req = tokens_keys_api_req(imp_id, org_id)
 
     if api_req.class == Hash
-      return api_req[:public_keys]
+      return api_req['public_keys']
     else
       return []
     end
@@ -69,15 +69,15 @@ class ProviderOrgsController < ApplicationController
 
   def org_npi(org)
     hash = org.first
-    return hash[:value]
+    return hash['value']
   end
 
   def org_status(npi)
     @npi = npi
     @orgs = current_user.provider_orgs
-    org = @orgs.select { |org| org[:npi] == @npi }
+    org = @orgs.select { |org| org['npi'] == @npi }
     
-    return org.first[:status]
+    return org.first['status']
   end
   
   def provider_org_param

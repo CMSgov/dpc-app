@@ -43,11 +43,10 @@ class User < ApplicationRecord
 
   def create_api_imp
     api_request = api_service.create_implementer(implementer)
-
     api_response = api_request.response_body
 
     if api_request.response_successful?
-      self.implementer_id = api_response[:id]
+      self.implementer_id = api_response['id']
       api_response
     else
       action = 'registered'
@@ -69,7 +68,7 @@ class User < ApplicationRecord
     api_client = ApiClient.new
     api_client.get_provider_orgs(self.implementer_id)
     if api_client.response_successful?
-      api_client.response_body.sort_by{|e| e[:created_at]}.reverse
+      api_client.response_body.sort_by{|e| e['created_at']}.reverse
     else
       false
     end

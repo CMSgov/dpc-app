@@ -23,7 +23,6 @@ RUN bundle exec bundle audit update && bundle exec bundle audit check --ignore C
 # Copy the code, test the app, and build the assets pipeline
 COPY /dpc-admin /dpc-admin
 
-# TODO: Determine if we have to remove /bin/yarn
 RUN rm -rf /bin/yarn
 RUN RAILS_ENV=production WEBPACKER_NODE_MODULES_BIN_PATH="node_modules/.bin" SECRET_KEY_BASE=dummy bundle exec rake assets:precompile --trace
 

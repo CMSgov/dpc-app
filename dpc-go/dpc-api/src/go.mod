@@ -15,9 +15,7 @@ require (
 	github.com/hashicorp/go-retryablehttp v0.6.8
 	github.com/joeljunstrom/go-luhn v0.0.0-20190413165225-1e071b33b576
 	github.com/kinbiko/jsonassert v1.0.1
-	github.com/microcosm-cc/bluemonday v1.0.4
-	github.com/opencontainers/go-digest v1.0.0 // indirect
-	github.com/opencontainers/image-spec v1.0.1 // indirect
+	github.com/microcosm-cc/bluemonday v1.0.15
 	github.com/pkg/errors v0.9.1
 	github.com/samply/golang-fhir-models/fhir-models v0.2.0
 	github.com/sjsdfg/common-lang-in-go v0.3.2
