@@ -6,7 +6,7 @@
           ID: <%= key['id'] %>
         </div>
         <div>
-          Created: <%= key['creation_date'].to_s(:long) %>
+          Created: <%= key['creation_date'][0..9] %>
         </div>
       </div>
 
