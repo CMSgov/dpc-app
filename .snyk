@@ -133,4 +133,9 @@ ignore:
         reason: not using the vulnerable version
         expires: 2022-10-15T15:32:25.097Z
         created: 2021-09-15T15:32:25.107Z
+  SNYK-JAVA-ORGMOCKSERVER-1566476:
+    - '*':
+        reason: this is test code, signed off in DPC-1737
+        expires: 2021-10-29T14:56:29.774Z
+        created: 2021-09-29T14:56:29.781Z
 patch: {}
