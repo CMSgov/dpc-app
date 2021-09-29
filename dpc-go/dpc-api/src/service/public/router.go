@@ -1,7 +1,8 @@
 package public
 
 import (
-	"net/http"
+    "context"
+    "net/http"
 	"strings"
 
 	"github.com/CMSgov/dpc/api/client"
@@ -83,7 +84,7 @@ func buildPublicRoutes(cont controllers, ssasClient client.SsasClient) http.Hand
 }
 
 // NewPublicServer configures clients, builds ADMIN routes, and creates a server.
-func NewPublicServer() *service.Server {
+func NewPublicServer(ctx context.Context) *service.Server {
 	attrClient := client.NewAttributionClient(client.AttributionConfig{
 		URL:     conf.GetAsString("attribution-client.url"),
 		Retries: conf.GetAsInt("attribution-client.retries", 3),
@@ -99,12 +100,15 @@ func NewPublicServer() *service.Server {
 		Retries: conf.GetAsInt("attribution-client.retries", 3),
 	})
 
-	ssasClient := client.NewSsasHTTPClient(client.SsasHTTPClientConfig{
+	ssasClient := client.NewSsasHTTPClient(ctx, client.SsasHTTPClientConfig{
 		PublicURL:    conf.GetAsString("ssas-client.public-url"),
 		AdminURL:     conf.GetAsString("ssas-client.admin-url"),
 		Retries:      conf.GetAsInt("ssas-client.attrRetries", 3),
 		ClientID:     conf.GetAsString("ssas-client.client-id"),
 		ClientSecret: conf.GetAsString("ssas-client.client-secret"),
+        CACert: conf.GetAsString("ssas-client.ca-cert"),
+        Cert: conf.GetAsString("ssas-client.cert"),
+        CertKey: conf.GetAsString("ssas-client.cert-key"),
 	})
 
 	port := conf.GetAsInt("PUBLIC_PORT", 3000)

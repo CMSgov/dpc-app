@@ -1,7 +1,8 @@
 package admin
 
 import (
-	"github.com/CMSgov/dpc/api/client"
+    "context"
+    "github.com/CMSgov/dpc/api/client"
 	"github.com/CMSgov/dpc/api/conf"
 	middleware2 "github.com/CMSgov/dpc/api/middleware"
 	"github.com/CMSgov/dpc/api/service"
@@ -65,18 +66,21 @@ func buildAdminRoutes(c controllers) http.Handler {
 }
 
 // NewAdminServer configures clients, builds ADMIN routes, and creates a server.
-func NewAdminServer() *service.Server {
+func NewAdminServer(ctx context.Context) *service.Server {
 	attrClient := client.NewAttributionClient(client.AttributionConfig{
 		URL:     conf.GetAsString("attribution-client.url"),
 		Retries: conf.GetAsInt("attribution-client.retries", 3),
 	})
 
-	ssasClient := client.NewSsasHTTPClient(client.SsasHTTPClientConfig{
+	ssasClient := client.NewSsasHTTPClient(ctx, client.SsasHTTPClientConfig{
 		PublicURL:    conf.GetAsString("ssas-client.public-url"),
 		AdminURL:     conf.GetAsString("ssas-client.admin-url"),
 		Retries:      conf.GetAsInt("ssas-client.attrRetries", 3),
 		ClientID:     conf.GetAsString("ssas-client.client-id"),
 		ClientSecret: conf.GetAsString("ssas-client.client-secret"),
+        CACert: conf.GetAsString("ssas-client.ca-cert"),
+        Cert: conf.GetAsString("ssas-client.cert"),
+        CertKey: conf.GetAsString("ssas-client.cert-key"),
 	})
 
 	port := conf.GetAsInt("ADMIN_PORT", 3011)
