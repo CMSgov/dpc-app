@@ -52,6 +52,10 @@
                     <groupId>com.fasterxml.jackson.core</groupId>
                     <artifactId>jackson-databind</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>org.apache.xmlgraphics</groupId>
+                    <artifactId>xmlgraphics-commons</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
