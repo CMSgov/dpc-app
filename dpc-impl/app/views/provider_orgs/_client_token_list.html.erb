@@ -6,10 +6,10 @@
           <%= token['label'] %>
         </div>
         <div>
-          Created: <%= token['creation_date'] %>
+          Created: <%= token['creation_date'][0..9] %>
         </div>
         <div>
-          Expires: <%= token['expires_at'] %>
+          Expires: <%= token['expires_at'][0..9] %>
         </div>
       </div>
 
