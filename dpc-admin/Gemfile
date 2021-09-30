@@ -35,6 +35,8 @@ gem 'active_model_serializers'
 gem 'lograge'
 gem 'macaroons'
 gem 'truemail'
+# < 1.12.5 has a vulnerability, and is required by other gems
+gem 'nokogiri', '>= 1.12.5'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
