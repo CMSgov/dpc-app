@@ -36,6 +36,8 @@ gem 'active_model_serializers', '>= 0.10.12'
 gem 'macaroons'
 gem 'lograge', '>= 0.11.2'
 gem 'redis-namespace'
+# < 1.12.5 has a vulnerability, and is required by other gems
+gem 'nokogiri', '>= 1.12.5'
 
 group :development, :test do
   gem 'byebug', platforms: [:mri, :mingw, :x64_mingw]
