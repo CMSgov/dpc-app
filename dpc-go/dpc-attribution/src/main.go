@@ -67,12 +67,16 @@ func main() {
 	attributionRouter := router.NewDPCAttributionRouter(os, gs, is, ios, ds, js)
 	port := conf.GetAsString("port", "3001")
 
-	authDisabled := conf.GetAsString("AUTH_DISABLED", "false")
+	authType := conf.GetAsString("AUTH_TYPE", "TLS")
 
-	if authDisabled == "true" {
+	if authType == "NONE" {
 		startUnsecureServer(ctx, port, attributionRouter)
+	} else if authType == "TLS" {
+		startTLSServer(ctx, port, attributionRouter)
+	} else if authType == "MTLS" {
+		startMTLSServer(ctx, port, attributionRouter)
 	} else {
-		startSecureServer(ctx, port, attributionRouter)
+		logger.WithContext(ctx).Fatal("Invalid value for DPC_AUTH_TYPE. Supported values: NONE, TLS, MTLS")
 	}
 }
 
@@ -87,7 +91,17 @@ func startUnsecureServer(ctx context.Context, port string, handler http.Handler)
 	}
 }
 
-func startSecureServer(ctx context.Context, port string, handler http.Handler) {
+func startTLSServer(ctx context.Context, port string, handler http.Handler) {
+	fmt.Printf("Starting secure TLS DPC-Attribution server on port %v ...\n", port)
+	startSecureServer(ctx, port, handler, false)
+}
+
+func startMTLSServer(ctx context.Context, port string, handler http.Handler) {
+	fmt.Printf("Starting secure MTLS DPC-Attribution server on port %v ...\n", port)
+	startSecureServer(ctx, port, handler, true)
+}
+
+func startSecureServer(ctx context.Context, port string, handler http.Handler, useMTLS bool) {
 	caPool, cert := getServerCertificates(ctx)
 
 	severConf := &tls.Config{
@@ -97,8 +111,11 @@ func startSecureServer(ctx context.Context, port string, handler http.Handler) {
 			serverConf := &tls.Config{
 				Certificates: []tls.Certificate{cert},
 				MinVersion:   tls.VersionTLS12,
-				ClientAuth:   tls.RequireAndVerifyClientCert,
 				ClientCAs:    caPool,
+			}
+
+			if useMTLS {
+				serverConf.ClientAuth = tls.RequireAndVerifyClientCert
 			}
 			return serverConf, nil
 		},
@@ -109,8 +126,6 @@ func startSecureServer(ctx context.Context, port string, handler http.Handler) {
 		Handler:   handler,
 		TLSConfig: severConf,
 	}
-
-	fmt.Printf("Starting secure DPC-Attribution server on port %v ...\n", port)
 	//If cert and key file paths are not passed the certs in tls configs are used.
 	if err := server.ListenAndServeTLS("", ""); err != nil {
 		logger.WithContext(ctx).Fatal("Failed to start server", zap.Error(err))
