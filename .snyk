@@ -133,6 +133,10 @@ ignore:
         reason: not using the vulnerable version
         expires: 2022-10-15T15:32:25.097Z
         created: 2021-09-15T15:32:25.107Z
+  SNYK-JAVA-ORGGLASSFISHJERSEYMEDIA-595972:
+    - '*':
+        reason: Used by tests only (see DPC-1672)
+        created: 2021-09-30T17:56:02.919Z
   SNYK-JAVA-ORGMOCKSERVER-1566476:
     - '*':
         reason: this is test code, signed off in DPC-1737
