@@ -4,7 +4,11 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.safety.Whitelist;
 
-public class XSSSanitizerUtil {
+public final class XSSSanitizerUtil {
+
+    private XSSSanitizerUtil() {
+        //util class
+    }
 
     public static String sanitize(String unsanitized) {
         String s1 = unsanitized.replaceAll("(\\s&\\s)", "   ");
