@@ -282,7 +282,7 @@
 									"var data = {",
 									"    \"iss\": postman.getEnvironmentVariable(\"client_token\"),",
 									"    \"sub\": postman.getEnvironmentVariable(\"client_token\"),",
-									"    \"aud\": postman.getEnvironmentVariable(\"api_public_base_url\")+\"/Token/auth\",",
+									"    \"aud\": postman.getEnvironmentVariable(\"api_public_base\")+\"/Token/auth\",",
 									"    \"exp\": Math.round(new Date().getTime() / 1000)+200,",
 									"    \"iat\": Math.round(new Date().getTime() / 1000),",
 									"    \"jti\": uuid,",
@@ -357,9 +357,9 @@
 							}
 						},
 						"url": {
-							"raw": "{{api_public_base_url}}/Token/auth",
+							"raw": "{{api_public_base}}/Token/auth",
 							"host": [
-								"{{api_public_base_url}}"
+								"{{api_public_base}}"
 							],
 							"path": [
 								"Token",
