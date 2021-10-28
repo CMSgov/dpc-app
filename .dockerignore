@@ -17,14 +17,6 @@ bbcerts/*
 !bbcerts/bb.keystore.enc
 .java-version
 
-# Ignore the IG outputs
-ig/output
-ig/generated_output
-.bin/
-bz-out/
-dpc-web/public/ig
-ig/source/resources/implementationguide/*parameters.json
-
 *.code-workspace
 .factorypath
 dpc-web/.rakeTasks
