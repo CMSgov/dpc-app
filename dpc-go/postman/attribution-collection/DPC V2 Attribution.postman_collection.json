@@ -2,7 +2,7 @@
 	"info": {
 		"_postman_id": "62416312-7f1c-40e6-a886-481e8f6158e3",
 		"name": "DPC Attribution",
-		"description": "This Postman collection contains all APIs for DPC-Attribtuion",
+		"description": "This Postman collection contains all APIs for DPC-Attribution",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
