@@ -242,8 +242,6 @@ Building the Additional Services
 
 Documentation on building the DPC Website is covered in the specific [README](dpc-web/README.md).
 
-Building the FHIR implementation guide is detailed [here](ig/README.md).
-
 Secrets management
 ---
 
