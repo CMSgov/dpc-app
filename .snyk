@@ -141,6 +141,10 @@ ignore:
     - '*':
         reason: 'this is test code, signed off in DPC-1737'
         created: 2021-09-29T14:56:29.781Z
+  SNYK-JAVA-ORGECLIPSEJETTY-1300835:
+    - '*':
+        reason: signed off in DPC-1775
+        created: 2021-10-14T15:25:20.041Z
   SNYK-JAVA-CAUHNHAPIFHIR-1290498:
     - '*':
         reason: 'see DPC-1675'
