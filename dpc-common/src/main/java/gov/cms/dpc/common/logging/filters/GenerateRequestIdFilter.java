@@ -2,6 +2,7 @@ package gov.cms.dpc.common.logging.filters;
 
 import gov.cms.dpc.common.Constants;
 import gov.cms.dpc.common.MDCConstants;
+import gov.cms.dpc.common.utils.XSSSanitizerUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -33,6 +34,6 @@ public class GenerateRequestIdFilter implements ContainerRequestFilter {
         }else{
             MDC.put(MDCConstants.DPC_REQUEST_ID, UUID.randomUUID().toString());
         }
-        logger.info("resource_requested={}, method={}",requestContext.getUriInfo().getPath(),requestContext.getMethod());
+        logger.info("resource_requested={}, method={}", XSSSanitizerUtil.sanitize(requestContext.getUriInfo().getPath()),requestContext.getMethod());
     }
 }
