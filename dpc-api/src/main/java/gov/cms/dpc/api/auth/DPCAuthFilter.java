@@ -3,6 +3,7 @@ package gov.cms.dpc.api.auth;
 import com.github.nitram509.jmacaroons.Macaroon;
 import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.common.MDCConstants;
+import gov.cms.dpc.common.utils.XSSSanitizerUtil;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.macaroons.exceptions.BakeryException;
 import io.dropwizard.auth.AuthFilter;
@@ -60,7 +61,7 @@ public abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organ
         if (!authenticated) {
             throw new WebApplicationException(dpc401handler.buildResponse(BEARER_PREFIX, realm));
         }
-        logger.info("event_type=request-received, resource_requested={}, method={}",uriInfo.getPath(),requestContext.getMethod());
+        logger.info("event_type=request-received, resource_requested={}, method={}", XSSSanitizerUtil.sanitize(uriInfo.getPath()),requestContext.getMethod());
     }
 
     private DPCAuthCredentials validateMacaroon(String macaroon, UriInfo uriInfo) {
