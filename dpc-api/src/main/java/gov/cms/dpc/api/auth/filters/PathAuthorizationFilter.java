@@ -1,13 +1,14 @@
 package gov.cms.dpc.api.auth.filters;
 
-import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.auth.DPCAuthCredentials;
 import gov.cms.dpc.api.auth.DPCAuthFilter;
+import gov.cms.dpc.api.auth.DPCUnauthorizedHandler;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
+import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.jdbi.TokenDAO;
+import gov.cms.dpc.common.utils.XSSSanitizerUtil;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import io.dropwizard.auth.Authenticator;
-import gov.cms.dpc.api.auth.DPCUnauthorizedHandler;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.slf4j.Logger;
@@ -41,7 +42,7 @@ public class PathAuthorizationFilter extends DPCAuthFilter {
         final String pathParam = this.pa.pathParam();
         final String pathValue = uriInfo.getPathParameters().getFirst(pathParam);
         if (pathValue == null) {
-            logger.error("Cannot find path param {} on request. Has: {}", pathParam, uriInfo.getPathParameters().keySet());
+            logger.error("Cannot find path param {} on request. Has: {}", XSSSanitizerUtil.sanitize(pathParam), uriInfo.getPathParameters().keySet());
             throw new WebApplicationException("Unable to get path parameter from request", Response.Status.INTERNAL_SERVER_ERROR);
         }
 
