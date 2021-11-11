@@ -1,11 +1,6 @@
-IG_PUBLISHER = ./.bin/org.hl7.fhir.publisher.jar
 REPORT_COVERAGE ?= false
 
 SMOKE_THREADS ?= 10
-
-${IG_PUBLISHER}:
-	-mkdir ./.bin
-	curl https://storage.googleapis.com/ig-build/org.hl7.fhir.publisher.jar -o ${IG_PUBLISHER}
 
 venv: venv/bin/activate
 
@@ -13,11 +8,6 @@ venv/bin/activate: requirements.txt
 	test -d venv || virtualenv venv
 	. venv/bin/activate
 	touch venv/bin/activate
-
-.PHONY: ig/publish
-ig/publish: ${IG_PUBLISHER}
-	@echo "Building Implementation Guide"
-	@java -jar ${IG_PUBLISHER} -ig ig/ig.json
 
 .PHONY: website
 website:

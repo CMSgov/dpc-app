@@ -43,6 +43,7 @@ public class NoHtmlValidatorTest {
                 Arguments.of(null, true),
                 Arguments.of("", true),
                 Arguments.of("hello\n\rbob", true),
+                Arguments.of("http://localhost/hi?hello=1234", true),
                 Arguments.of("<SCRIPT SRC=http://xss.rocks/xss.js></SCRIPT>", false),
                 Arguments.of("javascript:/*--></title></style></textarea></script></xmp><svg/onload='+/\"/+/onmouseover=1/+/[*/[]/+alert(1)//'>", false),
                 Arguments.of("<IMG SRC=\"javascript:alert('XSS');\">", false),
