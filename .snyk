@@ -161,4 +161,8 @@ ignore:
     - '*':
         reason: see DPC-1767
         created: 2021-11-10T15:45:04.084Z
+  SNYK-PYTHON-CRYPTOGRAPHY-1022152:
+    - '*':
+        reason: see DPC-1757, used only for kicking off smoke tests
+        created: 2021-11-10T15:36:14.559Z
 patch: {}
