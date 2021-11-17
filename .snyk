@@ -147,10 +147,14 @@ ignore:
         created: 2021-10-14T15:25:20.041Z
   SNYK-JAVA-CAUHNHAPIFHIR-1290498:
     - '*':
-        reason: 'see DPC-1675'
+        reason: see DPC-1675
         created: 2021-10-23T22:16:31.218Z
   SNYK-RUBY-OMNIAUTH-174820:
     - '*':
         reason: mitigated with omniauth-rails_csrf_protection gem
         created: 2021-11-17T09:55:0.0Z
+  SNYK-PYTHON-CRYPTOGRAPHY-1022152:
+    - '*':
+        reason: see DPC-1757, used only for kicking off smoke tests
+        created: 2021-11-10T15:36:14.559Z
 patch: {}
