@@ -153,6 +153,18 @@ ignore:
     - '*':
         reason: mitigated with omniauth-rails_csrf_protection gem
         created: 2021-11-17T09:55:0.0Z
+  SNYK-PYTHON-IPADDRESS-1290073:
+    - '*':
+        reason: see DPC-1767
+        created: 2021-11-10T15:44:18.882Z
+  SNYK-PYTHON-IPADDRESS-1041793:
+    - '*':
+        reason: see DPC-1767
+        created: 2021-11-10T15:44:47.119Z
+  SNYK-PYTHON-IPADDRESS-590065:
+    - '*':
+        reason: see DPC-1767
+        created: 2021-11-10T15:45:04.084Z
   SNYK-PYTHON-CRYPTOGRAPHY-1022152:
     - '*':
         reason: see DPC-1757, used only for kicking off smoke tests
