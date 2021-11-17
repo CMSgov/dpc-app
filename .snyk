@@ -149,6 +149,18 @@ ignore:
     - '*':
         reason: see DPC-1675
         created: 2021-10-23T22:16:31.218Z
+  SNYK-PYTHON-IPADDRESS-1290073:
+    - '*':
+        reason: see DPC-1767
+        created: 2021-11-10T15:44:18.882Z
+  SNYK-PYTHON-IPADDRESS-1041793:
+    - '*':
+        reason: see DPC-1767
+        created: 2021-11-10T15:44:47.119Z
+  SNYK-PYTHON-IPADDRESS-590065:
+    - '*':
+        reason: see DPC-1767
+        created: 2021-11-10T15:45:04.084Z
   SNYK-PYTHON-CRYPTOGRAPHY-1022152:
     - '*':
         reason: see DPC-1757, used only for kicking off smoke tests
