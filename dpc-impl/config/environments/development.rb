@@ -83,8 +83,6 @@ Rails.application.configure do
   # Inline source maps
   config.sass.inline_source_maps = true
 
-  # Uncomment if you wish to allow Action Cable access from any origin.
-  # config.action_cable.disable_request_forgery_protection = true
   # Devise requires mailer
   config.action_mailer.default_url_options = { host: 'localhost', port: 4000 }
   config.action_mailer.asset_host = 'http://localhost:4000'
