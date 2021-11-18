@@ -1,10 +1,8 @@
 package gov.cms.dpc.common.hibernate.validator;
 
 import gov.cms.dpc.common.annotations.NoHtml;
+import gov.cms.dpc.common.utils.XSSSanitizerUtil;
 import org.apache.commons.lang3.StringUtils;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.safety.Whitelist;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
@@ -25,7 +23,7 @@ public class NoHtmlValidator implements ConstraintValidator<NoHtml, String> {
         }
         // Ignore `&` in names and addresses
         String s1 = s.replaceAll("(\\s&\\s)", "   ");
-        String safe = Jsoup.clean(s1, "", Whitelist.none(), new Document.OutputSettings().prettyPrint(false));
+        String safe = XSSSanitizerUtil.sanitize(s1);
         return safe.equals(s1);
     }
 }

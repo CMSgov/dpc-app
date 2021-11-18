@@ -75,7 +75,6 @@ func (mc *MockSsasClient) ValidateToken(ctx context.Context, reqBytes []byte) ([
 	return args.Get(0).([]byte), args.Error(1)
 }
 
-
 type MockController struct {
 	mock.Mock
 }
