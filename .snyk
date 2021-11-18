@@ -1,5 +1,5 @@
 # Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
-version: v1.14.1
+version: v1.22.1
 # ignores vulnerabilities until expiry date; change duration by modifying expiry date
 ignore:
   SNYK-JS-LODASH-590103:
@@ -128,4 +128,45 @@ ignore:
     - newman > postman-runtime > postman-url-encoder > postman-collection > sanitize-html:
         reason: Affects tests only
         expires: '2021-01-14T20:54:26.492Z'
+  SNYK-JAVA-IONETTY-564897:
+    - '*':
+        reason: not using the vulnerable version
+        expires: 2022-10-15T15:32:25.097Z
+        created: 2021-09-15T15:32:25.107Z
+  SNYK-JAVA-ORGGLASSFISHJERSEYMEDIA-595972:
+    - '*':
+        reason: Used by tests only (see DPC-1672)
+        created: 2021-09-30T17:56:02.919Z
+  SNYK-JAVA-ORGMOCKSERVER-1566476:
+    - '*':
+        reason: 'this is test code, signed off in DPC-1737'
+        created: 2021-09-29T14:56:29.781Z
+  SNYK-JAVA-ORGECLIPSEJETTY-1300835:
+    - '*':
+        reason: signed off in DPC-1775
+        created: 2021-10-14T15:25:20.041Z
+  SNYK-JAVA-CAUHNHAPIFHIR-1290498:
+    - '*':
+        reason: see DPC-1675
+        created: 2021-10-23T22:16:31.218Z
+  SNYK-PYTHON-IPADDRESS-1290073:
+    - '*':
+        reason: see DPC-1767
+        created: 2021-11-10T15:44:18.882Z
+  SNYK-PYTHON-IPADDRESS-1041793:
+    - '*':
+        reason: see DPC-1767
+        created: 2021-11-10T15:44:47.119Z
+  SNYK-PYTHON-IPADDRESS-590065:
+    - '*':
+        reason: see DPC-1767
+        created: 2021-11-10T15:45:04.084Z
+  SNYK-PYTHON-CRYPTOGRAPHY-1022152:
+    - '*':
+        reason: see DPC-1757, used only for kicking off smoke tests
+        created: 2021-11-10T15:36:14.559Z
+  SNYK-RUBY-NOKOGIRI-1726792:
+    - '*':
+        reason: false positive; alert says to upgrade to already-installed version
+        created: 2021-11-17T13:35:10.514Z
 patch: {}

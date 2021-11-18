@@ -7,7 +7,7 @@ ruby '2.7.2'
 gem 'rails', '~> 6.1.4', '>= 6.1.4.1'
 gem 'pg', '~> 1.1'
 # Use Puma as the app server
-gem 'puma', '~> 5.0'
+gem 'puma', '>= 5.5.1'
 # Use SCSS for stylesheets
 gem 'sass-rails', '>= 6.0.0'
 # Transpile app-like JavaScript. Read more: https://github.com/rails/webpacker
@@ -17,9 +17,12 @@ gem 'turbolinks', '~> 5'
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 gem 'jbuilder', '~> 2.7'
 # Use Redis adapter to run Action Cable in production
-# gem 'redis', '~> 4.0'
+gem 'redis', '~> 4.0'
+gem 'redis-namespace'
 # Use Active Model has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
+gem 'sidekiq', '~> 6.1'
+gem 'sidekiq_alive'
 
 # Use Active Storage variant
 # gem 'image_processing', '~> 1.2'
@@ -37,6 +40,8 @@ gem 'omniauth-oktaoauth'
 gem 'octokit' # can be removed once we move past github omniauth
 
 gem 'truemail'
+# < 1.12.5 has a vulnerability, and is required by other gems
+gem 'nokogiri', '>= 1.12.5'
 
 group :development, :test do
   gem 'byebug', platforms: [:mri, :mingw, :x64_mingw]
@@ -60,6 +65,8 @@ group :development do
   # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
   gem 'spring'
   gem 'simplecov', '<= 0.17'
+  gem 'letter_opener_web', '~> 1.4', '>= 1.4.0'
+  gem 'letter_opener'
 end
 
 group :test do
@@ -68,6 +75,7 @@ group :test do
   gem 'webdrivers'
   gem 'climate_control'
   gem 'rails-controller-testing', '>= 1.0.5'
+  gem 'fakeredis'
 end
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem

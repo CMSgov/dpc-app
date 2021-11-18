@@ -27,23 +27,23 @@
     <ul id="searchList">
       <% @user.provider_orgs.each_with_index do |provider| %>
         <li>
-          <%= link_to provider_orgs_path(org_id: provider[:org_id]), class: "provider-link", data: {test: "porg_#{provider[:npi]}"} do  %>
+          <%= link_to provider_orgs_path(org_id: provider['org_id']), class: "provider-link", data: {test: "porg_#{provider['npi']}"} do  %>
             <div class="provider_card_container">
               <div class="provider_name">
-                <%= provider[:org_name] %>
+                <%= provider['org_name'] %>
               </div>
 
               <div class="provider_info">
                 <div class="provider_npi">
-                  NPI: <%= provider[:npi] %>
+                  NPI: <%= provider['npi'] %>
                 </div>
 
                 <div class="provider_api_id">
-                  ID: <%= provider[:org_id] %>
+                  ID: <%= provider['org_id'] %>
                 </div>
 
                 <div class="provider_status">
-                  Status: <span class="<%= active_status_class if status_active?(provider[:status]) %>"><%= provider[:status] %></span>
+                  Status: <span class="<%= active_status_class if status_active?(provider['status']) %>"><%= provider['status'] %></span>
                 </div>
               </div>
             </div>

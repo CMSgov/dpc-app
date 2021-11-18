@@ -1,8 +1,8 @@
 # Note: You must restart bin/webpack-dev-server for changes to take effect
 
 default: &default
-  source_path: app/javascript
-  source_entry_path: packs
+  source_path: app/assets/javascripts
+  source_entry_path: .
   public_root_path: public
   public_output_path: packs
   cache_path: tmp/cache/webpacker
@@ -51,6 +51,9 @@ default: &default
 development:
   <<: *default
   compile: true
+
+  # Verifies that correct packages and versions are installed by inspecting package.json, yarn.lock, and node_modules
+  check_yarn_integrity: false
 
   # Reference: https://webpack.js.org/configuration/dev-server/
   dev_server:

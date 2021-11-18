@@ -131,6 +131,46 @@ services:
       - redis
       - db
 
+  dpc_adminv2:
+    build:
+      context: .
+      dockerfile: dpc-adminv2/Dockerfile
+    image: dpc-adminv2:latest
+    volumes:
+      - "./dpc-adminv2/coverage:/dpc-adminv2/coverage"
+      - ./tmp/letter_opener/adminv2:/dpc-adminv2/tmp/letter_opener
+    environment:
+      - REDIS_URL=redis://redis
+      - DATABASE_URL=postgresql://db/dpc-impl_development
+      - TEST_DATABASE_URL=postgresql://db/dpc-impl_test
+      - DB_USER=postgres
+      - DB_PASS=dpc-safe
+      - DATABASE_CLEANER_ALLOW_REMOTE_DATABASE_URL=true
+    ports:
+      - "4002:4002"
+    depends_on:
+      - db
+      - redis
+      - adminv2_sidekiq
+
+  adminv2_sidekiq:
+    volumes:
+      - ./tmp/letter_opener/adminv2:/dpc-adminv2/tmp/letter_opener
+    build:
+      context: .
+      dockerfile: dpc-adminv2/Dockerfile
+    command: sidekiq
+    image: dpc-adminv2-sidekiq:latest
+    environment:
+      - REDIS_URL=redis://redis
+      - DATABASE_URL=postgresql://db/dpc-impl_development
+      - DB_USER=postgres
+      - DB_PASS=dpc-safe
+    depends_on:
+      - redis
+      - db
+
+
   # Starts up each service in the background
   start_core_dependencies:
     image: dadarek/wait-for-dependencies
@@ -156,3 +196,9 @@ services:
     depends_on:
       - dpc_impl
     command: dpc_impl:4000
+
+  start_adminv2:
+    image: dadarek/wait-for-dependencies
+    depends_on:
+      - dpc_adminv2
+    command: dpc_adminv2:4002

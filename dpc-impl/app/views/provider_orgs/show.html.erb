@@ -1,4 +1,4 @@
-<% title @org[:name] %>
+<% title @org['name'] %>
 
 <div class="ds-u-margin-bottom--6" id="dashboard__title">
   <div class="ds-u-margin-bottom--3">
@@ -12,10 +12,10 @@
     <% end %>
   </div>
 
-  <h1 class="ds-text-heading--4xl ds-title"><%= @org[:name] %></h1>
+  <h1 class="ds-text-heading--4xl ds-title"><%= @org['name'] %></h1>
   <div>
     <div>
-      <strong>Org ID:</strong> <%= @org[:id] %>
+      <strong>Org ID:</strong> <%= @org['id'] %>
     </div>
     <div>
       <strong>Provider NPI:</strong> <%= @npi %>
@@ -35,7 +35,7 @@
 
     <% if @public_keys.count.zero? && @client_tokens.count.zero? %>
       <h2>Add a Public Key & Signature Pair</h2>
-      <%= render partial: 'public_keys/new_public_key_form', org_name: @org[:name] %>
+      <%= render partial: 'public_keys/new_public_key_form', org_name: @org['name'] %>
     <% else %>
       <div class="porg_container" id="client_tokens_container">
         <div class="header-container flex-row-spc-btwn">

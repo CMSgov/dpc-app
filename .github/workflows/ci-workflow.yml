@@ -55,12 +55,22 @@ jobs:
           make test-docker
         working-directory: dpc-go/dpc-attribution
 
-  build-portals:
-    name: "Build and Test DPC Web Portals"
+  build-portals-v1:
+    name: "Build and Test DPCv1 Web Portals"
     runs-on: ubuntu-latest
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v1
-      - name: "Web Portals Build"
+      - name: "Web Portals v1 Build"
         run: |
-          make ci-portals
+          make ci-portals-v1
+
+  build-portals-v2:
+    name: "Build and Test DPCv2 Web Portals"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@v1
+      - name: "Web Portals v2 Build"
+        run: |
+          make ci-portals-v2
