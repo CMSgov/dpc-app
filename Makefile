@@ -1,11 +1,6 @@
-IG_PUBLISHER = ./.bin/org.hl7.fhir.publisher.jar
 REPORT_COVERAGE ?= false
 
 SMOKE_THREADS ?= 10
-
-${IG_PUBLISHER}:
-	-mkdir ./.bin
-	curl https://storage.googleapis.com/ig-build/org.hl7.fhir.publisher.jar -o ${IG_PUBLISHER}
 
 venv: venv/bin/activate
 
@@ -13,11 +8,6 @@ venv/bin/activate: requirements.txt
 	test -d venv || virtualenv venv
 	. venv/bin/activate
 	touch venv/bin/activate
-
-.PHONY: ig/publish
-ig/publish: ${IG_PUBLISHER}
-	@echo "Building Implementation Guide"
-	@java -jar ${IG_PUBLISHER} -ig ig/ig.json
 
 .PHONY: website
 website:
@@ -30,6 +20,10 @@ admin:
 .PHONY: impl
 impl:
 	@docker build -f dpc-impl/Dockerfile . -t dpc-impl
+
+.PHONY: adminv2
+adminv2:
+	@docker build -f dpc-adminv2/Dockerfile . -t dpc-adminv2
 
 .PHONY: start-app
 start-app: secure-envs
@@ -48,9 +42,10 @@ start-local-api: secure-envs start-local
 .PHONY: start-portals
 start-portals:
 	@docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.portals.yml up start_core_dependencies
-	# @docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.portals.yml up start_web
-	# @docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.portals.yml up start_admin
+	@docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.portals.yml up start_web
+	@docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.portals.yml up start_admin
 	@docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.portals.yml up start_impl
+	@docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.portals.yml up start_adminv2
 	@docker ps
 
 .PHONY: down-portals
@@ -113,6 +108,14 @@ ci-app: docker-base secure-envs
 .PHONY: ci-portals
 ci-portals: secure-envs
 	@./dpc-portals-test.sh
+
+.PHONY: ci-portals-v1
+ci-portals-v1: secure-envs
+	@./dpcv1-portals-test.sh
+
+.PHONY: ci-portals-v2
+ci-portals-v2: secure-envs
+	@./dpcv2-portals-test.sh
 
 .PHONY: smoke
 smoke:

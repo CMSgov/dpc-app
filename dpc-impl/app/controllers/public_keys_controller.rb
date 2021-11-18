@@ -29,7 +29,7 @@ class PublicKeysController < ApplicationController
     end
 
     if org_name_present?(params) && new_public_key[:response]
-      @client_token = new_public_key[:message][:client_token]
+      @client_token = new_public_key[:message]['client_token']
       render :show
     elsif new_public_key[:response]
       flash[:notice] = 'Public key sucessfully uploaded.'
@@ -67,7 +67,7 @@ class PublicKeysController < ApplicationController
     api_req = tokens_keys_api_req(imp_id, org_id)
 
     if api_req.class == Hash
-      return api_req[:client_tokens]
+      return api_req['client_tokens']
     else
       return []
     end
@@ -84,7 +84,7 @@ class PublicKeysController < ApplicationController
     api_req = tokens_keys_api_req(imp_id, org_id)
 
     if api_req.class == Hash
-      return api_req[:public_keys]
+      return api_req['public_keys']
     else
       return []
     end

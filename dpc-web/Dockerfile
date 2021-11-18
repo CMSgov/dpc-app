@@ -7,8 +7,6 @@ RUN gem install jekyll
 # Build the IG assets
 WORKDIR /dpc-app
 COPY / /dpc-app
-RUN make ig/publish
-
 
 FROM ruby:2.7.2-alpine AS ruby_builder
 
@@ -33,7 +31,6 @@ RUN bundle exec bundle audit update && bundle exec bundle audit check --ignore C
 
 # Copy the code, test the app, and build the assets pipeline
 COPY /dpc-web /dpc-web
-COPY --from=java_builder /dpc-app/dpc-web/public/ig /dpc-web/public/ig
 RUN RAILS_ENV=production SECRET_KEY_BASE=dummy bundle exec rake assets:precompile
 
 # Clean up from the build

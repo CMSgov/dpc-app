@@ -7,7 +7,7 @@ ruby '2.7.2'
 
 # Anchored versions, do not bump without testing
 gem 'rails', '~> 6.1.3', '>= 6.1.3.2'
-gem 'puma', '>= 5.3.1'
+gem 'puma', '>= 5.5.1'
 gem 'redis', '~> 4.0'
 gem 'coffee-rails', '~> 5.0', '>= 5.0.0'
 gem 'kramdown', '~> 2.3', '>= 2.3.1'
@@ -36,6 +36,8 @@ gem 'active_model_serializers', '>= 0.10.12'
 gem 'macaroons'
 gem 'lograge', '>= 0.11.2'
 gem 'redis-namespace'
+# < 1.12.5 has a vulnerability, and is required by other gems
+gem 'nokogiri', '>= 1.12.5'
 
 group :development, :test do
   gem 'byebug', platforms: [:mri, :mingw, :x64_mingw]
