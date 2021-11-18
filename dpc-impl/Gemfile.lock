@@ -1,11 +1,6 @@
 GEM
   remote: https://rubygems.org/
   specs:
-    actioncable (6.1.4.1)
-      actionpack (= 6.1.4.1)
-      activesupport (= 6.1.4.1)
-      nio4r (~> 2.0)
-      websocket-driver (>= 0.6.1)
     actionmailbox (6.1.4.1)
       actionpack (= 6.1.4.1)
       activejob (= 6.1.4.1)
@@ -205,21 +200,6 @@ GEM
       rack
     rack-test (1.1.0)
       rack (>= 1.0, < 3)
-    rails (6.1.4.1)
-      actioncable (= 6.1.4.1)
-      actionmailbox (= 6.1.4.1)
-      actionmailer (= 6.1.4.1)
-      actionpack (= 6.1.4.1)
-      actiontext (= 6.1.4.1)
-      actionview (= 6.1.4.1)
-      activejob (= 6.1.4.1)
-      activemodel (= 6.1.4.1)
-      activerecord (= 6.1.4.1)
-      activestorage (= 6.1.4.1)
-      activesupport (= 6.1.4.1)
-      bundler (>= 1.15.0)
-      railties (= 6.1.4.1)
-      sprockets-rails (>= 2.0.0)
     rails-controller-testing (1.0.5)
       actionpack (>= 5.0.1.rc1)
       actionview (>= 5.0.1.rc1)
@@ -344,11 +324,6 @@ GEM
       rack-proxy (>= 0.6.1)
       railties (>= 5.2)
       semantic_range (>= 2.3.0)
-    websocket-driver (0.7.5)
-      websocket-extensions (>= 0.1.0)
-    websocket-driver (0.7.5-java)
-      websocket-extensions (>= 0.1.0)
-    websocket-extensions (0.1.5)
     xpath (3.2.0)
       nokogiri (~> 1.8)
     zeitwerk (2.4.2)
@@ -364,7 +339,18 @@ PLATFORMS
   x86_64-linux-musl
 
 DEPENDENCIES
+  actionmailbox (= 6.1.4.1)
+  actionmailer (= 6.1.4.1)
+  actionpack (= 6.1.4.1)
+  actiontext (= 6.1.4.1)
+  actionview (= 6.1.4.1)
+  activejob (= 6.1.4.1)
+  activemodel (= 6.1.4.1)
+  activerecord (= 6.1.4.1)
+  activestorage (= 6.1.4.1)
+  activesupport (= 6.1.4.1)
   bootsnap (>= 1.4.4)
+  bundler (>= 1.15.0)
   bundler-audit
   byebug
   capybara (>= 3.35.3)
@@ -389,8 +375,8 @@ DEPENDENCIES
   pry
   pry-nav
   puma (>= 5.5.1)
-  rails (~> 6.1.4, >= 6.1.4.1)
   rails-controller-testing (>= 1.0.5)
+  railties (= 6.1.4.1)
   redis (~> 4.0)
   redis-namespace
   rspec-rails (>= 5.0.1)
