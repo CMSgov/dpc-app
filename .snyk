@@ -22,6 +22,10 @@ ignore:
     - '*':
         reason: see DPC-1675
         created: 2021-10-23T22:16:31.218Z
+  SNYK-RUBY-OMNIAUTH-174820:
+    - '*':
+        reason: mitigated with omniauth-rails_csrf_protection gem
+        created: 2021-11-17T09:55:0.0Z
   SNYK-PYTHON-IPADDRESS-1290073:
     - '*':
         reason: see DPC-1767
