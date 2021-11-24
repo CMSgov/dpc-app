@@ -7,7 +7,11 @@
     "node": ">=0.12"
   },
   "dependencies": {
-    "newman": "^5.3.0"
+    "newman": "^5.3.0",
+    "ansi-regex": ">=5.0.1"
+  },
+  "dependenciesComments": {
+    "ansi-regex": "included to avoid vulnerable version"
   },
   "devDependencies": {},
   "scripts": {

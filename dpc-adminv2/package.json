@@ -5,7 +5,7 @@
     "@cmsgov/design-system": "^2.6.1",
     "@rails/activestorage": "^6.0.0",
     "@rails/ujs": "^6.0.0",
-    "@rails/webpacker": "5.4.0",
+    "@rails/webpacker": "5.4.3",
     "normalize.css": "^8.0.1",
     "svg4everybody": "^2.1.9",
     "turbolinks": "^5.2.0"
