@@ -3,24 +3,28 @@ package client
 import (
 	"bytes"
 	"context"
+	"crypto/tls"
+	"crypto/x509"
+	b64 "encoding/base64"
 	"encoding/json"
 	"fmt"
 	"github.com/CMSgov/dpc/api/constants"
-	"io/ioutil"
-	"net/http"
-
 	"github.com/CMSgov/dpc/api/logger"
 	"github.com/go-chi/chi/middleware"
-
 	"github.com/hashicorp/go-retryablehttp"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
+	"io/ioutil"
+	"net/http"
 )
 
 // AttributionConfig is a struct to hold configuration info for retryablehttp client
 type AttributionConfig struct {
 	URL     string
 	Retries int
+	CACert  string
+	Cert    string
+	CertKey string
 }
 
 // ResourceType is a type to be used when making requests to different endpoints in attribution service
@@ -71,13 +75,62 @@ type AttributionClient struct {
 }
 
 // NewAttributionClient initializes the retryable client and returns a reference to the attribution client
-func NewAttributionClient(config AttributionConfig) Client {
+func NewAttributionClient(ctx context.Context, config AttributionConfig) Client {
 	client := retryablehttp.NewClient()
 	client.RetryMax = config.Retries
+	caPool, cert := getAttrCertificates(ctx, config.CACert, config.Cert, config.CertKey)
+
+	if len(cert.Certificate) != 0 && caPool != nil {
+		client.HTTPClient.Transport = &http.Transport{
+			TLSClientConfig: &tls.Config{
+				RootCAs:      caPool,
+				Certificates: []tls.Certificate{cert},
+				MinVersion:   tls.VersionTLS12,
+			},
+		}
+	}
+
 	return &AttributionClient{
 		config:     config,
 		httpClient: client,
 	}
+}
+
+func getAttrCertificates(ctx context.Context, caCert string, cert string, certKey string) (*x509.CertPool, tls.Certificate) {
+	if caCert == "" || cert == "" || certKey == "" {
+		logger.WithContext(ctx).Warn("Missing one of: DPC_ATTR_CA_CERT, DPC_ATTR_CERT, DPC_ATTR_CERT_KEY")
+		return nil, tls.Certificate{}
+	}
+
+	caB, err := b64.StdEncoding.DecodeString(caCert)
+	if err != nil {
+		logger.WithContext(ctx).Fatal("Could not base64 decode DPC_ATTR_CA_CERT", zap.Error(err))
+	}
+	crtB, err := b64.StdEncoding.DecodeString(cert)
+	if err != nil {
+		logger.WithContext(ctx).Fatal("Could not base64 decode DPC_ATTR_CERT", zap.Error(err))
+	}
+	keyB, err := b64.StdEncoding.DecodeString(certKey)
+	if err != nil {
+		logger.WithContext(ctx).Fatal("Could not base64 decode DPC_ATTR_CERT_KEY", zap.Error(err))
+	}
+
+	caStr := string(caB)
+	crtStr := string(crtB)
+	keyStr := string(keyB)
+
+	certPool := x509.NewCertPool()
+	ok := certPool.AppendCertsFromPEM([]byte(caStr))
+	if !ok {
+		logger.WithContext(ctx).Fatal("Failed to parse attribution client cert")
+	}
+
+	crt, err := tls.X509KeyPair([]byte(crtStr), []byte(keyStr))
+	if err != nil {
+		logger.WithContext(ctx).Fatal("Failed to parse server cert/key par", zap.Error(err))
+	}
+
+	return certPool, crt
 }
 
 // CreateImplOrg is a function to create an Implementer/Organization relation via attribution service

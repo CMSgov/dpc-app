@@ -7,7 +7,6 @@ AllCops:
   NewCops: enable
   TargetRubyVersion: 2.7
   Exclude:
-    - 'app/channels/application_cable/**/*'
     - 'app/jobs/application_job.rb'
     - 'app/mailers/application_mailer.rb'
     - 'app/models/application_record.rb'

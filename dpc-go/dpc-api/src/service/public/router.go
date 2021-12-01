@@ -1,9 +1,7 @@
 package public
 
 import (
-	"net/http"
-	"strings"
-
+	"context"
 	"github.com/CMSgov/dpc/api/client"
 	"github.com/CMSgov/dpc/api/conf"
 	middleware2 "github.com/CMSgov/dpc/api/middleware"
@@ -12,6 +10,8 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/render"
+	"net/http"
+	"strings"
 )
 
 func buildPublicRoutes(cont controllers, ssasClient client.SsasClient) http.Handler {
@@ -83,10 +83,14 @@ func buildPublicRoutes(cont controllers, ssasClient client.SsasClient) http.Hand
 }
 
 // NewPublicServer configures clients, builds ADMIN routes, and creates a server.
-func NewPublicServer() *service.Server {
-	attrClient := client.NewAttributionClient(client.AttributionConfig{
+func NewPublicServer(ctx context.Context) *service.Server {
+
+	attrClient := client.NewAttributionClient(ctx, client.AttributionConfig{
 		URL:     conf.GetAsString("attribution-client.url"),
 		Retries: conf.GetAsInt("attribution-client.retries", 3),
+		CACert:  conf.GetAsString("ATTR_CA_CERT"),
+		Cert:    conf.GetAsString("ATTR_CERT"),
+		CertKey: conf.GetAsString("ATTR_CERT_KEY"),
 	})
 
 	dataClient := client.NewDataClient(client.DataConfig{
