@@ -20,12 +20,12 @@ func main() {
 		logger.WithContext(ctx).Fatal("Failed to start server", zap.Error(err))
 	}()
 
-	ps := public.NewPublicServer()
+	ps := public.NewPublicServer(ctx)
 	if ps == nil {
 		log.Fatal("Could not create public server")
 	}
 
-	as := admin.NewAdminServer()
+	as := admin.NewAdminServer(ctx)
 	if as == nil {
 		log.Fatal("Could not create admin server")
 	}
