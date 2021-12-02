@@ -2,136 +2,9 @@
 version: v1.22.1
 # ignores vulnerabilities until expiry date; change duration by modifying expiry date
 ignore:
-  SNYK-JS-LODASH-590103:
-    - newman > lodash:
-        reason: Affects tests only
-        expires: '2021-01-14T20:54:26.490Z'
-    - newman > postman-collection > lodash:
-        reason: Affects tests only
-        expires: '2021-01-14T20:54:26.490Z'
-    - newman > postman-runtime > lodash:
-        reason: Affects tests only
-        expires: '2021-01-14T20:54:26.490Z'
-    - newman > postman-runtime > postman-collection > lodash:
-        reason: Affects tests only
-        expires: '2021-01-14T20:54:26.490Z'
-    - newman > postman-runtime > postman-sandbox > lodash:
-        reason: Affects tests only
-        expires: '2021-01-14T20:54:26.490Z'
-    - newman > postman-runtime > async > lodash:
-        reason: Affects tests only
-        expires: '2021-01-14T20:54:26.491Z'
-    - newman > postman-runtime > postman-url-encoder > postman-collection > lodash:
-        reason: Affects tests only
-        expires: '2021-01-14T20:54:26.491Z'
-    - lodash:
-        reason: Affects tests only
-        expires: '2021-01-14T20:54:26.492Z'
-    - newman > postman-collection-transformer > lodash:
-        reason: Affects tests only
-        expires: '2021-01-14T20:54:26.492Z'
-    - newman > postman-runtime > postman-sandbox > uvm > lodash:
-        reason: Affects tests only
-        expires: '2021-01-14T20:54:26.492Z'
-  SNYK-JS-MARKED-584281:
-    - newman > postman-collection > marked:
-        reason: Affects tests only
-        expires: '2021-01-14T20:54:26.490Z'
-    - newman > postman-runtime > postman-collection > marked:
-        reason: Affects tests only
-        expires: '2021-01-14T20:54:26.490Z'
-    - newman > postman-runtime > postman-url-encoder > postman-collection > marked:
-        reason: Affects tests only
-        expires: '2021-01-14T20:54:26.491Z'
-  SNYK-JS-LODASH-567746:
-    - newman > lodash:
-        reason: Affects tests only
-        expires: '2021-01-14T20:54:26.490Z'
-    - newman > postman-collection > lodash:
-        reason: Affects tests only
-        expires: '2021-01-14T20:54:26.490Z'
-    - newman > postman-collection-transformer > lodash:
-        reason: Affects tests only
-        expires: '2021-01-14T20:54:26.491Z'
-    - newman > postman-runtime > lodash:
-        reason: Affects tests only
-        expires: '2021-01-14T20:54:26.491Z'
-    - newman > postman-runtime > postman-collection > lodash:
-        reason: Affects tests only
-        expires: '2021-01-14T20:54:26.491Z'
-    - newman > postman-runtime > postman-sandbox > lodash:
-        reason: Affects tests only
-        expires: '2021-01-14T20:54:26.491Z'
-    - newman > postman-runtime > postman-sandbox > uvm > lodash:
-        reason: Affects tests only
-        expires: '2021-01-14T20:54:26.491Z'
-    - newman > postman-runtime > async > lodash:
-        reason: Affects tests only
-        expires: '2021-01-14T20:54:26.491Z'
-    - newman > postman-runtime > postman-url-encoder > postman-collection > lodash:
-        reason: Affects tests only
-        expires: '2021-01-14T20:54:26.491Z'
-    - lodash:
-        reason: Affects tests only
-        expires: '2021-01-14T20:54:26.492Z'
-  SNYK-JS-LODASH-608086:
-    - newman > lodash:
-        reason: Affects tests only
-        expires: '2021-01-14T20:54:26.490Z'
-    - newman > postman-collection > lodash:
-        reason: Affects tests only
-        expires: '2021-01-14T20:54:26.490Z'
-    - newman > postman-collection-transformer > lodash:
-        reason: Affects tests only
-        expires: '2021-01-14T20:54:26.491Z'
-    - newman > postman-runtime > lodash:
-        reason: Affects tests only
-        expires: '2021-01-14T20:54:26.491Z'
-    - newman > postman-runtime > postman-collection > lodash:
-        reason: Affects tests only
-        expires: '2021-01-14T20:54:26.491Z'
-    - newman > postman-runtime > postman-sandbox > lodash:
-        reason: Affects tests only
-        expires: '2021-01-14T20:54:26.491Z'
-    - newman > postman-runtime > postman-sandbox > uvm > lodash:
-        reason: Affects tests only
-        expires: '2021-01-14T20:54:26.491Z'
-    - newman > postman-runtime > async > lodash:
-        reason: Affects tests only
-        expires: '2021-01-14T20:54:26.491Z'
-    - newman > postman-runtime > postman-url-encoder > postman-collection > lodash:
-        reason: Affects tests only
-        expires: '2021-01-14T20:54:26.491Z'
-    - lodash:
-        reason: Affects tests only
-        expires: '2021-01-14T20:54:26.492Z'
-  SNYK-JS-AJV-584908:
-    - ajv:
-        reason: No upgrade available
-        expires: '2021-01-14T20:54:26.492Z'
-    - har-validator > ajv:
-        reason: No upgrade available
-        expires: '2021-01-14T20:54:26.492Z'
-    - newman > postman-request > har-validator > ajv:
-        reason: No upgrade available
-        expires: '2021-01-14T20:54:26.492Z'
-    - newman > postman-runtime > postman-request > har-validator > ajv:
-        reason: No update available
-        expires: '2021-01-14T20:54:26.492Z'
-  SNYK-JS-SANITIZEHTML-585892:
-    - newman > postman-collection > sanitize-html:
-        reason: Affects tests only
-        expires: '2021-01-14T20:54:26.492Z'
-    - newman > postman-runtime > postman-collection > sanitize-html:
-        reason: Affects tests only
-        expires: '2021-01-14T20:54:26.492Z'
-    - newman > postman-runtime > postman-url-encoder > postman-collection > sanitize-html:
-        reason: Affects tests only
-        expires: '2021-01-14T20:54:26.492Z'
   SNYK-JAVA-IONETTY-564897:
     - '*':
         reason: not using the vulnerable version
-        expires: 2022-10-15T15:32:25.097Z
         created: 2021-09-15T15:32:25.107Z
   SNYK-JAVA-ORGGLASSFISHJERSEYMEDIA-595972:
     - '*':
@@ -149,6 +22,10 @@ ignore:
     - '*':
         reason: see DPC-1675
         created: 2021-10-23T22:16:31.218Z
+  SNYK-RUBY-OMNIAUTH-174820:
+    - '*':
+        reason: mitigated with omniauth-rails_csrf_protection gem
+        created: 2021-11-17T09:55:0.0Z
   SNYK-PYTHON-IPADDRESS-1290073:
     - '*':
         reason: see DPC-1767
@@ -169,4 +46,16 @@ ignore:
     - '*':
         reason: false positive; alert says to upgrade to already-installed version
         created: 2021-11-17T13:35:10.514Z
+  SNYK-JAVA-ORGHIBERNATE-568162:
+    - '*':
+        reason: see DPC-1749
+        created: 2021-11-19T16:01:0.0Z
+  SNYK-JAVA-ORGHIBERNATE-569100:
+    - '*':
+        reason: see DPC-1749
+        created: 2021-11-19T16:01:0.0Z
+  SNYK-JAVA-ORGECLIPSEJETTY-1080611:
+    - '*':
+        reason: see DPC-1758
+        created: 2021-11-19T16:01:0.0Z
 patch: {}
