@@ -94,7 +94,8 @@ func NewAdminServer(ctx context.Context) *service.Server {
 	}
 
 	r := buildAdminRoutes(controllers)
-	return service.NewServer("DPC-API Admin Server", port, true, r)
+	authType := conf.GetAsString("AUTH_TYPE", "TLS")
+	return service.NewServer("DPC-API Admin Server", port, authType, r)
 }
 
 type controllers struct {
