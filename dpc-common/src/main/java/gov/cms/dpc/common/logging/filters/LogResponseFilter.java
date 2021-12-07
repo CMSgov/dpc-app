@@ -3,6 +3,7 @@ package gov.cms.dpc.common.logging.filters;
 import com.google.inject.Provider;
 import gov.cms.dpc.common.Constants;
 import gov.cms.dpc.common.MDCConstants;
+import gov.cms.dpc.common.utils.XSSSanitizerUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -25,6 +26,6 @@ public class LogResponseFilter implements ContainerResponseFilter{
         if(requestId!=null){
             responseContext.getHeaders().add(Constants.DPC_REQUEST_ID_HEADER, requestId);
         }
-        logger.info("resource_requested={}, method={}, status={}",requestContext.getUriInfo().getPath(),requestContext.getMethod(),responseContext.getStatus());
+        logger.info("resource_requested={}, method={}, status={}", XSSSanitizerUtil.sanitize(requestContext.getUriInfo().getPath()),requestContext.getMethod(),responseContext.getStatus());
     }
 }

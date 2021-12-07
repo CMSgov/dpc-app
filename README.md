@@ -9,6 +9,22 @@ Data @ The Point of Care
 [![Language grade: Java](https://img.shields.io/lgtm/grade/java/g/CMSgov/dpc-app.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/CMSgov/dpc-app/context:java)
 [![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/CMSgov/dpc-app.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/CMSgov/dpc-app/context:javascript)  
 
+What is DPC?
+---
+
+Visit our [website](https://dpc.cms.gov/) for background information.
+
+Required tools and languages
+---
+
+- Python 3 and `pip`
+- Java 11 and `mvn`
+- Go
+- Ruby and `bundler`
+- `npm`
+- [Ansible Vault](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html#)
+- Docker (make sure to allocate more than the default 2Gb of memory)
+
 Required services
 ---
 
@@ -242,8 +258,6 @@ Building the Additional Services
 
 Documentation on building the DPC Website is covered in the specific [README](dpc-web/README.md).
 
-Building the FHIR implementation guide is detailed [here](ig/README.md).
-
 Secrets management
 ---
 
@@ -253,7 +267,7 @@ Secrets management
 
 The files committed in the `ops/config/encrypted` directory hold secret information, and are encrypted with [Ansible Vault](https://docs.ansible.com/ansible/2.4/vault.html).
 
-In order to encrypt and decrypt configuration variables, you must create a `.vault_password` file in this repository root directory. Contact another team member to gain access to the vault password.
+In order to encrypt and decrypt configuration variables, you must create a `.vault_password` file in this repository root directory and in the `/dpc-go/dpc-attribution` directory. Contact another team member to gain access to the vault password.
 
 **IMPORTANT:** Files containing sensitive information are enumerated in the `.secrets` file in this directory. If you want to protect the contents of a file using the `ops/scripts/secrets` helper script, it must match a pattern listed in `.secrets`.
 
