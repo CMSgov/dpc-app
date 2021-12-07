@@ -64,24 +64,24 @@ func (s *Server) Serve(ctx context.Context) error {
 func (s *Server) startSecureServer(ctx context.Context, useMTLS bool) error {
 	caPool, cert := getServerCertificates(ctx)
 
-	severTlsConf := &tls.Config{
+	severTlSConf := &tls.Config{
 		Certificates: []tls.Certificate{cert},
 		MinVersion:   tls.VersionTLS12,
 	}
 
-    if useMTLS {
-        severTlsConf.GetConfigForClient = func(hi *tls.ClientHelloInfo) (*tls.Config, error) {
-            serverConf := &tls.Config{
-                Certificates: []tls.Certificate{cert},
-                MinVersion:   tls.VersionTLS12,
-                ClientAuth:   tls.RequireAndVerifyClientCert,
-                ClientCAs:    caPool,
-            }
-            return serverConf, nil
-        }
-    }
+	if useMTLS {
+		severTlSConf.GetConfigForClient = func(hi *tls.ClientHelloInfo) (*tls.Config, error) {
+			serverConf := &tls.Config{
+				Certificates: []tls.Certificate{cert},
+				MinVersion:   tls.VersionTLS12,
+				ClientAuth:   tls.RequireAndVerifyClientCert,
+				ClientCAs:    caPool,
+			}
+			return serverConf, nil
+		}
+	}
 
-	s.server.TLSConfig = severTlsConf
+	s.server.TLSConfig = severTlSConf
 
 	if err := s.server.ListenAndServeTLS("", ""); err != nil {
 		logger.WithContext(ctx).Fatal(fmt.Sprintf("Failed to start secure server: %s", s.name), zap.Error(err))
