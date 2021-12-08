@@ -126,7 +126,7 @@ func NewPublicServer(ctx context.Context) *service.Server {
 	}
 
 	r := buildPublicRoutes(controllers, ssasClient)
-	return service.NewServer("DPC-API Public Server", port, true, r)
+	return service.NewServer("DPC-API Public Server", port, "NONE", r)
 
 }
 
