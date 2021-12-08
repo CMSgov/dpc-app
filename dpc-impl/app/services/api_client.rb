@@ -139,6 +139,6 @@ class ApiClient
   end
 
   def use_ssl?
-    !(Rails.env.development? || Rails.env.test?)
+    (ENV.fetch('ENV') == "prod-sbx" || ENV.fetch('ENV') == "prod")
   end
 end
