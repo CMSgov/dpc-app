@@ -10,8 +10,7 @@ import (
 	"github.com/CMSgov/dpc/api/logger"
 	"go.uber.org/zap"
 	"net/http"
-	"strings"
-	"time"
+    "time"
 )
 
 // Server wrapper struct for an http server.
