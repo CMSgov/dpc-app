@@ -7,6 +7,7 @@ env:
   REPORT_COVERAGE: true
   CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
   DPC_CA_CERT: ${{ secrets.DPC_CA_CERT }}
+  ENV: github-ci
 
 jobs:
   build-api:
