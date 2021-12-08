@@ -22,19 +22,19 @@ type Server struct {
 	//Port server will be running on
 	port int
 
-	//Determines if MTLS will be disabled
-	securityDisabled bool
+	//Determines if type of auth. Supported values: NONE, TLS, MTLS
+	authType string
 
 	//Http server
 	server http.Server
 }
 
 // NewServer creates a new http server wrapper
-func NewServer(name string, port int, securityDisabled bool, handler http.Handler) *Server {
+func NewServer(name string, port int, authType string, handler http.Handler) *Server {
 	s := Server{}
 	s.name = name
 	s.port = port
-	s.securityDisabled = securityDisabled
+	s.authType = authType
 	s.server = http.Server{
 		Handler:      handler,
 		Addr:         fmt.Sprintf("%s%d", ":", s.port),
@@ -47,75 +47,71 @@ func NewServer(name string, port int, securityDisabled bool, handler http.Handle
 
 // Serve Start the server, uses Mutual TLS if security is not disabled
 func (s *Server) Serve(ctx context.Context) error {
-	if s.securityDisabled {
+	if s.authType == "NONE" {
 		fmt.Printf("Starting UNSECURE %s on port %d\n", s.name, s.port)
 		return s.server.ListenAndServe()
+	} else if s.authType == "TLS" {
+		fmt.Printf("Starting secure TLS %s on port %d\n", s.name, s.port)
+		return s.startSecureServer(ctx, false)
+
+	} else if s.authType == "MTLS" {
+		fmt.Printf("Starting secure MTLS %s on port %d\n", s.name, s.port)
+		return s.startSecureServer(ctx, true)
 	}
 
+	return fmt.Errorf("invalid auth type. Supported values: NONE, TLS, MTLS")
+}
+
+func (s *Server) startSecureServer(ctx context.Context, useMTLS bool) error {
 	caPool, cert := getServerCertificates(ctx)
 
-	s.server.TLSConfig = &tls.Config{
+	severTlSConf := &tls.Config{
 		Certificates: []tls.Certificate{cert},
-		GetConfigForClient: func(hi *tls.ClientHelloInfo) (*tls.Config, error) {
-			serverConf := &tls.Config{
-				Certificates:          []tls.Certificate{cert},
-				MinVersion:            tls.VersionTLS12,
-				ClientAuth:            tls.RequireAndVerifyClientCert,
-				ClientCAs:             caPool,
-				VerifyPeerCertificate: getClientValidator(hi, caPool),
-			}
-			return serverConf, nil
-		},
+		MinVersion:   tls.VersionTLS12,
 	}
 
-	fmt.Printf("Starting secure %s on port %d\n", s.name, s.port)
+	if useMTLS {
+		severTlSConf.GetConfigForClient = func(hi *tls.ClientHelloInfo) (*tls.Config, error) {
+			serverConf := &tls.Config{
+				Certificates: []tls.Certificate{cert},
+				MinVersion:   tls.VersionTLS12,
+				ClientAuth:   tls.RequireAndVerifyClientCert,
+				ClientCAs:    caPool,
+			}
+			return serverConf, nil
+		}
+	}
+
+	s.server.TLSConfig = severTlSConf
+
 	if err := s.server.ListenAndServeTLS("", ""); err != nil {
 		logger.WithContext(ctx).Fatal(fmt.Sprintf("Failed to start secure server: %s", s.name), zap.Error(err))
 	}
 	return nil
 }
 
-func getClientValidator(helloInfo *tls.ClientHelloInfo, cerPool *x509.CertPool) func([][]byte, [][]*x509.Certificate) error {
-	acS := conf.GetAsString("ALLOWED_CLIENTS", "local.portal.dpc.cms.gov")
-	allowed := strings.Split(acS, ",")
-	return func(rawCerts [][]byte, verifiedChains [][]*x509.Certificate) error {
-		for _, dnsN := range verifiedChains[0][0].DNSNames {
-			for _, n := range allowed {
-				if n == dnsN {
-					return nil
-				}
-			}
-		}
-		return fmt.Errorf("client's SAN does not contain one of the allowed alt name. Allowed: %s", allowed)
-	}
-}
-
 func getServerCertificates(ctx context.Context) (*x509.CertPool, tls.Certificate) {
-	caB, err := b64.StdEncoding.DecodeString(conf.GetAsString("CA_CERT"))
-	if err != nil {
-		logger.WithContext(ctx).Fatal("Could not base64 decode DPC_CA_CERT", zap.Error(err))
-	}
 	crtB, err := b64.StdEncoding.DecodeString(conf.GetAsString("CERT"))
 	if err != nil {
 		logger.WithContext(ctx).Fatal("Could not base64 decode DPC_CERT", zap.Error(err))
 	}
 	keyB, err := b64.StdEncoding.DecodeString(conf.GetAsString("CERT_KEY"))
 	if err != nil {
-		logger.WithContext(ctx).Fatal("Could not base64 decode DPC_CA_KEY", zap.Error(err))
+		logger.WithContext(ctx).Fatal("Could not base64 decode DPC_CERT_KEY", zap.Error(err))
 	}
 
-	caStr := string(caB)
 	crtStr := string(crtB)
 	keyStr := string(keyB)
 
-	if caStr == "" || crtStr == "" || keyStr == "" {
-		logger.WithContext(ctx).Fatal("One of the following required environment variables is missing: DPC_CA_CERT, DPC_CERT, DPC_CERT_KEY")
+	if crtStr == "" || keyStr == "" {
+		logger.WithContext(ctx).Fatal("One of the following required environment variables is missing or not base64 encoded: DPC_CA_CERT, DPC_CERT, DPC_CERT_KEY")
 	}
 
+	// We are using the server cert as the CA cert.
 	certPool := x509.NewCertPool()
-	ok := certPool.AppendCertsFromPEM([]byte(caStr))
+	ok := certPool.AppendCertsFromPEM([]byte(crtStr))
 	if !ok {
-		logger.WithContext(ctx).Fatal("Failed to parse server CA cert")
+		logger.WithContext(ctx).Fatal("Failed to parse server cert")
 	}
 
 	crt, err := tls.X509KeyPair([]byte(crtStr), []byte(keyStr))
