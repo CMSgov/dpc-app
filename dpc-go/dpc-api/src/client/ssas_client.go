@@ -3,7 +3,10 @@ package client
 import (
 	"bytes"
 	"context"
-	"encoding/json"
+    "crypto/tls"
+    "crypto/x509"
+    b64 "encoding/base64"
+    "encoding/json"
 	"fmt"
 	"github.com/CMSgov/dpc/api/conf"
 	"github.com/CMSgov/dpc/api/constants"
@@ -25,6 +28,9 @@ type SsasHTTPClientConfig struct {
 	Retries      int
 	ClientID     string
 	ClientSecret string
+    CACert  string
+    Cert    string
+    CertKey string
 }
 
 // Contains the different ResourceType for calls to attribution
@@ -59,14 +65,65 @@ type SsasHTTPClient struct {
 }
 
 // NewSsasHTTPClient initializes the retryable client and returns a reference to the ssas client
-func NewSsasHTTPClient(config SsasHTTPClientConfig) SsasClient {
+func NewSsasHTTPClient(ctx context.Context,config SsasHTTPClientConfig) SsasClient {
 	client := retryablehttp.NewClient()
 	client.RetryMax = config.Retries
+    caPool, cert := getSsasCertificates(ctx,config.CACert, config.Cert, config.CertKey)
+
+    if len(cert.Certificate) != 0 && caPool != nil {
+        client.HTTPClient.Transport = &http.Transport{
+            TLSClientConfig: &tls.Config{
+                RootCAs:      caPool,
+                Certificates: []tls.Certificate{cert},
+                MinVersion:   tls.VersionTLS12,
+            },
+        }
+    }
+
 	return &SsasHTTPClient{
 		config:     config,
 		httpClient: client,
 	}
 }
+
+
+func getSsasCertificates(ctx context.Context, caCert string, cert string, certKey string) (*x509.CertPool, tls.Certificate) {
+    if caCert == "" || cert == "" || certKey == "" {
+        logger.WithContext(ctx).Warn("Missing one of: DPC_ATTR_CA_CERT, DPC_ATTR_CERT, DPC_ATTR_CERT_KEY")
+        return nil, tls.Certificate{}
+    }
+
+    caB, err := b64.StdEncoding.DecodeString(caCert)
+    if err != nil {
+        logger.WithContext(ctx).Fatal("Could not base64 decode DPC_ATTR_CA_CERT", zap.Error(err))
+    }
+    crtB, err := b64.StdEncoding.DecodeString(cert)
+    if err != nil {
+        logger.WithContext(ctx).Fatal("Could not base64 decode DPC_ATTR_CERT", zap.Error(err))
+    }
+    keyB, err := b64.StdEncoding.DecodeString(certKey)
+    if err != nil {
+        logger.WithContext(ctx).Fatal("Could not base64 decode DPC_ATTR_CERT_KEY", zap.Error(err))
+    }
+
+    caStr := string(caB)
+    crtStr := string(crtB)
+    keyStr := string(keyB)
+
+    certPool := x509.NewCertPool()
+    ok := certPool.AppendCertsFromPEM([]byte(caStr))
+    if !ok {
+        logger.WithContext(ctx).Fatal("Failed to parse attribution client cert")
+    }
+
+    crt, err := tls.X509KeyPair([]byte(crtStr), []byte(keyStr))
+    if err != nil {
+        logger.WithContext(ctx).Fatal("Failed to parse server cert/key par", zap.Error(err))
+    }
+
+    return certPool, crt
+}
+
 
 // CreateToken function to create a token for ssas system
 func (sc *SsasHTTPClient) CreateToken(ctx context.Context, systemID string, label string) (string, error) {
