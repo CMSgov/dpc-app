@@ -1,4 +1,5 @@
 #!/bin/bash
+
 mkdir -p b64
 #Generate CA
 openssl req -newkey rsa:2048 -nodes -x509 -days 365 -out local.ca.crt -keyout local.ca.key -subj "/C=US/ST=CA/L=LosAngeles/O=ACME/CN=localhost"
