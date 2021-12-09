@@ -24,6 +24,7 @@ services:
       - DB_USER=postgres
       - DB_PASS=dpc-safe
       - DATABASE_CLEANER_ALLOW_REMOTE_DATABASE_URL=true
+      - DPC_CA_CERT=${DPC_CA_CERT}
     ports:
       - "3900:3500"
     depends_on:
@@ -106,6 +107,7 @@ services:
       - DB_USER=postgres
       - DB_PASS=dpc-safe
       - DATABASE_CLEANER_ALLOW_REMOTE_DATABASE_URL=true
+      - ENV=local
     ports:
       - "4000:4000"
     depends_on:

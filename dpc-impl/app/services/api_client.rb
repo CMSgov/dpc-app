@@ -93,6 +93,14 @@ class ApiClient
   def http_request(request, uri)
     http = Net::HTTP.new(uri.host, uri.port)
 
+    if use_ssl?
+      http.use_ssl = true
+      http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+      http.cert = OpenSSL::X509::Certificate.new(Base64.decode64(ENV.fetch('DPC_PORTAL_CERT')))
+      http.ca_file = ENV.fetch('DPC_CA_CERT_PATH')
+      http.key = OpenSSL::PKey::RSA.new(Base64.decode64(ENV.fetch('DPC_PORTAL_KEY')))
+    end
+
     begin
       response = http.request(request)
       @response_status = response.code.to_i
@@ -128,5 +136,9 @@ class ApiClient
     request.body = json
 
     http_request(request, uri)
+  end
+
+  def use_ssl?
+    (ENV.fetch('ENV') == "prod-sbx" || ENV.fetch('ENV') == "prod")
   end
 end
