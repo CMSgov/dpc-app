@@ -64,6 +64,10 @@
                     <groupId>xerces</groupId>
                     <artifactId>xercesImpl</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>org.apache.jmeter</groupId>
+                    <artifactId>ApacheJMeter_core</artifactId>
+                </exclusion>	
             </exclusions>
         </dependency>
         <!-- tika parser explicit upgrade to something that doesn't break snyk -->
