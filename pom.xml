@@ -51,7 +51,7 @@
         <jooq.version>3.13.4</jooq.version>
         <bouncey.version>1.69</bouncey.version>
         <pitest.version>1.5.1</pitest.version>
-        <newrelic.agent.version>5.14.0</newrelic.agent.version>
+        <newrelic.agent.version>7.4.1</newrelic.agent.version>
         <newrelic.agent.type>zip</newrelic.agent.type>
         <h2.version>1.4.200</h2.version>
     </properties>
@@ -310,6 +310,17 @@
     </dependencyManagement>
 
     <dependencies>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <version>2.15.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j-impl</artifactId>
+            <version>2.15.0</version>
+        </dependency>
+
         <!--Test resources-->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
