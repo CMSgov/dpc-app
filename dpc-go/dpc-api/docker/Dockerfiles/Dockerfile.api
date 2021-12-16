@@ -1,4 +1,4 @@
-FROM golang:1.15-alpine3.12 AS builder
+FROM golang:1.17.5-alpine3.15 AS builder
 RUN apk add --no-cache git
 WORKDIR /app/dpc-api
 COPY src/ .
@@ -7,7 +7,7 @@ COPY swaggerui ../swaggerui
 COPY DPCCapabilities.json ../DPCCapabilities.json
 RUN go build  -o ./bin/api .
 
-FROM golang:1.15-alpine3.12
+FROM golang:1.17.5-alpine3.15
 RUN apk update upgrade
 RUN apk --no-cache add ca-certificates aws-cli curl
 WORKDIR /app/dpc-api
