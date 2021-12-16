@@ -2,7 +2,7 @@
 
 module DeviseHelper
   def devise_error_messages!
-    return if flash.notice.blank? && flash.alert.blank? || flash.notice =~ /signed out/i
+    return if (flash.notice.blank? && flash.alert.blank?) || flash.notice =~ /signed out/i
     return notice_msg.html_safe if flash.notice
     return alert_msg.html_safe if flash.alert
   end
