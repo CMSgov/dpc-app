@@ -13,7 +13,7 @@
     <name>DPC SmokeTests</name>
 
     <properties>
-        <jmeter.version>5.4.1</jmeter.version>
+        <jmeter.version>5.4.3</jmeter.version>
     </properties>
 
     <dependencies>
