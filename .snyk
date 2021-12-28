@@ -58,4 +58,36 @@ ignore:
     - '*':
         reason: see DPC-1758
         created: 2021-11-19T16:01:0.0Z
+  SNYK-JAVA-NETMINIDEV-1298655:
+    - '*':
+        reason: false positive; already upgraded
+        created: 2021-12-14T15:24:0.0Z
+  SNYK-JAVA-ORGJSOUP-1567345:
+    - '*':
+        reason: false positive; already upgraded
+        created: 2021-12-22T12:17:0.0Z
+  SNYK-JAVA-ORGAPACHECOMMONS-1316638:
+    - '*':
+        reason: see DPC-1675
+        created: 2021-12-22T12:27:0.0Z
+  SNYK-JAVA-ORGAPACHECOMMONS-1316639:
+    - '*':
+        reason: see DPC-1675
+        created: 2021-12-22T12:27:0.0Z
+  SNYK-JAVA-ORGAPACHECOMMONS-1316640:
+    - '*':
+        reason: see DPC-1675
+        created: 2021-12-22T12:27:0.0Z
+  SNYK-JAVA-ORGAPACHECOMMONS-1316641:
+    - '*':
+        reason: see DPC-1675
+        created: 2021-12-22T12:27:0.0Z
+  SNYK-JAVA-ORGAPACHELOGGINGLOG4J-2321524:
+    - '*':
+        reason: false positive; already upgraded
+        created: 2021-12-22T12:46:0.0Z
+  SNYK-JAVA-ORGAPACHELOGGINGLOG4J-2320014:
+    - '*':
+        reason: false positive; already upgraded
+        created: 2021-12-22T12:46:0.0Z
 patch: {}
