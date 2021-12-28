@@ -22,3 +22,8 @@ reporting:
   - module: passfail
     criteria:
       - "fail>50%, stop as failed"
+
+modules:
+  jmeter:
+    version: 5.4.3
+    fix-log4j: true
