@@ -53,7 +53,7 @@
         <pitest.version>1.5.1</pitest.version>
         <newrelic.agent.version>7.4.1</newrelic.agent.version>
         <newrelic.agent.type>zip</newrelic.agent.type>
-        <h2.version>2.0.202</h2.version>
+        <h2.version>2.0.206</h2.version>
     </properties>
 
     <developers>
