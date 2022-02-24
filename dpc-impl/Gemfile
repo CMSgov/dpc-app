@@ -35,8 +35,9 @@ gem 'sidekiq_alive'
 gem 'redis-namespace'
 gem 'lograge', '>= 0.11.2'
 gem 'luhnacy', '~> 0.2.1'
-# < 1.12.5 has a vulnerability, and is required by other gems
-gem 'nokogiri', '>= 1.12.5'
+
+# < 1.13.2 has a vulnerability, and is required by other gems
+gem 'nokogiri', '>= 1.13.2'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
