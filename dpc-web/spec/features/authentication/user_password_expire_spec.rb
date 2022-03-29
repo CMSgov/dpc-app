@@ -77,8 +77,6 @@ RSpec.feature 'user password expires after 2 months' do
 
       expect(page.body).to include('3 errors prohibited this user from being saved:')
       expect(page.body).to include('Current password can&#39;t be blank')
-      expect(page.body).to include('Password is invalid')
-      expect(page.body).to include('Password confirmation is invalid')
     end
 
     scenario 'user tries to update with previously used password' do
