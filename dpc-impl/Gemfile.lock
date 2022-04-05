@@ -192,9 +192,9 @@ GEM
     pry-nav (1.0.0)
       pry (>= 0.9.10, < 0.15)
     public_suffix (4.0.6)
-    puma (5.6.2)
+    puma (5.6.4)
       nio4r (~> 2.0)
-    puma (5.6.2-java)
+    puma (5.6.4-java)
       nio4r (~> 2.0)
     racc (1.6.0)
     racc (1.6.0-java)
@@ -380,7 +380,7 @@ DEPENDENCIES
   pg (~> 1.1)
   pry
   pry-nav
-  puma (>= 5.5.1)
+  puma (>= 5.6.4)
   rails-controller-testing (>= 1.0.5)
   railties (= 6.1.4.7)
   redis (~> 4.0)
