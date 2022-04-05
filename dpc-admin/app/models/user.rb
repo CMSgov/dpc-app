@@ -77,7 +77,7 @@ class User < ApplicationRecord
       users.each do |user|
         attributes = user.attributes
         attributes['tags'] = user.tags.map(&:name)
-        escaped_attributes = attributes.map do |k, v|
+        escaped_attributes = attributes.to_h do |k, v|
           if ESCAPED_ATTRS.include? k
             v = ERB::Util.html_escape(v)
 
@@ -89,7 +89,7 @@ class User < ApplicationRecord
           end
 
           [k, v]
-        end.to_h
+        end
         csv << escaped_attributes.values_at(*ATTRS)
       end
     end
