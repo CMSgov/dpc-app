@@ -13,7 +13,7 @@
     <name>DPC BlueButton Interaction Client</name>
 
     <properties>
-        <mockserverVersion>5.11.2</mockserverVersion>
+        <mockserverVersion>5.13.2</mockserverVersion>
     </properties>
 
     <dependencies>
