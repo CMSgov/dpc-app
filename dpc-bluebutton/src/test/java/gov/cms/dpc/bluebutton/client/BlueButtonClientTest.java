@@ -326,7 +326,7 @@ class BlueButtonClientTest {
                                         new Header("Content-Type", "application/fhir+xml;charset=UTF-8")
                                 )
                                 .withBody(payload)
-                                .withDelay(TimeUnit.SECONDS, 1)
+                                .withDelay(new org.mockserver.model.Delay(TimeUnit.SECONDS, 1))
                 );
     }
 
