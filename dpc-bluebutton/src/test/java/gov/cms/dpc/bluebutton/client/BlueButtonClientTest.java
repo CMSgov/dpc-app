@@ -325,7 +325,7 @@ class BlueButtonClientTest {
                                 .withHeader(
                                         new Header("Content-Type", "application/fhir+xml;charset=UTF-8")
                                 )
-                                .withBody(payload))
+                                .withBody(payload)
                 );
     }
 
