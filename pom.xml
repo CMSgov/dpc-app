@@ -42,7 +42,7 @@
         <typesafe.config.groupID>${jitpack.groupID}</typesafe.config.groupID>
         <hapi.fhir.groupID>ca.uhn.hapi.fhir</hapi.fhir.groupID>
         <hapi.fhir.version>4.2.0</hapi.fhir.version>
-        <pgsql.version>42.2.24.jre7</pgsql.version>
+        <pgsql.version>42.3.3</pgsql.version>
         <java.version>11</java.version>
         <jib.container.appRoot>/app</jib.container.appRoot>
         <jib.ecr.root>755619740999.dkr.ecr.us-east-1.amazonaws.com</jib.ecr.root>
