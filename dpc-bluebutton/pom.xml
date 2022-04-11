@@ -62,7 +62,7 @@
         <dependency>
             <groupId>org.mozilla</groupId>
             <artifactId>rhino</artifactId>
-            <version>1.7.13</version>
+            <version>1.7.14</version>
         </dependency>
         <dependency>
             <groupId>org.apache.velocity</groupId>
@@ -92,7 +92,7 @@
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-handler-proxy</artifactId>
-            <version>4.1.69.Final</version>
+            <version>4.1.75.Final</version>
         </dependency>
         <dependency>
             <groupId>io.netty</groupId>
@@ -102,7 +102,7 @@
         <dependency>
             <groupId>net.minidev</groupId>
             <artifactId>json-smart</artifactId>
-            <version>2.4.7</version>
+            <version>2.4.8</version>
         </dependency>
        <dependency>
           <groupId>gov.cms.dpc</groupId>
