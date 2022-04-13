@@ -13,7 +13,7 @@
     <name>DPC BlueButton Interaction Client</name>
 
     <properties>
-        <mockserverVersion>5.11.2</mockserverVersion>
+        <mockserverVersion>5.13.2</mockserverVersion>
     </properties>
 
     <dependencies>
@@ -26,6 +26,7 @@
         <dependency>
             <groupId>io.dropwizard</groupId>
             <artifactId>dropwizard-core</artifactId>
+            <version>2.0.0</version>
         </dependency>
         <dependency>
             <groupId>${hapi.fhir.groupID}</groupId>
@@ -71,7 +72,7 @@
         </dependency>
         <dependency>
             <groupId>org.mock-server</groupId>
-            <artifactId>mockserver-netty</artifactId>
+            <artifactId>mockserver-netty-no-dependencies</artifactId>
             <version>${mockserverVersion}</version>
             <exclusions>
                 <exclusion>
