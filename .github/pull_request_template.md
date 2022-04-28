@@ -1,32 +1,10 @@
-<!--
+## [DPC-xxxx](https://jira.cms.gov/browse/DPC-xxxx)
 
---- PR Hygiene Checklist ---
+## Change Details
 
-1. Make sure your branch is named with this format: `user-initials/description-ABC-123`. For example, `jj/add-awesomeness-bcda-99999`
-2. Update the PR title: `dpc-99999 Feature: Add Awesomeness`
-3. Edit the text below - do not leave placeholders in the text.
-4. Add any other details that will be helpful for the reviewers: details description, screenshots, etc
-5. Request a review from someone/multiple someones
--->
+* 
 
-<!-- Replace xxx with the JIRA ticket number: -->
-
-### Fixes [DPC-xxx](https://jira.cms.gov/browse/DPC-xxx)
-
-<!-- Describe the problem being solved here: -->
-
-### Proposed Changes
-
-<!-- List of changes with bullet points here: -->
-
-### Change Details
-
-<!-- Add detailed discussion of changes here: -->
-
-### Security Implications
-
-<!-- Does the change deal with PII/PHI at all? What should reviewers look for in
-terms of security concerns? -->
+## Security Implications
 
 - [ ] new software dependencies
 
@@ -50,16 +28,6 @@ terms of security concerns? -->
 and would like to solicit the team's feedback. Optionally, provide background
 information regarding your questions and concerns. -->
 
-- [ ] no PHI/PII is affected by this change
+- [ ] PHI/PII is affected by this change
 
 <!-- If yes, provide what PHI/PII is affected by this change -->
-
-### Acceptance Validation
-
-<!-- Were you able to fully test the acceptance criteria on the related ticket? if not, why not? -->
-
-<!-- Insert screenshots if applicable (drag images here) -->
-
-### Feedback Requested
-
-<!-- What type of feedback you want from your reviewers? -->
