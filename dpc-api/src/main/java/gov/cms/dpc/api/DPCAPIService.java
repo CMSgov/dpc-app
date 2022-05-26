@@ -66,9 +66,6 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
         bootstrap.addBundle(guiceBundle);
         bootstrap.addBundle(new TypesafeConfigurationBundle("dpc.api"));
 
-        // Wrapper around some of the uglier bundle initialization commands
-        setupCustomBundles(bootstrap);
-
         // Add CLI commands
         addCLICommands(bootstrap);
     }
