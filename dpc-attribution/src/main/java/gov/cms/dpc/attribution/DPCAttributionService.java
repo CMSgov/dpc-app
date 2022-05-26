@@ -10,7 +10,6 @@ import gov.cms.dpc.common.hibernate.attribution.DPCHibernateModule;
 import gov.cms.dpc.common.logging.filters.GenerateRequestIdFilter;
 import gov.cms.dpc.common.logging.filters.LogResponseFilter;
 import gov.cms.dpc.common.utils.EnvironmentParser;
-import gov.cms.dpc.common.utils.PropertiesProvider;
 import gov.cms.dpc.fhir.FHIRModule;
 import io.dropwizard.Application;
 import io.dropwizard.db.PooledDataSourceFactory;
