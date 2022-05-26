@@ -32,8 +32,6 @@ import io.dropwizard.db.DataSourceFactory;
 import io.dropwizard.migrations.MigrationsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
-import io.federecio.dropwizard.swagger.SwaggerBundle;
-import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 import java.util.List;
 
 public class DPCAPIService extends Application<DPCAPIConfiguration> {
@@ -109,29 +107,6 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
         bootstrap.addCommand(new OrganizationCommand());
         bootstrap.addCommand(new TokenCommand());
         bootstrap.addCommand(new KeyCommand());
-    }
-
-    private void setupCustomBundles(final Bootstrap<DPCAPIConfiguration> bootstrap) {
-        final PropertiesProvider propertiesProvider = new PropertiesProvider();
-        bootstrap.addBundle(new SwaggerBundle<DPCAPIConfiguration>() {
-            @Override
-            protected SwaggerBundleConfiguration getSwaggerBundleConfiguration(DPCAPIConfiguration dpcapiConfiguration) {
-                final SwaggerBundleConfiguration swaggerBundleConfiguration = dpcapiConfiguration.getSwaggerBundleConfiguration();
-                swaggerBundleConfiguration.setVersion(propertiesProvider.getApplicationVersion());
-                return swaggerBundleConfiguration;
-            }
-        });
-        bootstrap.addBundle(new MigrationsBundle<DPCAPIConfiguration>() {
-            @Override
-            public DataSourceFactory getDataSourceFactory(DPCAPIConfiguration dpcAPIConfiguration) {
-                return dpcAPIConfiguration.getAuthDatabase();
-            }
-
-            @Override
-            public String getMigrationsFileName() {
-                return "migrations/auth.migrations.xml";
-            }
-        });
     }
 
     private void setupJacksonMapping(final Bootstrap<DPCAPIConfiguration> bootstrap) {
