@@ -27,6 +27,8 @@ import gov.cms.dpc.macaroons.BakeryModule;
 import gov.cms.dpc.queue.JobQueueModule;
 import io.dropwizard.Application;
 import io.dropwizard.auth.AuthValueFactoryProvider;
+import io.dropwizard.db.DataSourceFactory;
+import io.dropwizard.migrations.MigrationsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import java.util.List;
@@ -62,6 +64,9 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
 
         bootstrap.addBundle(guiceBundle);
         bootstrap.addBundle(new TypesafeConfigurationBundle("dpc.api"));
+
+        // Wrapper around some of the uglier bundle initialization commands
+        setupCustomBundles(bootstrap);
 
         // Add CLI commands
         addCLICommands(bootstrap);
@@ -101,6 +106,20 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
         bootstrap.addCommand(new OrganizationCommand());
         bootstrap.addCommand(new TokenCommand());
         bootstrap.addCommand(new KeyCommand());
+    }
+
+    private void setupCustomBundles(final Bootstrap<DPCAPIConfiguration> bootstrap) {
+        bootstrap.addBundle(new MigrationsBundle<DPCAPIConfiguration>() {
+            @Override
+            public DataSourceFactory getDataSourceFactory(DPCAPIConfiguration dpcAPIConfiguration) {
+                return dpcAPIConfiguration.getAuthDatabase();
+            }
+
+            @Override
+            public String getMigrationsFileName() {
+                return "migrations/auth.migrations.xml";
+            }
+        });
     }
 
     private void setupJacksonMapping(final Bootstrap<DPCAPIConfiguration> bootstrap) {
