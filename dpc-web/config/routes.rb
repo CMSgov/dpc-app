@@ -23,7 +23,7 @@ Rails.application.routes.draw do
 
   match '/home', to: redirect("#{ENV['STATIC_SITE_URL']}"), via: :get
 
-  match '/docs', to: redirect("#{ENV['STATIC_SITE_URL']}/docs"), via: :get
+  match '/docs', to: redirect("#{ENV['STATIC_SITE_URL']}/docsV1"), via: :get
 
   # downloadable files
   match '/download_snippet', to: 'public_keys#download_snippet', as: 'download_snippet', via: :post
