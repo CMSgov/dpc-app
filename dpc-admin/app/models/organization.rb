@@ -37,7 +37,7 @@ class Organization < ApplicationRecord
   }
 
   scope :is_not_registered, -> {
-    where('id IN(SELECT DISTINCT(o.id) FROM organizations as o LEFT JOIN registered_organizations as ro ON ro.organization_id = o.id WHERE ro.organization_id IS NULL or ro.enabled IS NOT true)')
+    where('id IN(SELECT DISTINCT(o.id) FROM organizations AS o LEFT JOIN registered_organizations AS ro ON ro.organization_id = o.id WHERE ro.organization_id IS NULL OR ro.enabled IS NOT true)')
   }
 
   def address_type
