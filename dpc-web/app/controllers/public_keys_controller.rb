@@ -10,6 +10,19 @@ class PublicKeysController < ApplicationController
     @organization = current_user.organizations.find(params[:organization_id])
   end
 
+  def destroy
+    @organization = current_user.organizations.find(org_id)
+    reg_org = @organization.registered_organization
+
+    manager = PublicKeyManager.new(registered_organization: reg_org)
+    if manager.delete_public_key(id: params[:id])
+      flash[:notice] = 'Public token successfully deleted.'
+      redirect_to root_path
+    else
+      render_error 'Public token could not be deleted.'
+    end
+  end
+
   def create
     @organization = current_user.organizations.find(params[:organization_id])
     return render_error('Required values missing.') if missing_params
