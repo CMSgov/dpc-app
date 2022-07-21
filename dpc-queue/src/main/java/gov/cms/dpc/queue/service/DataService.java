@@ -72,7 +72,7 @@ public class DataService {
                                  OffsetDateTime transactionTime,
                                  String requestingIP, String requestUrl, DPCResourceType... resourceTypes) {
         UUID jobID = this.queue.createJob(organizationID, orgNPI, providerNPI, patientMBIs, List.of(resourceTypes), since, transactionTime, requestingIP, requestUrl, false, false);
-        LOGGER.info("Patient everything export job created with job_id={} _since={}", jobID.toString(), since);
+        LOGGER.info("Patient everything export job created with job_id={} _since={} from requestUrl{}", jobID.toString(), since, requestUrl);
 
         Optional<List<JobQueueBatch>> optionalBatches = waitForJobToComplete(jobID, organizationID, this.queue);
 
@@ -80,14 +80,18 @@ public class DataService {
             List<JobQueueBatch> batches = optionalBatches.get();
             List<JobQueueBatchFile> files = batches.stream().map(JobQueueBatch::getJobQueueBatchFiles).flatMap(List::stream).collect(Collectors.toList());
             if (files.size() == 1 && files.get(0).getResourceType() == DPCResourceType.OperationOutcome) {
+                // An OperationOutcome (ERROR) was returned
                 return assembleOperationOutcome(batches);
             } else {
+                // A normal Bundle of data was returned
                 return assembleBundleFromBatches(batches, List.of(resourceTypes));
             }
         }
 
+        // No data for the batch was returned AND No OperationOutcome was created
         LOGGER.error("No data returned from queue for job, jobID: {}; jobTimeout: {}", jobID, jobTimeoutInSeconds);
-        throw new DataRetrievalException("Failed to retrieve data");
+        // These Exceptions are not just thrown in the application - the message is also sent in the Response payload
+        throw new DataRetrievalException("Failed to retrieve data"); 
     }
 
     private Optional<List<JobQueueBatch>> waitForJobToComplete(UUID jobID, UUID organizationID, IJobQueue queue) {
@@ -103,6 +107,8 @@ public class DataService {
         }, 0, 250, TimeUnit.MILLISECONDS);
 
         // this timeout value should probably be adjusted according to the number of types being requested
+        // In the case of the /Patient/*/$everything endpoint - we're getting all types back which may take longer than nother requests
+        // Experimenting with increasing this threshold from 30 to 60
         dataFuture.completeOnTimeout(Optional.empty(), jobTimeoutInSeconds, TimeUnit.SECONDS);
 
         try {
