@@ -105,7 +105,7 @@
                 Before you can start testing in the sandbox, add your public keys to get a UUID that you will use when you authenticate access. <%= link_to "Add a public key", new_organization_public_key_path(organization_id: organization.id) %>
               </p>
             <% else %>
-              <% organization.reg_org.public_keys.each do |key, index| %>
+              <% organization.reg_org.public_keys.each_with_index do |key, index| %>
                 <ul class="credentials">
                   <li class="credential">
                     <svg class="icon icon--lg ds-u-margin-right--3" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
