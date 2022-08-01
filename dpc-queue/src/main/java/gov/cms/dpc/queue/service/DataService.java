@@ -72,7 +72,7 @@ public class DataService {
                                  OffsetDateTime transactionTime,
                                  String requestingIP, String requestUrl, DPCResourceType... resourceTypes) {
         UUID jobID = this.queue.createJob(organizationID, orgNPI, providerNPI, patientMBIs, List.of(resourceTypes), since, transactionTime, requestingIP, requestUrl, false, false);
-        LOGGER.info("Patient everything export job created with job_id={} _since={} from requestUrl{}", jobID.toString(), since, requestUrl);
+        LOGGER.info("Patient everything export job created with job_id={} _since={} from requestUrl={}", jobID.toString(), since, requestUrl);
 
         Optional<List<JobQueueBatch>> optionalBatches = waitForJobToComplete(jobID, organizationID, this.queue);
 
