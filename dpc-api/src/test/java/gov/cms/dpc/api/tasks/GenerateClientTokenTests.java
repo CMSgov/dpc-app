@@ -3,16 +3,28 @@ package gov.cms.dpc.api.tasks;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.nitram509.jmacaroons.MacaroonsBuilder;
 import com.google.common.collect.ImmutableMultimap;
+
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
+import ca.uhn.fhir.rest.gclient.IReadExecutable;
+import ca.uhn.fhir.rest.gclient.IUpdateTyped;
+import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import edu.emory.mathcs.backport.java.util.Collections;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.entities.PublicKeyEntity;
 import gov.cms.dpc.api.entities.TokenEntity;
 import gov.cms.dpc.api.models.CollectionResponse;
+import gov.cms.dpc.api.resources.v1.OrganizationResource;
 import gov.cms.dpc.api.resources.v1.TokenResource;
 import gov.cms.dpc.api.tasks.tokens.DeleteToken;
 import gov.cms.dpc.api.tasks.tokens.GenerateClientTokens;
 import gov.cms.dpc.api.tasks.tokens.ListClientTokens;
 import gov.cms.dpc.macaroons.MacaroonBakery;
+import gov.cms.dpc.testing.APIAuthHelpers;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import io.dropwizard.jersey.jsr310.OffsetDateTimeParam;
 import org.hl7.fhir.dstu3.model.Organization;
@@ -41,6 +53,7 @@ import static org.mockito.Mockito.times;
 public class GenerateClientTokenTests {
 
     private TokenResource tokenResource = Mockito.mock(TokenResource.class);
+    private OrganizationResource orgResource = Mockito.mock(OrganizationResource.class);
     private static MacaroonBakery bakery = Mockito.mock(MacaroonBakery.class);
     private ArgumentCaptor<OrganizationPrincipal> principalCaptor = ArgumentCaptor.forClass(OrganizationPrincipal.class);
     private ArgumentCaptor<String> tokenLabelCaptor = ArgumentCaptor.forClass(String.class);
@@ -49,9 +62,10 @@ public class GenerateClientTokenTests {
     private final ListClientTokens lct;
     private final DeleteToken dct;
     private final ObjectMapper mapper;
+    private final FhirContext ctx;
 
     GenerateClientTokenTests() {
-        this.gct = new GenerateClientTokens(bakery, tokenResource);
+        this.gct = new GenerateClientTokens(bakery, tokenResource, orgResource);
         this.lct = new ListClientTokens(tokenResource);
         this.dct = new DeleteToken(tokenResource);
         this.mapper = new ObjectMapper();
@@ -79,6 +93,14 @@ public class GenerateClientTokenTests {
         final TokenEntity response = Mockito.mock(TokenEntity.class);
         Mockito.when(response.getToken()).thenReturn("test token");
         Mockito.when(tokenResource.createOrganizationToken(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(response);
+        final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
+
+        final Bundle organizations = client
+                .search()
+                .forResource(Organization.class)
+                .returnBundle(Bundle.class)
+                .encodedJson()
+                .execute();
 
         final UUID id = UUID.randomUUID();
         final Organization org = new Organization();

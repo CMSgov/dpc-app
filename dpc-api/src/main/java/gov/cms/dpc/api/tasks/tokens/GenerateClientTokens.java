@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableMultimap;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.entities.TokenEntity;
 import gov.cms.dpc.api.resources.v1.TokenResource;
+import gov.cms.dpc.api.resources.v1.OrganizationResource;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import io.dropwizard.jersey.jsr310.OffsetDateTimeParam;
 import io.dropwizard.servlets.tasks.Task;
@@ -31,13 +32,15 @@ public class GenerateClientTokens extends Task {
     private static final Logger logger = LoggerFactory.getLogger(GenerateClientTokens.class);
 
     private final MacaroonBakery bakery;
-    private final TokenResource resource;
+    private final TokenResource resourceToken;
+    private final OrganizationResource resourceOrganization;
 
     @Inject
-    public GenerateClientTokens(MacaroonBakery bakery, TokenResource resource) {
+    public GenerateClientTokens(MacaroonBakery bakery, TokenResource resourceToken, OrganizationResource  resourceOrganization) {
         super("generate-token");
         this.bakery = bakery;
-        this.resource = resource;
+        this.resourceToken = resourceToken;
+        this.resourceOrganization = resourceOrganization;
     }
 
     @Override
@@ -50,21 +53,31 @@ public class GenerateClientTokens extends Task {
             final Macaroon macaroon = bakery.createMacaroon(Collections.emptyList());
             output.write(macaroon.serialize(MacaroonVersion.SerializationVersion.V1_BINARY));
         } else {
-            final String organization = organizationCollection.asList().get(0);
+            final String organizationId = organizationCollection.asList().get(0);
             final Organization orgResource = new Organization();
-            orgResource.setId(organization);
-            final String tokenLabel = labelCollection.isEmpty() ? null : labelCollection.asList().get(0);
-            Optional<OffsetDateTimeParam> expiration = Optional.empty();
-            if(!expirationCollection.isEmpty() && !StringUtils.isBlank(expirationCollection.asList().get(0))){
-                expiration = Optional.of(new OffsetDateTimeParam(expirationCollection.asList().get(0)));
-            }
-            final TokenEntity tokenResponse = this.resource
-                    .createOrganizationToken(
-                            new OrganizationPrincipal(orgResource), null,
-                            tokenLabel,
-                            expiration);
+            orgResource.setId(organizationId);
 
-            output.write(tokenResponse.getToken());
+            final OrganizationPrincipal orgPrincipal = new OrganizationPrincipal(orgResource);
+            final var existingOrg = resourceOrganization.orgSearch(orgPrincipal);
+
+            String existingId = existingOrg == null ? "-1" : existingOrg.getId();
+            if(existingId == organizationId) {
+                final String tokenLabel = labelCollection.isEmpty() ? null : labelCollection.asList().get(0);
+                Optional<OffsetDateTimeParam> expiration = Optional.empty();
+                if(!expirationCollection.isEmpty() && !StringUtils.isBlank(expirationCollection.asList().get(0))){
+                    expiration = Optional.of(new OffsetDateTimeParam(expirationCollection.asList().get(0)));
+                }
+                final TokenEntity tokenResponse = this.resourceToken
+                        .createOrganizationToken(
+                                new OrganizationPrincipal(orgResource), null,
+                                tokenLabel,
+                                expiration);
+    
+                output.write(tokenResponse.getToken());
+            } else {
+                logger.warn("ATTEMPT TO CREATE ORPHAN MACAROON.");
+                throw new Error("ERROR: No Organization found with this ID (`" + organizationId + "`). Please double check your data and try again.");
+            }
         }
     }
 }
