@@ -14,6 +14,7 @@ import ca.uhn.fhir.rest.gclient.IUpdateTyped;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import edu.emory.mathcs.backport.java.util.Collections;
+import gov.cms.dpc.api.AbstractSecureApplicationTest;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.entities.PublicKeyEntity;
 import gov.cms.dpc.api.entities.TokenEntity;
@@ -23,10 +24,13 @@ import gov.cms.dpc.api.resources.v1.TokenResource;
 import gov.cms.dpc.api.tasks.tokens.DeleteToken;
 import gov.cms.dpc.api.tasks.tokens.GenerateClientTokens;
 import gov.cms.dpc.api.tasks.tokens.ListClientTokens;
+import gov.cms.dpc.common.entities.OrganizationEntity;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.testing.APIAuthHelpers;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import io.dropwizard.jersey.jsr310.OffsetDateTimeParam;
+
+import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -50,7 +54,7 @@ import static org.mockito.Mockito.times;
 
 @SuppressWarnings("unchecked")
 @ExtendWith(BufferedLoggerHandler.class)
-public class GenerateClientTokenTests {
+public class GenerateClientTokenTests extends AbstractSecureApplicationTest {
 
     private TokenResource tokenResource = Mockito.mock(TokenResource.class);
     private OrganizationResource orgResource = Mockito.mock(OrganizationResource.class);
@@ -62,7 +66,6 @@ public class GenerateClientTokenTests {
     private final ListClientTokens lct;
     private final DeleteToken dct;
     private final ObjectMapper mapper;
-    private final FhirContext ctx;
 
     GenerateClientTokenTests() {
         this.gct = new GenerateClientTokens(bakery, tokenResource, orgResource);
@@ -75,6 +78,7 @@ public class GenerateClientTokenTests {
     void cleanup() {
         Mockito.reset(bakery);
         Mockito.reset(tokenResource);
+        Mockito.reset(orgResource);
     }
 
     @Test
@@ -91,16 +95,19 @@ public class GenerateClientTokenTests {
     void testTokenCreation() throws IOException {
 
         final TokenEntity response = Mockito.mock(TokenEntity.class);
+        final OrganizationPrincipal orgPrincipal = Mockito.mock(OrganizationPrincipal.class);
         Mockito.when(response.getToken()).thenReturn("test token");
         Mockito.when(tokenResource.createOrganizationToken(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(response);
-        final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
 
-        final Bundle organizations = client
+        final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
+        final Bundle organizationBundle = client
                 .search()
                 .forResource(Organization.class)
                 .returnBundle(Bundle.class)
                 .encodedJson()
                 .execute();
+
+        Mockito.when(orgResource.orgSearch(orgPrincipal)).thenReturn(organizationBundle);
 
         final UUID id = UUID.randomUUID();
         final Organization org = new Organization();

@@ -36,7 +36,7 @@ public class GenerateClientTokens extends Task {
     private final OrganizationResource resourceOrganization;
 
     @Inject
-    public GenerateClientTokens(MacaroonBakery bakery, TokenResource resourceToken, OrganizationResource  resourceOrganization) {
+    public GenerateClientTokens(MacaroonBakery bakery, TokenResource resourceToken, OrganizationResource resourceOrganization) {
         super("generate-token");
         this.bakery = bakery;
         this.resourceToken = resourceToken;
