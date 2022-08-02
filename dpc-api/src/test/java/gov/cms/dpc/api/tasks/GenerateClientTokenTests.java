@@ -3,18 +3,7 @@ package gov.cms.dpc.api.tasks;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.nitram509.jmacaroons.MacaroonsBuilder;
 import com.google.common.collect.ImmutableMultimap;
-
-import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
-import ca.uhn.fhir.rest.gclient.IReadExecutable;
-import ca.uhn.fhir.rest.gclient.IUpdateTyped;
-import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import edu.emory.mathcs.backport.java.util.Collections;
-import gov.cms.dpc.api.AbstractSecureApplicationTest;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.entities.PublicKeyEntity;
 import gov.cms.dpc.api.entities.TokenEntity;
@@ -26,7 +15,6 @@ import gov.cms.dpc.api.tasks.tokens.GenerateClientTokens;
 import gov.cms.dpc.api.tasks.tokens.ListClientTokens;
 import gov.cms.dpc.common.entities.OrganizationEntity;
 import gov.cms.dpc.macaroons.MacaroonBakery;
-import gov.cms.dpc.testing.APIAuthHelpers;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import io.dropwizard.jersey.jsr310.OffsetDateTimeParam;
 
@@ -54,7 +42,7 @@ import static org.mockito.Mockito.times;
 
 @SuppressWarnings("unchecked")
 @ExtendWith(BufferedLoggerHandler.class)
-public class GenerateClientTokenTests extends AbstractSecureApplicationTest {
+public class GenerateClientTokenTests {
 
     private TokenResource tokenResource = Mockito.mock(TokenResource.class);
     private OrganizationResource orgResource = Mockito.mock(OrganizationResource.class);
@@ -93,25 +81,17 @@ public class GenerateClientTokenTests extends AbstractSecureApplicationTest {
 
     @Test
     void testTokenCreation() throws IOException {
-
         final TokenEntity response = Mockito.mock(TokenEntity.class);
-        final OrganizationPrincipal orgPrincipal = Mockito.mock(OrganizationPrincipal.class);
         Mockito.when(response.getToken()).thenReturn("test token");
         Mockito.when(tokenResource.createOrganizationToken(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(response);
-
-        final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
-        final Bundle organizationBundle = client
-                .search()
-                .forResource(Organization.class)
-                .returnBundle(Bundle.class)
-                .encodedJson()
-                .execute();
-
-        Mockito.when(orgResource.orgSearch(orgPrincipal)).thenReturn(organizationBundle);
 
         final UUID id = UUID.randomUUID();
         final Organization org = new Organization();
         org.setId(id.toString());
+
+        final Bundle orgBundle = new Bundle();
+        orgBundle.addEntry().setResource(org);
+        Mockito.when(orgResource.orgSearch(Mockito.any())).thenReturn(orgBundle);
 
         final ImmutableMultimap<String, String> map = ImmutableMultimap.of("organization", id.toString());
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
@@ -134,6 +114,10 @@ public class GenerateClientTokenTests extends AbstractSecureApplicationTest {
         final Organization org = new Organization();
         org.setId(id.toString());
 
+        final Bundle orgBundle = new Bundle();
+        orgBundle.addEntry().setResource(org);
+        Mockito.when(orgResource.orgSearch(Mockito.any())).thenReturn(orgBundle);
+
         final ImmutableMultimap<String, String> map = ImmutableMultimap.of("organization", id.toString(), "label", tokenLabel);
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
             gct.execute(map, new PrintWriter(new OutputStreamWriter(bos)));
@@ -152,6 +136,10 @@ public class GenerateClientTokenTests extends AbstractSecureApplicationTest {
         final UUID id = UUID.randomUUID();
         final Organization org = new Organization();
         org.setId(id.toString());
+
+        final Bundle orgBundle = new Bundle();
+        orgBundle.addEntry().setResource(org);
+        Mockito.when(orgResource.orgSearch(Mockito.any())).thenReturn(orgBundle);
 
         final ImmutableMultimap<String, String> map = ImmutableMultimap.of("organization", id.toString(), "expiration", "");
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
@@ -172,6 +160,10 @@ public class GenerateClientTokenTests extends AbstractSecureApplicationTest {
         final UUID id = UUID.randomUUID();
         final Organization org = new Organization();
         org.setId(id.toString());
+
+        final Bundle orgBundle = new Bundle();
+        orgBundle.addEntry().setResource(org);
+        Mockito.when(orgResource.orgSearch(Mockito.any())).thenReturn(orgBundle);
 
         final ImmutableMultimap<String, String> map = ImmutableMultimap.of("organization", id.toString(), "expiration", expires);
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {

@@ -58,10 +58,10 @@ public class GenerateClientTokens extends Task {
             orgResource.setId(organizationId);
 
             final OrganizationPrincipal orgPrincipal = new OrganizationPrincipal(orgResource);
-            final var existingOrg = resourceOrganization.orgSearch(orgPrincipal);
+            final var existingOrg = this.resourceOrganization.orgSearch(orgPrincipal);
+            String existingId = existingOrg == null ? "-1" : existingOrg.getEntryFirstRep().getResource().getId();
 
-            String existingId = existingOrg == null ? "-1" : existingOrg.getId();
-            if(existingId == organizationId) {
+            if(organizationId.equals(existingId)) {
                 final String tokenLabel = labelCollection.isEmpty() ? null : labelCollection.asList().get(0);
                 Optional<OffsetDateTimeParam> expiration = Optional.empty();
                 if(!expirationCollection.isEmpty() && !StringUtils.isBlank(expirationCollection.asList().get(0))){
