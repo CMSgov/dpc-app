@@ -18,6 +18,7 @@ import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import io.dropwizard.jersey.jsr310.OffsetDateTimeParam;
 
+import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.junit.jupiter.api.AfterEach;
@@ -43,7 +44,6 @@ import static org.mockito.Mockito.times;
 @SuppressWarnings("unchecked")
 @ExtendWith(BufferedLoggerHandler.class)
 public class GenerateClientTokenTests {
-
     private TokenResource tokenResource = Mockito.mock(TokenResource.class);
     private OrganizationResource orgResource = Mockito.mock(OrganizationResource.class);
     private static MacaroonBakery bakery = Mockito.mock(MacaroonBakery.class);
@@ -124,6 +124,30 @@ public class GenerateClientTokenTests {
             Mockito.verify(bakery, never()).createMacaroon(eq(Collections.emptyList()));
             Mockito.verify(tokenResource, times(1)).createOrganizationToken(Mockito.isNotNull(), Mockito.isNull(), tokenLabelCaptor.capture(), eq(Optional.empty()));
             assertEquals(tokenLabel, tokenLabelCaptor.getValue(), "Should have correct label");
+        }
+    }
+
+    @Test
+    void testTokenCreationWithOrgNotFound() throws IOException {
+        final TokenEntity response = Mockito.mock(TokenEntity.class);
+        Mockito.when(response.getToken()).thenReturn("test token");
+        Mockito.when(tokenResource.createOrganizationToken(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(response);
+
+        final UUID id = UUID.randomUUID();
+        final Organization org = new Organization();
+        org.setId(id.toString());
+
+        Mockito.when(orgResource.orgSearch(Mockito.any())).thenReturn(null);
+
+        final ImmutableMultimap<String, String> map = ImmutableMultimap.of("organization", id.toString());
+        try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+            gct.execute(map, new PrintWriter(new OutputStreamWriter(bos)));
+            final WebApplicationException ex = assertThrows(WebApplicationException.class, () -> lct.execute(map, new PrintWriter(new OutputStreamWriter(bos))));
+//            assertEquals(HttpStatus.BAD_REQUEST_400
+//                    , ex.getResponse().getStatus()
+//                    , String.format("ERROR: Organization not found with ID: \"%s\". Please double check your data and try again.", id.toString()));
+            assertEquals(String.format("ERROR: Organization not found with ID: \"%s\". Please double check your data and try again.", id.toString())
+                    , ex.getMessage());
         }
     }
 

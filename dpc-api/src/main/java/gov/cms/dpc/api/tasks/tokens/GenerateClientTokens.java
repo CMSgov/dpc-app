@@ -18,6 +18,8 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.Optional;
@@ -76,7 +78,7 @@ public class GenerateClientTokens extends Task {
                 output.write(tokenResponse.getToken());
             } else {
                 logger.warn("ATTEMPT TO CREATE ORPHAN MACAROON.");
-                throw new Error("ERROR: No Organization found with this ID (`" + organizationId + "`). Please double check your data and try again.");
+                throw new WebApplicationException(String.format("ERROR: Organization not found with ID: \"%s\". Please double check your data and try again.", organizationId), Response.Status.BAD_REQUEST);
             }
         }
     }
