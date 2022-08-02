@@ -5,6 +5,10 @@ volumes:
 
 services:
 
+  db:
+    ports:
+      - "5432:5432"
+
   redis:
     image: redis:latest
 
