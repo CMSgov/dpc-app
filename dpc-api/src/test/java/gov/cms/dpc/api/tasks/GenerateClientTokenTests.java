@@ -141,13 +141,10 @@ public class GenerateClientTokenTests {
 
         final ImmutableMultimap<String, String> map = ImmutableMultimap.of("organization", id.toString());
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
-            gct.execute(map, new PrintWriter(new OutputStreamWriter(bos)));
-            final WebApplicationException ex = assertThrows(WebApplicationException.class, () -> lct.execute(map, new PrintWriter(new OutputStreamWriter(bos))));
-//            assertEquals(HttpStatus.BAD_REQUEST_400
-//                    , ex.getResponse().getStatus()
-//                    , String.format("ERROR: Organization not found with ID: \"%s\". Please double check your data and try again.", id.toString()));
-            assertEquals(String.format("ERROR: Organization not found with ID: \"%s\". Please double check your data and try again.", id.toString())
-                    , ex.getMessage());
+            final WebApplicationException ex = assertThrows(WebApplicationException.class, () -> gct.execute(map, new PrintWriter(new OutputStreamWriter(bos))));
+            assertEquals(HttpStatus.BAD_REQUEST_400
+                    , ex.getResponse().getStatus()
+                    , String.format("ERROR: Organization not found with ID: \"%s\". Please double check your data and try again.", id.toString()));
         }
     }
 
