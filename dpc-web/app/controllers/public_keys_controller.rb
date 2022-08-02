@@ -11,7 +11,7 @@ class PublicKeysController < ApplicationController
   end
 
   def destroy
-    @organization = current_user.organizations.find(org_id)
+    @organization = current_user.organizations.find(params[:organization_id])
     reg_org = @organization.registered_organization
 
     manager = PublicKeyManager.new(registered_organization: reg_org)
