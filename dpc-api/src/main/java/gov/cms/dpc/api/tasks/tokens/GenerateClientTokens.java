@@ -34,15 +34,15 @@ public class GenerateClientTokens extends Task {
     private static final Logger logger = LoggerFactory.getLogger(GenerateClientTokens.class);
 
     private final MacaroonBakery bakery;
-    private final TokenResource resourceToken;
-    private final OrganizationResource resourceOrganization;
+    private final TokenResource tokenResource;
+    private final OrganizationResource orgResource;
 
     @Inject
-    public GenerateClientTokens(MacaroonBakery bakery, TokenResource resourceToken, OrganizationResource resourceOrganization) {
+    public GenerateClientTokens(MacaroonBakery bakery, TokenResource tokenResource, OrganizationResource orgResource) {
         super("generate-token");
         this.bakery = bakery;
-        this.resourceToken = resourceToken;
-        this.resourceOrganization = resourceOrganization;
+        this.tokenResource = tokenResource;
+        this.orgResource = orgResource;
     }
 
     @Override
@@ -56,11 +56,11 @@ public class GenerateClientTokens extends Task {
             output.write(macaroon.serialize(MacaroonVersion.SerializationVersion.V1_BINARY));
         } else {
             final String organizationId = organizationCollection.asList().get(0);
-            final Organization orgResource = new Organization();
-            orgResource.setId(organizationId);
+            final Organization organization = new Organization();
+            organization.setId(organizationId);
 
-            final OrganizationPrincipal orgPrincipal = new OrganizationPrincipal(orgResource);
-            final var existingOrg = this.resourceOrganization.orgSearch(orgPrincipal);
+            final OrganizationPrincipal orgPrincipal = new OrganizationPrincipal(organization);
+            final var existingOrg = this.orgResource.orgSearch(orgPrincipal);
             String existingId = existingOrg == null ? "-1" : existingOrg.getEntryFirstRep().getResource().getId();
 
             if(organizationId.equals(existingId)) {
@@ -69,9 +69,9 @@ public class GenerateClientTokens extends Task {
                 if(!expirationCollection.isEmpty() && !StringUtils.isBlank(expirationCollection.asList().get(0))){
                     expiration = Optional.of(new OffsetDateTimeParam(expirationCollection.asList().get(0)));
                 }
-                final TokenEntity tokenResponse = this.resourceToken
+                final TokenEntity tokenResponse = this.tokenResource
                         .createOrganizationToken(
-                                new OrganizationPrincipal(orgResource), null,
+                                new OrganizationPrincipal(organization), null,
                                 tokenLabel,
                                 expiration);
     
