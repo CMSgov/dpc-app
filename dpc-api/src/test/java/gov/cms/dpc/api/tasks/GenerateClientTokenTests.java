@@ -13,11 +13,9 @@ import gov.cms.dpc.api.resources.v1.TokenResource;
 import gov.cms.dpc.api.tasks.tokens.DeleteToken;
 import gov.cms.dpc.api.tasks.tokens.GenerateClientTokens;
 import gov.cms.dpc.api.tasks.tokens.ListClientTokens;
-import gov.cms.dpc.common.entities.OrganizationEntity;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import io.dropwizard.jersey.jsr310.OffsetDateTimeParam;
-
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Organization;
