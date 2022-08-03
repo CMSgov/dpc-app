@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 # rubocop:disable Metrics/ClassLength
 
 class APIClient
@@ -193,3 +194,5 @@ class APIClient
     @response_body = { 'issue' => [{ 'details' => { 'text' => 'Connection error' } }] }
   end
 end
+
+# rubocop:enable Metrics/ClassLength
