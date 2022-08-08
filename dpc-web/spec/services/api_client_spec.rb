@@ -465,7 +465,7 @@ RSpec.describe APIClient do
 
         stub_request(:delete, 'http://dpc.example.com/Key/3fa85f64-5717-4562-b3fc-2c963f66afa6')
           .with(
-            headers: { 'Accept'=>'application/json', 'Content-Type'=>'application/json'}
+            headers: { 'Accept'=>'application/json', 'Content-Type'=>'application/json' }
           )
           .to_return(status: 200, body: '', headers: {})
 
