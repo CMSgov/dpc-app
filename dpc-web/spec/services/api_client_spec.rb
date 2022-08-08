@@ -463,13 +463,11 @@ RSpec.describe APIClient do
           params: { label: 'Sandbox Key 1', public_key: stubbed_key, snippet_signature: 'signature_snippet' }
         )
 
-        stub_request(:delete, "http://dpc.example.com/Key/3fa85f64-5717-4562-b3fc-2c963f66afa6").
-         with(
-           headers: {
-       	  'Accept'=>'application/json',
-       	  'Content-Type'=>'application/json',
-           }).
-         to_return(status: 200, body: "", headers: {})
+        stub_request(:delete, 'http://dpc.example.com/Key/3fa85f64-5717-4562-b3fc-2c963f66afa6')
+          .with(
+            headers: { 'Accept'=>'application/json', 'Content-Type'=>'application/json'}
+          )
+          .to_return(status: 200, body: '', headers: {})
 
         api_client.delete_public_key(
           registered_org.api_id,

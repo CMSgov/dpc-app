@@ -28,10 +28,9 @@ RSpec.describe PublicKeyManager do
           new_public_key = manager.create_public_key(@public_key_params)
 
           expect(new_public_key[:response]).to eq(true)
-          new_public_key = manager.delete_public_key({id: '570f7a71-0e8f-48a1-83b0-c46ac35d6ef3'})
+          new_public_key = manager.delete_public_key({ id: '570f7a71-0e8f-48a1-83b0-c46ac35d6ef3' })
 
           expect(new_public_key).to eq(true)
-
         end
       end
 

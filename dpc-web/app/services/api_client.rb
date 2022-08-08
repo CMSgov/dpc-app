@@ -192,4 +192,3 @@ class APIClient
     @response_body = { 'issue' => [{ 'details' => { 'text' => 'Connection error' } }] }
   end
 end
-
