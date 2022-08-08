@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-# rubocop:disable Metrics/ClassLength
-
 class APIClient
   attr_reader :base_url, :response_body, :response_status
 
@@ -195,4 +193,3 @@ class APIClient
   end
 end
 
-# rubocop:enable Metrics/ClassLength
