@@ -15,8 +15,10 @@ RSpec.describe PublicKeyManager do
 
           api_client = instance_double(APIClient)
           allow(APIClient).to receive(:new).and_return(api_client)
+          allow(api_client).to receive(:delete_public_key)
+            .with(registered_org.api_id, '570f7a71-0e8f-48a1-83b0-c46ac35d6ef3')
+            .and_return(true)
           allow(api_client).to receive(:create_public_key)
-            .with(registered_org.api_id, params: @public_key_params)
             .and_return(api_client)
           allow(api_client).to receive(:response_successful?).and_return(true)
           allow(api_client).to receive(:response_body).and_return('id' => '570f7a71-0e8f-48a1-83b0-c46ac35d6ef3')
@@ -26,6 +28,10 @@ RSpec.describe PublicKeyManager do
           new_public_key = manager.create_public_key(@public_key_params)
 
           expect(new_public_key[:response]).to eq(true)
+          new_public_key = manager.delete_public_key({id: '570f7a71-0e8f-48a1-83b0-c46ac35d6ef3'})
+
+          expect(new_public_key).to eq(true)
+
         end
       end
 

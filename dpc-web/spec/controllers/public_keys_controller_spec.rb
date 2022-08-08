@@ -35,6 +35,57 @@ RSpec.describe PublicKeysController, type: :controller do
     end
   end
 
+  describe 'GET #destroy' do
+    let!(:user) { create(:user, :assigned) }
+
+    context 'authenticated user' do
+      before(:each) do
+        sign_in user, scope: :user
+      end
+
+      context 'with a successful call to the api' do
+        it 'returns http success' do
+          stub = stub_api_client(
+            message: :create_organization,
+            success: true,
+            response: default_org_creation_response
+          )
+          allow(stub).to receive(:get_public_keys).and_return(stub)
+          allow(stub).to receive(:response_body).and_return(default_org_creation_response, { 'entities' => [] })
+
+          org = create(:organization, :api_enabled)
+          user.organizations << org
+
+          allow(stub).to receive(:delete_public_key).and_return(true)
+
+          get :destroy, params: { id: 1, organization_id: org.id }
+          expect(response.location).to include(request.host + root_path)
+          expect(response).to have_http_status(:found)
+        end
+      end
+
+      context 'with a failed call to the api' do
+        it 'renders new' do
+          stub = stub_api_client(
+            message: :create_organization,
+            success: true,
+            response: default_org_creation_response
+          )
+          allow(stub).to receive(:get_public_keys).and_return(stub)
+          allow(stub).to receive(:response_body).and_return(default_org_creation_response, { 'entities' => [] })
+
+          org = create(:organization, :api_enabled)
+          user.organizations << org
+
+          allow(stub).to receive(:delete_public_key).and_return(false)
+
+          get :destroy, params: { id: 1, organization_id: org.id }
+          expect(response).to render_template(:new)
+        end
+      end
+    end
+  end
+
   describe 'GET #create' do
     let!(:user) { create(:user, :assigned) }
     let(:org) { create(:organization, :api_enabled) }
