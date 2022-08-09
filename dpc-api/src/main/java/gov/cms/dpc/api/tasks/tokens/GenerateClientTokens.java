@@ -59,27 +59,18 @@ public class GenerateClientTokens extends Task {
             final Organization organization = new Organization();
             organization.setId(organizationId);
 
+            // default `orgExist` to true, the `checkOrg` option is meant to be optional
+            // when present, ensure the submitted orgId matches an org in the db.
             Boolean orgExists = true;
-            if(!needCheckOrgCollection.isEmpty()
+            final Boolean needOrgValidation = !needCheckOrgCollection.isEmpty()
                     && !StringUtils.isBlank(needCheckOrgCollection.asList().get(0))
-                    && needCheckOrgCollection.asList().get(0) == "true"
-            ) {
-                orgExists = checkOrgExists(organization);
+                    && needCheckOrgCollection.asList().get(0) == "true";
+            if(needOrgValidation) {
+                orgExists = validateOrgExists(organization);
             }
 
             if(orgExists) {
-                final String tokenLabel = labelCollection.isEmpty() ? null : labelCollection.asList().get(0);
-                Optional<OffsetDateTimeParam> expiration = Optional.empty();
-                if(!expirationCollection.isEmpty() && !StringUtils.isBlank(expirationCollection.asList().get(0))){
-                    expiration = Optional.of(new OffsetDateTimeParam(expirationCollection.asList().get(0)));
-                }
-                final TokenEntity tokenResponse = this.tokenResource
-                        .createOrganizationToken(
-                                new OrganizationPrincipal(organization), null,
-                                tokenLabel,
-                                expiration);
-    
-                output.write(tokenResponse.getToken());
+                createTokan(output, labelCollection, expirationCollection, organization);
             } else {
                 logger.warn("ATTEMPT TO CREATE ORPHAN MACAROON.");
                 throw new WebApplicationException(String.format("ERROR: Organization not found with ID: \"%s\". Please double check your data and try again.", organizationId), Response.Status.BAD_REQUEST);
@@ -93,9 +84,26 @@ public class GenerateClientTokens extends Task {
         output.write(macaroon.serialize(MacaroonVersion.SerializationVersion.V1_BINARY));
     }
 
-    private Boolean checkOrgExists(Organization organization) {
+    private Boolean validateOrgExists(Organization organization) {
         final OrganizationPrincipal orgPrincipal = new OrganizationPrincipal(organization);
         final var existingOrg = this.orgResource.orgSearch(orgPrincipal);
         return existingOrg == null ? false : true;
+    }
+
+    private void createTokan(PrintWriter output, ImmutableCollection<String> labelCollection, ImmutableCollection<String> expirationCollection, Organization organization) {
+        final String tokenLabel = labelCollection.isEmpty() ? null : labelCollection.asList().get(0);
+        // Use Expiration Date if provided, otherwise use `empty` value, and will default to 1-year
+        Optional<OffsetDateTimeParam> expiration = Optional.empty();
+        final Boolean hasExpiration = !expirationCollection.isEmpty() && !StringUtils.isBlank(expirationCollection.asList().get(0));
+        if(hasExpiration){
+            expiration = Optional.of(new OffsetDateTimeParam(expirationCollection.asList().get(0)));
+        }
+        final TokenEntity tokenResponse = this.tokenResource
+                .createOrganizationToken(
+                        new OrganizationPrincipal(organization), null,
+                        tokenLabel,
+                        expiration);
+
+        output.write(tokenResponse.getToken());
     }
 }
