@@ -96,7 +96,6 @@ public class GenerateClientTokens extends Task {
     private Boolean checkOrgExists(Organization organization) {
         final OrganizationPrincipal orgPrincipal = new OrganizationPrincipal(organization);
         final var existingOrg = this.orgResource.orgSearch(orgPrincipal);
-//        String existingId = existingOrg == null ? "-1" : existingOrg.getEntryFirstRep().getResource().getId();
         return existingOrg == null ? false : true;
     }
 }
