@@ -59,17 +59,17 @@ public class GenerateClientTokens extends Task {
             final Organization organization = new Organization();
             organization.setId(organizationId);
 
-            // default `orgExist` to true, the `checkOrg` option is meant to be optional
-            // when present, ensure the submitted orgId matches an org in the db.
-            Boolean orgExists = true;
+            // `checkOrg` parameter is meant to be optional, if not present, default `canCreateToken` to true.
+            // When `checkOrg` is provided, ensure the submitted orgId matches an org in the db before creating token.
+            Boolean canCreateToken = true;
             final Boolean needOrgValidation = !needCheckOrgCollection.isEmpty()
                     && !StringUtils.isBlank(needCheckOrgCollection.asList().get(0))
                     && needCheckOrgCollection.asList().get(0) == "true";
             if(needOrgValidation) {
-                orgExists = validateOrgExists(organization);
+                canCreateToken = validateOrgExists(organization);
             }
 
-            if(orgExists) {
+            if(canCreateToken) {
                 createTokan(output, labelCollection, expirationCollection, organization);
             } else {
                 logger.warn("ATTEMPT TO CREATE ORPHAN MACAROON.");
