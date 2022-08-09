@@ -52,6 +52,12 @@ class APIClient
     delete_request(uri_string, delegated_macaroon(reg_org_api_id))
   end
 
+  def delete_public_key(reg_org_api_id, public_key_id)
+    uri_string = base_url + '/Key/' + public_key_id
+
+    delete_request(uri_string, delegated_macaroon(reg_org_api_id))
+  end
+
   def get_client_tokens(reg_org_api_id)
     uri_string = base_url + '/Token'
     get_request(uri_string, delegated_macaroon(reg_org_api_id))
