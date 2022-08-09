@@ -87,10 +87,6 @@ public class GenerateClientTokenTests {
         final Organization org = new Organization();
         org.setId(id.toString());
 
-        final Bundle orgBundle = new Bundle();
-        orgBundle.addEntry().setResource(org);
-        Mockito.when(orgResource.orgSearch(Mockito.any())).thenReturn(orgBundle);
-
         final ImmutableMultimap<String, String> map = ImmutableMultimap.of("organization", id.toString());
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
             gct.execute(map, new PrintWriter(new OutputStreamWriter(bos)));
@@ -112,10 +108,6 @@ public class GenerateClientTokenTests {
         final Organization org = new Organization();
         org.setId(id.toString());
 
-        final Bundle orgBundle = new Bundle();
-        orgBundle.addEntry().setResource(org);
-        Mockito.when(orgResource.orgSearch(Mockito.any())).thenReturn(orgBundle);
-
         final ImmutableMultimap<String, String> map = ImmutableMultimap.of("organization", id.toString(), "label", tokenLabel);
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
             gct.execute(map, new PrintWriter(new OutputStreamWriter(bos)));
@@ -126,7 +118,30 @@ public class GenerateClientTokenTests {
     }
 
     @Test
-    void testTokenCreationWithOrgNotFound() throws IOException {
+    void testTokenCreationWithOrgCheckAndOrgFound() throws IOException {
+        final TokenEntity response = Mockito.mock(TokenEntity.class);
+        Mockito.when(response.getToken()).thenReturn("test token");
+        Mockito.when(tokenResource.createOrganizationToken(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(response);
+
+        final UUID id = UUID.randomUUID();
+        final Organization org = new Organization();
+        org.setId(id.toString());
+
+        final Bundle orgBundle = new Bundle();
+        orgBundle.addEntry().setResource(org);
+        Mockito.when(orgResource.orgSearch(Mockito.any())).thenReturn(orgBundle);
+
+        final ImmutableMultimap<String, String> map = ImmutableMultimap.of("organization", id.toString(), "checkOrg", "true");
+        try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+            gct.execute(map, new PrintWriter(new OutputStreamWriter(bos)));
+            Mockito.verify(bakery, never()).createMacaroon(eq(Collections.emptyList()));
+            Mockito.verify(tokenResource, times(1)).createOrganizationToken(principalCaptor.capture(), Mockito.isNull(), Mockito.isNull(), eq(Optional.empty()));
+            assertEquals(id, principalCaptor.getValue().getID(), "Should have correct ID");
+        }
+    }
+
+    @Test
+    void testTokenCreationWithOrgCheckAndOrgNotFound() throws IOException {
         final TokenEntity response = Mockito.mock(TokenEntity.class);
         Mockito.when(response.getToken()).thenReturn("test token");
         Mockito.when(tokenResource.createOrganizationToken(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(response);
@@ -137,7 +152,7 @@ public class GenerateClientTokenTests {
 
         Mockito.when(orgResource.orgSearch(Mockito.any())).thenReturn(null);
 
-        final ImmutableMultimap<String, String> map = ImmutableMultimap.of("organization", id.toString());
+        final ImmutableMultimap<String, String> map = ImmutableMultimap.of("organization", id.toString(), "checkOrg", "true");
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
             final WebApplicationException ex = assertThrows(WebApplicationException.class, () -> gct.execute(map, new PrintWriter(new OutputStreamWriter(bos))));
             assertEquals(HttpStatus.BAD_REQUEST_400
@@ -155,10 +170,6 @@ public class GenerateClientTokenTests {
         final UUID id = UUID.randomUUID();
         final Organization org = new Organization();
         org.setId(id.toString());
-
-        final Bundle orgBundle = new Bundle();
-        orgBundle.addEntry().setResource(org);
-        Mockito.when(orgResource.orgSearch(Mockito.any())).thenReturn(orgBundle);
 
         final ImmutableMultimap<String, String> map = ImmutableMultimap.of("organization", id.toString(), "expiration", "");
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
@@ -179,10 +190,6 @@ public class GenerateClientTokenTests {
         final UUID id = UUID.randomUUID();
         final Organization org = new Organization();
         org.setId(id.toString());
-
-        final Bundle orgBundle = new Bundle();
-        orgBundle.addEntry().setResource(org);
-        Mockito.when(orgResource.orgSearch(Mockito.any())).thenReturn(orgBundle);
 
         final ImmutableMultimap<String, String> map = ImmutableMultimap.of("organization", id.toString(), "expiration", expires);
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {

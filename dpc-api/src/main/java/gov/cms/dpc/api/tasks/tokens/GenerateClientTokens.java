@@ -50,20 +50,24 @@ public class GenerateClientTokens extends Task {
         final ImmutableCollection<String> expirationCollection = parameters.get("expiration");
         final ImmutableCollection<String> labelCollection = parameters.get("label");
         final ImmutableCollection<String> organizationCollection = parameters.get("organization");
+        final ImmutableCollection<String> needCheckOrgCollection = parameters.get("checkOrg");
         if (organizationCollection.isEmpty()) {
-            logger.warn("CREATING UNRESTRICTED MACAROON. ENSURE THIS IS OK");
-            final Macaroon macaroon = bakery.createMacaroon(Collections.emptyList());
-            output.write(macaroon.serialize(MacaroonVersion.SerializationVersion.V1_BINARY));
+            // Is this really want we want to be doing here, creating an unrestricted macaroon?
+            createUnrestrictedMacaroon(output);
         } else {
             final String organizationId = organizationCollection.asList().get(0);
             final Organization organization = new Organization();
             organization.setId(organizationId);
 
-            final OrganizationPrincipal orgPrincipal = new OrganizationPrincipal(organization);
-            final var existingOrg = this.orgResource.orgSearch(orgPrincipal);
-            String existingId = existingOrg == null ? "-1" : existingOrg.getEntryFirstRep().getResource().getId();
+            Boolean orgExists = true;
+            if(!needCheckOrgCollection.isEmpty()
+                    && !StringUtils.isBlank(needCheckOrgCollection.asList().get(0))
+                    && needCheckOrgCollection.asList().get(0) == "true"
+            ) {
+                orgExists = checkOrgExists(organization);
+            }
 
-            if(organizationId.equals(existingId)) {
+            if(orgExists) {
                 final String tokenLabel = labelCollection.isEmpty() ? null : labelCollection.asList().get(0);
                 Optional<OffsetDateTimeParam> expiration = Optional.empty();
                 if(!expirationCollection.isEmpty() && !StringUtils.isBlank(expirationCollection.asList().get(0))){
@@ -81,5 +85,18 @@ public class GenerateClientTokens extends Task {
                 throw new WebApplicationException(String.format("ERROR: Organization not found with ID: \"%s\". Please double check your data and try again.", organizationId), Response.Status.BAD_REQUEST);
             }
         }
+    }
+
+    private void createUnrestrictedMacaroon(PrintWriter output) {
+        logger.warn("CREATING UNRESTRICTED MACAROON. ENSURE THIS IS OK");
+        final Macaroon macaroon = bakery.createMacaroon(Collections.emptyList());
+        output.write(macaroon.serialize(MacaroonVersion.SerializationVersion.V1_BINARY));
+    }
+
+    private Boolean checkOrgExists(Organization organization) {
+        final OrganizationPrincipal orgPrincipal = new OrganizationPrincipal(organization);
+        final var existingOrg = this.orgResource.orgSearch(orgPrincipal);
+//        String existingId = existingOrg == null ? "-1" : existingOrg.getEntryFirstRep().getResource().getId();
+        return existingOrg == null ? false : true;
     }
 }
