@@ -63,10 +63,10 @@ public class GenerateClientTokens extends Task {
              * `checkOrg` parameter is meant to be optional, if provided and "true" ensure the submitted orgId
              * matches an org in the db before creating token. `checkOrg` Not present, just create the token.
              */
-            final Boolean needOrgValidation = !needCheckOrgCollection.isEmpty()
+            final boolean needOrgValidation = !needCheckOrgCollection.isEmpty()
                     && !StringUtils.isBlank(needCheckOrgCollection.asList().get(0))
                     && needCheckOrgCollection.asList().get(0) == "true";
-            Boolean canCreateToken = needOrgValidation ? validateOrgExists(organization) : true;
+            boolean canCreateToken = needOrgValidation ? validateOrgExists(organization) : true;
 
             if(canCreateToken) {
                 createTokan(output, labelCollection, expirationCollection, organization);
@@ -93,7 +93,7 @@ public class GenerateClientTokens extends Task {
         final String tokenLabel = labelCollection.isEmpty() ? null : labelCollection.asList().get(0);
         // Use Expiration Date if provided, otherwise use `empty` value, and will default to 1-year
         Optional<OffsetDateTimeParam> expiration = Optional.empty();
-        final Boolean hasExpiration = !expirationCollection.isEmpty() && !StringUtils.isBlank(expirationCollection.asList().get(0));
+        final boolean hasExpiration = !expirationCollection.isEmpty() && !StringUtils.isBlank(expirationCollection.asList().get(0));
         if(hasExpiration){
             expiration = Optional.of(new OffsetDateTimeParam(expirationCollection.asList().get(0)));
         }
