@@ -81,6 +81,8 @@ RSpec.describe PublicKeysController, type: :controller do
 
           get :destroy, params: { id: 1, organization_id: org.id }
           expect(response).to render_template(:new)
+
+          expect(flash[:error]).to_not be_nil
         end
       end
     end
