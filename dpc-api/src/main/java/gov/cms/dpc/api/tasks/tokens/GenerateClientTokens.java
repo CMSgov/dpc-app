@@ -52,7 +52,7 @@ public class GenerateClientTokens extends Task {
         final ImmutableCollection<String> organizationCollection = parameters.get("organization");
         final ImmutableCollection<String> needCheckOrgCollection = parameters.get("checkOrg");
         if (organizationCollection.isEmpty()) {
-            // Is this really want we want to be doing here, creating an unrestricted macaroon?
+            // This path is used for local development only.
             createUnrestrictedMacaroon(output);
         } else {
             final String organizationId = organizationCollection.asList().get(0);
@@ -69,7 +69,7 @@ public class GenerateClientTokens extends Task {
             boolean canCreateToken = needOrgValidation ? validateOrgExists(organization) : true;
 
             if(canCreateToken) {
-                createTokan(output, labelCollection, expirationCollection, organization);
+                createToken(output, labelCollection, expirationCollection, organization);
             } else {
                 logger.warn("ATTEMPT TO CREATE ORPHAN MACAROON.");
                 throw new WebApplicationException(String.format("ERROR: Organization not found with ID: \"%s\". Please double check your data and try again.", organizationId), Response.Status.BAD_REQUEST);
@@ -77,19 +77,19 @@ public class GenerateClientTokens extends Task {
         }
     }
 
-    private void createUnrestrictedMacaroon(PrintWriter output) {
+    protected void createUnrestrictedMacaroon(PrintWriter output) {
         logger.warn("CREATING UNRESTRICTED MACAROON. ENSURE THIS IS OK");
         final Macaroon macaroon = bakery.createMacaroon(Collections.emptyList());
         output.write(macaroon.serialize(MacaroonVersion.SerializationVersion.V1_BINARY));
     }
 
-    private Boolean validateOrgExists(Organization organization) {
+    protected Boolean validateOrgExists(Organization organization) {
         final OrganizationPrincipal orgPrincipal = new OrganizationPrincipal(organization);
         final var existingOrg = this.orgResource.orgSearch(orgPrincipal);
-        return existingOrg == null ? false : true;
+        return !existingOrg.isEmpty();
     }
 
-    private void createTokan(PrintWriter output, ImmutableCollection<String> labelCollection, ImmutableCollection<String> expirationCollection, Organization organization) {
+    protected void createToken(PrintWriter output, ImmutableCollection<String> labelCollection, ImmutableCollection<String> expirationCollection, Organization organization) {
         final String tokenLabel = labelCollection.isEmpty() ? null : labelCollection.asList().get(0);
         // Use Expiration Date if provided, otherwise use `empty` value, and will default to 1-year
         Optional<OffsetDateTimeParam> expiration = Optional.empty();

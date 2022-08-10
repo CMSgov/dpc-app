@@ -150,7 +150,7 @@ public class GenerateClientTokenTests {
         final Organization org = new Organization();
         org.setId(id.toString());
 
-        Mockito.when(orgResource.orgSearch(Mockito.any())).thenReturn(null);
+        Mockito.when(orgResource.orgSearch(Mockito.any())).thenReturn(new Bundle());
 
         final ImmutableMultimap<String, String> map = ImmutableMultimap.of("organization", id.toString(), "checkOrg", "true");
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
