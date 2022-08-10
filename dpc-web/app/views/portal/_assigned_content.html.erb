@@ -105,7 +105,7 @@
                 Before you can start testing in the sandbox, add your public keys to get a UUID that you will use when you authenticate access. <%= link_to "Add a public key", new_organization_public_key_path(organization_id: organization.id) %>
               </p>
             <% else %>
-              <% organization.reg_org.public_keys.each do |key| %>
+              <% organization.reg_org.public_keys.each_with_index do |key, index| %>
                 <ul class="credentials">
                   <li class="credential">
                     <svg class="icon icon--lg ds-u-margin-right--3" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -118,7 +118,21 @@
                         <p>Created: <%= formatted_datestr(key['createdAt']) %></p>
                       </div>
                     </div>
-                    <div class="credential__actions">
+                    <div class="credential__delete usa-accordion">
+                      <button id="button<%= index +1 %>" class="usa-accordion__button credential__delete_button" aria-expanded="false" aria-controls="collapse_key<%= index +1 %>">
+                        X
+                      </button>
+                      <div id="collapse_key<%= index +1 %>" class="credential__btn_container usa-accordion__content">
+                        <div class="credential__text">
+                          Delete Public Key?
+                        </div>
+                        <div class="credential__actions">
+                          <button class="credential__cancel_btn" onclick="collapseButtons('button<%= index +1 %>', 'collapse_key<%= index +1 %>')">
+                            Cancel
+                          </button>
+                          <%= button_to "Delete", organization_public_key_path(id: key['id'], organization_id: organization.id), method: :delete, class: "ds-c-button ds-c-button--danger ds-u-float--right"%>
+                        </div>
+                      </div>
                     </div>
                   </li>
                 </ul>
