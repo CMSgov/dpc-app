@@ -47,24 +47,31 @@
               <% end %>
             </div>
           </div>
-          <div class="ds-l-row">
+          <%= debug organization.reg_org.client_tokens %>
+          <table class="ds-l-row" style="width: 100%">
             <div class="ds-l-col--12">
+            <tbody style="width: 100%">
+            <tr>
+              <th>Key Name</th>
+              <th>Creation Date</th>
+              <th>Expiritation Date</th>
+            </tr>
                 <% if organization.reg_org.client_tokens.count == 0 %>
                   <p class="ds-u-color--muted">
                     Before you can start testing in the sandbox, you must create a unique client token for each application or vendor that will have access to the sandbox on your behalf. <%= link_to "Create a client token", new_organization_client_token_path(organization_id: organization.id) %>.
                   </p>
                 <% else %>
                   <% organization.reg_org.client_tokens.each_with_index do |token, index| %>
-                    <ul class="credentials">
+                    <tr class="credentials">
                       <li class="credential">
                         <div class="credential__body">
-                          <h3 class="credential__name"><%= token['label'] %></h3>
+                          <h3 class="credential__name"><td><%= token['label'] %></td></h3>
                           <div class="credential__meta">
-                            <p>Created: <%= formatted_datestr(token['createdAt']) %></p>
-                            <p>Expires: <%= formatted_datestr(token['expiresAt']) %></p>
+                            <td>Created: <%= formatted_datestr(token['createdAt']) %></td>
+                            <td>Expires: <%= formatted_datestr(token['expiresAt']) %></td>
                           </div>
                         </div>
-                        <div class="credential__delete usa-accordion">
+                        <td class="usa-accordion">
                           <button id="button<%= index +1 %>" class="usa-accordion__button credential__delete_button" aria-expanded="false" aria-controls="collapse<%= index +1 %>">
                             X
                           </button>
@@ -79,13 +86,14 @@
                               <%= button_to "Delete Token", organization_client_token_path(id: token['id'], organization_id: organization.id), method: :delete, class: "ds-c-button ds-c-button--danger ds-u-float--right" %>
                             </div>
                           </div>
-                        </div>
+                        </td>
                       </li>
-                    </ul>
+                    </tr>
                 <% end %>
               <% end %>
+              </tbody>
             </div>
-        </div>
+        </table>
       </section>
       <section class="box">
         <div class="box__content">
