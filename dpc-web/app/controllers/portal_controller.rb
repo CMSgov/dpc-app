@@ -5,6 +5,6 @@ class PortalController < ApplicationController
 
   def show
     @user = current_user
-    @client_tokens = @user.organization.find(org_id).reg_org.client_tokens()
+    @client_tokens = @user.primary_organization.reg_org.client_tokens()
   end
 end

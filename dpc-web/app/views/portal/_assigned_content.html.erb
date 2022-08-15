@@ -47,7 +47,6 @@
               <% end %>
             </div>
           </div>
-          <%= debug organization.reg_org.client_tokens %>
           <table class="ds-l-row" style="width: 100%">
             <div class="ds-l-col--12">
             <tbody style="width: 100%">
@@ -61,7 +60,7 @@
                     Before you can start testing in the sandbox, you must create a unique client token for each application or vendor that will have access to the sandbox on your behalf. <%= link_to "Create a client token", new_organization_client_token_path(organization_id: organization.id) %>.
                   </p>
                 <% else %>
-                  <% organization.reg_org.client_tokens.each_with_index do |token, index| %>
+                  <% @client_tokens.each_with_index do |token, index| %>
                     <tr class="credentials">
                       <li class="credential">
                         <div class="credential__body">
