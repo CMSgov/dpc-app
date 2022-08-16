@@ -47,19 +47,19 @@
               <% end %>
             </div>
           </div>
-          <div class="usa-table-container--scrollable" tabindex="0">
-            <table class="usa-table">
+            <table class="usa-table" data-toggle="table" id="client-token-table">
+            <caption aria-hidden="true" hidden>Client Token Table</caption>
               <div class="ds-l-col--12">
                 <% if organization.reg_org.client_tokens.count != 0 %>
                   <thead>
                     <tr>
-                      <th data-sortable scope="col" role="columnheader">
+                      <th data-sortable="true" scope="col" role="columnheader">
                         Key Name
                       </th>
-                      <th data-sortable scope="col" role="columnheader" aria-sort="descending">
+                      <th data-sortable="true" scope="col" role="columnheader" aria-sort="descending">
                         Creation Date
                       </th>
-                      <th data-sortable scope="col" role="columnheader">
+                      <th data-sortable="true" scope="col" role="columnheader">
                         Expiration Date
                       </th>
                       <th>Actions</th>
@@ -73,40 +73,36 @@
                     </p>
                   <% else %>
                     <% @client_tokens.each_with_index do |token, index| %>
-                      <tr class="credentials">
-                        <li class="credential">
-                          <div class="credential__body">
-                            <h3 class="credential__name">
-                              <%= tag.th role: 'rowheader', scope: 'row', data: { sortable_value: token['label']} do %> 
-                                <%= token['label'] %> 
-                              <% end %>
-                            </h3>
-                            <div class="credential__meta">
-                              <%= tag.td data: {sortable_value: token['createdAt']} do %>
-                                Created: <%= formatted_datestr(token['createdAt']) %>
-                              <% end %>
-                              <%= tag.td data: {sortable_value: token['expiresAt']} do %>
-                                Expires: <%= formatted_datestr(token['expiresAt']) %>
-                              <% end %>
+                      <tr class="credentials">                        
+                        <%= tag.td data: { sortable_value: token['label']} do %> 
+                          <h3 class="credential__name">
+                            <%= token['label'] %> 
+                          </h3>
+                        <% end %>
+                        <%= tag.td data: {sortable_value: token['createdAt']} do %>
+                          Created: <%= formatted_datestr(token['createdAt']) %>
+                        <% end %>
+                        <%= tag.td data: {sortable_value: token['expiresAt']} do %>
+                          Expires: <%= formatted_datestr(token['expiresAt']) %>
+                        <% end %>
+                        <td data-sortable="false">
+                        <div class="usa-accordion">
+                          <button id="button<%= index +1 %>" class="usa-accordion__button credential__delete_button" aria-expanded="false" aria-controls="collapse<%= index +1 %>">
+                            X
+                          </button>
+                          <div id="collapse<%= index +1 %>" class="credential__btn_container usa-accordion__content">
+                            <div class="credential__text">
+                              Delete Client Token?
+                            </div>
+                            <div class="credential__actions">
+                              <button class="credential__cancel_btn" onclick="collapseButtons('button<%= index +1 %>', 'collapse<%= index +1 %>')">
+                                Cancel
+                              </button>
+                              <%= button_to "Delete Token", organization_client_token_path(id: token['id'], organization_id: organization.id), method: :delete, class: "ds-c-button ds-c-button--danger ds-u-float--right" %>
                             </div>
                           </div>
-                          <td class="usa-accordion">
-                            <button id="button<%= index +1 %>" class="usa-accordion__button credential__delete_button" aria-expanded="false" aria-controls="collapse<%= index +1 %>">
-                              X
-                            </button>
-                            <div id="collapse<%= index +1 %>" class="credential__btn_container usa-accordion__content">
-                              <div class="credential__text">
-                                Delete Client Token?
-                              </div>
-                              <div class="credential__actions">
-                                <button class="credential__cancel_btn" onclick="collapseButtons('button<%= index +1 %>', 'collapse<%= index +1 %>')">
-                                  Cancel
-                                </button>
-                                <%= button_to "Delete Token", organization_client_token_path(id: token['id'], organization_id: organization.id), method: :delete, class: "ds-c-button ds-c-button--danger ds-u-float--right" %>
-                              </div>
-                            </div>
-                          </td>
-                        </li>
+                        </div>
+                        </td>
                       </tr>
                     <% end %>
                   <% end %>
@@ -117,7 +113,6 @@
               class="usa-sr-only usa-table__announcement-region"
               aria-live="polite">
             </div>
-          </div>
       </section>
       <section class="box">
         <div class="box__content">
