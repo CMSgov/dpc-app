@@ -32,7 +32,7 @@
         <%= link_to "Edit", edit_organization_url(organization), class: "ds-c-button ds-c-button--outline ds-c-button--small", data: { test: "edit-link" } %>
       <%end %>
     </div>
-
+    <%= debug @client_tokens %>
     <% if organization.reg_org.present? && organization.reg_org.enabled == true %>
       <section class="box">
         <div class="box__content">
