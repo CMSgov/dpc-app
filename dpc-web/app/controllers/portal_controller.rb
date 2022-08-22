@@ -5,7 +5,7 @@ class PortalController < ApplicationController
 
   def show
     @user = current_user
-    if current_user.unassigned?
+    if current_user.unassigned? or current_user.primary_organization.nil?
       @client_tokens = []
       @public_keys = []
     else
