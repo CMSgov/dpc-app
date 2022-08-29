@@ -9,8 +9,13 @@ class PortalController < ApplicationController
       @client_tokens = []
       @public_keys = []
     else
-      @client_tokens = @user.primary_organization.reg_org.client_tokens
-      @public_keys = @user.primary_organization.reg_org.public_keys
+      if params.has_key?(:page)
+        @client_tokens = Kaminari.paginate_array(@user.primary_organization.reg_org.client_tokens).page(params[:page]).per(2)
+        @public_keys = Kaminari.paginate_array(@user.primary_organization.reg_org.public_keys).page(params[:page]).per(2)
+      else
+        @client_tokens = Kaminari.paginate_array(@user.primary_organization.reg_org.client_tokens).page(0).per(2)
+        @public_keys = Kaminari.paginate_array(@user.primary_organization.reg_org.public_keys).page(0).per(2)
+      end
     end
   end
 end
