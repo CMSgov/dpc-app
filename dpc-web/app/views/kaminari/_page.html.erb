@@ -8,11 +8,5 @@
     remote:        data-remote
 -%>
 <li class="usa-pagination__item usa-pagination__page-no usa-pagination<%= '-current' if page.current? %>">
-  <% unless page.current? %>
-    <%= link_to url, page, {remote: remote, rel: page.rel, class: "usa-pagination__button", aria: {label: "Page"}} %>
-  <% else %>
-    <p class="usa-pagination__button" aria-label="Page">
-      <%= page %> 
-    </p>
-  <% end %>
+  <%= link_to page, url, {remote: remote, rel: page.rel, class: "usa-pagination__button", aria: {label: "Page"}} %>
 </li>

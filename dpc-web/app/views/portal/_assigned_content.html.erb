@@ -99,9 +99,9 @@
                     </td>
                   </tr>
                 <% end %>
-              </tbody>
-              <%= paginate @client_tokens, window: 1, outer_window: 1 %>
+              </tbody>              
             </table>
+            <%= paginate @client_tokens, window: 1, outer_window: 1 %>
             <div
               class="usa-sr-only usa-table__announcement-region"
               aria-live="polite">
@@ -186,9 +186,9 @@
                     </td>
                   </tr>
                 <% end %>
-              </tbody>
-              <%= paginate @public_keys, window: 1, outer_window: 1  %>
+              </tbody>              
             </table>
+            <%= paginate @public_keys, window: 1, outer_window: 1  %>
             <div
               class="usa-sr-only usa-table__announcement-region"
               aria-live="polite">
