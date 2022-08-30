@@ -10,6 +10,7 @@ class PortalController < ApplicationController
       @public_keys = []
     else
       if params.has_key?(:page)
+        # TODO disallow the user from inputting too large of a page number
         @client_tokens = Kaminari.paginate_array(@user.primary_organization.reg_org.client_tokens).page(params[:page]).per(5)
         @public_keys = Kaminari.paginate_array(@user.primary_organization.reg_org.public_keys).page(params[:page]).per(5)
       else
