@@ -8,7 +8,6 @@ class PortalController < ApplicationController
     if current_user.unassigned? || current_user.primary_organization.reg_org.nil?
       @client_tokens = []
       @public_keys = []
-      #((@user.primary_organization.reg_org.client_tokens.length() / 5) >= params[:page].to_i)
     else
       if params.has_key?(:key_page)
         # TODO disallow the user from inputting too large of a page number
