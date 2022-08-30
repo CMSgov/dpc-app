@@ -10,7 +10,7 @@ class PortalController < ApplicationController
       @public_keys = []
     else
       get_public_keys(params)
-      get_client_tokens(params) 
+      get_client_tokens(params)
     end
   end
 
@@ -29,5 +29,4 @@ class PortalController < ApplicationController
                        Kaminari.paginate_array(@user.primary_organization.reg_org.client_tokens).page(0).per(10)
                      end
   end
-
 end
