@@ -32,7 +32,6 @@
         <%= link_to "Edit", edit_organization_url(organization), class: "ds-c-button ds-c-button--outline ds-c-button--small", data: { test: "edit-link" } %>
       <%end %>
     </div>
-
     <% if organization.reg_org.present? && organization.reg_org.enabled == true %>
       <section class="box">
         <div class="box__content">
@@ -47,44 +46,70 @@
               <% end %>
             </div>
           </div>
-          <div class="ds-l-row">
-            <div class="ds-l-col--12">
-                <% if organization.reg_org.client_tokens.count == 0 %>
-                  <p class="ds-u-color--muted">
-                    Before you can start testing in the sandbox, you must create a unique client token for each application or vendor that will have access to the sandbox on your behalf. <%= link_to "Create a client token", new_organization_client_token_path(organization_id: organization.id) %>.
-                  </p>
-                <% else %>
-                  <% organization.reg_org.client_tokens.each_with_index do |token, index| %>
-                    <ul class="credentials">
-                      <li class="credential">
-                        <div class="credential__body">
-                          <h3 class="credential__name"><%= token['label'] %></h3>
-                          <div class="credential__meta">
-                            <p>Created: <%= formatted_datestr(token['createdAt']) %></p>
-                            <p>Expires: <%= formatted_datestr(token['expiresAt']) %></p>
+          <% if organization.reg_org.client_tokens.count != 0 %>
+            <table class="usa-table" data-toggle="table" id="client-token-table">
+              <caption aria-hidden="true" hidden>Client Token Table</caption>
+              <div class="ds-l-col--12">
+                <thead>
+                  <tr>
+                    <th data-sortable="true" scope="col" role="columnheader">
+                      Token Name
+                    </th>
+                    <th data-sortable="true" scope="col" role="columnheader" aria-sort="descending">
+                      Creation Date
+                    </th>
+                    <th data-sortable="true" scope="col" role="columnheader">
+                      Expiration Date
+                    </th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>           
+              </div>
+              <tbody style="width: 100%">
+                <% @client_tokens.each_with_index do |token, index| %>
+                  <tr class="credentials">                        
+                    <%= tag.td data: { sortable_value: token['label']} do %> 
+                      <h3 class="credential__name">
+                        <%= token['label'] %> 
+                      </h3>
+                    <% end %>
+                    <%= tag.td data: {sortable_value: token['createdAt']} do %>
+                      Created: <%= formatted_datestr(token['createdAt']) %>
+                    <% end %>
+                    <%= tag.td data: {sortable_value: token['expiresAt']} do %>
+                      Expires: <%= formatted_datestr(token['expiresAt']) %>
+                    <% end %>
+                    <td data-sortable="false">
+                      <div class="usa-accordion">
+                        <button id="button<%= index +1 %>" class="usa-accordion__button credential__delete_button" aria-expanded="false" aria-controls="collapse<%= index +1 %>">
+                          X
+                        </button>
+                        <div id="collapse<%= index +1 %>" class="credential__btn_container usa-accordion__content">
+                          <div class="credential__text">
+                            Delete Client Token?
+                          </div>
+                          <div class="credential__actions">
+                            <button class="credential__cancel_btn" onclick="collapseButtons('button<%= index +1 %>', 'collapse<%= index +1 %>')">
+                              Cancel
+                            </button>
+                            <%= button_to "Delete Token", organization_client_token_path(id: token['id'], organization_id: organization.id), method: :delete, class: "ds-c-button ds-c-button--danger ds-u-float--right" %>
                           </div>
                         </div>
-                        <div class="credential__delete usa-accordion">
-                          <button id="button<%= index +1 %>" class="usa-accordion__button credential__delete_button" aria-expanded="false" aria-controls="collapse<%= index +1 %>">
-                            X
-                          </button>
-                          <div id="collapse<%= index +1 %>" class="credential__btn_container usa-accordion__content">
-                            <div class="credential__text">
-                              Delete Client Token?
-                            </div>
-                            <div class="credential__actions">
-                              <button class="credential__cancel_btn" onclick="collapseButtons('button<%= index +1 %>', 'collapse<%= index +1 %>')">
-                                Cancel
-                              </button>
-                              <%= button_to "Delete Token", organization_client_token_path(id: token['id'], organization_id: organization.id), method: :delete, class: "ds-c-button ds-c-button--danger ds-u-float--right" %>
-                            </div>
-                          </div>
-                        </div>
-                      </li>
-                    </ul>
+                      </div>
+                    </td>
+                  </tr>
                 <% end %>
-              <% end %>
+              </tbody>
+            </table>
+            <div
+              class="usa-sr-only usa-table__announcement-region"
+              aria-live="polite">
             </div>
+          <% else %>
+            <p class="ds-u-color--muted">
+              Before you can start testing in the sandbox, you must create a unique client token for each application or vendor that will have access to the sandbox on your behalf. <%= link_to "Create a client token", new_organization_client_token_path(organization_id: organization.id) %>.
+            </p>
+          <% end %>
         </div>
       </section>
       <section class="box">
@@ -100,50 +125,80 @@
               <% end %>
             </div>
           </div>
-            <% if organization.reg_org.public_keys.count == 0 %>
-              <p class="ds-u-color--muted">
-                Before you can start testing in the sandbox, add your public keys to get a UUID that you will use when you authenticate access. <%= link_to "Add a public key", new_organization_public_key_path(organization_id: organization.id) %>
-              </p>
-            <% else %>
-              <% organization.reg_org.public_keys.each_with_index do |key, index| %>
-                <ul class="credentials">
-                  <li class="credential">
-                    <svg class="icon icon--lg ds-u-margin-right--3" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                      <use xlink:href="/assets/solid.svg#key"></use>
-                    </svg>
-                    <div class="credential__body">
-                      <h3 class="credential__name"><%= key['label'] %></h3>
-                      <div class="credential__meta">
-                        <p class="ds-u-color--base"><%= key['id'] %></p>
-                        <p>Created: <%= formatted_datestr(key['createdAt']) %></p>
+          <% if organization.reg_org.public_keys.count == 0 %>
+            <p class="ds-u-color--muted">
+              Before you can start testing in the sandbox, add your public keys to get a UUID that you will use when you authenticate access. <%= link_to "Add a public key", new_organization_public_key_path(organization_id: organization.id) %>
+            </p>
+          <% else %>
+            <table class="usa-table" data-toggle="table" id="public-key-table">
+              <caption aria-hidden="true" hidden>Public Key Table</caption>
+              <div class="ds-l-col--12">
+                <thead>
+                  <tr>
+                    <th data-sortable="true" scope="col" role="columnheader">
+                      Key Name
+                    </th>
+                    <th data-sortable="true" scope="col" role="columnheader">
+                      Key ID
+                    </th>
+                    <th data-sortable="true" scope="col" role="columnheader" aria-sort="descending">
+                      Creation Date
+                    </th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>           
+              </div>
+              <tbody style="width: 100%">
+                <% @public_keys.each_with_index do |key, index| %>
+                  <tr class="credentials">
+                    <%= tag.td data: {sortable_value: key['label']} do %>
+                      <div class="credential">
+                        <svg class="icon icon--lg ds-u-margin-right--3" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                          <use xlink:href="/assets/solid.svg#key"></use>
+                        </svg>
+                        <h3 class="credential__name"><%= key['label'] %></h3>
                       </div>
-                    </div>
-                    <div class="credential__delete usa-accordion">
-                      <button id="button<%= index +1 %>" class="usa-accordion__button credential__delete_button" aria-expanded="false" aria-controls="collapse_key<%= index +1 %>">
-                        X
-                      </button>
-                      <div id="collapse_key<%= index +1 %>" class="credential__btn_container usa-accordion__content">
-                        <div class="credential__text">
-                          Delete Public Key?
-                        </div>
-                        <div class="credential__actions">
-                          <button class="credential__cancel_btn" onclick="collapseButtons('button<%= index +1 %>', 'collapse_key<%= index +1 %>')">
-                            Cancel
-                          </button>
-                          <%= button_to "Delete", organization_public_key_path(id: key['id'], organization_id: organization.id), method: :delete, class: "ds-c-button ds-c-button--danger ds-u-float--right"%>
+                    <% end %>
+                    <%= tag.td data: {sortable_value: key['id']} do %>
+                      <p class="ds-u-color--base"><%= key['id'] %></p>
+                    <% end %>
+                    <%= tag.td data: {sortable_value: key['createdAt']} do %>
+                      <p>Created: <%= formatted_datestr(key['createdAt']) %></p>
+                    <% end %>
+                    <td data-sortable="false">
+                      <div class="credential__delete usa-accordion">
+                        <button id="button<%= index +1 %>" class="usa-accordion__button credential__delete_button" aria-expanded="false" aria-controls="collapse_key<%= index +1 %>">
+                          X
+                        </button>
+                        <div id="collapse_key<%= index +1 %>" class="credential__btn_container usa-accordion__content">
+                          <div class="credential__text">
+                            Delete Public Key?
+                          </div>
+                          <div class="credential__actions">
+                            <button class="credential__cancel_btn" onclick="collapseButtons('button<%= index +1 %>', 'collapse_key<%= index +1 %>')">
+                              Cancel
+                            </button>
+                            <%= button_to "Delete", organization_public_key_path(id: key['id'], organization_id: organization.id), method: :delete, class: "ds-c-button ds-c-button--danger ds-u-float--right"%>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </li>
-                </ul>
-              <% end %>
+                    </td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+            <div
+              class="usa-sr-only usa-table__announcement-region"
+              aria-live="polite">
+            </div>
           <% end %>
+          </div>
         </div>
+        <p><svg class="icon ds-u-margin-right--1" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <use xlink:href="/assets/solid.svg#exclamation-triangle"></use>
+        </svg> You will need <strong>both</strong> client tokens and public keys to use the API for this organization.</p>
       </section>
-
-      <p><svg class="icon ds-u-margin-right--1" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <use xlink:href="/assets/solid.svg#exclamation-triangle"></use>
-      </svg> You will need <strong>both</strong> client tokens and public keys to use the API for this organization.</p>
+      
     <% else %>
     <section class="box box--dashed ds-u-margin-bottom--7">
       <div class="box__content">

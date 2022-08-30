@@ -21,5 +21,5 @@
 //= require activestorage
 //= require_tree ./utils
 //= require_tree .
-
+//= require bootstrap-table/bootstrap-table
 svg4everybody();
