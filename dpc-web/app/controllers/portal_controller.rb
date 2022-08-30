@@ -8,14 +8,19 @@ class PortalController < ApplicationController
     if current_user.unassigned? || current_user.primary_organization.reg_org.nil?
       @client_tokens = []
       @public_keys = []
+      #((@user.primary_organization.reg_org.client_tokens.length() / 5) >= params[:page].to_i)
     else
-      if params.has_key?(:page)
+      if params.has_key?(:key_page)
         # TODO disallow the user from inputting too large of a page number
-        @client_tokens = Kaminari.paginate_array(@user.primary_organization.reg_org.client_tokens).page(params[:page]).per(5)
-        @public_keys = Kaminari.paginate_array(@user.primary_organization.reg_org.public_keys).page(params[:page]).per(5)
+        @public_keys = Kaminari.paginate_array(@user.primary_organization.reg_org.public_keys).page(params[:key_page]).per(10)
       else
-        @client_tokens = Kaminari.paginate_array(@user.primary_organization.reg_org.client_tokens).page(0).per(5)
-        @public_keys = Kaminari.paginate_array(@user.primary_organization.reg_org.public_keys).page(0).per(5)
+        @public_keys = Kaminari.paginate_array(@user.primary_organization.reg_org.public_keys).page(0).per(10)
+      end
+
+      if params.has_key?(:token_page)
+        @client_tokens = Kaminari.paginate_array(@user.primary_organization.reg_org.client_tokens).page(params[:token_page]).per(10)
+      else
+        @client_tokens = Kaminari.paginate_array(@user.primary_organization.reg_org.client_tokens).page(0).per(10)
       end
     end
   end

@@ -101,7 +101,7 @@
                 <% end %>
               </tbody>              
             </table>
-            <%= paginate @client_tokens, window: 1, outer_window: 1 %>
+            <%= paginate @client_tokens, window: 1, outer_window: 1, param_name: :token_page %>
             <div
               class="usa-sr-only usa-table__announcement-region"
               aria-live="polite">
@@ -188,7 +188,7 @@
                 <% end %>
               </tbody>              
             </table>
-            <%= paginate @public_keys, window: 1, outer_window: 1  %>
+            <%= paginate @public_keys, window: 1, outer_window: 1, param_name: :key_page   %>
             <div
               class="usa-sr-only usa-table__announcement-region"
               aria-live="polite">
