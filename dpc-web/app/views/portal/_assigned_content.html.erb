@@ -101,11 +101,11 @@
                 <% end %>
               </tbody>              
             </table>
-            <%= paginate @client_tokens, window: 1, outer_window: 1, param_name: :token_page %>
             <div
               class="usa-sr-only usa-table__announcement-region"
               aria-live="polite">
             </div>
+            <%= paginate @client_tokens, window: 1, outer_window: 1, param_name: :token_page %>
           <% else %>
             <p class="ds-u-color--muted">
               Before you can start testing in the sandbox, you must create a unique client token for each application or vendor that will have access to the sandbox on your behalf. <%= link_to "Create a client token", new_organization_client_token_path(organization_id: organization.id) %>.
@@ -188,11 +188,11 @@
                 <% end %>
               </tbody>              
             </table>
-            <%= paginate @public_keys, window: 1, outer_window: 1, param_name: :key_page   %>
             <div
               class="usa-sr-only usa-table__announcement-region"
               aria-live="polite">
             </div>
+            <%= paginate @public_keys, window: 1, outer_window: 1, param_name: :key_page %>            
           <% end %>
           </div>
         </div>
