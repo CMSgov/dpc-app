@@ -69,6 +69,7 @@ GEM
     bindex (0.8.1)
     bootsnap (1.12.0)
       msgpack (~> 1.2)
+    bootstrap-table-rails (1.20.2)
     brakeman (5.2.3)
     builder (3.2.4)
     bundler-audit (0.9.1)
@@ -422,6 +423,7 @@ DEPENDENCIES
   activestorage (~> 6.1.6)
   activesupport (~> 6.1.6)
   bootsnap (>= 1.1.0)
+  bootstrap-table-rails
   brakeman
   bundler (>= 1.15.0)
   bundler-audit
@@ -481,4 +483,4 @@ RUBY VERSION
    ruby 2.7.2p137
 
 BUNDLED WITH
-   2.3.10
+   2.3.18
