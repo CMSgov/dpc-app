@@ -195,6 +195,7 @@ public class PatientResource extends AbstractPatientResource {
                 .execute();
 
         if (practitioner == null) {
+            // Is this the best code to be throwing here?
             throw new WebApplicationException(HttpStatus.UNAUTHORIZED_401);
         }
 
@@ -216,10 +217,13 @@ public class PatientResource extends AbstractPatientResource {
         Resource result = dataService.retrieveData(orgId, orgNPI, practitionerNPI, List.of(patientMbi), since, APIHelpers.fetchTransactionTime(bfdClient),
                 requestingIP, requestUrl, DPCResourceType.Patient, DPCResourceType.ExplanationOfBenefit, DPCResourceType.Coverage);
         if (DPCResourceType.Bundle.getPath().equals(result.getResourceType().getPath())) {
+            // A Bundle containing patient data was returned
             return (Bundle) result;
         }
         if (DPCResourceType.OperationOutcome.getPath().equals(result.getResourceType().getPath())) {
+            // An OperationOutcome (ERROR) was returned
             OperationOutcome resultOp = (OperationOutcome) result;
+            // getIssueFirstRep() grabs the first issue only - there may be others
             throw new WebApplicationException(resultOp.getIssueFirstRep().getDetails().getText());
         }
 
