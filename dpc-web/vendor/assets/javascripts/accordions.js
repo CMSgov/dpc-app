@@ -585,7 +585,7 @@ var hideButton = function hideButton(button) {
 var accordion = behavior(_defineProperty({}, CLICK, _defineProperty({}, BUTTON, function (event) {
   event.preventDefault();
 
-  toggleButton(this);
+  toggleButton(this, this.getAttribute(EXPANDED) === 'true');
 
   if (this.getAttribute(EXPANDED) === 'true') {
     // We were just expanded, but if another accordion was also just

@@ -10,15 +10,12 @@ import gov.cms.dpc.common.hibernate.attribution.DPCHibernateModule;
 import gov.cms.dpc.common.logging.filters.GenerateRequestIdFilter;
 import gov.cms.dpc.common.logging.filters.LogResponseFilter;
 import gov.cms.dpc.common.utils.EnvironmentParser;
-import gov.cms.dpc.common.utils.PropertiesProvider;
 import gov.cms.dpc.fhir.FHIRModule;
 import io.dropwizard.Application;
 import io.dropwizard.db.PooledDataSourceFactory;
 import io.dropwizard.migrations.MigrationsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
-import io.federecio.dropwizard.swagger.SwaggerBundle;
-import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 import org.knowm.dropwizard.sundial.SundialBundle;
 import org.knowm.dropwizard.sundial.SundialConfiguration;
 import org.slf4j.Logger;
@@ -30,14 +27,7 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
 
     private final DPCHibernateBundle<DPCAttributionConfiguration> hibernateBundle = new DPCHibernateBundle<>();
 
-    private static Boolean swaggerEnabled = false;
-
     public static void main(final String[] args) throws Exception {
-        // Only enable Swagger when running as a server
-        if (args != null && "server".equals(args[0])) {
-            swaggerEnabled = true;
-        }
-
         new DPCAttributionService().run(args);
     }
 
@@ -96,17 +86,5 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
         };
 
         bootstrap.addBundle(sundialBundle);
-
-        if (swaggerEnabled) {
-            final PropertiesProvider propertiesProvider = new PropertiesProvider();
-            bootstrap.addBundle(new SwaggerBundle<>() {
-                @Override
-                protected SwaggerBundleConfiguration getSwaggerBundleConfiguration(DPCAttributionConfiguration configuration) {
-                    final SwaggerBundleConfiguration config = configuration.getSwaggerBundleConfiguration();
-                    config.setVersion(propertiesProvider.getApplicationVersion());
-                    return config;
-                }
-            });
-        }
     }
 }
