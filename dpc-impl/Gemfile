@@ -4,24 +4,24 @@ git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 ruby '2.7.2'
 
 # Specifying rails components to be able to omit unused actioncable
-gem 'actionmailbox', '6.1.4.4'
-gem 'actionmailer', '6.1.4.4'
-gem 'actionpack', '6.1.4.4'
-gem 'actiontext', '6.1.4.4'
-gem 'actionview', '6.1.4.4'
-gem 'activejob', '6.1.4.4'
-gem 'activemodel', '6.1.4.4'
-gem 'activerecord', '6.1.4.4'
-gem 'activestorage', '6.1.4.4'
-gem 'activesupport', '6.1.4.4'
+gem 'actionmailbox', '~> 6.1.6'
+gem 'actionmailer', '~> 6.1.6'
+gem 'actionpack', '~> 6.1.6'
+gem 'actiontext', '~> 6.1.6'
+gem 'actionview', '~> 6.1.6'
+gem 'activejob', '~> 6.1.6'
+gem 'activemodel', '~> 6.1.6'
+gem 'activerecord', '~> 6.1.6'
+gem 'activestorage', '~> 6.1.6'
+gem 'activesupport', '~> 6.1.6'
 gem 'bundler', '>= 1.15.0'
-gem 'railties', '6.1.4.4'
+gem 'railties', '~> 6.1.6'
 gem 'pg', '~> 1.1'
-gem 'puma', '>= 5.5.1'
+gem 'puma', '>= 5.6.4'
 gem 'redis', '~> 4.0'
 gem 'sass-rails', '>= 6.0.0'
 gem 'webpacker', '~> 5.4', '>= 5.4.0'
-gem 'sidekiq', '~> 6.1'
+gem 'sidekiq', '~> 6.4'
 gem 'turbolinks', '~> 5'
 gem 'jbuilder', '~> 2.7'
 gem 'newrelic_rpm', '~> 6.10'
@@ -35,8 +35,9 @@ gem 'sidekiq_alive'
 gem 'redis-namespace'
 gem 'lograge', '>= 0.11.2'
 gem 'luhnacy', '~> 0.2.1'
-# < 1.12.5 has a vulnerability, and is required by other gems
-gem 'nokogiri', '>= 1.12.5'
+
+# < 1.13.2 has a vulnerability, and is required by other gems
+gem 'nokogiri', '>= 1.13.4'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
@@ -58,7 +59,7 @@ group :development do
   # Access an interactive console on exception pages or by calling 'console' anywhere in the code.
   gem 'web-console', '>= 4.1.0'
   gem 'listen', '~> 3.3'
-  gem 'letter_opener_web', '~> 1.4', '>= 1.4.0'
+  gem 'letter_opener_web', '~> 2.0'
 
   gem 'simplecov', '<= 0.17'
   # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
