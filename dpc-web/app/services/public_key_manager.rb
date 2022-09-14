@@ -40,6 +40,11 @@ class PublicKeyManager
     true
   end
 
+  def delete_public_key(params)
+    api_client = APIClient.new
+    api_client.delete_public_key(registered_organization.api_id, params[:id])
+  end
+
   def public_keys
     api_client = APIClient.new
     api_client.get_public_keys(registered_organization.api_id)
