@@ -14,7 +14,7 @@ Rails.application.routes.draw do
 
   resources :organizations, only: [:edit, :update] do
     resources :client_tokens, only: [:new, :create, :destroy]
-    resources :public_keys, only: [:new, :create]
+    resources :public_keys, only: [:new, :create, :destroy]
   end
 
   devise_scope :user do
