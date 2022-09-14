@@ -12,7 +12,6 @@ import gov.cms.dpc.fhir.configuration.IDPCFHIRConfiguration;
 import gov.cms.dpc.macaroons.config.TokenPolicy;
 import io.dropwizard.client.JerseyClientConfiguration;
 import io.dropwizard.db.DataSourceFactory;
-import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.Valid;
@@ -82,10 +81,6 @@ public class DPCAPIConfiguration extends TypesafeConfiguration implements IDPCDa
     public void setTokenPolicy(TokenPolicy tokenPolicy) {
         this.tokenPolicy = tokenPolicy;
     }
-
-    @Valid
-    @JsonProperty("swagger")
-    private SwaggerBundleConfiguration swaggerBundleConfiguration;
 
     @Override
     public DataSourceFactory getDatabase() {
@@ -168,14 +163,6 @@ public class DPCAPIConfiguration extends TypesafeConfiguration implements IDPCDa
     @Override
     public BBClientConfiguration getBlueButtonConfiguration() {
         return this.clientConfiguration;
-    }
-
-    public SwaggerBundleConfiguration getSwaggerBundleConfiguration() {
-        return swaggerBundleConfiguration;
-    }
-
-    public void setSwaggerBundleConfiguration(SwaggerBundleConfiguration swaggerBundleConfiguration) {
-        this.swaggerBundleConfiguration = swaggerBundleConfiguration;
     }
 
     public int getJobTimeoutInSeconds() {
