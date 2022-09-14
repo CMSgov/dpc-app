@@ -5,18 +5,18 @@ ruby '2.7.2'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails', branch: 'main'
 # Specifying rails components to be able to omit unused actioncable
-gem 'actionmailbox', '6.1.4.7'
-gem 'actionmailer', '6.1.4.7'
-gem 'actionpack', '6.1.4.7'
-gem 'actiontext', '6.1.4.7'
-gem 'actionview', '6.1.4.7'
-gem 'activejob', '6.1.4.7'
-gem 'activemodel', '6.1.4.7'
-gem 'activerecord', '6.1.4.7'
-gem 'activestorage', '6.1.4.7'
-gem 'activesupport', '6.1.4.7'
+gem 'actionmailbox', '~> 6.1.6'
+gem 'actionmailer', '~> 6.1.6'
+gem 'actionpack', '~> 6.1.6'
+gem 'actiontext', '~> 6.1.6'
+gem 'actionview', '~> 6.1.6'
+gem 'activejob', '~> 6.1.6'
+gem 'activemodel', '~> 6.1.6'
+gem 'activerecord', '~> 6.1.6'
+gem 'activestorage', '~> 6.1.6'
+gem 'activesupport', '~> 6.1.6'
 gem 'bundler', '>= 1.15.0'
-gem 'railties', '6.1.4.7'
+gem 'railties', '~> 6.1.6'
 gem 'pg', '~> 1.1'
 # Use Puma as the app server
 gem 'puma', '>= 5.6.4'
@@ -77,7 +77,7 @@ group :development do
   # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
   gem 'spring'
   gem 'simplecov', '<= 0.17'
-  gem 'letter_opener_web', '~> 1.4', '>= 1.4.0'
+  gem 'letter_opener_web', '~> 2.0'
   gem 'letter_opener'
 end
 

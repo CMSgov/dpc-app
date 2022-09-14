@@ -1,11 +1,13 @@
 FROM ruby:2.7.2-alpine AS ruby_builder
 
 # Install build dependencies
-RUN apk add --no-cache postgresql-dev && \
+RUN apk update && \
+    apk add --no-cache postgresql-dev && \
     apk add --no-cache libsodium-dev && \
     apk add --no-cache shared-mime-info && \
     apk add --no-cache --virtual build-deps alpine-sdk npm tzdata && \
-    apk add xz
+    apk add xz && \
+    apk add --no-cache gcompat
 
 # Set the working directory
 RUN mkdir /dpc-admin
@@ -16,7 +18,11 @@ COPY /dpc-admin/Gemfile /dpc-admin/Gemfile.lock /dpc-admin/
 COPY /dpc-admin/package.json /dpc-admin/package-lock.json /dpc-admin/
 
 # Install the website dependencies
-RUN gem install bundler --no-document && bundle install && npm install
+RUN gem install bundler --no-document && \
+    gem uninstall nokogiri -I && \
+    bundle config set force_ruby_platform true && \
+    bundle install && \
+    npm install
 
 # Run bundler audit
 RUN bundle exec bundle audit update && bundle exec bundle audit check --ignore CVE-2015-9284

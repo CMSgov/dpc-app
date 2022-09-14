@@ -22,7 +22,6 @@ import gov.cms.dpc.common.hibernate.queue.DPCQueueHibernateModule;
 import gov.cms.dpc.common.logging.filters.GenerateRequestIdFilter;
 import gov.cms.dpc.common.logging.filters.LogResponseFilter;
 import gov.cms.dpc.common.utils.EnvironmentParser;
-import gov.cms.dpc.common.utils.PropertiesProvider;
 import gov.cms.dpc.fhir.FHIRModule;
 import gov.cms.dpc.macaroons.BakeryModule;
 import gov.cms.dpc.queue.JobQueueModule;
@@ -32,8 +31,6 @@ import io.dropwizard.db.DataSourceFactory;
 import io.dropwizard.migrations.MigrationsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
-import io.federecio.dropwizard.swagger.SwaggerBundle;
-import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 import java.util.List;
 
 public class DPCAPIService extends Application<DPCAPIConfiguration> {
@@ -112,15 +109,6 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
     }
 
     private void setupCustomBundles(final Bootstrap<DPCAPIConfiguration> bootstrap) {
-        final PropertiesProvider propertiesProvider = new PropertiesProvider();
-        bootstrap.addBundle(new SwaggerBundle<DPCAPIConfiguration>() {
-            @Override
-            protected SwaggerBundleConfiguration getSwaggerBundleConfiguration(DPCAPIConfiguration dpcapiConfiguration) {
-                final SwaggerBundleConfiguration swaggerBundleConfiguration = dpcapiConfiguration.getSwaggerBundleConfiguration();
-                swaggerBundleConfiguration.setVersion(propertiesProvider.getApplicationVersion());
-                return swaggerBundleConfiguration;
-            }
-        });
         bootstrap.addBundle(new MigrationsBundle<DPCAPIConfiguration>() {
             @Override
             public DataSourceFactory getDataSourceFactory(DPCAPIConfiguration dpcAPIConfiguration) {
