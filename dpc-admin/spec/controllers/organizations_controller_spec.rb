@@ -18,7 +18,7 @@ RSpec.describe OrganizationsController, type: :controller do
       it 'assigns @organizations to all organizations' do
         organizations = create_list(:organization, 2)
         get :index
-        expect(assigns(:organizations)).to eq(assigns(organizations))
+        expect(assigns(:organizations)).to eq(organizations)
       end
     end
   end
@@ -59,7 +59,6 @@ RSpec.describe OrganizationsController, type: :controller do
       before(:each) do
         sign_in internal_user, scope: :internal_user
       end
-
       it 'destroys the organization' do
         org = create(:organization)
         expect { delete :destroy, params: { id: org.id } }.to change(Organization, :count).by(-1)
