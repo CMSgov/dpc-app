@@ -16,7 +16,8 @@ curl -sSfL https://raw.githubusercontent.com/securego/gosec/master/install.sh | 
 echo -e "-------------- DPC-ATTRIBUTION LINTING STARTED --------------"
 golangci-lint --timeout 5m run && echo "*********** DPC-ATTRIBUTION IS LINT FREE!! ***********" || echo -e "*********** LINTING FAILED!! ***********"
 echo -e "-------------- SECURITY SCAN STARTED --------------"
-gosec -fmt=json -out=../results.json -stdout *.go
+pwd
+gosec -fmt=json -out=../results.json -stdout ./...
 echo -e "*********** SECURITY SCAN RESULTS: ***********"
 cat ../results.json
 
