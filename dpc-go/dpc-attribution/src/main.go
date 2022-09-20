@@ -19,6 +19,7 @@ import (
 	"github.com/CMSgov/dpc/attribution/router"
 	"github.com/CMSgov/dpc/attribution/service"
 	v1 "github.com/CMSgov/dpc/attribution/service/v1"
+	"time"
 )
 
 func main() {
@@ -125,6 +126,7 @@ func startSecureServer(ctx context.Context, port string, handler http.Handler, u
 		Addr:      fmt.Sprintf(":%s", port),
 		Handler:   handler,
 		TLSConfig: severConf,
+		ReadHeaderTimeout: 2 * time.Second,
 	}
 	//If cert and key file paths are not passed the certs in tls configs are used.
 	if err := server.ListenAndServeTLS("", ""); err != nil {
