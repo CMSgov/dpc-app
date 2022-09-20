@@ -10,8 +10,8 @@ mkdir -p test_results/${timestamp}
 mkdir -p test_results/latest
 
 cd src
-echo -e "-------------- TIDY UP GO PACKAGES --------------"
-go mod tidy
+echo -e "-------------- INSTALL LINTER --------------"
+curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin
 echo -e "-------------- DPC-API LINTING STARTED --------------"
 golangci-lint --timeout 5m run && echo "*********** DPC-API IS LINT FREE!! ***********" || echo -e "*********** LINTING FAILED!! ***********"
 echo -e "-------------- SECURITY SCAN STARTED --------------"
