@@ -17,7 +17,7 @@ gem 'activerecord', '~> 7.0.0'
 gem 'activestorage', '~> 7.0.0'
 gem 'activesupport', '~> 7.0.0'
 gem 'bundler', '>= 1.15.0'
-gem 'railties', '~> 6.1.6'
+gem 'railties', '~> 7.0.0'
 gem 'dotenv-rails', groups: [:development, :test]
 gem 'puma', '~> 4.3.12'
 gem 'redis', '~> 4.0'
