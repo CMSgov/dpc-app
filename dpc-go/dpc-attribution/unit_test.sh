@@ -10,8 +10,9 @@ mkdir -p test_results/${timestamp}
 mkdir -p test_results/latest
 
 cd src
-echo -e "-------------- INSTALL LINTER --------------"
+echo -e "-------------- INSTALL DEPS --------------"
 curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin
+curl -sSfL https://raw.githubusercontent.com/securego/gosec/master/install.sh | sh -s -- -b $(go env GOPATH)/bin vX.Y.Z
 echo -e "-------------- DPC-ATTRIBUTION LINTING STARTED --------------"
 golangci-lint --timeout 5m run && echo "*********** DPC-ATTRIBUTION IS LINT FREE!! ***********" || echo -e "*********** LINTING FAILED!! ***********"
 echo -e "-------------- SECURITY SCAN STARTED --------------"
