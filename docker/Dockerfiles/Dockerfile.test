@@ -1,5 +1,5 @@
 
-FROM golang:1.17.0-buster
+FROM golang:1.18.0-buster
 
 RUN curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin
 
