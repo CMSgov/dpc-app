@@ -40,6 +40,7 @@ func NewServer(name string, port int, authType string, handler http.Handler) *Se
 		ReadTimeout:  time.Duration(conf.GetAsInt("SERVER_READ_TIMEOUT_SECONDS", 10)) * time.Second,
 		WriteTimeout: time.Duration(conf.GetAsInt("SERVER_WRITE_TIMEOUT_SECONDS", 20)) * time.Second,
 		IdleTimeout:  time.Duration(conf.GetAsInt("SERVER_IDLE_TIMEOUT_SECONDS", 120)) * time.Second,
+		ReadHeaderTimeout: 2 * time.Second,
 	}
 	return &s
 }
