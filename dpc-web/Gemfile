@@ -7,7 +7,7 @@ ruby '2.7.2'
 
 # Anchored versions, do not bump without testing
 # Specifying rails components to be able to omit unused actioncable
-gem 'rails', '~> 6.1.4.1'
+gem 'rails', '~> 6.1.6.1'
 gem 'actionmailbox', '>= 6.0.5.1'
 gem 'actionmailer', '>= 6.0.5.1'
 gem 'actionpack', '>= 6.0.5.1'
