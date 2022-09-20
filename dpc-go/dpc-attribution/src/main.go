@@ -85,6 +85,7 @@ func startUnsecureServer(ctx context.Context, port string, handler http.Handler)
 	server := http.Server{
 		Addr:    fmt.Sprintf(":%s", port),
 		Handler: handler,
+		ReadHeaderTimeout: 2 * time.Second,
 	}
 	fmt.Printf("Starting UNSECURE DPC-Attribution server on port %v ...\n", port)
 	if err := server.ListenAndServe(); err != nil {
