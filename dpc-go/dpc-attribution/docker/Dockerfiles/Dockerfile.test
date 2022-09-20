@@ -3,7 +3,7 @@ FROM golang:1.18-buster
 ENV GO111MODULE=on
 
 # Download all dependencies
-COPY ../../../../go.mod ../../../../go.sum ./
+COPY go.mod go.sum tools.go ./
 
 RUN go get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.42.0
 RUN go get github.com/securego/gosec/v2/cmd/gosec@v2.12.0
