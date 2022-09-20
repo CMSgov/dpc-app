@@ -3,6 +3,9 @@ FROM golang:1.18.0-buster
 
 RUN curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin
 
+# Download all dependencies
+COPY go.mod go.sum tools.go ./
+
 RUN go get -u github.com/xo/usql
 RUN go get -u github.com/securego/gosec/cmd/gosec
 RUN go get -u gotest.tools/gotestsum
