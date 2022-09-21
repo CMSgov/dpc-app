@@ -489,7 +489,7 @@ DEPENDENCIES
   rubocop-performance (>= 1.10.2)
   sassc-rails (>= 2.1.2)
   selenium-webdriver
-  sidekiq (~> 6.4)
+  sidekiq (>= 6.4)
   sidekiq_alive
   simplecov (<= 0.17)
   spring
