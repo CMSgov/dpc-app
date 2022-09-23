@@ -127,8 +127,6 @@ GEM
       faraday-net_http (>= 2.0, < 3.1)
       ruby2_keywords (>= 0.0.4)
     faraday-net_http (3.0.0)
-    faraday-retry (2.0.0)
-      faraday (~> 2.0)
     ffi (1.15.5)
     globalid (1.0.0)
       activesupport (>= 5.0)
@@ -386,7 +384,6 @@ DEPENDENCIES
   factory_bot_rails (>= 6.2.0)
   faker
   fakeredis
-  faraday-retry
   health_check (>= 3.1.0)
   jbuilder (~> 2.7)
   letter_opener
