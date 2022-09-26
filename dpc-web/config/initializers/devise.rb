@@ -289,5 +289,5 @@ Devise.setup do |config|
   config.sign_in_after_change_password = false
 
   # Mailer layout
-  Devise::Mailer.layout "mailer"
+  Devise::Mailers.layout "mailer"
 end
