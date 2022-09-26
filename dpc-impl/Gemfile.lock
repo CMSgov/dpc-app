@@ -177,7 +177,7 @@ GEM
       digest
       net-protocol
       timeout
-    newrelic_rpm (8.10.1)
+    newrelic_rpm (8.4.0)
     nio4r (2.5.8)
     nokogiri (1.13.8-x86_64-darwin)
       racc (~> 1.4)
@@ -358,7 +358,7 @@ DEPENDENCIES
   listen (~> 3.3)
   lograge (>= 0.11.2)
   luhnacy (~> 0.2.1)
-  newrelic_rpm (~> 8.10.1)
+  newrelic_rpm (~> 8.4.0)
   nokogiri (>= 1.13.4)
   pg (~> 1.1)
   pry
