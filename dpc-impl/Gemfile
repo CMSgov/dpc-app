@@ -24,7 +24,7 @@ gem 'webpacker', '~> 5.4', '>= 5.4.0'
 gem 'sidekiq', '>= 6.4'
 gem 'turbolinks', '~> 5'
 gem 'jbuilder', '~> 2.7'
-gem 'newrelic_rpm', '~> 8.4.0'
+gem 'newrelic_rpm', '~> 7.2.0'
 gem 'bootsnap', '>= 1.4.4', require: false
 gem 'devise', '>= 4.8.0'
 gem 'devise_invitable', '~> 2.0.5'

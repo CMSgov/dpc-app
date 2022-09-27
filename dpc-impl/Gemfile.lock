@@ -177,7 +177,7 @@ GEM
       digest
       net-protocol
       timeout
-    newrelic_rpm (8.4.0)
+    newrelic_rpm (7.2.0)
     nio4r (2.5.8)
     nokogiri (1.13.8-x86_64-darwin)
       racc (~> 1.4)
@@ -220,7 +220,7 @@ GEM
     redis (4.8.0)
     redis-namespace (1.9.0)
       redis (>= 4)
-    regexp_parser (2.5.0)
+    regexp_parser (2.6.0)
     request_store (1.5.1)
       rack (>= 1.4)
     responders (3.0.1)
@@ -358,7 +358,7 @@ DEPENDENCIES
   listen (~> 3.3)
   lograge (>= 0.11.2)
   luhnacy (~> 0.2.1)
-  newrelic_rpm (~> 8.4.0)
+  newrelic_rpm (~> 7.2.0)
   nokogiri (>= 1.13.4)
   pg (~> 1.1)
   pry
