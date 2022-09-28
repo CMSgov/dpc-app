@@ -237,7 +237,7 @@ GEM
     net-smtp (0.3.2)
       net-protocol
     netrc (0.11.0)
-    newrelic_rpm (6.1.0.352)
+    newrelic_rpm (6.15.0)
     nio4r (2.5.8)
     nokogiri (1.13.8-x86_64-darwin)
       racc (~> 1.4)
@@ -479,7 +479,7 @@ DEPENDENCIES
   lograge
   luhnacy (~> 0.2.1)
   macaroons
-  newrelic_rpm (~> 6.1.0)
+  newrelic_rpm (~> 6.10)
   nokogiri (>= 1.13.4)
   octokit
   omniauth-github
