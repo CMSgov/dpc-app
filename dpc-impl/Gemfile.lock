@@ -170,7 +170,7 @@ GEM
       timeout
     net-smtp (0.3.2)
       net-protocol
-    newrelic_rpm (6.15.0)
+    newrelic_rpm (8.10.1)
     nio4r (2.5.8)
     nokogiri (1.13.8-x86_64-darwin)
       racc (~> 1.4)
@@ -350,7 +350,7 @@ DEPENDENCIES
   listen (~> 3.3)
   lograge (>= 0.11.2)
   luhnacy (~> 0.2.1)
-  newrelic_rpm (~> 6.10)
+  newrelic_rpm (~> 8.10)
   nokogiri (>= 1.13.4)
   pg (~> 1.1)
   pry

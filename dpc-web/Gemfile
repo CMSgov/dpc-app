@@ -18,6 +18,8 @@ gem 'activerecord',  '~> 7.0.3.1'
 gem 'activestorage', '~> 7.0.3.1'
 gem 'activesupport', '~> 7.0.3.1'
 gem 'railties', '~> 7.0.3.1'
+gem 'newrelic_rpm', '~> 8.10'
+
 gem 'bundler', '>= 1.15.0'
 gem 'sprockets-rails', '>= 3.2.2'
 gem 'puma', '>= 5.6.4'
@@ -26,7 +28,6 @@ gem 'coffee-rails', '~> 5.0', '>= 5.0.0'
 gem 'kramdown', '~> 2.3', '>= 2.3.1'
 gem 'luhnacy', '~> 0.2.1'
 gem 'sidekiq', '~> 6.4'
-gem 'newrelic_rpm', '~> 6.10'
 gem 'rexml', '>= 3.2.5' # adding for CVE-2021-28965
 gem 'bootsnap', '>= 1.1.0', require: false
 gem 'sassc-rails', '>= 2.1.2'

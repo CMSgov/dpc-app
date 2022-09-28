@@ -16,6 +16,8 @@ gem 'activerecord',  '~> 7.0.3.1'
 gem 'activestorage', '~> 7.0.3.1'
 gem 'activesupport', '~> 7.0.3.1'
 gem 'railties', '~> 7.0.3.1'
+gem 'newrelic_rpm', '~> 8.10'
+
 gem 'bundler', '>= 1.15.0'
 gem 'dotenv-rails', groups: [:development, :test]
 gem 'puma', '~> 4.3.12'
@@ -26,7 +28,6 @@ gem 'sidekiq', '~> 6.4'
 gem 'webpacker', '~> 4.0'
 gem 'turbolinks', '~> 5'
 gem 'jbuilder', '~> 2.7'
-gem 'newrelic_rpm', '~> 6.10'
 gem 'rexml', '>= 3.2.5' # adding for CVE-2021-28965
 gem 'bootsnap', '>= 1.4.2', require: false
 gem 'sassc-rails', '>= 2.1.2'
