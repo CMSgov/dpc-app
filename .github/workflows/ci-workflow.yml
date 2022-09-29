@@ -1,77 +1,37 @@
-name: "DPC CI Workflow"
-
-on: [push]
-
-env:
-  VAULT_PW: ${{ secrets.VAULT_PW }}
-  REPORT_COVERAGE: true
-  CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
-  DPC_CA_CERT: ${{ secrets.DPC_CA_CERT }}
-  ENV: "github-ci"
-
+# This is our basic workflow for automating secrets scanning with GitHub Actions
+ 
+name: Secrets Scanning
+ 
+# Controls when the workflow will run
+on: push
+ 
+# Defining the job(s) to be run to execute secrets scanning
 jobs:
-  build-api:
-    name: "Build and Test API"
-    runs-on: ubuntu-latest
-    steps:
-      - name: "Checkout code"
-        uses: actions/checkout@v1
-      - name: "Set up JDK 11"
-        uses: actions/setup-java@v1
-        with:
-          java-version: "11"
-      - name: "Set up Python 3.8.1"
-        uses: actions/setup-python@v2
-        with:
-          python-version: "3.8.1"
-      - name: "API Build"
-        run: |
-          make ci-app
-      - name: "Smoke Test"
-        run: |
-          make smoke
-
-  build-api-v2:
-    name: "Build and Test API V2"
-    runs-on: ubuntu-latest
-    steps:
-      - name: "Checkout code"
-        uses: actions/checkout@v2
-      - name: Run all tests
-        run: |
-          make test-docker
-        working-directory: dpc-go/dpc-api
-
-  build-attribution-v2:
-    name: "Build and Test Attribution V2"
-    runs-on: ubuntu-latest
-    steps:
-      - name: "Checkout code"
-        uses: actions/checkout@v2
-      - name: Prepare to decrypt secrets
-        run: |
-          echo $VAULT_PW > dpc-go/dpc-attribution/.vault_password
-      - name: Run all tests
-        run: |
-          make test-docker
-        working-directory: dpc-go/dpc-attribution
-
-  build-portals-v1:
-    name: "Build and Test DPCv1 Web Portals"
-    runs-on: ubuntu-latest
-    steps:
-      - name: "Checkout code"
-        uses: actions/checkout@v1
-      - name: "Web Portals v1 Build"
-        run: |
-          make ci-portals-v1
-
-  build-portals-v2:
-    name: "Build and Test DPCv2 Web Portals"
-    runs-on: ubuntu-latest
-    steps:
-      - name: "Checkout code"
-        uses: actions/checkout@v1
-      - name: "Web Portals v2 Build"
-        run: |
-          make ci-portals-v2
+ 
+ # This workflow contains a single job called "Scan-for-secrets"
+ Scan-for-secrets:
+ 
+   # The type of runner that the job will run on
+   runs-on: ubuntu-latest
+ 
+   # Steps define the order in which the tasks will be executed
+   steps:
+ 
+     # Checks-out the repository so our job can access it
+     - uses: actions/checkout@v2
+    
+     # Installs secret scanner on the runner
+     - name: Install Whispers
+       run: sudo pip install whispers
+ 
+     # Scan repo for secrets
+     - name: Run scanner for the repository
+       run: whispers ${{ github.workspace }} > /tmp/scan_output.json
+ 
+     # Upload Artifacts
+     - name: Upload the scan output
+       uses: actions/upload-artifact@v2
+       with:
+         name: scan_results
+         path: /tmp/scan_output.json
+         retention-days: 2

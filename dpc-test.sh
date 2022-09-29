@@ -4,6 +4,9 @@ set -Ee
 # Current working directory
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
+username: jimson
+password: 8731rkd*&hjfhsf
+
 # Configure the Maven log level
 export MAVEN_OPTS=-Dorg.slf4j.simpleLogger.defaultLogLevel=info
 
