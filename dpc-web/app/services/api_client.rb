@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ApiClient
+class APIClient
   attr_reader :base_url, :response_body, :response_status
 
   def initialize

@@ -12,8 +12,8 @@ RSpec.describe PublicKeyManager do
       context 'successful API request' do
         it 'responds true' do
           registered_org = build(:registered_organization)
-          api_client = instance_double(ApiClient)
-          allow(ApiClient).to receive(:new).and_return(api_client)
+          api_client = instance_double(APIClient)
+          allow(APIClient).to receive(:new).and_return(api_client)
           allow(api_client).to receive(:create_public_key)
             .and_return(api_client)
           allow(api_client).to receive(:response_successful?).and_return(true)
@@ -31,8 +31,8 @@ RSpec.describe PublicKeyManager do
         it 'responds false' do
           registered_org = build(:registered_organization)
 
-          api_client = instance_double(ApiClient)
-          allow(ApiClient).to receive(:new).and_return(api_client)
+          api_client = instance_double(APIClient)
+          allow(APIClient).to receive(:new).and_return(api_client)
           allow(api_client).to receive(:create_public_key)
             .with(registered_org.api_id, params: @public_key_params)
             .and_return(api_client)
@@ -78,8 +78,8 @@ RSpec.describe PublicKeyManager do
       context 'successful API request' do
         it 'responds true' do
           registered_org = build(:registered_organization)
-          api_client = instance_double(ApiClient)
-          allow(ApiClient).to receive(:new).and_return(api_client)
+          api_client = instance_double(APIClient)
+          allow(APIClient).to receive(:new).and_return(api_client)
           allow(api_client).to receive(:delete_public_key)
             .with(registered_org.api_id, '570f7a71-0e8f-48a1-83b0-c46ac35d6ef3')
             .and_return(true)
@@ -101,8 +101,8 @@ RSpec.describe PublicKeyManager do
         it 'responds false' do
           registered_org = build(:registered_organization)
 
-          api_client = instance_double(ApiClient)
-          allow(ApiClient).to receive(:new).and_return(api_client)
+          api_client = instance_double(APIClient)
+          allow(APIClient).to receive(:new).and_return(api_client)
           allow(api_client).to receive(:delete_public_key)
             .with(registered_org.api_id, '570f7a71-0e8f-48a1-83b0-c46ac35d6ef3')
             .and_return(false)
@@ -148,8 +148,8 @@ RSpec.describe PublicKeyManager do
       it 'returns array of public keys' do
         registered_org = build(:registered_organization)
 
-        api_client = instance_double(ApiClient)
-        allow(ApiClient).to receive(:new).and_return(api_client)
+        api_client = instance_double(APIClient)
+        allow(APIClient).to receive(:new).and_return(api_client)
         allow(api_client).to receive(:get_public_keys)
           .with(registered_org.api_id).and_return(api_client)
         allow(api_client).to receive(:response_successful?).and_return(true)
@@ -164,8 +164,8 @@ RSpec.describe PublicKeyManager do
       it 'returns empty array' do
         registered_org = build(:registered_organization)
 
-        api_client = instance_double(ApiClient)
-        allow(ApiClient).to receive(:new).and_return(api_client)
+        api_client = instance_double(APIClient)
+        allow(APIClient).to receive(:new).and_return(api_client)
         allow(api_client).to receive(:get_public_keys)
           .with(registered_org.api_id).and_return(api_client)
         allow(api_client).to receive(:response_successful?).and_return(false)
