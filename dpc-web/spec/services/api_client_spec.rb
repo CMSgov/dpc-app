@@ -3,7 +3,7 @@
 require 'rails_helper'
 require './lib/luhnacy_lib/luhnacy_lib'
 
-RSpec.describe APIClient do
+RSpec.describe ApiClient do
   include OrganizationsHelper
 
   let!(:org) { create(:organization, npi: LuhnacyLib.generate_npi) }
@@ -91,7 +91,7 @@ RSpec.describe APIClient do
                 '"endpoint":[{"reference":"Endpoint/d385cfb4-dc36-4cd0-b8f8-400a6dea2d66"}]}'
         )
 
-        api_client = APIClient.new
+        api_client = ApiClient.new
 
         api_client.create_organization(org, fhir_endpoint: fhir_endpoint.attributes)
 
@@ -112,7 +112,7 @@ RSpec.describe APIClient do
         allow(http_stub).to receive(:use_ssl=).with(false).and_return(false)
         allow(http_stub).to receive(:request).and_raise(Errno::ECONNREFUSED)
 
-        api_client = APIClient.new
+        api_client = ApiClient.new
 
         api_client.create_organization(org, fhir_endpoint: fhir_endpoint.attributes)
 
@@ -194,7 +194,7 @@ RSpec.describe APIClient do
                 '"text":"org.hibernate.exception.ConstraintViolationException: could not execute statement"}}]}'
         )
 
-        api_client = APIClient.new
+        api_client = ApiClient.new
 
         api_client.create_organization(org, fhir_endpoint: fhir_endpoint.attributes)
         parse_response = JSON.parse api_client.response_body
@@ -228,7 +228,7 @@ RSpec.describe APIClient do
             }
           ).to_return(status: 200, body: '{}', headers: {})
 
-        client = APIClient.new
+        client = ApiClient.new
         expect(client.update_organization(registered_org)).to eq(client)
         expect(client.response_successful?).to eq(true)
       end
@@ -246,7 +246,7 @@ RSpec.describe APIClient do
             }
           ).to_return(status: 500, body: '', headers: {})
 
-        client = APIClient.new
+        client = ApiClient.new
         expect(client.update_organization(registered_org)).to eq(client)
         expect(client.response_successful?).to eq(false)
       end
@@ -268,7 +268,7 @@ RSpec.describe APIClient do
             }
           ).to_return(status: 200, body: '{}', headers: {})
 
-        client = APIClient.new
+        client = ApiClient.new
         expect(client.update_endpoint(registered_org)).to eq(client)
         expect(client.response_successful?).to eq(true)
       end
@@ -288,7 +288,7 @@ RSpec.describe APIClient do
             }
           ).to_return(status: 500, body: '', headers: {})
 
-        client = APIClient.new
+        client = ApiClient.new
         expect(client.update_endpoint(registered_org)).to eq(client)
         expect(client.response_successful?).to eq(false)
       end
@@ -308,7 +308,7 @@ RSpec.describe APIClient do
           body: '{"token":"1234567890","label":"Sandbox Token 1","createdAt":"2019-11-07T17:15:22.781Z"}'
         )
 
-        api_client = APIClient.new
+        api_client = ApiClient.new
 
         api_client.create_client_token(registered_org.api_id, params: { label: 'Sandbox Token 1' })
 
@@ -331,7 +331,7 @@ RSpec.describe APIClient do
           body: '{}'
         )
 
-        api_client = APIClient.new
+        api_client = ApiClient.new
 
         api_client.create_client_token(registered_org.api_id, params: { label: 'Sandbox Token 1' })
 
@@ -352,7 +352,7 @@ RSpec.describe APIClient do
                 '"createdAt":"2019-11-07T17:15:22.781Z","expiresdAt":"2019-11-07T17:15:22.781Z"}]'
         )
 
-        api_client = APIClient.new
+        api_client = ApiClient.new
 
         api_client.get_client_tokens(registered_org.api_id)
 
@@ -375,7 +375,7 @@ RSpec.describe APIClient do
         allow(http_stub).to receive(:use_ssl=).with(false).and_return(false)
         allow(http_stub).to receive(:request).and_raise(Errno::ECONNREFUSED)
 
-        api_client = APIClient.new
+        api_client = ApiClient.new
 
         api_client.get_client_tokens(registered_org.api_id)
 
@@ -399,7 +399,7 @@ RSpec.describe APIClient do
           body: ''
         )
 
-        api_client = APIClient.new
+        api_client = ApiClient.new
 
         api_client.get_client_tokens(registered_org.api_id)
 
@@ -423,7 +423,7 @@ RSpec.describe APIClient do
                 '"id":"3fa85f64-5717-4562-b3fc-2c963f66afa6"}'
         )
 
-        api_client = APIClient.new
+        api_client = ApiClient.new
 
         api_client.create_public_key(
           registered_org.api_id,
@@ -456,7 +456,7 @@ RSpec.describe APIClient do
                 '"id":"3fa85f64-5717-4562-b3fc-2c963f66afa6"}'
         )
 
-        api_client = APIClient.new
+        api_client = ApiClient.new
 
         api_client.create_public_key(
           registered_org.api_id,
@@ -490,7 +490,7 @@ RSpec.describe APIClient do
           body: '{}'
         )
 
-        api_client = APIClient.new
+        api_client = ApiClient.new
 
         api_client.create_public_key(
           registered_org.api_id,
@@ -518,7 +518,7 @@ RSpec.describe APIClient do
                 '"createdAt":"2019-11-07T17:15:22.781Z"}]'
         )
 
-        api_client = APIClient.new
+        api_client = ApiClient.new
 
         api_client.get_public_keys(registered_org.api_id)
 
@@ -542,7 +542,7 @@ RSpec.describe APIClient do
           body: '{}'
         )
 
-        api_client = APIClient.new
+        api_client = ApiClient.new
 
         api_client.get_public_keys(registered_org.api_id)
 

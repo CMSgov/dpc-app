@@ -8,8 +8,8 @@ RSpec.describe ClientTokenManager do
       it 'responds true with @client_token set' do
         registered_org = build(:registered_organization)
         token = { 'token' => 'exampleToken' }
-        api_client = instance_double(APIClient)
-        allow(APIClient).to receive(:new).and_return(api_client)
+        api_client = instance_double(ApiClient)
+        allow(ApiClient).to receive(:new).and_return(api_client)
         allow(api_client).to receive(:create_client_token)
           .with(registered_org.api_id, params: { label: 'Test Token 1' })
           .and_return(api_client)
@@ -25,8 +25,8 @@ RSpec.describe ClientTokenManager do
     context 'failed API request' do
       it 'responds false' do
         registered_org = build(:registered_organization)
-        api_client = instance_double(APIClient)
-        allow(APIClient).to receive(:new).and_return(api_client)
+        api_client = instance_double(ApiClient)
+        allow(ApiClient).to receive(:new).and_return(api_client)
         allow(api_client).to receive(:create_client_token)
           .with(registered_org.api_id, params: { label: 'Test Token 1' })
           .and_return(api_client)
@@ -45,8 +45,8 @@ RSpec.describe ClientTokenManager do
       it 'responds with client_tokens array' do
         registered_org = build(:registered_organization)
         tokens = [{ 'token' => 'exampleToken' }]
-        api_client = instance_double(APIClient)
-        allow(APIClient).to receive(:new).and_return(api_client)
+        api_client = instance_double(ApiClient)
+        allow(ApiClient).to receive(:new).and_return(api_client)
         allow(api_client).to receive(:get_client_tokens)
           .with(registered_org.api_id)
           .and_return(api_client)
@@ -61,8 +61,8 @@ RSpec.describe ClientTokenManager do
     context 'failed API request' do
       it 'responds with empty array' do
         registered_org = build(:registered_organization)
-        api_client = instance_double(APIClient)
-        allow(APIClient).to receive(:new).and_return(api_client)
+        api_client = instance_double(ApiClient)
+        allow(ApiClient).to receive(:new).and_return(api_client)
         allow(api_client).to receive(:get_client_tokens)
           .with(registered_org.api_id)
           .and_return(api_client)

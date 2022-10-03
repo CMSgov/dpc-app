@@ -7,7 +7,6 @@ import (
 	"crypto/x509"
 	"encoding/hex"
 	"fmt"
-	"github.com/sjsdfg/common-lang-in-go/StringUtils"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -15,7 +14,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/sjsdfg/common-lang-in-go/StringUtils"
+
 	b64 "encoding/base64"
+
 	"github.com/CMSgov/dpc/attribution/client/fhir"
 	"github.com/CMSgov/dpc/attribution/conf"
 	"github.com/CMSgov/dpc/attribution/logger"
