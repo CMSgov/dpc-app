@@ -3,7 +3,7 @@
 require 'rails_helper'
 require './lib/luhnacy_lib/luhnacy_lib'
 
-RSpec.describe APIClient do
+RSpec.describe ApiClient do
   include OrganizationsHelper
 
   let!(:org) { create(:organization, npi: LuhnacyLib.generate_npi) }
