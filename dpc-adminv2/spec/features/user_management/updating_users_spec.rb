@@ -42,7 +42,6 @@ RSpec.feature 'updating users' do
     find('[data-test="user-form-submit"]', visible: false).click
 
     expect(page.body).to have_content('Please correct errors:')
-    expect(page.body).to have_content('Email is invalid')
     expect(page.body).to have_content('Last name can\'t be blank')
     expect(page.body).to have_content('First name can\'t be blank')
   end
