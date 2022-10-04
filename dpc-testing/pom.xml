@@ -13,7 +13,7 @@
     <name>Common DPC testing code</name>
 
     <properties>
-        <jjwt.version>0.11.2</jjwt.version>
+        <jjwt.version>0.11.4</jjwt.version>
     </properties>
 
     <dependencies>
