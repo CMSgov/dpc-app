@@ -3,7 +3,7 @@
 require 'rails_helper'
 
 RSpec.describe RegisteredOrganization, type: :model do
-  include APIClientSupport
+  include ApiClientSupport
 
   describe '#client_tokens' do
     it 'gets array from ClientTokenManager' do
@@ -42,7 +42,7 @@ RSpec.describe RegisteredOrganization, type: :model do
         allow(ENV).to receive(:[]).and_call_original
       end
 
-      it 'invokes APIClient and returns the response body' do
+      it 'invokes ApiClient and returns the response body' do
         api_client = stub_api_client(
           message: :create_organization,
           success: true,

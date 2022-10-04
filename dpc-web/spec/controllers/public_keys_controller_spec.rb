@@ -3,7 +3,7 @@
 require 'rails_helper'
 
 RSpec.describe PublicKeysController, type: :controller do
-  include APIClientSupport
+  include ApiClientSupport
 
   describe 'GET #new' do
     let!(:user) { create(:user, :assigned) }
