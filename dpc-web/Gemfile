@@ -38,7 +38,7 @@ gem 'devise-security', '>= 0.16.0'
 gem 'truemail'
 gem 'health_check', '>= 3.0.0'
 gem 'fhir_client', '>= 4.0.6'
-gem 'sidekiq_alive'
+gem 'sidekiq_alive', '~> 6.2.2'
 gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
 gem 'kaminari', '>= 1.2.1'
 gem 'active_model_serializers', '>= 0.10.12'
