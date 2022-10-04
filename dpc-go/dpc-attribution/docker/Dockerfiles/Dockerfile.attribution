@@ -1,4 +1,4 @@
-FROM golang:1.17.5-alpine3.15 AS builder
+FROM golang:1.18-alpine3.15 AS builder
 RUN apk add --no-cache git
 WORKDIR /app/dpc-attribution
 COPY src/ .
@@ -8,7 +8,7 @@ RUN go build  -o ./bin/attribution .
 FROM migrate/migrate AS migrator
 WORKDIR /usr/local/bin
 
-FROM golang:1.17.5-alpine3.15
+FROM golang:1.18-alpine3.15
 RUN apk update upgrade
 RUN apk --no-cache add ca-certificates aws-cli curl
 WORKDIR /app/dpc-attribution
