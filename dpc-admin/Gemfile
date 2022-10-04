@@ -40,7 +40,7 @@ gem 'omniauth-github'
 gem 'omniauth-oktaoauth'
 gem 'octokit' # can be removed once we move past github omniauth
 gem 'fhir_client'
-gem 'sidekiq_alive', '~> 6.2.2'
+gem 'sidekiq_alive', '~> 2.1.5'
 gem 'redis-namespace'
 gem 'kaminari'
 gem 'active_model_serializers'
