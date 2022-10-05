@@ -4,7 +4,7 @@ require 'mail'
 class DomainExistsValidator < ActiveModel::EachValidator#add
   def validate_each(record, attribute, value)
     begin
-      r = Truemail.validate(value).result.success
+      r = Truemail.validate(value, with: :mx).result.success
     rescue StandardError
       r = false
     end
