@@ -5,6 +5,7 @@ Truemail.configure do |config|
   # Truemail.validate('email@email.com') call without with-parameter
   # Available validation types: :regex, :mx, :smtp
   config.default_validation_type = :mx
+  config.not_rfc_mx_lookup_flow = true
 
   #
   #
