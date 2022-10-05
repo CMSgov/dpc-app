@@ -482,7 +482,7 @@ DEPENDENCIES
   sassc-rails (>= 2.1.2)
   selenium-webdriver
   sidekiq (~> 6.4)
-  sidekiq_alive
+  sidekiq_alive (~> 2.1.5)
   simplecov (<= 0.17)
   spring
   spring-watcher-listen (~> 2.0.0)
