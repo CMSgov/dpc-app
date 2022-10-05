@@ -482,9 +482,9 @@ DEPENDENCIES
   newrelic_rpm (~> 8.10)
   nokogiri (>= 1.13.4)
   octokit
-  omniauth-github
-  omniauth-oktaoauth
-  omniauth-rails_csrf_protection (~> 0.1)
+  omniauth-github (~> 1.4.0)
+  omniauth-oktaoauth (~> 0.1.6)
+  omniauth-rails_csrf_protection (~> 0.1.2)
   pg (>= 0.18, < 2.0)
   pry
   pry-nav
