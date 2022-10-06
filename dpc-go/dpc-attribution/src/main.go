@@ -19,6 +19,7 @@ import (
 	"github.com/CMSgov/dpc/attribution/router"
 	"github.com/CMSgov/dpc/attribution/service"
 	v1 "github.com/CMSgov/dpc/attribution/service/v1"
+	"time"
 )
 
 func main() {
@@ -84,6 +85,7 @@ func startUnsecureServer(ctx context.Context, port string, handler http.Handler)
 	server := http.Server{
 		Addr:    fmt.Sprintf(":%s", port),
 		Handler: handler,
+		ReadHeaderTimeout: 2 * time.Second,
 	}
 	fmt.Printf("Starting UNSECURE DPC-Attribution server on port %v ...\n", port)
 	if err := server.ListenAndServe(); err != nil {
@@ -125,6 +127,7 @@ func startSecureServer(ctx context.Context, port string, handler http.Handler, u
 		Addr:      fmt.Sprintf(":%s", port),
 		Handler:   handler,
 		TLSConfig: severConf,
+		ReadHeaderTimeout: 2 * time.Second,
 	}
 	//If cert and key file paths are not passed the certs in tls configs are used.
 	if err := server.ListenAndServeTLS("", ""); err != nil {
