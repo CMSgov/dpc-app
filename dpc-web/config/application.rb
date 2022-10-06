@@ -22,6 +22,10 @@ require 'macaroons'
 # you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)
 
+config.to_prepare do
+  Devise::Mailer.layout "mailer"
+end
+
 module DpcWebsite
   class Application < Rails::Application
 
