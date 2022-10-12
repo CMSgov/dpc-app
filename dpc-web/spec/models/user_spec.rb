@@ -155,7 +155,7 @@ RSpec.describe User, type: :model do
     it 'must use valid domain' do
       subject.email = 'fake_user@baddomaincom'
       begin
-        r = Truemail.validate(value).result.success
+        r = Truemail.validate(subject.email).result.success
       rescue StandardError
         r = false
       end
