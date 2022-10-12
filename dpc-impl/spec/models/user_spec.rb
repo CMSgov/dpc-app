@@ -32,13 +32,6 @@ RSpec.describe User, type: :model do
     end
   end
 
-  describe '#email' do
-    it 'must use valid domain' do
-      subject.email = 'fake_user@baddommaincom'
-      expect(subject).to_not be_valid
-    end
-  end
-
   describe '#agree_to_terms' do
     it 'is required' do
       subject.agree_to_terms = nil

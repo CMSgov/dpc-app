@@ -82,13 +82,6 @@ RSpec.describe User, type: :model do
     end
   end
 
-  describe '#email' do
-    it 'must use valid domain' do
-      subject.email = 'fake_user@baddomaincom'
-      expect(subject).to_not be_valid
-    end
-  end
-
   describe 'scopes' do
     describe '.assigned' do
       it 'includes only users with an organization' do
