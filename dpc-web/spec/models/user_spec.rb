@@ -177,6 +177,18 @@ RSpec.describe User, type: :model do
     end
   end
 
+  describe '#email' do
+    it 'must use valid domain' do
+      subject.email = 'fake_user@baddomaincom'
+      begin
+        r = Truemail.validate(value).result.success
+      rescue StandardError
+        r = false
+      end
+      expect(r).to_not be_truthy
+    end
+  end
+
   describe '#zip' do
     it 'is required' do
       subject.zip = nil
