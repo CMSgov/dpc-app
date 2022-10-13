@@ -9,6 +9,5 @@ class DomainExistsValidator < ActiveModel::EachValidator
       r = false
     end
     record.errors.add(attribute, 'is invalid') unless r
-    #record.errors[attribute] << (options[:message] || 'is invalid') unless r
   end
 end
