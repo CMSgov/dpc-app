@@ -21,7 +21,7 @@ Devise.setup do |config|
   config.mailer_sender = 'dpcinfo@cms.hhs.gov'
 
   # Configure the class responsible to send e-mails.
-  # config.mailer = 'Devise::Mailer'
+  config.mailer = 'Devise::Mailer'
 
   # Configure the parent class responsible to send e-mails.
   # config.parent_mailer = 'ActionMailer::Base'
@@ -289,5 +289,4 @@ Devise.setup do |config|
   config.sign_in_after_change_password = false
 
   # Mailer layout
-  Devise::Mailer.layout "mailer"
 end

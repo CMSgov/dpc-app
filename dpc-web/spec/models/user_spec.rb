@@ -149,8 +149,8 @@ RSpec.describe User, type: :model do
         end
       end
     end
-  end
-
+  end  
+  
   describe '#email' do
     it 'must use valid domain' do
       subject.email = 'fake_user@baddomaincom'
