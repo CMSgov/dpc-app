@@ -34,7 +34,7 @@ RSpec.describe User, type: :model do
 
   describe '#email' do
     it 'must use valid domain' do
-      subject.email = 'fake_user@baddommaincom'
+      subject.email = 'fake_user@baddomaincom'
       expect(subject).to_not be_valid
     end
   end

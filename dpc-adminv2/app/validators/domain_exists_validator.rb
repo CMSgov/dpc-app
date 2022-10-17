@@ -8,6 +8,6 @@ class DomainExistsValidator < ActiveModel::EachValidator
     rescue StandardError
       r = false
     end
-    record.errors[attribute] << (options[:message] || 'is invalid') unless r
+    record.errors.add(attribute, 'is invalid') unless r
   end
 end
