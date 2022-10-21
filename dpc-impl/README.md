@@ -35,16 +35,16 @@ Both V2 versions of the api service and the attribution service have Mutual TLS 
 
 1. In the `docker-compose.portals.yml` file, set `API_METADATA_URL` to `http://host.docker.internal:3011/api/v2`
 3. In the `dpc-go/dpc-api/docker-compose.yml` file
-    a. Set `DPC_ATTRIBUTION-CLIENT_URL` to `http://host.docker.internal:3001` 
-    b. Set `DPC_SSAS-CLIENT_ADMIN-URL` to `http://host.docker.internal:3104`
-    c. Set `DPC_SSAS-CLIENT_PUBLIC-URL` to `http://host.docker.internal:3103`
+    *  Set `DPC_ATTRIBUTION-CLIENT_URL` to `http://host.docker.internal:3001` 
+    * Set `DPC_SSAS-CLIENT_ADMIN-URL` to `http://host.docker.internal:3104`
+    * Set `DPC_SSAS-CLIENT_PUBLIC-URL` to `http://host.docker.internal:3103`
 
 ### Build the V2 Docker images and spin up the containers
 
 This `make` command will build all of the necessary Docker images required to run V2 on your local machine
 
 ```Bash
-make build-va
+make build-v2
 ```
 
 This `make` command will spin up all of the necessary Docker containers required to run V2, including the dpc-impl service,the V2 api service, V2 attribution service, the consent service, the aggregation service and a postgres database.
@@ -65,8 +65,11 @@ make load-ssas-fixtures
 
 Now that the SSAS database is seeded with the admin system, we need a new client secret to feed to the V2 api.
 
-1. Run `make ssas-creds` in your console and copy the outputted secret value
-1. In the `dpc-go/dpc-api/docker-compose.yml` file, set `DPC_SSAS-CLIENT_CLIENT-SECRET` to the output of the above command
+1. Run the following `make` command in your console and copy the outputted secret value
+```Bash
+make ssas-creds
+```
+2. In the `dpc-go/dpc-api/docker-compose.yml` file, set `DPC_SSAS-CLIENT_CLIENT-SECRET` to the output of the above command
 
 ### Restart V2 API
 
