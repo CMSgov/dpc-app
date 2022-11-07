@@ -269,6 +269,7 @@ public class DistributedBatchQueue extends JobQueueCommon {
             try {
                 job.setCompletedStatus(aggregatorID);
                 session.merge(job);
+                logger.debug("Completed job: {}", job.toString());
 
                 final var delay = Duration.between(job.getStartTime().orElseThrow(), job.getCompleteTime().orElseThrow());
                 successTimer.update(delay.toMillis(), TimeUnit.MILLISECONDS);
@@ -285,6 +286,7 @@ public class DistributedBatchQueue extends JobQueueCommon {
             try {
                 job.setFailedStatus();
                 session.merge(job);
+                logger.debug("Failed job: {}", job.toString());
 
                 final var delay = Duration.between(job.getStartTime().orElseThrow(), job.getUpdateTime().orElseThrow());
                 failureTimer.update(delay.toMillis(), TimeUnit.MILLISECONDS);

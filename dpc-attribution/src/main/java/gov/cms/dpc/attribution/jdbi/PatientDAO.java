@@ -3,6 +3,8 @@ package gov.cms.dpc.attribution.jdbi;
 import gov.cms.dpc.common.entities.*;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
 import io.dropwizard.hibernate.AbstractDAO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.persistence.criteria.*;
@@ -12,6 +14,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class PatientDAO extends AbstractDAO<PatientEntity> {
+    private static final Logger logger = LoggerFactory.getLogger(PatientDAO.class);
 
     @Inject
     public PatientDAO(DPCManagedSessionFactory factory) {
@@ -19,6 +22,7 @@ public class PatientDAO extends AbstractDAO<PatientEntity> {
     }
 
     public PatientEntity persistPatient(PatientEntity patient) {
+        logger.info("Persisting patient {}", patient.toString());
         return this.persist(patient);
     }
 
