@@ -17,6 +17,7 @@ import org.slf4j.MDC;
 import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -173,17 +174,16 @@ public class AggregationEngine implements Runnable {
             MDC.remove(MDCConstants.PATIENT_ID);
             // Finish processing the batch
             if (this.isRunning()) {
-                logger.info("COMPLETED job");
+                logger.debug("dpcMetric=ProjectJobBatchResult,completionResult={},jobID={},completionTime={}", "COMPLETE", job.getJobID(), Instant.now().toString());
                 // Calculate metadata for the file (length and checksum)
                 calculateFileMetadata(job);
                 this.queue.completeBatch(job, aggregatorID);
             } else {
-                logger.info("PAUSED job");
                 this.queue.pauseBatch(job, aggregatorID);
             }
         } catch (Exception error) {
             try {
-                logger.error("FAILED job", error);
+                logger.debug("dpcMetric=ProjectJobBatchResult,completionResult={},jobID={},completionTime={}", "FAILED", job.getJobID(), Instant.now().toString());
                 this.queue.failBatch(job, aggregatorID);
             } catch (Exception failedBatchException) {
                 logger.error("FAILED to mark job {} batch {} as failed. Batch will remain in the running state, and stuck job logic will retry this in 5 minutes...", job.getJobID(), job.getBatchID(), failedBatchException);
