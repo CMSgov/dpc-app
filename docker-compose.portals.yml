@@ -18,8 +18,6 @@ services:
       - ./tmp/letter_opener/web:/dpc-web/tmp/letter_opener
 
     environment:
-      - GOLDEN_MACAROON=MDAyM2xvY2F0aW9uIGh0dHA6Ly9sb2NhbGhvc3Q6MzAwMgowMDM0aWRlbnRpZmllciBkZWQwYmQ3Ny0xZmRjLTQ3ZWEtYTMyMi0xZWM3MGNiMDQ4NWQKMDAyZnNpZ25hdHVyZSCFDzu7f_PWRSt61ETz8fu3EdnkkIaUBsx9QAaJaxTDxgo
-      - API_METADATA_URL=http://host.docker.internal:3002/v1
       - REDIS_URL=redis://redis
       - DATABASE_URL=postgresql://db/dpc-website_development
       - TEST_DATABASE_URL=postgresql://db/dpc-website_test
@@ -61,7 +59,7 @@ services:
       - ./tmp/letter_opener/admin:/dpc-admin/tmp/letter_opener
     environment:
       - REDIS_URL=redis://redis
-      - GOLDEN_MACAROON=MDAyM2xvY2F0aW9uIGh0dHA6Ly9sb2NhbGhvc3Q6MzAwMgowMDM0aWRlbnRpZmllciBkZWQwYmQ3Ny0xZmRjLTQ3ZWEtYTMyMi0xZWM3MGNiMDQ4NWQKMDAyZnNpZ25hdHVyZSCFDzu7f_PWRSt61ETz8fu3EdnkkIaUBsx9QAaJaxTDxgo
+      - GOLDEN_MACAROON=${GOLDEN_MACAROON}
       - API_METADATA_URL=http://api:3002/v1
       - DATABASE_URL=postgresql://db/dpc-website_development
       - TEST_DATABASE_URL=postgresql://db/dpc-website_test
