@@ -56,15 +56,15 @@ public abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organ
         final String macaroon = MacaroonHelpers.extractMacaroonFromRequest(requestContext, unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
 
         final DPCAuthCredentials dpcAuthCredentials = validateMacaroon(macaroon, uriInfo);
-        final String orgId = dpcAuthCredentials.getOrganization().getId();
-        final String resource_requested = XSSSanitizerUtil.sanitize(uriInfo.getPath());
-        final String method = requestContext.getMethod();
 
         final boolean authenticated = this.authenticate(requestContext, dpcAuthCredentials, null);
         if (!authenticated) {
             throw new WebApplicationException(dpc401handler.buildResponse(BEARER_PREFIX, realm));
         }
-        logger.info("event_type=request-received, resource_requested={}, organization_id={}, method={}", resource_requested, orgId, method);
+        logger.info("event_type=request-received, resource_requested={}, organization_id={}, method={}",
+                XSSSanitizerUtil.sanitize(uriInfo.getPath()),
+                dpcAuthCredentials.getOrganization().getId(),
+                requestContext.getMethod());
     }
 
     private DPCAuthCredentials validateMacaroon(String macaroon, UriInfo uriInfo) {

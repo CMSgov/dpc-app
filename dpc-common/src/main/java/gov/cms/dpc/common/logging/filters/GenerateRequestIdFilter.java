@@ -40,6 +40,10 @@ public class GenerateRequestIdFilter implements ContainerRequestFilter {
         }else{
             MDC.put(MDCConstants.DPC_REQUEST_ID, UUID.randomUUID().toString());
         }
-        logger.info("resource_requested={}, method={}", XSSSanitizerUtil.sanitize(requestContext.getUriInfo().getPath()),requestContext.getMethod());
+        logger.info("resource_requested={}, method={}, media_type={}, use_provided_request_id={}",
+                XSSSanitizerUtil.sanitize(requestContext.getUriInfo().getPath()),
+                requestContext.getMethod(),
+                requestContext.getMediaType().getType(),
+                useProvidedRequestId);
     }
 }
