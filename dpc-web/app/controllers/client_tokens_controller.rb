@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 class ClientTokensController < ApplicationController
   before_action :authenticate_user!
   before_action :organization_enabled?
