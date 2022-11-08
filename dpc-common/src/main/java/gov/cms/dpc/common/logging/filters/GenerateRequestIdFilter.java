@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 import javax.annotation.Priority;
-import javax.ws.rs.InternalServerErrorException;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import java.io.IOException;
@@ -28,11 +28,14 @@ public class GenerateRequestIdFilter implements ContainerRequestFilter {
 
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
+        String resourceRequested = XSSSanitizerUtil.sanitize(requestContext.getUriInfo().getPath());
+        String method = requestContext.getMethod();
+        String mediaType = requestContext.getMediaType().getType();
         try {
             MDC.clear();
         } catch(IllegalStateException exception) {
             logger.info("mdc_clear_error={}", exception.getMessage());
-            throw new InternalServerErrorException("Something went wrong, please try again. If this continues, contact DPC admin.");
+            throw new WebApplicationException("Something went wrong, please try again. If this continues, contact DPC admin.");
         }
         String requestId = requestContext.getHeaderString(Constants.DPC_REQUEST_ID_HEADER);
         if(requestId!=null && useProvidedRequestId) {
@@ -40,10 +43,6 @@ public class GenerateRequestIdFilter implements ContainerRequestFilter {
         }else{
             MDC.put(MDCConstants.DPC_REQUEST_ID, UUID.randomUUID().toString());
         }
-        logger.info("resource_requested={}, method={}, media_type={}, use_provided_request_id={}",
-                XSSSanitizerUtil.sanitize(requestContext.getUriInfo().getPath()),
-                requestContext.getMethod(),
-                requestContext.getMediaType().getType(),
-                useProvidedRequestId);
+        logger.info("resource_requested={}, method={}, media_type={}, request_id={}, use_provided_request_id={}", resourceRequested, method, mediaType, requestId, useProvidedRequestId);
     }
 }
