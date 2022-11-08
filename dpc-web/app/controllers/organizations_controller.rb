@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class OrganizationsController < ApplicationController
-  #before_action :authenticate_user!
+  before_action :authenticate_user!
 
   def edit
     @organization = current_user.organizations.find(id_param)
