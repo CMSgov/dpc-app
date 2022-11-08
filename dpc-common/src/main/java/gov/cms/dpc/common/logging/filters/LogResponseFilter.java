@@ -23,6 +23,11 @@ public class LogResponseFilter implements ContainerResponseFilter{
     @Override
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext){
         String requestId = MDC.get(MDCConstants.DPC_REQUEST_ID);
+        String resource_requested = XSSSanitizerUtil.sanitize(requestContext.getUriInfo().getPath());
+        String media_type = requestContext.getMediaType().getType();
+        String method = requestContext.getMethod();
+        int status = responseContext.getStatus();
+
         if(requestId!=null){
             responseContext.getHeaders().add(Constants.DPC_REQUEST_ID_HEADER, requestId);
         }

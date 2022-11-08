@@ -27,13 +27,20 @@ public class GenerateRequestIdFilter implements ContainerRequestFilter {
 
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
-        MDC.clear();
         String requestId = requestContext.getHeaderString(Constants.DPC_REQUEST_ID_HEADER);
+        String resource_requested = XSSSanitizerUtil.sanitize(requestContext.getUriInfo().getPath());
+        String method = requestContext.getMethod();
+        String media_type = requestContext.getMediaType().getType();
+        try {
+            MDC.clear();
+        } catch(Error e) {
+            logger.info("resource_requested={}, method={}, media_type={}, mdc_clear_error={}", resource_requested, method, media_type, e.getMessage());
+        }
         if(requestId!=null && useProvidedRequestId) {
             MDC.put(MDCConstants.DPC_REQUEST_ID, requestId);
         }else{
             MDC.put(MDCConstants.DPC_REQUEST_ID, UUID.randomUUID().toString());
         }
-        logger.info("resource_requested={}, method={}", XSSSanitizerUtil.sanitize(requestContext.getUriInfo().getPath()),requestContext.getMethod());
+        logger.info("resource_requested={}, method={}, media_type={}, use_provided_request_id={}", resource_requested, method, media_type, useProvidedRequestId );
     }
 }
