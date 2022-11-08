@@ -50,7 +50,6 @@ services:
     env_file:
       - ./ops/config/decrypted/local.env
     environment:
-      - AUTH_DISABLED=true
       - attributionURL=http://attribution:8080/v1/
       - ENV=local
       - JACOCO=${REPORT_COVERAGE}
