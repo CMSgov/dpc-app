@@ -45,7 +45,7 @@ public class PatientEntity extends PersonEntity {
     @ManyToOne
     private OrganizationEntity organization;
 
-    @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "patient")
     private List<AttributionRelationship> attributions;
 
     public PatientEntity() {
@@ -136,16 +136,6 @@ public class PatientEntity extends PersonEntity {
                 Objects.equals(organization, that.organization) &&
                 Objects.equals(attributions, that.attributions);
     }
-
-    @Override
-    public String toString() {{
-        return "PatientEntity{" +
-                "beneficiaryID='" + beneficiaryID + '\'' +
-                ", mbiHash='" + mbiHash + '\'' +
-                ", dob=" + dob + '\'' +
-                ", organization=" + organization.getOrganizationID() + '\'' +
-                ", orgname=" + organization.getOrganizationName() + '\'';
-    }}
 
     @Override
     public int hashCode() {
