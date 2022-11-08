@@ -30,8 +30,8 @@ public class GenerateRequestIdFilter implements ContainerRequestFilter {
     public void filter(ContainerRequestContext requestContext) throws IOException {
         try {
             MDC.clear();
-        } catch(Error e) {
-            logger.info("mdc_clear_error={}", e.getMessage());
+        } catch(IllegalStateException exception) {
+            logger.info("mdc_clear_error={}", exception.getMessage());
             throw new InternalServerErrorException("Something went wrong, please try again. If this continues, contact DPC admin.");
         }
         String requestId = requestContext.getHeaderString(Constants.DPC_REQUEST_ID_HEADER);
