@@ -31,6 +31,6 @@ public class LogResponseFilter implements ContainerResponseFilter{
         if(requestId!=null){
             responseContext.getHeaders().add(Constants.DPC_REQUEST_ID_HEADER, requestId);
         }
-        logger.info("resource_requested={}, method={}, status={}", XSSSanitizerUtil.sanitize(requestContext.getUriInfo().getPath()),requestContext.getMethod(),responseContext.getStatus());
+        logger.info("resource_requested={}, media_type={}, method={}, status={}", resource_requested, media_type, method, status);
     }
 }
