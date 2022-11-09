@@ -30,7 +30,9 @@ public class GenerateRequestIdFilter implements ContainerRequestFilter {
     public void filter(ContainerRequestContext requestContext) throws IOException {
         String resourceRequested = XSSSanitizerUtil.sanitize(requestContext.getUriInfo().getPath());
         String method = requestContext.getMethod();
-        String mediaType = requestContext.getMediaType().getType();
+        String mediaType = requestContext.getMediaType() == null
+                ? null
+                : requestContext.getMediaType().getType();
         try {
             MDC.clear();
         } catch(IllegalStateException exception) {
