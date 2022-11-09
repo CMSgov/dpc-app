@@ -139,27 +139,4 @@ public class GenerateRequestIdFilterUnitTest {
         filter.filter(mockContext);
         assertNull(MDC.get("Some-Key"));
     }
-
-    @Test
-    public void TestMdcClearFailTo500() throws IOException {
-        String requestId = UUID.randomUUID().toString();
-        Mockito.when(mockContext.getHeaderString(ArgumentMatchers.eq(Constants.DPC_REQUEST_ID_HEADER))).thenReturn(requestId);
-        UriInfo mockUriInfo = Mockito.mock(UriInfo.class);
-        Mockito.when(mockUriInfo.getPath()).thenReturn("v1/Patients");
-        Mockito.when(mockContext.getUriInfo()).thenReturn(mockUriInfo);
-        Mockito.when(mockContext.getMethod()).thenReturn("GET");
-        MediaType mockMediaType = Mockito.mock(MediaType.class);
-        Mockito.when(mockMediaType.getType()).thenReturn("application/json");
-        Mockito.when(mockContext.getMediaType()).thenReturn(mockMediaType);
-//        MDC mockMDC = Mockito.mock(MDC.class);
-//        mockMDC.put("Some-Key", "some-value");
-//        mockMDC.clear();
-//        Mockito.when(mockMDC.clear()).thenThrow()
-
-//        MDC.put("Some-Key", "some-value");
-        filter = new GenerateRequestIdFilter(true);
-        filter.filter(mockContext);
-        assertEquals(requestId, "12");
-        //assertThrows(WebApplicationException.class, MDC.clear(), "Something went wrong, please try again. If this continues, contact DPC admin.");
-    }
 }
