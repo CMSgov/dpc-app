@@ -175,7 +175,7 @@ public class AggregationEngine implements Runnable {
             // Finish processing the batch
             if (this.isRunning()) {
                 // Calculate metadata for the file (length and checksum)
-                logger.debug("dpcMetric=ProjectJobBatchResult,completionResult={},jobID={},completionTime={}", "COMPLETE", job.getJobID(), Instant.now().toString());
+                logger.info("dpcMetric=ProjectJobBatchResult,completionResult={},jobID={},completionTime={}", "COMPLETE", job.getJobID(), Instant.now().toString());
                 calculateFileMetadata(job);
                 this.queue.completeBatch(job, aggregatorID);
             } else {
@@ -184,7 +184,7 @@ public class AggregationEngine implements Runnable {
             }
         } catch (Exception error) {
             try {
-                logger.debug("dpcMetric=ProjectJobBatchResult,completionResult={},jobID={},completionTime={}", "FAILED", job.getJobID(), Instant.now().toString());
+                logger.info("dpcMetric=ProjectJobBatchResult,completionResult={},jobID={},completionTime={}", "FAILED", job.getJobID(), Instant.now().toString());
                 this.queue.failBatch(job, aggregatorID);
             } catch (Exception failedBatchException) {
                 logger.error("FAILED to mark job {} batch {} as failed. Batch will remain in the running state, and stuck job logic will retry this in 5 minutes...", job.getJobID(), job.getBatchID(), failedBatchException);
