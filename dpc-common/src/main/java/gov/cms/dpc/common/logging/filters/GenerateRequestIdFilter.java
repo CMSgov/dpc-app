@@ -37,12 +37,10 @@ public class GenerateRequestIdFilter implements ContainerRequestFilter {
             logger.info("mdc_clear_error={}, resource_requested={}, method={}, media_type={}, use_provided_request_id={}", exception.getMessage(), resourceRequested, method, mediaType, useProvidedRequestId);
             throw new WebApplicationException("Something went wrong, please try again. If this continues, contact DPC admin.");
         }
-        String requestId = requestContext.getHeaderString(Constants.DPC_REQUEST_ID_HEADER);
-        if(requestId!=null && useProvidedRequestId) {
-            MDC.put(MDCConstants.DPC_REQUEST_ID, requestId);
-        }else{
-            MDC.put(MDCConstants.DPC_REQUEST_ID, UUID.randomUUID().toString());
-        }
+        String requestId = requestContext.getHeaderString(Constants.DPC_REQUEST_ID_HEADER) != null && useProvidedRequestId
+                ? requestContext.getHeaderString(Constants.DPC_REQUEST_ID_HEADER)
+                : UUID.randomUUID().toString();
+        MDC.put(MDCConstants.DPC_REQUEST_ID, requestId);
         logger.info("resource_requested={}, method={}, media_type={}, request_id={}, use_provided_request_id={}", resourceRequested, method, mediaType, requestId, useProvidedRequestId);
     }
 }
