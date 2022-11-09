@@ -50,7 +50,7 @@ public class GenerateRequestIdFilterUnitTest {
             Mockito.when(mockContext.getHeaderString(ArgumentMatchers.eq(Constants.DPC_REQUEST_ID_HEADER))).thenReturn(null);
             filter = new GenerateRequestIdFilter(true);
             filter.filter(mockContext);
-            assertEquals("resource_requested=v1/Patients, method=GET, media_type=application/json, use_provided_request_id=true", listAppender.list.get(0).getFormattedMessage());
+            assertEquals("resource_requested=v1/Patients, method=GET, media_type=application/json, request_id=" + null + ", use_provided_request_id=false", listAppender.list.get(0).getFormattedMessage());
             assertNotNull(MDC.get(MDCConstants.DPC_REQUEST_ID));
             UUID.fromString(MDC.get(MDCConstants.DPC_REQUEST_ID));
 
@@ -58,7 +58,7 @@ public class GenerateRequestIdFilterUnitTest {
             Mockito.when(mockContext.getHeaderString(ArgumentMatchers.eq(Constants.DPC_REQUEST_ID_HEADER))).thenReturn(null);
             filter = new GenerateRequestIdFilter(false);
             filter.filter(mockContext);
-            assertEquals("resource_requested=v1/Patients, method=GET, media_type=application/json, use_provided_request_id=false", listAppender.list.get(1).getFormattedMessage());
+            assertEquals("resource_requested=v1/Patients, method=GET, media_type=application/json, request_id=" + requestId + ", use_provided_request_id=false", listAppender.list.get(1).getFormattedMessage());
             assertNotNull(MDC.get(MDCConstants.DPC_REQUEST_ID));
             UUID.fromString(MDC.get(MDCConstants.DPC_REQUEST_ID));
         } finally {
@@ -87,7 +87,7 @@ public class GenerateRequestIdFilterUnitTest {
             //With request-id in header and use header value Disabled
             filter = new GenerateRequestIdFilter(false);
             filter.filter(mockContext);
-            assertEquals("resource_requested=v1/Patients, method=GET, media_type=application/json, use_provided_request_id=true", listAppender.list.get(0).getFormattedMessage());
+            assertEquals("resource_requested=v1/Patients, method=GET, media_type=application/json, request_id=" + requestId + ", use_provided_request_id=false", listAppender.list.get(0).getFormattedMessage());
             assertNotEquals(requestId, MDC.get(MDCConstants.DPC_REQUEST_ID));
         } finally {
             listAppender.stop();
@@ -115,7 +115,7 @@ public class GenerateRequestIdFilterUnitTest {
             //With request-id in header and use header value enabled
             filter = new GenerateRequestIdFilter(true);
             filter.filter(mockContext);
-            assertEquals("resource_requested=v1/Patients, method=GET, media_type=application/json, use_provided_request_id=true", listAppender.list.get(0).getFormattedMessage());
+            assertEquals("resource_requested=v1/Patients, method=GET, media_type=application/json, request_id=" + requestId + ", use_provided_request_id=true", listAppender.list.get(0).getFormattedMessage());
             assertEquals(requestId, MDC.get(MDCConstants.DPC_REQUEST_ID));
         } finally {
             listAppender.stop();

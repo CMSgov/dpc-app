@@ -34,7 +34,7 @@ public class GenerateRequestIdFilter implements ContainerRequestFilter {
         try {
             MDC.clear();
         } catch(IllegalStateException exception) {
-            logger.info("mdc_clear_error={}", exception.getMessage());
+            logger.info("mdc_clear_error={}, resource_requested={}, method={}, media_type={}, use_provided_request_id={}", exception.getMessage(), resourceRequested, method, mediaType, useProvidedRequestId);
             throw new WebApplicationException("Something went wrong, please try again. If this continues, contact DPC admin.");
         }
         String requestId = requestContext.getHeaderString(Constants.DPC_REQUEST_ID_HEADER);
