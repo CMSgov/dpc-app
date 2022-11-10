@@ -24,7 +24,9 @@ public class LogResponseFilter implements ContainerResponseFilter{
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext){
         String requestId = MDC.get(MDCConstants.DPC_REQUEST_ID);
         String resourceRequested = XSSSanitizerUtil.sanitize(requestContext.getUriInfo().getPath());
-        String mediaType = requestContext.getMediaType().getType();
+        String mediaType = requestContext.getMediaType() == null
+                ? null
+                : requestContext.getMediaType().getType();
         String method = requestContext.getMethod();
         int status = responseContext.getStatus();
 
