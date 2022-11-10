@@ -43,6 +43,7 @@ import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.time.Instant;
 
 import static gov.cms.dpc.api.APIHelpers.addOrganizationTag;
 import static gov.cms.dpc.fhir.FHIRMediaTypes.*;
@@ -316,7 +317,7 @@ public class GroupResource extends AbstractGroupResource {
         final UUID jobID = this.queue.createJob(orgID, orgNPI, providerNPI, attributedPatients, resources, since, transactionTime, requestingIP, requestUrl, true, isSmoke);
         final int totalPatients = attributedPatients == null ? 0 : attributedPatients.size();
         final String resourcesRequested = resources.stream().map(DPCResourceType::getPath).filter(Objects::nonNull).collect(Collectors.joining(";"));
-        logger.info("dpcMetric=jobCreated,jobId={},orgId={},groupId={},totalPatients={},resourcesRequested={},submitTime={}", jobID, orgID, rosterID, totalPatients, resourcesRequested, transactionTime);
+        logger.info("dpcMetric=jobCreated,jobId={},orgId={},groupId={},totalPatients={},resourcesRequested={},submitTime={}", jobID, orgID, rosterID, totalPatients, resourcesRequested, Instant.now().toString());
         return Response.status(Response.Status.ACCEPTED)
                 .contentLocation(URI.create(this.baseURL + "/Jobs/" + jobID)).build();
     }
