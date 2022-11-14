@@ -287,6 +287,8 @@ public class GroupResource extends AbstractGroupResource {
                            @Context HttpServletRequest request) {
         logger.info("Exporting data for provider: {} _since: {}", rosterID, sinceParam);
 
+        final String eventTime = Instant.now().toString().replace("T", " ").substring(0, 22);
+
         // Check the parameters
         checkExportRequest(outputFormat, Prefer);
 
@@ -317,7 +319,7 @@ public class GroupResource extends AbstractGroupResource {
         final UUID jobID = this.queue.createJob(orgID, orgNPI, providerNPI, attributedPatients, resources, since, transactionTime, requestingIP, requestUrl, true, isSmoke);
         final int totalPatients = attributedPatients == null ? 0 : attributedPatients.size();
         final String resourcesRequested = resources.stream().map(DPCResourceType::getPath).filter(Objects::nonNull).collect(Collectors.joining(";"));
-        logger.info("dpcMetric=jobCreated,jobId={},orgId={},groupId={},totalPatients={},resourcesRequested={},submitTime={}", jobID, orgID, rosterID, totalPatients, resourcesRequested, Instant.now().toString());
+        logger.info("dpcMetric=jobSumitted,jobId={},orgId={},groupId={},totalPatients={},resourcesRequested={},submitTime={}", jobID, orgID, rosterID, totalPatients, resourcesRequested, eventTime);
         return Response.status(Response.Status.ACCEPTED)
                 .contentLocation(URI.create(this.baseURL + "/Jobs/" + jobID)).build();
     }

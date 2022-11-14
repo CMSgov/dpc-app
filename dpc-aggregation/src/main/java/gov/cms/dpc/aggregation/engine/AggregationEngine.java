@@ -174,8 +174,10 @@ public class AggregationEngine implements Runnable {
             MDC.remove(MDCConstants.PATIENT_ID);
             // Finish processing the batch
             if (this.isRunning()) {
+
+                final String eventTime = Instant.now().toString().replace("T", " ").substring(0, 22);
                 // Calculate metadata for the file (length and checksum)
-                logger.info("dpcMetric=ProjectJobBatchResult,completionResult={},jobID={},completionTime={}", "COMPLETE", job.getJobID(), Instant.now().toString());
+                logger.info("dpcMetric=jobComplete,completionResult={},jobID={},eventTime={}", "COMPLETE", job.getJobID(), eventTime);
                 calculateFileMetadata(job);
                 this.queue.completeBatch(job, aggregatorID);
             } else {
@@ -184,7 +186,8 @@ public class AggregationEngine implements Runnable {
             }
         } catch (Exception error) {
             try {
-                logger.info("dpcMetric=ProjectJobBatchResult,completionResult={},jobID={},completionTime={}", "FAILED", job.getJobID(), Instant.now().toString());
+                final String eventTime = Instant.now().toString().replace("T", " ").substring(0, 22);
+                logger.info("dpcMetric=jobFail,completionResult={},jobID={},eventTime={}", "FAILED", job.getJobID(), eventTime);
                 this.queue.failBatch(job, aggregatorID);
             } catch (Exception failedBatchException) {
                 logger.error("FAILED to mark job {} batch {} as failed. Batch will remain in the running state, and stuck job logic will retry this in 5 minutes...", job.getJobID(), job.getBatchID(), failedBatchException);
