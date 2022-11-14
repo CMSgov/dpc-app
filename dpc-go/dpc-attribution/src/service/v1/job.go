@@ -4,18 +4,18 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"github.com/CMSgov/dpc/attribution/conf"
-	"github.com/CMSgov/dpc/attribution/repository"
 	"io/ioutil"
 	"net/http"
 	"strings"
 	"time"
 
+	"github.com/CMSgov/dpc/attribution/conf"
+	"github.com/CMSgov/dpc/attribution/repository"
+
 	"github.com/CMSgov/dpc/attribution/client"
 	"github.com/CMSgov/dpc/attribution/middleware"
 	"github.com/google/uuid"
 
-	"github.com/CMSgov/dpc/attribution/model/v1"
 	"github.com/CMSgov/dpc/attribution/util"
 	"github.com/darahayes/go-boom"
 	"github.com/pkg/errors"
@@ -95,7 +95,7 @@ func (js *JobServiceV1) Export(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Info(fmt.Sprintf(
-		"dpcMetric=jobCreated,jobId=%s,orgId=%s,groupId=%s,totalPatients=%x,resourcesRequested=%s",
+		"dpcMetric=jobCreated,jobID=%s,orgId=%s,groupId=%s,totalPatients=%x,resourcesRequested=%s",
 		*job,
 		orgID,
 		er.GroupID,
