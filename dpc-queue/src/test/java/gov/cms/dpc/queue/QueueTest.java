@@ -204,13 +204,13 @@ class QueueTest {
 
     void testSinceEqualTransactionTime(JobQueueCommon queue) {
         final var transactionTime = OffsetDateTime.now(ZoneOffset.UTC);
-        final var jobId = queue.createJob(orgID, orgNPI, providerNPI, patientMBIs,
+        final var jobID = queue.createJob(orgID, orgNPI, providerNPI, patientMBIs,
                 Arrays.asList(DPCResourceType.Patient, DPCResourceType.ExplanationOfBenefit),
                 transactionTime,
                 transactionTime, null, null,true, false);
 
         // Check that the Job has a empty queue
-        final Optional<JobQueueBatch> job = queue.getJobBatches(jobId).stream().findFirst();
+        final Optional<JobQueueBatch> job = queue.getJobBatches(jobID).stream().findFirst();
         assertAll(() -> assertTrue(job.isPresent(), "Should be present in the queue."),
                 () -> assertEquals(JobStatus.QUEUED, job.get().getStatus(), "Job should be in queue"),
                 () -> assertTrue(job.get().getPatients().isEmpty()));

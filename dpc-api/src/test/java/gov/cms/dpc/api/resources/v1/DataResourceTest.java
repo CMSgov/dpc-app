@@ -88,21 +88,21 @@ class DataResourceTest {
 
     @Test
     void testFileFromExpiredJob() {
-        UUID jobId = UUID.randomUUID();
+        UUID jobID = UUID.randomUUID();
 
         Mockito.when(manager.getFile(Mockito.any(), Mockito.anyString())).thenAnswer(answer -> {
             final File tempPath = FileUtils.getTempDirectory();
             final File file = File.createTempFile("test", ".ndjson", tempPath);
             FileUtils.write(file, "This is a test", StandardCharsets.UTF_8);
-            return new FileManager.FilePointer("", file.length(), jobId, OffsetDateTime.now(ZoneOffset.UTC), file);
+            return new FileManager.FilePointer("", file.length(), jobID, OffsetDateTime.now(ZoneOffset.UTC), file);
         });
 
         UUID aggregatorId = UUID.randomUUID();
-        JobQueueBatch jobQueueBatch = new JobQueueBatch(jobId, null, null, null, Collections.emptyList(), null, null, null, null, null, true);
+        JobQueueBatch jobQueueBatch = new JobQueueBatch(jobID, null, null, null, Collections.emptyList(), null, null, null, null, null, true);
         jobQueueBatch.setRunningStatus(aggregatorId);
         jobQueueBatch.setCompletedStatus(aggregatorId);
         jobQueueBatch.setCompleteTime(OffsetDateTime.now().minusHours(25));
-        Mockito.when(queue.getJobBatches(jobId)).thenReturn(List.of(jobQueueBatch));
+        Mockito.when(queue.getJobBatches(jobID)).thenReturn(List.of(jobQueueBatch));
 
         final Response response = RESOURCE.target("/v1/Data/test.ndjson")
                 .request()
