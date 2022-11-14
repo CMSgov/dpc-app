@@ -229,7 +229,7 @@ public class JobResourceTest {
         final var orgID = FHIRExtractors.getEntityUUID(organizationPrincipal.getOrganization().getId());
         final var queue = new MemoryBatchQueue(1);
 
-        final UUID jobID = queue.createJob(orgID,
+        final UUID jobId = queue.createJob(orgID,
                 TEST_ORG_NPI,
                 TEST_PROVIDER_NPI,
                 List.of(TEST_PATIENT_ID, "2", "3"),
@@ -237,7 +237,7 @@ public class JobResourceTest {
                 null,
                 OffsetDateTime.now(ZoneOffset.UTC), null, null, true, false);
 
-        List<JobQueueBatch> batches = queue.getJobBatches(jobID);
+        List<JobQueueBatch> batches = queue.getJobBatches(jobId);
         OffsetDateTime timeAgo = OffsetDateTime.now().minusHours(24);
         for (JobQueueBatch batch : batches) {
             queue.claimBatch(AGGREGATOR_ID);
@@ -249,14 +249,14 @@ public class JobResourceTest {
         }
 
         final var resource = new JobResource(queue, TEST_BASEURL);
-        var response = resource.checkJobStatus(organizationPrincipal, jobID.toString());
+        var response = resource.checkJobStatus(organizationPrincipal, jobId.toString());
         assertEquals(HttpStatus.GONE_410, response.getStatus());
 
         for (JobQueueBatch batch : batches) {
             batch.setCompleteTime(OffsetDateTime.now().minusHours(23));
         }
 
-        response = resource.checkJobStatus(organizationPrincipal, jobID.toString());
+        response = resource.checkJobStatus(organizationPrincipal, jobId.toString());
         assertEquals(HttpStatus.OK_200, response.getStatus());
     }
 
