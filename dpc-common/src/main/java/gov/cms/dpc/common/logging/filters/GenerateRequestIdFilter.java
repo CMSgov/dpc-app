@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 import javax.annotation.Priority;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import java.io.IOException;
@@ -27,13 +28,21 @@ public class GenerateRequestIdFilter implements ContainerRequestFilter {
 
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
-        MDC.clear();
-        String requestId = requestContext.getHeaderString(Constants.DPC_REQUEST_ID_HEADER);
-        if(requestId!=null && useProvidedRequestId) {
-            MDC.put(MDCConstants.DPC_REQUEST_ID, requestId);
-        }else{
-            MDC.put(MDCConstants.DPC_REQUEST_ID, UUID.randomUUID().toString());
+        String resourceRequested = XSSSanitizerUtil.sanitize(requestContext.getUriInfo().getPath());
+        String method = requestContext.getMethod();
+        String mediaType = requestContext.getMediaType() == null
+                ? null
+                : requestContext.getMediaType().getType();
+        try {
+            MDC.clear();
+        } catch(IllegalStateException exception) {
+            logger.info("mdc_clear_error={}, resource_requested={}, method={}, media_type={}, use_provided_request_id={}", exception.getMessage(), resourceRequested, method, mediaType, useProvidedRequestId);
+            throw new WebApplicationException("Something went wrong, please try again. If this continues, contact DPC admin.");
         }
-        logger.info("resource_requested={}, method={}", XSSSanitizerUtil.sanitize(requestContext.getUriInfo().getPath()),requestContext.getMethod());
+        String requestId = requestContext.getHeaderString(Constants.DPC_REQUEST_ID_HEADER) != null && useProvidedRequestId
+                ? requestContext.getHeaderString(Constants.DPC_REQUEST_ID_HEADER)
+                : UUID.randomUUID().toString();
+        MDC.put(MDCConstants.DPC_REQUEST_ID, requestId);
+        logger.info("resource_requested={}, method={}, media_type={}, request_id={}, use_provided_request_id={}", resourceRequested, method, mediaType, requestId, useProvidedRequestId);
     }
 }
