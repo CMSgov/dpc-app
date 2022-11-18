@@ -53,6 +53,7 @@ down-portals:
 	@docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.portals.yml down
 
 .PHONY: down-start-v2-portals
+down-start-v2-portals:
 	@docker-compose -p start-v2-portals -f docker-compose.yml -f docker-compose.portals.yml down
 
 .PHONY: start-dpc
