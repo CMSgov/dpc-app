@@ -154,6 +154,7 @@ public class AggregationEngine implements Runnable {
      */
     @Trace
     protected void processJobBatch(JobQueueBatch job) {
+        final String eventTime = Instant.now().toString().replace("T", " ").substring(0, 22);
         try {
             MDC.put(MDCConstants.JOB_ID, job.getJobID().toString());
             MDC.put(MDCConstants.JOB_BATCH_ID, job.getBatchID().toString());
@@ -175,7 +176,6 @@ public class AggregationEngine implements Runnable {
             // Finish processing the batch
             if (this.isRunning()) {
 
-                final String eventTime = Instant.now().toString().replace("T", " ").substring(0, 22);
                 // Calculate metadata for the file (length and checksum)
                 logger.info("dpcMetric=jobComplete,completionResult={},jobID={},eventTime={}", "COMPLETE", job.getJobID(), eventTime);
                 calculateFileMetadata(job);
@@ -186,7 +186,6 @@ public class AggregationEngine implements Runnable {
             }
         } catch (Exception error) {
             try {
-                final String eventTime = Instant.now().toString().replace("T", " ").substring(0, 22);
                 logger.info("dpcMetric=jobFail,completionResult={},jobID={},eventTime={}", "FAILED", job.getJobID(), eventTime);
                 this.queue.failBatch(job, aggregatorID);
             } catch (Exception failedBatchException) {
