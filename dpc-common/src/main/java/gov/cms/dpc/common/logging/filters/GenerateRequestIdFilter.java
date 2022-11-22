@@ -32,7 +32,7 @@ public class GenerateRequestIdFilter implements ContainerRequestFilter {
         String method = requestContext.getMethod();
         String mediaType = requestContext.getMediaType() == null
                 ? null
-                : requestContext.getMediaType().getType();
+                : requestContext.getMediaType().toString();
         try {
             MDC.clear();
         } catch(IllegalStateException exception) {
