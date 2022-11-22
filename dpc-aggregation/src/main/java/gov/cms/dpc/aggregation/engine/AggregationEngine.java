@@ -154,7 +154,7 @@ public class AggregationEngine implements Runnable {
      */
     @Trace
     protected void processJobBatch(JobQueueBatch job) {
-        final String eventTime = Instant.now().toString().replace("T", " ").substring(0, 22);
+        final String queueCompleteTime = Instant.now().toString().replace("T", " ").substring(0, 22);
         try {
             MDC.put(MDCConstants.JOB_ID, job.getJobID().toString());
             MDC.put(MDCConstants.JOB_BATCH_ID, job.getBatchID().toString());
@@ -163,6 +163,7 @@ public class AggregationEngine implements Runnable {
             MDC.put(MDCConstants.IS_V2, Boolean.toString(job.isV2()));
 
             logger.info("Processing job, exporting to: {}.", this.operationsConfig.getExportPath());
+            logger.info("dpcMetric=queueComplete,jobID={},eventTime={}",  job.getJobID(), queueCompleteTime);
             logger.debug("Has {} attributed beneficiaries", job.getPatients().size());
 
             Optional<String> nextPatientID = job.fetchNextPatient(aggregatorID);
@@ -175,10 +176,10 @@ public class AggregationEngine implements Runnable {
             MDC.remove(MDCConstants.PATIENT_ID);
             // Finish processing the batch
             if (this.isRunning()) {
-
+                final String jobTime = Instant.now().toString().replace("T", " ").substring(0, 22);
                 // Calculate metadata for the file (length and checksum)
-                logger.info("dpcMetric=jobComplete,completionResult={},jobID={},eventTime={}", "COMPLETE", job.getJobID(), eventTime);
                 calculateFileMetadata(job);
+                logger.info("dpcMetric=jobComplete,completionResult={},jobID={},eventTime={}", "COMPLETE", job.getJobID(), jobTime);
                 this.queue.completeBatch(job, aggregatorID);
             } else {
                 logger.info("PAUSED job");
@@ -186,7 +187,8 @@ public class AggregationEngine implements Runnable {
             }
         } catch (Exception error) {
             try {
-                logger.info("dpcMetric=jobFail,completionResult={},jobID={},eventTime={}", "FAILED", job.getJobID(), eventTime);
+                final String jobTime = Instant.now().toString().replace("T", " ").substring(0, 22);
+                logger.info("dpcMetric=jobFail,completionResult={},jobID={},eventTime={}", "FAILED", job.getJobID(), jobTime);
                 this.queue.failBatch(job, aggregatorID);
             } catch (Exception failedBatchException) {
                 logger.error("FAILED to mark job {} batch {} as failed. Batch will remain in the running state, and stuck job logic will retry this in 5 minutes...", job.getJobID(), job.getBatchID(), failedBatchException);
