@@ -163,7 +163,7 @@ public class AggregationEngine implements Runnable {
             MDC.put(MDCConstants.IS_V2, Boolean.toString(job.isV2()));
 
             logger.info("Processing job, exporting to: {}.", this.operationsConfig.getExportPath());
-            logger.info("dpcMetric=queueComplete,jobID={},eventTime={}",  job.getJobID(), queueCompleteTime);
+            logger.info("dpcMetric=queueComplete,jobID={},queueCompleteTime={}",  job.getJobID(), queueCompleteTime);
             logger.debug("Has {} attributed beneficiaries", job.getPatients().size());
 
             Optional<String> nextPatientID = job.fetchNextPatient(aggregatorID);
@@ -179,7 +179,7 @@ public class AggregationEngine implements Runnable {
                 final String jobTime = Instant.now().toString().replace("T", " ").substring(0, 22);
                 // Calculate metadata for the file (length and checksum)
                 calculateFileMetadata(job);
-                logger.info("dpcMetric=jobComplete,completionResult={},jobID={},eventTime={}", "COMPLETE", job.getJobID(), jobTime);
+                logger.info("dpcMetric=jobComplete,completionResult={},jobID={},jobCompleteTime={}", "COMPLETE", job.getJobID(), jobTime);
                 this.queue.completeBatch(job, aggregatorID);
             } else {
                 logger.info("PAUSED job");
@@ -188,7 +188,7 @@ public class AggregationEngine implements Runnable {
         } catch (Exception error) {
             try {
                 final String jobTime = Instant.now().toString().replace("T", " ").substring(0, 22);
-                logger.info("dpcMetric=jobFail,completionResult={},jobID={},eventTime={}", "FAILED", job.getJobID(), jobTime);
+                logger.info("dpcMetric=jobFail,completionResult={},jobID={},jobCompleteTime={}", "FAILED", job.getJobID(), jobTime);
                 this.queue.failBatch(job, aggregatorID);
             } catch (Exception failedBatchException) {
                 logger.error("FAILED to mark job {} batch {} as failed. Batch will remain in the running state, and stuck job logic will retry this in 5 minutes...", job.getJobID(), job.getBatchID(), failedBatchException);
