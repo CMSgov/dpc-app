@@ -42,6 +42,9 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import java.time.Instant;
 
 import static gov.cms.dpc.api.APIHelpers.bulkResourceClient;
 import static gov.cms.dpc.fhir.helpers.FHIRHelpers.handleMethodOutcome;
@@ -49,6 +52,7 @@ import static gov.cms.dpc.fhir.helpers.FHIRHelpers.handleMethodOutcome;
 @Api(value = "Patient", authorizations = @Authorization(value = "access_token"))
 @Path("/v1/Patient")
 public class PatientResource extends AbstractPatientResource {
+    private static final Logger logger = LoggerFactory.getLogger(PatientResource.class);
 
     // TODO: This should be moved into a helper class, in DPC-432.
     // This checks to see if the Identifier is fully specified or not.
@@ -185,6 +189,9 @@ public class PatientResource extends AbstractPatientResource {
                              @ApiParam(value = "Patient resource ID", required = true) @PathParam("patientID") UUID patientId,
                              @QueryParam("_since") @NoHtml String sinceParam,
                              @Context HttpServletRequest request) {
+        final String eventTime = Instant.now().toString().replace("T", " ").substring(0, 22);
+        final UUID jobID = UUID.randomUUID();
+        logger.info("dpcMetric=queueSubmitted,requestUrl={},jobID={},queueSubmitTime={}", "/Patient/$everything", jobID ,eventTime);
         final Provenance.ProvenanceAgentComponent performer = FHIRExtractors.getProvenancePerformer(provenance);
         final UUID practitionerId = FHIRExtractors.getEntityUUID(performer.getOnBehalfOfReference().getReference());
         Practitioner practitioner = this.client
@@ -193,7 +200,7 @@ public class PatientResource extends AbstractPatientResource {
                 .withId(practitionerId.toString())
                 .encodedJson()
                 .execute();
-
+            
         if (practitioner == null) {
             // Is this the best code to be throwing here?
             throw new WebApplicationException(HttpStatus.UNAUTHORIZED_401);
@@ -218,10 +225,14 @@ public class PatientResource extends AbstractPatientResource {
                 requestingIP, requestUrl, DPCResourceType.Patient, DPCResourceType.ExplanationOfBenefit, DPCResourceType.Coverage);
         if (DPCResourceType.Bundle.getPath().equals(result.getResourceType().getPath())) {
             // A Bundle containing patient data was returned
+            final String jobTime = Instant.now().toString().replace("T", " ").substring(0, 22);
+            logger.info("dpcMetric=jobComplete,completionResult={},jobID={},jobCompleteTime={}", "COMPLETE", jobID, jobTime);
             return (Bundle) result;
         }
         if (DPCResourceType.OperationOutcome.getPath().equals(result.getResourceType().getPath())) {
             // An OperationOutcome (ERROR) was returned
+            final String jobTime = Instant.now().toString().replace("T", " ").substring(0, 22);
+            logger.info("dpcMetric=jobFail,completionResult={},jobID={},jobCompleteTime={}", "FAILED", jobID, jobTime);
             OperationOutcome resultOp = (OperationOutcome) result;
             // getIssueFirstRep() grabs the first issue only - there may be others
             throw new WebApplicationException(resultOp.getIssueFirstRep().getDetails().getText());
