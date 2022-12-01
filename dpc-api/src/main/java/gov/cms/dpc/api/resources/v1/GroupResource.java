@@ -287,7 +287,6 @@ public class GroupResource extends AbstractGroupResource {
         logger.info("Exporting data for provider: {} _since: {}", rosterID, sinceParam);
 
         final String eventTime = APIHelpers.getSplunkTimestamp();
-
         // Check the parameters
         checkExportRequest(outputFormat, Prefer);
 
