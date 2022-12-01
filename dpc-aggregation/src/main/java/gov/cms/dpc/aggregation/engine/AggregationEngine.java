@@ -14,7 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
-import java.time.Instant;
 import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
@@ -154,7 +153,7 @@ public class AggregationEngine implements Runnable {
      */
     @Trace
     protected void processJobBatch(JobQueueBatch job) {
-        final String queueCompleteTime = Instant.now().toString().replace("T", " ").substring(0, 22);
+        final String queueCompleteTime = AggregationUtils.getSplunkTimestamp();
         try {
             MDC.put(MDCConstants.JOB_ID, job.getJobID().toString());
             MDC.put(MDCConstants.JOB_BATCH_ID, job.getBatchID().toString());
@@ -176,7 +175,7 @@ public class AggregationEngine implements Runnable {
             MDC.remove(MDCConstants.PATIENT_ID);
             // Finish processing the batch
             if (this.isRunning()) {
-                final String jobTime = Instant.now().toString().replace("T", " ").substring(0, 22);
+                final String jobTime = AggregationUtils.getSplunkTimestamp();
                 // Calculate metadata for the file (length and checksum)
                 calculateFileMetadata(job);
                 logger.info("dpcMetric=jobComplete,completionResult={},jobID={},jobCompleteTime={}", "COMPLETE", job.getJobID(), jobTime);
@@ -187,7 +186,7 @@ public class AggregationEngine implements Runnable {
             }
         } catch (Exception error) {
             try {
-                final String jobTime = Instant.now().toString().replace("T", " ").substring(0, 22);
+                final String jobTime = AggregationUtils.getSplunkTimestamp();
                 logger.info("dpcMetric=jobFail,completionResult={},jobID={},jobCompleteTime={}", "FAILED", job.getJobID(), jobTime);
                 this.queue.failBatch(job, aggregatorID);
             } catch (Exception failedBatchException) {

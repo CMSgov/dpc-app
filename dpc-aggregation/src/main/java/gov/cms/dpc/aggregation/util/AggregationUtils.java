@@ -5,6 +5,7 @@ import org.bouncycastle.jcajce.provider.digest.SHA256;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.StringType;
+import java.time.Instant;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -44,5 +45,9 @@ public final class AggregationUtils {
                 .setDetails(new org.hl7.fhir.r4.model.CodeableConcept().setText(failReason.detail))
                 .setLocation(patientLocation);
         return outcome;
+    }
+
+    public static String getSplunkTimestamp() {
+        return Instant.now().toString().replace("T", " ").substring(0, 22);
     }
 }

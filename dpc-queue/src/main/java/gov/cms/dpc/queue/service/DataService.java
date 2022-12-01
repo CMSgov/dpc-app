@@ -6,6 +6,7 @@ import gov.cms.dpc.common.annotations.JobTimeout;
 import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.JobStatus;
+import gov.cms.dpc.queue.QueueHelpers;
 import gov.cms.dpc.queue.exceptions.DataRetrievalException;
 import gov.cms.dpc.queue.exceptions.DataRetrievalRetryException;
 import gov.cms.dpc.queue.models.JobQueueBatch;
@@ -13,7 +14,6 @@ import gov.cms.dpc.queue.models.JobQueueBatchFile;
 import org.hl7.fhir.dstu3.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.time.Instant;
 
 import javax.inject.Inject;
 import java.io.BufferedReader;
@@ -74,28 +74,28 @@ public class DataService {
                                  String requestingIP, String requestUrl, DPCResourceType... resourceTypes) {
         UUID jobID = this.queue.createJob(organizationID, orgNPI, providerNPI, patientMBIs, List.of(resourceTypes), since, transactionTime, requestingIP, requestUrl, false, false);
         LOGGER.info("Patient everything export job created with job_id={} _since={} from requestUrl={}", jobID.toString(), since, requestUrl);
-        final String eventTime = Instant.now().toString().replace("T", " ").substring(0, 22);
+        final String eventTime = QueueHelpers.getSplunkTimestamp();
         LOGGER.info("dpcMetric=queueSubmitted,requestUrl={},jobID={},queueSubmitTime={}", "/Patient/$everything", jobID ,eventTime);
 
         Optional<List<JobQueueBatch>> optionalBatches = waitForJobToComplete(jobID, organizationID, this.queue);
 
         if (optionalBatches.isPresent()) {
-            final String jobTime = Instant.now().toString().replace("T", " ").substring(0, 22);
-            LOGGER.info("dpcMetric=jobComplete,completionResult={},jobID={},jobCompleteTime={}", "COMPLETE", jobID, jobTime);
             List<JobQueueBatch> batches = optionalBatches.get();
             List<JobQueueBatchFile> files = batches.stream().map(JobQueueBatch::getJobQueueBatchFiles).flatMap(List::stream).collect(Collectors.toList());
             if (files.size() == 1 && files.get(0).getResourceType() == DPCResourceType.OperationOutcome) {
                 // An OperationOutcome (ERROR) was returned
+                final String jobTime = QueueHelpers.getSplunkTimestamp();
+                LOGGER.info("dpcMetric=jobError,completionResult={},jobID={},jobCompleteTime={}", "FAILED", jobID, jobTime);
                 return assembleOperationOutcome(batches);
             } else {
+                final String jobTime = QueueHelpers.getSplunkTimestamp();
+                LOGGER.info("dpcMetric=jobComplete,completionResult={},jobID={},jobCompleteTime={}", "COMPLETE", jobID, jobTime);
                 // A normal Bundle of data was returned
                 return assembleBundleFromBatches(batches, List.of(resourceTypes));
             }
         }
 
         // No data for the batch was returned AND No OperationOutcome was created
-        final String jobTime = Instant.now().toString().replace("T", " ").substring(0, 22);
-        LOGGER.info("dpcMetric=jobFail,completionResult={},jobID={},jobCompleteTime={}", "FAILED", jobID, jobTime);
         LOGGER.error("No data returned from queue for job, jobID: {}; jobTimeout: {}", jobID, jobTimeoutInSeconds);
         // These Exceptions are not just thrown in the application - the message is also sent in the Response payload
         throw new DataRetrievalException("Failed to retrieve data"); 
