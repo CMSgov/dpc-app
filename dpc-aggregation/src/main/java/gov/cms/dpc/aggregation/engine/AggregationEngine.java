@@ -1,5 +1,5 @@
 package gov.cms.dpc.aggregation.engine;
-
+import gov.cms.dpc.common.logging.SplunkTimestamp;
 import com.newrelic.api.agent.Trace;
 import gov.cms.dpc.aggregation.util.AggregationUtils;
 import gov.cms.dpc.common.MDCConstants;
@@ -153,6 +153,7 @@ public class AggregationEngine implements Runnable {
      */
     @Trace
     protected void processJobBatch(JobQueueBatch job) {
+        final String queueCompleteTime = SplunkTimestamp.getSplunkTimestamp();
         try {
             MDC.put(MDCConstants.JOB_ID, job.getJobID().toString());
             MDC.put(MDCConstants.JOB_BATCH_ID, job.getBatchID().toString());
@@ -161,6 +162,7 @@ public class AggregationEngine implements Runnable {
             MDC.put(MDCConstants.IS_V2, Boolean.toString(job.isV2()));
 
             logger.info("Processing job, exporting to: {}.", this.operationsConfig.getExportPath());
+            logger.info("dpcMetric=queueComplete,jobID={},queueCompleteTime={}",  job.getJobID(), queueCompleteTime);
             logger.debug("Has {} attributed beneficiaries", job.getPatients().size());
 
             Optional<String> nextPatientID = job.fetchNextPatient(aggregatorID);
@@ -173,9 +175,10 @@ public class AggregationEngine implements Runnable {
             MDC.remove(MDCConstants.PATIENT_ID);
             // Finish processing the batch
             if (this.isRunning()) {
-                logger.info("COMPLETED job");
+                final String jobTime = SplunkTimestamp.getSplunkTimestamp();
                 // Calculate metadata for the file (length and checksum)
                 calculateFileMetadata(job);
+                logger.info("dpcMetric=jobComplete,completionResult={},jobID={},jobCompleteTime={}", "COMPLETE", job.getJobID(), jobTime);
                 this.queue.completeBatch(job, aggregatorID);
             } else {
                 logger.info("PAUSED job");
@@ -183,7 +186,8 @@ public class AggregationEngine implements Runnable {
             }
         } catch (Exception error) {
             try {
-                logger.error("FAILED job", error);
+                final String jobTime = SplunkTimestamp.getSplunkTimestamp();
+                logger.info("dpcMetric=jobFail,completionResult={},jobID={},jobCompleteTime={}", "FAILED", job.getJobID(), jobTime);
                 this.queue.failBatch(job, aggregatorID);
             } catch (Exception failedBatchException) {
                 logger.error("FAILED to mark job {} batch {} as failed. Batch will remain in the running state, and stuck job logic will retry this in 5 minutes...", job.getJobID(), job.getBatchID(), failedBatchException);
