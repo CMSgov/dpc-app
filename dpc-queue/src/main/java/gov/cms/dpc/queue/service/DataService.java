@@ -85,7 +85,7 @@ public class DataService {
             if (files.size() == 1 && files.get(0).getResourceType() == DPCResourceType.OperationOutcome) {
                 // An OperationOutcome (ERROR) was returned
                 final String jobTime = SplunkTimestamp.getSplunkTimestamp();
-                LOGGER.info("dpcMetric=jobError,completionResult={},jobID={},jobCompleteTime={}", "FAILED", jobID, jobTime);
+                LOGGER.info("dpcMetric=jobFail,completionResult={},jobID={},jobCompleteTime={}", "FAILED", jobID, jobTime);
                 return assembleOperationOutcome(batches);
             } else {
                 final String jobTime = SplunkTimestamp.getSplunkTimestamp();
@@ -96,7 +96,7 @@ public class DataService {
         }
 
         final String jobTime = SplunkTimestamp.getSplunkTimestamp();
-        LOGGER.info("dpcMetric=jobTimeout,completionResult={},jobID={},jobCompleteTime={}", "TIMEOUT", jobID, jobTime);
+        LOGGER.info("dpcMetric=jobFail,completionResult={},jobID={},jobCompleteTime={}", "APPLICATIONERROR", jobID, jobTime);
         // No data for the batch was returned AND No OperationOutcome was created
         LOGGER.error("No data returned from queue for job, jobID: {}; jobTimeout: {}", jobID, jobTimeoutInSeconds);
         // These Exceptions are not just thrown in the application - the message is also sent in the Response payload
