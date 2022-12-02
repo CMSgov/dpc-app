@@ -7,7 +7,6 @@ import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.*;
-import java.time.Instant;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.OffsetDateTime;
@@ -101,9 +100,5 @@ public class APIHelpers {
             return null;
         }
         return request.getQueryString() == null ? request.getRequestURL().toString() : request.getRequestURL().append(request.getQueryString()).toString();
-    }
-
-    public static String getSplunkTimestamp() {
-        return Instant.now().toString().replace("T", " ").substring(0, 22);
     }
 }

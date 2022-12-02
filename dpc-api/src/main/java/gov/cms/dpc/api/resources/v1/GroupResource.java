@@ -43,6 +43,7 @@ import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.util.*;
 import java.util.stream.Collectors;
+import gov.cms.dpc.common.logging.SplunkTimestamp;
 
 import static gov.cms.dpc.api.APIHelpers.addOrganizationTag;
 import static gov.cms.dpc.fhir.FHIRMediaTypes.*;
@@ -286,7 +287,7 @@ public class GroupResource extends AbstractGroupResource {
                            @Context HttpServletRequest request) {
         logger.info("Exporting data for provider: {} _since: {}", rosterID, sinceParam);
 
-        final String eventTime = APIHelpers.getSplunkTimestamp();
+        final String eventTime = SplunkTimestamp.getSplunkTimestamp();
         // Check the parameters
         checkExportRequest(outputFormat, Prefer);
 

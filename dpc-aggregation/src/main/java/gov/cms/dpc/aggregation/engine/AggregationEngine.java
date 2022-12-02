@@ -1,5 +1,5 @@
 package gov.cms.dpc.aggregation.engine;
-
+import gov.cms.dpc.common.logging.SplunkTimestamp;
 import com.newrelic.api.agent.Trace;
 import gov.cms.dpc.aggregation.util.AggregationUtils;
 import gov.cms.dpc.common.MDCConstants;
@@ -153,7 +153,7 @@ public class AggregationEngine implements Runnable {
      */
     @Trace
     protected void processJobBatch(JobQueueBatch job) {
-        final String queueCompleteTime = AggregationUtils.getSplunkTimestamp();
+        final String queueCompleteTime = SplunkTimestamp.getSplunkTimestamp();
         try {
             MDC.put(MDCConstants.JOB_ID, job.getJobID().toString());
             MDC.put(MDCConstants.JOB_BATCH_ID, job.getBatchID().toString());
@@ -175,7 +175,7 @@ public class AggregationEngine implements Runnable {
             MDC.remove(MDCConstants.PATIENT_ID);
             // Finish processing the batch
             if (this.isRunning()) {
-                final String jobTime = AggregationUtils.getSplunkTimestamp();
+                final String jobTime = SplunkTimestamp.getSplunkTimestamp();
                 // Calculate metadata for the file (length and checksum)
                 calculateFileMetadata(job);
                 logger.info("dpcMetric=jobComplete,completionResult={},jobID={},jobCompleteTime={}", "COMPLETE", job.getJobID(), jobTime);
@@ -186,7 +186,7 @@ public class AggregationEngine implements Runnable {
             }
         } catch (Exception error) {
             try {
-                final String jobTime = AggregationUtils.getSplunkTimestamp();
+                final String jobTime = SplunkTimestamp.getSplunkTimestamp();
                 logger.info("dpcMetric=jobFail,completionResult={},jobID={},jobCompleteTime={}", "FAILED", job.getJobID(), jobTime);
                 this.queue.failBatch(job, aggregatorID);
             } catch (Exception failedBatchException) {
