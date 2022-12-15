@@ -79,7 +79,7 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
         bootstrap.addBundle(new TypesafeConfigurationBundle("dpc.api"));
 
         // Swagger
-        bootstrap.addBundle(new AssetsBundle("/swagapp", "/", "index.html", "static"));
+        bootstrap.addBundle(new AssetsBundle("/swagapp", "/docs", "index.html", "static"));
 
         // Wrapper around some of the uglier bundle initialization commands
         setupCustomBundles(bootstrap);
