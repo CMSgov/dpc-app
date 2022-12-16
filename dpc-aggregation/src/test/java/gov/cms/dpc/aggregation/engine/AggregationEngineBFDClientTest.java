@@ -161,15 +161,14 @@ public class AggregationEngineBFDClientTest {
                         HttpHeaders.X_FORWARDED_FOR,
                         Constants.BlueButton.ORIGINAL_QUERY_ID_HEADER,
                         Constants.BlueButton.APPLICATION_NAME_HEADER,
-                        Constants.BlueButton.ORIGINAL_QUERY_TIME_STAMP_HEADER,
-                        Constants.BlueButton.APPLICATION_ID_HEADER);
+                        Constants.BlueButton.ORIGINAL_QUERY_TIME_STAMP_HEADER);
         Assertions.assertThat(headerValue.getAllValues()).containsExactlyInAnyOrder(
                 "mbi",
                 TEST_PROVIDER_NPI,
                 "127.0.0.1",
                 jobID.toString(),
                 Constants.BlueButton.APPLICATION_NAME_DESC,
-                completeJob.getTransactionTime().toString(),completeJob.getJobID().toString());
+                completeJob.getTransactionTime().toString());
 
         engine.stop();
     }

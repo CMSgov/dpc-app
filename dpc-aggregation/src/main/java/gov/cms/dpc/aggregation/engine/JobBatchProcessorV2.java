@@ -123,7 +123,6 @@ public class JobBatchProcessorV2 {
             headers.put(Constants.BlueButton.BULK_CLIENTNAME_HEADER,Constants.BlueButton.APPLICATION_NAME_DESC);
         } else {
             headers.put(Constants.DPC_CLIENT_ID_HEADER, job.getProviderNPI());
-            headers.put(Constants.BlueButton.APPLICATION_ID_HEADER,job.getJobID().toString());
             headers.put(Constants.BlueButton.APPLICATION_NAME_HEADER,Constants.BlueButton.APPLICATION_NAME_DESC);
             headers.put(Constants.BlueButton.ORIGINAL_QUERY_TIME_STAMP_HEADER,job.getTransactionTime().toString());
         }
