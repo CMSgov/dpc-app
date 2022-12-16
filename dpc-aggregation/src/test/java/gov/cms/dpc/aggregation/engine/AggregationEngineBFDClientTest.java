@@ -155,20 +155,8 @@ public class AggregationEngineBFDClientTest {
         // Look at the result
         final var completeJob = queue.getJobBatches(jobID).stream().findFirst().orElseThrow();
         assertEquals(JobStatus.COMPLETED, completeJob.getStatus());
-        Assertions.assertThat(headerKey.getAllValues()).containsExactlyInAnyOrder
-                (Constants.INCLUDE_IDENTIFIERS_HEADER,
-                        Constants.DPC_CLIENT_ID_HEADER,
-                        HttpHeaders.X_FORWARDED_FOR,
-                        Constants.BlueButton.ORIGINAL_QUERY_ID_HEADER,
-                        Constants.BlueButton.APPLICATION_NAME_HEADER,
-                        Constants.BlueButton.ORIGINAL_QUERY_TIME_STAMP_HEADER);
-        Assertions.assertThat(headerValue.getAllValues()).containsExactlyInAnyOrder(
-                "mbi",
-                TEST_PROVIDER_NPI,
-                "127.0.0.1",
-                jobID.toString(),
-                Constants.BlueButton.APPLICATION_NAME_DESC,
-                completeJob.getTransactionTime().toString());
+        Assertions.assertThat(headerKey.getAllValues()).containsExactlyInAnyOrder(Constants.INCLUDE_IDENTIFIERS_HEADER, Constants.DPC_CLIENT_ID_HEADER, HttpHeaders.X_FORWARDED_FOR, Constants.BlueButton.ORIGINAL_QUERY_ID_HEADER, Constants.BlueButton.APPLICATION_NAME_HEADER, Constants.BlueButton.ORIGINAL_QUERY_TIME_STAMP_HEADER);
+        Assertions.assertThat(headerValue.getAllValues()).containsExactlyInAnyOrder("mbi", TEST_PROVIDER_NPI, "127.0.0.1", jobID.toString(), Constants.BlueButton.APPLICATION_NAME_DESC, completeJob.getTransactionTime().toString());
 
         engine.stop();
     }
