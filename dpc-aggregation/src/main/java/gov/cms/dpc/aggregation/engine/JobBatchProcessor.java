@@ -185,6 +185,7 @@ public class JobBatchProcessor {
                     return groupedByResourceFlow.compose((upstream) -> bufferAndWrite(upstream, writer, resourceCount, sequenceCount));
                 });
     }
+
     /**
      * This part of the flow chain buffers resources and writes them in batches to a file
      *
