@@ -1,0 +1,10 @@
+defaultName: swagger
+server:
+  rootPath: /v1/swagger/
+logging:
+  level: ERROR
+  appenders:
+    - type: console
+      threshold: ALL
+      timeZone: UTC
+      target: stdout
