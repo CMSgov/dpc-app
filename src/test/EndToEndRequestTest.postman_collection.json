@@ -1054,7 +1054,7 @@
 									"",
 									"// Response should have FHIR Content-Type",
 									"pm.test(\"Content-type is application/fhir+ndjson\", function() {",
-									"   pm.response.to.have.header(\"Content-Type\", \"application/fhir+ndjson\"); ",
+									"   pm.response.to.have.header(\"Content-Type\", \"application/ndjson\"); ",
 									"});",
 									"",
 									"// There should be 2 patients.",
@@ -1116,7 +1116,7 @@
 								"exec": [
 									"// Response should have FHIR Content-Type",
 									"pm.test(\"Content-type is application/fhir+ndjson\", function() {",
-									"   pm.response.to.have.header(\"Content-Type\", \"application/fhir+ndjson\"); ",
+									"   pm.response.to.have.header(\"Content-Type\", \"application/ndjson\"); ",
 									"   pm.environment.set(\"file_timestamp\", pm.response.headers.get(\"Last-Modified\"))",
 									"});",
 									"",
@@ -1168,7 +1168,7 @@
 								"exec": [
 									"// Response should have FHIR Content-Type",
 									"pm.test(\"Content-type is application/fhir+ndjson\", function() {",
-									"   pm.response.to.have.header(\"Content-Type\", \"application/fhir+ndjson\"); ",
+									"   pm.response.to.have.header(\"Content-Type\", \"application/ndjson\"); ",
 									"});",
 									"",
 									"// There should be 8 coverage.",
@@ -1229,7 +1229,7 @@
 								"exec": [
 									"// Response should have FHIR Content-Type",
 									"pm.test(\"Content-type is application/fhir+ndjson\", function() {",
-									"   pm.response.to.have.header(\"Content-Type\", \"application/fhir+ndjson\"); ",
+									"   pm.response.to.have.header(\"Content-Type\", \"application/ndjson\"); ",
 									"});",
 									"",
 									"// There should be 1 operation outcome.",
