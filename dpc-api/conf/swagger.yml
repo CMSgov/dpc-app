@@ -1,4 +1,4 @@
-defaultName: swagger
+defaultName: DPC API Service
 server:
   rootPath: /v1/swagger/
 logging:
