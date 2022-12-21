@@ -1,4 +1,3 @@
-
 package gov.cms.dpc.aggregation.engine;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -22,7 +21,6 @@ import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.MemoryBatchQueue;
-import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.util.Lists;
@@ -63,7 +61,6 @@ public class AggregationEngineBFDClientTest {
     private final UUID orgID = UUID.randomUUID();
     private final String TEST_ORG_NPI = NPIUtil.generateNPI();
     private final String TEST_PROVIDER_NPI = NPIUtil.generateNPI();
-    private JobQueueBatch completeJob;
 
     @BeforeEach
     public void setup() throws GeneralSecurityException {
@@ -118,8 +115,8 @@ public class AggregationEngineBFDClientTest {
         final var completeJob = queue.getJobBatches(jobID).stream().findFirst().orElseThrow();
         assertEquals(JobStatus.COMPLETED, completeJob.getStatus());
 
-        Assertions.assertThat(headerKey.getAllValues()).containsExactlyInAnyOrder(Constants.INCLUDE_IDENTIFIERS_HEADER, Constants.BULK_CLIENT_ID_HEADER, Constants.BULK_JOB_ID_HEADER, HttpHeaders.X_FORWARDED_FOR, Constants.BlueButton.ORIGINAL_QUERY_ID_HEADER,Constants.BlueButton.BULK_CLIENTNAME_HEADER);
-        Assertions.assertThat(headerValue.getAllValues()).containsExactlyInAnyOrder("mbi", TEST_PROVIDER_NPI, jobID.toString(), "127.0.0.1", jobID.toString(),Constants.BlueButton.APPLICATION_NAME_DESC);
+        Assertions.assertThat(headerKey.getAllValues()).containsExactlyInAnyOrder(Constants.INCLUDE_IDENTIFIERS_HEADER, Constants.BULK_CLIENT_ID_HEADER, Constants.BULK_JOB_ID_HEADER, HttpHeaders.X_FORWARDED_FOR, Constants.BFD_ORIGINAL_QUERY_ID_HEADER);
+        Assertions.assertThat(headerValue.getAllValues()).containsExactlyInAnyOrder("mbi", TEST_PROVIDER_NPI, jobID.toString(), "127.0.0.1", jobID.toString());
 
         engine.stop();
     }
@@ -155,8 +152,9 @@ public class AggregationEngineBFDClientTest {
         // Look at the result
         final var completeJob = queue.getJobBatches(jobID).stream().findFirst().orElseThrow();
         assertEquals(JobStatus.COMPLETED, completeJob.getStatus());
-        Assertions.assertThat(headerKey.getAllValues()).containsExactlyInAnyOrder(Constants.INCLUDE_IDENTIFIERS_HEADER, Constants.DPC_CLIENT_ID_HEADER, HttpHeaders.X_FORWARDED_FOR, Constants.BlueButton.ORIGINAL_QUERY_ID_HEADER, Constants.BlueButton.APPLICATION_NAME_HEADER, Constants.BlueButton.ORIGINAL_QUERY_TIME_STAMP_HEADER);
-        Assertions.assertThat(headerValue.getAllValues()).containsExactlyInAnyOrder("mbi", TEST_PROVIDER_NPI, "127.0.0.1", jobID.toString(), Constants.BlueButton.APPLICATION_NAME_DESC, completeJob.getTransactionTime().toString());
+
+        Assertions.assertThat(headerKey.getAllValues()).containsExactlyInAnyOrder(Constants.INCLUDE_IDENTIFIERS_HEADER, Constants.DPC_CLIENT_ID_HEADER, HttpHeaders.X_FORWARDED_FOR, Constants.BFD_ORIGINAL_QUERY_ID_HEADER);
+        Assertions.assertThat(headerValue.getAllValues()).containsExactlyInAnyOrder("mbi", TEST_PROVIDER_NPI, "127.0.0.1", jobID.toString());
 
         engine.stop();
     }
