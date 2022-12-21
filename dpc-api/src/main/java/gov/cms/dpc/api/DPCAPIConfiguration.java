@@ -101,7 +101,7 @@ public class DPCAPIConfiguration extends TypesafeConfiguration implements IDPCDa
 
     @NotEmpty
     @JsonProperty
-    private String defaultName = "swagger";
+    private String defaultName = "DPC API Service";
 
     public String getDefaultName() {
         return defaultName;
