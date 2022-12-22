@@ -130,24 +130,9 @@ public class JobBatchProcessor {
                 resourceType,
                 since,
                 job.getTransactionTime());
-        return fetcher.fetchResources(patientID, buildHeaders(job))
+        //return fetcher.fetchResources(patientID, buildHeaders(job))
+        return fetcher.fetchResources(patientID, new JobHeaders(job).fetchHeaders())
                 .flatMap(Flowable::fromIterable);
-    }
-
-    private Map<String, String> buildHeaders(JobQueueBatch job) {
-        Map<String, String> headers = new HashMap<>();
-        headers.put(HttpHeaders.X_FORWARDED_FOR, job.getRequestingIP());
-        headers.put(Constants.BlueButton.ORIGINAL_QUERY_ID_HEADER, job.getJobID().toString());
-        if (job.isBulk()) {
-            headers.put(Constants.BULK_JOB_ID_HEADER, job.getJobID().toString());
-            headers.put(Constants.BULK_CLIENT_ID_HEADER, job.getProviderNPI());
-            headers.put(Constants.BlueButton.BULK_CLIENTNAME_HEADER,Constants.BlueButton.APPLICATION_NAME_DESC);
-        } else {
-            headers.put(Constants.DPC_CLIENT_ID_HEADER, job.getProviderNPI());
-            headers.put(Constants.BlueButton.APPLICATION_NAME_HEADER,Constants.BlueButton.APPLICATION_NAME_DESC);
-            headers.put(Constants.BlueButton.ORIGINAL_QUERY_TIME_STAMP_HEADER,job.getTransactionTime().toString());
-        }
-        return headers;
     }
 
     private List<LookBackAnswer> getLookBackAnswers(JobQueueBatch job, String patientId) {
