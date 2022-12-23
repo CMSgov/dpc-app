@@ -3,7 +3,6 @@ package gov.cms.dpc.aggregation.engine;
 import com.google.common.net.HttpHeaders;
 import gov.cms.dpc.common.Constants;
 import gov.cms.dpc.queue.models.JobQueueBatch;
-import gov.cms.dpc.aggregation.engine.JobHeaders;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,6 +22,7 @@ public class JobHeaders {
     public  Map<String, String> fetchHeaders() {
         return buildHeaders(getJob());
     }
+    //public Map<String, String> buildHeaders(JobQueueBatch job) {
     public Map<String, String> buildHeaders(JobQueueBatch job) {
         Map<String, String> headers = new HashMap<>();
         headers.put(HttpHeaders.X_FORWARDED_FOR, job.getRequestingIP());
