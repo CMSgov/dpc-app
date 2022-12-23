@@ -76,6 +76,7 @@ class DataResourceTest {
 
         final Response response = RESOURCE.target("/v1/Data/test.ndjson")
                 .request()
+                .header(org.apache.http.HttpHeaders.ACCEPT, "application/ndjson")
                 .get();
 
         final InputStream output = response.readEntity(InputStream.class);
@@ -125,6 +126,7 @@ class DataResourceTest {
         Response response = RESOURCE.target("/v1/Data/test.ndjson")
                 .request()
                 .header(org.apache.http.HttpHeaders.RANGE, "bytes=0-1")
+                .header(org.apache.http.HttpHeaders.ACCEPT, "application/ndjson")
                 .get();
 
         InputStream is = response.readEntity(InputStream.class);
@@ -193,6 +195,7 @@ class DataResourceTest {
         // Request file with an invalid range
         response = RESOURCE.target("/v1/Data/test.ndjson")
                 .request()
+                .header(org.apache.http.HttpHeaders.ACCEPT, "application/ndjson")
                 .header(org.apache.http.HttpHeaders.RANGE, "bytes=50-0")
                 .get();
 
@@ -211,6 +214,7 @@ class DataResourceTest {
 
         final Response response = RESOURCE.target("/v1/Data/test.ndjson")
                 .request()
+                .header(org.apache.http.HttpHeaders.ACCEPT, "application/ndjson")
                 .header(org.apache.http.HttpHeaders.RANGE, "frames=0-1")
                 .get();
 
@@ -249,6 +253,7 @@ class DataResourceTest {
         void testMismatchingETagHeader(String method) {
             final Invocation.Builder builder = RESOURCE.target("/v1/Data/test.ndjson")
                     .request()
+                    .header(org.apache.http.HttpHeaders.ACCEPT, "application/ndjson")
                     .header(HttpHeaders.IF_NONE_MATCH, "Not a real value");
 
             final Response response = createHTTPMethodCall(method, builder);
@@ -271,6 +276,7 @@ class DataResourceTest {
         void testWeakETagHeader(String method) {
             final Invocation.Builder builder = RESOURCE.target("/v1/Data/test.ndjson")
                     .request()
+                    .header(org.apache.http.HttpHeaders.ACCEPT, "application/ndjson")
                     .header(HttpHeaders.IF_NONE_MATCH, "This should match--gzip");
 
             final Response response = createHTTPMethodCall(method, builder);
@@ -283,6 +289,7 @@ class DataResourceTest {
 
             final Invocation.Builder builder = RESOURCE.target("/v1/Data/test.ndjson")
                     .request()
+                    .header(org.apache.http.HttpHeaders.ACCEPT, "application/ndjson")
                     .header(HttpHeaders.IF_MODIFIED_SINCE, modifiedDate.toInstant().toEpochMilli());
 
             final Response response = createHTTPMethodCall(method, builder);
