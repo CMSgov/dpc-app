@@ -22,7 +22,6 @@ public class JobHeaders {
     public  Map<String, String> fetchHeaders() {
         return buildHeaders(getJob());
     }
-    //public Map<String, String> buildHeaders(JobQueueBatch job) {
     public Map<String, String> buildHeaders(JobQueueBatch job) {
         Map<String, String> headers = new HashMap<>();
         headers.put(HttpHeaders.X_FORWARDED_FOR, job.getRequestingIP());
