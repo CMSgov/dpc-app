@@ -36,7 +36,7 @@ public class GenerateRequestIdFilterUnitTest {
         Mockito.when(mockContext.getUriInfo()).thenReturn(mockUriInfo);
         Mockito.when(mockContext.getMethod()).thenReturn("GET");
         MediaType mockMediaType = Mockito.mock(MediaType.class);
-        Mockito.when(mockMediaType.getType()).thenReturn("application/json");
+        Mockito.when(mockMediaType.toString()).thenReturn("application/json");
         Mockito.when(mockContext.getMediaType()).thenReturn(mockMediaType);
 
         Logger logger = (Logger) LoggerFactory.getLogger(GenerateRequestIdFilter.class);
@@ -72,7 +72,7 @@ public class GenerateRequestIdFilterUnitTest {
         Mockito.when(mockContext.getUriInfo()).thenReturn(mockUriInfo);
         Mockito.when(mockContext.getMethod()).thenReturn("GET");
         MediaType mockMediaType = Mockito.mock(MediaType.class);
-        Mockito.when(mockMediaType.getType()).thenReturn("application/json");
+        Mockito.when(mockMediaType.toString()).thenReturn("application/json");
         Mockito.when(mockContext.getMediaType()).thenReturn(mockMediaType);
 
         Logger logger = (Logger) LoggerFactory.getLogger(GenerateRequestIdFilter.class);
@@ -100,7 +100,7 @@ public class GenerateRequestIdFilterUnitTest {
         Mockito.when(mockContext.getUriInfo()).thenReturn(mockUriInfo);
         Mockito.when(mockContext.getMethod()).thenReturn("GET");
         MediaType mockMediaType = Mockito.mock(MediaType.class);
-        Mockito.when(mockMediaType.getType()).thenReturn("application/json");
+        Mockito.when(mockMediaType.toString()).thenReturn("application/json");
         Mockito.when(mockContext.getMediaType()).thenReturn(mockMediaType);
 
         Logger logger = (Logger) LoggerFactory.getLogger(GenerateRequestIdFilter.class);
@@ -128,7 +128,7 @@ public class GenerateRequestIdFilterUnitTest {
         Mockito.when(mockContext.getUriInfo()).thenReturn(mockUriInfo);
         Mockito.when(mockContext.getMethod()).thenReturn("GET");
         MediaType mockMediaType = Mockito.mock(MediaType.class);
-        Mockito.when(mockMediaType.getType()).thenReturn("application/json");
+        Mockito.when(mockMediaType.toString()).thenReturn("application/json");
         Mockito.when(mockContext.getMediaType()).thenReturn(mockMediaType);
 
         MDC.put("Some-Key", "some-value");

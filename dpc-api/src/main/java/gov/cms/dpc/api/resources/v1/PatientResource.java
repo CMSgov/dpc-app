@@ -193,7 +193,7 @@ public class PatientResource extends AbstractPatientResource {
                 .withId(practitionerId.toString())
                 .encodedJson()
                 .execute();
-
+            
         if (practitioner == null) {
             // Is this the best code to be throwing here?
             throw new WebApplicationException(HttpStatus.UNAUTHORIZED_401);
