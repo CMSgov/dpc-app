@@ -128,9 +128,9 @@ public class JobBatchProcessor {
                 resourceType,
                 since,
                 job.getTransactionTime());
-        //return fetcher.fetchResources(patientID, buildHeaders(job))
-        return fetcher.fetchResources(patientID, new JobHeaders(job).fetchHeaders())
-                .flatMap(Flowable::fromIterable);
+        return fetcher.fetchResources(patientID, new JobHeaders(job.getRequestingIP(),job.getJobID().toString(),
+                        job.getProviderNPI(),job.getTransactionTime().toString(),job.isBulk()).buildHeaders())
+                           .flatMap(Flowable::fromIterable);
     }
 
     private List<LookBackAnswer> getLookBackAnswers(JobQueueBatch job, String patientId) {

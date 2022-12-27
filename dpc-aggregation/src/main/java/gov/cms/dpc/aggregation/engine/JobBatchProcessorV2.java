@@ -107,9 +107,9 @@ public class JobBatchProcessorV2 {
                 resourceType,
                 since,
                 job.getTransactionTime());
-
-        return fetcher.fetchResources(patientID, new JobHeaders(job).fetchHeaders())
-                .flatMap(Flowable::fromIterable);
+        return fetcher.fetchResources(patientID, new JobHeaders(job.getRequestingIP(),job.getJobID().toString(),
+                    job.getProviderNPI(),job.getTransactionTime().toString(),job.isBulk()).buildHeaders()).
+                        flatMap(Flowable::fromIterable);
     }
 
     private Flowable<JobQueueBatchFile> writeResource(JobQueueBatch job, Flowable<Resource> flow) {
