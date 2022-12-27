@@ -47,7 +47,7 @@ public class LogResponseFilterTest {
         Mockito.when(mockRequest.getUriInfo()).thenReturn(mockUriInfo);
         Mockito.when(mockRequest.getMethod()).thenReturn("GET");
         MediaType mockMediaType = Mockito.mock(MediaType.class);
-        Mockito.when(mockMediaType.getType()).thenReturn("application/json");
+        Mockito.when(mockMediaType.toString()).thenReturn("application/json");
         Mockito.when(mockRequest.getMediaType()).thenReturn(mockMediaType);
 
 
