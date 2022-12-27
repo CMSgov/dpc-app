@@ -47,7 +47,6 @@ class JobHeadersTest {
         assertThat(this.providerNPI).isNotNull().isEqualTo(this.randomUUID);
         assertThat(this.transactionTime).isNotNull();
         headers = jobHeaders.buildHeaders();
-        assertThat(headers).containsExactlyInAnyOrderEntriesOf(headers);
         assertTrue(Maps.difference(headers, headers).areEqual());
         tearDown();
         this.isBulk=false;
@@ -57,7 +56,6 @@ class JobHeadersTest {
         assertThat(this.providerNPI).isNotNull().isEqualTo(this.randomUUID);
         assertThat(this.transactionTime).isNotNull();
         headers = jobHeaders.buildHeaders();
-        assertThat(headers).containsExactlyInAnyOrderEntriesOf(headers);
         assertTrue(Maps.difference(headers, headers).areEqual());
     }
 

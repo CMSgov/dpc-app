@@ -34,14 +34,16 @@ public class JobHeaders {
             headers.put(Constants.BULK_JOB_ID_HEADER, this.jobID);
             headers.put(Constants.BULK_CLIENT_ID_HEADER, this.providerNPI);
             headers.put(Constants.BlueButton.BULK_CLIENTNAME_HEADER,Constants.BlueButton.APPLICATION_NAME_DESC);
-            logger.info("adding blue button BFD headers for bulk job: jobID, providerNPI, appName" + this.jobID, " ",
-                    this.providerNPI, " ", Constants.BlueButton.APPLICATION_NAME_DESC);
+            String message = this.jobID + " " + this.providerNPI + " " + Constants.BlueButton.APPLICATION_NAME_DESC;
+            String formatter = String.format("%s", "adding blue button BFD headers for bulk job: jobID, providerNPI, appName");
+            logger.info(formatter, message);
         } else {
             headers.put(Constants.DPC_CLIENT_ID_HEADER, this.providerNPI);
             headers.put(Constants.BlueButton.APPLICATION_NAME_HEADER,Constants.BlueButton.APPLICATION_NAME_DESC);
             headers.put(Constants.BlueButton.ORIGINAL_QUERY_TIME_STAMP_HEADER,this.transactionTime);
-            logger.info("adding blue button BFD headers for non-bulk job: jobID, providerNPI, appName" +
-                    this.providerNPI, " ", Constants.BlueButton.APPLICATION_NAME_DESC, " ", this.transactionTime);
+            String message = this.providerNPI + " " + Constants.BlueButton.APPLICATION_NAME_DESC + " " + this.transactionTime;
+            String formatter = String.format("%s", "adding blue button BFD headers for non-bulk job: providerNPI, appName, transactionTime");
+            logger.info(formatter, message);
         }
         return headers;
     }
