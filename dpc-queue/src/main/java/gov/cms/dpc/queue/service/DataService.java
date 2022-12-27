@@ -3,6 +3,7 @@ package gov.cms.dpc.queue.service;
 import ca.uhn.fhir.context.FhirContext;
 import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.common.annotations.JobTimeout;
+import gov.cms.dpc.common.logging.SplunkTimestamp;
 import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.JobStatus;
@@ -73,6 +74,8 @@ public class DataService {
                                  String requestingIP, String requestUrl, DPCResourceType... resourceTypes) {
         UUID jobID = this.queue.createJob(organizationID, orgNPI, providerNPI, patientMBIs, List.of(resourceTypes), since, transactionTime, requestingIP, requestUrl, false, false);
         LOGGER.info("Patient everything export job created with job_id={} _since={} from requestUrl={}", jobID.toString(), since, requestUrl);
+        final String eventTime = SplunkTimestamp.getSplunkTimestamp();
+        LOGGER.info("dpcMetric=queueSubmitted,requestUrl={},jobID={},queueSubmitTime={}", "/Patient/$everything", jobID ,eventTime);
 
         Optional<List<JobQueueBatch>> optionalBatches = waitForJobToComplete(jobID, organizationID, this.queue);
 
@@ -81,13 +84,19 @@ public class DataService {
             List<JobQueueBatchFile> files = batches.stream().map(JobQueueBatch::getJobQueueBatchFiles).flatMap(List::stream).collect(Collectors.toList());
             if (files.size() == 1 && files.get(0).getResourceType() == DPCResourceType.OperationOutcome) {
                 // An OperationOutcome (ERROR) was returned
+                final String jobTime = SplunkTimestamp.getSplunkTimestamp();
+                LOGGER.info("dpcMetric=jobFail,completionResult={},jobID={},jobCompleteTime={}", "FAILED", jobID, jobTime);
                 return assembleOperationOutcome(batches);
             } else {
+                final String jobTime = SplunkTimestamp.getSplunkTimestamp();
+                LOGGER.info("dpcMetric=jobComplete,completionResult={},jobID={},jobCompleteTime={}", "COMPLETE", jobID, jobTime);
                 // A normal Bundle of data was returned
                 return assembleBundleFromBatches(batches, List.of(resourceTypes));
             }
         }
 
+        final String jobTime = SplunkTimestamp.getSplunkTimestamp();
+        LOGGER.info("dpcMetric=jobFail,completionResult={},jobID={},jobCompleteTime={}", "APPLICATIONERROR", jobID, jobTime);
         // No data for the batch was returned AND No OperationOutcome was created
         LOGGER.error("No data returned from queue for job, jobID: {}; jobTimeout: {}", jobID, jobTimeoutInSeconds);
         // These Exceptions are not just thrown in the application - the message is also sent in the Response payload

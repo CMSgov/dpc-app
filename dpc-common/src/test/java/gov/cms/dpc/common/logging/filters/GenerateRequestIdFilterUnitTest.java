@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import ch.qos.logback.classic.Logger;
 import org.slf4j.MDC;
 import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -29,12 +30,14 @@ public class GenerateRequestIdFilterUnitTest {
 
     @Test
     public void testRequestIdIsGeneratedWhenMissingInHeader() throws IOException {
-        String requestId = UUID.randomUUID().toString();
-        Mockito.when(mockContext.getHeaderString(ArgumentMatchers.eq(Constants.DPC_REQUEST_ID_HEADER))).thenReturn(requestId);
+        Mockito.when(mockContext.getHeaderString(ArgumentMatchers.eq(Constants.DPC_REQUEST_ID_HEADER))).thenReturn(null);
         UriInfo mockUriInfo = Mockito.mock(UriInfo.class);
         Mockito.when(mockUriInfo.getPath()).thenReturn("v1/Patients");
         Mockito.when(mockContext.getUriInfo()).thenReturn(mockUriInfo);
         Mockito.when(mockContext.getMethod()).thenReturn("GET");
+        MediaType mockMediaType = Mockito.mock(MediaType.class);
+        Mockito.when(mockMediaType.toString()).thenReturn("application/json");
+        Mockito.when(mockContext.getMediaType()).thenReturn(mockMediaType);
 
         Logger logger = (Logger) LoggerFactory.getLogger(GenerateRequestIdFilter.class);
         ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
@@ -43,18 +46,16 @@ public class GenerateRequestIdFilterUnitTest {
             logger.addAppender(listAppender);
 
             //Without request-id in header and extraction enabled
-            Mockito.when(mockContext.getHeaderString(ArgumentMatchers.eq(Constants.DPC_REQUEST_ID_HEADER))).thenReturn(null);
             filter = new GenerateRequestIdFilter(true);
             filter.filter(mockContext);
-            assertEquals("resource_requested=v1/Patients, method=GET", listAppender.list.get(0).getFormattedMessage());
+            assertEquals("resource_requested=v1/Patients, method=GET, media_type=application/json, request_id=" + MDC.get(MDCConstants.DPC_REQUEST_ID) + ", use_provided_request_id=true", listAppender.list.get(0).getFormattedMessage());
             assertNotNull(MDC.get(MDCConstants.DPC_REQUEST_ID));
             UUID.fromString(MDC.get(MDCConstants.DPC_REQUEST_ID));
 
             //Without request-id in header and extraction disabled
-            Mockito.when(mockContext.getHeaderString(ArgumentMatchers.eq(Constants.DPC_REQUEST_ID_HEADER))).thenReturn(null);
             filter = new GenerateRequestIdFilter(false);
             filter.filter(mockContext);
-            assertEquals("resource_requested=v1/Patients, method=GET", listAppender.list.get(0).getFormattedMessage());
+            assertEquals("resource_requested=v1/Patients, method=GET, media_type=application/json, request_id=" + MDC.get(MDCConstants.DPC_REQUEST_ID) + ", use_provided_request_id=false", listAppender.list.get(1).getFormattedMessage());
             assertNotNull(MDC.get(MDCConstants.DPC_REQUEST_ID));
             UUID.fromString(MDC.get(MDCConstants.DPC_REQUEST_ID));
         } finally {
@@ -70,6 +71,9 @@ public class GenerateRequestIdFilterUnitTest {
         Mockito.when(mockUriInfo.getPath()).thenReturn("v1/Patients");
         Mockito.when(mockContext.getUriInfo()).thenReturn(mockUriInfo);
         Mockito.when(mockContext.getMethod()).thenReturn("GET");
+        MediaType mockMediaType = Mockito.mock(MediaType.class);
+        Mockito.when(mockMediaType.toString()).thenReturn("application/json");
+        Mockito.when(mockContext.getMediaType()).thenReturn(mockMediaType);
 
         Logger logger = (Logger) LoggerFactory.getLogger(GenerateRequestIdFilter.class);
         ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
@@ -80,7 +84,7 @@ public class GenerateRequestIdFilterUnitTest {
             //With request-id in header and use header value Disabled
             filter = new GenerateRequestIdFilter(false);
             filter.filter(mockContext);
-            assertEquals("resource_requested=v1/Patients, method=GET", listAppender.list.get(0).getFormattedMessage());
+            assertEquals("resource_requested=v1/Patients, method=GET, media_type=application/json, request_id=" + MDC.get(MDCConstants.DPC_REQUEST_ID) + ", use_provided_request_id=false", listAppender.list.get(0).getFormattedMessage());
             assertNotEquals(requestId, MDC.get(MDCConstants.DPC_REQUEST_ID));
         } finally {
             listAppender.stop();
@@ -95,6 +99,9 @@ public class GenerateRequestIdFilterUnitTest {
         Mockito.when(mockUriInfo.getPath()).thenReturn("v1/Patients");
         Mockito.when(mockContext.getUriInfo()).thenReturn(mockUriInfo);
         Mockito.when(mockContext.getMethod()).thenReturn("GET");
+        MediaType mockMediaType = Mockito.mock(MediaType.class);
+        Mockito.when(mockMediaType.toString()).thenReturn("application/json");
+        Mockito.when(mockContext.getMediaType()).thenReturn(mockMediaType);
 
         Logger logger = (Logger) LoggerFactory.getLogger(GenerateRequestIdFilter.class);
         ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
@@ -105,7 +112,7 @@ public class GenerateRequestIdFilterUnitTest {
             //With request-id in header and use header value enabled
             filter = new GenerateRequestIdFilter(true);
             filter.filter(mockContext);
-            assertEquals("resource_requested=v1/Patients, method=GET", listAppender.list.get(0).getFormattedMessage());
+            assertEquals("resource_requested=v1/Patients, method=GET, media_type=application/json, request_id=" + requestId + ", use_provided_request_id=true", listAppender.list.get(0).getFormattedMessage());
             assertEquals(requestId, MDC.get(MDCConstants.DPC_REQUEST_ID));
         } finally {
             listAppender.stop();
@@ -120,6 +127,9 @@ public class GenerateRequestIdFilterUnitTest {
         Mockito.when(mockUriInfo.getPath()).thenReturn("v1/Patients");
         Mockito.when(mockContext.getUriInfo()).thenReturn(mockUriInfo);
         Mockito.when(mockContext.getMethod()).thenReturn("GET");
+        MediaType mockMediaType = Mockito.mock(MediaType.class);
+        Mockito.when(mockMediaType.toString()).thenReturn("application/json");
+        Mockito.when(mockContext.getMediaType()).thenReturn(mockMediaType);
 
         MDC.put("Some-Key", "some-value");
         assertNotNull(MDC.get("Some-Key"));

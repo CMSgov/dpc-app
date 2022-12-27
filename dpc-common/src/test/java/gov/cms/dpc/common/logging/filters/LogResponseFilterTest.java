@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriInfo;
@@ -45,6 +46,9 @@ public class LogResponseFilterTest {
         Mockito.when(mockUriInfo.getPath()).thenReturn("v1/Patients");
         Mockito.when(mockRequest.getUriInfo()).thenReturn(mockUriInfo);
         Mockito.when(mockRequest.getMethod()).thenReturn("GET");
+        MediaType mockMediaType = Mockito.mock(MediaType.class);
+        Mockito.when(mockMediaType.toString()).thenReturn("application/json");
+        Mockito.when(mockRequest.getMediaType()).thenReturn(mockMediaType);
 
 
         Logger logger = (Logger) LoggerFactory.getLogger(LogResponseFilter.class);
@@ -59,7 +63,7 @@ public class LogResponseFilterTest {
             MDC.put(MDCConstants.DPC_REQUEST_ID, requestId);
             Mockito.when(mockResponse.getStatus()).thenReturn(200);
             filter.filter(mockRequest,mockResponse);
-            assertEquals("resource_requested=v1/Patients, method=GET, status=200", listAppender.list.get(0).getFormattedMessage());
+            assertEquals("resource_requested=v1/Patients, media_type=application/json, method=GET, status=200", listAppender.list.get(0).getFormattedMessage());
             assertEquals(1,headers.get(Constants.DPC_REQUEST_ID_HEADER).size());
             assertEquals(requestId,headers.get(Constants.DPC_REQUEST_ID_HEADER).get(0));
 
@@ -67,7 +71,7 @@ public class LogResponseFilterTest {
             MDC.clear();
             Mockito.when(mockResponse.getStatus()).thenReturn(202);
             filter.filter(mockRequest, mockResponse);
-            assertEquals("resource_requested=v1/Patients, method=GET, status=202", listAppender.list.get(1).getFormattedMessage());
+            assertEquals("resource_requested=v1/Patients, media_type=application/json, method=GET, status=202", listAppender.list.get(1).getFormattedMessage());
             assertFalse(headers.containsKey(MDCConstants.DPC_REQUEST_ID));
 
         } finally {
