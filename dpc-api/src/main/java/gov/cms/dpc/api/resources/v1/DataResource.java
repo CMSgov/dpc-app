@@ -43,6 +43,7 @@ import static gov.cms.dpc.fhir.dropwizard.filters.StreamingContentSizeFilter.X_C
  */
 @Api(tags = {"Bulk Data", "Data"}, authorizations = @Authorization(value = "access_token"))
 @Path("/v1/Data")
+@Produces("application/ndjson")
 public class DataResource extends AbstractDataResource {
 
     private static final Logger logger = LoggerFactory.getLogger(DataResource.class);
