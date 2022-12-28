@@ -117,6 +117,11 @@ public class AggregationEngine implements Runnable {
                 .map(Optional::get)
                 
                 .doOnDispose(() -> {
+                    // tell splunk the job is complete
+                    final String jobTime = SplunkTimestamp.getSplunkTimestamp();
+                    logger.info("dpcMetric=jobComplete,completionResult={},jobID={},jobCompleteTime={}", "COMPLETE", MDCConstants.JOB_ID, jobTime);
+
+                    // clear the mdc constants
                     MDC.remove(MDCConstants.JOB_ID);
                     MDC.remove(MDCConstants.JOB_BATCH_ID);
                     MDC.remove(MDCConstants.ORGANIZATION_ID);
@@ -179,10 +184,8 @@ public class AggregationEngine implements Runnable {
             MDC.remove(MDCConstants.PATIENT_ID);
             // Finish processing the batch
             if (this.isRunning()) {
-                final String jobTime = SplunkTimestamp.getSplunkTimestamp();
                 // Calculate metadata for the file (length and checksum)
-                calculateFileMetadata(job);
-                logger.info("dpcMetric=jobComplete,completionResult={},jobID={},jobCompleteTime={}", "COMPLETE", job.getJobID(), jobTime);
+                calculateFileMetadata(job);                
                 this.queue.completeBatch(job, aggregatorID);
             } else {
                 logger.info("PAUSED job");
