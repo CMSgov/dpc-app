@@ -3,11 +3,9 @@ package gov.cms.dpc.aggregation.engine;
 import ca.uhn.fhir.context.FhirContext;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
-import com.google.common.net.HttpHeaders;
 import gov.cms.dpc.aggregation.service.*;
 import gov.cms.dpc.aggregation.util.AggregationUtils;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
-import gov.cms.dpc.common.Constants;
 import gov.cms.dpc.common.MDCConstants;
 import gov.cms.dpc.common.utils.MetricMaker;
 import gov.cms.dpc.fhir.DPCResourceType;
@@ -130,24 +128,9 @@ public class JobBatchProcessor {
                 resourceType,
                 since,
                 job.getTransactionTime());
-        return fetcher.fetchResources(patientID, buildHeaders(job))
-                .flatMap(Flowable::fromIterable);
-    }
-
-    private Map<String, String> buildHeaders(JobQueueBatch job) {
-        Map<String, String> headers = new HashMap<>();
-        headers.put(HttpHeaders.X_FORWARDED_FOR, job.getRequestingIP());
-        headers.put(Constants.BlueButton.ORIGINAL_QUERY_ID_HEADER, job.getJobID().toString());
-        if (job.isBulk()) {
-            headers.put(Constants.BULK_JOB_ID_HEADER, job.getJobID().toString());
-            headers.put(Constants.BULK_CLIENT_ID_HEADER, job.getProviderNPI());
-            headers.put(Constants.BlueButton.BULK_CLIENTNAME_HEADER,Constants.BlueButton.APPLICATION_NAME_DESC);
-        } else {
-            headers.put(Constants.DPC_CLIENT_ID_HEADER, job.getProviderNPI());
-            headers.put(Constants.BlueButton.APPLICATION_NAME_HEADER,Constants.BlueButton.APPLICATION_NAME_DESC);
-            headers.put(Constants.BlueButton.ORIGINAL_QUERY_TIME_STAMP_HEADER,job.getTransactionTime().toString());
-        }
-        return headers;
+        return fetcher.fetchResources(patientID, new JobHeaders(job.getRequestingIP(),job.getJobID().toString(),
+                        job.getProviderNPI(),job.getTransactionTime().toString(),job.isBulk()).buildHeaders())
+                           .flatMap(Flowable::fromIterable);
     }
 
     private List<LookBackAnswer> getLookBackAnswers(JobQueueBatch job, String patientId) {

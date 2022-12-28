@@ -118,6 +118,9 @@ public class AggregationEngineBFDClientTest {
         final var completeJob = queue.getJobBatches(jobID).stream().findFirst().orElseThrow();
         assertEquals(JobStatus.COMPLETED, completeJob.getStatus());
 
+        Assertions.assertThat(completeJob.getJobID()).isNotNull();
+        Assertions.assertThat(completeJob.getProviderNPI()).isNotNull();
+        Assertions.assertThat(completeJob.getTransactionTime()).isNotNull();
         Assertions.assertThat(headerKey.getAllValues()).containsExactlyInAnyOrder(Constants.INCLUDE_IDENTIFIERS_HEADER, Constants.BULK_CLIENT_ID_HEADER, Constants.BULK_JOB_ID_HEADER, HttpHeaders.X_FORWARDED_FOR, Constants.BlueButton.ORIGINAL_QUERY_ID_HEADER,Constants.BlueButton.BULK_CLIENTNAME_HEADER);
         Assertions.assertThat(headerValue.getAllValues()).containsExactlyInAnyOrder("mbi", TEST_PROVIDER_NPI, jobID.toString(), "127.0.0.1", jobID.toString(),Constants.BlueButton.APPLICATION_NAME_DESC);
 
@@ -154,7 +157,11 @@ public class AggregationEngineBFDClientTest {
 
         // Look at the result
         final var completeJob = queue.getJobBatches(jobID).stream().findFirst().orElseThrow();
+
         assertEquals(JobStatus.COMPLETED, completeJob.getStatus());
+        Assertions.assertThat(completeJob.getJobID()).isNotNull();
+        Assertions.assertThat(completeJob.getProviderNPI()).isNotNull();
+        Assertions.assertThat(completeJob.getTransactionTime()).isNotNull();
         Assertions.assertThat(headerKey.getAllValues()).containsExactlyInAnyOrder(Constants.INCLUDE_IDENTIFIERS_HEADER, Constants.DPC_CLIENT_ID_HEADER, HttpHeaders.X_FORWARDED_FOR, Constants.BlueButton.ORIGINAL_QUERY_ID_HEADER, Constants.BlueButton.APPLICATION_NAME_HEADER, Constants.BlueButton.ORIGINAL_QUERY_TIME_STAMP_HEADER);
         Assertions.assertThat(headerValue.getAllValues()).containsExactlyInAnyOrder("mbi", TEST_PROVIDER_NPI, "127.0.0.1", jobID.toString(), Constants.BlueButton.APPLICATION_NAME_DESC, completeJob.getTransactionTime().toString());
 
