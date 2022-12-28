@@ -103,11 +103,19 @@ public class AggregationEngine implements Runnable {
                     logger.debug(String.format("Configuring queue to poll every %d milliseconds", operationsConfig.getPollingFrequency()));
                     return completed.delay(operationsConfig.getPollingFrequency(), TimeUnit.MILLISECONDS);
                 })
-                .doOnEach(item -> logger.trace("Processing item: " + item.toString()))
+                .doOnEach(item -> {
+                    logger.trace("Processing item: " + item.toString());
+                    Optional<JobQueueBatch> jobOption = item.getValue();
+                    jobOption.ifPresent(job -> {
+                        final String queueCompleteTime = SplunkTimestamp.getSplunkTimestamp();
+                        logger.info("dpcMetric=queueComplete,jobID={},queueCompleteTime={}", job.getJobID(), queueCompleteTime);
+                    });
+                })
                 .doOnError(error -> logger.error("Unable to complete job.", error))
                 .retry()
                 .filter(Optional::isPresent)
                 .map(Optional::get)
+                
                 .doOnDispose(() -> {
                     MDC.remove(MDCConstants.JOB_ID);
                     MDC.remove(MDCConstants.JOB_BATCH_ID);
@@ -115,8 +123,6 @@ public class AggregationEngine implements Runnable {
                     MDC.remove(MDCConstants.PROVIDER_NPI);
                     MDC.remove(MDCConstants.IS_SMOKE_TEST_ORG);
                     MDC.remove(MDCConstants.IS_BULK);
-
-
                 })
                 .subscribe(
                         this::processJobBatch,
@@ -153,7 +159,6 @@ public class AggregationEngine implements Runnable {
      */
     @Trace
     protected void processJobBatch(JobQueueBatch job) {
-        final String queueCompleteTime = SplunkTimestamp.getSplunkTimestamp();
         try {
             MDC.put(MDCConstants.JOB_ID, job.getJobID().toString());
             MDC.put(MDCConstants.JOB_BATCH_ID, job.getBatchID().toString());
@@ -162,7 +167,6 @@ public class AggregationEngine implements Runnable {
             MDC.put(MDCConstants.IS_V2, Boolean.toString(job.isV2()));
 
             logger.info("Processing job, exporting to: {}.", this.operationsConfig.getExportPath());
-            logger.info("dpcMetric=queueComplete,jobID={},queueCompleteTime={}",  job.getJobID(), queueCompleteTime);
             logger.debug("Has {} attributed beneficiaries", job.getPatients().size());
 
             Optional<String> nextPatientID = job.fetchNextPatient(aggregatorID);
