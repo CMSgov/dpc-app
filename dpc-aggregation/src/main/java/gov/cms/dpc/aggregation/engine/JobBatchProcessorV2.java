@@ -3,13 +3,11 @@ package gov.cms.dpc.aggregation.engine;
 import ca.uhn.fhir.context.FhirContext;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
-import com.google.common.net.HttpHeaders;
 import com.google.inject.name.Named;
 import gov.cms.dpc.aggregation.service.ConsentResult;
 import gov.cms.dpc.aggregation.service.ConsentService;
 import gov.cms.dpc.aggregation.util.AggregationUtils;
 import gov.cms.dpc.bluebutton.clientV2.BlueButtonClientV2;
-import gov.cms.dpc.common.Constants;
 import gov.cms.dpc.common.utils.MetricMaker;
 import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.queue.IJobQueue;
@@ -109,24 +107,9 @@ public class JobBatchProcessorV2 {
                 resourceType,
                 since,
                 job.getTransactionTime());
-        return fetcher.fetchResources(patientID, buildHeaders(job))
-                .flatMap(Flowable::fromIterable);
-    }
-
-    private Map<String, String> buildHeaders(JobQueueBatch job) {
-        Map<String, String> headers = new HashMap<>();
-        headers.put(HttpHeaders.X_FORWARDED_FOR, job.getRequestingIP());
-        headers.put(Constants.BlueButton.ORIGINAL_QUERY_ID_HEADER, job.getJobID().toString());
-        if (job.isBulk()) {
-            headers.put(Constants.BULK_JOB_ID_HEADER, job.getJobID().toString());
-            headers.put(Constants.BULK_CLIENT_ID_HEADER, job.getProviderNPI());
-            headers.put(Constants.BlueButton.BULK_CLIENTNAME_HEADER,Constants.BlueButton.APPLICATION_NAME_DESC);
-        } else {
-            headers.put(Constants.DPC_CLIENT_ID_HEADER, job.getProviderNPI());
-            headers.put(Constants.BlueButton.APPLICATION_NAME_HEADER,Constants.BlueButton.APPLICATION_NAME_DESC);
-            headers.put(Constants.BlueButton.ORIGINAL_QUERY_TIME_STAMP_HEADER,job.getTransactionTime().toString());
-        }
-        return headers;
+        return fetcher.fetchResources(patientID, new JobHeaders(job.getRequestingIP(),job.getJobID().toString(),
+                    job.getProviderNPI(),job.getTransactionTime().toString(),job.isBulk()).buildHeaders()).
+                        flatMap(Flowable::fromIterable);
     }
 
     private Flowable<JobQueueBatchFile> writeResource(JobQueueBatch job, Flowable<Resource> flow) {
