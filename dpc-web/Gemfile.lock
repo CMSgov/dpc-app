@@ -279,7 +279,7 @@ GEM
     puma (5.6.5)
       nio4r (~> 2.0)
     racc (1.6.1)
-    rack (2.2.4)
+    rack (2.2.6.2)
     rack-test (2.0.2)
       rack (>= 1.3)
     rails-controller-testing (1.0.5)
@@ -491,7 +491,7 @@ DEPENDENCIES
   simplecov (<= 0.17)
   spring
   spring-watcher-listen (~> 2.0.0)
-  sprockets-rails (>= 3.2.2)
+  sprockets-rails (>= 3.4.2)
   truemail
   tzinfo-data
   uglifier (>= 1.3.0)
