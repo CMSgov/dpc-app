@@ -99,6 +99,14 @@ public class DPCAPIConfiguration extends TypesafeConfiguration implements IDPCDa
 
     private List<String> lookBackExemptOrgs;
 
+    @NotEmpty
+    @JsonProperty
+    private String defaultName = "DPC API Service";
+
+    public String getDefaultName() {
+        return defaultName;
+    }
+
     public DPCAPIConfiguration() {
         // Jackson required
     }

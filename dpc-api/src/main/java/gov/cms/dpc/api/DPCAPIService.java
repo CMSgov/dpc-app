@@ -2,6 +2,7 @@ package gov.cms.dpc.api;
 
 import ca.mestevens.java.configuration.bundle.TypesafeConfigurationBundle;
 import com.codahale.metrics.jersey2.InstrumentedResourceMethodApplicationListener;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.datatype.hibernate5.Hibernate5Module;
 import com.hubspot.dropwizard.guicier.GuiceBundle;
@@ -12,6 +13,7 @@ import gov.cms.dpc.api.cli.keys.KeyCommand;
 import gov.cms.dpc.api.cli.organizations.OrganizationCommand;
 import gov.cms.dpc.api.cli.tokens.TokenCommand;
 import gov.cms.dpc.api.exceptions.JsonParseExceptionMapper;
+import gov.cms.dpc.api.resources.v1.*;
 import gov.cms.dpc.bluebutton.BlueButtonClientModule;
 import gov.cms.dpc.common.hibernate.attribution.DPCHibernateBundle;
 import gov.cms.dpc.common.hibernate.attribution.DPCHibernateModule;
@@ -26,12 +28,23 @@ import gov.cms.dpc.fhir.FHIRModule;
 import gov.cms.dpc.macaroons.BakeryModule;
 import gov.cms.dpc.queue.JobQueueModule;
 import io.dropwizard.Application;
+import io.dropwizard.assets.AssetsBundle;
 import io.dropwizard.auth.AuthValueFactoryProvider;
 import io.dropwizard.db.DataSourceFactory;
 import io.dropwizard.migrations.MigrationsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
+import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
+import io.swagger.v3.oas.integration.SwaggerConfiguration;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.License;
+import io.swagger.v3.oas.models.servers.Server;
+
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class DPCAPIService extends Application<DPCAPIConfiguration> {
 
@@ -65,6 +78,9 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
         bootstrap.addBundle(guiceBundle);
         bootstrap.addBundle(new TypesafeConfigurationBundle("dpc.api"));
 
+        // Swagger
+        bootstrap.addBundle(new AssetsBundle("/app", "/v1/swagger", "index.html"));
+
         // Wrapper around some of the uglier bundle initialization commands
         setupCustomBundles(bootstrap);
 
@@ -82,6 +98,41 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
         environment.jersey().register(new JsonParseExceptionMapper());
         environment.jersey().register(new GenerateRequestIdFilter(false));
         environment.jersey().register(new LogResponseFilter());
+
+        OpenAPI oas = new OpenAPI();
+        Info info = new Info()
+                .title("Data at the Point of Care")
+                .description("As patients move throughout the healthcare system, providers often struggle to gain and maintain a complete picture of their medical history.\n" +
+                        "Data at the Point of Care fills in the gaps with claims data to inform providers with secure, structured patient history, past procedures, medication adherence, and more.")
+                .termsOfService("https://dpc.cms.gov/terms-of-service")
+                .license(new License()
+                        .name("Public Domain")
+                        .url("https://github.com/CMSgov/dpc-app/blob/master/LICENSE.md"));
+
+        oas.info(info);
+        List<Server> servers = new ArrayList<>();
+        servers.add(new Server().url("/api"));
+        oas.servers(servers);
+        SwaggerConfiguration oasConfig = new SwaggerConfiguration()
+                .openAPI(oas)
+                .prettyPrint(true)
+                .resourcePackages(Stream.of("gov.cms.dpc.api.resources.v1").collect(Collectors.toSet()));
+
+        environment.jersey().register(BaseResource.class);
+        environment.jersey().register(DataResource.class);
+        environment.jersey().register(DefinitionResource.class);
+        environment.jersey().register(EndpointResource.class);
+        environment.jersey().register(GroupResource.class);
+        environment.jersey().register(JobResource.class);
+        environment.jersey().register(KeyResource.class);
+        environment.jersey().register(OrganizationResource.class);
+        environment.jersey().register(PatientResource.class);
+        environment.jersey().register(PractitionerResource.class);
+        environment.jersey().register(TokenResource.class);
+        environment.getObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_NULL);
+
+        // eg.
+        environment.jersey().register(new OpenApiResource().openApiConfiguration(oasConfig));
     }
 
     private GuiceBundle<DPCAPIConfiguration> setupGuiceBundle() {
