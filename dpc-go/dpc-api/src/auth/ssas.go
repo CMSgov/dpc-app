@@ -44,6 +44,7 @@ func (s SSASPlugin) MakeAccessToken(credentials Credentials) (string, error) {
 	if err != nil {
 		return "", errors.Wrap(err, "token request failed")
 	}
+	/* #nosec G307 */
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
