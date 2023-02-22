@@ -40,8 +40,6 @@ This documentation serves as a guide for running the DPC project on your local e
 <!-- TOC -->
 
 ## Additional Documentation
-[Developer Onboarding Document](https://linktogoogledoc??)
-
 [DPC One-Pager](https://dpc.cms.gov/assets/downloads/dpc-one-pager.pdf)
 
 What is DPC?
@@ -71,7 +69,6 @@ beneficiaries. Visit our [website](https://dpc.cms.gov/) for background informat
 - JetBrains [Intelli-J Idea IDE](https://jetbrains.com/idea)
 - [Docker Desktop](https://docs.docker.com/desktop/mac/install/)
 - [Postman](https://www.postman.com/downloads/)
-- [Cisco AnyConnect](https://www.cisco.com/c/en/us/support/docs/smb/routers/cisco-rv-series-small-business-routers/smb5642-install-cisco-anyconnect-secure-mobility-client-on-a-mac-com-rev1.pdf) or [OpenVPN](https://openvpn.net/client-connect-vpn-for-mac-os/)
 
 
 Decrypting encrypted files
