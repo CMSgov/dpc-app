@@ -37,23 +37,13 @@ cp ops/scripts/pre-commit .git/hooks
 
 > Note: You can use `make secure-envs` to decrypt files and create the pre-commit hook at the same time.
 
+<br/>
 
 BUILD
 ====
-Run the `make ci-app` command
+Run the `make ci-app` command  
 
-### Edit the `docker-compose.portals.yml` file
-
-
-
-#### Set `API_METADATA URL` and `GOLDEN MACAROON` variables
-
-
-### Generate a Golden Macaroon
-We will need a macaroon for the docker configuration. Run this command to generate one.
-`curl -X POST http://localhost:9903/tasks/generate-token`
-
-
+<br/>
 
 CONFIGURE
 ====
