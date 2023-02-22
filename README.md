@@ -1,18 +1,59 @@
-Data @ The Point of Care
--
+# DPC: *Data @ The Point of Care*
+This documentation serves as a guide for running the DPC project on your local environment.
 
 
 [![Build Status](https://travis-ci.org/CMSgov/dpc-app.svg?branch=master)](https://travis-ci.org/CMSgov/dpc-app)
 [![Maintainability](https://api.codeclimate.com/v1/badges/46309e9b1877a7b18324/maintainability)](https://codeclimate.com/github/CMSgov/dpc-app/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/46309e9b1877a7b18324/test_coverage)](https://codeclimate.com/github/CMSgov/dpc-app/test_coverage)
 
+
+
+<!-- TOC -->
+## Table of Contents
+* [DPC: *Data @ The Point of Care*](#dpc--data--the-point-of-care)
+  * [Documentation](#documentation)
+  * [What is DPC?](#what-is-dpc)
+  * [Required tools and languages](#required-tools-and-languages)
+  * [Recommended tools](#recommended-tools)
+  * [Troubleshooting](#troubleshooting)
+  * [Decrypting encrypted files](#decrypting-encrypted-files)
+  * [Building DPC](#building-dpc)
+    * [There are two ways to build DPC:](#there-are-two-ways-to-build-dpc-)
+      * [Option 1: Full Integration Test](#option-1--full-integration-test)
+      * [Option 2: Manually](#option-2--manually)
+  * [Running DPC](#running-dpc)
+  * [Running via Docker](#running-via-docker)
+  * [Running DPC v2 via Docker](#running-dpc-v2-via-docker)
+  * [Manual JAR execution](#manual-jar-execution)
+  * [Seeding the database](#seeding-the-database)
+  * [Testing the Application](#testing-the-application)
+    * [Demo client](#demo-client)
+    * [Manual testing](#manual-testing)
+    * [Smoke tests](#smoke-tests)
+  * [Generating the source code documentation via JavaDoc](#generating-the-source-code-documentation-via-javadoc)
+  * [Building the Additional Services](#building-the-additional-services)
+    * [Postman Collection](#postman-collection)
+  * [Secrets management](#secrets-management)
+    * [Sensitive Docker configuration files](#sensitive-docker-configuration-files)
+    * [Managing encrypted files](#managing-encrypted-files)
+    * [BFD Transaction Time details](#bfd-transaction-time-details)
+<!-- TOC -->
+
+## Additional Documentation
+[Developer Onboarding Document](https://linktogoogledoc??)
+
+[DPC One-Pager](https://dpc.cms.gov/assets/downloads/dpc-one-pager.pdf)
+
 What is DPC?
 ---
+The Data at the Point of Care **(DPC)** project is a pilot application
+programming interface **(API)** whose goal is to enable healthcare
+providers to deliver high quality care directly to Medicare
+beneficiaries. Visit our [website](https://dpc.cms.gov/) for background information.
 
-Visit our [website](https://dpc.cms.gov/) for background information.
-
-Required tools and languages
----
+## Tech Environment
+###### [`^`](#table-of-contents)
+### Required tools and languages
 
 - Python 3 and `pip`
 - Java 11 and `mvn`
@@ -21,7 +62,34 @@ Required tools and languages
 - `npm`
 - [Ansible Vault](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html#)
 - Docker (make sure to allocate more than the default 2Gb of memory)
+- [AWS CLI](https://aws.amazon.com/cli/)
 
+
+### Recommended tools
+###### [`^`](#table-of-contents)
+- [PgAdmin](https://pgadmin.org) or [Postico](https://postico.com) *(MacOS)*
+- JetBrains [Intelli-J Idea IDE](https://jetbrains.com/idea)
+- [Docker Desktop](https://docs.docker.com/desktop/mac/install/)
+- [Postman](https://www.postman.com/downloads/)
+- [Cisco AnyConnect](https://www.cisco.com/c/en/us/support/docs/smb/routers/cisco-rv-series-small-business-routers/smb5642-install-cisco-anyconnect-secure-mobility-client-on-a-mac-com-rev1.pdf) or [OpenVPN](https://openvpn.net/client-connect-vpn-for-mac-os/)
+
+
+Decrypting encrypted files
+---
+###### [`^`](#table-of-contents)
+See [Secrets Management](#secrets-management) for details on how to encrypt and decrypt required secrets.
+
+Before building the app or running any tests, the decrypted secrets must be available as environment variables.
+
+In order to encrypt and decrypt configuration variables, you must create a `.vault_password` file in this repository root directory.
+Contact another team member to gain access to the vault password.
+
+Included in the cloned project you will find a couple of encrypted files located at  `dpc-app/ops/config/encrypted` that will need to be decrypted before proceeding.
+
+Run `make secure-envs` to decrypt the encrypted files.
+If decrypted successfully, you will see the decrypted data in new files under `/ops/config/decrypted` with the same names as the corresponding encrypted files.
+
+This command also creates a git pre-commit hook in order to avoid accidentally committing a decrypted file.
 Required services
 ---
 
@@ -57,26 +125,9 @@ dpc.attribution {
 This can create an issue when running tests with IntelliJ which by default sets the working directory to be the module root, which means any local overrides are ignored.
 This can be fixed by setting the working directory to the project root, but needs to done manually.
 
-Decrypting encrypted files
----
-
-See [Secrets Management](#secrets-management) for details on how to encrypt and decrypt required secrets.
-
-Before building the app or running any tests, the decrypted secrets must be available as environment variables.
-
-In order to encrypt and decrypt configuration variables, you must create a `.vault_password` file in this repository root directory. 
-Contact another team member to gain access to the vault password.
-
-Included in the cloned project you will find a couple of encrypted files located at  `dpc-app/ops/config/encrypted` that will need to be decrypted before proceeding. 
-
-Run `make secure-envs` to decrypt the encrypted files.
-If decrypted successfully, you will see the decrypted data in new files under `/ops/config/decrypted` with the same names as the corresponding encrypted files.
-
-This command also creates a git pre-commit hook in order to avoid accidentally committing a decrypted file.
-
 Building DPC
 ---
-
+###### [`^`](#table-of-contents)
 > Note: Before building DPC, you must first ensure that [the required secrets are decrypted](#decrypting-encrypted-files). 
 
 ### There are two ways to build DPC:
@@ -107,7 +158,7 @@ Running DPC
 Once the JARs are built, they can be run in two ways either via [`docker-compose`](https://docs.docker.com/compose/overview/) or by manually running the JARs.
 
 ## Running via Docker 
-
+###### [`^`](#table-of-contents)
 The application (along with all required dependencies) can be automatically started with the following command: `make start-app`. [Install Docker](https://www.docker.com/products/docker-desktop)
 
 The individual services can be started (along with their dependencies) by passing the service name to the `up` command.
@@ -119,8 +170,41 @@ docker-compose up {db,aggregation,attribution,api}
 By default, the Docker containers start with minimal authentication enabled, meaning that some functionality (such as extracting the organization_id from the access token) will not work as expected and always return the same value.
 This can be overriding during startup by setting the `AUTH_DISABLED=false` environment variable. 
 
-## Running DPC v2 via Docker
+When running locally, you'll need to update the docker-compse.yml file by adding
+```yaml
+ports: 
+  - "5432:5432"
+```
 
+in the `db` node e.g.
+```yaml
+db: 
+  image: postgres:11 
+  ports: 
+    - "5432:5432"
+```
+### Generate a Golden Macaroon
+We will need a macaroon for the docker configuration. Run the command below to generate one.
+`curl -X POST http://localhost:9903/tasks/generate-token`
+
+
+Also, the docker-compose.portal.yml file requires adding the **`API_METADATA URL`** variable and the **`GOLDEN_MACAROON`** variable.
+```yaml
+dpc-web: 
+  ... 
+environments: 
+  ... 
+  - GOLDEN_MACAROON: ...  
+  - API_METADATA_URL=http://host.docker.internal:3002/v1
+  .. 
+dpc_admin: 
+  ...
+  - API_METADATA_URL=${API_METADATA URL}
+  - GOLDEN_MACAROON: ...
+```
+
+## Running DPC v2 via Docker
+###### [`^`](#table-of-contents)
 In order to start up all required services for v2 of DPC locally, use the command `make start-v2`.
 
 To seed the database, use `make seed-db`. This will populate data in v1 version of the `dpc_attribution_db`.
@@ -129,7 +213,7 @@ Conversely, to shut down DPC v2 locally, use `make down-v2` in order to graceful
 and remove the docker network.
 
 ## Manual JAR execution
-
+###### [`^`](#table-of-contents)
 Alternatively, the individual services can be manually executing the `server` command for the various services.
 
 > Note: When manually running the individual services you'll need to ensure that there are no listening port collisions.
@@ -164,7 +248,7 @@ This means that only the config variables directly specified in the file will be
 
 Seeding the database
 ---
-
+###### [`^`](#table-of-contents)
 > Note: This step is not required when directly running the `demo` for the `dpc-api` service, which partially seeds the database on first execution.
 
 By default, DPC initially starts with an empty attribution database, this means that no patients have been attributed to any providers and thus nothing can be exported from BlueButton.
@@ -173,6 +257,8 @@ In order to successfully test and demonstrate the application, there needs to be
 We provide a small CSV [file](src/main/resources/test_associations.csv) which associates some fake providers with valid patients from the BlueButton sandbox.
 
 The database can be automatically migrated and seeded by running `make seed-db` or by using the following commands.
+
+> **Note:** For instances where one cannot setup the DPC due to authorization issues, follow the steps in the [manual table setup document](DbTables.md) to populate the necessary tables manually. 
 
 ```bash
 java -jar dpc-attribution/target/dpc-attribution.jar db migrate
@@ -183,6 +269,7 @@ Testing the Application
 ---
 
 ### Demo client
+###### [`^`](#table-of-contents)
 The `dpc-api` component contains a `demo` command, which illustrates the basic workflow for submitting an export request and modifying an attribution roster.
 It can be executed with the following command:
 
@@ -202,7 +289,7 @@ This request fails because the provider is not registered with the application a
 1. Outputs the download URLs for all files generated by the export request.
 
 ### Manual testing
-
+###### [`^`](#table-of-contents)
 
 The recommended method for testing the Services is with the [Postman](https://www.getpostman.com) application.
 This allows easy visualization of responses, as well as simplifies adding the necessary HTTP Headers.
@@ -240,6 +327,7 @@ You will need to set the *ACCEPT* header to `application/fhir+json` (per the FHI
 
 
 ### Smoke tests
+###### [`^`](#table-of-contents)
 
 Smoke tests are provided by [Taurus](https://github.com/Blazemeter/taurus) and [JMeter](https://jmeter.apache.org).
 The tests can be run by the environment specific Makefile commands. e.g. `make smoke/local` will run the smoke tests against the locally running Docker instances.
@@ -249,18 +337,45 @@ In order to run the tests, you'll need to ensure that `virtualenv` is installed.
 ```bash
 pip3 install virtualenv
 ```
+Generating the source code documentation via JavaDoc
+---
+The entire project's code base documentation can be generated in HTML format by using the Java's
+JavaDoc tool. The [Intelli-J Idea](https://jetbrains.com/idea) IDE makes this easy to do. Navigate to the **Tools>Generate JavaDoc** menu item, specify the scope of the documentation and the output location and you'll be able to view an interactive document outlining the code members.
+
 
 Building the Additional Services
 ---
-
+###### [`^`](#table-of-contents)
 Documentation on building the DPC Website is covered in the specific [README](dpc-web/README.md).
+
+
+### Postman Collection
+###### [`^`](#table-of-contents)
+> Note: Prior to running the tests, ensure that you've updated these Postman Environment variables: 
+>- organization-id 
+>- patient-id
+
+Once the development environment is up and running, you should now be able to run some calls to the API via the DPC Postman Collections. Below, are some useful endpoints for verifying a functional development environment:
+- Register Single Patient
+- Register Practitioner
+- Get all groups
+- Add Patient to Group
+- Create Export Data Request
+
+
+In order to encrypt and decrypt configuration variables, you must create a `.vault_password` file in this repository root directory and in the `/dpc-go/dpc-attribution` directory. Contact another team member to gain access to the vault password.
+
+**IMPORTANT:** Files containing sensitive information are enumerated in the `.secrets` file in this directory. If you want to protect the contents of a file using the `ops/scripts/secrets` helper script, it must match a pattern listed in `.secrets`.
+
+To avoid committing and pushing unencrypted secret files, use the included `ops/scripts/pre-commit` Git pre-commit hook from this directory:
+
 
 Secrets management
 ---
-
+###### [`^`](#table-of-contents)
 > Note: You can use `make secure-envs` to decrypt files and create the pre-commit hook at the same time.
 
-### Sensitive Docker configuration files
+### Sensitive Docker configuration files   [`^`](#table-of-contents)
 
 The files committed in the `ops/config/encrypted` directory hold secret information, and are encrypted with [Ansible Vault](https://docs.ansible.com/ansible/2.4/vault.html).
 
@@ -274,7 +389,7 @@ To avoid committing and pushing unencrypted secret files, use the included `ops/
 cp ops/scripts/pre-commit .git/hooks
 ```
 
-### Managing encrypted files
+### Managing encrypted files   [`^`](#table-of-contents)
 * Temporarily decrypt files by running the following command from this directory:
 ```
 ./ops/scripts/secrets --decrypt
@@ -287,7 +402,7 @@ cp ops/scripts/pre-commit .git/hooks
 ./ops/scripts/secrets --encrypt <filename>
 ```
 
-### BFD Transaction Time details
+### BFD Transaction Time details   [`^`](#table-of-contents)
 When requesting data from BFD, you must ensure that the `_since` time in the request is after the current BFD transaction time.
 
 The BFD transaction time comes from the Meta object in the bundled response (Bundle.Meta.LastUpdated).
@@ -313,3 +428,8 @@ Therefore, using a fake patient ID which is guaranteed not to match is an easy w
   ]
 }
 ```
+
+## Troubleshooting  [`^`](#table-of-contents)
+
+Please see the [troublshooting document ](Troubleshooting.md) for more help
+
