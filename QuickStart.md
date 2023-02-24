@@ -37,13 +37,12 @@ cp ops/scripts/pre-commit .git/hooks
 
 > Note: You can use `make secure-envs` to decrypt files and create the pre-commit hook at the same time.
 
-<br/>
 
 BUILD
 ====
-Run the `make ci-app` command  
+Run the `make ci-app` command
 
-<br/>
+
 
 CONFIGURE
 ====

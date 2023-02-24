@@ -1,5 +1,5 @@
 # DPC: *Data @ The Point of Care*
-This documentation serves as a guide for running the DPC project on your local environment.
+This document serves as a guide for running the DPC project on your local environment.
 
 
 [![Build Status](https://travis-ci.org/CMSgov/dpc-app.svg?branch=master)](https://travis-ci.org/CMSgov/dpc-app)
@@ -11,11 +11,11 @@ This documentation serves as a guide for running the DPC project on your local e
 <!-- TOC -->
 ## Table of Contents
 * [DPC: *Data @ The Point of Care*](#dpc--data--the-point-of-care)
-  * [Documentation](#documentation)
+  * [Documentation](#additional-documentation)
   * [What is DPC?](#what-is-dpc)
   * [Required tools and languages](#required-tools-and-languages)
   * [Recommended tools](#recommended-tools)
-  * [Troubleshooting](#troubleshooting)
+  * [Troubleshooting](#troubleshooting-)
   * [Decrypting encrypted files](#decrypting-encrypted-files)
   * [Building DPC](#building-dpc)
     * [There are two ways to build DPC:](#there-are-two-ways-to-build-dpc-)
@@ -34,9 +34,9 @@ This documentation serves as a guide for running the DPC project on your local e
   * [Building the Additional Services](#building-the-additional-services)
     * [Postman Collection](#postman-collection)
   * [Secrets management](#secrets-management)
-    * [Sensitive Docker configuration files](#sensitive-docker-configuration-files)
-    * [Managing encrypted files](#managing-encrypted-files)
-    * [BFD Transaction Time details](#bfd-transaction-time-details)
+    * [Sensitive Docker configuration files](#sensitive-docker-configuration-files-)
+    * [Managing encrypted files](#managing-encrypted-files-)
+    * [BFD Transaction Time details](#bfd-transaction-time-details-)
 <!-- TOC -->
 
 ## Additional Documentation
@@ -69,6 +69,7 @@ beneficiaries. Visit our [website](https://dpc.cms.gov/) for background informat
 - JetBrains [Intelli-J Idea IDE](https://jetbrains.com/idea)
 - [Docker Desktop](https://docs.docker.com/desktop/mac/install/)
 - [Postman](https://www.postman.com/downloads/)
+
 
 
 Decrypting encrypted files
@@ -349,8 +350,10 @@ Documentation on building the DPC Website is covered in the specific [README](dp
 ### Postman Collection
 ###### [`^`](#table-of-contents)
 > Note: Prior to running the tests, ensure that you've updated these Postman Environment variables: 
->- organization-id 
->- patient-id
+>- organization-id
+>- client-token
+>- public-key
+>- private-key
 
 Once the development environment is up and running, you should now be able to run some calls to the API via the DPC Postman Collections. Below, are some useful endpoints for verifying a functional development environment:
 - Register Single Patient
@@ -372,7 +375,7 @@ Secrets management
 ###### [`^`](#table-of-contents)
 > Note: You can use `make secure-envs` to decrypt files and create the pre-commit hook at the same time.
 
-### Sensitive Docker configuration files   [`^`](#table-of-contents)
+### Sensitive Docker configuration files  [`^`](#table-of-contents)
 
 The files committed in the `ops/config/encrypted` directory hold secret information, and are encrypted with [Ansible Vault](https://docs.ansible.com/ansible/2.4/vault.html).
 
@@ -429,4 +432,3 @@ Therefore, using a fake patient ID which is guaranteed not to match is an easy w
 ## Troubleshooting  [`^`](#table-of-contents)
 
 Please see the [troublshooting document ](Troubleshooting.md) for more help
-
