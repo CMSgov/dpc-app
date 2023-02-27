@@ -1,5 +1,5 @@
 # DPC: *Data @ The Point of Care*
-This document serves as a guide for running the DPC project on your local environment.
+This document serves as a guide for running the DPC API on your local environment.
 
 
 [![Build Status](https://travis-ci.org/CMSgov/dpc-app.svg?branch=master)](https://travis-ci.org/CMSgov/dpc-app)
@@ -42,9 +42,9 @@ This document serves as a guide for running the DPC project on your local enviro
 ## Additional Documentation
 [DPC One-Pager](https://dpc.cms.gov/assets/downloads/dpc-one-pager.pdf)
 
-What is DPC?
+What Is DPC?
 ---
-The Data at the Point of Care **(DPC)** project is a pilot application
+Data at the Point of Care **(DPC)** is a pilot application
 programming interface **(API)** whose goal is to enable healthcare
 providers to deliver high quality care directly to Medicare
 beneficiaries. Visit our [website](https://dpc.cms.gov/) for background information.
@@ -72,7 +72,7 @@ beneficiaries. Visit our [website](https://dpc.cms.gov/) for background informat
 
 
 
-Decrypting encrypted files
+Decrypting Encrypted Files
 ---
 ###### [`^`](#table-of-contents)
 See [Secrets Management](#secrets-management) for details on how to encrypt and decrypt required secrets.
@@ -88,7 +88,7 @@ Run `make secure-envs` to decrypt the encrypted files.
 If decrypted successfully, you will see the decrypted data in new files under `/ops/config/decrypted` with the same names as the corresponding encrypted files.
 
 This command also creates a git pre-commit hook in order to avoid accidentally committing a decrypted file.
-Required services
+Required services < "required services" looks like this in an incomplete sentence?> 
 ---
 
 DPC requires an external Postgres database to be running. While a separate Postgres server can be used, the `docker-compose` file includes everything needed, and can be started like so: 
@@ -100,7 +100,7 @@ docker-compose up start_core_dependencies
 > Warning: If you do have an existing Postgres database running on port 5342, docker-compose WILL NOT alert you to the port conflict. Ensure any local Postgres databases are stopped before starting docker-compose.
 
 By default, the application attempts to connect to the `dpc_attribution`, `dpc_queue`, and `dpc_auth` databases on the localhost as the `postgres` user with a password of `dpc-safe`.
-When using docker-compose, all the required databases will be created automatically. Upon container startup, the databases will be initialized automatically with all the correct data. If for some reason this behavior is not desired, set an environment variable of `DB_MIGRATION=0`.
+When using docker-compose, all the required databases will be created automatically. Upon container startup, the databases will be initialized automatically with all the correct data. If this behavior is not desired, set an environment variable of `DB_MIGRATION=0`.
 
 The defaults can be overridden in the configuration files.
 Common configuration options (such as database connection strings) are stored in a [server.conf](src/main/resources/server.conf) file and included in the various modules via the `include "server.conf"` attribute in module application config files.
@@ -120,8 +120,8 @@ dpc.attribution {
 ```
 
 > Note: On startup, the services look for a local override file (application.local.conf) in the root of their *current* working directory.
-This can create an issue when running tests with IntelliJ which by default sets the working directory to be the module root, which means any local overrides are ignored.
-This can be fixed by setting the working directory to the project root, but needs to done manually.
+This can create an issue when running tests with IntelliJ. The default sets the working directory to be the module root, which means any local overrides are ignored.
+This can be fixed by setting the working directory to the project root, but needs to be done manually.
 
 Building DPC
 ---
@@ -146,27 +146,28 @@ This command will convert the contents of `ops/config/decrypted/local.env` to Ma
 
 Then, run `mvn clean install` to build and test the application. Dependencies will need to be up and running for this option to succeed.
 
-Running `mvn clean install` will also construct the *Docker* images for the individual services. To skip the Docker build pass `-Djib.skip=True`
+Running `mvn clean install` will also construct the Docker images for the individual services. To skip the Docker build, pass `-Djib.skip=True`.
 
 Note that the `dpc-base` image produced by `make docker-base` is not stored in a remote repository. The `mvn clean install` process relies on the base image being available via the local Docker daemon.
 
 Running DPC
 --- 
 
-Once the JARs are built, they can be run in two ways either via [`docker-compose`](https://docs.docker.com/compose/overview/) or by manually running the JARs.
+Once the JARs are built, they can be run in two ways, either via [`docker-compose`](https://docs.docker.com/compose/overview/) or by manually running the JARs.
 
 ## Running via Docker 
 ###### [`^`](#table-of-contents)
-The application (along with all required dependencies) can be automatically started with the following command: `make start-app`. [Install Docker](https://www.docker.com/products/docker-desktop)
 
+Click on [Install Docker](https://www.docker.com/products/docker-desktop) to setup Docker.
+The application (along with all required dependencies) can be automatically started with the following command: `make start-app`. 
 The individual services can be started (along with their dependencies) by passing the service name to the `up` command.
 
 ```bash
 docker-compose up {db,aggregation,attribution,api}
 ``` 
 
-By default, the Docker containers start with minimal authentication enabled, meaning that some functionality (such as extracting the organization_id from the access token) will not work as expected and always return the same value.
-This can be overriding during startup by setting the `AUTH_DISABLED=false` environment variable. 
+By default, the Docker containers start with minimal authentication enabled, meaning that some functionality (such as extracting the organization_id from the access token) will not work as expected and always returns the same value.
+This can be overridden during startup by setting the `AUTH_DISABLED=false` environment variable. 
 
 When running locally, you'll need to update the docker-compse.yml file by adding
 ```yaml
@@ -181,8 +182,8 @@ db:
   ports: 
     - "5432:5432"
 ```
-### Generate a Golden Macaroon
-We will need a macaroon for the docker configuration. Run the command below to generate one.
+### Generating a Golden Macaroon
+We will need a macaroon for the Docker configuration. Run the command below to generate one:
 `curl -X POST http://localhost:9903/tasks/generate-token`
 
 
@@ -201,20 +202,19 @@ dpc_admin:
   - GOLDEN_MACAROON: ...
 ```
 
-## Running DPC v2 via Docker
+## Running DPC V2 via Docker
 ###### [`^`](#table-of-contents)
-In order to start up all required services for v2 of DPC locally, use the command `make start-v2`.
+In order to start up all required services for V2 of DPC locally, use the command `make start-v2`.
 
-To seed the database, use `make seed-db`. This will populate data in v1 version of the `dpc_attribution_db`.
+To seed the database, use `make seed-db`. This will populate data in V1 version of the `dpc_attribution_db`.
 
-Conversely, to shut down DPC v2 locally, use `make down-v2` in order to gracefully shut down all running containers
-and remove the docker network.
+Conversely, to shut down DPC V2 locally, use `make down-v2`. This coommand will shut down all running containers and remove the Docker network.
 
-## Manual JAR execution
+## Manual JAR Execution
 ###### [`^`](#table-of-contents)
 Alternatively, the individual services can be manually executing the `server` command for the various services.
 
-> Note: When manually running the individual services you'll need to ensure that there are no listening port collisions.
+> Note: When manually running the individual services, you'll need to ensure that there are no listening port collisions.
 By default, each service starts with the same application (8080) and admin (9900) ports. We provide a sample `application.local.conf` file which contains all the necessary configuration options.
 This file can be copied and used directly: `cp application.local.conf.sample application.local.conf`.
 
@@ -223,7 +223,7 @@ Authentication can be disabled in one of two ways:
 Set the `ENV` environment variable to `local` (which is the default when running under Docker).
 Or, set `dpc.api.authenticationDisabled=true` in the config file (the default from the sample config file).   
 
-Next start each service in a new terminal window, from within the the `dpc-app` root directory. 
+Next, start each service in a new terminal window, from within the the `dpc-app` root directory. 
 
 ```bash
 java -jar dpc-attribution/target/dpc-attribution.jar server
@@ -232,31 +232,31 @@ java -jar dpc-api/target/dpc-api.jar server
 ```
 
 By default, the services will attempt to load the `local.application.conf` file from the current execution directory. 
-This can be overridden in two ways.
+This can be overridden in two ways:
 1. Passing `ENV={dev,test,prod}` will load a `{dev,test,prod}.application.conf` file from the service resources directory.
 1. Manually specifying a configuration file after the server command `server src/main/resources/application.conf` will directly load that configuration set.
 
 > Note: Manually specifying a config file will disable the normal configuration merging process. 
 This means that only the config variables directly specified in the file will be loaded, no other `application.conf` or `reference.conf` files will be processed. 
 
-1. You can check that the application is running by requesting the FHIR `CapabilitiesStatement` for the `dpc-api` service, which will return a json formatted FHIR resource.
+1. You can check that the application is running by requesting the FHIR `CapabilitiesStatement` for the `dpc-api` service, which will return a JSON-formatted FHIR resource.
     ```bash
     curl -H "Accept: application/fhir+json" http://localhost:3002/v1/metadata
     ```
 
-Seeding the database
+Seeding the Database
 ---
 ###### [`^`](#table-of-contents)
 > Note: This step is not required when directly running the `demo` for the `dpc-api` service, which partially seeds the database on first execution.
 
-By default, DPC initially starts with an empty attribution database, this means that no patients have been attributed to any providers and thus nothing can be exported from BlueButton.
+By default, DPC initially starts with an empty attribution database, which means that no patients have been attributed to any providers and thus nothing can be exported from BlueButton2.0.
 
 In order to successfully test and demonstrate the application, there needs to be initial data loaded into the attribution database.
-We provide a small CSV [file](src/main/resources/test_associations.csv) which associates some fake providers with valid patients from the BlueButton sandbox.
+We provide a small CSV [file](src/main/resources/test_associations.csv) which associates some fake providers with valid patients from the BlueButton2.0 Sandbox.
 
-The database can be automatically migrated and seeded by running `make seed-db` or by using the following commands.
+The database can be automatically migrated and seeded by running `make seed-db` or by using the following commands:
 
-> **Note:** For instances where one cannot setup the DPC due to authorization issues, follow the steps in the [manual table setup document](DbTables.md) to populate the necessary tables manually. 
+> **Note:** For instances where one cannot set up the DPC due to authorization issues, follow the steps in the [manual table setup document](DbTables.md) to populate the necessary tables manually. 
 
 ```bash
 java -jar dpc-attribution/target/dpc-attribution.jar db migrate
