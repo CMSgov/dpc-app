@@ -1,4 +1,4 @@
-#Quick Start Guide
+# Quick Start Guide
 
 This is a quick start guide for running the DPC API on your local environment. For full documentation, see the [User Guide](./README.md).
 
