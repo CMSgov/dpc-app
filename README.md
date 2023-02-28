@@ -157,7 +157,7 @@ Once the JARs are built, they can be run in two ways, either via [`docker-compos
 
 ### Running DPC via Docker 
 
-Click on [Install Docker](https://www.docker.com/products/docker-desktop) to setup Docker.
+Click on [Install Docker](https://www.docker.com/products/docker-desktop) to set up Docker.
 The application (along with all required dependencies) can be automatically started with the following command: `make start-app`. 
 The individual services can be started (along with their dependencies) by passing the service name to the `up` command.
 
@@ -343,17 +343,17 @@ Documentation on building the DPC Website is covered in the specific [README](dp
 ### Postman collection
 
 Note: Prior to running the tests, ensure that you've updated these Postman Environment variables: 
->- organization-id
->- client-token
->- public-key
->- private-key
+- organization-id
+- client-token
+- public-key
+- private-key
 
 Once the development environment is up and running, you should now be able to run some calls to the API via the DPC Postman Collections. Below, are some useful endpoints for verifying a functional development environment:
-- Register Single Patient
-- Register Practitioner
+- Register single patient
+- Register practitioner
 - Get all groups
-- Add Patient to Group
-- Create Export Data Request
+- Add patient to group
+- Create export data request
 
 
 In order to encrypt and decrypt configuration variables, you must create a `.vault_password` file in this repository root directory and in the `/dpc-go/dpc-attribution` directory. Contact another team member to gain access to the vault password.
