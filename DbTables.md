@@ -1,13 +1,13 @@
-DB Tables Setup
+Database Tables Setup
 ---
 
-Normally during the DPC setup, all the necessary tables are populated automatically. If however you're not yet authorized 
+Normally during the DPC setup, all the necessary tables are populated automatically. If, however, you're not yet authorized 
 to access the DPC GitHub account, calls to the DPC endpoints will fail. In these instances, use the example tables
 below to populate the necessary tables. Once completed, access to the DPC endpoints should function normally.
 
 ### Required Values:
 - **Organization ID**: One can generate a UUID for this value using online tools.
-- **NPI** (National Provider Identification): You can use any of the online NPI generators such as this one on [JSFiddle](https://jsfiddle.net/alexdresko/cLNB6/)
+- **NPI** (National Provider Identification): You can use any of the online NPI generators such as this one on [JSFiddle](https://jsfiddle.net/alexdresko/cLNB6/).
 
 
 ### dpc-website_development_REGISTERED_ORGANIZATIONS
