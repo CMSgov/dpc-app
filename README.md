@@ -1,6 +1,6 @@
 # User Guide
 This document serves as a guide for running the Data at the Point of Care (DPC) API on your local environment. See 
-[DPC One-Pager](https://dpc.cms.gov/assets/downloads/dpc-one-pager.pdf) to more about the API and the [DPC Website](https://dpc.cms.gov/)
+[DPC One-Pager](https://dpc.cms.gov/assets/downloads/dpc-one-pager.pdf) and the [DPC Website](https://dpc.cms.gov/) to learn more about the API.
 
 
 [![Build Status](https://travis-ci.org/CMSgov/dpc-app.svg?branch=master)](https://travis-ci.org/CMSgov/dpc-app)
