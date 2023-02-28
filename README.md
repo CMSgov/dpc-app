@@ -20,10 +20,10 @@ This document serves as a guide for running the Data at the Point of Care (DPC) 
      * [Option 1: Full integration test](#option-1-full-integration-test)
      * [Option 2: Manually](#option-2-manually)
   * [Running DPC](#running-dpc)
-  * [Running DPC via Docker](#running-via-docker)
-  * [Generating a Golden Macaroon](#generating-a-golden-macaroon)
-  * [Running DPC V2 via Docker](#running-dpc-v2-via-docker)
-  * [Manual JAR Execution](#manual-jar-execution)
+     * [Running DPC via Docker](#running-via-docker)
+     * [Generating a Golden Macaroon](#generating-a-golden-macaroon)
+     * [Running DPC V2 via Docker](#running-dpc-v2-via-docker)
+     * [Manual JAR Execution](#manual-jar-execution)
   * [Seeding the Database](#seeding-the-database)
   * [Testing the Application](#testing-the-application)
     * [Demo client](#demo-client)
@@ -78,13 +78,11 @@ providers to deliver high quality care directly to Medicare beneficiaries. See
 
 Before building the app or running any tests, the decrypted secrets must be available as environment variables.
 
-In order to encrypt and decrypt configuration variables, you must create a `.vault_password` file in this repository root directory.
-Contact another team member to gain access to the vault password.
+In order to encrypt and decrypt configuration variables, you must create a `.vault_password` file in this repository root directory. Contact another team member to gain access to the vault password.
 
-Included in the cloned project you will find a couple of encrypted files located at  `dpc-app/ops/config/encrypted` that will need to be decrypted before proceeding.
+In the cloned project, you will find a couple of encrypted files located at  `dpc-app/ops/config/encrypted` that will need to be decrypted before proceeding.
 
-Run `make secure-envs` to decrypt the encrypted files.
-If decrypted successfully, you will see the decrypted data in new files under `/ops/config/decrypted` with the same names as the corresponding encrypted files.
+Run `make secure-envs` to decrypt the encrypted files. If decrypted successfully, you will see the decrypted data in new files under `/ops/config/decrypted` with the same names as the corresponding encrypted files.
 
 This command also creates a git pre-commit hook in order to avoid accidentally committing a decrypted file.
 
@@ -100,7 +98,7 @@ DPC requires an external Postgres database to be running. While a separate Postg
 docker-compose up start_core_dependencies
 ```
 
-**Warning**: If you do have an existing Postgres database running on port 5342, docker-compose WILL NOT alert you to the port conflict. Ensure any local Postgres databases are stopped before starting docker-compose.
+**Warning**: If you do have an existing Postgres database running on port 5342, docker-compose **will not** alert you to the port conflict. Ensure any local Postgres databases are stopped before starting docker-compose.
 
 By default, the application attempts to connect to the `dpc_attribution`, `dpc_queue`, and `dpc_auth` databases on the localhost as the `postgres` user with a password of `dpc-safe`.
 When using docker-compose, all the required databases will be created automatically. Upon container startup, the databases will be initialized automatically with all the correct data. If this behavior is not desired, set an environment variable of `DB_MIGRATION=0`.
@@ -109,7 +107,7 @@ The defaults can be overridden in the configuration files.
 Common configuration options (such as database connection strings) are stored in a [server.conf](src/main/resources/server.conf) file and included in the various modules via the `include "server.conf"` attribute in module application config files.
 See the `dpc-attribution` [application.conf](dpc-attribution/src/main/resources/application.conf) for an example.
 
-Default settings can be overridden either directly in the module configurations, or via an `application.local.conf` file in the project root directory. 
+Default settings can be overridden, either directly in the module configurations or via an `application.local.conf` file in the project root directory. 
 For example, modifying the `dpc-attribution` configuration:
 
 ```yaml
@@ -137,7 +135,7 @@ In addition, some of upstream dependencies have not been updated to support Java
 
 ##### Option 1: Full integration test
 
-Run `make ci-app`. This will start the dependencies, build all components, run integration tests, and run a full end to end test. You will be left with compiled JARs for each component, as well as compiled Docker containers.
+Run `make ci-app`. This will start the dependencies, build all components, run integration tests, and run a full end-to-end test. You will be left with compiled JARs for each component, as well as compiled Docker containers.
 
 ##### Option 2: Manually
 
@@ -157,8 +155,7 @@ Note that the `dpc-base` image produced by `make docker-base` is not stored in a
 
 Once the JARs are built, they can be run in two ways, either via [`docker-compose`](https://docs.docker.com/compose/overview/) or by manually running the JARs.
 
-## Running DPC via Docker 
-###### [`^`](#table-of-contents)
+### Running DPC via Docker 
 
 Click on [Install Docker](https://www.docker.com/products/docker-desktop) to setup Docker.
 The application (along with all required dependencies) can be automatically started with the following command: `make start-app`. 
@@ -184,8 +181,7 @@ db:
   ports: 
     - "5432:5432"
 ```
-## Generating a Golden Macaroon
-###### [`^`](#table-of-contents)
+### Generating a Golden Macaroon
 
 You will need a macaroon for the Docker configuration. Run the command below to generate one:
 `curl -X POST http://localhost:9903/tasks/generate-token`
@@ -206,19 +202,19 @@ dpc_admin:
   - GOLDEN_MACAROON: ...
 ```
 
-## Running DPC V2 via Docker
-###### [`^`](#table-of-contents)
+### Running DPC V2 via Docker
+
 In order to start up all required services for V2 of DPC locally, use the command `make start-v2`.
 
 To seed the database, use `make seed-db`. This will populate data in V1 version of the `dpc_attribution_db`.
 
 Conversely, to shut down DPC V2 locally, use `make down-v2`. This command will shut down all running containers and remove the Docker network. 
 
-## Manual JAR Execution
-###### [`^`](#table-of-contents)
+### Manual JAR Execution
+
 Alternatively, the individual services can be manually executing the `server` command for the various services.
 
-When manually running the individual services, you'll need to ensure that there are no listening port collisions.By default, each service starts with the same application (8080) and admin (9900) ports. We provide a sample `application.local.conf` file which contains all the necessary configuration options. This file can be copied and used directly: `cp application.local.conf.sample application.local.conf`.
+When manually running the individual services, you'll need to ensure that there are no listening port collisions. By default, each service starts with the same application (8080) and admin (9900) ports. We provide a sample `application.local.conf` file which contains all the necessary configuration options. This file can be copied and used directly: `cp application.local.conf.sample application.local.conf`.
 
 **Important Note**: The API service requires authentication before performing actions. This will cause most integration tests to fail, as they expect the endpoints to be open. Authentication can be disabled in one of two ways: 
 * Set the `ENV` environment variable to `local` (which is the default when running under Docker).
@@ -234,13 +230,13 @@ java -jar dpc-api/target/dpc-api.jar server
 
 By default, the services will attempt to load the `local.application.conf` file from the current execution directory. 
 This can be overridden in two ways:
-1. Passing `ENV={dev,test,prod}` will load a `{dev,test,prod}.application.conf` file from the service resources directory.
-1. Manually specifying a configuration file after the server command `server src/main/resources/application.conf` will directly load that configuration set.
+* Passing `ENV={dev,test,prod}` will load a `{dev,test,prod}.application.conf` file from the service resources directory.
+* Manually specifying a configuration file after the server command `server src/main/resources/application.conf` will directly load that configuration set.
 
 **Note**: Manually specifying a config file will disable the normal configuration merging process. 
 This means that only the config variables directly specified in the file will be loaded, no other `application.conf` or `reference.conf` files will be processed. 
 
-1. You can check that the application is running by requesting the FHIR `CapabilitiesStatement` for the `dpc-api` service, which will return a JSON-formatted FHIR resource.
+* You can check that the application is running by requesting the FHIR `CapabilitiesStatement` for the `dpc-api` service, which will return a JSON-formatted FHIR resource.
     ```bash
     curl -H "Accept: application/fhir+json" http://localhost:3002/v1/metadata
     ```
@@ -297,12 +293,12 @@ Steps for testing the data export:
 1. Make an initial GET request to the following endpoint: `http://localhost:3002/v1/Group/3461C774-B48F-11E8-96F8-529269fb1459/$export`.
 This will request a data export for all the patients attribution to provider: `3461C774-B48F-11E8-96F8-529269fb1459`.
 You will need to set the Accept header to `application/fhir+json` (per the FHIR bulk spec).
-1. The response from the Export endpoint should be a *204* with the `Content-Location` header containing a URL which the user can use to to check the status of the job. <why is content-location header formatted differently from the other headers?>
+1. The response from the Export endpoint should be a **204** with the `Content-Location` header containing a URL which the user can use to to check the status of the job. <why is content-location header formatted differently from the other headers?>
 1. Make a GET request using the URL provided by the `/Group` endpoint from the previous step.
- Which <not clear on what "which" is referring to> has this format: `http://localhost:3002/v1/Jobs/{unique UUID of export job}`.
+ Which has this format: `http://localhost:3002/v1/Jobs/{unique UUID of export job}`.
  You will need to ensure that the Accept header is set to `application/fhir+json` (per the FHIR bulk spec).
  You will need to ensure that the Prefer header is set to `respond-async`.
- The server should return a *204* response until the job has completed.
+ The server should return a **204** response until the job has completed.
  Once the job is complete, the endpoint should return data in the following format (the actual values will be different):
  
      ```javascript
@@ -346,7 +342,7 @@ Documentation on building the DPC Website is covered in the specific [README](dp
 
 ### Postman collection
 
-> Note: Prior to running the tests, ensure that you've updated these Postman Environment variables: 
+Note: Prior to running the tests, ensure that you've updated these Postman Environment variables: 
 >- organization-id
 >- client-token
 >- public-key
