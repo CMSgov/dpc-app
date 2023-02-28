@@ -1,5 +1,6 @@
 # DPC: *Data @ The Point of Care*
-This document serves as a guide for running the DPC API on your local environment.
+This document serves as a guide for running the DPC API on your local environment. Click on
+[DPC One-Pager](https://dpc.cms.gov/assets/downloads/dpc-one-pager.pdf) to more about the API.
 
 
 [![Build Status](https://travis-ci.org/CMSgov/dpc-app.svg?branch=master)](https://travis-ci.org/CMSgov/dpc-app)
@@ -10,19 +11,18 @@ This document serves as a guide for running the DPC API on your local environmen
 
 <!-- TOC -->
 ## Table of Contents
-* [DPC: *Data @ The Point of Care*](#dpc--data--the-point-of-care)
-  * [Documentation](#additional-documentation)
-  * [What is DPC?](#what-is-dpc)
-  * [Required tools and languages](#required-tools-and-languages)
-  * [Recommended tools](#recommended-tools)
-  * [Troubleshooting](#troubleshooting-)
-  * [Decrypting encrypted files](#decrypting-encrypted-files)
-  * [Building DPC](#building-dpc)
-    * [There are two ways to build DPC:](#there-are-two-ways-to-build-dpc-)
-      * [Option 1: Full Integration Test](#option-1--full-integration-test)
-      * [Option 2: Manually](#option-2--manually)
+* [What is DPC?](#what-is-dpc)
+* [Tech Environment](#tech-environment)
+   * [Required tools and languages](#required-tools-and-languages)
+   * [Recommended tools](#recommended-tools)
+ * [Decrypting encrypted files](#decrypting-encrypted-files)
+ * [Required services](#required-services)
+ * [Building DPC](#building-dpc)
+     * [Option 1: Full Integration Test](#option-1-full-integration-test)
+     * [Option 2: Manually](#option-2-manually)
   * [Running DPC](#running-dpc)
   * [Running via Docker](#running-via-docker)
+  * [Generating a Golden Macaroon](#generating-a-golden-macaroon)
   * [Running DPC v2 via Docker](#running-dpc-v2-via-docker)
   * [Manual JAR execution](#manual-jar-execution)
   * [Seeding the database](#seeding-the-database)
@@ -34,13 +34,14 @@ This document serves as a guide for running the DPC API on your local environmen
   * [Building the Additional Services](#building-the-additional-services)
     * [Postman Collection](#postman-collection)
   * [Secrets management](#secrets-management)
-    * [Sensitive Docker configuration files](#sensitive-docker-configuration-files-)
-    * [Managing encrypted files](#managing-encrypted-files-)
-    * [BFD Transaction Time details](#bfd-transaction-time-details-)
+    * [Sensitive Docker configuration files](#sensitive-docker-configuration-files)
+    * [Managing encrypted files](#managing-encrypted-files)
+    * [BFD Transaction Time details](#bfd-transaction-time-details)
+  * [Troubleshooting](#troubleshooting) 
 <!-- TOC -->
 
-## Additional Documentation
-[DPC One-Pager](https://dpc.cms.gov/assets/downloads/dpc-one-pager.pdf)
+
+
 
 What Is DPC?
 ---
