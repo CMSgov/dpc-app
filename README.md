@@ -20,7 +20,7 @@ This document serves as a guide for running the Data at the Point of Care (DPC) 
      * [Option 1: Full integration test](#option-1-full-integration-test)
      * [Option 2: Manually](#option-2-manually)
   * [Running DPC](#running-dpc)
-  * [Running via Docker](#running-via-docker)
+  * [Running DPC via Docker](#running-via-docker)
   * [Generating a Golden Macaroon](#generating-a-golden-macaroon)
   * [Running DPC V2 via Docker](#running-dpc-v2-via-docker)
   * [Manual JAR Execution](#manual-jar-execution)
@@ -158,7 +158,7 @@ Note that the `dpc-base` image produced by `make docker-base` is not stored in a
 
 Once the JARs are built, they can be run in two ways, either via [`docker-compose`](https://docs.docker.com/compose/overview/) or by manually running the JARs.
 
-## Running via Docker 
+## Running DPC via Docker 
 ###### [`^`](#table-of-contents)
 
 Click on [Install Docker](https://www.docker.com/products/docker-desktop) to setup Docker.
