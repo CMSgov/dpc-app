@@ -1,6 +1,6 @@
 # DPC: *Data @ The Point of Care*
-This document serves as a guide for running the DPC API on your local environment. Click on
-[DPC One-Pager](https://dpc.cms.gov/assets/downloads/dpc-one-pager.pdf) to more about the API.
+This document serves as a guide for running the DPC API on your local environment. See 
+[DPC One-Pager](https://dpc.cms.gov/assets/downloads/dpc-one-pager.pdf) to more about the API and the [DPC Website](https://dpc.cms.gov/)
 
 
 [![Build Status](https://travis-ci.org/CMSgov/dpc-app.svg?branch=master)](https://travis-ci.org/CMSgov/dpc-app)
@@ -11,40 +11,40 @@ This document serves as a guide for running the DPC API on your local environmen
 
 <!-- TOC -->
 ## Table of Contents
-* [What is DPC?](#what-is-dpc)
+* [What Is DPC?](#what-is-dpc)
 * [Tech Environment](#tech-environment)
    * [Required tools and languages](#required-tools-and-languages)
    * [Recommended tools](#recommended-tools)
- * [Decrypting encrypted files](#decrypting-encrypted-files)
- * [Required services](#required-services)
+ * [Decrypting Encrypted Files](#decrypting-encrypted-files)
+ * [Required Services](#required-services)
  * [Building DPC](#building-dpc)
-     * [Option 1: Full Integration Test](#option-1-full-integration-test)
+     * [Option 1: Full integration test](#option-1-full-integration-test)
      * [Option 2: Manually](#option-2-manually)
   * [Running DPC](#running-dpc)
   * [Running via Docker](#running-via-docker)
   * [Generating a Golden Macaroon](#generating-a-golden-macaroon)
-  * [Running DPC v2 via Docker](#running-dpc-v2-via-docker)
-  * [Manual JAR execution](#manual-jar-execution)
-  * [Seeding the database](#seeding-the-database)
+  * [Running DPC V2 via Docker](#running-dpc-v2-via-docker)
+  * [Manual JAR Execution](#manual-jar-execution)
+  * [Seeding the Database](#seeding-the-database)
   * [Testing the Application](#testing-the-application)
     * [Demo client](#demo-client)
     * [Manual testing](#manual-testing)
     * [Smoke tests](#smoke-tests)
-  * [Generating the source code documentation via JavaDoc](#generating-the-source-code-documentation-via-javadoc)
+  * [Generating the Source Code Documentation via JavaDoc](#generating-the-source-code-documentation-via-javadoc)
   * [Building the Additional Services](#building-the-additional-services)
-    * [Postman Collection](#postman-collection)
-  * [Secrets management](#secrets-management)
+    * [Postman collection](#postman-collection)
+  * [Secrets Management](#secrets-management)
     * [Sensitive Docker configuration files](#sensitive-docker-configuration-files)
     * [Managing encrypted files](#managing-encrypted-files)
-    * [BFD Transaction Time details](#bfd-transaction-time-details)
+    * [BFD transaction time details](#bfd-transaction-time-details)
   * [Troubleshooting](#troubleshooting) 
 <!-- TOC -->
 
 
 
 
-What Is DPC?
----
+## What Is DPC?
+
 Data at the Point of Care **(DPC)** is a pilot application
 programming interface **(API)** whose goal is to enable healthcare
 providers to deliver high quality care directly to Medicare
@@ -52,6 +52,7 @@ beneficiaries. Visit our [website](https://dpc.cms.gov/) for background informat
 
 ## Tech Environment
 ###### [`^`](#table-of-contents)
+
 ### Required tools and languages
 
 - Python 3 and `pip`
@@ -65,7 +66,7 @@ beneficiaries. Visit our [website](https://dpc.cms.gov/) for background informat
 
 
 ### Recommended tools
-###### [`^`](#table-of-contents)
+
 - [PgAdmin](https://pgadmin.org) or [Postico](https://postico.com) *(MacOS)*
 - JetBrains [Intelli-J Idea IDE](https://jetbrains.com/idea)
 - [Docker Desktop](https://docs.docker.com/desktop/mac/install/)
@@ -73,9 +74,9 @@ beneficiaries. Visit our [website](https://dpc.cms.gov/) for background informat
 
 
 
-Decrypting Encrypted Files
----
+## Decrypting Encrypted Files
 ###### [`^`](#table-of-contents)
+
 See [Secrets Management](#secrets-management) for details on how to encrypt and decrypt required secrets.
 
 Before building the app or running any tests, the decrypted secrets must be available as environment variables.
@@ -90,9 +91,8 @@ If decrypted successfully, you will see the decrypted data in new files under `/
 
 This command also creates a git pre-commit hook in order to avoid accidentally committing a decrypted file.
 
-Required services 
----
-######
+## Required Services 
+###### [`^`](#table-of-contents)
 
 
 DPC requires an external Postgres database to be running. While a separate Postgres server can be used, the `docker-compose` file includes everything needed, and can be started like so: 
@@ -127,9 +127,9 @@ dpc.attribution {
 This can create an issue when running tests with IntelliJ. The default sets the working directory to be the module root, which means any local overrides are ignored.
 This can be fixed by setting the working directory to the project root, but needs to be done manually.
 
-Building DPC
----
+## Building DPC
 ###### [`^`](#table-of-contents)
+
 > Note: Before building DPC, you must first ensure that [the required secrets are decrypted](#decrypting-encrypted-files). 
 
 ### There are two ways to build DPC:
@@ -137,11 +137,11 @@ Building DPC
 > Note: DPC only supports Java 11 due to our use of new languages features, which prevents using older JDK versions.
 In addition, some of upstream dependencies have not been updated to support Java 12 and newer, but we plan on adding support at a later date. 
 
-#### Option 1: Full integration test
+##### Option 1: Full integration test
 
 Run `make ci-app`. This will start the dependencies, build all components, run integration tests, and run a full end to end test. You will be left with compiled JARs for each component, as well as compiled Docker containers.
 
-#### Option 2: Manually
+##### Option 2: Manually
 
 Run `make docker-base` to build the common, baseline Docker image (i.e., `dpc-base:latest`) used across DPC services.
 
@@ -154,8 +154,8 @@ Running `mvn clean install` will also construct the Docker images for the indivi
 
 Note that the `dpc-base` image produced by `make docker-base` is not stored in a remote repository. The `mvn clean install` process relies on the base image being available via the local Docker daemon.
 
-Running DPC
---- 
+## Running DPC
+###### [`^`](#table-of-contents)
 
 Once the JARs are built, they can be run in two ways, either via [`docker-compose`](https://docs.docker.com/compose/overview/) or by manually running the JARs.
 
@@ -186,7 +186,9 @@ db:
   ports: 
     - "5432:5432"
 ```
-### Generating a Golden Macaroon
+## Generating a Golden Macaroon
+###### [`^`](#table-of-contents)
+
 You will need a macaroon for the Docker configuration. Run the command below to generate one:
 `curl -X POST http://localhost:9903/tasks/generate-token`
 
@@ -248,9 +250,9 @@ This means that only the config variables directly specified in the file will be
     curl -H "Accept: application/fhir+json" http://localhost:3002/v1/metadata
     ```
 
-Seeding the Database
----
+## Seeding the Database
 ###### [`^`](#table-of-contents)
+
 > Note: This step is not required when directly running the `demo` for the `dpc-api` service, which partially seeds the database on first execution.
 
 By default, DPC initially starts with an empty attribution database, which means that no patients have been attributed to any providers and thus nothing can be exported from BlueButton2.0.
@@ -267,11 +269,11 @@ java -jar dpc-attribution/target/dpc-attribution.jar db migrate
 java -jar dpc-attribution/target/dpc-attribution.jar seed
 ``` 
 
-Testing the Application
----
+## Testing the Application
+###### [`^`](#table-of-contents)
 
 ### Demo client
-###### [`^`](#table-of-contents)
+
 The `dpc-api` component contains a `demo` command, which illustrates the basic workflow for submitting an export request and modifying an attribution roster.
 It can be executed with the following command:
 
@@ -290,7 +292,6 @@ The demo performs the following actions:
 1. Outputs the download URLs for all files generated by the Export request.
 
 ### Manual testing
-###### [`^`](#table-of-contents)
 
 The recommended method for testing the services is with the [Postman](https://www.getpostman.com) application.
 This allows easy visualization of responses, as well as simplifies adding the necessary HTTP headers.
@@ -326,7 +327,6 @@ You will need to set the Accept header to `application/fhir+json` (per the FHIR 
 
 
 ### Smoke tests
-###### [`^`](#table-of-contents)
 
 Smoke tests are provided by [Taurus](https://github.com/Blazemeter/taurus) and [JMeter](https://jmeter.apache.org).
 The tests can be run by the environment-specific Makefile commands (e.g., `make smoke/local` will run the smoke tests against the locally running Docker instances).
@@ -336,20 +336,21 @@ In order to run the tests, you'll need to ensure that `virtualenv` is installed.
 ```bash
 pip3 install virtualenv
 ```
-Generating the Source Code Documentation via JavaDoc 
----
+## Generating the Source Code Documentation via JavaDoc 
+###### [`^`](#table-of-contents)
+
 The entire project's code base documentation can be generated in HTML format by using the Java's
 JavaDoc tool. The [Intelli-J Idea](https://jetbrains.com/idea) integrated development environment makes this easy to do. Navigate to the **Tools>Generate JavaDoc** menu item, specify the scope of the documentation and the output location, and you'll be able to view an interactive document outlining the code members.
 
 
-Building the Additional Services
----
+## Building the Additional Services
 ###### [`^`](#table-of-contents)
+
 Documentation on building the DPC Website is covered in the specific [README](dpc-web/README.md).
 
 
 ### Postman collection
-###### [`^`](#table-of-contents)
+
 > Note: Prior to running the tests, ensure that you've updated these Postman Environment variables: 
 >- organization-id
 >- client-token
@@ -371,12 +372,13 @@ In order to encrypt and decrypt configuration variables, you must create a `.vau
 To avoid committing and pushing unencrypted secret files, use the included `ops/scripts/pre-commit` Git pre-commit hook from this directory:
 
 
-Secrets management
----
+## Secrets Management
 ###### [`^`](#table-of-contents)
+
 > Note: You can use `make secure-envs` to decrypt files and create the pre-commit hook at the same time.
 
-### Sensitive Docker configuration files  [`^`](#table-of-contents)
+### Sensitive Docker configuration files  
+
 
 The files committed in the `ops/config/encrypted` directory hold secret information, and are encrypted with [Ansible Vault](https://docs.ansible.com/ansible/2.4/vault.html).
 
@@ -390,7 +392,8 @@ To avoid committing and pushing unencrypted secret files, use the included `ops/
 cp ops/scripts/pre-commit .git/hooks
 ```
 
-### Managing encrypted files   [`^`](#table-of-contents)
+### Managing encrypted files  
+
 * Temporarily decrypt files by running the following command from this directory:
 ```
 ./ops/scripts/secrets --decrypt
@@ -403,7 +406,8 @@ cp ops/scripts/pre-commit .git/hooks
 ./ops/scripts/secrets --encrypt <filename>
 ```
 
-### BFD transaction time details   [`^`](#table-of-contents)
+### BFD transaction time details   
+
 When requesting data from BFD, you must ensure that the `_since` time in the request is after the current BFD transaction time.
 
 The BFD transaction time comes from the Meta object in the bundled response (Bundle.Meta.LastUpdated).
@@ -430,6 +434,7 @@ Therefore, using a fake patient ID which is guaranteed not to match is an easy w
 }
 ```
 
-## Troubleshooting  [`^`](#table-of-contents)
+## Troubleshooting  
+###### [`^`](#table-of-contents)
 
 Please see the [troublshooting document ](Troubleshooting.md) for more help.
