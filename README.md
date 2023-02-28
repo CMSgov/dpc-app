@@ -1,6 +1,5 @@
 # User Guide
-This document serves as a guide for running the Data at the Point of Care (DPC) API on your local environment. See 
-[DPC One-Pager](https://dpc.cms.gov/assets/downloads/dpc-one-pager.pdf) and the [DPC Website](https://dpc.cms.gov/) to learn more about the API.
+This document serves as a guide for running the Data at the Point of Care (DPC) API on your local environment. 
 
 
 [![Build Status](https://travis-ci.org/CMSgov/dpc-app.svg?branch=master)](https://travis-ci.org/CMSgov/dpc-app)
@@ -45,10 +44,10 @@ This document serves as a guide for running the Data at the Point of Care (DPC) 
 
 ## What Is DPC?
 
-Data at the Point of Care **(DPC)** is a pilot application
-programming interface **(API)** whose goal is to enable healthcare
+DPC is a pilot application programming interface **(API)** whose goal is to enable healthcare
 providers to deliver high quality care directly to Medicare
-beneficiaries. Visit our [website](https://dpc.cms.gov/) for background information.
+beneficiaries. See 
+[DPC One-Pager](https://dpc.cms.gov/assets/downloads/dpc-one-pager.pdf) and the [DPC Website](https://dpc.cms.gov/) to learn more about the API.
 
 ## Tech Environment
 ###### [`^`](#table-of-contents)
