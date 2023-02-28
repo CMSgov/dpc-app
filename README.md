@@ -21,9 +21,9 @@ This document serves as a guide for running the Data at the Point of Care (DPC) 
      * [Option 2: Manually](#option-2-manually)
   * [Running DPC](#running-dpc)
      * [Running DPC via Docker](#running-via-docker)
-     * [Generating a Golden Macaroon](#generating-a-golden-macaroon)
+     * [Generating a golden macaroon](#generating-a-golden-macaroon)
      * [Running DPC V2 via Docker](#running-dpc-v2-via-docker)
-     * [Manual JAR Execution](#manual-jar-execution)
+     * [Manual JAR execution](#manual-jar-execution)
   * [Seeding the Database](#seeding-the-database)
   * [Testing the Application](#testing-the-application)
     * [Demo client](#demo-client)
@@ -181,7 +181,7 @@ db:
   ports: 
     - "5432:5432"
 ```
-### Generating a Golden Macaroon
+### Generating a golden macaroon
 
 You will need a macaroon for the Docker configuration. Run the command below to generate one:
 `curl -X POST http://localhost:9903/tasks/generate-token`
@@ -210,7 +210,7 @@ To seed the database, use `make seed-db`. This will populate data in V1 version 
 
 Conversely, to shut down DPC V2 locally, use `make down-v2`. This command will shut down all running containers and remove the Docker network. 
 
-### Manual JAR Execution
+### Manual JAR execution
 
 Alternatively, the individual services can be manually executing the `server` command for the various services.
 
