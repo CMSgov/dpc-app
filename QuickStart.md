@@ -1,4 +1,6 @@
-This is a quick start guide for running the DPC API on your local environment. For full documentation, see the main [README](./README.md).
+#Quick Start Guide
+
+This is a quick start guide for running the DPC API on your local environment. For full documentation, see the [User Guide](./README.md).
 
 SECURE
 ====
@@ -74,10 +76,10 @@ This can be overridden during startup by setting the `AUTH_DISABLED=false` envir
 
 
 ### Generate a Golden Macaroon
-We will need a macaroon for the docker configuration. Run this command to generate one.
+You will need a macaroon for the Docker configuration. Run this command to generate one.
 `curl -X POST http://localhost:9903/tasks/generate-token`
 
-We then need to add the **`API_METADATA URL`** variable and the **`GOLDEN_MACAROON`** variable to the `dpc_web` and `dpc_admin` services in the docker-compose.portal.yml file.
+You will then need to add the **`API_METADATA URL`** variable and the **`GOLDEN_MACAROON`** variable to the `dpc_web` and `dpc_admin` services in the docker-compose.portal.yml file.
 ```yaml
 dpc-web: 
    
