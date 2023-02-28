@@ -293,7 +293,7 @@ Steps for testing the data export:
 1. Make an initial GET request to the following endpoint: `http://localhost:3002/v1/Group/3461C774-B48F-11E8-96F8-529269fb1459/$export`.
 This will request a data export for all the patients attribution to provider: `3461C774-B48F-11E8-96F8-529269fb1459`.
 You will need to set the Accept header to `application/fhir+json` (per the FHIR bulk spec).
-1. The response from the Export endpoint should be a **204** with the `Content-Location` header containing a URL which the user can use to to check the status of the job. <why is content-location header formatted differently from the other headers?>
+1. The response from the Export endpoint should be a **204** with the `Content-Location` header containing a URL which the user can use to to check the status of the job. 
 1. Make a GET request using the URL provided by the `/Group` endpoint from the previous step.
  Which has this format: `http://localhost:3002/v1/Jobs/{unique UUID of export job}`.
  You will need to ensure that the Accept header is set to `application/fhir+json` (per the FHIR bulk spec).
