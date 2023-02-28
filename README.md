@@ -1,5 +1,5 @@
-# DPC: *Data @ The Point of Care*
-This document serves as a guide for running the DPC API on your local environment. See 
+# User Guide
+This document serves as a guide for running the Data at the Point of Care (DPC) API on your local environment. See 
 [DPC One-Pager](https://dpc.cms.gov/assets/downloads/dpc-one-pager.pdf) to more about the API and the [DPC Website](https://dpc.cms.gov/)
 
 
