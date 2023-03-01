@@ -114,7 +114,7 @@ Once populated, you should see the options to create a public key and a client t
 TEST
 ====
 ### Test with Postman
-Once the development environment is up and running, you should now be able to run some calls to the API via the [DPC Postman Collections](https://dpc.cms.gov/docsV1.html#postman-collection). Below, are some useful endpoints for verifying a functional development environment:
+Once the development environment is up and running, you should now be able to run some calls to the API via the [DPC Postman Collections](https://dpc.cms.gov/docsV1.html#postman-collection). Below, are a few for verifying a functional development environment:
 - Register single patient
 - Register practitioner
 - Get all groups
