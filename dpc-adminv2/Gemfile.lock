@@ -409,7 +409,7 @@ DEPENDENCIES
   rspec-rails (>= 5.0.1)
   sass-rails (>= 6.0.0)
   selenium-webdriver
-  sidekiq (~> 7.0, >= 7.0.0)
+  sidekiq (~> 7.0, >= 7.0.8)
   sidekiq_alive
   simplecov (<= 0.17)
   spring
