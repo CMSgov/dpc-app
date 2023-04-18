@@ -29,7 +29,7 @@ public class EntityConverterTest {
     }
 
     @BeforeEach
-    private void setup() {
+    void setup() {
         converter = new FHIREntityConverter();
     }
 
