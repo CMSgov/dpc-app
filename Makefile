@@ -121,6 +121,14 @@ ci-portals: secure-envs
 ci-portals-v1: secure-envs
 	@./dpcv1-portals-test.sh
 
+.PHONY: ci-admin-portal
+ci-admin-portal: secure-envs
+	@./dpc-admin-portal-test.sh
+
+.PHONY: ci-web-portal
+ci-web-portal: secure-envs
+	@./dpc-web-portal-test.sh
+
 .PHONY: ci-portals-v2
 ci-portals-v2: secure-envs
 	@./dpcv2-portals-test.sh
