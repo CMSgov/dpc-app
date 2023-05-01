@@ -129,10 +129,6 @@ ci-admin-portal: secure-envs
 ci-web-portal: secure-envs
 	@./dpc-web-portal-test.sh
 
-.PHONY: ci-portals-v2
-ci-portals-v2: secure-envs
-	@./dpcv2-portals-test.sh
-
 .PHONY: smoke
 smoke:
 	@mvn clean package -DskipTests -Djib.skip=True -pl dpc-smoketest -am -ntp
