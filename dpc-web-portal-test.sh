@@ -8,7 +8,7 @@ echo "│                       │"
 echo "└───────────────────────┘"
 
 # Build the container
-make web
+make website
 
 # Prepare the environment 
 docker-compose -p start-v1-portals -f docker-compose.yml -f docker-compose.portals.yml up start_core_dependencies
