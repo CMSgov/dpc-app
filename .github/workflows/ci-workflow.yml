@@ -31,12 +31,22 @@ jobs:
         run: |
           make smoke
 
-  build-portals-v1:
-    name: "Build and Test DPCv1 Web Portals"
+  build-dpc-web:
+    name: "Build and Test DPC Web"
     runs-on: ubuntu-latest
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v1
-      - name: "Web Portals v1 Build"
+      - name: "DPC Web Build"
         run: |
-          make ci-portals-v1
+          make ci-web-portal
+  
+  build-dpc-admin:
+    name: "Build and Test DPC Admin Portal"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@v1
+      - name: "DPC Admin Portal Build"
+        run: |
+          make ci-admin-portal
