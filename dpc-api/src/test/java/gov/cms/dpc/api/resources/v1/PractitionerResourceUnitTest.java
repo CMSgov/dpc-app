@@ -34,8 +34,18 @@ public class PractitionerResourceUnitTest {
 
     @BeforeEach
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
         resource = new PractitionerResource(attributionClient, fhirValidator);
+    }
+
+    @Test
+    public void testPractitionerSearch() {
+        //testPractitionerSearch
+    }
+
+    @Test
+    public void testGetProvider() {
+        //testGetProvider
     }
 
     @Test
@@ -58,5 +68,25 @@ public class PractitionerResourceUnitTest {
 
         assertEquals(practitioner, result);
         assertEquals("Organization ID", practitioner.getMeta().getTag(DPCIdentifierSystem.DPC.getSystem(), orgId.toString()).getDisplay());
+    }
+
+    @Test
+    public void testBulkSubmitProviders() {
+        //testBulkSubmitProviders
+    }
+
+    @Test
+    public void testDeleteProvider() {
+        //testDeleteProvider
+    }
+
+    @Test
+    public void testUpdateProvider() {
+        //testUpdateProvider
+    }
+
+    @Test
+    public void testValidateProvider() {
+        //testValidateProvider
     }
 }
