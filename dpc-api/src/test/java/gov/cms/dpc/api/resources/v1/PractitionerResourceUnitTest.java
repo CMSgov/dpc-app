@@ -3,13 +3,25 @@ package gov.cms.dpc.api.resources.v1;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.ICreateTyped;
+import ca.uhn.fhir.rest.gclient.IDeleteTyped;
+import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
+import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.IReadExecutable;
 import ca.uhn.fhir.validation.FhirValidator;
+import ca.uhn.fhir.validation.ValidationOptions;
+import ca.uhn.fhir.validation.ValidationResult;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
+import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
+
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Organization;
-import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Practitioner;
+import org.hl7.fhir.dstu3.model.Resource;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Answers;
@@ -18,8 +30,14 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import javax.ws.rs.core.Response;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class PractitionerResourceUnitTest {
@@ -27,25 +45,60 @@ public class PractitionerResourceUnitTest {
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     IGenericClient attributionClient;
 
-    @Mock
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     FhirValidator fhirValidator;
 
-    PractitionerResource resource;
+    PractitionerResource practitionerResource;
 
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
-        resource = new PractitionerResource(attributionClient, fhirValidator);
+        practitionerResource = new PractitionerResource(attributionClient, fhirValidator);
     }
 
     @Test
     public void testPractitionerSearch() {
-        //testPractitionerSearch
+        UUID orgId = UUID.randomUUID();
+        Organization organization = new Organization();
+        organization.setId(orgId.toString());
+        OrganizationPrincipal organizationPrincipal = new OrganizationPrincipal(organization);
+        String providerNPI = NPIUtil.generateNPI();
+        Map<String, List<String>> searchParams = new HashMap<>();
+        searchParams.put("organization", Collections.singletonList(organizationPrincipal.getOrganization().getIdElement().getIdPart()));
+        searchParams.put("identifier", Collections.singletonList(providerNPI));
+        Bundle bundle = new Bundle();
+
+        @SuppressWarnings("unchecked")
+        IQuery<IBaseBundle> queryExec = Mockito.mock(IQuery.class, Answers.RETURNS_DEEP_STUBS);
+        @SuppressWarnings("unchecked")
+        IQuery<Bundle> mockQuery = Mockito.mock(IQuery.class);
+        Mockito.when(attributionClient.search().forResource(Practitioner.class).encodedJson()).thenReturn(queryExec);
+        Mockito.when(queryExec.returnBundle(Bundle.class)).thenReturn(mockQuery);
+        Mockito.when(mockQuery.execute()).thenReturn(bundle);
+        Mockito.when(mockQuery.whereMap(searchParams)).thenReturn(mockQuery);
+
+        System.out.println(providerNPI);
+        System.out.println(organizationPrincipal);
+
+        Bundle actualResponse = practitionerResource.practitionerSearch(organizationPrincipal, providerNPI);
+        
+        assertEquals(bundle, actualResponse);
     }
 
     @Test
     public void testGetProvider() {
-        //testGetProvider
+        UUID providerId = UUID.randomUUID();
+        Practitioner practitioner = new Practitioner();
+        practitioner.setId(providerId.toString());
+
+        @SuppressWarnings("unchecked")
+        IReadExecutable<Practitioner> readExec = Mockito.mock(IReadExecutable.class);
+        Mockito.when(attributionClient.read().resource(Practitioner.class).withId(providerId.toString()).encodedJson()).thenReturn(readExec);
+        Mockito.when(readExec.execute()).thenReturn(practitioner);
+
+        Practitioner actualResponse = practitionerResource.getProvider(providerId);
+
+        assertEquals(practitioner, actualResponse);
     }
 
     @Test
@@ -63,7 +116,7 @@ public class PractitionerResourceUnitTest {
         outcome.setResource(practitioner);
         Mockito.when(createExec.execute()).thenReturn(outcome);
 
-        Response response = resource.submitProvider(organizationPrincipal, practitioner);
+        Response response = practitionerResource.submitProvider(organizationPrincipal, practitioner);
         Practitioner result = (Practitioner) response.getEntity();
 
         assertEquals(practitioner, result);
@@ -72,21 +125,71 @@ public class PractitionerResourceUnitTest {
 
     @Test
     public void testBulkSubmitProviders() {
-        //testBulkSubmitProviders
+        UUID orgId = UUID.randomUUID();
+        Organization organization = new Organization();
+        organization.setId(orgId.toString());
+        OrganizationPrincipal organizationPrincipal = new OrganizationPrincipal(organization);
+        String PRACTITIONER_PROFILE = "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-practitioner";
+        Practitioner practitioner = new Practitioner();
+        Bundle bundle = new Bundle();
+        bundle.addEntry().setResource(practitioner);
+
+        @SuppressWarnings("unchecked")
+        IOperationUntypedWithInput<Bundle> practitionerBundle = Mockito.mock(IOperationUntypedWithInput.class);
+        Parameters params = new Parameters();
+        params.addParameter().setResource(bundle);
+        Mockito.when(attributionClient
+            .operation()
+            .onType(Practitioner.class)
+            .named("submit")
+            .withParameters(params)
+            .returnResourceType(Bundle.class)
+            .encodedJson()
+        ).thenReturn(practitionerBundle);
+        Mockito.when(practitionerBundle.execute()).thenReturn(bundle);
+        
+        Bundle actualResponse = practitionerResource.bulkSubmitProviders(organizationPrincipal, params);
+
+        assertEquals(bundle, actualResponse);
     }
 
     @Test
     public void testDeleteProvider() {
-        //testDeleteProvider
+        UUID providerId = UUID.randomUUID();
+
+        IDeleteTyped delResp = Mockito.mock(IDeleteTyped.class);
+        Mockito.when(attributionClient.delete().resourceById(new IdType("Practitioner", providerId.toString())).encodedJson()).thenReturn(delResp);
+
+        Response actualResponse = practitionerResource.deleteProvider(providerId);
+
+        assertEquals(200, actualResponse.getStatus());
     }
 
     @Test
     public void testUpdateProvider() {
-        //testUpdateProvider
+        // Not yet implemented
     }
 
     @Test
     public void testValidateProvider() {
-        //testValidateProvider
+        UUID orgId = UUID.randomUUID();
+        Organization organization = new Organization();
+        organization.setId(orgId.toString());
+        OrganizationPrincipal organizationPrincipal = new OrganizationPrincipal(organization);
+        Parameters params = new Parameters();
+        params.addParameter().setResource(new Bundle());
+
+        ValidationResult validationResult = Mockito.mock(ValidationResult.class);
+        Resource resource = params.getParameterFirstRep().getResource();
+        ValidationOptions valOps = new ValidationOptions();
+        String practitioner_profile_uri = "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-practitioner";
+        valOps.addProfile(practitioner_profile_uri);
+        Mockito.when(
+            fhirValidator.validateWithResult(resource, valOps)
+        ).thenReturn(validationResult);
+
+        IBaseOperationOutcome actualResponse = practitionerResource.validateProvider(organizationPrincipal, params);
+        
+        assertNotNull(actualResponse);
     }
 }
