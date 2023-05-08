@@ -14,6 +14,7 @@ import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 
+import org.apache.commons.lang.NotImplementedException;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Organization;
@@ -31,6 +32,7 @@ import org.mockito.MockitoAnnotations;
 
 import javax.ws.rs.core.Response;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -39,6 +41,7 @@ import java.util.UUID;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class PractitionerResourceUnitTest {
 
@@ -129,20 +132,18 @@ public class PractitionerResourceUnitTest {
         Organization organization = new Organization();
         organization.setId(orgId.toString());
         OrganizationPrincipal organizationPrincipal = new OrganizationPrincipal(organization);
-        String PRACTITIONER_PROFILE = "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-practitioner";
-        Practitioner practitioner = new Practitioner();
         Bundle bundle = new Bundle();
-        bundle.addEntry().setResource(practitioner);
+        bundle.addEntry().setResource(new Practitioner());
+        Parameters params = new Parameters();
+        params.addParameter().setResource(bundle);
 
         @SuppressWarnings("unchecked")
         IOperationUntypedWithInput<Bundle> practitionerBundle = Mockito.mock(IOperationUntypedWithInput.class);
-        Parameters params = new Parameters();
-        params.addParameter().setResource(bundle);
         Mockito.when(attributionClient
             .operation()
             .onType(Practitioner.class)
             .named("submit")
-            .withParameters(params)
+            .withParameters(Mockito.any())
             .returnResourceType(Bundle.class)
             .encodedJson()
         ).thenReturn(practitionerBundle);
