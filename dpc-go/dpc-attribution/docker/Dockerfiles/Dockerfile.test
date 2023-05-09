@@ -1,8 +1,0 @@
-FROM golang:1.18-buster
-
-ENV GO111MODULE=on
-
-RUN go install gotest.tools/gotestsum@v1.8.1
-
-WORKDIR dpc-attribution
-COPY . .
