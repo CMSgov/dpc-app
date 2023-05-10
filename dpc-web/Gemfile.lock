@@ -312,6 +312,8 @@ GEM
     rbnacl-libsodium (1.0.16)
       rbnacl (>= 3.0.1)
     redis (4.8.1)
+    redis-client (0.14.1)
+      connection_pool
     redis-namespace (1.10.0)
       redis (>= 4)
     regexp_parser (2.7.0)
@@ -373,10 +375,11 @@ GEM
       rexml (~> 3.2, >= 3.2.5)
       rubyzip (>= 1.2.2, < 3.0)
       websocket (~> 1.0)
-    sidekiq (6.5.8)
-      connection_pool (>= 2.2.5, < 3)
-      rack (~> 2.0)
-      redis (>= 4.5.0, < 5)
+    sidekiq (7.0.8)
+      concurrent-ruby (< 2)
+      connection_pool (>= 2.3.0)
+      rack (>= 2.2.4)
+      redis-client (>= 0.11.0)
     sidekiq_alive (2.1.9)
       rack (< 3)
       sidekiq (>= 5, < 8)
@@ -490,7 +493,7 @@ DEPENDENCIES
   rubocop-performance (>= 1.10.2)
   sassc-rails (>= 2.1.2)
   selenium-webdriver
-  sidekiq (~> 6.4)
+  sidekiq (~> 7.0, >= 7.0.8)
   sidekiq_alive (~> 2.1.5)
   simplecov (<= 0.17)
   spring
@@ -507,4 +510,4 @@ RUBY VERSION
    ruby 2.7.2p137
 
 BUNDLED WITH
-   2.4.12
+   2.3.10
