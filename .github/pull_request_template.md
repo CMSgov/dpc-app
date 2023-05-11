@@ -1,33 +1,24 @@
-## [DPC-xxxx](https://jira.cms.gov/browse/DPC-xxxx)
+## 🎫 Ticket
 
-## Change Details
+https://jira.cms.gov/browse/DPC-xxx
 
-* 
+## 🛠 Changes
 
-## Security Implications
+(What was added, updated, or removed in this PR.)
 
-- [ ] new software dependencies
+## ℹ️ Context for reviewers
 
-<!-- If yes, list the new dependencies and briefly note any relevant security impacts -->
+(Background context, more in-depth details of the implementation, and anything else you'd like to call out or ask reviewers.)
 
-- [ ] security controls or supporting software altered
+## ✅ Acceptance Validation
 
-<!-- If yes, what security controls or supporting software are affected? -->
+(How were the changes verified? Did you fully test the acceptance criteria in the ticket? Provide reproducible testing instructions and screenshots if applicable.)
 
-- [ ] new data stored or transmitted
+## 🔒 Security Implications
 
-<!-- If yes, what new data are we storing or transmitting? Is the data considered PII/PHI? -->
+- [ ] This PR adds a new software dependency or dependencies.
+- [ ] This PR modifies or invalidates one or more of our security controls.
+- [ ] This PR stores or transmits data that was not stored or transmitted before.
+- [ ] This PR requires additional review of its security implications for other reasons.
 
-- [ ] security checklist is completed for this change
-
-<!-- If yes, provide a link to the security checklist in Confluence here. -->
-
-- [ ] requires more information or team discussion to evaluate security implications
-
-<!-- Use this to indicate you're unsure how this change may impact system security
-and would like to solicit the team's feedback. Optionally, provide background
-information regarding your questions and concerns. -->
-
-- [ ] PHI/PII is affected by this change
-
-<!-- If yes, provide what PHI/PII is affected by this change -->
+If any security implications apply, add Jason Ashbaugh (GitHub username: StewGoin) as a reviewer and do not merge this PR without his approval.
