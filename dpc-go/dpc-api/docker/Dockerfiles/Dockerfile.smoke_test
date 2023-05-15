@@ -1,6 +1,0 @@
-FROM postman/newman
-WORKDIR /go/src/github.com/CMSgov/dpc-api/postman_test
-COPY ./test/smoke .
-WORKDIR /go/src/github.com/CMSgov/dpc-api
-ENV NODE_OPTIONS "--max-old-space-size=2048"
-ENTRYPOINT ["newman", "run", "--timeout-script", "99999"]

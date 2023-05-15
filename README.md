@@ -22,7 +22,6 @@ This document serves as a guide for running the Data at the Point of Care (DPC) 
   * [Running DPC](#running-dpc)
      * [Running DPC via Docker](#running-dpc-via-docker)
      * [Generating a golden macaroon](#generating-a-golden-macaroon)
-     * [Running DPC V2 via Docker](#running-dpc-v2-via-docker)
      * [Manual JAR execution](#manual-jar-execution)
   * [Seeding the Database](#seeding-the-database)
   * [Testing the Application](#testing-the-application)
@@ -36,6 +35,7 @@ This document serves as a guide for running the Data at the Point of Care (DPC) 
     * [Sensitive Docker configuration files](#sensitive-docker-configuration-files)
     * [Managing encrypted files](#managing-encrypted-files)
     * [BFD transaction time details](#bfd-transaction-time-details)
+    * [Installing and Using Pre-Commit](#installing-and-using-pre-commit)
   * [Troubleshooting](#troubleshooting) 
 <!-- TOC -->
 
@@ -201,14 +201,6 @@ dpc_admin:
   - API_METADATA_URL=${API_METADATA URL}
   - GOLDEN_MACAROON: ...
 ```
-
-### Running DPC V2 via Docker
-
-In order to start up all required services for V2 of DPC locally, use the command `make start-v2`.
-
-To seed the database, use `make seed-db`. This will populate data in V1 version of the `dpc_attribution_db`.
-
-Conversely, to shut down DPC V2 locally, use `make down-v2`. This command will shut down all running containers and remove the Docker network. 
 
 ### Manual JAR execution
 
@@ -424,6 +416,31 @@ Therefore, using a fake patient ID which is guaranteed not to match is an easy w
   ]
 }
 ```
+
+
+### Installing and Using Pre-commit
+
+Anyone committing to this repo must use the pre-commit hook to lower the likelihood that secrets will be exposed.
+
+#### Step 1: Install pre-commit
+
+You can install pre-commit using the MacOS package manager Homebrew:
+
+```sh
+brew install pre-commit
+```
+
+Other installation options can be found in the [pre-commit documentation](https://pre-commit.com/#install).
+
+#### Step 2: Install the hooks
+
+Run the following command to install the gitleaks hook:
+
+```sh
+pre-commit install
+```
+
+This will download and install the pre-commit hooks specified in `.pre-commit-config.yaml`.
 
 ## Troubleshooting  
 ###### [`^`](#table-of-contents)
