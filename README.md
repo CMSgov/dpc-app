@@ -22,7 +22,6 @@ This document serves as a guide for running the Data at the Point of Care (DPC) 
   * [Running DPC](#running-dpc)
      * [Running DPC via Docker](#running-dpc-via-docker)
      * [Generating a golden macaroon](#generating-a-golden-macaroon)
-     * [Running DPC V2 via Docker](#running-dpc-v2-via-docker)
      * [Manual JAR execution](#manual-jar-execution)
   * [Seeding the Database](#seeding-the-database)
   * [Testing the Application](#testing-the-application)
@@ -202,14 +201,6 @@ dpc_admin:
   - API_METADATA_URL=${API_METADATA URL}
   - GOLDEN_MACAROON: ...
 ```
-
-### Running DPC V2 via Docker
-
-In order to start up all required services for V2 of DPC locally, use the command `make start-v2`.
-
-To seed the database, use `make seed-db`. This will populate data in V1 version of the `dpc_attribution_db`.
-
-Conversely, to shut down DPC V2 locally, use `make down-v2`. This command will shut down all running containers and remove the Docker network. 
 
 ### Manual JAR execution
 

@@ -75,36 +75,6 @@ down-dpc:
 	@docker-compose -f docker-compose.yml -f docker-compose.portals.yml down
 	@docker ps
 
-.PHONY: build-v2
-build-v2: secure-envs
-	@docker-compose -p dpc-v2 -f docker-compose.yml -f dpc-go/dpc-attribution/docker-compose.yml build attribution2
-	@docker-compose -p dpc-v2 -f dpc-go/dpc-api/docker-compose.yml build api
-	@docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.v2.yml build --no-cache ssas-migrate
-	@docker-compose -p dpc-v2 -f docker-compose.yml -f dpc-go/dpc-attribution/docker-compose.yml -f docker-compose.v2.yml build ssas
-
-.PHONY: start-v2
-start-v2: secure-envs
-	@docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.v2.yml up start_core_dependencies
-	@docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.v2.yml up start_api_dependencies
-	@docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.v2.yml -f dpc-go/dpc-attribution/docker-compose.yml up -d --build attribution2
-	@docker-compose -p dpc-v2 -f dpc-go/dpc-api/docker-compose.yml up -d --build api
-	@docker ps
-
-.PHONY: down-v2
-down-v2:
-	@docker-compose -p dpc-v2 -f docker-compose.yml -f dpc-go/dpc-attribution/docker-compose.yml -f docker-compose.v2.yml down
-	@docker-compose -p dpc-v2 -f dpc-go/dpc-api/docker-compose.yml down
-	@docker ps
-
-.PHONY: load-ssas-fixtures
-load-ssas-fixtures:
-	@docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.v2.yml run --rm ssas-migrate -database "postgres://postgres:dpc-safe@db:5432/bcda?sslmode=disable" -path /go/src/github.com/CMSgov/bcda-ssas-app/db/migrations up
-	@docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.v2.yml run ssas --add-fixture-data
-
-.PHONY: ssas-creds
-ssas-creds:
-	@./make_ssas_creds.sh
-
 .PHONY: seed-db
 seed-db:
 	@java -jar dpc-attribution/target/dpc-attribution.jar db migrate && java -jar dpc-attribution/target/dpc-attribution.jar seed
@@ -167,9 +137,3 @@ maven-config:
 .PHONY: unit-tests
 unit-tests:
 	@bash ./dpc-unit-test.sh
-
-.PHONY: bfd-certs
-bfd-certs:
-	@bash ops/scripts/secrets --decrypt dpc-go/dpc-attribution/shared_files/encrypted/bfd-dev-test-ca-file.crt | tail -n +2 > dpc-go/dpc-attribution/shared_files/decrypted/bfd-dev-test-ca-file.crt
-	@bash ops/scripts/secrets --decrypt dpc-go/dpc-attribution/shared_files/encrypted/bfd-dev-test-cert.pem | tail -n +2 > dpc-go/dpc-attribution/shared_files/decrypted/bfd-dev-test-cert.pem
-	@bash ops/scripts/secrets --decrypt dpc-go/dpc-attribution/shared_files/encrypted/bfd-dev-test-key.pem | tail -n +2 > dpc-go/dpc-attribution/shared_files/decrypted/bfd-dev-test-key.pem
