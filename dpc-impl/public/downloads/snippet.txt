@@ -1,1 +1,0 @@
-This is the snippet used to verify a key pair.
