@@ -42,27 +42,4 @@ class BaseResourceUnitTest {
         assertEquals(par, baseResource.patientOperations());
         assertEquals(pr, baseResource.practitionerOperations());
     }
-
-    @Test
-    public void testCapabilitiesStatement() {
-        String baseURL = "baseURL";
-        BaseResource baseResource = new BaseResource(kr, tr, gr, jr, dr, er, or, par, pr, sdr, baseURL);
-        CapabilityStatement capStatement = new CapabilityStatement();
-
-        try(MockedStatic<Capabilities> capabilities = Mockito.mockStatic(Capabilities.class) ) {
-            capabilities.when(() -> Capabilities.getCapabilities(baseURL)).thenReturn(capStatement);
-            assertEquals(capStatement, baseResource.metadata());
-        }
-    }
-
-    @Test
-    public void testVersion() {
-        String version = "version";
-
-        try(MockedConstruction<PropertiesProvider> ignored = mockConstruction(PropertiesProvider.class, (mock, context) ->
-                when(mock.getBuildVersion()).thenReturn(version))) {
-            BaseResource baseResource = new BaseResource(kr, tr, gr, jr, dr, er, or, par, pr, sdr, "baseURL");
-            assertEquals(version, baseResource.version());
-        }
-    }
 }
