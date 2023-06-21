@@ -1,10 +1,6 @@
 package gov.cms.dpc.api.resources.v1;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-import gov.cms.dpc.api.core.Capabilities;
-import gov.cms.dpc.common.utils.PropertiesProvider;
-import org.hl7.fhir.dstu3.model.CapabilityStatement;
 import org.junit.jupiter.api.*;
 import org.mockito.*;
 
