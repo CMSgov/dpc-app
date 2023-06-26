@@ -51,7 +51,7 @@ public class EndpointResourceUnitTest {
         Endpoint result = (Endpoint) response.getEntity();
 
         assertEquals(endpoint, result);
-        assertEquals("Organization/" + op.getOrganization().getId().toString(), endpoint.getManagingOrganization().getReference());
+        assertEquals("Organization/" + op.getOrganization().getId(), endpoint.getManagingOrganization().getReference());
     }
 
     @Test
@@ -82,7 +82,7 @@ public class EndpointResourceUnitTest {
         Endpoint result = (Endpoint) response.getEntity();
 
         assertEquals(endpoint, result);
-        assertEquals("Organization/" + op.getOrganization().getId().toString(), endpoint.getManagingOrganization().getReference());
+        assertEquals("Organization/" + op.getOrganization().getId(), endpoint.getManagingOrganization().getReference());
     }
 
     @Test
@@ -152,9 +152,8 @@ public class EndpointResourceUnitTest {
         UUID endPointUUID = UUID.randomUUID();
         doReturn(existingEndPoint).when(spiedResource).fetchEndpoint(endPointUUID);
 
-        WebApplicationException exception =  assertThrows(WebApplicationException.class, () -> {
-            spiedResource.updateEndpoint(endPointUUID, newEndPoint);
-        });
+        WebApplicationException exception =  assertThrows(WebApplicationException.class,
+                () -> spiedResource.updateEndpoint(endPointUUID, newEndPoint));
         assertEquals(exception.getResponse().getStatus(), HttpStatus.SC_UNPROCESSABLE_ENTITY);
     }
 
