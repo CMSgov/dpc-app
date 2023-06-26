@@ -80,9 +80,6 @@ public class PractitionerResourceUnitTest {
         Mockito.when(mockQuery.execute()).thenReturn(bundle);
         Mockito.when(mockQuery.whereMap(searchParams)).thenReturn(mockQuery);
 
-        System.out.println(providerNPI);
-        System.out.println(organizationPrincipal);
-
         Bundle actualResponse = practitionerResource.practitionerSearch(organizationPrincipal, providerNPI);
         
         assertEquals(bundle, actualResponse);
