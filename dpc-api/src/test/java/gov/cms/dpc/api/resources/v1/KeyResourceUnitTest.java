@@ -1,10 +1,10 @@
 package gov.cms.dpc.api.resources.v1;
 
+import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.entities.PublicKeyEntity;
 import gov.cms.dpc.api.jdbi.PublicKeyDAO;
 import org.apache.http.HttpStatus;
-import org.hl7.fhir.dstu3.model.Organization;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -35,7 +35,7 @@ public class KeyResourceUnitTest {
 
     @Test
     public void testGetPublicKeys() {
-        OrganizationPrincipal organizationPrincipal = getOrganizationPrincipal();
+        OrganizationPrincipal organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
 
         PublicKeyEntity publicKeyEntity = mock(PublicKeyEntity.class);
         List<PublicKeyEntity> publicKeyList = List.of(publicKeyEntity);
@@ -49,7 +49,7 @@ public class KeyResourceUnitTest {
 
     @Test
     public void testGetPublicKey() {
-        OrganizationPrincipal organizationPrincipal = getOrganizationPrincipal();
+        OrganizationPrincipal organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
         UUID publicKeyUUID = UUID.randomUUID();
 
         PublicKeyEntity publicKeyEntity = mock(PublicKeyEntity.class);
@@ -62,7 +62,7 @@ public class KeyResourceUnitTest {
 
     @Test
     public void testGetPublicKeyNotFound() {
-        OrganizationPrincipal organizationPrincipal = getOrganizationPrincipal();
+        OrganizationPrincipal organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
         UUID publicKeyUUID = UUID.randomUUID();
 
         when(publicKeyDao.publicKeySearch(publicKeyUUID, organizationPrincipal.getID())).thenReturn(List.of());
@@ -73,7 +73,7 @@ public class KeyResourceUnitTest {
 
     @Test
     public void testDeletePublicKey() {
-        OrganizationPrincipal organizationPrincipal = getOrganizationPrincipal();
+        OrganizationPrincipal organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
         UUID publicKeyUUID = UUID.randomUUID();
 
         PublicKeyEntity publicKeyEntity = mock(PublicKeyEntity.class);
@@ -87,7 +87,7 @@ public class KeyResourceUnitTest {
 
     @Test
     public void testDeletePublicKeyNotFound() {
-        OrganizationPrincipal organizationPrincipal = getOrganizationPrincipal();
+        OrganizationPrincipal organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
         UUID publicKeyUUID = UUID.randomUUID();
 
         when(publicKeyDao.publicKeySearch(publicKeyUUID, organizationPrincipal.getID())).thenReturn(List.of());
@@ -99,7 +99,7 @@ public class KeyResourceUnitTest {
 
     @Test
     public void testSubmitKey() throws GeneralSecurityException, IOException {
-        OrganizationPrincipal organizationPrincipal = getOrganizationPrincipal();
+        OrganizationPrincipal organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
         KeyResource.KeySignature keySignature = KeyResourceTest.generateKeyAndSignature();
 
         String label = "A test key label";
@@ -120,7 +120,7 @@ public class KeyResourceUnitTest {
 
     @Test
     public void testSubmitKeyTooLong() throws GeneralSecurityException {
-        OrganizationPrincipal organizationPrincipal = getOrganizationPrincipal();
+        OrganizationPrincipal organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
         KeyResource.KeySignature keySignature = KeyResourceTest.generateKeyAndSignature();
         String label = "A really, really, really long, test key label";
 
@@ -131,17 +131,11 @@ public class KeyResourceUnitTest {
 
     @Test
     public void testSubmitKeyBadPEMString() {
-        OrganizationPrincipal organizationPrincipal = getOrganizationPrincipal();
+        OrganizationPrincipal organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
         KeyResource.KeySignature keySignature = new KeyResource.KeySignature("badPEMString", "badSignature");
 
         WebApplicationException exception =  assertThrows(WebApplicationException.class,
                 () -> resource.submitKey(organizationPrincipal, keySignature, Optional.of("label")));
         assertEquals(HttpStatus.SC_BAD_REQUEST, exception.getResponse().getStatus());
-    }
-
-    private OrganizationPrincipal getOrganizationPrincipal() {
-        Organization organization = new Organization();
-        organization.setId(UUID.randomUUID().toString());
-        return new OrganizationPrincipal(organization);
     }
 }
