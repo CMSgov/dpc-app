@@ -26,7 +26,7 @@ RUN gem install bundler --no-document && \
 
 # Run bundler audit
 # TODO: remove second ignore once Rails is upgraded
-RUN bundle exec bundle audit update && bundle exec bundle audit check --ignore CVE-2015-9284
+RUN bundle exec bundle audit update && bundle exec bundle audit check --ignore CVE-2015-9284 --ignore CVE-2023-28362
 
 # Copy the code, test the app, and build the assets pipeline
 COPY /dpc-admin /dpc-admin
