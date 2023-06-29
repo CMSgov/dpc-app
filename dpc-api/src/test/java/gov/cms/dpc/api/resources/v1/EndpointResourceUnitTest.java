@@ -3,6 +3,7 @@ package gov.cms.dpc.api.resources.v1;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.*;
+import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import org.apache.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
@@ -36,7 +37,7 @@ public class EndpointResourceUnitTest {
 
     @Test
     public void testCreateEndpointWithNoManagingOrganization() {
-        OrganizationPrincipal op = createOrganizationalPrincipal();
+        OrganizationPrincipal op = APITestHelpers.makeOrganizationPrincipal();
 
         Endpoint endpoint = new Endpoint();
 
@@ -56,7 +57,7 @@ public class EndpointResourceUnitTest {
 
     @Test
     public void testCreateEndpointWithManagingOrganizationMismatch() {
-        OrganizationPrincipal organizationPrincipal = createOrganizationalPrincipal();
+        OrganizationPrincipal organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
 
         Endpoint endpoint = new Endpoint();
         endpoint.setManagingOrganization(new Reference("Organization/" + UUID.randomUUID()));
@@ -66,7 +67,7 @@ public class EndpointResourceUnitTest {
 
     @Test
     public void testCreateEndpointWithMatchingManagingOrganizations() {
-        OrganizationPrincipal op = createOrganizationalPrincipal();
+        OrganizationPrincipal op = APITestHelpers.makeOrganizationPrincipal();
 
         Endpoint endpoint = new Endpoint();
         endpoint.setManagingOrganization(new Reference("Organization/" + op.getOrganization().getId()));
@@ -87,7 +88,7 @@ public class EndpointResourceUnitTest {
 
     @Test
     public void testGetEndpoints() {
-        OrganizationPrincipal organizationPrincipal = createOrganizationalPrincipal();
+        OrganizationPrincipal organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
 
         Bundle bundle = mock(Bundle.class);
         IQuery<Bundle> iQueryBundle = mock(IQuery.class);
@@ -168,12 +169,5 @@ public class EndpointResourceUnitTest {
 
         // Delete always returns a 200
         assertEquals(HttpStatus.SC_OK, resource.deleteEndpoint(endPointUUID).getStatus());
-    }
-
-    private OrganizationPrincipal createOrganizationalPrincipal() {
-        UUID orgId = UUID.randomUUID();
-        Organization organization = new Organization();
-        organization.setId(orgId.toString());
-        return new OrganizationPrincipal(organization);
     }
 }
