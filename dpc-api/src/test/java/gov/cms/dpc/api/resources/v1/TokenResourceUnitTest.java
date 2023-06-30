@@ -136,16 +136,17 @@ public class TokenResourceUnitTest {
         Mockito.when(policy.getExpirationPolicy()).thenReturn(expirationPolicy);
         Mockito.when(policy.getVersionPolicy()).thenReturn(versionPolicy);
         Mockito.when(bakery.createMacaroon(Mockito.any())).thenReturn(macaroon);
-        Mockito.mockStatic(MacaroonBakery.class);
-        Mockito.when(MacaroonBakery.getCaveats(macaroon)).thenReturn(macaroonCaveats);
-        try (MockedStatic<OffsetDateTime> mockedStatic = Mockito.mockStatic(OffsetDateTime.class)) {
-            mockedStatic.when(() -> OffsetDateTime.now(ZoneOffset.UTC)).thenReturn(timeNow);
-            Mockito.when(mockTokenDao.persistToken(Mockito.any())).thenReturn(persistedToken);
-            Mockito.when(bakery.serializeMacaroon(macaroon, true)).thenReturn(token_result.getBytes());
+        try (MockedStatic<MacaroonBakery> mockedStaticMacaroon = Mockito.mockStatic(MacaroonBakery.class)) {
+            mockedStaticMacaroon.when(() -> MacaroonBakery.getCaveats(macaroon)).thenReturn(macaroonCaveats);
+            try (MockedStatic<OffsetDateTime> mockedStatic = Mockito.mockStatic(OffsetDateTime.class)) {
+                mockedStatic.when(() -> OffsetDateTime.now(ZoneOffset.UTC)).thenReturn(timeNow);
+                Mockito.when(mockTokenDao.persistToken(Mockito.any())).thenReturn(persistedToken);
+                Mockito.when(bakery.serializeMacaroon(macaroon, true)).thenReturn(token_result.getBytes());
 
-            TokenEntity actualResponse = tokenResource.createOrganizationToken(organizationPrincipal, null, authURL, optExpires);
+                TokenEntity actualResponse = tokenResource.createOrganizationToken(organizationPrincipal, null, authURL, optExpires);
 
-            assertEquals(persistedToken, actualResponse);
+                assertEquals(persistedToken, actualResponse);
+            }
         }
     }
 
