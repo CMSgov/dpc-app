@@ -21,10 +21,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Answers;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import io.dropwizard.jersey.jsr310.OffsetDateTimeParam;
 
+import com.ethlo.time.TimezoneOffset;
 import com.github.nitram509.jmacaroons.Macaroon;
 
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
@@ -136,14 +138,15 @@ public class TokenResourceUnitTest {
         Mockito.when(bakery.createMacaroon(Mockito.any())).thenReturn(macaroon);
         Mockito.mockStatic(MacaroonBakery.class);
         Mockito.when(MacaroonBakery.getCaveats(macaroon)).thenReturn(macaroonCaveats);
-        Mockito.mockStatic(OffsetDateTime.class);
-        Mockito.when(OffsetDateTime.now(ZoneOffset.UTC)).thenReturn(timeNow);
-        Mockito.when(mockTokenDao.persistToken(Mockito.any())).thenReturn(persistedToken);
-        Mockito.when(bakery.serializeMacaroon(macaroon, true)).thenReturn(token_result.getBytes());
+        try (MockedStatic<OffsetDateTime> mockedStatic = Mockito.mockStatic(OffsetDateTime.class)) {
+            mockedStatic.when(() -> OffsetDateTime.now(ZoneOffset.UTC)).thenReturn(timeNow);
+            Mockito.when(mockTokenDao.persistToken(Mockito.any())).thenReturn(persistedToken);
+            Mockito.when(bakery.serializeMacaroon(macaroon, true)).thenReturn(token_result.getBytes());
 
-        TokenEntity actualResponse = tokenResource.createOrganizationToken(organizationPrincipal, null, authURL, optExpires);
+            TokenEntity actualResponse = tokenResource.createOrganizationToken(organizationPrincipal, null, authURL, optExpires);
 
-        assertEquals(persistedToken, actualResponse);
+            assertEquals(persistedToken, actualResponse);
+        }
     }
 
     @Test
