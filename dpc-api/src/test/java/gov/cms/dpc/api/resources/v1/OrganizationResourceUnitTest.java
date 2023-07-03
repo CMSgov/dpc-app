@@ -20,7 +20,6 @@ import javax.ws.rs.core.Response;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.openMocks;
@@ -41,6 +40,20 @@ public class OrganizationResourceUnitTest {
     }
 
     @Test
+    public void testSubmitOrganizationNoOrganization() {
+        Bundle bundle = new Bundle();
+
+        try {
+            orgResource.submitOrganization(bundle);
+            fail("This call is supposed to fail.");
+        } catch (WebApplicationException exc) {
+            String excMsg = "Bundle must include Organization";
+            assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), exc.getResponse().getStatus());
+            assertEquals(excMsg, exc.getMessage());
+        }
+    }
+
+    @Test
     public void testSubmitOrganizationNoEndpoints() {
         UUID orgID = UUID.randomUUID();
         Organization organization = new Organization();
@@ -48,7 +61,14 @@ public class OrganizationResourceUnitTest {
         Bundle bundle = new Bundle();
         bundle.addEntry().setResource(organization);
 
-        assertThrows(WebApplicationException.class, () -> orgResource.submitOrganization(bundle));
+        try {
+            orgResource.submitOrganization(bundle);
+            fail("This call is supposed to fail");
+        } catch (WebApplicationException exc) {
+            String excMsg = "Organization must have at least 1 endpoint";
+            assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), exc.getResponse().getStatus());
+            assertEquals(excMsg, exc.getMessage());
+        }
     }
 
     @Test
@@ -93,9 +113,10 @@ public class OrganizationResourceUnitTest {
         Organization organization = new Organization();
         organization.setId(orgID.toString());
 
-        IUpdateExecutable updateExec = mock(IUpdateExecutable.class);
         MethodOutcome outcome = mock(MethodOutcome.class);
         when(outcome.getResource()).thenReturn(organization);
+
+        IUpdateExecutable updateExec = mock(IUpdateExecutable.class);
         when(attributionClient
                 .update()
                 .resource(organization)
@@ -106,5 +127,30 @@ public class OrganizationResourceUnitTest {
 
         Organization actualResponse = orgResource.updateOrganization(orgID, organization);
         assertEquals(organization, actualResponse);
+    }
+
+    @Test
+    public void testUpdateOrganizationNoResource() {
+        UUID orgID = UUID.randomUUID();
+        Organization organization = new Organization();
+        organization.setId(orgID.toString());
+
+        IUpdateExecutable updateExec = mock(IUpdateExecutable.class);
+        when(attributionClient
+                .update()
+                .resource(organization)
+                .withId(orgID.toString())
+                .encodedJson()
+        ).thenReturn(updateExec);
+        when(updateExec.execute()).thenReturn(mock(MethodOutcome.class));
+
+        try {
+            orgResource.updateOrganization(orgID, organization);
+            fail("This call is supposed to fail.");
+        } catch (WebApplicationException exc) {
+            String excMsg = "Unable to update Organization";
+            assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), exc.getResponse().getStatus());
+            assertEquals(excMsg, exc.getMessage());
+        }
     }
 }
