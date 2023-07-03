@@ -1,14 +1,18 @@
 package gov.cms.dpc.api.resources.v1;
 
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IDeleteTyped;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.IReadExecutable;
+import ca.uhn.fhir.rest.gclient.IUpdateExecutable;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.jdbi.PublicKeyDAO;
 import gov.cms.dpc.api.jdbi.TokenDAO;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,10 +20,17 @@ import org.mockito.Answers;
 import org.mockito.Mock;
 
 import javax.ws.rs.core.Response;
-import java.util.*;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.openMocks;
 
 public class OrganizationResourceUnitTest {
@@ -70,8 +81,9 @@ public class OrganizationResourceUnitTest {
         Map<String, List<String>> searchParams = new HashMap<>();
         searchParams.put(
                 "organization",
-                Collections.singletonList(organizationPrincipal.getOrganization().getIdElement().getIdPart())
+                singletonList(organizationPrincipal.getOrganization().getIdElement().getIdPart())
         );
+        searchParams.put("identifier", singletonList(orgID.toString()));
         Bundle bundle = new Bundle();
 
         @SuppressWarnings("unchecked")
@@ -126,6 +138,22 @@ public class OrganizationResourceUnitTest {
 
     @Test
     public void testUpdateOrganization() {
-        // TODO
+        UUID orgID = UUID.randomUUID();
+        Organization organization = new Organization();
+        organization.setId(orgID.toString());
+
+        IUpdateExecutable updateExec = mock(IUpdateExecutable.class);
+        MethodOutcome outcome = mock(MethodOutcome.class);
+        when(outcome.getResource()).thenReturn(organization);
+        when(attributionClient
+                .update()
+                .resource(organization)
+                .withId(orgID.toString())
+                .encodedJson()
+        ).thenReturn(updateExec);
+        when(updateExec.execute()).thenReturn(outcome);
+
+        Organization actualResponse = orgResource.updateOrganization(orgID, organization);
+        assertEquals(organization, actualResponse);
     }
 }
