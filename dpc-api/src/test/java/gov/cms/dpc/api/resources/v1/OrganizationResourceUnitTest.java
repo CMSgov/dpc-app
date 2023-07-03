@@ -14,18 +14,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Answers;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 
 import javax.ws.rs.core.Response;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.*;
+import static org.mockito.MockitoAnnotations.openMocks;
 
 public class OrganizationResourceUnitTest {
 
@@ -33,12 +28,12 @@ public class OrganizationResourceUnitTest {
     IGenericClient attributionClient;
     OrganizationResource orgResource;
 
-    TokenDAO tokenDAO = Mockito.mock(TokenDAO.class);
-    PublicKeyDAO publicKeyDAO = Mockito.mock(PublicKeyDAO.class);
+    TokenDAO tokenDAO = mock(TokenDAO.class);
+    PublicKeyDAO publicKeyDAO = mock(PublicKeyDAO.class);
 
     @BeforeEach
     public void setUp() {
-        MockitoAnnotations.openMocks(this);
+        openMocks(this);
         orgResource = new OrganizationResource(attributionClient, tokenDAO, publicKeyDAO);
     }
 
@@ -51,16 +46,16 @@ public class OrganizationResourceUnitTest {
         bundle.addEntry().setResource(organization);
 
         @SuppressWarnings("unchecked")
-        IOperationUntypedWithInput<Bundle> organizationBundle = Mockito.mock(IOperationUntypedWithInput.class);
-        Mockito.when(attributionClient
+        IOperationUntypedWithInput<Bundle> organizationBundle = mock(IOperationUntypedWithInput.class);
+        when(attributionClient
                 .operation()
                 .onType(Organization.class)
                 .named("submit")
-                .withParameters(Mockito.any())
+                .withParameters(any())
                 .returnResourceType(Bundle.class)
                 .encodedJson()
         ).thenReturn(organizationBundle);
-        Mockito.when(organizationBundle.execute()).thenReturn(bundle);
+        when(organizationBundle.execute()).thenReturn(bundle);
 
         Organization actualResponse = orgResource.submitOrganization(bundle);
         assertEquals(organization, actualResponse);
@@ -80,14 +75,14 @@ public class OrganizationResourceUnitTest {
         Bundle bundle = new Bundle();
 
         @SuppressWarnings("unchecked")
-        IQuery<IBaseBundle> queryExec = Mockito.mock(IQuery.class, Answers.RETURNS_DEEP_STUBS);
+        IQuery<IBaseBundle> queryExec = mock(IQuery.class, Answers.RETURNS_DEEP_STUBS);
         @SuppressWarnings("unchecked")
-        IQuery<Bundle> mockQuery = Mockito.mock(IQuery.class);
+        IQuery<Bundle> mockQuery = mock(IQuery.class);
 
-        Mockito.when(attributionClient.search().forResource(Organization.class).encodedJson()).thenReturn(queryExec);
-        Mockito.when(queryExec.returnBundle(Bundle.class)).thenReturn(mockQuery);
-        Mockito.when(mockQuery.execute()).thenReturn(bundle);
-        Mockito.when(mockQuery.whereMap(searchParams)).thenReturn(mockQuery);
+        when(attributionClient.search().forResource(Organization.class).encodedJson()).thenReturn(queryExec);
+        when(queryExec.returnBundle(Bundle.class)).thenReturn(mockQuery);
+        when(mockQuery.execute()).thenReturn(bundle);
+        when(mockQuery.whereMap(searchParams)).thenReturn(mockQuery);
 
         Bundle actualResponse = orgResource.orgSearch(organizationPrincipal);
         assertEquals(bundle, actualResponse);
@@ -100,13 +95,17 @@ public class OrganizationResourceUnitTest {
         organization.setId(orgID.toString());
 
         @SuppressWarnings("unchecked")
-        IReadExecutable<Organization> readExec = Mockito.mock(IReadExecutable.class);
+        IReadExecutable<Organization> readExec = mock(IReadExecutable.class);
 
-        Mockito.when(attributionClient.read().resource(Organization.class).withId(orgID.toString()).encodedJson()).thenReturn(readExec);
-        Mockito.when(readExec.execute()).thenReturn(organization);
+        when(attributionClient
+                .read()
+                .resource(Organization.class)
+                .withId(orgID.toString())
+                .encodedJson()
+        ).thenReturn(readExec);
+        when(readExec.execute()).thenReturn(organization);
 
         Organization actualResponse = orgResource.getOrganization(orgID);
-
         assertEquals(organization, actualResponse);
     }
 
@@ -114,11 +113,14 @@ public class OrganizationResourceUnitTest {
     public void testDeleteOrganization() {
         UUID orgID = UUID.randomUUID();
 
-        IDeleteTyped delRet = Mockito.mock(IDeleteTyped.class);
-        Mockito.when(attributionClient.delete().resourceById(new IdType("Organization", orgID.toString())).encodedJson()).thenReturn(delRet);
+        IDeleteTyped delRet = mock(IDeleteTyped.class);
+        when(attributionClient
+                .delete()
+                .resourceById(new IdType("Organization", orgID.toString()))
+                .encodedJson()
+        ).thenReturn(delRet);
 
         Response actualResponse = orgResource.deleteOrganization(orgID);
-
         assertEquals(200, actualResponse.getStatus());
     }
 
