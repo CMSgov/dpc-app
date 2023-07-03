@@ -3,32 +3,24 @@ package gov.cms.dpc.api.resources.v1;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IDeleteTyped;
-import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
-import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.IReadExecutable;
 import ca.uhn.fhir.rest.gclient.IUpdateExecutable;
-import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.jdbi.PublicKeyDAO;
 import gov.cms.dpc.api.jdbi.TokenDAO;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Organization;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Answers;
 import org.mockito.Mock;
 
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
-import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.openMocks;
@@ -49,55 +41,14 @@ public class OrganizationResourceUnitTest {
     }
 
     @Test
-    public void testSubmitOrganization() {
+    public void testSubmitOrganizationNoEndpoints() {
         UUID orgID = UUID.randomUUID();
         Organization organization = new Organization();
         organization.setId(orgID.toString());
         Bundle bundle = new Bundle();
         bundle.addEntry().setResource(organization);
 
-        @SuppressWarnings("unchecked")
-        IOperationUntypedWithInput<Bundle> organizationBundle = mock(IOperationUntypedWithInput.class);
-        when(attributionClient
-                .operation()
-                .onType(Organization.class)
-                .named("submit")
-                .withParameters(any())
-                .returnResourceType(Bundle.class)
-                .encodedJson()
-        ).thenReturn(organizationBundle);
-        when(organizationBundle.execute()).thenReturn(bundle);
-
-        Organization actualResponse = orgResource.submitOrganization(bundle);
-        assertEquals(organization, actualResponse);
-    }
-
-    @Test
-    public void testOrgSearch() {
-        UUID orgID = UUID.randomUUID();
-        Organization organization = new Organization();
-        organization.setId(orgID.toString());
-        OrganizationPrincipal organizationPrincipal = new OrganizationPrincipal(organization);
-        Map<String, List<String>> searchParams = new HashMap<>();
-        searchParams.put(
-                "organization",
-                singletonList(organizationPrincipal.getOrganization().getIdElement().getIdPart())
-        );
-        searchParams.put("identifier", singletonList(orgID.toString()));
-        Bundle bundle = new Bundle();
-
-        @SuppressWarnings("unchecked")
-        IQuery<IBaseBundle> queryExec = mock(IQuery.class, Answers.RETURNS_DEEP_STUBS);
-        @SuppressWarnings("unchecked")
-        IQuery<Bundle> mockQuery = mock(IQuery.class);
-
-        when(attributionClient.search().forResource(Organization.class).encodedJson()).thenReturn(queryExec);
-        when(queryExec.returnBundle(Bundle.class)).thenReturn(mockQuery);
-        when(mockQuery.execute()).thenReturn(bundle);
-        when(mockQuery.whereMap(searchParams)).thenReturn(mockQuery);
-
-        Bundle actualResponse = orgResource.orgSearch(organizationPrincipal);
-        assertEquals(bundle, actualResponse);
+        assertThrows(WebApplicationException.class, () -> orgResource.submitOrganization(bundle));
     }
 
     @Test
