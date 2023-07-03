@@ -69,6 +69,7 @@ public class KeyResourceUnitTest {
         WebApplicationException exception = assertThrows(WebApplicationException.class,
                 () -> resource.getPublicKey(organizationPrincipal, publicKeyUUID));
         assertEquals(HttpStatus.SC_NOT_FOUND, exception.getResponse().getStatus());
+        assertEquals("Cannot find public key", exception.getMessage());
     }
 
     @Test
@@ -95,6 +96,7 @@ public class KeyResourceUnitTest {
         WebApplicationException exception = assertThrows(WebApplicationException.class,
                 () -> resource.deletePublicKey(organizationPrincipal, publicKeyUUID));
         assertEquals(HttpStatus.SC_NOT_FOUND, exception.getResponse().getStatus());
+        assertEquals("Cannot find certificate", exception.getMessage());
     }
 
     @Test
@@ -127,6 +129,7 @@ public class KeyResourceUnitTest {
         WebApplicationException exception = assertThrows(WebApplicationException.class,
                 () -> resource.submitKey(organizationPrincipal, keySignature, Optional.of(label)));
         assertEquals(HttpStatus.SC_BAD_REQUEST, exception.getResponse().getStatus());
+        assertEquals("Key label cannot be more than 25 characters", exception.getMessage());
     }
 
     @Test
@@ -137,5 +140,7 @@ public class KeyResourceUnitTest {
         WebApplicationException exception =  assertThrows(WebApplicationException.class,
                 () -> resource.submitKey(organizationPrincipal, keySignature, Optional.of("label")));
         assertEquals(HttpStatus.SC_BAD_REQUEST, exception.getResponse().getStatus());
+        assertEquals("Public key could not be parsed", exception.getMessage());
+
     }
 }
