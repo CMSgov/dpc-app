@@ -3,11 +3,14 @@ package gov.cms.dpc.api.resources.v1;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IDeleteTyped;
+import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import ca.uhn.fhir.rest.gclient.IReadExecutable;
 import ca.uhn.fhir.rest.gclient.IUpdateExecutable;
 import gov.cms.dpc.api.jdbi.PublicKeyDAO;
 import gov.cms.dpc.api.jdbi.TokenDAO;
+import gov.cms.dpc.testing.factories.OrganizationFactory;
 import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Endpoint;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,6 +24,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.openMocks;
@@ -38,6 +42,32 @@ public class OrganizationResourceUnitTest {
     public void setUp() {
         openMocks(this);
         orgResource = new OrganizationResource(attributionClient, tokenDAO, publicKeyDAO);
+    }
+
+    @Test
+    public void testSubmitOrganization() {
+        UUID orgID = UUID.randomUUID();
+        Organization organization = new Organization();
+        organization.setId(orgID.toString());
+        Bundle bundle = new Bundle();
+        bundle.addEntry().setResource(organization);
+        Endpoint endpoint = OrganizationFactory.createFakeEndpoint();
+        bundle.addEntry().setResource(endpoint);
+
+        @SuppressWarnings("unchecked")
+        IOperationUntypedWithInput<Organization> submitExec = mock(IOperationUntypedWithInput.class);
+        when(attributionClient
+                .operation()
+                .onType(Organization.class)
+                .named("submit")
+                .withParameters(any())
+                .returnResourceType(Organization.class)
+                .encodedJson()
+        ).thenReturn(submitExec);
+        when(submitExec.execute()).thenReturn(organization);
+
+        Organization actualResponse = orgResource.submitOrganization(bundle);
+        assertEquals(organization, actualResponse);
     }
 
     @Test
@@ -80,7 +110,6 @@ public class OrganizationResourceUnitTest {
 
         @SuppressWarnings("unchecked")
         IReadExecutable<Organization> readExec = mock(IReadExecutable.class);
-
         when(attributionClient
                 .read()
                 .resource(Organization.class)
