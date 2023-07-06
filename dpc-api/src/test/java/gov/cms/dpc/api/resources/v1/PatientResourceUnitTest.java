@@ -14,6 +14,7 @@ import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
+import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.queue.service.DataService;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
@@ -25,10 +26,12 @@ import org.mockito.Mock;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.UUID;
 
 import static gov.cms.dpc.api.APITestHelpers.createProvenance;
-import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -169,10 +172,11 @@ public class PatientResourceUnitTest {
         Bundle bundle = new Bundle();
         bundle.addEntry().setResource(patient);
         Provenance provenance = createProvenance(
-                orgId.toString(), practitionerId.toString(), singletonList(patientId.toString())
+                orgId.toString(), practitionerId.toString(), List.of(patientId.toString())
         );
 
         String since = "2000-01-01T12:00+00:00";
+        OffsetDateTime sinceTime = OffsetDateTime.parse(since, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
         HttpServletRequest request = mock(HttpServletRequest.class);
         String requestUrl = "http://localhost:3000/v1/Patient/12345/everything";
         String requestIp = "200.0.200.200";
@@ -180,8 +184,9 @@ public class PatientResourceUnitTest {
         when(request.getHeader(HttpHeaders.X_FORWARDED_FOR)).thenReturn(requestIp);
 
         when(dataService.retrieveData(
-                eq(orgId), eq(orgNpi), eq(pracNpi), eq(singletonList(patientMbi)), any(), any(), eq(requestIp), eq(requestUrl)
-        )).thenReturn(patient);
+                eq(orgId), eq(orgNpi), eq(pracNpi), eq(List.of(patientMbi)), eq(sinceTime), any(), eq(requestIp), eq(requestUrl),
+                eq(DPCResourceType.Patient), eq(DPCResourceType.ExplanationOfBenefit), eq(DPCResourceType.Coverage)
+        )).thenReturn(bundle);
         when(
                 bfdClient.requestPatientFromServer(anyString(), any(), any())
         ).thenReturn(bundle);
