@@ -2,10 +2,7 @@ package gov.cms.dpc.api.resources.v1;
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.gclient.ICreateTyped;
-import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
-import ca.uhn.fhir.rest.gclient.IReadExecutable;
-import ca.uhn.fhir.rest.gclient.IUpdateExecutable;
+import ca.uhn.fhir.rest.gclient.*;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationOptions;
 import ca.uhn.fhir.validation.ValidationResult;
@@ -16,6 +13,7 @@ import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.queue.service.DataService;
+import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,9 +30,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static gov.cms.dpc.api.APITestHelpers.createProvenance;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -195,20 +191,49 @@ public class PatientResourceUnitTest {
         assertEquals(bundle, actualResponse);
     }
 
-//    @Test
-//    public void testDeletePatient() {
-//        UUID patientId = UUID.randomUUID();
-//
-//        IDeleteTyped delResp = Mockito.mock(IDeleteTyped.class);
-//        Mockito.when(attributionClient
-//                .delete()
-//                .resourceById(new IdType("Patient", patientId.toString()))
-//                .encodedJson()
-//        ).thenReturn(delResp);
-//
-//        Response actualResponse = patientResource.deletePatient(patientId);
-//        assertEquals(200, actualResponse.getStatus());
-//    }
+    @Test
+    public void testEverythingNoPractitioner() {
+        UUID practitionerId = UUID.randomUUID();
+        UUID patientId = UUID.randomUUID();
+        UUID orgId = UUID.randomUUID();
+        Organization organization = new Organization();
+        organization.setId(orgId.toString());
+        OrganizationPrincipal organizationPrincipal = new OrganizationPrincipal(organization);
+        Provenance provenance = createProvenance(
+                orgId.toString(), practitionerId.toString(), List.of(patientId.toString())
+        );
+        String since = "2000-01-01T12:00+00:00";
+        HttpServletRequest request = mock(HttpServletRequest.class);
+
+        @SuppressWarnings("unchecked")
+        IReadExecutable<Practitioner> pracExec = mock(IReadExecutable.class);
+        when(
+                attributionClient.read().resource(Practitioner.class).withId(practitionerId.toString()).encodedJson()
+        ).thenReturn(pracExec);
+        when(pracExec.execute()).thenReturn(null);
+
+        try {
+            patientResource.everything(organizationPrincipal, provenance, patientId, since, request);
+            fail("This call is supposed to fail.");
+        } catch (WebApplicationException exc) {
+            assertEquals(HttpStatus.UNAUTHORIZED_401, exc.getResponse().getStatus());
+        }
+    }
+
+    @Test
+    public void testDeletePatient() {
+        UUID patientId = UUID.randomUUID();
+
+        IDeleteTyped delResp = mock(IDeleteTyped.class);
+        when(attributionClient
+                .delete()
+                .resourceById("Patient", patientId.toString())
+                .encodedJson()
+        ).thenReturn(delResp);
+
+        Response actualResponse = patientResource.deletePatient(patientId);
+        assertEquals(200, actualResponse.getStatus());
+    }
 
     @Test
     public void testUpdatePatient() {
