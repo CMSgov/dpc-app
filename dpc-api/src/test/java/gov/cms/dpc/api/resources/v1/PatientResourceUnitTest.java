@@ -60,11 +60,12 @@ public class PatientResourceUnitTest {
     }
 
     @Test
-    public void testPatientSearchNoIdentifier() {
+    public void testPatientSearch() {
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
         organization.setId(orgId.toString());
         OrganizationPrincipal organizationPrincipal = new OrganizationPrincipal(organization);
+        String patientMbi = "3aa0C00aA00";
         UUID patientId = UUID.randomUUID();
         Patient patient = new Patient();
         patient.setId(patientId.toString());
@@ -80,12 +81,12 @@ public class PatientResourceUnitTest {
                 .search()
                 .forResource(Patient.class)
                 .encodedJson()
-                .where(Patient.ORGANIZATION.hasId(orgId.toString()))
         ).thenReturn(queryExec);
-        when(queryExec.returnBundle(Bundle.class)).thenReturn(mockQuery);
+        when(queryExec.where(Patient.ORGANIZATION.hasId(orgId.toString())).returnBundle(Bundle.class)).thenReturn(mockQuery);
+        when(mockQuery.where(Patient.IDENTIFIER.exactly().identifier(patientMbi))).thenReturn(mockQuery);
         when(mockQuery.execute()).thenReturn(bundle);
 
-        Bundle actualResponse = patientResource.patientSearch(organizationPrincipal, null);
+        Bundle actualResponse = patientResource.patientSearch(organizationPrincipal, patientMbi);
         assertEquals(bundle, actualResponse);
     }
 
