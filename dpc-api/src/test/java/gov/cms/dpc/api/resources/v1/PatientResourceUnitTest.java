@@ -15,6 +15,7 @@ import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.queue.service.DataService;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -56,6 +57,36 @@ public class PatientResourceUnitTest {
     public void setUp() {
         openMocks(this);
         patientResource = new PatientResource(attributionClient, fhirValidator, dataService, bfdClient);
+    }
+
+    @Test
+    public void testPatientSearchNoIdentifier() {
+        UUID orgId = UUID.randomUUID();
+        Organization organization = new Organization();
+        organization.setId(orgId.toString());
+        OrganizationPrincipal organizationPrincipal = new OrganizationPrincipal(organization);
+        UUID patientId = UUID.randomUUID();
+        Patient patient = new Patient();
+        patient.setId(patientId.toString());
+        patient.setManagingOrganizationTarget(organization);
+        Bundle bundle = new Bundle();
+        bundle.addEntry().setResource(patient);
+
+        @SuppressWarnings("unchecked")
+        IQuery<IBaseBundle> queryExec = mock(IQuery.class, Answers.RETURNS_DEEP_STUBS);
+        @SuppressWarnings("unchecked")
+        IQuery<Bundle> mockQuery = mock(IQuery.class);
+        when(attributionClient
+                .search()
+                .forResource(Patient.class)
+                .encodedJson()
+                .where(Patient.ORGANIZATION.hasId(orgId.toString()))
+        ).thenReturn(queryExec);
+        when(queryExec.returnBundle(Bundle.class)).thenReturn(mockQuery);
+        when(mockQuery.execute()).thenReturn(bundle);
+
+        Bundle actualResponse = patientResource.patientSearch(organizationPrincipal, null);
+        assertEquals(bundle, actualResponse);
     }
 
     @Test
