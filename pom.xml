@@ -653,9 +653,6 @@
                         <exclude>**/*_.class</exclude>
                         <!--Exclude auto-generated JOOQ classes-->
                         <exclude>gov/cms/dpc/attribution/dao/**/*</exclude>
-                        <!-- Classes manually created using the UnitofWorkAwareProxyFactory are not instrumented correctly, so remove them from analysis, otherwise they show 0%-->
-                        <exclude>gov/cms/dpc/api/resources/v1/TokenResource*</exclude>
-                        <exclude>gov/cms/dpc/api/resources/v1/KeyResource*</exclude>
                         <!-- Exclude the cli commands, which we don't have tests for-->
                         <exclude>gov/cms/dpc/**/cli/**/*</exclude>
                         <!-- Exclude HL7 parsers, because they're too big-->
