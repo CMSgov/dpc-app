@@ -66,9 +66,9 @@ public class PatientResourceUnitTest {
         organization.setId(orgId.toString());
         OrganizationPrincipal organizationPrincipal = new OrganizationPrincipal(organization);
         String patientMbi = "3aa0C00aA00";
-        UUID patientId = UUID.randomUUID();
+        String expandedMbi = String.format("%s|%s", DPCIdentifierSystem.MBI.getSystem(), patientMbi);
         Patient patient = new Patient();
-        patient.setId(patientId.toString());
+        patient.addIdentifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue(patientMbi);
         patient.setManagingOrganizationTarget(organization);
         Bundle bundle = new Bundle();
         bundle.addEntry().setResource(patient);
@@ -83,10 +83,37 @@ public class PatientResourceUnitTest {
                 .encodedJson()
         ).thenReturn(queryExec);
         when(queryExec.where(Patient.ORGANIZATION.hasId(orgId.toString())).returnBundle(Bundle.class)).thenReturn(mockQuery);
-        when(mockQuery.where(Patient.IDENTIFIER.exactly().identifier(patientMbi))).thenReturn(mockQuery);
+        when(mockQuery.where(Patient.IDENTIFIER.exactly().identifier(expandedMbi))).thenReturn(mockQuery);
         when(mockQuery.execute()).thenReturn(bundle);
 
         Bundle actualResponse = patientResource.patientSearch(organizationPrincipal, patientMbi);
+        assertEquals(bundle, actualResponse);
+    }
+
+    @Test
+    public void testPatientSearchNoIdentifier() {
+        UUID orgId = UUID.randomUUID();
+        Organization organization = new Organization();
+        organization.setId(orgId.toString());
+        OrganizationPrincipal organizationPrincipal = new OrganizationPrincipal(organization);
+        Patient patient = new Patient();
+        patient.setManagingOrganizationTarget(organization);
+        Bundle bundle = new Bundle();
+        bundle.addEntry().setResource(patient);
+
+        @SuppressWarnings("unchecked")
+        IQuery<IBaseBundle> queryExec = mock(IQuery.class, Answers.RETURNS_DEEP_STUBS);
+        @SuppressWarnings("unchecked")
+        IQuery<Bundle> mockQuery = mock(IQuery.class);
+        when(attributionClient
+                .search()
+                .forResource(Patient.class)
+                .encodedJson()
+        ).thenReturn(queryExec);
+        when(queryExec.where(Patient.ORGANIZATION.hasId(orgId.toString())).returnBundle(Bundle.class)).thenReturn(mockQuery);
+        when(mockQuery.execute()).thenReturn(bundle);
+
+        Bundle actualResponse = patientResource.patientSearch(organizationPrincipal, null);
         assertEquals(bundle, actualResponse);
     }
 
