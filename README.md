@@ -11,9 +11,13 @@ This document serves as a guide for running the Data at the Point of Care (DPC) 
 <!-- TOC -->
 ## Table of Contents
 * [What Is DPC?](#what-is-dpc)
-* [Tech Environment](#tech-environment)
-   * [Required tools and languages](#required-tools-and-languages)
+* [Components](#components)
+  * [Main Services](#main-services)
+  * [Shared Modules](#shared-modules)
+* [Local Development Setup](#tech-environment)
+   * [Required Dependencies](#required-dependencies)
    * [Recommended tools](#recommended-tools)
+   * [Installing and Using Pre-Commit](#installing-and-using-pre-commit)
  * [Decrypting Encrypted Files](#decrypting-encrypted-files)
  * [Required Services](#required-services)
  * [Building DPC](#building-dpc)
@@ -35,11 +39,8 @@ This document serves as a guide for running the Data at the Point of Care (DPC) 
     * [Sensitive Docker configuration files](#sensitive-docker-configuration-files)
     * [Managing encrypted files](#managing-encrypted-files)
     * [BFD transaction time details](#bfd-transaction-time-details)
-    * [Installing and Using Pre-Commit](#installing-and-using-pre-commit)
   * [Troubleshooting](#troubleshooting) 
 <!-- TOC -->
-
-
 
 
 ## What Is DPC?
@@ -48,28 +49,88 @@ DPC is a pilot application programming interface (API) whose goal is to enable h
 providers to deliver high quality care directly to Medicare beneficiaries. See 
 [DPC One-Pager](https://dpc.cms.gov/assets/downloads/dpc-one-pager.pdf) and the [DPC Website](https://dpc.cms.gov/) to learn more about the API.
 
-## Tech Environment
+## Components
+
+#### Main Services
+
+The DPC application is split into multiple services.
+
+|Service|User-facing|Description|Stack|
+|---|---|---|---|
+|[dpc-web](/dpc-web)|User-facing|Portal for managing organizations|Ruby on Rails|
+|[dpc-admin](/dpc-admin)|Internal|Administrative Portal for managing organizations|Ruby on Rails|
+|[dpc-api](/dpc-api)|User-facing|Asynchronous FHIR API for managing organizations and requesting or retrieving data|Java (Dropwizard)|
+|[dpc-attribution](/dpc-attribution)|Internal|Manages attribution data|Java (Dropwizard)|
+|[dpc-queue](/dpc-queue)|Manages export jobs|Java (Dropwizard)|
+|[dpc-aggregation](/dpc-aggregation)|Internal|Pulls data for a single batch in a job|Java (Dropwizard + RxJava)|
+|[dpc-consent](/dpc-consent)|Internal|Manages data-sharing consent|Java (Dropwizard)|
+
+#### Shared Modules
+
+In addition to services, several modules are shared across components.
+
+|Module Name|Description|Stack|
+|---|---|---|
+|[dpc-bluebutton](/dpc-bluebutton)|Bluebutton API Client|Java|
+|[dpc-macaroons](/dpc-macaroons)|Implementation of macaroons for authentication|Java|
+|[dpc-common](/dpc-common)|Shared utilities for components|Java|
+|[dpc-testing](/dpc-testing)|Shared utilities for testing|Java|
+|[dpc-smoketest](/dpc-smoketest)|Smoke test suite|Java|
+
+## Local Development Setup
 ###### [`^`](#table-of-contents)
 
-### Required tools and languages
+### Required Dependencies
 
-- Python 3 and `pip`
-- Java 11 and `mvn`
-- Go
+When running the applications locally, you'll want to run everything through Docker. This simplifies the process of spinning up multiple services, connecting them together, and upgrading tooling versions over time.
+
+In that scenario, you only need the following dependencies:
+
+- Install [Ansible Vault](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html#)
+- Install [Docker Desktop](https://docs.docker.com/install/) (make sure to allocate more than the default 2Gb of memory)
+- Install [Pre-commit](https://pre-commit.com/) with [Gitleaks](https://github.com/gitleaks/gitleaks)
+
+If you want to build applications locally, you'll need the following tools:
+
+- Java 11 and Maven (`mvn`)
 - Ruby and `bundler`
-- `npm`
-- [Ansible Vault](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html#)
-- Docker (make sure to allocate more than the default 2Gb of memory)
-- [AWS CLI](https://aws.amazon.com/cli/)
 
+In addition, it's helpful to have the following installed for more specific scenarios:
+
+- Running [smoke tests](#smoke-tests): Python 3 (includes `pip`)
+- Running [postman tests](#postman-collection): Node.js (includes `npm`)
 
 ### Recommended tools
 
-- [PgAdmin](https://pgadmin.org) or [Postico](https://postico.com) *(MacOS)*
-- JetBrains [Intelli-J Idea IDE](https://jetbrains.com/idea)
-- [Docker Desktop](https://docs.docker.com/desktop/mac/install/)
-- [Postman](https://www.postman.com/downloads/)
+For development, we recommend the following tooling:
 
+- Code Editor: JetBrains [Intelli-J Idea IDE](https://jetbrains.com/idea) or [Visual Studio Code](https://code.visualstudio.com/)
+- Database browser: [PgAdmin](https://pgadmin.org) or [Postico](https://postico.com) *(MacOS)*
+- API browser and testing tool: [Postman](https://www.postman.com/downloads/)
+
+### Installing and Using Pre-commit
+
+Anyone committing to this repo must use the pre-commit hook to lower the likelihood that secrets will be exposed.
+
+#### Step 1: Install pre-commit
+
+You can install pre-commit using the MacOS package manager Homebrew:
+
+```sh
+brew install pre-commit
+```
+
+Other installation options can be found in the [pre-commit documentation](https://pre-commit.com/#install).
+
+#### Step 2: Install the hooks
+
+Run the following command to install the gitleaks hook:
+
+```sh
+pre-commit install
+```
+
+This will download and install the pre-commit hooks specified in `.pre-commit-config.yaml`.
 
 
 ## Decrypting Encrypted Files
@@ -311,7 +372,7 @@ You will need to set the Accept header to `application/fhir+json` (per the FHIR 
 
 ### Smoke tests
 
-Smoke tests are provided by [Taurus](https://github.com/Blazemeter/taurus) and [JMeter](https://jmeter.apache.org).
+s are provided by [Taurus](https://github.com/Blazemeter/taurus) and [JMeter](https://jmeter.apache.org).
 The tests can be run by the environment-specific Makefile commands (e.g., `make smoke/local` will run the smoke tests against the locally running Docker instances).
 
 In order to run the tests, you'll need to ensure that `virtualenv` is installed.
@@ -416,31 +477,6 @@ Therefore, using a fake patient ID which is guaranteed not to match is an easy w
   ]
 }
 ```
-
-
-### Installing and Using Pre-commit
-
-Anyone committing to this repo must use the pre-commit hook to lower the likelihood that secrets will be exposed.
-
-#### Step 1: Install pre-commit
-
-You can install pre-commit using the MacOS package manager Homebrew:
-
-```sh
-brew install pre-commit
-```
-
-Other installation options can be found in the [pre-commit documentation](https://pre-commit.com/#install).
-
-#### Step 2: Install the hooks
-
-Run the following command to install the gitleaks hook:
-
-```sh
-pre-commit install
-```
-
-This will download and install the pre-commit hooks specified in `.pre-commit-config.yaml`.
 
 ## Troubleshooting  
 ###### [`^`](#table-of-contents)
