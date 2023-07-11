@@ -139,19 +139,23 @@ The fastest way to get started with building and running the applications is to 
 ## Decrypting Encrypted Files
 ###### [`^`](#table-of-contents)
 
+The files committed in the `ops/config/encrypted` directory hold secret information, and are encrypted with [Ansible Vault](https://docs.ansible.com/ansible/2.4/vault.html).
 
 Before building the app or running any tests, the decrypted secrets must be available as environment variables.
 
-In order to encrypt and decrypt configuration variables, you must create a `.vault_password` file in this repository root directory. Contact another team member to gain access to the vault password.
-
-In the cloned project, you will find a couple of encrypted files located at  `dpc-app/ops/config/encrypted` that will need to be decrypted before proceeding.
+In order to encrypt and decrypt configuration variables, you must create a `.vault_password` file in the root directory. Contact another team member to gain access to the vault password.
 
 Run `make secure-envs` to decrypt the encrypted files. If decrypted successfully, you will see the decrypted data in new files under `/ops/config/decrypted` with the same names as the corresponding encrypted files.
 
-This command also creates a git pre-commit hook in order to avoid accidentally committing a decrypted file.
+### Re-encrypting files
 
-**Note**: See [Secrets Management](#secrets-management) for details on how to encrypt and decrypt required secrets.
+To re-encrypt files after updating them, you can run the following command:
 
+```
+./ops/scripts/secrets --encrypt <filename>
+```
+
+Note that this will always generate a unique hash, even if you didn't change the file.
 ## Required Services 
 ###### [`^`](#table-of-contents)
 
@@ -412,46 +416,8 @@ Once the development environment is up and running, you should now be able to ru
 - Create export data request
 
 
-In order to encrypt and decrypt configuration variables, you must create a `.vault_password` file in this repository root directory and in the `/dpc-go/dpc-attribution` directory. Contact another team member to gain access to the vault password.
-
-**Important Note:** Files containing sensitive information are enumerated in the `.secrets` file in this directory. If you want to protect the contents of a file using the `ops/scripts/secrets` helper script, it must match a pattern listed in `.secrets`.
-
-To avoid committing and pushing unencrypted secret files, use the included `ops/scripts/pre-commit` Git pre-commit hook from this directory:
-
-
-## Secrets Management
+## Other Notes
 ###### [`^`](#table-of-contents)
-
-> Note: You can use `make secure-envs` to decrypt files and create the pre-commit hook at the same time.
-
-### Sensitive Docker configuration files  
-
-
-The files committed in the `ops/config/encrypted` directory hold secret information, and are encrypted with [Ansible Vault](https://docs.ansible.com/ansible/2.4/vault.html).
-
-In order to encrypt and decrypt configuration variables, you must create a `.vault_password` file in this repository root directory and in the `/dpc-go/dpc-attribution` directory. Contact another team member to gain access to the vault password.
-
-**IMPORTANT:** Files containing sensitive information are enumerated in the `.secrets` file in this directory. If you want to protect the contents of a file using the `ops/scripts/secrets` helper script, it must match a pattern listed in `.secrets`.
-
-To avoid committing and pushing unencrypted secret files, use the included `ops/scripts/pre-commit` Git pre-commit hook from this directory:
-
-```
-cp ops/scripts/pre-commit .git/hooks
-```
-
-### Managing encrypted files  
-
-* Temporarily decrypt files by running the following command from this directory:
-```
-./ops/scripts/secrets --decrypt
-```
-
-* While files are decrypted, copy the files from `ops/config/encrypted` to the sibling directory `ops/config/decrypted`.
-
-* Encrypt changed files with:
-```
-./ops/scripts/secrets --encrypt <filename>
-```
 
 ### BFD transaction time details   
 
