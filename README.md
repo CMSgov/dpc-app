@@ -152,7 +152,13 @@ Before building the app or running any tests, the decrypted secrets must be avai
 
 In order to encrypt and decrypt configuration variables, you must create a `.vault_password` file in the root directory. Contact another team member to gain access to the vault password.
 
-Run `make secure-envs` to decrypt the encrypted files. If decrypted successfully, you will see the decrypted data in new files under `/ops/config/decrypted` with the same names as the corresponding encrypted files.
+Run the following to decrypt the encrypted files:
+
+```sh
+make secure-envs
+```
+
+If decrypted successfully, you will see the decrypted data in new files under `/ops/config/decrypted` with the same names as the corresponding encrypted files.
 
 ### Re-encrypting files
 
@@ -178,11 +184,9 @@ docker-compose up start_core_dependencies
 ## Building the DPC API
 ###### [`^`](#table-of-contents)
 
-Before building the DPC API, you must first ensure that [the required secrets are decrypted](#decrypting-encrypted-files). 
-
 ### How the API Works
 
-By default, the APi components will attempt to connect to the `dpc_attribution`, `dpc_queue`, and `dpc_auth` databases on the localhost as the `postgres` user with a password of `dpc-safe`.
+By default, the API components will attempt to connect to the `dpc_attribution`, `dpc_queue`, and `dpc_auth` databases on the localhost as the `postgres` user with a password of `dpc-safe`.
 
 All of these databases should be created automatically from the previous step. When the API applications start, migrations will run and initialize the databases with the correct tables and data. If this behavior is not desired, set an environment variable of `DB_MIGRATION=0`.
 
