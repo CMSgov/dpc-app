@@ -55,15 +55,15 @@ providers to deliver high quality care directly to Medicare beneficiaries. See
 
 The DPC application is split into multiple services.
 
-|Service|User-facing|Description|Stack|
+|Service|Type|Description|Stack|
 |---|---|---|---|
-|[dpc-web](/dpc-web)|User-facing|Portal for managing organizations|Ruby on Rails|
-|[dpc-admin](/dpc-admin)|Internal|Administrative Portal for managing organizations|Ruby on Rails|
-|[dpc-api](/dpc-api)|User-facing|Asynchronous FHIR API for managing organizations and requesting or retrieving data|Java (Dropwizard)|
-|[dpc-attribution](/dpc-attribution)|Internal|Manages attribution data|Java (Dropwizard)|
-|[dpc-queue](/dpc-queue)|Manages export jobs|Java (Dropwizard)|
-|[dpc-aggregation](/dpc-aggregation)|Internal|Pulls data for a single batch in a job|Java (Dropwizard + RxJava)|
-|[dpc-consent](/dpc-consent)|Internal|Manages data-sharing consent|Java (Dropwizard)|
+|[dpc-web](/dpc-web)|Public Portal|Portal for managing organizations|Ruby on Rails|
+|[dpc-admin](/dpc-admin)|Internal Portal|Administrative Portal for managing organizations|Ruby on Rails|
+|[dpc-api](/dpc-api)|Public API|Asynchronous FHIR API for managing organizations and requesting or retrieving data|Java (Dropwizard)|
+|[dpc-attribution](/dpc-attribution)|Internal API|Provides and updates data about attribution|Java (Dropwizard)|
+|[dpc-consent](/dpc-consent)|Internal API|Provides and updates information about data-sharing consent for individuals|Java (Dropwizard)|
+|[dpc-queue](/dpc-queue)|Internal API|Provides and updates data about export jobs and batches|Java (Dropwizard)|
+|[dpc-aggregation](/dpc-aggregation)|Internal Worker Service|Polls for job batches and exports data for singular batches|Java (Dropwizard + RxJava)|
 
 #### Shared Modules
 
