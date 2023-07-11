@@ -132,6 +132,9 @@ pre-commit install
 
 This will download and install the pre-commit hooks specified in `.pre-commit-config.yaml`.
 
+### Quickstart
+
+The fastest way to get started with building and running the applications is to follow [the Quickstart guide](/QuickStart.md). However, you can see below for more granular details.
 
 ## Decrypting Encrypted Files
 ###### [`^`](#table-of-contents)
@@ -372,7 +375,7 @@ You will need to set the Accept header to `application/fhir+json` (per the FHIR 
 
 ### Smoke tests
 
-s are provided by [Taurus](https://github.com/Blazemeter/taurus) and [JMeter](https://jmeter.apache.org).
+Smoke tests are provided by [Taurus](https://github.com/Blazemeter/taurus) and [JMeter](https://jmeter.apache.org).
 The tests can be run by the environment-specific Makefile commands (e.g., `make smoke/local` will run the smoke tests against the locally running Docker instances).
 
 In order to run the tests, you'll need to ensure that `virtualenv` is installed.
