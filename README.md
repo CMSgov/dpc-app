@@ -11,16 +11,23 @@ This document serves as a guide for running the Data at the Point of Care (DPC) 
 <!-- TOC -->
 ## Table of Contents
 * [What Is DPC?](#what-is-dpc)
-* [Tech Environment](#tech-environment)
-   * [Required tools and languages](#required-tools-and-languages)
+* [Components](#components)
+  * [Main Services](#main-services)
+  * [Shared Modules](#shared-modules)
+* [Local Development Setup](#tech-environment)
+   * [Required Dependencies](#required-dependencies)
    * [Recommended tools](#recommended-tools)
- * [Decrypting Encrypted Files](#decrypting-encrypted-files)
- * [Required Services](#required-services)
- * [Building DPC](#building-dpc)
+   * [Installing and Using Pre-Commit](#installing-and-using-pre-commit)
+   * [Quickstart](#quickstart)
+ * [Managing Encrypted Files](#managing-encrypted-files)
+   * [Re-encrypting files](#re-encrypting-files)
+ * [Starting the Database](#starting-the-database)
+ * [Building the DPC API](#building-dpc)
+     * [How the API Works](#how-the-api-works)
      * [Option 1: Full integration test](#option-1-full-integration-test)
      * [Option 2: Manually](#option-2-manually)
-  * [Running DPC](#running-dpc)
-     * [Running DPC via Docker](#running-dpc-via-docker)
+  * [Running the DPC API](#running-dpc)
+     * [Running the DPC API via Docker](#running-dpc-via-docker)
      * [Generating a golden macaroon](#generating-a-golden-macaroon)
      * [Manual JAR execution](#manual-jar-execution)
   * [Seeding the Database](#seeding-the-database)
@@ -31,15 +38,10 @@ This document serves as a guide for running the Data at the Point of Care (DPC) 
   * [Generating the Source Code Documentation via JavaDoc](#generating-the-source-code-documentation-via-javadoc)
   * [Building the Additional Services](#building-the-additional-services)
     * [Postman collection](#postman-collection)
-  * [Secrets Management](#secrets-management)
-    * [Sensitive Docker configuration files](#sensitive-docker-configuration-files)
-    * [Managing encrypted files](#managing-encrypted-files)
+  * [Other Notes](#other-notes)
     * [BFD transaction time details](#bfd-transaction-time-details)
-    * [Installing and Using Pre-Commit](#installing-and-using-pre-commit)
   * [Troubleshooting](#troubleshooting) 
 <!-- TOC -->
-
-
 
 
 ## What Is DPC?
@@ -48,47 +50,124 @@ DPC is a pilot application programming interface (API) whose goal is to enable h
 providers to deliver high quality care directly to Medicare beneficiaries. See 
 [DPC One-Pager](https://dpc.cms.gov/assets/downloads/dpc-one-pager.pdf) and the [DPC Website](https://dpc.cms.gov/) to learn more about the API.
 
-## Tech Environment
+## Components
+
+#### Main Services
+
+The DPC application is split into multiple services.
+
+|Service|Type|Description|Stack|
+|---|---|---|---|
+|[dpc-web](/dpc-web)|Public Portal|Portal for managing organizations|Ruby on Rails|
+|[dpc-admin](/dpc-admin)|Internal Portal|Administrative Portal for managing organizations|Ruby on Rails|
+|[dpc-api](/dpc-api)|Public API|Asynchronous FHIR API for managing organizations and requesting or retrieving data|Java (Dropwizard)|
+|[dpc-attribution](/dpc-attribution)|Internal API|Provides and updates data about attribution|Java (Dropwizard)|
+|[dpc-consent](/dpc-consent)|Internal API|Provides and updates information about data-sharing consent for individuals|Java (Dropwizard)|
+|[dpc-queue](/dpc-queue)|Internal API|Provides and updates data about export jobs and batches|Java (Dropwizard)|
+|[dpc-aggregation](/dpc-aggregation)|Internal Worker Service|Polls for job batches and exports data for singular batches|Java (Dropwizard + RxJava)|
+
+#### Shared Modules
+
+In addition to services, several modules are shared across components.
+
+|Module Name|Description|Stack|
+|---|---|---|
+|[dpc-bluebutton](/dpc-bluebutton)|Bluebutton API Client|Java|
+|[dpc-macaroons](/dpc-macaroons)|Implementation of macaroons for authentication|Java|
+|[dpc-common](/dpc-common)|Shared utilities for components|Java|
+|[dpc-testing](/dpc-testing)|Shared utilities for testing|Java|
+|[dpc-smoketest](/dpc-smoketest)|Smoke test suite|Java|
+
+## Local Development Setup
 ###### [`^`](#table-of-contents)
 
-### Required tools and languages
+### Required Dependencies
 
-- Python 3 and `pip`
-- Java 11 and `mvn`
-- Go
+When running the applications locally, you'll want to run everything through Docker. This simplifies the process of spinning up multiple services, connecting them together, and upgrading tooling versions over time.
+
+In that scenario, you only need the following dependencies:
+
+- Install [Ansible Vault](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html#)
+- Install [Docker Desktop](https://docs.docker.com/install/) (make sure to allocate more than the default 2Gb of memory)
+- Install [Pre-commit](https://pre-commit.com/) with [Gitleaks](https://github.com/gitleaks/gitleaks)
+
+If you want to build applications locally, you'll need the following tools:
+
 - Ruby and `bundler`
-- `npm`
-- [Ansible Vault](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html#)
-- Docker (make sure to allocate more than the default 2Gb of memory)
-- [AWS CLI](https://aws.amazon.com/cli/)
+- Java 11 and Maven (`mvn`)
 
+> **Note:** DPC only supports Java 11 due to our use of new languages features, which prevents using older JDK versions. 
+>
+> In addition, some of the upstream dependencies have not been updated to support Java 12 and newer, but we plan on adding support at a later date. 
+
+In addition, it's helpful to have the following installed for more specific scenarios:
+
+- Running [smoke tests](#smoke-tests): Python 3 (includes `pip`)
+- Running [postman tests](#postman-collection): Node.js (includes `npm`)
 
 ### Recommended tools
 
-- [PgAdmin](https://pgadmin.org) or [Postico](https://postico.com) *(MacOS)*
-- JetBrains [Intelli-J Idea IDE](https://jetbrains.com/idea)
-- [Docker Desktop](https://docs.docker.com/desktop/mac/install/)
-- [Postman](https://www.postman.com/downloads/)
+For development, we recommend the following tooling:
 
+- Code Editor: JetBrains [Intelli-J Idea IDE](https://jetbrains.com/idea) or [Visual Studio Code](https://code.visualstudio.com/)
+- Database browser: [PgAdmin](https://pgadmin.org) or [Postico](https://postico.com) *(MacOS)*
+- API browser and testing tool: [Postman](https://www.postman.com/downloads/)
 
+### Installing and Using Pre-commit
 
-## Decrypting Encrypted Files
+Anyone committing to this repo must use the pre-commit hook to lower the likelihood that secrets will be exposed.
+
+#### Step 1: Install pre-commit
+
+You can install pre-commit using the MacOS package manager Homebrew:
+
+```sh
+brew install pre-commit
+```
+
+Other installation options can be found in the [pre-commit documentation](https://pre-commit.com/#install).
+
+#### Step 2: Install the hooks
+
+Run the following command to install the gitleaks hook:
+
+```sh
+pre-commit install
+```
+
+This will download and install the pre-commit hooks specified in `.pre-commit-config.yaml`.
+
+### Quickstart
+
+The fastest way to get started with building and running the applications is to follow [the Quickstart guide](/QuickStart.md). However, you can see below for more granular details.
+
+## Managing Encrypted Files
 ###### [`^`](#table-of-contents)
 
+The files committed in the `ops/config/encrypted` directory hold secret information, and are encrypted with [Ansible Vault](https://docs.ansible.com/ansible/2.4/vault.html).
 
 Before building the app or running any tests, the decrypted secrets must be available as environment variables.
 
-In order to encrypt and decrypt configuration variables, you must create a `.vault_password` file in this repository root directory. Contact another team member to gain access to the vault password.
+In order to encrypt and decrypt configuration variables, you must create a `.vault_password` file in the root directory. Contact another team member to gain access to the vault password.
 
-In the cloned project, you will find a couple of encrypted files located at  `dpc-app/ops/config/encrypted` that will need to be decrypted before proceeding.
+Run the following to decrypt the encrypted files:
 
-Run `make secure-envs` to decrypt the encrypted files. If decrypted successfully, you will see the decrypted data in new files under `/ops/config/decrypted` with the same names as the corresponding encrypted files.
+```sh
+make secure-envs
+```
 
-This command also creates a git pre-commit hook in order to avoid accidentally committing a decrypted file.
+If decrypted successfully, you will see the decrypted data in new files under `/ops/config/decrypted` with the same names as the corresponding encrypted files.
 
-**Note**: See [Secrets Management](#secrets-management) for details on how to encrypt and decrypt required secrets.
+### Re-encrypting files
 
-## Required Services 
+To re-encrypt files after updating them, you can run the following command:
+
+```
+./ops/scripts/secrets --encrypt <filename>
+```
+
+Note that this will always generate a unique hash, even if you didn't change the file.
+## Starting the Database
 ###### [`^`](#table-of-contents)
 
 
@@ -100,8 +179,14 @@ docker-compose up start_core_dependencies
 
 **Warning**: If you do have an existing Postgres database running on port 5342, docker-compose **will not** alert you to the port conflict. Ensure any local Postgres databases are stopped before starting docker-compose.
 
-By default, the application attempts to connect to the `dpc_attribution`, `dpc_queue`, and `dpc_auth` databases on the localhost as the `postgres` user with a password of `dpc-safe`.
-When using docker-compose, all the required databases will be created automatically. Upon container startup, the databases will be initialized automatically with all the correct data. If this behavior is not desired, set an environment variable of `DB_MIGRATION=0`.
+## Building the DPC API
+###### [`^`](#table-of-contents)
+
+### How the API Works
+
+By default, the API components will attempt to connect to the `dpc_attribution`, `dpc_queue`, and `dpc_auth` databases on the localhost as the `postgres` user with a password of `dpc-safe`.
+
+All of these databases should be created automatically from the previous step. When the API applications start, migrations will run and initialize the databases with the correct tables and data. If this behavior is not desired, set an environment variable of `DB_MIGRATION=0`.
 
 The defaults can be overridden in the configuration files.
 Common configuration options (such as database connection strings) are stored in a [server.conf](src/main/resources/server.conf) file and included in the various modules via the `include "server.conf"` attribute in module application config files.
@@ -123,15 +208,7 @@ dpc.attribution {
 **Note**: On startup, the services look for a local override file (application.local.conf) in the root of their *current* working directory. This can create an issue when running tests with IntelliJ. The default sets the working directory to be the module root, which means any local overrides are ignored.
 This can be fixed by setting the working directory to the project root, but needs to be done manually.
 
-## Building DPC
-###### [`^`](#table-of-contents)
-
-Before building DPC, you must first ensure that [the required secrets are decrypted](#decrypting-encrypted-files). 
-
 ### There are two ways to build DPC:
-
-**Note**: DPC only supports Java 11 due to our use of new languages features, which prevents using older JDK versions.
-In addition, some of upstream dependencies have not been updated to support Java 12 and newer, but we plan on adding support at a later date. 
 
 ##### Option 1: Full integration test
 
@@ -150,12 +227,12 @@ Running `mvn clean install` will also construct the Docker images for the indivi
 
 Note that the `dpc-base` image produced by `make docker-base` is not stored in a remote repository. The `mvn clean install` process relies on the base image being available via the local Docker daemon.
 
-## Running DPC
+## Running the DPC API
 ###### [`^`](#table-of-contents)
 
 Once the JARs are built, they can be run in two ways, either via [`docker-compose`](https://docs.docker.com/compose/overview/) or by manually running the JARs.
 
-### Running DPC via Docker 
+### Running the DPC API via Docker 
 
 Click on [Install Docker](https://www.docker.com/products/docker-desktop) to set up Docker.
 The application (along with all required dependencies) can be automatically started with the following command: `make start-app`. 
@@ -348,46 +425,8 @@ Once the development environment is up and running, you should now be able to ru
 - Create export data request
 
 
-In order to encrypt and decrypt configuration variables, you must create a `.vault_password` file in this repository root directory and in the `/dpc-go/dpc-attribution` directory. Contact another team member to gain access to the vault password.
-
-**Important Note:** Files containing sensitive information are enumerated in the `.secrets` file in this directory. If you want to protect the contents of a file using the `ops/scripts/secrets` helper script, it must match a pattern listed in `.secrets`.
-
-To avoid committing and pushing unencrypted secret files, use the included `ops/scripts/pre-commit` Git pre-commit hook from this directory:
-
-
-## Secrets Management
+## Other Notes
 ###### [`^`](#table-of-contents)
-
-> Note: You can use `make secure-envs` to decrypt files and create the pre-commit hook at the same time.
-
-### Sensitive Docker configuration files  
-
-
-The files committed in the `ops/config/encrypted` directory hold secret information, and are encrypted with [Ansible Vault](https://docs.ansible.com/ansible/2.4/vault.html).
-
-In order to encrypt and decrypt configuration variables, you must create a `.vault_password` file in this repository root directory and in the `/dpc-go/dpc-attribution` directory. Contact another team member to gain access to the vault password.
-
-**IMPORTANT:** Files containing sensitive information are enumerated in the `.secrets` file in this directory. If you want to protect the contents of a file using the `ops/scripts/secrets` helper script, it must match a pattern listed in `.secrets`.
-
-To avoid committing and pushing unencrypted secret files, use the included `ops/scripts/pre-commit` Git pre-commit hook from this directory:
-
-```
-cp ops/scripts/pre-commit .git/hooks
-```
-
-### Managing encrypted files  
-
-* Temporarily decrypt files by running the following command from this directory:
-```
-./ops/scripts/secrets --decrypt
-```
-
-* While files are decrypted, copy the files from `ops/config/encrypted` to the sibling directory `ops/config/decrypted`.
-
-* Encrypt changed files with:
-```
-./ops/scripts/secrets --encrypt <filename>
-```
 
 ### BFD transaction time details   
 
@@ -416,31 +455,6 @@ Therefore, using a fake patient ID which is guaranteed not to match is an easy w
   ]
 }
 ```
-
-
-### Installing and Using Pre-commit
-
-Anyone committing to this repo must use the pre-commit hook to lower the likelihood that secrets will be exposed.
-
-#### Step 1: Install pre-commit
-
-You can install pre-commit using the MacOS package manager Homebrew:
-
-```sh
-brew install pre-commit
-```
-
-Other installation options can be found in the [pre-commit documentation](https://pre-commit.com/#install).
-
-#### Step 2: Install the hooks
-
-Run the following command to install the gitleaks hook:
-
-```sh
-pre-commit install
-```
-
-This will download and install the pre-commit hooks specified in `.pre-commit-config.yaml`.
 
 ## Troubleshooting  
 ###### [`^`](#table-of-contents)

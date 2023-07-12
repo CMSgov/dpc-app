@@ -6,37 +6,16 @@ SECURE
 ====
 
 ### Create the .vault_password file in the project root:
-- Get the secret from team member as stated in [README](./README.md).
-- Run the `make secure-envs` command.
-
-
-
-
-
-
-
-
-### Secrets management
-
-
-
-
-### Sensitive Docker configuration files 
 
 The files committed in the `ops/config/encrypted` directory hold secret information and are encrypted with [Ansible Vault](https://docs.ansible.com/ansible/2.4/vault.html).
 
-In order to encrypt and decrypt configuration variables, you must create a `.vault_password` file in this repository root directory and in the `/dpc-go/dpc-attribution` directory. Contact another team member to gain access to the vault password.
+In order to encrypt and decrypt configuration variables, you must create a `.vault_password` file in the root directory. Contact another team member to gain access to the vault password.
 
-**IMPORTANT:** Files containing sensitive information are enumerated in the `.secrets` file in this directory. If you want to protect the contents of a file using the `ops/scripts/secrets` helper script, it must match a pattern listed in `.secrets`.
+Afterwards, run the following to decrypt files for local development:
 
-To avoid committing and pushing unencrypted secret files, use the included `ops/scripts/pre-commit` Git pre-commit hook from this directory:
-
+```sh
+make secure-envs
 ```
-cp ops/scripts/pre-commit .git/hooks
-```
-
-> Note: You can use `make secure-envs` to decrypt files and create the pre-commit hook at the same time.
-
 
 BUILD
 ====
