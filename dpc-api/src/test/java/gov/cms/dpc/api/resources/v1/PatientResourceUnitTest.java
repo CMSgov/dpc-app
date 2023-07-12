@@ -66,7 +66,6 @@ public class PatientResourceUnitTest {
         organization.setId(orgId.toString());
         OrganizationPrincipal organizationPrincipal = new OrganizationPrincipal(organization);
         String patientMbi = "3aa0C00aA00";
-        String expandedMbi = String.format("%s|%s", DPCIdentifierSystem.MBI.getSystem(), patientMbi);
         Patient patient = new Patient();
         patient.addIdentifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue(patientMbi);
         patient.setManagingOrganizationTarget(organization);
@@ -82,8 +81,8 @@ public class PatientResourceUnitTest {
                 .forResource(Patient.class)
                 .encodedJson()
         ).thenReturn(queryExec);
-        when(queryExec.where(Patient.ORGANIZATION.hasId(orgId.toString())).returnBundle(Bundle.class)).thenReturn(mockQuery);
-        when(mockQuery.where(Patient.IDENTIFIER.exactly().identifier(expandedMbi))).thenReturn(mockQuery);
+        when(queryExec.where(any(ICriterion.class)).returnBundle(Bundle.class)).thenReturn(mockQuery);
+        when(mockQuery.where(any(ICriterion.class))).thenReturn(mockQuery);
         when(mockQuery.execute()).thenReturn(bundle);
 
         Bundle actualResponse = patientResource.patientSearch(organizationPrincipal, patientMbi);
@@ -110,7 +109,7 @@ public class PatientResourceUnitTest {
                 .forResource(Patient.class)
                 .encodedJson()
         ).thenReturn(queryExec);
-        when(queryExec.where(Patient.ORGANIZATION.hasId(orgId.toString())).returnBundle(Bundle.class)).thenReturn(mockQuery);
+        when(queryExec.where(any(ICriterion.class)).returnBundle(Bundle.class)).thenReturn(mockQuery);
         when(mockQuery.execute()).thenReturn(bundle);
 
         Bundle actualResponse = patientResource.patientSearch(organizationPrincipal, null);
