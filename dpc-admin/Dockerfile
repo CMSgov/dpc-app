@@ -1,4 +1,4 @@
-FROM ruby:2.7.2-alpine AS ruby_builder
+FROM ruby:3.0.6-alpine AS ruby_builder
 
 # Install build dependencies
 RUN apk update && \
