@@ -19,9 +19,6 @@ public class FHIRRequestFeatureTest {
 
     ResourceInfo info = Mockito.mock(ResourceInfo.class);
     FeatureContext context = Mockito.mock(FeatureContext.class);
-    Method method = Mockito.mock(Method.class);
-    FHIR fhirAnnotation = Mockito.mock(FHIR.class);
-    FHIRAsync asyncAnnotation = Mockito.mock(FHIRAsync.class);
     FHIRRequestFeature feature = new FHIRRequestFeature();
 
     private FHIRRequestFeatureTest() {
@@ -32,21 +29,19 @@ public class FHIRRequestFeatureTest {
     void cleanup() {
         Mockito.reset(info);
         Mockito.reset(context);
-        Mockito.reset(method);
-        Mockito.reset(fhirAnnotation);
     }
 
     @Test
-    void testFHIRResourceAnnotation() {
-        Mockito.when(method.getAnnotation(FHIR.class)).thenReturn(this.fhirAnnotation);
+    void testFHIRResourceAnnotation() throws NoSuchMethodException {
+        Method method = FHIRRequestFeatureTest.class.getMethod("testFhirAnnotationMethod");
         Mockito.when(info.getResourceMethod()).thenReturn(method);
         feature.configure(info, context);
         Mockito.verify(context, Mockito.times(1)).register(FHIRRequestFilter.class);
     }
 
     @Test
-    void testFHIRClassAnnotation() {
-        Mockito.when(method.getAnnotation(FHIR.class)).thenReturn(null);
+    void testFHIRClassAnnotation() throws NoSuchMethodException {
+        Method method = FHIRRequestFeatureTest.class.getMethod("testNoAnnotationMethod");
         Mockito.when(info.getResourceClass()).thenAnswer(answer -> FHIRResourceClass.class);
         Mockito.when(info.getResourceMethod()).thenReturn(method);
         feature.configure(info, context);
@@ -54,25 +49,27 @@ public class FHIRRequestFeatureTest {
     }
 
     @Test
-    void testAsyncFHIRResourceAnnotation() {
-        Mockito.when(info.getResourceClass()).thenAnswer(answer -> FHIRAsyncResourceClass.class);
-        Mockito.when(method.getAnnotation(FHIRAsync.class)).thenReturn(this.asyncAnnotation);
-        Mockito.when(info.getResourceMethod()).thenReturn(method);
-        feature.configure(info, context);
-        Mockito.verify(context, Mockito.times(1)).register(FHIRAsyncRequestFilter.class);
-    }
-
-    @Test
-    void testAsyncFHIRClassAnnotation() {
+    void testAsyncFHIRResourceAnnotation() throws NoSuchMethodException {
+        Method method = FHIRRequestFeatureTest.class.getMethod("testFhirAsyncAnnotatedMethod");
         Mockito.when(info.getResourceClass()).thenAnswer(answer -> FHIRAsyncResourceClass.class);
         Mockito.when(info.getResourceMethod()).thenReturn(method);
         feature.configure(info, context);
         Mockito.verify(context, Mockito.times(1)).register(FHIRAsyncRequestFilter.class);
     }
 
+    @Test
+    void testAsyncFHIRClassAnnotation() throws NoSuchMethodException {
+        Method method = FHIRRequestFeatureTest.class.getMethod("testFhirAsyncAnnotatedMethod");
+        Mockito.when(info.getResourceClass()).thenAnswer(answer -> FHIRAsyncResourceClass.class);
+        Mockito.when(info.getResourceMethod()).thenReturn(method);
+        feature.configure(info, context);
+        Mockito.verify(context, Mockito.times(1)).register(FHIRAsyncRequestFilter.class);
+    }
+
 
     @Test
-    void testNoAnnotation() {
+    void testNoAnnotation() throws NoSuchMethodException {
+        Method method = FHIRRequestFeatureTest.class.getMethod("testNoAnnotationMethod");
         Mockito.when(info.getResourceClass()).thenAnswer(answer -> NoAnnotationClass.class);
         Mockito.when(info.getResourceMethod()).thenReturn(method);
         feature.configure(info, context);
@@ -92,4 +89,10 @@ public class FHIRRequestFeatureTest {
     static class NoAnnotationClass {
 
     }
+
+    @FHIR
+    public void testFhirAnnotationMethod() {}
+    @FHIRAsync
+    public void testFhirAsyncAnnotatedMethod() {}
+    public void testNoAnnotationMethod() {}
 }
