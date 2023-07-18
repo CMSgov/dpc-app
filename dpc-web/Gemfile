@@ -3,7 +3,7 @@
 source 'https://rubygems.org'
 git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
-ruby '2.7.2'
+ruby '3.0.6'
 
 # Anchored versions, do not bump without testing
 # Specifying rails components to be able to omit unused actioncable
