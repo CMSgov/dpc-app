@@ -63,7 +63,7 @@ class Organization < ApplicationRecord
   end
 
   def npi_valid?
-    return true if npi.blank? else false
+    return npi.blank?
 
     validate_npi
   end

@@ -5,7 +5,7 @@ require:
 
 AllCops:
   NewCops: enable
-  TargetRubyVersion: 2.7
+  TargetRubyVersion: 3.0
   Exclude:
     - 'app/jobs/application_job.rb'
     - 'app/mailers/application_mailer.rb'
@@ -21,7 +21,7 @@ Bundler/OrderedGems:
 # Layout/LineLength:
 #   Max: 120
 Metrics/ClassLength:
-    Max: 
+    Max:
       200
 
 Metrics/BlockLength:
