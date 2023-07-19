@@ -53,7 +53,7 @@ class Organization < ApplicationRecord
   end
 
   def assign_id
-    return npi.present?
+    return false unless npi.present?
 
     self.npi = LuhnacyLib.generate_npi
   end
@@ -63,7 +63,7 @@ class Organization < ApplicationRecord
   end
 
   def npi_valid?
-    return npi.blank?
+    return false if npi.blank?
 
     validate_npi
   end
