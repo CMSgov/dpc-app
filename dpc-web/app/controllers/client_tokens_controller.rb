@@ -42,7 +42,7 @@ class ClientTokensController < ApplicationController
     @organization = current_user.organizations.find(org_id)
     @reg_org = @organization.reg_org
 
-    return false if @reg_org.present? && @reg_org.enabled == true
+    return true if @reg_org.present? && @reg_org.enabled == true
 
     redirect_to root_path
   end
