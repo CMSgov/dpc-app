@@ -38,6 +38,7 @@ This document serves as a guide for running the Data at the Point of Care (DPC) 
   * [Generating the Source Code Documentation via JavaDoc](#generating-the-source-code-documentation-via-javadoc)
   * [Building the Additional Services](#building-the-additional-services)
     * [Postman collection](#postman-collection)
+  * [Code Coverage](#code-coverage)
   * [Other Notes](#other-notes)
     * [BFD transaction time details](#bfd-transaction-time-details)
   * [Troubleshooting](#troubleshooting) 
@@ -424,6 +425,23 @@ Once the development environment is up and running, you should now be able to ru
 - Add patient to group
 - Create export data request
 
+
+## Code Coverage
+###### [`^`](#table-of-contents)
+
+- Run `make unit-tests` to use Jacoco to generate local code coverage reports.  Within each module, the human-readable report can be found at `module/target/site/jacoco/index.html`.  The machine-readable version that gets loaded to SonarQube is `jacoco.xml` in the same directory.
+- Stand up a local version of SonarQube inside a Docker container as described [here](https://docs.sonarsource.com/sonarqube/latest/try-out-sonarqube/).  Essentially, just run the following command `docker run -d --name sonarqube -e SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true -p 9000:9000 sonarqube:latest`.
+  - Login to SonarQube at http://localhost:9000 with login:pass of admin:admin.
+  - Setup a new project as described in the link above.
+- Run the following command to load your coverage data into SonarQube, inserting your project key, name and token...
+    ```
+    mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.7.0.1746:sonar \
+      -Dsonar.projectKey={YOUR PROJECT KEY} \
+      -Dsonar.projectName='{YOUR PROJECT NAME}' \
+      -Dsonar.host.url=http://localhost:9000 \
+      -Dsonar.token={YOUR PROJECT TOKEN}
+    ```
+- Your code coverage results should now be in your local version of SonarQube.
 
 ## Other Notes
 ###### [`^`](#table-of-contents)
