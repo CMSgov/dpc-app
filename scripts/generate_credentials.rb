@@ -171,7 +171,7 @@ def generate_token(env, access_token, org_id, public_key_label, expiration)
 end
 
 def create_credential_file(org_id, public_key_id, expiration, client_token)
-    credential_file = File.new("~/Desktop/dpc-credentials.txt", "w")
+    credential_file = File.new(ENV["HOME"]+"/Desktop/dpc-credentials.txt", "w")
     credential_file.puts("Registered Organization ID: #{org_id}\n")
     credential_file.puts("Public Key ID: PUBLIC_KEY_ID: #{public_key_id}\n")
     credential_file.puts("Organization Token Expiration Date: #{expiration}\n")
