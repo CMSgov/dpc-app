@@ -42,6 +42,9 @@ Style/IfUnlessModifier:
 Style/Lambda:
   Enabled: false
 
+Style/ReturnNilInPredicateMethodDefinition:
+  Enabled: false
+
 Style/SymbolArray:
   Exclude:
     - 'Gemfile'
