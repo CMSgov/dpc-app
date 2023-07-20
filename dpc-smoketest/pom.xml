@@ -14,6 +14,7 @@
 
     <properties>
         <jmeter.version>5.5</jmeter.version>
+        <sonar.skip>true</sonar.skip>
     </properties>
 
     <dependencies>
