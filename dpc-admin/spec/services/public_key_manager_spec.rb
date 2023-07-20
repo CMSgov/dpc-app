@@ -23,7 +23,7 @@ RSpec.describe PublicKeyManager do
 
           manager = PublicKeyManager.new(registered_organization: registered_org)
 
-          new_public_key = manager.create_public_key(@public_key_params)
+          new_public_key = manager.create_public_key(**@public_key_params)
 
           expect(new_public_key[:response]).to eq(true)
         end
@@ -43,7 +43,7 @@ RSpec.describe PublicKeyManager do
 
           manager = PublicKeyManager.new(registered_organization: registered_org)
 
-          new_public_key = manager.create_public_key(@public_key_params)
+          new_public_key = manager.create_public_key(**@public_key_params)
 
           expect(new_public_key[:response]).to eq(false)
         end
