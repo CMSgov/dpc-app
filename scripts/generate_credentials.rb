@@ -1,6 +1,7 @@
 require 'uri'
 require 'net/http'
 require 'json'
+require 'openssl'
 
 
 def get_test_org_bundle(npi) 
@@ -180,7 +181,7 @@ def create_credential_file(org_id, public_key_id, expiration, client_token)
 end
 
 def create_encrypted_zip_file(path_to_org_pub_key)
-    system("openssl rand -base64 64 > ~/Desktop/password.txt")
+    system("openssl rand -base64 64 | tr -d '\n' > ~/Desktop/password.txt")
     random_password = File.read(ENV["HOME"]+"/Desktop/password.txt")
     system("cd ~/Desktop; zip -P '#{random_password}' 'dpc-credentials' dpc-credentials.txt")
     system("cd ~/Desktop; openssl pkeyutl -encrypt -inkey #{path_to_org_pub_key} -pubin -in password.txt -out encrypted_password.enc")
