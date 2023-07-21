@@ -8,7 +8,7 @@ RUN gem install jekyll -v 3.3.1
 WORKDIR /dpc-app
 COPY / /dpc-app
 
-FROM ruby:2.7.2-alpine AS ruby_builder
+FROM ruby:3.0.6-alpine AS ruby_builder
 
 # Install build dependencies
 RUN apk update && \
@@ -46,7 +46,7 @@ RUN rm -rf /usr/local/bundle/cache/*.gem && \
     find /usr/local/bundle/gems/ -name "*.o" -delete
 
 
-FROM ruby:2.7.2-alpine
+FROM ruby:3.0.6-alpine
 
 # Install app dependencies
 RUN apk add --no-cache postgresql-client nodejs tzdata

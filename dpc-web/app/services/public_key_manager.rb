@@ -59,6 +59,6 @@ class PublicKeyManager
   end
 
   def strip_carriage_returns(str)
-    str.gsub(/\r/, '')
+    str.gsub("\r", '')
   end
 end
