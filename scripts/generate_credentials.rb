@@ -179,17 +179,17 @@ def create_credential_file(org_id, public_key_id, expiration, client_token)
     credential_file.close()
 end
 
-def create_zip_file()
+def create_encrypted_zip_file(path_to_org_pub_key)
+    system("openssl rand -base64 64 > ~/Desktop/password.txt")
+    random_password = File.read(ENV["HOME"]+"/Desktop/password.txt")
+    system("cd ~/Desktop; zip -P '#{random_password}' 'dpc-credentials' dpc-credentials.txt")
+    system("cd ~/Desktop; openssl pkeyutl -encrypt -inkey #{path_to_org_pub_key} -pubin -in password.txt -out encrypted_password.enc")
 end
 
-def encrypt_zip_file()
-end
-
-def generate_credentials(env, jwt, golden_macaroon, org_bundle, public_key_label, key, signature)
+def generate_credentials(env, jwt, golden_macaroon, org_bundle, public_key_label, key, signature, path_to_org_pub_key)
     access_token = request_access_token(env, jwt)
     org_id = register_organization(env, golden_macaroon, org_bundle)
     public_key = upload_public_key(env, access_token, org_id, public_key_label, key, signature)
     generated_token = generate_token(env, access_token, org_id, public_key_label)
-    create_zip_file()
-    encrypt_zip_file()
+    create_encrypted_zip_file(path_to_org_pub_key)
 end
