@@ -1,0 +1,72 @@
+{
+    "resourceType": "Parameters",
+    "parameter": [
+    {
+        "resource": {
+        "resourceType": "Bundle",
+        "type": "collection",
+        "entry": [
+            {
+            "resource": {
+                "resourceType": "Organization",
+                "identifier": [
+                {
+                    "system": "http://hl7.org/fhir/sid/us-npi",
+                    "value": "123"
+                }
+                ],
+                "name": "Decent Shepherd Community Care",
+                "address": [
+                {
+                    "use": "work",
+                    "type": "both",
+                    "line": [
+                    "160 Wells Ave"
+                    ],
+                    "city": "Newton",
+                    "state": "MA",
+                    "postalCode": "02459",
+                    "country": "US"
+                }
+                ],
+                "contact": [
+                {
+                    "name": {
+                    "use": "usual",
+                    "family": "Lai",
+                    "given": [
+                        "Guanpi"
+                    ]
+                    },
+                    "address": {
+                    "use": "work",
+                    "type": "both",
+                    "line": [
+                        "160 Wells Ave"
+                    ],
+                    "city": "Newton",
+                    "state": "MA",
+                    "postalCode": "02459",
+                    "country": "US"
+                    },
+                    "telecom": [
+                    {
+                        "system": "phone",
+                        "use": "work",
+                        "value": "480-262-5629"
+                    },
+                    {
+                        "system": "email",
+                        "use": "work",
+                        "value": "guanpi.lai@acclivityhealth.com"
+                    }
+                    ]
+                }
+                ]
+            }
+            }
+        ]
+        }
+    }
+    ]
+}
