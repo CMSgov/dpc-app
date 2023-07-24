@@ -3,84 +3,55 @@ require 'net/http'
 require 'json'
 require 'openssl'
 
+class Settings
+    def initialize(env, jwt, golden_macaroon, public_key_label, key, signature, path_to_org_pub_key)
+        @env = env
+        @jwt = jwt
+        @golden_macaroon = golden_macaroon
+        @public_key_label = public_key_label
+        @key = key
+        @signature = signature
+        @path_to_org_pub_key = path_to_org_pub_key
+    end
 
-def get_test_org_bundle(npi) 
-    return {
-        "resourceType": "Parameters",
-        "parameter": [
-        {
-            "resource": {
-            "resourceType": "Bundle",
-            "type": "collection",
-            "entry": [
-                {
-                "resource": {
-                    "resourceType": "Organization",
-                    "identifier": [
-                    {
-                        "system": "http://hl7.org/fhir/sid/us-npi",
-                        "value": "#{npi}"
-                    }
-                    ],
-                    "name": "Decent Shepherd Community Care",
-                    "address": [
-                    {
-                        "use": "work",
-                        "type": "both",
-                        "line": [
-                        "160 Wells Ave"
-                        ],
-                        "city": "Newton",
-                        "state": "MA",
-                        "postalCode": "02459",
-                        "country": "US"
-                    }
-                    ],
-                    "contact": [
-                    {
-                        "name": {
-                        "use": "usual",
-                        "family": "Lai",
-                        "given": [
-                            "Guanpi"
-                        ]
-                        },
-                        "address": {
-                        "use": "work",
-                        "type": "both",
-                        "line": [
-                            "160 Wells Ave"
-                        ],
-                        "city": "Newton",
-                        "state": "MA",
-                        "postalCode": "02459",
-                        "country": "US"
-                        },
-                        "telecom": [
-                        {
-                            "system": "phone",
-                            "use": "work",
-                            "value": "480-262-5629"
-                        },
-                        {
-                            "system": "email",
-                            "use": "work",
-                            "value": "guanpi.lai@acclivityhealth.com"
-                        }
-                        ]
-                    }
-                    ]
-                }
-                }
-            ]
-            }
-        }
-        ]
-    }
+    def env
+        @env
+    end
+
+    def jwt
+        @jwt
+    end
+
+    def golden_macaroon
+        @golden_macaroon
+    end
+
+    def public_key_label
+        @public_key_label
+    end
+
+    def key
+        @key
+    end
+
+    def signature
+        @signature
+    end
+
+    def path_to_org_pub_key
+        @path_to_org_pub_key
+    end
 end
 
-def request_access_token(env, jwt)
-    url = URI("https://#{env}.dpc.cms.gov/api/v1/Token/auth")
+def get_test_org_bundle(npi) 
+    file = File.read("./scripts/test_org_bundle.json")
+    org_bundle = JSON.parse(file)
+    org_bundle['parameter'][0]['resource']['entry'][0]['resource']['identifier'][0]['value'] = "#{npi}"
+    return org_bundle
+end
+
+def request_access_token(settings)
+    url = URI("https://#{settings.env}.dpc.cms.gov/api/v1/Token/auth")
 
     https = Net::HTTP.new(url.host, url.port)
     https.use_ssl = true
@@ -88,7 +59,7 @@ def request_access_token(env, jwt)
     request = Net::HTTP::Post.new(url)
     request["Content-Type"] = "application/x-www-form-urlencoded"
     request["Accept"] = "application/json"
-    request.body = "grant_type=client_credentials&scope=system%2F*.*&client_assertion_type=urn%3Aietf%3Aparams%3Aoauth%3Aclient-assertion-type%3Ajwt-bearer&client_assertion=#{jwt}"
+    request.body = "grant_type=client_credentials&scope=system%2F*.*&client_assertion_type=urn%3Aietf%3Aparams%3Aoauth%3Aclient-assertion-type%3Ajwt-bearer&client_assertion=#{settings.jwt}"
 
     response = https.request(request)
 
@@ -101,15 +72,15 @@ def request_access_token(env, jwt)
       end
 end
 
-def register_organization(env, golden_macaroon, org_bundle)
-    url = URI("https://#{env}.dpc.cms.gov/api/v1/Organization/$submit")
+def register_organization(settings, org_bundle)
+    url = URI("https://#{settings.env}.dpc.cms.gov/api/v1/Organization/$submit")
 
     https = Net::HTTP.new(url.host, url.port)
     https.use_ssl = true
 
     request = Net::HTTP::Post.new(url)
     request["Content-Type"] = "application/fhir+json"
-    request["Authorization"] = "Bearer " + golden_macaroon
+    request["Authorization"] = "Bearer " + settings.golden_macaroon
     request.body = JSON.dump(org_bundle)
 
     response = https.request(request)
@@ -123,13 +94,13 @@ def register_organization(env, golden_macaroon, org_bundle)
       end
 end
 
-def upload_public_key(env, access_token, org_id, public_key_label, key, signature)
+def upload_public_key(settings, access_token, org_id)
     key_signature = {
-        "key": key,
-        "signature": signature
+        "key": settings.key,
+        "signature": settings.signature
     }
 
-    url = URI("https://#{env}.dpc.cms.gov/api/tasks/upload-key?organization=#{org_id}&label=#{label}")
+    url = URI("https://#{settings.env}.dpc.cms.gov/api/tasks/upload-key?organization=#{org_id}&label=#{settings.public_key_label}")
 
     https = Net::HTTP.new(url.host, url.port)
     https.use_ssl = true
@@ -150,8 +121,8 @@ def upload_public_key(env, access_token, org_id, public_key_label, key, signatur
       end
 end
 
-def generate_token(env, access_token, org_id, public_key_label, expiration)
-    url = URI("https://#{env}.dpc.cms.gov/api/tasks/generate-token?organization=#{org_id}&label=#{public_key_label}&expiration=#{expiration}")
+def generate_token(settings, access_token, org_id, expiration)
+    url = URI("https://#{settings.env}.dpc.cms.gov/api/tasks/generate-token?organization=#{org_id}&label=#{settings.public_key_label}&expiration=#{expiration}")
 
     https = Net::HTTP.new(url.host, url.port)
     https.use_ssl = true
@@ -188,9 +159,10 @@ def create_encrypted_zip_file(path_to_org_pub_key)
 end
 
 def generate_credentials(env, jwt, golden_macaroon, org_bundle, public_key_label, key, signature, path_to_org_pub_key)
-    access_token = request_access_token(env, jwt)
-    org_id = register_organization(env, golden_macaroon, org_bundle)
-    public_key = upload_public_key(env, access_token, org_id, public_key_label, key, signature)
-    generated_token = generate_token(env, access_token, org_id, public_key_label)
-    create_encrypted_zip_file(path_to_org_pub_key)
+    settings = Settings.new(env, jwt, golden_macaroon, public_key_label, key, signature, path_to_org_pub_key)
+    access_token = request_access_token(settings)
+    org_id = register_organization(settings, org_bundle)
+    public_key = upload_public_key(settings, access_token, org_id)
+    generated_token = generate_token(settings, access_token, org_id)
+    create_encrypted_zip_file(settings.path_to_org_pub_key)
 end
