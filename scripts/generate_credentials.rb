@@ -1,6 +1,17 @@
 require 'uri'
 require 'net/http'
 require 'json'
+require 'bundler/inline'
+
+gemfile do
+    source 'https://rubygems.org'
+    gem 'macaroons'
+    gem 'activesupport'
+end
+
+require 'macaroons'
+require 'active_support/core_ext/numeric/time.rb'
+
 
 class Credentials
     def initialize(env, jwt, golden_macaroon, org_key, org_signature, path_to_org_pub_key)
@@ -119,15 +130,23 @@ def upload_public_key(credentials, access_token, org_id)
       end
 end
 
-def generate_token(credentials, access_token, org_id, public_key_label, expiration)
-    url = URI("https://#{credentials.env}.dpc.cms.gov/api/tasks/generate-token?organization=#{org_id}&label=#{public_key_label}&expiration=#{expiration}")
+def delegated_macaroon(golden_macaroon, reg_org_api_id, expiration=2.minutes.from_now.iso8601)
+    m = Macaroon.from_binary(golden_macaroon)
+    m.add_first_party_caveat("organization_id = #{reg_org_api_id}")
+    m.add_first_party_caveat("expires = #{expiration}")
+    m.add_first_party_caveat('dpc_macaroon_version = 1')
+    return m.serialize
+end
+
+def generate_token(env, delegated_macaroon, public_key_label)
+    url = URI("https://#{env}.dpc.cms.gov/api/v1/Token?label=#{public_key_label}")
 
     https = Net::HTTP.new(url.host, url.port)
     https.use_ssl = true
 
     request = Net::HTTP::Post.new(url)
     request["Content-Type"] = "application/json"
-    request["Authorization"] = "Bearer " + access_token
+    request["Authorization"] = "Bearer " + delegated_macaroon
 
     response = https.request(request)
     
@@ -140,12 +159,12 @@ def generate_token(credentials, access_token, org_id, public_key_label, expirati
     end
 end
 
-def create_credential_file(org_id, public_key_id, expiration, client_token)
+def create_credential_file(org_id, public_key_id, generated_token_obj)
     credential_file = File.new(ENV["HOME"]+"/Desktop/dpc-credentials.txt", "w")
     credential_file.puts("Registered Organization ID: #{org_id}\n")
     credential_file.puts("Public Key ID: PUBLIC_KEY_ID: #{public_key_id}\n")
-    credential_file.puts("Organization Token Expiration Date: #{expiration}\n")
-    credential_file.puts("Organization Client Token: #{client_token}\n")
+    credential_file.puts("Organization Token Expiration Date: #{generated_token_obj['expiresAt']}\n")
+    credential_file.puts("Organization Client Token: #{generated_token_obj['token']}\n")
     credential_file.close()
 end
 
@@ -157,10 +176,12 @@ def create_encrypted_zip_file(path_to_org_pub_key)
 end
 
 #credentials is an instance of Credentials class
-def generate_credentials(credentials, org_bundle, public_key_label, path_to_org_pub_key)
+def generate_credentials(credentials, org_bundle, public_key_label, path_to_org_pub_key, expiration)
     access_token = request_access_token(credentials)
     org_id = register_organization(credentials, org_bundle)
     public_key = upload_public_key(credentials, access_token, org_id)
-    generated_token = generate_token(credentials, access_token, org_id, public_key_label)
+    delegated_macaroon = delegated_macaroon(credentials.golden_macaroon, org_id, expiration)
+    generated_token_obj = generate_token(credentials.env, delegated_macaroon, org_id, public_key_label)
+    create_credential_file(org_id, public_key, generated_token_obj)
     create_encrypted_zip_file(credentials.path_to_org_pub_key)
 end
