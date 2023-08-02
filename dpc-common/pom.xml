@@ -51,6 +51,11 @@
             <artifactId>validation-api</artifactId>
             <version>2.0.1.Final</version>
         </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+            <version>2.13.5</version>
+        </dependency>
 
         <!--Locking this dependency version to the one provided by Dropwizard, we'll need to manually update it as we go along-->
         <dependency>
