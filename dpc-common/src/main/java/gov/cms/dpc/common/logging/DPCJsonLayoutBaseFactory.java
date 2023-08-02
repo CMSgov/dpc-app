@@ -13,7 +13,7 @@ public class DPCJsonLayoutBaseFactory extends EventJsonLayoutBaseFactory {
 
     @Override
     public LayoutBase<ILoggingEvent> build(LoggerContext context, TimeZone timeZone) {
-        DPCJsonLayout jsonLayout = new DPCJsonLayout(this.createDropwizardJsonFormatter(), this.createTimestampFormatter(timeZone), this.createThrowableProxyConverter(), this.getIncludes(), this.getCustomFieldNames(), this.getAdditionalFields(), this.getIncludesMdcKeys(), this.isFlattenMdc());
+        DPCJsonLayout jsonLayout = new DPCJsonLayout(this.createDropwizardJsonFormatter(), this.createTimestampFormatter(timeZone), this.createThrowableProxyConverter(context), this.getIncludes(), this.getCustomFieldNames(), this.getAdditionalFields(), this.getIncludesMdcKeys(), this.isFlattenMdc());
         jsonLayout.setContext(context);
         return jsonLayout;
     }
