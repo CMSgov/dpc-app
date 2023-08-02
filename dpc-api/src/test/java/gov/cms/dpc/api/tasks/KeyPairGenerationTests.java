@@ -10,6 +10,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import javax.ws.rs.WebApplicationException;
 import java.io.*;
+import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -26,7 +28,7 @@ class KeyPairGenerationTests {
 
     @Test
     void checkSuccessful() throws Exception {
-        final ImmutableMultimap<String, String> map = ImmutableMultimap.of("user", "nickrobison-usds");
+        final Map<String, List<String>> map = Map.of("user", List.of("nickrobison-usds"));
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
             task.execute(map, new PrintWriter(new OutputStreamWriter(bos)));
 
