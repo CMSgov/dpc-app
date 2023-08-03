@@ -7,7 +7,6 @@ import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.google.inject.name.Named;
-import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import com.typesafe.config.Config;
 import gov.cms.dpc.api.auth.jwt.IJTICache;
 import gov.cms.dpc.api.converters.ChecksumConverterProvider;
@@ -40,6 +39,7 @@ import io.jsonwebtoken.SigningKeyResolverAdapter;
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.vyarus.dropwizard.guice.module.support.DropwizardAwareModule;
 
 import javax.inject.Singleton;
 

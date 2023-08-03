@@ -3,7 +3,6 @@ package gov.cms.dpc.fhir;
 import ca.uhn.fhir.context.FhirContext;
 import com.google.inject.Binder;
 import com.google.inject.Provides;
-import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import gov.cms.dpc.fhir.configuration.IDPCFHIRConfiguration;
 import gov.cms.dpc.fhir.converters.FHIREntityConverter;
 import gov.cms.dpc.fhir.dropwizard.features.FHIRRequestFeature;
@@ -15,11 +14,12 @@ import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.HAPIExceptionHandler;
 import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.JerseyExceptionHandler;
 import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.PersistenceExceptionHandler;
 import gov.cms.dpc.fhir.parameters.FHIRParamValueFactory;
-import gov.cms.dpc.fhir.parameters.ProvenanceResourceFactoryProvider;
+import gov.cms.dpc.fhir.parameters.ProvenanceResourceParamProvider;
 import gov.cms.dpc.fhir.validations.dropwizard.FHIRValidationModule;
 import io.dropwizard.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.vyarus.dropwizard.guice.module.support.DropwizardAwareModule;
 
 import javax.inject.Singleton;
 
@@ -54,12 +54,12 @@ public class FHIRModule<T extends Configuration & IDPCFHIRConfiguration> extends
         binder.bind(HAPIExceptionHandler.class);
         binder.bind(DefaultFHIRExceptionHandler.class);
         binder.bind(FHIRParamValueFactory.class);
-        binder.bind(ProvenanceResourceFactoryProvider.class);
+        binder.bind(ProvenanceResourceParamProvider.class);
 
         binder.bind(FHIREntityConverter.class).toProvider(EntityConverterProvider.class).in(Singleton.class);
 
         // Validator
-        final FHIRValidationConfiguration validationConfig = getConfiguration().getFHIRConfiguration().getValidation();
+        final FHIRValidationConfiguration validationConfig = configuration().getFHIRConfiguration().getValidation();
         if (validationConfig.isEnabled()) {
             logger.info("Enabling FHIR resource validation");
             binder.install(new FHIRValidationModule(validationConfig));

@@ -3,10 +3,10 @@ package gov.cms.dpc.common.hibernate.attribution;
 import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.google.inject.Scopes;
-import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import io.dropwizard.Configuration;
 import io.dropwizard.db.DataSourceFactory;
 import io.dropwizard.db.ManagedDataSource;
+import ru.vyarus.dropwizard.guice.module.support.DropwizardAwareModule;
 
 import javax.inject.Singleton;
 
@@ -33,12 +33,12 @@ public class DPCHibernateModule<T extends Configuration & IDPCDatabase> extends 
     @Provides
     @Singleton
     ManagedDataSource provideDataSource(DataSourceFactory factory) {
-        return factory.build(getEnvironment().metrics(), "tested-things");
+        return factory.build(environment().metrics(), "tested-things");
     }
 
     @Provides
     @Singleton
     DataSourceFactory provideFactory() {
-        return getConfiguration().getDatabase();
+        return configuration().getDatabase();
     }
 }
