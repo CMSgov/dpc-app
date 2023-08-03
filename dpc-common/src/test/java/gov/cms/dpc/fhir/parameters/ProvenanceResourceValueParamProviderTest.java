@@ -19,7 +19,7 @@ class ProvenanceResourceValueFactoryProviderTest {
 
     private static Injector injector = Mockito.mock(Injector.class);
     private static FhirContext ctx = Mockito.mock(FhirContext.class);
-    private static ProvenanceResourceFactoryProvider factory;
+    private static ProvenanceResourceParamProvider factory;
 
     private ProvenanceResourceValueFactoryProviderTest() {
         // Not used
@@ -27,7 +27,7 @@ class ProvenanceResourceValueFactoryProviderTest {
 
     @BeforeAll
     static void setup() {
-        factory = new ProvenanceResourceFactoryProvider(injector, ctx);
+        factory = new ProvenanceResourceParamProvider(injector, ctx);
     }
 
     @Test
@@ -37,7 +37,7 @@ class ProvenanceResourceValueFactoryProviderTest {
         Mockito.when(parameter.getDeclaredAnnotation(ProvenanceHeader.class)).thenReturn(mockAnnotation);
         Mockito.when(parameter.getRawType()).thenAnswer(answer -> Patient.class);
 
-        final Factory<?> valueFactory = factory.getValueFactory(parameter);
+        final Factory<?> valueFactory = factory.getValueProvider(parameter);
         assertAll(() -> assertNotNull(valueFactory, "Should have factory"),
                 () -> assertEquals(ProvenanceResourceValueFactory.class, valueFactory.getClass(), "Should have provenance factory"));
     }
@@ -47,7 +47,7 @@ class ProvenanceResourceValueFactoryProviderTest {
         final Parameter parameter = Mockito.mock(Parameter.class);
         Mockito.when(parameter.getDeclaredAnnotation(ProvenanceHeader.class)).thenReturn(null);
 
-        assertNull(factory.getValueFactory(parameter), "Factory should be null");
+        assertNull(factory.getValueProvider(parameter), "Factory should be null");
     }
 
     @Test
@@ -57,6 +57,6 @@ class ProvenanceResourceValueFactoryProviderTest {
         Mockito.when(parameter.getDeclaredAnnotation(ProvenanceHeader.class)).thenReturn(mockAnnotation);
         Mockito.when(parameter.getRawType()).thenAnswer(answer -> Mockito.class);
 
-        assertNull(factory.getValueFactory(parameter), "Should not have factory for non-FHIR resource");
+        assertNull(factory.getValueProvider(parameter), "Should not have factory for non-FHIR resource");
     }
 }

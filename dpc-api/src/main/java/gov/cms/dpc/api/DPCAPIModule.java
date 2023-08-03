@@ -110,7 +110,7 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
                                 String.class},
                         new Object[]{dao,
                                 bakery,
-                                this.getConfiguration().getTokenPolicy(),
+                                configuration().getTokenPolicy(),
                                 resolver,
                                 cache, publicURL});
     }
@@ -128,30 +128,30 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
     @Provides
     @Singleton
     public MetricRegistry provideMetricRegistry() {
-        return getEnvironment().metrics();
+        return environment().metrics();
     }
 
     @Provides
     public Config provideConfig() {
-        return getConfiguration().getConfig();
+        return configuration().getConfig();
     }
 
     @Provides
     @ExportPath
     public String provideExportPath() {
-        return getConfiguration().getExportPath();
+        return configuration().getExportPath();
     }
 
     @Provides
     @ServiceBaseURL
     public String provideBaseURL() {
-        return getConfiguration().getPublicURL();
+        return configuration().getPublicURL();
     }
 
     @Provides
     @APIV1
     public String provideV1URL() {
-        return getConfiguration().getPublicURL() + "/v1";
+        return configuration().getPublicURL() + "/v1";
     }
 
     @Provides
@@ -168,7 +168,7 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
 
     @Provides
     TokenPolicy providePolicy() {
-        return getConfiguration().getTokenPolicy();
+        return configuration().getTokenPolicy();
     }
 
     @Provides
@@ -182,9 +182,9 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
     @Singleton
     @Named("attribution")
     public IGenericClient provideFHIRClient(FhirContext ctx) {
-        logger.info("Connecting to attribution server at {}.", getConfiguration().getAttributionURL());
+        logger.info("Connecting to attribution server at {}.", configuration().getAttributionURL());
         ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
-        IGenericClient client = ctx.newRestfulGenericClient(getConfiguration().getAttributionURL());
+        IGenericClient client = ctx.newRestfulGenericClient(configuration().getAttributionURL());
         client.registerInterceptor(new RequestIdHeaderInterceptor());
         return client;
     }
@@ -192,6 +192,6 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
     @Provides
     @JobTimeout
     public int provideJobTimeoutInSeconds() {
-        return getConfiguration().getJobTimeoutInSeconds();
+        return configuration().getJobTimeoutInSeconds();
     }
 }

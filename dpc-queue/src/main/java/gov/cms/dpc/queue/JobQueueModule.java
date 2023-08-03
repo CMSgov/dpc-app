@@ -3,12 +3,12 @@ package gov.cms.dpc.queue;
 import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.google.inject.Scopes;
-import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import gov.cms.dpc.queue.annotations.AggregatorID;
 import gov.cms.dpc.queue.annotations.QueueBatchSize;
 import gov.cms.dpc.queue.health.JobQueueHealthCheck;
 import gov.cms.dpc.queue.service.DataService;
 import io.dropwizard.Configuration;
+import ru.vyarus.dropwizard.guice.module.support.DropwizardAwareModule;
 
 import java.util.UUID;
 

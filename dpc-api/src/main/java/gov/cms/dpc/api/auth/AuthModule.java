@@ -2,7 +2,6 @@ package gov.cms.dpc.api.auth;
 
 import com.google.inject.Binder;
 import com.google.inject.TypeLiteral;
-import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import gov.cms.dpc.api.DPCAPIConfiguration;
 import gov.cms.dpc.api.auth.filters.PathAuthorizationFilter;
 import gov.cms.dpc.api.auth.jwt.CaffeineJTICache;
@@ -18,6 +17,7 @@ import io.dropwizard.auth.UnauthorizedHandler;
 import io.jsonwebtoken.SigningKeyResolverAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.vyarus.dropwizard.guice.module.support.DropwizardAwareModule;
 
 /**
  * {@link DropwizardAwareModule} for determining which authentication system to use.
@@ -36,7 +36,7 @@ public class AuthModule extends DropwizardAwareModule<DPCAPIConfiguration> {
         final var authenticatorTypeLiteral = new TypeLiteral<Authenticator<DPCAuthCredentials, OrganizationPrincipal>>() {
         };
 
-        if (getConfiguration().isAuthenticationDisabled()) {
+        if (configuration().isAuthenticationDisabled()) {
             logger.warn("AUTHENTICATION IS DISABLED!!! USE ONLY IN DEVELOPMENT");
             binder.bind(AuthFactory.class).to(StaticAuthFactory.class);
             binder.bind(authenticatorTypeLiteral).to(StaticAuthenticator.class);
