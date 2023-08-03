@@ -4,13 +4,15 @@ import ca.uhn.fhir.context.FhirContext;
 import com.google.inject.Injector;
 import gov.cms.dpc.fhir.annotations.ProvenanceHeader;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
-import org.glassfish.hk2.api.Factory;
+import org.glassfish.jersey.server.ContainerRequest;
 import org.glassfish.jersey.server.model.Parameter;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
+
+import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -37,7 +39,7 @@ class ProvenanceResourceValueFactoryProviderTest {
         Mockito.when(parameter.getDeclaredAnnotation(ProvenanceHeader.class)).thenReturn(mockAnnotation);
         Mockito.when(parameter.getRawType()).thenAnswer(answer -> Patient.class);
 
-        final Factory<?> valueFactory = factory.getValueProvider(parameter);
+        Function<ContainerRequest, ?> valueFactory = factory.getValueProvider(parameter);
         assertAll(() -> assertNotNull(valueFactory, "Should have factory"),
                 () -> assertEquals(ProvenanceResourceValueFactory.class, valueFactory.getClass(), "Should have provenance factory"));
     }

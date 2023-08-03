@@ -4,13 +4,15 @@ import ca.uhn.fhir.context.FhirContext;
 import com.google.inject.Injector;
 import gov.cms.dpc.fhir.annotations.FHIRParameter;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
-import org.glassfish.hk2.api.Factory;
+import org.glassfish.jersey.server.ContainerRequest;
 import org.glassfish.jersey.server.model.Parameter;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
+
+import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -37,7 +39,7 @@ class FHIRParamValueFactoryTest {
         Mockito.when(parameter.getDeclaredAnnotation(FHIRParameter.class)).thenReturn(mockAnnotation);
         Mockito.when(parameter.getRawType()).thenAnswer(answer -> Patient.class);
 
-        final Factory<?> valueFactory = factory.getValueFactory(parameter);
+        Function<ContainerRequest, ?> valueFactory = factory.getValueProvider(parameter);
         assertAll(() -> assertNotNull(valueFactory, "Should have factory"),
                 () -> assertEquals(ParamResourceFactory.class, valueFactory.getClass(), "Should have provenance factory"));
     }
@@ -48,7 +50,7 @@ class FHIRParamValueFactoryTest {
         Mockito.when(parameter.getDeclaredAnnotation(FHIRParameter.class)).thenReturn(null);
         Mockito.when(parameter.getRawType()).thenAnswer(answer -> Patient.class);
 
-        assertNull(factory.getValueFactory(parameter), "Should not have factory");
+        assertNull(factory.getValueProvider(parameter), "Should not have factory");
     }
 
     @Test
@@ -58,6 +60,6 @@ class FHIRParamValueFactoryTest {
         Mockito.when(parameter.getDeclaredAnnotation(FHIRParameter.class)).thenReturn(mockAnnotation);
         Mockito.when(parameter.getRawType()).thenAnswer(answer -> Mockito.class);
 
-        assertNull(factory.getValueFactory(parameter), "Should not have factory");
+        assertNull(factory.getValueProvider(parameter), "Should not have factory");
     }
 }
