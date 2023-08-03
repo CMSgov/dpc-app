@@ -1,6 +1,5 @@
 package gov.cms.dpc.queue;
 
-import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.google.inject.Scopes;
 import gov.cms.dpc.queue.annotations.AggregatorID;
@@ -25,22 +24,22 @@ public class JobQueueModule<T extends Configuration & DPCQueueConfig> extends Dr
     }
 
     @Override
-    public void configure(Binder binder) {
+    protected void configure() {
         // Manually bind
         // to the Memory Queue, as a Singleton
         if (this.inMemory) {
-            binder.bind(IJobQueue.class)
+            binder().bind(IJobQueue.class)
                     .to(MemoryBatchQueue.class)
                     .in(Scopes.SINGLETON);
         } else {
-            binder.bind(IJobQueue.class)
+            binder().bind(IJobQueue.class)
                     .to(DistributedBatchQueue.class)
                     .in(Scopes.SINGLETON);
         }
 
         // Bind the healthcheck
-        binder.bind(JobQueueHealthCheck.class);
-        binder.bind(DataService.class);
+        binder().bind(JobQueueHealthCheck.class);
+        binder().bind(DataService.class);
     }
 
     @Provides

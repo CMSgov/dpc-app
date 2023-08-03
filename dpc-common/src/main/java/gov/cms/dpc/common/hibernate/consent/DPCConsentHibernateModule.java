@@ -1,6 +1,5 @@
 package gov.cms.dpc.common.hibernate.consent;
 
-import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.google.inject.Scopes;
 import io.dropwizard.Configuration;
@@ -17,8 +16,8 @@ public class DPCConsentHibernateModule<T extends Configuration & IDPCConsentData
     }
 
     @Override
-    public void configure(Binder binder) {
-        binder.bind(DPCConsentHibernateBundle.class).in(Scopes.SINGLETON);
+    protected void configure() {
+        binder().bind(DPCConsentHibernateBundle.class).in(Scopes.SINGLETON);
     }
 
     @Provides

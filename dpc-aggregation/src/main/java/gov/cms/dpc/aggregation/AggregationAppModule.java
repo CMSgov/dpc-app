@@ -4,7 +4,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import com.codahale.metrics.MetricRegistry;
-import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.google.inject.name.Named;
 import com.typesafe.config.Config;
@@ -34,11 +33,11 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
     }
 
     @Override
-    public void configure(Binder binder) {
-        binder.bind(AggregationEngine.class);
-        binder.bind(AggregationManager.class).asEagerSingleton();
-        binder.bind(JobBatchProcessor.class);
-        binder.bind(JobBatchProcessorV2.class);
+    protected void configure() {
+        binder().bind(AggregationEngine.class);
+        binder().bind(AggregationManager.class).asEagerSingleton();
+        binder().bind(JobBatchProcessor.class);
+        binder().bind(JobBatchProcessorV2.class);
 
         // Healthchecks
         // Additional health-checks can be added here

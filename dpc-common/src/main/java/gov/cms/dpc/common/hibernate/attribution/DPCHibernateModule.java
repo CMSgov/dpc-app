@@ -1,6 +1,5 @@
 package gov.cms.dpc.common.hibernate.attribution;
 
-import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.google.inject.Scopes;
 import io.dropwizard.Configuration;
@@ -20,8 +19,8 @@ public class DPCHibernateModule<T extends Configuration & IDPCDatabase> extends 
     }
 
     @Override
-    public void configure(Binder binder) {
-        binder.bind(DPCHibernateBundle.class).in(Scopes.SINGLETON);
+    protected void configure() {
+        binder().bind(DPCHibernateBundle.class).in(Scopes.SINGLETON);
     }
 
     @Provides

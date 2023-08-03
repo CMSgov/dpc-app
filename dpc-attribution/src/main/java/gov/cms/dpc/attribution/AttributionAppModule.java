@@ -1,6 +1,5 @@
 package gov.cms.dpc.attribution;
 
-import com.google.inject.Binder;
 import com.google.inject.Provides;
 import gov.cms.dpc.attribution.jdbi.*;
 import gov.cms.dpc.attribution.resources.v1.*;
@@ -20,25 +19,25 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
     }
 
     @Override
-    public void configure(Binder binder) {
+    protected void configure() {
         // Resources
-        binder.bind(V1AttributionResource.class);
-        binder.bind(EndpointResource.class);
-        binder.bind(PatientResource.class);
-        binder.bind(PractitionerResource.class);
-        binder.bind(GroupResource.class);
-        binder.bind(OrganizationResource.class);
+        binder().bind(V1AttributionResource.class);
+        binder().bind(EndpointResource.class);
+        binder().bind(PatientResource.class);
+        binder().bind(PractitionerResource.class);
+        binder().bind(GroupResource.class);
+        binder().bind(OrganizationResource.class);
 
         // DAOs
-        binder.bind(EndpointDAO.class);
-        binder.bind(OrganizationDAO.class);
-        binder.bind(PatientDAO.class);
-        binder.bind(ProviderDAO.class);
-        binder.bind(RosterDAO.class);
-        binder.bind(RelationshipDAO.class);
+        binder().bind(EndpointDAO.class);
+        binder().bind(OrganizationDAO.class);
+        binder().bind(PatientDAO.class);
+        binder().bind(ProviderDAO.class);
+        binder().bind(RosterDAO.class);
+        binder().bind(RelationshipDAO.class);
 
         // Tasks
-        binder.bind(TruncateDatabase.class);
+        binder().bind(TruncateDatabase.class);
 
         // Services
 
