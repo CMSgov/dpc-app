@@ -1,7 +1,6 @@
 package gov.cms.dpc.api.tasks;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableMultimap;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.entities.PublicKeyEntity;
 import gov.cms.dpc.api.models.CollectionResponse;
@@ -133,7 +132,7 @@ public class PublicKeyTaskTests {
     }
 
     @Test
-    void testKeyDeletion() throws IOException {
+    void testKeyDeletion() throws Exception {
         final UUID id = UUID.randomUUID();
         final UUID keyID = UUID.randomUUID();
         final Map<String, List<String>> map = Map.of("organization", List.of(id.toString()), "key", List.of(keyID.toString()));

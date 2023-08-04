@@ -61,7 +61,7 @@ public class GenerateClientTokenTests {
     }
 
     @Test
-    void testTokenCreationNoOrg() throws IOException {
+    void testTokenCreationNoOrg() throws Exception {
         Mockito.when(bakery.createMacaroon(Mockito.any())).thenAnswer(answer -> MacaroonsBuilder.create("", "", ""));
         final Map<String, List<String>> map = Map.of();
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
@@ -71,7 +71,7 @@ public class GenerateClientTokenTests {
     }
 
     @Test
-    void testTokenCreation() throws IOException {
+    void testTokenCreation() throws Exception {
 
         final TokenEntity response = Mockito.mock(TokenEntity.class);
         Mockito.when(response.getToken()).thenReturn("test token");
@@ -91,7 +91,7 @@ public class GenerateClientTokenTests {
     }
 
     @Test
-    void testTokenCreationWithLabel() throws IOException {
+    void testTokenCreationWithLabel() throws Exception {
         final String tokenLabel = "test-token-label";
         final TokenEntity response = Mockito.mock(TokenEntity.class);
         response.setLabel(tokenLabel);
@@ -112,7 +112,7 @@ public class GenerateClientTokenTests {
     }
 
     @Test
-    void testTokenCreationWithMissingExpirationValue() throws IOException {
+    void testTokenCreationWithMissingExpirationValue() throws Exception {
         TokenEntity response = new TokenEntity();
         response.setToken("random test token");
         Mockito.when(tokenResource.createOrganizationToken(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(response);
@@ -130,7 +130,7 @@ public class GenerateClientTokenTests {
     }
 
     @Test
-    void testTokenCreationWithExpiration() throws IOException {
+    void testTokenCreationWithExpiration() throws Exception {
         final String expires = OffsetDateTime.now(ZoneOffset.UTC).plusMonths(12).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
         final Optional<OffsetDateTimeParam> optExpires = Optional.of(new OffsetDateTimeParam(expires));
         final TokenEntity response = Mockito.mock(TokenEntity.class);
