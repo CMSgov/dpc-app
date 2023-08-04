@@ -12,8 +12,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 
-import java.util.function.Function;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(BufferedLoggerHandler.class)
@@ -39,7 +37,8 @@ class ProvenanceResourceValueFactoryProviderTest {
         Mockito.when(parameter.getDeclaredAnnotation(ProvenanceHeader.class)).thenReturn(mockAnnotation);
         Mockito.when(parameter.getRawType()).thenAnswer(answer -> Patient.class);
 
-        Function<ContainerRequest, ?> valueFactory = factory.getValueProvider(parameter);
+        ContainerRequest request = Mockito.mock(ContainerRequest.class);
+        ProvenanceResourceValueFactory valueFactory = (ProvenanceResourceValueFactory) factory.getValueProvider(parameter).apply(request);
         assertAll(() -> assertNotNull(valueFactory, "Should have factory"),
                 () -> assertEquals(ProvenanceResourceValueFactory.class, valueFactory.getClass(), "Should have provenance factory"));
     }
