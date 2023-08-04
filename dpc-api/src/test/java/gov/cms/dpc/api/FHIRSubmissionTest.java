@@ -12,7 +12,7 @@ import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.DPCResourceType;
-import gov.cms.dpc.fhir.parameters.ProvenanceResourceFactoryProvider;
+import gov.cms.dpc.fhir.parameters.ProvenanceResourceParamProvider;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.MemoryBatchQueue;
 import gov.cms.dpc.queue.models.JobQueueBatch;
@@ -22,7 +22,8 @@ import io.dropwizard.auth.AuthValueFactoryProvider;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
 import org.eclipse.jetty.http.HttpStatus;
-import org.glassfish.jersey.server.spi.internal.ValueFactoryProvider;
+import org.glassfish.jersey.server.ContainerRequest;
+import org.glassfish.jersey.server.spi.internal.ValueParamProvider;
 import org.glassfish.jersey.test.grizzly.GrizzlyWebTestContainerFactory;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -60,7 +61,7 @@ class FHIRSubmissionTest {
     private static final IRead mockRead = mock(IRead.class);
     private static final IReadTyped mockTypedRead = mock(IReadTyped.class);
     private static final IReadExecutable mockExecutable = mock(IReadExecutable.class);
-    private static final ProvenanceResourceFactoryProvider factory = mock(ProvenanceResourceFactoryProvider.class);
+    private static final ProvenanceResourceParamProvider factory = mock(ProvenanceResourceParamProvider.class);
 
     private static final AuthFilter<DPCAuthCredentials, OrganizationPrincipal> staticFilter = new StaticAuthFilter(new StaticAuthenticator());
     private static final GrizzlyWebTestContainerFactory testContainer = new GrizzlyWebTestContainerFactory();
@@ -294,8 +295,8 @@ class FHIRSubmissionTest {
 
     @SuppressWarnings("unchecked")
     private static void mockFactory() {
-        Mockito.when(factory.getPriority()).thenReturn(ValueFactoryProvider.Priority.NORMAL);
+        Mockito.when(factory.getPriority()).thenReturn(ValueParamProvider.Priority.NORMAL);
         final org.glassfish.hk2.api.Factory f = mock(org.glassfish.hk2.api.Factory.class);
-        Mockito.when(factory.getValueFactory(Mockito.any())).thenReturn(f);
+        Mockito.when(factory.getValueProvider(Mockito.any()).apply(Mockito.any())).thenReturn(f);
     }
 }
