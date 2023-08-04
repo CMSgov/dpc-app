@@ -1,7 +1,6 @@
 package gov.cms.dpc.api.tasks;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableMultimap;
 import gov.cms.dpc.api.models.KeyPairResponse;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import org.eclipse.jetty.http.HttpStatus;
@@ -40,7 +39,7 @@ class KeyPairGenerationTests {
     @Test
     void checkRequiresUsername() throws IOException {
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
-            final WebApplicationException exception = assertThrows(WebApplicationException.class, () -> task.execute(ImmutableMultimap.of(), new PrintWriter(new OutputStreamWriter(bos))));
+            final WebApplicationException exception = assertThrows(WebApplicationException.class, () -> task.execute(Map.of(), new PrintWriter(new OutputStreamWriter(bos))));
             assertAll(() -> assertEquals(HttpStatus.BAD_REQUEST_400, exception.getResponse().getStatus(), "Should have bad response"),
                     () -> assertEquals("Must have ID of user generating keypair", exception.getMessage(), "Should show missing user"));
         }

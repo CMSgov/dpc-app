@@ -2,7 +2,6 @@ package gov.cms.dpc.api.tasks;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.nitram509.jmacaroons.MacaroonsBuilder;
-import com.google.common.collect.ImmutableMultimap;
 import edu.emory.mathcs.backport.java.util.Collections;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.entities.PublicKeyEntity;
@@ -27,9 +26,7 @@ import java.io.*;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
@@ -66,7 +63,7 @@ public class GenerateClientTokenTests {
     @Test
     void testTokenCreationNoOrg() throws IOException {
         Mockito.when(bakery.createMacaroon(Mockito.any())).thenAnswer(answer -> MacaroonsBuilder.create("", "", ""));
-        final ImmutableMultimap<String, String> map = ImmutableMultimap.of();
+        final Map<String, List<String>> map = Map.of();
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
             gct.execute(map, new PrintWriter(new OutputStreamWriter(bos)));
             Mockito.verify(bakery, times(1)).createMacaroon(eq(Collections.emptyList()));
@@ -84,7 +81,7 @@ public class GenerateClientTokenTests {
         final Organization org = new Organization();
         org.setId(id.toString());
 
-        final ImmutableMultimap<String, String> map = ImmutableMultimap.of("organization", id.toString());
+        final Map<String, List<String>> map = Map.of("organization", List.of(id.toString()));
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
             gct.execute(map, new PrintWriter(new OutputStreamWriter(bos)));
             Mockito.verify(bakery, never()).createMacaroon(eq(Collections.emptyList()));
@@ -105,7 +102,7 @@ public class GenerateClientTokenTests {
         final Organization org = new Organization();
         org.setId(id.toString());
 
-        final ImmutableMultimap<String, String> map = ImmutableMultimap.of("organization", id.toString(), "label", tokenLabel);
+        final Map<String, List<String>> map = Map.of("organization", List.of(id.toString()), "label", List.of(tokenLabel));
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
             gct.execute(map, new PrintWriter(new OutputStreamWriter(bos)));
             Mockito.verify(bakery, never()).createMacaroon(eq(Collections.emptyList()));
@@ -124,7 +121,7 @@ public class GenerateClientTokenTests {
         final Organization org = new Organization();
         org.setId(id.toString());
 
-        final ImmutableMultimap<String, String> map = ImmutableMultimap.of("organization", id.toString(), "expiration", "");
+        final Map<String, List<String>> map = Map.of("organization", List.of(id.toString()), "expiration", List.of(""));
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
             gct.execute(map, new PrintWriter(new OutputStreamWriter(bos)));
             Mockito.verify(bakery, never()).createMacaroon(eq(Collections.emptyList()));
@@ -144,7 +141,7 @@ public class GenerateClientTokenTests {
         final Organization org = new Organization();
         org.setId(id.toString());
 
-        final ImmutableMultimap<String, String> map = ImmutableMultimap.of("organization", id.toString(), "expiration", expires);
+        final Map<String, List<String>> map = Map.of("organization", List.of(id.toString()), "expiration", List.of(expires));
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
             gct.execute(map, new PrintWriter(new OutputStreamWriter(bos)));
             Mockito.verify(bakery, never()).createMacaroon(eq(Collections.emptyList()));
@@ -155,7 +152,7 @@ public class GenerateClientTokenTests {
 
     @Test
     void testTokenListNoOrg() throws IOException {
-        final ImmutableMultimap<String, String> map = ImmutableMultimap.of();
+        final Map<String, List<String>> map = Map.of();
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
             final WebApplicationException ex = assertThrows(WebApplicationException.class, () -> lct.execute(map, new PrintWriter(new OutputStreamWriter(bos))));
             assertEquals("Must have organization", ex.getMessage(), "Should have correct message");
@@ -172,7 +169,7 @@ public class GenerateClientTokenTests {
             return new CollectionResponse<PublicKeyEntity>(new ArrayList<>());
         });
 
-        final ImmutableMultimap<String, String> map = ImmutableMultimap.of("organization", id.toString());
+        final Map<String, List<String>> map = Map.of("organization", List.of(id.toString()));
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
             lct.execute(map, new PrintWriter(new OutputStreamWriter(bos)));
 
@@ -183,7 +180,7 @@ public class GenerateClientTokenTests {
 
     @Test
     void testTokenDeleteNoOrg() throws IOException {
-        final ImmutableMultimap<String, String> map = ImmutableMultimap.of();
+        final Map<String, List<String>> map = Map.of();
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
             final WebApplicationException ex = assertThrows(WebApplicationException.class, () -> dct.execute(map, new PrintWriter(new OutputStreamWriter(bos))));
             assertEquals("Must have organization", ex.getMessage(), "Should have correct message");
@@ -193,7 +190,7 @@ public class GenerateClientTokenTests {
     @Test
     void testTokenDeleteNoToken() throws IOException {
         final UUID id = UUID.randomUUID();
-        final ImmutableMultimap<String, String> map = ImmutableMultimap.of("organization", id.toString());
+        final Map<String, List<String>> map = Map.of("organization", List.of(id.toString()));
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
             final WebApplicationException ex = assertThrows(WebApplicationException.class, () -> dct.execute(map, new PrintWriter(new OutputStreamWriter(bos))));
             assertEquals("Must have token", ex.getMessage(), "Should have correct message");
@@ -204,7 +201,7 @@ public class GenerateClientTokenTests {
     void testTokenDelete() throws IOException {
         final UUID id = UUID.randomUUID();
         final UUID keyID = UUID.randomUUID();
-        final ImmutableMultimap<String, String> map = ImmutableMultimap.of("organization", id.toString(), "token", keyID.toString());
+        final Map<String, List<String>> map = Map.of("organization", List.of(id.toString()), "token", List.of(keyID.toString()));
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
             dct.execute(map, new PrintWriter(new OutputStreamWriter(bos)));
             Mockito.verify(tokenResource, times(1)).deleteOrganizationToken(Mockito.any(), eq(keyID));
