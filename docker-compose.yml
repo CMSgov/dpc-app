@@ -20,6 +20,8 @@ services:
       - ./ops/config/decrypted/local.env
     environment:
       - ENV=local
+      - APP_VERSION=localVersion
+      - APPLICATION=dpc-aggregation
       - USE_BFD_MOCK=${USE_BFD_MOCK:-true}
       - JACOCO=${REPORT_COVERAGE}
     depends_on:
@@ -35,6 +37,8 @@ services:
       - db
     environment:
       - ENV=local
+      - APP_VERSION=localVersion
+      - APPLICATION=dpc-attribution
       - JACOCO=${REPORT_COVERAGE}
     ports:
       - "3500:8080"
@@ -52,6 +56,8 @@ services:
     environment:
       - attributionURL=http://attribution:8080/v1/
       - ENV=local
+      - APP_VERSION=localVersion
+      - APPLICATION=dpc-api
       - JACOCO=${REPORT_COVERAGE}
       - exportPath=/app/data
       - JVM_FLAGS=-Ddpc.api.authenticationDisabled=${AUTH_DISABLED:-false}
@@ -67,6 +73,8 @@ services:
       - db
     environment:
       - ENV=local
+      - APP_VERSION=localVersion
+      - APPLICATION=dpc-consent
       - JACOCO=${REPORT_COVERAGE}
     ports:
       - "3600:3600"
