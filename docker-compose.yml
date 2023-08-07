@@ -111,6 +111,10 @@ services:
     image: maven:3.6-jdk-11
     env_file:
       - ./ops/config/decrypted/local.env
+    environment:
+      - ENV=local
+      - APP_VERSION=localVersion
+      - APPLICATION=dpc-tests
     volumes:
       - export-volume:/tmp
       - ./:/usr/src/mymaven
