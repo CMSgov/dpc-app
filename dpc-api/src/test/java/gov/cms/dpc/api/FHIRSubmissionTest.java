@@ -39,6 +39,7 @@ import java.time.OffsetDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Function;
 
 import static gov.cms.dpc.fhir.FHIRHeaders.PREFER_HEADER;
 import static gov.cms.dpc.fhir.FHIRHeaders.PREFER_RESPOND_ASYNC;
@@ -297,6 +298,8 @@ class FHIRSubmissionTest {
     private static void mockFactory() {
         Mockito.when(factory.getPriority()).thenReturn(ValueParamProvider.Priority.NORMAL);
         final org.glassfish.hk2.api.Factory f = mock(org.glassfish.hk2.api.Factory.class);
-        Mockito.when(factory.getValueProvider(Mockito.any()).apply(Mockito.any())).thenReturn(f);
+        Function<ContainerRequest, ?> func = mock(Function.class);
+        Mockito.when(factory.getValueProvider(Mockito.any())).thenReturn(func);
+        Mockito.when(func.apply(Mockito.any())).thenReturn(f);
     }
 }
