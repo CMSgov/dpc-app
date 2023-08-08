@@ -20,7 +20,7 @@ trap _finally EXIT
 if [ -n "$REPORT_COVERAGE" ]; then
    echo "┌──────────────────────────────────────────┐"
    echo "│                                          │"
-   echo "│      Running Tests and Code Climate      │"
+   echo "│      Running Tests and Code Climate v2   │"
    echo "│                                          │"
    echo "└──────────────────────────────────────────┘"
 else
@@ -60,6 +60,9 @@ docker-compose up start_core_dependencies
 docker-compose up start_api_dependencies
 
 # Run the integration tests
+echo "FIND ME!!!"
+ls -la docker-compose*
+cat docker-compose.yml
 docker-compose up --exit-code-from tests tests
 
 docker-compose down
