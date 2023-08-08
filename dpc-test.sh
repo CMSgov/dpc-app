@@ -20,7 +20,7 @@ trap _finally EXIT
 if [ -n "$REPORT_COVERAGE" ]; then
    echo "┌──────────────────────────────────────────┐"
    echo "│                                          │"
-   echo "│      Running Tests and Code Climate LOG  │"
+   echo "│      Running Tests and Code Climate      │"
    echo "│                                          │"
    echo "└──────────────────────────────────────────┘"
 else
@@ -40,11 +40,9 @@ if [ -n "$REPORT_COVERAGE" ]; then
 fi
 
 # Build the application
-echo "BEFORE BUILD!!!"
 docker-compose up start_core_dependencies
 mvn clean compile -Perror-prone -B -V -ntp
 mvn package -Pci -ntp
-echo "AFTER BUILD!!!"
 
 # Format the test results and copy to a new directory
 if [ -n "$REPORT_COVERAGE" ]; then
@@ -62,9 +60,6 @@ docker-compose up start_core_dependencies
 docker-compose up start_api_dependencies
 
 # Run the integration tests
-echo "FIND ME!!!"
-ls -la docker-compose*
-cat docker-compose.yml
 docker-compose up --exit-code-from tests tests
 
 docker-compose down
