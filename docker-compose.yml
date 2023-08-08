@@ -113,7 +113,7 @@ services:
       - ./ops/config/decrypted/local.env
     environment:
       - ENV=local
-      - APP_VERSION=localVersion
+      - APP_VERSION=local-version
       - APPLICATION=dpc-tests
     volumes:
       - export-volume:/tmp

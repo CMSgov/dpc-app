@@ -13,6 +13,10 @@ jobs:
   build-api:
     name: "Build and Test API"
     runs-on: ubuntu-20.04
+    env:
+      ENV: "local"
+      APP_VERSION: "local-version"
+      APPLICATION: "local-tests"
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v1
