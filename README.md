@@ -209,16 +209,6 @@ dpc.attribution {
 **Note**: On startup, the services look for a local override file (application.local.conf) in the root of their *current* working directory. This can create an issue when running tests with IntelliJ. The default sets the working directory to be the module root, which means any local overrides are ignored.
 This can be fixed by setting the working directory to the project root, but needs to be done manually.
 
-### Environment Variables:
-If running locally, the following environment variables need to be set on your machine.  If you're running through Docker they're already set in the docker-compose.yml file and should be set in the production environments.
-```shell
-ENV
-VERSION
-APPLICATION 
-```
-These vars are added to any logs that are written so when running locally you can set them to whatever you want, but the logger requires them to have a value.
-
-
 ### There are two ways to build DPC:
 
 ##### Option 1: Full integration test
