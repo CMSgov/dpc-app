@@ -40,7 +40,7 @@ public class UploadPublicKey extends PostBodyTask {
         final List<String> labelParams = parameters.get("label");
 
         final Optional<String> label;
-        if (labelParams.isEmpty()) {
+        if (labelParams == null || labelParams.isEmpty()) {
             label = Optional.empty();
         } else {
             label = Optional.ofNullable(labelParams.get(0));

@@ -21,6 +21,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
+import javax.ws.rs.WebApplicationException;
 import java.io.*;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -153,7 +154,7 @@ public class GenerateClientTokenTests {
     void testTokenListNoOrg() throws IOException {
         final Map<String, List<String>> map = Map.of();
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
-            final NullPointerException ex = assertThrows(NullPointerException.class, () -> lct.execute(map, new PrintWriter(new OutputStreamWriter(bos))));
+            final WebApplicationException ex = assertThrows(WebApplicationException.class, () -> lct.execute(map, new PrintWriter(new OutputStreamWriter(bos))));
             assertEquals("Must have organization", ex.getMessage(), "Should have correct message");
         }
     }
@@ -181,7 +182,7 @@ public class GenerateClientTokenTests {
     void testTokenDeleteNoOrg() throws IOException {
         final Map<String, List<String>> map = Map.of();
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
-            final NullPointerException ex = assertThrows(NullPointerException.class, () -> dct.execute(map, new PrintWriter(new OutputStreamWriter(bos))));
+            final WebApplicationException ex = assertThrows(WebApplicationException.class, () -> dct.execute(map, new PrintWriter(new OutputStreamWriter(bos))));
             assertEquals("Must have organization", ex.getMessage(), "Should have correct message");
         }
     }
@@ -191,7 +192,7 @@ public class GenerateClientTokenTests {
         final UUID id = UUID.randomUUID();
         final Map<String, List<String>> map = Map.of("organization", List.of(id.toString()));
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
-            final NullPointerException ex = assertThrows(NullPointerException.class, () -> dct.execute(map, new PrintWriter(new OutputStreamWriter(bos))));
+            final WebApplicationException ex = assertThrows(WebApplicationException.class, () -> dct.execute(map, new PrintWriter(new OutputStreamWriter(bos))));
             assertEquals("Must have token", ex.getMessage(), "Should have correct message");
         }
     }

@@ -38,7 +38,7 @@ public class DeletePublicKey extends Task {
 
         final List<String> keyCollection = parameters.get("key");
 
-        if (keyCollection.isEmpty()) {
+        if (keyCollection == null || keyCollection.isEmpty()) {
             throw new WebApplicationException("Must have key", Response.Status.BAD_REQUEST);
         }
 

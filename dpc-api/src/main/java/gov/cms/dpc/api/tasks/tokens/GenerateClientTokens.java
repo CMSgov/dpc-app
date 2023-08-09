@@ -45,7 +45,7 @@ public class GenerateClientTokens extends Task {
         final List<String> expirationCollection = parameters.get("expiration");
         final List<String> labelCollection = parameters.get("label");
         final List<String> organizationCollection = parameters.get("organization");
-        if (organizationCollection.isEmpty()) {
+        if (organizationCollection == null || organizationCollection.isEmpty()) {
             logger.warn("CREATING UNRESTRICTED MACAROON. ENSURE THIS IS OK");
             final Macaroon macaroon = bakery.createMacaroon(Collections.emptyList());
             output.write(macaroon.serialize(MacaroonVersion.SerializationVersion.V1_BINARY));
@@ -53,9 +53,10 @@ public class GenerateClientTokens extends Task {
             final String organization = organizationCollection.get(0);
             final Organization orgResource = new Organization();
             orgResource.setId(organization);
-            final String tokenLabel = labelCollection.isEmpty() ? null : labelCollection.get(0);
+            final String tokenLabel = (labelCollection == null || labelCollection.isEmpty()) ? null : labelCollection.get(0);
             Optional<OffsetDateTimeParam> expiration = Optional.empty();
-            if(!expirationCollection.isEmpty() && !StringUtils.isBlank(expirationCollection.get(0))){
+
+            if(expirationCollection != null && !expirationCollection.isEmpty() && !StringUtils.isBlank(expirationCollection.get(0))){
                 expiration = Optional.of(new OffsetDateTimeParam(expirationCollection.get(0)));
             }
             final TokenEntity tokenResponse = this.resource

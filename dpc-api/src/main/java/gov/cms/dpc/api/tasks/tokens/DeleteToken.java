@@ -38,7 +38,7 @@ public class DeleteToken extends Task {
 
         final List<String> tokenCollection = parameters.get("token");
 
-        if (tokenCollection.isEmpty()) {
+        if (tokenCollection == null || tokenCollection.isEmpty()) {
             throw new WebApplicationException("Must have token", Response.Status.BAD_REQUEST);
         }
 

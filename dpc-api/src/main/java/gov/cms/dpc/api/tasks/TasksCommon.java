@@ -25,7 +25,7 @@ public class TasksCommon {
     public static Organization extractOrganization(Map<String, List<String>> parameters) {
         final List<String> organizationCollection = parameters.get(ORG_PARAM);
 
-        if (organizationCollection.isEmpty()) {
+        if (organizationCollection == null || organizationCollection.isEmpty()) {
             throw new WebApplicationException("Must have organization", Response.Status.BAD_REQUEST);
         }
 
