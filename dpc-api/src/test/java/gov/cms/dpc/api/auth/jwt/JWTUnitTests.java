@@ -169,7 +169,7 @@ class JWTUnitTests {
             assertEquals(400, response.getStatus(), "Should have failed");
             DPCValidationErrorMessage errorMessage = response.readEntity(DPCValidationErrorMessage.class);
             assertNotNull(errorMessage, "Should have a validation failure");
-            assertEquals("arg1 Grant type is required", errorMessage.getErrors().get(0), "Should fail due to missing grant type");
+            assertEquals("form field grant_type Grant type is required", errorMessage.getErrors().get(0), "Should fail due to missing grant type");
         }
 
         @Test

@@ -49,7 +49,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 /**
- * Verifies the a user can successfully submit a data export job
+ * Verifies that a user can successfully submit a data export job
  */
 @ExtendWith(DropwizardExtensionsSupport.class)
 @ExtendWith(BufferedLoggerHandler.class)
