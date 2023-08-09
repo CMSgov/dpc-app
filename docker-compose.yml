@@ -19,6 +19,7 @@ services:
     env_file:
       - ./ops/config/decrypted/local.env
     environment:
+      - ENV=local
       - USE_BFD_MOCK=${USE_BFD_MOCK:-true}
       - JACOCO=${REPORT_COVERAGE}
     depends_on:
@@ -33,6 +34,7 @@ services:
     depends_on:
       - db
     environment:
+      - ENV=local
       - JACOCO=${REPORT_COVERAGE}
     ports:
       - "3500:8080"
@@ -48,6 +50,7 @@ services:
     env_file:
       - ./ops/config/decrypted/local.env
     environment:
+      - ENV=local
       - attributionURL=http://attribution:8080/v1/
       - JACOCO=${REPORT_COVERAGE}
       - exportPath=/app/data
@@ -63,6 +66,7 @@ services:
     depends_on:
       - db
     environment:
+      - ENV=local
       - JACOCO=${REPORT_COVERAGE}
     ports:
       - "3600:3600"
@@ -99,8 +103,6 @@ services:
     image: maven:3.6-jdk-11
     env_file:
       - ./ops/config/decrypted/local.env
-    environment:
-      - ENV=eat_me_testing
     volumes:
       - export-volume:/tmp
       - ./:/usr/src/mymaven
