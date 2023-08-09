@@ -48,7 +48,7 @@ public class GenerateKeyPair extends Task {
         final OffsetDateTime createdOn = OffsetDateTime.now(ZoneOffset.UTC);
 
         final List<String> userCollection = parameters.get("user");
-        if (userCollection.isEmpty()) {
+        if (userCollection == null || userCollection.isEmpty()) {
             throw new WebApplicationException("Must have ID of user generating keypair", Response.Status.BAD_REQUEST);
         }
         final String userID = userCollection.get(0);
