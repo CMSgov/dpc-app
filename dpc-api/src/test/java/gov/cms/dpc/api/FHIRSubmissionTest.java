@@ -24,7 +24,7 @@ import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
 import org.eclipse.jetty.http.HttpStatus;
 import org.glassfish.jersey.server.ContainerRequest;
-import org.glassfish.jersey.server.model.Parameter;
+import org.glassfish.jersey.server.spi.internal.ValueParamProvider;
 import org.glassfish.jersey.test.grizzly.GrizzlyWebTestContainerFactory;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -71,7 +71,14 @@ class FHIRSubmissionTest {
     // Test data
     private static final List<String> testBeneficiaries = List.of("0Z00Z00ZZ01", "0Z00Z00ZZ02", "0Z00Z00ZZ03", "0Z00Z00ZZ04");
 
-    private static ResourceExtension groupResource;
+    private final ResourceExtension groupResource = ResourceExtension.builder()
+            .addResource(new GroupResource(queue, client, TEST_BASE_URL, bfdClient, new DPCAPIConfiguration()))
+            .addResource(new JobResource(queue, TEST_BASE_URL))
+            .setTestContainerFactory(testContainer)
+            .addProvider(staticFilter)
+            .addProvider(new AuthValueFactoryProvider.Binder<>(OrganizationPrincipal.class))
+            .addProvider(paramProvider)
+            .build();
 
     @BeforeAll
     static void setup() {
@@ -290,21 +297,10 @@ class FHIRSubmissionTest {
 
     @SuppressWarnings("unchecked")
     private static void mockFactory() {
+        when(paramProvider.getPriority()).thenReturn(ValueParamProvider.Priority.NORMAL);
         final ProvenanceResourceValueFactory f = mock(ProvenanceResourceValueFactory.class);
         Function<ContainerRequest, ProvenanceResourceValueFactory> func = mock(Function.class);
         Mockito.when(paramProvider.getValueProvider(Mockito.any())).thenReturn(func);
         Mockito.when(func.apply(Mockito.any())).thenReturn(f);
-
-        Parameter parameter = mock(Parameter.class);
-        ContainerRequest request = mock(ContainerRequest.class);
-
-        groupResource = ResourceExtension.builder()
-                .addResource(new GroupResource(queue, client, TEST_BASE_URL, bfdClient, new DPCAPIConfiguration()))
-                .addResource(new JobResource(queue, TEST_BASE_URL))
-                .setTestContainerFactory(testContainer)
-                .addProvider(staticFilter)
-                .addProvider(new AuthValueFactoryProvider.Binder<>(OrganizationPrincipal.class))
-                .addProvider(paramProvider.getValueProvider(parameter).apply(request))
-                .build();
     }
 }
