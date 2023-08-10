@@ -12,6 +12,7 @@ import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.DPCResourceType;
+import gov.cms.dpc.fhir.annotations.ProvenanceHeader;
 import gov.cms.dpc.fhir.parameters.ProvenanceResourceParamProvider;
 import gov.cms.dpc.fhir.parameters.ProvenanceResourceValueFactory;
 import gov.cms.dpc.queue.IJobQueue;
@@ -24,6 +25,7 @@ import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
 import org.eclipse.jetty.http.HttpStatus;
 import org.glassfish.jersey.server.ContainerRequest;
+import org.glassfish.jersey.server.model.Parameter;
 import org.glassfish.jersey.server.spi.internal.ValueParamProvider;
 import org.glassfish.jersey.test.grizzly.GrizzlyWebTestContainerFactory;
 import org.hl7.fhir.dstu3.model.*;
@@ -71,14 +73,7 @@ class FHIRSubmissionTest {
     // Test data
     private static final List<String> testBeneficiaries = List.of("0Z00Z00ZZ01", "0Z00Z00ZZ02", "0Z00Z00ZZ03", "0Z00Z00ZZ04");
 
-    private final ResourceExtension groupResource = ResourceExtension.builder()
-            .addResource(new GroupResource(queue, client, TEST_BASE_URL, bfdClient, new DPCAPIConfiguration()))
-            .addResource(new JobResource(queue, TEST_BASE_URL))
-            .setTestContainerFactory(testContainer)
-            .addProvider(staticFilter)
-            .addProvider(new AuthValueFactoryProvider.Binder<>(OrganizationPrincipal.class))
-            .addProvider(factory)
-            .build();
+    private static ResourceExtension groupResource;
 
     @BeforeAll
     static void setup() {
@@ -302,5 +297,20 @@ class FHIRSubmissionTest {
         Function<ContainerRequest, ProvenanceResourceValueFactory> func = mock(Function.class);
         Mockito.when(factory.getValueProvider(Mockito.any())).thenReturn(func);
         Mockito.when(func.apply(Mockito.any())).thenReturn(f);
+
+        final ContainerRequest request = mock(ContainerRequest.class);
+        final Parameter parameter = mock(Parameter.class);
+        final ProvenanceHeader mockAnnotation = mock(ProvenanceHeader.class);
+        Mockito.when(parameter.getDeclaredAnnotation(ProvenanceHeader.class)).thenReturn(mockAnnotation);
+        Mockito.when(parameter.getRawType()).thenAnswer(answer -> Patient.class);
+
+        groupResource = ResourceExtension.builder()
+                .addResource(new GroupResource(queue, client, TEST_BASE_URL, bfdClient, new DPCAPIConfiguration()))
+                .addResource(new JobResource(queue, TEST_BASE_URL))
+                .setTestContainerFactory(testContainer)
+                .addProvider(staticFilter)
+                .addProvider(new AuthValueFactoryProvider.Binder<>(OrganizationPrincipal.class))
+                .addProvider(factory.getValueProvider(parameter).apply(request))
+                .build();
     }
 }
