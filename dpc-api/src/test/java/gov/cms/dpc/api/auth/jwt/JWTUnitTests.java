@@ -169,7 +169,7 @@ class JWTUnitTests {
             assertEquals(400, response.getStatus(), "Should have failed");
             DPCValidationErrorMessage errorMessage = response.readEntity(DPCValidationErrorMessage.class);
             assertNotNull(errorMessage, "Should have a validation failure");
-            assertTrue(errorMessage.getErrors().contains("arg1 Grant type is required"), "Should fail due to missing grant type");
+            assertEquals("arg1 Grant type is required", errorMessage.getErrors().get(0), "Should fail due to missing grant type");
         }
 
         @Test
@@ -204,7 +204,7 @@ class JWTUnitTests {
             assertEquals(400, response.getStatus(), "Should have failed, but for different reasons");
             DPCValidationErrorMessage errorMessage = response.readEntity(DPCValidationErrorMessage.class);
             assertNotNull(errorMessage, "Should have a validation failure");
-            assertTrue(errorMessage.getErrors().contains("arg2 Assertion type is required"), "Should fail due to assertion type");
+            assertEquals("arg2 Assertion type is required", errorMessage.getErrors().get(0), "Should fail due to assertion type");
         }
 
         @Test
