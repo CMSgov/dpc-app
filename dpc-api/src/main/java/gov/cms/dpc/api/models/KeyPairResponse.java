@@ -7,8 +7,8 @@ import gov.cms.dpc.api.converters.BakeryKeyPairSerializer;
 import gov.cms.dpc.common.converters.jackson.OffsetDateTimeToStringConverter;
 import gov.cms.dpc.common.converters.jackson.StringToOffsetDateTimeConverter;
 import gov.cms.dpc.macaroons.thirdparty.BakeryKeyPair;
-import org.hibernate.validator.constraints.NotEmpty;
 
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.time.OffsetDateTime;
 

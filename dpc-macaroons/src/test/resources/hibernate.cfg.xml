@@ -6,6 +6,9 @@
 <hibernate-configuration>
     <session-factory>
 
+        <!-- Disable duplicate validation -->
+        <property name="javax.persistence.validation.mode">none</property>
+
         <!-- Connection settings -->
         <property name="hibernate.connection.driver_class">org.postgresql.Driver</property>
         <property name="hibernate.connection.url">jdbc:postgresql://localhost:5432/dpc_attribution</property>

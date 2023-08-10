@@ -12,9 +12,9 @@ import io.swagger.annotations.ApiModelProperty;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.validator.constraints.Length;
-import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
