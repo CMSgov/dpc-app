@@ -26,7 +26,6 @@ import gov.cms.dpc.testing.BufferedLoggerHandler;
 import io.reactivex.disposables.Disposable;
 import org.assertj.core.util.Lists;
 import org.hl7.fhir.dstu3.model.Bundle;
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -515,7 +514,7 @@ class AggregationEngineTest {
             final String fileContents = Files.readString(Path.of(outputFilePath));
             assertEquals(mbis.size(), Arrays.stream(fileContents.split("\n")).count(), "Contains multiple patients in file output");
         } catch (Exception e) {
-            Assert.fail("Failed to read output file");
+            fail("Failed to read output file");
         }
     }
 
@@ -553,7 +552,7 @@ class AggregationEngineTest {
             final String fileContents = Files.readString(Path.of(outputFilePath));
             assertEquals(mbis.size(), Arrays.stream(fileContents.split("\n")).count(), "Contains multiple patients in file output");
         } catch (Exception e) {
-            Assert.fail("Failed to read output file");
+            fail("Failed to read output file");
         }
     }
 
@@ -760,13 +759,13 @@ class AggregationEngineTest {
                 null, null,  true, false);
 
         AggregationEngineHealthCheck healthCheck = new AggregationEngineHealthCheck(engine);
-        Assert.assertTrue(healthCheck.check().isHealthy());
+        assertTrue(healthCheck.check().isHealthy());
 
         ExecutorService executor = Executors.newCachedThreadPool();
         executor.execute(engine);
         executor.awaitTermination(2, TimeUnit.SECONDS);
 
-        Assert.assertFalse(healthCheck.check().isHealthy());
+        assertFalse(healthCheck.check().isHealthy());
     }
 
     private void testWithThrowable(Throwable throwable) throws GeneralSecurityException {

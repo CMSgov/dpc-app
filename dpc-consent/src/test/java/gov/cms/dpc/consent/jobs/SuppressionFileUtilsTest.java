@@ -5,12 +5,10 @@ import gov.cms.dpc.consent.exceptions.InvalidSuppressionRecordException;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.Paths;
-import java.sql.Date;
 import java.time.LocalDate;
 import java.util.Optional;
 
-import static org.junit.Assert.*;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class SuppressionFileUtilsTest {
 

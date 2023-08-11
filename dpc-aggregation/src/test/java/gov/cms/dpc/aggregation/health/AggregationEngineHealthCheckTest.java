@@ -21,7 +21,6 @@ import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.MemoryBatchQueue;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,6 +34,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyMap;
 
 /**
@@ -97,13 +97,13 @@ public class AggregationEngineHealthCheckTest {
                 null, null, true, false);
 
         AggregationEngineHealthCheck healthCheck = new AggregationEngineHealthCheck(engine);
-        Assert.assertTrue(healthCheck.check().isHealthy());
+        assertTrue(healthCheck.check().isHealthy());
 
         ExecutorService executor = Executors.newCachedThreadPool();
         executor.execute(engine);
         executor.awaitTermination(2, TimeUnit.SECONDS);
 
-        Assert.assertTrue(healthCheck.check().isHealthy());
+        assertTrue(healthCheck.check().isHealthy());
 
     }
 
@@ -125,13 +125,13 @@ public class AggregationEngineHealthCheckTest {
                 null, null, true, false);
 
         AggregationEngineHealthCheck healthCheck = new AggregationEngineHealthCheck(engine);
-        Assert.assertTrue(healthCheck.check().isHealthy());
+        assertTrue(healthCheck.check().isHealthy());
 
         ExecutorService executor = Executors.newCachedThreadPool();
         executor.execute(engine);
         executor.awaitTermination(2, TimeUnit.SECONDS);
 
-        Assert.assertTrue(healthCheck.check().isHealthy());
+        assertTrue(healthCheck.check().isHealthy());
 
     }
 
@@ -153,13 +153,13 @@ public class AggregationEngineHealthCheckTest {
         Mockito.doThrow(new RuntimeException("Error")).when(queue).claimBatch(Mockito.any(UUID.class));
 
         AggregationEngineHealthCheck healthCheck = new AggregationEngineHealthCheck(engine);
-        Assert.assertTrue(healthCheck.check().isHealthy());
+        assertTrue(healthCheck.check().isHealthy());
 
         ExecutorService executor = Executors.newCachedThreadPool();
         executor.execute(engine);
         executor.awaitTermination(2, TimeUnit.SECONDS);
 
-        Assert.assertTrue(healthCheck.check().isHealthy());
+        assertTrue(healthCheck.check().isHealthy());
 
     }
 
@@ -180,12 +180,12 @@ public class AggregationEngineHealthCheckTest {
                 null, null, true, false);
 
         AggregationEngineHealthCheck healthCheck = new AggregationEngineHealthCheck(engine);
-        Assert.assertTrue(healthCheck.check().isHealthy());
+        assertTrue(healthCheck.check().isHealthy());
 
         ExecutorService executor = Executors.newCachedThreadPool();
         executor.execute(engine);
         executor.awaitTermination(2, TimeUnit.SECONDS);
 
-        Assert.assertTrue(healthCheck.check().isHealthy());
+        assertTrue(healthCheck.check().isHealthy());
     }
 }
