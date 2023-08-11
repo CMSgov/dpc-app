@@ -3,6 +3,7 @@ package gov.cms.dpc.fhir.parameters;
 import ca.uhn.fhir.context.FhirContext;
 import com.google.inject.Injector;
 import gov.cms.dpc.fhir.annotations.FHIRParameter;
+import org.glassfish.hk2.api.Factory;
 import org.glassfish.jersey.server.ContainerRequest;
 import org.glassfish.jersey.server.model.Parameter;
 import org.glassfish.jersey.server.spi.internal.ValueParamProvider;
@@ -29,7 +30,7 @@ public class FHIRParamValueFactory implements ValueParamProvider {
 
 
     @Override
-    public Function<ContainerRequest, ParamResourceFactory> getValueProvider(Parameter parameter) {
+    public Function<ContainerRequest, Factory<?>> getValueProvider(Parameter parameter) {
         if (parameter.getDeclaredAnnotation(FHIRParameter.class) != null) {
             // If the parameter is a resource, pass it off to the resource factory
             if (IBaseResource.class.isAssignableFrom(parameter.getRawType()))

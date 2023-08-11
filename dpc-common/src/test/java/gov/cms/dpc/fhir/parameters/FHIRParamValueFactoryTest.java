@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import com.google.inject.Injector;
 import gov.cms.dpc.fhir.annotations.FHIRParameter;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
+import org.glassfish.hk2.api.Factory;
 import org.glassfish.jersey.server.ContainerRequest;
 import org.glassfish.jersey.server.model.Parameter;
 import org.hl7.fhir.dstu3.model.Patient;
@@ -38,7 +39,7 @@ class FHIRParamValueFactoryTest {
         Mockito.when(parameter.getRawType()).thenAnswer(answer -> Patient.class);
 
         ContainerRequest request = Mockito.mock(ContainerRequest.class);
-        ParamResourceFactory valueFactory = (ParamResourceFactory) factory.getValueProvider(parameter).apply(request);
+        Factory<?> valueFactory = factory.getValueProvider(parameter).apply(request);
         assertAll(() -> assertNotNull(valueFactory, "Should have factory"),
                 () -> assertEquals(ParamResourceFactory.class, valueFactory.getClass(), "Should have provenance factory"));
     }
