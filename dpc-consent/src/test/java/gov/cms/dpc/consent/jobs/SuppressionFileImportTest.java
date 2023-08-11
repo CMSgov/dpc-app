@@ -1,8 +1,10 @@
 package gov.cms.dpc.consent.jobs;
 
-import com.google.inject.*;
-import gov.cms.dpc.common.hibernate.consent.DPCConsentManagedSessionFactory;
+import com.google.inject.AbstractModule;
+import com.google.inject.Guice;
+import com.google.inject.Provides;
 import gov.cms.dpc.common.consent.entities.ConsentEntity;
+import gov.cms.dpc.common.hibernate.consent.DPCConsentManagedSessionFactory;
 import gov.cms.dpc.consent.DPCConsentConfiguration;
 import gov.cms.dpc.consent.DPCConsentService;
 import gov.cms.dpc.consent.jdbi.ConsentDAO;
@@ -11,11 +13,10 @@ import gov.cms.dpc.testing.JobTestUtils;
 import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.DropwizardTestSupport;
-import io.dropwizard.testing.junit.DAOTestRule;
+import io.dropwizard.testing.junit5.DAOTestExtension;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.context.internal.ManagedSessionContext;
-import org.junit.Rule;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,7 +33,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
+
 
 @IntegrationTest
 public class SuppressionFileImportTest {
@@ -44,8 +46,7 @@ public class SuppressionFileImportTest {
     private ConsentDAO consentDAO;
     final Path PATH_1800_COPY = Paths.get("./src/test/resources/synthetic-1800-files/copy");
 
-    @Rule
-    public DAOTestRule database = DAOTestRule.newBuilder().addEntityClass(ConsentEntity.class).setProperty("webAllowOthers", "false").build();
+    public DAOTestExtension database = DAOTestExtension.newBuilder().addEntityClass(ConsentEntity.class).setProperty("webAllowOthers", "false").build();
 
     @BeforeEach
     void setUp() throws Exception {
