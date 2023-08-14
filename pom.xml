@@ -146,6 +146,13 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            <dependency>
+                <groupId>io.dropwizard</groupId>
+                <artifactId>dropwizard-dependencies</artifactId>
+                <version>${dropwizard.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <!--No longer shipped with Java 11, so we need to include it manually-->
             <dependency>
                 <groupId>javax.xml.bind</groupId>
