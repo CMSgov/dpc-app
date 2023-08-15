@@ -28,7 +28,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import javax.inject.Inject;
 import javax.ws.rs.HttpMethod;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -53,7 +52,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(BufferedLoggerHandler.class)
 public class GroupResourceTest extends AbstractSecureApplicationTest {
 
-    @Inject
     GroupResourceTest() {
         // Not used
     }

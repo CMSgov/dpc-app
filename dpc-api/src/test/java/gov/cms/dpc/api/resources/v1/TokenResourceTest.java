@@ -25,7 +25,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.opentest4j.AssertionFailedError;
 
-import javax.inject.Inject;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
@@ -47,7 +46,6 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
     private final ObjectMapper mapper;
     private String fullyAuthedToken;
 
-    @Inject
     private TokenResourceTest() {
         this.mapper = new ObjectMapper();
 
