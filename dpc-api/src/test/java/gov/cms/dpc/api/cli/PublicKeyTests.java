@@ -8,7 +8,6 @@ import gov.cms.dpc.api.cli.keys.KeyList;
 import gov.cms.dpc.api.cli.keys.KeyUpload;
 import gov.cms.dpc.api.cli.organizations.OrganizationRegistration;
 import gov.cms.dpc.api.resources.v1.KeyResource;
-import gov.cms.dpc.testing.KeyType;
 import io.dropwizard.cli.Cli;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.util.JarLocation;
@@ -17,6 +16,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import javax.inject.Inject;
 import java.io.*;
 import java.nio.file.Path;
 import java.security.KeyPair;
@@ -44,6 +44,7 @@ public class PublicKeyTests extends AbstractApplicationTest {
     private final ByteArrayOutputStream stdErr = new ByteArrayOutputStream();
     private Cli cli;
 
+    @Inject
     PublicKeyTests() {
         // Not used
     }

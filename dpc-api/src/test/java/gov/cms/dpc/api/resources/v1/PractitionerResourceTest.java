@@ -24,6 +24,7 @@ import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Practitioner;
 import org.junit.jupiter.api.Test;
 
+import javax.inject.Inject;
 import javax.ws.rs.HttpMethod;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -40,6 +41,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class PractitionerResourceTest extends AbstractSecureApplicationTest {
 
+    @Inject
     PractitionerResourceTest() {
         // Not used
     }

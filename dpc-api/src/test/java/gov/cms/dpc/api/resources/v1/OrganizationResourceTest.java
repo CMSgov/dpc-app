@@ -38,6 +38,7 @@ import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.junit.jupiter.api.Test;
 
+import javax.inject.Inject;
 import javax.ws.rs.HttpMethod;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -57,6 +58,7 @@ class OrganizationResourceTest extends AbstractSecureApplicationTest {
 
     private final ObjectMapper mapper;
 
+    @Inject
     OrganizationResourceTest() {
         this.mapper = new ObjectMapper();
     }

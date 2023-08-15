@@ -13,6 +13,7 @@ import org.hl7.fhir.dstu3.model.*;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+import javax.inject.Inject;
 import java.sql.Date;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -20,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class ProfileTests extends AbstractSecureApplicationTest {
 
+    @Inject
     private ProfileTests() {
         // Not used
     }

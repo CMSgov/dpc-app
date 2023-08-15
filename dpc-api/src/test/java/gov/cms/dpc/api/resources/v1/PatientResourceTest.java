@@ -31,6 +31,7 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 
+import javax.inject.Inject;
 import javax.ws.rs.HttpMethod;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -66,6 +67,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
     final IGenericClient consentClient = APITestHelpers.buildConsentClient(ctx);
 
+    @Inject
     PatientResourceTest() {
         // Not used
     }
@@ -291,7 +293,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
                 .execute();
 
         assertEquals(64, resultNoSince.getTotal(), "Should have 64 entries in Bundle");
-        
+
         // Request with a blank since parameter should still return data
         Bundle resultEmptySince = client
                 .operation()
@@ -304,7 +306,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
                 .execute();
 
         assertEquals(64, resultEmptySince.getTotal(), "Should have 64 entries in Bundle");
-        
+
         // Request with an invalid since parameter should throw an error
         assertThrows(InvalidRequestException.class, () -> client
                 .operation()
@@ -327,7 +329,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
                 .useHttpGet()
                 .withAdditionalHeader("X-Provenance", generateProvenance(ORGANIZATION_ID, practitioner.getId()))
                 .execute());
-        
+
         // Request with a valid since parameter should return data
         String sinceValid = OffsetDateTime.now(ZoneId.of("America/Puerto_Rico")).minusSeconds(5).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
         Bundle resultValidSince = client

@@ -14,6 +14,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import javax.inject.Inject;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.PrintStream;
@@ -39,6 +40,7 @@ class TokenTests extends AbstractApplicationTest {
     private final ByteArrayOutputStream stdErr = new ByteArrayOutputStream();
     private Cli cli;
 
+    @Inject
     TokenTests() {
         // Not used
     }
