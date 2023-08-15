@@ -1,6 +1,5 @@
 package gov.cms.dpc.consent.resources;
 
-import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.common.consent.entities.ConsentEntity;
 import gov.cms.dpc.consent.jdbi.ConsentDAO;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
@@ -20,7 +19,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static gov.cms.dpc.fhir.FHIRMediaTypes.FHIR_JSON;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -31,11 +30,6 @@ import static org.mockito.Mockito.when;
 @Disabled
 @ExtendWith(DropwizardExtensionsSupport.class)
 public class ConsentResourceUnitTest {
-
-    static {
-        // otherwise our testContainer doesn't get assembled properly
-        JerseyGuiceUtils.reset();
-    }
 
     private static final String TEST_HICN = "this_is_a_placeholder_hicn";
     private static final String TEST_MBI = "this_is_a_placeholder_mbi";
