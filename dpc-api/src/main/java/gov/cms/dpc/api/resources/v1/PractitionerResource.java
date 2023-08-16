@@ -120,7 +120,7 @@ public class PractitionerResource extends AbstractPractitionerResource {
             @ApiResponse(code = 422, message = "Provider does not satisfy the required FHIR profile")
     })
     @Override
-    public Response submitProvider(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
+    public Response submitProvider(@Auth OrganizationPrincipal organizationPrincipal,
                                    @Valid @Profiled(profile = PractitionerProfile.PROFILE_URI) Practitioner provider) {
 
         APIHelpers.addOrganizationTag(provider, organizationPrincipal.getID().toString());
@@ -142,8 +142,7 @@ public class PractitionerResource extends AbstractPractitionerResource {
             "<p> Each Practitioner MUST implement the " + PRACTITIONER_PROFILE + " profile.")
     @ApiResponses(@ApiResponse(code = 422, message = "Provider does not satisfy the required FHIR profile"))
     @Override
-    public Bundle bulkSubmitProviders(@ApiParam(hidden = true) @Auth OrganizationPrincipal organization,
-                                      @ApiParam Parameters params) {
+    public Bundle bulkSubmitProviders(@Auth OrganizationPrincipal organization, Parameters params) {
         final Bundle providerBundle = (Bundle) params.getParameterFirstRep().getResource();
         final Consumer<Practitioner> entryHandler = (resource) -> validateProvider(resource,
                 organization.getOrganization().getId(),
@@ -196,7 +195,7 @@ public class PractitionerResource extends AbstractPractitionerResource {
     @ApiOperation(value = "Validate Practitioner resource", notes = "Validates the given resource against the " + PractitionerProfile.PROFILE_URI + " profile." +
             "<p>This method always returns a 200 status, even in respond to a non-conformant resource.")
     @Override
-    public IBaseOperationOutcome validateProvider(@Auth @ApiParam(hidden = true) OrganizationPrincipal organization, Parameters parameters) {
+    public IBaseOperationOutcome validateProvider(@Auth OrganizationPrincipal organization, Parameters parameters) {
         return ValidationHelpers.validateAgainstProfile(this.validator, parameters, PractitionerProfile.PROFILE_URI);
     }
 

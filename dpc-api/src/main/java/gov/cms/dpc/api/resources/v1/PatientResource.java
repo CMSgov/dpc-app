@@ -113,7 +113,7 @@ public class PatientResource extends AbstractPatientResource {
     @ApiOperation(value = "Create Patient", notes = "Create a Patient record associated to the Organization.")
     @ApiResponses(@ApiResponse(code = 422, message = "Patient does not satisfy the required FHIR profile"))
     @Override
-    public Response submitPatient(@ApiParam(hidden = true) @Auth OrganizationPrincipal organization, @Valid @Profiled(profile = PatientProfile.PROFILE_URI) @ApiParam Patient patient) {
+    public Response submitPatient(@Auth OrganizationPrincipal organization, @Valid @Profiled(profile = PatientProfile.PROFILE_URI) Patient patient) {
 
         // Set the Managing Organization on the Patient
         final Reference orgReference = new Reference(new IdType("Organization", organization.getOrganization().getId()));
@@ -137,8 +137,7 @@ public class PatientResource extends AbstractPatientResource {
             "<p> Each Patient resource MUST implement the " + PatientProfile.PROFILE_URI + "profile.")
     @ApiResponses(@ApiResponse(code = 422, message = "Patient does not satisfy the required FHIR profile"))
     @Override
-    public Bundle bulkSubmitPatients(@ApiParam(hidden = true) @Auth OrganizationPrincipal organization,
-                                     @ApiParam Parameters params) {
+    public Bundle bulkSubmitPatients(@Auth OrganizationPrincipal organization, Parameters params) {
         final Bundle patientBundle = (Bundle) params.getParameterFirstRep().getResource();
         final Consumer<Patient> entryHandler = (patient) -> validateAndAddOrg(patient, organization.getOrganization().getId(), validator);
 
@@ -193,7 +192,7 @@ public class PatientResource extends AbstractPatientResource {
                 .withId(practitionerId.toString())
                 .encodedJson()
                 .execute();
-            
+
         if (practitioner == null) {
             // Is this the best code to be throwing here?
             throw new WebApplicationException(HttpStatus.UNAUTHORIZED_401);
@@ -286,7 +285,7 @@ public class PatientResource extends AbstractPatientResource {
     @ApiOperation(value = "Validate Patient resource", notes = "Validates the given resource against the " + PatientProfile.PROFILE_URI + " profile." +
             "<p>This method always returns a 200 status, even in response to a non-conformant resource.")
     @Override
-    public IBaseOperationOutcome validatePatient(@Auth @ApiParam(hidden = true) OrganizationPrincipal organization, @ApiParam Parameters parameters) {
+    public IBaseOperationOutcome validatePatient(@Auth OrganizationPrincipal organization, Parameters parameters) {
         return ValidationHelpers.validateAgainstProfile(this.validator, parameters, PatientProfile.PROFILE_URI);
     }
 
