@@ -20,7 +20,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import javax.inject.Inject;
 import java.io.IOException;
 
 import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
@@ -44,7 +43,6 @@ public class AbstractApplicationTest {
             ConfigOverride.config(KEY_PREFIX, "logging.level", "ERROR"));
     protected FhirContext ctx;
 
-    @Inject
     protected AbstractApplicationTest() {
         // Not used
     }
