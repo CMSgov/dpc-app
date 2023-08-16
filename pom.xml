@@ -165,8 +165,10 @@
             </dependency>
             <dependency>
                 <groupId>ru.vyarus</groupId>
-                <artifactId>dropwizard-guicey</artifactId>
+                <artifactId>guicey-bom</artifactId>
                 <version>5.9.1</version>
+                <type>pom</type>
+                <scope>import</scope>
                 <exclusions>
                     <exclusion>
                         <groupId>org.eclipse.jetty</groupId>
@@ -339,6 +341,11 @@
             <groupId>org.apache.velocity</groupId>
             <artifactId>velocity-engine-core</artifactId>
             <version>2.3</version>
+        </dependency>
+        <dependency>
+            <groupId>ru.vyarus</groupId>
+            <artifactId>dropwizard-guicey</artifactId>
+            <version>5.9.1</version>
         </dependency>
     </dependencies>
 
