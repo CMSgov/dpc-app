@@ -52,8 +52,8 @@ public class EndpointResource extends AbstractEndpointResource {
             @ApiResponse(code = 422, message = "Endpoint not valid")
     })
     @Override
-    public Response createEndpoint(@Auth OrganizationPrincipal organizationPrincipal,
-                                   @Valid @Profiled(profile = EndpointProfile.PROFILE_URI) Endpoint endpoint) {
+    public Response createEndpoint(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
+                                   @ApiParam @Valid @Profiled(profile = EndpointProfile.PROFILE_URI) Endpoint endpoint) {
         Reference organizationPrincipalRef = new Reference(new IdType("Organization", organizationPrincipal.getID().toString()));
         if (endpoint.hasManagingOrganization() && !endpoint.getManagingOrganization().getReference().equals(organizationPrincipalRef.getReference())) {
             throw new WebApplicationException("An Endpoint cannot be created for a different Organization", HttpStatus.UNPROCESSABLE_ENTITY_422);

@@ -123,8 +123,9 @@ public class KeyResource extends AbstractKeyResource {
     @ApiResponses(@ApiResponse(code = 400, message = "Public key is not valid."))
     @UnitOfWork
     @Override
-    public PublicKeyEntity submitKey(@Auth OrganizationPrincipal organizationPrincipal,
-                                     KeySignature keySignature,
+    public PublicKeyEntity submitKey(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
+                                     @ApiParam KeySignature keySignature,
+                                     @ApiParam(name = "label", value = "Public Key Label (cannot be more than 25 characters in length)", defaultValue = "key:{random integer}", allowableValues = "range[-infinity, 25]")
                                      @QueryParam(value = "label") Optional<String> keyLabelOptional) {
         final String keyLabel;
         if (keyLabelOptional.isPresent()) {
