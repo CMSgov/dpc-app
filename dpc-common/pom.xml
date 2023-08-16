@@ -72,6 +72,7 @@
         <dependency>
             <groupId>com.hubspot.dropwizard</groupId>
             <artifactId>dropwizard-guicier</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>io.dropwizard</groupId>
