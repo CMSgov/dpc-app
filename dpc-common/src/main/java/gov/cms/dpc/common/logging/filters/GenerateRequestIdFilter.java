@@ -19,6 +19,13 @@ public class GenerateRequestIdFilter implements ContainerRequestFilter {
 
     private static final Logger logger = LoggerFactory.getLogger(GenerateRequestIdFilter.class);
 
+    private final boolean useProvidedRequestId;
+
+    public GenerateRequestIdFilter(boolean useProvidedRequestId){
+        this.useProvidedRequestId = useProvidedRequestId;
+    }
+
+
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
         String resourceRequested = XSSSanitizerUtil.sanitize(requestContext.getUriInfo().getPath());
@@ -26,8 +33,6 @@ public class GenerateRequestIdFilter implements ContainerRequestFilter {
         String mediaType = requestContext.getMediaType() == null
                 ? null
                 : requestContext.getMediaType().toString();
-        // TODO: is this right?
-        boolean useProvidedRequestId = (boolean) requestContext.getProperty("use_provided_request_id");
         try {
             MDC.clear();
         } catch(IllegalStateException exception) {
