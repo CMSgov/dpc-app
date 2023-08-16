@@ -1,24 +1,29 @@
 package gov.cms.dpc.common.logging.filters;
 
+import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import gov.cms.dpc.common.Constants;
 import gov.cms.dpc.common.MDCConstants;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import java.io.IOException;
-import java.util.UUID;
-import org.mockito.*;
+import org.mockito.ArgumentMatchers;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.slf4j.LoggerFactory;
-import ch.qos.logback.classic.Logger;
 import org.slf4j.MDC;
+
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
+import java.io.IOException;
+import java.util.UUID;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class GenerateRequestIdFilterUnitTest {
-    private GenerateRequestIdFilter filter;
+    private final GenerateRequestIdFilter filter = new GenerateRequestIdFilter();
 
     @Mock
     ContainerRequestContext mockContext;
@@ -46,14 +51,14 @@ public class GenerateRequestIdFilterUnitTest {
             logger.addAppender(listAppender);
 
             //Without request-id in header and extraction enabled
-            filter = new GenerateRequestIdFilter(true);
+            Mockito.when(mockContext.getProperty("use_provided_request_id")).thenReturn(true);
             filter.filter(mockContext);
             assertEquals("resource_requested=v1/Patients, method=GET, media_type=application/json, request_id=" + MDC.get(MDCConstants.DPC_REQUEST_ID) + ", use_provided_request_id=true", listAppender.list.get(0).getFormattedMessage());
             assertNotNull(MDC.get(MDCConstants.DPC_REQUEST_ID));
             UUID.fromString(MDC.get(MDCConstants.DPC_REQUEST_ID));
 
             //Without request-id in header and extraction disabled
-            filter = new GenerateRequestIdFilter(false);
+            Mockito.when(mockContext.getProperty("use_provided_request_id")).thenReturn(false);
             filter.filter(mockContext);
             assertEquals("resource_requested=v1/Patients, method=GET, media_type=application/json, request_id=" + MDC.get(MDCConstants.DPC_REQUEST_ID) + ", use_provided_request_id=false", listAppender.list.get(1).getFormattedMessage());
             assertNotNull(MDC.get(MDCConstants.DPC_REQUEST_ID));
@@ -74,6 +79,7 @@ public class GenerateRequestIdFilterUnitTest {
         MediaType mockMediaType = Mockito.mock(MediaType.class);
         Mockito.when(mockMediaType.toString()).thenReturn("application/json");
         Mockito.when(mockContext.getMediaType()).thenReturn(mockMediaType);
+        Mockito.when(mockContext.getProperty("use_provided_request_id")).thenReturn(false);
 
         Logger logger = (Logger) LoggerFactory.getLogger(GenerateRequestIdFilter.class);
         ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
@@ -82,7 +88,6 @@ public class GenerateRequestIdFilterUnitTest {
             logger.addAppender(listAppender);
 
             //With request-id in header and use header value Disabled
-            filter = new GenerateRequestIdFilter(false);
             filter.filter(mockContext);
             assertEquals("resource_requested=v1/Patients, method=GET, media_type=application/json, request_id=" + MDC.get(MDCConstants.DPC_REQUEST_ID) + ", use_provided_request_id=false", listAppender.list.get(0).getFormattedMessage());
             assertNotEquals(requestId, MDC.get(MDCConstants.DPC_REQUEST_ID));
@@ -102,6 +107,7 @@ public class GenerateRequestIdFilterUnitTest {
         MediaType mockMediaType = Mockito.mock(MediaType.class);
         Mockito.when(mockMediaType.toString()).thenReturn("application/json");
         Mockito.when(mockContext.getMediaType()).thenReturn(mockMediaType);
+        Mockito.when(mockContext.getProperty("use_provided_request_id")).thenReturn(true);
 
         Logger logger = (Logger) LoggerFactory.getLogger(GenerateRequestIdFilter.class);
         ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
@@ -110,7 +116,6 @@ public class GenerateRequestIdFilterUnitTest {
             logger.addAppender(listAppender);
 
             //With request-id in header and use header value enabled
-            filter = new GenerateRequestIdFilter(true);
             filter.filter(mockContext);
             assertEquals("resource_requested=v1/Patients, method=GET, media_type=application/json, request_id=" + requestId + ", use_provided_request_id=true", listAppender.list.get(0).getFormattedMessage());
             assertEquals(requestId, MDC.get(MDCConstants.DPC_REQUEST_ID));
@@ -130,10 +135,10 @@ public class GenerateRequestIdFilterUnitTest {
         MediaType mockMediaType = Mockito.mock(MediaType.class);
         Mockito.when(mockMediaType.toString()).thenReturn("application/json");
         Mockito.when(mockContext.getMediaType()).thenReturn(mockMediaType);
+        Mockito.when(mockContext.getProperty("use_provided_request_id")).thenReturn(true);
 
         MDC.put("Some-Key", "some-value");
         assertNotNull(MDC.get("Some-Key"));
-        filter = new GenerateRequestIdFilter(true);
         filter.filter(mockContext);
         assertNull(MDC.get("Some-Key"));
     }
