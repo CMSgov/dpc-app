@@ -1,6 +1,8 @@
 package gov.cms.dpc.api.auth;
 
+import com.google.inject.Binder;
 import com.google.inject.TypeLiteral;
+import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import gov.cms.dpc.api.DPCAPIConfiguration;
 import gov.cms.dpc.api.auth.filters.PathAuthorizationFilter;
 import gov.cms.dpc.api.auth.jwt.CaffeineJTICache;
@@ -16,7 +18,6 @@ import io.dropwizard.auth.UnauthorizedHandler;
 import io.jsonwebtoken.SigningKeyResolverAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.vyarus.dropwizard.guice.module.support.DropwizardAwareModule;
 
 /**
  * {@link DropwizardAwareModule} for determining which authentication system to use.
@@ -30,25 +31,25 @@ public class AuthModule extends DropwizardAwareModule<DPCAPIConfiguration> {
     private static final Logger logger = LoggerFactory.getLogger(AuthModule.class);
 
     @Override
-    protected void configure() {
+    public void configure(Binder binder) {
 
         final var authenticatorTypeLiteral = new TypeLiteral<Authenticator<DPCAuthCredentials, OrganizationPrincipal>>() {
         };
 
-        if (configuration().isAuthenticationDisabled()) {
+        if (getConfiguration().isAuthenticationDisabled()) {
             logger.warn("AUTHENTICATION IS DISABLED!!! USE ONLY IN DEVELOPMENT");
-            binder().bind(AuthFactory.class).to(StaticAuthFactory.class);
-            binder().bind(authenticatorTypeLiteral).to(StaticAuthenticator.class);
+            binder.bind(AuthFactory.class).to(StaticAuthFactory.class);
+            binder.bind(authenticatorTypeLiteral).to(StaticAuthenticator.class);
 
         } else {
-            binder().bind(DPCUnauthorizedHandler.class);
-            binder().bind(UnauthorizedHandler.class).to(DPCUnauthorizedHandler.class);
-            binder().bind(AuthFactory.class).to(DPCAuthFactory.class);
-            binder().bind(authenticatorTypeLiteral).to(MacaroonsAuthenticator.class);
+            binder.bind(DPCUnauthorizedHandler.class);
+            binder.bind(UnauthorizedHandler.class).to(DPCUnauthorizedHandler.class);
+            binder.bind(AuthFactory.class).to(DPCAuthFactory.class);
+            binder.bind(authenticatorTypeLiteral).to(MacaroonsAuthenticator.class);
         }
-        binder().bind(DPCAuthDynamicFeature.class);
-        binder().bind(SigningKeyResolverAdapter.class).to(JwtKeyResolver.class);
-        binder().bind(IJTICache.class).to(CaffeineJTICache.class);
-        binder().bind(BakeryKeyPair.class).toProvider(new BakeryKeyPairProvider(configuration()));
+        binder.bind(DPCAuthDynamicFeature.class);
+        binder.bind(SigningKeyResolverAdapter.class).to(JwtKeyResolver.class);
+        binder.bind(IJTICache.class).to(CaffeineJTICache.class);
+        binder.bind(BakeryKeyPair.class).toProvider(new BakeryKeyPairProvider(getConfiguration()));
     }
 }

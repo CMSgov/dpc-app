@@ -4,6 +4,7 @@ import ca.mestevens.java.configuration.bundle.TypesafeConfigurationBundle;
 import com.codahale.metrics.jersey2.InstrumentedResourceMethodApplicationListener;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.datatype.hibernate5.Hibernate5Module;
+import com.hubspot.dropwizard.guicier.GuiceBundle;
 import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.api.auth.AuthModule;
 import gov.cms.dpc.api.cli.keys.KeyCommand;
@@ -29,7 +30,6 @@ import io.dropwizard.db.DataSourceFactory;
 import io.dropwizard.migrations.MigrationsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
-import ru.vyarus.dropwizard.guice.GuiceBundle;
 
 import java.util.List;
 
@@ -53,7 +53,7 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
     public void initialize(final Bootstrap<DPCAPIConfiguration> bootstrap) {
         setupJacksonMapping(bootstrap);
         // Setup Guice bundle and module injection
-        final GuiceBundle guiceBundle = setupGuiceBundle();
+        final GuiceBundle<DPCAPIConfiguration> guiceBundle = setupGuiceBundle();
 
         // The Hibernate bundle must be initialized before Guice.
         // The Hibernate Guice module requires an initialized SessionFactory,
@@ -84,11 +84,11 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
         environment.jersey().register(LogResponseFilter.class);
     }
 
-    private GuiceBundle setupGuiceBundle() {
+    private GuiceBundle<DPCAPIConfiguration> setupGuiceBundle() {
         // This is required for Guice to load correctly. Not entirely sure why
         // https://github.com/dropwizard/dropwizard/issues/1772
         JerseyGuiceUtils.reset();
-        return GuiceBundle.builder()
+        return GuiceBundle.defaultBuilder(DPCAPIConfiguration.class)
                 .modules(
                         new DPCHibernateModule<>(hibernateBundle),
                         new DPCQueueHibernateModule<>(hibernateQueueBundle),

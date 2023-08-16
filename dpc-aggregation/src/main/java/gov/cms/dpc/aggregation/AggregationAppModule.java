@@ -4,8 +4,10 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import com.codahale.metrics.MetricRegistry;
+import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.google.inject.name.Named;
+import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import com.typesafe.config.Config;
 import gov.cms.dpc.aggregation.engine.AggregationEngine;
 import gov.cms.dpc.aggregation.engine.JobBatchProcessor;
@@ -19,7 +21,6 @@ import gov.cms.dpc.fhir.hapi.ContextUtils;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.vyarus.dropwizard.guice.module.support.DropwizardAwareModule;
 
 import javax.inject.Singleton;
 
@@ -33,11 +34,11 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
     }
 
     @Override
-    protected void configure() {
-        binder().bind(AggregationEngine.class);
-        binder().bind(AggregationManager.class).asEagerSingleton();
-        binder().bind(JobBatchProcessor.class);
-        binder().bind(JobBatchProcessorV2.class);
+    public void configure(Binder binder) {
+        binder.bind(AggregationEngine.class);
+        binder.bind(AggregationManager.class).asEagerSingleton();
+        binder.bind(JobBatchProcessor.class);
+        binder.bind(JobBatchProcessorV2.class);
 
         // Healthchecks
         // Additional health-checks can be added here
@@ -70,23 +71,23 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
     @Provides
     @Singleton
     MetricRegistry provideMetricRegistry() {
-        return environment().metrics();
+        return getEnvironment().metrics();
     }
 
     @Provides
     public Config provideConfig() {
-        return configuration().getConfig();
+        return getConfiguration().getConfig();
     }
 
     @Provides
     @ExportPath
     public String provideExportPath() {
-        return configuration().getExportPath();
+        return getConfiguration().getExportPath();
     }
 
     @Provides
     OperationsConfig provideOperationsConfig() {
-        final var config = configuration();
+        final var config = getConfiguration();
 
         return new OperationsConfig(
                 config.getResourcesPerFileCount(),
@@ -102,7 +103,7 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
     @Provides
     @JobTimeout
     public int provideJobTimeoutInSeconds() {
-        return configuration().getJobTimeoutInSeconds();
+        return getConfiguration().getJobTimeoutInSeconds();
     }
 
     @Provides
@@ -118,9 +119,9 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
     @Singleton
     @Named("consentClient")
     public IGenericClient provideConsentClient(FhirContext ctx) {
-        logger.info("Connecting to consent server at {}.", configuration().getConsentServiceUrl());
+        logger.info("Connecting to consent server at {}.", getConfiguration().getConsentServiceUrl());
         ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
-        IGenericClient client = ctx.newRestfulGenericClient(configuration().getConsentServiceUrl());
+        IGenericClient client = ctx.newRestfulGenericClient(getConfiguration().getConsentServiceUrl());
         return client;
     }
 

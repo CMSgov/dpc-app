@@ -3,9 +3,11 @@ package gov.cms.dpc.bluebutton;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.codahale.metrics.MetricRegistry;
+import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
+import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.bluebutton.client.BlueButtonClientImpl;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
@@ -25,7 +27,6 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContexts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.vyarus.dropwizard.guice.module.support.DropwizardAwareModule;
 
 import javax.net.ssl.SSLContext;
 import java.io.FileInputStream;
@@ -58,24 +59,24 @@ public class BlueButtonClientModule<T extends Configuration & BlueButtonBundleCo
     }
 
     @Override
-    protected void configure() {
+    public void configure(Binder binder) {
         if (this.bbClientConfiguration == null) {
-            this.bbClientConfiguration = configuration().getBlueButtonConfiguration();
+            this.bbClientConfiguration = getConfiguration().getBlueButtonConfiguration();
         }
 
         final boolean healthCheckEnabled = this.bbClientConfiguration.isRegisterHealthCheck();
         if(healthCheckEnabled){
-            binder().bind(BlueButtonHealthCheck.class);
+            binder.bind(BlueButtonHealthCheck.class);
         }
 
         final BBClientConfiguration.R4Configuration r4Configuration = this.bbClientConfiguration.getR4Configuration();
         if (r4Configuration != null && StringUtils.isNotEmpty(r4Configuration.getServerBaseUrl())) {
             R4ClientProvider client = new R4ClientProvider(r4Configuration.getServerBaseUrl());
-            binder().requestInjection(client);
-            binder().bind(IGenericClient.class).annotatedWith(Names.named("bbclientR4")).toProvider(client).asEagerSingleton();
+            binder.requestInjection(client);
+            binder.bind(IGenericClient.class).annotatedWith(Names.named("bbclientR4")).toProvider(client).asEagerSingleton();
             BlueButtonClientV2Provider blueButtonClientV2Provider = new BlueButtonClientV2Provider(this.bbClientConfiguration);
-            binder().requestInjection(blueButtonClientV2Provider);
-            binder().bind(BlueButtonClientV2.class).toProvider(blueButtonClientV2Provider).asEagerSingleton();
+            binder.requestInjection(blueButtonClientV2Provider);
+            binder.bind(BlueButtonClientV2.class).toProvider(blueButtonClientV2Provider).asEagerSingleton();
         }
         logger.info("Blue Button health checks are {}.", healthCheckEnabled ? "enabled" : "disabled");
     }

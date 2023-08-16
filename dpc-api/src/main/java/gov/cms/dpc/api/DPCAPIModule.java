@@ -4,8 +4,10 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import com.codahale.metrics.MetricRegistry;
+import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.google.inject.name.Named;
+import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import com.typesafe.config.Config;
 import gov.cms.dpc.api.auth.jwt.IJTICache;
 import gov.cms.dpc.api.converters.ChecksumConverterProvider;
@@ -38,7 +40,6 @@ import io.jsonwebtoken.SigningKeyResolverAdapter;
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.vyarus.dropwizard.guice.module.support.DropwizardAwareModule;
 
 import javax.inject.Singleton;
 
@@ -53,35 +54,35 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
     }
 
     @Override
-    protected void configure() {
+    public void configure(Binder binder) {
         // V1 Resources
-        binder().bind(BaseResource.class);
-        binder().bind(DataResource.class);
-        binder().bind(DefinitionResource.class);
-        binder().bind(EndpointResource.class);
-        binder().bind(GroupResource.class);
-        binder().bind(JobResource.class);
-        binder().bind(PatientResource.class);
-        binder().bind(PractitionerResource.class);
+        binder.bind(BaseResource.class);
+        binder.bind(DataResource.class);
+        binder.bind(DefinitionResource.class);
+        binder.bind(EndpointResource.class);
+        binder.bind(GroupResource.class);
+        binder.bind(JobResource.class);
+        binder.bind(PatientResource.class);
+        binder.bind(PractitionerResource.class);
 
         // DAO
-        binder().bind(PublicKeyDAO.class);
-        binder().bind(TokenDAO.class);
+        binder.bind(PublicKeyDAO.class);
+        binder.bind(TokenDAO.class);
 
         // Tasks
-        binder().bind(GenerateClientTokens.class);
-        binder().bind(GenerateKeyPair.class);
-        binder().bind(ListClientTokens.class);
-        binder().bind(DeleteToken.class);
-        binder().bind(UploadPublicKey.class);
-        binder().bind(ListPublicKeys.class);
-        binder().bind(DeletePublicKey.class);
+        binder.bind(GenerateClientTokens.class);
+        binder.bind(GenerateKeyPair.class);
+        binder.bind(ListClientTokens.class);
+        binder.bind(DeleteToken.class);
+        binder.bind(UploadPublicKey.class);
+        binder.bind(ListPublicKeys.class);
+        binder.bind(DeletePublicKey.class);
 
-        binder().bind(FileManager.class);
-        binder().bind(HttpRangeHeaderParamConverterProvider.class);
-        binder().bind(ChecksumConverterProvider.class);
+        binder.bind(FileManager.class);
+        binder.bind(HttpRangeHeaderParamConverterProvider.class);
+        binder.bind(ChecksumConverterProvider.class);
 
-        binder().bind(DataService.class);
+        binder.bind(DataService.class);
 
         // Healthchecks
         // Additional health-checks can be added here
@@ -109,7 +110,7 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
                                 String.class},
                         new Object[]{dao,
                                 bakery,
-                                configuration().getTokenPolicy(),
+                                getConfiguration().getTokenPolicy(),
                                 resolver,
                                 cache, publicURL});
     }
@@ -127,30 +128,30 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
     @Provides
     @Singleton
     public MetricRegistry provideMetricRegistry() {
-        return environment().metrics();
+        return getEnvironment().metrics();
     }
 
     @Provides
     public Config provideConfig() {
-        return configuration().getConfig();
+        return getConfiguration().getConfig();
     }
 
     @Provides
     @ExportPath
     public String provideExportPath() {
-        return configuration().getExportPath();
+        return getConfiguration().getExportPath();
     }
 
     @Provides
     @ServiceBaseURL
     public String provideBaseURL() {
-        return configuration().getPublicURL();
+        return getConfiguration().getPublicURL();
     }
 
     @Provides
     @APIV1
     public String provideV1URL() {
-        return configuration().getPublicURL() + "/v1";
+        return getConfiguration().getPublicURL() + "/v1";
     }
 
     @Provides
@@ -167,7 +168,7 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
 
     @Provides
     TokenPolicy providePolicy() {
-        return configuration().getTokenPolicy();
+        return getConfiguration().getTokenPolicy();
     }
 
     @Provides
@@ -181,9 +182,9 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
     @Singleton
     @Named("attribution")
     public IGenericClient provideFHIRClient(FhirContext ctx) {
-        logger.info("Connecting to attribution server at {}.", configuration().getAttributionURL());
+        logger.info("Connecting to attribution server at {}.", getConfiguration().getAttributionURL());
         ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
-        IGenericClient client = ctx.newRestfulGenericClient(configuration().getAttributionURL());
+        IGenericClient client = ctx.newRestfulGenericClient(getConfiguration().getAttributionURL());
         client.registerInterceptor(new RequestIdHeaderInterceptor());
         return client;
     }
@@ -191,6 +192,6 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
     @Provides
     @JobTimeout
     public int provideJobTimeoutInSeconds() {
-        return configuration().getJobTimeoutInSeconds();
+        return getConfiguration().getJobTimeoutInSeconds();
     }
 }
