@@ -25,6 +25,7 @@ public class GenerateRequestIdFilter implements ContainerRequestFilter {
         this.useProvidedRequestId = useProvidedRequestId;
     }
 
+
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
         String resourceRequested = XSSSanitizerUtil.sanitize(requestContext.getUriInfo().getPath());

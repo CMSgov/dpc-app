@@ -3,7 +3,6 @@ package gov.cms.dpc.fhir.dropwizard.filters;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
 import org.eclipse.jetty.server.Response;
 
-import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
@@ -15,7 +14,6 @@ import java.util.function.Predicate;
 
 public class FHIRRequestFilter implements ContainerRequestFilter {
 
-    @Inject
     FHIRRequestFilter() {
         // Not used
     }

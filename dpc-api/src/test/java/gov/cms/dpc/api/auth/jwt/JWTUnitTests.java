@@ -112,7 +112,7 @@ class JWTUnitTests {
             // Should still have an exception
             validationErrorResponse = response.readEntity(DPCValidationErrorMessage.class);
             assertEquals(400, response.getStatus(), "Should have failed");
-            assertEquals(2, validationErrorResponse.getErrors().size(), "Should have two violations");
+            assertEquals(2, validationErrorResponse.getErrors().size(), "Should have two violation");
 
             // Add the assertion type
             formData.add("client_assertion_type", TokenResource.CLIENT_ASSERTION_TYPE);
