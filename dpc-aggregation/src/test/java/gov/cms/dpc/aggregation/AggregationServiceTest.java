@@ -22,7 +22,7 @@ public class AggregationServiceTest {
     private static final DropwizardTestSupport<DPCAggregationConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCAggregationService.class, "ci.application.conf", ConfigOverride.config("server.applicationConnectors[0].port", "7777"));
 
     @BeforeAll
-    static void start() throws Exception {
+    static void start() {
         APPLICATION.before();
     }
 
