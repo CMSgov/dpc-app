@@ -5,6 +5,7 @@ import com.google.inject.Injector;
 import gov.cms.dpc.fhir.annotations.ProvenanceHeader;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import org.glassfish.hk2.api.Factory;
+import org.glassfish.jersey.server.ContainerRequest;
 import org.glassfish.jersey.server.model.Parameter;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.jupiter.api.BeforeAll;
@@ -37,7 +38,8 @@ class ProvenanceResourceValueFactoryProviderTest {
         Mockito.when(parameter.getDeclaredAnnotation(ProvenanceHeader.class)).thenReturn(mockAnnotation);
         Mockito.when(parameter.getRawType()).thenAnswer(answer -> Patient.class);
 
-        final Factory<?> valueFactory = factory.getValueFactory(parameter);
+        final ContainerRequest request = Mockito.mock(ContainerRequest.class);
+        final Factory<?> valueFactory = factory.getValueProvider(parameter).apply(request);
         assertAll(() -> assertNotNull(valueFactory, "Should have factory"),
                 () -> assertEquals(ProvenanceResourceValueFactory.class, valueFactory.getClass(), "Should have provenance factory"));
     }
@@ -47,7 +49,7 @@ class ProvenanceResourceValueFactoryProviderTest {
         final Parameter parameter = Mockito.mock(Parameter.class);
         Mockito.when(parameter.getDeclaredAnnotation(ProvenanceHeader.class)).thenReturn(null);
 
-        assertNull(factory.getValueFactory(parameter), "Factory should be null");
+        assertNull(factory.getValueProvider(parameter), "Factory should be null");
     }
 
     @Test
@@ -57,6 +59,6 @@ class ProvenanceResourceValueFactoryProviderTest {
         Mockito.when(parameter.getDeclaredAnnotation(ProvenanceHeader.class)).thenReturn(mockAnnotation);
         Mockito.when(parameter.getRawType()).thenAnswer(answer -> Mockito.class);
 
-        assertNull(factory.getValueFactory(parameter), "Should not have factory for non-FHIR resource");
+        assertNull(factory.getValueProvider(parameter), "Should not have factory for non-FHIR resource");
     }
 }

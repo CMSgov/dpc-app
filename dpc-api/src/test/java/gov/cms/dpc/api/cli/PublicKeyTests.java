@@ -8,7 +8,6 @@ import gov.cms.dpc.api.cli.keys.KeyList;
 import gov.cms.dpc.api.cli.keys.KeyUpload;
 import gov.cms.dpc.api.cli.organizations.OrganizationRegistration;
 import gov.cms.dpc.api.resources.v1.KeyResource;
-import gov.cms.dpc.testing.KeyType;
 import io.dropwizard.cli.Cli;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.util.JarLocation;
@@ -79,9 +78,9 @@ public class PublicKeyTests extends AbstractApplicationTest {
     @Test
     void testPublicKeyLifecycle() throws Exception {
         // Create the organization
-        final boolean success = cli.run("register", "-f", "../src/main/resources/organization.tmpl.json", "--no-token", "--host", "http://localhost:3500/v1");
+        final Optional<Throwable> success = cli.run("register", "-f", "../src/main/resources/organization.tmpl.json", "--no-token", "--host", "http://localhost:3500/v1");
 
-        assertAll(() -> assertTrue(success, "Should have succeeded"),
+        assertAll(() -> assertTrue(success.isPresent(), "Should have succeeded"),
                 () -> assertEquals("", stdErr.toString(), "Should not have errors"));
 
         // Pull out the organization ID
@@ -103,9 +102,9 @@ public class PublicKeyTests extends AbstractApplicationTest {
         final String sigStr = signString(keyPair.getPrivate(), KeyResource.SNIPPET);
         final Path sigFilePath = writeToTempFile(sigStr);
 
-        final boolean s2 = cli.run("upload", organizationID, keyFilePath.toString(), sigFilePath.toString());
+        final Optional<Throwable> s2 = cli.run("upload", organizationID, keyFilePath.toString(), sigFilePath.toString());
 
-        assertAll(() -> assertTrue(s2, "Should have succeeded"),
+        assertAll(() -> assertTrue(s2.isPresent(), "Should have succeeded"),
                 () -> assertEquals("", stdErr.toString(), "Should not have any errors"));
 
         // List the organization tokens
@@ -115,9 +114,9 @@ public class PublicKeyTests extends AbstractApplicationTest {
         // Try to remove it
         stdOut.reset();
         stdErr.reset();
-        final boolean s3 = cli.run("delete", "-o", organizationID, matchedKeyIDs.get(0).toString());
+        final Optional<Throwable> s3 = cli.run("delete", "-o", organizationID, matchedKeyIDs.get(0).toString());
 
-        assertTrue(s3, "Should have succeeded");
+        assertTrue(s3.isPresent(), "Should have succeeded");
 
         final List<UUID> tokenIDs = getKeyIDs(organizationID);
         assertTrue(tokenIDs.isEmpty(), "Should not have any keys");
@@ -128,7 +127,7 @@ public class PublicKeyTests extends AbstractApplicationTest {
         stdOut.reset();
         stdErr.reset();
 
-        final boolean s2 = cli.run("list", organizationID);
+        final Optional<Throwable> s2 = cli.run("list", organizationID);
 
         // Find all of the key IDs
         final List<UUID> matchedKeyIDs = Pattern.compile("║\\s([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})")
@@ -139,7 +138,7 @@ public class PublicKeyTests extends AbstractApplicationTest {
                 .map(UUID::fromString)
                 .collect(Collectors.toList());
 
-        assertAll(() -> assertTrue(s2, "Should have succeeded"),
+        assertAll(() -> assertTrue(s2.isPresent(), "Should have succeeded"),
                 () -> assertEquals("", stdErr.toString(), "Should be empty"));
 
         return matchedKeyIDs;

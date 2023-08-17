@@ -5,6 +5,7 @@ import com.google.inject.Injector;
 import gov.cms.dpc.fhir.annotations.FHIRParameter;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import org.glassfish.hk2.api.Factory;
+import org.glassfish.jersey.server.ContainerRequest;
 import org.glassfish.jersey.server.model.Parameter;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.jupiter.api.BeforeAll;
@@ -37,7 +38,8 @@ class FHIRParamValueFactoryTest {
         Mockito.when(parameter.getDeclaredAnnotation(FHIRParameter.class)).thenReturn(mockAnnotation);
         Mockito.when(parameter.getRawType()).thenAnswer(answer -> Patient.class);
 
-        final Factory<?> valueFactory = factory.getValueFactory(parameter);
+        final ContainerRequest request = Mockito.mock(ContainerRequest.class);
+        final Factory<?> valueFactory = factory.getValueProvider(parameter).apply(request);
         assertAll(() -> assertNotNull(valueFactory, "Should have factory"),
                 () -> assertEquals(ParamResourceFactory.class, valueFactory.getClass(), "Should have provenance factory"));
     }
@@ -48,7 +50,7 @@ class FHIRParamValueFactoryTest {
         Mockito.when(parameter.getDeclaredAnnotation(FHIRParameter.class)).thenReturn(null);
         Mockito.when(parameter.getRawType()).thenAnswer(answer -> Patient.class);
 
-        assertNull(factory.getValueFactory(parameter), "Should not have factory");
+        assertNull(factory.getValueProvider(parameter), "Should not have factory");
     }
 
     @Test
@@ -58,6 +60,6 @@ class FHIRParamValueFactoryTest {
         Mockito.when(parameter.getDeclaredAnnotation(FHIRParameter.class)).thenReturn(mockAnnotation);
         Mockito.when(parameter.getRawType()).thenAnswer(answer -> Mockito.class);
 
-        assertNull(factory.getValueFactory(parameter), "Should not have factory");
+        assertNull(factory.getValueProvider(parameter), "Should not have factory");
     }
 }
