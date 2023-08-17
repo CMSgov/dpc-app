@@ -5,7 +5,6 @@ import com.codahale.metrics.jersey2.InstrumentedResourceMethodApplicationListene
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.datatype.hibernate5.Hibernate5Module;
 import com.hubspot.dropwizard.guicier.GuiceBundle;
-import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.api.auth.AuthModule;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.cli.keys.KeyCommand;
@@ -31,6 +30,7 @@ import io.dropwizard.db.DataSourceFactory;
 import io.dropwizard.migrations.MigrationsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
+
 import java.util.List;
 
 public class DPCAPIService extends Application<DPCAPIConfiguration> {
@@ -85,9 +85,6 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
     }
 
     private GuiceBundle<DPCAPIConfiguration> setupGuiceBundle() {
-        // This is required for Guice to load correctly. Not entirely sure why
-        // https://github.com/dropwizard/dropwizard/issues/1772
-        JerseyGuiceUtils.reset();
         return GuiceBundle.defaultBuilder(DPCAPIConfiguration.class)
                 .modules(
                         new DPCHibernateModule<>(hibernateBundle),
