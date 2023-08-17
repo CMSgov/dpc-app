@@ -7,8 +7,6 @@ import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.attribution.cli.SeedCommand;
 import gov.cms.dpc.common.hibernate.attribution.DPCHibernateBundle;
 import gov.cms.dpc.common.hibernate.attribution.DPCHibernateModule;
-import gov.cms.dpc.common.logging.filters.GenerateRequestIdFilter;
-import gov.cms.dpc.common.logging.filters.LogResponseFilter;
 import gov.cms.dpc.common.utils.EnvironmentParser;
 import gov.cms.dpc.fhir.FHIRModule;
 import io.dropwizard.Application;
@@ -51,8 +49,9 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
         EnvironmentParser.getEnvironment("Attribution");
         final var listener = new InstrumentedResourceMethodApplicationListener(environment.metrics());
         environment.jersey().getResourceConfig().register(listener);
-        environment.jersey().register(new GenerateRequestIdFilter(true));
-        environment.jersey().register(new LogResponseFilter());
+        // TODO: testing a thing
+        // environment.jersey().register(new GenerateRequestIdFilter(true));
+        // environment.jersey().register(new LogResponseFilter());
     }
 
     private void registerBundles(Bootstrap<DPCAttributionConfiguration> bootstrap) {
