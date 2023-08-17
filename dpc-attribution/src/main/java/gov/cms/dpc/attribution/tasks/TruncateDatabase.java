@@ -34,7 +34,7 @@ public class TruncateDatabase extends Task {
 
 
     @Override
-    public void execute(Map<String, List<String>> params, PrintWriter printWriter) throws Exception {
+    public void execute(Map<String, List<String>> map, PrintWriter printWriter) throws Exception {
 
         // Get the db factory
         final PooledDataSourceFactory dataSourceFactory = configuration.getDatabase();

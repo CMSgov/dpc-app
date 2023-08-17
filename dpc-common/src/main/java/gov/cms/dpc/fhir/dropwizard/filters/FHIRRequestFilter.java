@@ -14,6 +14,10 @@ import java.util.function.Predicate;
 
 public class FHIRRequestFilter implements ContainerRequestFilter {
 
+    FHIRRequestFilter() {
+        // Not used
+    }
+
     @Override
     public void filter(ContainerRequestContext requestContext) {
         // Ensure the `Accept` header is set to a FHIR media type
