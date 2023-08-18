@@ -2,11 +2,11 @@ package gov.cms.dpc.attribution;
 
 import ca.mestevens.java.configuration.bundle.TypesafeConfigurationBundle;
 import com.codahale.metrics.jersey2.InstrumentedResourceMethodApplicationListener;
-import com.hubspot.dropwizard.guicier.GuiceBundle;
-import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.attribution.cli.SeedCommand;
 import gov.cms.dpc.common.hibernate.attribution.DPCHibernateBundle;
 import gov.cms.dpc.common.hibernate.attribution.DPCHibernateModule;
+import gov.cms.dpc.common.logging.filters.GenerateRequestIdFilter;
+import gov.cms.dpc.common.logging.filters.LogResponseFilter;
 import gov.cms.dpc.common.utils.EnvironmentParser;
 import gov.cms.dpc.fhir.FHIRModule;
 import io.dropwizard.Application;
@@ -18,6 +18,7 @@ import org.knowm.dropwizard.sundial.SundialBundle;
 import org.knowm.dropwizard.sundial.SundialConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.vyarus.dropwizard.guice.GuiceBundle;
 
 public class DPCAttributionService extends Application<DPCAttributionConfiguration> {
 
@@ -36,9 +37,6 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
 
     @Override
     public void initialize(Bootstrap<DPCAttributionConfiguration> bootstrap) {
-        // This is required for Guice to load correctly. Not entirely sure why
-        // https://github.com/dropwizard/dropwizard/issues/1772
-        JerseyGuiceUtils.reset();
         registerBundles(bootstrap);
 
         bootstrap.addCommand(new SeedCommand(bootstrap.getApplication()));
@@ -49,13 +47,12 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
         EnvironmentParser.getEnvironment("Attribution");
         final var listener = new InstrumentedResourceMethodApplicationListener(environment.metrics());
         environment.jersey().getResourceConfig().register(listener);
-        // TODO: testing a thing
-        // environment.jersey().register(new GenerateRequestIdFilter(true));
-        // environment.jersey().register(new LogResponseFilter());
+         environment.jersey().register(new GenerateRequestIdFilter(true));
+         environment.jersey().register(new LogResponseFilter());
     }
 
     private void registerBundles(Bootstrap<DPCAttributionConfiguration> bootstrap) {
-        GuiceBundle<DPCAttributionConfiguration> guiceBundle = GuiceBundle.defaultBuilder(DPCAttributionConfiguration.class)
+        GuiceBundle guiceBundle = GuiceBundle.builder()
                 .modules(
                         new DPCHibernateModule<>(hibernateBundle),
                         new AttributionAppModule(),

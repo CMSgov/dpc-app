@@ -4,12 +4,12 @@ import ca.mestevens.java.configuration.bundle.TypesafeConfigurationBundle;
 import com.codahale.metrics.jersey2.InstrumentedResourceMethodApplicationListener;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.datatype.hibernate5.Hibernate5Module;
-import com.hubspot.dropwizard.guicier.GuiceBundle;
-import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.api.auth.AuthModule;
+import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.cli.keys.KeyCommand;
 import gov.cms.dpc.api.cli.organizations.OrganizationCommand;
 import gov.cms.dpc.api.cli.tokens.TokenCommand;
+import gov.cms.dpc.api.exceptions.JsonParseExceptionMapper;
 import gov.cms.dpc.bluebutton.BlueButtonClientModule;
 import gov.cms.dpc.common.hibernate.attribution.DPCHibernateBundle;
 import gov.cms.dpc.common.hibernate.attribution.DPCHibernateModule;
@@ -17,15 +17,19 @@ import gov.cms.dpc.common.hibernate.auth.DPCAuthHibernateBundle;
 import gov.cms.dpc.common.hibernate.auth.DPCAuthHibernateModule;
 import gov.cms.dpc.common.hibernate.queue.DPCQueueHibernateBundle;
 import gov.cms.dpc.common.hibernate.queue.DPCQueueHibernateModule;
+import gov.cms.dpc.common.logging.filters.GenerateRequestIdFilter;
+import gov.cms.dpc.common.logging.filters.LogResponseFilter;
 import gov.cms.dpc.common.utils.EnvironmentParser;
 import gov.cms.dpc.fhir.FHIRModule;
 import gov.cms.dpc.macaroons.BakeryModule;
 import gov.cms.dpc.queue.JobQueueModule;
 import io.dropwizard.Application;
+import io.dropwizard.auth.AuthValueFactoryProvider;
 import io.dropwizard.db.DataSourceFactory;
 import io.dropwizard.migrations.MigrationsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
+import ru.vyarus.dropwizard.guice.GuiceBundle;
 
 import java.util.List;
 
@@ -49,7 +53,7 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
     public void initialize(final Bootstrap<DPCAPIConfiguration> bootstrap) {
         setupJacksonMapping(bootstrap);
         // Setup Guice bundle and module injection
-        final GuiceBundle<DPCAPIConfiguration> guiceBundle = setupGuiceBundle();
+        final GuiceBundle guiceBundle = setupGuiceBundle();
 
         // The Hibernate bundle must be initialized before Guice.
         // The Hibernate Guice module requires an initialized SessionFactory,
@@ -74,18 +78,14 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
         EnvironmentParser.getEnvironment("API");
         final var listener = new InstrumentedResourceMethodApplicationListener(environment.metrics());
         environment.jersey().getResourceConfig().register(listener);
-        // TODO: testing a thing
-        // environment.jersey().register(new AuthValueFactoryProvider.Binder<>(OrganizationPrincipal.class));
-        // environment.jersey().register(new JsonParseExceptionMapper());
-        // environment.jersey().register(new GenerateRequestIdFilter(false));
-        // environment.jersey().register(new LogResponseFilter());
+         environment.jersey().register(new AuthValueFactoryProvider.Binder<>(OrganizationPrincipal.class));
+         environment.jersey().register(new JsonParseExceptionMapper());
+         environment.jersey().register(new GenerateRequestIdFilter(false));
+         environment.jersey().register(new LogResponseFilter());
     }
 
-    private GuiceBundle<DPCAPIConfiguration> setupGuiceBundle() {
-        // This is required for Guice to load correctly. Not entirely sure why
-        // https://github.com/dropwizard/dropwizard/issues/1772
-        JerseyGuiceUtils.reset();
-        return GuiceBundle.defaultBuilder(DPCAPIConfiguration.class)
+    private GuiceBundle setupGuiceBundle() {
+        return GuiceBundle.builder()
                 .modules(
                         new DPCHibernateModule<>(hibernateBundle),
                         new DPCQueueHibernateModule<>(hibernateQueueBundle),
