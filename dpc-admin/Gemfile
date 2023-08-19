@@ -18,7 +18,7 @@ gem 'activesupport', '~> 7.0.5.1'
 gem 'railties', '~> 7.0.5.1'
 gem 'bundler', '>= 1.15.0'
 gem 'dotenv-rails', groups: [:development, :test]
-gem 'puma', '~> 5.6.4'
+gem 'puma', '~> 5.6.7'
 gem 'redis', '~> 4.0'
 gem 'luhnacy', '~> 0.2.1'
 gem 'omniauth-rails_csrf_protection', '~> 0.1.2'
