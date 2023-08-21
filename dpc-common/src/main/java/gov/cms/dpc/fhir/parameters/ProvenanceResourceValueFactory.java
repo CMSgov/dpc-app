@@ -2,7 +2,6 @@ package gov.cms.dpc.fhir.parameters;
 
 import ca.uhn.fhir.context.FhirContext;
 import com.google.inject.Injector;
-import org.glassfish.hk2.api.Factory;
 import org.hl7.fhir.dstu3.model.Provenance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,11 +9,12 @@ import org.slf4j.LoggerFactory;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
+import java.util.function.Supplier;
 
 /**
- * {@link Factory} for extracting a {@link org.hl7.fhir.dstu3.model.Provenance} resource from a request header.
+ * {@link Supplier} for extracting a {@link org.hl7.fhir.dstu3.model.Provenance} resource from a request header.
  */
-public class ProvenanceResourceValueFactory implements Factory<Provenance> {
+public class ProvenanceResourceValueFactory implements Supplier<Provenance> {
 
     static final String PROVENANCE_HEADER = "X-Provenance";
     private static final Logger logger = LoggerFactory.getLogger(ProvenanceResourceValueFactory.class);
@@ -28,7 +28,7 @@ public class ProvenanceResourceValueFactory implements Factory<Provenance> {
     }
 
     @Override
-    public Provenance provide() {
+    public Provenance get() {
         final HttpServletRequest request = injector.getInstance(HttpServletRequest.class);
         final String headerValue = request.getHeader(PROVENANCE_HEADER);
         if (headerValue == null) {
@@ -43,10 +43,5 @@ public class ProvenanceResourceValueFactory implements Factory<Provenance> {
         }
 
         return provenance;
-    }
-
-    @Override
-    public void dispose(Provenance instance) {
-        // Not used
     }
 }

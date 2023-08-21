@@ -297,7 +297,7 @@ class FHIRSubmissionTest {
     @SuppressWarnings("unchecked")
     private static void mockFactory() {
         Mockito.when(factory.getPriority()).thenReturn(ValueParamProvider.Priority.NORMAL);
-        final Function<ContainerRequest, org.glassfish.hk2.api.Factory<?>> func = mock(Function.class);
+        final Function<ContainerRequest, java.util.function.Supplier<?>> func = mock(Function.class);
         Mockito.when(factory.getValueProvider(Mockito.any())).thenReturn(func);
     }
 }
