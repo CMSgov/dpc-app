@@ -4,6 +4,7 @@ import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.FHIRAsync;
 import gov.cms.dpc.fhir.dropwizard.filters.FHIRAsyncRequestFilter;
 import gov.cms.dpc.fhir.dropwizard.filters.FHIRRequestFilter;
+import gov.cms.dpc.fhir.parameters.ProvenanceResourceFactoryProvider;
 
 import javax.inject.Inject;
 import javax.ws.rs.container.DynamicFeature;
@@ -21,6 +22,7 @@ public class FHIRRequestFeature implements DynamicFeature {
 
     @Override
     public void configure(ResourceInfo resourceInfo, FeatureContext context) {
+        context.register(ProvenanceResourceFactoryProvider.class);
         if (resourceInfo.getResourceMethod().getAnnotation(FHIR.class) != null || resourceInfo.getResourceClass().getAnnotation(FHIR.class) != null) {
             context.register(FHIRRequestFilter.class);
             return;

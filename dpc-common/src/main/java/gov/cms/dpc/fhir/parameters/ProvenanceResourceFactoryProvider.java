@@ -18,6 +18,7 @@ import java.util.function.Function;
 /**
  * Custom {@link ValueParamProvider} that lets us cleanly extract {@link org.hl7.fhir.dstu3.model.Provenance} resources from the {@link ProvenanceResourceValueFactory#PROVENANCE_HEADER}.
  */
+// TODO: figure out what the consumed/produced values should be
 @Provider
 @Consumes
 @Produces
