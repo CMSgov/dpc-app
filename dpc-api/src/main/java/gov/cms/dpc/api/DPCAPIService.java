@@ -106,7 +106,7 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
     }
 
     private void setupCustomBundles(final Bootstrap<DPCAPIConfiguration> bootstrap) {
-        bootstrap.addBundle(new MigrationsBundle<DPCAPIConfiguration>() {
+        bootstrap.addBundle(new MigrationsBundle<>() {
             @Override
             public DataSourceFactory getDataSourceFactory(DPCAPIConfiguration dpcAPIConfiguration) {
                 return dpcAPIConfiguration.getAuthDatabase();
