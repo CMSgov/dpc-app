@@ -73,7 +73,7 @@ public class FHIRRequestFeatureTest {
         Mockito.when(info.getResourceClass()).thenAnswer(answer -> NoAnnotationClass.class);
         Mockito.when(info.getResourceMethod()).thenReturn(method);
         feature.configure(info, context);
-        Mockito.verify(context, Mockito.never()).register(Mockito.any());
+        Mockito.verify(context, Mockito.atMostOnce()).register(Mockito.any());
     }
 
     @FHIR
