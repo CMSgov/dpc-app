@@ -153,6 +153,13 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            <dependency>
+                <groupId>ru.vyarus.guicey</groupId>
+                <artifactId>guicey-bom</artifactId>
+                <version>5.9.1</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <!--No longer shipped with Java 11, so we need to include it manually-->
             <dependency>
                 <groupId>javax.xml.bind</groupId>
@@ -168,12 +175,11 @@
             <dependency>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-io</artifactId>
-                <version>9.4.44.v20210927</version>
+                <version>9.4.51.v20230217</version>
             </dependency>
             <dependency>
                 <groupId>ru.vyarus</groupId>
                 <artifactId>dropwizard-guicey</artifactId>
-                <version>5.9.1</version>
             </dependency>
             <dependency>
                 <groupId>com.typesafe</groupId>
