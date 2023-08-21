@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.vyarus.dropwizard.guice.module.support.DropwizardAwareModule;
 
+import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import static gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration.FHIRValidationConfiguration;
@@ -27,6 +28,7 @@ public class FHIRModule<T extends Configuration & IDPCFHIRConfiguration> extends
 
     private static final Logger logger = LoggerFactory.getLogger(FHIRModule.class);
 
+    @Inject
     public FHIRModule() {
         // Not used
     }
