@@ -39,7 +39,7 @@ class ProvenanceResourceValueFactoryTest {
 
         final ProvenanceResourceValueFactory factory = new ProvenanceResourceValueFactory(mockInjector, ctx);
 
-        final Provenance prov2 = factory.provide();
+        final Provenance prov2 = factory.get();
         assertTrue(provenance.equalsDeep(prov2), "Should have matching provenance resource");
     }
 

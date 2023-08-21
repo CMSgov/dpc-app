@@ -92,7 +92,7 @@ class ParamResourceFactoryTest {
 
         final ParamResourceFactory factory = new ParamResourceFactory(mockInjector, parameter, parser);
 
-        assertTrue(dummyPatient.equalsDeep((Patient) factory.provide()), "Should have returned dummy patient");
+        assertTrue(dummyPatient.equalsDeep((Patient) factory.get()), "Should have returned dummy patient");
     }
 
     @Test
@@ -121,8 +121,8 @@ class ParamResourceFactoryTest {
         Mockito.when(parameter.getRawType()).thenAnswer(answer -> Patient.class);
 
         final ParamResourceFactory factory = new ParamResourceFactory(mockInjector, parameter, parser);
-        assertAll(() -> assertTrue(namedPatient.equalsDeep((Patient) factory.provide()), "Should have returned dummy patient"),
-                () -> assertFalse(unnamedPatient.equalsDeep((Patient) factory.provide()), "Should have returned dummy patient"));
+        assertAll(() -> assertTrue(namedPatient.equalsDeep((Patient) factory.get()), "Should have returned dummy patient"),
+                () -> assertFalse(unnamedPatient.equalsDeep((Patient) factory.get()), "Should have returned dummy patient"));
     }
 
     @Test
