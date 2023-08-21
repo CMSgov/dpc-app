@@ -53,7 +53,7 @@ class ProvenanceResourceValueFactoryTest {
 
         final ProvenanceResourceValueFactory factory = new ProvenanceResourceValueFactory(mockInjector, ctx);
 
-        final WebApplicationException exception = assertThrows(WebApplicationException.class, factory::provide, "Should throw an exception");
+        final WebApplicationException exception = assertThrows(WebApplicationException.class, factory::get, "Should throw an exception");
         assertAll(() -> assertEquals(HttpStatus.BAD_REQUEST_400, exception.getResponse().getStatus(), "Should be a bad request"),
                 () -> assertEquals(String.format("Must have %s header", ProvenanceResourceValueFactory.PROVENANCE_HEADER), exception.getMessage(), "Should show missing header"));
     }
@@ -72,7 +72,7 @@ class ProvenanceResourceValueFactoryTest {
 
         final ProvenanceResourceValueFactory factory = new ProvenanceResourceValueFactory(mockInjector, ctx);
 
-        final WebApplicationException exception = assertThrows(WebApplicationException.class, factory::provide, "Should throw an exception");
+        final WebApplicationException exception = assertThrows(WebApplicationException.class, factory::get, "Should throw an exception");
         assertAll(() -> assertEquals(HttpStatus.BAD_REQUEST_400, exception.getResponse().getStatus(), "Should be a bad request"),
                 () -> assertEquals("Cannot parse FHIR `Provenance` resource", exception.getMessage(), "Should show missing header"));
     }
