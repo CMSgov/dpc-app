@@ -13,13 +13,13 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
+import org.hibernate.query.criteria.HibernateCriteriaBuilder;
+import org.hibernate.query.criteria.JpaCriteriaQuery;
+import org.hibernate.query.criteria.JpaRoot;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
@@ -119,9 +119,9 @@ public class DistributedBatchQueue extends JobQueueCommon {
         try (final Session session = this.factory.openSession()) {
             final Transaction tx = session.beginTransaction();
             try {
-                final CriteriaBuilder builder = session.getCriteriaBuilder();
-                final CriteriaQuery<JobQueueBatch> query = builder.createQuery(JobQueueBatch.class);
-                final Root<JobQueueBatch> root = query.from(JobQueueBatch.class);
+                final HibernateCriteriaBuilder builder = session.getCriteriaBuilder();
+                final JpaCriteriaQuery<JobQueueBatch> query = builder.createQuery(JobQueueBatch.class);
+                final JpaRoot<JobQueueBatch> root = query.from(JobQueueBatch.class);
 
                 query.select(root);
                 query.where(
@@ -176,9 +176,9 @@ public class DistributedBatchQueue extends JobQueueCommon {
 
         // Unstick stuck batches
         if ( stuckBatchIDs != null && !stuckBatchIDs.isEmpty() ) {
-            final CriteriaBuilder builder = session.getCriteriaBuilder();
-            final CriteriaQuery<JobQueueBatch> query = builder.createQuery(JobQueueBatch.class);
-            final Root<JobQueueBatch> root = query.from(JobQueueBatch.class);
+            final HibernateCriteriaBuilder builder = session.getCriteriaBuilder();
+            final JpaCriteriaQuery<JobQueueBatch> query = builder.createQuery(JobQueueBatch.class);
+            final JpaRoot<JobQueueBatch> root = query.from(JobQueueBatch.class);
 
             query.select(root);
             query.where(root.get("batchID").in(stuckBatchIDs.stream().map(UUID::fromString).collect(Collectors.toList())));
@@ -203,8 +203,8 @@ public class DistributedBatchQueue extends JobQueueCommon {
     @SuppressWarnings("unchecked")
     private Optional<JobQueueBatch> claimBatchFromDatabase(Session session, UUID aggregatorID) {
         // Claim a new batch
-        Optional<String> batchID = session.createNativeQuery("SELECT Cast(batch_id as varchar) batch_id FROM job_queue_batch WHERE status = 0 ORDER BY priority ASC, submit_time ASC LIMIT 1 FOR UPDATE SKIP LOCKED")
-                .uniqueResultOptional();
+        Query<String> batchQuery = (Query<String>) session.createNativeQuery("SELECT Cast(batch_id as varchar) batch_id FROM job_queue_batch WHERE status = 0 ORDER BY priority ASC, submit_time ASC LIMIT 1 FOR UPDATE SKIP LOCKED");
+        Optional<String> batchID = batchQuery.uniqueResultOptional();
 
         if ( batchID.isPresent() ) {
             JobQueueBatch batch = session.get(JobQueueBatch.class, UUID.fromString(batchID.get()));
@@ -298,9 +298,9 @@ public class DistributedBatchQueue extends JobQueueCommon {
     public long queueSize() {
         try (final Session session = this.factory.openSession()) {
             try {
-                final CriteriaBuilder builder = session.getCriteriaBuilder();
-                final CriteriaQuery<Long> query = builder.createQuery(Long.class);
-                final Root<JobQueueBatch> root = query.from(JobQueueBatch.class);
+                final HibernateCriteriaBuilder builder = session.getCriteriaBuilder();
+                final JpaCriteriaQuery<Long> query = builder.createQuery(Long.class);
+                final JpaRoot<JobQueueBatch> root = query.from(JobQueueBatch.class);
 
                 query.select(builder.count(root));
                 query.where(
