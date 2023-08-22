@@ -120,10 +120,10 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
     @Singleton
     @Named("consentClient")
     public IGenericClient provideConsentClient(FhirContext ctx) {
-        logger.info("Connecting to consent server at {}.", configuration().getConsentServiceUrl());
+        String serviceUrl = configuration().getConsentServiceUrl();
+        logger.info("Connecting to consent server at {}.", serviceUrl);
         ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
-        IGenericClient client = ctx.newRestfulGenericClient(configuration().getConsentServiceUrl());
-        return client;
+        return ctx.newRestfulGenericClient(serviceUrl);
     }
 
     @Provides

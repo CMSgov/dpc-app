@@ -183,9 +183,10 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
     @Singleton
     @Named("attribution")
     public IGenericClient provideFHIRClient(FhirContext ctx) {
-        logger.info("Connecting to attribution server at {}.", configuration().getAttributionURL());
+        String attributionUrl = configuration().getAttributionURL();
+        logger.info("Connecting to attribution server at {}.", attributionUrl);
         ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
-        IGenericClient client = ctx.newRestfulGenericClient(configuration().getAttributionURL());
+        IGenericClient client = ctx.newRestfulGenericClient(attributionUrl);
         client.registerInterceptor(new RequestIdHeaderInterceptor());
         return client;
     }
