@@ -140,7 +140,7 @@ class ResourceFetcher {
             case Coverage:
                 return blueButtonClient.requestCoverageFromServer(beneId, lastUpdated, headers);
             default:
-                throw new JobQueueFailure(jobID, batchID, "Unexpected resource type: " + resourceType.toString());
+                throw new JobQueueFailure(jobID, batchID, "Unexpected resource type: " + resourceType.getPath());
         }
     }
 
@@ -181,8 +181,8 @@ class ResourceFetcher {
     private void addResources(ArrayList<Resource> resources, Bundle bundle) {
         bundle.getEntry().forEach((entry) -> {
             final var resource = entry.getResource();
-            if (!Objects.equals(resource.getResourceType().getPath(), resourceType.getPath())) {
-                throw new DataFormatException(String.format("Unexpected resource type: got %s expected: %s", resource.getResourceType().toString(), resourceType));
+            if (!resource.getResourceType().getPath().equals(resourceType.getPath())) {
+                throw new DataFormatException(String.format("Unexpected resource type: got %s expected: %s", resource.getResourceType().toString(), resourceType.getPath()));
             }
             resources.add(resource);
         });
