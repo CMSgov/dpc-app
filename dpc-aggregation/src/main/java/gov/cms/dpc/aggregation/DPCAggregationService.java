@@ -47,7 +47,7 @@ public class DPCAggregationService extends Application<DPCAggregationConfigurati
 
         bootstrap.addBundle(guiceBundle);
         bootstrap.addBundle(new TypesafeConfigurationBundle("dpc.aggregation"));
-        bootstrap.addBundle(new MigrationsBundle<DPCAggregationConfiguration>() {
+        bootstrap.addBundle(new MigrationsBundle<>() {
             @Override
             public DataSourceFactory getDataSourceFactory(DPCAggregationConfiguration dpcAggregationConfiguration) {
                 return dpcAggregationConfiguration.getQueueDatabase();

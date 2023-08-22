@@ -49,7 +49,7 @@ public class DPCConsentService extends Application<DPCConsentConfiguration> {
         bootstrap.addBundle(hibernateBundle);
         bootstrap.addBundle(guiceBundle);
         bootstrap.addBundle(new TypesafeConfigurationBundle("dpc.consent"));
-        bootstrap.addBundle(new MigrationsBundle<DPCConsentConfiguration>() {
+        bootstrap.addBundle(new MigrationsBundle<>() {
             @Override
             public PooledDataSourceFactory getDataSourceFactory(DPCConsentConfiguration configuration) {
                 logger.debug("Connecting to database {} at {}", configuration.getConsentDatabase().getDriverClass(), configuration.getConsentDatabase().getUrl());

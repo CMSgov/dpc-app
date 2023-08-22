@@ -66,7 +66,7 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
 
         bootstrap.addBundle(guiceBundle);
         bootstrap.addBundle(new TypesafeConfigurationBundle("dpc.attribution"));
-        bootstrap.addBundle(new MigrationsBundle<DPCAttributionConfiguration>() {
+        bootstrap.addBundle(new MigrationsBundle<>() {
             @Override
             public PooledDataSourceFactory getDataSourceFactory(DPCAttributionConfiguration configuration) {
                 logger.debug("Connecting to database {} at {}", configuration.getDatabase().getDriverClass(), configuration.getDatabase().getUrl());
