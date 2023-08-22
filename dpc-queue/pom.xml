@@ -61,6 +61,10 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>javax.persistence</groupId>
+            <artifactId>javax.persistence-api</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
         </dependency>
@@ -85,9 +89,9 @@
                     <!--Locking this dependency version to the one provided by Dropwizard, we'll need to manually update it as we go along-->
                     <annotationProcessorPaths>
                         <annotationProcessorPath>
-                            <groupId>org.hibernate.orm</groupId>
+                            <groupId>org.hibernate</groupId>
                             <artifactId>hibernate-jpamodelgen</artifactId>
-                            <version>6.2.5.Final</version>
+                            <version>5.6.7.Final</version>
                         </annotationProcessorPath>
                         <path>
                             <groupId>javax.xml.bind</groupId>
