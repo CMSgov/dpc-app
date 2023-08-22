@@ -20,6 +20,7 @@ import gov.cms.dpc.common.hibernate.queue.DPCQueueHibernateModule;
 import gov.cms.dpc.common.logging.filters.GenerateRequestIdFilter;
 import gov.cms.dpc.common.logging.filters.LogResponseFilter;
 import gov.cms.dpc.common.utils.EnvironmentParser;
+import gov.cms.dpc.fhir.FHIRModule;
 import gov.cms.dpc.macaroons.BakeryModule;
 import gov.cms.dpc.queue.JobQueueModule;
 import io.dropwizard.Application;
@@ -29,6 +30,7 @@ import io.dropwizard.migrations.MigrationsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import ru.vyarus.dropwizard.guice.GuiceBundle;
+import ru.vyarus.dropwizard.guice.module.context.unique.LegacyModeDuplicatesDetector;
 
 import java.util.List;
 
@@ -93,8 +95,9 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
                         new BakeryModule(),
                         new DPCAPIModule(hibernateAuthBundle),
                         new JobQueueModule<>(),
-                        //new FHIRModule<>(),
+                        new FHIRModule<>(),
                         new BlueButtonClientModule<>())
+                .duplicateConfigDetector(new LegacyModeDuplicatesDetector())
                 .build();
     }
 

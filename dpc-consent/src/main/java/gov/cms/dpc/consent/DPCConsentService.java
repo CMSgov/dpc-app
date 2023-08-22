@@ -7,6 +7,7 @@ import gov.cms.dpc.common.hibernate.consent.DPCConsentHibernateModule;
 import gov.cms.dpc.common.utils.EnvironmentParser;
 import gov.cms.dpc.consent.cli.ConsentCommands;
 import gov.cms.dpc.consent.cli.SeedCommand;
+import gov.cms.dpc.fhir.FHIRModule;
 import io.dropwizard.Application;
 import io.dropwizard.db.PooledDataSourceFactory;
 import io.dropwizard.migrations.MigrationsBundle;
@@ -18,6 +19,7 @@ import org.knowm.dropwizard.sundial.SundialConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.vyarus.dropwizard.guice.GuiceBundle;
+import ru.vyarus.dropwizard.guice.module.context.unique.LegacyModeDuplicatesDetector;
 
 import java.sql.SQLException;
 
@@ -41,9 +43,10 @@ public class DPCConsentService extends Application<DPCConsentConfiguration> {
         GuiceBundle guiceBundle = GuiceBundle.builder()
                 .modules(
                         new DPCConsentHibernateModule<>(hibernateBundle),
-                        //new FHIRModule<>(),
-                        new ConsentAppModule()
-                ).build();
+                        new FHIRModule<>(),
+                        new ConsentAppModule())
+                .duplicateConfigDetector(new LegacyModeDuplicatesDetector())
+                .build();
 
         bootstrap.addBundle(hibernateBundle);
         bootstrap.addBundle(guiceBundle);

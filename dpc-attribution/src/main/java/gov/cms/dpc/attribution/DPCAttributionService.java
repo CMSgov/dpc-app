@@ -8,6 +8,7 @@ import gov.cms.dpc.common.hibernate.attribution.DPCHibernateModule;
 import gov.cms.dpc.common.logging.filters.GenerateRequestIdFilter;
 import gov.cms.dpc.common.logging.filters.LogResponseFilter;
 import gov.cms.dpc.common.utils.EnvironmentParser;
+import gov.cms.dpc.fhir.FHIRModule;
 import io.dropwizard.Application;
 import io.dropwizard.db.PooledDataSourceFactory;
 import io.dropwizard.migrations.MigrationsBundle;
@@ -18,6 +19,7 @@ import org.knowm.dropwizard.sundial.SundialConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.vyarus.dropwizard.guice.GuiceBundle;
+import ru.vyarus.dropwizard.guice.module.context.unique.LegacyModeDuplicatesDetector;
 
 public class DPCAttributionService extends Application<DPCAttributionConfiguration> {
 
@@ -54,8 +56,9 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
         GuiceBundle guiceBundle = GuiceBundle.builder()
                 .modules(
                         new DPCHibernateModule<>(hibernateBundle),
-                        new AttributionAppModule())
-                        //new FHIRModule<>())
+                        new AttributionAppModule(),
+                        new FHIRModule<>())
+                .duplicateConfigDetector(new LegacyModeDuplicatesDetector())
                 .build();
 
         // The Hibernate bundle must be initialized before Guice.

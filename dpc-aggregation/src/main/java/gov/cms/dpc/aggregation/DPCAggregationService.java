@@ -14,6 +14,7 @@ import io.dropwizard.migrations.MigrationsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import ru.vyarus.dropwizard.guice.GuiceBundle;
+import ru.vyarus.dropwizard.guice.module.context.unique.LegacyModeDuplicatesDetector;
 
 public class DPCAggregationService extends Application<DPCAggregationConfiguration> {
 
@@ -37,6 +38,7 @@ public class DPCAggregationService extends Application<DPCAggregationConfigurati
                         new DPCHibernateModule<>(hibernateBundle),
                         new JobQueueModule<>(),
                         new BlueButtonClientModule<>())
+                .duplicateConfigDetector(new LegacyModeDuplicatesDetector())
                 .build();
 
         // The Hibernate bundle must be initialized before Guice.
