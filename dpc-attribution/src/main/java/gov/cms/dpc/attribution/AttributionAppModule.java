@@ -14,7 +14,7 @@ import java.time.Duration;
 
 class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfiguration> {
 
-    public AttributionAppModule() {
+    AttributionAppModule() {
         // Not used
     }
 

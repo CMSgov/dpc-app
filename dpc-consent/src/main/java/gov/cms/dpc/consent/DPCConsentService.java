@@ -2,6 +2,7 @@ package gov.cms.dpc.consent;
 
 import ca.mestevens.java.configuration.bundle.TypesafeConfigurationBundle;
 import com.codahale.metrics.jersey2.InstrumentedResourceMethodApplicationListener;
+import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.common.hibernate.consent.DPCConsentHibernateBundle;
 import gov.cms.dpc.common.hibernate.consent.DPCConsentHibernateModule;
 import gov.cms.dpc.common.utils.EnvironmentParser;
@@ -19,7 +20,6 @@ import org.knowm.dropwizard.sundial.SundialConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.vyarus.dropwizard.guice.GuiceBundle;
-import ru.vyarus.dropwizard.guice.module.context.unique.LegacyModeDuplicatesDetector;
 
 import java.sql.SQLException;
 
@@ -40,12 +40,15 @@ public class DPCConsentService extends Application<DPCConsentConfiguration> {
 
     @Override
     public void initialize(Bootstrap<DPCConsentConfiguration> bootstrap) {
+        // This is required for Guice to load correctly. Not entirely sure why
+        // https://github.com/dropwizard/dropwizard/issues/1772
+        JerseyGuiceUtils.reset();
+
         GuiceBundle guiceBundle = GuiceBundle.builder()
                 .modules(
                         new DPCConsentHibernateModule<>(hibernateBundle),
                         new FHIRModule<>(),
                         new ConsentAppModule())
-                .duplicateConfigDetector(new LegacyModeDuplicatesDetector())
                 .build();
 
         bootstrap.addBundle(hibernateBundle);

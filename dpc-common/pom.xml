@@ -46,12 +46,16 @@
             <groupId>javax.ws.rs</groupId>
             <artifactId>javax.ws.rs-api</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.squarespace.jersey2-guice</groupId>
+            <artifactId>jersey2-guice-impl</artifactId>
+            <version>1.0.6</version>
+        </dependency>
 
         <!--Locking this dependency version to the one provided by Dropwizard, we'll need to manually update it as we go along-->
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-core</artifactId>
-            <version>5.6.7.Final</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

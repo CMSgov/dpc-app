@@ -28,7 +28,7 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
     private static final Logger logger = LoggerFactory.getLogger(AggregationAppModule.class);
 
 
-    public AggregationAppModule() {
+    AggregationAppModule() {
         // Not used
     }
 

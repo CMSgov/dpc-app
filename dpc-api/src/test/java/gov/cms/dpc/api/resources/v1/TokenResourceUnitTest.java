@@ -1,34 +1,6 @@
 package gov.cms.dpc.api.resources.v1;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
-
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-
-import org.hibernate.HibernateException;
-import org.hl7.fhir.dstu3.model.Organization;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.Answers;
-import org.mockito.Mock;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
-import io.dropwizard.jersey.jsr310.OffsetDateTimeParam;
-
-import com.ethlo.time.TimezoneOffset;
 import com.github.nitram509.jmacaroons.Macaroon;
-
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.jwt.IJTICache;
 import gov.cms.dpc.api.entities.TokenEntity;
@@ -39,7 +11,26 @@ import gov.cms.dpc.macaroons.MacaroonCaveat;
 import gov.cms.dpc.macaroons.config.TokenPolicy;
 import gov.cms.dpc.macaroons.config.TokenPolicy.ExpirationPolicy;
 import gov.cms.dpc.macaroons.config.TokenPolicy.VersionPolicy;
+import io.dropwizard.jersey.jsr310.OffsetDateTimeParam;
 import io.jsonwebtoken.SigningKeyResolverAdapter;
+import org.hl7.fhir.dstu3.model.Organization;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.*;
+
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class TokenResourceUnitTest {
     @Mock
@@ -74,7 +65,7 @@ public class TokenResourceUnitTest {
         CollectionResponse<TokenEntity> expected = new CollectionResponse<>(tokenEntityList);
 
         Mockito.when(mockTokenDao.fetchTokens(orgId)).thenAnswer(answer -> tokenEntityList);
-        
+
         CollectionResponse<TokenEntity> actualResponse = tokenResource.getOrganizationTokens(organizationPrincipal);
 
         assertEquals(expected.getEntities(), actualResponse.getEntities());
@@ -92,7 +83,7 @@ public class TokenResourceUnitTest {
         tokenEntityList.add(tokenEntity);
 
         Mockito.when(mockTokenDao.findTokenByOrgAndID(orgId, tokenId)).thenAnswer(answer -> tokenEntityList);
-        
+
         TokenEntity actualResponse = tokenResource.getOrganizationToken(organizationPrincipal, tokenId);
 
         assertEquals(tokenEntityList.get(0), actualResponse);
@@ -107,7 +98,7 @@ public class TokenResourceUnitTest {
         UUID tokenId = UUID.randomUUID();
 
         Mockito.when(mockTokenDao.findTokenByOrgAndID(orgId, tokenId)).thenAnswer(answer -> new ArrayList<TokenEntity>());
-        
+
         assertThrows(WebApplicationException.class, () -> tokenResource.getOrganizationToken(organizationPrincipal, tokenId));
     }
 

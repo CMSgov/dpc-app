@@ -4,6 +4,7 @@ import ca.mestevens.java.configuration.bundle.TypesafeConfigurationBundle;
 import com.codahale.metrics.jersey2.InstrumentedResourceMethodApplicationListener;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.datatype.hibernate5.Hibernate5Module;
+import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.api.auth.AuthModule;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.cli.keys.KeyCommand;
@@ -30,7 +31,6 @@ import io.dropwizard.migrations.MigrationsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import ru.vyarus.dropwizard.guice.GuiceBundle;
-import ru.vyarus.dropwizard.guice.module.context.unique.LegacyModeDuplicatesDetector;
 
 import java.util.List;
 
@@ -86,6 +86,9 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
     }
 
     private GuiceBundle setupGuiceBundle() {
+        // This is required for Guice to load correctly. Not entirely sure why
+        // https://github.com/dropwizard/dropwizard/issues/1772
+        JerseyGuiceUtils.reset();
         return GuiceBundle.builder()
                 .modules(
                         new DPCHibernateModule<>(hibernateBundle),
@@ -97,7 +100,6 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
                         new JobQueueModule<>(),
                         new FHIRModule<>(),
                         new BlueButtonClientModule<>())
-                .duplicateConfigDetector(new LegacyModeDuplicatesDetector())
                 .build();
     }
 

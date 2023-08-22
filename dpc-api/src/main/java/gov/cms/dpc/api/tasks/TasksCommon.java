@@ -1,6 +1,5 @@
 package gov.cms.dpc.api.tasks;
 
-import com.google.common.collect.ImmutableMultimap;
 import org.hl7.fhir.dstu3.model.Organization;
 
 import javax.ws.rs.WebApplicationException;
@@ -19,7 +18,7 @@ public class TasksCommon {
     /**
      * Extract an {@link Organization} from the Task parameters. Specifically from the `organization` query param.
      *
-     * @param parameters - {@link ImmutableMultimap} of parameters
+     * @param parameters - {@link Map} of parameters
      * @return - {@link Organization} extracted from query params
      * @throws WebApplicationException if the organization ID is missing
      */
