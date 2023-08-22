@@ -8,7 +8,6 @@ import gov.cms.dpc.common.hibernate.attribution.DPCHibernateModule;
 import gov.cms.dpc.common.logging.filters.GenerateRequestIdFilter;
 import gov.cms.dpc.common.logging.filters.LogResponseFilter;
 import gov.cms.dpc.common.utils.EnvironmentParser;
-import gov.cms.dpc.fhir.FHIRModule;
 import io.dropwizard.Application;
 import io.dropwizard.db.PooledDataSourceFactory;
 import io.dropwizard.migrations.MigrationsBundle;
@@ -55,8 +54,8 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
         GuiceBundle guiceBundle = GuiceBundle.builder()
                 .modules(
                         new DPCHibernateModule<>(hibernateBundle),
-                        new AttributionAppModule(),
-                        new FHIRModule<>())
+                        new AttributionAppModule())
+                        //new FHIRModule<>())
                 .build();
 
         // The Hibernate bundle must be initialized before Guice.

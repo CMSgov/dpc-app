@@ -12,7 +12,6 @@ import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.DefaultFHIRExceptionHandl
 import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.HAPIExceptionHandler;
 import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.JerseyExceptionHandler;
 import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.PersistenceExceptionHandler;
-import gov.cms.dpc.fhir.parameters.FHIRParamValueFactory;
 import gov.cms.dpc.fhir.validations.dropwizard.FHIRValidationModule;
 import io.dropwizard.Configuration;
 import org.slf4j.Logger;
@@ -43,7 +42,7 @@ public class FHIRModule<T extends Configuration & IDPCFHIRConfiguration> extends
         binder().bind(FHIRHandler.class);
         binder().bind(BundleHandler.class);
         binder().bind(FHIRRequestFeature.class);
-        binder().bind(FHIRParamValueFactory.class);
+        //binder().bind(FHIRParamValueFactory.class);
         binder().bind(StreamingContentSizeFilter.class);
 
         // Custom exception mappers
@@ -51,7 +50,6 @@ public class FHIRModule<T extends Configuration & IDPCFHIRConfiguration> extends
         binder().bind(PersistenceExceptionHandler.class);
         binder().bind(HAPIExceptionHandler.class);
         binder().bind(DefaultFHIRExceptionHandler.class);
-        binder().bind(FHIRParamValueFactory.class);
         //binder().bind(ProvenanceResourceFactoryProvider.class);
 
         binder().bind(FHIREntityConverter.class).toProvider(EntityConverterProvider.class).in(Singleton.class);

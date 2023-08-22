@@ -7,7 +7,6 @@ import gov.cms.dpc.common.hibernate.consent.DPCConsentHibernateModule;
 import gov.cms.dpc.common.utils.EnvironmentParser;
 import gov.cms.dpc.consent.cli.ConsentCommands;
 import gov.cms.dpc.consent.cli.SeedCommand;
-import gov.cms.dpc.fhir.FHIRModule;
 import io.dropwizard.Application;
 import io.dropwizard.db.PooledDataSourceFactory;
 import io.dropwizard.migrations.MigrationsBundle;
@@ -42,7 +41,7 @@ public class DPCConsentService extends Application<DPCConsentConfiguration> {
         GuiceBundle guiceBundle = GuiceBundle.builder()
                 .modules(
                         new DPCConsentHibernateModule<>(hibernateBundle),
-                        new FHIRModule<>(),
+                        //new FHIRModule<>(),
                         new ConsentAppModule()
                 ).build();
 
