@@ -40,8 +40,6 @@ public class DPCConsentService extends Application<DPCConsentConfiguration> {
 
     @Override
     public void initialize(Bootstrap<DPCConsentConfiguration> bootstrap) {
-        // This is required for Guice to load correctly. Not entirely sure why
-        // https://github.com/dropwizard/dropwizard/issues/1772
         JerseyGuiceUtils.reset();
 
         GuiceBundle guiceBundle = GuiceBundle.builder()
