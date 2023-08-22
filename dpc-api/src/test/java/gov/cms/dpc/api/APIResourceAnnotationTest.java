@@ -25,6 +25,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.reflections.scanners.Scanners.ConstructorsAnnotated;
 import static org.reflections.scanners.Scanners.MethodsAnnotated;
 
 // Ensure that all resources have the appropriate handlers and annotations
@@ -38,6 +39,7 @@ class APIResourceAnnotationTest {
         final ConfigurationBuilder config = new ConfigurationBuilder()
                 .setUrls(ClasspathHelper.forPackage("gov.cms.dpc.api.resources"))
                 .setScanners(MethodsAnnotated)
+                .setScanners(ConstructorsAnnotated)
                 .filterInputsBy(new FilterBuilder().includePackage("gov.cms.dpc.api.resources"));
 
         final Reflections reflections = new Reflections(config);
