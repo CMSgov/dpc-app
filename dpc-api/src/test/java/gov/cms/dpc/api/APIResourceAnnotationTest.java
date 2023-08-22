@@ -14,7 +14,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.reflections.Reflections;
-import org.reflections.scanners.MethodAnnotationsScanner;
+import org.reflections.scanners.Scanners;
 import org.reflections.util.ClasspathHelper;
 import org.reflections.util.ConfigurationBuilder;
 import org.reflections.util.FilterBuilder;
@@ -37,7 +37,7 @@ class APIResourceAnnotationTest {
     static void filterMethods() {
         final ConfigurationBuilder config = new ConfigurationBuilder()
                 .setUrls(ClasspathHelper.forPackage("gov.cms.dpc.api.resources"))
-                .setScanners(new MethodAnnotationsScanner())
+                .setScanners(Scanners.ConstructorsAnnotated)
                 .filterInputsBy(new FilterBuilder().includePackage("gov.cms.dpc.api.resources"));
 
         final Reflections reflections = new Reflections(config);

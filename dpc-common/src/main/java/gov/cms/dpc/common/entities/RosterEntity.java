@@ -114,7 +114,7 @@ public class RosterEntity implements Serializable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, attributedProvider, managingOrganization, attributions, createdAt, updatedAt);
+        return Objects.hash(id, attributedProvider, managingOrganization, createdAt, updatedAt);
     }
 
     public static RosterEntity fromFHIR(Group attributionRoster, ProviderEntity providerEntity, OffsetDateTime expiration) {
