@@ -38,6 +38,7 @@ class APIResourceAnnotationTest {
         final ConfigurationBuilder config = new ConfigurationBuilder()
                 .setUrls(ClasspathHelper.forPackage("gov.cms.dpc.api.resources"))
                 .setScanners(Scanners.ConstructorsAnnotated)
+                .setScanners(Scanners.MethodsAnnotated)
                 .filterInputsBy(new FilterBuilder().includePackage("gov.cms.dpc.api.resources"));
 
         final Reflections reflections = new Reflections(config);
