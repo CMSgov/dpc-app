@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import com.codahale.metrics.MetricRegistry;
+import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.google.inject.name.Named;
 import com.typesafe.config.Config;
@@ -54,34 +55,35 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
 
     @Override
     public void configure() {
+        Binder binder = binder();
         // V1 Resources
-        binder().bind(BaseResource.class);
-        binder().bind(DataResource.class);
-        binder().bind(DefinitionResource.class);
-        binder().bind(EndpointResource.class);
-        binder().bind(GroupResource.class);
-        binder().bind(JobResource.class);
-        binder().bind(PatientResource.class);
-        binder().bind(PractitionerResource.class);
+        binder.bind(BaseResource.class);
+        binder.bind(DataResource.class);
+        binder.bind(DefinitionResource.class);
+        binder.bind(EndpointResource.class);
+        binder.bind(GroupResource.class);
+        binder.bind(JobResource.class);
+        binder.bind(PatientResource.class);
+        binder.bind(PractitionerResource.class);
 
         // DAO
-        binder().bind(PublicKeyDAO.class);
-        binder().bind(TokenDAO.class);
+        binder.bind(PublicKeyDAO.class);
+        binder.bind(TokenDAO.class);
 
         // Tasks
-        binder().bind(GenerateClientTokens.class);
-        binder().bind(GenerateKeyPair.class);
-        binder().bind(ListClientTokens.class);
-        binder().bind(DeleteToken.class);
-        binder().bind(UploadPublicKey.class);
-        binder().bind(ListPublicKeys.class);
-        binder().bind(DeletePublicKey.class);
+        binder.bind(GenerateClientTokens.class);
+        binder.bind(GenerateKeyPair.class);
+        binder.bind(ListClientTokens.class);
+        binder.bind(DeleteToken.class);
+        binder.bind(UploadPublicKey.class);
+        binder.bind(ListPublicKeys.class);
+        binder.bind(DeletePublicKey.class);
 
-        binder().bind(FileManager.class);
-        binder().bind(HttpRangeHeaderParamConverterProvider.class);
-        binder().bind(ChecksumConverterProvider.class);
+        binder.bind(FileManager.class);
+        binder.bind(HttpRangeHeaderParamConverterProvider.class);
+        binder.bind(ChecksumConverterProvider.class);
 
-        binder().bind(DataService.class);
+        binder.bind(DataService.class);
 
         // Healthchecks
         // Additional health-checks can be added here

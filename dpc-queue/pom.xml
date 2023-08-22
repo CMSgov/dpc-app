@@ -56,7 +56,7 @@
             <version>${slf4j.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.hibernate.orm</groupId>
+            <groupId>org.hibernate</groupId>
             <artifactId>hibernate-core</artifactId>
             <scope>provided</scope>
         </dependency>
@@ -91,7 +91,7 @@
                         <annotationProcessorPath>
                             <groupId>org.hibernate</groupId>
                             <artifactId>hibernate-jpamodelgen</artifactId>
-                            <version>5.6.7.Final</version>
+                            <version>5.4.2.Final</version>
                         </annotationProcessorPath>
                         <path>
                             <groupId>javax.xml.bind</groupId>
