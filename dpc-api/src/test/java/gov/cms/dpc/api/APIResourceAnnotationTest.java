@@ -14,6 +14,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.reflections.Reflections;
+import org.reflections.scanners.MethodAnnotationsScanner;
 import org.reflections.util.ClasspathHelper;
 import org.reflections.util.ConfigurationBuilder;
 import org.reflections.util.FilterBuilder;
@@ -25,8 +26,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.reflections.scanners.Scanners.ConstructorsAnnotated;
-import static org.reflections.scanners.Scanners.MethodsAnnotated;
 
 // Ensure that all resources have the appropriate handlers and annotations
 @ExtendWith(BufferedLoggerHandler.class)
@@ -38,8 +37,7 @@ class APIResourceAnnotationTest {
     static void filterMethods() {
         final ConfigurationBuilder config = new ConfigurationBuilder()
                 .setUrls(ClasspathHelper.forPackage("gov.cms.dpc.api.resources"))
-                .setScanners(MethodsAnnotated)
-                .setScanners(ConstructorsAnnotated)
+                .setScanners(new MethodAnnotationsScanner())
                 .filterInputsBy(new FilterBuilder().includePackage("gov.cms.dpc.api.resources"));
 
         final Reflections reflections = new Reflections(config);
