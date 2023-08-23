@@ -1,7 +1,6 @@
 package gov.cms.dpc.fhir.dropwizard.handlers;
 
 import ca.uhn.fhir.context.FhirContext;
-import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
 import gov.cms.dpc.fhir.annotations.BundleReturnProperties;
@@ -24,11 +23,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(DropwizardExtensionsSupport.class)
 public class BundleHandlerTest {
-
-    static {
-        // otherwise our testContainer doesn't get assembled properly
-        JerseyGuiceUtils.reset();
-    }
 
     private static ResourceExtension resource = buildResource();
     private static FhirContext ctx;
