@@ -55,7 +55,6 @@ public class FHIRModule<T extends Configuration & IDPCFHIRConfiguration> extends
         binder.bind(PersistenceExceptionHandler.class);
         binder.bind(HAPIExceptionHandler.class);
         binder.bind(DefaultFHIRExceptionHandler.class);
-        binder.bind(FHIRParamValueFactory.class);
         binder.bind(ProvenanceResourceFactoryProvider.class);
 
         binder.bind(FHIREntityConverter.class).toProvider(EntityConverterProvider.class).in(Singleton.class);
