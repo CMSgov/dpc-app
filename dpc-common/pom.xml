@@ -69,8 +69,8 @@
             <version>0.10.2</version>
         </dependency>
         <dependency>
-            <groupId>ru.vyarus</groupId>
-            <artifactId>dropwizard-guicey</artifactId>
+            <groupId>com.hubspot.dropwizard</groupId>
+            <artifactId>dropwizard-guicier</artifactId>
         </dependency>
         <dependency>
             <groupId>io.dropwizard</groupId>

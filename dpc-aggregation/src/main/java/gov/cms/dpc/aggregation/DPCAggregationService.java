@@ -1,6 +1,7 @@
 package gov.cms.dpc.aggregation;
 
 import ca.mestevens.java.configuration.bundle.TypesafeConfigurationBundle;
+import com.hubspot.dropwizard.guicier.GuiceBundle;
 import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.bluebutton.BlueButtonClientModule;
 import gov.cms.dpc.common.hibernate.attribution.DPCHibernateBundle;
@@ -14,7 +15,6 @@ import io.dropwizard.db.DataSourceFactory;
 import io.dropwizard.migrations.MigrationsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
-import ru.vyarus.dropwizard.guice.GuiceBundle;
 
 public class DPCAggregationService extends Application<DPCAggregationConfiguration> {
 
@@ -33,7 +33,7 @@ public class DPCAggregationService extends Application<DPCAggregationConfigurati
     @Override
     public void initialize(Bootstrap<DPCAggregationConfiguration> bootstrap) {
         JerseyGuiceUtils.reset();
-        GuiceBundle guiceBundle = GuiceBundle.builder()
+        GuiceBundle<DPCAggregationConfiguration> guiceBundle = GuiceBundle.defaultBuilder(DPCAggregationConfiguration.class)
                 .modules(new AggregationAppModule(),
                         new DPCQueueHibernateModule<>(queueHibernateBundle),
                         new DPCHibernateModule<>(hibernateBundle),
@@ -49,7 +49,7 @@ public class DPCAggregationService extends Application<DPCAggregationConfigurati
 
         bootstrap.addBundle(guiceBundle);
         bootstrap.addBundle(new TypesafeConfigurationBundle("dpc.aggregation"));
-        bootstrap.addBundle(new MigrationsBundle<>() {
+        bootstrap.addBundle(new MigrationsBundle<DPCAggregationConfiguration>() {
             @Override
             public DataSourceFactory getDataSourceFactory(DPCAggregationConfiguration dpcAggregationConfiguration) {
                 return dpcAggregationConfiguration.getQueueDatabase();
