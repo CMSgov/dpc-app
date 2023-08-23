@@ -6,6 +6,7 @@ import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.attribution.cli.SeedCommand;
 import gov.cms.dpc.common.hibernate.attribution.DPCHibernateBundle;
 import gov.cms.dpc.common.hibernate.attribution.DPCHibernateModule;
+import gov.cms.dpc.common.logging.filters.GenerateRequestIdFilter;
 import gov.cms.dpc.common.logging.filters.LogResponseFilter;
 import gov.cms.dpc.common.utils.EnvironmentParser;
 import gov.cms.dpc.fhir.FHIRModule;
@@ -37,7 +38,7 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
 
     @Override
     public void initialize(Bootstrap<DPCAttributionConfiguration> bootstrap) {
-        // This is required to avoid an IllegalStateException.
+        // This is required for Guice to load correctly. Not entirely sure why
         // https://github.com/dropwizard/dropwizard/issues/1772
         JerseyGuiceUtils.reset();
         registerBundles(bootstrap);
@@ -50,7 +51,7 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
         EnvironmentParser.getEnvironment("Attribution");
         final var listener = new InstrumentedResourceMethodApplicationListener(environment.metrics());
         environment.jersey().getResourceConfig().register(listener);
-        //environment.jersey().register(new GenerateRequestIdFilter(true));
+        environment.jersey().register(new GenerateRequestIdFilter(true));
         environment.jersey().register(LogResponseFilter.class);
     }
 
