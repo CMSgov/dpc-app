@@ -13,6 +13,7 @@ import io.dropwizard.auth.Authenticator;
 import org.hl7.fhir.dstu3.model.Organization;
 
 import javax.annotation.Priority;
+import javax.inject.Inject;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ContainerRequestContext;
@@ -30,6 +31,7 @@ public class AdminAuthFilter extends AuthFilter<DPCAuthCredentials, Organization
 
     private final MacaroonBakery bakery;
 
+    @Inject
     public AdminAuthFilter(MacaroonBakery bakery, Authenticator<DPCAuthCredentials, OrganizationPrincipal> authenticator) {
         this.authenticator = authenticator;
         this.bakery = bakery;
