@@ -89,7 +89,7 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
         // This is required to avoid an IllegalStateException.
         // https://github.com/dropwizard/dropwizard/issues/1772
         JerseyGuiceUtils.reset();
-        return GuiceBundle.builder().enableAutoConfig()
+        return GuiceBundle.builder()
                 .modules(
                         new DPCHibernateModule<>(hibernateBundle),
                         new DPCQueueHibernateModule<>(hibernateQueueBundle),
@@ -98,8 +98,8 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
                         new BakeryModule(),
                         new DPCAPIModule(hibernateAuthBundle),
                         new JobQueueModule<>(),
-                        new FHIRModule<>(),
-                        new BlueButtonClientModule<>())
+                        new FHIRModule<DPCAPIConfiguration>(),
+                        new BlueButtonClientModule<DPCAPIConfiguration>())
                 .build();
     }
 

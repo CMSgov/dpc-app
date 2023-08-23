@@ -56,11 +56,11 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
     }
 
     private void registerBundles(Bootstrap<DPCAttributionConfiguration> bootstrap) {
-        GuiceBundle guiceBundle = GuiceBundle.builder().enableAutoConfig()
+        GuiceBundle guiceBundle = GuiceBundle.builder()
                 .modules(
                         new DPCHibernateModule<>(hibernateBundle),
                         new AttributionAppModule(),
-                        new FHIRModule<>())
+                        new FHIRModule<DPCAttributionConfiguration>())
                 .build();
 
         // The Hibernate bundle must be initialized before Guice.

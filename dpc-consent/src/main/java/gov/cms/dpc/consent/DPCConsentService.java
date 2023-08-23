@@ -42,10 +42,10 @@ public class DPCConsentService extends Application<DPCConsentConfiguration> {
     public void initialize(Bootstrap<DPCConsentConfiguration> bootstrap) {
         JerseyGuiceUtils.reset();
 
-        GuiceBundle guiceBundle = GuiceBundle.builder().enableAutoConfig()
+        GuiceBundle guiceBundle = GuiceBundle.builder()
                 .modules(
                         new DPCConsentHibernateModule<>(hibernateBundle),
-                        new FHIRModule<>(),
+                        new FHIRModule<DPCConsentConfiguration>(),
                         new ConsentAppModule())
                 .build();
 
