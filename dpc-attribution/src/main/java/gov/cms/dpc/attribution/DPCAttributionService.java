@@ -38,7 +38,7 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
 
     @Override
     public void initialize(Bootstrap<DPCAttributionConfiguration> bootstrap) {
-        // This is required for Guice to load correctly. Not entirely sure why
+        // This is required to avoid an IllegalStateException.
         // https://github.com/dropwizard/dropwizard/issues/1772
         JerseyGuiceUtils.reset();
         registerBundles(bootstrap);

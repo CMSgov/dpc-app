@@ -86,7 +86,7 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
     }
 
     private GuiceBundle setupGuiceBundle() {
-        // This is required for Guice to load correctly. Not entirely sure why
+        // This is required to avoid an IllegalStateException.
         // https://github.com/dropwizard/dropwizard/issues/1772
         JerseyGuiceUtils.reset();
         return GuiceBundle.builder()
