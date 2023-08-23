@@ -66,7 +66,7 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
         // The Hibernate bundle must be initialized before Guice.
         // The Hibernate Guice module requires an initialized SessionFactory,
         // so Dropwizard needs to initialize the HibernateBundle first to create the SessionFactory.
-//        bootstrap.addBundle(hibernateBundle);
+        bootstrap.addBundle(hibernateBundle);
 
         bootstrap.addBundle(guiceBundle);
         bootstrap.addBundle(new TypesafeConfigurationBundle("dpc.attribution"));

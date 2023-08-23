@@ -45,7 +45,7 @@ class ConsentCommandsTest {
                 });
             }
         };
-        app.initialize(bootstrap);
+        //app.initialize(bootstrap);
         return bootstrap;
     }
 

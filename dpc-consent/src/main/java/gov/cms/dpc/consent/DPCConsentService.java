@@ -49,7 +49,7 @@ public class DPCConsentService extends Application<DPCConsentConfiguration> {
                         new ConsentAppModule())
                 .build();
 
-//        bootstrap.addBundle(hibernateBundle);
+        bootstrap.addBundle(hibernateBundle);
         bootstrap.addBundle(guiceBundle);
         bootstrap.addBundle(new TypesafeConfigurationBundle("dpc.consent"));
         bootstrap.addBundle(new MigrationsBundle<>() {
