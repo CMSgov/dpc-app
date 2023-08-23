@@ -185,13 +185,12 @@ public class APITestHelpers {
     static <C extends io.dropwizard.Configuration> void setupApplication(DropwizardTestSupport<C> application) throws
             Exception {
         ConfigFactory.invalidateCaches();
+        SharedConfigurationState.clear();
         // Truncate attribution database
         truncateDatabase();
         application.before();
-        SharedConfigurationState.clear();
         // Truncate the Auth DB
         application.getApplication().run("db", "drop-all", "--confirm-delete-everything", "ci.application.conf");
-        SharedConfigurationState.clear();
         application.getApplication().run("db", "migrate", "ci.application.conf");
 
     }
