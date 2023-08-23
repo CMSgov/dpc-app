@@ -3,7 +3,6 @@ package gov.cms.dpc.fhir;
 import ca.uhn.fhir.context.FhirContext;
 import com.google.inject.Binder;
 import com.google.inject.Provides;
-import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import gov.cms.dpc.fhir.configuration.IDPCFHIRConfiguration;
 import gov.cms.dpc.fhir.converters.FHIREntityConverter;
 import gov.cms.dpc.fhir.dropwizard.features.FHIRRequestFeature;
@@ -20,6 +19,7 @@ import gov.cms.dpc.fhir.validations.dropwizard.FHIRValidationModule;
 import io.dropwizard.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.vyarus.dropwizard.guice.module.support.DropwizardAwareModule;
 
 import javax.inject.Singleton;
 
@@ -40,7 +40,9 @@ public class FHIRModule<T extends Configuration & IDPCFHIRConfiguration> extends
     }
 
     @Override
-    public void configure(Binder binder) {
+    public void configure() {
+        Binder binder = binder();
+
         // Request/Response handlers
         binder.bind(FHIRHandler.class);
         binder.bind(BundleHandler.class);
@@ -58,7 +60,7 @@ public class FHIRModule<T extends Configuration & IDPCFHIRConfiguration> extends
         binder.bind(FHIREntityConverter.class).toProvider(EntityConverterProvider.class).in(Singleton.class);
 
         // Validator
-        final FHIRValidationConfiguration validationConfig = getConfiguration().getFHIRConfiguration().getValidation();
+        final FHIRValidationConfiguration validationConfig = configuration().getFHIRConfiguration().getValidation();
         if (validationConfig.isEnabled()) {
             logger.info("Enabling FHIR resource validation");
             binder.install(new FHIRValidationModule(validationConfig));

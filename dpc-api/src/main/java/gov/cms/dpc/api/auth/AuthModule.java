@@ -2,7 +2,6 @@ package gov.cms.dpc.api.auth;
 
 import com.google.inject.Binder;
 import com.google.inject.TypeLiteral;
-import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import gov.cms.dpc.api.DPCAPIConfiguration;
 import gov.cms.dpc.api.auth.filters.PathAuthorizationFilter;
 import gov.cms.dpc.api.auth.jwt.CaffeineJTICache;
@@ -18,6 +17,7 @@ import io.dropwizard.auth.UnauthorizedHandler;
 import io.jsonwebtoken.SigningKeyResolverAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.vyarus.dropwizard.guice.module.support.DropwizardAwareModule;
 
 /**
  * {@link DropwizardAwareModule} for determining which authentication system to use.
@@ -31,11 +31,13 @@ public class AuthModule extends DropwizardAwareModule<DPCAPIConfiguration> {
     private static final Logger logger = LoggerFactory.getLogger(AuthModule.class);
 
     @Override
-    public void configure(Binder binder) {
+    public void configure() {
+
+        Binder binder = binder();
         final var authenticatorTypeLiteral = new TypeLiteral<Authenticator<DPCAuthCredentials, OrganizationPrincipal>>() {
         };
 
-        if (getConfiguration().isAuthenticationDisabled()) {
+        if (configuration().isAuthenticationDisabled()) {
             logger.warn("AUTHENTICATION IS DISABLED!!! USE ONLY IN DEVELOPMENT");
             binder.bind(AuthFactory.class).to(StaticAuthFactory.class);
             binder.bind(authenticatorTypeLiteral).to(StaticAuthenticator.class);
@@ -49,6 +51,6 @@ public class AuthModule extends DropwizardAwareModule<DPCAPIConfiguration> {
         binder.bind(DPCAuthDynamicFeature.class);
         binder.bind(SigningKeyResolverAdapter.class).to(JwtKeyResolver.class);
         binder.bind(IJTICache.class).to(CaffeineJTICache.class);
-        binder.bind(BakeryKeyPair.class).toProvider(new BakeryKeyPairProvider(this.getConfiguration()));
+        binder.bind(BakeryKeyPair.class).toProvider(new BakeryKeyPairProvider(this.configuration()));
     }
 }
