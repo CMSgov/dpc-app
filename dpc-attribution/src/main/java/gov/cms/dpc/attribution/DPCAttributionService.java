@@ -56,7 +56,7 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
     }
 
     private void registerBundles(Bootstrap<DPCAttributionConfiguration> bootstrap) {
-        GuiceBundle guiceBundle = GuiceBundle.builder()
+        GuiceBundle guiceBundle = GuiceBundle.builder().enableAutoConfig()
                 .modules(
                         new DPCHibernateModule<>(hibernateBundle),
                         new AttributionAppModule(),
