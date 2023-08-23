@@ -33,7 +33,7 @@ public class DPCAggregationService extends Application<DPCAggregationConfigurati
     @Override
     public void initialize(Bootstrap<DPCAggregationConfiguration> bootstrap) {
         JerseyGuiceUtils.reset();
-        GuiceBundle guiceBundle = GuiceBundle.builder().enableAutoConfig()
+        GuiceBundle guiceBundle = GuiceBundle.builder()
                 .modules(new AggregationAppModule(),
                         new DPCQueueHibernateModule<>(queueHibernateBundle),
                         new DPCHibernateModule<>(hibernateBundle),
