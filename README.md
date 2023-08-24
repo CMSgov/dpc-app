@@ -39,6 +39,7 @@ This document serves as a guide for running the Data at the Point of Care (DPC) 
   * [Building the Additional Services](#building-the-additional-services)
     * [Postman collection](#postman-collection)
   * [Code Coverage](#code-coverage)
+  * [Local Debugging](#local-debugging)
   * [Other Notes](#other-notes)
     * [BFD transaction time details](#bfd-transaction-time-details)
   * [Troubleshooting](#troubleshooting) 
@@ -442,6 +443,22 @@ Once the development environment is up and running, you should now be able to ru
       -Dsonar.token={YOUR PROJECT TOKEN}
     ```
 - Your code coverage results should now be in your local version of SonarQube.
+
+## Local Debugging
+###### [`^`](#table-of-contents)
+
+If you're running locally through Docker and you want to use your debugger there are two steps.
+- Open up port 5005 on whichever service you want to debug
+  - Add the following to docker-compose.yml under api, aggregation, attribution or consent.
+    ```    
+    ports:
+        - "5005:5005"
+    ```
+- Instead of using `make start-dpc` or `make start-app` to start the application, use `make start-dpc-debug` or `make start-app-debug`.
+  - They'll both do a clean compile of the app with debug information and start each service with the debug agent.
+- Now you can attach your debugger to the running app on port 5005.
+  - If you're using IntelliJ, there are instructions [here](https://www.jetbrains.com/help/idea/attaching-to-local-process.html#attach-to-remote).
+
 
 ## Other Notes
 ###### [`^`](#table-of-contents)

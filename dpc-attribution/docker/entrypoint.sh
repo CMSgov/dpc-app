@@ -21,7 +21,14 @@ if [ $DB_MIGRATION -eq 1 ]; then
   eval java ${JVM_FLAGS} ${JAVA_CLASSES} db migrate
 fi
 
-CMDLINE="java ${JVM_FLAGS} ${JACOCO} ${NR_AGENT} ${JAVA_CLASSES}"
+if [ "$DEBUG_MODE" = "true" ]; then
+    echo "Setting debug mode"
+    DEBUG_FLAGS="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
+else
+    DEBUG_FLAGS=""
+fi
+
+CMDLINE="java ${JVM_FLAGS} ${DEBUG_FLAGS} ${JACOCO} ${NR_AGENT} ${JAVA_CLASSES}"
 
 if [ -n "$SEED" ]; then
     echo "Loading seeds"

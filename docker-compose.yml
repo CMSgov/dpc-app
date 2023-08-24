@@ -22,6 +22,7 @@ services:
       - ENV=local
       - USE_BFD_MOCK=${USE_BFD_MOCK:-true}
       - JACOCO=${REPORT_COVERAGE}
+      - DEBUG_MODE=${DEBUG_MODE:-false}
     depends_on:
       - db
       - consent
@@ -36,6 +37,7 @@ services:
     environment:
       - ENV=local
       - JACOCO=${REPORT_COVERAGE}
+      - DEBUG_MODE=${DEBUG_MODE:-false}
     ports:
       - "3500:8080"
       - "9902:9900"
@@ -55,6 +57,7 @@ services:
       - JACOCO=${REPORT_COVERAGE}
       - exportPath=/app/data
       - JVM_FLAGS=-Ddpc.api.authenticationDisabled=${AUTH_DISABLED:-false}
+      - DEBUG_MODE=${DEBUG_MODE:-false}
     depends_on:
       - attribution
     volumes:
@@ -68,6 +71,7 @@ services:
     environment:
       - ENV=local
       - JACOCO=${REPORT_COVERAGE}
+      - DEBUG_MODE=${DEBUG_MODE:-false}
     ports:
       - "3600:3600"
       - "9004:9900"
