@@ -45,7 +45,6 @@ import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.codesystems.V3RoleClass;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import ru.vyarus.dropwizard.guice.module.context.SharedConfigurationState;
 
 import javax.validation.Validation;
 import javax.validation.Validator;
@@ -189,7 +188,6 @@ public class APITestHelpers {
         truncateDatabase();
         application.before();
         // Truncate the Auth DB
-        SharedConfigurationState.clear();
         application.getApplication().run("db", "drop-all", "--confirm-delete-everything", "ci.application.conf");
         application.getApplication().run("db", "migrate", "ci.application.conf");
 
