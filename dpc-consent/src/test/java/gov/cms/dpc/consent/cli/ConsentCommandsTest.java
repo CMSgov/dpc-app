@@ -9,6 +9,7 @@ import io.dropwizard.setup.Environment;
 import io.dropwizard.testing.POJOConfigurationFactory;
 import io.dropwizard.util.JarLocation;
 import org.junit.jupiter.api.*;
+import ru.vyarus.dropwizard.guice.module.context.SharedConfigurationState;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -69,6 +70,7 @@ class ConsentCommandsTest {
         System.setOut(originalOut);
         System.setErr(originalErr);
         System.setIn(originalIn);
+        SharedConfigurationState.clear();
     }
 
     @AfterEach

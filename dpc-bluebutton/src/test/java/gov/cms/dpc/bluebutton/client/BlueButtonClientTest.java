@@ -29,6 +29,7 @@ import org.mockserver.matchers.Times;
 import org.mockserver.model.Header;
 import org.mockserver.model.HttpRequest;
 import org.mockserver.model.Parameter;
+import ru.vyarus.dropwizard.guice.module.context.SharedConfigurationState;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -122,9 +123,9 @@ class BlueButtonClientTest {
         );
 
         createMockServerExpectation(
-            "/v1/fhir/ExplainationOfBenefit", 
-            HttpStatus.OK_200, 
-            getRawXML(SAMPLE_EOB_PATH_PREFIX + TEST_SINGLE_EOB_PATIENT_ID + ".xml"), 
+            "/v1/fhir/ExplainationOfBenefit",
+            HttpStatus.OK_200,
+            getRawXML(SAMPLE_EOB_PATH_PREFIX + TEST_SINGLE_EOB_PATIENT_ID + ".xml"),
             List.of(
                     Parameter.param("patient", TEST_SINGLE_EOB_PATIENT_ID),
                     Parameter.param("excludeSAMHSA", "true"),
@@ -149,6 +150,7 @@ class BlueButtonClientTest {
     @AfterAll
     static void tearDown() {
         mockServer.stop();
+        SharedConfigurationState.clear();
     }
 
     @Test
