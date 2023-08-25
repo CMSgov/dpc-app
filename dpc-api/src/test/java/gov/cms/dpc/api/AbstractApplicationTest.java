@@ -53,7 +53,7 @@ public class AbstractApplicationTest {
 
     @BeforeAll
     public static void setup() throws Exception {
-        //APITestHelpers.setupApplication(APPLICATION);
+        APITestHelpers.setupApplication(APPLICATION);
     }
 
     @BeforeEach
