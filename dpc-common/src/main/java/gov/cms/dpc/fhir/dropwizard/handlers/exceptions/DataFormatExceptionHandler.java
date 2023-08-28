@@ -6,15 +6,19 @@ import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 
 import javax.inject.Inject;
+import javax.ws.rs.container.ResourceInfo;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Provider;
 
 @Provider
 public class DataFormatExceptionHandler extends AbstractFHIRExceptionHandler<DataFormatException> {
 
+    private ResourceInfo info;
+
     @Inject
-    DataFormatExceptionHandler() {
-        super();
+    DataFormatExceptionHandler(@Context ResourceInfo info) {
+        super(info);
     }
 
     @Override
