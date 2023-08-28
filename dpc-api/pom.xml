@@ -55,8 +55,8 @@
             <artifactId>jaxb-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>ru.vyarus</groupId>
-            <artifactId>dropwizard-guicey</artifactId>
+            <groupId>com.hubspot.dropwizard</groupId>
+            <artifactId>dropwizard-guicier</artifactId>
         </dependency>
         <dependency>
             <groupId>${typesafe.config.groupID}</groupId>

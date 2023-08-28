@@ -7,6 +7,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.google.inject.name.Named;
+import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import com.typesafe.config.Config;
 import gov.cms.dpc.api.auth.jwt.IJTICache;
 import gov.cms.dpc.api.converters.ChecksumConverterProvider;
@@ -39,7 +40,6 @@ import io.jsonwebtoken.SigningKeyResolverAdapter;
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.vyarus.dropwizard.guice.module.support.DropwizardAwareModule;
 
 import javax.inject.Singleton;
 
@@ -54,8 +54,7 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
     }
 
     @Override
-    public void configure() {
-        Binder binder = binder();
+    public void configure(Binder binder) {
         // V1 Resources
         binder.bind(BaseResource.class);
         binder.bind(DataResource.class);
@@ -111,7 +110,7 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
                                 String.class},
                         new Object[]{dao,
                                 bakery,
-                                this.configuration().getTokenPolicy(),
+                                this.getConfiguration().getTokenPolicy(),
                                 resolver,
                                 cache, publicURL});
     }
@@ -129,30 +128,30 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
     @Provides
     @Singleton
     public MetricRegistry provideMetricRegistry() {
-        return environment().metrics();
+        return getEnvironment().metrics();
     }
 
     @Provides
     public Config provideConfig() {
-        return configuration().getConfig();
+        return getConfiguration().getConfig();
     }
 
     @Provides
     @ExportPath
     public String provideExportPath() {
-        return configuration().getExportPath();
+        return getConfiguration().getExportPath();
     }
 
     @Provides
     @ServiceBaseURL
     public String provideBaseURL() {
-        return configuration().getPublicURL();
+        return getConfiguration().getPublicURL();
     }
 
     @Provides
     @APIV1
     public String provideV1URL() {
-        return configuration().getPublicURL() + "/v1";
+        return getConfiguration().getPublicURL() + "/v1";
     }
 
     @Provides
@@ -169,7 +168,7 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
 
     @Provides
     TokenPolicy providePolicy() {
-        return configuration().getTokenPolicy();
+        return getConfiguration().getTokenPolicy();
     }
 
     @Provides
@@ -183,7 +182,7 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
     @Singleton
     @Named("attribution")
     public IGenericClient provideFHIRClient(FhirContext ctx) {
-        String attributionUrl = configuration().getAttributionURL();
+        String attributionUrl = getConfiguration().getAttributionURL();
         logger.info("Connecting to attribution server at {}.", attributionUrl);
         ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
         IGenericClient client = ctx.newRestfulGenericClient(attributionUrl);
@@ -194,6 +193,6 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
     @Provides
     @JobTimeout
     public int provideJobTimeoutInSeconds() {
-        return configuration().getJobTimeoutInSeconds();
+        return getConfiguration().getJobTimeoutInSeconds();
     }
 }

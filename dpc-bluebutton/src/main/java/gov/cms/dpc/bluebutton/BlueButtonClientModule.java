@@ -7,6 +7,7 @@ import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
+import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.bluebutton.client.BlueButtonClientImpl;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
@@ -26,7 +27,6 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContexts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.vyarus.dropwizard.guice.module.support.DropwizardAwareModule;
 
 import javax.net.ssl.SSLContext;
 import java.io.FileInputStream;
@@ -59,11 +59,9 @@ public class BlueButtonClientModule<T extends Configuration & BlueButtonBundleCo
     }
 
     @Override
-    public void configure() {
-        Binder binder = binder();
-
+    public void configure(Binder binder) {
         if (this.bbClientConfiguration == null) {
-            this.bbClientConfiguration = configuration().getBlueButtonConfiguration();
+            this.bbClientConfiguration = getConfiguration().getBlueButtonConfiguration();
         }
 
         final boolean healthCheckEnabled = this.bbClientConfiguration.isRegisterHealthCheck();
@@ -139,7 +137,7 @@ public class BlueButtonClientModule<T extends Configuration & BlueButtonBundleCo
             try {
                 keyStoreStream = new FileInputStream(keyStorePath);
             } catch (FileNotFoundException e) {
-                logger.error("Could not find keystore at location: {}" + Paths.get(keyStorePath).toAbsolutePath().toString());
+                logger.error("Could not find keystore at location: {}", Paths.get(keyStorePath).toAbsolutePath().toString());
                 throw new BlueButtonClientSetupException("Unable to find keystore", e);
             }
         }
