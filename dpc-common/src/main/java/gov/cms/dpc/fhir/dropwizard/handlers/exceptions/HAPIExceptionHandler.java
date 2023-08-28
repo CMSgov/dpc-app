@@ -14,17 +14,16 @@ import javax.ws.rs.ext.Provider;
 @Provider
 public class HAPIExceptionHandler extends AbstractFHIRExceptionHandler<BaseServerResponseException> {
 
-    @Context
     private ResourceInfo info;
 
     @Inject
-    HAPIExceptionHandler() {
-        super();
+    HAPIExceptionHandler(@Context ResourceInfo info) {
+        super(info);
     }
 
     @Override
     public Response toResponse(BaseServerResponseException exception) {
-        if (isFHIRResource(this.info)) {
+        if (isFHIRResource()) {
             return handleFHIRException(exception);
         } else {
             return handleNonFHIRException(exception);

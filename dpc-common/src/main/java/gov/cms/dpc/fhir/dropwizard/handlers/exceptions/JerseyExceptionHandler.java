@@ -24,17 +24,16 @@ import java.util.Set;
 @Provider
 public class JerseyExceptionHandler extends AbstractFHIRExceptionHandler<JerseyViolationException> {
 
-    @Context
     private ResourceInfo info;
 
     @Inject
-    JerseyExceptionHandler() {
-        super();
+    JerseyExceptionHandler(@Context ResourceInfo info) {
+        super(info);
     }
 
     @Override
     public Response toResponse(JerseyViolationException exception) {
-        if (isFHIRResource(this.info)) {
+        if (isFHIRResource()) {
             return handleFHIRException(exception);
         } else {
             return handleNonFHIRException(exception);

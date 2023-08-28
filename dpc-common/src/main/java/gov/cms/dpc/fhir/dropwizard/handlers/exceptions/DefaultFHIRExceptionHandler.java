@@ -19,17 +19,14 @@ import javax.ws.rs.ext.Provider;
 @Provider
 public class DefaultFHIRExceptionHandler extends AbstractFHIRExceptionHandler<Throwable> {
 
-    @Context
-    private ResourceInfo info;
-
     @Inject
-    public DefaultFHIRExceptionHandler() {
-        super();
+    public DefaultFHIRExceptionHandler(@Context ResourceInfo info) {
+        super(info);
     }
 
     @Override
     public Response toResponse(Throwable exception) {
-        if (isFHIRResource(this.info)) {
+        if (isFHIRResource()) {
             return handleFHIRException(exception);
         } else {
             return handleNonFHIRException(exception);

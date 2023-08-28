@@ -28,17 +28,16 @@ public class PersistenceExceptionHandler extends AbstractFHIRExceptionHandler<Pe
     private static final Logger logger = LoggerFactory.getLogger(PersistenceExceptionHandler.class);
     private static final Pattern MSG_PATTERN = Pattern.compile("ERROR:\\s(duplicate\\s[a-zA-Z_]*\\svalue\\sviolates\\sunique\\sconstraint)");
 
-    @Context
     private ResourceInfo info;
 
     @Inject
-    PersistenceExceptionHandler() {
-        super();
+    PersistenceExceptionHandler(@Context ResourceInfo info) {
+        super(info);
     }
 
     @Override
     public Response toResponse(PersistenceException exception) {
-        if (isFHIRResource(this.info)) {
+        if (isFHIRResource()) {
             return handleFHIRException(exception);
         } else {
             return handleNonFHIRException(exception);
