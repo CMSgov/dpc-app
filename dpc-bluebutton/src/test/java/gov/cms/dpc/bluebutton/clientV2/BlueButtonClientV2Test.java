@@ -29,7 +29,6 @@ import org.mockserver.matchers.Times;
 import org.mockserver.model.Header;
 import org.mockserver.model.HttpRequest;
 import org.mockserver.model.Parameter;
-import ru.vyarus.dropwizard.guice.module.context.SharedConfigurationState;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -150,7 +149,6 @@ class BlueButtonClientV2Test {
     @AfterAll
     static void tearDown() {
         mockServer.stop();
-        SharedConfigurationState.clear();
     }
 
     @Test

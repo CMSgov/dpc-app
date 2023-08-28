@@ -9,7 +9,6 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import ru.vyarus.dropwizard.guice.module.context.SharedConfigurationState;
 
 import java.util.SortedSet;
 
@@ -30,7 +29,6 @@ public class AggregationServiceTest {
     @AfterAll
     static void stop() {
         APPLICATION.after();
-        SharedConfigurationState.clear();
     }
 
     @Test

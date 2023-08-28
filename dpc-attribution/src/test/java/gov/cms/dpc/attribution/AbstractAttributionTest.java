@@ -14,7 +14,6 @@ import org.apache.http.impl.client.HttpClients;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.extension.ExtendWith;
-import ru.vyarus.dropwizard.guice.module.context.SharedConfigurationState;
 
 import java.io.IOException;
 
@@ -45,7 +44,6 @@ public abstract class AbstractAttributionTest {
         // Ensure there are no active connections left
         checkAllConnectionsClosed(String.format("http://localhost:%s", APPLICATION.getAdminPort()));
         APPLICATION.after();
-        SharedConfigurationState.clear();
     }
 
     protected String getServerURL() {

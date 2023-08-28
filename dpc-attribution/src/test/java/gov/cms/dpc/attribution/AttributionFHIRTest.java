@@ -25,7 +25,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.extension.ExtendWith;
-import ru.vyarus.dropwizard.guice.module.context.SharedConfigurationState;
 
 import java.io.InputStream;
 import java.time.Instant;
@@ -74,7 +73,6 @@ class AttributionFHIRTest {
     @AfterAll
     static void shutdown() {
         APPLICATION.after();
-        SharedConfigurationState.clear();
     }
 
     @TestFactory

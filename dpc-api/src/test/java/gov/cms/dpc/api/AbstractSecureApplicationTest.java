@@ -21,7 +21,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
-import ru.vyarus.dropwizard.guice.module.context.SharedConfigurationState;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -107,7 +106,6 @@ public class AbstractSecureApplicationTest {
     public static void shutdown() throws IOException {
         checkAllConnectionsClosed(String.format("http://localhost:%s", APPLICATION.getAdminPort()));
         APPLICATION.after();
-        SharedConfigurationState.clear();
     }
 
     private static void checkAllConnectionsClosed(String adminURL) throws IOException {

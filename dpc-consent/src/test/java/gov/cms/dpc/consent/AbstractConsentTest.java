@@ -8,7 +8,6 @@ import gov.cms.dpc.testing.IntegrationTest;
 import io.dropwizard.testing.DropwizardTestSupport;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import ru.vyarus.dropwizard.guice.module.context.SharedConfigurationState;
 
 @IntegrationTest
 public abstract class AbstractConsentTest {
@@ -26,7 +25,6 @@ public abstract class AbstractConsentTest {
     @AfterAll
     public static void shutdown() {
         APPLICATION.after();
-        SharedConfigurationState.clear();
     }
 
     // supporting a v1 path might require inserting something like attribution.resources.AbstractAttributionResource
