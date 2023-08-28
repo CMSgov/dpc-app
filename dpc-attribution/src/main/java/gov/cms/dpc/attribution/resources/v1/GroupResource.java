@@ -16,6 +16,7 @@ import gov.cms.dpc.common.entities.RosterEntity;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.annotations.FHIR;
+import gov.cms.dpc.fhir.annotations.FHIRParameter;
 import gov.cms.dpc.fhir.converters.FHIREntityConverter;
 import io.dropwizard.hibernate.UnitOfWork;
 import org.apache.commons.lang3.tuple.Pair;
@@ -189,7 +190,7 @@ public class GroupResource extends AbstractGroupResource {
     @FHIR
     @UnitOfWork
     @Override
-    public Group addRosterMembers(@PathParam("rosterID") UUID rosterID, Group groupUpdate) {
+    public Group addRosterMembers(@PathParam("rosterID") UUID rosterID, @FHIRParameter Group groupUpdate) {
         if (!this.rosterDAO.rosterExists(rosterID)) {
             throw new WebApplicationException(NOT_FOUND_EXCEPTION, Response.Status.NOT_FOUND);
         }
@@ -246,7 +247,7 @@ public class GroupResource extends AbstractGroupResource {
     @FHIR
     @UnitOfWork
     @Override
-    public Group removeRosterMembers(@PathParam("rosterID") UUID rosterID, Group groupUpdate) {
+    public Group removeRosterMembers(@PathParam("rosterID") UUID rosterID, @FHIRParameter Group groupUpdate) {
         if (!this.rosterDAO.rosterExists(rosterID)) {
             throw new WebApplicationException(NOT_FOUND_EXCEPTION, Response.Status.NOT_FOUND);
         }

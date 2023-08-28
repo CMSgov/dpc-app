@@ -1,6 +1,7 @@
 package gov.cms.dpc.attribution.resources;
 
 import gov.cms.dpc.fhir.annotations.FHIR;
+import gov.cms.dpc.fhir.annotations.FHIRParameter;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Parameters;
@@ -35,7 +36,7 @@ public abstract class AbstractOrganizationResource {
     @POST
     @Path("/$submit")
     @FHIR
-    public abstract Response submitOrganization(Bundle transactionBundle);
+    public abstract Response submitOrganization(@FHIRParameter Bundle transactionBundle);
 
     /**
      * Fetch the {@link Organization} with the given ID
