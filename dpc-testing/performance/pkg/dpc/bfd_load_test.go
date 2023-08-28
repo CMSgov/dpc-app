@@ -22,8 +22,8 @@ type JobQueueBatch struct {
 	BatchID         string   `pg:"batch_id"`
 	OrganizationID  string   `pg:"organization_id"`
 	ProviderID      string   `pg:"provider_id"`
-	Patients        []string
-	ResourceTypes   []string
+	Patients        string
+	ResourceTypes   string
 	Status          int `sql:",notnull"`
 	Priority        int
 	IsBulk          bool
