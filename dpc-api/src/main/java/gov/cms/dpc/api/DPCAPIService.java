@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.datatype.hibernate5.Hibernate5Module;
 import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.api.auth.AuthModule;
-import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.cli.keys.KeyCommand;
 import gov.cms.dpc.api.cli.organizations.OrganizationCommand;
 import gov.cms.dpc.api.cli.tokens.TokenCommand;
@@ -79,7 +78,7 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
         EnvironmentParser.getEnvironment("API");
         final var listener = new InstrumentedResourceMethodApplicationListener(environment.metrics());
         environment.jersey().getResourceConfig().register(listener);
-        environment.jersey().register(new AuthValueFactoryProvider.Binder<>(OrganizationPrincipal.class));
+        environment.jersey().register(AuthValueFactoryProvider.Binder.class);
         environment.jersey().register(JsonParseExceptionMapper.class);
         environment.jersey().register(new GenerateRequestIdFilter(false));
         environment.jersey().register(LogResponseFilter.class);
