@@ -7,6 +7,8 @@ import org.hl7.fhir.dstu3.model.OperationOutcome;
 
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.container.ResourceInfo;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Provider;
 
@@ -17,6 +19,9 @@ import javax.ws.rs.ext.Provider;
 @Provider
 public class DefaultFHIRExceptionHandler extends AbstractFHIRExceptionHandler<Throwable> {
 
+    @Context
+    private ResourceInfo info;
+
     @Inject
     public DefaultFHIRExceptionHandler() {
         super();
@@ -24,7 +29,7 @@ public class DefaultFHIRExceptionHandler extends AbstractFHIRExceptionHandler<Th
 
     @Override
     public Response toResponse(Throwable exception) {
-        if (isFHIRResource()) {
+        if (isFHIRResource(this.info)) {
             return handleFHIRException(exception);
         } else {
             return handleNonFHIRException(exception);

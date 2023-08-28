@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.persistence.PersistenceException;
+import javax.ws.rs.container.ResourceInfo;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Provider;
 import java.util.regex.Matcher;
@@ -26,6 +28,9 @@ public class PersistenceExceptionHandler extends AbstractFHIRExceptionHandler<Pe
     private static final Logger logger = LoggerFactory.getLogger(PersistenceExceptionHandler.class);
     private static final Pattern MSG_PATTERN = Pattern.compile("ERROR:\\s(duplicate\\s[a-zA-Z_]*\\svalue\\sviolates\\sunique\\sconstraint)");
 
+    @Context
+    private ResourceInfo info;
+
     @Inject
     PersistenceExceptionHandler() {
         super();
@@ -33,7 +38,7 @@ public class PersistenceExceptionHandler extends AbstractFHIRExceptionHandler<Pe
 
     @Override
     public Response toResponse(PersistenceException exception) {
-        if (isFHIRResource()) {
+        if (isFHIRResource(this.info)) {
             return handleFHIRException(exception);
         } else {
             return handleNonFHIRException(exception);
