@@ -15,10 +15,6 @@ import java.time.Duration;
 
 class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfiguration> {
 
-    AttributionAppModule() {
-        // Not used
-    }
-
     @Override
     public void configure() {
         Binder binder = binder();

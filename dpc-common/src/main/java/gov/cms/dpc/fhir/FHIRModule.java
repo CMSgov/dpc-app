@@ -29,10 +29,6 @@ public class FHIRModule<T extends Configuration & IDPCFHIRConfiguration> extends
 
     private static final Logger logger = LoggerFactory.getLogger(FHIRModule.class);
 
-    public FHIRModule() {
-        // Not used
-    }
-
     @Provides
     @Singleton
     public FhirContext provideSTU3Context() {

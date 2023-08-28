@@ -187,7 +187,6 @@ public class APITestHelpers {
         ConfigFactory.invalidateCaches();
         // Truncate attribution database
         truncateDatabase();
-        SharedConfigurationState.clear();
         application.before();
         // Truncate the Auth DB
         application.getApplication().run("db", "drop-all", "--confirm-delete-everything", "ci.application.conf");
