@@ -14,6 +14,7 @@ import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.api.resources.AbstractOrganizationResource;
 import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.annotations.FHIR;
+import gov.cms.dpc.fhir.annotations.FHIRParameter;
 import gov.cms.dpc.fhir.annotations.Profiled;
 import gov.cms.dpc.fhir.validations.profiles.OrganizationProfile;
 import io.dropwizard.auth.Auth;
@@ -54,7 +55,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
     @ApiOperation(hidden = true, value = "Create organization by submitting Bundle")
     @AdminOperation
     @Override
-    public Organization submitOrganization(@PathParam("resource") @NotNull Bundle organizationBundle) {
+    public Organization submitOrganization(@FHIRParameter(name = "resource") @NotNull Bundle organizationBundle) {
         // Validate bundle
         validateOrganizationBundle(organizationBundle);
 
