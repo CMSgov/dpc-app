@@ -3,6 +3,7 @@ package gov.cms.dpc.api.resources.v1;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import com.github.nitram509.jmacaroons.Macaroon;
+import gov.cms.dpc.api.auth.MacaroonHelpers;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.Authorizer;
 import gov.cms.dpc.api.auth.annotations.Public;
@@ -281,14 +282,19 @@ public class TokenResource extends AbstractTokenResource {
                 .build()
                 .parseClaimsJws(jwtBody);
 
-        // Determine if claims are present and valid
-        // Required claims are specified here: http://hl7.org/fhir/us/bulkdata/2019May/authorization/index.html#protocol-details
-        // TODO: wire in the real Organization ID, for auditing purposes
-        handleJWTClaims(UUID.randomUUID(), claims);
-
         // Extract the Client Macaroon from the subject field (which is the same as the issuer)
         final String clientMacaroon = claims.getBody().getSubject();
         final List<Macaroon> macaroons = MacaroonBakery.deserializeMacaroon(clientMacaroon);
+
+        // Get org id from macaroon caveats
+        UUID orgId = MacaroonHelpers.extractOrgIDFromCaveats(macaroons).orElseThrow(() -> {
+            logger.error("No organization found on macaroon");
+            throw new WebApplicationException(INVALID_JWT_MSG, Response.Status.UNAUTHORIZED);
+        });
+
+        // Determine if claims are present and valid
+        // Required claims are specified here: http://hl7.org/fhir/us/bulkdata/2019May/authorization/index.html#protocol-details
+        handleJWTClaims(orgId, claims);
 
         // Add the additional claims that we need
         // Currently, we need to set an expiration time, a set of scopes,

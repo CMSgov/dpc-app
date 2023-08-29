@@ -480,6 +480,32 @@
                 </plugins>
             </build>
         </profile>
+        <profile>
+            <id>debug</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>compile-with-debug-info</id>
+                                <phase>compile</phase>
+                                <goals>
+                                    <goal>compile</goal>
+                                </goals>
+                                <configuration>
+                                    <showWarnings>true</showWarnings>
+                                    <compilerArgs>
+                                        <arg>-g</arg>
+                                    </compilerArgs>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
 
     <build>

@@ -23,6 +23,14 @@ start-app: secure-envs
 	@USE_BFD_MOCK=false docker-compose up start_api_dependencies
 	@docker-compose up start_api
 
+.PHONY: start-app-debug
+start-app-debug: secure-envs
+	@mvn clean install -Pdebug -DskipTests -ntp
+	@docker-compose -f docker-compose.yml -f docker-compose.portals.yml up start_core_dependencies
+	@DEBUG_MODE=true USE_BFD_MOCK=false docker-compose -f docker-compose.yml -f docker-compose.portals.yml up start_api_dependencies
+	@DEBUG_MODE=true docker-compose -f docker-compose.yml -f docker-compose.portals.yml up start_api
+	@docker ps
+
 .PHONY: start-local
 start-local: secure-envs
 	@docker-compose -f docker-compose.yml -f docker-compose-local.yml up start_api_dependencies
@@ -51,6 +59,16 @@ start-dpc: secure-envs
 	@docker-compose -f docker-compose.yml -f docker-compose.portals.yml up start_core_dependencies
 	@USE_BFD_MOCK=false docker-compose -f docker-compose.yml -f docker-compose.portals.yml up start_api_dependencies
 	@docker-compose -f docker-compose.yml -f docker-compose.portals.yml up start_api
+	@docker-compose -f docker-compose.yml -f docker-compose.portals.yml up start_web
+	@docker-compose -f docker-compose.yml -f docker-compose.portals.yml up start_admin
+	@docker ps
+
+.PHONY: start-dpc-debug
+start-dpc-debug: secure-envs
+	@mvn clean install -Pdebug -DskipTests -ntp
+	@docker-compose -f docker-compose.yml -f docker-compose.portals.yml up start_core_dependencies
+	@DEBUG_MODE=true USE_BFD_MOCK=false docker-compose -f docker-compose.yml -f docker-compose.portals.yml up start_api_dependencies
+	@DEBUG_MODE=true docker-compose -f docker-compose.yml -f docker-compose.portals.yml up start_api
 	@docker-compose -f docker-compose.yml -f docker-compose.portals.yml up start_web
 	@docker-compose -f docker-compose.yml -f docker-compose.portals.yml up start_admin
 	@docker ps
