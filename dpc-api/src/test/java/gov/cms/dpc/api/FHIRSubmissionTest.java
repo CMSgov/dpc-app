@@ -40,7 +40,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 import static gov.cms.dpc.fhir.FHIRHeaders.PREFER_HEADER;
 import static gov.cms.dpc.fhir.FHIRHeaders.PREFER_RESPOND_ASYNC;
@@ -298,7 +297,7 @@ class FHIRSubmissionTest {
     @SuppressWarnings("unchecked")
     private static void mockFactory() {
         Mockito.when(factory.getPriority()).thenReturn(ValueParamProvider.Priority.NORMAL);
-        final Function<ContainerRequest, Supplier<?>> func = mock(Function.class);
+        final Function<ContainerRequest, Object> func = mock(Function.class);
         Mockito.when(factory.getValueProvider(Mockito.any())).thenReturn(func);
     }
 }

@@ -4,6 +4,7 @@ import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import com.google.inject.Injector;
 import gov.cms.dpc.fhir.annotations.FHIRParameter;
+import org.glassfish.hk2.api.Factory;
 import org.glassfish.jersey.server.model.Parameter;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Resource;
@@ -19,7 +20,7 @@ import java.util.function.Supplier;
 /**
  * {@link Supplier} for converting {@link Parameters} to the underlying FHIR {@link org.hl7.fhir.instance.model.api.IBaseResource}
  */
-public class ParamResourceFactory implements Supplier<Object> {
+public class ParamResourceFactory implements Factory<Object> {
 
     private static final Logger logger = LoggerFactory.getLogger(ParamResourceFactory.class);
 
@@ -34,7 +35,7 @@ public class ParamResourceFactory implements Supplier<Object> {
     }
 
     @Override
-    public Object get() {
+    public Object provide() {
         final Resource resource = extractFHIRResource(extractParameters());
         final Class<?> rawType = parameter.getRawType();
         try {
@@ -43,6 +44,11 @@ public class ParamResourceFactory implements Supplier<Object> {
             logger.error("Parameter type does not match payload", e);
             throw new WebApplicationException(String.format("Provided resource must be: `%s`, not `%s`", rawType.getSimpleName(), resource.getResourceType()), Response.Status.BAD_REQUEST);
         }
+    }
+
+    @Override
+    public void dispose(Object instance) {
+        // Not used
     }
 
     private Parameters extractParameters() {

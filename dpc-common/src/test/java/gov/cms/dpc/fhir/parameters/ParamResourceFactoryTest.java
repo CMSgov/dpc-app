@@ -43,7 +43,7 @@ class ParamResourceFactoryTest {
 
         final ParamResourceFactory factory = new ParamResourceFactory(mockInjector, null, parser);
 
-        final WebApplicationException exception = assertThrows(WebApplicationException.class, factory::get, "Should throw exception");
+        final WebApplicationException exception = assertThrows(WebApplicationException.class, factory::provide, "Should throw exception");
         assertAll(() -> assertEquals(HttpStatus.BAD_REQUEST_400, exception.getResponse().getStatus(), "Should be a bad request"),
                 () -> assertEquals("Resource type must be `Parameters`", exception.getMessage(), "Should have wrong resource message"));
     }
@@ -64,7 +64,7 @@ class ParamResourceFactoryTest {
 
         final ParamResourceFactory factory = new ParamResourceFactory(mockInjector, null, parser);
 
-        final WebApplicationException exception = assertThrows(WebApplicationException.class, factory::get, "Should throw exception");
+        final WebApplicationException exception = assertThrows(WebApplicationException.class, factory::provide, "Should throw exception");
         assertAll(() -> assertEquals(HttpStatus.INTERNAL_SERVER_ERROR_500, exception.getResponse().getStatus(), "Should be an internal exception"),
                 () -> assertEquals("Cannot read input stream", exception.getMessage(), "Should have wrong resource message"));
     }
@@ -92,7 +92,7 @@ class ParamResourceFactoryTest {
 
         final ParamResourceFactory factory = new ParamResourceFactory(mockInjector, parameter, parser);
 
-        assertTrue(dummyPatient.equalsDeep((Patient) factory.get()), "Should have returned dummy patient");
+        assertTrue(dummyPatient.equalsDeep((Patient) factory.provide()), "Should have returned dummy patient");
     }
 
     @Test
@@ -121,8 +121,8 @@ class ParamResourceFactoryTest {
         Mockito.when(parameter.getRawType()).thenAnswer(answer -> Patient.class);
 
         final ParamResourceFactory factory = new ParamResourceFactory(mockInjector, parameter, parser);
-        assertAll(() -> assertTrue(namedPatient.equalsDeep((Patient) factory.get()), "Should have returned dummy patient"),
-                () -> assertFalse(unnamedPatient.equalsDeep((Patient) factory.get()), "Should have returned dummy patient"));
+        assertAll(() -> assertTrue(namedPatient.equalsDeep((Patient) factory.provide()), "Should have returned dummy patient"),
+                () -> assertFalse(unnamedPatient.equalsDeep((Patient) factory.provide()), "Should have returned dummy patient"));
     }
 
     @Test
@@ -148,7 +148,7 @@ class ParamResourceFactoryTest {
 
         final ParamResourceFactory factory = new ParamResourceFactory(mockInjector, parameter, parser);
 
-        final WebApplicationException exception = assertThrows(WebApplicationException.class, factory::get, "Should throw an exception");
+        final WebApplicationException exception = assertThrows(WebApplicationException.class, factory::provide, "Should throw an exception");
 
         assertAll(() -> assertEquals(HttpStatus.BAD_REQUEST_400, exception.getResponse().getStatus(), "Should be a bad request"),
                 () -> assertEquals("Provided resource must be: `Practitioner`, not `Patient`", exception.getMessage(), "Should have useful message"));
@@ -177,7 +177,7 @@ class ParamResourceFactoryTest {
 
         final ParamResourceFactory factory = new ParamResourceFactory(mockInjector, parameter, parser);
 
-        final WebApplicationException exception = assertThrows(WebApplicationException.class, factory::get, "Should throw an exception");
+        final WebApplicationException exception = assertThrows(WebApplicationException.class, factory::provide, "Should throw an exception");
         assertAll(() -> assertEquals(HttpStatus.BAD_REQUEST_400, exception.getResponse().getStatus(), "Should be a bad request"),
                 () -> assertEquals("Cannot find matching parameter named `missing`", exception.getMessage(), "Should output which parameter is missing"));
     }

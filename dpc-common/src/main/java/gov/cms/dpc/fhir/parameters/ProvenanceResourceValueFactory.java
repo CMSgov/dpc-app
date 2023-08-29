@@ -2,6 +2,7 @@ package gov.cms.dpc.fhir.parameters;
 
 import ca.uhn.fhir.context.FhirContext;
 import com.google.inject.Injector;
+import org.glassfish.hk2.api.Factory;
 import org.hl7.fhir.dstu3.model.Provenance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +15,7 @@ import java.util.function.Supplier;
 /**
  * {@link Supplier} for extracting a {@link org.hl7.fhir.dstu3.model.Provenance} resource from a request header.
  */
-public class ProvenanceResourceValueFactory implements Supplier<Provenance> {
+public class ProvenanceResourceValueFactory implements Factory<Provenance> {
 
     static final String PROVENANCE_HEADER = "X-Provenance";
     private static final Logger logger = LoggerFactory.getLogger(ProvenanceResourceValueFactory.class);
@@ -28,7 +29,7 @@ public class ProvenanceResourceValueFactory implements Supplier<Provenance> {
     }
 
     @Override
-    public Provenance get() {
+    public Provenance provide() {
         final HttpServletRequest request = injector.getInstance(HttpServletRequest.class);
         final String headerValue = request.getHeader(PROVENANCE_HEADER);
         if (headerValue == null) {
@@ -43,5 +44,10 @@ public class ProvenanceResourceValueFactory implements Supplier<Provenance> {
         }
 
         return provenance;
+    }
+
+    @Override
+    public void dispose(Provenance instance) {
+        // Not used
     }
 }

@@ -13,7 +13,6 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.Produces;
 import javax.ws.rs.ext.Provider;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 /**
  * Custom {@link ValueParamProvider} that lets us cleanly extract {@link org.hl7.fhir.dstu3.model.Provenance} resources from the {@link ProvenanceResourceValueFactory#PROVENANCE_HEADER}.
@@ -34,7 +33,7 @@ public class ProvenanceResourceFactoryProvider implements ValueParamProvider {
     }
 
     @Override
-    public Function<ContainerRequest, Supplier<?>> getValueProvider(Parameter parameter) {
+    public Function<ContainerRequest, Object> getValueProvider(Parameter parameter) {
         if (parameter.getDeclaredAnnotation(ProvenanceHeader.class) != null) {
             // If the parameter is a resource, pass it off to the resource factory
             if (IBaseResource.class.isAssignableFrom(parameter.getRawType()))

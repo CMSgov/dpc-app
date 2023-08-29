@@ -74,7 +74,6 @@ public class OrganizationResource extends AbstractOrganizationResource {
     }
 
     @Override
-    @POST
     @FHIR
     @UnitOfWork
     @Timed

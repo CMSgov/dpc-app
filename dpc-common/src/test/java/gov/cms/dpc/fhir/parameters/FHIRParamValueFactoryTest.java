@@ -40,7 +40,7 @@ class FHIRParamValueFactoryTest {
         Mockito.when(parameter.getRawType()).thenAnswer(answer -> Patient.class);
 
         final ContainerRequest request = Mockito.mock(ContainerRequest.class);
-        final Supplier<?> valueFactory = factory.getValueProvider(parameter).apply(request);
+        final Object valueFactory = factory.getValueProvider(parameter).apply(request);
         assertAll(() -> assertNotNull(valueFactory, "Should have factory"),
                 () -> assertEquals(ParamResourceFactory.class, valueFactory.getClass(), "Should have provenance factory"));
     }
