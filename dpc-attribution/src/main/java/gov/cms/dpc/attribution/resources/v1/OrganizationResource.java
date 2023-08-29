@@ -11,7 +11,6 @@ import gov.cms.dpc.common.entities.OrganizationEntity;
 import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.annotations.FHIR;
-import gov.cms.dpc.fhir.annotations.FHIRParameter;
 import gov.cms.dpc.fhir.converters.FHIREntityConverter;
 import io.dropwizard.hibernate.UnitOfWork;
 import org.apache.commons.lang3.StringUtils;
@@ -78,7 +77,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
     @UnitOfWork
     @Timed
     @ExceptionMetered
-    public Response submitOrganization(@FHIRParameter(name = "resource") Bundle transactionBundle) {
+    public Response submitOrganization(@PathParam("resource") Bundle transactionBundle) {
 
         final Optional<Organization> optOrganization = transactionBundle
                 .getEntry()
