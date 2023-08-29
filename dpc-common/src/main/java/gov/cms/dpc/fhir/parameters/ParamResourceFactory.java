@@ -15,10 +15,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
-import java.util.function.Supplier;
 
 /**
- * {@link Supplier} for converting {@link Parameters} to the underlying FHIR {@link org.hl7.fhir.instance.model.api.IBaseResource}
+ * {@link Factory} for converting {@link Parameters} to the underlying FHIR {@link org.hl7.fhir.instance.model.api.IBaseResource}
  */
 public class ParamResourceFactory implements Factory<Object> {
 

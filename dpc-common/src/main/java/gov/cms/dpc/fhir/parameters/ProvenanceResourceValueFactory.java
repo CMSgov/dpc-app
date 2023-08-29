@@ -10,10 +10,9 @@ import org.slf4j.LoggerFactory;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
-import java.util.function.Supplier;
 
 /**
- * {@link Supplier} for extracting a {@link org.hl7.fhir.dstu3.model.Provenance} resource from a request header.
+ * {@link Factory} for extracting a {@link org.hl7.fhir.dstu3.model.Provenance} resource from a request header.
  */
 public class ProvenanceResourceValueFactory implements Factory<Provenance> {
 
