@@ -31,8 +31,10 @@ public class ProvenanceResourceFactoryProvider implements ValueParamProvider {
     public Function<ContainerRequest, Object> getValueProvider(Parameter parameter) {
         if (parameter.getDeclaredAnnotation(ProvenanceHeader.class) != null) {
             // If the parameter is a resource, pass it off to the resource factory
-            if (IBaseResource.class.isAssignableFrom(parameter.getRawType()))
-                return x -> new ProvenanceResourceValueFactory(injector, ctx).provide();
+            if (IBaseResource.class.isAssignableFrom(parameter.getRawType())) {
+                ProvenanceResourceValueFactory factory = new ProvenanceResourceValueFactory(injector, ctx);
+                return x -> factory.provide();
+            }
         }
 
         return null;

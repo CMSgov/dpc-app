@@ -32,8 +32,10 @@ public class FHIRParamValueFactory implements ValueParamProvider {
     public Function<ContainerRequest, Object> getValueProvider(Parameter parameter) {
         if (parameter.getDeclaredAnnotation(FHIRParameter.class) != null) {
             // If the parameter is a resource, pass it off to the resource factory
-            if (IBaseResource.class.isAssignableFrom(parameter.getRawType()))
-                return x -> new ParamResourceFactory(injector, parameter, ctx.newJsonParser()).provide();
+            if (IBaseResource.class.isAssignableFrom(parameter.getRawType())) {
+                ParamResourceFactory factory = new ParamResourceFactory(injector, parameter, ctx.newJsonParser());
+                return x -> factory.provide();
+            }
         }
 
         return null;
