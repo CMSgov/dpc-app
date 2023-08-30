@@ -1,7 +1,6 @@
 package gov.cms.dpc.fhir.parameters;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.IParser;
 import com.google.inject.Injector;
 import gov.cms.dpc.fhir.annotations.FHIRParameter;
 import org.glassfish.jersey.server.ContainerRequest;
@@ -22,13 +21,10 @@ public class FHIRParamValueFactory implements ValueParamProvider {
     private final Injector injector;
     private final FhirContext ctx;
 
-    private final IParser parser;
-
     @Inject
-    FHIRParamValueFactory(Injector injector, FhirContext ctx, IParser parser) {
+    FHIRParamValueFactory(Injector injector, FhirContext ctx) {
         this.injector = injector;
         this.ctx = ctx;
-        this.parser = parser;
     }
 
 
@@ -37,7 +33,7 @@ public class FHIRParamValueFactory implements ValueParamProvider {
         if (parameter.getDeclaredAnnotation(FHIRParameter.class) != null) {
             // If the parameter is a resource, pass it off to the resource factory
             if (IBaseResource.class.isAssignableFrom(parameter.getRawType()))
-                return x -> new ParamResourceFactory(injector, parameter, parser).provide();
+                return x -> new ParamResourceFactory(injector, parameter, ctx.newJsonParser()).provide();
         }
 
         return null;
