@@ -9,8 +9,6 @@ import org.glassfish.jersey.server.spi.internal.ValueParamProvider;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import javax.inject.Inject;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.Produces;
 import javax.ws.rs.ext.Provider;
 import java.util.function.Function;
 
@@ -18,8 +16,6 @@ import java.util.function.Function;
  * Custom {@link ValueParamProvider} that lets us cleanly extract {@link org.hl7.fhir.dstu3.model.Provenance} resources from the {@link ProvenanceResourceValueFactory#PROVENANCE_HEADER}.
  */
 @Provider
-@Consumes
-@Produces
 public class ProvenanceResourceFactoryProvider implements ValueParamProvider {
 
     private final Injector injector;
