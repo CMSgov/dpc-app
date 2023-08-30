@@ -105,7 +105,7 @@ class TokenTests extends AbstractApplicationTest {
         stdErr.reset();
         final Optional<Throwable> s3 = cli.run("delete", "-o", organizationID, matchedTokenIDs.get(0).toString());
 
-        assertTrue(s3.isPresent(), "Should have succeeded");
+        assertTrue(s3.isEmpty(), "Should have succeeded");
 
         final List<UUID> tokenIDs = getTokenIDs(organizationID);
         assertTrue(tokenIDs.isEmpty(), "Should not have any tokens");

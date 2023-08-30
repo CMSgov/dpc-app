@@ -116,7 +116,7 @@ public class PublicKeyTests extends AbstractApplicationTest {
         stdErr.reset();
         final Optional<Throwable> s3 = cli.run("delete", "-o", organizationID, matchedKeyIDs.get(0).toString());
 
-        assertTrue(s3.isPresent(), "Should have succeeded");
+        assertTrue(s3.isEmpty(), "Should have succeeded");
 
         final List<UUID> tokenIDs = getKeyIDs(organizationID);
         assertTrue(tokenIDs.isEmpty(), "Should not have any keys");
