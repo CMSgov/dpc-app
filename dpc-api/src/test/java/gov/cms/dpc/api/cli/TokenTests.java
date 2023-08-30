@@ -93,7 +93,7 @@ class TokenTests extends AbstractApplicationTest {
         stdErr.reset();
         final Optional<Throwable> s2 = cli.run("create", organizationID);
 
-        assertAll(() -> assertTrue(s2.isPresent(), "Should have succeeded"),
+        assertAll(() -> assertTrue(s2.isEmpty(), "Should have succeeded"),
                 () -> assertEquals("", stdErr.toString(), "Should not have any errors"));
 
         // List the organization tokens

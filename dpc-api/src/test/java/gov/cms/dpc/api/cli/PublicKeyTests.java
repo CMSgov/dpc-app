@@ -138,7 +138,7 @@ public class PublicKeyTests extends AbstractApplicationTest {
                 .map(UUID::fromString)
                 .collect(Collectors.toList());
 
-        assertAll(() -> assertTrue(s2.isPresent(), "Should have succeeded"),
+        assertAll(() -> assertTrue(s2.isEmpty(), "Should have succeeded"),
                 () -> assertEquals("", stdErr.toString(), "Should be empty"));
 
         return matchedKeyIDs;
