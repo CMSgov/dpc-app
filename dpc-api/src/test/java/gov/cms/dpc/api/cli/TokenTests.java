@@ -111,7 +111,7 @@ class TokenTests extends AbstractApplicationTest {
         assertTrue(tokenIDs.isEmpty(), "Should not have any tokens");
     }
 
-    List<UUID> getTokenIDs(String organizationID) {
+    List<UUID> getTokenIDs(String organizationID) throws Exception {
         stdOut.reset();
         stdErr.reset();
 

@@ -4,7 +4,6 @@ import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.codesystems.EndpointConnectionType;
 
 import java.util.List;
-import java.util.UUID;
 
 /**
  * A small collection of helper classes for creating fake (but valid) {@link Organization} resources.
@@ -58,7 +57,7 @@ public class OrganizationFactory {
         Endpoint endpoint = createFakeEndpoint();
         endpoint.setId((String)null);
         endpoint.setName("Fake Endpoint");
-        endpoint.setManagingOrganization(new Reference(new IdType("Organization", UUID.randomUUID().toString())));
+        endpoint.setManagingOrganization(new Reference(new IdType("Organization", "46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0")));
         endpoint.setAddress("http://www.example.com/endpoint");
         return endpoint;
     }
