@@ -79,7 +79,6 @@ public class OrganizationResource extends AbstractOrganizationResource {
     @Timed
     @ExceptionMetered
     public Response submitOrganization(@FHIRParameter(name = "resource") Bundle transactionBundle) {
-        System.out.println("IN SUBMIT ORGANIZATION");
 
         final Optional<Organization> optOrganization = transactionBundle
                 .getEntry()
@@ -88,7 +87,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
                 .map(entry -> (Organization) entry.getResource())
                 .findFirst();
 
-        if (!optOrganization.isPresent()) {
+        if (optOrganization.isEmpty()) {
             return Response.status(HttpStatus.UNPROCESSABLE_ENTITY_422).entity("Must provide organization to register").build();
         }
 
@@ -96,7 +95,6 @@ public class OrganizationResource extends AbstractOrganizationResource {
         if (StringUtils.isBlank(organization.getId())) {
             organization.setId(generateNewOrgId());
         }
-        System.out.println("ORG ID: " + organization.getId());
         final OrganizationEntity entity = this.converter.fromFHIR(OrganizationEntity.class, organization);
         final List<EndpointEntity> endpoints = extractEndpoints(transactionBundle);
         endpoints.forEach(endpointEntity -> endpointEntity.setOrganization(entity));
@@ -106,7 +104,6 @@ public class OrganizationResource extends AbstractOrganizationResource {
             final OrganizationEntity persistedOrg = this.dao.registerOrganization(entity);
             return Response.status(Response.Status.CREATED).entity(this.converter.toFHIR(Organization.class, persistedOrg)).build();
         } catch (Exception e) {
-            System.out.println("ERROR IN SUBMIT");
             logger.error("Error: ", e);
             throw e;
         }
