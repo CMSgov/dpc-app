@@ -230,12 +230,12 @@ public class EndpointResourceTest extends AbstractSecureApplicationTest {
         final IGenericClient orgBClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgBContext.getClientToken(), UUID.fromString(orgBContext.getPublicKeyId()), orgBContext.getPrivateKey());
 
         //Setup Org A with one single endpoint
-        MethodOutcome outcome = orgAClient.create().resource(OrganizationFactory.createValidFakeEndpoint(orgAContext.getOrgId())).execute();
-        final Endpoint orgAEndpoint = (Endpoint) outcome.getResource();
+        final Endpoint orgAEndpoint = OrganizationFactory.createValidFakeEndpoint(orgAContext.getOrgId());
+        orgAClient.create().resource(orgAEndpoint).execute();
 
         //Setup Org B with one single endpoint
-        outcome = orgBClient.create().resource(OrganizationFactory.createValidFakeEndpoint(orgBContext.getOrgId())).execute();
-        final Endpoint orgBEndpoint = (Endpoint) outcome.getResource();
+        final Endpoint orgBEndpoint = OrganizationFactory.createValidFakeEndpoint(orgBContext.getOrgId());
+        orgBClient.create().resource(orgBEndpoint).execute();
 
         //Assert Org B can NOT delete org A's endpoint.
         IDeleteTyped executableDelete = orgBClient.delete().resourceById("Endpoint",new IdType(orgAEndpoint.getId()).getIdPart());
