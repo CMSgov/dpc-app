@@ -94,8 +94,8 @@ public class ConsentEntity implements Serializable {
     @Column(name = "source_code")
     private String sourceCode;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "opt_out_id", nullable = false)
+    @ManyToOne()
+    @JoinColumn(name = "opt_out_id")
     private OptOutFileEntity optOutFile;
 
     public UUID getId() {
