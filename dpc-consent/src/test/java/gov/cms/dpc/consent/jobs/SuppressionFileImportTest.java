@@ -13,11 +13,10 @@ import gov.cms.dpc.testing.JobTestUtils;
 import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.DropwizardTestSupport;
-import io.dropwizard.testing.junit.DAOTestRule;
+import io.dropwizard.testing.junit5.DAOTestExtension;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.context.internal.ManagedSessionContext;
-import org.junit.Rule;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -47,8 +46,7 @@ public class SuppressionFileImportTest {
     private ConsentDAO consentDAO;
     final Path PATH_1800_COPY = Paths.get("./src/test/resources/synthetic-1800-files/copy");
 
-    @Rule
-    public DAOTestRule database = DAOTestRule.newBuilder().addEntityClass(ConsentEntity.class).setProperty("webAllowOthers", "false").build();
+    public DAOTestExtension database = DAOTestExtension.newBuilder().addEntityClass(ConsentEntity.class).setProperty("webAllowOthers", "false").build();
 
     @BeforeEach
     void setUp() throws Exception {

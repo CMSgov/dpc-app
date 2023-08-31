@@ -462,7 +462,6 @@
                                         <arg>-Xlint:all,-processing</arg>
                                         <!-- For now, lets just treat errors as errors, and warnings can be ignored -->
                                         <!-- <arg>-Werror</arg> -->
-                                        <arg>-Xlint:deprecation</arg>
                                     </compilerArgs>
                                     <annotationProcessorPaths>
                                         <path>
