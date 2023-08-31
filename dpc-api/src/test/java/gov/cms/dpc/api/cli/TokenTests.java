@@ -111,7 +111,7 @@ class TokenTests extends AbstractApplicationTest {
         assertTrue(tokenIDs.isEmpty(), "Should not have any tokens");
     }
 
-    List<UUID> getTokenIDs(String organizationID) throws Exception {
+    List<UUID> getTokenIDs(String organizationID) {
         stdOut.reset();
         stdErr.reset();
 
@@ -126,7 +126,7 @@ class TokenTests extends AbstractApplicationTest {
                 .map(UUID::fromString)
                 .collect(Collectors.toList());
 
-        assertAll(() -> assertTrue(s2.isPresent(), "Should have succeeded"),
+        assertAll(() -> assertTrue(s2.isEmpty(), "Should have succeeded"),
                 () -> assertEquals("", stdErr.toString(), "Should be empty"));
 
         return matchedTokenIDs;
