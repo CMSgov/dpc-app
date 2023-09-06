@@ -6,6 +6,7 @@ import org.hl7.fhir.dstu3.model.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import java.util.List;
 import java.util.UUID;
 
 import static gov.cms.dpc.fhir.FHIRExtractors.*;
@@ -15,10 +16,11 @@ import static org.junit.jupiter.api.Assertions.*;
 public class FHIRExtractorTests {
 
     private static final String MISSING_ID_FMT = "Cannot find identifier for system: %s";
+    private static final String MISSING_MBI_FMT = "Patient: %s doesn't have an MBI";
     private static final String PERFORMER = "Cannot find Provenance performer";
 
     @Test
-    void testPatientMultipleIDs() {
+    void testGetMBIMultipleIDs() {
         final Patient patient = new Patient();
         // This double nesting verifies that the fromString method works correctly. Makes PiTest happy.
         patient.addIdentifier().setSystem(DPCIdentifierSystem.fromString(DPCIdentifierSystem.DPC.getSystem()).getSystem()).setValue("test-dpc-one");
@@ -28,11 +30,111 @@ public class FHIRExtractorTests {
     }
 
     @Test
-    void testPatientNoID() {
+    void testGetMBINoID() {
         final Patient patient = new Patient();
+        patient.setId("id");
 
         final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> getPatientMBI(patient), "Should not have patient MBI");
-        assertEquals(String.format(MISSING_ID_FMT, DPCIdentifierSystem.MBI.getSystem()), exception.getMessage(), "Should have correct exception message");
+        assertEquals(String.format(MISSING_MBI_FMT, "id"), exception.getMessage(), "Should have correct exception message");
+    }
+
+    @Test
+    void testGetMBIMultipleMBIs() {
+        final Patient patient = new Patient();
+        patient
+            .addIdentifier()
+            .setSystem(DPCIdentifierSystem.MBI.getSystem())
+            .setValue("0A00A00AA01")
+            .addExtension()
+                .setUrl(DPCExtensionSystem.IDENTIFIER_CURRENCY.getSystem())
+                .setValue(new Coding().setCode(DPCExtensionSystem.CURRENT));
+
+        patient
+            .addIdentifier()
+            .setSystem(DPCIdentifierSystem.MBI.getSystem())
+            .setValue("0A00A00AA01")
+            .addExtension()
+                .setUrl(DPCExtensionSystem.IDENTIFIER_CURRENCY.getSystem())
+                .setValue(new Coding().setCode(DPCExtensionSystem.HISTORIC));
+
+        assertEquals("0A00A00AA01", getPatientMBI(patient), "Should have MBI");
+    }
+
+    @Test
+    void testGetMBIMultipleMBIsNoneCurrent() {
+        final Patient patient = new Patient();
+        patient.setId("id");
+        patient
+                .addIdentifier()
+                .setSystem(DPCIdentifierSystem.MBI.getSystem())
+                .setValue("0A00A00AA01")
+                .addExtension()
+                .setUrl(DPCExtensionSystem.IDENTIFIER_CURRENCY.getSystem())
+                .setValue(new Coding().setCode(DPCExtensionSystem.HISTORIC));
+
+        patient
+                .addIdentifier()
+                .setSystem(DPCIdentifierSystem.MBI.getSystem())
+                .setValue("0A00A00AA01")
+                .addExtension()
+                .setUrl(DPCExtensionSystem.IDENTIFIER_CURRENCY.getSystem())
+                .setValue(new Coding().setCode(DPCExtensionSystem.HISTORIC));
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> getPatientMBI(patient));
+        assertEquals("Cannot find current MBI for patient: id", exception.getMessage());
+    }
+
+    @Test
+    void testGetMBIMultipleMBIsNoneWithCurrency() {
+        final Patient patient = new Patient();
+        patient.setId("id");
+        patient
+                .addIdentifier()
+                .setSystem(DPCIdentifierSystem.MBI.getSystem())
+                .setValue("0A00A00AA01");
+
+        patient
+                .addIdentifier()
+                .setSystem(DPCIdentifierSystem.MBI.getSystem())
+                .setValue("0A00A00AA01");
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> getPatientMBI(patient));
+        assertEquals("Cannot find an MBI with identifier currency for patient: id", exception.getMessage());
+    }
+
+    @Test
+    void testGetMBIsOneFound() {
+        final Patient patient = new Patient();
+        Identifier validMBI = new Identifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("0A00A00AA01");
+        Identifier invalidMBI = new Identifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("mbi2");
+        Identifier bene_id = new Identifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("bene_id");
+        patient.addIdentifier(validMBI);
+        patient.addIdentifier(invalidMBI);
+        patient.addIdentifier(bene_id);
+
+        assertEquals(List.of(validMBI.getValue()), FHIRExtractors.getPatientMBIs(patient));
+    }
+
+    @Test
+    void testGetMBIsMultipleFound() {
+        final Patient patient = new Patient();
+        Identifier validMBI1 = new Identifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("0A00A00AA01");
+        Identifier validMBI2 = new Identifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("0A00A00AA02");
+        Identifier bene_id = new Identifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("bene_id");
+        patient.addIdentifier(validMBI1);
+        patient.addIdentifier(validMBI2);
+        patient.addIdentifier(bene_id);
+
+        assertEquals(List.of(validMBI1.getValue(), validMBI2.getValue()), FHIRExtractors.getPatientMBIs(patient));
+    }
+
+    @Test
+    void testGetMBIsNoneFound() {
+        final Patient patient = new Patient();
+        Identifier invalidMBI = new Identifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("mbi");
+        patient.addIdentifier(invalidMBI);
+
+        assertEquals(List.of(), FHIRExtractors.getPatientMBIs(patient));
     }
 
     @Test
@@ -175,5 +277,23 @@ public class FHIRExtractorTests {
         cc.addCoding().setSystem(DPCIdentifierSystem.NPPES.getSystem()).setCode("123345");
         gc.setValue(cc);
         assertEquals("123345", getAttributedNPI(group), "Should have correct NPI");
+    }
+
+    @Test
+    void testFindMatchingIdentifiersMultipleFound() {
+        Identifier idMbi1 = new Identifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("mbi1");
+        Identifier idMbi2 = new Identifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("mbi1");
+        Identifier idBeneId = new Identifier().setSystem(DPCIdentifierSystem.BENE_ID.getSystem()).setValue("bene_id");
+
+        assertEquals(List.of(idMbi1, idMbi2), FHIRExtractors.findMatchingIdentifiers(List.of(idMbi1, idMbi2, idBeneId), DPCIdentifierSystem.MBI));
+    }
+
+    @Test
+    void testFindMatchingIdentifiersNoneFound() {
+        Identifier idMbi1 = new Identifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("mbi1");
+        Identifier idMbi2 = new Identifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("mbi1");
+        Identifier idBeneId = new Identifier().setSystem(DPCIdentifierSystem.BENE_ID.getSystem()).setValue("bene_id");
+
+        assertTrue(FHIRExtractors.findMatchingIdentifiers(List.of(idMbi1, idMbi2, idBeneId), DPCIdentifierSystem.HICN).isEmpty());
     }
 }
