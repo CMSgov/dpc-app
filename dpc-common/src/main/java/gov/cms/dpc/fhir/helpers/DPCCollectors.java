@@ -12,8 +12,8 @@ public class DPCCollectors {
      * A collector that returns a single {@link Optional}.  Converts the collection operated on to a list, and if there
      * is one and only one element, wraps it in an {@link Optional} and returns it.  If the collection is empty or has
      * more than one element, an empty {@link Optional} is returned.
+     * @param <T> The type of object the collection this operates on is made up of.
      * @return {@link Optional}
-     * @param <T>
      */
      public static <T> Collector<T, ?, Optional<T>> singleOrNone() {
         return Collectors.collectingAndThen(

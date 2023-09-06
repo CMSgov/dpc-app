@@ -194,12 +194,12 @@ public class FHIRExtractors {
      * is thrown.  You should only call this when you're sure there is only one matching identifier, or you don't care
      * which is returned.
      *
-     * @param identifiers
-     * @param system
+     * @param identifiers List of {@link Identifier}s to search
+     * @param system {@link DPCIdentifierSystem} to search identifiers for
      * @return {@link Identifier}
-     * @throws {@link IllegalArgumentException} if no identifier is found
+     * @throws IllegalArgumentException
      */
-    public static Identifier findMatchingIdentifier(List<Identifier> identifiers, DPCIdentifierSystem system) {
+    public static Identifier findMatchingIdentifier(List<Identifier> identifiers, DPCIdentifierSystem system) throws IllegalArgumentException {
         return identifiers
                 .stream()
                 .filter(id -> id.getSystem().equals(system.getSystem()))
@@ -210,8 +210,8 @@ public class FHIRExtractors {
     /**
      * Returns the identifiers from the given list that have the given system.
      *
-     * @param identifiers
-     * @param system
+     * @param identifiers List of {@link Identifier}s to search
+     * @param system {@link DPCIdentifierSystem} to search identifiers for
      * @return list of {@link Identifier}
      */
     public static List<Identifier> findMatchingIdentifiers(List<Identifier> identifiers, DPCIdentifierSystem system) {
