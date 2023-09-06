@@ -11,7 +11,6 @@ import org.hl7.fhir.dstu3.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
@@ -56,9 +55,7 @@ public class ParamResourceFactory implements Factory<Object> {
         // It would be better to have this automatically provided, but it's simple enough to do it manually, rather than wrangling Guice scopes.
         final HttpServletRequest request = injector.getInstance(HttpServletRequest.class);
         try {
-            ServletInputStream inputStream = request.getInputStream();
-            logger.info("Input stream: {}", inputStream);
-            return parser.parseResource(Parameters.class, inputStream);
+            return parser.parseResource(Parameters.class, request.getInputStream());
         } catch (DataFormatException e) {
             logger.error("Unable to parse Parameters resource.", e);
             throw new WebApplicationException("Resource type must be `Parameters`", Response.Status.BAD_REQUEST);
