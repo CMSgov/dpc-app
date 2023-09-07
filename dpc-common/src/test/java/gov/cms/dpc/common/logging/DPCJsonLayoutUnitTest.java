@@ -39,7 +39,7 @@ public class DPCJsonLayoutUnitTest {
 
     @BeforeEach
     public void setup() {
-        MockitoAnnotations.openMocks(this);
+        MockitoAnnotations.initMocks(this);
         dpcJsonLayout = new DPCJsonLayout(jsonFormatter,
                 timestampFormatter,
                 throwableHandlingConverter,

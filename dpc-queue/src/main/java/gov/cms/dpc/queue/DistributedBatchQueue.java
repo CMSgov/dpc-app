@@ -13,13 +13,13 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
-import org.hibernate.query.criteria.HibernateCriteriaBuilder;
-import org.hibernate.query.criteria.JpaCriteriaQuery;
-import org.hibernate.query.criteria.JpaRoot;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
@@ -119,9 +119,9 @@ public class DistributedBatchQueue extends JobQueueCommon {
         try (final Session session = this.factory.openSession()) {
             final Transaction tx = session.beginTransaction();
             try {
-                final HibernateCriteriaBuilder builder = session.getCriteriaBuilder();
-                final JpaCriteriaQuery<JobQueueBatch> query = builder.createQuery(JobQueueBatch.class);
-                final JpaRoot<JobQueueBatch> root = query.from(JobQueueBatch.class);
+                final CriteriaBuilder builder = session.getCriteriaBuilder();
+                final CriteriaQuery<JobQueueBatch> query = builder.createQuery(JobQueueBatch.class);
+                final Root<JobQueueBatch> root = query.from(JobQueueBatch.class);
 
                 query.select(root);
                 query.where(
@@ -142,7 +142,7 @@ public class DistributedBatchQueue extends JobQueueCommon {
             final String queryString =
                     "SELECT f FROM gov.cms.dpc.queue.models.JobQueueBatchFile f LEFT JOIN gov.cms.dpc.queue.models.JobQueueBatch b on b.jobID = f.jobID WHERE f.fileName = :fileName AND b.orgID = :org";
 
-            final Query query = session.createQuery(queryString, JobQueueBatchFile.class);
+            final Query query = session.createQuery(queryString);
             query.setParameter("fileName", fileID);
             query.setParameter("org", organizationID);
             return query.uniqueResultOptional();
@@ -176,9 +176,9 @@ public class DistributedBatchQueue extends JobQueueCommon {
 
         // Unstick stuck batches
         if ( stuckBatchIDs != null && !stuckBatchIDs.isEmpty() ) {
-            final HibernateCriteriaBuilder builder = session.getCriteriaBuilder();
-            final JpaCriteriaQuery<JobQueueBatch> query = builder.createQuery(JobQueueBatch.class);
-            final JpaRoot<JobQueueBatch> root = query.from(JobQueueBatch.class);
+            final CriteriaBuilder builder = session.getCriteriaBuilder();
+            final CriteriaQuery<JobQueueBatch> query = builder.createQuery(JobQueueBatch.class);
+            final Root<JobQueueBatch> root = query.from(JobQueueBatch.class);
 
             query.select(root);
             query.where(root.get("batchID").in(stuckBatchIDs.stream().map(UUID::fromString).collect(Collectors.toList())));
@@ -200,9 +200,10 @@ public class DistributedBatchQueue extends JobQueueCommon {
      * @param aggregatorID - The ID of the aggregator processing the job
      * @return the claimed job batch
      */
+    @SuppressWarnings("unchecked")
     private Optional<JobQueueBatch> claimBatchFromDatabase(Session session, UUID aggregatorID) {
         // Claim a new batch
-        Optional<String> batchID = session.createQuery("SELECT Cast(batch_id as varchar) batch_id FROM job_queue_batch WHERE status = 0 ORDER BY priority ASC, submit_time ASC LIMIT 1 FOR UPDATE SKIP LOCKED", String.class)
+        Optional<String> batchID = session.createNativeQuery("SELECT Cast(batch_id as varchar) batch_id FROM job_queue_batch WHERE status = 0 ORDER BY priority ASC, submit_time ASC LIMIT 1 FOR UPDATE SKIP LOCKED")
                 .uniqueResultOptional();
 
         if ( batchID.isPresent() ) {
@@ -297,9 +298,9 @@ public class DistributedBatchQueue extends JobQueueCommon {
     public long queueSize() {
         try (final Session session = this.factory.openSession()) {
             try {
-                final HibernateCriteriaBuilder builder = session.getCriteriaBuilder();
-                final JpaCriteriaQuery<Long> query = builder.createQuery(Long.class);
-                final JpaRoot<JobQueueBatch> root = query.from(JobQueueBatch.class);
+                final CriteriaBuilder builder = session.getCriteriaBuilder();
+                final CriteriaQuery<Long> query = builder.createQuery(Long.class);
+                final Root<JobQueueBatch> root = query.from(JobQueueBatch.class);
 
                 query.select(builder.count(root));
                 query.where(
@@ -325,8 +326,8 @@ public class DistributedBatchQueue extends JobQueueCommon {
                 OffsetDateTime stuckSince = OffsetDateTime.now(ZoneId.systemDefault()).minusMinutes(3);
 
                 logger.debug(String.format("Checking aggregatorID(%s) for stuck jobs since (%s)...", aggregatorID, stuckSince.toString()));
-                Long stuckBatchCount = session
-                        .createQuery("select count(*) from job_queue_batch where aggregatorID = :aggregatorID and status = 1 and updateTime < :updateTime", Long.class)
+                Long stuckBatchCount = (Long) session
+                        .createQuery("select count(*) from job_queue_batch where aggregatorID = :aggregatorID and status = 1 and updateTime < :updateTime")
                         .setParameter("aggregatorID", aggregatorID)
                         .setParameter("updateTime", stuckSince)
                         .uniqueResult();

@@ -25,7 +25,7 @@ public class GenerateRequestIdFilterUnitTest {
 
     @BeforeEach
     public void setUp(){
-        MockitoAnnotations.openMocks(this);
+        MockitoAnnotations.initMocks(this);
     }
 
     @Test

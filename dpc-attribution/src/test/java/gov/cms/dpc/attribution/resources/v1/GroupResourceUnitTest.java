@@ -56,7 +56,7 @@ public class GroupResourceUnitTest {
 
     @BeforeEach
     public void setUp() {
-        MockitoAnnotations.openMocks(this);
+        MockitoAnnotations.initMocks(this);
         configuration = new DPCAttributionConfiguration();
         groupResource = new GroupResource(converter, providerDAO, rosterDAO, patientDAO, relationshipDAO, configuration);
     }

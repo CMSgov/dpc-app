@@ -29,7 +29,7 @@ public class ConsentServiceImplUnitTest {
 
     @BeforeEach
     public void setUp() {
-        MockitoAnnotations.openMocks(this);
+        MockitoAnnotations.initMocks(this);
         consentService = new ConsentServiceImpl(mockConsentClient);
     }
 

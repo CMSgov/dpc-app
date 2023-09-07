@@ -43,7 +43,7 @@ public class OrganizationResourceUnitTest {
 
     @BeforeEach
     public void setUp() {
-        MockitoAnnotations.openMocks(this);
+        MockitoAnnotations.initMocks(this);
         configuration = new DPCAttributionConfiguration();
         resource = new OrganizationResource(converter,mockOrganizationDao,mockEndpointDao, configuration);
     }
