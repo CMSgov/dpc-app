@@ -29,7 +29,7 @@ public class KeyResourceUnitTest {
 
     @BeforeEach
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
         resource = new KeyResource(publicKeyDao);
     }
 
