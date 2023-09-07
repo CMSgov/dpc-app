@@ -194,9 +194,9 @@
             </dependency>
             <!--Locking this dependency version to the one provided by Dropwizard, we'll need to manually update it as we go along-->
             <dependency>
-                <groupId>org.hibernate.orm</groupId>
+                <groupId>org.hibernate</groupId>
                 <artifactId>hibernate-core</artifactId>
-                <version>6.2.5.Final</version>
+                <version>5.6.15.Final</version>
             </dependency>
             <dependency>
                 <groupId>org.hibernate.validator</groupId>

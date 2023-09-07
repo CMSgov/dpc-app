@@ -79,7 +79,7 @@ public class ParamResourceFactory implements Factory<Object> {
                     .findAny()
                     .orElseThrow(() -> {
                         logger.error("Cannot find parameter named `{}` in resource", parameterName);
-                        return new WebApplicationException(String.format("Cannot find matching parameter named `%s`", parameterName), Response.Status.BAD_REQUEST);
+                        throw new WebApplicationException(String.format("Cannot find matching parameter named `%s`", parameterName), Response.Status.BAD_REQUEST);
                     });
 
         }
