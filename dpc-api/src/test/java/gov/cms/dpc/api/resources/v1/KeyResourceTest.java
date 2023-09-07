@@ -169,6 +169,7 @@ class KeyResourceTest extends AbstractSecureApplicationTest {
 
     // TODO: Remove this test when ECC support is re-enabled.
     @Test
+    @SuppressWarnings("unchecked")
     public void testRejectEccKey() throws NoSuchAlgorithmException, IOException {
         KeyPair eccKeyPair = APIAuthHelpers.generateKeyPair(KeyType.ECC);
         String publicKeyStr = APIAuthHelpers.generatePublicKey(eccKeyPair.getPublic());

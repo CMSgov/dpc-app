@@ -40,9 +40,8 @@ class ConsentCommandsTest {
         Bootstrap<DPCConsentConfiguration> bootstrap = new Bootstrap<>(app) {
             public void run(DPCConsentConfiguration configuration, Environment environment) throws Exception {
                 super.run(configuration, environment);
-                setConfigurationFactoryFactory((klass, validator, objectMapper, propertyPrefix) -> {
-                    return new POJOConfigurationFactory(configuration);
-                });
+                setConfigurationFactoryFactory((klass, validator, objectMapper, propertyPrefix) ->
+                        new POJOConfigurationFactory<>(configuration));
             }
         };
         app.initialize(bootstrap);
