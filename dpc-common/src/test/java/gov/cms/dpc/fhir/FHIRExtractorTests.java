@@ -20,7 +20,7 @@ public class FHIRExtractorTests {
     private static final String PERFORMER = "Cannot find Provenance performer";
 
     @Test
-    void testGetMBIMultipleIDs() {
+    void testGetMBI_MultipleIDs() {
         final Patient patient = new Patient();
         // This double nesting verifies that the fromString method works correctly. Makes PiTest happy.
         patient.addIdentifier().setSystem(DPCIdentifierSystem.fromString(DPCIdentifierSystem.DPC.getSystem()).getSystem()).setValue("test-dpc-one");
@@ -30,7 +30,7 @@ public class FHIRExtractorTests {
     }
 
     @Test
-    void testGetMBINoID() {
+    void testGetMBI_NoID() {
         final Patient patient = new Patient();
         patient.setId("id");
 
@@ -39,7 +39,7 @@ public class FHIRExtractorTests {
     }
 
     @Test
-    void testGetMBIMultipleMBIs() {
+    void testGetMBI_MultipleMBIs() {
         final Patient patient = new Patient();
         patient
             .addIdentifier()
@@ -61,7 +61,7 @@ public class FHIRExtractorTests {
     }
 
     @Test
-    void testGetMBIMultipleMBIsNoneCurrent() {
+    void testGetMBI_MultipleMBIs_NoneCurrent() {
         final Patient patient = new Patient();
         patient.setId("id");
         patient
@@ -85,7 +85,7 @@ public class FHIRExtractorTests {
     }
 
     @Test
-    void testGetMBIMultipleMBIsNoneWithCurrency() {
+    void testGetMBI_MultipleMBIs_NoneWithCurrency() {
         final Patient patient = new Patient();
         patient.setId("id");
         patient
@@ -103,7 +103,15 @@ public class FHIRExtractorTests {
     }
 
     @Test
-    void testGetMBIsOneFound() {
+    void testGetMBI_BadFormat() {
+        final Patient patient = new Patient();
+        patient.addIdentifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("bad_mbi");
+
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> getPatientMBI(patient));
+    }
+
+    @Test
+    void testGetMBIs_OneFound() {
         final Patient patient = new Patient();
         Identifier validMBI = new Identifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("0A00A00AA01");
         Identifier invalidMBI = new Identifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("mbi2");
@@ -116,7 +124,7 @@ public class FHIRExtractorTests {
     }
 
     @Test
-    void testGetMBIsMultipleFound() {
+    void testGetMBIs_MultipleFound_SomeWithBadFormat() {
         final Patient patient = new Patient();
         Identifier validMBI1 = new Identifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("0A00A00AA01");
         Identifier validMBI2 = new Identifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("0A00A00AA02");
@@ -129,7 +137,7 @@ public class FHIRExtractorTests {
     }
 
     @Test
-    void testGetMBIsNoneFound() {
+    void testGetMBIs_NoneFound() {
         final Patient patient = new Patient();
         Identifier invalidMBI = new Identifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("mbi");
         patient.addIdentifier(invalidMBI);

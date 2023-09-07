@@ -50,11 +50,11 @@ public class FHIRExtractors {
      */
     public static String getPatientMBI(Patient patient) {
         List<Identifier> mbis = findMatchingIdentifiers(patient.getIdentifier(), DPCIdentifierSystem.MBI);
-        Identifier currentMBI;
+        String currentMBI;
 
         if(mbis.size() == 1) {
             // If we only received one MBI, use it
-            currentMBI = mbis.get(0);
+            currentMBI = mbis.get(0).getValue();
         } else if(mbis.size() > 1) {
             // If we received multiple MBI's, find the one marked current
             currentMBI = mbis.stream()
@@ -67,13 +67,21 @@ public class FHIRExtractors {
                     return mbi.castToCoding(mbiExtension.getValue()).getCode().equals(DPCExtensionSystem.CURRENT);
                 })
                 .collect(DPCCollectors.singleOrNone())
-                .orElseThrow(() -> new IllegalArgumentException("Cannot find current MBI for patient: " + patient.getId()));
+                .orElseThrow(() -> new IllegalArgumentException("Cannot find current MBI for patient: " + patient.getId()))
+                .getValue();
         } else {
             // Patient resource didn't have any MBIs
             throw new IllegalArgumentException("Patient: " + patient.getId() + " doesn't have an MBI");
         }
 
-        return currentMBI.getValue();
+        // We only return MBIs if they're in the correct format
+        Pattern mbiPattern = Pattern.compile(PatientEntity.MBI_FORMAT);
+        if (mbiPattern.matcher(currentMBI).matches()) {
+            return currentMBI;
+        } else {
+            logger.error("Invalid MBI");
+            throw new IllegalArgumentException("MBI: " + currentMBI + " for patient: " + patient.getId() + " does not match MBI format");
+        }
     }
 
     /**
