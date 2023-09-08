@@ -13,7 +13,6 @@ import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.parameters.ProvenanceResourceFactoryProvider;
-import gov.cms.dpc.fhir.parameters.ProvenanceResourceValueFactory;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.MemoryBatchQueue;
 import gov.cms.dpc.queue.models.JobQueueBatch;
@@ -23,6 +22,7 @@ import io.dropwizard.auth.AuthValueFactoryProvider;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
 import org.eclipse.jetty.http.HttpStatus;
+import org.glassfish.hk2.api.Factory;
 import org.glassfish.jersey.server.ContainerRequest;
 import org.glassfish.jersey.server.spi.internal.ValueParamProvider;
 import org.glassfish.jersey.test.grizzly.GrizzlyWebTestContainerFactory;
@@ -298,7 +298,7 @@ class FHIRSubmissionTest {
     @SuppressWarnings("unchecked")
     private static void mockFactory() {
         Mockito.when(factory.getPriority()).thenReturn(ValueParamProvider.Priority.NORMAL);
-        final Function<ContainerRequest, ProvenanceResourceValueFactory> func = mock(Function.class);
+        final Function<ContainerRequest, Factory<?>> func = mock(Function.class);
         Mockito.when(factory.getValueProvider(Mockito.any())).thenReturn(func);
     }
 }
