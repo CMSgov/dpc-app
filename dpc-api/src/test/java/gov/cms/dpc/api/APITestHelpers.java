@@ -186,6 +186,7 @@ public class APITestHelpers {
             Exception {
         ConfigFactory.invalidateCaches();
         // Truncate attribution database
+        SharedConfigurationState.clear();
         truncateDatabase();
         application.before();
         // Truncate the Auth DB

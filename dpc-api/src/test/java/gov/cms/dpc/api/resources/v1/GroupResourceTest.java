@@ -52,10 +52,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(BufferedLoggerHandler.class)
 public class GroupResourceTest extends AbstractSecureApplicationTest {
 
-    GroupResourceTest() {
-        // Not used
-    }
-
     @Test
     void testMissingProvenance() throws IOException {
         final IParser parser = ctx.newJsonParser();
