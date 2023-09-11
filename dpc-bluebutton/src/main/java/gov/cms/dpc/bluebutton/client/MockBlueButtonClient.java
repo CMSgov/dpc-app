@@ -55,7 +55,7 @@ public class MockBlueButtonClient implements BlueButtonClient {
 
     );
     public static final List<String> TEST_PATIENT_WITH_BAD_IDS = List.of("-1", "-2", TEST_PATIENT_MBIS.get(0), TEST_PATIENT_MBIS.get(1), "-3");
-    public static final String MULTIPLE_RESULTS_MBI = "0SW4N00AA00";
+    public static final String MULTIPLE_RESULTS_MBI = "9V99EU8XY91"; //"0SW4N00AA00";
     public static final OffsetDateTime BFD_TRANSACTION_TIME = OffsetDateTime.ofInstant(Instant.now().truncatedTo(ChronoUnit.MILLIS), ZoneOffset.UTC);
     public static final OffsetDateTime TEST_LAST_UPDATED = OffsetDateTime.parse("2020-01-01T00:00:00-05:00");
 
