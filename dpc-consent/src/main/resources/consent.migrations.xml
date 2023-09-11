@@ -74,7 +74,7 @@
             <column name="updated_at" type="TIMESTAMP WITH TIME ZONE" />
         </createTable>
         <addColumn tableName="CONSENT">
-            <column name="opt_out_file_id" type="UUID"></column>
+            <column name="opt_out_file_id" type="UUID" />
         </addColumn>
         <addForeignKeyConstraint
                 baseTableName="CONSENT"
