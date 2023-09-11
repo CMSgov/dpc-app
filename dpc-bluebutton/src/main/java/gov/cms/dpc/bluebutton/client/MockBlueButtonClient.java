@@ -219,7 +219,7 @@ public class MockBlueButtonClient implements BlueButtonClient {
     }
 
     /**
-     * Attempts to parse an input stream into a resource.  First as XML, then if that doesn't work as JSON.
+     * Attempts to parse an input stream into a resource.
      * @param aClass The resource class to parse the stream into.
      * @param inputStream The input stream to read the resource from.
      * @param fileExtension The file extension of the resource (.xml or .json)
