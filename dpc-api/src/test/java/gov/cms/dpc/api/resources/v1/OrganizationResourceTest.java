@@ -230,9 +230,12 @@ class OrganizationResourceTest extends AbstractSecureApplicationTest {
         organization.setName("New Org Name");
         organization.setContact(List.of());
 
+        Parameters parameters = new Parameters();
+        parameters.addParameter().setResource(organization);
+
         MethodOutcome outcome = client
                 .update()
-                .resource(organization)
+                .resource(parameters)
                 .execute();
 
         Organization result = (Organization) outcome.getResource();
