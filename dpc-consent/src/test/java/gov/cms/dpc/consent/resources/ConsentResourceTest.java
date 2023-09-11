@@ -21,7 +21,6 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -191,6 +190,27 @@ class ConsentResourceTest extends AbstractConsentTest {
                 .search()
                 .forResource(Consent.class)
                 .where(new StringClientParam("patient").matches().value(patientValue))
+                .encodedJson()
+                .returnBundle(Bundle.class)
+                .execute();
+
+        final Consent found = (Consent) sut.getEntryFirstRep().getResource();
+        System.out.println(ctx.newJsonParser().setPrettyPrint(true).encodeResourceToString(found));
+
+        assertEquals(ConsentEntityConverter.OPT_IN_MAGIC, found.getPolicyRule());
+        assertEquals(TEST_CONSENT_REF, found.getId());
+    }
+
+    @ParameterizedTest
+    @CsvSource({"MBI,mbi_1", "HICN,hicn_1"})
+    final void searchConsentResource_multiple_ids(String system, String patientId) {
+        final IGenericClient client = createFHIRClient(ctx, getServerURL());
+        final String patientValue = String.format("%s|%s", DPCIdentifierSystem.valueOf(system).getSystem(), patientId);
+
+        final Bundle sut = client
+                .search()
+                .forResource(Consent.class)
+                .where(new StringClientParam("patients").matches().value(patientValue + ","))
                 .encodedJson()
                 .returnBundle(Bundle.class)
                 .execute();
