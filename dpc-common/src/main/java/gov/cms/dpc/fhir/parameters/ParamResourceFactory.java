@@ -53,8 +53,11 @@ public class ParamResourceFactory implements Factory<Object> {
     private Parameters extractParameters() {
         // Directly call the injector to get the current Servlet Request.
         // It would be better to have this automatically provided, but it's simple enough to do it manually, rather than wrangling Guice scopes.
+        logger.info("IN EXTRACT PARAMETERS");
         final HttpServletRequest request = injector.getInstance(HttpServletRequest.class);
         try {
+            logger.info("INPUT STREAM IS: ");
+            logger.info(request.getInputStream().toString());
             return parser.parseResource(Parameters.class, request.getInputStream());
         } catch (DataFormatException e) {
             logger.error("Unable to parse Parameters resource.", e);
