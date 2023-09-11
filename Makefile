@@ -37,7 +37,7 @@ start-it-debug: secure-envs
 	@mvn clean compile -Pdebug -B -V -ntp -DskipTests
 	@mvn package -Pci -ntp -DskipTests
 	@docker-compose up start_core_dependencies
-	@docker-compose up start_api_dependencies
+	@DEBUG_MODE=true docker-compose up start_api_dependencies
 
 .PHONY: start-local
 start-local: secure-envs
