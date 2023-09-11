@@ -203,7 +203,7 @@ class ConsentResourceTest extends AbstractConsentTest {
 
     @ParameterizedTest
     @CsvSource({"MBI,mbi_1", "HICN,hicn_1"})
-    final void searchConsentResource_multiple_ids(String system, String patientId) {
+    final void searchConsentResource_list_of_ids(String system, String patientId) {
         final IGenericClient client = createFHIRClient(ctx, getServerURL());
         final String patientValue = String.format("%s|%s", DPCIdentifierSystem.valueOf(system).getSystem(), patientId);
 
@@ -220,6 +220,27 @@ class ConsentResourceTest extends AbstractConsentTest {
 
         assertEquals(ConsentEntityConverter.OPT_IN_MAGIC, found.getPolicyRule());
         assertEquals(TEST_CONSENT_REF, found.getId());
+    }
+
+    @Test
+    final void searchConsentResource_multiple_ids() {
+        String patientIds = "mbi_1,hicn_1";
+        final IGenericClient client = createFHIRClient(ctx, getServerURL());
+
+        final Bundle sut = client
+                .search()
+                .forResource(Consent.class)
+                .where(new StringClientParam("patients").matches().value(patientIds))
+                .encodedJson()
+                .returnBundle(Bundle.class)
+                .execute();
+
+        final Consent found = (Consent) sut.getEntryFirstRep().getResource();
+        System.out.println(ctx.newJsonParser().setPrettyPrint(true).encodeResourceToString(found));
+
+        assertEquals(ConsentEntityConverter.OPT_IN_MAGIC, found.getPolicyRule());
+        assertEquals(TEST_CONSENT_REF, found.getId());
+
     }
 
     @Test
