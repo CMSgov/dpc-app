@@ -30,8 +30,10 @@ public class MockBlueButtonClient implements BlueButtonClient {
     private static final String SAMPLE_METADATA_PATH_PREFIX = "bb-test-data/";
     private static final String SAMPLE_EMPTY_BUNDLE = "bb-test-data/empty";
 
+    public static final String MULTIPLE_RESULTS_MBI = "9V99EU8XY91";
+
     public static final List<String> TEST_PATIENT_MBIS = List.of(
-        "2SW4N00AA00", "4SP0P00AA00", "3S58A00AA00", "4S58A00AA00", "5S58A00AA00", "1SQ3F00AA00", "9V99EU8XY91", "1S00EU8FE91"
+        "2SW4N00AA00", "4SP0P00AA00", "3S58A00AA00", "4S58A00AA00", "5S58A00AA00", "1SQ3F00AA00", MULTIPLE_RESULTS_MBI, "1S00EU8FE91"
     );
     public static final Map<String, String> MBI_BENE_ID_MAP = Map.of(
             TEST_PATIENT_MBIS.get(0), "-20140000008325",
@@ -55,7 +57,6 @@ public class MockBlueButtonClient implements BlueButtonClient {
 
     );
     public static final List<String> TEST_PATIENT_WITH_BAD_IDS = List.of("-1", "-2", TEST_PATIENT_MBIS.get(0), TEST_PATIENT_MBIS.get(1), "-3");
-    public static final String MULTIPLE_RESULTS_MBI = "9V99EU8XY91"; //"0SW4N00AA00";
     public static final OffsetDateTime BFD_TRANSACTION_TIME = OffsetDateTime.ofInstant(Instant.now().truncatedTo(ChronoUnit.MILLIS), ZoneOffset.UTC);
     public static final OffsetDateTime TEST_LAST_UPDATED = OffsetDateTime.parse("2020-01-01T00:00:00-05:00");
 
@@ -227,9 +228,9 @@ public class MockBlueButtonClient implements BlueButtonClient {
      * @param <T> An {@link IBaseResource}
      */
     private <T extends IBaseResource> T parseResource(Class<T> aClass, InputStream inputStream, String fileExtension) {
-        if( fileExtension == XML ) {
+        if( fileExtension.equals(XML) ) {
             return parserXml.parseResource(aClass, inputStream);
-        } else if (fileExtension == JSON) {
+        } else if (fileExtension.equals(JSON) ) {
             return parserJson.parseResource(aClass, inputStream);
         } else {
             throw new IllegalArgumentException("Cannot parse resource with unknown file extension: " + fileExtension);
