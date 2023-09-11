@@ -58,4 +58,30 @@
             <column name="source_code" type="VARCHAR"/>
         </addColumn>
     </changeSet>
+    <changeSet id="add-opt-out-file" author="rswv">
+        <createTable tableName="OPT_OUT_FILE">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="timestamp" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="import_status" type="VARCHAR" />
+            <column name="created_at" type="TIMESTAMP WITH TIME ZONE" />
+            <column name="updated_at" type="TIMESTAMP WITH TIME ZONE" />
+        </createTable>
+        <addColumn tableName="CONSENT">
+            <column name="opt_out_file_id" type="UUID" />
+        </addColumn>
+        <addForeignKeyConstraint
+                baseTableName="CONSENT"
+                baseColumnNames="opt_out_file_id"
+                constraintName="fk_consent_opt_out_file"
+                referencedTableName="OPT_OUT_FILE"
+                referencedColumnNames="id"
+        />
+    </changeSet>
 </databaseChangeLog>
