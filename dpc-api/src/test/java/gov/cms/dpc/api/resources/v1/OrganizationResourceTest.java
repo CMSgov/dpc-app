@@ -236,6 +236,7 @@ class OrganizationResourceTest extends AbstractSecureApplicationTest {
         MethodOutcome outcome = client
                 .update()
                 .resource(parameters)
+                .withId(orgID)
                 .execute();
 
         Organization result = (Organization) outcome.getResource();
