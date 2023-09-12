@@ -468,7 +468,7 @@ If you want to run and debug integration tests through IntelliJ there are a few 
   - Go to Run -> Edit Configurations
   - Click Edit Configuration Templates and select JUnit
   - At the bottom, add a new .env file and point it to `ops/config/decrypted/local.env`
-- We need to start our dependant services, so run `make start-it-debug`
+- We need to start our dependent services, so run `make start-it-debug`
   - This will recompile dpc with debug extensions included and start containers for dpc-attribution, dpc-aggregation, dpc-consent and a db.
 - Now you should be able to run any of the integration tests under dpc-api by clicking on the little green arrow next to their implementation.
   - Need to debug a test?  Right click on the triangle and select debug.
