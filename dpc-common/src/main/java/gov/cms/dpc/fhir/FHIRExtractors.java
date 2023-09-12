@@ -79,7 +79,6 @@ public class FHIRExtractors {
         if (mbiPattern.matcher(currentMBI).matches()) {
             return currentMBI;
         } else {
-            logger.error("Invalid MBI");
             throw new IllegalArgumentException("MBI: " + currentMBI + " for patient: " + patient.getId() + " does not match MBI format");
         }
     }
