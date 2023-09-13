@@ -1,0 +1,126 @@
+{
+  "resourceType": "Bundle",
+  "id": "bc89bf94-d55f-4347-995d-0fa7e9c8d312",
+  "type": "searchset",
+  "total": 1,
+  "entry": [
+    {
+      "resource": {
+        "resourceType": "Patient",
+        "id": "-10000010288391",
+        "meta": {
+          "lastUpdated": "2023-04-26T15:19:31.964-04:00"
+        },
+        "extension": [
+          {
+            "url": "https://bluebutton.cms.gov/resources/variables/race",
+            "valueCoding": {
+              "system": "https://bluebutton.cms.gov/resources/variables/race",
+              "code": "5",
+              "display": "Hispanic"
+            }
+          },
+          {
+            "url": "https://bluebutton.cms.gov/resources/variables/rfrnc_yr",
+            "valueDate": "2023"
+          },
+          {
+            "url": "https://bluebutton.cms.gov/resources/variables/dual_01",
+            "valueCoding": {
+              "system": "https://bluebutton.cms.gov/resources/variables/dual_01",
+              "code": "NA",
+              "display": "Non-Medicaid"
+            }
+          },
+          {
+            "url": "https://bluebutton.cms.gov/resources/variables/dual_02",
+            "valueCoding": {
+              "system": "https://bluebutton.cms.gov/resources/variables/dual_02",
+              "code": "NA",
+              "display": "Non-Medicaid"
+            }
+          },
+          {
+            "url": "https://bluebutton.cms.gov/resources/variables/dual_03",
+            "valueCoding": {
+              "system": "https://bluebutton.cms.gov/resources/variables/dual_03",
+              "code": "NA",
+              "display": "Non-Medicaid"
+            }
+          },
+          {
+            "url": "https://bluebutton.cms.gov/resources/variables/dual_04",
+            "valueCoding": {
+              "system": "https://bluebutton.cms.gov/resources/variables/dual_04",
+              "code": "NA",
+              "display": "Non-Medicaid"
+            }
+          },
+          {
+            "url": "https://bluebutton.cms.gov/resources/variables/dual_05",
+            "valueCoding": {
+              "system": "https://bluebutton.cms.gov/resources/variables/dual_05",
+              "code": "NA",
+              "display": "Non-Medicaid"
+            }
+          }
+        ],
+        "identifier": [
+          {
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
+            "value": "-10000010288391"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "bd02000753dfa2182d57bd9f3debaa274cb59af96d66e76c83df133c33970f80"
+          },
+          {
+            "extension": [
+              {
+                "url": "https://bluebutton.cms.gov/resources/codesystem/identifier-currency",
+                "valueCoding": {
+                  "system": "https://bluebutton.cms.gov/resources/codesystem/identifier-currency",
+                  "code": "current",
+                  "display": "Current"
+                }
+              }
+            ],
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "9V99EU8XY91"
+          },
+          {
+            "extension": [
+              {
+                "url": "https://bluebutton.cms.gov/resources/codesystem/identifier-currency",
+                "valueCoding": {
+                  "system": "https://bluebutton.cms.gov/resources/codesystem/identifier-currency",
+                  "code": "historic",
+                  "display": "Historic"
+                }
+              }
+            ],
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "1S00EU8FE91"
+          }
+        ],
+        "name": [
+          {
+            "use": "usual",
+            "family": "Ruecker817",
+            "given": [
+              "Kurt412"
+            ]
+          }
+        ],
+        "gender": "male",
+        "birthDate": "1972-11-11",
+        "address": [
+          {
+            "state": "05",
+            "postalCode": "92596"
+          }
+        ]
+      }
+    }
+  ]
+}
