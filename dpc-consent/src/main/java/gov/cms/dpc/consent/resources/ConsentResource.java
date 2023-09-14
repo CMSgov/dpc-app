@@ -2,6 +2,7 @@ package gov.cms.dpc.consent.resources;
 
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
+import com.google.common.base.Splitter;
 import com.google.inject.name.Named;
 import gov.cms.dpc.common.consent.entities.ConsentEntity;
 import gov.cms.dpc.consent.jdbi.ConsentDAO;
@@ -81,7 +82,7 @@ public class ConsentResource {
 
         } else if (patientId.isPresent()) {
 
-            for (String pId : patientId.get().split(",")) {
+            for (String pId : Splitter.on(',').split(patientId.get())) {
                 final Identifier patientIdentifier = FHIRExtractors.parseIDFromQueryParam(pId);
                 entities.addAll(getEntitiesByPatient(patientIdentifier));
             }
