@@ -476,6 +476,11 @@ If you want to run and debug integration tests through IntelliJ there are a few 
   - Now you can attach your debugger to that service and still run integration tests as described above.
   - You'll have one debugger tab open on an IT in dpc-api and another on the dependant service, allowing you to set break points in either and examine the test end to end.
 
+#### Running Integration Tests Against the BFD Sandbox
+Want to run your integration tests against the real BFD sandbox instead of using the MockBlueButtonClient?  In docker-compose.yml, under the aggregation service, set the USE_BFD_MOCK env variable to true and then rerun `make start-it-debug.`
+
+Note: Many of our integration tests are written for specific test data that only exists in our MockBlueButtonClient.  If you switch to the real BFD sandbox these tests will fail, but if you want a true end to end test this is the way to go.  A list of synthetic patients in the sandbox can be found [here](https://github.com/CMSgov/beneficiary-fhir-data/wiki/Synthetic-Data-Guide).
+
 ## Other Notes
 ###### [`^`](#table-of-contents)
 
