@@ -107,7 +107,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
         APITestHelpers.setupPatientTest(client, parser);
 
         final Bundle patients = fetchPatients(client);
-        assertEquals(101, patients.getTotal(), "Should have correct number of patients");
+        assertEquals(100, patients.getTotal(), "Should have correct number of patients");
 
         final Bundle specificSearch = fetchPatientBundleByMBI(client, "4S41C00AA00");
 
@@ -169,7 +169,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
 
         final Bundle patients = fetchPatients(client);
 
-        assertEquals(101, patients.getTotal(), "Should have correct number of patients");
+        assertEquals(100, patients.getTotal(), "Should have correct number of patients");
 
         // Try to remove one
 
@@ -195,7 +195,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
         // Search again
         final Bundle secondSearch = fetchPatients(client);
 
-        assertEquals(100, secondSearch.getTotal(), "Should have correct number of patients");
+        assertEquals(99, secondSearch.getTotal(), "Should have correct number of patients");
     }
 
     @Test
@@ -208,7 +208,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
 
         final Bundle patients = fetchPatients(client);
 
-        assertEquals(100, patients.getTotal(), "Should have correct number of patients");
+        assertEquals(99, patients.getTotal(), "Should have correct number of patients");
 
         // Try to update one
         final Patient patient = (Patient) patients.getEntry().get(patients.getTotal() - 2).getResource();
@@ -458,40 +458,6 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    @Order(9)
-    void testPatientEverything_CanHandlePatientWithMultipleMBIs() throws IOException, URISyntaxException, GeneralSecurityException {
-        IGenericClient client = generateClient(ORGANIZATION_NPI, "patient-everything-key-4");
-        APITestHelpers.setupPractitionerTest(client, parser);
-
-        String mbi = MockBlueButtonClient.TEST_PATIENT_MBIS.get(6);
-        Patient patient = fetchPatient(client, mbi);
-        Practitioner practitioner = fetchPractitionerByNPI(client);
-        final String patientId = FHIRExtractors.getEntityUUID(patient.getId()).toString();
-
-        Bundle everythingBundle = client
-                .operation()
-                .onInstance(new IdType("Patient", patientId))
-                .named("$everything")
-                .withNoParameters(Parameters.class)
-                .returnResourceType(Bundle.class)
-                .useHttpGet()
-                .withAdditionalHeader("X-Provenance", generateProvenance(ORGANIZATION_ID, practitioner.getId()))
-                .execute();
-
-        Patient patientResource = (Patient) everythingBundle.getEntry().stream()
-                .filter(entry -> entry.getResource().getResourceType().getPath() == "patient")
-                .findFirst().get().getResource();
-
-        // Patient should have multiple MBIs
-        List<String> mbis =  FHIRExtractors.getPatientMBIs(patientResource);
-        assertEquals(2, mbis.size());
-        assertTrue(mbis.containsAll(List.of("9V99EU8XY91", "1S00EU8FE91")));
-
-        // Current MBI
-        assertEquals("9V99EU8XY91", FHIRExtractors.getPatientMBI(patientResource));
-    }
-
-    @Test
     public void tesGetPatientByUUID() throws GeneralSecurityException, IOException, URISyntaxException {
         final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
         final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
@@ -564,6 +530,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
        assertThrows(AuthenticationException.class, () ->
                APITestHelpers.getPatientEverything(orgBClient, orgAPatient.getIdElement().getIdPart(), generateProvenance(orgAContext.getOrgId(), orgAPractitionerId))
        , "Expected auth error when export another org's patient's data");
+
     }
 
     private IGenericClient generateClient(String orgNPI, String keyLabel) throws IOException, URISyntaxException, GeneralSecurityException {

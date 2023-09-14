@@ -31,14 +31,6 @@ start-app-debug: secure-envs
 	@DEBUG_MODE=true docker-compose -f docker-compose.yml -f docker-compose.portals.yml up start_api
 	@docker ps
 
-.PHONY: start-it-debug
-start-it-debug: secure-envs
-	@docker-compose down
-	@mvn clean compile -Pdebug -B -V -ntp -DskipTests
-	@mvn package -Pci -ntp -DskipTests
-	@docker-compose up start_core_dependencies
-	@DEBUG_MODE=true docker-compose up start_api_dependencies
-
 .PHONY: start-local
 start-local: secure-envs
 	@docker-compose -f docker-compose.yml -f docker-compose-local.yml up start_api_dependencies

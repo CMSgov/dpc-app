@@ -1,7 +1,6 @@
 package gov.cms.dpc.fhir;
 
 import gov.cms.dpc.common.entities.PatientEntity;
-import gov.cms.dpc.fhir.helpers.DPCCollectors;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
@@ -14,7 +13,6 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * Helper class for extracting various features from FHIR resources
@@ -49,62 +47,14 @@ public class FHIRExtractors {
      * @return - {@link String} patient MBI
      */
     public static String getPatientMBI(Patient patient) {
-        List<Identifier> mbis = findMatchingIdentifiers(patient.getIdentifier(), DPCIdentifierSystem.MBI);
-        String currentMBI;
-
-        if(mbis.size() == 1) {
-            // If we only received one MBI, use it
-            currentMBI = mbis.get(0).getValue();
-        } else if(mbis.size() > 1) {
-            // If we received multiple MBI's, find the one marked current
-            currentMBI = mbis.stream()
-                .filter( mbi -> {
-                    Extension mbiExtension = mbi.getExtension().stream()
-                        .filter(ext -> ext.hasUrlElement() && ext.getUrl().equals(DPCExtensionSystem.IDENTIFIER_CURRENCY.getSystem()))
-                        .collect(DPCCollectors.singleOrNone())
-                        .orElseThrow(() -> new IllegalArgumentException("Cannot find an MBI with identifier currency for patient: " + patient.getId()));
-
-                    return mbi.castToCoding(mbiExtension.getValue()).getCode().equals(DPCExtensionSystem.CURRENT);
-                })
-                .collect(DPCCollectors.singleOrNone())
-                .orElseThrow(() -> new IllegalArgumentException("Cannot find current MBI for patient: " + patient.getId()))
-                .getValue();
-        } else {
-            // Patient resource didn't have any MBIs
-            throw new IllegalArgumentException("Patient: " + patient.getId() + " doesn't have an MBI");
+        String identifier = findMatchingIdentifier(patient.getIdentifier(), DPCIdentifierSystem.MBI).getValue();
+        Pattern mbiPattern = Pattern.compile(PatientEntity.MBI_FORMAT);
+        if (mbiPattern.matcher(identifier).matches()) {
+            return identifier;
         }
 
-        // We only return MBIs if they're in the correct format
-        Pattern mbiPattern = Pattern.compile(PatientEntity.MBI_FORMAT);
-        if (mbiPattern.matcher(currentMBI).matches()) {
-            return currentMBI;
-        } else {
-            throw new IllegalArgumentException("MBI: " + currentMBI + " for patient: " + patient.getId() + " does not match MBI format");
-        }
-    }
-
-    /**
-     * Extract all Medicare Beneficiary IDs (MBI) from the given {@link org.hl7.fhir.dstu3.model.Patient} resource
-     *
-     * @param patient - {@link Patient} provider to get MBI from
-     * @return - List of {@link String} patient MBI
-     */
-    public static List<String> getPatientMBIs(Patient patient) {
-        List<Identifier> identifiers = findMatchingIdentifiers(patient.getIdentifier(), DPCIdentifierSystem.MBI);
-        Pattern mbiPattern = Pattern.compile(PatientEntity.MBI_FORMAT);
-
-        return identifiers
-            .stream()
-            .map(identifier -> {
-                if(mbiPattern.matcher(identifier.getValue()).matches()) {
-                    return identifier.getValue();
-                } else {
-                    logger.warn("MBI: " + identifier.getValue() + " for patient: " + patient.getId() + " does not match MBI format");
-                    return null;
-                }
-            })
-            .filter(Objects::nonNull)
-            .collect(Collectors.toList());
+        logger.error("Invalid MBI");
+        throw new IllegalArgumentException("Patient Identifier for system " + DPCIdentifierSystem.MBI.getSystem() + " must match MBI format");
     }
 
     /**
@@ -195,37 +145,12 @@ public class FHIRExtractors {
         return Pair.of(tag.substring(0, idx), tag.substring(idx + 1));
     }
 
-    /**
-     * Returns an identifier from the list of identifiers that has the given system.  If there are multiple identifiers
-     * with the given system, one is picked non-deterministically.  If there are none, an {@link IllegalArgumentException}
-     * is thrown.  You should only call this when you're sure there is only one matching identifier, or you don't care
-     * which is returned.
-     *
-     * @param identifiers List of {@link Identifier}s to search
-     * @param system {@link DPCIdentifierSystem} to search identifiers for
-     * @return {@link Identifier}
-     * @throws IllegalArgumentException
-     */
-    public static Identifier findMatchingIdentifier(List<Identifier> identifiers, DPCIdentifierSystem system) throws IllegalArgumentException {
+    public static Identifier findMatchingIdentifier(List<Identifier> identifiers, DPCIdentifierSystem system) {
         return identifiers
                 .stream()
                 .filter(id -> id.getSystem().equals(system.getSystem()))
                 .findAny()
                 .orElseThrow(() -> new IllegalArgumentException(String.format("Cannot find identifier for system: %s", system.getSystem())));
-    }
-
-    /**
-     * Returns the identifiers from the given list that have the given system.
-     *
-     * @param identifiers List of {@link Identifier}s to search
-     * @param system {@link DPCIdentifierSystem} to search identifiers for
-     * @return list of {@link Identifier}
-     */
-    public static List<Identifier> findMatchingIdentifiers(List<Identifier> identifiers, DPCIdentifierSystem system) {
-        return identifiers
-                .stream()
-                .filter(id -> id.getSystem().equals(system.getSystem()))
-                .collect(Collectors.toList());
     }
 
     /**
