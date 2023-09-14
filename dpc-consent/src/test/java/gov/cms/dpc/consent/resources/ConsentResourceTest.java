@@ -214,7 +214,7 @@ class ConsentResourceTest extends AbstractConsentTest {
                 .returnBundle(Bundle.class)
                 .execute();
 
-        assertEquals(2, sut.getTotal(), "Should find 2 consent records.");
+        assertEquals(1, sut.getTotal(), "Should only find one consent record.");
 
         final Consent found = (Consent) sut.getEntryFirstRep().getResource();
         System.out.println(ctx.newJsonParser().setPrettyPrint(true).encodeResourceToString(found));
