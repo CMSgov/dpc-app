@@ -64,9 +64,9 @@ public class ConsentResource {
     public List<Consent> search(
             @ApiParam(value = "Consent resource _id") @QueryParam(Consent.SP_RES_ID) Optional<UUID> id,
             @ApiParam(value = "Consent resource identifier") @QueryParam(Consent.SP_IDENTIFIER) Optional<UUID> identifier,
-            @ApiParam(value = "Patient Identifier(s)") @QueryParam(Consent.SP_PATIENT) Optional<String> patientId) {
+            @ApiParam(value = "Patient Identifier") @QueryParam(Consent.SP_PATIENT) Optional<String> patientId) {
 
-        List<ConsentEntity> entities = List.of();
+        final List<ConsentEntity> entities;
 
         // Priority order for processing params. If multiple params are passed, we only pay attention to one
         if (id.isPresent()) {
@@ -81,10 +81,8 @@ public class ConsentResource {
 
         } else if (patientId.isPresent()) {
 
-            for (String pId : patientId.get().split(",")) {
-                final Identifier patientIdentifier = FHIRExtractors.parseIDFromQueryParam(pId);
-                entities.addAll(getEntitiesByPatient(patientIdentifier));
-            }
+            final Identifier patientIdentifier = FHIRExtractors.parseIDFromQueryParam(patientId.get());
+            entities = getEntitiesByPatient(patientIdentifier);
 
         } else {
 

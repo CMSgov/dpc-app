@@ -8,6 +8,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.CapabilityStatement;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,20 +28,22 @@ public class MockBlueButtonClient implements BlueButtonClient {
     private static final String SAMPLE_PATIENT_PATH_PREFIX = "bb-test-data/patient/";
     private static final String SAMPLE_COVERAGE_PATH_PREFIX = "bb-test-data/coverage/";
     private static final String SAMPLE_METADATA_PATH_PREFIX = "bb-test-data/";
-    private static final String SAMPLE_EMPTY_BUNDLE = "bb-test-data/empty.xml";
+    private static final String SAMPLE_EMPTY_BUNDLE = "bb-test-data/empty";
 
-    public static final List<String> TEST_PATIENT_MBIS = List.of("2SW4N00AA00", "4SP0P00AA00", "3S58A00AA00", "4S58A00AA00", "5S58A00AA00", "1SQ3F00AA00");
+    public static final String MULTIPLE_RESULTS_MBI = "9V99EU8XY91";
+
+    public static final List<String> TEST_PATIENT_MBIS = List.of(
+        "2SW4N00AA00", "4SP0P00AA00", "3S58A00AA00", "4S58A00AA00", "5S58A00AA00", "1SQ3F00AA00", MULTIPLE_RESULTS_MBI, "1S00EU8FE91"
+    );
     public static final Map<String, String> MBI_BENE_ID_MAP = Map.of(
             TEST_PATIENT_MBIS.get(0), "-20140000008325",
             TEST_PATIENT_MBIS.get(1), "-20140000009893",
             TEST_PATIENT_MBIS.get(2), "-19990000002208",
             TEST_PATIENT_MBIS.get(3), "-19990000002209",
             TEST_PATIENT_MBIS.get(4), "-19990000002210",
-            TEST_PATIENT_MBIS.get(5), "-20000000001809"
-
-
-
-
+            TEST_PATIENT_MBIS.get(5), "-20000000001809",
+            TEST_PATIENT_MBIS.get(6), "-10000010288391",
+            TEST_PATIENT_MBIS.get(7), "-10000010288391"
             );
     public static final Map<String, String> MBI_HASH_MAP = Map.of(
             TEST_PATIENT_MBIS.get(0), "abadf57ff8dc94610ca0d479feadb1743c9cd3c77caf1eafde5719a154379fb6",
@@ -48,19 +51,25 @@ public class MockBlueButtonClient implements BlueButtonClient {
             TEST_PATIENT_MBIS.get(2), "e411277fd31da392eaa9a45df53b0c429e365626182f50d9f35810d77f0e2756",
             TEST_PATIENT_MBIS.get(3), "41af07535e0a66226cf2f0e6c551c0a15bd49192fc055aa5cd2e63f31f90a419",
             TEST_PATIENT_MBIS.get(4), "d35350fce12f555089f938c0323a13122622123038e8af057a4191fd450c2b90",
-            TEST_PATIENT_MBIS.get(5), "a006edba97087f2911a35706e46bf1287d21d8fa515024ace44d589bdef9d819"
+            TEST_PATIENT_MBIS.get(5), "a006edba97087f2911a35706e46bf1287d21d8fa515024ace44d589bdef9d819",
+            TEST_PATIENT_MBIS.get(6), "bd02000753dfa2182d57bd9f3debaa274cb59af96d66e76c83df133c33970f80",
+            TEST_PATIENT_MBIS.get(7), "bd02000753dfa2182d57bd9f3debaa274cb59af96d66e76c83df133c33970f80"
 
     );
     public static final List<String> TEST_PATIENT_WITH_BAD_IDS = List.of("-1", "-2", TEST_PATIENT_MBIS.get(0), TEST_PATIENT_MBIS.get(1), "-3");
-    public static final String MULTIPLE_RESULTS_MBI = "0SW4N00AA00";
     public static final OffsetDateTime BFD_TRANSACTION_TIME = OffsetDateTime.ofInstant(Instant.now().truncatedTo(ChronoUnit.MILLIS), ZoneOffset.UTC);
     public static final OffsetDateTime TEST_LAST_UPDATED = OffsetDateTime.parse("2020-01-01T00:00:00-05:00");
 
-    private final IParser parser;
+    private static final String JSON = ".json";
+    private static final String XML = ".xml";
+
+    private final IParser parserXml;
+    private final IParser parserJson;
 
     public MockBlueButtonClient(FhirContext fhirContext) {
         fhirContext.setPerformanceOptions(PerformanceOptionsEnum.DEFERRED_MODEL_SCANNING);
-        parser = fhirContext.newXmlParser();
+        parserXml = fhirContext.newXmlParser();
+        parserJson = fhirContext.newJsonParser();
     }
 
     @Override
@@ -108,10 +117,10 @@ public class MockBlueButtonClient implements BlueButtonClient {
         final var params = URLEncodedUtils.parse(nextUrl.getQuery(), StandardCharsets.UTF_8);
         final var patient = params.stream().filter(pair -> pair.getName().equals("patient")).findFirst().orElseThrow().getValue();
         final var startIndex = params.stream().filter(pair -> pair.getName().equals("startIndex")).findFirst().orElseThrow().getValue();
-        var path = SAMPLE_EOB_PATH_PREFIX + patient + "_" + startIndex + ".xml";
+        var path = SAMPLE_EOB_PATH_PREFIX + patient + "_" + startIndex + XML;
 
         try(InputStream sampleData = MockBlueButtonClient.class.getClassLoader().getResourceAsStream(path)) {
-            final var nextBundle = parser.parseResource(Bundle.class, sampleData);
+            final var nextBundle = parseResource(Bundle.class, sampleData, XML);
             nextBundle.getMeta().setLastUpdated(Date.from(BFD_TRANSACTION_TIME.toInstant()));
             return nextBundle;
         } catch(IOException ex) {
@@ -122,8 +131,8 @@ public class MockBlueButtonClient implements BlueButtonClient {
     @Override
     public CapabilityStatement requestCapabilityStatement() throws ResourceNotFoundException {
         final var path = SAMPLE_METADATA_PATH_PREFIX + "meta.xml";
-        try(InputStream sampleData = loadResource(path, null)) {
-            return parser.parseResource(CapabilityStatement.class, sampleData);
+        try(InputStream sampleData = loadResource(path)) {
+            return parseResource(CapabilityStatement.class, sampleData, XML);
         } catch(IOException ex) {
             throw formNoPatientException(null);
         }
@@ -137,14 +146,27 @@ public class MockBlueButtonClient implements BlueButtonClient {
     /**
      * Read a Bundle FHIR Resource from jar's Bundle resource file.
      *
-     * @param pathPrefix - Path to the XML sample data
+     * @param pathPrefix - Path to the XML or JSON sample data
      * @param beneId - CCW/BFD beneficiary ID of patient (https://bluebutton.cms.gov/resources/variables/bene_id)
      * @return FHIR Resource
      */
     @SuppressWarnings("JdkObsolete") // Date class is used by FHIR stu3 Meta model
     private Bundle loadBundle(String pathPrefix, String beneId) {
-        try(InputStream sampleData = loadResource(pathPrefix, beneId)) {
-            final var bundle = parser.parseResource(Bundle.class, sampleData);
+        if (!MBI_BENE_ID_MAP.containsValue(beneId)) {
+            throw formNoPatientException(beneId);
+        }
+
+        // Check if the resource is an .xml, .json, or doesn't exit at all.
+        String fileExt;
+        try {
+            fileExt = getResourceExtension(pathPrefix + beneId);
+        } catch(IllegalArgumentException exc) {
+            // Resource doesn't exist, return an empty bundle
+            return loadEmptyBundle();
+        }
+
+        try( InputStream sampleData = loadResource(pathPrefix + beneId + fileExt) ) {
+            final var bundle = parseResource(Bundle.class, sampleData, fileExt);
             bundle.getMeta().setLastUpdated(Date.from(BFD_TRANSACTION_TIME.toInstant()));
             return bundle;
         } catch(IOException ex) {
@@ -155,16 +177,11 @@ public class MockBlueButtonClient implements BlueButtonClient {
     /**
      * Create a stream from a resource.
      *
-     * @param pathPrefix - The path to the resource file
-     * @param beneId - The beneficiary ID of the patient associated with the file
+     * @param resourceName - Fully qualified name of the resource to load, including path and file name
      * @return the stream associated with the resource
      */
-    private InputStream loadResource(String pathPrefix, String beneId) throws ResourceNotFoundException {
-        if (!MBI_BENE_ID_MAP.containsValue(beneId)) {
-            throw formNoPatientException(beneId);
-        }
-        final var path = pathPrefix + beneId + ".xml";
-        return MockBlueButtonClient.class.getClassLoader().getResourceAsStream(path);
+    private InputStream loadResource(String resourceName) throws ResourceNotFoundException, IOException {
+        return MockBlueButtonClient.class.getClassLoader().getResourceAsStream(resourceName);
     }
 
     /**
@@ -189,8 +206,8 @@ public class MockBlueButtonClient implements BlueButtonClient {
      */
     @SuppressWarnings("JdkObsolete") // Date class is used by FHIR stu3 Meta model
     private Bundle loadEmptyBundle() {
-        try(InputStream sampleData = MockBlueButtonClient.class.getClassLoader().getResourceAsStream(SAMPLE_EMPTY_BUNDLE)) {
-            final var bundle = parser.parseResource(Bundle.class, sampleData);
+        try(InputStream sampleData = MockBlueButtonClient.class.getClassLoader().getResourceAsStream(SAMPLE_EMPTY_BUNDLE + JSON)) {
+            final var bundle = parseResource(Bundle.class, sampleData, JSON);
             bundle.getMeta().setLastUpdated(Date.from(BFD_TRANSACTION_TIME.toInstant()));
             return bundle;
         } catch(IOException ex) {
@@ -200,5 +217,40 @@ public class MockBlueButtonClient implements BlueButtonClient {
 
     private ResourceNotFoundException formNoPatientException(String patientID) {
         return new ResourceNotFoundException("No patient found with ID: " + patientID);
+    }
+
+    /**
+     * Attempts to parse an input stream into a resource.
+     * @param aClass The resource class to parse the stream into.
+     * @param inputStream The input stream to read the resource from.
+     * @param fileExtension The file extension of the resource (.xml or .json)
+     * @return The parsed resource
+     * @param <T> An {@link IBaseResource}
+     */
+    private <T extends IBaseResource> T parseResource(Class<T> aClass, InputStream inputStream, String fileExtension) {
+        if( fileExtension.equals(XML) ) {
+            return parserXml.parseResource(aClass, inputStream);
+        } else if (fileExtension.equals(JSON) ) {
+            return parserJson.parseResource(aClass, inputStream);
+        } else {
+            throw new IllegalArgumentException("Cannot parse resource with unknown file extension: " + fileExtension);
+        }
+    }
+
+    /**
+     * Tries reading the resource as both an xml and json file to figure out which one it is, then returns the correct
+     * file extension.
+     * @param resourceName The name of the resource to read
+     * @return The resource's file extension (.xml or .json)
+     */
+    private String getResourceExtension(String resourceName) {
+        // Try reading as XML first, since that's what 99% of our sample data is
+        if( MockBlueButtonClient.class.getClassLoader().getResource(resourceName + XML) != null ) {
+            return XML;
+        } else if( MockBlueButtonClient.class.getClassLoader().getResource(resourceName + JSON) != null ) {
+            return JSON;
+        } else {
+            throw new IllegalArgumentException("Resource: " + resourceName + " not found");
+        }
     }
 }
