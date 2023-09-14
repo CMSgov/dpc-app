@@ -46,7 +46,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
-import java.util.List;
+import java.util.Collections;
 import java.util.UUID;
 
 import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
@@ -214,8 +214,9 @@ class OrganizationResourceTest extends AbstractSecureApplicationTest {
         final String orgID = UUID.randomUUID().toString();
         final IParser parser = ctx.newJsonParser();
         final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
+        final String macaroon = FHIRHelpers.registerOrganization(attrClient, parser, orgID, "1111121111", getAdminURL());
         final Pair<UUID, PrivateKey> uuidPrivateKeyPair = APIAuthHelpers.generateAndUploadKey("org-update-key", orgID, GOLDEN_MACAROON, getBaseURL());
-        final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, uuidPrivateKeyPair.getLeft(), uuidPrivateKeyPair.getRight());
+        final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), macaroon, uuidPrivateKeyPair.getLeft(), uuidPrivateKeyPair.getRight());
 
         Organization organization = client
                 .read()
@@ -227,7 +228,7 @@ class OrganizationResourceTest extends AbstractSecureApplicationTest {
         assertNotNull(organization);
 
         organization.setName("New Org Name");
-        organization.setContact(List.of());
+        organization.setContact(Collections.emptyList());
 
         MethodOutcome outcome = client
                 .update()

@@ -409,10 +409,10 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
         final IGenericClient orgBClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgBContext.getClientToken(), UUID.fromString(orgBContext.getPublicKeyId()), orgBContext.getPrivateKey());
 
         Practitioner orgAPractitioner = createAndSubmitPractitioner(orgAContext.getOrgId(), orgAClient);
-        Group orgAGroup = createAndSubmitGroup(orgAContext.getOrgId(), orgAPractitioner, orgAClient, Lists.emptyList());
+        Group orgAGroup = createAndSubmitGroup(orgAContext.getOrgId(), orgAPractitioner, orgAClient, Collections.emptyList());
 
         Practitioner orgBPractitioner = createAndSubmitPractitioner(orgBContext.getOrgId(), orgBClient);
-        Group orgBGroup = createAndSubmitGroup(orgBContext.getOrgId(), orgBPractitioner, orgBClient, Lists.emptyList());
+        Group orgBGroup = createAndSubmitGroup(orgBContext.getOrgId(), orgBPractitioner, orgBClient, Collections.emptyList());
 
         Group foundGroup = orgAClient.read()
                 .resource(Group.class)
@@ -450,12 +450,12 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
         final IGenericClient orgBClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgBContext.getClientToken(), UUID.fromString(orgBContext.getPublicKeyId()), orgBContext.getPrivateKey());
 
         Practitioner orgAPractitioner = createAndSubmitPractitioner(orgAContext.getOrgId(), orgAClient);
-        Group orgAGroup = createAndSubmitGroup(orgAContext.getOrgId(), orgAPractitioner, orgAClient, Lists.emptyList());
+        Group orgAGroup = createAndSubmitGroup(orgAContext.getOrgId(), orgAPractitioner, orgAClient, Collections.emptyList());
 
         Practitioner orgBPractitioner = createAndSubmitPractitioner(orgBContext.getOrgId(), orgBClient);
-        Group orgBGroup = createAndSubmitGroup(orgBContext.getOrgId(), orgBPractitioner, orgBClient, Lists.emptyList());
+        Group orgBGroup = createAndSubmitGroup(orgBContext.getOrgId(), orgBPractitioner, orgBClient, Collections.emptyList());
 
-        Provenance provenance = APITestHelpers.createProvenance(orgBContext.getOrgId(), orgBPractitioner.getId(), Collections.EMPTY_LIST);
+        Provenance provenance = APITestHelpers.createProvenance(orgBContext.getOrgId(), orgBPractitioner.getId(), Collections.emptyList());
         assertThrows(AuthenticationException.class, () -> {
             orgBClient.delete()
                     .resource(orgAGroup)
@@ -480,12 +480,12 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
         final IGenericClient orgBClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgBContext.getClientToken(), UUID.fromString(orgBContext.getPublicKeyId()), orgBContext.getPrivateKey());
 
         Practitioner orgAPractitioner = createAndSubmitPractitioner(orgAContext.getOrgId(), orgAClient);
-        Group orgAGroup = createAndSubmitGroup(orgAContext.getOrgId(), orgAPractitioner, orgAClient, Lists.emptyList());
+        Group orgAGroup = createAndSubmitGroup(orgAContext.getOrgId(), orgAPractitioner, orgAClient, Collections.emptyList());
 
         Practitioner orgBPractitioner = createAndSubmitPractitioner(orgBContext.getOrgId(), orgBClient);
-        Group orgBGroup = createAndSubmitGroup(orgBContext.getOrgId(), orgBPractitioner, orgBClient, Lists.emptyList());
+        Group orgBGroup = createAndSubmitGroup(orgBContext.getOrgId(), orgBPractitioner, orgBClient, Collections.emptyList());
 
-        Provenance provenance = APITestHelpers.createProvenance(orgBContext.getOrgId(), orgBPractitioner.getId(), Collections.EMPTY_LIST);
+        Provenance provenance = APITestHelpers.createProvenance(orgBContext.getOrgId(), orgBPractitioner.getId(), Collections.emptyList());
         assertThrows(AuthenticationException.class, () -> {
             orgBClient.update().resource(orgAGroup)
                     .encodedJson()
@@ -509,10 +509,10 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
         final IGenericClient orgBClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgBContext.getClientToken(), UUID.fromString(orgBContext.getPublicKeyId()), orgBContext.getPrivateKey());
 
         Practitioner orgAPractitioner = createAndSubmitPractitioner(orgAContext.getOrgId(), orgAClient);
-        Group orgAGroup = createAndSubmitGroup(orgAContext.getOrgId(), orgAPractitioner, orgAClient, Lists.emptyList());
+        Group orgAGroup = createAndSubmitGroup(orgAContext.getOrgId(), orgAPractitioner, orgAClient, Collections.emptyList());
 
         Practitioner orgBPractitioner = createAndSubmitPractitioner(orgBContext.getOrgId(), orgBClient);
-        createAndSubmitGroup(orgBContext.getOrgId(), orgBPractitioner, orgBClient, Lists.emptyList());
+        createAndSubmitGroup(orgBContext.getOrgId(), orgBPractitioner, orgBClient, Collections.emptyList());
 
         Bundle results = orgAClient.search()
                 .forResource(DPCResourceType.Group.toString())
@@ -573,7 +573,7 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
         //Assert an org can NOT update their group with another org's patient.
         InvalidRequestException e = assertThrows(InvalidRequestException.class, () -> {
             orgBGroup.addMember(new Group.GroupMemberComponent().setEntity(new Reference(orgAPatient.getId())));
-            Provenance provenance = APITestHelpers.createProvenance(orgBContext.getOrgId(), orgBPractitioner.getId(), Collections.EMPTY_LIST);
+            Provenance provenance = APITestHelpers.createProvenance(orgBContext.getOrgId(), orgBPractitioner.getId(), Collections.emptyList());
             String provenanceStr = ctx.newJsonParser().encodeResourceToString(provenance);
             APITestHelpers.updateResource(orgBClient, orgBGroup.getId(), orgBGroup, Map.of("X-Provenance", provenanceStr));
         }, "Org B should not be able to update roster with patient managed by Org A ");
@@ -609,7 +609,7 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
         APIAuthHelpers.AuthResponse auth = APIAuthHelpers.jwtAuthFlow(getBaseURL(), orgBContext.getClientToken(), UUID.fromString(orgBContext.getPublicKeyId()), orgBContext.getPrivateKey());
         conn.setRequestProperty(HttpHeaders.AUTHORIZATION, "Bearer " + auth.accessToken);
 
-        Provenance provenance = createProvenance(orgBContext.getOrgId(), orgBPractitioner.getId(), Lists.emptyList());
+        Provenance provenance = createProvenance(orgBContext.getOrgId(), orgBPractitioner.getId(), Collections.emptyList());
         String provString = ctx.newJsonParser().encodeResourceToString(provenance);
         conn.setRequestProperty("X-Provenance", provString);
 
@@ -643,7 +643,7 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
                 .withOrgTag(UUID.fromString(orgAContext.getOrgId()))
                 .build();
 
-        Provenance provenance = APITestHelpers.createProvenance(orgBContext.getOrgId(), orgBPractitioner.getId(), Collections.EMPTY_LIST);
+        Provenance provenance = APITestHelpers.createProvenance(orgBContext.getOrgId(), orgBPractitioner.getId(), Collections.emptyList());
         Group result = (Group) APITestHelpers.createResource(orgBClient, groupWithOrgATag, Map.of("X-Provenance", ctx.newJsonParser().encodeResourceToString(provenance))).getResource();
 
         assertEquals(orgBGroup.getId(),result.getId(), "Org B's group should have been returned even if they specified Org A in the meta tag");
@@ -669,7 +669,7 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
                 .withPatients(patientIds.toArray(String[]::new))
                 .build();
 
-        Provenance provenance = APITestHelpers.createProvenance(orgId, practitionerId, Collections.EMPTY_LIST);
+        Provenance provenance = APITestHelpers.createProvenance(orgId, practitionerId, Collections.emptyList());
         return (Group) APITestHelpers.createResource(client, group, Map.of("X-Provenance", ctx.newJsonParser().encodeResourceToString(provenance))).getResource();
     }
 }
