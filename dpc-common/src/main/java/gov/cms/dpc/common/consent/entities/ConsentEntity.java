@@ -94,6 +94,10 @@ public class ConsentEntity implements Serializable {
     @Column(name = "source_code")
     private String sourceCode;
 
+    @ManyToOne()
+    @JoinColumn(name = "opt_out_file_id")
+    private OptOutFileEntity optOutFile;
+
     public UUID getId() {
         return id;
     }
@@ -182,6 +186,9 @@ public class ConsentEntity implements Serializable {
 
     public void setSourceCode(String sourceCode) { this.sourceCode = sourceCode; }
 
+    public OptOutFileEntity getOptOutFile() { return optOutFile; }
+
+    public void setOptOutFile(OptOutFileEntity optOutFile) { this.optOutFile = optOutFile; }
 
     public static ConsentEntity defaultConsentEntity(Optional<UUID> id, Optional<String> hicn, Optional<String> mbi) {
         ConsentEntity ce = new ConsentEntity();
