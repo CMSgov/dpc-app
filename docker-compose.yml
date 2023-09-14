@@ -3,8 +3,6 @@ version: '3'
 services:
 
   db:
-    ports:
-      - "5432:5432"
     image: postgres:11
     command: postgres -c 'max_connections=250'
     environment:
