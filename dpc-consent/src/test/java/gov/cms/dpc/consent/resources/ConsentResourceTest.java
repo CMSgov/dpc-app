@@ -210,7 +210,7 @@ class ConsentResourceTest extends AbstractConsentTest {
         final Bundle sut = client
                 .search()
                 .forResource(Consent.class)
-                .where(new StringClientParam("patients").matches().value(patientValue + ","))
+                .where(new StringClientParam("patient").matches().value(patientValue + ","))
                 .encodedJson()
                 .returnBundle(Bundle.class)
                 .execute();
@@ -230,7 +230,7 @@ class ConsentResourceTest extends AbstractConsentTest {
         final Bundle sut = client
                 .search()
                 .forResource(Consent.class)
-                .where(new StringClientParam("patients").matches().value(patientIds))
+                .where(new StringClientParam("patient").matches().value(patientIds))
                 .encodedJson()
                 .returnBundle(Bundle.class)
                 .execute();

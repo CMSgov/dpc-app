@@ -64,8 +64,7 @@ public class ConsentResource {
     public List<Consent> search(
             @ApiParam(value = "Consent resource _id") @QueryParam(Consent.SP_RES_ID) Optional<UUID> id,
             @ApiParam(value = "Consent resource identifier") @QueryParam(Consent.SP_IDENTIFIER) Optional<UUID> identifier,
-            @ApiParam(value = "Patient Identifier") @QueryParam(Consent.SP_PATIENT) Optional<String> patientId,
-            @ApiParam(value = "List of patient identifiers") @QueryParam("patients") Optional<String> patientIds) {
+            @ApiParam(value = "Patient Identifier(s)") @QueryParam(Consent.SP_PATIENT) Optional<String> patientId) {
 
         List<ConsentEntity> entities = List.of();
 
@@ -82,14 +81,9 @@ public class ConsentResource {
 
         } else if (patientId.isPresent()) {
 
-            final Identifier patientIdentifier = FHIRExtractors.parseIDFromQueryParam(patientId.get());
-            entities = getEntitiesByPatient(patientIdentifier);
-
-        } else if (patientIds.isPresent()) {
-
-            for (String pId : patientIds.get().split(",")) {
-                Identifier pIdentifier = FHIRExtractors.parseIDFromQueryParam(pId);
-                entities.addAll(getEntitiesByPatient(pIdentifier));
+            for (String pId : patientId.get().split(",")) {
+                final Identifier patientIdentifier = FHIRExtractors.parseIDFromQueryParam(pId);
+                entities.addAll(getEntitiesByPatient(patientIdentifier));
             }
 
         } else {
