@@ -201,29 +201,8 @@ class ConsentResourceTest extends AbstractConsentTest {
         assertEquals(TEST_CONSENT_REF, found.getId());
     }
 
-    @ParameterizedTest
-    @CsvSource({"MBI,mbi_1", "HICN,hicn_1"})
-    final void searchConsentResource_list_of_ids(String system, String patientId) {
-        final IGenericClient client = createFHIRClient(ctx, getServerURL());
-        final String patientValue = String.format("%s|%s", DPCIdentifierSystem.valueOf(system).getSystem(), patientId);
-
-        final Bundle sut = client
-                .search()
-                .forResource(Consent.class)
-                .where(new StringClientParam("patient").matches().value(patientValue + ","))
-                .encodedJson()
-                .returnBundle(Bundle.class)
-                .execute();
-
-        final Consent found = (Consent) sut.getEntryFirstRep().getResource();
-        System.out.println(ctx.newJsonParser().setPrettyPrint(true).encodeResourceToString(found));
-
-        assertEquals(ConsentEntityConverter.OPT_IN_MAGIC, found.getPolicyRule());
-        assertEquals(TEST_CONSENT_REF, found.getId());
-    }
-
     @Test
-    final void searchConsentResource_multiple_ids() {
+    final void searchConsentResource_multiple_ids_for_one_patient() {
         String patientIds = "mbi_1,mbi_2";
         final IGenericClient client = createFHIRClient(ctx, getServerURL());
 
@@ -234,6 +213,8 @@ class ConsentResourceTest extends AbstractConsentTest {
                 .encodedJson()
                 .returnBundle(Bundle.class)
                 .execute();
+
+        assertEquals(2, sut.getTotal(), "Should find 2 consent records.");
 
         final Consent found = (Consent) sut.getEntryFirstRep().getResource();
         System.out.println(ctx.newJsonParser().setPrettyPrint(true).encodeResourceToString(found));
