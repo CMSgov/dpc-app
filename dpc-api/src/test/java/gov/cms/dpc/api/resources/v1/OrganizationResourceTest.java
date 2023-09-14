@@ -214,9 +214,8 @@ class OrganizationResourceTest extends AbstractSecureApplicationTest {
         final String orgID = UUID.randomUUID().toString();
         final IParser parser = ctx.newJsonParser();
         final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
-        final String macaroon = FHIRHelpers.registerOrganization(attrClient, parser, orgID, "1111121111", getAdminURL());
         final Pair<UUID, PrivateKey> uuidPrivateKeyPair = APIAuthHelpers.generateAndUploadKey("org-update-key", orgID, GOLDEN_MACAROON, getBaseURL());
-        final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), macaroon, uuidPrivateKeyPair.getLeft(), uuidPrivateKeyPair.getRight());
+        final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, uuidPrivateKeyPair.getLeft(), uuidPrivateKeyPair.getRight());
 
         Organization organization = client
                 .read()
