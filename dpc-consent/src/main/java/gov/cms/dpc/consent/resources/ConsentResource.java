@@ -2,6 +2,7 @@ package gov.cms.dpc.consent.resources;
 
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
+import com.google.common.base.Splitter;
 import com.google.inject.name.Named;
 import gov.cms.dpc.common.consent.entities.ConsentEntity;
 import gov.cms.dpc.consent.jdbi.ConsentDAO;
@@ -22,6 +23,7 @@ import org.hl7.fhir.dstu3.model.Identifier;
 import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -66,7 +68,7 @@ public class ConsentResource {
             @ApiParam(value = "Consent resource identifier") @QueryParam(Consent.SP_IDENTIFIER) Optional<UUID> identifier,
             @ApiParam(value = "Patient Identifier") @QueryParam(Consent.SP_PATIENT) Optional<String> patientId) {
 
-        final List<ConsentEntity> entities;
+        List<ConsentEntity> entities = new ArrayList<>();
 
         // Priority order for processing params. If multiple params are passed, we only pay attention to one
         if (id.isPresent()) {
@@ -81,8 +83,10 @@ public class ConsentResource {
 
         } else if (patientId.isPresent()) {
 
-            final Identifier patientIdentifier = FHIRExtractors.parseIDFromQueryParam(patientId.get());
-            entities = getEntitiesByPatient(patientIdentifier);
+            for (String pId : Splitter.on(',').split(patientId.get())) {
+                final Identifier patientIdentifier = FHIRExtractors.parseIDFromQueryParam(pId);
+                entities.addAll(getEntitiesByPatient(patientIdentifier));
+            }
 
         } else {
 
