@@ -19,16 +19,18 @@ import java.util.regex.Pattern;
 
 /**
  * Custom exception handler for {@link PersistenceException} handling.
- * It checks to see if the underlying exception is a {@link ConstraintViolationException} and if so, returns a {@link Response.Status#BAD_REQUEST} rather than a {@link Response.Status#INTERNAL_SERVER_ERROR}
+ * It checks to see if the underlying exception is a
+ * {@link ConstraintViolationException} and if so, returns a
+ * {@link Response.Status#BAD_REQUEST} rather than a
+ * {@link Response.Status#INTERNAL_SERVER_ERROR}
  * It also makes sure we don't leak any DB information to the end user.
  */
 @Provider
 public class PersistenceExceptionHandler extends AbstractFHIRExceptionHandler<PersistenceException> {
 
     private static final Logger logger = LoggerFactory.getLogger(PersistenceExceptionHandler.class);
-    private static final Pattern MSG_PATTERN = Pattern.compile("ERROR:\\s(duplicate\\s[a-zA-Z_]*\\svalue\\sviolates\\sunique\\sconstraint)");
-
-    private ResourceInfo info;
+    private static final Pattern MSG_PATTERN = Pattern
+            .compile("ERROR:\\s(duplicate\\s[a-zA-Z_]*\\svalue\\sviolates\\sunique\\sconstraint)");
 
     @Inject
     PersistenceExceptionHandler(@Context ResourceInfo info) {

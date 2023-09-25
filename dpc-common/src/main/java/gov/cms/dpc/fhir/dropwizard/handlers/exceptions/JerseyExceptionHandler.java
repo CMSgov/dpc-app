@@ -19,12 +19,11 @@ import java.util.Set;
 
 /**
  * Custom exception handler for {@link JerseyViolationException}.
- * It provides human readable error messages which can help pinpoint which violates the user needs to address.
+ * It provides human readable error messages which can help pinpoint which
+ * violates the user needs to address.
  */
 @Provider
 public class JerseyExceptionHandler extends AbstractFHIRExceptionHandler<JerseyViolationException> {
-
-    private ResourceInfo info;
 
     @Inject
     JerseyExceptionHandler(@Context ResourceInfo info) {
@@ -73,7 +72,8 @@ public class JerseyExceptionHandler extends AbstractFHIRExceptionHandler<JerseyV
     private Pair<ImmutableList<String>, Integer> processConstraintViolations(JerseyViolationException exception) {
         final Set<ConstraintViolation<?>> violations = exception.getConstraintViolations();
         final Invocable invocable = exception.getInvocable();
-        //noinspection Guava Replacing with Streams means a redundent copy when building the response
+        // noinspection Guava Replacing with Streams means a redundent copy when
+        // building the response
         final ImmutableList<String> errors = FluentIterable.from(exception.getConstraintViolations())
                 .transform(violation -> {
                     assert violation != null;
