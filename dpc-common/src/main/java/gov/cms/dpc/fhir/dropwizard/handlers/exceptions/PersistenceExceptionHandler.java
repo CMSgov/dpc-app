@@ -28,8 +28,6 @@ public class PersistenceExceptionHandler extends AbstractFHIRExceptionHandler<Pe
     private static final Logger logger = LoggerFactory.getLogger(PersistenceExceptionHandler.class);
     private static final Pattern MSG_PATTERN = Pattern.compile("ERROR:\\s(duplicate\\s[a-zA-Z_]*\\svalue\\sviolates\\sunique\\sconstraint)");
 
-    private ResourceInfo info;
-
     @Inject
     PersistenceExceptionHandler(@Context ResourceInfo info) {
         super(info);

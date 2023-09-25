@@ -14,8 +14,6 @@ import javax.ws.rs.ext.Provider;
 @Provider
 public class DataFormatExceptionHandler extends AbstractFHIRExceptionHandler<DataFormatException> {
 
-    private ResourceInfo info;
-
     @Inject
     DataFormatExceptionHandler(@Context ResourceInfo info) {
         super(info);

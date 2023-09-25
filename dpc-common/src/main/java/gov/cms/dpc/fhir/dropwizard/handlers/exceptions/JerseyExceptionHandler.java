@@ -24,8 +24,6 @@ import java.util.Set;
 @Provider
 public class JerseyExceptionHandler extends AbstractFHIRExceptionHandler<JerseyViolationException> {
 
-    private ResourceInfo info;
-
     @Inject
     JerseyExceptionHandler(@Context ResourceInfo info) {
         super(info);

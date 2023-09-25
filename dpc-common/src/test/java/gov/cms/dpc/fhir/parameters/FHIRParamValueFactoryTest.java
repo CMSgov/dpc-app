@@ -1,7 +1,6 @@
 package gov.cms.dpc.fhir.parameters;
 
 import ca.uhn.fhir.context.FhirContext;
-import com.google.inject.Injector;
 import gov.cms.dpc.fhir.annotations.FHIRParameter;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import org.glassfish.jersey.server.ContainerRequest;
@@ -18,19 +17,18 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.function.Function;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 @ExtendWith(BufferedLoggerHandler.class)
 class FHIRParamValueFactoryTest {
 
-    private static Injector injector = Mockito.mock(Injector.class);
     private static FhirContext ctx = FhirContext.forDstu3();
 
     private static FHIRParamValueFactory factory;
 
     @BeforeAll
     static void setup() {
-        factory = new FHIRParamValueFactory(injector, ctx);
+        factory = new FHIRParamValueFactory(ctx);
     }
 
     @Test
@@ -46,7 +44,6 @@ class FHIRParamValueFactoryTest {
         final ServletInputStream inputStream = Mockito.mock(ServletInputStream.class);
         Mockito.when(httpRequest.getHeader(ProvenanceResourceValueFactory.PROVENANCE_HEADER)).thenReturn(provString);
         Mockito.when(httpRequest.getInputStream()).thenReturn(inputStream);
-        Mockito.when(injector.getInstance(HttpServletRequest.class)).thenReturn(httpRequest);
 
         final ContainerRequest request = Mockito.mock(ContainerRequest.class);
         final Function<ContainerRequest, Object> valueFunc = factory.getValueProvider(parameter);

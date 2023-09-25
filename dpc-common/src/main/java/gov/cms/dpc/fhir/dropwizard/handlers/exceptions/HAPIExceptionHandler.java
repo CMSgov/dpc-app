@@ -14,8 +14,6 @@ import javax.ws.rs.ext.Provider;
 @Provider
 public class HAPIExceptionHandler extends AbstractFHIRExceptionHandler<BaseServerResponseException> {
 
-    private ResourceInfo info;
-
     @Inject
     HAPIExceptionHandler(@Context ResourceInfo info) {
         super(info);

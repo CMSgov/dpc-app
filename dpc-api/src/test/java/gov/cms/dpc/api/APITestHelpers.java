@@ -43,7 +43,6 @@ import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.dstu3.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.codesystems.V3RoleClass;
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import ru.vyarus.dropwizard.guice.module.context.SharedConfigurationState;
 
@@ -274,7 +273,7 @@ public class APITestHelpers {
                 .resource(resource)
                 .encodedJson();
 
-        extraHeaders.entrySet().forEach(entry -> iCreateTyped.withAdditionalHeader(entry.getKey(),entry.getValue()));
+        extraHeaders.forEach(iCreateTyped::withAdditionalHeader);
         return iCreateTyped.execute();
     }
 
@@ -302,25 +301,25 @@ public class APITestHelpers {
         return resourceSearch(client,resourceType, Maps.newHashMap());
     }
 
-    public static IBaseOperationOutcome deleteResourceById(IGenericClient client, DPCResourceType resourceType, String resourceId){
-        return client.delete()
+    public static void deleteResourceById(IGenericClient client, DPCResourceType resourceType, String resourceId){
+        client.delete()
                 .resourceById(resourceType.name(), resourceId)
                 .execute();
     }
 
-    public static MethodOutcome updateResource(IGenericClient client, String id, IBaseResource resource, Map<String,String> extraHeaders){
+    public static void updateResource(IGenericClient client, String id, IBaseResource resource, Map<String,String> extraHeaders){
         IUpdateExecutable executable = client
                 .update()
                 .resource(resource)
                 .withId(id)
                 .encodedJson();
 
-        extraHeaders.entrySet().forEach(entry -> executable.withAdditionalHeader(entry.getKey(),entry.getValue()));
-       return executable.execute();
+        extraHeaders.forEach(executable::withAdditionalHeader);
+        executable.execute();
     }
 
-    public static MethodOutcome updateResource(IGenericClient client, String id, IBaseResource resource){
-       return updateResource(client, id,resource, Maps.newHashMap());
+    public static void updateResource(IGenericClient client, String id, IBaseResource resource){
+        updateResource(client, id, resource, Maps.newHashMap());
     }
 
     public static Bundle getPatientEverything(IGenericClient client, String patientId, String provenance){
