@@ -13,7 +13,8 @@ import javax.ws.rs.ext.Provider;
 import java.util.function.Function;
 
 /**
- * Custom {@link ValueParamProvider} that lets us cleanly map between {@link org.hl7.fhir.dstu3.model.Parameters} and use specified resource types.
+ * Custom {@link ValueParamProvider} that lets us cleanly map between
+ * {@link org.hl7.fhir.dstu3.model.Parameters} and use specified resource types.
  */
 @Provider
 public class FHIRParamValueFactory implements ValueParamProvider {
@@ -27,14 +28,12 @@ public class FHIRParamValueFactory implements ValueParamProvider {
         this.ctx = ctx;
     }
 
-
     @Override
     public Function<ContainerRequest, Object> getValueProvider(Parameter parameter) {
         if (parameter.getDeclaredAnnotation(FHIRParameter.class) != null) {
             // If the parameter is a resource, pass it off to the resource factory
             if (IBaseResource.class.isAssignableFrom(parameter.getRawType())) {
-                ParamResourceFactory factory = new ParamResourceFactory(injector, parameter, ctx.newJsonParser());
-                return x -> factory.provide();
+                return x -> new ParamResourceFactory(x, parameter, ctx.newJsonParser()).provide();
             }
         }
 
