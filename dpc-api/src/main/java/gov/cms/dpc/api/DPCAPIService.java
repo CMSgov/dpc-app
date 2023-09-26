@@ -31,15 +31,19 @@ import io.dropwizard.migrations.MigrationsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import ru.vyarus.dropwizard.guice.GuiceBundle;
+import ru.vyarus.dropwizard.guice.injector.lookup.InjectorLookup;
 
 import java.util.List;
+
+import javax.validation.ValidatorFactory;
 
 public class DPCAPIService extends Application<DPCAPIConfiguration> {
 
     private final DPCHibernateBundle<DPCAPIConfiguration> hibernateBundle = new DPCHibernateBundle<>();
     private final DPCQueueHibernateBundle<DPCAPIConfiguration> hibernateQueueBundle = new DPCQueueHibernateBundle<>();
-    private final DPCAuthHibernateBundle<DPCAPIConfiguration> hibernateAuthBundle = new DPCAuthHibernateBundle<>(List.of(
-            "gov.cms.dpc.macaroons.store.hibernate.entities"));
+    private final DPCAuthHibernateBundle<DPCAPIConfiguration> hibernateAuthBundle = new DPCAuthHibernateBundle<>(
+            List.of(
+                    "gov.cms.dpc.macaroons.store.hibernate.entities"));
 
     public static void main(final String[] args) throws Exception {
         new DPCAPIService().run(args);
@@ -58,11 +62,11 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
 
         // The Hibernate bundle must be initialized before Guice.
         // The Hibernate Guice module requires an initialized SessionFactory,
-        // so Dropwizard needs to initialize the HibernateBundle first to create the SessionFactory.
+        // so Dropwizard needs to initialize the HibernateBundle first to create the
+        // SessionFactory.
         bootstrap.addBundle(hibernateBundle);
         bootstrap.addBundle(hibernateQueueBundle);
         bootstrap.addBundle(hibernateAuthBundle);
-
         bootstrap.addBundle(guiceBundle);
         bootstrap.addBundle(new TypesafeConfigurationBundle("dpc.api"));
 
@@ -75,7 +79,7 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
 
     @Override
     public void run(final DPCAPIConfiguration configuration,
-                    final Environment environment) {
+            final Environment environment) {
         EnvironmentParser.getEnvironment("API");
         final var listener = new InstrumentedResourceMethodApplicationListener(environment.metrics());
         environment.jersey().getResourceConfig().register(listener);
@@ -83,6 +87,10 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
         environment.jersey().register(new JsonParseExceptionMapper());
         environment.jersey().register(new GenerateRequestIdFilter(false));
         environment.jersey().register(new LogResponseFilter());
+        environment.setValidator(
+                InjectorLookup.getInjector(this).get().getInstance(ValidatorFactory.class).getValidator());
+        // environment.jersey().register(new
+        // InjectValidatorFeature(environment.getValidator()));
     }
 
     private GuiceBundle setupGuiceBundle() {
@@ -124,7 +132,8 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
     }
 
     private void setupJacksonMapping(final Bootstrap<DPCAPIConfiguration> bootstrap) {
-        // By default, Jackson will ignore @Transient annotated fields. We need to disable this so we can use Hibernate entities for serialization as well.
+        // By default, Jackson will ignore @Transient annotated fields. We need to
+        // disable this so we can use Hibernate entities for serialization as well.
         // We can still ignore fields using @JsonIgnore
         final Hibernate5Module h5M = new Hibernate5Module();
         h5M.disable(Hibernate5Module.Feature.USE_TRANSIENT_ANNOTATION);
