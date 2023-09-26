@@ -49,9 +49,9 @@ class ParamResourceFactoryTest {
         final ContainerRequest mockRequest = Mockito.mock(ContainerRequest.class);
         final ParamResourceFactory factory = new ParamResourceFactory(mockRequest, null, parser);
 
-//        final WebApplicationException exception = assertThrows(WebApplicationException.class, factory::provide, "Should throw exception");
-//        assertAll(() -> assertEquals(HttpStatus.INTERNAL_SERVER_ERROR_500, exception.getResponse().getStatus(), "Should be an internal exception"),
-//                () -> assertEquals("Cannot read input stream", exception.getMessage(), "Should have wrong resource message"));
+        final WebApplicationException exception = assertThrows(WebApplicationException.class, factory::provide, "Should throw exception");
+        assertAll(() -> assertEquals(HttpStatus.INTERNAL_SERVER_ERROR_500, exception.getResponse().getStatus(), "Should be an internal exception"),
+                () -> assertEquals("Cannot read input stream", exception.getMessage(), "Should have wrong resource message"));
     }
 
     @Test
@@ -72,7 +72,7 @@ class ParamResourceFactoryTest {
         final ContainerRequest mockRequest = Mockito.mock(ContainerRequest.class);
         final ParamResourceFactory factory = new ParamResourceFactory(mockRequest, parameter, parser);
 
-//        assertTrue(dummyPatient.equalsDeep((Patient) factory.provide()), "Should have returned dummy patient");
+        assertTrue(dummyPatient.equalsDeep((Patient) factory.provide()), "Should have returned dummy patient");
     }
 
     @Test
@@ -96,8 +96,8 @@ class ParamResourceFactoryTest {
 
         final ContainerRequest mockRequest = Mockito.mock(ContainerRequest.class);
         final ParamResourceFactory factory = new ParamResourceFactory(mockRequest, parameter, parser);
-//        assertAll(() -> assertTrue(namedPatient.equalsDeep((Patient) factory.provide()), "Should have returned dummy patient"),
-//                () -> assertFalse(unnamedPatient.equalsDeep((Patient) factory.provide()), "Should have returned dummy patient"));
+        assertAll(() -> assertTrue(namedPatient.equalsDeep((Patient) factory.provide()), "Should have returned dummy patient"),
+                () -> assertFalse(unnamedPatient.equalsDeep((Patient) factory.provide()), "Should have returned dummy patient"));
     }
 
     @Test
@@ -118,10 +118,10 @@ class ParamResourceFactoryTest {
         final ContainerRequest mockRequest = Mockito.mock(ContainerRequest.class);
         final ParamResourceFactory factory = new ParamResourceFactory(mockRequest, parameter, parser);
 
-//        final WebApplicationException exception = assertThrows(WebApplicationException.class, factory::provide, "Should throw an exception");
-//
-//        assertAll(() -> assertEquals(HttpStatus.BAD_REQUEST_400, exception.getResponse().getStatus(), "Should be a bad request"),
-//                () -> assertEquals("Provided resource must be: `Practitioner`, not `Patient`", exception.getMessage(), "Should have useful message"));
+        final WebApplicationException exception = assertThrows(WebApplicationException.class, factory::provide, "Should throw an exception");
+
+        assertAll(() -> assertEquals(HttpStatus.BAD_REQUEST_400, exception.getResponse().getStatus(), "Should be a bad request"),
+                () -> assertEquals("Provided resource must be: `Practitioner`, not `Patient`", exception.getMessage(), "Should have useful message"));
     }
 
     @Test
@@ -142,8 +142,8 @@ class ParamResourceFactoryTest {
         final ContainerRequest mockRequest = Mockito.mock(ContainerRequest.class);
         final ParamResourceFactory factory = new ParamResourceFactory(mockRequest, parameter, parser);
 
-//        final WebApplicationException exception = assertThrows(WebApplicationException.class, factory::provide, "Should throw an exception");
-//        assertAll(() -> assertEquals(HttpStatus.BAD_REQUEST_400, exception.getResponse().getStatus(), "Should be a bad request"),
-//                () -> assertEquals("Cannot find matching parameter named `missing`", exception.getMessage(), "Should output which parameter is missing"));
+        final WebApplicationException exception = assertThrows(WebApplicationException.class, factory::provide, "Should throw an exception");
+        assertAll(() -> assertEquals(HttpStatus.BAD_REQUEST_400, exception.getResponse().getStatus(), "Should be a bad request"),
+                () -> assertEquals("Cannot find matching parameter named `missing`", exception.getMessage(), "Should output which parameter is missing"));
     }
 }
