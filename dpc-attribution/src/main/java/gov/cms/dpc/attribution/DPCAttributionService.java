@@ -2,6 +2,7 @@ package gov.cms.dpc.attribution;
 
 import ca.mestevens.java.configuration.bundle.TypesafeConfigurationBundle;
 import com.codahale.metrics.jersey2.InstrumentedResourceMethodApplicationListener;
+import com.google.inject.Injector;
 import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.attribution.cli.SeedCommand;
 import gov.cms.dpc.common.hibernate.attribution.DPCHibernateBundle;
@@ -20,6 +21,10 @@ import org.knowm.dropwizard.sundial.SundialConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.vyarus.dropwizard.guice.GuiceBundle;
+import ru.vyarus.dropwizard.guice.injector.lookup.InjectorLookup;
+
+import javax.validation.ValidatorFactory;
+import java.util.Optional;
 
 public class DPCAttributionService extends Application<DPCAttributionConfiguration> {
 
@@ -53,6 +58,13 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
         environment.jersey().getResourceConfig().register(listener);
         environment.jersey().register(new GenerateRequestIdFilter(true));
         environment.jersey().register(new LogResponseFilter());
+
+        // Find Guice-aware validator and swap in for Dropwizard's default hk2 validator.
+        Optional<Injector> injector = InjectorLookup.getInjector(this);
+        if (injector.isPresent()) {
+            ValidatorFactory validatorFactory = injector.get().getInstance(ValidatorFactory.class);
+            environment.setValidator(validatorFactory.getValidator());
+        }
     }
 
     private void registerBundles(Bootstrap<DPCAttributionConfiguration> bootstrap) {
