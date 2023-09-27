@@ -488,7 +488,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    public void tesGetPatientByUUID() throws GeneralSecurityException, IOException, URISyntaxException {
+    public void testGetPatientByUUID() throws GeneralSecurityException, IOException, URISyntaxException {
         final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
         final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
         final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());
