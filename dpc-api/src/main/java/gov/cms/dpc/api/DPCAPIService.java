@@ -4,6 +4,7 @@ import ca.mestevens.java.configuration.bundle.TypesafeConfigurationBundle;
 import com.codahale.metrics.jersey2.InstrumentedResourceMethodApplicationListener;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.datatype.hibernate5.Hibernate5Module;
+import com.google.inject.Injector;
 import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.api.auth.AuthModule;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
@@ -31,8 +32,11 @@ import io.dropwizard.migrations.MigrationsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import ru.vyarus.dropwizard.guice.GuiceBundle;
+import ru.vyarus.dropwizard.guice.injector.lookup.InjectorLookup;
 
+import javax.validation.ValidatorFactory;
 import java.util.List;
+import java.util.Optional;
 
 public class DPCAPIService extends Application<DPCAPIConfiguration> {
 
@@ -83,6 +87,13 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
         environment.jersey().register(new JsonParseExceptionMapper());
         environment.jersey().register(new GenerateRequestIdFilter(false));
         environment.jersey().register(new LogResponseFilter());
+
+        // Find Guice-aware validator and swap in for Dropwizard's default hk2 validator.
+        Optional<Injector> injector = InjectorLookup.getInjector(this);
+        if (injector.isPresent()) {
+            ValidatorFactory validatorFactory = injector.get().getInstance(ValidatorFactory.class);
+            environment.setValidator(validatorFactory.getValidator());
+        }
     }
 
     private GuiceBundle setupGuiceBundle() {
