@@ -19,7 +19,6 @@ import gov.cms.dpc.testing.APIAuthHelpers;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import gov.cms.dpc.testing.factories.FHIRGroupBuilder;
 import org.apache.http.HttpHeaders;
-import org.assertj.core.util.Lists;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.codesystems.V3RoleClass;
