@@ -168,7 +168,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
             @ApiResponse(code = 422, message = "Provided resource is not a valid FHIR Organization")
     })
     @Override
-    public Organization updateOrganization(@NotNull @PathParam("organizationID") UUID organizationID, @Valid @Profiled(profile = OrganizationProfile.PROFILE_URI) Organization organization) {
+    public Organization updateOrganization(@NotNull @PathParam("organizationID") UUID organizationID, @Valid @Profiled Organization organization) {
         MethodOutcome outcome = this.client
                 .update()
                 .resource(organization)

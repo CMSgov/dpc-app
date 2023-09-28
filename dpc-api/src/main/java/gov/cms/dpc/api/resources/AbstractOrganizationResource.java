@@ -30,5 +30,5 @@ public abstract class AbstractOrganizationResource {
 
     @PUT
     @Path("/{organizationID}")
-    public abstract Organization updateOrganization(@NotNull UUID organizationID, @Valid @Profiled(profile = OrganizationProfile.PROFILE_URI) Organization organization);
+    public abstract Organization updateOrganization(@NotNull UUID organizationID, @Valid @Profiled Organization organization);
 }

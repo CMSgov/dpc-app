@@ -25,7 +25,7 @@ public abstract class AbstractGroupResource extends AbstractResourceWithSince {
     }
 
     @POST
-    public abstract Response createRoster(OrganizationPrincipal organizationPrincipal, @Valid @Profiled(profile = AttestationProfile.PROFILE_URI) Provenance rosterAttestation, Group attributionRoster);
+    public abstract Response createRoster(OrganizationPrincipal organizationPrincipal, @Valid @Profiled Provenance rosterAttestation, Group attributionRoster);
 
     @GET
     public abstract Bundle rosterSearch(OrganizationPrincipal organizationPrincipal, @NoHtml String providerNPI, @NoHtml String patientID);
@@ -36,11 +36,11 @@ public abstract class AbstractGroupResource extends AbstractResourceWithSince {
 
     @PUT
     @Path("/{rosterID}")
-    public abstract Group updateRoster(OrganizationPrincipal security, UUID rosterID, @Valid @Profiled(profile = AttestationProfile.PROFILE_URI) Provenance rosterAttestation, Group rosterUpdate);
+    public abstract Group updateRoster(OrganizationPrincipal security, UUID rosterID, @Valid @Profiled Provenance rosterAttestation, Group rosterUpdate);
 
     @POST
     @Path("/{rosterID}/$add")
-    public abstract Group addRosterMembers(OrganizationPrincipal organizationPrincipal, UUID rosterID, @Valid @Profiled(profile = AttestationProfile.PROFILE_URI) Provenance rosterAttestation, Group rosterUpdate);
+    public abstract Group addRosterMembers(OrganizationPrincipal organizationPrincipal, UUID rosterID, @Valid @Profiled Provenance rosterAttestation, Group rosterUpdate);
 
     @POST
     @Path("/{rosterID}/$remove")

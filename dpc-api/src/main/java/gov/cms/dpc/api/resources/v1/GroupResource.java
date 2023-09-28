@@ -90,7 +90,7 @@ public class GroupResource extends AbstractGroupResource {
     })
     @Override
     public Response createRoster(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
-                                 @ApiParam(hidden = true) @Valid @Profiled(profile = AttestationProfile.PROFILE_URI) @ProvenanceHeader Provenance rosterAttestation,
+                                 @ApiParam(hidden = true) @Valid @Profiled @ProvenanceHeader Provenance rosterAttestation,
                                  Group attributionRoster) {
         // Log attestation
         logAndVerifyAttestation(rosterAttestation, null, attributionRoster);
@@ -181,7 +181,7 @@ public class GroupResource extends AbstractGroupResource {
     })
     @Override
     public Group updateRoster(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal, @ApiParam(value = "Attribution Group ID") @PathParam("rosterID") UUID rosterID,
-                              @ApiParam(hidden = true) @Valid @Profiled(profile = AttestationProfile.PROFILE_URI) @ProvenanceHeader Provenance rosterAttestation,
+                              @ApiParam(hidden = true) @Valid @Profiled @ProvenanceHeader Provenance rosterAttestation,
                               Group rosterUpdate) {
 
         logAndVerifyAttestation(rosterAttestation, rosterID, rosterUpdate);
@@ -209,7 +209,7 @@ public class GroupResource extends AbstractGroupResource {
     @Override
     public Group addRosterMembers(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
                                   @ApiParam(value = "Attribution roster ID") @PathParam("rosterID") UUID rosterID,
-                                  @ApiParam(hidden = true) @Valid @Profiled(profile = AttestationProfile.PROFILE_URI) @ProvenanceHeader Provenance rosterAttestation,
+                                  @ApiParam(hidden = true) @Valid @Profiled @ProvenanceHeader Provenance rosterAttestation,
                                   Group groupUpdate) {
         logAndVerifyAttestation(rosterAttestation, rosterID, groupUpdate);
         addOrganizationTag(groupUpdate, organizationPrincipal.getID().toString());

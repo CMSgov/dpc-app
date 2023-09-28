@@ -27,7 +27,7 @@ public abstract class AbstractPractitionerResource {
     public abstract Bundle practitionerSearch(OrganizationPrincipal organization, @NoHtml String providerNPI);
 
     @POST
-    public abstract Response submitProvider(OrganizationPrincipal organization, @Valid @Profiled(profile = PractitionerProfile.PROFILE_URI) Practitioner provider);
+    public abstract Response submitProvider(OrganizationPrincipal organization, @Valid @Profiled Practitioner provider);
 
     @POST
     @Path("/$submit")
@@ -43,7 +43,7 @@ public abstract class AbstractPractitionerResource {
 
     @PUT
     @Path("/{providerID}")
-    public abstract Practitioner updateProvider(UUID providerID, @Valid @Profiled(profile = PractitionerProfile.PROFILE_URI) Practitioner provider);
+    public abstract Practitioner updateProvider(UUID providerID, @Valid @Profiled Practitioner provider);
 
     @POST
     @Path("/$validate")

@@ -21,7 +21,7 @@ public abstract class AbstractEndpointResource {
     }
 
     @POST
-    public abstract Response createEndpoint(@ApiParam(hidden = true) OrganizationPrincipal organization, @Valid @Profiled(profile = EndpointProfile.PROFILE_URI) Endpoint endpoint);
+    public abstract Response createEndpoint(@ApiParam(hidden = true) OrganizationPrincipal organization, @Valid @Profiled Endpoint endpoint);
 
     @GET
     public abstract Bundle getEndpoints(OrganizationPrincipal organization);
@@ -32,7 +32,7 @@ public abstract class AbstractEndpointResource {
 
     @PUT
     @Path("/{endpointID}")
-    public abstract Endpoint updateEndpoint(@NotNull UUID endpointID, @Valid @Profiled(profile = EndpointProfile.PROFILE_URI) Endpoint endpoint);
+    public abstract Endpoint updateEndpoint(@NotNull UUID endpointID, @Valid @Profiled Endpoint endpoint);
 
     @DELETE
     @Path("/{endpointID}")

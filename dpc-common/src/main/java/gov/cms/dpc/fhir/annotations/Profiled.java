@@ -26,8 +26,6 @@ public @interface Profiled {
 
     Class<? extends Payload>[] payload() default {};
 
-    String profile();
-
     @Target({FIELD, METHOD, PARAMETER, ANNOTATION_TYPE})
     @Retention(RUNTIME)
     @Documented

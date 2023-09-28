@@ -49,7 +49,7 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
 
     private final DPCAuthHibernateBundle<DPCAPIConfiguration> authHibernateBundle;
 
-    public DPCAPIModule(DPCAuthHibernateBundle<DPCAPIConfiguration> authHibernateBundle) {
+    DPCAPIModule(DPCAuthHibernateBundle<DPCAPIConfiguration> authHibernateBundle) {
         this.authHibernateBundle = authHibernateBundle;
     }
 
