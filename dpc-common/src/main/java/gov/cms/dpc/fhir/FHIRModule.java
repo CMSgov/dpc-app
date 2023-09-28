@@ -1,8 +1,10 @@
 package gov.cms.dpc.fhir;
 
 import ca.uhn.fhir.context.FhirContext;
+
 import com.google.inject.Binder;
 import com.google.inject.Provides;
+
 import gov.cms.dpc.fhir.configuration.IDPCFHIRConfiguration;
 import gov.cms.dpc.fhir.converters.FHIREntityConverter;
 import gov.cms.dpc.fhir.dropwizard.features.FHIRRequestFeature;

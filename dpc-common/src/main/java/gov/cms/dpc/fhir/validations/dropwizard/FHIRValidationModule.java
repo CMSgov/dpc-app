@@ -19,7 +19,8 @@ import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 
 /**
- * Guice module for setting up the required Validation components, if requested by the application
+ * Guice module for setting up the required Validation components, if requested
+ * by the application
  */
 public class FHIRValidationModule extends AbstractModule {
 
@@ -29,11 +30,11 @@ public class FHIRValidationModule extends AbstractModule {
         this.config = config;
     }
 
-
     @Override
     protected void configure() {
 
-        // Create a multi-binder for automatically bundling and injecting a Set of ConstraintValidators
+        // Create a multi-binder for automatically bundling and injecting a Set of
+        // ConstraintValidators
         TypeLiteral<ConstraintValidator<?, ?>> constraintType = new TypeLiteral<>() {
         };
         Multibinder<ConstraintValidator<?, ?>> constraintBinder = Multibinder.newSetBinder(binder(), constraintType);

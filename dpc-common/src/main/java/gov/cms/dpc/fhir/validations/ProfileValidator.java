@@ -11,7 +11,9 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
 /**
- * Hibernate {@link ConstraintValidator} that provides support for running the {@link FhirValidator} against FHIR resources, as part of the normal Dropwizard validation framework.
+ * Hibernate {@link ConstraintValidator} that provides support for running the
+ * {@link FhirValidator} against FHIR resources, as part of the normal
+ * Dropwizard validation framework.
  * This requires that the {@link Profiled} annotation be added to the resource.
  */
 public class ProfileValidator implements ConstraintValidator<Profiled, BaseResource> {
@@ -41,7 +43,8 @@ public class ProfileValidator implements ConstraintValidator<Profiled, BaseResou
             return false;
         }
 
-        // Create a validation option object which forces validation against the given profile.
+        // Create a validation option object which forces validation against the given
+        // profile.
         final ValidationOptions options = new ValidationOptions();
         options.addProfile(profileURI);
         final ValidationResult result = this.validator.validateWithResult(value, options);
