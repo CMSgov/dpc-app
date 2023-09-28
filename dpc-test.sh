@@ -44,15 +44,15 @@ docker-compose up start_core_dependencies
 mvn clean compile -Perror-prone -B -V -ntp -DskipTests
 mvn package -Pci -ntp -DskipTests
 
-# Format the test results and copy to a new directory
-if [ -n "$REPORT_COVERAGE" ]; then
-  mvn jacoco:report -ntp
-  mkdir -p reports
+# # Format the test results and copy to a new directory
+# if [ -n "$REPORT_COVERAGE" ]; then
+#   mvn jacoco:report -ntp
+#   mkdir -p reports
 
-  for module in dpc-aggregation dpc-api dpc-attribution dpc-queue dpc-macaroons; do
-    JACOCO_SOURCE_PATH=./$module/src/main/java ./cc-test-reporter format-coverage ./$module/target/site/jacoco/jacoco.xml --input-type jacoco -o reports/codeclimate.unit.$module.json
-  done
-fi
+#   for module in dpc-aggregation dpc-api dpc-attribution dpc-queue dpc-macaroons; do
+#     JACOCO_SOURCE_PATH=./$module/src/main/java ./cc-test-reporter format-coverage ./$module/target/site/jacoco/jacoco.xml --input-type jacoco -o reports/codeclimate.unit.$module.json
+#   done
+# fi
 
 docker-compose down
 docker-compose up start_core_dependencies
@@ -76,16 +76,16 @@ npm run test
 docker-compose down -t 60
 
 # Collect the coverage reports for the Docker integration tests
-if [ -n "$REPORT_COVERAGE" ]; then
-  mvn jacoco:report-integration -Pci -ntp
+# if [ -n "$REPORT_COVERAGE" ]; then
+#   mvn jacoco:report-integration -Pci -ntp
 
-  for module in dpc-aggregation dpc-api dpc-attribution; do
-    JACOCO_SOURCE_PATH=./$module/src/main/java ./cc-test-reporter format-coverage ./$module/target/site/jacoco-it/jacoco.xml --input-type jacoco -o reports/codeclimate.integration.$module.json
-  done
+#   for module in dpc-aggregation dpc-api dpc-attribution; do
+#     JACOCO_SOURCE_PATH=./$module/src/main/java ./cc-test-reporter format-coverage ./$module/target/site/jacoco-it/jacoco.xml --input-type jacoco -o reports/codeclimate.integration.$module.json
+#   done
 
-  ./cc-test-reporter sum-coverage reports/codeclimate.* -o coverage/codeclimate.json
-  ./cc-test-reporter upload-coverage
-fi
+#   ./cc-test-reporter sum-coverage reports/codeclimate.* -o coverage/codeclimate.json
+#   ./cc-test-reporter upload-coverage
+# fi
 
 echo "┌──────────────────────────────────────────┐"
 echo "│                                          │"
