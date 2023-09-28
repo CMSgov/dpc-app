@@ -2,8 +2,6 @@ package gov.cms.dpc.fhir.validations.dropwizard;
 
 import com.google.inject.Injector;
 
-import java.util.Set;
-
 import javax.inject.Inject;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorFactory;
@@ -19,9 +17,6 @@ public class InjectingConstraintValidatorFactory implements ConstraintValidatorF
 
     @Inject
     private Injector injector;
-
-    public InjectingConstraintValidatorFactory(Set<ConstraintValidator<?, ?>> validators) {
-    }
 
     @Override
     public <T extends ConstraintValidator<?, ?>> T getInstance(final Class<T> key) {

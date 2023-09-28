@@ -22,9 +22,6 @@ import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.HAPIExceptionHandler;
 import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.JerseyExceptionHandler;
 import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.PersistenceExceptionHandler;
 import gov.cms.dpc.fhir.hapi.ContextUtils;
-import gov.cms.dpc.fhir.validations.DPCProfileSupport;
-import gov.cms.dpc.fhir.validations.ProfileValidator;
-import gov.cms.dpc.fhir.validations.dropwizard.FHIRValidatorProvider;
 import gov.cms.dpc.fhir.validations.dropwizard.InjectingConstraintValidatorFactory;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.testing.factories.FHIRPatientBuilder;
@@ -39,8 +36,6 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.eclipse.jetty.http.HttpStatus;
 import org.glassfish.jersey.test.grizzly.GrizzlyWebTestContainerFactory;
-import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
-import org.hl7.fhir.dstu3.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.codesystems.V3RoleClass;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
@@ -57,7 +52,6 @@ import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -68,8 +62,6 @@ public class APITestHelpers {
     private static final String ATTRIBUTION_TRUNCATE_TASK = "http://localhost:9902/tasks/truncate";
     public static String BASE_URL = "https://dpc.cms.gov/api";
     public static String ORGANIZATION_NPI = "1111111112";
-
-    private static final ObjectMapper mapper = new ObjectMapper();
 
     private APITestHelpers() {
         // Not used
@@ -100,14 +92,15 @@ public class APITestHelpers {
         return client;
     }
 
-    public static IGenericClient buildConsentClient(FhirContext ctx){
+    public static IGenericClient buildConsentClient(FhirContext ctx) {
         ContextUtils.prefetchResourceModels(ctx, JobQueueBatch.validResourceTypes);
         ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
         return ctx.newRestfulGenericClient(CONSENT_URL);
     }
 
     public static void setupPractitionerTest(IGenericClient client, IParser parser) throws IOException {
-        try (InputStream inputStream = APITestHelpers.class.getClassLoader().getResourceAsStream("provider_bundle.json")) {
+        try (InputStream inputStream = APITestHelpers.class.getClassLoader()
+                .getResourceAsStream("provider_bundle.json")) {
             final Parameters providerParameters = (Parameters) parser.parseResource(inputStream);
 
             client
@@ -121,7 +114,8 @@ public class APITestHelpers {
     }
 
     public static void setupPatientTest(IGenericClient client, IParser parser) throws IOException {
-        try (InputStream inputStream = APITestHelpers.class.getClassLoader().getResourceAsStream("patient_bundle.json")) {
+        try (InputStream inputStream = APITestHelpers.class.getClassLoader()
+                .getResourceAsStream("patient_bundle.json")) {
             final Parameters patientParameters = (Parameters) parser.parseResource(inputStream);
 
             client
@@ -135,16 +129,18 @@ public class APITestHelpers {
     }
 
     /**
-     * Build Dropwizard test instance with a specific subset of Resources and Providers
+     * Build Dropwizard test instance with a specific subset of Resources and
+     * Providers
      *
      * @param ctx        - {@link FhirContext} context to use
      * @param resources  - {@link List} of resources to add to test instance
      * @param providers  - {@link List} of providers to add to test instance
-     * @param validation - {@code true} enable custom validation. {@code false} Disable custom validation
+     * @param validation - {@code true} enable custom validation. {@code false}
+     *                   Disable custom validation
      * @return - {@link ResourceExtension}
      */
-    public static ResourceExtension buildResourceExtension(FhirContext
-                                                                   ctx, List<Object> resources, List<Object> providers, boolean validation) {
+    public static ResourceExtension buildResourceExtension(FhirContext ctx, List<Object> resources,
+            List<Object> providers, boolean validation) {
 
         final FHIRHandler fhirHandler = new FHIRHandler(ctx);
         final var builder = ResourceExtension
@@ -168,11 +164,13 @@ public class APITestHelpers {
             config.setSchematronValidation(true);
             config.setSchemaValidation(true);
 
-            final DPCProfileSupport dpcModule = new DPCProfileSupport(ctx);
-            final ValidationSupportChain support = new ValidationSupportChain(new DefaultProfileValidationSupport(), dpcModule);
-            final InjectingConstraintValidatorFactory constraintFactory = new InjectingConstraintValidatorFactory(
-                    Set.of(new ProfileValidator(new FHIRValidatorProvider(ctx, config, support).get())));
-
+            // final DPCProfileSupport dpcModule = new DPCProfileSupport(ctx);
+            // final ValidationSupportChain support = new ValidationSupportChain(new
+            // DefaultProfileValidationSupport(),
+            // dpcModule);
+            final InjectingConstraintValidatorFactory constraintFactory = new InjectingConstraintValidatorFactory();
+            // Set.of(new ProfileValidator(new FHIRValidatorProvider(ctx, config,
+            // support).get())
             builder.setValidator(provideValidator(constraintFactory));
         }
 
@@ -182,8 +180,8 @@ public class APITestHelpers {
         return builder.build();
     }
 
-    static <C extends io.dropwizard.Configuration> void setupApplication(DropwizardTestSupport<C> application) throws
-            Exception {
+    static <C extends io.dropwizard.Configuration> void setupApplication(DropwizardTestSupport<C> application)
+            throws Exception {
         ConfigFactory.invalidateCaches();
         // Truncate attribution database
         SharedConfigurationState.clear();
@@ -203,13 +201,14 @@ public class APITestHelpers {
             final HttpPost post = new HttpPost(ATTRIBUTION_TRUNCATE_TASK);
 
             try (CloseableHttpResponse execute = client.execute(post)) {
-                assertEquals(HttpStatus.OK_200, execute.getStatusLine().getStatusCode(), "Should have truncated database");
+                assertEquals(HttpStatus.OK_200, execute.getStatusLine().getStatusCode(),
+                        "Should have truncated database");
             }
         }
     }
 
-    static <C extends io.dropwizard.Configuration> void checkHealth(DropwizardTestSupport<C> application) throws
-            IOException {
+    static <C extends io.dropwizard.Configuration> void checkHealth(DropwizardTestSupport<C> application)
+            throws IOException {
         // URI of the API Service Healthcheck
         final String healthURI = String.format("http://localhost:%s/healthcheck", application.getAdminPort());
         try (CloseableHttpClient client = HttpClients.createDefault()) {
@@ -245,7 +244,7 @@ public class APITestHelpers {
                 .build();
     }
 
-    public static Provenance createProvenance(String orgId, String practitionerId, List<String> patientIds){
+    public static Provenance createProvenance(String orgId, String practitionerId, List<String> patientIds) {
         final Coding reasonCoding = new Coding().setSystem("http://hl7.org/fhir/v3/ActReason").setCode("TREAT");
 
         final Coding roleCode = new Coding()
@@ -263,32 +262,35 @@ public class APITestHelpers {
                 .setReason(Collections.singletonList(reasonCoding))
                 .addAgent(component);
 
-        for(String patientId:patientIds){
+        for (String patientId : patientIds) {
             provenance.addTarget(new Reference(patientId));
         }
         return provenance;
     }
 
-    public static MethodOutcome createResource(IGenericClient client, IBaseResource resource, Map<String,String> extraHeaders){
+    public static MethodOutcome createResource(IGenericClient client, IBaseResource resource,
+            Map<String, String> extraHeaders) {
         ICreateTyped iCreateTyped = client.create()
                 .resource(resource)
                 .encodedJson();
 
-        extraHeaders.entrySet().forEach(entry -> iCreateTyped.withAdditionalHeader(entry.getKey(),entry.getValue()));
+        extraHeaders.entrySet().forEach(entry -> iCreateTyped.withAdditionalHeader(entry.getKey(), entry.getValue()));
         return iCreateTyped.execute();
     }
 
-    public static MethodOutcome createResource(IGenericClient client, IBaseResource resource){
-        return createResource(client,resource, Maps.newHashMap());
+    public static MethodOutcome createResource(IGenericClient client, IBaseResource resource) {
+        return createResource(client, resource, Maps.newHashMap());
     }
 
-    public  static <T extends IBaseResource> T getResourceById(IGenericClient client, Class<T> clazz, String resourceId){
-       return client.read()
+    public static <T extends IBaseResource> T getResourceById(IGenericClient client, Class<T> clazz,
+            String resourceId) {
+        return client.read()
                 .resource(clazz)
                 .withId(resourceId).encodedJson().execute();
     }
 
-    public  static Bundle resourceSearch(IGenericClient client, DPCResourceType resourceType, Map<String,List<String>> searchParams){
+    public static Bundle resourceSearch(IGenericClient client, DPCResourceType resourceType,
+            Map<String, List<String>> searchParams) {
         return client
                 .search()
                 .forResource(resourceType.name())
@@ -298,32 +300,34 @@ public class APITestHelpers {
                 .execute();
     }
 
-    public  static Bundle resourceSearch(IGenericClient client, DPCResourceType resourceType){
-        return resourceSearch(client,resourceType, Maps.newHashMap());
+    public static Bundle resourceSearch(IGenericClient client, DPCResourceType resourceType) {
+        return resourceSearch(client, resourceType, Maps.newHashMap());
     }
 
-    public static IBaseOperationOutcome deleteResourceById(IGenericClient client, DPCResourceType resourceType, String resourceId){
+    public static IBaseOperationOutcome deleteResourceById(IGenericClient client, DPCResourceType resourceType,
+            String resourceId) {
         return client.delete()
                 .resourceById(resourceType.name(), resourceId)
                 .execute();
     }
 
-    public static MethodOutcome updateResource(IGenericClient client, String id, IBaseResource resource, Map<String,String> extraHeaders){
+    public static MethodOutcome updateResource(IGenericClient client, String id, IBaseResource resource,
+            Map<String, String> extraHeaders) {
         IUpdateExecutable executable = client
                 .update()
                 .resource(resource)
                 .withId(id)
                 .encodedJson();
 
-        extraHeaders.entrySet().forEach(entry -> executable.withAdditionalHeader(entry.getKey(),entry.getValue()));
-       return executable.execute();
+        extraHeaders.entrySet().forEach(entry -> executable.withAdditionalHeader(entry.getKey(), entry.getValue()));
+        return executable.execute();
     }
 
-    public static MethodOutcome updateResource(IGenericClient client, String id, IBaseResource resource){
-       return updateResource(client, id,resource, Maps.newHashMap());
+    public static MethodOutcome updateResource(IGenericClient client, String id, IBaseResource resource) {
+        return updateResource(client, id, resource, Maps.newHashMap());
     }
 
-    public static Bundle getPatientEverything(IGenericClient client, String patientId, String provenance){
+    public static Bundle getPatientEverything(IGenericClient client, String patientId, String provenance) {
         return client
                 .operation()
                 .onInstance(new IdType("Patient", patientId))
@@ -335,7 +339,7 @@ public class APITestHelpers {
                 .execute();
     }
 
-    public static Bundle doGroupExport(IGenericClient client,String groupId, String provenance){
+    public static Bundle doGroupExport(IGenericClient client, String groupId, String provenance) {
         return client
                 .operation()
                 .onInstance(new IdType("Group", groupId))
