@@ -52,7 +52,6 @@ public class ProfileValidator implements ConstraintValidator<Profiled, BaseResou
             return true;
         }
 
-        System.out.println("NOT VALID");
         // If we failed, tell us why
         result.getMessages()
                 .forEach(msg -> context
