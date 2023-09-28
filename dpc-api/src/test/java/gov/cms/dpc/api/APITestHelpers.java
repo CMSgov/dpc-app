@@ -185,10 +185,10 @@ public class APITestHelpers {
             Exception {
         ConfigFactory.invalidateCaches();
         // Truncate attribution database
-        SharedConfigurationState.clear();
         truncateDatabase();
         application.before();
         // Truncate the Auth DB
+        // NOTE: both shared state clears are necessary
         SharedConfigurationState.clear();
         application.getApplication().run("db", "drop-all", "--confirm-delete-everything", "ci.application.conf");
         SharedConfigurationState.clear();
