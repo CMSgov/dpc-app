@@ -10,6 +10,7 @@ import org.hl7.fhir.dstu3.model.Provenance;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.MockedConstruction;
 import org.mockito.Mockito;
 
 import javax.servlet.ServletInputStream;
@@ -47,8 +48,14 @@ class FHIRParamValueFactoryTest {
 
         final ContainerRequest request = Mockito.mock(ContainerRequest.class);
         final Function<ContainerRequest, Object> valueFunc = factory.getValueProvider(parameter);
-        assertAll(() -> assertNotNull(valueFunc, "Should have factory function"),
-                () -> assertEquals(Provenance.class, valueFunc.apply(request).getClass(), "Should have provenance"));
+
+        try (MockedConstruction<ParamResourceFactory> mocked = Mockito.mockConstruction(ParamResourceFactory.class,
+            (mock, context) -> {
+                Mockito.when(mock.provide()).thenReturn(provenance);
+            })) {
+            assertAll(() -> assertNotNull(valueFunc, "Should have factory function"),
+                    () -> assertEquals(Provenance.class, valueFunc.apply(request).getClass(), "Should have provenance"));
+        }
     }
 
     @Test
