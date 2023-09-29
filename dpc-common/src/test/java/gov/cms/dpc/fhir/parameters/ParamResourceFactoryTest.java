@@ -15,7 +15,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 
 import javax.ws.rs.WebApplicationException;
-import java.io.InputStream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -30,7 +29,7 @@ class ParamResourceFactoryTest {
     void testNonParameter() {
         final IParser parser = Mockito.mock(IParser.class);
         final ContainerRequest mockRequest = Mockito.mock(ContainerRequest.class);
-        Mockito.when(mockRequest.getEntityStream()).thenThrow(DataFormatException.class);
+        Mockito.when(parser.parseResource(Parameters.class, mockRequest.getEntityStream())).thenThrow(DataFormatException.class);
 
         final ParamResourceFactory factory = new ParamResourceFactory(mockRequest, null, parser);
         final WebApplicationException exception = assertThrows(WebApplicationException.class, factory::provide, "Should throw exception");
@@ -44,16 +43,15 @@ class ParamResourceFactoryTest {
         final Patient dummyPatient = new Patient();
         parameters.addParameter().setResource(dummyPatient);
 
-        final IParser parser = Mockito.mock(IParser.class);
-        Mockito.when(parser.parseResource(Mockito.eq(Parameters.class), Mockito.any(InputStream.class))).thenReturn(parameters);
-
         final Parameter parameter = Mockito.mock(Parameter.class);
         final FHIRParameter annotation = Mockito.mock(FHIRParameter.class);
         Mockito.when(annotation.name()).thenReturn("");
         Mockito.when(parameter.getAnnotation(FHIRParameter.class)).thenReturn(annotation);
         Mockito.when(parameter.getRawType()).thenAnswer(answer -> Patient.class);
 
+        final IParser parser = Mockito.mock(IParser.class);
         final ContainerRequest mockRequest = Mockito.mock(ContainerRequest.class);
+        Mockito.when(parser.parseResource(Parameters.class, mockRequest.getEntityStream())).thenReturn(parameters);
         final ParamResourceFactory factory = new ParamResourceFactory(mockRequest, parameter, parser);
 
         assertTrue(dummyPatient.equalsDeep((Patient) factory.provide()), "Should have returned dummy patient");
@@ -69,16 +67,15 @@ class ParamResourceFactoryTest {
         parameters.addParameter().setResource(unnamedPatient);
         parameters.addParameter().setResource(namedPatient).setName("named");
 
-        final IParser parser = Mockito.mock(IParser.class);
-        Mockito.when(parser.parseResource(Mockito.eq(Parameters.class), Mockito.any(InputStream.class))).thenReturn(parameters);
-
         final Parameter parameter = Mockito.mock(Parameter.class);
         final FHIRParameter annotation = Mockito.mock(FHIRParameter.class);
         Mockito.when(annotation.name()).thenReturn("named");
         Mockito.when(parameter.getAnnotation(FHIRParameter.class)).thenReturn(annotation);
         Mockito.when(parameter.getRawType()).thenAnswer(answer -> Patient.class);
 
+        final IParser parser = Mockito.mock(IParser.class);
         final ContainerRequest mockRequest = Mockito.mock(ContainerRequest.class);
+        Mockito.when(parser.parseResource(Parameters.class, mockRequest.getEntityStream())).thenReturn(parameters);
         final ParamResourceFactory factory = new ParamResourceFactory(mockRequest, parameter, parser);
         assertAll(() -> assertTrue(namedPatient.equalsDeep((Patient) factory.provide()), "Should have returned dummy patient"),
                 () -> assertFalse(unnamedPatient.equalsDeep((Patient) factory.provide()), "Should have returned dummy patient"));
@@ -90,16 +87,15 @@ class ParamResourceFactoryTest {
         final Patient dummyPatient = new Patient();
         parameters.addParameter().setResource(dummyPatient);
 
-        final IParser parser = Mockito.mock(IParser.class);
-        Mockito.when(parser.parseResource(Mockito.eq(Parameters.class), Mockito.any(InputStream.class))).thenReturn(parameters);
-
         final Parameter parameter = Mockito.mock(Parameter.class);
         final FHIRParameter annotation = Mockito.mock(FHIRParameter.class);
         Mockito.when(annotation.name()).thenReturn("");
         Mockito.when(parameter.getAnnotation(FHIRParameter.class)).thenReturn(annotation);
         Mockito.when(parameter.getRawType()).thenAnswer(answer -> Practitioner.class);
 
+        final IParser parser = Mockito.mock(IParser.class);
         final ContainerRequest mockRequest = Mockito.mock(ContainerRequest.class);
+        Mockito.when(parser.parseResource(Parameters.class, mockRequest.getEntityStream())).thenReturn(parameters);
         final ParamResourceFactory factory = new ParamResourceFactory(mockRequest, parameter, parser);
 
         final WebApplicationException exception = assertThrows(WebApplicationException.class, factory::provide, "Should throw an exception");
@@ -114,9 +110,6 @@ class ParamResourceFactoryTest {
         final Patient dummyPatient = new Patient();
         parameters.addParameter().setResource(dummyPatient);
 
-        final IParser parser = Mockito.mock(IParser.class);
-        Mockito.when(parser.parseResource(Mockito.eq(Parameters.class), Mockito.any(InputStream.class))).thenReturn(parameters);
-
         final Parameter parameter = Mockito.mock(Parameter.class);
         final FHIRParameter annotation = Mockito.mock(FHIRParameter.class);
         Mockito.when(annotation.name()).thenReturn("missing");
@@ -124,6 +117,8 @@ class ParamResourceFactoryTest {
         Mockito.when(parameter.getRawType()).thenAnswer(answer -> Patient.class);
 
         final ContainerRequest mockRequest = Mockito.mock(ContainerRequest.class);
+        final IParser parser = Mockito.mock(IParser.class);
+        Mockito.when(parser.parseResource(Parameters.class, mockRequest.getEntityStream())).thenReturn(parameters);
         final ParamResourceFactory factory = new ParamResourceFactory(mockRequest, parameter, parser);
 
         final WebApplicationException exception = assertThrows(WebApplicationException.class, factory::provide, "Should throw an exception");
