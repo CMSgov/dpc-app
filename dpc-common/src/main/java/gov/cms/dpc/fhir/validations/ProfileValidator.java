@@ -45,7 +45,7 @@ public class ProfileValidator implements ConstraintValidator<Profiled, BaseResou
 
         // Create a validation option object which forces validation against the given profile.
         final ValidationOptions options = new ValidationOptions();
-        options.addProfile(resourceProfileMap.get(value.getClass()));
+        options.addProfile(resourceProfileMap.getOrDefault(value.getClass(), ""));
         final ValidationResult result = this.validator.validateWithResult(value, options);
 
         if (result.isSuccessful()) {
@@ -63,6 +63,7 @@ public class ProfileValidator implements ConstraintValidator<Profiled, BaseResou
         return false;
     }
 
+    // This map must be updated if we need to use profiles for any other resources.
     private Map<Class<?>, String> setProfilesForResources() {
         return Map.of(
             Endpoint.class, EndpointProfile.PROFILE_URI,

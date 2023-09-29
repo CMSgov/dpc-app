@@ -188,7 +188,7 @@ public class APITestHelpers {
         truncateDatabase();
         application.before();
         // Truncate the Auth DB
-        // NOTE: both shared state clears are necessary
+        // dropwizard-guicey will raise a SharedStateError unless we clear the configuration state before each run
         SharedConfigurationState.clear();
         application.getApplication().run("db", "drop-all", "--confirm-delete-everything", "ci.application.conf");
         SharedConfigurationState.clear();
