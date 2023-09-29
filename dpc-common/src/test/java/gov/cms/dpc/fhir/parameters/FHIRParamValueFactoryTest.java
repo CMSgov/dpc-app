@@ -17,7 +17,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.function.Function;
 
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(BufferedLoggerHandler.class)
 class FHIRParamValueFactoryTest {
@@ -47,9 +47,8 @@ class FHIRParamValueFactoryTest {
 
         final ContainerRequest request = Mockito.mock(ContainerRequest.class);
         final Function<ContainerRequest, Object> valueFunc = factory.getValueProvider(parameter);
-//        TODO: debug
-//        assertAll(() -> assertNotNull(valueFunc, "Should have factory function"),
-//                () -> assertEquals(Provenance.class, valueFunc.apply(request).getClass(), "Should have provenance"));
+        assertAll(() -> assertNotNull(valueFunc, "Should have factory function"),
+                () -> assertEquals(Provenance.class, valueFunc.apply(request).getClass(), "Should have provenance"));
     }
 
     @Test
