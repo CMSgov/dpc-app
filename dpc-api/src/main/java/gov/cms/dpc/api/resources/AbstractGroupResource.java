@@ -5,7 +5,6 @@ import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.common.annotations.NoHtml;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.Profiled;
-import gov.cms.dpc.fhir.validations.profiles.AttestationProfile;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Group;
 import org.hl7.fhir.dstu3.model.Provenance;

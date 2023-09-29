@@ -2,7 +2,6 @@ package gov.cms.dpc.api.resources;
 
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.fhir.annotations.Profiled;
-import gov.cms.dpc.fhir.validations.profiles.EndpointProfile;
 import io.swagger.annotations.ApiParam;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Endpoint;
