@@ -50,3 +50,13 @@ jobs:
       - name: "DPC Admin Portal Build"
         run: |
           make ci-admin-portal
+
+  build-dpc-portal:
+    name: "Build and Test DPC Portal"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@v1
+      - name: "DPC Portal Build"
+        run: |
+          make ci-portal

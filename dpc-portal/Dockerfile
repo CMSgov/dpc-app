@@ -35,8 +35,8 @@ RUN set -eux \
         --no-cache \
         nodejs \
         yarn
-RUN rails webpacker:install
-RUN RAILS_ENV=production WEBPACKER_NODE_MODULES_BIN_PATH="node_modules/.bin" SECRET_KEY_BASE=dummy bundle exec rake assets:precompile --trace
+#RUN rails webpacker:install
+#RUN RAILS_ENV=production WEBPACKER_NODE_MODULES_BIN_PATH="node_modules/.bin" SECRET_KEY_BASE=dummy bundle exec rake assets:precompile --trace
 
 # Clean up from the build
 RUN rm -rf /usr/local/bundle/cache/*.gem && \
