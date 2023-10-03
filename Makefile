@@ -101,10 +101,6 @@ seed-db:
 ci-app: docker-base secure-envs
 	@./dpc-test.sh
 
-.PHONY: ci-portals
-ci-portals: secure-envs
-	@./dpc-portals-test.sh
-
 .PHONY: ci-portals-v1
 ci-portals-v1: secure-envs
 	@./dpcv1-portals-test.sh
