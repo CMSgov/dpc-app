@@ -1,24 +1,12 @@
 # README
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+This is the Data Point of Care (DPC) website. It will allow users to sign up for the DPC service, get credentialed and configure their account.
 
-Things you may want to cover:
+# Running via Docker
 
-* Ruby version
+The DPC website can be run locally via docker. Follow the below steps to build and run the website into a Docker container.
 
-* System dependencies
-
-* Configuration
-
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+- Run `make start-portals` to start dpc-portal in a docker container.
+  - This will also start dpc-web and dpc-admin, which are no longer used in production.
+- Run `make down-portals` to stop dpc-portal.
+- To run tests against dpc-portal, run `make ci-portal`.
