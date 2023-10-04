@@ -90,8 +90,6 @@ services:
       - "3100:3000"
     depends_on:
       - db
-    healthcheck:
-      test: curl --fail http://localhost:3000 || exit 1
 
   admin_sidekiq:
     volumes:
