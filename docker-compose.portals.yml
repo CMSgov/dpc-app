@@ -55,7 +55,7 @@ services:
       dockerfile: dpc-admin/Dockerfile
     image: dpc-web-admin:latest
     volumes:
-      - "./dpc-admin:/dpc-admin/"
+      - "./dpc-admin/coverage:/dpc-admin/coverage"
       - ./tmp/letter_opener/admin:/dpc-admin/tmp/letter_opener
     environment:
       - REDIS_URL=redis://redis
