@@ -23,24 +23,24 @@ echo "│                         │"
 echo "│  Running DPC Web Tests  │"
 echo "│                         │"
 echo "└─────────────────────────┘"
-docker-compose -p start-v1-portals -f docker-compose.yml -f docker-compose.portals.yml run --entrypoint "rubocop" dpc_web
-docker-compose -p start-v1-portals -f docker-compose.yml -f docker-compose.portals.yml run --entrypoint "bundle exec rails spec" dpc_web
+docker-compose -p start-v1-portals -f docker-compose.yml -f docker-compose.portals.yml run --entrypoint "bundle exec rubocop" dpc_web
+docker-compose -p start-v1-portals -f docker-compose.yml -f docker-compose.portals.yml run --entrypoint "bundle exec rspec" dpc_web
 
 echo "┌───────────────────────────┐"
 echo "│                           │"
 echo "│  Running DPC Admin Tests  │"
 echo "│                           │"
 echo "└───────────────────────────┘"
-docker-compose -p start-v1-portals -f docker-compose.yml -f docker-compose.portals.yml run --entrypoint "rubocop" dpc_admin
-docker-compose -p start-v1-portals -f docker-compose.yml -f docker-compose.portals.yml run --entrypoint "bundle exec rails spec" dpc_admin
+docker-compose -p start-v1-portals -f docker-compose.yml -f docker-compose.portals.yml run --entrypoint "bundle exec rubocop" dpc_admin
+docker-compose -p start-v1-portals -f docker-compose.yml -f docker-compose.portals.yml run --entrypoint "bundle exec rspec" dpc_admin
 
 echo "┌───────────────────────────┐"
 echo "│                           │"
 echo "│  Running DPC Portal Tests │"
 echo "│                           │"
 echo "└───────────────────────────┘"
-docker-compose -p start-v1-portals -f docker-compose.yml -f docker-compose.portals.yml run --entrypoint "rubocop" dpc_portal
-docker-compose -p start-v1-portals -f docker-compose.yml -f docker-compose.portals.yml run --entrypoint "bundle exec rails spec" dpc_portal
+docker-compose -p start-v1-portals -f docker-compose.yml -f docker-compose.portals.yml run --entrypoint "bundle exec rubocop" dpc_portal
+docker-compose -p start-v1-portals -f docker-compose.yml -f docker-compose.portals.yml run --entrypoint "bundle exec rspec" dpc_portal
 
 echo "┌──────────────────────────────────────────┐"
 echo "│                                          │"
