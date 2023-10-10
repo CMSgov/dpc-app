@@ -1,7 +1,5 @@
 package gov.cms.dpc.api.tasks.tokens;
 
-import com.google.common.collect.ImmutableCollection;
-import com.google.common.collect.ImmutableMultimap;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.resources.v1.TokenResource;
 import io.dropwizard.servlets.tasks.Task;
@@ -12,6 +10,8 @@ import javax.inject.Singleton;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import java.io.PrintWriter;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static gov.cms.dpc.api.tasks.TasksCommon.extractOrganization;
@@ -33,16 +33,16 @@ public class DeleteToken extends Task {
     }
 
     @Override
-    public void execute(ImmutableMultimap<String, String> parameters, PrintWriter output) {
+    public void execute(Map<String, List<String>> parameters, PrintWriter output) {
         final Organization organization = extractOrganization(parameters);
 
-        final ImmutableCollection<String> tokenCollection = parameters.get("token");
+        final List<String> tokenCollection = parameters.get("token");
 
-        if (tokenCollection.isEmpty()) {
+        if (tokenCollection == null || tokenCollection.isEmpty()) {
             throw new WebApplicationException("Must have token", Response.Status.BAD_REQUEST);
         }
 
-        final String tokenID = tokenCollection.asList().get(0);
+        final String tokenID = tokenCollection.get(0);
         this.resource
                 .deleteOrganizationToken(
                         new OrganizationPrincipal(organization),

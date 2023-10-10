@@ -4,6 +4,7 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.ICriterion;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Answers;
@@ -29,16 +30,17 @@ public class ConsentServiceImplUnitTest {
 
     @BeforeEach
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
         consentService = new ConsentServiceImpl(mockConsentClient);
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void getConsent() {
         final String testMbi = "0OO0OO0OO00";
 
         Bundle bundle = new Bundle();
-        IQuery queryExec = Mockito.mock(IQuery.class, Answers.RETURNS_DEEP_STUBS);
+        IQuery<IBaseBundle> queryExec = Mockito.mock(IQuery.class, Answers.RETURNS_DEEP_STUBS);
         Mockito.when(mockConsentClient.search().forResource(Consent.class).encodedJson()).thenReturn(queryExec);
         IQuery<Bundle> mockQuery = Mockito.mock(IQuery.class);
         Mockito.when(queryExec.returnBundle(any(Class.class)).where(any(ICriterion.class))).thenReturn(mockQuery);

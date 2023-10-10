@@ -1,8 +1,6 @@
 package gov.cms.dpc.api.tasks;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableCollection;
-import com.google.common.collect.ImmutableMultimap;
 import gov.cms.dpc.api.models.KeyPairResponse;
 import gov.cms.dpc.common.utils.EnvironmentParser;
 import gov.cms.dpc.macaroons.thirdparty.BakeryKeyPair;
@@ -19,6 +17,8 @@ import javax.ws.rs.core.Response;
 import java.io.PrintWriter;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Admin task to create a new {@link BakeryKeyPair} for use by the {@link gov.cms.dpc.macaroons.MacaroonBakery} component.
@@ -42,16 +42,16 @@ public class GenerateKeyPair extends Task {
     }
 
     @Override
-    public void execute(ImmutableMultimap<String, String> parameters, PrintWriter printWriter) throws Exception {
+    public void execute(Map<String, List<String>> parameters, PrintWriter printWriter) throws Exception {
         final String environment = EnvironmentParser.getEnvironment("API", false);
 
         final OffsetDateTime createdOn = OffsetDateTime.now(ZoneOffset.UTC);
 
-        final ImmutableCollection<String> userCollection = parameters.get("user");
-        if (userCollection.isEmpty()) {
+        final List<String> userCollection = parameters.get("user");
+        if (userCollection == null || userCollection.isEmpty()) {
             throw new WebApplicationException("Must have ID of user generating keypair", Response.Status.BAD_REQUEST);
         }
-        final String userID = userCollection.asList().get(0);
+        final String userID = userCollection.get(0);
 
         logger.warn("User: {} is generating new Bakery Keypair!!!", userID);
 

@@ -4,13 +4,17 @@ import ca.uhn.fhir.context.FhirContext;
 import com.google.inject.Injector;
 import gov.cms.dpc.fhir.annotations.ProvenanceHeader;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
-import org.glassfish.hk2.api.Factory;
+import org.glassfish.jersey.server.ContainerRequest;
 import org.glassfish.jersey.server.model.Parameter;
 import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.Provenance;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -18,12 +22,8 @@ import static org.junit.jupiter.api.Assertions.*;
 class ProvenanceResourceValueFactoryProviderTest {
 
     private static Injector injector = Mockito.mock(Injector.class);
-    private static FhirContext ctx = Mockito.mock(FhirContext.class);
+    private static FhirContext ctx = FhirContext.forDstu3();
     private static ProvenanceResourceFactoryProvider factory;
-
-    private ProvenanceResourceValueFactoryProviderTest() {
-        // Not used
-    }
 
     @BeforeAll
     static void setup() {
@@ -37,9 +37,16 @@ class ProvenanceResourceValueFactoryProviderTest {
         Mockito.when(parameter.getDeclaredAnnotation(ProvenanceHeader.class)).thenReturn(mockAnnotation);
         Mockito.when(parameter.getRawType()).thenAnswer(answer -> Patient.class);
 
-        final Factory<?> valueFactory = factory.getValueFactory(parameter);
-        assertAll(() -> assertNotNull(valueFactory, "Should have factory"),
-                () -> assertEquals(ProvenanceResourceValueFactory.class, valueFactory.getClass(), "Should have provenance factory"));
+        Provenance provenance = new Provenance();
+        final String provString = ctx.newJsonParser().encodeResourceToString(provenance);
+        final HttpServletRequest httpRequest = Mockito.mock(HttpServletRequest.class);
+        Mockito.when(httpRequest.getHeader(ProvenanceResourceValueFactory.PROVENANCE_HEADER)).thenReturn(provString);
+        Mockito.when(injector.getInstance(HttpServletRequest.class)).thenReturn(httpRequest);
+
+        final ContainerRequest request = Mockito.mock(ContainerRequest.class);
+        final Function<ContainerRequest, Provenance> valueFunc = factory.getValueProvider(parameter);
+        assertAll(() -> assertNotNull(valueFunc, "Should have factory"),
+                () -> assertEquals(Provenance.class, valueFunc.apply(request).getClass(), "Should have provenance"));
     }
 
     @Test
@@ -47,7 +54,7 @@ class ProvenanceResourceValueFactoryProviderTest {
         final Parameter parameter = Mockito.mock(Parameter.class);
         Mockito.when(parameter.getDeclaredAnnotation(ProvenanceHeader.class)).thenReturn(null);
 
-        assertNull(factory.getValueFactory(parameter), "Factory should be null");
+        assertNull(factory.getValueProvider(parameter), "Factory should be null");
     }
 
     @Test
@@ -57,6 +64,6 @@ class ProvenanceResourceValueFactoryProviderTest {
         Mockito.when(parameter.getDeclaredAnnotation(ProvenanceHeader.class)).thenReturn(mockAnnotation);
         Mockito.when(parameter.getRawType()).thenAnswer(answer -> Mockito.class);
 
-        assertNull(factory.getValueFactory(parameter), "Should not have factory for non-FHIR resource");
+        assertNull(factory.getValueProvider(parameter), "Should not have factory for non-FHIR resource");
     }
 }

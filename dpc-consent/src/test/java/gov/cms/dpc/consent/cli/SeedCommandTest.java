@@ -60,7 +60,7 @@ class SeedCommandTest {
     @Test
     void testSeedCommand() throws Exception {
 
-        final boolean success = cli.run("seed", "ci.application.conf");
+        final Optional<Throwable> success = cli.run("seed", "ci.application.conf");
         /* dies here with the following error
         Should not have errors ==> expected: <> but was: <io.dropwizard.configuration.ConfigurationParsingException: default configuration has an error:
           * Unrecognized field at: consentDatabase
@@ -74,7 +74,7 @@ class SeedCommandTest {
         This is because consentdb (annotation on Config database property) does not match getter name. However, making them match by changing
         the setter name results in the property values not being injected correctly.
         */
-        assertAll(() -> assertTrue(success, "Should have succeeded"),
+        assertAll(() -> assertTrue(success.isPresent(), "Should have succeeded"),
                 () -> assertEquals("", stdErr.toString(), "Should not have errors"));
 
         // todo confirm 10 seeds are present (count)

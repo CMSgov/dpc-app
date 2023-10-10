@@ -23,7 +23,6 @@ import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.Profiled;
 import gov.cms.dpc.fhir.annotations.ProvenanceHeader;
 import gov.cms.dpc.fhir.validations.ValidationHelpers;
-import gov.cms.dpc.fhir.validations.profiles.AttestationProfile;
 import gov.cms.dpc.fhir.validations.profiles.PatientProfile;
 import gov.cms.dpc.queue.service.DataService;
 import io.dropwizard.auth.Auth;
@@ -113,7 +112,7 @@ public class PatientResource extends AbstractPatientResource {
     @ApiOperation(value = "Create Patient", notes = "Create a Patient record associated to the Organization.")
     @ApiResponses(@ApiResponse(code = 422, message = "Patient does not satisfy the required FHIR profile"))
     @Override
-    public Response submitPatient(@ApiParam(hidden = true) @Auth OrganizationPrincipal organization, @Valid @Profiled(profile = PatientProfile.PROFILE_URI) @ApiParam Patient patient) {
+    public Response submitPatient(@ApiParam(hidden = true) @Auth OrganizationPrincipal organization, @Valid @Profiled @ApiParam Patient patient) {
 
         // Set the Managing Organization on the Patient
         final Reference orgReference = new Reference(new IdType("Organization", organization.getOrganization().getId()));
@@ -181,7 +180,7 @@ public class PatientResource extends AbstractPatientResource {
     })
     @Override
     public Bundle everything(@ApiParam(hidden = true) @Auth OrganizationPrincipal organization,
-                             @Valid @Profiled(profile = AttestationProfile.PROFILE_URI) @ProvenanceHeader Provenance provenance,
+                             @Valid @Profiled @ProvenanceHeader Provenance provenance,
                              @ApiParam(value = "Patient resource ID", required = true) @PathParam("patientID") UUID patientId,
                              @QueryParam("_since") @NoHtml String sinceParam,
                              @Context HttpServletRequest request) {
@@ -193,7 +192,7 @@ public class PatientResource extends AbstractPatientResource {
                 .withId(practitionerId.toString())
                 .encodedJson()
                 .execute();
-            
+
         if (practitioner == null) {
             // Is this the best code to be throwing here?
             throw new WebApplicationException(HttpStatus.UNAUTHORIZED_401);
@@ -262,7 +261,7 @@ public class PatientResource extends AbstractPatientResource {
             @ApiResponse(code = 422, message = "Patient does not satisfy the required FHIR profile")
     })
     @Override
-    public Patient updatePatient(@ApiParam(value = "Patient resource ID", required = true) @PathParam("patientID") UUID patientID, @Valid @Profiled(profile = PatientProfile.PROFILE_URI) @ApiParam Patient patient) {
+    public Patient updatePatient(@ApiParam(value = "Patient resource ID", required = true) @PathParam("patientID") UUID patientID, @Valid @Profiled @ApiParam Patient patient) {
         final MethodOutcome outcome = this.client
                 .update()
                 .resource(patient)

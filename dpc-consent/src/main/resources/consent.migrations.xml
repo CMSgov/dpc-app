@@ -38,14 +38,6 @@
             </column>
         </addColumn>
     </changeSet>
-    <changeSet id="change-type-consent-effective-date" author="embh">
-        <dropColumn tableName="CONSENT" columnName="effective_date"/>
-        <addColumn tableName="CONSENT">
-            <column name="effective_date" type="DATE">
-                <constraints nullable="false" />
-            </column>
-        </addColumn>
-    </changeSet>
     <changeSet id="nullable-hicn" author="deirdre">
         <dropNotNullConstraint
                 tableName="CONSENT"

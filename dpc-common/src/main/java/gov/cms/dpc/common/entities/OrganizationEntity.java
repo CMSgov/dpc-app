@@ -3,12 +3,12 @@ package gov.cms.dpc.common.entities;
 import gov.cms.dpc.common.annotations.NoHtml;
 import gov.cms.dpc.common.annotations.OrganizationId;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
-import org.hibernate.validator.constraints.NotEmpty;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Organization;
 
 import javax.persistence.*;
 import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
 import java.util.List;
 import java.util.UUID;

@@ -18,8 +18,8 @@
             <artifactId>dropwizard-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.hubspot.dropwizard</groupId>
-            <artifactId>dropwizard-guicier</artifactId>
+            <groupId>ru.vyarus</groupId>
+            <artifactId>dropwizard-guicey</artifactId>
         </dependency>
         <dependency>
             <groupId>gov.cms.dpc</groupId>
@@ -61,6 +61,10 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>javax.persistence</groupId>
+            <artifactId>javax.persistence-api</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
         </dependency>
@@ -87,7 +91,7 @@
                         <annotationProcessorPath>
                             <groupId>org.hibernate</groupId>
                             <artifactId>hibernate-jpamodelgen</artifactId>
-                            <version>5.4.2.Final</version>
+                            <version>5.6.15.Final</version>
                         </annotationProcessorPath>
                         <path>
                             <groupId>javax.xml.bind</groupId>

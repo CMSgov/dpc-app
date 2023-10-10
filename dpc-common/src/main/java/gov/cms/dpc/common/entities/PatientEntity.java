@@ -1,11 +1,11 @@
 package gov.cms.dpc.common.entities;
 
 import gov.cms.dpc.common.annotations.NoHtml;
-import org.hibernate.validator.constraints.NotEmpty;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.Patient;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import java.time.LocalDate;

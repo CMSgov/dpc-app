@@ -87,7 +87,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
                 .map(entry -> (Organization) entry.getResource())
                 .findFirst();
 
-        if (!optOrganization.isPresent()) {
+        if (optOrganization.isEmpty()) {
             return Response.status(HttpStatus.UNPROCESSABLE_ENTITY_422).entity("Must provide organization to register").build();
         }
 

@@ -11,6 +11,8 @@ import org.hl7.fhir.dstu3.model.OperationOutcome;
 
 import javax.inject.Inject;
 import javax.validation.ConstraintViolation;
+import javax.ws.rs.container.ResourceInfo;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Provider;
 import java.util.Set;
@@ -23,8 +25,8 @@ import java.util.Set;
 public class JerseyExceptionHandler extends AbstractFHIRExceptionHandler<JerseyViolationException> {
 
     @Inject
-    JerseyExceptionHandler() {
-        super();
+    JerseyExceptionHandler(@Context ResourceInfo info) {
+        super(info);
     }
 
     @Override

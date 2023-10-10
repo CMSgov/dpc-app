@@ -7,9 +7,9 @@ import gov.cms.dpc.api.models.CreateTokenRequest;
 import gov.cms.dpc.api.models.JWTAuthResponse;
 import gov.cms.dpc.common.annotations.NoHtml;
 import io.dropwizard.jersey.jsr310.OffsetDateTimeParam;
-import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;

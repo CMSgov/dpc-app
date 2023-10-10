@@ -123,8 +123,8 @@ class BlueButtonClientV2Test {
 
         createMockServerExpectation(
             "/v2/fhir/ExplanationOfBenefit",
-            HttpStatus.OK_200, 
-            getRawXML(SAMPLE_EOB_PATH_PREFIX + TEST_SINGLE_EOB_PATIENT_ID + ".xml"), 
+            HttpStatus.OK_200,
+            getRawXML(SAMPLE_EOB_PATH_PREFIX + TEST_SINGLE_EOB_PATIENT_ID + ".xml"),
             List.of(
                     Parameter.param("patient", TEST_SINGLE_EOB_PATIENT_ID),
                     Parameter.param("excludeSAMHSA", "true"),

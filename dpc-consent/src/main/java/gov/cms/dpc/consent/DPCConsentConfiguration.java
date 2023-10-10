@@ -6,10 +6,10 @@ import gov.cms.dpc.common.hibernate.consent.IDPCConsentDatabase;
 import gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration;
 import gov.cms.dpc.fhir.configuration.IDPCFHIRConfiguration;
 import io.dropwizard.db.DataSourceFactory;
-import org.hibernate.validator.constraints.NotEmpty;
 import org.knowm.dropwizard.sundial.SundialConfiguration;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 public class DPCConsentConfiguration extends TypesafeConfiguration implements IDPCConsentDatabase, IDPCFHIRConfiguration {

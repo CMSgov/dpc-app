@@ -18,11 +18,11 @@ import io.dropwizard.hibernate.UnitOfWork;
 import io.swagger.annotations.*;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.eclipse.jetty.http.HttpStatus;
-import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;

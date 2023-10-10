@@ -74,9 +74,9 @@ class TokenTests extends AbstractApplicationTest {
     @Test
     void testTokenLifecycle() throws Exception {
         // Create the organization
-        final boolean success = cli.run("register", "-f", "../src/main/resources/organization.tmpl.json", "--no-token", "--host", "http://localhost:3500/v1");
+        final Optional<Throwable> success = cli.run("register", "-f", "../src/main/resources/organization.tmpl.json", "--no-token", "--host", "http://localhost:3500/v1");
 
-        assertAll(() -> assertTrue(success, "Should have succeeded"),
+        assertAll(() -> assertTrue(success.isEmpty(), "Should have succeeded"),
                 () -> assertEquals("", stdErr.toString(), "Should not have errors"));
 
         // Pull out the organization ID
@@ -91,9 +91,9 @@ class TokenTests extends AbstractApplicationTest {
         final String organizationID = matcher.group(0);
         stdOut.reset();
         stdErr.reset();
-        final boolean s2 = cli.run("create", organizationID);
+        final Optional<Throwable> s2 = cli.run("create", organizationID);
 
-        assertAll(() -> assertTrue(s2, "Should have succeeded"),
+        assertAll(() -> assertTrue(s2.isEmpty(), "Should have succeeded"),
                 () -> assertEquals("", stdErr.toString(), "Should not have any errors"));
 
         // List the organization tokens
@@ -103,9 +103,9 @@ class TokenTests extends AbstractApplicationTest {
         // Try to remove it
         stdOut.reset();
         stdErr.reset();
-        final boolean s3 = cli.run("delete", "-o", organizationID, matchedTokenIDs.get(0).toString());
+        final Optional<Throwable> s3 = cli.run("delete", "-o", organizationID, matchedTokenIDs.get(0).toString());
 
-        assertTrue(s3, "Should have succeeded");
+        assertTrue(s3.isEmpty(), "Should have succeeded");
 
         final List<UUID> tokenIDs = getTokenIDs(organizationID);
         assertTrue(tokenIDs.isEmpty(), "Should not have any tokens");
@@ -115,7 +115,7 @@ class TokenTests extends AbstractApplicationTest {
         stdOut.reset();
         stdErr.reset();
 
-        final boolean s2 = cli.run("list", organizationID);
+        final Optional<Throwable> s2 = cli.run("list", organizationID);
 
         // Find all of the token IDs
         final List<UUID> matchedTokenIDs = Pattern.compile("║\\s([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})")
@@ -126,7 +126,7 @@ class TokenTests extends AbstractApplicationTest {
                 .map(UUID::fromString)
                 .collect(Collectors.toList());
 
-        assertAll(() -> assertTrue(s2, "Should have succeeded"),
+        assertAll(() -> assertTrue(s2.isEmpty(), "Should have succeeded"),
                 () -> assertEquals("", stdErr.toString(), "Should be empty"));
 
         return matchedTokenIDs;
