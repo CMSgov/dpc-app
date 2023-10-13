@@ -1,27 +1,40 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
-require './lib/luhnacy_lib/luhnacy_lib'
 
-RSpec.describe ApiClient do
-  include OrganizationsHelper
-
-  let!(:org) { create(:organization, npi: LuhnacyLib.generate_npi) }
-  let!(:registered_org) { build(:registered_organization, organization: org) }
-  let!(:fhir_endpoint) do
-    build(
-      :fhir_endpoint,
-      name: 'Cool SBX',
+RSpec.describe DpcClient do
+  let!(:org) do
+    double('organization',
+           npi: 'long thing', name: 'Org', address_use: 'work', address_type: 'both',
+           address_city: 'Akron', address_state: 'OH', address_street: '111 Main ST', 'address_street_2' => 'STE 5',
+           address_zip: '22222')
+  end
+  let!(:reg_org) do double('RegisteredOrg',
+                           api_id: 'some-api-key',
+                           fhir_endpoint_id: 'some-fhir-endpoint-id',
+                           api_endpoint_ref: 'Endpoint/some-fhir-endpoing-id')
+  end
+  let(:fhir_endpoint_attributes) do
+    { name: 'Cool SBX',
       uri: 'https://cool.com',
-      status: 'active',
-      registered_organization: registered_org
+      status: 'active' }.with_indifferent_access
+  end
+  let!(:fhir_endpoint) do
+    double(
+      :fhir_endpoint,
+      name: fhir_endpoint_attributes[:name],
+      uri: fhir_endpoint_attributes[:uri],
+      status: fhir_endpoint_attributes[:status],
+      attributes: fhir_endpoint_attributes
     )
   end
 
+  # rubocop:disable Layout/LineLength
   before(:each) do
     allow(ENV).to receive(:fetch).with('API_METADATA_URL').and_return('http://dpc.example.com')
     allow(ENV).to receive(:fetch).with('GOLDEN_MACAROON').and_return('MDAyM2xvY2F0aW9uIGh0dHA6Ly9sb2NhbGhvc3Q6MzAwMgowMDM0aWRlbnRpZmllciBiODY2NmVjMi1lOWY1LTRjODctYjI0My1jMDlhYjgyY2QwZTMKMDAyZnNpZ25hdHVyZSA1hzDOqfW_1hasj-tOps9XEBwMTQIW9ACQcZPuhAGxwwo')
   end
+  # rubocop:enable Layout/LineLength
 
   describe '#create_organization' do
     context 'successful API request' do
@@ -71,10 +84,10 @@ RSpec.describe ApiClient do
                     },
                     payloadType: [
                       {
-                        'coding': [
+                        coding: [
                           {
-                            'system': 'http://hl7.org/fhir/endpoint-payload-type',
-                            'code': 'any'
+                            system: 'http://hl7.org/fhir/endpoint-payload-type',
+                            code: 'any'
                           }
                         ]
                       }
@@ -91,7 +104,7 @@ RSpec.describe ApiClient do
                 '"endpoint":[{"reference":"Endpoint/d385cfb4-dc36-4cd0-b8f8-400a6dea2d66"}]}'
         )
 
-        api_client = ApiClient.new
+        api_client = DpcClient.new
 
         api_client.create_organization(org, fhir_endpoint: fhir_endpoint.attributes)
 
@@ -112,7 +125,7 @@ RSpec.describe ApiClient do
         allow(http_stub).to receive(:use_ssl=).with(false).and_return(false)
         allow(http_stub).to receive(:request).and_raise(Errno::ECONNREFUSED)
 
-        api_client = ApiClient.new
+        api_client = DpcClient.new
 
         api_client.create_organization(org, fhir_endpoint: fhir_endpoint.attributes)
 
@@ -174,10 +187,10 @@ RSpec.describe ApiClient do
                     },
                     payloadType: [
                       {
-                        'coding': [
+                        coding: [
                           {
-                            'system': 'http://hl7.org/fhir/endpoint-payload-type',
-                            'code': 'any'
+                            system: 'http://hl7.org/fhir/endpoint-payload-type',
+                            code: 'any'
                           }
                         ]
                       }
@@ -194,7 +207,7 @@ RSpec.describe ApiClient do
                 '"text":"org.hibernate.exception.ConstraintViolationException: could not execute statement"}}]}'
         )
 
-        api_client = ApiClient.new
+        api_client = DpcClient.new
 
         api_client.create_organization(org, fhir_endpoint: fhir_endpoint.attributes)
         parse_response = JSON.parse api_client.response_body
@@ -218,9 +231,9 @@ RSpec.describe ApiClient do
   describe '#update_organization' do
     context 'successful request' do
       it 'uses fhir_client to send org data to API' do
-        stub_request(:put, "http://dpc.example.com/Organization/#{registered_org.api_id}")
+        stub_request(:put, "http://dpc.example.com/Organization/#{reg_org.api_id}")
           .with(
-            body: /#{registered_org.api_id}/,
+            body: /#{reg_org.api_id}/,
             headers: {
               'Accept' => 'application/fhir+json',
               'Content-Type' => 'application/fhir+json;charset=utf-8',
@@ -228,17 +241,17 @@ RSpec.describe ApiClient do
             }
           ).to_return(status: 200, body: '{}', headers: {})
 
-        client = ApiClient.new
-        expect(client.update_organization(registered_org)).to eq(client)
+        client = DpcClient.new
+        expect(client.update_organization(org, reg_org.api_id, reg_org.api_endpoint_ref)).to eq(client)
         expect(client.response_successful?).to eq(true)
       end
     end
 
     context 'unsuccessful request' do
       it 'uses fhir_client to send org data to API' do
-        stub_request(:put, "http://dpc.example.com/Organization/#{registered_org.api_id}")
+        stub_request(:put, "http://dpc.example.com/Organization/#{reg_org.api_id}")
           .with(
-            body: /#{registered_org.api_id}/,
+            body: /#{reg_org.api_id}/,
             headers: {
               'Accept' => 'application/fhir+json',
               'Content-Type' => 'application/fhir+json;charset=utf-8',
@@ -246,8 +259,8 @@ RSpec.describe ApiClient do
             }
           ).to_return(status: 500, body: '', headers: {})
 
-        client = ApiClient.new
-        expect(client.update_organization(registered_org)).to eq(client)
+        client = DpcClient.new
+        expect(client.update_organization(org, reg_org.api_id, reg_org.fhir_endpoint_id)).to eq(client)
         expect(client.response_successful?).to eq(false)
       end
     end
@@ -256,11 +269,9 @@ RSpec.describe ApiClient do
   describe '#update_endpoint' do
     context 'successful request' do
       it 'uses fhir_client to send endpoint data to API' do
-        build(:fhir_endpoint, registered_organization: registered_org)
-
-        stub_request(:put, "http://dpc.example.com/Endpoint/#{registered_org.fhir_endpoint_id}")
+        stub_request(:put, "http://dpc.example.com/Endpoint/#{reg_org.fhir_endpoint_id}")
           .with(
-            body: /#{registered_org.fhir_endpoint_id}/,
+            body: /#{reg_org.fhir_endpoint_id}/,
             headers: {
               'Accept' => 'application/fhir+json',
               'Content-Type' => 'application/fhir+json;charset=utf-8',
@@ -268,19 +279,17 @@ RSpec.describe ApiClient do
             }
           ).to_return(status: 200, body: '{}', headers: {})
 
-        client = ApiClient.new
-        expect(client.update_endpoint(registered_org)).to eq(client)
+        client = DpcClient.new
+        expect(client.update_endpoint(reg_org.api_id, reg_org.fhir_endpoint_id, fhir_endpoint)).to eq(client)
         expect(client.response_successful?).to eq(true)
       end
     end
 
     context 'unsuccessul request' do
       it 'uses fhir_client to send org data to API' do
-        build(:fhir_endpoint, registered_organization: registered_org)
-
-        stub_request(:put, "http://dpc.example.com/Endpoint/#{registered_org.fhir_endpoint_id}")
+        stub_request(:put, "http://dpc.example.com/Endpoint/#{reg_org.fhir_endpoint_id}")
           .with(
-            body: /#{registered_org.fhir_endpoint_id}/,
+            body: /#{reg_org.fhir_endpoint_id}/,
             headers: {
               'Accept' => 'application/fhir+json',
               'Content-Type' => 'application/fhir+json;charset=utf-8',
@@ -288,8 +297,8 @@ RSpec.describe ApiClient do
             }
           ).to_return(status: 500, body: '', headers: {})
 
-        client = ApiClient.new
-        expect(client.update_endpoint(registered_org)).to eq(client)
+        client = DpcClient.new
+        expect(client.update_endpoint(reg_org.api_id, reg_org.fhir_endpoint_id, fhir_endpoint)).to eq(client)
         expect(client.response_successful?).to eq(false)
       end
     end
@@ -303,12 +312,12 @@ RSpec.describe ApiClient do
         ).to_return(
           status: 200,
           body: '[{"id":"4r85cfb4-dc36-4cd0-b8f8-400a6dea2d66","label":"Sandbox Token 1",' \
-                '"createdAt":"2019-11-07T17:15:22.781Z","expiresdAt":"2019-11-07T17:15:22.781Z"}]'
+                '"createdAt":"2019-11-07T17:15:22.781Z","expiresAt":"2019-11-07T17:15:22.781Z"}]'
         )
 
-        api_client = ApiClient.new
+        api_client = DpcClient.new
 
-        api_client.get_client_tokens(registered_org.api_id)
+        api_client.get_client_tokens(reg_org.api_id)
 
         expect(api_client.response_status).to eq(200)
         expect(api_client.response_body).to eq(
@@ -316,7 +325,7 @@ RSpec.describe ApiClient do
             'id' => '4r85cfb4-dc36-4cd0-b8f8-400a6dea2d66',
             'label' => 'Sandbox Token 1',
             'createdAt' => '2019-11-07T17:15:22.781Z',
-            'expiresdAt' =>'2019-11-07T17:15:22.781Z'
+            'expiresAt' => '2019-11-07T17:15:22.781Z'
           }]
         )
       end
@@ -329,9 +338,9 @@ RSpec.describe ApiClient do
         allow(http_stub).to receive(:use_ssl=).with(false).and_return(false)
         allow(http_stub).to receive(:request).and_raise(Errno::ECONNREFUSED)
 
-        api_client = ApiClient.new
+        api_client = DpcClient.new
 
-        api_client.get_client_tokens(registered_org.api_id)
+        api_client.get_client_tokens(reg_org.api_id)
 
         expect(api_client.response_status).to eq(500)
         expect(api_client.response_body).to eq(
@@ -353,9 +362,9 @@ RSpec.describe ApiClient do
           body: ''
         )
 
-        api_client = ApiClient.new
+        api_client = DpcClient.new
 
-        api_client.get_client_tokens(registered_org.api_id)
+        api_client.get_client_tokens(reg_org.api_id)
 
         expect(api_client.response_status).to eq(500)
         expect(api_client.response_body).to eq('')
@@ -374,9 +383,9 @@ RSpec.describe ApiClient do
                 '"createdAt":"2019-11-07T17:15:22.781Z"}]'
         )
 
-        api_client = ApiClient.new
+        api_client = DpcClient.new
 
-        api_client.get_public_keys(registered_org.api_id)
+        api_client.get_public_keys(reg_org.api_id)
 
         expect(api_client.response_status).to eq(200)
         expect(api_client.response_body).to eq(
@@ -398,9 +407,9 @@ RSpec.describe ApiClient do
           body: '{}'
         )
 
-        api_client = ApiClient.new
+        api_client = DpcClient.new
 
-        api_client.get_public_keys(registered_org.api_id)
+        api_client.get_public_keys(reg_org.api_id)
 
         expect(api_client.response_status).to eq(500)
         expect(api_client.response_body).to eq('{}')
