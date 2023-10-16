@@ -1,8 +1,10 @@
-require "bundler/setup"
+# frozen_string_literal: true
 
-APP_RAKEFILE = File.expand_path("spec/dummy/Rakefile", __dir__)
-load "rails/tasks/engine.rake"
+require 'bundler/setup'
 
-load "rails/tasks/statistics.rake"
+APP_RAKEFILE = File.expand_path('spec/dummy/Rakefile', __dir__)
+load 'rails/tasks/engine.rake'
 
-require "bundler/gem_tasks"
+load 'rails/tasks/statistics.rake'
+
+require 'bundler/gem_tasks'

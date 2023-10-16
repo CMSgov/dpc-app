@@ -9,10 +9,11 @@ RSpec.describe DpcClient do
            address_city: 'Akron', address_state: 'OH', address_street: '111 Main ST', 'address_street_2' => 'STE 5',
            address_zip: '22222')
   end
-  let!(:reg_org) do double('RegisteredOrg',
-                           api_id: 'some-api-key',
-                           fhir_endpoint_id: 'some-fhir-endpoint-id',
-                           api_endpoint_ref: 'Endpoint/some-fhir-endpoing-id')
+  let!(:reg_org) do
+    double('RegisteredOrg',
+           api_id: 'some-api-key',
+           fhir_endpoint_id: 'some-fhir-endpoint-id',
+           api_endpoint_ref: 'Endpoint/some-fhir-endpoing-id')
   end
   let(:fhir_endpoint_attributes) do
     { name: 'Cool SBX',
