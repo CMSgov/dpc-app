@@ -1,15 +1,21 @@
-source "https://rubygems.org"
+# frozen_string_literal: true
+
+source 'https://rubygems.org'
 git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
 # Specify your gem's dependencies in api_client.gemspec.
 gemspec
 
-gem 'sqlite3', git: "https://github.com/sparklemotion/sqlite3-ruby"
-gem "sprockets-rails"
+gem 'active_model_serializers'
+# rubocop:disable Bundler/OrderedGems
 gem 'macaroons'
 gem 'fhir_client'
-gem 'active_model_serializers'
+# rubocop:enable Bundler/OrderedGems
+gem 'nokogiri'
+gem 'rspec-rails'
 gem 'rubocop'
+gem 'sprockets-rails'
+gem 'sqlite3', git: 'https://github.com/sparklemotion/sqlite3-ruby'
 gem 'webmock'
 # Start debugger with binding.b [https://github.com/ruby/debug]
-# gem "debug", ">= 1.0.0"
+# gem 'debug', '>= 1.0.0'

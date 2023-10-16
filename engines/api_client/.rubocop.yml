@@ -5,6 +5,7 @@ AllCops:
     - 'app/jobs/application_job.rb'
     - 'app/mailers/application_mailer.rb'
     - 'app/models/application_record.rb'
+    - 'spec/dummy/**/*'
     - 'bin/**/*'
     - 'config/**/*'
     - 'config.ru'
@@ -13,5 +14,8 @@ AllCops:
 Metrics/BlockLength:
   AllowedMethods: ['describe', 'context', 'it', 'config']
 
+Metrics/ClassLength:
+  Max: 150
+
 Metrics/MethodLength:
-  Max: 15
+  Max: 30

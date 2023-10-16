@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Turns object into hash
 class OrganizationSubmitSerializer < ActiveModel::Serializer
   attribute(:resourceType) { 'Parameters' }
 
@@ -77,10 +78,10 @@ class OrganizationSubmitSerializer < ActiveModel::Serializer
         },
         payloadType: [
           {
-            'coding': [
+            coding: [
               {
-                'system': 'http://hl7.org/fhir/endpoint-payload-type',
-                'code': 'any'
+                system: 'http://hl7.org/fhir/endpoint-payload-type',
+                code: 'any'
               }
             ]
           }

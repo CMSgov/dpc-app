@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Provides interaction with dpc-api
 class DpcClient
   attr_reader :base_url, :response_body, :response_status
 
@@ -12,7 +13,7 @@ class DpcClient
   end
 
   def create_organization(org, fhir_endpoint: {})
-    uri_string = base_url + '/Organization/$submit'
+    uri_string = "#{base_url}/Organization/$submit"
     json = OrganizationSubmitSerializer.new(org, fhir_endpoint: fhir_endpoint).to_json
     post_request(uri_string, json, fhir_headers(golden_macaroon))
     self
@@ -37,12 +38,12 @@ class DpcClient
   end
 
   def get_client_tokens(reg_org_api_id)
-    uri_string = base_url + '/Token'
+    uri_string = "#{base_url}/Token"
     get_request(uri_string, delegated_macaroon(reg_org_api_id))
   end
 
   def create_public_key(reg_org_api_id, params: {})
-    uri_string = base_url + '/Key'
+    uri_string = "#{base_url}/Key"
 
     json = {
       key: params[:public_key],
@@ -60,7 +61,7 @@ class DpcClient
   end
 
   def get_public_keys(reg_org_api_id)
-    uri_string = base_url + '/Key'
+    uri_string = "#{base_url}/Key"
     get_request(uri_string, delegated_macaroon(reg_org_api_id))
   end
 
@@ -75,7 +76,7 @@ class DpcClient
   private
 
   def auth_header(token)
-    { 'Authorization': "Bearer #{token}" }
+    { Authorization: "Bearer #{token}" }
   end
 
   def delegated_macaroon(reg_org_api_id)
@@ -121,7 +122,7 @@ class DpcClient
   def post_text_request(uri_string, json, query_params, token)
     uri = URI.parse uri_string
     uri.query = URI.encode_www_form(query_params)
-    text_headers = { 'Content-Type': json_content, 'Accept': json_content }.merge(auth_header(token))
+    text_headers = { 'Content-Type' => json_content, Accept: json_content }.merge(auth_header(token))
 
     request = Net::HTTP::Post.new(uri.request_uri, text_headers)
     request.body = json
@@ -153,11 +154,11 @@ class DpcClient
   end
 
   def headers(token)
-    { 'Content-Type': json_content, 'Accept': json_content }.merge(auth_header(token))
+    { 'Content-Type' => json_content, Accept: json_content }.merge(auth_header(token))
   end
 
   def fhir_headers(token)
-    { 'Content-Type': 'application/fhir+json', 'Accept': 'application/fhir+json' }.merge(auth_header(token))
+    { 'Content-Type' => 'application/fhir+json', Accept: 'application/fhir+json' }.merge(auth_header(token))
   end
 
   def use_ssl?

@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# builds payloads for fhir resources
 class FhirResourceBuilder
   def fhir_org(org, api_id, api_endpoint_ref)
     fhir_org = FHIR::Organization.new(
@@ -54,10 +55,10 @@ class FhirResourceBuilder
   def payload_type
     [
       {
-        'coding': [
+        coding: [
           {
-            'system': 'http://hl7.org/fhir/endpoint-payload-type',
-            'code': 'any'
+            system: 'http://hl7.org/fhir/endpoint-payload-type',
+            code: 'any'
           }
         ]
       }
