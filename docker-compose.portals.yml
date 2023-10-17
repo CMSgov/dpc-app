@@ -73,6 +73,23 @@ services:
       - redis
       - admin_sidekiq
 
+  admin_sidekiq:
+    volumes:
+      - ./tmp/letter_opener/admin:/dpc-admin/tmp/letter_opener
+    build:
+      context: .
+      dockerfile: dpc-admin/Dockerfile
+    command: sidekiq
+    image: dpc-admin-sidekiq:latest
+    environment:
+      - REDIS_URL=redis://redis
+      - DATABASE_URL=postgresql://db/dpc-website_development
+      - DB_USER=postgres
+      - DB_PASS=dpc-safe
+    depends_on:
+      - redis
+      - db
+
   dpc_portal:
     build:
       context: .
@@ -90,15 +107,16 @@ services:
       - "3100:3000"
     depends_on:
       - db
+      - portal_sidekiq
 
-  admin_sidekiq:
+  portal_sidekiq:
     volumes:
-      - ./tmp/letter_opener/admin:/dpc-admin/tmp/letter_opener
+      - ./tmp/letter_opener/portal:/dpc-portal/tmp/letter_opener
     build:
       context: .
-      dockerfile: dpc-admin/Dockerfile
+      dockerfile: dpc-portal/Dockerfile
     command: sidekiq
-    image: dpc-admin-sidekiq:latest
+    image: dpc-portal-sidekiq:latest
     environment:
       - REDIS_URL=redis://redis
       - DATABASE_URL=postgresql://db/dpc-website_development
