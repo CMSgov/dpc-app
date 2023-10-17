@@ -119,7 +119,7 @@ services:
     image: dpc-portal-sidekiq:latest
     environment:
       - REDIS_URL=redis://redis
-      - DATABASE_URL=postgresql://db/dpc-website_development
+      - DATABASE_URL=postgresql://db/dpc-portal_development
       - DB_USER=postgres
       - DB_PASS=dpc-safe
     depends_on:
