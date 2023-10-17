@@ -305,6 +305,52 @@ RSpec.describe DpcClient do
     end
   end
 
+  describe '#create_client_token' do
+    context 'successful API request' do
+      it 'sends data to API and sets response instance variables' do
+        stub_request(:post, 'http://dpc.example.com/Token').with(
+          headers: { 'Content-Type' => 'application/json' },
+          body: {
+            label: 'Sandbox Token 1'
+          }.to_json
+        ).to_return(
+          status: 200,
+          body: '{"token":"1234567890","label":"Sandbox Token 1","createdAt":"2019-11-07T17:15:22.781Z"}'
+        )
+
+        api_client = DpcClient.new
+
+        api_client.create_client_token(reg_org.api_id, params: { label: 'Sandbox Token 1' })
+
+        expect(api_client.response_status).to eq(200)
+        expect(api_client.response_body).to eq(
+          { 'token' => '1234567890', 'label' => 'Sandbox Token 1', 'createdAt' => '2019-11-07T17:15:22.781Z' }
+        )
+      end
+    end
+
+    context 'unsuccessful API request' do
+      it 'sends data to API and sets response instance variables' do
+        stub_request(:post, 'http://dpc.example.com/Token').with(
+          headers: { 'Content-Type' => 'application/json' },
+          body: {
+            label: 'Sandbox Token 1'
+          }.to_json
+        ).to_return(
+          status: 500,
+          body: '{}'
+        )
+
+        api_client = DpcClient.new
+
+        api_client.create_client_token(reg_org.api_id, params: { label: 'Sandbox Token 1' })
+
+        expect(api_client.response_status).to eq(500)
+        expect(api_client.response_body).to eq('{}')
+      end
+    end
+  end
+
   describe '#get_client_tokens' do
     context 'successful API request' do
       it 'sends data to API and sets response instance variables' do
@@ -369,6 +415,136 @@ RSpec.describe DpcClient do
 
         expect(api_client.response_status).to eq(500)
         expect(api_client.response_body).to eq('')
+      end
+    end
+  end
+
+  describe '#delete_client_token' do
+    context 'successful API request' do
+      it 'returns success' do
+        stub_request(:delete, 'http://dpc.example.com/Token/some-token-id')
+          .with(
+            headers: { 'Accept' => 'application/json', 'Content-Type' => 'application/json' }
+          )
+          .to_return(status: 200, body: '', headers: {})
+
+        api_client = DpcClient.new
+
+        api_client.delete_client_token(reg_org.api_id, 'some-token-id')
+        expect(api_client.response_status).to eq(200)
+      end
+    end
+
+    context 'unsuccessful API request' do
+      it 'returns failure' do
+        stub_request(:delete, 'http://dpc.example.com/Token/some-token-id')
+          .with(
+            headers: { 'Accept' => 'application/json', 'Content-Type' => 'application/json' }
+          )
+          .to_return(status: 500, body: '', headers: {})
+
+        api_client = DpcClient.new
+
+        api_client.delete_client_token(reg_org.api_id, 'some-token-id')
+        expect(api_client.response_status).to eq(500)
+      end
+    end
+  end
+
+  describe '#create_public_key' do
+    context 'successful API request' do
+      it 'sends data to API and sets response instance variables' do
+        stub_request(:post, 'http://dpc.example.com/Key?label=Sandbox+Key+1').with(
+          body: {
+            key: stubbed_key,
+            signature: 'signature_snippet'
+          }
+        ).to_return(
+          status: 200,
+          body: '{"label":"Sandbox Key 1","createdAt":"2019-11-07T19:38:44.205Z",' \
+                '"id":"3fa85f64-5717-4562-b3fc-2c963f66afa6"}'
+        )
+
+        api_client = DpcClient.new
+
+        api_client.create_public_key(
+          reg_org.api_id,
+          params: { label: 'Sandbox Key 1', public_key: stubbed_key, snippet_signature: 'signature_snippet' }
+        )
+
+        expect(api_client.response_status).to eq(200)
+        expect(api_client.response_body).to eq(
+          {
+            'label' => 'Sandbox Key 1',
+            'createdAt' => '2019-11-07T19:38:44.205Z',
+            'id' => '3fa85f64-5717-4562-b3fc-2c963f66afa6'
+          }
+        )
+      end
+    end
+  end
+
+  describe '#delete_public_key' do
+    context 'successful API request' do
+      it 'sends data to API and sets response instance variables' do
+        stub_request(:post, 'http://dpc.example.com/Key?label=Sandbox+Key+1').with(
+          body: {
+            key: stubbed_key,
+            signature: 'signature_snippet'
+          }
+        ).to_return(
+          status: 200,
+          body: '{"label":"Sandbox Key 1","createdAt":"2019-11-07T19:38:44.205Z",' \
+                '"id":"3fa85f64-5717-4562-b3fc-2c963f66afa6"}'
+        )
+
+        api_client = DpcClient.new
+
+        api_client.create_public_key(
+          reg_org.api_id,
+          params: { label: 'Sandbox Key 1', public_key: stubbed_key, snippet_signature: 'signature_snippet' }
+        )
+
+        stub_request(:delete, 'http://dpc.example.com/Key/3fa85f64-5717-4562-b3fc-2c963f66afa6')
+          .with(
+            headers: { 'Accept' => 'application/json', 'Content-Type' => 'application/json' }
+          )
+          .to_return(status: 200, body: '', headers: {})
+
+        api_client.delete_public_key(
+          reg_org.api_id,
+          '3fa85f64-5717-4562-b3fc-2c963f66afa6'
+        )
+
+        expect(api_client.response_status).to eq(200)
+      end
+    end
+
+    context 'unsuccessful API request' do
+      it 'sends data to API and sets response instance variables' do
+        stub_request(:post, 'http://dpc.example.com/Key?label=Sandbox+Key+1').with(
+          body: {
+            key: stubbed_key,
+            signature: 'stubbed_sign_txt_signature'
+          }
+        ).to_return(
+          status: 500,
+          body: '{}'
+        )
+
+        api_client = DpcClient.new
+
+        api_client.create_public_key(
+          reg_org.api_id,
+          params: {
+            label: 'Sandbox Key 1',
+            public_key: stubbed_key,
+            snippet_signature: 'stubbed_sign_txt_signature'
+          }
+        )
+
+        expect(api_client.response_status).to eq(500)
+        expect(api_client.response_body).to eq('{}')
       end
     end
   end
