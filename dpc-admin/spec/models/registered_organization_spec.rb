@@ -3,7 +3,7 @@
 require 'rails_helper'
 
 RSpec.describe RegisteredOrganization, type: :model do
-  include ApiClientSupport
+  include DpcClientSupport
 
   describe '#client_tokens' do
     it 'gets array from ClientTokenManager' do
@@ -150,7 +150,9 @@ RSpec.describe RegisteredOrganization, type: :model do
           allow(reg_org).to receive(:update_api_endpoint)
           reg_org.update(updated_at: Time.now)
 
-          expect(api_client).to have_received(:update_organization).with(reg_org)
+          expect(api_client).to have_received(:update_organization).with(reg_org.organization,
+                                                                         reg_org.api_id,
+                                                                         reg_org.api_endpoint_ref)
         end
       end
 
@@ -172,7 +174,7 @@ RSpec.describe RegisteredOrganization, type: :model do
           allow(reg_org).to receive(:update_api_endpoint)
           reg_org.update(updated_at: Time.now)
 
-          expect(api_client).to have_received(:update_organization).with(reg_org)
+          expect(api_client).to have_received(:update_organization).with(reg_org.organization, reg_org.api_id, reg_org.api_endpoint_ref)
           expect(reg_org.errors.count).to eq(1)
         end
       end
@@ -199,7 +201,9 @@ RSpec.describe RegisteredOrganization, type: :model do
           allow(reg_org).to receive(:update_api_organization)
           reg_org.update(created_at: new_attr)
 
-          expect(api_client).to have_received(:update_endpoint).with(reg_org)
+          expect(api_client).to have_received(:update_endpoint).with(reg_org.api_id,
+                                                                     reg_org.fhir_endpoint_id,
+                                                                     reg_org.fhir_endpoint)
           expect(reg_org.created_at.to_i).to eq(new_attr.to_i)
         end
       end
@@ -224,7 +228,9 @@ RSpec.describe RegisteredOrganization, type: :model do
           allow(reg_org).to receive(:update_api_organization)
           reg_org.update(created_at: new_attr)
 
-          expect(api_client).to have_received(:update_endpoint).with(reg_org)
+          expect(api_client).to have_received(:update_endpoint).with(reg_org.api_id,
+                                                                     reg_org.fhir_endpoint_id,
+                                                                     reg_org.fhir_endpoint)
           expect(reg_org.errors.count).to eq(1)
           expect(reg_org.reload.created_at.to_i).to eq(old_attr.to_i)
         end

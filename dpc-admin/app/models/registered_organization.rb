@@ -50,7 +50,7 @@ class RegisteredOrganization < ApplicationRecord
   end
 
   def update_api_organization
-    api_request = api_service.update_organization(self)
+    api_request = api_service.update_organization(organization, api_id, api_endpoint_ref)
     api_response = api_request.response_body
     return if api_request.response_successful?
 
@@ -61,7 +61,7 @@ class RegisteredOrganization < ApplicationRecord
   end
 
   def update_api_endpoint
-    api_request = api_service.update_endpoint(self)
+    api_request = api_service.update_endpoint(api_id, fhir_endpoint_id, fhir_endpoint)
     api_response = api_request.response_body
     return if api_request.response_successful?
 
@@ -90,7 +90,7 @@ class RegisteredOrganization < ApplicationRecord
   private
 
   def api_service
-    @api_service ||= ApiClient.new
+    @api_service ||= DpcClient.new
   end
 
   def api_error(action, msg)

@@ -426,12 +426,12 @@ RSpec.describe DpcClient do
           .with(
             headers: { 'Accept' => 'application/json', 'Content-Type' => 'application/json' }
           )
-          .to_return(status: 200, body: '', headers: {})
+          .to_return(status: 204, headers: {})
 
         api_client = DpcClient.new
 
         api_client.delete_client_token(reg_org.api_id, 'some-token-id')
-        expect(api_client.response_status).to eq(200)
+        expect(api_client.response_status).to eq(204)
       end
     end
 

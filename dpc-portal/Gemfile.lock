@@ -1,3 +1,15 @@
+GIT
+  remote: https://github.com/CMSgov/dpc-app.git
+  revision: d85a3962090a4dd3ddf4137a69694f532842a32d
+  branch: jd/dpc-api-client-to-dpc-portal
+  glob: engines/api_client/api_client.gemspec
+  specs:
+    api_client (0.1.0)
+      active_model_serializers
+      activemodel (~> 7.0.7.1)
+      fhir_client
+      macaroons
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -473,6 +485,7 @@ DEPENDENCIES
   activerecord (~> 7.0.7.1)
   activestorage (~> 7.0.7.1)
   activesupport (~> 7.0.7.1)
+  api_client!
   bootsnap (>= 1.4.2)
   bundler (>= 1.15.0)
   bundler-audit
