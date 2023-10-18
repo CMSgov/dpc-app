@@ -3,7 +3,7 @@
 require 'rails_helper'
 
 RSpec.describe OrganizationUserAssignment, type: :model do
-  include APIClientSupport
+  include DpcClientSupport
 
   describe 'callbacks' do
     describe '#send_organization_sandbox_email' do

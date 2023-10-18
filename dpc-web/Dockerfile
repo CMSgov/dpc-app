@@ -38,6 +38,10 @@ RUN bundle exec bundle audit update && bundle exec bundle audit check --ignore C
 
 # Copy the code, test the app, and build the assets pipeline
 COPY /dpc-web /dpc-web
+
+# Necessary to run again after copy to install api_client
+RUN bundle install
+
 RUN RAILS_ENV=production SECRET_KEY_BASE=dummy bundle exec rake assets:precompile
 
 # Clean up from the build

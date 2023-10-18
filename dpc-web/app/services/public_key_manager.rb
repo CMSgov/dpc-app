@@ -18,7 +18,7 @@ class PublicKeyManager
                message: @errors[0] }
     end
 
-    api_client = ApiClient.new
+    api_client = DpcClient.new
     api_client.create_public_key(registered_organization.api_id,
                                  params: { label: label, public_key: public_key,
                                            snippet_signature: snippet_signature })
@@ -41,12 +41,12 @@ class PublicKeyManager
   end
 
   def delete_public_key(params)
-    api_client = ApiClient.new
+    api_client = DpcClient.new
     api_client.delete_public_key(registered_organization.api_id, params[:id])
   end
 
   def public_keys
-    api_client = ApiClient.new
+    api_client = DpcClient.new
     api_client.get_public_keys(registered_organization.api_id)
 
     if api_client.response_successful?
