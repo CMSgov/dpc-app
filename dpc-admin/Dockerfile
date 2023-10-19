@@ -31,6 +31,10 @@ RUN bundle exec bundle audit update && bundle exec bundle audit check --ignore C
 COPY /dpc-admin /dpc-admin
 
 RUN rm -rf /bin/yarn
+
+# Necessary to run again after copy to install api_client
+RUN bundle install
+
 RUN RAILS_ENV=production WEBPACKER_NODE_MODULES_BIN_PATH="node_modules/.bin" SECRET_KEY_BASE=dummy bundle exec rake assets:precompile --trace
 
 # Clean up from the build
