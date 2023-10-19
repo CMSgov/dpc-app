@@ -12,13 +12,10 @@ dpc_client = DpcClient.new
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'api_client', path: '../engines/api_client'
+gem 'api_client', github: 'CMSgov/dpc-app', branch: 'master', glob: 'engines/api_client/api_client.gemspec'
 ```
 
 And then execute:
 ```bash
-$ bundle
+$ bundle install
 ```
-
-## License
-The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).

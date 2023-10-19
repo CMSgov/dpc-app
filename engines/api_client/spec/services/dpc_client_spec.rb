@@ -37,6 +37,42 @@ RSpec.describe DpcClient do
   end
   # rubocop:enable Layout/LineLength
 
+  describe '#get_organization' do
+    let(:headers) do
+      {
+        'Accept' => 'application/fhir+json',
+        'Accept-Charset' => 'utf-8',
+        'Accept-Encoding' => 'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
+        'Host' => 'dpc.example.com',
+        'User-Agent' => 'Ruby FHIR Client',
+        'Authorization' => /.*/
+      }
+    end
+    context 'successful API request' do
+      it 'uses fhir_client to retrieve organization data from API' do
+        body = '{"resourceType":"Organization"}'
+        stub_request(:get, "http://dpc.example.com/Organization/#{reg_org.api_id}")
+          .with(headers: headers).to_return(status: 200, body: body, headers: {})
+        client = DpcClient.new
+        fhir_client = client.get_organization(reg_org.api_id)
+        expect(fhir_client).to_not be_nil
+        expect(fhir_client.resourceType).to eq 'Organization'
+      end
+    end
+
+    context 'unsuccessul request' do
+      it 'uses fhir_client to retrieve organization data from API' do
+        stub_request(:get, "http://dpc.example.com/Organization/#{reg_org.api_id}")
+          .with(headers: headers).to_return(status: 500, body: '', headers: {})
+
+        client = DpcClient.new
+
+        fhir_client = client.get_organization(reg_org.api_id)
+        expect(fhir_client).to be_nil
+      end
+    end
+  end
+
   describe '#create_organization' do
     context 'successful API request' do
       it 'sends data to API and sets response instance variables' do

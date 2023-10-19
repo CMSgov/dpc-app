@@ -1,6 +1,15 @@
 # frozen_string_literal: true
 
+require 'simplecov'
 require 'webmock/rspec'
+
+SimpleCov.start do
+  track_files '**/{app,lib}/**/*.rb'
+  add_filter 'lib/api_client/version.rb'
+  add_filter %r{/dummy/}
+  SimpleCov.minimum_coverage 80
+  SimpleCov.minimum_coverage_by_file 0
+end
 
 RSpec.configure do |config|
   config.expect_with :rspec do |expectations|
