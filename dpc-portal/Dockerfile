@@ -10,10 +10,11 @@ RUN apk update && \
     apk add --no-cache gcompat
 
 # Set the working directory
-RUN mkdir /dpc-portal
+RUN mkdir -p /dpc-portal/vendor/api_client
 WORKDIR /dpc-portal
 
 # Copy over the files needed to fetch dependencies
+COPY /engines/api_client/ /dpc-portal/vendor/api_client/
 COPY /dpc-portal/Gemfile /dpc-portal/Gemfile.lock /dpc-portal/
 COPY /dpc-portal/package.json /dpc-portal/
 
@@ -36,8 +37,9 @@ RUN rails webpacker:install
 RUN RAILS_ENV=production WEBPACKER_NODE_MODULES_BIN_PATH="node_modules/.bin" SECRET_KEY_BASE=dummy bundle exec rake assets:precompile --trace
 
 # Clean up from the build
-
-
+RUN rm -rf /usr/local/bundle/cache/*.gem && \
+    find /usr/local/bundle/gems/ -name "*.c" -delete && \
+    find /usr/local/bundle/gems/ -name "*.o" -delete
 
 # Declare the entrypoint shell script
 ENTRYPOINT ["./docker/entrypoint.sh"]

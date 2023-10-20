@@ -19,10 +19,11 @@ RUN apk update && \
     apk add --no-cache gcompat
 
 # Set the working directory
-RUN mkdir /dpc-web
+RUN mkdir -p /dpc-web/vendor/api_client
 WORKDIR /dpc-web
 
 # Copy over the files needed to fetch dependencies
+COPY /engines/api_client/ /dpc-web/vendor/api_client/
 COPY /dpc-web/Gemfile /dpc-web/Gemfile.lock /dpc-web/
 COPY /dpc-web/package.json /dpc-web/package-lock.json /dpc-web/
 
@@ -38,9 +39,6 @@ RUN bundle exec bundle audit update && bundle exec bundle audit check --ignore C
 
 # Copy the code, test the app, and build the assets pipeline
 COPY /dpc-web /dpc-web
-
-# Necessary to run again after copy to install api_client
-RUN bundle install
 
 RUN RAILS_ENV=production SECRET_KEY_BASE=dummy bundle exec rake assets:precompile
 

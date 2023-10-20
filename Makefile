@@ -19,7 +19,7 @@ admin:
 
 .PHONY: portal
 portal:
-	@docker build -f dpc-portal/Dockerfile . -t dpc-portal
+	@docker build -f dpc-portal/Dockerfile . -t dpc-web-portal
 
 .PHONY: start-app
 start-app: secure-envs

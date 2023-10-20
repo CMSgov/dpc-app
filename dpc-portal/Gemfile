@@ -52,9 +52,7 @@ gem 'webpacker', '~> 4.0'
 # < 1.13.2 has a vulnerability, and is required by other gems
 gem 'nokogiri', '>= 1.13.10'
 
-# rubocop:disable Layout/LineLength
-gem 'api_client', github: 'CMSgov/dpc-app', branch: 'jd/dpc-api-client-to-dpc-portal', glob: 'engines/api_client/api_client.gemspec'
-# rubocop:enable Layout/LineLength
+gem 'api_client', path: 'vendor/api_client'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console

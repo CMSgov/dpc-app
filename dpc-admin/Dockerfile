@@ -10,10 +10,11 @@ RUN apk update && \
     apk add --no-cache gcompat
 
 # Set the working directory
-RUN mkdir /dpc-admin
-WORKDIR /dpc-admin
+RUN mkdir -p /dpc-admin/vendor/api_client
+Workdir /dpc-admin
 
 # Copy over the files needed to fetch dependencies
+COPY /engines/api_client/ /dpc-admin/vendor/api_client/
 COPY /dpc-admin/Gemfile /dpc-admin/Gemfile.lock /dpc-admin/
 COPY /dpc-admin/package.json /dpc-admin/package-lock.json /dpc-admin/
 
@@ -31,9 +32,6 @@ RUN bundle exec bundle audit update && bundle exec bundle audit check --ignore C
 COPY /dpc-admin /dpc-admin
 
 RUN rm -rf /bin/yarn
-
-# Necessary to run again after copy to install api_client
-RUN bundle install
 
 RUN RAILS_ENV=production WEBPACKER_NODE_MODULES_BIN_PATH="node_modules/.bin" SECRET_KEY_BASE=dummy bundle exec rake assets:precompile --trace
 
