@@ -520,7 +520,7 @@ DEPENDENCIES
   selenium-webdriver
   sidekiq (~> 7.1)
   sidekiq_alive (~> 2.1.5)
-  simplecov (<= 0.17)
+  simplecov
   spring
   spring-watcher-listen (~> 2.0.0)
   truemail
@@ -536,4 +536,4 @@ RUBY VERSION
    ruby 3.0.6p216
 
 BUNDLED WITH
-   2.4.20
+   2.4.21
