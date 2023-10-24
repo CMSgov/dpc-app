@@ -17,6 +17,7 @@ WORKDIR /dpc-portal
 COPY /engines/api_client/ /dpc-portal/vendor/api_client/
 COPY /dpc-portal/Gemfile /dpc-portal/Gemfile.lock /dpc-portal/
 COPY /dpc-portal/package.json /dpc-portal/
+COPY /dpc-portal/package-lock.json /dpc-portal/
 
 # Install the website dependencies
 RUN gem install bundler --no-document && \

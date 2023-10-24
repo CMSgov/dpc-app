@@ -81,6 +81,7 @@ In addition to services, several modules are shared across components.
 |[dpc-common](/dpc-common)|Shared utilities for components|Java|
 |[dpc-testing](/dpc-testing)|Shared utilities for testing|Java|
 |[dpc-smoketest](/dpc-smoketest)|Smoke test suite|Java|
+|[engines](/engines)|Shared engines|Ruby|
 
 ## Local Development Setup
 ###### [`^`](#table-of-contents)

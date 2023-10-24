@@ -1,8 +1,5 @@
-GIT
-  remote: https://github.com/CMSgov/dpc-app.git
-  revision: d85a3962090a4dd3ddf4137a69694f532842a32d
-  branch: jd/dpc-api-client-to-dpc-portal
-  glob: engines/api_client/api_client.gemspec
+PATH
+  remote: vendor/api_client
   specs:
     api_client (0.1.0)
       active_model_serializers
@@ -549,4 +546,4 @@ RUBY VERSION
    ruby 3.0.6p216
 
 BUNDLED WITH
-   2.4.20
+   2.4.21
