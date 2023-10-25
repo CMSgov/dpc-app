@@ -2,7 +2,11 @@
 
 Rails.application.configure do
   config.lograge.custom_options = lambda do |event|
-    { params: event.payload[:params],
-      level: event.payload[:level] }
+    { ddsource: 'ruby',
+      params: event.payload[:params].reject { |k| %w(controller action).include? k },
+      environment: ENV['ENV'] || 'development',
+      exception: event.payload[:exception],
+      level: ENV["LOG_LEVEL"] || :info
+    }
   end
 end
