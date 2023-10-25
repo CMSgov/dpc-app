@@ -157,7 +157,7 @@ class DpcClient
 
     if use_ssl?
       http.use_ssl = true
-      http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+      http.verify_mode = OpenSSL::SSL::VERIFY_PEER
     end
 
     response = http.request(request)
