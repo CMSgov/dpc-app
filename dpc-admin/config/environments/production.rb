@@ -58,13 +58,6 @@ Rails.application.configure do
   # Log to a dedicated file
   config.lograge.logger = ActiveSupport::Logger.new(STDOUT)
 
-  # This is useful if you want to log query parameters
-  config.lograge.custom_options = lambda do |event|
-    { :ddsource => 'ruby',
-      :params => event.payload[:params].reject { |k| %w(controller action).include? k }
-    }
-  end
-
   # Use the lowest log level to ensure availability of diagnostic information
   # when problems arise.
   config.log_level = ENV["LOG_LEVEL"] || :info

@@ -134,7 +134,7 @@ class ApiClient
 
     if use_ssl?
       http.use_ssl = true
-      http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+      http.verify_mode = OpenSSL::SSL::VERIFY_NONE
     end
 
     response = http.request(request)
