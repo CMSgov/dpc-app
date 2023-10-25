@@ -152,4 +152,4 @@ services:
     image: dadarek/wait-for-dependencies
     depends_on:
       - dpc_portal
-    command: dpc_portal:3000
+    command: dpc_portal:3100
