@@ -14,6 +14,9 @@ SimpleCov.start 'rails' do
   add_filter 'app/mailers/application_mailer.rb'
   add_filter 'app/models/application_record.rb'
 
+  # Gems added already tested
+
+  add_filter 'vendor'
   SimpleCov.minimum_coverage 90
   SimpleCov.minimum_coverage_by_file 0
 end

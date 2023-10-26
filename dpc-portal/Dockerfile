@@ -10,12 +10,14 @@ RUN apk update && \
     apk add --no-cache gcompat
 
 # Set the working directory
-RUN mkdir /dpc-portal
+RUN mkdir -p /dpc-portal/vendor/api_client
 WORKDIR /dpc-portal
 
 # Copy over the files needed to fetch dependencies
+COPY /engines/api_client/ /dpc-portal/vendor/api_client/
 COPY /dpc-portal/Gemfile /dpc-portal/Gemfile.lock /dpc-portal/
 COPY /dpc-portal/package.json /dpc-portal/
+COPY /dpc-portal/package-lock.json /dpc-portal/
 
 # Install the website dependencies
 RUN gem install bundler --no-document && \
@@ -30,11 +32,8 @@ RUN bundle exec bundle audit update && bundle exec bundle audit check --ignore C
 # Copy the code, test the app, and build the assets pipeline
 COPY /dpc-portal /dpc-portal
 
-RUN set -eux \
-    & apk add \
-        --no-cache \
-        nodejs \
-        yarn
+RUN rm -rf /bin/yarn
+
 RUN rails webpacker:install
 RUN RAILS_ENV=production WEBPACKER_NODE_MODULES_BIN_PATH="node_modules/.bin" SECRET_KEY_BASE=dummy bundle exec rake assets:precompile --trace
 
@@ -42,8 +41,6 @@ RUN RAILS_ENV=production WEBPACKER_NODE_MODULES_BIN_PATH="node_modules/.bin" SEC
 RUN rm -rf /usr/local/bundle/cache/*.gem && \
     find /usr/local/bundle/gems/ -name "*.c" -delete && \
     find /usr/local/bundle/gems/ -name "*.o" -delete
-
-
 
 # Declare the entrypoint shell script
 ENTRYPOINT ["./docker/entrypoint.sh"]

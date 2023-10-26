@@ -8,7 +8,7 @@ class ClientTokenManager
   end
 
   def create_client_token(label: nil)
-    api_client = ApiClient.new
+    api_client = DpcClient.new
     api_client.create_client_token(registered_organization.api_id, params: { label: label })
 
     @client_token = api_client.response_body
@@ -17,12 +17,12 @@ class ClientTokenManager
   end
 
   def delete_client_token(params)
-    api_client = ApiClient.new
+    api_client = DpcClient.new
     api_client.delete_client_token(registered_organization.api_id, params[:id])
   end
 
   def client_tokens
-    api_client = ApiClient.new
+    api_client = DpcClient.new
     api_client.get_client_tokens(registered_organization.api_id)
     if api_client.response_successful?
       api_client.response_body['entities']

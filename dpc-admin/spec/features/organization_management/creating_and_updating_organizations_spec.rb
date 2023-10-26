@@ -5,7 +5,7 @@ require './lib/luhnacy_lib/luhnacy_lib'
 
 
 RSpec.feature 'creating and updating organizations' do
-  include ApiClientSupport
+  include DpcClientSupport
   include OrganizationsHelper
 
   let!(:internal_user) { create :internal_user }
@@ -150,7 +150,9 @@ RSpec.feature 'creating and updating organizations' do
     fill_in 'organization_name', with: new_name
     find('[data-test="form-submit"]').click
 
-    expect(api_client).to have_received(:update_organization).with(reg_org)
+    expect(api_client).to have_received(:update_organization).with(reg_org.organization,
+                                                                   reg_org.api_id,
+                                                                   reg_org.api_endpoint_ref)
   end
 
   scenario 'updating an API enabled organization without npi unsuccessfully' do

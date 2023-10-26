@@ -10,3 +10,4 @@ AllCops:
     - 'config.ru'
     - 'db/**/*'
     - 'node_modules/**/*'
+    - 'vendor/**/*'

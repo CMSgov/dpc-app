@@ -19,7 +19,7 @@ admin:
 
 .PHONY: portal
 portal:
-	@docker build -f dpc-portal/Dockerfile . -t dpc-portal
+	@docker build -f dpc-portal/Dockerfile . -t dpc-web-portal
 
 .PHONY: start-app
 start-app: secure-envs
@@ -116,6 +116,10 @@ ci-portal: secure-envs
 .PHONY: ci-web-portal
 ci-web-portal: secure-envs
 	@./dpc-web-portal-test.sh
+
+.PHONY: ci-api-client
+ci-api-client:
+	@./dpc-api-client-test.sh
 
 .PHONY: smoke
 smoke:

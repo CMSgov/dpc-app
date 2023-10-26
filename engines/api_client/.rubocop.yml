@@ -1,0 +1,21 @@
+AllCops:
+  NewCops: enable
+  TargetRubyVersion: 3.0
+  Exclude:
+    - 'app/jobs/application_job.rb'
+    - 'app/mailers/application_mailer.rb'
+    - 'app/models/application_record.rb'
+    - 'spec/dummy/**/*'
+    - 'bin/**/*'
+    - 'config/**/*'
+    - 'config.ru'
+    - 'db/**/*'
+    - 'node_modules/**/*'
+Metrics/BlockLength:
+  AllowedMethods: ['describe', 'context', 'it', 'config']
+
+Metrics/ClassLength:
+  Max: 150
+
+Metrics/MethodLength:
+  Max: 30
