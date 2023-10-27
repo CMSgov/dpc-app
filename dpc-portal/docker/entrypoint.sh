@@ -11,9 +11,9 @@ if [ "$1" == "portal" ]; then
   # Start the database service (and make accessible outside the Docker container)
   echo "Starting Rails server..."
   if [[ -n "$JACOCO" ]]; then
-    bundle exec rails server -b 0.0.0.0 -p 3000
+    bundle exec rails server -b 0.0.0.0 -p 3100
   else
-    bundle exec rails server -b 0.0.0.0 -p 3000 2>&1 | tee -a /var/log/dpc-portal-$(hostname).log
+    bundle exec rails server -b 0.0.0.0 -p 3100 2>&1 | tee -a /var/log/dpc-portal-$(hostname).log
   fi
 fi
 
