@@ -5,7 +5,7 @@ var utag_data = {
   "page_name": "{{ page.title }}",
   "page_path": "{{ page.url }}",
   "site_domain": "https://sandbox.dpc.cms.gov",
-  "site_environment": ENV['ENV'],
+  "site_environment": "{{ jekyll.environment }}",
 }
 </script>
 
@@ -13,9 +13,7 @@ var utag_data = {
 <script type="text/javascript">
 (function(a,b,c,d){
     var src_url = '';
-    {% if ENV['ENV'] == 'prod' %}
-    src_url = 'https://tags.tiqcdn.com/utag/cmsgov/cms-dpc/prod/utag.js';
-    {% elsif ENV['ENV'] == 'stage' %}
+    {% if jekyll.environment == 'prod-sbx' %}
     src_url = 'https://tags.tiqcdn.com/utag/cmsgov/cms-dpc/qa/utag.js';
     {% else %}
     src_url = 'https://tags.tiqcdn.com/utag/cmsgov/cms-dpc/dev/utag.js';
