@@ -1,17 +1,17 @@
 <!-- Tealium Tag Manager - DataLayer -->
 <script type="text/javascript">
-var utag_data = {
-  "content_language": "en",
-  "page_name": "{{ page.title }}",
-  "page_path": "{{ page.url }}",
-  "site_domain": "https://sandbox.dpc.cms.gov",
-  "site_environment": "{{ jekyll.environment }}",
-}
+    var utag_data = {
+      "content_language": "en",
+      "page_name": "{{ page.title }}",
+      "page_path": "{{ page.url }}",
+      "site_domain": "https://sandbox.dpc.cms.gov",
+      "site_environment": "{{ jekyll.environment }}",
+    }
 </script>
 
 <!-- Tealium Tag Manager - ASYNC -->
 <script type="text/javascript">
-(function(a,b,c,d){
+    (function(a,b,c,d){
     var src_url = '';
     {% if jekyll.environment == 'prod-sbx' %}
     src_url = 'https://tags.tiqcdn.com/utag/cmsgov/cms-dpc/qa/utag.js';
@@ -21,5 +21,5 @@ var utag_data = {
     a=src_url;b=document;c='script';d=b.createElement(c);
     d.src=a;d.type='text/java'+c;d.async=true;
     a=b.getElementsByTagName(c)[0];a.parentNode.insertBefore(d,a);
-})();
+    })();
 </script>
