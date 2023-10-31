@@ -1,0 +1,18 @@
+Started GET "/" for ::1 at 2023-10-31 16:27:32 -0400
+Processing by HelloController#index as HTML
+  Rendering layout layouts/application.html.erb
+  Rendering hello/index.html.erb within layouts/application
+  Rendered hello/index.html.erb within layouts/application (Duration: 0.8ms | Allocations: 573)
+  Rendered layout layouts/application.html.erb (Duration: 138.0ms | Allocations: 100289)
+Completed 200 OK in 143ms (Views: 140.5ms | ActiveRecord: 0.0ms | Allocations: 106072)
+
+
+Started GET "/" for ::1 at 2023-10-31 16:42:08 -0400
+Processing by HelloController#index as HTML
+  Rendering layout layouts/application.html.erb
+  Rendering hello/index.html.erb within layouts/application
+  Rendered hello/index.html.erb within layouts/application (Duration: 0.6ms | Allocations: 466)
+  Rendered layout layouts/application.html.erb (Duration: 18.1ms | Allocations: 36901)
+Completed 200 OK in 21ms (Views: 19.5ms | ActiveRecord: 0.0ms | Allocations: 41775)
+
+
