@@ -1,0 +1,42 @@
+<%= render partial: 'shared/usa_banner' %>
+<a class="ds-c-skip-nav" href="#main">Skip to main content</a>
+
+<nav class="navbar" id="navbar">
+
+  <%= link_to "#{image_tag("top-nav-heart.svg", alt: "Heart logo")} Data at the Point of Care".html_safe, root_path, class: "site-logo" %>
+
+  <button id="topnav__show-button" class="ds-c-button ds-c-button--transparent ds-c-button--big topnav__show-button" type="button" aria-controls="topnav-wrap" aria-label="Show menu">
+    <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <use xlink:href="/assets/solid.svg#bars"></use>
+    </svg>
+  </button>
+
+  <div class="topnav-wrap" id="topnav-wrap">
+    <button id="topnav__close-button" class="ds-c-button ds-c-button--transparent ds-c-button--big topnav__close-button" type="button"
+aria-controls="topnav-wrap" aria-label="Close menu">
+      <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <use xlink:href="/assets/solid.svg#times"></use>
+      </svg>
+    </button>
+    <ul class="topnav">
+      <li class="topnav__item">
+        <%= link_to "Home", home_path, class: "topnav__link"  %>
+      </li>
+
+      <li class="topnav__item">
+        <%= link_to "Documentation", docs_path, class: "topnav__link"  %>
+      </li>
+
+      <li class="topnav__item">
+        <li><%= link_to "Frequently Asked Questions", faq_path, class: "topnav__link" %></li>
+      </li>
+
+      <li class="topnav__item topnav__item--buttons ds-u-padding-right--1">
+        <%= link_to "Log in", "/session/new", class: "ds-c-button", data: { test: "login-link" } %>
+      </li>
+      <li class="topnav__item topnav__item--buttons">
+        <%= link_to "Request access", "/users/new", class: "ds-c-button ds-c-button--primary" %>
+      </li>
+    </ul>
+  </div>
+</nav>

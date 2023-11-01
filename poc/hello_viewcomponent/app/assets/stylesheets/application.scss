@@ -1,0 +1,55 @@
+/*
+ * This is a manifest file that'll be compiled into application.css, which will include all the files
+ * listed below.
+ *
+ * Any CSS and SCSS file within this directory, lib/assets/stylesheets, or any plugin's
+ * vendor/assets/stylesheets directory can be referenced here using a relative path.
+ *
+ * You're free to add application-wide styles to this file and they'll appear at the bottom of the
+ * compiled file so the styles you add here take precedence over styles defined in any other CSS/SCSS
+ * files in this directory. Styles in this file should be added after the last require_* statement.
+ * It is generally better to create a new file per style scope.
+ *
+ * require_tree .
+ * require_self
+ */
+ // In our Gulp Sass task, we've added node_modules to the list of paths that
+// are used to resolve @import declarations, so we omit it from the path below.
+ @import 'normalize.css/normalize';
+ @import '@cmsgov/design-system-core/src/index';
+ @import '@cmsgov/design-system-layout/src/index';
+ @import "sidenav";
+ @import "settings/font-faces";
+ @import "settings/variables";
+ @import "base/base";
+ @import "base/typography";
+ @import "components/accordions";
+ @import "components/alerts";
+ @import "components/benefit-prop";
+ @import "components/billboard";
+ @import "components/boxes";
+ @import "components/buttons";
+ @import "components/cards";
+ @import "components/credentials";
+ @import "components/counter";
+ @import "components/fields";
+ @import "components/field-groups";
+ @import "components/footer";
+ @import "components/guide";
+ @import "components/hero";
+ @import "components/icons";
+ @import "components/imgs";
+ @import "components/left-nav";
+ @import "components/modals";
+ @import "components/module-containers";
+ @import "components/navbar";
+ @import "components/page-headers";
+ @import "components/pagination";
+ @import "components/password-check";
+ @import "components/pills";
+ @import "components/process-list";
+ @import "components/public_keys";
+ @import "components/radio_buttons";
+ @import "components/site-blocks";
+ @import "components/usa_banner";
+ @import "utilities/add-ons";

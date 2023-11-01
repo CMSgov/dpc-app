@@ -34,3 +34,102 @@ Processing by HelloController#index as HTML
 Completed 200 OK in 35ms (Views: 32.3ms | ActiveRecord: 0.0ms | Allocations: 46069)
 
 
+Started GET "/" for ::1 at 2023-11-01 15:43:04 -0400
+Processing by HelloController#index as HTML
+  Rendering layout layouts/application.html.erb
+  Rendering hello/index.html.erb within layouts/application
+  Rendered hello/index.html.erb within layouts/application (Duration: 1.5ms | Allocations: 2723)
+  Rendered shared/_usa_banner.erb (Duration: 0.4ms | Allocations: 611)
+  Rendered shared/_navbar.html.erb (Duration: 2.0ms | Allocations: 3806)
+  Rendered layout layouts/application.html.erb (Duration: 25.9ms | Allocations: 45039)
+Completed 500 Internal Server Error in 29ms (ActiveRecord: 0.0ms | Allocations: 49900)
+
+
+  
+ActionView::Template::Error (The asset "top-nav-heart.svg" is not present in the asset pipeline.
+):
+    3: 
+    4: <nav class="navbar" id="navbar">
+    5: 
+    6:   <%= link_to "#{image_tag("top-nav-heart.svg", alt: "Heart logo")} Data at the Point of Care".html_safe, root_path, class: "site-logo" %>
+    7: 
+    8:   <button id="topnav__show-button" class="ds-c-button ds-c-button--transparent ds-c-button--big topnav__show-button" type="button" aria-controls="topnav-wrap" aria-label="Show menu">
+    9:     <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  
+app/views/shared/_navbar.html.erb:6
+app/views/layouts/application.html.erb:14
+Started GET "/" for ::1 at 2023-11-01 15:44:15 -0400
+Processing by HelloController#index as HTML
+  Rendering layout layouts/application.html.erb
+  Rendering hello/index.html.erb within layouts/application
+  Rendered hello/index.html.erb within layouts/application (Duration: 1.4ms | Allocations: 2723)
+  Rendered shared/_usa_banner.erb (Duration: 0.4ms | Allocations: 611)
+  Rendered shared/_navbar.html.erb (Duration: 1.4ms | Allocations: 2025)
+  Rendered layout layouts/application.html.erb (Duration: 82.2ms | Allocations: 86218)
+Completed 200 OK in 85ms (Views: 83.7ms | ActiveRecord: 0.0ms | Allocations: 91133)
+
+
+Started GET "/" for ::1 at 2023-11-01 15:45:03 -0400
+Processing by HelloController#index as HTML
+  Rendering layout layouts/application.html.erb
+  Rendering hello/index.html.erb within layouts/application
+  Rendered hello/index.html.erb within layouts/application (Duration: 1.5ms | Allocations: 2723)
+  Rendered layout layouts/application.html.erb (Duration: 27.3ms | Allocations: 9608)
+Completed 500 Internal Server Error in 30ms (ActiveRecord: 0.0ms | Allocations: 14459)
+
+
+  
+LoadError (cannot load such file -- sassc):
+  
+app/views/layouts/application.html.erb:9
+Started GET "/" for ::1 at 2023-11-01 15:47:26 -0400
+Processing by HelloController#index as HTML
+  Rendering layout layouts/application.html.erb
+  Rendering hello/index.html.erb within layouts/application
+  Rendered hello/index.html.erb within layouts/application (Duration: 1.6ms | Allocations: 2723)
+  Rendered layout layouts/application.html.erb (Duration: 15.1ms | Allocations: 7734)
+Completed 500 Internal Server Error in 18ms (ActiveRecord: 0.0ms | Allocations: 12585)
+
+
+  
+LoadError (cannot load such file -- sassc):
+  
+app/views/layouts/application.html.erb:9
+Started GET "/" for ::1 at 2023-11-01 15:48:11 -0400
+Processing by HelloController#index as HTML
+  Rendering layout layouts/application.html.erb
+  Rendering hello/index.html.erb within layouts/application
+  Rendered hello/index.html.erb within layouts/application (Duration: 2.0ms | Allocations: 2723)
+  Rendered shared/_usa_banner.erb (Duration: 0.4ms | Allocations: 611)
+  Rendered shared/_navbar.html.erb (Duration: 1.3ms | Allocations: 2002)
+  Rendered layout layouts/application.html.erb (Duration: 1534.2ms | Allocations: 574000)
+Completed 200 OK in 1538ms (Views: 1535.8ms | ActiveRecord: 0.0ms | Allocations: 578915)
+
+
+Started GET "/fonts/roboto-v19-latin-regular.woff2" for ::1 at 2023-11-01 15:48:13 -0400
+Started GET "/fonts/roboto-v19-latin-700.woff2" for ::1 at 2023-11-01 15:48:13 -0400
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-regular.woff2"):
+  
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-700.woff2"):
+  
+Started GET "/fonts/roboto-v19-latin-regular.woff" for ::1 at 2023-11-01 15:48:13 -0400
+Started GET "/fonts/roboto-v19-latin-700.woff" for ::1 at 2023-11-01 15:48:13 -0400
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-regular.woff"):
+  
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-700.woff"):
+  
+Started GET "/" for ::1 at 2023-11-01 15:48:26 -0400
+Processing by HelloController#index as HTML
+  Rendering layout layouts/application.html.erb
+  Rendering hello/index.html.erb within layouts/application
+  Rendered hello/index.html.erb within layouts/application (Duration: 2.3ms | Allocations: 473)
+  Rendered shared/_usa_banner.erb (Duration: 0.0ms | Allocations: 9)
+  Rendered shared/_navbar.html.erb (Duration: 1.4ms | Allocations: 843)
+  Rendered layout layouts/application.html.erb (Duration: 17.8ms | Allocations: 9615)
+Completed 200 OK in 20ms (Views: 18.6ms | ActiveRecord: 0.0ms | Allocations: 9972)
+
+

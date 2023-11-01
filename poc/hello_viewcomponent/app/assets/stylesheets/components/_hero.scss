@@ -1,0 +1,143 @@
+.hero {
+  background-color: $color-primary-darkest;
+  color: $color-white;
+  padding: $spacer-7 0;
+
+  h1 {
+    color: $color-white;
+    line-height: 1.2;
+    margin: $spacer-2 0 0;
+  }
+
+  a:not(.ds-c-button) {
+    color: $color-primary-alt-light;
+  }
+}
+
+.hero__badge {
+  background: $color-primary-alt-lightest;
+  border-radius: 8px;
+  color: $color-primary-darkest;
+  display: inline-block;
+  font-weight: $font-bold;
+  margin: $spacer-2 0;
+  padding: $spacer-1 $spacer-2;
+  text-transform: uppercase;
+}
+
+.hero__primary-heading {
+  font-size: $h1-font-size;
+  margin-bottom: 0;
+
+  @media (min-width: $width-md) {
+    font-size: $h1-font-size;
+  }
+
+  @media (min-width: $width-lg) {
+    font-size: $display-font-size;
+  }
+}
+
+.hero__container {
+  align-items: center;
+
+  flex-direction: column;
+
+  @media (min-width: $width-md) {
+    display: flex;
+    flex-direction: row;
+  }
+}
+
+.hero__image-container {
+
+  @media (min-width: $width-lg) {
+    padding-top: 0;
+    padding-left: $spacer-7;
+  }
+}
+
+.hero__image {
+  display: block;
+  height: 100%;
+  margin: $spacer-5 auto 0;
+  width: 10rem;
+
+  @media (min-width: $width-md) {
+    margin: 0 auto;
+    width: 12rem;
+  }
+
+  @media (min-width: $width-lg) {
+    width: 21rem;
+  }
+}
+
+#hero_button__container {
+
+  @media (min-width: $width-md) {
+    display: flex;
+    justify-content: space-between;
+  }
+}
+
+#hero__banner {
+  background-color: $color-warn-light;
+  display: flex;
+  padding: $spacer-2;
+
+  div:first-child {
+    padding-right: $spacer-1;
+  }
+
+  div:last-child {
+    padding-left: $spacer-1;
+  }
+
+
+
+  .banner-content {
+    display: flex;
+    flex-direction: row;
+    margin: 0 auto;
+
+    @media (max-width: $width-md) {
+      align-items: center;
+      flex-direction: column;
+      text-align: center;
+    }
+  }
+
+  .banner-text__title {
+    font-size: $h2-font-size;
+    font-weight: 700;
+  }
+
+  .banner-text__content {
+    font-size: $small-font-size;
+
+    a {
+      color: $color-primary;
+    }
+
+    a:visited {
+      color: $color-primary-darker;
+    }
+  }
+
+  .banner-btn__container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    .sign_up_btn {
+      background-color: $color-primary-alt-light;
+      color: $color-black;
+      font-weight: 700;
+      margin: 8px 0;
+      padding: 3px $spacer-3;
+      text-decoration: none;
+      text-transform: uppercase;
+    }
+  }
+}
