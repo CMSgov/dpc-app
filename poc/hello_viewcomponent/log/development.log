@@ -133,3 +133,127 @@ Processing by HelloController#index as HTML
 Completed 200 OK in 20ms (Views: 18.6ms | ActiveRecord: 0.0ms | Allocations: 9972)
 
 
+Started GET "/" for ::1 at 2023-11-01 17:58:15 -0400
+Processing by HelloController#index as HTML
+  Rendering layout layouts/application.html.erb
+  Rendering hello/index.html.erb within layouts/application
+  Rendered hello/index.html.erb within layouts/application (Duration: 6.0ms | Allocations: 2722)
+  Rendered shared/_usa_banner.erb (Duration: 0.4ms | Allocations: 631)
+  Rendered layout layouts/application.html.erb (Duration: 82.7ms | Allocations: 74702)
+Completed 200 OK in 86ms (Views: 84.2ms | ActiveRecord: 0.0ms | Allocations: 79620)
+
+
+Started GET "/fonts/roboto-v19-latin-regular.woff2" for ::1 at 2023-11-01 17:58:15 -0400
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-regular.woff2"):
+  
+Started GET "/fonts/roboto-v19-latin-700.woff2" for ::1 at 2023-11-01 17:58:15 -0400
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-700.woff2"):
+  
+Started GET "/fonts/roboto-v19-latin-regular.woff" for ::1 at 2023-11-01 17:58:15 -0400
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-regular.woff"):
+  
+Started GET "/fonts/roboto-v19-latin-700.woff" for ::1 at 2023-11-01 17:58:15 -0400
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-700.woff"):
+  
+Started GET "/" for ::1 at 2023-11-01 17:58:57 -0400
+Processing by HelloController#index as HTML
+  Rendering layout layouts/application.html.erb
+  Rendering hello/index.html.erb within layouts/application
+  Rendered hello/index.html.erb within layouts/application (Duration: 1.5ms | Allocations: 2723)
+  Rendered shared/_usa_banner.erb (Duration: 0.4ms | Allocations: 631)
+  Rendered layout layouts/application.html.erb (Duration: 85.6ms | Allocations: 74820)
+Completed 200 OK in 89ms (Views: 87.1ms | ActiveRecord: 0.0ms | Allocations: 79738)
+
+
+Started GET "/fonts/roboto-v19-latin-regular.woff2" for ::1 at 2023-11-01 17:58:57 -0400
+Started GET "/fonts/roboto-v19-latin-700.woff2" for ::1 at 2023-11-01 17:58:57 -0400
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-regular.woff2"):
+  
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-700.woff2"):
+  
+Started GET "/fonts/roboto-v19-latin-regular.woff" for ::1 at 2023-11-01 17:58:57 -0400
+Started GET "/fonts/roboto-v19-latin-700.woff" for ::1 at 2023-11-01 17:58:57 -0400
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-regular.woff"):
+  
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-700.woff"):
+  
+Started GET "/" for ::1 at 2023-11-01 18:01:45 -0400
+Processing by HelloController#index as HTML
+  Rendering layout layouts/application.html.erb
+  Rendering hello/index.html.erb within layouts/application
+  Rendered hello/index.html.erb within layouts/application (Duration: 1.6ms | Allocations: 2723)
+  Rendered layout layouts/application.html.erb (Duration: 85.9ms | Allocations: 76396)
+Completed 500 Internal Server Error in 89ms (ActiveRecord: 0.0ms | Allocations: 81269)
+
+
+  
+ActionView::Template::Error (uninitialized constant NavbarComponent::Usa_BannerComponent
+Did you mean?  UsaBannerComponent):
+    11:   </head>
+    12: 
+    13:   <body>
+    14:     <%= render(NavbarComponent.new()) %>
+    15:     <%= yield %>
+    16:   </body>
+    17: </html>
+  
+app/components/navbar_component.html.erb:1:in `call'
+app/views/layouts/application.html.erb:14
+Started GET "/" for ::1 at 2023-11-01 18:02:12 -0400
+Processing by HelloController#index as HTML
+  Rendering layout layouts/application.html.erb
+  Rendering hello/index.html.erb within layouts/application
+  Rendered hello/index.html.erb within layouts/application (Duration: 1.5ms | Allocations: 2723)
+  Rendered layout layouts/application.html.erb (Duration: 90.4ms | Allocations: 76728)
+Completed 200 OK in 93ms (Views: 91.9ms | ActiveRecord: 0.0ms | Allocations: 81665)
+
+
+Started GET "/fonts/roboto-v19-latin-regular.woff2" for ::1 at 2023-11-01 18:02:12 -0400
+Started GET "/fonts/roboto-v19-latin-700.woff2" for ::1 at 2023-11-01 18:02:12 -0400
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-regular.woff2"):
+  
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-700.woff2"):
+  
+Started GET "/fonts/roboto-v19-latin-regular.woff" for ::1 at 2023-11-01 18:02:12 -0400
+Started GET "/fonts/roboto-v19-latin-700.woff" for ::1 at 2023-11-01 18:02:12 -0400
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-regular.woff"):
+  
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-700.woff"):
+  
+Started GET "/" for ::1 at 2023-11-01 18:02:38 -0400
+Processing by HelloController#index as HTML
+  Rendering layout layouts/application.html.erb
+  Rendering hello/index.html.erb within layouts/application
+  Rendered hello/index.html.erb within layouts/application (Duration: 2.1ms | Allocations: 627)
+  Rendered layout layouts/application.html.erb (Duration: 15.5ms | Allocations: 12027)
+Completed 200 OK in 19ms (Views: 18.1ms | ActiveRecord: 0.0ms | Allocations: 13080)
+
+
+Started GET "/fonts/roboto-v19-latin-regular.woff2" for ::1 at 2023-11-01 18:02:38 -0400
+Started GET "/fonts/roboto-v19-latin-700.woff2" for ::1 at 2023-11-01 18:02:38 -0400
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-regular.woff2"):
+  
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-700.woff2"):
+  
+Started GET "/fonts/roboto-v19-latin-regular.woff" for ::1 at 2023-11-01 18:02:38 -0400
+Started GET "/fonts/roboto-v19-latin-700.woff" for ::1 at 2023-11-01 18:02:38 -0400
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-regular.woff"):
+  
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-700.woff"):
+  

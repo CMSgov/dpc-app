@@ -11,7 +11,7 @@
   </head>
 
   <body>
-    <%= render partial: 'shared/navbar' %>
+    <%= render(NavbarComponent.new()) %>
     <%= yield %>
   </body>
 </html>
