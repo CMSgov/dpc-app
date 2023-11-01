@@ -1,0 +1,64 @@
+.site-block {
+  border-top: 2px solid $color-primary-alt-light;
+  padding: $spacer-7 0;
+  position: relative;
+
+  .ds-l-container {
+    position: relative;
+
+    &:before {
+      content: "";
+      background-color: $color-white;
+      border: 2px solid $color-primary-alt-light;
+      border-radius: 50%;
+      height: .5rem;
+      left: $spacer-2;
+      position: absolute;
+      top: calc(0px - #{$spacer-7} - .25rem - 2.5px);
+      width: .5rem;
+
+      @media (min-width: $width-sm) {
+        left: $spacer-4;
+      }
+    }
+  }
+}
+
+.site-block--alt {
+  background-color: $color-primary-alt-lightest;
+
+  a {
+    color: $color-primary-darker;
+  }
+}
+
+.site-block-header * {
+  max-width: 77ch;
+}
+
+.site-block-header__heading {
+  margin-top: 0;
+  max-width: 48ch;
+
+  @media (min-width: $width-md) {
+    font-size: $h1-font-size;
+  }
+}
+
+.card {
+  background-color: $color-white;
+  box-shadow: 0 0 0 rbga(0,0,0, .5);
+  padding: $spacer-3 $spacer-4;
+}
+
+.card--border-top {
+  border-top: 4px solid $color-success-light;
+}
+
+.card--border-top--red {
+  border-top: 4px solid $color-error-dark;
+}
+
+.card--shadow {
+  box-shadow: 0px 0px 50px rgba(0,0,0,0.5);
+}

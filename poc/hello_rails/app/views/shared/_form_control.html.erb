@@ -1,0 +1,18 @@
+<% model = record.class.name.underscore %>
+
+<div class="form-group">
+  <label for="<%= control.scan(/id="(\w*)"/)&.last&.first %>">
+    <%= label.is_a?(String) ? label : column.to_s.split('_').map(&label).join(' ') %>
+    <% if required %>
+      <span style="font-size: smaller; color: red">*</span>
+    <% end %>
+  </label><br/>
+
+  <%= control %><br/>
+
+  <% unless record.errors[column].blank? %>
+    <span style="font-size: smaller; color: red">
+      <%= record.errors[column].map(&:capitalize).join(', ') %>
+    </span>
+  <% end %>
+</div>

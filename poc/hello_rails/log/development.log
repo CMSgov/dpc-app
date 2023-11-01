@@ -16,3 +16,677 @@ Processing by HelloController#index as HTML
 Completed 200 OK in 21ms (Views: 19.5ms | ActiveRecord: 0.0ms | Allocations: 41775)
 
 
+Started GET "/" for ::1 at 2023-11-01 10:32:46 -0400
+Processing by HelloController#index as HTML
+  Rendering layout layouts/application.html.erb
+  Rendering hello/index.html.erb within layouts/application
+  Rendered hello/index.html.erb within layouts/application (Duration: 0.6ms | Allocations: 466)
+  Rendered shared/_usa_banner.erb (Duration: 0.3ms | Allocations: 612)
+  Rendered shared/_navbar.html.erb (Duration: 9.2ms | Allocations: 6667)
+  Rendered layout layouts/application.html.erb (Duration: 31.3ms | Allocations: 43154)
+Completed 500 Internal Server Error in 35ms (ActiveRecord: 0.0ms | Allocations: 47968)
+
+
+  
+ActionView::Template::Error (undefined method `user_signed_in?' for #<ActionView::Base:0x0000000000aaf0>):
+    3: 
+    4: <nav class="navbar" id="navbar">
+    5: 
+    6:   <% if user_signed_in? %>
+    7:     <%= link_to "#{image_tag("top-nav-heart.svg", alt: "Heart logo")} Data at the Point of Care".html_safe, root_path, class: "site-logo" %>
+    8:   <% else %>
+    9:     <%= link_to "#{image_tag("top-nav-heart.svg", alt: "Heart logo")} Data at the Point of Care".html_safe, home_path, class: "site-logo" %>
+  
+app/views/shared/_navbar.html.erb:6
+app/views/layouts/application.html.erb:14
+Started GET "/" for ::1 at 2023-11-01 10:33:46 -0400
+Processing by HelloController#index as HTML
+  Rendering layout layouts/application.html.erb
+  Rendering hello/index.html.erb within layouts/application
+  Rendered hello/index.html.erb within layouts/application (Duration: 0.7ms | Allocations: 466)
+  Rendered shared/_usa_banner.erb (Duration: 0.4ms | Allocations: 612)
+  Rendered shared/_navbar.html.erb (Duration: 1.9ms | Allocations: 3937)
+  Rendered layout layouts/application.html.erb (Duration: 22.8ms | Allocations: 40282)
+Completed 500 Internal Server Error in 27ms (ActiveRecord: 0.0ms | Allocations: 45096)
+
+
+  
+ActionView::Template::Error (The asset "top-nav-heart.svg" is not present in the asset pipeline.
+):
+    3: 
+    4: <nav class="navbar" id="navbar">
+    5: 
+    6:   <%= link_to "#{image_tag("top-nav-heart.svg", alt: "Heart logo")} Data at the Point of Care".html_safe, root_path, class: "site-logo" %>
+    7: 
+    8:   <button id="topnav__show-button" class="ds-c-button ds-c-button--transparent ds-c-button--big topnav__show-button" type="button" aria-controls="topnav-wrap" aria-label="Show menu">
+    9:     <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  
+app/views/shared/_navbar.html.erb:6
+app/views/layouts/application.html.erb:14
+Started GET "/" for ::1 at 2023-11-01 10:34:55 -0400
+Processing by HelloController#index as HTML
+  Rendering layout layouts/application.html.erb
+  Rendering hello/index.html.erb within layouts/application
+  Rendered hello/index.html.erb within layouts/application (Duration: 0.6ms | Allocations: 466)
+  Rendered shared/_usa_banner.erb (Duration: 0.4ms | Allocations: 612)
+  Rendered shared/_navbar.html.erb (Duration: 6.8ms | Allocations: 7057)
+  Rendered layout layouts/application.html.erb (Duration: 100.5ms | Allocations: 86850)
+Completed 500 Internal Server Error in 103ms (ActiveRecord: 0.0ms | Allocations: 91664)
+
+
+  
+ActionView::Template::Error (undefined local variable or method `home_path' for #<ActionView::Base:0x0000000000aaf0>):
+    20:     </button>
+    21:     <ul class="topnav">
+    22:       <li class="topnav__item">
+    23:         <%= link_to "Home", home_path, class: "topnav__link"  %>
+    24:       </li>
+    25: 
+    26:       <li class="topnav__item">
+  
+app/views/shared/_navbar.html.erb:23
+app/views/layouts/application.html.erb:14
+Started GET "/" for ::1 at 2023-11-01 10:43:27 -0400
+Processing by HelloController#index as HTML
+  Rendering layout layouts/application.html.erb
+  Rendering hello/index.html.erb within layouts/application
+  Rendered hello/index.html.erb within layouts/application (Duration: 0.6ms | Allocations: 466)
+  Rendered shared/_usa_banner.erb (Duration: 0.3ms | Allocations: 612)
+  Rendered shared/_navbar.html.erb (Duration: 6.9ms | Allocations: 7109)
+  Rendered layout layouts/application.html.erb (Duration: 52.6ms | Allocations: 55963)
+Completed 500 Internal Server Error in 56ms (ActiveRecord: 0.0ms | Allocations: 60777)
+
+
+  
+ActionView::Template::Error (undefined local variable or method `docs_path' for #<ActionView::Base:0x0000000000ab90>):
+    24:       </li>
+    25: 
+    26:       <li class="topnav__item">
+    27:         <%= link_to "Documentation", docs_path, class: "topnav__link"  %>
+    28:       </li>
+    29: 
+    30:       <li class="topnav__item">
+  
+app/views/shared/_navbar.html.erb:27
+app/views/layouts/application.html.erb:14
+Started GET "/" for ::1 at 2023-11-01 10:44:49 -0400
+Processing by HelloController#index as HTML
+  Rendering layout layouts/application.html.erb
+  Rendering hello/index.html.erb within layouts/application
+  Rendered hello/index.html.erb within layouts/application (Duration: 0.6ms | Allocations: 465)
+  Rendered shared/_usa_banner.erb (Duration: 0.5ms | Allocations: 612)
+  Rendered shared/_navbar.html.erb (Duration: 6.8ms | Allocations: 7159)
+  Rendered layout layouts/application.html.erb (Duration: 47.8ms | Allocations: 55390)
+Completed 500 Internal Server Error in 51ms (ActiveRecord: 0.0ms | Allocations: 60205)
+
+
+  
+ActionView::Template::Error (undefined local variable or method `faq_path' for #<ActionView::Base:0x0000000000ac30>):
+    28:       </li>
+    29: 
+    30:       <li class="topnav__item">
+    31:         <li><%= link_to "Frequently Asked Questions", faq_path, class: "topnav__link" %></li>
+    32:       </li>
+    33: 
+    34:       <% if user_signed_in? %>
+  
+app/views/shared/_navbar.html.erb:31
+app/views/layouts/application.html.erb:14
+Started GET "/" for ::1 at 2023-11-01 10:45:33 -0400
+Processing by HelloController#index as HTML
+  Rendering layout layouts/application.html.erb
+  Rendering hello/index.html.erb within layouts/application
+  Rendered hello/index.html.erb within layouts/application (Duration: 0.6ms | Allocations: 465)
+  Rendered shared/_usa_banner.erb (Duration: 0.3ms | Allocations: 612)
+  Rendered shared/_navbar.html.erb (Duration: 8.7ms | Allocations: 6934)
+  Rendered layout layouts/application.html.erb (Duration: 58.5ms | Allocations: 55471)
+Completed 500 Internal Server Error in 62ms (ActiveRecord: 0.0ms | Allocations: 60286)
+
+
+  
+ActionView::Template::Error (undefined method `user_signed_in?' for #<ActionView::Base:0x0000000000ad70>):
+    31:         <li><%= link_to "Frequently Asked Questions", faq_path, class: "topnav__link" %></li>
+    32:       </li>
+    33: 
+    34:       <% if user_signed_in? %>
+    35:         <li class="topnav__item usa-accordion">
+    36:           <button class="topnav__link usa-accordion__button" type="button" aria-expanded="false"
+    37:                   aria-controls="nav-1" data-test="my-account-menu">My account</button>
+  
+app/views/shared/_navbar.html.erb:34
+app/views/layouts/application.html.erb:14
+Started GET "/" for ::1 at 2023-11-01 10:46:49 -0400
+Processing by HelloController#index as HTML
+  Rendering layout layouts/application.html.erb
+  Rendering hello/index.html.erb within layouts/application
+  Rendered hello/index.html.erb within layouts/application (Duration: 0.7ms | Allocations: 465)
+  Rendered shared/_usa_banner.erb (Duration: 0.4ms | Allocations: 612)
+  Rendered shared/_navbar.html.erb (Duration: 2.4ms | Allocations: 4267)
+  Rendered layout layouts/application.html.erb (Duration: 44.0ms | Allocations: 52597)
+Completed 500 Internal Server Error in 48ms (ActiveRecord: 0.0ms | Allocations: 57412)
+
+
+  
+ActionView::Template::Error (uninitialized constant #<Class:0x0000000140d34820>::User):
+    32:       </li>
+    33: 
+    34:       <li class="topnav__item topnav__item--buttons ds-u-padding-right--1">
+    35:         <%= link_to "Log in", new_session_path(User), class: "ds-c-button", data: { test: "login-link" } %>
+    36:       </li>
+    37:       <li class="topnav__item topnav__item--buttons">
+    38:         <%= link_to "Request access", new_user_registration_path, class: "ds-c-button ds-c-button--primary" %>
+  
+app/views/shared/_navbar.html.erb:35
+app/views/layouts/application.html.erb:14
+Started GET "/" for ::1 at 2023-11-01 10:58:16 -0400
+Processing by HelloController#index as HTML
+  Rendering layout layouts/application.html.erb
+  Rendering hello/index.html.erb within layouts/application
+  Rendered hello/index.html.erb within layouts/application (Duration: 0.5ms | Allocations: 465)
+  Rendered shared/_usa_banner.erb (Duration: 0.4ms | Allocations: 612)
+  Rendered shared/_navbar.html.erb (Duration: 2.9ms | Allocations: 4267)
+  Rendered layout layouts/application.html.erb (Duration: 43.9ms | Allocations: 52510)
+Completed 500 Internal Server Error in 47ms (ActiveRecord: 0.0ms | Allocations: 57325)
+
+
+  
+ActionView::Template::Error (uninitialized constant #<Class:0x00000001203e35e8>::User):
+    32:       </li>
+    33: 
+    34:       <li class="topnav__item topnav__item--buttons ds-u-padding-right--1">
+    35:         <%= link_to "Log in", new_session_path(User), class: "ds-c-button", data: { test: "login-link" } %>
+    36:       </li>
+    37:       <li class="topnav__item topnav__item--buttons">
+    38:         <%= link_to "Request access", new_user_registration_path, class: "ds-c-button ds-c-button--primary" %>
+  
+app/views/shared/_navbar.html.erb:35
+app/views/layouts/application.html.erb:14
+Started GET "/" for ::1 at 2023-11-01 10:59:45 -0400
+Processing by HelloController#index as HTML
+  Rendering layout layouts/application.html.erb
+  Rendering hello/index.html.erb within layouts/application
+  Rendered hello/index.html.erb within layouts/application (Duration: 0.6ms | Allocations: 465)
+  Rendered shared/_usa_banner.erb (Duration: 0.5ms | Allocations: 612)
+  Rendered shared/_navbar.html.erb (Duration: 17.1ms | Allocations: 25755)
+  Rendered layout layouts/application.html.erb (Duration: 62.9ms | Allocations: 73925)
+Completed 500 Internal Server Error in 66ms (ActiveRecord: 0.0ms | Allocations: 78740)
+
+
+  
+ActionView::Template::Error (uninitialized constant User::OrganizationTypable):
+    32:       </li>
+    33: 
+    34:       <li class="topnav__item topnav__item--buttons ds-u-padding-right--1">
+    35:         <%= link_to "Log in", new_session_path(User), class: "ds-c-button", data: { test: "login-link" } %>
+    36:       </li>
+    37:       <li class="topnav__item topnav__item--buttons">
+    38:         <%= link_to "Request access", new_user_registration_path, class: "ds-c-button ds-c-button--primary" %>
+  
+app/models/user.rb:6:in `<class:User>'
+app/models/user.rb:5:in `<main>'
+app/views/shared/_navbar.html.erb:35
+app/views/layouts/application.html.erb:14
+Started GET "/" for ::1 at 2023-11-01 11:01:42 -0400
+Processing by HelloController#index as HTML
+  Rendering layout layouts/application.html.erb
+  Rendering hello/index.html.erb within layouts/application
+  Rendered hello/index.html.erb within layouts/application (Duration: 0.6ms | Allocations: 465)
+  Rendered shared/_usa_banner.erb (Duration: 0.5ms | Allocations: 612)
+  Rendered shared/_navbar.html.erb (Duration: 19.4ms | Allocations: 29647)
+  Rendered layout layouts/application.html.erb (Duration: 45.3ms | Allocations: 77993)
+Completed 500 Internal Server Error in 48ms (ActiveRecord: 0.0ms | Allocations: 82808)
+
+
+  
+ActionView::Template::Error (undefined method `devise' for User:Class):
+    32:       </li>
+    33: 
+    34:       <li class="topnav__item topnav__item--buttons ds-u-padding-right--1">
+    35:         <%= link_to "Log in", new_session_path(User), class: "ds-c-button", data: { test: "login-link" } %>
+    36:       </li>
+    37:       <li class="topnav__item topnav__item--buttons">
+    38:         <%= link_to "Request access", new_user_registration_path, class: "ds-c-button ds-c-button--primary" %>
+  
+app/models/user.rb:19:in `<class:User>'
+app/models/user.rb:5:in `<main>'
+app/views/shared/_navbar.html.erb:35
+app/views/layouts/application.html.erb:14
+Started GET "/" for ::1 at 2023-11-01 11:04:03 -0400
+Processing by HelloController#index as HTML
+  Rendering layout layouts/application.html.erb
+  Rendering hello/index.html.erb within layouts/application
+  Rendered hello/index.html.erb within layouts/application (Duration: 0.5ms | Allocations: 465)
+  Rendered shared/_usa_banner.erb (Duration: 0.4ms | Allocations: 612)
+  Rendered shared/_navbar.html.erb (Duration: 18.1ms | Allocations: 29319)
+  Rendered layout layouts/application.html.erb (Duration: 87.2ms | Allocations: 77911)
+Completed 500 Internal Server Error in 90ms (ActiveRecord: 0.0ms | Allocations: 82765)
+
+
+  
+ActionView::Template::Error (undefined method `devise' for User:Class):
+    32:       </li>
+    33: 
+    34:       <li class="topnav__item topnav__item--buttons ds-u-padding-right--1">
+    35:         <%= link_to "Log in", new_session_path(User), class: "ds-c-button", data: { test: "login-link" } %>
+    36:       </li>
+    37:       <li class="topnav__item topnav__item--buttons">
+    38:         <%= link_to "Request access", new_user_registration_path, class: "ds-c-button ds-c-button--primary" %>
+  
+app/models/user.rb:19:in `<class:User>'
+app/models/user.rb:5:in `<main>'
+app/views/shared/_navbar.html.erb:35
+app/views/layouts/application.html.erb:14
+Started GET "/" for ::1 at 2023-11-01 11:05:33 -0400
+Processing by HelloController#index as HTML
+  Rendering layout layouts/application.html.erb
+  Rendering hello/index.html.erb within layouts/application
+  Rendered hello/index.html.erb within layouts/application (Duration: 0.7ms | Allocations: 465)
+  Rendered shared/_usa_banner.erb (Duration: 0.4ms | Allocations: 612)
+  Rendered shared/_navbar.html.erb (Duration: 17.2ms | Allocations: 28270)
+  Rendered layout layouts/application.html.erb (Duration: 86.8ms | Allocations: 77156)
+Completed 500 Internal Server Error in 90ms (ActiveRecord: 0.0ms | Allocations: 82010)
+
+
+  
+ActionView::Template::Error (uninitialized constant Devise::Models::PasswordExpirable
+Did you mean?  Devise::PasswordsController):
+    32:       </li>
+    33: 
+    34:       <li class="topnav__item topnav__item--buttons ds-u-padding-right--1">
+    35:         <%= link_to "Log in", new_session_path(User), class: "ds-c-button", data: { test: "login-link" } %>
+    36:       </li>
+    37:       <li class="topnav__item topnav__item--buttons">
+    38:         <%= link_to "Request access", new_user_registration_path, class: "ds-c-button ds-c-button--primary" %>
+  
+app/models/user.rb:19:in `<class:User>'
+app/models/user.rb:5:in `<main>'
+app/views/shared/_navbar.html.erb:35
+app/views/layouts/application.html.erb:14
+Started GET "/" for ::1 at 2023-11-01 11:08:45 -0400
+Processing by HelloController#index as HTML
+  Rendering layout layouts/application.html.erb
+  Rendering hello/index.html.erb within layouts/application
+  Rendered hello/index.html.erb within layouts/application (Duration: 0.6ms | Allocations: 465)
+  Rendered shared/_usa_banner.erb (Duration: 0.4ms | Allocations: 612)
+  Rendered shared/_navbar.html.erb (Duration: 9.7ms | Allocations: 7065)
+  Rendered layout layouts/application.html.erb (Duration: 65.1ms | Allocations: 55903)
+Completed 500 Internal Server Error in 68ms (ActiveRecord: 0.0ms | Allocations: 60757)
+
+
+  
+ActionView::Template::Error (undefined local variable or method `new_session_path' for #<ActionView::Base:0x0000000000b568>):
+    32:       </li>
+    33: 
+    34:       <li class="topnav__item topnav__item--buttons ds-u-padding-right--1">
+    35:         <%= link_to "Log in", new_session_path, class: "ds-c-button", data: { test: "login-link" } %>
+    36:       </li>
+    37:       <li class="topnav__item topnav__item--buttons">
+    38:         <%= link_to "Request access", new_user_registration_path, class: "ds-c-button ds-c-button--primary" %>
+  
+app/views/shared/_navbar.html.erb:35
+app/views/layouts/application.html.erb:14
+Started GET "/" for ::1 at 2023-11-01 11:12:24 -0400
+Processing by HelloController#index as HTML
+  Rendering layout layouts/application.html.erb
+  Rendering hello/index.html.erb within layouts/application
+  Rendered hello/index.html.erb within layouts/application (Duration: 0.8ms | Allocations: 465)
+  Rendered shared/_usa_banner.erb (Duration: 0.4ms | Allocations: 612)
+  Rendered shared/_navbar.html.erb (Duration: 10.3ms | Allocations: 7110)
+  Rendered layout layouts/application.html.erb (Duration: 80.8ms | Allocations: 55921)
+Completed 500 Internal Server Error in 84ms (ActiveRecord: 0.0ms | Allocations: 60775)
+
+
+  
+ActionView::Template::Error (undefined local variable or method `new_session_path' for #<ActionView::Base:0x0000000000b658>
+Did you mean?  session_new_path):
+    32:       </li>
+    33: 
+    34:       <li class="topnav__item topnav__item--buttons ds-u-padding-right--1">
+    35:         <%= link_to "Log in", new_session_path, class: "ds-c-button", data: { test: "login-link" } %>
+    36:       </li>
+    37:       <li class="topnav__item topnav__item--buttons">
+    38:         <%= link_to "Request access", new_user_registration_path, class: "ds-c-button ds-c-button--primary" %>
+  
+app/views/shared/_navbar.html.erb:35
+app/views/layouts/application.html.erb:14
+Started GET "/" for ::1 at 2023-11-01 11:13:46 -0400
+Processing by HelloController#index as HTML
+  Rendering layout layouts/application.html.erb
+  Rendering hello/index.html.erb within layouts/application
+  Rendered hello/index.html.erb within layouts/application (Duration: 0.6ms | Allocations: 465)
+  Rendered shared/_usa_banner.erb (Duration: 0.4ms | Allocations: 612)
+  Rendered shared/_navbar.html.erb (Duration: 10.1ms | Allocations: 7071)
+  Rendered layout layouts/application.html.erb (Duration: 65.9ms | Allocations: 55153)
+Completed 500 Internal Server Error in 69ms (ActiveRecord: 0.0ms | Allocations: 59968)
+
+
+  
+ActionView::Template::Error (undefined local variable or method `new_session_path' for #<ActionView::Base:0x0000000000af00>
+Did you mean?  session_new_path):
+    32:       </li>
+    33: 
+    34:       <li class="topnav__item topnav__item--buttons ds-u-padding-right--1">
+    35:         <%= link_to "Log in", new_session_path, class: "ds-c-button", data: { test: "login-link" } %>
+    36:       </li>
+    37:       <li class="topnav__item topnav__item--buttons">
+    38:         <%= link_to "Request access", new_user_registration_path, class: "ds-c-button ds-c-button--primary" %>
+  
+app/views/shared/_navbar.html.erb:35
+app/views/layouts/application.html.erb:14
+Started GET "/" for ::1 at 2023-11-01 11:15:43 -0400
+Processing by HelloController#index as HTML
+  Rendering layout layouts/application.html.erb
+  Rendering hello/index.html.erb within layouts/application
+  Rendered hello/index.html.erb within layouts/application (Duration: 0.6ms | Allocations: 465)
+  Rendered shared/_usa_banner.erb (Duration: 0.4ms | Allocations: 612)
+  Rendered shared/_navbar.html.erb (Duration: 2.6ms | Allocations: 2042)
+  Rendered layout layouts/application.html.erb (Duration: 49.1ms | Allocations: 50102)
+Completed 200 OK in 52ms (Views: 50.6ms | ActiveRecord: 0.0ms | Allocations: 54972)
+
+
+Started GET "/" for ::1 at 2023-11-01 11:20:22 -0400
+Processing by HelloController#index as HTML
+  Rendering layout layouts/application.html.erb
+  Rendering hello/index.html.erb within layouts/application
+  Rendered hello/index.html.erb within layouts/application (Duration: 0.6ms | Allocations: 465)
+  Rendered layout layouts/application.html.erb (Duration: 40.9ms | Allocations: 23243)
+Completed 500 Internal Server Error in 44ms (ActiveRecord: 0.0ms | Allocations: 28048)
+
+
+  
+LoadError (cannot load such file -- sassc):
+  
+app/views/layouts/application.html.erb:9
+Started GET "/" for ::1 at 2023-11-01 11:24:40 -0400
+Processing by HelloController#index as HTML
+  Rendering layout layouts/application.html.erb
+  Rendering hello/index.html.erb within layouts/application
+  Rendered hello/index.html.erb within layouts/application (Duration: 0.6ms | Allocations: 465)
+  Rendered layout layouts/application.html.erb (Duration: 13.3ms | Allocations: 5408)
+Completed 500 Internal Server Error in 16ms (ActiveRecord: 0.0ms | Allocations: 10213)
+
+
+  
+LoadError (cannot load such file -- sassc):
+  
+app/views/layouts/application.html.erb:9
+Started GET "/" for ::1 at 2023-11-01 11:28:20 -0400
+Processing by HelloController#index as HTML
+  Rendering layout layouts/application.html.erb
+  Rendering hello/index.html.erb within layouts/application
+  Rendered hello/index.html.erb within layouts/application (Duration: 0.6ms | Allocations: 465)
+  Rendered layout layouts/application.html.erb (Duration: 13.1ms | Allocations: 5401)
+Completed 500 Internal Server Error in 16ms (ActiveRecord: 0.0ms | Allocations: 10206)
+
+
+  
+LoadError (cannot load such file -- sassc):
+  
+app/views/layouts/application.html.erb:9
+Started GET "/" for ::1 at 2023-11-01 11:31:32 -0400
+Processing by HelloController#index as HTML
+  Rendering layout layouts/application.html.erb
+  Rendering hello/index.html.erb within layouts/application
+  Rendered hello/index.html.erb within layouts/application (Duration: 0.6ms | Allocations: 465)
+  Rendered layout layouts/application.html.erb (Duration: 5.7ms | Allocations: 5547)
+Completed 500 Internal Server Error in 21ms (ActiveRecord: 0.0ms | Allocations: 10374)
+
+
+  
+ActionView::Template::Error (Error: File to import not found or unreadable: normalize.css/normalize.
+        on line 18:2 of app/assets/stylesheets/application.scss
+>>  @import 'normalize.css/normalize';
+
+   -^
+):
+     6:     <%= csrf_meta_tags %>
+     7:     <%= csp_meta_tag %>
+     8: 
+     9:     <%= stylesheet_link_tag "application" %>
+    10:     <%= javascript_importmap_tags %>
+    11:   </head>
+    12: 
+  
+app/assets/stylesheets/application.scss:18
+app/views/layouts/application.html.erb:9
+Started GET "/" for ::1 at 2023-11-01 11:31:52 -0400
+Processing by HelloController#index as HTML
+  Rendering layout layouts/application.html.erb
+  Rendering hello/index.html.erb within layouts/application
+  Rendered hello/index.html.erb within layouts/application (Duration: 0.5ms | Allocations: 465)
+  Rendered layout layouts/application.html.erb (Duration: 4.7ms | Allocations: 5555)
+Completed 500 Internal Server Error in 10ms (ActiveRecord: 0.0ms | Allocations: 10382)
+
+
+  
+ActionView::Template::Error (Error: File to import not found or unreadable: normalize.css/normalize.
+        on line 18:2 of app/assets/stylesheets/application.scss
+>>  @import 'normalize.css/normalize';
+
+   -^
+):
+     6:     <%= csrf_meta_tags %>
+     7:     <%= csp_meta_tag %>
+     8: 
+     9:     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    10:     <%= javascript_importmap_tags %>
+    11:   </head>
+    12: 
+  
+app/assets/stylesheets/application.scss:18
+app/views/layouts/application.html.erb:9
+Started GET "/" for ::1 at 2023-11-01 11:37:27 -0400
+Processing by HelloController#index as HTML
+  Rendering layout layouts/application.html.erb
+  Rendering hello/index.html.erb within layouts/application
+  Rendered hello/index.html.erb within layouts/application (Duration: 0.6ms | Allocations: 465)
+  Rendered layout layouts/application.html.erb (Duration: 23.4ms | Allocations: 7620)
+Completed 500 Internal Server Error in 26ms (ActiveRecord: 0.0ms | Allocations: 12447)
+
+
+  
+ActionView::Template::Error (Error: File to import not found or unreadable: @cmsgov/design-system-core/src/index.
+        on line 19:2 of app/assets/stylesheets/application.scss
+>>  @import '@cmsgov/design-system-core/src/index';
+
+   -^
+):
+     6:     <%= csrf_meta_tags %>
+     7:     <%= csp_meta_tag %>
+     8: 
+     9:     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    10:     <%= javascript_importmap_tags %>
+    11:   </head>
+    12: 
+  
+app/assets/stylesheets/application.scss:19
+app/views/layouts/application.html.erb:9
+Started GET "/" for ::1 at 2023-11-01 11:42:17 -0400
+Processing by HelloController#index as HTML
+  Rendering layout layouts/application.html.erb
+  Rendering hello/index.html.erb within layouts/application
+  Rendered hello/index.html.erb within layouts/application (Duration: 0.6ms | Allocations: 465)
+  Rendered layout layouts/application.html.erb (Duration: 12.0ms | Allocations: 5555)
+Completed 500 Internal Server Error in 16ms (ActiveRecord: 0.0ms | Allocations: 10382)
+
+
+  
+ActionView::Template::Error (Error: File to import not found or unreadable: @cmsgov/design-system-core/src/index.
+        on line 19:2 of app/assets/stylesheets/application.scss
+>>  @import '@cmsgov/design-system-core/src/index';
+
+   -^
+):
+     6:     <%= csrf_meta_tags %>
+     7:     <%= csp_meta_tag %>
+     8: 
+     9:     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    10:     <%= javascript_importmap_tags %>
+    11:   </head>
+    12: 
+  
+app/assets/stylesheets/application.scss:19
+app/views/layouts/application.html.erb:9
+Started GET "/" for ::1 at 2023-11-01 11:52:30 -0400
+Processing by HelloController#index as HTML
+  Rendering layout layouts/application.html.erb
+  Rendering hello/index.html.erb within layouts/application
+  Rendered hello/index.html.erb within layouts/application (Duration: 0.6ms | Allocations: 465)
+  Rendered shared/_usa_banner.erb (Duration: 0.4ms | Allocations: 612)
+  Rendered shared/_navbar.html.erb (Duration: 1.4ms | Allocations: 2005)
+  Rendered layout layouts/application.html.erb (Duration: 1508.1ms | Allocations: 562274)
+Completed 200 OK in 1511ms (Views: 1509.5ms | ActiveRecord: 0.0ms | Allocations: 567143)
+
+
+Started GET "/fonts/roboto-v19-latin-regular.woff2" for ::1 at 2023-11-01 11:52:31 -0400
+Started GET "/fonts/roboto-v19-latin-700.woff2" for ::1 at 2023-11-01 11:52:31 -0400
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-regular.woff2"):
+  
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-700.woff2"):
+  
+Started GET "/fonts/roboto-v19-latin-regular.woff" for ::1 at 2023-11-01 11:52:31 -0400
+Started GET "/fonts/roboto-v19-latin-700.woff" for ::1 at 2023-11-01 11:52:31 -0400
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-regular.woff"):
+  
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-700.woff"):
+  
+Started GET "/faq" for ::1 at 2023-11-01 11:54:13 -0400
+Processing by HelloController#index as HTML
+  Rendering layout layouts/application.html.erb
+  Rendering hello/index.html.erb within layouts/application
+  Rendered hello/index.html.erb within layouts/application (Duration: 0.1ms | Allocations: 7)
+  Rendered shared/_usa_banner.erb (Duration: 0.0ms | Allocations: 9)
+  Rendered shared/_navbar.html.erb (Duration: 1.5ms | Allocations: 843)
+  Rendered layout layouts/application.html.erb (Duration: 17.2ms | Allocations: 8994)
+Completed 200 OK in 20ms (Views: 18.0ms | ActiveRecord: 0.0ms | Allocations: 9348)
+
+
+Started GET "/docs" for ::1 at 2023-11-01 11:54:14 -0400
+Processing by HelloController#index as HTML
+  Rendering layout layouts/application.html.erb
+  Rendering hello/index.html.erb within layouts/application
+  Rendered hello/index.html.erb within layouts/application (Duration: 0.0ms | Allocations: 7)
+  Rendered shared/_usa_banner.erb (Duration: 0.0ms | Allocations: 9)
+  Rendered shared/_navbar.html.erb (Duration: 1.4ms | Allocations: 826)
+  Rendered layout layouts/application.html.erb (Duration: 12.7ms | Allocations: 8871)
+Completed 200 OK in 14ms (Views: 13.2ms | ActiveRecord: 0.0ms | Allocations: 9191)
+
+
+Started GET "/home" for ::1 at 2023-11-01 11:54:15 -0400
+Processing by HelloController#index as HTML
+  Rendering layout layouts/application.html.erb
+  Rendering hello/index.html.erb within layouts/application
+  Rendered hello/index.html.erb within layouts/application (Duration: 0.0ms | Allocations: 7)
+  Rendered shared/_usa_banner.erb (Duration: 0.0ms | Allocations: 9)
+  Rendered shared/_navbar.html.erb (Duration: 1.3ms | Allocations: 826)
+  Rendered layout layouts/application.html.erb (Duration: 12.7ms | Allocations: 8862)
+Completed 200 OK in 14ms (Views: 13.2ms | ActiveRecord: 0.0ms | Allocations: 9183)
+
+
+Started GET "/" for ::1 at 2023-11-01 11:54:16 -0400
+Processing by HelloController#index as HTML
+  Rendering layout layouts/application.html.erb
+  Rendering hello/index.html.erb within layouts/application
+  Rendered hello/index.html.erb within layouts/application (Duration: 0.1ms | Allocations: 7)
+  Rendered shared/_usa_banner.erb (Duration: 0.0ms | Allocations: 9)
+  Rendered shared/_navbar.html.erb (Duration: 1.1ms | Allocations: 826)
+  Rendered layout layouts/application.html.erb (Duration: 12.3ms | Allocations: 8856)
+Completed 200 OK in 14ms (Views: 13.1ms | ActiveRecord: 0.0ms | Allocations: 9177)
+
+
+Started GET "/" for ::1 at 2023-11-01 11:58:03 -0400
+Processing by HelloController#index as HTML
+  Rendering layout layouts/application.html.erb
+  Rendering hello/index.html.erb within layouts/application
+  Rendered hello/index.html.erb within layouts/application (Duration: 0.4ms | Allocations: 471)
+  Rendered shared/_usa_banner.erb (Duration: 0.4ms | Allocations: 612)
+  Rendered shared/_navbar.html.erb (Duration: 1.4ms | Allocations: 2021)
+  Rendered layout layouts/application.html.erb (Duration: 79.5ms | Allocations: 67933)
+Completed 200 OK in 83ms (Views: 81.0ms | ActiveRecord: 0.0ms | Allocations: 72803)
+
+
+Started GET "/fonts/roboto-v19-latin-regular.woff2" for ::1 at 2023-11-01 11:58:03 -0400
+Started GET "/fonts/roboto-v19-latin-700.woff2" for ::1 at 2023-11-01 11:58:03 -0400
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-regular.woff2"):
+  
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-700.woff2"):
+  
+Started GET "/fonts/roboto-v19-latin-regular.woff" for ::1 at 2023-11-01 11:58:04 -0400
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-regular.woff"):
+  
+Started GET "/fonts/roboto-v19-latin-700.woff" for ::1 at 2023-11-01 11:58:04 -0400
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-700.woff"):
+  
+Started GET "/" for ::1 at 2023-11-01 11:58:12 -0400
+Processing by HelloController#index as HTML
+  Rendering layout layouts/application.html.erb
+  Rendering hello/index.html.erb within layouts/application
+  Rendered hello/index.html.erb within layouts/application (Duration: 0.1ms | Allocations: 7)
+  Rendered shared/_usa_banner.erb (Duration: 0.0ms | Allocations: 9)
+  Rendered shared/_navbar.html.erb (Duration: 1.3ms | Allocations: 844)
+  Rendered layout layouts/application.html.erb (Duration: 17.3ms | Allocations: 9022)
+Completed 200 OK in 19ms (Views: 18.1ms | ActiveRecord: 0.0ms | Allocations: 9376)
+
+
+Started GET "/" for ::1 at 2023-11-01 12:00:06 -0400
+Processing by HelloController#index as HTML
+  Rendering layout layouts/application.html.erb
+  Rendering hello/index.html.erb within layouts/application
+  Rendered hello/index.html.erb within layouts/application (Duration: 0.6ms | Allocations: 477)
+  Rendered shared/_usa_banner.erb (Duration: 0.4ms | Allocations: 612)
+  Rendered shared/_navbar.html.erb (Duration: 1.4ms | Allocations: 2019)
+  Rendered layout layouts/application.html.erb (Duration: 88.5ms | Allocations: 67616)
+Completed 200 OK in 92ms (Views: 90.1ms | ActiveRecord: 0.0ms | Allocations: 72486)
+
+
+Started GET "/fonts/roboto-v19-latin-regular.woff2" for ::1 at 2023-11-01 12:00:06 -0400
+Started GET "/fonts/roboto-v19-latin-700.woff2" for ::1 at 2023-11-01 12:00:06 -0400
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-regular.woff2"):
+  
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-700.woff2"):
+  
+Started GET "/fonts/roboto-v19-latin-regular.woff" for ::1 at 2023-11-01 12:00:06 -0400
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-regular.woff"):
+  
+Started GET "/fonts/roboto-v19-latin-700.woff" for ::1 at 2023-11-01 12:00:06 -0400
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-700.woff"):
+  
+Started GET "/" for ::1 at 2023-11-01 12:01:31 -0400
+Processing by HelloController#index as HTML
+  Rendering layout layouts/application.html.erb
+  Rendering hello/index.html.erb within layouts/application
+  Rendered hello/index.html.erb within layouts/application (Duration: 0.4ms | Allocations: 477)
+  Rendered shared/_usa_banner.erb (Duration: 0.4ms | Allocations: 612)
+  Rendered shared/_navbar.html.erb (Duration: 1.4ms | Allocations: 2021)
+  Rendered layout layouts/application.html.erb (Duration: 66.4ms | Allocations: 67915)
+Completed 200 OK in 70ms (Views: 67.8ms | ActiveRecord: 0.0ms | Allocations: 72785)
+
+
+Started GET "/fonts/roboto-v19-latin-regular.woff2" for ::1 at 2023-11-01 12:01:31 -0400
+Started GET "/fonts/roboto-v19-latin-700.woff2" for ::1 at 2023-11-01 12:01:31 -0400
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-regular.woff2"):
+  
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-700.woff2"):
+  
+Started GET "/fonts/roboto-v19-latin-regular.woff" for ::1 at 2023-11-01 12:01:31 -0400
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-regular.woff"):
+  
+Started GET "/fonts/roboto-v19-latin-700.woff" for ::1 at 2023-11-01 12:01:31 -0400
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-700.woff"):
+  

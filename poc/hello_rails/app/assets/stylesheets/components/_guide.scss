@@ -1,0 +1,59 @@
+#guide-content{
+  pre {
+    background-color: $color-gray-lightest;
+    border-radius: 6px;
+  
+    padding: 3px 5px;
+  
+    white-space: pre-wrap;       /* css-3 */
+    white-space: -moz-pre-wrap !important;  /* Mozilla, since 1999 */
+    white-space: -pre-wrap;      /* Opera 4-6 */
+    white-space: -o-pre-wrap;    /* Opera 7 */
+    word-wrap: break-word;       /* Internet Explorer 5.5+ */
+  }
+
+  .button-ex {
+    background-color: $color-primary;
+    border-radius: 6px;
+    color: $color-white;
+    font-weight: 700;
+    padding: 3px 7px 3px 6px;
+  }
+}
+
+.guide_sub-link {
+  text-decoration: none;
+}
+
+.guide_sub-link:visited {
+  color: $color-primary;
+}
+
+.guide__table {
+  border: 0.5px solid $color-gray-dark;
+
+  th {
+    border: 0.5px solid $color-gray-dark;
+    background-color: $color-gray-lighter;
+    padding: 0 $spacer-2;
+  }
+
+  td {
+    border: 0.5px solid $color-gray-dark;
+    padding: $spacer-1;
+    text-align: center;
+  }
+
+  .notes {
+    width: 50%;
+  }
+}
+
+.guide_top_link {
+  color: $color-gray-dark;
+  font-size: 18px;
+}
+
+.guide_top_link:visited {
+  color: $color-gray-dark;
+}
