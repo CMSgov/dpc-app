@@ -1,0 +1,36 @@
+Started GET "/" for ::1 at 2023-11-01 15:28:30 -0400
+Processing by HelloController#index as HTML
+  Rendering layout layouts/application.html.erb
+  Rendering hello/index.html.erb within layouts/application
+  Rendered hello/index.html.erb within layouts/application (Duration: 2.3ms | Allocations: 2793)
+  Rendered layout layouts/application.html.erb (Duration: 2.4ms | Allocations: 2902)
+Completed 500 Internal Server Error in 12ms (ActiveRecord: 0.0ms | Allocations: 8673)
+
+
+  
+ActionView::SyntaxErrorInTemplate (Encountered a syntax error while rendering template: check <%= render(HelloComponent.new())) %>
+):
+1:    <%= render(HelloComponent.new())) %>
+  
+app/views/hello/index.html.erb:1: syntax error, unexpected ')', expecting `end'
+app/views/hello/index.html.erb:1: syntax error, unexpected ')', expecting `end'
+app/views/hello/index.html.erb:1: syntax error, unexpected ')', expecting `end'
+app/views/hello/index.html.erb:1: syntax error, unexpected ')', expecting `end'
+Started GET "/" for ::1 at 2023-11-01 15:28:53 -0400
+Processing by HelloController#index as HTML
+  Rendering layout layouts/application.html.erb
+  Rendering hello/index.html.erb within layouts/application
+  Rendered hello/index.html.erb within layouts/application (Duration: 1.7ms | Allocations: 2749)
+  Rendered layout layouts/application.html.erb (Duration: 146.7ms | Allocations: 106116)
+Completed 200 OK in 150ms (Views: 148.3ms | ActiveRecord: 0.0ms | Allocations: 111036)
+
+
+Started GET "/" for ::1 at 2023-11-01 15:29:25 -0400
+Processing by HelloController#index as HTML
+  Rendering layout layouts/application.html.erb
+  Rendering hello/index.html.erb within layouts/application
+  Rendered hello/index.html.erb within layouts/application (Duration: 2.1ms | Allocations: 2723)
+  Rendered layout layouts/application.html.erb (Duration: 30.1ms | Allocations: 41149)
+Completed 200 OK in 35ms (Views: 32.3ms | ActiveRecord: 0.0ms | Allocations: 46069)
+
+
