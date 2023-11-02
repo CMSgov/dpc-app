@@ -12,8 +12,8 @@
 <!-- Tealium Tag Manager - ASYNC -->
 <script type="text/javascript">
     (function(a,b,c,d){
-    var src_url = "https://tags.tiqcdn.com/utag/cmsgov/cms-dpc/#{ ENV['ENV'] == 'prod-sbx' ? 'qa' : 'dev'}/utag.js"
-    a=src_url;b=document;c='script';d=b.createElement(c);
+    a="https://tags.tiqcdn.com/utag/cmsgov/cms-dpc/#{ ENV['ENV'] == 'prod-sbx' ? 'qa' : 'dev'}/utag.js";
+    b=document;c='script';d=b.createElement(c);
     d.src=a;d.type='text/java'+c;d.async=true;
     a=b.getElementsByTagName(c)[0];a.parentNode.insertBefore(d,a);
     })();
