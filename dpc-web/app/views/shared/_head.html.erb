@@ -36,10 +36,6 @@
   <%= stylesheet_link_tag 'https://cdnjs.cloudflare.com/ajax/libs/uswds/2.13.3/css/uswds.min.css', crossorigin: 'anonymous'%>
   <%= stylesheet_link_tag    'application', media: 'all' %>
 
-  <% if ENV['ENV'] == 'prod-sbx' %>
-  <script src="https://tags.tiqcdn.com/utag/cmsgov/cms-dpc/qa/utag.sync.js"></script>
-  <% else %>
-  <script src="https://tags.tiqcdn.com/utag/cmsgov/cms-dpc/dev/utag.sync.js"></script>
-  <% end %>
+  <%= javascript_include_tag "https://tags.tiqcdn.com/utag/cmsgov/cms-dpc/#{ ENV['ENV'] == 'prod-spx' ? 'qa' : 'dev'}/utag.sync.js" %>
 
 </head>
