@@ -5,7 +5,7 @@
       "page_name": "<%= content_for?(:title) ? yield(:title) : 'CMS.gov' %>",
       "page_path": "<% request.fullpath %>",
       "site_domain": "<% request.domain %>",
-      "site_environment": ENV['ENV'],
+      "site_environment": "<% ENV['ENV'] %>",
     }
 </script>
 
