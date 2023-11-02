@@ -5,3 +5,122 @@ Processing by Rails::WelcomeController#index as HTML
 Completed 200 OK in 11ms (Views: 3.1ms | ActiveRecord: 0.0ms | Allocations: 10104)
 
 
+Started GET "/" for ::1 at 2023-11-02 13:13:11 -0400
+Processing by HelloController#index as HTML
+  Rendering layout ApplicationLayout
+  Rendering Hello::IndexView within application_layout
+  Rendered Hello::IndexView within application_layout (Duration: 0.7ms | Allocations: 256)
+  Rendered layout ApplicationLayout (Duration: 104.9ms | Allocations: 101219)
+Completed 200 OK in 154ms (Views: 107.8ms | ActiveRecord: 0.0ms | Allocations: 146925)
+
+
+Started GET "/" for ::1 at 2023-11-02 13:13:29 -0400
+Processing by Rails::WelcomeController#index as HTML
+  Rendering /Users/michaelesposito/.rbenv/versions/3.0.6/lib/ruby/gems/3.0.0/gems/railties-7.0.8/lib/rails/templates/rails/welcome/index.html.erb
+  Rendered /Users/michaelesposito/.rbenv/versions/3.0.6/lib/ruby/gems/3.0.0/gems/railties-7.0.8/lib/rails/templates/rails/welcome/index.html.erb (Duration: 1.2ms | Allocations: 832)
+Completed 200 OK in 8ms (Views: 2.4ms | ActiveRecord: 0.0ms | Allocations: 7516)
+
+
+Started GET "/" for ::1 at 2023-11-02 13:13:31 -0400
+Processing by Rails::WelcomeController#index as HTML
+  Rendering /Users/michaelesposito/.rbenv/versions/3.0.6/lib/ruby/gems/3.0.0/gems/railties-7.0.8/lib/rails/templates/rails/welcome/index.html.erb
+  Rendered /Users/michaelesposito/.rbenv/versions/3.0.6/lib/ruby/gems/3.0.0/gems/railties-7.0.8/lib/rails/templates/rails/welcome/index.html.erb (Duration: 1.2ms | Allocations: 489)
+Completed 200 OK in 5ms (Views: 3.2ms | ActiveRecord: 0.0ms | Allocations: 1550)
+
+
+Started GET "/hello" for ::1 at 2023-11-02 13:13:41 -0400
+Processing by HelloController#index as HTML
+  Rendering layout ApplicationLayout
+  Rendering Hello::IndexView within application_layout
+  Rendered Hello::IndexView within application_layout (Duration: 0.5ms | Allocations: 200)
+  Rendered layout ApplicationLayout (Duration: 23.7ms | Allocations: 36577)
+Completed 200 OK in 60ms (Views: 26.3ms | ActiveRecord: 0.0ms | Allocations: 75921)
+
+
+Started GET "/hello" for ::1 at 2023-11-02 13:16:02 -0400
+Processing by HelloController#index as HTML
+  Rendering layout ApplicationLayout
+  Rendering Hello::IndexView within application_layout
+  Rendered Hello::IndexView within application_layout (Duration: 0.4ms | Allocations: 227)
+  Rendered layout ApplicationLayout (Duration: 15.8ms | Allocations: 36703)
+Completed 200 OK in 66ms (Views: 18.2ms | ActiveRecord: 0.0ms | Allocations: 79846)
+
+
+Started GET "/hello" for ::1 at 2023-11-02 13:17:31 -0400
+Processing by HelloController#index as HTML
+  Rendering layout ApplicationLayout
+  Rendering Hello::IndexView within application_layout
+  Rendered Hello::IndexView within application_layout (Duration: 0.3ms | Allocations: 227)
+  Rendered layout ApplicationLayout (Duration: 15.3ms | Allocations: 36576)
+Completed 200 OK in 61ms (Views: 18.9ms | ActiveRecord: 0.0ms | Allocations: 79748)
+
+
+Started GET "/hello" for ::1 at 2023-11-02 13:19:02 -0400
+Processing by HelloController#index as HTML
+  Rendering layout ApplicationLayout
+  Rendering Hello::IndexView within application_layout
+  Rendered Hello::IndexView within application_layout (Duration: 0.3ms | Allocations: 235)
+  Rendered layout ApplicationLayout (Duration: 11.3ms | Allocations: 5011)
+Completed 500 Internal Server Error in 56ms (ActiveRecord: 0.0ms | Allocations: 48116)
+
+
+  
+SassC::SyntaxError (Error: File to import not found or unreadable: normalize.css/normalize.
+        on line 18:2 of app/assets/stylesheets/application.scss
+>>  @import 'normalize.css/normalize';
+
+   -^
+):
+  
+app/assets/stylesheets/application.scss:18
+app/views/layouts/application_layout.rb:15:in `block (2 levels) in template'
+app/views/layouts/application_layout.rb:10:in `block in template'
+app/views/layouts/application_layout.rb:9:in `template'
+app/controllers/hello_controller.rb:7:in `index'
+Started GET "/hello" for ::1 at 2023-11-02 13:20:12 -0400
+Processing by HelloController#index as HTML
+  Rendering layout ApplicationLayout
+  Rendering Hello::IndexView within application_layout
+  Rendered Hello::IndexView within application_layout (Duration: 1.1ms | Allocations: 235)
+  Rendered layout ApplicationLayout (Duration: 8.7ms | Allocations: 4079)
+Completed 500 Internal Server Error in 56ms (ActiveRecord: 0.0ms | Allocations: 47118)
+
+
+  
+SassC::SyntaxError (Error: File to import not found or unreadable: normalize.css/normalize.
+        on line 18:2 of app/assets/stylesheets/application.scss
+>>  @import 'normalize.css/normalize';
+
+   -^
+):
+  
+app/assets/stylesheets/application.scss:18
+app/views/layouts/application_layout.rb:15:in `block (2 levels) in template'
+app/views/layouts/application_layout.rb:10:in `block in template'
+app/views/layouts/application_layout.rb:9:in `template'
+app/controllers/hello_controller.rb:7:in `index'
+Started GET "/hello" for ::1 at 2023-11-02 13:22:41 -0400
+Processing by HelloController#index as HTML
+  Rendering layout ApplicationLayout
+  Rendering Hello::IndexView within application_layout
+  Rendered Hello::IndexView within application_layout (Duration: 0.4ms | Allocations: 235)
+  Rendered layout ApplicationLayout (Duration: 1427.5ms | Allocations: 509992)
+Completed 200 OK in 1445ms (Views: 1430.4ms | ActiveRecord: 0.0ms | Allocations: 553086)
+
+
+Started GET "/fonts/roboto-v19-latin-700.woff2" for ::1 at 2023-11-02 13:22:42 -0400
+Started GET "/fonts/roboto-v19-latin-regular.woff2" for ::1 at 2023-11-02 13:22:42 -0400
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-700.woff2"):
+  
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-regular.woff2"):
+  
+Started GET "/fonts/roboto-v19-latin-700.woff" for ::1 at 2023-11-02 13:22:42 -0400
+Started GET "/fonts/roboto-v19-latin-regular.woff" for ::1 at 2023-11-02 13:22:42 -0400
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-700.woff"):
+  
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-regular.woff"):
+  

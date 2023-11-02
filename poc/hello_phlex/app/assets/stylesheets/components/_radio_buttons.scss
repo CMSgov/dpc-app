@@ -1,0 +1,78 @@
+.radio_buttons__container {
+  display: flex;
+  flex-direction: column-reverse;
+
+  .radio-btn-label {
+    display: flex;
+    flex-direction: row;
+  }
+
+/* The container */
+.container {
+  display: block;
+  position: relative;
+  padding-left: 35px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  font-family: Open Sans,Helvetica,sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Hide the browser's default radio button */
+.container input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+}
+
+/* Create a custom radio button */
+.checkmark {
+  background-color: #fff;
+  border: 2px solid #212121;
+  -webkit-box-sizing: border-box;
+  border-radius: 100%;
+  box-sizing: border-box;
+  content: "\a0";
+  height: 23px;
+  left: 0;
+  line-height: 1.5;
+  position: absolute;
+  text-indent: .15em;
+  top: 0;
+  width: 23px;
+}
+
+  .container:hover input ~ .checkmark {
+    background-color: #ccc;
+  }
+
+  .container input:checked ~ .checkmark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 23px;
+    width: 23px;
+    background-color: #0071bc;
+    background-image: url(../images/checkmark-white.svg);
+    border-radius: 50%;
+    background-repeat: no-repeat;
+    background-size: 100%;
+    border-color: #0071bc;
+  }
+
+  .checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+  }
+
+  .container input:checked ~ .checkmark:after {
+    display: none;
+  }
+
+}

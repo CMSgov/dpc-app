@@ -1,0 +1,52 @@
+.benefit-prop {
+
+  display: flex;
+  flex-direction: column;
+  margin: $spacer-3 0;
+
+
+  @media (min-width: $width-sm) {
+    align-items: flex-start;
+    flex-direction: row;
+    margin: $spacer-2 0;
+  }
+
+  @media (min-width: $width-md) {
+    align-items: unset;
+    flex-direction: column;
+    margin: 0;
+  }
+}
+
+.benefit-prop__img-wrap {
+  flex-shrink: 0;
+  flex-basis: 1;
+  max-width: 100%;
+
+  @media (min-width: $width-sm) {
+    padding: 0 $spacer-3 0 0;
+  }
+
+  @media (min-width: $width-md) {
+    padding: $spacer-5;
+  }
+
+  img {
+    display: block;
+    margin: 0 auto;
+    height: 100%;
+    width: 25%;
+
+    @media (min-width: $width-sm) {
+      width: 72px;
+    }
+
+    @media (min-width: $width-md) {
+      width: 100%;
+    }
+  }
+}
+
+.benefit-prop__body {
+  max-width: 100%;
+}

@@ -1,0 +1,54 @@
+.pagination {
+  font-size: 0;
+  display: inline-block;
+  margin: $spacer-2 0 $spacer-2 1px;
+
+  .page,
+  .first,
+  .last,
+  .next,
+  .prev {
+    background-color: $color-white;
+    border: 1px solid $color-gray-lighter;
+    display: inline-flex;
+    font-size: $base-font-size;
+    margin-left: -1px;
+  }
+
+  .gap,
+  .current {
+    color: $color-muted;
+    display: inline-block;
+    margin-left: -1px;
+    padding: $spacer-1/2 $spacer-1;
+    text-align: center;
+  }
+
+  .current {
+    font-weight: $font-bold;
+  }
+
+  a,
+  a:visited {
+    display: block;
+    padding: $spacer-1/2 $spacer-1;
+    text-align: center;
+    text-decoration: none;
+  }
+
+  a:hover {
+    background-color: $color-primary;
+    color: $color-white;
+  }
+
+  > *:first-child {
+    border-top-left-radius: 3px;
+    border-bottom-left-radius: 3px;
+  }
+
+  > *:last-child {
+    border-top-right-radius: 3px;
+    border-bottom-right-radius: 3px;
+  }
+}
+
