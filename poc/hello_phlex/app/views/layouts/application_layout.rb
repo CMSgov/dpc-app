@@ -17,6 +17,7 @@ class ApplicationLayout < ApplicationView
 			end
 
 			body do
+			    render NavbarComponent.new
 				main(&block)
 			end
 		end
