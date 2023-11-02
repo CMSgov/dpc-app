@@ -106,7 +106,7 @@ services:
       - DB_PASS=dpc-safe
       - DATABASE_CLEANER_ALLOW_REMOTE_DATABASE_URL=true
     ports:
-      - "3100:3000"
+      - "3100:3100"
     depends_on:
       - db
       - portal_sidekiq
@@ -152,4 +152,4 @@ services:
     image: dadarek/wait-for-dependencies
     depends_on:
       - dpc_portal
-    command: dpc_portal:3000
+    command: dpc_portal:3100
