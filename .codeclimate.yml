@@ -1,6 +1,8 @@
 version: "2"
 exclude_patterns:
   - "**/DPCResourceType.java" # Ignoring this file intentionally to use capitalized constants
+  - "**/MockBlueButtonClient.java" # Ignoring test utilities
+  - "**/MockBlueButtonClientV2.java"
   # Add back all the default ignore paths
   - "config/"
   - "db/"
