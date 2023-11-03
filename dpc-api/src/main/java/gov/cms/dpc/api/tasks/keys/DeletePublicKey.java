@@ -1,7 +1,5 @@
 package gov.cms.dpc.api.tasks.keys;
 
-import com.google.common.collect.ImmutableCollection;
-import com.google.common.collect.ImmutableMultimap;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.resources.v1.KeyResource;
 import io.dropwizard.servlets.tasks.Task;
@@ -12,6 +10,8 @@ import javax.inject.Singleton;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import java.io.PrintWriter;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static gov.cms.dpc.api.tasks.TasksCommon.extractOrganization;
@@ -33,16 +33,16 @@ public class DeletePublicKey extends Task {
     }
 
     @Override
-    public void execute(ImmutableMultimap<String, String> parameters, PrintWriter printWriter) {
+    public void execute(Map<String, List<String>> parameters, PrintWriter printWriter) {
         final Organization organization = extractOrganization(parameters);
 
-        final ImmutableCollection<String> keyCollection = parameters.get("key");
+        final List<String> keyCollection = parameters.get("key");
 
-        if (keyCollection.isEmpty()) {
+        if (keyCollection == null || keyCollection.isEmpty()) {
             throw new WebApplicationException("Must have key", Response.Status.BAD_REQUEST);
         }
 
-        final String keyID = keyCollection.asList().get(0);
+        final String keyID = keyCollection.get(0);
         this.resource
                 .deletePublicKey(new OrganizationPrincipal(organization),
                         UUID.fromString(keyID));

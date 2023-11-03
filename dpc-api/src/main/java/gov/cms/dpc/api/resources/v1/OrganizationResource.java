@@ -16,7 +16,6 @@ import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.FHIRParameter;
 import gov.cms.dpc.fhir.annotations.Profiled;
-import gov.cms.dpc.fhir.validations.profiles.OrganizationProfile;
 import io.dropwizard.auth.Auth;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.swagger.annotations.*;
@@ -168,7 +167,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
             @ApiResponse(code = 422, message = "Provided resource is not a valid FHIR Organization")
     })
     @Override
-    public Organization updateOrganization(@NotNull @PathParam("organizationID") UUID organizationID, @Valid @Profiled(profile = OrganizationProfile.PROFILE_URI) Organization organization) {
+    public Organization updateOrganization(@NotNull @PathParam("organizationID") UUID organizationID, @Valid @Profiled Organization organization) {
         MethodOutcome outcome = this.client
                 .update()
                 .resource(organization)

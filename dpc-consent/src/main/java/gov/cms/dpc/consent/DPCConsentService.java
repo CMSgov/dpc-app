@@ -2,7 +2,6 @@ package gov.cms.dpc.consent;
 
 import ca.mestevens.java.configuration.bundle.TypesafeConfigurationBundle;
 import com.codahale.metrics.jersey2.InstrumentedResourceMethodApplicationListener;
-import com.hubspot.dropwizard.guicier.GuiceBundle;
 import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.common.hibernate.consent.DPCConsentHibernateBundle;
 import gov.cms.dpc.common.hibernate.consent.DPCConsentHibernateModule;
@@ -20,6 +19,7 @@ import org.knowm.dropwizard.sundial.SundialBundle;
 import org.knowm.dropwizard.sundial.SundialConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.vyarus.dropwizard.guice.GuiceBundle;
 
 import java.sql.SQLException;
 
@@ -41,18 +41,17 @@ public class DPCConsentService extends Application<DPCConsentConfiguration> {
     @Override
     public void initialize(Bootstrap<DPCConsentConfiguration> bootstrap) {
         JerseyGuiceUtils.reset();
-
-        GuiceBundle<DPCConsentConfiguration> guiceBundle = GuiceBundle.defaultBuilder(DPCConsentConfiguration.class)
+        GuiceBundle guiceBundle = GuiceBundle.builder()
                 .modules(
                         new DPCConsentHibernateModule<>(hibernateBundle),
-                        new FHIRModule<>(),
-                        new ConsentAppModule()
-                ).build();
+                        new FHIRModule<DPCConsentConfiguration>(),
+                        new ConsentAppModule())
+                .build();
 
         bootstrap.addBundle(hibernateBundle);
         bootstrap.addBundle(guiceBundle);
         bootstrap.addBundle(new TypesafeConfigurationBundle("dpc.consent"));
-        bootstrap.addBundle(new MigrationsBundle<DPCConsentConfiguration>() {
+        bootstrap.addBundle(new MigrationsBundle<>() {
             @Override
             public PooledDataSourceFactory getDataSourceFactory(DPCConsentConfiguration configuration) {
                 logger.debug("Connecting to database {} at {}", configuration.getConsentDatabase().getDriverClass(), configuration.getConsentDatabase().getUrl());

@@ -1,0 +1,20 @@
+{
+  "name": "dpc-portal",
+  "private": true,
+  "dependencies": {
+    "@cmsgov/design-system-core": "^3.7.0",
+    "@cmsgov/design-system-layout": "^3.7.0",
+    "@rails/activestorage": "^6.1.4",
+    "@rails/ujs": "^6.1.4",
+    "@rails/webpacker": "5.4.3",
+    "normalize.css": "^8.0.1",
+    "ssri": "^6.0.2",
+    "svg4everybody": "^2.1.9",
+    "tar": "6.1.11",
+    "turbolinks": "^5.2.0"
+  },
+  "version": "0.1.0",
+  "devDependencies": {
+    "webpack-dev-server": "^3.11.2"
+  }
+}

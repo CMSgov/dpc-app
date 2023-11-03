@@ -10,10 +10,6 @@ import java.security.SecureRandom;
 
 public class BakeryModule extends PrivateModule {
 
-    public BakeryModule() {
-        // Not used
-    }
-
     @Override
     protected void configure() {
         bind(IRootKeyStore.class).to(HibernateKeyStore.class);

@@ -2,8 +2,6 @@ package gov.cms.dpc.api.tasks.tokens;
 
 import com.github.nitram509.jmacaroons.Macaroon;
 import com.github.nitram509.jmacaroons.MacaroonVersion;
-import com.google.common.collect.ImmutableCollection;
-import com.google.common.collect.ImmutableMultimap;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.entities.TokenEntity;
 import gov.cms.dpc.api.resources.v1.TokenResource;
@@ -19,6 +17,8 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.PrintWriter;
 import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -41,22 +41,22 @@ public class GenerateClientTokens extends Task {
     }
 
     @Override
-    public void execute(ImmutableMultimap<String, String> parameters, PrintWriter output) {
-        final ImmutableCollection<String> expirationCollection = parameters.get("expiration");
-        final ImmutableCollection<String> labelCollection = parameters.get("label");
-        final ImmutableCollection<String> organizationCollection = parameters.get("organization");
-        if (organizationCollection.isEmpty()) {
+    public void execute(Map<String, List<String>> parameters, PrintWriter output) {
+        final List<String> expirationCollection = parameters.get("expiration");
+        final List<String> labelCollection = parameters.get("label");
+        final List<String> organizationCollection = parameters.get("organization");
+        if (organizationCollection == null || organizationCollection.isEmpty()) {
             logger.warn("CREATING UNRESTRICTED MACAROON. ENSURE THIS IS OK");
             final Macaroon macaroon = bakery.createMacaroon(Collections.emptyList());
             output.write(macaroon.serialize(MacaroonVersion.SerializationVersion.V1_BINARY));
         } else {
-            final String organization = organizationCollection.asList().get(0);
+            final String organization = organizationCollection.get(0);
             final Organization orgResource = new Organization();
             orgResource.setId(organization);
-            final String tokenLabel = labelCollection.isEmpty() ? null : labelCollection.asList().get(0);
+            final String tokenLabel = (labelCollection == null || labelCollection.isEmpty()) ? null : labelCollection.get(0);
             Optional<OffsetDateTimeParam> expiration = Optional.empty();
-            if(!expirationCollection.isEmpty() && !StringUtils.isBlank(expirationCollection.asList().get(0))){
-                expiration = Optional.of(new OffsetDateTimeParam(expirationCollection.asList().get(0)));
+            if(expirationCollection != null && !expirationCollection.isEmpty() && !StringUtils.isBlank(expirationCollection.get(0))){
+                expiration = Optional.of(new OffsetDateTimeParam(expirationCollection.get(0)));
             }
             final TokenEntity tokenResponse = this.resource
                     .createOrganizationToken(

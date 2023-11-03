@@ -90,6 +90,44 @@ services:
       - redis
       - db
 
+  dpc_portal:
+    build:
+      context: .
+      dockerfile: dpc-portal/Dockerfile
+    image: dpc-web-portal:latest
+    volumes:
+      - "./dpc-portal/coverage:/dpc-portal/coverage"
+      - ./tmp/letter_opener/portal:/dpc-portal/tmp/letter_opener
+    environment:
+      - REDIS_URL=redis://redis
+      - DATABASE_URL=postgresql://db/dpc-portal_development
+      - TEST_DATABASE_URL=postgresql://db/dpc-portal_test
+      - DB_USER=postgres
+      - DB_PASS=dpc-safe
+      - DATABASE_CLEANER_ALLOW_REMOTE_DATABASE_URL=true
+    ports:
+      - "3100:3100"
+    depends_on:
+      - db
+      - portal_sidekiq
+
+  portal_sidekiq:
+    volumes:
+      - ./tmp/letter_opener/portal:/dpc-portal/tmp/letter_opener
+    build:
+      context: .
+      dockerfile: dpc-portal/Dockerfile
+    command: sidekiq
+    image: dpc-portal-sidekiq:latest
+    environment:
+      - REDIS_URL=redis://redis
+      - DATABASE_URL=postgresql://db/dpc-portal_development
+      - DB_USER=postgres
+      - DB_PASS=dpc-safe
+    depends_on:
+      - redis
+      - db
+
   # Starts up each service in the background
   start_core_dependencies:
     image: dadarek/wait-for-dependencies
@@ -109,3 +147,9 @@ services:
     depends_on:
       - dpc_admin
     command: dpc_admin:3000
+
+  start_portal:
+    image: dadarek/wait-for-dependencies
+    depends_on:
+      - dpc_portal
+    command: dpc_portal:3100

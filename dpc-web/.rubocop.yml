@@ -14,6 +14,7 @@ AllCops:
     - 'config/**/*'
     - 'config.ru'
     - 'db/**/*'
+    - 'vendor/**/*'
 
 Bundler/OrderedGems:
   Enabled: false

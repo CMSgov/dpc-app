@@ -25,6 +25,7 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
+            <version>1.2.12</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -52,6 +53,10 @@
             <groupId>io.dropwizard</groupId>
             <artifactId>dropwizard-testing</artifactId>
             <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate.validator</groupId>
+            <artifactId>hibernate-validator</artifactId>
         </dependency>
         <dependency>
             <groupId>org.glassfish.jersey.core</groupId>
@@ -94,7 +99,11 @@
         <dependency>
             <groupId>javax.ws.rs</groupId>
             <artifactId>javax.ws.rs-api</artifactId>
-            <version>2.1.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>3.24.2</version>
         </dependency>
         <!-- required by HAPI FHIR; specifying non-vulnerable version -->
         <dependency>

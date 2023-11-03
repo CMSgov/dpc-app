@@ -7,7 +7,6 @@ import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
-import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.bluebutton.client.BlueButtonClientImpl;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
@@ -27,6 +26,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContexts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.vyarus.dropwizard.guice.module.support.DropwizardAwareModule;
 
 import javax.net.ssl.SSLContext;
 import java.io.FileInputStream;
@@ -59,9 +59,11 @@ public class BlueButtonClientModule<T extends Configuration & BlueButtonBundleCo
     }
 
     @Override
-    public void configure(Binder binder) {
+    public void configure() {
+        Binder binder = binder();
+
         if (this.bbClientConfiguration == null) {
-            this.bbClientConfiguration = getConfiguration().getBlueButtonConfiguration();
+            this.bbClientConfiguration = configuration().getBlueButtonConfiguration();
         }
 
         final boolean healthCheckEnabled = this.bbClientConfiguration.isRegisterHealthCheck();

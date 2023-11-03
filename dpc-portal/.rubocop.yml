@@ -1,0 +1,13 @@
+AllCops:
+  NewCops: enable
+  TargetRubyVersion: 3.0
+  Exclude:
+    - 'app/jobs/application_job.rb'
+    - 'app/mailers/application_mailer.rb'
+    - 'app/models/application_record.rb'
+    - 'bin/**/*'
+    - 'config/**/*'
+    - 'config.ru'
+    - 'db/**/*'
+    - 'node_modules/**/*'
+    - 'vendor/**/*'

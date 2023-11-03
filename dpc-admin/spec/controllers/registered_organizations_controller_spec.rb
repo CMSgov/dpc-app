@@ -5,7 +5,7 @@ require 'rails_helper'
 require './spec/shared_examples/internal_user_authenticable_controller'
 
 RSpec.describe RegisteredOrganizationsController, type: :controller do
-  include ApiClientSupport
+  include DpcClientSupport
 
   describe '#new' do
     let!(:organization) { create(:organization) }

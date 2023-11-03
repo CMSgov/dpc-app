@@ -121,7 +121,7 @@ public class PractitionerResource extends AbstractPractitionerResource {
     })
     @Override
     public Response submitProvider(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
-                                   @Valid @Profiled(profile = PractitionerProfile.PROFILE_URI) Practitioner provider) {
+                                   @Valid @Profiled Practitioner provider) {
 
         APIHelpers.addOrganizationTag(provider, organizationPrincipal.getID().toString());
         final var providerCreate = this.client
@@ -183,7 +183,7 @@ public class PractitionerResource extends AbstractPractitionerResource {
     @ApiOperation(value = "Update provider", notes = "FHIR endpoint to update the given Practitioner resource with new values.")
     @ApiResponses(@ApiResponse(code = 422, message = "Provider does not satisfy the required FHIR profile"))
     @Override
-    public Practitioner updateProvider(@ApiParam(value = "Practitioner resource ID", required = true) @PathParam("providerID") UUID providerID, @Valid @Profiled(profile = PractitionerProfile.PROFILE_URI) Practitioner provider) {
+    public Practitioner updateProvider(@ApiParam(value = "Practitioner resource ID", required = true) @PathParam("providerID") UUID providerID, @Valid @Profiled Practitioner provider) {
         throw new WebApplicationException("Update Practitioner not yet implemented.", Response.Status.NOT_IMPLEMENTED);
     }
 

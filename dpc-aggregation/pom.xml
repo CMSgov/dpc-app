@@ -88,8 +88,8 @@
             <artifactId>config</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.hubspot.dropwizard</groupId>
-            <artifactId>dropwizard-guicier</artifactId>
+            <groupId>ru.vyarus</groupId>
+            <artifactId>dropwizard-guicey</artifactId>
         </dependency>
         <dependency>
             <groupId>io.reactivex.rxjava2</groupId>

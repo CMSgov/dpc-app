@@ -34,8 +34,8 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <dropwizard.version>1.3.29</dropwizard.version>
-        <junit.jupiter.version>5.9.2</junit.jupiter.version>
+        <dropwizard.version>2.1.7</dropwizard.version>
+        <junit.jupiter.version>5.9.3</junit.jupiter.version>
         <slf4j.version>1.7.36</slf4j.version>
         <!--Custom group IDs for pulling dependencies from JitPack-->
         <jitpack.groupID>com.github.nickrobison-usds</jitpack.groupID>
@@ -146,6 +146,20 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            <dependency>
+                <groupId>io.dropwizard</groupId>
+                <artifactId>dropwizard-dependencies</artifactId>
+                <version>${dropwizard.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>ru.vyarus.guicey</groupId>
+                <artifactId>guicey-bom</artifactId>
+                <version>5.9.1</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <!--No longer shipped with Java 11, so we need to include it manually-->
             <dependency>
                 <groupId>javax.xml.bind</groupId>
@@ -161,12 +175,12 @@
             <dependency>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-io</artifactId>
-                <version>9.4.44.v20210927</version>
+                <version>9.4.51.v20230217</version>
             </dependency>
             <dependency>
-                <groupId>com.hubspot.dropwizard</groupId>
-                <artifactId>dropwizard-guicier</artifactId>
-                <version>1.3.5.2</version>
+                <groupId>ru.vyarus</groupId>
+                <artifactId>dropwizard-guicey</artifactId>
+                <version>5.9.1</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.eclipse.jetty</groupId>
@@ -189,6 +203,16 @@
                 <groupId>org.hibernate</groupId>
                 <artifactId>hibernate-core</artifactId>
                 <version>5.6.15.Final</version>
+            </dependency>
+            <dependency>
+                <groupId>org.hibernate.validator</groupId>
+                <artifactId>hibernate-validator</artifactId>
+                <version>6.2.5.Final</version>
+            </dependency>
+            <dependency>
+                <groupId>javax.persistence</groupId>
+                <artifactId>javax.persistence-api</artifactId>
+                <version>2.2</version>
             </dependency>
             <dependency>
                 <groupId>org.postgresql</groupId>
@@ -233,7 +257,7 @@
             <dependency>
                 <groupId>com.smoketurner</groupId>
                 <artifactId>dropwizard-swagger</artifactId>
-                <version>1.3.17-1</version>
+                <version>2.0.12-1</version>
             </dependency>
             <dependency>
                 <groupId>org.knowm</groupId>

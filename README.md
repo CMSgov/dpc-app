@@ -59,15 +59,16 @@ providers to deliver high quality care directly to Medicare beneficiaries. See
 
 The DPC application is split into multiple services.
 
-|Service|Type|Description|Stack|
-|---|---|---|---|
-|[dpc-web](/dpc-web)|Public Portal|Portal for managing organizations|Ruby on Rails|
-|[dpc-admin](/dpc-admin)|Internal Portal|Administrative Portal for managing organizations|Ruby on Rails|
-|[dpc-api](/dpc-api)|Public API|Asynchronous FHIR API for managing organizations and requesting or retrieving data|Java (Dropwizard)|
-|[dpc-attribution](/dpc-attribution)|Internal API|Provides and updates data about attribution|Java (Dropwizard)|
-|[dpc-consent](/dpc-consent)|Internal API|Provides and updates information about data-sharing consent for individuals|Java (Dropwizard)|
-|[dpc-queue](/dpc-queue)|Internal API|Provides and updates data about export jobs and batches|Java (Dropwizard)|
-|[dpc-aggregation](/dpc-aggregation)|Internal Worker Service|Polls for job batches and exports data for singular batches|Java (Dropwizard + RxJava)|
+| Service|Type|Description|Stack|
+|-------------------------------------|---|----------------------------------------------------------------------------------------|---|
+| [dpc-web](/dpc-web)                 |Public Portal| Portal for managing organizations (Sandbox only, and soon to be deprecated)            |Ruby on Rails|
+| [dpc-admin](/dpc-admin)             |Internal Portal| Administrative Portal for managing organizations (Sandbox only, and soon to be deprecated) |Ruby on Rails|
+| [dpc-portal](/dpc-portal)           |Public Portal| Portal for managing organizations                                                      |Ruby on Rails|
+| [dpc-api](/dpc-api)                 |Public API| Asynchronous FHIR API for managing organizations and requesting or retrieving data     |Java (Dropwizard)|
+| [dpc-attribution](/dpc-attribution) |Internal API| Provides and updates data about attribution                                            |Java (Dropwizard)|
+| [dpc-consent](/dpc-consent)         |Internal API| Provides and updates information about data-sharing consent for individuals            |Java (Dropwizard)|
+| [dpc-queue](/dpc-queue)             |Internal API| Provides and updates data about export jobs and batches                                |Java (Dropwizard)|
+| [dpc-aggregation](/dpc-aggregation) |Internal Worker Service| Polls for job batches and exports data for singular batches                            |Java (Dropwizard + RxJava)|
 
 #### Shared Modules
 
@@ -80,6 +81,7 @@ In addition to services, several modules are shared across components.
 |[dpc-common](/dpc-common)|Shared utilities for components|Java|
 |[dpc-testing](/dpc-testing)|Shared utilities for testing|Java|
 |[dpc-smoketest](/dpc-smoketest)|Smoke test suite|Java|
+|[engines](/engines)|Shared engines|Ruby|
 
 ## Local Development Setup
 ###### [`^`](#table-of-contents)
@@ -409,7 +411,8 @@ JavaDoc tool. The [Intelli-J Idea](https://jetbrains.com/idea) integrated develo
 ## Building the Additional Services
 ###### [`^`](#table-of-contents)
 
-Documentation on building the DPC Website is covered in the specific [README](dpc-web/README.md).
+- Documentation on building the DPC Portal is covered in the specific [README](dpc-portal/README.md).
+- Documentation on building the DPC Website is covered in the specific [README](dpc-web/README.md).
 
 
 ### Postman collection

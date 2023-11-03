@@ -5,6 +5,8 @@ import gov.cms.dpc.fhir.FHIRMediaTypes;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 
 import javax.inject.Inject;
+import javax.ws.rs.container.ResourceInfo;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Provider;
 
@@ -13,8 +15,8 @@ import javax.ws.rs.ext.Provider;
 public class HAPIExceptionHandler extends AbstractFHIRExceptionHandler<BaseServerResponseException> {
 
     @Inject
-    HAPIExceptionHandler() {
-        super();
+    HAPIExceptionHandler(@Context ResourceInfo info) {
+        super(info);
     }
 
     @Override

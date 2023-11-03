@@ -50,6 +50,8 @@ gem 'bootstrap-table-rails'
 # < 1.13.2 has a vulnerability, and is required by other gems
 gem 'nokogiri', '>= 1.13.10'
 
+gem 'api_client', path: 'vendor/api_client'
+
 group :development, :test do
   gem 'byebug', platforms: [:mri, :mingw, :x64_mingw]
   gem 'pry'
@@ -78,7 +80,7 @@ end
 
 group :development do
   gem 'web-console', '>= 4.2.0'
-  gem 'listen', '>= 3.0.5', '< 3.3'
+  gem 'listen', '~> 3.5'
   gem 'spring'
   gem 'spring-watcher-listen', '~> 2.0.0'
 

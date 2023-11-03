@@ -10,12 +10,13 @@ import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.converters.FHIREntityConverter;
 import gov.cms.dpc.testing.factories.FHIRGroupBuilder;
 import gov.cms.dpc.testing.factories.FHIRPatientBuilder;
-import org.assertj.core.util.Lists;
 import org.hl7.fhir.dstu3.model.Group;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.*;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
@@ -24,7 +25,6 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-
 import static org.mockito.ArgumentMatchers.*;
 
 public class GroupResourceUnitTest {
@@ -56,7 +56,7 @@ public class GroupResourceUnitTest {
 
     @BeforeEach
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
         configuration = new DPCAttributionConfiguration();
         groupResource = new GroupResource(converter, providerDAO, rosterDAO, patientDAO, relationshipDAO, configuration);
     }
@@ -80,7 +80,7 @@ public class GroupResourceUnitTest {
 
         configuration.setPatientLimit(10);
         configuration.setExpirationThreshold(10);
-        Mockito.when(rosterDAO.findEntities(isNull(),eq(orgId), eq(providerNpi), isNull())).thenReturn(Lists.emptyList());
+        Mockito.when(rosterDAO.findEntities(isNull(),eq(orgId), eq(providerNpi), isNull())).thenReturn(List.of());
         Mockito.when(providerDAO.getProviders(isNull(),eq(providerNpi), eq(orgId))).thenReturn(List.of(new ProviderEntity()));
         patientBank.keySet().stream().forEach(patientId ->
                 Mockito.when(patientDAO.patientSearch(eq(patientId), isNull(),eq(orgId))).thenReturn(List.of(new PatientEntity())));
@@ -116,7 +116,7 @@ public class GroupResourceUnitTest {
 
         configuration.setPatientLimit(10);
         configuration.setExpirationThreshold(10);
-        Mockito.when(rosterDAO.findEntities(isNull(),eq(orgId), eq(providerNpi), isNull())).thenReturn(Lists.emptyList());
+        Mockito.when(rosterDAO.findEntities(isNull(),eq(orgId), eq(providerNpi), isNull())).thenReturn(List.of());
         Mockito.when(providerDAO.getProviders(isNull(),eq(providerNpi), eq(orgId))).thenReturn(List.of(new ProviderEntity()));
         patientBank.keySet().stream().forEach(patientId ->
                 Mockito.when(patientDAO.patientSearch(eq(patientId), isNull(),eq(orgId))).thenReturn(List.of(new PatientEntity())));
