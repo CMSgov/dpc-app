@@ -15,4 +15,11 @@ public final class Constants {
         public static final String APPLICATION_NAME_HEADER = "BlueButton-Application";
         public static final String APPLICATION_NAME_DESC = "DPC";
     }
+    public static final String ADDRESS_ENTITY_CITY = "Galveston";
+    public static final String ADDRESS_ENTITY_COUNTRY = "US";
+    public static final String ADDRESS_ENTITY_DISTRICT = "Southern";
+    public static final String ADDRESS_ENTITY_ZIP = "77550";
+    public static final String ADDRESS_ENTITY_STATE = "TX";
+    public static final String ADDRESS_ENTITY_LINE1 = "416 21st St";
+    public static final String ADDRESS_ENTITY_LINE2 = "N/A";
 }
