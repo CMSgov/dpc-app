@@ -8,6 +8,7 @@ include Phlex::Rails::Helpers::ImageTag
 register_element :use
 
   def template
+    render UsaBannerComponent.new
     a(class: "ds-c-skip-nav", href: "#main") {"Skip to main content"}
 
     nav(class: "navbar", id: "navbar") {

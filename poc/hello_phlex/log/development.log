@@ -4990,3 +4990,902 @@ ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-
   
 ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-regular.woff"):
   
+Started GET "/users/new" for ::1 at 2023-11-02 16:35:17 -0400
+Processing by HelloController#index as HTML
+  Rendering layout ApplicationLayout
+  Rendering Hello::IndexView within application_layout
+  Rendered Hello::IndexView within application_layout (Duration: 0.5ms | Allocations: 237)
+  Rendered layout ApplicationLayout (Duration: 70.2ms | Allocations: 82711)
+Completed 200 OK in 119ms (Views: 73.3ms | ActiveRecord: 0.0ms | Allocations: 125816)
+
+
+Started GET "/fonts/roboto-v19-latin-regular.woff2" for ::1 at 2023-11-02 16:35:17 -0400
+Started GET "/fonts/roboto-v19-latin-700.woff2" for ::1 at 2023-11-02 16:35:17 -0400
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-regular.woff2"):
+  
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-700.woff2"):
+  
+Started GET "/fonts/roboto-v19-latin-700.woff" for ::1 at 2023-11-02 16:35:17 -0400
+Started GET "/fonts/roboto-v19-latin-regular.woff" for ::1 at 2023-11-02 16:35:17 -0400
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-700.woff"):
+  
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-regular.woff"):
+  
+Started GET "/users/new" for ::1 at 2023-11-02 16:39:55 -0400
+Processing by HelloController#index as HTML
+  Rendering layout ApplicationLayout
+  Rendering Hello::IndexView within application_layout
+  Rendered Hello::IndexView within application_layout (Duration: 0.5ms | Allocations: 235)
+  Rendered layout ApplicationLayout (Duration: 61.6ms | Allocations: 66278)
+Completed 500 Internal Server Error in 108ms (ActiveRecord: 0.0ms | Allocations: 109302)
+
+
+  
+SyntaxError (/Users/michaelesposito/GitHub/dpc-app/poc/hello_phlex/app/views/components/usa_banner_component.rb:5: syntax error, unexpected local variable or method, expecting ')'
+...n(class: "ds-c-usa-banner" aria: {label: "Official governmen...
+...                           ^~~~
+/Users/michaelesposito/GitHub/dpc-app/poc/hello_phlex/app/views/components/usa_banner_component.rb:5: syntax error, unexpected ')', expecting `end'
+..."Official government website"}) {
+...                              ^
+/Users/michaelesposito/GitHub/dpc-app/poc/hello_phlex/app/views/components/usa_banner_component.rb:9: syntax error, unexpected '\n', expecting =>
+/Users/michaelesposito/GitHub/dpc-app/poc/hello_phlex/app/views/components/usa_banner_component.rb:11: syntax error, unexpected ',', expecting `end'
+... ds-c-usa-banner__header-flag",
+...                              ^
+/Users/michaelesposito/GitHub/dpc-app/poc/hello_phlex/app/views/components/usa_banner_component.rb:12: syntax error, unexpected ',', expecting `end'
+            focusable: "false",
+                              ^
+/Users/michaelesposito/GitHub/dpc-app/poc/hello_phlex/app/views/components/usa_banner_component.rb:13: syntax error, unexpected ',', expecting `end'
+            id: "icon-2",
+                        ^
+/Users/michaelesposito/GitHub/dpc-app/poc/hello_phlex/app/views/components/usa_banner_component.rb:14: syntax error, unexpected ',', expecting `end'
+...          viewBox: "0 0 16 11",
+...                              ^
+/Users/michaelesposito/GitHub/dpc-app/poc/hello_phlex/app/views/components/usa_banner_component.rb:15: syntax error, unexpected ',', expecting `end'
+...: "http://www.w3.org/2000/svg",
+...                              ^
+/Users/michaelesposito/GitHub/dpc-app/poc/hello_phlex/app/views/components/usa_banner_component.rb:17: syntax error, unexpected ')', expecting `end'
+        ) {
+        ^
+/Users/michaelesposito/GitHub/dpc-app/poc/hello_phlex/app/views/components/usa_banner_component.rb:19: syntax error, unexpected '}', expecting `end'
+        }
+        ^
+):
+  
+app/views/components/usa_banner_component.rb:5: syntax error, unexpected local variable or method, expecting ')'
+app/views/components/usa_banner_component.rb:5: syntax error, unexpected ')', expecting `end'
+app/views/components/usa_banner_component.rb:9: syntax error, unexpected '\n', expecting =>
+app/views/components/usa_banner_component.rb:11: syntax error, unexpected ',', expecting `end'
+app/views/components/usa_banner_component.rb:12: syntax error, unexpected ',', expecting `end'
+app/views/components/usa_banner_component.rb:13: syntax error, unexpected ',', expecting `end'
+app/views/components/usa_banner_component.rb:14: syntax error, unexpected ',', expecting `end'
+app/views/components/usa_banner_component.rb:15: syntax error, unexpected ',', expecting `end'
+app/views/components/usa_banner_component.rb:17: syntax error, unexpected ')', expecting `end'
+app/views/components/usa_banner_component.rb:19: syntax error, unexpected '}', expecting `end'
+app/views/components/usa_banner_component.rb:5: syntax error, unexpected local variable or method, expecting ')'
+app/views/components/usa_banner_component.rb:5: syntax error, unexpected ')', expecting `end'
+app/views/components/usa_banner_component.rb:9: syntax error, unexpected '\n', expecting =>
+app/views/components/usa_banner_component.rb:11: syntax error, unexpected ',', expecting `end'
+app/views/components/usa_banner_component.rb:12: syntax error, unexpected ',', expecting `end'
+app/views/components/usa_banner_component.rb:13: syntax error, unexpected ',', expecting `end'
+app/views/components/usa_banner_component.rb:14: syntax error, unexpected ',', expecting `end'
+app/views/components/usa_banner_component.rb:15: syntax error, unexpected ',', expecting `end'
+app/views/components/usa_banner_component.rb:17: syntax error, unexpected ')', expecting `end'
+app/views/components/usa_banner_component.rb:19: syntax error, unexpected '}', expecting `end'
+app/views/components/navbar_component.rb:11:in `template'
+app/views/layouts/application_layout.rb:20:in `block (2 levels) in template'
+app/views/layouts/application_layout.rb:19:in `block in template'
+app/views/layouts/application_layout.rb:9:in `template'
+app/controllers/hello_controller.rb:7:in `index'
+Started GET "/users/new" for ::1 at 2023-11-02 16:40:17 -0400
+Processing by HelloController#index as HTML
+  Rendering layout ApplicationLayout
+  Rendering Hello::IndexView within application_layout
+  Rendered Hello::IndexView within application_layout (Duration: 0.4ms | Allocations: 235)
+  Rendered layout ApplicationLayout (Duration: 57.5ms | Allocations: 66304)
+Completed 500 Internal Server Error in 74ms (ActiveRecord: 0.0ms | Allocations: 109328)
+
+
+  
+SyntaxError (/Users/michaelesposito/GitHub/dpc-app/poc/hello_phlex/app/views/components/usa_banner_component.rb:9: syntax error, unexpected '\n', expecting =>
+/Users/michaelesposito/GitHub/dpc-app/poc/hello_phlex/app/views/components/usa_banner_component.rb:11: syntax error, unexpected ',', expecting '}'
+... ds-c-usa-banner__header-flag",
+...                              ^
+/Users/michaelesposito/GitHub/dpc-app/poc/hello_phlex/app/views/components/usa_banner_component.rb:12: syntax error, unexpected ',', expecting `end'
+            focusable: "false",
+                              ^
+/Users/michaelesposito/GitHub/dpc-app/poc/hello_phlex/app/views/components/usa_banner_component.rb:13: syntax error, unexpected ',', expecting `end'
+            id: "icon-2",
+                        ^
+/Users/michaelesposito/GitHub/dpc-app/poc/hello_phlex/app/views/components/usa_banner_component.rb:14: syntax error, unexpected ',', expecting `end'
+...          viewBox: "0 0 16 11",
+...                              ^
+/Users/michaelesposito/GitHub/dpc-app/poc/hello_phlex/app/views/components/usa_banner_component.rb:15: syntax error, unexpected ',', expecting `end'
+...: "http://www.w3.org/2000/svg",
+...                              ^
+/Users/michaelesposito/GitHub/dpc-app/poc/hello_phlex/app/views/components/usa_banner_component.rb:17: syntax error, unexpected ')', expecting `end'
+        ) {
+        ^
+/Users/michaelesposito/GitHub/dpc-app/poc/hello_phlex/app/views/components/usa_banner_component.rb:19: syntax error, unexpected '}', expecting `end'
+        }
+        ^
+):
+  
+app/views/components/usa_banner_component.rb:9: syntax error, unexpected '\n', expecting =>
+app/views/components/usa_banner_component.rb:11: syntax error, unexpected ',', expecting '}'
+app/views/components/usa_banner_component.rb:12: syntax error, unexpected ',', expecting `end'
+app/views/components/usa_banner_component.rb:13: syntax error, unexpected ',', expecting `end'
+app/views/components/usa_banner_component.rb:14: syntax error, unexpected ',', expecting `end'
+app/views/components/usa_banner_component.rb:15: syntax error, unexpected ',', expecting `end'
+app/views/components/usa_banner_component.rb:17: syntax error, unexpected ')', expecting `end'
+app/views/components/usa_banner_component.rb:19: syntax error, unexpected '}', expecting `end'
+app/views/components/usa_banner_component.rb:9: syntax error, unexpected '\n', expecting =>
+app/views/components/usa_banner_component.rb:11: syntax error, unexpected ',', expecting '}'
+app/views/components/usa_banner_component.rb:12: syntax error, unexpected ',', expecting `end'
+app/views/components/usa_banner_component.rb:13: syntax error, unexpected ',', expecting `end'
+app/views/components/usa_banner_component.rb:14: syntax error, unexpected ',', expecting `end'
+app/views/components/usa_banner_component.rb:15: syntax error, unexpected ',', expecting `end'
+app/views/components/usa_banner_component.rb:17: syntax error, unexpected ')', expecting `end'
+app/views/components/usa_banner_component.rb:19: syntax error, unexpected '}', expecting `end'
+app/views/components/navbar_component.rb:11:in `template'
+app/views/layouts/application_layout.rb:20:in `block (2 levels) in template'
+app/views/layouts/application_layout.rb:19:in `block in template'
+app/views/layouts/application_layout.rb:9:in `template'
+app/controllers/hello_controller.rb:7:in `index'
+Started GET "/users/new" for ::1 at 2023-11-02 16:40:39 -0400
+Processing by HelloController#index as HTML
+  Rendering layout ApplicationLayout
+  Rendering Hello::IndexView within application_layout
+  Rendered Hello::IndexView within application_layout (Duration: 0.4ms | Allocations: 235)
+  Rendered layout ApplicationLayout (Duration: 62.7ms | Allocations: 82333)
+Completed 200 OK in 79ms (Views: 65.2ms | ActiveRecord: 0.0ms | Allocations: 125432)
+
+
+Started GET "/fonts/roboto-v19-latin-700.woff2" for ::1 at 2023-11-02 16:40:39 -0400
+Started GET "/fonts/roboto-v19-latin-regular.woff2" for ::1 at 2023-11-02 16:40:39 -0400
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-700.woff2"):
+  
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-regular.woff2"):
+  
+Started GET "/fonts/roboto-v19-latin-regular.woff" for ::1 at 2023-11-02 16:40:39 -0400
+Started GET "/fonts/roboto-v19-latin-700.woff" for ::1 at 2023-11-02 16:40:39 -0400
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-regular.woff"):
+  
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-700.woff"):
+  
+Started GET "/users/new" for ::1 at 2023-11-02 16:44:23 -0400
+Processing by HelloController#index as HTML
+  Rendering layout ApplicationLayout
+  Rendering Hello::IndexView within application_layout
+  Rendered Hello::IndexView within application_layout (Duration: 0.7ms | Allocations: 235)
+  Rendered layout ApplicationLayout (Duration: 67.2ms | Allocations: 66024)
+Completed 500 Internal Server Error in 113ms (ActiveRecord: 0.0ms | Allocations: 109048)
+
+
+  
+SyntaxError (/Users/michaelesposito/GitHub/dpc-app/poc/hello_phlex/app/views/components/usa_banner_component.rb:22: syntax error, unexpected local variable or method, expecting ')'
+...         path(fill: "#1E33B1" d: "M0 0h8v7H0z")
+...                              ^
+/Users/michaelesposito/GitHub/dpc-app/poc/hello_phlex/app/views/components/usa_banner_component.rb:22: syntax error, unexpected ')', expecting '}'
+...ll: "#1E33B1" d: "M0 0h8v7H0z")
+...                              ^
+/Users/michaelesposito/GitHub/dpc-app/poc/hello_phlex/app/views/components/usa_banner_component.rb:26: syntax error, unexpected '}', expecting `end'
+        }
+        ^
+):
+  
+app/views/components/usa_banner_component.rb:22: syntax error, unexpected local variable or method, expecting ')'
+app/views/components/usa_banner_component.rb:22: syntax error, unexpected ')', expecting '}'
+app/views/components/usa_banner_component.rb:26: syntax error, unexpected '}', expecting `end'
+app/views/components/usa_banner_component.rb:22: syntax error, unexpected local variable or method, expecting ')'
+app/views/components/usa_banner_component.rb:22: syntax error, unexpected ')', expecting '}'
+app/views/components/usa_banner_component.rb:26: syntax error, unexpected '}', expecting `end'
+app/views/components/navbar_component.rb:11:in `template'
+app/views/layouts/application_layout.rb:20:in `block (2 levels) in template'
+app/views/layouts/application_layout.rb:19:in `block in template'
+app/views/layouts/application_layout.rb:9:in `template'
+app/controllers/hello_controller.rb:7:in `index'
+Started GET "/users/new" for ::1 at 2023-11-02 16:44:47 -0400
+Processing by HelloController#index as HTML
+  Rendering layout ApplicationLayout
+  Rendering Hello::IndexView within application_layout
+  Rendered Hello::IndexView within application_layout (Duration: 0.4ms | Allocations: 235)
+  Rendered layout ApplicationLayout (Duration: 60.7ms | Allocations: 84438)
+Completed 500 Internal Server Error in 76ms (ActiveRecord: 0.0ms | Allocations: 127502)
+
+
+  
+NoMethodError (undefined method `g' for #<UsaBannerComponent:0x000000013c568ed8 @_routes=nil, @_buffer="<!-- Before ApplicationLayout --><!DOCTYPE html><html><head><title>Hello World in Phlex</title><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><meta name=\"csrf-param\" content=\"authenticity_token\" />\n<meta name=\"csrf-token\" content=\"MhD_2Wbb74E1k_rnh6OXV8dz4KQOJN8-FLPpy1iXiO-jsleMEf6kTGazpwFKJL_iDoL-XR6goL_EK4bifNQ1SQ\" /><link rel=\"stylesheet\" href=\"/assets/application-2ffae0080b68404406566d414805a4879ca5303427ed776af9eee6fc0aeffcd5.css\" data_turbo_track=\"reload\" /><script type=\"importmap\" data-turbo-track=\"reload\">{\n  \"imports\": {\n    \"application\": \"/assets/application-37f365cbecf1fa2810a8303f4b6571676fa1f9c56c248528bc14ddb857531b95.js\",\n    \"@hotwired/turbo-rails\": \"/assets/turbo.min-dfd93b3092d1d0ff56557294538d069bdbb28977d3987cb39bc0dd892f32fc57.js\",\n    \"@hotwired/stimulus\": \"/assets/stimulus.min-dd364f16ec9504dfb72672295637a1c8838773b01c0b441bd41008124c407894.js\",\n    \"@hotwired/stimulus-loading\": \"/assets/stimulus-loading-3576ce92b149ad5d6959438c6f291e2426c86df3b874c525b30faad51b0d96b3.js\",\n    \"controllers/application\": \"/assets/controllers/application-368d98631bccbf2349e0d4f8269afb3fe9625118341966de054759d96ea86c7e.js\",\n    \"controllers/hello_controller\": \"/assets/controllers/hello_controller-549135e8e7c683a538c3d6d517339ba470fcfb79d62f738a0a089ba41851a554.js\",\n    \"controllers\": \"/assets/controllers/index-2db729dddcc5b979110e98de4b6720f83f91a123172e87281d5a58410fc43806.js\"\n  }\n}</script>\n<link rel=\"modulepreload\" href=\"/assets/application-37f365cbecf1fa2810a8303f4b6571676fa1f9c56c248528bc14ddb857531b95.js\">\n<link rel=\"modulepreload\" href=\"/assets/turbo.min-dfd93b3092d1d0ff56557294538d069bdbb28977d3987cb39bc0dd892f32fc57.js\">\n<link rel=\"modulepreload\" href=\"/assets/stimulus.min-dd364f16ec9504dfb72672295637a1c8838773b01c0b441bd41008124c407894.js\">\n<link rel=\"modulepreload\" href=\"/assets/stimulus-loading-3576ce92b149ad5d6959438c6f291e2426c86df3b874c525b30faad51b0d96b3.js\">\n<script src=\"/assets/es-module-shims.min-4ca9b3dd5e434131e3bb4b0c1d7dff3bfd4035672a5086deec6f73979a49be73.js\" async=\"async\" data-turbo-track=\"reload\"></script>\n<script type=\"module\">import \"application\"</script></head>", @_context=#<Phlex::Context:0x000000013c0e4d58 @target="<body><!-- Before NavbarComponent --><!-- Before UsaBannerComponent --><section class=\"ds-c-usa-banner\" aria-label=\"Official government website\"><svg aria-hidden=\"false\" aria-labelledby=\"icon-2__title\" class=\"ds-c-icon ds-c-icon--usa-flag ds-c-usa-banner__header-flag\" focusable=\"false\" id=\"icon-2\" viewBox=\"0 0 16 11\" xmlns=\"http://www.w3.org/2000/svg\" role=\"img\"><title id=\"icon-2__title\">U.S. Flag</title>">, @_view_context=#<ActionView::Base:0x0000000000b770>, @_parent=#<NavbarComponent:0x000000013c560850 @_routes=nil, @_buffer="<!-- Before ApplicationLayout --><!DOCTYPE html><html><head><title>Hello World in Phlex</title><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><meta name=\"csrf-param\" content=\"authenticity_token\" />\n<meta name=\"csrf-token\" content=\"MhD_2Wbb74E1k_rnh6OXV8dz4KQOJN8-FLPpy1iXiO-jsleMEf6kTGazpwFKJL_iDoL-XR6goL_EK4bifNQ1SQ\" /><link rel=\"stylesheet\" href=\"/assets/application-2ffae0080b68404406566d414805a4879ca5303427ed776af9eee6fc0aeffcd5.css\" data_turbo_track=\"reload\" /><script type=\"importmap\" data-turbo-track=\"reload\">{\n  \"imports\": {\n    \"application\": \"/assets/application-37f365cbecf1fa2810a8303f4b6571676fa1f9c56c248528bc14ddb857531b95.js\",\n    \"@hotwired/turbo-rails\": \"/assets/turbo.min-dfd93b3092d1d0ff56557294538d069bdbb28977d3987cb39bc0dd892f32fc57.js\",\n    \"@hotwired/stimulus\": \"/assets/stimulus.min-dd364f16ec9504dfb72672295637a1c8838773b01c0b441bd41008124c407894.js\",\n    \"@hotwired/stimulus-loading\": \"/assets/stimulus-loading-3576ce92b149ad5d6959438c6f291e2426c86df3b874c525b30faad51b0d96b3.js\",\n    \"controllers/application\": \"/assets/controllers/application-368d98631bccbf2349e0d4f8269afb3fe9625118341966de054759d96ea86c7e.js\",\n    \"controllers/hello_controller\": \"/assets/controllers/hello_controller-549135e8e7c683a538c3d6d517339ba470fcfb79d62f738a0a089ba41851a554.js\",\n    \"controllers\": \"/assets/controllers/index-2db729dddcc5b979110e98de4b6720f83f91a123172e87281d5a58410fc43806.js\"\n  }\n}</script>\n<link rel=\"modulepreload\" href=\"/assets/application-37f365cbecf1fa2810a8303f4b6571676fa1f9c56c248528bc14ddb857531b95.js\">\n<link rel=\"modulepreload\" href=\"/assets/turbo.min-dfd93b3092d1d0ff56557294538d069bdbb28977d3987cb39bc0dd892f32fc57.js\">\n<link rel=\"modulepreload\" href=\"/assets/stimulus.min-dd364f16ec9504dfb72672295637a1c8838773b01c0b441bd41008124c407894.js\">\n<link rel=\"modulepreload\" href=\"/assets/stimulus-loading-3576ce92b149ad5d6959438c6f291e2426c86df3b874c525b30faad51b0d96b3.js\">\n<script src=\"/assets/es-module-shims.min-4ca9b3dd5e434131e3bb4b0c1d7dff3bfd4035672a5086deec6f73979a49be73.js\" async=\"async\" data-turbo-track=\"reload\"></script>\n<script type=\"module\">import \"application\"</script></head>", @_context=#<Phlex::Context:0x000000013c0e4d58 @target="<body><!-- Before NavbarComponent --><!-- Before UsaBannerComponent --><section class=\"ds-c-usa-banner\" aria-label=\"Official government website\"><svg aria-hidden=\"false\" aria-labelledby=\"icon-2__title\" class=\"ds-c-icon ds-c-icon--usa-flag ds-c-usa-banner__header-flag\" focusable=\"false\" id=\"icon-2\" viewBox=\"0 0 16 11\" xmlns=\"http://www.w3.org/2000/svg\" role=\"img\"><title id=\"icon-2__title\">U.S. Flag</title>">, @_view_context=#<ActionView::Base:0x0000000000b770>, @_parent=#<ApplicationLayout:0x000000013c0e4f60 @_routes=nil, @_buffer="<!-- Before ApplicationLayout --><!DOCTYPE html><html><head><title>Hello World in Phlex</title><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><meta name=\"csrf-param\" content=\"authenticity_token\" />\n<meta name=\"csrf-token\" content=\"MhD_2Wbb74E1k_rnh6OXV8dz4KQOJN8-FLPpy1iXiO-jsleMEf6kTGazpwFKJL_iDoL-XR6goL_EK4bifNQ1SQ\" /><link rel=\"stylesheet\" href=\"/assets/application-2ffae0080b68404406566d414805a4879ca5303427ed776af9eee6fc0aeffcd5.css\" data_turbo_track=\"reload\" /><script type=\"importmap\" data-turbo-track=\"reload\">{\n  \"imports\": {\n    \"application\": \"/assets/application-37f365cbecf1fa2810a8303f4b6571676fa1f9c56c248528bc14ddb857531b95.js\",\n    \"@hotwired/turbo-rails\": \"/assets/turbo.min-dfd93b3092d1d0ff56557294538d069bdbb28977d3987cb39bc0dd892f32fc57.js\",\n    \"@hotwired/stimulus\": \"/assets/stimulus.min-dd364f16ec9504dfb72672295637a1c8838773b01c0b441bd41008124c407894.js\",\n    \"@hotwired/stimulus-loading\": \"/assets/stimulus-loading-3576ce92b149ad5d6959438c6f291e2426c86df3b874c525b30faad51b0d96b3.js\",\n    \"controllers/application\": \"/assets/controllers/application-368d98631bccbf2349e0d4f8269afb3fe9625118341966de054759d96ea86c7e.js\",\n    \"controllers/hello_controller\": \"/assets/controllers/hello_controller-549135e8e7c683a538c3d6d517339ba470fcfb79d62f738a0a089ba41851a554.js\",\n    \"controllers\": \"/assets/controllers/index-2db729dddcc5b979110e98de4b6720f83f91a123172e87281d5a58410fc43806.js\"\n  }\n}</script>\n<link rel=\"modulepreload\" href=\"/assets/application-37f365cbecf1fa2810a8303f4b6571676fa1f9c56c248528bc14ddb857531b95.js\">\n<link rel=\"modulepreload\" href=\"/assets/turbo.min-dfd93b3092d1d0ff56557294538d069bdbb28977d3987cb39bc0dd892f32fc57.js\">\n<link rel=\"modulepreload\" href=\"/assets/stimulus.min-dd364f16ec9504dfb72672295637a1c8838773b01c0b441bd41008124c407894.js\">\n<link rel=\"modulepreload\" href=\"/assets/stimulus-loading-3576ce92b149ad5d6959438c6f291e2426c86df3b874c525b30faad51b0d96b3.js\">\n<script src=\"/assets/es-module-shims.min-4ca9b3dd5e434131e3bb4b0c1d7dff3bfd4035672a5086deec6f73979a49be73.js\" async=\"async\" data-turbo-track=\"reload\"></script>\n<script type=\"module\">import \"application\"</script></head>", @_context=#<Phlex::Context:0x000000013c0e4d58 @target="<body><!-- Before NavbarComponent --><!-- Before UsaBannerComponent --><section class=\"ds-c-usa-banner\" aria-label=\"Official government website\"><svg aria-hidden=\"false\" aria-labelledby=\"icon-2__title\" class=\"ds-c-icon ds-c-icon--usa-flag ds-c-usa-banner__header-flag\" focusable=\"false\" id=\"icon-2\" viewBox=\"0 0 16 11\" xmlns=\"http://www.w3.org/2000/svg\" role=\"img\"><title id=\"icon-2__title\">U.S. Flag</title>">, @_view_context=#<ActionView::Base:0x0000000000b770>, @_parent=nil>>>):
+  
+app/views/components/usa_banner_component.rb:19:in `block (2 levels) in template'
+app/views/components/usa_banner_component.rb:6:in `block in template'
+app/views/components/usa_banner_component.rb:5:in `template'
+app/views/components/navbar_component.rb:11:in `template'
+app/views/layouts/application_layout.rb:20:in `block (2 levels) in template'
+app/views/layouts/application_layout.rb:19:in `block in template'
+app/views/layouts/application_layout.rb:9:in `template'
+app/controllers/hello_controller.rb:7:in `index'
+Started GET "/users/new" for ::1 at 2023-11-02 16:46:20 -0400
+Processing by HelloController#index as HTML
+  Rendering layout ApplicationLayout
+  Rendering Hello::IndexView within application_layout
+  Rendered Hello::IndexView within application_layout (Duration: 0.4ms | Allocations: 235)
+  Rendered layout ApplicationLayout (Duration: 74.7ms | Allocations: 84569)
+Completed 500 Internal Server Error in 91ms (ActiveRecord: 0.0ms | Allocations: 127633)
+
+
+  
+NoMethodError (undefined method `path' for #<UsaBannerComponent:0x0000000141dc3c90 @_routes=nil, @_buffer="<!-- Before ApplicationLayout --><!DOCTYPE html><html><head><title>Hello World in Phlex</title><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><meta name=\"csrf-param\" content=\"authenticity_token\" />\n<meta name=\"csrf-token\" content=\"6L9HFr9ZKzf_q4Z2mk08gN2YKzQuzXroX803ylq-0LV5He9DyHxg-qyL25BXyhQ1FGk1zT5JBWmPVVjjfv1tEw\" /><link rel=\"stylesheet\" href=\"/assets/application-2ffae0080b68404406566d414805a4879ca5303427ed776af9eee6fc0aeffcd5.css\" data_turbo_track=\"reload\" /><script type=\"importmap\" data-turbo-track=\"reload\">{\n  \"imports\": {\n    \"application\": \"/assets/application-37f365cbecf1fa2810a8303f4b6571676fa1f9c56c248528bc14ddb857531b95.js\",\n    \"@hotwired/turbo-rails\": \"/assets/turbo.min-dfd93b3092d1d0ff56557294538d069bdbb28977d3987cb39bc0dd892f32fc57.js\",\n    \"@hotwired/stimulus\": \"/assets/stimulus.min-dd364f16ec9504dfb72672295637a1c8838773b01c0b441bd41008124c407894.js\",\n    \"@hotwired/stimulus-loading\": \"/assets/stimulus-loading-3576ce92b149ad5d6959438c6f291e2426c86df3b874c525b30faad51b0d96b3.js\",\n    \"controllers/application\": \"/assets/controllers/application-368d98631bccbf2349e0d4f8269afb3fe9625118341966de054759d96ea86c7e.js\",\n    \"controllers/hello_controller\": \"/assets/controllers/hello_controller-549135e8e7c683a538c3d6d517339ba470fcfb79d62f738a0a089ba41851a554.js\",\n    \"controllers\": \"/assets/controllers/index-2db729dddcc5b979110e98de4b6720f83f91a123172e87281d5a58410fc43806.js\"\n  }\n}</script>\n<link rel=\"modulepreload\" href=\"/assets/application-37f365cbecf1fa2810a8303f4b6571676fa1f9c56c248528bc14ddb857531b95.js\">\n<link rel=\"modulepreload\" href=\"/assets/turbo.min-dfd93b3092d1d0ff56557294538d069bdbb28977d3987cb39bc0dd892f32fc57.js\">\n<link rel=\"modulepreload\" href=\"/assets/stimulus.min-dd364f16ec9504dfb72672295637a1c8838773b01c0b441bd41008124c407894.js\">\n<link rel=\"modulepreload\" href=\"/assets/stimulus-loading-3576ce92b149ad5d6959438c6f291e2426c86df3b874c525b30faad51b0d96b3.js\">\n<script src=\"/assets/es-module-shims.min-4ca9b3dd5e434131e3bb4b0c1d7dff3bfd4035672a5086deec6f73979a49be73.js\" async=\"async\" data-turbo-track=\"reload\"></script>\n<script type=\"module\">import \"application\"</script></head>", @_context=#<Phlex::Context:0x00000001419eae20 @target="<body><!-- Before NavbarComponent --><!-- Before UsaBannerComponent --><section class=\"ds-c-usa-banner\" aria-label=\"Official government website\"><svg aria-hidden=\"false\" aria-labelledby=\"icon-2__title\" class=\"ds-c-icon ds-c-icon--usa-flag ds-c-usa-banner__header-flag\" focusable=\"false\" id=\"icon-2\" viewBox=\"0 0 16 11\" xmlns=\"http://www.w3.org/2000/svg\" role=\"img\"><title id=\"icon-2__title\">U.S. Flag</title><g fill-rule=\"evenodd\">">, @_view_context=#<ActionView::Base:0x0000000000b770>, @_parent=#<NavbarComponent:0x0000000141db2030 @_routes=nil, @_buffer="<!-- Before ApplicationLayout --><!DOCTYPE html><html><head><title>Hello World in Phlex</title><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><meta name=\"csrf-param\" content=\"authenticity_token\" />\n<meta name=\"csrf-token\" content=\"6L9HFr9ZKzf_q4Z2mk08gN2YKzQuzXroX803ylq-0LV5He9DyHxg-qyL25BXyhQ1FGk1zT5JBWmPVVjjfv1tEw\" /><link rel=\"stylesheet\" href=\"/assets/application-2ffae0080b68404406566d414805a4879ca5303427ed776af9eee6fc0aeffcd5.css\" data_turbo_track=\"reload\" /><script type=\"importmap\" data-turbo-track=\"reload\">{\n  \"imports\": {\n    \"application\": \"/assets/application-37f365cbecf1fa2810a8303f4b6571676fa1f9c56c248528bc14ddb857531b95.js\",\n    \"@hotwired/turbo-rails\": \"/assets/turbo.min-dfd93b3092d1d0ff56557294538d069bdbb28977d3987cb39bc0dd892f32fc57.js\",\n    \"@hotwired/stimulus\": \"/assets/stimulus.min-dd364f16ec9504dfb72672295637a1c8838773b01c0b441bd41008124c407894.js\",\n    \"@hotwired/stimulus-loading\": \"/assets/stimulus-loading-3576ce92b149ad5d6959438c6f291e2426c86df3b874c525b30faad51b0d96b3.js\",\n    \"controllers/application\": \"/assets/controllers/application-368d98631bccbf2349e0d4f8269afb3fe9625118341966de054759d96ea86c7e.js\",\n    \"controllers/hello_controller\": \"/assets/controllers/hello_controller-549135e8e7c683a538c3d6d517339ba470fcfb79d62f738a0a089ba41851a554.js\",\n    \"controllers\": \"/assets/controllers/index-2db729dddcc5b979110e98de4b6720f83f91a123172e87281d5a58410fc43806.js\"\n  }\n}</script>\n<link rel=\"modulepreload\" href=\"/assets/application-37f365cbecf1fa2810a8303f4b6571676fa1f9c56c248528bc14ddb857531b95.js\">\n<link rel=\"modulepreload\" href=\"/assets/turbo.min-dfd93b3092d1d0ff56557294538d069bdbb28977d3987cb39bc0dd892f32fc57.js\">\n<link rel=\"modulepreload\" href=\"/assets/stimulus.min-dd364f16ec9504dfb72672295637a1c8838773b01c0b441bd41008124c407894.js\">\n<link rel=\"modulepreload\" href=\"/assets/stimulus-loading-3576ce92b149ad5d6959438c6f291e2426c86df3b874c525b30faad51b0d96b3.js\">\n<script src=\"/assets/es-module-shims.min-4ca9b3dd5e434131e3bb4b0c1d7dff3bfd4035672a5086deec6f73979a49be73.js\" async=\"async\" data-turbo-track=\"reload\"></script>\n<script type=\"module\">import \"application\"</script></head>", @_context=#<Phlex::Context:0x00000001419eae20 @target="<body><!-- Before NavbarComponent --><!-- Before UsaBannerComponent --><section class=\"ds-c-usa-banner\" aria-label=\"Official government website\"><svg aria-hidden=\"false\" aria-labelledby=\"icon-2__title\" class=\"ds-c-icon ds-c-icon--usa-flag ds-c-usa-banner__header-flag\" focusable=\"false\" id=\"icon-2\" viewBox=\"0 0 16 11\" xmlns=\"http://www.w3.org/2000/svg\" role=\"img\"><title id=\"icon-2__title\">U.S. Flag</title><g fill-rule=\"evenodd\">">, @_view_context=#<ActionView::Base:0x0000000000b770>, @_parent=#<ApplicationLayout:0x00000001419eb050 @_routes=nil, @_buffer="<!-- Before ApplicationLayout --><!DOCTYPE html><html><head><title>Hello World in Phlex</title><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><meta name=\"csrf-param\" content=\"authenticity_token\" />\n<meta name=\"csrf-token\" content=\"6L9HFr9ZKzf_q4Z2mk08gN2YKzQuzXroX803ylq-0LV5He9DyHxg-qyL25BXyhQ1FGk1zT5JBWmPVVjjfv1tEw\" /><link rel=\"stylesheet\" href=\"/assets/application-2ffae0080b68404406566d414805a4879ca5303427ed776af9eee6fc0aeffcd5.css\" data_turbo_track=\"reload\" /><script type=\"importmap\" data-turbo-track=\"reload\">{\n  \"imports\": {\n    \"application\": \"/assets/application-37f365cbecf1fa2810a8303f4b6571676fa1f9c56c248528bc14ddb857531b95.js\",\n    \"@hotwired/turbo-rails\": \"/assets/turbo.min-dfd93b3092d1d0ff56557294538d069bdbb28977d3987cb39bc0dd892f32fc57.js\",\n    \"@hotwired/stimulus\": \"/assets/stimulus.min-dd364f16ec9504dfb72672295637a1c8838773b01c0b441bd41008124c407894.js\",\n    \"@hotwired/stimulus-loading\": \"/assets/stimulus-loading-3576ce92b149ad5d6959438c6f291e2426c86df3b874c525b30faad51b0d96b3.js\",\n    \"controllers/application\": \"/assets/controllers/application-368d98631bccbf2349e0d4f8269afb3fe9625118341966de054759d96ea86c7e.js\",\n    \"controllers/hello_controller\": \"/assets/controllers/hello_controller-549135e8e7c683a538c3d6d517339ba470fcfb79d62f738a0a089ba41851a554.js\",\n    \"controllers\": \"/assets/controllers/index-2db729dddcc5b979110e98de4b6720f83f91a123172e87281d5a58410fc43806.js\"\n  }\n}</script>\n<link rel=\"modulepreload\" href=\"/assets/application-37f365cbecf1fa2810a8303f4b6571676fa1f9c56c248528bc14ddb857531b95.js\">\n<link rel=\"modulepreload\" href=\"/assets/turbo.min-dfd93b3092d1d0ff56557294538d069bdbb28977d3987cb39bc0dd892f32fc57.js\">\n<link rel=\"modulepreload\" href=\"/assets/stimulus.min-dd364f16ec9504dfb72672295637a1c8838773b01c0b441bd41008124c407894.js\">\n<link rel=\"modulepreload\" href=\"/assets/stimulus-loading-3576ce92b149ad5d6959438c6f291e2426c86df3b874c525b30faad51b0d96b3.js\">\n<script src=\"/assets/es-module-shims.min-4ca9b3dd5e434131e3bb4b0c1d7dff3bfd4035672a5086deec6f73979a49be73.js\" async=\"async\" data-turbo-track=\"reload\"></script>\n<script type=\"module\">import \"application\"</script></head>", @_context=#<Phlex::Context:0x00000001419eae20 @target="<body><!-- Before NavbarComponent --><!-- Before UsaBannerComponent --><section class=\"ds-c-usa-banner\" aria-label=\"Official government website\"><svg aria-hidden=\"false\" aria-labelledby=\"icon-2__title\" class=\"ds-c-icon ds-c-icon--usa-flag ds-c-usa-banner__header-flag\" focusable=\"false\" id=\"icon-2\" viewBox=\"0 0 16 11\" xmlns=\"http://www.w3.org/2000/svg\" role=\"img\"><title id=\"icon-2__title\">U.S. Flag</title><g fill-rule=\"evenodd\">">, @_view_context=#<ActionView::Base:0x0000000000b770>, @_parent=nil>>>):
+  
+app/views/components/usa_banner_component.rb:23:in `block (3 levels) in template'
+app/views/components/usa_banner_component.rb:22:in `block (2 levels) in template'
+app/views/components/usa_banner_component.rb:9:in `block in template'
+app/views/components/usa_banner_component.rb:8:in `template'
+app/views/components/navbar_component.rb:11:in `template'
+app/views/layouts/application_layout.rb:20:in `block (2 levels) in template'
+app/views/layouts/application_layout.rb:19:in `block in template'
+app/views/layouts/application_layout.rb:9:in `template'
+app/controllers/hello_controller.rb:7:in `index'
+Started GET "/users/new" for ::1 at 2023-11-02 16:47:04 -0400
+Processing by HelloController#index as HTML
+  Rendering layout ApplicationLayout
+  Rendering Hello::IndexView within application_layout
+  Rendered Hello::IndexView within application_layout (Duration: 0.4ms | Allocations: 235)
+  Rendered layout ApplicationLayout (Duration: 61.6ms | Allocations: 66411)
+Completed 500 Internal Server Error in 77ms (ActiveRecord: 0.0ms | Allocations: 109435)
+
+
+  
+SyntaxError (/Users/michaelesposito/GitHub/dpc-app/poc/hello_phlex/app/views/components/usa_banner_component.rb:5: syntax error, unexpected ':', expecting `end'
+register_element: g
+                ^
+/Users/michaelesposito/GitHub/dpc-app/poc/hello_phlex/app/views/components/usa_banner_component.rb:6: syntax error, unexpected ':', expecting `end'
+register_element: path
+                ^
+):
+  
+app/views/components/usa_banner_component.rb:5: syntax error, unexpected ':', expecting `end'
+app/views/components/usa_banner_component.rb:6: syntax error, unexpected ':', expecting `end'
+app/views/components/usa_banner_component.rb:5: syntax error, unexpected ':', expecting `end'
+app/views/components/usa_banner_component.rb:6: syntax error, unexpected ':', expecting `end'
+app/views/components/navbar_component.rb:11:in `template'
+app/views/layouts/application_layout.rb:20:in `block (2 levels) in template'
+app/views/layouts/application_layout.rb:19:in `block in template'
+app/views/layouts/application_layout.rb:9:in `template'
+app/controllers/hello_controller.rb:7:in `index'
+Started GET "/users/new" for ::1 at 2023-11-02 16:47:32 -0400
+Processing by HelloController#index as HTML
+  Rendering layout ApplicationLayout
+  Rendering Hello::IndexView within application_layout
+  Rendered Hello::IndexView within application_layout (Duration: 0.5ms | Allocations: 235)
+  Rendered layout ApplicationLayout (Duration: 63.8ms | Allocations: 83179)
+Completed 200 OK in 80ms (Views: 66.2ms | ActiveRecord: 0.0ms | Allocations: 126278)
+
+
+Started GET "/fonts/roboto-v19-latin-regular.woff2" for ::1 at 2023-11-02 16:47:32 -0400
+Started GET "/fonts/roboto-v19-latin-700.woff2" for ::1 at 2023-11-02 16:47:32 -0400
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-regular.woff2"):
+  
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-700.woff2"):
+  
+Started GET "/fonts/roboto-v19-latin-regular.woff" for ::1 at 2023-11-02 16:47:32 -0400
+Started GET "/fonts/roboto-v19-latin-700.woff" for ::1 at 2023-11-02 16:47:32 -0400
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-regular.woff"):
+  
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-700.woff"):
+  
+Started GET "/users/new" for ::1 at 2023-11-02 16:54:15 -0400
+Processing by HelloController#index as HTML
+  Rendering layout ApplicationLayout
+  Rendering Hello::IndexView within application_layout
+  Rendered Hello::IndexView within application_layout (Duration: 0.4ms | Allocations: 235)
+  Rendered layout ApplicationLayout (Duration: 72.4ms | Allocations: 83441)
+Completed 200 OK in 118ms (Views: 75.1ms | ActiveRecord: 0.0ms | Allocations: 126542)
+
+
+Started GET "/fonts/roboto-v19-latin-700.woff2" for ::1 at 2023-11-02 16:54:15 -0400
+Started GET "/fonts/roboto-v19-latin-regular.woff2" for ::1 at 2023-11-02 16:54:15 -0400
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-700.woff2"):
+  
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-regular.woff2"):
+  
+Started GET "/fonts/roboto-v19-latin-regular.woff" for ::1 at 2023-11-02 16:54:15 -0400
+Started GET "/fonts/roboto-v19-latin-700.woff" for ::1 at 2023-11-02 16:54:15 -0400
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-regular.woff"):
+  
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-700.woff"):
+  
+Started GET "/users/new" for ::1 at 2023-11-03 11:05:52 -0400
+Processing by HelloController#index as HTML
+  Rendering layout ApplicationLayout
+  Rendering Hello::IndexView within application_layout
+  Rendered Hello::IndexView within application_layout (Duration: 0.4ms | Allocations: 235)
+  Rendered layout ApplicationLayout (Duration: 65.0ms | Allocations: 82840)
+Completed 200 OK in 81ms (Views: 67.3ms | ActiveRecord: 0.0ms | Allocations: 125939)
+
+
+Started GET "/fonts/roboto-v19-latin-regular.woff2" for ::1 at 2023-11-03 11:05:52 -0400
+Started GET "/fonts/roboto-v19-latin-700.woff2" for ::1 at 2023-11-03 11:05:52 -0400
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-regular.woff2"):
+  
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-700.woff2"):
+  
+Started GET "/fonts/roboto-v19-latin-regular.woff" for ::1 at 2023-11-03 11:05:52 -0400
+Started GET "/fonts/roboto-v19-latin-700.woff" for ::1 at 2023-11-03 11:05:52 -0400
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-regular.woff"):
+  
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-700.woff"):
+  
+Started GET "/users/new" for ::1 at 2023-11-03 11:29:12 -0400
+Processing by HelloController#index as HTML
+  Rendering layout ApplicationLayout
+  Rendering Hello::IndexView within application_layout
+  Rendered Hello::IndexView within application_layout (Duration: 0.5ms | Allocations: 235)
+  Rendered layout ApplicationLayout (Duration: 67.9ms | Allocations: 66263)
+Completed 500 Internal Server Error in 88ms (ActiveRecord: 0.0ms | Allocations: 109287)
+
+
+  
+SyntaxError (/Users/michaelesposito/GitHub/dpc-app/poc/hello_phlex/app/views/components/usa_banner_component.rb:76: syntax error, unexpected '}', expecting =>
+...            stroke: {width="1"}
+...                              ^
+/Users/michaelesposito/GitHub/dpc-app/poc/hello_phlex/app/views/components/usa_banner_component.rb:91: syntax error, unexpected `end', expecting '}'
+  end
+  ^~~
+):
+  
+app/views/components/usa_banner_component.rb:76: syntax error, unexpected '}', expecting =>
+app/views/components/usa_banner_component.rb:91: syntax error, unexpected `end', expecting '}'
+app/views/components/usa_banner_component.rb:76: syntax error, unexpected '}', expecting =>
+app/views/components/usa_banner_component.rb:91: syntax error, unexpected `end', expecting '}'
+app/views/components/navbar_component.rb:11:in `template'
+app/views/layouts/application_layout.rb:20:in `block (2 levels) in template'
+app/views/layouts/application_layout.rb:19:in `block in template'
+app/views/layouts/application_layout.rb:9:in `template'
+app/controllers/hello_controller.rb:7:in `index'
+Started GET "/users/new" for ::1 at 2023-11-03 11:29:45 -0400
+Processing by HelloController#index as HTML
+  Rendering layout ApplicationLayout
+  Rendering Hello::IndexView within application_layout
+  Rendered Hello::IndexView within application_layout (Duration: 0.4ms | Allocations: 235)
+  Rendered layout ApplicationLayout (Duration: 103.6ms | Allocations: 84896)
+Completed 500 Internal Server Error in 123ms (ActiveRecord: 0.0ms | Allocations: 127960)
+
+
+  
+NoMethodError (undefined method `circle' for #<UsaBannerComponent:0x000000010540ebf0 @_routes=nil, @_buffer="<!-- Before ApplicationLayout --><!DOCTYPE html><html><head><title>Hello World in Phlex</title><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><meta name=\"csrf-param\" content=\"authenticity_token\" />\n<meta name=\"csrf-token\" content=\"axMXy7JjFRGPvGWE2ea2nJYltT7K3nty52-nV4LNNLS72qNLHfB7MquGXD1wYV_gp5Iydk6bZ17ATTVkI5p23Q\" /><link rel=\"stylesheet\" href=\"/assets/application-2ffae0080b68404406566d414805a4879ca5303427ed776af9eee6fc0aeffcd5.css\" data_turbo_track=\"reload\" /><script type=\"importmap\" data-turbo-track=\"reload\">{\n  \"imports\": {\n    \"application\": \"/assets/application-37f365cbecf1fa2810a8303f4b6571676fa1f9c56c248528bc14ddb857531b95.js\",\n    \"@hotwired/turbo-rails\": \"/assets/turbo.min-dfd93b3092d1d0ff56557294538d069bdbb28977d3987cb39bc0dd892f32fc57.js\",\n    \"@hotwired/stimulus\": \"/assets/stimulus.min-dd364f16ec9504dfb72672295637a1c8838773b01c0b441bd41008124c407894.js\",\n    \"@hotwired/stimulus-loading\": \"/assets/stimulus-loading-3576ce92b149ad5d6959438c6f291e2426c86df3b874c525b30faad51b0d96b3.js\",\n    \"controllers/application\": \"/assets/controllers/application-368d98631bccbf2349e0d4f8269afb3fe9625118341966de054759d96ea86c7e.js\",\n    \"controllers/hello_controller\": \"/assets/controllers/hello_controller-549135e8e7c683a538c3d6d517339ba470fcfb79d62f738a0a089ba41851a554.js\",\n    \"controllers\": \"/assets/controllers/index-2db729dddcc5b979110e98de4b6720f83f91a123172e87281d5a58410fc43806.js\"\n  }\n}</script>\n<link rel=\"modulepreload\" href=\"/assets/application-37f365cbecf1fa2810a8303f4b6571676fa1f9c56c248528bc14ddb857531b95.js\">\n<link rel=\"modulepreload\" href=\"/assets/turbo.min-dfd93b3092d1d0ff56557294538d069bdbb28977d3987cb39bc0dd892f32fc57.js\">\n<link rel=\"modulepreload\" href=\"/assets/stimulus.min-dd364f16ec9504dfb72672295637a1c8838773b01c0b441bd41008124c407894.js\">\n<link rel=\"modulepreload\" href=\"/assets/stimulus-loading-3576ce92b149ad5d6959438c6f291e2426c86df3b874c525b30faad51b0d96b3.js\">\n<script src=\"/assets/es-module-shims.min-4ca9b3dd5e434131e3bb4b0c1d7dff3bfd4035672a5086deec6f73979a49be73.js\" async=\"async\" data-turbo-track=\"reload\"></script>\n<script type=\"module\">import \"application\"</script></head>", @_context=#<Phlex::Context:0x0000000102868d98 @target="<body><!-- Before NavbarComponent --><!-- Before UsaBannerComponent --><section class=\"ds-c-usa-banner\" aria-label=\"Official government website\"><header class=\"ds-c-usa-banner__header\"><svg aria-hidden=\"false\" aria-labelledby=\"icon-2__title\" class=\"ds-c-icon ds-c-icon--usa-flag ds-c-usa-banner__header-flag\" focusable=\"false\" id=\"icon-2\" viewBox=\"0 0 16 11\" xmlns=\"http://www.w3.org/2000/svg\" role=\"img\"><title id=\"icon-2__title\">U.S. Flag</title><g fill-rule=\"evenodd\"><path fill=\"#FFF\" d=\"M0 0h16v11H0z\"></path><path fill=\"#DB3E1F\" d=\"M8 0h8v1H8z\"></path><path fill=\"#1E33B1\" d=\"M0 0h8v7H0z\"></path><path fill=\"#DB3E1F\" d=\"M8 2h8v1H8zM8 4h8v1H8zM8 6h8v1H8zM0 8h16v1H0zM0 10h16v1H0z\"></path><path fill=\"#FFF\" d=\"M1 1h1v1H1zM2 3h1v1H2zM1 5h1v1H1zM3 1h1v1H3zM4 3h1v1H4zM3 5h1v1H3zM5 1h1v1H5zM6 3h1v1H6zM5 5h1v1H5z\"></path></g></svg><p class=\"ds-c-usa-banner__header-text\"><span>An official website of the United States government</span><button class=\"ds-c-usa-banner__button\" aria-expanded=\"false\" aria-controls=\"gov-banner_1\" id=\"usa-banner__button\"><span class=\"ds-c-usa-banner__button-text\">Here’s how you know</span><svg aria-hidden=\"true\" class=\"ds-c-icon ds-c-icon--arrow ds-c-icon--arrow-down ds-c-usa-banner__action-icon\" focusable=\"false\" id=\"icon-3\" viewBox=\"0 0 320 512\" xmlns=\"http://www.w3.org/2000/svg\" direction=\"down\"><path fill=\"currentColor\" d=\"M285.476 272.971L91.132 467.314c-9.373 9.373-24.569 9.373-33.941 0l-22.667-22.667c-9.357-9.357-9.375-24.522-.04-33.901L188.505 256 34.484 101.255c-9.335-9.379-9.317-24.544.04-33.901l22.667-22.667c9.373-9.373 24.569-9.373 33.941 0L285.475 239.03c9.373 9.372 9.373 24.568.001 33.941z\"></path></svg></button></p></header><div class=\"ds-c-usa-banner__content\" id=\"gov-banner_1\" hidden=\"\"><div class=\"ds-c-usa-banner__guidance-container\"><div class=\"ds-c-usa-banner__guidance\"><svg aria-hidden=\"true\" class=\"ds-c-icon ds-c-icon--building-circle ds-c-usa-banner__icon ds-c-icon-color--primary\" focusable=\"false\" id=\"icon-4\" viewBox=\"0 0 54 54\" xmlns=\"http://www.w3.org/2000/svg\"><g><path class=\"ds-c-icon--building-circle__building\" fill=\"currentColor\" d=\"M36.5,20.91v1.36H35.15a0.71,0.71,0,0,1-.73.68H18.23a0.71,0.71,0,0,1-.73-0.68H16.14V20.91l10.18-4.07Zm0,13.57v1.36H16.14V34.48a0.71,0.71,0,0,1,.73-0.68h18.9A0.71,0.71,0,0,1,36.5,34.48ZM21.57,23.62v8.14h1.36V23.62h2.71v8.14H27V23.62h2.71v8.14h1.36V23.62h2.71v8.14h0.63a0.71,0.71,0,0,1,.73.68v0.68H17.5V32.45a0.71,0.71,0,0,1,.73-0.68h0.63V23.62h2.71Z\"></path>">, @_view_context=#<ActionView::Base:0x0000000000b770>, @_parent=#<NavbarComponent:0x00000001119d3980 @_routes=nil, @_buffer="<!-- Before ApplicationLayout --><!DOCTYPE html><html><head><title>Hello World in Phlex</title><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><meta name=\"csrf-param\" content=\"authenticity_token\" />\n<meta name=\"csrf-token\" content=\"axMXy7JjFRGPvGWE2ea2nJYltT7K3nty52-nV4LNNLS72qNLHfB7MquGXD1wYV_gp5Iydk6bZ17ATTVkI5p23Q\" /><link rel=\"stylesheet\" href=\"/assets/application-2ffae0080b68404406566d414805a4879ca5303427ed776af9eee6fc0aeffcd5.css\" data_turbo_track=\"reload\" /><script type=\"importmap\" data-turbo-track=\"reload\">{\n  \"imports\": {\n    \"application\": \"/assets/application-37f365cbecf1fa2810a8303f4b6571676fa1f9c56c248528bc14ddb857531b95.js\",\n    \"@hotwired/turbo-rails\": \"/assets/turbo.min-dfd93b3092d1d0ff56557294538d069bdbb28977d3987cb39bc0dd892f32fc57.js\",\n    \"@hotwired/stimulus\": \"/assets/stimulus.min-dd364f16ec9504dfb72672295637a1c8838773b01c0b441bd41008124c407894.js\",\n    \"@hotwired/stimulus-loading\": \"/assets/stimulus-loading-3576ce92b149ad5d6959438c6f291e2426c86df3b874c525b30faad51b0d96b3.js\",\n    \"controllers/application\": \"/assets/controllers/application-368d98631bccbf2349e0d4f8269afb3fe9625118341966de054759d96ea86c7e.js\",\n    \"controllers/hello_controller\": \"/assets/controllers/hello_controller-549135e8e7c683a538c3d6d517339ba470fcfb79d62f738a0a089ba41851a554.js\",\n    \"controllers\": \"/assets/controllers/index-2db729dddcc5b979110e98de4b6720f83f91a123172e87281d5a58410fc43806.js\"\n  }\n}</script>\n<link rel=\"modulepreload\" href=\"/assets/application-37f365cbecf1fa2810a8303f4b6571676fa1f9c56c248528bc14ddb857531b95.js\">\n<link rel=\"modulepreload\" href=\"/assets/turbo.min-dfd93b3092d1d0ff56557294538d069bdbb28977d3987cb39bc0dd892f32fc57.js\">\n<link rel=\"modulepreload\" href=\"/assets/stimulus.min-dd364f16ec9504dfb72672295637a1c8838773b01c0b441bd41008124c407894.js\">\n<link rel=\"modulepreload\" href=\"/assets/stimulus-loading-3576ce92b149ad5d6959438c6f291e2426c86df3b874c525b30faad51b0d96b3.js\">\n<script src=\"/assets/es-module-shims.min-4ca9b3dd5e434131e3bb4b0c1d7dff3bfd4035672a5086deec6f73979a49be73.js\" async=\"async\" data-turbo-track=\"reload\"></script>\n<script type=\"module\">import \"application\"</script></head>", @_context=#<Phlex::Context:0x0000000102868d98 @target="<body><!-- Before NavbarComponent --><!-- Before UsaBannerComponent --><section class=\"ds-c-usa-banner\" aria-label=\"Official government website\"><header class=\"ds-c-usa-banner__header\"><svg aria-hidden=\"false\" aria-labelledby=\"icon-2__title\" class=\"ds-c-icon ds-c-icon--usa-flag ds-c-usa-banner__header-flag\" focusable=\"false\" id=\"icon-2\" viewBox=\"0 0 16 11\" xmlns=\"http://www.w3.org/2000/svg\" role=\"img\"><title id=\"icon-2__title\">U.S. Flag</title><g fill-rule=\"evenodd\"><path fill=\"#FFF\" d=\"M0 0h16v11H0z\"></path><path fill=\"#DB3E1F\" d=\"M8 0h8v1H8z\"></path><path fill=\"#1E33B1\" d=\"M0 0h8v7H0z\"></path><path fill=\"#DB3E1F\" d=\"M8 2h8v1H8zM8 4h8v1H8zM8 6h8v1H8zM0 8h16v1H0zM0 10h16v1H0z\"></path><path fill=\"#FFF\" d=\"M1 1h1v1H1zM2 3h1v1H2zM1 5h1v1H1zM3 1h1v1H3zM4 3h1v1H4zM3 5h1v1H3zM5 1h1v1H5zM6 3h1v1H6zM5 5h1v1H5z\"></path></g></svg><p class=\"ds-c-usa-banner__header-text\"><span>An official website of the United States government</span><button class=\"ds-c-usa-banner__button\" aria-expanded=\"false\" aria-controls=\"gov-banner_1\" id=\"usa-banner__button\"><span class=\"ds-c-usa-banner__button-text\">Here’s how you know</span><svg aria-hidden=\"true\" class=\"ds-c-icon ds-c-icon--arrow ds-c-icon--arrow-down ds-c-usa-banner__action-icon\" focusable=\"false\" id=\"icon-3\" viewBox=\"0 0 320 512\" xmlns=\"http://www.w3.org/2000/svg\" direction=\"down\"><path fill=\"currentColor\" d=\"M285.476 272.971L91.132 467.314c-9.373 9.373-24.569 9.373-33.941 0l-22.667-22.667c-9.357-9.357-9.375-24.522-.04-33.901L188.505 256 34.484 101.255c-9.335-9.379-9.317-24.544.04-33.901l22.667-22.667c9.373-9.373 24.569-9.373 33.941 0L285.475 239.03c9.373 9.372 9.373 24.568.001 33.941z\"></path></svg></button></p></header><div class=\"ds-c-usa-banner__content\" id=\"gov-banner_1\" hidden=\"\"><div class=\"ds-c-usa-banner__guidance-container\"><div class=\"ds-c-usa-banner__guidance\"><svg aria-hidden=\"true\" class=\"ds-c-icon ds-c-icon--building-circle ds-c-usa-banner__icon ds-c-icon-color--primary\" focusable=\"false\" id=\"icon-4\" viewBox=\"0 0 54 54\" xmlns=\"http://www.w3.org/2000/svg\"><g><path class=\"ds-c-icon--building-circle__building\" fill=\"currentColor\" d=\"M36.5,20.91v1.36H35.15a0.71,0.71,0,0,1-.73.68H18.23a0.71,0.71,0,0,1-.73-0.68H16.14V20.91l10.18-4.07Zm0,13.57v1.36H16.14V34.48a0.71,0.71,0,0,1,.73-0.68h18.9A0.71,0.71,0,0,1,36.5,34.48ZM21.57,23.62v8.14h1.36V23.62h2.71v8.14H27V23.62h2.71v8.14h1.36V23.62h2.71v8.14h0.63a0.71,0.71,0,0,1,.73.68v0.68H17.5V32.45a0.71,0.71,0,0,1,.73-0.68h0.63V23.62h2.71Z\"></path>">, @_view_context=#<ActionView::Base:0x0000000000b770>, @_parent=#<ApplicationLayout:0x0000000102868f50 @_routes=nil, @_buffer="<!-- Before ApplicationLayout --><!DOCTYPE html><html><head><title>Hello World in Phlex</title><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><meta name=\"csrf-param\" content=\"authenticity_token\" />\n<meta name=\"csrf-token\" content=\"axMXy7JjFRGPvGWE2ea2nJYltT7K3nty52-nV4LNNLS72qNLHfB7MquGXD1wYV_gp5Iydk6bZ17ATTVkI5p23Q\" /><link rel=\"stylesheet\" href=\"/assets/application-2ffae0080b68404406566d414805a4879ca5303427ed776af9eee6fc0aeffcd5.css\" data_turbo_track=\"reload\" /><script type=\"importmap\" data-turbo-track=\"reload\">{\n  \"imports\": {\n    \"application\": \"/assets/application-37f365cbecf1fa2810a8303f4b6571676fa1f9c56c248528bc14ddb857531b95.js\",\n    \"@hotwired/turbo-rails\": \"/assets/turbo.min-dfd93b3092d1d0ff56557294538d069bdbb28977d3987cb39bc0dd892f32fc57.js\",\n    \"@hotwired/stimulus\": \"/assets/stimulus.min-dd364f16ec9504dfb72672295637a1c8838773b01c0b441bd41008124c407894.js\",\n    \"@hotwired/stimulus-loading\": \"/assets/stimulus-loading-3576ce92b149ad5d6959438c6f291e2426c86df3b874c525b30faad51b0d96b3.js\",\n    \"controllers/application\": \"/assets/controllers/application-368d98631bccbf2349e0d4f8269afb3fe9625118341966de054759d96ea86c7e.js\",\n    \"controllers/hello_controller\": \"/assets/controllers/hello_controller-549135e8e7c683a538c3d6d517339ba470fcfb79d62f738a0a089ba41851a554.js\",\n    \"controllers\": \"/assets/controllers/index-2db729dddcc5b979110e98de4b6720f83f91a123172e87281d5a58410fc43806.js\"\n  }\n}</script>\n<link rel=\"modulepreload\" href=\"/assets/application-37f365cbecf1fa2810a8303f4b6571676fa1f9c56c248528bc14ddb857531b95.js\">\n<link rel=\"modulepreload\" href=\"/assets/turbo.min-dfd93b3092d1d0ff56557294538d069bdbb28977d3987cb39bc0dd892f32fc57.js\">\n<link rel=\"modulepreload\" href=\"/assets/stimulus.min-dd364f16ec9504dfb72672295637a1c8838773b01c0b441bd41008124c407894.js\">\n<link rel=\"modulepreload\" href=\"/assets/stimulus-loading-3576ce92b149ad5d6959438c6f291e2426c86df3b874c525b30faad51b0d96b3.js\">\n<script src=\"/assets/es-module-shims.min-4ca9b3dd5e434131e3bb4b0c1d7dff3bfd4035672a5086deec6f73979a49be73.js\" async=\"async\" data-turbo-track=\"reload\"></script>\n<script type=\"module\">import \"application\"</script></head>", @_context=#<Phlex::Context:0x0000000102868d98 @target="<body><!-- Before NavbarComponent --><!-- Before UsaBannerComponent --><section class=\"ds-c-usa-banner\" aria-label=\"Official government website\"><header class=\"ds-c-usa-banner__header\"><svg aria-hidden=\"false\" aria-labelledby=\"icon-2__title\" class=\"ds-c-icon ds-c-icon--usa-flag ds-c-usa-banner__header-flag\" focusable=\"false\" id=\"icon-2\" viewBox=\"0 0 16 11\" xmlns=\"http://www.w3.org/2000/svg\" role=\"img\"><title id=\"icon-2__title\">U.S. Flag</title><g fill-rule=\"evenodd\"><path fill=\"#FFF\" d=\"M0 0h16v11H0z\"></path><path fill=\"#DB3E1F\" d=\"M8 0h8v1H8z\"></path><path fill=\"#1E33B1\" d=\"M0 0h8v7H0z\"></path><path fill=\"#DB3E1F\" d=\"M8 2h8v1H8zM8 4h8v1H8zM8 6h8v1H8zM0 8h16v1H0zM0 10h16v1H0z\"></path><path fill=\"#FFF\" d=\"M1 1h1v1H1zM2 3h1v1H2zM1 5h1v1H1zM3 1h1v1H3zM4 3h1v1H4zM3 5h1v1H3zM5 1h1v1H5zM6 3h1v1H6zM5 5h1v1H5z\"></path></g></svg><p class=\"ds-c-usa-banner__header-text\"><span>An official website of the United States government</span><button class=\"ds-c-usa-banner__button\" aria-expanded=\"false\" aria-controls=\"gov-banner_1\" id=\"usa-banner__button\"><span class=\"ds-c-usa-banner__button-text\">Here’s how you know</span><svg aria-hidden=\"true\" class=\"ds-c-icon ds-c-icon--arrow ds-c-icon--arrow-down ds-c-usa-banner__action-icon\" focusable=\"false\" id=\"icon-3\" viewBox=\"0 0 320 512\" xmlns=\"http://www.w3.org/2000/svg\" direction=\"down\"><path fill=\"currentColor\" d=\"M285.476 272.971L91.132 467.314c-9.373 9.373-24.569 9.373-33.941 0l-22.667-22.667c-9.357-9.357-9.375-24.522-.04-33.901L188.505 256 34.484 101.255c-9.335-9.379-9.317-24.544.04-33.901l22.667-22.667c9.373-9.373 24.569-9.373 33.941 0L285.475 239.03c9.373 9.372 9.373 24.568.001 33.941z\"></path></svg></button></p></header><div class=\"ds-c-usa-banner__content\" id=\"gov-banner_1\" hidden=\"\"><div class=\"ds-c-usa-banner__guidance-container\"><div class=\"ds-c-usa-banner__guidance\"><svg aria-hidden=\"true\" class=\"ds-c-icon ds-c-icon--building-circle ds-c-usa-banner__icon ds-c-icon-color--primary\" focusable=\"false\" id=\"icon-4\" viewBox=\"0 0 54 54\" xmlns=\"http://www.w3.org/2000/svg\"><g><path class=\"ds-c-icon--building-circle__building\" fill=\"currentColor\" d=\"M36.5,20.91v1.36H35.15a0.71,0.71,0,0,1-.73.68H18.23a0.71,0.71,0,0,1-.73-0.68H16.14V20.91l10.18-4.07Zm0,13.57v1.36H16.14V34.48a0.71,0.71,0,0,1,.73-0.68h18.9A0.71,0.71,0,0,1,36.5,34.48ZM21.57,23.62v8.14h1.36V23.62h2.71v8.14H27V23.62h2.71v8.14h1.36V23.62h2.71v8.14h0.63a0.71,0.71,0,0,1,.73.68v0.68H17.5V32.45a0.71,0.71,0,0,1,.73-0.68h0.63V23.62h2.71Z\"></path>">, @_view_context=#<ActionView::Base:0x0000000000b770>, @_parent=nil>>>):
+  
+app/views/components/usa_banner_component.rb:69:in `block (6 levels) in template'
+app/views/components/usa_banner_component.rb:67:in `block (5 levels) in template'
+app/views/components/usa_banner_component.rb:59:in `block (4 levels) in template'
+app/views/components/usa_banner_component.rb:58:in `block (3 levels) in template'
+app/views/components/usa_banner_component.rb:57:in `block (2 levels) in template'
+app/views/components/usa_banner_component.rb:56:in `block in template'
+app/views/components/usa_banner_component.rb:9:in `template'
+app/views/components/navbar_component.rb:11:in `template'
+app/views/layouts/application_layout.rb:20:in `block (2 levels) in template'
+app/views/layouts/application_layout.rb:19:in `block in template'
+app/views/layouts/application_layout.rb:9:in `template'
+app/controllers/hello_controller.rb:7:in `index'
+Started GET "/users/new" for ::1 at 2023-11-03 11:30:36 -0400
+Processing by HelloController#index as HTML
+  Rendering layout ApplicationLayout
+  Rendering Hello::IndexView within application_layout
+  Rendered Hello::IndexView within application_layout (Duration: 0.4ms | Allocations: 235)
+  Rendered layout ApplicationLayout (Duration: 79.1ms | Allocations: 83248)
+Completed 500 Internal Server Error in 99ms (ActiveRecord: 0.0ms | Allocations: 126277)
+
+
+  
+ArgumentError (wrong number of arguments (given 0, expected 1)):
+  
+app/views/components/usa_banner_component.rb:85:in `block (4 levels) in template'
+app/views/components/usa_banner_component.rb:82:in `block (3 levels) in template'
+app/views/components/usa_banner_component.rb:58:in `block (2 levels) in template'
+app/views/components/usa_banner_component.rb:57:in `block in template'
+app/views/components/usa_banner_component.rb:10:in `template'
+app/views/components/navbar_component.rb:11:in `template'
+app/views/layouts/application_layout.rb:20:in `block (2 levels) in template'
+app/views/layouts/application_layout.rb:19:in `block in template'
+app/views/layouts/application_layout.rb:9:in `template'
+app/controllers/hello_controller.rb:7:in `index'
+Started GET "/users/new" for ::1 at 2023-11-03 11:32:31 -0400
+Processing by HelloController#index as HTML
+  Rendering layout ApplicationLayout
+  Rendering Hello::IndexView within application_layout
+  Rendered Hello::IndexView within application_layout (Duration: 0.4ms | Allocations: 235)
+  Rendered layout ApplicationLayout (Duration: 74.7ms | Allocations: 83831)
+Completed 200 OK in 91ms (Views: 77.3ms | ActiveRecord: 0.0ms | Allocations: 126930)
+
+
+Started GET "/fonts/roboto-v19-latin-regular.woff2" for ::1 at 2023-11-03 11:32:31 -0400
+Started GET "/fonts/roboto-v19-latin-700.woff2" for ::1 at 2023-11-03 11:32:31 -0400
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-regular.woff2"):
+  
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-700.woff2"):
+  
+Started GET "/fonts/roboto-v19-latin-regular.woff" for ::1 at 2023-11-03 11:32:31 -0400
+Started GET "/fonts/roboto-v19-latin-700.woff" for ::1 at 2023-11-03 11:32:31 -0400
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-regular.woff"):
+  
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-700.woff"):
+  
+Started GET "/users/new" for ::1 at 2023-11-03 11:33:17 -0400
+Processing by HelloController#index as HTML
+  Rendering layout ApplicationLayout
+  Rendering Hello::IndexView within application_layout
+  Rendered Hello::IndexView within application_layout (Duration: 0.5ms | Allocations: 235)
+  Rendered layout ApplicationLayout (Duration: 70.1ms | Allocations: 83412)
+Completed 200 OK in 87ms (Views: 72.9ms | ActiveRecord: 0.0ms | Allocations: 126511)
+
+
+Started GET "/fonts/roboto-v19-latin-regular.woff2" for ::1 at 2023-11-03 11:33:17 -0400
+Started GET "/fonts/roboto-v19-latin-700.woff2" for ::1 at 2023-11-03 11:33:17 -0400
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-regular.woff2"):
+  
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-700.woff2"):
+  
+Started GET "/fonts/roboto-v19-latin-regular.woff" for ::1 at 2023-11-03 11:33:17 -0400
+Started GET "/fonts/roboto-v19-latin-700.woff" for ::1 at 2023-11-03 11:33:17 -0400
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-regular.woff"):
+  
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-700.woff"):
+  
+Started GET "/users/new" for ::1 at 2023-11-03 11:34:24 -0400
+Processing by HelloController#index as HTML
+  Rendering layout ApplicationLayout
+  Rendering Hello::IndexView within application_layout
+  Rendered Hello::IndexView within application_layout (Duration: 0.4ms | Allocations: 235)
+  Rendered layout ApplicationLayout (Duration: 72.3ms | Allocations: 83861)
+Completed 200 OK in 89ms (Views: 75.2ms | ActiveRecord: 0.0ms | Allocations: 126960)
+
+
+Started GET "/fonts/roboto-v19-latin-regular.woff2" for ::1 at 2023-11-03 11:34:24 -0400
+Started GET "/fonts/roboto-v19-latin-700.woff2" for ::1 at 2023-11-03 11:34:24 -0400
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-regular.woff2"):
+  
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-700.woff2"):
+  
+Started GET "/fonts/roboto-v19-latin-regular.woff" for ::1 at 2023-11-03 11:34:24 -0400
+Started GET "/fonts/roboto-v19-latin-700.woff" for ::1 at 2023-11-03 11:34:24 -0400
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-regular.woff"):
+  
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-700.woff"):
+  
+Started GET "/users/new" for ::1 at 2023-11-03 11:41:39 -0400
+Processing by HelloController#index as HTML
+  Rendering layout ApplicationLayout
+  Rendering Hello::IndexView within application_layout
+  Rendered Hello::IndexView within application_layout (Duration: 0.4ms | Allocations: 235)
+  Rendered layout ApplicationLayout (Duration: 66.9ms | Allocations: 84097)
+Completed 200 OK in 83ms (Views: 69.5ms | ActiveRecord: 0.0ms | Allocations: 127196)
+
+
+Started GET "/fonts/roboto-v19-latin-regular.woff2" for ::1 at 2023-11-03 11:41:40 -0400
+Started GET "/fonts/roboto-v19-latin-700.woff2" for ::1 at 2023-11-03 11:41:40 -0400
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-regular.woff2"):
+  
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-700.woff2"):
+  
+Started GET "/fonts/roboto-v19-latin-regular.woff" for ::1 at 2023-11-03 11:41:40 -0400
+Started GET "/fonts/roboto-v19-latin-700.woff" for ::1 at 2023-11-03 11:41:40 -0400
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-regular.woff"):
+  
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-700.woff"):
+  
+Started GET "/users/new" for ::1 at 2023-11-03 11:48:19 -0400
+Processing by HelloController#index as HTML
+  Rendering layout ApplicationLayout
+  Rendering Hello::IndexView within application_layout
+  Rendered Hello::IndexView within application_layout (Duration: 0.4ms | Allocations: 235)
+  Rendered layout ApplicationLayout (Duration: 61.4ms | Allocations: 66948)
+Completed 500 Internal Server Error in 79ms (ActiveRecord: 0.0ms | Allocations: 109972)
+
+
+  
+SyntaxError (/Users/michaelesposito/GitHub/dpc-app/poc/hello_phlex/app/views/components/usa_banner_component.rb:132: syntax error, unexpected ')', expecting =>
+...type: "text/javascript", defer) {
+...                              ^
+/Users/michaelesposito/GitHub/dpc-app/poc/hello_phlex/app/views/components/usa_banner_component.rb:153: syntax error, unexpected '}', expecting `end'
+    }
+    ^
+):
+  
+app/views/components/usa_banner_component.rb:132: syntax error, unexpected ')', expecting =>
+app/views/components/usa_banner_component.rb:153: syntax error, unexpected '}', expecting `end'
+app/views/components/usa_banner_component.rb:132: syntax error, unexpected ')', expecting =>
+app/views/components/usa_banner_component.rb:153: syntax error, unexpected '}', expecting `end'
+app/views/components/navbar_component.rb:11:in `template'
+app/views/layouts/application_layout.rb:20:in `block (2 levels) in template'
+app/views/layouts/application_layout.rb:19:in `block in template'
+app/views/layouts/application_layout.rb:9:in `template'
+app/controllers/hello_controller.rb:7:in `index'
+Started GET "/users/new" for ::1 at 2023-11-03 11:48:59 -0400
+Processing by HelloController#index as HTML
+  Rendering layout ApplicationLayout
+  Rendering Hello::IndexView within application_layout
+  Rendered Hello::IndexView within application_layout (Duration: 0.6ms | Allocations: 235)
+  Rendered layout ApplicationLayout (Duration: 62.9ms | Allocations: 84222)
+Completed 200 OK in 84ms (Views: 65.4ms | ActiveRecord: 0.0ms | Allocations: 127321)
+
+
+Started GET "/fonts/roboto-v19-latin-regular.woff2" for ::1 at 2023-11-03 11:48:59 -0400
+Started GET "/fonts/roboto-v19-latin-700.woff2" for ::1 at 2023-11-03 11:48:59 -0400
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-regular.woff2"):
+  
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-700.woff2"):
+  
+Started GET "/fonts/roboto-v19-latin-regular.woff" for ::1 at 2023-11-03 11:48:59 -0400
+Started GET "/fonts/roboto-v19-latin-700.woff" for ::1 at 2023-11-03 11:48:59 -0400
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-regular.woff"):
+  
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-700.woff"):
+  
+Started GET "/users/new" for ::1 at 2023-11-03 11:54:09 -0400
+Processing by HelloController#index as HTML
+  Rendering layout ApplicationLayout
+  Rendering Hello::IndexView within application_layout
+  Rendered Hello::IndexView within application_layout (Duration: 0.4ms | Allocations: 235)
+  Rendered layout ApplicationLayout (Duration: 64.9ms | Allocations: 66809)
+Completed 500 Internal Server Error in 81ms (ActiveRecord: 0.0ms | Allocations: 109833)
+
+
+  
+SyntaxError (/Users/michaelesposito/GitHub/dpc-app/poc/hello_phlex/app/views/components/usa_banner_component.rb:155: unterminated string meets end of file
+/Users/michaelesposito/GitHub/dpc-app/poc/hello_phlex/app/views/components/usa_banner_component.rb:155: syntax error, unexpected end-of-input, expecting '}'):
+  
+app/views/components/usa_banner_component.rb:155: unterminated string meets end of file
+app/views/components/usa_banner_component.rb:155: syntax error, unexpected end-of-input, expecting '}'
+app/views/components/usa_banner_component.rb:155: unterminated string meets end of file
+app/views/components/usa_banner_component.rb:155: syntax error, unexpected end-of-input, expecting '}'
+app/views/components/navbar_component.rb:11:in `template'
+app/views/layouts/application_layout.rb:20:in `block (2 levels) in template'
+app/views/layouts/application_layout.rb:19:in `block in template'
+app/views/layouts/application_layout.rb:9:in `template'
+app/controllers/hello_controller.rb:7:in `index'
+Started GET "/users/new" for ::1 at 2023-11-03 11:54:23 -0400
+Processing by HelloController#index as HTML
+  Rendering layout ApplicationLayout
+  Rendering Hello::IndexView within application_layout
+  Rendered Hello::IndexView within application_layout (Duration: 0.4ms | Allocations: 235)
+  Rendered layout ApplicationLayout (Duration: 39.6ms | Allocations: 84078)
+Completed 200 OK in 57ms (Views: 42.0ms | ActiveRecord: 0.0ms | Allocations: 127177)
+
+
+Started GET "/fonts/roboto-v19-latin-regular.woff2" for ::1 at 2023-11-03 11:54:23 -0400
+Started GET "/fonts/roboto-v19-latin-700.woff2" for ::1 at 2023-11-03 11:54:23 -0400
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-regular.woff2"):
+  
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-700.woff2"):
+  
+Started GET "/fonts/roboto-v19-latin-regular.woff" for ::1 at 2023-11-03 11:54:23 -0400
+Started GET "/fonts/roboto-v19-latin-700.woff" for ::1 at 2023-11-03 11:54:23 -0400
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-regular.woff"):
+  
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-700.woff"):
+  
+Started GET "/users/new" for ::1 at 2023-11-03 12:24:27 -0400
+Processing by HelloController#index as HTML
+  Rendering layout ApplicationLayout
+  Rendering Hello::IndexView within application_layout
+  Rendered Hello::IndexView within application_layout (Duration: 0.4ms | Allocations: 235)
+  Rendered layout ApplicationLayout (Duration: 64.2ms | Allocations: 84444)
+Completed 200 OK in 80ms (Views: 66.6ms | ActiveRecord: 0.0ms | Allocations: 127543)
+
+
+Started GET "/fonts/roboto-v19-latin-700.woff2" for ::1 at 2023-11-03 12:24:27 -0400
+Started GET "/fonts/roboto-v19-latin-regular.woff2" for ::1 at 2023-11-03 12:24:27 -0400
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-700.woff2"):
+  
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-regular.woff2"):
+  
+Started GET "/fonts/roboto-v19-latin-700.woff" for ::1 at 2023-11-03 12:24:27 -0400
+Started GET "/fonts/roboto-v19-latin-regular.woff" for ::1 at 2023-11-03 12:24:27 -0400
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-700.woff"):
+  
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-regular.woff"):
+  
+Started GET "/users/new" for ::1 at 2023-11-03 12:24:59 -0400
+Processing by HelloController#index as HTML
+  Rendering layout ApplicationLayout
+  Rendering Hello::IndexView within application_layout
+  Rendered Hello::IndexView within application_layout (Duration: 0.4ms | Allocations: 235)
+  Rendered layout ApplicationLayout (Duration: 61.6ms | Allocations: 84297)
+Completed 200 OK in 78ms (Views: 63.9ms | ActiveRecord: 0.0ms | Allocations: 127396)
+
+
+Started GET "/fonts/roboto-v19-latin-regular.woff2" for ::1 at 2023-11-03 12:25:00 -0400
+Started GET "/fonts/roboto-v19-latin-700.woff2" for ::1 at 2023-11-03 12:25:00 -0400
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-regular.woff2"):
+  
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-700.woff2"):
+  
+Started GET "/fonts/roboto-v19-latin-regular.woff" for ::1 at 2023-11-03 12:25:00 -0400
+Started GET "/fonts/roboto-v19-latin-700.woff" for ::1 at 2023-11-03 12:25:00 -0400
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-regular.woff"):
+  
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-700.woff"):
+  
+Started GET "/users/new" for ::1 at 2023-11-03 13:02:42 -0400
+Processing by HelloController#index as HTML
+  Rendering layout ApplicationLayout
+  Rendering Hello::IndexView within application_layout
+  Rendered Hello::IndexView within application_layout (Duration: 0.4ms | Allocations: 235)
+  Rendered layout ApplicationLayout (Duration: 71.1ms | Allocations: 84184)
+Completed 200 OK in 87ms (Views: 73.4ms | ActiveRecord: 0.0ms | Allocations: 127283)
+
+
+Started GET "/fonts/roboto-v19-latin-regular.woff2" for ::1 at 2023-11-03 13:02:42 -0400
+Started GET "/fonts/roboto-v19-latin-700.woff2" for ::1 at 2023-11-03 13:02:42 -0400
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-regular.woff2"):
+  
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-700.woff2"):
+  
+Started GET "/fonts/roboto-v19-latin-regular.woff" for ::1 at 2023-11-03 13:02:42 -0400
+Started GET "/fonts/roboto-v19-latin-700.woff" for ::1 at 2023-11-03 13:02:42 -0400
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-regular.woff"):
+  
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-700.woff"):
+  
+Started GET "/users/new" for ::1 at 2023-11-03 13:04:23 -0400
+Processing by HelloController#index as HTML
+  Rendering layout ApplicationLayout
+  Rendering Hello::IndexView within application_layout
+  Rendered Hello::IndexView within application_layout (Duration: 0.5ms | Allocations: 235)
+  Rendered layout ApplicationLayout (Duration: 74.1ms | Allocations: 84228)
+Completed 200 OK in 126ms (Views: 77.0ms | ActiveRecord: 0.0ms | Allocations: 127327)
+
+
+Started GET "/fonts/roboto-v19-latin-regular.woff2" for ::1 at 2023-11-03 13:04:23 -0400
+Started GET "/fonts/roboto-v19-latin-700.woff2" for ::1 at 2023-11-03 13:04:23 -0400
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-regular.woff2"):
+  
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-700.woff2"):
+  
+Started GET "/fonts/roboto-v19-latin-regular.woff" for ::1 at 2023-11-03 13:04:23 -0400
+Started GET "/fonts/roboto-v19-latin-700.woff" for ::1 at 2023-11-03 13:04:23 -0400
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-regular.woff"):
+  
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-700.woff"):
+  
+Started GET "/users/new" for ::1 at 2023-11-03 13:05:26 -0400
+Processing by HelloController#index as HTML
+  Rendering layout ApplicationLayout
+  Rendering Hello::IndexView within application_layout
+  Rendered Hello::IndexView within application_layout (Duration: 0.4ms | Allocations: 235)
+  Rendered layout ApplicationLayout (Duration: 64.9ms | Allocations: 84168)
+Completed 200 OK in 109ms (Views: 68.0ms | ActiveRecord: 0.0ms | Allocations: 127267)
+
+
+Started GET "/fonts/roboto-v19-latin-700.woff2" for ::1 at 2023-11-03 13:05:26 -0400
+Started GET "/fonts/roboto-v19-latin-regular.woff2" for ::1 at 2023-11-03 13:05:26 -0400
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-700.woff2"):
+  
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-regular.woff2"):
+  
+Started GET "/fonts/roboto-v19-latin-regular.woff" for ::1 at 2023-11-03 13:05:26 -0400
+Started GET "/fonts/roboto-v19-latin-700.woff" for ::1 at 2023-11-03 13:05:26 -0400
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-regular.woff"):
+  
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-700.woff"):
+  
+Started GET "/users/new" for ::1 at 2023-11-03 13:06:35 -0400
+Processing by HelloController#index as HTML
+  Rendering layout ApplicationLayout
+  Rendering Hello::IndexView within application_layout
+  Rendered Hello::IndexView within application_layout (Duration: 0.4ms | Allocations: 235)
+  Rendered layout ApplicationLayout (Duration: 70.8ms | Allocations: 84276)
+Completed 200 OK in 87ms (Views: 73.5ms | ActiveRecord: 0.0ms | Allocations: 127375)
+
+
+Started GET "/fonts/roboto-v19-latin-regular.woff2" for ::1 at 2023-11-03 13:06:35 -0400
+Started GET "/fonts/roboto-v19-latin-700.woff2" for ::1 at 2023-11-03 13:06:35 -0400
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-regular.woff2"):
+  
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-700.woff2"):
+  
+Started GET "/fonts/roboto-v19-latin-regular.woff" for ::1 at 2023-11-03 13:06:35 -0400
+Started GET "/fonts/roboto-v19-latin-700.woff" for ::1 at 2023-11-03 13:06:35 -0400
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-regular.woff"):
+  
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-700.woff"):
+  
+Started GET "/users/new" for ::1 at 2023-11-03 13:07:26 -0400
+Processing by HelloController#index as HTML
+  Rendering layout ApplicationLayout
+  Rendering Hello::IndexView within application_layout
+  Rendered Hello::IndexView within application_layout (Duration: 0.4ms | Allocations: 235)
+  Rendered layout ApplicationLayout (Duration: 75.1ms | Allocations: 84107)
+Completed 200 OK in 124ms (Views: 78.1ms | ActiveRecord: 0.0ms | Allocations: 127206)
+
+
+Started GET "/fonts/roboto-v19-latin-regular.woff2" for ::1 at 2023-11-03 13:07:26 -0400
+Started GET "/fonts/roboto-v19-latin-700.woff2" for ::1 at 2023-11-03 13:07:26 -0400
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-regular.woff2"):
+  
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-700.woff2"):
+  
+Started GET "/fonts/roboto-v19-latin-regular.woff" for ::1 at 2023-11-03 13:07:26 -0400
+Started GET "/fonts/roboto-v19-latin-700.woff" for ::1 at 2023-11-03 13:07:26 -0400
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-regular.woff"):
+  
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-700.woff"):
+  
+Started GET "/users/new" for ::1 at 2023-11-03 13:07:59 -0400
+Processing by HelloController#index as HTML
+  Rendering layout ApplicationLayout
+  Rendering Hello::IndexView within application_layout
+  Rendered Hello::IndexView within application_layout (Duration: 0.5ms | Allocations: 235)
+  Rendered layout ApplicationLayout (Duration: 64.4ms | Allocations: 84217)
+Completed 200 OK in 82ms (Views: 66.7ms | ActiveRecord: 0.0ms | Allocations: 127316)
+
+
+Started GET "/fonts/roboto-v19-latin-regular.woff2" for ::1 at 2023-11-03 13:08:00 -0400
+Started GET "/fonts/roboto-v19-latin-700.woff2" for ::1 at 2023-11-03 13:08:00 -0400
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-regular.woff2"):
+  
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-700.woff2"):
+  
+Started GET "/fonts/roboto-v19-latin-regular.woff" for ::1 at 2023-11-03 13:08:00 -0400
+Started GET "/fonts/roboto-v19-latin-700.woff" for ::1 at 2023-11-03 13:08:00 -0400
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-regular.woff"):
+  
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-700.woff"):
+  
+Started GET "/users/new" for ::1 at 2023-11-03 13:12:48 -0400
+Processing by HelloController#index as HTML
+  Rendering layout ApplicationLayout
+  Rendering Hello::IndexView within application_layout
+  Rendered Hello::IndexView within application_layout (Duration: 0.4ms | Allocations: 235)
+  Rendered layout ApplicationLayout (Duration: 69.3ms | Allocations: 66447)
+Completed 500 Internal Server Error in 113ms (ActiveRecord: 0.0ms | Allocations: 109471)
+
+
+  
+SyntaxError (/Users/michaelesposito/GitHub/dpc-app/poc/hello_phlex/app/views/components/usa_banner_component.rb:77: syntax error, unexpected ':', expecting =>
+...                  stroke-width: "1"
+...                              ^
+/Users/michaelesposito/GitHub/dpc-app/poc/hello_phlex/app/views/components/usa_banner_component.rb:78: syntax error, unexpected ')', expecting '}'
+                            )
+                            ^
+/Users/michaelesposito/GitHub/dpc-app/poc/hello_phlex/app/views/components/usa_banner_component.rb:164: syntax error, unexpected `end', expecting '}'
+  end
+  ^~~
+):
+  
+app/views/components/usa_banner_component.rb:77: syntax error, unexpected ':', expecting =>
+app/views/components/usa_banner_component.rb:78: syntax error, unexpected ')', expecting '}'
+app/views/components/usa_banner_component.rb:164: syntax error, unexpected `end', expecting '}'
+app/views/components/usa_banner_component.rb:77: syntax error, unexpected ':', expecting =>
+app/views/components/usa_banner_component.rb:78: syntax error, unexpected ')', expecting '}'
+app/views/components/usa_banner_component.rb:164: syntax error, unexpected `end', expecting '}'
+app/views/components/navbar_component.rb:11:in `template'
+app/views/layouts/application_layout.rb:20:in `block (2 levels) in template'
+app/views/layouts/application_layout.rb:19:in `block in template'
+app/views/layouts/application_layout.rb:9:in `template'
+app/controllers/hello_controller.rb:7:in `index'
+Started GET "/users/new" for ::1 at 2023-11-03 13:13:20 -0400
+Processing by HelloController#index as HTML
+  Rendering layout ApplicationLayout
+  Rendering Hello::IndexView within application_layout
+  Rendered Hello::IndexView within application_layout (Duration: 0.5ms | Allocations: 235)
+  Rendered layout ApplicationLayout (Duration: 63.9ms | Allocations: 84323)
+Completed 200 OK in 81ms (Views: 66.3ms | ActiveRecord: 0.0ms | Allocations: 127422)
+
+
+Started GET "/fonts/roboto-v19-latin-regular.woff2" for ::1 at 2023-11-03 13:13:20 -0400
+Started GET "/fonts/roboto-v19-latin-700.woff2" for ::1 at 2023-11-03 13:13:20 -0400
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-regular.woff2"):
+  
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-700.woff2"):
+  
+Started GET "/fonts/roboto-v19-latin-regular.woff" for ::1 at 2023-11-03 13:13:21 -0400
+Started GET "/fonts/roboto-v19-latin-700.woff" for ::1 at 2023-11-03 13:13:21 -0400
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-regular.woff"):
+  
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-700.woff"):
+  
+Started GET "/users/new" for ::1 at 2023-11-03 13:14:24 -0400
+Processing by HelloController#index as HTML
+  Rendering layout ApplicationLayout
+  Rendering Hello::IndexView within application_layout
+  Rendered Hello::IndexView within application_layout (Duration: 0.4ms | Allocations: 235)
+  Rendered layout ApplicationLayout (Duration: 73.9ms | Allocations: 84213)
+Completed 200 OK in 91ms (Views: 76.8ms | ActiveRecord: 0.0ms | Allocations: 127312)
+
+
+Started GET "/fonts/roboto-v19-latin-700.woff2" for ::1 at 2023-11-03 13:14:24 -0400
+Started GET "/fonts/roboto-v19-latin-regular.woff2" for ::1 at 2023-11-03 13:14:24 -0400
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-700.woff2"):
+  
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-regular.woff2"):
+  
+Started GET "/fonts/roboto-v19-latin-regular.woff" for ::1 at 2023-11-03 13:14:24 -0400
+Started GET "/fonts/roboto-v19-latin-700.woff" for ::1 at 2023-11-03 13:14:24 -0400
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-regular.woff"):
+  
+  
+ActionController::RoutingError (No route matches [GET] "/fonts/roboto-v19-latin-700.woff"):
+  
