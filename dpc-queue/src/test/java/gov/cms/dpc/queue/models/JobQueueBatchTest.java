@@ -36,7 +36,7 @@ public class JobQueueBatchTest {
         final var job = createJobQueueBatch();
         assertTrue(job.isValid());
 
-        job.aggregatorID = aggregatorID;
+        job.setAggregatorIDForTesting(aggregatorID);
         assertFalse(job.isValid());
 
         job.status = JobStatus.RUNNING;
@@ -51,8 +51,42 @@ public class JobQueueBatchTest {
         job.status = JobStatus.COMPLETED;
         assertFalse(job.isValid());
 
-        job.aggregatorID = null;
+        job.setAggregatorIDForTesting(null);
         assertTrue(job.isValid());
+    }
+
+    @Test
+    void testIsV2() {
+        final var job = createJobQueueBatch();
+        assertFalse(job.isV2());
+
+        job.requestUrl = "/v2/";
+        System.out.println(job.requestUrl);
+        assertTrue(job.isV2());
+    }
+
+    @Test
+    void testCreateJobQueueBatch() {
+        final var job = createJobQueueBatch();
+        assertAll(
+                () -> assertEquals(jobID, job.getJobID()),
+                () -> assertEquals(orgID, job.getOrgID()),
+                () -> assertEquals(orgNPI, job.getOrgNPI()),
+                () -> assertEquals(providerNPI, job.getProviderNPI()),
+                () -> assertEquals(resourceTypes, job.getResourceTypes())
+        );
+    }
+
+    @Test
+    void testGetJobQueueBatchFile() {
+        final var job = createJobQueueBatch();
+        var file1 = job.addJobQueueFile(DPCResourceType.Patient, 0, 1);
+        assertEquals(file1, job.getJobQueueFile(DPCResourceType.Patient).get());
+
+        var file2 = job.addJobQueueFile(DPCResourceType.Patient, 0, 1);
+        assertEquals(file1, file2);
+        assertEquals(file1.getCount(), 2);
+        assertEquals(file1, job.getJobQueueFileLatest(DPCResourceType.Patient).get());
     }
 
     @Test
@@ -278,14 +312,14 @@ public class JobQueueBatchTest {
     @Test
     void testVerifyAggregatorID_Match() {
         final var job = createJobQueueBatch();
-        job.aggregatorID = aggregatorID;
+        job.setAggregatorIDForTesting(aggregatorID);
         job.verifyAggregatorID(aggregatorID);
     }
 
     @Test
     void testVerifyAggregatorID_InvalidMatch() {
         final var job = createJobQueueBatch();
-        job.aggregatorID = UUID.randomUUID();
+        job.setAggregatorIDForTesting(UUID.randomUUID());
 
         try {
             job.verifyAggregatorID(aggregatorID);
