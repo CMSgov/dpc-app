@@ -15,8 +15,6 @@ import io.dropwizard.migrations.MigrationsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import liquibase.exception.DatabaseException;
-import org.knowm.dropwizard.sundial.SundialBundle;
-import org.knowm.dropwizard.sundial.SundialConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.vyarus.dropwizard.guice.GuiceBundle;
@@ -63,12 +61,6 @@ public class DPCConsentService extends Application<DPCConsentConfiguration> {
                 return "consent.migrations.xml";
             }
         });
-        // bootstrap.addBundle(new SundialBundle<>() {
-        //     @Override
-        //     public SundialConfiguration getSundialConfiguration(DPCConsentConfiguration dpcConsentConfiguration) {
-        //         return dpcConsentConfiguration.getSundial();
-        //     }
-        // });
         bootstrap.addCommand(new SeedCommand(bootstrap.getApplication()));
         bootstrap.addCommand(new ConsentCommands());
     }
