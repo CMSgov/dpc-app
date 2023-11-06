@@ -63,12 +63,12 @@ public class DPCConsentService extends Application<DPCConsentConfiguration> {
                 return "consent.migrations.xml";
             }
         });
-        bootstrap.addBundle(new SundialBundle<>() {
-            @Override
-            public SundialConfiguration getSundialConfiguration(DPCConsentConfiguration dpcConsentConfiguration) {
-                return dpcConsentConfiguration.getSundial();
-            }
-        });
+        // bootstrap.addBundle(new SundialBundle<>() {
+        //     @Override
+        //     public SundialConfiguration getSundialConfiguration(DPCConsentConfiguration dpcConsentConfiguration) {
+        //         return dpcConsentConfiguration.getSundial();
+        //     }
+        // });
         bootstrap.addCommand(new SeedCommand(bootstrap.getApplication()));
         bootstrap.addCommand(new ConsentCommands());
     }
