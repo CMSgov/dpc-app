@@ -178,6 +178,8 @@ public class JobQueueBatch implements Serializable {
     @Column(name = "is_bulk")
     private boolean isBulk;
 
+    public JobQueueBatch() {
+    }
 
     public JobQueueBatch(UUID jobID,
                          UUID orgID,
