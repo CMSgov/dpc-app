@@ -31,6 +31,14 @@ public class JobQueueBatchTest {
     private static final String providerNPI = NPIUtil.generateNPI();
     private static final List<String> patientList = List.of("1", "2", "3");
 
+
+    @Test
+    void testIsValidResourceType() {
+        assertTrue(JobQueueBatch.isValidResourceType(DPCResourceType.Patient));
+        assertFalse(JobQueueBatch.isValidResourceType(DPCResourceType.Practitioner));
+    }
+
+
     @Test
     void testIsValid() {
         final var job = createJobQueueBatch();
@@ -61,20 +69,40 @@ public class JobQueueBatchTest {
         assertFalse(job.isV2());
 
         job.requestUrl = "/v2/";
-        System.out.println(job.requestUrl);
         assertTrue(job.isV2());
     }
 
     @Test
     void testCreateJobQueueBatch() {
         final var job = createJobQueueBatch();
-        assertAll(
-                () -> assertEquals(jobID, job.getJobID()),
-                () -> assertEquals(orgID, job.getOrgID()),
-                () -> assertEquals(orgNPI, job.getOrgNPI()),
-                () -> assertEquals(providerNPI, job.getProviderNPI()),
-                () -> assertEquals(resourceTypes, job.getResourceTypes())
-        );
+        job.setAggregatorIDForTesting(aggregatorID);
+        job.setCompleteTime(OffsetDateTime.now(ZoneOffset.UTC));
+        job.setPriority(1000);
+
+        final var expected = "JobQueueBatch" +
+                             "{batchID=" + job.getBatchID() +
+                             ", jobID=" + job.getJobID() +
+                             ", orgID=" + job.getOrgID() +
+                             ", orgNPI='" + job.getOrgNPI() + '\'' +
+                             ", providerID='" + job.getProviderID() + '\'' +
+                             ", providerNPI='" + job.getProviderNPI() + '\'' +
+                             ", status=" + job.getStatus() +
+                             ", priority=" + job.getPriority() +
+                             ", patients=" + job.getPatients() +
+                             ", patientIndex=" + (job.getPatientIndex().isPresent() ? job.getPatientIndex() : null) +
+                             ", resourceTypes=" + job.getResourceTypes() +
+                             ", since=" + (job.getSince().isPresent() ? job.getSince() : null) +
+                             ", transactionTime=" + job.getTransactionTime() +
+                             ", aggregatorID=" + job.getAggregatorID().get() +
+                             ", updateTime=" + (job.getUpdateTime().isPresent() ? job.getUpdateTime() : null) +
+                             ", submitTime=" + job.getSubmitTime().get() +
+                             ", startTime=" + (job.getStartTime().isPresent() ? job.getStartTime() : null) +
+                             ", completeTime=" + job.getCompleteTime().get() +
+                             ", requestUrl='" + job.getRequestUrl() + '\'' +
+                             ", requestingIP='" + job.getRequestingIP() + '\'' +
+                             ", isBulk=" + job.isBulk() +
+                             '}';
+        assertEquals(expected, job.toString());
     }
 
     @Test
@@ -135,6 +163,7 @@ public class JobQueueBatchTest {
         final Optional<String> done = job.fetchNextPatient(aggregatorID);
         assertTrue(done.isEmpty());
         assertEquals(2, job.getPatientIndex().get());
+        assertEquals(3, job.getPatientsProcessed());
 
         Mockito.verify(job, Mockito.times(job.getPatients().size() + 1)).verifyAggregatorID(aggregatorID);
     }
@@ -188,6 +217,7 @@ public class JobQueueBatchTest {
         assertFalse(job.getAggregatorID().isPresent());
         assertNotNull(job.getCompleteTime());
         assertNull(job.patientIndex);
+        assertEquals(3, job.getPatientsProcessed());
 
         Mockito.verify(job).verifyAggregatorID(aggregatorID);
     }
@@ -205,6 +235,7 @@ public class JobQueueBatchTest {
         assertFalse(job.getAggregatorID().isPresent());
         assertNotNull(job.getCompleteTime());
         assertNull(job.patientIndex);
+        assertEquals(0, job.getPatientsProcessed());
 
         Mockito.verify(job).verifyAggregatorID(aggregatorID);
     }
@@ -249,6 +280,7 @@ public class JobQueueBatchTest {
         assertNotNull(job.getCompleteTime());
         assertEquals(2, job.patientIndex);
         assertTrue(job.getJobQueueBatchFiles().isEmpty());
+        assertEquals(3, job.getPatientsProcessed());
 
         Mockito.verify(job, Mockito.never()).verifyAggregatorID(aggregatorID);
     }
@@ -284,6 +316,7 @@ public class JobQueueBatchTest {
         assertNull(job.completeTime);
         assertNull(job.aggregatorID);
         assertTrue(job.getJobQueueBatchFiles().isEmpty());
+        assertEquals(0, job.getPatientsProcessed());
     }
 
     @Test
@@ -301,6 +334,7 @@ public class JobQueueBatchTest {
         assertNull(job.completeTime);
         assertNull(job.aggregatorID);
         assertTrue(job.getJobQueueBatchFiles().isEmpty());
+        assertEquals(0, job.getPatientsProcessed());
     }
 
     @Test
