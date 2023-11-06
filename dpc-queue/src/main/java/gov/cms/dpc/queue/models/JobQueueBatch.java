@@ -178,8 +178,6 @@ public class JobQueueBatch implements Serializable {
     @Column(name = "is_bulk")
     private boolean isBulk;
 
-    public JobQueueBatch() {
-    }
 
     public JobQueueBatch(UUID jobID,
                          UUID orgID,
@@ -245,6 +243,10 @@ public class JobQueueBatch implements Serializable {
         return batchID;
     }
 
+    public void setBatchIDForTesting(UUID batchID) {
+        this.batchID = batchID;
+    }
+
     public UUID getJobID() {
         return jobID;
     }
@@ -293,6 +295,10 @@ public class JobQueueBatch implements Serializable {
         return transactionTime;
     }
 
+    public void setTransactionTimeForTesting(OffsetDateTime transactionTime) {
+        this.transactionTime = transactionTime;
+    }
+
     public Optional<UUID> getAggregatorID() {
         return Optional.ofNullable(aggregatorID);
     }
@@ -307,6 +313,10 @@ public class JobQueueBatch implements Serializable {
 
     public Optional<OffsetDateTime> getSubmitTime() {
         return Optional.ofNullable(submitTime);
+    }
+
+    public void setSubmitTimeForTesting(OffsetDateTime submitTime) {
+        this.submitTime = submitTime;
     }
 
     public Optional<OffsetDateTime> getStartTime() {

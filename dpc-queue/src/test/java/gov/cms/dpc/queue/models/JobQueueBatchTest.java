@@ -79,8 +79,8 @@ public class JobQueueBatchTest {
         job.setCompleteTime(OffsetDateTime.now(ZoneOffset.UTC));
         job.setPriority(1000);
 
-        final var expected = "JobQueueBatch" +
-                             "{batchID=" + job.getBatchID() +
+        final var expected = "JobQueueBatch{" +
+                             "batchID=" + job.getBatchID() +
                              ", jobID=" + job.getJobID() +
                              ", orgID=" + job.getOrgID() +
                              ", orgNPI='" + job.getOrgNPI() + '\'' +
@@ -394,6 +394,17 @@ public class JobQueueBatchTest {
 
     JobQueueBatch createJobQueueBatch() {
         return new JobQueueBatch(jobID, orgID, orgNPI, providerNPI, patientList, resourceTypes, null, OffsetDateTime.now(ZoneOffset.UTC), null, null,true);
+    }
+
+
+    @Test
+    void testEquals() {
+        var job1 = createJobQueueBatch();
+        var job2 = createJobQueueBatch();
+        job2.setBatchIDForTesting(job1.getBatchID());
+        job2.setTransactionTimeForTesting(job1.getTransactionTime());
+        job2.setSubmitTimeForTesting(job1.getSubmitTime().get());
+        assertEquals(job1, job2);
     }
 
 }
