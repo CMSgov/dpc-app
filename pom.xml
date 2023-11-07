@@ -710,6 +710,8 @@
                         <exclude>org/hl7/fhir/r5/formats/*</exclude>
                         <!-- We can exclude testing files, because they're for testing-->
                         <exclude>gov/cms/dpc/testing/**/*</exclude>
+                        <!-- Exclude test utilities for BlueButton-->
+                        <exclude>gov/cms/dpc/bluebutton/**/MockBlueButton*.class</exclude>
                     </excludes>
                 </configuration>
                 <executions>
