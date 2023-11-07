@@ -44,7 +44,7 @@ public class JobQueueBatchTest {
         final var job = createJobQueueBatch();
         assertTrue(job.isValid());
 
-        job.setAggregatorIDForTesting(aggregatorID);
+        job.aggregatorID = aggregatorID;
         assertFalse(job.isValid());
 
         job.status = JobStatus.RUNNING;
@@ -59,7 +59,7 @@ public class JobQueueBatchTest {
         job.status = JobStatus.COMPLETED;
         assertFalse(job.isValid());
 
-        job.setAggregatorIDForTesting(null);
+        job.aggregatorID = null;
         assertTrue(job.isValid());
     }
 
@@ -75,9 +75,13 @@ public class JobQueueBatchTest {
     @Test
     void testCreateJobQueueBatch() {
         final var job = createJobQueueBatch();
-        job.setAggregatorIDForTesting(aggregatorID);
-        job.setCompleteTime(OffsetDateTime.now(ZoneOffset.UTC));
+        job.aggregatorID = aggregatorID;
+        var completeTime = OffsetDateTime.now(ZoneOffset.UTC);
+        job.setCompleteTime(completeTime);
         job.setPriority(1000);
+        assertEquals(aggregatorID, job.getAggregatorID().get());
+        assertEquals(completeTime, job.getCompleteTime().get());
+        assertEquals(1000, job.getPriority());
 
         final var expected = "JobQueueBatch{" +
                              "batchID=" + job.getBatchID() +
@@ -87,17 +91,17 @@ public class JobQueueBatchTest {
                              ", providerID='" + job.getProviderID() + '\'' +
                              ", providerNPI='" + job.getProviderNPI() + '\'' +
                              ", status=" + job.getStatus() +
-                             ", priority=" + job.getPriority() +
+                             ", priority=" + 1000 +
                              ", patients=" + job.getPatients() +
                              ", patientIndex=" + (job.getPatientIndex().isPresent() ? job.getPatientIndex() : null) +
                              ", resourceTypes=" + job.getResourceTypes() +
                              ", since=" + (job.getSince().isPresent() ? job.getSince() : null) +
                              ", transactionTime=" + job.getTransactionTime() +
-                             ", aggregatorID=" + job.getAggregatorID().get() +
+                             ", aggregatorID=" + aggregatorID +
                              ", updateTime=" + (job.getUpdateTime().isPresent() ? job.getUpdateTime() : null) +
                              ", submitTime=" + job.getSubmitTime().get() +
                              ", startTime=" + (job.getStartTime().isPresent() ? job.getStartTime() : null) +
-                             ", completeTime=" + job.getCompleteTime().get() +
+                             ", completeTime=" + completeTime +
                              ", requestUrl='" + job.getRequestUrl() + '\'' +
                              ", requestingIP='" + job.getRequestingIP() + '\'' +
                              ", isBulk=" + job.isBulk() +
@@ -346,14 +350,14 @@ public class JobQueueBatchTest {
     @Test
     void testVerifyAggregatorID_Match() {
         final var job = createJobQueueBatch();
-        job.setAggregatorIDForTesting(aggregatorID);
+        job.aggregatorID = aggregatorID;
         job.verifyAggregatorID(aggregatorID);
     }
 
     @Test
     void testVerifyAggregatorID_InvalidMatch() {
         final var job = createJobQueueBatch();
-        job.setAggregatorIDForTesting(UUID.randomUUID());
+        job.aggregatorID = UUID.randomUUID();
 
         try {
             job.verifyAggregatorID(aggregatorID);
@@ -403,7 +407,7 @@ public class JobQueueBatchTest {
         var job2 = createJobQueueBatch();
         job2.setBatchIDForTesting(job1.getBatchID());
         job2.setTransactionTimeForTesting(job1.getTransactionTime());
-        job2.setSubmitTimeForTesting(job1.getSubmitTime().get());
+        job2.submitTime = job1.getSubmitTime().get();
         assertEquals(job1, job2);
     }
 

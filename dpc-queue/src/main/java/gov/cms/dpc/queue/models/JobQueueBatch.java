@@ -305,20 +305,12 @@ public class JobQueueBatch implements Serializable {
         return Optional.ofNullable(aggregatorID);
     }
 
-    public void setAggregatorIDForTesting(UUID aggregatorID) {
-        this.aggregatorID = aggregatorID;
-    }
-
     public Optional<OffsetDateTime> getUpdateTime() {
         return Optional.ofNullable(updateTime);
     }
 
     public Optional<OffsetDateTime> getSubmitTime() {
         return Optional.ofNullable(submitTime);
-    }
-
-    public void setSubmitTimeForTesting(OffsetDateTime submitTime) {
-        this.submitTime = submitTime;
     }
 
     public Optional<OffsetDateTime> getStartTime() {
