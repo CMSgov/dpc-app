@@ -15,5 +15,4 @@ public final class Constants {
         public static final String APPLICATION_NAME_HEADER = "BlueButton-Application";
         public static final String APPLICATION_NAME_DESC = "DPC";
     }
-
 }
