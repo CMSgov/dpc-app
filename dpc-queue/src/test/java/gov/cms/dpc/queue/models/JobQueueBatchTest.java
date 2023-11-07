@@ -75,7 +75,7 @@ public class JobQueueBatchTest {
     @Test
     void testCreateJobQueueBatch() {
         final var job = createJobQueueBatch();
-        job.aggregatorID = aggregatorID;
+        job.setAggregatorIDForTesting(aggregatorID);
         var completeTime = OffsetDateTime.now(ZoneOffset.UTC);
         job.setCompleteTime(completeTime);
         job.setPriority(1000);
