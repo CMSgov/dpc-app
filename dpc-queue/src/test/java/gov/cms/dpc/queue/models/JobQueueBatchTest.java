@@ -8,7 +8,6 @@ import gov.cms.dpc.testing.BufferedLoggerHandler;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
 import java.time.OffsetDateTime;
@@ -404,12 +403,12 @@ public class JobQueueBatchTest {
 
     @Test
     void testEquals() {
-        var timestamp = OffsetDateTime.now(ZoneOffset.UTC);
-        MockedStatic<OffsetDateTime> mockedDateTime = Mockito.mockStatic(OffsetDateTime.class);
-        mockedDateTime.when(OffsetDateTime::now).thenReturn(timestamp);
-
         Mockito.mockStatic(UUID.class);
         Mockito.when(UUID.randomUUID()).thenReturn(jobID);
+
+        OffsetDateTime timestamp = OffsetDateTime.now(ZoneOffset.UTC);
+        Mockito.mockStatic(OffsetDateTime.class);
+        Mockito.when(OffsetDateTime.now(ZoneOffset.UTC)).thenReturn(timestamp);
 
         var job1 = createJobQueueBatch();
         var job2 = createJobQueueBatch();
