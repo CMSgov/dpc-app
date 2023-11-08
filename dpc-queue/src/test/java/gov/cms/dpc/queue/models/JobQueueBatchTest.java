@@ -404,16 +404,17 @@ public class JobQueueBatchTest {
 
     @Test
     void testEquals() {
-        MockedStatic<UUID> uuidMockedStatic = Mockito.mockStatic(UUID.class);
-        uuidMockedStatic.when(UUID::randomUUID).thenReturn(jobID);
-
         OffsetDateTime timestamp = OffsetDateTime.now(ZoneOffset.UTC);
-        MockedStatic<OffsetDateTime> dateTimeMockedStatic = Mockito.mockStatic(OffsetDateTime.class);
-        dateTimeMockedStatic.when(OffsetDateTime::now).thenReturn(timestamp);
 
-        var job1 = createJobQueueBatch();
-        var job2 = createJobQueueBatch();
-        assertEquals(job1, job2);
+        try (MockedStatic<UUID> uuidMockedStatic = Mockito.mockStatic(UUID.class)) {
+            uuidMockedStatic.when(UUID::randomUUID).thenReturn(jobID);
+
+            var job1 = new JobQueueBatch(jobID, orgID, orgNPI, providerNPI, patientList, resourceTypes, null, timestamp, null, null,true);
+            var job2 = new JobQueueBatch(jobID, orgID, orgNPI, providerNPI, patientList, resourceTypes, null, timestamp, null, null,true);
+            job1.submitTime = timestamp;
+            job2.submitTime = timestamp;
+            assertEquals(job1, job2);
+        }
     }
 
 }
