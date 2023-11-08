@@ -245,10 +245,6 @@ public class JobQueueBatch implements Serializable {
         return batchID;
     }
 
-    public void setBatchIDForTesting(UUID batchID) {
-        this.batchID = batchID;
-    }
-
     public UUID getJobID() {
         return jobID;
     }
@@ -295,10 +291,6 @@ public class JobQueueBatch implements Serializable {
 
     public OffsetDateTime getTransactionTime() {
         return transactionTime;
-    }
-
-    public void setTransactionTimeForTesting(OffsetDateTime transactionTime) {
-        this.transactionTime = transactionTime;
     }
 
     public Optional<UUID> getAggregatorID() {
