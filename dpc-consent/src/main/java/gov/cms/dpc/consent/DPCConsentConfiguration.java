@@ -6,7 +6,6 @@ import gov.cms.dpc.common.hibernate.consent.IDPCConsentDatabase;
 import gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration;
 import gov.cms.dpc.fhir.configuration.IDPCFHIRConfiguration;
 import io.dropwizard.db.DataSourceFactory;
-import org.knowm.dropwizard.sundial.SundialConfiguration;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
@@ -18,11 +17,6 @@ public class DPCConsentConfiguration extends TypesafeConfiguration implements ID
     @NotNull
     @JsonProperty("consentdb")
     private DataSourceFactory consentDatabase = new DataSourceFactory();
-
-    @Valid
-    @NotNull
-    @JsonProperty("sundial")
-    private SundialConfiguration sundial = new SundialConfiguration();
 
     @NotEmpty
     private String suppressionFileDir;
@@ -38,10 +32,6 @@ public class DPCConsentConfiguration extends TypesafeConfiguration implements ID
     @Override
     public DataSourceFactory getConsentDatabase() {
         return consentDatabase;
-    }
-
-    public SundialConfiguration getSundial() {
-        return sundial;
     }
 
     public String getSuppressionFileDir() { return suppressionFileDir; }
