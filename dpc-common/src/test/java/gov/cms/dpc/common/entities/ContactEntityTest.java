@@ -1,16 +1,16 @@
 package gov.cms.dpc.common.entities;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.hl7.fhir.dstu3.model.Organization;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.UUID;
 import java.util.ArrayList;
-public class ContactEntityTest {
 
+public class ContactEntityTest {
 
 	@Test
 	public void testGettersAndSetters() {
@@ -50,7 +50,7 @@ public class ContactEntityTest {
 		Organization.OrganizationContactComponent fhirContact = contact.toFHIR();
 
 		assertNotNull(fhirContact);
-		
+
 		assertEquals(name.getFamily(), fhirContact.getName().getFamily());
 		assertEquals(telecom.size(), fhirContact.getTelecom().size());
 		assertEquals(address.getType(), fhirContact.getAddress().getType());

@@ -1,8 +1,8 @@
 package gov.cms.dpc.common.entities;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.UUID;
 
@@ -28,7 +28,7 @@ public class ProviderEntityTest {
 		ProviderEntity provider = new ProviderEntity();
 		PatientEntity p1 = new PatientEntity();
 		PatientEntity p2 = new PatientEntity();
-		provider.setAttributedPatients(List.of(p1,p2));
+		provider.setAttributedPatients(List.of(p1, p2));
 
 		assertEquals(2, provider.getAttributedPatients().size());
 		assertEquals(p1, provider.getAttributedPatients().get(0));
@@ -40,7 +40,7 @@ public class ProviderEntityTest {
 		ProviderEntity provider = new ProviderEntity();
 		RosterEntity r1 = new RosterEntity();
 		RosterEntity r2 = new RosterEntity();
-		provider.setAttributionRosters(List.of(r1,r2));
+		provider.setAttributionRosters(List.of(r1, r2));
 
 		assertEquals(2, provider.getAttributionRosters().size());
 		assertEquals(r1, provider.getAttributionRosters().get(0));
@@ -71,7 +71,7 @@ public class ProviderEntityTest {
 		p1.setProviderNPI("1234567890");
 
 		ProviderEntity p2 = new ProviderEntity();
-		assertNotEquals(p2.hashCode(),p1.hashCode());
+		assertNotEquals(p2.hashCode(), p1.hashCode());
 		p2.setID(id);
 		p2.setProviderNPI("1234567890");
 

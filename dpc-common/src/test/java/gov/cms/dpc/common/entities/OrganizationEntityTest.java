@@ -1,7 +1,7 @@
 
 package gov.cms.dpc.common.entities;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import org.hl7.fhir.dstu3.model.Identifier;
 
@@ -10,14 +10,14 @@ import java.util.List;
 import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-
 public class OrganizationEntityTest {
 
 	@Test
 	public void testGettersAndSetters() {
 		OrganizationEntity org = new OrganizationEntity();
 		UUID id = UUID.randomUUID();
-		OrganizationEntity.OrganizationID organizationID = new OrganizationEntity.OrganizationID(DPCIdentifierSystem.NPPES,"1234");
+		OrganizationEntity.OrganizationID organizationID = new OrganizationEntity.OrganizationID(
+				DPCIdentifierSystem.NPPES, "1234");
 		String orgName = "CMS";
 		AddressEntity orgAddress = new AddressEntity();
 		List<ContactEntity> contacts = new ArrayList<>();
@@ -45,7 +45,7 @@ public class OrganizationEntityTest {
 		assertEquals(providerEntities, org.getProviders());
 		assertEquals(patientEntities, org.getPatients());
 		assertEquals(rosters, org.getRosters());
-	
+
 	}
 
 	@Test
@@ -73,7 +73,8 @@ public class OrganizationEntityTest {
 
 	@Test
 	public void testOrganizationIDToFHIR() {
-		OrganizationEntity.OrganizationID orgId = new OrganizationEntity.OrganizationID(DPCIdentifierSystem.NPPES,"1234");
+		OrganizationEntity.OrganizationID orgId = new OrganizationEntity.OrganizationID(DPCIdentifierSystem.NPPES,
+				"1234");
 		Identifier fhirID = orgId.toFHIR();
 
 		assertEquals(DPCIdentifierSystem.NPPES.getSystem(), fhirID.getSystem());

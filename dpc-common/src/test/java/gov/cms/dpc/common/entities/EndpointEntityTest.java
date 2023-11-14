@@ -1,13 +1,12 @@
 package gov.cms.dpc.common.entities;
 
-import static org.junit.Assert.assertEquals;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.Test;
 
 import org.hl7.fhir.dstu3.model.Endpoint;
 import java.util.UUID;
 
 public class EndpointEntityTest {
-
 
 	@Test
 	public void testGettersAndSetters() {
@@ -65,5 +64,4 @@ public class EndpointEntityTest {
 		assertEquals(code, connectionType.getCode());
 	}
 
-	
 }
