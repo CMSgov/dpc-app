@@ -1,30 +1,30 @@
 package gov.cms.dpc.common.entities;
 
-import static org.junit.Assert.assertEquals;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.Test;
 
 import org.hl7.fhir.dstu3.model.Address;
 
 public class AddressEntityTest {
 	private String addressCity = "Galveston";
-    private String addressCountry = "US";
-    private String addressDistrict = "Southern";
-    private String addressZip = "77550";
-    private String addressState = "TX";
-    private String addressLine1 = "416 21st St";
-    private String addressLine2 = "N/A";
+	private String addressCountry = "US";
+	private String addressDistrict = "Southern";
+	private String addressZip = "77550";
+	private String addressState = "TX";
+	private String addressLine1 = "416 21st St";
+	private String addressLine2 = "N/A";
 
 	@Test
 	public void testGettersAndSetters() {
-		//Create an object, and set / get the objects in the Entity.
+		// Create an object, and set / get the objects in the Entity.
 		AddressEntity address = new AddressEntity();
-        address.setCity(addressCity);
-        address.setCountry(addressCountry);
-        address.setDistrict(addressDistrict);
-        address.setPostalCode(addressZip);
-        address.setState(addressState);
-        address.setUse(Address.AddressUse.WORK);
-        address.setType(Address.AddressType.BOTH);
+		address.setCity(addressCity);
+		address.setCountry(addressCountry);
+		address.setDistrict(addressDistrict);
+		address.setPostalCode(addressZip);
+		address.setState(addressState);
+		address.setUse(Address.AddressUse.WORK);
+		address.setType(Address.AddressType.BOTH);
 		address.setLine1(addressLine1);
 		address.setLine2(addressLine2);
 
@@ -39,16 +39,16 @@ public class AddressEntityTest {
 	}
 
 	@Test
-	public void testToFHIR(){
+	public void testToFHIR() {
 		AddressEntity address = new AddressEntity();
 
-        address.setCity(addressCity);
-        address.setCountry(addressCountry);
-        address.setDistrict(addressDistrict);
-        address.setPostalCode(addressZip);
-        address.setState(addressState);
-        address.setUse(Address.AddressUse.WORK);
-        address.setType(Address.AddressType.BOTH);
+		address.setCity(addressCity);
+		address.setCountry(addressCountry);
+		address.setDistrict(addressDistrict);
+		address.setPostalCode(addressZip);
+		address.setState(addressState);
+		address.setUse(Address.AddressUse.WORK);
+		address.setType(Address.AddressType.BOTH);
 		address.setLine1(addressLine1);
 		address.setLine2(addressLine2);
 
@@ -65,8 +65,6 @@ public class AddressEntityTest {
 		assertEquals(addressZip, address2.getPostalCode());
 		assertEquals(addressState, address2.getState());
 
-
 	}
-
 
 }
