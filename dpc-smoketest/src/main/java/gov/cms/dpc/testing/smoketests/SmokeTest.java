@@ -116,23 +116,14 @@ public class SmokeTest extends AbstractJavaSamplerClient {
             submitRosters(exportClient, providerBundle, patientReferences, smokeTestSampler);
             exportDataAndHandleResults(exportClient, providerBundle, clientToken, keyTuple, smokeTestSampler);
         } catch (IllegalStateException e) {
-            logger.error(e.getMessage());
+            logger.error("FAILURE: ", e);
         }
-        boolean success = true;
-        for (SampleResult sampleResult : smokeTestSampler.getSubResults()) {
-            if (!sampleResult.isSuccessful()) {
-                success = false;
-                logger.info("{} FAILED", sampleResult.getSampleLabel());
-            }
-        }
+        boolean success = Arrays.stream(smokeTestSampler.getSubResults()).allMatch(SampleResult::isSuccessful);
         smokeTestSampler.setSuccessful(success);
         if (smokeTestSampler.getEndTime() == 0L) {
             smokeTestSampler.sampleEnd();
         }
         logger.info("Test completed");
-        if (!success) {
-            logger.info("TEST FAILED");
-        }
         return smokeTestSampler;
     }
 
@@ -259,9 +250,6 @@ public class SmokeTest extends AbstractJavaSamplerClient {
         sampleResult.sampleStart();
 
         try {
-            if (organizationID.equals("69c0d4d4-9c07-4fa8-9053-e10fb1608b48")) {
-                throw new RuntimeException("wtvr");
-            }
             String npi = NPIUtil.generateNPI();
             String clientToken =  FHIRHelpers.registerOrganization(adminClient, fhirContext.newJsonParser(), organizationID, npi, apiAdminUrl);
             sampleResult.setSuccessful(true);
