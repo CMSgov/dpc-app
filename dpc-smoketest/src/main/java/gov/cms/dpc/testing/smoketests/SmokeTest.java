@@ -299,7 +299,7 @@ public class SmokeTest extends AbstractJavaSamplerClient {
         } catch (ResourceNotFoundException e) {
             return null;
         } catch (InternalErrorException exception) {
-            logger.error(exception.getMessage());
+            logger.error("500 error getting organization {}, but it is probably just a 404", orgId);
             return null;
         }
     }
