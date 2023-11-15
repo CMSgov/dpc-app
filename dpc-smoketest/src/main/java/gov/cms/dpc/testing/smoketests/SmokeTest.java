@@ -2,6 +2,7 @@ package gov.cms.dpc.testing.smoketests;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.github.nitram509.jmacaroons.MacaroonVersion;
 import com.github.nitram509.jmacaroons.MacaroonsBuilder;
@@ -27,6 +28,7 @@ import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
 import java.security.Security;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -84,7 +86,9 @@ public class SmokeTest extends AbstractJavaSamplerClient {
         final IGenericClient client = APIAuthHelpers.buildAdminClient(fhirContext, apiHost, goldenMacaroon, true, true);
         try {
             logger.info("Post Test Cleanup. Deleting organization: {} host: {}", organizationID, apiHost);
-            deleteOrg(organizationID,client);
+            deleteOrg(organizationID, client);
+        } catch (ResourceNotFoundException e) {
+            logger.info("Cannot not delete organization {} because does not exist", organizationID);
         } catch (Exception e) {
             logger.error("Cannot delete organization: {}", organizationID, e);
             System.exit(1);
@@ -102,19 +106,33 @@ public class SmokeTest extends AbstractJavaSamplerClient {
         smokeTestSampler.setSampleLabel("Smoke Test");
         smokeTestSampler.setSuccessful(false);
         smokeTestSampler.sampleStart();
+        try {
+            String clientToken = registerOrg(organizationID, smokeTestSampler);
+            Pair<UUID, PrivateKey> keyTuple = generateAndUploadKey(smokeTestSampler);
+            final IGenericClient exportClient = APIAuthHelpers.buildAuthenticatedClient(fhirContext, apiHost, clientToken, keyTuple.getLeft(), keyTuple.getRight(), true, true);
 
-        String clientToken = registerOrg(organizationID, smokeTestSampler);
-        Pair<UUID, PrivateKey> keyTuple = generateAndUploadKey();
-        final IGenericClient exportClient = APIAuthHelpers.buildAuthenticatedClient(fhirContext, apiHost, clientToken, keyTuple.getLeft(), keyTuple.getRight(), true, true);
-
-        Bundle providerBundle = submitPractitionerBundle(exportClient,smokeTestSampler);
-        Map<String, Reference> patientReferences = submitPatientBundle(exportClient,smokeTestSampler);
-        submitRosters(exportClient, providerBundle, patientReferences);
-        exportDataAndHandleResults(exportClient,providerBundle,clientToken,keyTuple);
-
-        smokeTestSampler.setSuccessful(true);
-        smokeTestSampler.sampleEnd();
+            Bundle providerBundle = submitPractitionerBundle(exportClient, smokeTestSampler);
+            Map<String, Reference> patientReferences = submitPatientBundle(exportClient, smokeTestSampler);
+            submitRosters(exportClient, providerBundle, patientReferences, smokeTestSampler);
+            exportDataAndHandleResults(exportClient, providerBundle, clientToken, keyTuple, smokeTestSampler);
+        } catch (IllegalStateException e) {
+            logger.error(e.getMessage());
+        }
+        boolean success = true;
+        for (SampleResult sampleResult : smokeTestSampler.getSubResults()) {
+            if (!sampleResult.isSuccessful()) {
+                success = false;
+                logger.info("{} FAILED", sampleResult.getSampleLabel());
+            }
+        }
+        smokeTestSampler.setSuccessful(success);
+        if (smokeTestSampler.getEndTime() == 0L) {
+            smokeTestSampler.sampleEnd();
+        }
         logger.info("Test completed");
+        if (!success) {
+            logger.info("TEST FAILED");
+        }
         return smokeTestSampler;
     }
 
@@ -130,7 +148,12 @@ public class SmokeTest extends AbstractJavaSamplerClient {
         }
         return orgIds.get(currThreadNum);
     }
-    private void exportDataAndHandleResults(IGenericClient exportClient, Bundle providerBundle, String clientToken, Pair<UUID,PrivateKey> keyTuple){
+    private void exportDataAndHandleResults(IGenericClient exportClient, Bundle providerBundle, String clientToken, Pair<UUID,PrivateKey> keyTuple, SampleResult parentSampler){
+        logger.debug("Exporting data");
+        final SampleResult exportSample = new SampleResult();
+        exportSample.setSampleLabel("Exporting Data");
+        exportSample.setSuccessful(false);
+        exportSample.sampleStart();
         // Create a custom http client to use for monitoring the non-FHIR export request
         try (CloseableHttpClient httpClient = APIAuthHelpers.createCustomHttpClient()
                 .trusting()
@@ -146,17 +169,30 @@ public class SmokeTest extends AbstractJavaSamplerClient {
                     .collect(Collectors.toList());
 
             ClientUtils.handleExportJob(exportClient, providerNPIs, httpClient, apiHost);
+            exportSample.setSuccessful(true);
         } catch (IOException e) {
             throw new IllegalStateException("Somehow, could not monitor export response", e);
+        } finally {
+            exportSample.sampleEnd();
+            parentSampler.addSubResult(exportSample);
         }
     }
 
-    private void submitRosters(IGenericClient client,Bundle providerBundle, Map<String, Reference> patientReferences){
+    private void submitRosters(IGenericClient client,Bundle providerBundle, Map<String, Reference> patientReferences, SampleResult parentSampler){
         logger.debug("Uploading roster");
+        final SampleResult rosterSample = new SampleResult();
+        rosterSample.setSampleLabel("Uploading Roster");
+        rosterSample.setSuccessful(false);
+        rosterSample.sampleStart();
+
         try {
             ClientUtils.createAndUploadRosters(seedFileLoc, providerBundle, client, UUID.fromString(organizationID), patientReferences);
+            rosterSample.setSuccessful(true);
         } catch (Exception e) {
             throw new IllegalStateException("Cannot upload roster", e);
+        } finally {
+            rosterSample.sampleEnd();
+            parentSampler.addSubResult(rosterSample);
         }
     }
 
@@ -198,11 +234,20 @@ public class SmokeTest extends AbstractJavaSamplerClient {
         }
     }
 
-    private Pair<UUID,PrivateKey> generateAndUploadKey(){
+    private Pair<UUID,PrivateKey> generateAndUploadKey(SampleResult parentSampleResult){
+        final SampleResult sampleResult = new SampleResult();
+        sampleResult.setSampleLabel("Upload Key");
+        sampleResult.setSuccessful(false);
+        sampleResult.sampleStart();
         try {
-            return APIAuthHelpers.generateAndUploadKey(KEY_ID, organizationID, goldenMacaroon, apiHost);
+            Pair<UUID,PrivateKey> pair = APIAuthHelpers.generateAndUploadKey(KEY_ID, organizationID, goldenMacaroon, apiHost);
+            sampleResult.setSuccessful(true);
+            return pair;
         } catch (IOException | URISyntaxException | GeneralSecurityException e) {
             throw new IllegalStateException("Failed uploading public key", e);
+        } finally {
+            sampleResult.sampleEnd();
+            parentSampleResult.addSubResult(sampleResult);
         }
     }
 
@@ -214,6 +259,9 @@ public class SmokeTest extends AbstractJavaSamplerClient {
         sampleResult.sampleStart();
 
         try {
+            if (organizationID.equals("69c0d4d4-9c07-4fa8-9053-e10fb1608b48")) {
+                throw new RuntimeException("wtvr");
+            }
             String npi = NPIUtil.generateNPI();
             String clientToken =  FHIRHelpers.registerOrganization(adminClient, fhirContext.newJsonParser(), organizationID, npi, apiAdminUrl);
             sampleResult.setSuccessful(true);
@@ -262,6 +310,13 @@ public class SmokeTest extends AbstractJavaSamplerClient {
                     .execute();
         } catch (ResourceNotFoundException e) {
             return null;
+        } catch (InternalErrorException exception) {
+            if (exception.getMessage().equals("HTTP 500 Internal Server Error")) {
+                logger.error("Could not retrieve organization with id {} due to 500 error", orgId, exception);
+                throw new IllegalStateException("Cannot verify org does not exist");
+            } else {
+                throw exception;
+            }
         }
     }
 
