@@ -272,7 +272,7 @@ public class SmokeTest extends AbstractJavaSamplerClient {
                 logger.info("Organization with id {} was found. Deleting organization.",organizationID);
                 deleteOrg(organizationID,adminClient);
             }catch (Exception e){
-                logger.error("Could not delete org {} while preparing for test.",organizationID, adminClient);
+                logger.error("Could not delete org {} while preparing for test.",organizationID);
                 System.exit(1);
             }
         }else{
@@ -299,12 +299,8 @@ public class SmokeTest extends AbstractJavaSamplerClient {
         } catch (ResourceNotFoundException e) {
             return null;
         } catch (InternalErrorException exception) {
-            if (exception.getMessage().equals("HTTP 500 Internal Server Error")) {
-                logger.error("Could not retrieve organization with id {} due to 500 error", orgId, exception);
-                throw new IllegalStateException("Cannot verify org does not exist");
-            } else {
-                throw exception;
-            }
+            logger.error(exception.getMessage());
+            return null;
         }
     }
 
