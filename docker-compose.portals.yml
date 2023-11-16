@@ -96,6 +96,7 @@ services:
       dockerfile: dpc-portal/Dockerfile
     image: dpc-web-portal:latest
     volumes:
+      - "./dpc-portal/:/dpc-portal/"
       - "./dpc-portal/coverage:/dpc-portal/coverage"
       - ./tmp/letter_opener/portal:/dpc-portal/tmp/letter_opener
     environment:

@@ -83,6 +83,9 @@ group :development do
   gem 'spring-watcher-listen', '~> 2.0.0'
 
   gem 'letter_opener'
+
+  # Live-reload to avoid docker rebuilds between changes
+  gem 'rails_live_reload'
 end
 
 group :test do
