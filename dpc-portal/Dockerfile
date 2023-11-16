@@ -16,23 +16,18 @@ WORKDIR /dpc-portal
 # Copy over the files needed to fetch dependencies
 COPY /engines/api_client/ /dpc-portal/vendor/api_client/
 COPY /dpc-portal/Gemfile /dpc-portal/Gemfile.lock /dpc-portal/
-COPY /dpc-portal/package.json /dpc-portal/
-COPY /dpc-portal/package-lock.json /dpc-portal/
 
 # Install the website dependencies
 RUN gem install bundler --no-document && \
     gem uninstall nokogiri -I && \
     bundle config set force_ruby_platform true && \
-    bundle install && \
-    npm install
+    bundle install
 
 # Run bundler audit
 RUN bundle exec bundle audit update && bundle exec bundle audit check --ignore CVE-2015-9284
 
 # Copy the code, test the app, and build the assets pipeline
 COPY /dpc-portal /dpc-portal
-
-RUN rm -rf /bin/yarn
 
 RUN RAILS_ENV=production SECRET_KEY_BASE=dummy bundle exec rake assets:precompile --trace
 
