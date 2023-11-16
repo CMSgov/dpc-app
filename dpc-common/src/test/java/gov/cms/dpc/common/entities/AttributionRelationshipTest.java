@@ -1,8 +1,8 @@
 package gov.cms.dpc.common.entities;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import org.junit.jupiter.api.Test;
 
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -16,7 +16,7 @@ public class AttributionRelationshipTest {
 		AttributionRelationship r1 = new AttributionRelationship();
 		AttributionRelationship r2 = new AttributionRelationship();
 
-		//Objects should be equal at this point.
+		// Objects should be equal at this point.
 		assertEquals(r1, r2);
 		assertEquals(r1.hashCode(), r2.hashCode());
 
@@ -38,9 +38,8 @@ public class AttributionRelationshipTest {
 		r2.setPeriodBegin(periodBegin);
 		r2.setPeriodEnd(periodEnd);
 
-		assertEquals(r1,r2);
+		assertEquals(r1, r2);
 		assertEquals(r1.hashCode(), r2.hashCode());
-
 
 	}
 
@@ -53,14 +52,15 @@ public class AttributionRelationshipTest {
 		PatientEntity patient = new PatientEntity();
 		relationship.setPatient(patient);
 		relationship.setInactive(true);
-		
+
 		OffsetDateTime periodBegin = OffsetDateTime.now();
 		OffsetDateTime periodEnd = periodBegin.plusDays(30);
 
 		relationship.setPeriodBegin(periodBegin);
 		relationship.setPeriodEnd(periodEnd);
 
-		String expected = "AttributionRelationship{attributionID=1, roster=" + roster.toString() + ", patient=" + patient.toString() + ", inactive=true, begin=" + periodBegin + ", end="+ periodEnd + "}";
+		String expected = "AttributionRelationship{attributionID=1, roster=" + roster.toString() + ", patient="
+				+ patient.toString() + ", inactive=true, begin=" + periodBegin + ", end=" + periodEnd + "}";
 		assertEquals(expected, relationship.toString());
 	}
 

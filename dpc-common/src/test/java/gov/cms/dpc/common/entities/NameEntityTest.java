@@ -1,8 +1,8 @@
 package gov.cms.dpc.common.entities;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import org.junit.jupiter.api.Test;
 
 import org.hl7.fhir.dstu3.model.HumanName;
 
@@ -31,7 +31,7 @@ public class NameEntityTest {
 	}
 
 	@Test
-	public void testToFHIR(){
+	public void testToFHIR() {
 		NameEntity name = new NameEntity();
 		HumanName.NameUse use = HumanName.NameUse.OFFICIAL;
 		String given = "Australian";

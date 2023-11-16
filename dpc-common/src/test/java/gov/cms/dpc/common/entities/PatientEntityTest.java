@@ -1,9 +1,9 @@
 package gov.cms.dpc.common.entities;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.Test;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -18,7 +18,7 @@ public class PatientEntityTest {
 		PatientEntity patient = new PatientEntity();
 		String beneficiaryId = "12345";
 		String mbiHash = "54321";
-		LocalDate dob = LocalDate.of(1995,1,1);
+		LocalDate dob = LocalDate.of(1995, 1, 1);
 		AdministrativeGender gender = AdministrativeGender.MALE;
 		OrganizationEntity org = new OrganizationEntity();
 		List<AttributionRelationship> attributionRelationships = new ArrayList<>();
@@ -75,12 +75,12 @@ public class PatientEntityTest {
 
 	@Test
 	public void testLocalDateFunctions() {
-		LocalDate localDate = LocalDate.of(2023,10,15);
+		LocalDate localDate = LocalDate.of(2023, 10, 15);
 		Date utilityDate = PatientEntity.fromLocalDate(localDate);
 		LocalDate convertedDate = PatientEntity.toLocalDate(utilityDate);
 
 		assertNotNull(convertedDate);
 		assertNotNull(utilityDate);
-		assertEquals(localDate,convertedDate);
+		assertEquals(localDate, convertedDate);
 	}
 }
