@@ -1,7 +1,10 @@
 package gov.cms.dpc.api.resources.v1;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
-import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
@@ -25,7 +28,7 @@ import org.hl7.fhir.dstu3.model.*;
 
 
 @Api(value = "Admin", authorizations = @Authorization(value = "access_token"))
-@Path("/v1/admin")
+@Path("/v1/Admin")
 public class AdminResource {
     private final IGenericClient client;
 
@@ -45,12 +48,19 @@ public class AdminResource {
             authorizations = @Authorization(value = "access_token"))
     @ApiResponses(value = {
             @ApiResponse(code = 401, message = "An organization is only allowed to see their own Organization resource")})
-    public Bundle getOrganizations(@NotNull @QueryParam(value="ids") Set<UUID> ids) {
-        return this.client
+    public Bundle getOrganizations(@NotNull @QueryParam(value="ids") String ids) {
+        Bundle bundle = this.client
                     .search()
                     .forResource(Organization.class)
                     .encodedJson()
                     .returnBundle(Bundle.class)
                     .execute();
+        Set<String> idSet = Arrays.asList(ids.split(",")).stream().collect(Collectors.toSet());
+        bundle.setEntry(bundle.getEntry()
+                            .stream()
+                            .filter(entry -> idSet.contains(entry.getResource().getId()))
+                            .collect(Collectors.toList())
+        );
+        return bundle;
     }
 }

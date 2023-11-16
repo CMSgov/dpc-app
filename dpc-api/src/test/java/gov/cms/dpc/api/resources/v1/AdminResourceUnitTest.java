@@ -40,12 +40,14 @@ public class AdminResourceUnitTest {
         UUID orgID2 = UUID.randomUUID();
         Organization organization2 = new Organization();
         organization2.setId(orgID2.toString());
-        Set<UUID> ids = new HashSet<UUID>();
-        ids.add(orgID1);
-        ids.add(orgID2);
+        UUID orgID3 = UUID.randomUUID();
+        Organization organization3 = new Organization();
+        organization2.setId(orgID3.toString());
+        String ids = orgID1.toString()+","+orgID2.toString();
         Bundle bundle = new Bundle();
         bundle.addEntry().setResource(organization1);
         bundle.addEntry().setResource(organization2);
+        bundle.addEntry().setResource(organization3);
 
         @SuppressWarnings("unchecked")
         IQuery<IBaseBundle> queryExec = Mockito.mock(IQuery.class, Answers.RETURNS_DEEP_STUBS);
@@ -55,7 +57,10 @@ public class AdminResourceUnitTest {
         Mockito.when(queryExec.returnBundle(Bundle.class)).thenReturn(mockQuery);
         Mockito.when(mockQuery.execute()).thenReturn(bundle);
 
+        Bundle res = new Bundle();
+        res.addEntry().setResource(organization1);
+        res.addEntry().setResource(organization2);
         Bundle actualResponse = adminResource.getOrganizations(ids);
-        assertEquals(bundle, actualResponse);
+        assertEquals(res, actualResponse);
     }
 }
