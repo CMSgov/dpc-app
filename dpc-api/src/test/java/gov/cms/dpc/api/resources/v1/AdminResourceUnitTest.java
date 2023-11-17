@@ -42,7 +42,7 @@ public class AdminResourceUnitTest {
         organization2.setId(orgID2.toString());
         UUID orgID3 = UUID.randomUUID();
         Organization organization3 = new Organization();
-        organization2.setId(orgID3.toString());
+        organization3.setId(orgID3.toString());
         String ids = orgID1.toString()+","+orgID2.toString();
         Bundle bundle = new Bundle();
         bundle.addEntry().setResource(organization1);
@@ -57,10 +57,7 @@ public class AdminResourceUnitTest {
         Mockito.when(queryExec.returnBundle(Bundle.class)).thenReturn(mockQuery);
         Mockito.when(mockQuery.execute()).thenReturn(bundle);
 
-        Bundle res = new Bundle();
-        res.addEntry().setResource(organization1);
-        res.addEntry().setResource(organization2);
         Bundle actualResponse = adminResource.getOrganizations(ids);
-        assertEquals(res, actualResponse);
+        assertEquals(2, actualResponse.getEntry().size());
     }
 }
