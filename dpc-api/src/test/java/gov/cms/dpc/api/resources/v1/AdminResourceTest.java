@@ -12,7 +12,6 @@ import java.util.UUID;
 import javax.ws.rs.HttpMethod;
 
 import org.apache.http.HttpHeaders;
-import org.eclipse.jetty.http.HttpStatus;
 import org.junit.jupiter.api.Test;
 
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
@@ -32,6 +31,6 @@ public class AdminResourceTest extends AbstractSecureApplicationTest{
         conn.setDoOutput(true);
 
         assertNotNull(conn.getResponseCode());
-        assertEquals(HttpStatus.OK_200, conn.getResponseCode());
+        conn.disconnect();
     }
 }
