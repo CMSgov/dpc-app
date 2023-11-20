@@ -35,15 +35,15 @@ public class HAPIExceptionHandlerTest {
         final HAPIExceptionHandler handler = new HAPIExceptionHandler(Mockito.mock(ResourceInfo.class));
 
         try {
-            handler.toResponse(new ServerResponseException(HttpStatus.NOT_FOUND_404));
+            handler.toResponse(new ServerResponseException(HttpStatus.NOT_FOUND_404, ""));
         } catch (IllegalStateException exception) {
             assertEquals("Cannot return HAPI exception for non-FHIR method", exception.getMessage());
         }
     }
 
     static class ServerResponseException extends BaseServerResponseException {
-        public ServerResponseException(int theStatusCode) {
-            super(theStatusCode, "");
+        public ServerResponseException(int theStatusCode, String theMessage) {
+            super(theStatusCode, theMessage);
         }
     }
 
