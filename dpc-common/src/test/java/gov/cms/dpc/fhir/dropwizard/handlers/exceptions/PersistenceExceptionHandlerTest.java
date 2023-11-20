@@ -27,6 +27,7 @@ public class PersistenceExceptionHandlerTest {
         ConstraintViolationException exception = new ConstraintViolationException("", new SQLException(errMsg), "constraintName");
         Response response = handler.toResponse(new PersistenceException(exception));
         assertEquals(HttpStatus.BAD_REQUEST_400, response.getStatus());
+
         OperationOutcome.OperationOutcomeIssueComponent issue = ((OperationOutcome) response.getEntity()).getIssueFirstRep();
         assertEquals(OperationOutcome.IssueSeverity.FATAL, issue.getSeverity());
         assertEquals(errMsg, issue.getDetails().getText());
@@ -40,6 +41,7 @@ public class PersistenceExceptionHandlerTest {
 
         Response response = handler.toResponse(new PersistenceException(new Exception()));
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR_500, response.getStatus());
+
         OperationOutcome.OperationOutcomeIssueComponent issue = ((OperationOutcome) response.getEntity()).getIssueFirstRep();
         assertEquals(OperationOutcome.IssueSeverity.FATAL, issue.getSeverity());
         assertEquals("Internal server error", issue.getDetails().getText());
@@ -53,6 +55,7 @@ public class PersistenceExceptionHandlerTest {
         ConstraintViolationException exception = new ConstraintViolationException("", new SQLException(errMsg), "constraintName");
         Response response = handler.toResponse(new PersistenceException(exception));
         assertEquals(HttpStatus.BAD_REQUEST_400, response.getStatus());
+
         String issue = (String) response.getEntity();
         assertTrue(issue.contains(errMsg));
     }
@@ -64,6 +67,7 @@ public class PersistenceExceptionHandlerTest {
 
         Response response = handler.toResponse(new PersistenceException(new Exception()));
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR_500, response.getStatus());
+
         String issue = (String) response.getEntity();
         assertTrue(issue.contains("Internal server error"));
     }
