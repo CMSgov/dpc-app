@@ -12,6 +12,7 @@ import java.util.UUID;
 import javax.ws.rs.HttpMethod;
 
 import org.apache.http.HttpHeaders;
+import org.eclipse.jetty.http.HttpStatus;
 import org.junit.jupiter.api.Test;
 
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
@@ -22,7 +23,7 @@ public class AdminResourceTest extends AbstractSecureApplicationTest{
     void testGetOrganizations() throws IOException, URISyntaxException {
         UUID orgID1 = UUID.randomUUID();
         UUID orgID2 = UUID.randomUUID();
-        URL url = new URL(getBaseURL() + "Admin/organizations?ids="+orgID1.toString() + "," + orgID2.toString());
+        URL url = new URL(getBaseURL() + "Admin/Organization?ids="+orgID1.toString() + "," + orgID2.toString());
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod(HttpMethod.GET);
         conn.setRequestProperty(HttpHeaders.CONTENT_TYPE, "application/fhir+json");
@@ -31,6 +32,21 @@ public class AdminResourceTest extends AbstractSecureApplicationTest{
         conn.setDoOutput(true);
 
         assertNotNull(conn.getResponseCode());
+        conn.disconnect();
+    }
+
+    @Test
+    void testNoGoldenMacaroon() throws IOException, URISyntaxException {
+        UUID orgID1 = UUID.randomUUID();
+        UUID orgID2 = UUID.randomUUID();
+        URL url = new URL(getBaseURL() + "Admin/Organization?ids="+orgID1.toString() + "," + orgID2.toString());
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod(HttpMethod.GET);
+        conn.setRequestProperty(HttpHeaders.CONTENT_TYPE, "application/fhir+json");
+
+        conn.setDoOutput(true);
+
+        assertEquals(HttpStatus.UNAUTHORIZED_401, conn.getResponseCode());
         conn.disconnect();
     }
 }
