@@ -16,6 +16,7 @@ import com.google.inject.name.Named;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import gov.cms.dpc.api.auth.annotations.AdminOperation;
+import gov.cms.dpc.api.resources.AbstractAdminResource;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -27,7 +28,7 @@ import org.hl7.fhir.dstu3.model.*;
 
 @Api(value = "Admin", authorizations = @Authorization(value = "access_token"))
 @Path("/v1/Admin")
-public class AdminResource {
+public class AdminResource extends AbstractAdminResource{
     private final IGenericClient client;
 
     @Inject
