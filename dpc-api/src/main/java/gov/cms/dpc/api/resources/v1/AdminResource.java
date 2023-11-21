@@ -36,7 +36,7 @@ public class AdminResource {
     }
 
     @GET
-    @Path("organizations")
+    @Path("Organization")
     @FHIR
     @Timed
     @AdminOperation
