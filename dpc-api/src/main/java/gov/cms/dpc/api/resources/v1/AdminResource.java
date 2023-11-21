@@ -45,7 +45,7 @@ public class AdminResource {
             notes = "FHIR endpoint which returns list of Organization resources that are currently registered with the application.",
             authorizations = @Authorization(value = "access_token"))
     @ApiResponses(value = {
-            @ApiResponse(code = 401, message = "An organization is only allowed to see their own Organization resource")})
+            @ApiResponse(code = 401, message = "Only administrators can use this endpoint")})
     public Bundle getOrganizations(@NotNull @QueryParam(value="ids") String ids) {
         Bundle bundle = this.client
                     .search()
