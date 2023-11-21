@@ -10,6 +10,7 @@ import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.Response;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class DataFormatExceptionHandlerTest {
 
@@ -32,6 +33,7 @@ public class DataFormatExceptionHandlerTest {
 
         try {
             handler.handleNonFHIRException(new DataFormatException());
+            fail("This call is supposed to fail.");
         } catch (IllegalStateException exception) {
             assertEquals("Cannot throw FHIR Parser exception from non-FHIR endpoint", exception.getMessage());
         }

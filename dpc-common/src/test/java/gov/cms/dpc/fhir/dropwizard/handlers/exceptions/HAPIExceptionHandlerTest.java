@@ -11,6 +11,7 @@ import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.Response;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class HAPIExceptionHandlerTest {
 
@@ -36,6 +37,7 @@ public class HAPIExceptionHandlerTest {
 
         try {
             handler.toResponse(new ServerResponseException(HttpStatus.NOT_FOUND_404, ""));
+            fail("This call is supposed to fail.");
         } catch (IllegalStateException exception) {
             assertEquals("Cannot return HAPI exception for non-FHIR method", exception.getMessage());
         }
