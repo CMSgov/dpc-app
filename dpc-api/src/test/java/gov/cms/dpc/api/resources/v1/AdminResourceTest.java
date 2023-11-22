@@ -16,6 +16,7 @@ import org.eclipse.jetty.http.HttpStatus;
 import org.junit.jupiter.api.Test;
 
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
+import gov.cms.dpc.testing.APIAuthHelpers;
 
 public class AdminResourceTest extends AbstractSecureApplicationTest{
 
@@ -32,6 +33,7 @@ public class AdminResourceTest extends AbstractSecureApplicationTest{
         conn.setDoOutput(true);
 
         assertNotNull(conn.getResponseCode());
+        assertEquals(HttpStatus.OK_200, conn.getResponseCode());
         conn.disconnect();
     }
 
@@ -43,6 +45,8 @@ public class AdminResourceTest extends AbstractSecureApplicationTest{
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod(HttpMethod.GET);
         conn.setRequestProperty(HttpHeaders.CONTENT_TYPE, "application/fhir+json");
+        APIAuthHelpers.AuthResponse auth = APIAuthHelpers.jwtAuthFlow(getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
+        conn.setRequestProperty(HttpHeaders.AUTHORIZATION, "Bearer " + auth.accessToken);
 
         conn.setDoOutput(true);
 
