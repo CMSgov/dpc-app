@@ -6,7 +6,12 @@
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
+    <%= javascript_include_tag 'https://cdnjs.cloudflare.com/ajax/libs/uswds/3.7.0/js/uswds-init.min.js', crossorigin: 'anonymous' %>
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <%# <%= javascript_include_tag "application", "data-turbo-track": "reload" %> %>
+    <%# <%= javascript_pack_tag 'application' %>
+    <%# <%= stylesheet_pack_tag 'application' %>
+    <%= stylesheet_link_tag "application" %>
   </head>
 
   <body>
