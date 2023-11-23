@@ -9,6 +9,7 @@ Rails.application.routes.draw do
     if Rails.env.development?
       require 'sidekiq/web'
       mount Sidekiq::Web, at: '/sidekiq'
+      mount Lookbook::Engine, at: "/lookbook"
     end
   end
 end

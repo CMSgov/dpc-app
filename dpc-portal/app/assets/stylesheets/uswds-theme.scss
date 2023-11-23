@@ -1,0 +1,6 @@
+@use "uswds-core" with (
+  $background-color-settings: (
+    focus: true,
+    hover: false,
+  )
+);

@@ -64,6 +64,10 @@ group :development, :test do
   gem 'pry-nav'
   gem 'rspec-rails'
   gem 'webmock'
+
+  # Lookbook
+  gem "lookbook", ">= 2.1.1"
+  gem 'actioncable', '~> 7.0.7.1'
 end
 
 group :development do
@@ -102,3 +106,5 @@ end
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem 'tzinfo-data', platforms: %i[mingw mswin x64_mingw jruby]
+
+gem "view_component", "~> 3.7"
