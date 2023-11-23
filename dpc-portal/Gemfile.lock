@@ -191,6 +191,8 @@ GEM
     jbuilder (2.11.5)
       actionview (>= 5.0.0)
       activesupport (>= 5.0.0)
+    jsbundling-rails (1.2.1)
+      railties (>= 6.0.0)
     json (2.6.3)
     jsonapi-renderer (0.2.2)
     jwt (2.7.1)
@@ -508,6 +510,7 @@ DEPENDENCIES
   fhir_client
   health_check
   jbuilder (~> 2.7)
+  jsbundling-rails (~> 1.2)
   kaminari
   letter_opener
   listen (~> 3.2)

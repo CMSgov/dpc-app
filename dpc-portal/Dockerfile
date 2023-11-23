@@ -5,7 +5,7 @@ RUN apk update && \
     apk add --no-cache postgresql-dev && \
     apk add --no-cache libsodium-dev && \
     apk add --no-cache shared-mime-info && \
-    apk add --no-cache --virtual build-deps alpine-sdk npm tzdata && \
+    apk add --no-cache --virtual build-deps yarn alpine-sdk tzdata && \
     apk add xz && \
     apk add --no-cache gcompat
 
@@ -24,7 +24,7 @@ RUN gem install bundler --no-document && \
     gem uninstall nokogiri -I && \
     bundle config set force_ruby_platform true && \
     bundle install && \
-    npm install
+    yarn install
 
 # Run bundler audit
 RUN bundle exec bundle audit update && bundle exec bundle audit check --ignore CVE-2015-9284
@@ -32,9 +32,9 @@ RUN bundle exec bundle audit update && bundle exec bundle audit check --ignore C
 # Copy the code, test the app, and build the assets pipeline
 COPY /dpc-portal /dpc-portal
 
-RUN rm -rf /bin/yarn
+# RUN rm -rf /bin/yarn
 
-RUN rails webpacker:install
+RUN rails javascript:install:esbuild
 RUN RAILS_ENV=production WEBPACKER_NODE_MODULES_BIN_PATH="node_modules/.bin" SECRET_KEY_BASE=dummy bundle exec rake assets:precompile --trace
 
 # Clean up from the build
