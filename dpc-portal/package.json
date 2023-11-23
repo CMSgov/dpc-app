@@ -6,8 +6,7 @@
     "@uswds/uswds": "^3.7.0",
     "ssri": "^6.0.2",
     "svg4everybody": "^2.1.9",
-    "tar": "6.1.11",
-    "turbolinks": "^5.2.0"
+    "tar": "6.1.11"
   },
   "version": "0.1.0",
   "devDependencies": {
