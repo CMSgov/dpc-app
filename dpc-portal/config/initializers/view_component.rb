@@ -1,5 +1,7 @@
 # Enable ViewComponent::Preview files to be loaded as preview.rb when
 # stored in nested directories within app/components.
+#
+# Pulled from https://github.com/palkan/view_component-contrib/
 module ViewComponentSidecarDirectories
         PREVIEW_GLOB = "**/{preview.rb,*_preview.rb}"
   
