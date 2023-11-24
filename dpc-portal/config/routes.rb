@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
 Rails.application.routes.draw do
-  devise_for :users
   scope 'portal' do
+    devise_for :users
+
     # Defines the root path route ("/")
     root 'main#welcome'
 
