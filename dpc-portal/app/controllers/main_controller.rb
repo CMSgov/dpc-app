@@ -3,6 +3,6 @@
 # Handles entry
 class MainController < ApplicationController
   def welcome
-    render plain: 'Hello, World'
+    render Alert::Component.new(text: "test")
   end
 end
