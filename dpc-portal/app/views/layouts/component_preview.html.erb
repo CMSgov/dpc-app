@@ -12,6 +12,10 @@
 
   <body>
     <%= javascript_include_tag 'https://cdnjs.cloudflare.com/ajax/libs/uswds/3.7.0/js/uswds.min.js', crossorigin: 'anonymous' %>
+    <div class="grid-row">
+      <div class="grid-col-fill">
     <%= yield %>
+    </div>
+    </div>
   </body>
 </html>
