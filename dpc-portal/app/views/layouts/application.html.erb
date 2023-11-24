@@ -10,8 +10,11 @@
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
   </head>
 
-  <body>
+  <body class="grid-container margin-top-5 margin-bottom-8">
     <%= javascript_include_tag 'https://cdnjs.cloudflare.com/ajax/libs/uswds/3.7.0/js/uswds.min.js', crossorigin: 'anonymous' %>
+
+    <div class="grid-row">
+      <div class="grid-col-fill">
     <% if notice %>
       <%= render Alert::Component.new do %>
        <%= notice %>
@@ -25,5 +28,7 @@
     <% end %>
     
     <%= yield %>
+    </div>
+    </div>
   </body>
 </html>
