@@ -22,5 +22,9 @@ module DpcPortal
     # config.eager_load_paths << Rails.root.join("extras")
 
     config.active_job.queue_adapter = :sidekiq
+
+    # Look up previews directly in the path and set default layout
+    config.view_component.preview_paths << Rails.root.join("app", "components")
+    config.view_component.default_preview_layout = "component_preview"
   end
 end

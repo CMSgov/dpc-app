@@ -12,18 +12,6 @@
 
   <body>
     <%= javascript_include_tag 'https://cdnjs.cloudflare.com/ajax/libs/uswds/3.7.0/js/uswds.min.js', crossorigin: 'anonymous' %>
-    <% if notice %>
-      <%= render Alert::Component.new do %>
-       <%= notice %>
-      <% end %>
-    <% end %>
-
-    <% if alert %>
-      <%= render Alert::Component.new(status: :error) do %>
-       <%= alert %>
-      <% end %>
-    <% end %>
-    
     <%= yield %>
   </body>
 </html>
