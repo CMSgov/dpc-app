@@ -14,6 +14,9 @@ SimpleCov.start 'rails' do
   add_filter 'app/mailers/application_mailer.rb'
   add_filter 'app/models/application_record.rb'
 
+  # Filter out ViewComponent / Lookbook previews
+  add_filter 'app/components/**/preview.rb'
+
   # Gems added already tested
 
   add_filter 'vendor'
