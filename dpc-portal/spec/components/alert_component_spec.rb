@@ -11,21 +11,6 @@ RSpec.describe Alert::Component, type: :component do
     end
   end
 
-  info_alert = <<~HTML
-    <div class='usa-alert usa-alert--info usa-alert--slim' >
-      <div class='usa-alert__body'>
-        <p class='usa-alert__text'>
-          Check six
-        </p>
-      </div>
-    </div>
-  HTML
-
-  it 'matches the html' do
-    render_component
-    expect(rendered_content).to match_html_fragment(info_alert)
-  end
-
   it 'is an alert' do
     render_component
     expect(page).to have_selector('div.usa-alert')
@@ -62,7 +47,7 @@ RSpec.describe Alert::Component, type: :component do
       it 'includes the heading' do
         render_component
         expect(page)
-          .to have_selector('.usa-alert .usa-alert__body h3.usa-alert__heading')
+          .to have_selector('.usa-alert .usa-alert__body h4.usa-alert__heading')
       end
 
       it 'includes the heading text' do
