@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
-require 'view_component/test_helpers'
 
 RSpec.describe Alert::Component, type: :component do
   subject(:component) { described_class.new }
