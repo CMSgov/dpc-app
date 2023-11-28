@@ -10,6 +10,9 @@ fi
 if [ "$1" == "portal" ]; then
   # Start the database service (and make accessible outside the Docker container)
   echo "Starting Rails server..."
+  
+  echo "Migrating the database..."
+  bundle exec rails db:migrate
   if [[ -n "$JACOCO" ]]; then
     bundle exec rails server -b 0.0.0.0 -p 3100
   else
