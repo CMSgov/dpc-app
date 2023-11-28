@@ -101,3 +101,5 @@ end
 gem 'tzinfo-data', platforms: %i[mingw mswin x64_mingw jruby]
 
 gem "oauth2", "= 1.4.11"
+
+gem "aws-sdk", "~> 3.2"
