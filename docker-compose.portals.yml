@@ -80,7 +80,7 @@ services:
     build:
       context: .
       dockerfile: dpc-admin/Dockerfile
-    command: sidekiq -q admin
+    command: sidekiq
     image: dpc-admin-sidekiq:latest
     environment:
       - REDIS_URL=redis://redis
@@ -118,7 +118,7 @@ services:
     build:
       context: .
       dockerfile: dpc-portal/Dockerfile
-    command: sidekiq -q portal
+    command: sidekiq
     image: dpc-portal-sidekiq:latest
     environment:
       - REDIS_URL=redis://redis
