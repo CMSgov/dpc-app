@@ -62,7 +62,7 @@ module DpcWebsite
     
     # Ensure mailer jobs get sent to a specialized web queue. Our web applications share
     # a single Redis instance and process jobs based on their queue name.
-    config.action_mailer.deliver_later_queue_name = "admin"
+    config.action_mailer.deliver_later_queue_name = "web"
     
     config.to_prepare { Devise::Mailer.layout "mailer" }
 
