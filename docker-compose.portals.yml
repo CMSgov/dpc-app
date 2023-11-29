@@ -3,6 +3,7 @@ version: '3'
 volumes:
   coverage:
 
+
 services:
 
   redis:
@@ -79,7 +80,7 @@ services:
     build:
       context: .
       dockerfile: dpc-admin/Dockerfile
-    command: sidekiq
+    command: sidekiq -q admin
     image: dpc-admin-sidekiq:latest
     environment:
       - REDIS_URL=redis://redis
@@ -117,7 +118,7 @@ services:
     build:
       context: .
       dockerfile: dpc-portal/Dockerfile
-    command: sidekiq
+    command: sidekiq -q portal
     image: dpc-portal-sidekiq:latest
     environment:
       - REDIS_URL=redis://redis
