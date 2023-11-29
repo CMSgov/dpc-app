@@ -14,7 +14,11 @@ import org.hl7.fhir.dstu3.model.*;
 import org.junit.jupiter.api.Test;
 
 import java.sql.Date;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static gov.cms.dpc.common.utils.SeedProcessor.createBaseAttributionGroup;
 import static org.junit.jupiter.api.Assertions.*;
@@ -30,6 +34,27 @@ class OrganizationResourceTest extends AbstractAttributionTest {
         final Organization organization = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()));
         assertAll(() -> assertNotNull(organization, "Should have an org back"),
                 () -> assertFalse(organization.getEndpoint().isEmpty(), "Should have endpoints"));
+    }
+
+    @Test
+    void testGetOrganizationsByIds() {
+        final IGenericClient client = AttributionTestHelpers.createFHIRClient(ctx, getServerURL());
+        OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "1633101112", false);
+        OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "1733101113", false);
+        Map<String, List<String>> searchParams = new HashMap<>();
+        searchParams.put("identifier", Collections.singletonList("1633101112, 1733101113"));
+        final Bundle organizations = client
+                .search()
+                .forResource(Organization.class)
+                .whereMap(searchParams)
+                .returnBundle(Bundle.class)
+                .encodedJson()
+                .execute();
+
+        List<String> ids = new ArrayList<String>();
+        ids.add("1633101112");
+        ids.add("1733101113");
+        assertEquals(2, organizations.getEntry().size());
     }
 
     @Test
