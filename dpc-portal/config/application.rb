@@ -22,5 +22,9 @@ module DpcPortal
     # config.eager_load_paths << Rails.root.join("extras")
 
     config.active_job.queue_adapter = :sidekiq
+    
+    # Ensure mailer jobs get sent to a specialized admin queue. Our web applications share
+    # a single Redis instance and process jobs based on their queue name.
+    config.action_mailer.deliver_later_queue_name = "portal"
   end
 end
