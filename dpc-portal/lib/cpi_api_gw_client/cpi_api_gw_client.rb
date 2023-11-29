@@ -1,24 +1,23 @@
+# frozen_string_literal: true
+
 require 'oauth2'
 
-cms_idm_url = 'https://impl.idp.idm.cms.gov/'
-access_token_url = '/oauth2/aus2151jb0hszrbLU297/v1/token'
-
-
+# A client for requests to the CPI API Gateway
 class CPIAPIGatewayClient
-    attr_accessor :token
+  attr_accessor :token
 
-    def initialize()
-        client_id = ENV['CPI_API_GW_CLIENT_ID']
-        client_secret = ENV['CPI_API_GW_CLIENT_SECRET']
-        @client = OAuth2::Client.new(client_id, client_secret,
-                                     site: cms_idm_url,
-                                     token_url: access_token_url)
-        fetch_token
-    end
+  def initialize
+    client_id = ENV.fetch('CPI_API_GW_CLIENT_ID', nil)
+    client_secret = ENV.fetch('CPI_API_GW_CLIENT_SECRET', nil)
+    @client = OAuth2::Client.new(client_id, client_secret,
+                                 site: 'https://impl.idp.idm.cms.gov/',
+                                 token_url: '/oauth2/aus2151jb0hszrbLU297/v1/token')
+    fetch_token
+  end
 
-    private
-    
-    def fetch_token
-        @token = @client.client_credentials.get_token
-    end
+  private
+
+  def fetch_token
+    @token = @client.client_credentials.get_token
+  end
 end
