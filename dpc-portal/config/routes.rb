@@ -10,6 +10,9 @@ Rails.application.routes.draw do
     if Rails.env.development?
       require 'sidekiq/web'
       mount Sidekiq::Web, at: '/sidekiq'
+    end
+
+    if Rails.env.development? || ENV["ENV"] == "dev"
       mount Lookbook::Engine, at: "/lookbook"
     end
   end
