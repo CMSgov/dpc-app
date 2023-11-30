@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe Alert::Component, type: :component do
+RSpec.describe Core::Alert::Component, type: :component do
   subject(:component) { described_class.new }
 
   def render_component

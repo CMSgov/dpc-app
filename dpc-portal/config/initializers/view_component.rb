@@ -3,7 +3,7 @@
 #
 # Pulled from https://github.com/palkan/view_component-contrib/
 module ViewComponentSidecarDirectories
-        PREVIEW_GLOB = "**/{preview.rb,*_preview.rb}"
+        PREVIEW_GLOB = "**/*/{preview.rb,*_preview.rb}"
   
         def self.extended(base)
           base.singleton_class.prepend(ClassMethods)
