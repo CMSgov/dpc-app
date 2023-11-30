@@ -50,7 +50,7 @@ public class AdminResource extends AbstractAdminResource{
             @ApiResponse(code = 401, message = "Only administrators can use this endpoint")})
     public Bundle getOrganizations(@NotNull @QueryParam(value="ids") String ids) {
         Map<String, List<String>> searchParams = new HashMap<>();
-        searchParams.put("ids", Collections.singletonList(ids));
+        searchParams.put("identifier", Collections.singletonList(ids));
         Bundle bundle = this.client
                     .search()
                     .forResource(Organization.class)
