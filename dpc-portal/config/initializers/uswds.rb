@@ -6,5 +6,4 @@
 # - Ensures that the js files are exposed properly for use in the application layout.
 #
 # See also: app/assets/stylesheets/uswds-theme.scss
-Rails.application.config.assets.paths <<
-  Rails.root.join('node_modules/@uswds/uswds/dist')
+Rails.application.config.assets.paths << Rails.root.join('node_modules/@uswds/uswds/dist')
