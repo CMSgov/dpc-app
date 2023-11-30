@@ -30,6 +30,7 @@ public class BaseResource extends AbstractBaseResource {
     private final AbstractPatientResource par;
     private final AbstractPractitionerResource pr;
     private final AbstractDefinitionResource sdr;
+    private final AbstractAdminResource ar;
     private final PropertiesProvider pp;
     private final String baseURL;
     @Inject
@@ -43,6 +44,7 @@ public class BaseResource extends AbstractBaseResource {
                         PatientResource par,
                         PractitionerResource pr,
                         DefinitionResource sdr,
+                        AdminResource ar,
                         @APIV1 String baseURL) {
         this.kr = kr;
         this.tr = tr;
@@ -54,6 +56,7 @@ public class BaseResource extends AbstractBaseResource {
         this.par = par;
         this.pr = pr;
         this.sdr = sdr;
+        this.ar = ar;
         this.pp = new PropertiesProvider();
         this.baseURL = baseURL;
     }
@@ -117,6 +120,11 @@ public class BaseResource extends AbstractBaseResource {
     @Override
     public AbstractOrganizationResource organizationOperations() {
         return this.or;
+    }
+
+    @Override
+    public AbstractAdminResource adminOperations() {
+        return this.ar;
     }
 
     @Override
