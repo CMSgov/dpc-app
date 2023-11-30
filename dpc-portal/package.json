@@ -2,19 +2,19 @@
   "name": "dpc-portal",
   "private": true,
   "dependencies": {
-    "@cmsgov/design-system-core": "^3.7.0",
-    "@cmsgov/design-system-layout": "^3.7.0",
-    "@rails/activestorage": "^6.1.4",
-    "@rails/ujs": "^6.1.4",
-    "@rails/webpacker": "5.4.3",
-    "normalize.css": "^8.0.1",
+    "@uswds/uswds": "^3.7.0",
     "ssri": "^6.0.2",
     "svg4everybody": "^2.1.9",
-    "tar": "6.1.11",
-    "turbolinks": "^5.2.0"
+    "tar": "6.1.11"
   },
   "version": "0.1.0",
   "devDependencies": {
+    "sass": "^1.69.5",
+    "watch": "^1.0.2",
     "webpack-dev-server": "^3.11.2"
+  },
+  "scripts": {
+    "build:css": "sass ./app/assets/stylesheets/application.sass.scss:./app/assets/builds/application.css --no-source-map --load-path=node_modules --load-path=node_modules/@uswds/uswds/packages",
+    "build:css:watch": "watch 'sass ./app/assets/stylesheets/application.sass.scss:./app/assets/builds/application.css --no-source-map --load-path=node_modules --load-path=node_modules/@uswds/uswds/packages' ./app/assets/stylesheets/"
   }
 }

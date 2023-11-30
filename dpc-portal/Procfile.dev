@@ -1,0 +1,2 @@
+web: bundle exec rails server -b 0.0.0.0 -p 3100 2>&1 | tee -a /var/log/dpc-portal-$(hostname).log
+css: npm run build:css:watch

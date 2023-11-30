@@ -3,16 +3,18 @@
 require 'simplecov'
 
 SimpleCov.start 'rails' do
-  track_files '**/{app,lib}/**/*.rb'
-
   add_group 'Serializers', 'app/serializers'
   add_group 'Services', 'app/services'
   add_group 'Validators', 'app/validators'
+  add_group 'Components', 'app/components'
 
   # Abstract Classes: can be removed after implementation
   add_filter 'app/jobs/application_job.rb'
   add_filter 'app/mailers/application_mailer.rb'
   add_filter 'app/models/application_record.rb'
+
+  # Filter out ViewComponent / Lookbook previews
+  add_filter %r{app/components/.*/preview.rb}
 
   # Gems added already tested
 

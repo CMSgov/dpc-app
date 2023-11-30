@@ -26,5 +26,9 @@ module DpcPortal
     # Ensure mailer jobs get sent to a specialized admin queue. Our web applications share
     # a single Redis instance and process jobs based on their queue name.
     config.action_mailer.deliver_later_queue_name = "portal"
+
+    # Look up previews directly in the path and set default layout
+    config.view_component.preview_paths << Rails.root.join("app", "components")
+    config.view_component.default_preview_layout = "component_preview"
   end
 end
