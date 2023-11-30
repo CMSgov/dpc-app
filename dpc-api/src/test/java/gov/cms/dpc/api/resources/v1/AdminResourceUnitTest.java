@@ -49,7 +49,7 @@ public class AdminResourceUnitTest {
         bundle.addEntry().setResource(organization1);
         bundle.addEntry().setResource(organization2);
         Map<String, List<String>> searchParams = new HashMap<>();
-        searchParams.put("ids", Collections.singletonList(ids));
+        searchParams.put("identifier", Collections.singletonList(ids));
 
         @SuppressWarnings("unchecked")
         IQuery<IBaseBundle> queryExec = Mockito.mock(IQuery.class, Answers.RETURNS_DEEP_STUBS);
