@@ -537,6 +537,7 @@ DEPENDENCIES
   macaroons
   newrelic_rpm (~> 8.10)
   nokogiri (>= 1.13.10)
+  oauth2 (= 1.4.11)
   octokit
   omniauth-github (~> 1.4.0)
   omniauth-oktaoauth (~> 0.1.6)
