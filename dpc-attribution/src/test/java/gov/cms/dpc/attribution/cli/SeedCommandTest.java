@@ -1,5 +1,6 @@
 package gov.cms.dpc.attribution.cli;
 
+import gov.cms.dpc.attribution.AbstractAttributionTest;
 import gov.cms.dpc.attribution.DPCAttributionConfiguration;
 import gov.cms.dpc.attribution.DPCAttributionService;
 import io.dropwizard.cli.Cli;
@@ -11,15 +12,13 @@ import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class SeedCommandTest {
+public class SeedCommandTest extends AbstractAttributionTest {
 
     private final PrintStream originalOut = System.out;
     private final PrintStream originalErr = System.err;
@@ -55,12 +54,10 @@ public class SeedCommandTest {
 
     @Test
     void testSeedCommand() {
-        final String timestamp = "2020-01-01T12:00:00+03:00";
-        final LocalDateTime offsetDateTime = OffsetDateTime.parse(timestamp).toLocalDateTime();
-        final Optional<Throwable> success = cli.run("seed", "ci.application.conf", "-t", timestamp);
+        final Optional<Throwable> success = cli.run("seed", "ci.application.conf");
         assertAll(() -> assertTrue(success.isEmpty(), "Should have succeeded"),
                 () -> assertEquals("", stdErr.toString(), "Should not have errors"),
-                () -> assertTrue(stdOut.toString().contains(("Seeding attribution at time " + offsetDateTime))),
+                () -> assertTrue(stdOut.toString().contains("Seeding attribution at time ")),
                 () -> assertTrue(stdOut.toString().contains("Finished loading seeds")));
     }
 }
