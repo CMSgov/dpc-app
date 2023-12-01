@@ -57,7 +57,7 @@ public class SeedCommandTest {
     void testSeedCommand() {
         final String timestamp = "2020-01-01T12:00:00+03:00";
         final LocalDateTime offsetDateTime = OffsetDateTime.parse(timestamp).toLocalDateTime();
-        final Optional<Throwable> success = cli.run("seed", "-t", timestamp);
+        final Optional<Throwable> success = cli.run("seed", "ci.application.conf", "-t", timestamp);
         assertAll(() -> assertTrue(success.isEmpty(), "Should have succeeded"),
                 () -> assertEquals("", stdErr.toString(), "Should not have errors"),
                 () -> assertTrue(stdOut.toString().contains(("Seeding attribution at time " + offsetDateTime))),
