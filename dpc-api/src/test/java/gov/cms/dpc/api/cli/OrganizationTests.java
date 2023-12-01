@@ -90,7 +90,8 @@ public class OrganizationTests extends AbstractApplicationTest {
         stdErr.reset();
 
         // Delete the organization
-        final Optional<Throwable> delete = cli.run("delete", orgId, "--host", "http://localhost:3500/v1");
+        final String orgReference = "Organization/" + orgId;
+        final Optional<Throwable> delete = cli.run("delete", orgReference, "--host", "http://localhost:3500/v1");
         assertAll(() -> assertTrue(delete.isEmpty(), "Should have succeeded"),
                 () -> assertEquals("", stdErr.toString(), "Should not have errors"),
                 () -> assertTrue(stdOut.toString().contains("Successfully deleted Organization")));
