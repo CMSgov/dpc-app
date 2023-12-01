@@ -76,6 +76,7 @@ public class OrganizationTests extends AbstractApplicationTest {
         final Matcher matcher = Pattern.compile("[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}").matcher(stdOut.toString());
         assertTrue(matcher.find(), "Should find organization ID");
         final String orgId = matcher.group(0);
+
         stdOut.reset();
         stdErr.reset();
 
@@ -84,14 +85,16 @@ public class OrganizationTests extends AbstractApplicationTest {
         assertAll(() -> assertTrue(listOrgs.isEmpty(), "Should have succeeded"),
                 () -> assertEquals("", stdErr.toString(), "Should not have errors"),
                 () -> assertTrue(stdOut.toString().contains(orgId)));
+
         stdOut.reset();
         stdErr.reset();
 
         // Delete the organization
-        final Optional<Throwable> delete = cli.run("delete", "--host", "http://localhost:3500/v1", orgId);
+        final Optional<Throwable> delete = cli.run("delete", orgId, "--host", "http://localhost:3500/v1");
         assertAll(() -> assertTrue(delete.isEmpty(), "Should have succeeded"),
                 () -> assertEquals("", stdErr.toString(), "Should not have errors"),
                 () -> assertTrue(stdOut.toString().contains("Successfully deleted Organization")));
+
         stdOut.reset();
         stdErr.reset();
 
