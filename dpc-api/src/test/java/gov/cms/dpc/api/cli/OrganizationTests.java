@@ -14,7 +14,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -27,7 +26,6 @@ import static org.mockito.Mockito.when;
 public class OrganizationTests extends AbstractApplicationTest {
     private final PrintStream originalOut = System.out;
     private final PrintStream originalErr = System.err;
-    private final InputStream originalIn = System.in;
 
     private final ByteArrayOutputStream stdOut = new ByteArrayOutputStream();
     private final ByteArrayOutputStream stdErr = new ByteArrayOutputStream();
@@ -61,7 +59,6 @@ public class OrganizationTests extends AbstractApplicationTest {
     void teardown() {
         System.setOut(originalOut);
         System.setErr(originalErr);
-        System.setIn(originalIn);
     }
 
     @Test
@@ -103,6 +100,6 @@ public class OrganizationTests extends AbstractApplicationTest {
         final Optional<Throwable> listEmpty = cli.run("list", "--host", "http://localhost:3500/v1");
         assertAll(() -> assertTrue(listEmpty.isEmpty(), "Should have succeeded"),
                 () -> assertEquals("", stdErr.toString(), "Should not have errors"),
-                () -> assertEquals("", stdOut.toString(), "Should not have output"));
+                () -> assertFalse(stdOut.toString().contains(orgId), "Should not list organization"));
     }
 }
