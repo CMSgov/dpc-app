@@ -69,7 +69,8 @@ public class OrganizationTests extends AbstractApplicationTest {
         // Create the organization
         final Optional<Throwable> register = cli.run("register", "-f", "../src/main/resources/organization.tmpl.json", "--no-token", "--host", "http://localhost:3500/v1");
         assertAll(() -> assertTrue(register.isEmpty(), "Should have succeeded"),
-                () -> assertEquals("", stdErr.toString(), "Should not have errors"));
+                () -> assertEquals("", stdErr.toString(), "Should not have errors"),
+                () -> assertTrue(stdOut.toString().contains("Registered organization:")));
 
         // Pull out the organization ID
         final Matcher matcher = Pattern.compile("[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}").matcher(stdOut.toString());
@@ -79,8 +80,7 @@ public class OrganizationTests extends AbstractApplicationTest {
         stdErr.reset();
 
         // List organizations
-        final Optional<Throwable> listOrgs = cli.run("list");
-        System.out.println(stdOut);
+        final Optional<Throwable> listOrgs = cli.run("list", "--host", "http://localhost:3500/v1");
         assertAll(() -> assertTrue(listOrgs.isEmpty(), "Should have succeeded"),
                 () -> assertEquals("", stdErr.toString(), "Should not have errors"),
                 () -> assertTrue(stdOut.toString().contains(orgId)));
@@ -88,16 +88,15 @@ public class OrganizationTests extends AbstractApplicationTest {
         stdErr.reset();
 
         // Delete the organization
-        final Optional<Throwable> delete = cli.run("delete", "--id", orgId);
-        System.out.println(stdOut);
+        final Optional<Throwable> delete = cli.run("delete", "--id", orgId, "--host", "http://localhost:3500/v1");
         assertAll(() -> assertTrue(delete.isEmpty(), "Should have succeeded"),
-                () -> assertEquals("", stdErr.toString(), "Should not have errors"));
+                () -> assertEquals("", stdErr.toString(), "Should not have errors"),
+                () -> assertTrue(stdOut.toString().contains("Successfully deleted Organization")));
         stdOut.reset();
         stdErr.reset();
 
         // Confirm the organization has been deleted
-        final Optional<Throwable> listEmpty = cli.run("list");
-        System.out.println(stdOut);
+        final Optional<Throwable> listEmpty = cli.run("list", "--host", "http://localhost:3500/v1");
         assertAll(() -> assertTrue(listEmpty.isEmpty(), "Should have succeeded"),
                 () -> assertEquals("", stdErr.toString(), "Should not have errors"),
                 () -> assertEquals("", stdOut.toString(), "Should not have output"));
