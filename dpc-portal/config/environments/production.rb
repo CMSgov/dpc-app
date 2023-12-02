@@ -30,8 +30,7 @@ Rails.application.configure do
   # config.assets.css_compressor = :sass
 
   # Fall back to assets pipeline at runtime if a precompiled asset is mising.
-  # TODO: Fix pipeline to ensure precompiled assets include everything.
-  config.assets.compile = true
+  config.assets.compile = false
 
   # Enable serving of images, stylesheets, and JavaScripts from an asset server.
   # config.asset_host = "http://assets.example.com"
