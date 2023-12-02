@@ -97,7 +97,7 @@ services:
       dockerfile: dpc-portal/Dockerfile
     image: dpc-web-portal:latest
     volumes:
-      # - "./dpc-portal/:/dpc-portal/"
+      - "./dpc-portal/:/dpc-portal/"
       - "./dpc-portal/coverage:/dpc-portal/coverage"
       - ./tmp/letter_opener/portal:/dpc-portal/tmp/letter_opener
     environment:
@@ -106,7 +106,6 @@ services:
       - 'PS1=${DOCKER_PS1:-[docker] \w: }'
       - "LSCOLORS=${DOCKER_LSCOLORS:- }"
       # Application settings
-      - RAILS_RELATIVE_URL_ROOT=/portal
       - REDIS_URL=redis://redis
       - DATABASE_URL=postgresql://db/dpc-portal_development
       - TEST_DATABASE_URL=postgresql://db/dpc-portal_test
