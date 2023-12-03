@@ -333,11 +333,6 @@ GEM
     rails-html-sanitizer (1.6.0)
       loofah (~> 2.21)
       nokogiri (~> 1.14)
-    rails_live_reload (0.3.4)
-      listen
-      nio4r
-      railties
-      websocket-driver
     railties (7.0.7.2)
       actionpack (= 7.0.7.2)
       activesupport (= 7.0.7.2)
@@ -547,7 +542,6 @@ DEPENDENCIES
   pry-nav
   puma (~> 5.6.7)
   rails-controller-testing
-  rails_live_reload
   railties (~> 7.0.7.1)
   rbnacl
   rbnacl-libsodium
