@@ -1,5 +1,9 @@
 # frozen_string_literal: true
 
+# Sets up the application's routes. Note that this is served
+# under the /portal prefix, as configured in the application.rb 
+# and config.ru via config.relative_url_root.
+#
 Rails.application.routes.draw do
   devise_for :users
 

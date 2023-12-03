@@ -2,6 +2,7 @@
 
 require 'active_support/core_ext/integer/time'
 
+# These settings are applied in local development.
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
 
@@ -62,6 +63,9 @@ Rails.application.configure do
 
   # Suppress logger output for asset requests.
   config.assets.quiet = true
+
+  # Fall back to assets pipeline at runtime if a precompiled asset is mising.
+  # This setting differs from deployed environments.
   config.assets.compile = true
 
   # Raises error for missing translations.
