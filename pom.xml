@@ -703,8 +703,8 @@
                         <exclude>**/*_.class</exclude>
                         <!--Exclude auto-generated JOOQ classes-->
                         <exclude>gov/cms/dpc/attribution/dao/**/*</exclude>
-                        <!-- Exclude the cli commands, which we don't have tests for-->
-                        <exclude>gov/cms/dpc/**/cli/**/*</exclude>
+<!--                        &lt;!&ndash; Exclude the cli commands, which we don't have tests for&ndash;&gt;-->
+<!--                        <exclude>gov/cms/dpc/**/cli/**/*</exclude>-->
                         <!-- Exclude HL7 parsers, because they're too big-->
                         <exclude>org/hl7/fhir/r4/formats/*</exclude>
                         <exclude>org/hl7/fhir/r5/formats/*</exclude>
