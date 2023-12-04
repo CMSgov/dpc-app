@@ -61,7 +61,7 @@ public class SeedCommandTest {
 
     @Test
     void testSeedCommand() {
-        final Optional<Throwable> success = cli.run("seed", "application.conf");
+        final Optional<Throwable> success = cli.run("seed", "ci.application.conf");
         assertAll(() -> assertTrue(success.isEmpty(), "Should have succeeded"),
                 () -> assertEquals("", stdErr.toString(), "Should not have errors"),
                 () -> assertTrue(stdOut.toString().contains("Seeding attribution at time ")),
