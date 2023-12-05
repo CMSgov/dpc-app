@@ -69,9 +69,9 @@ public class SeedCommandTest extends AbstractAttributionTest {
     @Test
     void testSeedCommand() {
         final Optional<Throwable> success = cli.run("seed", "ci.application.conf");
-        assertAll(() -> assertTrue(success.isEmpty(), "Should have succeeded"),
-                () -> assertEquals("", stdErr.toString(), "Should not have errors"),
-                () -> assertTrue(stdOut.toString().contains("Seeding attribution at time ")),
-                () -> assertTrue(stdOut.toString().contains("Finished loading seeds")));
+        assertTrue(success.isEmpty(), "Should have succeeded");
+        assertEquals("", stdErr.toString(), "Should not have errors");
+        assertTrue(stdOut.toString().contains("Seeding attribution at time "));
+        assertTrue(stdOut.toString().contains("Finished loading seeds"));
     }
 }
