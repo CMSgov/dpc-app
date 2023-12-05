@@ -25,6 +25,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.extension.ExtendWith;
+import ru.vyarus.dropwizard.guice.module.context.SharedConfigurationState;
 
 import java.io.InputStream;
 import java.time.Instant;
@@ -53,6 +54,7 @@ class AttributionFHIRTest {
 
     @BeforeAll
     static void setup() throws Exception {
+        SharedConfigurationState.clear();
         APPLICATION.before();
         APPLICATION.getApplication().run("db", "drop-all", "--confirm-delete-everything", "ci.application.conf");
         APPLICATION.getApplication().run("db", "migrate", "ci.application.conf");
