@@ -2,10 +2,11 @@ package gov.cms.dpc.attribution.cli;
 
 import gov.cms.dpc.attribution.DPCAttributionConfiguration;
 import gov.cms.dpc.attribution.DPCAttributionService;
-import io.dropwizard.Application;
+import gov.cms.dpc.testing.IntegrationTest;
 import io.dropwizard.cli.Cli;
 import io.dropwizard.setup.Bootstrap;
-import io.dropwizard.testing.DropwizardTestSupport;
+import io.dropwizard.setup.Environment;
+import io.dropwizard.testing.POJOConfigurationFactory;
 import io.dropwizard.util.JarLocation;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+@IntegrationTest
 public class SeedCommandTest {
 
     private final PrintStream originalOut = System.out;
@@ -26,35 +28,39 @@ public class SeedCommandTest {
 
     private final ByteArrayOutputStream stdOut = new ByteArrayOutputStream();
     private final ByteArrayOutputStream stdErr = new ByteArrayOutputStream();
+
+    private static final DPCAttributionService app = new DPCAttributionService();
+    private static final Bootstrap<DPCAttributionConfiguration> bs = setupBootstrap();
+
     private Cli cli;
 
-    private final DropwizardTestSupport<DPCAttributionConfiguration> APPLICATION =
-            new DropwizardTestSupport<>(DPCAttributionService.class, "ci.application.conf");
-
-    SeedCommandTest() {
-        // Not used
+    private static Bootstrap<DPCAttributionConfiguration> setupBootstrap() {
+        // adapted from DropwizardTestSupport
+        Bootstrap<DPCAttributionConfiguration> bootstrap = new Bootstrap<>(SeedCommandTest.app) {
+            public void run(DPCAttributionConfiguration configuration, Environment environment) throws Exception {
+                super.run(configuration, environment);
+                setConfigurationFactoryFactory((klass, validator, objectMapper, propertyPrefix) ->
+                        new POJOConfigurationFactory<>(configuration));
+            }
+        };
+        SeedCommandTest.app.initialize(bootstrap);
+        return bootstrap;
     }
 
     @BeforeEach
-    void cliSetup() throws Exception {
+    void cliSetup() {
         final JarLocation location = mock(JarLocation.class);
         when(location.getVersion()).thenReturn(Optional.of("1.0.0"));
-
-        APPLICATION.before();
-        final Application<DPCAttributionConfiguration> application = APPLICATION.getApplication();
-        final Bootstrap<DPCAttributionConfiguration> bootstrap = new Bootstrap<>(application);
-        bootstrap.addCommand(new SeedCommand(application));
 
         // Redirect stdout and stderr to our byte streams
         System.setOut(new PrintStream(stdOut));
         System.setErr(new PrintStream(stdErr));
 
-        cli = new Cli(location, bootstrap, stdOut, stdErr);
+        cli = new Cli(location, bs, stdOut, stdErr);
     }
 
     @AfterEach
     void teardown() {
-        APPLICATION.after();
         System.setOut(originalOut);
         System.setErr(originalErr);
     }
