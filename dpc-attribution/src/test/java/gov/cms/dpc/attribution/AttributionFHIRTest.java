@@ -58,6 +58,7 @@ class AttributionFHIRTest {
         APPLICATION.before();
         SharedConfigurationState.clear();
         APPLICATION.getApplication().run("db", "drop-all", "--confirm-delete-everything", "ci.application.conf");
+        SharedConfigurationState.clear();
         APPLICATION.getApplication().run("db", "migrate", "ci.application.conf");
 
         // Get the test seeds
