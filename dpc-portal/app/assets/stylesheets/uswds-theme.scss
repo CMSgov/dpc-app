@@ -3,8 +3,8 @@
     // to ensure that the compiled assets are referenced correctly.
     //
     // See also: config/initializers/uswds.rb
-    $theme-image-path: "img",
-    $theme-font-path: "fonts",
+    $theme-image-path: "@uswds/uswds/dist/img",
+    $theme-font-path: "@uswds/uswds/dist/fonts",
     $theme-show-compile-warnings: true,
     $theme-show-notifications: false
 );

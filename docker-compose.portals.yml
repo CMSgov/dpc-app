@@ -97,7 +97,23 @@ services:
       dockerfile: dpc-portal/Dockerfile
     image: dpc-web-portal:latest
     volumes:
-      - "./dpc-portal/:/dpc-portal/"
+      # Mount specific directories to avoid overwriting 
+      # precompiled assets (public/assets/) and node_modules
+      - "./dpc-portal/app:/dpc-portal/app"
+      - "./dpc-portal/db:/dpc-portal/db"
+      - "./dpc-portal/lib:/dpc-portal/lib"
+      - "./dpc-portal/bin:/dpc-portal/bin"
+      - "./dpc-portal/config:/dpc-portal/config"
+      - "./dpc-portal/config.ru:/dpc-portal/config.ru"
+      - "./dpc-portal/spec:/dpc-portal/spec"
+
+      # Mount dependency files
+      - "./dpc-portal/package.json:/dpc-portal/package.json"
+      - "./dpc-portal/package-lock.json:/dpc-portal/package-lock.json"
+      - "./dpc-portal/Gemfile:/dpc-portal/Gemfile"
+      - "./dpc-portal/Gemfile.lock:/dpc-portal/Gemfile.lock"
+
+      # Mount coverage and utility files
       - "./dpc-portal/coverage:/dpc-portal/coverage"
       - ./tmp/letter_opener/portal:/dpc-portal/tmp/letter_opener
     environment:

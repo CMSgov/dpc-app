@@ -10,11 +10,6 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
-    actioncable (7.0.7.2)
-      actionpack (= 7.0.7.2)
-      activesupport (= 7.0.7.2)
-      nio4r (~> 2.0)
-      websocket-driver (>= 0.6.1)
     actionmailbox (7.0.7.2)
       actionpack (= 7.0.7.2)
       activejob (= 7.0.7.2)
@@ -333,11 +328,6 @@ GEM
     rails-html-sanitizer (1.6.0)
       loofah (~> 2.21)
       nokogiri (~> 1.14)
-    rails_live_reload (0.3.4)
-      listen
-      nio4r
-      railties
-      websocket-driver
     railties (7.0.7.2)
       actionpack (= 7.0.7.2)
       activesupport (= 7.0.7.2)
@@ -486,9 +476,6 @@ GEM
       hashdiff (>= 0.4.0, < 2.0.0)
     webrick (1.8.1)
     websocket (1.2.10)
-    websocket-driver (0.7.6)
-      websocket-extensions (>= 0.1.0)
-    websocket-extensions (0.1.5)
     xpath (3.2.0)
       nokogiri (~> 1.8)
     yard (0.9.34)
@@ -498,7 +485,6 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  actioncable (~> 7.0.7.1)
   actionmailbox (~> 7.0.7.1)
   actionmailer (~> 7.0.7.1)
   actionpack (~> 7.0.7.1)
@@ -547,7 +533,6 @@ DEPENDENCIES
   pry-nav
   puma (~> 5.6.7)
   rails-controller-testing
-  rails_live_reload
   railties (~> 7.0.7.1)
   rbnacl
   rbnacl-libsodium

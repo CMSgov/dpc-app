@@ -13,6 +13,10 @@ module DpcPortal
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 7.0
 
+    # Set the relative_url_root at runtime, which will be used in various places
+    # to ensure that we are serving everything under the portal scope.
+    config.relative_url_root = '/portal'
+
     # Configuration for the application, engines, and railties goes here.
     #
     # These settings can be overridden in specific environments using the files

@@ -14,3 +14,7 @@ The DPC website can be run locally via docker. Follow the below steps to build a
 ## View Components
 
 We utilize the [ViewComponent](https://viewcomponent.org/) library to create custom components. These components are documented and viewable within [Lookbook](http://localhost:3100/portal/lookbook).
+
+## Assets Pipeline
+
+Read more about the assets pipeline [here](/docs/portal/assets-pipeline.md).
