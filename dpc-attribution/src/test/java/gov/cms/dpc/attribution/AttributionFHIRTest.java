@@ -56,6 +56,7 @@ class AttributionFHIRTest {
     static void setup() throws Exception {
         SharedConfigurationState.clear();
         APPLICATION.before();
+        SharedConfigurationState.clear();
         APPLICATION.getApplication().run("db", "drop-all", "--confirm-delete-everything", "ci.application.conf");
         APPLICATION.getApplication().run("db", "migrate", "ci.application.conf");
 
