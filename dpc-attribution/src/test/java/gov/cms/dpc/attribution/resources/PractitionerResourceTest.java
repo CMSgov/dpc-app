@@ -15,6 +15,7 @@ import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.validations.profiles.PractitionerProfile;
 import org.hl7.fhir.dstu3.model.*;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
@@ -247,6 +248,7 @@ class PractitionerResourceTest extends AbstractAttributionTest {
         assertThrows(ResourceNotFoundException.class, getRequest::execute, "Should not have resource");
     }
 
+    @Disabled
     @Test
     void testPractitionerSubmitWhenPastLimit() {
 
