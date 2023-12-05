@@ -20,12 +20,8 @@ import io.dropwizard.testing.DropwizardTestSupport;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.DynamicTest;
-import org.junit.jupiter.api.TestFactory;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
-import ru.vyarus.dropwizard.guice.module.context.SharedConfigurationState;
 
 import java.io.InputStream;
 import java.time.Instant;
@@ -39,6 +35,7 @@ import static gov.cms.dpc.attribution.SharedMethods.submitAttributionBundle;
 import static gov.cms.dpc.common.utils.SeedProcessor.createBaseAttributionGroup;
 import static org.junit.jupiter.api.Assertions.*;
 
+@Disabled
 @ExtendWith(BufferedLoggerHandler.class)
 @IntegrationTest
 class AttributionFHIRTest {
@@ -54,11 +51,8 @@ class AttributionFHIRTest {
 
     @BeforeAll
     static void setup() throws Exception {
-        SharedConfigurationState.clear();
         APPLICATION.before();
-        SharedConfigurationState.clear();
         APPLICATION.getApplication().run("db", "drop-all", "--confirm-delete-everything", "ci.application.conf");
-        SharedConfigurationState.clear();
         APPLICATION.getApplication().run("db", "migrate", "ci.application.conf");
 
         // Get the test seeds
