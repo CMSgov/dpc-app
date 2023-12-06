@@ -8,6 +8,7 @@ import gov.cms.dpc.testing.IntegrationTest;
 import io.dropwizard.testing.DropwizardTestSupport;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import ru.vyarus.dropwizard.guice.module.context.SharedConfigurationState;
 
 @IntegrationTest
 public abstract class AbstractConsentTest {
@@ -18,7 +19,9 @@ public abstract class AbstractConsentTest {
     @BeforeAll
     public static void initDB() throws Exception {
         APPLICATION.before();
+        SharedConfigurationState.clear();
         APPLICATION.getApplication().run("db", "migrate", "ci.application.conf");
+        SharedConfigurationState.clear();
         APPLICATION.getApplication().run("seed", "ci.application.conf");
     }
 

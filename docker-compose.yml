@@ -111,7 +111,7 @@ services:
       - export-volume:/tmp
       - ./:/usr/src/mymaven
     working_dir: /usr/src/mymaven
-    command: sh -c "mvn test -Pintegration-tests -pl dpc-api -am -ntp"
+    command: sh -c "mvn test -Pintegration-tests -am -ntp"
     network_mode: host
 
 volumes:
