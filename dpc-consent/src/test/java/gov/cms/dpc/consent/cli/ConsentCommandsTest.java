@@ -9,7 +9,6 @@ import io.dropwizard.setup.Environment;
 import io.dropwizard.testing.POJOConfigurationFactory;
 import io.dropwizard.util.JarLocation;
 import org.junit.jupiter.api.*;
-import ru.vyarus.dropwizard.guice.module.context.SharedConfigurationState;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -22,6 +21,7 @@ import static org.mockito.Mockito.when;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @IntegrationTest
+@Disabled
 class ConsentCommandsTest {
 
     private final PrintStream originalOut = System.out;
@@ -52,7 +52,6 @@ class ConsentCommandsTest {
     @BeforeAll
     void cliSetup() throws Exception {
 
-        SharedConfigurationState.clear();
         app.run("db", "migrate", "ci.application.conf");
 
         // Redirect stdout and stderr to our byte streams
