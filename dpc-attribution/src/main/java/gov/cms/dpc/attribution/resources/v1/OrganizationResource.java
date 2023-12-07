@@ -67,7 +67,8 @@ public class OrganizationResource extends AbstractOrganizationResource {
                     .map(o -> this.converter.toFHIR(Organization.class, o))
                     .collect(Collectors.toList());
         }
-        Set<String> idSet = Arrays.asList(identifier.split(",")).stream().collect(Collectors.toSet());
+        String parsedToken = parseTokenTag((tag) -> tag, identifier);
+        Set<String> idSet = Arrays.asList(parsedToken.split(",")).stream().collect(Collectors.toSet());
         if (idSet.size() > 1) {
             return this.dao.getOrganizationsByIds(idSet)
                 .stream()
@@ -75,7 +76,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
                 .collect(Collectors.toList());
         }
         // Pull out the NPI, keeping it as a string.
-        final List<OrganizationEntity> queryList = this.dao.searchByIdentifier(parseTokenTag((tag) -> tag, identifier));
+        final List<OrganizationEntity> queryList = this.dao.searchByIdentifier(parsedToken);
 
         return queryList
                 .stream()
