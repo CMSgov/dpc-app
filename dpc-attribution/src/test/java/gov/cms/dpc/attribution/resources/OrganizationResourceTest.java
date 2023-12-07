@@ -42,7 +42,7 @@ class OrganizationResourceTest extends AbstractAttributionTest {
         OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "1633101112", false);
         OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "1733101113", false);
         Map<String, List<String>> searchParams = new HashMap<>();
-        searchParams.put("identifier", Collections.singletonList("1633101112, 1733101113"));
+        searchParams.put("identifier", Collections.singletonList("id|1633101112, 1733101113"));
         final Bundle organizations = client
                 .search()
                 .forResource(Organization.class)

@@ -44,7 +44,7 @@ public class AdminResourceUnitTest {
         UUID orgID2 = UUID.randomUUID();
         Organization organization2 = new Organization();
         organization2.setId(orgID2.toString());
-        String ids = orgID1.toString()+","+orgID2.toString();
+        String ids = "id|"+orgID1.toString()+","+orgID2.toString();
         Bundle bundle = new Bundle();
         bundle.addEntry().setResource(organization1);
         bundle.addEntry().setResource(organization2);
