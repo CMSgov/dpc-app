@@ -25,8 +25,11 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
+
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -64,8 +67,16 @@ public class OrganizationResource extends AbstractOrganizationResource {
                     .map(o -> this.converter.toFHIR(Organization.class, o))
                     .collect(Collectors.toList());
         }
+        String parsedToken = parseTokenTag((tag) -> tag, identifier);
+        Set<String> idSet = Arrays.asList(parsedToken.split(",")).stream().collect(Collectors.toSet());
+        if (idSet.size() > 1) {
+            return this.dao.getOrganizationsByIds(idSet)
+                .stream()
+                .map(o -> this.converter.toFHIR(Organization.class, o))
+                .collect(Collectors.toList());
+        }
         // Pull out the NPI, keeping it as a string.
-        final List<OrganizationEntity> queryList = this.dao.searchByIdentifier(parseTokenTag((tag) -> tag, identifier));
+        final List<OrganizationEntity> queryList = this.dao.searchByIdentifier(parsedToken);
 
         return queryList
                 .stream()

@@ -1,8 +1,9 @@
 package gov.cms.dpc.api.resources.v1;
 
-import java.util.Arrays;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
@@ -48,18 +49,15 @@ public class AdminResource extends AbstractAdminResource{
     @ApiResponses(value = {
             @ApiResponse(code = 401, message = "Only administrators can use this endpoint")})
     public Bundle getOrganizations(@NotNull @QueryParam(value="ids") String ids) {
+        Map<String, List<String>> searchParams = new HashMap<>();
+        searchParams.put("identifier", Collections.singletonList(ids));
         Bundle bundle = this.client
                     .search()
                     .forResource(Organization.class)
+                    .whereMap(searchParams)
                     .encodedJson()
                     .returnBundle(Bundle.class)
                     .execute();
-        Set<String> idSet = Arrays.asList(ids.split(",")).stream().collect(Collectors.toSet());
-        bundle.setEntry(bundle.getEntry()
-                            .stream()
-                            .filter(entry -> idSet.contains(entry.getResource().getId()))
-                            .collect(Collectors.toList())
-        );
         return bundle;
     }
 }
