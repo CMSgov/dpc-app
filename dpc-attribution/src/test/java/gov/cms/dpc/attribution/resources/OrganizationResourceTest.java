@@ -40,16 +40,13 @@ class OrganizationResourceTest extends AbstractAttributionTest {
     void testGetOrganizationsByIds() {
         final IGenericClient client = AttributionTestHelpers.createFHIRClient(ctx, getServerURL());
         List<String> ids = new ArrayList<String>();
-        try {
-                final Organization testOrg2 = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "1733101113", true);
-                final Organization testOrg1 = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "1234567777", true);
-                ids.add(testOrg1.getIdentifierFirstRep().getId());
-                ids.add(testOrg2.getIdentifierFirstRep().getId());
-        } catch(Exception e) {
-                System.out.println("testGetOrganizationsByIds error: "+e);
-        }
+        final Organization testOrg2 = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "1633101111", false);
+        final Organization testOrg1 = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "1633101110", false);
+        ids.add(testOrg1.getIdentifierFirstRep().getId());
+        ids.add(testOrg2.getIdentifierFirstRep().getId());
+
         Map<String, List<String>> searchParams = new HashMap<>();
-        searchParams.put("identifier", Collections.singletonList("id|1833191124,1733101113"));
+        searchParams.put("identifier", Collections.singletonList("id|1633101111,1633101110"));
         final Bundle organizations = client
                 .search()
                 .forResource(Organization.class)
