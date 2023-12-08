@@ -39,10 +39,10 @@ class OrganizationResourceTest extends AbstractAttributionTest {
     @Test
     void testGetOrganizationsByIds() {
         final IGenericClient client = AttributionTestHelpers.createFHIRClient(ctx, getServerURL());
-        Organization testOrg1 = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "1833101112", false);
+        Organization testOrg1 = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "1833191124", false);
         Organization testOrg2 = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "1733101113", false);
         Map<String, List<String>> searchParams = new HashMap<>();
-        searchParams.put("identifier", Collections.singletonList("id|1833101112,1733101113"));
+        searchParams.put("identifier", Collections.singletonList("id|1833191124,1733101113"));
         final Bundle organizations = client
                 .search()
                 .forResource(Organization.class)
@@ -52,8 +52,9 @@ class OrganizationResourceTest extends AbstractAttributionTest {
                 .execute();
 
         List<String> ids = new ArrayList<String>();
-        ids.add(testOrg1.getIdentifierFirstRep().toString());
-        ids.add(testOrg2.getIdentifierFirstRep().toString());
+        System.out.println(testOrg1.getIdentifierFirstRep().getId());
+        ids.add(testOrg1.getIdentifierFirstRep().getId());
+        ids.add(testOrg2.getIdentifierFirstRep().getId());
         assertEquals(ids.size(), organizations.getEntry().size());
     }
 
@@ -206,7 +207,7 @@ class OrganizationResourceTest extends AbstractAttributionTest {
         Identifier identifier = new Identifier();
         identifier.setSystem(DPCIdentifierSystem.NPPES.getSystem());
         identifier.setValue("1633101112");
-        assertEquals(organization1.getIdentifierFirstRep().toString(), organization2.getIdentifierFirstRep().toString());
+        assertEquals(organization1.getIdentifierFirstRep().getId(), organization2.getIdentifierFirstRep().getId());
 
         organization2.setIdentifier(Collections.singletonList(identifier));
         IUpdateTyped update = client.update().resource(organization2);
