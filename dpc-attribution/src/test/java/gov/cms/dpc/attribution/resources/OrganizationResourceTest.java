@@ -39,10 +39,10 @@ class OrganizationResourceTest extends AbstractAttributionTest {
     @Test
     void testGetOrganizationsByIds() {
         final IGenericClient client = AttributionTestHelpers.createFHIRClient(ctx, getServerURL());
-        OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "1633101112", false);
-        OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "1733101113", false);
+        Organization testOrg1 = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "1633101112", false);
+        Organization testOrg2 = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "1733101113", false);
         Map<String, List<String>> searchParams = new HashMap<>();
-        searchParams.put("identifier", Collections.singletonList("id|1633101112, 1733101113"));
+        searchParams.put("identifier", Collections.singletonList("id|1633101112,1733101113"));
         final Bundle organizations = client
                 .search()
                 .forResource(Organization.class)
@@ -52,9 +52,9 @@ class OrganizationResourceTest extends AbstractAttributionTest {
                 .execute();
 
         List<String> ids = new ArrayList<String>();
-        ids.add("1633101112");
-        ids.add("1733101113");
-        assertEquals(2, organizations.getEntry().size());
+        ids.add(testOrg1.getIdentifierFirstRep().toString());
+        ids.add(testOrg2.getIdentifierFirstRep().toString());
+        assertEquals(ids.size(), organizations.getEntry().size());
     }
 
     @Test
@@ -200,12 +200,13 @@ class OrganizationResourceTest extends AbstractAttributionTest {
     @Test
     void testUpdateOrganizationWithDuplicateNPI() {
         final IGenericClient client = AttributionTestHelpers.createFHIRClient(ctx, getServerURL());
-        OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "1633101112", false);
+        Organization organization1 = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "1633101112", false);
         Organization organization2 = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "1235567892", false);
 
         Identifier identifier = new Identifier();
         identifier.setSystem(DPCIdentifierSystem.NPPES.getSystem());
         identifier.setValue("1633101112");
+        assertEquals(organization1.getIdentifierFirstRep().toString(), organization2.getIdentifierFirstRep().toString());
 
         organization2.setIdentifier(Collections.singletonList(identifier));
         IUpdateTyped update = client.update().resource(organization2);
