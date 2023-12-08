@@ -39,7 +39,7 @@ class OrganizationResourceTest extends AbstractAttributionTest {
     @Test
     void testGetOrganizationsByIds() {
         final IGenericClient client = AttributionTestHelpers.createFHIRClient(ctx, getServerURL());
-        Organization testOrg1 = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "1833191124", false);
+        Organization testOrg1 = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "1833191124", true);
         Organization testOrg2 = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "1733101113", false);
         Map<String, List<String>> searchParams = new HashMap<>();
         searchParams.put("identifier", Collections.singletonList("id|1833191124,1733101113"));
