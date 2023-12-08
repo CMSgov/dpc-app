@@ -4,20 +4,71 @@ require 'oauth2'
 
 # A client for requests to the CPI API Gateway
 class CPIAPIGatewayClient
-  attr_accessor :token
+  attr_accessor :access
 
   def initialize
+    env = ENV.fetch('ENV', nil)
     client_id = ENV.fetch('CPI_API_GW_CLIENT_ID', nil)
     client_secret = ENV.fetch('CPI_API_GW_CLIENT_SECRET', nil)
+    cms_idm_url = ENV.fetch('CMS_IDM_OAUTH_URL', nil)
+    @cpi_api_gateway_url = ENV.fetch('CPI_API_GW_BASE_URL', nil)
+
     @client = OAuth2::Client.new(client_id, client_secret,
-                                 site: 'https://impl.idp.idm.cms.gov/',
-                                 token_url: '/oauth2/aus2151jb0hszrbLU297/v1/token')
+                                 site: cms_idm_url,
+                                 token_url: '/oauth2/aus2151jb0hszrbLU297/v1/token',
+                                 ssl: {
+                                  verify: env == 'local' ? false : true
+                                 })
     fetch_token
+  end
+
+  def fetch_enrollment_id(npi)
+    refresh_token
+    body = { providerID: { npi: npi.to_s } }.to_json
+    response = @access.post(@cpi_api_gateway_url + 'api/1.0/ppr/providers/enrollments',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: body)
+    response.parsed
+  end
+
+  def fetch_enrollment_roles(enrollment_id)
+    refresh_token
+    response = @access.get(@cpi_api_gateway_url + 'api/1.0/ppr/providers/enrollments/' + enrollment_id + '/roles',
+                            headers: { 'Content-Type': 'application/json' })
+    response.parsed
+  end
+
+  def fetch_authorized_official_med_sanctions(ssn)
+    refresh_token
+    body =  {
+      providerID: {
+        providerType: "ind",
+        identity: {
+          idType: "ssn",
+          id: ssn.to_s
+        }
+      },
+      dataSets: {
+      subjectAreas: {
+          medSanctions: true
+      }
+  }
+    }.to_json
+    response = @access.post(@cpi_api_gateway_url + 'api/1.0/ppr/providers',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: body)
+    response.parsed
   end
 
   private
 
   def fetch_token
-    @token = @client.client_credentials.get_token
+    @access = @client.client_credentials.get_token(scope: 'READ')
+  end
+
+  def refresh_token
+    if @access.expired?
+      fetch_token
+    end
   end
 end
