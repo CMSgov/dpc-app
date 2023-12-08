@@ -38,15 +38,15 @@ class OrganizationResourceTest extends AbstractAttributionTest {
 
     @Test
     void testGetOrganizationsByIds() {
-        final IGenericClient client = AttributionTestHelpers.createFHIRClient(ctx, getServerURL());
         List<String> ids = new ArrayList<String>();
-        final Organization testOrg2 = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "1633101111", false);
-        final Organization testOrg1 = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "1633101110", false);
-        ids.add(testOrg1.getIdentifierFirstRep().getId());
-        ids.add(testOrg2.getIdentifierFirstRep().getId());
+        final IGenericClient client = AttributionTestHelpers.createFHIRClient(ctx, getServerURL());
+        Organization organization1 = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "1633101112", true);
+        Organization organization2 = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "1235567892", false);
+        ids.add(organization1.getIdentifierFirstRep().getId());
+        ids.add(organization2.getIdentifierFirstRep().getId());
 
         Map<String, List<String>> searchParams = new HashMap<>();
-        searchParams.put("identifier", Collections.singletonList("id|1633101111,1633101110"));
+        searchParams.put("identifier", Collections.singletonList("id|"+organization1.getIdentifierFirstRep().getId()+","+organization2.getIdentifierFirstRep().getId()));
         final Bundle organizations = client
                 .search()
                 .forResource(Organization.class)
