@@ -1,0 +1,10 @@
+@use "uswds-core" with (
+    // USWDS assets are compiled from the node_modules folder, so we need
+    // to ensure that the compiled assets are referenced correctly.
+    //
+    // See also: config/initializers/uswds.rb
+    $theme-image-path: "@uswds/uswds/dist/img",
+    $theme-font-path: "@uswds/uswds/dist/fonts",
+    $theme-show-compile-warnings: true,
+    $theme-show-notifications: false
+);

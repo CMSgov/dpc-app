@@ -1,17 +1,29 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>DpcPortal</title>
+    <title>Data at the Point of Care</title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
-
+    <%= javascript_include_tag '@uswds/uswds/dist/js/uswds-init.min.js' %>
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
   </head>
-
-  <body>
-    <p class="notice"><%= notice %></p>
-    <p class="alert"><%= alert %></p>
-    <%= yield %>
+  <body class="grid-container margin-top-5 margin-bottom-8">
+    <%= javascript_include_tag '@uswds/uswds/dist/js/uswds.min.js' %>
+    <div class="grid-row">
+      <div class="grid-col-fill">
+        <% if notice %>
+          <%= render Alert::Component.new do %>
+            <%= notice %>
+          <% end %>
+        <% end %>
+        <% if alert %>
+          <%= render Alert::Component.new(status: :error) do %>
+            <%= alert %>
+          <% end %>
+        <% end %>
+        <%= yield %>
+      </div>
+    </div>
   </body>
 </html>

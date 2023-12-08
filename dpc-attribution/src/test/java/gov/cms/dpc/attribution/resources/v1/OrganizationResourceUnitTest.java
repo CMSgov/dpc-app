@@ -66,6 +66,7 @@ public class OrganizationResourceUnitTest {
         Mockito.when(mockOrganizationDao.getOrganizationsByIds(any())).thenReturn(orgEntList);
 
         List<Organization> orgs = resource.searchOrganizations("id|123,456");
+
         assertEquals(2, orgs.size());
     }
 

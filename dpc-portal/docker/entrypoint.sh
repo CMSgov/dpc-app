@@ -10,18 +10,18 @@ fi
 if [ "$1" == "portal" ]; then
   # Start the database service (and make accessible outside the Docker container)
   echo "Starting Rails server..."
-  if [[ -n "$JACOCO" ]]; then
+  
+  echo "Migrating the database..."
+  bundle exec rails db:migrate
+
+  if [[ "$RAILS_ENV" == "production" ]]; then
     bundle exec rails server -b 0.0.0.0 -p 3100
   else
-    bundle exec rails server -b 0.0.0.0 -p 3100 2>&1 | tee -a /var/log/dpc-portal-$(hostname).log
+    ./bin/dev
   fi
 fi
 
 if [ "$1" == "sidekiq" ]; then
   # Start Sidekiq job processing
-  if [[ -n "$JACOCO" ]]; then
-    bundle exec sidekiq -q default -q mailers
-  else
-    bundle exec sidekiq -q default -q mailers 2>&1 | tee -a /var/log/dpc-portal-$(hostname)-sidekiq.log
-  fi
+  bundle exec sidekiq -q portal
 fi
