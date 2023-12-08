@@ -39,10 +39,10 @@ class OrganizationResourceTest extends AbstractAttributionTest {
     @Test
     void testGetOrganizationsByIds() {
         final IGenericClient client = AttributionTestHelpers.createFHIRClient(ctx, getServerURL());
-        Organization testOrg1 = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "1633101112", false);
+        Organization testOrg1 = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "1833101112", false);
         Organization testOrg2 = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "1733101113", false);
         Map<String, List<String>> searchParams = new HashMap<>();
-        searchParams.put("identifier", Collections.singletonList("id|1633101112,1733101113"));
+        searchParams.put("identifier", Collections.singletonList("id|1833101112,1733101113"));
         final Bundle organizations = client
                 .search()
                 .forResource(Organization.class)
@@ -200,7 +200,7 @@ class OrganizationResourceTest extends AbstractAttributionTest {
     @Test
     void testUpdateOrganizationWithDuplicateNPI() {
         final IGenericClient client = AttributionTestHelpers.createFHIRClient(ctx, getServerURL());
-        Organization organization1 = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "1633101112", false);
+        Organization organization1 = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "1633101112", true);
         Organization organization2 = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "1235567892", false);
 
         Identifier identifier = new Identifier();
