@@ -37,29 +37,6 @@ class OrganizationResourceTest extends AbstractAttributionTest {
     }
 
     @Test
-    void testGetOrganizationsByIds() {
-        List<String> ids = new ArrayList<String>();
-        final IGenericClient client = AttributionTestHelpers.createFHIRClient(ctx, getServerURL());
-        Organization organization1 = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "1633101111", true);
-        Organization organization2 = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "1235567893", false);
-        ids.add(organization1.getIdentifierFirstRep().getId());
-        ids.add(organization2.getIdentifierFirstRep().getId());
-
-        Map<String, List<String>> searchParams = new HashMap<>();
-        System.out.println("org1: "+organization1.getIdentifierFirstRep().getId());
-        searchParams.put("identifier", Collections.singletonList("id|"+organization1.getIdentifierFirstRep().getId()+","+organization2.getIdentifierFirstRep().getId()));
-        final Bundle organizations = client
-                .search()
-                .forResource(Organization.class)
-                .whereMap(searchParams)
-                .returnBundle(Bundle.class)
-                .encodedJson()
-                .execute();
-
-        assertEquals(ids.size(), organizations.getEntry().size());
-    }
-
-    @Test
     void testInvalidOrganization() {
 
         // Create fake organization with missing data
@@ -213,6 +190,29 @@ class OrganizationResourceTest extends AbstractAttributionTest {
         organization2.setIdentifier(Collections.singletonList(identifier));
         IUpdateTyped update = client.update().resource(organization2);
         assertThrows(InvalidRequestException.class, update::execute);
+    }
+
+    @Test
+    void testGetOrganizationsByIds() {
+        List<String> ids = new ArrayList<String>();
+        final IGenericClient client = AttributionTestHelpers.createFHIRClient(ctx, getServerURL());
+        Organization organization1 = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "1633101191", false);
+        Organization organization2 = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "1235567893", false);
+        ids.add(organization1.getIdentifierFirstRep().getId());
+        ids.add(organization2.getIdentifierFirstRep().getId());
+
+        Map<String, List<String>> searchParams = new HashMap<>();
+        System.out.println("org1: "+organization1.getIdentifierFirstRep().getId());
+        searchParams.put("identifier", Collections.singletonList("id|"+organization1.getIdentifierFirstRep().getId()+","+organization2.getIdentifierFirstRep().getId()));
+        final Bundle organizations = client
+                .search()
+                .forResource(Organization.class)
+                .whereMap(searchParams)
+                .returnBundle(Bundle.class)
+                .encodedJson()
+                .execute();
+
+        assertEquals(ids.size(), organizations.getEntry().size());
     }
 
     private Practitioner createFakePractitioner(Organization organization) {
