@@ -2,7 +2,7 @@ package gov.cms.dpc.attribution.resources;
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.gclient.IUpdateTyped;
+// import ca.uhn.fhir.rest.gclient.IUpdateTyped;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.dpc.attribution.AbstractAttributionTest;
@@ -195,24 +195,24 @@ class OrganizationResourceTest extends AbstractAttributionTest {
     @Test
     void testGetOrganizationsByIds() {
         List<String> ids = new ArrayList<String>();
-        // final IGenericClient client = AttributionTestHelpers.createFHIRClient(ctx, getServerURL());
+        final IGenericClient client = AttributionTestHelpers.createFHIRClient(ctx, getServerURL());
         Organization organization1 = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "1633101112", true);
         Organization organization2 = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "1235567892", false);
         ids.add(organization1.getIdentifierFirstRep().getId());
         ids.add(organization2.getIdentifierFirstRep().getId());
 
-        // Map<String, List<String>> searchParams = new HashMap<>();
-        // System.out.println("org1: "+organization1.getIdentifierFirstRep().getId());
-        // searchParams.put("identifier", Collections.singletonList("id|"+organization1.getIdentifierFirstRep().getId()+","+organization2.getIdentifierFirstRep().getId()));
-        // final Bundle organizations = client
-        //         .search()
-        //         .forResource(Organization.class)
-        //         .whereMap(searchParams)
-        //         .returnBundle(Bundle.class)
-        //         .encodedJson()
-        //         .execute();
+        Map<String, List<String>> searchParams = new HashMap<>();
+        System.out.println("org1: "+organization1.getIdentifierFirstRep().getId());
+        searchParams.put("identifier", Collections.singletonList("id|"+organization1.getIdentifierFirstRep().getId()+","+organization2.getIdentifierFirstRep().getId()));
+        final Bundle organizations = client
+                .search()
+                .forResource(Organization.class)
+                .whereMap(searchParams)
+                .returnBundle(Bundle.class)
+                .encodedJson()
+                .execute();
 
-        // assertEquals(ids.size(), organizations.getEntry().size());
+        assertEquals(ids.size(), organizations.getEntry().size());
     }
 
     private Practitioner createFakePractitioner(Organization organization) {
