@@ -170,11 +170,11 @@ RSpec.describe PublicKeysController, type: :controller do
           }
         )
 
-        expect(post :create, params: {
+        expect((post :create, params: {
           organization_id: org.id,
           public_key: 'test key',
           label: 'aaaaabbbbbcccccddddd'
-        }).to redirect_to(portal_path)
+        })).to redirect_to(portal_path)
       end
     end
   end
@@ -245,9 +245,9 @@ RSpec.describe PublicKeysController, type: :controller do
     it 'renders an error and redirects to portal' do
       expect(controller).to receive(:organization_enabled?).and_raise(ActiveRecord::RecordNotFound)
 
-      expect(get :new, params: {
+      expect((get :new, params: {
         organization_id: '1'
-      }).to redirect_to(portal_path)
+      })).to redirect_to(portal_path)
     end
   end
 end

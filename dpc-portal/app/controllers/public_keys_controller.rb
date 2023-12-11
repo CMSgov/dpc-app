@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Creates and destroys public keys
 class PublicKeysController < ApplicationController
   layout 'public-key-new'
 

@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Manages creation and deletion of public keys
 class PublicKeyManager
   attr_reader :registered_organization, :errors
 
@@ -8,8 +9,7 @@ class PublicKeyManager
     @errors = []
   end
 
-  def create_public_key(public_key:, label:,
-                        snippet_signature:)
+  def create_public_key(public_key:, label:, snippet_signature:)
     public_key = strip_carriage_returns(public_key)
     snippet_signature = strip_carriage_returns(snippet_signature)
 
@@ -19,9 +19,8 @@ class PublicKeyManager
     end
 
     api_client = DpcClient.new
-    api_client.create_public_key(api_id,
-                                 params: { label: label, public_key: public_key,
-                                           snippet_signature: snippet_signature })
+    api_client.create_public_key(api_id, params: { label: label, public_key: public_key,
+                                                   snippet_signature: snippet_signature })
 
     { response: api_client.response_successful?,
       message: api_client.response_body }

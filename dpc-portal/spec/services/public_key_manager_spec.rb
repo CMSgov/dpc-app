@@ -5,7 +5,8 @@ require 'rails_helper'
 RSpec.describe PublicKeyManager do
   describe '#create_public_key' do
     before(:each) do
-      @public_key_params = { label: 'Test Key 1', public_key: file_fixture('stubbed_key.pem').read, snippet_signature: 'stubbed_sign_txt_signature' }
+      @public_key_params = { label: 'Test Key 1', public_key: file_fixture('stubbed_key.pem').read,
+                             snippet_signature: 'stubbed_sign_txt_signature' }
     end
 
     context 'with valid key' do
@@ -53,7 +54,8 @@ RSpec.describe PublicKeyManager do
         registered_org = build(:registered_organization)
         manager = PublicKeyManager.new(registered_organization: registered_org)
 
-        new_public_key = manager.create_public_key(label: 'Test Key 1', public_key: file_fixture('private_key.pem').read, snippet_signature: 'stubbed_sign_txt_signature')
+        new_public_key = manager.create_public_key(label: 'Test Key 1', public_key: file_fixture('private_key.pem').read,
+                                                   snippet_signature: 'stubbed_sign_txt_signature')
 
         expect(new_public_key[:response]).to eq(false)
       end
@@ -62,7 +64,8 @@ RSpec.describe PublicKeyManager do
         registered_org = build(:registered_organization)
         manager = PublicKeyManager.new(registered_organization: registered_org)
 
-        new_public_key = manager.create_public_key(label: 'Test Key 1', public_key: file_fixture('bad_cert.pub').read, snippet_signature: 'stubbed_sign_txt_signature')
+        new_public_key = manager.create_public_key(label: 'Test Key 1', public_key: file_fixture('bad_cert.pub').read,
+                                                   snippet_signature: 'stubbed_sign_txt_signature')
 
         expect(new_public_key[:response]).to eq(false)
       end
@@ -71,7 +74,8 @@ RSpec.describe PublicKeyManager do
 
   describe '#delete_public_key' do
     before(:each) do
-      @public_key_params = { label: 'Test Key 1', public_key: file_fixture('stubbed_key.pem').read, snippet_signature: 'stubbed_sign_txt_signature' }
+      @public_key_params = { label: 'Test Key 1', public_key: file_fixture('stubbed_key.pem').read,
+                             snippet_signature: 'stubbed_sign_txt_signature' }
     end
 
     context 'with valid key' do
@@ -127,7 +131,8 @@ RSpec.describe PublicKeyManager do
         registered_org = build(:registered_organization)
         manager = PublicKeyManager.new(registered_organization: registered_org)
 
-        new_public_key = manager.create_public_key(label: 'Test Key 1', public_key: file_fixture('private_key.pem').read, snippet_signature: 'stubbed_sign_txt_signature')
+        new_public_key = manager.create_public_key(label: 'Test Key 1', public_key: file_fixture('private_key.pem').read,
+                                                   snippet_signature: 'stubbed_sign_txt_signature')
 
         expect(new_public_key[:response]).to eq(false)
       end
@@ -136,7 +141,8 @@ RSpec.describe PublicKeyManager do
         registered_org = build(:registered_organization)
         manager = PublicKeyManager.new(registered_organization: registered_org)
 
-        new_public_key = manager.create_public_key(label: 'Test Key 1', public_key: file_fixture('bad_cert.pub').read, snippet_signature: 'stubbed_sign_txt_signature')
+        new_public_key = manager.create_public_key(label: 'Test Key 1', public_key: file_fixture('bad_cert.pub').read,
+                                                   snippet_signature: 'stubbed_sign_txt_signature')
 
         expect(new_public_key[:response]).to eq(false)
       end
