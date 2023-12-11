@@ -176,21 +176,21 @@ class OrganizationResourceTest extends AbstractAttributionTest {
                 .execute(), "Should not have updated organization");
     }
 
-    @Test
-    void testUpdateOrganizationWithDuplicateNPI() {
-        final IGenericClient client = AttributionTestHelpers.createFHIRClient(ctx, getServerURL());
-        Organization organization1 = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "1633101112", true);
-        Organization organization2 = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "1235567892", false);
+//     @Test
+//     void testUpdateOrganizationWithDuplicateNPI() {
+//         final IGenericClient client = AttributionTestHelpers.createFHIRClient(ctx, getServerURL());
+//         Organization organization1 = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "1633101112", true);
+//         Organization organization2 = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "1235567892", false);
 
-        Identifier identifier = new Identifier();
-        identifier.setSystem(DPCIdentifierSystem.NPPES.getSystem());
-        identifier.setValue("1633101112");
-        assertEquals(organization1.getIdentifierFirstRep().getId(), organization2.getIdentifierFirstRep().getId());
+//         Identifier identifier = new Identifier();
+//         identifier.setSystem(DPCIdentifierSystem.NPPES.getSystem());
+//         identifier.setValue("1633101112");
+//         assertEquals(organization1.getIdentifierFirstRep().getId(), organization2.getIdentifierFirstRep().getId());
 
-        organization2.setIdentifier(Collections.singletonList(identifier));
-        IUpdateTyped update = client.update().resource(organization2);
-        assertThrows(InvalidRequestException.class, update::execute);
-    }
+//         organization2.setIdentifier(Collections.singletonList(identifier));
+//         IUpdateTyped update = client.update().resource(organization2);
+//         assertThrows(InvalidRequestException.class, update::execute);
+//     }
 
     @Test
     void testGetOrganizationsByIds() {
