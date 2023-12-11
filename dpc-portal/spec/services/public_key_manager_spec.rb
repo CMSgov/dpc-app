@@ -50,16 +50,17 @@ RSpec.describe PublicKeyManager do
 
     context 'with invalid key' do
       it 'returns false when key is private' do
-        force_key_private
-
         api_id = SecureRandom.uuid
         manager = PublicKeyManager.new(api_id)
 
-        new_public_key = manager.create_public_key(label: 'Test Key 1',
-                                                   public_key: file_fixture('stubbed_key.pem').read,
-                                                   snippet_signature: 'stubbed_sign_txt_signature')
+        force_key_private
+        response = manager.create_public_key(label: 'Test Key 1',
+                                             public_key: file_fixture('stubbed_key.pem').read,
+                                             snippet_signature: 'stubbed_sign_txt_signature')
 
-        expect(new_public_key[:response]).to eq(false)
+        expect(response[:response]).to eq(false)
+        expect(manager.errors.size).to eq 1
+        expect(manager.errors.first).to eq 'Must be a public key'
       end
 
       it 'returns false when key is not in pem format' do
@@ -113,17 +114,17 @@ RSpec.describe PublicKeyManager do
 
     context 'with invalid key' do
       it 'returns false when key is private' do
-        force_key_private
-
         api_id = SecureRandom.uuid
-
         manager = PublicKeyManager.new(api_id)
 
-        new_public_key = manager.create_public_key(label: 'Test Key 1',
-                                                   public_key: file_fixture('stubbed_key.pem').read,
-                                                   snippet_signature: 'stubbed_sign_txt_signature')
+        force_key_private
+        response = manager.create_public_key(label: 'Test Key 1',
+                                             public_key: file_fixture('stubbed_key.pem').read,
+                                             snippet_signature: 'stubbed_sign_txt_signature')
 
-        expect(new_public_key[:response]).to eq(false)
+        expect(response[:response]).to eq(false)
+        expect(manager.errors.size).to eq 1
+        expect(manager.errors.first).to eq 'Must be a public key'
       end
 
       it 'returns false when key is not in pem format' do

@@ -6,10 +6,11 @@ class OrganizationsController < ApplicationController
 
   def index
     @organizations = [@organization]
+    render plain: @organizations.inspect
   end
 
   def show
-    @organization
+    render plain: @organization.inspect
   end
 
   private

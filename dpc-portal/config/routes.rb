@@ -16,7 +16,7 @@ Rails.application.routes.draw do
   # method, which does not work correctly for applications served on a subpath.
   match '/portal', to: 'main#welcome', via: :get
 
-  resources :organizations, only: [:show]
+  resources :organizations, only: [:index, :show]
 
   if Rails.env.development?
     require 'sidekiq/web'
