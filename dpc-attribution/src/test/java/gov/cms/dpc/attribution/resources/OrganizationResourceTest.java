@@ -196,7 +196,7 @@ class OrganizationResourceTest extends AbstractAttributionTest {
     void testGetOrganizationsByIds() {
         List<String> ids = new ArrayList<String>();
         final IGenericClient client = AttributionTestHelpers.createFHIRClient(ctx, getServerURL());
-        Organization organization1 = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "1633101191", false);
+        Organization organization1 = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "1633101191", true);
         Organization organization2 = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "1235567893", false);
         ids.add(organization1.getIdentifierFirstRep().getId());
         ids.add(organization2.getIdentifierFirstRep().getId());
