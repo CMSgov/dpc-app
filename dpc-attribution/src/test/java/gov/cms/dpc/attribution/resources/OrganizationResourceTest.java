@@ -11,6 +11,7 @@ import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.testing.OrganizationHelpers;
 import org.hl7.fhir.dstu3.model.*;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import java.sql.Date;
@@ -25,15 +26,37 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class OrganizationResourceTest extends AbstractAttributionTest {
 
+        final IGenericClient client;
+        final List<Organization> organizationsToCleanUp;
+
     private OrganizationResourceTest() {
-        // Not used
+        client = AttributionTestHelpers.createFHIRClient(ctx, getServerURL());
+        organizationsToCleanUp = new ArrayList<>();
+    }
+
+    @AfterEach
+    public void cleanup() {
+        organizationsToCleanUp.forEach(organization -> {
+            try {
+                client
+                        .delete()
+                        .resourceById(new IdType(organization.getId()))
+                        .encodedJson()
+                        .execute();
+            } catch (Exception e) {
+                //ignore
+            }
+
+        });
+        organizationsToCleanUp.clear();
     }
 
     @Test
     void testBasicRegistration() {
-        final Organization organization = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()));
+        final Organization organization = OrganizationHelpers.createOrganization(ctx, client);
         assertAll(() -> assertNotNull(organization, "Should have an org back"),
                 () -> assertFalse(organization.getEndpoint().isEmpty(), "Should have endpoints"));
+        organizationsToCleanUp.add(organization);
     }
 
     @Test
@@ -42,8 +65,6 @@ class OrganizationResourceTest extends AbstractAttributionTest {
         // Create fake organization with missing data
         final Organization resource = new Organization();
         resource.addIdentifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("test-mbi");
-
-        final IGenericClient client = AttributionTestHelpers.createFHIRClient(ctx, getServerURL());
 
         final Parameters parameters = new Parameters();
         parameters.addParameter().setResource(resource).setName("resource");
@@ -66,8 +87,6 @@ class OrganizationResourceTest extends AbstractAttributionTest {
         final Organization resource = new Organization();
         resource.addIdentifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("test-mbi");
 
-        final IGenericClient client = AttributionTestHelpers.createFHIRClient(ctx, getServerURL());
-
         final Parameters parameters = new Parameters();
         parameters.addParameter().setResource(resource);
 
@@ -84,9 +103,8 @@ class OrganizationResourceTest extends AbstractAttributionTest {
 
     @Test
     void testOrgDeletion() {
-        final Organization organization = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "1234567992", false);
+        final Organization organization = OrganizationHelpers.createOrganization(ctx, client, "1234567992", false);
         // Add a fake provider and practitioner
-        final IGenericClient client = AttributionTestHelpers.createFHIRClient(ctx, getServerURL());
 
         final Practitioner practitioner = createFakePractitioner(organization);
         final MethodOutcome practCreated = client
@@ -155,8 +173,7 @@ class OrganizationResourceTest extends AbstractAttributionTest {
 
     @Test
     void testUpdateOrganization() {
-        final IGenericClient client = AttributionTestHelpers.createFHIRClient(ctx, getServerURL());
-        Organization organization = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "1632101113", false);
+        Organization organization = OrganizationHelpers.createOrganization(ctx, client, "1632101113", false);
 
         Identifier identifier = new Identifier();
         identifier.setSystem(DPCIdentifierSystem.NPPES.getSystem());
@@ -174,13 +191,13 @@ class OrganizationResourceTest extends AbstractAttributionTest {
                 .update()
                 .resource(organization)
                 .execute(), "Should not have updated organization");
+        organizationsToCleanUp.add(organization);
     }
 
     @Test
     void testUpdateOrganizationWithDuplicateNPI() {
-        final IGenericClient client = AttributionTestHelpers.createFHIRClient(ctx, getServerURL());
-        Organization organization1 = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "1633101112", true);
-        Organization organization2 = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "1235567892", false);
+        Organization organization1 = OrganizationHelpers.createOrganization(ctx, client, "1633101112", true);
+        Organization organization2 = OrganizationHelpers.createOrganization(ctx, client, "1235567892", false);
 
         Identifier identifier = new Identifier();
         identifier.setSystem(DPCIdentifierSystem.NPPES.getSystem());
@@ -190,14 +207,15 @@ class OrganizationResourceTest extends AbstractAttributionTest {
         organization2.setIdentifier(Collections.singletonList(identifier));
         IUpdateTyped update = client.update().resource(organization2);
         assertThrows(InvalidRequestException.class, update::execute);
+        organizationsToCleanUp.add(organization1);
+        organizationsToCleanUp.add(organization2);
     }
 
     @Test
     void testGetOrganizationsByIds() {
         List<String> ids = new ArrayList<String>();
-        final IGenericClient client = AttributionTestHelpers.createFHIRClient(ctx, getServerURL());
-        Organization organization1 = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "1633101114", true);
-        Organization organization2 = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "1235567893", false);
+        Organization organization1 = OrganizationHelpers.createOrganization(ctx, client, "1633101112", true);
+        Organization organization2 = OrganizationHelpers.createOrganization(ctx, client, "1235567892", false);
         ids.add(organization1.getIdentifierFirstRep().getValue());
         ids.add(organization2.getIdentifierFirstRep().getValue());
 
@@ -212,6 +230,8 @@ class OrganizationResourceTest extends AbstractAttributionTest {
                 .execute();
 
         assertEquals(ids.size(), organizations.getEntry().size());
+        organizationsToCleanUp.add(organization1);
+        organizationsToCleanUp.add(organization2);
     }
 
     private Practitioner createFakePractitioner(Organization organization) {
