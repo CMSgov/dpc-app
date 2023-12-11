@@ -1,15 +1,25 @@
-<li class="usa-card">
+<li class="usa-card" style="list-style:none">
     <div class="usa-card__container">
         <div class="usa-card__header">
-            <p class="usa-card__heading">Provider Organization</p>
+            <h2 class="usa-card__heading">
+                <%= @name %>
+            </h2>
         </div>
         <div class="usa-card__body">
-            <p>
-                NPI: whatever
-            </p>
-        </div>
-        <div class="usa-card__footer">
-            <p>Footer</p>
+            <div id="npi_div" style="float:left">
+                <p class="usa-card__text">
+                    <span style="font-weight:bold">NPI</span>
+                    <br>
+                    <span><%= @npi %></span>
+                </p>
+            </div>
+            <div id="status_div" style="float:right">
+                <p class="usa-card__text">
+                    <span style="font-weight:bold">Status</span>
+                    <br>
+                    <span style="background:<%= @status_color %>; color:white"><%= @status %></span>
+                </p>
+            </div>
         </div>
     </div>
 </li>
