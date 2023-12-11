@@ -34,7 +34,11 @@ class PublicKeysController < ApplicationController
       snippet_signature: params[:snippet_signature]
     )
 
-    new_public_key[:response] ? redirect_to portal_path : render_error new_public_key[:message]
+    if new_public_key[:response]
+        redirect_to portal_path
+    else
+        render_error new_public_key[:message]
+    end
   end
 
   def download_snippet

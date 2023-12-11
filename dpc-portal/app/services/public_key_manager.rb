@@ -13,9 +13,7 @@ class PublicKeyManager
     public_key = strip_carriage_returns(public_key)
     snippet_signature = strip_carriage_returns(snippet_signature)
 
-    if invalid_encoding?(public_key)
-      return { response: false, message: @errors[0] }
-    end
+    return { response: false, message: @errors[0] } if invalid_encoding?(public_key)
 
     api_client = DpcClient.new
     api_client.create_public_key(api_id, params: { label: label, public_key: public_key,
