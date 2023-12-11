@@ -23,8 +23,7 @@ class PublicKeysController < ApplicationController
 
   def create
     @organization = current_user.organizations.find(params[:organization_id])
-    return render_error('Required values missing.') if missing_params
-    return render_error('Label cannot be over 25 characters') if label_length
+    validate_params
 
     manager = PublicKeyManager.new(api_id: @organization.registered_organization.api_id)
 
@@ -35,9 +34,9 @@ class PublicKeysController < ApplicationController
     )
 
     if new_public_key[:response]
-        redirect_to portal_path
+      redirect_to portal_path
     else
-        render_error new_public_key[:message]
+      render_error new_public_key[:message]
     end
   end
 
@@ -58,6 +57,11 @@ class PublicKeysController < ApplicationController
 
   def label_length
     params[:label].length > 25
+  end
+
+  def validate_params
+    return render_error('Required values missing.') if missing_params
+    return render_error('Label cannot be over 25 characters') if label_length
   end
 
   def unauthorized
