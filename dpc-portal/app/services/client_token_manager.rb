@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Manages client tokens for an organization
 class ClientTokenManager
   attr_reader :api_id, :client_token
 

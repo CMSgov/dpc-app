@@ -1,21 +1,29 @@
 # frozen_string_literal: true
 
 module DpcClientSupport
-  def stub_api_client(message:, response: {}, api_client: nil)
-    doubled_client = api_client || instance_double(DpcClient)
+  def stub_api_client(message:, response: {})
+    doubled_client = instance_double(DpcClient)
     allow(DpcClient).to receive(:new).and_return(doubled_client)
     allow(doubled_client).to receive(message).and_return(response)
     doubled_client
   end
 
-  def stub_self_returning_api_client(message:, success: true, response: {}, api_client: nil)
+  # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def stub_self_returning_api_client(message:, success: true, response: {}, api_client: nil, with: nil)
     doubled_client = api_client || instance_double(DpcClient)
     allow(DpcClient).to receive(:new).and_return(doubled_client)
-    allow(doubled_client).to receive(message).and_return(doubled_client)
+    if with
+      allow(doubled_client).to receive(message)
+        .with(*with)
+        .and_return(doubled_client)
+    else
+      allow(doubled_client).to receive(message).and_return(doubled_client)
+    end
     allow(doubled_client).to receive(:response_successful?).and_return(success)
     allow(doubled_client).to receive(:response_body).and_return(response)
     doubled_client
   end
+  # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
 
   def default_get_org_response(api_id)
     FHIR::Organization.new(

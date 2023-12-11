@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Manages public keys for an organization
 class PublicKeyManager
   attr_reader :api_id, :errors
 
@@ -8,15 +9,11 @@ class PublicKeyManager
     @errors = []
   end
 
-  def create_public_key(public_key:, label:,
-                        snippet_signature:)
+  def create_public_key(public_key:, label:, snippet_signature:)
     public_key = strip_carriage_returns(public_key)
     snippet_signature = strip_carriage_returns(snippet_signature)
 
-    if invalid_encoding?(public_key)
-      return { response: false,
-               message: @errors[0] }
-    end
+    return { response: false, message: @errors[0] } if invalid_encoding?(public_key)
 
     api_client = DpcClient.new
     api_client.create_public_key(api_id,
