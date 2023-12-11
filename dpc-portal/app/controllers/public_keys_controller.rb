@@ -26,8 +26,7 @@ class PublicKeysController < ApplicationController
     return render_error('Required values missing.') if missing_params
     return render_error('Label cannot be over 25 characters') if label_length
 
-    reg_org = @organization.registered_organization
-    manager = PublicKeyManager.new(api_id: reg_org.api_id)
+    manager = PublicKeyManager.new(api_id: @organization.registered_organization.api_id)
 
     new_public_key = manager.create_public_key(
       public_key: params[:public_key],
@@ -35,11 +34,7 @@ class PublicKeysController < ApplicationController
       snippet_signature: params[:snippet_signature]
     )
 
-    if new_public_key[:response]
-      redirect_to portal_path
-    else
-      render_error new_public_key[:message]
-    end
+    new_public_key[:response] ? redirect_to portal_path : render_error new_public_key[:message]
   end
 
   def download_snippet

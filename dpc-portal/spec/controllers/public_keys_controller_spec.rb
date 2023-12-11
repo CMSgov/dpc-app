@@ -228,9 +228,9 @@ RSpec.describe PublicKeysController, type: :controller do
 
     context 'when the organization is not enabled' do
       it 'redirects to the root path' do
-        expect(get :new, params: {
+        expect((get :new, params: {
           organization_id: org.id
-        }).to redirect_to(root_path)
+        })).to redirect_to(root_path)
       end
     end
   end

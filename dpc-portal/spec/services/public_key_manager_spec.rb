@@ -5,7 +5,7 @@ require 'rails_helper'
 RSpec.describe PublicKeyManager do
   describe '#create_public_key' do
     before(:each) do
-      @public_key_params = { label: 'Test Key 1', public_key: file_fixture('stubbed_key.pem').read,
+      @public_key_params = { label: 'Test Key', public_key: file_fixture('stubbed_key.pem').read,
                              snippet_signature: 'stubbed_sign_txt_signature' }
     end
 
@@ -54,7 +54,7 @@ RSpec.describe PublicKeyManager do
         registered_org = build(:registered_organization)
         manager = PublicKeyManager.new(registered_organization: registered_org)
 
-        new_public_key = manager.create_public_key(label: 'Test Key 1', public_key: file_fixture('private_key.pem').read,
+        new_public_key = manager.create_public_key(label: 'Test Key', public_key: file_fixture('private_key.pem').read,
                                                    snippet_signature: 'stubbed_sign_txt_signature')
 
         expect(new_public_key[:response]).to eq(false)
@@ -64,7 +64,7 @@ RSpec.describe PublicKeyManager do
         registered_org = build(:registered_organization)
         manager = PublicKeyManager.new(registered_organization: registered_org)
 
-        new_public_key = manager.create_public_key(label: 'Test Key 1', public_key: file_fixture('bad_cert.pub').read,
+        new_public_key = manager.create_public_key(label: 'Test Key', public_key: file_fixture('bad_cert.pub').read,
                                                    snippet_signature: 'stubbed_sign_txt_signature')
 
         expect(new_public_key[:response]).to eq(false)
@@ -74,7 +74,7 @@ RSpec.describe PublicKeyManager do
 
   describe '#delete_public_key' do
     before(:each) do
-      @public_key_params = { label: 'Test Key 1', public_key: file_fixture('stubbed_key.pem').read,
+      @public_key_params = { label: 'Test Key', public_key: file_fixture('stubbed_key.pem').read,
                              snippet_signature: 'stubbed_sign_txt_signature' }
     end
 
@@ -131,7 +131,7 @@ RSpec.describe PublicKeyManager do
         registered_org = build(:registered_organization)
         manager = PublicKeyManager.new(registered_organization: registered_org)
 
-        new_public_key = manager.create_public_key(label: 'Test Key 1', public_key: file_fixture('private_key.pem').read,
+        new_public_key = manager.create_public_key(label: 'Test Key', public_key: file_fixture('private_key.pem').read,
                                                    snippet_signature: 'stubbed_sign_txt_signature')
 
         expect(new_public_key[:response]).to eq(false)
@@ -141,7 +141,7 @@ RSpec.describe PublicKeyManager do
         registered_org = build(:registered_organization)
         manager = PublicKeyManager.new(registered_organization: registered_org)
 
-        new_public_key = manager.create_public_key(label: 'Test Key 1', public_key: file_fixture('bad_cert.pub').read,
+        new_public_key = manager.create_public_key(label: 'Test Key', public_key: file_fixture('bad_cert.pub').read,
                                                    snippet_signature: 'stubbed_sign_txt_signature')
 
         expect(new_public_key[:response]).to eq(false)
@@ -154,15 +154,16 @@ RSpec.describe PublicKeyManager do
       it 'returns array of public keys' do
         registered_org = build(:registered_organization)
 
+        api_id = '570f7a71-0e8f-48a1-83b0-c46ac35d6ef3'
         api_client = instance_double(DpcClient)
         allow(DpcClient).to receive(:new).and_return(api_client)
         allow(api_client).to receive(:get_public_keys)
           .with(registered_org.api_id).and_return(api_client)
         allow(api_client).to receive(:response_successful?).and_return(true)
-        allow(api_client).to receive(:response_body).and_return('entities' => ['id' => '570f7a71-0e8f-48a1-83b0-c46ac35d6ef3'])
+        allow(api_client).to receive(:response_body).and_return('entities' => ['id' => api_id])
 
         manager = PublicKeyManager.new(registered_organization: registered_org)
-        expect(manager.public_keys).to eq(['id' => '570f7a71-0e8f-48a1-83b0-c46ac35d6ef3'])
+        expect(manager.public_keys).to eq(['id' => api_id])
       end
     end
 
