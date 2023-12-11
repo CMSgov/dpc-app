@@ -2,7 +2,7 @@ package gov.cms.dpc.attribution.resources;
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-// import ca.uhn.fhir.rest.gclient.IUpdateTyped;
+import ca.uhn.fhir.rest.gclient.IUpdateTyped;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.dpc.attribution.AbstractAttributionTest;
@@ -176,35 +176,32 @@ class OrganizationResourceTest extends AbstractAttributionTest {
                 .execute(), "Should not have updated organization");
     }
 
-//     @Test
-//     void testUpdateOrganizationWithDuplicateNPI() {
-//         final IGenericClient client = AttributionTestHelpers.createFHIRClient(ctx, getServerURL());
-//         Organization organization1 = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "1633101112", true);
-//         Organization organization2 = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "1235567892", false);
+    @Test
+    void testUpdateOrganizationWithDuplicateNPI() {
+        final IGenericClient client = AttributionTestHelpers.createFHIRClient(ctx, getServerURL());
+        Organization organization1 = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "1633101112", true);
+        Organization organization2 = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "1235567892", false);
 
-//         Identifier identifier = new Identifier();
-//         identifier.setSystem(DPCIdentifierSystem.NPPES.getSystem());
-//         identifier.setValue("1633101112");
-//         assertEquals(organization1.getIdentifierFirstRep().getId(), organization2.getIdentifierFirstRep().getId());
+        Identifier identifier = new Identifier();
+        identifier.setSystem(DPCIdentifierSystem.NPPES.getSystem());
+        identifier.setValue("1633101112");
+        assertEquals(organization1.getIdentifierFirstRep().getId(), organization2.getIdentifierFirstRep().getId());
 
-//         organization2.setIdentifier(Collections.singletonList(identifier));
-//         IUpdateTyped update = client.update().resource(organization2);
-//         assertThrows(InvalidRequestException.class, update::execute);
-//     }
+        organization2.setIdentifier(Collections.singletonList(identifier));
+        IUpdateTyped update = client.update().resource(organization2);
+        assertThrows(InvalidRequestException.class, update::execute);
+    }
 
     @Test
     void testGetOrganizationsByIds() {
         List<String> ids = new ArrayList<String>();
         final IGenericClient client = AttributionTestHelpers.createFHIRClient(ctx, getServerURL());
-        Organization organization1 = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "1633101112", true);
-        Organization organization2 = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "1235567892", false);
+        Organization organization1 = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "1633101114", true);
+        Organization organization2 = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "1235567893", false);
         ids.add(organization1.getIdentifierFirstRep().getValue());
         ids.add(organization2.getIdentifierFirstRep().getValue());
 
         Map<String, List<String>> searchParams = new HashMap<>();
-        System.out.println("org1: "+organization1.getIdentifierFirstRep().getValue());
-        System.out.println(organization1);
-        System.out.println("org2: "+organization2.getIdentifierFirstRep().getValue());
         searchParams.put("identifier", Collections.singletonList("id|"+organization1.getIdentifierFirstRep().getValue()+","+organization2.getIdentifierFirstRep().getValue()));
         final Bundle organizations = client
                 .search()
