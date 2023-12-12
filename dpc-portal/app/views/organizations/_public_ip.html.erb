@@ -1,0 +1,8 @@
+<tr>
+  <td><%= public_ip['label'] %></td>
+  <td><%= public_ip['ip_addr'] %></td>
+  <td data-sort-value="<%= public_ip['createdAt'] %>">
+    <%= formatted_datestr(public_ip['createdAt']) %>
+  </td>
+  <td>X</td>
+</tr>
