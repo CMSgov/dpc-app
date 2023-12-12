@@ -31,7 +31,7 @@ describe CPIAPIGatewayClient do
       client = CPIAPIGatewayClient.new
       allow(client.access).to receive(:expired?).and_return(false)
 
-      expect(client).to receive(:refresh_token)
+      expect(client).to receive(:request_client).and_return access_token_object_instance
       expect(client.access).to receive(:post)
                            .with("#{cpi_api_gateway_url}api/1.0/ppr/providers/enrollments",
                                  { body: { providerID: { npi: '12345' } }.to_json,
@@ -54,7 +54,7 @@ describe CPIAPIGatewayClient do
       allow(access_token_object_instance).to receive(:expired?).and_return(false)
       client = CPIAPIGatewayClient.new
 
-      expect(client).to receive(:refresh_token)
+      expect(client).to receive(:request_client).and_return access_token_object_instance
       expect(client.access).to receive(:get)
                            .with("#{cpi_api_gateway_url}api/1.0/ppr/providers/enrollments/123456/roles",
                                  { headers: { 'Content-Type': 'application/json' } })
@@ -91,7 +91,7 @@ describe CPIAPIGatewayClient do
         }
       }
 
-      expect(client).to receive(:refresh_token)
+      expect(client).to receive(:request_client).and_return access_token_object_instance
       expect(client.access).to receive(:post)
                            .with("#{cpi_api_gateway_url}api/1.0/ppr/providers",
                                  { body: request_body.to_json,

@@ -13,6 +13,7 @@ class CPIAPIGatewayClient
     client_secret = ENV.fetch('CPI_API_GW_CLIENT_SECRET', nil)
     cms_idm_url = ENV.fetch('CMS_IDM_OAUTH_URL', nil)
     @cpi_api_gateway_url = ENV.fetch('CPI_API_GW_BASE_URL', nil)
+    @cpi_api_gateway_url += '/' unless @cpi_api_gateway_url.end_with?('/')
     @client = OAuth2::Client.new(client_id, client_secret,
                                  site: cms_idm_url,
                                  token_url: '/oauth2/aus2151jb0hszrbLU297/v1/token',
@@ -23,25 +24,28 @@ class CPIAPIGatewayClient
   end
   # rubocop:enable Metrics/MethodLength
 
+  # fetch data about an organization, including enrollment_id
   def fetch_enrollment(npi)
-    refresh_token
+    req_client = request_client
     body = { providerID: { npi: npi.to_s } }.to_json
-    response = @access.post("#{@cpi_api_gateway_url}api/1.0/ppr/providers/enrollments",
-                            headers: { 'Content-Type': 'application/json' },
-                            body: body)
+    response = req_client.post("#{@cpi_api_gateway_url}api/1.0/ppr/providers/enrollments",
+                               headers: { 'Content-Type': 'application/json' },
+                               body: body)
     response.parsed
   end
 
+  # fetch a list of roles, roughly corresponding to associated individuals
   def fetch_enrollment_roles(enrollment_id)
-    refresh_token
-    response = @access.get("#{@cpi_api_gateway_url}api/1.0/ppr/providers/enrollments/#{enrollment_id}/roles",
-                           headers: { 'Content-Type': 'application/json' })
+    req_client = request_client
+    response = req_client.get("#{@cpi_api_gateway_url}api/1.0/ppr/providers/enrollments/#{enrollment_id}/roles",
+                              headers: { 'Content-Type': 'application/json' })
     response.parsed
   end
 
   # rubocop:disable Metrics/MethodLength
+  # fetch info about the authorized official, including a list of med sanctions
   def fetch_authorized_official_med_sanctions(ssn)
-    refresh_token
+    req_client = request_client
     body = {
       providerID: {
         providerType: 'ind',
@@ -56,9 +60,9 @@ class CPIAPIGatewayClient
         }
       }
     }.to_json
-    response = @access.post("#{@cpi_api_gateway_url}api/1.0/ppr/providers",
-                            headers: { 'Content-Type': 'application/json' },
-                            body: body)
+    response = req_client.post("#{@cpi_api_gateway_url}api/1.0/ppr/providers",
+                               headers: { 'Content-Type': 'application/json' },
+                               body: body)
     response.parsed
   end
   # rubocop:enable Metrics/MethodLength
@@ -69,9 +73,8 @@ class CPIAPIGatewayClient
     @access = @client.client_credentials.get_token(scope: 'READ')
   end
 
-  def refresh_token
-    return unless @access.expired?
-
-    fetch_token
+  def request_client
+    fetch_token if @access.nil? || @access.expired?
+    @access
   end
 end
