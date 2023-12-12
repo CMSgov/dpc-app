@@ -1,0 +1,104 @@
+<div>
+  <div class="shadow-5 border-1px border-base-lighter radius-md margin-bottom-4 padding-left-3 padding-bottom-3">
+    <h2><%= @organization.name %></h2>
+    <div><strong>NPI</strong> <%= @organization.npi %></div>
+  </div>
+  <div class="shadow-5 border-1px border-base-lighter radius-md margin-bottom-4 padding-left-3 padding-bottom-3">
+    <div class="grid-container">
+      <div class="grid-row">
+	<div class="grid-col-8">
+	  <h2>Client Tokens</h2>
+	</div>
+	<div class="grid-col-4 margin-top-2">
+	  <%= button_to 'Generate token', root_path, method: :get, class: 'usa-button' %>
+	</div>
+      </div>
+    </div>
+    <div class="usa-table">
+      <% if @organization.client_tokens.present? %>
+        <%= render(Core::Table::Component.new(id: 'client-tokens-table')) do %>
+          <caption aria-hidden="true" hidden>Client Token Table</caption>
+          <thead>
+            <tr>
+	      <th scope="row" role="columnheader">Label</th>
+	      <th scope="row" role="columnheader">Expiration Date</th>
+	      <th data-sortable scope="row" role="columnheader" role="columnheader" aria-sort="ascending">Creation Date</th>
+	      <th scope="row" role="columnheader">&nbsp;</th>
+	    </tr>
+          </thead>
+	  <tbody>
+            <%= render partial: 'client_token', collection: @organization.client_tokens %>
+	  </tbody>
+        <% end %>
+	<div class="usa-sr-only usa-table__announcement-region" aria-live="polite"></div>
+      <% else %>
+        <p>Before you can start testing in the sandbox, you must create a unique client token for each application or vendor that will have access to the sandbox on your behalf.
+      </p>
+      <% end %>
+    </div>
+  </div>
+  <div class="shadow-5 border-1px border-base-lighter radius-md margin-bottom-4 padding-left-3 padding-bottom-3">
+    <div class="grid-container">
+      <div class="grid-row">
+	<div class="grid-col-8">
+	  <h2>Public Keys</h2>
+	</div>
+	<div class="grid-col-4 margin-top-2">
+	  <%= button_to 'Create key', root_path, method: :get, class: 'usa-button' %>
+	</div>
+      </div>
+    </div>
+    <div class="usa-table">
+      <% if @organization.public_keys.present? %>
+        <%= render(Core::Table::Component.new(id: 'public-keys-table')) do %>
+          <caption aria-hidden="true" hidden>Public Key Table</caption>
+          <thead>
+            <tr>
+	      <th scope="row" role="columnheader">Label</th>
+	      <th scope="row" role="columnheader">Key ID</th>
+	      <th data-sortable scope="row" role="columnheader" aria-sort="ascending">Creation Date</th>
+	      <th scope="row" role="columnheader">&nbsp;</th>
+	    </tr>
+          </thead>
+          <%= render partial: 'public_key', collection: @organization.public_keys %>
+        <% end %>
+	<div class="usa-sr-only usa-table__announcement-region" aria-live="polite"></div>
+      <% else %>
+        <p>Before you can start testing in the sandbox, add your public keys to get a UUID that you will use when you authenticate access.</p>
+      </p>
+      <% end %>
+    </div>
+  </div>
+  <div class="shadow-5 border-1px border-base-lighter radius-md margin-bottom-4 padding-left-3 padding-bottom-3">
+    <div class="grid-container">
+      <div class="grid-row">
+	<div class="grid-col-8">
+	  <h2>Public IPs</h2>
+	</div>
+	<div class="grid-col-4 margin-top-2">
+	  <%= button_to 'Add IP', root_path, method: :get, class: 'usa-button' %>
+	</div>
+      </div>
+    </div>
+    <div class="usa-table">
+      <% if @organization.public_ips.present? %>
+        <%= render(Core::Table::Component.new(id: 'public-ips-table')) do %>
+          <caption aria-hidden="true" hidden>Public IP Table</caption>
+          <thead>
+            <tr>
+	      <th scope="row" role="columnheader">Label</th>
+	      <th scope="row" role="columnheader">Public IP</th>
+	      <th data-sortable scope="row" role="columnheader" aria-sort="ascending">Date Added</th>
+	      <th scope="row" role="columnheader">&nbsp;</th>
+	    </tr>
+          </thead>
+          <%= render partial: 'public_ip', collection: @organization.public_ips %>
+        <% end %>
+	<div class="usa-sr-only usa-table__announcement-region" aria-live="polite"></div>
+      <% else %>
+        <p>Before you can start testing in the sandbox, add your public ips.</p>
+      </p>
+      <% end %>
+    </div>
+  </div>
+</div>
