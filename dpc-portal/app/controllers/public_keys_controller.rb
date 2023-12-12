@@ -20,6 +20,7 @@ class PublicKeysController < ApplicationController
     end
   end
 
+  # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
   def create
     @organization = current_user.organizations.find(params[:organization_id])
     return render_error('Required values missing.') if missing_params
@@ -39,6 +40,7 @@ class PublicKeysController < ApplicationController
       render_error new_public_key[:message]
     end
   end
+  # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
 
   def download_snippet
     send_file 'public/snippet.txt', type: 'application/zip', status: 202
