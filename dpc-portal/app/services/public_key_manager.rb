@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
-# Manages creation and deletion of public keys
+# Manages public keys for an organization
 class PublicKeyManager
-  attr_reader :registered_organization, :errors
+  attr_reader :api_id, :errors
 
-  def initialize(registered_organization:)
-    @api_id = registered_organization
+  def initialize(api_id)
+    @api_id = api_id
     @errors = []
   end
 
@@ -16,10 +16,12 @@ class PublicKeyManager
     return { response: false, message: @errors[0] } if invalid_encoding?(public_key)
 
     api_client = DpcClient.new
-    api_client.create_public_key(api_id, params: { label: label, public_key: public_key,
-                                                   snippet_signature: snippet_signature })
+    api_client.create_public_key(api_id,
+                                 params: { label: label, public_key: public_key,
+                                           snippet_signature: snippet_signature })
 
-    { response: api_client.response_successful?, message: api_client.response_body }
+    { response: api_client.response_successful?,
+      message: api_client.response_body }
   end
 
   def invalid_encoding?(key_string)

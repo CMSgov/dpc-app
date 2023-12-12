@@ -4,7 +4,14 @@ import gov.cms.dpc.attribution.AttributionTestHelpers;
 import gov.cms.dpc.attribution.DPCAttributionConfiguration;
 import gov.cms.dpc.attribution.jdbi.EndpointDAO;
 import gov.cms.dpc.attribution.jdbi.OrganizationDAO;
+import gov.cms.dpc.common.entities.AddressEntity;
+import gov.cms.dpc.common.entities.ContactEntity;
+import gov.cms.dpc.common.entities.EndpointEntity;
+import gov.cms.dpc.common.entities.NameEntity;
+import gov.cms.dpc.common.entities.OrganizationEntity;
+import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.converters.FHIREntityConverter;
+
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,6 +22,7 @@ import org.mockito.MockitoAnnotations;
 
 import javax.ws.rs.core.Response;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -46,6 +54,20 @@ public class OrganizationResourceUnitTest {
         MockitoAnnotations.openMocks(this);
         configuration = new DPCAttributionConfiguration();
         resource = new OrganizationResource(converter,mockOrganizationDao,mockEndpointDao, configuration);
+    }
+
+    @Test
+    void testGetOrganizationsByIds() {
+        OrganizationEntity orgEnt1 = createOrganizationEntity("123", "org1");
+        OrganizationEntity orgEnt2 = createOrganizationEntity("456", "org2");
+        List<OrganizationEntity> orgEntList = new ArrayList<>();
+        orgEntList.add(orgEnt1);
+        orgEntList.add(orgEnt2);
+        Mockito.when(mockOrganizationDao.getOrganizationsByIds(any())).thenReturn(orgEntList);
+
+        List<Organization> orgs = resource.searchOrganizations("id|123,456");
+
+        assertEquals(2, orgs.size());
     }
 
     @Test
@@ -108,5 +130,27 @@ public class OrganizationResourceUnitTest {
     private Bundle buildBundleWithTestOrg(String uuid){
         Organization organization = AttributionTestHelpers.createOrgResource(uuid, "1334567892");
         return AttributionTestHelpers.createBundle(organization);
+    }
+
+    private OrganizationEntity createOrganizationEntity(String orgId, String orgName) {
+        AddressEntity addressEntity = new AddressEntity();
+        addressEntity.setLine1("123 Test Street");
+        NameEntity nameEntity = new NameEntity();
+        nameEntity.setFamily("family");
+        ContactEntity contactEntity = new ContactEntity();
+        contactEntity.setName(nameEntity);
+        contactEntity.setAddress(addressEntity);
+        contactEntity.setTelecom(List.of());
+        EndpointEntity endpointEntity = new EndpointEntity();
+        endpointEntity.setId(UUID.randomUUID());
+        OrganizationEntity.OrganizationID orgEntId = new OrganizationEntity.OrganizationID(DPCIdentifierSystem.NPPES, orgId);
+        OrganizationEntity organizationEntity = new OrganizationEntity();
+        organizationEntity.setId(UUID.randomUUID());
+        organizationEntity.setOrganizationID(orgEntId);
+        organizationEntity.setOrganizationName(orgName);
+        organizationEntity.setOrganizationAddress(addressEntity);
+        organizationEntity.setContacts(List.of(contactEntity));
+        organizationEntity.setEndpoints(List.of(endpointEntity));
+        return organizationEntity;
     }
 }

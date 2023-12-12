@@ -24,7 +24,7 @@ public class AdminResourceTest extends AbstractSecureApplicationTest{
     void testGetOrganizations() throws IOException, URISyntaxException {
         UUID orgID1 = UUID.randomUUID();
         UUID orgID2 = UUID.randomUUID();
-        URL url = new URL(getBaseURL() + "/Admin/Organization/?ids="+orgID1.toString() + "," + orgID2.toString());
+        URL url = new URL(getBaseURL() + "/Admin/Organization/?ids=id|"+orgID1.toString() + "," + orgID2.toString());
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod(HttpMethod.GET);
         conn.setRequestProperty(HttpHeaders.CONTENT_TYPE, "application/fhir+json");
@@ -40,7 +40,7 @@ public class AdminResourceTest extends AbstractSecureApplicationTest{
     @Test
     void testNoGoldenMacaroon() throws IOException, URISyntaxException {
         UUID orgID1 = UUID.randomUUID();
-        URL url = new URL(getBaseURL() + "/Admin/Organization/?ids="+orgID1.toString());
+        URL url = new URL(getBaseURL() + "/Admin/Organization/?ids=id|"+orgID1.toString());
         System.out.println("admin organization search url: " + url.toString());
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod(HttpMethod.GET);
