@@ -15,9 +15,7 @@
             </div>
             <div id="status_div" style="float:right">
                 <p class="usa-card__text">
-                    <span style="font-weight:bold">Status</span>
-                    <br>
-                    <span style="background:<%= @status_color %>; color:white"><%= @status %></span>
+                    <%= render Core::Button::ButtonComponent.new(text: 'View Details', on_click: "alert('View Details Placeholder');")%>
                 </p>
             </div>
         </div>

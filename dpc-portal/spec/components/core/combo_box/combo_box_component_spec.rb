@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe Core::Card::OrganizationCardComponent, type: :component do
+RSpec.describe Core::ComboBox::ComboBoxComponent, type: :component do
   pending "add some examples to (or delete) #{__FILE__}"
 
   # it "renders something useful" do
