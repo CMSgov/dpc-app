@@ -23,7 +23,7 @@ class CPIAPIGatewayClient
   end
   # rubocop:enable Metrics/MethodLength
 
-  def fetch_enrollment_id(npi)
+  def fetch_enrollment(npi)
     refresh_token
     body = { providerID: { npi: npi.to_s } }.to_json
     response = @access.post("#{@cpi_api_gateway_url}api/1.0/ppr/providers/enrollments",
