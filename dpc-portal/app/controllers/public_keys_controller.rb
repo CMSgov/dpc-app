@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
-# Creates and destroys public keys
+# Creates and destroys public keys for an organization
 class PublicKeysController < ApplicationController
   layout 'public-key-new'
+  before_action :organization_enabled?, except: :download_snippet
 
   def new
     @organization = current_user.organizations.find(params[:organization_id])
@@ -10,9 +11,7 @@ class PublicKeysController < ApplicationController
 
   def destroy
     @organization = current_user.organizations.find(params[:organization_id])
-    reg_org = @organization.registered_organization
-
-    manager = PublicKeyManager.new(api_id: reg_org.api_id)
+    manager = PublicKeyManager.new(api_id: @organization.registered_organization.api_id)
     if manager.delete_public_key(id: params[:id])
       flash[:notice] = 'Public token successfully deleted.'
       redirect_to root_path
@@ -23,7 +22,8 @@ class PublicKeysController < ApplicationController
 
   def create
     @organization = current_user.organizations.find(params[:organization_id])
-    validate_params
+    return render_error('Required values missing.') if missing_params
+    return render_error('Label cannot be over 25 characters') if label_length
 
     manager = PublicKeyManager.new(api_id: @organization.registered_organization.api_id)
 
@@ -44,6 +44,15 @@ class PublicKeysController < ApplicationController
     send_file 'public/snippet.txt', type: 'application/zip', status: 202
   end
 
+  def organization_enabled?
+    @organization = current_user.organizations.find(params[:organization_id])
+    @reg_org = @organization.reg_org
+
+    return if @reg_org.present? && @reg_org.enabled == true
+
+    redirect_to root_path
+  end
+
   private
 
   def render_error(msg)
@@ -57,11 +66,6 @@ class PublicKeysController < ApplicationController
 
   def label_length
     params[:label].length > 25
-  end
-
-  def validate_params
-    return render_error('Required values missing.') if missing_params
-    return render_error('Label cannot be over 25 characters') if label_length
   end
 
   def unauthorized
