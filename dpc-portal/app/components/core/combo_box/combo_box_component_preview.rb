@@ -11,7 +11,7 @@ module Core
       # @param label "Label of the combo box"
       # @param id "ID of the combo box"
       def multiple_options(label: 'Label', id: 'id')
-        render(Core::ComboBox::ComboBoxComponent.new(label: label, id: id, options: ['one', 'two', 'three']))
+        render(Core::ComboBox::ComboBoxComponent.new(label: label, id: id, options: %w[one two three]))
       end
 
       # @param label "Label of the combo box"

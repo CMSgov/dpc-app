@@ -11,8 +11,7 @@ module Core
       # @param name "Name of the organization"
       # @param npi "NPI of the organization"
       def default(name: 'Org Name', npi: 'npi_123_abc')
-        render(Core::Card::OrganizationCardComponent.new(name: name, npi: npi, status: 'Good',
-                                                         status_color: 'LightSkyBlue'))
+        render(Core::Card::OrganizationCardComponent.new(name: name, npi: npi))
       end
     end
   end
