@@ -4,10 +4,10 @@ module Core
   module Button
     # Render a USWDS-styled button.
     class ButtonComponent < ViewComponent::Base
-      def initialize(label:, on_click:)
+      def initialize(label:, destination:)
         super
         @label = label
-        @on_click = on_click
+        @destination = destination
       end
     end
   end

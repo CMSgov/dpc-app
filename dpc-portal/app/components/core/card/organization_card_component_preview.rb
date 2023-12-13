@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'ostruct'
+
 module Core
   module Card
     # Organization Card Component
@@ -8,10 +10,9 @@ module Core
     # [See at USWDS](https://designsystem.digital.gov/components/card/)
     #
     class OrganizationCardComponentPreview < ViewComponent::Preview
-      # @param name "Name of the organization"
-      # @param npi "NPI of the organization"
-      def default(name: 'Org Name', npi: 'npi_123_abc')
-        render(Core::Card::OrganizationCardComponent.new(name: name, npi: npi))
+      def default()
+        testOrg = OpenStruct.new(name: "Test Organization", npi: "npi_123456")
+        render(Core::Card::OrganizationCardComponent.new(organization: testOrg))
       end
     end
   end

@@ -4,10 +4,10 @@ module Core
   module Card
     # Render a USWDS-styled card for an organization.
     class OrganizationCardComponent < ViewComponent::Base
-      def initialize(name:, npi:)
+      def initialize(organization:)
         super
-        @name = name
-        @npi = npi
+        @name = organization.name
+        @npi = organization.npi
       end
     end
   end
