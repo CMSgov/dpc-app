@@ -23,7 +23,6 @@ describe CPIAPIGatewayClient do
 
   describe '.fetch_enrollment' do
     it 'makes a post request' do
-      response_double = instance_double(OAuth2::Response)
       allow(OAuth2::Client).to receive(:new).and_return(oauth_client)
       allow(oauth_client).to receive(:client_credentials).and_return(client_credentials_strategy_instance)
       expect(client_credentials_strategy_instance).to receive(:get_token).and_return(access_token_object_instance)
