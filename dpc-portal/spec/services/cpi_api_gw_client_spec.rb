@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
-require './lib/cpi_api_gw_client/cpi_api_gw_client'
+require './app/services/cpi_api_gw_client/cpi_api_gw_client'
 
 describe CPIAPIGatewayClient do
   cpi_api_gateway_url = ENV.fetch('CPI_API_GW_BASE_URL', nil)
