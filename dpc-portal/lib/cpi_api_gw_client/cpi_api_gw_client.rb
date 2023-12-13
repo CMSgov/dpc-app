@@ -26,26 +26,23 @@ class CPIAPIGatewayClient
 
   # fetch data about an organization, including enrollment_id
   def fetch_enrollment(npi)
-    req_client = request_client
     body = { providerID: { npi: npi.to_s } }.to_json
-    response = req_client.post("#{@cpi_api_gateway_url}api/1.0/ppr/providers/enrollments",
-                               headers: { 'Content-Type': 'application/json' },
-                               body: body)
+    response = request_client.post("#{@cpi_api_gateway_url}api/1.0/ppr/providers/enrollments",
+                                   headers: { 'Content-Type': 'application/json' },
+                                   body: body)
     response.parsed
   end
 
   # fetch a list of roles, roughly corresponding to associated individuals
   def fetch_enrollment_roles(enrollment_id)
-    req_client = request_client
-    response = req_client.get("#{@cpi_api_gateway_url}api/1.0/ppr/providers/enrollments/#{enrollment_id}/roles",
-                              headers: { 'Content-Type': 'application/json' })
+    response = request_client.get("#{@cpi_api_gateway_url}api/1.0/ppr/providers/enrollments/#{enrollment_id}/roles",
+                                  headers: { 'Content-Type': 'application/json' })
     response.parsed
   end
 
   # rubocop:disable Metrics/MethodLength
   # fetch info about the authorized official, including a list of med sanctions
   def fetch_authorized_official_med_sanctions(ssn)
-    req_client = request_client
     body = {
       providerID: {
         providerType: 'ind',
@@ -60,9 +57,9 @@ class CPIAPIGatewayClient
         }
       }
     }.to_json
-    response = req_client.post("#{@cpi_api_gateway_url}api/1.0/ppr/providers",
-                               headers: { 'Content-Type': 'application/json' },
-                               body: body)
+    response = request_client.post("#{@cpi_api_gateway_url}api/1.0/ppr/providers",
+                                   headers: { 'Content-Type': 'application/json' },
+                                   body: body)
     response.parsed
   end
   # rubocop:enable Metrics/MethodLength
