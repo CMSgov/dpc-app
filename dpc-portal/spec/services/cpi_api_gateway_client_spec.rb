@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
-require './app/services/cpi_api_gw_client/cpi_api_gw_client'
+require './app/services/cpi_api_gateway_client'
 
-describe CPIAPIGatewayClient do
+describe CpiApiGatewayClient do
   cpi_api_gateway_url = ENV.fetch('CPI_API_GW_BASE_URL', nil)
   let(:oauth_client) { instance_double(OAuth2::Client) }
   let(:client_credentials_strategy_instance) { instance_double(OAuth2::Strategy::ClientCredentials) }
@@ -15,7 +15,7 @@ describe CPIAPIGatewayClient do
       allow(OAuth2::Client).to receive(:new).and_return(oauth_client)
       allow(oauth_client).to receive(:client_credentials).and_return(client_credentials_strategy_instance)
       expect(client_credentials_strategy_instance).to receive(:get_token).and_return(access_token_object_instance)
-      client = CPIAPIGatewayClient.new
+      client = CpiApiGatewayClient.new
 
       expect(client.access).to eq access_token_object_instance
     end
@@ -26,7 +26,7 @@ describe CPIAPIGatewayClient do
       allow(OAuth2::Client).to receive(:new).and_return(oauth_client)
       allow(oauth_client).to receive(:client_credentials).and_return(client_credentials_strategy_instance)
       expect(client_credentials_strategy_instance).to receive(:get_token).and_return(access_token_object_instance)
-      client = CPIAPIGatewayClient.new
+      client = CpiApiGatewayClient.new
       allow(client.access).to receive(:expired?).and_return(false)
 
       expect(client).to receive(:request_client).and_return access_token_object_instance
@@ -46,7 +46,7 @@ describe CPIAPIGatewayClient do
       allow(oauth_client).to receive(:client_credentials).and_return(client_credentials_strategy_instance)
       expect(client_credentials_strategy_instance).to receive(:get_token).and_return(access_token_object_instance)
       allow(access_token_object_instance).to receive(:expired?).and_return(false)
-      client = CPIAPIGatewayClient.new
+      client = CpiApiGatewayClient.new
 
       expect(client).to receive(:request_client).and_return access_token_object_instance
       expect(client.access).to receive(:get)
@@ -64,7 +64,7 @@ describe CPIAPIGatewayClient do
       allow(oauth_client).to receive(:client_credentials).and_return(client_credentials_strategy_instance)
       expect(client_credentials_strategy_instance).to receive(:get_token).and_return(access_token_object_instance)
       allow(access_token_object_instance).to receive(:expired?).and_return(false)
-      client = CPIAPIGatewayClient.new
+      client = CpiApiGatewayClient.new
 
       request_body = {
         providerID: {

@@ -3,7 +3,7 @@
 require 'oauth2'
 
 # A client for requests to the CPI API Gateway
-class CPIAPIGatewayClient
+class CpiApiGatewayClient
   attr_accessor :access
 
   # rubocop:disable Metrics/MethodLength
