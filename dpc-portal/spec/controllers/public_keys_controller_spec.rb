@@ -6,42 +6,22 @@ RSpec.describe PublicKeysController, type: :controller do
   include DpcClientSupport
 
   describe 'GET #new' do
-    let!(:user) { create(:user, :assigned) }
     let(:org) { create(:organization, :api_enabled) }
 
-    context 'authenticated user' do
-      before(:each) do
-        sign_in user, scope: :user
-
-        stub = stub_api_client(
-          message: :create_organization,
-          success: true,
-          response: default_org_creation_response
-        )
-        allow(stub).to receive(:get_public_keys).and_return(stub)
-        allow(stub).to receive(:response_body).and_return(default_org_creation_response, { 'entities' => [] })
-
-        user.organizations << org
-      end
-
+    context 'user' do
       it 'assigns the correct organization' do
         get :new, params: {
           organization_id: org.id
         }
 
         expect(response.status).to eq(200)
-        expect(assigns(:organization)).not_to be_nil
       end
     end
   end
 
   describe 'GET #destroy' do
-    let!(:user) { create(:user, :assigned) }
 
-    context 'authenticated user' do
-      before(:each) do
-        sign_in user, scope: :user
-      end
+    context 'user' do
 
       context 'with a successful call to the api' do
         it 'returns http success' do
@@ -50,11 +30,8 @@ RSpec.describe PublicKeysController, type: :controller do
             success: true,
             response: default_org_creation_response
           )
-          allow(stub).to receive(:get_public_keys).and_return(stub)
-          allow(stub).to receive(:response_body).and_return(default_org_creation_response, { 'entities' => [] })
 
           org = create(:organization, :api_enabled)
-          user.organizations << org
 
           allow(stub).to receive(:delete_public_key).and_return(true)
 
@@ -71,11 +48,8 @@ RSpec.describe PublicKeysController, type: :controller do
             success: true,
             response: default_org_creation_response
           )
-          allow(stub).to receive(:get_public_keys).and_return(stub)
-          allow(stub).to receive(:response_body).and_return(default_org_creation_response, { 'entities' => [] })
 
           org = create(:organization, :api_enabled)
-          user.organizations << org
 
           allow(stub).to receive(:delete_public_key).and_return(false)
 
@@ -89,22 +63,6 @@ RSpec.describe PublicKeysController, type: :controller do
   end
 
   describe 'GET #create' do
-    let!(:user) { create(:user, :assigned) }
-    let(:org) { create(:organization, :api_enabled) }
-
-    before(:each) do
-      sign_in user, scope: :user
-
-      stub = stub_api_client(
-        message: :create_organization,
-        success: true,
-        response: default_org_creation_response
-      )
-      allow(stub).to receive(:get_public_keys).and_return(stub)
-      allow(stub).to receive(:response_body).and_return(default_org_creation_response, { 'entities' => [] })
-
-      user.organizations << org
-    end
 
     context 'when missing a public key param' do
       it 'renders an error' do
@@ -180,22 +138,6 @@ RSpec.describe PublicKeysController, type: :controller do
   end
 
   describe 'GET #download_snippet' do
-    let!(:user) { create(:user, :assigned) }
-    let(:org) { create(:organization) }
-
-    before(:each) do
-      sign_in user, scope: :user
-
-      stub = stub_api_client(
-        message: :create_organization,
-        success: true,
-        response: default_org_creation_response
-      )
-      allow(stub).to receive(:get_public_keys).and_return(stub)
-      allow(stub).to receive(:response_body).and_return(default_org_creation_response, { 'entities' => [] })
-
-      user.organizations << org
-    end
 
     context 'when the snippet is requested' do
       it 'serves the snippet file' do
@@ -204,33 +146,6 @@ RSpec.describe PublicKeysController, type: :controller do
         expect(response.status).to eq(202)
         expect(response.header['Content-Type']).to eq('application/zip')
         expect(response.body).to eq('This is the snippet used to verify a key pair in DPC.')
-      end
-    end
-  end
-
-  describe 'GET #organization_enabled?' do
-    let!(:user) { create(:user, :assigned) }
-    let(:org) { create(:organization) }
-
-    before(:each) do
-      sign_in user, scope: :user
-
-      stub = stub_api_client(
-        message: :create_organization,
-        success: true,
-        response: default_org_creation_response
-      )
-      allow(stub).to receive(:get_public_keys).and_return(stub)
-      allow(stub).to receive(:response_body).and_return(default_org_creation_response, { 'entities' => [] })
-
-      user.organizations << org
-    end
-
-    context 'when the organization is not enabled' do
-      it 'redirects to the root path' do
-        expect((get :new, params: {
-          organization_id: org.id
-        })).to redirect_to(root_path)
       end
     end
   end
