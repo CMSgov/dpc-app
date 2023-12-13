@@ -5,11 +5,13 @@ require './lib/cpi_api_gw_client/cpi_api_gw_client'
 
 describe CPIAPIGatewayClient do
   cpi_api_gateway_url = ENV.fetch('CPI_API_GW_BASE_URL', nil)
+  let(:oauth_client) { instance_double(OAuth2::Client) }
+  let(:client_credentials_strategy_instance) { instance_double(OAuth2::Strategy::ClientCredentials) }
+  let(:access_token_object_instance) { instance_double(OAuth2::AccessToken) }
+  let(:response_double) { instance_double(OAuth2::Response) }
+
   describe '.new' do
     it 'sets a token' do
-      oauth_client = instance_double(OAuth2::Client)
-      client_credentials_strategy_instance = instance_double(OAuth2::Strategy::ClientCredentials)
-      access_token_object_instance = instance_double(OAuth2::AccessToken)
       allow(OAuth2::Client).to receive(:new).and_return(oauth_client)
       allow(oauth_client).to receive(:client_credentials).and_return(client_credentials_strategy_instance)
       expect(client_credentials_strategy_instance).to receive(:get_token).and_return(access_token_object_instance)
@@ -21,9 +23,6 @@ describe CPIAPIGatewayClient do
 
   describe '.fetch_enrollment' do
     it 'makes a post request' do
-      oauth_client = instance_double(OAuth2::Client)
-      client_credentials_strategy_instance = instance_double(OAuth2::Strategy::ClientCredentials)
-      access_token_object_instance = instance_double(OAuth2::AccessToken)
       response_double = instance_double(OAuth2::Response)
       allow(OAuth2::Client).to receive(:new).and_return(oauth_client)
       allow(oauth_client).to receive(:client_credentials).and_return(client_credentials_strategy_instance)
@@ -44,10 +43,6 @@ describe CPIAPIGatewayClient do
 
   describe '.fetch_enrollment_roles' do
     it 'makes a get request' do
-      oauth_client = instance_double(OAuth2::Client)
-      client_credentials_strategy_instance = instance_double(OAuth2::Strategy::ClientCredentials)
-      access_token_object_instance = instance_double(OAuth2::AccessToken)
-      response_double = instance_double(OAuth2::Response)
       allow(OAuth2::Client).to receive(:new).and_return(oauth_client)
       allow(oauth_client).to receive(:client_credentials).and_return(client_credentials_strategy_instance)
       expect(client_credentials_strategy_instance).to receive(:get_token).and_return(access_token_object_instance)
@@ -66,10 +61,6 @@ describe CPIAPIGatewayClient do
 
   describe '.fetch_authorized_official_med_sanctions' do
     it 'makes a post request' do
-      oauth_client = instance_double(OAuth2::Client)
-      client_credentials_strategy_instance = instance_double(OAuth2::Strategy::ClientCredentials)
-      access_token_object_instance = instance_double(OAuth2::AccessToken)
-      response_double = instance_double(OAuth2::Response)
       allow(OAuth2::Client).to receive(:new).and_return(oauth_client)
       allow(oauth_client).to receive(:client_credentials).and_return(client_credentials_strategy_instance)
       expect(client_credentials_strategy_instance).to receive(:get_token).and_return(access_token_object_instance)
