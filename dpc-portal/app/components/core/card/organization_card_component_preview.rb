@@ -11,8 +11,7 @@ module Core
     #
     class OrganizationCardComponentPreview < ViewComponent::Preview
       def default()
-        testOrg = OpenStruct.new(name: "Test Organization", npi: "npi_123456")
-        render(Core::Card::OrganizationCardComponent.new(organization: testOrg))
+        render(Core::Card::OrganizationCardComponent.new(organization: OpenStruct.new(name: "Test Organization", npi: "npi_123456")))
       end
     end
   end

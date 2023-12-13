@@ -1,0 +1,21 @@
+<div id="search_boxes" class="grid-row grid-gap">
+    <% org_names = [] %>
+    <% org_npis = [] %>
+    <% @organizations.each do |organization| %>
+        <% org_names.push(organization.name) %>
+        <% org_npis.push(organization.npi) %>
+    <% end %>
+
+    <div id="org_name_search" style="float:left">       
+        <%= render Core::ComboBox::ComboBoxComponent.new(label: 'Organization Name', id: "npi_search", options: org_names) %>
+    </div>
+    <div id="npi_search" style="float:left">
+        <%= render Core::ComboBox::ComboBoxComponent.new(label: 'NPI', id: "npi_search", options: org_npis)%>
+    </div>
+</div>
+<br>
+<ul class="usa-card-group">
+    <% @organizations.each do |organization| %>
+        <%= render Core::Card::OrganizationCardComponent.new(organization: organization)%>
+    <% end %>
+</ul>
