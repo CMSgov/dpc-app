@@ -100,6 +100,8 @@ services:
       - "./dpc-portal/:/dpc-portal/"
       - "./dpc-portal/coverage:/dpc-portal/coverage"
       - ./tmp/letter_opener/portal:/dpc-portal/tmp/letter_opener
+    env_file:
+      - ./ops/config/decrypted/local.env
     environment:
       # Misc. non-application settings
       - TERM=${TERM:-xterm-256color}
@@ -112,8 +114,6 @@ services:
       - DB_USER=postgres
       - DB_PASS=dpc-safe
       - DATABASE_CLEANER_ALLOW_REMOTE_DATABASE_URL=true
-      - CPI_API_GW_CLIENT_ID=${CPI_API_GW_CLIENT_ID}
-      - CPI_API_GW_CLIENT_SECRET=${CPI_API_GW_CLIENT_SECRET}
       - CPI_API_GW_BASE_URL=https://val.cpiapi.cms.gov/
       - CMS_IDM_OAUTH_URL=https://impl.idp.idm.cms.gov/
       - ENV=local
