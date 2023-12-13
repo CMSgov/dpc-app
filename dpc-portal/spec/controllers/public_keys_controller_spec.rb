@@ -20,9 +20,7 @@ RSpec.describe PublicKeysController, type: :controller do
   end
 
   describe 'GET #destroy' do
-
     context 'user' do
-
       context 'with a successful call to the api' do
         it 'returns http success' do
           stub = stub_api_client(
@@ -63,7 +61,6 @@ RSpec.describe PublicKeysController, type: :controller do
   end
 
   describe 'GET #create' do
-
     context 'when missing a public key param' do
       it 'renders an error' do
         post :create, params: {
@@ -138,7 +135,6 @@ RSpec.describe PublicKeysController, type: :controller do
   end
 
   describe 'GET #download_snippet' do
-
     context 'when the snippet is requested' do
       it 'serves the snippet file' do
         post :download_snippet, params: {}

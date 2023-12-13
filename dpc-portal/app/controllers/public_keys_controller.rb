@@ -2,7 +2,6 @@
 
 # Creates and destroys public keys for an organization
 class PublicKeysController < ApplicationController
-
   def new
     @organization_id = params[:organization_id]
   end
