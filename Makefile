@@ -54,7 +54,7 @@ start-local-api: secure-envs start-local
 	@docker-compose -f docker-compose.yml -f docker-compose-local.yml up start_api
 
 .PHONY: start-portals
-start-portals:
+start-portals: secure-envs
 	@docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.portals.yml up start_core_dependencies
 	@docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.portals.yml up start_web
 	@docker-compose -p dpc-v2 -f docker-compose.yml -f docker-compose.portals.yml up start_admin
