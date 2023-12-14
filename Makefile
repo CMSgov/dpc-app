@@ -153,10 +153,10 @@ maven-config:
 	@while read line;do echo "-D$${line} " >> ./.mvn/maven.config;done < ./ops/config/decrypted/local.env
 
 psql: ## Run a psql shell
-    @docker-compose -f docker-compose.yml exec -it db psql -U postgres
+	@docker-compose -f docker-compose.yml exec -it db psql -U postgres
 
 portal-console: ## Run a rails console shell
-    @docker-compose -f docker-compose.yml -f docker-compose.portals.yml exec -it dpc_portal rails console
+	@docker-compose -f docker-compose.yml -f docker-compose.portals.yml exec -it dpc_portal rails console
 
 
 # Build & Test commands
