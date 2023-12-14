@@ -1,5 +1,9 @@
 FROM ruby:3.0.6-alpine AS ruby_builder
 
+# Add HHS CA Cert
+COPY HHS-FPKI-Intermediate-CA-E1.pem /usr/local/share/ca-certificates/HHS-FPKI-Intermediate-CA-E1.pem
+RUN update-ca-certificates
+
 # Install build dependencies
 RUN apk update && \
     apk add --no-cache postgresql-dev && \
