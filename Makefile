@@ -174,6 +174,10 @@ ci-app: docker-base secure-envs
 ci-portals: secure-envs
 	@./dpc-portals-test.sh
 
+.PHONY: ci-portals-v1
+ci-portals-v1: secure-envs
+	@./dpc-portals-test.sh
+
 .PHONY: ci-admin-portal
 ci-admin-portal: secure-envs
 	@./dpc-admin-portal-test.sh
