@@ -43,5 +43,9 @@ yarn-debug.log*
 .yarn-integrity
 
 .env
-
 coverage
+
+# Ignore API client engine, which is copied over during builds.
+vendor/api_client
+/app/assets/builds/*
+!/app/assets/builds/.keep

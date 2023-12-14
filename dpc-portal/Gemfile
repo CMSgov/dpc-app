@@ -29,9 +29,11 @@ gem 'health_check'
 gem 'jbuilder', '~> 2.7'
 gem 'kaminari'
 gem 'lograge'
+gem 'lookbook', '>= 2.1.1' # install lookbook so it can be deployed in lower environments.
 gem 'luhnacy', '~> 0.2.1'
 gem 'macaroons'
 gem 'newrelic_rpm', '~> 8.10'
+gem 'oauth2', '= 1.4.11'
 gem 'octokit' # can be removed once we move past github omniauth
 gem 'omniauth-github', '~> 1.4.0'
 gem 'omniauth-oktaoauth', '~> 0.1.6'
@@ -46,9 +48,9 @@ gem 'sassc-rails', '>= 2.1.2'
 gem 'sidekiq', '~> 7.1'
 gem 'sidekiq_alive', '~> 2.1.5'
 gem 'truemail'
-gem 'turbolinks', '~> 5'
 gem 'uglifier', '>= 1.3.0'
-gem 'webpacker', '~> 4.0'
+gem 'view_component', '~> 3.7'
+
 # < 1.13.2 has a vulnerability, and is required by other gems
 gem 'nokogiri', '>= 1.13.10'
 

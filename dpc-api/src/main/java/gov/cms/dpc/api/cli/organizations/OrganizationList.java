@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 public class OrganizationList extends AbstractAttributionCommand {
 
-    OrganizationList() {
+    public OrganizationList() {
         super("list", "List registered organizations");
     }
 

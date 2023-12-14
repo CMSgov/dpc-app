@@ -39,6 +39,9 @@ public abstract class AbstractBaseResource {
     @Path("/Organization")
     public abstract AbstractOrganizationResource organizationOperations();
 
+    @Path("/Admin")
+    public abstract AbstractAdminResource adminOperations();
+
     @Path("/Patient")
     public abstract AbstractPatientResource patientOperations();
 

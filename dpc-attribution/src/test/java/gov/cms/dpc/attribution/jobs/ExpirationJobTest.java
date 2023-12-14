@@ -19,6 +19,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import ru.vyarus.dropwizard.guice.module.context.SharedConfigurationState;
 
 import javax.ws.rs.client.Client;
 
@@ -46,8 +47,10 @@ class ExpirationJobTest {
     void initDB() throws Exception {
         JobTestUtils.resetScheduler();
         APPLICATION.before();
+        SharedConfigurationState.clear();
         APPLICATION.getApplication().run("db", "migrate", "ci.application.conf");
         // Seed the database, but use a really early time
+        SharedConfigurationState.clear();
         APPLICATION.getApplication().run("seed", "-t 2015-01-01T12:12:12Z", "ci.application.conf");
 
         this.client = new JerseyClientBuilder(APPLICATION.getEnvironment()).build("test");

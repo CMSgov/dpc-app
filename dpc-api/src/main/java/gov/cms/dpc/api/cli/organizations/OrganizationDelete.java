@@ -9,7 +9,7 @@ import org.hl7.fhir.dstu3.model.IdType;
 
 public class OrganizationDelete extends AbstractAttributionCommand {
 
-    OrganizationDelete() {
+    public OrganizationDelete() {
         super("delete", "Delete registered organization");
     }
 
