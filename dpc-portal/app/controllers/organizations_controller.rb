@@ -14,7 +14,7 @@ class OrganizationsController < ApplicationController
   def load_organization
     @organization = case ENV.fetch('ENV', nil)
                     when 'prod-sbx'
-                      redirect_to root_url
+                      return redirect_to root_url
                     when 'test'
                       Organization.new('6a1dbf47-825b-40f3-b81d-4a7ffbbdc270')
                     when 'dev'

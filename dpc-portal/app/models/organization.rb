@@ -2,12 +2,15 @@
 
 # Wrapper for calls to dpc-api
 class Organization
-  attr_reader :api_id, :name, :npi
+  attr_reader :api_id, :name, :npi, :found
 
   def initialize(api_id)
     @api_id = api_id
     @client = DpcClient.new
     data = @client.get_organization(api_id)
+    raise DpcRecordNotFound, 'No such organization' unless data
+
+    @found = true
     @name = data.name
     @npi = data.identifier.select { |id| id.system == 'http://hl7.org/fhir/sid/us-npi' }.first&.value
     @keys = @tokens = nil
@@ -33,3 +36,5 @@ class Organization
     [{ 'label' => 'My IP', 'ip_addr' => '91.142.87.5', 'createdAt' => '2021-04-08T12:03:44.823+00:00' }]
   end
 end
+
+class DpcRecordNotFound < ActiveRecord::RecordNotFound; end
