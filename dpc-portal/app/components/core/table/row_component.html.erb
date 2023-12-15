@@ -1,0 +1,7 @@
+<%= raw '<tbody>' if iteration.first? %>
+<tr>
+  <% attributes.each do |attribute| %>
+  <td data-sort-value="<%= attribute %>"><%= attribute %></td>
+  <% end %>
+</tr>
+<%= raw '</tbody>' if iteration.last? %>
