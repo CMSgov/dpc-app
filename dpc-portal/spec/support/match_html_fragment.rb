@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# From https://github.com/TalariaSoftware/blob/main/uswds_components/spec/support/match_html_fragment.rb
 module MatchHtmlFragment
   class MatchHtmlFragment
     attr_accessor :failure_message

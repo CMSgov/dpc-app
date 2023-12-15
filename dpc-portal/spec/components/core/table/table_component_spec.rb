@@ -6,7 +6,7 @@ require 'rails_helper'
 #
 # TODO:
 # - scrollable
-RSpec.describe Core::Table::Component, type: :component do
+RSpec.describe Core::Table::TableComponent, type: :component do
   describe 'html' do
     subject(:html) do
       render_inline(component)
@@ -39,11 +39,11 @@ RSpec.describe Core::Table::Component, type: :component do
       it { is_expected.to match_html_fragment(expected_html) }
     end
 
-    context 'when the table is striped' do
-      let(:component) { described_class.new(striped: true) }
+    context 'when the table has additional classes' do
+      let(:component) { described_class.new(additional_classes: ['width-full']) }
       let(:expected_html) do
         <<~HTML
-          <table id="" class="usa-table usa-table--striped">
+          <table id="" class="width-full usa-table">
           </table>
         HTML
       end
@@ -51,36 +51,13 @@ RSpec.describe Core::Table::Component, type: :component do
       it { is_expected.to match_html_fragment(expected_html) }
     end
 
-    context 'when the table is borderless' do
-      let(:component) { described_class.new(borderless: true) }
+    context 'when the table is sortable' do
+      let(:component) { described_class.new(sortable: true) }
       let(:expected_html) do
         <<~HTML
-          <table id="" class="usa-table usa-table--borderless">
+          <table id="" class="usa-table">
           </table>
-        HTML
-      end
-
-      it { is_expected.to match_html_fragment(expected_html) }
-    end
-
-    context 'when the table is stacked' do
-      let(:component) { described_class.new(stacked: true) }
-      let(:expected_html) do
-        <<~HTML
-          <table id="" class="usa-table usa-table--stacked">
-          </table>
-        HTML
-      end
-
-      it { is_expected.to match_html_fragment(expected_html) }
-    end
-
-    context 'when the table has a stacked header' do
-      let(:component) { described_class.new(stacked_header: true) }
-      let(:expected_html) do
-        <<~HTML
-          <table id="" class="usa-table usa-table--stacked-header">
-          </table>
+          <div class="usa-sr-only usa-table__announcement-region" aria-live="polite"></div>
         HTML
       end
 

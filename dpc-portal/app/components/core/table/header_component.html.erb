@@ -1,0 +1,15 @@
+          <caption aria-hidden="true" hidden><%= caption %></caption>
+          <thead>
+            <tr>
+	      <% columns.each_with_index do |title, index| %>
+	        <% if sort == index %>
+                  <th data-sortable scope="row" role="columnheader" aria-sort="ascending">
+		<% else %>
+                  <th scope="row" role="columnheader">
+		<% end %>
+                  <%= title %>
+	        </th>
+	      <% end %>
+            </tr>
+          </thead>
+

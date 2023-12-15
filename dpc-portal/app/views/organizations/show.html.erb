@@ -1,104 +1,56 @@
 <div>
-  <div class="shadow-5 border-1px border-base-lighter radius-md margin-bottom-4 padding-left-3 padding-bottom-3">
-    <h2><%= @organization.name %></h2>
-    <div><strong>NPI</strong> <%= @organization.npi %></div>
-  </div>
-  <div class="shadow-5 border-1px border-base-lighter radius-md margin-bottom-4 padding-left-3 padding-bottom-3">
-    <div class="grid-container">
-      <div class="grid-row">
-	<div class="grid-col-8">
-	  <h2>Client Tokens</h2>
-	</div>
-	<div class="grid-col-4 margin-top-2">
-	  <%= button_to 'Generate token', root_path, method: :get, class: 'usa-button' %>
-	</div>
-      </div>
-    </div>
-    <div class="usa-table">
+  <%= render(Core::Card::BasicComponent.new(text_content: <<~HTML
+    <h1>#{@organization.name}</h1>
+    <div><strong>NPI</strong> #{@organization.npi}</div>
+    HTML
+    )) %>
+
+  <%= render(Core::Card::BasicComponent.new(text_content: '<h2>Client Tokens</h2>',
+      button_params: { name: 'Generate token', path: root_path, method: :get} )) do %>
+    <div>
       <% if @organization.client_tokens.present? %>
-        <%= render(Core::Table::Component.new(id: 'client-tokens-table')) do %>
-          <caption aria-hidden="true" hidden>Client Token Table</caption>
-          <thead>
-            <tr>
-	      <th scope="row" role="columnheader">Label</th>
-	      <th scope="row" role="columnheader">Expiration Date</th>
-	      <th data-sortable scope="row" role="columnheader" role="columnheader" aria-sort="ascending">Creation Date</th>
-	      <th scope="row" role="columnheader">&nbsp;</th>
-	    </tr>
-          </thead>
-	  <tbody>
-            <%= render partial: 'client_token', collection: @organization.client_tokens %>
-	  </tbody>
+        <%= render(Core::Table::TableComponent.new(id: 'client-tokens-table', additional_classes: ['width-full'], sortable: true)) do %>
+          <%= render(Core::Table::HeaderComponent.new(caption: 'Client Token Table',
+                                                      columns: ['Label', 'Expiration Date', 'Creation Date', ''],
+                                                      sort: 2)) %>
+          <%= render(Core::Table::RowComponent.with_collection(@organization.client_tokens, keys: ['label', 'expiresAt', 'createdAt', 'X'])) %>
         <% end %>
-	<div class="usa-sr-only usa-table__announcement-region" aria-live="polite"></div>
       <% else %>
-        <p>Before you can start testing in the sandbox, you must create a unique client token for each application or vendor that will have access to the sandbox on your behalf.
-      </p>
+        <p>Before you can access production data, you must create a unique client token for each application or vendor that will have access to API.</p>
       <% end %>
     </div>
-  </div>
-  <div class="shadow-5 border-1px border-base-lighter radius-md margin-bottom-4 padding-left-3 padding-bottom-3">
-    <div class="grid-container">
-      <div class="grid-row">
-	<div class="grid-col-8">
-	  <h2>Public Keys</h2>
-	</div>
-	<div class="grid-col-4 margin-top-2">
-	  <%= button_to 'Create key', root_path, method: :get, class: 'usa-button' %>
-	</div>
-      </div>
-    </div>
-    <div class="usa-table">
+  <% end %>
+  <%= render(Core::Card::BasicComponent.new(text_content: '<h2>Public Keys</h2>',
+      button_params: { name: 'Create key', path: root_path, method: :get} )) do %>
+    <div>
       <% if @organization.public_keys.present? %>
-        <%= render(Core::Table::Component.new(id: 'public-keys-table')) do %>
-          <caption aria-hidden="true" hidden>Public Key Table</caption>
-          <thead>
-            <tr>
-	      <th scope="row" role="columnheader">Label</th>
-	      <th scope="row" role="columnheader">Key ID</th>
-	      <th data-sortable scope="row" role="columnheader" aria-sort="ascending">Creation Date</th>
-	      <th scope="row" role="columnheader">&nbsp;</th>
-	    </tr>
-          </thead>
-          <%= render partial: 'public_key', collection: @organization.public_keys %>
+      <%= render(Core::Table::TableComponent.new(id: 'public-keys-table',
+          additional_classes: ['width-full'], sortable: true)) do %>
+          <%= render(Core::Table::HeaderComponent.new(caption: 'Public Key Table',
+                                                      columns: ['Label', 'Key ID', 'Creation Date', ''],
+                                                      sort: 2)) %>
+          <%= render(Core::Table::RowComponent.with_collection(@organization.public_keys, keys: ['label', 'id', 'createdAt', 'X'])) %>
         <% end %>
-	<div class="usa-sr-only usa-table__announcement-region" aria-live="polite"></div>
       <% else %>
-        <p>Before you can start testing in the sandbox, add your public keys to get a UUID that you will use when you authenticate access.</p>
+        <p>Before you can access production data, add your public keys to get a UUID that you will use when you authenticate access.</p>
       </p>
       <% end %>
     </div>
-  </div>
-  <div class="shadow-5 border-1px border-base-lighter radius-md margin-bottom-4 padding-left-3 padding-bottom-3">
-    <div class="grid-container">
-      <div class="grid-row">
-	<div class="grid-col-8">
-	  <h2>Public IPs</h2>
-	</div>
-	<div class="grid-col-4 margin-top-2">
-	  <%= button_to 'Add IP', root_path, method: :get, class: 'usa-button' %>
-	</div>
-      </div>
-    </div>
-    <div class="usa-table">
+  <% end %>
+
+  <%= render(Core::Card::BasicComponent.new(text_content: '<h2>Public IPs</h2>',
+      button_params: { name: 'Add IP', path: root_path, method: :get} )) do %>
+    <div>
       <% if @organization.public_ips.present? %>
-        <%= render(Core::Table::Component.new(id: 'public-ips-table')) do %>
-          <caption aria-hidden="true" hidden>Public IP Table</caption>
-          <thead>
-            <tr>
-	      <th scope="row" role="columnheader">Label</th>
-	      <th scope="row" role="columnheader">Public IP</th>
-	      <th data-sortable scope="row" role="columnheader" aria-sort="ascending">Date Added</th>
-	      <th scope="row" role="columnheader">&nbsp;</th>
-	    </tr>
-          </thead>
-          <%= render partial: 'public_ip', collection: @organization.public_ips %>
+        <%= render(Core::Table::TableComponent.new(id: 'public-ips-table', additional_classes: ['width-full'], sortable: true)) do %>
+          <%= render(Core::Table::HeaderComponent.new(caption: 'Public IP Table',
+                                                      columns: ['Label', 'Public IP', 'Date Added', ''],
+                                                      sort: 2)) %>
+          <%= render(Core::Table::RowComponent.with_collection(@organization.public_ips, keys: ['label', 'ip_addr', 'createdAt', 'X'])) %>
         <% end %>
-	<div class="usa-sr-only usa-table__announcement-region" aria-live="polite"></div>
       <% else %>
-        <p>Before you can start testing in the sandbox, add your public ips.</p>
-      </p>
+        <p>Before you can access production data, you must provide a public IP address (max of 8).</p>
       <% end %>
     </div>
-  </div>
+  <% end %>
 </div>

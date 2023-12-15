@@ -7,7 +7,7 @@ module Core
     #
     # [See at USWDS](https://designsystem.digital.gov/components/table/)
     #
-    class Preview < ViewComponent::Preview
+    class TableComponentPreview < ViewComponent::Preview
       DEFAULT_INNER_HTML = <<~HTML
         <caption>
           A table shows information in columns and rows.
@@ -56,15 +56,12 @@ module Core
       # `stacked` and `stacked_header` determine how the table looks on mobile-width
       # views.
       #
-      # @param borderless toggle
-      # @param striped toggle
-      # @param stacked toggle
-      # @param stacked_header toggle
+      # @param sortable toggle
       # @param inner_html textarea
-      def parameterized(borderless: false, striped: false, stacked: false, stacked_header: false,
-                        inner_html: DEFAULT_INNER_HTML)
-        render Core::Table::Component.new(borderless: borderless, striped: striped, stacked: stacked,
-                                          stacked_header: stacked_header) do
+      # @param additional_classes textarea space-delimited
+      def parameterized(additional_classes: '', sortable: false, inner_html: DEFAULT_INNER_HTML)
+        more_classes = additional_classes.present? ? additional_classes.split : []
+        render Core::Table::TableComponent.new(additional_classes: more_classes, sortable: sortable) do
           raw inner_html
         end
       end
