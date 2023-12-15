@@ -136,6 +136,9 @@ down-dpc:
 down-portals: ## Shut down all services
 down-portals: down-dpc
 
+down-start-v1-portals: ## Shut down all services
+down-start-v1-portals: down-dpc
+
 
 # Utility commands
 # =================
