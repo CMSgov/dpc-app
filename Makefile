@@ -34,6 +34,9 @@ smoke/prod: venv smoke
 
 
 # Build commands
+#
+# These commands build/compile our applications and docker images.
+# To start the applications, use the start-* commands below.
 # ==============
 
 api: ## Builds the Java API services
