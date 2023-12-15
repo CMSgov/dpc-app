@@ -10,20 +10,23 @@ module Core
     class ComboBoxComponentPreview < ViewComponent::Preview
       # @param label "Label of the combo box"
       # @param id "ID of the combo box"
-      def multiple_options(label: 'Label', id: 'id')
-        render(Core::ComboBox::ComboBoxComponent.new(label: label, id: id, options: %w[one two three]))
+      # @param on_change "Function to call when combo box selection is changed"
+      def multiple_options(label: 'Label', id: 'id', on_change: "alert('changed');")
+        render(Core::ComboBox::ComboBoxComponent.new(label: label, id: id, options: %w[one two three], on_change: on_change))
       end
 
       # @param label "Label of the combo box"
       # @param id "ID of the combo box"
-      def one_option(label: 'Label', id: 'id')
-        render(Core::ComboBox::ComboBoxComponent.new(label: label, id: id, options: ['only option']))
+      # @param on_change "Function to call when combo box selection is changed"
+      def one_option(label: 'Label', id: 'id', on_change: "alert('changed');")
+        render(Core::ComboBox::ComboBoxComponent.new(label: label, id: id, options: ['only option'], on_change: on_change))
       end
 
       # @param label "Label of the combo box"
       # @param id "ID of the combo box"
-      def no_options(label: 'Label', id: 'id')
-        render(Core::ComboBox::ComboBoxComponent.new(label: label, id: id, options: []))
+      # @param on_change "Function to call when combo box selection is changed"
+      def no_options(label: 'Label', id: 'id', on_change: "alert('changed');")
+        render(Core::ComboBox::ComboBoxComponent.new(label: label, id: id, options: [], on_change: on_change))
       end
     end
   end

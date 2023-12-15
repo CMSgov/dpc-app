@@ -7,10 +7,10 @@
     <% end %>
 
     <div id="org_name_search" style="float:left">       
-        <%= render Core::ComboBox::ComboBoxComponent.new(label: 'Organization Name', id: "npi_search", options: org_names) %>
+        <%= render Core::ComboBox::ComboBoxComponent.new(label: 'Organization Name', id: "org_search_selection", options: org_names, on_change: "filterOrgName(this);") %>
     </div>
     <div id="npi_search" style="float:left">
-        <%= render Core::ComboBox::ComboBoxComponent.new(label: 'NPI', id: "npi_search", options: org_npis)%>
+        <%= render Core::ComboBox::ComboBoxComponent.new(label: 'NPI', id: "npi_search_selection", options: org_npis, on_change: "filterNpi(this);")%>
     </div>
 </div>
 <br>
@@ -19,3 +19,36 @@
         <%= render Core::Card::OrganizationCardComponent.new(organization: organization)%>
     <% end %>
 </ul>
+
+<script>
+        function filterOrgName(selected) {
+            filter(selected.value, document.getElementById("npi_search_selection").value);
+        }
+
+        function filterNpi(selected) {
+            filter(document.getElementById("org_search_selection").value, selected.value);
+        }
+
+        function filter(org_name, npi) {
+            alert("filtering: [" + org_name + "]:[" + npi + "]")
+            cards = document.querySelectorAll("div.usa-card__container");
+            
+            // TODO: write real filtering logic
+            cards.forEach((card) => {
+                if(org_name > '') {
+                    if(card.dataset.name != org_name) {
+                        card.style.display = 'none';
+                    } 
+                } else {
+                    card.style.display = 'block';
+                }
+                if(npi > '') {
+                    if(card.dataset.npi != npi) {
+                        card.style.display = 'none';
+                    }
+                } else {
+                    card.style.display = 'block';
+                }
+            });
+        }
+</script
