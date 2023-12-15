@@ -6,8 +6,9 @@ This is the Data Point of Care (DPC) website. It will allow users to sign up for
 
 The DPC website can be run locally via docker. Follow the below steps to build and run the website into a Docker container.
 
--   Run `make start-portals` to start dpc-portal in a docker container.
-    -   This will also start dpc-web and dpc-admin, which are only used in the sandbox environment.
+-   Run `make portal` to build the docker image, and `make start-portal` to start dpc-portal in a docker container.
+-   Run `make portal-console` to open an interactive Rails console within the dpc-portal container.
+-   Run `make psql` to open a psql shell within the database container.
 -   Run `make down-portals` to stop dpc-portal.
 -   To run tests against dpc-portal, run `make ci-portal`.
 

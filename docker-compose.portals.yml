@@ -127,6 +127,8 @@ services:
       - REDIS_URL=redis://redis
       - DATABASE_URL=postgresql://db/dpc-portal_development
       - TEST_DATABASE_URL=postgresql://db/dpc-portal_test
+      - GOLDEN_MACAROON=${GOLDEN_MACAROON}
+      - API_METADATA_URL=http://api:3002/v1
       - DB_USER=postgres
       - DB_PASS=dpc-safe
       - DATABASE_CLEANER_ALLOW_REMOTE_DATABASE_URL=true
