@@ -9,10 +9,6 @@ class OrganizationsController < ApplicationController
     render plain: @organizations.inspect
   end
 
-  def show
-    render plain: @organization.inspect
-  end
-
   private
 
   def load_organization
