@@ -9,10 +9,11 @@ module Core
     #
     class OrganizationCardComponentPreview < ViewComponent::Preview
       OrgStruct = Struct.new(:name, :npi)
-      org = OrgStruct.new('Test Organization', 'npi_123456')
+      OrgStruct.new('Test Organization', 'npi_123456')
 
       def default
-        render(Core::Card::OrganizationCardComponent.new(organization: OrgStruct.new('Test Organization', 'npi_123456')))
+        render(Core::Card::OrganizationCardComponent.new(organization: OrgStruct.new('Test Organization',
+                                                                                     'npi_123456')))
       end
     end
   end

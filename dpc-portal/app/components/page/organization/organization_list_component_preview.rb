@@ -14,14 +14,15 @@ module Page
 
       def multiple_orgs
         render(Page::Organization::OrganizationListComponent.new(organizations: [
-                                                     OrgStruct.new('Test Organization 1', 'npi_111111'),
-                                                     OrgStruct.new('Test Organization 2', 'npi_222222'),
-                                                     OrgStruct.new('Test Organization 3', 'npi_333333')
-                                                   ]))
+                                                                   OrgStruct.new('Test Organization 1', 'npi_111111'),
+                                                                   OrgStruct.new('Test Organization 2', 'npi_222222'),
+                                                                   OrgStruct.new('Test Organization 3', 'npi_333333')
+                                                                 ]))
       end
 
       def one_org
-        render(Page::Organization::OrganizationListComponent.new(organizations: [OrgStruct.new('Test Organization', 'npi_123456')]))
+        render(Page::Organization::OrganizationListComponent.new(organizations: [OrgStruct.new('Test Organization',
+                                                                                               'npi_123456')]))
       end
 
       def no_org
