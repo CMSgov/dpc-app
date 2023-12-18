@@ -1,0 +1,226 @@
+<% title "New Public Key" %>
+
+<div class="ds-u-padding-y--0 ds-u-fill--white public-key__container">
+  <section class="ds-u-display--flex ds-u-padding-top--4 ds-u-justify-content--between ds-u-align-items--center public-key__intro-container">
+    <div class="public-key__intro">
+      <div class="ds-u-padding-left--7 ds-u-padding-top--2 ds-u-padding-right--4 ds-u-padding-bottom--2 ds-h1 public-key__intro-header">
+        How to Generate a Public Key
+      </div>
+      <div class="ds-u-padding-left--3 public-key__intro-windows">
+        <strong>Window users</strong><br />
+        If you are using Windows, you can use this link for downloading openSSL: <%= link_to 'https://wiki.openssl.org/index.php/Binaries', 'https://wiki.openssl.org/index.php/Binaries', target: '_blank' %>
+      </div>
+    </div>
+    <div class="ds-u-padding-left--7 ds-u-padding-bottom--7 ds-u-font-style--italic public-key__files">
+      <strong>Please ensure all files created from this page are stored in ONE folder.</strong><br />
+      (These include: private.pem, public.pem, snippet.txt, snippet.txt.sig, signature.sig)
+    </div>
+  </section>
+
+  <section class="ds-l-container ds-u-margin-bottom--4 ds-u-font-size--small">
+    <div class="ds-l-row">
+      <div class="ds-l-col--6 ds-l-md-col--3 step step_1">
+        <%= image_tag("private_key.svg", alt: "A picture of a locked lock with a key hole") %>
+        <h4>1. Generate a private key</h4>
+        <div>
+          Use the command invocation:<br />
+          <div class="code-block ds-u-truncate">
+            <code>
+              <span id="private-key">openssl genrsa -out private.pem 4096</span>
+            </code>
+          </div>
+          <div class="copy-btn__container">
+            <button onclick="copyText('private-key')" class="copy-btn ds-c-button--primary">Copy</button>
+          </div>
+          <div class="confirm-msg">
+            <span id="confirm-private-key"></span>
+          </div>
+        </div>
+        <p><strong><span class="ds-u-color--error">IMPORTANT!</span> The contents of your private key (private.pem file) should be treated as sensitive/secret information.</strong> Take care in the handling and storage of this information as it is essential to the security of your connection with DPC.</p>
+      </div>
+      <div class="ds-l-col--6 ds-l-md-col--3 step_2">
+        <%= image_tag("public-key-image.svg", alt: "A picture of a key") %>
+        <h4>2. Generate a public key</h4>
+        <div>
+          Use the command invocation:<br />
+          <div class="code-block ds-u-truncate">
+            <code>
+              <span id="public-key">openssl rsa -in private.pem -outform PEM -pubout -out public.pem</span>
+            </code>
+          </div>
+          <div class="copy-btn__container">
+            <button onclick="copyText('public-key')" class="copy-btn ds-c-button--primary">Copy</button>
+          </div>
+          <div class="confirm-msg">
+            <span id="confirm-public-key"></span>
+          </div>
+        </div>
+        <p><strong>Paste the contents</strong> of this public.pem file into the ‘Public Key’ field below and proceed to creating your public key signature.</p>
+      </div>
+      <div class="ds-l-col--6 ds-l-md-col--3 step_3">
+        <%= image_tag("create-sig-image.svg", alt: "") %>
+        <h4>3a. Create public key snippet</h4>
+
+        <div class="download_btn_container">
+          <div class="download_btn_form">
+            <%= button_to 'DOWNLOAD', download_snippet_path, class: "ds-u-padding--1 ds-c-button--primary ds-u-font-weight--bold download_btn" %>
+          </div>
+          <div class="ds-u-padding--1 download_btn_description">
+            snippet.txt file to create snippet
+          </div>
+        </div>
+
+        <div>
+          Use the command invocation:<br />
+          <div class="code-block ds-u-truncate">
+            <code>
+              <span id="sig-snippet">openssl dgst -sign private.pem -sha256 -out snippet.txt.sig snippet.txt</span>
+            </code>
+          </div>
+        </div>
+        <div class="copy-btn__container">
+          <div class="tooltip">
+            <%= image_tag("information.svg", alt: "") %><br />
+            <span class="tooltiptext">This command signs the downloaded snippet.txt file with your private key to create a signed public key signature in binary format. (snippet.txt.sig)</span>
+          </div>
+          <div>
+            <button onclick="copyText('sig-snippet')"  class="copy-btn ds-c-button--primary">Copy</button>
+          </div>
+        </div>
+        <div class="confirm-msg">
+          <span id="confirm-sig-snippet" style="display: hidden;"></span>
+        </div>
+
+        <h4>3b. Verify public key snippet</h4>
+
+        <div>
+          Use the command invocation:<br />
+          <div class="code-block ds-u-truncate">
+            <code>
+              <span id="verify-sig">openssl dgst -verify public.pem -sha256 -signature snippet.txt.sig snippet.txt</span>
+            </code>
+          </div>
+          <div class="copy-btn__container">
+            <div class="tooltip">
+              <%= image_tag("information.svg", alt: "") %><br />
+              <span class="tooltiptext">This command verifies the snippet.txt.sig file.</span>
+            </div>
+            <div>
+              <button onclick="copyText('verify-sig')" class="copy-btn ds-c-button--primary">Copy</button>
+            </div>
+          </div>
+          <div class="confirm-msg">
+            <span id="confirm-verify-sig" style="display: hidden;"></span>
+          </div>
+        </div>
+
+        <p class="ds-u-font-weight--bold">Results <u>must</u> confirm <span class="ds-u-color--success">Verified Ok</span></p>
+      </div>
+      <div class="ds-l-col--6 ds-l-md-col--3 step_4">
+        <%= image_tag("verified-pk-sig.svg", alt: "") %>
+
+        <div>
+          <h4>4. Generate a <em>verified</em> public key signature</h4>
+
+          Use the command invocation:<br />
+          <div class="code-block ds-u-truncate">
+            <code>
+              <span id="b64">openssl base64 -in snippet.txt.sig -out signature.sig</span>
+            </code>
+          </div>
+          <div class="copy-btn__container">
+            <div class="tooltip">
+              <%= image_tag("information.svg", alt: "") %><br />
+              <span class="tooltiptext">This command creates your verified public key signature into a human-readable format that can be pasted below. (signature.txt)</span>
+            </div>
+            <div>
+              <button onclick="copyText('b64')" class="copy-btn ds-c-button--primary">Copy</button>
+            </div>
+          </div>
+          <div class="confirm-msg">
+            <span id="confirm-b64"></span>
+          </div>
+        </div>
+
+        <p><strong>Paste the contents</strong> of this signature.sig file into the ‘Public Key Signature’ field below.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="ds-u-fill--warn-lighter ds-u-padding-top--3 ds-u-color--primary-darkest ds-u-text-align--center ds-u-font-weight--bold">
+    <div class="ds-u-margin-bottom--0 ds-h2">
+      Upload Your Public Key
+    </div>
+    <div class="ds-u-font-style--italic ds-u-margin-top--0 ds-u-padding-bottom--4 ds-h4">
+      Please complete the following instructions to upload your public key.
+    </div>
+  </section>
+
+  <section>
+    <%= form_tag organization_public_keys_path(organization_id: params[:organization_id]), method: :post do %>
+      <div class="public_key_form_grid">
+        <div class="pk-grid-cell pk-instruction" id="label-inst">
+          <div class="ds-display pk-inst-num">
+            1.
+          </div>
+          <div class="pk-inst">
+            Add a <strong>LABEL</strong> for your public key that can be easily recognized in the future.
+          </div>
+        </div>
+        <div class="pk-grid-cell pk-triangle">
+        </div>
+        <div class="pk-grid-cell pk-form-field" id="label-form">
+          <div class="field ds-u-margin-y--5">
+            <%= label_tag :label, "Label", class: "ds-c-label" %>
+            <%= text_field_tag :label, params[:label], class: "ds-c-field", onkeyup: "characterCount('label',25,'pubkey-char-count')" %>
+            <span class="char-count ds-u-color--gray ds-u-font-weight--normal" id="pubkey-char-count">(0/25)</span>
+          </div>
+        </div>
+        <div class="pk-grid-cell pk-instruction" id="key-inst">
+          <div class="ds-display pk-inst-num">
+            2.
+          </div>
+          <div class="pk-inst">
+            The <strong>PUBLIC KEY</strong> field <u>must include</u> the “BEGIN PUBLIC KEY” and “END PUBLIC KEY” tags from your public.pem file.<br />
+
+            <div class="pub-key-ex-container">
+              <%= image_tag("pub-key-ex.svg", alt: "", class: "pub-key-ex") %>
+            </div>
+          </div>
+        </div>
+        <div class="pk-grid-cell pk-triangle">
+        </div>
+        <div class="pk-grid-cell pk-form-field" id="key-form">
+          <div class="field ds-u-margin-y--5">
+            <%= label_tag :public_key, "Public Key", class: "ds-c-label" %>
+            <%= text_area_tag :public_key, params[:label], class: "ds-c-field" %>
+          </div>
+        </div>
+        <div class="pk-grid-cell pk-instruction" id="sig-inst">
+          <div class="ds-display pk-inst-num">
+            3.
+          </div>
+          <div class="pk-inst">
+            The public key signature (snippet.txt.sig file) <u>must yield</u> “Verified Ok” results in order to successfully generate the signature.sig file and paste its contents in the <strong>PUBLIC KEY SIGNATURE</strong> field.
+          </div>
+        </div>
+        <div class="pk-grid-cell pk-triangle">
+        </div>
+        <div class="pk-grid-cell pk-form-field" id="sig-form">
+          <div class="field ds-u-margin-y--5">
+            <%= label_tag :snippet_signature, "Signature Snippet", class: "ds-c-label" %>
+            <%= text_area_tag :snippet_signature, params[:label], class: "ds-c-field" %>
+          </div>
+        </div>
+        <div class="ds-u-font-style--italic ds-u-text-align--center ds-u-fill--primary-darkest ds-u-color--white pk-grid-cell" id="need-help">
+          <span class="ds-u-color--error"><strong>Need Help?</strong></span> See <strong>DPC’s User Guide</strong> for more information.
+        </div>
+        <div class="pk-grid-cell pk-space">
+        </div>
+        <div class="pk-grid-cell pk-form-field" id="submit-btn">
+          <%= submit_tag "Add key", class: "ds-c-button ds-c-button--primary key-subitbtn", data: { test: "form-submit" } %>
+        </div>
+      </div>
+    <% end %>
+  </section>
+</div>
