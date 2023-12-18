@@ -3,13 +3,49 @@
 require 'rails_helper'
 
 RSpec.describe Core::Card::OrganizationCardComponent, type: :component do
-  pending "add some examples to (or delete) #{__FILE__}"
+    describe 'html' do
+        subject(:html) do
+            render_inline(component)
+            rendered_content
+        end
 
-  # it "renders something useful" do
-  #   expect(
-  #     render_inline(described_class.new(attr: "value")) { "Hello, components!" }.css("p").to_html
-  #   ).to include(
-  #     "Hello, components!"
-  #   )
-  # end
+        let(:component) { 
+            org = double("org")
+            allow(org).to receive(:name).and_return('name')
+            allow(org).to receive(:npi).and_return('npi')
+            described_class.new(organization: org) 
+        }
+        let(:expected_html) do
+            <<~HTML
+            <li class="usa-card tablet-lg:grid-col-1 widescreen:grid-col-1" style="list-style:none; visibility:visible;" data-npi="npi" data-name="name">
+                <div class="usa-card__container">
+                <div class="usa-card__header">
+                    <h2 class="usa-card__heading">
+                    name
+                    </h2>
+                </div>
+                <div class="usa-card__body">
+                    <div id="npi_div" style="float:left">
+                    <p class="usa-card__text">
+                        <span style="font-weight:bold">NPI</span>
+                        <span>npi</span>
+                    </p>
+                    </div>
+                    <div id="status_div" style="float:right">
+                    <p class="usa-card__text">
+                        <form class="button_to" method="get" action="/portal/"><button class="usa-button" type="submit">View Details</button></form>
+                    </p>
+                    </div>
+                </div>
+                </div>
+            </li>
+            HTML
+        end
+
+        before do
+            render_inline(component)
+        end
+      
+        it { is_expected.to match_html_fragment(expected_html) }
+    end
 end
