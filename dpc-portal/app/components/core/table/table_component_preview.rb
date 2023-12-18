@@ -53,8 +53,8 @@ module Core
         </tbody>
       HTML
 
-      # `stacked` and `stacked_header` determine how the table looks on mobile-width
-      # views.
+      # `sortable` does not show up in the Preview, but does show up in the HTML.
+      # It adds a div with an "aria-live" attribute that uswds requires for accessibility
       #
       # @param sortable toggle
       # @param inner_html textarea

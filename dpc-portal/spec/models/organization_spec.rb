@@ -31,4 +31,10 @@ RSpec.describe Organization, type: :model do
     expect(organization.client_tokens.size).to eq 1
     expect(organization.client_tokens.first['id']).to eq 'bd49166a-f896-400f-aaa2-c6fa953e1128'
   end
+
+  it 'raises error if not found' do
+    api_id = SecureRandom.uuid
+    stub_api_client(message: :get_organization, response: nil)
+    expect { Organization.new(api_id) }.to raise_error(DpcRecordNotFound)
+  end
 end
