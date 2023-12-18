@@ -25,7 +25,7 @@ RSpec.describe Page::Organization::ShowComponent, type: :component do
       end
       it 'Should have Generate token button' do
         button = <<~BUTTON
-          <form class="button_to" method="get" action="/portal/">
+          <form class="button_to" method="get" action="/portal/organizations/#{org.path_id}/client_tokens/new">
             <button class="usa-button" type="submit">Generate token</button>
           </form>
         BUTTON
@@ -191,9 +191,10 @@ end
 
 # Mocks the Organization class
 class MockOrg
-  attr_accessor :name, :npi
+  attr_accessor :path_id, :name, :npi
 
   def initialize(row_count)
+    @path_id = '99790463-de1f-4f7f-a529-3e4f59dc7131'
     @name = 'Health'
     @npi = '11111'
     @row_count = row_count

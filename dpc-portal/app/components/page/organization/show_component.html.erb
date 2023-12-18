@@ -7,7 +7,7 @@
     )) %>
 
   <%= render(Core::Card::BasicComponent.new(text_content: '<h2>Client Tokens</h2>',
-      button_params: { name: 'Generate token', path: root_path, method: :get} )) do %>
+      button_params: { name: 'Generate token', path: new_organization_client_token_path(@organization.path_id), method: :get} )) do %>
     <div>
       <% if @organization.client_tokens.present? %>
         <%= render(Core::Table::TableComponent.new(id: 'client-tokens-table', additional_classes: ['width-full'], sortable: true)) do %>

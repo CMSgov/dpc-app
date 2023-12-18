@@ -6,7 +6,6 @@ require 'oauth2'
 class CpiApiGatewayClient
   attr_accessor :access
 
-  # rubocop:disable Metrics/MethodLength
   def initialize
     env = ENV.fetch('ENV', nil)
     client_id = ENV.fetch('CPI_API_GW_CLIENT_ID', nil)
@@ -22,7 +21,6 @@ class CpiApiGatewayClient
                                  })
     fetch_token
   end
-  # rubocop:enable Metrics/MethodLength
 
   # fetch data about an organization, including enrollment_id
   def fetch_enrollment(npi)
@@ -40,7 +38,6 @@ class CpiApiGatewayClient
     response.parsed
   end
 
-  # rubocop:disable Metrics/MethodLength
   # fetch info about the authorized official, including a list of med sanctions
   def fetch_authorized_official_med_sanctions(ssn)
     body = {
@@ -62,7 +59,6 @@ class CpiApiGatewayClient
                                    body: body)
     response.parsed
   end
-  # rubocop:enable Metrics/MethodLength
 
   private
 
