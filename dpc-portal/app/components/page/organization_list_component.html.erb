@@ -30,22 +30,20 @@
         }
 
         function filter(org_name, npi) {
-            alert("filtering: [" + org_name + "]:[" + npi + "]")
-            cards = document.querySelectorAll("div.usa-card__container");
+            cards = document.querySelectorAll("li.usa-card");
             
-            // TODO: write real filtering logic
             cards.forEach((card) => {
-                if(org_name > '') {
-                    if(card.dataset.name != org_name) {
-                        card.style.display = 'none';
-                    } 
-                } else {
-                    card.style.display = 'block';
+                filtered = false;
+
+                if((org_name > '') && (card.dataset.name != org_name) ) {
+                    filtered = true;
+                } 
+                if((npi > '') && (card.dataset.npi != npi)) {
+                    filtered = true;
                 }
-                if(npi > '') {
-                    if(card.dataset.npi != npi) {
-                        card.style.display = 'none';
-                    }
+
+                if(filtered) {
+                    card.style.display = 'none';
                 } else {
                     card.style.display = 'block';
                 }
