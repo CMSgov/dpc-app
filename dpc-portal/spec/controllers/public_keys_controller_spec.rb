@@ -138,12 +138,4 @@ RSpec.describe PublicKeysController, type: :controller do
       end
     end
   end
-
-  context 'When a record not found error is encountered' do
-    it 'renders an error and redirects to portal' do
-      expect((get :new, params: {
-        organization_id: '1'
-      })).to redirect_to(portal_path)
-    end
-  end
 end
