@@ -9,15 +9,15 @@
     <div class="box__content">
 
       <h2 class="box__heading">New token for <%= @organization.name %></h2>
+      <hr/>
       <%= form_tag organization_client_tokens_path(organization_id: params[:organization_id]), method: :post do %>
 
-        <div class="field">
-          <%= label_tag :label, "Label", class: "ds-c-label" %>
-          <%= text_field_tag :label, params[:label], class: "ds-c-field", maxlength: "25"  %>
-          <p class="ds-c-field__hint">Choose a descriptive name to make your token easily identifiable to you.</p>
-        </div>
-
-        <%= submit_tag "Create token", class: "ds-c-button ds-c-button--primary", data: { test: "form-submit" } %>
+      <%= render(Core::Form::TextInputComponent.new(label: 'Label',
+	  attribute: :label,
+	  hint: 'Choose a descriptive name to make your token easily identifiable to you.',
+	  default: params[:label],
+	  input_options: { max_length: 25 })) %>
+        <%= submit_tag "Create token", class: "usa-button", data: { test: "form-submit" } %>
       <% end %>
     </div>
   </section>
