@@ -6,17 +6,17 @@ module Core
     class RowComponentPreview < ViewComponent::Preview
       # @after_render :wrap_in_table
       #
-      #
       # @param values textarea comma-delimited values
-      def parameterized(values: 'First,Second,Third')
-        obj = {}
+      # @param delete_path textarea url for delete button
+      def parameterized(values: 'First,Second,Third', delete_path: nil)
+        obj = { 'id' => SecureRandom.uuid }
         attributes = []
         (values || '').split(',').each_with_index do |v, i|
           obj[i.to_s] = v
           attributes << i.to_s
         end
 
-        render(Core::Table::RowComponent.with_collection([obj], keys: attributes))
+        render(Core::Table::RowComponent.with_collection([obj], keys: attributes, delete_path: delete_path))
       end
 
       private

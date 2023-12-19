@@ -83,23 +83,36 @@ RSpec.describe Page::Organization::ShowComponent, type: :component do
         is_expected.to include(normalize_space(header))
       end
       it 'should have token rows' do
-        row = <<~HTML
-          <tbody>
-            <tr>
-              <td data-sort-value="Token 1">Token 1</td>
-              <td data-sort-value="12/16/2023 at  5:01PM UTC">12/16/2023 at  5:01PM UTC</td>
-              <td data-sort-value="12/15/2023 at  5:01PM UTC">12/15/2023 at  5:01PM UTC</td>
-              <td data-sort-value="X">X</td>
-            </tr>
-            <tr>
-              <td data-sort-value="Token 2">Token 2</td>
-              <td data-sort-value="12/16/2023 at  5:01PM UTC">12/16/2023 at  5:01PM UTC</td>
-              <td data-sort-value="12/15/2023 at  5:01PM UTC">12/15/2023 at  5:01PM UTC</td>
-              <td data-sort-value="X">X</td>
-            </tr>
-          </tbody>
+        row1 = <<~HTML
+          <tr>
+            <td data-sort-value="Token 1">Token 1</td>
+            <td data-sort-value="12/16/2023 at  5:01PM UTC">12/16/2023 at  5:01PM UTC</td>
+            <td data-sort-value="12/15/2023 at  5:01PM UTC">12/15/2023 at  5:01PM UTC</td>
         HTML
-        is_expected.to include(normalize_space(row))
+        row2 = <<~HTML
+          <tr>
+            <td data-sort-value="Token 2">Token 2</td>
+            <td data-sort-value="12/16/2023 at  5:01PM UTC">12/16/2023 at  5:01PM UTC</td>
+            <td data-sort-value="12/15/2023 at  5:01PM UTC">12/15/2023 at  5:01PM UTC</td>
+        HTML
+        is_expected.to include(normalize_space(row1))
+        is_expected.to include(normalize_space(row2))
+      end
+      it 'should have delete token form' do
+        form1 = <<~HTML
+          <form class="button_to" method="post" action="/portal/organizations/99790463-de1f-4f7f-a529-3e4f59dc7131/client_tokens/token-id-1">
+           <input type="hidden" name="_method" value="delete" autocomplete="off" />
+           <button class="usa-button" type="submit">Yes, revoke token</button>
+          </form>
+        HTML
+        form2 = <<~HTML
+          <form class="button_to" method="post" action="/portal/organizations/99790463-de1f-4f7f-a529-3e4f59dc7131/client_tokens/token-id-2">
+           <input type="hidden" name="_method" value="delete" autocomplete="off" />
+           <button class="usa-button" type="submit">Yes, revoke token</button>
+          </form>
+        HTML
+        is_expected.to include(normalize_space(form1))
+        is_expected.to include(normalize_space(form2))
       end
       it 'should have key table header' do
         header = <<~HTML
@@ -207,6 +220,7 @@ class MockOrg
     tokens = []
     @row_count.times do |index|
       tokens << { 'label' => "Token #{index + 1}",
+                  'id' => "token-id-#{index + 1}",
                   'expiresAt' => @expires,
                   'createdAt' => @created }
     end

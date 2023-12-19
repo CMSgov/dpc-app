@@ -15,16 +15,18 @@ module Page
 
     # Mocks the Organization class
     class MockOrg
-      attr_accessor :name, :npi
+      attr_accessor :name, :npi, :path_id
 
       def initialize(row_count)
         @row_count = row_count
+        @path_id = SecureRandom.uuid
       end
 
       def client_tokens
         tokens = []
         @row_count.times do |index|
           tokens << { 'label' => "Token #{index + 1}",
+                      'id' => SecureRandom.uuid,
                       'expiresAt' => index.days.from_now.to_fs(:iso8601),
                       'createdAt' => index.days.ago.to_fs(:iso8601) }
         end
@@ -45,6 +47,7 @@ module Page
         tokens = []
         @row_count.times do |index|
           tokens << { 'label' => "IP Addr #{index + 1}",
+                      'id' => SecureRandom.uuid,
                       'ip_addr' => "127.0.0.#{index + 10}",
                       'createdAt' => index.days.ago.to_fs(:iso8601) }
         end

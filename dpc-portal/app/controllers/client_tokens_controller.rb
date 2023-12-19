@@ -23,7 +23,7 @@ class ClientTokensController < ApplicationController
     else
       flash[:alert] = 'Client token could not be deleted.'
     end
-      redirect_to organization_path(params[:organization_id])
+    redirect_to organization_path(params[:organization_id])
   end
 
   private

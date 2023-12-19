@@ -67,7 +67,7 @@ RSpec.describe 'ClientTokens', type: :request do
                                      api_client: api_client)
       delete "/organizations/#{org_api_id}/client_tokens/#{token_guid}"
       expect(flash[:notice]).to eq('Client token successfully deleted.')
-      expect(response).to redirect_to(organization_path(org_api_id))      
+      expect(response).to redirect_to(organization_path(org_api_id))
     end
     it 'renders error if error' do
       org_api_id = SecureRandom.uuid
@@ -81,7 +81,7 @@ RSpec.describe 'ClientTokens', type: :request do
                                      api_client: api_client)
       delete "/organizations/#{org_api_id}/client_tokens/#{token_guid}"
       expect(flash[:alert]).to eq('Client token could not be deleted.')
-      expect(response).to redirect_to(organization_path(org_api_id))      
+      expect(response).to redirect_to(organization_path(org_api_id))
     end
   end
 end

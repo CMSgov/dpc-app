@@ -3,5 +3,59 @@
   <% attributes.each do |attribute| %>
   <td data-sort-value="<%= attribute %>"><%= attribute %></td>
   <% end %>
+  <% if delete_path %>
+  <td>
+      <a
+	href="#delete-modal-<%= obj['id'] %>"
+	aria-controls="delete-modal-<%= obj['id'] %>"
+	data-open-modal
+	>X</a>
+      <div
+	class="usa-modal"
+	id="delete-modal-<%= obj['id'] %>"
+	aria-labelledby="delete-modal-<%= obj['id'] %>-heading"
+	aria-describedby="delete-modal-<%= obj['id'] %>-description"
+	>
+	<div class="usa-modal__content">
+	  <div class="usa-modal__main">
+            <h2 class="usa-modal__heading" id="delete-modal-<%= obj['id'] %>-heading">
+              Permanently revoke client token?
+            </h2>
+            <div class="usa-prose">
+              <p id="delete-modal-<%= obj['id'] %>-description">
+		Once revoked, this client token will not work to access production data.
+              </p>
+            </div>
+            <div class="usa-modal__footer">
+              <ul class="usa-button-group">
+		<li class="usa-button-group__item">
+		  <%= button_to 'Yes, revoke token', "#{delete_path}/#{obj['id']}", method: :delete, class: 'usa-button' %>
+		</li>
+		<li class="usa-button-group__item">
+		  <button
+                    type="button"
+                    class="usa-button usa-button--unstyled padding-105 text-center"
+                    data-close-modal
+		    >
+                    No, go back
+		  </button>
+		</li>
+              </ul>
+            </div>
+	  </div>
+	  <button
+            type="button"
+            class="usa-button usa-modal__close"
+            aria-label="Close this window"
+            data-close-modal
+	    >
+            <svg class="usa-icon" aria-hidden="true" focusable="false" role="img">
+              <use xlink:href="/assets/img/sprite.svg#close"></use>
+            </svg>
+	  </button>
+	</div>
+      </div>
+  </td>
+  <% end %>
 </tr>
 <%= raw '</tbody>' if iteration.last? %>
