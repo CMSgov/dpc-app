@@ -32,15 +32,6 @@ module DpcClientSupport
     )
   end
 
-  def default_org_creation_response
-    {
-      'id' => '923a4f7b-eade-494a-8ca4-7a685edacfad',
-      'endpoint' => [
-        'reference' => 'Endpoint/437f7b17-3d48-4654-949d-57ea80f8f1d7'
-      ]
-    }
-  end
-
   def default_get_public_keys
     { 'entities' =>
       [{ 'id' => '579dd199-3c2d-48e8-8594-cec35e223527',

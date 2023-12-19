@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
-require 'securerandom'
 
 RSpec.describe PublicKeysController, type: :controller do
   include DpcClientSupport
@@ -25,9 +24,9 @@ RSpec.describe PublicKeysController, type: :controller do
       context 'with a successful call to the api' do
         it 'returns http success' do
           stub = stub_api_client(
-            message: :create_organization,
+            message: :get_organization,
             success: true,
-            response: default_org_creation_response
+            response: default_get_org_response(org_id)
           )
 
           allow(stub).to receive(:delete_public_key).and_return(true)
@@ -41,9 +40,9 @@ RSpec.describe PublicKeysController, type: :controller do
       context 'with a failed call to the api' do
         it 'renders new' do
           stub = stub_api_client(
-            message: :create_organization,
+            message: :get_organization,
             success: true,
-            response: default_org_creation_response
+            response: default_get_org_response(org_id)
           )
 
           allow(stub).to receive(:delete_public_key).and_return(false)
