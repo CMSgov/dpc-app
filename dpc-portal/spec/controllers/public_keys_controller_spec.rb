@@ -5,9 +5,9 @@ require 'rails_helper'
 RSpec.describe PublicKeysController, type: :controller do
   include DpcClientSupport
 
-  describe 'GET #new' do
-    org_id = SecureRandom.uuid
+org_id = SecureRandom.uuid
 
+  describe 'GET #new' do
     context 'user' do
       it 'assigns the correct organization' do
         get :new, params: {
