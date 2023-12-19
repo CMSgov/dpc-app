@@ -7,6 +7,8 @@ module Page
       def initialize(organizations:)
         super
         @organizations = organizations
+        @org_names = organizations.map(&:name)
+        @org_npis = organizations.map(&:npi)
       end
     end
   end

@@ -9,6 +9,10 @@ RSpec.describe Core::ComboBox::ComboBoxComponent, type: :component do
       rendered_content
     end
 
+    before do
+      render_inline(component)
+    end
+
     context 'when has no options' do
       let(:component) { described_class.new(label: 'label', id: 'id', options: [], on_change: 'on_change') }
       let(:expected_html) do
@@ -20,10 +24,6 @@ RSpec.describe Core::ComboBox::ComboBoxComponent, type: :component do
           </select>
           </div>
         HTML
-      end
-
-      before do
-        render_inline(component)
       end
 
       it { is_expected.to match_html_fragment(expected_html) }
@@ -45,10 +45,6 @@ RSpec.describe Core::ComboBox::ComboBoxComponent, type: :component do
         HTML
       end
 
-      before do
-        render_inline(component)
-      end
-
       it { is_expected.to match_html_fragment(expected_html) }
     end
 
@@ -67,10 +63,6 @@ RSpec.describe Core::ComboBox::ComboBoxComponent, type: :component do
             </select>
           </div>
         HTML
-      end
-
-      before do
-        render_inline(component)
       end
 
       it { is_expected.to match_html_fragment(expected_html) }
