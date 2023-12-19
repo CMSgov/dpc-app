@@ -28,7 +28,6 @@ RSpec.describe 'ClientTokens', type: :request do
       post "/organizations/#{org_api_id}/client_tokens", params: { label: 'New Token' }
       expect(assigns(:organization).api_id).to eq org_api_id
       expect(assigns(:client_token)['id']).to eq token_guid
-      expect(response).to render_template('show')
     end
 
     it 'fails if no label' do
@@ -38,7 +37,6 @@ RSpec.describe 'ClientTokens', type: :request do
       post "/organizations/#{org_api_id}/client_tokens"
       expect(assigns(:organization).api_id).to eq org_api_id
       expect(flash[:alert]).to eq('Label required.')
-      expect(response).to render_template('new')
     end
 
     it 'shows error if problem' do
@@ -51,7 +49,6 @@ RSpec.describe 'ClientTokens', type: :request do
                                      api_client: api_client)
       post "/organizations/#{org_api_id}/client_tokens", params: { label: 'New Token' }
       expect(flash[:alert]).to eq('Client token could not be created.')
-      expect(response).to render_template('new')
     end
   end
 

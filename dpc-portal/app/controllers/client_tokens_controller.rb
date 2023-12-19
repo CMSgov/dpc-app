@@ -4,6 +4,10 @@
 class ClientTokensController < ApplicationController
   before_action :load_organization
 
+  def new
+    render Page::ClientToken::NewTokenComponent.new(@organization)
+  end
+
   def create
     manager = ClientTokenManager.new(params[:organization_id])
     if params_present? && manager.create_client_token(label: params[:label])
@@ -34,7 +38,7 @@ class ClientTokensController < ApplicationController
 
   def render_error(msg)
     flash[:alert] = msg
-    render :new
+    render Page::ClientToken::NewTokenComponent.new(@organization)
   end
 
   def load_organization

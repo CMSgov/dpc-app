@@ -2,6 +2,7 @@
 
 module Core
   module Form
+    # Preview of text input component
     class TextInputComponentPreview < ViewComponent::Preview
       #
       # @param label textarea

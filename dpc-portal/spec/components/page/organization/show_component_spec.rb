@@ -3,6 +3,7 @@
 require 'rails_helper'
 
 RSpec.describe Page::Organization::ShowComponent, type: :component do
+  include ComponentSupport
   describe 'html' do
     subject(:html) do
       render_inline(component)
@@ -16,7 +17,7 @@ RSpec.describe Page::Organization::ShowComponent, type: :component do
     end
 
     context 'No tokens, keys, or ip addrs' do
-      let(:org) { MockOrg.new(0) }
+      let(:org) { ComponentSupport::MockOrg.new(0) }
       it 'Should have org name' do
         is_expected.to include("<h1>#{org.name}</h1>")
       end
@@ -65,7 +66,7 @@ RSpec.describe Page::Organization::ShowComponent, type: :component do
       end
     end
     context 'Tokens, keys, and ip addrs' do
-      let(:org) { MockOrg.new(2) }
+      let(:org) { ComponentSupport::MockOrg.new(2) }
       it 'should have token table header' do
         header = <<~HTML
           <caption aria-hidden="true" hidden>Public Key Table</caption>
@@ -195,55 +196,5 @@ RSpec.describe Page::Organization::ShowComponent, type: :component do
         is_expected.to include(normalize_space(row))
       end
     end
-  end
-
-  def normalize_space(str)
-    str.gsub(/^ +/, '').gsub("\n", '')
-  end
-end
-
-# Mocks the Organization class
-class MockOrg
-  attr_accessor :path_id, :name, :npi
-
-  def initialize(row_count)
-    @path_id = '99790463-de1f-4f7f-a529-3e4f59dc7131'
-    @name = 'Health'
-    @npi = '11111'
-    @row_count = row_count
-    @created = '2023-12-15 17:01'
-    @expires = '2023-12-16 17:01'
-    @guid = '99790463-de1f-4f7f-a529-3e4f59dc713'
-  end
-
-  def client_tokens
-    tokens = []
-    @row_count.times do |index|
-      tokens << { 'label' => "Token #{index + 1}",
-                  'id' => "token-id-#{index + 1}",
-                  'expiresAt' => @expires,
-                  'createdAt' => @created }
-    end
-    tokens
-  end
-
-  def public_keys
-    tokens = []
-    @row_count.times do |index|
-      tokens << { 'label' => "Key #{index + 1}",
-                  'id' => @guid + index.to_s,
-                  'createdAt' => @created }
-    end
-    tokens
-  end
-
-  def public_ips
-    tokens = []
-    @row_count.times do |index|
-      tokens << { 'label' => "IP Addr #{index + 1}",
-                  'ip_addr' => "127.0.0.#{index + 10}",
-                  'createdAt' => @created }
-    end
-    tokens
   end
 end
