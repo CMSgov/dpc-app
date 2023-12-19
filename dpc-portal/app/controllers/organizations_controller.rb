@@ -6,7 +6,7 @@ class OrganizationsController < ApplicationController
 
   def index
     @organizations = [@organization]
-    render plain: @organizations.inspect
+    render(Page::Organization::OrganizationListComponent.new(organizations: @organizations))
   end
 
   private
