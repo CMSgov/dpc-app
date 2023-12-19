@@ -25,7 +25,6 @@ RSpec.describe PublicKeysController, type: :controller do
         it 'returns http success' do
           stub = stub_api_client(
             message: :get_organization,
-            success: true,
             response: default_get_org_response(org_id)
           )
 
@@ -41,7 +40,6 @@ RSpec.describe PublicKeysController, type: :controller do
         it 'renders new' do
           stub = stub_api_client(
             message: :get_organization,
-            success: true,
             response: default_get_org_response(org_id)
           )
 
