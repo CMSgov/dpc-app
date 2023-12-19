@@ -102,6 +102,7 @@ services:
       - "./dpc-portal/app:/dpc-portal/app"
       - "./dpc-portal/db:/dpc-portal/db"
       - "./dpc-portal/lib:/dpc-portal/lib"
+      - "./dpc-portal/log:/dpc-portal/log"
       - "./dpc-portal/bin:/dpc-portal/bin"
       - "./dpc-portal/config:/dpc-portal/config"
       - "./dpc-portal/config.ru:/dpc-portal/config.ru"

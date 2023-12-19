@@ -8,7 +8,7 @@ module DpcClientSupport
     doubled_client
   end
 
-  # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  # rubocop:disable Metrics/AbcSize
   def stub_self_returning_api_client(message:, success: true, response: {}, api_client: nil, with: nil)
     doubled_client = api_client || instance_double(DpcClient)
     allow(DpcClient).to receive(:new).and_return(doubled_client)
@@ -23,7 +23,7 @@ module DpcClientSupport
     allow(doubled_client).to receive(:response_body).and_return(response)
     doubled_client
   end
-  # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
+  # rubocop:enable Metrics/AbcSize
 
   def default_get_org_response(api_id)
     FHIR::Organization.new(

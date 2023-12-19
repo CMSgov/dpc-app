@@ -6,7 +6,7 @@ class OrganizationsController < ApplicationController
 
   def index
     @organizations = [@organization]
-    render plain: @organizations.inspect
+    render(Page::Organization::OrganizationListComponent.new(organizations: @organizations))
   end
 
   private
@@ -22,5 +22,7 @@ class OrganizationsController < ApplicationController
                     else
                       Organization.new(params[:id])
                     end
+  rescue DpcRecordNotFound
+    render file: "#{Rails.root}/public/404.html", layout: false, status: :not_found
   end
 end

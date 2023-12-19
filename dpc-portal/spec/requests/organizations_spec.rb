@@ -10,7 +10,7 @@ RSpec.describe 'Organizations', type: :request do
       api_id = SecureRandom.uuid
       stub_api_client(message: :get_organization,
                       response: default_get_org_response(api_id))
-      get '/organizations'
+      get '/organizations', params: { id: api_id }
     end
   end
 

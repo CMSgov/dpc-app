@@ -1,10 +1,10 @@
 <div>
   <div class="shadow-5 border-1px border-base-lighter radius-md margin-bottom-4 padding-x-3 padding-bottom-3">
     <div class="display-flex flex-row flex-justify">
-      <div class="flex-align-self-start">
+      <div class="flex-align-self-center">
         <%= raw @text_content %>
       </div>
-      <div class="flex-align-self-end">
+      <div class="flex-align-self-center">
         <% if @button_params %>
           <%= button_to @button_params[:name], @button_params[:path], method: @button_params[:method], class: 'usa-button' %>
         <% end %>
