@@ -1,17 +1,18 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
+require 'securerandom'
 
 RSpec.describe PublicKeysController, type: :controller do
   include DpcClientSupport
 
   describe 'GET #new' do
-    let(:org) { create(:organization, :api_enabled) }
+    org_id = SecureRandom.uuid
 
     context 'user' do
       it 'assigns the correct organization' do
         get :new, params: {
-          organization_id: org.id
+          organization_id: org_id
         }
 
         expect(response.status).to eq(200)
@@ -29,11 +30,9 @@ RSpec.describe PublicKeysController, type: :controller do
             response: default_org_creation_response
           )
 
-          org = create(:organization, :api_enabled)
-
           allow(stub).to receive(:delete_public_key).and_return(true)
 
-          get :destroy, params: { id: 1, organization_id: org.id }
+          get :destroy, params: { id: 1, organization_id: org_id }
           expect(response.location).to include(request.host + root_path)
           expect(response).to have_http_status(:found)
         end
@@ -47,11 +46,9 @@ RSpec.describe PublicKeysController, type: :controller do
             response: default_org_creation_response
           )
 
-          org = create(:organization, :api_enabled)
-
           allow(stub).to receive(:delete_public_key).and_return(false)
 
-          get :destroy, params: { id: 1, organization_id: org.id }
+          get :destroy, params: { id: 1, organization_id: org_id }
           expect(response).to render_template(:new)
 
           expect(flash[:alert]).to_not be_nil
@@ -64,7 +61,7 @@ RSpec.describe PublicKeysController, type: :controller do
     context 'when missing a public key param' do
       it 'renders an error' do
         post :create, params: {
-          organization_id: org.id,
+          organization_id: org_id,
           label: ''
         }
 
@@ -78,7 +75,7 @@ RSpec.describe PublicKeysController, type: :controller do
     context 'when label is greater than 25' do
       it 'renders an error' do
         post :create, params: {
-          organization_id: org.id,
+          organization_id: org_id,
           public_key: 'test key',
           label: 'aaaaabbbbbcccccdddddeeeeefffff'
         }
@@ -102,7 +99,7 @@ RSpec.describe PublicKeysController, type: :controller do
         )
 
         post :create, params: {
-          organization_id: org.id,
+          organization_id: org_id,
           public_key: 'test key',
           label: 'aaaaabbbbbcccccddddd'
         }
@@ -126,7 +123,7 @@ RSpec.describe PublicKeysController, type: :controller do
         )
 
         expect((post :create, params: {
-          organization_id: org.id,
+          organization_id: org_id,
           public_key: 'test key',
           label: 'aaaaabbbbbcccccddddd'
         })).to redirect_to(portal_path)
@@ -147,14 +144,8 @@ RSpec.describe PublicKeysController, type: :controller do
   end
 
   context 'When a record not found error is encountered' do
-    let!(:user) { create(:user, :assigned) }
-
-    before(:each) do
-      sign_in user, scope: :user
-    end
 
     it 'renders an error and redirects to portal' do
-      expect(controller).to receive(:organization_enabled?).and_raise(ActiveRecord::RecordNotFound)
 
       expect((get :new, params: {
         organization_id: '1'
