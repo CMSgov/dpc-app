@@ -134,7 +134,6 @@ RSpec.describe PublicKeysController, type: :controller do
     context 'when the snippet is requested' do
       it 'serves the snippet file' do
         post :download_snippet, params: {}
-
         expect(response.status).to eq(202)
         expect(response.header['Content-Type']).to eq('application/zip')
         expect(response.body).to eq('This is the snippet used to verify a key pair in DPC.')
@@ -143,9 +142,7 @@ RSpec.describe PublicKeysController, type: :controller do
   end
 
   context 'When a record not found error is encountered' do
-
     it 'renders an error and redirects to portal' do
-
       expect((get :new, params: {
         organization_id: '1'
       })).to redirect_to(portal_path)
