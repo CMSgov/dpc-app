@@ -12,33 +12,33 @@
     <% end %>
 </ul>
 
-<script>
-        function filterOrgName(selected) {
-            filter(selected.value, document.getElementById("npi_search_selection").value);
-        }
+<%= javascript_tag do -%>
+    function filterOrgName(selected) {
+        filter(selected.value, document.getElementById("npi_search_selection").value);
+    }
 
-        function filterNpi(selected) {
-            filter(document.getElementById("org_search_selection").value, selected.value);
-        }
+    function filterNpi(selected) {
+        filter(document.getElementById("org_search_selection").value, selected.value);
+    }
 
-        function filter(org_name, npi) {
-            cards = document.querySelectorAll("li.usa-card");
-            
-            cards.forEach((card) => {
-                filtered = false;
+    function filter(org_name, npi) {
+        cards = document.querySelectorAll("li.usa-card");
+        
+        cards.forEach((card) => {
+            filtered = false;
 
-                if((org_name > '') && (card.dataset.name != org_name) ) {
-                    filtered = true;
-                } 
-                if((npi > '') && (card.dataset.npi != npi)) {
-                    filtered = true;
-                }
+            if((org_name > '') && (card.dataset.name != org_name) ) {
+                filtered = true;
+            } 
+            if((npi > '') && (card.dataset.npi != npi)) {
+                filtered = true;
+            }
 
-                if(filtered) {
-                    card.style.display = 'none';
-                } else {
-                    card.style.display = 'block';
-                }
-            });
-        }
-</script>
+            if(filtered) {
+                card.style.display = 'none';
+            } else {
+                card.style.display = 'block';
+            }
+        });
+    }
+<% end -%>
