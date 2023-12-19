@@ -1,0 +1,22 @@
+<li class="usa-card tablet-lg:grid-col-1 widescreen:grid-col-1" style="list-style:none; visibility:visible;" data-npi="<%= @npi%>" data-name="<%= @name%>">
+    <div class="usa-card__container">
+        <div class="usa-card__header">
+            <h2 class="usa-card__heading">
+                <%= @name %>
+            </h2>
+        </div>
+        <div class="usa-card__body">
+            <div id="npi_div" style="float:left">
+                <p class="usa-card__text">
+                    <span style="font-weight:bold">NPI</span>
+                    <span><%= @npi %></span>
+                </p>
+            </div>
+            <div id="status_div" style="float:right">
+                <p class="usa-card__text">
+                    <%= render Core::Button::ButtonComponent.new(label: 'View Details', destination: organization_path(@api_id))%>
+                </p>
+            </div>
+        </div>
+    </div>
+</li>
