@@ -20,6 +20,7 @@ class ClientTokenManager
   def delete_client_token(params)
     api_client = DpcClient.new
     api_client.delete_client_token(api_id, params[:id])
+    api_client.response_successful?
   end
 
   def client_tokens

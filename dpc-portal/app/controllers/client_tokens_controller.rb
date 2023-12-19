@@ -20,10 +20,10 @@ class ClientTokensController < ApplicationController
     manager = ClientTokenManager.new(params[:organization_id])
     if manager.delete_client_token(id: params[:id])
       flash[:notice] = 'Client token successfully deleted.'
-      redirect_to root_path
     else
-      render_error 'Client token could not be deleted.'
+      flash[:alert] = 'Client token could not be deleted.'
     end
+      redirect_to organization_path(params[:organization_id])
   end
 
   private

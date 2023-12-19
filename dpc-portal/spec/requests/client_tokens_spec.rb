@@ -28,6 +28,7 @@ RSpec.describe 'ClientTokens', type: :request do
       post "/organizations/#{org_api_id}/client_tokens", params: { label: 'New Token' }
       expect(assigns(:organization).api_id).to eq org_api_id
       expect(assigns(:client_token)['id']).to eq token_guid
+      expect(response).to render_template('show')
     end
 
     it 'fails if no label' do
@@ -37,6 +38,7 @@ RSpec.describe 'ClientTokens', type: :request do
       post "/organizations/#{org_api_id}/client_tokens"
       expect(assigns(:organization).api_id).to eq org_api_id
       expect(flash[:alert]).to eq('Label required.')
+      expect(response).to render_template('new')
     end
 
     it 'shows error if problem' do
@@ -49,11 +51,37 @@ RSpec.describe 'ClientTokens', type: :request do
                                      api_client: api_client)
       post "/organizations/#{org_api_id}/client_tokens", params: { label: 'New Token' }
       expect(flash[:alert]).to eq('Client token could not be created.')
+      expect(response).to render_template('new')
     end
   end
 
   describe 'DELETE /destroy' do
-    it 'flashes success if succeeds'
-    it 'renders error if error'
+    it 'flashes success if succeeds' do
+      org_api_id = SecureRandom.uuid
+      token_guid = SecureRandom.uuid
+      api_client = stub_api_client(message: :get_organization,
+                                   response: default_get_org_response(org_api_id))
+      stub_self_returning_api_client(message: :delete_client_token,
+                                     response: nil,
+                                     with: [org_api_id, token_guid],
+                                     api_client: api_client)
+      delete "/organizations/#{org_api_id}/client_tokens/#{token_guid}"
+      expect(flash[:notice]).to eq('Client token successfully deleted.')
+      expect(response).to redirect_to(organization_path(org_api_id))      
+    end
+    it 'renders error if error' do
+      org_api_id = SecureRandom.uuid
+      token_guid = SecureRandom.uuid
+      api_client = stub_api_client(message: :get_organization,
+                                   response: default_get_org_response(org_api_id))
+      stub_self_returning_api_client(message: :delete_client_token,
+                                     response: nil,
+                                     success: false,
+                                     with: [org_api_id, token_guid],
+                                     api_client: api_client)
+      delete "/organizations/#{org_api_id}/client_tokens/#{token_guid}"
+      expect(flash[:alert]).to eq('Client token could not be deleted.')
+      expect(response).to redirect_to(organization_path(org_api_id))      
+    end
   end
 end
