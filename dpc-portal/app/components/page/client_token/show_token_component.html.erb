@@ -1,9 +1,16 @@
 <div>
-  <div class="margin-bottom-5">&larr; <%= link_to @organization.name, organization_path(organization.path_id) %></div>
+  <div class="margin-bottom-5">&larr; <%= link_to organization.name, organization_path(organization.path_id) %></div>
   <h1>Client token created</h1>
   <div>
     <h2>"<%= client_token['label'] %>" created for <%= organization.name %></h2>
     <hr/>
-    
+    <%= render(Core::Form::TextAreaComponent.new(label: 'Your token', attribute: :token, default: client_token['token'], input_options: { rows: 9, readonly: :readonly })) %>
+    <div class="usa-alert usa-alert--warning">
+      <div class="usa-alert__body">
+	<p class="usa-alert__text">
+	  Copy or download your token right now! You won't be able to see it again.
+	</p>
+      </div>
+    </div>
   </div>
 </div>

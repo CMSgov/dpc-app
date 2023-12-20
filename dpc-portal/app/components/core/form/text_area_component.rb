@@ -14,7 +14,7 @@ module Core
         @hint = hint
         @default = default
         input_options[:class] ||= []
-        input_options[:class] << 'usa-input'
+        input_options[:class] << 'usa-textarea'
       end
     end
   end

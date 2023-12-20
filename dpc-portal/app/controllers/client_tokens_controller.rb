@@ -12,7 +12,7 @@ class ClientTokensController < ApplicationController
     manager = ClientTokenManager.new(params[:organization_id])
     if params_present? && manager.create_client_token(label: params[:label])
       @client_token = manager.client_token
-      render :show
+      render(Page::ClientToken::ShowTokenComponent.new(@organization, @client_token))
     else
       return render_error 'Label required.' unless params_present?
 
