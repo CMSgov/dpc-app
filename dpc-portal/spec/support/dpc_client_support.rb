@@ -44,9 +44,9 @@ koPuyOLZ4oalcqVMGJFeYpcCAwEAAQ==
          'label' => 'aws-scripts' }] }
   end
 
-  def default_get_client_tokens
+  def default_get_client_tokens(guid: 'bd49166a-f896-400f-aaa2-c6fa953e1128')
     { 'entities' =>
-      [{ 'id' => 'bd49166a-f896-400f-aaa2-c6fa953e1128',
+      [{ 'id' => guid,
          'tokenType' => 'MACAROON',
          'label' => 'Token for organization 4b15098b-d53f-432d-a2f3-416a9483527b.',
          'createdAt' => '2020-09-10T02:45:07.452+00:00',

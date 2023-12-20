@@ -9,7 +9,7 @@ RSpec.describe Core::Table::RowComponent, type: :component do
       rendered_content
     end
 
-    let(:obj) { { 'a' => 'First', 'b' => 'Second' } }
+    let(:obj) { { 'a' => 'First', 'b' => 'Second', 'id' => 'some-guid' } }
     let(:component) { described_class.with_collection([obj], keys: %w[a b]) }
     let(:expected_html) do
       <<~HTML
@@ -27,6 +27,16 @@ RSpec.describe Core::Table::RowComponent, type: :component do
     end
 
     it { is_expected.to match_html_fragment(expected_html) }
+
+    context 'with delete' do
+      let(:component) { described_class.with_collection([obj], keys: %w[a b], delete_path: '/foo/bar') }
+      let(:expected_html) do
+        <<~HTML
+          <form class="button_to" method="post" action="/foo/bar/some-guid"><input type="hidden" name="_method" value="delete" autocomplete="off" /><button class="usa-button" type="submit">Yes, revoke token</button></form>
+        HTML
+      end
+      it { is_expected.to include(expected_html) }
+    end
 
     context 'with two rows' do
       let(:component) { described_class.with_collection([obj, obj], keys: %w[a b]) }

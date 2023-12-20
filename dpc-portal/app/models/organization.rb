@@ -4,6 +4,8 @@
 class Organization
   attr_reader :api_id, :name, :npi
 
+  alias path_id api_id
+
   def initialize(api_id)
     @api_id = api_id
     @client = DpcClient.new

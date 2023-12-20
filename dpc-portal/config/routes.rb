@@ -17,6 +17,7 @@ Rails.application.routes.draw do
   match '/portal', to: 'main#welcome', via: :get
 
   resources :organizations, only: [:index, :show] do
+    resources :client_tokens, only: [:new, :create, :destroy]
     resources :public_keys, only: [:new, :create, :destroy]
   end
 
