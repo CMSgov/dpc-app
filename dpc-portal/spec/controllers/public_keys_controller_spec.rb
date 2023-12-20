@@ -10,6 +10,11 @@ RSpec.describe PublicKeysController, type: :controller do
   describe 'GET #new' do
     context 'user' do
       it 'assigns the correct organization' do
+        stub_api_client(
+          message: :get_organization,
+          response: default_get_org_response(org_id)
+        )
+
         get :new, params: {
           organization_id: org_id
         }
@@ -27,7 +32,6 @@ RSpec.describe PublicKeysController, type: :controller do
             message: :get_organization,
             response: default_get_org_response(org_id)
           )
-
           allow(stub).to receive(:delete_public_key).and_return(true)
 
           get :destroy, params: { id: 1, organization_id: org_id }
@@ -42,7 +46,6 @@ RSpec.describe PublicKeysController, type: :controller do
             message: :get_organization,
             response: default_get_org_response(org_id)
           )
-
           allow(stub).to receive(:delete_public_key).and_return(false)
 
           get :destroy, params: { id: 1, organization_id: org_id }
@@ -57,6 +60,11 @@ RSpec.describe PublicKeysController, type: :controller do
   describe 'GET #create' do
     context 'when missing a public key param' do
       it 'renders an error' do
+        stub_api_client(
+          message: :get_organization,
+          response: default_get_org_response(org_id)
+        )
+
         post :create, params: {
           organization_id: org_id,
           label: ''
@@ -71,6 +79,11 @@ RSpec.describe PublicKeysController, type: :controller do
 
     context 'when label is greater than 25' do
       it 'renders an error' do
+        stub_api_client(
+          message: :get_organization,
+          response: default_get_org_response(org_id)
+        )
+
         post :create, params: {
           organization_id: org_id,
           public_key: 'test key',
