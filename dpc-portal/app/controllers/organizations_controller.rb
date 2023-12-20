@@ -9,6 +9,10 @@ class OrganizationsController < ApplicationController
     render(Page::Organization::OrganizationListComponent.new(organizations: @organizations))
   end
 
+  def show
+    render(Page::Organization::ShowComponent.new(@organization))
+  end
+
   private
 
   def load_organization
