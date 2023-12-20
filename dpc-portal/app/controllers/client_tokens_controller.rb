@@ -37,7 +37,7 @@ class ClientTokensController < ApplicationController
   end
 
   def render_error(msg)
-    flash[:alert] = msg
+    flash.now.alert = msg
     render Page::ClientToken::NewTokenComponent.new(@organization)
   end
 
