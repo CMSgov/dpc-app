@@ -22,7 +22,7 @@
     </div>
   <% end %>
   <%= render(Core::Card::BasicComponent.new(text_content: '<h2>Public Keys</h2>',
-      button_params: { name: 'Create key', path: new_organization_public_key_path(@organization.path_id), method: :get} )) do %>
+      button_params: { name: 'Create key', path: new_organization_public_key_path(@organization.api_id), method: :get} )) do %>
     <div>
       <% if @organization.public_keys.present? %>
       <%= render(Core::Table::TableComponent.new(id: 'public-keys-table',
