@@ -97,7 +97,7 @@ services:
       dockerfile: dpc-portal/Dockerfile
     image: dpc-web-portal:latest
     volumes:
-      # Mount specific directories to avoid overwriting
+      # Mount specific directories to avoid overwriting 
       # precompiled assets (public/assets/) and node_modules
       - "./dpc-portal/app:/dpc-portal/app"
       - "./dpc-portal/db:/dpc-portal/db"
@@ -128,8 +128,8 @@ services:
       - REDIS_URL=redis://redis
       - DATABASE_URL=postgresql://db/dpc-portal_development
       - TEST_DATABASE_URL=postgresql://db/dpc-portal_test
-      - GOLDEN_MACAROON=MDAyYWxvY2F0aW9uIGh0dHBzOi8vdGVzdC5kcGMuY21zLmdvdi9hcGkKMDAzNGlkZW50aWZpZXIgN2NlYmJkNWMtOGJhZi00OTE3LWI4NmEtN2Q0M2ZlOWJiYjkwCjAwMmZzaWduYXR1cmUgrMnrfP2Fh425KF3Mu9Yq8di_Q0n_d90d9oFPWJlPFR0K
-      - API_METADATA_URL=https://test.dpc.cms.gov/api/v1
+      - GOLDEN_MACAROON=${GOLDEN_MACAROON}
+      - API_METADATA_URL=http://api:3002/v1
       - DB_USER=postgres
       - DB_PASS=dpc-safe
       - DATABASE_CLEANER_ALLOW_REMOTE_DATABASE_URL=true
