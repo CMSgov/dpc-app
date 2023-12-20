@@ -184,7 +184,7 @@ class DpcClient
   end
 
   def use_ssl?
-    !(Rails.env.development? || Rails.env.test?)
+    true
   end
 
   def connection_error

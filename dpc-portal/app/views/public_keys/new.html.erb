@@ -5,24 +5,14 @@
     <section class="box">
         <div>
             <h2>New Public Key for <%= @organization.name %></h2>
+            <%= form_tag organization_public_keys_path(organization_id: params[:organization_id]), method: :post do %>
 
-                <div class="field">
-                    <%= label_tag :label, "Label" %>
-                    <%= text_field_tag :label, params[:label] %>
-                    <p>Choose a descriptive name to make your key easily identifiable to you.</p>
-                </div>
-                <div class="text">
-                    <%= label_tag :public_key, "Public Key" %>
-                    <%= text_field_tag :public_key, params[:public_key] %>
-                    <p>Must include the "BEGIN PUBLIC KEY" and "END PUBLIC KEY" tags from your public.pem file.</p>
-                </div>
-                <div class="text">
-                    <%= label_tag :snippet_signature, "Signature Snippet" %>
-                    <%= text_field_tag :snippet_signature, params[:snippet_signature] %>
-                    <p>Must yield "Verified Ok" results in order to generate the signature.sig file.</p>
-                </div>
+                <%= render(Core::Form::TextInputComponent.new(label: "Label", attribute: :label, default: params[:label], hint: 'Choose a descriptive name to make your key easily identifiable to you.')) %>
+                <%= render(Core::Form::TextAreaComponent.new(label: "Public Key", attribute: :public_key, default: params[:public_key], hint: 'Must include the "BEGIN PUBLIC KEY" and "END PUBLIC KEY" tags from your public.pem file.')) %>
+                <%= render(Core::Form::TextAreaComponent.new(label: "Signature Snippet", attribute: :snippet_signature, default: params[:snippet_signature], hint: 'Must yield "Verified Ok" results in order to generate the signature.sig file.')) %>
 
-                <%= submit_tag "Add key">
+                <%= submit_tag "Add key" %>
+            <% end %>
         </div>
     </section>
 </div>
