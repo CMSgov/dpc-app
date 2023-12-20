@@ -1,0 +1,17 @@
+<div>
+  <div class="margin-bottom-5">&larr; <%= link_to @organization.name, organization_path(organization.path_id) %></div>
+  <h1>Create a new client token</h1>
+  <div>
+    <h2>New token for <%= organization.name %></h2>
+    <hr/>
+    <%= form_tag organization_client_tokens_path(organization_id: organization.path_id), method: :post do %>
+
+    <%= render(Core::Form::TextInputComponent.new(label: 'Label',
+	attribute: :label,
+	hint: 'Choose a descriptive name to make your token easily identifiable to you.',
+	default: params[:label],
+	input_options: { max_length: 25 })) %>
+    <%= submit_tag "Create token", class: "usa-button", data: { test: "form-submit" } %>
+    <% end %>
+  </div>
+</div>

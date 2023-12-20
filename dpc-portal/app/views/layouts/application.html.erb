@@ -13,12 +13,12 @@
     <div class="grid-row">
       <div class="grid-col-fill">
         <% if notice %>
-          <%= render Alert::Component.new do %>
+          <%= render Core::Alert::Component.new do %>
             <%= notice %>
           <% end %>
         <% end %>
         <% if alert %>
-          <%= render Alert::Component.new(status: :error) do %>
+          <%= render Core::Alert::Component.new(status: :error) do %>
             <%= alert %>
           <% end %>
         <% end %>

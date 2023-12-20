@@ -61,4 +61,26 @@ RSpec.describe ClientTokenManager do
       end
     end
   end
+
+  describe '#delete_client_token' do
+    it 'responds with success on success' do
+      api_id = SecureRandom.uuid
+      params = { id: 'token-guid' }
+      stub_self_returning_api_client(message: :delete_client_token,
+                                     with: [api_id, params[:id]])
+
+      manager = ClientTokenManager.new(api_id)
+      expect(manager.delete_client_token(params)).to be true
+    end
+    it 'responds with failure on failure' do
+      api_id = SecureRandom.uuid
+      params = { id: 'token-guid' }
+      stub_self_returning_api_client(message: :delete_client_token,
+                                     success: false,
+                                     with: [api_id, params[:id]])
+
+      manager = ClientTokenManager.new(api_id)
+      expect(manager.delete_client_token(params)).to be false
+    end
+  end
 end
