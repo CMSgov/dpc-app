@@ -56,8 +56,8 @@ class PublicKeysController < ApplicationController
                     else
                       Organization.new(params[:organization_id])
                     end
-    rescue DpcRecordNotFound
-      render file: "#{Rails.root}/public/404.html", layout: false, status: :not_found
+  rescue DpcRecordNotFound
+    render file: "#{Rails.root}/public/404.html", layout: false, status: :not_found
   end
 
   def render_error(msg)
