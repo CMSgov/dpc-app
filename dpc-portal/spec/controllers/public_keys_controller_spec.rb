@@ -25,46 +25,39 @@ RSpec.describe PublicKeysController, type: :controller do
   end
 
   describe 'GET #destroy' do
-    context 'user' do
-      context 'with a successful call to the api' do
-        it 'returns http success' do
-          stub = stub_api_client(
-            message: :get_organization,
-            response: default_get_org_response(org_id)
-          )
-          allow(stub).to receive(:delete_public_key).and_return(true)
+    stub = stub_api_client(
+      message: :get_organization,
+      response: default_get_org_response(org_id)
+    )
+    context 'with a successful call to the api' do
+      it 'returns http success' do
+        allow(stub).to receive(:delete_public_key).and_return(true)
 
-          get :destroy, params: { id: 1, organization_id: org_id }
-          expect(response.location).to include(request.host + root_path)
-          expect(response).to have_http_status(:found)
-        end
+        get :destroy, params: { id: 1, organization_id: org_id }
+        expect(response.location).to include(request.host + root_path)
+        expect(response).to have_http_status(:found)
       end
+    end
 
-      context 'with a failed call to the api' do
-        it 'renders new' do
-          stub = stub_api_client(
-            message: :get_organization,
-            response: default_get_org_response(org_id)
-          )
-          allow(stub).to receive(:delete_public_key).and_return(false)
+    context 'with a failed call to the api' do
+      it 'renders new' do
+        allow(stub).to receive(:delete_public_key).and_return(false)
 
-          get :destroy, params: { id: 1, organization_id: org_id }
-          expect(response).to render_template(:new)
+        get :destroy, params: { id: 1, organization_id: org_id }
+        expect(response).to render_template(:new)
 
-          expect(flash[:alert]).to_not be_nil
-        end
+        expect(flash[:alert]).to_not be_nil
       end
     end
   end
 
   describe 'GET #create' do
+    stub_api_client(
+      message: :get_organization,
+      response: default_get_org_response(org_id)
+    )
     context 'when missing a public key param' do
       it 'renders an error' do
-        stub_api_client(
-          message: :get_organization,
-          response: default_get_org_response(org_id)
-        )
-
         post :create, params: {
           organization_id: org_id,
           label: ''
@@ -79,11 +72,6 @@ RSpec.describe PublicKeysController, type: :controller do
 
     context 'when label is greater than 25' do
       it 'renders an error' do
-        stub_api_client(
-          message: :get_organization,
-          response: default_get_org_response(org_id)
-        )
-
         post :create, params: {
           organization_id: org_id,
           public_key: 'test key',
@@ -142,6 +130,10 @@ RSpec.describe PublicKeysController, type: :controller do
   end
 
   describe 'GET #download_snippet' do
+    stub_api_client(
+      message: :get_organization,
+      response: default_get_org_response(org_id)
+    )
     context 'when the snippet is requested' do
       it 'serves the snippet file' do
         post :download_snippet, params: {}
