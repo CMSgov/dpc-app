@@ -153,7 +153,7 @@ RSpec.describe Page::Organization::ShowComponent, type: :component do
         HTML
         is_expected.to include(normalize_space(row))
       end
-      it 'should have delete token form' do
+      it 'should have delete key form' do
         form1 = <<~HTML
           <form class="button_to" method="post" action="/portal/organizations/99790463-de1f-4f7f-a529-3e4f59dc7131/public_keys/key-id-1">
             <input type="hidden" name="_method" value="delete" autocomplete="off" />
