@@ -34,7 +34,7 @@ RSpec.describe Page::Organization::ShowComponent, type: :component do
       end
       it 'Should have Create key button' do
         button = <<~BUTTON
-          <form class="button_to" method="get" action="/portal/">
+          <form class="button_to" method="get" action="/portal/organizations/#{org.path_id}/public_keys/new">
             <button class="usa-button" type="submit">Create key</button>
           </form>
         BUTTON
