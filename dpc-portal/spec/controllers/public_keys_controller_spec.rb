@@ -25,12 +25,12 @@ RSpec.describe PublicKeysController, type: :controller do
   end
 
   describe 'GET #destroy' do
-    stub = stub_api_client(
-      message: :get_organization,
-      response: default_get_org_response(org_id)
-    )
     context 'with a successful call to the api' do
       it 'returns http success' do
+        stub = stub_api_client(
+          message: :get_organization,
+          response: default_get_org_response(org_id)
+        )
         allow(stub).to receive(:delete_public_key).and_return(true)
 
         get :destroy, params: { id: 1, organization_id: org_id }
@@ -41,6 +41,10 @@ RSpec.describe PublicKeysController, type: :controller do
 
     context 'with a failed call to the api' do
       it 'renders new' do
+        stub = stub_api_client(
+          message: :get_organization,
+          response: default_get_org_response(org_id)
+        )
         allow(stub).to receive(:delete_public_key).and_return(false)
 
         get :destroy, params: { id: 1, organization_id: org_id }
@@ -52,12 +56,12 @@ RSpec.describe PublicKeysController, type: :controller do
   end
 
   describe 'GET #create' do
-    stub_api_client(
-      message: :get_organization,
-      response: default_get_org_response(org_id)
-    )
     context 'when missing a public key param' do
       it 'renders an error' do
+        stub_api_client(
+          message: :get_organization,
+          response: default_get_org_response(org_id)
+        )
         post :create, params: {
           organization_id: org_id,
           label: ''
@@ -72,6 +76,10 @@ RSpec.describe PublicKeysController, type: :controller do
 
     context 'when label is greater than 25' do
       it 'renders an error' do
+        stub_api_client(
+          message: :get_organization,
+          response: default_get_org_response(org_id)
+        )
         post :create, params: {
           organization_id: org_id,
           public_key: 'test key',
@@ -130,12 +138,12 @@ RSpec.describe PublicKeysController, type: :controller do
   end
 
   describe 'GET #download_snippet' do
-    stub_api_client(
-      message: :get_organization,
-      response: default_get_org_response(org_id)
-    )
     context 'when the snippet is requested' do
       it 'serves the snippet file' do
+        stub_api_client(
+          message: :get_organization,
+          response: default_get_org_response(org_id)
+        )
         post :download_snippet, params: {}
         expect(response.status).to eq(202)
         expect(response.header['Content-Type']).to eq('application/zip')
