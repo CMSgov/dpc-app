@@ -108,7 +108,7 @@
                 <constraints nullable="false"/>
             </column>
             <column name="label" type="VARCHAR"/>
-            <column name="created_at" type="TIMESTAMP">
+            <column name="created_at" type="TIMESTAMP WITH TIME ZONE">
                 <constraints nullable="false"/>
             </column>
         </createTable>
