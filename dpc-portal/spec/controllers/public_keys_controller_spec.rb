@@ -95,6 +95,10 @@ RSpec.describe PublicKeysController, type: :controller do
 
     context 'when the PublicKeyManager raises an error' do
       it 'renders an error' do
+        stub_api_client(
+          message: :get_organization,
+          response: default_get_org_response(org_id)
+        )
         doubled_manager = instance_double(PublicKeyManager)
         allow(PublicKeyManager).to receive(:new).and_return(doubled_manager)
         allow(doubled_manager).to receive(:create_public_key).and_return(
@@ -119,6 +123,10 @@ RSpec.describe PublicKeysController, type: :controller do
 
     context 'when the user creates a new public key' do
       it 'redirects to the portal path successfully' do
+        stub_api_client(
+          message: :get_organization,
+          response: default_get_org_response(org_id)
+        )
         doubled_manager = instance_double(PublicKeyManager)
         allow(PublicKeyManager).to receive(:new).and_return(doubled_manager)
         allow(doubled_manager).to receive(:create_public_key).and_return(
