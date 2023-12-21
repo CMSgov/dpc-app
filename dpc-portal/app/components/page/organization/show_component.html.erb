@@ -30,7 +30,7 @@
           <%= render(Core::Table::HeaderComponent.new(caption: 'Public Key Table',
                                                       columns: ['Label', 'Key ID', 'Creation Date', ''],
                                                       sort: 2)) %>
-          <%= render(Core::Table::RowComponent.with_collection(@organization.public_keys, keys: ['label', 'id', 'createdAt', 'X'])) %>
+          <%= render(Core::Table::RowComponent.with_collection(@organization.public_keys, keys: ['label', 'id', 'createdAt'], delete_path: organization_public_keys_path(@organization.path_id))) %>
         <% end %>
       <% else %>
         <p>Before you can access production data, add your public keys to get a UUID that you will use when you authenticate access.</p>
