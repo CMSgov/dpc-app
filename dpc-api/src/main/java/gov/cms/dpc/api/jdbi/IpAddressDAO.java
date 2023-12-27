@@ -2,7 +2,6 @@ package gov.cms.dpc.api.jdbi;
 
 import gov.cms.dpc.api.entities.IpAddressEntity;
 import gov.cms.dpc.api.entities.IpAddressEntity_;
-import gov.cms.dpc.api.entities.PublicKeyEntity;
 import gov.cms.dpc.common.hibernate.auth.DPCAuthManagedSessionFactory;
 import io.dropwizard.hibernate.AbstractDAO;
 import javax.inject.Inject;
@@ -10,7 +9,6 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 public class IpAddressDAO extends AbstractDAO<IpAddressEntity> {
@@ -29,8 +27,8 @@ public class IpAddressDAO extends AbstractDAO<IpAddressEntity> {
        return list(query);
    }
 
-   public Optional<IpAddressEntity> persistIpAddress(IpAddressEntity ipAddressEntity) {
-        return Optional.ofNullable(persist(ipAddressEntity));
+   public IpAddressEntity persistIpAddress(IpAddressEntity ipAddressEntity) {
+        return persist(ipAddressEntity);
     }
 
     public void deleteIpAddress(IpAddressEntity ipAddress) {
