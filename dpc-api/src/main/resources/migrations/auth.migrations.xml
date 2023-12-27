@@ -96,9 +96,9 @@
         <addUniqueConstraint tableName="ORGANIZATION_KEYS" columnNames="organization_id, label"/>
     </changeSet>
 
-    <changeSet id="create-ip-address-table" author="Mike Esposito">
-        <createTable tableName="IP_ADDRESS">
-            <column name="ip_address_id" type="UUID">
+    <changeSet id="create-ip-addresses-table" author="Mike Esposito">
+        <createTable tableName="IP_ADDRESSES">
+            <column name="id" type="UUID">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="organization_id" type="UUID">
@@ -113,7 +113,7 @@
             </column>
         </createTable>
 
-        <createIndex tableName="IP_ADDRESS" indexName="ip_address_organization_id_idx">
+        <createIndex tableName="IP_ADDRESSES" indexName="ip_addresses_organization_id_idx">
             <column name="organization_id"/>
         </createIndex>
     </changeSet>

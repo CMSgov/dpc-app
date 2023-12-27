@@ -17,15 +17,15 @@ import java.io.Serializable;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
-@Entity(name = "ip_address")
+@Entity(name = "ip_addresses")
 @TypeDef(typeClass = PostgreSQLInetType.class, defaultForType = Inet.class)
 public class IpAddressEntity implements Serializable {
     public static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue
-    @Column(name = "ip_address_id", updatable = false, nullable = false, columnDefinition = "uuid")
-    private UUID ipAddressId;
+    @Column(name = "id", updatable = false, nullable = false, columnDefinition = "uuid")
+    private UUID id;
 
     @Column(name = "organization_id", nullable = false, columnDefinition = "uuid")
     private UUID organizationId;
@@ -42,7 +42,7 @@ public class IpAddressEntity implements Serializable {
     @CreationTimestamp
     private OffsetDateTime createdAt;
 
-    public UUID getIpAddressId() {return ipAddressId;}
+    public UUID getId() {return id;}
     public void setOrganizationId(UUID organizationId) {this.organizationId = organizationId;}
     public UUID getOrganizationId() {return organizationId;}
     public void setIpAddress(Inet ipAddress) {this.ipAddress = ipAddress;}

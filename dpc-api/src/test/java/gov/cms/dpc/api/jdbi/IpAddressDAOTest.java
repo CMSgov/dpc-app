@@ -1,11 +1,11 @@
 package gov.cms.dpc.api.jdbi;
 
 import gov.cms.dpc.api.entities.IpAddressEntity;
+import gov.cms.dpc.common.hibernate.AbstractDAOTest;
 import gov.cms.dpc.common.hibernate.auth.DPCAuthManagedSessionFactory;
 import io.hypersistence.utils.hibernate.type.basic.Inet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import gov.cms.dpc.common.hibernate.AbstractDAOTest;
 
 import javax.persistence.PersistenceException;
 import java.util.List;
@@ -30,7 +30,7 @@ class IpAddressDAOTest extends AbstractDAOTest<IpAddressEntity> {
         assertEquals("192.168.1.1", returnedIp.getIpAddress().getAddress());
         assertEquals("test label", returnedIp.getLabel());
         assertFalse(returnedIp.getCreatedAt().toString().isEmpty());
-        assertFalse(returnedIp.getIpAddressId().toString().isEmpty());
+        assertFalse(returnedIp.getId().toString().isEmpty());
         assertFalse(returnedIp.getOrganizationId().toString().isEmpty());
     }
 
