@@ -26,7 +26,7 @@ public abstract class AbstractDAOTest<E> {
 
     protected DAOTestExtension db;
 
-    public AbstractDAOTest() {
+    protected AbstractDAOTest() {
         postgreSql.start();
 
         db = DAOTestExtension.newBuilder()
