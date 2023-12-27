@@ -5,6 +5,7 @@ import gov.cms.dpc.common.hibernate.auth.DPCAuthManagedSessionFactory;
 import io.hypersistence.utils.hibernate.type.basic.Inet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import gov.cms.dpc.common.hibernate.AbstractDAOTest;
 
 import javax.persistence.PersistenceException;
 import java.util.List;
@@ -12,10 +13,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class IpAddressDAOTest extends AbstractDAOTest {
-    // We have to tell AbstractDAOTest class which type of Entity we're testing
-    public IpAddressDAOTest() { super(IpAddressEntity.class); }
-
+class IpAddressDAOTest extends AbstractDAOTest<IpAddressEntity> {
     IpAddressDAO ipAddressDAO;
 
     @BeforeEach

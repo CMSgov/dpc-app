@@ -1,7 +1,8 @@
-package gov.cms.dpc.api.jdbi;
+package gov.cms.dpc.common.hibernate;
 
 import io.dropwizard.testing.junit5.DAOTestExtension;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
+import io.dropwizard.util.Generics;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.dialect.PostgreSQL10Dialect;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,12 +20,13 @@ import org.testcontainers.utility.DockerImageName;
  */
 @ExtendWith(DropwizardExtensionsSupport.class)
 @Testcontainers
-abstract class AbstractDAOTest {
+public abstract class AbstractDAOTest<E> {
     @Container
     private final PostgreSQLContainer postgreSql = new PostgreSQLContainer(DockerImageName.parse("postgres:14.7"));
+
     protected DAOTestExtension db;
 
-    public AbstractDAOTest(Class<?> type) {
+    public AbstractDAOTest() {
         postgreSql.start();
 
         db = DAOTestExtension.newBuilder()
@@ -33,7 +35,7 @@ abstract class AbstractDAOTest {
             .setUrl(postgreSql.getJdbcUrl())
             .setUsername(postgreSql.getUsername())
             .setPassword(postgreSql.getPassword())
-            .addEntityClass(type)
+            .addEntityClass(Generics.getTypeParameter(this.getClass()))
             .build();
     }
 }
