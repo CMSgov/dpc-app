@@ -1,4 +1,4 @@
-package gov.cms.dpc.common.hibernate;
+package gov.cms.dpc.testing;
 
 import io.dropwizard.testing.junit5.DAOTestExtension;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
