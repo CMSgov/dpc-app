@@ -12,7 +12,7 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.codehaus.groovy.tools.shell.util.NoExitSecurityManager;
+import gov.cms.dpc.testing.NoExitSecurityManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -115,9 +115,13 @@ class KeyListUnitTest {
 
             Optional<Throwable> errors = cli.run("list", "org_id");
             assertFalse(errors.isEmpty());
-        }
-        System.setSecurityManager(originalSecurityManager);
 
+            Throwable throwable = errors.get();
+            assertInstanceOf(RuntimeException.class, throwable);
+            assertEquals("1", throwable.getMessage());
+        }
+
+        System.setSecurityManager(originalSecurityManager);
         assertFalse(stdErr.toString().isEmpty());
     }
 }
