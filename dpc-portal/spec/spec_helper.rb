@@ -16,6 +16,9 @@ SimpleCov.start 'rails' do
   # Filter out ViewComponent / Lookbook previews
   add_filter %r{app/components/.*/.*preview.rb}
 
+  # Filter out utility tasks
+  add_filter 'lib/tasks/dpc.rake'
+
   # Gems added already tested
 
   add_filter 'vendor'
