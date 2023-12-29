@@ -1,10 +1,7 @@
 package gov.cms.dpc.api.cli.keys;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.dpc.api.DPCAPIConfiguration;
 import gov.cms.dpc.api.DPCAPIService;
-import gov.cms.dpc.api.entities.PublicKeyEntity;
-import gov.cms.dpc.api.models.CollectionResponse;
 import gov.cms.dpc.testing.APIAuthHelpers;
 import gov.cms.dpc.testing.NoExitSecurityManager;
 import io.dropwizard.cli.Cli;
@@ -24,15 +21,13 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 
-class KeyListUnitTest {
+class KeyDeleteUnitTest {
     private final PrintStream originalOut = System.out;
     private final PrintStream originalErr = System.err;
 
@@ -50,7 +45,7 @@ class KeyListUnitTest {
 
         // Add commands you want to test
         final Bootstrap<DPCAPIConfiguration> bootstrap = new Bootstrap<>(new DPCAPIService());
-        bootstrap.addCommand(new KeyList());
+        bootstrap.addCommand(new KeyDelete());
 
         cli = new Cli(mock(JarLocation.class), bootstrap, stdOut, stdErr);
 
@@ -67,48 +62,44 @@ class KeyListUnitTest {
     }
 
     @Test
-    public void testListKeys_happyPath() throws IOException {
-        PublicKeyEntity publicKeyEntity = new PublicKeyEntity();
-        publicKeyEntity.setId(UUID.randomUUID());
-        publicKeyEntity.setLabel("test public key");
-        publicKeyEntity.setCreatedAt(OffsetDateTime.now());
-        CollectionResponse collectionResponse = new CollectionResponse(List.of(publicKeyEntity));
-
-        ObjectMapper mapper = new ObjectMapper();
-        String payload = mapper.writeValueAsString(collectionResponse);
-
+    public void testDeleteKeys_happyPath() {
         new MockServerClient(taskUri.getHost(), taskUri.getPort())
             .when(
                 HttpRequest.request()
                     .withMethod("POST")
-                    .withPath(taskUri.getPath() + "list-keys")
-                    .withQueryStringParameters(List.of(Parameter.param("organization", "org_id")))
+                    .withPath(taskUri.getPath() + "delete-key")
+                    .withQueryStringParameters(List.of(
+                        Parameter.param("organization", "org_id"),
+                        Parameter.param("key", "key_id")
+                    ))
             )
             .respond(
                 org.mockserver.model.HttpResponse.response()
                     .withStatusCode(HttpStatus.SC_OK)
-                    .withBody(payload)
             );
 
-        Optional<Throwable> errors = cli.run("list", "org_id");
+        Optional<Throwable> errors = cli.run("delete", "-o", "org_id", "key_id");
         assertTrue(errors.isEmpty());
 
         String results = stdOut.toString();
-        assertTrue(results.contains("│ test public key │"));
+        assertTrue(results.contains("Successfully deleted public key"));
     }
 
     @Test
-    public void testListKeys_badResponse() throws IOException {
+    public void testDeleteKeys_badResponse() throws IOException {
         new MockServerClient(taskUri.getHost(), taskUri.getPort())
             .when(
                 HttpRequest.request()
                     .withMethod("POST")
-                    .withPath(taskUri.getPath() + "list-keys")
-                    .withQueryStringParameters(List.of(Parameter.param("organization", "org_id")))
+                    .withPath(taskUri.getPath() + "delete-key")
+                    .withQueryStringParameters(List.of(
+                        Parameter.param("organization", "org_id"),
+                        Parameter.param("key", "key_id")
+                    ))
             )
             .respond(
                 org.mockserver.model.HttpResponse.response()
-                    .withStatusCode(HttpStatus.SC_BAD_REQUEST)
+                    .withStatusCode(HttpStatus.SC_NOT_FOUND)
             );
 
         // This is kind of kludgey and isn't guaranteed to work for all versions of Java, but it allows us to test error
@@ -116,7 +107,7 @@ class KeyListUnitTest {
         SecurityManager originalSecurityManager = System.getSecurityManager();
         System.setSecurityManager(new NoExitSecurityManager());
 
-        Optional<Throwable> errors = cli.run("list", "org_id");
+        Optional<Throwable> errors = cli.run("delete", "-o", "org_id", "key_id");
         assertFalse(errors.isEmpty());
 
         Throwable throwable = errors.get();

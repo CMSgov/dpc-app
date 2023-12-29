@@ -1,10 +1,7 @@
 package gov.cms.dpc.api.cli.keys;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.dpc.api.DPCAPIConfiguration;
 import gov.cms.dpc.api.DPCAPIService;
-import gov.cms.dpc.api.entities.PublicKeyEntity;
-import gov.cms.dpc.api.models.CollectionResponse;
 import gov.cms.dpc.testing.APIAuthHelpers;
 import gov.cms.dpc.testing.NoExitSecurityManager;
 import io.dropwizard.cli.Cli;
@@ -14,6 +11,8 @@ import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.integration.ClientAndServer;
 import org.mockserver.model.HttpRequest;
@@ -24,15 +23,16 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.time.OffsetDateTime;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 
-class KeyListUnitTest {
+class KeyUploadUnitTest {
     private final PrintStream originalOut = System.out;
     private final PrintStream originalErr = System.err;
 
@@ -50,7 +50,7 @@ class KeyListUnitTest {
 
         // Add commands you want to test
         final Bootstrap<DPCAPIConfiguration> bootstrap = new Bootstrap<>(new DPCAPIService());
-        bootstrap.addCommand(new KeyList());
+        bootstrap.addCommand(new KeyUpload());
 
         cli = new Cli(mock(JarLocation.class), bootstrap, stdOut, stdErr);
 
@@ -67,56 +67,65 @@ class KeyListUnitTest {
     }
 
     @Test
-    public void testListKeys_happyPath() throws IOException {
-        PublicKeyEntity publicKeyEntity = new PublicKeyEntity();
-        publicKeyEntity.setId(UUID.randomUUID());
-        publicKeyEntity.setLabel("test public key");
-        publicKeyEntity.setCreatedAt(OffsetDateTime.now());
-        CollectionResponse collectionResponse = new CollectionResponse(List.of(publicKeyEntity));
-
-        ObjectMapper mapper = new ObjectMapper();
-        String payload = mapper.writeValueAsString(collectionResponse);
-
+    public void testDeleteKeys_happyPath() throws IOException {
         new MockServerClient(taskUri.getHost(), taskUri.getPort())
             .when(
                 HttpRequest.request()
                     .withMethod("POST")
-                    .withPath(taskUri.getPath() + "list-keys")
-                    .withQueryStringParameters(List.of(Parameter.param("organization", "org_id")))
+                    .withPath(taskUri.getPath() + "upload-key")
+                    .withQueryStringParameters(List.of(
+                        Parameter.param("organization", "org_id"),
+                        Parameter.param("label", "label")
+                    ))
             )
             .respond(
                 org.mockserver.model.HttpResponse.response()
                     .withStatusCode(HttpStatus.SC_OK)
-                    .withBody(payload)
+                    .withBody("org_id")
             );
 
-        Optional<Throwable> errors = cli.run("list", "org_id");
+        Optional<Throwable> errors = Optional.empty();
+        try (MockedStatic<Files> files = Mockito.mockStatic(Files.class, Mockito.CALLS_REAL_METHODS)) {
+            files.when(() -> Files.readString(eq(Paths.get("key_file")))).thenReturn("fake key data");
+            files.when(() -> Files.readString(eq(Paths.get("sig_file")))).thenReturn("fake sig data");
+
+            errors = cli.run("upload", "org_id", "-l", "label", "key_file", "sig_file");
+        }
         assertTrue(errors.isEmpty());
 
         String results = stdOut.toString();
-        assertTrue(results.contains("│ test public key │"));
+        assertTrue(results.contains("org_id"));
     }
 
     @Test
-    public void testListKeys_badResponse() throws IOException {
+    public void testDeleteKeys_badResponse() throws IOException {
         new MockServerClient(taskUri.getHost(), taskUri.getPort())
-            .when(
-                HttpRequest.request()
-                    .withMethod("POST")
-                    .withPath(taskUri.getPath() + "list-keys")
-                    .withQueryStringParameters(List.of(Parameter.param("organization", "org_id")))
-            )
-            .respond(
-                org.mockserver.model.HttpResponse.response()
-                    .withStatusCode(HttpStatus.SC_BAD_REQUEST)
-            );
+                .when(
+                        HttpRequest.request()
+                                .withMethod("POST")
+                                .withPath(taskUri.getPath() + "upload-key")
+                                .withQueryStringParameters(List.of(
+                                        Parameter.param("organization", "org_id"),
+                                        Parameter.param("label", "label")
+                                ))
+                )
+                .respond(
+                        org.mockserver.model.HttpResponse.response()
+                                .withStatusCode(HttpStatus.SC_NOT_FOUND)
+                );
 
         // This is kind of kludgey and isn't guaranteed to work for all versions of Java, but it allows us to test error
         // cases that call System.exit()
         SecurityManager originalSecurityManager = System.getSecurityManager();
         System.setSecurityManager(new NoExitSecurityManager());
 
-        Optional<Throwable> errors = cli.run("list", "org_id");
+        Optional<Throwable> errors = Optional.empty();
+        try (MockedStatic<Files> files = Mockito.mockStatic(Files.class, Mockito.CALLS_REAL_METHODS)) {
+            files.when(() -> Files.readString(eq(Paths.get("key_file")))).thenReturn("fake key data");
+            files.when(() -> Files.readString(eq(Paths.get("sig_file")))).thenReturn("fake sig data");
+
+            errors = cli.run("upload", "org_id", "-l", "label", "key_file", "sig_file");
+        }
         assertFalse(errors.isEmpty());
 
         Throwable throwable = errors.get();
