@@ -96,4 +96,26 @@
         <addUniqueConstraint tableName="ORGANIZATION_KEYS" columnNames="organization_id, label"/>
     </changeSet>
 
+    <changeSet id="create-ip-addresses-table" author="Mike Esposito">
+        <createTable tableName="IP_ADDRESSES">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="organization_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ip_address" type="INET">
+                <constraints nullable="false"/>
+            </column>
+            <column name="label" type="VARCHAR"/>
+            <column name="created_at" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createIndex tableName="IP_ADDRESSES" indexName="ip_addresses_organization_id_idx">
+            <column name="organization_id"/>
+        </createIndex>
+    </changeSet>
+
 </databaseChangeLog>
