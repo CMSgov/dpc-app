@@ -200,6 +200,11 @@
             <version>2.9.0</version>
         </dependency>
         <dependency>
+            <groupId>io.hypersistence</groupId>
+            <artifactId>hypersistence-utils-hibernate-55</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
             <groupId>org.mock-server</groupId>
             <artifactId>mockserver-netty</artifactId>
             <version>${mockserverVersion}</version>
@@ -213,11 +218,6 @@
                     <artifactId>json-smart</artifactId>
                 </exclusion>
             </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>io.hypersistence</groupId>
-            <artifactId>hypersistence-utils-hibernate-55</artifactId>
-            <scope>compile</scope>
         </dependency>
     </dependencies>
 
