@@ -7,6 +7,7 @@ import gov.cms.dpc.api.entities.PublicKeyEntity;
 import gov.cms.dpc.api.models.CollectionResponse;
 import gov.cms.dpc.testing.APIAuthHelpers;
 import gov.cms.dpc.testing.NoExitSecurityManager;
+import gov.cms.dpc.testing.exceptions.SystemExitException;
 import io.dropwizard.cli.Cli;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.util.JarLocation;
@@ -120,7 +121,7 @@ class KeyListUnitTest {
         assertFalse(errors.isEmpty());
 
         Throwable throwable = errors.get();
-        assertInstanceOf(RuntimeException.class, throwable);
+        assertInstanceOf(SystemExitException.class, throwable);
         assertEquals("1", throwable.getMessage());
 
         System.setSecurityManager(originalSecurityManager);

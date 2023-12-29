@@ -1,5 +1,7 @@
 package gov.cms.dpc.testing;
 
+import gov.cms.dpc.testing.exceptions.SystemExitException;
+
 import java.security.Permission;
 
 /**
@@ -18,6 +20,6 @@ public class NoExitSecurityManager extends SecurityManager {
     @Override
     public void checkExit(int status) {
         super.checkExit(status);
-        throw new RuntimeException(String.valueOf(status));
+        throw new SystemExitException(String.valueOf(status));
     }
 }
