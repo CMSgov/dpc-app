@@ -24,7 +24,8 @@ RSpec.describe 'PublicKeys', type: :request do
       stub_self_returning_api_client(message: :create_public_key,
                                      response: default_get_public_keys,
                                      api_client: api_client)
-      post "/organizations/#{org_api_id}/public_keys", params: { label: 'New Key', organization_id: org_api_id, public_key: 'test key' }
+      post "/organizations/#{org_api_id}/public_keys",
+           params: { label: 'New Key', organization_id: org_api_id, public_key: 'test key' }
       expect(assigns(:organization).api_id).to eq org_api_id
       expect(response).to redirect_to(organization_path(org_api_id))
     end
@@ -39,11 +40,13 @@ RSpec.describe 'PublicKeys', type: :request do
     end
 
     it 'fails if label over 25 characters' do
-        org_api_id = SecureRandom.uuid
-        stub_api_client(message: :get_organization,
-                        response: default_get_org_response(org_api_id))
-        post "/organizations/#{org_api_id}/public_keys", params: { label: 'aaaaabbbbbcccccdddddeeeeefffff', organization_id: org_api_id, public_key: 'test key' }
-        expect(flash[:alert]).to eq('Label cannot be over 25 characters')
+      org_api_id = SecureRandom.uuid
+      stub_api_client(message: :get_organization,
+                      response: default_get_org_response(org_api_id))
+      post "/organizations/#{org_api_id}/public_keys",
+           params: { label: 'aaaaabbbbbcccccdddddeeeeefffff', organization_id: org_api_id, public_key: 'test key' }
+      expect(flash[:alert]).to eq('Label cannot be over 25 characters')
+    end
 
     it 'shows error if problem' do
       org_api_id = SecureRandom.uuid
@@ -53,7 +56,8 @@ RSpec.describe 'PublicKeys', type: :request do
                                      success: false,
                                      response: nil,
                                      api_client: api_client)
-      post "/organizations/#{org_api_id}/public_keys", params: { label: 'New Key', organization_id: org_api_id, public_key: 'test key' }
+      post "/organizations/#{org_api_id}/public_keys",
+           params: { label: 'New Key', organization_id: org_api_id, public_key: 'test key' }
       expect(flash[:alert]).to eq('Public key could not be created.')
     end
   end
