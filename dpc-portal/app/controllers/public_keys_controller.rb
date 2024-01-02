@@ -1,20 +1,20 @@
 # frozen_string_literal: true
 
-# Creates and destroys public keys for an organization
+# Handles public key requests
 class PublicKeysController < ApplicationController
   before_action :load_organization
 
   def new
-    @organization_id = params[:organization_id]
+    render Page::PublicKey::NewKeyComponent.new(@organization)
   end
 
   def destroy
     manager = PublicKeyManager.new(api_id: params[:organization_id])
     if manager.delete_public_key(id: params[:id])
-      flash[:notice] = 'Public token successfully deleted.'
+      flash[:notice] = 'Public key successfully deleted.'
       redirect_to organization_path(params[:organization_id])
     else
-      render_error 'Public token could not be deleted.'
+      render_error 'Public key could not be deleted.'
     end
   end
 
@@ -32,7 +32,8 @@ class PublicKeysController < ApplicationController
     )
 
     if new_public_key[:response]
-      redirect_to portal_path
+      flash[:notice] = 'Public key successfully created.'
+      redirect_to organization_path(params[:organization_id])
     else
       render_error new_public_key[:message]
     end
@@ -56,13 +57,11 @@ class PublicKeysController < ApplicationController
                     else
                       Organization.new(params[:organization_id])
                     end
-  rescue DpcRecordNotFound
-    render file: "#{Rails.root}/public/404.html", layout: false, status: :not_found
   end
 
   def render_error(msg)
     flash[:alert] = msg
-    render :new
+    render Page::PublicKey::NewKeyComponent.new(@organization)
   end
 
   def missing_params
