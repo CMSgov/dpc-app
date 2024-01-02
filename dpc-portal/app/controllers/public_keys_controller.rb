@@ -8,16 +8,6 @@ class PublicKeysController < ApplicationController
     render Page::PublicKey::NewKeyComponent.new(@organization)
   end
 
-  def destroy
-    manager = PublicKeyManager.new(api_id: params[:organization_id])
-    if manager.delete_public_key(id: params[:id])
-      flash[:notice] = 'Public key successfully deleted.'
-      redirect_to organization_path(params[:organization_id])
-    else
-      render_error 'Public key could not be deleted.'
-    end
-  end
-
   # rubocop:disable Metrics/AbcSize
   def create
     return render_error('Required values missing.') if missing_params
@@ -35,10 +25,20 @@ class PublicKeysController < ApplicationController
       flash[:notice] = 'Public key successfully created.'
       redirect_to organization_path(params[:organization_id])
     else
-      render_error new_public_key[:message]
+      render_error 'Public key could not be created.'
     end
   end
   # rubocop:enable Metrics/AbcSize
+
+  def destroy
+    manager = PublicKeyManager.new(api_id: params[:organization_id])
+    if manager.delete_public_key(id: params[:id])
+      flash[:notice] = 'Public key successfully deleted.'
+      redirect_to organization_path(params[:organization_id])
+    else
+      render_error 'Public key could not be deleted.'
+    end
+  end
 
   def download_snippet
     send_file 'public/snippet.txt', type: 'application/zip', status: 202
