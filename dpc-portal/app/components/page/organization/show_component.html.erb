@@ -25,8 +25,7 @@
       button_params: { name: 'Create key', path: new_organization_public_key_path(@organization.path_id), method: :get} )) do %>
     <div>
       <% if @organization.public_keys.present? %>
-      <%= render(Core::Table::TableComponent.new(id: 'public-keys-table',
-          additional_classes: ['width-full'], sortable: true)) do %>
+      <%= render(Core::Table::TableComponent.new(id: 'public-keys-table', additional_classes: ['width-full'], sortable: true)) do %>
           <%= render(Core::Table::HeaderComponent.new(caption: 'Public Key Table',
                                                       columns: ['Label', 'Key ID', 'Creation Date', ''],
                                                       sort: 2)) %>
