@@ -10,7 +10,11 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=dpc-safe
     volumes:
+      # Mount database startup script, which automatically creates new databases
+      # based on the POSTGRES_MULTIPLE_DATABASES variable above.
       - ./docker/postgres:/docker-entrypoint-initdb.d
+      # Mount persistent volume to ensure data is not erased across containers.
+      - pgdata:/var/lib/postgresql/data
 
   aggregation:
     image: ${ECR_HOST:-755619740999.dkr.ecr.us-east-1.amazonaws.com/dpc-aggregation}:latest
@@ -115,6 +119,7 @@ services:
     network_mode: host
 
 volumes:
+  pgdata:
   export-volume:
     driver: local
     driver_opts:
