@@ -95,9 +95,10 @@ RSpec.describe 'PublicKeys', type: :request do
   describe 'GET #download_snippet' do
     context 'when the snippet is requested' do
       it 'serves the snippet file' do
+        org_api_id = SecureRandom.uuid
         stub_api_client(
           message: :get_organization,
-          response: default_get_org_response(org_id)
+          response: default_get_org_response(org_api_id)
         )
         post :download_snippet, params: {}
         expect(response.status).to eq(202)
