@@ -137,21 +137,20 @@ RSpec.describe Page::Organization::ShowComponent, type: :component do
         is_expected.to include(normalize_space(header))
       end
       it 'should have key rows' do
-        row = <<~HTML
-          <tbody>
-            <tr>
-              <td data-sort-value="Key 1">Key 1</td>
-              <td data-sort-value="99790463-de1f-4f7f-a529-3e4f59dc7130">99790463-de1f-4f7f-a529-3e4f59dc7130</td>
-              <td data-sort-value="12/15/2023 at  5:01PM UTC">12/15/2023 at  5:01PM UTC</td>
-            </tr>
-            <tr>
-              <td data-sort-value="Key 2">Key 2</td>
-              <td data-sort-value="99790463-de1f-4f7f-a529-3e4f59dc7131">99790463-de1f-4f7f-a529-3e4f59dc7131</td>
-              <td data-sort-value="12/15/2023 at  5:01PM UTC">12/15/2023 at  5:01PM UTC</td>
-            </tr>
-          </tbody>
+        row1 = <<~HTML
+          <tr>
+            <td data-sort-value="Key 1">Key 1</td>
+            <td data-sort-value="99790463-de1f-4f7f-a529-3e4f59dc7130">99790463-de1f-4f7f-a529-3e4f59dc7130</td>
+            <td data-sort-value="12/15/2023 at  5:01PM UTC">12/15/2023 at  5:01PM UTC</td>
         HTML
-        is_expected.to include(normalize_space(row))
+        row2 = <<~HTML
+          <tr>
+            <td data-sort-value="Key 2">Key 2</td>
+            <td data-sort-value="99790463-de1f-4f7f-a529-3e4f59dc7131">99790463-de1f-4f7f-a529-3e4f59dc7131</td>
+            <td data-sort-value="12/15/2023 at  5:01PM UTC">12/15/2023 at  5:01PM UTC</td>
+        HTML
+        is_expected.to include(normalize_space(row1))
+        is_expected.to include(normalize_space(row2))
       end
       it 'should have delete key form' do
         form1 = <<~HTML

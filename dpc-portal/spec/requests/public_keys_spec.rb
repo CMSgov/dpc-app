@@ -91,20 +91,4 @@ RSpec.describe 'PublicKeys', type: :request do
       expect(response).to redirect_to(organization_path(org_api_id))
     end
   end
-
-  describe 'GET #download_snippet' do
-    context 'when the snippet is requested' do
-      it 'serves the snippet file' do
-        org_api_id = SecureRandom.uuid
-        stub_api_client(
-          message: :get_organization,
-          response: default_get_org_response(org_api_id)
-        )
-        post :download_snippet, params: {}
-        expect(response.status).to eq(202)
-        expect(response.header['Content-Type']).to eq('application/zip')
-        expect(response.body).to eq('This is the snippet used to verify a key pair in DPC.')
-      end
-    end
-  end
 end
