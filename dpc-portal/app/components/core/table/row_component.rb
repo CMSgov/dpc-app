@@ -6,14 +6,15 @@ module Core
     class RowComponent < ViewComponent::Base
       with_collection_parameter :obj
 
-      attr_accessor :obj, :attributes, :iteration, :delete_path
+      attr_accessor :obj, :attributes, :iteration, :delete_path, :obj_name
 
-      def initialize(obj:, obj_iteration:, keys:, delete_path: nil)
+      def initialize(obj:, obj_iteration:, keys:, delete_path: nil, obj_name: nil)
         super
         @obj = obj
         @attributes = []
         @iteration = obj_iteration
         @delete_path = delete_path
+        @obj_name = obj_name
         keys.each do |key|
           attributes << format_if_date(obj[key] || key)
         end
