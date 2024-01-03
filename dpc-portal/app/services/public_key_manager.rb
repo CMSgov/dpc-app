@@ -40,6 +40,7 @@ class PublicKeyManager
   def delete_public_key(params)
     api_client = DpcClient.new
     api_client.delete_public_key(api_id, params[:id])
+    api_client.response_successful?
   end
 
   def public_keys

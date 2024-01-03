@@ -13,7 +13,7 @@ class PublicKeysController < ApplicationController
     return render_error('Required values missing.') if missing_params
     return render_error('Label cannot be over 25 characters') if label_length
 
-    manager = PublicKeyManager.new(api_id: params[:organization_id])
+    manager = PublicKeyManager.new(params[:organization_id])
 
     new_public_key = manager.create_public_key(
       public_key: params[:public_key],

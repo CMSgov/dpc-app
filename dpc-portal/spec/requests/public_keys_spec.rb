@@ -17,7 +17,7 @@ RSpec.describe 'PublicKeys', type: :request do
   end
 
   describe 'POST /create' do
-    it 'succeeds if label' do
+    it 'succeeds with params' do
       org_api_id = SecureRandom.uuid
       api_client = stub_api_client(message: :get_organization,
                                    response: default_get_org_response(org_api_id))
