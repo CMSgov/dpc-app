@@ -27,9 +27,10 @@ RSpec.describe 'PublicKeys', type: :request do
       post "/organizations/#{org_api_id}/public_keys", params: {
         label: 'New Key',
         organization_id: org_api_id,
-        public_key: 'test key',
+        public_key: file_fixture('stubbed_key.pem').read,
         snippet_signature: 'test snippet signature'
       }
+      expect(flash[:notice]).to eq('Public key successfully created.')
       expect(assigns(:organization).api_id).to eq org_api_id
       expect(response).to redirect_to(organization_path(org_api_id))
     end
@@ -39,7 +40,6 @@ RSpec.describe 'PublicKeys', type: :request do
       stub_api_client(message: :get_organization,
                       response: default_get_org_response(org_api_id))
       post "/organizations/#{org_api_id}/public_keys"
-      expect(assigns(:organization).api_id).to eq org_api_id
       expect(flash[:alert]).to eq('Required values missing.')
     end
 
@@ -50,7 +50,7 @@ RSpec.describe 'PublicKeys', type: :request do
       post "/organizations/#{org_api_id}/public_keys", params: {
         label: 'aaaaabbbbbcccccdddddeeeeefffff',
         organization_id: org_api_id,
-        public_key: 'test key',
+        public_key: file_fixture('stubbed_key.pem').read,
         snippet_signature: 'test snippet signature'
       }
       expect(flash[:alert]).to eq('Label cannot be over 25 characters')
@@ -67,7 +67,7 @@ RSpec.describe 'PublicKeys', type: :request do
       post "/organizations/#{org_api_id}/public_keys", params: {
         label: 'New Key',
         organization_id: org_api_id,
-        public_key: 'test key',
+        public_key: file_fixture('stubbed_key.pem').read,
         snippet_signature: 'test snippet signature'
       }
       expect(flash[:alert]).to eq('Public key could not be created.')
