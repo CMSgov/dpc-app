@@ -81,7 +81,7 @@ RSpec.describe 'PublicKeys', type: :request do
       key_guid = SecureRandom.uuid
       api_client = stub_api_client(message: :get_organization,
                                    response: default_get_org_response(org_api_id))
-      stub_self_returning_api_client(message: :delete_client_token,
+      stub_self_returning_api_client(message: :delete_public_key,
                                      response: nil,
                                      success: false,
                                      with: [org_api_id, key_guid],
