@@ -31,8 +31,8 @@ class PublicKeysController < ApplicationController
   # rubocop:enable Metrics/AbcSize
 
   def destroy
-    manager = PublicKeyManager.new(api_id: params[:organization_id])
-    if manager.delete_public_key(id: params[:id])
+    manager = PublicKeyManager.new(params[:organization_id])
+    if manager.delete_public_key(params)
       flash[:notice] = 'Public key successfully deleted.'
       redirect_to organization_path(params[:organization_id])
     else
