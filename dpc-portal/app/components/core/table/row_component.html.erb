@@ -19,17 +19,17 @@
 	<div class="usa-modal__content">
 	  <div class="usa-modal__main">
             <h2 class="usa-modal__heading" id="delete-modal-<%= obj['id'] %>-heading">
-              Permanently revoke client token?
+              Permanently revoke <%= obj_name %>?
             </h2>
             <div class="usa-prose">
               <p id="delete-modal-<%= obj['id'] %>-description">
-		Once revoked, this client token will not work to access production data.
+		Once revoked, this <%= obj_name %> will not work to access production data.
               </p>
             </div>
             <div class="usa-modal__footer">
               <ul class="usa-button-group">
 		<li class="usa-button-group__item">
-		  <%= button_to 'Yes, revoke token', "#{delete_path}/#{obj['id']}", method: :delete, class: 'usa-button' %>
+		  <%= button_to "Yes, revoke #{obj_name.split.last}", "#{delete_path}/#{obj['id']}", method: :delete, class: 'usa-button' %>
 		</li>
 		<li class="usa-button-group__item">
 		  <button

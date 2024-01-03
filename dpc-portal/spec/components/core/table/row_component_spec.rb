@@ -29,10 +29,12 @@ RSpec.describe Core::Table::RowComponent, type: :component do
     it { is_expected.to match_html_fragment(expected_html) }
 
     context 'with delete' do
-      let(:component) { described_class.with_collection([obj], keys: %w[a b], delete_path: '/foo/bar') }
+      let(:component) do
+        described_class.with_collection([obj], keys: %w[a b], delete_path: '/foo/bar', obj_name: 'row component')
+      end
       let(:expected_html) do
         <<~HTML
-          <form class="button_to" method="post" action="/foo/bar/some-guid"><input type="hidden" name="_method" value="delete" autocomplete="off" /><button class="usa-button" type="submit">Yes, revoke token</button></form>
+          <form class="button_to" method="post" action="/foo/bar/some-guid"><input type="hidden" name="_method" value="delete" autocomplete="off" /><button class="usa-button" type="submit">Yes, revoke component</button></form>
         HTML
       end
       it { is_expected.to include(expected_html) }

@@ -34,7 +34,7 @@ RSpec.describe Page::Organization::ShowComponent, type: :component do
       end
       it 'Should have Create key button' do
         button = <<~BUTTON
-          <form class="button_to" method="get" action="/portal/">
+          <form class="button_to" method="get" action="/portal/organizations/#{org.path_id}/public_keys/new">
             <button class="usa-button" type="submit">Create key</button>
           </form>
         BUTTON
@@ -137,23 +137,36 @@ RSpec.describe Page::Organization::ShowComponent, type: :component do
         is_expected.to include(normalize_space(header))
       end
       it 'should have key rows' do
-        row = <<~HTML
-          <tbody>
-            <tr>
-              <td data-sort-value="Key 1">Key 1</td>
-              <td data-sort-value="99790463-de1f-4f7f-a529-3e4f59dc7130">99790463-de1f-4f7f-a529-3e4f59dc7130</td>
-              <td data-sort-value="12/15/2023 at  5:01PM UTC">12/15/2023 at  5:01PM UTC</td>
-              <td data-sort-value="X">X</td>
-            </tr>
-            <tr>
-              <td data-sort-value="Key 2">Key 2</td>
-              <td data-sort-value="99790463-de1f-4f7f-a529-3e4f59dc7131">99790463-de1f-4f7f-a529-3e4f59dc7131</td>
-              <td data-sort-value="12/15/2023 at  5:01PM UTC">12/15/2023 at  5:01PM UTC</td>
-              <td data-sort-value="X">X</td>
-            </tr>
-          </tbody>
+        row1 = <<~HTML
+          <tr>
+            <td data-sort-value="Key 1">Key 1</td>
+            <td data-sort-value="99790463-de1f-4f7f-a529-3e4f59dc7130">99790463-de1f-4f7f-a529-3e4f59dc7130</td>
+            <td data-sort-value="12/15/2023 at  5:01PM UTC">12/15/2023 at  5:01PM UTC</td>
         HTML
-        is_expected.to include(normalize_space(row))
+        row2 = <<~HTML
+          <tr>
+            <td data-sort-value="Key 2">Key 2</td>
+            <td data-sort-value="99790463-de1f-4f7f-a529-3e4f59dc7131">99790463-de1f-4f7f-a529-3e4f59dc7131</td>
+            <td data-sort-value="12/15/2023 at  5:01PM UTC">12/15/2023 at  5:01PM UTC</td>
+        HTML
+        is_expected.to include(normalize_space(row1))
+        is_expected.to include(normalize_space(row2))
+      end
+      it 'should have delete key form' do
+        form1 = <<~HTML
+          <form class="button_to" method="post" action="/portal/organizations/99790463-de1f-4f7f-a529-3e4f59dc7131/public_keys/99790463-de1f-4f7f-a529-3e4f59dc7130">
+            <input type="hidden" name="_method" value="delete" autocomplete="off" />
+            <button class="usa-button" type="submit">Yes, revoke key</button>
+          </form>
+        HTML
+        form2 = <<~HTML
+          <form class="button_to" method="post" action="/portal/organizations/99790463-de1f-4f7f-a529-3e4f59dc7131/public_keys/99790463-de1f-4f7f-a529-3e4f59dc7131">
+            <input type="hidden" name="_method" value="delete" autocomplete="off" />
+            <button class="usa-button" type="submit">Yes, revoke key</button>
+          </form>
+        HTML
+        is_expected.to include(normalize_space(form1))
+        is_expected.to include(normalize_space(form2))
       end
       it 'should have ip_addr table header' do
         header = <<~HTML

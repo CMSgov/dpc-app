@@ -92,7 +92,7 @@ RSpec.describe PublicKeyManager do
           manager = PublicKeyManager.new(api_id)
           response = manager.delete_public_key(id: key_guid)
 
-          expect(response.response_successful?).to be true
+          expect(response).to be true
         end
       end
 
@@ -107,7 +107,7 @@ RSpec.describe PublicKeyManager do
           manager = PublicKeyManager.new(api_id)
           response = manager.delete_public_key(id: key_guid)
 
-          expect(response.response_successful?).to be false
+          expect(response).to be false
         end
       end
     end

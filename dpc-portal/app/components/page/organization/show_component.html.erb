@@ -14,7 +14,7 @@
           <%= render(Core::Table::HeaderComponent.new(caption: 'Client Token Table',
                                                       columns: ['Label', 'Expiration Date', 'Creation Date', ''],
                                                       sort: 2)) %>
-          <%= render(Core::Table::RowComponent.with_collection(@organization.client_tokens, keys: ['label', 'expiresAt', 'createdAt'], delete_path: organization_client_tokens_path(@organization.path_id))) %>
+          <%= render(Core::Table::RowComponent.with_collection(@organization.client_tokens, keys: ['label', 'expiresAt', 'createdAt'], delete_path: organization_client_tokens_path(@organization.path_id), obj_name: 'client token')) %>
         <% end %>
       <% else %>
         <p>Before you can access production data, you must create a unique client token for each application or vendor that will have access to API.</p>
@@ -22,19 +22,17 @@
     </div>
   <% end %>
   <%= render(Core::Card::BasicComponent.new(text_content: '<h2>Public Keys</h2>',
-      button_params: { name: 'Create key', path: root_path, method: :get} )) do %>
+      button_params: { name: 'Create key', path: new_organization_public_key_path(@organization.path_id), method: :get} )) do %>
     <div>
       <% if @organization.public_keys.present? %>
-      <%= render(Core::Table::TableComponent.new(id: 'public-keys-table',
-          additional_classes: ['width-full'], sortable: true)) do %>
+      <%= render(Core::Table::TableComponent.new(id: 'public-keys-table', additional_classes: ['width-full'], sortable: true)) do %>
           <%= render(Core::Table::HeaderComponent.new(caption: 'Public Key Table',
                                                       columns: ['Label', 'Key ID', 'Creation Date', ''],
                                                       sort: 2)) %>
-          <%= render(Core::Table::RowComponent.with_collection(@organization.public_keys, keys: ['label', 'id', 'createdAt', 'X'])) %>
+          <%= render(Core::Table::RowComponent.with_collection(@organization.public_keys, keys: ['label', 'id', 'createdAt'], delete_path: organization_public_keys_path(@organization.path_id), obj_name: 'public key')) %>
         <% end %>
       <% else %>
         <p>Before you can access production data, add your public keys to get a UUID that you will use when you authenticate access.</p>
-      </p>
       <% end %>
     </div>
   <% end %>
