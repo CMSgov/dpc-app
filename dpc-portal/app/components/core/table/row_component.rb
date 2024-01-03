@@ -8,7 +8,7 @@ module Core
 
       attr_accessor :obj, :attributes, :iteration, :delete_path, :obj_name
 
-      def initialize(obj:, obj_iteration:, keys:, delete_path: nil, obj_name: nil)
+      def initialize(obj:, obj_iteration:, keys:, delete_path: nil, obj_name: '')
         super
         @obj = obj
         @attributes = []
