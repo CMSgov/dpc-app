@@ -26,7 +26,6 @@ RSpec.describe 'PublicKeys', type: :request do
                                      api_client: api_client)
       post "/organizations/#{org_api_id}/public_keys", params: {
         label: 'New Key',
-        organization_id: org_api_id,
         public_key: file_fixture('stubbed_key.pem').read,
         snippet_signature: 'test snippet signature'
       }
@@ -49,7 +48,6 @@ RSpec.describe 'PublicKeys', type: :request do
                       response: default_get_org_response(org_api_id))
       post "/organizations/#{org_api_id}/public_keys", params: {
         label: 'aaaaabbbbbcccccdddddeeeeefffff',
-        organization_id: org_api_id,
         public_key: file_fixture('stubbed_key.pem').read,
         snippet_signature: 'test snippet signature'
       }
@@ -66,7 +64,6 @@ RSpec.describe 'PublicKeys', type: :request do
                                      api_client: api_client)
       post "/organizations/#{org_api_id}/public_keys", params: {
         label: 'New Key',
-        organization_id: org_api_id,
         public_key: file_fixture('stubbed_key.pem').read,
         snippet_signature: 'test snippet signature'
       }
