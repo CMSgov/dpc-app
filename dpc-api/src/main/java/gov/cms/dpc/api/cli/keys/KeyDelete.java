@@ -25,7 +25,7 @@ public class KeyDelete extends AbstractAdminCommand {
     public void addAdditionalOptions(Subparser subparser) {
         subparser
                 .addArgument("--org", "-o")
-                .dest("org-reference")
+                .dest(ORG_REFERENCE)
                 .required(true)
                 .help("Organization entity");
         subparser
