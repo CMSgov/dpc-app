@@ -29,7 +29,7 @@
             <div class="usa-modal__footer">
               <ul class="usa-button-group">
 		<li class="usa-button-group__item">
-		  <%= button_to 'Yes, revoke <%= obj_name.split.last' %>', "#{delete_path}/#{obj['id']}", method: :delete, class: 'usa-button' %>
+		  <%= button_to "Yes, revoke #{obj_name.split.last}" %>, "#{delete_path}/#{obj['id']}", method: :delete, class: 'usa-button' %>
 		</li>
 		<li class="usa-button-group__item">
 		  <button
