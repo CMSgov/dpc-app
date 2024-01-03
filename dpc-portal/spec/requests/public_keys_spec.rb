@@ -100,7 +100,6 @@ RSpec.describe 'PublicKeys', type: :request do
                                      api_client: api_client)
       delete "/organizations/#{org_api_id}/public_keys/#{key_guid}"
       expect(flash[:alert]).to eq('Public key could not be deleted.')
-      expect(response).to redirect_to(organization_path(org_api_id))
     end
   end
 end

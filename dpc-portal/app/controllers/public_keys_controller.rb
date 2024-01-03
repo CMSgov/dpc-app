@@ -36,7 +36,7 @@ class PublicKeysController < ApplicationController
       flash[:notice] = 'Public key successfully deleted.'
       redirect_to organization_path(params[:organization_id])
     else
-      render_error 'Public key could not be deleted.'
+      flash[:alert] = 'Public key could not be deleted.'
     end
   end
 
