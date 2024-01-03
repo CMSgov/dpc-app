@@ -20,6 +20,7 @@ class PublicKeyManager
                                  params: { label: label, public_key: public_key,
                                            snippet_signature: snippet_signature })
 
+    Rails.logger.error "Failed to create public key: #{api_client.response_body}" unless api_client.response_successful?
     { response: api_client.response_successful?,
       message: api_client.response_body }
   end
@@ -40,6 +41,7 @@ class PublicKeyManager
   def delete_public_key(params)
     api_client = DpcClient.new
     api_client.delete_public_key(api_id, params[:id])
+    Rails.logger.error "Failed to delete public key: #{api_client.response_body}" unless api_client.response_successful?
     api_client.response_successful?
   end
 
