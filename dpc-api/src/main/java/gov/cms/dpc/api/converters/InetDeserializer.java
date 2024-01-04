@@ -1,6 +1,5 @@
 package gov.cms.dpc.api.converters;
 
-import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -10,7 +9,7 @@ import io.hypersistence.utils.hibernate.type.basic.Inet;
 import java.io.IOException;
 
 /**
- * Custom deserializer for the {@link Inet} class.  Jackson can serialize it fine on it's own, but needs a little
+ * Custom deserializer for the {@link Inet} class.  Jackson can serialize it fine on its own, but needs a little
  * help in the other direction.
  */
 public class InetDeserializer extends StdDeserializer<Inet> {

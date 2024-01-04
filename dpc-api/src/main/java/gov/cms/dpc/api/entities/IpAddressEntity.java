@@ -44,13 +44,8 @@ public class IpAddressEntity implements Serializable {
     @CreationTimestamp
     private OffsetDateTime createdAt;
 
-    // TODO try removing this once it's working
-    public IpAddressEntity() {
-        // Hibernate required.
-        // Without this, end points that can submit an IpAddressEntity won't be able to construct the object from json.
-    }
-
     public UUID getId() {return id;}
+    public IpAddressEntity setId(UUID id) {this.id = id; return this;}
     public IpAddressEntity setOrganizationId(UUID organizationId) {this.organizationId = organizationId; return this;}
     public UUID getOrganizationId() {return organizationId;}
     public IpAddressEntity setIpAddress(Inet ipAddress) {this.ipAddress = ipAddress; return this;}

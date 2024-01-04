@@ -24,6 +24,7 @@ import java.util.UUID;
 @Path("/v1/IpAddress")
 public class IpAddressResource extends AbstractIpAddressResource {
     private static final Logger logger = LoggerFactory.getLogger(IpAddressResource.class);
+    static final int MAX_IPS = 8;
     private final IpAddressDAO dao;
 
     @Inject
@@ -61,8 +62,14 @@ public class IpAddressResource extends AbstractIpAddressResource {
     )
     @ApiResponses(@ApiResponse(code = 400, message = "Organization has too many Ip addresses."))
     public IpAddressEntity submitIpAddress(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal, IpAddressEntity ipAddressEntity) {
-        // TODO check ip address count
-        return this.dao.persistIpAddress(ipAddressEntity);
+        CollectionResponse currentIps = getOrganizationIpAddresses(organizationPrincipal);
+
+        if(currentIps.getCount() >= MAX_IPS) {
+            logger.debug(String.format("Cannot add Ip for org: %s.  They are already at the max of %d.", organizationPrincipal.getID(), MAX_IPS));
+            throw new WebApplicationException(String.format("Max Ips for organization reached: %d", MAX_IPS), Response.Status.BAD_REQUEST);
+        } else {
+            return this.dao.persistIpAddress(ipAddressEntity);
+        }
     }
 
     @Override
@@ -76,7 +83,13 @@ public class IpAddressResource extends AbstractIpAddressResource {
             authorizations = @Authorization(value = "access_token")
     )
     public Response deleteIpAddress(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal, UUID ipAddressId) {
-        // TODO delete
-        return Response.noContent().build();
+        CollectionResponse currentIps = getOrganizationIpAddresses(organizationPrincipal);
+
+        if(currentIps.getEntities().stream().anyMatch(ip -> ((IpAddressEntity)ip).getId().equals(ipAddressId))) {
+            this.dao.deleteIpAddress(new IpAddressEntity().setId(ipAddressId));
+            return Response.noContent().build();
+        } else {
+            throw new WebApplicationException("Ip address not found", Response.Status.NOT_FOUND);
+        }
     }
 }

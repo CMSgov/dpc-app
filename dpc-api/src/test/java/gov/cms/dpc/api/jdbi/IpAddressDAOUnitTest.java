@@ -13,7 +13,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class IpAddressDAOTest extends AbstractDAOTest<IpAddressEntity> {
+class IpAddressDAOUnitTest extends AbstractDAOTest<IpAddressEntity> {
     IpAddressDAO ipAddressDAO;
 
     @BeforeEach
