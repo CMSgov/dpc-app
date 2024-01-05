@@ -2,6 +2,8 @@
 
 # Manages ip addresses for an organization
 class IpAddressManager
+  require 'ipaddr'
+
   attr_reader :api_id, :errors
 
   def initialize(api_id)
@@ -12,7 +14,7 @@ class IpAddressManager
   def create_ip_address(ip_address:, label:)
     label = strip_carriage_returns(label)
     ip_address = strip_carriage_returns(ip_address)
-    return { response: false, message: @errors[0] } if invalid_ip?(ip_address) || label_length?(params[:label])
+    return { response: false, message: @errors[0] } if invalid_ip?(ip_address) || label_length?(label)
 
     api_client = DpcClient.new
     api_client.create_ip_address(api_id, params: { label: label, ip_address: ip_address })
@@ -45,12 +47,20 @@ class IpAddressManager
   private
 
   def invalid_ip?(addr_string)
-    # TODO
-    @addr_string = addr_string
+    IPAddr.new(addr_string)
+    false
+  rescue IPAddr::InvalidAddressError
+    @errors << 'Invalid IP address.'
+    true
   end
 
   def label_length?(label)
-    label.length > 25
+    if label.length > 25
+      @errors << 'Label cannot be over 25 characters.'
+      true
+    else
+      false
+    end
   end
 
   def strip_carriage_returns(str)

@@ -17,7 +17,7 @@ RSpec.describe 'IpAddresses', type: :request do
   end
 
   describe 'POST /create' do
-    it 'succeeds if label' do
+    it 'succeeds with valid params' do
       org_api_id = SecureRandom.uuid
       api_client = stub_api_client(message: :get_organization,
                                    response: default_get_org_response(org_api_id))
@@ -35,6 +35,31 @@ RSpec.describe 'IpAddresses', type: :request do
       post "/organizations/#{org_api_id}/ip_addresses"
       expect(assigns(:organization).api_id).to eq org_api_id
       expect(flash[:alert]).to eq('Required values missing.')
+    end
+
+    it 'fails if invalid IP' do
+      org_api_id = SecureRandom.uuid
+      api_client = stub_api_client(message: :get_organization,
+                                   response: default_get_org_response(org_api_id))
+      stub_self_returning_api_client(message: :create_ip_address,
+                                     response: default_get_ip_addresses['entities'].first,
+                                     api_client: api_client)
+      post "/organizations/#{org_api_id}/ip_addresses", params: { label: 'Public IP 1', ip_address: '333.333.333.333' }
+      expect(assigns(:organization).api_id).to eq org_api_id
+      expect(flash[:alert]).to eq('IP address could not be created.')
+    end
+
+    it 'fails if label over 25 characters' do
+      org_api_id = SecureRandom.uuid
+      api_client = stub_api_client(message: :get_organization,
+                                   response: default_get_org_response(org_api_id))
+      stub_self_returning_api_client(message: :create_ip_address,
+                                     response: default_get_ip_addresses['entities'].first,
+                                     api_client: api_client)
+      post "/organizations/#{org_api_id}/ip_addresses",
+           params: { label: 'aaaaabbbbbcccccdddddeeeeefffff', ip_address: '136.226.19.87' }
+      expect(assigns(:organization).api_id).to eq org_api_id
+      expect(flash[:alert]).to eq('IP address could not be created.')
     end
 
     it 'shows error if problem' do
