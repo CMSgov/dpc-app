@@ -3,7 +3,7 @@
 module Page
   module IpAddress
     # Renders ip_address/new preview
-    class NewAddressComponentPreview < ViewComponent::Base
+    class NewAddressComponentPreview < ViewComponent::Preview
       def default
         render(Page::IpAddress::NewAddressComponent.new(MockOrg.new('Health Hut')))
       end
