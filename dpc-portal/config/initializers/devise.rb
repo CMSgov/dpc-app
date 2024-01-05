@@ -9,6 +9,22 @@
 # Use this hook to configure devise mailer, warden hooks and so forth.
 # Many of these configuration options can be set straight in your model.
 Devise.setup do |config|
+  config.omniauth :openid_connect, {
+                    name: :openid_connect,
+                    issuer: 'https://idp.int.identitysandbox.gov/',
+                    discovery: true,
+                    scope: [:openid, :email, :profile, :phone],
+                    response_type: :code,
+                    prompt: :select_account,
+                    acr_values: 'http://idmanagement.gov/ns/assurance/ial/2',
+                    client_options: {
+                      port: 443,
+                      scheme: 'https',
+                      host: 'idp.int.identitysandbox.gov',
+                      identifier: 'urn:gov:cms:openidconnect.profiles:sp:sso:cms:dpc',
+                      secret: 'YJw4zK/IDAda4bxbjIAx4Onm',
+                      redirect_uri: 'http://localhost:3100/users/auth/openid_connect/callback'}
+                  }
   # The secret key used by Devise. Devise uses this key to generate
   # random tokens. Changing this key will render invalid all existing
   # confirmation, reset password and unlock tokens in the database.
