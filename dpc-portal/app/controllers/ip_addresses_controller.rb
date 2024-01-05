@@ -15,7 +15,8 @@ class IpAddressesController < ApplicationController
     manager = IpAddressManager.new(params[:organization_id])
     new_ip_address = manager.create_ip_address(ip_address: params[:ip_address], label: params[:label])
     if new_ip_address[:response]
-      notify_and_redirect('IP address successfully created.')
+      flash[:notice] = 'IP address successfully created.'
+      redirect_to organization_path(params[:organization_id])
     else
       render_error('IP address could not be created.')
     end
@@ -25,10 +26,11 @@ class IpAddressesController < ApplicationController
   def destroy
     manager = IpAddressManager.new(params[:organization_id])
     if manager.delete_ip_address(params)
-      notify_and_redirect('IP address successfully deleted.')
+      flash[:notice] = 'IP address successfully deleted.'
     else
-      render_error('IP address could not be deleted.')
+      flash[:alert] = 'IP address could not be deleted.'
     end
+    redirect_to organization_path(params[:organization_id])
   end
 
   private
@@ -36,11 +38,6 @@ class IpAddressesController < ApplicationController
   def render_error(msg)
     flash[:alert] = msg
     render Page::IpAddress::NewAddressComponent.new(@organization)
-  end
-
-  def notify_and_redirect(msg)
-    flash[:notice] = msg
-    redirect_to organization_path(params[:organization_id])
   end
 
   def load_organization
