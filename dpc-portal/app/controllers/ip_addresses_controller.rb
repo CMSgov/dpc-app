@@ -1,0 +1,58 @@
+# frozen_string_literal: true
+
+# Handles IP address requests
+class IpAddressesController < ApplicationController
+  before_action :load_organization
+
+  def new
+    render Page::IpAddress::NewIpAddressComponent.new(@organization)
+  end
+
+  # rubocop:disable Metrics/AbcSize
+  def create
+    return render_error('Required values missing.') if params[:ip_address].blank? || params[:label].blank?
+
+    manager = IpAddressManager.new(params[:organization_id])
+    new_ip_address = manager.create_ip_address(ip_address: params[:ip_address], label: params[:label])
+    if new_ip_address[:response]
+      notify_and_redirect('IP address successfully created.')
+    else
+      render_error('IP address could not be created.')
+    end
+  end
+  # rubocop:enable Metrics/AbcSize
+
+  def destroy
+    manager = IpAddressManager.new(params[:organization_id])
+    if manager.delete_ip_address(params)
+      notify_and_redirect('IP address successfully deleted.')
+    else
+      render_error('IP address could not be deleted.')
+    end
+  end
+
+  private
+
+  def render_error(msg)
+    flash[:alert] = msg
+    render Page::IpAddress::NewIpAddressComponent.new(@organization)
+  end
+
+  def notify_and_redirect(msg)
+    flash[:notice] = msg
+    redirect_to organization_path(params[:organization_id])
+  end
+
+  def load_organization
+    @organization = case ENV.fetch('ENV', nil)
+                    when 'prod-sbx'
+                      redirect_to root_url
+                    when 'test'
+                      Organization.new('6a1dbf47-825b-40f3-b81d-4a7ffbbdc270')
+                    when 'dev'
+                      Organization.new('78d02106-2837-4d07-8c51-8d73332aff09')
+                    else
+                      Organization.new(params[:organization_id])
+                    end
+  end
+end

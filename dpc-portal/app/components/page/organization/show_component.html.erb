@@ -38,14 +38,14 @@
   <% end %>
 
   <%= render(Core::Card::BasicComponent.new(text_content: '<h2>Public IPs</h2>',
-      button_params: { name: 'Add IP', path: root_path, method: :get} )) do %>
+      button_params: { name: 'Add IP', path: new_organization_ip_address_path, method: :get} )) do %>
     <div>
       <% if @organization.public_ips.present? %>
         <%= render(Core::Table::TableComponent.new(id: 'public-ips-table', additional_classes: ['width-full'], sortable: true)) do %>
           <%= render(Core::Table::HeaderComponent.new(caption: 'Public IP Table',
                                                       columns: ['Label', 'Public IP', 'Date Added', ''],
                                                       sort: 2)) %>
-          <%= render(Core::Table::RowComponent.with_collection(@organization.public_ips, keys: ['label', 'ip_addr', 'createdAt', 'X'])) %>
+          <%= render(Core::Table::RowComponent.with_collection(@organization.public_ips, keys: ['label', 'ip_addr', 'createdAt'], delete_path: organization_ip_addresses_path(@organization.path_id), obj_name: 'IP address')) %>
         <% end %>
       <% else %>
         <p>Before you can access production data, you must provide a public IP address (max of 8).</p>

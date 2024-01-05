@@ -87,6 +87,24 @@ class DpcClient
     get_request(uri_string, delegated_macaroon(reg_org_api_id))
   end
 
+  def create_ip_address(reg_org_api_id, params: {})
+    post_text_request(
+      "#{base_url}/IpAddress",
+      { ip_address: params[:ip_address] }.to_json,
+      { label: params[:label] },
+      delegated_macaroon(reg_org_api_id)
+    )
+    self
+  end
+
+  def delete_ip_address(reg_org_api_id, address_id)
+    delete_request("#{base_url}/IpAddress/#{address_id}", delegated_macaroon(reg_org_api_id))
+  end
+
+  def get_ip_addresses(reg_org_api_id)
+    get_request("#{base_url}/IpAddress", delegated_macaroon(reg_org_api_id))
+  end
+
   def response_successful?
     (200...299).cover? @response_status
   end
