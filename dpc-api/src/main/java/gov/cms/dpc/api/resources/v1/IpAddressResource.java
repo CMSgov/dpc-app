@@ -15,9 +15,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.Optional;
 import java.util.UUID;
 
 @Api(tags = {"Auth", "IpAddress"}, authorizations = @Authorization(value = "access_token"))
@@ -61,7 +63,7 @@ public class IpAddressResource extends AbstractIpAddressResource {
             authorizations = @Authorization(value = "access_token")
     )
     @ApiResponses(@ApiResponse(code = 400, message = "Organization has too many Ip addresses."))
-    public IpAddressEntity submitIpAddress(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal, IpAddressEntity ipAddressEntity) {
+    public IpAddressEntity submitIpAddress(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal, @ApiParam IpAddressEntity ipAddressEntity) {
         CollectionResponse currentIps = getOrganizationIpAddresses(organizationPrincipal);
 
         if(currentIps.getCount() >= MAX_IPS) {
@@ -74,6 +76,7 @@ public class IpAddressResource extends AbstractIpAddressResource {
 
     @Override
     @DELETE
+    @Path("/{ipAddressId}")
     @Timed
     @ExceptionMetered
     @Authorizer
@@ -82,13 +85,19 @@ public class IpAddressResource extends AbstractIpAddressResource {
             value = "Deletes an Ip address for an organization",
             authorizations = @Authorization(value = "access_token")
     )
-    public Response deleteIpAddress(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal, UUID ipAddressId) {
+    public Response deleteIpAddress(
+            @ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
+            @ApiParam @NotNull @PathParam(value = "ipAddressId") UUID ipAddressId
+    ) {
         CollectionResponse currentIps = getOrganizationIpAddresses(organizationPrincipal);
+        Optional<IpAddressEntity> optionalIp = currentIps.getEntities().stream().filter(ip ->
+            ((IpAddressEntity)ip).getId().equals(ipAddressId)).findFirst();
 
-        if(currentIps.getEntities().stream().anyMatch(ip -> ((IpAddressEntity)ip).getId().equals(ipAddressId))) {
-            this.dao.deleteIpAddress(new IpAddressEntity().setId(ipAddressId));
+        if(!optionalIp.isEmpty()) {
+            this.dao.deleteIpAddress(optionalIp.get());
             return Response.noContent().build();
         } else {
+            logger.debug("Cannot delete Ip: %s for org: %s.  Ip address not found.");
             throw new WebApplicationException("Ip address not found", Response.Status.NOT_FOUND);
         }
     }

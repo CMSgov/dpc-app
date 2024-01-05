@@ -46,6 +46,14 @@ class IpAddressResourceUnitTest {
     }
 
     @Test
+    public void testGet_nothingReturned() {
+        when(ipAddressDAO.fetchIpAddresses(organizationPrincipal.getID())).thenReturn(List.of());
+
+        CollectionResponse response = ipAddressResource.getOrganizationIpAddresses(organizationPrincipal);
+        assertEquals(0, response.getCount());
+    }
+
+    @Test
     public void testPost_happyPath() {
         IpAddressEntity ipAddressEntity = new IpAddressEntity();
 
