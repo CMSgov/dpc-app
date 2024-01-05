@@ -38,7 +38,7 @@
   <% end %>
 
   <%= render(Core::Card::BasicComponent.new(text_content: '<h2>Public IPs</h2>',
-      button_params: { name: 'Add IP', path: new_organization_ip_address_path, method: :get} )) do %>
+      button_params: { name: 'Add IP', path: new_organization_ip_address_path(@organization.path_id), method: :get} )) do %>
     <div>
       <% if @organization.public_ips.present? %>
         <%= render(Core::Table::TableComponent.new(id: 'public-ips-table', additional_classes: ['width-full'], sortable: true)) do %>

@@ -42,7 +42,7 @@ RSpec.describe Page::Organization::ShowComponent, type: :component do
       end
       it 'Should have Add IP button' do
         button = <<~BUTTON
-          <form class="button_to" method="get" action="/portal/">
+          <form class="button_to" method="get" action="/portal/organizations/#{org.path_id}/ip_addresses/new">
             <button class="usa-button" type="submit">Add IP</button>
           </form>
         BUTTON
@@ -196,13 +196,11 @@ RSpec.describe Page::Organization::ShowComponent, type: :component do
               <td data-sort-value="IP Addr 1">IP Addr 1</td>
               <td data-sort-value="127.0.0.10">127.0.0.10</td>
               <td data-sort-value="12/15/2023 at  5:01PM UTC">12/15/2023 at  5:01PM UTC</td>
-              <td data-sort-value="X">X</td>
             </tr>
             <tr>
               <td data-sort-value="IP Addr 2">IP Addr 2</td>
               <td data-sort-value="127.0.0.11">127.0.0.11</td>
               <td data-sort-value="12/15/2023 at  5:01PM UTC">12/15/2023 at  5:01PM UTC</td>
-              <td data-sort-value="X">X</td>
             </tr>
           </tbody>
         HTML
