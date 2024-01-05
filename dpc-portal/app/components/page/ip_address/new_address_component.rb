@@ -3,7 +3,7 @@
 module Page
   module IpAddress
     # Renders ip_address/new
-    class NewIpAddressComponent < ViewComponent::Base
+    class NewAddressComponent < ViewComponent::Base
       attr_accessor :organization, :obj_name
 
       def initialize(organization)

@@ -5,7 +5,7 @@ class IpAddressesController < ApplicationController
   before_action :load_organization
 
   def new
-    render Page::IpAddress::NewIpAddressComponent.new(@organization)
+    render Page::IpAddress::NewAddressComponent.new(@organization)
   end
 
   # rubocop:disable Metrics/AbcSize
@@ -35,7 +35,7 @@ class IpAddressesController < ApplicationController
 
   def render_error(msg)
     flash[:alert] = msg
-    render Page::IpAddress::NewIpAddressComponent.new(@organization)
+    render Page::IpAddress::NewAddressComponent.new(@organization)
   end
 
   def notify_and_redirect(msg)
