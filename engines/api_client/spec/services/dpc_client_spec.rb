@@ -641,9 +641,7 @@ RSpec.describe DpcClient do
           )
 
           api_client = DpcClient.new
-
           api_client.create_ip_address(reg_org.api_id, params: { label: 'Sandbox IP 1', ip_address: '136.226.19.87' })
-
           expect(api_client.response_status).to eq(200)
           expect(api_client.response_body).to eq(
                                                 {
@@ -668,12 +666,10 @@ RSpec.describe DpcClient do
           )
 
           api_client = DpcClient.new
-
           api_client.create_ip_address(
             reg_org.api_id,
             params: { label: 'Sandbox IP 1', ip_address: '136.226.19.87' }
           )
-
           stub_request(:delete, 'http://dpc.example.com/IpAddress/3fa85f64-5717-4562-b3fc-2c963f66afa6')
             .with(
               headers: { 'Accept' => 'application/json', 'Content-Type' => 'application/json' }
@@ -684,7 +680,6 @@ RSpec.describe DpcClient do
             reg_org.api_id,
             '3fa85f64-5717-4562-b3fc-2c963f66afa6'
           )
-
           expect(api_client.response_status).to eq(200)
         end
       end
@@ -699,7 +694,6 @@ RSpec.describe DpcClient do
           )
 
           api_client = DpcClient.new
-
           api_client.create_ip_address(
             reg_org.api_id,
             params: {
@@ -707,7 +701,6 @@ RSpec.describe DpcClient do
               ip_address: '136.226.19.87'
             }
           )
-
           expect(api_client.response_status).to eq(500)
           expect(api_client.response_body).to eq('{}')
         end
@@ -726,9 +719,7 @@ RSpec.describe DpcClient do
           )
 
           api_client = DpcClient.new
-
           api_client.get_public_keys(reg_org.api_id)
-
           expect(api_client.response_status).to eq(200)
           expect(api_client.response_body).to eq(
                                                 [{
@@ -750,9 +741,7 @@ RSpec.describe DpcClient do
           )
 
           api_client = DpcClient.new
-
           api_client.get_ip_addresses(reg_org.api_id)
-
           expect(api_client.response_status).to eq(500)
           expect(api_client.response_body).to eq('{}')
         end

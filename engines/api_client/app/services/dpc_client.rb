@@ -97,8 +97,8 @@ class DpcClient
     self
   end
 
-  def delete_ip_address(reg_org_api_id, address_id)
-    delete_request("#{base_url}/IpAddress/#{address_id}", delegated_macaroon(reg_org_api_id))
+  def delete_ip_address(reg_org_api_id, addr_id)
+    delete_request("#{base_url}/IpAddress/#{addr_id}", delegated_macaroon(reg_org_api_id))
   end
 
   def get_ip_addresses(reg_org_api_id)

@@ -64,6 +64,7 @@ RSpec.describe IpAddressManager do
           expect(new_ip_address[:message]).to eq('Label cannot be over 25 characters.')
         end
       end
+
       context 'invalid IP' do
         it 'response with error' do
           api_id = SecureRandom.uuid

@@ -98,6 +98,7 @@ RSpec.describe 'IpAddresses', type: :request do
       expect(flash[:notice]).to eq('IP address successfully deleted.')
       expect(response).to redirect_to(organization_path(org_api_id))
     end
+
     it 'renders error if error' do
       org_api_id = SecureRandom.uuid
       addr_guid = SecureRandom.uuid
