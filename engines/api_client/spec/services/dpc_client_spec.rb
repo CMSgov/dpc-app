@@ -748,4 +748,8 @@ RSpec.describe DpcClient do
       end
     end
   end
+
+  def stubbed_key
+    file_fixture('stubbed_key.pem').read
+  end
 end
