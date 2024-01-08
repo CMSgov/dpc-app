@@ -16,7 +16,8 @@ class IpAddressesController < ApplicationController
       flash[:notice] = 'IP address successfully created.'
       redirect_to organization_path(params[:organization_id])
     else
-      render_error("IP address could not be created: #{manager.errors.join(', ')}.")
+      flash[:alert] = "IP address could not be created: #{manager.errors.join(', ')}."
+      render Page::IpAddress::NewAddressComponent.new(@organization)
     end
   end
 
@@ -32,11 +33,6 @@ class IpAddressesController < ApplicationController
   # rubocop:enable Metrics/AbcSize
 
   private
-
-  def render_error(msg)
-    flash[:alert] = msg
-    render Page::IpAddress::NewAddressComponent.new(@organization)
-  end
 
   def load_organization
     @organization = case ENV.fetch('ENV', nil)
