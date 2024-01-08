@@ -16,19 +16,16 @@ class IpAddressesController < ApplicationController
       flash[:notice] = 'IP address successfully created.'
       redirect_to organization_path(params[:organization_id])
     else
-      manager.errors << new_ip_address[:message]
-      render_error('IP address could not be created.')
+      render_error("IP address could not be created: #{manager.errors[0]}")
     end
   end
 
   def destroy
     manager = IpAddressManager.new(params[:organization_id])
-    response = manager.delete_ip_address(params)
-    if response[:response]
+    if manager.delete_ip_address(params)
       flash[:notice] = 'IP address successfully deleted.'
     else
-      manager.errors << response[:message]
-      flash[:alert] = 'IP address could not be deleted.'
+      flash[:alert] = "IP address could not be deleted: #{manager.errors[0]}"
     end
     redirect_to organization_path(params[:organization_id])
   end

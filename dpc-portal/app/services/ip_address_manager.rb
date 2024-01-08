@@ -11,6 +11,7 @@ class IpAddressManager
     @errors = []
   end
 
+  # rubocop:disable Metrics/AbcSize
   def create_ip_address(ip_address:, label:)
     return { response: false, message: @errors[0] } if missing_params(ip_address, label)
 
@@ -21,17 +22,26 @@ class IpAddressManager
     api_client = DpcClient.new
     api_client.create_ip_address(api_id, params: { label: label, ip_address: ip_address })
 
-    Rails.logger.error "Failed to create ip address: #{api_client.response_body}" unless api_client.response_successful?
+    unless api_client.response_successful?
+      Rails.logger.error "Failed to create ip address: #{api_client.response_body}"
+      @errors << (api_client.response_body || 'Failed to create IP address.')
+    end
+
     { response: api_client.response_successful?,
       message: api_client.response_body }
   end
+  # rubocop:enable Metrics/AbcSize
 
   def delete_ip_address(params)
     api_client = DpcClient.new
     api_client.delete_ip_address(api_id, params[:id])
-    Rails.logger.error "Failed to delete ip_address: #{api_client.response_body}" unless api_client.response_successful?
-    { response: api_client.response_successful?,
-      message: api_client.response_body }
+
+    unless api_client.response_successful?
+      Rails.logger.error "Failed to delete ip_address: #{api_client.response_body}"
+      @errors << (api_client.response_body || 'Failed to delete IP address.')
+    end
+
+    api_client.response_successful?
   end
 
   def ip_addresses
