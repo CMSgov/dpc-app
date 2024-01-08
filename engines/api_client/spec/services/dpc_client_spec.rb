@@ -13,7 +13,7 @@ RSpec.describe DpcClient do
     double('RegisteredOrg',
            api_id: 'some-api-key',
            fhir_endpoint_id: 'some-fhir-endpoint-id',
-           api_endpoint_ref: 'Endpoint/some-fhir-endpoing-id')
+           api_endpoint_ref: 'Endpoint/some-fhir-endpoint-id')
   end
   let(:fhir_endpoint_attributes) do
     { name: 'Cool SBX',
@@ -60,7 +60,7 @@ RSpec.describe DpcClient do
       end
     end
 
-    context 'unsuccessul request' do
+    context 'unsuccessful request' do
       it 'uses fhir_client to retrieve organization data from API' do
         stub_request(:get, "http://dpc.example.com/Organization/#{reg_org.api_id}")
           .with(headers: headers).to_return(status: 500, body: '', headers: {})
@@ -322,7 +322,7 @@ RSpec.describe DpcClient do
       end
     end
 
-    context 'unsuccessul request' do
+    context 'unsuccessful request' do
       it 'uses fhir_client to send org data to API' do
         stub_request(:put, "http://dpc.example.com/Endpoint/#{reg_org.fhir_endpoint_id}")
           .with(
