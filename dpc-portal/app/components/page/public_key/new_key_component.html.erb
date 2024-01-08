@@ -8,7 +8,7 @@
             <%= form_tag organization_public_keys_path(organization_id: organization.path_id), method: :post do %>
 
             <%= render(Core::Form::TextInputComponent.new(
-              label: "Label", attribute: :label, default: params[:label], input_options: { max_length: 25 },
+              label: "Label", attribute: :label, default: params[:label], input_options: { maxlength: 25 },
               hint: 'Choose a descriptive name to make your key easily identifiable to you.')
             ) %>
             <%= render(Core::Form::TextAreaComponent.new(

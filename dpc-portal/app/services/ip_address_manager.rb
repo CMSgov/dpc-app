@@ -12,6 +12,8 @@ class IpAddressManager
   end
 
   def create_ip_address(ip_address:, label:)
+    return { response: false, message: @errors[0] } if missing_params(ip_address, label)
+
     label = strip_carriage_returns(label)
     ip_address = strip_carriage_returns(ip_address)
     return { response: false, message: @errors[0] } if invalid_ip?(ip_address) || label_length?(label)
@@ -45,6 +47,15 @@ class IpAddressManager
   end
 
   private
+
+  def missing_params(ip_address, label)
+    if ip_address.blank?
+      @errors << 'Missing IP address.'
+    elsif label.blank?
+      @errors << 'Missing label.'
+    end
+    ip_address.blank? || label.blank?
+  end
 
   def invalid_ip?(addr_string)
     IPAddr.new(addr_string)

@@ -25,12 +25,12 @@ RSpec.describe Page::IpAddress::NewAddressComponent, type: :component do
                 <div class="margin-bottom-4">
                   <label class="usa-label" for="label">Label</label>
                   <p class="usa-hint">Choose a descriptive name to make your IP address easily identifiable to you.</p>
-                  <input type="text" name="label" id="label" max_length="25" class="usa-input">
+                  <input type="text" name="label" id="label" maxlength="25" class="usa-input">
                 </div>
                 <div class="margin-bottom-4">
                   <label class="usa-label" for="ip_address">Public IP address</label>
                   <p class="usa-hint">For example, 136.226.19.87</p>
-                  <input type="text" name="ip_address" id="ip_address" max_length="10" class="usa-input">
+                  <input type="text" name="ip_address" id="ip_address" maxlength="15" class="usa-input">
                 </div>
                 <input type="submit" name="commit" value="Add IP" class="usa-button" data-test="form:submit" data-disable-with="Add IP">
               </form>

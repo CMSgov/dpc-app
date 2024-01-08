@@ -8,10 +8,7 @@ class IpAddressesController < ApplicationController
     render Page::IpAddress::NewAddressComponent.new(@organization)
   end
 
-  # rubocop:disable Metrics/AbcSize
   def create
-    return render_error('Required values missing.') if params[:ip_address].blank? || params[:label].blank?
-
     manager = IpAddressManager.new(params[:organization_id])
     new_ip_address = manager.create_ip_address(ip_address: params[:ip_address], label: params[:label])
     if new_ip_address[:response]
@@ -21,7 +18,6 @@ class IpAddressesController < ApplicationController
       render_error('IP address could not be created.')
     end
   end
-  # rubocop:enable Metrics/AbcSize
 
   def destroy
     manager = IpAddressManager.new(params[:organization_id])

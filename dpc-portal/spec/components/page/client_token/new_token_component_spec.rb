@@ -25,7 +25,7 @@ RSpec.describe Page::ClientToken::NewTokenComponent, type: :component do
               <div class="margin-bottom-4">
                 <label class="usa-label" for="label">Label</label>
                 <p class="usa-hint">Choose a descriptive name to make your token easily identifiable to you.</p>
-                <input type="text" name="label" id="label" max_length="25" class="usa-input" />
+                <input type="text" name="label" id="label" maxlength="25" class="usa-input" />
               </div>
               <input type="submit" name="commit" value="Create token" class="usa-button" data-test="form-submit" data-disable-with="Create token" />
             </form>

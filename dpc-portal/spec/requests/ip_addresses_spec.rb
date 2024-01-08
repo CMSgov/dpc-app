@@ -28,13 +28,22 @@ RSpec.describe 'IpAddresses', type: :request do
       expect(assigns(:organization).api_id).to eq org_api_id
     end
 
-    it 'fails if missing params' do
+    it 'fails if missing label' do
       org_api_id = SecureRandom.uuid
       stub_api_client(message: :get_organization,
                       response: default_get_org_response(org_api_id))
-      post "/organizations/#{org_api_id}/ip_addresses"
+      post "/organizations/#{org_api_id}/ip_addresses", params: { ip_address: '136.226.19.87' }
       expect(assigns(:organization).api_id).to eq org_api_id
-      expect(flash[:alert]).to eq('Required values missing.')
+      expect(flash[:alert]).to eq('IP address could not be created.')
+    end
+
+    it 'fails if missing IP' do
+      org_api_id = SecureRandom.uuid
+      stub_api_client(message: :get_organization,
+                      response: default_get_org_response(org_api_id))
+      post "/organizations/#{org_api_id}/ip_addresses", params: { label: 'Public IP 1' }
+      expect(assigns(:organization).api_id).to eq org_api_id
+      expect(flash[:alert]).to eq('IP address could not be created.')
     end
 
     it 'fails if invalid IP' do
