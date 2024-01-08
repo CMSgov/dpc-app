@@ -42,7 +42,22 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
         this.fullyAuthedToken = APIAuthHelpers.jwtAuthFlow(getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY).accessToken;
     }
 
+    // TODO Once we turn on the IpAddress end point, remove this test and re-enable all of the others.
     @Test
+    public void testForbidden() throws URISyntaxException, IOException {
+        CloseableHttpClient client = HttpClients.createDefault();
+        URIBuilder uriBuilder = new URIBuilder(String.format("%s/IpAddress", getBaseURL()));
+
+        HttpGet get = new HttpGet(uriBuilder.build());
+        get.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
+        get.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + this.fullyAuthedToken);
+
+        CloseableHttpResponse response = client.execute(get);
+        assertEquals(HttpStatus.SC_FORBIDDEN, response.getStatusLine().getStatusCode());
+    }
+
+    @Test
+    @Disabled
     @Order(1)
     public void testBadAuth() throws URISyntaxException, IOException {
         CloseableHttpClient client = HttpClients.createDefault();
@@ -57,6 +72,7 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
+    @Disabled
     @Order(2)
     public void testNoAuth() throws URISyntaxException, IOException {
         CloseableHttpClient client = HttpClients.createDefault();
@@ -70,6 +86,7 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
+    @Disabled
     @Order(3)
     public void testPost_happyPath() throws IOException, URISyntaxException {
         CloseableHttpClient client = HttpClients.createDefault();
@@ -97,6 +114,7 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
+    @Disabled
     @Order(4)
     // Force this to run after the POST test
     public void testGet() throws URISyntaxException, IOException {
@@ -123,6 +141,7 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
+    @Disabled
     @Order(5)
     public void testDelete_happyPath() throws URISyntaxException, IOException {
         CloseableHttpClient client = HttpClients.createDefault();
@@ -137,6 +156,7 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
+    @Disabled
     @Order(6)
     public void testDelete_notFound() throws URISyntaxException, IOException {
         CloseableHttpClient client = HttpClients.createDefault();
@@ -151,6 +171,7 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
+    @Disabled
     @Order(7)
     // Force this test to run last since it's going to max out our Ips for the org
     public void testPost_tooManyIps() throws IOException, URISyntaxException {
