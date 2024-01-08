@@ -16,7 +16,7 @@ class IpAddressesController < ApplicationController
       flash[:notice] = 'IP address successfully created.'
       redirect_to organization_path(params[:organization_id])
     else
-      render_error("IP address could not be created: #{manager.errors[0]}")
+      render_error("IP address could not be created: #{manager.errors.join(', ')}.")
     end
   end
 
@@ -25,7 +25,7 @@ class IpAddressesController < ApplicationController
     if manager.delete_ip_address(params)
       flash[:notice] = 'IP address successfully deleted.'
     else
-      flash[:alert] = "IP address could not be deleted: #{manager.errors[0]}"
+      flash[:alert] = "IP address could not be deleted: #{manager.errors.join(', ')}."
     end
     redirect_to organization_path(params[:organization_id])
   end

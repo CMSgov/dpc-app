@@ -61,7 +61,7 @@ RSpec.describe IpAddressManager do
           new_ip_address = manager.create_ip_address(**@ip_address_params)
 
           expect(new_ip_address[:response]).to eq(false)
-          expect(new_ip_address[:message]).to eq('Label cannot be over 25 characters.')
+          expect(new_ip_address[:message]).to eq('Failed to create IP address: label cannot be over 25 characters.')
         end
       end
 
@@ -78,7 +78,7 @@ RSpec.describe IpAddressManager do
           new_ip_address = manager.create_ip_address(**@ip_address_params)
 
           expect(new_ip_address[:response]).to eq(false)
-          expect(new_ip_address[:message]).to eq('Invalid IP address.')
+          expect(new_ip_address[:message]).to eq('Failed to create IP address: invalid IP address.')
         end
       end
     end

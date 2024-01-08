@@ -13,18 +13,22 @@ class IpAddressManager
 
   # rubocop:disable Metrics/AbcSize
   def create_ip_address(ip_address:, label:)
-    return { response: false, message: @errors[0] } if missing_params(ip_address, label)
+    if missing_params(ip_address, label)
+      return { response: false, message: "Failed to create IP address: #{@errors.join(', ')}." }
+    end
 
     label = strip_carriage_returns(label)
     ip_address = strip_carriage_returns(ip_address)
-    return { response: false, message: @errors[0] } if invalid_ip?(ip_address) || label_length?(label)
+    if invalid_ip?(ip_address) || label_length?(label)
+      return { response: false, message: "Failed to create IP address: #{@errors.join(', ')}." }
+    end
 
     api_client = DpcClient.new
     api_client.create_ip_address(api_id, params: { label: label, ip_address: ip_address })
 
     unless api_client.response_successful?
-      Rails.logger.error "Failed to create ip address: #{api_client.response_body}"
-      @errors << (api_client.response_body || 'Failed to create IP address.')
+      Rails.logger.error "Failed to create IP address: #{api_client.response_body}"
+      @errors << (api_client.response_body || 'failed to create IP address')
     end
 
     { response: api_client.response_successful?,
@@ -37,8 +41,8 @@ class IpAddressManager
     api_client.delete_ip_address(api_id, params[:id])
 
     unless api_client.response_successful?
-      Rails.logger.error "Failed to delete ip_address: #{api_client.response_body}"
-      @errors << (api_client.response_body || 'Failed to delete IP address.')
+      Rails.logger.error "Failed to delete IP address: #{api_client.response_body}"
+      @errors << (api_client.response_body || 'failed to delete IP address')
     end
 
     api_client.response_successful?
@@ -51,7 +55,7 @@ class IpAddressManager
     if api_client.response_successful?
       api_client.response_body['entities']
     else
-      Rails.logger.warn 'Could not get ip_addresses'
+      Rails.logger.warn "Could not get IP addresses: #{api_client.response_body}"
       @errors << api_client.response_body
       []
     end
@@ -60,11 +64,8 @@ class IpAddressManager
   private
 
   def missing_params(ip_address, label)
-    if ip_address.blank?
-      @errors << 'Missing IP address.'
-    elsif label.blank?
-      @errors << 'Missing label.'
-    end
+    @errors << 'missing label' if label.blank?
+    @errors << 'missing IP address' if ip_address.blank?
     ip_address.blank? || label.blank?
   end
 
@@ -72,17 +73,13 @@ class IpAddressManager
     IPAddr.new(addr_string)
     false
   rescue IPAddr::InvalidAddressError
-    @errors << 'Invalid IP address.'
+    @errors << 'invalid IP address'
     true
   end
 
   def label_length?(label)
-    if label.length > 25
-      @errors << 'Label cannot be over 25 characters.'
-      true
-    else
-      false
-    end
+    @errors << 'label cannot be over 25 characters' if label.length > 25
+    label.length > 25
   end
 
   def strip_carriage_returns(str)

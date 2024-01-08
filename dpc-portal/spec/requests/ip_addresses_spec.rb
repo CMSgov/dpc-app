@@ -28,22 +28,13 @@ RSpec.describe 'IpAddresses', type: :request do
       expect(assigns(:organization).api_id).to eq org_api_id
     end
 
-    it 'fails if missing label' do
+    it 'fails if missing params' do
       org_api_id = SecureRandom.uuid
       stub_api_client(message: :get_organization,
                       response: default_get_org_response(org_api_id))
-      post "/organizations/#{org_api_id}/ip_addresses", params: { ip_address: '136.226.19.87' }
+      post "/organizations/#{org_api_id}/ip_addresses"
       expect(assigns(:organization).api_id).to eq org_api_id
-      expect(flash[:alert]).to eq('IP address could not be created: Missing label.')
-    end
-
-    it 'fails if missing IP' do
-      org_api_id = SecureRandom.uuid
-      stub_api_client(message: :get_organization,
-                      response: default_get_org_response(org_api_id))
-      post "/organizations/#{org_api_id}/ip_addresses", params: { label: 'Public IP 1' }
-      expect(assigns(:organization).api_id).to eq org_api_id
-      expect(flash[:alert]).to eq('IP address could not be created: Missing IP address.')
+      expect(flash[:alert]).to eq('IP address could not be created: missing label, missing IP address.')
     end
 
     it 'fails if invalid IP' do
@@ -55,7 +46,7 @@ RSpec.describe 'IpAddresses', type: :request do
                                      api_client: api_client)
       post "/organizations/#{org_api_id}/ip_addresses", params: { label: 'Public IP 1', ip_address: '333.333.333.333' }
       expect(assigns(:organization).api_id).to eq org_api_id
-      expect(flash[:alert]).to eq('IP address could not be created: Invalid IP address.')
+      expect(flash[:alert]).to eq('IP address could not be created: invalid IP address.')
     end
 
     it 'fails if label over 25 characters' do
@@ -68,7 +59,7 @@ RSpec.describe 'IpAddresses', type: :request do
       post "/organizations/#{org_api_id}/ip_addresses",
            params: { label: 'aaaaabbbbbcccccdddddeeeeefffff', ip_address: '136.226.19.87' }
       expect(assigns(:organization).api_id).to eq org_api_id
-      expect(flash[:alert]).to eq('IP address could not be created: Label cannot be over 25 characters.')
+      expect(flash[:alert]).to eq('IP address could not be created: label cannot be over 25 characters.')
     end
 
     it 'shows error if problem' do
@@ -80,7 +71,7 @@ RSpec.describe 'IpAddresses', type: :request do
                                      response: nil,
                                      api_client: api_client)
       post "/organizations/#{org_api_id}/ip_addresses", params: { label: 'Public IP 1', ip_address: '136.226.19.87' }
-      expect(flash[:alert]).to eq('IP address could not be created: Failed to create IP address.')
+      expect(flash[:alert]).to eq('IP address could not be created: failed to create IP address.')
     end
   end
 
@@ -110,7 +101,7 @@ RSpec.describe 'IpAddresses', type: :request do
                                      with: [org_api_id, addr_guid],
                                      api_client: api_client)
       delete "/organizations/#{org_api_id}/ip_addresses/#{addr_guid}"
-      expect(flash[:alert]).to eq('IP address could not be deleted: Failed to delete IP address.')
+      expect(flash[:alert]).to eq('IP address could not be deleted: failed to delete IP address.')
       expect(response).to redirect_to(organization_path(org_api_id))
     end
   end
