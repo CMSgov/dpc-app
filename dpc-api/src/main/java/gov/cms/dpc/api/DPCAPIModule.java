@@ -24,6 +24,7 @@ import gov.cms.dpc.api.tasks.tokens.DeleteToken;
 import gov.cms.dpc.api.tasks.tokens.GenerateClientTokens;
 import gov.cms.dpc.api.tasks.tokens.ListClientTokens;
 import gov.cms.dpc.common.annotations.APIV1;
+import gov.cms.dpc.common.annotations.EnableIpAddressEndpoints;
 import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.common.annotations.JobTimeout;
 import gov.cms.dpc.common.annotations.ServiceBaseURL;
@@ -89,49 +90,55 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
 
         // Healthchecks
         // Additional health-checks can be added here
-        // By default, Dropwizard adds a check for Hibernate and each additional database (e.g. auth, queue, etc)
-        // We also get the JobQueueStatus by default, even though it always return healthy
+        // By default, Dropwizard adds a check for Hibernate and each additional
+        // database (e.g. auth, queue, etc)
+        // We also get the JobQueueStatus by default, even though it always return
+        // healthy
     }
 
-    // Since the KeyResource requires access to the Auth DB, we have to manually do the creation and resource injection,
-    // in order to ensure that the @UnitOfWork annotations are tied to the correct SessionFactory
+    // Since the KeyResource requires access to the Auth DB, we have to manually do
+    // the creation and resource injection,
+    // in order to ensure that the @UnitOfWork annotations are tied to the correct
+    // SessionFactory
     @Provides
     public KeyResource provideKeyResource(PublicKeyDAO dao) {
         return new UnitOfWorkAwareProxyFactory(authHibernateBundle)
-                .create(KeyResource.class, new Class<?>[]{PublicKeyDAO.class}, new Object[]{dao});
+                .create(KeyResource.class, new Class<?>[] { PublicKeyDAO.class }, new Object[] { dao });
     }
 
     @Provides
-    public TokenResource provideTokenResource(TokenDAO dao, MacaroonBakery bakery, SigningKeyResolverAdapter resolver, IJTICache cache, @APIV1 String publicURL) {
+    public TokenResource provideTokenResource(TokenDAO dao, MacaroonBakery bakery, SigningKeyResolverAdapter resolver,
+            IJTICache cache, @APIV1 String publicURL) {
         return new UnitOfWorkAwareProxyFactory(authHibernateBundle)
                 .create(TokenResource.class,
-                        new Class<?>[]{TokenDAO.class,
+                        new Class<?>[] { TokenDAO.class,
                                 MacaroonBakery.class,
                                 TokenPolicy.class,
                                 SigningKeyResolverAdapter.class,
                                 IJTICache.class,
-                                String.class},
-                        new Object[]{dao,
+                                String.class },
+                        new Object[] { dao,
                                 bakery,
                                 this.configuration().getTokenPolicy(),
                                 resolver,
-                                cache, publicURL});
+                                cache, publicURL });
     }
 
     @Provides
     public IpAddressResource provideIpAddressResource(IpAddressDAO dao) {
         return new UnitOfWorkAwareProxyFactory(authHibernateBundle)
-            .create(IpAddressResource.class, new Class<?>[]{IpAddressDAO.class}, new Object[]{dao});
+                .create(IpAddressResource.class, new Class<?>[] { IpAddressDAO.class }, new Object[] { dao });
     }
 
     @Provides
-    public OrganizationResource provideOrganizationResource(@Named("attribution") IGenericClient client, TokenDAO tokenDAO, PublicKeyDAO keyDAO) {
+    public OrganizationResource provideOrganizationResource(@Named("attribution") IGenericClient client,
+            TokenDAO tokenDAO, PublicKeyDAO keyDAO) {
         return new UnitOfWorkAwareProxyFactory(authHibernateBundle)
                 .create(OrganizationResource.class,
-                        new Class<?>[]{IGenericClient.class,
-                        TokenDAO.class,
-                        PublicKeyDAO.class},
-                        new Object[]{client, tokenDAO, keyDAO});
+                        new Class<?>[] { IGenericClient.class,
+                                TokenDAO.class,
+                                PublicKeyDAO.class },
+                        new Object[] { client, tokenDAO, keyDAO });
     }
 
     @Provides
@@ -203,5 +210,11 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
     @JobTimeout
     public int provideJobTimeoutInSeconds() {
         return configuration().getJobTimeoutInSeconds();
+    }
+
+    @Provides
+    @EnableIpAddressEndpoints
+    public boolean provideEnableIpAddressEndpoints() {
+        return configuration().getEnableIpAddressEndpoints();
     }
 }

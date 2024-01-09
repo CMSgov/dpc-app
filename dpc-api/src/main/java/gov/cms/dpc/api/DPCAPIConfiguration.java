@@ -20,7 +20,8 @@ import javax.validation.constraints.NotNull;
 import java.util.LinkedList;
 import java.util.List;
 
-public class DPCAPIConfiguration extends TypesafeConfiguration implements IDPCDatabase, IDPCQueueDatabase, IDPCAuthDatabase, IDPCFHIRConfiguration, BlueButtonBundleConfiguration {
+public class DPCAPIConfiguration extends TypesafeConfiguration implements IDPCDatabase, IDPCQueueDatabase,
+        IDPCAuthDatabase, IDPCFHIRConfiguration, BlueButtonBundleConfiguration {
 
     @NotEmpty
     private String exportPath;
@@ -73,6 +74,8 @@ public class DPCAPIConfiguration extends TypesafeConfiguration implements IDPCDa
 
     @Min(0)
     private int jobTimeoutInSeconds;
+
+    private boolean enableIpAddressEndpoints;
 
     public TokenPolicy getTokenPolicy() {
         return tokenPolicy;
@@ -146,6 +149,7 @@ public class DPCAPIConfiguration extends TypesafeConfiguration implements IDPCDa
     public String getPublicURL() {
         return publicURL;
     }
+
     public void setPublicURL(String publicURL) {
         this.publicURL = publicURL;
     }
@@ -170,12 +174,21 @@ public class DPCAPIConfiguration extends TypesafeConfiguration implements IDPCDa
     }
 
     public List<String> getLookBackExemptOrgs() {
-        if(lookBackExemptOrgs == null){
+        if (lookBackExemptOrgs == null) {
             return new LinkedList<>();
         }
-        return lookBackExemptOrgs; }
+        return lookBackExemptOrgs;
+    }
 
     public void setLookBackExemptOrgs(List<String> lookBackExemptOrgs) {
         this.lookBackExemptOrgs = lookBackExemptOrgs;
+    }
+
+    public boolean getEnableIpAddressEndpoints() {
+        return this.enableIpAddressEndpoints;
+    }
+
+    public void setEnableIpAddressEndpoints(boolean enableIpAddressEndpoints) {
+        this.enableIpAddressEndpoints = enableIpAddressEndpoints;
     }
 }

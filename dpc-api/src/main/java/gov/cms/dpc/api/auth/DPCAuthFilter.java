@@ -3,6 +3,7 @@ package gov.cms.dpc.api.auth;
 import com.github.nitram509.jmacaroons.Macaroon;
 import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.common.MDCConstants;
+import gov.cms.dpc.common.annotations.EnableIpAddressEndpoints;
 import gov.cms.dpc.common.utils.XSSSanitizerUtil;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.macaroons.exceptions.BakeryException;
@@ -24,10 +25,12 @@ import java.util.UUID;
 import static gov.cms.dpc.api.auth.MacaroonHelpers.BEARER_PREFIX;
 
 /**
- * {@link AuthFilter} implementation which extracts the Macaroon (base64 encoded) from the request.
+ * {@link AuthFilter} implementation which extracts the Macaroon (base64
+ * encoded) from the request.
  * Once extracted, it passes it down along the authn/authz chain.
  * <p>
- * This assumes that the Macaroon is either passed via the {@link HttpHeaders#AUTHORIZATION} header
+ * This assumes that the Macaroon is either passed via the
+ * {@link HttpHeaders#AUTHORIZATION} header
  * in the form 'Bearer {macaroon-values}'.
  * <p>
  * Or, directly via the 'token' query param (e.g. no Bearer prefix)
@@ -36,17 +39,19 @@ public abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organ
 
     private static final Logger logger = LoggerFactory.getLogger(DPCAuthFilter.class);
 
-
     private final TokenDAO dao;
     private final MacaroonBakery bakery;
     private final DPCUnauthorizedHandler dpc401handler;
+    private final boolean enableIpAddressEndpoints;
 
-
-    protected DPCAuthFilter(MacaroonBakery bakery, Authenticator<DPCAuthCredentials, OrganizationPrincipal> auth, TokenDAO dao, DPCUnauthorizedHandler dpc401handler ) {
+    protected DPCAuthFilter(MacaroonBakery bakery, Authenticator<DPCAuthCredentials, OrganizationPrincipal> auth,
+            TokenDAO dao, DPCUnauthorizedHandler dpc401handler,
+            @EnableIpAddressEndpoints boolean enableIpAddressEndpoints) {
         this.authenticator = auth;
         this.bakery = bakery;
         this.dao = dao;
         this.dpc401handler = dpc401handler;
+        this.enableIpAddressEndpoints = enableIpAddressEndpoints;
     }
 
     protected abstract DPCAuthCredentials buildCredentials(String macaroon, UUID organizationID, UriInfo uriInfo);
@@ -54,7 +59,8 @@ public abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organ
     @Override
     public void filter(final ContainerRequestContext requestContext) {
         final UriInfo uriInfo = requestContext.getUriInfo();
-        final String macaroon = MacaroonHelpers.extractMacaroonFromRequest(requestContext, unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
+        final String macaroon = MacaroonHelpers.extractMacaroonFromRequest(requestContext,
+                unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
 
         final DPCAuthCredentials dpcAuthCredentials = validateMacaroon(macaroon, uriInfo);
         final String orgId = dpcAuthCredentials.getOrganization().getId();
@@ -62,7 +68,7 @@ public abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organ
         final String method = requestContext.getMethod();
 
         // TODO Remove this when we want to turn on the IpAddress end point
-        if(resourceRequested.equals("v1/IpAddress")) {
+        if (!enableIpAddressEndpoints && resourceRequested.equals("v1/IpAddress")) {
             throw new WebApplicationException(Response.Status.FORBIDDEN);
         }
 
@@ -70,7 +76,8 @@ public abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organ
         if (!authenticated) {
             throw new WebApplicationException(dpc401handler.buildResponse(BEARER_PREFIX, realm));
         }
-        logger.info("event_type=request-received, resource_requested={}, organization_id={}, method={}", resourceRequested, orgId, method);
+        logger.info("event_type=request-received, resource_requested={}, organization_id={}, method={}",
+                resourceRequested, orgId, method);
     }
 
     private DPCAuthCredentials validateMacaroon(String macaroon, UriInfo uriInfo) {
@@ -110,9 +117,12 @@ public abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organ
         try {
             orgID = this.dao.findOrgByToken(macaroonID);
         } catch (Exception e) {
-            // The macaroon ID doesn't match, we need to determine if we're looking at a Golden Macaroon, or if the client id has been deleted
-            // Check the length of the provided Macaroons, if more than 1, it's a client token which has been removed, so fail
-            // If the length is 1 it's either a golden macaroon or an undischarged Macaroon, which will fail in the next auth phase
+            // The macaroon ID doesn't match, we need to determine if we're looking at a
+            // Golden Macaroon, or if the client id has been deleted
+            // Check the length of the provided Macaroons, if more than 1, it's a client
+            // token which has been removed, so fail
+            // If the length is 1 it's either a golden macaroon or an undischarged Macaroon,
+            // which will fail in the next auth phase
             if (macaroons.size() > 1) {
                 throw new WebApplicationException(dpc401handler.buildResponse(BEARER_PREFIX, realm));
             }

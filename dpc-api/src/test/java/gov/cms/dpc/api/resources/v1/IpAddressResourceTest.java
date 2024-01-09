@@ -39,10 +39,12 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
             .setOrganizationId(UUID.fromString(ORGANIZATION_ID));
 
     private IpAddressResourceTest() throws IOException, URISyntaxException {
-        this.fullyAuthedToken = APIAuthHelpers.jwtAuthFlow(getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY).accessToken;
+        this.fullyAuthedToken = APIAuthHelpers.jwtAuthFlow(getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID,
+                PRIVATE_KEY).accessToken;
     }
 
-    // TODO Once we turn on the IpAddress end point, remove this test and re-enable all of the others.
+    // TODO Once we turn on the IpAddress end point, remove this test and re-enable
+    // all of the others.
     @Test
     public void testForbidden() throws URISyntaxException, IOException {
         CloseableHttpClient client = HttpClients.createDefault();
@@ -65,7 +67,7 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
 
         HttpGet get = new HttpGet(uriBuilder.build());
         get.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
-        get.setHeader(HttpHeaders.AUTHORIZATION, "Bearer FAKE_AUTH_TOKEN" );
+        get.setHeader(HttpHeaders.AUTHORIZATION, "Bearer FAKE_AUTH_TOKEN");
 
         CloseableHttpResponse response = client.execute(get);
         assertEquals(HttpStatus.SC_UNAUTHORIZED, response.getStatusLine().getStatusCode());
@@ -128,8 +130,10 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
         CloseableHttpResponse response = client.execute(get);
         assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
 
-        TypeReference<CollectionResponse<IpAddressEntity>> typeRef = new TypeReference<CollectionResponse<IpAddressEntity>>() {};
-        CollectionResponse<IpAddressEntity> responseCollection = mapper.readValue(response.getEntity().getContent(), typeRef);
+        TypeReference<CollectionResponse<IpAddressEntity>> typeRef = new TypeReference<CollectionResponse<IpAddressEntity>>() {
+        };
+        CollectionResponse<IpAddressEntity> responseCollection = mapper.readValue(response.getEntity().getContent(),
+                typeRef);
         assertEquals(1, responseCollection.getCount());
 
         IpAddressEntity responseIp = responseCollection.getEntities().stream().findFirst().get();
@@ -176,7 +180,7 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
     // Force this test to run last since it's going to max out our Ips for the org
     public void testPost_tooManyIps() throws IOException, URISyntaxException {
         // We shouldn't have any rows in the table at this point, so fill up to the max
-        for(int i=1; i<=8; i++) {
+        for (int i = 1; i <= 8; i++) {
             writeIpAddress(String.format("test post %d", i), new Inet("192.168.1.1"));
         }
 
@@ -201,9 +205,9 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
 
     private IpAddressEntity writeIpAddress(String label, Inet ip) throws URISyntaxException, IOException {
         IpAddressEntity ipAddressEntity = new IpAddressEntity()
-            .setLabel(label)
-            .setOrganizationId(UUID.fromString(ORGANIZATION_ID))
-            .setIpAddress(ip);
+                .setLabel(label)
+                .setOrganizationId(UUID.fromString(ORGANIZATION_ID))
+                .setIpAddress(ip);
 
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
             String ipAddressJson = mapper.writeValueAsString(ipAddressEntity);
