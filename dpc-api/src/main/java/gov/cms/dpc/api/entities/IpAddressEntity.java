@@ -2,6 +2,7 @@ package gov.cms.dpc.api.entities;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import gov.cms.dpc.api.converters.InetDeserializer;
 import gov.cms.dpc.common.converters.jackson.OffsetDateTimeToStringConverter;
 import gov.cms.dpc.common.converters.jackson.StringToOffsetDateTimeConverter;
 import io.hypersistence.utils.hibernate.type.basic.Inet;
@@ -31,6 +32,7 @@ public class IpAddressEntity implements Serializable {
     private UUID organizationId;
 
     @Column(name = "ip_address", nullable = false, columnDefinition = "inet")
+    @JsonDeserialize(using = InetDeserializer.class)
     private Inet ipAddress;
 
     @NotNull
@@ -43,11 +45,12 @@ public class IpAddressEntity implements Serializable {
     private OffsetDateTime createdAt;
 
     public UUID getId() {return id;}
-    public void setOrganizationId(UUID organizationId) {this.organizationId = organizationId;}
+    public IpAddressEntity setId(UUID id) {this.id = id; return this;}
+    public IpAddressEntity setOrganizationId(UUID organizationId) {this.organizationId = organizationId; return this;}
     public UUID getOrganizationId() {return organizationId;}
-    public void setIpAddress(Inet ipAddress) {this.ipAddress = ipAddress;}
+    public IpAddressEntity setIpAddress(Inet ipAddress) {this.ipAddress = ipAddress; return this;}
     public Inet getIpAddress() {return ipAddress;}
-    public void setLabel(String label) {this.label = label;}
+    public IpAddressEntity setLabel(String label) {this.label = label; return this;}
     public String getLabel() {return label;}
     public OffsetDateTime getCreatedAt() {return createdAt;}
 }

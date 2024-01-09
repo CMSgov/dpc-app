@@ -566,7 +566,7 @@ DEPENDENCIES
   pg (>= 0.18, < 2.0)
   pry
   pry-nav
-  puma (>= 6.4.2)
+  puma (~> 6.4.2)
   rails-controller-testing
   railties (~> 7.0.7.1)
   rbnacl
