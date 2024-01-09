@@ -22,6 +22,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_01_05_195626) do
     t.datetime "remember_created_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "given_name"
+    t.string "family_name"
     t.string "provider", limit: 50, default: "", null: false
     t.string "uid", limit: 50, default: "", null: false
     t.index ["email"], name: "index_users_on_email", unique: true

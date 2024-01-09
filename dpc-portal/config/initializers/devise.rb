@@ -13,7 +13,7 @@ Devise.setup do |config|
                     name: :openid_connect,
                     issuer: 'https://idp.int.identitysandbox.gov/',
                     discovery: true,
-                    scope: [:openid, :email, :profile, :phone],
+                    scope: %i[openid email profile phone social_security_number],
                     response_type: :code,
                     acr_values: 'http://idmanagement.gov/ns/assurance/ial/2',
                     client_auth_method: :jwt_bearer,
@@ -21,9 +21,10 @@ Devise.setup do |config|
                       port: 443,
                       scheme: 'https',
                       host: 'idp.int.identitysandbox.gov',
-                      identifier: 'urn:gov:cms:openidconnect.profiles:sp:sso:cms:dpc',
-#                      secret: OpenSSL::PKey::RSA.new(ENV['LG_PRIVATE_KEY']),
-                      redirect_uri: 'http://localhost:3100/portal/users/auth/openid_connect/callback'}
+                      identifier: "urn:gov:cms:openidconnect.profiles:sp:sso:cms:dpc:#{ENV['ENV']}",
+                      private_key: OpenSSL::PKey::RSA.new(ENV['LG_PRIVATE_KEY'] || 1024),
+                      redirect_uri: 'http://localhost:3100/portal/users/auth/openid_connect/callback'
+                    }
                   }
   # The secret key used by Devise. Devise uses this key to generate
   # random tokens. Changing this key will render invalid all existing
