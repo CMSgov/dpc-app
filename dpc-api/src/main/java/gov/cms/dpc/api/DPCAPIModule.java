@@ -12,6 +12,7 @@ import gov.cms.dpc.api.auth.jwt.IJTICache;
 import gov.cms.dpc.api.converters.ChecksumConverterProvider;
 import gov.cms.dpc.api.converters.HttpRangeHeaderParamConverterProvider;
 import gov.cms.dpc.api.core.FileManager;
+import gov.cms.dpc.api.jdbi.IpAddressDAO;
 import gov.cms.dpc.api.jdbi.PublicKeyDAO;
 import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.api.resources.v1.*;
@@ -69,6 +70,7 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
         // DAO
         binder.bind(PublicKeyDAO.class);
         binder.bind(TokenDAO.class);
+        binder.bind(IpAddressDAO.class);
 
         // Tasks
         binder.bind(GenerateClientTokens.class);
@@ -114,6 +116,12 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
                                 this.configuration().getTokenPolicy(),
                                 resolver,
                                 cache, publicURL});
+    }
+
+    @Provides
+    public IpAddressResource provideIpAddressResource(IpAddressDAO dao) {
+        return new UnitOfWorkAwareProxyFactory(authHibernateBundle)
+            .create(IpAddressResource.class, new Class<?>[]{IpAddressDAO.class}, new Object[]{dao});
     }
 
     @Provides

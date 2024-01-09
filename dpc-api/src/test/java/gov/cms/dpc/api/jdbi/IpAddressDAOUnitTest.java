@@ -13,7 +13,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class IpAddressDAOTest extends AbstractDAOTest<IpAddressEntity> {
+class IpAddressDAOUnitTest extends AbstractDAOTest<IpAddressEntity> {
     IpAddressDAO ipAddressDAO;
 
     @BeforeEach
@@ -83,10 +83,9 @@ class IpAddressDAOTest extends AbstractDAOTest<IpAddressEntity> {
     }
 
     private IpAddressEntity createIpAddressEntity(UUID orgId, String address, String label) {
-        IpAddressEntity ip = new IpAddressEntity();
-        ip.setOrganizationId(orgId);
-        ip.setIpAddress(new Inet(address));
-        ip.setLabel(label);
-        return ip;
+        return new IpAddressEntity()
+            .setOrganizationId(orgId)
+            .setIpAddress(new Inet(address))
+            .setLabel(label);
     }
 }
