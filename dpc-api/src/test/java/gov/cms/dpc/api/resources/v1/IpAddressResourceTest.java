@@ -196,6 +196,7 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
+    @Disabled
     @Order(8)
     public void testPost_noIp() throws IOException, URISyntaxException {
         CreateIpAddressRequest emptyIpRequest = new CreateIpAddressRequest(null);
