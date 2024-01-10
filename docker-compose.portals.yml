@@ -118,7 +118,7 @@ services:
       - "./dpc-portal/coverage:/dpc-portal/coverage"
       - ./tmp/letter_opener/portal:/dpc-portal/tmp/letter_opener
 
-      # Mount API client engone
+      # Mount API client engine
       - "./engine/api_client:/dpc-portal/vendor/api_client"
     env_file:
       - ./ops/config/decrypted/local.env
