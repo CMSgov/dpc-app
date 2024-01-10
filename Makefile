@@ -136,9 +136,9 @@ down-dpc:
 down-portals: ## Shut down all services
 down-portals: down-dpc
 
-down-start-v1-portals: ## Shut down all services
-down-start-v1-portals: down-dpc
-
+down-start-v1-portals: ## Shut down test services
+down-start-v1-portals:
+	@docker-compose -p start-v1-portals -f docker-compose.yml -f docker-compose.portals.yml down
 
 # Utility commands
 # =================
