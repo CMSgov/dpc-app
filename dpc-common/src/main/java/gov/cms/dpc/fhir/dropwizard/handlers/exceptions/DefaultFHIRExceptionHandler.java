@@ -67,6 +67,15 @@ public class DefaultFHIRExceptionHandler extends AbstractFHIRExceptionHandler<Th
 
     @Override
     Response handleNonFHIRException(Throwable exception) {
+        // Log 4XX errors if they occur, since the default handler doesn't do so.
+        if (exception instanceof WebApplicationException) {
+            final Response response = ((WebApplicationException) exception).getResponse();
+            Response.Status.Family family = response.getStatusInfo().getFamily();
+            if (family.equals(Response.Status.Family.CLIENT_ERROR)) {
+                logger.info("(4xx) Client error occurred", exception);
+            }
+        }
+
         return super.toResponse(exception);
     }
 }
