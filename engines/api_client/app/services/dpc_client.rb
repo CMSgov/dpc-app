@@ -90,8 +90,8 @@ class DpcClient
   def create_ip_address(reg_org_api_id, params: {})
     post_text_request(
       "#{base_url}/IpAddress",
-      { ip_address: params[:ip_address] }.to_json,
-      { label: params[:label] },
+      { ip_address: params[:ip_address],  label: params[:label] }.to_json,
+      { },
       delegated_macaroon(reg_org_api_id)
     )
     self
