@@ -1,7 +1,6 @@
 package gov.cms.dpc.api.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import javax.validation.constraints.NotNull;
 
 public class CreateIpAddressRequest {
