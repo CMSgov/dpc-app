@@ -5,6 +5,8 @@ import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.entities.IpAddressEntity;
 import gov.cms.dpc.api.jdbi.IpAddressDAO;
 import gov.cms.dpc.api.models.CollectionResponse;
+import gov.cms.dpc.api.models.CreateIpAddressRequest;
+import io.hypersistence.utils.hibernate.type.basic.Inet;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,6 +21,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -55,18 +58,19 @@ class IpAddressResourceUnitTest {
 
     @Test
     public void testPost_happyPath() {
+        CreateIpAddressRequest createIpAddressRequest = new CreateIpAddressRequest(new Inet("192.168.1.1"));
         IpAddressEntity ipAddressEntity = new IpAddressEntity();
 
         when(ipAddressDAO.fetchIpAddresses(organizationPrincipal.getID())).thenReturn(List.of());
-        when(ipAddressDAO.persistIpAddress(ipAddressEntity)).thenReturn(ipAddressEntity);
+        when(ipAddressDAO.persistIpAddress(any())).thenReturn(ipAddressEntity);
 
-        IpAddressEntity response = ipAddressResource.submitIpAddress(organizationPrincipal, ipAddressEntity);
+        IpAddressEntity response = ipAddressResource.submitIpAddress(organizationPrincipal, createIpAddressRequest);
         assertSame(ipAddressEntity, response);
     }
 
     @Test
     public void testPost_tooManyIps() {
-        IpAddressEntity ipAddressEntity = new IpAddressEntity();
+        CreateIpAddressRequest createIpAddressRequest = new CreateIpAddressRequest(new Inet("192.168.1.1"));
 
         List<IpAddressEntity> existingIps = new ArrayList<>();
         for(int i=0; i <= 8; i++) {
@@ -76,7 +80,7 @@ class IpAddressResourceUnitTest {
         when(ipAddressDAO.fetchIpAddresses(organizationPrincipal.getID())).thenReturn(existingIps);
 
         assertThrows(WebApplicationException.class, () -> {
-            ipAddressResource.submitIpAddress(organizationPrincipal, ipAddressEntity);
+            ipAddressResource.submitIpAddress(organizationPrincipal, createIpAddressRequest);
         });
     }
 
