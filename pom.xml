@@ -408,6 +408,7 @@
                         <artifactId>maven-surefire-plugin</artifactId>
                         <configuration combine.self="override">
                             <groups>Integration</groups>
+                            <forkedProcessExitTimeoutInSeconds>600</forkedProcessExitTimeoutInSeconds>
                         </configuration>
                     </plugin>
                 </plugins>

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
 import gov.cms.dpc.api.entities.IpAddressEntity;
 import gov.cms.dpc.api.models.CollectionResponse;
+import gov.cms.dpc.api.models.CreateIpAddressRequest;
 import gov.cms.dpc.testing.APIAuthHelpers;
 import io.hypersistence.utils.hibernate.type.basic.Inet;
 import org.apache.http.HttpHeaders;
@@ -33,10 +34,14 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
     private final ObjectMapper mapper = new ObjectMapper();
     private final String fullyAuthedToken;
 
-    private static IpAddressEntity ipAddressEntity = new IpAddressEntity()
+    private static IpAddressEntity ipAddressEntityResponse = new IpAddressEntity()
             .setLabel("test label")
-            .setIpAddress(new Inet("192.168.1.1"))
-            .setOrganizationId(UUID.fromString(ORGANIZATION_ID));
+            .setIpAddress(new Inet("192.168.1.1"));
+
+    private final CreateIpAddressRequest ipRequest = new CreateIpAddressRequest(
+            new Inet("192.168.1.1"),
+            "test label"
+    );
 
     private IpAddressResourceTest() throws IOException, URISyntaxException {
         this.fullyAuthedToken = APIAuthHelpers.jwtAuthFlow(getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY).accessToken;
@@ -90,7 +95,7 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
     @Order(3)
     public void testPost_happyPath() throws IOException, URISyntaxException {
         CloseableHttpClient client = HttpClients.createDefault();
-        String ipAddressJson = mapper.writeValueAsString(ipAddressEntity);
+        String ipAddressJson = mapper.writeValueAsString(ipRequest);
         URIBuilder uriBuilder = new URIBuilder(String.format("%s/IpAddress", getBaseURL()));
 
         HttpPost post = new HttpPost(uriBuilder.build());
@@ -104,13 +109,13 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
 
         IpAddressEntity responseIp = mapper.readValue(response.getEntity().getContent(), IpAddressEntity.class);
         assertNotNull(responseIp.getId());
-        assertEquals(ipAddressEntity.getOrganizationId(), responseIp.getOrganizationId());
-        assertEquals(ipAddressEntity.getLabel(), responseIp.getLabel());
-        assertEquals(ipAddressEntity.getIpAddress(), responseIp.getIpAddress());
+        assertEquals(ORGANIZATION_ID, responseIp.getOrganizationId().toString());
+        assertEquals(ipRequest.getLabel(), responseIp.getLabel());
+        assertEquals(ipRequest.getIpAddress(), responseIp.getIpAddress());
         assertNotNull(responseIp.getCreatedAt());
 
         // Save the updated ipAddressEntity for future tests
-        this.ipAddressEntity = responseIp;
+        this.ipAddressEntityResponse = responseIp;
     }
 
     @Test
@@ -134,9 +139,9 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
 
         IpAddressEntity responseIp = responseCollection.getEntities().stream().findFirst().get();
         assertNotNull(responseIp.getId());
-        assertEquals(ipAddressEntity.getOrganizationId(), responseIp.getOrganizationId());
-        assertEquals(ipAddressEntity.getLabel(), responseIp.getLabel());
-        assertEquals(ipAddressEntity.getIpAddress(), responseIp.getIpAddress());
+        assertEquals(ipAddressEntityResponse.getOrganizationId(), responseIp.getOrganizationId());
+        assertEquals(ipAddressEntityResponse.getLabel(), responseIp.getLabel());
+        assertEquals(ipAddressEntityResponse.getIpAddress(), responseIp.getIpAddress());
         assertNotNull(responseIp.getCreatedAt());
     }
 
@@ -145,7 +150,7 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
     @Order(5)
     public void testDelete_happyPath() throws URISyntaxException, IOException {
         CloseableHttpClient client = HttpClients.createDefault();
-        URIBuilder uriBuilder = new URIBuilder(String.format("%s/IpAddress/%s", getBaseURL(), ipAddressEntity.getId()));
+        URIBuilder uriBuilder = new URIBuilder(String.format("%s/IpAddress/%s", getBaseURL(), ipAddressEntityResponse.getId()));
 
         HttpDelete delete = new HttpDelete(uriBuilder.build());
         delete.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
@@ -180,13 +185,13 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
             writeIpAddress(String.format("test post %d", i), new Inet("192.168.1.1"));
         }
 
-        IpAddressEntity ipAddressEntity = new IpAddressEntity()
-                .setLabel("should not post")
-                .setOrganizationId(UUID.fromString(ORGANIZATION_ID))
-                .setIpAddress(new Inet("192.168.1.1"));
+        CreateIpAddressRequest ipAddressRequest = new CreateIpAddressRequest(
+            new Inet("192.168.1.1"),
+            "should not post"
+        );
 
         CloseableHttpClient client = HttpClients.createDefault();
-        String ipAddressJson = mapper.writeValueAsString(ipAddressEntity);
+        String ipAddressJson = mapper.writeValueAsString(ipAddressRequest);
         URIBuilder uriBuilder = new URIBuilder(String.format("%s/IpAddress", getBaseURL()));
 
         HttpPost post = new HttpPost(uriBuilder.build());
@@ -200,13 +205,10 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
     }
 
     private IpAddressEntity writeIpAddress(String label, Inet ip) throws URISyntaxException, IOException {
-        IpAddressEntity ipAddressEntity = new IpAddressEntity()
-            .setLabel(label)
-            .setOrganizationId(UUID.fromString(ORGANIZATION_ID))
-            .setIpAddress(ip);
+        CreateIpAddressRequest ipAddressRequest = new CreateIpAddressRequest(ip, label);
 
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
-            String ipAddressJson = mapper.writeValueAsString(ipAddressEntity);
+            String ipAddressJson = mapper.writeValueAsString(ipAddressRequest);
             URIBuilder uriBuilder = new URIBuilder(String.format("%s/IpAddress", getBaseURL()));
 
             HttpPost post = new HttpPost(uriBuilder.build());
