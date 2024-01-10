@@ -66,6 +66,15 @@ public class IpAddressResource extends AbstractIpAddressResource {
     )
     @ApiResponses(@ApiResponse(code = 400, message = "Organization has too many Ip addresses."))
     public IpAddressEntity submitIpAddress(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal, @ApiParam CreateIpAddressRequest createIpAddressRequest) {
+        Inet ipAddress = new Inet(createIpAddressRequest.getIpAddress());
+        try {
+            // Converts to a Java InetAddress and verifies host.  Throws an exception if it fails.
+            ipAddress.toInetAddress();
+        } catch(Exception e) {
+            throw new WebApplicationException(String.format("Invalid ip address: %s", createIpAddressRequest.getIpAddress()), e, Response.Status.BAD_REQUEST);
+        }
+
+
         CollectionResponse currentIps = getOrganizationIpAddresses(organizationPrincipal);
 
         if(currentIps.getCount() >= MAX_IPS) {
@@ -74,7 +83,7 @@ public class IpAddressResource extends AbstractIpAddressResource {
         } else {
             IpAddressEntity ipAddressEntity = new IpAddressEntity()
                 .setOrganizationId(organizationPrincipal.getID())
-                .setIpAddress(new Inet(createIpAddressRequest.getIpAddress()))
+                .setIpAddress(ipAddress)
                 .setLabel(createIpAddressRequest.getLabel());
 
             return this.dao.persistIpAddress(ipAddressEntity);
