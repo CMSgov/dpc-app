@@ -2,12 +2,12 @@ package gov.cms.dpc.api.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.NotEmpty;
 
 public class CreateIpAddressRequest {
     private String label;
 
-    @NotNull
+    @NotEmpty
     private String ipAddress;
 
     public String getLabel() {return this.label;}
