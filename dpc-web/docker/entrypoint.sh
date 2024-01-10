@@ -16,7 +16,7 @@ if [ "$1" == "web" ]; then
   # This step is not needed, as there is no database seed data yet
 
   # Autogenerate fresh golden macaroons in local development
-  if [[ "$RAILS_ENV" == "production" ]] && [[ -z "$GOLDEN_MACAROON" ]]; then
+  if [[ "$RAILS_ENV" != "production" ]] && [[ -z "$GOLDEN_MACAROON" ]]; then
     echo "No golden macaroon found. Attempting to generate a new one..."
     export GOLDEN_MACAROON=$(curl -X POST -w '\n' ${API_ADMIN_URL}/tasks/generate-token || echo '')
 
