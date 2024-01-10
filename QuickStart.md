@@ -52,31 +52,6 @@ Set authentication_disabled for JVM set to **[true]** in the `api` service in th
 By default, the Docker containers start with minimal authentication enabled, meaning that some functionality (such as extracting the organization_id from the access token) will not work as expected and always return the same value.
 This can be overridden during startup by setting the `AUTH_DISABLED=false` environment variable.
 
-
-
-### Generate a Golden Macaroon
-You will need a macaroon for the Docker configuration. Run this command to generate one.
-`curl -X POST http://localhost:9903/tasks/generate-token`
-
-You will then need to add the **`API_METADATA URL`** variable and the **`GOLDEN_MACAROON`** variable to the `dpc_web` and `dpc_admin` services in the docker-compose.portal.yml file.
-```yaml
-dpc-web: 
-   
-  environment: 
-    ... 
-    - GOLDEN_MACAROON=newly-generated-macaroon  
-    - API_METADATA_URL=http://host.docker.internal:3002/v1
-    .. 
-  dpc_admin: 
-    ...
-    - API_METADATA_URL=${API_METADATA URL}
-    - GOLDEN_MACAROON=${ ...
-```
-
-
-
-
-
 RUN
 ====
 

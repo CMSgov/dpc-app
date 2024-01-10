@@ -265,24 +265,9 @@ db:
 ```
 ### Generating a golden macaroon
 
-You will need a macaroon for the Docker configuration. Run the command below to generate one:
-`curl -X POST http://localhost:9903/tasks/generate-token`
+Golden macaroons are automatically generated and configured upon startup for the frontend applications. To generate your own for use, run the command below:
 
-
-Also, the docker-compose.portal.yml file requires adding the **`API_METADATA URL`** variable and the **`GOLDEN_MACAROON`** variable.
-```yaml
-dpc-web: 
-  ... 
-environments: 
-  ... 
-  - GOLDEN_MACAROON: ...  
-  - API_METADATA_URL=http://host.docker.internal:3002/v1
-  .. 
-dpc_admin: 
-  ...
-  - API_METADATA_URL=${API_METADATA URL}
-  - GOLDEN_MACAROON: ...
-```
+`curl -X POST -w '\n' http://localhost:9903/tasks/generate-token`
 
 ### Manual JAR execution
 

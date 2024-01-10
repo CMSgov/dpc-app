@@ -22,6 +22,9 @@ services:
       - REDIS_URL=redis://redis
       - DATABASE_URL=postgresql://db/dpc-website_development
       - TEST_DATABASE_URL=postgresql://db/dpc-website_test
+      - API_METADATA_URL=http://api:3002/v1
+      - API_ADMIN_URL=http://api:9900
+      - GOLDEN_MACAROON=${GOLDEN_MACAROON}
       - DB_USER=postgres
       - DB_PASS=dpc-safe
       - DATABASE_CLEANER_ALLOW_REMOTE_DATABASE_URL=true
@@ -62,6 +65,7 @@ services:
       - REDIS_URL=redis://redis
       - GOLDEN_MACAROON=${GOLDEN_MACAROON}
       - API_METADATA_URL=http://api:3002/v1
+      - API_ADMIN_URL=http://api:9900
       - DATABASE_URL=postgresql://db/dpc-website_development
       - TEST_DATABASE_URL=postgresql://db/dpc-website_test
       - DB_USER=postgres
@@ -130,6 +134,7 @@ services:
       - TEST_DATABASE_URL=postgresql://db/dpc-portal_test
       - GOLDEN_MACAROON=${GOLDEN_MACAROON}
       - API_METADATA_URL=http://api:3002/v1
+      - API_ADMIN_URL=http://api:9900
       - DB_USER=postgres
       - DB_PASS=dpc-safe
       - DATABASE_CLEANER_ALLOW_REMOTE_DATABASE_URL=true
