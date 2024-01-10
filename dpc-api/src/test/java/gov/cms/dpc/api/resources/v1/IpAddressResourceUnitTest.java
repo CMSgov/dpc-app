@@ -6,7 +6,6 @@ import gov.cms.dpc.api.entities.IpAddressEntity;
 import gov.cms.dpc.api.jdbi.IpAddressDAO;
 import gov.cms.dpc.api.models.CollectionResponse;
 import gov.cms.dpc.api.models.CreateIpAddressRequest;
-import io.hypersistence.utils.hibernate.type.basic.Inet;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -58,7 +57,7 @@ class IpAddressResourceUnitTest {
 
     @Test
     public void testPost_happyPath() {
-        CreateIpAddressRequest createIpAddressRequest = new CreateIpAddressRequest(new Inet("192.168.1.1"));
+        CreateIpAddressRequest createIpAddressRequest = new CreateIpAddressRequest("192.168.1.1");
         IpAddressEntity ipAddressEntity = new IpAddressEntity();
 
         when(ipAddressDAO.fetchIpAddresses(organizationPrincipal.getID())).thenReturn(List.of());
@@ -70,7 +69,7 @@ class IpAddressResourceUnitTest {
 
     @Test
     public void testPost_tooManyIps() {
-        CreateIpAddressRequest createIpAddressRequest = new CreateIpAddressRequest(new Inet("192.168.1.1"));
+        CreateIpAddressRequest createIpAddressRequest = new CreateIpAddressRequest("192.168.1.1");
 
         List<IpAddressEntity> existingIps = new ArrayList<>();
         for(int i=0; i <= 8; i++) {

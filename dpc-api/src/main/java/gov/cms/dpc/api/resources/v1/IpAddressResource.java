@@ -11,6 +11,7 @@ import gov.cms.dpc.api.models.CreateIpAddressRequest;
 import gov.cms.dpc.api.resources.AbstractIpAddressResource;
 import io.dropwizard.auth.Auth;
 import io.dropwizard.hibernate.UnitOfWork;
+import io.hypersistence.utils.hibernate.type.basic.Inet;
 import io.swagger.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,7 +74,7 @@ public class IpAddressResource extends AbstractIpAddressResource {
         } else {
             IpAddressEntity ipAddressEntity = new IpAddressEntity()
                 .setOrganizationId(organizationPrincipal.getID())
-                .setIpAddress(createIpAddressRequest.getIpAddress())
+                .setIpAddress(new Inet(createIpAddressRequest.getIpAddress()))
                 .setLabel(createIpAddressRequest.getLabel());
 
             return this.dao.persistIpAddress(ipAddressEntity);
