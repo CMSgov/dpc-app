@@ -35,7 +35,7 @@ RUN gem install bundler --no-document && \
 RUN bundle exec bundle audit update && bundle exec bundle audit check --ignore CVE-2015-9284
 
 # Copy the code, test the app, and build the assets pipeline
-COPY /engines/api_client /vendor/api_client
+COPY /engines/api_client /dpc-portal/vendor/api_client
 COPY /dpc-portal /dpc-portal
 
 RUN rm -rf /bin/yarn
