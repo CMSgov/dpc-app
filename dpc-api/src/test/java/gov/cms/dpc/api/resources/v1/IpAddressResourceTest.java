@@ -7,7 +7,6 @@ import gov.cms.dpc.api.entities.IpAddressEntity;
 import gov.cms.dpc.api.models.CollectionResponse;
 import gov.cms.dpc.api.models.CreateIpAddressRequest;
 import gov.cms.dpc.testing.APIAuthHelpers;
-import io.hypersistence.utils.hibernate.type.basic.Inet;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -34,14 +33,9 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
     private final ObjectMapper mapper = new ObjectMapper();
     private final String fullyAuthedToken;
 
-    private static IpAddressEntity ipAddressEntityResponse = new IpAddressEntity()
-            .setLabel("test label")
-            .setIpAddress(new Inet("192.168.1.1"));
+    private static IpAddressEntity ipAddressEntityResponse = new IpAddressEntity();
 
-    private final CreateIpAddressRequest ipRequest = new CreateIpAddressRequest(
-            new Inet("192.168.1.1"),
-            "test label"
-    );
+    private final CreateIpAddressRequest ipRequest = new CreateIpAddressRequest("192.168.1.1", "test label");
 
     private IpAddressResourceTest() throws IOException, URISyntaxException {
         this.fullyAuthedToken = APIAuthHelpers.jwtAuthFlow(getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY).accessToken;
@@ -111,7 +105,7 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
         assertNotNull(responseIp.getId());
         assertEquals(ORGANIZATION_ID, responseIp.getOrganizationId().toString());
         assertEquals(ipRequest.getLabel(), responseIp.getLabel());
-        assertEquals(ipRequest.getIpAddress(), responseIp.getIpAddress());
+        assertEquals(ipRequest.getIpAddress(), responseIp.getIpAddress().getAddress());
         assertNotNull(responseIp.getCreatedAt());
 
         // Save the updated ipAddressEntity for future tests
@@ -182,13 +176,10 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
     public void testPost_tooManyIps() throws IOException, URISyntaxException {
         // We shouldn't have any rows in the table at this point, so fill up to the max
         for(int i=1; i<=8; i++) {
-            writeIpAddress(String.format("test post %d", i), new Inet("192.168.1.1"));
+            writeIpAddress(String.format("test post %d", i), "192.168.1.1");
         }
 
-        CreateIpAddressRequest ipAddressRequest = new CreateIpAddressRequest(
-            new Inet("192.168.1.1"),
-            "should not post"
-        );
+        CreateIpAddressRequest ipAddressRequest = new CreateIpAddressRequest("192.128.1.1","should not post");
 
         CloseableHttpClient client = HttpClients.createDefault();
         String ipAddressJson = mapper.writeValueAsString(ipAddressRequest);
@@ -204,7 +195,27 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
         assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatusLine().getStatusCode());
     }
 
-    private IpAddressEntity writeIpAddress(String label, Inet ip) throws URISyntaxException, IOException {
+    @Test
+    @Disabled
+    @Order(8)
+    public void testPost_noIp() throws IOException, URISyntaxException {
+        CreateIpAddressRequest emptyIpRequest = new CreateIpAddressRequest(null);
+
+        CloseableHttpClient client = HttpClients.createDefault();
+        String ipAddressJson = mapper.writeValueAsString(emptyIpRequest);
+        URIBuilder uriBuilder = new URIBuilder(String.format("%s/IpAddress", getBaseURL()));
+
+        HttpPost post = new HttpPost(uriBuilder.build());
+        post.setEntity(new StringEntity(ipAddressJson));
+        post.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
+        post.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
+        post.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + this.fullyAuthedToken);
+
+        CloseableHttpResponse response = client.execute(post);
+        assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatusLine().getStatusCode());
+    }
+
+    private IpAddressEntity writeIpAddress(String label, String ip) throws URISyntaxException, IOException {
         CreateIpAddressRequest ipAddressRequest = new CreateIpAddressRequest(ip, label);
 
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
