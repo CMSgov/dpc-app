@@ -57,5 +57,8 @@ RSpec.describe 'Organizations', type: :request do
     stub_self_returning_api_client(message: :get_public_keys,
                                    response: default_get_public_keys,
                                    api_client: client)
+    stub_self_returning_api_client(message: :get_ip_addresses,
+                                   response: default_get_ip_addresses,
+                                   api_client: client)
   end
 end

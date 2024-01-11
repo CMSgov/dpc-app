@@ -30,7 +30,7 @@ module ComponentSupport
       tokens = []
       @row_count.times do |index|
         tokens << { 'label' => "Key #{index + 1}",
-                    'id' => @guid + index.to_s,
+                    'id' => "key-id-#{index + 1}",
                     'createdAt' => @created }
       end
       tokens
@@ -40,6 +40,7 @@ module ComponentSupport
       tokens = []
       @row_count.times do |index|
         tokens << { 'label' => "IP Addr #{index + 1}",
+                    'id' => "addr-id-#{index + 1}",
                     'ip_addr' => "127.0.0.#{index + 10}",
                     'createdAt' => @created }
       end

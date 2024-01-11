@@ -7,9 +7,11 @@ import gov.cms.dpc.api.auth.annotations.Authorizer;
 import gov.cms.dpc.api.entities.IpAddressEntity;
 import gov.cms.dpc.api.jdbi.IpAddressDAO;
 import gov.cms.dpc.api.models.CollectionResponse;
+import gov.cms.dpc.api.models.CreateIpAddressRequest;
 import gov.cms.dpc.api.resources.AbstractIpAddressResource;
 import io.dropwizard.auth.Auth;
 import io.dropwizard.hibernate.UnitOfWork;
+import io.hypersistence.utils.hibernate.type.basic.Inet;
 import io.swagger.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,13 +65,27 @@ public class IpAddressResource extends AbstractIpAddressResource {
             authorizations = @Authorization(value = "access_token")
     )
     @ApiResponses(@ApiResponse(code = 400, message = "Organization has too many Ip addresses."))
-    public IpAddressEntity submitIpAddress(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal, @ApiParam IpAddressEntity ipAddressEntity) {
+    public IpAddressEntity submitIpAddress(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal, @ApiParam CreateIpAddressRequest createIpAddressRequest) {
+        Inet ipAddress = new Inet(createIpAddressRequest.getIpAddress());
+        try {
+            // Converts to a Java InetAddress and verifies host.  Throws an exception if it fails.
+            ipAddress.toInetAddress();
+        } catch(Exception e) {
+            throw new WebApplicationException(String.format("Invalid ip address: %s", createIpAddressRequest.getIpAddress()), e, Response.Status.BAD_REQUEST);
+        }
+
+
         CollectionResponse currentIps = getOrganizationIpAddresses(organizationPrincipal);
 
         if(currentIps.getCount() >= MAX_IPS) {
             logger.debug(String.format("Cannot add Ip for org: %s.  They are already at the max of %d.", organizationPrincipal.getID(), MAX_IPS));
             throw new WebApplicationException(String.format("Max Ips for organization reached: %d", MAX_IPS), Response.Status.BAD_REQUEST);
         } else {
+            IpAddressEntity ipAddressEntity = new IpAddressEntity()
+                .setOrganizationId(organizationPrincipal.getID())
+                .setIpAddress(ipAddress)
+                .setLabel(createIpAddressRequest.getLabel());
+
             return this.dao.persistIpAddress(ipAddressEntity);
         }
     }
