@@ -54,13 +54,13 @@ RSpec.describe Core::Form::TextInputComponent, type: :component do
     end
 
     context 'has max length' do
-      let(:input_options) { { max_length: 25 } }
+      let(:input_options) { { maxlength: 25 } }
       let(:component) { described_class.new(label: 'Some Label', attribute: 'attr', input_options: input_options) }
       let(:expected_html) do
         <<~HTML
           <div class="margin-bottom-4">
             <label class="usa-label" for="attr">Some Label</label>
-            <input type="text" name="attr" id="attr" value="" class="usa-input" max_length="25" />
+            <input type="text" name="attr" id="attr" value="" class="usa-input" maxlength="25" />
            </div>
         HTML
       end

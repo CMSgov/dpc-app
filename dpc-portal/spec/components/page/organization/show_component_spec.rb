@@ -42,7 +42,7 @@ RSpec.describe Page::Organization::ShowComponent, type: :component do
       end
       it 'Should have Add IP button' do
         button = <<~BUTTON
-          <form class="button_to" method="get" action="/portal/">
+          <form class="button_to" method="get" action="/portal/organizations/#{org.path_id}/ip_addresses/new">
             <button class="usa-button" type="submit">Add IP</button>
           </form>
         BUTTON
@@ -140,13 +140,13 @@ RSpec.describe Page::Organization::ShowComponent, type: :component do
         row1 = <<~HTML
           <tr>
             <td data-sort-value="Key 1">Key 1</td>
-            <td data-sort-value="99790463-de1f-4f7f-a529-3e4f59dc7130">99790463-de1f-4f7f-a529-3e4f59dc7130</td>
+            <td data-sort-value="key-id-1">key-id-1</td>
             <td data-sort-value="12/15/2023 at  5:01PM UTC">12/15/2023 at  5:01PM UTC</td>
         HTML
         row2 = <<~HTML
           <tr>
             <td data-sort-value="Key 2">Key 2</td>
-            <td data-sort-value="99790463-de1f-4f7f-a529-3e4f59dc7131">99790463-de1f-4f7f-a529-3e4f59dc7131</td>
+            <td data-sort-value="key-id-2">key-id-2</td>
             <td data-sort-value="12/15/2023 at  5:01PM UTC">12/15/2023 at  5:01PM UTC</td>
         HTML
         is_expected.to include(normalize_space(row1))
@@ -154,13 +154,13 @@ RSpec.describe Page::Organization::ShowComponent, type: :component do
       end
       it 'should have delete key form' do
         form1 = <<~HTML
-          <form class="button_to" method="post" action="/portal/organizations/99790463-de1f-4f7f-a529-3e4f59dc7131/public_keys/99790463-de1f-4f7f-a529-3e4f59dc7130">
+          <form class="button_to" method="post" action="/portal/organizations/99790463-de1f-4f7f-a529-3e4f59dc7131/public_keys/key-id-1">
             <input type="hidden" name="_method" value="delete" autocomplete="off" />
             <button class="usa-button" type="submit">Yes, revoke key</button>
           </form>
         HTML
         form2 = <<~HTML
-          <form class="button_to" method="post" action="/portal/organizations/99790463-de1f-4f7f-a529-3e4f59dc7131/public_keys/99790463-de1f-4f7f-a529-3e4f59dc7131">
+          <form class="button_to" method="post" action="/portal/organizations/99790463-de1f-4f7f-a529-3e4f59dc7131/public_keys/key-id-2">
             <input type="hidden" name="_method" value="delete" autocomplete="off" />
             <button class="usa-button" type="submit">Yes, revoke key</button>
           </form>
@@ -190,23 +190,36 @@ RSpec.describe Page::Organization::ShowComponent, type: :component do
         is_expected.to include(normalize_space(header))
       end
       it 'should have ip_addr row' do
-        row = <<~HTML
-          <tbody>
-            <tr>
+        row1 = <<~HTML
+          <tr>
               <td data-sort-value="IP Addr 1">IP Addr 1</td>
               <td data-sort-value="127.0.0.10">127.0.0.10</td>
               <td data-sort-value="12/15/2023 at  5:01PM UTC">12/15/2023 at  5:01PM UTC</td>
-              <td data-sort-value="X">X</td>
-            </tr>
-            <tr>
-              <td data-sort-value="IP Addr 2">IP Addr 2</td>
-              <td data-sort-value="127.0.0.11">127.0.0.11</td>
-              <td data-sort-value="12/15/2023 at  5:01PM UTC">12/15/2023 at  5:01PM UTC</td>
-              <td data-sort-value="X">X</td>
-            </tr>
-          </tbody>
         HTML
-        is_expected.to include(normalize_space(row))
+        row2 = <<~HTML
+          <tr>
+            <td data-sort-value="IP Addr 2">IP Addr 2</td>
+            <td data-sort-value="127.0.0.11">127.0.0.11</td>
+            <td data-sort-value="12/15/2023 at  5:01PM UTC">12/15/2023 at  5:01PM UTC</td>
+        HTML
+        is_expected.to include(normalize_space(row1))
+        is_expected.to include(normalize_space(row2))
+      end
+      it 'should have delete address form' do
+        form1 = <<~HTML
+          <form class="button_to" method="post" action="/portal/organizations/99790463-de1f-4f7f-a529-3e4f59dc7131/ip_addresses/addr-id-1">
+            <input type="hidden" name="_method" value="delete" autocomplete="off" />
+            <button class="usa-button" type="submit">Yes, revoke address</button>
+          </form>
+        HTML
+        form2 = <<~HTML
+          <form class="button_to" method="post" action="/portal/organizations/99790463-de1f-4f7f-a529-3e4f59dc7131/ip_addresses/addr-id-2">
+            <input type="hidden" name="_method" value="delete" autocomplete="off" />
+            <button class="usa-button" type="submit">Yes, revoke address</button>
+          </form>
+        HTML
+        is_expected.to include(normalize_space(form1))
+        is_expected.to include(normalize_space(form2))
       end
     end
   end

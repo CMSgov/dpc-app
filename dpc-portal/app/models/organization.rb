@@ -14,7 +14,7 @@ class Organization
 
     @name = data.name
     @npi = data.identifier.select { |id| id.system == 'http://hl7.org/fhir/sid/us-npi' }.first&.value
-    @keys = @tokens = nil
+    @keys = @tokens = @ips = nil
   end
 
   def public_keys
@@ -34,7 +34,11 @@ class Organization
   end
 
   def public_ips
-    [{ 'label' => 'My IP', 'ip_addr' => '91.142.87.5', 'createdAt' => '2021-04-08T12:03:44.823+00:00' }]
+    unless @ips
+      ipm = IpAddressManager.new(api_id)
+      @ips = ipm.ip_addresses
+    end
+    @ips
   end
 end
 

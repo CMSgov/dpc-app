@@ -19,6 +19,7 @@ Rails.application.routes.draw do
   resources :organizations, only: [:index, :show] do
     resources :client_tokens, only: [:new, :create, :destroy]
     resources :public_keys, only: [:new, :create, :destroy]
+    resources :ip_addresses, only: [:new, :create, :destroy]
   end
 
   match '/download_snippet', to: 'public_keys#download_snippet', as: 'download_snippet', via: :post
