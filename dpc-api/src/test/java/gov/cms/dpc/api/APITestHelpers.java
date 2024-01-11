@@ -181,7 +181,7 @@ public class APITestHelpers {
         return builder.build();
     }
 
-    static <C extends io.dropwizard.Configuration> void setupApplication(DropwizardTestSupport<C> application) throws
+    static <C extends io.dropwizard.core.Configuration> void setupApplication(DropwizardTestSupport<C> application) throws
             Exception {
         ConfigFactory.invalidateCaches();
         // Truncate attribution database
@@ -207,7 +207,7 @@ public class APITestHelpers {
         }
     }
 
-    static <C extends io.dropwizard.Configuration> void checkHealth(DropwizardTestSupport<C> application) throws
+    static <C extends io.dropwizard.core.Configuration> void checkHealth(DropwizardTestSupport<C> application) throws
             IOException {
         // URI of the API Service Healthcheck
         final String healthURI = String.format("http://localhost:%s/healthcheck", application.getAdminPort());
