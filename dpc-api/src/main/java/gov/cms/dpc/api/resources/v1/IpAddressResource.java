@@ -11,6 +11,7 @@ import gov.cms.dpc.api.models.CreateIpAddressRequest;
 import gov.cms.dpc.api.resources.AbstractIpAddressResource;
 import io.dropwizard.auth.Auth;
 import io.dropwizard.hibernate.UnitOfWork;
+import io.hypersistence.utils.hibernate.type.basic.Inet;
 import io.swagger.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,6 +66,15 @@ public class IpAddressResource extends AbstractIpAddressResource {
     )
     @ApiResponses(@ApiResponse(code = 400, message = "Organization has too many Ip addresses."))
     public IpAddressEntity submitIpAddress(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal, @ApiParam CreateIpAddressRequest createIpAddressRequest) {
+        Inet ipAddress = new Inet(createIpAddressRequest.getIpAddress());
+        try {
+            // Converts to a Java InetAddress and verifies host.  Throws an exception if it fails.
+            ipAddress.toInetAddress();
+        } catch(Exception e) {
+            throw new WebApplicationException(String.format("Invalid ip address: %s", createIpAddressRequest.getIpAddress()), e, Response.Status.BAD_REQUEST);
+        }
+
+
         CollectionResponse currentIps = getOrganizationIpAddresses(organizationPrincipal);
 
         if(currentIps.getCount() >= MAX_IPS) {
@@ -73,7 +83,7 @@ public class IpAddressResource extends AbstractIpAddressResource {
         } else {
             IpAddressEntity ipAddressEntity = new IpAddressEntity()
                 .setOrganizationId(organizationPrincipal.getID())
-                .setIpAddress(createIpAddressRequest.getIpAddress())
+                .setIpAddress(ipAddress)
                 .setLabel(createIpAddressRequest.getLabel());
 
             return this.dao.persistIpAddress(ipAddressEntity);
