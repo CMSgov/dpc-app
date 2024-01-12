@@ -1,6 +1,5 @@
 package gov.cms.dpc.consent;
 
-import ca.mestevens.java.configuration.bundle.TypesafeConfigurationBundle;
 import com.codahale.metrics.jersey2.InstrumentedResourceMethodApplicationListener;
 import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.common.hibernate.consent.DPCConsentHibernateBundle;
@@ -15,6 +14,7 @@ import io.dropwizard.migrations.MigrationsBundle;
 import io.dropwizard.core.setup.Bootstrap;
 import io.dropwizard.core.setup.Environment;
 import liquibase.exception.DatabaseException;
+import no.digipost.dropwizard.TypeSafeConfiguredBundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.vyarus.dropwizard.guice.GuiceBundle;
@@ -48,7 +48,7 @@ public class DPCConsentService extends Application<DPCConsentConfiguration> {
 
         bootstrap.addBundle(hibernateBundle);
         bootstrap.addBundle(guiceBundle);
-        bootstrap.addBundle(new TypesafeConfigurationBundle("dpc.consent"));
+        bootstrap.addBundle(new TypeSafeConfiguredBundle<>());
         bootstrap.addBundle(new MigrationsBundle<>() {
             @Override
             public PooledDataSourceFactory getDataSourceFactory(DPCConsentConfiguration configuration) {
