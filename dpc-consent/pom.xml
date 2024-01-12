@@ -44,8 +44,8 @@
             <artifactId>dropwizard-guicey</artifactId>
         </dependency>
         <dependency>
-            <groupId>${typesafe.config.groupID}</groupId>
-            <artifactId>typesafe-dropwizard-configuration</artifactId>
+            <groupId>no.digipost</groupId>
+            <artifactId>typesafe-config-bundle</artifactId>
         </dependency>
         <dependency>
             <groupId>com.google.inject</groupId>
@@ -110,7 +110,7 @@
             <groupId>org.glassfish.jersey.test-framework.providers</groupId>
             <artifactId>jersey-test-framework-provider-grizzly2</artifactId>
             <!-- Ideally, this should track the version used in Dropwizard-->
-            <version>3.1.5</version>
+            <version>2.39.1</version>
             <scope>test</scope>
             <exclusions>
                 <exclusion>

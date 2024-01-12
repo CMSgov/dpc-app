@@ -54,8 +54,8 @@
             <artifactId>dropwizard-guicey</artifactId>
         </dependency>
         <dependency>
-            <groupId>${typesafe.config.groupID}</groupId>
-            <artifactId>typesafe-dropwizard-configuration</artifactId>
+            <groupId>no.digipost</groupId>
+            <artifactId>typesafe-config-bundle</artifactId>
         </dependency>
         <dependency>
             <groupId>com.google.inject</groupId>
