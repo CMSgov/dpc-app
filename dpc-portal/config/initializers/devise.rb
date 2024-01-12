@@ -9,6 +9,12 @@
 # Use this hook to configure devise mailer, warden hooks and so forth.
 # Many of these configuration options can be set straight in your model.
 Devise.setup do |config|
+  begin
+    private_key = OpenSSL::PKey::RSA.new(ENV['LG_PRIVATE_KEY'])
+  rescue TypeError, OpenSSL::PKey::RSAError => e
+    Rails.logger.error("Unable to create private key for omniauth: #{e}")
+    private_key = OpenSSL::PKey::RSA.new(1024)
+  end
   config.omniauth :openid_connect, {
                     name: :openid_connect,
                     issuer: 'https://idp.int.identitysandbox.gov/',
@@ -22,7 +28,7 @@ Devise.setup do |config|
                       scheme: 'https',
                       host: 'idp.int.identitysandbox.gov',
                       identifier: "urn:gov:cms:openidconnect.profiles:sp:sso:cms:dpc:#{ENV['ENV']}",
-                      private_key: OpenSSL::PKey::RSA.new(ENV['LG_PRIVATE_KEY'] || 1024),
+                      private_key: private_key,
                       redirect_uri: 'http://localhost:3100/portal/users/auth/openid_connect/callback'
                     }
                   }

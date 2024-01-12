@@ -13,6 +13,12 @@ class LoginDotGovController < Devise::OmniauthCallbacksController
   end
 
   def failure
-    logger.warn 'User decided not to continue logging in'
+    if params[:code]
+      @message = 'Something went wrong.'
+      logger.error 'Login.gov Configuration error'
+    else
+      @message = 'You have decided not to authenticate via login.gov.'
+      logger.warn 'User decided not to continue logging in'
+    end
   end
 end
