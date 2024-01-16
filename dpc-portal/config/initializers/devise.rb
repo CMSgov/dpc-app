@@ -21,7 +21,7 @@ Devise.setup do |config|
          when 'prod'
            'https://dpc.cms.gov'
          else
-           "https://#{ENV['ENV']}.dpc.cms.gov}"
+           "https://#{ENV['ENV']}.dpc.cms.gov"
          end
   config.omniauth :openid_connect, {
                     name: :openid_connect,
