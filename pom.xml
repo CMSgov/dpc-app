@@ -39,7 +39,6 @@
         <slf4j.version>2.0.11</slf4j.version>
         <!--Custom group IDs for pulling dependencies from JitPack-->
         <jitpack.groupID>com.github.nickrobison-usds</jitpack.groupID>
-        <typesafe.config.groupID>${jitpack.groupID}</typesafe.config.groupID>
         <hapi.fhir.groupID>ca.uhn.hapi.fhir</hapi.fhir.groupID>
         <hapi.fhir.version>4.2.0</hapi.fhir.version>
         <pgsql.version>42.6.0</pgsql.version>
