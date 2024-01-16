@@ -33,11 +33,8 @@ gem 'lookbook', '>= 2.1.1' # install lookbook so it can be deployed in lower env
 gem 'luhnacy', '~> 0.2.1'
 gem 'macaroons'
 gem 'newrelic_rpm', '~> 8.10'
-gem 'oauth2', '= 1.4.11'
-gem 'octokit' # can be removed once we move past github omniauth
-gem 'omniauth-github', '~> 1.4.0'
-gem 'omniauth-oktaoauth', '~> 0.1.6'
-gem 'omniauth-rails_csrf_protection', '~> 0.1.2'
+gem 'omniauth_openid_connect'
+gem 'omniauth-rails_csrf_protection'
 gem 'pg', '>= 0.18', '< 2.0'
 gem 'puma', '~> 6.4.2'
 gem 'railties', '~> 7.0.7.1'

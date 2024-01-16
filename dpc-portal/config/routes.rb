@@ -5,7 +5,10 @@
 # and config.ru via config.relative_url_root.
 #
 Rails.application.routes.draw do
-  devise_for :users
+  devise_for :users, controllers: { omniauth_callbacks: 'login_dot_gov' }
+  devise_scope :user do
+    get '/users/auth/failure', to: 'login_dot_gov#failure', as: 'login_dot_gov_failure'
+  end
 
   # Defines the root path route ("/")
   root 'main#welcome'
