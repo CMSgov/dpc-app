@@ -224,6 +224,9 @@ public class JobBatchProcessor {
     private boolean isOptedOut(Optional<List<ConsentResult>> consentResultsOptional) {
         if (consentResultsOptional.isPresent()) {
             final List<ConsentResult> consentResults = consentResultsOptional.get();
+            if (consentResults.isEmpty()) {
+                return false;
+            }
             final ConsentResult latestConsent = Collections.max(consentResults, Comparator.comparing(consent -> consent.getConsentDate()));
             final boolean isActive = latestConsent.isActive();
             final boolean isOptOut = ConsentResult.PolicyType.OPT_OUT.equals(latestConsent.getPolicyType());
@@ -231,7 +234,7 @@ public class JobBatchProcessor {
             return isActive && isOptOut && !isFutureConsent;
         }
         // This should never execute. Log an error.
-        logger.error("Consent result is unexpectedly empty.");
+        logger.error("Consent result is unexpectedly null.");
         return true;
     }
 
