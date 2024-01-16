@@ -224,14 +224,17 @@ public class JobBatchProcessor {
     private boolean isOptedOut(Optional<List<ConsentResult>> consentResultsOptional) {
         if (consentResultsOptional.isPresent()) {
             final List<ConsentResult> consentResults = consentResultsOptional.get();
-            long optOutCount = consentResults.stream().filter(consentResult -> {
-                final boolean isActive = consentResult.isActive();
-                final boolean isOptOut = ConsentResult.PolicyType.OPT_OUT.equals(consentResult.getPolicyType());
-                final boolean isFutureConsent = consentResult.getConsentDate().after(new Date());
-                return isActive && isOptOut && !isFutureConsent;
-            }).count();
-            return optOutCount > 0;
+            if (consentResults.isEmpty()) {
+                return false;
+            }
+            final ConsentResult latestConsent = Collections.max(consentResults, Comparator.comparing(consent -> consent.getConsentDate()));
+            final boolean isActive = latestConsent.isActive();
+            final boolean isOptOut = ConsentResult.PolicyType.OPT_OUT.equals(latestConsent.getPolicyType());
+            final boolean isFutureConsent = latestConsent.getConsentDate().after(new Date());
+            return isActive && isOptOut && !isFutureConsent;
         }
+        // This should never execute. Log an error.
+        logger.error("Consent result is unexpectedly null.");
         return true;
     }
 
