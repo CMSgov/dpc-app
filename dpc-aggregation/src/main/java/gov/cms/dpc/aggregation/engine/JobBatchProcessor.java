@@ -17,6 +17,7 @@ import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
+import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
@@ -28,6 +29,8 @@ import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+
+import static gov.cms.dpc.fhir.FHIRExtractors.getPatientMBIs;
 
 public class JobBatchProcessor {
     private static final Logger logger = LoggerFactory.getLogger(JobBatchProcessor.class);
@@ -238,5 +241,21 @@ public class JobBatchProcessor {
     private boolean passesLookBack(List<LookBackAnswer> answers) {
         return answers.stream()
                 .anyMatch(a -> a.matchDateCriteria() && (a.orgNPIMatchAnyEobNPIs() || a.practitionerNPIMatchAnyEobNPIs()));
+    }
+
+    /**
+     * Takes a list of resources, finds all of the {@link Patient}s and returns a list of their valid
+     * MBIs.  If there is more than one {@link Patient} all of their MBIs will be returned, and if there are no
+     * {@link Patient}s an empty list will be returned.
+     * @param resources A {@link Flowable} of FHIR {@link Resource}s
+     * @return A {@link List} of MBIs
+     */
+    private List<String> getMBIs(Flowable<Resource> resources) {
+        return resources
+                .filter(r -> DPCResourceType.Patient.getPath().equals(r.getResourceType().getPath()))
+                .map(r -> (Patient)r)
+                .flatMap(p -> Flowable.fromIterable(getPatientMBIs(p)))
+                .toList()
+                .blockingGet();
     }
 }
