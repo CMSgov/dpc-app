@@ -10,7 +10,7 @@
 # Many of these configuration options can be set straight in your model.
 Devise.setup do |config|
   begin
-    private_key = OpenSSL::PKey::RSA.new(ENV['LG_PRIVATE_KEY'])
+    private_key = OpenSSL::PKey::RSA.new(ENV['LOGIN_GOV_PRIVATE_KEY'])
   rescue TypeError, OpenSSL::PKey::RSAError => e
     Rails.logger.error("Unable to create private key for omniauth: #{e}")
     private_key = OpenSSL::PKey::RSA.new(1024)
