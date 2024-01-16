@@ -15,6 +15,14 @@ Devise.setup do |config|
     Rails.logger.error("Unable to create private key for omniauth: #{e}")
     private_key = OpenSSL::PKey::RSA.new(1024)
   end
+  host = case ENV['ENV']
+         when 'local'
+           'http://localhost:3100'
+         when 'prod'
+           'https://dpc.cms.gov'
+         else
+           "https://#{ENV['ENV']}.dpc.cms.gov}"
+         end
   config.omniauth :openid_connect, {
                     name: :openid_connect,
                     issuer: 'https://idp.int.identitysandbox.gov/',
@@ -29,7 +37,7 @@ Devise.setup do |config|
                       host: 'idp.int.identitysandbox.gov',
                       identifier: "urn:gov:cms:openidconnect.profiles:sp:sso:cms:dpc:#{ENV['ENV']}",
                       private_key: private_key,
-                      redirect_uri: 'http://localhost:3100/portal/users/auth/openid_connect/callback'
+                      redirect_uri: "#{host}/portal/users/auth/openid_connect/callback"
                     }
                   }
   # The secret key used by Devise. Devise uses this key to generate
