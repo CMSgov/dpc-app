@@ -43,7 +43,7 @@ class JobBatchProcessorUnitTest {
      */
 
     @Test
-    public void testGetMBIs_oneResource() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+    public void testGetMBIs_onePatient() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         Identifier identifier = new Identifier();
         identifier.setSystem(DPCIdentifierSystem.MBI.getSystem());
         identifier.setValue("4S41C00AA00");
@@ -54,14 +54,19 @@ class JobBatchProcessorUnitTest {
         Method getMBIs = JobBatchProcessor.class.getDeclaredMethod("getMBIs", Flowable.class);
         getMBIs.setAccessible(true);
 
-        List<String> mbis = (List<String>) getMBIs.invoke(jobBatchProcessor, Flowable.just(patient));
+        List<String> mbis = (List<String>) getMBIs.invoke(jobBatchProcessor, Flowable.just(
+                patient,
+                new ExplanationOfBenefit(),
+                new ExplanationOfBenefit(),
+                new Coverage()
+        ));
 
         assertEquals(1, mbis.size());
         assertEquals(identifier.getValue(), mbis.get(0));
     }
 
     @Test
-    public void testGetMBIs_manyResources() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+    public void testGetMBIs_manyPatients() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         Identifier mbi1 = new Identifier();
         mbi1.setSystem(DPCIdentifierSystem.MBI.getSystem());
         mbi1.setValue("4S41C00AA00");
@@ -81,16 +86,41 @@ class JobBatchProcessorUnitTest {
         Patient patient = new Patient();
         patient.setIdentifier(List.of(mbi1, mbi2, beneId, badMbi));
 
-        ExplanationOfBenefit eob = new ExplanationOfBenefit();
-        Coverage coverage = new Coverage();
-
         Method getMBIs = JobBatchProcessor.class.getDeclaredMethod("getMBIs", Flowable.class);
         getMBIs.setAccessible(true);
 
-        List<String> mbis = (List<String>) getMBIs.invoke(jobBatchProcessor, Flowable.just(patient, eob, coverage));
+        List<String> mbis = (List<String>) getMBIs.invoke(jobBatchProcessor, Flowable.just(
+                patient,
+                new ExplanationOfBenefit(),
+                new Coverage())
+        );
 
         assertEquals(2, mbis.size());
         assertTrue(mbis.contains(mbi1.getValue()));
         assertTrue(mbis.contains(mbi2.getValue()));
+    }
+
+    @Test
+    public void testGetMBIs_noResources() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        Method getMBIs = JobBatchProcessor.class.getDeclaredMethod("getMBIs", Flowable.class);
+        getMBIs.setAccessible(true);
+
+        List<String> mbis = (List<String>) getMBIs.invoke(jobBatchProcessor, Flowable.empty());
+
+        assertEquals(0, mbis.size());
+    }
+
+    @Test
+    public void testGetMBIs_noPatients() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        Method getMBIs = JobBatchProcessor.class.getDeclaredMethod("getMBIs", Flowable.class);
+        getMBIs.setAccessible(true);
+
+        List<String> mbis = (List<String>) getMBIs.invoke(jobBatchProcessor, Flowable.just(
+                new ExplanationOfBenefit(),
+                new Coverage(),
+                new ExplanationOfBenefit())
+        );
+
+        assertEquals(0, mbis.size());
     }
 }
