@@ -27,7 +27,6 @@ public abstract class AbstractDAOTest<E> {
     protected DAOTestExtension db;
 
     protected AbstractDAOTest() {
-//        TODO: dropwizard - class file for org.junit.rules.TestRule not found
         postgreSql.start();
 
         db = DAOTestExtension.newBuilder()

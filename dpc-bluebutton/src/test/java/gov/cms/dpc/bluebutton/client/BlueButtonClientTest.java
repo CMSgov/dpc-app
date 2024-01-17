@@ -42,7 +42,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-// TODO: dropwizard - Channel handler removed before valid response has been received
+// TODO: dropwizard - Channel handler removed before valid response has been received (typesafe config issue?)
 @Disabled
 @ExtendWith(BufferedLoggerHandler.class)
 class BlueButtonClientTest {
