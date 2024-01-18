@@ -21,7 +21,6 @@ import static org.mockito.Mockito.when;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @IntegrationTest
-@Disabled
 class ConsentCommandsTest {
 
     private final PrintStream originalOut = System.out;

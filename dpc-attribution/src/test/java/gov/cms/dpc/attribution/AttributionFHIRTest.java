@@ -35,7 +35,6 @@ import static gov.cms.dpc.attribution.SharedMethods.submitAttributionBundle;
 import static gov.cms.dpc.common.utils.SeedProcessor.createBaseAttributionGroup;
 import static org.junit.jupiter.api.Assertions.*;
 
-@Disabled
 @ExtendWith(BufferedLoggerHandler.class)
 @IntegrationTest
 class AttributionFHIRTest {
