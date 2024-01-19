@@ -3,6 +3,8 @@ package gov.cms.dpc.aggregation;
 import ca.mestevens.java.configuration.bundle.TypesafeConfigurationBundle;
 import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.bluebutton.BlueButtonClientModule;
+import gov.cms.dpc.bluebutton.client.BlueButtonClient;
+import gov.cms.dpc.bluebutton.health.BlueButtonHealthCheck;
 import gov.cms.dpc.common.hibernate.attribution.DPCHibernateBundle;
 import gov.cms.dpc.common.hibernate.attribution.DPCHibernateModule;
 import gov.cms.dpc.common.hibernate.queue.DPCQueueHibernateBundle;
@@ -16,10 +18,14 @@ import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import ru.vyarus.dropwizard.guice.GuiceBundle;
 
+import javax.inject.Inject;
+
 public class DPCAggregationService extends Application<DPCAggregationConfiguration> {
 
     private final DPCQueueHibernateBundle<DPCAggregationConfiguration> queueHibernateBundle = new DPCQueueHibernateBundle<>();
     private final DPCHibernateBundle<DPCAggregationConfiguration> hibernateBundle = new DPCHibernateBundle<>();
+
+    private BlueButtonClient bbc;
 
     public static void main(final String[] args) throws Exception {
         new DPCAggregationService().run(args);
@@ -62,8 +68,16 @@ public class DPCAggregationService extends Application<DPCAggregationConfigurati
         });
     }
 
+    @Inject
+    private void putBbc(BlueButtonClient bbc) {
+        this.bbc = bbc;
+    }
+
+
+
     @Override
     public void run(DPCAggregationConfiguration configuration, Environment environment) {
         EnvironmentParser.getEnvironment("Aggregation");
+        environment.healthChecks().register("blue-button-client", new BlueButtonHealthCheck(bbc));
     }
 }
