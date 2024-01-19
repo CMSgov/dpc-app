@@ -448,7 +448,6 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
                 .useHttpGet()
                 .withAdditionalHeader("X-Provenance", generateProvenance(ORGANIZATION_ID, practitioner.getId()));
 
-
         InternalErrorException exception = assertThrows(InternalErrorException.class, getEverythingOperation::execute, "Expected Internal server error when retrieving opted out patient.");
         assertTrue(exception.getResponseBody().contains("\"text\":\"Data not available for opted out patient\""), "Incorrect or missing operation outcome in response body.");
     }
@@ -485,6 +484,33 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
 
         // Current MBI
         assertEquals("9V99EU8XY91", FHIRExtractors.getPatientMBI(patientResource));
+    }
+
+    @Test
+    @Order(10)
+    void testPatientEverythingForOptedOutPatientOnMultipleMbis() throws IOException, URISyntaxException, GeneralSecurityException {
+        IGenericClient client = generateClient(ORGANIZATION_NPI, "patient-everything-key-5");
+        APITestHelpers.setupPractitionerTest(client, parser);
+
+        String mbi = MockBlueButtonClient.TEST_PATIENT_MBIS.get(6);
+        String historicMbi = MockBlueButtonClient.TEST_PATIENT_MBIS.get(7);
+        Patient patient = fetchPatient(client, mbi);
+        Practitioner practitioner = fetchPractitionerByNPI(client);
+        final String patientId = FHIRExtractors.getEntityUUID(patient.getId()).toString();
+
+        optOutPatient(historicMbi);
+
+        IOperationUntypedWithInput<Bundle> getEverythingOperation = client
+                .operation()
+                .onInstance(new IdType("Patient", patientId))
+                .named("$everything")
+                .withNoParameters(Parameters.class)
+                .returnResourceType(Bundle.class)
+                .useHttpGet()
+                .withAdditionalHeader("X-Provenance", generateProvenance(ORGANIZATION_ID, practitioner.getId()));
+
+        InternalErrorException exception = assertThrows(InternalErrorException.class, getEverythingOperation::execute, "Expected Internal server error when retrieving opted out patient.");
+        assertTrue(exception.getResponseBody().contains("\"text\":\"Data not available for opted out patient\""), "Incorrect or missing operation outcome in response body.");
     }
 
     @Test

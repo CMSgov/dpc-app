@@ -29,6 +29,9 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static gov.cms.dpc.fhir.DPCIdentifierSystem.HICN;
+import static gov.cms.dpc.fhir.DPCIdentifierSystem.MBI;
+
 @Path("v1/Consent")
 public class ConsentResource {
 
@@ -88,6 +91,12 @@ public class ConsentResource {
                 entities.addAll(getEntitiesByPatient(patientIdentifier));
             }
 
+            // If no consent records were found, create a default opt in for the first MBI sent to us
+            if(entities.isEmpty()) {
+                Identifier firstIdentifier = FHIRExtractors.parseIDFromQueryParam(Splitter.on(',').split(patientId.get()).iterator().next());
+                entities = List.of(ConsentEntity.defaultConsentEntity(Optional.empty(), extractHicn(firstIdentifier), extractMbi(firstIdentifier)));
+            }
+
         } else {
 
             throw new WebApplicationException("Must have some form of Consent Resource ID or Patient ID", Response.Status.BAD_REQUEST);
@@ -136,31 +145,37 @@ public class ConsentResource {
     }
 
     private List<ConsentEntity> getEntitiesByPatient(Identifier patientIdentifier) {
-        List<ConsentEntity> entities;
-        Optional<String> hicnValue = Optional.empty();
-        Optional<String> mbiValue = Optional.empty();
         String field;
 
         // we have been asked to search for a patient id defined by one among two (soon three!) coding systems
         // we need to determine which database field that system's value is stored in
         switch (DPCIdentifierSystem.fromString(patientIdentifier.getSystem())) {
             case MBI:
-                mbiValue = Optional.of(patientIdentifier.getValue());
                 field = "mbi";
                 break;
             case HICN:
-                hicnValue = Optional.of(patientIdentifier.getValue());
                 field = "hicn";
                 break;
             default:
                 throw new WebApplicationException("Unknown Patient ID code system", Response.Status.BAD_REQUEST);
         }
 
-        entities = this.dao.findBy(field, patientIdentifier.getValue());
+        return this.dao.findBy(field, patientIdentifier.getValue());
+    }
 
-        if (entities.isEmpty()) {
-            entities = List.of(ConsentEntity.defaultConsentEntity(Optional.empty(), hicnValue, mbiValue));
+    private Optional<String> extractMbi(Identifier identifier) {
+        if(DPCIdentifierSystem.fromString(identifier.getSystem()).equals(MBI))  {
+            return Optional.of(identifier.getValue());
+        } else {
+            return Optional.empty();
         }
-        return entities;
+    }
+
+    private Optional<String> extractHicn(Identifier identifier) {
+        if(DPCIdentifierSystem.fromString(identifier.getSystem()).equals(HICN))  {
+            return Optional.of(identifier.getValue());
+        } else {
+            return Optional.empty();
+        }
     }
 }
