@@ -262,6 +262,17 @@ class PractitionerResourceTest extends AbstractAttributionTest {
         practitionersToCleanUp.add(pract);
 
         assertNotNull(pract, "Should be created");
+        Map<String, List<String>> searchParams = new HashMap<>();
+        searchParams.put("organization", Collections.singletonList(DEFAULT_ORG_ID));
+        final Bundle providers = client
+                .search()
+                .forResource(Practitioner.class)
+                .whereMap(searchParams)
+                .returnBundle(Bundle.class)
+                .encodedJson()
+                .execute();
+
+        assertEquals(5, providers.getEntry().size(), "Should have assigned providers");
 
         // Try again, should fail
         final ICreateTyped creation2 = submitPractitioner(practitioner2);
