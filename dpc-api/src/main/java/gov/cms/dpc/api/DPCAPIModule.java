@@ -7,7 +7,6 @@ import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.google.inject.name.Named;
-import com.typesafe.config.Config;
 import gov.cms.dpc.api.auth.jwt.IJTICache;
 import gov.cms.dpc.api.converters.ChecksumConverterProvider;
 import gov.cms.dpc.api.converters.HttpRangeHeaderParamConverterProvider;
@@ -140,10 +139,10 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
         return environment().metrics();
     }
 
-    @Provides
-    public Config provideConfig() {
-        return configuration().getConfig();
-    }
+//    @Provides
+//    public Config provideConfig() {
+//        return configuration().getConfig();
+//    }
 
     @Provides
     @ExportPath
