@@ -14,6 +14,8 @@ import io.dropwizard.hibernate.UnitOfWork;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Practitioner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotEmpty;
@@ -27,6 +29,7 @@ import static gov.cms.dpc.attribution.utils.RESTUtils.bulkResourceHandler;
 
 @FHIR
 public class PractitionerResource extends AbstractPractitionerResource {
+    private static final Logger logger = LoggerFactory.getLogger(PractitionerResource.class);
 
     private final ProviderDAO dao;
     private final FHIREntityConverter converter;
@@ -66,7 +69,7 @@ public class PractitionerResource extends AbstractPractitionerResource {
         final ProviderEntity entity = this.converter.fromFHIR(ProviderEntity.class, provider);
         final Long totalExistingProviders = this.dao.getProvidersCount(null, null, entity.getOrganization().getId());
         final List<ProviderEntity> existingProvidersByNPI = this.dao.getProviders(null, entity.getProviderNPI(), entity.getOrganization().getId());
-
+        logger.info("PROVIDER LIMIT: {}", providerLimit);
         if (providerLimit != null && providerLimit != -1 && totalExistingProviders >= providerLimit) {
             return Response.status(422).entity(this.converter.toFHIR(Practitioner.class, entity)).build();
         }
