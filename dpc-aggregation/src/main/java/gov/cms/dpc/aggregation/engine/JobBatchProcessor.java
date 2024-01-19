@@ -1,6 +1,7 @@
 package gov.cms.dpc.aggregation.engine;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.dpc.aggregation.service.*;
@@ -15,21 +16,20 @@ import gov.cms.dpc.queue.models.JobQueueBatchFile;
 import io.reactivex.Flowable;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.lang3.tuple.Pair;
-import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
-import org.hl7.fhir.dstu3.model.OperationOutcome;
-import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.dstu3.model.Resource;
+import org.hl7.fhir.dstu3.model.*;
 import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 import javax.inject.Inject;
+import java.security.GeneralSecurityException;
 import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import static gov.cms.dpc.fhir.FHIRExtractors.getPatientMBI;
 import static gov.cms.dpc.fhir.FHIRExtractors.getPatientMBIs;
 
 public class JobBatchProcessor {
@@ -63,13 +63,16 @@ public class JobBatchProcessor {
      * @param aggregatorID the current aggregatorID
      * @param queue        the queue
      * @param job          the job to process
-     * @param patientID    the current patient id to process
+     * @param mbi    the current patient id to process
      * @return A list of batch files {@link JobQueueBatchFile}
      */
-    public List<JobQueueBatchFile> processJobBatchPartial(UUID aggregatorID, IJobQueue queue, JobQueueBatch job, String patientID) {
+    public List<JobQueueBatchFile> processJobBatchPartial(UUID aggregatorID, IJobQueue queue, JobQueueBatch job, String mbi) {
         StopWatch stopWatch = StopWatch.createStarted();
         OutcomeReason failReason = null;
-        final Pair<Optional<List<ConsentResult>>, Optional<OperationOutcome>> consentResult = getConsent(patientID);
+
+        final Patient patient = fetchPatient(job, mbi);
+
+        final Pair<Optional<List<ConsentResult>>, Optional<OperationOutcome>> consentResult = getConsent(patient);
 
         Flowable<Resource> flowable;
         if (consentResult.getRight().isPresent()) {
@@ -77,20 +80,20 @@ public class JobBatchProcessor {
             failReason = OutcomeReason.INTERNAL_ERROR;
         } else if (isOptedOut(consentResult.getLeft())) {
             failReason = OutcomeReason.CONSENT_OPTED_OUT;
-            flowable = Flowable.just(AggregationUtils.toOperationOutcome(OutcomeReason.CONSENT_OPTED_OUT, patientID));
+            flowable = Flowable.just(AggregationUtils.toOperationOutcome(OutcomeReason.CONSENT_OPTED_OUT, mbi));
         } else if (isLookBackExempt(job.getOrgID())) {
             logger.info("Skipping lookBack for org: {}", job.getOrgID().toString());
             MDC.put(MDCConstants.IS_SMOKE_TEST_ORG, "true");
             flowable = Flowable.fromIterable(job.getResourceTypes())
-                    .flatMap(r -> fetchResource(job, patientID, r, job.getSince().orElse(null)));
+                    .flatMap(r -> fetchResource(job, patient, r, job.getSince().orElse(null)));
         } else {
-            List<LookBackAnswer> answers = getLookBackAnswers(job, patientID);
+            List<LookBackAnswer> answers = getLookBackAnswers(job, patient);
             if (passesLookBack(answers)) {
                 flowable = Flowable.fromIterable(job.getResourceTypes())
-                        .flatMap(r -> fetchResource(job, patientID, r, job.getSince().orElse(null)));
+                        .flatMap(r -> fetchResource(job, patient, r, job.getSince().orElse(null)));
             } else {
                 failReason = LookBackAnalyzer.analyze(answers);
-                flowable = Flowable.just(AggregationUtils.toOperationOutcome(failReason, patientID));
+                flowable = Flowable.just(AggregationUtils.toOperationOutcome(failReason, mbi));
             }
         }
 
@@ -117,13 +120,11 @@ public class JobBatchProcessor {
     /**
      * Fetch and write a specific resource type
      *
-     * @param job          the job to associate the fetch
-     * @param patientID    the patientID to fetch data
-     * @param resourceType the resourceType to fetch data
-     * @param since        the since date
+     * @param job       the job to associate the fetch
+     * @param patient   the {@link Patient} we're fetching data for
      * @return A flowable and resourceType the user requested
      */
-    private Flowable<Resource> fetchResource(JobQueueBatch job, String patientID, DPCResourceType resourceType, OffsetDateTime since) {
+    private Flowable<Resource> fetchResource(JobQueueBatch job, Patient patient, DPCResourceType resourceType, OffsetDateTime since) {
         // Make this flow hot (ie. only called once) when multiple subscribers attach
         final var fetcher = new ResourceFetcher(bbclient,
                 job.getJobID(),
@@ -131,18 +132,50 @@ public class JobBatchProcessor {
                 resourceType,
                 since,
                 job.getTransactionTime());
-        return fetcher.fetchResources(patientID, new JobHeaders(job.getRequestingIP(),job.getJobID().toString(),
+        return fetcher.fetchResources(patient, new JobHeaders(job.getRequestingIP(),job.getJobID().toString(),
                         job.getProviderNPI(),job.getTransactionTime().toString(),job.isBulk()).buildHeaders())
                            .flatMap(Flowable::fromIterable);
     }
 
-    private List<LookBackAnswer> getLookBackAnswers(JobQueueBatch job, String patientId) {
+    /**
+     * Fetches the {@link Patient} referenced by the given mbi.  Throws a {@link ResourceNotFoundException} if no
+     * {@link Patient} can be found.
+     * @param job   The job associated to the fetch
+     * @param mbi   The mbi of the {@link Patient}
+     * @return      The {@link Patient}
+     */
+    private Patient fetchPatient(JobQueueBatch job, String mbi) {
+        JobHeaders headers = new JobHeaders(
+                job.getRequestingIP(),
+                job.getJobID().toString(),
+                job.getProviderNPI(),
+                job.getTransactionTime().toString(),
+                job.isBulk());
+
+        Bundle patients;
+        try {
+            patients = bbclient.requestPatientFromServerByMbi(mbi, headers.buildHeaders());
+        } catch (GeneralSecurityException e) {
+            logger.error("Failed to retrieve Patient", e);
+            throw new ResourceNotFoundException("Failed to retrieve Patient");
+        }
+
+        // If we get more than one unique Patient for an MBI then we've got some upstream problems.
+        if (patients.getTotal() == 1) {
+            return (Patient) patients.getEntryFirstRep().getResource();
+        }
+
+        logger.error("Expected 1 Patient to match MBI but found {}", patients.getTotal());
+        throw new ResourceNotFoundException(String.format("Expected 1 Patient to match MBI but found %d", patients.getTotal()));
+    }
+
+    private List<LookBackAnswer> getLookBackAnswers(JobQueueBatch job, Patient patient) {
         List<LookBackAnswer> result = new ArrayList<>();
         final String practitionerNPI = job.getProviderNPI();
         final String organizationNPI = job.getOrgNPI();
         if (practitionerNPI != null && organizationNPI != null) {
             MDC.put(MDCConstants.PROVIDER_NPI, practitionerNPI);
-            Flowable<Resource> flowable = fetchResource(job, patientId, DPCResourceType.ExplanationOfBenefit, null);
+            Flowable<Resource> flowable = fetchResource(job, patient, DPCResourceType.ExplanationOfBenefit, null);
             result = flowable
                     .filter(resource -> Objects.requireNonNull(DPCResourceType.ExplanationOfBenefit.getPath()).equals(resource.getResourceType().getPath()))
                     .map(ExplanationOfBenefit.class::cast)
@@ -213,12 +246,19 @@ public class JobBatchProcessor {
         return DPCResourceType.OperationOutcome == resourceType ? operationalOutcomeMeter : resourceMeter;
     }
 
-    private Pair<Optional<List<ConsentResult>>, Optional<OperationOutcome>> getConsent(String patientId) {
+    /**
+     * Returns a {@link List} of {@link ConsentResult}s if successful.  An {@link OperationOutcome} if not.  Only one of
+     * the two {@link Optional}s returned will be filled in.
+     *
+     * @param patient   A {@link Patient} that we want to get {@link ConsentResult}s for
+     * @return          A {@link Pair}
+     */
+    private Pair<Optional<List<ConsentResult>>, Optional<OperationOutcome>> getConsent(Patient patient) {
         try {
-            return Pair.of(consentService.getConsent(patientId), Optional.empty());
+            return Pair.of(consentService.getConsent(getPatientMBIs(patient)), Optional.empty());
         } catch (Exception e) {
             logger.error("Unable to retrieve consent from consent service.", e);
-            OperationOutcome operationOutcome = AggregationUtils.toOperationOutcome(OutcomeReason.INTERNAL_ERROR, patientId);
+            OperationOutcome operationOutcome = AggregationUtils.toOperationOutcome(OutcomeReason.INTERNAL_ERROR, getPatientMBI(patient));
             return Pair.of(Optional.empty(), Optional.of(operationOutcome));
         }
     }

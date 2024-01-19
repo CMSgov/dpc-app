@@ -16,10 +16,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
-import java.security.GeneralSecurityException;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
+
+import static gov.cms.dpc.fhir.FHIRExtractors.getPatientMBI;
 
 /**
  * A resource fetcher will fetch resources of particular type from passed {@link BlueButtonClient}
@@ -60,18 +61,18 @@ class ResourceFetcher {
      * Fetch all the resources for a specific patient. If errors are encountered from BlueButton,
      * a OperationOutcome resource is used.
      *
-     * @param mbi to use
+     * @param patient {@link Patient} we're fetching resources for
      * @param headers headers
      * @return a flow with all the resources for specific patient
      */
-    Flowable<List<Resource>> fetchResources(String mbi, Map<String, String> headers) {
+    Flowable<List<Resource>> fetchResources(Patient patient, Map<String, String> headers) {
         return Flowable.fromCallable(() -> {
             String fetchId = UUID.randomUUID().toString();
             logger.debug("Fetching first {} from BlueButton for {}", resourceType.toString(), fetchId);
-            final Bundle firstFetched = fetchFirst(mbi, headers);
+            final Bundle firstFetched = fetchFirst(patient, headers);
             return fetchAllBundles(firstFetched, fetchId, headers);
         })
-                .onErrorResumeNext((Throwable error) -> handleError(mbi, error));
+                .onErrorResumeNext((Throwable error) -> handleError(patient, error));
     }
 
     /**
@@ -101,11 +102,11 @@ class ResourceFetcher {
 
     /**
      * Turn an error into a flow.
-     * @param mbi MBI
+     * @param patient The {@link Patient} we're loading resources for
      * @param error the error
      * @return a Flowable of list of resources
      */
-    private Publisher<List<Resource>> handleError(String mbi, Throwable error) {
+    private Publisher<List<Resource>> handleError(Patient patient, Throwable error) {
         if (error instanceof JobQueueFailure) {
             // JobQueueFailure is an internal error. Just pass it along as an error.
             return Flowable.error(error);
@@ -113,63 +114,38 @@ class ResourceFetcher {
 
         // Other errors should be turned into OperationOutcome and just recorded.
         logger.error("Turning error into OperationOutcome.", error);
-        final var operationOutcome = formOperationOutcome(mbi, error);
+        final var operationOutcome = formOperationOutcome(getPatientMBI(patient), error);
         return Flowable.just(List.of(operationOutcome));
     }
 
     /**
      * Based on resourceType, fetch a resource or a bundle of resources.
      *
-     * @param mbi of the resource to fetch
+     * @param patient   {@link Patient} we're fetching resrouc
      * @return the first bundle of resources
      */
-    private Bundle fetchFirst(String mbi, Map<String, String> headers) {
-        Patient patient = fetchPatient(mbi, headers);
+    private Bundle fetchFirst(Patient patient, Map<String, String> headers) {
         patient.getIdentifier().stream()
                 .filter(i -> i.getSystem().equals(DPCIdentifierSystem.MBI_HASH.getSystem()))
                 .findFirst()
                 .ifPresent(i -> MDC.put(MDCConstants.PATIENT_ID, i.getValue()));
 
-        var beneId = getBeneIdFromPatient(patient);
+        String patientId = patient.getIdElement().getIdPart();
+
         final var lastUpdated = formLastUpdatedParam();
         switch (resourceType) {
+            // Why are we reloading the Patient, because on reload we're passing a lastUpdated parameter.  If the user
+            // only wants resources from the last month and our patient hasn't been updated in a year, this method will
+            // return an empty bundle.
             case Patient:
-                return blueButtonClient.requestPatientFromServer(beneId, lastUpdated, headers);
+                return blueButtonClient.requestPatientFromServer(patientId, lastUpdated, headers);
             case ExplanationOfBenefit:
-                return blueButtonClient.requestEOBFromServer(beneId, lastUpdated, headers);
+                return blueButtonClient.requestEOBFromServer(patientId, lastUpdated, headers);
             case Coverage:
-                return blueButtonClient.requestCoverageFromServer(beneId, lastUpdated, headers);
+                return blueButtonClient.requestCoverageFromServer(patientId, lastUpdated, headers);
             default:
                 throw new JobQueueFailure(jobID, batchID, "Unexpected resource type: " + resourceType.toString());
         }
-    }
-
-    private Patient fetchPatient(String mbi, Map<String, String> headers) {
-        Bundle patients;
-        try {
-            patients = blueButtonClient.requestPatientFromServerByMbi(mbi, headers);
-        } catch (GeneralSecurityException e) {
-            logger.error("Failed to retrieve Patient", e);
-            throw new ResourceNotFoundException("Failed to retrieve Patient");
-        }
-
-        if (patients.getTotal() == 1) {
-            return (Patient) patients.getEntryFirstRep().getResource();
-        }
-
-        logger.error("Expected 1 Patient to match MBI but found {}", patients.getTotal());
-        throw new ResourceNotFoundException(String.format("Expected 1 Patient to match MBI but found %d", patients.getTotal()));
-    }
-
-    private String getBeneIdFromPatient(Patient patient) {
-        return patient.getIdentifier().stream()
-                .filter(id -> DPCIdentifierSystem.BENE_ID.getSystem().equals(id.getSystem()))
-                .findFirst()
-                .map(Identifier::getValue)
-                .orElseThrow(() -> {
-                    logger.error("No bene_id found in Patient resource");
-                    return new ResourceNotFoundException("No bene_id found in Patient resource");
-                });
     }
 
     /**

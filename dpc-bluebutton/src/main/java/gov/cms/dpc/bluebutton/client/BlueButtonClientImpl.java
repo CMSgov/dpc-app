@@ -72,17 +72,17 @@ public class BlueButtonClientImpl implements BlueButtonClient {
     /**
      * Queries Blue Button server for patient data
      *
-     * @param beneId The requested patient's ID
+     * @param patientId The {@link Patient} resource's id
      * @param headers
      * @return {@link Patient} A FHIR Patient resource
      * @throws ResourceNotFoundException when no such patient with the provided ID exists
      */
     @Override
-    public Bundle requestPatientFromServer(String beneId, DateRangeParam lastUpdated, Map<String, String> headers) throws ResourceNotFoundException {
-        logger.debug("Attempting to fetch patient ID {} from baseURL: {}", beneId, client.getServerBase());
-        ICriterion<ReferenceClientParam> criterion = new ReferenceClientParam(Patient.SP_RES_ID).hasId(beneId);
+    public Bundle requestPatientFromServer(String patientId, DateRangeParam lastUpdated, Map<String, String> headers) throws ResourceNotFoundException {
+        logger.debug("Attempting to fetch patient ID {} from baseURL: {}", patientId, client.getServerBase());
+        ICriterion<ReferenceClientParam> criterion = new ReferenceClientParam(Patient.SP_RES_ID).hasId(patientId);
         return instrumentCall(REQUEST_EOB_METRIC, () ->
-                fetchBundle(Patient.class, Collections.singletonList(criterion), beneId, lastUpdated, headers));
+                fetchBundle(Patient.class, Collections.singletonList(criterion), patientId, lastUpdated, headers));
     }
 
     /**
@@ -134,23 +134,23 @@ public class BlueButtonClientImpl implements BlueButtonClient {
      *  returns the Bundle it received from BlueButton to the caller, and the caller is responsible for handling Bundles
      *  that contain no EoBs.
      *
-     * @param beneId The requested patient's ID
+     * @param patientId The {@link Patient} resource's ID
      * @param headers
      * @return {@link Bundle} Containing a number (possibly 0) of {@link ExplanationOfBenefit} objects
      * @throws ResourceNotFoundException when the requested patient does not exist
      */
     @Override
-    public Bundle requestEOBFromServer(String beneId, DateRangeParam lastUpdated, Map<String, String> headers) {
-        logger.debug("Attempting to fetch EOBs for patient ID {} from baseURL: {}", beneId, client.getServerBase());
+    public Bundle requestEOBFromServer(String patientId, DateRangeParam lastUpdated, Map<String, String> headers) {
+        logger.debug("Attempting to fetch EOBs for patient ID {} from baseURL: {}", patientId, client.getServerBase());
 
         List<ICriterion<? extends IParam>> criteria = new ArrayList<ICriterion<? extends IParam>>();
-        criteria.add(ExplanationOfBenefit.PATIENT.hasId(beneId));
+        criteria.add(ExplanationOfBenefit.PATIENT.hasId(patientId));
         criteria.add(new TokenClientParam("excludeSAMHSA").exactly().code("true"));
 
         return instrumentCall(REQUEST_EOB_METRIC, () ->
                 fetchBundle(ExplanationOfBenefit.class,
                         criteria,
-                        beneId,
+                        patientId,
                         lastUpdated,
                         headers));
     }
@@ -168,20 +168,20 @@ public class BlueButtonClientImpl implements BlueButtonClient {
      *  returns the Bundle it received from BlueButton to the caller, and the caller is responsible for handling Bundles
      *  that contain no coverage records.
      *
-     * @param beneId The requested patient's ID
+     * @param patientId The requested {@link Patient} resource's ID
      * @param headers
      * @return {@link Bundle} Containing a number (possibly 0) of {@link ExplanationOfBenefit} objects
      * @throws ResourceNotFoundException when the requested patient does not exist
      */
     @Override
-    public Bundle requestCoverageFromServer(String beneId, DateRangeParam lastUpdated, Map<String, String> headers) throws ResourceNotFoundException {
-        logger.debug("Attempting to fetch Coverage for patient ID {} from baseURL: {}", beneId, client.getServerBase());
+    public Bundle requestCoverageFromServer(String patientId, DateRangeParam lastUpdated, Map<String, String> headers) throws ResourceNotFoundException {
+        logger.debug("Attempting to fetch Coverage for patient ID {} from baseURL: {}", patientId, client.getServerBase());
 
         List<ICriterion<? extends IParam>> criteria = new ArrayList<ICriterion<? extends IParam>>();
-        criteria.add(Coverage.BENEFICIARY.hasId(formBeneficiaryID(beneId)));
+        criteria.add(Coverage.BENEFICIARY.hasId(formBeneficiaryID(patientId)));
 
         return instrumentCall(REQUEST_COVERAGE_METRIC, () ->
-                fetchBundle(Coverage.class, criteria, beneId, lastUpdated, headers));
+                fetchBundle(Coverage.class, criteria, patientId, lastUpdated, headers));
     }
 
     @Override
