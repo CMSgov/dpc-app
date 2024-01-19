@@ -1,10 +1,10 @@
 package gov.cms.dpc.attribution;
 
-import ca.mestevens.java.configuration.TypesafeConfiguration;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import gov.cms.dpc.common.hibernate.attribution.IDPCDatabase;
 import gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration;
 import gov.cms.dpc.fhir.configuration.IDPCFHIRConfiguration;
+import io.dropwizard.Configuration;
 import io.dropwizard.db.DataSourceFactory;
 import org.knowm.dropwizard.sundial.SundialConfiguration;
 
@@ -15,7 +15,7 @@ import javax.validation.constraints.NotNull;
 import java.time.Duration;
 import java.util.List;
 
-public class DPCAttributionConfiguration extends TypesafeConfiguration implements IDPCDatabase, IDPCFHIRConfiguration {
+public class DPCAttributionConfiguration extends Configuration implements IDPCDatabase, IDPCFHIRConfiguration {
 
     @Valid
     private Duration expirationThreshold;

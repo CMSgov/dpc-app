@@ -1,6 +1,5 @@
 package gov.cms.dpc.aggregation;
 
-import ca.mestevens.java.configuration.bundle.TypesafeConfigurationBundle;
 import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.bluebutton.BlueButtonClientModule;
 import gov.cms.dpc.common.hibernate.attribution.DPCHibernateBundle;
@@ -48,7 +47,6 @@ public class DPCAggregationService extends Application<DPCAggregationConfigurati
         bootstrap.addBundle(hibernateBundle);
 
         bootstrap.addBundle(guiceBundle);
-        bootstrap.addBundle(new TypesafeConfigurationBundle("dpc.aggregation"));
         bootstrap.addBundle(new MigrationsBundle<>() {
             @Override
             public DataSourceFactory getDataSourceFactory(DPCAggregationConfiguration dpcAggregationConfiguration) {

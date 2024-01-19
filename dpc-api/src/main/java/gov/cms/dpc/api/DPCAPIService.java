@@ -1,6 +1,5 @@
 package gov.cms.dpc.api;
 
-import ca.mestevens.java.configuration.bundle.TypesafeConfigurationBundle;
 import com.codahale.metrics.jersey2.InstrumentedResourceMethodApplicationListener;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.datatype.hibernate5.Hibernate5Module;
@@ -68,7 +67,6 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
         bootstrap.addBundle(hibernateAuthBundle);
 
         bootstrap.addBundle(guiceBundle);
-        bootstrap.addBundle(new TypesafeConfigurationBundle("dpc.api"));
 
         // Wrapper around some of the uglier bundle initialization commands
         setupCustomBundles(bootstrap);

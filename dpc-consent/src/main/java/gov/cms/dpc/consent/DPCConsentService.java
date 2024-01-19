@@ -1,6 +1,5 @@
 package gov.cms.dpc.consent;
 
-import ca.mestevens.java.configuration.bundle.TypesafeConfigurationBundle;
 import com.codahale.metrics.jersey2.InstrumentedResourceMethodApplicationListener;
 import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.common.hibernate.consent.DPCConsentHibernateBundle;
@@ -48,7 +47,6 @@ public class DPCConsentService extends Application<DPCConsentConfiguration> {
 
         bootstrap.addBundle(hibernateBundle);
         bootstrap.addBundle(guiceBundle);
-        bootstrap.addBundle(new TypesafeConfigurationBundle("dpc.consent"));
         bootstrap.addBundle(new MigrationsBundle<>() {
             @Override
             public PooledDataSourceFactory getDataSourceFactory(DPCConsentConfiguration configuration) {

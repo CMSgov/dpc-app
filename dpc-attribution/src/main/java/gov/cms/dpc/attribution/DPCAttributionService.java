@@ -1,6 +1,5 @@
 package gov.cms.dpc.attribution;
 
-import ca.mestevens.java.configuration.bundle.TypesafeConfigurationBundle;
 import com.codahale.metrics.jersey2.InstrumentedResourceMethodApplicationListener;
 import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.attribution.cli.SeedCommand;
@@ -69,7 +68,6 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
         bootstrap.addBundle(hibernateBundle);
 
         bootstrap.addBundle(guiceBundle);
-        bootstrap.addBundle(new TypesafeConfigurationBundle("dpc.attribution"));
         bootstrap.addBundle(new MigrationsBundle<>() {
             @Override
             public PooledDataSourceFactory getDataSourceFactory(DPCAttributionConfiguration configuration) {
