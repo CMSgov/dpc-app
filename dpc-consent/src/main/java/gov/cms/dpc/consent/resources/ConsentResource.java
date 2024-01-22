@@ -91,7 +91,8 @@ public class ConsentResource {
                 entities.addAll(getEntitiesByPatient(patientIdentifier));
             }
 
-            // If no consent records were found, create a default opt in for the first MBI sent to us
+            // If no consent records were found, create a default opt in for the first MBI sent to us.
+            // I'd prefer this just returns an empty list, but dpc-api is written to expect this behavior.
             if(entities.isEmpty()) {
                 Identifier firstIdentifier = FHIRExtractors.parseIDFromQueryParam(Splitter.on(',').split(patientId.get()).iterator().next());
                 entities = List.of(ConsentEntity.defaultConsentEntity(Optional.empty(), extractHicn(firstIdentifier), extractMbi(firstIdentifier)));
