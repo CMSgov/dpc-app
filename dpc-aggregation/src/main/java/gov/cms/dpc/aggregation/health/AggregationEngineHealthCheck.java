@@ -1,13 +1,13 @@
 package gov.cms.dpc.aggregation.health;
 
-import com.codahale.metrics.health.HealthCheck;
 import gov.cms.dpc.aggregation.engine.AggregationEngine;
+import ru.vyarus.dropwizard.guice.module.installer.feature.health.NamedHealthCheck;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 @Singleton
-public class AggregationEngineHealthCheck extends HealthCheck {
+public class AggregationEngineHealthCheck extends NamedHealthCheck {
 
     private AggregationEngine aggregationEngine;
 
@@ -23,5 +23,10 @@ public class AggregationEngineHealthCheck extends HealthCheck {
             result = Result.unhealthy("Aggregation Engine instance: " + aggregationEngine.getAggregatorID() + " in error state");
         }
         return result;
+    }
+
+    @Override
+    public String getName() {
+        return "aggregation-engine";
     }
 }

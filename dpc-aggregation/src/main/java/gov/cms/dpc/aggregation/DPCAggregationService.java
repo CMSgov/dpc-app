@@ -4,7 +4,6 @@ import ca.mestevens.java.configuration.bundle.TypesafeConfigurationBundle;
 import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.bluebutton.BlueButtonClientModule;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
-import gov.cms.dpc.bluebutton.health.BlueButtonHealthCheck;
 import gov.cms.dpc.common.hibernate.attribution.DPCHibernateBundle;
 import gov.cms.dpc.common.hibernate.attribution.DPCHibernateModule;
 import gov.cms.dpc.common.hibernate.queue.DPCQueueHibernateBundle;
@@ -78,6 +77,5 @@ public class DPCAggregationService extends Application<DPCAggregationConfigurati
     @Override
     public void run(DPCAggregationConfiguration configuration, Environment environment) {
         EnvironmentParser.getEnvironment("Aggregation");
-        environment.healthChecks().register("blue-button-client", new BlueButtonHealthCheck(bbc));
     }
 }
