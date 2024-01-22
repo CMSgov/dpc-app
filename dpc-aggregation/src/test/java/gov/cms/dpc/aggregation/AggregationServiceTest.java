@@ -39,6 +39,7 @@ public class AggregationServiceTest {
 
         // Ensure that the various healthchecks are propagated from the modules
         assertAll(() -> assertTrue(names.contains("blue-button-client"), "Should have BB health check"));
+        assertAll(() -> assertTrue(names.contains("aggregation-engine"), "Should have Aggregation Engine health check"));
 
         // Everything should be true
         checks.runHealthChecks().forEach((key, value) -> assertTrue(value.isHealthy(), String.format("Healthcheck: %s is not ok.", key)));
