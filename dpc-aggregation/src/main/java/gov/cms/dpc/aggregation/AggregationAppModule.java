@@ -14,7 +14,6 @@ import gov.cms.dpc.aggregation.engine.JobBatchProcessorV2;
 import gov.cms.dpc.aggregation.engine.OperationsConfig;
 import gov.cms.dpc.aggregation.health.AggregationEngineHealthCheck;
 import gov.cms.dpc.aggregation.service.*;
-import gov.cms.dpc.bluebutton.health.BlueButtonHealthCheck;
 import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.common.annotations.JobTimeout;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
@@ -42,7 +41,6 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
         binder.bind(AggregationManager.class).asEagerSingleton();
         binder.bind(JobBatchProcessor.class);
         binder.bind(JobBatchProcessorV2.class);
-        binder.bind(BlueButtonHealthCheck.class);
         binder.bind(AggregationEngineHealthCheck.class);
 
         // Healthchecks
