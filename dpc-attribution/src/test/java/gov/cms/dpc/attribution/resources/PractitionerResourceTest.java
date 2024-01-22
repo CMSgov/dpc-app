@@ -252,7 +252,6 @@ class PractitionerResourceTest extends AbstractAttributionTest {
 
         //Currently 4 providers are created in the seed for the test
         APPLICATION.getConfiguration().setProviderLimit(5);
-        APPLICATION.before();
 
         final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
         final Practitioner practitioner2 = AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());

@@ -27,7 +27,7 @@ public abstract class AbstractAttributionTest {
     private static final ObjectMapper mapper = new ObjectMapper();
 
     protected static final DropwizardTestSupport<DPCAttributionConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCAttributionService.class, "ci.application.conf", ConfigOverride.config(KEY_PREFIX, "", ""),
-            ConfigOverride.config(KEY_PREFIX, "logging.level", "INFO"));
+            ConfigOverride.config(KEY_PREFIX, "logging.level", "INFO"), ConfigOverride.config(KEY_PREFIX, "providerLimit", "5"));
 
     protected static final String ORGANIZATION_ID = "0c527d2e-2e8a-4808-b11d-0fa06baf8254";
 
