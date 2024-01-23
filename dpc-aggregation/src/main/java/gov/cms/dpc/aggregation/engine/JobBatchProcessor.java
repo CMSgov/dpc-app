@@ -23,7 +23,6 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 import javax.inject.Inject;
-import java.security.GeneralSecurityException;
 import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -69,31 +68,36 @@ public class JobBatchProcessor {
     public List<JobQueueBatchFile> processJobBatchPartial(UUID aggregatorID, IJobQueue queue, JobQueueBatch job, String mbi) {
         StopWatch stopWatch = StopWatch.createStarted();
         OutcomeReason failReason = null;
-
-        final Patient patient = fetchPatient(job, mbi);
-
-        final Pair<Optional<List<ConsentResult>>, Optional<OperationOutcome>> consentResult = getConsent(patient);
-
         Flowable<Resource> flowable;
-        if (consentResult.getRight().isPresent()) {
-            flowable = Flowable.just(consentResult.getRight().get());
+
+        final Optional<Patient> optPatient = fetchPatient(job, mbi);
+        if(optPatient.isEmpty()) {
             failReason = OutcomeReason.INTERNAL_ERROR;
-        } else if (isOptedOut(consentResult.getLeft())) {
-            failReason = OutcomeReason.CONSENT_OPTED_OUT;
-            flowable = Flowable.just(AggregationUtils.toOperationOutcome(OutcomeReason.CONSENT_OPTED_OUT, mbi));
-        } else if (isLookBackExempt(job.getOrgID())) {
-            logger.info("Skipping lookBack for org: {}", job.getOrgID().toString());
-            MDC.put(MDCConstants.IS_SMOKE_TEST_ORG, "true");
-            flowable = Flowable.fromIterable(job.getResourceTypes())
-                    .flatMap(r -> fetchResource(job, patient, r, job.getSince().orElse(null)));
+            flowable = Flowable.just(AggregationUtils.toOperationOutcome(failReason, mbi));
         } else {
-            List<LookBackAnswer> answers = getLookBackAnswers(job, patient);
-            if (passesLookBack(answers)) {
+            final Patient patient = optPatient.get();
+            final Pair<Optional<List<ConsentResult>>, Optional<OperationOutcome>> consentResult = getConsent(patient);
+
+            if (consentResult.getRight().isPresent()) {
+                flowable = Flowable.just(consentResult.getRight().get());
+                failReason = OutcomeReason.INTERNAL_ERROR;
+            } else if (isOptedOut(consentResult.getLeft())) {
+                failReason = OutcomeReason.CONSENT_OPTED_OUT;
+                flowable = Flowable.just(AggregationUtils.toOperationOutcome(OutcomeReason.CONSENT_OPTED_OUT, mbi));
+            } else if (isLookBackExempt(job.getOrgID())) {
+                logger.info("Skipping lookBack for org: {}", job.getOrgID().toString());
+                MDC.put(MDCConstants.IS_SMOKE_TEST_ORG, "true");
                 flowable = Flowable.fromIterable(job.getResourceTypes())
                         .flatMap(r -> fetchResource(job, patient, r, job.getSince().orElse(null)));
             } else {
-                failReason = LookBackAnalyzer.analyze(answers);
-                flowable = Flowable.just(AggregationUtils.toOperationOutcome(failReason, mbi));
+                List<LookBackAnswer> answers = getLookBackAnswers(job, patient);
+                if (passesLookBack(answers)) {
+                    flowable = Flowable.fromIterable(job.getResourceTypes())
+                            .flatMap(r -> fetchResource(job, patient, r, job.getSince().orElse(null)));
+                } else {
+                    failReason = LookBackAnalyzer.analyze(answers);
+                    flowable = Flowable.just(AggregationUtils.toOperationOutcome(failReason, mbi));
+                }
             }
         }
 
@@ -144,7 +148,7 @@ public class JobBatchProcessor {
      * @param mbi   The mbi of the {@link Patient}
      * @return      The {@link Patient}
      */
-    private Patient fetchPatient(JobQueueBatch job, String mbi) {
+    private Optional<Patient> fetchPatient(JobQueueBatch job, String mbi) {
         JobHeaders headers = new JobHeaders(
                 job.getRequestingIP(),
                 job.getJobID().toString(),
@@ -155,18 +159,18 @@ public class JobBatchProcessor {
         Bundle patients;
         try {
             patients = bbclient.requestPatientFromServerByMbi(mbi, headers.buildHeaders());
-        } catch (GeneralSecurityException e) {
+        } catch (Exception e) {
             logger.error("Failed to retrieve Patient", e);
-            throw new ResourceNotFoundException("Failed to retrieve Patient");
+            return Optional.empty();
         }
 
         // If we get more than one unique Patient for an MBI then we've got some upstream problems.
         if (patients.getTotal() == 1) {
-            return (Patient) patients.getEntryFirstRep().getResource();
+            return Optional.of((Patient) patients.getEntryFirstRep().getResource());
         }
 
         logger.error("Expected 1 Patient to match MBI but found {}", patients.getTotal());
-        throw new ResourceNotFoundException(String.format("Expected 1 Patient to match MBI but found %d", patients.getTotal()));
+        return Optional.empty();
     }
 
     private List<LookBackAnswer> getLookBackAnswers(JobQueueBatch job, Patient patient) {

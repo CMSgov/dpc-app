@@ -31,6 +31,7 @@ public class MockBlueButtonClient implements BlueButtonClient {
     private static final String SAMPLE_EMPTY_BUNDLE = "bb-test-data/empty";
 
     public static final String MULTIPLE_RESULTS_MBI = "9V99EU8XY91";
+    public static final List<String> MULTIPLE_RESULTS_MBI_LIST = List.of(MULTIPLE_RESULTS_MBI, "1S00EU8FE91");
 
     public static final List<String> TEST_PATIENT_MBIS = List.of(
         "2SW4N00AA00", "4SP0P00AA00", "3S58A00AA00", "4S58A00AA00", "5S58A00AA00", "1SQ3F00AA00", MULTIPLE_RESULTS_MBI, "1S00EU8FE91"
