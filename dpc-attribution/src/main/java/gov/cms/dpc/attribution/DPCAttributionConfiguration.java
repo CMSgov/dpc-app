@@ -43,6 +43,8 @@ public class DPCAttributionConfiguration extends TypesafeConfiguration implement
     @Min(-1)
     private Integer providerLimit;
 
+    private String providerLimitStr;
+
     @Min(-1)
     private Integer patientLimit;
 
@@ -92,7 +94,12 @@ public class DPCAttributionConfiguration extends TypesafeConfiguration implement
     }
 
     public Integer getProviderLimit() {
-        return providerLimit;
+        if (providerLimit != null) {
+            return providerLimit;
+        } else if (providerLimitStr != null) {
+            return Integer.valueOf(providerLimitStr);
+        }
+        return null;
     }
 
     public void setProviderLimit(Integer providerLimit) {

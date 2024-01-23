@@ -9,10 +9,14 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import gov.cms.dpc.attribution.AbstractAttributionTest;
 import gov.cms.dpc.attribution.AttributionTestHelpers;
+import gov.cms.dpc.attribution.DPCAttributionConfiguration;
+import gov.cms.dpc.attribution.DPCAttributionService;
 import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.validations.profiles.PractitionerProfile;
+import io.dropwizard.testing.ConfigOverride;
+import io.dropwizard.testing.DropwizardTestSupport;
 import org.hl7.fhir.dstu3.model.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -251,6 +255,11 @@ class PractitionerResourceTest extends AbstractAttributionTest {
     void testPractitionerSubmitWhenPastLimit() throws Exception {
 
         //Currently 4 providers are created in the seed for the test
+        APPLICATION.after();
+        APPLICATION = new DropwizardTestSupport<>(DPCAttributionService.class, "ci.application.conf",
+                ConfigOverride.config(KEY_PREFIX, "logging.level", "INFO"),
+                ConfigOverride.config(KEY_PREFIX, "providerLimitStr", "5"));
+        APPLICATION.before();
         APPLICATION.getConfiguration().setProviderLimit(5);
 
         final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
@@ -288,9 +297,15 @@ class PractitionerResourceTest extends AbstractAttributionTest {
     }
 
     @Test
-    void testPractitionerSubmitWhenLimitIsSetToNegativeOne() {
+    void testPractitionerSubmitWhenLimitIsSetToNegativeOne() throws Exception {
 
         //Currently 4 providers are created in the seed for the test
+        APPLICATION.after();
+        APPLICATION = new DropwizardTestSupport<>(DPCAttributionService.class, "ci.application.conf",
+                ConfigOverride.config(KEY_PREFIX, "logging.level", "INFO"),
+                ConfigOverride.config(KEY_PREFIX, "providerLimitStr", "-1"));
+        APPLICATION.before();
+
         APPLICATION.getConfiguration().setProviderLimit(-1);
 
         final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
