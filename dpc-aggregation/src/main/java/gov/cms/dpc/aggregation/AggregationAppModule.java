@@ -74,11 +74,6 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
         return environment().metrics();
     }
 
-//    @Provides
-//    public Config provideConfig() {
-//        return configuration().getConfig();
-//    }
-
     @Provides
     @ExportPath
     public String provideExportPath() {

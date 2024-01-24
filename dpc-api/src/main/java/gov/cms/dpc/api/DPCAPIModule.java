@@ -139,11 +139,6 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
         return environment().metrics();
     }
 
-//    @Provides
-//    public Config provideConfig() {
-//        return configuration().getConfig();
-//    }
-
     @Provides
     @ExportPath
     public String provideExportPath() {
