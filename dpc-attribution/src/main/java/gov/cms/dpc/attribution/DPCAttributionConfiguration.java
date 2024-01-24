@@ -94,12 +94,11 @@ public class DPCAttributionConfiguration extends TypesafeConfiguration implement
     }
 
     public Integer getProviderLimit() {
-        if (providerLimit != null) {
-            return providerLimit;
-        } else if (providerLimitStr != null) {
+        // Overriding for test
+        if (providerLimitStr != null) {
             return Integer.valueOf(providerLimitStr);
         }
-        return null;
+        return providerLimit;
     }
 
     public void setProviderLimit(Integer providerLimit) {

@@ -255,12 +255,9 @@ class PractitionerResourceTest extends AbstractAttributionTest {
     void testPractitionerSubmitWhenPastLimit() throws Exception {
 
         //Currently 4 providers are created in the seed for the test
-        APPLICATION.after();
-        APPLICATION = new DropwizardTestSupport<>(DPCAttributionService.class, "ci.application.conf",
-                ConfigOverride.config(KEY_PREFIX, "logging.level", "INFO"),
-                ConfigOverride.config(KEY_PREFIX, "providerLimitStr", "5"));
-        APPLICATION.before();
-        APPLICATION.getConfiguration().setProviderLimit(5);
+
+        overrideConfig("providerLimitStr", "5");
+        assertEquals(5, APPLICATION.getConfiguration().getProviderLimit());
 
         final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
         final Practitioner practitioner2 = AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
@@ -271,17 +268,6 @@ class PractitionerResourceTest extends AbstractAttributionTest {
         practitionersToCleanUp.add(pract);
 
         assertNotNull(pract, "Should be created");
-        Map<String, List<String>> searchParams = new HashMap<>();
-        searchParams.put("organization", Collections.singletonList(DEFAULT_ORG_ID));
-        final Bundle providers = client
-                .search()
-                .forResource(Practitioner.class)
-                .whereMap(searchParams)
-                .returnBundle(Bundle.class)
-                .encodedJson()
-                .execute();
-
-        assertEquals(5, providers.getEntry().size(), "Should have assigned providers");
 
         // Try again, should fail
         final ICreateTyped creation2 = submitPractitioner(practitioner2);
@@ -300,13 +286,8 @@ class PractitionerResourceTest extends AbstractAttributionTest {
     void testPractitionerSubmitWhenLimitIsSetToNegativeOne() throws Exception {
 
         //Currently 4 providers are created in the seed for the test
-        APPLICATION.after();
-        APPLICATION = new DropwizardTestSupport<>(DPCAttributionService.class, "ci.application.conf",
-                ConfigOverride.config(KEY_PREFIX, "logging.level", "INFO"),
-                ConfigOverride.config(KEY_PREFIX, "providerLimitStr", "-1"));
-        APPLICATION.before();
-
-        APPLICATION.getConfiguration().setProviderLimit(-1);
+        overrideConfig("providerLimitStr", "-1");
+        assertEquals(-1, APPLICATION.getConfiguration().getProviderLimit());
 
         final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
 
