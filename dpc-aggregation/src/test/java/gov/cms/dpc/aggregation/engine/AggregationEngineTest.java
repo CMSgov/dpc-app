@@ -537,7 +537,7 @@ class AggregationEngineTest {
 
     @Test
     void multiplePatientsMatchTest() {
-        final List<String> mbis = Collections.singletonList(MockBlueButtonClient.MULTIPLE_RESULTS_MBI);
+        final List<String> mbis = Collections.singletonList(MockBlueButtonClient.TEST_PATIENT_MULTIPLE_MBIS.get(0));
 
         final var orgID = UUID.randomUUID();
 
