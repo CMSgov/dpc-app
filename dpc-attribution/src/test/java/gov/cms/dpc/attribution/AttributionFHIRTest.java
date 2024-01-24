@@ -41,7 +41,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class AttributionFHIRTest {
 
     private static final String KEY_PREFIX = "dpc.attribution";
-    private static final DropwizardTestSupport<DPCAttributionConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCAttributionService.class, "ci.application.conf", ConfigOverride.config("server.applicationConnectors[0].port", "3727"),
+    private static final DropwizardTestSupport<DPCAttributionConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCAttributionService.class, "ci.application.yml", ConfigOverride.config("server.applicationConnectors[0].port", "3727"),
             ConfigOverride.config(KEY_PREFIX, "logging.level", "ERROR"));
     private static final FhirContext ctx = FhirContext.forDstu3();
     private static final String CSV = "test_associations-dpr.csv";
@@ -52,8 +52,8 @@ class AttributionFHIRTest {
     @BeforeAll
     static void setup() throws Exception {
         APPLICATION.before();
-        APPLICATION.getApplication().run("db", "drop-all", "--confirm-delete-everything", "ci.application.conf");
-        APPLICATION.getApplication().run("db", "migrate", "ci.application.conf");
+        APPLICATION.getApplication().run("db", "drop-all", "--confirm-delete-everything", "ci.application.yml");
+        APPLICATION.getApplication().run("db", "migrate", "ci.application.yml");
 
         // Get the test seeds
         final InputStream resource = AttributionFHIRTest.class.getClassLoader().getResourceAsStream(CSV);
