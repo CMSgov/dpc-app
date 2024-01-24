@@ -255,8 +255,8 @@ class PractitionerResourceTest extends AbstractAttributionTest {
     void testPractitionerSubmitWhenPastLimit() throws Exception {
 
         //Currently 4 providers are created in the seed for the test
-
         overrideConfig("providerLimitStr", "5");
+        APPLICATION.getConfiguration().setProviderLimit(5);
 
         final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
         final Practitioner practitioner2 = AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
@@ -286,6 +286,7 @@ class PractitionerResourceTest extends AbstractAttributionTest {
 
         //Currently 4 providers are created in the seed for the test
         overrideConfig("providerLimitStr", "-1");
+        APPLICATION.getConfiguration().setProviderLimit(-1);
 
         final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
 
