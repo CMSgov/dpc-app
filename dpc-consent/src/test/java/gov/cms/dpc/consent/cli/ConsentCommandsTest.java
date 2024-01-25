@@ -31,11 +31,11 @@ class ConsentCommandsTest {
     private final ByteArrayOutputStream stdErr = new ByteArrayOutputStream();
 
     private static final DPCConsentService app = new DPCConsentService();
-    private static final Bootstrap<DPCConsentConfiguration> bs = setupBootstrap();
+    private static final Bootstrap<DPCConsentConfiguration> bs = setupBootstrap(app);
 
     private Cli cli;
 
-    private static Bootstrap<DPCConsentConfiguration> setupBootstrap() {
+    private static Bootstrap<DPCConsentConfiguration> setupBootstrap(DPCConsentService app) {
         // adapted from DropwizardTestSupport
         Bootstrap<DPCConsentConfiguration> bootstrap = new Bootstrap<>(ConsentCommandsTest.app) {
             public void run(DPCConsentConfiguration configuration, Environment environment) throws Exception {
@@ -61,12 +61,10 @@ class ConsentCommandsTest {
     }
 
     @AfterEach
-    void reset() {
+    void teardown() {
         System.setOut(originalOut);
         System.setErr(originalErr);
         System.setIn(originalIn);
-        stdOut.reset();
-        stdErr.reset();
     }
 
     @Test
