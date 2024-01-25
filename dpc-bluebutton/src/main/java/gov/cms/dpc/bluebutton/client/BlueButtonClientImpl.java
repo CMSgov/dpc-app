@@ -81,7 +81,7 @@ public class BlueButtonClientImpl implements BlueButtonClient {
     public Bundle requestPatientFromServer(String patientId, DateRangeParam lastUpdated, Map<String, String> headers) throws ResourceNotFoundException {
         logger.debug("Attempting to fetch patient ID {} from baseURL: {}", patientId, client.getServerBase());
         ICriterion<ReferenceClientParam> criterion = new ReferenceClientParam(Patient.SP_RES_ID).hasId(patientId);
-        return instrumentCall(REQUEST_EOB_METRIC, () ->
+        return instrumentCall(REQUEST_PATIENT_METRIC, () ->
                 fetchBundle(Patient.class, Collections.singletonList(criterion), patientId, lastUpdated, headers));
     }
 
