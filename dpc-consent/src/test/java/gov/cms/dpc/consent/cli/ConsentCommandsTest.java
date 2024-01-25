@@ -37,42 +37,34 @@ class ConsentCommandsTest {
 
     private static Bootstrap<DPCConsentConfiguration> setupBootstrap(DPCConsentService app) {
         // adapted from DropwizardTestSupport
-        Bootstrap<DPCConsentConfiguration> bootstrap = new Bootstrap<>(app) {
+        Bootstrap<DPCConsentConfiguration> bootstrap = new Bootstrap<>(ConsentCommandsTest.app) {
             public void run(DPCConsentConfiguration configuration, Environment environment) throws Exception {
                 super.run(configuration, environment);
                 setConfigurationFactoryFactory((klass, validator, objectMapper, propertyPrefix) ->
                         new POJOConfigurationFactory<>(configuration));
             }
         };
-        app.initialize(bootstrap);
+        ConsentCommandsTest.app.initialize(bootstrap);
         return bootstrap;
     }
 
-    @BeforeAll
+    @BeforeEach
     void cliSetup() throws Exception {
-
+        final JarLocation location = mock(JarLocation.class);
+        when(location.getVersion()).thenReturn(Optional.of("1.0.0"));
 
         // Redirect stdout and stderr to our byte streams
         System.setOut(new PrintStream(stdOut));
         System.setErr(new PrintStream(stdErr));
 
-        final JarLocation location = mock(JarLocation.class);
-        when(location.getVersion()).thenReturn(Optional.of("1.0.0"));
-
         cli = new Cli(location, bs, stdOut, stdErr);
     }
 
-    @AfterAll
+    @AfterEach
     void teardown() {
         System.setOut(originalOut);
         System.setErr(originalErr);
         System.setIn(originalIn);
-    }
-
-    @AfterEach
-    void resetIO() {
-        stdOut.reset();
-        stdErr.reset();
     }
 
     @Test
