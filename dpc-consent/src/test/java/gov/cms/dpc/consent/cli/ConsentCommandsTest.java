@@ -95,7 +95,6 @@ class ConsentCommandsTest {
 
     @Test
     final void createDefaultOptInRecord() throws Exception {
-        stdErr.reset();
         final Optional<Throwable> t2 = cli.run("consent", "create", "-p", "t2-mbi", "-d", "2019-11-22", "-i", "--host", "http://localhost:3500/v1");
         assertAll(() -> assertTrue(t2.isPresent(), "Should have succeeded"),
                 () -> assertEquals("", stdErr.toString(), "Should not have errors"));
@@ -103,7 +102,6 @@ class ConsentCommandsTest {
 
     @Test
     final void createDefaultOptOutRecord() throws Exception {
-        stdErr.reset();
         final Optional<Throwable> t3 = cli.run("consent", "create", "-p", "t3-mbi", "-d", "2019-11-23", "-o", "--host", "http://localhost:3500/v1");
         assertAll(() -> assertTrue(t3.isPresent(), "Should have succeeded"),
                 () -> assertEquals("", stdErr.toString(), "Should not have errors"));

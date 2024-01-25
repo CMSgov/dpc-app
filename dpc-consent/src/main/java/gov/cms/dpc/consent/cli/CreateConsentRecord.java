@@ -42,6 +42,8 @@ public class CreateConsentRecord extends ConsentCommand {
     private static final Logger logger = LoggerFactory.getLogger(CreateConsentRecord.class);
 
     private static final String IN_OR_OUT_ARG = "inOrOut";
+    private static final String IN_ARG = "in";
+    private static final String OUT_ARG = "out";
 
     private final Settings settings;
 
@@ -63,36 +65,34 @@ public class CreateConsentRecord extends ConsentCommand {
                 .help("effective date of this record (e.g., 2019-11-20)");
 
 
-        addInOrOutGroup(subparser);
-    }
-
-    private void addInOrOutGroup(Subparser subparser) {
-        MutuallyExclusiveGroup group = subparser.addMutuallyExclusiveGroup();
-        group
-                .addArgument("-i", "--in")
-                .dest(IN_OR_OUT_ARG)
+        subparser.addArgument("-i", "--in")
+                .dest(IN_ARG)
                 .action(Arguments.storeConst()).setConst(ConsentEntity.OPT_IN)
                 .help("flag indicating this is an optin record; mutually exclusive with -o");
-        group
-                .addArgument("-o", "--out")
-                .dest(IN_OR_OUT_ARG)
+        subparser.addArgument("-o", "--out")
+                .dest(OUT_ARG)
                 .action(Arguments.storeConst()).setConst(ConsentEntity.OPT_OUT)
                 .help("flag indicating this is an optout record; mutually exclusive with -i");
 
-        group.required(true);
     }
 
     @Override
     protected void run(Bootstrap<DPCConsentConfiguration> bootstrap, Namespace namespace, DPCConsentConfiguration dpcConsentConfiguration) throws DataAccessException, SQLException {
         final String mbi = namespace.getString("mbi");
         final LocalDate effectiveDate = LocalDate.parse(namespace.getString("effective-date"));
-        final String inOrOut = namespace.getString(IN_OR_OUT_ARG);
+        final String in = namespace.getString(IN_ARG);
+        final String out = namespace.getString(OUT_ARG);
+        logger.error("PARAMETERS: MBI = " + mbi, ", DATE = " + effectiveDate.toString() + ", in: " + in + ", out: " + out);
 
         // TODO verify mbi / org exist in DPC attribution
 
         ConsentEntity ce = ConsentEntity.defaultConsentEntity(Optional.empty(), Optional.empty(), Optional.of(mbi));
         ce.setEffectiveDate(effectiveDate);
-        ce.setPolicyCode(inOrOut);
+        if (in.isBlank() && !out.isBlank()){
+            ce.setPolicyCode(out);
+        } else if (!in.isBlank() && out.isBlank()) {
+            ce.setPolicyCode(in);
+        }
 
         saveEntity(bootstrap, dpcConsentConfiguration, ce);
 
