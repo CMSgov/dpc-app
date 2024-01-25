@@ -109,9 +109,7 @@ class ResourceFetcherUnitTest {
         );
 
         Flowable<List<Resource>> results = fetcher.fetchResources(testPatient, Map.of());
-        JobQueueFailure exception = assertThrows(JobQueueFailure.class, () -> {
-            results.flatMap(Flowable::fromIterable).toList().blockingGet();
-        });
+        JobQueueFailure exception = assertThrows(JobQueueFailure.class, () -> results.flatMap(Flowable::fromIterable).toList().blockingGet());
 
         assertEquals("BFD's transaction time regression", exception.getMessage());
     }
@@ -221,9 +219,7 @@ class ResourceFetcherUnitTest {
 
         Flowable<List<Resource>> results = fetcher.fetchResources(testPatient, Map.of());
 
-        JobQueueFailure exception = assertThrows(JobQueueFailure.class, () -> {
-            results.flatMap(Flowable::fromIterable).toList().blockingGet();
-        });
+        JobQueueFailure exception = assertThrows(JobQueueFailure.class, () -> results.flatMap(Flowable::fromIterable).toList().blockingGet());
 
         assertTrue(exception.getMessage().contains("Unexpected resource type: Practitioner"));
     }

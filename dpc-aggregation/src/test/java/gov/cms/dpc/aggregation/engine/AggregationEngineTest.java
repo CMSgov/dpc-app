@@ -57,7 +57,6 @@ class AggregationEngineTest {
     private ConsentService mockConsentService;
 
     static private final FhirContext fhirContext = FhirContext.forDstu3();
-    static private final FhirContext fhirContextR4 = FhirContext.forR4();
     static private final MetricRegistry metricRegistry = new MetricRegistry();
     static private String exportPath;
 

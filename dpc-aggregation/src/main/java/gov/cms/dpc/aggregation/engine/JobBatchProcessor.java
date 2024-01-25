@@ -289,20 +289,4 @@ public class JobBatchProcessor {
         return answers.stream()
                 .anyMatch(a -> a.matchDateCriteria() && (a.orgNPIMatchAnyEobNPIs() || a.practitionerNPIMatchAnyEobNPIs()));
     }
-
-    /**
-     * Takes a list of resources, finds all of the {@link Patient}s and returns a list of their valid
-     * MBIs.  If there is more than one {@link Patient} all of their MBIs will be returned, and if there are no
-     * {@link Patient}s an empty list will be returned.
-     * @param resources A {@link Flowable} of FHIR {@link Resource}s
-     * @return A {@link List} of MBIs
-     */
-    private List<String> getMBIs(Flowable<Resource> resources) {
-        return resources
-                .filter(r -> DPCResourceType.Patient.getPath().equals(r.getResourceType().getPath()))
-                .map(r -> (Patient)r)
-                .flatMap(p -> Flowable.fromIterable(getPatientMBIs(p)))
-                .toList()
-                .blockingGet();
-    }
 }
