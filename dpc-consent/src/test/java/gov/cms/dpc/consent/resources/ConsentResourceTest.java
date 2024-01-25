@@ -204,7 +204,7 @@ class ConsentResourceTest extends AbstractConsentTest {
 
     @Test
     final void searchConsentResource_multiple_ids_for_one_patient() {
-        String patientIds = "mbi_1,mbi_2";
+        String patientIds = String.format("%s|%s,%s|%s", MBI.getSystem(), "mbi_1", MBI.getSystem(), "mbi_no_record");
         final IGenericClient client = createFHIRClient(ctx, getServerURL());
 
         final Bundle sut = client
