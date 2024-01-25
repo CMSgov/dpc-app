@@ -175,7 +175,13 @@ public class FHIRExtractors {
             system = system.substring(0, system.length() - 1);
         }
         identifier.setSystem(system);
-        identifier.setValue(stringPair.getRight());
+        // Strip off any trailing '\' characters.
+        // These might come in when parsing an ID that was separated by comma
+        String value = stringPair.getRight();
+        if (value.endsWith("\\")) {
+            value = value.substring(0, value.length() - 1);
+        }
+        identifier.setValue(value);
         return identifier;
     }
 

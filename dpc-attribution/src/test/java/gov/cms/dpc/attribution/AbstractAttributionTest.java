@@ -26,7 +26,7 @@ public abstract class AbstractAttributionTest {
     private static final String KEY_PREFIX = "dpc.attribution";
     private static final ObjectMapper mapper = new ObjectMapper();
 
-    protected static DropwizardTestSupport<DPCAttributionConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCAttributionService.class, "ci.application.conf",
+    protected static final DropwizardTestSupport<DPCAttributionConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCAttributionService.class, "ci.application.conf",
             ConfigOverride.config(KEY_PREFIX, "logging.level", "ERROR"));
 
     protected static final String ORGANIZATION_ID = "0c527d2e-2e8a-4808-b11d-0fa06baf8254";
@@ -51,15 +51,6 @@ public abstract class AbstractAttributionTest {
 
     protected String getServerURL() {
         return String.format("http://localhost:%s/v1", APPLICATION.getLocalPort());
-    }
-
-    // Restarts application with one of the configuration values overridden
-    protected void overrideConfig(String key, String value) throws Exception {
-        APPLICATION.after();
-        APPLICATION = new DropwizardTestSupport<>(DPCAttributionService.class, "ci.application.conf",
-                ConfigOverride.config(KEY_PREFIX, "logging.level", "ERROR"),
-                ConfigOverride.config(KEY_PREFIX, key, value));
-        APPLICATION.before();
     }
 
     private static void checkAllConnectionsClosed(String adminURL) throws IOException {
