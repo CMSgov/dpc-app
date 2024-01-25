@@ -61,10 +61,12 @@ class ConsentCommandsTest {
     }
 
     @AfterEach
-    void teardown() {
+    void reset() {
         System.setOut(originalOut);
         System.setErr(originalErr);
         System.setIn(originalIn);
+        stdOut.reset();
+        stdErr.reset();
     }
 
     @Test
