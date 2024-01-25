@@ -14,7 +14,6 @@ import io.dropwizard.migrations.MigrationsBundle;
 import io.dropwizard.core.setup.Bootstrap;
 import io.dropwizard.core.setup.Environment;
 import liquibase.exception.DatabaseException;
-import no.digipost.dropwizard.TypeSafeConfiguredBundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.vyarus.dropwizard.guice.GuiceBundle;
@@ -48,7 +47,6 @@ public class DPCConsentService extends Application<DPCConsentConfiguration> {
 
         bootstrap.addBundle(hibernateBundle);
         bootstrap.addBundle(guiceBundle);
-        bootstrap.addBundle(new TypeSafeConfiguredBundle<>());
         bootstrap.addBundle(new MigrationsBundle<>() {
             @Override
             public PooledDataSourceFactory getDataSourceFactory(DPCConsentConfiguration configuration) {

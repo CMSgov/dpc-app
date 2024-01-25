@@ -30,7 +30,6 @@ import io.dropwizard.db.DataSourceFactory;
 import io.dropwizard.migrations.MigrationsBundle;
 import io.dropwizard.core.setup.Bootstrap;
 import io.dropwizard.core.setup.Environment;
-import no.digipost.dropwizard.TypeSafeConfiguredBundle;
 import ru.vyarus.dropwizard.guice.GuiceBundle;
 import ru.vyarus.dropwizard.guice.injector.lookup.InjectorLookup;
 
@@ -68,7 +67,6 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
         bootstrap.addBundle(hibernateAuthBundle);
 
         bootstrap.addBundle(guiceBundle);
-        bootstrap.addBundle(new TypeSafeConfiguredBundle<>());
 
         // Wrapper around some of the uglier bundle initialization commands
         setupCustomBundles(bootstrap);

@@ -13,7 +13,6 @@ import io.dropwizard.db.DataSourceFactory;
 import io.dropwizard.migrations.MigrationsBundle;
 import io.dropwizard.core.setup.Bootstrap;
 import io.dropwizard.core.setup.Environment;
-import no.digipost.dropwizard.TypeSafeConfiguredBundle;
 import ru.vyarus.dropwizard.guice.GuiceBundle;
 
 public class DPCAggregationService extends Application<DPCAggregationConfiguration> {
@@ -48,7 +47,6 @@ public class DPCAggregationService extends Application<DPCAggregationConfigurati
         bootstrap.addBundle(hibernateBundle);
 
         bootstrap.addBundle(guiceBundle);
-        bootstrap.addBundle(new TypeSafeConfiguredBundle<>());
         bootstrap.addBundle(new MigrationsBundle<>() {
             @Override
             public DataSourceFactory getDataSourceFactory(DPCAggregationConfiguration dpcAggregationConfiguration) {

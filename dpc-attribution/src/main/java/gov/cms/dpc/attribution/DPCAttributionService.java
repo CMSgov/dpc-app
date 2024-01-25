@@ -14,7 +14,6 @@ import io.dropwizard.core.setup.Bootstrap;
 import io.dropwizard.core.setup.Environment;
 import io.dropwizard.db.PooledDataSourceFactory;
 import io.dropwizard.migrations.MigrationsBundle;
-import no.digipost.dropwizard.TypeSafeConfiguredBundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.vyarus.dropwizard.guice.GuiceBundle;
@@ -67,7 +66,6 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
         bootstrap.addBundle(hibernateBundle);
 
         bootstrap.addBundle(guiceBundle);
-        bootstrap.addBundle(new TypeSafeConfiguredBundle<>());
         bootstrap.addBundle(new MigrationsBundle<>() {
             @Override
             public PooledDataSourceFactory getDataSourceFactory(DPCAttributionConfiguration configuration) {
