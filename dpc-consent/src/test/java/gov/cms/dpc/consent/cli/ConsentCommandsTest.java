@@ -52,7 +52,7 @@ class ConsentCommandsTest {
     void cliSetup() throws Exception {
         final JarLocation location = mock(JarLocation.class);
         when(location.getVersion()).thenReturn(Optional.of("1.0.0"));
-
+        stdErr.reset();
         // Redirect stdout and stderr to our byte streams
         System.setOut(new PrintStream(stdOut));
         System.setErr(new PrintStream(stdErr));
