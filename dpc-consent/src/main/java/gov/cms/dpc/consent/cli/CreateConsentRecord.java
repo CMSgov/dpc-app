@@ -40,7 +40,6 @@ public class CreateConsentRecord extends ConsentCommand {
 
     private static final Logger logger = LoggerFactory.getLogger(CreateConsentRecord.class);
 
-    private static final String IN_OR_OUT_ARG = "inOrOut";
     private static final String IN_ARG = "in";
     private static final String OUT_ARG = "out";
 
@@ -81,7 +80,7 @@ public class CreateConsentRecord extends ConsentCommand {
         final LocalDate effectiveDate = LocalDate.parse(namespace.getString("effective-date"));
         final String in = namespace.getString(IN_ARG);
         final String out = namespace.getString(OUT_ARG);
-        logger.error("PARAMETERS: MBI = " + mbi, ", DATE = " + effectiveDate.toString() + ", in: " + in + ", out: " + out);
+        logger.error(String.format("PARAMETERS: MBI %s, DATE %s, IN %s, OUT %s", mbi, effectiveDate, in, out));
 
         // TODO verify mbi / org exist in DPC attribution
 
