@@ -62,7 +62,7 @@ public class JobBatchProcessor {
      * @param aggregatorID the current aggregatorID
      * @param queue        the queue
      * @param job          the job to process
-     * @param mbi    the current patient id to process
+     * @param mbi          the current patient mbi to process
      * @return A list of batch files {@link JobQueueBatchFile}
      */
     public List<JobQueueBatchFile> processJobBatchPartial(UUID aggregatorID, IJobQueue queue, JobQueueBatch job, String mbi) {
