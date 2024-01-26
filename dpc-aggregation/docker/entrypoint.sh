@@ -29,9 +29,11 @@ else
     NR_AGENT=""
 fi
 
+CONFFILE="/app/resources/application.yml"
+
 if [ $DB_MIGRATION -eq 1 ]; then
   echo "Migrating the database"
-  eval java ${JVM_FLAGS} ${JAVA_CLASSES} db migrate
+  eval java ${JVM_FLAGS} ${JAVA_CLASSES} db migrate ${CONFFILE}
 fi
 
 if [ "$DEBUG_MODE" = "true" ]; then
@@ -46,7 +48,7 @@ CMDLINE="java ${JVM_FLAGS} ${DEBUG_FLAGS} ${JACOCO} ${NR_AGENT} ${JAVA_CLASSES}"
 echo "Running server via entrypoint!"
 
 if [ -n "$JACOCO" ]; then
-  exec ${CMDLINE} "$@"
+  exec ${CMDLINE} "$@" ${CONFFILE}
 else
-  exec ${CMDLINE} "$@" 2>&1 | tee -a /var/log/dpc-aggregation-$(hostname).log
+  exec ${CMDLINE} "$@" ${CONFFILE} 2>&1 | tee -a /var/log/dpc-aggregation-$(hostname).log
 fi

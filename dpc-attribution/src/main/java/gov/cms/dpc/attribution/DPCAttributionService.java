@@ -16,8 +16,6 @@ import io.dropwizard.db.PooledDataSourceFactory;
 import io.dropwizard.migrations.MigrationsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
-import io.federecio.dropwizard.swagger.SwaggerBundle;
-import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 import org.knowm.dropwizard.sundial.SundialBundle;
 import org.knowm.dropwizard.sundial.SundialConfiguration;
 import org.slf4j.Logger;
@@ -87,12 +85,12 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
             }
         });
 
-        bootstrap.addBundle(new SwaggerBundle<>() {
-            @Override
-            protected SwaggerBundleConfiguration getSwaggerBundleConfiguration(DPCAttributionConfiguration dpcAttributionConfiguration) {
-                return dpcAttributionConfiguration.getSwaggerBundleConfiguration();
-            }
-        });
+//        bootstrap.addBundle(new SwaggerBundle<>() {
+//            @Override
+//            protected SwaggerBundleConfiguration getSwaggerBundleConfiguration(DPCAttributionConfiguration dpcAttributionConfiguration) {
+//                return dpcAttributionConfiguration.getSwaggerBundleConfiguration();
+//            }
+//        });
 
         final SundialBundle<DPCAttributionConfiguration> sundialBundle = new SundialBundle<>() {
             @Override

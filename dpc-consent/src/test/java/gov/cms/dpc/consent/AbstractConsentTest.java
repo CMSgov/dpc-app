@@ -12,7 +12,7 @@ import ru.vyarus.dropwizard.guice.module.context.SharedConfigurationState;
 
 @IntegrationTest
 public abstract class AbstractConsentTest {
-    protected static final DropwizardTestSupport<DPCConsentConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCConsentService.class, "ci.application.conf");
+    protected static final DropwizardTestSupport<DPCConsentConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCConsentService.class, "application.yml");
 
     protected FhirContext ctx = FhirContext.forDstu3();
 
@@ -20,9 +20,9 @@ public abstract class AbstractConsentTest {
     public static void initDB() throws Exception {
         APPLICATION.before();
         SharedConfigurationState.clear();
-        APPLICATION.getApplication().run("db", "migrate", "ci.application.conf");
+        APPLICATION.getApplication().run("db", "migrate", "application.yml");
         SharedConfigurationState.clear();
-        APPLICATION.getApplication().run("seed", "ci.application.conf");
+        APPLICATION.getApplication().run("seed", "application.yml");
     }
 
     @AfterAll

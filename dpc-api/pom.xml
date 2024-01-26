@@ -219,11 +219,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <dependency>
-            <groupId>com.typesafe</groupId>
-            <artifactId>config</artifactId>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 
     <build>

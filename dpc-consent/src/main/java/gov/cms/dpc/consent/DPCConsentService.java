@@ -9,6 +9,8 @@ import gov.cms.dpc.consent.cli.ConsentCommands;
 import gov.cms.dpc.consent.cli.SeedCommand;
 import gov.cms.dpc.fhir.FHIRModule;
 import io.dropwizard.Application;
+import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
+import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.db.PooledDataSourceFactory;
 import io.dropwizard.migrations.MigrationsBundle;
 import io.dropwizard.setup.Bootstrap;
@@ -38,6 +40,13 @@ public class DPCConsentService extends Application<DPCConsentConfiguration> {
     @Override
     public void initialize(Bootstrap<DPCConsentConfiguration> bootstrap) {
         JerseyGuiceUtils.reset();
+
+        // Enable variable substitution with environment variables
+        EnvironmentVariableSubstitutor substitutor = new EnvironmentVariableSubstitutor(false);
+        SubstitutingSourceProvider provider =
+                new SubstitutingSourceProvider(bootstrap.getConfigurationSourceProvider(), substitutor);
+        bootstrap.setConfigurationSourceProvider(provider);
+
         GuiceBundle guiceBundle = GuiceBundle.builder()
                 .modules(
                         new DPCConsentHibernateModule<>(hibernateBundle),

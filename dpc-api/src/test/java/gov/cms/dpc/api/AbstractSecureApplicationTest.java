@@ -44,7 +44,7 @@ public class AbstractSecureApplicationTest {
     private static final String KEY_PREFIX = "dpc.api";
     private static final ObjectMapper mapper = new ObjectMapper();
 
-    private static final DropwizardTestSupport<DPCAPIConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCAPIService.class, "ci.application.conf", ConfigOverride.config(KEY_PREFIX, "", "true"),
+    private static final DropwizardTestSupport<DPCAPIConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCAPIService.class, "application.yml", ConfigOverride.config(KEY_PREFIX, "", "true"),
             ConfigOverride.config(KEY_PREFIX, "logging.level", "ERROR"));
     protected static FhirContext ctx;
     protected static String ORGANIZATION_TOKEN;

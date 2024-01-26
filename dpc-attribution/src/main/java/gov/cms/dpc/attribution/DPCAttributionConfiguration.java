@@ -6,7 +6,6 @@ import gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration;
 import gov.cms.dpc.fhir.configuration.IDPCFHIRConfiguration;
 import io.dropwizard.Configuration;
 import io.dropwizard.db.DataSourceFactory;
-import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 import org.knowm.dropwizard.sundial.SundialConfiguration;
 
 import javax.validation.Valid;
@@ -41,8 +40,8 @@ public class DPCAttributionConfiguration extends Configuration implements IDPCDa
     @JsonProperty("fhir")
     private DPCFHIRConfiguration fhirConfig;
 
-    @JsonProperty("swagger")
-    private SwaggerBundleConfiguration swaggerBundleConfiguration;
+//    @JsonProperty("swagger")
+//    private SwaggerBundleConfiguration swaggerBundleConfiguration;
 
     @Min(-1)
     private Integer providerLimit;
@@ -87,13 +86,13 @@ public class DPCAttributionConfiguration extends Configuration implements IDPCDa
         this.fhirConfig = config;
     }
 
-    public SwaggerBundleConfiguration getSwaggerBundleConfiguration() {
-        return swaggerBundleConfiguration;
-    }
-
-    public void setSwaggerBundleConfiguration(SwaggerBundleConfiguration swaggerBundleConfiguration) {
-        this.swaggerBundleConfiguration = swaggerBundleConfiguration;
-    }
+//    public SwaggerBundleConfiguration getSwaggerBundleConfiguration() {
+//        return swaggerBundleConfiguration;
+//    }
+//
+//    public void setSwaggerBundleConfiguration(SwaggerBundleConfiguration swaggerBundleConfiguration) {
+//        this.swaggerBundleConfiguration = swaggerBundleConfiguration;
+//    }
 
     public Boolean getMigrationEnabled() {
         return migrationEnabled;
