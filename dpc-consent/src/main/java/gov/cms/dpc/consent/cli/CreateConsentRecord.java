@@ -8,6 +8,7 @@ import io.dropwizard.db.ManagedDataSource;
 import io.dropwizard.db.PooledDataSourceFactory;
 import io.dropwizard.setup.Bootstrap;
 import net.sourceforge.argparse4j.impl.Arguments;
+import net.sourceforge.argparse4j.inf.MutuallyExclusiveGroup;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
 import org.jooq.DSLContext;
@@ -15,8 +16,6 @@ import org.jooq.conf.RenderQuotedNames;
 import org.jooq.conf.Settings;
 import org.jooq.exception.DataAccessException;
 import org.jooq.impl.DSL;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -38,10 +37,10 @@ import static gov.cms.dpc.consent.dao.tables.Consent.CONSENT;
  */
 public class CreateConsentRecord extends ConsentCommand {
 
-    private static final Logger logger = LoggerFactory.getLogger(CreateConsentRecord.class);
-
     private static final String IN_ARG = "in";
     private static final String OUT_ARG = "out";
+
+    private static final String IN_OR_OUT_ARG = "inOrOut";
 
     private final Settings settings;
 
@@ -63,38 +62,38 @@ public class CreateConsentRecord extends ConsentCommand {
                 .help("effective date of this record (e.g., 2019-11-20)");
 
 
-        subparser.addArgument("-i", "--in")
-                .dest(IN_ARG)
+        addInOrOutGroup(subparser);
+    }
+
+    private void addInOrOutGroup(Subparser subparser) {
+        MutuallyExclusiveGroup group = subparser.addMutuallyExclusiveGroup();
+        group
+                .addArgument("-i", "--in")
+                .dest(IN_OR_OUT_ARG)
                 .action(Arguments.storeConst()).setConst(ConsentEntity.OPT_IN)
                 .help("flag indicating this is an optin record; mutually exclusive with -o");
-        subparser.addArgument("-o", "--out")
-                .dest(OUT_ARG)
+        group
+                .addArgument("-o", "--out")
+                .dest(IN_OR_OUT_ARG)
                 .action(Arguments.storeConst()).setConst(ConsentEntity.OPT_OUT)
                 .help("flag indicating this is an optout record; mutually exclusive with -i");
 
+        group.required(true);
     }
 
     @Override
     protected void run(Bootstrap<DPCConsentConfiguration> bootstrap, Namespace namespace, DPCConsentConfiguration dpcConsentConfiguration) throws DataAccessException, SQLException {
         final String mbi = namespace.getString("mbi");
         final LocalDate effectiveDate = LocalDate.parse(namespace.getString("effective-date"));
-        final String in = namespace.getString(IN_ARG);
-        final String out = namespace.getString(OUT_ARG);
-        logger.error(String.format("PARAMETERS: MBI %s, DATE %s, IN %s, OUT %s", mbi, effectiveDate, in, out));
+        final String inOrOut = namespace.getString(IN_OR_OUT_ARG);
 
         // TODO verify mbi / org exist in DPC attribution
 
         ConsentEntity ce = ConsentEntity.defaultConsentEntity(Optional.empty(), Optional.empty(), Optional.of(mbi));
         ce.setEffectiveDate(effectiveDate);
-        if (in.isBlank() && !out.isBlank()){
-            ce.setPolicyCode(out);
-        } else if (!in.isBlank() && out.isBlank()) {
-            ce.setPolicyCode(in);
-        }
+        ce.setPolicyCode(inOrOut);
 
         saveEntity(bootstrap, dpcConsentConfiguration, ce);
-
-        logger.info("Created {} consent entry. Consent entry id: {}, effective {}",ce.getPolicyCode(), ce.getId().toString(), ce.getEffectiveDate());
     }
 
     private void saveEntity(Bootstrap<DPCConsentConfiguration> bootstrap, DPCConsentConfiguration dpcConsentConfiguration, ConsentEntity entity) throws DataAccessException, SQLException {
