@@ -16,6 +16,8 @@ import org.jooq.conf.RenderQuotedNames;
 import org.jooq.conf.Settings;
 import org.jooq.exception.DataAccessException;
 import org.jooq.impl.DSL;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -36,8 +38,8 @@ import static gov.cms.dpc.consent.dao.tables.Consent.CONSENT;
  * </ul>
  */
 public class CreateConsentRecord extends ConsentCommand {
-
     private static final String IN_OR_OUT_ARG = "inOrOut";
+    private static final Logger logger = LoggerFactory.getLogger(CreateConsentRecord.class);
 
     private final Settings settings;
 
@@ -91,6 +93,8 @@ public class CreateConsentRecord extends ConsentCommand {
         ce.setPolicyCode(inOrOut);
 
         saveEntity(bootstrap, dpcConsentConfiguration, ce);
+
+        logger.info("Created {} consent entry. Consent entry id: {}, effective {}",ce.getPolicyCode(), ce.getId().toString(), ce.getEffectiveDate());
     }
 
     private void saveEntity(Bootstrap<DPCConsentConfiguration> bootstrap, DPCConsentConfiguration dpcConsentConfiguration, ConsentEntity entity) throws DataAccessException, SQLException {
