@@ -10,6 +10,7 @@ import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.common.MDCConstants;
 import gov.cms.dpc.common.utils.MetricMaker;
 import gov.cms.dpc.fhir.DPCResourceType;
+import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatchFile;
@@ -67,50 +68,111 @@ public class JobBatchProcessor {
      */
     public List<JobQueueBatchFile> processJobBatchPartial(UUID aggregatorID, IJobQueue queue, JobQueueBatch job, String mbi) {
         StopWatch stopWatch = StopWatch.createStarted();
-        OutcomeReason failReason = null;
-        Flowable<Resource> flowable;
+        Optional<OutcomeReason> failReason = Optional.empty();
+        Optional<Flowable<Resource>> flowable = Optional.empty();
 
+        // Load the Patient resource from BFD.
         final Optional<Patient> optPatient = fetchPatient(job, mbi);
         if(optPatient.isEmpty()) {
-            failReason = OutcomeReason.INTERNAL_ERROR;
-            flowable = Flowable.just(AggregationUtils.toOperationOutcome(failReason, mbi));
-        } else {
-            final Patient patient = optPatient.get();
-            final Pair<Optional<List<ConsentResult>>, Optional<OperationOutcome>> consentResult = getConsent(patient);
+            // Failed to load patient
+            failReason = Optional.of(OutcomeReason.INTERNAL_ERROR);
+            flowable = Optional.of(Flowable.just(AggregationUtils.toOperationOutcome(failReason.get(), mbi)));
+        }
 
-            if (consentResult.getRight().isPresent()) {
-                flowable = Flowable.just(consentResult.getRight().get());
-                failReason = OutcomeReason.INTERNAL_ERROR;
-            } else if (isOptedOut(consentResult.getLeft())) {
-                failReason = OutcomeReason.CONSENT_OPTED_OUT;
-                flowable = Flowable.just(AggregationUtils.toOperationOutcome(OutcomeReason.CONSENT_OPTED_OUT, mbi));
-            } else if (isLookBackExempt(job.getOrgID())) {
-                logger.info("Skipping lookBack for org: {}", job.getOrgID().toString());
-                MDC.put(MDCConstants.IS_SMOKE_TEST_ORG, "true");
-                flowable = Flowable.fromIterable(job.getResourceTypes())
-                        .flatMap(r -> fetchResource(job, patient, r, job.getSince().orElse(null)));
-            } else {
-                List<LookBackAnswer> answers = getLookBackAnswers(job, patient);
-                if (passesLookBack(answers)) {
-                    flowable = Flowable.fromIterable(job.getResourceTypes())
-                            .flatMap(r -> fetchResource(job, patient, r, job.getSince().orElse(null)));
-                } else {
-                    failReason = LookBackAnalyzer.analyze(answers);
-                    flowable = Flowable.just(AggregationUtils.toOperationOutcome(failReason, mbi));
-                }
+        // Check if the patient has opted out
+        if(flowable.isEmpty()) {
+            Optional<Pair<Flowable<Resource>, OutcomeReason>> consentResult = checkConsent(optPatient.get());
+            if(consentResult.isPresent()) {
+                flowable = Optional.of(consentResult.get().getLeft());
+                failReason = Optional.of(consentResult.get().getRight());
             }
         }
 
-        final var results = writeResource(job, flowable)
+        // Check if the patient passes look back
+        if(flowable.isEmpty()) {
+            Optional<Pair<Flowable<Resource>, OutcomeReason>> lookBackResult = checkLookBack(optPatient.get(), job);
+            if(lookBackResult.isPresent()) {
+                flowable = Optional.of(lookBackResult.get().getLeft());
+                failReason = Optional.of(lookBackResult.get().getRight());
+            }
+        }
+
+        // All checks passed, load resources
+        if(flowable.isEmpty()) {
+            flowable = Optional.of(
+                    Flowable.fromIterable(job.getResourceTypes()).flatMap(r -> fetchResource(job, optPatient.get(), r, job.getSince().orElse(null)))
+            );
+        }
+
+        final var results = writeResource(job, flowable.get())
                 .toList()
                 .blockingGet();
         queue.completePartialBatch(job, aggregatorID);
 
         final String resourcesRequested = job.getResourceTypes().stream().map(DPCResourceType::getPath).filter(Objects::nonNull).collect(Collectors.joining(";"));
-        final String failReasonLabel = failReason == null ? "NA" : failReason.name();
+        final String failReasonLabel = failReason.isEmpty() ? "NA" : failReason.get().name();
         stopWatch.stop();
-        logger.info("dpcMetric=DataExportResult,dataRetrieved={},failReason={},resourcesRequested={},duration={}", failReason == null, failReasonLabel, resourcesRequested, stopWatch.getTime());
+        logger.info("dpcMetric=DataExportResult,dataRetrieved={},failReason={},resourcesRequested={},duration={}", failReason.isEmpty(), failReasonLabel, resourcesRequested, stopWatch.getTime());
         return results;
+    }
+
+    /**
+     * Checks the given patient against the consent service and returns any issues if the check doesn't pass.
+     * @param patient   {@link Patient} resource we're checking consent for.
+     * @return If there's a problem, it returns a pair of a {@link Flowable} {@link OperationOutcome} and an {@link OutcomeReason}.
+     * If the Patient passes the consent check, it returns an empty {@link Optional}s.
+     */
+    private Optional<Pair<Flowable<Resource>, OutcomeReason>> checkConsent(Patient patient) {
+        final Pair<Optional<List<ConsentResult>>, Optional<OperationOutcome>> consentResult = getConsent(patient);
+
+        if (consentResult.getRight().isPresent()) {
+            // Consent check returned an error
+            return Optional.of(
+                    Pair.of(
+                        Flowable.just(consentResult.getRight().get()),
+                        OutcomeReason.INTERNAL_ERROR
+                    )
+            );
+        } else if (isOptedOut(consentResult.getLeft())) {
+            // Enrollee is opted out
+            return Optional.of(
+                    Pair.of(
+                            Flowable.just(AggregationUtils.toOperationOutcome(OutcomeReason.CONSENT_OPTED_OUT, FHIRExtractors.getPatientMBI(patient))),
+                            OutcomeReason.CONSENT_OPTED_OUT
+                    )
+            );
+        }
+
+        // Passes consent check
+        return Optional.empty();
+    }
+
+    /**
+     * Does the patient look back check and returns any issues if it doesn't pass.
+     * @param patient   {@link Patient} resource we're looking for a relationship for.
+     * @param job       {@link JobQueueBatch} currently running.
+     * @return If there's a problem, it returns a pair of a {@link Flowable} {@link OperationOutcome} and an {@link OutcomeReason}.
+     * If the look back check passes, an empty {@link Optional}.
+     */
+    private Optional<Pair<Flowable<Resource>, OutcomeReason>> checkLookBack(Patient patient, JobQueueBatch job) {
+        if (isLookBackExempt(job.getOrgID())) {
+            logger.info("Skipping lookBack for org: {}", job.getOrgID().toString());
+            MDC.put(MDCConstants.IS_SMOKE_TEST_ORG, "true");
+        } else {
+            List<LookBackAnswer> answers = getLookBackAnswers(job, patient);
+            if (!passesLookBack(answers)) {
+                OutcomeReason failReason = LookBackAnalyzer.analyze(answers);
+                return Optional.of(
+                        Pair.of(
+                        Flowable.just(AggregationUtils.toOperationOutcome(failReason, FHIRExtractors.getPatientMBI(patient))),
+                        failReason
+                        )
+                );
+            }
+        }
+
+        // Passes lookback check
+        return Optional.empty();
     }
 
     private boolean isLookBackExempt(UUID orgId) {
