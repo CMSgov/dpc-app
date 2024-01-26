@@ -50,8 +50,6 @@ class ConsentCommandsTest {
 
     @BeforeAll
     void cliSetup() throws Exception {
-        ((LoggerContext)org.slf4j.LoggerFactory.getILoggerFactory()).stop();
-
         // Redirect stdout and stderr to our byte streams
         System.setOut(new PrintStream(stdOut));
         System.setErr(new PrintStream(stdErr));
@@ -60,6 +58,11 @@ class ConsentCommandsTest {
         when(location.getVersion()).thenReturn(Optional.of("1.0.0"));
 
         cli = new Cli(location, bs, stdOut, stdErr);
+    }
+
+    @BeforeEach
+    void stopLogging() {
+        ((LoggerContext)org.slf4j.LoggerFactory.getILoggerFactory()).stop();
     }
 
     @AfterAll
