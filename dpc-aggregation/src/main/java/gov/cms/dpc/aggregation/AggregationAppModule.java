@@ -7,7 +7,6 @@ import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.google.inject.name.Named;
-import com.typesafe.config.Config;
 import gov.cms.dpc.aggregation.engine.AggregationEngine;
 import gov.cms.dpc.aggregation.engine.JobBatchProcessor;
 import gov.cms.dpc.aggregation.engine.JobBatchProcessorV2;
@@ -73,11 +72,6 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
     @Singleton
     MetricRegistry provideMetricRegistry() {
         return environment().metrics();
-    }
-
-    @Provides
-    public Config provideConfig() {
-        return configuration().getConfig();
     }
 
     @Provides

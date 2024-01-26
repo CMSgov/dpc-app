@@ -2,7 +2,7 @@ package gov.cms.dpc.common.hibernate.consent;
 
 import com.google.inject.Provides;
 import com.google.inject.Scopes;
-import io.dropwizard.Configuration;
+import io.dropwizard.core.Configuration;
 import ru.vyarus.dropwizard.guice.module.support.DropwizardAwareModule;
 
 import javax.inject.Singleton;

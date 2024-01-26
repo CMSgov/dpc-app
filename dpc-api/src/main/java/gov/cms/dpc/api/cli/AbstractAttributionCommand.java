@@ -2,7 +2,7 @@ package gov.cms.dpc.api.cli;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
-import io.dropwizard.cli.Command;
+import io.dropwizard.core.cli.Command;
 import net.sourceforge.argparse4j.inf.Subparser;
 
 /**

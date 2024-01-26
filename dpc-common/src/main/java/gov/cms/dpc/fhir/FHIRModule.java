@@ -16,7 +16,7 @@ import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.PersistenceExceptionHandl
 import gov.cms.dpc.fhir.parameters.FHIRParamValueFactory;
 import gov.cms.dpc.fhir.parameters.ProvenanceResourceFactoryProvider;
 import gov.cms.dpc.fhir.validations.dropwizard.FHIRValidationModule;
-import io.dropwizard.Configuration;
+import io.dropwizard.core.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.vyarus.dropwizard.guice.module.support.DropwizardAwareModule;

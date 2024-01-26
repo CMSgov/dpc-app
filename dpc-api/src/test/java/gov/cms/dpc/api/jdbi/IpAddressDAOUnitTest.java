@@ -1,8 +1,8 @@
 package gov.cms.dpc.api.jdbi;
 
 import gov.cms.dpc.api.entities.IpAddressEntity;
-import gov.cms.dpc.testing.AbstractDAOTest;
 import gov.cms.dpc.common.hibernate.auth.DPCAuthManagedSessionFactory;
+import gov.cms.dpc.testing.AbstractDAOTest;
 import io.hypersistence.utils.hibernate.type.basic.Inet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
