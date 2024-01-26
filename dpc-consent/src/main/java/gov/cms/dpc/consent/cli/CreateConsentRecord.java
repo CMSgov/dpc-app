@@ -37,9 +37,6 @@ import static gov.cms.dpc.consent.dao.tables.Consent.CONSENT;
  */
 public class CreateConsentRecord extends ConsentCommand {
 
-    private static final String IN_ARG = "in";
-    private static final String OUT_ARG = "out";
-
     private static final String IN_OR_OUT_ARG = "inOrOut";
 
     private final Settings settings;
