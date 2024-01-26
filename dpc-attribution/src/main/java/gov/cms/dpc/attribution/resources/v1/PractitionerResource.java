@@ -14,8 +14,6 @@ import io.dropwizard.hibernate.UnitOfWork;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Practitioner;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotEmpty;
@@ -29,7 +27,6 @@ import static gov.cms.dpc.attribution.utils.RESTUtils.bulkResourceHandler;
 
 @FHIR
 public class PractitionerResource extends AbstractPractitionerResource {
-    private static final Logger logger = LoggerFactory.getLogger(PractitionerResource.class);
 
     private final ProviderDAO dao;
     private final FHIREntityConverter converter;
