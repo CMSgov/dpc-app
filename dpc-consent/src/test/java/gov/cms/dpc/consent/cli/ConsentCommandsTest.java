@@ -31,41 +31,47 @@ class ConsentCommandsTest {
     private final ByteArrayOutputStream stdErr = new ByteArrayOutputStream();
 
     private static final DPCConsentService app = new DPCConsentService();
-    private static final Bootstrap<DPCConsentConfiguration> bs = setupBootstrap();
+    private static final Bootstrap<DPCConsentConfiguration> bs = setupBootstrap(app);
 
     private Cli cli;
 
-    private static Bootstrap<DPCConsentConfiguration> setupBootstrap() {
+    private static Bootstrap<DPCConsentConfiguration> setupBootstrap(DPCConsentService app) {
         // adapted from DropwizardTestSupport
-        Bootstrap<DPCConsentConfiguration> bootstrap = new Bootstrap<>(ConsentCommandsTest.app) {
+        Bootstrap<DPCConsentConfiguration> bootstrap = new Bootstrap<>(app) {
             public void run(DPCConsentConfiguration configuration, Environment environment) throws Exception {
                 super.run(configuration, environment);
                 setConfigurationFactoryFactory((klass, validator, objectMapper, propertyPrefix) ->
                         new POJOConfigurationFactory<>(configuration));
             }
         };
-        ConsentCommandsTest.app.initialize(bootstrap);
+        app.initialize(bootstrap);
         return bootstrap;
     }
 
-    @BeforeEach
+    @BeforeAll
     void cliSetup() throws Exception {
         ((LoggerContext)org.slf4j.LoggerFactory.getILoggerFactory()).stop();
-        final JarLocation location = mock(JarLocation.class);
-        when(location.getVersion()).thenReturn(Optional.of("1.0.0"));
+        app.run("db", "migrate", "ci.application.conf");
         // Redirect stdout and stderr to our byte streams
         System.setOut(new PrintStream(stdOut));
         System.setErr(new PrintStream(stdErr));
 
+        final JarLocation location = mock(JarLocation.class);
+        when(location.getVersion()).thenReturn(Optional.of("1.0.0"));
+
         cli = new Cli(location, bs, stdOut, stdErr);
     }
 
-    @AfterEach
+    @AfterAll
     void teardown() {
         System.setOut(originalOut);
         System.setErr(originalErr);
-        stdErr.reset();
+    }
+
+    @AfterEach
+    void resetIO() {
         stdOut.reset();
+        stdErr.reset();
     }
 
     @Test

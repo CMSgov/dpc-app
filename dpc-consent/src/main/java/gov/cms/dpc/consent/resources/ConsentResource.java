@@ -83,11 +83,11 @@ public class ConsentResource {
         } else if (patientId.isPresent()) {
             Identifier patientIdentifier = null;
             for (String pId : Splitter.on(',').split(patientId.get())) {
-                patientIdentifier  = FHIRExtractors.parseIDFromQueryParam(pId);
+                patientIdentifier = FHIRExtractors.parseIDFromQueryParam(pId);
                 entities.addAll(getEntitiesByPatient(patientIdentifier));
             }
 
-            if (entities.isEmpty()) {
+            if (entities.isEmpty() && patientIdentifier != null) {
                 switch(getSystemField(patientIdentifier)) {
                     case "mbi":
                         entities = List.of(ConsentEntity.defaultConsentEntity(Optional.empty(), Optional.empty(), Optional.ofNullable(patientIdentifier.getValue())));
@@ -95,6 +95,8 @@ public class ConsentResource {
                     case "hicn":
                         entities = List.of(ConsentEntity.defaultConsentEntity(Optional.empty(), Optional.ofNullable(patientIdentifier.getValue()), Optional.empty()));
                         break;
+                    default:
+                        // no-op
                 }
             }
 

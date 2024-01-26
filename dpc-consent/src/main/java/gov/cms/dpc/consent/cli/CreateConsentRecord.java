@@ -38,8 +38,10 @@ import static gov.cms.dpc.consent.dao.tables.Consent.CONSENT;
  * </ul>
  */
 public class CreateConsentRecord extends ConsentCommand {
-    private static final String IN_OR_OUT_ARG = "inOrOut";
+
     private static final Logger logger = LoggerFactory.getLogger(CreateConsentRecord.class);
+
+    private static final String IN_OR_OUT_ARG = "inOrOut";
 
     private final Settings settings;
 
