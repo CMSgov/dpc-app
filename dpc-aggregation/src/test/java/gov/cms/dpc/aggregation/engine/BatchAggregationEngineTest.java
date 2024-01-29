@@ -7,7 +7,6 @@ import com.typesafe.config.ConfigFactory;
 import gov.cms.dpc.aggregation.service.*;
 import gov.cms.dpc.aggregation.util.AggregationUtils;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
-import gov.cms.dpc.bluebutton.clientV2.MockBlueButtonClientV2;
 import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.hapi.ContextUtils;
@@ -94,8 +93,6 @@ class BatchAggregationEngineTest {
         MockBlueButtonClient.TEST_PATIENT_MBIS.forEach(mbi -> Mockito.when(consentService.getConsent(List.of(mbi))).thenReturn(Optional.of(Lists.list(consentResult))));
         // Special case where patient has multiple MBIs
         Mockito.when(consentService.getConsent(MockBlueButtonClient.TEST_PATIENT_MULTIPLE_MBIS)).thenReturn(Optional.of(Lists.list(consentResult)));
-
-        MockBlueButtonClientV2.TEST_PATIENT_MBIS.forEach(mbi -> Mockito.when(consentService.getConsent(List.of(mbi))).thenReturn(Optional.of(Lists.list(consentResult))));
     }
 
     /**

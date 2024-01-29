@@ -81,7 +81,7 @@ public class JobBatchProcessor {
 
         // Check if the patient has opted out
         if(flowable.isEmpty()) {
-            Optional<Pair<Flowable<Resource>, OutcomeReason>> consentResult = checkConsent(optPatient.get());
+            Optional<Pair<Flowable<Resource>, OutcomeReason>> consentResult = checkForOptOut(optPatient.get());
             if(consentResult.isPresent()) {
                 flowable = Optional.of(consentResult.get().getLeft());
                 failReason = Optional.of(consentResult.get().getRight());
@@ -122,7 +122,7 @@ public class JobBatchProcessor {
      * @return If there's a problem, it returns a pair of a {@link Flowable} {@link OperationOutcome} and an {@link OutcomeReason}.
      * If the Patient passes the consent check, it returns an empty {@link Optional}s.
      */
-    private Optional<Pair<Flowable<Resource>, OutcomeReason>> checkConsent(Patient patient) {
+    private Optional<Pair<Flowable<Resource>, OutcomeReason>> checkForOptOut(Patient patient) {
         final Pair<Optional<List<ConsentResult>>, Optional<OperationOutcome>> consentResult = getConsent(patient);
 
         if (consentResult.getRight().isPresent()) {

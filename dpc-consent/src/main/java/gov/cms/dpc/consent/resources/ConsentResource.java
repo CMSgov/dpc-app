@@ -75,14 +75,11 @@ public class ConsentResource {
 
         // Priority order for processing params. If multiple params are passed, we only pay attention to one
         if (id.isPresent()) {
-
             final Optional<ConsentEntity> consentEntity = this.dao.getConsent(id.get());
-            entities = consentEntity.map(List::of).orElseGet(() -> List.of(ConsentEntity.defaultConsentEntity(id, Optional.empty(), Optional.empty())));
 
         } else if (identifier.isPresent()) {
             // not sure we should support this
             final Optional<ConsentEntity> consentEntity = this.dao.getConsent(identifier.get());
-            entities = consentEntity.map(List::of).orElseGet(() -> List.of(ConsentEntity.defaultConsentEntity(id, Optional.empty(), Optional.empty())));
 
         } else if (patientId.isPresent()) {
 
@@ -91,20 +88,9 @@ public class ConsentResource {
                 entities.addAll(getEntitiesByPatient(patientIdentifier));
             }
 
-            // If no consent records were found, create a default opt in for the first MBI sent to us.
-            // I'd prefer this just returns an empty list, but dpc-aggregation is written to expect this behavior.
-            if(entities.isEmpty()) {
-                Identifier firstIdentifier = FHIRExtractors.parseIDFromQueryParam(Splitter.on(',').split(patientId.get()).iterator().next());
-                entities = List.of(ConsentEntity.defaultConsentEntity(Optional.empty(), extractHicn(firstIdentifier), extractMbi(firstIdentifier)));
-            }
-
         } else {
 
             throw new WebApplicationException("Must have some form of Consent Resource ID or Patient ID", Response.Status.BAD_REQUEST);
-        }
-
-        if (entities.isEmpty()) {
-            throw new WebApplicationException("Cannot find patient with given ID", Response.Status.NOT_FOUND);
         }
 
         return entities
