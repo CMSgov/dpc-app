@@ -3,6 +3,7 @@ package gov.cms.dpc.attribution;
 import com.codahale.metrics.jersey2.InstrumentedResourceMethodApplicationListener;
 import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.attribution.cli.SeedCommand;
+import gov.cms.dpc.attribution.jobs.ExpireAttributions;
 import gov.cms.dpc.common.hibernate.attribution.DPCHibernateBundle;
 import gov.cms.dpc.common.hibernate.attribution.DPCHibernateModule;
 import gov.cms.dpc.common.logging.filters.GenerateRequestIdFilter;
@@ -13,7 +14,11 @@ import io.dropwizard.core.Application;
 import io.dropwizard.core.setup.Bootstrap;
 import io.dropwizard.core.setup.Environment;
 import io.dropwizard.db.PooledDataSourceFactory;
+import io.dropwizard.jobs.GuiceJobsBundle;
+import io.dropwizard.jobs.Job;
+import io.dropwizard.jobs.JobsBundle;
 import io.dropwizard.migrations.MigrationsBundle;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.vyarus.dropwizard.guice.GuiceBundle;
@@ -66,6 +71,8 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
         bootstrap.addBundle(hibernateBundle);
 
         bootstrap.addBundle(guiceBundle);
+        GuiceJobsBundle guiceJobsBundle = new GuiceJobsBundle(guiceBundle.getInjector());
+        bootstrap.addBundle(guiceJobsBundle);
         bootstrap.addBundle(new MigrationsBundle<>() {
             @Override
             public PooledDataSourceFactory getDataSourceFactory(DPCAttributionConfiguration configuration) {
@@ -73,14 +80,7 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
                 return configuration.getDatabase();
             }
         });
-//        TODO: dropwizard - sundial using Dropwizard 2.x
-//        final SundialBundle<DPCAttributionConfiguration> sundialBundle = new SundialBundle<>() {
-//            @Override
-//            public SundialConfiguration getSundialConfiguration(DPCAttributionConfiguration dpcAttributionConfiguration) {
-//                return dpcAttributionConfiguration.getSundial();
-//            }
-//        };
-//
-//        bootstrap.addBundle(sundialBundle);
+        Job expireAttributionsJob = new ExpireAttributions();
+        bootstrap.addBundle(new JobsBundle(expireAttributionsJob));
     }
 }

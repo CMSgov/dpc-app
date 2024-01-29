@@ -4,9 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import gov.cms.dpc.common.hibernate.attribution.IDPCDatabase;
 import gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration;
 import gov.cms.dpc.fhir.configuration.IDPCFHIRConfiguration;
-import io.dropwizard.core.Configuration;
 import io.dropwizard.db.DataSourceFactory;
-import org.knowm.dropwizard.sundial.SundialConfiguration;
+import io.dropwizard.jobs.JobConfiguration;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
@@ -15,7 +14,7 @@ import javax.validation.constraints.NotNull;
 import java.time.Duration;
 import java.util.List;
 
-public class DPCAttributionConfiguration extends Configuration implements IDPCDatabase, IDPCFHIRConfiguration {
+public class DPCAttributionConfiguration extends JobConfiguration implements IDPCDatabase, IDPCFHIRConfiguration {
 
     @Valid
     private Duration expirationThreshold;
@@ -26,11 +25,6 @@ public class DPCAttributionConfiguration extends Configuration implements IDPCDa
     @NotNull
     @JsonProperty("database")
     private DataSourceFactory database = new DataSourceFactory();
-
-    @Valid
-    @NotNull
-    @JsonProperty("sundial")
-    private SundialConfiguration sundial = new SundialConfiguration();
 
     @NotEmpty
     private String publicServerURL;
@@ -51,10 +45,6 @@ public class DPCAttributionConfiguration extends Configuration implements IDPCDa
     @Override
     public DataSourceFactory getDatabase() {
         return database;
-    }
-
-    public SundialConfiguration getSundial() {
-        return sundial;
     }
 
     public Duration getExpirationThreshold() {

@@ -65,8 +65,13 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>org.knowm</groupId>
-            <artifactId>dropwizard-sundial</artifactId>
+            <groupId>io.github.dropwizard-jobs</groupId>
+            <artifactId>dropwizard-jobs-core</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.github.dropwizard-jobs</groupId>
+            <artifactId>dropwizard-jobs-guice</artifactId>
             <scope>compile</scope>
         </dependency>
         <dependency>

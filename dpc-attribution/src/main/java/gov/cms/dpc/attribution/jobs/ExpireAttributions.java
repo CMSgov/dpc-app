@@ -1,17 +1,17 @@
 package gov.cms.dpc.attribution.jobs;
 
-import com.google.inject.Injector;
 import gov.cms.dpc.attribution.DPCAttributionConfiguration;
 import gov.cms.dpc.attribution.dao.tables.Attributions;
 import gov.cms.dpc.attribution.exceptions.AttributionException;
 import io.dropwizard.db.ManagedDataSource;
+import io.dropwizard.jobs.Job;
+import io.dropwizard.jobs.annotations.On;
+
 import org.jooq.DSLContext;
 import org.jooq.conf.Settings;
 import org.jooq.impl.DSL;
-import org.knowm.sundial.Job;
-import org.knowm.sundial.SundialJobScheduler;
-import org.knowm.sundial.annotations.CronTrigger;
-import org.knowm.sundial.exceptions.JobInterruptException;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +27,7 @@ import java.time.temporal.ChronoUnit;
  * This job runs every day at midnight to expire (remove) attribution relationships which are older than a certain threshold.
  * The value is set in the config file ({@link DPCAttributionConfiguration#getExpirationThreshold()}) and defaults to 90 days.
  */
-@CronTrigger(cron = "0 0 * * * ?")
+@On("0 0 * * * ?")
 public class ExpireAttributions extends Job {
 
     private static final Logger logger = LoggerFactory.getLogger(ExpireAttributions.class);
@@ -37,14 +37,10 @@ public class ExpireAttributions extends Job {
     @Inject
     private Settings settings;
 
-    public ExpireAttributions() {
-        // Manually load the Guice injector. Since the job loads at the beginning of the startup process, Guice is not automatically injected.
-        final Injector attribute = (Injector) SundialJobScheduler.getServletContext().getAttribute("com.google.inject.Injector");
-        attribute.injectMembers(this);
-    }
+    public ExpireAttributions() {}
 
     @Override
-    public void doRun() throws JobInterruptException {
+    public void doJob(JobExecutionContext jobContext) throws JobExecutionException {
         final OffsetDateTime expirationTemporal = OffsetDateTime.now(ZoneOffset.UTC);
         // Find all the jobs and remove them
         logger.debug("Expiring active attribution relationships before {}.", expirationTemporal.format(DateTimeFormatter.ISO_DATE_TIME));
