@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-configuration PUBLIC
+        "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+
+<hibernate-configuration>
+    <session-factory>
+
+        <!-- Connection settings -->
+        <property name="hibernate.connection.driver_class">org.postgresql.Driver</property>
+        <property name="hibernate.connection.url">jdbc:postgresql://localhost:5432/dpc_attribution</property>
+        <property name="hibernate.connection.username">postgres</property>
+        <property name="hibernate.connection.password">dpc-safe</property>
+
+        <!-- SQL dialect -->
+        <property name="hibernate.dialect">org.hibernate.dialect.PostgreSQL10Dialect</property>
+
+        <!-- Print executed SQL to stdout -->
+        <property name="show_sql">false</property>
+
+        <!-- Update database on startup -->
+        <property name="hibernate.hbm2ddl.auto">create-drop</property>
+        <property name="hibernate.connection.autocommit">true</property>
+
+        <!-- Annotated entity classes -->
+        <mapping class="gov.cms.dpc.queue.models.JobQueueBatch"/>
+        <mapping class="gov.cms.dpc.queue.models.JobQueueBatchFile"/>
+
+    </session-factory>
+</hibernate-configuration>

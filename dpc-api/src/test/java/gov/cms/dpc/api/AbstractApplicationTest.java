@@ -34,13 +34,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ExtendWith(BufferedLoggerHandler.class)
 public class AbstractApplicationTest {
 
-    // Application prefix, which we need in order to correctly override config values.
-    private static final String KEY_PREFIX = "dpc.api";
+    private static final String configPath = "src/test/resources/test.application.yml";
+
     private static final ObjectMapper mapper = new ObjectMapper();
 
-    private static final DropwizardTestSupport<DPCAPIConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCAPIService.class, "application.yml",
-            ConfigOverride.config(KEY_PREFIX, "authenticationDisabled", "true"),
-            ConfigOverride.config(KEY_PREFIX, "logging.level", "ERROR"));
+    private static final DropwizardTestSupport<DPCAPIConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCAPIService.class, configPath,
+            ConfigOverride.config("authenticationDisabled", "true"),
+            ConfigOverride.config("logging.level", "ERROR"));
     protected FhirContext ctx;
 
     protected AbstractApplicationTest() {

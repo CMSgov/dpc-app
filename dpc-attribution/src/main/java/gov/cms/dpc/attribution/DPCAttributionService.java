@@ -85,6 +85,8 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
             }
         });
 
+// TODO: dropwizard config - java.lang.NoSuchMethodError: 'org.reflections.util.FilterBuilder org.reflections.util.FilterBuilder.includePackage(java.lang.String[]
+
 //        bootstrap.addBundle(new SwaggerBundle<>() {
 //            @Override
 //            protected SwaggerBundleConfiguration getSwaggerBundleConfiguration(DPCAttributionConfiguration dpcAttributionConfiguration) {

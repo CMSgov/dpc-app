@@ -67,6 +67,8 @@ public class APITestHelpers {
     public static String BASE_URL = "https://dpc.cms.gov/api";
     public static String ORGANIZATION_NPI = "1111111112";
 
+    private static final String configPath = "src/test/resources/test.application.yml";
+
     private static final ObjectMapper mapper = new ObjectMapper();
 
     private APITestHelpers() {
@@ -188,9 +190,9 @@ public class APITestHelpers {
         // Truncate the Auth DB
         // dropwizard-guicey will raise a SharedStateError unless we clear the configuration state before each run
         SharedConfigurationState.clear();
-        application.getApplication().run("db", "drop-all", "--confirm-delete-everything", "application.yml");
+        application.getApplication().run("db", "drop-all", "--confirm-delete-everything", configPath);
         SharedConfigurationState.clear();
-        application.getApplication().run("db", "migrate", "application.yml");
+        application.getApplication().run("db", "migrate", configPath);
 
     }
 
