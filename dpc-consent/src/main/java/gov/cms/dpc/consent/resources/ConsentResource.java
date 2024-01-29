@@ -29,9 +29,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static gov.cms.dpc.fhir.DPCIdentifierSystem.HICN;
-import static gov.cms.dpc.fhir.DPCIdentifierSystem.MBI;
-
 @Path("v1/Consent")
 public class ConsentResource {
 
@@ -76,20 +73,20 @@ public class ConsentResource {
         // Priority order for processing params. If multiple params are passed, we only pay attention to one
         if (id.isPresent()) {
             final Optional<ConsentEntity> consentEntity = this.dao.getConsent(id.get());
+            entities = consentEntity.map(List::of).orElse(entities);
 
         } else if (identifier.isPresent()) {
             // not sure we should support this
             final Optional<ConsentEntity> consentEntity = this.dao.getConsent(identifier.get());
+            entities = consentEntity.map(List::of).orElse(entities);
 
         } else if (patientId.isPresent()) {
-
             for (String pId : Splitter.on(',').split(patientId.get())) {
                 final Identifier patientIdentifier = FHIRExtractors.parseIDFromQueryParam(pId);
                 entities.addAll(getEntitiesByPatient(patientIdentifier));
             }
 
         } else {
-
             throw new WebApplicationException("Must have some form of Consent Resource ID or Patient ID", Response.Status.BAD_REQUEST);
         }
 
@@ -148,21 +145,5 @@ public class ConsentResource {
         }
 
         return this.dao.findBy(field, patientIdentifier.getValue());
-    }
-
-    private Optional<String> extractMbi(Identifier identifier) {
-        if(DPCIdentifierSystem.fromString(identifier.getSystem()).equals(MBI))  {
-            return Optional.of(identifier.getValue());
-        } else {
-            return Optional.empty();
-        }
-    }
-
-    private Optional<String> extractHicn(Identifier identifier) {
-        if(DPCIdentifierSystem.fromString(identifier.getSystem()).equals(HICN))  {
-            return Optional.of(identifier.getValue());
-        } else {
-            return Optional.empty();
-        }
     }
 }
