@@ -14,7 +14,7 @@ import io.dropwizard.core.Application;
 import io.dropwizard.core.setup.Bootstrap;
 import io.dropwizard.core.setup.Environment;
 import io.dropwizard.db.PooledDataSourceFactory;
-import io.dropwizard.jobs.GuiceJobsBundle;
+import io.dropwizard.jobs.GuiceJobManager;
 import io.dropwizard.jobs.Job;
 import io.dropwizard.jobs.JobsBundle;
 import io.dropwizard.migrations.MigrationsBundle;
@@ -28,6 +28,8 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
     private static final Logger logger = LoggerFactory.getLogger(DPCAttributionService.class);
 
     private final DPCHibernateBundle<DPCAttributionConfiguration> hibernateBundle = new DPCHibernateBundle<>();
+
+    private GuiceBundle guiceBundle;
 
     public static void main(final String[] args) throws Exception {
         new DPCAttributionService().run(args);
@@ -50,6 +52,9 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
 
     @Override
     public void run(DPCAttributionConfiguration configuration, Environment environment) {
+        GuiceJobManager jobManager = new GuiceJobManager(configuration, guiceBundle.getInjector());
+		environment.lifecycle().manage(jobManager);
+
         EnvironmentParser.getEnvironment("Attribution");
         final var listener = new InstrumentedResourceMethodApplicationListener(environment.metrics());
         environment.jersey().getResourceConfig().register(listener);
@@ -58,7 +63,8 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
     }
 
     private void registerBundles(Bootstrap<DPCAttributionConfiguration> bootstrap) {
-        GuiceBundle guiceBundle = GuiceBundle.builder()
+        guiceBundle = GuiceBundle.builder()
+                .enableAutoConfig("gov.cms.dpc.attribution")
                 .modules(
                         new DPCHibernateModule<>(hibernateBundle),
                         new AttributionAppModule(),
@@ -71,8 +77,6 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
         bootstrap.addBundle(hibernateBundle);
 
         bootstrap.addBundle(guiceBundle);
-        GuiceJobsBundle guiceJobsBundle = new GuiceJobsBundle(guiceBundle.getInjector());
-        bootstrap.addBundle(guiceJobsBundle);
         bootstrap.addBundle(new MigrationsBundle<>() {
             @Override
             public PooledDataSourceFactory getDataSourceFactory(DPCAttributionConfiguration configuration) {
