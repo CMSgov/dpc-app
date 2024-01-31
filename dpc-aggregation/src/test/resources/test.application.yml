@@ -1,0 +1,93 @@
+database:
+  driverClass: org.postgresql.Driver
+  url: ${DATABASE_URL:-"jdbc:postgresql://db:5432/dpc_attribution"}  # TODO: dropwizard - set based on ENV
+  user: ${ATTRIBUTION_DB_USER:-postgres}
+  password: ${ATTRIBUTION_DB_PASS:-dpc-safe}
+  initialSize: 5
+  minSize: 5
+  maxSize: 10
+
+queuedb:
+  driverClass: org.postgresql.Driver
+  url: ${QUEUE_DB_URL:-"jdbc:postgresql://db:5432/dpc_queue"}  # TODO: dropwizard - set based on ENV
+  user: ${QUEUE_DB_USER:-postgres}
+  password: ${QUEUE_DB_PASS:-dpc-safe}
+  initialSize: 5
+  minSize: 5
+  maxSize: 10
+
+server:
+  enableThreadNameFilter: false
+  registerDefaultExceptionMappers: false
+  applicationConnectors:
+    - type: http
+      port: 3002
+  adminConnectors:
+    - type: http
+      port: 9900
+  requestLog:
+    appenders:
+      - type: console
+        timeZone: UTC
+        layout:
+          type: access-json
+          timestampFormat: "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
+          additionalFields:
+            environment: ${ENV:-"unknown_env"}
+            version: ${APP_VERSION:-"unknown_version"}
+            application: ${APPLICATION:-"dpc-aggregation"}
+
+logging:
+  level: ERROR
+  loggers:
+    "liquibase": INFO
+    "gov.cms.dpc.queue.DistributedBatchQueue": DEBUG
+    "org.hibernate": ERROR
+    "org.hibernate.SQL": ERROR
+  appenders:
+    - type: console
+      timeZone: UTC
+      layout:
+        type: json-dpc
+        timestampFormat: "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
+        additionalFields:
+          environment: ${ENV:-"unknown_env"}
+          version: ${APP_VERSION:-"unknown_version"}
+          application: ${APPLICATION:-"dpc-aggregation"}
+      # Prevent log entries from being dropped under all circumstances
+      # While nice from a performance standpoint, we must ensure full audit capability of the application
+      discardingThreshold: 0
+
+bbclient:
+  registerHealthCheck: false
+  keyStore:
+    type: "JKS"
+    defaultPassword: ${?BB_KEYSTORE_PASS:-"changeit"}
+    location: ${BB_KEYSTORE_LOCATION:-"/bb.keystore"}
+
+  timeouts:
+    connectionTimeout: 5000 # ms
+    socketTimeout: 5000 # ms
+    requestTimeout: 5000 # ms
+
+  serverBaseUrl: ${BFD_URL}
+  resourcesCount: 100 # Max number of resource that a request to BB will return before using another request
+  bfdHashIter: ${BFD_HASH_ITER}
+  bfdHashPepper: ${BFD_HASH_PEPPER}
+
+  r4Configuration:
+    serverBaseUrl: ${BFD_URL_V2}
+
+consentServiceUrl: "http://localhost:3600/v1/"
+
+retryCount: 3 # Number of times to retry reach BB request
+resourcesPerFileCount: 5000 # Max number of resources that an export file will have before creating a new file
+exportPath: "/tmp"
+
+# Lookback Settings
+# The number of months to look back for a claim
+lookBackMonths: ${LOOK_BACK_MONTHS:-18}
+lookBackExemptOrgs: ${LOOK_BACK_EXEMPT_ORGS:-["0ab352f1-2bf1-44c4-aa7a-3004a1ffef12","69c0d4d4-9c07-4fa8-9053-e10fb1608b48","c7f5247b-4c41-478c-84eb-a6e801bdb145"]}
+
+# The date to start looking back from
+lookBackDate: ${LOOK_BACK_DATE:-2000-01}

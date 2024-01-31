@@ -7,7 +7,6 @@ import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.DropwizardTestSupport;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -20,7 +19,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ExtendWith(BufferedLoggerHandler.class)
 public class AggregationServiceTest {
 
-    private static final DropwizardTestSupport<DPCAggregationConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCAggregationService.class, "application.yml", ConfigOverride.config("server.applicationConnectors[0].port", "7777"));
+    private static final DropwizardTestSupport<DPCAggregationConfiguration> APPLICATION =
+            new DropwizardTestSupport<>(DPCAggregationService.class, "test.application.yml",
+                    ConfigOverride.config("server.applicationConnectors[0].port", "7777"),
+                    ConfigOverride.config("bbclient.bfdHashPepper", "6E6F747468657265616C706570706572"),  // not a real pepper
+                    ConfigOverride.config("bbclient.bfdHashIter", "1000"));
 
     @BeforeAll
     static void start() throws Exception{
