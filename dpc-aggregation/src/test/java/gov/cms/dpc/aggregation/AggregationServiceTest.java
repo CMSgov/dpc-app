@@ -16,7 +16,6 @@ import java.util.SortedSet;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@Disabled
 @IntegrationTest
 @ExtendWith(BufferedLoggerHandler.class)
 public class AggregationServiceTest {
@@ -39,7 +38,8 @@ public class AggregationServiceTest {
         final SortedSet<String> names = checks.getNames();
 
         // Ensure that the various healthchecks are propagated from the modules
-        assertAll(() -> assertTrue(names.contains("BlueButtonHealthCheck"), "Should have BB health check"));
+        assertAll(() -> assertTrue(names.contains("blue-button-client"), "Should have BB health check"));
+        assertAll(() -> assertTrue(names.contains("aggregation-engine"), "Should have Aggregation Engine health check"));
 
         // Everything should be true
         checks.runHealthChecks().forEach((key, value) -> assertTrue(value.isHealthy(), String.format("Healthcheck: %s is not ok.", key)));

@@ -15,7 +15,6 @@ import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.validations.profiles.PractitionerProfile;
 import org.hl7.fhir.dstu3.model.*;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
@@ -248,10 +247,12 @@ class PractitionerResourceTest extends AbstractAttributionTest {
         assertThrows(ResourceNotFoundException.class, getRequest::execute, "Should not have resource");
     }
 
-    @Disabled
     @Test
-    void testPractitionerSubmitWhenPastLimit() {
+    void testPractitionerSubmitWhenPastLimit() throws Exception {
 
+        // Restart so update takes effect
+        APPLICATION.after();
+        APPLICATION.before();
         //Currently 4 providers are created in the seed for the test
         APPLICATION.getConfiguration().setProviderLimit(5);
 
@@ -279,9 +280,11 @@ class PractitionerResourceTest extends AbstractAttributionTest {
     }
 
     @Test
-    void testPractitionerSubmitWhenLimitIsSetToNegativeOne() {
+    void testPractitionerSubmitWhenLimitIsSetToNegativeOne() throws Exception {
 
-        //Currently 4 providers are created in the seed for the test
+        // Restart so update takes effect
+        APPLICATION.after();
+        APPLICATION.before();
         APPLICATION.getConfiguration().setProviderLimit(-1);
 
         final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
