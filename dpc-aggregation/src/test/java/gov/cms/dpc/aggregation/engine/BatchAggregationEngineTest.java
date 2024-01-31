@@ -7,7 +7,6 @@ import com.typesafe.config.ConfigFactory;
 import gov.cms.dpc.aggregation.service.*;
 import gov.cms.dpc.aggregation.util.AggregationUtils;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
-import gov.cms.dpc.bluebutton.clientV2.MockBlueButtonClientV2;
 import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.hapi.ContextUtils;
@@ -77,11 +76,9 @@ class BatchAggregationEngineTest {
         consentService = Mockito.mock(ConsentService.class);
         queue = new MemoryBatchQueue(100);
         final var bbclient = Mockito.spy(new MockBlueButtonClient(fhirContext));
-        final var bbclientV2 = Mockito.spy(new MockBlueButtonClientV2(fhirContextR4));
         lookBackService = Mockito.spy(EveryoneGetsDataLookBackServiceImpl.class);
         JobBatchProcessor jobBatchProcessor = Mockito.spy(new JobBatchProcessor(bbclient, fhirContext, metricRegistry, operationsConfig, lookBackService, consentService));
-        JobBatchProcessorV2 jobBatchProcessorV2 = Mockito.spy(new JobBatchProcessorV2(bbclientV2, fhirContextR4, metricRegistry, operationsConfig, consentService));
-        engine = Mockito.spy(new AggregationEngine(aggregatorID, queue, operationsConfig, jobBatchProcessor, jobBatchProcessorV2));
+        engine = Mockito.spy(new AggregationEngine(aggregatorID, queue, operationsConfig, jobBatchProcessor));
         engine.queueRunning.set(true);
         Disposable subscribe = Mockito.mock(Disposable.class);
         doReturn(false).when(subscribe).isDisposed();
@@ -92,8 +89,10 @@ class BatchAggregationEngineTest {
         consentResult.setActive(true);
         consentResult.setPolicyType(ConsentResult.PolicyType.OPT_IN);
         consentResult.setConsentId(UUID.randomUUID().toString());
-        MockBlueButtonClient.TEST_PATIENT_MBIS.forEach(mbi -> Mockito.when(consentService.getConsent(mbi)).thenReturn(Optional.of(Lists.list(consentResult))));
-        MockBlueButtonClientV2.TEST_PATIENT_MBIS.forEach(mbi -> Mockito.when(consentService.getConsent(mbi)).thenReturn(Optional.of(Lists.list(consentResult))));
+
+        MockBlueButtonClient.TEST_PATIENT_MBIS.forEach(mbi -> Mockito.when(consentService.getConsent(List.of(mbi))).thenReturn(Optional.of(Lists.list(consentResult))));
+        // Special case where patient has multiple MBIs
+        Mockito.when(consentService.getConsent(MockBlueButtonClient.TEST_PATIENT_MULTIPLE_MBIS)).thenReturn(Optional.of(Lists.list(consentResult)));
     }
 
     /**
@@ -208,80 +207,6 @@ class BatchAggregationEngineTest {
         final var errorFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), DPCResourceType.OperationOutcome, 0);
         assertTrue(Files.exists(Path.of(errorFilePath)), "expect error file for failed patient");
     }
-
-    /**
-     * Test if a engine can handle a simple V2 job with one resource type, one test provider, and one patient.
-     */
-    @Test
-    void largeV2JobTestSingleResource() {
-        // Make a simple job with one resource type
-        final var orgID = UUID.randomUUID();
-        final var jobID = queue.createJob(
-                orgID,
-                TEST_ORG_NPI,
-                TEST_PROVIDER_NPI,
-                Collections.singletonList(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0)),
-                Collections.singletonList(DPCResourceType.ExplanationOfBenefit),
-                MockBlueButtonClientV2.TEST_LAST_UPDATED.minusSeconds(1),
-                MockBlueButtonClientV2.BFD_TRANSACTION_TIME,
-                null, "http:example.org/v2/Group/id/$export", true, false);
-
-        // Do the job
-        queue.claimBatch(engine.getAggregatorID())
-                .ifPresent(engine::processJobBatch);
-
-        // Look at the result
-        final var completeJob = queue.getJobBatches(jobID).stream().findFirst().orElseThrow();
-        assertEquals(JobStatus.COMPLETED, completeJob.getStatus());
-        final List<JobQueueBatchFile> sorted = completeJob.getJobQueueBatchFiles().stream().sorted(Comparator.comparingInt(JobQueueBatchFile::getSequence)).collect(Collectors.toList());
-        assertAll(() -> assertEquals(4, sorted.size()),
-                () -> assertEquals(10, sorted.get(0).getCount()),
-                () -> assertEquals(8, sorted.get(3).getCount()));
-
-        // Look at the output files
-        final var outputFilePath = ResourceWriterV2.formOutputFilePath(exportPath, completeJob.getBatchID(), DPCResourceType.ExplanationOfBenefit, 0);
-        assertTrue(Files.exists(Path.of(outputFilePath)));
-        final var errorFilePath = ResourceWriterV2.formOutputFilePath(exportPath, completeJob.getBatchID(), DPCResourceType.OperationOutcome, 0);
-        assertFalse(Files.exists(Path.of(errorFilePath)), "expect no error file");
-    }
-
-    /**
-     * Test if a engine can handle a V2 simple job with one resource type, one test provider, and one patient.
-     */
-    @Test
-    void largeV2JobWithBadPatientTest() {
-        final var orgID = UUID.randomUUID();
-
-        // Make a simple job with one resource type
-        final var jobID = queue.createJob(
-                orgID,
-                TEST_ORG_NPI,
-                TEST_PROVIDER_NPI,
-                MockBlueButtonClientV2.TEST_PATIENT_WITH_BAD_IDS,
-                Collections.singletonList(DPCResourceType.ExplanationOfBenefit),
-                MockBlueButtonClientV2.TEST_LAST_UPDATED.minusSeconds(1),
-                MockBlueButtonClientV2.BFD_TRANSACTION_TIME,
-                null, "http:example.org/v2/Group/id/$export", true, false);
-
-        // Do the job
-        queue.claimBatch(engine.getAggregatorID())
-                .ifPresent(engine::processJobBatch);
-
-        // Look at the result
-        final var completeJob = queue.getJobBatches(jobID).stream().findFirst().orElseThrow();
-        assertEquals(JobStatus.COMPLETED, completeJob.getStatus());
-        assertAll(
-                () -> assertEquals(5, completeJob.getJobQueueBatchFiles().size(), String.format("Unexpected JobModel: %s", completeJob.toString())),
-                () -> assertTrue(completeJob.getJobQueueFile(DPCResourceType.ExplanationOfBenefit).isPresent(), "Expect a EOB"),
-                () -> assertFalse(completeJob.getJobQueueFile(DPCResourceType.OperationOutcome).isEmpty(), "Expect an error"));
-
-        // Look at the output files
-        final var outputFilePath = ResourceWriterV2.formOutputFilePath(exportPath, completeJob.getBatchID(), DPCResourceType.ExplanationOfBenefit, 0);
-        assertTrue(Files.exists(Path.of(outputFilePath)));
-        final var errorFilePath = ResourceWriterV2.formOutputFilePath(exportPath, completeJob.getBatchID(), DPCResourceType.OperationOutcome, 0);
-        assertTrue(Files.exists(Path.of(errorFilePath)), "expect error file for failed patient");
-    }
-
     @Test
     void lookBackDateCriteriaMismatch() throws IOException {
         final var orgID = UUID.randomUUID();

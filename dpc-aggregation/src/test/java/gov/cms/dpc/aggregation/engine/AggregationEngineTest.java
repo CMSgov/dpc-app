@@ -12,8 +12,6 @@ import gov.cms.dpc.aggregation.service.EveryoneGetsDataLookBackServiceImpl;
 import gov.cms.dpc.aggregation.service.LookBackService;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
-import gov.cms.dpc.bluebutton.clientV2.BlueButtonClientV2;
-import gov.cms.dpc.bluebutton.clientV2.MockBlueButtonClientV2;
 import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.hapi.ContextUtils;
@@ -52,7 +50,6 @@ class AggregationEngineTest {
     private static final String TEST_ORG_NPI = NPIUtil.generateNPI();
     private static final String TEST_PROVIDER_NPI = NPIUtil.generateNPI();
     private BlueButtonClient bbclient;
-    private BlueButtonClientV2 bbclientV2;
     private IJobQueue queue;
     private AggregationEngine engine;
     private Disposable subscribe;
@@ -60,7 +57,6 @@ class AggregationEngineTest {
     private ConsentService mockConsentService;
 
     static private final FhirContext fhirContext = FhirContext.forDstu3();
-    static private final FhirContext fhirContextR4 = FhirContext.forR4();
     static private final MetricRegistry metricRegistry = new MetricRegistry();
     static private String exportPath;
 
@@ -80,17 +76,15 @@ class AggregationEngineTest {
         consentResult.setActive(true);
         consentResult.setPolicyType(ConsentResult.PolicyType.OPT_IN);
         consentResult.setConsentId(UUID.randomUUID().toString());
-        Mockito.when(mockConsentService.getConsent(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0))).thenReturn(Optional.of(Lists.list(consentResult)));
-        Mockito.when(mockConsentService.getConsent(MockBlueButtonClient.TEST_PATIENT_MBIS.get(1))).thenReturn(Optional.of(Lists.list(consentResult)));
+        Mockito.when(mockConsentService.getConsent(List.of(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0)))).thenReturn(Optional.of(Lists.list(consentResult)));
+        Mockito.when(mockConsentService.getConsent(List.of(MockBlueButtonClient.TEST_PATIENT_MBIS.get(1)))).thenReturn(Optional.of(Lists.list(consentResult)));
 
         queue = Mockito.spy(new MemoryBatchQueue(10));
         bbclient = Mockito.spy(new MockBlueButtonClient(fhirContext));
-        bbclientV2 = Mockito.spy(new MockBlueButtonClientV2(fhirContextR4));
         var operationalConfig = new OperationsConfig(1000, exportPath, 500, YearMonth.of(2014, 3));
         lookBackService = Mockito.spy(EveryoneGetsDataLookBackServiceImpl.class);
         JobBatchProcessor jobBatchProcessor = Mockito.spy(new JobBatchProcessor(bbclient, fhirContext, metricRegistry, operationalConfig, lookBackService, mockConsentService));
-        JobBatchProcessorV2 jobBatchProcessorV2 = Mockito.spy(new JobBatchProcessorV2(bbclientV2, fhirContextR4, metricRegistry, operationalConfig, mockConsentService));
-        engine = Mockito.spy(new AggregationEngine(aggregatorID, queue, operationalConfig, jobBatchProcessor, jobBatchProcessorV2));
+        engine = Mockito.spy(new AggregationEngine(aggregatorID, queue, operationalConfig, jobBatchProcessor));
         engine.queueRunning.set(true);
         AggregationEngine.setGlobalErrorHandler();
         subscribe = Mockito.mock(Disposable.class);
@@ -106,9 +100,6 @@ class AggregationEngineTest {
         var patientMBI = MockBlueButtonClient.MBI_BENE_ID_MAP.get(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0));
         Bundle patient = bbclient.requestPatientFromServer(patientMBI, null, null);
         assertNotNull(patient);
-        // add test for v2 mock client
-        org.hl7.fhir.r4.model.Bundle patientV2 = bbclientV2.requestPatientFromServer(patientMBI, null, null);
-        assertNotNull(patientV2);
     }
 
     /**
@@ -237,38 +228,6 @@ class AggregationEngineTest {
     }
 
     /**
-     * Test if a engine can handle a simple V2 job with one resource type, one test provider, and one patient.
-     */
-    @Test
-    void simpleV2JobTest() {
-        final var orgID = UUID.randomUUID();
-
-        // Make a simple job with one resource type
-        final var jobID = queue.createJob(
-                orgID,
-                TEST_ORG_NPI,
-                TEST_PROVIDER_NPI,
-                Collections.singletonList(MockBlueButtonClientV2.TEST_PATIENT_MBIS.get(0)),
-                Collections.singletonList(DPCResourceType.Patient),
-                null,
-                MockBlueButtonClientV2.BFD_TRANSACTION_TIME,
-                null, "https://example.org/V2/Group/id/$export", true, false);
-
-        // Work the batch
-        queue.claimBatch(engine.getAggregatorID())
-                .ifPresent(engine::processJobBatch);
-
-        // Look at the result
-        final var completeJob = queue.getJobBatches(jobID).stream().findFirst().orElseThrow();
-        assertEquals(JobStatus.COMPLETED, completeJob.getStatus());
-        assertEquals(1000, completeJob.getPriority());
-        final var outputFilePath = ResourceWriterV2.formOutputFilePath(exportPath, completeJob.getBatchID(), DPCResourceType.Patient, 0);
-        assertTrue(Files.exists(Path.of(outputFilePath)));
-        final var errorFilePath = ResourceWriterV2.formOutputFilePath(exportPath, completeJob.getBatchID(), DPCResourceType.OperationOutcome, 0);
-        assertFalse(Files.exists(Path.of(errorFilePath)), "expect no error file");
-    }
-
-    /**
      * Test if a engine can handle a simple job with one resource type, one test provider, one patient and since.
      */
     @Test
@@ -296,37 +255,6 @@ class AggregationEngineTest {
         final var outputFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), DPCResourceType.Patient, 0);
         assertFalse(Files.exists(Path.of(outputFilePath)));
         final var errorFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), DPCResourceType.OperationOutcome, 0);
-        assertFalse(Files.exists(Path.of(errorFilePath)), "expect no error file");
-    }
-
-    /**
-     * Test if a engine can handle a simple V2 job with one resource type, one test provider, one patient and since.
-     */
-    @Test
-    void sinceV2JobTest() {
-        final var orgID = UUID.randomUUID();
-
-        // Make a simple job with one resource type
-        final var jobID = queue.createJob(
-                orgID,
-                TEST_ORG_NPI,
-                TEST_PROVIDER_NPI,
-                Collections.singletonList(MockBlueButtonClientV2.TEST_PATIENT_MBIS.get(0)),
-                Collections.singletonList(DPCResourceType.Patient),
-                MockBlueButtonClientV2.BFD_TRANSACTION_TIME,
-                MockBlueButtonClientV2.BFD_TRANSACTION_TIME,
-                null, "https://example.org/v2/Group/id/$export", true, false);
-
-        // Work the batch
-        queue.claimBatch(engine.getAggregatorID())
-                .ifPresent(engine::processJobBatch);
-
-        // Look at the result. Should be not have any output file.
-        final var completeJob = queue.getJobBatches(jobID).stream().findFirst().orElseThrow();
-        assertEquals(JobStatus.COMPLETED, completeJob.getStatus());
-        final var outputFilePath = ResourceWriterV2.formOutputFilePath(exportPath, completeJob.getBatchID(), DPCResourceType.Patient, 0);
-        assertFalse(Files.exists(Path.of(outputFilePath)));
-        final var errorFilePath = ResourceWriterV2.formOutputFilePath(exportPath, completeJob.getBatchID(), DPCResourceType.OperationOutcome, 0);
         assertFalse(Files.exists(Path.of(errorFilePath)), "expect no error file");
     }
 
@@ -363,38 +291,6 @@ class AggregationEngineTest {
     }
 
     /**
-     * Test if the engine can handle a V2 job with multiple output files and patients
-     */
-    @Test
-    void multipleFileV2JobTest() {
-        final var orgID = UUID.randomUUID();
-        final List<String> mbis = List.of(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0), MockBlueButtonClient.TEST_PATIENT_MBIS.get(1));
-
-        // build a job with multiple resource types
-        final var jobID = queue.createJob(
-                orgID,
-                TEST_ORG_NPI,
-                TEST_PROVIDER_NPI,
-                mbis,
-                JobQueueBatch.validResourceTypes,
-                null,
-                MockBlueButtonClientV2.BFD_TRANSACTION_TIME,
-                null, "https://example.org/v2/Group/id/$export", true, false);
-
-        // Work the batch
-        queue.claimBatch(engine.getAggregatorID())
-                .ifPresent(engine::processJobBatch);
-
-        // Look at the result
-        assertAll(() -> assertTrue(queue.getJobBatches(jobID).stream().findFirst().isPresent()),
-                () -> assertEquals(JobStatus.COMPLETED, queue.getJobBatches(jobID).stream().findFirst().get().getStatus()));
-        JobQueueBatch.validResourceTypes.forEach(resourceType -> {
-            var outputFilePath = ResourceWriterV2.formOutputFilePath(exportPath, queue.getJobBatches(jobID).stream().findFirst().get().getBatchID(), resourceType, 0);
-            assertTrue(Files.exists(Path.of(outputFilePath)));
-        });
-    }
-
-    /**
      * Test if the engine can split a job into multiple batches
      */
     @Test
@@ -411,29 +307,6 @@ class AggregationEngineTest {
                 null,
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
                 null, null, true, false);
-
-        // Assert the queue size
-        assertEquals(2, queue.queueSize());
-        assertEquals(5000, queue.getJobBatches(jobID).get(0).getPriority());
-    }
-
-    /**
-     * Test if the engine can split a V2 job into multiple batches
-     */
-    @Test
-    void multipleBatchV2JobTest() {
-        final var orgID = UUID.randomUUID();
-
-        // build a job with multiple resource types
-        final var jobID = queue.createJob(
-                orgID,
-                TEST_ORG_NPI,
-                TEST_PROVIDER_NPI,
-                Arrays.asList("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11"),
-                JobQueueBatch.validResourceTypes,
-                null,
-                MockBlueButtonClientV2.BFD_TRANSACTION_TIME,
-                null, "https://example.org/v2/Group/id/$export", true, false);
 
         // Assert the queue size
         assertEquals(2, queue.queueSize());
@@ -509,44 +382,6 @@ class AggregationEngineTest {
                 () -> assertEquals(JobStatus.COMPLETED, queue.getJobBatches(jobID).stream().findFirst().get().getStatus())
         );
         var outputFilePath = ResourceWriter.formOutputFilePath(exportPath, queue.getJobBatches(jobID).stream().findFirst().get().getBatchID(), DPCResourceType.Patient, 0);
-        assertTrue(Files.exists(Path.of(outputFilePath)));
-        try {
-            final String fileContents = Files.readString(Path.of(outputFilePath));
-            assertEquals(mbis.size(), Arrays.stream(fileContents.split("\n")).count(), "Contains multiple patients in file output");
-        } catch (Exception e) {
-            fail("Failed to read output file");
-        }
-    }
-
-    /**
-     * Test if the engine can handle appending to a V2 batch file with multiple patients
-     */
-    @Test
-    void appendV2BatchFileTest() {
-        final var orgID = UUID.randomUUID();
-        final List<String> mbis = List.of(MockBlueButtonClientV2.TEST_PATIENT_MBIS.get(0), MockBlueButtonClientV2.TEST_PATIENT_MBIS.get(1));
-
-        // build a job with multiple resource types
-        final var jobID = queue.createJob(
-                orgID,
-                TEST_ORG_NPI,
-                TEST_PROVIDER_NPI,
-                mbis,
-                Collections.singletonList(DPCResourceType.Patient),
-                null,
-                MockBlueButtonClientV2.BFD_TRANSACTION_TIME,
-                null, "https://example.org/v2/Group/id/$export", true, false);
-
-        // Work the batch
-        queue.claimBatch(engine.getAggregatorID())
-                .ifPresent(engine::processJobBatch);
-
-        // Look at the result
-        assertAll(
-                () -> assertTrue(queue.getJobBatches(jobID).stream().findFirst().isPresent()),
-                () -> assertEquals(JobStatus.COMPLETED, queue.getJobBatches(jobID).stream().findFirst().get().getStatus())
-        );
-        var outputFilePath = ResourceWriterV2.formOutputFilePath(exportPath, queue.getJobBatches(jobID).stream().findFirst().get().getBatchID(), DPCResourceType.Patient, 0);
         assertTrue(Files.exists(Path.of(outputFilePath)));
         try {
             final String fileContents = Files.readString(Path.of(outputFilePath));
@@ -685,9 +520,9 @@ class AggregationEngineTest {
         Mockito.verify(bbclient, atLeastOnce()).requestPatientFromServerByMbi(idCaptor.capture(), anyMap());
         Mockito.verify(bbclient, atLeastOnce()).requestEOBFromServer(idCaptor.capture(), lastUpdatedCaptor.capture(), anyMap());
         var values = idCaptor.getAllValues();
-        assertEquals(0,
+        assertEquals(1,
                 values.stream().filter(value -> value.equals("-1")).count(),
-                "Should be 0 call, never makes it past lookback");
+                "Should be 1 call when loading the patient for consent check, then doesn't go any further");
 
         // Look at the result. It should have one error, but be successful otherwise.
         assertTrue(queue.getJobBatches(jobID).stream().findFirst().isPresent());
@@ -701,7 +536,7 @@ class AggregationEngineTest {
 
     @Test
     void multiplePatientsMatchTest() {
-        final List<String> mbis = Collections.singletonList(MockBlueButtonClient.MULTIPLE_RESULTS_MBI);
+        final List<String> mbis = Collections.singletonList(MockBlueButtonClient.TEST_PATIENT_MULTIPLE_MBIS.get(0));
 
         final var orgID = UUID.randomUUID();
 

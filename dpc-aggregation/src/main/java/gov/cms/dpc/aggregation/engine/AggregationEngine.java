@@ -39,7 +39,6 @@ public class AggregationEngine implements Runnable {
     private final IJobQueue queue;
     private final OperationsConfig operationsConfig;
     private final JobBatchProcessor jobBatchProcessor;
-    private final JobBatchProcessorV2 jobBatchProcessorV2;
     private Disposable subscribe;
 
     /**
@@ -57,12 +56,11 @@ public class AggregationEngine implements Runnable {
      * @param jobBatchProcessor - {@link JobBatchProcessor} contains all the job processing logic
      */
     @Inject
-    public AggregationEngine(@AggregatorID UUID aggregatorID, IJobQueue queue, OperationsConfig operationsConfig, JobBatchProcessor jobBatchProcessor, JobBatchProcessorV2 jobBatchProcessorV2) {
+    public AggregationEngine(@AggregatorID UUID aggregatorID, IJobQueue queue, OperationsConfig operationsConfig, JobBatchProcessor jobBatchProcessor) {
         this.aggregatorID = aggregatorID;
         this.queue = queue;
         this.operationsConfig = operationsConfig;
         this.jobBatchProcessor = jobBatchProcessor;
-        this.jobBatchProcessorV2 = jobBatchProcessorV2;
     }
 
     /**
@@ -196,12 +194,7 @@ public class AggregationEngine implements Runnable {
     }
 
     private Optional<String> processPatient(JobQueueBatch job, String patientId) {
-        if (job.isV2()) {
-            jobBatchProcessorV2.processJobBatchPartial(aggregatorID, queue, job, patientId);
-        }
-        else {
-            jobBatchProcessor.processJobBatchPartial(aggregatorID, queue, job, patientId);
-        }
+        jobBatchProcessor.processJobBatchPartial(aggregatorID, queue, job, patientId);
 
         // Stop processing when no patients or early shutdown
         return this.isRunning() ? job.fetchNextPatient(aggregatorID) : Optional.empty();
