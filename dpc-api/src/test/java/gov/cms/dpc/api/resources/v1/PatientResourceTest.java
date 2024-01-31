@@ -11,6 +11,7 @@ import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import gov.cms.dpc.aggregation.service.ConsentResult;
 import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
 import gov.cms.dpc.api.TestOrganizationContext;
@@ -22,6 +23,7 @@ import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.helpers.FHIRHelpers;
 import gov.cms.dpc.testing.APIAuthHelpers;
 import gov.cms.dpc.testing.factories.FHIRPractitionerBuilder;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpHeaders;
 import org.eclipse.jetty.http.HttpStatus;
@@ -45,6 +47,7 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -53,8 +56,14 @@ import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
 import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_NPI;
 import static org.junit.jupiter.api.Assertions.*;
 
+/*
+    If you're running this locally, you'll need to wipe out the rows in the consent table in between runs.  If not, the
+    opt outs from the previous run will interfere with the current one.
+ */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class PatientResourceTest extends AbstractSecureApplicationTest {
+    final java.util.Date dateYesterday = Date.from(Instant.now().minus(1, ChronoUnit.DAYS));
+    final java.util.Date dateToday = Date.from(Instant.now());
 
     public static final String PROVENANCE_FMT = "{ \"resourceType\": \"Provenance\", \"recorded\": \"" + DateTimeType.now().getValueAsString() + "\"," +
             " \"reason\": [ { \"system\": \"http://hl7.org/fhir/v3/ActReason\", \"code\": \"TREAT\"  } ], \"agent\": [ { \"role\": " +
@@ -267,7 +276,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     @Test
     @Order(6)
     void testPatientEverythingWithoutGroupFetchesData() throws IOException, URISyntaxException, GeneralSecurityException {
-        IGenericClient client = generateClient(ORGANIZATION_NPI, "patient-everything-key");
+        IGenericClient client = generateClient(ORGANIZATION_NPI, RandomStringUtils.randomAlphabetic(25));
         APITestHelpers.setupPractitionerTest(client, parser);
 
         String mbi = MockBlueButtonClient.TEST_PATIENT_MBIS.get(2);
@@ -342,8 +351,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     @Test
     @Order(7)
     void testPatientEverythingWithGroupFetchesData() throws IOException, URISyntaxException, GeneralSecurityException {
-        IGenericClient client = generateClient(ORGANIZATION_NPI, "patient-everything-key-2");
-        APITestHelpers.setupPractitionerTest(client, parser);
+        IGenericClient client = generateClient(ORGANIZATION_NPI, RandomStringUtils.randomAlphabetic(25));
 
         String mbi = MockBlueButtonClient.TEST_PATIENT_MBIS.get(2);
         Patient patient = fetchPatient(client, mbi);
@@ -428,36 +436,8 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
 
     @Test
     @Order(8)
-    void testPatientEverythingForOptedOutPatient() throws IOException, URISyntaxException, GeneralSecurityException {
-        IGenericClient client = generateClient(ORGANIZATION_NPI, "patient-everything-key-3");
-        APITestHelpers.setupPractitionerTest(client, parser);
-
-        String mbi = MockBlueButtonClient.TEST_PATIENT_MBIS.get(3);
-        Patient patient = fetchPatient(client, mbi);
-        Practitioner practitioner = fetchPractitionerByNPI(client);
-        final String patientId = FHIRExtractors.getEntityUUID(patient.getId()).toString();
-
-        optOutPatient(mbi);
-
-        IOperationUntypedWithInput<Bundle> getEverythingOperation = client
-                .operation()
-                .onInstance(new IdType("Patient", patientId))
-                .named("$everything")
-                .withNoParameters(Parameters.class)
-                .returnResourceType(Bundle.class)
-                .useHttpGet()
-                .withAdditionalHeader("X-Provenance", generateProvenance(ORGANIZATION_ID, practitioner.getId()));
-
-
-        InternalErrorException exception = assertThrows(InternalErrorException.class, getEverythingOperation::execute, "Expected Internal server error when retrieving opted out patient.");
-        assertTrue(exception.getResponseBody().contains("\"text\":\"Data not available for opted out patient\""), "Incorrect or missing operation outcome in response body.");
-    }
-
-    @Test
-    @Order(9)
     void testPatientEverything_CanHandlePatientWithMultipleMBIs() throws IOException, URISyntaxException, GeneralSecurityException {
-        IGenericClient client = generateClient(ORGANIZATION_NPI, "patient-everything-key-4");
-        APITestHelpers.setupPractitionerTest(client, parser);
+        IGenericClient client = generateClient(ORGANIZATION_NPI, RandomStringUtils.randomAlphabetic(25));
 
         String mbi = MockBlueButtonClient.TEST_PATIENT_MBIS.get(6);
         Patient patient = fetchPatient(client, mbi);
@@ -485,6 +465,88 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
 
         // Current MBI
         assertEquals("9V99EU8XY91", FHIRExtractors.getPatientMBI(patientResource));
+    }
+
+    @Test
+    @Order(9)
+    void testPatientEverythingForOptedOutPatient() throws IOException, URISyntaxException, GeneralSecurityException {
+        IGenericClient client = generateClient(ORGANIZATION_NPI, RandomStringUtils.randomAlphabetic(25));
+
+        String mbi = MockBlueButtonClient.TEST_PATIENT_MBIS.get(2);
+        Patient patient = fetchPatient(client, mbi);
+        Practitioner practitioner = fetchPractitionerByNPI(client);
+        final String patientId = FHIRExtractors.getEntityUUID(patient.getId()).toString();
+
+        optOutPatient(mbi, dateYesterday);
+
+        IOperationUntypedWithInput<Bundle> getEverythingOperation = client
+                .operation()
+                .onInstance(new IdType("Patient", patientId))
+                .named("$everything")
+                .withNoParameters(Parameters.class)
+                .returnResourceType(Bundle.class)
+                .useHttpGet()
+                .withAdditionalHeader("X-Provenance", generateProvenance(ORGANIZATION_ID, practitioner.getId()));
+
+        InternalErrorException exception = assertThrows(InternalErrorException.class, getEverythingOperation::execute, "Expected Internal server error when retrieving opted out patient.");
+        assertTrue(exception.getResponseBody().contains("\"text\":\"Data not available for opted out patient\""), "Incorrect or missing operation outcome in response body.");
+    }
+
+    @Test
+    @Order(10)
+    void testPatientEverythingForOptedOutPatientOnMultipleMbis() throws IOException, URISyntaxException, GeneralSecurityException {
+        IGenericClient client = generateClient(ORGANIZATION_NPI, RandomStringUtils.randomAlphabetic(25));
+
+        String mbi = MockBlueButtonClient.TEST_PATIENT_MBIS.get(6);
+        String historicMbi = MockBlueButtonClient.TEST_PATIENT_MBIS.get(7);
+
+        Patient patient = fetchPatient(client, mbi);
+        Practitioner practitioner = fetchPractitionerByNPI(client);
+        final String patientId = FHIRExtractors.getEntityUUID(patient.getId()).toString();
+
+        optOutPatient(historicMbi, dateYesterday);
+
+        IOperationUntypedWithInput<Bundle> getEverythingOperation = client
+                .operation()
+                .onInstance(new IdType("Patient", patientId))
+                .named("$everything")
+                .withNoParameters(Parameters.class)
+                .returnResourceType(Bundle.class)
+                .useHttpGet()
+                .withAdditionalHeader("X-Provenance", generateProvenance(ORGANIZATION_ID, practitioner.getId()));
+
+        InternalErrorException exception = assertThrows(InternalErrorException.class, getEverythingOperation::execute, "Expected Internal server error when retrieving opted out patient.");
+        assertTrue(exception.getResponseBody().contains("\"text\":\"Data not available for opted out patient\""), "Incorrect or missing operation outcome in response body.");
+    }
+
+    @Test
+    public void testOptInPatient() throws GeneralSecurityException, IOException, URISyntaxException {
+        IGenericClient client = generateClient(ORGANIZATION_NPI, RandomStringUtils.randomAlphabetic(25));
+
+        String mbi = MockBlueButtonClient.TEST_PATIENT_MBIS.get(2);
+        Patient patient = fetchPatient(client, mbi);
+        Practitioner practitioner = fetchPractitionerByNPI(client);
+        final String patientId = FHIRExtractors.getEntityUUID(patient.getId()).toString();
+
+        optInPatient(mbi, dateToday);
+
+        Bundle bundle = client
+                .operation()
+                .onInstance(new IdType("Patient", patientId))
+                .named("$everything")
+                .withNoParameters(Parameters.class)
+                .returnResourceType(Bundle.class)
+                .useHttpGet()
+                .withAdditionalHeader("X-Provenance", generateProvenance(ORGANIZATION_ID, practitioner.getId()))
+                .execute();
+
+        Patient patientResource = (Patient) bundle.getEntry().stream()
+                .filter(entry -> entry.getResource().getResourceType().getPath() == "patient")
+                .findFirst().get().getResource();
+
+        // Patient should have multiple MBIs
+        String resultMbi =  FHIRExtractors.getPatientMBI(patientResource);
+        assertEquals(MockBlueButtonClient.TEST_PATIENT_MBIS.get(2), resultMbi );
     }
 
     @Test
@@ -601,7 +663,15 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
         return (Practitioner) practSearch.getEntry().get(0).getResource();
     }
 
-    private void optOutPatient(String mbi){
+    private void optOutPatient(String mbi, java.util.Date date){
+        sendConsent(mbi, ConsentResult.PolicyType.OPT_OUT.getValue(), date);
+    }
+
+    private void optInPatient(String mbi, java.util.Date date){
+        sendConsent(mbi, ConsentResult.PolicyType.OPT_IN.getValue(), date);
+    }
+
+    private void sendConsent(String mbi, String policyUrl, java.util.Date date) {
         Consent consent = new Consent();
         consent.setStatus(Consent.ConsentState.ACTIVE);
 
@@ -613,20 +683,17 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
         String patientRefPath = "/Patient?identity=|"+mbi;
         consent.setPatient(new Reference("http://api.url" + patientRefPath));
 
-        java.util.Date date = java.util.Date.from(Instant.now());
         consent.setDateTime(date);
 
         Reference orgRef = new Reference("Organization/" + UUID.randomUUID().toString());
         consent.setOrganization(List.of(orgRef));
 
-        String policyUrl = "http://hl7.org/fhir/ConsentPolicy/opt-out";
         consent.setPolicyRule(policyUrl);
 
-       consentClient
+        consentClient
                 .create()
                 .resource(consent)
                 .encodedJson()
                 .execute();
     }
-
 }

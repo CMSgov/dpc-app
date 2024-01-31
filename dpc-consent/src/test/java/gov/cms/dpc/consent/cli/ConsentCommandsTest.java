@@ -1,5 +1,6 @@
 package gov.cms.dpc.consent.cli;
 
+import ch.qos.logback.classic.LoggerContext;
 import gov.cms.dpc.consent.DPCConsentConfiguration;
 import gov.cms.dpc.consent.DPCConsentService;
 import gov.cms.dpc.testing.IntegrationTest;
@@ -21,12 +22,10 @@ import static org.mockito.Mockito.when;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @IntegrationTest
-@Disabled
 class ConsentCommandsTest {
 
     private final PrintStream originalOut = System.out;
     private final PrintStream originalErr = System.err;
-    private final InputStream originalIn = System.in;
 
     private final ByteArrayOutputStream stdOut = new ByteArrayOutputStream();
     private final ByteArrayOutputStream stdErr = new ByteArrayOutputStream();
@@ -51,9 +50,6 @@ class ConsentCommandsTest {
 
     @BeforeAll
     void cliSetup() throws Exception {
-
-        app.run("db", "migrate", "application.yml");
-
         // Redirect stdout and stderr to our byte streams
         System.setOut(new PrintStream(stdOut));
         System.setErr(new PrintStream(stdErr));
@@ -64,11 +60,15 @@ class ConsentCommandsTest {
         cli = new Cli(location, bs, stdOut, stdErr);
     }
 
+    @BeforeEach
+    void stopLogging() {
+        ((LoggerContext)org.slf4j.LoggerFactory.getILoggerFactory()).stop();
+    }
+
     @AfterAll
     void teardown() {
         System.setOut(originalOut);
         System.setErr(originalErr);
-        System.setIn(originalIn);
     }
 
     @AfterEach
@@ -81,7 +81,7 @@ class ConsentCommandsTest {
     final void pertinentHelpMessageDisplayed() throws Exception {
         final Optional<Throwable> t1 = cli.run("consent", "create", "-h");
         String errorMsg = String.format("Should have pertinent help message, got: %s", stdOut.toString());
-        assertAll(() -> assertTrue(t1.isPresent(), "Should have succeeded"),
+        assertAll(() -> assertFalse(t1.isPresent(), "Should have succeeded"),
                 () -> assertEquals("", stdErr.toString(), "Should not have errors"),
                 () -> assertTrue(stdOut.toString().contains("Create a new consent record"), errorMsg));
     }
@@ -89,7 +89,7 @@ class ConsentCommandsTest {
     @Test
     final void onlyAllowsInOrOut() throws Exception {
         final Optional<Throwable> t1 = cli.run("consent", "create", "-p", "t2-mbi", "-d", "2019-11-22", "-i", "-o", "--host", "http://localhost:3500/v1");
-        assertAll(() -> assertFalse(t1.isPresent(), "Should have failed"),
+        assertAll(() -> assertTrue(t1.isPresent(), "Should have failed"),
                 () -> assertEquals("", stdOut.toString(), "Should not have output"),
                 () -> assertNotEquals("", stdErr.toString(), "Should have errors"),
                 () -> assertTrue(stdErr.toString().contains("argument -o/--out: not allowed with argument -i/--in"), "Should have '-o not allowed with -i' help message"));
@@ -98,7 +98,7 @@ class ConsentCommandsTest {
     @Test
     final void detectsInvalidDate() throws Exception {
         final Optional<Throwable> t5 = cli.run("consent", "create", "-p", "tA-mbi", "-d", "Nov 22 2019", "-i", "--host", "http://localhost:3500/v1");
-        assertAll(() -> assertFalse(t5.isPresent(), "Should have failed"),
+        assertAll(() -> assertTrue(t5.isPresent(), "Should have failed"),
                 () -> assertEquals("", stdOut.toString(), "Should not have output"),
                 () -> assertNotEquals("", stdErr.toString(), "Should have errors"),
                 () -> assertTrue(stdErr.toString().contains("java.time.format.DateTimeParseException"), "Should have date parsing error"));
@@ -107,14 +107,14 @@ class ConsentCommandsTest {
     @Test
     final void createDefaultOptInRecord() throws Exception {
         final Optional<Throwable> t2 = cli.run("consent", "create", "-p", "t2-mbi", "-d", "2019-11-22", "-i", "--host", "http://localhost:3500/v1");
-        assertAll(() -> assertTrue(t2.isPresent(), "Should have succeeded"),
+        assertAll(() -> assertFalse(t2.isPresent(), "Should have succeeded"),
                 () -> assertEquals("", stdErr.toString(), "Should not have errors"));
     }
 
     @Test
     final void createDefaultOptOutRecord() throws Exception {
         final Optional<Throwable> t3 = cli.run("consent", "create", "-p", "t3-mbi", "-d", "2019-11-23", "-o", "--host", "http://localhost:3500/v1");
-        assertAll(() -> assertTrue(t3.isPresent(), "Should have succeeded"),
+        assertAll(() -> assertFalse(t3.isPresent(), "Should have succeeded"),
                 () -> assertEquals("", stdErr.toString(), "Should not have errors"));
     }
 }

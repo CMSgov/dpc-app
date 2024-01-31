@@ -61,5 +61,7 @@ public class ConsentResult {
             }
             return null;
         }
+
+        public String getValue() {return policyUrl;}
     }
 }
