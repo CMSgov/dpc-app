@@ -9,6 +9,10 @@ import ru.vyarus.dropwizard.guice.module.installer.install.InstanceInstaller;
 import ru.vyarus.dropwizard.guice.module.installer.util.FeatureUtils;
 import ru.vyarus.dropwizard.guice.module.installer.util.Reporter;
 
+
+/*
+ * Code source: https://github.com/grommitz/dropwizard-jobs-guicey-example/blob/master/src/main/java/com/github/grommitz/dwguicey/GuiceyInstaller.java
+ */
 public class GuiceyInstaller implements FeatureInstaller, InstanceInstaller<Job> {
 
 	private final Reporter reporter = new Reporter(GuiceyInstaller.class, "jobs =");
