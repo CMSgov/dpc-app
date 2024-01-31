@@ -10,7 +10,6 @@ import gov.cms.dpc.testing.BufferedLoggerHandler;
 import gov.cms.dpc.testing.IntegrationTest;
 import gov.cms.dpc.testing.JobTestUtils;
 import io.dropwizard.client.JerseyClientBuilder;
-import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.DropwizardTestSupport;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.Bundle;
@@ -36,9 +35,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ExtendWith(BufferedLoggerHandler.class)
 @IntegrationTest
 class ExpirationJobTest {
-    private static final String KEY_PREFIX = "dpc.attribution";
-    private static final DropwizardTestSupport<DPCAttributionConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCAttributionService.class, "ci.application.yml", ConfigOverride.config("server.applicationConnectors[0].port", "3727"),
-            ConfigOverride.config(KEY_PREFIX, "logging.level", "ERROR"));
+    private static final String configPath = "src/test/resources/test.application.yml";
+    private static final DropwizardTestSupport<DPCAttributionConfiguration> APPLICATION =
+            new DropwizardTestSupport<>(DPCAttributionService.class, configPath);
     private static final String PROVIDER_ID = "2322222227";
     private static final FhirContext ctx = FhirContext.forDstu3();
     private Client client;
@@ -48,10 +47,10 @@ class ExpirationJobTest {
         JobTestUtils.resetScheduler();
         APPLICATION.before();
         SharedConfigurationState.clear();
-        APPLICATION.getApplication().run("db", "migrate", "ci.application.yml");
+        APPLICATION.getApplication().run("db", "migrate", configPath);
         // Seed the database, but use a really early time
         SharedConfigurationState.clear();
-        APPLICATION.getApplication().run("seed", "-t 2015-01-01T12:12:12Z", "ci.application.yml");
+        APPLICATION.getApplication().run("seed", "-t 2015-01-01T12:12:12Z", configPath);
 
         this.client = new JerseyClientBuilder(APPLICATION.getEnvironment()).build("test");
     }
