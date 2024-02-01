@@ -38,9 +38,10 @@ public class AbstractApplicationTest {
 
     private static final ObjectMapper mapper = new ObjectMapper();
 
-    private static final DropwizardTestSupport<DPCAPIConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCAPIService.class, configPath,
-            ConfigOverride.config("authenticationDisabled", "true"),
-            ConfigOverride.config("logging.level", "ERROR"));
+    private static final DropwizardTestSupport<DPCAPIConfiguration> APPLICATION =
+            new DropwizardTestSupport<>(DPCAPIService.class, configPath,
+                    ConfigOverride.config("authenticationDisabled", "true"),
+                    ConfigOverride.config("logging.level", "ERROR"));
     protected FhirContext ctx;
 
     protected AbstractApplicationTest() {

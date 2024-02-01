@@ -231,6 +231,12 @@
             <version>0.4.0-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>gov.cms.dpc</groupId>
+            <artifactId>dpc-aggregation</artifactId>
+            <version>0.4.0-SNAPSHOT</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>

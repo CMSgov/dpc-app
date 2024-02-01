@@ -44,8 +44,9 @@ public class AbstractSecureApplicationTest {
     private static final String configPath = "src/test/resources/test.application.yml";
     private static final ObjectMapper mapper = new ObjectMapper();
 
-    private static final DropwizardTestSupport<DPCAPIConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCAPIService.class, configPath,
-            ConfigOverride.config("logging.level", "ERROR"));
+    private static final DropwizardTestSupport<DPCAPIConfiguration> APPLICATION =
+            new DropwizardTestSupport<>(DPCAPIService.class, configPath,
+                    ConfigOverride.config("logging.level", "ERROR"));
     protected static FhirContext ctx;
     protected static String ORGANIZATION_TOKEN;
     // Macaroon to use for doing admin things (like creating tokens and keys)
