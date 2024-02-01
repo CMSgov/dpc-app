@@ -2,7 +2,7 @@ publicServerURL: "https://dpc.cms.gov"
 
 database:
   driverClass: org.postgresql.Driver
-  url: "jdbc:postgresql://localhost:5432/dpc_attribution"
+  url: "jdbc:postgresql://db:5432/dpc_attribution"
   user: ${ATTRIBUTION_DB_USER:-postgres}
   password: ${ATTRIBUTION_DB_PASS:-dpc-safe}
   initialSize: 5
