@@ -16,22 +16,11 @@ server:
   adminConnectors:
     - type: http
       port: 9900
-  requestLog:
-    appenders:
-      - type: console
-        timeZone: UTC
-        layout:
-          type: access-json
-          timestampFormat: "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
-          additionalFields:
-            environment: ${ENV:-"unknown_env"}
-            version: ${APP_VERSION:-"unknown_version"}
-            application: ${APPLICATION:-"dpc-consent"}
 
 logging:
   level: ERROR
   loggers:
-    "liquibase": INFO
+    "liquibase": ERROR
     "gov.cms.dpc.queue.DistributedBatchQueue": DEBUG
     "org.hibernate": ERROR
     "org.hibernate.SQL": ERROR

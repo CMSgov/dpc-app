@@ -34,6 +34,8 @@ server:
   adminConnectors:
     - type: http
       port: 9900
+  filterFactories:
+    - type: token-filter-factory
   requestLog:
     appenders:
       - type: console
@@ -70,7 +72,7 @@ logging:
 
 jobTimeoutInSeconds: ${JOB_TIMEOUT_IN_SECONDS:-60}
 
-publicURL: ${PUBLIC_URL:-"http://localhost:3002"} # The root URL at which the application is accessible, if necessary, include the port, do not include the application version
+publicURL: "http://localhost:3002" # The root URL at which the application is accessible, if necessary, include the port, do not include the application version
 
 authdb:
   driverClass: org.postgresql.Driver
@@ -83,11 +85,8 @@ authdb:
 
 lookBackExemptOrgs: ${LOOK_BACK_EXEMPT_ORGS:-["0ab352f1-2bf1-44c4-aa7a-3004a1ffef12","69c0d4d4-9c07-4fa8-9053-e10fb1608b48","c7f5247b-4c41-478c-84eb-a6e801bdb145"]}
 
-filterFactories:
-    - type: token-filter-factory
-
 bbclient:
-  registerHealthCheck: ${BB_REGISTER_HEALTH_CHECK}
+  registerHealthCheck: ${BB_REGISTER_HEALTH_CHECK:-false}
   keyStore:
     type: "JKS"
     defaultPassword: ${BB_KEYSTORE_PASS:-"changeit"}

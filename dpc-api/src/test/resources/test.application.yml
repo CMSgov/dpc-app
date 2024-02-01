@@ -1,6 +1,6 @@
 database:
   driverClass: org.postgresql.Driver
-  url: "jdbc:postgresql://db:5432/dpc_attribution"
+  url: "jdbc:postgresql://localhost:5432/dpc_attribution"
   user: ${ATTRIBUTION_DB_USER:-postgres}
   password: ${ATTRIBUTION_DB_PASS:-dpc-safe}
   initialSize: 5
@@ -9,7 +9,7 @@ database:
 
 queuedb:
   driverClass: org.postgresql.Driver
-  url: "jdbc:postgresql://db:5432/dpc_queue"
+  url: "jdbc:postgresql://localhost:5432/dpc_queue"
   user: ${QUEUE_DB_USER:-postgres}
   password: ${QUEUE_DB_PASS:-dpc-safe}
   initialSize: 5
@@ -25,17 +25,6 @@ server:
   adminConnectors:
     - type: http
       port: 9900
-  requestLog:
-    appenders:
-      - type: console
-        timeZone: UTC
-        layout:
-          type: access-json
-          timestampFormat: "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
-          additionalFields:
-            environment: ${ENV:-"unknown_env"}
-            version: ${APP_VERSION:-"unknown_version"}
-            application: ${APPLICATION:-"dpc-api"}
 
 logging:
   level: ERROR
@@ -61,11 +50,11 @@ logging:
 
 jobTimeoutInSeconds: ${JOB_TIMEOUT_IN_SECONDS:-60}
 
-publicURL: ${PUBLIC_URL:-"http://localhost:3002"} # The root URL at which the application is accessible, if necessary, include the port, do not include the application version
+publicURL: "http://localhost:3002" # The root URL at which the application is accessible, if necessary, include the port, do not include the application version
 
 authdb:
   driverClass: org.postgresql.Driver
-  url: "jdbc:postgresql://db:5432/dpc_auth"
+  url: "jdbc:postgresql://localhost:5432/dpc_auth"
   user: ${AUTH_DB_USER:-postgres}
   password: ${AUTH_DB_PASS:-dpc-safe}
   initialSize: 5
@@ -75,7 +64,7 @@ authdb:
 lookBackExemptOrgs: ${LOOK_BACK_EXEMPT_ORGS:-["0ab352f1-2bf1-44c4-aa7a-3004a1ffef12","69c0d4d4-9c07-4fa8-9053-e10fb1608b48","c7f5247b-4c41-478c-84eb-a6e801bdb145"]}
 
 bbclient:
-  registerHealthCheck: false  # TODO: dropwizard - ${BB_REGISTER_HEALTH_CHECK}
+  registerHealthCheck: ${BB_REGISTER_HEALTH_CHECK:-false}
   keyStore:
     type: "JKS"
     defaultPassword: ${BB_KEYSTORE_PASS:-"changeit"}
