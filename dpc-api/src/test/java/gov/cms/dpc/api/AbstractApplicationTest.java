@@ -34,7 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ExtendWith(BufferedLoggerHandler.class)
 public class AbstractApplicationTest {
 
-    private static final String configPath = "src/test/resources/test.application.yml";
+    private static final String configPath = "src/main/resources/ci.application.yml";
 
     private static final ObjectMapper mapper = new ObjectMapper();
 

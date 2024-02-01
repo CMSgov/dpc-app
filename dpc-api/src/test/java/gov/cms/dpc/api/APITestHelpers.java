@@ -67,7 +67,7 @@ public class APITestHelpers {
     public static String BASE_URL = "https://dpc.cms.gov/api";
     public static String ORGANIZATION_NPI = "1111111112";
 
-    private static final String configPath = "src/test/resources/test.application.yml";
+    private static final String configPath = "src/main/resources/ci.application.yml";
 
     private static final ObjectMapper mapper = new ObjectMapper();
 

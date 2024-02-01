@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class AggregationServiceTest {
 
     private static final DropwizardTestSupport<DPCAggregationConfiguration> APPLICATION =
-            new DropwizardTestSupport<>(DPCAggregationService.class, "src/test/resources/test.application.yml",
+            new DropwizardTestSupport<>(DPCAggregationService.class, "src/main/resources/ci.application.yml",
                     ConfigOverride.config("server.applicationConnectors[0].port", "7777"),
                     ConfigOverride.config("bbclient.bfdHashPepper", "6E6F747468657265616C706570706572"),  // not a real pepper
                     ConfigOverride.config("bbclient.bfdHashIter", "1000"));

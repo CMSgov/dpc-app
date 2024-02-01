@@ -35,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ExtendWith(BufferedLoggerHandler.class)
 @IntegrationTest
 class ExpirationJobTest {
-    private static final String configPath = "src/test/resources/test.application.yml";
+    private static final String configPath = "src/main/resources/ci.application.yml";
     private static final DropwizardTestSupport<DPCAttributionConfiguration> APPLICATION =
             new DropwizardTestSupport<>(DPCAttributionService.class, configPath);
     private static final String PROVIDER_ID = "2322222227";

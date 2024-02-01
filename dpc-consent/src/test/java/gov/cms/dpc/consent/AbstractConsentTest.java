@@ -13,7 +13,7 @@ import ru.vyarus.dropwizard.guice.module.context.SharedConfigurationState;
 @IntegrationTest
 public abstract class AbstractConsentTest {
 
-    private static String configPath = "src/test/resources/test.application.yml";
+    private static String configPath = "src/main/resources/ci.application.yml";
 
     protected static final DropwizardTestSupport<DPCConsentConfiguration> APPLICATION =
             new DropwizardTestSupport<>(DPCConsentService.class, configPath);
