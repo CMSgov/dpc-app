@@ -1,8 +1,0 @@
-dpc.attribution:
-  database:
-    url: "jdbc:postgresql://db.dpc-test.local:5432/dpc_attribution"
-
-  server:
-    applicationConnectors:
-      - type: http
-        port: 8080
