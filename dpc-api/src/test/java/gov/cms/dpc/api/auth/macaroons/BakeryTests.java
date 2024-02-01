@@ -17,7 +17,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.security.SecureRandom;
 import java.util.Collections;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -28,11 +27,6 @@ class BakeryTests {
     private static final String BAD_ORG_ID = "0c527d2e-2e8a-4808-b11d-0fa06baf8252";
 
     private MacaroonBakery bakery;
-
-    private Map<String, Object> tokens = Map.of(
-        "versionPolicy", Map.of("minimumVersion", 1, "currentVersion", 2),
-        "expirationPolicy", Map.of("expirationOffset", 1, "expirationUnit", "YEARS")
-    );
 
     @BeforeEach
     void setup() {
@@ -56,10 +50,11 @@ class BakeryTests {
         TokenPolicy.VersionPolicy versionPolicy = new TokenPolicy.VersionPolicy();
         versionPolicy.setMinimumVersion(1);
         versionPolicy.setCurrentVersion(2);
+        tokenPolicy.setVersionPolicy(versionPolicy);
         TokenPolicy.ExpirationPolicy expirationPolicy = new TokenPolicy.ExpirationPolicy();
         expirationPolicy.setExpirationOffset(1);
         expirationPolicy.setExpirationUnit("YEARS");
-        tokenPolicy.setVersionPolicy(versionPolicy);
+        tokenPolicy.setExpirationPolicy(expirationPolicy);
         return tokenPolicy;
     }
 }
