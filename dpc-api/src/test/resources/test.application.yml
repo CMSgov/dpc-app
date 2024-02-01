@@ -68,7 +68,7 @@ bbclient:
   keyStore:
     type: "JKS"
     defaultPassword: ${BB_KEYSTORE_PASS:-"changeit"}
-    location: ${BB_KEYSTORE_LOCATION:-"/bb.keystore"}
+    location: ${BB_KEYSTORE_LOCATION:-"../bbcerts/bb.keystore"}
   timeouts:
     connectionTimeout: 5000 # ms
     socketTimeout: 5000 # ms
