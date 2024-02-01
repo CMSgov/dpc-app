@@ -1,6 +1,6 @@
 consentdb:
   driverClass: org.postgresql.Driver
-  url: "jdbc:postgresql://db:5432/dpc_consent"
+  url: "jdbc:postgresql://db.dpc-test.local:5432/dpc_consent"
   user: ${CONSENT_DB_USER:-postgres}
   password: ${CONSENT_DB_PASS:-dpc-safe}
   initialSize: 5
@@ -57,7 +57,7 @@ logging:
 suppressionFileDir: "/dpc/in/1800"
 
 # base URL for FHIR references to DPC resources (Patients, Organizations, etc) embedded in a Consent resource
-fhirReferenceURL: "http://localhost:3200/api/v1"
+fhirReferenceURL: "https://test.dpc.cms.gov/api/v1"
 
 # Disable FHIR validation
 fhir:

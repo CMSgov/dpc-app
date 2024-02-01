@@ -2,7 +2,7 @@ publicServerURL: "https://dpc.cms.gov"
 
 database:
   driverClass: org.postgresql.Driver
-  url: ${ATTRIBUTION_DB_URL:-"jdbc:postgresql://db:5432/dpc_attribution"}  # TODO: set ATTRIBUTION_DB_URL based on ENV
+  url: "jdbc:postgresql://db.dpc-test.local:5432/dpc_attribution"
   user: ${ATTRIBUTION_DB_USER:-postgres}
   password: ${ATTRIBUTION_DB_PASS:-dpc-safe}
   initialSize: 5
