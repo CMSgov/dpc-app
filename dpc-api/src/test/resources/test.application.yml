@@ -100,4 +100,4 @@ tokens:
     expirationOffset: 1
     expirationUnit: "YEARS"
 
-keyPairLocation: ${BAKERY_KEYPAIR_LOCATION:-"/bakery_keypair.json"}
+keyPairLocation: ${BAKERY_KEYPAIR_LOCATION:-"../src/main/resources/keypair/bakery_keypair.json"}
