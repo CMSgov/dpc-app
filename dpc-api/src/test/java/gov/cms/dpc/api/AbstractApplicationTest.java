@@ -97,8 +97,6 @@ public class AbstractApplicationTest {
                             }
                         });
             }
-
-
         }
     }
 }

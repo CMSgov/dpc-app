@@ -208,7 +208,7 @@
                     <container>
                         <args>
                             <arg>server</arg>
-                            <!--<arg>${jib.container.appRoot}/resources/application.yml</arg>-->
+                            <!--<arg>${jib.container.appRoot}/resources/ci.application.yml</arg>-->
                         </args>
                         <ports>
                             <port>8080</port>

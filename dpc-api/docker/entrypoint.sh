@@ -30,7 +30,7 @@ else
     NR_AGENT=""
 fi
 
-CONFFILE="/app/resources/application.yml"
+CONFFILE="/app/resources/ci.application.yml"
 
 if [ $DB_MIGRATION -eq 1 ]; then
   echo "Migrating the database"
