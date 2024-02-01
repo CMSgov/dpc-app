@@ -1,7 +1,0 @@
-server.requestLog.appenders: []
-
-logging:
-    level: ERROR
-    loggers:
-        "liquibase": ERROR
-        "org.hibernate.SQL": ERROR
