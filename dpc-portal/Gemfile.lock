@@ -85,7 +85,6 @@ GEM
       i18n
     bcrypt (3.1.19)
     bindata (2.4.15)
-    bindex (0.8.1)
     bootsnap (1.16.0)
       msgpack (~> 1.2)
     builder (3.2.4)
@@ -143,6 +142,8 @@ GEM
     email_validator (2.2.4)
       activemodel
     erubi (1.12.0)
+    et-orbi (1.2.7)
+      tzinfo
     execjs (2.9.1)
     factory_bot (6.2.1)
       activesupport (>= 5.0.0)
@@ -186,6 +187,9 @@ GEM
       date_time_precision (>= 0.8)
       mime-types (>= 3.0)
       nokogiri (>= 1.11.4)
+    fugit (1.9.0)
+      et-orbi (~> 1, >= 1.2.7)
+      raabro (~> 1.4)
     globalid (1.2.1)
       activesupport (>= 6.1)
     hashdiff (1.0.1)
@@ -332,6 +336,7 @@ GEM
     public_suffix (5.0.3)
     puma (6.4.2)
       nio4r (~> 2.0)
+    raabro (1.4.0)
     racc (1.7.1)
     rack (2.2.8)
     rack-oauth2 (2.2.1)
@@ -429,6 +434,8 @@ GEM
     ruby-progressbar (1.13.0)
     ruby2_keywords (0.0.5)
     rubyzip (2.3.2)
+    rufus-scheduler (3.9.1)
+      fugit (~> 1.1, >= 1.1.6)
     sassc (2.4.0)
       ffi (~> 1.9)
     sassc-rails (2.1.2)
@@ -446,6 +453,10 @@ GEM
       connection_pool (>= 2.3.0)
       rack (>= 2.2.4)
       redis-client (>= 0.14.0)
+    sidekiq-scheduler (5.0.3)
+      rufus-scheduler (~> 3.2)
+      sidekiq (>= 6, < 8)
+      tilt (>= 1.4.0)
     sidekiq_alive (2.1.9)
       rack (< 3)
       sidekiq (>= 5, < 8)
@@ -574,6 +585,7 @@ DEPENDENCIES
   sassc-rails (>= 2.1.2)
   selenium-webdriver
   sidekiq (~> 7.1)
+  sidekiq-scheduler
   sidekiq_alive (~> 2.1.5)
   simplecov
   spring
@@ -589,4 +601,4 @@ RUBY VERSION
    ruby 3.0.6p216
 
 BUNDLED WITH
-   2.5.4
+   2.5.5

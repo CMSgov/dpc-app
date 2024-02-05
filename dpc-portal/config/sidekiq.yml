@@ -1,0 +1,7 @@
+# config/sidekiq.yml
+
+:scheduler:
+  :schedule:
+    log_a_minute:
+      cron: '0 * * * * *'   # Runs once per minute
+      class: LogAMinuteJob

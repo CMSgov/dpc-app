@@ -5,8 +5,7 @@ git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
 ruby '3.0.6'
 
-# Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-# Specifying rails components to be able to omit unused actioncable
+gem 'sidekiq-scheduler'
 gem 'actionmailbox', '~> 7.0.7.1'
 gem 'actionmailer', '~> 7.0.7.1'
 gem 'actionpack', '~> 7.0.7.1'
