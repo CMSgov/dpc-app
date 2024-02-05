@@ -1,18 +1,15 @@
 database:
   driverClass: org.postgresql.Driver
-  url: ${DATABASE_URL:-"jdbc:postgresql://db:5432/dpc_attribution"}  # TODO: dropwizard - set based on ENV
+  url: "jdbc:postgresql://db:5432/dpc_attribution"  # TODO: dropwizard - set based on ENV
   user: ${ATTRIBUTION_DB_USER:-postgres}
   password: ${ATTRIBUTION_DB_PASS:-dpc-safe}
   initialSize: 5
   minSize: 5
   maxSize: 10
-  properties:
-    charSet: UTF-8
-    hibernate.dialect: org.hibernate.dialect.PostgreSQL10Dialect
 
 queuedb:
   driverClass: org.postgresql.Driver
-  url: ${QUEUE_DB_URL:-"jdbc:postgresql://db:5432/dpc_queue"}  # TODO: dropwizard - set based on ENV
+  url: "jdbc:postgresql://db:5432/dpc_queue"  # TODO: dropwizard - set based on ENV
   user: ${QUEUE_DB_USER:-postgres}
   password: ${QUEUE_DB_PASS:-dpc-safe}
   initialSize: 5
