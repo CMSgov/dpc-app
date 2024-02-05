@@ -1,3 +1,6 @@
+# frozen_string_literal: true
+
+# Logs when called
 class LogAMinuteJob < ApplicationJob
   queue_as :portal
 
