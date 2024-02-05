@@ -1,6 +1,6 @@
 database:
   driverClass: org.postgresql.Driver
-  url: "jdbc:postgresql://localhost:5432/dpc_attribution"
+  url: ${DATABASE_URL:-"jdbc:postgresql://localhost:5432/dpc_attribution"}  # TODO: dropwizard - set based on ENV
   user: ${ATTRIBUTION_DB_USER:-postgres}
   password: ${ATTRIBUTION_DB_PASS:-dpc-safe}
   initialSize: 5
@@ -9,7 +9,7 @@ database:
 
 queuedb:
   driverClass: org.postgresql.Driver
-  url: "jdbc:postgresql://localhost:5432/dpc_queue"
+  url: ${QUEUE_DB_URL:-"jdbc:postgresql://localhost:5432/dpc_queue"}  # TODO: dropwizard - set based on ENV
   user: ${QUEUE_DB_USER:-postgres}
   password: ${QUEUE_DB_PASS:-dpc-safe}
   initialSize: 5
@@ -18,7 +18,7 @@ queuedb:
 
 consentdb:
   driverClass: org.postgresql.Driver
-  url: "jdbc:postgresql://localhost:5432/dpc_consent"
+  url: ${CONSENT_DB_URL:-"jdbc:postgresql://localhost:5432/dpc_consent"}  # TODO: dropwizard - set based on ENV
   user: ${CONSENT_DB_USER:-postgres}
   password: ${CONSENT_DB_PASS:-dpc-safe}
   initialSize: 5

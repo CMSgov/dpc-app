@@ -1,6 +1,6 @@
 consentdb:
   driverClass: org.postgresql.Driver
-  url: "jdbc:postgresql://db:5432/dpc_consent"
+  url: ${CONSENT_DB_URL:-"jdbc:postgresql://localhost:5432/dpc_consent"}  # TODO: dropwizard - set based on ENV
   user: ${CONSENT_DB_USER:-postgres}
   password: ${CONSENT_DB_PASS:-dpc-safe}
   initialSize: 5
