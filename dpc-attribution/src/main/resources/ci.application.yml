@@ -2,7 +2,7 @@ publicServerURL: "https://dpc.cms.gov"
 
 database:
   driverClass: org.postgresql.Driver
-  url: ${DATABASE_URL:-"jdbc:postgresql://db:5432/dpc_attribution"}  # TODO: dropwizard - set based on ENV
+  url: jdbc:postgresql://db:5432/dpc_attribution  # TODO: dropwizard - set based on ENV
   user: ${ATTRIBUTION_DB_USER:-postgres}
   password: ${ATTRIBUTION_DB_PASS:-dpc-safe}
   initialSize: 5
@@ -26,11 +26,11 @@ logging:
       timeZone: UTC
       layout:
         type: json-dpc
-        timestampFormat: "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
+        timestampFormat: yyyy-MM-dd'T'HH:mm:ss.SSSZ
         additionalFields:
-          environment: ${ENV:-"unknown_env"}
-          version: ${APP_VERSION:-"unknown_version"}
-          application: ${APPLICATION:-"dpc-attribution"}
+          environment: ${ENV:-unknown_env}
+          version: ${APP_VERSION:-unknown_version}
+          application: ${APPLICATION:-dpc-attribution}
 
       # Prevent log entries from being dropped under all circumstances
       # While nice from a performance standpoint, we must ensure full audit capability of the application
