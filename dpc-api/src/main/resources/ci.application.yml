@@ -1,6 +1,6 @@
 database:
   driverClass: org.postgresql.Driver
-  url: jdbc:postgresql://db:5432/dpc_attribution  # TODO: dropwizard - set based on ENV
+  url: ${DATABASE_URL:-"jdbc:postgresql://db:5432/dpc_attribution"}  # TODO: dropwizard - set based on ENV
   user: ${ATTRIBUTION_DB_USER:-postgres}
   password: ${ATTRIBUTION_DB_PASS:-dpc-safe}
   initialSize: 5
@@ -9,7 +9,7 @@ database:
 
 queuedb:
   driverClass: org.postgresql.Driver
-  url: jdbc:postgresql://db:5432/dpc_queue  # TODO: dropwizard - set based on ENV
+  url: ${QUEUE_DB_URL:-"jdbc:postgresql://db:5432/dpc_queue"}  # TODO: dropwizard - set based on ENV
   user: ${QUEUE_DB_USER:-postgres}
   password: ${QUEUE_DB_PASS:-dpc-safe}
   initialSize: 5
@@ -18,7 +18,7 @@ queuedb:
 
 consentdb:
   driverClass: org.postgresql.Driver
-  url: jdbc:postgresql://db:5432/dpc_consent  # TODO: dropwizard - set based on ENV
+  url: ${CONSENT_DB_URL:-"jdbc:postgresql://db:5432/dpc_consent"}  # TODO: dropwizard - set based on ENV
   user: ${CONSENT_DB_USER:-postgres}
   password: ${CONSENT_DB_PASS:-dpc-safe}
   initialSize: 5
@@ -49,11 +49,11 @@ logging:
       timeZone: UTC
       layout:
         type: json-dpc
-        timestampFormat: yyyy-MM-dd'T'HH:mm:ss.SSSZ
+        timestampFormat: "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
         additionalFields:
-          environment: ${ENV:-unknown_env}
-          version: ${APP_VERSION:-unknown_version}
-          application: ${APPLICATION:dpc-api}
+          environment: ${ENV:-"unknown_env"}
+          version: ${APP_VERSION:-"unknown_version"}
+          application: ${APPLICATION:"dpc-api"}
 
       # Prevent log entries from being dropped under all circumstances
       # While nice from a performance standpoint, we must ensure full audit capability of the application
@@ -61,11 +61,11 @@ logging:
 
 jobTimeoutInSeconds: ${JOB_TIMEOUT_IN_SECONDS:-60}
 
-publicURL: http://localhost:3002 # The root URL at which the application is accessible, if necessary, include the port, do not include the application version
+publicURL: "http://localhost:3002" # The root URL at which the application is accessible, if necessary, include the port, do not include the application version
 
 authdb:
   driverClass: org.postgresql.Driver
-  url: jdbc:postgresql://localhost:5432/dpc_auth
+  url: "jdbc:postgresql://localhost:5432/dpc_auth"
   user: ${AUTH_DB_USER:-postgres}
   password: ${AUTH_DB_PASS:-dpc-safe}
   initialSize: 5
@@ -77,9 +77,9 @@ lookBackExemptOrgs: ${LOOK_BACK_EXEMPT_ORGS:-["0ab352f1-2bf1-44c4-aa7a-3004a1ffe
 bbclient:
   registerHealthCheck: ${BB_REGISTER_HEALTH_CHECK:-false}
   keyStore:
-    type: JKS
-    defaultPassword: ${BB_KEYSTORE_PASS:-changeit}
-  location: ${BB_KEYSTORE_LOCATION:-../bbcerts/bb.keystore}
+    type: "JKS"
+    defaultPassword: ${BB_KEYSTORE_PASS:-"changeit"}
+  location: ${BB_KEYSTORE_LOCATION:-"../bbcerts/bb.keystore"}
   timeouts:
     connectionTimeout: 5000 # ms
     socketTimeout: 5000 # ms
@@ -91,8 +91,8 @@ bbclient:
 
 authenticationDisabled: false
 
-attributionURL: http://localhost:3500/v1/
-exportPath: /tmp
+attributionURL: "http://localhost:3500/v1/"
+exportPath: "/tmp"
 
 httpClient:
   timeout: 5s
@@ -111,6 +111,6 @@ tokens:
 
   expirationPolicy:
     expirationOffset: 1
-    expirationUnit: YEARS
+    expirationUnit: "YEARS"
 
 keyPairLocation: ${BAKERY_KEYPAIR_LOCATION:-"../src/main/resources/keypair/bakery_keypair.json"}
