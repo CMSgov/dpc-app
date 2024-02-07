@@ -238,6 +238,57 @@
                     </container>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.jooq</groupId>
+                <artifactId>jooq-codegen-maven</artifactId>
+                <version>${jooq.version}</version>
+                <executions>
+                    <execution>
+                        <id>generate-postgres-jpa</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <generator>
+                                <database>
+                                    <name>org.jooq.meta.extensions.jpa.JPADatabase</name>
+                                    <properties>
+                                        <property>
+                                            <key>packages</key>
+                                            <value>gov.cms.dpc.common.entities</value>
+                                        </property>
+                                        <property>
+                                            <key>dialect</key>
+                                            <value>org.hibernate.dialect.PostgreSQL10Dialect</value>
+                                        </property>
+                                    </properties>
+                                    <includes>.*</includes>
+                                </database>
+                                <generate>
+                                    <javaTimeTypes>true</javaTimeTypes>
+                                </generate>
+                                <target>
+                                    <packageName>gov.cms.dpc.aggregation.dao</packageName>
+                                    <directory>target/generated-sources/jooq</directory>
+                                </target>
+                            </generator>
+                        </configuration>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.jooq</groupId>
+                        <artifactId>jooq-meta-extensions</artifactId>
+                        <version>${jooq.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>javax.persistence</groupId>
+                        <artifactId>javax.persistence-api</artifactId>
+                        <version>2.2</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
         </plugins>
     </build>
 </project>
