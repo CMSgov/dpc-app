@@ -10,14 +10,14 @@ database:
     charSet: UTF-8
     hibernate.dialect: org.hibernate.dialect.PostgreSQL10Dialect
 
-queuedb:
-  driverClass: org.postgresql.Driver
-  url: ${QUEUE_DB_URL:-"jdbc:postgresql://db:5432/dpc_queue"}  # TODO: dropwizard - set based on ENV
-  user: ${QUEUE_DB_USER:-postgres}
-  password: ${QUEUE_DB_PASS:-dpc-safe}
-  initialSize: 5
-  minSize: 5
-  maxSize: 10
+#queuedb:
+#  driverClass: org.postgresql.Driver
+#  url: ${QUEUE_DB_URL:-"jdbc:postgresql://db:5432/dpc_queue"}  # TODO: dropwizard - set based on ENV
+#  user: ${QUEUE_DB_USER:-postgres}
+#  password: ${QUEUE_DB_PASS:-dpc-safe}
+#  initialSize: 5
+#  minSize: 5
+#  maxSize: 10
 
 server:
   enableThreadNameFilter: false
