@@ -1,0 +1,16 @@
+version: '3.1'
+services:
+  localstack:
+    image: localstack/localstack:2.2.0
+    container_name: opt-out-s3
+    environment:
+      - AWS_DEFAULT_REGION=us-east-1
+      - GATEWAY_LISTEN=0.0.0.0:4566
+      - SERVICES=s3
+      - DEBUG=1
+    ports:
+      - '4566-4583:4566-4583'
+    volumes:
+      - './.localstack:/tmp/localstack'
+      - '/var/run/docker.sock:/var/run/docker.sock'
+      
