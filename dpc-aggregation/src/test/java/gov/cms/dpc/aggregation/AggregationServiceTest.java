@@ -7,7 +7,6 @@ import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.DropwizardTestSupport;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -16,8 +15,7 @@ import java.util.SortedSet;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-// TODO: dropwizard - debug
-@Disabled
+
 @IntegrationTest
 @ExtendWith(BufferedLoggerHandler.class)
 public class AggregationServiceTest {
@@ -28,6 +26,8 @@ public class AggregationServiceTest {
 
     @BeforeAll
     static void start() throws Exception{
+        System.out.println("AGGREGATION CONFIGURATION");
+        System.out.println(APPLICATION.getConfiguration());
         APPLICATION.before();
     }
 
