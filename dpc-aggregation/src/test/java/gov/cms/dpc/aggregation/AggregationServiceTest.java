@@ -26,8 +26,10 @@ public class AggregationServiceTest {
 
     @BeforeAll
     static void start() throws Exception{
-        System.out.println("AGGREGATION CONFIGURATION");
+        System.out.println("CWD:");
+        System.out.println(System.getProperty("user.dir"));
         APPLICATION.before();
+        System.out.println("AGGREGATION CONFIGURATION:");
         System.out.println(APPLICATION.getConfiguration());
     }
 
