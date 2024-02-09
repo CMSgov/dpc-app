@@ -10,8 +10,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import java.io.File;
-import java.util.Arrays;
+import java.nio.file.Paths;
 import java.util.SortedSet;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -28,11 +27,9 @@ public class AggregationServiceTest {
 
     @BeforeAll
     static void start() throws Exception{
-        File file = new File("user.dir");
-        System.out.println(Arrays.toString(file.listFiles()));
+        System.out.println("CWD:");
+        System.out.println(Paths.get(".").toAbsolutePath());
         APPLICATION.before();
-        System.out.println("AGGREGATION CONFIGURATION:");
-        System.out.println(APPLICATION.getConfiguration());
     }
 
     @AfterAll
