@@ -10,6 +10,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import java.io.File;
+import java.util.Arrays;
 import java.util.SortedSet;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -21,11 +23,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class AggregationServiceTest {
 
     private static final DropwizardTestSupport<DPCAggregationConfiguration> APPLICATION =
-            new DropwizardTestSupport<>(DPCAggregationService.class, "/src/main/resources/ci.application.yml",
+            new DropwizardTestSupport<>(DPCAggregationService.class, "/src/test/resources/ci.application.yml",
                     ConfigOverride.config("server.applicationConnectors[0].port", "7777"));
 
     @BeforeAll
     static void start() throws Exception{
+        File file = new File("user.dir");
+        System.out.println(Arrays.toString(file.listFiles()));
         APPLICATION.before();
         System.out.println("AGGREGATION CONFIGURATION:");
         System.out.println(APPLICATION.getConfiguration());
