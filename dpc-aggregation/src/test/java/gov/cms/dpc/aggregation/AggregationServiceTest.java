@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class AggregationServiceTest {
 
     private static final DropwizardTestSupport<DPCAggregationConfiguration> APPLICATION =
-            new DropwizardTestSupport<>(DPCAggregationService.class, "src/main/resources/ci.application.yml",
+            new DropwizardTestSupport<>(DPCAggregationService.class, "src/test/resources/ci.application.yml",
                     ConfigOverride.config("server.applicationConnectors[0].port", "7777"));
 
     @BeforeAll
