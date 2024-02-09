@@ -10,7 +10,11 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import java.io.File;
+import java.util.Objects;
 import java.util.SortedSet;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -21,13 +25,18 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class AggregationServiceTest {
 
     private static final DropwizardTestSupport<DPCAggregationConfiguration> APPLICATION =
-            new DropwizardTestSupport<>(DPCAggregationService.class, "src/test/resources/ci.application.yml",
+            new DropwizardTestSupport<>(DPCAggregationService.class, "/src/main/resources/ci.application.yml",
                     ConfigOverride.config("server.applicationConnectors[0].port", "7777"));
 
     @BeforeAll
     static void start() throws Exception{
         System.out.println("CWD:");
         System.out.println(System.getProperty("user.dir"));
+        System.out.println("LS:");
+        System.out.println(Stream.of(Objects.requireNonNull(new File("user.dir").listFiles()))
+                .filter(file -> !file.isDirectory())
+                .map(File::getName)
+                .collect(Collectors.toSet()));
         APPLICATION.before();
         System.out.println("AGGREGATION CONFIGURATION:");
         System.out.println(APPLICATION.getConfiguration());
