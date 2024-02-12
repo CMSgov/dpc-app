@@ -6,20 +6,22 @@ class AOVerificationService
     @cpi_api_gw_client = CpiApiGatewayClient.new
   end
 
-  def check_ao_eligibility(organization_npi, ao_ssn)
-    # TODO: get address from enrollment
-    return { success: false, reason: 'med_sanctions' } if med_sanctions?(ao_ssn)
-
+  def check_ao_eligibility(organization_npi, hashed_ao_ssn)
     approved_enrollments = get_approved_enrollments(organization_npi)
     return { success: false, reason: approved_enrollments } if approved_enrollments == 'bad_npi'
 
     enrollment_ids = approved_enrollments.map { |enrollment| enrollment['enrollmentID'] }
     return { success: false, reason: 'no_approved_enrollment' } if enrollment_ids.empty?
 
-    ao_role = enrollment_ids.find { |enrollment_id| !get_authorized_official(enrollment_id, ao_ssn).nil? }
-    return unless ao_role.nil?
+    ao_role = nil
+    enrollment_ids.find do |enrollment_id|
+      ao_role = get_authorized_official_role(enrollment_id, hashed_ao_ssn)
+    end
+    return { success: false, reason: 'user_not_authorized_official' } if ao_role.nil?
 
-    { success: false, reason: 'user_not_authorized_official' }
+    return { success: false, reason: 'med_sanctions' } if med_sanctions?(ao_role['ssn'])
+
+    { success: true }
   end
 
   private
@@ -44,8 +46,10 @@ class AOVerificationService
     response['enrollments'].select { |enrollment| enrollment['status'] == 'APPROVED' }
   end
 
-  def get_authorized_official(enrollment_id, ao_ssn)
+  def get_authorized_official_role(enrollment_id, hashed_ao_ssn)
     response = @cpi_api_gw_client.fetch_enrollment_roles(enrollment_id)
-    response['enrollments']['roles'].find { |role| role['roleCode'] == '10' && role['ssn'] == ao_ssn.to_s }
+    response['enrollments']['roles'].find do |role|
+      role['roleCode'] == '10' && Digest::SHA2.new(256).hexdigest(role['ssn']) == hashed_ao_ssn
+    end
   end
 end

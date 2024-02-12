@@ -28,29 +28,11 @@ describe AOVerificationService do
   end
 
   describe '.check_ao_eligibility' do
-    it 'makes api calls to CPI API Gateway' do
+    it 'makes api calls to CPI API Gateway and returns success message' do
       service = AOVerificationService.new
       organization_npi = 1_234_554_333
-      ao_ssn = 111_223_456
-      expect(cpi_api_gw_client).to receive(:fetch_authorized_official_med_sanctions)
-        .with(ao_ssn)
-        .and_return({
-                      'provider' => {
-                        'providerType' => 'ind',
-                        'idType' => 'ssn',
-                        'npi' => '4444444444',
-                        'medSanctions' => [
-                          {
-                            'sanctionCode' => '12ABC',
-                            'sanctionDate' => '2010-08-17',
-                            'description' => 'MED Sanction',
-                            'deletedTimestamp' => '2021-09-24T16:26:48.598-04:00',
-                            'reinstatementDate' => '2020-08-17',
-                            'reinstatementReasonDescription' => 'LICENSE REVOCATION OR SUSPENSION'
-                          }
-                        ]
-                      }
-                    })
+      ao_ssn = '111223456'
+      hashed_ao_ssn = Digest::SHA2.new(256).hexdigest(ao_ssn)
       expect(cpi_api_gw_client).to receive(:fetch_enrollment)
         .with(organization_npi)
         .and_return({
@@ -89,75 +71,40 @@ describe AOVerificationService do
                         'enrollmentID' => '045678',
                         'roles' => [{
                           'roleCode' => '10',
-                          'ssn' => ao_ssn.to_s
+                          'ssn' => ao_ssn
                         }]
                       }
                     })
-      service.check_ao_eligibility(organization_npi, ao_ssn)
-    end
-
-    it 'returns an error if the AO has an active med sanction' do
-      service = AOVerificationService.new
-      organization_npi = 1_234_554_333
-      ao_ssn = 111_223_456
       expect(cpi_api_gw_client).to receive(:fetch_authorized_official_med_sanctions)
         .with(ao_ssn)
         .and_return({
                       'provider' => {
                         'providerType' => 'ind',
                         'idType' => 'ssn',
-                        'npi' => '4444444444',
-                        'medSanctions' => [
-                          {
-                            'sanctionCode' => '12ABC',
-                            'sanctionDate' => '2010-08-17',
-                            'description' => 'MED Sanction',
-                            'deletedTimestamp' => '2021-09-24T16:26:48.598-04:00',
-                            'reinstatementDate' => nil,
-                            'reinstatementReasonDescription' => 'LICENSE REVOCATION OR SUSPENSION'
-                          }
-                        ]
+                        'npi' => '4444444444'
                       }
                     })
-      response = service.check_ao_eligibility(organization_npi, ao_ssn)
-      expect(response).to include({ success: false, reason: 'med_sanctions' })
+      response = service.check_ao_eligibility(organization_npi, hashed_ao_ssn)
+      expect(response).to include({ success: true })
     end
 
     it 'returns an error if looking up enrollments for the NPI returns a 404' do
       service = AOVerificationService.new
       organization_npi = 1_234_554_333
-      ao_ssn = 111_223_456
-      allow(cpi_api_gw_client).to receive(:fetch_authorized_official_med_sanctions)
-        .with(ao_ssn)
-        .and_return({
-                      'provider' => {
-                        'providerType' => 'ind',
-                        'idType' => 'ssn',
-                        'npi' => '4444444444'
-                      }
-                    })
+      ao_ssn = '111223456'
+      hashed_ao_ssn = Digest::SHA2.new(256).hexdigest(ao_ssn)
       expect(cpi_api_gw_client).to receive(:fetch_enrollment)
                                .with(organization_npi)
-        .and_return({
-                      'code' => '404'
-                    })
-      response = service.check_ao_eligibility(organization_npi, ao_ssn)
+        .and_return({ 'code' => '404' })
+      response = service.check_ao_eligibility(organization_npi, hashed_ao_ssn)
       expect(response).to include({ success: false, reason: 'bad_npi' })
     end
 
     it 'returns an error if there are no approved enrollments' do
       service = AOVerificationService.new
       organization_npi = 1_234_554_333
-      ao_ssn = 111_223_456
-      allow(cpi_api_gw_client).to receive(:fetch_authorized_official_med_sanctions)
-        .with(ao_ssn)
-        .and_return({
-                      'provider' => {
-                        'providerType' => 'ind',
-                        'idType' => 'ssn',
-                        'npi' => '4444444444'
-                      }
-                    })
+      ao_ssn = '111223456'
+      hashed_ao_ssn = Digest::SHA2.new(256).hexdigest(ao_ssn)
       expect(cpi_api_gw_client).to receive(:fetch_enrollment)
         .with(organization_npi)
         .and_return({
@@ -174,24 +121,16 @@ describe AOVerificationService do
                                           'npi' => organization_npi.to_s
                                         }]
                     })
-      response = service.check_ao_eligibility(organization_npi, ao_ssn)
+      response = service.check_ao_eligibility(organization_npi, hashed_ao_ssn)
       expect(response).to include({ success: false, reason: 'no_approved_enrollment' })
     end
 
     it 'returns an error if the user is not an authorized official' do
       service = AOVerificationService.new
       organization_npi = 1_234_554_333
-      ao_ssn = 111_223_456
+      ao_ssn = '111223456'
+      hashed_ao_ssn = Digest::SHA2.new(256).hexdigest(ao_ssn)
       enrollment_id = '023456'
-      allow(cpi_api_gw_client).to receive(:fetch_authorized_official_med_sanctions)
-        .with(ao_ssn)
-        .and_return({
-                      'provider' => {
-                        'providerType' => 'ind',
-                        'idType' => 'ssn',
-                        'npi' => '4444444444'
-                      }
-                    })
       allow(cpi_api_gw_client).to receive(:fetch_enrollment)
         .with(organization_npi)
         .and_return({
@@ -220,8 +159,65 @@ describe AOVerificationService do
                         }]
                       }
                     })
-      response = service.check_ao_eligibility(organization_npi, ao_ssn)
+      response = service.check_ao_eligibility(organization_npi, hashed_ao_ssn)
       expect(response).to include({ success: false, reason: 'user_not_authorized_official' })
+    end
+
+    it 'returns an error if the AO has an active med sanction' do
+      service = AOVerificationService.new
+      organization_npi = 1_234_554_333
+      ao_ssn = '111223456'
+      hashed_ao_ssn = Digest::SHA2.new(256).hexdigest(ao_ssn)
+      enrollment_id = '023456'
+      allow(cpi_api_gw_client).to receive(:fetch_enrollment)
+        .with(organization_npi)
+        .and_return({
+                      'enrollments' => [{
+                        'enrollmentID' => enrollment_id,
+                        'status' => 'APPROVED',
+                        'statusDate' => '2024-02-06',
+                        'npi' => organization_npi.to_s
+                      },
+                                        {
+                                          'enrollmentID' => '045678',
+                                          'status' => 'DEACTIVATED',
+                                          'statusDate' => '2023-02-06',
+                                          'npi' => organization_npi.to_s
+                                        }]
+                    })
+      expect(cpi_api_gw_client).to receive(:fetch_enrollment_roles)
+        .with(enrollment_id)
+        .and_return({
+                      'enrollments' => {
+                        'enrollmentID' => enrollment_id,
+                        'roles' => [{
+                          'macID' => '12345',
+                          'ssn' => ao_ssn,
+                          'roleCode' => '10'
+                        }]
+                      }
+                    })
+      expect(cpi_api_gw_client).to receive(:fetch_authorized_official_med_sanctions)
+        .with(ao_ssn)
+        .and_return({
+                      'provider' => {
+                        'providerType' => 'ind',
+                        'idType' => 'ssn',
+                        'npi' => '4444444444',
+                        'medSanctions' => [
+                          {
+                            'sanctionCode' => '12ABC',
+                            'sanctionDate' => '2010-08-17',
+                            'description' => 'MED Sanction',
+                            'deletedTimestamp' => '2021-09-24T16:26:48.598-04:00',
+                            'reinstatementDate' => nil,
+                            'reinstatementReasonDescription' => 'LICENSE REVOCATION OR SUSPENSION'
+                          }
+                        ]
+                      }
+                    })
+      response = service.check_ao_eligibility(organization_npi, hashed_ao_ssn)
+      expect(response).to include({ success: false, reason: 'med_sanctions' })
     end
   end
 end
