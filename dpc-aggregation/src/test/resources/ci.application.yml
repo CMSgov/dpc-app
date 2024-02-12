@@ -29,7 +29,7 @@ server:
 logging:
   level: ERROR
   loggers:
-    "liquibase": INFO
+    "liquibase": ERROR
     "gov.cms.dpc.queue.DistributedBatchQueue": DEBUG
     "org.hibernate": ERROR
     "org.hibernate.SQL": ERROR
@@ -48,7 +48,7 @@ logging:
       discardingThreshold: 0
 
 bbclient:
-  registerHealthCheck: false
+  registerHealthCheck: true
   keyStore:
     type: "JKS"
     defaultPassword: ${?BB_KEYSTORE_PASS:-"changeit"}

@@ -29,8 +29,6 @@ public class AggregationServiceTest {
     @BeforeAll
     static void start() throws Exception{
         APPLICATION.before();
-        System.out.println("AGGREGATION CONFIG");
-        System.out.println(APPLICATION.getConfiguration());
     }
 
     @AfterAll
