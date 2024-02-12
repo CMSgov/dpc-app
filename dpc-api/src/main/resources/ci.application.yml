@@ -32,7 +32,7 @@ server:
 logging:
   level: ERROR
   loggers:
-    "liquibase": ERROR
+    "liquibase": INFO
     "gov.cms.dpc.queue.DistributedBatchQueue": DEBUG
     "org.hibernate": ERROR
     "org.hibernate.SQL": ERROR

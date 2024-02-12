@@ -26,7 +26,6 @@ import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
 import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_NPI;
 import static gov.cms.dpc.testing.APIAuthHelpers.TASK_URL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Default application setup the runs the {@link DPCAPIService} with authentication disabled. (e.g. using the {@link StaticAuthFilter}
@@ -56,9 +55,6 @@ public class AbstractApplicationTest {
     @BeforeAll
     public static void setup() throws Exception {
         APITestHelpers.setupApplication(APPLICATION);
-        System.out.println("APPLICATION CONFIGURATION");
-        System.out.println(APPLICATION.getConfiguration());
-        fail();
     }
 
     @BeforeEach

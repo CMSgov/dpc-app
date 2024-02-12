@@ -40,7 +40,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @IntegrationTest
 class AttributionFHIRTest {
 
-    private static final String configPath = "src/main/resources/ci.application.yml";
+    private static final String configPath = "src/test/resources/ci.application.yml";
     private static final DropwizardTestSupport<DPCAttributionConfiguration> APPLICATION =
             new DropwizardTestSupport<>(DPCAttributionService.class, configPath,
                     ConfigOverride.config("server.applicationConnectors[0].port", "3727"),
