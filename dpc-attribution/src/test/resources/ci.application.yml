@@ -70,8 +70,8 @@ lookBackExemptOrgs: ${LOOK_BACK_EXEMPT_ORGS:-["0ab352f1-2bf1-44c4-aa7a-3004a1ffe
 
 # TODO: dropwizard config - java.lang.NoSuchMethodError: 'org.reflections.util.FilterBuilder org.reflections.util.FilterBuilder.includePackage(java.lang.String[])
 #swagger:
-#  resourcePackage: "gov.cms.dpc.attribution.resources"
 #  title: "DPC Attribution Service"
-#  description: |
+#  description: >
 #    This service handles the majority of the application business logic, including authentication and attribution.
 #    <p>It performs no validation of input data, which is the domain of the API service or any internal services that might call it.
+#  resourcePackage: gov.cms.dpc.attribution.resources

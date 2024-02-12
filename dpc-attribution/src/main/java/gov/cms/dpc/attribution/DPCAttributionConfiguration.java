@@ -41,7 +41,7 @@ public class DPCAttributionConfiguration extends Configuration implements IDPCDa
     private DPCFHIRConfiguration fhirConfig;
 
 //    @JsonProperty("swagger")
-//    private SwaggerBundleConfiguration swaggerConfig;
+//    private SwaggerBundleConfiguration swaggerBundleConfiguration;
 
     @Min(-1)
     private Integer providerLimit;
@@ -87,11 +87,11 @@ public class DPCAttributionConfiguration extends Configuration implements IDPCDa
     }
 
 //    public SwaggerBundleConfiguration getSwaggerBundleConfiguration() {
-//        return swaggerConfig;
+//        return swaggerBundleConfiguration;
 //    }
 //
 //    public void setSwaggerBundleConfiguration(SwaggerBundleConfiguration swaggerBundleConfiguration) {
-//        this.swaggerConfig = swaggerBundleConfiguration;
+//        this.swaggerBundleConfiguration = swaggerBundleConfiguration;
 //    }
 
     public Boolean getMigrationEnabled() {
