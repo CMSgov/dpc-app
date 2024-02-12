@@ -11,7 +11,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import java.nio.file.Paths;
 import java.util.SortedSet;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -29,9 +28,9 @@ public class AggregationServiceTest {
 
     @BeforeAll
     static void start() throws Exception{
-        System.out.println("CWD:");
-        System.out.println(Paths.get(".").toAbsolutePath());
         APPLICATION.before();
+        System.out.println("AGGREGATION CONFIG");
+        System.out.println(APPLICATION.getConfiguration());
     }
 
     @AfterAll
