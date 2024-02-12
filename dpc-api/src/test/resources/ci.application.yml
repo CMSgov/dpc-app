@@ -97,7 +97,7 @@ bbclient:
 authenticationDisabled: false
 
 attributionURL: "http://localhost:3500/v1/"
-exportPath: "/app/data"
+exportPath: "/tmp"
 
 httpClient:
   timeout: 5s
