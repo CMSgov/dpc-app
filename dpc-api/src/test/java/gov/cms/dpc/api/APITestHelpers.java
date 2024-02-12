@@ -61,7 +61,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class APITestHelpers {
     private static final String ATTRIBUTION_URL = "http://localhost:3500/v1";
-    private static final String CONSENT_URL = "http://localhost:3600/v1/Consent";
+    private static final String CONSENT_URL = "http://consent:3600/v1/";
     public static final String ORGANIZATION_ID = "46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0";
     private static final String ATTRIBUTION_TRUNCATE_TASK = "http://localhost:9902/tasks/truncate";
     public static String BASE_URL = "https://dpc.cms.gov/api";
