@@ -28,10 +28,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpHeaders;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.*;
 
 import javax.ws.rs.HttpMethod;
 import java.io.BufferedReader;
@@ -74,6 +71,12 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     final IParser parser = ctx.newJsonParser();
     final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
     final IGenericClient consentClient = APITestHelpers.buildConsentClient(ctx);
+
+    @BeforeAll
+    public static void setUp() {
+        System.out.println("PATIENT RESOURCE CONFIGURATION");
+        System.out.println(APPLICATION.getConfiguration());
+    }
 
     @Test
     @Order(1)

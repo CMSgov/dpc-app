@@ -9,7 +9,6 @@ import gov.cms.dpc.fhir.helpers.FHIRHelpers;
 import gov.cms.dpc.testing.APIAuthHelpers;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import gov.cms.dpc.testing.IntegrationTest;
-import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.DropwizardTestSupport;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -44,9 +43,8 @@ public class AbstractSecureApplicationTest {
     private static final String configPath = "src/test/resources/ci.application.yml";
     private static final ObjectMapper mapper = new ObjectMapper();
 
-    private static final DropwizardTestSupport<DPCAPIConfiguration> APPLICATION =
-            new DropwizardTestSupport<>(DPCAPIService.class, configPath,
-                    ConfigOverride.config("logging.level", "ERROR"));
+    public static final DropwizardTestSupport<DPCAPIConfiguration> APPLICATION =
+            new DropwizardTestSupport<>(DPCAPIService.class, configPath);
     protected static FhirContext ctx;
     protected static String ORGANIZATION_TOKEN;
     // Macaroon to use for doing admin things (like creating tokens and keys)
