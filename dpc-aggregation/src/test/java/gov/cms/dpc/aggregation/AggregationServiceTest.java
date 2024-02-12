@@ -15,7 +15,6 @@ import java.util.SortedSet;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-
 @IntegrationTest
 @ExtendWith(BufferedLoggerHandler.class)
 public class AggregationServiceTest {
