@@ -16,10 +16,7 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.IOException;
@@ -88,6 +85,10 @@ public class AbstractSecureApplicationTest {
         final Pair<UUID, PrivateKey> uuidPrivateKeyPair = APIAuthHelpers.generateAndUploadKey("integration-test-key", ORGANIZATION_ID, GOLDEN_MACAROON, "http://localhost:3002/v1/");
         PRIVATE_KEY = uuidPrivateKeyPair.getRight();
         PUBLIC_KEY_ID = uuidPrivateKeyPair.getLeft();
+
+        System.out.println("SECURE APPLICATION CONFIG");
+        System.out.println(APPLICATION.getConfiguration());
+        Assertions.fail();
     }
 
     @BeforeEach

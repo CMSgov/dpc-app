@@ -14,10 +14,7 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.IOException;
@@ -54,6 +51,9 @@ public class AbstractApplicationTest {
     @BeforeAll
     public static void setup() throws Exception {
         APITestHelpers.setupApplication(APPLICATION);
+        System.out.println("APPLICATION CONFIG");
+        System.out.println(APPLICATION.getConfiguration());
+        Assertions.fail();
     }
 
     @BeforeEach
