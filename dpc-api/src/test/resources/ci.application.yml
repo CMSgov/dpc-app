@@ -94,10 +94,14 @@ bbclient:
   bfdHashPepper: ${BFD_HASH_PEPPER}
   bfdHashIter: ${BFD_HASH_ITER}
 
-authenticationDisabled: false
+authenticationDisabled: true
 
 attributionURL: "http://localhost:3500/v1/"
-exportPath: "/tmp"
+exportPath: "/app/data"
+
+queue:
+  singleServerConfig:
+    address: "redis://redis:6379"
 
 httpClient:
   timeout: 5s
