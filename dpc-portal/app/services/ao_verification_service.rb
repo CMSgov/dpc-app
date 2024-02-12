@@ -7,9 +7,15 @@ class AOVerificationService
   end
 
   def check_ao_eligibility(organization_npi, ao_ssn)
-    # TODO: handle error cases
     # TODO: get address from enrollment
-    enrollment_ids = get_approved_enrollments(organization_npi).map { |enrollment| enrollment['enrollmentID'] }
+    return { success: false, reason: 'med_sanctions' } if med_sanctions?(ao_ssn)
+
+    approved_enrollments = get_approved_enrollments(organization_npi)
+    return { success: false, reason: approved_enrollments } if approved_enrollments == 'bad_npi'
+
+    enrollment_ids = approved_enrollments.map { |enrollment| enrollment['enrollmentID'] }
+    return { success: false, reason: 'no_approved_enrollment' } if enrollment_ids.empty?
+
     ao_role = enrollment_ids.find { |enrollment_id| !get_authorized_official(enrollment_id, ao_ssn).nil? }
     return unless ao_role.nil?
 
@@ -19,12 +25,22 @@ class AOVerificationService
   private
 
   def med_sanctions?(ao_ssn)
-    # TODO: finish implementation
-    @cpi_api_gw_client.fetch_authorized_official_med_sanctions(ao_ssn)
+    response = @cpi_api_gw_client.fetch_authorized_official_med_sanctions(ao_ssn)
+    med_sanctions_records = response['provider']['medSanctions']
+    if med_sanctions_records.nil? || med_sanctions_records.empty?
+      false
+    else
+      current_med_sanction = med_sanctions_records.find do |record|
+        record['reinstatementDate'].nil? || Date.parse(record['reinstatementDate']) > Date.today
+      end
+      !current_med_sanction.nil?
+    end
   end
 
   def get_approved_enrollments(organization_npi)
     response = @cpi_api_gw_client.fetch_enrollment(organization_npi)
+    return 'bad_npi' if response['code'] == '404'
+
     response['enrollments'].select { |enrollment| enrollment['status'] == 'APPROVED' }
   end
 
