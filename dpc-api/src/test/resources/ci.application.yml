@@ -94,7 +94,7 @@ bbclient:
   bfdHashPepper: ${BFD_HASH_PEPPER}
   bfdHashIter: ${BFD_HASH_ITER}
 
-authenticationDisabled: true
+authenticationDisabled: false
 
 attributionURL: "http://localhost:3500/v1/"
 exportPath: "/app/data"
