@@ -5,7 +5,6 @@ import gov.cms.dpc.testing.BufferedLoggerHandler;
 import gov.cms.dpc.testing.IntegrationTest;
 import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.DropwizardTestSupport;
-import io.dropwizard.testing.ResourceHelpers;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -22,8 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class AggregationServiceTest {
 
     private static final DropwizardTestSupport<DPCAggregationConfiguration> APPLICATION =
-            new DropwizardTestSupport<>(DPCAggregationService.class,
-                    ResourceHelpers.resourceFilePath("ci.application.yml"),
+            new DropwizardTestSupport<>(DPCAggregationService.class, "src/test/resources/ci.application.yml",
                     ConfigOverride.config("server.applicationConnectors[0].port", "7777"));
 
     @BeforeAll
