@@ -40,8 +40,7 @@ public class AbstractApplicationTest {
 
     private static final DropwizardTestSupport<DPCAPIConfiguration> APPLICATION =
             new DropwizardTestSupport<>(DPCAPIService.class, configPath,
-                    ConfigOverride.config("authenticationDisabled", "true"),
-                    ConfigOverride.config("logging.level", "ERROR"));
+                    ConfigOverride.config("authenticationDisabled", "true"));
     protected FhirContext ctx;
 
     protected AbstractApplicationTest() {

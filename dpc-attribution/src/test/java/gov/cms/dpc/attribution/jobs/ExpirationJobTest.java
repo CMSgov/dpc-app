@@ -10,6 +10,7 @@ import gov.cms.dpc.testing.BufferedLoggerHandler;
 import gov.cms.dpc.testing.IntegrationTest;
 import gov.cms.dpc.testing.JobTestUtils;
 import io.dropwizard.client.JerseyClientBuilder;
+import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.DropwizardTestSupport;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.Bundle;
@@ -37,7 +38,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class ExpirationJobTest {
     private static final String configPath = "src/test/resources/ci.application.yml";
     private static final DropwizardTestSupport<DPCAttributionConfiguration> APPLICATION =
-            new DropwizardTestSupport<>(DPCAttributionService.class, configPath);
+            new DropwizardTestSupport<>(DPCAttributionService.class, configPath,
+                    ConfigOverride.config("server.applicationConnectors[0].port", "3727"));
     private static final String PROVIDER_ID = "2322222227";
     private static final FhirContext ctx = FhirContext.forDstu3();
     private Client client;
