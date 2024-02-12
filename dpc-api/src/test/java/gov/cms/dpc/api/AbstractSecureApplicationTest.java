@@ -32,6 +32,7 @@ import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
 import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_NPI;
 import static gov.cms.dpc.testing.APIAuthHelpers.TASK_URL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Abstract test that enables the default token authentication backend.
@@ -41,7 +42,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class AbstractSecureApplicationTest {
     protected static final String OTHER_ORG_ID = "065fbe84-3551-4ec3-98a3-0d1198c3cb55";
 
-    private static final String configPath = "src/main/resources/ci.application.yml";
+    private static final String configPath = "src/test/resources/ci.application.yml";
     private static final ObjectMapper mapper = new ObjectMapper();
 
     private static final DropwizardTestSupport<DPCAPIConfiguration> APPLICATION =
@@ -89,6 +90,10 @@ public class AbstractSecureApplicationTest {
         final Pair<UUID, PrivateKey> uuidPrivateKeyPair = APIAuthHelpers.generateAndUploadKey("integration-test-key", ORGANIZATION_ID, GOLDEN_MACAROON, "http://localhost:3002/v1/");
         PRIVATE_KEY = uuidPrivateKeyPair.getRight();
         PUBLIC_KEY_ID = uuidPrivateKeyPair.getLeft();
+
+        System.out.println("SECURE APPLICATION CONFIGURATION");
+        System.out.println(APPLICATION.getConfiguration());
+        fail();
     }
 
     @BeforeEach
