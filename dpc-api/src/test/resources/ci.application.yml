@@ -99,10 +99,6 @@ authenticationDisabled: true
 attributionURL: "http://localhost:3500/v1/"
 exportPath: "/app/data"
 
-queue:
-  singleServerConfig:
-    address: "redis://redis:6379"
-
 httpClient:
   timeout: 5s
   connectionRequestTimeout: 5s
