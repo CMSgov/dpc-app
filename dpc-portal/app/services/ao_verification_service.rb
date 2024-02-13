@@ -70,7 +70,7 @@ class AoVerificationService
   # rubocop:enable Metrics/AbcSize
 
   def waiver?(waivers_list)
-    return if waivers_list.nil? || waivers_list.empty?
+    return false if waivers_list.nil? || waivers_list.empty?
 
     active_waiver = waivers_list.find do |waiver|
       Date.parse(waiver['endDate']) > Date.today
