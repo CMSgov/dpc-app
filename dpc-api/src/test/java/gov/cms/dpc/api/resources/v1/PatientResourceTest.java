@@ -493,7 +493,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
                 .withAdditionalHeader("X-Provenance", generateProvenance(ORGANIZATION_ID, practitioner.getId()));
 
         InternalErrorException exception = assertThrows(InternalErrorException.class, getEverythingOperation::execute, "Expected Internal server error when retrieving opted out patient.");
-        System.out.println("EVERYTHING RESPONSE BODY");
+        System.out.println("EVERYTHING OPTED OUT");
         System.out.println(exception.getResponseBody());
         assertTrue(exception.getResponseBody().contains("\"text\":\"Data not available for opted out patient\""), "Incorrect or missing operation outcome in response body.");
     }
@@ -522,6 +522,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
                 .withAdditionalHeader("X-Provenance", generateProvenance(ORGANIZATION_ID, practitioner.getId()));
 
         InternalErrorException exception = assertThrows(InternalErrorException.class, getEverythingOperation::execute, "Expected Internal server error when retrieving opted out patient.");
+        System.out.println("EVERYTHING MULTIPLE MBIS");
         assertTrue(exception.getResponseBody().contains("\"text\":\"Data not available for opted out patient\""), "Incorrect or missing operation outcome in response body.");
     }
 
