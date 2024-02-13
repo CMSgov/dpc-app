@@ -1,4 +1,4 @@
-name: opt-out-import sbx (prod-sbx) deploy
+name: opt-out-import sbx deploy
 
 on:
   workflow_dispatch:
