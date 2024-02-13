@@ -37,8 +37,10 @@ class AoVerificationService
       end
     rescue OAuth2::Error => e
       if e.response.status == 500
+        Rails.logger.error 'API Gateway Error during AO Verification'
         return { success: false, reason: 'api_gateway_error' }
       elsif e.response.status == 404
+        Rails.logger.error 'Invalid API Gateway endpoint called during AO verification'
         return { success: false, reason: 'invalid_endpoint_called' }
       end
     end
