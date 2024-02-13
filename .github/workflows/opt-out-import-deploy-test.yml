@@ -25,7 +25,7 @@ jobs:
         run: |
           go build -o bootstrap main.go parsers.go utils.go models.go db.go
           zip function.zip bootstrap
-      - uses: aws-actions/configure-aws-credentials@v3
+      - uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: ${{ vars.ACCOUNT_ROLE }}

@@ -1,4 +1,4 @@
-name: opt-out-import sbx (prod-sbx) deploy
+name: opt-out-import sbx deploy
 
 on:
   workflow_dispatch:
@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: sbx
     steps:
-      - uses: aws-actions/configure-aws-credentials@v3
+      - uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: ${{ vars.ACCOUNT_ROLE }}
