@@ -523,6 +523,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
 
         InternalErrorException exception = assertThrows(InternalErrorException.class, getEverythingOperation::execute, "Expected Internal server error when retrieving opted out patient.");
         System.out.println("EVERYTHING MULTIPLE MBIS");
+        System.out.println(exception.getResponseBody());
         assertTrue(exception.getResponseBody().contains("\"text\":\"Data not available for opted out patient\""), "Incorrect or missing operation outcome in response body.");
     }
 
