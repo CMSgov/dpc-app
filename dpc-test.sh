@@ -56,6 +56,7 @@ if [ -n "$REPORT_COVERAGE" ]; then
 fi
 
 docker-compose down
+docker volume rm dpc-app_pgdata
 docker-compose up start_core_dependencies
 docker-compose up start_api_dependencies
 
@@ -63,7 +64,6 @@ docker-compose up start_api_dependencies
 docker-compose up --exit-code-from tests tests
 
 docker-compose down
-docker volume rm dpc-app_pgdata
 docker-compose up start_core_dependencies
 docker-compose up start_api_dependencies
 
