@@ -57,22 +57,22 @@ class AoVerificationService
   # rubocop:disable Metrics/AbcSize
   def med_sanctions?(ao_ssn)
     response = @cpi_api_gw_client.fetch_med_sanctions_and_waivers(ao_ssn)
-    return false if waiver?(response['provider']['waiverInfo'])
+    return false if waiver?(response.dig('provider', 'waiverInfo'))
 
-    med_sanctions_records = response['provider']['medSanctions']
+    med_sanctions_records = response.dig('provider', 'medSanctions')
     if med_sanctions_records.nil? || med_sanctions_records.empty?
       false
     else
       current_med_sanction = med_sanctions_records.find do |record|
         record['reinstatementDate'].nil? || Date.parse(record['reinstatementDate']) > Date.today
       end
-      !current_med_sanction.nil?
+      current_med_sanction.present?
     end
   end
   # rubocop:enable Metrics/AbcSize
 
   def waiver?(waivers_list)
-    return false if waivers_list.nil? || waivers_list.empty?
+    return false unless waivers_list.present?
 
     active_waiver = waivers_list.find do |waiver|
       Date.parse(waiver['endDate']) > Date.today
@@ -89,7 +89,8 @@ class AoVerificationService
 
   def get_authorized_official_role(enrollment_id, hashed_ao_ssn)
     response = @cpi_api_gw_client.fetch_enrollment_roles(enrollment_id)
-    response['enrollments']['roles'].find do |role|
+    roles_response = response.dig('enrollments', 'roles')
+    roles_response.find do |role|
       role['roleCode'] == '10' && Digest::SHA2.new(256).hexdigest(role['ssn']) == hashed_ao_ssn
     end
   end
