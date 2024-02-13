@@ -39,7 +39,7 @@ class CpiApiGatewayClient
   end
 
   # fetch info about the authorized official, including a list of med sanctions
-  def fetch_authorized_official_med_sanctions(ssn)
+  def fetch_med_sanctions_and_waivers(ssn)
     body = {
       providerID: {
         providerType: 'ind',
@@ -50,7 +50,7 @@ class CpiApiGatewayClient
       },
       dataSets: {
         subjectAreas: {
-          medSanctions: true
+          all: true
         }
       }
     }.to_json

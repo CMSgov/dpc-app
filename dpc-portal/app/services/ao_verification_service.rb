@@ -1,11 +1,15 @@
 # frozen_string_literal: true
 
 # A service that verifies a user as an Authorized Official (AO) for a given organization
-class AOVerificationService
+class AoVerificationService
   def initialize
     @cpi_api_gw_client = CpiApiGatewayClient.new
   end
 
+  # rubocop:disable Metrics/AbcSize
+  # rubocop:disable Metrics/CyclomaticComplexity
+  # rubocop:disable Metrics/MethodLength
+  # rubocop:disable Metrics/PerceivedComplexity
   def check_ao_eligibility(organization_npi, hashed_ao_ssn)
     begin
       approved_enrollments = get_approved_enrollments(organization_npi)
@@ -41,11 +45,18 @@ class AOVerificationService
 
     { success: true }
   end
+  # rubocop:enable Metrics/AbcSize
+  # rubocop:enable Metrics/CyclomaticComplexity
+  # rubocop:enable Metrics/MethodLength
+  # rubocop:enable Metrics/PerceivedComplexity
 
   private
 
+  # rubocop:disable Metrics/AbcSize
   def med_sanctions?(ao_ssn)
-    response = @cpi_api_gw_client.fetch_authorized_official_med_sanctions(ao_ssn)
+    response = @cpi_api_gw_client.fetch_med_sanctions_and_waivers(ao_ssn)
+    return false if waiver?(response['provider']['waiverInfo'])
+
     med_sanctions_records = response['provider']['medSanctions']
     if med_sanctions_records.nil? || med_sanctions_records.empty?
       false
@@ -55,6 +66,16 @@ class AOVerificationService
       end
       !current_med_sanction.nil?
     end
+  end
+  # rubocop:enable Metrics/AbcSize
+
+  def waiver?(waivers_list)
+    return if waivers_list.nil? || waivers_list.empty?
+
+    active_waiver = waivers_list.find do |waiver|
+      Date.parse(waiver['endDate']) > Date.today
+    end
+    !active_waiver.nil?
   end
 
   def get_approved_enrollments(organization_npi)
