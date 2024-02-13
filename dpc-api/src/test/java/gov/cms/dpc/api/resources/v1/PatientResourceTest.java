@@ -72,13 +72,6 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
     final IGenericClient consentClient = APITestHelpers.buildConsentClient(ctx);
 
-    // TODO: dropwizard - debug
-    @BeforeAll
-    public static void setUp() {
-        System.out.println("PATIENT RESOURCE CONFIGURATION");
-        System.out.println(APPLICATION.getConfiguration());
-    }
-
     @Test
     @Order(1)
     public void testCreatePatientReturnsAppropriateHeaders() {
