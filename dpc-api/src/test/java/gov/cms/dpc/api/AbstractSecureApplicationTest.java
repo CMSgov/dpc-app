@@ -45,8 +45,7 @@ public class AbstractSecureApplicationTest {
 
     private static final DropwizardTestSupport<DPCAPIConfiguration> APPLICATION =
             new DropwizardTestSupport<>(DPCAPIService.class, configPath,
-                    ConfigOverride.config("serverBaseUrl", "http://localhost:8083/v1/fhir/"),
-                    ConfigOverride.config("r4Configuration.serverBaseUrl", "http://localhost:8083/v2/fhir/"));
+                    ConfigOverride.config("bbclient.serverBaseUrl", "http://localhost:8083/v1/fhir/"));
     protected static FhirContext ctx;
     protected static String ORGANIZATION_TOKEN;
     // Macaroon to use for doing admin things (like creating tokens and keys)
