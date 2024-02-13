@@ -20,6 +20,8 @@ queuedb:
   maxSize: 10
 
 server:
+  applicationContextPath: "/api"
+  adminContextPath: "/api"
   enableThreadNameFilter: false
   registerDefaultExceptionMappers: false
   applicationConnectors:
