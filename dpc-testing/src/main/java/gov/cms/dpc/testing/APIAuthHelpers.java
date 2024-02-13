@@ -234,8 +234,6 @@ public class APIAuthHelpers {
         post.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
         try (CloseableHttpClient client = createCustomHttpClient().trusting().build()) {
             try (CloseableHttpResponse response = client.execute(post)) {
-                System.out.println("UPLOAD KEY RESPONSE");
-                System.out.println(response);
                 keyEntity = mapper.readValue(response.getEntity().getContent(), KeyView.class);
                 assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Key should be valid");
             }

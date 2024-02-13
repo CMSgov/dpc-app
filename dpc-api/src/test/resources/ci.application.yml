@@ -20,7 +20,6 @@ queuedb:
   maxSize: 10
 
 server:
-  applicationContextPath: "/api"
   enableThreadNameFilter: false
   registerDefaultExceptionMappers: false
   applicationConnectors:
@@ -59,7 +58,7 @@ logging:
         additionalFields:
           environment: ${ENV:-"unknown_env"}
           version: ${APP_VERSION:-"unknown_version"}
-          application: ${APPLICATION:"dpc-api"}
+          application: ${APPLICATION:-"dpc-api"}
 
       # Prevent log entries from being dropped under all circumstances
       # While nice from a performance standpoint, we must ensure full audit capability of the application

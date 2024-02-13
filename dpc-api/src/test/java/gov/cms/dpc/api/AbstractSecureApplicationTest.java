@@ -9,7 +9,6 @@ import gov.cms.dpc.fhir.helpers.FHIRHelpers;
 import gov.cms.dpc.testing.APIAuthHelpers;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import gov.cms.dpc.testing.IntegrationTest;
-import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.DropwizardTestSupport;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -44,8 +43,7 @@ public class AbstractSecureApplicationTest {
     private static final ObjectMapper mapper = new ObjectMapper();
 
     private static final DropwizardTestSupport<DPCAPIConfiguration> APPLICATION =
-            new DropwizardTestSupport<>(DPCAPIService.class, configPath,
-                    ConfigOverride.config("bbclient.serverBaseUrl", "http://localhost:8083/v1/fhir/"));
+            new DropwizardTestSupport<>(DPCAPIService.class, configPath);
     protected static FhirContext ctx;
     protected static String ORGANIZATION_TOKEN;
     // Macaroon to use for doing admin things (like creating tokens and keys)
@@ -62,15 +60,15 @@ public class AbstractSecureApplicationTest {
         final String orgId = UUID.randomUUID().toString();
         final String npi = NPIUtil.generateNPI();
         final String clientToken = FHIRHelpers.registerOrganization(attrClient, ctx.newJsonParser(), orgId,  npi, TASK_URL);
-        final Pair<UUID, PrivateKey> newKeyPair = APIAuthHelpers.generateAndUploadKey("integration-test-key", orgId, GOLDEN_MACAROON, "http://localhost:3002/v1/");
+        final Pair<UUID, PrivateKey> newKeyPair = APIAuthHelpers.generateAndUploadKey("integration-test-key", orgId, GOLDEN_MACAROON, getBaseURL());
         return new TestOrganizationContext(clientToken,npi,orgId,newKeyPair.getLeft().toString(),newKeyPair.getRight());
     }
 
-    protected String getBaseURL() {
+    protected static String getBaseURL() {
         return String.format("http://localhost:%d/v1", APPLICATION.getLocalPort());
     }
 
-    protected String getAdminURL() {
+    protected static String getAdminURL() {
         return String.format("http://localhost:%d/tasks/", APPLICATION.getAdminPort());
     }
 
@@ -85,14 +83,13 @@ public class AbstractSecureApplicationTest {
         ORGANIZATION_TOKEN = FHIRHelpers.registerOrganization(attrClient, ctx.newJsonParser(), ORGANIZATION_ID, ORGANIZATION_NPI, TASK_URL);
 
         // Register Public key
-        final Pair<UUID, PrivateKey> uuidPrivateKeyPair = APIAuthHelpers.generateAndUploadKey("integration-test-key", ORGANIZATION_ID, GOLDEN_MACAROON, "http://localhost:3002/v1/");
+        final Pair<UUID, PrivateKey> uuidPrivateKeyPair = APIAuthHelpers.generateAndUploadKey("integration-test-key", ORGANIZATION_ID, GOLDEN_MACAROON, getBaseURL());
         PRIVATE_KEY = uuidPrivateKeyPair.getRight();
         PUBLIC_KEY_ID = uuidPrivateKeyPair.getLeft();
     }
 
     @BeforeEach
     public void eachSetup() throws IOException {
-
         // Check health
         APITestHelpers.checkHealth(APPLICATION);
     }

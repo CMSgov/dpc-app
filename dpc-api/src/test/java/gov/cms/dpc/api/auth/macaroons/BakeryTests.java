@@ -45,17 +45,7 @@ class BakeryTests {
         assertThrows(BakeryException.class, () -> bakery.verifyMacaroon(Collections.singletonList(macaroon), String.format("organization_id = %s", BAD_ORG_ID)));
     }
 
-    // TODO: dropwizard - probably a better way to do this
     private TokenPolicy generateTokenPolicy() {
-        TokenPolicy tokenPolicy = new TokenPolicy();
-        TokenPolicy.VersionPolicy versionPolicy = new TokenPolicy.VersionPolicy();
-        versionPolicy.setMinimumVersion(1);
-        versionPolicy.setCurrentVersion(2);
-        tokenPolicy.setVersionPolicy(versionPolicy);
-        TokenPolicy.ExpirationPolicy expirationPolicy = new TokenPolicy.ExpirationPolicy();
-        expirationPolicy.setExpirationOffset(1);
-        expirationPolicy.setExpirationUnit("YEARS");
-        tokenPolicy.setExpirationPolicy(expirationPolicy);
-        return tokenPolicy;
+        return TokenPolicy.buildTokenPolicy(1, 2, 1, "YEARS");
     }
 }

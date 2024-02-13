@@ -28,7 +28,10 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpHeaders;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 
 import javax.ws.rs.HttpMethod;
 import java.io.BufferedReader;
@@ -486,8 +489,6 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
                 .withAdditionalHeader("X-Provenance", generateProvenance(ORGANIZATION_ID, practitioner.getId()));
 
         InternalErrorException exception = assertThrows(InternalErrorException.class, getEverythingOperation::execute, "Expected Internal server error when retrieving opted out patient.");
-        System.out.println("EVERYTHING OPTED OUT");
-        System.out.println(exception.getResponseBody());
         assertTrue(exception.getResponseBody().contains("\"text\":\"Data not available for opted out patient\""), "Incorrect or missing operation outcome in response body.");
     }
 
@@ -515,8 +516,6 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
                 .withAdditionalHeader("X-Provenance", generateProvenance(ORGANIZATION_ID, practitioner.getId()));
 
         InternalErrorException exception = assertThrows(InternalErrorException.class, getEverythingOperation::execute, "Expected Internal server error when retrieving opted out patient.");
-        System.out.println("EVERYTHING MULTIPLE MBIS");
-        System.out.println(exception.getResponseBody());
         assertTrue(exception.getResponseBody().contains("\"text\":\"Data not available for opted out patient\""), "Incorrect or missing operation outcome in response body.");
     }
 
