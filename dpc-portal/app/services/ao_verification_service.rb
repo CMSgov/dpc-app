@@ -7,19 +7,37 @@ class AOVerificationService
   end
 
   def check_ao_eligibility(organization_npi, hashed_ao_ssn)
-    approved_enrollments = get_approved_enrollments(organization_npi)
-    return { success: false, reason: approved_enrollments } if approved_enrollments == 'bad_npi'
+    begin
+      approved_enrollments = get_approved_enrollments(organization_npi)
+      if approved_enrollments == 'bad_npi'
+        Rails.logger.warn "Unable to find organization NPI #{organization_npi}"
+        return { success: false, reason: approved_enrollments }
+      end
 
-    enrollment_ids = approved_enrollments.map { |enrollment| enrollment['enrollmentID'] }
-    return { success: false, reason: 'no_approved_enrollment' } if enrollment_ids.empty?
+      enrollment_ids = approved_enrollments.map { |enrollment| enrollment['enrollmentID'] }
+      if enrollment_ids.empty?
+        Rails.logger.warn "No current approved enrollments for organization NPI #{organization_npi}"
+        return { success: false, reason: 'no_approved_enrollment' }
+      end
 
-    ao_role = nil
-    enrollment_ids.find do |enrollment_id|
-      ao_role = get_authorized_official_role(enrollment_id, hashed_ao_ssn)
+      ao_role = nil
+      enrollment_ids.find { |enrollment_id| ao_role = get_authorized_official_role(enrollment_id, hashed_ao_ssn) }
+      if ao_role.nil?
+        Rails.logger.warn "User failed Authorized Official status for organization NPI #{organization_npi}"
+        return { success: false, reason: 'user_not_authorized_official' }
+      end
+
+      if med_sanctions?(ao_role['ssn'])
+        Rails.logger.warn "User attempting to authorize for organization NPI #{organization_npi} has med sanctions."
+        return { success: false, reason: 'med_sanctions' }
+      end
+    rescue OAuth2::Error => e
+      if e.response.status == 500
+        return { success: false, reason: 'api_gateway_error' }
+      elsif e.response.status == 404
+        return { success: false, reason: 'invalid_endpoint_called' }
+      end
     end
-    return { success: false, reason: 'user_not_authorized_official' } if ao_role.nil?
-
-    return { success: false, reason: 'med_sanctions' } if med_sanctions?(ao_role['ssn'])
 
     { success: true }
   end

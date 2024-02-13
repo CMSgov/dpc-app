@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
+require 'rails_helper'
 require './app/services/ao_verification_service'
 require './app/services/cpi_api_gateway_client'
 
