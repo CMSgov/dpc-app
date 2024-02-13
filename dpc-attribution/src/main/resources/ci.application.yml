@@ -40,7 +40,7 @@ logging:
     "liquibase": INFO
     "gov.cms.dpc.queue.DistributedBatchQueue": DEBUG
     "org.hibernate": ERROR
-    "org.hibernate.SQL": INFO
+    "org.hibernate.SQL": ERROR
 
 expirationThreshold: 90 # In days
 migrationEnabled: true
