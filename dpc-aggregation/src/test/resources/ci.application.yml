@@ -82,7 +82,7 @@ consentServiceUrl: "http://localhost:3600/v1/"
 
 retryCount: 3 # Number of times to retry reach BB request
 resourcesPerFileCount: 5000 # Max number of resources that an export file will have before creating a new file
-exportPath: "/tmp"
+exportPath: "/app/data"
 
 # Lookback Settings
 # The number of months to look back for a claim
