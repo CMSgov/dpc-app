@@ -96,7 +96,7 @@ describe AoVerificationService do
                                .with(organization_npi)
         .and_return({ 'code' => '404' })
       response = service.check_ao_eligibility(organization_npi, hashed_ao_ssn)
-      expect(response).to include({ success: false, reason: 'bad_npi' })
+      expect(response).to include({ success: false, failure_reason: 'bad_npi' })
     end
 
     it 'returns an error if there are no approved enrollments' do
@@ -121,7 +121,7 @@ describe AoVerificationService do
                                         }]
                     })
       response = service.check_ao_eligibility(organization_npi, hashed_ao_ssn)
-      expect(response).to include({ success: false, reason: 'no_approved_enrollment' })
+      expect(response).to include({ success: false, failure_reason: 'no_approved_enrollment' })
     end
 
     it 'returns an error if the user is not an authorized official' do
@@ -159,7 +159,7 @@ describe AoVerificationService do
                       }
                     })
       response = service.check_ao_eligibility(organization_npi, hashed_ao_ssn)
-      expect(response).to include({ success: false, reason: 'user_not_authorized_official' })
+      expect(response).to include({ success: false, failure_reason: 'user_not_authorized_official' })
     end
 
     it 'returns an error if the AO has an active med sanction' do
@@ -216,7 +216,7 @@ describe AoVerificationService do
                       }
                     })
       response = service.check_ao_eligibility(organization_npi, hashed_ao_ssn)
-      expect(response).to include({ success: false, reason: 'med_sanctions' })
+      expect(response).to include({ success: false, failure_reason: 'med_sanctions' })
     end
 
     it 'does not return an error if user has a med sanction AND waiver' do

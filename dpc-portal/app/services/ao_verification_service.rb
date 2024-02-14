@@ -17,17 +17,17 @@ class AoVerificationService
   rescue OAuth2::Error => e
     if e.response.status == 500
       Rails.logger.error 'API Gateway Error during AO Verification'
-      { success: false, reason: 'api_gateway_error' }
+      { success: false, failure_reason: 'api_gateway_error' }
     elsif e.response.status == 404
       Rails.logger.error 'Invalid API Gateway endpoint called during AO verification'
-      { success: false, reason: 'invalid_endpoint_called' }
+      { success: false, failure_reason: 'invalid_endpoint_called' }
     else
       Rails.logger.error 'Unexpected error during AO Verification'
-      { success: false, reason: 'unexpected_error' }
+      { success: false, failure_reason: 'unexpected_error' }
     end
   rescue AoException => e
     Rails.logger.info "Failed AO check #{e.message} for organization NPI #{organization_npi}"
-    { success: false, reason: e.message }
+    { success: false, failure_reason: e.message }
   end
   # rubocop:enable Metrics/AbcSize
 
