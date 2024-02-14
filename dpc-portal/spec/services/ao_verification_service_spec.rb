@@ -2,8 +2,6 @@
 
 require 'spec_helper'
 require 'rails_helper'
-require './app/services/ao_verification_service'
-require './app/services/cpi_api_gateway_client'
 
 describe AoVerificationService do
   let(:ao_verification_service) { instance_double(AoVerificationService) }
