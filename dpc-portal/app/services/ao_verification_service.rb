@@ -24,8 +24,7 @@ class AoVerificationService
         return { success: false, reason: 'no_approved_enrollment' }
       end
 
-      ao_role = nil
-      enrollment_ids.find { |enrollment_id| ao_role = get_authorized_official_role(enrollment_id, hashed_ao_ssn) }
+      ao_role = get_authorized_official_role(enrollment_ids, hashed_ao_ssn)
       if ao_role.nil?
         Rails.logger.warn "User failed Authorized Official status for organization NPI #{organization_npi}"
         return { success: false, reason: 'user_not_authorized_official' }
@@ -54,7 +53,6 @@ class AoVerificationService
 
   private
 
-  # rubocop:disable Metrics/AbcSize
   def med_sanctions?(ao_ssn)
     response = @cpi_api_gw_client.fetch_med_sanctions_and_waivers(ao_ssn)
     return false if waiver?(response.dig('provider', 'waiverInfo'))
@@ -69,7 +67,6 @@ class AoVerificationService
       current_med_sanction.present?
     end
   end
-  # rubocop:enable Metrics/AbcSize
 
   def waiver?(waivers_list)
     return false unless waivers_list.present?
@@ -87,11 +84,15 @@ class AoVerificationService
     response['enrollments'].select { |enrollment| enrollment['status'] == 'APPROVED' }
   end
 
-  def get_authorized_official_role(enrollment_id, hashed_ao_ssn)
-    response = @cpi_api_gw_client.fetch_enrollment_roles(enrollment_id)
-    roles_response = response.dig('enrollments', 'roles')
-    roles_response.find do |role|
-      role['roleCode'] == '10' && Digest::SHA2.new(256).hexdigest(role['ssn']) == hashed_ao_ssn
+  def get_authorized_official_role(enrollment_ids, hashed_ao_ssn)
+    enrollment_ids.each do |enrollment_id|
+      response = @cpi_api_gw_client.fetch_enrollment_roles(enrollment_id)
+      roles_response = response.dig('enrollments', 'roles')
+      roles_response.each do |role|
+        return role if role['roleCode'] == '10' && Digest::SHA2.new(256).hexdigest(role['ssn']) == hashed_ao_ssn
+      end
     end
+
+    nil
   end
 end
