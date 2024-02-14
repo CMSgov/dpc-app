@@ -7,65 +7,45 @@ class AoVerificationService
   end
 
   # rubocop:disable Metrics/AbcSize
-  # rubocop:disable Metrics/CyclomaticComplexity
-  # rubocop:disable Metrics/MethodLength
-  # rubocop:disable Metrics/PerceivedComplexity
   def check_ao_eligibility(organization_npi, hashed_ao_ssn)
-    begin
-      approved_enrollments = get_approved_enrollments(organization_npi)
-      if approved_enrollments == 'bad_npi'
-        Rails.logger.warn "Unable to find organization NPI #{organization_npi}"
-        return { success: false, reason: approved_enrollments }
-      end
-
-      enrollment_ids = approved_enrollments.map { |enrollment| enrollment['enrollmentID'] }
-      if enrollment_ids.empty?
-        Rails.logger.warn "No current approved enrollments for organization NPI #{organization_npi}"
-        return { success: false, reason: 'no_approved_enrollment' }
-      end
-
-      ao_role = get_authorized_official_role(enrollment_ids, hashed_ao_ssn)
-      if ao_role.nil?
-        Rails.logger.warn "User failed Authorized Official status for organization NPI #{organization_npi}"
-        return { success: false, reason: 'user_not_authorized_official' }
-      end
-
-      if med_sanctions?(ao_role['ssn'])
-        Rails.logger.warn "User attempting to authorize for organization NPI #{organization_npi} has med sanctions."
-        return { success: false, reason: 'med_sanctions' }
-      end
-    rescue OAuth2::Error => e
-      if e.response.status == 500
-        Rails.logger.error 'API Gateway Error during AO Verification'
-        return { success: false, reason: 'api_gateway_error' }
-      elsif e.response.status == 404
-        Rails.logger.error 'Invalid API Gateway endpoint called during AO verification'
-        return { success: false, reason: 'invalid_endpoint_called' }
-      end
-    end
+    approved_enrollments = get_approved_enrollments(organization_npi)
+    enrollment_ids = approved_enrollments.map { |enrollment| enrollment['enrollmentID'] }
+    ao_role = get_authorized_official_role(enrollment_ids, hashed_ao_ssn)
+    check_med_sanctions(ao_role['ssn'])
 
     { success: true }
+  rescue OAuth2::Error => e
+    if e.response.status == 500
+      Rails.logger.error 'API Gateway Error during AO Verification'
+      { success: false, reason: 'api_gateway_error' }
+    elsif e.response.status == 404
+      Rails.logger.error 'Invalid API Gateway endpoint called during AO verification'
+      { success: false, reason: 'invalid_endpoint_called' }
+    else
+      Rails.logger.error 'Unexpected error during AO Verification'
+      { success: false, reason: 'unexpected_error' }
+    end
+  rescue AoException => e
+    Rails.logger.info "Failed AO check #{e.message} for organization NPI #{organization_npi}"
+    { success: false, reason: e.message }
   end
   # rubocop:enable Metrics/AbcSize
-  # rubocop:enable Metrics/CyclomaticComplexity
-  # rubocop:enable Metrics/MethodLength
-  # rubocop:enable Metrics/PerceivedComplexity
 
   private
 
-  def med_sanctions?(ao_ssn)
+  def check_med_sanctions(ao_ssn)
     response = @cpi_api_gw_client.fetch_med_sanctions_and_waivers(ao_ssn)
     return false if waiver?(response.dig('provider', 'waiverInfo'))
 
     med_sanctions_records = response.dig('provider', 'medSanctions')
-    if med_sanctions_records.nil? || med_sanctions_records.empty?
-      false
-    else
+    unless med_sanctions_records.nil? || med_sanctions_records.empty?
       current_med_sanction = med_sanctions_records.find do |record|
         record['reinstatementDate'].nil? || Date.parse(record['reinstatementDate']) > Date.today
       end
-      current_med_sanction.present?
+      raise AoException, 'med_sanctions' if current_med_sanction.present?
     end
+
+    false
   end
 
   def waiver?(waivers_list)
@@ -79,9 +59,12 @@ class AoVerificationService
 
   def get_approved_enrollments(organization_npi)
     response = @cpi_api_gw_client.fetch_enrollment(organization_npi)
-    return 'bad_npi' if response['code'] == '404'
+    raise AoException, 'bad_npi' if response['code'] == '404'
 
-    response['enrollments'].select { |enrollment| enrollment['status'] == 'APPROVED' }
+    enrollments = response['enrollments'].select { |enrollment| enrollment['status'] == 'APPROVED' }
+    raise AoException, 'no_approved_enrollment' if enrollments.empty?
+
+    enrollments
   end
 
   def get_authorized_official_role(enrollment_ids, hashed_ao_ssn)
@@ -93,6 +76,8 @@ class AoVerificationService
       end
     end
 
-    nil
+    raise AoException, 'user_not_authorized_official'
   end
 end
+
+class AoException < StandardError; end
