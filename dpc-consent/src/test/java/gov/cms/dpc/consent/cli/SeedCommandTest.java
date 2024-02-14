@@ -7,7 +7,6 @@ import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.util.JarLocation;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
@@ -19,7 +18,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@Disabled
 class SeedCommandTest {
 
     private final PrintStream originalOut = System.out;
@@ -61,20 +59,7 @@ class SeedCommandTest {
     void testSeedCommand() throws Exception {
 
         final Optional<Throwable> success = cli.run("seed", "src/test/resources/ci.application.yml");
-        /* dies here with the following error
-        Should not have errors ==> expected: <> but was: <io.dropwizard.configuration.ConfigurationParsingException: default configuration has an error:
-          * Unrecognized field at: consentDatabase
-                Did you mean?:
-                - consentdb
-                        - config
-                        - metrics
-                        - logging
-                        - server
-
-        This is because consentdb (annotation on Config database property) does not match getter name. However, making them match by changing
-        the setter name results in the property values not being injected correctly.
-        */
-        assertAll(() -> assertTrue(success.isPresent(), "Should have succeeded"),
+        assertAll(() -> assertTrue(success.isEmpty(), "Should have succeeded"),
                 () -> assertEquals("", stdErr.toString(), "Should not have errors"));
 
         // todo confirm 10 seeds are present (count)
