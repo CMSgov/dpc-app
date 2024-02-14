@@ -12,7 +12,6 @@ import io.dropwizard.util.JarLocation;
 import org.junit.jupiter.api.*;
 
 import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.Optional;
 
@@ -32,6 +31,8 @@ class ConsentCommandsTest {
 
     private static final DPCConsentService app = new DPCConsentService();
     private static final Bootstrap<DPCConsentConfiguration> bs = setupBootstrap(app);
+
+    private static final String configPath = "src/test/resources/ci.application.yml";
 
     private Cli cli;
 
@@ -88,7 +89,7 @@ class ConsentCommandsTest {
 
     @Test
     final void onlyAllowsInOrOut() throws Exception {
-        final Optional<Throwable> t1 = cli.run("consent", "create", "-p", "t2-mbi", "-d", "2019-11-22", "-i", "-o", "--host", "http://localhost:3500/v1");
+        final Optional<Throwable> t1 = cli.run("consent", "create", configPath, "-p", "t2-mbi", "-d", "2019-11-22", "-i", "-o", "--host", "http://localhost:3500/v1");
         assertAll(() -> assertTrue(t1.isPresent(), "Should have failed"),
                 () -> assertEquals("", stdOut.toString(), "Should not have output"),
                 () -> assertNotEquals("", stdErr.toString(), "Should have errors"),
@@ -97,7 +98,7 @@ class ConsentCommandsTest {
 
     @Test
     final void detectsInvalidDate() throws Exception {
-        final Optional<Throwable> t5 = cli.run("consent", "create", "-p", "tA-mbi", "-d", "Nov 22 2019", "-i", "--host", "http://localhost:3500/v1");
+        final Optional<Throwable> t5 = cli.run("consent", "create", configPath, "-p", "tA-mbi", "-d", "Nov 22 2019", "-i", "--host", "http://localhost:3500/v1");
         assertAll(() -> assertTrue(t5.isPresent(), "Should have failed"),
                 () -> assertEquals("", stdOut.toString(), "Should not have output"),
                 () -> assertNotEquals("", stdErr.toString(), "Should have errors"),
@@ -106,14 +107,14 @@ class ConsentCommandsTest {
 
     @Test
     final void createDefaultOptInRecord() throws Exception {
-        final Optional<Throwable> t2 = cli.run("consent", "create", "-p", "t2-mbi", "-d", "2019-11-22", "-i", "--host", "http://localhost:3500/v1");
+        final Optional<Throwable> t2 = cli.run("consent", "create", configPath, "-p", "t2-mbi", "-d", "2019-11-22", "-i", "--host", "http://localhost:3500/v1");
         assertAll(() -> assertFalse(t2.isPresent(), "Should have succeeded"),
                 () -> assertEquals("", stdErr.toString(), "Should not have errors"));
     }
 
     @Test
     final void createDefaultOptOutRecord() throws Exception {
-        final Optional<Throwable> t3 = cli.run("consent", "create", "-p", "t3-mbi", "-d", "2019-11-23", "-o", "--host", "http://localhost:3500/v1");
+        final Optional<Throwable> t3 = cli.run("consent", "create", configPath, "-p", "t3-mbi", "-d", "2019-11-23", "-o", "--host", "http://localhost:3500/v1");
         assertAll(() -> assertFalse(t3.isPresent(), "Should have succeeded"),
                 () -> assertEquals("", stdErr.toString(), "Should not have errors"));
     }
