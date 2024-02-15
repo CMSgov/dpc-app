@@ -78,6 +78,8 @@ bbclient:
   r4Configuration:
     serverBaseUrl: ${BFD_URL_V2}
 
+  useBfdMock: ${USE_BFD_MOCK:-true}
+
 consentServiceUrl: "http://localhost:3600/v1/"
 
 retryCount: 3 # Number of times to retry reach BB request
