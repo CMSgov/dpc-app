@@ -2,7 +2,7 @@ database:
   driverClass: org.postgresql.Driver
   url: "jdbc:postgresql://localhost:5432/dpc_attribution"  # TODO: dropwizard - set based on ENV
   user: postgres
-  password: ATTRIBUTION_DB_PASS:-dpc-safe
+  password: dpc-safe
   initialSize: 5
   minSize: 5
   maxSize: 10
@@ -85,9 +85,4 @@ resourcesPerFileCount: 5000 # Max number of resources that an export file will h
 exportPath: "/app/data"
 
 # Lookback Settings
-# The number of months to look back for a claim
-lookBackMonths: ${LOOK_BACK_MONTHS:-18}
-lookBackExemptOrgs: ${LOOK_BACK_EXEMPT_ORGS:-["0ab352f1-2bf1-44c4-aa7a-3004a1ffef12","69c0d4d4-9c07-4fa8-9053-e10fb1608b48","c7f5247b-4c41-478c-84eb-a6e801bdb145"]}
-
-# The date to start looking back from
-lookBackDate: ${LOOK_BACK_DATE:-2000-01}
+lookBackMonths: -1 # disable lookback
