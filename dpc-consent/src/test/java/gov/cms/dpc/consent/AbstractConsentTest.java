@@ -23,9 +23,9 @@ public abstract class AbstractConsentTest {
     public static void initDB() throws Exception {
         APPLICATION.before();
         SharedConfigurationState.clear();
-        APPLICATION.getApplication().run("db", "migrate", "ci.application.conf");
+        APPLICATION.getApplication().run("db", "migrate", configPath);
         SharedConfigurationState.clear();
-        APPLICATION.getApplication().run("seed", "ci.application.conf");
+        APPLICATION.getApplication().run("seed", configPath);
     }
 
     @AfterAll
