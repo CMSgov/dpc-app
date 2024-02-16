@@ -1,0 +1,51 @@
+<div>
+  <h1>Invite new user</h1>
+  <div class="usa-alert usa-alert--warning margin-bottom-4">
+    <div class="usa-alert__body">
+      <h4 class="usa-alert__heading">Exact match required</h4>
+      <p class="usa-alert__text">
+        The name and contact info you enter must be an exact match to the name and contact info your Credential Delegate will provide after receiving this invite.
+      </p>
+    </div>
+  </div>
+  <div>
+    <h2>Contact Information</h2>
+    <%= form_tag organization_credential_delegate_invitations_path(@organization.path_id), method: :post, class: ['usa-form'], id: "cd-form" do %>
+      <%= render(Core::Form::TextInputComponent.new(label: 'First or given name',
+          attribute: :given_name,
+          hint: 'For example, Jose, Darren, or Mai',
+          default: cd_invite.given_name,
+          error_msg: cd_invite.errors[:given_name]&.first,
+          input_options: { maxlength: 25 })) %>
+      <%= render(Core::Form::TextInputComponent.new(label: 'Last or family name',
+          attribute: :family_name,
+          hint: 'For example, Martinez Gonzalez, Gu, or Smith',
+          default: cd_invite.family_name,
+          error_msg: cd_invite.errors[:family_name]&.first,
+          input_options: { maxlength: 25 })) %>
+      <%= render(Core::Form::TextInputComponent.new(label: 'Primary phone number',
+          attribute: :phone_raw,
+          hint: '10-digit, U.S. only, for example 999-999-9999',
+          default: cd_invite.phone_raw,
+          error_msg: cd_invite.errors[:phone_raw]&.first || cd_invite.errors[:phone]&.first,
+          input_options: @phone_input_options)) %>
+      <%= render(Core::Form::TextInputComponent.new(label: 'Email',
+          attribute: :email,
+          error_msg: cd_invite.errors[:email]&.first,
+          default: cd_invite.email)) %>
+      <%= render(Core::Form::TextInputComponent.new(label: 'Confirm email',
+          attribute: :email_confirmation,
+          error_msg: cd_invite.errors[:email_confirmation]&.first,
+          default: cd_invite.email_confirmation)) %>
+    <% end %>
+    <%= link_to 'Go Back', organization_path(organization.path_id), class: ['usa-button', 'usa-button--outline'] %>
+    <a href="#verify-modal" aria-controls="verify-modal" class="usa-button" data-open-modal>Send invite</a>
+    <%= render(Core::Modal::ModalComponent.new(
+        'Are you sure?',
+        'Messaging for AO Invite agreement',
+        link_to("Yes, assign CD", "#", class: "usa-button", onclick: "document.getElementById('cd-form').submit();"),
+        'No, go back',
+        'verify-modal')) %>
+  </div>
+</div>
+
