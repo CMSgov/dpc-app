@@ -66,14 +66,12 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
       end
 
       it 'should have empty phone stanza' do
-        phone = <<~HTML
-          <div class="margin-bottom-4">
-            <label class="usa-label" for="phone_raw">Primary phone number</label>
-            <p class="usa-hint">10-digit, U.S. only, for example 999-999-9999</p>
-            <input type="text" name="phone_raw" id="phone_raw" value="" maxlength="12" placeholder="___-___-____" class="usa-input" />
-          </div>
-        HTML
-        is_expected.to include(normalize_space(phone))
+        phone = ['<label class="usa-label" for="phone_raw">Primary phone number</label>',
+                 '<p class="usa-hint">10-digit, U.S. only, for example 999-999-9999</p>',
+                 '<input type="text" name="phone_raw" id="phone_raw" value="" ',
+                 'class="usa-input usa-masked" placeholder="___-___-____" ',
+                 'pattern="\\d{3}-\\d{3}-\\d{4}" aria-describedby="telHint" />'].join
+        is_expected.to include(phone)
       end
 
       it 'should have empty email stanza' do
@@ -131,19 +129,17 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
         is_expected.to include(normalize_space(family_name))
       end
 
-      it 'should have empty phone stanza' do
-        phone = <<~HTML
-          <div class="margin-bottom-4">
-            <label class="usa-label" for="phone_raw">Primary phone number</label>
-            <p class="usa-hint">10-digit, U.S. only, for example 999-999-9999</p>
-            <p style="color: #b50909;">can't be blank</p>
-            <input type="text" name="phone_raw" id="phone_raw" value="" maxlength="12" placeholder="___-___-____" class="usa-input usa-input--error" />
-          </div>
-        HTML
+      it 'should have errored phone stanza' do
+        phone = ['<label class="usa-label" for="phone_raw">Primary phone number</label>',
+                 '<p class="usa-hint">10-digit, U.S. only, for example 999-999-9999</p>',
+                 %(<p style="color: #b50909;">can't be blank</p>),
+                 '<input type="text" name="phone_raw" id="phone_raw" value="" ',
+                 'class="usa-input usa-masked usa-input--error" placeholder="___-___-____" ',
+                 'pattern="\\d{3}-\\d{3}-\\d{4}" aria-describedby="telHint" />'].join
         is_expected.to include(normalize_space(phone))
       end
 
-      it 'should have empty email stanza' do
+      it 'should have errored email stanza' do
         email = <<~HTML
           <div class="margin-bottom-4">
             <label class="usa-label" for="email">Email</label>
@@ -154,7 +150,7 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
         is_expected.to include(normalize_space(email))
       end
 
-      it 'should have empty email confirmation stanza' do
+      it 'should have errored email confirmation stanza' do
         email_confirmation = <<~HTML
           <div class="margin-bottom-4">
             <label class="usa-label" for="email_confirmation">Confirm email</label>
@@ -197,13 +193,11 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
       end
 
       it 'should have filled phone stanza' do
-        phone = <<~HTML
-          <div class="margin-bottom-4">
-            <label class="usa-label" for="phone_raw">Primary phone number</label>
-            <p class="usa-hint">10-digit, U.S. only, for example 999-999-9999</p>
-            <input type="text" name="phone_raw" id="phone_raw" value="222-222-2222" maxlength="12" placeholder="___-___-____" class="usa-input" />
-          </div>
-        HTML
+        phone = ['<label class="usa-label" for="phone_raw">Primary phone number</label>',
+                 '<p class="usa-hint">10-digit, U.S. only, for example 999-999-9999</p>',
+                 '<input type="text" name="phone_raw" id="phone_raw" value="222-222-2222" ',
+                 'class="usa-input usa-masked" placeholder="___-___-____" ',
+                 'pattern="\\d{3}-\\d{3}-\\d{4}" aria-describedby="telHint" />'].join
         is_expected.to include(normalize_space(phone))
       end
 

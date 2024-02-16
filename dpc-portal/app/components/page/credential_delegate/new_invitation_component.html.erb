@@ -23,12 +23,12 @@
           default: cd_invite.family_name,
           error_msg: cd_invite.errors[:family_name]&.first,
           input_options: { maxlength: 25 })) %>
-      <%= render(Core::Form::TextInputComponent.new(label: 'Primary phone number',
+      <%= render(Core::Form::MaskedInputComponent.new(label: 'Primary phone number',
           attribute: :phone_raw,
           hint: '10-digit, U.S. only, for example 999-999-9999',
           default: cd_invite.phone_raw,
           error_msg: cd_invite.errors[:phone_raw]&.first || cd_invite.errors[:phone]&.first,
-          input_options: @phone_input_options)) %>
+          mask: 'us-phone')) %>
       <%= render(Core::Form::TextInputComponent.new(label: 'Email',
           attribute: :email,
           error_msg: cd_invite.errors[:email]&.first,
