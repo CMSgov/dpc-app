@@ -81,7 +81,7 @@ bbclient:
   bfdHashPepper: ${BFD_HASH_PEPPER}
   bfdHashIter: ${BFD_HASH_ITER}
 
-authenticationDisabled: ${AUTH_DISABLED:-false}
+authenticationDisabled: ${AUTH_DISABLED:-true}  # TODO: dropwizard - handle for e2e tests
 
 attributionURL: "http://localhost:3500/v1/"
 exportPath: "/tmp"
