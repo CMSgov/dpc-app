@@ -13,9 +13,11 @@ import gov.cms.dpc.consent.AbstractConsentTest;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.converters.entities.ConsentEntityConverter;
 import org.hl7.fhir.dstu3.model.*;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import ru.vyarus.dropwizard.guice.module.context.SharedConfigurationState;
 
 import java.time.Instant;
 import java.time.ZoneOffset;
@@ -35,6 +37,15 @@ class ConsentResourceTest extends AbstractConsentTest {
     private static final String TEST_CONSENT_REF = String.format("Consent/%s", TEST_CONSENT_UUID);
 
     private ConsentResourceTest() {
+    }
+
+    @BeforeAll
+    public static void initDB() throws Exception {
+        APPLICATION.before();
+        SharedConfigurationState.clear();
+        APPLICATION.getApplication().run("db", "migrate", configPath);
+        SharedConfigurationState.clear();
+        APPLICATION.getApplication().run("seed", configPath);
     }
 
     @Test

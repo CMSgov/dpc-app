@@ -7,26 +7,16 @@ import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import gov.cms.dpc.testing.IntegrationTest;
 import io.dropwizard.testing.DropwizardTestSupport;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import ru.vyarus.dropwizard.guice.module.context.SharedConfigurationState;
 
 @IntegrationTest
 public abstract class AbstractConsentTest {
-    private static final String configPath = "src/test/resources/ci.application.yml";
+    protected static final String configPath = "src/test/resources/ci.application.yml";
 
     protected static final DropwizardTestSupport<DPCConsentConfiguration> APPLICATION =
             new DropwizardTestSupport<>(DPCConsentService.class, configPath);
 
     protected FhirContext ctx = FhirContext.forDstu3();
 
-    @BeforeAll
-    public static void initDB() throws Exception {
-        APPLICATION.before();
-        SharedConfigurationState.clear();
-        APPLICATION.getApplication().run("db", "migrate", configPath);
-        SharedConfigurationState.clear();
-        APPLICATION.getApplication().run("seed", configPath);
-    }
 
     @AfterAll
     public static void shutdown() {
