@@ -5,7 +5,17 @@ require 'rails_helper'
 RSpec.describe 'ClientTokens', type: :request do
   include DpcClientSupport
 
+  describe 'GET /new not logged in' do
+    it 'redirects to login' do
+      get '/organizations/no-such-id/client_tokens/new'
+      expect(response).to redirect_to('/portal/users/sign_in')
+    end
+  end
+
   describe 'GET /new' do
+    let!(:user) { create(:user) }
+    before { sign_in user }
+
     it 'returns success' do
       api_id = SecureRandom.uuid
       stub_api_client(message: :get_organization,
@@ -16,7 +26,17 @@ RSpec.describe 'ClientTokens', type: :request do
     end
   end
 
+  describe 'Post /create not logged in' do
+    it 'redirects to login' do
+      post '/organizations/no-such-id/client_tokens'
+      expect(response).to redirect_to('/portal/users/sign_in')
+    end
+  end
+
   describe 'POST /create' do
+    let!(:user) { create(:user) }
+    before { sign_in user }
+
     it 'succeeds if label' do
       org_api_id = SecureRandom.uuid
       token_guid = SecureRandom.uuid
@@ -52,7 +72,17 @@ RSpec.describe 'ClientTokens', type: :request do
     end
   end
 
+  describe 'Delete /destroy not logged in' do
+    it 'redirects to login' do
+      delete '/organizations/no-such-id/client_tokens/no-such-id'
+      expect(response).to redirect_to('/portal/users/sign_in')
+    end
+  end
+
   describe 'DELETE /destroy' do
+    let!(:user) { create(:user) }
+    before { sign_in user }
+
     it 'flashes success if succeeds' do
       org_api_id = SecureRandom.uuid
       token_guid = SecureRandom.uuid
@@ -66,6 +96,7 @@ RSpec.describe 'ClientTokens', type: :request do
       expect(flash[:notice]).to eq('Client token successfully deleted.')
       expect(response).to redirect_to(organization_path(org_api_id))
     end
+
     it 'renders error if error' do
       org_api_id = SecureRandom.uuid
       token_guid = SecureRandom.uuid
