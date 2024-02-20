@@ -72,8 +72,8 @@ public class DPCConsentService extends Application<DPCConsentConfiguration> {
         });
         bootstrap.addBundle(new SwaggerBundle<>() {
             @Override
-            protected SwaggerBundleConfiguration getSwaggerBundleConfiguration(DPCConsentConfiguration dpcConsentConfiguration) {
-                return dpcConsentConfiguration.getSwaggerBundleConfiguration();
+            protected SwaggerBundleConfiguration getSwaggerBundleConfiguration(DPCConsentConfiguration configuration) {
+                return configuration.getSwaggerBundleConfiguration();
             }
         });
 

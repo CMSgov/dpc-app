@@ -89,8 +89,8 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
 
         bootstrap.addBundle(new SwaggerBundle<>() {
             @Override
-            protected SwaggerBundleConfiguration getSwaggerBundleConfiguration(DPCAttributionConfiguration dpcAttributionConfiguration) {
-                return dpcAttributionConfiguration.getSwaggerBundleConfiguration();
+            protected SwaggerBundleConfiguration getSwaggerBundleConfiguration(DPCAttributionConfiguration configuration) {
+                return configuration.getSwaggerBundleConfiguration();
             }
         });
 
