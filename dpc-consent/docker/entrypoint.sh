@@ -20,7 +20,7 @@ CONFFILE="/app/resources/ci.application.yml"
 
 if [ $DB_MIGRATION -eq 1 ]; then
   echo "Migrating the database"
-  eval java ${JVM_FLAGS} ${JAVA_CLASSES} db migrate ${CONFFILE}
+  eval java ${JAVA_CLASSES} db migrate ${CONFFILE}
 fi
 
 if [ "$DEBUG_MODE" = "true" ]; then
@@ -30,7 +30,7 @@ else
     DEBUG_FLAGS=""
 fi
 
-CMDLINE="java ${JVM_FLAGS} ${DEBUG_FLAGS} ${JACOCO} ${NR_AGENT} ${JAVA_CLASSES}"
+CMDLINE="java ${DEBUG_FLAGS} ${JACOCO} ${NR_AGENT} ${JAVA_CLASSES}"
 
 echo "Running server via entrypoint!"
 

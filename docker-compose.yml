@@ -60,7 +60,7 @@ services:
       - ENV=local
       - JACOCO=${REPORT_COVERAGE}
       - EXPORT_PATH=/app/data
-      - JVM_FLAGS=-DauthenticationDisabled=${AUTH_DISABLED:-false}
+      - AUTH_DISABLED=${AUTH_DISABLED:-false}
       - DEBUG_MODE=${DEBUG_MODE:-false}
     depends_on:
       - attribution
