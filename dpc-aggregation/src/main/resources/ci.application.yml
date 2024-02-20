@@ -77,7 +77,7 @@ exportPath: ${EXPORT_PATH:-"/app/data"}
 
 # Lookback Settings
 # The number of months to look back for a claim
-lookBackMonths: ${LOOK_BACK_MONTHS:--1}
+lookBackMonths: ${LOOK_BACK_MONTHS:-18}
 lookBackExemptOrgs: ${LOOK_BACK_EXEMPT_ORGS:-["0ab352f1-2bf1-44c4-aa7a-3004a1ffef12","69c0d4d4-9c07-4fa8-9053-e10fb1608b48","c7f5247b-4c41-478c-84eb-a6e801bdb145"]}
 
 # The date to start looking back from
