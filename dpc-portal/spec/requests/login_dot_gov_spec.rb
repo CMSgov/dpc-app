@@ -38,14 +38,6 @@ RSpec.describe 'LoginDotGov', type: :request do
         follow_redirect!
       end.to change { User.count }.by(0)
     end
-
-    it 'saves hashed ssn in session' do
-      post '/users/auth/openid_connect'
-      follow_redirect!
-      expect(cookies[:ao_id]).to_not be_blank
-      jar = ActionDispatch::Cookies::CookieJar.build(request, cookies.to_hash)
-      expect(jar.signed.encrypted[:ao_id]).to eq(Digest::SHA2.new(256).hexdigest('123'))
-    end
   end
 
   describe 'Get /users/auth/failure' do

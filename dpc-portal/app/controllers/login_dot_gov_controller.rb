@@ -9,7 +9,6 @@ class LoginDotGovController < Devise::OmniauthCallbacksController
     user = User.find_or_create_by(provider: auth.provider, uid: auth.uid) do |user_to_create|
       assign_user_properties(user_to_create, auth)
     end
-    ssn_cookie(auth.extra.raw_info.social_security_number)
     sign_in(:user, user)
   end
 
@@ -29,16 +28,8 @@ class LoginDotGovController < Devise::OmniauthCallbacksController
     user.email = auth.info.email
     user.given_name = auth.extra.raw_info.given_name
     user.family_name = auth.extra.raw_info.family_name
+    # Assign random, acceptable password to keep Devise happy.
+    # User should log in only through IdP
     user.password = user.password_confirmation = Devise.friendly_token[0, 20]
-  end
-
-  def ssn_cookie(ssn)
-    # We will be comparing against ssn in PECOS, which does not contain dashes
-    hex = Digest::SHA2.new(256).hexdigest(ssn.tr('^0-9', ''))
-    cookies.signed.encrypted[:ao_id] = {
-      value: hex,
-      http_only: true,
-      expires: 30.minutes
-    }
   end
 end
