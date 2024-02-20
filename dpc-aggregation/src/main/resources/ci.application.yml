@@ -67,7 +67,7 @@ bbclient:
   r4Configuration:
     serverBaseUrl: ${BFD_URL_V2}
 
-  useBfdMock: ${USE_BFD_MOCK:-true}
+  useBfdMock: ${USE_BFD_MOCK:-false}
 
 consentServiceUrl: "http://consent:3600/v1/"
 

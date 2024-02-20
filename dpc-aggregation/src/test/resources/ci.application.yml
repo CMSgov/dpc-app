@@ -1,17 +1,17 @@
 database:
   driverClass: org.postgresql.Driver
-  url: "jdbc:postgresql://localhost:5432/dpc_attribution"  # TODO: dropwizard - set based on ENV
-  user: postgres
-  password: dpc-safe
+  url: ${DATABASE_URL:-"jdbc:postgresql://localhost:5432/dpc_attribution"}
+  user: ${ATTRIBUTION_DB_USER:-postgres}
+  password: ${ATTRIBUTION_DB_PASS:-dpc-safe}
   initialSize: 5
   minSize: 5
   maxSize: 10
 
 queuedb:
   driverClass: org.postgresql.Driver
-  url: "jdbc:postgresql://localhost:5432/dpc_queue"  # TODO: dropwizard - set based on ENV
-  user: postgres
-  password: dpc-safe
+  url: ${QUEUE_DB_URL:-"jdbc:postgresql://localhost:5432/dpc_queue"}
+  user: ${QUEUE_DB_USER:-postgres}
+  password: ${QUEUE_DB_PASS:-dpc-safe}
   initialSize: 5
   minSize: 5
   maxSize: 10

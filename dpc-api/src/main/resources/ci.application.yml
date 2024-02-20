@@ -53,7 +53,8 @@ logging:
 
 jobTimeoutInSeconds: ${JOB_TIMEOUT_IN_SECONDS:-60}
 
-publicURL: "http://localhost:3002" # The root URL at which the application is accessible, if necessary, include the port, do not include the application version
+# The root URL at which the application is accessible, if necessary, include the port, do not include the application version
+publicURL: ${PUBLIC_URL:-"http://localhost:3002"}
 
 authdb:
   driverClass: org.postgresql.Driver
