@@ -28,14 +28,14 @@ RSpec.describe CdInvitation, type: :model do
     expect(valid_cd_invite.errors[:family_name]).to eq ["can't be blank"]
   end
 
-  it 'fails on fewer-than-nine digits in phone' do
+  it 'fails on fewer than ten digits in phone' do
     valid_cd_invite.phone_raw = '877-288-313'
     expect(valid_cd_invite.valid?).to eq false
     expect(valid_cd_invite.errors.size).to eq 1
     expect(valid_cd_invite.errors[:phone]).to eq ['is invalid']
   end
 
-  it 'fails on more-than-nine digits in phone' do
+  it 'fails on more than ten digits in phone' do
     valid_cd_invite.phone_raw = '877-288-31333'
     expect(valid_cd_invite.valid?).to eq false
     expect(valid_cd_invite.errors.size).to eq 1
