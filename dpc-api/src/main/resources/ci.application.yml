@@ -83,8 +83,8 @@ bbclient:
 
 authenticationDisabled: ${AUTH_DISABLED:-false}
 
-attributionURL: {ATTRIBUTION_URL:-"http://localhost:3500/v1/"}
-exportPath: {EXPORT_PATH:-"/tmp"}
+attributionURL: ${ATTRIBUTION_URL:-"http://localhost:3500/v1/"}
+exportPath: ${EXPORT_PATH:-"/tmp"}
 
 httpClient:
   timeout: 5s
