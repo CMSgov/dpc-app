@@ -50,9 +50,9 @@ logging:
       discardingThreshold: 0
 
 # TODO: dropwizard - figure out dropwizard-swagger
-#swagger:
-#  title: "DPC Consent Service"
-#  resourcePackage: gov.cms.dpc.consent.resources
+swagger:
+  resourcePackage: gov.cms.dpc.consent.resources
+  title: "DPC Consent Service"
 
 suppressionFileDir: "/dpc/in/1800"
 

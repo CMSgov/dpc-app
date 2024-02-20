@@ -6,6 +6,7 @@ import gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration;
 import gov.cms.dpc.fhir.configuration.IDPCFHIRConfiguration;
 import io.dropwizard.Configuration;
 import io.dropwizard.db.DataSourceFactory;
+import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
@@ -25,6 +26,9 @@ public class DPCConsentConfiguration extends Configuration implements IDPCConsen
     @NotNull
     @JsonProperty("fhir")
     private DPCFHIRConfiguration fhirConfig;
+
+    @JsonProperty("swagger")
+    private SwaggerBundleConfiguration swaggerBundleConfiguration;
 
     @NotEmpty
     private String fhirReferenceURL;
@@ -46,6 +50,14 @@ public class DPCConsentConfiguration extends Configuration implements IDPCConsen
     @Override
     public void setFHIRConfiguration(DPCFHIRConfiguration fhirConfig) {
         this.fhirConfig = fhirConfig;
+    }
+
+    public SwaggerBundleConfiguration getSwaggerBundleConfiguration() {
+        return swaggerBundleConfiguration;
+    }
+
+    public void setSwaggerBundleConfiguration(SwaggerBundleConfiguration swaggerBundleConfiguration) {
+        this.swaggerBundleConfiguration = swaggerBundleConfiguration;
     }
 
     public String getFhirReferenceURL() {

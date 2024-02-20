@@ -15,6 +15,8 @@ import io.dropwizard.db.PooledDataSourceFactory;
 import io.dropwizard.migrations.MigrationsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
+import io.federecio.dropwizard.swagger.SwaggerBundle;
+import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 import liquibase.exception.DatabaseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,6 +70,13 @@ public class DPCConsentService extends Application<DPCConsentConfiguration> {
                 return "consent.migrations.xml";
             }
         });
+        bootstrap.addBundle(new SwaggerBundle<>() {
+            @Override
+            protected SwaggerBundleConfiguration getSwaggerBundleConfiguration(DPCConsentConfiguration dpcConsentConfiguration) {
+                return dpcConsentConfiguration.getSwaggerBundleConfiguration();
+            }
+        });
+
         bootstrap.addCommand(new SeedCommand(bootstrap.getApplication()));
         bootstrap.addCommand(new ConsentCommands());
     }
