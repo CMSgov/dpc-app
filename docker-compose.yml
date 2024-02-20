@@ -75,7 +75,6 @@ services:
     environment:
       - ENV=local
       - JACOCO=${REPORT_COVERAGE}
-      - JVM_FLAGS=-DauthenticationDisabled=${AUTH_DISABLED:-false}
       - DEBUG_MODE=${DEBUG_MODE:-false}
     ports:
       - "3600:3600"
