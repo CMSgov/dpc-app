@@ -49,7 +49,6 @@ logging:
       # While nice from a performance standpoint, we must ensure full audit capability of the application
       discardingThreshold: 0
 
-# TODO: dropwizard - figure out dropwizard-swagger
 swagger:
   resourcePackage: gov.cms.dpc.consent.resources
   title: "DPC Consent Service"

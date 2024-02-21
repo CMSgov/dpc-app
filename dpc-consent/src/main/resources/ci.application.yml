@@ -1,6 +1,6 @@
 consentdb:
   driverClass: org.postgresql.Driver
-  url: ${CONSENT_DB_URL:-"jdbc:postgresql://db:5432/dpc_consent"}  # TODO: dropwizard - set based on ENV
+  url: ${CONSENT_DB_URL:-"jdbc:postgresql://db:5432/dpc_consent"}
   user: ${CONSENT_DB_USER:-postgres}
   password: ${CONSENT_DB_PASS:-dpc-safe}
   initialSize: 5
@@ -38,7 +38,6 @@ logging:
       # While nice from a performance standpoint, we must ensure full audit capability of the application
       discardingThreshold: 0
 
-# TODO: dropwizard - figure out dropwizard-swagger
 swagger:
   resourcePackage: gov.cms.dpc.consent.resources
   title: "DPC Consent Service"
@@ -46,7 +45,7 @@ swagger:
 suppressionFileDir: "/dpc/in/1800"
 
 # base URL for FHIR references to DPC resources (Patients, Organizations, etc) embedded in a Consent resource
-fhirReferenceURL: "http://localhost:3200/api/v1"
+fhirReferenceURL: ${FHIR_REFERENCE_URL:-"http://localhost:3200/api/v1"}
 
 # Disable FHIR validation
 fhir:
