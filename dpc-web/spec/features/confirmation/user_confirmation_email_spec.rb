@@ -25,7 +25,7 @@ RSpec.feature 'user resends confirmation instructions' do
 
       visit confirmation_link
 
-      expect(page.body).to include("Welcome, #{user.first_name}!")
+      expect(page.body).to include('Welcome!')
     end
   end
 
