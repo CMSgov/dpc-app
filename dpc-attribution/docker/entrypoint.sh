@@ -16,6 +16,11 @@ else
     NR_AGENT=""
 fi
 
+set -o allexport
+# shellcheck source=/dev/null
+. "/app/resources/${ENV:-local}.application.conf"
+set +o allexport
+
 CONFFILE="/app/resources/ci.application.yml"
 
 if [ $DB_MIGRATION -eq 1 ]; then
