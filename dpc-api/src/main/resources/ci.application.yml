@@ -1,6 +1,6 @@
 database:
   driverClass: org.postgresql.Driver
-  url: ${DATABASE_URL:-"jdbc:postgresql://db:5432/dpc_attribution"}  # TODO: dropwizard - set based on ENV
+  url: ${DATABASE_URL:-"jdbc:postgresql://db:5432/dpc_attribution"}
   user: ${ATTRIBUTION_DB_USER:-postgres}
   password: ${ATTRIBUTION_DB_PASS:-dpc-safe}
   initialSize: 5
@@ -12,7 +12,7 @@ database:
 
 queuedb:
   driverClass: org.postgresql.Driver
-  url: ${QUEUE_DB_URL:-"jdbc:postgresql://db:5432/dpc_queue"}  # TODO: dropwizard - set based on ENV
+  url: ${QUEUE_DB_URL:-"jdbc:postgresql://db:5432/dpc_queue"}
   user: ${QUEUE_DB_USER:-postgres}
   password: ${QUEUE_DB_PASS:-dpc-safe}
   initialSize: 5
@@ -22,6 +22,7 @@ queuedb:
 server:
   enableThreadNameFilter: false
   registerDefaultExceptionMappers: false
+  applicationContextPath: ${APP_CONTEXT_PATH:-"/"}
   applicationConnectors:
     - type: http
       port: 3002
@@ -58,7 +59,7 @@ publicURL: ${PUBLIC_URL:-"http://localhost:3002"}
 
 authdb:
   driverClass: org.postgresql.Driver
-  url: "jdbc:postgresql://db:5432/dpc_auth"
+  url: ${AUTH_DB_URL:-"jdbc:postgresql://db:5432/dpc_auth"}
   user: ${AUTH_DB_USER:-postgres}
   password: ${AUTH_DB_PASS:-dpc-safe}
   initialSize: 5
