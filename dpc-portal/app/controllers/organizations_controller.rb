@@ -10,7 +10,11 @@ class OrganizationsController < ApplicationController
   end
 
   def show
-    render(Page::Organization::ShowComponent.new(@organization))
+    if params[:ao]
+      render(Page::CredentialDelegate::ListComponent.new(@organization, []))
+    else
+      render(Page::Organization::ShowComponent.new(@organization))
+    end
   end
 
   private
