@@ -22,7 +22,7 @@ public abstract class AbstractConsentTest {
     protected FhirContext ctx = FhirContext.forDstu3();
 
     @BeforeAll
-    public static void setup() throws Exception {
+    public static void initDB() throws Exception {
         APPLICATION.before();
         SharedConfigurationState.clear();
         APPLICATION.getApplication().run("db", "migrate", configPath);
