@@ -14,7 +14,10 @@ import gov.cms.dpc.testing.BufferedLoggerHandler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.Constructor;
 
+import java.io.InputStream;
 import java.security.SecureRandom;
 import java.util.Collections;
 
@@ -46,6 +49,8 @@ class BakeryTests {
     }
 
     private TokenPolicy generateTokenPolicy() {
-        return TokenPolicy.buildTokenPolicy(1, 2, 1, "YEARS");
+        Yaml yaml = new Yaml(new Constructor(TokenPolicy.class));
+        InputStream stream = this.getClass().getClassLoader().getResourceAsStream("token_policy.yml");
+        return yaml.load(stream);
     }
 }

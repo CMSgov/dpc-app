@@ -18,20 +18,6 @@ public class TokenPolicy {
         // JacksonRequired
     }
 
-    // constructor for testing purposes
-    public static TokenPolicy buildTokenPolicy(int minimumVersion, int currentVersion, int expirationOffset, String expirationUnit) {
-        TokenPolicy tokenPolicy = new TokenPolicy();
-        TokenPolicy.VersionPolicy versionPolicy = new TokenPolicy.VersionPolicy();
-        versionPolicy.setMinimumVersion(minimumVersion);
-        versionPolicy.setCurrentVersion(currentVersion);
-        tokenPolicy.setVersionPolicy(versionPolicy);
-        TokenPolicy.ExpirationPolicy expirationPolicy = new TokenPolicy.ExpirationPolicy();
-        expirationPolicy.setExpirationOffset(expirationOffset);
-        expirationPolicy.setExpirationUnit(expirationUnit);
-        tokenPolicy.setExpirationPolicy(expirationPolicy);
-        return tokenPolicy;
-    }
-
     public VersionPolicy getVersionPolicy() {
         return versionPolicy;
     }
