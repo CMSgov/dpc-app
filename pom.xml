@@ -187,11 +187,6 @@
                     </exclusion>
                 </exclusions>
             </dependency>
-            <dependency>
-                <groupId>com.typesafe</groupId>
-                <artifactId>config</artifactId>
-                <version>1.4.2</version>
-            </dependency>
             <!--Locking this dependency version to the one provided by Dropwizard, we'll need to manually update it as we go along-->
             <dependency>
                 <groupId>org.hibernate</groupId>
