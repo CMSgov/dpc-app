@@ -43,7 +43,7 @@
     <%= render(Core::Modal::ModalComponent.new(
         'Are you sure?',
         'Messaging for AO Invite agreement',
-        link_to("Yes, assign CD", "#", class: "usa-button", onclick: "document.getElementById('cd-form').submit();"),
+        submit_tag("Yes, assign CD", class: "usa-button", form: "cd-form"),
         'No, go back',
         'verify-modal')) %>
   </div>
