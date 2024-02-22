@@ -35,12 +35,6 @@ set -o allexport
 . "/app/resources/${ENV:-local}.application.conf"
 set +o allexport
 
-if [ "$ENV" = "local" ]; then
-    CONF_FLAGS="-Ddw.queue.singleServerConfig.address=redis://redis:6379"
-else
-    CONF_FLAGS=""
-fi
-
 CONF_FILE="/app/resources/ci.application.yml"
 
 if [ $DB_MIGRATION -eq 1 ]; then
