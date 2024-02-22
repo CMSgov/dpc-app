@@ -14,7 +14,7 @@
             </div>
             <div id="status_div" style="float:right">
                 <p class="usa-card__text">
-                    <%= render Core::Button::ButtonComponent.new(label: 'View Details', destination: organization_path(@api_id))%>
+                    <%= render Core::Button::ButtonComponent.new(label: 'View Details', destination: organization_path(@api_id), additional_class: 'usa-button--outline') %>
                 </p>
             </div>
         </div>

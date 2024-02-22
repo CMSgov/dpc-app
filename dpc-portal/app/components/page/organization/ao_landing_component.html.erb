@@ -1,0 +1,28 @@
+<div>
+  <div class="margin-bottom-5">&larr; link</div>
+  <%= render Core::Prose::ProseComponent.new() do%>
+    <h1>Welcome to the DPC Portal</h1>
+    <p style="max-width: none">As an Authorized Official (AO), use this portal to manage access to Medicare claims data through the Data at the Point of Care (DPC) application programming interface (API)</p>
+    <div class="display-flex flex-row flex-justify">
+      <div class="flex-align-self-center">
+        <h2>My organizations</h2>
+      </div>
+      <div class="flex-align-self-center">
+        <%= render Core::Button::ButtonComponent.new(label: 'Add new organization', destination: root_path)%>
+      </div>
+    </div>
+    <p style="max-width: none">These are organizations for which you serve as an AO. Organizations cannot access Medicare claims data without an AO agreement to follow terms of service.</p>
+    <% if @organizations.blank?%>
+        <p>You don't have any organizations to show.</p>
+    <% else %>
+        <ul class="usa-card-group">
+            <% @organizations.each do |organization| %>
+                <%= render Core::Card::OrganizationCardComponent.new(organization: organization)%>
+            <% end %>
+        </ul>
+    <% end %>
+  <% end %>
+    <div class="margin-top-5">
+        <%= link_to 'Return home', root_path, class: ['usa-button', 'usa-button--outline'] %>
+    </div>
+</div>
