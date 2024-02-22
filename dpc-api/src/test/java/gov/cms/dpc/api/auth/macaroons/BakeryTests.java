@@ -17,6 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 
+import java.io.InputStream;
 import java.security.SecureRandom;
 import java.util.Collections;
 
@@ -49,6 +50,7 @@ class BakeryTests {
 
     private TokenPolicy generateTokenPolicy() {
         Yaml yaml = new Yaml(new Constructor(TokenPolicy.class));
-        return yaml.load(BakeryTests.class.getClassLoader().getResourceAsStream("token_policy.yml"));
+        InputStream stream = this.getClass().getClassLoader().getResourceAsStream("token_policy.yml");
+        return yaml.load(stream);
     }
 }

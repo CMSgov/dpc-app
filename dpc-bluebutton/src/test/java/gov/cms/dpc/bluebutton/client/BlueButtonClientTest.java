@@ -2,9 +2,13 @@ package gov.cms.dpc.bluebutton.client;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Stage;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
+import com.typesafe.config.ConfigRenderOptions;
 import gov.cms.dpc.bluebutton.BlueButtonClientModule;
 import gov.cms.dpc.bluebutton.config.BBClientConfiguration;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
@@ -25,8 +29,6 @@ import org.mockserver.matchers.Times;
 import org.mockserver.model.Header;
 import org.mockserver.model.HttpRequest;
 import org.mockserver.model.Parameter;
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.Constructor;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -62,9 +64,11 @@ class BlueButtonClientTest {
 
     private static BlueButtonClient bbc;
     private static ClientAndServer mockServer;
+    private static Config conf;
 
     @BeforeAll
     static void setupBlueButtonClient() throws IOException {
+        conf = getTestConfig();
         final Injector injector = Guice.createInjector(Stage.DEVELOPMENT, new TestModule(), new BlueButtonClientModule<>(getClientConfig()));
         bbc = injector.getInstance(BlueButtonClient.class);
 
@@ -327,8 +331,17 @@ class BlueButtonClientTest {
     }
 
     private static BBClientConfiguration getClientConfig() {
-        Yaml yaml = new Yaml(new Constructor(BBClientConfiguration.class));
-        return yaml.load(BlueButtonClientTest.class.getClassLoader().getResourceAsStream("test.application.yml"));
+        final String options = getTestConfig().getConfig("bbclient").root().render(ConfigRenderOptions.concise());
+
+        try {
+            return new ObjectMapper().readValue(options, BBClientConfiguration.class);
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    private static Config getTestConfig() {
+        return ConfigFactory.load("test.application.conf");
     }
 
     private static String getRawXML(String path) throws IOException {
