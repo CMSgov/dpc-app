@@ -108,3 +108,7 @@ tokens:
     expirationUnit: "YEARS"
 
 keyPairLocation: ${BAKERY_KEYPAIR_LOCATION:-"/bakery_keypair.json"}
+
+queue:
+  singleServerConfig:
+    address: "redis://redis:6379"
