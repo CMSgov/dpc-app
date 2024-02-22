@@ -1,0 +1,31 @@
+<div class="usa-modal" id="<%= modal_id %>" aria-labelledby="<%= modal_id %>-heading" aria-describedby="<%= modal_id %>-description">
+  <div class="usa-modal__content">
+    <div class="usa-modal__main">
+      <h2 class="usa-modal__heading" id="<%= modal_id %>-heading">
+        <%= raw heading %>
+      </h2>
+      <div class="usa-prose">
+        <p id="<%= modal_id %>-description">
+          <%= raw description %>
+        </p>
+      </div>
+      <div class="usa-modal__footer">
+        <ul class="usa-button-group">
+          <li class="usa-button-group__item">
+            <%= raw yes_action %>
+          </li>
+          <li class="usa-button-group__item">
+            <button type="button" class="usa-button usa-button--unstyled padding-105 text-center" data-close-modal>
+              <%= raw no_message %>
+            </button>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <button type="button" class="usa-button usa-modal__close" aria-label="Close this window" data-close-modal>
+      <svg class="usa-icon" aria-hidden="true" focusable="false" role="img">
+        <use xlink:href="/assets/img/sprite.svg#close"></use>
+      </svg>
+    </button>
+  </div>
+</div>

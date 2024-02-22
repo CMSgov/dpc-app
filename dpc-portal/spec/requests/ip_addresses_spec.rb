@@ -5,7 +5,17 @@ require 'rails_helper'
 RSpec.describe 'IpAddresses', type: :request do
   include DpcClientSupport
 
+  describe 'GET /new not logged in' do
+    it 'redirects to login' do
+      get '/organizations/no-such-id/ip_addresses/new'
+      expect(response).to redirect_to('/portal/users/sign_in')
+    end
+  end
+
   describe 'GET /new' do
+    let!(:user) { create(:user) }
+    before { sign_in user }
+
     it 'returns success' do
       api_id = SecureRandom.uuid
       stub_api_client(message: :get_organization,
@@ -16,7 +26,17 @@ RSpec.describe 'IpAddresses', type: :request do
     end
   end
 
+  describe 'Post /create not logged in' do
+    it 'redirects to login' do
+      post '/organizations/no-such-id/ip_addresses'
+      expect(response).to redirect_to('/portal/users/sign_in')
+    end
+  end
+
   describe 'POST /create' do
+    let!(:user) { create(:user) }
+    before { sign_in user }
+
     it 'succeeds with valid params' do
       org_api_id = SecureRandom.uuid
       api_client = stub_api_client(message: :get_organization,
@@ -75,7 +95,17 @@ RSpec.describe 'IpAddresses', type: :request do
     end
   end
 
+  describe 'Delete /destroy not logged in' do
+    it 'redirects to login' do
+      delete '/organizations/no-such-id/ip_addresses/no-such-id'
+      expect(response).to redirect_to('/portal/users/sign_in')
+    end
+  end
+
   describe 'DELETE /destroy' do
+    let!(:user) { create(:user) }
+    before { sign_in user }
+
     it 'flashes success if succeeds' do
       org_api_id = SecureRandom.uuid
       addr_guid = SecureRandom.uuid
