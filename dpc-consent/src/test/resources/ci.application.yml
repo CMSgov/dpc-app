@@ -56,7 +56,7 @@ swagger:
 suppressionFileDir: "/dpc/in/1800"
 
 # base URL for FHIR references to DPC resources (Patients, Organizations, etc) embedded in a Consent resource
-fhirReferenceURL: "http://localhost:3200/api/v1"
+fhirReferenceURL: ${FHIR_REFERENCE_URL:-"http://localhost:3200/api/v1"}
 
 # Disable FHIR validation
 fhir:
