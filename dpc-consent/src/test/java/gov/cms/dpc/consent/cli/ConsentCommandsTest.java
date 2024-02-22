@@ -32,7 +32,7 @@ class ConsentCommandsTest {
     private static final DPCConsentService app = new DPCConsentService();
     private static final Bootstrap<DPCConsentConfiguration> bs = setupBootstrap(app);
 
-    private static final String configPath = "src/test/resources/ci.application.yml";
+    private static final String configPath = "src/test/resources/test.application.yml";
 
     private Cli cli;
 
