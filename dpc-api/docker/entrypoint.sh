@@ -36,7 +36,7 @@ set -o allexport
 set +o allexport
 
 if [ "$ENV" = "local" ]; then
-    CONF_FLAGS="-Dqueue.singleServerConfig.address=redis://redis:6379"
+    CONF_FLAGS="-Ddw.queue.singleServerConfig.address=redis://redis:6379"
 else
     CONF_FLAGS=""
 fi
