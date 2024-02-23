@@ -72,8 +72,8 @@ bbclient:
 
   serverBaseUrl: ${BFD_URL}
   resourcesCount: 100 # Max number of resource that a request to BB will return before using another request
-  bfdHashIter: ${BFD_HASH_ITER}
-  bfdHashPepper: ${BFD_HASH_PEPPER}
+  bfdHashIter: ${BFD_HASH_ITER:-1000}
+  bfdHashPepper: ${BFD_HASH_PEPPER:-6E6F747468657265616C706570706572} # Not a real pepper. Used by BB for testing: https://github.com/CMSgov/bluebutton-ansible-playbooks-data-sandbox/blob/master/etl_server_redeploy.yml#L151
 
   r4Configuration:
     serverBaseUrl: ${BFD_URL_V2}
