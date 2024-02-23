@@ -14,7 +14,7 @@ server:
   registerDefaultExceptionMappers: false
   applicationConnectors:
     - type: http
-      port: 8080
+      port: 3002
   adminConnectors:
     - type: http
       port: 9900
