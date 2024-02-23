@@ -2,7 +2,7 @@
   <h1><%= @organization.name %></h1>
   <div class="margin-bottom-5">NPI: <%= @organization.npi %></div>
   <%= render(Core::Card::BasicComponent.new(text_content: '<h2>Credential delegates</h2>',
-    button_params: { name: 'Assign CD', path: new_organization_client_token_path(@organization.path_id), method: :get} )) do %>
+    button_params: { name: 'Assign CD', path: new_organization_credential_delegate_invitation_path(@organization.path_id), method: :get} )) do %>
       <hr />
       <p>A credential delegate (CD) manages secure API login information. You can assign anyone as a CD.</p>
       <div>
