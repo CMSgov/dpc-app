@@ -5,6 +5,7 @@ module Core
     # Render a USWDS-styled button.
     class ButtonComponent < ViewComponent::Base
       attr_accessor :label, :destination, :additional_class
+
       def initialize(label:, destination:, additional_class: nil)
         super
         @label = label

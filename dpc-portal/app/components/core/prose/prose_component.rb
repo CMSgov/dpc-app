@@ -1,11 +1,9 @@
 # frozen_string_literal: true
 
 module Core
-    module Prose
-      class ProseComponent < ViewComponent::Base
-        def initialize()
-          super
-        end
-      end
+  module Prose
+    # Render a USWDS-styled block of text.
+    class ProseComponent < ViewComponent::Base
     end
   end
+end
