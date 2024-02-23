@@ -2,5 +2,6 @@
 
 This directory will contain synthetic data in the format we expect to receive, which should be useful for testing, moving forward. 
 
-At present, all files were copied from https://github.com/CMSgov/bcda-app/tree/master/shared_files/synthetic1800MedicareFiles
+Current files:
 
+- P#EFT.ON.DPC.NGD.RSP.D240123.T1122001 -- Sample Response file. This is what we expect to receive from BFD.
