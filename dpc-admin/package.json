@@ -6,15 +6,16 @@
     "@cmsgov/design-system-layout": "^3.7.0",
     "@rails/activestorage": "^6.1.4",
     "@rails/ujs": "^6.1.4",
-    "@rails/webpacker": "5.4.3",
+    "jsrsasign": "^10.7.0",
+    "jsrsasign-util": "^1.0.5",
+    "jwt-decode": "^2.2.0",
     "normalize.css": "^8.0.1",
-    "ssri": "^6.0.2",
-    "svg4everybody": "^2.1.9",
-    "tar": "6.1.11",
-    "turbolinks": "^5.2.0"
+    "svg4everybody": "^2.1.9"
   },
-  "version": "0.1.0",
   "devDependencies": {
-    "webpack-dev-server": "^3.11.2"
+    "jest": "^26.4.0"
+  },
+  "scripts": {
+    "test": "jest"
   }
 }

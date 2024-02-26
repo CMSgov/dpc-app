@@ -237,7 +237,7 @@ RSpec.feature 'creating and updating organizations' do
   def stub_sandbox_notification_mailer(org, users=[])
     mailer = double(UserMailer)
     users.each do |user|
-      allow(UserMailer).to receive(:with).with(user: user, vendor: org.health_it_vendor?).and_return(mailer)
+      allow(UserMailer).to receive(:with).with(user:, vendor: org.health_it_vendor?).and_return(mailer)
     end
 
     allow(mailer).to receive(:organization_sandbox_email).and_return(mailer)

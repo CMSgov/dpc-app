@@ -17,11 +17,11 @@ RSpec.describe OrganizationUserAssignment, type: :model do
         user = create(:user)
 
         mailer = double(UserMailer)
-        allow(UserMailer).to receive(:with).with(user: user, vendor: false).and_return(mailer)
+        allow(UserMailer).to receive(:with).with(user:, vendor: false).and_return(mailer)
         allow(mailer).to receive(:organization_sandbox_email).and_return(mailer)
         allow(mailer).to receive(:deliver_later)
 
-        create(:organization_user_assignment, organization: org, user: user)
+        create(:organization_user_assignment, organization: org, user:)
 
         expect(UserMailer).to have_received(:with)
         expect(mailer).to have_received(:organization_sandbox_email)
@@ -58,7 +58,7 @@ RSpec.describe OrganizationUserAssignment, type: :model do
 
           allow(UserMailer).to receive(:with)
 
-          create(:organization_user_assignment, organization: org, user: user)
+          create(:organization_user_assignment, organization: org, user:)
 
           expect(UserMailer).not_to have_received(:with)
         end

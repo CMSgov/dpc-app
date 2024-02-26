@@ -4,7 +4,7 @@ class OrganizationsController < ApplicationController
   before_action :authenticate_internal_user!
 
   def index
-    results = BaseSearch.new(params: params, scope: params[:org_type]).results
+    results = BaseSearch.new(params:, scope: params[:org_type]).results
     @tags = Tag.all
 
     @organizations = org_page_params(results)
