@@ -37,7 +37,7 @@ type (
 
 func main() {
 	if isTesting {
-		filename := "T#EFT.ON.ACO.NGD1800.DPRF.D181120.T1000009"
+		filename := "P#EFT.ON.DPC.NGD.RSP.D240123.T1122001"
 		success, _ := importOptOutFile("demo-bucket", filename)
 		log.Println(success)
 	} else {

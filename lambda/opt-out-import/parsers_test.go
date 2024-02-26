@@ -6,9 +6,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/ianlopshire/go-fixedwidth"
 	giterr "github.com/pkg/errors"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestParseMetadata(t *testing.T) {
@@ -52,22 +52,22 @@ func TestParseRecord(t *testing.T) {
 	}
 
 	tests := []struct {
-		fileTime	time.Time
-		line		[]byte
-		metadata	*OptOutFilenameMetadata
-		unmarshaler	FileUnmarshaler
-		err			error
-	} {
+		fileTime    time.Time
+		line        []byte
+		metadata    *OptOutFilenameMetadata
+		unmarshaler FileUnmarshaler
+		err         error
+	}{
 		{
-			fileTime: fileTime,
-			line: line,
-			metadata: metadata,
+			fileTime:    fileTime,
+			line:        line,
+			metadata:    metadata,
 			unmarshaler: fixedwidth.Unmarshal,
-			err: nil,
+			err:         nil,
 		},
 		{
 			fileTime: fileTime,
-			line: line,
+			line:     line,
 			metadata: metadata,
 			unmarshaler: func(data []byte, v interface{}) error {
 				return errors.New("Unmarshaling failed")
@@ -80,7 +80,6 @@ func TestParseRecord(t *testing.T) {
 		suppression, err := ParseRecord(test.metadata, test.line, test.unmarshaler)
 		if err == nil {
 			assert.Equal(t, "5SJ0A00AA00", suppression.MBI)
-			assert.Equal(t, "1-800", suppression.SourceCode)
 			assert.Equal(t, Rejected, suppression.Status)
 		} else {
 			assert.Equal(t, test.err, giterr.Cause(err))

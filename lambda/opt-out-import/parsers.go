@@ -5,9 +5,9 @@ import (
 	"bytes"
 	"fmt"
 	"regexp"
-	"strconv"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/ianlopshire/go-fixedwidth"
 	"github.com/pkg/errors"
 )
@@ -60,29 +60,31 @@ func ParseConsentRecords(metadata *OptOutFilenameMetadata, b []byte) ([]*OptOutR
 }
 
 func ParseRecord(metadata *OptOutFilenameMetadata, b []byte, unmarshaler FileUnmarshaler) (*OptOutRecord, error) {
-	var record OptOutRecord
-	if err := unmarshaler(b, &record); err != nil {
+	var row ResponseFileRow
+	if err := unmarshaler(b, &row); err != nil {
 		return nil, errors.Wrapf(err, "failed to parse file: %s", metadata.FilePath)
 	}
-	record.Status = Rejected	// Default to rejected until we successfully process
 
-	var err error 
-	if record.EffectiveDt, err = ConvertDt(record.EffectiveDtString); err != nil {
-		err = errors.Wrapf(err, "failed to parse the effective date '%s' from file: %s", record.EffectiveDtString, metadata.FilePath)
-		return nil, err
+	policyCode, err := ConvertSharingPreference(row.SharingPreference)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to parse file: %s", metadata.FilePath)
 	}
-	if record.SAMHSAEffectiveDt, err = ConvertDt(record.SAMHSAEffectiveDtString); err != nil {
-		err = errors.Wrapf(err, "failed to parse the samhsa effective date '%s' from file: %s", record.SAMHSAEffectiveDtString, metadata.FilePath)
-		return nil, err
-	}
-	lk := record.BeneficiaryLinkKeyString
-	if lk == "" {
-		lk = "0"
-	}
-	if record.BeneficiaryLinkKey, err = strconv.Atoi(lk); err != nil {
-		err = errors.Wrapf(err, "failed to parse beneficiary link key from file: %s", metadata.FilePath)
-		return nil, err
+
+	record := OptOutRecord{
+		ID:         uuid.New().String(),
+		MBI:        row.MBI,
+		PolicyCode: policyCode,
 	}
 
 	return &record, nil
+}
+
+func ConvertSharingPreference(pref string) (string, error) {
+	if pref == "Y" {
+		return "OPTIN", nil
+	} else if pref == "N" {
+		return "OPTOUT", nil
+	} else {
+		return "", errors.New(fmt.Sprintf("Unexpected value %s for sharing preference.", pref))
+	}
 }
