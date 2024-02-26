@@ -1,7 +1,7 @@
 PATH
   remote: vendor/api_client
   specs:
-    api_client (0.1.1)
+    api_client (0.2.0)
       active_model_serializers
       activemodel (~> 7.0.8.1)
       fhir_client
@@ -586,7 +586,7 @@ DEPENDENCIES
   webmock
 
 RUBY VERSION
-   ruby 3.0.6p216
+   ruby 3.3.0p0
 
 BUNDLED WITH
    2.5.6

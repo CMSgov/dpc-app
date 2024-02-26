@@ -20,6 +20,8 @@ services:
 
     environment:
       - REDIS_URL=redis://redis
+      - GOLDEN_MACAROON=${GOLDEN_MACAROON}
+      - API_METADATA_URL=http://api:3002/v1
       - DATABASE_URL=postgresql://db/dpc-website_development
       - TEST_DATABASE_URL=postgresql://db/dpc-website_test
       - DB_USER=postgres
