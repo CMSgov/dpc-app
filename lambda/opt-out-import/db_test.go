@@ -227,7 +227,7 @@ func TestInsertConsentRecords_DatabaseError(t *testing.T) {
 	}
 
 	for _, res := range response {
-		fmt.Println(fmt.Printf("record %s: %s", res.ID, res.SourceCode))
+		fmt.Println(fmt.Printf("record %s", res.ID))
 	}
 	assert.EqualError(t, err, "insertConsentRecords: failed to insert to consent table: mock database error")
 	assert.Equal(t, 0, len(response))

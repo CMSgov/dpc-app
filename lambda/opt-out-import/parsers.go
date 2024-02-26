@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"fmt"
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -16,7 +17,7 @@ func ParseMetadata(bucket string, filename string) (OptOutFilenameMetadata, erro
 	var metadata OptOutFilenameMetadata
 	// Beneficiary Data Sharing Preferences File sent by 1-800-Medicare: P#EFT.ON.ACO.NGD1800.DPRF.Dyymmdd.Thhmmsst
 	// Prefix: T = test, P = prod;
-	filenameRegexp := regexp.MustCompile(`((P|T)\#EFT)\.ON\.ACO\.NGD1800\.DPRF\.(D\d{6}\.T\d{6})\d`)
+	filenameRegexp := regexp.MustCompile(`((P|T)\#EFT)\.ON\.DPC\.NGD\.RSP\.(D\d{6}\.T\d{6})\d`)
 	filenameMatches := filenameRegexp.FindStringSubmatch(filename)
 	if len(filenameMatches) < 4 {
 		err := fmt.Errorf("invalid filename for file: %s", filename)
@@ -44,7 +45,7 @@ func ParseConsentRecords(metadata *OptOutFilenameMetadata, b []byte) ([]*OptOutR
 	for scanner.Scan() {
 		bytes := scanner.Bytes()
 		// Do not parse header or footer rows
-		if len(bytes) == 459 {
+		if !strings.HasPrefix(string(bytes[:]), "HDR") && !strings.HasPrefix((string(bytes[:])), "TLR") {
 			record, err := ParseRecord(metadata, bytes, fixedwidth.Unmarshal)
 			if err != nil {
 				return records, fmt.Errorf("ParseConsentRecords: %w", err)

@@ -75,7 +75,7 @@ func insertConsentRecords(db *sql.DB, optOutFileId string, records []*OptOutReco
 	query := `INSERT INTO consent (id, mbi, effective_date, policy_code, loinc_code, opt_out_file_id, created_at, updated_at) 
 			  VALUES `
 	for i, rec := range records {
-		query += fmt.Sprintf("('%s', '%s', 'NOW()::date', %s, '64292-6', '%s', 'NOW()', 'NOW()')",
+		query += fmt.Sprintf("('%s', '%s', NOW()::date, '%s', '64292-6', '%s', 'NOW()', 'NOW()')",
 			rec.ID, rec.MBI, rec.PolicyCode, optOutFileId)
 		if i < len(records)-1 {
 			query += ", "
@@ -83,6 +83,7 @@ func insertConsentRecords(db *sql.DB, optOutFileId string, records []*OptOutReco
 			query += "\n"
 		}
 	}
+	print(query)
 	query += "RETURNING id, mbi, effective_date, opt_out_file_id"
 
 	rows, err := db.Query(query)

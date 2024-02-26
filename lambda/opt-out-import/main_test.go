@@ -108,11 +108,10 @@ func TestUploadResponseFile(t *testing.T) {
 			err:    nil,
 			record: []*OptOutRecord{
 				{
-					ID:               "Id",
-					OptOutFileID:     "FileId",
-					MBI:              "Mbi",
-					BeneficiaryFName: "Mike",
-					Status:           Accepted,
+					ID:           "Id",
+					OptOutFileID: "FileId",
+					MBI:          "Mbi",
+					Status:       Accepted,
 				},
 			},
 			uploader: func(input *s3manager.UploadInput, options ...func(*s3manager.Uploader)) (*s3manager.UploadOutput, error) {
@@ -129,11 +128,10 @@ func TestUploadResponseFile(t *testing.T) {
 			err:    errors.New("upload failed"),
 			record: []*OptOutRecord{
 				{
-					ID:               "Id",
-					OptOutFileID:     "FileId",
-					MBI:              "Mbi",
-					BeneficiaryFName: "Mike",
-					Status:           Accepted,
+					ID:           "Id",
+					OptOutFileID: "FileId",
+					MBI:          "Mbi",
+					Status:       Accepted,
 				},
 			},
 			uploader: func(input *s3manager.UploadInput, options ...func(*s3manager.Uploader)) (*s3manager.UploadOutput, error) {
@@ -150,11 +148,10 @@ func TestUploadResponseFile(t *testing.T) {
 			err:    errors.New("marshaling failed"),
 			record: []*OptOutRecord{
 				{
-					ID:               "Id",
-					OptOutFileID:     "FileId",
-					MBI:              "Mbi",
-					BeneficiaryFName: "Mike",
-					Status:           Accepted,
+					ID:           "Id",
+					OptOutFileID: "FileId",
+					MBI:          "Mbi",
+					Status:       Accepted,
 				},
 			},
 			uploader: func(input *s3manager.UploadInput, options ...func(*s3manager.Uploader)) (*s3manager.UploadOutput, error) {
