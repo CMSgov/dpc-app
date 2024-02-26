@@ -23,6 +23,9 @@ Rails.application.routes.draw do
     resources :client_tokens, only: [:new, :create, :destroy]
     resources :public_keys, only: [:new, :create, :destroy]
     resources :ip_addresses, only: [:new, :create, :destroy]
+    resources :credential_delegate_invitations, only: [:new, :create, :destroy] do
+      get 'success', on: :member
+    end
   end
 
   match '/download_snippet', to: 'public_keys#download_snippet', as: 'download_snippet', via: :post

@@ -5,7 +5,17 @@ require 'rails_helper'
 RSpec.describe 'Organizations', type: :request do
   include DpcClientSupport
 
+  describe 'GET /index not logged in' do
+    it 'redirects to login' do
+      get '/organizations'
+      expect(response).to redirect_to('/portal/users/sign_in')
+    end
+  end
+
   describe 'GET /index' do
+    let!(:user) { create(:user) }
+    before { sign_in user }
+
     it 'returns success' do
       api_id = SecureRandom.uuid
       stub_api_client(message: :get_organization,
@@ -14,7 +24,17 @@ RSpec.describe 'Organizations', type: :request do
     end
   end
 
+  describe 'GET /organizations/[organization_id] not logged in' do
+    it 'redirects to login' do
+      get '/organizations/no-such-id'
+      expect(response).to redirect_to('/portal/users/sign_in')
+    end
+  end
+
   describe 'GET /organizations/[organization_id]' do
+    let!(:user) { create(:user) }
+    before { sign_in user }
+
     it 'returns success' do
       api_id = SecureRandom.uuid
       stub_client(api_id)
