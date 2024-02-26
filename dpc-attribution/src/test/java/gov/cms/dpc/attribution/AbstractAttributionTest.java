@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import gov.cms.dpc.testing.IntegrationTest;
+import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.DropwizardTestSupport;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -26,7 +27,8 @@ public abstract class AbstractAttributionTest {
     private static final ObjectMapper mapper = new ObjectMapper();
 
     protected static final DropwizardTestSupport<DPCAttributionConfiguration> APPLICATION =
-            new DropwizardTestSupport<>(DPCAttributionService.class, configPath);
+            new DropwizardTestSupport<>(DPCAttributionService.class, configPath,
+                    ConfigOverride.config("server.applicationConnectors[0].port", "3727"));
 
     protected static final String ORGANIZATION_ID = "0c527d2e-2e8a-4808-b11d-0fa06baf8254";
 
