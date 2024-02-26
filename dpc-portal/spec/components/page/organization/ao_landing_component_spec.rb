@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe Page::Organization::OrganizationListComponent, type: :component do
+RSpec.describe Page::Organization::AoLandingComponent, type: :component do
   describe 'html' do
     subject(:html) do
       render_inline(component)
@@ -15,31 +15,42 @@ RSpec.describe Page::Organization::OrganizationListComponent, type: :component d
 
     context 'when has no options' do
       let(:component) { described_class.new(organizations: []) }
+      let(:html) do
+        <<~HTML
+          <div>
+            <div class="margin-bottom-5">&larr; link</div>
+            <div class="usa-prose">
+                <h1>Welcome to the DPC Portal</h1>
+                <p style="max-width: none">
+                As an Authorized Official (AO), use this portal to manage access to Medicare claims data
+                through the Data at the Point of Care (DPC) application programming interface (API)
+                </p>
+                <div class="display-flex flex-row flex-justify">
+                    <div class="flex-align-self-center">
+                    <h2>My organizations</h2>
+                    </div>
+                    <div class="flex-align-self-center">
+                        <form class="button_to" method="get" action="/portal/">
+                            <button class="usa-button " type="submit">Add new organization</button>
+                        </form>
+                    </div>
+                </div>
+                <p style="max-width: none">
+                These are organizations for which you serve as an AO.#{' '}
+                Organizations cannot access Medicare claims data without an AO agreement to follow terms of service.
+                </p>
+                <p>You don't have any organizations to show.</p>
+            </div>
+          </div>
+        HTML
+      end
 
       before do
         render_inline(component)
       end
 
-      it 'should have an empty org search' do
-        empty_org_search = <<~SELECT
-          <select class="usa-select" name="org_search_selection" id="org_search_selection" onchange="filterOrgName(this);">
-              <option value>Organization Name</option>
-          </select>
-        SELECT
-        is_expected.to include(normalize_space(empty_org_search))
-      end
-
-      it 'should have an empty npi search' do
-        empty_npi_search = <<~SELECT
-          <select class="usa-select" name="npi_search_selection" id="npi_search_selection" onchange="filterNpi(this);">
-              <option value>NPI</option>
-          </select>
-        SELECT
-        is_expected.to include(normalize_space(empty_npi_search))
-      end
-
-      it 'should have an empty org search combo box' do
-        is_expected.to include('<ul class="usa-card-group"></ul>')
+      it 'should have a no organization message' do
+        is_expected.to include(normalize_space(html))
       end
     end
 
@@ -51,7 +62,7 @@ RSpec.describe Page::Organization::OrganizationListComponent, type: :component d
         allow(org).to receive(:api_id).and_return('api')
         described_class.new(organizations: [org])
       end
-      let(:expected_html) do
+      let(:expected_card_html) do
         <<~HTML
           <ul class="usa-card-group">
               <li class="usa-card tablet-lg:grid-col-1 widescreen:grid-col-1" style="list-style:none; visibility:visible;" data-npi="npi" data-name="name">
@@ -84,28 +95,12 @@ RSpec.describe Page::Organization::OrganizationListComponent, type: :component d
         render_inline(component)
       end
 
-      it 'should have one org in search' do
-        empty_org_search = <<~SELECT
-          <select class="usa-select" name="org_search_selection" id="org_search_selection" onchange="filterOrgName(this);">
-              <option value>Organization Name</option>
-              <option value="name">name</option>
-          </select>
-        SELECT
-        is_expected.to include(normalize_space(empty_org_search))
-      end
-
-      it 'should have one npi in search' do
-        empty_npi_search = <<~SELECT
-          <select class="usa-select" name="npi_search_selection" id="npi_search_selection" onchange="filterNpi(this);">
-              <option value>NPI</option>
-              <option value="npi">npi</option>
-          </select>
-        SELECT
-        is_expected.to include(normalize_space(empty_npi_search))
-      end
-
       it 'should have one card in list' do
-        is_expected.to include(normalize_space(expected_html))
+        is_expected.to include(normalize_space(expected_card_html))
+      end
+
+      it 'should not show \'no organiztions to show message\'' do
+        is_expected.not_to include('<p>You don\'t have any organizations to show.</p>')
       end
     end
   end

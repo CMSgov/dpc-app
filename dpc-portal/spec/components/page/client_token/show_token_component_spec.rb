@@ -35,7 +35,7 @@ RSpec.describe Page::ClientToken::ShowTokenComponent, type: :component do
               </div>
             </div>
             <form class="button_to" method="get" action="http://test.host/portal/">
-              <button class="usa-button" type="submit">Return to portal</button>
+              <button class="usa-button " type="submit">Return to portal</button>
             </form>
           </div>
         </div>
