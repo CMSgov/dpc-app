@@ -1,7 +1,7 @@
 PATH
   remote: vendor/api_client
   specs:
-    api_client (0.1.1)
+    api_client (0.2.0)
       active_model_serializers
       activemodel (~> 7.0.8.1)
       fhir_client
@@ -271,6 +271,8 @@ GEM
     nokogiri (1.16.2)
       mini_portile2 (~> 2.8.2)
       racc (~> 1.4)
+    nokogiri (1.16.2-x86_64-darwin)
+      racc (~> 1.4)
     oauth2 (1.4.11)
       faraday (>= 0.17.3, < 3.0)
       jwt (>= 1.0, < 3.0)
@@ -521,7 +523,7 @@ DEPENDENCIES
   webmock (>= 3.13.0)
 
 RUBY VERSION
-   ruby 3.0.6p216
+   ruby 3.3.0p0
 
 BUNDLED WITH
    2.5.6
