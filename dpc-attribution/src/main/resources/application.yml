@@ -1,5 +1,3 @@
-publicServerURL: "https://dpc.cms.gov"
-
 database:
   driverClass: org.postgresql.Driver
   url: ${DATABASE_URL:-"jdbc:postgresql://db:5432/dpc_attribution"}
@@ -46,6 +44,8 @@ expirationThreshold: 90 # In days
 migrationEnabled: true
 sundial:
   annotated-jobs-package-name: gov.cms.dpc.attribution.jobs
+
+publicServerURL: "https://dpc.cms.gov"
 
 # Disable FHIR validation
 fhir:

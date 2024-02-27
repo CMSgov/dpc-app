@@ -18,10 +18,10 @@ fi
 
 set -o allexport
 # shellcheck source=/dev/null
-. "/app/resources/${ENV:-local}.application.conf"
+. "/app/resources/${ENV:-local}.application.env"
 set +o allexport
 
-CONF_FILE="/app/resources/ci.application.yml"
+CONF_FILE="/app/resources/application.yml"
 
 if [ $DB_MIGRATION -eq 1 ]; then
   echo "Migrating the database"
