@@ -287,7 +287,7 @@ When manually running the individual services, you'll need to ensure that there 
 * Set the `ENV` environment variable to `local` (which is the default when running under Docker).
 * Set `authenticationDisabled=true` in the config file (the default from the sample config file).   
 
-Next, start each service in a new terminal window, from within the the `dpc-app` root directory. 
+Next, start each service in a new terminal window, from within the `dpc-app` root directory. 
 
 ```bash
 java -jar dpc-attribution/target/dpc-attribution.jar server
