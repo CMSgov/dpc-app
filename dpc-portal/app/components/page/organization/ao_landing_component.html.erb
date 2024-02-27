@@ -16,9 +16,7 @@
         <p>You don't have any organizations to show.</p>
     <% else %>
         <ul class="usa-card-group">
-            <% @organizations.each do |organization| %>
-                <%= render Core::Card::OrganizationCardComponent.new(organization: organization)%>
-            <% end %>
+          <%= render(Core::Card::OrganizationCardComponent.with_collection(@organizations))%>
         </ul>
     <% end %>
   <% end %>

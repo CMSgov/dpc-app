@@ -70,7 +70,7 @@ RSpec.describe Page::Organization::OrganizationListComponent, type: :component d
                           </div>
                           <div id="status_div" style="float:right">
                               <p class="usa-card__text">
-                                  <form class="button_to" method="get" action="/portal/organizations/api"><button class="usa-button usa-button--outline" type="submit">View Details</button></form>
+                                  <form class="button_to" method="get" action="/portal/organizations/api"><button class="usa-button--outline usa-button" type="submit">View Details</button></form>
                               </p>
                           </div>
                       </div>

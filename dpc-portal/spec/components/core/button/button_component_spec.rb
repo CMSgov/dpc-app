@@ -13,7 +13,7 @@ RSpec.describe Core::Button::ButtonComponent, type: :component do
       let(:component) { described_class.new(label: 'label', destination: 'destination') }
       let(:expected_html) do
         <<~HTML
-          <form class="button_to" method="get" action="destination"><button class="usa-button " type="submit">label</button></form>
+          <form class="button_to" method="get" action="destination"><button class="usa-button" type="submit">label</button></form>
         HTML
       end
 
@@ -31,11 +31,11 @@ RSpec.describe Core::Button::ButtonComponent, type: :component do
       end
 
       let(:component) do
-        described_class.new(label: 'label', destination: 'destination', additional_class: 'usa-button--outline')
+        described_class.new(label: 'label', destination: 'destination', additional_classes: ['usa-button--outline'])
       end
       let(:expected_html) do
         <<~HTML
-          <form class="button_to" method="get" action="destination"><button class="usa-button usa-button--outline" type="submit">label</button></form>
+          <form class="button_to" method="get" action="destination"><button class="usa-button--outline usa-button" type="submit">label</button></form>
         HTML
       end
 
