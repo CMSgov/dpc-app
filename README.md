@@ -193,7 +193,7 @@ By default, the API components will attempt to connect to the `dpc_attribution`,
 
 All of these databases should be created automatically from the previous step. When the API applications start, migrations will run and initialize the databases with the correct tables and data. If this behavior is not desired, set an environment variable of `DB_MIGRATION=0`.
 
-Default settings can be overridden, either directly in the module configurations or via `local.application.conf` file in the project resources directory. 
+Default settings can be overridden, either directly in the module configurations or via `local.application.env` file in the project resources directory. 
 For example, modifying the `dpc-attribution` configuration:
 
 ```yaml
@@ -203,7 +203,7 @@ database:
   user: postgres
 ```
 
-**Note**: On startup, the services look for a local override file (local.application.conf) in the root of their *current* working directory. This can create an issue when running tests with IntelliJ. The default sets the working directory to be the module root, which means any local overrides are ignored.
+**Note**: On startup, the services look for a local override file (local.application.env) in the root of their *current* working directory. This can create an issue when running tests with IntelliJ. The default sets the working directory to be the module root, which means any local overrides are ignored.
 This can be fixed by setting the working directory to the project root, but needs to be done manually.
 
 ### There are two ways to build DPC:
@@ -295,11 +295,11 @@ java -jar dpc-aggregation/target/dpc-aggregation.jar server
 java -jar dpc-api/target/dpc-api.jar server
 ```
 
-By default, the services will attempt to load the `local.application.conf` file from the current execution directory. 
-This can be overridden by passing `ENV={dev,test,prod}`, which will load `{dev,test,prod}.application.conf` file from the service resources directory.
+By default, the services will attempt to load the `local.application.env` file from the current execution directory. 
+This can be overridden by passing `ENV={dev,test,prod}`, which will load `{dev,test,prod}.application.env` file from the service resources directory.
 
 **Note**: Manually specifying a config file will disable the normal configuration merging process. 
-This means that only the config variables directly specified in the file will be loaded, no other `application.conf` or `reference.conf` files will be processed. 
+This means that only the config variables directly specified in the file will be loaded, no other `application.env` files will be processed. 
 
 * You can check that the application is running by requesting the FHIR `CapabilitiesStatement` for the `dpc-api` service, which will return a JSON-formatted FHIR resource.
     ```bash
