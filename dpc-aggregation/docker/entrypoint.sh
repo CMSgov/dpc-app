@@ -29,10 +29,12 @@ else
     NR_AGENT=""
 fi
 
-set -o allexport
-# shellcheck source=/dev/null
-. "/app/resources/${ENV:-local}.application.env"
-set +o allexport
+if [ -n "$ENV" ]; then
+    set -o allexport
+    # shellcheck source=/dev/null
+    . "/app/resources/${ENV}.application.env"
+    set +o allexport
+fi
 
 CONF_FILE="/app/resources/application.yml"
 
