@@ -19,28 +19,26 @@ RSpec.describe Page::Organization::AoLandingComponent, type: :component do
         <<~HTML
           <div>
             <div class="margin-bottom-5">&larr; link</div>
-            <div class="usa-prose">
-                <h1>Welcome to the DPC Portal</h1>
-                <p style="max-width: none">
-                As an Authorized Official (AO), use this portal to manage access to Medicare claims data
-                through the Data at the Point of Care (DPC) application programming interface (API)
-                </p>
-                <div class="display-flex flex-row flex-justify">
-                    <div class="flex-align-self-center">
-                    <h2>My organizations</h2>
-                    </div>
-                    <div class="flex-align-self-center">
-                        <form class="button_to" method="get" action="/portal/">
-                            <button class="usa-button" type="submit">Add new organization</button>
-                        </form>
-                    </div>
+            <h1>Welcome to the DPC Portal</h1>
+            <p>
+            As an Authorized Official (AO), use this portal to manage access to Medicare claims data
+            through the Data at the Point of Care (DPC) application programming interface (API)
+            </p>
+            <div class="display-flex flex-row flex-justify">
+                <div class="flex-align-self-center">
+                <h2 class="margin-bottom-0">My organizations</h2>
                 </div>
-                <p style="max-width: none">
-                These are organizations for which you serve as an AO.#{' '}
-                Organizations cannot access Medicare claims data without an AO agreement to follow terms of service.
-                </p>
-                <p>You don't have any organizations to show.</p>
+                <div class="flex-align-self-center">
+                    <form class="button_to" method="get" action="/portal/">
+                        <button class="usa-button" type="submit">Add new organization</button>
+                    </form>
+                </div>
             </div>
+            <p>
+            These are organizations for which you serve as an AO.#{' '}
+            Organizations cannot access Medicare claims data without an AO agreement to follow terms of service.
+            </p>
+            <p>You don't have any organizations to show.</p>
           </div>
         HTML
       end

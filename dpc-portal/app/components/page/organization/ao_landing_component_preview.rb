@@ -2,13 +2,8 @@
 
 module Page
   module Organization
-    # OrganizationList
-    # ----------------
-    #
-    # [See at USWDS]
-    # https://designsystem.digital.gov/components/combo-box/
-    # https://designsystem.digital.gov/components/card/
-    #
+    # AoLanding
+    # Landing page for authorized officials, which shows a list of their organizations.
     class AoLandingComponentPreview < ViewComponent::Preview
       OrgStruct = Struct.new(:name, :npi, :api_id)
 
