@@ -7,6 +7,9 @@ database:
   initialSize: 5
   minSize: 5
   maxSize: 10
+  properties:
+    charSet: UTF-8
+    hibernate.dialect: org.hibernate.dialect.PostgreSQL10Dialect
 
 queuedb:
   driverClass: org.postgresql.Driver
