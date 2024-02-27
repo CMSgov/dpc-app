@@ -16,12 +16,11 @@ else
     NR_AGENT=""
 fi
 
-if [ -n "$ENV" ]; then
-    set -o allexport
-    # shellcheck source=/dev/null
-    . "/app/resources/${ENV}.application.env"
-    set +o allexport
-fi
+# set env vars for Dropwizard application
+set -o allexport
+# shellcheck source=/dev/null
+. "/app/resources/${ENV}.application.env"
+set +o allexport
 
 CONF_FILE="/app/resources/application.yml"
 
