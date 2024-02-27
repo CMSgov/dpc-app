@@ -125,11 +125,17 @@ func importOptOutFile(bucket string, file string) (bool, error) {
 		log.Info(fmt.Sprintf("ID: %s", rec.ID))
 	}
 
+	confirmationFile, err := generateConfirmationFile(true, records, fixedwidth.Marshal)
+	if err != nil {
+		log.Warning(fmt.Sprintf("Failed to generate confirmation file: %s", err))
+		return false, err
+	}
+
 	if sess, err := createSession(); err != nil {
 		log.Warning("Failed to create session for uploading response file")
 		return false, err
 	} else {
-		if err = uploadResponseFile(bucket, file+"_response", s3manager.NewUploader(sess).Upload, records, fixedwidth.Marshal); err != nil {
+		if err = uploadConfirmationFile(bucket, GenerateConfirmationFileName(), s3manager.NewUploader(sess).Upload, confirmationFile); err != nil {
 			log.Warning("Failed to write upload response file")
 			return false, err
 		}
@@ -183,16 +189,67 @@ func downloadS3File(bucket string, file string) ([]byte, error) {
 	return byte_arr, err
 }
 
-func uploadResponseFile(bucket string, file string, uploader S3Uploader, records []*OptOutRecord, marshaler FileMarshaler) error {
-	formattedRecords, err := marshaler(records)
-	if err != nil {
-		return err
+func generateConfirmationFile(successful bool, records []*OptOutRecord, marshaler FileMarshaler) ([]byte, error) {
+	fileCreationDate := time.Now().Format("20060102")
+	fileHeader := FileHeader{
+		HeaderCode:       "HDR_BENECONFIRM",
+		FileCreationDate: fileCreationDate,
 	}
 
-	_, err = uploader(&s3manager.UploadInput{
+	fileTrailer := FileTrailer{
+		TrailerCode:       "TLR_BENECONFIRM",
+		FileCreationDate:  fileCreationDate,
+		DetailRecordCount: fmt.Sprintf("%010d", len(records)),
+	}
+
+	var rows []ConfirmationFileRow
+	for _, record := range records {
+		sharingPreference := "N"
+		if record.PolicyCode == "OPTIN" {
+			sharingPreference = "Y"
+		}
+		recordStatus := "Accepted"
+		reasonCode := "00"
+		if !successful {
+			recordStatus = "Rejected"
+			reasonCode = "02"
+		}
+
+		row := ConfirmationFileRow{
+			MBI:               record.MBI,
+			EffectiveDate:     record.EffectiveDt.Format("20060102"),
+			SharingPreference: sharingPreference,
+			RecordStatus:      recordStatus,
+			ReasonCode:        reasonCode,
+		}
+
+		rows = append(rows, row)
+	}
+
+	formattedHeader, err := marshaler(fileHeader)
+	if err != nil {
+		return []byte{}, err
+	}
+	formattedHeader = append(formattedHeader, "\n"...)
+	formattedRows, err := marshaler(rows)
+	if err != nil {
+		return []byte{}, err
+	}
+	formattedRows = append(formattedRows, "\n"...)
+	formattedTrailer, err := marshaler(fileTrailer)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	output := append(formattedHeader, formattedRows...)
+	return append(output, formattedTrailer...), nil
+}
+
+func uploadConfirmationFile(bucket string, file string, uploader S3Uploader, confirmationFile []byte) error {
+	_, err := uploader(&s3manager.UploadInput{
 		Bucket: aws.String(bucket),
 		Key:    aws.String(file),
-		Body:   bytes.NewReader(formattedRecords),
+		Body:   bytes.NewReader(confirmationFile),
 	})
 	return err
 }

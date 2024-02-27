@@ -91,7 +91,7 @@ func TestDownloadS3File(t *testing.T) {
 
 }
 
-func TestUploadResponseFile(t *testing.T) {
+func TestUploadConfirmationFile(t *testing.T) {
 	tests := []struct {
 		name      string
 		bucket    string
@@ -165,7 +165,7 @@ func TestUploadResponseFile(t *testing.T) {
 
 	for _, test := range tests {
 		fmt.Printf("~~~ %s test\n", test.name)
-		err := uploadResponseFile(test.bucket, test.file, test.uploader, test.record, test.marshaler)
+		err := uploadConfirmationFile(test.bucket, test.file, test.uploader, test.record, test.marshaler)
 		assert.Equal(t, test.err, err)
 	}
 

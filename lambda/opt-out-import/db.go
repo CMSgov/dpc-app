@@ -83,7 +83,6 @@ func insertConsentRecords(db *sql.DB, optOutFileId string, records []*OptOutReco
 			query += "\n"
 		}
 	}
-	print(query)
 	query += "RETURNING id, mbi, effective_date, opt_out_file_id"
 
 	rows, err := db.Query(query)

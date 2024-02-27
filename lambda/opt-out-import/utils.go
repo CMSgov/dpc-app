@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"time"
 )
 
@@ -13,4 +14,9 @@ func ConvertDt(s string) (time.Time, error) {
 		return t, err
 	}
 	return t, nil
+}
+
+func GenerateConfirmationFileName() string {
+	currentDateTime := time.Now().Format("D060102.T150405")
+	return fmt.Sprintf("P#EFT.ON.DPC.NGD.CONF.%s", currentDateTime)
 }
