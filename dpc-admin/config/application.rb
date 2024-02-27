@@ -12,7 +12,7 @@ module Admin
     config.active_record.schema_format = :sql
 
     # Initialize configuration defaults for originally generated Rails version.
-    config.load_defaults 7.0
+    config.load_defaults 7.1
 
     # Add fonts to asset pipeline
     config.assets.prefix = '/admin/assets'

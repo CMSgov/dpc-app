@@ -15,6 +15,7 @@ services:
       dockerfile: dpc-web/Dockerfile
     image: dpc-web:latest
     volumes:
+      - "./dpc-web/Gemfile.lock:/dpc-web/Gemfile.lock"
       - "./dpc-web/coverage:/dpc-web/coverage"
       - ./tmp/letter_opener/web:/dpc-web/tmp/letter_opener
 
@@ -59,6 +60,7 @@ services:
       dockerfile: dpc-admin/Dockerfile
     image: dpc-web-admin:latest
     volumes:
+      - "./dpc-admin/Gemfile.lock:/dpc-admin/Gemfile.lock"
       - "./dpc-admin/coverage:/dpc-admin/coverage"
       - ./tmp/letter_opener/admin:/dpc-admin/tmp/letter_opener
     environment:

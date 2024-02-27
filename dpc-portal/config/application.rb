@@ -11,7 +11,7 @@ Bundler.require(*Rails.groups)
 module DpcPortal
   class Application < Rails::Application
     # Initialize configuration defaults for originally generated Rails version.
-    config.load_defaults 7.0
+    config.load_defaults 7.1
 
     # Set the relative_url_root at runtime, which will be used in various places
     # to ensure that we are serving everything under the portal scope.

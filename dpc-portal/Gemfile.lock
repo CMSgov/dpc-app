@@ -91,7 +91,7 @@ GEM
     base64 (0.1.1)
     bcp47 (0.3.3)
       i18n
-    bcrypt (3.1.19)
+    bcrypt (3.1.20)
     bigdecimal (3.1.6)
     bindata (2.4.15)
     bootsnap (1.16.0)
@@ -129,7 +129,7 @@ GEM
     database_cleaner-core (2.0.1)
     date (3.3.3)
     date_time_precision (0.8.1)
-    devise (4.9.2)
+    devise (4.9.3)
       bcrypt (~> 3.0)
       orm_adapter (~> 0.1)
       railties (>= 4.1.0)
@@ -409,7 +409,7 @@ GEM
       io-console (~> 0.5)
     request_store (1.5.1)
       rack (>= 1.4)
-    responders (3.1.0)
+    responders (3.1.1)
       actionpack (>= 5.2)
       railties (>= 5.2)
     rest-client (2.1.0)
@@ -565,7 +565,7 @@ DEPENDENCIES
   capybara (>= 2.15)
   climate_control
   database_cleaner
-  devise
+  devise (>= 4.9.3)
   devise-async
   devise-security
   dotenv-rails
