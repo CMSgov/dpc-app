@@ -17,7 +17,7 @@ public abstract class AbstractConsentTest {
 
     protected static final DropwizardTestSupport<DPCConsentConfiguration> APPLICATION =
             new DropwizardTestSupport<>(DPCConsentService.class, configPath,
-                    ConfigOverride.config("server.applicationConnectors[0].port", "6666"));
+                    ConfigOverride.config("server.applicationConnectors[0].port", "6543"));
 
     protected FhirContext ctx = FhirContext.forDstu3();
 
