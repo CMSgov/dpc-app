@@ -75,11 +75,11 @@ class Organization < ApplicationRecord
   def update_registered_organization
     return unless npi.present?
 
-    return registered_organization.update_api_organization if registered_organization.present?
+    registered_organization.update_api_organization if registered_organization.present?
   end
 
   def reg_org
-    return registered_organization if registered_organization.present?
+    registered_organization
   end
 
   def fhir_endpoint
