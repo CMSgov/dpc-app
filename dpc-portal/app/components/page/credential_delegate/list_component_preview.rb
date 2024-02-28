@@ -33,7 +33,7 @@ module Page
       private
 
       def org
-        MockOrg.new(name: 'Health Hut', npi: '111111111')
+        MockOrg.new('Health Hut', '111111111')
       end
     end
 
@@ -41,7 +41,7 @@ module Page
     class MockOrg
       attr_accessor :name, :npi, :path_id
 
-      def initialize(name:, npi:)
+      def initialize(name, npi)
         @name = name
         @npi = npi
         @path_id = SecureRandom.uuid
