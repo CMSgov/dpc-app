@@ -3,7 +3,10 @@
 module Page
   module Organization
     # AoLanding
+    # ----------------
+    #
     # Landing page for authorized officials, which shows a list of their organizations.
+    #
     class AoLandingComponentPreview < ViewComponent::Preview
       OrgStruct = Struct.new(:name, :npi, :api_id)
 
