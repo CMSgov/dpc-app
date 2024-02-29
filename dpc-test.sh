@@ -2,7 +2,7 @@
 set -Ee
 
 # Current working directory
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 
 # Configure the Maven log level
 export MAVEN_OPTS=-Dorg.slf4j.simpleLogger.defaultLogLevel=info
@@ -18,25 +18,18 @@ function _finally {
 trap _finally EXIT
 
 if [ -n "$REPORT_COVERAGE" ]; then
-   echo "┌──────────────────────────────────────────┐"
-   echo "│                                          │"
-   echo "│      Running Tests and Code Climate      │"
-   echo "│                                          │"
-   echo "└──────────────────────────────────────────┘"
+  echo "┌──────────────────────────────────────────┐"
+  echo "│                                      │"
+  echo "│      Running Tests and Coverage      │"
+  echo "│                                      │"
+  echo "└──────────────────────────────────────────┘"
 else
-    echo "┌──────────────────────────────────────────┐"
-    echo "│                                          │"
-    echo "│              Running Tests....           │"
-    echo "│  REPORT_COVERAGE not set, not running CC │"
-    echo "│                                          │"
-    echo "└──────────────────────────────────────────┘"
-fi
-
-# Install Code Climate
-if [ -n "$REPORT_COVERAGE" ]; then
-  wget https://codeclimate.com/downloads/test-reporter/test-reporter-0.6.3-linux-amd64 -O ./cc-test-reporter
-  chmod +x ./cc-test-reporter
-  ./cc-test-reporter before-build
+  echo "┌──────────────────────────────────────────┐"
+  echo "│                                          │"
+  echo "│              Running Tests....           │"
+  echo "│           REPORT_COVERAGE not set        │"
+  echo "│                                          │"
+  echo "└──────────────────────────────────────────┘"
 fi
 
 # Build the application
@@ -44,15 +37,9 @@ docker-compose up start_core_dependencies
 mvn clean compile -Perror-prone -B -V -ntp
 mvn package -Pci -ntp
 
-# Format the test results and copy to a new directory
+# Format the test results
 if [ -n "$REPORT_COVERAGE" ]; then
-    mvn jacoco:report -ntp
-    mkdir -p reports
-
-    for module in dpc-aggregation dpc-api dpc-attribution dpc-queue dpc-macaroons
-    do
-      JACOCO_SOURCE_PATH=./$module/src/main/java ./cc-test-reporter format-coverage ./$module/target/site/jacoco/jacoco.xml --input-type jacoco -o reports/codeclimate.unit.$module.json
-    done
+  mvn jacoco:report -ntp
 fi
 
 docker-compose down
@@ -80,15 +67,7 @@ docker-compose down -t 60
 
 # Collect the coverage reports for the Docker integration tests
 if [ -n "$REPORT_COVERAGE" ]; then
-    mvn jacoco:report-integration -Pci -ntp
-
-    for module in dpc-aggregation dpc-api dpc-attribution
-    do
-      JACOCO_SOURCE_PATH=./$module/src/main/java ./cc-test-reporter format-coverage ./$module/target/site/jacoco-it/jacoco.xml --input-type jacoco -o reports/codeclimate.integration.$module.json
-    done
-
-    ./cc-test-reporter sum-coverage reports/codeclimate.* -o coverage/codeclimate.json
-    ./cc-test-reporter upload-coverage
+  mvn jacoco:report-integration -Pci -ntp
 fi
 
 echo "┌──────────────────────────────────────────┐"
