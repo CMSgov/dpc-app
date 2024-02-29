@@ -21,6 +21,9 @@ module Core
       end
 
       def format_if_date(str)
+        # verification_code ABC123 parses
+        return str unless str.length > 6
+
         datetime = DateTime.parse(str)
         datetime.strftime('%m/%d/%Y at %l:%M%p UTC')
       rescue Date::Error
