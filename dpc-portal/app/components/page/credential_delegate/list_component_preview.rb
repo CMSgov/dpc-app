@@ -33,7 +33,7 @@ module Page
       private
 
       def org
-        MockOrg.new('Health Hut', '111111111')
+        Page::CredentialDelegate::MockOrg.new('Health Hut', '111111111')
       end
     end
 
