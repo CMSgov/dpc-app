@@ -1,2 +1,2 @@
 bin/bootstrap
-coverage/unit_coverage.out
+coverage/unit_coverage.*

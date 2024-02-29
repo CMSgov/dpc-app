@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"fmt"
 	"testing"
 	"time"
 
@@ -14,16 +13,16 @@ import (
 func TestParseMetadata(t *testing.T) {
 
 	// positive
-	expTime, _ := time.Parse(time.RFC3339, "2018-11-20T20:13:01Z")
-	metadata, _ := ParseMetadata("blah", "T#EFT.ON.ACO.NGD1800.DPRF.D181120.T2013010")
-	assert.Equal(t, "T#EFT.ON.ACO.NGD1800.DPRF.D181120.T2013010", metadata.Name)
-	assert.Equal(t, expTime.Format("010203040506"), metadata.Timestamp.Format("010203040506"))
+	expTime, _ := time.Parse(time.RFC3339, "2024-01-23T11:22:00Z")
+	metadata, _ := ParseMetadata("blah", "P.NGD.DPC.RSP.D240123.T1122001.IN")
+	assert.Equal(t, "P.NGD.DPC.RSP.D240123.T1122001.IN", metadata.Name)
+	assert.Equal(t, expTime.Format("D060102.T150405"), metadata.Timestamp.Format("D060102.T150405"))
 
 	// change the name and timestamp
-	expTime, _ = time.Parse(time.RFC3339, "2019-12-20T21:09:42Z")
-	metadata, _ = ParseMetadata("blah", "T#EFT.ON.ACO.NGD1800.DPRF.D191220.T2109420")
-	assert.Equal(t, "T#EFT.ON.ACO.NGD1800.DPRF.D191220.T2109420", metadata.Name)
-	assert.Equal(t, expTime.Format("010203040506"), metadata.Timestamp.Format("010203040506"))
+	expTime, _ = time.Parse(time.RFC3339, "2019-01-23T11:22:00Z")
+	metadata, _ = ParseMetadata("blah", "P.NGD.DPC.RSP.D190123.T1122001.IN")
+	assert.Equal(t, "P.NGD.DPC.RSP.D190123.T1122001.IN", metadata.Name)
+	assert.Equal(t, expTime.Format("D060102.T150405"), metadata.Timestamp.Format("D060102.T150405"))
 }
 
 func TestParseMetadata_InvalidData(t *testing.T) {
@@ -32,18 +31,18 @@ func TestParseMetadata_InvalidData(t *testing.T) {
 	_, err := ParseMetadata("path", "file")
 	assert.EqualError(t, err, "invalid filename for file: file")
 
-	_, err = ParseMetadata("/path", "T#EFT.ON.ACO.NGD1800.FRPD.D191220.T1000010")
-	assert.EqualError(t, err, "invalid filename for file: T#EFT.ON.ACO.NGD1800.FRPD.D191220.T1000010")
+	_, err = ParseMetadata("/path", "P.NGD.DPC.RSP.D240123.T1122001")
+	assert.EqualError(t, err, "invalid filename for file: P.NGD.DPC.RSP.D240123.T1122001")
 
 	// invalid date
-	_, err = ParseMetadata("/path", "T#EFT.ON.ACO.NGD1800.DPRF.D190117.T9909420")
-	assert.EqualError(t, err, "failed to parse date 'D190117.T990942' from file: T#EFT.ON.ACO.NGD1800.DPRF.D190117.T9909420: parsing time \"D190117.T990942\": hour out of range")
+	_, err = ParseMetadata("/path", "P.NGD.DPC.RSP.D190117.T9909420.IN")
+	assert.EqualError(t, err, "failed to parse date 'D190117.T990942' from file: P.NGD.DPC.RSP.D190117.T9909420.IN: parsing time \"D190117.T990942\": hour out of range")
 }
 
 func TestParseRecord(t *testing.T) {
 	// 181120 file
 	fileTime, _ := time.Parse(time.RFC3339, "2018-11-20T10:00:00Z")
-	line := []byte("5SJ0A00AA001847800005John                          Mitchell                      Doe                                     198203218702 E Fake St.                                        Apt. 63L                                               Region                                                 Las Vegas                               NV423139954M20190618201907011-800TY201907011-800TNT9992WeCare Medical                                                        ")
+	line := []byte("1SJ0A00AA00N")
 	metadata := &OptOutFilenameMetadata{
 		Timestamp:    fileTime,
 		FilePath:     "full-fake-filename",
@@ -52,6 +51,7 @@ func TestParseRecord(t *testing.T) {
 	}
 
 	tests := []struct {
+		number      int
 		fileTime    time.Time
 		line        []byte
 		metadata    *OptOutFilenameMetadata
@@ -59,13 +59,23 @@ func TestParseRecord(t *testing.T) {
 		err         error
 	}{
 		{
+			number:      1,
 			fileTime:    fileTime,
-			line:        line,
+			line:        []byte("1SJ0A00AA00N"),
 			metadata:    metadata,
 			unmarshaler: fixedwidth.Unmarshal,
 			err:         nil,
 		},
 		{
+			number:      2,
+			fileTime:    fileTime,
+			line:        []byte("1SJ0A00AA00Y"),
+			metadata:    metadata,
+			unmarshaler: fixedwidth.Unmarshal,
+			err:         nil,
+		},
+		{
+			number:   3,
 			fileTime: fileTime,
 			line:     line,
 			metadata: metadata,
@@ -78,9 +88,12 @@ func TestParseRecord(t *testing.T) {
 
 	for _, test := range tests {
 		suppression, err := ParseRecord(test.metadata, test.line, test.unmarshaler)
-		if err == nil {
-			assert.Equal(t, "5SJ0A00AA00", suppression.MBI)
-			assert.Equal(t, Rejected, suppression.Status)
+		if test.number == 1 {
+			assert.Equal(t, "1SJ0A00AA00", suppression.MBI)
+			assert.Equal(t, "OPTOUT", suppression.PolicyCode)
+		} else if test.number == 2 {
+			assert.Equal(t, "1SJ0A00AA00", suppression.MBI)
+			assert.Equal(t, "OPTIN", suppression.PolicyCode)
 		} else {
 			assert.Equal(t, test.err, giterr.Cause(err))
 		}
@@ -95,12 +108,9 @@ func TestParseRecord_InvalidData(t *testing.T) {
 		expErr string
 	}{
 		{
-			"1000087481 1847800005John                          Mitchell                      Doe                                     198203218702 E Fake St.                                        Apt. 63L                                               Region                                                 Las Vegas                               NV423139954M20190618201913011-800TY201907011-800TNA9999WeCare Medical                                                        		",
-			"failed to parse the effective date '20191301' from file"},
-		{"1000087481 1847800005John                          Mitchell                      Doe                                     198203218702 E Fake St.                                        Apt. 63L                                               Region                                                 Las Vegas                               NV423139954M20190618201907011-800TY201913011-800TNA9999WeCare Medical                                                        		",
-			"failed to parse the samhsa effective date '20191301' from file"},
-		{"1000087481 18e7800005John                          Mitchell                      Doe                                     198203218702 E Fake St.                                        Apt. 63L                                               Region                                                 Las Vegas                               NV423139954M20190618201907011-800TY201907011-800TNA9999WeCare Medical                                                        		",
-			"failed to parse beneficiary link key from file"},
+			"1SJ0A00AA00Q",
+			"failed to parse file: testfilepath: Unexpected value Q for sharing preference",
+		},
 	}
 
 	for _, tt := range tests {
@@ -114,7 +124,7 @@ func TestParseRecord_InvalidData(t *testing.T) {
 			suppression, err := ParseRecord(metadata, []byte(tt.line), fixedwidth.Unmarshal)
 			assert.Nil(t, suppression)
 			assert.NotNil(t, err)
-			assert.Contains(t, err.Error(), fmt.Sprintf("%s: %s", tt.expErr, fp))
+			assert.Contains(t, err.Error(), tt.expErr)
 		})
 	}
 }

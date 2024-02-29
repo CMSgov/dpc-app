@@ -120,9 +120,9 @@ func updateOptOutFileImportStatus(db *sql.DB, optOutFileId string, status string
 	query := `UPDATE opt_out_file
 			  SET import_status = $1, updated_at = NOW()
 			  WHERE id = $2
-			  RETURNING id, import_status, updated_at`
+			  RETURNING id, import_status`
 	row := db.QueryRow(query, status, optOutFileId)
-	if err := row.Scan(&entity.id, &entity.import_status, &entity.updated_at); err != nil {
+	if err := row.Scan(&entity.id, &entity.import_status); err != nil {
 		return fmt.Errorf("updateOptOutFileImportStatus: %w", err)
 	}
 	return nil

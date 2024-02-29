@@ -87,6 +87,6 @@ func ConvertSharingPreference(pref string) (string, error) {
 	} else if pref == "N" {
 		return "OPTOUT", nil
 	} else {
-		return "", errors.New(fmt.Sprintf("Unexpected value %s for sharing preference.", pref))
+		return "", errors.New(fmt.Sprintf("Unexpected value %s for sharing preference", pref))
 	}
 }

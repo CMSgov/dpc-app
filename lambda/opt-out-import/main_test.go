@@ -45,7 +45,7 @@ func TestHandlerDatabaseTimeoutError(t *testing.T) {
 	createConnectionVar = func(string, string) (*sql.DB, error) { return nil, errors.New("Connection attempt timed out") }
 	defer func() { createConnectionVar = ofn }()
 
-	event := getS3Event("demo-bucket", "T#EFT.ON.ACO.NGD1800.DPRF.D181120.T1000009")
+	event := getS3Event("demo-bucket", "P.NGD.DPC.RSP.D240123.T1122001.IN")
 	_, err := handler(context.Background(), event)
 
 	assert.EqualError(t, err, "Connection attempt timed out")
@@ -93,79 +93,38 @@ func TestDownloadS3File(t *testing.T) {
 
 func TestUploadConfirmationFile(t *testing.T) {
 	tests := []struct {
-		name      string
-		bucket    string
-		file      string
-		err       error
-		record    []*OptOutRecord
-		uploader  S3Uploader
-		marshaler FileMarshaler
+		name             string
+		bucket           string
+		file             string
+		err              error
+		confirmationFile []byte
+		uploader         S3Uploader
 	}{
 		{
-			name:   "happy-path",
-			bucket: "demo-bucket",
-			file:   "fake-file",
-			err:    nil,
-			record: []*OptOutRecord{
-				{
-					ID:           "Id",
-					OptOutFileID: "FileId",
-					MBI:          "Mbi",
-					Status:       Accepted,
-				},
-			},
+			name:             "happy-path",
+			bucket:           "demo-bucket",
+			file:             "fake-file",
+			err:              nil,
+			confirmationFile: []byte("test"),
 			uploader: func(input *s3manager.UploadInput, options ...func(*s3manager.Uploader)) (*s3manager.UploadOutput, error) {
-				return nil, nil
-			},
-			marshaler: func(v interface{}) ([]byte, error) {
 				return nil, nil
 			},
 		},
 		{
-			name:   "upload_fails",
-			bucket: "demo-bucket",
-			file:   "fake-file",
-			err:    errors.New("upload failed"),
-			record: []*OptOutRecord{
-				{
-					ID:           "Id",
-					OptOutFileID: "FileId",
-					MBI:          "Mbi",
-					Status:       Accepted,
-				},
-			},
+			name:             "upload_fails",
+			bucket:           "demo-bucket",
+			file:             "fake-file",
+			err:              errors.New("upload failed"),
+			confirmationFile: []byte("test"),
 			uploader: func(input *s3manager.UploadInput, options ...func(*s3manager.Uploader)) (*s3manager.UploadOutput, error) {
 				return nil, errors.New("upload failed")
-			},
-			marshaler: func(v interface{}) ([]byte, error) {
-				return nil, nil
-			},
-		},
-		{
-			name:   "file_marshaling_fails",
-			bucket: "demo-bucket",
-			file:   "fake-file",
-			err:    errors.New("marshaling failed"),
-			record: []*OptOutRecord{
-				{
-					ID:           "Id",
-					OptOutFileID: "FileId",
-					MBI:          "Mbi",
-					Status:       Accepted,
-				},
-			},
-			uploader: func(input *s3manager.UploadInput, options ...func(*s3manager.Uploader)) (*s3manager.UploadOutput, error) {
-				return nil, errors.New("upload failed")
-			},
-			marshaler: func(v interface{}) ([]byte, error) {
-				return nil, errors.New("marshaling failed")
 			},
 		},
 	}
 
 	for _, test := range tests {
 		fmt.Printf("~~~ %s test\n", test.name)
-		err := uploadConfirmationFile(test.bucket, test.file, test.uploader, test.record, test.marshaler)
+		err := uploadConfirmationFile(test.bucket, test.file, test.uploader, test.confirmationFile)
 		assert.Equal(t, test.err, err)
 	}
 

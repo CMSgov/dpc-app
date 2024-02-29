@@ -63,7 +63,7 @@ func TestInsertOptOutMetadata(t *testing.T) {
 		{
 			name:     "happy path",
 			bucket:   "demo-bucket",
-			filename: "T#EFT.ON.ACO.NGD1800.DPRF.D181120.T1000009",
+			filename: "P.NGD.DPC.RSP.D240123.T1122001.IN",
 			expect:   true,
 			err:      nil,
 		},
@@ -83,11 +83,11 @@ func TestInsertOptOutMetadata(t *testing.T) {
 			t.Errorf("Error when parsing opt out metadata %s", err)
 		}
 
-		timestampValue := time.Date(2018, 11, 20, 0, 0, 0, 0, time.UTC)
+		timestampValue := time.Date(2024, 01, 23, 0, 0, 0, 0, time.UTC)
 		rows := []string{"id", "name", "timestamp", "import_status"}
 		mock.ExpectQuery("INSERT INTO opt_out_file").
-			WithArgs(AnyString{}, "T#EFT.ON.ACO.NGD1800.DPRF.D181120.T1000009", "2018-11-20").
-			WillReturnRows(sqlmock.NewRows(rows).AddRow("(.*)", "T#EFT.ON.ACO.NGD1800.DPRF.D181120.T1000009", timestampValue, "In-Progress"))
+			WithArgs(AnyString{}, "P.NGD.DPC.RSP.D240123.T1122001.IN", "2024-01-23").
+			WillReturnRows(sqlmock.NewRows(rows).AddRow("(.*)", "P.NGD.DPC.RSP.D240123.T1122001.IN", timestampValue, "In-Progress"))
 
 		entity, err := insertOptOutMetadata(db, &metadata)
 		if err != nil {
@@ -113,7 +113,7 @@ func TestInsertConsentRecords(t *testing.T) {
 		{
 			name:          "happy path",
 			bucket:        "demo-bucket",
-			filename:      "T#EFT.ON.ACO.NGD1800.DPRF.D181120.T1000009",
+			filename:      "P.NGD.DPC.RSP.D240123.T1122001.IN",
 			expect:        true,
 			consentStatus: Accepted,
 			err:           nil,
@@ -185,10 +185,9 @@ func TestInsertConsentRecords_DatabaseError(t *testing.T) {
 		filename      string
 		consentStatus string
 	}{
-		name:          "database error",
-		bucket:        "demo-bucket",
-		filename:      "T#EFT.ON.ACO.NGD1800.DPRF.D181120.T1000009",
-		consentStatus: Rejected,
+		name:     "database error",
+		bucket:   "demo-bucket",
+		filename: "P.NGD.DPC.RSP.D240123.T1122001.IN",
 	}
 
 	db, mock, err := sqlmock.New()
@@ -208,7 +207,7 @@ func TestInsertConsentRecords_DatabaseError(t *testing.T) {
 		t.Errorf("Error when parsing opt out metadata %s", err)
 	}
 	metadata.FileID = "test_id"
-	consents, err := ParseConsentRecords(&metadata, f)
+	consentRecords, err := ParseConsentRecords(&metadata, f)
 	if err != nil {
 		t.Errorf("Error when parsing consent records %s", err)
 	}
@@ -220,11 +219,8 @@ func TestInsertConsentRecords_DatabaseError(t *testing.T) {
 		WithArgs(ImportFail, metadata.FileID).
 		WillReturnRows(sqlmock.NewRows(rows).AddRow(metadata.FileID, ImportFail))
 
-	response, err := insertConsentRecords(db, metadata.FileID, consents)
+	response, err := insertConsentRecords(db, metadata.FileID, consentRecords)
 	assert.Empty(t, response)
-	for _, consent := range consents {
-		assert.Equal(t, test.consentStatus, consent.Status)
-	}
 
 	for _, res := range response {
 		fmt.Println(fmt.Printf("record %s", res.ID))
@@ -256,11 +252,10 @@ func TestUpdateOptOutFileImportStatus(t *testing.T) {
 
 	for _, test := range tests {
 		id := "test-id"
-		updated_at := "2024-01-23 16:36:00.616721+00"
-		rows := []string{"id", "import_status", "updated_at"}
+		rows := []string{"id", "import_status"}
 		mock.ExpectQuery(`UPDATE opt_out_file`).
 			WithArgs(test.importStatus, id).
-			WillReturnRows(sqlmock.NewRows(rows).AddRow(id, test.importStatus, updated_at))
+			WillReturnRows(sqlmock.NewRows(rows).AddRow(id, test.importStatus))
 		err := updateOptOutFileImportStatus(db, id, test.importStatus)
 		assert.Equal(t, test.err, err)
 	}
