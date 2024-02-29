@@ -10,9 +10,11 @@ import (
 	"os"
 	"os/exec"
 	"testing"
+	"time"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/ianlopshire/go-fixedwidth"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -89,6 +91,71 @@ func TestDownloadS3File(t *testing.T) {
 		}
 	}
 
+}
+
+func TestGenerateConfirmationFile(t *testing.T) {
+	output1 := fmt.Sprintf(`HDR_BENECONFIRM%s
+1SJ0A00AA0020240110NAccepted  00
+2SJ0A00AA0020240110YAccepted  00
+TLR_BENECONFIRM%s0000000002`, time.Now().Format("20060102"), time.Now().Format("20060102"))
+	output2 := fmt.Sprintf(`HDR_BENECONFIRM%s
+1SJ0A00AA0020240110NRejected  02
+TLR_BENECONFIRM%s0000000001`, time.Now().Format("20060102"), time.Now().Format("20060102"))
+	tests := []struct {
+		name       string
+		successful bool
+		records    []*OptOutRecord
+		marshaller FileMarshaler
+		expected   string
+	}{
+		{
+			name:       "successful-import",
+			successful: true,
+			records: []*OptOutRecord{
+				{
+					ID:           "test1",
+					OptOutFileID: "2",
+					MBI:          "1SJ0A00AA00",
+					PolicyCode:   "OPTOUT",
+					EffectiveDt:  time.Date(2024, 01, 10, 0, 0, 0, 0, time.UTC),
+					Status:       Accepted,
+				},
+				{
+					ID:           "test2",
+					OptOutFileID: "2",
+					MBI:          "2SJ0A00AA00",
+					PolicyCode:   "OPTIN",
+					EffectiveDt:  time.Date(2024, 01, 10, 0, 0, 0, 0, time.UTC),
+					Status:       Accepted,
+				},
+			},
+			marshaller: fixedwidth.Marshal,
+			expected:   output1,
+		},
+		{
+			name:       "unsuccessful-import",
+			successful: false,
+			records: []*OptOutRecord{
+				{
+					ID:           "test1",
+					OptOutFileID: "2",
+					MBI:          "1SJ0A00AA00",
+					PolicyCode:   "OPTOUT",
+					EffectiveDt:  time.Date(2024, 01, 10, 0, 0, 0, 0, time.UTC),
+					Status:       Rejected,
+				},
+			},
+			marshaller: fixedwidth.Marshal,
+			expected:   output2,
+		},
+	}
+
+	for _, test := range tests {
+		fmt.Printf("~~~ %s test\n", test.name)
+		output, err := generateConfirmationFile(test.successful, test.records, test.marshaller)
+		assert.Equal(t, test.expected, string(output[:]))
+		assert.Equal(t, err, nil)
+	}
 }
 
 func TestUploadConfirmationFile(t *testing.T) {
