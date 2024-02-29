@@ -54,6 +54,10 @@ func TestHandlerDatabaseTimeoutError(t *testing.T) {
 }
 
 func TestDownloadS3File(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping integration test.")
+	}
+
 	loadS3()
 	f, err := os.ReadFile("dummyfile.txt")
 	if err != nil {
