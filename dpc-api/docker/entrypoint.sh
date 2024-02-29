@@ -32,8 +32,10 @@ fi
 
 # set env vars for Dropwizard application
 set -o allexport
+ENV_FILE="/app/resources/${ENV}.application.env"
+echo "Exporting env file ${ENV_FILE}"
 # shellcheck source=/dev/null
-. "/app/resources/${ENV}.application.env"
+. "$ENV_FILE"
 set +o allexport
 
 CONF_FILE="/app/resources/application.yml"
