@@ -11,7 +11,7 @@ module Page
     #
     class ListComponentPreview < ViewComponent::Preview
       def empty
-        render(Page::CredentialDelegate::ListComponent.new(org, []))
+        render(Page::CredentialDelegate::ListComponent.new(org, [], []))
       end
 
       def active
@@ -19,15 +19,17 @@ module Page
           CdOrgLink.new(given_name: 'Bob', family_name: 'Hodges', email: 'bob@example.com', pending: false),
           CdOrgLink.new(given_name: 'Lisa', family_name: 'Franklin', email: 'lisa@example.com', pending: false)
         ]
-        render(Page::CredentialDelegate::ListComponent.new(org, cds))
+        render(Page::CredentialDelegate::ListComponent.new(org, [], cds))
       end
 
       def pending
         cds = [
-          CdOrgLink.new(given_name: 'Bob', family_name: 'Hodges', email: 'bob@example.com', pending: true),
-          CdOrgLink.new(given_name: 'Lisa', family_name: 'Franklin', email: 'lisa@example.com', pending: true)
+          Invitation.new(invited_given_name: 'Bob', invited_family_name: 'Hodges', invited_email: 'bob@example.com',
+                         verification_code: 'ABC123'),
+          Invitation.new(invited_given_name: 'Lisa', invited_family_name: 'Franklin',
+                         invited_email: 'lisa@example.com', verification_code: '123ABC')
         ]
-        render(Page::CredentialDelegate::ListComponent.new(org, cds))
+        render(Page::CredentialDelegate::ListComponent.new(org, cds, []))
       end
 
       private

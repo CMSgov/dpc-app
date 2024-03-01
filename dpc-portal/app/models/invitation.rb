@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Placeholder for eventual ActiveRecord for saving this
+# Record of invitation, with possible verification code
 class Invitation < ApplicationRecord
   attr_reader :phone_raw
 
@@ -16,5 +16,11 @@ class Invitation < ApplicationRecord
   def phone_raw=(nbr)
     @phone_raw = nbr
     self.invited_phone = @phone_raw.tr('^0-9', '')
+  end
+
+  def show_attributes
+    { full_name: "#{invited_given_name} #{invited_family_name}",
+      email: invited_email,
+      verification_code: verification_code }.with_indifferent_access
   end
 end
