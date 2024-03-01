@@ -3,7 +3,7 @@ database:
   driverClass: org.postgresql.Driver
   url: ${DATABASE_URL:-"jdbc:postgresql://localhost:5432/dpc_attribution"}
   user: ${ATTRIBUTION_DB_USER:-postgres}
-  password: ${ATTRIBUTION_DB_PASS:-dpc-safe}
+  password: "${ATTRIBUTION_DB_PASS:-dpc-safe}"
   initialSize: 5
   minSize: 5
   maxSize: 10
