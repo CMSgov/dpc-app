@@ -10,7 +10,6 @@ import ca.uhn.fhir.rest.gclient.ICreateTyped;
 import ca.uhn.fhir.rest.gclient.IUpdateExecutable;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
-import com.typesafe.config.ConfigFactory;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.exceptions.JsonParseExceptionMapper;
 import gov.cms.dpc.fhir.DPCResourceType;
@@ -67,6 +66,8 @@ public class APITestHelpers {
     private static final String ATTRIBUTION_TRUNCATE_TASK = "http://localhost:9902/tasks/truncate";
     public static String BASE_URL = "https://dpc.cms.gov/api";
     public static String ORGANIZATION_NPI = "1111111112";
+
+    private static final String configPath = "src/test/resources/test.application.yml";
 
     private static final ObjectMapper mapper = new ObjectMapper();
 
@@ -183,16 +184,15 @@ public class APITestHelpers {
 
     static <C extends io.dropwizard.Configuration> void setupApplication(DropwizardTestSupport<C> application) throws
             Exception {
-        ConfigFactory.invalidateCaches();
         // Truncate attribution database
         truncateDatabase();
         application.before();
         // Truncate the Auth DB
         // dropwizard-guicey will raise a SharedStateError unless we clear the configuration state before each run
         SharedConfigurationState.clear();
-        application.getApplication().run("db", "drop-all", "--confirm-delete-everything", "ci.application.conf");
+        application.getApplication().run("db", "drop-all", "--confirm-delete-everything", configPath);
         SharedConfigurationState.clear();
-        application.getApplication().run("db", "migrate", "ci.application.conf");
+        application.getApplication().run("db", "migrate", configPath);
 
     }
 
