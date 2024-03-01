@@ -9,11 +9,15 @@ import gov.cms.dpc.common.logging.filters.GenerateRequestIdFilter;
 import gov.cms.dpc.common.logging.filters.LogResponseFilter;
 import gov.cms.dpc.common.utils.EnvironmentParser;
 import gov.cms.dpc.fhir.FHIRModule;
+import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
+import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.core.Application;
 import io.dropwizard.core.setup.Bootstrap;
 import io.dropwizard.core.setup.Environment;
 import io.dropwizard.db.PooledDataSourceFactory;
 import io.dropwizard.migrations.MigrationsBundle;
+import io.federecio.dropwizard.swagger.SwaggerBundle;
+import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.vyarus.dropwizard.guice.GuiceBundle;
@@ -38,6 +42,13 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
         // This is required for Guice to load correctly. Not entirely sure why
         // https://github.com/dropwizard/dropwizard/issues/1772
         JerseyGuiceUtils.reset();
+
+        // Enable variable substitution with environment variables
+        EnvironmentVariableSubstitutor substitutor = new EnvironmentVariableSubstitutor(false);
+        SubstitutingSourceProvider provider =
+                new SubstitutingSourceProvider(bootstrap.getConfigurationSourceProvider(), substitutor);
+        bootstrap.setConfigurationSourceProvider(provider);
+
         registerBundles(bootstrap);
 
         bootstrap.addCommand(new SeedCommand(bootstrap.getApplication()));
@@ -73,14 +84,12 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
                 return configuration.getDatabase();
             }
         });
-//        TODO: dropwizard - sundial using Dropwizard 2.x
-//        final SundialBundle<DPCAttributionConfiguration> sundialBundle = new SundialBundle<>() {
-//            @Override
-//            public SundialConfiguration getSundialConfiguration(DPCAttributionConfiguration dpcAttributionConfiguration) {
-//                return dpcAttributionConfiguration.getSundial();
-//            }
-//        };
-//
-//        bootstrap.addBundle(sundialBundle);
+
+        bootstrap.addBundle(new SwaggerBundle<>() {
+            @Override
+            protected SwaggerBundleConfiguration getSwaggerBundleConfiguration(DPCAttributionConfiguration configuration) {
+                return configuration.getSwaggerBundleConfiguration();
+            }
+        });
     }
 }
