@@ -9,21 +9,18 @@ class IpAddressesController < ApplicationController
     render Page::IpAddress::NewAddressComponent.new(@organization)
   end
 
-  # rubocop:disable Metrics/AbcSize
   def create
-    manager = IpAddressManager.new(params[:organization_id])
+    manager = IpAddressManager.new(@organization.dpc_api_organization_id)
     new_ip_address = manager.create_ip_address(ip_address: params[:ip_address], label: params[:label])
     if new_ip_address[:response]
-      flash[:notice] = 'IP address successfully created.'
-      redirect_to organization_path(params[:organization_id])
+      create_success
     else
-      flash[:alert] = "IP address could not be created: #{manager.errors.join(', ')}."
-      render Page::IpAddress::NewAddressComponent.new(@organization)
+      create_failure(manager.errors.join(', '))
     end
   end
 
   def destroy
-    manager = IpAddressManager.new(params[:organization_id])
+    manager = IpAddressManager.new(@organization.dpc_api_organization_id)
     if manager.delete_ip_address(params)
       flash[:notice] = 'IP address successfully deleted.'
     else
@@ -31,20 +28,16 @@ class IpAddressesController < ApplicationController
     end
     redirect_to organization_path(params[:organization_id])
   end
-  # rubocop:enable Metrics/AbcSize
 
   private
 
-  def load_organization
-    @organization = case ENV.fetch('ENV', nil)
-                    when 'prod-sbx'
-                      redirect_to root_url
-                    when 'test'
-                      Organization.new('6a1dbf47-825b-40f3-b81d-4a7ffbbdc270')
-                    when 'dev'
-                      Organization.new('78d02106-2837-4d07-8c51-8d73332aff09')
-                    else
-                      Organization.new(params[:organization_id])
-                    end
+  def create_success
+    flash[:notice] = 'IP address successfully created.'
+    redirect_to organization_path(params[:organization_id])
+  end
+
+  def create_failure(errors)
+    flash[:alert] = "IP address could not be created: #{errors}."
+    render Page::IpAddress::NewAddressComponent.new(@organization)
   end
 end

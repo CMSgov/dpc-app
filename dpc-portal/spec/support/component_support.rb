@@ -36,7 +36,7 @@ module ComponentSupport
       tokens
     end
 
-    def public_ips
+    def ip_addresses
       tokens = []
       @row_count.times do |index|
         tokens << { 'label' => "IP Addr #{index + 1}",

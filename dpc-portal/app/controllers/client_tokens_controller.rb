@@ -41,17 +41,4 @@ class ClientTokensController < ApplicationController
     flash.now.alert = msg
     render Page::ClientToken::NewTokenComponent.new(@organization)
   end
-
-  def load_organization
-    @organization = case ENV.fetch('ENV', nil)
-                    when 'prod-sbx'
-                      redirect_to root_url
-                    when 'test'
-                      Organization.new('6a1dbf47-825b-40f3-b81d-4a7ffbbdc270')
-                    when 'dev'
-                      Organization.new('78d02106-2837-4d07-8c51-8d73332aff09')
-                    else
-                      Organization.new(params[:organization_id])
-                    end
-  end
 end
