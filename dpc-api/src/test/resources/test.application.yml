@@ -2,7 +2,7 @@
 database:
   driverClass: org.postgresql.Driver
   url: ${DATABASE_URL:-"jdbc:postgresql://localhost:5432/dpc_attribution"}
-  user: ${ATTRIBUTION_DB_USER:-postgres}
+  user: "${ATTRIBUTION_DB_USER:-postgres}"
   password: "${ATTRIBUTION_DB_PASS:-dpc-safe}"
   initialSize: 5
   minSize: 5
@@ -14,7 +14,7 @@ database:
 queuedb:
   driverClass: org.postgresql.Driver
   url: ${QUEUE_DB_URL:-"jdbc:postgresql://localhost:5432/dpc_queue"}
-  user: ${QUEUE_DB_USER:-postgres}
+  user: "${QUEUE_DB_USER:-postgres}"
   password: "${QUEUE_DB_PASS:-dpc-safe}"
   initialSize: 5
   minSize: 5
