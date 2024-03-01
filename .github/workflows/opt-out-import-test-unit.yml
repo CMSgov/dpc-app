@@ -1,0 +1,23 @@
+name: opt-out-import unit tests
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/opt-out-import-test-unit.yml
+      - lambda/opt-out-import/**
+  workflow_dispatch:
+
+jobs:
+  test:
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./lambda/opt-out-import
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+      - name: Run unit tests for opt-out-import lambda
+        run: make test

@@ -1,0 +1,35 @@
+name: opt-out-import test deploy
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - lambda/opt-out-import/**
+  workflow_dispatch:
+
+jobs:
+  test:
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./lambda/opt-out-import
+    environment: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+      - name: Build opt-out-import zip file
+        run: |
+          go build -o bootstrap main.go parsers.go utils.go models.go db.go
+          zip function.zip bootstrap
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: ${{ vars.ACCOUNT_ROLE }}
+      - name: Upload and reload
+        run: |
+          aws s3 cp --no-progress function.zip s3://${{ vars.OPT_OUT_IMPORT_ZIP_BUCKET }}/function.zip
+          aws lambda update-function-code --function-name dpc-test-opt-out-import --s3-bucket ${{ vars.OPT_OUT_IMPORT_ZIP_BUCKET }} --s3-key function.zip

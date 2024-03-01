@@ -1,0 +1,80 @@
+# application.yml with changes to relative paths, urls, and logging for testing purposes
+database:
+  driverClass: org.postgresql.Driver
+  url: ${DATABASE_URL:-"jdbc:postgresql://localhost:5432/dpc_attribution"}
+  user: "${ATTRIBUTION_DB_USER:-postgres}"
+  password: "${ATTRIBUTION_DB_PASS:-dpc-safe}"
+  initialSize: 5
+  minSize: 5
+  maxSize: 10
+  properties:
+    charSet: UTF-8
+    hibernate.dialect: org.hibernate.dialect.PostgreSQL10Dialect
+
+server:
+  enableThreadNameFilter: false
+  registerDefaultExceptionMappers: false
+  applicationConnectors:
+    - type: http
+      port: 8080
+  adminConnectors:
+    - type: http
+      port: 9900
+  requestLog:
+    appenders:
+      - type: console
+        timeZone: UTC
+        layout:
+          type: access-json
+          timestampFormat: "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
+          additionalFields:
+            environment: ${ENV:-"unknown_env"}
+            version: ${APP_VERSION:-"unknown_version"}
+            application: ${APPLICATION:-"dpc-attribution"}
+
+logging:
+  level: ERROR
+  appenders:
+    - type: console
+      timeZone: UTC
+      layout:
+        type: json-dpc
+        timestampFormat: "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
+        additionalFields:
+          environment: ${ENV:-"unknown_env"}
+          version: ${APP_VERSION:-"unknown_version"}
+          application: ${APPLICATION:-"dpc-attribution"}
+
+      # Prevent log entries from being dropped under all circumstances
+      # While nice from a performance standpoint, we must ensure full audit capability of the application
+      discardingThreshold: 0
+
+  loggers:
+    "liquibase": ERROR
+    "gov.cms.dpc.queue.DistributedBatchQueue": DEBUG
+    "org.hibernate": ERROR
+    "org.hibernate.SQL": ERROR
+
+expirationThreshold: 90 # In days
+migrationEnabled: true
+sundial:
+  annotated-jobs-package-name: gov.cms.dpc.attribution.jobs
+
+publicServerURL: "https://dpc.cms.gov"
+
+# Disable FHIR validation
+fhir:
+  validation:
+    enabled: false
+
+patientLimit: ${PATIENT_LIMIT:--1}
+providerLimit: ${PROVIDER_LIMIT:--1}
+
+lookBackExemptOrgs: ${LOOK_BACK_EXEMPT_ORGS:-["0ab352f1-2bf1-44c4-aa7a-3004a1ffef12","69c0d4d4-9c07-4fa8-9053-e10fb1608b48","c7f5247b-4c41-478c-84eb-a6e801bdb145"]}
+
+swagger:
+  resourcePackage: gov.cms.dpc.attribution.resources
+  title: "DPC Attribution Service"
+  description: |
+    This service handles the majority of the application business logic, including authentication and attribution.
+    <p>It performs no validation of input data, which is the domain of the API service or any internal services that might call it.

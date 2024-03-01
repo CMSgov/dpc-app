@@ -26,6 +26,8 @@ import gov.cms.dpc.macaroons.BakeryModule;
 import gov.cms.dpc.queue.JobQueueModule;
 import io.dropwizard.core.Application;
 import io.dropwizard.auth.AuthValueFactoryProvider;
+import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
+import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.db.DataSourceFactory;
 import io.dropwizard.migrations.MigrationsBundle;
 import io.dropwizard.core.setup.Bootstrap;
@@ -55,6 +57,12 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
 
     @Override
     public void initialize(final Bootstrap<DPCAPIConfiguration> bootstrap) {
+        // Enable variable substitution with environment variables
+        EnvironmentVariableSubstitutor substitutor = new EnvironmentVariableSubstitutor(false);
+        SubstitutingSourceProvider provider =
+                new SubstitutingSourceProvider(bootstrap.getConfigurationSourceProvider(), substitutor);
+        bootstrap.setConfigurationSourceProvider(provider);
+
         setupJacksonMapping(bootstrap);
         // Setup Guice bundle and module injection
         final GuiceBundle guiceBundle = setupGuiceBundle();

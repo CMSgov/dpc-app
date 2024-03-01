@@ -71,9 +71,8 @@ public class AggregationEngineBFDClientTest {
         BlueButtonClientV2 blueButtonClientV2 = Mockito.spy(new BlueButtonClientV2Impl(bbClientV2, new BBClientConfiguration(), metricRegistry));
         OperationsConfig config = new OperationsConfig(1000, tempDir.toString(), 1, 1, 1, YearMonth.now(), List.of(orgID.toString()));
         JobBatchProcessor processor = new JobBatchProcessor(blueButtonClient, fhirContext, metricRegistry, config, lookBackService, mockConsentService);
-        JobBatchProcessorV2 processorV2 = new JobBatchProcessorV2(blueButtonClientV2, fhirContextR4, metricRegistry, config, mockConsentService);
         queue = new MemoryBatchQueue(100);
-        engine = new AggregationEngine(UUID.randomUUID(), queue, config, processor, processorV2);
+        engine = new AggregationEngine(UUID.randomUUID(), queue, config, processor);
         engine.queueRunning.set(true);
 
         Mockito.when(blueButtonClient.hashMbi(Mockito.anyString())).thenReturn(MockBlueButtonClient.MBI_HASH_MAP.get(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0)));

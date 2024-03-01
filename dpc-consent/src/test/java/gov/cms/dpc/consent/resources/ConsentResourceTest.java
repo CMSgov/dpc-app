@@ -13,7 +13,6 @@ import gov.cms.dpc.consent.AbstractConsentTest;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.converters.entities.ConsentEntityConverter;
 import org.hl7.fhir.dstu3.model.*;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -23,6 +22,7 @@ import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.List;
 
+import static gov.cms.dpc.fhir.DPCIdentifierSystem.MBI;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -196,16 +196,14 @@ class ConsentResourceTest extends AbstractConsentTest {
                 .execute();
 
         final Consent found = (Consent) sut.getEntryFirstRep().getResource();
-        System.out.println(ctx.newJsonParser().setPrettyPrint(true).encodeResourceToString(found));
 
         assertEquals(ConsentEntityConverter.OPT_IN_MAGIC, found.getPolicyRule());
         assertEquals(TEST_CONSENT_REF, found.getId());
     }
 
     @Test
-    @Disabled
     final void searchConsentResource_multiple_ids_for_one_patient() {
-        String patientIds = "mbi_1,mbi_2";
+        String patientIds = String.format("%s|%s,%s|%s", MBI.getSystem(), "mbi_1", MBI.getSystem(), "mbi_no_record");
         final IGenericClient client = createFHIRClient(ctx, getServerURL());
 
         final Bundle sut = client
@@ -219,7 +217,6 @@ class ConsentResourceTest extends AbstractConsentTest {
         assertEquals(1, sut.getTotal(), "Should only find one consent record.");
 
         final Consent found = (Consent) sut.getEntryFirstRep().getResource();
-        System.out.println(ctx.newJsonParser().setPrettyPrint(true).encodeResourceToString(found));
 
         assertEquals(ConsentEntityConverter.OPT_IN_MAGIC, found.getPolicyRule());
         assertEquals(TEST_CONSENT_REF, found.getId());

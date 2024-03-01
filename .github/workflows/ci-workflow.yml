@@ -1,6 +1,11 @@
 name: "DPC CI Workflow"
 
-on: [push]
+on:
+  pull_request:
+    paths-ignore:
+      - .github/workflows/opt-out-import-*
+      - lambda/**
+  workflow_dispatch: # Allow manual trigger
 
 env:
   VAULT_PW: ${{ secrets.VAULT_PW }}

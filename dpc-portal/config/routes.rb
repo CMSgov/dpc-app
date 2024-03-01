@@ -5,7 +5,10 @@
 # and config.ru via config.relative_url_root.
 #
 Rails.application.routes.draw do
-  devise_for :users
+  devise_for :users, controllers: { omniauth_callbacks: 'login_dot_gov' }
+  devise_scope :user do
+    get '/users/auth/failure', to: 'login_dot_gov#failure', as: 'login_dot_gov_failure'
+  end
 
   # Defines the root path route ("/")
   root 'main#welcome'
@@ -20,6 +23,9 @@ Rails.application.routes.draw do
     resources :client_tokens, only: [:new, :create, :destroy]
     resources :public_keys, only: [:new, :create, :destroy]
     resources :ip_addresses, only: [:new, :create, :destroy]
+    resources :credential_delegate_invitations, only: [:new, :create, :destroy] do
+      get 'success', on: :member
+    end
   end
 
   match '/download_snippet', to: 'public_keys#download_snippet', as: 'download_snippet', via: :post
