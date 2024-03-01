@@ -14,6 +14,7 @@ import gov.cms.dpc.testing.BufferedLoggerHandler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 
@@ -48,7 +49,7 @@ class BakeryTests {
     }
 
     private TokenPolicy generateTokenPolicy() {
-        Yaml yaml = new Yaml(new Constructor(TokenPolicy.class));
+        Yaml yaml = new Yaml(new Constructor(TokenPolicy.class, new LoaderOptions()));
         return yaml.load(BakeryTests.class.getClassLoader().getResourceAsStream("token_policy.yml"));
     }
 }
