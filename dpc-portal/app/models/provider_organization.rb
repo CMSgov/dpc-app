@@ -6,13 +6,7 @@ class ProviderOrganization < ApplicationRecord
 
   validates :npi, presence: true
 
-  def path_id
-    dpc_api_organization_id
-  end
-
-  def api_id
-    dpc_api_organization_id
-  end
+  alias_attribute :api_id, :dpc_api_organization_id
 
   def api_org
     @client = DpcClient.new
