@@ -22,7 +22,7 @@ queuedb:
 server:
   enableThreadNameFilter: false
   registerDefaultExceptionMappers: false
-  applicationContextPath: ${APP_CONTEXT_PATH:-"/"}
+  applicationContextPath: ${APP_CONTEXT_PATH:-""}
   applicationConnectors:
     - type: http
       port: 3002
