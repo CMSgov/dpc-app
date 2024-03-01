@@ -1,9 +1,9 @@
 package gov.cms.dpc.attribution;
 
 import ca.uhn.fhir.context.FhirContext;
-import gov.cms.dpc.testing.BufferedLoggerHandler;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import gov.cms.dpc.testing.BufferedLoggerHandler;
 import gov.cms.dpc.testing.IntegrationTest;
 import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.DropwizardTestSupport;
@@ -23,11 +23,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ExtendWith(BufferedLoggerHandler.class)
 @IntegrationTest
 public abstract class AbstractAttributionTest {
-    private static final String KEY_PREFIX = "dpc.attribution";
+    protected static final String configPath = "src/test/resources/test.application.yml";
     private static final ObjectMapper mapper = new ObjectMapper();
 
-    protected static final DropwizardTestSupport<DPCAttributionConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCAttributionService.class, "ci.application.conf",
-            ConfigOverride.config(KEY_PREFIX, "logging.level", "ERROR"));
+    protected static final DropwizardTestSupport<DPCAttributionConfiguration> APPLICATION =
+            new DropwizardTestSupport<>(DPCAttributionService.class, configPath,
+                    ConfigOverride.config("server.applicationConnectors[0].port", "3727"));
 
     protected static final String ORGANIZATION_ID = "0c527d2e-2e8a-4808-b11d-0fa06baf8254";
 
@@ -37,9 +38,9 @@ public abstract class AbstractAttributionTest {
     public static void initDB() throws Exception {
         APPLICATION.before();
         SharedConfigurationState.clear();
-        APPLICATION.getApplication().run("db", "migrate" , "ci.application.conf");
+        APPLICATION.getApplication().run("db", "migrate" , configPath);
         SharedConfigurationState.clear();
-        APPLICATION.getApplication().run("seed", "ci.application.conf");
+        APPLICATION.getApplication().run("seed", configPath);
     }
 
     @AfterAll

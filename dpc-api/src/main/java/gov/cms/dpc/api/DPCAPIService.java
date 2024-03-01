@@ -1,6 +1,5 @@
 package gov.cms.dpc.api;
 
-import ca.mestevens.java.configuration.bundle.TypesafeConfigurationBundle;
 import com.codahale.metrics.jersey2.InstrumentedResourceMethodApplicationListener;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.datatype.hibernate5.Hibernate5Module;
@@ -27,6 +26,8 @@ import gov.cms.dpc.macaroons.BakeryModule;
 import gov.cms.dpc.queue.JobQueueModule;
 import io.dropwizard.Application;
 import io.dropwizard.auth.AuthValueFactoryProvider;
+import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
+import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.db.DataSourceFactory;
 import io.dropwizard.migrations.MigrationsBundle;
 import io.dropwizard.setup.Bootstrap;
@@ -56,6 +57,12 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
 
     @Override
     public void initialize(final Bootstrap<DPCAPIConfiguration> bootstrap) {
+        // Enable variable substitution with environment variables
+        EnvironmentVariableSubstitutor substitutor = new EnvironmentVariableSubstitutor(false);
+        SubstitutingSourceProvider provider =
+                new SubstitutingSourceProvider(bootstrap.getConfigurationSourceProvider(), substitutor);
+        bootstrap.setConfigurationSourceProvider(provider);
+
         setupJacksonMapping(bootstrap);
         // Setup Guice bundle and module injection
         final GuiceBundle guiceBundle = setupGuiceBundle();
@@ -68,7 +75,6 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
         bootstrap.addBundle(hibernateAuthBundle);
 
         bootstrap.addBundle(guiceBundle);
-        bootstrap.addBundle(new TypesafeConfigurationBundle("dpc.api"));
 
         // Wrapper around some of the uglier bundle initialization commands
         setupCustomBundles(bootstrap);

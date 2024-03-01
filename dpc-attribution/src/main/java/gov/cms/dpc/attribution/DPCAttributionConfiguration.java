@@ -1,11 +1,12 @@
 package gov.cms.dpc.attribution;
 
-import ca.mestevens.java.configuration.TypesafeConfiguration;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import gov.cms.dpc.common.hibernate.attribution.IDPCDatabase;
 import gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration;
 import gov.cms.dpc.fhir.configuration.IDPCFHIRConfiguration;
+import io.dropwizard.Configuration;
 import io.dropwizard.db.DataSourceFactory;
+import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 import org.knowm.dropwizard.sundial.SundialConfiguration;
 
 import javax.validation.Valid;
@@ -15,7 +16,7 @@ import javax.validation.constraints.NotNull;
 import java.time.Duration;
 import java.util.List;
 
-public class DPCAttributionConfiguration extends TypesafeConfiguration implements IDPCDatabase, IDPCFHIRConfiguration {
+public class DPCAttributionConfiguration extends Configuration implements IDPCDatabase, IDPCFHIRConfiguration {
 
     @Valid
     private Duration expirationThreshold;
@@ -39,6 +40,9 @@ public class DPCAttributionConfiguration extends TypesafeConfiguration implement
     @NotNull
     @JsonProperty("fhir")
     private DPCFHIRConfiguration fhirConfig;
+
+    @JsonProperty("swagger")
+    private SwaggerBundleConfiguration swaggerBundleConfiguration;
 
     @Min(-1)
     private Integer providerLimit;
@@ -81,6 +85,14 @@ public class DPCAttributionConfiguration extends TypesafeConfiguration implement
     @Override
     public void setFHIRConfiguration(DPCFHIRConfiguration config) {
         this.fhirConfig = config;
+    }
+
+    public SwaggerBundleConfiguration getSwaggerBundleConfiguration() {
+        return swaggerBundleConfiguration;
+    }
+
+    public void setSwaggerBundleConfiguration(SwaggerBundleConfiguration swaggerBundleConfiguration) {
+        this.swaggerBundleConfiguration = swaggerBundleConfiguration;
     }
 
     public Boolean getMigrationEnabled() {

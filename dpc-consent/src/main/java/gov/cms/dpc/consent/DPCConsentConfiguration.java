@@ -1,17 +1,18 @@
 package gov.cms.dpc.consent;
 
-import ca.mestevens.java.configuration.TypesafeConfiguration;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import gov.cms.dpc.common.hibernate.consent.IDPCConsentDatabase;
 import gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration;
 import gov.cms.dpc.fhir.configuration.IDPCFHIRConfiguration;
+import io.dropwizard.Configuration;
 import io.dropwizard.db.DataSourceFactory;
+import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
-public class DPCConsentConfiguration extends TypesafeConfiguration implements IDPCConsentDatabase, IDPCFHIRConfiguration {
+public class DPCConsentConfiguration extends Configuration implements IDPCConsentDatabase, IDPCFHIRConfiguration {
 
     @Valid
     @NotNull
@@ -25,6 +26,9 @@ public class DPCConsentConfiguration extends TypesafeConfiguration implements ID
     @NotNull
     @JsonProperty("fhir")
     private DPCFHIRConfiguration fhirConfig;
+
+    @JsonProperty("swagger")
+    private SwaggerBundleConfiguration swaggerBundleConfiguration;
 
     @NotEmpty
     private String fhirReferenceURL;
@@ -46,6 +50,14 @@ public class DPCConsentConfiguration extends TypesafeConfiguration implements ID
     @Override
     public void setFHIRConfiguration(DPCFHIRConfiguration fhirConfig) {
         this.fhirConfig = fhirConfig;
+    }
+
+    public SwaggerBundleConfiguration getSwaggerBundleConfiguration() {
+        return swaggerBundleConfiguration;
+    }
+
+    public void setSwaggerBundleConfiguration(SwaggerBundleConfiguration swaggerBundleConfiguration) {
+        this.swaggerBundleConfiguration = swaggerBundleConfiguration;
     }
 
     public String getFhirReferenceURL() {
