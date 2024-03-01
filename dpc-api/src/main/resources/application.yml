@@ -72,7 +72,7 @@ bbclient:
   registerHealthCheck: ${BB_REGISTER_HEALTH_CHECK:-true}
   keyStore:
     type: "JKS"
-    defaultPassword: ${BB_KEYSTORE_PASS:-"changeit"}
+    defaultPassword: "${BB_KEYSTORE_PASS:-changeit}"
     location: ${BB_KEYSTORE_LOCATION:-"/bb.keystore"}
   timeouts:
     connectionTimeout: 5000 # ms
@@ -80,7 +80,7 @@ bbclient:
     requestTimeout: 5000 # ms
   serverBaseUrl: ${BFD_URL}
   resourcesCount: 100 # Max number of resource that a request to BB will return before using another request
-  bfdHashPepper: ${BFD_HASH_PEPPER}
+  bfdHashPepper: "${BFD_HASH_PEPPER}"
   bfdHashIter: ${BFD_HASH_ITER}
 
 authenticationDisabled: ${AUTH_DISABLED:-false}
