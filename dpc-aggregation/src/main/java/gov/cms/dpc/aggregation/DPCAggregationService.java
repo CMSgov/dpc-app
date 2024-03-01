@@ -39,8 +39,8 @@ public class DPCAggregationService extends Application<DPCAggregationConfigurati
         EnvironmentVariableSubstitutor substitutor = new EnvironmentVariableSubstitutor(false);
         SubstitutingSourceProvider provider =
                 new SubstitutingSourceProvider(bootstrap.getConfigurationSourceProvider(), substitutor);
-
         bootstrap.setConfigurationSourceProvider(provider);
+
         GuiceBundle guiceBundle = GuiceBundle.builder()
                 .modules(new AggregationAppModule(),
                         new DPCQueueHibernateModule<>(queueHibernateBundle),
