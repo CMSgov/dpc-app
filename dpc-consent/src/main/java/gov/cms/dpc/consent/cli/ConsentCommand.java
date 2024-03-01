@@ -30,6 +30,7 @@ public abstract class ConsentCommand extends ConfiguredCommand<DPCConsentConfigu
                 .required(true)
                 .setDefault("http://localhost:3500/v1")
                 .help("URL of the Attribution Service (used to verify ids)");
+        this.addFileArgument(subparser);
     }
 
     public abstract void addAdditionalOptions(Subparser subparser);

@@ -4,7 +4,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import com.codahale.metrics.MetricRegistry;
-import com.typesafe.config.ConfigFactory;
 import gov.cms.dpc.aggregation.health.AggregationEngineHealthCheck;
 import gov.cms.dpc.aggregation.service.ConsentResult;
 import gov.cms.dpc.aggregation.service.ConsentService;
@@ -58,12 +57,10 @@ class AggregationEngineTest {
 
     static private final FhirContext fhirContext = FhirContext.forDstu3();
     static private final MetricRegistry metricRegistry = new MetricRegistry();
-    static private String exportPath;
+    static private final String exportPath = "/tmp";
 
     @BeforeAll
     static void setupAll() {
-        final var config = ConfigFactory.load("testing.conf").getConfig("dpc.aggregation");
-        exportPath = config.getString("exportPath");
         AggregationEngine.setGlobalErrorHandler();
         ContextUtils.prefetchResourceModels(fhirContext, JobQueueBatch.validResourceTypes);
     }

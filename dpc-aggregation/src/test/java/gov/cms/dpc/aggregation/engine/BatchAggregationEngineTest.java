@@ -3,7 +3,6 @@ package gov.cms.dpc.aggregation.engine;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.PerformanceOptionsEnum;
 import com.codahale.metrics.MetricRegistry;
-import com.typesafe.config.ConfigFactory;
 import gov.cms.dpc.aggregation.service.*;
 import gov.cms.dpc.aggregation.util.AggregationUtils;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
@@ -50,15 +49,13 @@ class BatchAggregationEngineTest {
     static private final FhirContext fhirContext = FhirContext.forDstu3();
     static private final FhirContext fhirContextR4 = FhirContext.forR4();
     static private final MetricRegistry metricRegistry = new MetricRegistry();
-    static private String exportPath;
+    static private final String exportPath = "/tmp";
     static private OperationsConfig operationsConfig;
 
     @BeforeAll
     static void setupAll() {
         fhirContext.setPerformanceOptions(PerformanceOptionsEnum.DEFERRED_MODEL_SCANNING);
         fhirContextR4.setPerformanceOptions(PerformanceOptionsEnum.DEFERRED_MODEL_SCANNING);
-        final var config = ConfigFactory.load("testing.conf").getConfig("dpc.aggregation");
-        exportPath = config.getString("exportPath");
         operationsConfig = new OperationsConfig(10, exportPath, 3, YearMonth.of(2015, 3));
         AggregationEngine.setGlobalErrorHandler();
         ContextUtils.prefetchResourceModels(fhirContext, JobQueueBatch.validResourceTypes);

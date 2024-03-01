@@ -9,7 +9,6 @@ import gov.cms.dpc.fhir.helpers.FHIRHelpers;
 import gov.cms.dpc.testing.APIAuthHelpers;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import gov.cms.dpc.testing.IntegrationTest;
-import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.DropwizardTestSupport;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -40,12 +39,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ExtendWith(BufferedLoggerHandler.class)
 public class AbstractSecureApplicationTest {
     protected static final String OTHER_ORG_ID = "065fbe84-3551-4ec3-98a3-0d1198c3cb55";
-    // Application prefix, which we need in order to correctly override config values.
-    private static final String KEY_PREFIX = "dpc.api";
+    protected static final String configPath = "src/test/resources/test.application.yml";
     private static final ObjectMapper mapper = new ObjectMapper();
 
-    private static final DropwizardTestSupport<DPCAPIConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCAPIService.class, "ci.application.conf", ConfigOverride.config(KEY_PREFIX, "", "true"),
-            ConfigOverride.config(KEY_PREFIX, "logging.level", "ERROR"));
+    private static final DropwizardTestSupport<DPCAPIConfiguration> APPLICATION =
+            new DropwizardTestSupport<>(DPCAPIService.class, configPath);
     protected static FhirContext ctx;
     protected static String ORGANIZATION_TOKEN;
     // Macaroon to use for doing admin things (like creating tokens and keys)
