@@ -21,8 +21,31 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
       stub_api_client(message: :get_organization,
                       response: default_get_org_response(api_id))
       get "/organizations/#{api_id}/credential_delegate_invitations/new"
-      expect(assigns(:organization).api_id).to eq api_id
+      expect(assigns(:organization).dpc_api_organization_id).to eq api_id
       expect(response).to have_http_status(200)
+    end
+
+    it 'creates ProviderOrganization with org data if not exists' do
+      api_id = SecureRandom.uuid
+      stub_api_client(message: :get_organization,
+                      response: default_get_org_response(api_id))
+      expect do
+        get "/organizations/#{api_id}/credential_delegate_invitations/new"
+      end.to change { ProviderOrganization.count }.by(1)
+      expect(assigns(:organization).name).to eq "Bob's Health Hut"
+      expect(assigns(:organization).npi).to eq '1111111111'
+    end
+
+    it 'uses ProviderOrganization if exists' do
+      api_id = SecureRandom.uuid
+      stub_api_client(message: :get_organization,
+                      response: default_get_org_response(api_id))
+      create(:provider_organization, dpc_api_organization_id: api_id, name: 'Foo', npi: '2222222222')
+      expect do
+        get "/organizations/#{api_id}/credential_delegate_invitations/new"
+      end.to change { ProviderOrganization.count }.by(0)
+      expect(assigns(:organization).name).to eq 'Foo'
+      expect(assigns(:organization).npi).to eq '2222222222'
     end
   end
 
@@ -30,11 +53,11 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
     let!(:user) { create(:user) }
     let!(:api_id) { SecureRandom.uuid }
     let!(:successful_parameters) do
-      { given_name: 'Bob',
-        family_name: 'Hodges',
+      { invited_given_name: 'Bob',
+        invited_family_name: 'Hodges',
         phone_raw: '222-222-2222',
-        email: 'bob@example.com',
-        email_confirmation: 'bob@example.com' }
+        invited_email: 'bob@example.com',
+        invited_email_confirmation: 'bob@example.com' }
     end
 
     before do
@@ -42,14 +65,28 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
       stub_api_client(message: :get_organization,
                       response: default_get_org_response(api_id))
     end
+
+    it 'creates invitation record on success' do
+      expect do
+        post "/organizations/#{api_id}/credential_delegate_invitations", params: successful_parameters
+      end.to change { Invitation.count }.by(1)
+    end
+
     it 'redirects on success' do
       post "/organizations/#{api_id}/credential_delegate_invitations", params: successful_parameters
       expect(response).to redirect_to(success_organization_credential_delegate_invitation_path(api_id,
                                                                                                'new-invitation'))
     end
 
+    it 'does not create invitation record on failure' do
+      successful_parameters['invited_given_name'] = ''
+      expect do
+        post "/organizations/#{api_id}/credential_delegate_invitations", params: successful_parameters
+      end.to change { Invitation.count }.by(0)
+    end
+
     it 'does not redirect on failure' do
-      successful_parameters['given_name'] = ''
+      successful_parameters['invited_given_name'] = ''
       post "/organizations/#{api_id}/credential_delegate_invitations", params: successful_parameters
       expect(response.status).to eq(400)
     end
@@ -64,7 +101,7 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
       stub_api_client(message: :get_organization,
                       response: default_get_org_response(api_id))
       get "/organizations/#{api_id}/credential_delegate_invitations/foo/success"
-      expect(assigns(:organization).api_id).to eq api_id
+      expect(assigns(:organization).dpc_api_organization_id).to eq api_id
       expect(response).to have_http_status(200)
     end
   end

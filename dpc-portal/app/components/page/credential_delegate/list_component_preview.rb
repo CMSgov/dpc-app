@@ -33,7 +33,7 @@ module Page
       private
 
       def org
-        Page::CredentialDelegate::MockOrg.new('Health Hut', '111111111')
+        MockOrg.new('Health Hut')
       end
     end
 
@@ -41,9 +41,9 @@ module Page
     class MockOrg
       attr_accessor :name, :npi, :path_id
 
-      def initialize(name, npi)
+      def initialize(name)
         @name = name
-        @npi = npi
+        @npi = '11111111'
         @path_id = SecureRandom.uuid
       end
     end
