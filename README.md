@@ -193,24 +193,17 @@ By default, the API components will attempt to connect to the `dpc_attribution`,
 
 All of these databases should be created automatically from the previous step. When the API applications start, migrations will run and initialize the databases with the correct tables and data. If this behavior is not desired, set an environment variable of `DB_MIGRATION=0`.
 
-The defaults can be overridden in the configuration files.
-Common configuration options (such as database connection strings) are stored in a [server.conf](src/main/resources/server.conf) file and included in the various modules via the `include "server.conf"` attribute in module application config files.
-See the `dpc-attribution` [application.conf](dpc-attribution/src/main/resources/application.conf) for an example.
-
-Default settings can be overridden, either directly in the module configurations or via an `application.local.conf` file in the project root directory. 
+Default settings can be overridden, either directly in the module configurations or via `local.application.env` file in the project resources directory. 
 For example, modifying the `dpc-attribution` configuration:
 
 ```yaml
-dpc.attribution {
-  database = {
-    driverClass = org.postgresql.Driver
-    url = "jdbc:postgresql://localhost:5432/dpc-dev"
-    user = postgres
-  }
-}
+database:
+  driverClass: org.postgresql.Driver
+  url: "jdbc:postgresql://localhost:5432/dpc-dev"
+  user: postgres
 ```
 
-**Note**: On startup, the services look for a local override file (application.local.conf) in the root of their *current* working directory. This can create an issue when running tests with IntelliJ. The default sets the working directory to be the module root, which means any local overrides are ignored.
+**Note**: On startup, the services look for a local override file (local.application.env) in the root of their *current* working directory. This can create an issue when running tests with IntelliJ. The default sets the working directory to be the module root, which means any local overrides are ignored.
 This can be fixed by setting the working directory to the project root, but needs to be done manually.
 
 ### There are two ways to build DPC:
@@ -292,9 +285,9 @@ When manually running the individual services, you'll need to ensure that there 
 
 **Important Note**: The API service requires authentication before performing actions. This will cause most integration tests to fail, as they expect the endpoints to be open. Authentication can be disabled in one of two ways: 
 * Set the `ENV` environment variable to `local` (which is the default when running under Docker).
-* Set `dpc.api.authenticationDisabled=true` in the config file (the default from the sample config file).   
+* Set `authenticationDisabled=true` in the config file (the default from the sample config file).   
 
-Next, start each service in a new terminal window, from within the the `dpc-app` root directory. 
+Next, start each service in a new terminal window, from within the `dpc-app` root directory. 
 
 ```bash
 java -jar dpc-attribution/target/dpc-attribution.jar server
@@ -302,13 +295,11 @@ java -jar dpc-aggregation/target/dpc-aggregation.jar server
 java -jar dpc-api/target/dpc-api.jar server
 ```
 
-By default, the services will attempt to load the `local.application.conf` file from the current execution directory. 
-This can be overridden in two ways:
-* Passing `ENV={dev,test,prod}` will load a `{dev,test,prod}.application.conf` file from the service resources directory.
-* Manually specifying a configuration file after the server command `server src/main/resources/application.conf` will directly load that configuration set.
+By default, the services will attempt to load the `local.application.env` file from the current execution directory. 
+This can be overridden by passing `ENV={dev,test,prod}`, which will load `{dev,test,prod}.application.env` file from the service resources directory.
 
 **Note**: Manually specifying a config file will disable the normal configuration merging process. 
-This means that only the config variables directly specified in the file will be loaded, no other `application.conf` or `reference.conf` files will be processed. 
+This means that only the config variables directly specified in the file will be loaded, no other `application.env` files will be processed. 
 
 * You can check that the application is running by requesting the FHIR `CapabilitiesStatement` for the `dpc-api` service, which will return a JSON-formatted FHIR resource.
     ```bash

@@ -47,7 +47,7 @@ db:
 #### JVM Authentication
 Set authentication_disabled for JVM set to **[true]** in the `api` service in the same file.
 
-`JVM_FLAGS=-Ddpc.api.authenticationDisabled=${AUTH_DISABLED:-true}`
+`AUTH_DISABLED=true`
 
 By default, the Docker containers start with minimal authentication enabled, meaning that some functionality (such as extracting the organization_id from the access token) will not work as expected and always return the same value.
 This can be overridden during startup by setting the `AUTH_DISABLED=false` environment variable.

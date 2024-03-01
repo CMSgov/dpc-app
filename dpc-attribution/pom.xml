@@ -54,10 +54,6 @@
             <artifactId>dropwizard-guicey</artifactId>
         </dependency>
         <dependency>
-            <groupId>${typesafe.config.groupID}</groupId>
-            <artifactId>typesafe-dropwizard-configuration</artifactId>
-        </dependency>
-        <dependency>
             <groupId>com.google.inject</groupId>
             <artifactId>guice</artifactId>
         </dependency>
@@ -194,7 +190,7 @@
                     <container>
                         <args>
                             <arg>server</arg>
-                            <!--<arg>${jib.container.appRoot}/resources/application.conf</arg>-->
+                            <!--<arg>${jib.container.appRoot}/resources/application.yml</arg>-->
                         </args>
                         <ports>
                             <port>8080</port>

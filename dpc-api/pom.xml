@@ -60,10 +60,6 @@
             <artifactId>dropwizard-guicey</artifactId>
         </dependency>
         <dependency>
-            <groupId>${typesafe.config.groupID}</groupId>
-            <artifactId>typesafe-dropwizard-configuration</artifactId>
-        </dependency>
-        <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
             <version>2.11.0</version>

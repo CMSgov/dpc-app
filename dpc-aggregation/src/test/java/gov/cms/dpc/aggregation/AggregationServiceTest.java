@@ -7,7 +7,6 @@ import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.DropwizardTestSupport;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -20,7 +19,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ExtendWith(BufferedLoggerHandler.class)
 public class AggregationServiceTest {
 
-    private static final DropwizardTestSupport<DPCAggregationConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCAggregationService.class, "ci.application.conf", ConfigOverride.config("server.applicationConnectors[0].port", "7777"));
+    private static final String configPath = "src/test/resources/test.application.yml";
+    private static final DropwizardTestSupport<DPCAggregationConfiguration> APPLICATION =
+            new DropwizardTestSupport<>(DPCAggregationService.class, configPath,
+                    ConfigOverride.config("server.applicationConnectors[0].port", "7777"));
 
     @BeforeAll
     static void start() throws Exception{
