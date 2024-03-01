@@ -32,7 +32,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_02_29_222634) do
     t.string "dpc_api_organization_id"
     t.string "name"
     t.string "npi"
-    t.bigint "terms_of_service_accepted_by"
+    t.bigint "terms_of_service_accepted_by_id"
     t.datetime "terms_of_service_accepted_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
