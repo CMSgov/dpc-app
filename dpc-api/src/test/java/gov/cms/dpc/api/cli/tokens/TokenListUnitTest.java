@@ -1,10 +1,25 @@
 package gov.cms.dpc.api.cli.tokens;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import gov.cms.dpc.api.DPCAPIConfiguration;
+import gov.cms.dpc.api.DPCAPIService;
+import gov.cms.dpc.api.entities.TokenEntity;
+import gov.cms.dpc.api.entities.TokenEntity.TokenType;
+import gov.cms.dpc.api.models.CollectionResponse;
+import gov.cms.dpc.testing.APIAuthHelpers;
+import gov.cms.dpc.testing.NoExitSecurityManager;
+import gov.cms.dpc.testing.exceptions.SystemExitException;
+import io.dropwizard.core.cli.Cli;
+import io.dropwizard.core.setup.Bootstrap;
+import io.dropwizard.util.JarLocation;
+import org.apache.http.HttpStatus;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockserver.client.MockServerClient;
+import org.mockserver.integration.ClientAndServer;
+import org.mockserver.model.HttpRequest;
+import org.mockserver.model.Parameter;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -16,28 +31,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.apache.http.HttpStatus;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockserver.client.MockServerClient;
-import org.mockserver.integration.ClientAndServer;
-import org.mockserver.model.HttpRequest;
-import org.mockserver.model.Parameter;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import gov.cms.dpc.api.DPCAPIConfiguration;
-import gov.cms.dpc.api.DPCAPIService;
-import gov.cms.dpc.api.entities.TokenEntity;
-import gov.cms.dpc.api.entities.TokenEntity.TokenType;
-import gov.cms.dpc.api.models.CollectionResponse;
-import gov.cms.dpc.testing.APIAuthHelpers;
-import gov.cms.dpc.testing.NoExitSecurityManager;
-import gov.cms.dpc.testing.exceptions.SystemExitException;
-import io.dropwizard.cli.Cli;
-import io.dropwizard.setup.Bootstrap;
-import io.dropwizard.util.JarLocation;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
 
 public class TokenListUnitTest {
     private final PrintStream originalOut = System.out;
