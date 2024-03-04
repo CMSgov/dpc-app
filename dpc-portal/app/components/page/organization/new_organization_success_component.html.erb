@@ -1,0 +1,26 @@
+<div>
+  <div class="margin-bottom-5">&larr; <%= link_to @organization.name, organization_path(organization.path_id) %></div>
+  <h1>Add new organization</h1>
+  <h2>Organization added!</h2>
+  <div class="usa-alert usa-alert--success">
+    <div class="usa-alert__body">
+      <h4 class="usa-alert__heading">Success status</h4>
+      <p class="usa-alert__text">This is a succinct, helpful success message.</p>
+    </div>
+  </div>
+  <p>To manage your organization's credentials, you can assign a Credential Delegate (CD).
+    This person will be responsible for submitting your organization's technical requirements
+    and managing your access to the DPC API.
+  </p>
+  <p>Learn more about the Credential Delegate role.</p>
+  <div class="margin-top-5">
+    <div class="display-flex flex-row flex-start" style="gap:20px;">
+        <div class="flex-align-self-center">
+            <%= render Core::Button::ButtonComponent.new(label: 'Assign CD now', destination: root_path)%>
+        </div>
+        <div class="flex-align-self-center">
+            <%= link_to 'Assign CD later', root_path %>
+        </div>
+    </div>
+  </div>
+</div>
