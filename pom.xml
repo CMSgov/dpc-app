@@ -46,7 +46,7 @@
         <jib.container.appRoot>/app</jib.container.appRoot>
         <jib.ecr.root>755619740999.dkr.ecr.us-east-1.amazonaws.com</jib.ecr.root>
         <timestamp>${maven.build.timestamp}</timestamp>
-        <jacoco.version>0.8.8</jacoco.version>
+        <jacoco.version>0.8.5</jacoco.version>
         <jooq.version>3.13.4</jooq.version>
         <bouncey.version>1.70</bouncey.version>
         <pitest.version>1.5.1</pitest.version>
