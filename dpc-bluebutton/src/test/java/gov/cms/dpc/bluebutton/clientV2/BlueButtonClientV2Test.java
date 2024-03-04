@@ -21,7 +21,6 @@ import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockserver.client.MockServerClient;
@@ -42,8 +41,6 @@ import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-// TODO: dropwizard - org.mockserver.httpclient.SocketConnectionException: Channel handler removed before valid response has been received
-@Disabled
 @ExtendWith(BufferedLoggerHandler.class)
 class BlueButtonClientV2Test {
     // A random example patient (Jane Doe)
