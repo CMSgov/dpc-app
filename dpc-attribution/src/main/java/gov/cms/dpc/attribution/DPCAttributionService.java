@@ -92,7 +92,7 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
             }
         });
 
-//        TODO: dropwizard - remove sundial
+//        TODO: dropwizard-sundial
 //        final SundialBundle<DPCAttributionConfiguration> sundialBundle = new SundialBundle<>() {
 //            @Override
 //            public SundialConfiguration getSundialConfiguration(DPCAttributionConfiguration dpcAttributionConfiguration) {
