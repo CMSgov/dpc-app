@@ -14,7 +14,6 @@ database:
 server:
   enableThreadNameFilter: false
   registerDefaultExceptionMappers: false
-  applicationContextPath: "/api"
   applicationConnectors:
     - type: http
       port: 8080
