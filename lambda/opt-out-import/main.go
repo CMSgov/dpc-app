@@ -37,7 +37,7 @@ type (
 
 func main() {
 	if isTesting {
-		filename := "P.NGD.DPC.RSP.D240123.T1122001.IN"
+		filename := "bfdeft01/dpc/in/P.NGD.DPC.RSP.D240123.T1122001.IN"
 		success, _ := importOptOutFile("demo-bucket", filename)
 		log.Println(success)
 	} else {
@@ -135,7 +135,7 @@ func importOptOutFile(bucket string, file string) (bool, error) {
 		log.Warning("Failed to create session for uploading response file")
 		return false, err
 	} else {
-		if err = uploadConfirmationFile(bucket, GenerateConfirmationFileName(), s3manager.NewUploader(sess).Upload, confirmationFile); err != nil {
+		if err = uploadConfirmationFile(bucket, GenerateConfirmationFileName(file), s3manager.NewUploader(sess).Upload, confirmationFile); err != nil {
 			log.Warning("Failed to write upload response file")
 			return false, err
 		}
