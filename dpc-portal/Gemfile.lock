@@ -542,7 +542,7 @@ GEM
     websocket (1.2.10)
     xpath (3.2.0)
       nokogiri (~> 1.8)
-    yard (0.9.35)
+    yard (0.9.36)
     zeitwerk (2.6.12)
 
 PLATFORMS
@@ -582,7 +582,7 @@ DEPENDENCIES
   kaminari
   letter_opener
   lograge
-  lookbook (>= 2.1.1)
+  lookbook (>= 2.2.1)
   luhnacy (~> 0.2.1)
   macaroons
   newrelic_rpm (~> 8.10)
@@ -617,6 +617,7 @@ DEPENDENCIES
   view_component (~> 3.9)
   webdrivers
   webmock
+  yard (>= 0.9.36)
 
 RUBY VERSION
    ruby 3.3.0p0

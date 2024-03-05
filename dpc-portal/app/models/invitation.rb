@@ -23,6 +23,6 @@ class Invitation < ApplicationRecord
   def show_attributes
     { full_name: "#{invited_given_name} #{invited_family_name}",
       email: invited_email,
-      verification_code: verification_code }.with_indifferent_access
+      verification_code: }.with_indifferent_access
   end
 end

@@ -92,7 +92,7 @@ RSpec.describe 'Organizations', type: :request do
       api_id = SecureRandom.uuid
       stub_client(api_id)
       provider_organization = create(:provider_organization, dpc_api_organization_id: api_id)
-      create(:invitation, provider_organization: provider_organization, invited_by: user)
+      create(:invitation, provider_organization:, invited_by: user)
       get "/organizations/#{api_id}?ao=true"
       expect(assigns(:invitations).size).to eq 1
     end
