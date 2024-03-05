@@ -29,7 +29,6 @@ class PublicKeyManager
 
   def invalid_encoding?(key_string)
     key = OpenSSL::PKey::RSA.new(key_string)
-    puts key.inspect
     if key.private?
       @errors << 'Must be a public key'
       true
