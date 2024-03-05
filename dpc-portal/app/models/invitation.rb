@@ -5,9 +5,10 @@ class Invitation < ApplicationRecord
   attr_reader :phone_raw
 
   validates :invited_given_name, :invited_family_name, :phone_raw, :invited_email, :invited_email_confirmation,
-            :invitation_type, presence: true
-  validates :invited_email, format: Devise.email_regexp, confirmation: true
-  validates :invited_phone, format: { with: /\A[0-9]{10}\z/ }
+            presence: true, if: :new_record?
+  validates :invited_email, format: Devise.email_regexp, confirmation: true, if: :new_record?
+  validates :invitation_type, presence: true
+  validates :invited_phone, format: { with: /\A[0-9]{10}\z/ }, if: :new_record?
 
   enum invitation_type: %i[credential_delegate]
 
