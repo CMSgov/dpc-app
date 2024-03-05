@@ -1,0 +1,14 @@
+<div>
+  <div class="margin-bottom-5">&larr; <%= link_to "path", root_path %></div>
+  <h1>Add new organization</h1>
+  <h2>Look up NPI</h2>
+  <%= form_tag method: :post do %>
+
+    <%= render(Core::Form::TextInputComponent.new(
+        label: 'What is your Type 2 NPI?',
+	    attribute: 'npi',
+        input_options: { maxlength: 10 }
+    )) %>
+    <%= submit_tag "Search for organization", class: "usa-button", data: { test: "form-submit" } %>
+  <% end %>
+</div>
