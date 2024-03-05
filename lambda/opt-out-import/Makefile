@@ -9,6 +9,9 @@ build:
 test:
 	IS_TESTING=true DB_USER_DPC_CONSENT="postgres" DB_PASS_DPC_CONSENT="dpc-safe" go test -v -covermode=count -coverprofile=coverage/unit_coverage.out
 	go tool cover -html=coverage/unit_coverage.out -o coverage/unit_coverage.html
+test-short:
+	IS_TESTING=true DB_USER_DPC_CONSENT="postgres" DB_PASS_DPC_CONSENT="dpc-safe" go test -short -v -covermode=count -coverprofile=coverage/unit_coverage.out
+	go tool cover -html=coverage/unit_coverage.out -o coverage/unit_coverage.html
 run-local:
 	ENV="local" DB_USER_DPC_CONSENT="postgres" DB_PASS_DPC_CONSENT="dpc-safe" DB_HOST="localhost" IS_TESTING=true go run main.go parsers.go utils.go models.go db.go
 run:
