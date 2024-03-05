@@ -15,9 +15,9 @@ ActiveRecord::Schema[7.0].define(version: 2024_02_29_222634) do
   enable_extension "plpgsql"
 
   create_table "invitations", force: :cascade do |t|
-    t.bigint "provider_organization_id"
-    t.bigint "invited_by_id"
-    t.string "invitation_type"
+    t.bigint "provider_organization_id", null: false
+    t.bigint "invited_by_id", null: false
+    t.integer "invitation_type", null: false
     t.string "invited_given_name"
     t.string "invited_family_name"
     t.string "invited_phone"
@@ -31,7 +31,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_02_29_222634) do
   create_table "provider_organizations", force: :cascade do |t|
     t.string "dpc_api_organization_id"
     t.string "name"
-    t.string "npi"
+    t.string "npi", null: false
     t.bigint "terms_of_service_accepted_by_id"
     t.datetime "terms_of_service_accepted_at"
     t.datetime "created_at", null: false
@@ -56,4 +56,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_02_29_222634) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
+  add_foreign_key "invitations", "provider_organizations"
+  add_foreign_key "invitations", "users", column: "invited_by_id"
+  add_foreign_key "provider_organizations", "users", column: "terms_of_service_accepted_by_id"
 end

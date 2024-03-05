@@ -8,7 +8,7 @@ RSpec.describe Invitation, type: :model do
   let(:valid_cd_invite) do
     Invitation.new(provider_organization: organization,
                    invited_by: authorized_official,
-                   invitation_type: 'credential_delegate',
+                   invitation_type: :credential_delegate,
                    invited_given_name: 'Bob',
                    invited_family_name: 'Hogan',
                    phone_raw: '877-288-3131',
@@ -37,14 +37,13 @@ RSpec.describe Invitation, type: :model do
     valid_cd_invite.invitation_type = nil
     expect(valid_cd_invite.valid?).to eq false
     expect(valid_cd_invite.errors.size).to eq 1
-    expect(valid_cd_invite.errors[:invitation_type]).to eq ['is not included in the list']
+    expect(valid_cd_invite.errors[:invitation_type]).to eq ["can't be blank"]
   end
 
   it 'fails on invalid invitation type' do
-    valid_cd_invite.invitation_type = 'authorized_official'
-    expect(valid_cd_invite.valid?).to eq false
-    expect(valid_cd_invite.errors.size).to eq 1
-    expect(valid_cd_invite.errors[:invitation_type]).to eq ['is not included in the list']
+    expect do
+      valid_cd_invite.invitation_type = :birthday_party
+    end.to raise_error(ArgumentError)
   end
 
   it 'fails on blank given name' do
