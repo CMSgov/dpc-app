@@ -9,7 +9,7 @@ RSpec.shared_examples 'an internal user authenticable controller action' do |met
         params[:id] = create(resource).id
       end
 
-      send meth, action, params: params
+      send meth, action, params:
     end
 
     scenario 'is redirected to the sign in page' do
@@ -28,7 +28,7 @@ RSpec.shared_examples 'an internal user authenticable controller action' do |met
         params[:id] = create(resource).id
       end
 
-      send meth, action, params: params
+      send meth, action, params:
     end
 
     scenario 'is redirected to the home page' do
@@ -47,7 +47,7 @@ RSpec.shared_examples 'an internal user authenticable controller action' do |met
       @internal_user = InternalUser.last || create(:internal_user)
 
       sign_in @internal_user, scope: :internal_user
-      send meth, action, params: params
+      send meth, action, params:
     end
 
     # FIXME this should be meth, but will require some test refactoring
