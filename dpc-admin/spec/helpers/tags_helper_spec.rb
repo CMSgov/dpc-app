@@ -16,7 +16,7 @@ RSpec.describe TagsHelper, type: :helper do
   describe '#confirm_text' do
     it 'uses tagging number with confirm text' do
       tag = create(:tag)
-      create_list(:tagging, 2, tag: tag)
+      create_list(:tagging, 2, tag:)
       expect(helper.confirm_text(tag)).to eq('Are you sure? 2 records have this tag.')
     end
   end

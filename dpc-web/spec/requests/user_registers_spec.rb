@@ -6,11 +6,11 @@ RSpec.describe 'User Registers for Access', type: :request do
   let(:user) { attributes_for :user, requested_organization_type: 'speciality_clinic' }
 
   it 'creates a new user account' do
-    expect { post '/users', params: { user: user } }.to change(User, :count)
+    expect { post '/users', params: { user: } }.to change(User, :count)
   end
 
   it 'new user account contains correct values' do
-    post '/users', params: { user: user }
+    post '/users', params: { user: }
     stored_user = User.first
 
     user.delete(:password)

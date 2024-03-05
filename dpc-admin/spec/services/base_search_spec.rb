@@ -36,7 +36,7 @@ RSpec.describe BaseSearch do
           controller: 'organizations',
         }
 
-        expect(BaseSearch.new(params: params).results).to match_array([first_org, second_org, third_org])
+        expect(BaseSearch.new(params:).results).to match_array([first_org, second_org, third_org])
       end
     end
 
@@ -48,7 +48,7 @@ RSpec.describe BaseSearch do
             created_after: 7.days.ago
           }
 
-          expect(BaseSearch.new(params: params).results).to match_array([first_org, third_org])
+          expect(BaseSearch.new(params:).results).to match_array([first_org, third_org])
         end
       end
 
@@ -59,7 +59,7 @@ RSpec.describe BaseSearch do
             created_before: 7.days.ago
           }
 
-          expect(BaseSearch.new(params: params).results).to match_array([second_org])
+          expect(BaseSearch.new(params:).results).to match_array([second_org])
         end
       end
     end
@@ -83,7 +83,7 @@ RSpec.describe BaseSearch do
           created_before: 1.day.ago
         }
 
-        expect(BaseSearch.new(params: params).results).to match_array([user, vendor_user])
+        expect(BaseSearch.new(params:).results).to match_array([user, vendor_user])
       end
     end
 
@@ -96,7 +96,7 @@ RSpec.describe BaseSearch do
             created_after: 7.days.ago,
           }
 
-          expect(BaseSearch.new(params: params, scope: 'provider').results).to match_array([user, new_user])
+          expect(BaseSearch.new(params:, scope: 'provider').results).to match_array([user, new_user])
         end
       end
 
@@ -108,7 +108,7 @@ RSpec.describe BaseSearch do
             created_before: 7.days.ago,
           }
 
-          expect(BaseSearch.new(params: params, scope: 'provider').results).to match_array([old_unassigned_user])
+          expect(BaseSearch.new(params:, scope: 'provider').results).to match_array([old_unassigned_user])
         end
       end
     end
@@ -122,7 +122,7 @@ RSpec.describe BaseSearch do
             created_before: 7.days.ago,
           }
 
-          expect(BaseSearch.new(params: params, scope: 'vendor').results).to match_array([old_vendor_user])
+          expect(BaseSearch.new(params:, scope: 'vendor').results).to match_array([old_vendor_user])
         end
       end
 
@@ -134,7 +134,7 @@ RSpec.describe BaseSearch do
             created_after: 7.days.ago,
           }
 
-          expect(BaseSearch.new(params: params, scope: 'vendor').results).to match_array([unassigned_vendor_user])
+          expect(BaseSearch.new(params:, scope: 'vendor').results).to match_array([unassigned_vendor_user])
         end
       end
     end

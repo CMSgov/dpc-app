@@ -11,7 +11,7 @@ module Core
       # @param hint textarea
       # @param error textarea
       def parameterized(label: 'Some label', hint: 'Here is a hint', error: '')
-        render(Core::Form::MaskedInputComponent.new(label: label, attribute: :foo, mask: 'us-phone', hint: hint,
+        render(Core::Form::MaskedInputComponent.new(label:, attribute: :foo, mask: 'us-phone', hint:,
                                                     error_msg: error))
       end
 

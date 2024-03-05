@@ -43,7 +43,7 @@ RSpec.describe 'IpAddresses', type: :request do
                                    response: default_get_org_response(org_api_id))
       stub_self_returning_api_client(message: :create_ip_address,
                                      response: default_get_ip_addresses['entities'].first,
-                                     api_client: api_client)
+                                     api_client:)
       post "/organizations/#{org_api_id}/ip_addresses", params: { label: 'Public IP 1', ip_address: '136.226.19.87' }
       expect(assigns(:organization).api_id).to eq org_api_id
     end
@@ -63,7 +63,7 @@ RSpec.describe 'IpAddresses', type: :request do
                                    response: default_get_org_response(org_api_id))
       stub_self_returning_api_client(message: :create_ip_address,
                                      response: default_get_ip_addresses['entities'].first,
-                                     api_client: api_client)
+                                     api_client:)
       post "/organizations/#{org_api_id}/ip_addresses", params: { label: 'Public IP 1', ip_address: '333.333.333.333' }
       expect(assigns(:organization).api_id).to eq org_api_id
       expect(flash[:alert]).to eq('IP address could not be created: invalid IP address.')
@@ -75,7 +75,7 @@ RSpec.describe 'IpAddresses', type: :request do
                                    response: default_get_org_response(org_api_id))
       stub_self_returning_api_client(message: :create_ip_address,
                                      response: default_get_ip_addresses['entities'].first,
-                                     api_client: api_client)
+                                     api_client:)
       post "/organizations/#{org_api_id}/ip_addresses",
            params: { label: 'aaaaabbbbbcccccdddddeeeeefffff', ip_address: '136.226.19.87' }
       expect(assigns(:organization).api_id).to eq org_api_id
@@ -89,7 +89,7 @@ RSpec.describe 'IpAddresses', type: :request do
       stub_self_returning_api_client(message: :create_ip_address,
                                      success: false,
                                      response: nil,
-                                     api_client: api_client)
+                                     api_client:)
       post "/organizations/#{org_api_id}/ip_addresses", params: { label: 'Public IP 1', ip_address: '136.226.19.87' }
       expect(flash[:alert]).to eq('IP address could not be created: failed to create IP address.')
     end
@@ -114,7 +114,7 @@ RSpec.describe 'IpAddresses', type: :request do
       stub_self_returning_api_client(message: :delete_ip_address,
                                      response: nil,
                                      with: [org_api_id, addr_guid],
-                                     api_client: api_client)
+                                     api_client:)
       delete "/organizations/#{org_api_id}/ip_addresses/#{addr_guid}"
       expect(flash[:notice]).to eq('IP address successfully deleted.')
       expect(response).to redirect_to(organization_path(org_api_id))
@@ -129,7 +129,7 @@ RSpec.describe 'IpAddresses', type: :request do
                                      response: nil,
                                      success: false,
                                      with: [org_api_id, addr_guid],
-                                     api_client: api_client)
+                                     api_client:)
       delete "/organizations/#{org_api_id}/ip_addresses/#{addr_guid}"
       expect(flash[:alert]).to eq('IP address could not be deleted: failed to delete IP address.')
       expect(response).to redirect_to(organization_path(org_api_id))
