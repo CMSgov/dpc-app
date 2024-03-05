@@ -27,6 +27,7 @@ gem 'dotenv-rails', groups: %i[development test]
 gem 'fhir_client'
 gem 'health_check'
 gem 'jbuilder', '~> 2.7'
+gem 'json-jwt', '>= 1.16.6'
 gem 'kaminari'
 gem 'lograge'
 gem 'lookbook', '>= 2.1.1' # install lookbook so it can be deployed in lower environments.
