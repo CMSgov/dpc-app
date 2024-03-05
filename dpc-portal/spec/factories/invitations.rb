@@ -2,6 +2,8 @@
 
 FactoryBot.define do
   factory :invitation do
+    provider_organization
+    invited_by
     invited_given_name { 'Bob' }
     invited_family_name { 'Hodges' }
     phone_raw { '111-111-1111' }

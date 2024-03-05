@@ -3,18 +3,9 @@
 require 'rails_helper'
 
 RSpec.describe Invitation, type: :model do
-  let(:organization) { create(:provider_organization) }
-  let(:authorized_official) { create(:user) }
-  let(:valid_new_cd_invite) do
-    Invitation.new(provider_organization: organization,
-                   invited_by: authorized_official,
-                   invitation_type: :credential_delegate,
-                   invited_given_name: 'Bob',
-                   invited_family_name: 'Hogan',
-                   phone_raw: '877-288-3131',
-                   invited_email: 'bob@example.com',
-                   invited_email_confirmation: 'bob@example.com')
-  end
+  let(:organization) { build(:provider_organization) }
+  let(:authorized_official) { build(:user) }
+  let(:valid_new_cd_invite) { build(:invitation) }
 
   describe :create do
     it 'passes validations' do

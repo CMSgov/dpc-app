@@ -8,7 +8,7 @@ RSpec.describe ProviderOrganization, type: :model do
       expect(ProviderOrganization.new(npi: '1111111111')).to be_valid
     end
 
-    it 'should faile without npi' do
+    it 'should fail without npi' do
       expect(ProviderOrganization.new).to_not be_valid
     end
   end
