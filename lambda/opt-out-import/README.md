@@ -6,7 +6,7 @@ make sure you have aws cli downloaded on your computer
 configure aws with fake data, `aws configure`
 - run `docker-compose up -d`
 - run populate_s3.sh
-- run `aws --endpoint-url=http://localhost:4566 s3api list-objects --bucket demo-bucket` to verify dummyfile.txt was added to s3 in localstack
+- run `aws --endpoint-url=http://localhost:4566 s3api list-objects --bucket demo-bucket` to verify dummyfile.txt and contents of `./synthetic_test_data` was added to s3 in localstack
 - run `make test`
     - This will print out a coverage percentage and a report at `coverage/unit_coverage.html`.
 
