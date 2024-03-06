@@ -1,7 +1,5 @@
 package gov.cms.dpc.aggregation.service;
 
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
 import gov.cms.dpc.aggregation.engine.OperationsConfig;
 import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
@@ -36,8 +34,7 @@ public class LookBackServiceImplTest {
     @BeforeEach
     public void beforeEach() {
         MockitoAnnotations.openMocks(this);
-        Config config = ConfigFactory.load("testing.conf").getConfig("dpc.aggregation");
-        String exportPath = config.getString("exportPath");
+        String exportPath = "/tmp";
         OperationsConfig operationsConfig = new OperationsConfig(10, exportPath, 3, YearMonth.now());
         lookBackService = new LookBackServiceImpl(operationsConfig);
         eob = new ExplanationOfBenefit();

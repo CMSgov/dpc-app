@@ -41,7 +41,7 @@ RSpec.describe Core::Form::TextInputComponent, type: :component do
 
     context 'has more classes' do
       let(:input_options) { { class: ['custom-class'] } }
-      let(:component) { described_class.new(label: 'Some Label', attribute: 'attr', input_options: input_options) }
+      let(:component) { described_class.new(label: 'Some Label', attribute: 'attr', input_options:) }
       let(:expected_html) do
         <<~HTML
           <div class="margin-bottom-4">
@@ -55,12 +55,26 @@ RSpec.describe Core::Form::TextInputComponent, type: :component do
 
     context 'has max length' do
       let(:input_options) { { maxlength: 25 } }
-      let(:component) { described_class.new(label: 'Some Label', attribute: 'attr', input_options: input_options) }
+      let(:component) { described_class.new(label: 'Some Label', attribute: 'attr', input_options:) }
       let(:expected_html) do
         <<~HTML
           <div class="margin-bottom-4">
             <label class="usa-label" for="attr">Some Label</label>
             <input type="text" name="attr" id="attr" value="" class="usa-input" maxlength="25" />
+           </div>
+        HTML
+      end
+      it { is_expected.to match_html_fragment(expected_html) }
+    end
+
+    context 'error' do
+      let(:component) { described_class.new(label: 'Some Label', attribute: 'attr', error_msg: 'Bad Input') }
+      let(:expected_html) do
+        <<~HTML
+          <div class="margin-bottom-4">
+            <label class="usa-label" for="attr">Some Label</label>
+            <p style="color: #b50909;">Bad Input</p>
+            <input type="text" name="attr" id="attr" value="" class="usa-input usa-input--error" />
            </div>
         HTML
       end

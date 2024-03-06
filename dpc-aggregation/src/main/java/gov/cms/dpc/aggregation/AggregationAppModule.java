@@ -7,11 +7,10 @@ import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.google.inject.name.Named;
-import com.typesafe.config.Config;
 import gov.cms.dpc.aggregation.engine.AggregationEngine;
 import gov.cms.dpc.aggregation.engine.JobBatchProcessor;
-import gov.cms.dpc.aggregation.engine.JobBatchProcessorV2;
 import gov.cms.dpc.aggregation.engine.OperationsConfig;
+import gov.cms.dpc.aggregation.health.AggregationEngineHealthCheck;
 import gov.cms.dpc.aggregation.service.*;
 import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.common.annotations.JobTimeout;
@@ -39,13 +38,13 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
         binder.bind(AggregationEngine.class);
         binder.bind(AggregationManager.class).asEagerSingleton();
         binder.bind(JobBatchProcessor.class);
-        binder.bind(JobBatchProcessorV2.class);
+        binder.bind(AggregationEngineHealthCheck.class);
 
         // Healthchecks
         // Additional health-checks can be added here
-        // By default, Dropwizard adds a check for Hibernate and each additonal database (e.g. auth, queue, etc)
+        // By default, Dropwizard adds a check for Hibernate and each additional database (e.g. auth, queue, etc)
         // We also have JobQueueHealthy which ensures the queue is operation correctly
-        // We have the BlueButton Client healthcheck as well
+        // We have the BlueButton Client healthcheck as well, which adds itself based on configuration
     }
 
     @Provides
@@ -73,11 +72,6 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
     @Singleton
     MetricRegistry provideMetricRegistry() {
         return environment().metrics();
-    }
-
-    @Provides
-    public Config provideConfig() {
-        return configuration().getConfig();
     }
 
     @Provides

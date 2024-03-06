@@ -72,29 +72,22 @@ public class ConsentResource {
 
         // Priority order for processing params. If multiple params are passed, we only pay attention to one
         if (id.isPresent()) {
-
             final Optional<ConsentEntity> consentEntity = this.dao.getConsent(id.get());
-            entities = consentEntity.map(List::of).orElseGet(() -> List.of(ConsentEntity.defaultConsentEntity(id, Optional.empty(), Optional.empty())));
+            entities = consentEntity.map(List::of).orElse(entities);
 
         } else if (identifier.isPresent()) {
             // not sure we should support this
             final Optional<ConsentEntity> consentEntity = this.dao.getConsent(identifier.get());
-            entities = consentEntity.map(List::of).orElseGet(() -> List.of(ConsentEntity.defaultConsentEntity(id, Optional.empty(), Optional.empty())));
+            entities = consentEntity.map(List::of).orElse(entities);
 
         } else if (patientId.isPresent()) {
-
             for (String pId : Splitter.on(',').split(patientId.get())) {
                 final Identifier patientIdentifier = FHIRExtractors.parseIDFromQueryParam(pId);
                 entities.addAll(getEntitiesByPatient(patientIdentifier));
             }
 
         } else {
-
             throw new WebApplicationException("Must have some form of Consent Resource ID or Patient ID", Response.Status.BAD_REQUEST);
-        }
-
-        if (entities.isEmpty()) {
-            throw new WebApplicationException("Cannot find patient with given ID", Response.Status.NOT_FOUND);
         }
 
         return entities
@@ -136,31 +129,21 @@ public class ConsentResource {
     }
 
     private List<ConsentEntity> getEntitiesByPatient(Identifier patientIdentifier) {
-        List<ConsentEntity> entities;
-        Optional<String> hicnValue = Optional.empty();
-        Optional<String> mbiValue = Optional.empty();
         String field;
 
         // we have been asked to search for a patient id defined by one among two (soon three!) coding systems
         // we need to determine which database field that system's value is stored in
         switch (DPCIdentifierSystem.fromString(patientIdentifier.getSystem())) {
             case MBI:
-                mbiValue = Optional.of(patientIdentifier.getValue());
                 field = "mbi";
                 break;
             case HICN:
-                hicnValue = Optional.of(patientIdentifier.getValue());
                 field = "hicn";
                 break;
             default:
                 throw new WebApplicationException("Unknown Patient ID code system", Response.Status.BAD_REQUEST);
         }
 
-        entities = this.dao.findBy(field, patientIdentifier.getValue());
-
-        if (entities.isEmpty()) {
-            entities = List.of(ConsentEntity.defaultConsentEntity(Optional.empty(), hicnValue, mbiValue));
-        }
-        return entities;
+        return this.dao.findBy(field, patientIdentifier.getValue());
     }
 }

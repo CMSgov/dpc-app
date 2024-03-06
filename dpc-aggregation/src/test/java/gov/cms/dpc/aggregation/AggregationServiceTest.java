@@ -7,7 +7,6 @@ import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.DropwizardTestSupport;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -16,12 +15,14 @@ import java.util.SortedSet;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@Disabled
 @IntegrationTest
 @ExtendWith(BufferedLoggerHandler.class)
 public class AggregationServiceTest {
 
-    private static final DropwizardTestSupport<DPCAggregationConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCAggregationService.class, "ci.application.conf", ConfigOverride.config("server.applicationConnectors[0].port", "7777"));
+    private static final String configPath = "src/test/resources/test.application.yml";
+    private static final DropwizardTestSupport<DPCAggregationConfiguration> APPLICATION =
+            new DropwizardTestSupport<>(DPCAggregationService.class, configPath,
+                    ConfigOverride.config("server.applicationConnectors[0].port", "7777"));
 
     @BeforeAll
     static void start() throws Exception{
@@ -39,7 +40,8 @@ public class AggregationServiceTest {
         final SortedSet<String> names = checks.getNames();
 
         // Ensure that the various healthchecks are propagated from the modules
-        assertAll(() -> assertTrue(names.contains("BlueButtonHealthCheck"), "Should have BB health check"));
+        assertAll(() -> assertTrue(names.contains("blue-button-client"), "Should have BB health check"));
+        assertAll(() -> assertTrue(names.contains("aggregation-engine"), "Should have Aggregation Engine health check"));
 
         // Everything should be true
         checks.runHealthChecks().forEach((key, value) -> assertTrue(value.isHealthy(), String.format("Healthcheck: %s is not ok.", key)));

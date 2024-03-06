@@ -146,8 +146,8 @@ RSpec.describe RegisteredOrganizationsController, type: :controller do
 
         organization = create(:organization, :api_enabled)
 
-        api_client = stub_api_client(api_client: api_client, message: :update_organization, success: true, response: default_org_creation_response)
-        stub_api_client(api_client: api_client, message: :update_endpoint, success: true, response: default_org_creation_response)
+        api_client = stub_api_client(api_client:, message: :update_organization, success: true, response: default_org_creation_response)
+        stub_api_client(api_client:, message: :update_endpoint, success: true, response: default_org_creation_response)
 
         put :update, params: {
           organization_id: organization.id,
@@ -168,7 +168,7 @@ RSpec.describe RegisteredOrganizationsController, type: :controller do
 
         organization = create(:organization, :api_enabled)
 
-        stub_api_client(api_client: api_client, message: :update_organization, success: false, response: { 'issues' => ['Bad request'] })
+        stub_api_client(api_client:, message: :update_organization, success: false, response: { 'issues' => ['Bad request'] })
 
         put :update, params: {
           organization_id: organization.id,
@@ -250,8 +250,8 @@ RSpec.describe RegisteredOrganizationsController, type: :controller do
 
         organization = create(:organization, :api_enabled)
 
-        api_client = stub_api_client(api_client: api_client, message: :update_organization, success: true, response: default_org_creation_response)
-        stub_api_client(api_client: api_client, message: :update_endpoint, success: true, response: default_org_creation_response)
+        api_client = stub_api_client(api_client:, message: :update_organization, success: true, response: default_org_creation_response)
+        stub_api_client(api_client:, message: :update_endpoint, success: true, response: default_org_creation_response)
 
         expect(get :enable_or_disable, params: {
           organization_id: organization.id,
@@ -268,8 +268,8 @@ RSpec.describe RegisteredOrganizationsController, type: :controller do
 
         organization = create(:organization, :api_enabled)
 
-        api_client = stub_api_client(api_client: api_client, message: :update_organization, success: true, response: default_org_creation_response)
-        stub_api_client(api_client: api_client, message: :update_endpoint, success: true, response: default_org_creation_response)
+        api_client = stub_api_client(api_client:, message: :update_organization, success: true, response: default_org_creation_response)
+        stub_api_client(api_client:, message: :update_endpoint, success: true, response: default_org_creation_response)
 
         organization.registered_organization.enabled = false
         organization.registered_organization.save

@@ -56,6 +56,7 @@ if [ -n "$REPORT_COVERAGE" ]; then
 fi
 
 docker-compose down
+docker volume rm dpc-app_pgdata
 docker-compose up start_core_dependencies
 docker-compose up start_api_dependencies
 

@@ -9,7 +9,7 @@ class UserMailer < ApplicationMailer
       to: @user.email,
       subject: 'You have been added to an organization in Data at the Point of Care',
       template_path: 'user_mailer',
-      template_name: template_name
+      template_name:
     )
   end
 end

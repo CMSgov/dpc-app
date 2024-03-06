@@ -6,9 +6,9 @@ class LoginDotGovController < Devise::OmniauthCallbacksController
 
   def openid_connect
     auth = request.env['omniauth.auth']
-    user = User.new(email: auth.info.email,
-                    given_name: auth.extra.raw_info.given_name,
-                    family_name: auth.extra.raw_info.family_name)
+    user = User.find_or_create_by(provider: auth.provider, uid: auth.uid) do |user_to_create|
+      assign_user_properties(user_to_create, auth)
+    end
     sign_in(:user, user)
   end
 
@@ -20,5 +20,16 @@ class LoginDotGovController < Devise::OmniauthCallbacksController
       @message = 'You have decided not to authenticate via login.gov.'
       logger.warn 'User decided not to continue logging in'
     end
+  end
+
+  private
+
+  def assign_user_properties(user, auth)
+    user.email = auth.info.email
+    user.given_name = auth.extra.raw_info.given_name
+    user.family_name = auth.extra.raw_info.family_name
+    # Assign random, acceptable password to keep Devise happy.
+    # User should log in only through IdP
+    user.password = user.password_confirmation = Devise.friendly_token[0, 20]
   end
 end

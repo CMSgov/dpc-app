@@ -29,9 +29,19 @@ else
     NR_AGENT=""
 fi
 
+# set env vars for Dropwizard application
+set -o allexport
+ENV_FILE="/app/resources/${ENV}.application.env"
+echo "Exporting env file ${ENV_FILE}"
+# shellcheck source=/dev/null
+. "$ENV_FILE"
+set +o allexport
+
+CONF_FILE="/app/resources/application.yml"
+
 if [ $DB_MIGRATION -eq 1 ]; then
   echo "Migrating the database"
-  eval java ${JVM_FLAGS} ${JAVA_CLASSES} db migrate
+  eval java ${JAVA_CLASSES} db migrate ${CONF_FILE}
 fi
 
 if [ "$DEBUG_MODE" = "true" ]; then
@@ -41,12 +51,12 @@ else
     DEBUG_FLAGS=""
 fi
 
-CMDLINE="java ${JVM_FLAGS} ${DEBUG_FLAGS} ${JACOCO} ${NR_AGENT} ${JAVA_CLASSES}"
+CMDLINE="java ${DEBUG_FLAGS} ${JACOCO} ${NR_AGENT} ${JAVA_CLASSES}"
 
 echo "Running server via entrypoint!"
 
 if [ -n "$JACOCO" ]; then
-  exec ${CMDLINE} "$@"
+  exec ${CMDLINE} "$@" ${CONF_FILE}
 else
-  exec ${CMDLINE} "$@" 2>&1 | tee -a /var/log/dpc-aggregation-$(hostname).log
+  exec ${CMDLINE} "$@" ${CONF_FILE} 2>&1 | tee -a /var/log/dpc-aggregation-$(hostname).log
 fi

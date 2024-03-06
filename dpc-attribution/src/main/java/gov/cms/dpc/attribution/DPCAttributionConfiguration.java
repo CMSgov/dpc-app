@@ -1,11 +1,12 @@
 package gov.cms.dpc.attribution;
 
-import ca.mestevens.java.configuration.TypesafeConfiguration;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import gov.cms.dpc.common.hibernate.attribution.IDPCDatabase;
 import gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration;
 import gov.cms.dpc.fhir.configuration.IDPCFHIRConfiguration;
+import io.dropwizard.Configuration;
 import io.dropwizard.db.DataSourceFactory;
+import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 import io.dropwizard.jobs.JobConfiguration;
 
 import javax.validation.Valid;
@@ -34,6 +35,9 @@ public class DPCAttributionConfiguration extends JobConfiguration implements IDP
     @NotNull
     @JsonProperty("fhir")
     private DPCFHIRConfiguration fhirConfig;
+
+    @JsonProperty("swagger")
+    private SwaggerBundleConfiguration swaggerBundleConfiguration;
 
     @Min(-1)
     private Integer providerLimit;
@@ -72,6 +76,14 @@ public class DPCAttributionConfiguration extends JobConfiguration implements IDP
     @Override
     public void setFHIRConfiguration(DPCFHIRConfiguration config) {
         this.fhirConfig = config;
+    }
+
+    public SwaggerBundleConfiguration getSwaggerBundleConfiguration() {
+        return swaggerBundleConfiguration;
+    }
+
+    public void setSwaggerBundleConfiguration(SwaggerBundleConfiguration swaggerBundleConfiguration) {
+        this.swaggerBundleConfiguration = swaggerBundleConfiguration;
     }
 
     public Boolean getMigrationEnabled() {

@@ -1,0 +1,4 @@
+          <%= label_tag attribute, label, class: "usa-label" %>
+          <%= raw %[<p class="usa-hint">#{hint}</p>] if hint.present? %>
+          <%= raw %[<p style="color: #b50909;">#{error_msg}</p>] if error_msg.present? %>
+          <%= text_field_tag attribute, default, input_options %>

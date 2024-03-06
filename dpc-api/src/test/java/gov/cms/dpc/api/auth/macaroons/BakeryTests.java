@@ -1,9 +1,6 @@
 package gov.cms.dpc.api.auth.macaroons;
 
 import com.github.nitram509.jmacaroons.Macaroon;
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigBeanFactory;
-import com.typesafe.config.ConfigFactory;
 import gov.cms.dpc.macaroons.BakeryProvider;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.macaroons.MacaroonCaveat;
@@ -17,6 +14,8 @@ import gov.cms.dpc.testing.BufferedLoggerHandler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.Constructor;
 
 import java.security.SecureRandom;
 import java.util.Collections;
@@ -49,7 +48,7 @@ class BakeryTests {
     }
 
     private TokenPolicy generateTokenPolicy() {
-        final Config config = ConfigFactory.load();
-        return ConfigBeanFactory.create(config.getConfig("dpc.api.tokens"), TokenPolicy.class);
+        Yaml yaml = new Yaml(new Constructor(TokenPolicy.class));
+        return yaml.load(BakeryTests.class.getClassLoader().getResourceAsStream("token_policy.yml"));
     }
 }

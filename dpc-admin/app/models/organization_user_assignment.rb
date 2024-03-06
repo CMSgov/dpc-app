@@ -18,7 +18,7 @@ class OrganizationUserAssignment < ApplicationRecord
 
     if mail_throttle_store.can_email? user.email
       UserMailer
-        .with(user: user, vendor: organization.health_it_vendor?)
+        .with(user:, vendor: organization.health_it_vendor?)
         .organization_sandbox_email
         .deliver_later
     end

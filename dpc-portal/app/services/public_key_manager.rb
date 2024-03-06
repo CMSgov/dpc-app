@@ -17,8 +17,8 @@ class PublicKeyManager
 
     api_client = DpcClient.new
     api_client.create_public_key(api_id,
-                                 params: { label: label, public_key: public_key,
-                                           snippet_signature: snippet_signature })
+                                 params: { label:, public_key:,
+                                           snippet_signature: })
 
     Rails.logger.error "Failed to create public key: #{api_client.response_body}" unless api_client.response_successful?
     { response: api_client.response_successful?,

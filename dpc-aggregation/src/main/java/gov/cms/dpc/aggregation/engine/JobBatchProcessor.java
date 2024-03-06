@@ -1,6 +1,7 @@
 package gov.cms.dpc.aggregation.engine;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.dpc.aggregation.service.*;
@@ -9,16 +10,14 @@ import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.common.MDCConstants;
 import gov.cms.dpc.common.utils.MetricMaker;
 import gov.cms.dpc.fhir.DPCResourceType;
+import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatchFile;
 import io.reactivex.Flowable;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.lang3.tuple.Pair;
-import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
-import org.hl7.fhir.dstu3.model.OperationOutcome;
-import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.dstu3.model.Resource;
+import org.hl7.fhir.dstu3.model.*;
 import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +29,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import static gov.cms.dpc.fhir.FHIRExtractors.getPatientMBI;
 import static gov.cms.dpc.fhir.FHIRExtractors.getPatientMBIs;
 
 public class JobBatchProcessor {
@@ -63,47 +63,116 @@ public class JobBatchProcessor {
      * @param aggregatorID the current aggregatorID
      * @param queue        the queue
      * @param job          the job to process
-     * @param patientID    the current patient id to process
+     * @param mbi          the current patient mbi to process
      * @return A list of batch files {@link JobQueueBatchFile}
      */
-    public List<JobQueueBatchFile> processJobBatchPartial(UUID aggregatorID, IJobQueue queue, JobQueueBatch job, String patientID) {
+    public List<JobQueueBatchFile> processJobBatchPartial(UUID aggregatorID, IJobQueue queue, JobQueueBatch job, String mbi) {
         StopWatch stopWatch = StopWatch.createStarted();
-        OutcomeReason failReason = null;
-        final Pair<Optional<List<ConsentResult>>, Optional<OperationOutcome>> consentResult = getConsent(patientID);
+        Optional<OutcomeReason> failReason = Optional.empty();
+        Optional<Flowable<Resource>> flowable = Optional.empty();
 
-        Flowable<Resource> flowable;
-        if (consentResult.getRight().isPresent()) {
-            flowable = Flowable.just(consentResult.getRight().get());
-            failReason = OutcomeReason.INTERNAL_ERROR;
-        } else if (isOptedOut(consentResult.getLeft())) {
-            failReason = OutcomeReason.CONSENT_OPTED_OUT;
-            flowable = Flowable.just(AggregationUtils.toOperationOutcome(OutcomeReason.CONSENT_OPTED_OUT, patientID));
-        } else if (isLookBackExempt(job.getOrgID())) {
-            logger.info("Skipping lookBack for org: {}", job.getOrgID().toString());
-            MDC.put(MDCConstants.IS_SMOKE_TEST_ORG, "true");
-            flowable = Flowable.fromIterable(job.getResourceTypes())
-                    .flatMap(r -> fetchResource(job, patientID, r, job.getSince().orElse(null)));
-        } else {
-            List<LookBackAnswer> answers = getLookBackAnswers(job, patientID);
-            if (passesLookBack(answers)) {
-                flowable = Flowable.fromIterable(job.getResourceTypes())
-                        .flatMap(r -> fetchResource(job, patientID, r, job.getSince().orElse(null)));
-            } else {
-                failReason = LookBackAnalyzer.analyze(answers);
-                flowable = Flowable.just(AggregationUtils.toOperationOutcome(failReason, patientID));
+        // Load the Patient resource from BFD.
+        final Optional<Patient> optPatient = fetchPatient(job, mbi);
+        if(optPatient.isEmpty()) {
+            // Failed to load patient
+            failReason = Optional.of(OutcomeReason.INTERNAL_ERROR);
+            flowable = Optional.of(Flowable.just(AggregationUtils.toOperationOutcome(failReason.get(), mbi)));
+        }
+
+        // Check if the patient has opted out
+        if(flowable.isEmpty()) {
+            Optional<Pair<Flowable<Resource>, OutcomeReason>> consentResult = checkForOptOut(optPatient.get());
+            if(consentResult.isPresent()) {
+                flowable = Optional.of(consentResult.get().getLeft());
+                failReason = Optional.of(consentResult.get().getRight());
             }
         }
 
-        final var results = writeResource(job, flowable)
+        // Check if the patient passes look back
+        if(flowable.isEmpty()) {
+            Optional<Pair<Flowable<Resource>, OutcomeReason>> lookBackResult = checkLookBack(optPatient.get(), job);
+            if(lookBackResult.isPresent()) {
+                flowable = Optional.of(lookBackResult.get().getLeft());
+                failReason = Optional.of(lookBackResult.get().getRight());
+            }
+        }
+
+        // All checks passed, load resources
+        if(flowable.isEmpty()) {
+            flowable = Optional.of(
+                    Flowable.fromIterable(job.getResourceTypes()).flatMap(r -> fetchResource(job, optPatient.get(), r, job.getSince().orElse(null)))
+            );
+        }
+
+        final var results = writeResource(job, flowable.get())
                 .toList()
                 .blockingGet();
         queue.completePartialBatch(job, aggregatorID);
 
         final String resourcesRequested = job.getResourceTypes().stream().map(DPCResourceType::getPath).filter(Objects::nonNull).collect(Collectors.joining(";"));
-        final String failReasonLabel = failReason == null ? "NA" : failReason.name();
+        final String failReasonLabel = failReason.isEmpty() ? "NA" : failReason.get().name();
         stopWatch.stop();
-        logger.info("dpcMetric=DataExportResult,dataRetrieved={},failReason={},resourcesRequested={},duration={}", failReason == null, failReasonLabel, resourcesRequested, stopWatch.getTime());
+        logger.info("dpcMetric=DataExportResult,dataRetrieved={},failReason={},resourcesRequested={},duration={}", failReason.isEmpty(), failReasonLabel, resourcesRequested, stopWatch.getTime());
         return results;
+    }
+
+    /**
+     * Checks the given patient against the consent service and returns any issues if the check doesn't pass.
+     * @param patient   {@link Patient} resource we're checking consent for.
+     * @return If there's a problem, it returns a pair of a {@link Flowable} {@link OperationOutcome} and an {@link OutcomeReason}.
+     * If the Patient passes the consent check, it returns an empty {@link Optional}s.
+     */
+    private Optional<Pair<Flowable<Resource>, OutcomeReason>> checkForOptOut(Patient patient) {
+        final Pair<Optional<List<ConsentResult>>, Optional<OperationOutcome>> consentResult = getConsent(patient);
+
+        if (consentResult.getRight().isPresent()) {
+            // Consent check returned an error
+            return Optional.of(
+                    Pair.of(
+                        Flowable.just(consentResult.getRight().get()),
+                        OutcomeReason.INTERNAL_ERROR
+                    )
+            );
+        } else if (isOptedOut(consentResult.getLeft())) {
+            // Enrollee is opted out
+            return Optional.of(
+                    Pair.of(
+                            Flowable.just(AggregationUtils.toOperationOutcome(OutcomeReason.CONSENT_OPTED_OUT, FHIRExtractors.getPatientMBI(patient))),
+                            OutcomeReason.CONSENT_OPTED_OUT
+                    )
+            );
+        }
+
+        // Passes consent check
+        return Optional.empty();
+    }
+
+    /**
+     * Does the patient look back check and returns any issues if it doesn't pass.
+     * @param patient   {@link Patient} resource we're looking for a relationship for.
+     * @param job       {@link JobQueueBatch} currently running.
+     * @return If there's a problem, it returns a pair of a {@link Flowable} {@link OperationOutcome} and an {@link OutcomeReason}.
+     * If the look back check passes, an empty {@link Optional}.
+     */
+    private Optional<Pair<Flowable<Resource>, OutcomeReason>> checkLookBack(Patient patient, JobQueueBatch job) {
+        if (isLookBackExempt(job.getOrgID())) {
+            logger.info("Skipping lookBack for org: {}", job.getOrgID().toString());
+            MDC.put(MDCConstants.IS_SMOKE_TEST_ORG, "true");
+        } else {
+            List<LookBackAnswer> answers = getLookBackAnswers(job, patient);
+            if (!passesLookBack(answers)) {
+                OutcomeReason failReason = LookBackAnalyzer.analyze(answers);
+                return Optional.of(
+                        Pair.of(
+                        Flowable.just(AggregationUtils.toOperationOutcome(failReason, FHIRExtractors.getPatientMBI(patient))),
+                        failReason
+                        )
+                );
+            }
+        }
+
+        // Passes lookback check
+        return Optional.empty();
     }
 
     private boolean isLookBackExempt(UUID orgId) {
@@ -117,13 +186,11 @@ public class JobBatchProcessor {
     /**
      * Fetch and write a specific resource type
      *
-     * @param job          the job to associate the fetch
-     * @param patientID    the patientID to fetch data
-     * @param resourceType the resourceType to fetch data
-     * @param since        the since date
+     * @param job       the job to associate the fetch
+     * @param patient   the {@link Patient} we're fetching data for
      * @return A flowable and resourceType the user requested
      */
-    private Flowable<Resource> fetchResource(JobQueueBatch job, String patientID, DPCResourceType resourceType, OffsetDateTime since) {
+    private Flowable<Resource> fetchResource(JobQueueBatch job, Patient patient, DPCResourceType resourceType, OffsetDateTime since) {
         // Make this flow hot (ie. only called once) when multiple subscribers attach
         final var fetcher = new ResourceFetcher(bbclient,
                 job.getJobID(),
@@ -131,18 +198,50 @@ public class JobBatchProcessor {
                 resourceType,
                 since,
                 job.getTransactionTime());
-        return fetcher.fetchResources(patientID, new JobHeaders(job.getRequestingIP(),job.getJobID().toString(),
+        return fetcher.fetchResources(patient, new JobHeaders(job.getRequestingIP(),job.getJobID().toString(),
                         job.getProviderNPI(),job.getTransactionTime().toString(),job.isBulk()).buildHeaders())
                            .flatMap(Flowable::fromIterable);
     }
 
-    private List<LookBackAnswer> getLookBackAnswers(JobQueueBatch job, String patientId) {
+    /**
+     * Fetches the {@link Patient} referenced by the given mbi.  Throws a {@link ResourceNotFoundException} if no
+     * {@link Patient} can be found.
+     * @param job   The job associated to the fetch
+     * @param mbi   The mbi of the {@link Patient}
+     * @return      The {@link Patient}
+     */
+    private Optional<Patient> fetchPatient(JobQueueBatch job, String mbi) {
+        JobHeaders headers = new JobHeaders(
+                job.getRequestingIP(),
+                job.getJobID().toString(),
+                job.getProviderNPI(),
+                job.getTransactionTime().toString(),
+                job.isBulk());
+
+        Bundle patients;
+        try {
+            patients = bbclient.requestPatientFromServerByMbi(mbi, headers.buildHeaders());
+        } catch (Exception e) {
+            logger.error("Failed to retrieve Patient", e);
+            return Optional.empty();
+        }
+
+        // If we get more than one unique Patient for an MBI then we've got some upstream problems.
+        if (patients.getTotal() == 1) {
+            return Optional.of((Patient) patients.getEntryFirstRep().getResource());
+        }
+
+        logger.error("Expected 1 Patient to match MBI but found {}", patients.getTotal());
+        return Optional.empty();
+    }
+
+    private List<LookBackAnswer> getLookBackAnswers(JobQueueBatch job, Patient patient) {
         List<LookBackAnswer> result = new ArrayList<>();
         final String practitionerNPI = job.getProviderNPI();
         final String organizationNPI = job.getOrgNPI();
         if (practitionerNPI != null && organizationNPI != null) {
             MDC.put(MDCConstants.PROVIDER_NPI, practitionerNPI);
-            Flowable<Resource> flowable = fetchResource(job, patientId, DPCResourceType.ExplanationOfBenefit, null);
+            Flowable<Resource> flowable = fetchResource(job, patient, DPCResourceType.ExplanationOfBenefit, null);
             result = flowable
                     .filter(resource -> Objects.requireNonNull(DPCResourceType.ExplanationOfBenefit.getPath()).equals(resource.getResourceType().getPath()))
                     .map(ExplanationOfBenefit.class::cast)
@@ -213,12 +312,19 @@ public class JobBatchProcessor {
         return DPCResourceType.OperationOutcome == resourceType ? operationalOutcomeMeter : resourceMeter;
     }
 
-    private Pair<Optional<List<ConsentResult>>, Optional<OperationOutcome>> getConsent(String patientId) {
+    /**
+     * Returns a {@link List} of {@link ConsentResult}s if successful.  An {@link OperationOutcome} if not.  Only one of
+     * the two {@link Optional}s returned will be filled in.
+     *
+     * @param patient   A {@link Patient} that we want to get {@link ConsentResult}s for
+     * @return          A {@link Pair}
+     */
+    private Pair<Optional<List<ConsentResult>>, Optional<OperationOutcome>> getConsent(Patient patient) {
         try {
-            return Pair.of(consentService.getConsent(patientId), Optional.empty());
+            return Pair.of(consentService.getConsent(getPatientMBIs(patient)), Optional.empty());
         } catch (Exception e) {
             logger.error("Unable to retrieve consent from consent service.", e);
-            OperationOutcome operationOutcome = AggregationUtils.toOperationOutcome(OutcomeReason.INTERNAL_ERROR, patientId);
+            OperationOutcome operationOutcome = AggregationUtils.toOperationOutcome(OutcomeReason.INTERNAL_ERROR, getPatientMBI(patient));
             return Pair.of(Optional.empty(), Optional.of(operationOutcome));
         }
     }
@@ -244,21 +350,5 @@ public class JobBatchProcessor {
     private boolean passesLookBack(List<LookBackAnswer> answers) {
         return answers.stream()
                 .anyMatch(a -> a.matchDateCriteria() && (a.orgNPIMatchAnyEobNPIs() || a.practitionerNPIMatchAnyEobNPIs()));
-    }
-
-    /**
-     * Takes a list of resources, finds all of the {@link Patient}s and returns a list of their valid
-     * MBIs.  If there is more than one {@link Patient} all of their MBIs will be returned, and if there are no
-     * {@link Patient}s an empty list will be returned.
-     * @param resources A {@link Flowable} of FHIR {@link Resource}s
-     * @return A {@link List} of MBIs
-     */
-    private List<String> getMBIs(Flowable<Resource> resources) {
-        return resources
-                .filter(r -> DPCResourceType.Patient.getPath().equals(r.getResourceType().getPath()))
-                .map(r -> (Patient)r)
-                .flatMap(p -> Flowable.fromIterable(getPatientMBIs(p)))
-                .toList()
-                .blockingGet();
     }
 }
