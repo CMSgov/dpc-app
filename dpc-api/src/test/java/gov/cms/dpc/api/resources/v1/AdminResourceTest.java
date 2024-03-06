@@ -44,7 +44,7 @@ public class AdminResourceTest extends AbstractSecureApplicationTest{
         IGenericClient client = APIAuthHelpers.buildAdminClient(ctx, getAdminResourceURL(), GOLDEN_MACAROON, false);
 
         Map<String, List<String>> searchParams = new HashMap<>();
-        searchParams.put("npis", Collections.singletonList(DPCIdentifierSystem.MBI.getSystem() + "|" + APITestHelpers.ORGANIZATION_NPI));
+        searchParams.put("npis", Collections.singletonList(DPCIdentifierSystem.NPPES.getSystem() + "|" + APITestHelpers.ORGANIZATION_NPI));
 
         final Bundle orgBundle = client
                 .search()
