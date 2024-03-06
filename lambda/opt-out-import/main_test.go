@@ -53,7 +53,7 @@ func TestHandlerDatabaseTimeoutError(t *testing.T) {
 	assert.EqualError(t, err, "Connection attempt timed out")
 }
 
-func TestDownloadS3File(t *testing.T) {
+func TestIntegrationDownloadS3File(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skipping integration test.")
 	}
@@ -201,7 +201,7 @@ func TestUploadConfirmationFile(t *testing.T) {
 
 }
 
-func TestDeleteS3File(t *testing.T) {
+func TestIntegrationDeleteS3File(t *testing.T) {
 	loadS3()
 	tests := []struct {
 		name         string
