@@ -1,22 +1,25 @@
 package gov.cms.dpc.api.resources.v1;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import gov.cms.dpc.api.APITestHelpers;
+import gov.cms.dpc.api.AbstractSecureApplicationTest;
+import gov.cms.dpc.fhir.DPCIdentifierSystem;
+import gov.cms.dpc.testing.APIAuthHelpers;
+import org.apache.http.HttpHeaders;
+import org.eclipse.jetty.http.HttpStatus;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Organization;
+import org.junit.jupiter.api.Test;
 
+import javax.ws.rs.HttpMethod;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.UUID;
+import java.util.*;
 
-import javax.ws.rs.HttpMethod;
-
-import org.apache.http.HttpHeaders;
-import org.eclipse.jetty.http.HttpStatus;
-import org.junit.jupiter.api.Test;
-
-import gov.cms.dpc.api.AbstractSecureApplicationTest;
-import gov.cms.dpc.testing.APIAuthHelpers;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class AdminResourceTest extends AbstractSecureApplicationTest{
 
@@ -52,5 +55,27 @@ public class AdminResourceTest extends AbstractSecureApplicationTest{
 
         assertEquals(HttpStatus.UNAUTHORIZED_401, conn.getResponseCode());
         conn.disconnect();
+    }
+
+    @Test
+    void testSearchByNpi() {
+        IGenericClient client = APIAuthHelpers.buildAdminClient(ctx, getAdminResourceURL(), GOLDEN_MACAROON, false);
+
+        Map<String, List<String>> searchParams = new HashMap<>();
+        searchParams.put("npis", Collections.singletonList(DPCIdentifierSystem.MBI.getSystem() + "|" + APITestHelpers.ORGANIZATION_NPI));
+
+        final Bundle orgBundle = client
+                .search()
+                .forResource(Organization.class)
+                .whereMap(searchParams)
+                .returnBundle(Bundle.class)
+                .encodedJson()
+                .execute();
+
+        List<Bundle.BundleEntryComponent> orgs = orgBundle.getEntry();
+        assertEquals(1, orgs.size());
+
+        Organization org = (Organization) orgs.get(0).getResource();
+        assertEquals(APITestHelpers.ORGANIZATION_NPI, org.getIdentifierFirstRep().getValue());
     }
 }

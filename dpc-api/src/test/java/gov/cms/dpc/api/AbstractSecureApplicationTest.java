@@ -74,6 +74,10 @@ public class AbstractSecureApplicationTest {
         return String.format("http://localhost:%d/tasks/", APPLICATION.getAdminPort());
     }
 
+    protected String getAdminResourceURL() {
+        return String.format("http://localhost:%d/v1/Admin", APPLICATION.getLocalPort());
+    }
+
     @BeforeAll
     public static void setup() throws Exception {
         APITestHelpers.setupApplication(APPLICATION);
