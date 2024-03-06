@@ -77,6 +77,34 @@ RSpec.describe 'Organizations', type: :request do
     end
   end
 
+  describe 'GET /organizations/[organization_id]?ao=true' do
+    let!(:user) { create(:user) }
+    before { sign_in user }
+
+    it 'returns success' do
+      api_id = SecureRandom.uuid
+      stub_client(api_id)
+      get "/organizations/#{api_id}?ao=true"
+      expect(assigns(:organization).api_id).to eq api_id
+    end
+
+    it 'assigns invitations if exist' do
+      api_id = SecureRandom.uuid
+      stub_client(api_id)
+      provider_organization = create(:provider_organization, dpc_api_organization_id: api_id)
+      create(:invitation, provider_organization:, invited_by: user)
+      get "/organizations/#{api_id}?ao=true"
+      expect(assigns(:invitations).size).to eq 1
+    end
+
+    it 'does not assign invitations if not exist' do
+      api_id = SecureRandom.uuid
+      stub_client(api_id)
+      get "/organizations/#{api_id}?ao=true"
+      expect(assigns(:invitations).size).to eq 0
+    end
+  end
+
   def stub_client(api_id)
     client = stub_api_client(message: :get_organization,
                              response: default_get_org_response(api_id))
