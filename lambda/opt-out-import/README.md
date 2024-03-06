@@ -25,3 +25,7 @@ configure aws with fake data, `aws configure`
 - run populate_s3.sh
 - run `make build-test`
     - This will build the app with instrumentation, run it, print out a coverage percentage and a report at `coverage/int_coverage.html`
+
+## A Note on Integration Testing
+- If you're writing a tests that asserts a particular interaction with some other service, this is an integration test. These functions should be prefixed with `TestIntegration`.
+- Run integration tests with `make integration-test`.
