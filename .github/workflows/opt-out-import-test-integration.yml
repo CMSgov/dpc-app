@@ -1,0 +1,42 @@
+name: opt-out-import test integration
+
+on:
+  push:
+    paths:
+      - .github/workflows/opt-out-import-test-integration.yml
+      - lambda/opt-out-import/**
+  workflow_dispatch:
+
+# Ensure we have only one integration test running at a time
+concurrency:
+  group: opt-out-import-test-integration
+
+jobs:
+  # Deploy first if triggered by push
+  deploy:
+    if: ${{ github.event_name == 'push' }}
+    uses: ./.github/workflows/opt-out-import-test-deploy.yml
+    secrets: inherit
+
+  trigger:
+    if: ${{ always() }}
+    needs: deploy
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./lambda/opt-out-import
+    steps:
+      - uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          # Note that we use the lambda role with access to the bucket
+          role-to-assume: arn:aws:iam::${{ secrets.TEST_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-test-opt-out-import-function
+      - name: Upload test file to the BFD bucket to trigger lambda function via SNS message
+        run: |
+          aws s3 cp --no-progress synthetic_test_data/P.NGD.DPC.RSP.D240123.T1122001.IN \
+            s3://bfd-test-eft/bfdeft01/dpc/in/test-${{ github.run_id }}.txt
+
+  # TODO Run another job to check database for update, then check bucket for response file
