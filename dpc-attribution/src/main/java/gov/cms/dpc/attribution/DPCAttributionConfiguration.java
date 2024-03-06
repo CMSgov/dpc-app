@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import gov.cms.dpc.common.hibernate.attribution.IDPCDatabase;
 import gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration;
 import gov.cms.dpc.fhir.configuration.IDPCFHIRConfiguration;
-import io.dropwizard.core.Configuration;
 import io.dropwizard.db.DataSourceFactory;
 import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 import io.dropwizard.jobs.JobConfiguration;
