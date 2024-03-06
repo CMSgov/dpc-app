@@ -19,7 +19,7 @@ jobs:
       - uses: actions/setup-go@v5
       - name: Build opt-out-export zip file
         run: |
-          go build -o bootstrap main.go parsers.go utils.go models.go db.go
+          go build -o bootstrap main.go db.go
           zip function.zip bootstrap
       - uses: aws-actions/configure-aws-credentials@v4
         with:
