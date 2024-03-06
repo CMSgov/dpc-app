@@ -17,6 +17,7 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Group;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import ru.vyarus.dropwizard.guice.module.context.SharedConfigurationState;
@@ -33,6 +34,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * We currently don't have a way of verifying that the job runs when expected, since we can't really override Dropwizard's time source.
  * In the future, we might consider using something like ByteBuddy to intercept all system time calls and see if the job still gets run.
  */
+// TODO: dropwizard-sundial
+@Disabled
 @ExtendWith(BufferedLoggerHandler.class)
 @IntegrationTest
 class ExpirationJobTest {

@@ -34,9 +34,9 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <dropwizard.version>2.1.7</dropwizard.version>
-        <junit.jupiter.version>5.9.3</junit.jupiter.version>
-        <slf4j.version>1.7.36</slf4j.version>
+        <dropwizard.version>3.0.6</dropwizard.version>
+        <junit.jupiter.version>5.10.1</junit.jupiter.version>
+        <slf4j.version>2.0.11</slf4j.version>
         <!--Custom group IDs for pulling dependencies from JitPack-->
         <jitpack.groupID>com.github.nickrobison-usds</jitpack.groupID>
         <hapi.fhir.groupID>ca.uhn.hapi.fhir</hapi.fhir.groupID>
@@ -155,7 +155,7 @@
             <dependency>
                 <groupId>ru.vyarus.guicey</groupId>
                 <artifactId>guicey-bom</artifactId>
-                <version>5.9.1</version>
+                <version>6.2.1</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -174,12 +174,12 @@
             <dependency>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-io</artifactId>
-                <version>9.4.51.v20230217</version>
+                <version>10.0.19</version>
             </dependency>
             <dependency>
                 <groupId>ru.vyarus</groupId>
                 <artifactId>dropwizard-guicey</artifactId>
-                <version>5.9.1</version>
+                <version>6.2.1</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.eclipse.jetty</groupId>
@@ -251,7 +251,7 @@
             <dependency>
                 <groupId>com.smoketurner</groupId>
                 <artifactId>dropwizard-swagger</artifactId>
-                <version>2.0.12-1</version>
+                <version>3.0.0-1</version>
             </dependency>
             <dependency>
                 <groupId>io.github.dropwizard-jobs</groupId>

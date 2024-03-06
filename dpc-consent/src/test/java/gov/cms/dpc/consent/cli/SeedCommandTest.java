@@ -2,8 +2,8 @@ package gov.cms.dpc.consent.cli;
 
 import gov.cms.dpc.consent.DPCConsentConfiguration;
 import gov.cms.dpc.consent.DPCConsentService;
-import io.dropwizard.cli.Cli;
-import io.dropwizard.setup.Bootstrap;
+import io.dropwizard.core.cli.Cli;
+import io.dropwizard.core.setup.Bootstrap;
 import io.dropwizard.util.JarLocation;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -62,7 +62,7 @@ class SeedCommandTest {
 
         final Optional<Throwable> success = cli.run("seed", "src/test/resources/test.application.yml");
         /* dies here with the following error
-        Should not have errors ==> expected: <> but was: <io.dropwizard.configuration.ConfigurationParsingException: default configuration has an error:
+        Should not have errors ==> expected: <> but was: <io.dropwizard.core.Configuration.ConfigurationParsingException: default configuration has an error:
           * Unrecognized field at: consentDatabase
                 Did you mean?:
                 - consentdb
