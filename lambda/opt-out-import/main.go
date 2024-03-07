@@ -262,7 +262,7 @@ func deleteS3File(bucket string, file string) error {
 	svc := s3.New(sess)
 	_, err = svc.DeleteObject(&s3.DeleteObjectInput{Bucket: aws.String(bucket), Key: aws.String(file)})
 	if err != nil {
-		log.Warningf("Unable to delete object: %v", err)
+		log.Errorf("Unable to delete object: %v", err)
 		return err
 	}
 
