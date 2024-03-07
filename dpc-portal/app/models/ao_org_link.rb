@@ -1,0 +1,7 @@
+class AoOrgLink < ApplicationRecord
+  attr_reader :user_id, :provider_organization_id
+
+  def initialize
+    super
+  end
+end
