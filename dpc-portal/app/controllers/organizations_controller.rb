@@ -3,11 +3,12 @@
 # Shows Credential Delegates info about the organizations they manage the credentials for
 class OrganizationsController < ApplicationController
   before_action :authenticate_user!
-  before_action :load_organization
+  before_action :load_organization, only: [:index, :show]
 
   def index
     @organizations = [@organization]
-    render(Page::Organization::OrganizationListComponent.new(organizations: @organizations))
+    # render(Page::Organization::OrganizationListComponent.new(organizations: @organizations))
+    render(Page::Organization::AoLandingComponent.new(organizations: @organizations))
   end
 
   def show
@@ -16,6 +17,15 @@ class OrganizationsController < ApplicationController
     else
       render(Page::Organization::ShowComponent.new(@organization))
     end
+  end
+
+  def new
+    render(Page::Organization::NewOrganizationComponent.new)
+  end
+
+  def create
+    #:create should verify NPI input, create an AO organization link record, and show a success page
+    render(Page::Organization::NewOrganizationSuccessComponent.new)
   end
 
   private
