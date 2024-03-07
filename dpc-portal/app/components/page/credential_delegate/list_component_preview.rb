@@ -15,10 +15,7 @@ module Page
       end
 
       def active
-        cds = [
-          CdOrgLink.new,
-          CdOrgLink.new
-        ]
+        cds = [CdOrgLink.new, CdOrgLink.new]
         render(Page::CredentialDelegate::ListComponent.new(org, [], cds))
       end
 

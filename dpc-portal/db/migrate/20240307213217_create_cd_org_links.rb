@@ -8,8 +8,8 @@ class CreateCdOrgLinks < ActiveRecord::Migration[7.1]
       t.timestamps null: false
     end
 
-    add_foreign_key :ao_org_links, :users, :user_id
-    add_foreign_key :ao_org_links, :provider_organizations, :provider_organization_id
-    add_foreign_key :ao_org_links, :invitations, :invitation_id
+    add_foreign_key :ao_org_links, :users
+    add_foreign_key :ao_org_links, :provider_organizations
+    add_foreign_key :ao_org_links, :invitations
   end
 end
