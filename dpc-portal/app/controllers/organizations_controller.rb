@@ -24,8 +24,7 @@ class OrganizationsController < ApplicationController
   end
 
   def create
-    #:create should verify NPI input, create an AO organization link record, and show a success page
-    render(Page::Organization::NewOrganizationSuccessComponent.new)
+    render(Page::Organization::NewOrganizationSuccessComponent.new(params[:npi]))
   end
 
   private

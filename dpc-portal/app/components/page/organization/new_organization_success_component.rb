@@ -4,11 +4,11 @@ module Page
     module Organization
       # Page shown after successful completion of adding new organization.
       class NewOrganizationSuccessComponent < ViewComponent::Base
-        attr_accessor :organization
+        attr_accessor :npi
   
-        def initialize(organization)
+        def initialize(npi)
           super
-          @organization = organization
+          @npi = npi
         end
       end
     end
