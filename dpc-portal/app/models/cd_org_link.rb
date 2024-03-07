@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Link between credential delegate and provider organization
 class CdOrgLink < ApplicationRecord
   attr_reader :user_id, :provider_organization_id, :invitation_id
 
