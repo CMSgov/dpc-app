@@ -11,7 +11,7 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
     end
 
     let(:org) { ComponentSupport::MockOrg.new }
-    let(:cd_invite) { CdInvitation.new }
+    let(:cd_invite) { Invitation.new }
 
     let(:component) { described_class.new(org, cd_invite) }
 
@@ -46,29 +46,29 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
       it 'should have empty given name stanza' do
         first_name = <<~HTML
           <div class="margin-bottom-4">
-            <label class="usa-label" for="given_name">First or given name</label>
+            <label class="usa-label" for="invited_given_name">First or given name</label>
             <p class="usa-hint">For example, Jose, Darren, or Mai</p>
-            <input type="text" name="given_name" id="given_name" value="" maxlength="25" class="usa-input" />
+            <input type="text" name="invited_given_name" id="invited_given_name" maxlength="25" class="usa-input" />
           </div>
         HTML
         is_expected.to include(normalize_space(first_name))
       end
 
       it 'should have empty family name stanza' do
-        family_name = <<~HTML
+        invited_family_name = <<~HTML
           <div class="margin-bottom-4">
-            <label class="usa-label" for="family_name">Last or family name</label>
+            <label class="usa-label" for="invited_family_name">Last or family name</label>
             <p class="usa-hint">For example, Martinez Gonzalez, Gu, or Smith</p>
-            <input type="text" name="family_name" id="family_name" value="" maxlength="25" class="usa-input" />
+            <input type="text" name="invited_family_name" id="invited_family_name" maxlength="25" class="usa-input" />
           </div>
         HTML
-        is_expected.to include(normalize_space(family_name))
+        is_expected.to include(normalize_space(invited_family_name))
       end
 
       it 'should have empty phone stanza' do
         phone = ['<label class="usa-label" for="phone_raw">Primary phone number</label>',
                  '<p class="usa-hint">10-digit, U.S. only, for example 999-999-9999</p>',
-                 '<input type="text" name="phone_raw" id="phone_raw" value="" ',
+                 '<input type="text" name="phone_raw" id="phone_raw" ',
                  'class="usa-input usa-masked" placeholder="___-___-____" ',
                  'pattern="\\d{3}-\\d{3}-\\d{4}" aria-describedby="telHint" />'].join
         is_expected.to include(phone)
@@ -77,8 +77,8 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
       it 'should have empty email stanza' do
         email = <<~HTML
           <div class="margin-bottom-4">
-            <label class="usa-label" for="email">Email</label>
-            <input type="text" name="email" id="email" value="" class="usa-input" />
+            <label class="usa-label" for="invited_email">Email</label>
+            <input type="text" name="invited_email" id="invited_email" class="usa-input" />
           </div>
         HTML
         is_expected.to include(normalize_space(email))
@@ -87,8 +87,8 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
       it 'should have empty email confirmation stanza' do
         email_confirmation = <<~HTML
           <div class="margin-bottom-4">
-            <label class="usa-label" for="email_confirmation">Confirm email</label>
-            <input type="text" name="email_confirmation" id="email_confirmation" value="" class="usa-input" />
+            <label class="usa-label" for="invited_email_confirmation">Confirm email</label>
+            <input type="text" name="invited_email_confirmation" id="invited_email_confirmation" class="usa-input" />
           </div>
         HTML
         is_expected.to include(normalize_space(email_confirmation))
@@ -108,32 +108,32 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
       it 'should have errored given name stanza' do
         first_name = <<~HTML
           <div class="margin-bottom-4">
-            <label class="usa-label" for="given_name">First or given name</label>
+            <label class="usa-label" for="invited_given_name">First or given name</label>
             <p class="usa-hint">For example, Jose, Darren, or Mai</p>
             <p style="color: #b50909;">can't be blank</p>
-            <input type="text" name="given_name" id="given_name" value="" maxlength="25" class="usa-input usa-input--error" />
+            <input type="text" name="invited_given_name" id="invited_given_name" maxlength="25" class="usa-input usa-input--error" />
           </div>
         HTML
         is_expected.to include(normalize_space(first_name))
       end
 
       it 'should have errored family name stanza' do
-        family_name = <<~HTML
+        invited_family_name = <<~HTML
           <div class="margin-bottom-4">
-            <label class="usa-label" for="family_name">Last or family name</label>
+            <label class="usa-label" for="invited_family_name">Last or family name</label>
             <p class="usa-hint">For example, Martinez Gonzalez, Gu, or Smith</p>
             <p style="color: #b50909;">can't be blank</p>
-            <input type="text" name="family_name" id="family_name" value="" maxlength="25" class="usa-input usa-input--error" />
+            <input type="text" name="invited_family_name" id="invited_family_name" maxlength="25" class="usa-input usa-input--error" />
           </div>
         HTML
-        is_expected.to include(normalize_space(family_name))
+        is_expected.to include(normalize_space(invited_family_name))
       end
 
       it 'should have errored phone stanza' do
         phone = ['<label class="usa-label" for="phone_raw">Primary phone number</label>',
                  '<p class="usa-hint">10-digit, U.S. only, for example 999-999-9999</p>',
                  %(<p style="color: #b50909;">can't be blank</p>),
-                 '<input type="text" name="phone_raw" id="phone_raw" value="" ',
+                 '<input type="text" name="phone_raw" id="phone_raw" ',
                  'class="usa-input usa-masked usa-input--error" placeholder="___-___-____" ',
                  'pattern="\\d{3}-\\d{3}-\\d{4}" aria-describedby="telHint" />'].join
         is_expected.to include(normalize_space(phone))
@@ -142,9 +142,9 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
       it 'should have errored email stanza' do
         email = <<~HTML
           <div class="margin-bottom-4">
-            <label class="usa-label" for="email">Email</label>
+            <label class="usa-label" for="invited_email">Email</label>
             <p style="color: #b50909;">can't be blank</p>
-            <input type="text" name="email" id="email" value="" class="usa-input usa-input--error" />
+            <input type="text" name="invited_email" id="invited_email" class="usa-input usa-input--error" />
           </div>
         HTML
         is_expected.to include(normalize_space(email))
@@ -153,9 +153,9 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
       it 'should have errored email confirmation stanza' do
         email_confirmation = <<~HTML
           <div class="margin-bottom-4">
-            <label class="usa-label" for="email_confirmation">Confirm email</label>
+            <label class="usa-label" for="invited_email_confirmation">Confirm email</label>
             <p style="color: #b50909;">can't be blank</p>
-            <input type="text" name="email_confirmation" id="email_confirmation" value="" class="usa-input usa-input--error" />
+            <input type="text" name="invited_email_confirmation" id="invited_email_confirmation" class="usa-input usa-input--error" />
           </div>
         HTML
         is_expected.to include(normalize_space(email_confirmation))
@@ -164,32 +164,32 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
 
     context 'Pre-filled' do
       before do
-        cd_invite.given_name = 'Bob'
-        cd_invite.family_name = 'Hodges'
+        cd_invite.invited_given_name = 'Bob'
+        cd_invite.invited_family_name = 'Hodges'
         cd_invite.phone_raw = '222-222-2222'
-        cd_invite.email = cd_invite.email_confirmation = 'bob@example.com'
+        cd_invite.invited_email = cd_invite.invited_email_confirmation = 'bob@example.com'
       end
 
       it 'should have filled given name stanza' do
         first_name = <<~HTML
           <div class="margin-bottom-4">
-            <label class="usa-label" for="given_name">First or given name</label>
+            <label class="usa-label" for="invited_given_name">First or given name</label>
             <p class="usa-hint">For example, Jose, Darren, or Mai</p>
-            <input type="text" name="given_name" id="given_name" value="Bob" maxlength="25" class="usa-input" />
+            <input type="text" name="invited_given_name" id="invited_given_name" value="Bob" maxlength="25" class="usa-input" />
           </div>
         HTML
         is_expected.to include(normalize_space(first_name))
       end
 
       it 'should have filled family name stanza' do
-        family_name = <<~HTML
+        invited_family_name = <<~HTML
           <div class="margin-bottom-4">
-            <label class="usa-label" for="family_name">Last or family name</label>
+            <label class="usa-label" for="invited_family_name">Last or family name</label>
             <p class="usa-hint">For example, Martinez Gonzalez, Gu, or Smith</p>
-            <input type="text" name="family_name" id="family_name" value="Hodges" maxlength="25" class="usa-input" />
+            <input type="text" name="invited_family_name" id="invited_family_name" value="Hodges" maxlength="25" class="usa-input" />
           </div>
         HTML
-        is_expected.to include(normalize_space(family_name))
+        is_expected.to include(normalize_space(invited_family_name))
       end
 
       it 'should have filled phone stanza' do
@@ -204,8 +204,8 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
       it 'should have filled email stanza' do
         email = <<~HTML
           <div class="margin-bottom-4">
-            <label class="usa-label" for="email">Email</label>
-            <input type="text" name="email" id="email" value="bob@example.com" class="usa-input" />
+            <label class="usa-label" for="invited_email">Email</label>
+            <input type="text" name="invited_email" id="invited_email" value="bob@example.com" class="usa-input" />
           </div>
         HTML
         is_expected.to include(normalize_space(email))
@@ -214,8 +214,8 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
       it 'should have filled email confirmation stanza' do
         email_confirmation = <<~HTML
           <div class="margin-bottom-4">
-            <label class="usa-label" for="email_confirmation">Confirm email</label>
-            <input type="text" name="email_confirmation" id="email_confirmation" value="bob@example.com" class="usa-input" />
+            <label class="usa-label" for="invited_email_confirmation">Confirm email</label>
+            <input type="text" name="invited_email_confirmation" id="invited_email_confirmation" value="bob@example.com" class="usa-input" />
           </div>
         HTML
         is_expected.to include(normalize_space(email_confirmation))

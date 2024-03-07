@@ -15,8 +15,8 @@ class CdOrgLink
 
   def show_attributes
     { full_name: "#{given_name} #{family_name}",
-      email: email,
-      verification_code: verification_code,
+      email:,
+      verification_code:,
       activated_at: activated_at.to_s }.with_indifferent_access
   end
 

@@ -28,7 +28,8 @@ module DpcClientSupport
   def default_get_org_response(api_id)
     FHIR::Organization.new(
       name: "Bob's Health Hut",
-      id: api_id
+      id: api_id,
+      identifier: { system: 'http://hl7.org/fhir/sid/us-npi', value: '1111111111' }
     )
   end
 

@@ -16,7 +16,7 @@ module Core
       # @param body
       def default(status: :info, icon: true, heading: 'Heading',
                   body: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod.')
-        render Core::Alert::Component.new(status: status, heading: heading,
+        render Core::Alert::Component.new(status:, heading:,
                                           include_icon: icon) do
           body
         end

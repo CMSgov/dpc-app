@@ -85,7 +85,7 @@ class BaseSearch
   def apply_org_keyword_search(scope)
     if params[:keyword].present?
       keyword = "%#{params[:keyword].downcase}%"
-      scope = scope.where('LOWER(name) LIKE :keyword', keyword: keyword)
+      scope = scope.where('LOWER(name) LIKE :keyword', keyword:)
     end
 
     scope
@@ -119,7 +119,7 @@ class BaseSearch
 
     if params[:requested_org].present?
       org = "%#{params[:requested_org].downcase}%"
-      scope = scope.where('LOWER(users.requested_organization) LIKE :org', org: org)
+      scope = scope.where('LOWER(users.requested_organization) LIKE :org', org:)
     end
 
     if params[:requested_org_type].present?

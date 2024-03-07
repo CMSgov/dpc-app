@@ -10,9 +10,11 @@ import (
 	"os"
 	"os/exec"
 	"testing"
+	"time"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/ianlopshire/go-fixedwidth"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -45,13 +47,17 @@ func TestHandlerDatabaseTimeoutError(t *testing.T) {
 	createConnectionVar = func(string, string) (*sql.DB, error) { return nil, errors.New("Connection attempt timed out") }
 	defer func() { createConnectionVar = ofn }()
 
-	event := getS3Event("demo-bucket", "T#EFT.ON.ACO.NGD1800.DPRF.D181120.T1000009")
+	event := getS3Event("demo-bucket", "P.NGD.DPC.RSP.D240123.T1122001.IN")
 	_, err := handler(context.Background(), event)
 
 	assert.EqualError(t, err, "Connection attempt timed out")
 }
 
-func TestDownloadS3File(t *testing.T) {
+func TestIntegrationDownloadS3File(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping integration test.")
+	}
+
 	loadS3()
 	f, err := os.ReadFile("dummyfile.txt")
 	if err != nil {
@@ -91,90 +97,114 @@ func TestDownloadS3File(t *testing.T) {
 
 }
 
-func TestUploadResponseFile(t *testing.T) {
+func TestGenerateConfirmationFile(t *testing.T) {
+	output1 := fmt.Sprintf(`HDR_BENECONFIRM%s
+1SJ0A00AA0020240110NAccepted  00
+2SJ0A00AA0020240110YAccepted  00
+TLR_BENECONFIRM%s0000000002`, time.Now().Format("20060102"), time.Now().Format("20060102"))
+	output2 := fmt.Sprintf(`HDR_BENECONFIRM%s
+1SJ0A00AA0020240110NRejected  02
+TLR_BENECONFIRM%s0000000001`, time.Now().Format("20060102"), time.Now().Format("20060102"))
 	tests := []struct {
-		name      string
-		bucket    string
-		file      string
-		err       error
-		record    []*OptOutRecord
-		uploader  S3Uploader
-		marshaler FileMarshaler
+		name       string
+		successful bool
+		records    []*OptOutRecord
+		marshaller FileMarshaler
+		expected   string
 	}{
 		{
-			name:   "happy-path",
-			bucket: "demo-bucket",
-			file:   "fake-file",
-			err:    nil,
-			record: []*OptOutRecord{
+			name:       "successful-import",
+			successful: true,
+			records: []*OptOutRecord{
 				{
-					ID:               "Id",
-					OptOutFileID:     "FileId",
-					MBI:              "Mbi",
-					BeneficiaryFName: "Mike",
-					Status:           Accepted,
+					ID:           "test1",
+					OptOutFileID: "2",
+					MBI:          "1SJ0A00AA00",
+					PolicyCode:   "OPTOUT",
+					EffectiveDt:  time.Date(2024, 01, 10, 0, 0, 0, 0, time.UTC),
+					Status:       Accepted,
+				},
+				{
+					ID:           "test2",
+					OptOutFileID: "2",
+					MBI:          "2SJ0A00AA00",
+					PolicyCode:   "OPTIN",
+					EffectiveDt:  time.Date(2024, 01, 10, 0, 0, 0, 0, time.UTC),
+					Status:       Accepted,
 				},
 			},
-			uploader: func(input *s3manager.UploadInput, options ...func(*s3manager.Uploader)) (*s3manager.UploadOutput, error) {
-				return nil, nil
+			marshaller: fixedwidth.Marshal,
+			expected:   output1,
+		},
+		{
+			name:       "unsuccessful-import",
+			successful: false,
+			records: []*OptOutRecord{
+				{
+					ID:           "test1",
+					OptOutFileID: "2",
+					MBI:          "1SJ0A00AA00",
+					PolicyCode:   "OPTOUT",
+					EffectiveDt:  time.Date(2024, 01, 10, 0, 0, 0, 0, time.UTC),
+					Status:       Rejected,
+				},
 			},
-			marshaler: func(v interface{}) ([]byte, error) {
+			marshaller: fixedwidth.Marshal,
+			expected:   output2,
+		},
+	}
+
+	for _, test := range tests {
+		fmt.Printf("~~~ %s test\n", test.name)
+		output, err := generateConfirmationFile(test.successful, test.records, test.marshaller)
+		assert.Equal(t, test.expected, string(output[:]))
+		assert.Equal(t, err, nil)
+	}
+}
+
+func TestUploadConfirmationFile(t *testing.T) {
+	tests := []struct {
+		name             string
+		bucket           string
+		file             string
+		err              error
+		confirmationFile []byte
+		uploader         S3Uploader
+	}{
+		{
+			name:             "happy-path",
+			bucket:           "demo-bucket",
+			file:             "fake-file",
+			err:              nil,
+			confirmationFile: []byte("test"),
+			uploader: func(input *s3manager.UploadInput, options ...func(*s3manager.Uploader)) (*s3manager.UploadOutput, error) {
 				return nil, nil
 			},
 		},
 		{
-			name:   "upload_fails",
-			bucket: "demo-bucket",
-			file:   "fake-file",
-			err:    errors.New("upload failed"),
-			record: []*OptOutRecord{
-				{
-					ID:               "Id",
-					OptOutFileID:     "FileId",
-					MBI:              "Mbi",
-					BeneficiaryFName: "Mike",
-					Status:           Accepted,
-				},
-			},
+			name:             "upload_fails",
+			bucket:           "demo-bucket",
+			file:             "fake-file",
+			err:              errors.New("upload failed"),
+			confirmationFile: []byte("test"),
 			uploader: func(input *s3manager.UploadInput, options ...func(*s3manager.Uploader)) (*s3manager.UploadOutput, error) {
 				return nil, errors.New("upload failed")
-			},
-			marshaler: func(v interface{}) ([]byte, error) {
-				return nil, nil
-			},
-		},
-		{
-			name:   "file_marshaling_fails",
-			bucket: "demo-bucket",
-			file:   "fake-file",
-			err:    errors.New("marshaling failed"),
-			record: []*OptOutRecord{
-				{
-					ID:               "Id",
-					OptOutFileID:     "FileId",
-					MBI:              "Mbi",
-					BeneficiaryFName: "Mike",
-					Status:           Accepted,
-				},
-			},
-			uploader: func(input *s3manager.UploadInput, options ...func(*s3manager.Uploader)) (*s3manager.UploadOutput, error) {
-				return nil, errors.New("upload failed")
-			},
-			marshaler: func(v interface{}) ([]byte, error) {
-				return nil, errors.New("marshaling failed")
 			},
 		},
 	}
 
 	for _, test := range tests {
 		fmt.Printf("~~~ %s test\n", test.name)
-		err := uploadResponseFile(test.bucket, test.file, test.uploader, test.record, test.marshaler)
+		err := uploadConfirmationFile(test.bucket, test.file, test.uploader, test.confirmationFile)
 		assert.Equal(t, test.err, err)
 	}
 
 }
 
-func TestDeleteS3File(t *testing.T) {
+func TestIntegrationDeleteS3File(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping integration test.")
+	}
 	loadS3()
 	tests := []struct {
 		name         string
@@ -193,7 +223,9 @@ func TestDeleteS3File(t *testing.T) {
 	for _, test := range tests {
 		fmt.Printf("~~~ %s test\n", test.name)
 		err := deleteS3File(test.bucket, test.filenamePath)
-		if test.err != nil {
+		if test.err == nil {
+			assert.NoError(t, err)
+		} else {
 			assert.ErrorContains(t, err, test.err.Error())
 		}
 	}
