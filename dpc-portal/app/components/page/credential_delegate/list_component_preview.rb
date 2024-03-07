@@ -16,8 +16,8 @@ module Page
 
       def active
         cds = [
-          CdOrgLink.new(given_name: 'Bob', family_name: 'Hodges', email: 'bob@example.com', pending: false),
-          CdOrgLink.new(given_name: 'Lisa', family_name: 'Franklin', email: 'lisa@example.com', pending: false)
+          CdOrgLinkPlaceholder.new(given_name: 'Bob', family_name: 'Hodges', email: 'bob@example.com', pending: false),
+          CdOrgLinkPlaceholder.new(given_name: 'Lisa', family_name: 'Franklin', email: 'lisa@example.com', pending: false)
         ]
         render(Page::CredentialDelegate::ListComponent.new(org, [], cds))
       end

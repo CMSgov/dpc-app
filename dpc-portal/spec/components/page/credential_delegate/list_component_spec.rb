@@ -60,7 +60,7 @@ RSpec.describe Page::CredentialDelegate::ListComponent, type: :component do
     context 'Active credential delegate' do
       let(:invitations) { [] }
       let(:credential_delegates) do
-        [CdOrgLink.new(given_name: 'Bob', family_name: 'Hodges', email: 'bob@example.com', pending: false)]
+        [CdOrgLinkPlaceholder.new(given_name: 'Bob', family_name: 'Hodges', email: 'bob@example.com', pending: false)]
       end
 
       it 'has a table' do

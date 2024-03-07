@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Placeholder for eventual ActiveRecord for saving this
-class CdOrgLink
+class CdOrgLinkPlaceholder
   attr_reader :given_name, :family_name, :email, :pending, :verification_code, :activated_at
 
   def initialize(given_name:, family_name:, email:, pending:, verification_code: nil)

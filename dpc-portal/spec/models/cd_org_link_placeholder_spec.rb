@@ -2,15 +2,15 @@
 
 require 'rails_helper'
 
-RSpec.describe CdOrgLink, type: :model do
+RSpec.describe CdOrgLinkPlaceholder, type: :model do
   it 'sets pending' do
-    cd_org_link = CdOrgLink.new(given_name: 'Bob', family_name: 'Hodges', email: 'bob@example.com', pending: false)
+    cd_org_link = CdOrgLinkPlaceholder.new(given_name: 'Bob', family_name: 'Hodges', email: 'bob@example.com', pending: false)
     expect(cd_org_link.pending?).to eq false
   end
 
   it 'shows attributes' do
-    cd_org_link = CdOrgLink.new(given_name: 'Bob', family_name: 'Hodges', email: 'bob@example.com', pending: false,
-                                verification_code: 'ABC123')
+    cd_org_link = CdOrgLinkPlaceholder.new(given_name: 'Bob', family_name: 'Hodges', email: 'bob@example.com', pending: false,
+                                           verification_code: 'ABC123')
     attrs = cd_org_link.show_attributes
     expect(attrs['full_name']).to eq 'Bob Hodges'
     expect(attrs['email']).to eq 'bob@example.com'
