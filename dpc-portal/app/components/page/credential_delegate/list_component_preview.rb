@@ -19,6 +19,16 @@ module Page
         render(Page::CredentialDelegate::ListComponent.new(org, [], cds))
       end
 
+      def pending
+        cds = [
+          Invitation.new(invited_given_name: 'Bob', invited_family_name: 'Hodges', invited_email: 'bob@example.com',
+                         verification_code: 'ABC123'),
+          Invitation.new(invited_given_name: 'Lisa', invited_family_name: 'Franklin',
+                         invited_email: 'lisa@example.com', verification_code: '123ABC')
+        ]
+        render(Page::CredentialDelegate::ListComponent.new(org, cds, []))
+      end
+
       private
 
       def org
