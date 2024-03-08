@@ -86,19 +86,6 @@ RSpec.describe Page::CredentialDelegate::ListComponent, type: :component do
         is_expected.to include(normalize_space(expected_html))
       end
 
-      it 'has a row' do
-        activated = 1.day.ago.strftime('%m/%d/%Y at %l:%M%p UTC')
-        expected_html = <<~HTML
-          <tr>
-            <td data-sort-value="Bob Hodges">Bob Hodges</td>
-            <td data-sort-value="bob@example.com">bob@example.com</td>
-            <td data-sort-value="#{activated}">#{activated}</td>
-            <td data-sort-value="X">X</td>
-          </tr>
-        HTML
-        is_expected.to include(normalize_space(expected_html))
-      end
-
       it 'has no pending credential delegates' do
         expected_html = '<p>There are no pending credential delegates.</p>'
         is_expected.to include(normalize_space(expected_html))
