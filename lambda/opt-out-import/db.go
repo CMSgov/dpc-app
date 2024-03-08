@@ -54,6 +54,44 @@ func getConsentDbSecrets(dbuser string, dbpassword string) (map[string]string, e
 	return secretsInfo, nil
 }
 
+func getAssumeRoleArn() (string, error) {
+	if isTesting {
+		val := os.Getenv("AWS_ASSUME_ROLE_ARN")
+		if val == "" {
+			return "", fmt.Errorf("AWS_ASSUME_ROLE_ARN must be set during testing")
+		}
+
+		return val, nil
+	}
+
+	parameterName := fmt.Sprintf("/opt-out-import/dpc/%s/bfd-bucket-role-arn", os.Getenv("ENV"))
+
+	var keynames []*string = make([]*string, 1)
+	keynames[0] = &parameterName
+
+	sess, err := session.NewSession(&aws.Config{
+		Region: aws.String("us-east-1"),
+	})
+
+	if err != nil {
+		return "", fmt.Errorf("getAssumeRoleArn: Error creating AWS session: %w", err)
+	}
+
+	ssmsvc := ssm.New(sess)
+
+	withDecryption := true
+	result, err := ssmsvc.GetParameter(&ssm.GetParameterInput{
+		Name:           &parameterName,
+		WithDecryption: &withDecryption,
+	})
+
+	if err != nil {
+		return "", fmt.Errorf("getAssumeRoleArn: Error connecting to parameter store: %w", err)
+	}
+
+	return *result.Parameter.Value, nil
+}
+
 func insertOptOutMetadata(db *sql.DB, optOutMetadata *OptOutFilenameMetadata) (OptOutFileEntity, error) {
 	optOutFile := &OptOutFileEntity{}
 	id := uuid.New().String()

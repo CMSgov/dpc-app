@@ -157,14 +157,19 @@ func createSession() (*session.Session, error) {
 			},
 		})
 	} else {
-		sess, err = session.NewSession(&aws.Config{
-			Region: aws.String("us-east-1"),
-			Credentials: stscreds.NewCredentials(
-				sess,
-				os.Getenv("AWS_ASSUME_ROLE_ARN"),
-			),
-		})
+		assumeRoleArn, err := getAssumeRoleArn()
+
+		if err != nil {
+			sess, err = session.NewSession(&aws.Config{
+				Region: aws.String("us-east-1"),
+				Credentials: stscreds.NewCredentials(
+					sess,
+					assumeRoleArn,
+				),
+			})
+		}
 	}
+
 	if err != nil {
 		return nil, err
 	}

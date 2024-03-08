@@ -30,11 +30,13 @@ jobs:
         working-directory: ./lambda/opt-out-import
     steps:
       - uses: actions/checkout@v4
-      - uses: aws-actions/configure-aws-credentials@v3
+      - uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
-          # Note that we use the lambda role with access to the bucket
-          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-test-opt-out-import-function
+          # Note that we use the BFD role with access to the bucket
+          role-to-assume: arn:aws:iam::${{ secrets.BFD_ACCOUNT_ID }}:role/bfd-test-eft-dpc-bucket-role
+          role-chaining: true
+          role-skip-session-tagging: true
       - name: Upload test file to the BFD bucket to trigger lambda function via SNS message
         run: |
           aws s3 cp --no-progress synthetic_test_data/P.NGD.DPC.RSP.D240123.T1122001.IN \
