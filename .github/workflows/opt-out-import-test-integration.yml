@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - .github/workflows/opt-out-import-test-integration.yml
+      - .github/workflows/opt-out-import-test-deploy.yml
       - lambda/opt-out-import/**
   workflow_dispatch:
 
