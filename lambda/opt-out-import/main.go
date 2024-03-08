@@ -188,10 +188,12 @@ func downloadS3File(bucket string, file string) ([]byte, error) {
 		Bucket: aws.String(bucket),
 		Key:    aws.String(file),
 	})
-	log.Printf("file downloaded: size=%d", numBytes)
-	byte_arr := buff.Bytes()
 
-	return byte_arr, err
+	if err == nil {
+		log.Printf("file downloaded: size=%d", numBytes)
+	}
+
+	return buff.Bytes(), err
 }
 
 func generateConfirmationFile(successful bool, records []*OptOutRecord, marshaler FileMarshaler) ([]byte, error) {
