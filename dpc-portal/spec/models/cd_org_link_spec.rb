@@ -3,9 +3,6 @@
 require 'rails_helper'
 
 RSpec.describe CdOrgLink, type: :model do
-  let(:organization) { build(:provider_organization) }
-  let(:credentialed_delegate) { build(:user) }
-  let(:new_cd_invite) { build(:invitation) }
   let(:cd_org_link) { build(:cd_org_link) }
 
   it 'has foreign keys' do
