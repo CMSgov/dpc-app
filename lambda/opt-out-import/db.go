@@ -89,7 +89,13 @@ func getAssumeRoleArn() (string, error) {
 		return "", fmt.Errorf("getAssumeRoleArn: Error connecting to parameter store: %w", err)
 	}
 
-	return *result.Parameter.Value, nil
+	arn := *result.Parameter.Value
+
+	if arn == "" {
+		return "", fmt.Errorf("getAssumeRoleArn: No value found for bfd-bucket-role-arn")
+	}
+
+	return arn, nil
 }
 
 func insertOptOutMetadata(db *sql.DB, optOutMetadata *OptOutFilenameMetadata) (OptOutFileEntity, error) {
