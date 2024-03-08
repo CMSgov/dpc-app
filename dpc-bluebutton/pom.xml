@@ -79,6 +79,7 @@
             <artifactId>mockserver-netty</artifactId>
             <version>${mockserverVersion}</version>
             <classifier>shaded</classifier>
+            <scope>test</scope>
             <exclusions>
                 <exclusion>
                     <groupId>io.netty</groupId>
