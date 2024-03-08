@@ -171,6 +171,7 @@ func createSession() (*session.Session, error) {
 	}
 
 	if err != nil {
+		println(err)
 		return nil, err
 	}
 
