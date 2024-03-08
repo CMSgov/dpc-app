@@ -5,10 +5,10 @@ require 'rails_helper'
 RSpec.describe AoOrgLink, type: :model do
   let(:organization) { build(:provider_organization) }
   let(:authorized_official) { build(:user) }
-  let(:ao_org_link) { build(:ao_org_link) }
+  let(:ao_org_link) { build(:ao_org_link, user: authorized_official, provider_organization: organization) }
 
   it 'has foreign keys' do
-    expect(ao_org_link.user_id).to exist
-    expect(ao_org_link.provider_organization_id).to exist
+    expect(ao_org_link.user).not_to be(nil)
+    expect(ao_org_link.provider_organization).not_to be(nil)
   end
 end
