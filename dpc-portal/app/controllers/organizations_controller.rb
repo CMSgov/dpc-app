@@ -3,12 +3,11 @@
 # Shows Credential Delegates info about the organizations they manage the credentials for
 class OrganizationsController < ApplicationController
   before_action :authenticate_user!
-  before_action :load_organization, only: [:index, :show]
+  before_action :load_organization, only: %i[index show]
 
   def index
     @organizations = [@organization]
-    # render(Page::Organization::OrganizationListComponent.new(organizations: @organizations))
-    render(Page::Organization::AoLandingComponent.new(organizations: @organizations))
+    render(Page::Organization::OrganizationListComponent.new(organizations: @organizations))
   end
 
   def show
@@ -20,7 +19,7 @@ class OrganizationsController < ApplicationController
   end
 
   def new
-    render(Page::Organization::NewOrganizationComponent.new(""))
+    render(Page::Organization::NewOrganizationComponent.new(''))
   end
 
   def create
@@ -33,11 +32,11 @@ class OrganizationsController < ApplicationController
 
   def npi_error
     if params[:npi].blank?
-      return "can't be blank"
+      "can't be blank"
     elsif params[:npi].length != 10
-      return "length has to be 10"
+      'length has to be 10'
     else
-      return ""
+      ''
     end
   end
 
