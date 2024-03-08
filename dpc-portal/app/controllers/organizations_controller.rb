@@ -20,11 +20,25 @@ class OrganizationsController < ApplicationController
   end
 
   def new
-    render(Page::Organization::NewOrganizationComponent.new)
+    render(Page::Organization::NewOrganizationComponent.new(""))
   end
 
   def create
-    render(Page::Organization::NewOrganizationSuccessComponent.new(params[:npi]))
+    if npi_error.blank?
+      render(Page::Organization::NewOrganizationSuccessComponent.new(params[:npi]))
+    else
+      render(Page::Organization::NewOrganizationComponent.new(npi_error), status: :bad_request)
+    end
+  end
+
+  def npi_error
+    if params[:npi].blank?
+      return "can't be blank"
+    elsif params[:npi].length != 10
+      return "length has to be 10"
+    else
+      return ""
+    end
   end
 
   private

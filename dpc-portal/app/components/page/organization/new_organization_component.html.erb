@@ -6,9 +6,10 @@
 
     <%= render(Core::Form::TextInputComponent.new(
         label: 'What is your Type 2 NPI?',
-	      attribute: 'npi',
+	      attribute: :npi,
         default: params[:npi],
-        input_options: { maxlength: 10 }
+        input_options: { maxlength: 10 },
+        error_msg: @npi_error
     )) %>
     <%= submit_tag "Search for organization", class: "usa-button", data: { test: "form-submit" } %>
   <% end %>
