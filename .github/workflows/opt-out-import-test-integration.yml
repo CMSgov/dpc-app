@@ -44,6 +44,6 @@ jobs:
       - name: Upload test file to the BFD bucket to trigger lambda function via SNS message
         run: |
           aws s3 cp --no-progress synthetic_test_data/P.NGD.DPC.RSP.D240123.T1122001.IN \
-            s3://bfd-test-eft/bfdeft01/dpc/in/test-${{ github.run_id }}.txt
+            s3://bfd-test-eft/bfdeft01/dpc/in/P.NGD.DPC.RSP.D240123.T$(date +'%H%m%S').IN
 
   # TODO Run another job to check database for update, then check bucket for response file
