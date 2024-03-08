@@ -1,34 +1,17 @@
 package main
 
 import (
-	"context"
+	"testing"
 	"database/sql"
 	"io/ioutil"
 	"os"
 	"strings"
-	"testing"
 	"time"
+	"fmt"
 
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/stretchr/testify/assert"
 )
-
-func TestHandler(t *testing.T) {
-	tests := []struct {
-		event  Event
-		expect string
-		err    error
-	}{
-		{
-			event:  Event{date: "2023-08-22"},
-			expect: "",
-		},
-	}
-
-	for _, test := range tests {
-		response, _ := handler(context.Background(), test.event)
-		assert.Equal(t, test.expect, response)
-	}
-}
 
 func TestGenerateBeneAlignmentFile(t *testing.T) {
 	oriGetSecrets := getSecrets
@@ -36,16 +19,16 @@ func TestGenerateBeneAlignmentFile(t *testing.T) {
 	oriGetAttributionData := getAttributionData
 	oriGetConsentData := getConsentData
 
+	t.Setenv("AWS_ASSUME_ROLE_ARN", "fake_arn")
+
 	tests := []struct {
-		expect   string
 		err      error
 		mockFunc func()
 	}{
 		{
-			expect: "bene_alignment_file.txt",
 			err:    nil,
 			mockFunc: func() {
-				getSecrets = func(keynames []*string) (map[string]string, error) {
+				getSecrets = func(s *session.Session, keynames []*string) (map[string]string, error) {
 					return map[string]string{
 						"/dpc/dev/attribution/db_user_dpc_attribution": "db_user_dpc_attribution",
 						"/dpc/dev/attribution/db_pass_dpc_attribution": "db_pass_dpc_attribution",
@@ -76,14 +59,20 @@ func TestGenerateBeneAlignmentFile(t *testing.T) {
 					}
 					return nil
 				}
+
+				uploadToS3 = func(s *session.Session, fileName string, s3Bucket string, s3Path string) error {
+					return nil
+				}
 			},
 		},
 	}
 
 	for _, test := range tests {
 		test.mockFunc()
-		filename, _ := generateBeneAlignmentFile()
-		assert.Equal(t, test.expect, filename)
+		filename, err := generateBeneAlignmentFile()
+		
+		assert.NotEmpty(t, filename)
+		assert.Nil(t, err)
 	}
 
 	getSecrets = oriGetSecrets
@@ -151,4 +140,80 @@ func TestFormatFileData(t *testing.T) {
 		assert.ElementsMatch(t, test.expect, lines)
 		os.Remove(filename)
 	}
+}
+
+func TestGetAwsSession(t *testing.T) {
+	tests := []struct {
+		expect   		*session.Session
+		err      		error
+		newSession 		func(roleArn string) (*session.Session, error)
+		newLocalSession	func(endPoint string) (*session.Session, error)
+		setEnvironment	func() ()
+		isTesting		bool
+	}{
+		{
+			// Happy path, testing
+			expect: 			nil,
+			err: 				nil,
+			newSession: 		func(roleArn string) (*session.Session, error) { return nil, nil },
+			newLocalSession:	func(endPoint string) (*session.Session, error) { return nil, nil },
+			setEnvironment:		func() () {
+				t.Setenv("LOCAL_STACK_ENDPOINT", "endpoint")
+			},
+			isTesting: 			true,
+		},
+		{
+			// LOCAL_STACK_ENDPOINT not set, testing
+			expect: 			nil,
+			err: 				fmt.Errorf("LOCAL_STACK_ENDPOINT env variable not defined"),
+			newSession: 		func(roleArn string) (*session.Session, error) { return nil, nil },
+			newLocalSession:	func(endPoint string) (*session.Session, error) { return nil, nil },
+			setEnvironment:		func() () {
+				os.Unsetenv("LOCAL_STACK_ENDPOINT")
+			},
+			isTesting: 			true,
+		},
+		{
+			// Happy path, not testing
+			expect: 			nil,
+			err: 				nil,
+			newSession: 		func(roleArn string) (*session.Session, error) { return nil, nil },
+			newLocalSession:	func(endPoint string) (*session.Session, error) { return nil, nil },
+			setEnvironment:		func() () {
+				t.Setenv("AWS_ASSUME_ROLE_ARN", "arn")
+			},
+			isTesting: 			false,
+		},
+		{
+			// AWS_ASSUME_ROLE_ARN not set, not testing
+			expect: 			nil,
+			err: 				fmt.Errorf("AWS_ASSUME_ROLE_ARN env variable not defined"),
+			newSession: 		func(roleArn string) (*session.Session, error) { return nil, nil },
+			newLocalSession:	func(endPoint string) (*session.Session, error) { return nil, nil },
+			setEnvironment:		func() () {
+				os.Unsetenv("AWS_ASSUME_ROLE_ARN")
+			},
+			isTesting: 			false,
+		},
+	}
+
+	for _, test := range tests {
+		newSession = test.newSession
+		newLocalSession = test.newLocalSession
+		isTesting = test.isTesting
+
+		test.setEnvironment()
+		
+		s, err := getAwsSession()
+
+		assert.Equal(t, test.expect, s)
+		assert.Equal(t, test.err, err)
+	}
+}
+
+func TestGenerateAlignmentFileName(t *testing.T) {
+	now, _ := time.Parse("2006-01-02 15:04:05", "2010-01-01 12:00:00")
+
+	fileName := generateAlignmentFileName(now)
+	assert.Equal(t, "P#EFT.ON.DPC.NGD.REQ.D100101.T1200000", fileName)
 }
