@@ -5,18 +5,20 @@ import (
 	"bytes"
 	"fmt"
 	"regexp"
-	"strconv"
+	"strings"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/ianlopshire/go-fixedwidth"
 	"github.com/pkg/errors"
 )
 
 func ParseMetadata(bucket string, filename string) (OptOutFilenameMetadata, error) {
 	var metadata OptOutFilenameMetadata
-	// Beneficiary Data Sharing Preferences File sent by 1-800-Medicare: P#EFT.ON.ACO.NGD1800.DPRF.Dyymmdd.Thhmmsst
+	// P.NGD.DPC.RSP.D240123.T1122001.IN
+	// Beneficiary Data Sharing Preferences File sent by 1-800-Medicare: P.NGD.DPC.RSP.Dyymmdd.Thhmmsst.IN
 	// Prefix: T = test, P = prod;
-	filenameRegexp := regexp.MustCompile(`((P|T)\#EFT)\.ON\.ACO\.NGD1800\.DPRF\.(D\d{6}\.T\d{6})\d`)
+	filenameRegexp := regexp.MustCompile(`((P|T)\.NGD)\.DPC\.RSP\.(D\d{6}\.T\d{6})\d\.IN`)
 	filenameMatches := filenameRegexp.FindStringSubmatch(filename)
 	if len(filenameMatches) < 4 {
 		err := fmt.Errorf("invalid filename for file: %s", filename)
@@ -44,7 +46,7 @@ func ParseConsentRecords(metadata *OptOutFilenameMetadata, b []byte) ([]*OptOutR
 	for scanner.Scan() {
 		bytes := scanner.Bytes()
 		// Do not parse header or footer rows
-		if len(bytes) == 459 {
+		if !strings.HasPrefix(string(bytes[:]), "HDR") && !strings.HasPrefix((string(bytes[:])), "TLR") {
 			record, err := ParseRecord(metadata, bytes, fixedwidth.Unmarshal)
 			if err != nil {
 				return records, fmt.Errorf("ParseConsentRecords: %w", err)
@@ -60,29 +62,31 @@ func ParseConsentRecords(metadata *OptOutFilenameMetadata, b []byte) ([]*OptOutR
 }
 
 func ParseRecord(metadata *OptOutFilenameMetadata, b []byte, unmarshaler FileUnmarshaler) (*OptOutRecord, error) {
-	var record OptOutRecord
-	if err := unmarshaler(b, &record); err != nil {
+	var row ResponseFileRow
+	if err := unmarshaler(b, &row); err != nil {
 		return nil, errors.Wrapf(err, "failed to parse file: %s", metadata.FilePath)
 	}
-	record.Status = Rejected	// Default to rejected until we successfully process
 
-	var err error 
-	if record.EffectiveDt, err = ConvertDt(record.EffectiveDtString); err != nil {
-		err = errors.Wrapf(err, "failed to parse the effective date '%s' from file: %s", record.EffectiveDtString, metadata.FilePath)
-		return nil, err
+	policyCode, err := ConvertSharingPreference(row.SharingPreference)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to parse file: %s", metadata.FilePath)
 	}
-	if record.SAMHSAEffectiveDt, err = ConvertDt(record.SAMHSAEffectiveDtString); err != nil {
-		err = errors.Wrapf(err, "failed to parse the samhsa effective date '%s' from file: %s", record.SAMHSAEffectiveDtString, metadata.FilePath)
-		return nil, err
-	}
-	lk := record.BeneficiaryLinkKeyString
-	if lk == "" {
-		lk = "0"
-	}
-	if record.BeneficiaryLinkKey, err = strconv.Atoi(lk); err != nil {
-		err = errors.Wrapf(err, "failed to parse beneficiary link key from file: %s", metadata.FilePath)
-		return nil, err
+
+	record := OptOutRecord{
+		ID:         uuid.New().String(),
+		MBI:        row.MBI,
+		PolicyCode: policyCode,
 	}
 
 	return &record, nil
+}
+
+func ConvertSharingPreference(pref string) (string, error) {
+	if pref == "Y" {
+		return "OPTIN", nil
+	} else if pref == "N" {
+		return "OPTOUT", nil
+	} else {
+		return "", errors.New(fmt.Sprintf("Unexpected value %s for sharing preference", pref))
+	}
 }

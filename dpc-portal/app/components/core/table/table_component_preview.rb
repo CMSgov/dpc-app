@@ -61,7 +61,7 @@ module Core
       # @param additional_classes textarea space-delimited
       def parameterized(additional_classes: '', sortable: false, inner_html: DEFAULT_INNER_HTML)
         more_classes = additional_classes.present? ? additional_classes.split : []
-        render Core::Table::TableComponent.new(additional_classes: more_classes, sortable: sortable) do
+        render Core::Table::TableComponent.new(additional_classes: more_classes, sortable:) do
           raw inner_html
         end
       end

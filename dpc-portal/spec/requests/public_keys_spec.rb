@@ -43,7 +43,7 @@ RSpec.describe 'PublicKeys', type: :request do
                                    response: default_get_org_response(org_api_id))
       stub_self_returning_api_client(message: :create_public_key,
                                      response: default_get_public_keys,
-                                     api_client: api_client)
+                                     api_client:)
       post "/organizations/#{org_api_id}/public_keys", params: {
         label: 'New Key',
         public_key: file_fixture('stubbed_key.pem').read,
@@ -81,7 +81,7 @@ RSpec.describe 'PublicKeys', type: :request do
       stub_self_returning_api_client(message: :create_public_key,
                                      success: false,
                                      response: nil,
-                                     api_client: api_client)
+                                     api_client:)
       post "/organizations/#{org_api_id}/public_keys", params: {
         label: 'New Key',
         public_key: file_fixture('stubbed_key.pem').read,
@@ -110,7 +110,7 @@ RSpec.describe 'PublicKeys', type: :request do
       stub_self_returning_api_client(message: :delete_public_key,
                                      response: nil,
                                      with: [org_api_id, key_guid],
-                                     api_client: api_client)
+                                     api_client:)
       delete "/organizations/#{org_api_id}/public_keys/#{key_guid}"
       expect(flash[:notice]).to eq('Public key successfully deleted.')
       expect(response).to redirect_to(organization_path(org_api_id))
@@ -125,7 +125,7 @@ RSpec.describe 'PublicKeys', type: :request do
                                      response: nil,
                                      success: false,
                                      with: [org_api_id, key_guid],
-                                     api_client: api_client)
+                                     api_client:)
       delete "/organizations/#{org_api_id}/public_keys/#{key_guid}"
       expect(flash[:alert]).to eq('Public key could not be deleted.')
     end

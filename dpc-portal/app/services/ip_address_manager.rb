@@ -24,7 +24,7 @@ class IpAddressManager
     end
 
     api_client = DpcClient.new
-    api_client.create_ip_address(api_id, params: { label: label, ip_address: ip_address })
+    api_client.create_ip_address(api_id, params: { label:, ip_address: })
 
     unless api_client.response_successful?
       Rails.logger.error "Failed to create IP address: #{api_client.response_body}"
