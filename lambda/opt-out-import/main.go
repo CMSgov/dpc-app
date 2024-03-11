@@ -3,8 +3,6 @@ package main
 import (
 	"bytes"
 	"context"
-	"encoding/json"
-	"errors"
 	"fmt"
 	"os"
 	"time"
@@ -60,38 +58,21 @@ func handler(ctx context.Context, sqsEvent events.SQSEvent) (string, error) {
 	})
 
 	log.Info(sqsEvent.Records[0].Body)
+	s3Event, err := ParseSQSEvent(sqsEvent)
 
-	for _, sqsRecord := range sqsEvent.Records {
-		var snsEvent events.SNSEvent
-		err := json.Unmarshal([]byte(sqsRecord.Body), &snsEvent)
+	if err != nil {
+		return "", err
+	}
 
-		unmarshalTypeErr := new(json.UnmarshalTypeError)
-		if errors.As(err, &unmarshalTypeErr) {
-			log.Warn("Skipping event due to unrecognized format for SNS")
-			continue
-		}
-
-		for _, snsRecord := range snsEvent.Records {
-			var s3Event events.S3Event
-			err := json.Unmarshal([]byte(snsRecord.SNS.Message), &s3Event)
-
-			unmarshalTypeErr := new(json.UnmarshalTypeError)
-			if errors.As(err, &unmarshalTypeErr) {
-				log.Warn("Skipping event due to unrecognized format for S3")
-				continue
+	for _, e := range s3Event.Records {
+		if e.EventName == "ObjectCreated:Put" {
+			success, err := importOptOutFile(e.S3.Bucket.Name, e.S3.Object.Key)
+			log.Info(success)
+			if err != nil {
+				return e.S3.Object.Key, err
 			}
-
-			for _, e := range s3Event.Records {
-				if e.EventName == "ObjectCreated:Put" {
-					success, err := importOptOutFile(e.S3.Bucket.Name, e.S3.Object.Key)
-					log.Info(success)
-					if err != nil {
-						return e.S3.Object.Key, err
-					}
-					err = deleteS3File(e.S3.Bucket.Name, e.S3.Object.Key)
-					return e.S3.Object.Key, err
-				}
-			}
+			err = deleteS3File(e.S3.Bucket.Name, e.S3.Object.Key)
+			return e.S3.Object.Key, err
 		}
 	}
 

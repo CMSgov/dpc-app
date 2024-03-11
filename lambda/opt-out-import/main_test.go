@@ -21,7 +21,7 @@ import (
 func TestHandler(t *testing.T) {
 
 	tests := []struct {
-		event  events.S3Event
+		event  events.SQSEvent
 		expect string
 		err    error
 	}{
@@ -231,8 +231,8 @@ func TestIntegrationDeleteS3File(t *testing.T) {
 	}
 }
 
-func getS3Event(bucketName string, fileName string) events.S3Event {
-	var s3event events.S3Event
+func getS3Event(bucketName string, fileName string) events.SQSEvent {
+	var s3event events.SQSEvent
 
 	jsonFile, err := os.Open("testdata/s3event.json")
 	if err != nil {
@@ -249,8 +249,8 @@ func getS3Event(bucketName string, fileName string) events.S3Event {
 	if err != nil {
 		fmt.Println(err)
 	}
-	s3event.Records[0].S3.Bucket.Name = bucketName
-	s3event.Records[0].S3.Object.Key = fileName
+	// s3event.Records[0].S3.Bucket.Name = bucketName
+	// s3event.Records[0].S3.Object.Key = fileName
 	return s3event
 }
 
