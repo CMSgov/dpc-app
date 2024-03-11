@@ -102,7 +102,7 @@ func ParseSQSEvent(event events.SQSEvent) (*events.S3Event, error) {
 	unmarshalTypeErr := new(json.UnmarshalTypeError)
 	if errors.As(err, &unmarshalTypeErr) {
 		log.Warn("Skipping event due to unrecognized format for SNS")
-		return nil, err
+		return nil, nil
 	} else if err != nil {
 		return nil, err
 	}
