@@ -55,13 +55,4 @@ fi
 CMDLINE="java ${CONF_FLAGS} ${DEBUG_FLAGS} ${JACOCO} ${NR_AGENT} ${JAVA_CLASSES}"
 
 echo "Running server via entrypoint!"
-<<<<<<< HEAD
 exec ${CMDLINE} "$@"
-=======
-
-if [ -n "$JACOCO" ]; then
-  exec ${CMDLINE} "$@" ${CONF_FILE}
-else
-  exec ${CMDLINE} "$@" ${CONF_FILE} 2>&1 | tee -a /var/log/dpc-api-$(hostname).log
-fi
->>>>>>> 0c0b1a86bae64ac5d76cdebd661f294b4280d934
