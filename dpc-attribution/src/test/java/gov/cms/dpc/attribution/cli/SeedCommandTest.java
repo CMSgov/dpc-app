@@ -35,14 +35,15 @@ public class SeedCommandTest extends AbstractAttributionTest {
 
     private static Bootstrap<DPCAttributionConfiguration> setupBootstrap() {
         // adapted from DropwizardTestSupport
-        Bootstrap<DPCAttributionConfiguration> bootstrap = new Bootstrap<>(SeedCommandTest.app) {
+        Bootstrap<DPCAttributionConfiguration> bootstrap = new Bootstrap<>(app) {
+            @Override
             public void run(DPCAttributionConfiguration configuration, Environment environment) throws Exception {
                 super.run(configuration, environment);
                 setConfigurationFactoryFactory((klass, validator, objectMapper, propertyPrefix) ->
                         new POJOConfigurationFactory<>(configuration));
             }
         };
-        SeedCommandTest.app.initialize(bootstrap);
+        app.initialize(bootstrap);
         return bootstrap;
     }
 
