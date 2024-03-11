@@ -38,7 +38,7 @@ func getConsentDbSecrets(dbuser string, dbpassword string) (map[string]string, e
 		ssmsvc := ssm.New(sess)
 
 		withDecryption := true
-		param, err := ssmsvc.GetParameters(&ssm.GetParametersInput{
+		params, err := ssmsvc.GetParameters(&ssm.GetParametersInput{
 			Names:          keynames,
 			WithDecryption: &withDecryption,
 		})
@@ -46,7 +46,16 @@ func getConsentDbSecrets(dbuser string, dbpassword string) (map[string]string, e
 			return nil, fmt.Errorf("getConsentDbSecrets: Error connecting to parameter store: %w", err)
 		}
 
-		for _, item := range param.Parameters {
+		// Unknown keys will come back as invalid, make sure we error on them
+		if len(params.InvalidParameters) > 0 {
+			invalidParamsStr := ""
+			for i := 0; i < len(params.InvalidParameters); i++ {
+				invalidParamsStr += fmt.Sprintf("%s,\n", *params.InvalidParameters[i])
+			}
+			return nil, fmt.Errorf("invalid parameters error: %s", invalidParamsStr)
+		}
+
+		for _, item := range params.Parameters {
 			secretsInfo[*item.Name] = *item.Value
 		}
 	}

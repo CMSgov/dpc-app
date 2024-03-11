@@ -100,7 +100,7 @@ func importOptOutFile(bucket string, file string) (bool, error) {
 
 	bytes, err := downloadS3File(bucket, file)
 	if err != nil {
-		log.Warning("Failed to download opt out file from S3.")
+		log.Warningf("Failed to download opt out file from S3: %s", err)
 		if err := updateOptOutFileImportStatus(db, optOutFileEntity.id, ImportFail); err != nil {
 			return false, err
 		}

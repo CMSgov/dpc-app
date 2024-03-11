@@ -18,7 +18,7 @@ func ParseMetadata(bucket string, filename string) (OptOutFilenameMetadata, erro
 	// P.NGD.DPC.RSP.D240123.T1122001.IN
 	// Beneficiary Data Sharing Preferences File sent by 1-800-Medicare: P.NGD.DPC.RSP.Dyymmdd.Thhmmsst.IN
 	// Prefix: T = test, P = prod;
-	filenameRegexp := regexp.MustCompile(`((P|T)\.NGD)\.DPC\.RSP\.(D\d{6}\.T\d{7})\.IN`)
+	filenameRegexp := regexp.MustCompile(`((P|T)\.NGD)\.DPC\.RSP\.(D\d{6}\.T\d{6})\d\.IN`)
 	filenameMatches := filenameRegexp.FindStringSubmatch(filename)
 	if len(filenameMatches) < 4 {
 		err := fmt.Errorf("invalid filename for file: %s", filename)
