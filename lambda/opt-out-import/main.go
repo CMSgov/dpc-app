@@ -66,7 +66,7 @@ func handler(ctx context.Context, s3Event events.S3Event) (string, error) {
 }
 
 func importOptOutFile(bucket string, file string) (bool, error) {
-	log.Info(fmt.Printf("Importing opt out file: %s", file))
+	log.Info(fmt.Printf("Importing opt out file: %s (bucket: %s)", file, bucket))
 	metadata, err := ParseMetadata(bucket, file)
 	if err != nil {
 		log.Warning(fmt.Sprintf("Failed to parse opt out file metadata: %s", err))
