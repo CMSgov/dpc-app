@@ -57,7 +57,7 @@ public class SeedCommandTest {
         System.setOut(new PrintStream(stdOut));
         System.setErr(new PrintStream(stdErr));
 
-        cli = new Cli(location, bs, originalOut, stdErr);
+        cli = new Cli(location, bs, stdOut, stdErr);
     }
 
     @AfterEach
