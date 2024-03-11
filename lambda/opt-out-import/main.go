@@ -203,19 +203,6 @@ func downloadS3File(bucket string, file string) ([]byte, error) {
 		return []byte{}, err
 	}
 
-	svc := stsv2.NewFromConfig(*cfg)
-	input := &stsv2.GetCallerIdentityInput{}
-
-	result, err := svc.GetCallerIdentity(context.TODO(), input)
-	if err != nil {
-		// Print the error, cast err to awserr.Error to get the Code and
-		// Message from an error.
-		fmt.Println(err.Error())
-		return []byte{}, err
-	}
-
-	fmt.Println(result)
-
 	downloader := manager.NewDownloader(s3v2.NewFromConfig(*cfg))
 	buff := &aws.WriteAtBuffer{}
 	numBytes, err := downloader.Download(context.TODO(), buff, &s3v2.GetObjectInput{
