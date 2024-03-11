@@ -16,6 +16,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/aws/aws-sdk-go/service/sts"
 
 	"github.com/ianlopshire/go-fixedwidth"
 )
@@ -182,6 +183,20 @@ func downloadS3File(bucket string, file string) ([]byte, error) {
 	if err != nil {
 		return []byte{}, err
 	}
+
+	svc := sts.New(sess)
+	input := &sts.GetCallerIdentityInput{}
+
+	result, err := svc.GetCallerIdentity(input)
+	if err != nil {
+		// Print the error, cast err to awserr.Error to get the Code and
+		// Message from an error.
+		fmt.Println(err.Error())
+		return []byte{}, err
+	}
+
+	fmt.Println(result)
+
 	downloader := s3manager.NewDownloader(sess)
 	buff := &aws.WriteAtBuffer{}
 	numBytes, err := downloader.Download(buff, &s3.GetObjectInput{
