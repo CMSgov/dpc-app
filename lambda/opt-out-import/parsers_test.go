@@ -1,10 +1,16 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
+	"fmt"
+	"io"
+	"os"
+	"strconv"
 	"testing"
 	"time"
 
+	"github.com/aws/aws-lambda-go/events"
 	"github.com/ianlopshire/go-fixedwidth"
 	giterr "github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
@@ -127,4 +133,40 @@ func TestParseRecord_InvalidData(t *testing.T) {
 			assert.Contains(t, err.Error(), tt.expErr)
 		})
 	}
+}
+
+func TestParseSQSEvent(t *testing.T) {
+	jsonFile, err := os.Open("testdata/s3event.json")
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer jsonFile.Close()
+
+	byteValue, _ := io.ReadAll(jsonFile)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	var s3event events.S3Event
+	err = json.Unmarshal([]byte(byteValue), &s3event)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	val, err := json.Marshal(s3event)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	body := fmt.Sprintf("{\"Type\" : \"Notification\",\n  \"MessageId\" : \"123456-1234-1234-1234-6e06896db643\",\n  \"TopicArn\" : \"my-topic\",\n  \"Subject\" : \"Amazon S3 Notification\",\n  \"Message\" : %s}", strconv.Quote(string(val[:])))
+
+	event := events.SQSEvent{
+		Records: []events.SQSMessage{{Body: body}},
+	}
+
+	s3Event, err := ParseSQSEvent(event)
+	assert.Nil(t, err)
+	assert.NotNil(t, s3Event)
+	assert.Equal(t, "demo-bucket", s3Event.Records[0].S3.Bucket.Name)
 }

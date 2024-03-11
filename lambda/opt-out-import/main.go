@@ -51,14 +51,24 @@ func main() {
 	}
 }
 
-func handler(ctx context.Context, s3Event events.S3Event) (string, error) {
+func handler(ctx context.Context, sqsEvent events.SQSEvent) (string, error) {
 	log.SetFormatter(&log.JSONFormatter{
 		DisableHTMLEscape: true,
 		TimestampFormat:   time.RFC3339Nano,
 	})
+
+	s3Event, err := ParseSQSEvent(sqsEvent)
+
+	if err != nil {
+		log.Errorf("Failed to parse S3 event: %v", err)
+		return "", err
+	} else if s3Event == nil {
+		log.Infof("No S3 event found, skipping safely.")
+		return "", nil
+	}
+
 	for _, e := range s3Event.Records {
 		if e.EventName == "ObjectCreated:Put" {
-			log.Info(e)
 			success, err := importOptOutFile(e.S3.Bucket.Name, e.S3.Object.Key)
 			log.Info(success)
 			if err != nil {
@@ -68,6 +78,8 @@ func handler(ctx context.Context, s3Event events.S3Event) (string, error) {
 			return e.S3.Object.Key, err
 		}
 	}
+
+	log.Warningf("No ObjectCreated:Put events found, skipping safely.")
 	return "", nil
 }
 

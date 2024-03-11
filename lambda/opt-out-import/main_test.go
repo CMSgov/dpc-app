@@ -6,9 +6,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 	"os/exec"
+	"strconv"
 	"testing"
 	"time"
 
@@ -21,12 +22,12 @@ import (
 func TestHandler(t *testing.T) {
 
 	tests := []struct {
-		event  events.S3Event
+		event  events.SQSEvent
 		expect string
 		err    error
 	}{
 		{
-			event:  getS3Event("demo-bucket", "file_path"),
+			event:  getSQSEvent("demo-bucket", "file_path"),
 			expect: "file_path",
 			err:    nil,
 		},
@@ -47,7 +48,7 @@ func TestHandlerDatabaseTimeoutError(t *testing.T) {
 	createConnectionVar = func(string, string) (*sql.DB, error) { return nil, errors.New("Connection attempt timed out") }
 	defer func() { createConnectionVar = ofn }()
 
-	event := getS3Event("demo-bucket", "P.NGD.DPC.RSP.D240123.T1122001.IN")
+	event := getSQSEvent("demo-bucket", "P.NGD.DPC.RSP.D240123.T1122001.IN")
 	_, err := handler(context.Background(), event)
 
 	assert.EqualError(t, err, "Connection attempt timed out")
@@ -231,27 +232,38 @@ func TestIntegrationDeleteS3File(t *testing.T) {
 	}
 }
 
-func getS3Event(bucketName string, fileName string) events.S3Event {
-	var s3event events.S3Event
-
+func getSQSEvent(bucketName string, fileName string) events.SQSEvent {
 	jsonFile, err := os.Open("testdata/s3event.json")
 	if err != nil {
 		fmt.Println(err)
 	}
 	defer jsonFile.Close()
 
-	byteValue, _ := ioutil.ReadAll(jsonFile)
+	byteValue, _ := io.ReadAll(jsonFile)
 	if err != nil {
 		fmt.Println(err)
 	}
 
+	var s3event events.S3Event
 	err = json.Unmarshal([]byte(byteValue), &s3event)
 	if err != nil {
 		fmt.Println(err)
 	}
+
 	s3event.Records[0].S3.Bucket.Name = bucketName
 	s3event.Records[0].S3.Object.Key = fileName
-	return s3event
+
+	val, err := json.Marshal(s3event)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	body := fmt.Sprintf("{\"Type\" : \"Notification\",\n  \"MessageId\" : \"123456-1234-1234-1234-6e06896db643\",\n  \"TopicArn\" : \"my-topic\",\n  \"Subject\" : \"Amazon S3 Notification\",\n  \"Message\" : %s}", strconv.Quote(string(val[:])))
+	event := events.SQSEvent{
+		Records: []events.SQSMessage{{Body: body}},
+	}
+	return event
 }
 
 func loadS3() {
