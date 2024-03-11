@@ -36,6 +36,6 @@ jobs:
           role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-test-github-actions
       - name: Send event to trigger export lambda function
         run: |
-          aws lambda invoke --function-name dpc-test-opt-out-export --outfile test-result.txt
+          aws lambda invoke --function-name dpc-test-opt-out-export test-result.txt
 
   # TODO Check bucket for export file
