@@ -9,7 +9,30 @@ import (
 
 // Makes this easier to mock and unit test
 var ssmNew = ssm.New
+var ssmsvcGetParameter = (*ssm.SSM).GetParameter
 var ssmsvcGetParameters = (*ssm.SSM).GetParameters
+
+func GetParameter(s *session.Session, keyname string) (string, error) {
+	ssmsvc := ssmNew(s)
+
+	withDecryption := true
+	result, err := ssmsvcGetParameter(ssmsvc, &ssm.GetParameterInput{
+		Name:           &keyname,
+		WithDecryption: &withDecryption,
+	})
+
+	if err != nil {
+		return "", fmt.Errorf("Error retrieving parameter %s from parameter store: %w", keyname, err)
+	}
+
+	val := *result.Parameter.Value
+
+	if val == "" {
+		return "", fmt.Errorf("No parameter store value found for %s", keyname)
+	}
+
+	return val, nil
+}
 
 // Returns a list of parameters from the SSM Parameter Store
 func GetParameters(s *session.Session, keynames []*string) (map[string]string, error) {

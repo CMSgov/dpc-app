@@ -1,19 +1,20 @@
 package main
 
 import (
-	"testing"
+	"bytes"
 	"database/sql"
-	"io/ioutil"
+	"fmt"
 	"os"
 	"strings"
+	"testing"
 	"time"
-	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestGenerateBeneAlignmentFile(t *testing.T) {
+	oriGetSecret := getSecret
 	oriGetSecrets := getSecrets
 	oriCreateConnection := createConnection
 	oriGetAttributionData := getAttributionData
@@ -26,8 +27,12 @@ func TestGenerateBeneAlignmentFile(t *testing.T) {
 		mockFunc func()
 	}{
 		{
-			err:    nil,
+			err: nil,
 			mockFunc: func() {
+				getSecret = func(s *session.Session, keyname string) (string, error) {
+					return "fake_arn", nil
+				}
+
 				getSecrets = func(s *session.Session, keynames []*string) (map[string]string, error) {
 					return map[string]string{
 						"/dpc/dev/attribution/db_user_dpc_attribution": "db_user_dpc_attribution",
@@ -60,7 +65,7 @@ func TestGenerateBeneAlignmentFile(t *testing.T) {
 					return nil
 				}
 
-				uploadToS3 = func(s *session.Session, fileName string, s3Bucket string, s3Path string) error {
+				uploadToS3 = func(s *session.Session, fileName string, buff bytes.Buffer, s3Bucket string, s3Path string) error {
 					return nil
 				}
 			},
@@ -70,11 +75,11 @@ func TestGenerateBeneAlignmentFile(t *testing.T) {
 	for _, test := range tests {
 		test.mockFunc()
 		filename, err := generateBeneAlignmentFile()
-		
 		assert.NotEmpty(t, filename)
 		assert.Nil(t, err)
 	}
 
+	getSecret = oriGetSecret
 	getSecrets = oriGetSecrets
 	createConnection = oriCreateConnection
 	getAttributionData = oriGetAttributionData
@@ -133,67 +138,53 @@ func TestFormatFileData(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		filename, _ := formatFileData(test.patientInfos)
-		body, _ := ioutil.ReadFile(filename)
+		buff, _ := formatFileData("test-file", test.patientInfos)
+		body := buff.String()
 		lines := strings.Split(string(body), "\n")
 		assert.Equal(t, len(test.expect), len(lines))
 		assert.ElementsMatch(t, test.expect, lines)
-		os.Remove(filename)
 	}
 }
 
 func TestGetAwsSession(t *testing.T) {
 	tests := []struct {
-		expect   		*session.Session
-		err      		error
-		newSession 		func(roleArn string) (*session.Session, error)
-		newLocalSession	func(endPoint string) (*session.Session, error)
-		setEnvironment	func() ()
-		isTesting		bool
+		expect          *session.Session
+		err             error
+		newSession      func(roleArn string) (*session.Session, error)
+		newLocalSession func(endPoint string) (*session.Session, error)
+		setEnvironment  func()
+		isTesting       bool
 	}{
 		{
 			// Happy path, testing
-			expect: 			nil,
-			err: 				nil,
-			newSession: 		func(roleArn string) (*session.Session, error) { return nil, nil },
-			newLocalSession:	func(endPoint string) (*session.Session, error) { return nil, nil },
-			setEnvironment:		func() () {
+			expect:          nil,
+			err:             nil,
+			newSession:      func(roleArn string) (*session.Session, error) { return nil, nil },
+			newLocalSession: func(endPoint string) (*session.Session, error) { return nil, nil },
+			setEnvironment: func() {
 				t.Setenv("LOCAL_STACK_ENDPOINT", "endpoint")
 			},
-			isTesting: 			true,
+			isTesting: true,
 		},
 		{
 			// LOCAL_STACK_ENDPOINT not set, testing
-			expect: 			nil,
-			err: 				fmt.Errorf("LOCAL_STACK_ENDPOINT env variable not defined"),
-			newSession: 		func(roleArn string) (*session.Session, error) { return nil, nil },
-			newLocalSession:	func(endPoint string) (*session.Session, error) { return nil, nil },
-			setEnvironment:		func() () {
+			expect:          nil,
+			err:             fmt.Errorf("LOCAL_STACK_ENDPOINT env variable not defined"),
+			newSession:      func(roleArn string) (*session.Session, error) { return nil, nil },
+			newLocalSession: func(endPoint string) (*session.Session, error) { return nil, nil },
+			setEnvironment: func() {
 				os.Unsetenv("LOCAL_STACK_ENDPOINT")
 			},
-			isTesting: 			true,
+			isTesting: true,
 		},
 		{
 			// Happy path, not testing
-			expect: 			nil,
-			err: 				nil,
-			newSession: 		func(roleArn string) (*session.Session, error) { return nil, nil },
-			newLocalSession:	func(endPoint string) (*session.Session, error) { return nil, nil },
-			setEnvironment:		func() () {
-				t.Setenv("AWS_ASSUME_ROLE_ARN", "arn")
-			},
-			isTesting: 			false,
-		},
-		{
-			// AWS_ASSUME_ROLE_ARN not set, not testing
-			expect: 			nil,
-			err: 				fmt.Errorf("AWS_ASSUME_ROLE_ARN env variable not defined"),
-			newSession: 		func(roleArn string) (*session.Session, error) { return nil, nil },
-			newLocalSession:	func(endPoint string) (*session.Session, error) { return nil, nil },
-			setEnvironment:		func() () {
-				os.Unsetenv("AWS_ASSUME_ROLE_ARN")
-			},
-			isTesting: 			false,
+			expect:          nil,
+			err:             nil,
+			newSession:      func(roleArn string) (*session.Session, error) { return nil, nil },
+			newLocalSession: func(endPoint string) (*session.Session, error) { return nil, nil },
+			setEnvironment:  func() {},
+			isTesting:       false,
 		},
 	}
 
@@ -203,7 +194,6 @@ func TestGetAwsSession(t *testing.T) {
 		isTesting = test.isTesting
 
 		test.setEnvironment()
-		
 		s, err := getAwsSession()
 
 		assert.Equal(t, test.expect, s)

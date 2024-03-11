@@ -1,14 +1,15 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"database/sql"
 	"fmt"
 	"os"
 	"time"
 
-	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-lambda-go/events"
+	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go/aws/session"
 	_ "github.com/lib/pq"
 	log "github.com/sirupsen/logrus"
@@ -26,6 +27,7 @@ type PatientInfo struct {
 }
 
 // Allow these to be switched out during unit tests
+var getSecret = dpcaws.GetParameter
 var getSecrets = dpcaws.GetParameters
 var uploadToS3 = dpcaws.UploadFileToS3
 var newLocalSession = dpcaws.NewLocalSession
@@ -77,7 +79,7 @@ func generateBeneAlignmentFile() (string, error) {
 	keynames[2] = &consentDbUser
 	keynames[3] = &consentDbPassword
 
-	secretsInfo, pmErr :=  getSecrets(session, keynames)
+	secretsInfo, pmErr := getSecrets(session, keynames)
 	if pmErr != nil {
 		return "", pmErr
 	}
@@ -92,12 +94,19 @@ func generateBeneAlignmentFile() (string, error) {
 		return "", consentDbErr
 	}
 
-	fileName, fileErr := formatFileData(patientInfos)
+	fileName := generateAlignmentFileName(time.Now())
+	buff, fileErr := formatFileData(fileName, patientInfos)
+
 	if fileErr != nil {
 		return "", fileErr
 	}
 
-	s3Err := uploadToS3(session, fileName, os.Getenv("S3_UPLOAD_BUCKET"), os.Getenv("S3_UPLOAD_PATH"))
+	bfdSession, err := getAssumeRoleSession(session)
+	if err != nil {
+		return "", err
+	}
+
+	s3Err := uploadToS3(bfdSession, fileName, buff, os.Getenv("S3_UPLOAD_BUCKET"), os.Getenv("S3_UPLOAD_PATH"))
 	if s3Err != nil {
 		return "", s3Err
 	}
@@ -105,22 +114,15 @@ func generateBeneAlignmentFile() (string, error) {
 	return fileName, nil
 }
 
-func formatFileData(patientInfos map[string]PatientInfo) (string, error) {
-	filename := generateAlignmentFileName(time.Now())
-
-	file, err := os.Create(filename)
-	if err != nil {
-		log.Warning(fmt.Sprintf("Error creating file: %s", err))
-		return "", err
-	}
-	defer file.Close()
+func formatFileData(fileName string, patientInfos map[string]PatientInfo) (bytes.Buffer, error) {
+	var buff bytes.Buffer
 
 	recordCount := 0
 	curr_date := time.Now().Format("20060102")
-	_, err = file.WriteString(fmt.Sprintf("HDR_BENEDATAREQ%s\n", curr_date))
+	_, err := buff.WriteString(fmt.Sprintf("HDR_BENEDATAREQ%s\n", curr_date))
 	if err != nil {
 		log.Warning(fmt.Sprintf("Error writing header to file: %s", err))
-		return "", err
+		return buff, err
 	}
 	for _, patientInfo := range patientInfos {
 		benePadded := fmt.Sprintf("%-*s", 11, patientInfo.beneficiary_id)
@@ -146,26 +148,41 @@ func formatFileData(patientInfos map[string]PatientInfo) (string, error) {
 		}
 		optOutIndicatorPadded := fmt.Sprintf("%-*s\n", 1, optOutIndicator)
 
-		_, err = file.WriteString(benePadded + fNamePadded + lNamePadded + dobPadded + effectiveDtPadded + optOutIndicatorPadded)
+		_, err = buff.WriteString(benePadded + fNamePadded + lNamePadded + dobPadded + effectiveDtPadded + optOutIndicatorPadded)
 
 		if err != nil {
 			log.Warning(fmt.Sprintf("Error writing to file: %s", err))
-			return "", err
+			return buff, err
 		}
 		recordCount += 1
 	}
-	file.WriteString(fmt.Sprintf("TRL_BENEDATAREQ%s%010d", curr_date, recordCount))
-	log.WithField("num_patients", len(patientInfos)).Info(fmt.Sprintf("Successfully generated beneficiary alignment file: %s", filename))
-	return filename, nil
+	buff.WriteString(fmt.Sprintf("TRL_BENEDATAREQ%s%010d", curr_date, recordCount))
+	log.WithField("num_patients", len(patientInfos)).Info(fmt.Sprintf("Successfully generated beneficiary alignment file for file: %s", fileName))
+	return buff, nil
 }
 
-func generateAlignmentFileName(now time.Time) (string) {
+func generateAlignmentFileName(now time.Time) string {
 	fileFormat := "P#EFT.ON.DPC.NGD.REQ.D%s.T%s"
 
 	date := now.Format("060102")
 	time := now.Format("1504050")
 
 	return fmt.Sprintf(fileFormat, date, time)
+}
+
+func getAssumeRoleSession(session *session.Session) (*session.Session, error) {
+	parameterName := fmt.Sprintf("/opt-out-import/dpc/%s/bfd-bucket-role-arn", os.Getenv("ENV"))
+	assumeRoleArn, err := getSecret(session, parameterName)
+
+	if err != nil {
+		return nil, fmt.Errorf("Failed to retrieve assume role arn: %w", err)
+	}
+
+	if isTesting {
+		return getAwsSession()
+	} else {
+		return newSession(assumeRoleArn)
+	}
 }
 
 func getAwsSession() (*session.Session, error) {
@@ -176,12 +193,7 @@ func getAwsSession() (*session.Session, error) {
 			return nil, fmt.Errorf("LOCAL_STACK_ENDPOINT env variable not defined")
 		}
 		return newLocalSession(endPoint)
-	
 	} else {
-		assumeRoleArn, found := os.LookupEnv("AWS_ASSUME_ROLE_ARN")
-		if !found {
-			return nil, fmt.Errorf("AWS_ASSUME_ROLE_ARN env variable not defined")
-		}
-		return newSession(assumeRoleArn)
+		return newSession("")
 	}
 }
