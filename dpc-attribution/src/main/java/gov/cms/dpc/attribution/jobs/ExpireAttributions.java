@@ -6,7 +6,6 @@ import gov.cms.dpc.attribution.exceptions.AttributionException;
 import io.dropwizard.db.ManagedDataSource;
 import io.dropwizard.jobs.Job;
 import io.dropwizard.jobs.annotations.On;
-
 import org.jooq.DSLContext;
 import org.jooq.conf.Settings;
 import org.jooq.impl.DSL;
