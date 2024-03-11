@@ -1,0 +1,41 @@
+name: opt-out-export integration tests
+
+on:
+  push:
+    paths:
+      - .github/workflows/opt-out-export-test-integration.yml
+      - lambda/opt-out-export/**
+  workflow_dispatch:
+
+# Ensure we have only one integration test running at a time
+concurrency:
+  group: opt-out-export-test-integration
+
+jobs:
+  # Deploy first if triggered by push
+  deploy:
+    if: ${{ github.event_name == 'push' }}
+    uses: ./.github/workflows/opt-out-export-test-deploy.yml
+    secrets: inherit
+
+  trigger:
+    if: ${{ always() }}
+    needs: deploy
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./lambda/opt-out-export
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-test-github-actions
+      - name: Send event to trigger export lambda function
+        run: |
+          aws events put-events --entries file://test/events.json # TODO Add events.json matching rule for lambda trigger
+
+  # TODO Check bucket for export file

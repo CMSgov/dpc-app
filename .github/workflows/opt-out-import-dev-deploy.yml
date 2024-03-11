@@ -1,11 +1,6 @@
-name: opt-out-import test deploy
+name: opt-out-import dev deploy
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - lambda/opt-out-import/**
   workflow_dispatch:
 
 jobs:
@@ -17,7 +12,7 @@ jobs:
     defaults:
       run:
         working-directory: ./lambda/opt-out-import
-    environment: test
+    environment: dev
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
@@ -28,8 +23,10 @@ jobs:
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: ${{ vars.ACCOUNT_ROLE }}
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
       - name: Upload and reload
         run: |
-          aws s3 cp --no-progress function.zip s3://${{ vars.OPT_OUT_IMPORT_ZIP_BUCKET }}/function.zip
-          aws lambda update-function-code --function-name dpc-test-opt-out-import --s3-bucket ${{ vars.OPT_OUT_IMPORT_ZIP_BUCKET }} --s3-key function.zip
+          aws s3 cp --no-progress function.zip \
+            s3://dpc-dev-opt-out-import-function/function-${{ github.sha }}.zip
+          aws lambda update-function-code --function-name dpc-dev-opt-out-import \
+            --s3-bucket dpc-dev-opt-out-import-function --s3-key function-${{ github.sha }}.zip

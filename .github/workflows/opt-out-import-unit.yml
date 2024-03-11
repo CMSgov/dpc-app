@@ -3,15 +3,12 @@ name: opt-out-import unit tests
 on:
   pull_request:
     paths:
-      - .github/workflows/opt-out-import-test-unit.yml
+      - .github/workflows/opt-out-import-unit.yml
       - lambda/opt-out-import/**
   workflow_dispatch:
 
 jobs:
   test:
-    permissions:
-      contents: read
-      id-token: write
     runs-on: ubuntu-latest
     defaults:
       run:

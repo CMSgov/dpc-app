@@ -11,6 +11,12 @@ import (
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
+	awsv2 "github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
+	stscredsv2 "github.com/aws/aws-sdk-go-v2/credentials/stscreds"
+	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
+	s3v2 "github.com/aws/aws-sdk-go-v2/service/s3"
+	stsv2 "github.com/aws/aws-sdk-go-v2/service/sts"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -66,7 +72,7 @@ func handler(ctx context.Context, s3Event events.S3Event) (string, error) {
 }
 
 func importOptOutFile(bucket string, file string) (bool, error) {
-	log.Info(fmt.Printf("Importing opt out file: %s", file))
+	log.Info(fmt.Printf("Importing opt out file: %s (bucket: %s)", file, bucket))
 	metadata, err := ParseMetadata(bucket, file)
 	if err != nil {
 		log.Warning(fmt.Sprintf("Failed to parse opt out file metadata: %s", err))
@@ -100,7 +106,7 @@ func importOptOutFile(bucket string, file string) (bool, error) {
 
 	bytes, err := downloadS3File(bucket, file)
 	if err != nil {
-		log.Warning("Failed to download opt out file from S3.")
+		log.Warningf("Failed to download opt out file from S3: %s", err)
 		if err := updateOptOutFileImportStatus(db, optOutFileEntity.id, ImportFail); err != nil {
 			return false, err
 		}
@@ -144,6 +150,20 @@ func importOptOutFile(bucket string, file string) (bool, error) {
 	return true, err
 }
 
+func createV2Cfg() (*awsv2.Config, error) {
+	cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithRegion("us-east-1"))
+	assumeRoleArn, err := getAssumeRoleArn()
+
+	if err != nil {
+		return nil, err
+	}
+
+	client := stsv2.NewFromConfig(cfg)
+	creds := stscredsv2.NewAssumeRoleProvider(client, assumeRoleArn)
+	cfg.Credentials = awsv2.NewCredentialsCache(creds)
+	return &cfg, nil
+}
+
 func createSession() (*session.Session, error) {
 	sess := session.Must(session.NewSession())
 	var err error
@@ -157,14 +177,19 @@ func createSession() (*session.Session, error) {
 			},
 		})
 	} else {
-		sess, err = session.NewSession(&aws.Config{
-			Region: aws.String("us-east-1"),
-			Credentials: stscreds.NewCredentials(
-				sess,
-				os.Getenv("AWS_ASSUME_ROLE_ARN"),
-			),
-		})
+		assumeRoleArn, err := getAssumeRoleArn()
+
+		if err == nil {
+			sess, err = session.NewSession(&aws.Config{
+				Region: aws.String("us-east-1"),
+				Credentials: stscreds.NewCredentials(
+					sess,
+					assumeRoleArn,
+				),
+			})
+		}
 	}
+
 	if err != nil {
 		return nil, err
 	}
@@ -173,20 +198,23 @@ func createSession() (*session.Session, error) {
 }
 
 func downloadS3File(bucket string, file string) ([]byte, error) {
-	sess, err := createSession()
+	cfg, err := createV2Cfg()
 	if err != nil {
 		return []byte{}, err
 	}
-	downloader := s3manager.NewDownloader(sess)
+
+	downloader := manager.NewDownloader(s3v2.NewFromConfig(*cfg))
 	buff := &aws.WriteAtBuffer{}
-	numBytes, err := downloader.Download(buff, &s3.GetObjectInput{
+	numBytes, err := downloader.Download(context.TODO(), buff, &s3v2.GetObjectInput{
 		Bucket: aws.String(bucket),
 		Key:    aws.String(file),
 	})
-	log.Printf("file downloaded: size=%d", numBytes)
-	byte_arr := buff.Bytes()
 
-	return byte_arr, err
+	if err == nil {
+		log.Printf("file downloaded: size=%d", numBytes)
+	}
+
+	return buff.Bytes(), err
 }
 
 func generateConfirmationFile(successful bool, records []*OptOutRecord, marshaler FileMarshaler) ([]byte, error) {
