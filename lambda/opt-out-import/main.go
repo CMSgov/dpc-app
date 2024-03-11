@@ -11,12 +11,17 @@ import (
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
+	awsv2 "github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
+	stscredsv2 "github.com/aws/aws-sdk-go-v2/credentials/stscreds"
+	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
+	s3v2 "github.com/aws/aws-sdk-go-v2/service/s3"
+	stsv2 "github.com/aws/aws-sdk-go-v2/service/sts"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
-	"github.com/aws/aws-sdk-go/service/sts"
 
 	"github.com/ianlopshire/go-fixedwidth"
 )
@@ -145,6 +150,20 @@ func importOptOutFile(bucket string, file string) (bool, error) {
 	return true, err
 }
 
+func createV2Cfg() (*awsv2.Config, error) {
+	cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithRegion("us-east-1"))
+	assumeRoleArn, err := getAssumeRoleArn()
+
+	if err != nil {
+		return nil, err
+	}
+
+	client := stsv2.NewFromConfig(cfg)
+	creds := stscredsv2.NewAssumeRoleProvider(client, assumeRoleArn)
+	cfg.Credentials = awsv2.NewCredentialsCache(creds)
+	return &cfg, nil
+}
+
 func createSession() (*session.Session, error) {
 	sess := session.Must(session.NewSession())
 	var err error
@@ -179,15 +198,15 @@ func createSession() (*session.Session, error) {
 }
 
 func downloadS3File(bucket string, file string) ([]byte, error) {
-	sess, err := createSession()
+	cfg, err := createV2Cfg()
 	if err != nil {
 		return []byte{}, err
 	}
 
-	svc := sts.New(sess)
-	input := &sts.GetCallerIdentityInput{}
+	svc := stsv2.NewFromConfig(*cfg)
+	input := &stsv2.GetCallerIdentityInput{}
 
-	result, err := svc.GetCallerIdentity(input)
+	result, err := svc.GetCallerIdentity(context.TODO(), input)
 	if err != nil {
 		// Print the error, cast err to awserr.Error to get the Code and
 		// Message from an error.
@@ -197,9 +216,9 @@ func downloadS3File(bucket string, file string) ([]byte, error) {
 
 	fmt.Println(result)
 
-	downloader := s3manager.NewDownloader(sess)
+	downloader := manager.NewDownloader(s3v2.NewFromConfig(*cfg))
 	buff := &aws.WriteAtBuffer{}
-	numBytes, err := downloader.Download(buff, &s3.GetObjectInput{
+	numBytes, err := downloader.Download(context.TODO(), buff, &s3v2.GetObjectInput{
 		Bucket: aws.String(bucket),
 		Key:    aws.String(file),
 	})
