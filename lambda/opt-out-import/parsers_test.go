@@ -1,7 +1,12 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
+	"fmt"
+	"io"
+	"os"
+	"strconv"
 	"testing"
 	"time"
 
@@ -131,13 +136,37 @@ func TestParseRecord_InvalidData(t *testing.T) {
 }
 
 func TestParseSQSEvent(t *testing.T) {
-	body := "{\n  \"Type\" : \"Notification\",\n  \"MessageId\" : \"27e4306f-db21-52e8-ac8b-6e06896db643\",\n  \"TopicArn\" : \"arn:aws:sns:us-east-1:577373831711:bfd-test-eft-inbound-received-s3-dpc\",\n  \"Subject\" : \"Amazon S3 Notification\",\n  \"Message\" : \"{\\\"Records\\\":[{\\\"eventVersion\\\":\\\"2.1\\\",\\\"eventSource\\\":\\\"aws:s3\\\",\\\"awsRegion\\\":\\\"us-east-1\\\",\\\"eventTime\\\":\\\"2024-03-11T18:40:11.978Z\\\",\\\"eventName\\\":\\\"ObjectCreated:Put\\\",\\\"userIdentity\\\":{\\\"principalId\\\":\\\"AWS:AROAYM3RJQIP6E7GYLGEM:GitHubActions\\\"},\\\"requestParameters\\\":{\\\"sourceIPAddress\\\":\\\"52.159.142.207\\\"},\\\"responseElements\\\":{\\\"x-amz-request-id\\\":\\\"1FBF7M97BMGBA51P\\\",\\\"x-amz-id-2\\\":\\\"HTuKjp1ErjzUZRXSrcwqrKGd+R8pZwM/Xe7ozkCqJguFgSJw8MyIuW8+AE0SIxTDffnQs9wahu4+BE6IGIWKBjgB6JMUaJSYNVdUwMxp2RQ=\\\"},\\\"s3\\\":{\\\"s3SchemaVersion\\\":\\\"1.0\\\",\\\"configurationId\\\":\\\"bfd-test-eft-inbound-received-s3-dpc\\\",\\\"bucket\\\":{\\\"name\\\":\\\"bfd-test-eft\\\",\\\"ownerIdentity\\\":{\\\"principalId\\\":\\\"A5VBSMJFI0FCE\\\"},\\\"arn\\\":\\\"arn:aws:s3:::bfd-test-eft\\\"},\\\"object\\\":{\\\"key\\\":\\\"bfdeft01/dpc/in/P.NGD.DPC.RSP.D240311.T1840071.IN\\\",\\\"size\\\":148,\\\"eTag\\\":\\\"ab963837c0a2bb70c7f0d3aa886bf24c\\\",\\\"sequencer\\\":\\\"0065EF500BCCA7C4C6\\\"}}}]}\",\n  \"Timestamp\" : \"2024-03-11T18:40:12.630Z\",\n  \"SignatureVersion\" : \"1\",\n  \"Signature\" : \"W2xExh3H6n7j3U9RFliPV4gaG3oLAps2ilrpStqQaAkJ5ebf4+/gB2NKk9LH6e7rlX4+JAFlAwVGVNX+fdKNbBVKPpt+uyk+Ng586yQxVPoAFdbnnVu/KnyKnZ42iilNSR2vridid/LQBGkRWEqpBhYbtg/Ny/rZWD6PzqW0RktiNLscgat/i/PwOY6bmhz9fmd2NysRqh+BptrE4NZtEc6YxT1AOLswnj8KVcSlv0sEuD+/71Qrd69XKK+62yoXnH65+adLrejEVFQcv8MYVGsexvkhesQjWooTu6Kw2y/b/atp250d1yJPLR+UTuYAII0Z1rcmCIwpvB/wUuzBBw==\",\n  \"SigningCertURL\" : \"https://sns.us-east-1.amazonaws.com/SimpleNotificationService-60eadc530605d63b8e62a523676ef735.pem\",\n  \"UnsubscribeURL\" : \"https://sns.us-east-1.amazonaws.com/?Action=Unsubscribe&SubscriptionArn=arn:aws:sns:us-east-1:577373831711:bfd-test-eft-inbound-received-s3-dpc:5a305355-b238-4c5b-b1fb-e987474b09e4\"\n}"
+	jsonFile, err := os.Open("testdata/s3event.json")
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer jsonFile.Close()
+
+	byteValue, _ := io.ReadAll(jsonFile)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	var s3event events.S3Event
+	err = json.Unmarshal([]byte(byteValue), &s3event)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	val, err := json.Marshal(s3event)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	body := fmt.Sprintf("{\"Type\" : \"Notification\",\n  \"MessageId\" : \"123456-1234-1234-1234-6e06896db643\",\n  \"TopicArn\" : \"my-topic\",\n  \"Subject\" : \"Amazon S3 Notification\",\n  \"Message\" : %s}", strconv.Quote(string(val[:])))
+
 	event := events.SQSEvent{
 		Records: []events.SQSMessage{{Body: body}},
 	}
 
 	s3Event, err := ParseSQSEvent(event)
 	assert.Nil(t, err)
-	println(s3Event.Records[0].S3.Bucket.Name)
 	assert.NotNil(t, s3Event)
+	assert.Equal(t, "demo-bucket", s3Event.Records[0].S3.Bucket.Name)
 }
