@@ -7,8 +7,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-lambda-go/events"
+	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go/aws/session"
 	_ "github.com/lib/pq"
 	log "github.com/sirupsen/logrus"
@@ -26,6 +26,7 @@ type PatientInfo struct {
 }
 
 // Allow these to be switched out during unit tests
+var getSecret = dpcaws.GetParameter
 var getSecrets = dpcaws.GetParameters
 var uploadToS3 = dpcaws.UploadFileToS3
 var newLocalSession = dpcaws.NewLocalSession
@@ -38,7 +39,7 @@ func main() {
 		var filename, err = generateBeneAlignmentFile()
 		if err != nil {
 			log.Error(err)
-		} else {		
+		} else {
 			log.Println(filename)
 		}
 	} else {
@@ -77,7 +78,7 @@ func generateBeneAlignmentFile() (string, error) {
 	keynames[2] = &consentDbUser
 	keynames[3] = &consentDbPassword
 
-	secretsInfo, pmErr :=  getSecrets(session, keynames)
+	secretsInfo, pmErr := getSecrets(session, keynames)
 	if pmErr != nil {
 		return "", pmErr
 	}
@@ -96,6 +97,8 @@ func generateBeneAlignmentFile() (string, error) {
 	if fileErr != nil {
 		return "", fileErr
 	}
+
+	getAssumeRoleSession(session)
 
 	s3Err := uploadToS3(session, fileName, os.Getenv("S3_UPLOAD_BUCKET"), os.Getenv("S3_UPLOAD_PATH"))
 	if s3Err != nil {
@@ -159,13 +162,24 @@ func formatFileData(patientInfos map[string]PatientInfo) (string, error) {
 	return filename, nil
 }
 
-func generateAlignmentFileName(now time.Time) (string) {
+func generateAlignmentFileName(now time.Time) string {
 	fileFormat := "P#EFT.ON.DPC.NGD.REQ.D%s.T%s"
 
 	date := now.Format("060102")
 	time := now.Format("1504050")
 
 	return fmt.Sprintf(fileFormat, date, time)
+}
+
+func getAssumeRoleSession(session *session.Session) (*session.Session, error) {
+	parameterName := fmt.Sprintf("/opt-out-import/dpc/%s/bfd-bucket-role-arn", os.Getenv("ENV"))
+	assumeRoleArn, err := getSecret(session, parameterName)
+
+	if err != nil {
+		return nil, fmt.Errorf("Failed to retrieve assume role arn: %w", err)
+	}
+
+	return newSession(assumeRoleArn)
 }
 
 func getAwsSession() (*session.Session, error) {
@@ -176,12 +190,7 @@ func getAwsSession() (*session.Session, error) {
 			return nil, fmt.Errorf("LOCAL_STACK_ENDPOINT env variable not defined")
 		}
 		return newLocalSession(endPoint)
-	
 	} else {
-		assumeRoleArn, found := os.LookupEnv("AWS_ASSUME_ROLE_ARN")
-		if !found {
-			return nil, fmt.Errorf("AWS_ASSUME_ROLE_ARN env variable not defined")
-		}
-		return newSession(assumeRoleArn)
+		return newSession("")
 	}
 }
