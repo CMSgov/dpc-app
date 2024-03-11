@@ -178,7 +178,11 @@ func getAssumeRoleSession(session *session.Session) (*session.Session, error) {
 		return nil, fmt.Errorf("Failed to retrieve assume role arn: %w", err)
 	}
 
-	return newSession(assumeRoleArn)
+	if isTesting {
+		return getAwsSession()
+	} else {
+		return newSession(assumeRoleArn)
+	}
 }
 
 func getAwsSession() (*session.Session, error) {
