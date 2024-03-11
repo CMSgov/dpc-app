@@ -57,11 +57,14 @@ func handler(ctx context.Context, sqsEvent events.SQSEvent) (string, error) {
 		TimestampFormat:   time.RFC3339Nano,
 	})
 
-	log.Info(sqsEvent.Records[0].Body)
 	s3Event, err := ParseSQSEvent(sqsEvent)
 
 	if err != nil {
+		log.Errorf("Failed to parse S3 event: %w", err)
 		return "", err
+	} else if s3Event == nil {
+		log.Infof("No S3 event found, skipping safely.")
+		return "", nil
 	}
 
 	for _, e := range s3Event.Records {
@@ -76,6 +79,7 @@ func handler(ctx context.Context, sqsEvent events.SQSEvent) (string, error) {
 		}
 	}
 
+	log.Warningf("No ObjectCreated:Put events found, skipping safely.")
 	return "", nil
 }
 
