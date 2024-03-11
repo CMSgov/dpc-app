@@ -11,11 +11,12 @@ public class JobTestUtils {
     private JobTestUtils() {}
 
     public static int startJob(DropwizardTestSupport<?> application, Client client, String jobName) {
-        Response response = client.target(
-                String.format(
-                        "http://localhost:%d/%s/tasks/startjob?JOB_NAME=%s",
-                        application.getAdminPort(), application.getEnvironment().getAdminContext().getContextPath(), jobName
-                ))
+        String requestUrl = String.format(
+                "http://localhost:%d/tasks/startjob?JOB_NAME=%s",
+                application.getAdminPort(), jobName
+        );
+        System.out.println(requestUrl);
+        Response response = client.target(requestUrl)
                 .request()
                 .post(Entity.text(""));
 
