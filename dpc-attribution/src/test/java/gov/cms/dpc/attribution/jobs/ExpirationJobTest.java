@@ -49,7 +49,6 @@ class ExpirationJobTest {
 
     @BeforeEach
     void initDB() throws Exception {
-        JobTestUtils.resetScheduler();
         APPLICATION.before();
         SharedConfigurationState.clear();
         APPLICATION.getApplication().run("db", "migrate", configPath);
