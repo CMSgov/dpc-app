@@ -1,9 +1,9 @@
 package main
 
 import (
+	"bytes"
 	"database/sql"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strings"
 	"testing"
@@ -65,7 +65,7 @@ func TestGenerateBeneAlignmentFile(t *testing.T) {
 					return nil
 				}
 
-				uploadToS3 = func(s *session.Session, fileName string, s3Bucket string, s3Path string) error {
+				uploadToS3 = func(s *session.Session, fileName string, buff bytes.Buffer, s3Bucket string, s3Path string) error {
 					return nil
 				}
 			},
@@ -139,12 +139,11 @@ func TestFormatFileData(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		filename, _ := formatFileData(test.patientInfos)
-		body, _ := ioutil.ReadFile(filename)
+		buff, _ := formatFileData("test-file", test.patientInfos)
+		body := buff.String()
 		lines := strings.Split(string(body), "\n")
 		assert.Equal(t, len(test.expect), len(lines))
 		assert.ElementsMatch(t, test.expect, lines)
-		os.Remove(filename)
 	}
 }
 
