@@ -100,8 +100,12 @@ func generateBeneAlignmentFile() (string, error) {
 		return "", fileErr
 	}
 
-	getAssumeRoleSession(session)
-	s3Err := uploadToS3(session, fileName, buff, os.Getenv("S3_UPLOAD_BUCKET"), os.Getenv("S3_UPLOAD_PATH"))
+	bfdSession, err := getAssumeRoleSession(session)
+	if err != nil {
+		return "", err
+	}
+
+	s3Err := uploadToS3(bfdSession, fileName, buff, os.Getenv("S3_UPLOAD_BUCKET"), os.Getenv("S3_UPLOAD_PATH"))
 	if s3Err != nil {
 		return "", s3Err
 	}
