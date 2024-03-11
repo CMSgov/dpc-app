@@ -10,7 +10,7 @@ RSpec.describe Page::Organization::NewOrganizationComponent, type: :component do
       normalize_space(rendered_content)
     end
 
-    let(:component) { described_class.new('') }
+    let(:component) { described_class.new }
 
     before do
       render_inline(component)

@@ -105,6 +105,57 @@ RSpec.describe 'Organizations', type: :request do
     end
   end
 
+  describe 'AO org flow' do
+    let!(:user) { create(:user) }
+    before { sign_in user }
+
+    context 'GET /organizations/new' do
+      it 'returns success' do
+        SecureRandom.uuid
+        get '/organizations/new'
+        expect(response).to be_ok
+      end
+    end
+
+    context 'POST /organizations' do
+      it 'succeeds with valid input' do
+        post '/organizations', params: { npi: '1111111111' }
+        expect(response).to redirect_to(tos_form_organization_path('place-holder'))
+      end
+
+      it 'fails if blank' do
+        post '/organizations', params: { npi: '' }
+        expect(response).to be_bad_request
+        expect(assigns(:npi_error)).to eq "can't be blank"
+      end
+
+      it 'fails if not 10 digits' do
+        post '/organizations', params: { npi: '22' }
+        expect(response).to be_bad_request
+        expect(assigns(:npi_error)).to eq 'length has to be 10'
+      end
+    end
+
+    context 'GET /organizations/[organization_id]/tos_form' do
+      it 'renders tos form' do
+        get '/organizations/place-holder/tos_form'
+        expect(response).to be_ok
+      end
+    end
+    context 'POST /organizations/[organization_id]/sign_tos' do
+      it 'succeeds' do
+        post '/organizations/place-holder/sign_tos'
+        expect(response).to redirect_to(success_organization_path('place-holder'))
+      end
+    end
+    context 'GET /organizations/[organization_id]/success' do
+      it 'shows success page' do
+        get '/organizations/foo/success'
+        expect(response).to be_ok
+      end
+    end
+  end
+
   def stub_client(api_id)
     client = stub_api_client(message: :get_organization,
                              response: default_get_org_response(api_id))

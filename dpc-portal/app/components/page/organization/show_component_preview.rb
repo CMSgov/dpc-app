@@ -6,7 +6,7 @@ module Page
     class ShowComponentPreview < ViewComponent::Preview
       # @param row_count
       def default(row_count: 2)
-        org = MockOrg.new(row_count.to_i)
+        org = MockOrgShow.new(row_count.to_i)
         org.name = 'Universal Healthcare Clinic'
         org.npi = '11111111'
         render(Page::Organization::ShowComponent.new(org))
@@ -14,7 +14,7 @@ module Page
     end
 
     # Mocks the Organization class
-    class MockOrg
+    class MockOrgShow
       attr_accessor :name, :npi, :path_id
 
       def initialize(row_count)

@@ -22,15 +22,27 @@ class OrganizationsController < ApplicationController
   end
 
   def new
-    render(Page::Organization::NewOrganizationComponent.new(''))
+    render(Page::Organization::NewOrganizationComponent.new)
   end
 
   def create
-    if npi_error.blank?
-      render(Page::Organization::NewOrganizationSuccessComponent.new(params[:npi]))
-    else
-      render(Page::Organization::NewOrganizationComponent.new(npi_error), status: :bad_request)
-    end
+    @npi_error = npi_error
+    return redirect_to tos_form_organization_path('place-holder') unless @npi_error.present?
+
+    render(Page::Organization::NewOrganizationComponent.new(@npi_error), status: :bad_request)
+  end
+
+  def tos_form
+    organization = ProviderOrganization.new(npi: '1111111111', name: 'Health Hut')
+    render(Page::Organization::TosFormComponent.new(organization))
+  end
+
+  def sign_tos
+    redirect_to success_organization_path('place-holder')
+  end
+
+  def success
+    render(Page::Organization::NewOrganizationSuccessComponent.new(params[:npi]))
   end
 
   def npi_error
@@ -38,8 +50,6 @@ class OrganizationsController < ApplicationController
       "can't be blank"
     elsif params[:npi].length != 10
       'length has to be 10'
-    else
-      ''
     end
   end
 

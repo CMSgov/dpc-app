@@ -5,7 +5,7 @@ module Page
     # Preview of new organization component
     class NewOrganizationComponentPreview < ViewComponent::Preview
       def default
-        render(Page::Organization::NewOrganizationComponent.new(''))
+        render(Page::Organization::NewOrganizationComponent.new)
       end
 
       def blank_error

@@ -6,7 +6,7 @@ module Page
     class NewOrganizationComponent < ViewComponent::Base
       attr_reader :npi_error
 
-      def initialize(npi_error)
+      def initialize(npi_error = '')
         super
         @npi_error = npi_error
       end
