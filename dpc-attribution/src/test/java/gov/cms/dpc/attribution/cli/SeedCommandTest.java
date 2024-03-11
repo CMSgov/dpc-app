@@ -1,6 +1,5 @@
 package gov.cms.dpc.attribution.cli;
 
-import gov.cms.dpc.attribution.AbstractAttributionTest;
 import gov.cms.dpc.attribution.DPCAttributionConfiguration;
 import gov.cms.dpc.attribution.DPCAttributionService;
 import gov.cms.dpc.testing.IntegrationTest;
@@ -22,7 +21,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @IntegrationTest
-public class SeedCommandTest extends AbstractAttributionTest {
+public class SeedCommandTest {
 
     private final PrintStream originalOut = System.out;
     private final PrintStream originalErr = System.err;
@@ -69,7 +68,7 @@ public class SeedCommandTest extends AbstractAttributionTest {
     @Test
     void testSeedCommand() {
         final Optional<Throwable> success = cli.run("seed", "src/test/resources/test.application.yml");
-        //assertTrue(success.isEmpty(), "Should have succeeded");
+        assertTrue(success.isEmpty(), "Should have succeeded");
         assertEquals("", stdErr.toString(), "Should not have errors");
         assertTrue(stdOut.toString().contains("Seeding attribution at time "));
         assertTrue(stdOut.toString().contains("Finished loading seeds"));
