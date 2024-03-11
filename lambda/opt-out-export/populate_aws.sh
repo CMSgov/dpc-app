@@ -22,11 +22,17 @@ aws --endpoint-url=http://localhost:4566 ssm put-parameter \
     --value "dpc-safe" \
     --type "String"
 
+aws --endpoint-url=http://localhost:4566 ssm put-parameter \
+    --name "/opt-out-import/dpc/local/bfd-bucket-role-arn" \
+    --value "assume_role_arn_123456789" \
+    --type "String"
+
 # Output all of our parameters
 aws --endpoint-url=http://localhost:4566 ssm get-parameter --name "/dpc/local/attribution/db_read_only_user_dpc_attribution"
 aws --endpoint-url=http://localhost:4566 ssm get-parameter --name "/dpc/local/consent/db_read_only_user_dpc_consent"
 aws --endpoint-url=http://localhost:4566 ssm get-parameter --name "/dpc/local/attribution/db_read_only_pass_dpc_attribution"
 aws --endpoint-url=http://localhost:4566 ssm get-parameter --name "/dpc/local/consent/db_read_only_pass_dpc_consent"
+aws --endpoint-url=http://localhost:4566 ssm get-parameter --name "/opt-out-import/dpc/local/bfd-bucket-role-arn"
 
 # Create the S3 bucket we're going to upload to
 aws --endpoint-url=http://localhost:4566 s3 mb s3://bfd-local-eft
