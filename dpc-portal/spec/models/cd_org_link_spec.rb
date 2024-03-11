@@ -11,8 +11,8 @@ RSpec.describe CdOrgLink, type: :model do
   end
 
   it 'has foreign keys' do
-    expect(cd_org_link.user).not_to be(nil)
-    expect(cd_org_link.provider_organization).not_to be(nil)
-    expect(cd_org_link.invitation).not_to be(nil)
+    expect(cd_org_link.user).to eq credential_delegate
+    expect(cd_org_link.provider_organization).to eq organization
+    expect(cd_org_link.invitation).to eq new_cd_invite
   end
 end
