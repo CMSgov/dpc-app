@@ -57,8 +57,8 @@ func handler(ctx context.Context, s3Event events.S3Event) (string, error) {
 		TimestampFormat:   time.RFC3339Nano,
 	})
 	for _, e := range s3Event.Records {
+		log.Info(e)
 		if e.EventName == "ObjectCreated:Put" {
-			log.Info(e)
 			success, err := importOptOutFile(e.S3.Bucket.Name, e.S3.Object.Key)
 			log.Info(success)
 			if err != nil {
@@ -68,6 +68,7 @@ func handler(ctx context.Context, s3Event events.S3Event) (string, error) {
 			return e.S3.Object.Key, err
 		}
 	}
+
 	return "", nil
 }
 
