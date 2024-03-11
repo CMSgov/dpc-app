@@ -16,7 +16,7 @@ var newUploader = s3manager.NewUploader
 var upload = s3manager.Uploader.Upload
 
 // AddFileToS3
-// Uses the given session s to upload the file to the given s3Bucket
+// Uses the given sessions to upload the file to the given s3Bucket
 func UploadFileToS3(s *session.Session, fileName string, buff bytes.Buffer, s3Bucket string, s3Path string) error {
 	// Upload file to bucket
 	uploader := newUploader(s)

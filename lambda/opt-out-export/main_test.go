@@ -75,7 +75,6 @@ func TestGenerateBeneAlignmentFile(t *testing.T) {
 	for _, test := range tests {
 		test.mockFunc()
 		filename, err := generateBeneAlignmentFile()
-
 		assert.NotEmpty(t, filename)
 		assert.Nil(t, err)
 	}
@@ -195,7 +194,6 @@ func TestGetAwsSession(t *testing.T) {
 		isTesting = test.isTesting
 
 		test.setEnvironment()
-
 		s, err := getAwsSession()
 
 		assert.Equal(t, test.expect, s)

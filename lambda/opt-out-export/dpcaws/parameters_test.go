@@ -79,6 +79,7 @@ func TestGetParameter(t *testing.T) {
 	}
 }
 
+
 func TestGetParameters(t *testing.T) {
 	key1 := "key1"
 	key2 := "key2"

@@ -40,7 +40,7 @@ func main() {
 		var filename, err = generateBeneAlignmentFile()
 		if err != nil {
 			log.Error(err)
-		} else {
+		} else {		
 			log.Println(filename)
 		}
 	} else {
@@ -96,6 +96,7 @@ func generateBeneAlignmentFile() (string, error) {
 
 	fileName := generateAlignmentFileName(time.Now())
 	buff, fileErr := formatFileData(fileName, patientInfos)
+
 	if fileErr != nil {
 		return "", fileErr
 	}
