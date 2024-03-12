@@ -63,7 +63,7 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
     @Override
     public void run(DPCAttributionConfiguration configuration, Environment environment) {
         GuiceJobManager jobManager = new GuiceJobManager(configuration, guiceBundle.getInjector());
-		environment.lifecycle().manage(jobManager);
+        environment.lifecycle().manage(jobManager);
 
         EnvironmentParser.getEnvironment("Attribution");
         final var listener = new InstrumentedResourceMethodApplicationListener(environment.metrics());
