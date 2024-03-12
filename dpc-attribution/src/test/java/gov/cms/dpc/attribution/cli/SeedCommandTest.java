@@ -28,28 +28,23 @@ public class SeedCommandTest {
     private final PrintStream originalErr = System.err;
     private final ByteArrayOutputStream stdErr = new ByteArrayOutputStream();
 
-    private static final DPCAttributionService app = new DPCAttributionService();
-    private static final Bootstrap<DPCAttributionConfiguration> bs = setupBootstrap();
-
     private Cli cli;
 
-    private static Bootstrap<DPCAttributionConfiguration> setupBootstrap() {
-        // adapted from DropwizardTestSupport
-        Bootstrap<DPCAttributionConfiguration> bootstrap = new Bootstrap<>(SeedCommandTest.app) {
+    @BeforeEach
+    void setup() {
+        final JarLocation location = mock(JarLocation.class);
+        when(location.getVersion()).thenReturn(Optional.of("1.0.0"));
+
+        // Configure bootstrap
+        DPCAttributionService app = new DPCAttributionService();
+        Bootstrap<DPCAttributionConfiguration> bs = new Bootstrap<>(app) {
             public void run(DPCAttributionConfiguration configuration, Environment environment) throws Exception {
                 super.run(configuration, environment);
                 setConfigurationFactoryFactory((klass, validator, objectMapper, propertyPrefix) ->
                         new POJOConfigurationFactory<>(configuration));
             }
         };
-        SeedCommandTest.app.initialize(bootstrap);
-        return bootstrap;
-    }
-
-    @BeforeEach
-    void cliSetup() {
-        final JarLocation location = mock(JarLocation.class);
-        when(location.getVersion()).thenReturn(Optional.of("1.0.0"));
+        app.initialize(bs);
 
         // Redirect stderr to our byte stream
         System.setErr(new PrintStream(stdErr));
