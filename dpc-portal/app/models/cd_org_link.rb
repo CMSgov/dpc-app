@@ -2,13 +2,13 @@
 
 # Link between credential delegate and provider organization
 class CdOrgLink < ApplicationRecord
-  attr_reader :user_id, :provider_organization_id, :invitation_id
-
   belongs_to :user, required: true
   belongs_to :provider_organization, required: true
   belongs_to :invitation, required: true
 
   def show_attributes
-    { user_id:, provider_organization_id:, invitation_id: }.with_indifferent_access
+    { full_name: "#{user.given_name} #{user.family_name}",
+      email: user.email.to_s,
+      verification_code: invitation.verification_code.to_s }.with_indifferent_access
   end
 end
