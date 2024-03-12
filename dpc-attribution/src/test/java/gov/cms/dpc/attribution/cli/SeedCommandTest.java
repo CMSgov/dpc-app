@@ -18,6 +18,7 @@ import java.io.PrintStream;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -66,8 +67,7 @@ public class SeedCommandTest extends AbstractAttributionTest {
     @Test
     void testSeedCommand() {
         final Optional<Throwable> success = cli.run("seed", "src/test/resources/test.application.yml");
-        // TODO: dropwizard - debug
-        //assertTrue(success.isEmpty(), "Should have succeeded");
+        assertTrue(success.isEmpty(), "Should have succeeded");
         assertEquals("", stdErr.toString(), "Should not have errors");
     }
 }
