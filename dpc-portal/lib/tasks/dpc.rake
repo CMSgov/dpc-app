@@ -12,7 +12,7 @@ namespace :dpc do
                       'name' => 'DPC Sandbox Test Endpoint',
                       'uri' => 'https://dpc.cms.gov/test-endpoint' }
     client = DpcClient.new
-    client.create_organization(org, fhir_endpoint: fhir_endpoint)
+    client.create_organization(org, fhir_endpoint:)
     if client.response_successful?
       puts "http://localhost:3100/portal/organizations/#{client.response_body['id']}"
     else

@@ -12,7 +12,10 @@ class OrganizationsController < ApplicationController
 
   def show
     if params[:ao]
-      render(Page::CredentialDelegate::ListComponent.new(@organization, []))
+      provider_organization = ProviderOrganization.find_by(dpc_api_organization_id: @organization.api_id)
+      @invitations = Invitation.where(provider_organization:,
+                                      invited_by: current_user)
+      render(Page::CredentialDelegate::ListComponent.new(@organization, @invitations, []))
     else
       render(Page::Organization::ShowComponent.new(@organization))
     end

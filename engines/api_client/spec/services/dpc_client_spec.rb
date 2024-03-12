@@ -52,7 +52,7 @@ RSpec.describe DpcClient do
       it 'uses fhir_client to retrieve organization data from API' do
         body = '{"resourceType":"Organization"}'
         stub_request(:get, "http://dpc.example.com/Organization/#{reg_org.api_id}")
-          .with(headers: headers).to_return(status: 200, body: body, headers: {})
+          .with(headers:).to_return(status: 200, body:, headers: {})
         client = DpcClient.new
         fhir_client = client.get_organization(reg_org.api_id)
         expect(fhir_client).to_not be_nil
@@ -63,7 +63,7 @@ RSpec.describe DpcClient do
     context 'unsuccessful request' do
       it 'uses fhir_client to retrieve organization data from API' do
         stub_request(:get, "http://dpc.example.com/Organization/#{reg_org.api_id}")
-          .with(headers: headers).to_return(status: 500, body: '', headers: {})
+          .with(headers:).to_return(status: 500, body: '', headers: {})
 
         client = DpcClient.new
 
@@ -637,19 +637,19 @@ RSpec.describe DpcClient do
           ).to_return(
             status: 200,
             body: '{"label":"Sandbox IP 1","createdAt":"2019-11-07T19:38:44.205Z",' \
-              '"id":"3fa85f64-5717-4562-b3fc-2c963f66afa6"}'
+                  '"id":"3fa85f64-5717-4562-b3fc-2c963f66afa6"}'
           )
 
           api_client = DpcClient.new
           api_client.create_ip_address(reg_org.api_id, params: { label: 'Sandbox IP 1', ip_address: '136.226.19.87' })
           expect(api_client.response_status).to eq(200)
           expect(api_client.response_body).to eq(
-                                                {
-                                                  'label' => 'Sandbox IP 1',
-                                                  'createdAt' => '2019-11-07T19:38:44.205Z',
-                                                  'id' => '3fa85f64-5717-4562-b3fc-2c963f66afa6'
-                                                }
-                                              )
+            {
+              'label' => 'Sandbox IP 1',
+              'createdAt' => '2019-11-07T19:38:44.205Z',
+              'id' => '3fa85f64-5717-4562-b3fc-2c963f66afa6'
+            }
+          )
         end
       end
     end
@@ -662,7 +662,7 @@ RSpec.describe DpcClient do
           ).to_return(
             status: 200,
             body: '{"label":"Sandbox IP 1","createdAt":"2019-11-07T19:38:44.205Z",' \
-              '"id":"3fa85f64-5717-4562-b3fc-2c963f66afa6"}'
+                  '"id":"3fa85f64-5717-4562-b3fc-2c963f66afa6"}'
           )
 
           api_client = DpcClient.new
@@ -715,19 +715,19 @@ RSpec.describe DpcClient do
           ).to_return(
             status: 200,
             body: '[{"id":"4r85cfb4-dc36-4cd0-b8f8-400a6dea2d66","label":"Sandbox IP 1",' \
-              '"createdAt":"2019-11-07T17:15:22.781Z"}]'
+                  '"createdAt":"2019-11-07T17:15:22.781Z"}]'
           )
 
           api_client = DpcClient.new
           api_client.get_public_keys(reg_org.api_id)
           expect(api_client.response_status).to eq(200)
           expect(api_client.response_body).to eq(
-                                                [{
-                                                   'id' => '4r85cfb4-dc36-4cd0-b8f8-400a6dea2d66',
-                                                   'label' => 'Sandbox IP 1',
-                                                   'createdAt' => '2019-11-07T17:15:22.781Z'
-                                                 }]
-                                              )
+            [{
+              'id' => '4r85cfb4-dc36-4cd0-b8f8-400a6dea2d66',
+              'label' => 'Sandbox IP 1',
+              'createdAt' => '2019-11-07T17:15:22.781Z'
+            }]
+          )
         end
       end
 

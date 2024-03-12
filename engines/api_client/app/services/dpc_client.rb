@@ -14,7 +14,7 @@ class DpcClient
 
   def create_organization(org, fhir_endpoint: {})
     uri_string = "#{base_url}/Organization/$submit"
-    json = OrganizationSubmitSerializer.new(org, fhir_endpoint: fhir_endpoint).to_json
+    json = OrganizationSubmitSerializer.new(org, fhir_endpoint:).to_json
     post_request(uri_string, json, fhir_headers(golden_macaroon))
     self
   end
@@ -90,8 +90,8 @@ class DpcClient
   def create_ip_address(reg_org_api_id, params: {})
     post_text_request(
       "#{base_url}/IpAddress",
-      { ip_address: params[:ip_address],  label: params[:label] }.to_json,
-      { },
+      { ip_address: params[:ip_address], label: params[:label] }.to_json,
+      {},
       delegated_macaroon(reg_org_api_id)
     )
     self

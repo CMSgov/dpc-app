@@ -9,7 +9,7 @@ module Core
       # @param hint textarea
       # @param error textarea
       def parameterized(label: 'Some label', hint: 'Here is a hint', error: '')
-        render(Core::Form::TextInputComponent.new(label: label, attribute: :foo, hint: hint, error_msg: error))
+        render(Core::Form::TextInputComponent.new(label:, attribute: :foo, hint:, error_msg: error))
       end
     end
   end

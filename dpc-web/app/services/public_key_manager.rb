@@ -20,8 +20,8 @@ class PublicKeyManager
 
     api_client = DpcClient.new
     api_client.create_public_key(registered_organization.api_id,
-                                 params: { label: label, public_key: public_key,
-                                           snippet_signature: snippet_signature })
+                                 params: { label:, public_key:,
+                                           snippet_signature: })
 
     { response: api_client.response_successful?,
       message: api_client.response_body }

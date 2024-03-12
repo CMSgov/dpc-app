@@ -38,7 +38,7 @@ func getConsentDbSecrets(dbuser string, dbpassword string) (map[string]string, e
 		ssmsvc := ssm.New(sess)
 
 		withDecryption := true
-		param, err := ssmsvc.GetParameters(&ssm.GetParametersInput{
+		params, err := ssmsvc.GetParameters(&ssm.GetParametersInput{
 			Names:          keynames,
 			WithDecryption: &withDecryption,
 		})
@@ -46,12 +46,65 @@ func getConsentDbSecrets(dbuser string, dbpassword string) (map[string]string, e
 			return nil, fmt.Errorf("getConsentDbSecrets: Error connecting to parameter store: %w", err)
 		}
 
-		for _, item := range param.Parameters {
+		// Unknown keys will come back as invalid, make sure we error on them
+		if len(params.InvalidParameters) > 0 {
+			invalidParamsStr := ""
+			for i := 0; i < len(params.InvalidParameters); i++ {
+				invalidParamsStr += fmt.Sprintf("%s,\n", *params.InvalidParameters[i])
+			}
+			return nil, fmt.Errorf("invalid parameters error: %s", invalidParamsStr)
+		}
+
+		for _, item := range params.Parameters {
 			secretsInfo[*item.Name] = *item.Value
 		}
 	}
 
 	return secretsInfo, nil
+}
+
+func getAssumeRoleArn() (string, error) {
+	if isTesting {
+		val := os.Getenv("AWS_ASSUME_ROLE_ARN")
+		if val == "" {
+			return "", fmt.Errorf("AWS_ASSUME_ROLE_ARN must be set during testing")
+		}
+
+		return val, nil
+	}
+
+	parameterName := fmt.Sprintf("/opt-out-import/dpc/%s/bfd-bucket-role-arn", os.Getenv("ENV"))
+
+	var keynames []*string = make([]*string, 1)
+	keynames[0] = &parameterName
+
+	sess, err := session.NewSession(&aws.Config{
+		Region: aws.String("us-east-1"),
+	})
+
+	if err != nil {
+		return "", fmt.Errorf("getAssumeRoleArn: Error creating AWS session: %w", err)
+	}
+
+	ssmsvc := ssm.New(sess)
+
+	withDecryption := true
+	result, err := ssmsvc.GetParameter(&ssm.GetParameterInput{
+		Name:           &parameterName,
+		WithDecryption: &withDecryption,
+	})
+
+	if err != nil {
+		return "", fmt.Errorf("getAssumeRoleArn: Error connecting to parameter store: %w", err)
+	}
+
+	arn := *result.Parameter.Value
+
+	if arn == "" {
+		return "", fmt.Errorf("getAssumeRoleArn: No value found for bfd-bucket-role-arn")
+	}
+
+	return arn, nil
 }
 
 func insertOptOutMetadata(db *sql.DB, optOutMetadata *OptOutFilenameMetadata) (OptOutFileEntity, error) {
@@ -72,12 +125,11 @@ func insertOptOutMetadata(db *sql.DB, optOutMetadata *OptOutFilenameMetadata) (O
 
 func insertConsentRecords(db *sql.DB, optOutFileId string, records []*OptOutRecord) ([]OptOutRecord, error) {
 	createdRecords := []OptOutRecord{}
-	query := `INSERT INTO consent (id, mbi, effective_date, policy_code, loinc_code, source_code, opt_out_file_id, created_at, updated_at) 
+	query := `INSERT INTO consent (id, mbi, effective_date, policy_code, loinc_code, opt_out_file_id, created_at, updated_at) 
 			  VALUES `
 	for i, rec := range records {
-		id := uuid.New().String()
-		query += fmt.Sprintf("('%s', '%s', '%s', 'OPTOUT', '64292-6', '%s', '%s', 'NOW()', 'NOW()')",
-			id, rec.MBI, rec.EffectiveDt.Format(time.DateOnly), rec.SourceCode, optOutFileId)
+		query += fmt.Sprintf("('%s', '%s', NOW()::date, '%s', '64292-6', '%s', 'NOW()', 'NOW()')",
+			rec.ID, rec.MBI, rec.PolicyCode, optOutFileId)
 		if i < len(records)-1 {
 			query += ", "
 		} else {
@@ -121,9 +173,9 @@ func updateOptOutFileImportStatus(db *sql.DB, optOutFileId string, status string
 	query := `UPDATE opt_out_file
 			  SET import_status = $1, updated_at = NOW()
 			  WHERE id = $2
-			  RETURNING id, import_status, updated_at`
+			  RETURNING id, import_status`
 	row := db.QueryRow(query, status, optOutFileId)
-	if err := row.Scan(&entity.id, &entity.import_status, &entity.updated_at); err != nil {
+	if err := row.Scan(&entity.id, &entity.import_status); err != nil {
 		return fmt.Errorf("updateOptOutFileImportStatus: %w", err)
 	}
 	return nil

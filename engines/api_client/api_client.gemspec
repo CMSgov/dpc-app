@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.homepage    = 'https://github.com/CMSgov/dpc-app'
   spec.summary     = 'Contacts dpc api.'
   spec.description = 'Provides functionality for interacting with the dpc api.'
-  spec.required_ruby_version = '>= 3.0'
+  spec.required_ruby_version = '>= 3.3'
 
   # Prevent pushing this gem to RubyGems.org. To allow pushes either set the "allowed_push_host"
   # to allow pushing to a single host or delete this section to allow pushing to any host.
@@ -25,7 +25,7 @@ Gem::Specification.new do |spec|
     Dir['{app,config,db,lib}/**/*', 'README.md']
   end
 
-  spec.add_dependency 'activemodel', '~> 7.0.8.1'
+  spec.add_dependency 'activemodel', '~> 7.1.3.2'
   spec.add_dependency 'active_model_serializers'
   spec.add_dependency 'fhir_client'
   spec.add_dependency 'macaroons'

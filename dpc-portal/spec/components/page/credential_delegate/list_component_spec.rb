@@ -12,13 +12,14 @@ RSpec.describe Page::CredentialDelegate::ListComponent, type: :component do
 
     let(:org) { ComponentSupport::MockOrg.new }
 
-    let(:component) { described_class.new(org, credential_delegates) }
+    let(:component) { described_class.new(org, invitations, credential_delegates) }
 
     before do
       render_inline(component)
     end
 
     context 'No credential delegates' do
+      let(:invitations) { [] }
       let(:credential_delegates) { [] }
 
       let(:expected_html) do
@@ -57,6 +58,7 @@ RSpec.describe Page::CredentialDelegate::ListComponent, type: :component do
     end
 
     context 'Active credential delegate' do
+      let(:invitations) { [] }
       let(:credential_delegates) do
         [CdOrgLink.new(given_name: 'Bob', family_name: 'Hodges', email: 'bob@example.com', pending: false)]
       end
@@ -103,10 +105,11 @@ RSpec.describe Page::CredentialDelegate::ListComponent, type: :component do
       end
     end
     context 'Pending credential delegate' do
-      let(:credential_delegates) do
-        [CdOrgLink.new(given_name: 'Bob', family_name: 'Hodges', email: 'bob@example.com', pending: true,
-                       verification_code: 'ABC123')]
+      let(:invitations) do
+        [Invitation.new(invited_given_name: 'Bob', invited_family_name: 'Hodges', invited_email: 'bob@example.com',
+                        verification_code: 'ABC123')]
       end
+      let(:credential_delegates) { [] }
 
       it 'has a table' do
         expected_html = <<~HTML

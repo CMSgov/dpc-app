@@ -1,0 +1,32 @@
+name: opt-out-export dev deploy
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./lambda/opt-out-export
+    environment: dev
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+      - name: Build opt-out-export zip file
+        run: |
+          go build -o bootstrap main.go db.go
+          zip function.zip bootstrap
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
+      - name: Upload and reload
+        run: |
+          aws s3 cp --no-progress function.zip \
+            s3://dpc-dev-opt-out-export-function/function-${{ github.sha }}.zip
+          aws lambda update-function-code --function-name dpc-dev-opt-out-export \
+            --s3-bucket dpc-dev-opt-out-export-function --s3-key function-${{ github.sha }}.zip

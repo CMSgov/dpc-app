@@ -6,7 +6,7 @@ class UsersController < ApplicationController
   before_action :authenticate_internal_user!
 
   def index
-    results = BaseSearch.new(params: params, scope: params[:org_type]).results
+    results = BaseSearch.new(params:, scope: params[:org_type]).results
     @tags = Tag.all
 
     @users = results.order('users.created_at DESC').page params[:page]
@@ -56,7 +56,7 @@ class UsersController < ApplicationController
     else
       respond_to do |format|
         filename = "users-#{Time.now.strftime('%Y%m%dT%H%M')}.csv"
-        format.csv { send_data User.to_csv(user_ids), filename: filename }
+        format.csv { send_data User.to_csv(user_ids), filename: }
       end
     end
   end

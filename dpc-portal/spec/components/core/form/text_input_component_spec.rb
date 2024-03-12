@@ -41,7 +41,7 @@ RSpec.describe Core::Form::TextInputComponent, type: :component do
 
     context 'has more classes' do
       let(:input_options) { { class: ['custom-class'] } }
-      let(:component) { described_class.new(label: 'Some Label', attribute: 'attr', input_options: input_options) }
+      let(:component) { described_class.new(label: 'Some Label', attribute: 'attr', input_options:) }
       let(:expected_html) do
         <<~HTML
           <div class="margin-bottom-4">
@@ -55,7 +55,7 @@ RSpec.describe Core::Form::TextInputComponent, type: :component do
 
     context 'has max length' do
       let(:input_options) { { maxlength: 25 } }
-      let(:component) { described_class.new(label: 'Some Label', attribute: 'attr', input_options: input_options) }
+      let(:component) { described_class.new(label: 'Some Label', attribute: 'attr', input_options:) }
       let(:expected_html) do
         <<~HTML
           <div class="margin-bottom-4">

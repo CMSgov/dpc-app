@@ -40,7 +40,7 @@ RSpec.describe Core::Form::TextAreaComponent, type: :component do
     end
     context 'readonly' do
       let(:input_options) { { readonly: :readonly } }
-      let(:component) { described_class.new(label: 'Some Label', attribute: 'attr', input_options: input_options) }
+      let(:component) { described_class.new(label: 'Some Label', attribute: 'attr', input_options:) }
       let(:expected_html) do
         <<~HTML
           <div class="margin-bottom-4">
