@@ -13,7 +13,8 @@ public class JobTestUtils {
     public static int startJob(DropwizardTestSupport<?> application, Client client, String jobName) {
         Response response = client.target(
                 String.format(
-                        "http://localhost:%d/tasks/startjob?JOB_NAME=%s", application.getAdminPort(), jobName
+                        "http://localhost:%d/%s/tasks/startjob?JOB_NAME=%s",
+                        application.getAdminPort(), application.getEnvironment().getAdminContext().getContextPath(), jobName
                 ))
                 .request()
                 .post(Entity.text(""));
@@ -24,7 +25,8 @@ public class JobTestUtils {
     public static int stopJob(DropwizardTestSupport<?> application, Client client, String jobName) {
         Response response = client.target(
                 String.format(
-                        "http://localhost:%d/tasks/stopjob?JOB_NAME=%s", application.getAdminPort(), jobName
+                        "http://localhost:%d/%s/tasks/stopjob?JOB_NAME=%s",
+                        application.getAdminPort(), application.getEnvironment().getAdminContext().getContextPath(), jobName
                 ))
                 .request()
                 .post(Entity.text(""));
