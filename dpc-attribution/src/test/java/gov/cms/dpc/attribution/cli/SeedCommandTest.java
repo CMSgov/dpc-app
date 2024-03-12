@@ -34,7 +34,7 @@ public class SeedCommandTest {
 
     private static Bootstrap<DPCAttributionConfiguration> setupBootstrap() {
         // adapted from DropwizardTestSupport
-        Bootstrap<DPCAttributionConfiguration> bootstrap = new Bootstrap<>(app) {
+        Bootstrap<DPCAttributionConfiguration> bootstrap = new Bootstrap<>(SeedCommandTest.app) {
             @Override
             public void run(DPCAttributionConfiguration configuration, Environment environment) throws Exception {
                 super.run(configuration, environment);
@@ -42,7 +42,7 @@ public class SeedCommandTest {
                         new POJOConfigurationFactory<>(configuration));
             }
         };
-        app.initialize(bootstrap);
+        SeedCommandTest.app.initialize(bootstrap);
         return bootstrap;
     }
 
