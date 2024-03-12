@@ -24,6 +24,7 @@ import static org.mockito.Mockito.when;
 @IntegrationTest
 public class SeedCommandTest {
 
+    private final PrintStream originalOut = System.out;
     private final PrintStream originalErr = System.err;
     private final ByteArrayOutputStream stdErr = new ByteArrayOutputStream();
 
@@ -35,7 +36,6 @@ public class SeedCommandTest {
     private static Bootstrap<DPCAttributionConfiguration> setupBootstrap() {
         // adapted from DropwizardTestSupport
         Bootstrap<DPCAttributionConfiguration> bootstrap = new Bootstrap<>(SeedCommandTest.app) {
-            @Override
             public void run(DPCAttributionConfiguration configuration, Environment environment) throws Exception {
                 super.run(configuration, environment);
                 setConfigurationFactoryFactory((klass, validator, objectMapper, propertyPrefix) ->
@@ -54,7 +54,7 @@ public class SeedCommandTest {
         // Redirect stderr to our byte stream
         System.setErr(new PrintStream(stdErr));
 
-        cli = new Cli(location, bs, System.out, stdErr);
+        cli = new Cli(location, bs, originalOut, stdErr);
     }
 
     @AfterEach
