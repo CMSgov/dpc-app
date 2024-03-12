@@ -1,6 +1,5 @@
 package gov.cms.dpc.attribution.cli;
 
-import gov.cms.dpc.attribution.AbstractAttributionTest;
 import gov.cms.dpc.attribution.DPCAttributionConfiguration;
 import gov.cms.dpc.attribution.DPCAttributionService;
 import gov.cms.dpc.testing.IntegrationTest;
@@ -23,9 +22,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @IntegrationTest
-public class SeedCommandTest extends AbstractAttributionTest {
+public class SeedCommandTest {
 
-    private final PrintStream originalOut = System.out;
     private final PrintStream originalErr = System.err;
     private final ByteArrayOutputStream stdErr = new ByteArrayOutputStream();
 
@@ -56,7 +54,7 @@ public class SeedCommandTest extends AbstractAttributionTest {
         // Redirect stderr to our byte stream
         System.setErr(new PrintStream(stdErr));
 
-        cli = new Cli(location, bs, originalOut, stdErr);
+        cli = new Cli(location, bs, System.out, stdErr);
     }
 
     @AfterEach
