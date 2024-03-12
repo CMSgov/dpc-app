@@ -39,6 +39,7 @@ public class SeedCommandTest {
         DPCAttributionService app = new DPCAttributionService();
         Bootstrap<DPCAttributionConfiguration> bs = new Bootstrap<>(app) {
             public void run(DPCAttributionConfiguration configuration, Environment environment) throws Exception {
+                // adapted from DropwizardTestSupport
                 super.run(configuration, environment);
                 setConfigurationFactoryFactory((klass, validator, objectMapper, propertyPrefix) ->
                         new POJOConfigurationFactory<>(configuration));
