@@ -35,11 +35,10 @@ public class SeedCommandTest {
         final JarLocation location = mock(JarLocation.class);
         when(location.getVersion()).thenReturn(Optional.of("1.0.0"));
 
-        // Configure bootstrap
+        // Configure bootstrap - adapted from DropwizardTestSupport
         DPCAttributionService app = new DPCAttributionService();
         Bootstrap<DPCAttributionConfiguration> bs = new Bootstrap<>(app) {
             public void run(DPCAttributionConfiguration configuration, Environment environment) throws Exception {
-                // adapted from DropwizardTestSupport
                 super.run(configuration, environment);
                 setConfigurationFactoryFactory((klass, validator, objectMapper, propertyPrefix) ->
                         new POJOConfigurationFactory<>(configuration));

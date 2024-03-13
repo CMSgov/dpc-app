@@ -53,7 +53,7 @@ public class ExpireAttributions extends Job {
             throw new AttributionException("Unable to open connection to database.", e);
         }
 
-//        Remove everything that is inactive and has been expired for more than 6 months
+        // Remove everything that is inactive and has been expired for more than 6 months
         try (final Connection connection = this.dataSource.getConnection(); final DSLContext context = DSL.using(connection, this.settings)) {
             final int removed = context
                     .delete(Attributions.ATTRIBUTIONS)

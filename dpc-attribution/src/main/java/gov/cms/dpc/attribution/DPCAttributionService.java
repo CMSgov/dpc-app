@@ -17,7 +17,6 @@ import io.dropwizard.core.setup.Bootstrap;
 import io.dropwizard.core.setup.Environment;
 import io.dropwizard.db.PooledDataSourceFactory;
 import io.dropwizard.jobs.GuiceJobManager;
-import io.dropwizard.jobs.Job;
 import io.dropwizard.jobs.JobsBundle;
 import io.dropwizard.migrations.MigrationsBundle;
 import io.federecio.dropwizard.swagger.SwaggerBundle;
@@ -85,8 +84,8 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
         // The Hibernate Guice module requires an initialized SessionFactory,
         // so Dropwizard needs to initialize the HibernateBundle first to create the SessionFactory.
         bootstrap.addBundle(hibernateBundle);
-
         bootstrap.addBundle(guiceBundle);
+
         bootstrap.addBundle(new MigrationsBundle<>() {
             @Override
             public PooledDataSourceFactory getDataSourceFactory(DPCAttributionConfiguration configuration) {
@@ -101,7 +100,7 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
                 return configuration.getSwaggerBundleConfiguration();
             }
         });
-        Job expireAttributionsJob = new ExpireAttributions();
-        bootstrap.addBundle(new JobsBundle(expireAttributionsJob));
+
+        bootstrap.addBundle(new JobsBundle(new ExpireAttributions()));
     }
 }
