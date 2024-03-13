@@ -3,6 +3,12 @@
 // the public/assets folder when running assets:precompile.
 
 // Link assets provided by USWDS installation.
+//
+// This serves a couple different purposes:
+// - Ensures that images and fonts are exposed properly on the client-side,
+//   since USWDS CSS references specific assets for their design components.
+// - Ensures that the js files are exposed properly for use in the application layout.
+//
 //= link_tree ../../../node_modules/@uswds/uswds/dist/img
 //= link_tree ../../../node_modules/@uswds/uswds/dist/fonts
 //= link @uswds/uswds/dist/js/uswds-init.min.js
