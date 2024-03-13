@@ -10,6 +10,6 @@ class AoOrgLink < ApplicationRecord
 
   def show_attributes
     { full_name: "#{user.given_name} #{user.family_name}",
-      email: user.email.to_s }.with_indifferent_access
+      email: user.email }.with_indifferent_access
   end
 end
