@@ -15,7 +15,9 @@ module Page
       end
 
       def active
-        cds = [CdOrgLink.new, CdOrgLink.new]
+        user1 = User.new(given_name: 'Bob', family_name: 'Hodges', email: 'bob@example.com')
+        user2 = User.new(given_name: 'Lisa', family_name: 'Franklin', email: 'lisa@example.com')
+        cds = [CdOrgLink.new(user: user1), CdOrgLink.new(user: user2)]
         render(Page::CredentialDelegate::ListComponent.new(org, [], cds))
       end
 

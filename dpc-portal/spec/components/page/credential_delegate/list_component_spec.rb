@@ -58,10 +58,9 @@ RSpec.describe Page::CredentialDelegate::ListComponent, type: :component do
     end
 
     context 'Active credential delegate' do
+      let(:user) { User.new(given_name: 'Bob', family_name: 'Hodges', email: 'bob@example.com') }
       let(:invitations) { [] }
-      let(:credential_delegates) do
-        [CdOrgLink.new]
-      end
+      let(:credential_delegates) { [CdOrgLink.new(user:)] }
 
       it 'has a table' do
         expected_html = <<~HTML
@@ -87,12 +86,10 @@ RSpec.describe Page::CredentialDelegate::ListComponent, type: :component do
       end
 
       it 'has a row' do
-        activated = 1.day.ago.strftime('%m/%d/%Y at %l:%M%p UTC')
         expected_html = <<~HTML
           <tr>
             <td data-sort-value="Bob Hodges">Bob Hodges</td>
             <td data-sort-value="bob@example.com">bob@example.com</td>
-            <td data-sort-value="#{activated}">#{activated}</td>
             <td data-sort-value="X">X</td>
           </tr>
         HTML
