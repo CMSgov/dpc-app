@@ -32,7 +32,7 @@ Rails.application.routes.draw do
   end
 
   match '/download_snippet', to: 'public_keys#download_snippet', as: 'download_snippet', via: :post
-\
+
   if Rails.env.development?
     require 'sidekiq/web'
     mount Sidekiq::Web, at: '/sidekiq'
