@@ -3,16 +3,28 @@
 require 'rails_helper'
 
 RSpec.describe CdOrgLink, type: :model do
-  let(:organization) { build(:provider_organization) }
-  let(:credential_delegate) { build(:user) }
-  let(:new_cd_invite) { build(:invitation) }
+  let(:provider_organization) { build(:provider_organization) }
+  let(:user) do
+    User.new(given_name: 'Bob', family_name: 'Hodges', email: 'bob@example.com')
+  end
+  let(:invitation) do
+    Invitation.new(invited_given_name: 'Bob', invited_family_name: 'Hodges', invited_email: 'bob@example.com',
+                   verification_code: 'ABC123')
+  end
   let(:cd_org_link) do
-    build(:cd_org_link, user: credential_delegate, provider_organization: organization, invitation: new_cd_invite)
+    build(:cd_org_link, user:, provider_organization:, invitation:)
   end
 
   it 'has foreign keys' do
-    expect(cd_org_link.user).to eq credential_delegate
-    expect(cd_org_link.provider_organization).to eq organization
-    expect(cd_org_link.invitation).to eq new_cd_invite
+    expect(cd_org_link.user).to eq user
+    expect(cd_org_link.provider_organization).to eq provider_organization
+    expect(cd_org_link.invitation).to eq invitation
+  end
+
+  it 'shows attributes' do
+    attrs = cd_org_link.show_attributes
+    expect(attrs['full_name']).to eq 'Bob Hodges'
+    expect(attrs['email']).to eq 'bob@example.com'
+    expect(attrs['verification_code']).to eq 'ABC123'
   end
 end
