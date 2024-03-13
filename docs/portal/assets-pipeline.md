@@ -8,4 +8,6 @@ All CSS must be imported by the [application.sass.scss](/dpc-portal/app/assets/s
 
 The `assets:precompile` step in the Dockerfile takes care of everything else, compiling all linked assets in the Sprockets [manifest.js](/dpc-portal/app/assets/config/manifest.js) file into the `public/assets` folder with digest strings embedded into each filename. This causes automatic browser cache-busting to ensure that users always receive the newest version of an asset after a deployment.
 
+Additionally, the [USWDS initializer](/dpc-portal/config/initializers/uswds.rb) adds the compiled USWDS dist folder to Rails asset paths for ease of use.
+
 Read more about Sprockets [here](https://github.com/rails/sprockets/blob/main/guides/how_sprockets_works.md).
