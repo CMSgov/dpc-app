@@ -7,9 +7,4 @@ class AoOrgLink < ApplicationRecord
 
   belongs_to :user, required: true
   belongs_to :provider_organization, required: true
-
-  def show_attributes
-    { full_name: "#{user.given_name} #{user.family_name}",
-      email: user.email }.with_indifferent_access
-  end
 end

@@ -26,5 +26,6 @@ RSpec.describe CdOrgLink, type: :model do
     expect(attrs['full_name']).to eq 'Bob Hodges'
     expect(attrs['email']).to eq 'bob@example.com'
     expect(attrs['verification_code']).to eq 'ABC123'
+    expect(attrs['activated_at']).to eq cd_org_link.created_at.to_s
   end
 end
