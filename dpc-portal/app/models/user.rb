@@ -16,4 +16,16 @@ class User < ApplicationRecord
       user.password = Devise.friendly_token[0, 20]
     end
   end
+
+  def can_access?(organization)
+    is_cd?(organization) || is_ao?(organization)
+  end
+
+  def is_ao?(organization)
+    AoOrgLink.where(user: self, provider_organization: organization).exists?
+  end
+
+  def is_cd?(organization)
+    CdOrgLink.where(user: self, provider_organization: organization, disabled_at: nil).exists?
+  end
 end
