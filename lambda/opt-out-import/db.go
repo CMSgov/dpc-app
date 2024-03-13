@@ -38,7 +38,7 @@ func getConsentDbSecrets(dbuser string, dbpassword string) (map[string]string, e
 		ssmsvc := ssm.New(sess)
 
 		withDecryption := true
-		param, err := ssmsvc.GetParameters(&ssm.GetParametersInput{
+		params, err := ssmsvc.GetParameters(&ssm.GetParametersInput{
 			Names:          keynames,
 			WithDecryption: &withDecryption,
 		})
@@ -46,12 +46,65 @@ func getConsentDbSecrets(dbuser string, dbpassword string) (map[string]string, e
 			return nil, fmt.Errorf("getConsentDbSecrets: Error connecting to parameter store: %w", err)
 		}
 
-		for _, item := range param.Parameters {
+		// Unknown keys will come back as invalid, make sure we error on them
+		if len(params.InvalidParameters) > 0 {
+			invalidParamsStr := ""
+			for i := 0; i < len(params.InvalidParameters); i++ {
+				invalidParamsStr += fmt.Sprintf("%s,\n", *params.InvalidParameters[i])
+			}
+			return nil, fmt.Errorf("invalid parameters error: %s", invalidParamsStr)
+		}
+
+		for _, item := range params.Parameters {
 			secretsInfo[*item.Name] = *item.Value
 		}
 	}
 
 	return secretsInfo, nil
+}
+
+func getAssumeRoleArn() (string, error) {
+	if isTesting {
+		val := os.Getenv("AWS_ASSUME_ROLE_ARN")
+		if val == "" {
+			return "", fmt.Errorf("AWS_ASSUME_ROLE_ARN must be set during testing")
+		}
+
+		return val, nil
+	}
+
+	parameterName := fmt.Sprintf("/opt-out-import/dpc/%s/bfd-bucket-role-arn", os.Getenv("ENV"))
+
+	var keynames []*string = make([]*string, 1)
+	keynames[0] = &parameterName
+
+	sess, err := session.NewSession(&aws.Config{
+		Region: aws.String("us-east-1"),
+	})
+
+	if err != nil {
+		return "", fmt.Errorf("getAssumeRoleArn: Error creating AWS session: %w", err)
+	}
+
+	ssmsvc := ssm.New(sess)
+
+	withDecryption := true
+	result, err := ssmsvc.GetParameter(&ssm.GetParameterInput{
+		Name:           &parameterName,
+		WithDecryption: &withDecryption,
+	})
+
+	if err != nil {
+		return "", fmt.Errorf("getAssumeRoleArn: Error connecting to parameter store: %w", err)
+	}
+
+	arn := *result.Parameter.Value
+
+	if arn == "" {
+		return "", fmt.Errorf("getAssumeRoleArn: No value found for bfd-bucket-role-arn")
+	}
+
+	return arn, nil
 }
 
 func insertOptOutMetadata(db *sql.DB, optOutMetadata *OptOutFilenameMetadata) (OptOutFileEntity, error) {
