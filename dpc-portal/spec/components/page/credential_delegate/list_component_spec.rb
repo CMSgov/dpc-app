@@ -90,12 +90,12 @@ RSpec.describe Page::CredentialDelegate::ListComponent, type: :component do
       end
 
       it 'has a row' do
-        activated_at = credential_delegates.first.created_at
+        activated = credential_delegates.first.created_at
         expected_html = <<~HTML
           <tr>
             <td data-sort-value="Bob Hodges">Bob Hodges</td>
             <td data-sort-value="bob@example.com">bob@example.com</td>
-            <td data-sort-value="#{activated_at}">#{activated_at}</td>
+            <td data-sort-value="#{activated}">#{activated}</td>
             <td data-sort-value="X">X</td>
           </tr>
         HTML
