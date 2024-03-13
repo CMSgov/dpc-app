@@ -59,8 +59,12 @@ RSpec.describe Page::CredentialDelegate::ListComponent, type: :component do
 
     context 'Active credential delegate' do
       let(:user) { User.new(given_name: 'Bob', family_name: 'Hodges', email: 'bob@example.com') }
+      let(:invitation) do
+        Invitation.new(invited_given_name: 'Bob', invited_family_name: 'Hodges', invited_email: 'bob@example.com',
+                       verification_code: 'ABC123')
+      end
       let(:invitations) { [] }
-      let(:credential_delegates) { [CdOrgLink.new(user:)] }
+      let(:credential_delegates) { [CdOrgLink.new(user:, invitation:)] }
 
       it 'has a table' do
         expected_html = <<~HTML
@@ -93,6 +97,59 @@ RSpec.describe Page::CredentialDelegate::ListComponent, type: :component do
             <td data-sort-value="X">X</td>
           </tr>
         HTML
+        is_expected.to include(normalize_space(expected_html))
+      end
+
+      it 'has no pending credential delegates' do
+        expected_html = '<p>There are no pending credential delegates.</p>'
+        is_expected.to include(normalize_space(expected_html))
+      end
+    end
+
+    context 'Pending credential delegate' do
+      let(:invitations) do
+        [Invitation.new(invited_given_name: 'Bob', invited_family_name: 'Hodges', invited_email: 'bob@example.com',
+                        verification_code: 'ABC123')]
+      end
+      let(:credential_delegates) { [] }
+
+      it 'has a table' do
+        expected_html = <<~HTML
+          <table id="pending-cd-table" class="width-full usa-table">
+            <caption aria-hidden="true" hidden>Pending Credential Delegate Table</caption>
+            <thead>
+              <tr>
+                <th scope="row" role="columnheader">
+                  Name
+                </th>
+                <th scope="row" role="columnheader">
+                  Email
+                </th>
+                <th scope="row" role="columnheader">
+                  Invite code
+                </th>
+                <th scope="row" role="columnheader">
+                </th>
+              </tr>
+            </thead>
+        HTML
+        is_expected.to include(normalize_space(expected_html))
+      end
+
+      it 'has a row' do
+        expected_html = <<~HTML
+          <tr>
+            <td data-sort-value="Bob Hodges">Bob Hodges</td>
+            <td data-sort-value="bob@example.com">bob@example.com</td>
+            <td data-sort-value="ABC123">ABC123</td>
+            <td data-sort-value="X">X</td>
+          </tr>
+        HTML
+        is_expected.to include(normalize_space(expected_html))
+      end
+
+      it 'has no active credential delegates' do
+        expected_html = '<p>There are no active credential delegates.</p>'
         is_expected.to include(normalize_space(expected_html))
       end
     end
