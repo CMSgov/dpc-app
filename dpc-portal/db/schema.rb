@@ -33,7 +33,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_07_213217) do
 
   create_table "invitations", force: :cascade do |t|
     t.bigint "provider_organization_id", null: false
-    t.bigint "invited_by_id"
+    t.bigint "invited_by_id", null: false
     t.integer "invitation_type", null: false
     t.string "invited_given_name"
     t.string "invited_family_name"

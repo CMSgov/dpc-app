@@ -118,9 +118,54 @@ RSpec.describe 'Organizations', type: :request do
     end
 
     context 'POST /organizations' do
-      it 'succeeds with valid input' do
-        post '/organizations', params: { npi: '1111111111' }
-        expect(response).to redirect_to(tos_form_organization_path('place-holder'))
+      context 'with valid input' do
+        it 'creates new org if none exists' do
+          npi = '1111111111'
+          expect do
+            post '/organizations', params: { npi: }
+          end.to change { ProviderOrganization.count }.by 1
+          org = assigns(:organization)
+          expect(org.npi).to eq npi
+          expect(org.name).to eq "Org with npi #{npi}"
+          expect(org.terms_of_service_accepted_by).to be_nil
+          expect(org.terms_of_service_accepted_at).to be_nil
+          expect(response).to redirect_to(tos_form_organization_path(org))
+        end
+
+        it 'creates new ao-org-link if none exists' do
+          npi = '1111111111'
+          expect do
+            post '/organizations', params: { npi: }
+          end.to change { AoOrgLink.count }.by 1
+          link = assigns(:ao_org_link)
+          expect(link.provider_organization).to eq assigns(:organization)
+          expect(link.user).to eq user
+        end
+
+        it 'does not create new org if exists' do
+          npi = '1111111111'
+          name = 'Health Hut'
+          create(:provider_organization, npi:, name:)
+          expect do
+            post '/organizations', params: { npi: }
+          end.to change { ProviderOrganization.count }.by 0
+          org = assigns(:organization)
+          expect(org.npi).to eq npi
+          expect(org.name).to eq name
+          expect(org.terms_of_service_accepted_by).to be_nil
+          expect(org.terms_of_service_accepted_at).to be_nil
+          expect(response).to redirect_to(tos_form_organization_path(org))
+        end
+
+        it 'redirects to success if org has signed tos' do
+          npi = '1111111111'
+          create(:provider_organization, npi:, terms_of_service_accepted_at: 1.day.ago)
+          expect do
+            post '/organizations', params: { npi: }
+          end.to change { ProviderOrganization.count }.by 0
+          org = assigns(:organization)
+          expect(response).to redirect_to(success_organization_path(org))
+        end
       end
 
       it 'fails if blank' do
@@ -138,20 +183,34 @@ RSpec.describe 'Organizations', type: :request do
 
     context 'GET /organizations/[organization_id]/tos_form' do
       it 'renders tos form' do
-        get '/organizations/place-holder/tos_form'
+        org = create(:provider_organization)
+        get "/organizations/#{org.id}/tos_form"
         expect(response).to be_ok
+      end
+      it 'fails if no org' do
+        get '/organizations/fake-org/tos_form'
+        expect(response).to be_not_found
       end
     end
     context 'POST /organizations/[organization_id]/sign_tos' do
       it 'succeeds' do
-        post '/organizations/place-holder/sign_tos'
-        expect(response).to redirect_to(success_organization_path('place-holder'))
+        org = create(:provider_organization)
+        post "/organizations/#{org.id}/sign_tos"
+        org.reload
+        expect(org.terms_of_service_accepted_at).to be_present
+        expect(org.terms_of_service_accepted_by).to eq user
+        expect(response).to redirect_to(success_organization_path(org))
       end
     end
     context 'GET /organizations/[organization_id]/success' do
       it 'shows success page' do
-        get '/organizations/foo/success'
+        org = create(:provider_organization)
+        get "/organizations/#{org.id}/success"
         expect(response).to be_ok
+      end
+      it 'fails if no org' do
+        get '/organizations/fake-org/success'
+        expect(response).to be_not_found
       end
     end
   end
