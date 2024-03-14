@@ -41,8 +41,16 @@
             <artifactId>dropwizard-hibernate</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.knowm</groupId>
-            <artifactId>dropwizard-sundial</artifactId>
+            <groupId>io.github.dropwizard-jobs</groupId>
+            <artifactId>dropwizard-jobs-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.github.dropwizard-jobs</groupId>
+            <artifactId>dropwizard-jobs-guice</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.quartz-scheduler</groupId>
+            <artifactId>quartz</artifactId>
         </dependency>
         <!--No longer shipped with Java 11, so we need to include it manually-->
         <dependency>

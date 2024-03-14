@@ -1,9 +1,9 @@
 # application.yml with changes to relative paths, urls, and logging for testing purposes
 consentdb:
   driverClass: org.postgresql.Driver
-  url: ${CONSENT_DB_URL:-"jdbc:postgresql://localhost:5432/dpc_consent"}
-  user: ${CONSENT_DB_USER:-postgres}
-  password: ${CONSENT_DB_PASS:-dpc-safe}
+  url: "jdbc:postgresql://localhost:5432/dpc_consent"
+  user: postgres
+  password: dpc-safe
   initialSize: 5
   minSize: 5
   maxSize: 10
@@ -57,7 +57,7 @@ swagger:
 suppressionFileDir: "/dpc/in/1800"
 
 # base URL for FHIR references to DPC resources (Patients, Organizations, etc) embedded in a Consent resource
-fhirReferenceURL: ${FHIR_REFERENCE_URL:-"http://localhost:3200/api/v1"}
+fhirReferenceURL: "http://localhost:3200/api/v1"
 
 # Disable FHIR validation
 fhir:

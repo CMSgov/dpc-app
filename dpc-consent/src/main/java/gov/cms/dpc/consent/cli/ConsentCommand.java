@@ -2,8 +2,8 @@ package gov.cms.dpc.consent.cli;
 
 import ca.uhn.fhir.context.FhirContext;
 import gov.cms.dpc.consent.DPCConsentConfiguration;
-import io.dropwizard.cli.Command;
-import io.dropwizard.cli.ConfiguredCommand;
+import io.dropwizard.core.cli.Command;
+import io.dropwizard.core.cli.ConfiguredCommand;
 import net.sourceforge.argparse4j.inf.Subparser;
 
 /**
