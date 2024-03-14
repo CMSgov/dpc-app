@@ -10,8 +10,15 @@ class ApplicationController < ActionController::Base
 
   def load_organization
     @organization = ProviderOrganization.find(params[:organization_id])
-    redirect_to organizations_path unless current_user.can_access?(@organization)
   rescue ActiveRecord::RecordNotFound
     render file: "#{Rails.root}/public/404.html", layout: false, status: :not_found
+  end
+
+  def can_access?
+    redirect_to organizations_path unless current_user.can_access?(@organization)
+  end
+
+  def ao?
+    redirect_to organizations_path unless current_user.ao?(@organization)
   end
 end

@@ -4,6 +4,7 @@
 class PublicKeysController < ApplicationController
   before_action :authenticate_user!
   before_action :load_organization
+  before_action :can_access?
 
   def new
     render Page::PublicKey::NewKeyComponent.new(@organization)

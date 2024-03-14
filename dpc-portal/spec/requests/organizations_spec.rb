@@ -28,7 +28,11 @@ RSpec.describe 'Organizations', type: :request do
       expect(assigns(:organizations)).to eq [org]
     end
 
-    it 'returns organizations linked to user as cd'
+    it 'returns organizations linked to user as cd' do
+      create(:cd_org_link, provider_organization: org, user:)
+      get '/organizations'
+      expect(assigns(:organizations)).to eq [org]
+    end
   end
 
   describe 'GET /organizations/[organization_id] not logged in' do

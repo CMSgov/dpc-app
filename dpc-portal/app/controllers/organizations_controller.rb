@@ -5,7 +5,9 @@ class OrganizationsController < ApplicationController
   before_action :block_prod_sbx
   before_action :authenticate_user!
   before_action :load_organization, only: %i[show tos_form sign_tos success]
+  before_action :can_access?, only: %i[show]
   before_action :check_npi, only: %i[create]
+  before_action :ao?, only: %i[tos_form sign_tos success]
 
   def index
     @organizations = current_user.provider_organizations
@@ -13,7 +15,7 @@ class OrganizationsController < ApplicationController
   end
 
   def show
-    if params[:ao]
+    if params[:ao] && current_user.ao?(@organization)
       @invitations = Invitation.where(provider_organization: @organization,
                                       invited_by: current_user)
       @cds = CdOrgLink.where(provider_organization: @organization,

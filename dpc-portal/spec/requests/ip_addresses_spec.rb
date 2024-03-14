@@ -17,7 +17,7 @@ RSpec.describe 'IpAddresses', type: :request do
     let!(:org) { create(:provider_organization) }
     before { sign_in user }
     it 'redirects to organizations' do
-      get "/organizations/#{org.id}/client_tokens/new"
+      get "/organizations/#{org.id}/ip_addresses/new"
       expect(response).to redirect_to('/organizations')
     end
   end
