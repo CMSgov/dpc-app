@@ -1,7 +1,7 @@
 name: opt-out-import test integration
 
 on:
-  push:
+  pull_request:
     paths:
       - .github/workflows/opt-out-import-test-integration.yml
       - .github/workflows/opt-out-import-test-deploy.yml
@@ -13,9 +13,9 @@ concurrency:
   group: opt-out-import-test-integration
 
 jobs:
-  # Deploy first if triggered by push
+  # Deploy first if triggered by pull_request
   deploy:
-    if: ${{ github.event_name == 'push' }}
+    if: ${{ github.event_name == 'pull_request' }}
     uses: ./.github/workflows/opt-out-import-test-deploy.yml
     secrets: inherit
 

@@ -45,8 +45,6 @@ logging:
 
 expirationThreshold: 90 # In days
 migrationEnabled: true
-sundial:
-  annotated-jobs-package-name: gov.cms.dpc.attribution.jobs
 
 publicServerURL: "https://dpc.cms.gov"
 
