@@ -8,7 +8,6 @@ module Core
     # [See at USWDS](https://designsystem.digital.gov/components/card/)
     #
     class OrganizationCardComponentPreview < ViewComponent::Preview
-
       # @after_render :wrap_in_ul
       def default
         org = ProviderOrganization.new(name: 'Health Hut', npi: '1111111111', id: 2)

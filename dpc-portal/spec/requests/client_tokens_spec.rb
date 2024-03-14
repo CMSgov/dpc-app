@@ -71,8 +71,6 @@ RSpec.describe 'ClientTokens', type: :request do
       end
 
       it 'fails if no label' do
-        stub_api_client(message: :get_organization,
-                        response: default_get_org_response(org_api_id))
         post "/organizations/#{org.id}/client_tokens"
         expect(assigns(:organization)).to eq org
         expect(flash[:alert]).to eq('Label required.')
