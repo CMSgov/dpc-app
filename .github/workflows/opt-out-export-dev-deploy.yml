@@ -2,6 +2,12 @@ name: opt-out-export dev deploy
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - master
+    paths:
+      - lambda/opt-out-export/**
+      - .github/workflows/opt-out-export-dev-deploy.yml
 
 jobs:
   test:

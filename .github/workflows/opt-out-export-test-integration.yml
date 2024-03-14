@@ -1,9 +1,10 @@
 name: opt-out-export integration tests
 
 on:
-  push:
+  pull_request:
     paths:
       - .github/workflows/opt-out-export-test-integration.yml
+      - .github/workflows/opt-out-export-test-deploy.yml
       - lambda/opt-out-export/**
   workflow_dispatch:
 
@@ -12,9 +13,9 @@ concurrency:
   group: opt-out-export-test-integration
 
 jobs:
-  # Deploy first if triggered by push
+  # Deploy first if triggered by pull_request
   deploy:
-    if: ${{ github.event_name == 'push' }}
+    if: ${{ github.event_name == 'pull_request' }}
     uses: ./.github/workflows/opt-out-export-test-deploy.yml
     secrets: inherit
 
