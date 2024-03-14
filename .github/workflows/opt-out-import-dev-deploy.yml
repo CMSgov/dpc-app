@@ -2,6 +2,12 @@ name: opt-out-import dev deploy
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - master
+    paths:
+      - lambda/opt-out-import/**
+      - .github/workflows/opt-out-import-dev-deploy.yml
 
 jobs:
   test:

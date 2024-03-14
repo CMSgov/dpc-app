@@ -1,7 +1,7 @@
 name: opt-out-export integration tests
 
 on:
-  push:
+  pull_request:
     paths:
       - .github/workflows/opt-out-export-test-integration.yml
       - lambda/opt-out-export/**
