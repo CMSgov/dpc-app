@@ -12,6 +12,7 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
         expect(response).to redirect_to('/portal/users/sign_in')
       end
     end
+
     context 'as cd' do
       let!(:user) { create(:user) }
       let!(:org) { create(:provider_organization) }
@@ -25,6 +26,7 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
         expect(response).to redirect_to('/organizations')
       end
     end
+
     context 'as ao' do
       let!(:user) { create(:user) }
       let!(:org) { create(:provider_organization) }
@@ -89,6 +91,7 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
         expect(response.status).to eq(400)
       end
     end
+
     context 'as cd' do
       before do
         create(:cd_org_link, provider_organization: org, user:)
@@ -112,6 +115,7 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
       sign_in user
       create(:ao_org_link, provider_organization: org, user:)
     end
+
     it 'returns success' do
       get "/organizations/#{org.id}/credential_delegate_invitations/foo/success"
       expect(assigns(:organization)).to eq org

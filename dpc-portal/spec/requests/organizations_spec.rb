@@ -5,73 +5,84 @@ require 'rails_helper'
 RSpec.describe 'Organizations', type: :request do
   include DpcClientSupport
 
-  describe 'GET /index not logged in' do
-    it 'redirects to login' do
-      get '/organizations'
-      expect(response).to redirect_to('/portal/users/sign_in')
-    end
-  end
-
   describe 'GET /index' do
-    let!(:user) { create(:user) }
-    let!(:org) { create(:provider_organization) }
-    before { sign_in user }
-
-    it 'returns success if no orgs associated with user' do
-      get '/organizations'
-      expect(assigns(:organizations)).to be_empty
+    context 'not logged in' do
+      it 'redirects to login' do
+        get '/organizations'
+        expect(response).to redirect_to('/portal/users/sign_in')
+      end
     end
 
-    it 'returns organizations linked to user as ao' do
-      create(:ao_org_link, provider_organization: org, user:)
-      get '/organizations'
-      expect(assigns(:organizations)).to eq [org]
-    end
+    describe 'logged in' do
+      let!(:user) { create(:user) }
+      let!(:org) { create(:provider_organization) }
+      before { sign_in user }
 
-    it 'returns organizations linked to user as cd' do
-      create(:cd_org_link, provider_organization: org, user:)
-      get '/organizations'
-      expect(assigns(:organizations)).to eq [org]
-    end
-  end
+      it 'returns success if no orgs associated with user' do
+        get '/organizations'
+        expect(assigns(:organizations)).to be_empty
+      end
 
-  describe 'GET /organizations/[organization_id] not logged in' do
-    it 'redirects to login' do
-      org = create(:provider_organization)
-      get "/organizations/#{org.id}"
-      expect(response).to redirect_to('/portal/users/sign_in')
-    end
-  end
+      it 'returns organizations linked to user as ao' do
+        create(:ao_org_link, provider_organization: org, user:)
+        get '/organizations'
+        expect(assigns(:organizations)).to eq [org]
+      end
 
-  describe 'GET /organizations/[organization_id] not own' do
-    let!(:user) { create(:user) }
-    before { sign_in user }
-    it 'redirects to organizations page' do
-      org = create(:provider_organization)
-      get "/organizations/#{org.id}"
-      expect(response).to redirect_to(organizations_path)
+      it 'returns organizations linked to user as cd' do
+        create(:cd_org_link, provider_organization: org, user:)
+        get '/organizations'
+        expect(assigns(:organizations)).to eq [org]
+      end
     end
   end
 
   describe 'GET /organizations/[organization_id]' do
-    let!(:user) { create(:user) }
-    let!(:org) { create(:provider_organization) }
-    let!(:link) { create(:ao_org_link, user:, provider_organization: org) }
-    before { sign_in user }
-
-    it 'returns success' do
-      get "/organizations/#{org.id}"
-      expect(assigns(:organization)).to eq org
+    context 'not logged in' do
+      it 'redirects to login' do
+        org = create(:provider_organization)
+        get "/organizations/#{org.id}"
+        expect(response).to redirect_to('/portal/users/sign_in')
+      end
     end
 
-    it 'redirects if prod-sbx' do
-      allow(ENV)
-        .to receive(:fetch)
-        .with('ENV', nil)
-        .and_return('prod-sbx')
-      get "/organizations/#{org.id}"
-      expect(assigns(:organization)).to be_nil
-      expect(response).to redirect_to(root_url)
+    context 'no link to org' do
+      let!(:user) { create(:user) }
+      before { sign_in user }
+      it 'redirects to organizations page' do
+        org = create(:provider_organization)
+        get "/organizations/#{org.id}"
+        expect(response).to redirect_to(organizations_path)
+      end
+    end
+
+    context 'as cd' do
+      let!(:user) { create(:user) }
+      let!(:org) { create(:provider_organization) }
+      let!(:link) { create(:cd_org_link, user:, provider_organization: org) }
+      before { sign_in user }
+
+      it 'returns success' do
+        get "/organizations/#{org.id}"
+        expect(assigns(:organization)).to eq org
+      end
+
+      it 'shows credential page' do
+        get "/organizations/#{org.id}"
+        expect(response.body).to include('<h2>Client Tokens</h2>')
+        expect(response.body).to include('<h2>Public Keys</h2>')
+        expect(response.body).to include('<h2>Public IPs</h2>')
+      end
+
+      it 'redirects if prod-sbx' do
+        allow(ENV)
+          .to receive(:fetch)
+          .with('ENV', nil)
+          .and_return('prod-sbx')
+        get "/organizations/#{org.id}"
+        expect(assigns(:organization)).to be_nil
+        expect(response).to redirect_to(root_url)
+      end
     end
   end
 
@@ -88,6 +99,13 @@ RSpec.describe 'Organizations', type: :request do
       it 'returns success' do
         get "/organizations/#{org.id}?ao=true"
         expect(assigns(:organization)).to eq org
+      end
+
+      it 'shows CD list page' do
+        get "/organizations/#{org.id}?ao=true"
+        expect(response.body).to include('<h2>Credential delegates</h2>')
+        expect(response.body).to include('<h2>Pending</h2>')
+        expect(response.body).to include('<h2>Active</h2>')
       end
 
       context :invitations do
@@ -131,6 +149,13 @@ RSpec.describe 'Organizations', type: :request do
       it 'returns success' do
         get "/organizations/#{org.id}?ao=true"
         expect(assigns(:organization)).to eq org
+      end
+
+      it 'does not show CD list page' do
+        get "/organizations/#{org.id}?ao=true"
+        expect(response.body).to_not include('<h2>Credential delegates</h2>')
+        expect(response.body).to_not include('<h2>Pending</h2>')
+        expect(response.body).to_not include('<h2>Active</h2>')
       end
 
       it 'does not assign invitations even if exist' do
@@ -224,11 +249,13 @@ RSpec.describe 'Organizations', type: :request do
         get "/organizations/#{org.id}/tos_form"
         expect(response).to be_ok
       end
+
       it 'fails if no org' do
         get '/organizations/fake-org/tos_form'
         expect(response).to be_not_found
       end
     end
+
     context 'POST /organizations/[organization_id]/sign_tos' do
       it 'succeeds if ao' do
         org = create(:provider_organization)
@@ -239,6 +266,7 @@ RSpec.describe 'Organizations', type: :request do
         expect(org.terms_of_service_accepted_by).to eq user
         expect(response).to redirect_to(success_organization_path(org))
       end
+
       it 'fails if not ao' do
         org = create(:provider_organization)
         create(:cd_org_link, provider_organization: org, user:)
@@ -247,6 +275,7 @@ RSpec.describe 'Organizations', type: :request do
         expect(response).to redirect_to(organizations_path)
       end
     end
+
     context 'GET /organizations/[organization_id]/success' do
       it 'shows success page' do
         org = create(:provider_organization)
@@ -254,6 +283,7 @@ RSpec.describe 'Organizations', type: :request do
         get "/organizations/#{org.id}/success"
         expect(response).to be_ok
       end
+
       it 'fails if no org' do
         get '/organizations/fake-org/success'
         expect(response).to be_not_found
