@@ -6,6 +6,9 @@ class ProviderOrganization < ApplicationRecord
 
   belongs_to :terms_of_service_accepted_by, class_name: 'User', required: false
 
+  has_many :ao_org_links
+  has_many :cd_org_links
+
   def public_keys
     @keys ||= []
     if dpc_api_organization_id.present?

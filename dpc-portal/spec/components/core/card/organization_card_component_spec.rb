@@ -13,7 +13,7 @@ RSpec.describe Core::Card::OrganizationCardComponent, type: :component do
       org = double('org')
       allow(org).to receive(:name).and_return('name')
       allow(org).to receive(:npi).and_return('npi')
-      allow(org).to receive(:api_id).and_return('api')
+      allow(org).to receive(:id).and_return('api')
       described_class.new(organization: org)
     end
     let(:expected_html) do

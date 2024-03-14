@@ -37,39 +37,39 @@ RSpec.describe User, type: :model do
     end
   end
 
-  describe :is_ao do
+  describe :ao do
     let(:user) { create(:user) }
     let(:other_user) { create(:user) }
     let(:provider_organization) { create(:provider_organization) }
 
     it 'should be ao if link present' do
       create(:ao_org_link, user:, provider_organization:)
-      expect(user.is_ao?(provider_organization)).to be true
+      expect(user.ao?(provider_organization)).to be true
     end
 
     it 'should not be ao if link not present' do
       create(:ao_org_link, user: other_user, provider_organization:)
-      expect(user.is_ao?(provider_organization)).to be false
+      expect(user.ao?(provider_organization)).to be false
     end
   end
-  describe :is_cd do
+  describe :cd do
     let(:user) { create(:user) }
     let(:other_user) { create(:user) }
     let(:provider_organization) { create(:provider_organization) }
 
     it 'should be cd if link present' do
       create(:cd_org_link, user:, provider_organization:)
-      expect(user.is_cd?(provider_organization)).to be true
+      expect(user.cd?(provider_organization)).to be true
     end
 
     it 'should not be cd if link disabled' do
       create(:cd_org_link, user:, provider_organization:, disabled_at: 1.day.ago)
-      expect(user.is_cd?(provider_organization)).to be false
+      expect(user.cd?(provider_organization)).to be false
     end
 
     it 'should not be cd if link not present' do
       create(:cd_org_link, user: other_user, provider_organization:)
-      expect(user.is_cd?(provider_organization)).to be false
+      expect(user.cd?(provider_organization)).to be false
     end
   end
   describe :can_access do
@@ -99,6 +99,22 @@ RSpec.describe User, type: :model do
     it 'should not have access if cd link not present' do
       create(:cd_org_link, user: other_user, provider_organization:)
       expect(user.can_access?(provider_organization)).to be false
+    end
+  end
+
+  describe :provider_organizations do
+    let(:provider_organization) { create(:provider_organization) }
+    let(:user) { create(:user) }
+    it 'should return orgs with ao_org_link' do
+      create(:ao_org_link, provider_organization:, user:)
+      expect(user.provider_organizations).to include(provider_organization)
+    end
+    it 'should return orgs with cd_org_link' do
+      create(:cd_org_link, provider_organization:, user:)
+      expect(user.provider_organizations).to include(provider_organization)
+    end
+    it 'should not return orgs without link' do
+      expect(user.provider_organizations).to_not include(provider_organization)
     end
   end
 end

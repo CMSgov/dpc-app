@@ -9,7 +9,7 @@ module Core
         super
         @name = organization.name
         @npi = organization.npi
-        @api_id = organization.api_id
+        @api_id = organization.id
       end
     end
   end

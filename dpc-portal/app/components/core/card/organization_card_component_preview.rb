@@ -8,7 +8,7 @@ module Core
     # [See at USWDS](https://designsystem.digital.gov/components/card/)
     #
     class OrganizationCardComponentPreview < ViewComponent::Preview
-      OrgStruct = Struct.new(:name, :npi, :api_id)
+      OrgStruct = Struct.new(:name, :npi, :id)
 
       # @after_render :wrap_in_ul
       def default
