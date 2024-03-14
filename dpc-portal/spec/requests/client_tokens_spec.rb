@@ -12,16 +12,28 @@ RSpec.describe 'ClientTokens', type: :request do
     end
   end
 
+  describe 'GET /new no link to org' do
+    let!(:user) { create(:user) }
+    let!(:org) { create(:provider_organization) }
+    before { sign_in user }
+    it 'redirects to organizations' do
+      get "/organizations/#{org.id}/client_tokens/new"
+      expect(response).to redirect_to('/organizations')
+    end
+  end
+
   describe 'GET /new' do
     let!(:user) { create(:user) }
-    before { sign_in user }
+    let!(:org) { create(:provider_organization) }
+    
+    before do
+      create(:cd_org_link, provider_organization: org, user:)
+      sign_in user
+    end
 
     it 'returns success' do
-      api_id = SecureRandom.uuid
-      stub_api_client(message: :get_organization,
-                      response: default_get_org_response(api_id))
-      get "/organizations/#{api_id}/client_tokens/new"
-      expect(assigns(:organization).api_id).to eq api_id
+      get "/organizations/#{org.id}/client_tokens/new"
+      expect(assigns(:organization)).to eq org
       expect(response).to have_http_status(200)
     end
   end
@@ -35,39 +47,42 @@ RSpec.describe 'ClientTokens', type: :request do
 
   describe 'POST /create' do
     let!(:user) { create(:user) }
-    before { sign_in user }
+    let(:org_api_id) { SecureRandom.uuid }
+    let!(:org) { create(:provider_organization, dpc_api_organization_id: org_api_id) }
+    
+    before do
+      create(:cd_org_link, provider_organization: org, user:)
+      sign_in user
+    end
 
     it 'succeeds if label' do
-      org_api_id = SecureRandom.uuid
       token_guid = SecureRandom.uuid
       api_client = stub_api_client(message: :get_organization,
                                    response: default_get_org_response(org_api_id))
       stub_self_returning_api_client(message: :create_client_token,
                                      response: default_get_client_tokens(guid: token_guid)['entities'].first,
                                      api_client:)
-      post "/organizations/#{org_api_id}/client_tokens", params: { label: 'New Token' }
-      expect(assigns(:organization).api_id).to eq org_api_id
+      post "/organizations/#{org.id}/client_tokens", params: { label: 'New Token' }
+      expect(assigns(:organization)).to eq org
       expect(assigns(:client_token)['id']).to eq token_guid
     end
 
     it 'fails if no label' do
-      org_api_id = SecureRandom.uuid
       stub_api_client(message: :get_organization,
                       response: default_get_org_response(org_api_id))
-      post "/organizations/#{org_api_id}/client_tokens"
-      expect(assigns(:organization).api_id).to eq org_api_id
+      post "/organizations/#{org.id}/client_tokens"
+      expect(assigns(:organization)).to eq org
       expect(flash[:alert]).to eq('Label required.')
     end
 
     it 'shows error if problem' do
-      org_api_id = SecureRandom.uuid
       api_client = stub_api_client(message: :get_organization,
                                    response: default_get_org_response(org_api_id))
       stub_self_returning_api_client(message: :create_client_token,
                                      success: false,
                                      response: nil,
                                      api_client:)
-      post "/organizations/#{org_api_id}/client_tokens", params: { label: 'New Token' }
+      post "/organizations/#{org.id}/client_tokens", params: { label: 'New Token' }
       expect(flash[:alert]).to eq('Client token could not be created.')
     end
   end
@@ -81,10 +96,15 @@ RSpec.describe 'ClientTokens', type: :request do
 
   describe 'DELETE /destroy' do
     let!(:user) { create(:user) }
-    before { sign_in user }
+    let(:org_api_id) { SecureRandom.uuid }
+    let!(:org) { create(:provider_organization, dpc_api_organization_id: org_api_id) }
+    
+    before do
+      create(:cd_org_link, provider_organization: org, user:)
+      sign_in user
+    end
 
     it 'flashes success if succeeds' do
-      org_api_id = SecureRandom.uuid
       token_guid = SecureRandom.uuid
       api_client = stub_api_client(message: :get_organization,
                                    response: default_get_org_response(org_api_id))
@@ -92,13 +112,12 @@ RSpec.describe 'ClientTokens', type: :request do
                                      response: nil,
                                      with: [org_api_id, token_guid],
                                      api_client:)
-      delete "/organizations/#{org_api_id}/client_tokens/#{token_guid}"
+      delete "/organizations/#{org.id}/client_tokens/#{token_guid}"
       expect(flash[:notice]).to eq('Client token successfully deleted.')
-      expect(response).to redirect_to(organization_path(org_api_id))
+      expect(response).to redirect_to(organization_path(org.id))
     end
 
     it 'renders error if error' do
-      org_api_id = SecureRandom.uuid
       token_guid = SecureRandom.uuid
       api_client = stub_api_client(message: :get_organization,
                                    response: default_get_org_response(org_api_id))
@@ -107,9 +126,9 @@ RSpec.describe 'ClientTokens', type: :request do
                                      success: false,
                                      with: [org_api_id, token_guid],
                                      api_client:)
-      delete "/organizations/#{org_api_id}/client_tokens/#{token_guid}"
+      delete "/organizations/#{org.id}/client_tokens/#{token_guid}"
       expect(flash[:alert]).to eq('Client token could not be deleted.')
-      expect(response).to redirect_to(organization_path(org_api_id))
+      expect(response).to redirect_to(organization_path(org.id))
     end
   end
 end
