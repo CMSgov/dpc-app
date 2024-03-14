@@ -40,12 +40,12 @@ module Page
 
     # Mocks dpc-api Organization
     class MockOrg
-      attr_accessor :name, :npi, :path_id
+      attr_accessor :name, :npi, :id
 
       def initialize(name)
         @name = name
         @npi = '11111111'
-        @path_id = SecureRandom.uuid
+        @id = SecureRandom.uuid
       end
     end
   end

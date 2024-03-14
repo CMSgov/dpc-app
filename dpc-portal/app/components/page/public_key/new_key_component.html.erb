@@ -1,11 +1,11 @@
 <div>
-    <div class="margin-bottom-5">&larr; <%= link_to @organization.name, organization_path(organization.path_id) %></div>
+    <div class="margin-bottom-5">&larr; <%= link_to @organization.name, organization_path(organization.id) %></div>
     <h1>Add Public Key</h1>
 
     <section class="box">
         <div>
             <h2>New Public Key for <%= @organization.name %></h2>
-            <%= form_tag organization_public_keys_path(organization_id: organization.path_id), method: :post do %>
+            <%= form_tag organization_public_keys_path(organization_id: organization.id), method: :post do %>
 
             <%= render(Core::Form::TextInputComponent.new(
               label: "Label", attribute: :label, default: params[:label], input_options: { maxlength: 25 },

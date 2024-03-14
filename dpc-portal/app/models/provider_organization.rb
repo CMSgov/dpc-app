@@ -35,8 +35,4 @@ class ProviderOrganization < ApplicationRecord
     end
     @ips
   end
-
-  def path_id
-    id
-  end
 end

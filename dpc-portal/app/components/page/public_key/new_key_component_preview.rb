@@ -11,11 +11,11 @@ module Page
 
     # Mocks dpc-api organization
     class MockOrg
-      attr_accessor :name, :path_id
+      attr_accessor :name, :id
 
       def initialize(name)
         @name = name
-        @path_id = 'some-guid'
+        @id = 'some-guid'
       end
     end
   end
