@@ -123,8 +123,8 @@ func insertOptOutMetadata(db *sql.DB, optOutMetadata *OptOutFilenameMetadata) (O
 	return *optOutFile, nil
 }
 
-func insertConsentRecords(db *sql.DB, optOutFileId string, records []*OptOutRecord) ([]OptOutRecord, error) {
-	createdRecords := []OptOutRecord{}
+func insertConsentRecords(db *sql.DB, optOutFileId string, records []*OptOutRecord) ([]*OptOutRecord, error) {
+	createdRecords := []*OptOutRecord{}
 	query := `INSERT INTO consent (id, mbi, effective_date, policy_code, loinc_code, opt_out_file_id, created_at, updated_at) 
 			  VALUES `
 	for i, rec := range records {
@@ -152,7 +152,7 @@ func insertConsentRecords(db *sql.DB, optOutFileId string, records []*OptOutReco
 			return createdRecords, fmt.Errorf("insertConsentRecords: Failed to read newly created consent records: %w", err)
 		}
 		record.Status = Accepted
-		createdRecords = append(createdRecords, record)
+		createdRecords = append(createdRecords, &record)
 	}
 
 	// We're inserting all records in one batch, so if there wasn't an error they were all processed successfully
