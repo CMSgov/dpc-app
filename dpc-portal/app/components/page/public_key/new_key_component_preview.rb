@@ -5,17 +5,8 @@ module Page
     # Renders public_keys/new preview
     class NewKeyComponentPreview < ViewComponent::Preview
       def default
-        render(Page::PublicKey::NewKeyComponent.new(MockOrg.new('Health Hut')))
-      end
-    end
-
-    # Mocks dpc-api organization
-    class MockOrg
-      attr_accessor :name, :id
-
-      def initialize(name)
-        @name = name
-        @id = 'some-guid'
+        org = ProviderOrganization.new(name: 'Health Hut', npi: '1111111111', id: 2)
+        render(Page::PublicKey::NewKeyComponent.new(org))
       end
     end
   end

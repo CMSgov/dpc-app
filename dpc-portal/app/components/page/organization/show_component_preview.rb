@@ -15,11 +15,11 @@ module Page
 
     # Mocks the Organization class
     class MockOrgShow
-      attr_accessor :name, :npi, :id
+      attr_accessor :name, :npi, :to_param
 
       def initialize(row_count)
         @row_count = row_count
-        @id = SecureRandom.uuid
+        @to_param = '2'
       end
 
       def client_tokens

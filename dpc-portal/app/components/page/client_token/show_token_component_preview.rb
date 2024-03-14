@@ -5,18 +5,9 @@ module Page
     # renders a preview of the show client token
     class ShowTokenComponentPreview < ViewComponent::Preview
       def default
+        org = ProviderOrganization.new(name: 'Health Hut', npi: '1111111111', id: 2)
         client_token = { 'label' => 'Prod Token', 'token' => SecureRandom.base64(34) }
-        render(Page::ClientToken::ShowTokenComponent.new(MockOrg.new('Health Hut'), client_token))
-      end
-    end
-
-    # Mocks dpc-api organization
-    class MockOrg
-      attr_accessor :name, :id
-
-      def initialize(name)
-        @name = name
-        @id = 'some-guid'
+        render(Page::ClientToken::ShowTokenComponent.new(org, client_token))
       end
     end
   end

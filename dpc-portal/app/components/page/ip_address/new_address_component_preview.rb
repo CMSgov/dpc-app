@@ -5,17 +5,8 @@ module Page
     # Renders ip_address/new preview
     class NewAddressComponentPreview < ViewComponent::Preview
       def default
-        render(Page::IpAddress::NewAddressComponent.new(MockOrg.new('Health Hut')))
-      end
-    end
-
-    # Mocks dpc-api organization
-    class MockOrg
-      attr_accessor :name, :id
-
-      def initialize(name)
-        @name = name
-        @id = 'some-guid'
+        org = ProviderOrganization.new(name: 'Health Hut', npi: '1111111111', id: 2)
+        render(Page::IpAddress::NewAddressComponent.new(org))
       end
     end
   end

@@ -3,10 +3,10 @@
 module ComponentSupport
   # Mocks an org from dpc-api
   class MockOrg
-    attr_accessor :id, :name, :npi
+    attr_accessor :name, :npi, :to_param
 
     def initialize(row_count = 0)
-      @id = 2
+      @to_param = '2'
       @name = 'Health'
       @npi = '11111'
       @row_count = row_count

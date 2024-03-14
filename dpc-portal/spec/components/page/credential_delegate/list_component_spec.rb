@@ -34,7 +34,7 @@ RSpec.describe Page::CredentialDelegate::ListComponent, type: :component do
                     <h2>Credential delegates</h2>
                   </div>
                   <div class="flex-align-self-center">
-                    <form class="button_to" method="get" action="/portal/organizations/#{org.id}/credential_delegate_invitations/new"><button class="usa-button" type="submit">Assign CD</button></form>
+                    <form class="button_to" method="get" action="/portal/organizations/#{org.to_param}/credential_delegate_invitations/new"><button class="usa-button" type="submit">Assign CD</button></form>
                   </div>
                 </div>
                 <hr />

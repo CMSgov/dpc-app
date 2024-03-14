@@ -5,7 +5,7 @@ module Page
     # Previews Invite Credential Delegate form
     class NewInvitationComponentPreview < ViewComponent::Preview
       def new
-        render(Page::CredentialDelegate::NewInvitationComponent.new(MockOrg.new('Health Hut'), Invitation.new))
+        render(Page::CredentialDelegate::NewInvitationComponent.new(org, Invitation.new))
       end
 
       def filled_in
@@ -14,24 +14,19 @@ module Page
                                    phone_raw: '877-288-3131',
                                    invited_email: 'bob@example.com',
                                    invited_email_confirmation: 'bob@example.com')
-        render(Page::CredentialDelegate::NewInvitationComponent.new(MockOrg.new('Health Hut'), cd_invite))
+        render(Page::CredentialDelegate::NewInvitationComponent.new(org, cd_invite))
       end
 
       def errors
         cd_invite = Invitation.new
         cd_invite.valid?
-        render(Page::CredentialDelegate::NewInvitationComponent.new(MockOrg.new('Health Hut'), cd_invite))
+        render(Page::CredentialDelegate::NewInvitationComponent.new(org, cd_invite))
       end
-    end
 
-    # Mocks dpc-api organization
-    class MockOrg
-      attr_accessor :name, :npi, :id
+      private
 
-      def initialize(name)
-        @name = name
-        @npi = '11111111'
-        @id = SecureRandom.uuid
+      def org
+        ProviderOrganization.new(name: 'Health Hut', npi: '1111111111', id: 2)
       end
     end
   end

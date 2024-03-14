@@ -7,8 +7,8 @@ module Page
       attr_accessor :organization
 
       def initialize(organization)
-        super
         @organization = organization
+        super
       end
     end
   end
