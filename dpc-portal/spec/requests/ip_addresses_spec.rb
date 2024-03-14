@@ -25,7 +25,7 @@ RSpec.describe 'IpAddresses', type: :request do
   describe 'GET /new' do
     let!(:user) { create(:user) }
     let!(:org) { create(:provider_organization) }
-    
+
     before do
       create(:cd_org_link, provider_organization: org, user:)
       sign_in user
@@ -49,7 +49,7 @@ RSpec.describe 'IpAddresses', type: :request do
     let!(:user) { create(:user) }
     let(:org_api_id) { SecureRandom.uuid }
     let!(:org) { create(:provider_organization, dpc_api_organization_id: org_api_id) }
-    
+
     before do
       create(:cd_org_link, provider_organization: org, user:)
       sign_in user
@@ -119,7 +119,7 @@ RSpec.describe 'IpAddresses', type: :request do
     let!(:user) { create(:user) }
     let(:org_api_id) { SecureRandom.uuid }
     let!(:org) { create(:provider_organization, dpc_api_organization_id: org_api_id) }
-    
+
     before do
       create(:cd_org_link, provider_organization: org, user:)
       sign_in user
