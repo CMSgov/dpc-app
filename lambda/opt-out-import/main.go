@@ -143,7 +143,7 @@ func importOptOutFile(bucket string, file string) (bool, error) {
 		log.Info(fmt.Sprintf("ID: %s", rec.ID))
 	}
 
-	confirmationFile, err := generateConfirmationFile(true, records, fixedwidth.Marshal)
+	confirmationFile, err := generateConfirmationFile(true, createdRecords, fixedwidth.Marshal)
 	if err != nil {
 		log.Warning(fmt.Sprintf("Failed to generate confirmation file: %s", err))
 		return false, err
