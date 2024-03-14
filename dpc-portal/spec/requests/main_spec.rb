@@ -13,5 +13,14 @@ RSpec.describe 'Mains', type: :request do
       get root_path
       expect(response.body).to eq('Hello, World')
     end
+
+    it 'succeeds on prod-sbx' do
+      allow(ENV)
+        .to receive(:fetch)
+        .with('ENV', nil)
+        .and_return('prod-sbx')
+      get root_path
+      expect(response).to be_successful
+    end
   end
 end

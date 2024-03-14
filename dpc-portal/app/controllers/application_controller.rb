@@ -2,6 +2,8 @@
 
 # Parent class of all controllers
 class ApplicationController < ActionController::Base
+  before_action :block_prod_sbx
+
   private
 
   def block_prod_sbx

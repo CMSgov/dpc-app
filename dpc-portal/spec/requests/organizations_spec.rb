@@ -78,43 +78,65 @@ RSpec.describe 'Organizations', type: :request do
   describe 'GET /organizations/[organization_id]?ao=true' do
     let!(:user) { create(:user) }
     let!(:org) { create(:provider_organization) }
-    let!(:link) { create(:ao_org_link, user:, provider_organization: org) }
     before { sign_in user }
 
-    it 'returns success' do
-      get "/organizations/#{org.id}?ao=true"
-      expect(assigns(:organization)).to eq org
+    context 'as ao' do
+      before do
+        create(:ao_org_link, user:, provider_organization: org)
+      end
+
+      it 'returns success' do
+        get "/organizations/#{org.id}?ao=true"
+        expect(assigns(:organization)).to eq org
+      end
+
+      context :invitations do
+        it 'assigns if exist' do
+          create(:invitation, provider_organization: org, invited_by: user)
+          get "/organizations/#{org.id}?ao=true"
+          expect(assigns(:invitations).size).to eq 1
+        end
+
+        it 'does not assign if not exist' do
+          get "/organizations/#{org.id}?ao=true"
+          expect(assigns(:invitations).size).to eq 0
+        end
+      end
+
+      context :credential_delegates do
+        it 'assigns if exist' do
+          create(:cd_org_link, provider_organization: org)
+          get "/organizations/#{org.id}?ao=true"
+          expect(assigns(:cds).size).to eq 1
+        end
+
+        it 'does not assign if not exist' do
+          get "/organizations/#{org.id}?ao=true"
+          expect(assigns(:cds).size).to eq 0
+        end
+
+        it 'does not assign if link disabled' do
+          create(:cd_org_link, provider_organization: org, disabled_at: 1.day.ago)
+          get "/organizations/#{org.id}?ao=true"
+          expect(assigns(:cds).size).to eq 0
+        end
+      end
     end
 
-    context :invitations do
-      it 'assigns if exist' do
+    context 'as cd' do
+      before do
+        create(:cd_org_link, user:, provider_organization: org)
+      end
+
+      it 'returns success' do
+        get "/organizations/#{org.id}?ao=true"
+        expect(assigns(:organization)).to eq org
+      end
+
+      it 'does not assign invitations even if exist' do
         create(:invitation, provider_organization: org, invited_by: user)
         get "/organizations/#{org.id}?ao=true"
-        expect(assigns(:invitations).size).to eq 1
-      end
-
-      it 'does not assign if not exist' do
-        get "/organizations/#{org.id}?ao=true"
-        expect(assigns(:invitations).size).to eq 0
-      end
-    end
-
-    context :credential_delegates do
-      it 'assigns if exist' do
-        create(:cd_org_link, provider_organization: org)
-        get "/organizations/#{org.id}?ao=true"
-        expect(assigns(:cds).size).to eq 1
-      end
-
-      it 'does not assign if not exist' do
-        get "/organizations/#{org.id}?ao=true"
-        expect(assigns(:invitations).size).to eq 0
-      end
-
-      it 'does not assign if link disabled' do
-        create(:cd_org_link, provider_organization: org, disabled_at: 1.day.ago)
-        get "/organizations/#{org.id}?ao=true"
-        expect(assigns(:invitations).size).to eq 0
+        expect(assigns(:invitations)).to be_nil
       end
     end
   end
@@ -208,7 +230,7 @@ RSpec.describe 'Organizations', type: :request do
       end
     end
     context 'POST /organizations/[organization_id]/sign_tos' do
-      it 'succeeds' do
+      it 'succeeds if ao' do
         org = create(:provider_organization)
         create(:ao_org_link, provider_organization: org, user:)
         post "/organizations/#{org.id}/sign_tos"
@@ -216,6 +238,13 @@ RSpec.describe 'Organizations', type: :request do
         expect(org.terms_of_service_accepted_at).to be_present
         expect(org.terms_of_service_accepted_by).to eq user
         expect(response).to redirect_to(success_organization_path(org))
+      end
+      it 'fails if not ao' do
+        org = create(:provider_organization)
+        create(:cd_org_link, provider_organization: org, user:)
+        post "/organizations/#{org.id}/sign_tos"
+        expect(org.terms_of_service_accepted_at).to_not be_present
+        expect(response).to redirect_to(organizations_path)
       end
     end
     context 'GET /organizations/[organization_id]/success' do
