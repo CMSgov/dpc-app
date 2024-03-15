@@ -13,20 +13,6 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
       end
     end
 
-    context 'as cd' do
-      let!(:user) { create(:user) }
-      let!(:org) { create(:provider_organization) }
-      before do
-        create(:cd_org_link, provider_organization: org, user:)
-        sign_in user
-      end
-
-      it 'redirects to organizations' do
-        get "/organizations/#{org.id}/credential_delegate_invitations/new"
-        expect(response).to redirect_to('/organizations')
-      end
-    end
-
     context 'as ao' do
       let!(:user) { create(:user) }
       let!(:org) { create(:provider_organization) }
@@ -40,6 +26,19 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
         get "/organizations/#{org.id}/credential_delegate_invitations/new"
         expect(assigns(:organization)).to eq org
         expect(response).to have_http_status(200)
+      end
+    end
+
+    context 'as cd' do
+      let!(:user) { create(:user) }
+      let!(:org) { create(:provider_organization) }
+      before do
+        create(:cd_org_link, provider_organization: org, user:)
+        sign_in user
+      end
+      it 'redirects to organizations' do
+        get "/organizations/#{org.id}/credential_delegate_invitations/new"
+        expect(response).to redirect_to('/organizations')
       end
     end
   end
@@ -56,6 +55,7 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
     end
 
     context 'as ao' do
+      let(:api_id) { org.id }
       before do
         create(:ao_org_link, provider_organization: org, user:)
         sign_in user
@@ -63,31 +63,31 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
 
       it 'creates invitation record on success' do
         expect do
-          post "/organizations/#{org.id}/credential_delegate_invitations", params: successful_parameters
+          post "/organizations/#{api_id}/credential_delegate_invitations", params: successful_parameters
         end.to change { Invitation.count }.by(1)
       end
 
       it 'adds verification code to invitation record on success' do
-        post "/organizations/#{org.id}/credential_delegate_invitations", params: successful_parameters
+        post "/organizations/#{api_id}/credential_delegate_invitations", params: successful_parameters
         expect(assigns(:cd_invitation).verification_code.length).to eq 6
       end
 
       it 'redirects on success' do
-        post "/organizations/#{org.id}/credential_delegate_invitations", params: successful_parameters
-        expect(response).to redirect_to(success_organization_credential_delegate_invitation_path(org,
+        post "/organizations/#{api_id}/credential_delegate_invitations", params: successful_parameters
+        expect(response).to redirect_to(success_organization_credential_delegate_invitation_path(api_id,
                                                                                                  'new-invitation'))
       end
 
       it 'does not create invitation record on failure' do
         successful_parameters['invited_given_name'] = ''
         expect do
-          post "/organizations/#{org.id}/credential_delegate_invitations", params: successful_parameters
+          post "/organizations/#{api_id}/credential_delegate_invitations", params: successful_parameters
         end.to change { Invitation.count }.by(0)
       end
 
       it 'does not redirect on failure' do
         successful_parameters['invited_given_name'] = ''
-        post "/organizations/#{org.id}/credential_delegate_invitations", params: successful_parameters
+        post "/organizations/#{api_id}/credential_delegate_invitations", params: successful_parameters
         expect(response.status).to eq(400)
       end
     end
