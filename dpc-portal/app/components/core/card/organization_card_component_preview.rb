@@ -8,10 +8,12 @@ module Core
     # [See at USWDS](https://designsystem.digital.gov/components/card/)
     #
     class OrganizationCardComponentPreview < ViewComponent::Preview
+      OrgStruct = Struct.new(:name, :npi, :api_id)
+
       # @after_render :wrap_in_ul
       def default
-        org = ProviderOrganization.new(name: 'Health Hut', npi: '1111111111', id: 2)
-        render(Core::Card::OrganizationCardComponent.new(organization: org))
+        render(Core::Card::OrganizationCardComponent.new(organization: OrgStruct.new('Test Organization', 'npi_123456',
+                                                                                     'api_123')))
       end
 
       private

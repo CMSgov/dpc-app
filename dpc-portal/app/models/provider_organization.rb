@@ -35,4 +35,12 @@ class ProviderOrganization < ApplicationRecord
     end
     @ips
   end
+
+  def api_id
+    id
+  end
+
+  def path_id
+    id
+  end
 end

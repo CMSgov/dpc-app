@@ -38,7 +38,7 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
 
       it 'should match form tag' do
         form_tag = ['<form class="usa-form" id="cd-form"',
-                    %(action="/portal/organizations/#{org.to_param}/credential_delegate_invitations"),
+                    %(action="/portal/organizations/#{org.path_id}/credential_delegate_invitations"),
                     'accept-charset="UTF-8" method="post">'].join(' ')
         is_expected.to include(form_tag)
       end

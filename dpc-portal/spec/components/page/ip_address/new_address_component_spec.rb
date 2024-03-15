@@ -16,12 +16,12 @@ RSpec.describe Page::IpAddress::NewAddressComponent, type: :component do
     let(:expected_html) do
       <<~HTML
         <div>
-          <div class="margin-bottom-5">← <a href="/portal/organizations/#{org.to_param}">#{org.name}</a></div>
+          <div class="margin-bottom-5">← <a href="/portal/organizations/#{org.path_id}">#{org.name}</a></div>
           <h1>Add Public IP Address</h1>
           <section class="box">
             <div>
               <h2>New IP address for #{org.name}</h2>
-              <form action="/portal/organizations/#{org.to_param}/ip_addresses" accept-charset="UTF-8" method="post">
+              <form action="/portal/organizations/#{org.path_id}/ip_addresses" accept-charset="UTF-8" method="post">
                 <div class="margin-bottom-4">
                   <label class="usa-label" for="label">Label</label>
                   <p class="usa-hint">Choose a descriptive name to make your IP address easily identifiable to you.</p>

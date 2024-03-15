@@ -19,7 +19,7 @@ class CredentialDelegateInvitationsController < ApplicationController
                                     invited_by: current_user,
                                     verification_code: (Array('A'..'Z') + Array(0..9)).sample(6).join)
     if @cd_invitation.save
-      redirect_to success_organization_credential_delegate_invitation_path(@organization, 'new-invitation')
+      redirect_to success_organization_credential_delegate_invitation_path(@organization.path_id, 'new-invitation')
     else
       render(Page::CredentialDelegate::NewInvitationComponent.new(@organization, @cd_invitation), status: :bad_request)
     end

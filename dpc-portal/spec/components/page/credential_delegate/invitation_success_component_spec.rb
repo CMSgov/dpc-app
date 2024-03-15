@@ -16,7 +16,7 @@ RSpec.describe Page::CredentialDelegate::InvitationSuccessComponent, type: :comp
     let(:expected_html) do
       <<~HTML
         <div>
-          <div class="margin-bottom-5">← <a href="/portal/organizations/#{org.to_param}">#{org.name}</a></div>
+          <div class="margin-bottom-5">← <a href="/portal/organizations/#{org.path_id}">#{org.name}</a></div>
            <h1>Credential delegate invite sent</h1>
            <div class="usa-alert usa-alert--success">
              <div class="usa-alert__body">
