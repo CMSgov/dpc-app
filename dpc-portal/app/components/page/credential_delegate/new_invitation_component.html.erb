@@ -10,7 +10,7 @@
   </div>
   <div>
     <h2>Contact Information</h2>
-    <%= form_tag organization_credential_delegate_invitations_path(@organization), method: :post, class: ['usa-form'], id: "cd-form" do %>
+    <%= form_tag organization_credential_delegate_invitations_path(@organization.path_id), method: :post, class: ['usa-form'], id: "cd-form" do %>
       <%= render(Core::Form::TextInputComponent.new(label: 'First or given name',
           attribute: :invited_given_name,
           hint: 'For example, Jose, Darren, or Mai',
@@ -38,7 +38,7 @@
           error_msg: cd_invite.errors[:invited_email_confirmation]&.first,
           default: cd_invite.invited_email_confirmation)) %>
     <% end %>
-    <%= link_to 'Go Back', organization_path(organization), class: ['usa-button', 'usa-button--outline'] %>
+    <%= link_to 'Go Back', organization_path(organization.path_id), class: ['usa-button', 'usa-button--outline'] %>
     <a href="#verify-modal" aria-controls="verify-modal" class="usa-button" data-open-modal>Send invite</a>
     <%= render(Core::Modal::ModalComponent.new(
         'Are you sure?',

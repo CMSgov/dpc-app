@@ -7,7 +7,9 @@ module Core
       with_collection_parameter :organization
       def initialize(organization:)
         super
-        @organization = organization
+        @name = organization.name
+        @npi = organization.npi
+        @api_id = organization.api_id
       end
     end
   end
