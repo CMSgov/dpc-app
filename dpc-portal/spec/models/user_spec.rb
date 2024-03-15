@@ -113,6 +113,10 @@ RSpec.describe User, type: :model do
       create(:cd_org_link, provider_organization:, user:)
       expect(user.provider_organizations).to include(provider_organization)
     end
+    it 'should not return orgs with disabaled cd_org_link' do
+      create(:cd_org_link, provider_organization:, user:, disabled_at: 2.days.ago)
+      expect(user.provider_organizations).to_not include(provider_organization)
+    end
     it 'should not return orgs without link' do
       expect(user.provider_organizations).to_not include(provider_organization)
     end

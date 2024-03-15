@@ -19,7 +19,8 @@ class User < ApplicationRecord
 
   def provider_organizations
     ProviderOrganization.joins(:ao_org_links).where('ao_org_links.user_id = ?', id) +
-      ProviderOrganization.joins(:cd_org_links).where('cd_org_links.user_id = ?', id)
+      ProviderOrganization.joins(:cd_org_links).where('cd_org_links.user_id = ? AND cd_org_links.disabled_at IS NULL',
+                                                      id)
   end
 
   def can_access?(organization)
