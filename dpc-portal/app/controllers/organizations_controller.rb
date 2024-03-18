@@ -4,9 +4,9 @@
 class OrganizationsController < ApplicationController
   before_action :authenticate_user!
   before_action :load_organization, only: %i[show tos_form sign_tos success]
-  before_action :can_access?, only: %i[show]
+  before_action :require_can_access, only: %i[show]
   before_action :check_npi, only: %i[create]
-  before_action :ao?, only: %i[tos_form sign_tos success]
+  before_action :require_ao, only: %i[tos_form sign_tos success]
 
   def index
     @organizations = current_user.provider_organizations
@@ -67,10 +67,7 @@ class OrganizationsController < ApplicationController
 
   private
 
-  def load_organization
-    @organization = ProviderOrganization.find(params[:id])
-    redirect_to organizations_path unless current_user.can_access?(@organization)
-  rescue ActiveRecord::RecordNotFound
-    render file: "#{Rails.root}/public/404.html", layout: false, status: :not_found
+  def organization_id
+    params[:id]
   end
 end

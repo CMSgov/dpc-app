@@ -4,7 +4,7 @@
 class IpAddressesController < ApplicationController
   before_action :authenticate_user!
   before_action :load_organization
-  before_action :can_access?
+  before_action :require_can_access
 
   def new
     render Page::IpAddress::NewAddressComponent.new(@organization)
