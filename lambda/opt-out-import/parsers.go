@@ -16,8 +16,8 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func ParseMetadata(bucket string, filename string) (OptOutFilenameMetadata, error) {
-	var metadata OptOutFilenameMetadata
+func ParseMetadata(bucket string, filename string) (ResponseFileMetadata, error) {
+	var metadata ResponseFileMetadata
 	// P.NGD.DPC.RSP.D240123.T1122001.IN
 	// Beneficiary Data Sharing Preferences File sent by 1-800-Medicare: P.NGD.DPC.RSP.Dyymmdd.Thhmmsst.IN
 	// Prefix: T = test, P = prod;
@@ -42,7 +42,7 @@ func ParseMetadata(bucket string, filename string) (OptOutFilenameMetadata, erro
 	return metadata, nil
 }
 
-func ParseConsentRecords(metadata *OptOutFilenameMetadata, b []byte) ([]*OptOutRecord, error) {
+func ParseConsentRecords(metadata *ResponseFileMetadata, b []byte) ([]*OptOutRecord, error) {
 	var records []*OptOutRecord
 	r := bytes.NewReader(b)
 	scanner := bufio.NewScanner(r)
@@ -64,7 +64,7 @@ func ParseConsentRecords(metadata *OptOutFilenameMetadata, b []byte) ([]*OptOutR
 	return records, err
 }
 
-func ParseRecord(metadata *OptOutFilenameMetadata, b []byte, unmarshaler FileUnmarshaler) (*OptOutRecord, error) {
+func ParseRecord(metadata *ResponseFileMetadata, b []byte, unmarshaler FileUnmarshaler) (*OptOutRecord, error) {
 	var row ResponseFileRow
 	if err := unmarshaler(b, &row); err != nil {
 		return nil, errors.Wrapf(err, "failed to parse file: %s", metadata.FilePath)

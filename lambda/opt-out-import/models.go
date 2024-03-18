@@ -14,7 +14,7 @@ type OptOutFileEntity struct {
 	updated_at    string
 }
 
-type OptOutFilenameMetadata struct {
+type ResponseFileMetadata struct {
 	Name         string
 	Timestamp    time.Time
 	FilePath     string
@@ -23,7 +23,7 @@ type OptOutFilenameMetadata struct {
 	FileID       string
 }
 
-func (m OptOutFilenameMetadata) String() string {
+func (m ResponseFileMetadata) String() string {
 	if m.FilePath != "" {
 		return m.FilePath
 	}
