@@ -210,23 +210,40 @@ func createSession() (*session.Session, error) {
 }
 
 func downloadS3File(bucket string, file string) ([]byte, error) {
-	cfg, err := createV2Cfg()
-	if err != nil {
-		return []byte{}, err
-	}
-
-	downloader := manager.NewDownloader(s3v2.NewFromConfig(*cfg))
-	buff := &aws.WriteAtBuffer{}
-	numBytes, err := downloader.Download(context.TODO(), buff, &s3v2.GetObjectInput{
-		Bucket: aws.String(bucket),
-		Key:    aws.String(file),
-	})
-
-	if err == nil {
+	if os.Getenv("ENV") == "local" {
+		sess, err := createSession()
+		if err != nil {
+			return []byte{}, err
+		}
+		downloader := s3manager.NewDownloader(sess)
+		buff := &aws.WriteAtBuffer{}
+		numBytes, err := downloader.Download(buff, &s3.GetObjectInput{
+			Bucket: aws.String(bucket),
+			Key:    aws.String(file),
+		})
 		log.Printf("file downloaded: size=%d", numBytes)
-	}
+		byte_arr := buff.Bytes()
 
-	return buff.Bytes(), err
+		return byte_arr, err
+	} else {
+		cfg, err := createV2Cfg()
+		if err != nil {
+			return []byte{}, err
+		}
+
+		downloader := manager.NewDownloader(s3v2.NewFromConfig(*cfg))
+		buff := &aws.WriteAtBuffer{}
+		numBytes, err := downloader.Download(context.TODO(), buff, &s3v2.GetObjectInput{
+			Bucket: aws.String(bucket),
+			Key:    aws.String(file),
+		})
+
+		if err == nil {
+			log.Printf("file downloaded: size=%d", numBytes)
+		}
+
+		return buff.Bytes(), err
+	}
 }
 
 func generateConfirmationFile(successful bool, records []*OptOutRecord, marshaler FileMarshaler) ([]byte, error) {
