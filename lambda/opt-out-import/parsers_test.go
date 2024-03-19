@@ -49,7 +49,7 @@ func TestParseRecord(t *testing.T) {
 	// 181120 file
 	fileTime, _ := time.Parse(time.RFC3339, "2018-11-20T10:00:00Z")
 	line := []byte("1SJ0A00AA00N")
-	metadata := &OptOutFilenameMetadata{
+	metadata := &ResponseFileMetadata{
 		Timestamp:    fileTime,
 		FilePath:     "full-fake-filename",
 		Name:         "fake-filename",
@@ -60,7 +60,7 @@ func TestParseRecord(t *testing.T) {
 		number      int
 		fileTime    time.Time
 		line        []byte
-		metadata    *OptOutFilenameMetadata
+		metadata    *ResponseFileMetadata
 		unmarshaler FileUnmarshaler
 		err         error
 	}{
@@ -121,7 +121,7 @@ func TestParseRecord_InvalidData(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.line, func(t *testing.T) {
-			metadata := &OptOutFilenameMetadata{
+			metadata := &ResponseFileMetadata{
 				Timestamp:    time.Now(),
 				FilePath:     fp,
 				Name:         tt.line,
