@@ -13,7 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGenerateBeneAlignmentFile(t *testing.T) {
+func TestGenerateRequestFile(t *testing.T) {
 	oriGetSecret := getSecret
 	oriGetSecrets := getSecrets
 	oriCreateConnection := createConnection
@@ -74,7 +74,7 @@ func TestGenerateBeneAlignmentFile(t *testing.T) {
 
 	for _, test := range tests {
 		test.mockFunc()
-		filename, err := generateBeneAlignmentFile()
+		filename, err := generateRequestFile()
 		assert.NotEmpty(t, filename)
 		assert.Nil(t, err)
 	}
@@ -201,9 +201,9 @@ func TestGetAwsSession(t *testing.T) {
 	}
 }
 
-func TestGenerateAlignmentFileName(t *testing.T) {
+func TestGenerateRequestFileName(t *testing.T) {
 	now, _ := time.Parse("2006-01-02 15:04:05", "2010-01-01 12:00:00")
 
-	fileName := generateAlignmentFileName(now)
+	fileName := generateRequestFileName(now)
 	assert.Equal(t, "P#EFT.ON.DPC.NGD.REQ.D100101.T1200000", fileName)
 }

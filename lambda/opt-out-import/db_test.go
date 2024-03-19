@@ -52,7 +52,7 @@ func TestGetConsentDbSecrets(t *testing.T) {
 	}
 }
 
-func TestInsertOptOutMetadata(t *testing.T) {
+func TestInsertResponseFileMetadata(t *testing.T) {
 	tests := []struct {
 		name     string
 		bucket   string
@@ -89,7 +89,7 @@ func TestInsertOptOutMetadata(t *testing.T) {
 			WithArgs(AnyString{}, "P.NGD.DPC.RSP.D240123.T1122001.IN", "2024-01-23").
 			WillReturnRows(sqlmock.NewRows(rows).AddRow("(.*)", "P.NGD.DPC.RSP.D240123.T1122001.IN", timestampValue, "In-Progress"))
 
-		entity, err := insertOptOutMetadata(db, &metadata)
+		entity, err := insertResponseFileMetadata(db, &metadata)
 		if err != nil {
 			t.Error(err)
 		}
@@ -229,7 +229,7 @@ func TestInsertConsentRecords_DatabaseError(t *testing.T) {
 	assert.Equal(t, 0, len(response))
 }
 
-func TestUpdateOptOutFileImportStatus(t *testing.T) {
+func TestUpdateResponseFileImportStatus(t *testing.T) {
 	tests := []struct {
 		importStatus string
 		err          error
@@ -256,7 +256,7 @@ func TestUpdateOptOutFileImportStatus(t *testing.T) {
 		mock.ExpectQuery(`UPDATE opt_out_file`).
 			WithArgs(test.importStatus, id).
 			WillReturnRows(sqlmock.NewRows(rows).AddRow(id, test.importStatus))
-		err := updateOptOutFileImportStatus(db, id, test.importStatus)
+		err := updateResponseFileImportStatus(db, id, test.importStatus)
 		assert.Equal(t, test.err, err)
 	}
 }
