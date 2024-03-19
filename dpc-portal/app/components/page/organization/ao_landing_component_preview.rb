@@ -8,22 +8,15 @@ module Page
     # Landing page for authorized officials, which shows a list of their organizations.
     #
     class AoLandingComponentPreview < ViewComponent::Preview
-      OrgStruct = Struct.new(:name, :npi, :api_id)
-
       def multiple_orgs
-        render(Page::Organization::AoLandingComponent.new(
-                 organizations: [
-                   OrgStruct.new('Test Organization 1', 'npi_111111', 'api_111'),
-                   OrgStruct.new('Test Organization 2', 'npi_222222', 'api_222'),
-                   OrgStruct.new('Test Organization 3', 'npi_333333', 'api_333')
-                 ]
-               ))
+        orgs = []
+        3.times { |i| orgs << ProviderOrganization.new(name: "Test Organization #{i}", npi: "#{i}111111111", id: i) }
+        render(Page::Organization::AoLandingComponent.new(organizations: orgs))
       end
 
       def one_org
-        render(Page::Organization::AoLandingComponent.new(organizations: [OrgStruct.new('Test Organization',
-                                                                                        'npi_123456',
-                                                                                        'api_123')]))
+        org = ProviderOrganization.new(name: 'Health Hut', npi: '1111111111', id: 2)
+        render(Page::Organization::AoLandingComponent.new(organizations: [org]))
       end
 
       def no_org

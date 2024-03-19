@@ -9,7 +9,7 @@ class CdOrgLink < ApplicationRecord
   def show_attributes
     { full_name: "#{user.given_name} #{user.family_name}",
       email: user.email,
-      verification_code: invitation.verification_code,
+      verification_code: invitation&.verification_code,
       activated_at: created_at.to_s }.with_indifferent_access
   end
 end

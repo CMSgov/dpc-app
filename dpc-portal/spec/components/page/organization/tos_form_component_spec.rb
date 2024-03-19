@@ -10,7 +10,7 @@ RSpec.describe Page::Organization::TosFormComponent, type: :component do
       normalize_space(rendered_content)
     end
 
-    let(:organization) { build(:provider_organization, name: 'Health Hut') }
+    let(:organization) { build(:provider_organization, name: 'Health Hut', npi: '11111111', id: 2) }
     let(:component) { described_class.new(organization) }
     let(:expected_html) do
       <<~HTML

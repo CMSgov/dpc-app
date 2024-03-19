@@ -2,6 +2,6 @@
 
 FactoryBot.define do
   factory :provider_organization do
-    npi { '11111111' }
+    npi { 10.times.map { rand(0..9) }.join }
   end
 end

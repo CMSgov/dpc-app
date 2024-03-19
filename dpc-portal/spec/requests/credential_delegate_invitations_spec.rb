@@ -5,53 +5,47 @@ require 'rails_helper'
 RSpec.describe 'CredentialDelegateInvitations', type: :request do
   include DpcClientSupport
 
-  describe 'GET /new not logged in' do
-    it 'redirects to login' do
-      get '/organizations/no-such-id/credential_delegate_invitations/new'
-      expect(response).to redirect_to('/portal/users/sign_in')
-    end
-  end
-
   describe 'GET /new' do
-    let!(:user) { create(:user) }
-
-    before { sign_in user }
-    it 'returns success' do
-      api_id = SecureRandom.uuid
-      stub_api_client(message: :get_organization,
-                      response: default_get_org_response(api_id))
-      get "/organizations/#{api_id}/credential_delegate_invitations/new"
-      expect(assigns(:organization).dpc_api_organization_id).to eq api_id
-      expect(response).to have_http_status(200)
+    context 'not logged in' do
+      it 'redirects to login' do
+        get '/organizations/no-such-id/credential_delegate_invitations/new'
+        expect(response).to redirect_to('/portal/users/sign_in')
+      end
     end
 
-    it 'creates ProviderOrganization with org data if not exists' do
-      api_id = SecureRandom.uuid
-      stub_api_client(message: :get_organization,
-                      response: default_get_org_response(api_id))
-      expect do
-        get "/organizations/#{api_id}/credential_delegate_invitations/new"
-      end.to change { ProviderOrganization.count }.by(1)
-      expect(assigns(:organization).name).to eq "Bob's Health Hut"
-      expect(assigns(:organization).npi).to eq '1111111111'
+    context 'as ao' do
+      let!(:user) { create(:user) }
+      let!(:org) { create(:provider_organization) }
+
+      before do
+        create(:ao_org_link, provider_organization: org, user:)
+        sign_in user
+      end
+
+      it 'returns success' do
+        get "/organizations/#{org.id}/credential_delegate_invitations/new"
+        expect(assigns(:organization)).to eq org
+        expect(response).to have_http_status(200)
+      end
     end
 
-    it 'uses ProviderOrganization if exists' do
-      api_id = SecureRandom.uuid
-      stub_api_client(message: :get_organization,
-                      response: default_get_org_response(api_id))
-      create(:provider_organization, dpc_api_organization_id: api_id, name: 'Foo', npi: '2222222222')
-      expect do
-        get "/organizations/#{api_id}/credential_delegate_invitations/new"
-      end.to change { ProviderOrganization.count }.by(0)
-      expect(assigns(:organization).name).to eq 'Foo'
-      expect(assigns(:organization).npi).to eq '2222222222'
+    context 'as cd' do
+      let!(:user) { create(:user) }
+      let!(:org) { create(:provider_organization) }
+      before do
+        create(:cd_org_link, provider_organization: org, user:)
+        sign_in user
+      end
+      it 'redirects to organizations' do
+        get "/organizations/#{org.id}/credential_delegate_invitations/new"
+        expect(response).to redirect_to('/organizations')
+      end
     end
   end
 
   describe 'POST /create' do
     let!(:user) { create(:user) }
-    let!(:api_id) { SecureRandom.uuid }
+    let!(:org) { create(:provider_organization) }
     let!(:successful_parameters) do
       { invited_given_name: 'Bob',
         invited_family_name: 'Hodges',
@@ -60,53 +54,71 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
         invited_email_confirmation: 'bob@example.com' }
     end
 
-    before do
-      sign_in user
-      stub_api_client(message: :get_organization,
-                      response: default_get_org_response(api_id))
-    end
+    context 'as ao' do
+      let(:api_id) { org.id }
+      before do
+        create(:ao_org_link, provider_organization: org, user:)
+        sign_in user
+      end
 
-    it 'creates invitation record on success' do
-      expect do
+      it 'creates invitation record on success' do
+        expect do
+          post "/organizations/#{api_id}/credential_delegate_invitations", params: successful_parameters
+        end.to change { Invitation.count }.by(1)
+      end
+
+      it 'adds verification code to invitation record on success' do
         post "/organizations/#{api_id}/credential_delegate_invitations", params: successful_parameters
-      end.to change { Invitation.count }.by(1)
-    end
+        expect(assigns(:cd_invitation).verification_code.length).to eq 6
+      end
 
-    it 'adds verification code to invitation record on success' do
-      post "/organizations/#{api_id}/credential_delegate_invitations", params: successful_parameters
-      expect(assigns(:cd_invitation).verification_code.length).to eq 6
-    end
-
-    it 'redirects on success' do
-      post "/organizations/#{api_id}/credential_delegate_invitations", params: successful_parameters
-      expect(response).to redirect_to(success_organization_credential_delegate_invitation_path(api_id,
-                                                                                               'new-invitation'))
-    end
-
-    it 'does not create invitation record on failure' do
-      successful_parameters['invited_given_name'] = ''
-      expect do
+      it 'redirects on success' do
         post "/organizations/#{api_id}/credential_delegate_invitations", params: successful_parameters
-      end.to change { Invitation.count }.by(0)
+        expect(response).to redirect_to(success_organization_credential_delegate_invitation_path(api_id,
+                                                                                                 'new-invitation'))
+      end
+
+      it 'does not create invitation record on failure' do
+        successful_parameters['invited_given_name'] = ''
+        expect do
+          post "/organizations/#{api_id}/credential_delegate_invitations", params: successful_parameters
+        end.to change { Invitation.count }.by(0)
+      end
+
+      it 'does not redirect on failure' do
+        successful_parameters['invited_given_name'] = ''
+        post "/organizations/#{api_id}/credential_delegate_invitations", params: successful_parameters
+        expect(response.status).to eq(400)
+      end
     end
 
-    it 'does not redirect on failure' do
-      successful_parameters['invited_given_name'] = ''
-      post "/organizations/#{api_id}/credential_delegate_invitations", params: successful_parameters
-      expect(response.status).to eq(400)
+    context 'as cd' do
+      before do
+        create(:cd_org_link, provider_organization: org, user:)
+        sign_in user
+      end
+
+      it 'fails even with good parameters' do
+        expect do
+          post "/organizations/#{org.id}/credential_delegate_invitations", params: successful_parameters
+        end.to change { Invitation.count }.by(0)
+        expect(response).to redirect_to(organizations_path)
+      end
     end
   end
 
   describe 'GET /success' do
     let!(:user) { create(:user) }
+    let!(:org) { create(:provider_organization) }
 
-    before { sign_in user }
+    before do
+      sign_in user
+      create(:ao_org_link, provider_organization: org, user:)
+    end
+
     it 'returns success' do
-      api_id = SecureRandom.uuid
-      stub_api_client(message: :get_organization,
-                      response: default_get_org_response(api_id))
-      get "/organizations/#{api_id}/credential_delegate_invitations/foo/success"
-      expect(assigns(:organization).dpc_api_organization_id).to eq api_id
+      get "/organizations/#{org.id}/credential_delegate_invitations/foo/success"
+      expect(assigns(:organization)).to eq org
       expect(response).to have_http_status(200)
     end
   end
