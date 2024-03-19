@@ -52,6 +52,9 @@ var getAttributionData = func(dbUser string, dbPassword string, patientInfos map
 			log.Warningf("Error reading data: %v", err)
 		} else {
 			count += 1
+			if count%10000 == 0 {
+				log.Infof("Read %d rows", count)
+			}
 		}
 
 		patientInfos[perPatientInfo.beneficiary_id] = perPatientInfo
