@@ -37,7 +37,7 @@ public class HAPIExceptionHandlerTest {
                 .setSeverity(OperationOutcome.IssueSeverity.ERROR)
                 .setDiagnostics(errMsg);
 
-        Response response = handler.toResponse(new ServerResponseException(HttpStatus.NOT_FOUND_404, errMsg));
+        Response response = handler.toResponse(new ServerResponseException(HttpStatus.NOT_FOUND_404, errMsg, outcome));
         assertEquals(HttpStatus.NOT_FOUND_404, response.getStatus());
 
         OperationOutcome.OperationOutcomeIssueComponent issue = ((OperationOutcome) response.getEntity()).getIssueFirstRep();
