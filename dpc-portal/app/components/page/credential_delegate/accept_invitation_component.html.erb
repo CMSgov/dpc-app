@@ -1,0 +1,30 @@
+<div>
+  <h1>Accept organization invite</h1>
+  <div class="usa-alert usa-alert--info margin-bottom-4">
+    <div class="usa-alert__body">
+      <h4 class="usa-alert__heading">Key information</h4>
+      <p class="usa-alert__text">
+	<ul>
+	  <li>Info one</li>
+	  <li>Info two</li>
+	  <li>Info three</li>
+	  <li>Info four</li>
+	</ul>
+      </p>
+    </div>
+  </div>
+  <div>
+    <h2>Provide invite code</h2>
+    <p>You are invited to <%= @organization.name %> by the Authorized Official (AO),
+      <%= @cd_invite.invited_by&.given_name %>
+      <%= @cd_invite.invited_by&.family_name %>.</p>
+    <%= form_tag confirm_organization_credential_delegate_invitation_path(@organization, @cd_invite), method: :post, class: ['usa-form'], id: "cd-accept-form" do %>
+      <%= render(Core::Form::TextInputComponent.new(label: 'Enter the invite code:',
+          attribute: :verification_code,
+          default: @cd_invite.verification_code,
+          error_msg: @cd_invite.errors[:verification_code]&.first,
+          input_options: { maxlength: 6 })) %>
+    <% end %>
+    <%= submit_tag "Accept invite", class: "usa-button", data: { test: "form:submit" } %>
+  </div>
+</div>
