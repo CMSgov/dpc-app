@@ -2,6 +2,7 @@
 
 module Page
   module CredentialDelegate
+    # Displays accept invitation form
     class AcceptInvitationComponentPreview < ViewComponent::Preview
       def accept
         org = ProviderOrganization.new(id: 2, name: 'Health Hut')
@@ -9,6 +10,7 @@ module Page
         invitation = Invitation.new(id: 4, invited_by: user)
         render(Page::CredentialDelegate::AcceptInvitationComponent.new(org, invitation))
       end
+
       def error
         org = ProviderOrganization.new(id: 2, name: 'Health Hut')
         user = User.new(given_name: 'Robert', family_name: 'Hodges')
