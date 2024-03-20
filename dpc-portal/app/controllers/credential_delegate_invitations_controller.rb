@@ -54,7 +54,7 @@ class CredentialDelegateInvitationsController < ApplicationController
       return render(Page::CredentialDelegate::BadInvitationComponent.new('pii_mismatch'),
                     status: :forbidden)
     end
-    return unless params[:verification_code] != @cd_invitation.verification_code
+    return if params[:verification_code] == @cd_invitation.verification_code
 
     @cd_invitation.errors.add(:verification_code, :bad_code, message: 'tbd')
     render(Page::CredentialDelegate::AcceptInvitationComponent.new(@organization, @cd_invitation),
