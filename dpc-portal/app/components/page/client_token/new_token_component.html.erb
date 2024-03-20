@@ -7,10 +7,10 @@
     <%= form_tag organization_client_tokens_path(organization_id: organization.path_id), method: :post do %>
 
     <%= render(Core::Form::TextInputComponent.new(label: 'Label',
-	attribute: :label,
-	hint: 'Choose a descriptive name to make your token easily identifiable to you.',
-	default: params[:label],
-	input_options: { maxlength: 25 })) %>
+        attribute: :label,
+        hint: 'Choose a descriptive name to make your token easily identifiable to you.',
+        default: params[:label],
+        input_options: { maxlength: 25 })) %>
     <%= submit_tag "Create token", class: "usa-button", data: { test: "form-submit" } %>
     <% end %>
   </div>

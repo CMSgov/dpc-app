@@ -11,9 +11,8 @@ RSpec.describe Page::CredentialDelegate::AcceptInvitationComponent, type: :compo
     end
 
     let(:org) { ComponentSupport::MockOrg.new }
-    let(:cd_id) { '4' }
     let(:ao) { build(:user, given_name: 'Bob', family_name: 'Hodges') }
-    let(:cd_invite) { Invitation.new(id: cd_id, invited_by: ao, verification_code: 'ABC123') }
+    let(:cd_invite) { Invitation.new(id: 4, invited_by: ao, verification_code: 'ABC123') }
 
     let(:component) { described_class.new(org, cd_invite) }
 
