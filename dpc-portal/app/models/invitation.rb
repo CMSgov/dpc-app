@@ -25,4 +25,12 @@ class Invitation < ApplicationRecord
       email: invited_email,
       verification_code: }.with_indifferent_access
   end
+
+  def expired?
+    created_at < 2.days.ago
+  end
+
+  def accepted?
+    CdOrgLink.where(invitation: self).exists?
+  end
 end

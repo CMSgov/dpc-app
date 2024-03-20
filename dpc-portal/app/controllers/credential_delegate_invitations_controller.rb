@@ -5,6 +5,7 @@ class CredentialDelegateInvitationsController < ApplicationController
   before_action :authenticate_user!
   before_action :load_organization
   before_action :require_ao, only: %i[new create success]
+  before_action :load_invitation, only: %i[accept confirm]
 
   def new
     render(Page::CredentialDelegate::NewInvitationComponent.new(@organization, Invitation.new))
@@ -27,5 +28,26 @@ class CredentialDelegateInvitationsController < ApplicationController
 
   def success
     render(Page::CredentialDelegate::InvitationSuccessComponent.new(@organization))
+  end
+
+  def accept
+    if current_user.email != @cd_invitation.invited_email
+      return render(Page::CredentialDelegate::BadInvitationComponent.new('pii_mismatch'),
+                    status: :forbidden)
+    end
+    
+    render(Page::CredentialDelegate::AcceptInvitationComponent.new(@organization, @cd_invitation))
+  end
+
+  private
+
+  def load_invitation
+    @cd_invitation = Invitation.find(params[:id])
+    if @cd_invitation.expired? || @cd_invitation.accepted?
+      render(Page::CredentialDelegate::BadInvitationComponent.new('invalid'),
+             status: :forbidden)
+    end
+  rescue ActiveRecord::RecordNotFound
+    render(Page::CredentialDelegate::BadInvitationComponent.new('invalid'), status: :not_found)
   end
 end

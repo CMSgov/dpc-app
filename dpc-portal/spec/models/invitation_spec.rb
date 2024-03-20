@@ -137,4 +137,30 @@ RSpec.describe Invitation, type: :model do
       end.to raise_error(ArgumentError)
     end
   end
+
+  describe :expired do
+    it 'should not be expired if less than 2 days old' do
+      invitation = create(:invitation, created_at: 47.hours.ago)
+      expect(invitation.expired?).to eq false
+    end
+    it 'should be expired if more than 2 days old' do
+      invitation = create(:invitation, created_at: 49.hours.ago)
+      expect(invitation.expired?).to eq true
+    end
+    it 'should be expired if 2 days old' do
+      invitation = create(:invitation, created_at: 2.days.ago)
+      expect(invitation.expired?).to eq true
+    end
+  end
+
+  describe :accepted do
+    it 'should be accepted if has cd_org_link' do
+      link = create(:cd_org_link)
+      expect(link.invitation.accepted?).to eq true
+    end
+    it 'should not be accepted if not have cd_org_link' do
+      invitation = create(:invitation)
+      expect(invitation.accepted?).to eq false
+    end
+  end
 end

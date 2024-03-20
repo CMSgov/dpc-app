@@ -122,4 +122,60 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
       expect(response).to have_http_status(200)
     end
   end
+
+  describe 'GET /accept' do
+    let(:invited_by) { create(:invited_by) }
+    let!(:cd_invite) { build(:invitation) }
+    let(:user) do
+      create(:user, given_name: cd_invite.invited_given_name,
+                    family_name: cd_invite.invited_family_name,
+                    email: cd_invite.invited_email)
+    end
+    let(:org) { create(:provider_organization) }
+
+    before do
+      cd_invite.save!
+      sign_in user
+    end
+    it 'should show form if valid invitation' do
+      get "/organizations/#{org.id}/credential_delegate_invitations/#{cd_invite.id}/accept"
+      expect(response).to be_ok
+      expect(response.body).to include(confirm_organization_credential_delegate_invitation_path(org, cd_invite))
+    end
+    it 'should show warning page with 404 if missing' do
+      get "/organizations/#{org.id}/credential_delegate_invitations/bad-id/accept"
+      expect(response).to be_not_found
+      expect(response.body).to include('usa-alert--warning')
+    end
+    it 'should show warning page if expired' do
+      cd_invite.update_attribute(:created_at, 3.days.ago)
+      get "/organizations/#{org.id}/credential_delegate_invitations/#{cd_invite.id}/accept"
+      expect(response).to be_forbidden
+      expect(response.body).to include('usa-alert--warning')
+    end
+    it 'should show warning page if accepted' do
+      create(:cd_org_link, invitation: cd_invite)
+      get "/organizations/#{org.id}/credential_delegate_invitations/#{cd_invite.id}/accept"
+      expect(response).to be_forbidden
+      expect(response.body).to include('usa-alert--warning')
+    end
+    it 'should show error page if email not match' do
+      user.update_attribute(:email, 'another@example.com')
+      get "/organizations/#{org.id}/credential_delegate_invitations/#{cd_invite.id}/accept"
+      expect(response).to be_forbidden
+      expect(response.body).to include('usa-alert--error')
+    end
+  end
+
+  describe 'POST /confirm' do
+    context 'success' do
+      it 'should create CdOrgLink'
+      it 'should update invitation'
+      it 'should redirect to organizations page with notice'
+    end
+    context 'failure' do
+      it 'should render form with error if OTP not match'
+      it 'should render error page if PII not match'
+    end
+  end
 end

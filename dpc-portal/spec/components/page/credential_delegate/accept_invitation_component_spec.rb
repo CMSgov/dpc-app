@@ -10,7 +10,6 @@ RSpec.describe Page::CredentialDelegate::AcceptInvitationComponent, type: :compo
       normalize_space(rendered_content)
     end
 
-
     let(:org) { ComponentSupport::MockOrg.new }
     let(:cd_id) { '4' }
     let(:ao) { build(:user, given_name: 'Bob', family_name: 'Hodges') }
@@ -35,8 +34,9 @@ RSpec.describe Page::CredentialDelegate::AcceptInvitationComponent, type: :compo
       end
 
       it 'should match form tag' do
+        form_url = "/portal/organizations/#{org.path_id}/credential_delegate_invitations/#{cd_invite.id}/confirm"
         form_tag = ['<form class="usa-form" id="cd-accept-form"',
-                    %(action="/portal/organizations/#{org.path_id}/credential_delegate_invitations/#{cd_invite.id}/confirm"),
+                    %(action="#{form_url}"),
                     'accept-charset="UTF-8" method="post">'].join(' ')
         is_expected.to include(form_tag)
       end
@@ -62,7 +62,7 @@ RSpec.describe Page::CredentialDelegate::AcceptInvitationComponent, type: :compo
 
     context 'Errors' do
       let(:error_msg) { 'Some error message' }
-      
+
       before { cd_invite.errors.add(:verification_code, :is_bad, message: error_msg) }
       it 'should have errored verification_code stanza' do
         verification_code = <<~HTML
