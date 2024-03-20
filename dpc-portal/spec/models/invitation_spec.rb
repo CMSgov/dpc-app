@@ -163,4 +163,28 @@ RSpec.describe Invitation, type: :model do
       expect(invitation.accepted?).to eq false
     end
   end
+
+  describe :match_user do
+    let(:cd_invite) { build(:invitation) }
+    let(:user) do
+      build(:user, given_name: cd_invite.invited_given_name,
+                   family_name: cd_invite.invited_family_name,
+                   email: cd_invite.invited_email)
+    end
+    it 'should match user if names and email correct' do
+      expect(cd_invite.match_user?(user)).to eq true
+    end
+    it 'should not match user if given name not correct' do
+      user.given_name = "not #{cd_invite.invited_given_name}"
+      expect(cd_invite.match_user?(user)).to eq false
+    end
+    it 'should not match user if family name not correct' do
+      user.family_name = "not #{cd_invite.invited_family_name}"
+      expect(cd_invite.match_user?(user)).to eq false
+    end
+    it 'should not match user if email not correct' do
+      user.email = "not #{cd_invite.invited_email}"
+      expect(cd_invite.match_user?(user)).to eq false
+    end
+  end
 end

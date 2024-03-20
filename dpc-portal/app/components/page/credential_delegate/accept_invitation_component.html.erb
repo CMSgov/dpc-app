@@ -20,10 +20,9 @@
     <%= form_tag confirm_organization_credential_delegate_invitation_path(@organization, @cd_invite), method: :post, class: ['usa-form'], id: "cd-accept-form" do %>
       <%= render(Core::Form::TextInputComponent.new(label: 'Enter the invite code:',
           attribute: :verification_code,
-          default: @cd_invite.verification_code,
           error_msg: @cd_invite.errors[:verification_code]&.first,
           input_options: { maxlength: 6 })) %>
+      <%= submit_tag "Accept invite", class: "usa-button", data: { test: "form:submit" } %>
     <% end %>
-    <%= submit_tag "Accept invite", class: "usa-button", data: { test: "form:submit" } %>
   </div>
 </div>

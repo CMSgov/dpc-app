@@ -33,4 +33,8 @@ class Invitation < ApplicationRecord
   def accepted?
     CdOrgLink.where(invitation: self).exists?
   end
+
+  def match_user?(user)
+    invited_given_name == user.given_name && invited_family_name == user.family_name && invited_email == user.email
+  end
 end

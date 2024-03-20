@@ -13,7 +13,7 @@ RSpec.describe Page::CredentialDelegate::AcceptInvitationComponent, type: :compo
     let(:org) { ComponentSupport::MockOrg.new }
     let(:cd_id) { '4' }
     let(:ao) { build(:user, given_name: 'Bob', family_name: 'Hodges') }
-    let(:cd_invite) { Invitation.new(id: cd_id, invited_by: ao) }
+    let(:cd_invite) { Invitation.new(id: cd_id, invited_by: ao, verification_code: 'ABC123') }
 
     let(:component) { described_class.new(org, cd_invite) }
 
@@ -53,7 +53,7 @@ RSpec.describe Page::CredentialDelegate::AcceptInvitationComponent, type: :compo
         verification_code = <<~HTML
           <div class="margin-bottom-4">
             <label class="usa-label" for="verification_code">Enter the invite code:</label>
-            <input type="text" name="verification_code" id="verification_code" maxlength="6" class="usa-input" />
+            <input type="text" name="verification_code" id="verification_code" value="" maxlength="6" class="usa-input" />
           </div>
         HTML
         is_expected.to include(normalize_space(verification_code))
@@ -69,7 +69,7 @@ RSpec.describe Page::CredentialDelegate::AcceptInvitationComponent, type: :compo
           <div class="margin-bottom-4">
             <label class="usa-label" for="verification_code">Enter the invite code:</label>
             <p style="color: #b50909;">#{error_msg}</p>
-            <input type="text" name="verification_code" id="verification_code" maxlength="6" class="usa-input usa-input--error" />
+            <input type="text" name="verification_code" id="verification_code" value="" maxlength="6" class="usa-input usa-input--error" />
           </div>
         HTML
         is_expected.to include(normalize_space(verification_code))
