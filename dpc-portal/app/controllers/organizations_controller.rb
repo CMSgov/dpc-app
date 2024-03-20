@@ -3,21 +3,23 @@
 # Shows Credential Delegates info about the organizations they manage the credentials for
 class OrganizationsController < ApplicationController
   before_action :authenticate_user!
-  before_action :load_organization, only: %i[index show]
-  before_action :load_organization_by_id, only: %i[tos_form sign_tos success]
+  before_action :load_organization, only: %i[show tos_form sign_tos success]
+  before_action :require_can_access, only: %i[show]
   before_action :check_npi, only: %i[create]
+  before_action :require_ao, only: %i[tos_form sign_tos success]
 
   def index
-    @organizations = [@organization]
+    @organizations = current_user.provider_organizations
     render(Page::Organization::OrganizationListComponent.new(organizations: @organizations))
   end
 
   def show
-    if params[:ao]
-      provider_organization = ProviderOrganization.find_by(dpc_api_organization_id: @organization.api_id)
-      @invitations = Invitation.where(provider_organization:,
+    if params[:ao] && current_user.ao?(@organization)
+      @invitations = Invitation.where(provider_organization: @organization,
                                       invited_by: current_user)
-      render(Page::CredentialDelegate::ListComponent.new(@organization, @invitations, []))
+      @cds = CdOrgLink.where(provider_organization: @organization,
+                             disabled_at: nil)
+      render(Page::CredentialDelegate::ListComponent.new(@organization, @invitations, @cds))
     else
       render(Page::Organization::ShowComponent.new(@organization))
     end
@@ -65,24 +67,7 @@ class OrganizationsController < ApplicationController
 
   private
 
-  def load_organization
-    @organization = case ENV.fetch('ENV', nil)
-                    when 'prod-sbx'
-                      redirect_to root_url
-                    when 'test'
-                      Organization.new('6a1dbf47-825b-40f3-b81d-4a7ffbbdc270')
-                    when 'dev'
-                      Organization.new('78d02106-2837-4d07-8c51-8d73332aff09')
-                    else
-                      Organization.new(params[:id])
-                    end
-  rescue DpcRecordNotFound
-    render file: "#{Rails.root}/public/404.html", layout: false, status: :not_found
-  end
-
-  def load_organization_by_id
-    @organization = ProviderOrganization.find(params[:id])
-  rescue ActiveRecord::RecordNotFound
-    render file: "#{Rails.root}/public/404.html", layout: false, status: :not_found
+  def organization_id
+    params[:id]
   end
 end
