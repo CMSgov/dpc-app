@@ -157,7 +157,7 @@ func formatFileData(fileName string, patientInfos map[string]PatientInfo) (bytes
 		recordCount += 1
 	}
 	buff.WriteString(fmt.Sprintf("TRL_BENEDATAREQ%s%010d", curr_date, recordCount))
-	log.WithField("num_patients", len(patientInfos)).Info(fmt.Sprintf("Successfully generated beneficiary alignment file for file: %s", fileName))
+	log.WithField("num_patients", len(patientInfos)).WithField("request_filename", fileName).WithField("request_filesize", buff.Len()).Info(fmt.Sprintf("Successfully generated beneficiary alignment file for file: %s", fileName))
 	return buff, nil
 }
 
