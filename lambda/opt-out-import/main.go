@@ -63,7 +63,7 @@ func handler(ctx context.Context, sqsEvent events.SQSEvent) (string, error) {
 		log.Errorf("Failed to parse S3 event: %v", err)
 		return "", err
 	} else if s3Event == nil {
-		log.Infof("No S3 event found, skipping safely.")
+		log.Info("No S3 event found, skipping safely.")
 		return "", nil
 	}
 
@@ -79,7 +79,7 @@ func handler(ctx context.Context, sqsEvent events.SQSEvent) (string, error) {
 		}
 	}
 
-	log.Warningf("No ObjectCreated:Put events found, skipping safely.")
+	log.Info("No ObjectCreated:Put events found, skipping safely.")
 	return "", nil
 }
 
