@@ -10,18 +10,10 @@ fi
 if [ "$1" == "admin" ]; then
   # Start the database service (and make accessible outside the Docker container)
   echo "Starting Rails server..."
-  if [[ -n "$JACOCO" ]]; then
-    bundle exec rails server -b 0.0.0.0 -p 3000
-  else
-    bundle exec rails server -b 0.0.0.0 -p 3000 2>&1 | tee -a /var/log/dpc-admin-$(hostname).log
-  fi
+  bundle exec rails server -b 0.0.0.0 -p 3000
 fi
 
 if [ "$1" == "sidekiq" ]; then
   # Start Sidekiq job processing
-  if [[ -n "$JACOCO" ]]; then
-    bundle exec sidekiq -q admin
-  else
-    bundle exec sidekiq -q admin 2>&1 | tee -a /var/log/dpc-admin-$(hostname)-sidekiq.log
-  fi
+  bundle exec sidekiq -q admin
 fi
