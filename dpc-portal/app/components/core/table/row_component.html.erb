@@ -1,0 +1,17 @@
+<%= raw '<tbody>' if iteration.first? %>
+<tr>
+  <% attributes.each do |attribute| %>
+  <td data-sort-value="<%= attribute %>"><%= attribute %></td>
+  <% end %>
+  <% if delete_path %>
+  <td>
+    <a href="#delete-modal-<%= obj['id'] %>" aria-controls="delete-modal-<%= obj['id'] %>" data-open-modal>X</a>
+    <%= render(Core::Modal::ModalComponent.new("Permanently revoke #{obj_name}?",
+        "Once revoked, the #{obj_name} will not work to access production data.",
+        button_to("Yes, revoke #{obj_name.split.last}", "#{delete_path}/#{obj['id']}", method: :delete, class: 'usa-button'),
+        'No, go back',
+        "delete-modal-#{obj['id']}")) %>
+  </td>
+  <% end %>
+</tr>
+<%= raw '</tbody>' if iteration.last? %>

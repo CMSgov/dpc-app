@@ -39,6 +39,9 @@ public abstract class AbstractBaseResource {
     @Path("/Organization")
     public abstract AbstractOrganizationResource organizationOperations();
 
+    @Path("/Admin")
+    public abstract AbstractAdminResource adminOperations();
+
     @Path("/Patient")
     public abstract AbstractPatientResource patientOperations();
 
@@ -47,6 +50,9 @@ public abstract class AbstractBaseResource {
 
     @Path("/StructureDefinition")
     public abstract AbstractDefinitionResource definitionResourceOperations();
+
+    @Path("/IpAddress")
+    public abstract AbstractIpAddressResource ipAddressOperations();
 
     /**
      * Returns the FHIR capabilities statement

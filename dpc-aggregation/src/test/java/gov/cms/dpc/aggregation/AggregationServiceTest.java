@@ -19,10 +19,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ExtendWith(BufferedLoggerHandler.class)
 public class AggregationServiceTest {
 
-    private static final DropwizardTestSupport<DPCAggregationConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCAggregationService.class, "ci.application.conf", ConfigOverride.config("server.applicationConnectors[0].port", "7777"));
+    private static final String configPath = "src/test/resources/test.application.yml";
+    private static final DropwizardTestSupport<DPCAggregationConfiguration> APPLICATION =
+            new DropwizardTestSupport<>(DPCAggregationService.class, configPath,
+                    ConfigOverride.config("server.applicationConnectors[0].port", "7777"));
 
     @BeforeAll
-    static void start() {
+    static void start() throws Exception{
         APPLICATION.before();
     }
 
@@ -37,7 +40,8 @@ public class AggregationServiceTest {
         final SortedSet<String> names = checks.getNames();
 
         // Ensure that the various healthchecks are propagated from the modules
-        assertAll(() -> assertTrue(names.contains("BlueButtonHealthCheck"), "Should have BB health check"));
+        assertAll(() -> assertTrue(names.contains("blue-button-client"), "Should have BB health check"));
+        assertAll(() -> assertTrue(names.contains("aggregation-engine"), "Should have Aggregation Engine health check"));
 
         // Everything should be true
         checks.runHealthChecks().forEach((key, value) -> assertTrue(value.isHealthy(), String.format("Healthcheck: %s is not ok.", key)));

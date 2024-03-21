@@ -150,7 +150,7 @@ public class EndpointResourceTest extends AbstractSecureApplicationTest {
 
         //Assert Org B can NOT get org A's endpoint
         IReadExecutable<Endpoint> readExecutable = orgBClient.read().resource(Endpoint.class).withId(orgAEndpoint.getId());
-        assertThrows(AuthenticationException.class, () -> readExecutable.execute(), "Expected auth error when accessing another org's endpoint");
+        assertThrows(AuthenticationException.class, readExecutable::execute, "Expected auth error when accessing another org's endpoint");
     }
 
     @Test
@@ -185,13 +185,13 @@ public class EndpointResourceTest extends AbstractSecureApplicationTest {
         //Assert Org B can NOT update org A's endpoint.
         orgAEndpoint.setName("Name updated by Org A");
         IUpdateExecutable iUpdateExecutable = orgBClient.update().resource(orgAEndpoint).withId(orgAEndpoint.getId());
-        assertThrows(AuthenticationException.class, () -> iUpdateExecutable.execute(), "Expected auth error when updating another org's endpoint.");
+        assertThrows(AuthenticationException.class, iUpdateExecutable::execute, "Expected auth error when updating another org's endpoint.");
 
         //Assert Org B can NOT update their endpoint to have org A's reference in managing organization
         orgBEndpoint.setPayloadType(List.of(createCodeableConcept()));
         orgBEndpoint.setManagingOrganization(new Reference(new IdType("Organization", orgAContext.getOrgId())));
         final IUpdateExecutable updateExecutable = orgBClient.update().resource(orgBEndpoint).withId(orgBEndpoint.getId());
-        assertThrows(UnprocessableEntityException.class, () -> updateExecutable.execute(), "Expected 422 error when updating the endpoints org's endpoint.");
+        assertThrows(UnprocessableEntityException.class, updateExecutable::execute, "Expected 422 error when updating the endpoints org's endpoint.");
     }
 
     private CodeableConcept createCodeableConcept (){
@@ -219,7 +219,7 @@ public class EndpointResourceTest extends AbstractSecureApplicationTest {
 
         //Assert Org A CAN NOT delete their last endpoint.
         IDeleteTyped deleteExecutable = orgAClient.delete().resourceById("Endpoint",new IdType(endpointIds[1]).getIdPart());
-        assertThrows(UnprocessableEntityException.class, () -> deleteExecutable.execute(), "Expected 422 when deleting the last endpoint");
+        assertThrows(UnprocessableEntityException.class, deleteExecutable::execute, "Expected 422 when deleting the last endpoint");
     }
 
     @Test
@@ -239,7 +239,7 @@ public class EndpointResourceTest extends AbstractSecureApplicationTest {
 
         //Assert Org B can NOT delete org A's endpoint.
         IDeleteTyped executableDelete = orgBClient.delete().resourceById("Endpoint",new IdType(orgAEndpoint.getId()).getIdPart());
-        assertThrows(AuthenticationException.class, () -> executableDelete.execute(), "Expected auth error when deleting another org's endpoint.");
+        assertThrows(AuthenticationException.class, executableDelete::execute, "Expected auth error when deleting another org's endpoint.");
 
         //Assert Org B CAN delete their own endpoint
         Set<String> availableEndpoints = getAvailableResources(orgBClient, Endpoint.class);

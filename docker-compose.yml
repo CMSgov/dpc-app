@@ -6,11 +6,15 @@ services:
     image: postgres:11
     command: postgres -c 'max_connections=250'
     environment:
-      - POSTGRES_MULTIPLE_DATABASES=dpc_attribution,dpc_queue,dpc_auth,dpc_consent,dpc-website_development,bcda
+      - POSTGRES_MULTIPLE_DATABASES=dpc_attribution,dpc_queue,dpc_auth,dpc_consent,dpc-website_development,bcda,dpc-portal_development
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=dpc-safe
     volumes:
+      # Mount database startup script, which automatically creates new databases
+      # based on the POSTGRES_MULTIPLE_DATABASES variable above.
       - ./docker/postgres:/docker-entrypoint-initdb.d
+      # Mount persistent volume to ensure data is not erased across containers.
+      - pgdata:/var/lib/postgresql/data
 
   aggregation:
     image: ${ECR_HOST:-755619740999.dkr.ecr.us-east-1.amazonaws.com/dpc-aggregation}:latest
@@ -22,6 +26,7 @@ services:
       - ENV=local
       - USE_BFD_MOCK=${USE_BFD_MOCK:-true}
       - JACOCO=${REPORT_COVERAGE}
+      - DEBUG_MODE=${DEBUG_MODE:-false}
     depends_on:
       - db
       - consent
@@ -36,6 +41,7 @@ services:
     environment:
       - ENV=local
       - JACOCO=${REPORT_COVERAGE}
+      - DEBUG_MODE=${DEBUG_MODE:-false}
     ports:
       - "3500:8080"
       - "9902:9900"
@@ -50,11 +56,12 @@ services:
     env_file:
       - ./ops/config/decrypted/local.env
     environment:
-      - attributionURL=http://attribution:8080/v1/
+      - ATTRIBUTION_URL=http://attribution:8080/v1/
       - ENV=local
       - JACOCO=${REPORT_COVERAGE}
-      - exportPath=/app/data
-      - JVM_FLAGS=-Ddpc.api.authenticationDisabled=${AUTH_DISABLED:-false}
+      - EXPORT_PATH=/app/data
+      - AUTH_DISABLED=${AUTH_DISABLED:-false}
+      - DEBUG_MODE=${DEBUG_MODE:-false}
     depends_on:
       - attribution
     volumes:
@@ -68,6 +75,7 @@ services:
     environment:
       - ENV=local
       - JACOCO=${REPORT_COVERAGE}
+      - DEBUG_MODE=${DEBUG_MODE:-false}
     ports:
       - "3600:3600"
       - "9004:9900"
@@ -107,10 +115,11 @@ services:
       - export-volume:/tmp
       - ./:/usr/src/mymaven
     working_dir: /usr/src/mymaven
-    command: sh -c "mvn test -Pintegration-tests -pl dpc-api -am -ntp"
+    command: sh -c "mvn test -Pintegration-tests -am -ntp"
     network_mode: host
 
 volumes:
+  pgdata:
   export-volume:
     driver: local
     driver_opts:

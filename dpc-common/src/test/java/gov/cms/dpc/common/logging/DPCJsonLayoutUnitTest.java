@@ -7,14 +7,18 @@ import com.google.common.collect.Maps;
 import io.dropwizard.logging.json.EventAttribute;
 import io.dropwizard.logging.json.layout.JsonFormatter;
 import io.dropwizard.logging.json.layout.TimestampFormatter;
-import org.mockito.Mock;
-import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.when;
 
 
@@ -39,13 +43,13 @@ public class DPCJsonLayoutUnitTest {
 
     @BeforeEach
     public void setup() {
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
         dpcJsonLayout = new DPCJsonLayout(jsonFormatter,
                 timestampFormatter,
                 throwableHandlingConverter,
                 Set.of(EventAttribute.MESSAGE),
-                new HashMap<String, String>(),
-                new HashMap<String, Object>(),
+                new HashMap<>(),
+                new HashMap<>(),
                 new HashSet<>(),
                 false
                 );

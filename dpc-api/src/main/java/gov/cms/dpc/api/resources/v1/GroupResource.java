@@ -15,6 +15,7 @@ import gov.cms.dpc.api.resources.AbstractGroupResource;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.common.annotations.APIV1;
 import gov.cms.dpc.common.annotations.NoHtml;
+import gov.cms.dpc.common.logging.SplunkTimestamp;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.FHIRExtractors;
@@ -22,7 +23,6 @@ import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.FHIRAsync;
 import gov.cms.dpc.fhir.annotations.Profiled;
 import gov.cms.dpc.fhir.annotations.ProvenanceHeader;
-import gov.cms.dpc.fhir.validations.profiles.AttestationProfile;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import io.dropwizard.auth.Auth;
@@ -43,7 +43,6 @@ import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.util.*;
 import java.util.stream.Collectors;
-import gov.cms.dpc.common.logging.SplunkTimestamp;
 
 import static gov.cms.dpc.api.APIHelpers.addOrganizationTag;
 import static gov.cms.dpc.fhir.FHIRMediaTypes.*;
@@ -90,7 +89,7 @@ public class GroupResource extends AbstractGroupResource {
     })
     @Override
     public Response createRoster(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
-                                 @ApiParam(hidden = true) @Valid @Profiled(profile = AttestationProfile.PROFILE_URI) @ProvenanceHeader Provenance rosterAttestation,
+                                 @ApiParam(hidden = true) @Valid @Profiled @ProvenanceHeader Provenance rosterAttestation,
                                  Group attributionRoster) {
         // Log attestation
         logAndVerifyAttestation(rosterAttestation, null, attributionRoster);
@@ -181,7 +180,7 @@ public class GroupResource extends AbstractGroupResource {
     })
     @Override
     public Group updateRoster(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal, @ApiParam(value = "Attribution Group ID") @PathParam("rosterID") UUID rosterID,
-                              @ApiParam(hidden = true) @Valid @Profiled(profile = AttestationProfile.PROFILE_URI) @ProvenanceHeader Provenance rosterAttestation,
+                              @ApiParam(hidden = true) @Valid @Profiled @ProvenanceHeader Provenance rosterAttestation,
                               Group rosterUpdate) {
 
         logAndVerifyAttestation(rosterAttestation, rosterID, rosterUpdate);
@@ -209,7 +208,7 @@ public class GroupResource extends AbstractGroupResource {
     @Override
     public Group addRosterMembers(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
                                   @ApiParam(value = "Attribution roster ID") @PathParam("rosterID") UUID rosterID,
-                                  @ApiParam(hidden = true) @Valid @Profiled(profile = AttestationProfile.PROFILE_URI) @ProvenanceHeader Provenance rosterAttestation,
+                                  @ApiParam(hidden = true) @Valid @Profiled @ProvenanceHeader Provenance rosterAttestation,
                                   Group groupUpdate) {
         logAndVerifyAttestation(rosterAttestation, rosterID, groupUpdate);
         addOrganizationTag(groupUpdate, organizationPrincipal.getID().toString());

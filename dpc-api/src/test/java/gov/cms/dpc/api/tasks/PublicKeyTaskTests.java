@@ -1,7 +1,6 @@
 package gov.cms.dpc.api.tasks;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableMultimap;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.entities.PublicKeyEntity;
 import gov.cms.dpc.api.models.CollectionResponse;
@@ -19,9 +18,7 @@ import org.mockito.Mockito;
 
 import javax.ws.rs.WebApplicationException;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -49,7 +46,7 @@ public class PublicKeyTaskTests {
 
     @Test
     void testKeyUploadNoOrg() throws Exception {
-        final ImmutableMultimap<String, String> map = ImmutableMultimap.of();
+        final Map<String, List<String>> map = Map.of();
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
             final WebApplicationException ex = assertThrows(WebApplicationException.class, () -> upk.execute(map, "", new PrintWriter(new OutputStreamWriter(bos))));
             assertEquals("Must have organization", ex.getMessage(), "Should have correct message");
@@ -59,7 +56,7 @@ public class PublicKeyTaskTests {
     @Test
     void testKeyUpload() throws Exception {
         final UUID id = UUID.randomUUID();
-        final ImmutableMultimap<String, String> map = ImmutableMultimap.of("organization", id.toString());
+        final Map<String, List<String>> map = Map.of("organization", List.of(id.toString()));
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
             upk.execute(map, "{\"key\":\"this is a key\",\"signature\":\"this is a signature\"}", new PrintWriter(new OutputStreamWriter(bos)));
             ArgumentCaptor<KeyResource.KeySignature> keySigArg = ArgumentCaptor.forClass(KeyResource.KeySignature.class);
@@ -74,7 +71,7 @@ public class PublicKeyTaskTests {
     @Test
     void testKeyUploadLabel() throws Exception {
         final UUID id = UUID.randomUUID();
-        final ImmutableMultimap<String, String> map = ImmutableMultimap.of("organization", id.toString(), "label", "this is a label");
+        final Map<String, List<String>> map = Map.of("organization", List.of(id.toString()), "label", List.of("this is a label"));
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
             upk.execute(map, "{\"key\":\"this is a key\",\"signature\":\"this is a signature\"}", new PrintWriter(new OutputStreamWriter(bos)));
             ArgumentCaptor<KeyResource.KeySignature> keySigArg = ArgumentCaptor.forClass(KeyResource.KeySignature.class);
@@ -97,7 +94,7 @@ public class PublicKeyTaskTests {
             return new CollectionResponse<PublicKeyEntity>(new ArrayList<>());
         });
 
-        final ImmutableMultimap<String, String> map = ImmutableMultimap.of("organization", id.toString());
+        final Map<String, List<String>> map = Map.of("organization", List.of(id.toString()));
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
             lpk.execute(map, new PrintWriter(new OutputStreamWriter(bos)));
 
@@ -108,7 +105,7 @@ public class PublicKeyTaskTests {
 
     @Test
     void testKeyListNoOrg() throws IOException {
-        final ImmutableMultimap<String, String> map = ImmutableMultimap.of();
+        final Map<String, List<String>> map = Map.of();
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
             final WebApplicationException ex = assertThrows(WebApplicationException.class, () -> lpk.execute(map, new PrintWriter(new OutputStreamWriter(bos))));
             assertEquals("Must have organization", ex.getMessage(), "Should have correct message");
@@ -117,7 +114,7 @@ public class PublicKeyTaskTests {
 
     @Test
     void testKeyDeletionNoOrg() throws IOException {
-        final ImmutableMultimap<String, String> map = ImmutableMultimap.of();
+        final Map<String, List<String>> map = Map.of();
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
             final WebApplicationException ex = assertThrows(WebApplicationException.class, () -> dpk.execute(map, new PrintWriter(new OutputStreamWriter(bos))));
             assertEquals("Must have organization", ex.getMessage(), "Should have correct message");
@@ -127,7 +124,7 @@ public class PublicKeyTaskTests {
     @Test
     void testKeyDeletionNoKey() throws IOException {
         final UUID id = UUID.randomUUID();
-        final ImmutableMultimap<String, String> map = ImmutableMultimap.of("organization", id.toString());
+        final Map<String, List<String>> map = Map.of("organization", List.of(id.toString()));
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
             final WebApplicationException ex = assertThrows(WebApplicationException.class, () -> dpk.execute(map, new PrintWriter(new OutputStreamWriter(bos))));
             assertEquals("Must have key", ex.getMessage(), "Should have correct message");
@@ -138,7 +135,7 @@ public class PublicKeyTaskTests {
     void testKeyDeletion() throws IOException {
         final UUID id = UUID.randomUUID();
         final UUID keyID = UUID.randomUUID();
-        final ImmutableMultimap<String, String> map = ImmutableMultimap.of("organization", id.toString(), "key", keyID.toString());
+        final Map<String, List<String>> map = Map.of("organization", List.of(id.toString()), "key", List.of(keyID.toString()));
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
             dpk.execute(map, new PrintWriter(new OutputStreamWriter(bos)));
             Mockito.verify(keyResource, Mockito.times(1)).deletePublicKey(Mockito.any(), Mockito.eq(keyID));

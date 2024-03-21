@@ -1,9 +1,10 @@
 {
 	"info": {
-		"_postman_id": "5f37b58d-b843-4110-a54d-ed39f9d52460",
+		"_postman_id": "fa460e5e-c6fa-4028-b873-52c3cf08e8ee",
 		"name": "EndToEndRequestTest",
 		"description": "This test is an example of an end to end set of API requests to submit a roster and export patient data. Each element in the 'item' list is a single request.",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "27475832"
 	},
 	"item": [
 		{
@@ -15,7 +16,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "d8fdc0a8-8995-49fb-99ef-ede01a59a9bb",
 								"exec": [
 									"// Status should be 201",
 									"pm.test(\"Status is 201\", function () {",
@@ -81,7 +81,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "babe61be-8f50-4537-b89b-ce1264e6116a",
 								"exec": [
 									"pm.test(\"Status is 201 Created\", function () {",
 									"    pm.expect(pm.response.code).equals(201);",
@@ -128,7 +127,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "9c0ae7d2-9bda-4fb0-941e-eb7672f29527",
 								"exec": [
 									"pm.test(\"Status is OK\", function () {",
 									"    pm.response.to.be.ok;",
@@ -172,7 +170,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "8da99989-edf5-454a-b652-41190250e54a",
 								"exec": [
 									"pm.test(\"Status is 201\", function () {",
 									"    pm.response.to.have.status(201);",
@@ -229,8 +226,7 @@
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "Roster tests",
@@ -241,7 +237,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "af3eadcb-8d41-42f4-8c35-5085f5f36107",
 								"exec": [
 									"// Status should be 200",
 									"pm.test(\"Status is 200\", function () {",
@@ -308,7 +303,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "2ba5d71e-9d01-49ad-a8da-b025559876ee",
 								"exec": [
 									"// Status should be 200",
 									"pm.test(\"Status is 200\", function () {",
@@ -377,7 +371,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "dbf32e16-501c-403b-9f10-20279261ec7e",
 								"exec": [
 									"// Status should be 201",
 									"pm.test(\"Status is 201\", function () {",
@@ -412,7 +405,6 @@
 						{
 							"listen": "prerequest",
 							"script": {
-								"id": "6bd6440e-6358-4cc0-be87-7b4efdde1229",
 								"exec": [
 									"var group = {",
 									"  \"resourceType\": \"Group\",",
@@ -535,7 +527,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "6e41af2f-41ae-4ab4-b9e4-f427ac77e138",
 								"exec": [
 									"// Status should be 200",
 									"pm.test(\"Status is 200\", function () {",
@@ -556,11 +547,11 @@
 									"",
 									"    pm.globals.set(\"single_patient_id\", \"Patient/\" + response.entry[0].resource.id);",
 									"})",
-                                    "pm.test(\"Result should have MBI as uppercase\", function() {",
-                                    "    var response = pm.response.json();",
-                                    "    var mbiIdentifier = response.entry[0].resource.identifier.filter(identifier => identifier.system == \"http://hl7.org/fhir/sid/us-mbi\")[0]",
-                                    "    pm.expect(mbiIdentifier.value).to.equal(\"1SQ3F00AA00\");",
-                                    "})"
+									"pm.test(\"Result should have MBI as uppercase\", function() {",
+									"    var response = pm.response.json();",
+									"    var mbiIdentifier = response.entry[0].resource.identifier.filter(identifier => identifier.system == \"http://hl7.org/fhir/sid/us-mbi\")[0]",
+									"    pm.expect(mbiIdentifier.value).to.equal(\"1SQ3F00AA00\");",
+									"})"
 								],
 								"type": "text/javascript"
 							}
@@ -570,7 +561,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://{{hostname}}:{{api_port}}/v1/Patient?identifier=1sQ3f00aa00",
+							"raw": "http://{{hostname}}:{{api_port}}/v1/Patient?identifier=1sQ3f00Aa00",
 							"protocol": "http",
 							"host": [
 								"{{hostname}}"
@@ -597,7 +588,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "23bda94f-2589-4dcf-a8b3-044166cbaf7d",
 								"exec": [
 									"// Status should be 200",
 									"pm.test(\"Status is 200\", function () {",
@@ -656,7 +646,6 @@
 						{
 							"listen": "prerequest",
 							"script": {
-								"id": "523fe412-b2e8-42c0-9313-cc273c0f2d78",
 								"exec": [
 									"var group = JSON.parse(pm.globals.get(\"attribution_group\"));",
 									"var patientID = pm.globals.get(\"single_patient_id\");",
@@ -679,7 +668,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "6e8e1f2e-1d04-4a0f-a22d-5fd6927f418d",
 								"exec": [
 									"// Status should be 200",
 									"pm.test(\"Status is 200\", function () {",
@@ -746,7 +734,6 @@
 						{
 							"listen": "prerequest",
 							"script": {
-								"id": "4699b19e-dca5-4d57-8a69-6b584fefd5e6",
 								"exec": [
 									"// Build the attestation header",
 									"var attestation = {",
@@ -787,7 +774,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "d4682837-eefc-4626-a39f-45c7cc077e70",
 								"exec": [
 									"// Status should be 400",
 									"pm.test(\"Status is 400\", function () {",
@@ -852,8 +838,7 @@
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "Bulk Export",
@@ -864,7 +849,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "61dbf88e-b949-4874-9d7f-05bd0e3e6b8b",
 								"exec": [
 									"// Status should be 202",
 									"pm.test(\"Status is 202\", function () {",
@@ -889,7 +873,6 @@
 						{
 							"listen": "prerequest",
 							"script": {
-								"id": "279ee4c2-d9ff-41c8-b268-ef16ca3f013f",
 								"exec": [
 									"console.log(\"Group:\", pm.environment.get(\"attribution_group\"));"
 								],
@@ -935,7 +918,6 @@
 						{
 							"listen": "prerequest",
 							"script": {
-								"id": "24d1aaf5-f6a5-489e-91e7-421d2f3fc168",
 								"exec": [
 									"// Wait between pings",
 									"setTimeout(function() {}, 1000);"
@@ -946,7 +928,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "e4840a33-8d36-4d7a-9af4-bb562b62f451",
 								"exec": [
 									"if (pm.response.code == 200) {",
 									"    // Response should have FHIR Content-Type",
@@ -1048,7 +1029,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "3a2dbd63-1fc3-4880-81f0-5f218fad957e",
 								"exec": [
 									"require('crypto-js')",
 									"",
@@ -1085,7 +1065,6 @@
 						{
 							"listen": "prerequest",
 							"script": {
-								"id": "58cd062d-719d-4a54-964a-4c971f464baf",
 								"exec": [
 									"pm.environment.set(\"patient_url\", pm.environment.get(\"patient\").url)"
 								],
@@ -1112,7 +1091,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "1ff19a39-1917-4d23-9fc0-1e80b624a267",
 								"exec": [
 									"// Response should have FHIR Content-Type",
 									"pm.test(\"Content-type is application/ndjson\", function() {",
@@ -1137,7 +1115,6 @@
 						{
 							"listen": "prerequest",
 							"script": {
-								"id": "28686923-a654-4d56-a3a1-e4e1830eec70",
 								"exec": [
 									"pm.environment.set(\"eob_url\", pm.environment.get(\"eob\").url)"
 								],
@@ -1164,7 +1141,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "7a7b2436-1612-405a-98ba-592d6c125da6",
 								"exec": [
 									"// Response should have FHIR Content-Type",
 									"pm.test(\"Content-type is application/ndjson\", function() {",
@@ -1198,7 +1174,6 @@
 						{
 							"listen": "prerequest",
 							"script": {
-								"id": "82a59df8-453e-4b12-9c53-e550917f7cfd",
 								"exec": [
 									"pm.environment.set(\"coverage_url\", pm.environment.get(\"coverage\").url)"
 								],
@@ -1225,7 +1200,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "25ec9c81-b59c-4524-adb0-05c5633b2033",
 								"exec": [
 									"// Response should have FHIR Content-Type",
 									"pm.test(\"Content-type is application/ndjson\", function() {",
@@ -1241,7 +1215,7 @@
 									"    pm.expect(operationOutcomeItem.resourceType).to.equal(\"OperationOutcome\");",
 									"    pm.expect(operationOutcomeItem.issue).to.have.lengthOf(1);",
 									"    var issue = operationOutcomeItem.issue[0];",
-									"    pm.expect(issue.details.text).to.equal(\"DPC couldn't find any claims for this MBI; unable to demonstrate relationship with provider or organization\");",
+									"    pm.expect(issue.details.text).to.equal(\"Unable to retrieve patient data due to internal error\");",
 									"    pm.expect(issue.location).to.include('0S80C00AA00');",
 									"});",
 									"",
@@ -1261,7 +1235,6 @@
 						{
 							"listen": "prerequest",
 							"script": {
-								"id": "694e2fcf-c720-4e1c-90f6-10783dd62dcc",
 								"exec": [
 									"pm.environment.set(\"operationOutcome_url\", pm.environment.get(\"operationOutcome\").url)"
 								],
@@ -1288,7 +1261,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "b66bb3d3-b465-40f1-a0fa-507816ff7619",
 								"exec": [
 									"// Response should have FHIR Content-Type",
 									"pm.test(\"Content-type is application/ndjson\", function() {",
@@ -1333,7 +1305,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "595d8c8f-6ae2-408d-a1eb-0001ac956230",
 								"exec": [
 									"// Response should be 304",
 									"pm.test('Response should be not-modified', function() {",
@@ -1376,7 +1347,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "a3294ca5-5c4b-4fa3-ab92-d41efa02544a",
 								"exec": [
 									"// Status should be 202",
 									"pm.test(\"Status is 202\", function () {",
@@ -1401,7 +1371,6 @@
 						{
 							"listen": "prerequest",
 							"script": {
-								"id": "5257c1e2-c5e5-4d41-8515-7d10fcc620a1",
 								"exec": [
 									"console.log(\"Group:\", pm.environment.get(\"attribution_group\"));",
 									"pm.environment.set(\"since_timestamp\", new Date().toISOString());"
@@ -1461,7 +1430,6 @@
 						{
 							"listen": "prerequest",
 							"script": {
-								"id": "fe048bde-8074-4ea0-9342-a4070239da67",
 								"exec": [
 									"// Wait between pings",
 									"setTimeout(function() {}, 1000);"
@@ -1472,7 +1440,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "5535235a-e239-48c2-b3b6-7339ef0662de",
 								"exec": [
 									"if (pm.response.code == 200) {",
 									"    // Response should have FHIR Content-Type",
@@ -1516,7 +1483,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "99ef66da-7460-4665-8ea2-8b9a1aa37a37",
 								"exec": [
 									"pm.test(\"Status code should be 200\", function () {",
 									"    pm.response.to.have.status(200);",
@@ -1540,7 +1506,6 @@
 						{
 							"listen": "prerequest",
 							"script": {
-								"id": "c08deedf-8b27-48b4-bc92-af78e031ccac",
 								"exec": [
 									""
 								],
@@ -1575,8 +1540,7 @@
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "Updating",
@@ -1587,7 +1551,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "b7dde0db-98b3-439e-91a7-e571952e2bd8",
 								"exec": [
 									"pm.test(\"Status is 415\", function () {",
 									"    pm.response.to.have.status(415);",
@@ -1640,7 +1603,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "3ae43670-a11e-4cac-9ebc-a8f1b39d3c04",
 								"exec": [
 									"pm.test(\"Status is OK\", function () {",
 									"    pm.response.to.be.ok;",
@@ -1697,7 +1659,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "2f4e8c5f-db7b-4525-b138-bd1ffa23e83a",
 								"exec": [
 									"pm.test(\"Status is OK\", function () {",
 									"    pm.response.to.be.ok;",
@@ -1752,7 +1713,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "4f043b01-671d-4778-9867-42cd5f0ac1c8",
 								"exec": [
 									"pm.test(\"Status is 422\", function () {",
 									"    pm.response.to.have.status(422);",
@@ -1803,7 +1763,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "e3bf1f3c-1426-4e9b-9d1e-c26ba2c54951",
 								"exec": [
 									"pm.test(\"Status is 200\", function () {",
 									"    pm.response.to.have.status(200);",
@@ -1859,8 +1818,7 @@
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "Deletion",
@@ -1871,7 +1829,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "51fbe1c8-6368-4756-9426-338d5054412f",
 								"exec": [
 									"// Status should be 200",
 									"pm.test(\"Status is 200\", function () {",
@@ -1948,7 +1905,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "0f1c1e51-dd2f-4132-bb79-78be81153ccc",
 								"exec": [
 									"// Status should be 200",
 									"pm.test(\"Status is 200\", function () {",
@@ -2008,7 +1964,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "4abbb99c-f712-46cd-bbc6-2fb7cf35d0db",
 								"exec": [
 									"// Status should be 200",
 									"pm.test(\"Status is 200\", function () {",
@@ -2044,7 +1999,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "64d427a6-f028-49de-a753-6c4de2a643e9",
 								"exec": [
 									"pm.test(\"Bundle should be empty\", function() {",
 									"    var response = pm.response.json();",
@@ -2089,7 +2043,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "723d3de9-12ef-49a0-8036-b31184d227b6",
 								"exec": [
 									"pm.test(\"Status is OK\", function () {",
 									"    pm.response.to.be.ok;",
@@ -2126,15 +2079,13 @@
 					"response": []
 				}
 			],
-			"description": "Test that we can remove various resource and that everything cleans up appropriately.",
-			"protocolProfileBehavior": {}
+			"description": "Test that we can remove various resource and that everything cleans up appropriately."
 		}
 	],
 	"event": [
 		{
 			"listen": "prerequest",
 			"script": {
-				"id": "bc44ce8b-485d-4072-9691-e17ad5417f7b",
 				"type": "text/javascript",
 				"exec": [
 					""
@@ -2144,7 +2095,6 @@
 		{
 			"listen": "test",
 			"script": {
-				"id": "60ad4542-25e7-4f05-95da-0ecbcde8a1aa",
 				"type": "text/javascript",
 				"exec": [
 					""
@@ -2154,35 +2104,29 @@
 	],
 	"variable": [
 		{
-			"id": "07881292-1de2-4918-86c0-5de1906dedb8",
 			"key": "PROVIDER_ID",
 			"value": "8D80925A-027E-43DD-8AED-9A501CC4CD91",
 			"type": "string"
 		},
 		{
-			"id": "7717ba57-46d8-486e-a5d7-da8237c900a2",
 			"key": "hostname",
 			"value": "localhost",
 			"type": "string"
 		},
 		{
-			"id": "beeb67a8-91ae-4b41-8ef6-6fb16399eee5",
 			"key": "api_port",
 			"value": "3002",
 			"type": "string"
 		},
 		{
-			"id": "770b174b-c2c4-439b-babf-d9ec7155dbdb",
 			"key": "attribution_port",
 			"value": "3500",
 			"type": "string"
 		},
 		{
-			"id": "6ef027ab-07ee-4c2a-8c8a-45d4ff6540d3",
 			"key": "consent_port",
 			"value": "3600",
 			"type": "string"
 		}
-	],
-	"protocolProfileBehavior": {}
+	]
 }

@@ -7,12 +7,10 @@ import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.google.inject.name.Named;
-import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
-import com.typesafe.config.Config;
 import gov.cms.dpc.aggregation.engine.AggregationEngine;
 import gov.cms.dpc.aggregation.engine.JobBatchProcessor;
-import gov.cms.dpc.aggregation.engine.JobBatchProcessorV2;
 import gov.cms.dpc.aggregation.engine.OperationsConfig;
+import gov.cms.dpc.aggregation.health.AggregationEngineHealthCheck;
 import gov.cms.dpc.aggregation.service.*;
 import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.common.annotations.JobTimeout;
@@ -21,6 +19,7 @@ import gov.cms.dpc.fhir.hapi.ContextUtils;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.vyarus.dropwizard.guice.module.support.DropwizardAwareModule;
 
 import javax.inject.Singleton;
 
@@ -34,17 +33,18 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
     }
 
     @Override
-    public void configure(Binder binder) {
+    public void configure() {
+        Binder binder = binder();
         binder.bind(AggregationEngine.class);
         binder.bind(AggregationManager.class).asEagerSingleton();
         binder.bind(JobBatchProcessor.class);
-        binder.bind(JobBatchProcessorV2.class);
+        binder.bind(AggregationEngineHealthCheck.class);
 
         // Healthchecks
         // Additional health-checks can be added here
-        // By default, Dropwizard adds a check for Hibernate and each additonal database (e.g. auth, queue, etc)
+        // By default, Dropwizard adds a check for Hibernate and each additional database (e.g. auth, queue, etc)
         // We also have JobQueueHealthy which ensures the queue is operation correctly
-        // We have the BlueButton Client healthcheck as well
+        // We have the BlueButton Client healthcheck as well, which adds itself based on configuration
     }
 
     @Provides
@@ -71,23 +71,18 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
     @Provides
     @Singleton
     MetricRegistry provideMetricRegistry() {
-        return getEnvironment().metrics();
-    }
-
-    @Provides
-    public Config provideConfig() {
-        return getConfiguration().getConfig();
+        return environment().metrics();
     }
 
     @Provides
     @ExportPath
     public String provideExportPath() {
-        return getConfiguration().getExportPath();
+        return configuration().getExportPath();
     }
 
     @Provides
     OperationsConfig provideOperationsConfig() {
-        final var config = getConfiguration();
+        final var config = configuration();
 
         return new OperationsConfig(
                 config.getResourcesPerFileCount(),
@@ -103,7 +98,7 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
     @Provides
     @JobTimeout
     public int provideJobTimeoutInSeconds() {
-        return getConfiguration().getJobTimeoutInSeconds();
+        return configuration().getJobTimeoutInSeconds();
     }
 
     @Provides
@@ -119,10 +114,10 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
     @Singleton
     @Named("consentClient")
     public IGenericClient provideConsentClient(FhirContext ctx) {
-        logger.info("Connecting to consent server at {}.", getConfiguration().getConsentServiceUrl());
+        String serviceUrl = configuration().getConsentServiceUrl();
+        logger.info("Connecting to consent server at {}.", serviceUrl);
         ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
-        IGenericClient client = ctx.newRestfulGenericClient(getConfiguration().getConsentServiceUrl());
-        return client;
+        return ctx.newRestfulGenericClient(serviceUrl);
     }
 
     @Provides

@@ -30,7 +30,6 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.assertj.core.util.Lists;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Endpoint;
@@ -47,6 +46,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
+import java.util.Collections;
 import java.util.UUID;
 
 import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
@@ -228,11 +228,12 @@ class OrganizationResourceTest extends AbstractSecureApplicationTest {
         assertNotNull(organization);
 
         organization.setName("New Org Name");
-        organization.setContact(Lists.emptyList());
+        organization.setContact(Collections.emptyList());
 
         MethodOutcome outcome = client
                 .update()
                 .resource(organization)
+                .withId(orgID)
                 .execute();
 
         Organization result = (Organization) outcome.getResource();

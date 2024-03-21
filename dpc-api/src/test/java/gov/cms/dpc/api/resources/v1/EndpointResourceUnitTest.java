@@ -107,7 +107,7 @@ public class EndpointResourceUnitTest {
     @Test
     public void testFetchEndpoint() {
         Endpoint endPoint = mock(Endpoint.class);
-        IReadExecutable iReadExecutable = mock(IReadExecutable.class);
+        IReadExecutable<Endpoint> iReadExecutable = mock(IReadExecutable.class);
 
         when(attributionClient.read()
                 .resource(Endpoint.class)

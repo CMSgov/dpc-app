@@ -2,25 +2,14 @@ package gov.cms.dpc.api.resources.v1;
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.gclient.ICreateTyped;
-import ca.uhn.fhir.rest.gclient.IDeleteTyped;
-import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
-import ca.uhn.fhir.rest.gclient.IQuery;
-import ca.uhn.fhir.rest.gclient.IReadExecutable;
+import ca.uhn.fhir.rest.gclient.*;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationOptions;
 import ca.uhn.fhir.validation.ValidationResult;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
-
-import org.apache.commons.lang.NotImplementedException;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.Organization;
-import org.hl7.fhir.dstu3.model.Parameters;
-import org.hl7.fhir.dstu3.model.Practitioner;
-import org.hl7.fhir.dstu3.model.Resource;
+import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,17 +20,10 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import javax.ws.rs.core.Response;
+import java.util.*;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class PractitionerResourceUnitTest {
 
@@ -81,7 +63,7 @@ public class PractitionerResourceUnitTest {
         Mockito.when(mockQuery.whereMap(searchParams)).thenReturn(mockQuery);
 
         Bundle actualResponse = practitionerResource.practitionerSearch(organizationPrincipal, providerNPI);
-        
+
         assertEquals(bundle, actualResponse);
     }
 
@@ -145,7 +127,7 @@ public class PractitionerResourceUnitTest {
             .encodedJson()
         ).thenReturn(practitionerBundle);
         Mockito.when(practitionerBundle.execute()).thenReturn(bundle);
-        
+
         Bundle actualResponse = practitionerResource.bulkSubmitProviders(organizationPrincipal, params);
 
         assertEquals(bundle, actualResponse);
@@ -187,7 +169,7 @@ public class PractitionerResourceUnitTest {
         ).thenReturn(validationResult);
 
         IBaseOperationOutcome actualResponse = practitionerResource.validateProvider(organizationPrincipal, params);
-        
+
         assertNotNull(actualResponse);
     }
 }

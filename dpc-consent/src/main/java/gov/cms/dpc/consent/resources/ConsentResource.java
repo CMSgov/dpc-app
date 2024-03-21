@@ -2,6 +2,7 @@ package gov.cms.dpc.consent.resources;
 
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
+import com.google.common.base.Splitter;
 import com.google.inject.name.Named;
 import gov.cms.dpc.common.consent.entities.ConsentEntity;
 import gov.cms.dpc.consent.jdbi.ConsentDAO;
@@ -22,6 +23,7 @@ import org.hl7.fhir.dstu3.model.Identifier;
 import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -66,31 +68,26 @@ public class ConsentResource {
             @ApiParam(value = "Consent resource identifier") @QueryParam(Consent.SP_IDENTIFIER) Optional<UUID> identifier,
             @ApiParam(value = "Patient Identifier") @QueryParam(Consent.SP_PATIENT) Optional<String> patientId) {
 
-        final List<ConsentEntity> entities;
+        List<ConsentEntity> entities = new ArrayList<>();
 
         // Priority order for processing params. If multiple params are passed, we only pay attention to one
         if (id.isPresent()) {
-
             final Optional<ConsentEntity> consentEntity = this.dao.getConsent(id.get());
-            entities = consentEntity.map(List::of).orElseGet(() -> List.of(ConsentEntity.defaultConsentEntity(id, Optional.empty(), Optional.empty())));
+            entities = consentEntity.map(List::of).orElse(entities);
 
         } else if (identifier.isPresent()) {
             // not sure we should support this
             final Optional<ConsentEntity> consentEntity = this.dao.getConsent(identifier.get());
-            entities = consentEntity.map(List::of).orElseGet(() -> List.of(ConsentEntity.defaultConsentEntity(id, Optional.empty(), Optional.empty())));
+            entities = consentEntity.map(List::of).orElse(entities);
 
         } else if (patientId.isPresent()) {
-
-            final Identifier patientIdentifier = FHIRExtractors.parseIDFromQueryParam(patientId.get());
-            entities = getEntitiesByPatient(patientIdentifier);
+            for (String pId : Splitter.on(',').split(patientId.get())) {
+                final Identifier patientIdentifier = FHIRExtractors.parseIDFromQueryParam(pId);
+                entities.addAll(getEntitiesByPatient(patientIdentifier));
+            }
 
         } else {
-
             throw new WebApplicationException("Must have some form of Consent Resource ID or Patient ID", Response.Status.BAD_REQUEST);
-        }
-
-        if (entities.isEmpty()) {
-            throw new WebApplicationException("Cannot find patient with given ID", Response.Status.NOT_FOUND);
         }
 
         return entities
@@ -132,31 +129,21 @@ public class ConsentResource {
     }
 
     private List<ConsentEntity> getEntitiesByPatient(Identifier patientIdentifier) {
-        List<ConsentEntity> entities;
-        Optional<String> hicnValue = Optional.empty();
-        Optional<String> mbiValue = Optional.empty();
         String field;
 
         // we have been asked to search for a patient id defined by one among two (soon three!) coding systems
         // we need to determine which database field that system's value is stored in
         switch (DPCIdentifierSystem.fromString(patientIdentifier.getSystem())) {
             case MBI:
-                mbiValue = Optional.of(patientIdentifier.getValue());
                 field = "mbi";
                 break;
             case HICN:
-                hicnValue = Optional.of(patientIdentifier.getValue());
                 field = "hicn";
                 break;
             default:
                 throw new WebApplicationException("Unknown Patient ID code system", Response.Status.BAD_REQUEST);
         }
 
-        entities = this.dao.findBy(field, patientIdentifier.getValue());
-
-        if (entities.isEmpty()) {
-            entities = List.of(ConsentEntity.defaultConsentEntity(Optional.empty(), hicnValue, mbiValue));
-        }
-        return entities;
+        return this.dao.findBy(field, patientIdentifier.getValue());
     }
 }

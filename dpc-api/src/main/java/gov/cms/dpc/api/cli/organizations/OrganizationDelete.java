@@ -2,14 +2,14 @@ package gov.cms.dpc.api.cli.organizations;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import gov.cms.dpc.api.cli.AbstractAttributionCommand;
-import io.dropwizard.setup.Bootstrap;
+import io.dropwizard.core.setup.Bootstrap;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
 import org.hl7.fhir.dstu3.model.IdType;
 
 public class OrganizationDelete extends AbstractAttributionCommand {
 
-    OrganizationDelete() {
+    public OrganizationDelete() {
         super("delete", "Delete registered organization");
     }
 

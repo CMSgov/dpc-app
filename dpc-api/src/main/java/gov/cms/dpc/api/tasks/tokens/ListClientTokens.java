@@ -1,7 +1,6 @@
 package gov.cms.dpc.api.tasks.tokens;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableMultimap;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.entities.TokenEntity;
 import gov.cms.dpc.api.models.CollectionResponse;
@@ -12,6 +11,8 @@ import org.hl7.fhir.dstu3.model.Organization;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.PrintWriter;
+import java.util.List;
+import java.util.Map;
 
 import static gov.cms.dpc.api.tasks.TasksCommon.extractOrganization;
 
@@ -34,7 +35,7 @@ public class ListClientTokens extends Task {
     }
 
     @Override
-    public void execute(ImmutableMultimap<String, String> parameters, PrintWriter output) throws Exception {
+    public void execute(Map<String, List<String>> parameters, PrintWriter output) throws Exception {
         final Organization organization = extractOrganization(parameters);
 
         final CollectionResponse<TokenEntity> organizationTokens = this.resource.getOrganizationTokens(

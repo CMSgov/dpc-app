@@ -12,6 +12,9 @@ import java.lang.annotation.Target;
 import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
+/**
+ * Any resource using @Profiled must have a corresponding profile URI in resourceProfileMap in {@link ProfileValidator}
+ */
 @Target({FIELD, METHOD, PARAMETER, ANNOTATION_TYPE, TYPE_USE})
 @Retention(RUNTIME)
 @Constraint(validatedBy = ProfileValidator.class)
@@ -25,8 +28,6 @@ public @interface Profiled {
     Class<?>[] groups() default {};
 
     Class<? extends Payload>[] payload() default {};
-
-    String profile();
 
     @Target({FIELD, METHOD, PARAMETER, ANNOTATION_TYPE})
     @Retention(RUNTIME)

@@ -64,11 +64,9 @@ class BlueButtonClientV2Test {
 
     private static BlueButtonClientV2 bbc;
     private static ClientAndServer mockServer;
-    private static Config conf;
 
     @BeforeAll
     static void setupBlueButtonClient() throws IOException {
-        conf = getTestConfig();
         final Injector injector = Guice.createInjector(Stage.DEVELOPMENT, new TestModule(), new BlueButtonClientModule<>(getClientConfig()));
         bbc = injector.getInstance(BlueButtonClientV2.class);
 
@@ -123,8 +121,8 @@ class BlueButtonClientV2Test {
 
         createMockServerExpectation(
             "/v2/fhir/ExplanationOfBenefit",
-            HttpStatus.OK_200, 
-            getRawXML(SAMPLE_EOB_PATH_PREFIX + TEST_SINGLE_EOB_PATIENT_ID + ".xml"), 
+            HttpStatus.OK_200,
+            getRawXML(SAMPLE_EOB_PATH_PREFIX + TEST_SINGLE_EOB_PATIENT_ID + ".xml"),
             List.of(
                     Parameter.param("patient", TEST_SINGLE_EOB_PATIENT_ID),
                     Parameter.param("excludeSAMHSA", "true"),

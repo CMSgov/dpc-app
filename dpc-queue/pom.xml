@@ -18,8 +18,8 @@
             <artifactId>dropwizard-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.hubspot.dropwizard</groupId>
-            <artifactId>dropwizard-guicier</artifactId>
+            <groupId>ru.vyarus</groupId>
+            <artifactId>dropwizard-guicey</artifactId>
         </dependency>
         <dependency>
             <groupId>gov.cms.dpc</groupId>
@@ -35,7 +35,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>30.1.1-jre</version>
+            <version>32.0.0-jre</version>
         </dependency>
         <dependency>
             <groupId>com.google.inject</groupId>
@@ -59,6 +59,10 @@
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-core</artifactId>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax.persistence</groupId>
+            <artifactId>javax.persistence-api</artifactId>
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
@@ -87,7 +91,7 @@
                         <annotationProcessorPath>
                             <groupId>org.hibernate</groupId>
                             <artifactId>hibernate-jpamodelgen</artifactId>
-                            <version>5.4.2.Final</version>
+                            <version>5.6.15.Final</version>
                         </annotationProcessorPath>
                         <path>
                             <groupId>javax.xml.bind</groupId>

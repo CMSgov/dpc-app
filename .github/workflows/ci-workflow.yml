@@ -1,11 +1,15 @@
 name: "DPC CI Workflow"
 
-on: [push]
+on:
+  pull_request:
+    paths-ignore:
+      - .github/workflows/opt-out-*
+      - lambda/**
+  workflow_dispatch: # Allow manual trigger
 
 env:
   VAULT_PW: ${{ secrets.VAULT_PW }}
   REPORT_COVERAGE: true
-  CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
   DPC_CA_CERT: ${{ secrets.DPC_CA_CERT }}
   ENV: "github-ci"
 
@@ -40,7 +44,7 @@ jobs:
       - name: "DPC Web Build"
         run: |
           make ci-web-portal
-  
+
   build-dpc-admin:
     name: "Build and Test DPC Admin Portal"
     runs-on: ubuntu-latest
@@ -50,3 +54,13 @@ jobs:
       - name: "DPC Admin Portal Build"
         run: |
           make ci-admin-portal
+
+  build-dpc-portal:
+    name: "Build and Test DPC Portal"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@v1
+      - name: "DPC Portal Build"
+        run: |
+          make ci-portal

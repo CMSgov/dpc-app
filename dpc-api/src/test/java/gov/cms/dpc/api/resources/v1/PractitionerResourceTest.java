@@ -40,10 +40,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class PractitionerResourceTest extends AbstractSecureApplicationTest {
 
-    PractitionerResourceTest() {
-        // Not used
-    }
-
     @Test
     void ensurePractitionersExist() throws IOException, URISyntaxException, GeneralSecurityException {
         final IParser parser = ctx.newJsonParser();

@@ -1,28 +1,23 @@
 package gov.cms.dpc.consent;
 
-import ca.mestevens.java.configuration.TypesafeConfiguration;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import gov.cms.dpc.common.hibernate.consent.IDPCConsentDatabase;
 import gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration;
 import gov.cms.dpc.fhir.configuration.IDPCFHIRConfiguration;
+import io.dropwizard.core.Configuration;
 import io.dropwizard.db.DataSourceFactory;
-import org.hibernate.validator.constraints.NotEmpty;
-import org.knowm.dropwizard.sundial.SundialConfiguration;
+import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
-public class DPCConsentConfiguration extends TypesafeConfiguration implements IDPCConsentDatabase, IDPCFHIRConfiguration {
+public class DPCConsentConfiguration extends Configuration implements IDPCConsentDatabase, IDPCFHIRConfiguration {
 
     @Valid
     @NotNull
     @JsonProperty("consentdb")
     private DataSourceFactory consentDatabase = new DataSourceFactory();
-
-    @Valid
-    @NotNull
-    @JsonProperty("sundial")
-    private SundialConfiguration sundial = new SundialConfiguration();
 
     @NotEmpty
     private String suppressionFileDir;
@@ -32,16 +27,15 @@ public class DPCConsentConfiguration extends TypesafeConfiguration implements ID
     @JsonProperty("fhir")
     private DPCFHIRConfiguration fhirConfig;
 
+    @JsonProperty("swagger")
+    private SwaggerBundleConfiguration swaggerBundleConfiguration;
+
     @NotEmpty
     private String fhirReferenceURL;
 
     @Override
     public DataSourceFactory getConsentDatabase() {
         return consentDatabase;
-    }
-
-    public SundialConfiguration getSundial() {
-        return sundial;
     }
 
     public String getSuppressionFileDir() { return suppressionFileDir; }
@@ -56,6 +50,14 @@ public class DPCConsentConfiguration extends TypesafeConfiguration implements ID
     @Override
     public void setFHIRConfiguration(DPCFHIRConfiguration fhirConfig) {
         this.fhirConfig = fhirConfig;
+    }
+
+    public SwaggerBundleConfiguration getSwaggerBundleConfiguration() {
+        return swaggerBundleConfiguration;
+    }
+
+    public void setSwaggerBundleConfiguration(SwaggerBundleConfiguration swaggerBundleConfiguration) {
+        this.swaggerBundleConfiguration = swaggerBundleConfiguration;
     }
 
     public String getFhirReferenceURL() {

@@ -22,7 +22,8 @@ import io.dropwizard.auth.AuthValueFactoryProvider;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
 import org.eclipse.jetty.http.HttpStatus;
-import org.glassfish.jersey.server.spi.internal.ValueFactoryProvider;
+import org.glassfish.jersey.server.ContainerRequest;
+import org.glassfish.jersey.server.spi.internal.ValueParamProvider;
 import org.glassfish.jersey.test.grizzly.GrizzlyWebTestContainerFactory;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -38,6 +39,7 @@ import java.time.OffsetDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Function;
 
 import static gov.cms.dpc.fhir.FHIRHeaders.PREFER_HEADER;
 import static gov.cms.dpc.fhir.FHIRHeaders.PREFER_RESPOND_ASYNC;
@@ -46,7 +48,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 /**
- * Verifies the a user can successfully submit a data export job
+ * Verifies that a user can successfully submit a data export job
  */
 @ExtendWith(DropwizardExtensionsSupport.class)
 @ExtendWith(BufferedLoggerHandler.class)
@@ -294,8 +296,8 @@ class FHIRSubmissionTest {
 
     @SuppressWarnings("unchecked")
     private static void mockFactory() {
-        Mockito.when(factory.getPriority()).thenReturn(ValueFactoryProvider.Priority.NORMAL);
-        final org.glassfish.hk2.api.Factory f = mock(org.glassfish.hk2.api.Factory.class);
-        Mockito.when(factory.getValueFactory(Mockito.any())).thenReturn(f);
+        Mockito.when(factory.getPriority()).thenReturn(ValueParamProvider.Priority.NORMAL);
+        final Function<ContainerRequest, Provenance> func = mock(Function.class);
+        Mockito.when(factory.getValueProvider(Mockito.any())).thenReturn(func);
     }
 }

@@ -3,11 +3,11 @@ package gov.cms.dpc.api.auth.jwt;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.github.nitram509.jmacaroons.MacaroonVersion;
-import com.github.nitram509.jmacaroons.MacaroonsBuilder;
 import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.auth.DPCAuthDynamicFeature;
 import gov.cms.dpc.api.auth.DPCAuthFactory;
 import gov.cms.dpc.api.auth.DPCUnauthorizedHandler;
+import gov.cms.dpc.api.auth.MacaroonHelpers;
 import gov.cms.dpc.api.auth.macaroonauth.MacaroonsAuthenticator;
 import gov.cms.dpc.api.entities.PublicKeyEntity;
 import gov.cms.dpc.api.jdbi.PublicKeyDAO;
@@ -15,6 +15,8 @@ import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.api.resources.v1.TokenResource;
 import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.DPCValidationErrorMessage;
 import gov.cms.dpc.macaroons.MacaroonBakery;
+import gov.cms.dpc.macaroons.MacaroonCaveat;
+import gov.cms.dpc.macaroons.MacaroonCondition;
 import gov.cms.dpc.macaroons.config.TokenPolicy;
 import gov.cms.dpc.macaroons.store.MemoryRootKeyStore;
 import gov.cms.dpc.macaroons.thirdparty.MemoryThirdPartyKeyStore;
@@ -337,11 +339,13 @@ class JWTUnitTests {
         void testJTIReplay(KeyType keyType) throws NoSuchAlgorithmException {
             final Pair<String, PrivateKey> keyPair = generateKeypair(keyType);
 
+            String macaroon = buildMacaroon();
+
             final String jwt = Jwts.builder()
                     .setHeaderParam("kid", keyPair.getLeft())
                     .setAudience(String.format("%sToken/auth", "localhost:3002/v1/"))
-                    .setIssuer("macaroon")
-                    .setSubject("macaroon")
+                    .setIssuer(macaroon)
+                    .setSubject(macaroon)
                     .setId(UUID.randomUUID().toString())
                     .setExpiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
                     .signWith(keyPair.getRight(), APIAuthHelpers.getSigningAlgorithm(keyType))
@@ -356,8 +360,7 @@ class JWTUnitTests {
                     .request()
                     .post(Entity.entity("", MediaType.APPLICATION_FORM_URLENCODED));
 
-            // Since we're not using valid Macaroons for testing, we should get a 500 error, which means we made it past the JWT stage
-            assertEquals(HttpStatus.INTERNAL_SERVER_ERROR_500, response.getStatus(), "Should have invalid Macaroon");
+            assertEquals(HttpStatus.OK_200, response.getStatus(), "Should get a good status on first request");
 
             // Try to submit again
             Response r2 = RESOURCE.target("/v1/Token/auth")
@@ -797,8 +800,15 @@ class JWTUnitTests {
     }
 
     private static String buildMacaroon() {
-        return MacaroonsBuilder.create("http://local", "secret, secret", "id-one")
+        MacaroonBakery bakery = buildBakery();
+
+        MacaroonCondition orgCondition = new MacaroonCondition(
+                MacaroonHelpers.ORGANIZATION_CAVEAT_KEY,
+                MacaroonCondition.Operator.EQ,
+                UUID.randomUUID().toString());
+        MacaroonCaveat orgCaveat = new MacaroonCaveat(orgCondition);
+
+        return bakery.createMacaroon(List.of(orgCaveat))
                 .serialize(MacaroonVersion.SerializationVersion.V2_JSON);
     }
-
 }

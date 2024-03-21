@@ -1,0 +1,21 @@
+AllCops:
+  NewCops: enable
+  TargetRubyVersion: 3.3
+  Exclude:
+    - "app/jobs/application_job.rb"
+    - "app/mailers/application_mailer.rb"
+    - "app/models/application_record.rb"
+    - "bin/**/*"
+    - "config/**/*"
+    - "config.ru"
+    - "db/**/*"
+    - "node_modules/**/*"
+    - "vendor/**/*"
+
+# Prevent long test blocks from being flagged by rubocop
+Metrics/BlockLength:
+  Exclude:
+    - "spec/**/*"
+
+Metrics/MethodLength:
+  Max: 20

@@ -7,12 +7,11 @@ import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.google.inject.name.Named;
-import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
-import com.typesafe.config.Config;
 import gov.cms.dpc.api.auth.jwt.IJTICache;
 import gov.cms.dpc.api.converters.ChecksumConverterProvider;
 import gov.cms.dpc.api.converters.HttpRangeHeaderParamConverterProvider;
 import gov.cms.dpc.api.core.FileManager;
+import gov.cms.dpc.api.jdbi.IpAddressDAO;
 import gov.cms.dpc.api.jdbi.PublicKeyDAO;
 import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.api.resources.v1.*;
@@ -40,6 +39,7 @@ import io.jsonwebtoken.SigningKeyResolverAdapter;
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.vyarus.dropwizard.guice.module.support.DropwizardAwareModule;
 
 import javax.inject.Singleton;
 
@@ -54,7 +54,8 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
     }
 
     @Override
-    public void configure(Binder binder) {
+    public void configure() {
+        Binder binder = binder();
         // V1 Resources
         binder.bind(BaseResource.class);
         binder.bind(DataResource.class);
@@ -68,6 +69,7 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
         // DAO
         binder.bind(PublicKeyDAO.class);
         binder.bind(TokenDAO.class);
+        binder.bind(IpAddressDAO.class);
 
         // Tasks
         binder.bind(GenerateClientTokens.class);
@@ -110,9 +112,15 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
                                 String.class},
                         new Object[]{dao,
                                 bakery,
-                                this.getConfiguration().getTokenPolicy(),
+                                this.configuration().getTokenPolicy(),
                                 resolver,
                                 cache, publicURL});
+    }
+
+    @Provides
+    public IpAddressResource provideIpAddressResource(IpAddressDAO dao) {
+        return new UnitOfWorkAwareProxyFactory(authHibernateBundle)
+            .create(IpAddressResource.class, new Class<?>[]{IpAddressDAO.class}, new Object[]{dao});
     }
 
     @Provides
@@ -128,30 +136,25 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
     @Provides
     @Singleton
     public MetricRegistry provideMetricRegistry() {
-        return getEnvironment().metrics();
-    }
-
-    @Provides
-    public Config provideConfig() {
-        return getConfiguration().getConfig();
+        return environment().metrics();
     }
 
     @Provides
     @ExportPath
     public String provideExportPath() {
-        return getConfiguration().getExportPath();
+        return configuration().getExportPath();
     }
 
     @Provides
     @ServiceBaseURL
     public String provideBaseURL() {
-        return getConfiguration().getPublicURL();
+        return configuration().getPublicURL();
     }
 
     @Provides
     @APIV1
     public String provideV1URL() {
-        return getConfiguration().getPublicURL() + "/v1";
+        return configuration().getPublicURL() + "/v1";
     }
 
     @Provides
@@ -168,7 +171,7 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
 
     @Provides
     TokenPolicy providePolicy() {
-        return getConfiguration().getTokenPolicy();
+        return configuration().getTokenPolicy();
     }
 
     @Provides
@@ -182,9 +185,10 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
     @Singleton
     @Named("attribution")
     public IGenericClient provideFHIRClient(FhirContext ctx) {
-        logger.info("Connecting to attribution server at {}.", getConfiguration().getAttributionURL());
+        String attributionUrl = configuration().getAttributionURL();
+        logger.info("Connecting to attribution server at {}.", attributionUrl);
         ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
-        IGenericClient client = ctx.newRestfulGenericClient(getConfiguration().getAttributionURL());
+        IGenericClient client = ctx.newRestfulGenericClient(attributionUrl);
         client.registerInterceptor(new RequestIdHeaderInterceptor());
         return client;
     }
@@ -192,6 +196,6 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
     @Provides
     @JobTimeout
     public int provideJobTimeoutInSeconds() {
-        return getConfiguration().getJobTimeoutInSeconds();
+        return configuration().getJobTimeoutInSeconds();
     }
 }

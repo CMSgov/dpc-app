@@ -1,6 +1,5 @@
 package gov.cms.dpc.attribution.tasks;
 
-import com.google.common.collect.ImmutableMultimap;
 import gov.cms.dpc.attribution.DPCAttributionConfiguration;
 import gov.cms.dpc.attribution.utils.DBUtils;
 import io.dropwizard.db.ManagedDataSource;
@@ -15,6 +14,8 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.PrintWriter;
 import java.sql.Connection;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Admin task for truncating tables in the attribution database
@@ -33,7 +34,7 @@ public class TruncateDatabase extends Task {
 
 
     @Override
-    public void execute(ImmutableMultimap<String, String> immutableMultimap, PrintWriter printWriter) throws Exception {
+    public void execute(Map<String, List<String>> map, PrintWriter printWriter) throws Exception {
 
         // Get the db factory
         final PooledDataSourceFactory dataSourceFactory = configuration.getDatabase();

@@ -3,6 +3,7 @@ package gov.cms.dpc.api.resources.v1;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import com.github.nitram509.jmacaroons.Macaroon;
+import gov.cms.dpc.api.auth.MacaroonHelpers;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.Authorizer;
 import gov.cms.dpc.api.auth.annotations.Public;
@@ -28,7 +29,6 @@ import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.SecurityException;
 import io.swagger.annotations.*;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.validator.constraints.NotEmpty;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +37,7 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.persistence.NoResultException;
 import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -204,13 +205,13 @@ public class TokenResource extends AbstractTokenResource {
     @Override
     public JWTAuthResponse authorizeJWT(
             @ApiParam(name = "scope", allowableValues = "system/*.*", value = "Requested access scope", required = true)
-            @FormParam(value = "scope") @NoHtml @NotEmpty(message = "Scope is required") String scope,
+            @FormParam(value = "scope") String scope,
             @ApiParam(name = "grant_type", value = "Authorization grant type", required = true, allowableValues = "client_credentials")
-            @FormParam(value = "grant_type") @NoHtml @NotEmpty(message = "Grant type is required") String grantType,
+            @FormParam(value = "grant_type") String grantType,
             @ApiParam(name = "client_assertion_type", value = "Client Assertion Type", required = true, allowableValues = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer")
-            @FormParam(value = "client_assertion_type") @NoHtml @NotEmpty(message = "Assertion type is required") String clientAssertionType,
+            @FormParam(value = "client_assertion_type") String clientAssertionType,
             @ApiParam(name = "client_assertion", value = "Signed JWT", required = true)
-            @FormParam(value = "client_assertion") @NoHtml @NotEmpty(message = "Assertion is required") String jwtBody) {
+            @FormParam(value = "client_assertion") String jwtBody) {
         // Actual scope implementation will come as part of DPC-747
         validateJWTQueryParams(grantType, clientAssertionType, scope, jwtBody);
 
@@ -281,14 +282,19 @@ public class TokenResource extends AbstractTokenResource {
                 .build()
                 .parseClaimsJws(jwtBody);
 
-        // Determine if claims are present and valid
-        // Required claims are specified here: http://hl7.org/fhir/us/bulkdata/2019May/authorization/index.html#protocol-details
-        // TODO: wire in the real Organization ID, for auditing purposes
-        handleJWTClaims(UUID.randomUUID(), claims);
-
         // Extract the Client Macaroon from the subject field (which is the same as the issuer)
         final String clientMacaroon = claims.getBody().getSubject();
         final List<Macaroon> macaroons = MacaroonBakery.deserializeMacaroon(clientMacaroon);
+
+        // Get org id from macaroon caveats
+        UUID orgId = MacaroonHelpers.extractOrgIDFromCaveats(macaroons).orElseThrow(() -> {
+            logger.error("No organization found on macaroon");
+            throw new WebApplicationException(INVALID_JWT_MSG, Response.Status.UNAUTHORIZED);
+        });
+
+        // Determine if claims are present and valid
+        // Required claims are specified here: http://hl7.org/fhir/us/bulkdata/2019May/authorization/index.html#protocol-details
+        handleJWTClaims(orgId, claims);
 
         // Add the additional claims that we need
         // Currently, we need to set an expiration time, a set of scopes,

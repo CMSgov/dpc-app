@@ -34,7 +34,7 @@ public class LogResponseFilterTest {
 
     @BeforeEach
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
         filter = new LogResponseFilter();
     }
 

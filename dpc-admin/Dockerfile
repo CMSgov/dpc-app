@@ -1,4 +1,4 @@
-FROM ruby:3.0.6-alpine AS ruby_builder
+FROM ruby:3.3.0-alpine AS ruby_builder
 
 # Install build dependencies
 RUN apk update && \
@@ -10,10 +10,11 @@ RUN apk update && \
     apk add --no-cache gcompat
 
 # Set the working directory
-RUN mkdir /dpc-admin
-WORKDIR /dpc-admin
+RUN mkdir -p /dpc-admin/vendor/api_client
+Workdir /dpc-admin
 
 # Copy over the files needed to fetch dependencies
+COPY /engines/api_client/ /dpc-admin/vendor/api_client/
 COPY /dpc-admin/Gemfile /dpc-admin/Gemfile.lock /dpc-admin/
 COPY /dpc-admin/package.json /dpc-admin/package-lock.json /dpc-admin/
 
@@ -31,7 +32,8 @@ RUN bundle exec bundle audit update && bundle exec bundle audit check --ignore C
 COPY /dpc-admin /dpc-admin
 
 RUN rm -rf /bin/yarn
-RUN RAILS_ENV=production WEBPACKER_NODE_MODULES_BIN_PATH="node_modules/.bin" SECRET_KEY_BASE=dummy bundle exec rake assets:precompile --trace
+
+RUN RAILS_ENV=production SECRET_KEY_BASE=dummy bundle exec rake assets:precompile
 
 # Clean up from the build
 RUN rm -rf /usr/local/bundle/cache/*.gem && \
@@ -39,7 +41,7 @@ RUN rm -rf /usr/local/bundle/cache/*.gem && \
     find /usr/local/bundle/gems/ -name "*.o" -delete
 
 
-FROM ruby:3.0.6-alpine
+FROM ruby:3.3.0-alpine
 
 # Install app dependencies
 RUN apk add --no-cache postgresql-client nodejs tzdata libsodium-dev

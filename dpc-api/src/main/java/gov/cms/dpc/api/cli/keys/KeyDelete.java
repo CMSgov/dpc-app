@@ -1,7 +1,7 @@
 package gov.cms.dpc.api.cli.keys;
 
 import gov.cms.dpc.api.cli.AbstractAdminCommand;
-import io.dropwizard.setup.Bootstrap;
+import io.dropwizard.core.setup.Bootstrap;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -25,7 +25,7 @@ public class KeyDelete extends AbstractAdminCommand {
     public void addAdditionalOptions(Subparser subparser) {
         subparser
                 .addArgument("--org", "-o")
-                .dest("org-reference")
+                .dest(ORG_REFERENCE)
                 .required(true)
                 .help("Organization entity");
         subparser
