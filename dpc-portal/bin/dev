@@ -8,4 +8,16 @@ fi
 # Default to port 3000 if not specified
 export PORT="${PORT:-3000}"
 
+if [ -z "$GOLDEN_MACAROON" ]; then
+  echo "No golden macaroon found. Attempting to generate a new one..."
+  export GOLDEN_MACAROON=$(curl -X POST -w '\n' ${API_ADMIN_URL}/tasks/generate-token || echo '')
+
+  if [ -n "$GOLDEN_MACAROON" ]; then
+    echo "Successfully generated new golden macaroon."
+  else
+    echo "Could not generate a valid golden macaroon. Check that the API service is running."
+    echo "Starting Portal without a golden macaroon; certain functionality may not work correctly."
+  fi
+fi
+
 exec foreman start -f Procfile.dev "$@"
