@@ -201,9 +201,19 @@ func TestGetAwsSession(t *testing.T) {
 	}
 }
 
-func TestGenerateRequestFileName(t *testing.T) {
+func TestGenerateRequestFileName_Test(t *testing.T) {
 	now, _ := time.Parse("2006-01-02 15:04:05", "2010-01-01 12:00:00")
+	fileName := generateRequestFileName(now)
+	assert.Equal(t, "T#EFT.ON.DPC.NGD.REQ.D100101.T1200000", fileName)
+}
 
+func TestGenerateRequestFileName_Prod(t *testing.T) {
+	testEnv := os.Getenv("ENV")
+	os.Setenv("ENV", "prod")
+
+	now, _ := time.Parse("2006-01-02 15:04:05", "2010-01-01 12:00:00")
 	fileName := generateRequestFileName(now)
 	assert.Equal(t, "P#EFT.ON.DPC.NGD.REQ.D100101.T1200000", fileName)
+
+	os.Setenv("ENV", testEnv)
 }
