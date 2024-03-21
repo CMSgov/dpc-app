@@ -4,7 +4,7 @@ package gov.cms.dpc.common.logging.filters;
 import ch.qos.logback.access.spi.IAccessEvent;
 import ch.qos.logback.core.filter.Filter;
 import ch.qos.logback.core.spi.FilterReply;
-import io.dropwizard.logging.filter.FilterFactory;
+import io.dropwizard.logging.common.filter.FilterFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;

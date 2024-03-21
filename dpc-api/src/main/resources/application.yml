@@ -29,6 +29,17 @@ server:
   adminConnectors:
     - type: http
       port: 9900
+  requestLog:
+    appenders:
+      - type: console
+        timeZone: UTC
+        layout:
+          type: access-json
+          timestampFormat: "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
+          additionalFields:
+            environment: ${ENV:-"unknown_env"}
+            version: ${APP_VERSION:-"unknown_version"}
+            application: ${APPLICATION:-"dpc-api"}
 
 logging:
   level: ERROR
@@ -60,8 +71,8 @@ publicURL: ${PUBLIC_URL:-"http://localhost:3002"}
 authdb:
   driverClass: org.postgresql.Driver
   url: ${AUTH_DB_URL:-"jdbc:postgresql://db:5432/dpc_auth"}
-  user: ${AUTH_DB_USER:-postgres}
-  password: ${AUTH_DB_PASS:-dpc-safe}
+  user: "${AUTH_DB_USER:-postgres}"
+  password: "${AUTH_DB_PASS:-dpc-safe}"
   initialSize: 5
   minSize: 5
   maxSize: 10

@@ -101,13 +101,13 @@ RSpec.describe Page::Organization::ShowComponent, type: :component do
       end
       it 'should have delete token form' do
         form1 = <<~HTML
-          <form class="button_to" method="post" action="/portal/organizations/99790463-de1f-4f7f-a529-3e4f59dc7131/client_tokens/token-id-1">
+          <form class="button_to" method="post" action="/portal/organizations/2/client_tokens/token-id-1">
            <input type="hidden" name="_method" value="delete" autocomplete="off" />
            <button class="usa-button" type="submit">Yes, revoke token</button>
           </form>
         HTML
         form2 = <<~HTML
-          <form class="button_to" method="post" action="/portal/organizations/99790463-de1f-4f7f-a529-3e4f59dc7131/client_tokens/token-id-2">
+          <form class="button_to" method="post" action="/portal/organizations/2/client_tokens/token-id-2">
            <input type="hidden" name="_method" value="delete" autocomplete="off" />
            <button class="usa-button" type="submit">Yes, revoke token</button>
           </form>
@@ -154,13 +154,13 @@ RSpec.describe Page::Organization::ShowComponent, type: :component do
       end
       it 'should have delete key form' do
         form1 = <<~HTML
-          <form class="button_to" method="post" action="/portal/organizations/99790463-de1f-4f7f-a529-3e4f59dc7131/public_keys/key-id-1">
+          <form class="button_to" method="post" action="/portal/organizations/2/public_keys/key-id-1">
             <input type="hidden" name="_method" value="delete" autocomplete="off" />
             <button class="usa-button" type="submit">Yes, revoke key</button>
           </form>
         HTML
         form2 = <<~HTML
-          <form class="button_to" method="post" action="/portal/organizations/99790463-de1f-4f7f-a529-3e4f59dc7131/public_keys/key-id-2">
+          <form class="button_to" method="post" action="/portal/organizations/2/public_keys/key-id-2">
             <input type="hidden" name="_method" value="delete" autocomplete="off" />
             <button class="usa-button" type="submit">Yes, revoke key</button>
           </form>
@@ -207,13 +207,13 @@ RSpec.describe Page::Organization::ShowComponent, type: :component do
       end
       it 'should have delete address form' do
         form1 = <<~HTML
-          <form class="button_to" method="post" action="/portal/organizations/99790463-de1f-4f7f-a529-3e4f59dc7131/ip_addresses/addr-id-1">
+          <form class="button_to" method="post" action="/portal/organizations/2/ip_addresses/addr-id-1">
             <input type="hidden" name="_method" value="delete" autocomplete="off" />
             <button class="usa-button" type="submit">Yes, revoke address</button>
           </form>
         HTML
         form2 = <<~HTML
-          <form class="button_to" method="post" action="/portal/organizations/99790463-de1f-4f7f-a529-3e4f59dc7131/ip_addresses/addr-id-2">
+          <form class="button_to" method="post" action="/portal/organizations/2/ip_addresses/addr-id-2">
             <input type="hidden" name="_method" value="delete" autocomplete="off" />
             <button class="usa-button" type="submit">Yes, revoke address</button>
           </form>

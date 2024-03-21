@@ -3,10 +3,11 @@ package gov.cms.dpc.consent.cli;
 import ch.qos.logback.classic.LoggerContext;
 import gov.cms.dpc.consent.DPCConsentConfiguration;
 import gov.cms.dpc.consent.DPCConsentService;
+import gov.cms.dpc.testing.DummyJarLocation;
 import gov.cms.dpc.testing.IntegrationTest;
-import io.dropwizard.cli.Cli;
-import io.dropwizard.setup.Bootstrap;
-import io.dropwizard.setup.Environment;
+import io.dropwizard.core.cli.Cli;
+import io.dropwizard.core.setup.Bootstrap;
+import io.dropwizard.core.setup.Environment;
 import io.dropwizard.testing.POJOConfigurationFactory;
 import io.dropwizard.util.JarLocation;
 import org.junit.jupiter.api.*;
@@ -16,8 +17,6 @@ import java.io.PrintStream;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @IntegrationTest
@@ -55,8 +54,7 @@ class ConsentCommandsTest {
         System.setOut(new PrintStream(stdOut));
         System.setErr(new PrintStream(stdErr));
 
-        final JarLocation location = mock(JarLocation.class);
-        when(location.getVersion()).thenReturn(Optional.of("1.0.0"));
+        final JarLocation location = new DummyJarLocation();
 
         cli = new Cli(location, bs, stdOut, stdErr);
     }

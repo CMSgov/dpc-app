@@ -19,7 +19,7 @@ func ConvertDt(s string) (time.Time, error) {
 
 func GenerateConfirmationFileName(responseFile string) string {
 	path := strings.Split(responseFile, "in")
-	currentDateTime := time.Now().Format("D060102.T150405")
+	currentDateTime := time.Now().Format("D060102.T1504050")
 	filename := fmt.Sprintf("P#EFT.ON.DPC.NGD.CONF.%s", currentDateTime)
 	return fmt.Sprintf("%s/out/%s", path[0], filename)
 }
