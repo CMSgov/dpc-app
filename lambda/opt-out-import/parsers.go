@@ -3,18 +3,21 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"regexp"
 	"strings"
 	"time"
 
+	"github.com/aws/aws-lambda-go/events"
 	"github.com/google/uuid"
 	"github.com/ianlopshire/go-fixedwidth"
 	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 )
 
-func ParseMetadata(bucket string, filename string) (OptOutFilenameMetadata, error) {
-	var metadata OptOutFilenameMetadata
+func ParseMetadata(bucket string, filename string) (ResponseFileMetadata, error) {
+	var metadata ResponseFileMetadata
 	// P.NGD.DPC.RSP.D240123.T1122001.IN
 	// Beneficiary Data Sharing Preferences File sent by 1-800-Medicare: P.NGD.DPC.RSP.Dyymmdd.Thhmmsst.IN
 	// Prefix: T = test, P = prod;
@@ -39,7 +42,7 @@ func ParseMetadata(bucket string, filename string) (OptOutFilenameMetadata, erro
 	return metadata, nil
 }
 
-func ParseConsentRecords(metadata *OptOutFilenameMetadata, b []byte) ([]*OptOutRecord, error) {
+func ParseConsentRecords(metadata *ResponseFileMetadata, b []byte) ([]*OptOutRecord, error) {
 	var records []*OptOutRecord
 	r := bytes.NewReader(b)
 	scanner := bufio.NewScanner(r)
@@ -61,7 +64,7 @@ func ParseConsentRecords(metadata *OptOutFilenameMetadata, b []byte) ([]*OptOutR
 	return records, err
 }
 
-func ParseRecord(metadata *OptOutFilenameMetadata, b []byte, unmarshaler FileUnmarshaler) (*OptOutRecord, error) {
+func ParseRecord(metadata *ResponseFileMetadata, b []byte, unmarshaler FileUnmarshaler) (*OptOutRecord, error) {
 	var row ResponseFileRow
 	if err := unmarshaler(b, &row); err != nil {
 		return nil, errors.Wrapf(err, "failed to parse file: %s", metadata.FilePath)
@@ -89,4 +92,31 @@ func ConvertSharingPreference(pref string) (string, error) {
 	} else {
 		return "", errors.New(fmt.Sprintf("Unexpected value %s for sharing preference", pref))
 	}
+}
+
+// TODO: Iterate over records
+func ParseSQSEvent(event events.SQSEvent) (*events.S3Event, error) {
+	var snsEntity events.SNSEntity
+	err := json.Unmarshal([]byte(event.Records[0].Body), &snsEntity)
+
+	unmarshalTypeErr := new(json.UnmarshalTypeError)
+	if errors.As(err, &unmarshalTypeErr) {
+		log.Warn("Skipping event due to unrecognized format for SNS")
+		return nil, nil
+	} else if err != nil {
+		return nil, err
+	}
+
+	var s3Event events.S3Event
+	err = json.Unmarshal([]byte(snsEntity.Message), &s3Event)
+
+	unmarshalTypeErr = new(json.UnmarshalTypeError)
+	if errors.As(err, &unmarshalTypeErr) {
+		log.Warn("Skipping event due to unrecognized format for S3")
+		return nil, nil
+	} else if err != nil {
+		return nil, err
+	}
+
+	return &s3Event, nil
 }

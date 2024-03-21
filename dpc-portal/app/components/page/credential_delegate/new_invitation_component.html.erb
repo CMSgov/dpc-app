@@ -12,16 +12,16 @@
     <h2>Contact Information</h2>
     <%= form_tag organization_credential_delegate_invitations_path(@organization.path_id), method: :post, class: ['usa-form'], id: "cd-form" do %>
       <%= render(Core::Form::TextInputComponent.new(label: 'First or given name',
-          attribute: :given_name,
+          attribute: :invited_given_name,
           hint: 'For example, Jose, Darren, or Mai',
-          default: cd_invite.given_name,
-          error_msg: cd_invite.errors[:given_name]&.first,
+          default: cd_invite.invited_given_name,
+          error_msg: cd_invite.errors[:invited_given_name]&.first,
           input_options: { maxlength: 25 })) %>
       <%= render(Core::Form::TextInputComponent.new(label: 'Last or family name',
-          attribute: :family_name,
+          attribute: :invited_family_name,
           hint: 'For example, Martinez Gonzalez, Gu, or Smith',
-          default: cd_invite.family_name,
-          error_msg: cd_invite.errors[:family_name]&.first,
+          default: cd_invite.invited_family_name,
+          error_msg: cd_invite.errors[:invited_family_name]&.first,
           input_options: { maxlength: 25 })) %>
       <%= render(Core::Form::MaskedInputComponent.new(label: 'Primary phone number',
           attribute: :phone_raw,
@@ -30,13 +30,13 @@
           error_msg: cd_invite.errors[:phone_raw]&.first || cd_invite.errors[:phone]&.first,
           mask: 'us-phone')) %>
       <%= render(Core::Form::TextInputComponent.new(label: 'Email',
-          attribute: :email,
-          error_msg: cd_invite.errors[:email]&.first,
-          default: cd_invite.email)) %>
+          attribute: :invited_email,
+          error_msg: cd_invite.errors[:invited_email]&.first,
+          default: cd_invite.invited_email)) %>
       <%= render(Core::Form::TextInputComponent.new(label: 'Confirm email',
-          attribute: :email_confirmation,
-          error_msg: cd_invite.errors[:email_confirmation]&.first,
-          default: cd_invite.email_confirmation)) %>
+          attribute: :invited_email_confirmation,
+          error_msg: cd_invite.errors[:invited_email_confirmation]&.first,
+          default: cd_invite.invited_email_confirmation)) %>
     <% end %>
     <%= link_to 'Go Back', organization_path(organization.path_id), class: ['usa-button', 'usa-button--outline'] %>
     <a href="#verify-modal" aria-controls="verify-modal" class="usa-button" data-open-modal>Send invite</a>

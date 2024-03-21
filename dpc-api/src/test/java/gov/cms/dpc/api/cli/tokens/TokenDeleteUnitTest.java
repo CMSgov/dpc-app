@@ -1,19 +1,13 @@
 package gov.cms.dpc.api.cli.tokens;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.List;
-import java.util.Optional;
-
+import gov.cms.dpc.api.DPCAPIConfiguration;
+import gov.cms.dpc.api.DPCAPIService;
+import gov.cms.dpc.testing.APIAuthHelpers;
+import gov.cms.dpc.testing.NoExitSecurityManager;
+import gov.cms.dpc.testing.exceptions.SystemExitException;
+import io.dropwizard.core.cli.Cli;
+import io.dropwizard.core.setup.Bootstrap;
+import io.dropwizard.util.JarLocation;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,14 +17,16 @@ import org.mockserver.integration.ClientAndServer;
 import org.mockserver.model.HttpRequest;
 import org.mockserver.model.Parameter;
 
-import gov.cms.dpc.api.DPCAPIConfiguration;
-import gov.cms.dpc.api.DPCAPIService;
-import gov.cms.dpc.testing.APIAuthHelpers;
-import gov.cms.dpc.testing.NoExitSecurityManager;
-import gov.cms.dpc.testing.exceptions.SystemExitException;
-import io.dropwizard.cli.Cli;
-import io.dropwizard.setup.Bootstrap;
-import io.dropwizard.util.JarLocation;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.List;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
 
 public class TokenDeleteUnitTest {
     private final PrintStream originalOut = System.out;

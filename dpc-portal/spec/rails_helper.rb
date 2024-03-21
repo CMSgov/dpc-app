@@ -72,4 +72,7 @@ RSpec.configure do |config|
   # config.filter_gems_from_backtrace("gem name")
 
   config.include ViewComponent::TestHelpers, type: :component
+  config.expect_with :rspec do |c|
+    c.max_formatted_output_length = nil
+  end
 end
