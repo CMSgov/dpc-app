@@ -5,6 +5,7 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import gov.cms.dpc.testing.IntegrationTest;
+import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.DropwizardTestSupport;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -12,7 +13,11 @@ import ru.vyarus.dropwizard.guice.module.context.SharedConfigurationState;
 
 @IntegrationTest
 public abstract class AbstractConsentTest {
-    protected static final DropwizardTestSupport<DPCConsentConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCConsentService.class, "ci.application.conf");
+    protected static final String configPath = "src/test/resources/test.application.yml";
+
+    protected static final DropwizardTestSupport<DPCConsentConfiguration> APPLICATION =
+            new DropwizardTestSupport<>(DPCConsentService.class, configPath,
+                    ConfigOverride.config("server.applicationConnectors[0].port", "6543"));
 
     protected FhirContext ctx = FhirContext.forDstu3();
 
@@ -20,9 +25,9 @@ public abstract class AbstractConsentTest {
     public static void initDB() throws Exception {
         APPLICATION.before();
         SharedConfigurationState.clear();
-        APPLICATION.getApplication().run("db", "migrate", "ci.application.conf");
+        APPLICATION.getApplication().run("db", "migrate", configPath);
         SharedConfigurationState.clear();
-        APPLICATION.getApplication().run("seed", "ci.application.conf");
+        APPLICATION.getApplication().run("seed", configPath);
     }
 
     @AfterAll

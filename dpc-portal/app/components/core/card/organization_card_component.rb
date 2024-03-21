@@ -4,6 +4,7 @@ module Core
   module Card
     # Render a USWDS-styled card for an organization.
     class OrganizationCardComponent < ViewComponent::Base
+      with_collection_parameter :organization
       def initialize(organization:)
         super
         @name = organization.name

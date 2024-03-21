@@ -17,7 +17,7 @@ import gov.cms.dpc.bluebutton.config.BBClientConfiguration;
 import gov.cms.dpc.bluebutton.config.BlueButtonBundleConfiguration;
 import gov.cms.dpc.bluebutton.exceptions.BlueButtonClientSetupException;
 import gov.cms.dpc.bluebutton.health.BlueButtonHealthCheck;
-import io.dropwizard.Configuration;
+import io.dropwizard.core.Configuration;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
@@ -129,17 +129,17 @@ public class BlueButtonClientModule<T extends Configuration & BlueButtonBundleCo
         if (this.bbClientConfiguration.getKeystore().getLocation() == null) {
             keyStoreStream = BlueButtonClientImpl.class.getResourceAsStream(KEYSTORE_RESOURCE_KEY);
             if (keyStoreStream == null) {
-                logger.error("KeyStore location is empty, cannot find keyStore {} in resources", KEYSTORE_RESOURCE_KEY);
+                logger.error("KeyStore location is empty, cannot find keyStore " + KEYSTORE_RESOURCE_KEY + " in resources");
                 throw new BlueButtonClientSetupException("Unable to get keystore from resources",
                         new MissingResourceException("", BlueButtonClientImpl.class.getName(), KEYSTORE_RESOURCE_KEY));
             }
         } else {
             final String keyStorePath = this.bbClientConfiguration.getKeystore().getLocation();
-            logger.debug("Opening keystream from location: {}", keyStorePath);
+            logger.debug("Opening keystream from location: " + keyStorePath);
             try {
                 keyStoreStream = new FileInputStream(keyStorePath);
             } catch (FileNotFoundException e) {
-                logger.error("Could not find keystore at location: {}" + Paths.get(keyStorePath).toAbsolutePath().toString());
+                logger.error("Could not find keystore at location: " + Paths.get(keyStorePath).toAbsolutePath());
                 throw new BlueButtonClientSetupException("Unable to find keystore", e);
             }
         }

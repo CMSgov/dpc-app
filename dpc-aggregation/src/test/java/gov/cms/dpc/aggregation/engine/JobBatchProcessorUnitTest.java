@@ -2,8 +2,6 @@ package gov.cms.dpc.aggregation.engine;
 
 import ca.uhn.fhir.context.FhirContext;
 import com.codahale.metrics.MetricRegistry;
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
 import gov.cms.dpc.aggregation.service.ConsentResult;
 import gov.cms.dpc.aggregation.service.ConsentService;
 import gov.cms.dpc.aggregation.service.EveryoneGetsDataLookBackServiceImpl;
@@ -37,7 +35,7 @@ import static org.mockito.ArgumentMatchers.eq;
 
 @ExtendWith(MockitoExtension.class)
 class JobBatchProcessorUnitTest {
-    private static final Config config = ConfigFactory.load("testing.conf").getConfig("dpc.aggregation");
+    private static final String exportPath = "/tmp";
     private static final String TEST_ORG_NPI = NPIUtil.generateNPI();
     private static final String TEST_PROVIDER_NPI = NPIUtil.generateNPI();
     private static ConsentResult optIn;
@@ -121,7 +119,7 @@ class JobBatchProcessorUnitTest {
         // Create a config with our org look back exempt
         OperationsConfig operationsConfig = new OperationsConfig(
                 1000,
-                config.getString("exportPath"),
+                exportPath,
                 1,
                 500,
                 120,
@@ -169,7 +167,7 @@ class JobBatchProcessorUnitTest {
         // Create a config with our org look back exempt
         OperationsConfig operationsConfig = new OperationsConfig(
                 1,
-                config.getString("exportPath"),
+                exportPath,
                 1,
                 500,
                 120,
@@ -475,15 +473,15 @@ class JobBatchProcessorUnitTest {
     private OperationsConfig getOperationsConfig() {
         return new OperationsConfig(
                 1000,
-                config.getString("exportPath"),
+                exportPath,
                 500,
                 YearMonth.of(2014, 3)
         );
     }
 
     private void assertError(UUID batchId, DPCResourceType resourceType) {
-        final var outputFilePath = ResourceWriter.formOutputFilePath(config.getString("exportPath"), batchId, resourceType, 0);
-        final var errorFilePath = ResourceWriter.formOutputFilePath(config.getString("exportPath"), batchId, DPCResourceType.OperationOutcome, 0);
+        final var outputFilePath = ResourceWriter.formOutputFilePath(exportPath, batchId, resourceType, 0);
+        final var errorFilePath = ResourceWriter.formOutputFilePath(exportPath, batchId, DPCResourceType.OperationOutcome, 0);
 
         // Error file exists, but not output file
         assertFalse(Files.exists(Path.of(outputFilePath)));
@@ -491,8 +489,8 @@ class JobBatchProcessorUnitTest {
     }
 
     private void assertNoError(UUID batchId, DPCResourceType resourceType) {
-        final var outputFilePath = ResourceWriter.formOutputFilePath(config.getString("exportPath"), batchId, resourceType, 0);
-        final var errorFilePath = ResourceWriter.formOutputFilePath(config.getString("exportPath"), batchId, DPCResourceType.OperationOutcome, 0);
+        final var outputFilePath = ResourceWriter.formOutputFilePath(exportPath, batchId, resourceType, 0);
+        final var errorFilePath = ResourceWriter.formOutputFilePath(exportPath, batchId, DPCResourceType.OperationOutcome, 0);
 
         // Output file exists, but no error file
         assertTrue(Files.exists(Path.of(outputFilePath)));

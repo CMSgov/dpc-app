@@ -7,7 +7,7 @@ import gov.cms.dpc.queue.annotations.AggregatorID;
 import gov.cms.dpc.queue.annotations.QueueBatchSize;
 import gov.cms.dpc.queue.health.JobQueueHealthCheck;
 import gov.cms.dpc.queue.service.DataService;
-import io.dropwizard.Configuration;
+import io.dropwizard.core.Configuration;
 import ru.vyarus.dropwizard.guice.module.support.DropwizardAwareModule;
 
 import java.util.UUID;

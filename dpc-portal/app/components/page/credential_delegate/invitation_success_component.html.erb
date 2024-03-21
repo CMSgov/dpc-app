@@ -1,0 +1,14 @@
+<div>
+  <div class="margin-bottom-5">&larr; <%= link_to @organization.name, organization_path(organization.path_id) %></div>
+  <h1>Credential delegate invite sent</h1>
+  <div class="usa-alert usa-alert--success">
+    <div class="usa-alert__body">
+      <p class="usa-alert__text">
+	This is a succinct, helpful success message.
+      </p>
+    </div>
+  </div>
+  <div class="margin-top-5">
+    <%= link_to 'Return home', root_path, class: ['usa-button', 'usa-button--outline'] %>
+  </div>
+</div>

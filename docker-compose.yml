@@ -56,11 +56,11 @@ services:
     env_file:
       - ./ops/config/decrypted/local.env
     environment:
-      - attributionURL=http://attribution:8080/v1/
+      - ATTRIBUTION_URL=http://attribution:8080/v1/
       - ENV=local
       - JACOCO=${REPORT_COVERAGE}
-      - exportPath=/app/data
-      - JVM_FLAGS=-Ddpc.api.authenticationDisabled=${AUTH_DISABLED:-false}
+      - EXPORT_PATH=/app/data
+      - AUTH_DISABLED=${AUTH_DISABLED:-false}
       - DEBUG_MODE=${DEBUG_MODE:-false}
     depends_on:
       - attribution

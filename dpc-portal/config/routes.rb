@@ -19,10 +19,16 @@ Rails.application.routes.draw do
   # method, which does not work correctly for applications served on a subpath.
   match '/portal', to: 'main#welcome', via: :get
 
-  resources :organizations, only: [:index, :show] do
+  resources :organizations, only: [:index, :show, :new, :create] do
     resources :client_tokens, only: [:new, :create, :destroy]
     resources :public_keys, only: [:new, :create, :destroy]
     resources :ip_addresses, only: [:new, :create, :destroy]
+    resources :credential_delegate_invitations, only: [:new, :create, :destroy] do
+      get 'success', on: :member
+    end
+    get 'tos_form', on: :member
+    post 'sign_tos', on: :member
+    get 'success', on: :member
   end
 
   match '/download_snippet', to: 'public_keys#download_snippet', as: 'download_snippet', via: :post

@@ -130,7 +130,7 @@ RSpec.describe ClientTokensController, type: :controller do
         context 'successful API request' do
           before(:each) do
             stub_api_client(message: :create_organization, success: true, response: default_org_creation_response)
-            reg_org = create(:registered_organization, organization: organization)
+            reg_org = create(:registered_organization, organization:)
 
             manager = instance_double(ClientTokenManager)
             allow(ClientTokenManager).to receive(:new)
@@ -152,7 +152,7 @@ RSpec.describe ClientTokensController, type: :controller do
         context 'unsuccessful API request' do
           before(:each) do
             stub_api_client(message: :create_organization, success: true, response: default_org_creation_response)
-            reg_org = create(:registered_organization, organization: organization)
+            reg_org = create(:registered_organization, organization:)
 
             manager = instance_double(ClientTokenManager)
             allow(ClientTokenManager).to receive(:new)

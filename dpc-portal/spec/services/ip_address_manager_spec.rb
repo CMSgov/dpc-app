@@ -16,7 +16,7 @@ RSpec.describe IpAddressManager do
           api_id = SecureRandom.uuid
           response = { 'id' => '570f7a71-0e8f-48a1-83b0-c46ac35d6ef3' }
           stub_self_returning_api_client(message: :create_ip_address,
-                                         response: response,
+                                         response:,
                                          with: [api_id, { params: @ip_address_params }])
 
           manager = IpAddressManager.new(api_id)
@@ -34,7 +34,7 @@ RSpec.describe IpAddressManager do
           response = { 'id' => nil }
           stub_self_returning_api_client(message: :create_ip_address,
                                          success: false,
-                                         response: response,
+                                         response:,
                                          with: [api_id, { params: @ip_address_params }])
 
           manager = IpAddressManager.new(api_id)

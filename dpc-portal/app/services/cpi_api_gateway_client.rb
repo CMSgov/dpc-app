@@ -27,7 +27,7 @@ class CpiApiGatewayClient
     body = { providerID: { npi: npi.to_s } }.to_json
     response = request_client.post("#{@cpi_api_gateway_url}api/1.0/ppr/providers/enrollments",
                                    headers: { 'Content-Type': 'application/json' },
-                                   body: body)
+                                   body:)
     response.parsed
   end
 
@@ -56,7 +56,7 @@ class CpiApiGatewayClient
     }.to_json
     response = request_client.post("#{@cpi_api_gateway_url}api/1.0/ppr/providers",
                                    headers: { 'Content-Type': 'application/json' },
-                                   body: body)
+                                   body:)
     response.parsed
   end
 
