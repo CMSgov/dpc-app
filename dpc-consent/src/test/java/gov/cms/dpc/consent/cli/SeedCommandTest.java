@@ -2,6 +2,7 @@ package gov.cms.dpc.consent.cli;
 
 import gov.cms.dpc.consent.DPCConsentConfiguration;
 import gov.cms.dpc.consent.DPCConsentService;
+import gov.cms.dpc.testing.DummyJarLocation;
 import io.dropwizard.core.cli.Cli;
 import io.dropwizard.core.setup.Bootstrap;
 import io.dropwizard.util.JarLocation;
@@ -16,8 +17,6 @@ import java.io.PrintStream;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 @Disabled
 class SeedCommandTest {
@@ -37,8 +36,7 @@ class SeedCommandTest {
 
     @BeforeEach
     void cliSetup() {
-        final JarLocation location = mock(JarLocation.class);
-        when(location.getVersion()).thenReturn(Optional.of("1.0.0"));
+        final JarLocation location = new DummyJarLocation();
 
         final Bootstrap<DPCConsentConfiguration> bootstrap = new Bootstrap<>(new DPCConsentService());
         bootstrap.addCommand(new SeedCommand(bootstrap.getApplication()));

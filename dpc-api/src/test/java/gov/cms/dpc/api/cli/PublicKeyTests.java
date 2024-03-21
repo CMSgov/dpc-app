@@ -8,6 +8,7 @@ import gov.cms.dpc.api.cli.keys.KeyList;
 import gov.cms.dpc.api.cli.keys.KeyUpload;
 import gov.cms.dpc.api.cli.organizations.OrganizationRegistration;
 import gov.cms.dpc.api.resources.v1.KeyResource;
+import gov.cms.dpc.testing.DummyJarLocation;
 import io.dropwizard.core.cli.Cli;
 import io.dropwizard.core.setup.Bootstrap;
 import io.dropwizard.util.JarLocation;
@@ -30,8 +31,6 @@ import java.util.stream.Collectors;
 
 import static gov.cms.dpc.testing.APIAuthHelpers.*;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 public class PublicKeyTests extends AbstractApplicationTest {
 
@@ -49,9 +48,8 @@ public class PublicKeyTests extends AbstractApplicationTest {
 
     @BeforeEach
     void cliSetup() {
-        // Setup necessary mock
-        final JarLocation location = mock(JarLocation.class);
-        when(location.getVersion()).thenReturn(Optional.of("1.0.0"));
+        // Setup dummy JarLocation
+        final JarLocation location = new DummyJarLocation();
 
         // Add commands you want to test
         final Bootstrap<DPCAPIConfiguration> bootstrap = new Bootstrap<>(new DPCAPIService());
