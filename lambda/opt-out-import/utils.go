@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"strings"
 	"time"
 )
@@ -17,9 +18,12 @@ func ConvertDt(s string) (time.Time, error) {
 	return t, nil
 }
 
-func GenerateConfirmationFileName(responseFile string) string {
+func GenerateConfirmationFileName(responseFile string, dateTime time.Time) string {
+	prefix := "T"
+	if os.Getenv("ENV") == "prod" {
+		prefix = "P"
+	}
 	path := strings.Split(responseFile, "in")
-	currentDateTime := time.Now().Format("D060102.T1504050")
-	filename := fmt.Sprintf("P#EFT.ON.DPC.NGD.CONF.%s", currentDateTime)
-	return fmt.Sprintf("%s/out/%s", path[0], filename)
+	filename := fmt.Sprintf("%s#EFT.ON.DPC.NGD.CONF.%s", prefix, dateTime.Format("D060102.T1504050"))
+	return fmt.Sprintf("%sout/%s", path[0], filename)
 }
