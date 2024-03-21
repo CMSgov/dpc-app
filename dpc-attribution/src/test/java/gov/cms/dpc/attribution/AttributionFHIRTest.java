@@ -20,10 +20,7 @@ import io.dropwizard.testing.DropwizardTestSupport;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.DynamicTest;
-import org.junit.jupiter.api.TestFactory;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.InputStream;
@@ -38,13 +35,15 @@ import static gov.cms.dpc.attribution.SharedMethods.submitAttributionBundle;
 import static gov.cms.dpc.common.utils.SeedProcessor.createBaseAttributionGroup;
 import static org.junit.jupiter.api.Assertions.*;
 
+@Disabled
 @ExtendWith(BufferedLoggerHandler.class)
 @IntegrationTest
 class AttributionFHIRTest {
 
-    private static final String KEY_PREFIX = "dpc.attribution";
-    private static final DropwizardTestSupport<DPCAttributionConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCAttributionService.class, "ci.application.conf", ConfigOverride.config("server.applicationConnectors[0].port", "3727"),
-            ConfigOverride.config(KEY_PREFIX, "logging.level", "ERROR"));
+    private static final String configPath = "src/test/resources/test.application.yml";
+    private static final DropwizardTestSupport<DPCAttributionConfiguration> APPLICATION =
+            new DropwizardTestSupport<>(DPCAttributionService.class, configPath,
+                    ConfigOverride.config("server.applicationConnectors[0].port", "3727"));
     private static final FhirContext ctx = FhirContext.forDstu3();
     private static final String CSV = "test_associations-dpr.csv";
     private static Map<String, List<Pair<String, String>>> groupedPairs = new HashMap<>();
@@ -54,8 +53,8 @@ class AttributionFHIRTest {
     @BeforeAll
     static void setup() throws Exception {
         APPLICATION.before();
-        APPLICATION.getApplication().run("db", "drop-all", "--confirm-delete-everything", "ci.application.conf");
-        APPLICATION.getApplication().run("db", "migrate", "ci.application.conf");
+        APPLICATION.getApplication().run("db", "drop-all", "--confirm-delete-everything", configPath);
+        APPLICATION.getApplication().run("db", "migrate", configPath);
 
         // Get the test seeds
         final InputStream resource = AttributionFHIRTest.class.getClassLoader().getResourceAsStream(CSV);

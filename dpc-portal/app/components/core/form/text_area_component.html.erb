@@ -1,0 +1,7 @@
+        <div class="margin-bottom-4">
+          <%= label_tag attribute, label, class: "usa-label" %>
+          <%= raw %[<p class="usa-hint">#{hint}</p>] if hint.present? %>
+          <%= text_area_tag attribute, default, input_options  %>
+        </div>
+
+

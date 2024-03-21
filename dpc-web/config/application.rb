@@ -34,7 +34,7 @@ module DpcWebsite
     config.autoload_paths << Rails.root.join('lib/luhnacy_lib')
 
     # Initialize configuration defaults for originally generated Rails version.
-    config.load_defaults 5.2
+    config.load_defaults 7.1
 
     # Add fonts to asset pipeline
     config.assets.paths << Rails.root.join("app", "assets", "fonts")
@@ -59,7 +59,11 @@ module DpcWebsite
 
     # Sending mail with`DeliveryJob` has been deprecated. Work has been moved to `MailDeliveryJob`
     config.action_mailer.delivery_job = "ActionMailer::MailDeliveryJob"
-
+    
+    # Ensure mailer jobs get sent to a specialized web queue. Our web applications share
+    # a single Redis instance and process jobs based on their queue name.
+    config.action_mailer.deliver_later_queue_name = "web"
+    
     config.to_prepare { Devise::Mailer.layout "mailer" }
 
     # Mail throttling

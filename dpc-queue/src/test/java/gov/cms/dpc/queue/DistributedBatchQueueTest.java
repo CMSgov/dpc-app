@@ -12,7 +12,6 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
-import org.junit.Assert;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -98,7 +97,7 @@ public class DistributedBatchQueueTest {
 
         try {
             queue.assertHealthy(aggregatorID);
-            Assert.fail("Expected JobQueueUnhealthy exception not throw");
+            fail("Expected JobQueueUnhealthy exception not throw");
         } catch (JobQueueUnhealthy e) {
             assertEquals("Aggregator is not making progress on the queue", e.getMessage());
         }

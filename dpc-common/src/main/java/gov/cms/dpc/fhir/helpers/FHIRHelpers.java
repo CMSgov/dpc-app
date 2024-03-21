@@ -41,6 +41,7 @@ public class FHIRHelpers {
      * @param client         - {@link IGenericClient} client to communicate to attribution service
      * @param parser         - {@link IParser} to use for reading {@link Bundle} JSON
      * @param organizationID - {@link String} organization ID to filter for
+     * @param organizationNPI - {@link String} the NPI of the organization
      * @param adminURL       - {@link String} Base url for executing admin tasks
      * @return - {@link String} Access token generated for the {@link Organization}
      * @throws IOException - Throws if HTTP client fails

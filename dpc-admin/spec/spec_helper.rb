@@ -12,6 +12,7 @@ SimpleCov.start 'rails' do
 
   add_filter 'app/jobs/application_job.rb'
   add_filter 'app/controllers/pages_controller.rb' # loads static content
+  add_filter 'vendor'
 
   SimpleCov.minimum_coverage 80
   SimpleCov.minimum_coverage_by_file 0

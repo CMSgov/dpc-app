@@ -12,7 +12,7 @@ module Admin
     config.active_record.schema_format = :sql
 
     # Initialize configuration defaults for originally generated Rails version.
-    config.load_defaults 6.0
+    config.load_defaults 7.1
 
     # Add fonts to asset pipeline
     config.assets.prefix = '/admin/assets'
@@ -27,6 +27,10 @@ module Admin
 
     # Sending mail with`DeliveryJob` has been deprecated. Work has been moved to `MailDeliveryJob`
     config.action_mailer.delivery_job = 'ActionMailer::MailDeliveryJob'
+
+    # Ensure mailer jobs get sent to a specialized admin queue. Our web applications share
+    # a single Redis instance and process jobs based on their queue name.
+    config.action_mailer.deliver_later_queue_name = "admin"
 
     config.to_prepare { Devise::Mailer.layout 'mailer' }
 

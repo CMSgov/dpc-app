@@ -4,11 +4,13 @@ import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationOptions;
 import ca.uhn.fhir.validation.ValidationResult;
 import gov.cms.dpc.fhir.annotations.Profiled;
-import org.hl7.fhir.dstu3.model.BaseResource;
+import gov.cms.dpc.fhir.validations.profiles.*;
+import org.hl7.fhir.dstu3.model.*;
 
 import javax.inject.Inject;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
+import java.util.Map;
 
 /**
  * Hibernate {@link ConstraintValidator} that provides support for running the {@link FhirValidator} against FHIR resources, as part of the normal Dropwizard validation framework.
@@ -18,7 +20,7 @@ public class ProfileValidator implements ConstraintValidator<Profiled, BaseResou
 
     private static final String VALIDATION_CONSTANT = "{gov.cms.dpc.fhir.validations.ProfileValidator.";
     private final FhirValidator validator;
-    private String profileURI;
+    private Map<Class<?>, String> resourceProfileMap;
 
     @Inject
     public ProfileValidator(FhirValidator validator) {
@@ -27,7 +29,7 @@ public class ProfileValidator implements ConstraintValidator<Profiled, BaseResou
 
     @Override
     public void initialize(Profiled constraintAnnotation) {
-        this.profileURI = constraintAnnotation.profile();
+        this.resourceProfileMap = setProfilesForResources();
     }
 
     @Override
@@ -43,7 +45,7 @@ public class ProfileValidator implements ConstraintValidator<Profiled, BaseResou
 
         // Create a validation option object which forces validation against the given profile.
         final ValidationOptions options = new ValidationOptions();
-        options.addProfile(profileURI);
+        options.addProfile(resourceProfileMap.getOrDefault(value.getClass(), ""));
         final ValidationResult result = this.validator.validateWithResult(value, options);
 
         if (result.isSuccessful()) {
@@ -59,5 +61,16 @@ public class ProfileValidator implements ConstraintValidator<Profiled, BaseResou
                         .addConstraintViolation());
 
         return false;
+    }
+
+    // This map must be updated if we need to use profiles for any other resources.
+    private Map<Class<?>, String> setProfilesForResources() {
+        return Map.of(
+            Endpoint.class, EndpointProfile.PROFILE_URI,
+            Organization.class, OrganizationProfile.PROFILE_URI,
+            Patient.class, PatientProfile.PROFILE_URI,
+            Practitioner.class, PractitionerProfile.PROFILE_URI,
+            Provenance.class, AttestationProfile.PROFILE_URI
+        );
     }
 }

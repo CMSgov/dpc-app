@@ -39,6 +39,8 @@ This document serves as a guide for running the Data at the Point of Care (DPC) 
   * [Building the Additional Services](#building-the-additional-services)
     * [Postman collection](#postman-collection)
   * [Code Coverage](#code-coverage)
+  * [Local Debugging](#local-debugging)
+  * [Debugging Integration Tests](#debugging-integration-tests)
   * [Other Notes](#other-notes)
     * [BFD transaction time details](#bfd-transaction-time-details)
   * [Troubleshooting](#troubleshooting) 
@@ -57,15 +59,16 @@ providers to deliver high quality care directly to Medicare beneficiaries. See
 
 The DPC application is split into multiple services.
 
-|Service|Type|Description|Stack|
-|---|---|---|---|
-|[dpc-web](/dpc-web)|Public Portal|Portal for managing organizations|Ruby on Rails|
-|[dpc-admin](/dpc-admin)|Internal Portal|Administrative Portal for managing organizations|Ruby on Rails|
-|[dpc-api](/dpc-api)|Public API|Asynchronous FHIR API for managing organizations and requesting or retrieving data|Java (Dropwizard)|
-|[dpc-attribution](/dpc-attribution)|Internal API|Provides and updates data about attribution|Java (Dropwizard)|
-|[dpc-consent](/dpc-consent)|Internal API|Provides and updates information about data-sharing consent for individuals|Java (Dropwizard)|
-|[dpc-queue](/dpc-queue)|Internal API|Provides and updates data about export jobs and batches|Java (Dropwizard)|
-|[dpc-aggregation](/dpc-aggregation)|Internal Worker Service|Polls for job batches and exports data for singular batches|Java (Dropwizard + RxJava)|
+| Service|Type|Description|Stack|
+|-------------------------------------|---|----------------------------------------------------------------------------------------|---|
+| [dpc-web](/dpc-web)                 |Public Portal| Portal for managing organizations (Sandbox only, and soon to be deprecated)            |Ruby on Rails|
+| [dpc-admin](/dpc-admin)             |Internal Portal| Administrative Portal for managing organizations (Sandbox only, and soon to be deprecated) |Ruby on Rails|
+| [dpc-portal](/dpc-portal)           |Public Portal| Portal for managing organizations                                                      |Ruby on Rails|
+| [dpc-api](/dpc-api)                 |Public API| Asynchronous FHIR API for managing organizations and requesting or retrieving data     |Java (Dropwizard)|
+| [dpc-attribution](/dpc-attribution) |Internal API| Provides and updates data about attribution                                            |Java (Dropwizard)|
+| [dpc-consent](/dpc-consent)         |Internal API| Provides and updates information about data-sharing consent for individuals            |Java (Dropwizard)|
+| [dpc-queue](/dpc-queue)             |Internal API| Provides and updates data about export jobs and batches                                |Java (Dropwizard)|
+| [dpc-aggregation](/dpc-aggregation) |Internal Worker Service| Polls for job batches and exports data for singular batches                            |Java (Dropwizard + RxJava)|
 
 #### Shared Modules
 
@@ -78,6 +81,7 @@ In addition to services, several modules are shared across components.
 |[dpc-common](/dpc-common)|Shared utilities for components|Java|
 |[dpc-testing](/dpc-testing)|Shared utilities for testing|Java|
 |[dpc-smoketest](/dpc-smoketest)|Smoke test suite|Java|
+|[engines](/engines)|Shared engines|Ruby|
 
 ## Local Development Setup
 ###### [`^`](#table-of-contents)
@@ -189,24 +193,17 @@ By default, the API components will attempt to connect to the `dpc_attribution`,
 
 All of these databases should be created automatically from the previous step. When the API applications start, migrations will run and initialize the databases with the correct tables and data. If this behavior is not desired, set an environment variable of `DB_MIGRATION=0`.
 
-The defaults can be overridden in the configuration files.
-Common configuration options (such as database connection strings) are stored in a [server.conf](src/main/resources/server.conf) file and included in the various modules via the `include "server.conf"` attribute in module application config files.
-See the `dpc-attribution` [application.conf](dpc-attribution/src/main/resources/application.conf) for an example.
-
-Default settings can be overridden, either directly in the module configurations or via an `application.local.conf` file in the project root directory. 
+Default settings can be overridden, either directly in the module configurations or via `local.application.env` file in the project resources directory. 
 For example, modifying the `dpc-attribution` configuration:
 
 ```yaml
-dpc.attribution {
-  database = {
-    driverClass = org.postgresql.Driver
-    url = "jdbc:postgresql://localhost:5432/dpc-dev"
-    user = postgres
-  }
-}
+database:
+  driverClass: org.postgresql.Driver
+  url: "jdbc:postgresql://localhost:5432/dpc-dev"
+  user: postgres
 ```
 
-**Note**: On startup, the services look for a local override file (application.local.conf) in the root of their *current* working directory. This can create an issue when running tests with IntelliJ. The default sets the working directory to be the module root, which means any local overrides are ignored.
+**Note**: On startup, the services look for a local override file (local.application.env) in the root of their *current* working directory. This can create an issue when running tests with IntelliJ. The default sets the working directory to be the module root, which means any local overrides are ignored.
 This can be fixed by setting the working directory to the project root, but needs to be done manually.
 
 ### There are two ways to build DPC:
@@ -288,9 +285,9 @@ When manually running the individual services, you'll need to ensure that there 
 
 **Important Note**: The API service requires authentication before performing actions. This will cause most integration tests to fail, as they expect the endpoints to be open. Authentication can be disabled in one of two ways: 
 * Set the `ENV` environment variable to `local` (which is the default when running under Docker).
-* Set `dpc.api.authenticationDisabled=true` in the config file (the default from the sample config file).   
+* Set `authenticationDisabled=true` in the config file (the default from the sample config file).   
 
-Next, start each service in a new terminal window, from within the the `dpc-app` root directory. 
+Next, start each service in a new terminal window, from within the `dpc-app` root directory. 
 
 ```bash
 java -jar dpc-attribution/target/dpc-attribution.jar server
@@ -298,13 +295,11 @@ java -jar dpc-aggregation/target/dpc-aggregation.jar server
 java -jar dpc-api/target/dpc-api.jar server
 ```
 
-By default, the services will attempt to load the `local.application.conf` file from the current execution directory. 
-This can be overridden in two ways:
-* Passing `ENV={dev,test,prod}` will load a `{dev,test,prod}.application.conf` file from the service resources directory.
-* Manually specifying a configuration file after the server command `server src/main/resources/application.conf` will directly load that configuration set.
+By default, the services will attempt to load the `local.application.env` file from the current execution directory. 
+This can be overridden by passing `ENV={dev,test,prod}`, which will load `{dev,test,prod}.application.env` file from the service resources directory.
 
 **Note**: Manually specifying a config file will disable the normal configuration merging process. 
-This means that only the config variables directly specified in the file will be loaded, no other `application.conf` or `reference.conf` files will be processed. 
+This means that only the config variables directly specified in the file will be loaded, no other `application.env` files will be processed. 
 
 * You can check that the application is running by requesting the FHIR `CapabilitiesStatement` for the `dpc-api` service, which will return a JSON-formatted FHIR resource.
     ```bash
@@ -407,7 +402,8 @@ JavaDoc tool. The [Intelli-J Idea](https://jetbrains.com/idea) integrated develo
 ## Building the Additional Services
 ###### [`^`](#table-of-contents)
 
-Documentation on building the DPC Website is covered in the specific [README](dpc-web/README.md).
+- Documentation on building the DPC Portal is covered in the specific [README](dpc-portal/README.md).
+- Documentation on building the DPC Website is covered in the specific [README](dpc-web/README.md).
 
 
 ### Postman collection
@@ -442,6 +438,42 @@ Once the development environment is up and running, you should now be able to ru
       -Dsonar.token={YOUR PROJECT TOKEN}
     ```
 - Your code coverage results should now be in your local version of SonarQube.
+
+## Local Debugging
+###### [`^`](#table-of-contents)
+
+If you're running locally through Docker and you want to use your debugger there are two steps.
+- Open up port 5005 on whichever service you want to debug
+  - Add the following to docker-compose.yml under api, aggregation, attribution or consent.
+    ```    
+    ports:
+        - "5005:5005"
+    ```
+- Instead of using `make start-dpc` or `make start-app` to start the application, use `make start-dpc-debug` or `make start-app-debug`.
+  - They'll both do a clean compile of the app with debug information and start each service with the debug agent.
+- Now you can attach your debugger to the running app on port 5005.
+  - If you're using IntelliJ, there are instructions [here](https://www.jetbrains.com/help/idea/attaching-to-local-process.html#attach-to-remote).
+
+
+## Debugging Integration Tests
+###### [`^`](#table-of-contents)
+If you want to run and debug integration tests through IntelliJ there are a few steps you have to do first.  The same concepts should apply to VS Code, but you'll have to figure out the details yourself.
+- When running a test in the IDE, IntelliJ creates a temporary debug configuration.  We need to make sure our secure env variables get included.
+  - Go to Run -> Edit Configurations
+  - Click Edit Configuration Templates and select JUnit
+  - At the bottom, add a new .env file and point it to `ops/config/decrypted/local.env`
+- We need to start our dependent services, so run `make start-it-debug`
+  - This will recompile dpc with debug extensions included and start containers for dpc-attribution, dpc-aggregation, dpc-consent and a db.
+- Now you should be able to run any of the integration tests under dpc-api by clicking on the little green arrow next to their implementation.
+  - Need to debug a test?  Right click on the triangle and select debug.
+- If you have to debug one of the dependant services, for instance because an IT is calling dpc-attribution and getting a 500, and you can't figure out why, follow the instructions under [Local Debugging](#local-debugging) to open up the dependant service's debugger port in docker-compose, then rerun `make start-it-debug`.
+  - Now you can attach your debugger to that service and still run integration tests as described above.
+  - You'll have one debugger tab open on an IT in dpc-api and another on the dependant service, allowing you to set break points in either and examine the test end to end.
+
+#### Running Integration Tests Against the BFD Sandbox
+Want to run your integration tests against the real BFD sandbox instead of using the MockBlueButtonClient?  In docker-compose.yml, under the aggregation service, set the USE_BFD_MOCK env variable to true and then rerun `make start-it-debug.`
+
+Note: Many of our integration tests are written for specific test data that only exists in our MockBlueButtonClient.  If you switch to the real BFD sandbox these tests will fail, but if you want a true end to end test this is the way to go.  A list of synthetic patients in the sandbox can be found [here](https://github.com/CMSgov/beneficiary-fhir-data/wiki/Synthetic-Data-Guide).
 
 ## Other Notes
 ###### [`^`](#table-of-contents)

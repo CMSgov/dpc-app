@@ -2,8 +2,9 @@ package gov.cms.dpc.consent.cli;
 
 import gov.cms.dpc.consent.DPCConsentConfiguration;
 import gov.cms.dpc.consent.DPCConsentService;
-import io.dropwizard.cli.Cli;
-import io.dropwizard.setup.Bootstrap;
+import gov.cms.dpc.testing.DummyJarLocation;
+import io.dropwizard.core.cli.Cli;
+import io.dropwizard.core.setup.Bootstrap;
 import io.dropwizard.util.JarLocation;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,8 +17,6 @@ import java.io.PrintStream;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 @Disabled
 class SeedCommandTest {
@@ -37,8 +36,7 @@ class SeedCommandTest {
 
     @BeforeEach
     void cliSetup() {
-        final JarLocation location = mock(JarLocation.class);
-        when(location.getVersion()).thenReturn(Optional.of("1.0.0"));
+        final JarLocation location = new DummyJarLocation();
 
         final Bootstrap<DPCConsentConfiguration> bootstrap = new Bootstrap<>(new DPCConsentService());
         bootstrap.addCommand(new SeedCommand(bootstrap.getApplication()));
@@ -60,7 +58,7 @@ class SeedCommandTest {
     @Test
     void testSeedCommand() throws Exception {
 
-        final boolean success = cli.run("seed", "ci.application.conf");
+        final Optional<Throwable> success = cli.run("seed", "src/test/resources/test.application.yml");
         /* dies here with the following error
         Should not have errors ==> expected: <> but was: <io.dropwizard.configuration.ConfigurationParsingException: default configuration has an error:
           * Unrecognized field at: consentDatabase
@@ -74,7 +72,7 @@ class SeedCommandTest {
         This is because consentdb (annotation on Config database property) does not match getter name. However, making them match by changing
         the setter name results in the property values not being injected correctly.
         */
-        assertAll(() -> assertTrue(success, "Should have succeeded"),
+        assertAll(() -> assertTrue(success.isPresent(), "Should have succeeded"),
                 () -> assertEquals("", stdErr.toString(), "Should not have errors"));
 
         // todo confirm 10 seeds are present (count)

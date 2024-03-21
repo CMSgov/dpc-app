@@ -1,8 +1,6 @@
 package gov.cms.dpc.api.tasks.keys;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableCollection;
-import com.google.common.collect.ImmutableMultimap;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.entities.PublicKeyEntity;
 import gov.cms.dpc.api.resources.v1.KeyResource;
@@ -13,6 +11,8 @@ import org.hl7.fhir.dstu3.model.Organization;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.PrintWriter;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -35,15 +35,15 @@ public class UploadPublicKey extends PostBodyTask {
     }
 
     @Override
-    public void execute(ImmutableMultimap<String, String> parameters, String body, PrintWriter output) throws Exception {
+    public void execute(Map<String, List<String>> parameters, String body, PrintWriter output) throws Exception {
         final Organization organization = TasksCommon.extractOrganization(parameters);
-        final ImmutableCollection<String> labelParams = parameters.get("label");
+        final List<String> labelParams = parameters.get("label");
 
         final Optional<String> label;
-        if (labelParams.isEmpty()) {
+        if (labelParams == null || labelParams.isEmpty()) {
             label = Optional.empty();
         } else {
-            label = Optional.ofNullable(labelParams.asList().get(0));
+            label = Optional.ofNullable(labelParams.get(0));
         }
 
         KeyResource.KeySignature keySignature = new ObjectMapper().readValue(body, KeyResource.KeySignature.class);

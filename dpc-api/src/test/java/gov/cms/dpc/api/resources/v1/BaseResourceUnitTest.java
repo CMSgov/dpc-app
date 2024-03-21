@@ -19,6 +19,8 @@ class BaseResourceUnitTest {
     @Mock PatientResource par;
     @Mock PractitionerResource pr;
     @Mock DefinitionResource sdr;
+    @Mock AdminResource ar;
+    @Mock IpAddressResource ip;
 
     String url = "baseURL";
 
@@ -30,7 +32,7 @@ class BaseResourceUnitTest {
 
     @Test
     public void testGetterMethods() {
-        BaseResource baseResource = new BaseResource(kr, tr, gr, jr, dr, er, or, par, pr, sdr, url);
+        BaseResource baseResource = new BaseResource(kr, tr, gr, jr, dr, er, or, par, pr, sdr, ar, ip, url);
 
         assertEquals(kr, baseResource.keyOperations());
         assertEquals(tr, baseResource.tokenOperations());
@@ -42,11 +44,13 @@ class BaseResourceUnitTest {
         assertEquals(or, baseResource.organizationOperations());
         assertEquals(par, baseResource.patientOperations());
         assertEquals(pr, baseResource.practitionerOperations());
+        assertEquals(ar, baseResource.adminOperations());
+        assertEquals(ip, baseResource.ipAddressOperations());
     }
 
     @Test
     public void testMetadata() {
-        BaseResource baseResource = new BaseResource(kr, tr, gr, jr, dr, er, or, par, pr, sdr, url);
+        BaseResource baseResource = new BaseResource(kr, tr, gr, jr, dr, er, or, par, pr, sdr, ar, ip, url);
         CapabilityStatement capabilityStatement = Mockito.mock(CapabilityStatement.class);
 
         try(MockedStatic<Capabilities> capabilities = Mockito.mockStatic(Capabilities.class)) {
@@ -59,7 +63,7 @@ class BaseResourceUnitTest {
     @Test
     void testVersion() {
         try(MockedConstruction<PropertiesProvider> mock = Mockito.mockConstruction(PropertiesProvider.class)) {
-            BaseResource baseResource = new BaseResource(kr, tr, gr, jr, dr, er, or, par, pr, sdr, url);
+            BaseResource baseResource = new BaseResource(kr, tr, gr, jr, dr, er, or, par, pr, sdr, ar, ip, url);
 
             PropertiesProvider mockedPropertiesProvider = mock.constructed().get(0);
             Mockito.when(mockedPropertiesProvider.getBuildVersion()).thenReturn("version");

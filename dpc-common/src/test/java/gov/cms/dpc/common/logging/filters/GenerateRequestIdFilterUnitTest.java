@@ -1,20 +1,25 @@
 package gov.cms.dpc.common.logging.filters;
 
+import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import gov.cms.dpc.common.Constants;
 import gov.cms.dpc.common.MDCConstants;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import java.io.IOException;
-import java.util.UUID;
-import org.mockito.*;
+import org.mockito.ArgumentMatchers;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.slf4j.LoggerFactory;
-import ch.qos.logback.classic.Logger;
 import org.slf4j.MDC;
+
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
+import java.io.IOException;
+import java.util.UUID;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class GenerateRequestIdFilterUnitTest {
@@ -25,7 +30,7 @@ public class GenerateRequestIdFilterUnitTest {
 
     @BeforeEach
     public void setUp(){
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test
@@ -50,14 +55,14 @@ public class GenerateRequestIdFilterUnitTest {
             filter.filter(mockContext);
             assertEquals("resource_requested=v1/Patients, method=GET, media_type=application/json, request_id=" + MDC.get(MDCConstants.DPC_REQUEST_ID) + ", use_provided_request_id=true", listAppender.list.get(0).getFormattedMessage());
             assertNotNull(MDC.get(MDCConstants.DPC_REQUEST_ID));
-            UUID.fromString(MDC.get(MDCConstants.DPC_REQUEST_ID));
+            assertNotNull(UUID.fromString(MDC.get(MDCConstants.DPC_REQUEST_ID)));
 
             //Without request-id in header and extraction disabled
             filter = new GenerateRequestIdFilter(false);
             filter.filter(mockContext);
             assertEquals("resource_requested=v1/Patients, method=GET, media_type=application/json, request_id=" + MDC.get(MDCConstants.DPC_REQUEST_ID) + ", use_provided_request_id=false", listAppender.list.get(1).getFormattedMessage());
             assertNotNull(MDC.get(MDCConstants.DPC_REQUEST_ID));
-            UUID.fromString(MDC.get(MDCConstants.DPC_REQUEST_ID));
+            assertNotNull(UUID.fromString(MDC.get(MDCConstants.DPC_REQUEST_ID)));
         } finally {
             listAppender.stop();
         }

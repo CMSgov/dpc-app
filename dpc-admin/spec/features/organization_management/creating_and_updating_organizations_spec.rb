@@ -5,7 +5,7 @@ require './lib/luhnacy_lib/luhnacy_lib'
 
 
 RSpec.feature 'creating and updating organizations' do
-  include ApiClientSupport
+  include DpcClientSupport
   include OrganizationsHelper
 
   let!(:internal_user) { create :internal_user }
@@ -150,7 +150,9 @@ RSpec.feature 'creating and updating organizations' do
     fill_in 'organization_name', with: new_name
     find('[data-test="form-submit"]').click
 
-    expect(api_client).to have_received(:update_organization).with(reg_org)
+    expect(api_client).to have_received(:update_organization).with(reg_org.organization,
+                                                                   reg_org.api_id,
+                                                                   reg_org.api_endpoint_ref)
   end
 
   scenario 'updating an API enabled organization without npi unsuccessfully' do
@@ -235,7 +237,7 @@ RSpec.feature 'creating and updating organizations' do
   def stub_sandbox_notification_mailer(org, users=[])
     mailer = double(UserMailer)
     users.each do |user|
-      allow(UserMailer).to receive(:with).with(user: user, vendor: org.health_it_vendor?).and_return(mailer)
+      allow(UserMailer).to receive(:with).with(user:, vendor: org.health_it_vendor?).and_return(mailer)
     end
 
     allow(mailer).to receive(:organization_sandbox_email).and_return(mailer)

@@ -34,22 +34,14 @@
             <groupId>io.dropwizard</groupId>
             <artifactId>dropwizard-hibernate</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.knowm</groupId>
-            <artifactId>dropwizard-sundial</artifactId>
-        </dependency>
         <!--No longer shipped with Java 11, so we need to include it manually-->
         <dependency>
             <groupId>javax.xml.bind</groupId>
             <artifactId>jaxb-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.hubspot.dropwizard</groupId>
-            <artifactId>dropwizard-guicier</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>${typesafe.config.groupID}</groupId>
-            <artifactId>typesafe-dropwizard-configuration</artifactId>
+            <groupId>ru.vyarus</groupId>
+            <artifactId>dropwizard-guicey</artifactId>
         </dependency>
         <dependency>
             <groupId>com.google.inject</groupId>
@@ -114,7 +106,7 @@
             <groupId>org.glassfish.jersey.test-framework.providers</groupId>
             <artifactId>jersey-test-framework-provider-grizzly2</artifactId>
             <!-- Ideally, this should track the version used in Dropwizard-->
-            <version>2.31</version>
+            <version>2.41</version>
             <scope>test</scope>
             <exclusions>
                 <exclusion>
@@ -138,6 +130,12 @@
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
             <version>2.8.9</version>
+        </dependency>
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-annotations</artifactId>
+            <version>1.6.6</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 
@@ -216,7 +214,7 @@
                     <container>
                         <args>
                             <arg>server</arg>
-                            <!--<arg>${jib.container.appRoot}/resources/application.conf</arg>-->
+                            <!--<arg>${jib.container.appRoot}/resources/application.yml</arg>-->
                         </args>
                         <ports>
                             <port>8080</port>
@@ -249,7 +247,7 @@
                         <annotationProcessorPath>
                             <groupId>org.hibernate</groupId>
                             <artifactId>hibernate-jpamodelgen</artifactId>
-                            <version>5.4.2.Final</version>
+                            <version>5.6.15.Final</version>
                         </annotationProcessorPath>
                         <path>
                             <groupId>javax.xml.bind</groupId>

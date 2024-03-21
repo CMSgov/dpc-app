@@ -1,0 +1,9 @@
+<label class="usa-label" for="<%= @id %>"><%= @label %></label>
+<div class="usa-combo-box">
+  <select class="usa-select" name="<%= @id %>" id="<%= @id %>" onchange="<%= @on_change %>">
+    <option value><%= @label %></option>
+    <% @options.each do |option| %>
+      <option value="<%= option %>"><%= option %></option>
+    <% end %>
+  </select>
+</div>

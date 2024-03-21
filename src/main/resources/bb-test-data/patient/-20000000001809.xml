@@ -114,6 +114,10 @@
                     <system value='https://bluebutton.cms.gov/resources/identifier/mbi-hash'/>
                     <value value='a006edba97087f2911a35706e46bf1287d21d8fa515024ace44d589bdef9d819'/>
                 </identifier>
+                <identifier>
+                    <system value="http://hl7.org/fhir/sid/us-mbi"/>
+                    <value value="1SQ3F00AA00"/>
+                </identifier>
                 <name>
                     <use value='usual'/>
                     <family value='Doe'/>

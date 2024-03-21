@@ -1,0 +1,21 @@
+<div>
+    <div class="margin-bottom-5">&larr; <%= link_to @organization.name, organization_path(organization.path_id) %></div>
+    <h1>Add Public IP Address</h1>
+
+    <section class="box">
+        <div>
+            <h2>New IP address for <%= @organization.name %></h2>
+            <%= form_tag organization_ip_addresses_path(organization_id: organization.path_id), method: :post do %>
+                <%= render(Core::Form::TextInputComponent.new(
+                        label: "Label", attribute: :label, default: params[:label], input_options: { maxlength: 25 },
+                        hint: 'Choose a descriptive name to make your IP address easily identifiable to you.')
+                    ) %>
+                <%= render(Core::Form::TextInputComponent.new(
+                        label: "Public IP address", attribute: :ip_address, default: params[:ip_address], input_options: { maxlength: 15 },
+                        hint: 'For example, 136.226.19.87')
+                    ) %>
+                <%= submit_tag "Add IP", class: "usa-button", data: { test: "form:submit" } %>
+            <% end %>
+        </div>
+    </section>
+</div>

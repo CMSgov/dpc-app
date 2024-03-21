@@ -10,6 +10,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 public class OrganizationDAO extends AbstractDAO<OrganizationEntity> {
@@ -32,6 +33,16 @@ public class OrganizationDAO extends AbstractDAO<OrganizationEntity> {
         final CriteriaQuery<OrganizationEntity> query = builder.createQuery(OrganizationEntity.class);
         final Root<OrganizationEntity> root = query.from(OrganizationEntity.class);
         query.select(root);
+
+        return list(query);
+    }
+
+    public List<OrganizationEntity> getOrganizationsByIds(Set<String> ids) {
+        final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
+        final CriteriaQuery<OrganizationEntity> query = builder.createQuery(OrganizationEntity.class);
+        final Root<OrganizationEntity> root = query.from(OrganizationEntity.class);
+        
+        query.select(root).where(root.get("organizationID").get("value").in(ids));
 
         return list(query);
     }

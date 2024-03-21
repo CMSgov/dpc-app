@@ -15,6 +15,7 @@ import org.slf4j.MDC;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import java.util.Collections;
 import java.util.List;
@@ -59,6 +60,11 @@ public abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organ
         final String orgId = dpcAuthCredentials.getOrganization().getId();
         final String resourceRequested = XSSSanitizerUtil.sanitize(uriInfo.getPath());
         final String method = requestContext.getMethod();
+
+        // TODO Remove this when we want to turn on the IpAddress end point
+        if(resourceRequested.equals("v1/IpAddress")) {
+            throw new WebApplicationException(Response.Status.FORBIDDEN);
+        }
 
         final boolean authenticated = this.authenticate(requestContext, dpcAuthCredentials, null);
         if (!authenticated) {

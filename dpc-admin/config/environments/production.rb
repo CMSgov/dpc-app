@@ -24,7 +24,10 @@ Rails.application.configure do
 
   # Compress JavaScripts and CSS.
   
-  config.assets.js_compressor = Uglifier.new(:harmony => true)
+  config.assets.configure do |conf|
+    conf.js_compressor = :uglifier
+    conf.css_compressor = :sass
+  end
   # config.assets.css_compressor = :sass
 
   # Do not fallback to assets pipeline if a precompiled asset is missed.
@@ -57,13 +60,6 @@ Rails.application.configure do
 
   # Log to a dedicated file
   config.lograge.logger = ActiveSupport::Logger.new(STDOUT)
-
-  # This is useful if you want to log query parameters
-  config.lograge.custom_options = lambda do |event|
-    { :ddsource => 'ruby',
-      :params => event.payload[:params].reject { |k| %w(controller action).include? k }
-    }
-  end
 
   # Use the lowest log level to ensure availability of diagnostic information
   # when problems arise.

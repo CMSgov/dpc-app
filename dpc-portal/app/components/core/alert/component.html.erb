@@ -1,0 +1,10 @@
+<div class="usa-alert usa-alert--<%= status %> <%= heading.present? ? '' : ' usa-alert--slim' %> <%= include_icon ? '' : 'usa-alert--no-icon' %>">
+    <div class="usa-alert__body">
+      <% if heading.present? %>
+        <h4 class="usa-alert__heading"><%= heading %></h4>
+      <% end %>
+      <p class="usa-alert__text">
+        <%= content %>
+      </p>
+    </div>
+</div>

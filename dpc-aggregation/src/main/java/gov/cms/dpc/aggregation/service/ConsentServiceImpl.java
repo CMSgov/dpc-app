@@ -20,29 +20,38 @@ public class ConsentServiceImpl implements ConsentService {
 
     @Override
     public Optional<List<ConsentResult>> getConsent(String mbi) {
-        final Bundle bundle = doConsentSearch(mbi);
-
-        List<ConsentResult> results = bundle.getEntry().stream().map(entryComponent -> {
-            Consent consent = (Consent) entryComponent.getResource();
-            ConsentResult consentResult = new ConsentResult();
-            consentResult.setActive(Consent.ConsentState.ACTIVE.equals(consent.getStatus()));
-            consentResult.setConsentDate(consent.getDateTime());
-            consentResult.setConsentId(consent.getId());
-            consentResult.setPolicyType(ConsentResult.PolicyType.fromPolicyUrl(consent.getPolicyRule()));
-            return consentResult;
-        }).collect(Collectors.toList());
-
-        return Optional.of(results);
+        return getConsent(List.of(mbi));
     }
 
-    private Bundle doConsentSearch(String mbi){
-        final String mbiIdentifier = String.format("%s|%s", DPCIdentifierSystem.MBI.getSystem(), mbi);
+    @Override
+    public Optional<List<ConsentResult>> getConsent(List<String> mbis) {
+        final Bundle bundle = doConsentSearch(mbis);
+
+        return Optional.of(
+            bundle.getEntry().stream().map( entry -> {
+                Consent consent = (Consent) entry.getResource();
+
+                ConsentResult consentResult = new ConsentResult();
+                consentResult.setActive(Consent.ConsentState.ACTIVE.equals(consent.getStatus()));
+                consentResult.setConsentDate(consent.getDateTime());
+                consentResult.setConsentId(consent.getId());
+                consentResult.setPolicyType(ConsentResult.PolicyType.fromPolicyUrl(consent.getPolicyRule()));
+                return consentResult;
+            }).collect(Collectors.toList())
+        );
+    }
+
+    private Bundle doConsentSearch(List<String> mbis){
+        List<String> fullMbis = mbis.stream()
+                .map( mbi -> String.format("%s|%s", DPCIdentifierSystem.MBI.getSystem(), mbi) )
+                .collect(Collectors.toList());
+
         return consentClient
                 .search()
                 .forResource(Consent.class)
                 .encodedJson()
                 .returnBundle(Bundle.class)
-                .where(Consent.PATIENT.hasId(mbiIdentifier))
+                .where(Consent.PATIENT.hasAnyOfIds(fullMbis))
                 .execute();
     }
 }

@@ -4,7 +4,6 @@ import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.common.annotations.NoHtml;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.Profiled;
-import gov.cms.dpc.fhir.validations.profiles.PractitionerProfile;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Practitioner;
@@ -27,7 +26,7 @@ public abstract class AbstractPractitionerResource {
     public abstract Bundle practitionerSearch(OrganizationPrincipal organization, @NoHtml String providerNPI);
 
     @POST
-    public abstract Response submitProvider(OrganizationPrincipal organization, @Valid @Profiled(profile = PractitionerProfile.PROFILE_URI) Practitioner provider);
+    public abstract Response submitProvider(OrganizationPrincipal organization, @Valid @Profiled Practitioner provider);
 
     @POST
     @Path("/$submit")
@@ -43,7 +42,7 @@ public abstract class AbstractPractitionerResource {
 
     @PUT
     @Path("/{providerID}")
-    public abstract Practitioner updateProvider(UUID providerID, @Valid @Profiled(profile = PractitionerProfile.PROFILE_URI) Practitioner provider);
+    public abstract Practitioner updateProvider(UUID providerID, @Valid @Profiled Practitioner provider);
 
     @POST
     @Path("/$validate")

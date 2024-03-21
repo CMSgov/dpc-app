@@ -13,7 +13,6 @@ import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.Profiled;
 import gov.cms.dpc.fhir.helpers.FHIRHelpers;
-import gov.cms.dpc.fhir.validations.profiles.EndpointProfile;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.*;
 import org.eclipse.jetty.http.HttpStatus;
@@ -53,7 +52,7 @@ public class EndpointResource extends AbstractEndpointResource {
     })
     @Override
     public Response createEndpoint(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
-                                   @ApiParam @Valid @Profiled(profile = EndpointProfile.PROFILE_URI) Endpoint endpoint) {
+                                   @ApiParam @Valid @Profiled Endpoint endpoint) {
         Reference organizationPrincipalRef = new Reference(new IdType("Organization", organizationPrincipal.getID().toString()));
         if (endpoint.hasManagingOrganization() && !endpoint.getManagingOrganization().getReference().equals(organizationPrincipalRef.getReference())) {
             throw new WebApplicationException("An Endpoint cannot be created for a different Organization", HttpStatus.UNPROCESSABLE_ENTITY_422);
@@ -118,7 +117,7 @@ public class EndpointResource extends AbstractEndpointResource {
     })
     @Override
     public Endpoint updateEndpoint(@ApiParam(value = "Your Organization's FHIR Endpoint ID") @NotNull @PathParam("endpointID") UUID endpointID,
-                                   @Valid @Profiled(profile = EndpointProfile.PROFILE_URI) Endpoint endpoint) {
+                                   @Valid @Profiled Endpoint endpoint) {
         Endpoint currEndpoint = fetchEndpoint(endpointID);
         if (!endpoint.getManagingOrganization().getReference().equals(currEndpoint.getManagingOrganization().getReference())) {
             throw new WebApplicationException("An Endpoint's Organization cannot be changed", HttpStatus.UNPROCESSABLE_ENTITY_422);

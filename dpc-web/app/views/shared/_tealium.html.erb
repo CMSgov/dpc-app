@@ -1,0 +1,20 @@
+<!-- Tealium Tag Manager - DataLayer -->
+<script type="text/javascript">
+    var utag_data = {
+      "content_language": "en",
+      "page_name": "<%= content_for?(:title) ? yield(:title) : 'CMS.gov' %>",
+      "page_path": "<%= request.fullpath %>",
+      "site_domain": "<%= request.domain %>",
+      "site_environment": "<%= ENV['ENV'] %>",
+    }
+</script>
+
+<!-- Tealium Tag Manager - ASYNC -->
+<script type="text/javascript">
+    (function(a,b,c,d){
+    a="<%= "https://tags.tiqcdn.com/utag/cmsgov/cms-dpc/#{ ENV['ENV'] == 'prod-sbx' ? 'qa' : 'dev'}/utag.js" %>";
+    b=document;c='script';d=b.createElement(c);
+    d.src=a;d.type='text/java'+c;d.async=true;
+    a=b.getElementsByTagName(c)[0];a.parentNode.insertBefore(d,a);
+    })();
+</script>

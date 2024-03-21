@@ -20,8 +20,8 @@ echo "│                         │"
 echo "│  Running DPC Web Tests  │"
 echo "│                         |"
 echo "└─────────────────────────┘"
-docker-compose -p start-v1-portals -f docker-compose.yml -f docker-compose.portals.yml run --entrypoint "rubocop" dpc_web
-docker-compose -p start-v1-portals -f docker-compose.yml -f docker-compose.portals.yml run --entrypoint "bundle exec rails spec" dpc_web
+docker-compose -p start-v1-portals -f docker-compose.yml -f docker-compose.portals.yml run --entrypoint "bundle exec rubocop" dpc_web
+docker-compose -p start-v1-portals -f docker-compose.yml -f docker-compose.portals.yml run --entrypoint "bundle exec rspec" dpc_web
 
 echo "┌──────────────────────────────┐"
 echo "│                              │"

@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.persistence.PersistenceException;
+import javax.ws.rs.container.ResourceInfo;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Provider;
 import java.util.regex.Matcher;
@@ -27,8 +29,8 @@ public class PersistenceExceptionHandler extends AbstractFHIRExceptionHandler<Pe
     private static final Pattern MSG_PATTERN = Pattern.compile("ERROR:\\s(duplicate\\s[a-zA-Z_]*\\svalue\\sviolates\\sunique\\sconstraint)");
 
     @Inject
-    PersistenceExceptionHandler() {
-        super();
+    PersistenceExceptionHandler(@Context ResourceInfo info) {
+        super(info);
     }
 
     @Override
