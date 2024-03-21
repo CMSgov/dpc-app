@@ -7,6 +7,7 @@ import gov.cms.dpc.api.cli.organizations.OrganizationRegistration;
 import gov.cms.dpc.api.cli.tokens.TokenCreate;
 import gov.cms.dpc.api.cli.tokens.TokenDelete;
 import gov.cms.dpc.api.cli.tokens.TokenList;
+import gov.cms.dpc.testing.DummyJarLocation;
 import io.dropwizard.core.cli.Cli;
 import io.dropwizard.core.setup.Bootstrap;
 import io.dropwizard.util.JarLocation;
@@ -26,8 +27,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 class TokenTests extends AbstractApplicationTest {
 
@@ -45,9 +44,8 @@ class TokenTests extends AbstractApplicationTest {
 
     @BeforeEach
     void cliSetup() {
-        // Setup necessary mock
-        final JarLocation location = mock(JarLocation.class);
-        when(location.getVersion()).thenReturn(Optional.of("1.0.0"));
+        // Setup dummy JarLocation
+        final JarLocation location = new DummyJarLocation();
 
         // Add commands you want to test
         final Bootstrap<DPCAPIConfiguration> bootstrap = new Bootstrap<>(new DPCAPIService());

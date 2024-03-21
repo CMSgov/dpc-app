@@ -5,103 +5,164 @@ require 'rails_helper'
 RSpec.describe 'Organizations', type: :request do
   include DpcClientSupport
 
-  describe 'GET /index not logged in' do
-    it 'redirects to login' do
-      get '/organizations'
-      expect(response).to redirect_to('/portal/users/sign_in')
-    end
-  end
-
   describe 'GET /index' do
-    let!(:user) { create(:user) }
-    before { sign_in user }
-
-    it 'returns success' do
-      api_id = SecureRandom.uuid
-      stub_api_client(message: :get_organization,
-                      response: default_get_org_response(api_id))
-      get '/organizations', params: { id: api_id }
+    context 'not logged in' do
+      it 'redirects to login' do
+        get '/organizations'
+        expect(response).to redirect_to('/portal/users/sign_in')
+      end
     end
-  end
 
-  describe 'GET /organizations/[organization_id] not logged in' do
-    it 'redirects to login' do
-      get '/organizations/no-such-id'
-      expect(response).to redirect_to('/portal/users/sign_in')
+    describe 'logged in' do
+      let!(:user) { create(:user) }
+      let!(:org) { create(:provider_organization) }
+      before { sign_in user }
+
+      it 'returns success if no orgs associated with user' do
+        get '/organizations'
+        expect(assigns(:organizations)).to be_empty
+      end
+
+      it 'returns organizations linked to user as ao' do
+        create(:ao_org_link, provider_organization: org, user:)
+        get '/organizations'
+        expect(assigns(:organizations)).to eq [org]
+      end
+
+      it 'returns organizations linked to user as cd' do
+        create(:cd_org_link, provider_organization: org, user:)
+        get '/organizations'
+        expect(assigns(:organizations)).to eq [org]
+      end
     end
   end
 
   describe 'GET /organizations/[organization_id]' do
-    let!(:user) { create(:user) }
-    before { sign_in user }
-
-    it 'returns success' do
-      api_id = SecureRandom.uuid
-      stub_client(api_id)
-      get "/organizations/#{api_id}"
-      expect(assigns(:organization).api_id).to eq api_id
+    context 'not logged in' do
+      it 'redirects to login' do
+        org = create(:provider_organization)
+        get "/organizations/#{org.id}"
+        expect(response).to redirect_to('/portal/users/sign_in')
+      end
     end
 
-    it 'redirects if prod-sbx' do
-      api_id = SecureRandom.uuid
-      allow(ENV)
-        .to receive(:fetch)
-        .with('ENV', nil)
-        .and_return('prod-sbx')
-      get "/organizations/#{api_id}"
-      expect(response).to redirect_to(root_url)
+    context 'no link to org' do
+      let!(:user) { create(:user) }
+      before { sign_in user }
+      it 'redirects to organizations page' do
+        org = create(:provider_organization)
+        get "/organizations/#{org.id}"
+        expect(response).to redirect_to(organizations_path)
+      end
     end
 
-    it 'goes to hard-coded org if test' do
-      api_id = SecureRandom.uuid
-      allow(ENV)
-        .to receive(:fetch)
-        .with('ENV', nil)
-        .and_return('test')
-      hard_coded_id = '6a1dbf47-825b-40f3-b81d-4a7ffbbdc270'
-      stub_client(hard_coded_id)
-      get "/organizations/#{api_id}"
-      expect(assigns(:organization).api_id).to eq hard_coded_id
-    end
+    context 'as cd' do
+      let!(:user) { create(:user) }
+      let!(:org) { create(:provider_organization) }
+      let!(:link) { create(:cd_org_link, user:, provider_organization: org) }
+      before { sign_in user }
 
-    it 'goes to hard-coded org if dev' do
-      api_id = SecureRandom.uuid
-      allow(ENV)
-        .to receive(:fetch)
-        .with('ENV', nil)
-        .and_return('dev')
-      hard_coded_id = '78d02106-2837-4d07-8c51-8d73332aff09'
-      stub_client(hard_coded_id)
-      get "/organizations/#{api_id}"
-      expect(assigns(:organization).api_id).to eq hard_coded_id
+      it 'returns success' do
+        get "/organizations/#{org.id}"
+        expect(assigns(:organization)).to eq org
+      end
+
+      it 'shows credential page' do
+        get "/organizations/#{org.id}"
+        expect(response.body).to include('<h2>Client Tokens</h2>')
+        expect(response.body).to include('<h2>Public Keys</h2>')
+        expect(response.body).to include('<h2>Public IPs</h2>')
+      end
+
+      it 'redirects if prod-sbx' do
+        allow(ENV)
+          .to receive(:fetch)
+          .with('ENV', nil)
+          .and_return('prod-sbx')
+        get "/organizations/#{org.id}"
+        expect(assigns(:organization)).to be_nil
+        expect(response).to redirect_to(root_url)
+      end
     end
   end
 
   describe 'GET /organizations/[organization_id]?ao=true' do
     let!(:user) { create(:user) }
+    let!(:org) { create(:provider_organization) }
     before { sign_in user }
 
-    it 'returns success' do
-      api_id = SecureRandom.uuid
-      stub_client(api_id)
-      get "/organizations/#{api_id}?ao=true"
-      expect(assigns(:organization).api_id).to eq api_id
+    context 'as ao' do
+      before do
+        create(:ao_org_link, user:, provider_organization: org)
+      end
+
+      it 'returns success' do
+        get "/organizations/#{org.id}?ao=true"
+        expect(assigns(:organization)).to eq org
+      end
+
+      it 'shows CD list page' do
+        get "/organizations/#{org.id}?ao=true"
+        expect(response.body).to include('<h2>Credential delegates</h2>')
+        expect(response.body).to include('<h2>Pending</h2>')
+        expect(response.body).to include('<h2>Active</h2>')
+      end
+
+      context :invitations do
+        it 'assigns if exist' do
+          create(:invitation, provider_organization: org, invited_by: user)
+          get "/organizations/#{org.id}?ao=true"
+          expect(assigns(:invitations).size).to eq 1
+        end
+
+        it 'does not assign if not exist' do
+          get "/organizations/#{org.id}?ao=true"
+          expect(assigns(:invitations).size).to eq 0
+        end
+      end
+
+      context :credential_delegates do
+        it 'assigns if exist' do
+          create(:cd_org_link, provider_organization: org)
+          get "/organizations/#{org.id}?ao=true"
+          expect(assigns(:cds).size).to eq 1
+        end
+
+        it 'does not assign if not exist' do
+          get "/organizations/#{org.id}?ao=true"
+          expect(assigns(:cds).size).to eq 0
+        end
+
+        it 'does not assign if link disabled' do
+          create(:cd_org_link, provider_organization: org, disabled_at: 1.day.ago)
+          get "/organizations/#{org.id}?ao=true"
+          expect(assigns(:cds).size).to eq 0
+        end
+      end
     end
 
-    it 'assigns invitations if exist' do
-      api_id = SecureRandom.uuid
-      stub_client(api_id)
-      provider_organization = create(:provider_organization, dpc_api_organization_id: api_id)
-      create(:invitation, provider_organization:, invited_by: user)
-      get "/organizations/#{api_id}?ao=true"
-      expect(assigns(:invitations).size).to eq 1
-    end
+    context 'as cd' do
+      before do
+        create(:cd_org_link, user:, provider_organization: org)
+      end
 
-    it 'does not assign invitations if not exist' do
-      api_id = SecureRandom.uuid
-      stub_client(api_id)
-      get "/organizations/#{api_id}?ao=true"
-      expect(assigns(:invitations).size).to eq 0
+      it 'returns success' do
+        get "/organizations/#{org.id}?ao=true"
+        expect(assigns(:organization)).to eq org
+      end
+
+      it 'does not show CD list page' do
+        get "/organizations/#{org.id}?ao=true"
+        expect(response.body).to_not include('<h2>Credential delegates</h2>')
+        expect(response.body).to_not include('<h2>Pending</h2>')
+        expect(response.body).to_not include('<h2>Active</h2>')
+      end
+
+      it 'does not assign invitations even if exist' do
+        create(:invitation, provider_organization: org, invited_by: user)
+        get "/organizations/#{org.id}?ao=true"
+        expect(assigns(:invitations)).to be_nil
+      end
     end
   end
 
@@ -184,48 +245,49 @@ RSpec.describe 'Organizations', type: :request do
     context 'GET /organizations/[organization_id]/tos_form' do
       it 'renders tos form' do
         org = create(:provider_organization)
+        create(:ao_org_link, provider_organization: org, user:)
         get "/organizations/#{org.id}/tos_form"
         expect(response).to be_ok
       end
+
       it 'fails if no org' do
         get '/organizations/fake-org/tos_form'
         expect(response).to be_not_found
       end
     end
+
     context 'POST /organizations/[organization_id]/sign_tos' do
-      it 'succeeds' do
+      it 'succeeds if ao' do
         org = create(:provider_organization)
+        create(:ao_org_link, provider_organization: org, user:)
         post "/organizations/#{org.id}/sign_tos"
         org.reload
         expect(org.terms_of_service_accepted_at).to be_present
         expect(org.terms_of_service_accepted_by).to eq user
         expect(response).to redirect_to(success_organization_path(org))
       end
+
+      it 'fails if not ao' do
+        org = create(:provider_organization)
+        create(:cd_org_link, provider_organization: org, user:)
+        post "/organizations/#{org.id}/sign_tos"
+        expect(org.terms_of_service_accepted_at).to_not be_present
+        expect(response).to redirect_to(organizations_path)
+      end
     end
+
     context 'GET /organizations/[organization_id]/success' do
       it 'shows success page' do
         org = create(:provider_organization)
+        create(:ao_org_link, provider_organization: org, user:)
         get "/organizations/#{org.id}/success"
         expect(response).to be_ok
       end
+
       it 'fails if no org' do
         get '/organizations/fake-org/success'
         expect(response).to be_not_found
       end
     end
-  end
-
-  def stub_client(api_id)
-    client = stub_api_client(message: :get_organization,
-                             response: default_get_org_response(api_id))
-    stub_self_returning_api_client(message: :get_client_tokens,
-                                   response: default_get_client_tokens,
-                                   api_client: client)
-    stub_self_returning_api_client(message: :get_public_keys,
-                                   response: default_get_public_keys,
-                                   api_client: client)
-    stub_self_returning_api_client(message: :get_ip_addresses,
-                                   response: default_get_ip_addresses,
-                                   api_client: client)
   end
 end

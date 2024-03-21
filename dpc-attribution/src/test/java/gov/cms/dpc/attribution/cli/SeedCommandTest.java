@@ -2,6 +2,7 @@ package gov.cms.dpc.attribution.cli;
 
 import gov.cms.dpc.attribution.DPCAttributionConfiguration;
 import gov.cms.dpc.attribution.DPCAttributionService;
+import gov.cms.dpc.testing.DummyJarLocation;
 import gov.cms.dpc.testing.IntegrationTest;
 import io.dropwizard.core.cli.Cli;
 import io.dropwizard.core.setup.Bootstrap;
@@ -18,8 +19,6 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 @IntegrationTest
 public class SeedCommandTest {
@@ -32,8 +31,7 @@ public class SeedCommandTest {
 
     @BeforeEach
     void setup() {
-        final JarLocation location = mock(JarLocation.class);
-        when(location.getVersion()).thenReturn(Optional.of("1.0.0"));
+        final JarLocation location = new DummyJarLocation();
 
         // Configure bootstrap - adapted from DropwizardTestSupport
         DPCAttributionService app = new DPCAttributionService();

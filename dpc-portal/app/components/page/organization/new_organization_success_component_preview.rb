@@ -5,17 +5,8 @@ module Page
     # Previews Invite Credential Delegate Success Page
     class NewOrganizationSuccessComponentPreview < ViewComponent::Preview
       def default
-        render(Page::Organization::NewOrganizationSuccessComponent.new(MockOrg.new('Health Hut')))
-      end
-    end
-
-    # Mocks dpc-api organization
-    class MockOrg
-      attr_accessor :name, :path_id
-
-      def initialize(name)
-        @name = name
-        @path_id = 'some-guid'
+        org = ProviderOrganization.new(name: 'Health Hut', npi: '1111111111', id: 2)
+        render(Page::Organization::NewOrganizationSuccessComponent.new(org))
       end
     end
   end
