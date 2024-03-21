@@ -23,7 +23,7 @@ require (
 	github.com/tsenart/vegeta v12.7.0+incompatible
 	github.com/zach-klippenstein/goregen v0.0.0-20160303162051-795b5e3961ea
 	golang.org/x/net v0.17.0 // indirect
-	mellium.im/sasl v0.2.1 // indirect
+	mellium.im/sasl v0.3.1 // indirect
 )
 
 replace github.com/CMSgov/dpc-app/dpcclient => ../../dpcclient
