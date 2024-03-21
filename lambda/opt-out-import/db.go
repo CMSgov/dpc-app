@@ -107,7 +107,7 @@ func getAssumeRoleArn() (string, error) {
 	return arn, nil
 }
 
-func insertOptOutMetadata(db *sql.DB, optOutMetadata *OptOutFilenameMetadata) (OptOutFileEntity, error) {
+func insertResponseFileMetadata(db *sql.DB, optOutMetadata *ResponseFileMetadata) (OptOutFileEntity, error) {
 	optOutFile := &OptOutFileEntity{}
 	id := uuid.New().String()
 	optOutMetadata.FileID = id
@@ -140,7 +140,7 @@ func insertConsentRecords(db *sql.DB, optOutFileId string, records []*OptOutReco
 
 	rows, err := db.Query(query)
 	if err != nil {
-		if err := updateOptOutFileImportStatus(db, optOutFileId, ImportFail); err != nil {
+		if err := updateResponseFileImportStatus(db, optOutFileId, ImportFail); err != nil {
 			return createdRecords, fmt.Errorf(
 				"insertConsentRecords: failed to update opt_out_file status to Failed: %w", err)
 		}
@@ -161,14 +161,14 @@ func insertConsentRecords(db *sql.DB, optOutFileId string, records []*OptOutReco
 	}
 
 	log.Info("Successfully inserted consent records.")
-	if err := updateOptOutFileImportStatus(db, optOutFileId, ImportComplete); err != nil {
+	if err := updateResponseFileImportStatus(db, optOutFileId, ImportComplete); err != nil {
 		return createdRecords, fmt.Errorf(
 			"insertConsentRecords: failed to update opt_out_file status to Complete: %w", err)
 	}
 	return createdRecords, err
 }
 
-func updateOptOutFileImportStatus(db *sql.DB, optOutFileId string, status string) error {
+func updateResponseFileImportStatus(db *sql.DB, optOutFileId string, status string) error {
 	entity := &OptOutFileEntity{}
 	query := `UPDATE opt_out_file
 			  SET import_status = $1, updated_at = NOW()

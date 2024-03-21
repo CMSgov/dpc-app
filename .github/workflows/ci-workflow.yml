@@ -10,7 +10,6 @@ on:
 env:
   VAULT_PW: ${{ secrets.VAULT_PW }}
   REPORT_COVERAGE: true
-  CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
   DPC_CA_CERT: ${{ secrets.DPC_CA_CERT }}
   ENV: "github-ci"
 
@@ -45,7 +44,7 @@ jobs:
       - name: "DPC Web Build"
         run: |
           make ci-web-portal
-  
+
   build-dpc-admin:
     name: "Build and Test DPC Admin Portal"
     runs-on: ubuntu-latest

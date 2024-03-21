@@ -37,10 +37,10 @@ var isTesting = os.Getenv("IS_TESTING") == "true"
 
 func main() {
 	if isTesting {
-		var filename, err = generateBeneAlignmentFile()
+		var filename, err = generateRequestFile()
 		if err != nil {
 			log.Error(err)
-		} else {		
+		} else {
 			log.Println(filename)
 		}
 	} else {
@@ -53,7 +53,7 @@ func handler(ctx context.Context, event events.S3Event) (string, error) {
 		DisableHTMLEscape: true,
 		TimestampFormat:   time.RFC3339Nano,
 	})
-	var filename, err = generateBeneAlignmentFile()
+	var filename, err = generateRequestFile()
 	if err != nil {
 		return "", err
 	}
@@ -61,7 +61,7 @@ func handler(ctx context.Context, event events.S3Event) (string, error) {
 	return filename, nil
 }
 
-func generateBeneAlignmentFile() (string, error) {
+func generateRequestFile() (string, error) {
 	session, sessErr := getAwsSession()
 	if sessErr != nil {
 		return "", sessErr
@@ -94,7 +94,7 @@ func generateBeneAlignmentFile() (string, error) {
 		return "", consentDbErr
 	}
 
-	fileName := generateAlignmentFileName(time.Now())
+	fileName := generateRequestFileName(time.Now())
 	buff, fileErr := formatFileData(fileName, patientInfos)
 
 	if fileErr != nil {
@@ -157,11 +157,11 @@ func formatFileData(fileName string, patientInfos map[string]PatientInfo) (bytes
 		recordCount += 1
 	}
 	buff.WriteString(fmt.Sprintf("TRL_BENEDATAREQ%s%010d", curr_date, recordCount))
-	log.WithField("num_patients", len(patientInfos)).Info(fmt.Sprintf("Successfully generated beneficiary alignment file for file: %s", fileName))
+	log.WithField("num_patients", len(patientInfos)).WithField("request_filename", fileName).WithField("request_filesize", buff.Len()).Info(fmt.Sprintf("Successfully generated beneficiary alignment file for file: %s", fileName))
 	return buff, nil
 }
 
-func generateAlignmentFileName(now time.Time) string {
+func generateRequestFileName(now time.Time) string {
 	fileFormat := "P#EFT.ON.DPC.NGD.REQ.D%s.T%s"
 
 	date := now.Format("060102")

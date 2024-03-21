@@ -44,7 +44,7 @@ type (
 func main() {
 	if isTesting {
 		filename := "bfdeft01/dpc/in/P.NGD.DPC.RSP.D240123.T1122001.IN"
-		success, _ := importOptOutFile("demo-bucket", filename)
+		success, _ := importResponseFile("demo-bucket", filename)
 		log.Println(success)
 	} else {
 		lambda.Start(handler)
@@ -63,13 +63,13 @@ func handler(ctx context.Context, sqsEvent events.SQSEvent) (string, error) {
 		log.Errorf("Failed to parse S3 event: %v", err)
 		return "", err
 	} else if s3Event == nil {
-		log.Infof("No S3 event found, skipping safely.")
+		log.Info("No S3 event found, skipping safely.")
 		return "", nil
 	}
 
 	for _, e := range s3Event.Records {
 		if e.EventName == "ObjectCreated:Put" {
-			success, err := importOptOutFile(e.S3.Bucket.Name, e.S3.Object.Key)
+			success, err := importResponseFile(e.S3.Bucket.Name, e.S3.Object.Key)
 			log.Info(success)
 			if err != nil {
 				return e.S3.Object.Key, err
@@ -79,11 +79,11 @@ func handler(ctx context.Context, sqsEvent events.SQSEvent) (string, error) {
 		}
 	}
 
-	log.Warningf("No ObjectCreated:Put events found, skipping safely.")
+	log.Info("No ObjectCreated:Put events found, skipping safely.")
 	return "", nil
 }
 
-func importOptOutFile(bucket string, file string) (bool, error) {
+func importResponseFile(bucket string, file string) (bool, error) {
 	log.Info(fmt.Printf("Importing opt out file: %s (bucket: %s)", file, bucket))
 	metadata, err := ParseMetadata(bucket, file)
 	if err != nil {
@@ -110,7 +110,7 @@ func importOptOutFile(bucket string, file string) (bool, error) {
 	}
 	defer db.Close()
 
-	optOutFileEntity, err := insertOptOutMetadata(db, &metadata)
+	optOutFileEntity, err := insertResponseFileMetadata(db, &metadata)
 	if err != nil {
 		log.Warning(fmt.Sprintf("Failed to insert opt out metadata: %s", err))
 		return false, err
@@ -119,7 +119,7 @@ func importOptOutFile(bucket string, file string) (bool, error) {
 	bytes, err := downloadS3File(bucket, file)
 	if err != nil {
 		log.Warningf("Failed to download opt out file from S3: %s", err)
-		if err := updateOptOutFileImportStatus(db, optOutFileEntity.id, ImportFail); err != nil {
+		if err := updateResponseFileImportStatus(db, optOutFileEntity.id, ImportFail); err != nil {
 			return false, err
 		}
 		return false, err
@@ -128,7 +128,7 @@ func importOptOutFile(bucket string, file string) (bool, error) {
 	records, err := ParseConsentRecords(&metadata, bytes)
 	if err != nil {
 		log.Warning(fmt.Sprintf("Failed to parse consent records: %s", err))
-		if err := updateOptOutFileImportStatus(db, optOutFileEntity.id, ImportFail); err != nil {
+		if err := updateResponseFileImportStatus(db, optOutFileEntity.id, ImportFail); err != nil {
 			return false, err
 		}
 		return false, err
@@ -210,23 +210,40 @@ func createSession() (*session.Session, error) {
 }
 
 func downloadS3File(bucket string, file string) ([]byte, error) {
-	cfg, err := createV2Cfg()
-	if err != nil {
-		return []byte{}, err
-	}
-
-	downloader := manager.NewDownloader(s3v2.NewFromConfig(*cfg))
-	buff := &aws.WriteAtBuffer{}
-	numBytes, err := downloader.Download(context.TODO(), buff, &s3v2.GetObjectInput{
-		Bucket: aws.String(bucket),
-		Key:    aws.String(file),
-	})
-
-	if err == nil {
+	if os.Getenv("ENV") == "local" {
+		sess, err := createSession()
+		if err != nil {
+			return []byte{}, err
+		}
+		downloader := s3manager.NewDownloader(sess)
+		buff := &aws.WriteAtBuffer{}
+		numBytes, err := downloader.Download(buff, &s3.GetObjectInput{
+			Bucket: aws.String(bucket),
+			Key:    aws.String(file),
+		})
 		log.Printf("file downloaded: size=%d", numBytes)
-	}
+		byte_arr := buff.Bytes()
 
-	return buff.Bytes(), err
+		return byte_arr, err
+	} else {
+		cfg, err := createV2Cfg()
+		if err != nil {
+			return []byte{}, err
+		}
+
+		downloader := manager.NewDownloader(s3v2.NewFromConfig(*cfg))
+		buff := &aws.WriteAtBuffer{}
+		numBytes, err := downloader.Download(context.TODO(), buff, &s3v2.GetObjectInput{
+			Bucket: aws.String(bucket),
+			Key:    aws.String(file),
+		})
+
+		if err == nil {
+			log.Printf("file downloaded: size=%d", numBytes)
+		}
+
+		return buff.Bytes(), err
+	}
 }
 
 func generateConfirmationFile(successful bool, records []*OptOutRecord, marshaler FileMarshaler) ([]byte, error) {
