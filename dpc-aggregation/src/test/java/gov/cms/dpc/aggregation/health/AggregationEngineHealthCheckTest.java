@@ -3,10 +3,8 @@ package gov.cms.dpc.aggregation.health;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import com.codahale.metrics.MetricRegistry;
-import com.typesafe.config.ConfigFactory;
 import gov.cms.dpc.aggregation.engine.AggregationEngine;
 import gov.cms.dpc.aggregation.engine.JobBatchProcessor;
-import gov.cms.dpc.aggregation.engine.JobBatchProcessorV2;
 import gov.cms.dpc.aggregation.engine.OperationsConfig;
 import gov.cms.dpc.aggregation.service.ConsentService;
 import gov.cms.dpc.aggregation.service.LookBackServiceImpl;
@@ -57,13 +55,11 @@ public class AggregationEngineHealthCheckTest {
     static private final FhirContext fhirContext = FhirContext.forDstu3();
     static private final FhirContext fhirContextR4 = FhirContext.forR4();
     static private final MetricRegistry metricRegistry = new MetricRegistry();
-    static private String exportPath;
+    static private final String exportPath = "/tmp";
 
 
     @BeforeAll
     static void setupAll() {
-        final var config = ConfigFactory.load("testing.conf").getConfig("dpc.aggregation");
-        exportPath = config.getString("exportPath");
         AggregationEngine.setGlobalErrorHandler();
         ContextUtils.prefetchResourceModels(fhirContext, JobQueueBatch.validResourceTypes);
     }
@@ -76,8 +72,7 @@ public class AggregationEngineHealthCheckTest {
         var operationalConfig = new OperationsConfig(1000, exportPath, 500, YearMonth.of(2015, 3));
         LookBackServiceImpl lookBackService = Mockito.spy(new LookBackServiceImpl(operationalConfig));
         JobBatchProcessor jobBatchProcessor = Mockito.spy(new JobBatchProcessor(bbclient, fhirContext, metricRegistry, operationalConfig, lookBackService, consentService));
-        JobBatchProcessorV2 jobBatchProcessorV2 = Mockito.spy(new JobBatchProcessorV2(bbclientV2, fhirContextR4, metricRegistry, operationalConfig, consentService));
-        engine = Mockito.spy(new AggregationEngine(aggregatorID, queue, operationalConfig, jobBatchProcessor, jobBatchProcessorV2));
+        engine = Mockito.spy(new AggregationEngine(aggregatorID, queue, operationalConfig, jobBatchProcessor));
         AggregationEngine.setGlobalErrorHandler();
     }
 

@@ -76,7 +76,7 @@ describe CpiApiGatewayClient do
         },
         dataSets: {
           subjectAreas: {
-            medSanctions: true
+            all: true
           }
         }
       }
@@ -88,7 +88,7 @@ describe CpiApiGatewayClient do
                                    headers: { 'Content-Type': 'application/json' } })
         .and_return(response_double)
       expect(response_double).to receive(:parsed)
-      client.fetch_authorized_official_med_sanctions(111_223_456)
+      client.fetch_med_sanctions_and_waivers(111_223_456)
     end
   end
 end

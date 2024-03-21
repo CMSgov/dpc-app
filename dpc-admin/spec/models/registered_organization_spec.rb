@@ -142,7 +142,7 @@ RSpec.describe RegisteredOrganization, type: :model do
           reg_org = create(:registered_organization)
 
           api_client = stub_api_client(
-            api_client: api_client,
+            api_client:,
             message: :update_organization,
             success: true,
             response: default_org_creation_response
@@ -166,7 +166,7 @@ RSpec.describe RegisteredOrganization, type: :model do
           reg_org = create(:registered_organization)
 
           api_client = stub_api_client(
-            api_client: api_client,
+            api_client:,
             message: :update_organization,
             success: false,
             response: 'Bad error'
@@ -193,7 +193,7 @@ RSpec.describe RegisteredOrganization, type: :model do
           reg_org = create(:registered_organization, created_at: old_attr)
 
           api_client = stub_api_client(
-            api_client: api_client,
+            api_client:,
             message: :update_endpoint,
             success: true, response:
             default_org_creation_response
@@ -220,7 +220,7 @@ RSpec.describe RegisteredOrganization, type: :model do
           reg_org = create(:registered_organization, created_at: old_attr)
 
           api_client = stub_api_client(
-            api_client: api_client,
+            api_client:,
             message: :update_endpoint,
             success: false,
             response: { issues: ['Bad request'] }

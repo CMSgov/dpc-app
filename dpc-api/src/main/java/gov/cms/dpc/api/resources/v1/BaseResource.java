@@ -32,6 +32,7 @@ public class BaseResource extends AbstractBaseResource {
     private final AbstractDefinitionResource sdr;
     private final AbstractAdminResource ar;
     private final PropertiesProvider pp;
+    private final AbstractIpAddressResource ip;
     private final String baseURL;
     @Inject
     public BaseResource(KeyResource kr,
@@ -45,6 +46,7 @@ public class BaseResource extends AbstractBaseResource {
                         PractitionerResource pr,
                         DefinitionResource sdr,
                         AdminResource ar,
+                        IpAddressResource ip,
                         @APIV1 String baseURL) {
         this.kr = kr;
         this.tr = tr;
@@ -58,6 +60,7 @@ public class BaseResource extends AbstractBaseResource {
         this.sdr = sdr;
         this.ar = ar;
         this.pp = new PropertiesProvider();
+        this.ip = ip;
         this.baseURL = baseURL;
     }
 
@@ -135,5 +138,10 @@ public class BaseResource extends AbstractBaseResource {
     @Override
     public AbstractPractitionerResource practitionerOperations() {
         return this.pr;
+    }
+
+    @Override
+    public AbstractIpAddressResource ipAddressOperations() {
+        return this.ip;
     }
 }

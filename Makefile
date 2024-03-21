@@ -53,7 +53,7 @@ admin:
 	@docker build -f dpc-admin/Dockerfile . -t dpc-web-admin
 
 portal: ## Builds the DPC portal
-portal:
+portal: 
 	mkdir -p dpc-portal/vendor/api_client
 	cp -r engines/api_client/ dpc-portal/vendor/api_client/
 	@docker build -f dpc-portal/Dockerfile . -t dpc-web-portal
@@ -89,7 +89,7 @@ start-admin:
 	@docker-compose -f docker-compose.yml -f docker-compose.portals.yml up start_admin
 
 start-portal: ## Start the DPC portal
-start-portal:
+start-portal: secure-envs
 	@docker-compose -f docker-compose.yml -f docker-compose.portals.yml up start_portal
 
 start-portals: ## Start all frontend services
@@ -136,9 +136,9 @@ down-dpc:
 down-portals: ## Shut down all services
 down-portals: down-dpc
 
-down-start-v1-portals: ## Shut down all services
-down-start-v1-portals: down-dpc
-
+down-start-v1-portals: ## Shut down test services
+down-start-v1-portals:
+	@docker-compose -p start-v1-portals -f docker-compose.yml -f docker-compose.portals.yml down
 
 # Utility commands
 # =================

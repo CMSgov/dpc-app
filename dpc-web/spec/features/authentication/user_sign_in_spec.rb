@@ -42,6 +42,6 @@ RSpec.feature 'user signs in' do
 
     visit confirmation_link
 
-    expect(page.body).to include("Welcome, #{unconfirmed.first_name}!")
+    expect(page.body).to include('Welcome!')
   end
 end

@@ -1,4 +1,4 @@
-FROM ruby:3.0.6-alpine AS ruby_builder
+FROM ruby:3.3.0-alpine AS ruby_builder
 
 # Install build dependencies
 RUN apk update && \
@@ -33,7 +33,7 @@ COPY /dpc-admin /dpc-admin
 
 RUN rm -rf /bin/yarn
 
-RUN RAILS_ENV=production WEBPACKER_NODE_MODULES_BIN_PATH="node_modules/.bin" SECRET_KEY_BASE=dummy bundle exec rake assets:precompile --trace
+RUN RAILS_ENV=production SECRET_KEY_BASE=dummy bundle exec rake assets:precompile
 
 # Clean up from the build
 RUN rm -rf /usr/local/bundle/cache/*.gem && \
@@ -41,7 +41,7 @@ RUN rm -rf /usr/local/bundle/cache/*.gem && \
     find /usr/local/bundle/gems/ -name "*.o" -delete
 
 
-FROM ruby:3.0.6-alpine
+FROM ruby:3.3.0-alpine
 
 # Install app dependencies
 RUN apk add --no-cache postgresql-client nodejs tzdata libsodium-dev

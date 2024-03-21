@@ -28,7 +28,8 @@ module DpcClientSupport
   def default_get_org_response(api_id)
     FHIR::Organization.new(
       name: "Bob's Health Hut",
-      id: api_id
+      id: api_id,
+      identifier: { system: 'http://hl7.org/fhir/sid/us-npi', value: '1111111111' }
     )
   end
 
@@ -51,5 +52,13 @@ koPuyOLZ4oalcqVMGJFeYpcCAwEAAQ==
          'label' => 'Token for organization 4b15098b-d53f-432d-a2f3-416a9483527b.',
          'createdAt' => '2020-09-10T02:45:07.452+00:00',
          'expiresAt' => '2021-09-10T02:45:07.449+00:00' }] }
+  end
+
+  def default_get_ip_addresses
+    { 'entities' =>
+        [{ 'id' => '579dd199-3c2d-48e8-8594-cec35e223527',
+           'ipAddress' => '136.226.19.87',
+           'createdAt' => '2020-09-10T02:30:27.526+00:00',
+           'label' => 'IP address for organization 4b15098b-d53f-432d-a2f3-416a9483527b.' }] }
   end
 end

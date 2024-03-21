@@ -11,7 +11,7 @@ gem 'active_model_serializers'
 gem 'macaroons'
 gem 'fhir_client'
 # rubocop:enable Bundler/OrderedGems
-gem 'nokogiri'
+gem 'nokogiri', '>= 1.16.2'
 gem 'rspec-rails'
 gem 'rubocop'
 gem 'simplecov'

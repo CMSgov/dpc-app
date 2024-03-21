@@ -51,6 +51,9 @@ public abstract class AbstractBaseResource {
     @Path("/StructureDefinition")
     public abstract AbstractDefinitionResource definitionResourceOperations();
 
+    @Path("/IpAddress")
+    public abstract AbstractIpAddressResource ipAddressOperations();
+
     /**
      * Returns the FHIR capabilities statement
      *

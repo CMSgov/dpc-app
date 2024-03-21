@@ -51,8 +51,6 @@
             <groupId>javax.ws.rs</groupId>
             <artifactId>javax.ws.rs-api</artifactId>
         </dependency>
-
-        <!--Locking this dependency version to the one provided by Dropwizard, we'll need to manually update it as we go along-->
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-core</artifactId>
@@ -63,10 +61,11 @@
             <artifactId>javax.persistence-api</artifactId>
             <scope>compile</scope>
         </dependency>
+        <!-- update with dropwizard upgrade -->
         <dependency>
             <groupId>org.reflections</groupId>
             <artifactId>reflections</artifactId>
-            <version>0.10.2</version>
+            <version>0.9.11</version>
         </dependency>
         <dependency>
             <groupId>ru.vyarus</groupId>
@@ -116,7 +115,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>30.1.1-jre</version>
+            <version>32.0.0-jre</version>
         </dependency>
         <dependency>
             <groupId>commons-validator</groupId>

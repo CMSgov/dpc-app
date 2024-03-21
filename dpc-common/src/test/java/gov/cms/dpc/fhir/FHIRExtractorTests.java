@@ -232,6 +232,10 @@ public class FHIRExtractorTests {
         final Identifier trailingSystem = parseIDFromQueryParam(String.format("%s\\|%s", DPCIdentifierSystem.HICN.getSystem(), "nada9"));
         assertAll(() -> assertEquals(DPCIdentifierSystem.HICN.getSystem(), trailingSystem.getSystem(), "Should have correct system"),
                 () -> assertEquals("nada9", trailingSystem.getValue(), "Should have empty value"));
+
+        final Identifier trailingValue = parseIDFromQueryParam(String.format("%s|%s\\", DPCIdentifierSystem.HICN.getSystem(), "nada9"));
+        assertAll(() -> assertEquals(DPCIdentifierSystem.HICN.getSystem(), trailingValue.getSystem(), "Should have correct system"),
+                () -> assertEquals("nada9", trailingValue.getValue(), "Should have empty value"));
     }
 
     @Test

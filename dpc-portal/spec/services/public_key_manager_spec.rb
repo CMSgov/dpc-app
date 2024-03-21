@@ -17,7 +17,7 @@ RSpec.describe PublicKeyManager do
           api_id = SecureRandom.uuid
           response = { 'id' => '570f7a71-0e8f-48a1-83b0-c46ac35d6ef3' }
           stub_self_returning_api_client(message: :create_public_key,
-                                         response: response,
+                                         response:,
                                          with: [api_id, { params: @public_key_params }])
 
           manager = PublicKeyManager.new(api_id)
@@ -35,7 +35,7 @@ RSpec.describe PublicKeyManager do
           response = { 'id' => nil }
           stub_self_returning_api_client(message: :create_public_key,
                                          success: false,
-                                         response: response,
+                                         response:,
                                          with: [api_id, { params: @public_key_params }])
 
           manager = PublicKeyManager.new(api_id)
@@ -92,7 +92,7 @@ RSpec.describe PublicKeyManager do
           manager = PublicKeyManager.new(api_id)
           response = manager.delete_public_key(id: key_guid)
 
-          expect(response.response_successful?).to be true
+          expect(response).to be true
         end
       end
 
@@ -107,7 +107,7 @@ RSpec.describe PublicKeyManager do
           manager = PublicKeyManager.new(api_id)
           response = manager.delete_public_key(id: key_guid)
 
-          expect(response.response_successful?).to be false
+          expect(response).to be false
         end
       end
     end

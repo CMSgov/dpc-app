@@ -9,12 +9,44 @@
 # Use this hook to configure devise mailer, warden hooks and so forth.
 # Many of these configuration options can be set straight in your model.
 Devise.setup do |config|
+  begin
+    private_key = OpenSSL::PKey::RSA.new(ENV['LOGIN_GOV_PRIVATE_KEY'])
+  rescue TypeError, OpenSSL::PKey::RSAError => e
+    Rails.logger.error("Unable to create private key for omniauth: #{e}")
+    private_key = OpenSSL::PKey::RSA.new(1024)
+  end
+  host = case ENV['ENV']
+         when 'local'
+           'http://localhost:3100'
+         when 'prod'
+           'https://dpc.cms.gov'
+         else
+           "https://#{ENV['ENV']}.dpc.cms.gov"
+         end
+  config.omniauth :openid_connect, {
+                    name: :openid_connect,
+                    issuer: 'https://idp.int.identitysandbox.gov/',
+                    discovery: true,
+                    scope: %i[openid email profile phone social_security_number],
+                    response_type: :code,
+                    acr_values: 'http://idmanagement.gov/ns/assurance/ial/2',
+                    client_auth_method: :jwt_bearer,
+                    client_options: {
+                      port: 443,
+                      scheme: 'https',
+                      host: 'idp.int.identitysandbox.gov',
+                      identifier: "urn:gov:cms:openidconnect.profiles:sp:sso:cms:dpc:#{ENV['ENV']}",
+                      private_key: private_key,
+                      redirect_uri: "#{host}/portal/users/auth/openid_connect/callback"
+                    }
+                  }
   # The secret key used by Devise. Devise uses this key to generate
   # random tokens. Changing this key will render invalid all existing
   # confirmation, reset password and unlock tokens in the database.
   # Devise will use the `secret_key_base` as its `secret_key`
   # by default. You can change it below and use your own secret key.
   # config.secret_key = '7c6c088e32429add964776c6270e102769c71e4be2817e0e198857372f78142dfde431b4c94fdda416eaf8b5b958710f5f7fbb9cec18944159d76ec1b3b23d80'
+  config.secret_key = Rails.application.secret_key_base
 
   # ==> Controller configuration
   # Configure the parent class to the devise controllers.

@@ -30,11 +30,11 @@ public class MockBlueButtonClient implements BlueButtonClient {
     private static final String SAMPLE_METADATA_PATH_PREFIX = "bb-test-data/";
     private static final String SAMPLE_EMPTY_BUNDLE = "bb-test-data/empty";
 
-    public static final String MULTIPLE_RESULTS_MBI = "9V99EU8XY91";
-
+    public static final List<String> TEST_PATIENT_MULTIPLE_MBIS = List.of("9V99EU8XY91", "1S00EU8FE91");
     public static final List<String> TEST_PATIENT_MBIS = List.of(
-        "2SW4N00AA00", "4SP0P00AA00", "3S58A00AA00", "4S58A00AA00", "5S58A00AA00", "1SQ3F00AA00", MULTIPLE_RESULTS_MBI, "1S00EU8FE91"
+        "2SW4N00AA00", "4SP0P00AA00", "3S58A00AA00", "4S58A00AA00", "5S58A00AA00", "1SQ3F00AA00", TEST_PATIENT_MULTIPLE_MBIS.get(0), TEST_PATIENT_MULTIPLE_MBIS.get(1)
     );
+
     public static final Map<String, String> MBI_BENE_ID_MAP = Map.of(
             TEST_PATIENT_MBIS.get(0), "-20140000008325",
             TEST_PATIENT_MBIS.get(1), "-20140000009893",

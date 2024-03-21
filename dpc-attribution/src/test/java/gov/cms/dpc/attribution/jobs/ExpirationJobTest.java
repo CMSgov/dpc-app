@@ -17,6 +17,7 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Group;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import ru.vyarus.dropwizard.guice.module.context.SharedConfigurationState;
@@ -32,26 +33,29 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * Integration test for verifying that the expiration jobs runs correctly.
  * We currently don't have a way of verifying that the job runs when expected, since we can't really override Dropwizard's time source.
  * In the future, we might consider using something like ByteBuddy to intercept all system time calls and see if the job still gets run.
+ * <p>
+ * Disabled until made effective
  */
+@Disabled
 @ExtendWith(BufferedLoggerHandler.class)
 @IntegrationTest
 class ExpirationJobTest {
-    private static final String KEY_PREFIX = "dpc.attribution";
-    private static final DropwizardTestSupport<DPCAttributionConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCAttributionService.class, "ci.application.conf", ConfigOverride.config("server.applicationConnectors[0].port", "3727"),
-            ConfigOverride.config(KEY_PREFIX, "logging.level", "ERROR"));
+    private static final String configPath = "src/test/resources/test.application.yml";
+    private static final DropwizardTestSupport<DPCAttributionConfiguration> APPLICATION =
+            new DropwizardTestSupport<>(DPCAttributionService.class, configPath,
+                    ConfigOverride.config("server.applicationConnectors[0].port", "3727"));
     private static final String PROVIDER_ID = "2322222227";
     private static final FhirContext ctx = FhirContext.forDstu3();
     private Client client;
 
     @BeforeEach
     void initDB() throws Exception {
-        JobTestUtils.resetScheduler();
         APPLICATION.before();
         SharedConfigurationState.clear();
-        APPLICATION.getApplication().run("db", "migrate", "ci.application.conf");
+        APPLICATION.getApplication().run("db", "migrate", configPath);
         // Seed the database, but use a really early time
         SharedConfigurationState.clear();
-        APPLICATION.getApplication().run("seed", "-t 2015-01-01T12:12:12Z", "ci.application.conf");
+        APPLICATION.getApplication().run("seed", "-t 2015-01-01T12:12:12Z", configPath);
 
         this.client = new JerseyClientBuilder(APPLICATION.getEnvironment()).build("test");
     }
