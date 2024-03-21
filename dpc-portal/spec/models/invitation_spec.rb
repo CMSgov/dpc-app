@@ -174,6 +174,12 @@ RSpec.describe Invitation, type: :model do
     it 'should match user if names and email correct' do
       expect(cd_invite.match_user?(user)).to eq true
     end
+    it 'should match user if names and email different case' do
+      user.given_name.upcase!
+      user.family_name.downcase!
+      user.email = user.email.upcase_first
+      expect(cd_invite.match_user?(user)).to eq true
+    end
     it 'should not match user if given name not correct' do
       user.given_name = "not #{cd_invite.invited_given_name}"
       expect(cd_invite.match_user?(user)).to eq false

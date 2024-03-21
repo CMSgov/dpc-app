@@ -35,6 +35,8 @@ class Invitation < ApplicationRecord
   end
 
   def match_user?(user)
-    invited_given_name == user.given_name && invited_family_name == user.family_name && invited_email == user.email
+    invited_given_name.downcase == user.given_name.downcase &&
+      invited_family_name.downcase == user.family_name.downcase &&
+      invited_email.downcase == user.email.downcase
   end
 end
