@@ -24,6 +24,8 @@ Rails.application.routes.draw do
     resources :public_keys, only: [:new, :create, :destroy]
     resources :ip_addresses, only: [:new, :create, :destroy]
     resources :credential_delegate_invitations, only: [:new, :create, :destroy] do
+      get 'accept', on: :member
+      post 'confirm', on: :member
       get 'success', on: :member
     end
     get 'tos_form', on: :member
