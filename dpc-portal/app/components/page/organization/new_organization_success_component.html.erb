@@ -19,7 +19,7 @@
             <%= render Core::Button::ButtonComponent.new(label: 'Assign CD now', destination: root_path)%>
         </div>
         <div class="flex-align-self-center">
-            <%= link_to 'Assign CD later', root_path %>
+            <%= link_to 'Assign CD later', new_organization_credential_delegate_invitation_path(@organization) %>
         </div>
     </div>
   </div>
