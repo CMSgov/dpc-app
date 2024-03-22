@@ -90,7 +90,7 @@ Rails.application.configure do
     address:         ENV['SMTP_ADDRESS'],
     port:            ENV['SMTP_PORT'],
     domain:          ENV['SMTP_DOMAIN'],
-    enable_starttls: true
+    enable_starttls: false
   }
 
   # Ignore bad email addresses and do not raise email delivery errors.
