@@ -17,7 +17,7 @@ RSpec.describe 'LoginDotGov', type: :request do
     it 'signs in a user' do
       post '/users/auth/openid_connect'
       follow_redirect!
-      expect(response.body).to include('Bob Hoskins')
+      expect(response.location).to eq organizations_url
     end
 
     it 'persists user if not exist' do

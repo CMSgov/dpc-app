@@ -10,6 +10,7 @@
   </head>
   <body class="grid-container margin-top-5 margin-bottom-8">
     <%= javascript_include_tag '@uswds/uswds/dist/js/uswds.min.js' %>
+    <%= button_to "Log Out", destroy_user_session_path, method: :delete if current_user %>
     <div class="grid-row">
       <div class="grid-col-fill">
         <% if notice %>
