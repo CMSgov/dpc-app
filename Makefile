@@ -53,7 +53,7 @@ admin:
 	@docker build -f dpc-admin/Dockerfile . -t dpc-web-admin
 
 portal: ## Builds the DPC portal
-portal: 
+portal:
 	mkdir -p dpc-portal/vendor/api_client
 	cp -r engines/api_client/ dpc-portal/vendor/api_client/
 	@docker build -f dpc-portal/Dockerfile . -t dpc-web-portal
@@ -130,7 +130,7 @@ start-it-debug: secure-envs
 # ==============
 
 down-dpc: ## Shut down all services
-down-dpc: 
+down-dpc:
 	@docker-compose -f docker-compose.yml -f docker-compose.portals.yml down
 
 down-portals: ## Shut down all services
@@ -143,6 +143,8 @@ down-start-v1-portals:
 # Utility commands
 # =================
 
+CONF_FILE = "dpc-attribution/src/test/resources/test.application.yml"
+
 secure-envs: ## Decrypt API environment secrets
 secure-envs:
 	@bash ops/scripts/secrets --decrypt ops/config/encrypted/bb.keystore | tail -n +2 > bbcerts/bb.keystore
@@ -150,7 +152,8 @@ secure-envs:
 
 seed-db: ## Seed attribution data for local database
 seed-db:
-	@java -jar dpc-attribution/target/dpc-attribution.jar db migrate && java -jar dpc-attribution/target/dpc-attribution.jar seed
+	@java -jar dpc-attribution/target/dpc-attribution.jar db migrate $(CONF_FILE)
+	@java -jar dpc-attribution/target/dpc-attribution.jar seed $(CONF_FILE)
 
 maven-config: ## Translate local environment variables into maven.config for manual API installation
 maven-config:
