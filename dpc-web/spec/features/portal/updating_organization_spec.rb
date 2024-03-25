@@ -16,7 +16,7 @@ RSpec.feature 'updating my organization' do
   scenario 'updating the org with a vailid Npi' do
     npi = LuhnacyLib.generate_npi
 
-    visit portal_path
+    visit root_path
     find('[data-test="edit-link"]').click
     fill_in 'organization_npi', with: npi
     fill_in 'organization_vendor', with: 'Cool EMR Vendor Name'
@@ -29,7 +29,7 @@ RSpec.feature 'updating my organization' do
   end
 
   scenario 'updating the org with an invalid Npi' do
-    visit portal_path
+    visit root_path
     find('[data-test="edit-link"]').click
     fill_in 'organization_npi', with: '123456789'
     find('[data-test="form-submit"]').click
