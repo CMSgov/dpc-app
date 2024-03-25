@@ -123,7 +123,7 @@ RSpec.describe ClientTokensController, type: :controller do
             organization_id: other_org.id, 
             label: 'Test', 
             api_environment: 'sandbox'
-          }).to redirect_to(root_path)
+          }).to redirect_to(authenticated_root_path)
         end
       end
 

@@ -12,7 +12,7 @@ RSpec.feature 'managing api credentials' do
     end
 
     it 'cannot manage api credentials' do
-      visit root_path
+      visit authenticated_root_path
       expect(page).not_to have_css('[data-test="new-client-token"]')
       expect(page).not_to have_css('[data-test="new-public-key"]')
     end
@@ -29,7 +29,7 @@ RSpec.feature 'managing api credentials' do
     end
 
     it 'cannot manage api credentials' do
-      visit root_path
+      visit authenticated_root_path
       expect(page).not_to have_css('[data-test="new-client-token"]')
       expect(page).not_to have_css('[data-test="new-public-key"]')
     end
@@ -55,7 +55,7 @@ RSpec.feature 'managing api credentials' do
       api_client = stub_empty_key_request
       api_client = stub_empty_token_request(api_client)
 
-      visit root_path
+      visit authenticated_root_path
 
       api_client = stub_token_creation_request(api_client)
       find('[data-test="new-client-token"]').click
@@ -80,7 +80,7 @@ RSpec.feature 'managing api credentials' do
       api_client = stub_empty_key_request
       api_client = stub_empty_token_request(api_client)
 
-      visit root_path
+      visit authenticated_root_path
       find('[data-test="new-public-key"]').click
 
       fill_in 'label', with: 'Sandbox Key 1'

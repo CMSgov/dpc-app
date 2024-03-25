@@ -74,6 +74,6 @@ class PublicKeysController < ApplicationController
 
   def unauthorized
     flash[:error] = 'Unauthorized'
-    redirect_to root_path
+    redirect_to authenticated_root_path
   end
 end
