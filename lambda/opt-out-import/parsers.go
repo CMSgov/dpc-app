@@ -55,7 +55,7 @@ func ParseConsentRecords(metadata *ResponseFileMetadata, b []byte) ([]*OptOutRec
 	for scanner.Scan() {
 		bytes := scanner.Bytes()
 		// Do not parse header or footer rows
-		if !strings.HasPrefix(string(bytes[:]), "HDR") && !strings.HasPrefix((string(bytes[:])), "TLR") {
+		if !strings.HasPrefix(string(bytes[:]), "HDR") && !strings.HasPrefix((string(bytes[:])), "TRL") {
 			record, err := ParseRecord(metadata, bytes, fixedwidth.Unmarshal)
 			if err != nil {
 				return records, fmt.Errorf("ParseConsentRecords: %w", err)
