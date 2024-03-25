@@ -143,6 +143,8 @@ down-start-v1-portals:
 # Utility commands
 # =================
 
+CONF_FILE = "dpc-attribution/src/test/resources/test.application.yml"
+
 secure-envs: ## Decrypt API environment secrets
 secure-envs:
 	@bash ops/scripts/secrets --decrypt ops/config/encrypted/bb.keystore | tail -n +2 > bbcerts/bb.keystore
@@ -150,8 +152,8 @@ secure-envs:
 
 seed-db: ## Seed attribution data for local database
 seed-db:
-	@java -jar dpc-attribution/target/dpc-attribution.jar db migrate "dpc-attribution/src/test/resources/test.application.yml"
-	@java -jar dpc-attribution/target/dpc-attribution.jar seed "dpc-attribution/src/test/resources/test.application.yml"
+	@java -jar dpc-attribution/target/dpc-attribution.jar db migrate $(CONF_FILE)
+	@java -jar dpc-attribution/target/dpc-attribution.jar seed $(CONF_FILE)
 
 maven-config: ## Translate local environment variables into maven.config for manual API installation
 maven-config:
