@@ -254,7 +254,7 @@ func generateConfirmationFile(successful bool, records []*OptOutRecord, marshale
 	}
 
 	fileTrailer := FileTrailer{
-		TrailerCode:       "TLR_BENECONFIRM",
+		TrailerCode:       "TRL_BENECONFIRM",
 		FileCreationDate:  fileCreationDate,
 		DetailRecordCount: fmt.Sprintf("%010d", len(records)),
 	}
