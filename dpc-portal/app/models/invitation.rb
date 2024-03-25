@@ -25,4 +25,18 @@ class Invitation < ApplicationRecord
       email: invited_email,
       verification_code: }.with_indifferent_access
   end
+
+  def expired?
+    created_at < 2.days.ago
+  end
+
+  def accepted?
+    CdOrgLink.where(invitation: self).exists?
+  end
+
+  def match_user?(user)
+    invited_given_name.downcase == user.given_name.downcase &&
+      invited_family_name.downcase == user.family_name.downcase &&
+      invited_email.downcase == user.email.downcase
+  end
 end

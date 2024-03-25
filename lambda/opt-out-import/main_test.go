@@ -48,7 +48,7 @@ func TestHandlerDatabaseTimeoutError(t *testing.T) {
 	createConnectionVar = func(string, string) (*sql.DB, error) { return nil, errors.New("Connection attempt timed out") }
 	defer func() { createConnectionVar = ofn }()
 
-	event := getSQSEvent("demo-bucket", "P.NGD.DPC.RSP.D240123.T1122001.IN")
+	event := getSQSEvent("demo-bucket", "T.NGD.DPC.RSP.D240123.T1122001.IN")
 	_, err := handler(context.Background(), event)
 
 	assert.EqualError(t, err, "Connection attempt timed out")
