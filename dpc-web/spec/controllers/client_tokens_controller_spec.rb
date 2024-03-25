@@ -32,9 +32,9 @@ RSpec.describe ClientTokensController, type: :controller do
       context 'with invalid organization id' do
         it 'redirects to portal' do
           other_org = create(:organization)
-          expect(get :new, params: {
+          expect(get(:new, params: {
             organization_id: other_org.id
-          }).to redirect_to(authenticated_root_path)
+          })).to redirect_to(authenticated_root_path)
         end
       end
     end
@@ -119,11 +119,11 @@ RSpec.describe ClientTokensController, type: :controller do
 
         it 'redirects to portal if invalid org' do
           other_org = create(:organization)
-          expect(post :create, params: { 
-            organization_id: other_org.id, 
-            label: 'Test', 
+          expect(post(:create, params: {
+            organization_id: other_org.id,
+            label: 'Test',
             api_environment: 'sandbox'
-          }).to redirect_to(authenticated_root_path)
+          })).to redirect_to(authenticated_root_path)
         end
       end
 
