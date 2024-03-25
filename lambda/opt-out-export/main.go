@@ -162,12 +162,16 @@ func formatFileData(fileName string, patientInfos map[string]PatientInfo) (bytes
 }
 
 func generateRequestFileName(now time.Time) string {
-	fileFormat := "P#EFT.ON.DPC.NGD.REQ.D%s.T%s"
+	fileFormat := "%s#EFT.ON.DPC.NGD.REQ.D%s.T%s"
 
+	prefix := "T"
+	if os.Getenv("ENV") == "prod" {
+		prefix = "P"
+	}
 	date := now.Format("060102")
 	time := now.Format("1504050")
 
-	return fmt.Sprintf(fileFormat, date, time)
+	return fmt.Sprintf(fileFormat, prefix, date, time)
 }
 
 func getAssumeRoleSession(session *session.Session) (*session.Session, error) {
