@@ -174,7 +174,7 @@ RSpec.describe PublicKeysController, type: :controller do
           organization_id: org.id,
           public_key: 'test key',
           label: 'aaaaabbbbbcccccddddd'
-        }).to redirect_to(portal_path)
+        }).to redirect_to(root_path)
       end
     end
   end
@@ -247,7 +247,7 @@ RSpec.describe PublicKeysController, type: :controller do
 
       expect(get :new, params: {
         organization_id: '1'
-      }).to redirect_to(portal_path)
+      }).to redirect_to(authenticated_root_path)
     end
   end
 end
