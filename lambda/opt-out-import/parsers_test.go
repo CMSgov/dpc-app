@@ -32,13 +32,14 @@ func TestParseMetadata(t *testing.T) {
 
 	// prod environment with correct prefix
 	testEnv := os.Getenv("ENV")
+
 	os.Setenv("ENV", "prod")
+	defer os.Setenv("ENV", testEnv)
+
 	expTime, _ = time.Parse(time.RFC3339, "2019-01-23T11:22:00Z")
 	metadata, _ = ParseMetadata("blah", "P.NGD.DPC.RSP.D190123.T1122001.IN")
 	assert.Equal(t, "P.NGD.DPC.RSP.D190123.T1122001.IN", metadata.Name)
 	assert.Equal(t, expTime.Format("D060102.T150405"), metadata.Timestamp.Format("D060102.T150405"))
-
-	os.Setenv("ENV", testEnv)
 }
 
 func TestParseMetadata_InvalidData(t *testing.T) {
