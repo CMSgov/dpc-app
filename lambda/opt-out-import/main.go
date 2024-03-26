@@ -43,7 +43,7 @@ type (
 
 func main() {
 	if isTesting {
-		filename := "bfdeft01/dpc/in/P.NGD.DPC.RSP.D240123.T1122001.IN"
+		filename := "bfdeft01/dpc/in/T.NGD.DPC.RSP.D240123.T1122001.IN"
 		success, _ := importResponseFile("demo-bucket", filename)
 		log.Println(success)
 	} else {
@@ -153,7 +153,7 @@ func importResponseFile(bucket string, file string) (bool, error) {
 		log.Warning("Failed to create session for uploading response file")
 		return false, err
 	} else {
-		if err = uploadConfirmationFile(bucket, GenerateConfirmationFileName(file), s3manager.NewUploader(sess).Upload, confirmationFile); err != nil {
+		if err = uploadConfirmationFile(bucket, GenerateConfirmationFileName(file, time.Now()), s3manager.NewUploader(sess).Upload, confirmationFile); err != nil {
 			log.Warning("Failed to write upload response file")
 			return false, err
 		}
@@ -254,7 +254,7 @@ func generateConfirmationFile(successful bool, records []*OptOutRecord, marshale
 	}
 
 	fileTrailer := FileTrailer{
-		TrailerCode:       "TLR_BENECONFIRM",
+		TrailerCode:       "TRL_BENECONFIRM",
 		FileCreationDate:  fileCreationDate,
 		DetailRecordCount: fmt.Sprintf("%010d", len(records)),
 	}

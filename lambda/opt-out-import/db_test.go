@@ -63,7 +63,7 @@ func TestInsertResponseFileMetadata(t *testing.T) {
 		{
 			name:     "happy path",
 			bucket:   "demo-bucket",
-			filename: "P.NGD.DPC.RSP.D240123.T1122001.IN",
+			filename: "T.NGD.DPC.RSP.D240123.T1122001.IN",
 			expect:   true,
 			err:      nil,
 		},
@@ -86,8 +86,8 @@ func TestInsertResponseFileMetadata(t *testing.T) {
 		timestampValue := time.Date(2024, 01, 23, 0, 0, 0, 0, time.UTC)
 		rows := []string{"id", "name", "timestamp", "import_status"}
 		mock.ExpectQuery("INSERT INTO opt_out_file").
-			WithArgs(AnyString{}, "P.NGD.DPC.RSP.D240123.T1122001.IN", "2024-01-23").
-			WillReturnRows(sqlmock.NewRows(rows).AddRow("(.*)", "P.NGD.DPC.RSP.D240123.T1122001.IN", timestampValue, "In-Progress"))
+			WithArgs(AnyString{}, "T.NGD.DPC.RSP.D240123.T1122001.IN", "2024-01-23").
+			WillReturnRows(sqlmock.NewRows(rows).AddRow("(.*)", "T.NGD.DPC.RSP.D240123.T1122001.IN", timestampValue, "In-Progress"))
 
 		entity, err := insertResponseFileMetadata(db, &metadata)
 		if err != nil {
@@ -113,7 +113,7 @@ func TestInsertConsentRecords(t *testing.T) {
 		{
 			name:          "happy path",
 			bucket:        "demo-bucket",
-			filename:      "P.NGD.DPC.RSP.D240123.T1122001.IN",
+			filename:      "T.NGD.DPC.RSP.D240123.T1122001.IN",
 			expect:        true,
 			consentStatus: Accepted,
 			err:           nil,
@@ -187,7 +187,7 @@ func TestInsertConsentRecords_DatabaseError(t *testing.T) {
 	}{
 		name:     "database error",
 		bucket:   "demo-bucket",
-		filename: "P.NGD.DPC.RSP.D240123.T1122001.IN",
+		filename: "T.NGD.DPC.RSP.D240123.T1122001.IN",
 	}
 
 	db, mock, err := sqlmock.New()

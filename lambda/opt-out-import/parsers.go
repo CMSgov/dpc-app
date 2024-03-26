@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"os"
 	"regexp"
 	"strings"
 	"time"
@@ -18,10 +19,15 @@ import (
 
 func ParseMetadata(bucket string, filename string) (ResponseFileMetadata, error) {
 	var metadata ResponseFileMetadata
-	// P.NGD.DPC.RSP.D240123.T1122001.IN
-	// Beneficiary Data Sharing Preferences File sent by 1-800-Medicare: P.NGD.DPC.RSP.Dyymmdd.Thhmmsst.IN
+	// T.NGD.DPC.RSP.D240123.T1122001.IN
+	// Beneficiary Data Sharing Preferences File sent by 1-800-Medicare: T.NGD.DPC.RSP.Dyymmdd.Thhmmsst.IN
 	// Prefix: T = test, P = prod;
-	filenameRegexp := regexp.MustCompile(`((P|T)\.NGD)\.DPC\.RSP\.(D\d{6}\.T\d{6})\d\.IN`)
+	filenamePrefix := "T"
+	if os.Getenv("ENV") == "prod" {
+		filenamePrefix = "P"
+	}
+	regex := fmt.Sprintf(`((%s)\.NGD)\.DPC\.RSP\.(D\d{6}\.T\d{6})\d\.IN`, filenamePrefix)
+	filenameRegexp := regexp.MustCompile(regex)
 	filenameMatches := filenameRegexp.FindStringSubmatch(filename)
 	if len(filenameMatches) < 4 {
 		err := fmt.Errorf("invalid filename for file: %s", filename)
@@ -49,7 +55,7 @@ func ParseConsentRecords(metadata *ResponseFileMetadata, b []byte) ([]*OptOutRec
 	for scanner.Scan() {
 		bytes := scanner.Bytes()
 		// Do not parse header or footer rows
-		if !strings.HasPrefix(string(bytes[:]), "HDR") && !strings.HasPrefix((string(bytes[:])), "TLR") {
+		if !strings.HasPrefix(string(bytes[:]), "HDR") && !strings.HasPrefix((string(bytes[:])), "TRL") {
 			record, err := ParseRecord(metadata, bytes, fixedwidth.Unmarshal)
 			if err != nil {
 				return records, fmt.Errorf("ParseConsentRecords: %w", err)

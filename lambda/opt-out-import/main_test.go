@@ -48,7 +48,7 @@ func TestHandlerDatabaseTimeoutError(t *testing.T) {
 	createConnectionVar = func(string, string) (*sql.DB, error) { return nil, errors.New("Connection attempt timed out") }
 	defer func() { createConnectionVar = ofn }()
 
-	event := getSQSEvent("demo-bucket", "P.NGD.DPC.RSP.D240123.T1122001.IN")
+	event := getSQSEvent("demo-bucket", "T.NGD.DPC.RSP.D240123.T1122001.IN")
 	_, err := handler(context.Background(), event)
 
 	assert.EqualError(t, err, "Connection attempt timed out")
@@ -102,10 +102,10 @@ func TestGenerateConfirmationFile(t *testing.T) {
 	output1 := fmt.Sprintf(`HDR_BENECONFIRM%s
 1SJ0A00AA0020240110NAccepted  00
 2SJ0A00AA0020240110YAccepted  00
-TLR_BENECONFIRM%s0000000002`, time.Now().Format("20060102"), time.Now().Format("20060102"))
+TRL_BENECONFIRM%s0000000002`, time.Now().Format("20060102"), time.Now().Format("20060102"))
 	output2 := fmt.Sprintf(`HDR_BENECONFIRM%s
 1SJ0A00AA0020240110NRejected  02
-TLR_BENECONFIRM%s0000000001`, time.Now().Format("20060102"), time.Now().Format("20060102"))
+TRL_BENECONFIRM%s0000000001`, time.Now().Format("20060102"), time.Now().Format("20060102"))
 	tests := []struct {
 		name       string
 		successful bool
