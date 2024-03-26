@@ -43,9 +43,13 @@ Rails.application.configure do
   config.action_mailer.raise_delivery_errors = false
 
   config.action_mailer.perform_caching = false
-
-  config.action_mailer.default_url_options = { host: ENV['HOST_NAME'], port: ENV['PORT'] }
-
+  config.action_mailer.perform_deliveries = false
+  config.action_mailer.default_url_options = { host: 'localhost', port: 3100 }
+  config.action_mailer.asset_host = "http://localhost:3100"
+  # By default we use letter_opener to render the email in a browser
+  # rather than send them:
+  config.action_mailer.preview_paths << "#{Rails.root}/spec/mailers/previews"
+ 
   # Print deprecation notices to the Rails logger.
   config.active_support.deprecation = :log
 

@@ -10,7 +10,8 @@ RSpec.describe Page::Organization::NewOrganizationSuccessComponent, type: :compo
       normalize_space(rendered_content)
     end
 
-    let(:component) { described_class.new('1234567890') }
+    let(:org) { ProviderOrganization.new(id: 4, name: 'Health Hut') }
+    let(:component) { described_class.new(org) }
     let(:expected_html) do
       <<~HTML
             <div>
@@ -38,7 +39,7 @@ RSpec.describe Page::Organization::NewOrganizationSuccessComponent, type: :compo
 
                     </div>
                     <div class="flex-align-self-center">
-                        <a href="/portal/">Assign CD later</a>
+                        <a href="/portal/organizations/#{org.id}/credential_delegate_invitations/new">Assign CD later</a>
                     </div>
                 </div>
             </div>
