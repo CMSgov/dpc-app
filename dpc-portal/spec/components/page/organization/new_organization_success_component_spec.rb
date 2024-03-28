@@ -35,11 +35,11 @@ RSpec.describe Page::Organization::NewOrganizationSuccessComponent, type: :compo
               <div class="margin-top-5">
                 <div class="display-flex flex-row flex-start" style="gap:20px;">
                     <div class="flex-align-self-center">
-                        <form class="button_to" method="get" action="/portal/"><button class="usa-button" type="submit">Assign CD now</button></form>
+                        <form class="button_to" method="get" action="/portal/organizations/#{org.id}/credential_delegate_invitations/new"><button class="usa-button" type="submit">Assign CD now</button></form>
 
                     </div>
                     <div class="flex-align-self-center">
-                        <a href="/portal/organizations/#{org.id}/credential_delegate_invitations/new">Assign CD later</a>
+                        <a href="/portal/">Assign CD later</a>
                     </div>
                 </div>
             </div>

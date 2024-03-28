@@ -16,10 +16,10 @@
   <div class="margin-top-5">
     <div class="display-flex flex-row flex-start" style="gap:20px;">
         <div class="flex-align-self-center">
-            <%= render Core::Button::ButtonComponent.new(label: 'Assign CD now', destination: root_path)%>
+            <%= render Core::Button::ButtonComponent.new(label: 'Assign CD now', destination: new_organization_credential_delegate_invitation_path(@organization))%>
         </div>
         <div class="flex-align-self-center">
-            <%= link_to 'Assign CD later', new_organization_credential_delegate_invitation_path(@organization) %>
+            <%= link_to 'Assign CD later', root_path %>
         </div>
     </div>
   </div>
