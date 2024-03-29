@@ -74,7 +74,8 @@ group :development do
   gem 'rubocop', require: false
   gem 'rubocop-performance', require: false
 
-  gem 'simplecov'
+  # Version 0.18 has a breaking change for sonarqube
+  gem 'simplecov', '<= 0.17'
   gem 'spring'
   gem 'spring-watcher-listen', '~> 2.0.0'
 
