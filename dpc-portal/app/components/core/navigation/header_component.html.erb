@@ -1,16 +1,44 @@
+<%= javascript_tag do %>
+function make_current(link_index) {
+  const selectors = <%= raw @selectors.inspect %>;
+  var current_index = 0;
+  for (anchor of document.querySelector('.usa-nav__primary').getElementsByTagName("a")) {
+    console.log(document.querySelector(selectors[current_index]));
+    if (current_index == link_index){
+      anchor.className = 'usa-nav-link usa-current';
+      if (document.querySelector(selectors[current_index])) {
+        document.querySelector(selectors[current_index]).style.display = 'block';
+      }
+    } else {
+      anchor.className = 'usa-nav-link';
+      if (document.querySelector(selectors[current_index])) {
+        document.querySelector(selectors[current_index]).style.display = 'none';
+      }
+    }
+    current_index++;
+  }
+}
+<% end %>
 <div class="usa-overlay"></div>
 <header class="usa-header usa-header--extended">
   <nav aria-label="Primary navigation" class="usa-nav">
     <div class="usa-nav__inner">
       <ul class="usa-nav__primary usa-accordion">
-	<% @links.each do |text, href, current|
-	   classes = current ? ['usa-nav-link', 'usa-current'] : 'usa-nav-link'
-	%>
+        <% start_index = -1
+           @links.each_with_index do |link, index|
+           text, show_selector, current = link
+           start_index = index if current
+        %>
         <li class="usa-nav__primary-item">
-	  <%= link_to text, href, class: classes %>
-	</li>
-	  <% end %>
+          <%= link_to text, '#', onclick: "make_current(#{index})", class: 'usa-nav-link' %>
+        </li>
+          <% end %>
       </ul>
     </div>
   </nav>
 </header>
+<%= javascript_tag do %>
+document.addEventListener("DOMContentLoaded", function() {
+   make_current(<%= start_index %>);
+}); 
+<% end %>
