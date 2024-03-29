@@ -22,6 +22,8 @@ Locally, you'll need to be running Zscaler in order to access the CPI API Gatewa
 
 We utilize the [ViewComponent](https://viewcomponent.org/) library to create custom components. These components are documented and viewable within [Lookbook](http://localhost:3100/portal/lookbook).
 
+Emails are not viewable in lookbook, but rather [here](http://localhost:3100/portal/rails/mailers/).
+
 ## Assets Pipeline
 
 Read more about the assets pipeline [here](/docs/portal/assets-pipeline.md).
