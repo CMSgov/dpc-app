@@ -7,7 +7,7 @@ module Core
     #
     class Preview < ViewComponent::Preview
       # @param logged_in toggle "Indicate whether user is logged in"
-      def default(logged_in: false)
+      def default(logged_in: true)
         render Core::SiteHeader::Component.new(logged_in:)
       end
     end
