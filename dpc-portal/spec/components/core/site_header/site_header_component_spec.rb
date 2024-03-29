@@ -14,12 +14,12 @@ RSpec.describe Core::SiteHeader::Component, type: :component do
 
       it 'should render site name' do
         render_inline(component)
-        expect(page.find('usa-logo--text')).to have_content('Data at the Point of Care')
+        expect(page.find('.usa-logo--text')).to have_content('Data at the Point of Care')
       end
 
       it 'should not render logout button' do
         render_inline(component)
-        expect(page).not_to have_selector('header button')
+        expect(page).not_to have_selector('.usa-header button')
       end
     end
 
@@ -33,13 +33,13 @@ RSpec.describe Core::SiteHeader::Component, type: :component do
 
       it 'should render site name' do
         render_inline(component)
-        expect(page.find('usa-logo--text')).to have_content('Data at the Point of Care')
+        expect(page.find('.usa-logo--text')).to have_content('Data at the Point of Care')
       end
 
       it 'should render logout button' do
         render_inline(component)
         expect(page).to have_selector('header button')
-        expect(page.find('header button')).to have_content('Log Out')
+        expect(page.find('.usa-header button')).to have_content('Log Out')
       end
     end
   end
