@@ -1,0 +1,16 @@
+<div class="usa-overlay"></div>
+<header class="usa-header usa-header--extended">
+  <nav aria-label="Primary navigation" class="usa-nav">
+    <div class="usa-nav__inner">
+      <ul class="usa-nav__primary usa-accordion">
+	<% @links.each do |text, href, current|
+	   classes = current ? ['usa-nav-link', 'usa-current'] : 'usa-nav-link'
+	%>
+        <li class="usa-nav__primary-item">
+	  <%= link_to text, href, class: classes %>
+	</li>
+	  <% end %>
+      </ul>
+    </div>
+  </nav>
+</header>
