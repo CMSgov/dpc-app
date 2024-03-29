@@ -8,22 +8,24 @@
     <%= javascript_include_tag '@uswds/uswds/dist/js/uswds-init.min.js' %>
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
   </head>
-  <body class="grid-container margin-top-5 margin-bottom-8">
+  <body class="minh-viewport bg-base-lightest">
     <%= javascript_include_tag '@uswds/uswds/dist/js/uswds.min.js' %>
-    <%= button_to "Log Out", destroy_user_session_path, method: :delete if current_user %>
-    <div class="grid-row">
-      <div class="grid-col-fill">
-        <% if notice %>
-          <%= render Core::Alert::Component.new do %>
-            <%= notice %>
+    <%= render Core::SiteHeader::Component.new(logged_in: !!current_user) %>
+    <div class="grid-container margin-top-5 margin-bottom-8">
+      <div class="grid-row">
+        <div class="grid-col-fill">
+          <% if notice %>
+            <%= render Core::Alert::Component.new do %>
+              <%= notice %>
+            <% end %>
           <% end %>
-        <% end %>
-        <% if alert %>
-          <%= render Core::Alert::Component.new(status: :error) do %>
-            <%= alert %>
+          <% if alert %>
+            <%= render Core::Alert::Component.new(status: :error) do %>
+              <%= alert %>
+            <% end %>
           <% end %>
-        <% end %>
-        <%= yield %>
+          <%= yield %>
+        </div>
       </div>
     </div>
   </body>
