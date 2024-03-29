@@ -24,7 +24,9 @@
               <%= alert %>
             <% end %>
           <% end %>
-          <%= yield %>
+          <main class="<%= 'margin-top-5' if notice or alert %>">
+            <%= yield %>
+          </main>
         </div>
       </div>
     </div>

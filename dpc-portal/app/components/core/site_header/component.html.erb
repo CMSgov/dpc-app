@@ -95,7 +95,10 @@
   <div class="grid-container display-flex flex-row flex-justify flex-align-center padding-top-5 padding-bottom-4">
     <div class="usa-navbar">
       <div class="usa-logo margin-bottom-0 margin-top-0">
-        <em class="usa-logo__text"><a href=<%= root_path %> class="text-no-underline text-black">Data at the Point of Care</a></em>
+        <a href=<%= root_path %> class="display-flex flex-row flex-align-center">
+          <%= image_tag("dpc-logo.svg", alt: "Data at the Point of Care Logo", style: "width: 1.5rem") %>
+          <span class="usa-logo--text text-no-underline text-black padding-left-1">Data at the Point of Care</span>
+        </a>
       </div>
     </div>
     <%= render Core::Button::ButtonComponent.new(label: "Log Out", destination: destroy_user_session_path, method: :delete) if logged_in %>
