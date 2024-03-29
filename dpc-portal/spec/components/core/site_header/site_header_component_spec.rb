@@ -39,7 +39,7 @@ RSpec.describe Core::SiteHeader::Component, type: :component do
       it 'should render logout button' do
         render_inline(component)
         expect(page).to have_selector('header button')
-        expect(page.find('header button')).to have_content("Log Out")
+        expect(page.find('header button')).to have_content('Log Out')
       end
     end
   end
