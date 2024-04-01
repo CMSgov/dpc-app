@@ -44,8 +44,12 @@ type (
 func main() {
 	if isTesting {
 		filename := "bfdeft01/dpc/in/T.NGD.DPC.RSP.D240123.T1122001.IN"
-		success, _ := importResponseFile("demo-bucket", filename)
-		log.Println(success)
+		createdOptOutCount, createdOptInCount, confirmationFileName, err := importResponseFile("demo-bucket", filename)
+		if err != nil {
+			log.Error(err)
+		} else {
+			log.Infof("Created %d opt outs, %d opt ins, and generated confirmation %s", createdOptOutCount, createdOptInCount, confirmationFileName)
+		}
 	} else {
 		lambda.Start(handler)
 	}
@@ -69,12 +73,20 @@ func handler(ctx context.Context, sqsEvent events.SQSEvent) (string, error) {
 
 	for _, e := range s3Event.Records {
 		if e.EventName == "ObjectCreated:Put" {
-			success, err := importResponseFile(e.S3.Bucket.Name, e.S3.Object.Key)
-			log.Info(success)
+			createdOptOutCount, createdOptInCount, confirmationFileName, err := importResponseFile(e.S3.Bucket.Name, e.S3.Object.Key)
+			logger := log.WithField("response_filename", e.S3.Object.Key).WithField("created_opt_outs_count", createdOptOutCount).WithField("created_opt_ins_count", createdOptInCount).WithField("confirmation_filename", confirmationFileName)
+
 			if err != nil {
+				logger.Errorf("Failed to import response file: %s", err)
 				return e.S3.Object.Key, err
 			}
+
+			logger.Info("Successfully imported response file and uploaded confirmation file")
+
 			err = deleteS3File(e.S3.Bucket.Name, e.S3.Object.Key)
+			if err != nil {
+				logger.Errorf("Failed to delete response file after import: %s", err)
+			}
 			return e.S3.Object.Key, err
 		}
 	}
@@ -83,83 +95,95 @@ func handler(ctx context.Context, sqsEvent events.SQSEvent) (string, error) {
 	return "", nil
 }
 
-func importResponseFile(bucket string, file string) (bool, error) {
-	log.Info(fmt.Printf("Importing opt out file: %s (bucket: %s)", file, bucket))
+func importResponseFile(bucket string, file string) (int, int, string, error) {
+	log.Infof("Importing opt out file: %s (bucket: %s)", file, bucket)
 	metadata, err := ParseMetadata(bucket, file)
 	if err != nil {
-		log.Warning(fmt.Sprintf("Failed to parse opt out file metadata: %s", err))
-		return false, err
+		log.Warningf("Failed to parse opt out file metadata: %s", err)
+		return 0, 0, "", err
 	}
 
 	dbuser := fmt.Sprintf("/dpc/%s/consent/db_user_dpc_consent", os.Getenv("ENV"))
 	dbpassword := fmt.Sprintf("/dpc/%s/consent/db_pass_dpc_consent", os.Getenv("ENV"))
 	secrets, err := getConsentDbSecrets(dbuser, dbpassword)
 	if err != nil {
-		log.Warning(fmt.Sprintf("Failed to get DB secrets: %s", err))
-		return false, err
+		log.Warningf("Failed to get DB secrets: %s", err)
+		return 0, 0, "", err
 	}
 
 	db, err := createConnectionVar(secrets[dbuser], secrets[dbpassword])
 	if err != nil {
-		log.Warning(fmt.Sprintf("Failed to create db connection: %s", err))
-		return false, err
+		log.Warningf("Failed to create db connection: %s", err)
+		return 0, 0, "", err
 	}
 	if err := db.Ping(); err != nil {
-		log.Warning(fmt.Sprintf("Ping error: %s", err))
-		return false, err
+		log.Warningf("Ping error: %s", err)
+		return 0, 0, "", err
 	}
 	defer db.Close()
 
 	optOutFileEntity, err := insertResponseFileMetadata(db, &metadata)
 	if err != nil {
-		log.Warning(fmt.Sprintf("Failed to insert opt out metadata: %s", err))
-		return false, err
+		log.Warningf("Failed to insert opt out metadata: %s", err)
+		return 0, 0, "", err
 	}
 
 	bytes, err := downloadS3File(bucket, file)
 	if err != nil {
 		log.Warningf("Failed to download opt out file from S3: %s", err)
-		if err := updateResponseFileImportStatus(db, optOutFileEntity.id, ImportFail); err != nil {
-			return false, err
+		if updateStatusErr := updateResponseFileImportStatus(db, optOutFileEntity.id, ImportFail); updateStatusErr != nil {
+			return 0, 0, "", updateStatusErr
 		}
-		return false, err
+		return 0, 0, "", err
 	}
 
 	records, err := ParseConsentRecords(&metadata, bytes)
 	if err != nil {
-		log.Warning(fmt.Sprintf("Failed to parse consent records: %s", err))
-		if err := updateResponseFileImportStatus(db, optOutFileEntity.id, ImportFail); err != nil {
-			return false, err
+		log.Warningf("Failed to parse consent records: %s", err)
+		if updateStatusErr := updateResponseFileImportStatus(db, optOutFileEntity.id, ImportFail); updateStatusErr != nil {
+			return 0, 0, "", updateStatusErr
 		}
-		return false, err
-	}
-	createdRecords, err := insertConsentRecords(db, optOutFileEntity.id, records)
-	if err != nil {
-		log.Warning(fmt.Sprintf("Failed to insert consent records: %s", err))
-		return false, err
-	}
-	log.WithField("created_records_count", len(createdRecords)).Info("Created consent records with the following ID fields:")
-	for _, rec := range createdRecords {
-		log.Info(fmt.Sprintf("ID: %s", rec.ID))
+		return 0, 0, "", err
 	}
 
+	createdRecords, err := insertConsentRecords(db, optOutFileEntity.id, records)
+
+	createdOptOutCount := 0
+	createdOptInCount := 0
+
+	log.Info("Created consent records with the following ID fields:")
+	for _, rec := range createdRecords {
+		log.Infof("ID: %s, Opt Out Preference: %s", rec.ID, rec.PolicyCode)
+		if rec.PolicyCode == "OPTIN" {
+			createdOptInCount++
+		} else {
+			createdOptOutCount++
+		}
+	}
+
+	if err != nil {
+		log.Warningf("Failed to insert consent records: %s", err)
+		return createdOptOutCount, createdOptInCount, "", err
+	}
+
+	confirmationFileName := GenerateConfirmationFileName(file, time.Now())
 	confirmationFile, err := generateConfirmationFile(true, createdRecords, fixedwidth.Marshal)
 	if err != nil {
-		log.Warning(fmt.Sprintf("Failed to generate confirmation file: %s", err))
-		return false, err
+		log.Warningf("Failed to generate confirmation file: %s", err)
+		return createdOptOutCount, createdOptInCount, confirmationFileName, err
 	}
 
 	if sess, err := createSession(); err != nil {
-		log.Warning("Failed to create session for uploading response file")
-		return false, err
+		log.Warning("Failed to create session for uploading confirmation file")
+		return createdOptOutCount, createdOptInCount, confirmationFileName, err
 	} else {
-		if err = uploadConfirmationFile(bucket, GenerateConfirmationFileName(file, time.Now()), s3manager.NewUploader(sess).Upload, confirmationFile); err != nil {
-			log.Warning("Failed to write upload response file")
-			return false, err
+		if err = uploadConfirmationFile(bucket, confirmationFileName, s3manager.NewUploader(sess).Upload, confirmationFile); err != nil {
+			log.Warning("Failed to write upload confirmation file")
+			return createdOptOutCount, createdOptInCount, confirmationFileName, err
 		}
 	}
 
-	return true, err
+	return createdOptOutCount, createdOptInCount, confirmationFileName, err
 }
 
 func createV2Cfg() (*awsv2.Config, error) {

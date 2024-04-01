@@ -27,15 +27,15 @@ func TestHandler(t *testing.T) {
 		err    error
 	}{
 		{
-			event:  getSQSEvent("demo-bucket", "file_path"),
-			expect: "file_path",
+			event:  getSQSEvent("demo-bucket", "bfdeft01/dpc/in/T.NGD.DPC.RSP.D240123.T1122001.IN"),
+			expect: "bfdeft01/dpc/in/T.NGD.DPC.RSP.D240123.T1122001.IN",
 			err:    nil,
 		},
 	}
 
 	for _, test := range tests {
 		response, err := handler(context.Background(), test.event)
-		assert.NotNil(t, err)
+		assert.Nil(t, err)
 		assert.Equal(t, test.expect, response)
 	}
 
