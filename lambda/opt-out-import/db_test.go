@@ -284,6 +284,45 @@ func TestInsertConsentRecordsEmptyFile(t *testing.T) {
 	}
 }
 
+func TestInsertConsentRecordsEmptyRecordsDirectCall(t *testing.T) {
+	tests := []struct {
+		name          string
+		bucket        string
+		filename      string
+		expect        bool
+		consentStatus string
+		err           error
+	}{
+		{
+			name:          "empty array",
+		},
+	}
+
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("Unexpected error when opening a mock database %s", err)
+	}
+	defer db.Close()
+
+	for _, test := range tests {
+		fmt.Printf("~~~ %s test\n", test.name)
+
+		fileId := "test_id"
+		
+		rows := []string{"id", "import_status"}
+		mock.ExpectQuery("UPDATE opt_out_file").
+			WithArgs(ImportComplete, fileId).
+			WillReturnRows(sqlmock.NewRows(rows).AddRow(fileId, ImportComplete))
+
+		var consents []*OptOutRecord
+		results, err := insertConsentRecords(db, "test_id", consents)
+		if err != nil {
+			t.Error(err)
+		}
+		assert.Empty(t, results)
+	}
+}
+
 func TestUpdateResponseFileImportStatus(t *testing.T) {
 	tests := []struct {
 		importStatus string
