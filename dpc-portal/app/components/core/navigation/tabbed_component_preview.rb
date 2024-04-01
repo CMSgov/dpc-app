@@ -2,17 +2,17 @@
 
 module Core
   module Navigation
-    # Header Navigation Component Preview
+    # Tabbed Navigation Component Preview
     # ----------------
     #
     # [See at USWDS](https://designsystem.digital.gov/components/header/extended/)
     # @after_render :add_sections
     #
-    class HeaderComponentPreview < ViewComponent::Preview
+    class TabbedComponentPreview < ViewComponent::Preview
       def default
-        links = [['Link 1', '.area_1', true],
-                 ['Link 2', '.area_2', false]]
-        render(Core::Navigation::HeaderComponent.new(links))
+        links = [['Link 1', 'https://example.com/1', '.area_1', false],
+                 ['Link 2', 'https://example.com/2', '.area_2', true]]
+        render(Core::Navigation::TabbedComponent.new('test_header', links))
       end
 
       private
