@@ -74,7 +74,12 @@ func handler(ctx context.Context, sqsEvent events.SQSEvent) (string, error) {
 	for _, e := range s3Event.Records {
 		if e.EventName == "ObjectCreated:Put" {
 			createdOptOutCount, createdOptInCount, confirmationFileName, err := importResponseFile(e.S3.Bucket.Name, e.S3.Object.Key)
-			logger := log.WithField("response_filename", e.S3.Object.Key).WithField("created_opt_outs_count", createdOptOutCount).WithField("created_opt_ins_count", createdOptInCount).WithField("confirmation_filename", confirmationFileName)
+			logger := log.WithFields(log.Fields{
+				"response_filename":      e.S3.Object.Key,
+				"created_opt_outs_count": createdOptOutCount,
+				"created_opt_ins_count":  createdOptInCount,
+				"confirmation_filename":  confirmationFileName,
+			})
 
 			if err != nil {
 				logger.Errorf("Failed to import response file: %s", err)
