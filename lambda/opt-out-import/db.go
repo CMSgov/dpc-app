@@ -150,12 +150,6 @@ func insertConsentRecords(db *sql.DB, optOutFileId string, records []*OptOutReco
 			return createdRecords, fmt.Errorf("insertConsentRecords: failed to insert to consent table: %w", err)
 		}
 
-		cols, err := rows.Columns()
-
-		for _, col := range cols {
-			log.Info(col)
-		}
-
 		for rows.Next() {
 			record := OptOutRecord{}
 			if err := rows.Scan(&record.ID, &record.MBI, &record.EffectiveDt, &record.PolicyCode, &record.OptOutFileID); err != nil {
