@@ -1,6 +1,4 @@
-<div>
-  <h1><%= @organization.name %></h1>
-  <div class="margin-bottom-5">NPI: <%= @organization.npi %></div>
+<div id="credential_delegates">
   <%= render(Core::Card::BasicComponent.new(text_content: '<h2>Credential delegates</h2>',
     button_params: { name: 'Assign CD', path: new_organization_credential_delegate_invitation_path(@organization.path_id), method: :get} )) do %>
       <hr />

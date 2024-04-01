@@ -138,7 +138,7 @@ RSpec.describe Core::Navigation::TabbedComponent, type: :component do
         //]]>
       </script>
       <div class="usa-overlay"></div>
-      <header id="header_id" class="usa-header usa-header--extended" style="display: none">
+      <header id="header_id" class="usa-header usa-header--extended margin-bottom-2" style="display: none">
         <nav aria-label="Primary navigation" class="usa-nav">
           <div class="usa-nav__inner">
             <ul class="usa-nav__primary usa-accordion">

@@ -21,7 +21,7 @@ class OrganizationsController < ApplicationController
                              disabled_at: nil)
       render(Page::CredentialDelegate::ListComponent.new(@organization, @invitations, @cds))
     else
-      render(Page::Organization::ShowComponent.new(@organization))
+      render(Page::Organization::CredentialsComponent.new(@organization))
     end
   end
 
