@@ -229,6 +229,100 @@ func TestInsertConsentRecords_DatabaseError(t *testing.T) {
 	assert.Equal(t, 0, len(response))
 }
 
+func TestInsertConsentRecordsEmptyFile(t *testing.T) {
+	tests := []struct {
+		name          string
+		bucket        string
+		filename      string
+		expect        bool
+		consentStatus string
+		err           error
+	}{
+		{
+			name:          "empty file",
+			bucket:        "demo-bucket",
+			filename:      "T.NGD.DPC.RSP.D010424.T1122001.IN",	// File has header and footer, but no data rows
+			expect:        true,
+			consentStatus: Accepted,
+		},
+	}
+
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("Unexpected error when opening a mock database %s", err)
+	}
+	defer db.Close()
+
+	for _, test := range tests {
+		fmt.Printf("~~~ %s test\n", test.name)
+
+		f, err := os.ReadFile(fmt.Sprintf("synthetic_test_data/%s", test.filename))
+		if err != nil {
+			fmt.Printf("unable to read file: %v", err)
+		}
+
+		metadata, err := ParseMetadata(test.bucket, test.filename)
+		if err != nil {
+			t.Errorf("Error when parsing opt out metadata %s", err)
+		}
+		metadata.FileID = "test_id"
+		consents, err := ParseConsentRecords(&metadata, f)
+		if err != nil {
+			t.Errorf("Error when parsing consent records %s", err)
+		}
+		assert.Empty(t, consents)
+		
+		rows := []string{"id", "import_status"}
+		mock.ExpectQuery("UPDATE opt_out_file").
+			WithArgs(ImportComplete, metadata.FileID).
+			WillReturnRows(sqlmock.NewRows(rows).AddRow(metadata.FileID, ImportComplete))
+		results, err := insertConsentRecords(db, "test_id", consents)
+		if err != nil {
+			t.Error(err)
+		}
+		assert.Empty(t, results)
+	}
+}
+
+func TestInsertConsentRecordsEmptyRecordsDirectCall(t *testing.T) {
+	tests := []struct {
+		name          string
+		bucket        string
+		filename      string
+		expect        bool
+		consentStatus string
+		err           error
+	}{
+		{
+			name:          "empty array",
+		},
+	}
+
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("Unexpected error when opening a mock database %s", err)
+	}
+	defer db.Close()
+
+	for _, test := range tests {
+		fmt.Printf("~~~ %s test\n", test.name)
+
+		fileId := "test_id"
+		
+		rows := []string{"id", "import_status"}
+		mock.ExpectQuery("UPDATE opt_out_file").
+			WithArgs(ImportComplete, fileId).
+			WillReturnRows(sqlmock.NewRows(rows).AddRow(fileId, ImportComplete))
+
+		var consents []*OptOutRecord
+		results, err := insertConsentRecords(db, "test_id", consents)
+		if err != nil {
+			t.Error(err)
+		}
+		assert.Empty(t, results)
+	}
+}
+
 func TestUpdateResponseFileImportStatus(t *testing.T) {
 	tests := []struct {
 		importStatus string
