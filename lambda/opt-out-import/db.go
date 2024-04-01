@@ -139,7 +139,7 @@ func insertConsentRecords(db *sql.DB, optOutFileId string, records []*OptOutReco
 				query += "\n"
 			}
 		}
-		query += "RETURNING id, mbi, effective_date, opt_out_file_id"
+		query += "RETURNING id, mbi, effective_date, policy_code, opt_out_file_id"
 
 		rows, err := db.Query(query)
 		if err != nil {
@@ -149,9 +149,16 @@ func insertConsentRecords(db *sql.DB, optOutFileId string, records []*OptOutReco
 			}
 			return createdRecords, fmt.Errorf("insertConsentRecords: failed to insert to consent table: %w", err)
 		}
+
+		cols, err := rows.Columns()
+
+		for _, col := range cols {
+			log.Info(col)
+		}
+
 		for rows.Next() {
 			record := OptOutRecord{}
-			if err := rows.Scan(&record.ID, &record.MBI, &record.EffectiveDt, &record.OptOutFileID); err != nil {
+			if err := rows.Scan(&record.ID, &record.MBI, &record.EffectiveDt, &record.PolicyCode, &record.OptOutFileID); err != nil {
 				return createdRecords, fmt.Errorf("insertConsentRecords: Failed to read newly created consent records: %w", err)
 			}
 			record.Status = Accepted

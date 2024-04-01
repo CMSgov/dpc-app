@@ -138,24 +138,26 @@ func TestInsertConsentRecords(t *testing.T) {
 		if err != nil {
 			t.Errorf("Error when parsing opt out metadata %s", err)
 		}
-		metadata.FileID = "test_id"
+
+		fileId := "test_id"
+		metadata.FileID = fileId
 		consents, err := ParseConsentRecords(&metadata, f)
 		if err != nil {
 			t.Errorf("Error when parsing consent records %s", err)
 		}
-		rows := []string{"id", "mbi", "effective_date", "opt_out_file_id"}
+		rows := []string{"id", "mbi", "effective_date", "policy_code", "opt_out_file_id"}
 		mock.ExpectQuery("INSERT INTO consent").
 			WillReturnRows(sqlmock.NewRows(rows).
-				AddRow("(.*)", "5SJ0A00AA00", time.Date(2019, 07, 01, 0, 0, 0, 0, time.UTC), "test_id").
-				AddRow("(.*)", "4SF6G00AA00", time.Date(2019, 07, 29, 0, 0, 0, 0, time.UTC), "test_id").
-				AddRow("(.*)", "4SH0A00AA00", time.Date(0001, 01, 01, 0, 0, 0, 0, time.UTC), "test_id").
-				AddRow("(.*)", "8SG0A00AA00", time.Date(2019, 07, 19, 0, 0, 0, 0, time.UTC), "test_id"))
+				AddRow("(.*)", "5SJ0A00AA00", time.Date(2019, 07, 01, 0, 0, 0, 0, time.UTC), "OPTOUT", fileId).
+				AddRow("(.*)", "4SF6G00AA00", time.Date(2019, 07, 29, 0, 0, 0, 0, time.UTC), "OPTOUT", fileId).
+				AddRow("(.*)", "4SH0A00AA00", time.Date(0001, 01, 01, 0, 0, 0, 0, time.UTC), "OPTOUT", fileId).
+				AddRow("(.*)", "8SG0A00AA00", time.Date(2019, 07, 19, 0, 0, 0, 0, time.UTC), "OPTOUT", fileId))
 
 		rows = []string{"id", "import_status"}
 		mock.ExpectQuery("UPDATE opt_out_file").
 			WithArgs(ImportComplete, metadata.FileID).
 			WillReturnRows(sqlmock.NewRows(rows).AddRow(metadata.FileID, ImportComplete))
-		results, err := insertConsentRecords(db, "test_id", consents)
+		results, err := insertConsentRecords(db, fileId, consents)
 		log.Printf("results: %d", len(results))
 		if err != nil {
 			t.Error(err)
@@ -241,7 +243,7 @@ func TestInsertConsentRecordsEmptyFile(t *testing.T) {
 		{
 			name:          "empty file",
 			bucket:        "demo-bucket",
-			filename:      "T.NGD.DPC.RSP.D010424.T1122001.IN",	// File has header and footer, but no data rows
+			filename:      "T.NGD.DPC.RSP.D010424.T1122001.IN", // File has header and footer, but no data rows
 			expect:        true,
 			consentStatus: Accepted,
 		},
@@ -271,7 +273,7 @@ func TestInsertConsentRecordsEmptyFile(t *testing.T) {
 			t.Errorf("Error when parsing consent records %s", err)
 		}
 		assert.Empty(t, consents)
-		
+
 		rows := []string{"id", "import_status"}
 		mock.ExpectQuery("UPDATE opt_out_file").
 			WithArgs(ImportComplete, metadata.FileID).
@@ -294,7 +296,7 @@ func TestInsertConsentRecordsEmptyRecordsDirectCall(t *testing.T) {
 		err           error
 	}{
 		{
-			name:          "empty array",
+			name: "empty array",
 		},
 	}
 
@@ -308,7 +310,7 @@ func TestInsertConsentRecordsEmptyRecordsDirectCall(t *testing.T) {
 		fmt.Printf("~~~ %s test\n", test.name)
 
 		fileId := "test_id"
-		
+
 		rows := []string{"id", "import_status"}
 		mock.ExpectQuery("UPDATE opt_out_file").
 			WithArgs(ImportComplete, fileId).
