@@ -9,8 +9,8 @@ module Page
         @links = [['User Access', 'https://example.com/1', '#credential_delegates', true],
                   ['Credentials', 'https://example.com/2', '#credentials', false]]
         @organization = organization
-        @active_credential_delegates = credential_delegates.map(&:show_attributes)
-        @pending_credential_delegates = cd_invitations.map(&:show_attributes)
+        @active_credential_delegates = credential_delegates
+        @pending_credential_delegates = cd_invitations
         @show_cds = show_cds
       end
     end
