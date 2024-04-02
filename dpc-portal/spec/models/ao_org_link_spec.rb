@@ -38,7 +38,7 @@ RSpec.describe AoOrgLink, type: :model do
       create(:ao_org_link, user:, provider_organization: provider_organization1, invitation:)
       duplicate = build(:ao_org_link, user:, provider_organization: provider_organization2, invitation:)
       expect(duplicate.valid?).to be_falsy
-      expect(duplicate.errors.full_messages).to include 'Invitation already exists for this invitation.'
+      expect(duplicate.errors.full_messages).to include 'Invitation already used by another AoOrgLink.'
     end
   end
 end
