@@ -4,12 +4,13 @@ module Core
   module Button
     # Render a USWDS-styled button.
     class ButtonComponent < ViewComponent::Base
-      attr_accessor :label, :destination, :additional_classes
+      attr_accessor :label, :destination, :method, :additional_classes
 
-      def initialize(label:, destination:, additional_classes: nil)
+      def initialize(label:, destination:, method: :get, additional_classes: nil)
         super
         @label = label
         @destination = destination
+        @method = method
         @additional_classes = additional_classes
       end
 
