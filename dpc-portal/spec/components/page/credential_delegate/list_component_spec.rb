@@ -26,7 +26,7 @@ RSpec.describe Page::CredentialDelegate::ListComponent, type: :component do
         <<~HTML
           <div id="credential_delegates">
             <div>
-              <div class="shadow-5 border-1px border-base-lighter radius-md margin-bottom-4 padding-x-3 padding-bottom-3">
+              <div class="bg-white shadow-5 border-1px border-base-lighter radius-md margin-bottom-4 padding-x-3 padding-bottom-3">
                 <div class="display-flex flex-row flex-justify">
                   <div class="flex-align-self-center">
                     <h2>Credential delegates</h2>
