@@ -78,6 +78,14 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
                                                                                                  'new-invitation'))
       end
 
+      it 'sends an invitation email on success' do
+        mailer = double(InvitationMailer)
+        expect(InvitationMailer).to receive(:with).with(invitation: instance_of(Invitation)).and_return(mailer)
+        expect(mailer).to receive(:invite_cd).and_return(mailer)
+        expect(mailer).to receive(:deliver_later)
+        post "/organizations/#{api_id}/credential_delegate_invitations", params: successful_parameters
+      end
+
       it 'does not create invitation record on failure' do
         successful_parameters['invited_given_name'] = ''
         expect do

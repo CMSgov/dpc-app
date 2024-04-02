@@ -10,7 +10,8 @@ RSpec.describe Page::Organization::NewOrganizationSuccessComponent, type: :compo
       normalize_space(rendered_content)
     end
 
-    let(:component) { described_class.new('1234567890') }
+    let(:org) { ProviderOrganization.new(id: 4, name: 'Health Hut') }
+    let(:component) { described_class.new(org) }
     let(:expected_html) do
       <<~HTML
             <div>
@@ -34,7 +35,7 @@ RSpec.describe Page::Organization::NewOrganizationSuccessComponent, type: :compo
               <div class="margin-top-5">
                 <div class="display-flex flex-row flex-start" style="gap:20px;">
                     <div class="flex-align-self-center">
-                        <form class="button_to" method="get" action="/portal/"><button class="usa-button" type="submit">Assign CD now</button></form>
+                        <form class="button_to" method="get" action="/portal/organizations/#{org.id}/credential_delegate_invitations/new"><button class="usa-button" type="submit">Assign CD now</button></form>
 
                     </div>
                     <div class="flex-align-self-center">

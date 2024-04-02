@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"strconv"
+	"strings"
 	"testing"
 	"time"
 
@@ -20,7 +21,6 @@ import (
 )
 
 func TestHandler(t *testing.T) {
-
 	tests := []struct {
 		event  events.SQSEvent
 		expect string
@@ -38,12 +38,22 @@ func TestHandler(t *testing.T) {
 		assert.NotNil(t, err)
 		assert.Equal(t, test.expect, response)
 	}
+}
 
+func TestIntegrationImportResponseFile(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping integration test.")
+	}
+
+	createdOptOutCount, createdOptInCount, confirmationFileName, err := importResponseFile("demo-bucket", "bfdeft01/dpc/in/T.NGD.DPC.RSP.D240123.T1122001.IN")
+	assert.Nil(t, err)
+	assert.Equal(t, 6, createdOptOutCount)
+	assert.Equal(t, 1, createdOptInCount)
+	assert.True(t, strings.Contains(confirmationFileName, "T#EFT.ON.DPC.NGD.CONF."))
 }
 
 func TestHandlerDatabaseTimeoutError(t *testing.T) {
 	//test timeout error is propragated to lambda
-
 	ofn := createConnectionVar
 	createConnectionVar = func(string, string) (*sql.DB, error) { return nil, errors.New("Connection attempt timed out") }
 	defer func() { createConnectionVar = ofn }()

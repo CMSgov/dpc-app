@@ -15,13 +15,13 @@ test-build:
 	go tool cover -html=coverage/int_coverage.out -o coverage/int_coverage.html
 
 test:
-	IS_TESTING=true DB_USER_DPC_CONSENT="postgres" DB_PASS_DPC_CONSENT="dpc-safe" go test -v -covermode=count -coverprofile=coverage/unit_coverage.out
+	IS_TESTING=true DB_USER_DPC_CONSENT="postgres" DB_PASS_DPC_CONSENT="dpc-safe" ENV="local" DB_HOST="localhost" go test -v -covermode=count -coverprofile=coverage/full_coverage.out
 	go tool cover -html=coverage/full_coverage.out -o coverage/full_coverage.html
 unit-test:
 	IS_TESTING=true DB_USER_DPC_CONSENT="postgres" DB_PASS_DPC_CONSENT="dpc-safe" go test -short -v -covermode=count -coverprofile=coverage/unit_coverage.out
 	go tool cover -html=coverage/unit_coverage.out -o coverage/unit_coverage.html
 integration-test:
-	IS_TESTING=true DB_USER_DPC_CONSENT="postgres" DB_PASS_DPC_CONSENT="dpc-safe" go test -run TestIntegration -v -covermode=count -coverprofile=coverage/unit_coverage.out
+	IS_TESTING=true DB_USER_DPC_CONSENT="postgres" DB_PASS_DPC_CONSENT="dpc-safe" ENV="local" DB_HOST="localhost" go test -run TestIntegration -v -covermode=count -coverprofile=coverage/unit_coverage.out
 	go tool covdata percent -i=coverage
 	go tool covdata textfmt -i=coverage -o=coverage/int_coverage.out
 	go tool cover -html=coverage/int_coverage.out -o coverage/int_coverage.html

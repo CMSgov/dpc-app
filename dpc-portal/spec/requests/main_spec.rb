@@ -11,7 +11,7 @@ RSpec.describe 'Mains', type: :request do
 
     it 'returns hello, world' do
       get root_path
-      expect(response.body).to eq('Hello, World')
+      expect(response.body).to include('Hello, World')
     end
 
     it 'succeeds on prod-sbx' do

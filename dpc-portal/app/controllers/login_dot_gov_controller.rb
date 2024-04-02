@@ -10,6 +10,7 @@ class LoginDotGovController < Devise::OmniauthCallbacksController
       assign_user_properties(user_to_create, auth)
     end
     sign_in(:user, user)
+    redirect_to session[:user_return_to] || organizations_path
   end
 
   def failure
