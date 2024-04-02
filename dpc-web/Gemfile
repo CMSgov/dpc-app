@@ -83,7 +83,7 @@ group :development do
   gem 'web-console', '>= 4.2.0'
   gem 'listen', '~> 3.5'
   gem 'spring'
-  gem 'spring-watcher-listen', '~> 2.0.0'
+  gem 'spring-watcher-listen', '~> 2.1.0'
 
   gem 'rubocop', '>= 1.12.0', require: false
   gem 'rubocop-performance', '>= 1.10.2', require: false
