@@ -161,8 +161,10 @@ func importResponseFile(bucket string, file string) (int, int, string, error) {
 		log.Infof("ID: %s, Opt Out Preference: %s", rec.ID, rec.PolicyCode)
 		if rec.PolicyCode == "OPTIN" {
 			createdOptInCount++
-		} else {
+		} else if rec.PolicyCode == "OPTOUT" {
 			createdOptOutCount++
+		} else {
+			log.Warningf("Unknown policy code saved to database for consent record %s", rec.ID)
 		}
 	}
 
