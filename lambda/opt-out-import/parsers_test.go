@@ -150,6 +150,37 @@ func TestParseRecord_InvalidData(t *testing.T) {
 	}
 }
 
+func TestParseRecord_FailOnRealMBI(t *testing.T) {
+	fp := "testfilepath"
+
+	tests := []struct {
+		line   string
+		expErr string
+	}{
+		{
+			"1EG4TE5MK73Y",
+			"failed to parse file: testfilepath: Valid MBI in non-production environment",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.line, func(t *testing.T) {
+			metadata := &ResponseFileMetadata{
+				Timestamp:    time.Now(),
+				FilePath:     fp,
+				Name:         tt.line,
+				DeliveryDate: time.Now(),
+			}
+			suppression, err := ParseRecord(metadata, []byte(tt.line), fixedwidth.Unmarshal)
+			assert.Nil(t, suppression)
+			assert.NotNil(t, err)
+			assert.Contains(t, err.Error(), tt.expErr)
+		})
+	}
+}
+
+// TODO add test parse bad mbi
+
 func TestParseSQSEvent(t *testing.T) {
 	jsonFile, err := os.Open("testdata/s3event.json")
 	if err != nil {

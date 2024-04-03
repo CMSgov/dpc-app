@@ -86,7 +86,7 @@ func ParseRecord(metadata *ResponseFileMetadata, b []byte, unmarshaler FileUnmar
 		MBI:        row.MBI,
 		PolicyCode: policyCode,
 	}
-
+	// TODO raise error if matches MBI in not-prod
 	return &record, nil
 }
 
