@@ -77,7 +77,7 @@ group :development do
   # Version 0.18 has a breaking change for sonarqube
   gem 'simplecov', '<= 0.17'
   gem 'spring'
-  gem 'spring-watcher-listen', '~> 2.0.0'
+  gem 'spring-watcher-listen', '~> 2.1.0'
 end
 
 group :test do
