@@ -30,10 +30,10 @@ document.addEventListener("DOMContentLoaded", function() {
     <div class="usa-nav__inner">
       <ul class="usa-nav__primary usa-accordion">
         <% @links.each_with_index do |link, index|
-           text, href, _, _ = link
+           text, _, _ = link
         %>
         <li class="usa-nav__primary-item">
-          <%= link_to text, href, onclick: "make_current(#{index}); return false", class: 'usa-nav-link' %>
+          <%= link_to text, '#', onclick: "make_current(#{index}); return false", class: 'usa-nav-link' %>
         </li>
           <% end %>
       </ul>

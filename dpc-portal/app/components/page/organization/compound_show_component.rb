@@ -6,8 +6,8 @@ module Page
     class CompoundShowComponent < ViewComponent::Base
       def initialize(organization, cd_invitations, credential_delegates, show_cds)
         super
-        @links = [['User Access', 'https://example.com/1', '#credential_delegates', true],
-                  ['Credentials', 'https://example.com/2', '#credentials', false]]
+        @links = [['User Access', '#credential_delegates', true],
+                  ['Credentials', '#credentials', false]]
         @organization = organization
         @active_credential_delegates = credential_delegates
         @pending_credential_delegates = cd_invitations

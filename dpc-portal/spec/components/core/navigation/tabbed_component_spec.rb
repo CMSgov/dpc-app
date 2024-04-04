@@ -22,12 +22,12 @@ RSpec.describe Core::Navigation::TabbedComponent, type: :component do
     end
 
     context 'when has one link' do
-      let(:links) { [['Link 1', '/href1', '.area1', false]] }
+      let(:links) { [['Link 1', '.area1', false]] }
       let(:expected_selectors) { '".area1"' }
       let(:expected_links) do
         <<~HTML
           <li class="usa-nav__primary-item">
-            <a class="usa-nav-link" href="/href1" onclick="make_current(0); return false">Link 1</a>
+            <a class="usa-nav-link" href="#" onclick="make_current(0); return false">Link 1</a>
           </li>
         HTML
       end
@@ -36,15 +36,15 @@ RSpec.describe Core::Navigation::TabbedComponent, type: :component do
     end
 
     context 'when has two links' do
-      let(:links) { [['Link 1', '/href1', '.area1', false], ['Link 2', '/href2', '.area2', false]] }
+      let(:links) { [['Link 1', '.area1', false], ['Link 2', '.area2', false]] }
       let(:expected_selectors) { '".area1", ".area2"' }
       let(:expected_links) do
         <<~HTML
           <li class="usa-nav__primary-item">
-            <a class="usa-nav-link" href="/href1" onclick="make_current(0); return false">Link 1</a>
+            <a class="usa-nav-link" href="#" onclick="make_current(0); return false">Link 1</a>
           </li>
           <li class="usa-nav__primary-item">
-            <a class="usa-nav-link" href="/href2" onclick="make_current(1); return false">Link 2</a>
+            <a class="usa-nav-link" href="#" onclick="make_current(1); return false">Link 2</a>
           </li>
         HTML
       end
@@ -53,16 +53,16 @@ RSpec.describe Core::Navigation::TabbedComponent, type: :component do
     end
 
     context 'when has two links, first current' do
-      let(:links) { [['Link 1', '/href1', '.area1', true], ['Link 2', '/href2', '.area2', false]] }
+      let(:links) { [['Link 1', '.area1', true], ['Link 2', '.area2', false]] }
       let(:expected_selectors) { '".area1", ".area2"' }
       let(:expected_start_index) { 0 }
       let(:expected_links) do
         <<~HTML
           <li class="usa-nav__primary-item">
-            <a class="usa-nav-link" href="/href1" onclick="make_current(0); return false">Link 1</a>
+            <a class="usa-nav-link" href="#" onclick="make_current(0); return false">Link 1</a>
           </li>
           <li class="usa-nav__primary-item">
-            <a class="usa-nav-link" href="/href2" onclick="make_current(1); return false">Link 2</a>
+            <a class="usa-nav-link" href="#" onclick="make_current(1); return false">Link 2</a>
           </li>
         HTML
       end
@@ -71,16 +71,16 @@ RSpec.describe Core::Navigation::TabbedComponent, type: :component do
     end
 
     context 'when has two links, second current' do
-      let(:links) { [['Link 1', '/href1', '.area1', false], ['Link 2', '/href2', '.area2', true]] }
+      let(:links) { [['Link 1', '.area1', false], ['Link 2', '.area2', true]] }
       let(:expected_selectors) { '".area1", ".area2"' }
       let(:expected_start_index) { 1 }
       let(:expected_links) do
         <<~HTML
           <li class="usa-nav__primary-item">
-            <a class="usa-nav-link" href="/href1" onclick="make_current(0); return false">Link 1</a>
+            <a class="usa-nav-link" href="#" onclick="make_current(0); return false">Link 1</a>
           </li>
           <li class="usa-nav__primary-item">
-            <a class="usa-nav-link" href="/href2" onclick="make_current(1); return false">Link 2</a>
+            <a class="usa-nav-link" href="#" onclick="make_current(1); return false">Link 2</a>
           </li>
         HTML
       end
@@ -89,16 +89,16 @@ RSpec.describe Core::Navigation::TabbedComponent, type: :component do
     end
 
     context 'when has two links, both current' do
-      let(:links) { [['Link 1', '/href1', '.area1', true], ['Link 2', '/href2', '.area2', true]] }
+      let(:links) { [['Link 1', '.area1', true], ['Link 2', '.area2', true]] }
       let(:expected_selectors) { '".area1", ".area2"' }
       let(:expected_start_index) { 1 }
       let(:expected_links) do
         <<~HTML
           <li class="usa-nav__primary-item">
-            <a class="usa-nav-link" href="/href1" onclick="make_current(0); return false">Link 1</a>
+            <a class="usa-nav-link" href="#" onclick="make_current(0); return false">Link 1</a>
           </li>
           <li class="usa-nav__primary-item">
-            <a class="usa-nav-link" href="/href2" onclick="make_current(1); return false">Link 2</a>
+            <a class="usa-nav-link" href="#" onclick="make_current(1); return false">Link 2</a>
           </li>
         HTML
       end
