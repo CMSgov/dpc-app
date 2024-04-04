@@ -8,8 +8,8 @@ RSpec.describe Page::Session::LoginComponent, type: :component do
     let(:url) { '/portal/' }
     let(:component) { described_class.new(url) }
     before { render_inline(component) }
-    it 'should be a section grid' do
-      expect(page).to have_selector('section.grid-container')
+    it 'should be a usa section' do
+      expect(page).to have_selector('section.usa-section')
     end
 
     it 'should have a login button' do
