@@ -25,6 +25,13 @@ class DpcClient
     client.read(FHIR::Organization, api_id).resource
   end
 
+  def get_organization_by_npi(npi)
+    uri_string = "#{base_url}/Admin"
+    client = FHIR::Client.new(uri_string)
+    client.additional_headers = auth_header(golden_macaroon)
+    client.search(FHIR::Organization, search: { parameters: { npis: "npi|#{npi}" }}).resource
+  end
+
   def update_organization(reg_org, api_id, api_endpoint_ref)
     fhir_org = FhirResourceBuilder.new.fhir_org(reg_org, api_id, api_endpoint_ref)
     fhir_client_update_request(api_id, fhir_org, api_id)

@@ -157,7 +157,7 @@ services:
       context: .
       dockerfile: dpc-portal/Dockerfile
     command: sidekiq
-    image: dpc-portal-sidekiq:latest
+    image: dpc-web-portal:latest
     environment:
       - REDIS_URL=redis://redis
       - DATABASE_URL=postgresql://db/dpc-portal_development
