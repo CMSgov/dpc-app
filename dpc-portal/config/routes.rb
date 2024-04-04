@@ -11,7 +11,7 @@ Rails.application.routes.draw do
   end
 
   # Defines the root path route ("/")
-  root 'main#welcome'
+  root 'organizations#index'
 
   # Route /portal to the main controller. This is a necessary workaround since
   # Lookbook mimics requests from the root_path, which will return /portal.
