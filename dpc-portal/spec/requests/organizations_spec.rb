@@ -74,6 +74,19 @@ RSpec.describe 'Organizations', type: :request do
         expect(response.body).to include('<h2>Public IPs</h2>')
       end
 
+      it 'does not show CD list page' do
+        get "/organizations/#{org.id}"
+        expect(response.body).to_not include('<h2>Credential delegates</h2>')
+        expect(response.body).to_not include('<h2>Pending</h2>')
+        expect(response.body).to_not include('<h2>Active</h2>')
+      end
+
+      it 'does not assign invitations even if exist' do
+        create(:invitation, provider_organization: org, invited_by: user)
+        get "/organizations/#{org.id}"
+        expect(assigns(:invitations)).to be_nil
+      end
+
       it 'redirects if prod-sbx' do
         allow(ENV)
           .to receive(:fetch)
@@ -84,25 +97,22 @@ RSpec.describe 'Organizations', type: :request do
         expect(response).to redirect_to(root_url)
       end
     end
-  end
-
-  describe 'GET /organizations/[organization_id]?ao=true' do
-    let!(:user) { create(:user) }
-    let!(:org) { create(:provider_organization) }
-    before { sign_in user }
 
     context 'as ao' do
+      let!(:user) { create(:user) }
+      let!(:org) { create(:provider_organization) }
       before do
         create(:ao_org_link, user:, provider_organization: org)
+        sign_in user
       end
 
       it 'returns success' do
-        get "/organizations/#{org.id}?ao=true"
+        get "/organizations/#{org.id}"
         expect(assigns(:organization)).to eq org
       end
 
       it 'shows CD list page' do
-        get "/organizations/#{org.id}?ao=true"
+        get "/organizations/#{org.id}"
         expect(response.body).to include('<h2>Credential delegates</h2>')
         expect(response.body).to include('<h2>Pending</h2>')
         expect(response.body).to include('<h2>Active</h2>')
@@ -111,12 +121,12 @@ RSpec.describe 'Organizations', type: :request do
       context :invitations do
         it 'assigns if exist' do
           create(:invitation, provider_organization: org, invited_by: user)
-          get "/organizations/#{org.id}?ao=true"
+          get "/organizations/#{org.id}"
           expect(assigns(:invitations).size).to eq 1
         end
 
         it 'does not assign if not exist' do
-          get "/organizations/#{org.id}?ao=true"
+          get "/organizations/#{org.id}"
           expect(assigns(:invitations).size).to eq 0
         end
       end
@@ -124,44 +134,20 @@ RSpec.describe 'Organizations', type: :request do
       context :credential_delegates do
         it 'assigns if exist' do
           create(:cd_org_link, provider_organization: org)
-          get "/organizations/#{org.id}?ao=true"
+          get "/organizations/#{org.id}"
           expect(assigns(:cds).size).to eq 1
         end
 
         it 'does not assign if not exist' do
-          get "/organizations/#{org.id}?ao=true"
+          get "/organizations/#{org.id}"
           expect(assigns(:cds).size).to eq 0
         end
 
         it 'does not assign if link disabled' do
           create(:cd_org_link, provider_organization: org, disabled_at: 1.day.ago)
-          get "/organizations/#{org.id}?ao=true"
+          get "/organizations/#{org.id}"
           expect(assigns(:cds).size).to eq 0
         end
-      end
-    end
-
-    context 'as cd' do
-      before do
-        create(:cd_org_link, user:, provider_organization: org)
-      end
-
-      it 'returns success' do
-        get "/organizations/#{org.id}?ao=true"
-        expect(assigns(:organization)).to eq org
-      end
-
-      it 'does not show CD list page' do
-        get "/organizations/#{org.id}?ao=true"
-        expect(response.body).to_not include('<h2>Credential delegates</h2>')
-        expect(response.body).to_not include('<h2>Pending</h2>')
-        expect(response.body).to_not include('<h2>Active</h2>')
-      end
-
-      it 'does not assign invitations even if exist' do
-        create(:invitation, provider_organization: org, invited_by: user)
-        get "/organizations/#{org.id}?ao=true"
-        expect(assigns(:invitations)).to be_nil
       end
     end
   end

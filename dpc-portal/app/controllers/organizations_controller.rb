@@ -14,15 +14,12 @@ class OrganizationsController < ApplicationController
   end
 
   def show
-    if params[:ao] && current_user.ao?(@organization)
-      @invitations = Invitation.where(provider_organization: @organization,
-                                      invited_by: current_user)
-      @cds = CdOrgLink.where(provider_organization: @organization,
-                             disabled_at: nil)
-      render(Page::CredentialDelegate::ListComponent.new(@organization, @invitations, @cds))
-    else
-      render(Page::Organization::ShowComponent.new(@organization))
+    show_cds = current_user.ao?(@organization)
+    if show_cds
+      @invitations = Invitation.where(provider_organization: @organization, invited_by: current_user)
+      @cds = CdOrgLink.where(provider_organization: @organization, disabled_at: nil)
     end
+    render(Page::Organization::CompoundShowComponent.new(@organization, @invitations, @cds, show_cds))
   end
 
   def new

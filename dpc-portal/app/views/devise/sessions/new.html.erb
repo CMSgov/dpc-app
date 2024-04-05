@@ -1,4 +1,1 @@
-<h2>Log in</h2>
-<%- resource_class.omniauth_providers.each do |provider| %>
-  <%= button_to "Sign in with #{OmniAuth::Utils.camelize(provider)}", omniauth_authorize_path(resource_name, provider), data: { turbo: false } %>
-<% end %>
+<%= render(Page::Session::LoginComponent.new(omniauth_authorize_path(:user, :openid_connect))) %>
