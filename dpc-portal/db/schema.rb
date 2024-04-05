@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_03_07_213217) do
+ActiveRecord::Schema[7.1].define(version: 2024_04_01_144012) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -19,6 +19,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_07_213217) do
     t.integer "provider_organization_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "invitation_id"
+    t.index ["invitation_id"], name: "index_ao_org_links_on_invitation_id"
     t.index ["user_id", "provider_organization_id"], name: "index_ao_org_links_on_user_id_and_provider_organization_id", unique: true
   end
 
@@ -73,6 +75,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_07_213217) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
+  add_foreign_key "ao_org_links", "invitations"
   add_foreign_key "ao_org_links", "provider_organizations"
   add_foreign_key "ao_org_links", "users"
   add_foreign_key "cd_org_links", "invitations"
