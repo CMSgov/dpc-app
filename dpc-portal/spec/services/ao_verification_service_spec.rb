@@ -74,7 +74,7 @@ describe AoVerificationService do
                         }]
                       }
                     })
-      expect(cpi_api_gw_client).to receive(:fetch_med_sanctions_and_waivers)
+      expect(cpi_api_gw_client).to receive(:fetch_med_sanctions_and_waivers_by_ssn)
         .with(ao_ssn)
         .and_return({
                       'provider' => {
@@ -196,7 +196,7 @@ describe AoVerificationService do
                         }]
                       }
                     })
-      expect(cpi_api_gw_client).to receive(:fetch_med_sanctions_and_waivers)
+      expect(cpi_api_gw_client).to receive(:fetch_med_sanctions_and_waivers_by_ssn)
         .with(ao_ssn)
         .and_return({
                       'provider' => {
@@ -253,7 +253,7 @@ describe AoVerificationService do
                         }]
                       }
                     })
-      expect(cpi_api_gw_client).to receive(:fetch_med_sanctions_and_waivers)
+      expect(cpi_api_gw_client).to receive(:fetch_med_sanctions_and_waivers_by_ssn)
         .with(ao_ssn)
         .and_return({
                       'provider' => {

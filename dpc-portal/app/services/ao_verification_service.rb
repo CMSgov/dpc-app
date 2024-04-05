@@ -34,7 +34,7 @@ class AoVerificationService
   private
 
   def check_med_sanctions(ao_ssn)
-    response = @cpi_api_gw_client.fetch_med_sanctions_and_waivers(ao_ssn)
+    response = @cpi_api_gw_client.fetch_med_sanctions_and_waivers_by_ssn(ao_ssn)
     return false if waiver?(response.dig('provider', 'waiverInfo'))
 
     med_sanctions_records = response.dig('provider', 'medSanctions')
