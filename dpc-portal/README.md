@@ -27,3 +27,11 @@ Emails are not viewable in lookbook, but rather [here](http://localhost:3100/por
 ## Assets Pipeline
 
 Read more about the assets pipeline [here](/docs/portal/assets-pipeline.md).
+
+## Unit testing
+
+To run unit tests during development, do the following:
+
+1. SSH into the dpc-portal container
+2. `rails db:create RAILS_ENV=test` to create the test database
+3. `bundle exec rspec path/to/test`

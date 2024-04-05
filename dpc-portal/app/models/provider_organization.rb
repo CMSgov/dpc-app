@@ -10,9 +10,7 @@ class ProviderOrganization < ApplicationRecord
   has_many :cd_org_links
 
   after_create do
-    unless dpc_api_organization_id.present?
-      SyncOrganizationJob.perform_later(id)
-    end
+    SyncOrganizationJob.perform_later(id) unless dpc_api_organization_id.present?
   end
 
   def public_keys
