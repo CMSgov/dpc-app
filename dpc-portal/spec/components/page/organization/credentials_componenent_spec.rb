@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe Page::Organization::ShowComponent, type: :component do
+RSpec.describe Page::Organization::CredentialsComponent, type: :component do
   include ComponentSupport
   describe 'html' do
     subject(:html) do
@@ -18,12 +18,6 @@ RSpec.describe Page::Organization::ShowComponent, type: :component do
 
     context 'No tokens, keys, or ip addrs' do
       let(:org) { ComponentSupport::MockOrg.new(0) }
-      it 'Should have org name' do
-        is_expected.to include("<h1>#{org.name}</h1>")
-      end
-      it 'Should have npi' do
-        is_expected.to include("<div><strong>NPI</strong> #{org.npi}</div>")
-      end
       it 'Should have Generate token button' do
         button = <<~BUTTON
           <form class="button_to" method="get" action="/portal/organizations/#{org.path_id}/client_tokens/new">

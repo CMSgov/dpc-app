@@ -3,13 +3,13 @@
 module Page
   module Organization
     # Previews the Organization#show page
-    class ShowComponentPreview < ViewComponent::Preview
+    class CredentialsComponentPreview < ViewComponent::Preview
       # @param row_count
       def default(row_count: 2)
         org = MockOrgShow.new(row_count.to_i)
         org.name = 'Universal Healthcare Clinic'
         org.npi = '11111111'
-        render(Page::Organization::ShowComponent.new(org))
+        render(Page::Organization::CredentialsComponent.new(org))
       end
     end
 

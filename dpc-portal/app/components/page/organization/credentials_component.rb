@@ -3,7 +3,7 @@
 module Page
   module Organization
     # Shows the Organization#view
-    class ShowComponent < ViewComponent::Base
+    class CredentialsComponent < ViewComponent::Base
       attr_accessor :organization
 
       def initialize(organization)

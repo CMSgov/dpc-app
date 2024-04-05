@@ -24,9 +24,7 @@ RSpec.describe Page::CredentialDelegate::ListComponent, type: :component do
 
       let(:expected_html) do
         <<~HTML
-          <div>
-            <h1>#{org.name}</h1>
-            <div class="margin-bottom-5">NPI: #{org.npi}</div>
+          <div id="credential_delegates">
             <div>
               <div class="bg-white shadow-5 border-1px border-base-lighter radius-md margin-bottom-4 padding-x-3 padding-bottom-3">
                 <div class="display-flex flex-row flex-justify">
