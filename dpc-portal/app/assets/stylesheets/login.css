@@ -1,0 +1,7 @@
+.login-button__logo {
+    vertical-align: middle;
+    color: #0000;
+    background: url("/assets/lg-logo-white.svg") 100% no-repeat;
+    margin-left: 2px;
+    font-size: 1.45rem
+}
