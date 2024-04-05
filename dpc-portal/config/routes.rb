@@ -17,7 +17,7 @@ Rails.application.routes.draw do
   # Lookbook mimics requests from the root_path, which will return /portal.
   # However, to complete the mimicing, it uses the Rails.application.routes.recognize_path
   # method, which does not work correctly for applications served on a subpath.
-  match '/portal', to: 'main#welcome', via: :get
+  match '/portal', to: 'organizations#index', via: :get
 
   resources :organizations, only: [:index, :show, :new, :create] do
     resources :client_tokens, only: [:new, :create, :destroy]

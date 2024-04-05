@@ -10,8 +10,8 @@ module Core
     #
     class TabbedComponentPreview < ViewComponent::Preview
       def default
-        links = [['Link 1', 'https://example.com/1', '.area_1', false],
-                 ['Link 2', 'https://example.com/2', '.area_2', true]]
+        links = [['Link 1', '.area_1', false],
+                 ['Link 2', '.area_2', true]]
         render(Core::Navigation::TabbedComponent.new('test_header', links))
       end
 
