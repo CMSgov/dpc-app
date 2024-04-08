@@ -112,6 +112,7 @@ func ParseRecord(metadata *ResponseFileMetadata, b []byte, unmarshaler FileUnmar
 		MBI:        row.MBI,
 		PolicyCode: policyCode,
 	}
+
 	return &record, nil
 }
 
