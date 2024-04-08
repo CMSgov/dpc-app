@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"strconv"
+	"strings"
 	"testing"
 	"time"
 
@@ -123,6 +124,7 @@ func TestParseRecord(t *testing.T) {
 
 func TestParseRecord_InvalidData(t *testing.T) {
 	fp := "testfilepath"
+	fn := "testfilename"
 
 	tests := []struct {
 		line   string
@@ -139,7 +141,7 @@ func TestParseRecord_InvalidData(t *testing.T) {
 			metadata := &ResponseFileMetadata{
 				Timestamp:    time.Now(),
 				FilePath:     fp,
-				Name:         tt.line,
+				Name:         fn,
 				DeliveryDate: time.Now(),
 			}
 			suppression, err := ParseRecord(metadata, []byte(tt.line), fixedwidth.Unmarshal)
@@ -150,36 +152,38 @@ func TestParseRecord_InvalidData(t *testing.T) {
 	}
 }
 
-func TestParseRecord_FailOnRealMBI(t *testing.T) {
+func TestParseRecord_FailOnRealMBINotProd(t *testing.T) {
 	fp := "testfilepath"
-
-	tests := []struct {
-		line   string
-		expErr string
-	}{
-		{
-			"1EG4TE5MK73Y",
-			"failed to parse file: testfilepath: Valid MBI in non-production environment",
-		},
+	fn := "testfilename"
+	lines := [2]string{"1EG4TE5MK73Y", "1eg4te5mk73Y"} // n.b. Although it matches the pattern, this is not a real MBI
+	
+	metadata := &ResponseFileMetadata{
+		Timestamp:    time.Now(),
+		FilePath:     fp,
+		Name:         fn,
+		DeliveryDate: time.Now(),
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.line, func(t *testing.T) {
-			metadata := &ResponseFileMetadata{
-				Timestamp:    time.Now(),
-				FilePath:     fp,
-				Name:         tt.line,
-				DeliveryDate: time.Now(),
-			}
-			suppression, err := ParseRecord(metadata, []byte(tt.line), fixedwidth.Unmarshal)
-			assert.Nil(t, suppression)
-			assert.NotNil(t, err)
-			assert.Contains(t, err.Error(), tt.expErr)
-		})
+	expErr := "failed to parse file: testfilepath: Valid MBI in non-production environment"
+	for _, line := range lines {
+		suppression, err := ParseRecord(metadata, []byte(line), fixedwidth.Unmarshal)
+		assert.Nil(t, suppression)
+		assert.NotNil(t, err)
+		assert.Contains(t, err.Error(), expErr)
+	}
+
+	// Should pass on prod
+	testEnv := os.Getenv("ENV")
+	os.Setenv("ENV", "prod")
+	defer os.Setenv("ENV", testEnv)
+
+	for _, line := range lines {
+		suppression, err := ParseRecord(metadata, []byte(line), fixedwidth.Unmarshal)
+		assert.Nil(t, err)
+		assert.Equal(t, "1EG4TE5MK73", strings.ToUpper(suppression.MBI))
+		assert.Equal(t, "OPTIN", suppression.PolicyCode)
 	}
 }
-
-// TODO add test parse bad mbi
 
 func TestParseSQSEvent(t *testing.T) {
 	jsonFile, err := os.Open("testdata/s3event.json")
