@@ -71,21 +71,19 @@ func ParseConsentRecords(metadata *ResponseFileMetadata, b []byte) ([]*OptOutRec
 }
 
 // Valid MBIs do not have these letters: BILOSZ
-// var validLetters = "AC-HJKMNPQRT-Y"
-// var mbiRegex = fmt.Sprintf("(?i)^[1-9][%[1]s][%[1]s0-9]\\d[%[1]s][%[1]s0-9]\\d([%[1]s]){2}(\\d){2}$", validLetters)
-var letterPattern = "[AC-HJKMNPQRT-Y]"
-var letterOrNumberPattern = "[AC-HJKMNPQRT-Y0-9]"
+const letterPattern = "[AC-HJKMNPQRT-Y]"
+const letterOrNumberPattern = "[AC-HJKMNPQRT-Y0-9]"
 var matcher = []string { "(?i)",
 		"[1-9]",
 		letterPattern,
 		letterOrNumberPattern,
-		"\\d",
+		`\d`,
 		letterPattern,
 		letterOrNumberPattern,
-		"\\d",
+		`\d`,
 		letterPattern,
 		letterPattern,
-		"(\\d){2}"}
+		`(\d){2}`}
 var mbiRegex = strings.Join(matcher, "")
 var mbiPattern = regexp.MustCompile(mbiRegex)
 
