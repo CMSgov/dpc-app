@@ -101,7 +101,7 @@ func ParseRecord(metadata *ResponseFileMetadata, b []byte, unmarshaler FileUnmar
 	if os.Getenv("ENV") != "prod" {
 		mbiMatches := mbiPattern.MatchString(row.MBI)
 		if mbiMatches {
-			return nil, errors.New("failed to parse file: testfilepath: Valid MBI in non-production environment")
+			return nil, errors.New(fmt.Sprintf("failed to parse file: %s: Valid MBI in non-production environment", metadata.FilePath))
 		}
 	}
 
