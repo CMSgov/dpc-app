@@ -5,7 +5,7 @@ require 'rails_helper'
 RSpec.describe DpcClient do
   let!(:org) do
     double('organization',
-           npi: 'long thing', name: 'Org', address_use: 'work', address_type: 'both',
+           npi: '1111111112', name: 'Org', address_use: 'work', address_type: 'both',
            address_city: 'Akron', address_state: 'OH', address_street: '111 Main ST', 'address_street_2' => 'STE 5',
            address_zip: '22222')
   end
@@ -68,6 +68,42 @@ RSpec.describe DpcClient do
         client = DpcClient.new
 
         fhir_client = client.get_organization(reg_org.api_id)
+        expect(fhir_client).to be_nil
+      end
+    end
+  end
+
+  describe '#get_organization_by_npi' do
+    let(:headers) do
+      {
+        'Accept' => 'application/fhir+json',
+        'Accept-Charset' => 'utf-8',
+        'Accept-Encoding' => 'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
+        'Host' => 'dpc.example.com',
+        'User-Agent' => 'Ruby FHIR Client',
+        'Authorization' => /.*/
+      }
+    end
+    context 'successful API request' do
+      it 'uses fhir_client to retrieve organization data from API' do
+        body = '{"resourceType":"Organization"}'
+        stub_request(:get, "http://dpc.example.com/Admin/Organization?npis=npi|#{org.npi}")
+          .with(headers:).to_return(status: 200, body:, headers: {})
+        client = DpcClient.new
+        fhir_client = client.get_organization_by_npi(org.npi)
+        expect(fhir_client).to_not be_nil
+        expect(fhir_client.resourceType).to eq 'Organization'
+      end
+    end
+
+    context 'unsuccessful request' do
+      it 'uses fhir_client to retrieve organization data from API' do
+        stub_request(:get, "http://dpc.example.com/Admin/Organization?npis=npi|#{org.npi}")
+          .with(headers:).to_return(status: 500, body: '', headers: {})
+
+        client = DpcClient.new
+
+        fhir_client = client.get_organization_by_npi(org.npi)
         expect(fhir_client).to be_nil
       end
     end
