@@ -7,6 +7,7 @@ class AoVerificationService
   end
 
   # rubocop:disable Metrics/AbcSize
+  # rubocop:disable Metrics/MethodLength
   def check_eligibility(organization_npi, hashed_ao_ssn)
     check_org_med_sanctions(organization_npi)
     approved_enrollments = get_approved_enrollments(organization_npi)
@@ -34,6 +35,7 @@ class AoVerificationService
     { success: false, failure_reason: e.message }
   end
   # rubocop:enable Metrics/AbcSize
+  # rubocop:enable Metrics/MethodLength
 
   private
 
