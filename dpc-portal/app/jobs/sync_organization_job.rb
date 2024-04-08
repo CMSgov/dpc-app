@@ -17,7 +17,7 @@ class SyncOrganizationJob < ApplicationJob
     if api_response.entry.empty?
       create_dpc_api_org(po)
     elsif api_response.entry.length == 1
-      org_id = api_response.entry[0].resource.id
+      org_id = api_response.entry.first.resource.id
       po.dpc_api_organization_id = org_id
       po.save
     else
@@ -49,7 +49,7 @@ class SyncOrganizationJob < ApplicationJob
   end
 
   def api_client
-    DpcClient.new
+    @api_client ||= DpcClient.new
   end
 end
 
