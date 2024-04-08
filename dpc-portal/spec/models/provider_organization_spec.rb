@@ -28,7 +28,8 @@ RSpec.describe ProviderOrganization, type: :model do
       po = ProviderOrganization.new(
         npi: 10.times.map { rand(0..9) }.join,
         name: 'Test org',
-        dpc_api_organization_id: 1)
+        dpc_api_organization_id: 1
+      )
       po.save
       assert_no_enqueued_jobs
     end
