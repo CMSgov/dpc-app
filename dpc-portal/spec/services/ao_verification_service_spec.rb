@@ -256,7 +256,7 @@ describe AoVerificationService do
                       }
                     })
       response = service.check_eligibility(organization_npi, hashed_ao_ssn)
-      expect(response).to include({ success: false, failure_reason: 'med_sanctions' })
+      expect(response).to include({ success: false, failure_reason: 'ao_med_sanctions' })
     end
 
     it 'returns an error if the org has an active med sanction' do
@@ -280,7 +280,7 @@ describe AoVerificationService do
                       }
                     })
       response = service.check_eligibility(organization_npi, hashed_ao_ssn)
-      expect(response).to include({ success: false, failure_reason: 'med_sanctions' })
+      expect(response).to include({ success: false, failure_reason: 'org_med_sanctions' })
     end
 
     it 'does not return an error if user has a med sanction AND waiver' do

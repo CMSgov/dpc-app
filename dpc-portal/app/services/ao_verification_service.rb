@@ -7,7 +7,6 @@ class AoVerificationService
   end
 
   # rubocop:disable Metrics/AbcSize
-  # rubocop:disable Metrics/MethodLength
   def check_eligibility(organization_npi, hashed_ao_ssn)
     check_org_med_sanctions(organization_npi)
     approved_enrollments = get_approved_enrollments(organization_npi)
@@ -28,25 +27,22 @@ class AoVerificationService
       { success: false, failure_reason: 'unexpected_error' }
     end
   rescue AoException => e
-    Rails.logger.info "Failed AO check #{e.message} for organization NPI #{organization_npi}"
-    { success: false, failure_reason: e.message }
-  rescue OrgException => e
-    Rails.logger.info "Failed org check #{e.message} for NPI #{organization_npi}"
+    Rails.logger.info "Failed check #{e.message} for organization NPI #{organization_npi}"
     { success: false, failure_reason: e.message }
   end
   # rubocop:enable Metrics/AbcSize
-  # rubocop:enable Metrics/MethodLength
 
   private
 
   def check_provider_med_sanctions(ao_ssn)
     response = @cpi_api_gw_client.fetch_med_sanctions_and_waivers_by_ssn(ao_ssn)
-    raise AoException, 'med_sanctions' if check_sanctions_response(response)
+    raise AoException, 'ao_med_sanctions' if check_sanctions_response(response)
   end
 
   def check_org_med_sanctions(npi)
     response = @cpi_api_gw_client.fetch_med_sanctions_and_waivers_by_org_npi(npi)
-    raise OrgException, 'med_sanctions' if check_sanctions_response(response)
+    puts 'Ready to fail'
+    raise AoException, 'org_med_sanctions' if check_sanctions_response(response)
   end
 
   def check_sanctions_response(response)
@@ -96,4 +92,3 @@ class AoVerificationService
 end
 
 class AoException < StandardError; end
-class OrgException < StandardError; end
