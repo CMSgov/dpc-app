@@ -12,6 +12,8 @@ import gov.cms.dpc.fhir.validations.ProfileValidator;
 import org.glassfish.jersey.server.internal.inject.ConfiguredValidator;
 import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.dstu3.hapi.validation.ValidationSupportChain;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorFactory;
@@ -24,6 +26,7 @@ import javax.validation.ValidatorFactory;
 public class FHIRValidationModule extends AbstractModule {
 
     private final FHIRValidationConfiguration config;
+    private static final Logger logger = LoggerFactory.getLogger(FHIRValidationModule.class);
 
     public FHIRValidationModule(FHIRValidationConfiguration config) {
         this.config = config;
@@ -32,7 +35,7 @@ public class FHIRValidationModule extends AbstractModule {
 
     @Override
     protected void configure() {
-
+        logger.info("Configuring FHIRValidationModule");
         // Create a multi-binder for automatically bundling and injecting a Set of ConstraintValidators
         TypeLiteral<ConstraintValidator<?, ?>> constraintType = new TypeLiteral<>() {
         };
