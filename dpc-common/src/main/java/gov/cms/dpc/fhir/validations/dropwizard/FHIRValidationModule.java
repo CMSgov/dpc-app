@@ -6,6 +6,7 @@ import com.google.inject.Provides;
 import com.google.inject.Scopes;
 import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.Multibinder;
+import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration.FHIRValidationConfiguration;
 import gov.cms.dpc.fhir.validations.DPCProfileSupport;
 import gov.cms.dpc.fhir.validations.ProfileValidator;
@@ -35,7 +36,10 @@ public class FHIRValidationModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        logger.info("Configuring FHIRValidationModule");
+        // This is required for Guice to load correctly.
+        // https://github.com/dropwizard/dropwizard/issues/1772
+        JerseyGuiceUtils.reset();
+
         // Create a multi-binder for automatically bundling and injecting a Set of ConstraintValidators
         TypeLiteral<ConstraintValidator<?, ?>> constraintType = new TypeLiteral<>() {
         };
