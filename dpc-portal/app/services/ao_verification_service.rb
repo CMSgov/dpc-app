@@ -41,7 +41,6 @@ class AoVerificationService
 
   def check_org_med_sanctions(npi)
     response = @cpi_api_gw_client.fetch_med_sanctions_and_waivers_by_org_npi(npi)
-    puts 'Ready to fail'
     raise AoException, 'org_med_sanctions' if check_sanctions_response(response)
   end
 
