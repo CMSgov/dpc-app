@@ -11,7 +11,7 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
     end
 
     let(:org) { ComponentSupport::MockOrg.new }
-    let(:cd_invite) { Invitation.new }
+    let(:cd_invite) { Invitation.new(invitation_type: 'credential_delegate') }
 
     let(:component) { described_class.new(org, cd_invite) }
 

@@ -134,7 +134,7 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
   describe 'GET /accept' do
     let(:invited_by) { create(:invited_by) }
     let(:verification_code) { 'ABC123' }
-    let!(:cd_invite) { build(:invitation, verification_code:) }
+    let!(:cd_invite) { build(:invitation, :cd, verification_code:) }
     let(:user) do
       create(:user, given_name: cd_invite.invited_given_name,
                     family_name: cd_invite.invited_family_name,
@@ -189,7 +189,7 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
   describe 'POST /confirm' do
     let(:invited_by) { create(:invited_by) }
     let(:verification_code) { 'ABC123' }
-    let!(:cd_invite) { build(:invitation, verification_code:) }
+    let!(:cd_invite) { build(:invitation, :cd, verification_code:) }
     let(:user) do
       create(:user, given_name: cd_invite.invited_given_name,
                     family_name: cd_invite.invited_family_name,
