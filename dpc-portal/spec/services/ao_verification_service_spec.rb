@@ -26,12 +26,20 @@ describe AoVerificationService do
     end
   end
 
-  describe '.check_ao_eligibility' do
+  describe '.check_eligibility' do
     it 'makes api calls to CPI API Gateway and returns success message' do
       service = AoVerificationService.new
       organization_npi = 1_234_554_333
       ao_ssn = '111223456'
       hashed_ao_ssn = Digest::SHA2.new(256).hexdigest(ao_ssn)
+      expect(cpi_api_gw_client).to receive(:fetch_med_sanctions_and_waivers_by_org_npi)
+        .with(organization_npi)
+        .and_return({
+                      'provider' => {
+                        'providerType' => 'org',
+                        'npi' => organization_npi.to_s
+                      }
+                    })
       expect(cpi_api_gw_client).to receive(:fetch_enrollment)
         .with(organization_npi)
         .and_return({
@@ -74,7 +82,7 @@ describe AoVerificationService do
                         }]
                       }
                     })
-      expect(cpi_api_gw_client).to receive(:fetch_med_sanctions_and_waivers)
+      expect(cpi_api_gw_client).to receive(:fetch_med_sanctions_and_waivers_by_ssn)
         .with(ao_ssn)
         .and_return({
                       'provider' => {
@@ -83,7 +91,7 @@ describe AoVerificationService do
                         'npi' => '4444444444'
                       }
                     })
-      response = service.check_ao_eligibility(organization_npi, hashed_ao_ssn)
+      response = service.check_eligibility(organization_npi, hashed_ao_ssn)
       expect(response).to include({ success: true })
     end
 
@@ -92,10 +100,18 @@ describe AoVerificationService do
       organization_npi = 1_234_554_333
       ao_ssn = '111223456'
       hashed_ao_ssn = Digest::SHA2.new(256).hexdigest(ao_ssn)
+      expect(cpi_api_gw_client).to receive(:fetch_med_sanctions_and_waivers_by_org_npi)
+        .with(organization_npi)
+        .and_return({
+                      'provider' => {
+                        'providerType' => 'org',
+                        'npi' => organization_npi.to_s
+                      }
+                    })
       expect(cpi_api_gw_client).to receive(:fetch_enrollment)
                                .with(organization_npi)
         .and_return({ 'code' => '404' })
-      response = service.check_ao_eligibility(organization_npi, hashed_ao_ssn)
+      response = service.check_eligibility(organization_npi, hashed_ao_ssn)
       expect(response).to include({ success: false, failure_reason: 'bad_npi' })
     end
 
@@ -104,6 +120,14 @@ describe AoVerificationService do
       organization_npi = 1_234_554_333
       ao_ssn = '111223456'
       hashed_ao_ssn = Digest::SHA2.new(256).hexdigest(ao_ssn)
+      expect(cpi_api_gw_client).to receive(:fetch_med_sanctions_and_waivers_by_org_npi)
+        .with(organization_npi)
+        .and_return({
+                      'provider' => {
+                        'providerType' => 'org',
+                        'npi' => organization_npi.to_s
+                      }
+                    })
       expect(cpi_api_gw_client).to receive(:fetch_enrollment)
         .with(organization_npi)
         .and_return({
@@ -120,7 +144,7 @@ describe AoVerificationService do
                                           'npi' => organization_npi.to_s
                                         }]
                     })
-      response = service.check_ao_eligibility(organization_npi, hashed_ao_ssn)
+      response = service.check_eligibility(organization_npi, hashed_ao_ssn)
       expect(response).to include({ success: false, failure_reason: 'no_approved_enrollment' })
     end
 
@@ -130,6 +154,14 @@ describe AoVerificationService do
       ao_ssn = '111223456'
       hashed_ao_ssn = Digest::SHA2.new(256).hexdigest(ao_ssn)
       enrollment_id = '023456'
+      expect(cpi_api_gw_client).to receive(:fetch_med_sanctions_and_waivers_by_org_npi)
+        .with(organization_npi)
+        .and_return({
+                      'provider' => {
+                        'providerType' => 'org',
+                        'npi' => organization_npi.to_s
+                      }
+                    })
       allow(cpi_api_gw_client).to receive(:fetch_enrollment)
         .with(organization_npi)
         .and_return({
@@ -158,7 +190,7 @@ describe AoVerificationService do
                         }]
                       }
                     })
-      response = service.check_ao_eligibility(organization_npi, hashed_ao_ssn)
+      response = service.check_eligibility(organization_npi, hashed_ao_ssn)
       expect(response).to include({ success: false, failure_reason: 'user_not_authorized_official' })
     end
 
@@ -168,6 +200,14 @@ describe AoVerificationService do
       ao_ssn = '111223456'
       hashed_ao_ssn = Digest::SHA2.new(256).hexdigest(ao_ssn)
       enrollment_id = '023456'
+      expect(cpi_api_gw_client).to receive(:fetch_med_sanctions_and_waivers_by_org_npi)
+        .with(organization_npi)
+        .and_return({
+                      'provider' => {
+                        'providerType' => 'org',
+                        'npi' => organization_npi.to_s
+                      }
+                    })
       allow(cpi_api_gw_client).to receive(:fetch_enrollment)
         .with(organization_npi)
         .and_return({
@@ -196,7 +236,7 @@ describe AoVerificationService do
                         }]
                       }
                     })
-      expect(cpi_api_gw_client).to receive(:fetch_med_sanctions_and_waivers)
+      expect(cpi_api_gw_client).to receive(:fetch_med_sanctions_and_waivers_by_ssn)
         .with(ao_ssn)
         .and_return({
                       'provider' => {
@@ -215,8 +255,32 @@ describe AoVerificationService do
                         ]
                       }
                     })
-      response = service.check_ao_eligibility(organization_npi, hashed_ao_ssn)
-      expect(response).to include({ success: false, failure_reason: 'med_sanctions' })
+      response = service.check_eligibility(organization_npi, hashed_ao_ssn)
+      expect(response).to include({ success: false, failure_reason: 'ao_med_sanctions' })
+    end
+
+    it 'returns an error if the org has an active med sanction' do
+      service = AoVerificationService.new
+      organization_npi = 1_234_554_333
+      ao_ssn = '111223456'
+      hashed_ao_ssn = Digest::SHA2.new(256).hexdigest(ao_ssn)
+      expect(cpi_api_gw_client).to receive(:fetch_med_sanctions_and_waivers_by_org_npi)
+        .with(organization_npi)
+        .and_return({
+                      'provider' => {
+                        'providerType' => 'org',
+                        'npi' => organization_npi.to_s,
+                        'medSanctions' => [
+                          {
+                            'sanctionCode' => 'fake_code',
+                            'sanctionDate' => '2010-08-17',
+                            'reinstatementDate' => nil
+                          }
+                        ]
+                      }
+                    })
+      response = service.check_eligibility(organization_npi, hashed_ao_ssn)
+      expect(response).to include({ success: false, failure_reason: 'org_med_sanctions' })
     end
 
     it 'does not return an error if user has a med sanction AND waiver' do
@@ -225,6 +289,14 @@ describe AoVerificationService do
       ao_ssn = '111223456'
       hashed_ao_ssn = Digest::SHA2.new(256).hexdigest(ao_ssn)
       enrollment_id = '023456'
+      expect(cpi_api_gw_client).to receive(:fetch_med_sanctions_and_waivers_by_org_npi)
+        .with(organization_npi)
+        .and_return({
+                      'provider' => {
+                        'providerType' => 'org',
+                        'npi' => organization_npi.to_s
+                      }
+                    })
       allow(cpi_api_gw_client).to receive(:fetch_enrollment)
         .with(organization_npi)
         .and_return({
@@ -253,7 +325,7 @@ describe AoVerificationService do
                         }]
                       }
                     })
-      expect(cpi_api_gw_client).to receive(:fetch_med_sanctions_and_waivers)
+      expect(cpi_api_gw_client).to receive(:fetch_med_sanctions_and_waivers_by_ssn)
         .with(ao_ssn)
         .and_return({
                       'provider' => {
@@ -279,7 +351,7 @@ describe AoVerificationService do
                         ]
                       }
                     })
-      response = service.check_ao_eligibility(organization_npi, hashed_ao_ssn)
+      response = service.check_eligibility(organization_npi, hashed_ao_ssn)
       expect(response).to include({ success: true })
     end
   end

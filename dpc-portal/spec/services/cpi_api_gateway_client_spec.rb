@@ -75,9 +75,7 @@ describe CpiApiGatewayClient do
           }
         },
         dataSets: {
-          subjectAreas: {
-            all: true
-          }
+          all: true
         }
       }
 
@@ -88,7 +86,36 @@ describe CpiApiGatewayClient do
                                    headers: { 'Content-Type': 'application/json' } })
         .and_return(response_double)
       expect(response_double).to receive(:parsed)
-      client.fetch_med_sanctions_and_waivers(111_223_456)
+      client.fetch_med_sanctions_and_waivers_by_ssn(111_223_456)
+    end
+  end
+
+  describe '.fetch_org_med_sanctions' do
+    it 'makes a post request' do
+      allow(OAuth2::Client).to receive(:new).and_return(oauth_client)
+      allow(oauth_client).to receive(:client_credentials).and_return(client_credentials_strategy_instance)
+      expect(client_credentials_strategy_instance).to receive(:get_token).and_return(access_token_object_instance)
+      allow(access_token_object_instance).to receive(:expired?).and_return(false)
+      client = CpiApiGatewayClient.new
+
+      request_body = {
+        providerID: {
+          providerType: 'org',
+          npi: '111223456'
+        },
+        dataSets: {
+          all: true
+        }
+      }
+
+      expect(client).to receive(:request_client).and_return access_token_object_instance
+      expect(client.access).to receive(:post)
+                           .with("#{cpi_api_gateway_url}api/1.0/ppr/providers",
+                                 { body: request_body.to_json,
+                                   headers: { 'Content-Type': 'application/json' } })
+        .and_return(response_double)
+      expect(response_double).to receive(:parsed)
+      client.fetch_med_sanctions_and_waivers_by_org_npi(111_223_456)
     end
   end
 end

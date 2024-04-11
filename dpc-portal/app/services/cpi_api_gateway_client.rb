@@ -39,7 +39,7 @@ class CpiApiGatewayClient
   end
 
   # fetch info about the authorized official, including a list of med sanctions
-  def fetch_med_sanctions_and_waivers(ssn)
+  def fetch_med_sanctions_and_waivers_by_ssn(ssn)
     body = {
       providerID: {
         providerType: 'ind',
@@ -49,15 +49,24 @@ class CpiApiGatewayClient
         }
       },
       dataSets: {
-        subjectAreas: {
-          all: true
-        }
+        all: true
       }
     }.to_json
-    response = request_client.post("#{@cpi_api_gateway_url}api/1.0/ppr/providers",
-                                   headers: { 'Content-Type': 'application/json' },
-                                   body:)
-    response.parsed
+    fetch_med_sanctions_and_waivers(body)
+  end
+
+  # fetch info about the organization, including a list of med sanctions
+  def fetch_med_sanctions_and_waivers_by_org_npi(npi)
+    body = {
+      providerID: {
+        providerType: 'org',
+        npi: npi.to_s
+      },
+      dataSets: {
+        all: true
+      }
+    }.to_json
+    fetch_med_sanctions_and_waivers(body)
   end
 
   private
@@ -69,5 +78,12 @@ class CpiApiGatewayClient
   def request_client
     fetch_token if @access.nil? || @access.expired?
     @access
+  end
+
+  def fetch_med_sanctions_and_waivers(body)
+    response = request_client.post("#{@cpi_api_gateway_url}api/1.0/ppr/providers",
+                                   headers: { 'Content-Type': 'application/json' },
+                                   body:)
+    response.parsed
   end
 end
