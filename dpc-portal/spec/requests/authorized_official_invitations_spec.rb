@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
-RSpec.describe "AuthorizedOfficialInvitations", type: :request do
+RSpec.describe 'AuthorizedOfficialInvitations', type: :request do
   describe 'GET /accept' do
     let!(:ao_invite) { create(:invitation, :ao) }
     let(:org) { create(:provider_organization) }
