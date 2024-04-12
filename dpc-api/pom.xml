@@ -56,7 +56,7 @@
             <artifactId>jaxb-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>ru.vyarus</groupId>
+            <groupId>ru.vyarus.dropwizard-guicey</groupId>
             <artifactId>dropwizard-guicey</artifactId>
         </dependency>
         <dependency>

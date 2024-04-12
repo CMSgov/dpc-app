@@ -1,17 +1,18 @@
 # frozen_string_literal: true
 
-# A service that verifies a user as an Authorized Official (AO) for a given organization
+# A service that verifies a user as an Authorized Official (AO) for a given organization, and verifies the organization
 class AoVerificationService
   def initialize
     @cpi_api_gw_client = CpiApiGatewayClient.new
   end
 
   # rubocop:disable Metrics/AbcSize
-  def check_ao_eligibility(organization_npi, hashed_ao_ssn)
+  def check_eligibility(organization_npi, hashed_ao_ssn)
+    check_org_med_sanctions(organization_npi)
     approved_enrollments = get_approved_enrollments(organization_npi)
     enrollment_ids = approved_enrollments.map { |enrollment| enrollment['enrollmentID'] }
     ao_role = get_authorized_official_role(enrollment_ids, hashed_ao_ssn)
-    check_med_sanctions(ao_role['ssn'])
+    check_provider_med_sanctions(ao_role['ssn'])
 
     { success: true }
   rescue OAuth2::Error => e
@@ -26,15 +27,24 @@ class AoVerificationService
       { success: false, failure_reason: 'unexpected_error' }
     end
   rescue AoException => e
-    Rails.logger.info "Failed AO check #{e.message} for organization NPI #{organization_npi}"
+    Rails.logger.info "Failed check #{e.message} for organization NPI #{organization_npi}"
     { success: false, failure_reason: e.message }
   end
   # rubocop:enable Metrics/AbcSize
 
   private
 
-  def check_med_sanctions(ao_ssn)
-    response = @cpi_api_gw_client.fetch_med_sanctions_and_waivers(ao_ssn)
+  def check_provider_med_sanctions(ao_ssn)
+    response = @cpi_api_gw_client.fetch_med_sanctions_and_waivers_by_ssn(ao_ssn)
+    raise AoException, 'ao_med_sanctions' if check_sanctions_response(response)
+  end
+
+  def check_org_med_sanctions(npi)
+    response = @cpi_api_gw_client.fetch_med_sanctions_and_waivers_by_org_npi(npi)
+    raise AoException, 'org_med_sanctions' if check_sanctions_response(response)
+  end
+
+  def check_sanctions_response(response)
     return false if waiver?(response.dig('provider', 'waiverInfo'))
 
     med_sanctions_records = response.dig('provider', 'medSanctions')
@@ -42,7 +52,7 @@ class AoVerificationService
       current_med_sanction = med_sanctions_records.find do |record|
         record['reinstatementDate'].nil? || Date.parse(record['reinstatementDate']) > Date.today
       end
-      raise AoException, 'med_sanctions' if current_med_sanction.present?
+      return true if current_med_sanction.present?
     end
 
     false

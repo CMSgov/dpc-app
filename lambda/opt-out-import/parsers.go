@@ -70,6 +70,23 @@ func ParseConsentRecords(metadata *ResponseFileMetadata, b []byte) ([]*OptOutRec
 	return records, err
 }
 
+// Valid MBIs do not have these letters: BILOSZ
+const letterPattern = "[AC-HJKMNPQRT-Y]"
+const letterOrNumberPattern = "[AC-HJKMNPQRT-Y0-9]"
+var matcher = []string { "(?i)",
+		"[1-9]",
+		letterPattern,
+		letterOrNumberPattern,
+		`\d`,
+		letterPattern,
+		letterOrNumberPattern,
+		`\d`,
+		letterPattern,
+		letterPattern,
+		`(\d){2}`}
+var mbiRegex = strings.Join(matcher, "")
+var mbiPattern = regexp.MustCompile(mbiRegex)
+
 func ParseRecord(metadata *ResponseFileMetadata, b []byte, unmarshaler FileUnmarshaler) (*OptOutRecord, error) {
 	var row ResponseFileRow
 	if err := unmarshaler(b, &row); err != nil {
@@ -79,6 +96,13 @@ func ParseRecord(metadata *ResponseFileMetadata, b []byte, unmarshaler FileUnmar
 	policyCode, err := ConvertSharingPreference(row.SharingPreference)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to parse file: %s", metadata.FilePath)
+	}
+
+	if os.Getenv("ENV") != "prod" {
+		mbiMatches := mbiPattern.MatchString(row.MBI)
+		if mbiMatches {
+			return nil, errors.New(fmt.Sprintf("failed to parse file: %s: Valid MBI in non-production environment", metadata.FilePath))
+		}
 	}
 
 	record := OptOutRecord{
