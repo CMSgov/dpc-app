@@ -133,20 +133,21 @@ class ResourceFetcher {
         String patientId = patient.getIdElement().getIdPart();
 
         final var lastUpdated = formLastUpdatedParam();
-        Bundle resultBundle = new Bundle();
         switch (resourceType) {
             // Why are we reloading the Patient, because on reload we're passing a lastUpdated parameter.  If the user
             // only wants resources from the last month and our patient hasn't been updated in a year, this method will
             // return an empty bundle.
             // TODO: Implement the since parameter ourselves using meta.lastUpdated and avoid pulling Patient and EoB twice.
             case Patient:
+                Bundle resultBundle = new Bundle();
                 Date patientLastUpdated = patient.getMeta().getLastUpdated();
                 if (patientLastUpdated == null) {
                     return blueButtonClient.requestPatientFromServer(patientId, lastUpdated, headers);
                 } else if (since != null && patientLastUpdated.toInstant().isBefore(since.toInstant())) {
-                    break;
+                    return resultBundle;
                 } else {
                     resultBundle.addEntry().setResource(patient);
+                    return resultBundle;
                 }
             case ExplanationOfBenefit:
                 return blueButtonClient.requestEOBFromServer(patientId, lastUpdated, headers);
@@ -155,7 +156,6 @@ class ResourceFetcher {
             default:
                 throw new JobQueueFailure(jobID, batchID, "Unexpected resource type: " + resourceType);
         }
-        return resultBundle;
     }
 
     /**
