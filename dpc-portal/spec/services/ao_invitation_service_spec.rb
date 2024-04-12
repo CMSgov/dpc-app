@@ -6,7 +6,7 @@ require 'rails_helper'
 describe AoInvitationService do
   let(:client) { instance_double(CpiApiGatewayClient) }
   let(:service) { AoInvitationService.new }
-  let(:organization_npi) { '11111111111' }
+  let(:organization_npi) { '3624913885' }
   before do
     allow(CpiApiGatewayClient).to receive(:new).and_return(client)
   end
@@ -22,6 +22,16 @@ describe AoInvitationService do
       expect(client).to receive(:org_info)
         .with(organization_npi)
         .and_return({ 'code' => '404' })
+      expect do
+        service.org_name(organization_npi)
+      end.to raise_error(AoInvitationServiceError)
+    end
+
+    it 'raises exception if bad npi' do
+      luhnacy = class_double('Luhnacy').as_stubbed_const
+      expect(luhnacy).to receive(:valid?)
+        .with("80840#{organization_npi}")
+        .and_return(false)
       expect do
         service.org_name(organization_npi)
       end.to raise_error(AoInvitationServiceError)
