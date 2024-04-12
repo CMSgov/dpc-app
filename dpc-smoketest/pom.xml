@@ -132,11 +132,16 @@
             <artifactId>gson</artifactId>
             <version>2.9.0</version>
         </dependency>
-        <!-- dropwizard-jackson wasn't getting pulled in transitively when run through Jenkins -->
+        <!-- dropwizard-jackson and jackson-databind weren't getting pulled in transitively when run through Jenkins -->
         <dependency>
             <groupId>io.dropwizard</groupId>
             <artifactId>dropwizard-jackson</artifactId>
             <version>3.0.7</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.16.1</version>
         </dependency>
     </dependencies>
 
