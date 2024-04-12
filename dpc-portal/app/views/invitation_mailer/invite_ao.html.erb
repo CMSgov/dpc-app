@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
+  </head>
+  <body>
+    <h1>Dear <%= @invitation.invited_given_name %> <%= @invitation.invited_family_name %>,</h1>
+    <p>You have been invited top exercise Authorized Official management of
+      <%= @invitation.provider_organization.name %> within Data at the Point of Care.</p>
+    <p><%= link_to 'Accept this invitation', accept_organization_authorized_official_invitation_url(@invitation.provider_organization, @invitation) %></p>
+    <p>Sincerely,</p>
+
+    <p>The Data at the Point of Care Team</p>
+  </body>
+</html>

@@ -6,12 +6,14 @@ class AoInvitationService
     organization = ProviderOrganization.find_or_create_by(npi: org_npi) do |org|
       org.name = org_name(org_npi)
     end
-    Invitation.create(invited_given_name: ao_given_name,
-                      invited_family_name: ao_family_name,
-                      invited_email: ao_email,
-                      invited_email_confirmation: ao_email,
-                      provider_organization: organization,
-                      invitation_type: 'authorized_official')
+    invitation = Invitation.create(invited_given_name: ao_given_name,
+                                   invited_family_name: ao_family_name,
+                                   invited_email: ao_email,
+                                   invited_email_confirmation: ao_email,
+                                   provider_organization: organization,
+                                   invitation_type: 'authorized_official')
+
+    InvitationMailer.with(invitation:).invite_ao.deliver_now
   end
 
   def org_name(npi)
