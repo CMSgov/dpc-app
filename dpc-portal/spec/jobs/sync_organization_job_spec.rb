@@ -18,11 +18,10 @@ RSpec.describe SyncOrganizationJob, type: :job do
   let(:get_organization_two_entries) { MockFHIRResponse.new(entries_count: 2) }
 
   let(:provider_organization) do
-    build(
+    create(
       :provider_organization,
       name: 'Test',
-      npi: 10.times.map { rand(0..9) }.join,
-      id: 1, dpc_api_organization_id: nil
+      dpc_api_organization_id: 'foo'
     )
   end
   let(:fhir_endpoint) do
@@ -48,7 +47,6 @@ RSpec.describe SyncOrganizationJob, type: :job do
   describe 'perform' do
     it 'creates an org in dpc-api if api_client returns no entry, then updates api org id' do
       assert_enqueued_with(job: SyncOrganizationJob, args: [provider_organization.id])
-      allow(ProviderOrganization).to receive(:find).with(provider_organization.id).and_return(provider_organization)
       expect(mock_dpc_client).to receive(:get_organization_by_npi).with(provider_organization.npi)
                                                                   .and_return(get_organization_zero_entries)
       expect(mock_dpc_client).to receive(:create_organization)
@@ -64,18 +62,18 @@ RSpec.describe SyncOrganizationJob, type: :job do
 
     it 'updates provider_organization.npi if api_client returns an entry' do
       assert_enqueued_with(job: SyncOrganizationJob, args: [provider_organization.id])
-      allow(ProviderOrganization).to receive(:find).with(provider_organization.id).and_return(provider_organization)
       expect(mock_dpc_client).to receive(:get_organization_by_npi).with(provider_organization.npi)
                                                                   .and_return(get_organization_one_entry)
-      expect(provider_organization).to receive(:dpc_api_organization_id=)
-        .with(get_organization_one_entry.entry[0].resource.id)
 
       perform_enqueued_jobs
+
+      provider_organization.reload
+      expected_dpc_api_organization_id = get_organization_one_entry.entry[0].resource.id.to_s
+      expect(provider_organization.dpc_api_organization_id).to eq expected_dpc_api_organization_id
     end
 
     it 'raises an error if multiple orgs are found for the NPI in dpc_attribution' do
       assert_enqueued_with(job: SyncOrganizationJob, args: [provider_organization.id])
-      allow(ProviderOrganization).to receive(:find).with(provider_organization.id).and_return(provider_organization)
       expect(mock_dpc_client).to receive(:get_organization_by_npi).with(provider_organization.npi)
                                                                   .and_return(get_organization_two_entries)
       expect do
@@ -86,7 +84,6 @@ RSpec.describe SyncOrganizationJob, type: :job do
 
     it 'raises an error if api_client.create_organization is unsuccessful' do
       assert_enqueued_with(job: SyncOrganizationJob, args: [provider_organization.id])
-      allow(ProviderOrganization).to receive(:find).with(provider_organization.id).and_return(provider_organization)
       expect(mock_dpc_client).to receive(:get_organization_by_npi).with(provider_organization.npi)
                                                                   .and_return(get_organization_zero_entries)
       expect(mock_dpc_client).to receive(:create_organization)
@@ -104,14 +101,15 @@ RSpec.describe SyncOrganizationJob, type: :job do
     end
 
     it 'raises an error if the provided unique ID is not found' do
+      provider_organization_id = provider_organization.id
       provider_organization.destroy
-      assert_enqueued_with(job: SyncOrganizationJob, args: [provider_organization.id])
+      assert_enqueued_with(job: SyncOrganizationJob, args: [provider_organization_id])
       expect(ProviderOrganization).to receive(:find)
-        .with(provider_organization.id)
+        .with(provider_organization_id)
         .and_raise(ActiveRecord::RecordNotFound)
       expect do
-        SyncOrganizationJob.perform_now(provider_organization.id)
-      end.to raise_error(SyncOrganizationJobError, "provider_organization #{provider_organization.id} not found")
+        SyncOrganizationJob.perform_now(provider_organization_id)
+      end.to raise_error(SyncOrganizationJobError, "provider_organization #{provider_organization_id} not found")
     end
   end
 end
