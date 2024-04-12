@@ -164,7 +164,7 @@ public class ClientUtils {
                     try {
                         responseBody = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
                         jobResponse = mapper.readValue(responseBody, JobCompletionModel.class);
-                    } catch (JsonParseException e) {
+                    } catch (JsonParseException | NoSuchFieldError e) {
                         logger.error("Failed to parse job status response: {}", responseBody);
                         throw e;
                     }
