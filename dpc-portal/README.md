@@ -27,3 +27,28 @@ Emails are not viewable in lookbook, but rather [here](http://localhost:3100/por
 ## Assets Pipeline
 
 Read more about the assets pipeline [here](/docs/portal/assets-pipeline.md).
+
+## Rails cheat sheet
+
+### Unit testing
+
+To run unit tests during development, do the following:
+
+1. SSH into the dpc-portal container
+2. `rails db:create RAILS_ENV=test` to create the test database
+3. `bundle exec rspec path/to/test`
+
+### Testing SyncOrganizationJob
+
+Since SyncOrganizationJob depends on [api_client](/engines/api_client), you'll need to make sure that a golden macaroon has been fetched. With the API running, run the following:
+```
+curl -X POST -w '\n' http://localhost:9903/tasks/generate-token
+```
+Then take the output and set an environment variable in your shell:
+```
+export GOLDEN_MACAROON={insert macaroon here}
+```
+
+Then run `make start-portal`. You can confirm that this worked by opening the Rails console and checking `ENV.fetch('GOLDEN_MACAROON')`.
+
+You can check the status of any jobs by going to the Sidekiq dashboard at `http://localhost:3100/portal/sidekiq`
