@@ -68,9 +68,7 @@ describe AoInvitationService do
         service.create_invitation(*params, organization_npi)
       end.to change { Invitation.count }.by 1
       organization = ProviderOrganization.find_by(npi: organization_npi)
-      matching_invitation = Invitation.where(invited_given_name: params[0],
-                                             invited_family_name: params[1],
-                                             invited_email: params[2],
+      matching_invitation = Invitation.where(invited_email: params[2],
                                              provider_organization: organization,
                                              invitation_type: 'authorized_official')
       expect(matching_invitation.count).to eq 1
@@ -79,7 +77,9 @@ describe AoInvitationService do
     it 'sends an invitation email on success' do
       stub_cpi_api_gw
       mailer = double(InvitationMailer)
-      expect(InvitationMailer).to receive(:with).with(invitation: instance_of(Invitation)).and_return(mailer)
+      expect(InvitationMailer).to receive(:with)
+        .with(invitation: instance_of(Invitation), given_name: params[0], family_name: params[1])
+        .and_return(mailer)
       expect(mailer).to receive(:invite_ao).and_return(mailer)
       expect(mailer).to receive(:deliver_now)
       service.create_invitation(*params, organization_npi)

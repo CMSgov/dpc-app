@@ -2,19 +2,17 @@
 
 # A service that verifies generates an ao invitation
 class AoInvitationService
-  def create_invitation(ao_given_name, ao_family_name, ao_email, org_npi)
+  def create_invitation(given_name, family_name, ao_email, org_npi)
     organization = ProviderOrganization.find_or_create_by(npi: org_npi) do |org|
       org.name = org_name(org_npi)
     end
 
-    invitation = Invitation.create(invited_given_name: ao_given_name,
-                                   invited_family_name: ao_family_name,
-                                   invited_email: ao_email,
+    invitation = Invitation.create(invited_email: ao_email,
                                    invited_email_confirmation: ao_email,
                                    provider_organization: organization,
                                    invitation_type: 'authorized_official')
 
-    InvitationMailer.with(invitation:).invite_ao.deliver_now
+    InvitationMailer.with(invitation:, given_name:, family_name:).invite_ao.deliver_now
 
     invitation
   end
