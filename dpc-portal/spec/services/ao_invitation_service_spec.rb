@@ -10,10 +10,10 @@ describe AoInvitationService do
   before do
     allow(CpiApiGatewayClient).to receive(:new).and_return(client)
   end
-  describe 'utilities' do
-    describe 'org_name'
+
+  describe 'org_name' do
     it 'fetches the name' do
-      stub_cpi_gw
+      stub_cpi_api_gw
       name = service.org_name(organization_npi)
       expect(name).to eq 'Health Hut'
     end
@@ -40,26 +40,30 @@ describe AoInvitationService do
 
   describe 'create invitation' do
     let(:params) { %w[Bob Hoskins bob@example.com] }
+
     it 'creates org if not exist' do
-      stub_cpi_gw
+      stub_cpi_api_gw
       expect do
         service.create_invitation(*params, organization_npi)
       end.to change { ProviderOrganization.count }.by 1
     end
+
     it 'does not create if org with npi exists' do
       create(:provider_organization, npi: organization_npi)
       expect do
         service.create_invitation(*params, organization_npi)
       end.to change { ProviderOrganization.count }.by 0
     end
+
     it 'creates org wich PECOS name' do
-      stub_cpi_gw
+      stub_cpi_api_gw
       service.create_invitation(*params, organization_npi)
       organization = ProviderOrganization.find_by(npi: organization_npi)
       expect(organization.name).to eq 'Health Hut'
     end
+
     it 'creates invitation' do
-      stub_cpi_gw
+      stub_cpi_api_gw
       expect do
         service.create_invitation(*params, organization_npi)
       end.to change { Invitation.count }.by 1
@@ -73,7 +77,7 @@ describe AoInvitationService do
     end
 
     it 'sends an invitation email on success' do
-      stub_cpi_gw
+      stub_cpi_api_gw
       mailer = double(InvitationMailer)
       expect(InvitationMailer).to receive(:with).with(invitation: instance_of(Invitation)).and_return(mailer)
       expect(mailer).to receive(:invite_ao).and_return(mailer)
@@ -82,7 +86,7 @@ describe AoInvitationService do
     end
   end
 
-  def stub_cpi_gw
+  def stub_cpi_api_gw
     expect(client).to receive(:org_info)
       .with(organization_npi)
       .and_return(org_stanza)

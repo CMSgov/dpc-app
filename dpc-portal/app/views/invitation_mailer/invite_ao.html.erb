@@ -5,7 +5,7 @@
   </head>
   <body>
     <h1>Dear <%= @invitation.invited_given_name %> <%= @invitation.invited_family_name %>,</h1>
-    <p>You have been invited top exercise Authorized Official management of
+    <p>You have been invited to exercise Authorized Official management of
       <%= @invitation.provider_organization.name %> within Data at the Point of Care.</p>
     <p><%= link_to 'Accept this invitation', accept_organization_authorized_official_invitation_url(@invitation.provider_organization, @invitation) %></p>
     <p>Sincerely,</p>
