@@ -15,6 +15,7 @@ venv/bin/activate: requirements.txt
 .PHONY: smoke
 smoke:
 	@mvn clean package -DskipTests -Djib.skip=True -pl dpc-smoketest -am -ntp
+	@mvn dependency:tree -pl dpc-smoketest
 
 .PHONY: smoke/local
 smoke/local: venv smoke
