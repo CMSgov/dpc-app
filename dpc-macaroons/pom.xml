@@ -19,7 +19,7 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.github.nickrobison-usds</groupId>
+            <groupId>${jitpack.groupID}</groupId>
             <artifactId>jmacaroons</artifactId>
             <version>1024efc25df40c63bbfbaedc6d75556d829d84c7</version>
         </dependency>
