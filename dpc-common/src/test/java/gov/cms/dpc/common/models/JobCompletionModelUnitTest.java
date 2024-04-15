@@ -1,5 +1,6 @@
 package gov.cms.dpc.common.models;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.Test;
@@ -13,6 +14,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class JobCompletionModelUnitTest {
     @Test
     public void testDeserialize() throws IOException {
+        JsonFormat.Feature readDateTimestampsAsNanoseconds = JsonFormat.Feature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS;
+
         ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
 
         // Load serialized JobCompletionModel
