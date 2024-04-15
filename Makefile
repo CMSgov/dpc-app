@@ -16,6 +16,8 @@ venv/bin/activate: requirements.txt
 smoke:
 	# Rebuild and install dpc-testing, common and smoketest before running.  This is to make sure that when we run this
 	# in Jenkins we don't use outdated dependencies from the local Maven cache.
+	@echo "Beginning installation"
+	@mvn dependency:purge-local-repository -DactTransitively=false -DreResolve=false
 	@mvn clean install -DskipTests -Djib.skip=True -pl dpc-testing -am -ntp
 	@mvn clean install -DskipTests -Djib.skip=True -pl dpc-common -am -ntp
 	@mvn clean package -DskipTests -Djib.skip=True -pl dpc-smoketest -am -ntp
