@@ -54,10 +54,6 @@
                     <artifactId>jackson-databind</artifactId>
                 </exclusion>
                 <exclusion>
-                    <groupId>com.fasterxml.jackson.core</groupId>
-                    <artifactId>jackson-annotations</artifactId>
-                </exclusion>
-                <exclusion>
                     <groupId>org.apache.xmlgraphics</groupId>
                     <artifactId>xmlgraphics-commons</artifactId>
                 </exclusion>
@@ -92,10 +88,6 @@
                 <exclusion>
                     <groupId>org.apache.commons</groupId>
                     <artifactId>commons-compress</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.fasterxml.jackson.core</groupId>
-                    <artifactId>jackson-annotations</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -139,17 +131,6 @@
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
             <version>2.9.0</version>
-        </dependency>
-        <!-- dropwizard-jackson and jackson-databind weren't getting pulled in transitively when run through Jenkins -->
-        <dependency>
-            <groupId>io.dropwizard</groupId>
-            <artifactId>dropwizard-jackson</artifactId>
-            <version>3.0.7</version>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>2.16.1</version>
         </dependency>
     </dependencies>
 
