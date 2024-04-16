@@ -166,6 +166,13 @@ public class ClientUtils {
                         Package pack = JsonFormat.class.getPackage();
                         logger.info("JsonFormat class: {}", pack);
 
+                        logger.info("==== Dumping entire classpath ====");
+                        String classpath = System.getProperty("java.class.path");
+                        String[] classPathValues = classpath.split(File.pathSeparator);
+                        for (String classPath: classPathValues) {
+                            logger.info(classPath);
+                        }
+
                         responseBody = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
                         jobResponse = mapper.readValue(responseBody, JobCompletionModel.class);
                     } catch (JsonParseException | NoSuchFieldError e) {
