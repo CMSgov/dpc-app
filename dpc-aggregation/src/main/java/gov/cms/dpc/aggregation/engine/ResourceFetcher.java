@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
@@ -147,6 +148,7 @@ class ResourceFetcher {
                     return resultBundle;
                 } else {
                     resultBundle.addEntry().setResource(patient);
+                    resultBundle.getMeta().setLastUpdated(Date.from(Instant.now()));
                     return resultBundle;
                 }
             case ExplanationOfBenefit:
@@ -154,7 +156,7 @@ class ResourceFetcher {
             case Coverage:
                 return blueButtonClient.requestCoverageFromServer(patientId, lastUpdated, headers);
             default:
-                throw new JobQueueFailure(jobID, batchID, "Unexpected resource type: " + resourceType);
+                throw new JobQueueFailure(jobID, batchID, "Unexpected resource type: " + resourceType.toString());
         }
     }
 

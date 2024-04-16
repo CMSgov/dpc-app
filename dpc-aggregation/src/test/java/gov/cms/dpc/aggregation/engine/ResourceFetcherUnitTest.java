@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.time.OffsetDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -44,7 +43,7 @@ class ResourceFetcherUnitTest {
     public void testHappyPath_Patient() {
         ResourceFetcher fetcher = getResourceFetcher(
                 DPCResourceType.Patient,
-                MockBlueButtonClient.TEST_LAST_UPDATED.minus(1, ChronoUnit.DAYS),
+                MockBlueButtonClient.TEST_LAST_UPDATED.minusDays(1),
                 MockBlueButtonClient.BFD_TRANSACTION_TIME
         );
 
@@ -59,7 +58,7 @@ class ResourceFetcherUnitTest {
     public void testHappyPath_Eob() {
         ResourceFetcher fetcher = getResourceFetcher(
                 DPCResourceType.ExplanationOfBenefit,
-                MockBlueButtonClient.TEST_LAST_UPDATED.minus(1, ChronoUnit.DAYS),
+                MockBlueButtonClient.TEST_LAST_UPDATED.minusDays(1),
                 MockBlueButtonClient.BFD_TRANSACTION_TIME
         );
 
@@ -74,7 +73,7 @@ class ResourceFetcherUnitTest {
     public void testHappyPath_coverage() {
         ResourceFetcher fetcher = getResourceFetcher(
                 DPCResourceType.Coverage,
-                MockBlueButtonClient.TEST_LAST_UPDATED.minus(1, ChronoUnit.DAYS),
+                MockBlueButtonClient.TEST_LAST_UPDATED.minusDays(1),
                 MockBlueButtonClient.BFD_TRANSACTION_TIME
         );
 
@@ -104,8 +103,8 @@ class ResourceFetcherUnitTest {
     public void testBadTransactionTime() {
         ResourceFetcher fetcher = getResourceFetcher(
                 DPCResourceType.Patient,
-                MockBlueButtonClient.TEST_LAST_UPDATED.minus(1, ChronoUnit.DAYS),
-                MockBlueButtonClient.BFD_TRANSACTION_TIME.plus(1, ChronoUnit.DAYS)
+                MockBlueButtonClient.TEST_LAST_UPDATED.minusDays(1),
+                MockBlueButtonClient.BFD_TRANSACTION_TIME.plusDays(1)
         );
 
         Flowable<List<Resource>> results = fetcher.fetchResources(testPatient, Map.of());
@@ -123,7 +122,7 @@ class ResourceFetcherUnitTest {
 
         ResourceFetcher fetcher = getResourceFetcher(
                 DPCResourceType.Patient,
-                MockBlueButtonClient.TEST_LAST_UPDATED.minus(1, ChronoUnit.DAYS),
+                MockBlueButtonClient.TEST_LAST_UPDATED.minusDays(1),
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
                 bbClient
         );
@@ -145,7 +144,7 @@ class ResourceFetcherUnitTest {
 
         ResourceFetcher fetcher = getResourceFetcher(
                 DPCResourceType.Patient,
-                MockBlueButtonClient.TEST_LAST_UPDATED.minus(1, ChronoUnit.DAYS),
+                MockBlueButtonClient.TEST_LAST_UPDATED.minusDays(1),
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
                 bbClient
         );
@@ -168,7 +167,7 @@ class ResourceFetcherUnitTest {
 
         ResourceFetcher fetcher = getResourceFetcher(
                 DPCResourceType.Patient,
-                MockBlueButtonClient.TEST_LAST_UPDATED.minus(1, ChronoUnit.DAYS),
+                MockBlueButtonClient.TEST_LAST_UPDATED.minusDays(1),
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
                 bbClient
         );
@@ -196,7 +195,7 @@ class ResourceFetcherUnitTest {
 
         ResourceFetcher fetcher = getResourceFetcher(
                 DPCResourceType.Patient,
-                MockBlueButtonClient.TEST_LAST_UPDATED.minus(1, ChronoUnit.DAYS),
+                MockBlueButtonClient.TEST_LAST_UPDATED.minusDays(1),
                 MockBlueButtonClient.BFD_TRANSACTION_TIME,
                 bbClient
         );
@@ -213,7 +212,7 @@ class ResourceFetcherUnitTest {
     public void testSearchForUnsupportedResourceType() {
         ResourceFetcher fetcher = getResourceFetcher(
                 DPCResourceType.Practitioner,
-                MockBlueButtonClient.TEST_LAST_UPDATED.minus(1, ChronoUnit.DAYS),
+                MockBlueButtonClient.TEST_LAST_UPDATED.minusDays(1),
                 MockBlueButtonClient.BFD_TRANSACTION_TIME
         );
 
