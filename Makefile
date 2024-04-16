@@ -16,7 +16,8 @@ venv/bin/activate: requirements.txt
 smoke:
 	# Purges JMeter's library, then copies all of dpc-smoketests dependencies into it
 	ls -la /var/jenkins_home/.bzt/jmeter-taurus/5.5/lib/*
-	@rm /var/jenkins_home/.bzt/jmeter-taurus/5.5/lib/*.jar
+	-rm /var/jenkins_home/.bzt/jmeter-taurus/5.5/lib/*.jar
+	-rm /var/jenkins_home/.bzt/jmeter-taurus/5.5/lib/*.old
 	@mvn clean package dependency:copy-dependencies -DskipTests -Djib.skip=True -pl dpc-smoketest -am -ntp
 	ls -la /var/jenkins_home/.bzt/jmeter-taurus/5.5/lib/*
 
