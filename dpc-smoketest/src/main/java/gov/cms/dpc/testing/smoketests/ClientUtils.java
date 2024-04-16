@@ -5,6 +5,7 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -162,6 +163,10 @@ public class ClientUtils {
                     }
                     String responseBody = "";
                     try {
+                        Package pack = JsonFormat.class.getPackage();
+                        logger.info("JsonFormat class: {}", pack);
+                        logger.info(JsonFormat.Feature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS.toString());
+
                         responseBody = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
                         jobResponse = mapper.readValue(responseBody, JobCompletionModel.class);
                     } catch (JsonParseException | NoSuchFieldError e) {

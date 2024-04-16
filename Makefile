@@ -20,7 +20,7 @@ smoke:
 	@mvn dependency:purge-local-repository -DactTransitively=false -DreResolve=false
 	@mvn clean install -DskipTests -Djib.skip=True -pl dpc-testing -am -ntp
 	@mvn clean install -DskipTests -Djib.skip=True -pl dpc-common -am -ntp
-	@mvn clean package -DskipTests -Djib.skip=True -pl dpc-smoketest -am -ntp
+	@mvn clean install -DskipTests -Djib.skip=True -pl dpc-smoketest -am -ntp
 	@mvn dependency:tree -pl dpc-smoketest
 
 .PHONY: smoke/local

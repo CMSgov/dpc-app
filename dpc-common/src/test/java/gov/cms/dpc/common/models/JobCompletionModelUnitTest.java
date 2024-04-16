@@ -14,6 +14,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class JobCompletionModelUnitTest {
     @Test
     public void testDeserialize() throws IOException {
+        Package pack = JsonFormat.class.getPackage();
+        System.out.println(pack);
+
         JsonFormat.Feature readDateTimestampsAsNanoseconds = JsonFormat.Feature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS;
 
         ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
