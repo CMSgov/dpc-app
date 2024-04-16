@@ -16,6 +16,7 @@ class JobCompletionModelUnitTest {
     public void testDeserialize() throws IOException {
         Package pack = JsonFormat.class.getPackage();
         System.out.println(pack);
+        System.out.println(JsonFormat.Feature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS.toString());
 
         JsonFormat.Feature readDateTimestampsAsNanoseconds = JsonFormat.Feature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS;
 

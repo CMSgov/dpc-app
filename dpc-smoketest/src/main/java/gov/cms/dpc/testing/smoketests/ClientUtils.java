@@ -165,7 +165,6 @@ public class ClientUtils {
                     try {
                         Package pack = JsonFormat.class.getPackage();
                         logger.info("JsonFormat class: {}", pack);
-                        logger.info(JsonFormat.Feature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS.toString());
 
                         responseBody = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
                         jobResponse = mapper.readValue(responseBody, JobCompletionModel.class);
