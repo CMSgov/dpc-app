@@ -135,9 +135,8 @@ class ResourceFetcher {
         final var lastUpdated = formLastUpdatedParam();
         switch (resourceType) {
             case Patient:
+                // rare - only needed if patient.lastUpdated is null
                 return blueButtonClient.requestPatientFromServer(patientId, lastUpdated, headers);
-            case ExplanationOfBenefit:
-                return blueButtonClient.requestEOBFromServer(patientId, lastUpdated, headers);
             case Coverage:
                 return blueButtonClient.requestCoverageFromServer(patientId, lastUpdated, headers);
             default:
