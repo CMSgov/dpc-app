@@ -125,7 +125,7 @@ class ResourceFetcher {
      * @param patient   {@link Patient} we're fetching resources for
      * @return the first bundle of resources
      */
-    private Bundle fetchFirst(Patient patient, Map<String, String> headers) {
+    protected Bundle fetchFirst(Patient patient, Map<String, String> headers) {
         patient.getIdentifier().stream()
                 .filter(i -> i.getSystem().equals(DPCIdentifierSystem.MBI_HASH.getSystem()))
                 .findFirst()

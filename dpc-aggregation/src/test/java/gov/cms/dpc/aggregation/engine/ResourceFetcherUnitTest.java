@@ -18,25 +18,22 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 
 class ResourceFetcherUnitTest {
     private static Patient testPatient;
     private static String testPatientMbi;
-    private static String testPatientFhirId;
+    private static MockBlueButtonClient bbClient;
 
     @BeforeAll
     public static void setup() {
-        MockBlueButtonClient bbClient = new MockBlueButtonClient(FhirContext.forDstu3());
+        bbClient = new MockBlueButtonClient(FhirContext.forDstu3());
 
         // Use an existing test patient from the MockBlueButtonClient
         testPatientMbi = MockBlueButtonClient.TEST_PATIENT_MBIS.get(0);
 
         Bundle bundle = bbClient.requestPatientFromServerByMbi(testPatientMbi, Map.of());
         testPatient = (Patient) bundle.getEntry().get(0).getResource();
-
-        testPatientFhirId = testPatient.getIdElement().getIdPart();
     }
 
     @Test
@@ -115,17 +112,16 @@ class ResourceFetcherUnitTest {
 
     @Test
     public void testResourceNotFound() {
-        MockBlueButtonClient bbClient = Mockito.spy(new MockBlueButtonClient(FhirContext.forDstu3()));
-
-        Mockito.doThrow(new ResourceNotFoundException("test exception"))
-                .when(bbClient).requestPatientFromServer(eq(testPatientFhirId), any(), any());
-
-        ResourceFetcher fetcher = getResourceFetcher(
-                DPCResourceType.Patient,
-                MockBlueButtonClient.TEST_LAST_UPDATED.minusDays(1),
-                MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                bbClient
+        ResourceFetcher fetcher = Mockito.spy(
+                getResourceFetcher(
+                    DPCResourceType.Patient,
+                    MockBlueButtonClient.TEST_LAST_UPDATED.minusDays(1),
+                    MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                    bbClient
+                )
         );
+        Mockito.doThrow(new ResourceNotFoundException("test exception"))
+                .when(fetcher).fetchFirst(eq(testPatient), any());
 
         Flowable<List<Resource>> results = fetcher.fetchResources(testPatient, Map.of());
         List<Resource> errors = results.flatMap(Flowable::fromIterable).toList().blockingGet();
@@ -137,17 +133,16 @@ class ResourceFetcherUnitTest {
 
     @Test
     public void testBaseServerErrorFetchingResources() {
-        MockBlueButtonClient bbClient = Mockito.spy(new MockBlueButtonClient(FhirContext.forDstu3()));
-
-        Mockito.doThrow(new FhirClientConnectionException("fhir client exception"))
-                .when(bbClient).requestPatientFromServer(eq(testPatientFhirId), any(), any());
-
-        ResourceFetcher fetcher = getResourceFetcher(
-                DPCResourceType.Patient,
-                MockBlueButtonClient.TEST_LAST_UPDATED.minusDays(1),
-                MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                bbClient
+        ResourceFetcher fetcher = Mockito.spy(
+                getResourceFetcher(
+                    DPCResourceType.Patient,
+                    MockBlueButtonClient.TEST_LAST_UPDATED.minusDays(1),
+                    MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                    bbClient
+            )
         );
+        Mockito.doThrow(new FhirClientConnectionException("fhir client exception"))
+                .when(fetcher).fetchFirst(eq(testPatient), any());
 
         Flowable<List<Resource>> results = fetcher.fetchResources(testPatient, Map.of());
         List<Resource> errors = results.flatMap(Flowable::fromIterable).toList().blockingGet();
@@ -159,18 +154,17 @@ class ResourceFetcherUnitTest {
 
     @Test
     public void testUnknownErrorFetchingResources() {
-        MockBlueButtonClient bbClient = Mockito.spy(new MockBlueButtonClient(FhirContext.forDstu3()));
-
+        ResourceFetcher fetcher = Mockito.spy(
+                getResourceFetcher(
+                    DPCResourceType.Patient,
+                    MockBlueButtonClient.TEST_LAST_UPDATED.minusDays(1),
+                    MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                    bbClient
+            )
+        );
         String exceptionMsg = "Unknown Exception";
         Mockito.doThrow(new IllegalStateException(exceptionMsg))
-                .when(bbClient).requestPatientFromServer(eq(testPatientFhirId), any(), any());
-
-        ResourceFetcher fetcher = getResourceFetcher(
-                DPCResourceType.Patient,
-                MockBlueButtonClient.TEST_LAST_UPDATED.minusDays(1),
-                MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                bbClient
-        );
+                .when(fetcher).fetchFirst(eq(testPatient), any());
 
         Flowable<List<Resource>> results = fetcher.fetchResources(testPatient, Map.of());
         List<Resource> errors = results.flatMap(Flowable::fromIterable).toList().blockingGet();
@@ -182,8 +176,6 @@ class ResourceFetcherUnitTest {
 
     @Test
     public void testWrongResourceTypeReturned() {
-        MockBlueButtonClient bbClient = Mockito.spy(new MockBlueButtonClient(FhirContext.forDstu3()));
-
         // Build EoB bundle
         ExplanationOfBenefit eob = new ExplanationOfBenefit();
         Bundle.BundleEntryComponent component = new Bundle.BundleEntryComponent();
@@ -191,14 +183,15 @@ class ResourceFetcherUnitTest {
         component.setResource(eob);
         bundle.addEntry(component);
 
-        Mockito.doReturn(bundle).when(bbClient).requestPatientFromServer(eq(testPatientFhirId), any(), any());
-
-        ResourceFetcher fetcher = getResourceFetcher(
-                DPCResourceType.Patient,
-                MockBlueButtonClient.TEST_LAST_UPDATED.minusDays(1),
-                MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                bbClient
+        ResourceFetcher fetcher = Mockito.spy(
+                getResourceFetcher(
+                    DPCResourceType.Patient,
+                    MockBlueButtonClient.TEST_LAST_UPDATED.minusDays(1),
+                    MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                    bbClient
+                )
         );
+        Mockito.doReturn(bundle).when(fetcher).fetchFirst(eq(testPatient), any());
 
         Flowable<List<Resource>> results = fetcher.fetchResources(testPatient, Map.of());
         List<Resource> errors = results.flatMap(Flowable::fromIterable).toList().blockingGet();
