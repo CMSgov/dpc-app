@@ -19,9 +19,10 @@ smoke:
 	ls -la /var/jenkins_home/.bzt/jmeter-taurus/5.5/lib/*
 	-rm /var/jenkins_home/.bzt/jmeter-taurus/5.5/lib/*.jar
 	echo "==== After purge"
-	@mvn clean package dependency:copy-dependencies -DskipTests -Djib.skip=True -pl dpc-smoketest -am -ntp
+	@mvn dependency:copy-dependencies -pl dpc-smoketest
 	echo "==== After rebuild"
 	ls -la /var/jenkins_home/.bzt/jmeter-taurus/5.5/lib/*
+	@mvn clean package -DskipTests -Djib.skip=True -pl dpc-smoketest -am -ntp
 
 .PHONY: smoke/local
 smoke/local: venv smoke
