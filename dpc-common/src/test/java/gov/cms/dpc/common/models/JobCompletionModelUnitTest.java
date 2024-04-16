@@ -1,11 +1,9 @@
 package gov.cms.dpc.common.models;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -15,16 +13,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class JobCompletionModelUnitTest {
     @Test
     public void testDeserialize() throws IOException {
-        Package pack = JsonFormat.class.getPackage();
-        System.out.println(pack);
-        System.out.println(JsonFormat.Feature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS.toString());
-
-        String classpath = System.getProperty("java.class.path");
-        String[] classPathValues = classpath.split(File.pathSeparator);
-        for (String classPath: classPathValues) {
-            System.out.println(classPath);
-        }
-
         ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
 
         // Load serialized JobCompletionModel

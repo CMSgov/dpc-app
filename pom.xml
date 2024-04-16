@@ -566,9 +566,10 @@
                 </plugins>
             </build>
         </profile>
+
         <!-- Add jmeter profile with a goal that will copy dependencies from Maven's local cache to JMeters static library -->
         <profile>
-            <id>jmeter</id>
+            <id>jmeter-on-jenkins</id>
             <build>
                 <plugins>
                     <plugin>
