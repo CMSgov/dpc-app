@@ -16,7 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
-import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
@@ -133,23 +132,10 @@ class ResourceFetcher {
 
         String patientId = patient.getIdElement().getIdPart();
 
-        Bundle resultBundle = new Bundle();
         final var lastUpdated = formLastUpdatedParam();
         switch (resourceType) {
             case Patient:
-                Date patientLastUpdated = patient.getMeta().getLastUpdated();
-                if (patientLastUpdated == null) {
-                    // rare
-                    return blueButtonClient.requestPatientFromServer(patientId, lastUpdated, headers);
-                } else if (since != null && patientLastUpdated.toInstant().isBefore(since.toInstant())) {
-                    // patient last updated earlier than since, so return empty bundle
-                    return resultBundle;
-                } else {
-                    // return patient without reloading
-                    resultBundle.addEntry().setResource(patient);
-                    resultBundle.getMeta().setLastUpdated(Date.from(Instant.now()));
-                    return resultBundle;
-                }
+                return blueButtonClient.requestPatientFromServer(patientId, lastUpdated, headers);
             case ExplanationOfBenefit:
                 return blueButtonClient.requestEOBFromServer(patientId, lastUpdated, headers);
             case Coverage:
