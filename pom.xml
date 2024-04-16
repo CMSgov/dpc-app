@@ -566,29 +566,6 @@
                 </plugins>
             </build>
         </profile>
-
-        <!-- Add jmeter profile with a goal that will copy dependencies from Maven's local cache to JMeters static library -->
-        <profile>
-            <id>jmeter-on-jenkins</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <artifactId>maven-dependency-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>copy-dependencies</goal>
-                                </goals>
-                                <configuration>
-                                    <outputDirectory>/var/jenkins_home/.bzt/jmeter-taurus/5.5/lib</outputDirectory>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
     </profiles>
 
     <build>
