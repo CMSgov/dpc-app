@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 import javax.inject.Inject;
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -92,16 +93,30 @@ public class JobBatchProcessor {
         if(flowable.isEmpty()) {
             Optional<Pair<Flowable<Resource>, OutcomeReason>> lookBackResult = checkLookBack(optPatient.get(), job);
             if(lookBackResult.isPresent()) {
-                flowable = Optional.of(lookBackResult.get().getLeft());
-                failReason = Optional.of(lookBackResult.get().getRight());
+                flowable = Optional.of(lookBackResult.get().getLeft());  // if passing, list of EOBs
+                failReason = lookBackResult.get().getRight() == null ?
+                        Optional.empty() : Optional.of(lookBackResult.get().getRight());
             }
         }
 
         // All checks passed, load resources
-        if(flowable.isEmpty()) {
-            flowable = Optional.of(
-                    Flowable.fromIterable(job.getResourceTypes()).flatMap(r -> fetchResource(job, optPatient.get(), r, job.getSince().orElse(null)))
-            );
+        if(failReason.isEmpty()) {
+            Date sinceParam = job.getSince().isPresent() ?
+                    Date.from(job.getSince().get().toInstant()) : Date.from(Instant.MIN);
+            if(job.getResourceTypes().equals(List.of(DPCResourceType.Patient))) {
+                flowable = Optional.of(
+                        Flowable.just((Resource) optPatient.get())
+                                .filter(r -> r.getMeta().getLastUpdated().after(sinceParam))
+                );
+            } else if(job.getResourceTypes().equals(List.of(DPCResourceType.ExplanationOfBenefit))) {
+                flowable.filter(r -> r.blockingFirst().getMeta().getLastUpdated().after(sinceParam));
+            } else {
+                List<DPCResourceType> types = job.getResourceTypes();
+                types.remove(DPCResourceType.ExplanationOfBenefit);
+                flowable = Optional.of(
+                        Flowable.concat(flowable.get(), Flowable.fromIterable(types).flatMap(r -> fetchResource(job, optPatient.get(), r, job.getSince().orElse(null))))
+                );
+            }
         }
 
         final var results = writeResource(job, flowable.get())
@@ -152,14 +167,17 @@ public class JobBatchProcessor {
      * @param patient   {@link Patient} resource we're looking for a relationship for.
      * @param job       {@link JobQueueBatch} currently running.
      * @return If there's a problem, it returns a pair of a {@link Flowable} {@link OperationOutcome} and an {@link OutcomeReason}.
-     * If the look back check passes, an empty {@link Optional}.
+     * If the look back check passes, a pair of a Flowable of {@link ExplanationOfBenefit} and a null OutcomeReason.
      */
     private Optional<Pair<Flowable<Resource>, OutcomeReason>> checkLookBack(Patient patient, JobQueueBatch job) {
         if (isLookBackExempt(job.getOrgID())) {
             logger.info("Skipping lookBack for org: {}", job.getOrgID().toString());
             MDC.put(MDCConstants.IS_SMOKE_TEST_ORG, "true");
+            return Optional.empty();
         } else {
-            List<LookBackAnswer> answers = getLookBackAnswers(job, patient);
+            Pair<List<LookBackAnswer>, Flowable<Resource>> lookBackPair = getLookBackAnswers(job, patient);
+            List<LookBackAnswer> answers = lookBackPair.getLeft();
+            Flowable<Resource> eobs = lookBackPair.getRight();
             if (!passesLookBack(answers)) {
                 OutcomeReason failReason = LookBackAnalyzer.analyze(answers);
                 return Optional.of(
@@ -168,11 +186,10 @@ public class JobBatchProcessor {
                         failReason
                         )
                 );
+            } else { // Passes lookback check
+                return Optional.of(Pair.of(eobs, null));
             }
         }
-
-        // Passes lookback check
-        return Optional.empty();
     }
 
     private boolean isLookBackExempt(UUID orgId) {
@@ -235,15 +252,16 @@ public class JobBatchProcessor {
         return Optional.empty();
     }
 
-    private List<LookBackAnswer> getLookBackAnswers(JobQueueBatch job, Patient patient) {
+    private Pair<List<LookBackAnswer>, Flowable<Resource>> getLookBackAnswers(JobQueueBatch job, Patient patient) {
         List<LookBackAnswer> result = new ArrayList<>();
+        Flowable<Resource> eobs = null;
         final String practitionerNPI = job.getProviderNPI();
         final String organizationNPI = job.getOrgNPI();
         if (practitionerNPI != null && organizationNPI != null) {
             MDC.put(MDCConstants.PROVIDER_NPI, practitionerNPI);
             Flowable<Resource> flowable = fetchResource(job, patient, DPCResourceType.ExplanationOfBenefit, null);
-            result = flowable
-                    .filter(resource -> Objects.requireNonNull(DPCResourceType.ExplanationOfBenefit.getPath()).equals(resource.getResourceType().getPath()))
+            eobs = flowable.filter(resource -> Objects.requireNonNull(DPCResourceType.ExplanationOfBenefit.getPath()).equals(resource.getResourceType().getPath()));
+            result = eobs
                     .map(ExplanationOfBenefit.class::cast)
                     .map(resource -> lookBackService.getLookBackAnswer(resource, organizationNPI, practitionerNPI, operationsConfig.getLookBackMonths()))
                     .toList()
@@ -252,7 +270,7 @@ public class JobBatchProcessor {
         } else {
             logger.error("couldn't get practitionerNPI and organizationNPI from job");
         }
-        return result;
+        return Pair.of(result, eobs);
     }
 
     private Flowable<JobQueueBatchFile> writeResource(JobQueueBatch job, Flowable<Resource> flow) {
@@ -336,7 +354,7 @@ public class JobBatchProcessor {
             if (consentResults.isEmpty()) {
                 return false;
             }
-            final ConsentResult latestConsent = Collections.max(consentResults, Comparator.comparing(consent -> consent.getConsentDate()));
+            final ConsentResult latestConsent = Collections.max(consentResults, Comparator.comparing(ConsentResult::getConsentDate));
             final boolean isActive = latestConsent.isActive();
             final boolean isOptOut = ConsentResult.PolicyType.OPT_OUT.equals(latestConsent.getPolicyType());
             final boolean isFutureConsent = latestConsent.getConsentDate().after(new Date());
