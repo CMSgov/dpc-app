@@ -157,12 +157,14 @@ services:
       context: .
       dockerfile: dpc-portal/Dockerfile
     command: sidekiq
-    image: dpc-portal-sidekiq:latest
+    image: dpc-web-portal:latest
     environment:
       - REDIS_URL=redis://redis
       - DATABASE_URL=postgresql://db/dpc-portal_development
       - DB_USER=postgres
       - DB_PASS=dpc-safe
+      - GOLDEN_MACAROON=${GOLDEN_MACAROON}
+      - API_METADATA_URL=http://api:3002/v1
     depends_on:
       - redis
       - db
