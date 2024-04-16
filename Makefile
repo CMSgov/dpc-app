@@ -14,12 +14,12 @@ venv/bin/activate: requirements.txt
 
 .PHONY: smoke
 smoke:
-	@cp ~/.m2/repository/com/fasterxml/jackson/core/jackson-annotations/2.16.1/jackson-annotations-2.16.1.jar /var/jenkins_home/.bzt/jmeter-taurus/5.5/lib/jackson-annotations-2.16.1.jar
-	@mv /var/jenkins_home/.bzt/jmeter-taurus/5.5/lib/jackson-annotations-2.13.3.jar /var/jenkins_home/.bzt/jmeter-taurus/5.5/lib/jackson-annotations-2.13.3.jar.old
-	@rm /var/jenkins_home/.bzt/jmeter-taurus/5.5/lib/jackson-annotations-2.16.1.jar.old
-	@ls -la /var/jenkins_home/.bzt/jmeter-taurus/5.5/lib/jackson*
+	#@cp ~/.m2/repository/com/fasterxml/jackson/core/jackson-annotations/2.16.1/jackson-annotations-2.16.1.jar /var/jenkins_home/.bzt/jmeter-taurus/5.5/lib/jackson-annotations-2.16.1.jar
+	#@mv /var/jenkins_home/.bzt/jmeter-taurus/5.5/lib/jackson-annotations-2.13.3.jar /var/jenkins_home/.bzt/jmeter-taurus/5.5/lib/jackson-annotations-2.13.3.jar.old
+	#@rm /var/jenkins_home/.bzt/jmeter-taurus/5.5/lib/jackson-annotations-2.16.1.jar.old
+	#@ls -la /var/jenkins_home/.bzt/jmeter-taurus/5.5/lib/jackson*
 	@mvn clean package -DskipTests -Djib.skip=True -pl dpc-smoketest -am -ntp
-	@mvn dependency:tree -pl dpc-smoketest
+	#@mvn dependency:tree -pl dpc-smoketest
 
 .PHONY: smoke/local
 smoke/local: venv smoke
