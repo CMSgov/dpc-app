@@ -4,7 +4,6 @@ REPORT_COVERAGE ?= false
 # ==============
 
 SMOKE_THREADS ?= 10
-TEST_DIR = /Users/michaelesposito/Github/dpc-app
 
 venv: venv/bin/activate
 
