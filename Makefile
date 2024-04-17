@@ -13,14 +13,14 @@ venv/bin/activate: requirements.txt
 	touch venv/bin/activate
 
 .PHONY: smoke
+smoke: ## If running on Jenkins, purges JMeter's library, then copies all of dpc-smoketests dependencies into it
 smoke:
-	# If running on Jenkins, purges JMeter's library, then copies all of dpc-smoketests dependencies into it
 	@JENKINS_DIR="/var/jenkins_home/.bzt/jmeter-taurus/5.5/lib"; \
-	echo "Jenkins dir: ${JENKINS_DIR}"; \
-	if [ -d ${JENKINS_DIR} ]; then \
+	echo "Jenkins dir: $$JENKINS_DIR"; \
+	if [ -d $$JENKINS_DIR ]; then \
       	echo "Rebuilding JMeter lib"; \
-      	-rm ${JENKINS_DIR}/*.jar; \
-      	mvn dependency:copy-dependencies -pl dpc-smoketest -DoutputDirectory=${JENKINS_DIR}; \
+      	rm $$JENKINS_DIR/*.jar; \
+      	mvn dependency:copy-dependencies -pl dpc-smoketest -DoutputDirectory=$$JENKINS_DIR; \
     else \
         echo "Not running on Jenkins"; \
     fi
