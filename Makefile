@@ -16,7 +16,6 @@ venv/bin/activate: requirements.txt
 smoke: ## If running on Jenkins, purges JMeter's library, then copies all of dpc-smoketests dependencies into it
 smoke:
 	@JENKINS_DIR="/var/jenkins_home/.bzt/jmeter-taurus/5.5/lib"; \
-	echo "Jenkins dir: $$JENKINS_DIR"; \
 	if [ -d $$JENKINS_DIR ]; then \
       	echo "Rebuilding JMeter lib"; \
       	rm $$JENKINS_DIR/*.jar; \
