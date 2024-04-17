@@ -37,8 +37,6 @@
         <dropwizard.version>3.0.7</dropwizard.version>
         <junit.jupiter.version>5.10.2</junit.jupiter.version>
         <slf4j.version>2.0.12</slf4j.version>
-        <!--Custom group IDs for pulling dependencies from JitPack-->
-        <jitpack.groupID>com.github.nickrobison-usds</jitpack.groupID>
         <hapi.fhir.groupID>ca.uhn.hapi.fhir</hapi.fhir.groupID>
         <hapi.fhir.version>4.2.0</hapi.fhir.version>
         <pgsql.version>42.7.2</pgsql.version>
@@ -177,7 +175,7 @@
                 <version>10.0.20</version>
             </dependency>
             <dependency>
-                <groupId>ru.vyarus.dropwizard-guicey</groupId>
+                <groupId>ru.vyarus</groupId>
                 <artifactId>dropwizard-guicey</artifactId>
                 <version>6.2.1</version>
                 <exclusions>
@@ -812,10 +810,4 @@
         </plugins>
     </reporting>
 
-    <repositories>
-        <repository>
-            <id>jitpack.io</id>
-            <url>https://jitpack.io</url>
-        </repository>
-    </repositories>
 </project>
