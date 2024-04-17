@@ -113,11 +113,10 @@ public class JobBatchProcessor {
                 logger.info("Returning cached ExplanationsOfBenefit");
                 flowable.filter(r -> r.blockingFirst().getMeta().getLastUpdated().after(sinceParam));
             } else {
-                logger.info("Fetching resources from database");
                 List<DPCResourceType> types = job.getResourceTypes();
-                types.remove(DPCResourceType.ExplanationOfBenefit);
+                logger.info("Fetching {} from database", types);
                 flowable = Optional.of(
-                        Flowable.concat(flowable.get(), Flowable.fromIterable(types).flatMap(r -> fetchResource(job, optPatient.get(), r, job.getSince().orElse(null))))
+                        Flowable.fromIterable(types).flatMap(r -> fetchResource(job, optPatient.get(), r, job.getSince().orElse(null)))
                 );
             }
         }
