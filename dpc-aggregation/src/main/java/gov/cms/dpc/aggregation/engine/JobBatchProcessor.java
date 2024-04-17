@@ -102,7 +102,7 @@ public class JobBatchProcessor {
         // All checks passed, load resources
         if(failReason.isEmpty()) {
             Date sinceParam = job.getSince().isPresent() ?
-                    Date.from(job.getSince().get().toInstant()) : Date.from(Instant.MIN);
+                    Date.from(job.getSince().get().toInstant()) : Date.from(Instant.EPOCH);
             if(job.getResourceTypes().equals(List.of(DPCResourceType.Patient))) {
                 flowable = Optional.of(
                         Flowable.just((Resource) optPatient.get())
