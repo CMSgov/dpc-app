@@ -4,7 +4,7 @@ REPORT_COVERAGE ?= false
 # ==============
 
 SMOKE_THREADS ?= 10
-JENKINS_DIR = "/var/jenkins_home/.bzt/jmeter-taurus/5.5/lib"
+TEST_DIR = /Users/michaelesposito/Github/dpc-app
 
 venv: venv/bin/activate
 
@@ -16,10 +16,13 @@ venv/bin/activate: requirements.txt
 .PHONY: smoke
 smoke:
 	# If running on Jenkins, purges JMeter's library, then copies all of dpc-smoketests dependencies into it
-	@if [ -d JENKINS_DIR ]; then \
-      echo "Rebuilding JMeter lib"; \
-      -rm /var/jenkins_home/.bzt/jmeter-taurus/5.5/lib/*.jar; \
-      mvn dependency:copy-dependencies -pl dpc-smoketest -DoutputDirectory=$JENKINS_DIR; \
+	@JENKINS_DIR="/var/jenkins_home/.bzt/jmeter-taurus/5.5/lib"; \
+	if [ -d $JENKINS_DIR ]; then \
+      	echo "Rebuilding JMeter lib"; \
+      	-rm /var/jenkins_home/.bzt/jmeter-taurus/5.5/lib/*.jar; \
+      	mvn dependency:copy-dependencies -pl dpc-smoketest -DoutputDirectory=$JENKINS_DIR; \
+    else \
+        echo "Not running on Jenkins"; \
     fi
 	@mvn clean package -DskipTests -Djib.skip=True -pl dpc-smoketest -am -ntp
 
