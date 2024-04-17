@@ -137,6 +137,7 @@
             <groupId>kg.apc</groupId>
             <artifactId>cmdrunner</artifactId>
             <version>2.2</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
