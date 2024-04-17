@@ -69,6 +69,8 @@ class CpiApiGatewayClient
     fetch_med_sanctions_and_waivers(body)
   end
 
+  alias org_info fetch_med_sanctions_and_waivers_by_org_npi
+
   private
 
   def fetch_token

@@ -16,6 +16,7 @@ AllCops:
 Metrics/BlockLength:
   Exclude:
     - "spec/**/*"
+    - "lib/tasks/dpc.rake"
 
 Metrics/MethodLength:
   Max: 20
