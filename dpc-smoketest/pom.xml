@@ -132,6 +132,12 @@
             <artifactId>gson</artifactId>
             <version>2.9.0</version>
         </dependency>
+        <!-- Not necessary for dpc-smoketest, but we need it when copying dependencies to JMeter's statick lib on Jenkins -->
+        <dependency>
+            <groupId>kg.apc</groupId>
+            <artifactId>cmdrunner</artifactId>
+            <version>2.2</version>
+        </dependency>
     </dependencies>
 
     <build>
