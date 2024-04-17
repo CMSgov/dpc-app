@@ -104,13 +104,16 @@ public class JobBatchProcessor {
             Date sinceParam = job.getSince().isPresent() ?
                     Date.from(job.getSince().get().toInstant()) : Date.from(Instant.EPOCH);
             if(job.getResourceTypes().equals(List.of(DPCResourceType.Patient))) {
+                logger.info("Returning cached Patient");
                 flowable = Optional.of(
                         Flowable.just((Resource) optPatient.get())
                                 .filter(r -> r.getMeta().getLastUpdated().after(sinceParam))
                 );
             } else if(job.getResourceTypes().equals(List.of(DPCResourceType.ExplanationOfBenefit))) {
+                logger.info("Returning cached ExplanationsOfBenefit");
                 flowable.filter(r -> r.blockingFirst().getMeta().getLastUpdated().after(sinceParam));
             } else {
+                logger.info("Fetching resources from database");
                 List<DPCResourceType> types = job.getResourceTypes();
                 types.remove(DPCResourceType.ExplanationOfBenefit);
                 flowable = Optional.of(

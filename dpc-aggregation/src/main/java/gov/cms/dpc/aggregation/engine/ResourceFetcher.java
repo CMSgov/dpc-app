@@ -133,6 +133,7 @@ class ResourceFetcher {
         String patientId = patient.getIdElement().getIdPart();
 
         final var lastUpdated = formLastUpdatedParam();
+        logger.info("Fetching {} from database", resourceType);
         switch (resourceType) {
             case Patient:
                 // rare - only needed if patient.lastUpdated is null
