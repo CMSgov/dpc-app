@@ -68,7 +68,7 @@
             <version>0.9.11</version>
         </dependency>
         <dependency>
-            <groupId>ru.vyarus.dropwizard-guicey</groupId>
+            <groupId>ru.vyarus</groupId>
             <artifactId>dropwizard-guicey</artifactId>
         </dependency>
         <dependency>
