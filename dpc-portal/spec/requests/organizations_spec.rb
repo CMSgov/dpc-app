@@ -82,7 +82,7 @@ RSpec.describe 'Organizations', type: :request do
       end
 
       it 'does not assign invitations even if exist' do
-        create(:invitation, provider_organization: org, invited_by: user)
+        create(:invitation, :cd, provider_organization: org, invited_by: user)
         get "/organizations/#{org.id}"
         expect(assigns(:invitations)).to be_nil
       end
@@ -120,7 +120,7 @@ RSpec.describe 'Organizations', type: :request do
 
       context :invitations do
         it 'assigns if exist' do
-          create(:invitation, provider_organization: org, invited_by: user)
+          create(:invitation, :cd, provider_organization: org, invited_by: user)
           get "/organizations/#{org.id}"
           expect(assigns(:invitations).size).to eq 1
         end

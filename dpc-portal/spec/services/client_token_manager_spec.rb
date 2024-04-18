@@ -6,7 +6,7 @@ RSpec.describe ClientTokenManager do
   include DpcClientSupport
   describe '#create_client_token' do
     context 'successful API request' do
-      it 'responds true with @client_token set', :focus do
+      it 'responds true with @client_token set' do
         api_id = SecureRandom.uuid
         token = 'exampleToken'
         label = { params: { label: 'Test Token 1' } }

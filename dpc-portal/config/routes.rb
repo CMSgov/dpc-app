@@ -28,6 +28,9 @@ Rails.application.routes.draw do
       post 'confirm', on: :member
       get 'success', on: :member
     end
+    resources :authorized_official_invitations, only: [] do
+      get 'accept', on: :member
+    end
     get 'tos_form', on: :member
     post 'sign_tos', on: :member
     get 'success', on: :member
