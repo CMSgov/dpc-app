@@ -42,9 +42,10 @@ class FakeCpiGateway < Sinatra::Base
   post '/api/1.0/ppr/providers/enrollments' do
     headers['content-type'] = 'application/json; charset=UTF-8'
     npi = @request_payload.dig('providerID', 'npi')
-    if npi == '3299073577'
+    case npi
+    when '3299073577'
       '{"code": "404"}'
-    elsif npi == '3782297014'
+    when '3782297014'
       {
         enrollments: [
           { status: 'INACTIVE' },
@@ -56,7 +57,7 @@ class FakeCpiGateway < Sinatra::Base
         enrollments: [
           {
             status: 'APPROVED',
-            enrollmentID: 'WTVR'
+            enrollmentID: npi
           }
         ]
       }.to_json
@@ -82,6 +83,9 @@ class FakeCpiGateway < Sinatra::Base
                  else
                    @request_payload.dig('providerID', 'npi')
                  end
+
+    return '{"code": "404"}' if identifier == '3299073577'
+
     provider = { providerType: provider_type, medSanctions: [], waiverInfo: [] }
 
     provider[:orgName] = "Organization #{identifier}" if provider_type == 'org'
@@ -96,6 +100,7 @@ class FakeCpiGateway < Sinatra::Base
         reinstatementReasonDescription: 'LICENSE REVOCATION OR SUSPENSION'
       }
     end
+
     if %(900777777 3098168743).include?(identifier)
       provider[:waiverInfo] << {
         effectiveDate: 1.year.ago.to_s,
@@ -103,6 +108,7 @@ class FakeCpiGateway < Sinatra::Base
         comment: 'Waiver covers everything'
       }
     end
+
     { provider: }.to_json
   end
 end

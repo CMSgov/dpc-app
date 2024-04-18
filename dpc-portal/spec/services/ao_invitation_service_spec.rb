@@ -7,9 +7,6 @@ describe AoInvitationService do
   let(:client) { CpiApiGatewayClient.new }
   let(:service) { AoInvitationService.new }
   let(:organization_npi) { '3624913885' }
-  before do
-    allow(CpiApiGatewayClient).to receive(:new).and_return(client)
-  end
 
   describe 'org_name' do
     it 'fetches the name' do
@@ -18,11 +15,9 @@ describe AoInvitationService do
     end
 
     it 'raises exception if no org' do
-      expect(client).to receive(:org_info)
-        .with(organization_npi)
-        .and_return({ 'code' => '404' })
+      missing_org_npi = '3299073577'
       expect do
-        service.org_name(organization_npi)
+        service.org_name(missing_org_npi)
       end.to raise_error(AoInvitationServiceError)
     end
 
