@@ -17,6 +17,8 @@ require 'sinatra/base'
 #   Enrollment Roles
 #    AO SSNS: 900111111
 class FakeCpiGateway < Sinatra::Base
+  set :server, 'thin'
+
   set(:method) do |method|
     method = method.to_s.upcase
     condition { request.request_method == method }
@@ -71,7 +73,7 @@ class FakeCpiGateway < Sinatra::Base
   # Enrollment Roles
   get '/api/1.0/ppr/providers/enrollments/:enrollmentID/roles' do
     headers['content-type'] = 'application/json; charset=UTF-8'
-    ao_ssns = %w[900111111 900666666 900777777]
+    ao_ssns = %w[900111111 900666666 900777777 900888888 666222222]
     roles = ao_ssns.map { |ssn| { pacId: ssn, roleCode: '10', ssn: } }
     {
       enrollments: {
@@ -109,12 +111,14 @@ class FakeCpiGateway < Sinatra::Base
 
     if %(900777777 3098168743).include?(identifier)
       provider[:waiverInfo] << {
-        effectiveDate: 1.year.ago.to_s,
-        endDate: 1.year.from_now.to_s,
+        effectiveDate: Date.today.prev_year.to_s,
+        endDate: Date.today.next_year.to_s,
         comment: 'Waiver covers everything'
       }
     end
 
     { provider: }.to_json
   end
+
+  run! if __FILE__ == $PROGRAM_NAME
 end

@@ -25,13 +25,19 @@ RSpec.describe AoOrgLink, type: :model do
   describe 'has an invitation' do
     let(:provider_organization1) { build(:provider_organization) }
     let(:provider_organization2) { build(:provider_organization) }
-    let(:invitation) { build(:invitation) }
+    let(:invitation) { create(:invitation, :ao) }
     let(:ao_org_link) { build(:ao_org_link, user:, provider_organization: provider_organization1, invitation:) }
 
     it 'has foreign keys' do
       expect(ao_org_link.user).to eq user
       expect(ao_org_link.provider_organization).to eq provider_organization1
       expect(ao_org_link.invitation).to eq invitation
+    end
+
+    it 'allows for multiple nil invitations' do
+      create(:ao_org_link, user:, provider_organization: provider_organization1, invitation: nil)
+      duplicate = build(:ao_org_link, user:, provider_organization: provider_organization2, invitation: nil)
+      expect(duplicate).to be_valid
     end
 
     it 'does not allow for duplicate invitations' do

@@ -173,7 +173,7 @@ RSpec.describe 'Organizations', type: :request do
           end.to change { ProviderOrganization.count }.by 1
           org = assigns(:organization)
           expect(org.npi).to eq npi
-          expect(org.name).to eq "Org with npi #{npi}"
+          expect(org.name).to eq "Organization #{npi}"
           expect(org.terms_of_service_accepted_by).to be_nil
           expect(org.terms_of_service_accepted_at).to be_nil
           expect(response).to redirect_to(tos_form_organization_path(org))
