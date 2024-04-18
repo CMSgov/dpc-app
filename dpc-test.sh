@@ -34,7 +34,7 @@ fi
 
 # Build the application
 docker-compose up start_core_dependencies
-mvn clean compile -Perror-prone -B -V -ntp -U
+mvn clean compile -Perror-prone -B -V -ntp -U -X
 mvn package -Pci -ntp
 
 # Format the test results
