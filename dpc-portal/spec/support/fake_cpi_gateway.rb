@@ -28,6 +28,8 @@ class FakeCpiGateway < Sinatra::Base
       @request_payload = JSON.parse request.body.read
     end
   end
+
+  # IDM identity service
   post '/oauth2/:token_id/v1/token' do
     headers['content-type'] = 'application/json; charset=UTF-8'
     {
@@ -39,6 +41,8 @@ class FakeCpiGateway < Sinatra::Base
     }.to_json
   end
 
+  # CPI API Gateway
+  # Enrollments
   post '/api/1.0/ppr/providers/enrollments' do
     headers['content-type'] = 'application/json; charset=UTF-8'
     npi = @request_payload.dig('providerID', 'npi')
@@ -64,6 +68,7 @@ class FakeCpiGateway < Sinatra::Base
     end
   end
 
+  # Enrollment Roles
   get '/api/1.0/ppr/providers/enrollments/:enrollmentID/roles' do
     headers['content-type'] = 'application/json; charset=UTF-8'
     ao_ssns = %w[900111111 900666666 900777777]
@@ -75,6 +80,7 @@ class FakeCpiGateway < Sinatra::Base
     }.to_json
   end
 
+  # Providers (med sanctions)
   post '/api/1.0/ppr/providers' do
     headers['content-type'] = 'application/json; charset=UTF-8'
     provider_type = @request_payload.dig('providerID', 'providerType')
