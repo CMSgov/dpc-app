@@ -28,10 +28,10 @@ class LoginDotGovController < Devise::OmniauthCallbacksController
 
   def maybe_update_user(user, auth)
     data = auth.extra.raw_info
-    if data.ial == 'http://idmanagement.gov/ns/assurance/ial/2'
-      user.update(given_name: data.given_name,
-                  family_name: data.family_name)
-    end
+    return unless data.ial == 'http://idmanagement.gov/ns/assurance/ial/2'
+
+    user.update(given_name: data.given_name,
+                family_name: data.family_name)
   end
 
   def assign_user_properties(user, auth)

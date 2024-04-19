@@ -13,7 +13,7 @@ RSpec.describe 'LoginDotGov', type: :request do
                                    extra: { raw_info: { given_name: 'Bob',
                                                         family_name: 'Hoskins',
                                                         social_security_number: '1-2-3',
-                                                        all_emails: %w(bob@example.com bob2@example.com),
+                                                        all_emails: %w[bob@example.com bob2@example.com],
                                                         ial: 'http://idmanagement.gov/ns/assurance/ial/2' } } })
       end
 
@@ -43,7 +43,7 @@ RSpec.describe 'LoginDotGov', type: :request do
       end
 
       it 'adds user names' do
-        user = create(:user, uid: '12345', provider: 'openid_connect', email: 'bob@example.com')
+        create(:user, uid: '12345', provider: 'openid_connect', email: 'bob@example.com')
         expect(User.where(uid: '12345', provider: 'openid_connect', email: 'bob@example.com', given_name: 'Bob',
                           family_name: 'Hoskins').count).to eq 0
         post '/users/auth/openid_connect'
@@ -60,7 +60,7 @@ RSpec.describe 'LoginDotGov', type: :request do
         OmniAuth.config.add_mock(:openid_connect,
                                  { uid: '12345',
                                    info: { email: 'bob@example.com' },
-                                   extra: { raw_info: { all_emails: %w(bob@example.com bob2@example.com),
+                                   extra: { raw_info: { all_emails: %w[bob@example.com bob2@example.com],
                                                         ial: 'http://idmanagement.gov/ns/assurance/ial/1' } } })
       end
 
@@ -90,7 +90,8 @@ RSpec.describe 'LoginDotGov', type: :request do
       end
 
       it 'does not update user names' do
-        user = create(:user, uid: '12345', provider: 'openid_connect', email: 'bob@example.com', given_name: 'Bob', family_name: 'Hoskins')
+        create(:user, uid: '12345', provider: 'openid_connect', email: 'bob@example.com', given_name: 'Bob',
+                      family_name: 'Hoskins')
         expect(User.where(uid: '12345', provider: 'openid_connect', email: 'bob@example.com', given_name: 'Bob',
                           family_name: 'Hoskins').count).to eq 1
         post '/users/auth/openid_connect'

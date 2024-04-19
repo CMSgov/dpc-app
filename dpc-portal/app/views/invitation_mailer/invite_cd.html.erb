@@ -8,7 +8,7 @@
     <h1>Dear <%= @invitation.invited_given_name %> <%= @invitation.invited_family_name %>,</h1>
     <p><%= @invitation.invited_by.given_name %> <%= @invitation.invited_by.family_name %> has invited you to manage
       the credentials for <%= @invitation.provider_organization.name %> within Data at the Point of Care.</p>
-    <p><%= link_to 'Accept this invitation', accept_organization_credential_delegate_invitation_url(@invitation.provider_organization, @invitation) %></p>
+    <p><%= link_to 'Accept this invitation', accept_organization_invitation_url(@invitation.provider_organization, @invitation) %></p>
     <p>Sincerely,</p>
 
     <p>The Data at the Point of Care Team</p>
