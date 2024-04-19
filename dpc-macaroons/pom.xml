@@ -22,8 +22,6 @@
             <groupId>com.github.nickrobison-usds</groupId>
             <artifactId>jmacaroons</artifactId>
             <version>1024efc25df40c63bbfbaedc6d75556d829d84c7</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/../libs/jmacaroons-1024efc25d.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>com.google.inject</groupId>
@@ -76,6 +74,14 @@
             <artifactId>junit-jupiter-params</artifactId>
         </dependency>
     </dependencies>
+
+    <repositories>
+        <repository>
+            <id>project.local</id>
+            <name>project</name>
+            <url>file://${project.basedir}/../repo</url>
+        </repository>
+    </repositories>
 
     <reporting>
         <plugins>
