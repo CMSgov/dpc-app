@@ -91,12 +91,10 @@ public class JobBatchProcessor {
 
         // Check if the patient passes look back
         if(flowable.isEmpty()) {
-            Optional<Pair<Flowable<Resource>, OutcomeReason>> lookBackResult = checkLookBack(optPatient.get(), job);
-            if(lookBackResult.isPresent()) {
-                flowable = Optional.of(lookBackResult.get().getLeft());  // if passing, list of EOBs
-                failReason = lookBackResult.get().getRight() == null ?
-                        Optional.empty() : Optional.of(lookBackResult.get().getRight());
-            }
+            Pair<Flowable<Resource>, OutcomeReason> lookBackResult = checkLookBack(optPatient.get(), job);
+                flowable = Optional.of(lookBackResult.getLeft());  // if passing, list of EOBs
+                failReason = lookBackResult.getRight() == null ?
+                        Optional.empty() : Optional.of(lookBackResult.getRight());
         }
 
         // All checks passed, load resources
@@ -169,29 +167,28 @@ public class JobBatchProcessor {
      * @param patient   {@link Patient} resource we're looking for a relationship for.
      * @param job       {@link JobQueueBatch} currently running.
      * @return If there's a problem, it returns a pair of a {@link Flowable} {@link OperationOutcome} and an {@link OutcomeReason}.
-     * If the look back check passes, a pair of a Flowable of {@link ExplanationOfBenefit} and a null OutcomeReason.
+     * If the look back check passes, a pair of a Flowable of {@link ExplanationOfBenefit} as Resource objects and a null OutcomeReason.
      */
-    private Optional<Pair<Flowable<Resource>, OutcomeReason>> checkLookBack(Patient patient, JobQueueBatch job) {
+    private Pair<Flowable<Resource>, OutcomeReason> checkLookBack(Patient patient, JobQueueBatch job) {
+        Pair<List<LookBackAnswer>, Flowable<Resource>> lookBackPair = getLookBackAnswers(job, patient);
+        List<LookBackAnswer> answers = lookBackPair.getLeft();
+        Flowable<Resource> eobs = lookBackPair.getRight();
+
         if (isLookBackExempt(job.getOrgID())) {
             logger.info("Skipping lookBack for org: {}", job.getOrgID().toString());
             MDC.put(MDCConstants.IS_SMOKE_TEST_ORG, "true");
-            return Optional.empty();
         } else {
-            Pair<List<LookBackAnswer>, Flowable<Resource>> lookBackPair = getLookBackAnswers(job, patient);
-            List<LookBackAnswer> answers = lookBackPair.getLeft();
-            Flowable<Resource> eobs = lookBackPair.getRight();
             if (!passesLookBack(answers)) {
                 OutcomeReason failReason = LookBackAnalyzer.analyze(answers);
-                return Optional.of(
-                        Pair.of(
+                return Pair.of(
                         Flowable.just(AggregationUtils.toOperationOutcome(failReason, FHIRExtractors.getPatientMBI(patient))),
                         failReason
-                        )
-                );
-            } else { // Passes lookback check
-                return Optional.of(Pair.of(eobs, null));
+                        );
             }
         }
+
+        // Passes lookback check or is exempt, return Explanations of Benefit
+        return Pair.of(eobs, null);
     }
 
     private boolean isLookBackExempt(UUID orgId) {
