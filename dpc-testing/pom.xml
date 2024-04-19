@@ -78,8 +78,6 @@
             <groupId>com.github.nickrobison-usds</groupId>
             <artifactId>jmacaroons</artifactId>
             <version>1024efc25df40c63bbfbaedc6d75556d829d84c7</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/../libs/jmacaroons-1024efc25d.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
@@ -145,4 +143,12 @@
             <artifactId>hibernate-core</artifactId>
         </dependency>
     </dependencies>
+
+    <repositories>
+        <repository>
+            <id>project.local</id>
+            <name>project</name>
+            <url>file://${project.basedir}/../repo</url>
+        </repository>
+    </repositories>
 </project>
