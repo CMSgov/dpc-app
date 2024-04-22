@@ -23,7 +23,7 @@ smoke:
     else \
         echo "Not running on Jenkins"; \
     fi
-	@mvn clean install -DskipTests -Djib.skip=True -pl dpc-smoketest -am -ntp
+	@mvn clean package -DskipTests -Djib.skip=True -pl dpc-common -pl dpc-testing -pl dpc-smoketest -am -ntp
 
 .PHONY: smoke/local
 smoke/local: venv smoke
