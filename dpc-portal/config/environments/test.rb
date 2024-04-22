@@ -63,3 +63,5 @@ Rails.application.configure do
   # Annotate rendered view with file names.
   # config.action_view.annotate_rendered_view_with_filenames = true
 end
+ENV['CPI_API_GW_BASE_URL'] = 'https://val.cpiapi.cms.gov/'
+ENV['CMS_IDM_OAUTH_URL'] = 'https://impl.idp.idm.cms.gov/'
