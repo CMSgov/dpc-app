@@ -3,8 +3,8 @@
 # Handles acceptance of invitations
 class InvitationsController < ApplicationController
   before_action :load_organization
-  before_action :load_invitation, only: %i[accept confirm]
-  before_action :authenticate_user!
+  before_action :load_invitation
+  before_action :authenticate_user!, except: %i[login]
   before_action :invitation_matches_cd, only: %i[confirm]
 
   def accept
@@ -24,18 +24,17 @@ class InvitationsController < ApplicationController
   end
 
   def login
-    session['omniauth.nonce'] = nonce = SecureRandom.hex(16)
-    session['omniauth.state'] = state = SecureRandom.hex(16)
+    login_session
+    client_id = "urn:gov:cms:openidconnect.profiles:sp:sso:cms:dpc:#{ENV.fetch('ENV', nil)}"
     url = URI::HTTPS.build(host: 'idp.int.identitysandbox.gov',
                            path: '/openid_connect/authorize',
                            query: { acr_values: 'http://idmanagement.gov/ns/assurance/ial/2',
-                                    client_id: 'urn:gov:cms:openidconnect.profiles:sp:sso:cms:dpc:local',
-                                    redirect_uri: 'http://localhost:3100/portal/users/auth/openid_connect/callback',
+                                    client_id:,
+                                    redirect_uri: "#{redirect_host}/portal/users/auth/openid_connect/callback",
                                     response_type: 'code',
                                     scope: 'openid email profile phone social_security_number',
-                                    nonce: nonce,
-                                    state: state
-                                  }.to_query)
+                                    nonce: @nonce,
+                                    state: @status }.to_query)
     redirect_to url, allow_other_host: true
   end
 
@@ -69,5 +68,22 @@ class InvitationsController < ApplicationController
     end
   rescue ActiveRecord::RecordNotFound
     render(Page::CredentialDelegate::BadInvitationComponent.new('invalid'), status: :not_found)
+  end
+
+  def login_session
+    session[:user_return_to] = accept_organization_invitation_url(@organization, params[:id])
+    session['omniauth.nonce'] = @nonce = SecureRandom.hex(16)
+    session['omniauth.state'] = @state = SecureRandom.hex(16)
+  end
+
+  def redirect_host
+    case ENV.fetch('ENV', nil)
+    when 'local'
+      'http://localhost:3100'
+    when 'prod'
+      'https://dpc.cms.gov'
+    else
+      "https://#{ENV.fetch('ENV', nil)}.dpc.cms.gov"
+    end
   end
 end

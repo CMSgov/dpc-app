@@ -166,13 +166,23 @@ RSpec.describe 'Invitations', type: :request do
     end
   end
 
-  describe 'POST /login', :focus do
+  describe 'POST /login' do
+    let(:invitation) { create(:invitation, :cd) }
     it 'should redirect to login.gov' do
-      invitation = create(:invitation, cd:)
       org_id = invitation.provider_organization.id
       post "/organizations/#{org_id}/invitations/#{invitation.id}/login"
       redirect_params = Rack::Utils.parse_query(URI.parse(response.location).query)
-      puts redirect_params
+      expect(redirect_params['acr_values']).to eq('http://idmanagement.gov/ns/assurance/ial/2')
+      expect(redirect_params['redirect_uri'][...29]).to eq 'http://localhost:3100/portal/'
+      expected_redirect = accept_organization_invitation_url(org_id, invitation)
+      expect(request.session[:user_return_to]).to eq expected_redirect
+    end
+
+    it 'should show warning page with 404 if missing' do
+      bad_org = create(:provider_organization)
+      post "/organizations/#{bad_org.id}/invitations/#{invitation.id}/login"
+      expect(response).to be_not_found
+      expect(response.body).to include('usa-alert--warning')
     end
   end
 end

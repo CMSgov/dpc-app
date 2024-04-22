@@ -5,7 +5,8 @@ require 'rails_helper'
 RSpec.describe Page::Session::InvitationLoginComponent, type: :component do
   include ComponentSupport
   describe 'login component' do
-    let(:invitation) { create(:invitation, :cd) }
+    let(:provider_organization) { build(:provider_organization, dpc_api_organization_id: 'foo') }
+    let(:invitation) { create(:invitation, :cd, provider_organization:) }
     let(:component) { described_class.new(invitation) }
     before { render_inline(component) }
     it 'should be a usa section' do
@@ -20,7 +21,7 @@ RSpec.describe Page::Session::InvitationLoginComponent, type: :component do
     end
 
     it 'should post to appropriate url' do
-      path = "organizations/#{invitation.provider_organization.id}/invitations/#{invitation.id}/login"
+      path = "organizations/#{provider_organization.id}/invitations/#{invitation.id}/login"
       url = "http://test.host/portal/#{path}"
       expect(page.find('form')[:action]).to eq url
       expect(page.find('form')[:method]).to eq 'post'
