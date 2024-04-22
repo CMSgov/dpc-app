@@ -29,6 +29,7 @@ Rails.application.routes.draw do
     resources :invitations, only: [] do
       get 'accept', on: :member
       post 'confirm', on: :member
+      post 'login', on: :member
     end
     get 'tos_form', on: :member
     post 'sign_tos', on: :member

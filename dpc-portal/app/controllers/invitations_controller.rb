@@ -22,6 +22,8 @@ class InvitationsController < ApplicationController
     redirect_to organizations_path
   end
 
+  def login; end
+
   private
 
   def invitation_matches_cd
