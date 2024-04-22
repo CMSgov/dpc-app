@@ -7,55 +7,74 @@ RSpec.describe 'Invitations', type: :request do
     context :cd do
       let(:invited_by) { create(:invited_by) }
       let(:verification_code) { 'ABC123' }
-      let!(:cd_invite) { build(:invitation, :cd, verification_code:) }
+      let!(:cd_invite) { create(:invitation, :cd, verification_code:) }
       let(:user) do
         create(:user, given_name: cd_invite.invited_given_name,
                       family_name: cd_invite.invited_family_name,
                       email: cd_invite.invited_email)
       end
-      let(:org) { create(:provider_organization) }
+      let(:org) { cd_invite.provider_organization }
 
-      before do
-        cd_invite.save!
-        sign_in user
+      context 'not logged in' do
+        it 'should show login if valid invitation' do
+          get "/organizations/#{org.id}/invitations/#{cd_invite.id}/accept"
+          expect(response).to be_ok
+          expect(response.body).to include(login_organization_invitation_path(org, cd_invite))
+        end
+        it 'should not show form if valid invitation' do
+          get "/organizations/#{org.id}/invitations/#{cd_invite.id}/accept"
+          expect(response).to be_ok
+          expect(response.body).not_to include(confirm_organization_invitation_path(org, cd_invite))
+        end
+        it 'should show warning page with 404 if missing' do
+          get "/organizations/#{org.id}/invitations/bad-id/accept"
+          expect(response).to be_not_found
+          expect(response.body).to include('usa-alert--warning')
+        end
+        it 'should show warning page with 404 if org-invitation mismatch' do
+          bad_org = create(:provider_organization)
+          get "/organizations/#{bad_org.id}/invitations/#{cd_invite.id}/accept"
+          expect(response).to be_not_found
+          expect(response.body).to include('usa-alert--warning')
+        end
+        it 'should show warning page if cancelled' do
+          cd_invite.update_attribute(:cancelled_at, 3.days.ago)
+          get "/organizations/#{org.id}/invitations/#{cd_invite.id}/accept"
+          expect(response).to be_forbidden
+          expect(response.body).to include('usa-alert--warning')
+        end
+        it 'should show warning page if expired' do
+          cd_invite.update_attribute(:created_at, 3.days.ago)
+          get "/organizations/#{org.id}/invitations/#{cd_invite.id}/accept"
+          expect(response).to be_forbidden
+          expect(response.body).to include('usa-alert--warning')
+        end
+        it 'should show warning page if accepted' do
+          create(:cd_org_link, invitation: cd_invite)
+          get "/organizations/#{org.id}/invitations/#{cd_invite.id}/accept"
+          expect(response).to be_forbidden
+          expect(response.body).to include('usa-alert--warning')
+        end
       end
-      it 'should show form if valid invitation' do
-        get "/organizations/#{org.id}/invitations/#{cd_invite.id}/accept"
-        expect(response).to be_ok
-        expect(response.body).to include(confirm_organization_invitation_path(org, cd_invite))
-      end
-      it 'should not show verification code' do
-        get "/organizations/#{org.id}/invitations/#{cd_invite.id}/accept"
-        expect(response.body).to_not include(cd_invite.verification_code)
-      end
-      it 'should show warning page with 404 if missing' do
-        get "/organizations/#{org.id}/invitations/bad-id/accept"
-        expect(response).to be_not_found
-        expect(response.body).to include('usa-alert--warning')
-      end
-      it 'should show warning page if cancelled' do
-        cd_invite.update_attribute(:cancelled_at, 3.days.ago)
-        get "/organizations/#{org.id}/invitations/#{cd_invite.id}/accept"
-        expect(response).to be_forbidden
-        expect(response.body).to include('usa-alert--warning')
-      end
-      it 'should show warning page if expired' do
-        cd_invite.update_attribute(:created_at, 3.days.ago)
-        get "/organizations/#{org.id}/invitations/#{cd_invite.id}/accept"
-        expect(response).to be_forbidden
-        expect(response.body).to include('usa-alert--warning')
-      end
-      it 'should show warning page if accepted' do
-        create(:cd_org_link, invitation: cd_invite)
-        get "/organizations/#{org.id}/invitations/#{cd_invite.id}/accept"
-        expect(response).to be_forbidden
-        expect(response.body).to include('usa-alert--warning')
-      end
-      it 'should show error page if email not match' do
-        user.update_attribute(:email, 'another@example.com')
-        get "/organizations/#{org.id}/invitations/#{cd_invite.id}/accept"
-        expect(response).to be_forbidden
-        expect(response.body).to include('usa-alert--error')
+      context 'logged in' do
+        before do
+          sign_in user
+        end
+        it 'should show form if valid invitation' do
+          get "/organizations/#{org.id}/invitations/#{cd_invite.id}/accept"
+          expect(response).to be_ok
+          expect(response.body).to include(confirm_organization_invitation_path(org, cd_invite))
+        end
+        it 'should not show verification code' do
+          get "/organizations/#{org.id}/invitations/#{cd_invite.id}/accept"
+          expect(response.body).to_not include(cd_invite.verification_code)
+        end
+        it 'should show error page if email not match' do
+          user.update_attribute(:email, 'another@example.com')
+          get "/organizations/#{org.id}/invitations/#{cd_invite.id}/accept"
+          expect(response).to be_forbidden
+          expect(response.body).to include('usa-alert--error')
+        end
       end
     end
   end
@@ -64,19 +83,18 @@ RSpec.describe 'Invitations', type: :request do
     context :cd do
       let(:invited_by) { create(:invited_by) }
       let(:verification_code) { 'ABC123' }
-      let!(:cd_invite) { build(:invitation, :cd, verification_code:) }
+      let!(:cd_invite) { create(:invitation, :cd, verification_code:) }
       let(:user) do
         create(:user, given_name: cd_invite.invited_given_name,
                       family_name: cd_invite.invited_family_name,
                       email: cd_invite.invited_email)
       end
-      let(:org) { create(:provider_organization) }
+      let(:org) { cd_invite.provider_organization }
 
       let(:success_params) { { verification_code: } }
       let(:fail_params) { { verification_code: 'badcode' } }
 
       before do
-        cd_invite.save!
         sign_in user
       end
       context 'success' do

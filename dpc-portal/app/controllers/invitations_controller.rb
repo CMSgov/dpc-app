@@ -4,6 +4,7 @@
 class InvitationsController < ApplicationController
   before_action :load_organization
   before_action :load_invitation, only: %i[accept confirm]
+  before_action :authenticate_user!
   before_action :invitation_matches_cd, only: %i[confirm]
 
   def accept
@@ -26,6 +27,12 @@ class InvitationsController < ApplicationController
 
   private
 
+  def authenticate_user!
+    return if current_user
+
+    render(Page::Session::InvitationLoginComponent.new(@cd_invitation))
+  end
+
   def invitation_matches_cd
     unless @cd_invitation.match_user?(current_user)
       return render(Page::CredentialDelegate::BadInvitationComponent.new('pii_mismatch'),
@@ -40,7 +47,9 @@ class InvitationsController < ApplicationController
 
   def load_invitation
     @cd_invitation = Invitation.find(params[:id])
-    if @cd_invitation.expired? || @cd_invitation.accepted? || @cd_invitation.cancelled_at.present?
+    if @organization != @cd_invitation.provider_organization
+      render(Page::CredentialDelegate::BadInvitationComponent.new('invalid'), status: :not_found)
+    elsif @cd_invitation.expired? || @cd_invitation.accepted? || @cd_invitation.cancelled_at.present?
       render(Page::CredentialDelegate::BadInvitationComponent.new('invalid'),
              status: :forbidden)
     end
