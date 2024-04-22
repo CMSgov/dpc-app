@@ -32,7 +32,7 @@ class InvitationsController < ApplicationController
                                     client_id:,
                                     redirect_uri: "#{redirect_host}/portal/users/auth/openid_connect/callback",
                                     response_type: 'code',
-                                    scope: 'openid email profile phone social_security_number',
+                                    scope: 'openid email all_emails profile phone social_security_number',
                                     nonce: @nonce,
                                     state: @status }.to_query)
     redirect_to url, allow_other_host: true
