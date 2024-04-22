@@ -19,12 +19,10 @@ smoke:
 	if [ -d $$JENKINS_DIR ]; then \
       	echo "Rebuilding JMeter lib"; \
       	rm $$JENKINS_DIR/*.jar; \
-      	mvn dependency:copy-dependencies -pl dpc-smoketest -DoutputDirectory=$$JENKINS_DIR; \
+      	mvn dependency:copy-dependencies -pl dpc-smoketest -DoutputDirectory=$$JENKINS_DIR -am; \
     else \
         echo "Not running on Jenkins"; \
     fi
-	@mvn clean install -DskipTests -Djib.skip=True -pl dpc-common -am -ntp
-	@mvn clean install -DskipTests -Djib.skip=True -pl dpc-testing -am -ntp
 	@mvn clean package -DskipTests -Djib.skip=True -pl dpc-smoketest -am -ntp
 
 .PHONY: smoke/local
