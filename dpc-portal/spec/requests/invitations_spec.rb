@@ -165,4 +165,14 @@ RSpec.describe 'Invitations', type: :request do
       end
     end
   end
+
+  describe 'POST /login', :focus do
+    it 'should redirect to login.gov' do
+      invitation = create(:invitation, cd:)
+      org_id = invitation.provider_organization.id
+      post "/organizations/#{org_id}/invitations/#{invitation.id}/login"
+      redirect_params = Rack::Utils.parse_query(URI.parse(response.location).query)
+      puts redirect_params
+    end
+  end
 end

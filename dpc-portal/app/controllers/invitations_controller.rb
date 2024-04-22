@@ -23,7 +23,21 @@ class InvitationsController < ApplicationController
     redirect_to organizations_path
   end
 
-  def login; end
+  def login
+    session['omniauth.nonce'] = nonce = SecureRandom.hex(16)
+    session['omniauth.state'] = state = SecureRandom.hex(16)
+    url = URI::HTTPS.build(host: 'idp.int.identitysandbox.gov',
+                           path: '/openid_connect/authorize',
+                           query: { acr_values: 'http://idmanagement.gov/ns/assurance/ial/2',
+                                    client_id: 'urn:gov:cms:openidconnect.profiles:sp:sso:cms:dpc:local',
+                                    redirect_uri: 'http://localhost:3100/portal/users/auth/openid_connect/callback',
+                                    response_type: 'code',
+                                    scope: 'openid email profile phone social_security_number',
+                                    nonce: nonce,
+                                    state: state
+                                  }.to_query)
+    redirect_to url, allow_other_host: true
+  end
 
   private
 
