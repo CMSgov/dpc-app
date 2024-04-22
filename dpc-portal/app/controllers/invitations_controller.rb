@@ -34,7 +34,7 @@ class InvitationsController < ApplicationController
                                     response_type: 'code',
                                     scope: 'openid email all_emails profile phone social_security_number',
                                     nonce: @nonce,
-                                    state: @status }.to_query)
+                                    state: @state }.to_query)
     redirect_to url, allow_other_host: true
   end
 
