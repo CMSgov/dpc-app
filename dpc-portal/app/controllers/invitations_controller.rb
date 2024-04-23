@@ -25,7 +25,7 @@ class InvitationsController < ApplicationController
 
   def login
     login_session
-    client_id = "urn:gov:cms:openidconnect.profiles:sp:sso:cms:dpc:#{ENV.fetch('ENV', nil)}"
+    client_id = "urn:gov:cms:openidconnect.profiles:sp:sso:cms:dpc:#{ENV.fetch('ENV')}"
     url = URI::HTTPS.build(host: 'idp.int.identitysandbox.gov',
                            path: '/openid_connect/authorize',
                            query: { acr_values: 'http://idmanagement.gov/ns/assurance/ial/2',
