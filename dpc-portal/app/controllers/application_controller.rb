@@ -14,7 +14,7 @@ class ApplicationController < ActionController::Base
   end
 
   def check_session_length
-    max_session = (User.remember_for * 60).to_i
+    max_session = User.remember_for.to_i / 60
     return unless max_session.minutes.ago > (session[:logged_in_at] || Time.now)
 
     reset_session
