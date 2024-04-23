@@ -101,22 +101,26 @@ public class JobBatchProcessor {
         if(failReason.isEmpty()) {
             Date sinceParam = job.getSince().isPresent() ?
                     Date.from(job.getSince().get().toInstant()) : Date.from(Instant.EPOCH);
-            if(job.getResourceTypes().equals(List.of(DPCResourceType.Patient))) {
-                logger.info("Returning cached Patient");
-                flowable = Optional.of(
-                        Flowable.just((Resource) optPatient.get())
-                                .filter(r -> r.getMeta().getLastUpdated().after(sinceParam))
-                );
-            } else if(job.getResourceTypes().equals(List.of(DPCResourceType.ExplanationOfBenefit))) {
-                logger.info("Returning cached ExplanationsOfBenefit");
-                flowable.filter(r -> r.blockingFirst().getMeta().getLastUpdated().after(sinceParam));
-            } else {
-                List<DPCResourceType> types = job.getResourceTypes();
-                logger.info("Fetching {} from database", types);
-                flowable = Optional.of(
-                        Flowable.fromIterable(types).flatMap(r -> fetchResource(job, optPatient.get(), r, job.getSince().orElse(null)))
-                );
+            Flowable<Resource> patientFlowable = Flowable.just(optPatient.get());
+            Flowable<Resource> eobFlowable = flowable.get();
+            Flowable<Resource> coverageFlowable = Flowable.empty();
+            if (job.getResourceTypes().contains(DPCResourceType.Coverage)) {
+                coverageFlowable = fetchResource(job, optPatient.get(), DPCResourceType.Coverage, job.getSince().orElse(null));
             }
+
+            Flowable<Resource> resultFlowable = Flowable.empty();
+            Map<DPCResourceType, Flowable<Resource>> resourceFlowables = Map.of(
+                    DPCResourceType.Patient, patientFlowable,
+                    DPCResourceType.ExplanationOfBenefit, eobFlowable,
+                    DPCResourceType.Coverage, coverageFlowable
+            );
+            for (DPCResourceType jobType : job.getResourceTypes()) {
+                resultFlowable = Flowable.concat(resultFlowable, resourceFlowables.get(jobType));
+            }
+            flowable = Optional.of(
+                    resultFlowable.filter(r -> r.getMeta().getLastUpdated() == null
+                                            || r.getMeta().getLastUpdated().after(sinceParam))
+            );
         }
 
         final var results = writeResource(job, flowable.get())
@@ -125,7 +129,7 @@ public class JobBatchProcessor {
         queue.completePartialBatch(job, aggregatorID);
 
         final String resourcesRequested = job.getResourceTypes().stream().map(DPCResourceType::getPath).filter(Objects::nonNull).collect(Collectors.joining(";"));
-        final String failReasonLabel = failReason.isEmpty() ? "NA" : failReason.get().name();
+        final String failReasonLabel = failReason.map(Enum::name).orElse("NA");
         stopWatch.stop();
         logger.info("dpcMetric=DataExportResult,dataRetrieved={},failReason={},resourcesRequested={},duration={}", failReason.isEmpty(), failReasonLabel, resourcesRequested, stopWatch.getTime());
         return results;
@@ -187,7 +191,7 @@ public class JobBatchProcessor {
             }
         }
 
-        // Passes lookback check or is exempt, return Explanations of Benefit
+        // Passes lookback check or is exempt, return Explanations of Benefit and no fail reason
         return Pair.of(eobs, null);
     }
 
