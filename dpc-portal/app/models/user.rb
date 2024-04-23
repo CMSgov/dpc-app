@@ -24,7 +24,7 @@ class User < ApplicationRecord
   end
 
   def under_max_time?
-    self.remember_created_at + Devise.remember_for < Time.now
+    remember_created_at + Devise.remember_for < Time.now
   end
 
   def can_access?(organization)
