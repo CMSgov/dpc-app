@@ -15,10 +15,10 @@ class ApplicationController < ActionController::Base
 
   def check_session_length
     max_session = (User.remember_for * 60).to_i
-    return unless max_session.minutes.ago > (session[:logged_in_at] || Time.now )
+    return unless max_session.minutes.ago > (session[:logged_in_at] || Time.now)
 
     reset_session
-    flash[:notice] = t('devise.failure.max_session_timeout', default: 'Your session has timed out. Please log in again.')
+    flash[:notice] = t('devise.failure.max_session_timeout', default: 'Your session has timed out.')
     redirect_to sign_in_path
   end
 
