@@ -12,7 +12,7 @@ class ApplicationController < ActionController::Base
   end
 
   def check_session_time
-    redirect_to destroy_user_session_path unless current_user.under_max_time?
+    redirect_to destroy_user_session_path unless current_user.nil? || current_user.under_max_time?
   end
 
   def organization_id
