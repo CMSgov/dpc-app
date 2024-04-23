@@ -8,6 +8,8 @@ Rails.application.routes.draw do
   devise_for :users, controllers: { omniauth_callbacks: 'login_dot_gov' }
   devise_scope :user do
     get '/users/auth/failure', to: 'login_dot_gov#failure', as: 'login_dot_gov_failure'
+    get 'active', to: 'users/sessions#active'
+    get 'timeout', to: 'users/sessions#timeout'
   end
 
   # Defines the root path route ("/")

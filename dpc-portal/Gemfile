@@ -17,6 +17,7 @@ gem 'active_model_serializers'
 gem 'activerecord', '~> 7.1.3.2'
 gem 'activestorage', '~> 7.1.3.2'
 gem 'activesupport', '~> 7.1.3.2'
+gem 'auto-session-timeout'
 gem 'bootsnap', '>= 1.4.2', require: false
 gem 'bundler', '>= 1.15.0'
 gem 'devise', '>= 4.9.3'

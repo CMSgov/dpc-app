@@ -3,7 +3,9 @@
 # Parent class of all controllers
 class ApplicationController < ActionController::Base
   before_action :block_prod_sbx
-  before_action :check_session_time
+  before_action :check_session_length
+
+  auto_session_timeout User.timeout_in
 
   private
 
@@ -11,8 +13,13 @@ class ApplicationController < ActionController::Base
     redirect_to root_url if ENV.fetch('ENV', nil) == 'prod-sbx'
   end
 
-  def check_session_time
-    redirect_to destroy_user_session_path unless current_user.nil? || current_user.under_max_time?
+  def check_session_length
+    max_session = (User.remember_for * 60).to_i
+    return unless max_session.minutes.ago > (session[:logged_in_at] || Time.now )
+
+    reset_session
+    flash[:notice] = t('devise.failure.max_session_timeout', default: 'Your session has timed out. Please log in again.')
+    redirect_to sign_in_path
   end
 
   def organization_id
