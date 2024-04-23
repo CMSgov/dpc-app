@@ -101,18 +101,17 @@ public class JobBatchProcessor {
         if(failReason.isEmpty()) {
             Date sinceParam = job.getSince().isPresent() ?
                     Date.from(job.getSince().get().toInstant()) : Date.from(Instant.EPOCH);
-            Flowable<Resource> patientFlowable = Flowable.just(optPatient.get());
-            Flowable<Resource> eobFlowable = flowable.get();
-            Flowable<Resource> coverageFlowable = Flowable.empty();
+
+            Flowable<Resource> coverageFlow = Flowable.empty();
             if (job.getResourceTypes().contains(DPCResourceType.Coverage)) {
-                coverageFlowable = fetchResource(job, optPatient.get(), DPCResourceType.Coverage, job.getSince().orElse(null));
+                coverageFlow = fetchResource(job, optPatient.get(), DPCResourceType.Coverage, job.getSince().orElse(null));
             }
 
             Flowable<Resource> resultFlowable = Flowable.empty();
             Map<DPCResourceType, Flowable<Resource>> resourceFlowables = Map.of(
-                    DPCResourceType.Patient, patientFlowable,
-                    DPCResourceType.ExplanationOfBenefit, eobFlowable,
-                    DPCResourceType.Coverage, coverageFlowable
+                    DPCResourceType.Patient, Flowable.just(optPatient.get()),
+                    DPCResourceType.ExplanationOfBenefit, flowable.get(),
+                    DPCResourceType.Coverage, coverageFlow
             );
             for (DPCResourceType jobType : job.getResourceTypes()) {
                 resultFlowable = Flowable.concat(resultFlowable, resourceFlowables.get(jobType));
