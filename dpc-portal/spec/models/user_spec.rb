@@ -37,7 +37,7 @@ RSpec.describe User, type: :model do
     end
   end
 
-  describe 'user is remembered and timed-out' do
+  describe 'is timed-out and remembered properly' do
     let(:user) { create(:user) }
     it 'times out after 30 minutes of inactivity' do
       expect(user.timedout?(31.minutes.ago)).to be true
@@ -46,8 +46,8 @@ RSpec.describe User, type: :model do
       expect(user.timedout?(29.minutes.ago)).to be false
     end
     it 'remembers user for 12 hours' do
-#       TODO: figure out how to test this
-#       expect(user.remember_expires_at.to_date).to eq 12.hours.from_now.to_date
+      # TODO: figure out how to test this
+      # expect(user.remember_expires_at.to_date).to eq 12.hours.from_now.to_date
     end
   end
 
