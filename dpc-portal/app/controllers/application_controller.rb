@@ -3,11 +3,17 @@
 # Parent class of all controllers
 class ApplicationController < ActionController::Base
   before_action :block_prod_sbx
+  before_action :check_session_time
 
   private
 
   def block_prod_sbx
     redirect_to root_url if ENV.fetch('ENV', nil) == 'prod-sbx'
+  end
+
+  def check_session_time
+      # TODO: make configurable
+      redirect_to destroy_user_session_path unless current_user.remember_created_at + 12.hours < Time.now
   end
 
   def organization_id
