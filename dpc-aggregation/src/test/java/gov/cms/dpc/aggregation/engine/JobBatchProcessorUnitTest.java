@@ -241,6 +241,41 @@ class JobBatchProcessorUnitTest {
     }
 
     @Test
+    public void testHappyPath_AllResources() {
+        String mbi = MockBlueButtonClient.TEST_PATIENT_MBIS.get(0);
+
+        OperationsConfig operationsConfig = getOperationsConfig();
+        JobBatchProcessor jobBatchProcessor = getJobBatchProcessor(bbClient, operationsConfig, new EveryoneGetsDataLookBackServiceImpl(), consentService);
+
+        IJobQueue queue = new MemoryBatchQueue();
+        final var jobID = queue.createJob(
+                UUID.randomUUID(),
+                TEST_ORG_NPI,
+                TEST_PROVIDER_NPI,
+                Collections.singletonList(mbi),
+                List.of(DPCResourceType.Patient, DPCResourceType.Coverage, DPCResourceType.ExplanationOfBenefit),
+                null,
+                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                null, null, true, false
+        );
+        List<JobQueueBatch> jobs = queue.getJobBatches(jobID);
+
+        Mockito.when(consentService.getConsent(List.of(mbi))).thenReturn(Optional.of(List.of(optIn)));
+
+        List<JobQueueBatchFile> results = jobBatchProcessor.processJobBatchPartial(
+                UUID.randomUUID(),
+                queue,
+                jobs.get(0),
+                mbi
+        );
+
+        assertEquals(3, results.size());
+        for (JobQueueBatchFile result : results) {
+            assertNoError(result.getBatchID(), result.getResourceType());
+        }
+    }
+
+    @Test
     public void testError_LoadingPatientByMbi() throws GeneralSecurityException {
         String mbi = MockBlueButtonClient.TEST_PATIENT_MBIS.get(0);
 
