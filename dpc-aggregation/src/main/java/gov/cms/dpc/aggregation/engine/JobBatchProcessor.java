@@ -256,7 +256,7 @@ public class JobBatchProcessor {
 
     private Pair<List<LookBackAnswer>, Flowable<Resource>> getLookBackAnswers(JobQueueBatch job, Patient patient) {
         List<LookBackAnswer> result = new ArrayList<>();
-        Flowable<Resource> eobs = null;
+        Flowable<Resource> eobs = Flowable.empty();
         final String practitionerNPI = job.getProviderNPI();
         final String organizationNPI = job.getOrgNPI();
         if (practitionerNPI != null && organizationNPI != null) {
