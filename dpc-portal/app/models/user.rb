@@ -23,6 +23,10 @@ class User < ApplicationRecord
                                                       id)
   end
 
+  def under_max_time?
+    user.remember_created_at + Devise.remember_for < Time.now
+  end
+
   def can_access?(organization)
     cd?(organization) || ao?(organization)
   end

@@ -12,8 +12,7 @@ class ApplicationController < ActionController::Base
   end
 
   def check_session_time
-      # TODO: make configurable
-      redirect_to destroy_user_session_path unless current_user.remember_created_at + 12.hours < Time.now
+    redirect_to destroy_user_session_path unless current_user.under_max_time?
   end
 
   def organization_id
