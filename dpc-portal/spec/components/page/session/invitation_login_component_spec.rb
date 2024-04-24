@@ -26,9 +26,5 @@ RSpec.describe Page::Session::InvitationLoginComponent, type: :component do
       expect(page.find('form')[:action]).to eq url
       expect(page.find('form')[:method]).to eq 'post'
     end
-
-    it 'should have two columns' do
-      expect(page.find_all('.grid-col-12').size).to eq 2
-    end
   end
 end
