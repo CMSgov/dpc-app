@@ -37,6 +37,26 @@ RSpec.describe User, type: :model do
     end
   end
 
+  describe 'times out and exceeds max session length' do
+    let(:user) { create(:user) }
+
+    after do
+      Timecop.return
+    end
+
+    it 'should time out after 30 minutes of inactivity' do
+      # expect user to not be timed out
+      Timecop.freeze(Time.now + 30.minutes)
+      # expect user to be timed out
+    end
+
+    it 'should exceed max session length after 12 hours' do
+      # expect user to be under max session time
+      Timecop.freeze(Time.now + 12.hours)
+      # expect user to exceed max session length
+    end
+  end
+
   describe :ao do
     let(:user) { create(:user) }
     let(:other_user) { create(:user) }
