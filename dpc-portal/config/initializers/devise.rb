@@ -27,9 +27,9 @@ Devise.setup do |config|
                     name: :openid_connect,
                     issuer: 'https://idp.int.identitysandbox.gov/',
                     discovery: true,
-                    scope: %i[openid email profile phone social_security_number],
+                    scope: %i[openid email all_emails],
                     response_type: :code,
-                    acr_values: 'http://idmanagement.gov/ns/assurance/ial/2',
+                    acr_values: 'http://idmanagement.gov/ns/assurance/ial/1',
                     client_auth_method: :jwt_bearer,
                     client_options: {
                       port: 443,

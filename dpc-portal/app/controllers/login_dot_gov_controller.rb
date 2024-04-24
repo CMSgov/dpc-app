@@ -9,6 +9,7 @@ class LoginDotGovController < Devise::OmniauthCallbacksController
     user = User.find_or_create_by(provider: auth.provider, uid: auth.uid) do |user_to_create|
       assign_user_properties(user_to_create, auth)
     end
+    maybe_update_user(user, auth)
     sign_in(:user, user)
     redirect_to session[:user_return_to] || organizations_path
   end
@@ -25,10 +26,16 @@ class LoginDotGovController < Devise::OmniauthCallbacksController
 
   private
 
+  def maybe_update_user(user, auth)
+    data = auth.extra.raw_info
+    return unless data.ial == 'http://idmanagement.gov/ns/assurance/ial/2'
+
+    user.update(given_name: data.given_name,
+                family_name: data.family_name)
+  end
+
   def assign_user_properties(user, auth)
     user.email = auth.info.email
-    user.given_name = auth.extra.raw_info.given_name
-    user.family_name = auth.extra.raw_info.family_name
     # Assign random, acceptable password to keep Devise happy.
     # User should log in only through IdP
     user.password = user.password_confirmation = Devise.friendly_token[0, 20]
