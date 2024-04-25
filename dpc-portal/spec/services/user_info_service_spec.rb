@@ -14,11 +14,11 @@ describe UserInfoService do
       {
         'sub' => '097d06f7-e9ad-4327-8db3-0ba193b7a2c2',
         'iss' => 'https://idp.int.identitysandbox.gov/',
-        'email' => 'jeffreydettmann+testtwo@navapbc.com',
+        'email' => 'david@example.com',
         'email_verified' => true,
         'all_emails' => [
-          'jeffreydettmann+testtwo@navapbc.com',
-          'jeffreydettmann+testtwoextra@navapbc.com'
+          'david@example.com',
+          'david2@example.com'
         ],
         'given_name' => 'David',
         'family_name' => 'Davis',

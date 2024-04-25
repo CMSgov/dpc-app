@@ -34,18 +34,14 @@ class UserInfoService
       raise UserInfoServiceError, 'server_error'
     end
   rescue Errno::ECONNREFUSED
-    connection_error
+    Rails.logger.error 'Could not connect to login.gov'
+    raise UserInfoServiceError, 'connection_error'
   end
 
   def parsed_response(response)
     return if response.body.blank?
 
     JSON.parse response.body
-  end
-
-  def connection_error
-    Rails.logger.error 'Could not connect to login.gov'
-    raise UserInfoServiceError, 'connection_error'
   end
 end
 
