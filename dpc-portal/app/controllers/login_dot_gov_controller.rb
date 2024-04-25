@@ -6,6 +6,7 @@ class LoginDotGovController < Devise::OmniauthCallbacksController
 
   def openid_connect
     auth = request.env['omniauth.auth']
+
     user = User.find_or_create_by(provider: auth.provider, uid: auth.uid) do |user_to_create|
       assign_user_properties(user_to_create, auth)
     end
@@ -32,8 +33,7 @@ class LoginDotGovController < Devise::OmniauthCallbacksController
 
     session[:login_dot_gov_token] = auth.credentials.token
     session[:login_dot_gov_token_exp] = auth.credentials.expires_in.seconds.from_now
-    user.update(given_name: data.given_name,
-                family_name: data.family_name)
+    user.update(given_name: data.given_name, family_name: data.family_name)
   end
 
   def assign_user_properties(user, auth)
