@@ -4,6 +4,7 @@ require 'spec_helper'
 require 'rails_helper'
 
 describe UserInfoService do
+  let(:user_info_url) { UserInfoService::USER_INFO_URI }
   let(:service) { UserInfoService.new }
   let(:token) { 'bearer-token' }
   let(:exp) { 2.hours.from_now }
@@ -33,7 +34,7 @@ describe UserInfoService do
     end
 
     before do
-      stub_request(:get, 'https://idp.int.identitysandbox.gov/api/openid_connect/userinfo')
+      stub_request(:get, user_info_url)
         .with(headers: { Authorization: "Bearer #{token}" })
         .to_return(body: response.to_json, status: 200)
     end
@@ -46,7 +47,7 @@ describe UserInfoService do
   context :bad_request do
     it 'should throw error if status is 401' do
       error = '{"error":"No can do"}'
-      stub_request(:get, 'https://idp.int.identitysandbox.gov/api/openid_connect/userinfo')
+      stub_request(:get, user_info_url)
         .with(headers: { Authorization: "Bearer #{token}" })
         .to_return(body: error, status: 401)
       expect do
@@ -55,7 +56,7 @@ describe UserInfoService do
     end
     it 'should throw error if status is 500' do
       error = '{"error":"shrug"}'
-      stub_request(:get, 'https://idp.int.identitysandbox.gov/api/openid_connect/userinfo')
+      stub_request(:get, user_info_url)
         .with(headers: { Authorization: "Bearer #{token}" })
         .to_return(body: error, status: 500)
       expect do
@@ -63,7 +64,7 @@ describe UserInfoService do
       end.to raise_error(UserInfoServiceError, 'server_error')
     end
     it 'should throw error if cannot connect' do
-      stub_request(:get, 'https://idp.int.identitysandbox.gov/api/openid_connect/userinfo')
+      stub_request(:get, user_info_url)
         .with(headers: { Authorization: "Bearer #{token}" })
         .to_raise(Errno::ECONNREFUSED)
       expect do

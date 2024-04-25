@@ -25,7 +25,7 @@ Devise.setup do |config|
          end
   config.omniauth :openid_connect, {
                     name: :openid_connect,
-                    issuer: 'https://idp.int.identitysandbox.gov/',
+                    issuer: "https://#{ENV.fetch('IDP_HOST')}/",
                     discovery: true,
                     scope: %i[openid email all_emails],
                     response_type: :code,
@@ -34,7 +34,7 @@ Devise.setup do |config|
                     client_options: {
                       port: 443,
                       scheme: 'https',
-                      host: 'idp.int.identitysandbox.gov',
+                      host: ENV.fetch('IDP_HOST'),
                       identifier: "urn:gov:cms:openidconnect.profiles:sp:sso:cms:dpc:#{ENV['ENV']}",
                       private_key: private_key,
                       redirect_uri: "#{host}/portal/users/auth/openid_connect/callback"

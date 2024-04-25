@@ -142,6 +142,7 @@ services:
       - DATABASE_CLEANER_ALLOW_REMOTE_DATABASE_URL=true
       - CPI_API_GW_BASE_URL=http://localhost:4567/
       - CMS_IDM_OAUTH_URL=http://localhost:4567/
+      - IDP_HOST=idp.int.identitysandbox.gov
       - RUBY_YJIT_ENABLE=1
       - ENV=local
     ports:

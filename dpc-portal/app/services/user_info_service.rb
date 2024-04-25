@@ -2,7 +2,7 @@
 
 # A service that verifies generates an ao invitation
 class UserInfoService
-  USER_INFO_URI = URI('https://idp.int.identitysandbox.gov/api/openid_connect/userinfo')
+  USER_INFO_URI = URI("https://#{ENV.fetch('IDP_HOST')}/api/openid_connect/userinfo")
 
   def user_info(session)
     validate_session(session)
