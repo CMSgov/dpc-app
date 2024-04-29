@@ -410,7 +410,7 @@ GEM
       psych (>= 4.0.0)
     redcarpet (3.6.0)
     redis (4.8.1)
-    redis-client (0.20.0)
+    redis-client (0.22.1)
       connection_pool
     redis-namespace (1.11.0)
       redis (>= 4)
@@ -477,7 +477,7 @@ GEM
       rexml (~> 3.2, >= 3.2.5)
       rubyzip (>= 1.2.2, < 3.0)
       websocket (~> 1.0)
-    sidekiq (7.2.2)
+    sidekiq (7.2.4)
       concurrent-ruby (< 2)
       connection_pool (>= 2.3.0)
       rack (>= 2.2.4)
@@ -622,7 +622,7 @@ DEPENDENCIES
   rubocop-performance
   sassc-rails (>= 2.1.2)
   selenium-webdriver
-  sidekiq (~> 7.1)
+  sidekiq (~> 7.2.4)
   sidekiq_alive (~> 2.1.5)
   simplecov (<= 0.17)
   sinatra
