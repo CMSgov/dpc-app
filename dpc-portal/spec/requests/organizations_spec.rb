@@ -47,6 +47,7 @@ RSpec.describe 'Organizations', type: :request do
         Timecop.travel(30.minutes.from_now)
         get '/organizations'
         expect(response).to redirect_to('/portal/users/sign_in')
+        expect(flash[:notice] = 'Your session expired. Please sign in again to continue.')
       end
 
       it 'redirects to login after session time elapses' do
@@ -56,11 +57,13 @@ RSpec.describe 'Organizations', type: :request do
         Timecop.scale(360) do # 1 real second = 1 simulated hour
           until Time.now > logged_in_at + 12.hours
             get '/organizations'
+            expect(response.body).to include('<option value>Organization Name</option>')
             Timecop.travel(20.minutes.from_now)
           end
+          get '/organizations'
+          expect(response).to redirect_to('/users/sign_in')
+          expect(flash[:notice] = 'You have exceeded the maximum session length. Please sign in again to continue.')
         end
-        get '/organizations'
-        expect(response).to redirect_to('/portal/users/sign_in')
       end
     end
   end
