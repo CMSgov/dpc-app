@@ -1,13 +1,3 @@
-FROM adoptopenjdk/openjdk11:latest AS java_builder
-
-# Install build dependencies
-RUN apt-get update && apt-get install -y build-essential ruby-full fontconfig ttf-dejavu
-RUN gem install jekyll -v 3.3.1
-
-# Build the IG assets
-WORKDIR /dpc-app
-COPY / /dpc-app
-
 FROM ruby:3.3-alpine AS ruby_builder
 
 # Install build dependencies
