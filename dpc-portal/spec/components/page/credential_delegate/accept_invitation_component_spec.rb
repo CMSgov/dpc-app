@@ -33,7 +33,7 @@ RSpec.describe Page::CredentialDelegate::AcceptInvitationComponent, type: :compo
       end
 
       it 'should match form tag' do
-        form_url = "/portal/organizations/#{org.path_id}/credential_delegate_invitations/#{cd_invite.id}/confirm"
+        form_url = "/portal/organizations/#{org.path_id}/invitations/#{cd_invite.id}/confirm"
         form_tag = ['<form class="usa-form" id="cd-accept-form"',
                     %(action="#{form_url}"),
                     'accept-charset="UTF-8" method="post">'].join(' ')

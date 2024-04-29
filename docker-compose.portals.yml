@@ -140,8 +140,9 @@ services:
       - DB_USER=postgres
       - DB_PASS=dpc-safe
       - DATABASE_CLEANER_ALLOW_REMOTE_DATABASE_URL=true
-      - CPI_API_GW_BASE_URL=https://val.cpiapi.cms.gov/
-      - CMS_IDM_OAUTH_URL=https://impl.idp.idm.cms.gov/
+      - CPI_API_GW_BASE_URL=http://localhost:4567/
+      - CMS_IDM_OAUTH_URL=http://localhost:4567/
+      - IDP_HOST=idp.int.identitysandbox.gov
       - RUBY_YJIT_ENABLE=1
       - ENV=local
     ports:

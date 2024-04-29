@@ -14,10 +14,15 @@ if [ "$1" == "portal" ]; then
   echo "Migrating the database..."
   bundle exec rails db:migrate
 
-  if [[ "$RAILS_ENV" == "production" ]]; then
+  if [[ "$ENV" == "production" ]]; then
+    echo "Starting in production"
     bundle exec rails server -b 0.0.0.0 -p 3100
-  else
+  elif [[ "$ENV" == "local" ]]; then
+    echo "Starting in development"
     ./bin/dev
+  else
+    echo "Starting in non-production"
+    ./bin/nonprod
   fi
 fi
 

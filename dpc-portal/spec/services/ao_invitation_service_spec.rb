@@ -4,26 +4,20 @@ require 'spec_helper'
 require 'rails_helper'
 
 describe AoInvitationService do
-  let(:client) { instance_double(CpiApiGatewayClient) }
+  let(:client) { CpiApiGatewayClient.new }
   let(:service) { AoInvitationService.new }
   let(:organization_npi) { '3624913885' }
-  before do
-    allow(CpiApiGatewayClient).to receive(:new).and_return(client)
-  end
 
   describe 'org_name' do
     it 'fetches the name' do
-      stub_cpi_api_gw
       name = service.org_name(organization_npi)
-      expect(name).to eq 'Health Hut'
+      expect(name).to eq "Organization #{organization_npi}"
     end
 
     it 'raises exception if no org' do
-      expect(client).to receive(:org_info)
-        .with(organization_npi)
-        .and_return({ 'code' => '404' })
+      missing_org_npi = '3299073577'
       expect do
-        service.org_name(organization_npi)
+        service.org_name(missing_org_npi)
       end.to raise_error(AoInvitationServiceError)
     end
 
@@ -42,7 +36,6 @@ describe AoInvitationService do
     let(:params) { %w[Bob Hoskins bob@example.com] }
 
     it 'creates org if not exist' do
-      stub_cpi_api_gw
       expect do
         service.create_invitation(*params, organization_npi)
       end.to change { ProviderOrganization.count }.by 1
@@ -56,14 +49,12 @@ describe AoInvitationService do
     end
 
     it 'creates org wich PECOS name' do
-      stub_cpi_api_gw
       service.create_invitation(*params, organization_npi)
       organization = ProviderOrganization.find_by(npi: organization_npi)
-      expect(organization.name).to eq 'Health Hut'
+      expect(organization.name).to eq "Organization #{organization_npi}"
     end
 
     it 'creates invitation' do
-      stub_cpi_api_gw
       expect do
         service.create_invitation(*params, organization_npi)
       end.to change { Invitation.count }.by 1
@@ -75,7 +66,6 @@ describe AoInvitationService do
     end
 
     it 'sends an invitation email on success' do
-      stub_cpi_api_gw
       mailer = double(InvitationMailer)
       expect(InvitationMailer).to receive(:with)
         .with(invitation: instance_of(Invitation), given_name: params[0], family_name: params[1])
@@ -84,31 +74,5 @@ describe AoInvitationService do
       expect(mailer).to receive(:deliver_now)
       service.create_invitation(*params, organization_npi)
     end
-  end
-
-  def stub_cpi_api_gw
-    expect(client).to receive(:org_info)
-      .with(organization_npi)
-      .and_return(org_stanza)
-  end
-
-  def org_stanza
-    {
-      'provider' => {
-        'providerType' => 'org',
-        'orgName' => 'Health Hut',
-        'npi' => organization_npi.to_s,
-        'addresses' => [
-          {
-            'addressLine1' => '1234 Company Ln.',
-            'addressLine2' => '#2222',
-            'city' => 'Fairfax',
-            'stateCode' => 'VA',
-            'zip' => '23230',
-            'dataIndicator' => 'CURRENT'
-          }
-        ]
-      }
-    }
   end
 end

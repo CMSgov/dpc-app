@@ -17,12 +17,13 @@ smoke: ## If running on Jenkins, purges JMeter's library, then copies all of dpc
 smoke:
 	@JENKINS_DIR="/var/jenkins_home/.bzt/jmeter-taurus/5.5/lib"; \
 	if [ -d $$JENKINS_DIR ]; then \
-      	echo "Rebuilding JMeter lib"; \
-      	rm $$JENKINS_DIR/*.jar; \
-      	mvn dependency:copy-dependencies -pl dpc-smoketest -DoutputDirectory=$$JENKINS_DIR; \
-    else \
-        echo "Not running on Jenkins"; \
-    fi
+		echo "Rebuilding JMeter lib"; \
+		rm $$JENKINS_DIR/*.jar; \
+		mvn clean install -DskipTests -Djib.skip=True -pl dpc-common -am -ntp; \
+		mvn dependency:copy-dependencies -pl dpc-smoketest -DoutputDirectory=$$JENKINS_DIR; \
+	else \
+		echo "Not running on Jenkins"; \
+	fi
 	@mvn clean package -DskipTests -Djib.skip=True -pl dpc-smoketest -am -ntp
 
 .PHONY: smoke/local

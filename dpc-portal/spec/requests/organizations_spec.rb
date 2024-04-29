@@ -201,7 +201,7 @@ RSpec.describe 'Organizations', type: :request do
           end.to change { ProviderOrganization.count }.by 1
           org = assigns(:organization)
           expect(org.npi).to eq npi
-          expect(org.name).to eq "Org with npi #{npi}"
+          expect(org.name).to eq "Organization #{npi}"
           expect(org.terms_of_service_accepted_by).to be_nil
           expect(org.terms_of_service_accepted_at).to be_nil
           expect(response).to redirect_to(tos_form_organization_path(org))
@@ -253,6 +253,17 @@ RSpec.describe 'Organizations', type: :request do
         post '/organizations', params: { npi: '22' }
         expect(response).to be_bad_request
         expect(assigns(:npi_error)).to eq 'length has to be 10'
+      end
+
+      it 'fails ao_org_link error' do
+        npi = '1111111111'
+        failed_link = build(:ao_org_link)
+        failed_link.errors.add(:base, 'Bad Link')
+        ao_org_link_double = class_double(AoOrgLink).as_stubbed_const
+        expect(ao_org_link_double).to receive(:find_or_create_by).and_return(failed_link)
+        post '/organizations', params: { npi: }
+        expect(response).to redirect_to(organizations_path)
+        expect(flash[:alert]).to eq('System Error: unable to create link')
       end
     end
 
