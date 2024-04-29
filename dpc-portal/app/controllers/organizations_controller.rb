@@ -7,6 +7,7 @@ class OrganizationsController < ApplicationController
   before_action :require_can_access, only: %i[show]
   before_action :check_npi, only: %i[create]
   before_action :require_ao, only: %i[tos_form sign_tos success]
+  before_action :tos_accepted, only: %i[show]
 
   def index
     @organizations = current_user.provider_organizations
@@ -44,7 +45,7 @@ class OrganizationsController < ApplicationController
     @organization.terms_of_service_accepted_at = DateTime.now
     @organization.terms_of_service_accepted_by = current_user
     @organization.save!
-    redirect_to success_organization_path(@organization)
+    redirect_to organization_path(@organization)
   end
 
   def success

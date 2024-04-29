@@ -62,29 +62,41 @@ RSpec.describe 'Organizations', type: :request do
       let!(:link) { create(:cd_org_link, user:, provider_organization: org) }
       before { sign_in user }
 
-      it 'returns success' do
-        get "/organizations/#{org.id}"
-        expect(assigns(:organization)).to eq org
+      context :not_signed_tos do
+        it 'should redirect' do
+          get "/organizations/#{org.id}"
+          expect(response).to redirect_to(organizations_url)
+        end
       end
 
-      it 'shows credential page' do
-        get "/organizations/#{org.id}"
-        expect(response.body).to include('<h2>Client Tokens</h2>')
-        expect(response.body).to include('<h2>Public Keys</h2>')
-        expect(response.body).to include('<h2>Public IPs</h2>')
-      end
+      context :signed_tos do
+        before { org.update(terms_of_service_accepted_by: user) }
 
-      it 'does not show CD list page' do
-        get "/organizations/#{org.id}"
-        expect(response.body).to_not include('<h2>Credential delegates</h2>')
-        expect(response.body).to_not include('<h2>Pending</h2>')
-        expect(response.body).to_not include('<h2>Active</h2>')
-      end
+        it 'returns success' do
+          get "/organizations/#{org.id}"
+          expect(response).to be_ok
+          expect(assigns(:organization)).to eq org
+        end
 
-      it 'does not assign invitations even if exist' do
-        create(:invitation, :cd, provider_organization: org, invited_by: user)
-        get "/organizations/#{org.id}"
-        expect(assigns(:invitations)).to be_nil
+        it 'shows credential page' do
+          get "/organizations/#{org.id}"
+          expect(response.body).to include('<h2>Client Tokens</h2>')
+          expect(response.body).to include('<h2>Public Keys</h2>')
+          expect(response.body).to include('<h2>Public IPs</h2>')
+        end
+
+        it 'does not show CD list page' do
+          get "/organizations/#{org.id}"
+          expect(response.body).to_not include('<h2>Credential delegates</h2>')
+          expect(response.body).to_not include('<h2>Pending</h2>')
+          expect(response.body).to_not include('<h2>Active</h2>')
+        end
+
+        it 'does not assign invitations even if exist' do
+          create(:invitation, :cd, provider_organization: org, invited_by: user)
+          get "/organizations/#{org.id}"
+          expect(assigns(:invitations)).to be_nil
+        end
       end
 
       it 'redirects if prod-sbx' do
@@ -100,53 +112,71 @@ RSpec.describe 'Organizations', type: :request do
 
     context 'as ao' do
       let!(:user) { create(:user) }
-      let!(:org) { create(:provider_organization) }
       before do
         create(:ao_org_link, user:, provider_organization: org)
         sign_in user
       end
 
-      it 'returns success' do
-        get "/organizations/#{org.id}"
-        expect(assigns(:organization)).to eq org
-      end
-
-      it 'shows CD list page' do
-        get "/organizations/#{org.id}"
-        expect(response.body).to include('<h2>Credential delegates</h2>')
-        expect(response.body).to include('<h2>Pending</h2>')
-        expect(response.body).to include('<h2>Active</h2>')
-      end
-
-      context :invitations do
-        it 'assigns if exist' do
-          create(:invitation, :cd, provider_organization: org, invited_by: user)
+      context :not_signed_tos do
+        let!(:org) { create(:provider_organization) }
+        it 'returns success' do
           get "/organizations/#{org.id}"
-          expect(assigns(:invitations).size).to eq 1
+          expect(response).to be_ok
+          expect(assigns(:organization)).to eq org
         end
 
-        it 'does not assign if not exist' do
+        it 'shows tos page' do
           get "/organizations/#{org.id}"
-          expect(assigns(:invitations).size).to eq 0
+          expect(response).to be_ok
+          expect(response.body).to include('<h2>Sign Terms of Service</h2>')
         end
       end
 
-      context :credential_delegates do
-        it 'assigns if exist' do
-          create(:cd_org_link, provider_organization: org)
+      context :signed_tos do
+        let!(:org) { create(:provider_organization, terms_of_service_accepted_by: user) }
+        it 'returns success' do
           get "/organizations/#{org.id}"
-          expect(assigns(:cds).size).to eq 1
+          expect(response).to be_ok
+          expect(assigns(:organization)).to eq org
         end
 
-        it 'does not assign if not exist' do
+        it 'shows CD list page' do
           get "/organizations/#{org.id}"
-          expect(assigns(:cds).size).to eq 0
+          expect(response.body).to include('<h2>Credential delegates</h2>')
+          expect(response.body).to include('<h2>Pending</h2>')
+          expect(response.body).to include('<h2>Active</h2>')
         end
 
-        it 'does not assign if link disabled' do
-          create(:cd_org_link, provider_organization: org, disabled_at: 1.day.ago)
-          get "/organizations/#{org.id}"
-          expect(assigns(:cds).size).to eq 0
+        context :invitations do
+          it 'assigns if exist' do
+            create(:invitation, :cd, provider_organization: org, invited_by: user)
+            get "/organizations/#{org.id}"
+            expect(assigns(:invitations).size).to eq 1
+          end
+
+          it 'does not assign if not exist' do
+            get "/organizations/#{org.id}"
+            expect(assigns(:invitations).size).to eq 0
+          end
+        end
+
+        context :credential_delegates do
+          it 'assigns if exist' do
+            create(:cd_org_link, provider_organization: org)
+            get "/organizations/#{org.id}"
+            expect(assigns(:cds).size).to eq 1
+          end
+
+          it 'does not assign if not exist' do
+            get "/organizations/#{org.id}"
+            expect(assigns(:cds).size).to eq 0
+          end
+
+          it 'does not assign if link disabled' do
+            create(:cd_org_link, provider_organization: org, disabled_at: 1.day.ago)
+            get "/organizations/#{org.id}"
+            expect(assigns(:cds).size).to eq 0
+          end
         end
       end
     end
@@ -244,6 +274,7 @@ RSpec.describe 'Organizations', type: :request do
         org = create(:provider_organization)
         create(:ao_org_link, provider_organization: org, user:)
         get "/organizations/#{org.id}/tos_form"
+        expect(response.body).to include('<h2>Sign Terms of Service</h2>')
         expect(response).to be_ok
       end
 
@@ -261,7 +292,7 @@ RSpec.describe 'Organizations', type: :request do
         org.reload
         expect(org.terms_of_service_accepted_at).to be_present
         expect(org.terms_of_service_accepted_by).to eq user
-        expect(response).to redirect_to(success_organization_path(org))
+        expect(response).to redirect_to(organization_path(org))
       end
 
       it 'fails if not ao' do
