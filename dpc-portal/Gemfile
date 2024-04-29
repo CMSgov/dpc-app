@@ -44,7 +44,7 @@ gem 'redis', '~> 4.0'
 gem 'redis-namespace'
 gem 'rexml', '>= 3.2.5' # adding for CVE-2021-28965
 gem 'sassc-rails', '>= 2.1.2'
-gem 'sidekiq', '~> 7.1'
+gem 'sidekiq', '~> 7.2.4'
 gem 'sidekiq_alive', '~> 2.1.5'
 gem 'sinatra'
 gem 'thin'
