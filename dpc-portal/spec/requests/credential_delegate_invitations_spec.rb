@@ -27,6 +27,19 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
         expect(assigns(:organization)).to eq org
         expect(response).to have_http_status(200)
       end
+
+      it 'shows tos page if not signed' do
+        get "/organizations/#{org.id}/credential_delegate_invitations/new"
+        expect(assigns(:organization)).to eq org
+        expect(response.body).to include('<h2>Sign Terms of Service</h2>')        
+      end  
+
+      it 'shows invite cd form if tos signed' do
+        org.update(terms_of_service_accepted_by: user)
+        get "/organizations/#{org.id}/credential_delegate_invitations/new"
+        expect(assigns(:organization)).to eq org
+        expect(response.body).to include('<h1>Invite new user</h1>')
+      end
     end
 
     context 'as cd' do
@@ -45,7 +58,7 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
 
   describe 'POST /create' do
     let!(:user) { create(:user) }
-    let!(:org) { create(:provider_organization) }
+    let!(:org) { create(:provider_organization, terms_of_service_accepted_by: user) }
     let!(:successful_parameters) do
       { invited_given_name: 'Bob',
         invited_family_name: 'Hodges',
@@ -117,7 +130,7 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
 
   describe 'GET /success' do
     let!(:user) { create(:user) }
-    let!(:org) { create(:provider_organization) }
+    let!(:org) { create(:provider_organization, terms_of_service_accepted_by: user) }
 
     before do
       sign_in user

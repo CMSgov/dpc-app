@@ -5,6 +5,7 @@ class CredentialDelegateInvitationsController < ApplicationController
   before_action :authenticate_user!
   before_action :load_organization
   before_action :require_ao, only: %i[new create success]
+  before_action :tos_accepted
 
   def new
     render(Page::CredentialDelegate::NewInvitationComponent.new(@organization, Invitation.new))
