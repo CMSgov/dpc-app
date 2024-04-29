@@ -6,10 +6,11 @@ class LoginDotGovController < Devise::OmniauthCallbacksController
 
   def openid_connect
     auth = request.env['omniauth.auth']
+
     user = User.find_or_create_by(provider: auth.provider, uid: auth.uid) do |user_to_create|
       assign_user_properties(user_to_create, auth)
     end
-    maybe_update_user(user, auth)
+    ial_2_actions(user, auth)
     sign_in(:user, user)
     redirect_to session[:user_return_to] || organizations_path
   end
@@ -26,12 +27,13 @@ class LoginDotGovController < Devise::OmniauthCallbacksController
 
   private
 
-  def maybe_update_user(user, auth)
+  def ial_2_actions(user, auth)
     data = auth.extra.raw_info
     return unless data.ial == 'http://idmanagement.gov/ns/assurance/ial/2'
 
-    user.update(given_name: data.given_name,
-                family_name: data.family_name)
+    session[:login_dot_gov_token] = auth.credentials.token
+    session[:login_dot_gov_token_exp] = auth.credentials.expires_in.seconds.from_now
+    user.update(given_name: data.given_name, family_name: data.family_name)
   end
 
   def assign_user_properties(user, auth)

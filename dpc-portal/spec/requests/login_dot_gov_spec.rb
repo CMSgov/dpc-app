@@ -4,11 +4,14 @@ require 'rails_helper'
 
 RSpec.describe 'LoginDotGov', type: :request do
   describe 'POST /users/auth/openid_connect' do
+    let(:token) { 'bearer-token' }
     context 'IAL/2' do
       before do
         OmniAuth.config.test_mode = true
         OmniAuth.config.add_mock(:openid_connect,
                                  { uid: '12345',
+                                   credentials: { expires_in: 899,
+                                                  token: },
                                    info: { email: 'bob@example.com' },
                                    extra: { raw_info: { given_name: 'Bob',
                                                         family_name: 'Hoskins',
@@ -51,6 +54,14 @@ RSpec.describe 'LoginDotGov', type: :request do
         expect(response.location).to eq organizations_url
         expect(User.where(uid: '12345', provider: 'openid_connect', email: 'bob@example.com', given_name: 'Bob',
                           family_name: 'Hoskins').count).to eq 1
+      end
+
+      it 'sets authentication token' do
+        post '/users/auth/openid_connect'
+        follow_redirect!
+        expect(request.session[:login_dot_gov_token]).to eq token
+        expect(request.session[:login_dot_gov_token_exp]).to_not be_nil
+        expect(request.session[:login_dot_gov_token_exp]).to be_within(1.second).of 899.seconds.from_now
       end
     end
 
@@ -99,6 +110,13 @@ RSpec.describe 'LoginDotGov', type: :request do
         expect(response.location).to eq organizations_url
         expect(User.where(uid: '12345', provider: 'openid_connect', email: 'bob@example.com', given_name: 'Bob',
                           family_name: 'Hoskins').count).to eq 1
+      end
+
+      it 'does not set authentication token' do
+        post '/users/auth/openid_connect'
+        follow_redirect!
+        expect(request.session[:login_dot_gov_token]).to be_nil
+        expect(request.session[:login_dot_gov_token_exp]).to be_nil
       end
     end
   end
