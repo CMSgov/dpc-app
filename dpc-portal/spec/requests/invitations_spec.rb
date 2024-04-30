@@ -173,7 +173,6 @@ RSpec.describe 'Invitations', type: :request do
       end
       let(:org) { ao_invite.provider_organization }
 
-
       before do
         sign_in user
       end
@@ -194,7 +193,7 @@ RSpec.describe 'Invitations', type: :request do
         it 'should redirect to organization page with notice' do
           post "/organizations/#{org.id}/invitations/#{ao_invite.id}/confirm"
           expect(response).to redirect_to(organization_path(org))
-          expected_message =  "Invitation accepted."
+          expected_message =  'Invitation accepted.'
           expect(flash[:notice]).to eq expected_message
         end
       end

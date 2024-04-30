@@ -25,7 +25,7 @@ class InvitationsController < ApplicationController
     else
       return render(Page::Invitations::BadInvitationComponent.new('invalid'),
                     status: :unprocessable_entity)
-    end 
+    end
     redirect_to organization_path(@organization)
   end
 
@@ -55,7 +55,7 @@ class InvitationsController < ApplicationController
   def bind_ao
     AoOrgLink.create!(user: current_user, provider_organization: @organization, invitation: @invitation)
     @invitation.update!(invited_given_name: nil, invited_family_name: nil, invited_phone: nil, invited_email: nil)
-    flash[:notice] = "Invitation accepted."
+    flash[:notice] = 'Invitation accepted.'
   end
 
   def authenticate_user!

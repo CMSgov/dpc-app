@@ -17,18 +17,20 @@ RSpec.describe Page::Invitations::AcceptInvitationComponent, type: :component do
     end
     context 'credential delegate' do
       let(:ao) { build(:user, given_name: 'Bob', family_name: 'Hodges') }
-      let(:cd_invite) { Invitation.new(id: 4, invited_by: ao, verification_code: 'ABC123', invitation_type: :credential_delegate) }
+      let(:cd_invite) do
+        Invitation.new(id: 4, invited_by: ao, verification_code: 'ABC123', invitation_type: :credential_delegate)
+      end
       let(:component) { described_class.new(org, cd_invite) }
 
       context 'New form' do
         it 'should match header' do
           header = <<~HTML
-          <h1>Accept organization invite</h1>
-            <div class="usa-alert usa-alert--info margin-bottom-4">
-              <div class="usa-alert__body">
-                <h4 class="usa-alert__heading">Key information</h4>
-                <p class="usa-alert__text">
-        HTML
+            <h1>Accept organization invite</h1>
+              <div class="usa-alert usa-alert--info margin-bottom-4">
+                <div class="usa-alert__body">
+                  <h4 class="usa-alert__heading">Key information</h4>
+                  <p class="usa-alert__text">
+          HTML
           is_expected.to include(normalize_space(header))
         end
 
@@ -50,11 +52,11 @@ RSpec.describe Page::Invitations::AcceptInvitationComponent, type: :component do
 
         it 'should have empty verification_code stanza' do
           verification_code = <<~HTML
-          <div class="margin-bottom-4">
-            <label class="usa-label" for="verification_code">Enter the invite code:</label>
-            <input type="text" name="verification_code" id="verification_code" value="" maxlength="6" class="usa-input" />
-          </div>
-        HTML
+            <div class="margin-bottom-4">
+              <label class="usa-label" for="verification_code">Enter the invite code:</label>
+              <input type="text" name="verification_code" id="verification_code" value="" maxlength="6" class="usa-input" />
+            </div>
+          HTML
           is_expected.to include(normalize_space(verification_code))
         end
       end
@@ -65,12 +67,12 @@ RSpec.describe Page::Invitations::AcceptInvitationComponent, type: :component do
         before { cd_invite.errors.add(:verification_code, :is_bad, message: error_msg) }
         it 'should have errored verification_code stanza' do
           verification_code = <<~HTML
-          <div class="margin-bottom-4">
-            <label class="usa-label" for="verification_code">Enter the invite code:</label>
-            <p style="color: #b50909;">#{error_msg}</p>
-            <input type="text" name="verification_code" id="verification_code" value="" maxlength="6" class="usa-input usa-input--error" />
-          </div>
-        HTML
+            <div class="margin-bottom-4">
+              <label class="usa-label" for="verification_code">Enter the invite code:</label>
+              <p style="color: #b50909;">#{error_msg}</p>
+              <input type="text" name="verification_code" id="verification_code" value="" maxlength="6" class="usa-input usa-input--error" />
+            </div>
+          HTML
           is_expected.to include(normalize_space(verification_code))
         end
       end
