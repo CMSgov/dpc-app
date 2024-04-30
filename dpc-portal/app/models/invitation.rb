@@ -38,9 +38,9 @@ class Invitation < ApplicationRecord
     end
   end
 
-  def match_user?(user)
+  def match_user?(user_info)
     if invitation_type == 'credential_delegate'
-      cd_match?(user)
+      cd_match?(user_info)
     elsif invitation_type == 'authorized_official'
       invited_email.downcase == user.email.downcase
     end
@@ -48,10 +48,12 @@ class Invitation < ApplicationRecord
 
   private
 
-  def cd_match?(user)
-    invited_given_name.downcase == user.given_name.downcase &&
-      invited_family_name.downcase == user.family_name.downcase &&
-      invited_email.downcase == user.email.downcase
+  def cd_match?(user_info)
+    return false unless invited_given_name.downcase == user_info['given_name'].downcase &&
+                        invited_family_name.downcase == user_info['family_name'].downcase &&
+                        invited_phone == user_info['phone'].tr('^0-9', '')
+
+    user_info['all_emails'].any? { |email| invited_email.downcase == email .downcase }
   end
 
   def needs_validation?

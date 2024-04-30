@@ -10,8 +10,8 @@ RSpec.describe 'Invitations', type: :request do
       let!(:cd_invite) { create(:invitation, :cd, verification_code:) }
       let(:user) do
         create(:user, given_name: cd_invite.invited_given_name,
-                      family_name: cd_invite.invited_family_name,
-                      email: cd_invite.invited_email)
+               family_name: cd_invite.invited_family_name,
+               email: cd_invite.invited_email)
       end
       let(:org) { cd_invite.provider_organization }
 
@@ -75,6 +75,8 @@ RSpec.describe 'Invitations', type: :request do
           expect(response).to be_forbidden
           expect(response.body).to include('usa-alert--error')
         end
+        it 'should not show error page if email in all_emails' do
+        end
       end
     end
   end
@@ -86,8 +88,8 @@ RSpec.describe 'Invitations', type: :request do
       let!(:cd_invite) { create(:invitation, :cd, verification_code:) }
       let(:user) do
         create(:user, given_name: cd_invite.invited_given_name,
-                      family_name: cd_invite.invited_family_name,
-                      email: cd_invite.invited_email)
+               family_name: cd_invite.invited_family_name,
+               email: cd_invite.invited_email)
       end
       let(:org) { cd_invite.provider_organization }
 
@@ -96,6 +98,7 @@ RSpec.describe 'Invitations', type: :request do
 
       before do
         sign_in user
+        stub_user_info
       end
       context 'success' do
         it 'should create CdOrgLink' do
@@ -148,8 +151,15 @@ RSpec.describe 'Invitations', type: :request do
           expect(response).to be_bad_request
           expect(response.body).to include(confirm_organization_invitation_path(org, cd_invite))
         end
-        it 'should render error page if PII not match' do
+        it 'should render error page if family_name not match' do
           user.update_attribute(:family_name, "not #{cd_invite.invited_family_name}")
+          post "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm", params: success_params
+          expect(response).to be_forbidden
+          expect(response.body).to_not include(confirm_organization_invitation_path(org, cd_invite))
+          expect(response.body).to include('usa-alert--error')
+        end
+        it 'should render error page if phone not match' do
+          cd_invite.update_attribute(:invited_phone, '9129999999')
           post "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm", params: success_params
           expect(response).to be_forbidden
           expect(response.body).to_not include(confirm_organization_invitation_path(org, cd_invite))
@@ -168,8 +178,8 @@ RSpec.describe 'Invitations', type: :request do
       let!(:ao_invite) { create(:invitation, :ao) }
       let(:user) do
         create(:user, given_name: 'Herman',
-                      family_name: 'Wouk',
-                      email: ao_invite.invited_email)
+               family_name: 'Wouk',
+               email: ao_invite.invited_email)
       end
       let(:org) { ao_invite.provider_organization }
 
@@ -228,4 +238,30 @@ RSpec.describe 'Invitations', type: :request do
       expect(response.body).to include('usa-alert--warning')
     end
   end
+end
+
+def stub_user_info(overrides: {})
+  user_info = {
+    'sub' => '097d06f7-e9ad-4327-8db3-0ba193b7a2c2',
+    'iss' => 'https://idp.int.identitysandbox.gov/',
+    'email' => 'bob@testy.com',
+    'email_verified' => true,
+    'all_emails' => [
+      'bob@testy.com',
+      'david@example.com',
+      'david2@example.com'
+    ],
+    'given_name' => 'Bob',
+    'family_name' => 'Hodges',
+    'birthdate' => '1938-10-06',
+    'social_security_number' => '900888888',
+    'phone' => '+1111111111',
+    'phone_verified' => true,
+    'verified_at' => 1_704_834_157,
+    'ial' => 'http://idmanagement.gov/ns/assurance/ial/2',
+    'aal' => 'urn:gov:gsa:ac:classes:sp:PasswordProtectedTransport:duo'
+  }
+
+  stub_request(:get, UserInfoService::USER_INFO_URI)
+    .to_return(body: response.to_json, status: 200)
 end

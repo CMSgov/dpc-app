@@ -164,33 +164,47 @@ RSpec.describe Invitation, type: :model do
       end
     end
 
-    describe :match_user do
+    describe :match_user, :focus do
       let(:cd_invite) { build(:invitation, :cd) }
-      let(:user) do
-        build(:user, given_name: cd_invite.invited_given_name,
-                     family_name: cd_invite.invited_family_name,
-                     email: cd_invite.invited_email)
+      let(:user_info) do
+        { 'email' => 'bob@testy.com',
+          'all_emails' => [
+            'bob@testy.com',
+            'bob@example.com'
+          ],
+          'given_name' => 'Bob',
+          'family_name' => 'Hodges',
+          'phone' => '+1111111111',
+        }
       end
-      it 'should match user if names and email correct' do
-        expect(cd_invite.match_user?(user)).to eq true
+      it 'should match user if names and email correct', :focus do
+        expect(cd_invite.match_user?(user_info)).to eq true
       end
-      it 'should match user if names and email different case' do
-        user.given_name.upcase!
-        user.family_name.downcase!
-        user.email = user.email.upcase_first
-        expect(cd_invite.match_user?(user)).to eq true
+      it 'should match user if names and email different case', :focus do
+        cd_invite.invited_given_name.upcase!
+        cd_invite.invited_family_name.downcase!
+        cd_invite.invited_email = cd_invite.invited_email.upcase_first
+        expect(cd_invite.match_user?(user_info)).to eq true
+      end
+      it 'should match if invited email in all_emails' do
+        cd_invite.invited_email = user_info.dig('all_emails', 1)
+        expect(cd_invite.match_user?(user_info)).to eq true
       end
       it 'should not match user if given name not correct' do
-        user.given_name = "not #{cd_invite.invited_given_name}"
-        expect(cd_invite.match_user?(user)).to eq false
+        cd_invite.invited_given_name = "not #{cd_invite.invited_given_name}"
+        expect(cd_invite.match_user?(user_info)).to eq false
       end
       it 'should not match user if family name not correct' do
-        user.family_name = "not #{cd_invite.invited_family_name}"
-        expect(cd_invite.match_user?(user)).to eq false
+        cd_invite.invited_family_name = "not #{cd_invite.invited_family_name}"
+        expect(cd_invite.match_user?(user_info)).to eq false
       end
       it 'should not match user if email not correct' do
-        user.email = "not #{cd_invite.invited_email}"
-        expect(cd_invite.match_user?(user)).to eq false
+        cd_invite.invited_email = "not #{cd_invite.invited_email}"
+        expect(cd_invite.match_user?(user_info)).to eq false
+      end
+      it 'should not match user if phone not correct' do
+        cd_invite.invited_phone = "not number"
+        expect(cd_invite.match_user?(user_info)).to eq false
       end
     end
   end
@@ -335,8 +349,8 @@ RSpec.describe Invitation, type: :model do
       let(:ao_invite) { build(:invitation, :ao) }
       let(:user) do
         build(:user, given_name: 'Hugo',
-                     family_name: 'Boss',
-                     email: ao_invite.invited_email)
+              family_name: 'Boss',
+              email: ao_invite.invited_email)
       end
       it 'should match user if email correct' do
         expect(ao_invite.match_user?(user)).to eq true
