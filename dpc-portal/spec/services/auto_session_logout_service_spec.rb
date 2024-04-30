@@ -13,6 +13,6 @@ RSpec.describe 'AutoSessionLogoutService', type: :request do
 
   it 'is timed out' do
     get '/timeout'
-    expect(response.location).to include('/users/sign_in')
+    expect(response).to redirect_to(new_user_session_path)
   end
 end
