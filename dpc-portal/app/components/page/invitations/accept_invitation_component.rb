@@ -4,10 +4,10 @@ module Page
   module Invitations
     # Displays accept invitation form
     class AcceptInvitationComponent < ViewComponent::Base
-      def initialize(organization, cd_invite)
+      def initialize(organization, invitation)
         super
         @organization = organization
-        @cd_invite = cd_invite
+        @invitation = invitation
       end
     end
   end
