@@ -35,6 +35,37 @@ RSpec.describe 'Organizations', type: :request do
         expect(assigns(:organizations)).to eq [org]
       end
     end
+
+    describe 'timed out' do
+      let!(:user) { create(:user) }
+      before { sign_in user }
+      after { Timecop.return }
+
+      it 'redirects to login after inactivity' do
+        get '/organizations'
+        expect(response.body).to include('<option value>Organization Name</option>')
+        Timecop.travel(30.minutes.from_now)
+        get '/organizations'
+        expect(response).to redirect_to('/portal/users/sign_in')
+        expect(flash[:notice] = 'Your session expired. Please sign in again to continue.')
+      end
+
+      it 'redirects to login after session time elapses' do
+        logged_in_at = Time.now
+        get '/organizations'
+        expect(response.body).to include('<option value>Organization Name</option>')
+        Timecop.scale(360) do # 1 real second = 1 simulated hour
+          until Time.now > logged_in_at + 12.hours
+            get '/organizations'
+            expect(response.body).to include('<option value>Organization Name</option>')
+            Timecop.travel(20.minutes.from_now)
+          end
+          get '/organizations'
+          expect(response).to redirect_to('/users/sign_in')
+          expect(flash[:notice] = 'You have exceeded the maximum session length. Please sign in again to continue.')
+        end
+      end
+    end
   end
 
   describe 'GET /organizations/[organization_id]' do

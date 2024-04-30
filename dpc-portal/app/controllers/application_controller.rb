@@ -3,6 +3,9 @@
 # Parent class of all controllers
 class ApplicationController < ActionController::Base
   before_action :block_prod_sbx
+  before_action :check_session_length
+
+  auto_session_timeout User.timeout_in
 
   private
 
@@ -20,6 +23,18 @@ class ApplicationController < ActionController::Base
   def block_prod_sbx
     redirect_to root_url if ENV.fetch('ENV', nil) == 'prod-sbx'
   end
+
+  # rubocop:disable Metrics/AbcSize
+  def check_session_length
+    session[:logged_in_at] = Time.now if session[:logged_in_at].nil?
+    max_session = User.remember_for.to_i / 60
+    return unless max_session.minutes.ago > session[:logged_in_at]
+
+    reset_session
+    flash[:notice] = t('devise.failure.max_session_timeout', default: 'Your session has timed out.')
+    redirect_to sign_in_path
+  end
+  # rubocop:enable Metrics/AbcSize
 
   def organization_id
     params[:organization_id]
