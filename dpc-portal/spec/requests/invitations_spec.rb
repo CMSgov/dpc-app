@@ -112,9 +112,9 @@ RSpec.describe 'Invitations', type: :request do
           expect(cd_invite.invited_phone).to be_blank
           expect(cd_invite.invited_email).to be_blank
         end
-        it 'should redirect to organizations page with notice' do
+        it 'should redirect to organization page with notice' do
           post "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm", params: success_params
-          expect(response).to redirect_to(organizations_path)
+          expect(response).to redirect_to(organization_path(org))
           expected_message =  "Invitation accepted. You can now manage this organization's credentials. Learn more."
           expect(flash[:notice]).to eq expected_message
         end
@@ -160,6 +160,50 @@ RSpec.describe 'Invitations', type: :request do
           post "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm", params: fail_params
           expect(response).to be_forbidden
           expect(response.body).to_not include(confirm_organization_invitation_path(org, cd_invite))
+          expect(response.body).to include('usa-alert--error')
+        end
+      end
+    end
+    context :ao do
+      let!(:ao_invite) { create(:invitation, :ao) }
+      let(:user) do
+        create(:user, given_name: 'Herman',
+                      family_name: 'Wouk',
+                      email: ao_invite.invited_email)
+      end
+      let(:org) { ao_invite.provider_organization }
+
+
+      before do
+        sign_in user
+      end
+      context 'success' do
+        it 'should create AoOrgLink' do
+          expect do
+            post "/organizations/#{org.id}/invitations/#{ao_invite.id}/confirm"
+          end.to change { AoOrgLink.count }.by(1)
+        end
+        it 'should update invitation' do
+          post "/organizations/#{org.id}/invitations/#{ao_invite.id}/confirm"
+          ao_invite.reload
+          expect(ao_invite.invited_given_name).to be_blank
+          expect(ao_invite.invited_family_name).to be_blank
+          expect(ao_invite.invited_phone).to be_blank
+          expect(ao_invite.invited_email).to be_blank
+        end
+        it 'should redirect to organization page with notice' do
+          post "/organizations/#{org.id}/invitations/#{ao_invite.id}/confirm"
+          expect(response).to redirect_to(organization_path(org))
+          expected_message =  "Invitation accepted."
+          expect(flash[:notice]).to eq expected_message
+        end
+      end
+      context 'failure' do
+        it 'should render error page if PII not match' do
+          ao_invite.update(invited_email: 'some-other-email@example.com')
+          post "/organizations/#{org.id}/invitations/#{ao_invite.id}/confirm"
+          expect(response).to be_forbidden
+          expect(response.body).to_not include(confirm_organization_invitation_path(org, ao_invite))
           expect(response.body).to include('usa-alert--error')
         end
       end

@@ -5,22 +5,28 @@ class InvitationsController < ApplicationController
   before_action :load_organization
   before_action :load_invitation
   before_action :authenticate_user!, except: %i[login]
-  before_action :invitation_matches_cd, only: %i[confirm]
+  before_action :invitation_matches_user, only: %i[confirm]
 
   def accept
-    if current_user.email != @cd_invitation.invited_email
+    if current_user.email != @invitation.invited_email
       return render(Page::Invitations::BadInvitationComponent.new('pii_mismatch'),
                     status: :forbidden)
     end
 
-    render(Page::Invitations::AcceptInvitationComponent.new(@organization, @cd_invitation))
+    render(Page::Invitations::AcceptInvitationComponent.new(@organization, @invitation))
   end
 
   def confirm
-    CdOrgLink.create!(user: current_user, provider_organization: @organization, invitation: @cd_invitation)
-    @cd_invitation.update!(invited_given_name: nil, invited_family_name: nil, invited_phone: nil, invited_email: nil)
-    flash[:notice] = "Invitation accepted. You can now manage this organization's credentials. Learn more."
-    redirect_to organizations_path
+    case @invitation.invitation_type
+    when 'credential_delegate'
+      bind_cd
+    when 'authorized_official'
+      bind_ao
+    else
+      return render(Page::Invitations::BadInvitationComponent.new('invalid'),
+                    status: :unprocessable_entity)
+    end 
+    redirect_to organization_path(@organization)
   end
 
   def login
@@ -40,29 +46,43 @@ class InvitationsController < ApplicationController
 
   private
 
+  def bind_cd
+    CdOrgLink.create!(user: current_user, provider_organization: @organization, invitation: @invitation)
+    @invitation.update!(invited_given_name: nil, invited_family_name: nil, invited_phone: nil, invited_email: nil)
+    flash[:notice] = "Invitation accepted. You can now manage this organization's credentials. Learn more."
+  end
+
+  def bind_ao
+    AoOrgLink.create!(user: current_user, provider_organization: @organization, invitation: @invitation)
+    @invitation.update!(invited_given_name: nil, invited_family_name: nil, invited_phone: nil, invited_email: nil)
+    flash[:notice] = "Invitation accepted."
+  end
+
   def authenticate_user!
     return if current_user
 
-    render(Page::Session::InvitationLoginComponent.new(@cd_invitation))
+    render(Page::Session::InvitationLoginComponent.new(@invitation))
   end
 
-  def invitation_matches_cd
-    unless @cd_invitation.match_user?(current_user)
+  def invitation_matches_user
+    unless @invitation.match_user?(current_user)
       return render(Page::Invitations::BadInvitationComponent.new('pii_mismatch'),
                     status: :forbidden)
     end
-    return if params[:verification_code] == @cd_invitation.verification_code
+    return if @invitation.invitation_type == :authorized_official
 
-    @cd_invitation.errors.add(:verification_code, :bad_code, message: 'tbd')
-    render(Page::Invitations::AcceptInvitationComponent.new(@organization, @cd_invitation),
+    return if params[:verification_code] == @invitation.verification_code
+
+    @invitation.errors.add(:verification_code, :bad_code, message: 'tbd')
+    render(Page::Invitations::AcceptInvitationComponent.new(@organization, @invitation),
            status: :bad_request)
   end
 
   def load_invitation
-    @cd_invitation = Invitation.find(params[:id])
-    if @organization != @cd_invitation.provider_organization
+    @invitation = Invitation.find(params[:id])
+    if @organization != @invitation.provider_organization
       render(Page::Invitations::BadInvitationComponent.new('invalid'), status: :not_found)
-    elsif @cd_invitation.expired? || @cd_invitation.accepted? || @cd_invitation.cancelled_at.present?
+    elsif @invitation.expired? || @invitation.accepted? || @invitation.cancelled_at.present?
       render(Page::Invitations::BadInvitationComponent.new('invalid'),
              status: :forbidden)
     end
