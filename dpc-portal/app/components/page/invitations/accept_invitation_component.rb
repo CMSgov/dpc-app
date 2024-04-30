@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Page
-  module CredentialDelegate
+  module Invitations
     # Displays accept invitation form
     class AcceptInvitationComponent < ViewComponent::Base
       def initialize(organization, cd_invite)

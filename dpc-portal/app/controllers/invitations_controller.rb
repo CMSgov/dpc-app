@@ -9,11 +9,11 @@ class InvitationsController < ApplicationController
 
   def accept
     if current_user.email != @cd_invitation.invited_email
-      return render(Page::CredentialDelegate::BadInvitationComponent.new('pii_mismatch'),
+      return render(Page::Invitations::BadInvitationComponent.new('pii_mismatch'),
                     status: :forbidden)
     end
 
-    render(Page::CredentialDelegate::AcceptInvitationComponent.new(@organization, @cd_invitation))
+    render(Page::Invitations::AcceptInvitationComponent.new(@organization, @cd_invitation))
   end
 
   def confirm
@@ -48,26 +48,26 @@ class InvitationsController < ApplicationController
 
   def invitation_matches_cd
     unless @cd_invitation.match_user?(current_user)
-      return render(Page::CredentialDelegate::BadInvitationComponent.new('pii_mismatch'),
+      return render(Page::Invitations::BadInvitationComponent.new('pii_mismatch'),
                     status: :forbidden)
     end
     return if params[:verification_code] == @cd_invitation.verification_code
 
     @cd_invitation.errors.add(:verification_code, :bad_code, message: 'tbd')
-    render(Page::CredentialDelegate::AcceptInvitationComponent.new(@organization, @cd_invitation),
+    render(Page::Invitations::AcceptInvitationComponent.new(@organization, @cd_invitation),
            status: :bad_request)
   end
 
   def load_invitation
     @cd_invitation = Invitation.find(params[:id])
     if @organization != @cd_invitation.provider_organization
-      render(Page::CredentialDelegate::BadInvitationComponent.new('invalid'), status: :not_found)
+      render(Page::Invitations::BadInvitationComponent.new('invalid'), status: :not_found)
     elsif @cd_invitation.expired? || @cd_invitation.accepted? || @cd_invitation.cancelled_at.present?
-      render(Page::CredentialDelegate::BadInvitationComponent.new('invalid'),
+      render(Page::Invitations::BadInvitationComponent.new('invalid'),
              status: :forbidden)
     end
   rescue ActiveRecord::RecordNotFound
-    render(Page::CredentialDelegate::BadInvitationComponent.new('invalid'), status: :not_found)
+    render(Page::Invitations::BadInvitationComponent.new('invalid'), status: :not_found)
   end
 
   def login_session

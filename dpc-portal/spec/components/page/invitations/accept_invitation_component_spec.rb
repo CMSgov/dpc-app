@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe Page::CredentialDelegate::AcceptInvitationComponent, type: :component do
+RSpec.describe Page::Invitations::AcceptInvitationComponent, type: :component do
   include ComponentSupport
   describe 'html' do
     subject(:html) do

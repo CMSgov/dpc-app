@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Page
-  module CredentialDelegate
+  module Invitations
     # Displays unfixable error message in accept invitation process
     class BadInvitationComponent < ViewComponent::Base
       def initialize(reason)
