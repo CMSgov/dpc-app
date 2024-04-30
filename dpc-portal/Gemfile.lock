@@ -632,8 +632,8 @@ DEPENDENCIES
   sinatra
   spring
   spring-watcher-listen (~> 2.1.0)
-  timecop
   thin
+  timecop
   truemail
   tzinfo-data
   uglifier (>= 1.3.0)
