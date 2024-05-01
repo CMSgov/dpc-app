@@ -48,7 +48,7 @@ RSpec.describe ProviderOrganization, type: :model do
         provider_organization.verification_status = :fake_status
       end.to raise_error(ArgumentError)
     end
-  
+
     it 'allows good verification_status' do
       expect do
         provider_organization.verification_status = :approved

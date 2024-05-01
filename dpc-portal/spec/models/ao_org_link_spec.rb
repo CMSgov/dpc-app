@@ -79,17 +79,17 @@ RSpec.describe AoOrgLink, type: :model do
     end
 
     it 'allows blank verification_reason' do
-        expect do
-          ao_org_link.verification_reason = ''
-          ao_org_link.save
-        end.not_to raise_error
+      expect do
+        ao_org_link.verification_reason = ''
+        ao_org_link.save
+      end.not_to raise_error
     end
 
     it 'allows nil verification_reason' do
-        expect do
-          ao_org_link.verification_reason = nil
-          ao_org_link.save
-        end.not_to raise_error
+      expect do
+        ao_org_link.verification_reason = nil
+        ao_org_link.save
+      end.not_to raise_error
     end
   end
 end

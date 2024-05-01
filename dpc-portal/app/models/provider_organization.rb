@@ -4,9 +4,9 @@
 class ProviderOrganization < ApplicationRecord
   validates :npi, presence: true
   validates :verification_reason, allow_nil: true, allow_blank: true,
-            :inclusion => {:in => :verification_reason}
+                                  inclusion: { in: :verification_reason }
   validates :verification_status, allow_nil: true,
-            :inclusion => {:in => :verification_status}
+                                  inclusion: { in: :verification_status }
 
   belongs_to :terms_of_service_accepted_by, class_name: 'User', required: false
 
