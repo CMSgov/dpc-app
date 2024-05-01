@@ -9,7 +9,7 @@ class InvitationsController < ApplicationController
 
   def accept
     if current_user.email != @invitation.invited_email
-      return render(Page::Invitations::BadInvitationComponent.new('pii_mismatch'),
+      return render(Page::Invitations::BadInvitationComponent.new('pii_mismatch', 'error'),
                     status: :forbidden)
     end
 
@@ -23,7 +23,7 @@ class InvitationsController < ApplicationController
     when 'authorized_official'
       bind_ao
     else
-      return render(Page::Invitations::BadInvitationComponent.new('invalid'),
+      return render(Page::Invitations::BadInvitationComponent.new('invalid', 'warning'),
                     status: :unprocessable_entity)
     end
     redirect_to organization_path(@organization)
@@ -67,9 +67,18 @@ class InvitationsController < ApplicationController
   def invitation_matches_user
     user_info = UserInfoService.new.user_info(session)
     unless @invitation.match_user?(user_info)
-      return render(Page::Invitations::BadInvitationComponent.new('pii_mismatch'),
+      return render(Page::Invitations::BadInvitationComponent.new('pii_mismatch', 'error'),
                     status: :forbidden)
     end
+    maybe_check_code
+  rescue UserInfoServiceError => e
+    handle_user_info_service_error(e)
+  rescue InvitationError => e
+    render(Page::Invitations::BadInvitationComponent.new(e.message, 'error'),
+           status: :forbidden)
+  end
+
+  def maybe_check_code
     return if @invitation.invitation_type == :authorized_official
 
     return if params[:verification_code] == @invitation.verification_code
@@ -77,8 +86,6 @@ class InvitationsController < ApplicationController
     @invitation.errors.add(:verification_code, :bad_code, message: 'tbd')
     render(Page::Invitations::AcceptInvitationComponent.new(@organization, @invitation),
            status: :bad_request)
-  rescue UserInfoServiceError => e
-    handle_user_info_service_error(e)
   end
 
   def handle_user_info_service_error(error)
@@ -86,20 +93,21 @@ class InvitationsController < ApplicationController
     when 'unauthorized'
       render(Page::Session::InvitationLoginComponent.new(@invitation))
     else
-      raise
+      render(Page::Invitations::BadInvitationComponent.new('server_error', 'warning'),
+             status: :service_unavailable)
     end
   end
 
   def load_invitation
     @invitation = Invitation.find(params[:id])
     if @organization != @invitation.provider_organization
-      render(Page::Invitations::BadInvitationComponent.new('invalid'), status: :not_found)
+      render(Page::Invitations::BadInvitationComponent.new('invalid', 'warning'), status: :not_found)
     elsif @invitation.expired? || @invitation.accepted? || @invitation.cancelled_at.present?
-      render(Page::Invitations::BadInvitationComponent.new('invalid'),
+      render(Page::Invitations::BadInvitationComponent.new('invalid', 'warning'),
              status: :forbidden)
     end
   rescue ActiveRecord::RecordNotFound
-    render(Page::Invitations::BadInvitationComponent.new('invalid'), status: :not_found)
+    render(Page::Invitations::BadInvitationComponent.new('invalid', 'warning'), status: :not_found)
   end
 
   def login_session
@@ -107,15 +115,15 @@ class InvitationsController < ApplicationController
     session['omniauth.nonce'] = @nonce = SecureRandom.hex(16)
     session['omniauth.state'] = @state = SecureRandom.hex(16)
   end
+end
 
-  def redirect_host
-    case ENV.fetch('ENV', nil)
-    when 'local'
-      'http://localhost:3100'
-    when 'prod'
-      'https://dpc.cms.gov'
-    else
-      "https://#{ENV.fetch('ENV', nil)}.dpc.cms.gov"
-    end
+def redirect_host
+  case ENV.fetch('ENV', nil)
+  when 'local'
+    'http://localhost:3100'
+  when 'prod'
+    'https://dpc.cms.gov'
+  else
+    "https://#{ENV.fetch('ENV', nil)}.dpc.cms.gov"
   end
 end

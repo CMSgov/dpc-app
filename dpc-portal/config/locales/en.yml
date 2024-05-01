@@ -1,33 +1,35 @@
-# Files in the config/locales directory are used for internationalization
-# and are automatically loaded by Rails. If you want to use locales other
-# than English, add the necessary files in this directory.
-#
-# To use the locales, use `I18n.t`:
-#
-#     I18n.t "hello"
-#
-# In views, this is aliased to just `t`:
-#
-#     <%= t("hello") %>
-#
-# To use a different locale, set it with `I18n.locale`:
-#
-#     I18n.locale = :es
-#
-# This would use the information in config/locales/es.yml.
-#
-# The following keys must be escaped otherwise they will not be retrieved by
-# the default I18n backend:
-#
-# true, false, on, off, yes, no
-#
-# Instead, surround them with single quotes.
-#
-# en:
-#   "true": "foo"
-#
-# To learn more, please read the Rails Internationalization guide
-# available at https://guides.rubyonrails.org/i18n.html.
-
 en:
-  hello: "Hello world"
+  verification:
+    pii_mismatch_heading:  Invitation denied
+    pii_mismatch_status: Warning Status
+    pii_mismatch_alert: This is a succinct, helpful message.
+    pii_mismatch_text: Sorry, this invitation is for someone else.
+    invalid_heading:  Invitation is invalid
+    invalid_status: Error Status
+    invalid_alert: This is a succinct, helpful message.
+    invalid_text: This invitation isn't valid. This could mean X, Y, or Z.
+    ao_med_sanctions_heading: Registration Failed
+    ao_med_sanctions_status: You are in the Medicare Exclusions Database.
+    ao_med_sanctions_alert: ''
+    ao_med_sanctions_text: You are listed as an excluded individual by the Office of Inspector General (OIG), which prohibits you from acting as this organization’s Authorized Official. For more information, contact the <a href="https://oig.hhs.gov/about-oig/contact-us/#exclusions">OIG Exclusions Branch</a>.
+    org_med_sanctions_heading: Registration Failed
+    org_med_sanctions_status: Your organization is in the Medicare Exclusions Database.
+    org_med_sanctions_alert: ''
+    org_med_sanctions_text: Your organization is listed as an excluded entity by the Office of Inspector General (OIG), which prohibits it from accessing beneficiary claims data. For more information, contact the <a href="https://oig.hhs.gov/about-oig/contact-us/#exclusions">OIG Exclusions Branch</a>.
+
+    no_approved_enrollment_heading: Registration Failed
+    no_approved_enrollment_status: Your organization is not currently approved by Medicare.
+    no_approved_enrollment_alert: ''
+    no_approved_enrollment_text: Your organization must have an approved enrollment status with Medicare to access beneficiary claims data. Your organization may need to <a href="https://www.cms.gov/medicare/enrollment-renewal/providers-suppliers/chain-ownership-system-pecos/manage-your-enrollment">manage its enrollment</a> in PECOS, the Medicare enrollment system.
+    bad_npi_heading: Registration Failed
+    bad_npi_status: Your organization is not currently approved by Medicare.
+    bad_npi_alert: ''
+    bad_npi_text: Your organization must have an approved enrollment status with Medicare to access beneficiary claims data. Your organization may need to <a href="https://www.cms.gov/medicare/enrollment-renewal/providers-suppliers/chain-ownership-system-pecos/manage-your-enrollment">manage its enrollment</a> in PECOS, the Medicare enrollment system.
+    user_not_authorized_official_heading: Registration Failed
+    user_not_authorized_official_status: You’re not the Authorized Official.
+    user_not_authorized_official_alert: ''
+    user_not_authorized_official_text: You are not on record as the Authorized Official for this organization. Your organization may need to <a href="https://pecos.cms.hhs.gov/pecos/login.do#headingLv1">update its Authorized Official</a> in PECOS, the Medicare enrollment system.
+    server_error_heading: Unable to Process Request
+    server_error_status: Internal Error
+    server_error_alert: ''
+    server_error_text: We are not currently able to process your request.

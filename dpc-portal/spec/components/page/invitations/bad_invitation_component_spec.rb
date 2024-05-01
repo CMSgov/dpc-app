@@ -16,7 +16,7 @@ RSpec.describe Page::Invitations::BadInvitationComponent, type: :component do
     end
 
     context 'invalid invitation' do
-      let(:component) { described_class.new('invalid') }
+      let(:component) { described_class.new('invalid', 'warning') }
       it 'should match header' do
         header = <<~HTML
           <h1>Invitation is invalid</h1>
@@ -27,7 +27,7 @@ RSpec.describe Page::Invitations::BadInvitationComponent, type: :component do
     end
 
     context 'PII mismatch' do
-      let(:component) { described_class.new('pii_mismatch') }
+      let(:component) { described_class.new('pii_mismatch', 'error') }
       it 'should match header' do
         header = <<~HTML
           <h1>Invitation denied</h1>

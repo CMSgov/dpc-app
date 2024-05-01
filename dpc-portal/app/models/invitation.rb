@@ -42,7 +42,7 @@ class Invitation < ApplicationRecord
     if invitation_type == 'credential_delegate'
       cd_match?(user_info)
     elsif invitation_type == 'authorized_official'
-      invited_email.downcase == user_info['email'].downcase
+      ao_match?(user_info)
     end
   end
 
@@ -58,7 +58,18 @@ class Invitation < ApplicationRecord
   end
   # rubocop:enable Metrics/AbcSize
 
+  def ao_match?(user_info)
+    service = AoVerificationService.new
+    result = service.check_eligibility(provider_organization.npi,
+                                       Digest::SHA2.new(256).hexdigest(user_info['social_security_number']))
+    raise InvitationError, result[:failure_reason] unless result[:success]
+
+    result[:success]
+  end
+
   def needs_validation?
     new_record? && invitation_type == 'credential_delegate'
   end
 end
+
+class InvitationError < StandardError; end

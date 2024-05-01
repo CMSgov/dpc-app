@@ -346,19 +346,15 @@ RSpec.describe Invitation, type: :model do
 
     describe :match_user do
       let(:ao_invite) { build(:invitation, :ao) }
-      let(:user_info) do
-        { 'email' => 'bob@testy.com' }
-      end
-      it 'should match user if email correct' do
-        expect(ao_invite.match_user?(user_info)).to eq true
-      end
-      it 'should match user if email different case' do
-        ao_invite.invited_email = ao_invite.invited_email.upcase_first
+      it 'should match user if ssn correct' do
+        user_info =         { 'social_security_number' => '900111111' }
         expect(ao_invite.match_user?(user_info)).to eq true
       end
       it 'should not match user if email not correct' do
-        ao_invite.invited_email = "not #{ao_invite.invited_email}"
-        expect(ao_invite.match_user?(user_info)).to eq false
+        user_info = { 'social_security_number' => '900111112' }
+        expect do
+          ao_invite.match_user?(user_info)
+        end.to raise_error(InvitationError, 'user_not_authorized_official')
       end
     end
   end

@@ -153,6 +153,13 @@ RSpec.describe 'Invitations', type: :request do
           expect(response.body).to include(login_organization_invitation_path(org, cd_invite))
         end
 
+        it 'should show error page if user info issue' do
+          user_service_class = class_double(UserInfoService).as_stubbed_const
+          expect(user_service_class).to receive(:new).and_raise(UserInfoServiceError, 'terrible thing happened')
+          post "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm", params: success_params
+          expect(response.body).to include(I18n.t('verification.server_error_text'))
+        end
+
         context 'not match' do
           before { stub_user_info }
           it 'should render form with error if OTP not match' do
@@ -195,9 +202,11 @@ RSpec.describe 'Invitations', type: :request do
 
       before do
         sign_in user
-        stub_user_info
       end
       context 'success' do
+        before do
+          stub_user_info
+        end
         it 'should create AoOrgLink' do
           expect do
             post "/organizations/#{org.id}/invitations/#{ao_invite.id}/confirm"
@@ -219,7 +228,10 @@ RSpec.describe 'Invitations', type: :request do
         end
       end
       context 'failure' do
-        it 'should render error page if PII not match' do
+        before do
+          stub_user_info(overrides: { 'social_security_number' => '900111112' })
+        end
+        it 'should render error page if SSN not match' do
           ao_invite.update(invited_email: 'some-other-email@example.com')
           post "/organizations/#{org.id}/invitations/#{ao_invite.id}/confirm"
           expect(response).to be_forbidden
