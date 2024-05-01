@@ -10,17 +10,9 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_04_29_182529) do
+ActiveRecord::Schema[7.1].define(version: 2024_05_01_124132) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
-
-  # Custom types defined in this database.
-  # Note that some types may not work with other database engines. Be careful if changing database.
-  create_enum "ao_org_link_verification_reason", ["ao_removal", "user_med_sanction", "no_approved_enrollments", "org_med_sanction"]
-  create_enum "po_verification_reason", ["", "org_med_sanction_waived", "user_med_sanction", "no_approved_enrollments", "org_med_sanction"]
-  create_enum "po_verification_status", ["approved", "rejected"]
-  create_enum "user_verification_reason", ["", "user_med_sanction_waived", "user_med_sanction"]
-  create_enum "user_verification_status", ["approved", "rejected"]
 
   create_table "ao_org_links", force: :cascade do |t|
     t.integer "user_id", null: false
@@ -29,7 +21,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_04_29_182529) do
     t.datetime "updated_at", null: false
     t.bigint "invitation_id"
     t.boolean "verification_status", default: true, null: false
-    t.enum "verification_reason", enum_type: "ao_org_link_verification_reason"
+    t.integer "verification_reason"
     t.datetime "last_checked_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
     t.index ["invitation_id"], name: "index_ao_org_links_on_invitation_id"
     t.index ["user_id", "provider_organization_id"], name: "index_ao_org_links_on_user_id_and_provider_organization_id", unique: true
@@ -66,8 +58,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_04_29_182529) do
     t.datetime "terms_of_service_accepted_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.enum "verification_status", enum_type: "po_verification_status"
-    t.enum "verification_reason", enum_type: "po_verification_reason"
+    t.integer "verification_status"
+    t.integer "verification_reason"
     t.datetime "last_checked_at"
     t.index ["dpc_api_organization_id"], name: "index_provider_organizations_on_dpc_api_organization_id", unique: true
     t.index ["npi"], name: "index_provider_organizations_on_npi", unique: true
@@ -95,8 +87,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_04_29_182529) do
     t.string "provider", limit: 50, default: "", null: false
     t.string "uid", limit: 50, default: "", null: false
     t.string "pac_id"
-    t.enum "verification_status", enum_type: "user_verification_status"
-    t.enum "verification_reason", enum_type: "user_verification_reason"
+    t.integer "verification_status"
+    t.integer "verification_reason"
     t.datetime "last_checked_at"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true

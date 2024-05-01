@@ -8,7 +8,7 @@ class User < ApplicationRecord
          :recoverable, :rememberable, :validatable,
          :omniauthable, omniauth_providers: [:openid_connect]
 
-  validates :verification_reason, allow_nil: true,
+  validates :verification_reason, allow_nil: true, allow_blank: true,
          :inclusion => {:in => :verification_reason}
   validates :verification_status, allow_nil: true,
          :inclusion => {:in => :verification_status}
@@ -40,13 +40,6 @@ class User < ApplicationRecord
     CdOrgLink.where(user: self, provider_organization: organization, disabled_at: nil).exists?
   end
 
-  enum :verification_reason, {
-    user_med_sanction_waived: 'user_med_sanction_waived', 
-    user_med_sanction: 'user_med_sanction'
-  }
-
-  enum :verification_status, {
-    approved: 'approved', 
-    rejected: 'rejected'
-  }
+  enum :verification_reason, %i[user_med_sanction_waived user_med_sanction]
+  enum :verification_status, %i[approved rejected]
 end
