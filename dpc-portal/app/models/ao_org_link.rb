@@ -9,9 +9,9 @@ class AoOrgLink < ApplicationRecord
   validates :verification_reason, allow_nil: true, allow_blank: true,
                                   inclusion: { in: :verification_reason }
 
+  enum verification_reason: %i[ao_removal user_med_sanction no_approved_enrollments org_med_sanction]
+
   belongs_to :user, required: true
   belongs_to :provider_organization, required: true
   belongs_to :invitation, required: false
-
-  enum verification_reason: %i[ao_removal user_med_sanction no_approved_enrollments org_med_sanction]
 end
