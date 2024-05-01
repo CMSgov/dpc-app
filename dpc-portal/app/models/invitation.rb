@@ -42,19 +42,21 @@ class Invitation < ApplicationRecord
     if invitation_type == 'credential_delegate'
       cd_match?(user_info)
     elsif invitation_type == 'authorized_official'
-      invited_email.downcase == user.email.downcase
+      invited_email.downcase == user_info['email'].downcase
     end
   end
 
   private
 
+  # rubocop:disable Metrics/AbcSize
   def cd_match?(user_info)
     return false unless invited_given_name.downcase == user_info['given_name'].downcase &&
                         invited_family_name.downcase == user_info['family_name'].downcase &&
                         invited_phone == user_info['phone'].tr('^0-9', '')
 
-    user_info['all_emails'].any? { |email| invited_email.downcase == email .downcase }
+    user_info['all_emails'].any? { |email| invited_email.downcase == email.downcase }
   end
+  # rubocop:enable Metrics/AbcSize
 
   def needs_validation?
     new_record? && invitation_type == 'credential_delegate'

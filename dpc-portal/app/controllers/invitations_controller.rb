@@ -65,7 +65,8 @@ class InvitationsController < ApplicationController
   end
 
   def invitation_matches_user
-    unless @invitation.match_user?(current_user)
+    user_info = UserInfoService.new.user_info(session)
+    unless @invitation.match_user?(user_info)
       return render(Page::Invitations::BadInvitationComponent.new('pii_mismatch'),
                     status: :forbidden)
     end
@@ -76,6 +77,17 @@ class InvitationsController < ApplicationController
     @invitation.errors.add(:verification_code, :bad_code, message: 'tbd')
     render(Page::Invitations::AcceptInvitationComponent.new(@organization, @invitation),
            status: :bad_request)
+  rescue UserInfoServiceError => e
+    handle_user_info_service_error(e)
+  end
+
+  def handle_user_info_service_error(error)
+    case error.message
+    when 'unauthorized'
+      render(Page::Session::InvitationLoginComponent.new(@invitation))
+    else
+      raise
+    end
   end
 
   def load_invitation

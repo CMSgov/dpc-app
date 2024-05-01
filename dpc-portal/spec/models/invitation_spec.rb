@@ -164,7 +164,7 @@ RSpec.describe Invitation, type: :model do
       end
     end
 
-    describe :match_user, :focus do
+    describe :match_user do
       let(:cd_invite) { build(:invitation, :cd) }
       let(:user_info) do
         { 'email' => 'bob@testy.com',
@@ -174,13 +174,12 @@ RSpec.describe Invitation, type: :model do
           ],
           'given_name' => 'Bob',
           'family_name' => 'Hodges',
-          'phone' => '+1111111111',
-        }
+          'phone' => '+1111111111' }
       end
-      it 'should match user if names and email correct', :focus do
+      it 'should match user if names and email correct' do
         expect(cd_invite.match_user?(user_info)).to eq true
       end
-      it 'should match user if names and email different case', :focus do
+      it 'should match user if names and email different case' do
         cd_invite.invited_given_name.upcase!
         cd_invite.invited_family_name.downcase!
         cd_invite.invited_email = cd_invite.invited_email.upcase_first
@@ -203,7 +202,7 @@ RSpec.describe Invitation, type: :model do
         expect(cd_invite.match_user?(user_info)).to eq false
       end
       it 'should not match user if phone not correct' do
-        cd_invite.invited_phone = "not number"
+        cd_invite.invited_phone = 'not number'
         expect(cd_invite.match_user?(user_info)).to eq false
       end
     end
@@ -347,21 +346,19 @@ RSpec.describe Invitation, type: :model do
 
     describe :match_user do
       let(:ao_invite) { build(:invitation, :ao) }
-      let(:user) do
-        build(:user, given_name: 'Hugo',
-              family_name: 'Boss',
-              email: ao_invite.invited_email)
+      let(:user_info) do
+        { 'email' => 'bob@testy.com' }
       end
       it 'should match user if email correct' do
-        expect(ao_invite.match_user?(user)).to eq true
+        expect(ao_invite.match_user?(user_info)).to eq true
       end
       it 'should match user if email different case' do
-        user.email = user.email.upcase_first
-        expect(ao_invite.match_user?(user)).to eq true
+        ao_invite.invited_email = ao_invite.invited_email.upcase_first
+        expect(ao_invite.match_user?(user_info)).to eq true
       end
       it 'should not match user if email not correct' do
-        user.email = "not #{ao_invite.invited_email}"
-        expect(ao_invite.match_user?(user)).to eq false
+        ao_invite.invited_email = "not #{ao_invite.invited_email}"
+        expect(ao_invite.match_user?(user_info)).to eq false
       end
     end
   end
