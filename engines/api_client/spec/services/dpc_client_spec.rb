@@ -668,8 +668,8 @@ RSpec.describe DpcClient do
     describe '#create_ip_address' do
       context 'successful API request' do
         it 'sends data to API and sets response instance variables' do
-          stub_request(:post, 'http://dpc.example.com/IpAddress?label=Sandbox+IP+1').with(
-            body: { ip_address: '136.226.19.87' }
+          stub_request(:post, 'http://dpc.example.com/IpAddress').with(
+            body: { ip_address: '136.226.19.87', label: 'Sandbox IP 1' }
           ).to_return(
             status: 200,
             body: '{"label":"Sandbox IP 1","createdAt":"2019-11-07T19:38:44.205Z",' \
@@ -693,8 +693,8 @@ RSpec.describe DpcClient do
     describe '#delete_ip_address' do
       context 'successful API request' do
         it 'sends data to API and sets response instance variables' do
-          stub_request(:post, 'http://dpc.example.com/IpAddress?label=Sandbox+IP+1').with(
-            body: { ip_address: '136.226.19.87' }
+          stub_request(:post, 'http://dpc.example.com/IpAddress').with(
+            body: { ip_address: '136.226.19.87', label: 'Sandbox IP 1' }
           ).to_return(
             status: 200,
             body: '{"label":"Sandbox IP 1","createdAt":"2019-11-07T19:38:44.205Z",' \
@@ -722,8 +722,8 @@ RSpec.describe DpcClient do
 
       context 'unsuccessful API request' do
         it 'sends data to API and sets response instance variables' do
-          stub_request(:post, 'http://dpc.example.com/IpAddress?label=Sandbox+IP+1').with(
-            body: { ip_address: '136.226.19.87' }
+          stub_request(:post, 'http://dpc.example.com/IpAddress').with(
+            body: { ip_address: '136.226.19.87', label: 'Sandbox IP 1' }
           ).to_return(
             status: 500,
             body: '{}'
@@ -746,7 +746,7 @@ RSpec.describe DpcClient do
     describe '#get_ip_addresses' do
       context 'successful API request' do
         it 'sends data to API and sets response instance variables' do
-          stub_request(:get, 'http://dpc.example.com/IpAddress').with(
+          stub_request(:get, 'http://dpc.example.com/Key').with(
             headers: { 'Content-Type' => 'application/json' }
           ).to_return(
             status: 200,
