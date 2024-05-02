@@ -48,13 +48,25 @@ class Invitation < ApplicationRecord
 
   private
 
-  # rubocop:disable Metrics/AbcSize
   def cd_match?(user_info)
     return false unless invited_given_name.downcase == user_info['given_name'].downcase &&
-                        invited_family_name.downcase == user_info['family_name'].downcase &&
-                        invited_phone == user_info['phone'].tr('^0-9', '')
+                        invited_family_name.downcase == user_info['family_name'].downcase
+
+    return false unless phone_match(user_info)
 
     user_info['all_emails'].any? { |email| invited_email.downcase == email.downcase }
+  end
+
+  # rubocop:disable Metrics/AbcSize
+  def phone_match(user_info)
+    user_phone = user_info['phone'].tr('^0-9', '')
+    if user_phone.length == invited_phone.length
+      user_phone == invited_phone
+    elsif user_phone.length > invited_phone.length && user_phone[0] == '1'
+      user_phone[1..] == invited_phone
+    elsif user_phone.length < invited_phone.length && invited_phone[0] == '1'
+      user_phone == invited_phone[1..]
+    end
   end
   # rubocop:enable Metrics/AbcSize
 

@@ -174,9 +174,9 @@ RSpec.describe Invitation, type: :model do
           ],
           'given_name' => 'Bob',
           'family_name' => 'Hodges',
-          'phone' => '+1111111111' }
+          'phone' => '+111-111-1111' }
       end
-      it 'should match user if names and email correct' do
+      it 'should match user if names, email, and phone correct' do
         expect(cd_invite.match_user?(user_info)).to eq true
       end
       it 'should match user if names and email different case' do
@@ -187,6 +187,14 @@ RSpec.describe Invitation, type: :model do
       end
       it 'should match if invited email in all_emails' do
         cd_invite.invited_email = user_info.dig('all_emails', 1)
+        expect(cd_invite.match_user?(user_info)).to eq true
+      end
+      it 'should match if user info phone starts with 1' do
+        plus_phone = user_info.merge('phone' => '+1-111-111-1111')
+        expect(cd_invite.match_user?(plus_phone)).to eq true
+      end
+      it 'should match if invited phone starts with 1' do
+        cd_invite.phone_raw = '+1-111-111-1111'
         expect(cd_invite.match_user?(user_info)).to eq true
       end
       it 'should not match user if given name not correct' do
@@ -347,7 +355,7 @@ RSpec.describe Invitation, type: :model do
     describe :match_user do
       let(:ao_invite) { build(:invitation, :ao) }
       it 'should match user if ssn correct' do
-        user_info =         { 'social_security_number' => '900111111' }
+        user_info = { 'social_security_number' => '900111111' }
         expect(ao_invite.match_user?(user_info)).to eq true
       end
       it 'should not match user if email not correct' do
