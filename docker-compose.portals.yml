@@ -165,7 +165,9 @@ services:
       - DB_USER=postgres
       - DB_PASS=dpc-safe
       - GOLDEN_MACAROON=${GOLDEN_MACAROON}
+      - API_ADMIN_URL=http://api:9900
       - API_METADATA_URL=http://api:3002/v1
+      - ENV=local
     depends_on:
       - redis
       - db
