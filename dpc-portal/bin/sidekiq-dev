@@ -8,7 +8,7 @@ if [ -z "$GOLDEN_MACAROON" ]; then
     echo "Successfully generated new golden macaroon."
   else
     echo "Could not generate a valid golden macaroon. Check that the API service is running."
-    echo "Starting Portal without a golden macaroon; certain functionality may not work correctly."
+    echo "Starting Portal Sidekiq without a golden macaroon; certain functionality may not work correctly."
   fi
 fi
 
