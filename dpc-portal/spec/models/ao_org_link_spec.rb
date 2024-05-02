@@ -47,4 +47,49 @@ RSpec.describe AoOrgLink, type: :model do
       expect(duplicate.errors.full_messages).to include 'Invitation already used by another AoOrgLink.'
     end
   end
+
+  describe 'sets defaults' do
+    let(:provider_organization) { build(:provider_organization) }
+    let(:ao_org_link) { create(:ao_org_link, user:, provider_organization:) }
+
+    it 'defaults verification_status to true' do
+      expect(ao_org_link.verification_status).to be true
+    end
+
+    it 'defaults last_checked_at to now' do
+      expect(ao_org_link.last_checked_at).to be_within(10.seconds).of Time.now
+    end
+  end
+
+  describe 'check validations' do
+    let(:provider_organization) { build(:provider_organization) }
+    let(:ao_org_link) { create(:ao_org_link, user:, provider_organization:) }
+
+    it 'fails on invalid verification_reason' do
+      expect do
+        ao_org_link.verification_reason = :fake_status
+      end.to raise_error(ArgumentError)
+    end
+
+    it 'allows good verification_reason' do
+      expect do
+        ao_org_link.verification_reason = :ao_removal
+        ao_org_link.save
+      end.not_to raise_error
+    end
+
+    it 'allows blank verification_reason' do
+      expect do
+        ao_org_link.verification_reason = ''
+        ao_org_link.save
+      end.not_to raise_error
+    end
+
+    it 'allows nil verification_reason' do
+      expect do
+        ao_org_link.verification_reason = nil
+        ao_org_link.save
+      end.not_to raise_error
+    end
+  end
 end

@@ -6,12 +6,61 @@ RSpec.describe ProviderOrganization, type: :model do
   include ActiveJob::TestHelper
 
   describe :validations do
+    let(:provider_organization) { create(:provider_organization) }
+
     it 'should pass if it has an npi' do
       expect(ProviderOrganization.new(npi: '1111111111')).to be_valid
     end
 
     it 'should fail without npi' do
       expect(ProviderOrganization.new).to_not be_valid
+    end
+
+    it 'fails on invalid verification_reason' do
+      expect do
+        provider_organization.verification_reason = :fake_reason
+      end.to raise_error(ArgumentError)
+    end
+
+    it 'allows good verification_reason' do
+      expect do
+        provider_organization.verification_reason = :org_med_sanction_waived
+        provider_organization.save
+      end.not_to raise_error
+    end
+
+    it 'allows blank verification_reason' do
+      expect do
+        provider_organization.verification_reason = ''
+        provider_organization.save
+      end.not_to raise_error
+    end
+
+    it 'allows nil verification_reason' do
+      expect do
+        provider_organization.verification_reason = nil
+        provider_organization.save
+      end.not_to raise_error
+    end
+
+    it 'fails on invalid verification_status' do
+      expect do
+        provider_organization.verification_status = :fake_status
+      end.to raise_error(ArgumentError)
+    end
+
+    it 'allows good verification_status' do
+      expect do
+        provider_organization.verification_status = :approved
+        provider_organization.save
+      end.not_to raise_error
+    end
+
+    it 'allows nil verification_status' do
+      expect do
+        provider_organization.verification_status = nil
+        provider_organization.save
+      end.not_to raise_error
     end
   end
 
