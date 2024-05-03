@@ -358,7 +358,7 @@ RSpec.describe Invitation, type: :model do
         user_info = { 'social_security_number' => '900111111' }
         expect(ao_invite.match_user?(user_info)).to eq true
       end
-      it 'should not match user if email not correct' do
+      it 'should not match user if ssn not correct' do
         user_info = { 'social_security_number' => '900111112' }
         expect do
           ao_invite.match_user?(user_info)

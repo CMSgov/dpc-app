@@ -189,6 +189,13 @@ RSpec.describe 'Organizations', type: :request do
             get "/organizations/#{org.id}"
             expect(assigns(:invitations).size).to eq 0
           end
+
+          it 'does not assign if only accepted exists' do
+            invitation = create(:invitation, :cd, provider_organization: org, invited_by: user)
+            create(:cd_org_link, provider_organization: org, invitation:)
+            get "/organizations/#{org.id}"
+            expect(assigns(:invitations).size).to eq 0
+          end
         end
 
         context :credential_delegates do

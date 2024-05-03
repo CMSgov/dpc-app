@@ -58,6 +58,7 @@ class Invitation < ApplicationRecord
   end
 
   # rubocop:disable Metrics/AbcSize
+  # Go ahead and pass if one or the other starts with US country code (1)
   def phone_match(user_info)
     user_phone = user_info['phone'].tr('^0-9', '')
     if user_phone.length == invited_phone.length

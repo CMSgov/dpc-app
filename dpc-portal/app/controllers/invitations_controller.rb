@@ -19,9 +19,9 @@ class InvitationsController < ApplicationController
   def confirm
     case @invitation.invitation_type
     when 'credential_delegate'
-      bind_cd
+      create_cd_org_link
     when 'authorized_official'
-      bind_ao
+      create_ao_org_link
     else
       return render(Page::Invitations::BadInvitationComponent.new('invalid', 'warning'),
                     status: :unprocessable_entity)
@@ -46,13 +46,13 @@ class InvitationsController < ApplicationController
 
   private
 
-  def bind_cd
+  def create_cd_org_link
     CdOrgLink.create!(user: current_user, provider_organization: @organization, invitation: @invitation)
     @invitation.update!(invited_given_name: nil, invited_family_name: nil, invited_phone: nil, invited_email: nil)
     flash[:notice] = "Invitation accepted. You can now manage this organization's credentials. Learn more."
   end
 
-  def bind_ao
+  def create_ao_org_link
     AoOrgLink.create!(user: current_user, provider_organization: @organization, invitation: @invitation)
     @invitation.update!(invited_given_name: nil, invited_family_name: nil, invited_phone: nil, invited_email: nil)
     flash[:notice] = 'Invitation accepted.'
@@ -70,7 +70,7 @@ class InvitationsController < ApplicationController
       return render(Page::Invitations::BadInvitationComponent.new('pii_mismatch', 'error'),
                     status: :forbidden)
     end
-    maybe_check_code
+    check_code if @invitation.invitation_type == 'credential_delegate'
   rescue UserInfoServiceError => e
     handle_user_info_service_error(e)
   rescue InvitationError => e
@@ -78,9 +78,7 @@ class InvitationsController < ApplicationController
            status: :forbidden)
   end
 
-  def maybe_check_code
-    return if @invitation.invitation_type == :authorized_official
-
+  def check_code
     return if params[:verification_code] == @invitation.verification_code
 
     @invitation.errors.add(:verification_code, :bad_code, message: 'tbd')
