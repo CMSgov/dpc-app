@@ -33,7 +33,7 @@ server:
             application: ${APPLICATION:-"dpc-attribution"}
 
 logging:
-  level: ERROR
+  level: WARN
   appenders:
     - type: console
       timeZone: UTC
@@ -54,6 +54,8 @@ logging:
     "gov.cms.dpc.queue.DistributedBatchQueue": DEBUG
     "org.hibernate": ERROR
     "org.hibernate.SQL": ERROR
+    "gov.cms.dpc.api.auth": INFO
+    "gov.cms.dpc.common.logging.filters": INFO
 
 expirationThreshold: 90 # In days
 migrationEnabled: true
