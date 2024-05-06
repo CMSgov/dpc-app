@@ -44,7 +44,7 @@ server:
           - type: token-filter-factory
 
 logging:
-  level: DEBUG
+  level: INFO
   loggers:
     "liquibase": ERROR
     "gov.cms.dpc.queue.DistributedBatchQueue": DEBUG

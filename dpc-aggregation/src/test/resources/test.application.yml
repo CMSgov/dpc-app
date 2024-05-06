@@ -42,7 +42,7 @@ server:
             application: ${APPLICATION:-"dpc-aggregation"}
 
 logging:
-  level: DEBUG
+  level: INFO
   loggers:
     "liquibase": ERROR
     "gov.cms.dpc.queue.DistributedBatchQueue": DEBUG
