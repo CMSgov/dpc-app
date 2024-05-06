@@ -33,7 +33,7 @@ server:
             application: ${APPLICATION:-"dpc-attribution"}
 
 logging:
-  level: WARN
+  level: DEBUG
   appenders:
     - type: console
       timeZone: UTC
