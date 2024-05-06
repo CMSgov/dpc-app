@@ -3,6 +3,13 @@
 # Link class to dpc-api Organization
 class ProviderOrganization < ApplicationRecord
   validates :npi, presence: true
+  validates :verification_reason, allow_nil: true, allow_blank: true,
+                                  inclusion: { in: :verification_reason }
+  validates :verification_status, allow_nil: true,
+                                  inclusion: { in: :verification_status }
+
+  enum verification_reason: %i[org_med_sanction_waived user_med_sanction no_approved_enrollments org_med_sanction]
+  enum verification_status: %i[approved rejected]
 
   belongs_to :terms_of_service_accepted_by, class_name: 'User', required: false
 

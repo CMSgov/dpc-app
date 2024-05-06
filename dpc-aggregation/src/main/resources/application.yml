@@ -44,6 +44,7 @@ logging:
   level: ERROR
   loggers:
     "liquibase": INFO
+    "gov.cms.dpc.aggregation.engine": INFO
     "gov.cms.dpc.queue.DistributedBatchQueue": DEBUG
     "org.hibernate": ERROR
     "org.hibernate.SQL": ERROR

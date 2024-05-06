@@ -123,6 +123,57 @@ RSpec.describe User, type: :model do
   end
 end
 
+describe :validations do
+  let(:user) { create(:user) }
+
+  it 'fails on invalid verification_reason' do
+    expect do
+      user.verification_reason = :fake_reason
+    end.to raise_error(ArgumentError)
+  end
+
+  it 'allows good verification_reason' do
+    expect do
+      user.verification_reason = :user_med_sanction_waived
+      user.save
+    end.not_to raise_error
+  end
+
+  it 'allows blank verification_reason' do
+    expect do
+      user.verification_reason = ''
+      user.save
+    end.not_to raise_error
+  end
+
+  it 'allows nil verification_reason' do
+    expect do
+      user.verification_reason = nil
+      user.save
+    end.not_to raise_error
+  end
+
+  it 'fails on invalid verification_status' do
+    expect do
+      user.verification_status = :fake_status
+    end.to raise_error(ArgumentError)
+  end
+
+  it 'allows good verification_status' do
+    expect do
+      user.verification_status = :approved
+      user.save
+    end.not_to raise_error
+  end
+
+  it 'allows nil verification_status' do
+    expect do
+      user.verification_status = nil
+      user.save
+    end.not_to raise_error
+  end
+end
+
 class MockAuthInfo
   attr_reader :provider, :uid, :info
 

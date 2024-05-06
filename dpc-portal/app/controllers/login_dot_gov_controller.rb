@@ -12,6 +12,7 @@ class LoginDotGovController < Devise::OmniauthCallbacksController
     end
     ial_2_actions(user, auth)
     sign_in(:user, user)
+    session[:logged_in_at] = Time.now
     redirect_to session[:user_return_to] || organizations_path
   end
 
