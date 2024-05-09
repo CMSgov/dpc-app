@@ -28,7 +28,6 @@ import io.dropwizard.jersey.jsr310.OffsetDateTimeParam;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.SecurityException;
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
