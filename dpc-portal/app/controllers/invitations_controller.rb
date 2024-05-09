@@ -17,10 +17,9 @@ class InvitationsController < ApplicationController
   end
 
   def confirm
-    case @invitation.invitation_type
-    when 'credential_delegate'
+    if @invitation.credential_delegate?
       create_cd_org_link
-    when 'authorized_official'
+    elsif @invitation.authorized_official?
       create_ao_org_link
     else
       return render(Page::Invitations::BadInvitationComponent.new('invalid', 'warning'),
@@ -70,7 +69,7 @@ class InvitationsController < ApplicationController
       return render(Page::Invitations::BadInvitationComponent.new('pii_mismatch', 'error'),
                     status: :forbidden)
     end
-    check_code if @invitation.invitation_type == 'credential_delegate'
+    check_code if @invitation.credential_delegate?
   rescue UserInfoServiceError => e
     handle_user_info_service_error(e)
   rescue InvitationError => e

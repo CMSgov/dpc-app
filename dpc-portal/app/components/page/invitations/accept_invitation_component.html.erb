@@ -14,7 +14,7 @@
     </div>
   </div>
   <div>
-    <% if @invitation.invitation_type == 'credential_delegate' %>
+    <% if @invitation.credential_delegate? %>
     <h2>Provide invite code</h2>
     <p>You are invited to <%= @organization.name %> by the Authorized Official (AO),
       <%= @invitation.invited_by&.given_name %> <%= @invitation.invited_by&.family_name %>.</p>

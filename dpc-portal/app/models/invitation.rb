@@ -31,17 +31,17 @@ class Invitation < ApplicationRecord
   end
 
   def accepted?
-    if invitation_type == 'credential_delegate'
+    if credential_delegate?
       CdOrgLink.where(invitation: self).exists?
-    elsif invitation_type == 'authorized_official'
+    elsif authorized_official?
       AoOrgLink.where(invitation: self).exists?
     end
   end
 
   def match_user?(user_info)
-    if invitation_type == 'credential_delegate'
+    if credential_delegate?
       cd_match?(user_info)
-    elsif invitation_type == 'authorized_official'
+    elsif authorized_official?
       ao_match?(user_info)
     end
   end
@@ -81,7 +81,7 @@ class Invitation < ApplicationRecord
   end
 
   def needs_validation?
-    new_record? && invitation_type == 'credential_delegate'
+    new_record? && credential_delegate?
   end
 end
 
