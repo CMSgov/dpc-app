@@ -9,10 +9,7 @@ class AoVerificationService
   # rubocop:disable Metrics/AbcSize
   def check_eligibility(organization_npi, hashed_ao_ssn)
     check_org_med_sanctions(organization_npi)
-    approved_enrollments = get_approved_enrollments(organization_npi)
-    enrollment_ids = approved_enrollments.map { |enrollment| enrollment['enrollmentID'] }
-    ao_role = get_authorized_official_role(enrollment_ids, hashed_ao_ssn)
-    check_provider_med_sanctions(ao_role['ssn'])
+    check_ao_eligibilty(organization_npi, :ssn, hashed_ao_ssn)
 
     { success: true }
   rescue OAuth2::Error => e
@@ -32,16 +29,23 @@ class AoVerificationService
   end
   # rubocop:enable Metrics/AbcSize
 
-  private
-
-  def check_provider_med_sanctions(ao_ssn)
-    response = @cpi_api_gw_client.fetch_med_sanctions_and_waivers_by_ssn(ao_ssn)
-    raise AoException, 'ao_med_sanctions' if check_sanctions_response(response)
+  def check_ao_eligibilty(organization_npi, identifier_type, identifier)
+    approved_enrollments = get_approved_enrollments(organization_npi)
+    enrollment_ids = approved_enrollments.map { |enrollment| enrollment['enrollmentID'] }
+    ao_role = get_authorized_official_role(enrollment_ids, identifier_type, identifier)
+    check_provider_med_sanctions(ao_role['ssn'])
   end
 
   def check_org_med_sanctions(npi)
     response = @cpi_api_gw_client.fetch_med_sanctions_and_waivers_by_org_npi(npi)
     raise AoException, 'org_med_sanctions' if check_sanctions_response(response)
+  end
+
+  private
+
+  def check_provider_med_sanctions(ao_ssn)
+    response = @cpi_api_gw_client.fetch_med_sanctions_and_waivers_by_ssn(ao_ssn)
+    raise AoException, 'ao_med_sanctions' if check_sanctions_response(response)
   end
 
   def check_sanctions_response(response)
@@ -77,16 +81,25 @@ class AoVerificationService
     enrollments
   end
 
-  def get_authorized_official_role(enrollment_ids, hashed_ao_ssn)
+  def get_authorized_official_role(enrollment_ids, identifier_type, identifier)
     enrollment_ids.each do |enrollment_id|
       response = @cpi_api_gw_client.fetch_enrollment_roles(enrollment_id)
       roles_response = response.dig('enrollments', 'roles')
       roles_response.each do |role|
-        return role if role['roleCode'] == '10' && Digest::SHA2.new(256).hexdigest(role['ssn']) == hashed_ao_ssn
+        return role if role_matches(role, identifier_type, identifier)
       end
     end
 
     raise AoException, 'user_not_authorized_official'
+  end
+
+  def role_matches(role, identifier_type, identifier)
+    case identifier_type
+    when :ssn
+      role['roleCode'] == '10' && Digest::SHA2.new(256).hexdigest(role['ssn']) == identifier
+    when :pac_id
+      role['roleCode'] == '10' && role['pacId'] == identifier
+    end
   end
 end
 

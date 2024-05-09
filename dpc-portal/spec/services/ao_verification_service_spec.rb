@@ -58,5 +58,52 @@ describe AoVerificationService do
       response = service.check_eligibility(org_npi, hashed_ao_ssn)
       expect(response).to include({ success: true })
     end
+
+    it 'returns an error on Gateway server error' do
+      org_npi = '3593081045'
+      response = service.check_eligibility(org_npi, hashed_ao_ssn)
+      expect(response[:success]).to eq false
+      expect(response[:failure_reason]).to eq 'api_gateway_error'
+    end
+
+    it 'returns an error on invalid endpoint' do
+      org_npi = '3746980325'
+      response = service.check_eligibility(org_npi, hashed_ao_ssn)
+      expect(response[:success]).to eq false
+      expect(response[:failure_reason]).to eq 'invalid_endpoint_called'
+    end
+
+    it 'returns an error when any error' do
+      org_npi = '3302763388'
+      response = service.check_eligibility(org_npi, hashed_ao_ssn)
+      expect(response[:success]).to eq false
+      expect(response[:failure_reason]).to eq 'unexpected_error'
+    end
+  end
+
+  describe '.check_ao_eligibility' do
+    it 'should work with good hashed ssn' do
+      expect do
+        service.check_ao_eligibilty(good_org_npi, :ssn, hashed_ao_ssn)
+      end.to_not raise_error
+    end
+
+    it 'should raise error with bad hashed ssn' do
+      expect do
+        service.check_ao_eligibilty(good_org_npi, :ssn, 'not even a hash')
+      end.to raise_error(AoException, 'user_not_authorized_official')
+    end
+
+    it 'should work with good pac_id' do
+      expect do
+        service.check_ao_eligibilty(good_org_npi, :pac_id, 'validPacId')
+      end.to_not raise_error
+    end
+
+    it 'should raise error with bad pac_id' do
+      expect do
+        service.check_ao_eligibilty(good_org_npi, :pac_id, 'not there')
+      end.to raise_error(AoException, 'user_not_authorized_official')
+    end
   end
 end

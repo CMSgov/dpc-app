@@ -2,6 +2,7 @@
 
 require 'sinatra/base'
 
+# rubocop:disable Metrics/ClassLength
 # This class simulates the CPI API Gateway and the IDM identity service
 #
 # Endpoints:
@@ -49,6 +50,21 @@ class FakeCpiGateway < Sinatra::Base
     headers['content-type'] = 'application/json; charset=UTF-8'
     npi = @request_payload.dig('providerID', 'npi')
     case npi
+    when '3593081045'
+      halt 500, {
+        success: 'false',
+        response: 'Internal server error'
+      }.to_json
+    when '3746980325'
+      halt 404, {
+        success: 'false',
+        response: 'no such path'
+      }.to_json
+    when '3302763388'
+      halt 430, {
+        success: 'false',
+        response: 'Shopify Security Rejection'
+      }.to_json
     when '3299073577'
       '{"code": "404"}'
     when '3782297014'
@@ -75,6 +91,7 @@ class FakeCpiGateway < Sinatra::Base
     headers['content-type'] = 'application/json; charset=UTF-8'
     ao_ssns = %w[900111111 900666666 900777777 900888888 666222222]
     roles = ao_ssns.map { |ssn| { pacId: ssn, roleCode: '10', ssn: } }
+    roles << { pacId: 'validPacId', roleCode: '10', ssn: '900428421' }
     {
       enrollments: {
         roles:
@@ -122,3 +139,4 @@ class FakeCpiGateway < Sinatra::Base
 
   run! if __FILE__ == $PROGRAM_NAME
 end
+# rubocop:enable Metrics/ClassLength
