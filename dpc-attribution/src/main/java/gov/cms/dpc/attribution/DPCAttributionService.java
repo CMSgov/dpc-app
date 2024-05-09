@@ -19,8 +19,6 @@ import io.dropwizard.db.PooledDataSourceFactory;
 import io.dropwizard.jobs.GuiceJobManager;
 import io.dropwizard.jobs.JobsBundle;
 import io.dropwizard.migrations.MigrationsBundle;
-import io.federecio.dropwizard.swagger.SwaggerBundle;
-import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.vyarus.dropwizard.guice.GuiceBundle;
@@ -91,13 +89,6 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
             public PooledDataSourceFactory getDataSourceFactory(DPCAttributionConfiguration configuration) {
                 logger.debug("Connecting to database {} at {}", configuration.getDatabase().getDriverClass(), configuration.getDatabase().getUrl());
                 return configuration.getDatabase();
-            }
-        });
-
-        bootstrap.addBundle(new SwaggerBundle<>() {
-            @Override
-            protected SwaggerBundleConfiguration getSwaggerBundleConfiguration(DPCAttributionConfiguration configuration) {
-                return configuration.getSwaggerBundleConfiguration();
             }
         });
 

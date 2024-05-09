@@ -75,10 +75,6 @@
             <artifactId>postgresql</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.smoketurner</groupId>
-            <artifactId>dropwizard-swagger</artifactId>
-        </dependency>
-        <dependency>
             <groupId>com.newrelic.agent.java</groupId>
             <artifactId>newrelic-java</artifactId>
             <version>${newrelic.agent.version}</version>

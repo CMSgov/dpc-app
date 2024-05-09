@@ -247,11 +247,6 @@
                 <version>${hapi.fhir.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.smoketurner</groupId>
-                <artifactId>dropwizard-swagger</artifactId>
-                <version>3.0.0-1</version>
-            </dependency>
-            <dependency>
                 <groupId>io.github.dropwizard-jobs</groupId>
                 <artifactId>dropwizard-jobs-core</artifactId>
                 <version>5.1.4</version>
