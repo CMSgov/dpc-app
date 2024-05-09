@@ -18,7 +18,6 @@ import gov.cms.dpc.fhir.annotations.FHIRParameter;
 import gov.cms.dpc.fhir.annotations.Profiled;
 import io.dropwizard.auth.Auth;
 import io.dropwizard.hibernate.UnitOfWork;
-import io.swagger.annotations.*;
 import org.hl7.fhir.dstu3.model.*;
 
 import javax.inject.Inject;
@@ -30,7 +29,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-@Api(value = "Organization", authorizations = @Authorization(value = "access_token"))
 @Path("/v1/Organization")
 public class OrganizationResource extends AbstractOrganizationResource {
 
@@ -51,7 +49,6 @@ public class OrganizationResource extends AbstractOrganizationResource {
     @FHIR
     @Timed
     @ExceptionMetered
-    @ApiOperation(hidden = true, value = "Create organization by submitting Bundle")
     @AdminOperation
     @Override
     public Organization submitOrganization(@FHIRParameter(name = "resource") @NotNull Bundle organizationBundle) {
@@ -75,12 +72,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
     @Timed
     @ExceptionMetered
     @Authorizer
-    @ApiOperation(value = "Get organization details",
-            notes = "FHIR endpoint which returns the Organization resource that is currently registered with the application.",
-            authorizations = @Authorization(value = "access_token"))
-    @ApiResponses(value = {
-            @ApiResponse(code = 401, message = "An organization is only allowed to see their own Organization resource")})
-    public Bundle orgSearch(@ApiParam(hidden = true) @Auth OrganizationPrincipal organization) {
+    public Bundle orgSearch(@Auth OrganizationPrincipal organization) {
         Bundle orgBundle = new Bundle();
 
         Organization org = this.client
@@ -103,11 +95,6 @@ public class OrganizationResource extends AbstractOrganizationResource {
     @Timed
     @ExceptionMetered
     @PathAuthorizer(type = DPCResourceType.Organization, pathParam = "organizationID")
-    @ApiOperation(value = "Get organization details by UUID",
-            notes = "FHIR endpoint which returns the Organization resource that is currently registered with the application.",
-            authorizations = @Authorization(value = "access_token"))
-    @ApiResponses(value = {
-            @ApiResponse(code = 401, message = "An organization is only allowed to see their own Organization resource")})
     public Organization getOrganization(@NotNull @PathParam("organizationID") UUID organizationID) {
         return this.client
                 .read()
@@ -124,12 +111,6 @@ public class OrganizationResource extends AbstractOrganizationResource {
     @ExceptionMetered
     @AdminOperation
     @UnitOfWork
-    @ApiOperation(value = "Delete Organization",
-            notes = "FHIR endpoint which removes the organization currently registered with the application.\n" +
-                    "This also removes all associated resources",
-            authorizations = @Authorization(value = "access_token"))
-    @ApiResponses(value = {
-            @ApiResponse(code = 401, message = "Cannot find organization to remove")})
     @Override
     public Response deleteOrganization(@NotNull @PathParam("organizationID") UUID organizationID) {
         // Delete from the attribution service
@@ -158,14 +139,6 @@ public class OrganizationResource extends AbstractOrganizationResource {
     @FHIR
     @Timed
     @ExceptionMetered
-    @ApiOperation(value = "Update organization record",
-            notes = "Update specific Organization record.",
-            authorizations = @Authorization(value = "access_token"))
-    @ApiResponses(value = {
-            @ApiResponse(code = 401, message = "An organization may update only their own Organization resource"),
-            @ApiResponse(code = 404, message = "Unable to find Organization to update"),
-            @ApiResponse(code = 422, message = "Provided resource is not a valid FHIR Organization")
-    })
     @Override
     public Organization updateOrganization(@NotNull @PathParam("organizationID") UUID organizationID, @Valid @Profiled Organization organization) {
         MethodOutcome outcome = this.client

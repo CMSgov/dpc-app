@@ -26,7 +26,6 @@ import gov.cms.dpc.fhir.validations.ValidationHelpers;
 import gov.cms.dpc.fhir.validations.profiles.PatientProfile;
 import gov.cms.dpc.queue.service.DataService;
 import io.dropwizard.auth.Auth;
-import io.swagger.annotations.*;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
@@ -45,7 +44,6 @@ import java.util.regex.Pattern;
 import static gov.cms.dpc.api.APIHelpers.bulkResourceClient;
 import static gov.cms.dpc.fhir.helpers.FHIRHelpers.handleMethodOutcome;
 
-@Api(value = "Patient", authorizations = @Authorization(value = "access_token"))
 @Path("/v1/Patient")
 public class PatientResource extends AbstractPatientResource {
 
@@ -71,12 +69,8 @@ public class PatientResource extends AbstractPatientResource {
     @Timed
     @ExceptionMetered
     @Authorizer
-    @ApiOperation(value = "Search for Patients", notes = "FHIR endpoint for searching for Patient resources." +
-            "<p> If Patient Identifier is provided, results will be filtered to match the given property")
     @Override
-    public Bundle patientSearch(@ApiParam(hidden = true)
-                                @Auth OrganizationPrincipal organization,
-                                @ApiParam(value = "Patient MBI")
+    public Bundle patientSearch(@Auth OrganizationPrincipal organization,
                                 @QueryParam(value = Patient.SP_IDENTIFIER) @NoHtml String patientMBI) {
 
         final var request = this.client
@@ -109,10 +103,8 @@ public class PatientResource extends AbstractPatientResource {
     @Timed
     @Authorizer
     @ExceptionMetered
-    @ApiOperation(value = "Create Patient", notes = "Create a Patient record associated to the Organization.")
-    @ApiResponses(@ApiResponse(code = 422, message = "Patient does not satisfy the required FHIR profile"))
     @Override
-    public Response submitPatient(@ApiParam(hidden = true) @Auth OrganizationPrincipal organization, @Valid @Profiled @ApiParam Patient patient) {
+    public Response submitPatient(@Auth OrganizationPrincipal organization, @Valid @Profiled Patient patient) {
 
         // Set the Managing Organization on the Patient
         final Reference orgReference = new Reference(new IdType("Organization", organization.getOrganization().getId()));
@@ -132,12 +124,8 @@ public class PatientResource extends AbstractPatientResource {
     @Timed
     @ExceptionMetered
     @Authorizer
-    @ApiOperation(value = "Bulk submit Patient resources", notes = "FHIR operation for submitting a Bundle of Patient resources, which will be associated to the given Organization." +
-            "<p> Each Patient resource MUST implement the " + PatientProfile.PROFILE_URI + "profile.")
-    @ApiResponses(@ApiResponse(code = 422, message = "Patient does not satisfy the required FHIR profile"))
     @Override
-    public Bundle bulkSubmitPatients(@ApiParam(hidden = true) @Auth OrganizationPrincipal organization,
-                                     @ApiParam Parameters params) {
+    public Bundle bulkSubmitPatients(@Auth OrganizationPrincipal organization, Parameters params) {
         final Bundle patientBundle = (Bundle) params.getParameterFirstRep().getResource();
         final Consumer<Patient> entryHandler = (patient) -> validateAndAddOrg(patient, organization.getOrganization().getId(), validator);
 
@@ -151,10 +139,8 @@ public class PatientResource extends AbstractPatientResource {
     @PathAuthorizer(type = DPCResourceType.Patient, pathParam = "patientID")
     @Timed
     @ExceptionMetered
-    @ApiOperation(value = "Fetch Patient", notes = "Fetch specific Patient record.")
-    @ApiResponses(@ApiResponse(code = 404, message = "Cannot find Patient with given ID"))
     @Override
-    public Patient getPatient(@ApiParam(value = "Patient resource ID", required = true) @PathParam("patientID") UUID patientID) {
+    public Patient getPatient(@PathParam("patientID") UUID patientID) {
         return this.client
                 .read()
                 .resource(Patient.class)
@@ -169,19 +155,10 @@ public class PatientResource extends AbstractPatientResource {
     @PathAuthorizer(type = DPCResourceType.Patient, pathParam = "patientID")
     @Timed
     @ExceptionMetered
-    @ApiImplicitParams(
-            @ApiImplicitParam(name = "X-Provenance", required = true, paramType = "header", type = "string", dataTypeClass = Provenance.class))
-    @ApiOperation(value = "Fetch entire Patient record", notes = "Fetch entire record for Patient with given ID synchronously. " +
-            "All resources available for the Patient are included in the result Bundle.")
-    @ApiResponses(value = {
-            @ApiResponse(code = 404, message = "Cannot find Patient record with given ID"),
-            @ApiResponse(code = 504, message = "", response = OperationOutcome.class),
-            @ApiResponse(code = 500, message = "A system error occurred", response = OperationOutcome.class)
-    })
     @Override
-    public Bundle everything(@ApiParam(hidden = true) @Auth OrganizationPrincipal organization,
+    public Bundle everything(@Auth OrganizationPrincipal organization,
                              @Valid @Profiled @ProvenanceHeader Provenance provenance,
-                             @ApiParam(value = "Patient resource ID", required = true) @PathParam("patientID") UUID patientId,
+                             @PathParam("patientID") UUID patientId,
                              @QueryParam("_since") @NoHtml String sinceParam,
                              @Context HttpServletRequest request) {
         final Provenance.ProvenanceAgentComponent performer = FHIRExtractors.getProvenancePerformer(provenance);
@@ -235,10 +212,8 @@ public class PatientResource extends AbstractPatientResource {
     @PathAuthorizer(type = DPCResourceType.Patient, pathParam = "patientID")
     @Timed
     @ExceptionMetered
-    @ApiOperation(value = "Delete Patient", notes = "Remove specific Patient record")
-    @ApiResponses(@ApiResponse(code = 404, message = "Unable to find Patient to delete"))
     @Override
-    public Response deletePatient(@ApiParam(value = "Patient resource ID", required = true) @PathParam("patientID") UUID patientID) {
+    public Response deletePatient(@PathParam("patientID") UUID patientID) {
         this.client
                 .delete()
                 .resourceById("Patient", patientID.toString())
@@ -254,14 +229,8 @@ public class PatientResource extends AbstractPatientResource {
     @FHIR
     @Timed
     @ExceptionMetered
-    @ApiOperation(value = "Update Patient record", notes = "Update specific Patient record." +
-            "<p>Currently, this method allows for updating of only the Patient first name, last name, and birthdate.")
-    @ApiResponses(value = {
-            @ApiResponse(code = 404, message = "Unable to find Patient to update"),
-            @ApiResponse(code = 422, message = "Patient does not satisfy the required FHIR profile")
-    })
     @Override
-    public Patient updatePatient(@ApiParam(value = "Patient resource ID", required = true) @PathParam("patientID") UUID patientID, @Valid @Profiled @ApiParam Patient patient) {
+    public Patient updatePatient(@PathParam("patientID") UUID patientID, @Valid @Profiled Patient patient) {
         final MethodOutcome outcome = this.client
                 .update()
                 .resource(patient)
@@ -282,10 +251,8 @@ public class PatientResource extends AbstractPatientResource {
     @Timed
     @ExceptionMetered
     @Authorizer
-    @ApiOperation(value = "Validate Patient resource", notes = "Validates the given resource against the " + PatientProfile.PROFILE_URI + " profile." +
-            "<p>This method always returns a 200 status, even in response to a non-conformant resource.")
     @Override
-    public IBaseOperationOutcome validatePatient(@Auth @ApiParam(hidden = true) OrganizationPrincipal organization, @ApiParam Parameters parameters) {
+    public IBaseOperationOutcome validatePatient(@Auth OrganizationPrincipal organization, Parameters parameters) {
         return ValidationHelpers.validateAgainstProfile(this.validator, parameters, PatientProfile.PROFILE_URI);
     }
 

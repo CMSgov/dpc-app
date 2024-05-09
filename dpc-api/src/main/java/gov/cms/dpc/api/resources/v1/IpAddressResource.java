@@ -12,7 +12,6 @@ import gov.cms.dpc.api.resources.AbstractIpAddressResource;
 import io.dropwizard.auth.Auth;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.hypersistence.utils.hibernate.type.basic.Inet;
-import io.swagger.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +23,6 @@ import javax.ws.rs.core.Response;
 import java.util.Optional;
 import java.util.UUID;
 
-@Api(tags = {"Auth", "IpAddress"}, authorizations = @Authorization(value = "access_token"))
 @Path("/v1/IpAddress")
 public class IpAddressResource extends AbstractIpAddressResource {
     private static final Logger logger = LoggerFactory.getLogger(IpAddressResource.class);
@@ -43,11 +41,7 @@ public class IpAddressResource extends AbstractIpAddressResource {
     @ExceptionMetered
     @Authorizer
     @UnitOfWork
-    @ApiOperation(
-        value = "Fetch Ip addresses for an organization",
-        authorizations = @Authorization(value = "access_token")
-    )
-    public CollectionResponse<IpAddressEntity> getOrganizationIpAddresses(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal) {
+    public CollectionResponse<IpAddressEntity> getOrganizationIpAddresses(@Auth OrganizationPrincipal organizationPrincipal) {
         return new CollectionResponse<>(this.dao.fetchIpAddresses(organizationPrincipal.getID()));
     }
 
@@ -59,13 +53,7 @@ public class IpAddressResource extends AbstractIpAddressResource {
     @ExceptionMetered
     @Authorizer
     @UnitOfWork
-    @ApiOperation(
-            value = "Submits an Ip address for an organization",
-            notes = "Organizations are currently limited to 8 Ip addresses.  If you attempt to submit more a 400 will be returned.",
-            authorizations = @Authorization(value = "access_token")
-    )
-    @ApiResponses(@ApiResponse(code = 400, message = "Organization has too many Ip addresses."))
-    public IpAddressEntity submitIpAddress(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal, @ApiParam CreateIpAddressRequest createIpAddressRequest) {
+    public IpAddressEntity submitIpAddress(@Auth OrganizationPrincipal organizationPrincipal, CreateIpAddressRequest createIpAddressRequest) {
         Inet ipAddress = new Inet(createIpAddressRequest.getIpAddress());
         try {
             // Converts to a Java InetAddress and verifies host.  Throws an exception if it fails.
@@ -97,13 +85,9 @@ public class IpAddressResource extends AbstractIpAddressResource {
     @ExceptionMetered
     @Authorizer
     @UnitOfWork
-    @ApiOperation(
-            value = "Deletes an Ip address for an organization",
-            authorizations = @Authorization(value = "access_token")
-    )
     public Response deleteIpAddress(
-            @ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
-            @ApiParam @NotNull @PathParam(value = "ipAddressId") UUID ipAddressId
+            @Auth OrganizationPrincipal organizationPrincipal,
+            @NotNull @PathParam(value = "ipAddressId") UUID ipAddressId
     ) {
         CollectionResponse currentIps = getOrganizationIpAddresses(organizationPrincipal);
         Optional<IpAddressEntity> optionalIp = currentIps.getEntities().stream().filter(ip ->

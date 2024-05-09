@@ -9,7 +9,6 @@ import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.auth.annotations.Public;
 import gov.cms.dpc.api.resources.v1.BaseResource;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
-import io.swagger.annotations.ApiOperation;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -66,13 +65,6 @@ class APIResourceAnnotationTest {
                 () -> assertTrue(method.isAnnotationPresent(ExceptionMetered.class), String.format("Method: %s in Class: %s must have @ExceptionMetered annotation", method.getName(), method.getDeclaringClass()))
         ));
     }
-
-    @Test
-    void allResourcesHaveSwaggerAnnotations() {
-        methods
-                .forEach(method ->
-                        assertTrue(method.isAnnotationPresent(ApiOperation.class), String.format("Method: %s in Class: %s must have Swagger annotation", method.getName(), method.getDeclaringClass())));
-    }// iterate over parameters (at least one should have Auth)
 
     @Test
     void allResourcesHaveSecurityAnnotations() {

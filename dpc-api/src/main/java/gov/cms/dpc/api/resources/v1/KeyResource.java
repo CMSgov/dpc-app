@@ -15,7 +15,6 @@ import gov.cms.dpc.common.annotations.NoHtml;
 import gov.cms.dpc.common.entities.OrganizationEntity;
 import io.dropwizard.auth.Auth;
 import io.dropwizard.hibernate.UnitOfWork;
-import io.swagger.annotations.*;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.eclipse.jetty.http.HttpStatus;
 import org.slf4j.Logger;
@@ -32,7 +31,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-@Api(tags = {"Auth", "Key"}, authorizations = @Authorization(value = "access_token"))
 @Path("/v1/Key")
 public class KeyResource extends AbstractKeyResource {
 
@@ -54,12 +52,8 @@ public class KeyResource extends AbstractKeyResource {
     @Authorizer
     @UnitOfWork
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Fetch public keys for Organization",
-            notes = "This endpoint returns all the public keys currently associated with the organization." +
-                    "<p>The returned keys are serialized using PEM encoding.",
-            authorizations = @Authorization(value = "access_token"))
     @Override
-    public CollectionResponse<PublicKeyEntity> getPublicKeys(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal) {
+    public CollectionResponse<PublicKeyEntity> getPublicKeys(@Auth OrganizationPrincipal organizationPrincipal) {
         return new CollectionResponse<>(this.dao.fetchPublicKeys(organizationPrincipal.getID()));
     }
 
@@ -70,12 +64,8 @@ public class KeyResource extends AbstractKeyResource {
     @UnitOfWork
     @Authorizer
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Fetch public key for Organization",
-            notes = "This endpoint returns the specified public key associated with the organization." +
-                    "<p>The returned keys are serialized using PEM encoding.")
-    @ApiResponses(@ApiResponse(code = 404, message = "Cannot find public key for organization"))
     @Override
-    public PublicKeyEntity getPublicKey(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal, @NotNull @PathParam(value = "keyID") UUID keyID) {
+    public PublicKeyEntity getPublicKey(@Auth OrganizationPrincipal organizationPrincipal, @NotNull @PathParam(value = "keyID") UUID keyID) {
         final List<PublicKeyEntity> publicKeys = this.dao.publicKeySearch(keyID, organizationPrincipal.getID());
         if (publicKeys.isEmpty()) {
             throw new WebApplicationException("Cannot find public key", Response.Status.NOT_FOUND);
@@ -90,14 +80,8 @@ public class KeyResource extends AbstractKeyResource {
     @UnitOfWork
     @Produces(MediaType.APPLICATION_JSON)
     @Authorizer
-    @ApiOperation(value = "Delete public key for Organization",
-            notes = "This endpoint deletes the specified public key associated with the organization.")
-    @ApiResponses(value = {
-            @ApiResponse(code = 404, message = "Cannot find public key for organization"),
-            @ApiResponse(code = 200, message = "Key successfully removed")
-    })
     @Override
-    public Response deletePublicKey(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal, @NotNull @PathParam(value = "keyID") UUID keyID) {
+    public Response deletePublicKey(@Auth OrganizationPrincipal organizationPrincipal, @NotNull @PathParam(value = "keyID") UUID keyID) {
         final List<PublicKeyEntity> keys = this.dao.publicKeySearch(keyID, organizationPrincipal.getID());
 
         if (keys.isEmpty()) {
@@ -114,18 +98,10 @@ public class KeyResource extends AbstractKeyResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Authorizer
-    @ApiOperation(value = "Register public key for Organization",
-            notes = "This endpoint registers the provided public key with the organization." +
-                    "<p>The provided key MUST be PEM encoded." +
-                    "<p>RSA keys of 4096-bits or greater are supported, as well as ECC keys using one of the following curves:" +
-                    "- secp256r1" +
-                    "- secp384r1")
-    @ApiResponses(@ApiResponse(code = 400, message = "Public key is not valid."))
     @UnitOfWork
     @Override
-    public PublicKeyEntity submitKey(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
-                                     @ApiParam KeySignature keySignature,
-                                     @ApiParam(name = "label", value = "Public Key Label (cannot be more than 25 characters in length)", defaultValue = "key:{random integer}", allowableValues = "range[-infinity, 25]")
+    public PublicKeyEntity submitKey(@Auth OrganizationPrincipal organizationPrincipal,
+                                     KeySignature keySignature,
                                      @QueryParam(value = "label") Optional<String> keyLabelOptional) {
         final String keyLabel;
         if (keyLabelOptional.isPresent()) {

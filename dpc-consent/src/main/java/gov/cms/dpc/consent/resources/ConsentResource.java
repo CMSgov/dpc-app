@@ -11,12 +11,7 @@ import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.converters.entities.ConsentEntityConverter;
 import io.dropwizard.hibernate.UnitOfWork;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
 import org.eclipse.jetty.http.HttpStatus;
-import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Consent;
 import org.hl7.fhir.dstu3.model.Identifier;
 
@@ -44,10 +39,7 @@ public class ConsentResource {
     @POST
     @FHIR
     @UnitOfWork
-    @ApiOperation(value = "Create a Consent resource")
-    @ApiResponses(value = { @ApiResponse(code = 201, message = "Consent resource was created"),
-            @ApiResponse(code = 400, message = "Consent resource was not created due to bad request") })
-    public Response create(@ApiParam(value = "Consent resource") Consent consent) {
+    public Response create(Consent consent) {
         ConsentEntity entity = ConsentEntityConverter.fromFhir(consent);
         entity = dao.persistConsent(entity);
         Consent result = ConsentEntityConverter.toFhir(entity, fhirReferenceURL);
@@ -60,13 +52,10 @@ public class ConsentResource {
     @Timed
     @ExceptionMetered
     @UnitOfWork
-    @ApiOperation(value = "Search for Consent Entries", notes = "Search for Consent records. " +
-            "<p>Must provide ONE OF Consent ID as an _id or identifier, or a patient MBI or HICN to search for.", response = Bundle.class)
-    @ApiResponses(@ApiResponse(code = 400, message = "Must provide Consent or Patient id"))
     public List<Consent> search(
-            @ApiParam(value = "Consent resource _id") @QueryParam(Consent.SP_RES_ID) Optional<UUID> id,
-            @ApiParam(value = "Consent resource identifier") @QueryParam(Consent.SP_IDENTIFIER) Optional<UUID> identifier,
-            @ApiParam(value = "Patient Identifier") @QueryParam(Consent.SP_PATIENT) Optional<String> patientId) {
+            @QueryParam(Consent.SP_RES_ID) Optional<UUID> id,
+            @QueryParam(Consent.SP_IDENTIFIER) Optional<UUID> identifier,
+            @QueryParam(Consent.SP_PATIENT) Optional<String> patientId) {
 
         List<ConsentEntity> entities = new ArrayList<>();
 
@@ -102,10 +91,7 @@ public class ConsentResource {
     @Timed
     @ExceptionMetered
     @UnitOfWork
-    @ApiOperation(value = "Locate a Consent entry by id")
-    @ApiResponses(@ApiResponse(code = 400, message = "invalid id value. Must have a consent resource id"))
-    public Consent getConsent(@ApiParam(value = "Consent resource ID", required = true) @PathParam("consentId") UUID consentId) {
-
+    public Consent getConsent(@PathParam("consentId") UUID consentId) {
         final ConsentEntity consentEntity = this.dao.getConsent(consentId).orElseThrow(() ->
                 new WebApplicationException("invalid consent resource id value", HttpStatus.NOT_FOUND_404)
         );
@@ -117,11 +103,7 @@ public class ConsentResource {
     @Path("/{consentId}")
     @FHIR
     @UnitOfWork
-    @ApiOperation(value = "Update a Consent resource")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "Consent resource was updated"),
-            @ApiResponse(code = 400, message = "Consent resource was not updated due to bad request") })
-    public Consent update(@ApiParam(value = "Consent resource ID", required = true) @PathParam("consentId") UUID consentId,
-                          @ApiParam(value = "Consent resource", required = true) Consent consent) {
+    public Consent update(@PathParam("consentId") UUID consentId, Consent consent) {
         consent.setId(consentId.toString());
         ConsentEntity entity = ConsentEntityConverter.fromFhir(consent);
         entity = this.dao.persistConsent(entity);

@@ -3,7 +3,6 @@ package gov.cms.dpc.api.models;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import gov.cms.dpc.common.converters.jackson.DurationToSecondsConverter;
-import io.swagger.annotations.ApiModelProperty;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
@@ -23,7 +22,6 @@ public class JWTAuthResponse implements Serializable {
     @NotNull
     @JsonProperty(value = "expires_in")
     @JsonSerialize(converter = DurationToSecondsConverter.class)
-    @ApiModelProperty(value = "Token expiration (in seconds)", dataType = "String")
     private Duration expiresIn;
     @NotEmpty
     private String scope;

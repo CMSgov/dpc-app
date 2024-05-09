@@ -27,7 +27,6 @@ import io.dropwizard.hibernate.UnitOfWork;
 import io.dropwizard.jersey.jsr310.OffsetDateTimeParam;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.SecurityException;
-import io.swagger.annotations.*;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.slf4j.Logger;
@@ -54,7 +53,6 @@ import static gov.cms.dpc.api.auth.MacaroonHelpers.ORGANIZATION_CAVEAT_KEY;
 import static gov.cms.dpc.api.auth.MacaroonHelpers.generateCaveatsForToken;
 import static gov.cms.dpc.macaroons.caveats.ExpirationCaveatSupplier.EXPIRATION_KEY;
 
-@Api(tags = {"Auth", "Token"}, authorizations = @Authorization(value = "access_token"))
 @Path("/v1/Token")
 public class TokenResource extends AbstractTokenResource {
 
@@ -92,10 +90,7 @@ public class TokenResource extends AbstractTokenResource {
     @Timed
     @ExceptionMetered
     @Authorizer
-    @ApiOperation(value = "Fetch client tokens", notes = "Method to retrieve the client tokens associated to the given Organization.")
-    @ApiResponses(value = @ApiResponse(code = 404, message = "Could not find Organization"))
-    public CollectionResponse<TokenEntity> getOrganizationTokens(
-            @ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal) {
+    public CollectionResponse<TokenEntity> getOrganizationTokens(@Auth OrganizationPrincipal organizationPrincipal) {
         return new CollectionResponse<>(this.dao.fetchTokens(organizationPrincipal.getID()));
     }
 
@@ -105,11 +100,8 @@ public class TokenResource extends AbstractTokenResource {
     @Timed
     @ExceptionMetered
     @Authorizer
-    @ApiOperation(value = "Fetch client token", notes = "Method to retrieve metadata for a specific access token")
-    @ApiResponses(value = @ApiResponse(code = 404, message = "Could not find Token", response = OperationOutcome.class))
     @Override
-    public TokenEntity getOrganizationToken(@ApiParam(hidden = true) @Auth OrganizationPrincipal principal,
-                                            @ApiParam(value = "Token ID", required = true) @NotNull @PathParam("tokenID") UUID tokenID) {
+    public TokenEntity getOrganizationToken(@Auth OrganizationPrincipal principal, @NotNull @PathParam("tokenID") UUID tokenID) {
         final List<TokenEntity> tokens = this.dao.findTokenByOrgAndID(principal.getID(), tokenID);
         if (tokens.isEmpty()) {
             throw new WebApplicationException("Cannot find token with matching ID", Response.Status.NOT_FOUND);
@@ -124,18 +116,12 @@ public class TokenResource extends AbstractTokenResource {
     @Timed
     @ExceptionMetered
     @Authorizer
-    @ApiOperation(value = "Create authentication token", notes = "Create a new authentication token for the given Organization (identified by Resource ID)." +
-            "<p>" +
-            "Token supports a custom human-readable label via the `label` query param as well as a custom expiration period via the `expiration` param." +
-            "<p>" +
-            "Note: The expiration time cannot exceed the maximum lifetime specified by the system (current 1 year)")
-    @ApiResponses(value = @ApiResponse(code = 400, message = "Cannot create token with specified parameters"))
     @Override
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public TokenEntity createOrganizationToken(
-            @ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal, @Valid CreateTokenRequest body,
-            @ApiParam(value = "Optional label for token") @QueryParam("label") @NoHtml String tokenLabel, @QueryParam("expiration") Optional<OffsetDateTimeParam> expiration) {
+            @Auth OrganizationPrincipal organizationPrincipal, @Valid CreateTokenRequest body,
+            @QueryParam("label") @NoHtml String tokenLabel, @QueryParam("expiration") Optional<OffsetDateTimeParam> expiration) {
 
         final UUID organizationID = organizationPrincipal.getID();
 
@@ -177,11 +163,7 @@ public class TokenResource extends AbstractTokenResource {
     @Timed
     @ExceptionMetered
     @Authorizer
-    @ApiOperation(value = "Delete authentication token", notes = "Delete the specified authentication token for the given Organization (identified by Resource ID)")
-    @ApiResponses({@ApiResponse(code = 204, message = "Successfully deleted token"), @ApiResponse(code = 404, message = "Unable to find token with given id")})
-    public Response deleteOrganizationToken(
-            @ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
-            @ApiParam(value = "Token ID", required = true) @NotNull @PathParam("tokenID") UUID tokenID) {
+    public Response deleteOrganizationToken(@Auth OrganizationPrincipal organizationPrincipal, @NotNull @PathParam("tokenID") UUID tokenID) {
         final List<TokenEntity> matchedToken = this.dao.findTokenByOrgAndID(organizationPrincipal.getID(), tokenID);
         assert matchedToken.size() == 1 : "Should only have a single matching token";
 
@@ -195,22 +177,14 @@ public class TokenResource extends AbstractTokenResource {
     @UnitOfWork
     @Timed
     @ExceptionMetered
-    @ApiOperation(value = "Request API access token", notes = "Request access token for API access")
-    @ApiResponses(
-            value = {@ApiResponse(code = 400, message = "Token request is invalid"),
-                    @ApiResponse(code = 401, message = "Client is not authorized to request access token")})
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_JSON)
     @Public
     @Override
     public JWTAuthResponse authorizeJWT(
-            @ApiParam(name = "scope", allowableValues = "system/*.*", value = "Requested access scope", required = true)
             @FormParam(value = "scope") String scope,
-            @ApiParam(name = "grant_type", value = "Authorization grant type", required = true, allowableValues = "client_credentials")
             @FormParam(value = "grant_type") String grantType,
-            @ApiParam(name = "client_assertion_type", value = "Client Assertion Type", required = true, allowableValues = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer")
             @FormParam(value = "client_assertion_type") String clientAssertionType,
-            @ApiParam(name = "client_assertion", value = "Signed JWT", required = true)
             @FormParam(value = "client_assertion") String jwtBody) {
         // Actual scope implementation will come as part of DPC-747
         validateJWTQueryParams(grantType, clientAssertionType, scope, jwtBody);
@@ -232,10 +206,6 @@ public class TokenResource extends AbstractTokenResource {
     @UnitOfWork
     @Timed
     @ExceptionMetered
-    @ApiOperation(value = "Validate API token request", notes = "Validates a given JWT to ensure the required claims and values are set correctly.", authorizations = @Authorization(value = ""))
-    @ApiResponses(
-            value = {@ApiResponse(code = 200, message = "Token request is valid"),
-                    @ApiResponse(code = 400, message = "Token request is invalid")})
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
     @Public
