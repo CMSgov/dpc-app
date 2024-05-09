@@ -32,10 +32,6 @@ RSpec.describe SyncOrganizationJob, type: :job do
     }
   end
 
-  before(:all) do
-    ActiveJob::Base.queue_adapter = :test
-  end
-
   before(:each) do
     SyncOrganizationJob.perform_later(provider_organization.id)
   end
