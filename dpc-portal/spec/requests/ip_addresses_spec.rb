@@ -5,6 +5,7 @@ require 'rails_helper'
 RSpec.describe 'IpAddresses', type: :request do
   include DpcClientSupport
 
+  let(:terms_of_service_accepted_by) { create(:user) }
   describe 'GET /new' do
     context 'not logged in' do
       it 'redirects to login' do
@@ -15,7 +16,7 @@ RSpec.describe 'IpAddresses', type: :request do
 
     context 'no link to org' do
       let!(:user) { create(:user) }
-      let!(:org) { create(:provider_organization) }
+      let!(:org) { create(:provider_organization, terms_of_service_accepted_by:) }
       before { sign_in user }
       it 'redirects to organizations' do
         get "/organizations/#{org.id}/ip_addresses/new"
@@ -23,9 +24,25 @@ RSpec.describe 'IpAddresses', type: :request do
       end
     end
 
-    context 'as cd' do
+    context :not_signed_tos do
       let!(:user) { create(:user) }
       let!(:org) { create(:provider_organization) }
+
+      before do
+        create(:cd_org_link, provider_organization: org, user:)
+        sign_in user
+      end
+
+      it 'redirects to organizations page' do
+        get "/organizations/#{org.id}/ip_addresses/new"
+        expect(assigns(:organization)).to eq org
+        expect(response).to redirect_to(organizations_path)
+      end
+    end
+
+    context 'as cd' do
+      let!(:user) { create(:user) }
+      let!(:org) { create(:provider_organization, terms_of_service_accepted_by:) }
 
       before do
         create(:cd_org_link, provider_organization: org, user:)
@@ -51,7 +68,7 @@ RSpec.describe 'IpAddresses', type: :request do
     context 'as cd' do
       let!(:user) { create(:user) }
       let(:org_api_id) { SecureRandom.uuid }
-      let!(:org) { create(:provider_organization, dpc_api_organization_id: org_api_id) }
+      let!(:org) { create(:provider_organization, terms_of_service_accepted_by:, dpc_api_organization_id: org_api_id) }
 
       before do
         create(:cd_org_link, provider_organization: org, user:)
@@ -123,7 +140,7 @@ RSpec.describe 'IpAddresses', type: :request do
     context 'as cd' do
       let!(:user) { create(:user) }
       let(:org_api_id) { SecureRandom.uuid }
-      let!(:org) { create(:provider_organization, dpc_api_organization_id: org_api_id) }
+      let!(:org) { create(:provider_organization, terms_of_service_accepted_by:, dpc_api_organization_id: org_api_id) }
 
       before do
         create(:cd_org_link, provider_organization: org, user:)

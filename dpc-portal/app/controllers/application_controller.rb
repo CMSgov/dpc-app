@@ -9,6 +9,17 @@ class ApplicationController < ActionController::Base
 
   private
 
+  def tos_accepted
+    return if @organization.terms_of_service_accepted_by.present?
+
+    if current_user.ao?(@organization)
+      render(Page::Organization::TosFormComponent.new(@organization))
+    else
+      flash[:notice] = 'Organization is not ready for credential management'
+      redirect_to organizations_path
+    end
+  end
+
   def block_prod_sbx
     redirect_to root_url if ENV.fetch('ENV', nil) == 'prod-sbx'
   end

@@ -94,10 +94,11 @@ RSpec.describe 'Invitations', type: :request do
       let(:success_params) { { verification_code: } }
       let(:fail_params) { { verification_code: 'badcode' } }
 
-      before do
-        sign_in user
-      end
+      before { sign_in user }
+
       context 'success' do
+        before { stub_user_info }
+
         it 'should create CdOrgLink' do
           expect do
             post "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm",
@@ -112,9 +113,9 @@ RSpec.describe 'Invitations', type: :request do
           expect(cd_invite.invited_phone).to be_blank
           expect(cd_invite.invited_email).to be_blank
         end
-        it 'should redirect to organizations page with notice' do
+        it 'should redirect to organization page with notice' do
           post "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm", params: success_params
-          expect(response).to redirect_to(organizations_path)
+          expect(response).to redirect_to(organization_path(org))
           expected_message =  "Invitation accepted. You can now manage this organization's credentials. Learn more."
           expect(flash[:notice]).to eq expected_message
         end
@@ -143,23 +144,98 @@ RSpec.describe 'Invitations', type: :request do
           expect(response).to be_forbidden
           expect(response.body).to include('usa-alert--warning')
         end
-        it 'should render form with error if OTP not match' do
-          post "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm", params: fail_params
-          expect(response).to be_bad_request
-          expect(response.body).to include(confirm_organization_invitation_path(org, cd_invite))
-        end
-        it 'should render error page if PII not match' do
-          user.update_attribute(:family_name, "not #{cd_invite.invited_family_name}")
+
+        it 'should show login if token expired' do
+          user_service_class = class_double(UserInfoService).as_stubbed_const
+          expect(user_service_class).to receive(:new).and_raise(UserInfoServiceError, 'unauthorized')
           post "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm", params: success_params
-          expect(response).to be_forbidden
-          expect(response.body).to_not include(confirm_organization_invitation_path(org, cd_invite))
-          expect(response.body).to include('usa-alert--error')
+          expect(response).to be_ok
+          expect(response.body).to include(login_organization_invitation_path(org, cd_invite))
         end
-        it 'should render error page if PII not match and OTP not match' do
-          user.update_attribute(:family_name, "not #{cd_invite.invited_family_name}")
-          post "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm", params: fail_params
+
+        it 'should show error page if user info issue' do
+          user_service_class = class_double(UserInfoService).as_stubbed_const
+          expect(user_service_class).to receive(:new).and_raise(UserInfoServiceError, 'terrible thing happened')
+          post "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm", params: success_params
+          expect(response.body).to include(I18n.t('verification.server_error_text'))
+        end
+
+        context 'not match' do
+          before { stub_user_info }
+          it 'should render form with error if OTP not match' do
+            post "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm", params: fail_params
+            expect(response).to be_bad_request
+            expect(response.body).to include(confirm_organization_invitation_path(org, cd_invite))
+          end
+          it 'should render error page if family_name not match' do
+            cd_invite.update_attribute(:invited_family_name, "not #{cd_invite.invited_family_name}")
+            post "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm", params: success_params
+            expect(response).to be_forbidden
+            expect(response.body).to_not include(confirm_organization_invitation_path(org, cd_invite))
+            expect(response.body).to include('usa-alert--error')
+          end
+          it 'should render error page if phone not match' do
+            cd_invite.update_attribute(:invited_phone, '9129999999')
+            post "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm", params: success_params
+            expect(response).to be_forbidden
+            expect(response.body).to_not include(confirm_organization_invitation_path(org, cd_invite))
+            expect(response.body).to include('usa-alert--error')
+          end
+          it 'should render error page if PII not match and OTP not match' do
+            cd_invite.update_attribute(:invited_family_name, "not #{cd_invite.invited_family_name}")
+            post "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm", params: fail_params
+            expect(response).to be_forbidden
+            expect(response.body).to_not include(confirm_organization_invitation_path(org, cd_invite))
+            expect(response.body).to include('usa-alert--error')
+          end
+        end
+      end
+    end
+    context :ao do
+      let!(:ao_invite) { create(:invitation, :ao) }
+      let(:user) do
+        create(:user, given_name: 'Herman',
+                      family_name: 'Wouk',
+                      email: ao_invite.invited_email)
+      end
+      let(:org) { ao_invite.provider_organization }
+
+      before do
+        sign_in user
+      end
+      context 'success' do
+        before do
+          stub_user_info
+        end
+        it 'should create AoOrgLink' do
+          expect do
+            post "/organizations/#{org.id}/invitations/#{ao_invite.id}/confirm"
+          end.to change { AoOrgLink.count }.by(1)
+        end
+        it 'should update invitation' do
+          post "/organizations/#{org.id}/invitations/#{ao_invite.id}/confirm"
+          ao_invite.reload
+          expect(ao_invite.invited_given_name).to be_blank
+          expect(ao_invite.invited_family_name).to be_blank
+          expect(ao_invite.invited_phone).to be_blank
+          expect(ao_invite.invited_email).to be_blank
+        end
+        it 'should redirect to organization page with notice' do
+          post "/organizations/#{org.id}/invitations/#{ao_invite.id}/confirm"
+          expect(response).to redirect_to(organization_path(org))
+          expected_message =  'Invitation accepted.'
+          expect(flash[:notice]).to eq expected_message
+        end
+      end
+      context 'failure' do
+        before do
+          stub_user_info(overrides: { 'social_security_number' => '900111112' })
+        end
+        it 'should render error page if SSN not match' do
+          ao_invite.update(invited_email: 'some-other-email@example.com')
+          post "/organizations/#{org.id}/invitations/#{ao_invite.id}/confirm"
           expect(response).to be_forbidden
-          expect(response.body).to_not include(confirm_organization_invitation_path(org, cd_invite))
+          expect(response.body).to_not include(confirm_organization_invitation_path(org, ao_invite))
           expect(response.body).to include('usa-alert--error')
         end
       end
@@ -185,4 +261,35 @@ RSpec.describe 'Invitations', type: :request do
       expect(response.body).to include('usa-alert--warning')
     end
   end
+end
+
+def user_info(overrides)
+  {
+    'sub' => '097d06f7-e9ad-4327-8db3-0ba193b7a2c2',
+    'iss' => 'https://idp.int.identitysandbox.gov/',
+    'email' => 'bob@testy.com',
+    'email_verified' => true,
+    'all_emails' => [
+      'bob@testy.com',
+      'david@example.com',
+      'david2@example.com'
+    ],
+    'given_name' => 'Bob',
+    'family_name' => 'Hodges',
+    'birthdate' => '1938-10-06',
+    'social_security_number' => '900888888',
+    'phone' => '+1111111111',
+    'phone_verified' => true,
+    'verified_at' => 1_704_834_157,
+    'ial' => 'http://idmanagement.gov/ns/assurance/ial/2',
+    'aal' => 'urn:gov:gsa:ac:classes:sp:PasswordProtectedTransport:duo'
+  }.merge(overrides)
+end
+
+def stub_user_info(overrides: {})
+  user_service_class = class_double(UserInfoService).as_stubbed_const
+  user_service = double(UserInfoService)
+  expect(user_service_class).to receive(:new).and_return(user_service)
+
+  expect(user_service).to receive(:user_info).and_return(user_info(overrides))
 end
