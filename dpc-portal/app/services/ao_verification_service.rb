@@ -41,6 +41,16 @@ class AoVerificationService
     raise AoException, 'org_med_sanctions' if check_sanctions_response(response)
   end
 
+  def get_approved_enrollments(organization_npi)
+    response = @cpi_api_gw_client.fetch_enrollment(organization_npi)
+    raise AoException, 'bad_npi' if response['code'] == '404'
+
+    enrollments = response['enrollments'].select { |enrollment| enrollment['status'] == 'APPROVED' }
+    raise AoException, 'no_approved_enrollment' if enrollments.empty?
+
+    enrollments
+  end
+
   private
 
   def check_provider_med_sanctions(ao_ssn)
@@ -69,16 +79,6 @@ class AoVerificationService
       Date.parse(waiver['endDate']) > Date.today
     end
     !active_waiver.nil?
-  end
-
-  def get_approved_enrollments(organization_npi)
-    response = @cpi_api_gw_client.fetch_enrollment(organization_npi)
-    raise AoException, 'bad_npi' if response['code'] == '404'
-
-    enrollments = response['enrollments'].select { |enrollment| enrollment['status'] == 'APPROVED' }
-    raise AoException, 'no_approved_enrollment' if enrollments.empty?
-
-    enrollments
   end
 
   def get_authorized_official_role(enrollment_ids, identifier_type, identifier)
