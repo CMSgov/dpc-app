@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'sinatra/base'
+require './lib/tasks/npis'
 
 # rubocop:disable Metrics/ClassLength
 # This class simulates the CPI API Gateway and the IDM identity service
@@ -67,7 +68,7 @@ class FakeCpiGateway < Sinatra::Base
       }.to_json
     when '3299073577'
       '{"code": "404"}'
-    when '3782297014'
+    when *Npis::ORG_NO_ENROLLMENTS
       {
         enrollments: [
           { status: 'INACTIVE' },
@@ -92,6 +93,9 @@ class FakeCpiGateway < Sinatra::Base
     ao_ssns = %w[900111111 900666666 900777777 900888888 666222222]
     roles = ao_ssns.map { |ssn| { pacId: ssn, roleCode: '10', ssn: } }
     roles << { pacId: 'validPacId', roleCode: '10', ssn: '900428421' }
+    PacIds::AO_HAS_ROLE.each do |pac_id|
+      roles << { pacId: pac_id, roleCode: '10', ssn: pac_id }
+    end
     {
       enrollments: {
         roles:
@@ -114,8 +118,11 @@ class FakeCpiGateway < Sinatra::Base
     provider = { providerType: provider_type, medSanctions: [], waiverInfo: [] }
 
     provider[:orgName] = "Organization #{identifier}" if provider_type == 'org'
+    sanctioned_ids = %w[900666666 900777777 3598564557 3098168743]
+    sanctioned_ids += Npis::ORG_FAILS_MED_CHECK
+    sanctioned_ids += PacIds::AO_FAILS_MED_CHECK
 
-    if %(900666666 9007777777 3598564557 3098168743).include?(identifier)
+    if sanctioned_ids.include?(identifier)
       provider[:medSanctions] << {
         sanctionCode: '12ABC',
         sanctionDate: '2010-08-17',
@@ -126,7 +133,7 @@ class FakeCpiGateway < Sinatra::Base
       }
     end
 
-    if %(900777777 3098168743).include?(identifier)
+    if %w[900777777 3098168743].include?(identifier)
       provider[:waiverInfo] << {
         effectiveDate: Date.today.prev_year.to_s,
         endDate: Date.today.next_year.to_s,
