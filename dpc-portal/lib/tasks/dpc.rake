@@ -29,10 +29,12 @@ namespace :dpc do
     fhir_endpoint = { 'status' => 'test',
                       'name' => 'DPC Sandbox Test Endpoint',
                       'uri' => 'https://dpc.cms.gov/test-endpoint' }
+
     client = DpcClient.new
     client.create_organization(org, fhir_endpoint:)
     if client.response_successful?
-      puts "http://localhost:3100/portal/organizations/#{client.response_body['id']}"
+      puts "Organization NPI: #{client.response_body['identifier'][0]['value']}"
+      puts "Organization Page: http://localhost:3100/portal/organizations/#{client.response_body['id']}"
     else
       puts "HTTP ERROR #{client.response_status} creating org"
     end
