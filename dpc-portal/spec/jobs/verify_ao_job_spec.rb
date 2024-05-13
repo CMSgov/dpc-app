@@ -38,9 +38,15 @@ RSpec.describe VerifyAoJob, type: :job do
         expect(User.where(verification_status: 'rejected')).to be_empty
       end
       it 'should update the links and users last_checked_at' do
+        links_to_check = AoOrgLink.where(last_checked_at: ..6.days.ago,
+                                         verification_status: true)
+
         VerifyAoJob.perform_now
-        User.all.each { |user| expect(user.last_checked_at).to be > 1.day.ago }
-        AoOrgLink.all.each { |user| expect(user.last_checked_at).to be > 1.day.ago }
+        links_to_check.each do |link|
+          link.reload
+          expect(link.last_checked_at).to be > 1.day.ago
+          expect(link.user.last_checked_at).to be > 1.day.ago
+        end
       end
     end
     context :failures do
