@@ -115,7 +115,7 @@ class FakeCpiGateway < Sinatra::Base
 
     provider[:orgName] = "Organization #{identifier}" if provider_type == 'org'
 
-    if %w(900666666 900777777 3598564557 3098168743).include?(identifier)
+    if %w[900666666 900777777 3598564557 3098168743].include?(identifier)
       provider[:medSanctions] << {
         sanctionCode: '12ABC',
         sanctionDate: '2010-08-17',
@@ -126,7 +126,7 @@ class FakeCpiGateway < Sinatra::Base
       }
     end
 
-    if %w(900777777 3098168743).include?(identifier)
+    if %w[900777777 3098168743].include?(identifier)
       provider[:waiverInfo] << {
         effectiveDate: Date.today.prev_year.to_s,
         endDate: Date.today.next_year.to_s,

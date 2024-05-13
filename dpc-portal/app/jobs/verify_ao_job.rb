@@ -9,6 +9,7 @@ class VerifyAoJob < ApplicationJob
     links_to_check.each do |link|
       service.check_ao_eligibilty(link.provider_organization.npi, :pac_id, link.user.pac_id)
       link.update!(last_checked_at: Time.now)
+      link.user.update!(last_checked_at: Time.now)
     rescue AoException => e
       handle_error(link, e.message)
     end

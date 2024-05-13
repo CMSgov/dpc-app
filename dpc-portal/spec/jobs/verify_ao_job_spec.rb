@@ -32,9 +32,15 @@ RSpec.describe VerifyAoJob, type: :job do
         VerifyAoJob.perform_now
         expect(AoOrgLink.where(last_checked_at: ..6.days.ago).count).to eq 4
       end
-      it 'should not invalidate valid ao_org_link objects' do
+      it 'should not invalidate ao_org_links or users' do
         VerifyAoJob.perform_now
         expect(AoOrgLink.where(verification_status: false)).to be_empty
+        expect(User.where(verification_status: 'rejected')).to be_empty
+      end
+      it 'should update the links and users last_checked_at' do
+        VerifyAoJob.perform_now
+        User.all.each { |user| expect(user.last_checked_at).to be > 1.day.ago }
+        AoOrgLink.all.each { |user| expect(user.last_checked_at).to be > 1.day.ago }
       end
     end
     context :failures do
