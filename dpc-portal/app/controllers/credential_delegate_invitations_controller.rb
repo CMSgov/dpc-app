@@ -5,6 +5,7 @@ class CredentialDelegateInvitationsController < ApplicationController
   before_action :authenticate_user!
   before_action :load_organization
   before_action :require_ao, only: %i[new create success]
+  before_action :tos_accepted
 
   def new
     render(Page::CredentialDelegate::NewInvitationComponent.new(@organization, Invitation.new))
@@ -36,7 +37,7 @@ class CredentialDelegateInvitationsController < ApplicationController
                               :invited_email_confirmation)
     Invitation.new(**permitted.to_h,
                    provider_organization: @organization,
-                   invitation_type: 'credential_delegate',
+                   invitation_type: :credential_delegate,
                    invited_by: current_user,
                    verification_code: (Array('A'..'Z') + Array(0..9)).sample(6).join)
   end

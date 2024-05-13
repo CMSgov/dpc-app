@@ -7,6 +7,7 @@ class OrganizationsController < ApplicationController
   before_action :require_can_access, only: %i[show]
   before_action :check_npi, only: %i[create]
   before_action :require_ao, only: %i[tos_form sign_tos success]
+  before_action :tos_accepted, only: %i[show]
 
   def index
     @organizations = current_user.provider_organizations
@@ -16,10 +17,11 @@ class OrganizationsController < ApplicationController
   def show
     show_cds = current_user.ao?(@organization)
     if show_cds
-      @invitations = Invitation.where(provider_organization: @organization, invited_by: current_user)
+      @invitations = Invitation.where(provider_organization: @organization,
+                                      invited_by: current_user).reject(&:accepted?)
       @cds = CdOrgLink.where(provider_organization: @organization, disabled_at: nil)
     end
-    render(Page::Organization::CompoundShowComponent.new(@organization, @invitations, @cds, show_cds))
+    render(Page::Organization::CompoundShowComponent.new(@organization, @cds, @invitations, show_cds))
   end
 
   def new
@@ -44,7 +46,7 @@ class OrganizationsController < ApplicationController
     @organization.terms_of_service_accepted_at = DateTime.now
     @organization.terms_of_service_accepted_by = current_user
     @organization.save!
-    redirect_to success_organization_path(@organization)
+    redirect_to organization_path(@organization)
   end
 
   def success

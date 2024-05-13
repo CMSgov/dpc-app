@@ -61,7 +61,7 @@ describe AoInvitationService do
       organization = ProviderOrganization.find_by(npi: organization_npi)
       matching_invitation = Invitation.where(invited_email: params[2],
                                              provider_organization: organization,
-                                             invitation_type: 'authorized_official')
+                                             invitation_type: :authorized_official)
       expect(matching_invitation.count).to eq 1
     end
 
