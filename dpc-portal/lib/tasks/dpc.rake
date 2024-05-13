@@ -65,7 +65,7 @@ def passes_by_org(npis, org_pass, link_pass, user_pass, sanction, debug = false)
     if org_pass
       return :fail_org_pass if org.verification_status == 'rejected' || org.verification_reason.present?
     else
-      return :fail_org_fail unless org.verification_status == 'rejected' && org.verification_reason == sanction
+      return :fail_org_fail if org.verification_status != 'rejected' || org.verification_reason != sanction
     end
 
     link = org.ao_org_links.first
@@ -77,16 +77,16 @@ def passes_by_org(npis, org_pass, link_pass, user_pass, sanction, debug = false)
     if link_pass
       return :fail_link_pass if !link.verification_status || link.verification_reason.present?
     else
-      return :fail_link_fail unless !link.verification_status && link.verification_reason == sanction
+      return :fail_link_fail if link.verification_status || link.verification_reason != sanction
     end
 
     puts "USER: #{link.user.inspect}" if debug
     return :fail_user_last_checked if !user_pass && link.user.last_checked_at < @start
 
     if user_pass
-      return :fail_user_pass if !link.user.verification_status == 'rejected' || link.user.verification_reason.present?
+      return :fail_user_pass if link.user.verification_status == 'rejected' || link.user.verification_reason.present?
     else
-      unless link.user.verification_status == 'rejected' && link.user.verification_reason == sanction
+      if link.user.verification_status != 'rejected' || link.user.verification_reason != sanction
         return :fail_user_fail
       end
     end
@@ -103,13 +103,18 @@ end
 
 def verify_org_job
   puts "ORG MED CHECK     : #{passes_by_org(Npis::ORG_FAILS_MED_CHECK, false, false, true, 'org_med_sanctions')}"
+  no_ao_fail = false
   ProviderOrganization.where(npi: Npis::NO_AO).each do |org|
     if org.last_checked_at < @start
-      puts 'NO AO             : fail'
-      return
+      no_ao_fail = true
+      break
     end
   end
-  puts 'NO AO             : success'
+  if no_ao_fail
+    puts 'NO AO             : fail'
+  else
+    puts 'NO AO             : success'
+  end
 end
 
 def build_models
