@@ -32,14 +32,4 @@ class VerifyProviderOrganizationJob < ApplicationJob
     ProviderOrganization.where(last_checked_at: ..lookback_hours.hours.ago,
                                verification_status: 'approved').limit(max_records)
   end
-
-  def unverify_all_links_and_orgs(user, message)
-    link_error_attributes = { last_checked_at: Time.now, verification_status: false,
-                              verification_reason: message }
-    other_error_attributes = link_error_attributes.merge(verification_status: 'rejected')
-    AoOrgLink.where(user:, verification_status: true).each do |link|
-      link.update!(link_error_attributes)
-      link.provider_organization.update!(other_error_attributes)
-    end
-  end
 end

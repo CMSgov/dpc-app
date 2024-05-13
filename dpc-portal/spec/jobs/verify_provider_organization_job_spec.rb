@@ -33,9 +33,19 @@ RSpec.describe VerifyProviderOrganizationJob, type: :job do
         VerifyProviderOrganizationJob.perform_now
         expect(ProviderOrganization.where(last_checked_at: ..6.days.ago).count).to eq 4
       end
-      it 'should not invalidate valid provider_organization objects' do
+      it 'should not invalidate provider_organizations' do
         VerifyProviderOrganizationJob.perform_now
         expect(ProviderOrganization.where(verification_status: 'rejected')).to be_empty
+      end
+      it 'should update provider_organizations last_checked_at' do
+        orgs_to_check = ProviderOrganization.where(last_checked_at: ..6.days.ago,
+                                                   verification_status: true)
+
+        VerifyAoJob.perform_now
+        orgs_to_check.each do |org|
+          org.reload
+          expect(org.last_checked_at).to be > 1.day.ago
+        end
       end
     end
     context :failures do
@@ -54,6 +64,7 @@ RSpec.describe VerifyProviderOrganizationJob, type: :job do
           expect(link.user.verification_status).to_not eq 'rejected'
           expect(link.provider_organization.verification_status).to eq 'rejected'
           expect(link.provider_organization.verification_reason).to eq 'org_med_sanctions'
+          expect(link.last_checked_at).to be > 1.day.ago
         end
       end
       it 'should update org and links if org has no enrollments' do
