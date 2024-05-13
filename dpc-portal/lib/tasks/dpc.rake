@@ -7,17 +7,19 @@ require './lib/tasks/npis'
 namespace :dpc do
   desc 'Performance tests Verification jobs'
   task verify_perf: :environment do
+    @good_npis = Npis::GOOD.dup
     build_models
     puts 'Starting Jobs'
-    start = Time.now
+    @start = Time.now
+    puts @start
     VerifyAoJob.perform_now
-    puts "VerifyAoJob took #{Time.now - start} seconds"
-    start = Time.now
-    VerifyProviderOrganizationJob.perform_now
-    puts "VerifyProviderOrganizationJob took #{Time.now - start} seconds"
+    puts "VerifyAoJob took #{(Time.now - @start).floor(1)} seconds"
     verify_ao_job
+    @start = Time.now
+    VerifyProviderOrganizationJob.perform_now
+    puts "VerifyProviderOrganizationJob took #{(Time.now - @start).floor(1)} seconds"
     verify_org_job
-#    cleanup
+    cleanup
   end
 
   desc <<~DESC
@@ -52,8 +54,63 @@ namespace :dpc do
   end
 end
 
-def verify_ao_job; end
-def verify_org_job; end
+def passes_by_org(npis, org_pass, link_pass, user_pass, sanction, debug = false)
+  return :fail if npis.empty?
+
+  npis.each do |npi|
+    org = ProviderOrganization.find_by_npi(npi)
+    puts "ORG: #{org.inspect}" if debug
+    return :fail_org_last_checked if !org_pass && org.last_checked_at < @start
+
+    if org_pass
+      return :fail_org_pass if org.verification_status == 'rejected' || org.verification_reason.present?
+    else
+      return :fail_org_fail unless org.verification_status == 'rejected' && org.verification_reason == sanction
+    end
+
+    link = org.ao_org_links.first
+    continue unless link
+
+    puts "LINK: #{link.inspect}" if debug
+    return :fail_link_last_checked if link.last_checked_at < @start
+
+    if link_pass
+      return :fail_link_pass if !link.verification_status || link.verification_reason.present?
+    else
+      return :fail_link_fail unless !link.verification_status && link.verification_reason == sanction
+    end
+
+    puts "USER: #{link.user.inspect}" if debug
+    return :fail_user_last_checked if !user_pass && link.user.last_checked_at < @start
+
+    if user_pass
+      return :fail_user_pass if !link.user.verification_status == 'rejected' || link.user.verification_reason.present?
+    else
+      unless link.user.verification_status == 'rejected' && link.user.verification_reason == sanction
+        return :fail_user_fail
+      end
+    end
+  end
+  :success
+end
+
+def verify_ao_job
+  puts "ORG NO ENROLLMENTS: #{passes_by_org(Npis::ORG_NO_ENROLLMENTS, false, false, true, 'no_approved_enrollment')}"
+  puts "AO NO LONGER AO   : #{passes_by_org(Npis::AO_NO_LONGER_AO, true, false, true, 'user_not_authorized_official')}"
+  puts "AO FAILS MED CHECK: #{passes_by_org(Npis::AO_FAILS_MED_CHECK, false, false, false, 'ao_med_sanctions')}"
+  puts "GOOD ORGS         : #{passes_by_org(Npis::GOOD, true, true, true, '')}"
+end
+
+def verify_org_job
+  puts "ORG MED CHECK     : #{passes_by_org(Npis::ORG_FAILS_MED_CHECK, false, false, true, 'org_med_sanctions')}"
+  ProviderOrganization.where(npi: Npis::NO_AO).each do |org|
+    if org.last_checked_at < @start
+      puts 'NO AO             : fail'
+      return
+    end
+  end
+  puts 'NO AO             : success'
+end
 
 def build_models
   Npis::ORG_FAILS_MED_CHECK.each do |npi|
@@ -66,22 +123,22 @@ def build_models
     make_basic(npi, PacIds::AO_NO_LONGER_AO, 'AO no longer AO')
   end
   Npis::AO_FAILS_MED_CHECK.each do |npi|
-    make_basic(npi, PacIds::AO_FAILS_MED_CHECK, 'AO no longer AO')
+    make_basic(npi, PacIds::AO_FAILS_MED_CHECK, 'AO Fails Med')
   end
   Npis::NO_AO.each do |npi|
-    ProviderOrganization.find_or_create_by(npi:) do |org|
-      org.name = "PERF Org No AO #{npi}"
-      org.verification_status = 'approved'
-      org.last_checked_at = 8.days.ago
-    end
+    org = ProviderOrganization.find_or_create_by(npi:)
+    org.name = "PERF Org No AO #{npi}"
+    org.verification_status = 'approved'
+    org.last_checked_at = 8.days.ago
+    org.save!
   end
   PacIds::AO_HAS_TWO.each do |pac_id|
-    make_multiple(pac_id, Npis::GOOD, 2)
+    make_multiple(pac_id, @good_npis, 2)
   end
   PacIds::AO_HAS_FOUR.each do |pac_id|
-    make_multiple(pac_id, Npis::GOOD, 4)
+    make_multiple(pac_id, @good_npis, 4)
   end
-  Npis::GOOD.each do |npi|
+  @good_npis.each do |npi|
     make_basic(npi, PacIds::AO_GOOD, 'Good')
   end
 end
@@ -92,44 +149,48 @@ def make_multiple(pac_id, npis, count)
   user = User.find_or_create_by(pac_id:) do |u|
     u.email = "PERF-#{pac_id}@example.com"
     u.password = u.password_confirmation = Devise.friendly_token[0, 20]
-    u.verification_status = 'approved'
   end
+  user.update!(verification_status: 'approved')
   count.times do
     npi = npis.pop
     raise unless npi
 
     org = ProviderOrganization.find_or_create_by(npi:) do |o|
       o.name = "PERF: Sharing #{pac_id} #{npi}"
-      o.verification_status = 'approved'
-      o.last_checked_at = 8.days.ago
     end
-    AoOrgLink.find_or_create_by(provider_organization: org, user:) do |link|
-      link.verification_status = true
-      link.last_checked_at = 8.days.ago
-    end
+    org.verification_status = 'approved'
+    org.last_checked_at = 8.days.ago
+    org.save!
+
+    link = AoOrgLink.find_or_create_by(provider_organization: org, user:)
+    link.verification_status = true
+    link.last_checked_at = 8.days.ago
+    link.save!
   end
 end
 
 def make_basic(npi, pac_ids, feature)
   raise unless npi
 
-  org = ProviderOrganization.find_or_create_by(npi:) do |o|
-    o.name = "PERF: #{feature} #{npi}"
-    o.verification_status = 'approved'
-    o.last_checked_at = 8.days.ago
-  end
+  org = ProviderOrganization.find_or_create_by(npi:)
+  org.name = "PERF: #{feature} #{npi}"
+
+  org.verification_status = 'approved'
+  org.last_checked_at = 8.days.ago
+  org.save!
   pac_id = pac_ids.pop
   raise unless pac_id
 
   user = User.find_or_create_by(pac_id:) do |u|
     u.email = "user#{pac_id}@example.com"
     u.password = u.password_confirmation = Devise.friendly_token[0, 20]
-    u.verification_status = 'approved'
   end
-  AoOrgLink.find_or_create_by(provider_organization: org, user:) do |link|
-    link.verification_status = true
-    link.last_checked_at = 8.days.ago
-  end
+  user.update!(verification_status: 'approved')
+
+  link = AoOrgLink.find_or_create_by(provider_organization: org, user:)
+  link.verification_status = true
+  link.last_checked_at = 8.days.ago
+  link.save!
 end
 
 def cleanup

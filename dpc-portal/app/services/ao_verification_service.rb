@@ -2,6 +2,8 @@
 
 # A service that verifies a user as an Authorized Official (AO) for a given organization, and verifies the organization
 class AoVerificationService
+  attr_reader :cpi_api_gw_client
+
   def initialize
     @cpi_api_gw_client = CpiApiGatewayClient.new
   end

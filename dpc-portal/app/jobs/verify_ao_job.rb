@@ -13,6 +13,7 @@ class VerifyAoJob < ApplicationJob
     rescue AoException => e
       handle_error(link, e.message)
     end
+    puts "Gateway calls: #{service.cpi_api_gw_client.counter}"
   end
 
   def handle_error(link, message)
