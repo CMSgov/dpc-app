@@ -1,4 +1,4 @@
-FROM ruby:3.3.0-alpine AS ruby_builder
+FROM ruby:3.3-alpine AS ruby_builder
 
 # Install build dependencies
 RUN apk update && \
@@ -41,7 +41,7 @@ RUN rm -rf /usr/local/bundle/cache/*.gem && \
     find /usr/local/bundle/gems/ -name "*.o" -delete
 
 
-FROM ruby:3.3.0-alpine
+FROM ruby:3.3-alpine
 
 # Install app dependencies
 RUN apk add --no-cache postgresql-client nodejs tzdata libsodium-dev

@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe Page::CredentialDelegate::BadInvitationComponent, type: :component do
+RSpec.describe Page::Invitations::BadInvitationComponent, type: :component do
   include ComponentSupport
 
   describe 'html' do
@@ -16,7 +16,7 @@ RSpec.describe Page::CredentialDelegate::BadInvitationComponent, type: :componen
     end
 
     context 'invalid invitation' do
-      let(:component) { described_class.new('invalid') }
+      let(:component) { described_class.new('invalid', 'warning') }
       it 'should match header' do
         header = <<~HTML
           <h1>Invitation is invalid</h1>
@@ -27,7 +27,7 @@ RSpec.describe Page::CredentialDelegate::BadInvitationComponent, type: :componen
     end
 
     context 'PII mismatch' do
-      let(:component) { described_class.new('pii_mismatch') }
+      let(:component) { described_class.new('pii_mismatch', 'error') }
       it 'should match header' do
         header = <<~HTML
           <h1>Invitation denied</h1>

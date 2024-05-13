@@ -10,7 +10,7 @@ class AoInvitationService
     invitation = Invitation.create(invited_email: ao_email,
                                    invited_email_confirmation: ao_email,
                                    provider_organization: organization,
-                                   invitation_type: 'authorized_official')
+                                   invitation_type: :authorized_official)
 
     InvitationMailer.with(invitation:, given_name:, family_name:).invite_ao.deliver_now
 
