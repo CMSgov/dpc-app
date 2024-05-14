@@ -7,12 +7,3 @@ siteLogo.addEventListener('click', function(e) {
     'link_url': siteLogo.href,
   });
 });
-
-const loginButton = document.querySelector('#login-button');
-loginButton.addEventListener('click', function (e) {
-  utag.link({
-    'event_name': 'login',
-    'link_type': 'link_other',
-    'link_url': 'login successful',
-  });
-});

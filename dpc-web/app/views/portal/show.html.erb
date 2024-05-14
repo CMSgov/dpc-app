@@ -1,4 +1,18 @@
 <% title "Welcome!" %>
+<% if session['login_successful'] == true %>
+  <script>
+    function fireLoginEvent() {
+      console.log('firing login event')
+      utag.link({
+        'event_name': 'login',
+        'link_type': 'link_other',
+        'link_url': 'login successful',
+      });
+    }
+
+    fireLoginEvent();
+  </script>
+<% end %>
 
 <div class="ds-l-container">
 
