@@ -23,16 +23,16 @@ class VerifyAoJob < ApplicationJob
   def handle_error(link, message)
     link_error_attributes = { last_checked_at: Time.now, verification_status: false,
                               verification_reason: message }
-    other_error_attributes = link_error_attributes.merge(verification_status: 'rejected')
+    entity_error_attributes = link_error_attributes.merge(verification_status: 'rejected')
     AoOrgLink.transaction do
       link.update!(link_error_attributes)
       case message
       when 'ao_med_sanctions'
-        link.user.update!(other_error_attributes)
-        link.provider_organization.update!(other_error_attributes)
+        link.user.update!(entity_error_attributes)
+        link.provider_organization.update!(entity_error_attributes)
         unverify_all_links_and_orgs(link.user, message)
       when 'no_approved_enrollment'
-        link.provider_organization.update!(other_error_attributes)
+        link.provider_organization.update!(entity_error_attributes)
       end
     end
   end
@@ -47,10 +47,10 @@ class VerifyAoJob < ApplicationJob
   def unverify_all_links_and_orgs(user, message)
     link_error_attributes = { last_checked_at: Time.now, verification_status: false,
                               verification_reason: message }
-    other_error_attributes = link_error_attributes.merge(verification_status: 'rejected')
+    entity_error_attributes = link_error_attributes.merge(verification_status: 'rejected')
     AoOrgLink.where(user:, verification_status: true).each do |link|
       link.update!(link_error_attributes)
-      link.provider_organization.update!(other_error_attributes)
+      link.provider_organization.update!(entity_error_attributes)
     end
   end
 end
