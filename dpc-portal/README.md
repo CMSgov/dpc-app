@@ -33,16 +33,7 @@ The following commands can be useful for manual interaction:
 
 To support manual workflows, the system offers rake commands that perform administrative commands for new accounts. These rake commands can be run within a portal shell (`make portal-sh`).
 
--   `rails dpc:make_org` - Creates a new provider organization.
-
-    ```sh
-    $ rails dpc:make_org
-
-    Organization NPI: 7838426501
-    Organization Page: http://localhost:3100/portal/organizations/70ee065b-01be-4150-894b-d71789d5c2af
-    ```
-
--   `rails dpc:invite_ao` - Creates a new AO invitation. The name and email does not currently matter.
+-   `rails dpc:invite_ao` - Creates a new AO invitation. The name does not currently matter, but the email should match your Login.gov sandbox email.
 
     ```sh
     $ rails dpc:invite_ao INVITE=Bob,Hoskins,bob@example.com,7838426501
