@@ -2,7 +2,7 @@
 
 # A background job that verifies AOs are still valid
 # It uses two environment variables to control number of records and how far to look back:
-# VERIFICATION_MAX_RECORDS: limits the number of records check to manage CPI API GW throttling
+# VERIFICATION_MAX_RECORDS: limits the number of records to check to manage CPI API GW throttling
 # VERIFICATION_LOOKBACK_HOURS: defines how long a record can be valid without needing to be checked
 class VerifyAoJob < ApplicationJob
   queue_as :portal
