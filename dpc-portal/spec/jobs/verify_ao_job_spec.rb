@@ -48,6 +48,20 @@ RSpec.describe VerifyAoJob, type: :job do
           expect(link.user.last_checked_at).to be > 1.day.ago
         end
       end
+      it 'should not update if any object fails to update' do
+        links_to_check = AoOrgLink.where(last_checked_at: ..6.days.ago,
+                                         verification_status: true)
+        expect_any_instance_of(User).to receive(:update!).and_raise('error')
+        expect do
+          VerifyAoJob.perform_now
+        end.to raise_error(RuntimeError, 'error')
+
+        links_to_check.each do |link|
+          link.reload
+          expect(link.last_checked_at).to be < 6.days.ago
+          expect(link.user.last_checked_at).to be_nil
+        end
+      end
     end
     context :failures do
       it "should update user and all user's orgs and links on failed ao med sanction" do
