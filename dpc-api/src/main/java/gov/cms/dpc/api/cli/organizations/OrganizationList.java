@@ -30,6 +30,7 @@ public class OrganizationList extends AbstractAttributionCommand {
         System.out.println(String.format("Connecting to Attribution service at: %s", attributionService));
 
         final IGenericClient client = ctx.newRestfulGenericClient(attributionService);
+        ctx.getRestfulClientFactory().setSocketTimeout(10 * 1000);
 
         final Bundle organizations = client
                 .search()
@@ -39,17 +40,18 @@ public class OrganizationList extends AbstractAttributionCommand {
                 .execute();
 
         // Generate the table
-        final String[] headers = {"ID", "NPI", "NAME"};
+        final String[] headers = { "ID", "NPI", "NAME" };
 
-        //noinspection FuseStreamOperations Fusing the operation here actually causes an issue with the print output
+        // noinspection FuseStreamOperations Fusing the operation here actually causes
+        // an issue with the print output
         final List<String[]> collect = organizations
                 .getEntry()
                 .stream()
                 .filter(Bundle.BundleEntryComponent::hasResource)
                 .map(Bundle.BundleEntryComponent::getResource)
                 .map(resource -> (Organization) resource)
-                .map(resource ->
-                        List.of(resource.getId(), resource.getIdentifierFirstRep().getValue(), resource.getName()))
+                .map(resource -> List.of(resource.getId(), resource.getIdentifierFirstRep().getValue(),
+                        resource.getName()))
                 .map(values -> values.toArray(new String[0]))
                 .collect(Collectors.toList());
 

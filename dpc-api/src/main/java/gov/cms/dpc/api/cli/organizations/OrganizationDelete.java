@@ -32,6 +32,7 @@ public class OrganizationDelete extends AbstractAttributionCommand {
         System.out.println(String.format("Connecting to Attribution service at: %s", attributionService));
 
         final IGenericClient client = ctx.newRestfulGenericClient(attributionService);
+        ctx.getRestfulClientFactory().setSocketTimeout(10 * 1000);
 
         client
                 .delete()

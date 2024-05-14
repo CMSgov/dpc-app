@@ -27,7 +27,6 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
 
     private static final Logger logger = LoggerFactory.getLogger(AggregationAppModule.class);
 
-
     AggregationAppModule() {
         // Not used
     }
@@ -42,9 +41,11 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
 
         // Healthchecks
         // Additional health-checks can be added here
-        // By default, Dropwizard adds a check for Hibernate and each additional database (e.g. auth, queue, etc)
+        // By default, Dropwizard adds a check for Hibernate and each additional
+        // database (e.g. auth, queue, etc)
         // We also have JobQueueHealthy which ensures the queue is operation correctly
-        // We have the BlueButton Client healthcheck as well, which adds itself based on configuration
+        // We have the BlueButton Client healthcheck as well, which adds itself based on
+        // configuration
     }
 
     @Provides
@@ -52,7 +53,8 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
     public FhirContext provideSTU3Context() {
         final var fhirContext = FhirContext.forDstu3();
 
-        // Setup the context with model scans (avoids doing this on the fetch threads and perhaps multithreaded bug)
+        // Setup the context with model scans (avoids doing this on the fetch threads
+        // and perhaps multithreaded bug)
         ContextUtils.prefetchResourceModels(fhirContext, JobQueueBatch.validResourceTypes);
         return fhirContext;
     }
@@ -63,7 +65,8 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
     public FhirContext provideR4Context() {
         final var fhirContext = FhirContext.forR4();
 
-        // Setup the context with model scans (avoids doing this on the fetch threads and perhaps multithreaded bug)
+        // Setup the context with model scans (avoids doing this on the fetch threads
+        // and perhaps multithreaded bug)
         ContextUtils.prefetchResourceModels(fhirContext, JobQueueBatch.validResourceTypes);
         return fhirContext;
     }
@@ -91,8 +94,7 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
                 config.getPollingFrequency(),
                 config.getLookBackMonths(),
                 config.getLookBackDate(),
-                config.getLookBackExemptOrgs()
-        );
+                config.getLookBackExemptOrgs());
     }
 
     @Provides
@@ -103,7 +105,7 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
 
     @Provides
     LookBackService provideLookBackService(DPCManagedSessionFactory sessionFactory, OperationsConfig operationsConfig) {
-        //Configuring to skip look back when look back months is less than 0
+        // Configuring to skip look back when look back months is less than 0
         if (operationsConfig.getLookBackMonths() < 0) {
             return new EveryoneGetsDataLookBackServiceImpl();
         }
@@ -117,6 +119,8 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
         String serviceUrl = configuration().getConsentServiceUrl();
         logger.info("Connecting to consent server at {}.", serviceUrl);
         ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
+        ctx.getRestfulClientFactory().setSocketTimeout(10 * 1000);
+
         return ctx.newRestfulGenericClient(serviceUrl);
     }
 

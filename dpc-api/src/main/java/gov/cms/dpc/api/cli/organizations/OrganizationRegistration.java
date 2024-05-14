@@ -63,7 +63,8 @@ public class OrganizationRegistration extends AbstractAttributionCommand {
         System.out.println("Registering Organization");
 
         // Read the file and parse it
-        final Path filePath = FileSystems.getDefault().getPath(namespace.getString(ORG_FILE)).normalize().toAbsolutePath();
+        final Path filePath = FileSystems.getDefault().getPath(namespace.getString(ORG_FILE)).normalize()
+                .toAbsolutePath();
         Bundle organization;
         try (FileInputStream fileInputStream = new FileInputStream(new File(filePath.toUri()))) {
             final IParser parser = ctx.newJsonParser();
@@ -76,9 +77,11 @@ public class OrganizationRegistration extends AbstractAttributionCommand {
         registerOrganization(organization, namespace.getString(ATTR_HOSTNAME), noToken, apiService);
     }
 
-    private void registerOrganization(Bundle organization, String attributionService, boolean noToken, String apiService) throws IOException, URISyntaxException {
+    private void registerOrganization(Bundle organization, String attributionService, boolean noToken,
+            String apiService) throws IOException, URISyntaxException {
         System.out.println(String.format("Connecting to Attribution service at: %s", attributionService));
         final IGenericClient client = ctx.newRestfulGenericClient(attributionService);
+        ctx.getRestfulClientFactory().setSocketTimeout(10 * 1000);
 
         final Parameters parameters = new Parameters();
 
