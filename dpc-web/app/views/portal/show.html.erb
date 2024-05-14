@@ -2,7 +2,6 @@
 <% if session['login_successful'] == true %>
   <script>
     function fireLoginEvent() {
-      console.log('firing login event')
       utag.link({
         'event_name': 'login',
         'link_type': 'link_other',
