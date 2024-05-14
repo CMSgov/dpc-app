@@ -1,15 +1,19 @@
 <% title "Welcome!" %>
-<% if session['login_successful'] == true %>
+<% if session['login_successful'] %>
   <script>
-    function fireLoginEvent() {
-      utag.link({
-        'event_name': 'login',
-        'link_type': 'link_other',
-        'link_url': 'login successful',
-      });
+    function submitLoginEvent() {
+      if (typeof utag != 'undefined' && typeof utag.link != 'undefined') {
+        utag.link({
+          'event_name': 'login',
+          'link_type': 'link_other',
+          'link_url': 'login successful',
+        });
+      } else {
+        setTimeout(submitLoginEvent, 200);
+      }
     }
 
-    fireLoginEvent();
+    submitLoginEvent();
   </script>
 <% end %>
 
