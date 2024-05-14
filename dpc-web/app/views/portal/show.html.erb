@@ -17,6 +17,8 @@
   </script>
 <% end %>
 
+<% session.delete 'login_successful' %>
+
 <div class="ds-l-container">
 
   <h1 class="ds-u-font-size--title ds-u-font-weight--normal ds-u-margin--0">Hi, <%= @user.first_name %></h1>
