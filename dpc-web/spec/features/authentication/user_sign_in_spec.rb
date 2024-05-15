@@ -12,6 +12,7 @@ RSpec.feature 'user signs in' do
     find('[data-test="submit"]').click
 
     expect(page).to have_css('[data-test="my-account-menu"]')
+    expect(page).to have_selector('script', text: 'function submitLoginEvent()', visible: false)
   end
 
   scenario 'user cannot sign in if account not confirmed' do
