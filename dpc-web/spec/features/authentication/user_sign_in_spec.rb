@@ -15,6 +15,16 @@ RSpec.feature 'user signs in' do
     expect(page).to have_selector('script', text: 'function submitLoginEvent()', visible: false)
   end
 
+  scenario 'submitLoginEvent should not be declared after login and page reload' do
+    visit new_user_session_path
+    fill_in 'user_email', with: user.email
+    fill_in 'user_password', with: '12345ABCDEfghi!'
+    find('[data-test="submit"]').click
+
+    refresh
+    expect(page).not_to have_selector('script', text: 'function submitLoginEvent()', visible: false)
+  end
+
   scenario 'user cannot sign in if account not confirmed' do
     unconfirmed = create(:user, confirmed_at: nil)
 
