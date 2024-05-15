@@ -10,6 +10,7 @@ class VerifyProviderOrganizationJob < ApplicationJob
 
   def perform
     service = AoVerificationService.new
+    @start = Time.now
     unless orgs_to_check.each do |org|
              service.check_org_med_sanctions(org.npi)
              service.get_approved_enrollments(org.npi)
@@ -17,7 +18,7 @@ class VerifyProviderOrganizationJob < ApplicationJob
     rescue AoException => e
       handle_error(org, e.message)
            end.empty?
-      VerifyProviderOrganizationJob.perform_later
+      enqueue_job(VerifyProviderOrganizationJob)
     end
   end
 

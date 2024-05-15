@@ -20,5 +20,10 @@ module Verification
         link.update!(link_error_attributes(message))
       end
     end
+
+    def enqueue_job(klass)
+      wait = (Time.now - @start).seconds
+      klass.set(wait:).perform_later
+    end
   end
 end

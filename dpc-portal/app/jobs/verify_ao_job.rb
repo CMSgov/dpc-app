@@ -9,6 +9,7 @@ class VerifyAoJob < ApplicationJob
   include Verification
 
   def perform
+    @start = Time.now
     service = AoVerificationService.new
     if links_to_check.each do |link|
          check_link(service, link)
@@ -16,9 +17,9 @@ class VerifyAoJob < ApplicationJob
     rescue AoException => e
       handle_error(link, e.message)
        end.empty?
-      VerifyProviderOrganizationJob.perform_later
+      enqueue_job(VerifyProviderOrganizationJob)
     else
-      VerifyAoJob.perform_later
+      enqueue_job(VerifyAoJob)
     end
   end
 
