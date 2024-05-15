@@ -9,13 +9,27 @@ class VerifyProviderOrganizationJob < ApplicationJob
 
   def perform
     service = AoVerificationService.new
+    calls_at_last_pause = 0
+    time_at_pause = Time.now
+    calls_per_pause = []
     orgs_to_check.each do |org|
       service.check_org_med_sanctions(org.npi)
       service.get_approved_enrollments(org.npi)
       org.update!(last_checked_at: Time.now)
     rescue AoException => e
       handle_error(org, e.message)
+    ensure
+      unless Rails.env.test?
+        if service.cpi_api_gw_client.counter - calls_at_last_pause > 20
+          calls_per_pause << service.cpi_api_gw_client.counter - calls_at_last_pause
+          time_since_last_pause = Time.now - time_at_pause
+          sleep(1 - time_since_last_pause) if time_since_last_pause < 1
+          time_at_pause = Time.now
+          calls_at_last_pause = service.cpi_api_gw_client.counter
+        end
+      end
     end
+    puts "Average calls per pause: #{calls_per_pause.reduce(:+).to_f / calls_per_pause.size}"
     puts "Gateway calls: #{service.cpi_api_gw_client.counter}"
   end
 

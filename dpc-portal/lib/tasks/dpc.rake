@@ -32,9 +32,10 @@ namespace :dpc do
       verify_ao_job
       @start = Time.now
       VerifyProviderOrganizationJob.perform_now
+      puts "VerifyProviderOrganizationJob took #{(Time.now - @start).floor(1)} seconds"
       verify_org_job
     end
-    cleanup
+    cleanup unless ENV.fetch('NO_CLEANUP', false)
   end
 
   desc <<~DESC
