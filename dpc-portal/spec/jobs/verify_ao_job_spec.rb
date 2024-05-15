@@ -3,7 +3,38 @@
 require 'rails_helper'
 
 RSpec.describe VerifyAoJob, type: :job do
+  include ActiveJob::TestHelper
+
   describe :perform do
+    context :chained do
+      before do
+        allow(ENV).to receive(:fetch).and_call_original
+        expect(ENV)
+          .to receive(:fetch)
+          .with('VERIFICATION_MAX_RECORDS', '10')
+          .and_return('4').at_least(4)
+        user = create(:user, pac_id: '900111111', verification_status: :approved)
+        10.times do |n|
+          create(:ao_org_link, user:, last_checked_at: (n + 6).days.ago)
+        end
+      end
+      it 'should keep calling until done' do
+        expect(AoOrgLink.where(last_checked_at: ..6.days.ago).count).to eq 10
+        VerifyAoJob.perform_now
+        expect(AoOrgLink.where(last_checked_at: ..6.days.ago).count).to eq 6
+        assert_enqueued_with(job: VerifyAoJob)
+        perform_enqueued_jobs
+        expect(AoOrgLink.where(last_checked_at: ..6.days.ago).count).to eq 2
+        assert_enqueued_with(job: VerifyAoJob)
+        perform_enqueued_jobs
+        expect(AoOrgLink.where(last_checked_at: ..6.days.ago).count).to eq 0
+        assert_enqueued_with(job: VerifyAoJob)
+        perform_enqueued_jobs
+        expect(AoOrgLink.where(last_checked_at: ..6.days.ago).count).to eq 0
+        assert_enqueued_with(job: VerifyProviderOrganizationJob)
+      end
+    end
+
     context :no_failures do
       before do
         allow(ENV).to receive(:fetch).and_call_original

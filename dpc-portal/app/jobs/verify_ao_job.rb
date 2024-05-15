@@ -10,13 +10,21 @@ class VerifyAoJob < ApplicationJob
 
   def perform
     service = AoVerificationService.new
-    links_to_check.each do |link|
-      service.check_org_med_sanctions(link.provider_organization.npi)
-      service.check_ao_eligibility(link.provider_organization.npi, :pac_id, link.user.pac_id)
-      update_success(link)
+    if links_to_check.each do |link|
+         check_link(service, link)
+         update_success(link)
     rescue AoException => e
       handle_error(link, e.message)
+       end.empty?
+      VerifyProviderOrganizationJob.perform_later
+    else
+      VerifyAoJob.perform_later
     end
+  end
+
+  def check_link(service, link)
+    service.check_org_med_sanctions(link.provider_organization.npi)
+    service.check_ao_eligibility(link.provider_organization.npi, :pac_id, link.user.pac_id)
   end
 
   def update_success(link)
