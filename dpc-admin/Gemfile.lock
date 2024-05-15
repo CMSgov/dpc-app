@@ -272,7 +272,7 @@ GEM
     netrc (0.11.0)
     newrelic_rpm (8.16.0)
     nio4r (2.7.1)
-    nokogiri (1.16.4)
+    nokogiri (1.16.5)
       mini_portile2 (~> 2.8.2)
       racc (~> 1.4)
     oauth2 (1.4.11)
@@ -529,7 +529,7 @@ DEPENDENCIES
   luhnacy (~> 0.2.1)
   macaroons
   newrelic_rpm (~> 8.10)
-  nokogiri (>= 1.16.2)
+  nokogiri (>= 1.16.5)
   octokit
   omniauth-github (~> 1.4.0)
   omniauth-oktaoauth (~> 0.1.6)
