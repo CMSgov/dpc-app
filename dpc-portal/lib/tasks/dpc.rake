@@ -12,7 +12,6 @@ namespace :dpc do
   desc 'Performance tests Verification jobs'
   task verify_perf: :environment do
     only_good = ENV.fetch('GOOD', false)
-    ENV['VERIFICATION_MAX_RECORDS'] = '10000'
     if only_good
       Npis::GOOD.each do |npi|
         make_basic(npi, PacIds::AO_GOOD, 'Good')
@@ -30,9 +29,9 @@ namespace :dpc do
       verify_only_good_ao_job
     else
       verify_ao_job
-      @start = Time.now
-      VerifyProviderOrganizationJob.perform_now
-      puts "VerifyProviderOrganizationJob took #{(Time.now - @start).floor(1)} seconds"
+      # @start = Time.now
+      # VerifyProviderOrganizationJob.perform_now
+      # puts "VerifyProviderOrganizationJob took #{(Time.now - @start).floor(1)} seconds"
       verify_org_job
     end
     cleanup unless ENV.fetch('NO_CLEANUP', false)
