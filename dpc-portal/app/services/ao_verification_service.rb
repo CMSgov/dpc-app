@@ -11,7 +11,7 @@ class AoVerificationService
   # rubocop:disable Metrics/AbcSize
   def check_eligibility(organization_npi, hashed_ao_ssn)
     check_org_med_sanctions(organization_npi)
-    check_ao_eligibilty(organization_npi, :ssn, hashed_ao_ssn)
+    check_ao_eligibility(organization_npi, :ssn, hashed_ao_ssn)
 
     { success: true }
   rescue OAuth2::Error => e
@@ -31,7 +31,7 @@ class AoVerificationService
   end
   # rubocop:enable Metrics/AbcSize
 
-  def check_ao_eligibilty(organization_npi, identifier_type, identifier)
+  def check_ao_eligibility(organization_npi, identifier_type, identifier)
     approved_enrollments = get_approved_enrollments(organization_npi)
     enrollment_ids = approved_enrollments.map { |enrollment| enrollment['enrollmentID'] }
     ao_role = get_authorized_official_role(enrollment_ids, identifier_type, identifier)

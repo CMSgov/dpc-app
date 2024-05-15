@@ -84,25 +84,25 @@ describe AoVerificationService do
   describe '.check_ao_eligibility' do
     it 'should work with good hashed ssn' do
       expect do
-        service.check_ao_eligibilty(good_org_npi, :ssn, hashed_ao_ssn)
+        service.check_ao_eligibility(good_org_npi, :ssn, hashed_ao_ssn)
       end.to_not raise_error
     end
 
     it 'should raise error with bad hashed ssn' do
       expect do
-        service.check_ao_eligibilty(good_org_npi, :ssn, 'not even a hash')
+        service.check_ao_eligibility(good_org_npi, :ssn, 'not even a hash')
       end.to raise_error(AoException, 'user_not_authorized_official')
     end
 
     it 'should work with good pac_id' do
       expect do
-        service.check_ao_eligibilty(good_org_npi, :pac_id, 'validPacId')
+        service.check_ao_eligibility(good_org_npi, :pac_id, 'validPacId')
       end.to_not raise_error
     end
 
     it 'should raise error with bad pac_id' do
       expect do
-        service.check_ao_eligibilty(good_org_npi, :pac_id, 'not there')
+        service.check_ao_eligibility(good_org_npi, :pac_id, 'not there')
       end.to raise_error(AoException, 'user_not_authorized_official')
     end
   end
