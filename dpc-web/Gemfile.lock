@@ -290,7 +290,7 @@ GEM
     netrc (0.11.0)
     newrelic_rpm (8.16.0)
     nio4r (2.7.1)
-    nokogiri (1.16.4)
+    nokogiri (1.16.5)
       mini_portile2 (~> 2.8.2)
       racc (~> 1.4)
     oauth2 (1.4.11)
@@ -437,10 +437,6 @@ GEM
     simplecov-html (0.10.2)
     simpleidn (0.2.2)
       unf (~> 0.1.4)
-    spring (4.2.1)
-    spring-watcher-listen (2.1.0)
-      listen (>= 2.7, < 4.0)
-      spring (>= 4)
     sprockets (4.2.1)
       concurrent-ruby (~> 1.0)
       rack (>= 2.2.4, < 4)
@@ -526,7 +522,7 @@ DEPENDENCIES
   luhnacy (~> 0.2.1)
   macaroons
   newrelic_rpm (~> 8.10)
-  nokogiri (>= 1.16.2)
+  nokogiri (>= 1.16.5)
   pg (>= 0.18, < 2.0)
   pry
   pry-nav
@@ -545,8 +541,6 @@ DEPENDENCIES
   sidekiq (~> 7.2.4)
   sidekiq_alive (~> 2.1.5)
   simplecov (<= 0.17)
-  spring
-  spring-watcher-listen (~> 2.1.0)
   sprockets-rails (>= 3.4.2)
   truemail
   tzinfo-data
