@@ -44,7 +44,9 @@ RSpec.describe VerifyAoJob, type: :job do
         VerifyAoJob.perform_now
         links_to_check.each do |link|
           link.reload
+          link.provider_organization.reload
           expect(link.last_checked_at).to be > 1.day.ago
+          expect(link.provider_organization.last_checked_at).to be > 1.day.ago
           expect(link.user.last_checked_at).to be > 1.day.ago
         end
       end
@@ -59,6 +61,7 @@ RSpec.describe VerifyAoJob, type: :job do
         links_to_check.each do |link|
           link.reload
           expect(link.last_checked_at).to be < 6.days.ago
+          expect(link.provider_organization.last_checked_at).to be_nil
           expect(link.user.last_checked_at).to be_nil
         end
       end
@@ -128,6 +131,24 @@ RSpec.describe VerifyAoJob, type: :job do
         expect(link.verification_reason).to eq 'user_not_authorized_official'
         expect(link.user.verification_status).to eq 'approved'
         expect(link.provider_organization.verification_status).to eq 'approved'
+      end
+      it 'should update org and link if org has med sanctions' do
+        provider_organization = create(:provider_organization, npi: '3598564557')
+        links = []
+        3.times do
+          links << create(:ao_org_link, provider_organization:)
+        end
+        links.first.update!(last_checked_at: 8.days.ago)
+        VerifyAoJob.perform_now
+        links.each do |link|
+          link.reload
+          expect(link.verification_status).to be false
+          expect(link.verification_reason).to eq 'org_med_sanctions'
+          expect(link.user.verification_status).to_not eq 'rejected'
+          expect(link.provider_organization.verification_status).to eq 'rejected'
+          expect(link.provider_organization.verification_reason).to eq 'org_med_sanctions'
+          expect(link.last_checked_at).to be > 1.day.ago
+        end
       end
       it 'should not update if any object fails to update' do
         user = create(:user, pac_id: '900111111', verification_status: :approved)

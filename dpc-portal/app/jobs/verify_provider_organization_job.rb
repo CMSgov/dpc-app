@@ -6,6 +6,7 @@
 # VERIFICATION_LOOKBACK_HOURS: defines how long a record can be valid without needing to be checked
 class VerifyProviderOrganizationJob < ApplicationJob
   queue_as :portal
+  include Verification
 
   def perform
     service = AoVerificationService.new
@@ -19,14 +20,9 @@ class VerifyProviderOrganizationJob < ApplicationJob
   end
 
   def handle_error(org, message)
-    org_error_attributes = { last_checked_at: Time.now, verification_status: 'rejected',
-                             verification_reason: message }
-    link_error_attributes = org_error_attributes.merge(verification_status: false)
     ProviderOrganization.transaction do
-      org.update!(org_error_attributes)
-      org.ao_org_links.where(verification_status: true).each do |link|
-        link.update!(link_error_attributes)
-      end
+      org.update!(entity_error_attributes(message))
+      update_org_sanctions(org, message)
     end
   end
 
