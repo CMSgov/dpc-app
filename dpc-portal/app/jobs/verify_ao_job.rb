@@ -13,6 +13,7 @@ class VerifyAoJob < ApplicationJob
     time_at_pause = Time.now
     calls_per_pause = []
     links_to_check.each do |link|
+      service.check_org_med_sanctions(link.provider_organization.npi)
       service.check_ao_eligibility(link.provider_organization.npi, :pac_id, link.user.pac_id)
       AoOrgLink.transaction do
         link.update!(last_checked_at: Time.now)
@@ -44,6 +45,12 @@ class VerifyAoJob < ApplicationJob
     AoOrgLink.transaction do
       link.update!(link_error_attributes)
       case message
+      when 'org_med_sanctions'
+        link.provider_organization.update!(entity_error_attributes)
+        link.provider_organization.ao_org_links.where(verification_status: true).each do |l|
+          l.update!(link_error_attributes)
+        end
+        unverify_all_links_and_orgs(link.user, message)
       when 'ao_med_sanctions'
         link.user.update!(entity_error_attributes)
         link.provider_organization.update!(entity_error_attributes)
