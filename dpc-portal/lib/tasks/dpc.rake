@@ -5,20 +5,35 @@ require './vendor/api_client/app/serializers/organization_submit_serializer'
 require './lib/tasks/npis'
 
 namespace :dpc do
+  desc 'Cleans up Performance tests Verification jobs'
+  task cleanup_perf: :environment do
+    cleanup
+  end
   desc 'Performance tests Verification jobs'
   task verify_perf: :environment do
-    @good_npis = Npis::GOOD.dup
-    build_models
+    only_good = ENV.fetch('GOOD', false)
+    ENV['VERIFICATION_MAX_RECORDS'] = '10000'
+    if only_good
+      Npis::GOOD.each do |npi|
+        make_basic(npi, PacIds::AO_GOOD, 'Good')
+      end
+    else
+      @good_npis = Npis::GOOD[...400].dup
+      build_models
+    end
     puts 'Starting Jobs'
     @start = Time.now
     puts @start
     VerifyAoJob.perform_now
     puts "VerifyAoJob took #{(Time.now - @start).floor(1)} seconds"
-    verify_ao_job
-    @start = Time.now
-    VerifyProviderOrganizationJob.perform_now
-    puts "VerifyProviderOrganizationJob took #{(Time.now - @start).floor(1)} seconds"
-    verify_org_job
+    if only_good
+      verify_only_good_ao_job
+    else
+      verify_ao_job
+      @start = Time.now
+      VerifyProviderOrganizationJob.perform_now
+      verify_org_job
+    end
     cleanup
   end
 
@@ -67,8 +82,8 @@ def passes_by_org(npis, org_pass, link_pass, user_pass, sanction, debug = false)
 
     if org_pass
       return :fail_org_pass if org.verification_status == 'rejected' || org.verification_reason.present?
-    else
-      return :fail_org_fail if org.verification_status != 'rejected' || org.verification_reason != sanction
+    elsif org.verification_status != 'rejected' || org.verification_reason != sanction
+      return :fail_org_fail
     end
 
     link = org.ao_org_links.first
@@ -79,8 +94,8 @@ def passes_by_org(npis, org_pass, link_pass, user_pass, sanction, debug = false)
 
     if link_pass
       return :fail_link_pass if !link.verification_status || link.verification_reason.present?
-    else
-      return :fail_link_fail if link.verification_status || link.verification_reason != sanction
+    elsif link.verification_status || link.verification_reason != sanction
+      return :fail_link_fail
     end
 
     puts "USER: #{link.user.inspect}" if debug
@@ -88,10 +103,8 @@ def passes_by_org(npis, org_pass, link_pass, user_pass, sanction, debug = false)
 
     if user_pass
       return :fail_user_pass if link.user.verification_status == 'rejected' || link.user.verification_reason.present?
-    else
-      if link.user.verification_status != 'rejected' || link.user.verification_reason != sanction
-        return :fail_user_fail
-      end
+    elsif link.user.verification_status != 'rejected' || link.user.verification_reason != sanction
+      return :fail_user_fail
     end
   end
   :success
@@ -101,6 +114,10 @@ def verify_ao_job
   puts "ORG NO ENROLLMENTS: #{passes_by_org(Npis::ORG_NO_ENROLLMENTS, false, false, true, 'no_approved_enrollment')}"
   puts "AO NO LONGER AO   : #{passes_by_org(Npis::AO_NO_LONGER_AO, true, false, true, 'user_not_authorized_official')}"
   puts "AO FAILS MED CHECK: #{passes_by_org(Npis::AO_FAILS_MED_CHECK, false, false, false, 'ao_med_sanctions')}"
+  puts "GOOD ORGS         : #{passes_by_org(Npis::GOOD[...400], true, true, true, '')}"
+end
+
+def verify_only_good_ao_job
   puts "GOOD ORGS         : #{passes_by_org(Npis::GOOD, true, true, true, '')}"
 end
 
