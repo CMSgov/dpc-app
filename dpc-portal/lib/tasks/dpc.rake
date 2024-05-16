@@ -10,6 +10,34 @@ namespace :dpc do
   task cleanup_perf: :environment do
     cleanup
   end
+
+  desc 'Set up performance tests'
+  task setup_perf: :environment do
+    only_good = ENV.fetch('GOOD', false)
+    if only_good
+      Npis::GOOD.each do |npi|
+        make_basic(npi, PacIds::AO_GOOD, 'Good')
+      end
+    else
+      @good_npis = Npis::GOOD[...400].dup
+      build_models
+    end
+    puts "Org count: #{ProviderOrganization.where('name LIKE ?', 'PERF%').count}"
+  end
+
+  desc 'Validate performance test'
+  task valid_perf: :environment do
+    puts 'Starting Jobs'
+    puts Time.now
+    @start = 1.day.ago
+    only_good = ENV.fetch('GOOD', false)
+    if only_good
+      verify_only_good_ao_job
+    else
+      verify_ao_job
+    end
+  end
+
   desc 'Performance tests Verification jobs'
   task verify_perf: :environment do
     only_good = ENV.fetch('GOOD', false)
@@ -120,7 +148,7 @@ def verify_ao_job
 end
 
 def verify_only_good_ao_job
-  puts "GOOD ORGS         : #{passes_by_org(Npis::GOOD, true, true, true, '')}"
+  puts "GOOD ORGS         : #{passes_by_org(Npis::GOOD, true, true, true, '', debug: false)}"
 end
 
 def verify_org_job

@@ -57,7 +57,7 @@ class VerifyAoJob < ApplicationJob
   end
 
   def links_to_check
-    max_records = ENV.fetch('VERIFICATION_MAX_RECORDS', '10').to_i
+    max_records = ENV.fetch('VERIFICATION_MAX_RECORDS', '25').to_i
     lookback_hours = ENV.fetch('VERIFICATION_LOOKBACK_HOURS', '144').to_i
     AoOrgLink.where(last_checked_at: ..lookback_hours.hours.ago,
                     verification_status: true).limit(max_records)
