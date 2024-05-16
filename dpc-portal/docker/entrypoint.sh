@@ -27,12 +27,14 @@ if [ "$1" == "portal" ]; then
 fi
 
 if [ "$1" == "sidekiq" ]; then
-  # Start Sidekiq job processing
-  if [[ "$ENV" == "local" ]]; then
+  if [[ "$ENV" == "production" ]]; then
+    echo "Starting in production"
+    bundle exec sidekiq -q portal
+  elif [[ "$ENV" == "local" ]]; then
     echo "Starting in development"
     ./bin/sidekiq-dev
   else
-    echo "Starting in non-local"
-    bundle exec sidekiq -q portal
+    echo "Starting in non-production"
+    ./bin/sidekiq-nonprod
   fi
 fi
