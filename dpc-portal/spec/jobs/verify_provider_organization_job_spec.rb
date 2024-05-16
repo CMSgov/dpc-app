@@ -41,7 +41,7 @@ RSpec.describe VerifyProviderOrganizationJob, type: :job do
         orgs_to_check = ProviderOrganization.where(last_checked_at: ..6.days.ago,
                                                    verification_status: true)
 
-        VerifyAoJob.perform_now
+        VerifyProviderOrganizationJob.perform_now
         orgs_to_check.each do |org|
           org.reload
           expect(org.last_checked_at).to be > 1.day.ago
