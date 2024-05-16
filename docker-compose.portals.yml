@@ -17,6 +17,7 @@ services:
     volumes:
       - "./dpc-web/coverage:/dpc-web/coverage"
       - ./tmp/letter_opener/web:/dpc-web/tmp/letter_opener
+      - "./dpc-web/Gemfile.lock:/dpc-web/Gemfile.lock"
 
     environment:
       - REDIS_URL=redis://redis
@@ -62,6 +63,7 @@ services:
     volumes:
       - "./dpc-admin/coverage:/dpc-admin/coverage"
       - ./tmp/letter_opener/admin:/dpc-admin/tmp/letter_opener
+      - "./dpc-admin/Gemfile.lock:/dpc-admin/Gemfile.lock"
     environment:
       - REDIS_URL=redis://redis
       - GOLDEN_MACAROON=${GOLDEN_MACAROON}

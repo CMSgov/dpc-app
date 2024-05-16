@@ -1,7 +1,7 @@
 source 'https://rubygems.org'
 git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
-ruby '3.3.0'
+ruby '~>3.3'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 # Specifying rails components to be able to omit unused actioncable
@@ -47,8 +47,8 @@ gem 'lograge'
 gem 'macaroons'
 gem 'sprockets-rails', '>= 3.4.2'
 gem 'truemail'
-# < 1.13.2 has a vulnerability, and is required by other gems
-gem 'nokogiri', '>= 1.16.2'
+# < 1.16.5 has a vulnerability, and is required by other gems
+gem 'nokogiri', '>= 1.16.5'
 
 gem 'api_client', path: 'vendor/api_client'
 

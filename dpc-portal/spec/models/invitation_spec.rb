@@ -166,31 +166,52 @@ RSpec.describe Invitation, type: :model do
 
     describe :match_user do
       let(:cd_invite) { build(:invitation, :cd) }
-      let(:user) do
-        build(:user, given_name: cd_invite.invited_given_name,
-                     family_name: cd_invite.invited_family_name,
-                     email: cd_invite.invited_email)
+      let(:user_info) do
+        { 'email' => 'bob@testy.com',
+          'all_emails' => [
+            'bob@testy.com',
+            'bob@example.com'
+          ],
+          'given_name' => 'Bob',
+          'family_name' => 'Hodges',
+          'phone' => '+111-111-1111' }
       end
-      it 'should match user if names and email correct' do
-        expect(cd_invite.match_user?(user)).to eq true
+      it 'should match user if names, email, and phone correct' do
+        expect(cd_invite.match_user?(user_info)).to eq true
       end
       it 'should match user if names and email different case' do
-        user.given_name.upcase!
-        user.family_name.downcase!
-        user.email = user.email.upcase_first
-        expect(cd_invite.match_user?(user)).to eq true
+        cd_invite.invited_given_name.upcase!
+        cd_invite.invited_family_name.downcase!
+        cd_invite.invited_email = cd_invite.invited_email.upcase_first
+        expect(cd_invite.match_user?(user_info)).to eq true
+      end
+      it 'should match if invited email in all_emails' do
+        cd_invite.invited_email = user_info.dig('all_emails', 1)
+        expect(cd_invite.match_user?(user_info)).to eq true
+      end
+      it 'should match if user info phone starts with 1' do
+        plus_phone = user_info.merge('phone' => '+1-111-111-1111')
+        expect(cd_invite.match_user?(plus_phone)).to eq true
+      end
+      it 'should match if invited phone starts with 1' do
+        cd_invite.phone_raw = '+1-111-111-1111'
+        expect(cd_invite.match_user?(user_info)).to eq true
       end
       it 'should not match user if given name not correct' do
-        user.given_name = "not #{cd_invite.invited_given_name}"
-        expect(cd_invite.match_user?(user)).to eq false
+        cd_invite.invited_given_name = "not #{cd_invite.invited_given_name}"
+        expect(cd_invite.match_user?(user_info)).to eq false
       end
       it 'should not match user if family name not correct' do
-        user.family_name = "not #{cd_invite.invited_family_name}"
-        expect(cd_invite.match_user?(user)).to eq false
+        cd_invite.invited_family_name = "not #{cd_invite.invited_family_name}"
+        expect(cd_invite.match_user?(user_info)).to eq false
       end
       it 'should not match user if email not correct' do
-        user.email = "not #{cd_invite.invited_email}"
-        expect(cd_invite.match_user?(user)).to eq false
+        cd_invite.invited_email = "not #{cd_invite.invited_email}"
+        expect(cd_invite.match_user?(user_info)).to eq false
+      end
+      it 'should not match user if phone not correct' do
+        cd_invite.invited_phone = 'not number'
+        expect(cd_invite.match_user?(user_info)).to eq false
       end
     end
   end
@@ -333,21 +354,15 @@ RSpec.describe Invitation, type: :model do
 
     describe :match_user do
       let(:ao_invite) { build(:invitation, :ao) }
-      let(:user) do
-        build(:user, given_name: 'Hugo',
-                     family_name: 'Boss',
-                     email: ao_invite.invited_email)
+      it 'should match user if ssn correct' do
+        user_info = { 'social_security_number' => '900111111' }
+        expect(ao_invite.match_user?(user_info)).to eq true
       end
-      it 'should match user if email correct' do
-        expect(ao_invite.match_user?(user)).to eq true
-      end
-      it 'should match user if email different case' do
-        user.email = user.email.upcase_first
-        expect(ao_invite.match_user?(user)).to eq true
-      end
-      it 'should not match user if email not correct' do
-        user.email = "not #{ao_invite.invited_email}"
-        expect(ao_invite.match_user?(user)).to eq false
+      it 'should not match user if ssn not correct' do
+        user_info = { 'social_security_number' => '900111112' }
+        expect do
+          ao_invite.match_user?(user_info)
+        end.to raise_error(InvitationError, 'user_not_authorized_official')
       end
     end
   end

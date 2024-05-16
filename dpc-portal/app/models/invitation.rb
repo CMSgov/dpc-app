@@ -31,30 +31,58 @@ class Invitation < ApplicationRecord
   end
 
   def accepted?
-    if invitation_type == 'credential_delegate'
+    if credential_delegate?
       CdOrgLink.where(invitation: self).exists?
-    elsif invitation_type == 'authorized_official'
+    elsif authorized_official?
       AoOrgLink.where(invitation: self).exists?
     end
   end
 
-  def match_user?(user)
-    if invitation_type == 'credential_delegate'
-      cd_match?(user)
-    elsif invitation_type == 'authorized_official'
-      invited_email.downcase == user.email.downcase
+  def match_user?(user_info)
+    if credential_delegate?
+      cd_match?(user_info)
+    elsif authorized_official?
+      ao_match?(user_info)
     end
   end
 
   private
 
-  def cd_match?(user)
-    invited_given_name.downcase == user.given_name.downcase &&
-      invited_family_name.downcase == user.family_name.downcase &&
-      invited_email.downcase == user.email.downcase
+  def cd_match?(user_info)
+    return false unless invited_given_name.downcase == user_info['given_name'].downcase &&
+                        invited_family_name.downcase == user_info['family_name'].downcase
+
+    return false unless phone_match(user_info)
+
+    user_info['all_emails'].any? { |email| invited_email.downcase == email.downcase }
+  end
+
+  # rubocop:disable Metrics/AbcSize
+  # Go ahead and pass if one or the other starts with US country code (1)
+  def phone_match(user_info)
+    user_phone = user_info['phone'].tr('^0-9', '')
+    if user_phone.length == invited_phone.length
+      user_phone == invited_phone
+    elsif user_phone.length > invited_phone.length && user_phone[0] == '1'
+      user_phone[1..] == invited_phone
+    elsif user_phone.length < invited_phone.length && invited_phone[0] == '1'
+      user_phone == invited_phone[1..]
+    end
+  end
+  # rubocop:enable Metrics/AbcSize
+
+  def ao_match?(user_info)
+    service = AoVerificationService.new
+    result = service.check_eligibility(provider_organization.npi,
+                                       Digest::SHA2.new(256).hexdigest(user_info['social_security_number']))
+    raise InvitationError, result[:failure_reason] unless result[:success]
+
+    result[:success]
   end
 
   def needs_validation?
-    new_record? && invitation_type == 'credential_delegate'
+    new_record? && credential_delegate?
   end
 end
+
+class InvitationError < StandardError; end

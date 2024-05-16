@@ -3,7 +3,7 @@
 source 'https://rubygems.org'
 git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
-ruby '3.3.0'
+ruby '~>3.3'
 
 # Anchored versions, do not bump without testing
 # Specifying rails components to be able to omit unused actioncable
@@ -48,8 +48,8 @@ gem 'rack', '~> 2.2.8.1'
 gem 'redis-namespace'
 gem 'bootstrap-table-rails'
 
-# < 1.13.2 has a vulnerability, and is required by other gems
-gem 'nokogiri', '>= 1.16.2'
+# < 1.16.5 has a vulnerability, and is required by other gems
+gem 'nokogiri', '>= 1.16.5'
 
 gem 'api_client', path: 'vendor/api_client'
 

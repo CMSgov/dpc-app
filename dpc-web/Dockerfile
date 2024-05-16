@@ -1,14 +1,4 @@
-FROM adoptopenjdk/openjdk11:latest AS java_builder
-
-# Install build dependencies
-RUN apt-get update && apt-get install -y build-essential ruby-full fontconfig ttf-dejavu
-RUN gem install jekyll -v 3.3.1
-
-# Build the IG assets
-WORKDIR /dpc-app
-COPY / /dpc-app
-
-FROM ruby:3.3.0-alpine AS ruby_builder
+FROM ruby:3.3-alpine AS ruby_builder
 
 # Install build dependencies
 RUN apk update && \
@@ -48,7 +38,7 @@ RUN rm -rf /usr/local/bundle/cache/*.gem && \
     find /usr/local/bundle/gems/ -name "*.o" -delete
 
 
-FROM ruby:3.3.0-alpine
+FROM ruby:3.3-alpine
 
 # Install app dependencies
 RUN apk add --no-cache postgresql-client nodejs tzdata
