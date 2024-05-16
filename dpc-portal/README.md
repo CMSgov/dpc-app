@@ -88,11 +88,11 @@ By default, the local portal is connected to a mock CPI API Gateway server with 
 
 ### Configuring the Portal
 
-Update the following environment variables in docker-compose.portals.yml. See [Confluence](https://confluence.cms.gov/pages/viewpage.action?spaceKey=DAPC&title=Authorized+Official+Verification) for the required values.
+Update the following environment variables in docker-compose.portals.yml:
 
 ```
-- CPI_API_GW_BASE_URL=<URL>
-- CMS_IDM_OAUTH_URL=<URL>
+- CPI_API_GW_BASE_URL=https://val.cpiapi.cms.gov/
+- CMS_IDM_OAUTH_URL=https://impl.idp.idm.cms.gov/
 ```
 
 ### Running ZScaler
