@@ -50,19 +50,14 @@ class VerifyAoJob < ApplicationJob
   end
 
   def links_to_check
-    max_records = ENV.fetch('VERIFICATION_MAX_RECORDS', '10').to_i
-    lookback_hours = ENV.fetch('VERIFICATION_LOOKBACK_HOURS', '144').to_i
     AoOrgLink.where(last_checked_at: ..lookback_hours.hours.ago,
                     verification_status: true).limit(max_records)
   end
 
   def unverify_all_links_and_orgs(user, message)
-    link_error_attributes = { last_checked_at: Time.now, verification_status: false,
-                              verification_reason: message }
-    entity_error_attributes = link_error_attributes.merge(verification_status: 'rejected')
     AoOrgLink.where(user:, verification_status: true).each do |link|
-      link.update!(link_error_attributes)
-      link.provider_organization.update!(entity_error_attributes)
+      link.update!(link_error_attributes(message))
+      link.provider_organization.update!(entity_error_attributes(message))
     end
   end
 end

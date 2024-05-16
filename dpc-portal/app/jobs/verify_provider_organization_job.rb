@@ -21,14 +21,11 @@ class VerifyProviderOrganizationJob < ApplicationJob
 
   def handle_error(org, message)
     ProviderOrganization.transaction do
-      org.update!(entity_error_attributes(message))
       update_org_sanctions(org, message)
     end
   end
 
   def orgs_to_check
-    max_records = ENV.fetch('VERIFICATION_MAX_RECORDS', '10').to_i
-    lookback_hours = ENV.fetch('VERIFICATION_LOOKBACK_HOURS', '144').to_i
     ProviderOrganization.where(last_checked_at: ..lookback_hours.hours.ago,
                                verification_status: 'approved').limit(max_records)
   end
