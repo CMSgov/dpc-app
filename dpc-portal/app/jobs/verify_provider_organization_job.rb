@@ -24,7 +24,6 @@ class VerifyProviderOrganizationJob < ApplicationJob
 
   def handle_error(org, message)
     ProviderOrganization.transaction do
-      org.update!(entity_error_attributes(message))
       update_org_sanctions(org, message)
     end
   end
