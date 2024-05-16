@@ -8,8 +8,8 @@ This is the Data Point of Care (DPC) Portal website. It allows users to manage a
 
 The DPC website can be run locally via docker. Follow the below steps to build and run the website into a Docker container.
 
--   Run `make portal` to build the docker image, and `make start-portal` to start dpc-portal in a docker container.
 -   The DPC API is required for much of the Portal's functionality. To run the DPC API, run `make start-api`.
+-   Run `make portal` to build the docker image, and `make start-portal` to start dpc-portal in a docker container.
 -   Run `make down-portals` to stop dpc-portal.
 
 The following commands can be useful for manual interaction:
@@ -52,6 +52,8 @@ One of the following fake SSNs are required on your Login.gov sandbox account in
 -   900888888
 -   666222222
 
+If you need to use another SSN, you can add it to the ao_ssns variable in the [fake enrollment roles endpoint](/dpc-portal/spec/support/fake_cpi_gateway.rb).
+
 Most generated NPIs will return a successful AO/organization verification when run against the [fake CPI API Gateway](/dpc-portal/spec/support/fake_cpi_gateway.rb). More specific scenarios are supported below:
 
 | Fake Organization NPI | Scenario                                       |
@@ -77,9 +79,25 @@ Emails are not viewable in lookbook, but can be found [here](http://localhost:31
 
 You can check the status of any jobs by going to the [Sidekiq dashboard](http://localhost:3100/portal/sidekiq).
 
-## Accessing the CPI API Gateway Locally
+## Accessing the VAL CPI API Gateway from Local Dev
 
-By default, the local portal is connected to a mock CPI API Gateway server with preset responses. To connect with the VAL CPI API Gateway environment, you'll need to be running Zscaler. To connect the local portal container over Zscaler, you'll want to add the following directly before line 5 of the Dockerfile and rerun the build steps:
+By default, the local portal is connected to a mock CPI API Gateway server with preset responses. To connect with the VAL CPI API Gateway environment, you'll need to:
+
+-   Configure the Portal to connect to CPI Val
+-   Run Zscaler.
+
+### Configuring the Portal
+
+Update the following environment variables in docker-compose.portals.yml:
+
+```
+- CPI_API_GW_BASE_URL=https://val.cpiapi.cms.gov/
+- CMS_IDM_OAUTH_URL=https://impl.idp.idm.cms.gov/
+```
+
+### Running ZScaler
+
+Spin up Zscaler on your machine. Once it's running, the local portal container will need the CA certificate loaded. You'll want to add the following directly before line 5 of the Dockerfile and rerun the build steps:
 
 `COPY Zscaler-Root-CA.pem /usr/local/share/ca-certificates/ZScaler-Root-CA.pem`
 
