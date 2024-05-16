@@ -6,52 +6,54 @@
 # VERIFICATION_LOOKBACK_HOURS: defines how long a record can be valid without needing to be checked
 class VerifyAoJob < ApplicationJob
   queue_as :portal
+  include Verification
 
   def perform
+    @start = Time.now
     service = AoVerificationService.new
-    calls_at_last_pause = 0
-    time_at_pause = Time.now
-    calls_per_pause = []
-    links_to_check.each do |link|
-      service.check_ao_eligibility(link.provider_organization.npi, :pac_id, link.user.pac_id)
-      AoOrgLink.transaction do
-        link.update!(last_checked_at: Time.now)
-        link.user.update!(last_checked_at: Time.now)
-      end
+    if links_to_check.each do |link|
+         check_link(service, link)
+         update_success(link)
     rescue AoException => e
       handle_error(link, e.message)
-    ensure
-      unless Rails.env.test?
-        if service.cpi_api_gw_client.counter - calls_at_last_pause > 20
-          calls_per_pause << service.cpi_api_gw_client.counter - calls_at_last_pause
-          time_since_last_pause = Time.now - time_at_pause
-          if time_since_last_pause < 1
-            sleep(1 - time_since_last_pause)
-          end
-          time_at_pause = Time.now
-          calls_at_last_pause = service.cpi_api_gw_client.counter
-        end
-      end
+       end.empty?
+      enqueue_job(VerifyProviderOrganizationJob)
+    else
+      enqueue_job(VerifyAoJob)
     end
-    puts "Average calls per pause: #{calls_per_pause.reduce(:+).to_f / calls_per_pause.size}"
-    puts "Gateway calls: #{service.cpi_api_gw_client.counter}"
+  end
+
+  def check_link(service, link)
+    service.check_org_med_sanctions(link.provider_organization.npi)
+    service.check_ao_eligibility(link.provider_organization.npi, :pac_id, link.user.pac_id)
+  end
+
+  def update_success(link)
+    AoOrgLink.transaction do
+      link.update!(last_checked_at: Time.now)
+      link.provider_organization.update!(last_checked_at: Time.now)
+      link.user.update!(last_checked_at: Time.now)
+    end
   end
 
   def handle_error(link, message)
-    link_error_attributes = { last_checked_at: Time.now, verification_status: false,
-                              verification_reason: message }
-    entity_error_attributes = link_error_attributes.merge(verification_status: 'rejected')
     AoOrgLink.transaction do
-      link.update!(link_error_attributes)
+      link.update!(link_error_attributes(message))
       case message
+      when 'org_med_sanctions'
+        update_org_sanctions(link.provider_organization, message)
       when 'ao_med_sanctions'
-        link.user.update!(entity_error_attributes)
-        link.provider_organization.update!(entity_error_attributes)
-        unverify_all_links_and_orgs(link.user, message)
+        update_ao_sanctions(link, message)
       when 'no_approved_enrollment'
-        link.provider_organization.update!(entity_error_attributes)
+        link.provider_organization.update!(entity_error_attributes(message))
       end
     end
+  end
+
+  def update_ao_sanctions(link, message)
+    link.user.update!(entity_error_attributes(message))
+    link.provider_organization.update!(entity_error_attributes(message))
+    unverify_all_links_and_orgs(link.user, message)
   end
 
   def links_to_check

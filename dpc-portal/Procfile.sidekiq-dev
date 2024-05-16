@@ -1,0 +1,2 @@
+sidekiq: bundle exec sidekiq -q portal
+cpigw: env PORT=4567 ruby spec/support/fake_cpi_gateway.rb

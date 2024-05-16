@@ -4,6 +4,7 @@ require './vendor/api_client/app/services/dpc_client'
 require './vendor/api_client/app/serializers/organization_submit_serializer'
 require './lib/tasks/npis'
 
+# rubocop:disable Metrics/AbcSize,  Metrics/CyclomaticComplexity, Metrics/MethodLength, Metrics/PerceivedComplexity, Metrics/ParameterLists
 namespace :dpc do
   desc 'Cleans up Performance tests Verification jobs'
   task cleanup_perf: :environment do
@@ -73,7 +74,7 @@ namespace :dpc do
   end
 end
 
-def passes_by_org(npis, org_pass, link_pass, user_pass, sanction, debug = false)
+def passes_by_org(npis, org_pass, link_pass, user_pass, sanction, debug: false)
   return :fail if npis.empty?
 
   npis.each do |npi|
@@ -266,6 +267,7 @@ def cleanup_org(org)
   org.destroy
 end
 
+# rubocop:enable Metrics/AbcSize,  Metrics/CyclomaticComplexity, Metrics/MethodLength, Metrics/PerceivedComplexity, Metrics/ParameterLists
 # Fakes an org necessary to work with the DpcClient
 class MockOrg
   # rubocop:disable Naming/VariableNumber

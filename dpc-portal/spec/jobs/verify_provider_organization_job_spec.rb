@@ -3,7 +3,46 @@
 require 'rails_helper'
 
 RSpec.describe VerifyProviderOrganizationJob, type: :job do
+  include ActiveJob::TestHelper
+
   describe :perform do
+    context :chained do
+      before do
+        allow(ENV).to receive(:fetch).and_call_original
+        10.times do |n|
+          link = create(:ao_org_link, last_checked_at: (n + 6).days.ago)
+          link.provider_organization.update!(verification_status: 'approved',
+                                             last_checked_at: (n + 6).days.ago)
+        end
+      end
+      before do
+        allow(ENV).to receive(:fetch).and_call_original
+        expect(ENV)
+          .to receive(:fetch)
+          .with('VERIFICATION_MAX_RECORDS', '10')
+          .and_return('4').at_least(4)
+        user = create(:user, pac_id: '900111111', verification_status: :approved)
+        10.times do |n|
+          create(:ao_org_link, user:, last_checked_at: (n + 6).days.ago)
+        end
+      end
+      it 'should keep calling until done' do
+        expect(ProviderOrganization.where(last_checked_at: ..6.days.ago).count).to eq 10
+        VerifyProviderOrganizationJob.perform_now
+        expect(ProviderOrganization.where(last_checked_at: ..6.days.ago).count).to eq 6
+        assert_enqueued_with(job: VerifyProviderOrganizationJob)
+        perform_enqueued_jobs
+        expect(ProviderOrganization.where(last_checked_at: ..6.days.ago).count).to eq 2
+        assert_enqueued_with(job: VerifyProviderOrganizationJob)
+        perform_enqueued_jobs
+        expect(ProviderOrganization.where(last_checked_at: ..6.days.ago).count).to eq 0
+        assert_enqueued_with(job: VerifyProviderOrganizationJob)
+        perform_enqueued_jobs
+        expect(ProviderOrganization.where(last_checked_at: ..6.days.ago).count).to eq 0
+        assert_no_enqueued_jobs
+      end
+    end
+
     context :no_failures do
       before do
         allow(ENV).to receive(:fetch).and_call_original
@@ -41,7 +80,7 @@ RSpec.describe VerifyProviderOrganizationJob, type: :job do
         orgs_to_check = ProviderOrganization.where(last_checked_at: ..6.days.ago,
                                                    verification_status: true)
 
-        VerifyAoJob.perform_now
+        VerifyProviderOrganizationJob.perform_now
         orgs_to_check.each do |org|
           org.reload
           expect(org.last_checked_at).to be > 1.day.ago
