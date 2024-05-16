@@ -5,6 +5,14 @@ module Verification
   extend ActiveSupport::Concern
 
   included do
+    def max_records
+      ENV.fetch('VERIFICATION_MAX_RECORDS', '10').to_i
+    end
+
+    def lookback_hours
+      ENV.fetch('VERIFICATION_LOOKBACK_HOURS', '144').to_i
+    end
+
     def link_error_attributes(message)
       { last_checked_at: Time.now, verification_status: false,
         verification_reason: message }
