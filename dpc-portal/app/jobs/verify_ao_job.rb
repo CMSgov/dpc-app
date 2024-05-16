@@ -35,6 +35,8 @@ class VerifyAoJob < ApplicationJob
         update_org_sanctions(link.provider_organization, message)
       when 'ao_med_sanctions'
         update_ao_sanctions(link, message)
+      when 'user_not_authorized_official'
+        link.provider_organization.update!(last_checked_at: Time.now)
       when 'no_approved_enrollment'
         link.provider_organization.update!(entity_error_attributes(message))
       end

@@ -121,7 +121,7 @@ RSpec.describe VerifyAoJob, type: :job do
         expect(link.provider_organization.verification_status).to eq 'rejected'
         expect(link.provider_organization.verification_reason).to eq 'no_approved_enrollment'
       end
-      it 'should update only link on fails no longer ao' do
+      it 'should update only link and org date on fails no longer ao' do
         user = create(:user, pac_id: 'bad-id', verification_status: :approved)
         provider_organization = create(:provider_organization, verification_status: :approved)
         link = create(:ao_org_link, last_checked_at: 8.days.ago, user:, provider_organization:)
@@ -131,6 +131,7 @@ RSpec.describe VerifyAoJob, type: :job do
         expect(link.verification_reason).to eq 'user_not_authorized_official'
         expect(link.user.verification_status).to eq 'approved'
         expect(link.provider_organization.verification_status).to eq 'approved'
+        expect(link.provider_organization.last_checked_at).to be > 1.day.ago
       end
       it 'should update org and link if org has med sanctions' do
         provider_organization = create(:provider_organization, npi: '3598564557')
