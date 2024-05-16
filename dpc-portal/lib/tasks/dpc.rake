@@ -41,7 +41,6 @@ namespace :dpc do
   desc 'Performance tests Verification jobs'
   task verify_perf: :environment do
     only_good = ENV.fetch('GOOD', false)
-    ENV['VERIFICATION_MAX_RECORDS'] = '10000'
     if only_good
       Npis::GOOD.each do |npi|
         make_basic(npi, PacIds::AO_GOOD, 'Good')
@@ -59,9 +58,9 @@ namespace :dpc do
       verify_only_good_ao_job
     else
       verify_ao_job
-      @start = Time.now
-      VerifyProviderOrganizationJob.perform_now
-      puts "VerifyProviderOrganizationJob took #{(Time.now - @start).floor(1)} seconds"
+      # @start = Time.now
+      # VerifyProviderOrganizationJob.perform_now
+      # puts "VerifyProviderOrganizationJob took #{(Time.now - @start).floor(1)} seconds"
       verify_org_job
     end
     cleanup unless ENV.fetch('NO_CLEANUP', false)
@@ -141,6 +140,7 @@ def passes_by_org(npis, org_pass, link_pass, user_pass, sanction, debug: false)
 end
 
 def verify_ao_job
+  puts "ORG MED CHECK     : #{passes_by_org(Npis::ORG_FAILS_MED_CHECK, false, false, true, 'org_med_sanctions')}"
   puts "ORG NO ENROLLMENTS: #{passes_by_org(Npis::ORG_NO_ENROLLMENTS, false, false, true, 'no_approved_enrollment')}"
   puts "AO NO LONGER AO   : #{passes_by_org(Npis::AO_NO_LONGER_AO, true, false, true, 'user_not_authorized_official')}"
   puts "AO FAILS MED CHECK: #{passes_by_org(Npis::AO_FAILS_MED_CHECK, false, false, false, 'ao_med_sanctions')}"
@@ -152,7 +152,6 @@ def verify_only_good_ao_job
 end
 
 def verify_org_job
-  puts "ORG MED CHECK     : #{passes_by_org(Npis::ORG_FAILS_MED_CHECK, false, false, true, 'org_med_sanctions')}"
   no_ao_fail = false
   ProviderOrganization.where(npi: Npis::NO_AO).each do |org|
     if org.last_checked_at < @start
