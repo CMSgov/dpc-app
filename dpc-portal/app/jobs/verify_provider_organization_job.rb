@@ -30,8 +30,6 @@ class VerifyProviderOrganizationJob < ApplicationJob
   end
 
   def orgs_to_check
-    max_records = ENV.fetch('VERIFICATION_MAX_RECORDS', '10').to_i
-    lookback_hours = ENV.fetch('VERIFICATION_LOOKBACK_HOURS', '144').to_i
     ProviderOrganization.where(last_checked_at: ..lookback_hours.hours.ago,
                                verification_status: 'approved').limit(max_records)
   end
