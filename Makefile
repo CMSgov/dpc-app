@@ -174,8 +174,11 @@ maven-config:
 psql: ## Run a psql shell
 	@docker-compose -f docker-compose.yml exec -it db psql -U postgres
 
+portal-sh: ## Run a portal shell
+	@docker-compose -f docker-compose.yml -f docker-compose.portals.yml exec -it dpc_portal bin/sh
+
 portal-console: ## Run a rails console shell
-	@docker-compose -f docker-compose.yml -f docker-compose.portals.yml exec -it dpc_portal rails console
+	@docker-compose -f docker-compose.yml -f docker-compose.portals.yml exec -it dpc_portal bin/console
 
 
 # Build & Test commands
