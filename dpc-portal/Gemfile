@@ -43,7 +43,7 @@ gem 'rack', '~> 2.2.8.1'
 gem 'railties', '~> 7.1.3.2'
 gem 'redis', '~> 4.0'
 gem 'redis-namespace'
-gem 'rexml', '>= 3.2.5' # adding for CVE-2021-28965
+gem 'rexml', '>= 3.2.7'
 gem 'sassc-rails', '>= 2.1.2'
 gem 'sidekiq', '~> 7.2.4'
 gem 'sidekiq_alive', '~> 2.1.5'

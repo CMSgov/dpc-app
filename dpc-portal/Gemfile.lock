@@ -428,7 +428,8 @@ GEM
       http-cookie (>= 1.0.2, < 2.0)
       mime-types (>= 1.16, < 4.0)
       netrc (~> 0.8)
-    rexml (3.2.6)
+    rexml (3.2.8)
+      strscan (>= 3.0.9)
     rouge (4.2.1)
     rspec-core (3.13.0)
       rspec-support (~> 3.13.0)
@@ -511,6 +512,7 @@ GEM
       activesupport (>= 5.2)
       sprockets (>= 3.0.0)
     stringio (3.1.0)
+    strscan (3.1.0)
     swd (2.0.3)
       activesupport (>= 3)
       attr_required (>= 0.0.5)
@@ -619,7 +621,7 @@ DEPENDENCIES
   rbnacl-libsodium
   redis (~> 4.0)
   redis-namespace
-  rexml (>= 3.2.5)
+  rexml (>= 3.2.7)
   rspec-rails
   rubocop
   rubocop-performance
