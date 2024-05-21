@@ -11,15 +11,16 @@ class VerifyAoJob < ApplicationJob
   def perform
     @start = Time.now
     service = AoVerificationService.new
-    if links_to_check.each do |link|
-         check_link(service, link)
-         update_success(link)
+    links_to_check.each do |link|
+      check_link(service, link)
+      update_success(link)
     rescue AoException => e
       handle_error(link, e.message)
-       end.empty?
-      enqueue_job(VerifyProviderOrganizationJob)
-    else
+    end
+    if links_to_check.present?
       enqueue_job(VerifyAoJob)
+    else
+      enqueue_job(VerifyProviderOrganizationJob)
     end
   end
 

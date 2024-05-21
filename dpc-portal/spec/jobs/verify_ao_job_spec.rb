@@ -28,9 +28,6 @@ RSpec.describe VerifyAoJob, type: :job do
         assert_enqueued_with(job: VerifyAoJob)
         perform_enqueued_jobs
         expect(AoOrgLink.where(last_checked_at: ..6.days.ago).count).to eq 0
-        assert_enqueued_with(job: VerifyAoJob)
-        perform_enqueued_jobs
-        expect(AoOrgLink.where(last_checked_at: ..6.days.ago).count).to eq 0
         assert_enqueued_with(job: VerifyProviderOrganizationJob)
       end
     end

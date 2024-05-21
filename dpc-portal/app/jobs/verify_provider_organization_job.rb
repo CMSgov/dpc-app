@@ -11,15 +11,16 @@ class VerifyProviderOrganizationJob < ApplicationJob
   def perform
     service = AoVerificationService.new
     @start = Time.now
-    unless orgs_to_check.each do |org|
-             service.check_org_med_sanctions(org.npi)
-             service.get_approved_enrollments(org.npi)
-             org.update!(last_checked_at: Time.now)
+    orgs_to_check.each do |org|
+      service.check_org_med_sanctions(org.npi)
+      service.get_approved_enrollments(org.npi)
+      org.update!(last_checked_at: Time.now)
     rescue AoException => e
       handle_error(org, e.message)
-           end.empty?
-      enqueue_job(VerifyProviderOrganizationJob)
     end
+    return if orgs_to_check.empty?
+
+    enqueue_job(VerifyProviderOrganizationJob)
   end
 
   def handle_error(org, message)

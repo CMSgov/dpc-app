@@ -36,9 +36,6 @@ RSpec.describe VerifyProviderOrganizationJob, type: :job do
         assert_enqueued_with(job: VerifyProviderOrganizationJob)
         perform_enqueued_jobs
         expect(ProviderOrganization.where(last_checked_at: ..6.days.ago).count).to eq 0
-        assert_enqueued_with(job: VerifyProviderOrganizationJob)
-        perform_enqueued_jobs
-        expect(ProviderOrganization.where(last_checked_at: ..6.days.ago).count).to eq 0
         assert_no_enqueued_jobs
       end
     end
