@@ -30,8 +30,7 @@ module Verification
     end
 
     def enqueue_job(klass)
-      wait = (Time.now - @start).seconds
-      klass.set(wait:).perform_later
+      klass.perform_later
     end
   end
 end
