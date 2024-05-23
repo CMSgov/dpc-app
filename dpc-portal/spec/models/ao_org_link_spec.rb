@@ -73,7 +73,7 @@ RSpec.describe AoOrgLink, type: :model do
 
     it 'allows good verification_reason' do
       expect do
-        ao_org_link.verification_reason = :ao_removal
+        ao_org_link.verification_reason = :user_not_authorized_official
         ao_org_link.save
       end.not_to raise_error
     end
