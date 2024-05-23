@@ -11,7 +11,8 @@ class OrganizationsController < ApplicationController
 
   def index
     @organizations = current_user.provider_organizations
-    render(Page::Organization::OrganizationListComponent.new(organizations: @organizations))
+    ao_or_cd = current_user.ao?(@organizations) ? :ao : :cd
+    render(Page::Organization::OrganizationListComponent.new(ao_or_cd:, organizations: @organizations))
   end
 
   def show

@@ -9,37 +9,35 @@ RSpec.describe Page::Organization::OrganizationListComponent, type: :component d
       normalize_space(rendered_content)
     end
 
+    let(:ao_ref) { 'As an Authorized Official' }
     def normalize_space(str)
       str.gsub(/^ +/, '').gsub("\n", '')
     end
 
-    context 'when has no options' do
-      let(:component) { described_class.new(organizations: []) }
+    context 'when is ao' do
+      let(:component) { described_class.new(ao_or_cd: :ao, organizations: []) }
 
       before do
         render_inline(component)
       end
 
-      it 'should have an empty org search' do
-        empty_org_search = <<~SELECT
-          <select class="usa-select" name="org_search_selection" id="org_search_selection" onchange="filterOrgName(this);">
-              <option value>Organization Name</option>
-          </select>
-        SELECT
-        is_expected.to include(normalize_space(empty_org_search))
+      it 'should have reference to Authorized Official' do
+        is_expected.to include(normalize_space(ao_ref))
+      end
+    end
+    context 'when has no options and is cd' do
+      let(:component) { described_class.new(ao_or_cd: :cd, organizations: []) }
+
+      before do
+        render_inline(component)
       end
 
-      it 'should have an empty npi search' do
-        empty_npi_search = <<~SELECT
-          <select class="usa-select" name="npi_search_selection" id="npi_search_selection" onchange="filterNpi(this);">
-              <option value>NPI</option>
-          </select>
-        SELECT
+      it 'should have not reference to Authorized Official' do
+        is_expected.to_not include(normalize_space(ao_ref))
+      end
+      it 'should say no organizations' do
+        empty_npi_search = "<p>You don't have any organizations to show.</p>"
         is_expected.to include(normalize_space(empty_npi_search))
-      end
-
-      it 'should have an empty org search combo box' do
-        is_expected.to include('<ul class="usa-card-group"></ul>')
       end
     end
 
@@ -49,7 +47,7 @@ RSpec.describe Page::Organization::OrganizationListComponent, type: :component d
         allow(org).to receive(:name).and_return('name')
         allow(org).to receive(:npi).and_return('npi')
         allow(org).to receive(:api_id).and_return('api')
-        described_class.new(organizations: [org])
+        described_class.new(ao_or_cd: :cd, organizations: [org])
       end
       let(:expected_html) do
         <<~HTML
@@ -82,26 +80,6 @@ RSpec.describe Page::Organization::OrganizationListComponent, type: :component d
 
       before do
         render_inline(component)
-      end
-
-      it 'should have one org in search' do
-        empty_org_search = <<~SELECT
-          <select class="usa-select" name="org_search_selection" id="org_search_selection" onchange="filterOrgName(this);">
-              <option value>Organization Name</option>
-              <option value="name">name</option>
-          </select>
-        SELECT
-        is_expected.to include(normalize_space(empty_org_search))
-      end
-
-      it 'should have one npi in search' do
-        empty_npi_search = <<~SELECT
-          <select class="usa-select" name="npi_search_selection" id="npi_search_selection" onchange="filterNpi(this);">
-              <option value>NPI</option>
-              <option value="npi">npi</option>
-          </select>
-        SELECT
-        is_expected.to include(normalize_space(empty_npi_search))
       end
 
       it 'should have one card in list' do

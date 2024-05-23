@@ -43,7 +43,7 @@ RSpec.describe 'Organizations', type: :request do
 
       it 'redirects to login after inactivity' do
         get '/organizations'
-        expect(response.body).to include('<option value>Organization Name</option>')
+        expect(response.body).to include("<p>You don't have any organizations to show.</p>")
         Timecop.travel(30.minutes.from_now)
         get '/organizations'
         expect(response).to redirect_to('/portal/users/sign_in')
@@ -53,11 +53,11 @@ RSpec.describe 'Organizations', type: :request do
       it 'redirects to login after session time elapses' do
         logged_in_at = Time.now
         get '/organizations'
-        expect(response.body).to include('<option value>Organization Name</option>')
+        expect(response.body).to include("<p>You don't have any organizations to show.</p>")
         Timecop.scale(360) do # 1 real second = 1 simulated hour
           until Time.now > logged_in_at + 12.hours
             get '/organizations'
-            expect(response.body).to include('<option value>Organization Name</option>')
+            expect(response.body).to include("<p>You don't have any organizations to show.</p>")
             Timecop.travel(20.minutes.from_now)
           end
           get '/organizations'

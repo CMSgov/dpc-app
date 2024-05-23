@@ -41,6 +41,7 @@ RSpec.describe User, type: :model do
     let(:user) { create(:user) }
     let(:other_user) { create(:user) }
     let(:provider_organization) { create(:provider_organization) }
+    let(:other_organization) { create(:provider_organization) }
 
     it 'should be ao if link present' do
       create(:ao_org_link, user:, provider_organization:)
@@ -50,6 +51,21 @@ RSpec.describe User, type: :model do
     it 'should not be ao if link not present' do
       create(:ao_org_link, user: other_user, provider_organization:)
       expect(user.ao?(provider_organization)).to be false
+    end
+
+    it 'should not be ao if only cd link present' do
+      create(:cd_org_link, user:, provider_organization:)
+      expect(user.ao?(provider_organization)).to be false
+    end
+
+    it 'should accept multiple organizations' do
+      create(:ao_org_link, user:, provider_organization:)
+      create(:cd_org_link, user:, provider_organization: other_organization)
+      expect(user.ao?([provider_organization, other_organization])).to be true
+    end
+
+    it 'should accept empty array' do
+      expect(user.ao?([])).to be false
     end
   end
   describe :cd do
