@@ -100,6 +100,49 @@ RSpec.describe 'Organizations', type: :request do
       end
     end
 
+    context 'org has sanctions' do
+      let!(:user) { create(:user) }
+      let!(:org) do
+        create(:provider_organization, verification_status: 'rejected',
+                                       verification_reason: 'org_med_sanctions')
+      end
+      before { sign_in user }
+
+      it 'should show access denied page' do
+        create(:ao_org_link, provider_organization: org, user:)
+        get "/organizations/#{org.id}"
+        expect(response.body).to include(I18n.t('verification.org_med_sanctions_status'))
+      end
+    end
+
+    context 'org not approved' do
+      let!(:user) { create(:user) }
+      let!(:org) do
+        create(:provider_organization, verification_status: 'rejected',
+                                       verification_reason: 'no_approved_enrollment')
+      end
+      before { sign_in user }
+
+      it 'should show access denied page' do
+        create(:ao_org_link, provider_organization: org, user:)
+        get "/organizations/#{org.id}"
+        expect(response.body).to include(I18n.t('verification.no_approved_enrollment_status'))
+      end
+    end
+
+    context 'user no longer ao' do
+      let!(:user) { create(:user) }
+      let!(:org) { create(:provider_organization) }
+      before { sign_in user }
+
+      it 'should show access denied page' do
+        create(:ao_org_link, provider_organization: org, user:, verification_status: false,
+                             verification_reason: 'user_not_authorized_official')
+        get "/organizations/#{org.id}"
+        expect(response.body).to include(I18n.t('verification.user_not_authorized_official_status'))
+      end
+    end
+
     context 'as cd' do
       let!(:user) { create(:user) }
       let!(:org) { create(:provider_organization) }

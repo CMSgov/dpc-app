@@ -54,9 +54,26 @@ class ApplicationController < ActionController::Base
 
   def require_can_access
     redirect_to organizations_path unless current_user.can_access?(@organization)
+
+    verify_status
   end
 
   def require_ao
     redirect_to organizations_path unless current_user.ao?(@organization)
+
+    verify_status
+  end
+
+  def verify_status
+    if @organization.rejected?
+      return render(Page::Utility::AccessDeniedComponent.new(organization: @organization,
+                                                             failure_code: @organization.verification_reason))
+    end
+
+    links = current_user.ao_org_links.where(provider_organization: @organization)
+    return if links.empty? || links.any?(&:verification_status?)
+
+    render(Page::Utility::AccessDeniedComponent.new(organization: @organization,
+                                                    failure_code: links.first.verification_reason))
   end
 end
