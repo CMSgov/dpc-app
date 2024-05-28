@@ -3,6 +3,7 @@
 # Shows Credential Delegates info about the organizations they manage the credentials for
 class OrganizationsController < ApplicationController
   before_action :authenticate_user!
+  before_action :check_user_verification
   before_action :load_organization, only: %i[show tos_form sign_tos success]
   before_action :require_can_access, only: %i[show]
   before_action :check_npi, only: %i[create]

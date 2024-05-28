@@ -42,6 +42,19 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
       end
     end
 
+    context 'has sanctions' do
+      let!(:user) { create(:user, verification_status: 'rejected', verification_reason: 'ao_med_sanctions') }
+      let!(:org) { create(:provider_organization) }
+      before { sign_in user }
+
+      it 'should show access denied page' do
+        create(:ao_org_link, provider_organization: org, user:)
+        get "/organizations/#{org.id}/credential_delegate_invitations/new"
+        expect(response.body).to include(I18n.t('verification.ao_med_sanctions_status'))
+        expect(assigns(:organization)).to be_nil
+      end
+    end
+
     context 'as cd' do
       let!(:user) { create(:user) }
       let!(:org) { create(:provider_organization) }

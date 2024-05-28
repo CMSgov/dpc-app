@@ -9,6 +9,12 @@ class ApplicationController < ActionController::Base
 
   private
 
+  def check_user_verification
+    return unless current_user&.rejected?
+
+    render(Page::Utility::AccessDeniedComponent.new(failure_code: current_user.verification_reason))
+  end
+
   def tos_accepted
     return if @organization.terms_of_service_accepted_by.present?
 
