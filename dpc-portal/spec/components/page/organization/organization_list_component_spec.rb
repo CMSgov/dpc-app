@@ -15,7 +15,7 @@ RSpec.describe Page::Organization::OrganizationListComponent, type: :component d
     end
 
     context 'when is ao' do
-      let(:component) { described_class.new(ao_or_cd: :ao, organizations: []) }
+      let(:component) { described_class.new(ao_or_cd: :ao, links: []) }
 
       before do
         render_inline(component)
@@ -26,7 +26,7 @@ RSpec.describe Page::Organization::OrganizationListComponent, type: :component d
       end
     end
     context 'when has no options and is cd' do
-      let(:component) { described_class.new(ao_or_cd: :cd, organizations: []) }
+      let(:component) { described_class.new(ao_or_cd: :cd, links: []) }
 
       before do
         render_inline(component)
@@ -44,7 +44,8 @@ RSpec.describe Page::Organization::OrganizationListComponent, type: :component d
     context 'when has one option' do
       let(:component) do
         org = ProviderOrganization.new(name: 'name', npi: 'npi', id: '5', terms_of_service_accepted_at: 2.days.ago)
-        described_class.new(ao_or_cd: :cd, organizations: [org])
+        link = CdOrgLink.new(provider_organization: org)
+        described_class.new(ao_or_cd: :cd, links: [link])
       end
       let(:expected_html) do
         <<~HTML

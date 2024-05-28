@@ -118,23 +118,23 @@ RSpec.describe User, type: :model do
     end
   end
 
-  describe :provider_organizations do
+  describe :provider_links do
     let(:provider_organization) { create(:provider_organization) }
     let(:user) { create(:user) }
     it 'should return orgs with ao_org_link' do
-      create(:ao_org_link, provider_organization:, user:)
-      expect(user.provider_organizations).to include(provider_organization)
+      link = create(:ao_org_link, provider_organization:, user:)
+      expect(user.provider_links).to include(link)
     end
     it 'should return orgs with cd_org_link' do
-      create(:cd_org_link, provider_organization:, user:)
-      expect(user.provider_organizations).to include(provider_organization)
+      link = create(:cd_org_link, provider_organization:, user:)
+      expect(user.provider_links).to include(link)
     end
     it 'should not return orgs with disabaled cd_org_link' do
-      create(:cd_org_link, provider_organization:, user:, disabled_at: 2.days.ago)
-      expect(user.provider_organizations).to_not include(provider_organization)
+      link = create(:cd_org_link, provider_organization:, user:, disabled_at: 2.days.ago)
+      expect(user.provider_links).to_not include(link)
     end
     it 'should not return orgs without link' do
-      expect(user.provider_organizations).to_not include(provider_organization)
+      expect(user.provider_links).to be_empty
     end
   end
 end

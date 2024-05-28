@@ -10,9 +10,7 @@
   <p>These are organizations for which you serve as an AO. Organizations cannot access Medicare claims data without an AO agreement to follow terms of service.</p>
 <% end %>
 <ul class="usa-card-group">
-    <% @organizations.each do |organization| %>
-        <%= render Core::Card::OrganizationCardComponent.new(organization: organization)%>
-    <% end %>
+   <%= render Core::Card::OrganizationCardComponent.with_collection(@links)%>
 </ul>
-<%=raw "<p>You don't have any organizations to show.</p>" if @organizations.blank? %>
+<%=raw "<p>You don't have any organizations to show.</p>" if @links.blank? %>
 </div>

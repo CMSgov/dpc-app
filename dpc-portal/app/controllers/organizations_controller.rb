@@ -11,9 +11,9 @@ class OrganizationsController < ApplicationController
   before_action :tos_accepted, only: %i[show]
 
   def index
-    @organizations = current_user.provider_organizations
-    ao_or_cd = current_user.ao?(@organizations) ? :ao : :cd
-    render(Page::Organization::OrganizationListComponent.new(ao_or_cd:, organizations: @organizations))
+    @links = current_user.provider_links
+    ao_or_cd = @links.any? { |link| link.is_a?(AoOrgLink) }
+    render(Page::Organization::OrganizationListComponent.new(ao_or_cd:, links: @links))
   end
 
   def show

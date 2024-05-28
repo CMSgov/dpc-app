@@ -22,7 +22,8 @@ module Core
         terms_of_service_accepted_at = tos_accepted == 'true' ? 2.days.ago : nil
         org = ProviderOrganization.new(id: 5, name: 'Test Organization', npi: 'npi_123456',
                                        terms_of_service_accepted_at:, verification_reason:, verification_status:)
-        render(Core::Card::OrganizationCardComponent.new(organization: org))
+        link = AoOrgLink.new(provider_organization: org)
+        render(Core::Card::OrganizationCardComponent.new(link:))
       end
 
       private

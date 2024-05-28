@@ -20,19 +20,19 @@ RSpec.describe 'Organizations', type: :request do
 
       it 'returns success if no orgs associated with user' do
         get '/organizations'
-        expect(assigns(:organizations)).to be_empty
+        expect(assigns(:links)).to be_empty
       end
 
       it 'returns organizations linked to user as ao' do
-        create(:ao_org_link, provider_organization: org, user:)
+        link = create(:ao_org_link, provider_organization: org, user:)
         get '/organizations'
-        expect(assigns(:organizations)).to eq [org]
+        expect(assigns(:links)).to eq [link]
       end
 
       it 'returns organizations linked to user as cd' do
-        create(:cd_org_link, provider_organization: org, user:)
+        link = create(:cd_org_link, provider_organization: org, user:)
         get '/organizations'
-        expect(assigns(:organizations)).to eq [org]
+        expect(assigns(:links)).to eq [link]
       end
     end
 
