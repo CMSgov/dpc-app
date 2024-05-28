@@ -105,7 +105,8 @@ RSpec.describe Core::Card::OrganizationCardComponent, type: :component do
     context 'link not valid' do
       let(:component) do
         org = ProviderOrganization.new(name: 'name', npi: 'npi', id: '5', verification_status: 'approved')
-        link = AoOrgLink.new(provider_organization: org, verification_status: false, verification_reason: 'user_not_authorized_official')
+        link = AoOrgLink.new(provider_organization: org, verification_status: false,
+                             verification_reason: 'user_not_authorized_official')
         described_class.new(link:)
       end
       let(:expected_html) do

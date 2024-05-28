@@ -32,6 +32,6 @@ RSpec.describe CdOrgLink, type: :model do
   it 'handles verification status' do
     expect(cd_org_link.verification_status?).to be_truthy
     cd_org_link.disabled_at = 1.day.ago
-    expect(cd_org_link.verification_status?).to be_falsey   
+    expect(cd_org_link.verification_status?).to be_falsey
   end
 end
