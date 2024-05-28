@@ -7,9 +7,18 @@ module Core
       with_collection_parameter :organization
       def initialize(organization:)
         super
-        @name = organization.name
-        @npi = organization.npi
-        @api_id = organization.api_id
+        @organization = organization
+      end
+
+      def before_render
+        @icon, @classes, @status = if @organization.rejected?
+                                     ['lock', %i[text-gray-50],
+                                      t("verification.#{@organization.verification_reason}_status")]
+                                   elsif @organization.terms_of_service_accepted_at.blank?
+                                     ['warning', %i[text-gold], 'You must sign DPC Terms of Service.']
+                                   else
+                                     ['verified', %i[text-accent-cool], 'Manage your organization.']
+                                   end
       end
     end
   end

@@ -43,37 +43,43 @@ RSpec.describe Page::Organization::OrganizationListComponent, type: :component d
 
     context 'when has one option' do
       let(:component) do
-        org = double('org')
-        allow(org).to receive(:name).and_return('name')
-        allow(org).to receive(:npi).and_return('npi')
-        allow(org).to receive(:api_id).and_return('api')
+        org = ProviderOrganization.new(name: 'name', npi: 'npi', id: '5', terms_of_service_accepted_at: 2.days.ago)
         described_class.new(ao_or_cd: :cd, organizations: [org])
       end
       let(:expected_html) do
         <<~HTML
-          <ul class="usa-card-group">
-              <li class="usa-card tablet-lg:grid-col-1 widescreen:grid-col-1" style="list-style:none; visibility:visible;" data-npi="npi" data-name="name">
-                  <div class="usa-card__container">
+                <ul class="usa-card-group">
+                  <li class="usa-card tablet-lg:grid-col-1 widescreen:grid-col-1" style="list-style:none; visibility:visible;" data-npi="npi" data-name="name">
+                      <div class="usa-card__container">
                       <div class="usa-card__header">
                           <h2 class="usa-card__heading">
-                              name
+                          name
                           </h2>
                       </div>
                       <div class="usa-card__body">
-                          <div id="npi_div" style="float:left">
-                              <p class="usa-card__text">
-                                  <span style="font-weight:bold">NPI</span>
-                                  <span>npi</span>
-                              </p>
+                          <div class="clearfix">
+                          <div id="npi_div" class="float-left">
+                          <p class="usa-card__text">
+                              <span style="font-weight:bold">NPI</span>
+                              <span>npi</span>
+                          </p>
                           </div>
-                          <div id="status_div" style="float:right">
-                              <p class="usa-card__text">
-                                  <form class="button_to" method="get" action="/portal/organizations/api"><button class="usa-button--outline usa-button" type="submit">View Details</button></form>
-                              </p>
+                          <div id="status_div" class="float-right">
+                          <p class="usa-card__text">
+                              <form class="button_to" method="get" action="/portal/organizations/5"><button class="usa-button--outline usa-button" type="submit">View Details</button></form>
+                          </p>
                           </div>
                       </div>
+                  <div class="clearfix">
+                    <div class="float-left">  <svg class="text-accent-cool usa-icon" style="transform: scale(1)" aria-hidden="true" role="img">
+                        <use xlink:href=/portal/assets/@uswds/uswds/dist/img/sprite-9865eea7b251e43137fb770626d6cd51c474a3a436678a6e66cafce50968076f.svg#verified></use>
+                      </svg>
+                    </div>
+                    <div class="float-left margin-left-1 margin-top-neg-2px">Manage your organization.</div>
                   </div>
-              </li>
+                </div>
+              </div>
+            </li>
           </ul>
         HTML
       end

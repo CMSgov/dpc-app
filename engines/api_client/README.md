@@ -12,7 +12,7 @@ dpc_client = DpcClient.new
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'api_client', github: 'CMSgov/dpc-app', branch: 'master', glob: 'engines/api_client/api_client.gemspec'
+gem 'api_client', github: 'CMSgov/dpc-app', branch: 'main', glob: 'engines/api_client/api_client.gemspec'
 ```
 
 And then execute:

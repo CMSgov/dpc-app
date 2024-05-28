@@ -8,12 +8,21 @@ module Core
     # [See at USWDS](https://designsystem.digital.gov/components/card/)
     #
     class OrganizationCardComponentPreview < ViewComponent::Preview
-      OrgStruct = Struct.new(:name, :npi, :api_id)
-
+      # @param tos_accepted
+      # @param failure_code
       # @after_render :wrap_in_ul
-      def default
-        render(Core::Card::OrganizationCardComponent.new(organization: OrgStruct.new('Test Organization', 'npi_123456',
-                                                                                     'api_123')))
+      def parameterized(failure_code: nil, tos_accepted: 'true')
+        if ProviderOrganization.defined_enums['verification_reason'].include? failure_code
+          verification_status = 'rejected'
+          verification_reason = failure_code
+        else
+          verification_status = verification_reason = nil
+        end
+
+        terms_of_service_accepted_at = tos_accepted == 'true' ? 2.days.ago : nil
+        org = ProviderOrganization.new(id: 5, name: 'Test Organization', npi: 'npi_123456',
+                                       terms_of_service_accepted_at:, verification_reason:, verification_status:)
+        render(Core::Card::OrganizationCardComponent.new(organization: org))
       end
 
       private

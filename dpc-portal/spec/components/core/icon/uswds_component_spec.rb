@@ -37,7 +37,7 @@ RSpec.describe Core::Icon::UswdsComponent, type: :component do
       it { is_expected.to match_html_fragment(expected_html) }
     end
     context 'added classes' do
-      let(:component) { described_class.new('lock', additional_classes: ['foo', 'bar']) }
+      let(:component) { described_class.new('lock', additional_classes: %w[foo bar]) }
       let(:expected_html) do
         <<~HTML
           <svg class="foo bar usa-icon" style="transform: scale(1)" aria-hidden="true" role="img">

@@ -10,7 +10,7 @@ Details on the data modifications are given [here](#practitioners).
 Details on the data modifications are given [here](#patients).
   - [patient_bundle-dpr.json](./patient_bundle-dpr.json) Like `patient_bundle.json`, but with IDs matching the BlueButton sandbox environment. This is the file to use when testing against any Data at the Point of Care environment.
 - [test_associations.csv](./test_associations.csv): A mapping of `Practitioner` resources to `Patient` resources (in a local environment only), which can be used to generate Patient rosters.
-Sample code for generating the corresponding `Group` resources is provided [here](https://github.com/CMSgov/dpc-app/blob/master/dpc-attribution/src/test/java/gov/cms/dpc/attribution/scripts/GenerateRosters.java).
+Sample code for generating the corresponding `Group` resources is provided [here](https://github.com/CMSgov/dpc-app/blob/main/dpc-attribution/src/test/java/gov/cms/dpc/attribution/scripts/GenerateRosters.java).
   - [test_associations-dpr.csv](./test_associations-dpr.csv): Like `test_associations.csv`, but with IDs matching the BlueButton sandbox environment. This is the file to use when testing against any Data at the Point of Care environment.
 - [organization_bundle.json](./organization_bundle.json): A `Bundle` of 2 `Organization`s and their corresponding `Endpoint` resources.
 These can be used for bootstrapping a local development environment in which no Organizations have been registered yet.
