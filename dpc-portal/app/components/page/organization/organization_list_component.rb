@@ -11,7 +11,7 @@ module Page
       end
 
       def ao?
-        !!@ao
+        @ao
       end
     end
   end

@@ -2,7 +2,7 @@
 
 module Core
   module Icon
-    # Renders an icon available fror USWDS
+    # Renders an icon available from USWDS
     class UswdsComponent < ViewComponent::Base
       def initialize(name, size: 1, additional_classes: [])
         super()

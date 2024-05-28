@@ -36,7 +36,7 @@ RSpec.describe 'Organizations', type: :request do
       end
     end
 
-    context 'has sanctions' do
+    context 'user has sanctions' do
       let!(:user) { create(:user, verification_status: 'rejected', verification_reason: 'ao_med_sanctions') }
       let!(:org) { create(:provider_organization) }
       before { sign_in user }

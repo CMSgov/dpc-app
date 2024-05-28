@@ -14,7 +14,7 @@ RSpec.describe 'PublicKeys', type: :request do
       end
     end
 
-    context 'has sanctions' do
+    context 'user has sanctions' do
       let!(:user) { create(:user, verification_status: 'rejected', verification_reason: 'ao_med_sanctions') }
       let!(:org) { create(:provider_organization, terms_of_service_accepted_by:) }
       before { sign_in user }

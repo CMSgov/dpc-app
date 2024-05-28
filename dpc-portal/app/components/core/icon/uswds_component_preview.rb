@@ -2,7 +2,7 @@
 
 module Core
   module Icon
-    # Previews an icon available fror USWDS
+    # Previews an icon available from USWDS
     class UswdsComponentPreview < ViewComponent::Preview
       # @param icon_name
       # @param size
