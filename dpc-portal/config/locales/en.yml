@@ -33,3 +33,12 @@ en:
     server_error_status: Internal Error
     server_error_alert: ''
     server_error_text: We are not currently able to process your request.
+    manage_org: Manage your organization.
+    tos_not_signed: You must sign DPC Terms of Service.
+  cd_access:
+    no_approved_enrollment_status: This organization is not currently approved by Medicare.
+    no_approved_enrollment_text: This organization must have an approved enrollment status with Medicare to access beneficiary claims data.
+    org_med_sanctions_status: This organization is in the Medicare Exclusions Database.
+    org_med_sanctions_text: This organization is listed as an excluded entity by the Office of Inspector General (OIG), which prohibits it from accessing beneficiary claims data.
+    manage_org: Manage credentials.
+    tos_not_signed: DPC Terms of Service not yet signed.

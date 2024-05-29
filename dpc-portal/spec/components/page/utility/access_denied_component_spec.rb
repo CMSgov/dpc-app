@@ -16,7 +16,7 @@ RSpec.describe Page::Utility::AccessDeniedComponent, type: :component do
     context 'with organization' do
       let(:component) do
         org = ProviderOrganization.new(name: 'name', npi: 'npi', id: '5', terms_of_service_accepted_at: 2.days.ago)
-        described_class.new(organization: org, failure_code: 'no_approved_enrollment')
+        described_class.new(organization: org, failure_code: 'verification.no_approved_enrollment')
       end
       let(:expected_html) do
         <<~HTML
@@ -34,7 +34,7 @@ RSpec.describe Page::Utility::AccessDeniedComponent, type: :component do
     end
     context 'without organization' do
       let(:component) do
-        described_class.new(failure_code: 'ao_med_sanctions')
+        described_class.new(failure_code: 'verification.ao_med_sanctions')
       end
       let(:expected_html) do
         <<~HTML

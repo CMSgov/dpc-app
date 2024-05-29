@@ -12,7 +12,7 @@ class ApplicationController < ActionController::Base
   def check_user_verification
     return unless current_user&.rejected?
 
-    render(Page::Utility::AccessDeniedComponent.new(failure_code: current_user.verification_reason))
+    render(Page::Utility::AccessDeniedComponent.new(failure_code: "verification.#{current_user.verification_reason}"))
   end
 
   def tos_accepted
@@ -66,14 +66,19 @@ class ApplicationController < ActionController::Base
 
   def verify_status
     if @organization.rejected?
-      return render(Page::Utility::AccessDeniedComponent.new(organization: @organization,
-                                                             failure_code: @organization.verification_reason))
+      failure_code = "#{code_prefix}.#{@organization.verification_reason}"
+      return render(Page::Utility::AccessDeniedComponent.new(organization: @organization, failure_code:))
     end
 
     links = current_user.ao_org_links.where(provider_organization: @organization)
     return if links.empty? || links.any?(&:verification_status?)
 
-    render(Page::Utility::AccessDeniedComponent.new(organization: @organization,
-                                                    failure_code: links.first.verification_reason))
+    failure_code = "verification.#{links.first.verification_reason}"
+    render(Page::Utility::AccessDeniedComponent.new(organization: @organization, failure_code:))
+  end
+
+  def code_prefix
+    has_ao_link = current_user.ao_org_links.where(provider_organization: @organization).exists?
+    has_ao_link ? 'verification' : 'cd_access'
   end
 end

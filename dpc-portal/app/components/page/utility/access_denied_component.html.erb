@@ -4,6 +4,6 @@
   <h1><%= @organization.name %></h1>
   <p><span class="text-bold">NPI:</span> <%= @organization.npi %></p>
   <% end %>
-  <div class="font-body-lg text-bold"><%= t("verification.#{@failure_code}_status") %></div>
-  <p><%=raw t("verification.#{@failure_code}_text") %></p>
+  <div class="font-body-lg text-bold"><%= t("#{@failure_code}_status") %></div>
+  <p><%=raw t("#{@failure_code}_text") %></p>
 </div>

@@ -76,7 +76,7 @@ RSpec.describe Page::Organization::OrganizationListComponent, type: :component d
                         <use xlink:href=/portal/assets/@uswds/uswds/dist/img/sprite-9865eea7b251e43137fb770626d6cd51c474a3a436678a6e66cafce50968076f.svg#verified></use>
                       </svg>
                     </div>
-                    <div class="float-left margin-left-1 margin-top-neg-2px">Manage your organization.</div>
+                    <div class="float-left margin-left-1 margin-top-neg-2px">#{I18n.t('cd_access.manage_org')}</div>
                   </div>
                 </div>
               </div>

@@ -12,16 +12,17 @@ module Core
       end
 
       def before_render
+        message_prefix = @link.is_a?(AoOrgLink) ? 'verification' : 'cd_access'
         @icon, @classes, @status = if @organization.rejected?
                                      ['lock', %i[text-gray-50],
-                                      t("verification.#{@organization.verification_reason}_status")]
+                                      t("#{message_prefix}.#{@organization.verification_reason}_status")]
                                    elsif !@link.verification_status?
                                      ['lock', %i[text-gray-50],
                                       t("verification.#{@link.verification_reason}_status")]
                                    elsif @organization.terms_of_service_accepted_at.blank?
-                                     ['warning', %i[text-gold], 'You must sign DPC Terms of Service.']
+                                     ['warning', %i[text-gold], t("#{message_prefix}.tos_not_signed")]
                                    else
-                                     ['verified', %i[text-accent-cool], 'Manage your organization.']
+                                     ['verified', %i[text-accent-cool], t("#{message_prefix}.manage_org")]
                                    end
       end
     end
