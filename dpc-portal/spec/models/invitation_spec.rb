@@ -96,6 +96,12 @@ RSpec.describe Invitation, type: :model do
         expect(valid_new_cd_invite.errors.size).to eq 1
         expect(valid_new_cd_invite.errors[:invited_email_confirmation]).to eq ["doesn't match Invited email"]
       end
+
+      it 'fails on bad status' do
+        expect do
+          valid_new_cd_invite.status = :fake_status
+        end.to raise_error(ArgumentError)
+      end
     end
 
     describe :update do

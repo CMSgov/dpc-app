@@ -4,7 +4,7 @@
 class CredentialDelegateInvitationsController < ApplicationController
   before_action :authenticate_user!
   before_action :load_organization
-  before_action :require_ao, only: %i[new create success]
+  before_action :require_ao
   before_action :tos_accepted
 
   def new
@@ -28,6 +28,13 @@ class CredentialDelegateInvitationsController < ApplicationController
 
   def success
     render(Page::CredentialDelegate::InvitationSuccessComponent.new(@organization))
+  end
+
+  def destroy
+    @invitation = Invitation.find(params[:id])
+    @invitation.update(status: :cancelled)
+    flash[:notice] = 'Invitation cancelled.'
+    redirect_to organization_path(@organization)
   end
 
   private

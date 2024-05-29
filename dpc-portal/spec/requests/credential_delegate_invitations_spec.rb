@@ -143,4 +143,38 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
       expect(response).to have_http_status(200)
     end
   end
+
+  describe 'Delete /destroy' do
+    let!(:user) { create(:user) }
+    let!(:org) { create(:provider_organization, terms_of_service_accepted_by: user) }
+    let(:invitation) { create(:invitation, :cd) }
+
+    context 'as cd' do
+      before do
+        create(:cd_org_link, provider_organization: org, user:)
+        sign_in user
+      end
+      it 'fails' do
+        delete "/organizations/#{org.id}/credential_delegate_invitations/#{invitation.id}"
+        expect(invitation.reload).to be_pending
+        expect(response).to redirect_to(organizations_path)
+      end
+    end
+
+    context 'as ao' do
+      before do
+        create(:ao_org_link, provider_organization: org, user:)
+        sign_in user
+      end
+      it 'soft deletes invitation' do
+        delete "/organizations/#{org.id}/credential_delegate_invitations/#{invitation.id}"
+        expect(invitation.reload).to be_cancelled
+        expect(response).to redirect_to(organization_path(org))
+      end
+      it 'flashes success if succeeds' do
+        delete "/organizations/#{org.id}/credential_delegate_invitations/#{invitation.id}"
+        expect(flash[:notice]).to eq('Invitation cancelled.')
+      end
+    end
+  end  
 end

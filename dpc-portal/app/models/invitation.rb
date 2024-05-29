@@ -11,7 +11,8 @@ class Invitation < ApplicationRecord
   validates :invited_phone, format: { with: /\A[0-9]{10}\z/ }, if: :needs_validation?
 
   enum invitation_type: %i[credential_delegate authorized_official]
-
+  enum :status, %i[pending accepted expired cancelled], default: :pending
+  
   belongs_to :provider_organization, required: true
   belongs_to :invited_by, class_name: 'User', required: false
 
