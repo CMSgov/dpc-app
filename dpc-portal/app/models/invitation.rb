@@ -12,7 +12,7 @@ class Invitation < ApplicationRecord
 
   enum invitation_type: %i[credential_delegate authorized_official]
   enum :status, %i[pending accepted expired cancelled], default: :pending
-  
+
   belongs_to :provider_organization, required: true
   belongs_to :invited_by, class_name: 'User', required: false
 
@@ -24,6 +24,7 @@ class Invitation < ApplicationRecord
   def show_attributes
     { full_name: "#{invited_given_name} #{invited_family_name}",
       email: invited_email,
+      id:,
       verification_code: }.with_indifferent_access
   end
 

@@ -147,7 +147,7 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
   describe 'Delete /destroy' do
     let!(:user) { create(:user) }
     let!(:org) { create(:provider_organization, terms_of_service_accepted_by: user) }
-    let(:invitation) { create(:invitation, :cd) }
+    let!(:invitation) { create(:invitation, :cd, provider_organization: org) }
 
     context 'as cd' do
       before do
@@ -167,7 +167,9 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
         sign_in user
       end
       it 'soft deletes invitation' do
-        delete "/organizations/#{org.id}/credential_delegate_invitations/#{invitation.id}"
+        expect do
+          delete "/organizations/#{org.id}/credential_delegate_invitations/#{invitation.id}"
+        end.to change { Invitation.count }.by(0)
         expect(invitation.reload).to be_cancelled
         expect(response).to redirect_to(organization_path(org))
       end
@@ -175,6 +177,27 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
         delete "/organizations/#{org.id}/credential_delegate_invitations/#{invitation.id}"
         expect(flash[:notice]).to eq('Invitation cancelled.')
       end
+      it 'returns error message on failure' do
+        invitation.errors.add(:invited_phone)
+        invitation_class = class_double(Invitation).as_stubbed_const
+        bad_invitation = instance_double(Invitation)
+        expect(bad_invitation).to receive(:provider_organization).and_return(org)
+        expect(bad_invitation).to receive(:update).and_return(false)
+        expect(bad_invitation).to receive_message_chain(:errors, :full_messages).and_return(%w[fake_error])
+        expect(invitation_class).to receive(:find).with(invitation.id.to_s).and_return(bad_invitation)
+
+        delete "/organizations/#{org.id}/credential_delegate_invitations/#{invitation.id}"
+        expect(flash[:alert]).to eq('Unable to cancel invitation at this time: fake_error')
+        expect(invitation.reload).to be_pending
+      end
+      it 'does not allow deletion of invitation for another org' do
+        other_org = create(:provider_organization)
+        other_invitation = create(:invitation, :cd, provider_organization: other_org)
+        delete "/organizations/#{org.id}/credential_delegate_invitations/#{other_invitation.id}"
+        expect(other_invitation.reload).to be_pending
+        expect(flash[:alert]).to eq('You do not have permission to cancel this invitation.')
+        expect(response).to redirect_to(organization_path(org))
+      end
     end
-  end  
+  end
 end

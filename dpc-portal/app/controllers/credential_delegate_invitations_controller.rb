@@ -5,7 +5,8 @@ class CredentialDelegateInvitationsController < ApplicationController
   before_action :authenticate_user!
   before_action :load_organization
   before_action :require_ao
-  before_action :tos_accepted
+  before_action :tos_accepted, except: %i[success destroy]
+  before_action :verify_invitation, only: %i[destroy]
 
   def new
     render(Page::CredentialDelegate::NewInvitationComponent.new(@organization, Invitation.new))
@@ -31,9 +32,12 @@ class CredentialDelegateInvitationsController < ApplicationController
   end
 
   def destroy
-    @invitation = Invitation.find(params[:id])
-    @invitation.update(status: :cancelled)
-    flash[:notice] = 'Invitation cancelled.'
+    if @invitation.update(status: :cancelled)
+      flash[:notice] = 'Invitation cancelled.'
+    else
+      errors = @invitation.errors.full_messages
+      flash[:alert] = "Unable to cancel invitation at this time: #{errors.join(', ')}"
+    end
     redirect_to organization_path(@organization)
   end
 
@@ -47,5 +51,13 @@ class CredentialDelegateInvitationsController < ApplicationController
                    invitation_type: :credential_delegate,
                    invited_by: current_user,
                    verification_code: (Array('A'..'Z') + Array(0..9)).sample(6).join)
+  end
+
+  def verify_invitation
+    @invitation = Invitation.find(params[:id])
+    return if @organization == @invitation.provider_organization
+
+    flash[:alert] = 'You do not have permission to cancel this invitation.'
+    redirect_to organization_path(@organization)
   end
 end
