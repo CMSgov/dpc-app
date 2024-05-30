@@ -159,14 +159,16 @@ RSpec.describe Invitation, type: :model do
       end
     end
 
-    describe :accepted do
-      it 'should be accepted if has cd_org_link' do
-        link = create(:cd_org_link)
-        expect(link.invitation.accepted?).to eq true
-      end
-      it 'should not be accepted if not have cd_org_link' do
+    describe :accept! do
+      it 'should unset attributes and change status' do
         invitation = create(:invitation, :cd)
-        expect(invitation.accepted?).to eq false
+        invitation.accept!
+        invitation.reload
+        expect(invitation.invited_given_name).to be_nil
+        expect(invitation.invited_family_name).to be_nil
+        expect(invitation.invited_phone).to be_nil
+        expect(invitation.invited_email).to be_nil
+        expect(invitation).to be_accepted
       end
     end
 
@@ -347,14 +349,16 @@ RSpec.describe Invitation, type: :model do
       end
     end
 
-    describe :accepted do
-      it 'should be accepted if has ao_org_link' do
-        link = create(:ao_org_link)
-        expect(link.invitation.accepted?).to eq true
-      end
-      it 'should not be accepted if not have ao_org_link' do
+    describe :accept! do
+      it 'should unset attributes and change status' do
         invitation = create(:invitation, :ao)
-        expect(invitation.accepted?).to eq false
+        invitation.accept!
+        invitation.reload
+        expect(invitation.invited_given_name).to be_nil
+        expect(invitation.invited_family_name).to be_nil
+        expect(invitation.invited_phone).to be_nil
+        expect(invitation.invited_email).to be_nil
+        expect(invitation).to be_accepted
       end
     end
 

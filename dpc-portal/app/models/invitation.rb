@@ -32,12 +32,9 @@ class Invitation < ApplicationRecord
     created_at < 2.days.ago
   end
 
-  def accepted?
-    if credential_delegate?
-      CdOrgLink.where(invitation: self).exists?
-    elsif authorized_official?
-      AoOrgLink.where(invitation: self).exists?
-    end
+  def accept!
+    update!(invited_given_name: nil, invited_family_name: nil, invited_phone: nil, invited_email: nil,
+            status: :accepted)
   end
 
   def match_user?(user_info)

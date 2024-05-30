@@ -18,7 +18,8 @@ class OrganizationsController < ApplicationController
     show_cds = current_user.ao?(@organization)
     if show_cds
       @invitations = Invitation.where(provider_organization: @organization,
-                                      invited_by: current_user).reject(&:accepted?)
+                                      invited_by: current_user,
+                                      status: :pending)
       @cds = CdOrgLink.where(provider_organization: @organization, disabled_at: nil)
     end
     render(Page::Organization::CompoundShowComponent.new(@organization, @cds, @invitations, show_cds))

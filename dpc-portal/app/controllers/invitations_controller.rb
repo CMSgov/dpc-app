@@ -47,13 +47,13 @@ class InvitationsController < ApplicationController
 
   def create_cd_org_link
     CdOrgLink.create!(user: current_user, provider_organization: @organization, invitation: @invitation)
-    @invitation.update!(invited_given_name: nil, invited_family_name: nil, invited_phone: nil, invited_email: nil)
+    @invitation.accept!
     flash[:notice] = "Invitation accepted. You can now manage this organization's credentials. Learn more."
   end
 
   def create_ao_org_link
     AoOrgLink.create!(user: current_user, provider_organization: @organization, invitation: @invitation)
-    @invitation.update!(invited_given_name: nil, invited_family_name: nil, invited_phone: nil, invited_email: nil)
+    @invitation.accept!
     flash[:notice] = 'Invitation accepted.'
   end
 
