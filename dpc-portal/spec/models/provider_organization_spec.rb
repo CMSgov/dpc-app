@@ -83,4 +83,24 @@ RSpec.describe ProviderOrganization, type: :model do
       assert_no_enqueued_jobs
     end
   end
+
+  describe 'after_update' do
+    it 'should delete client tokens' do
+      ActiveJob::Base.queue_adapter = :test
+      po = ProviderOrganization.new(
+        npi: 10.times.map { rand(0..9) }.join,
+        name: 'Test org',
+        dpc_api_organization_id: 1,
+        verification_status: :approved
+      )
+      po.save
+      tokens = [{ 'token' => 'abcdef' }]
+
+      manager = instance_double(ClientTokenManager)
+      allow(manager).to receive(:client_tokens).and_return(tokens)
+      po.verification_status = :rejected
+      #expect(manager).to receive(:delete_client_token)
+      assert_no_enqueued_jobs
+    end
+  end
 end

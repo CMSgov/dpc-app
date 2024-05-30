@@ -20,6 +20,17 @@ class ProviderOrganization < ApplicationRecord
     SyncOrganizationJob.perform_later(id) unless dpc_api_organization_id.present?
   end
 
+  after_update do
+    if dpc_api_organization_id.present?
+      ctm = ClientTokenManager.new(dpc_api_organization_id)
+      if verification_status_changed?(from: :approved, to: :rejected)
+        ctm.client_tokens.each do |token|
+          ctm.delete_client_token(token)
+        end
+      end
+    end
+  end
+
   def public_keys
     @keys ||= []
     if dpc_api_organization_id.present?
