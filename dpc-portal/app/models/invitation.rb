@@ -9,6 +9,7 @@ class Invitation < ApplicationRecord
   validates :invited_email, format: Devise.email_regexp, confirmation: true, if: :new_record?
   validates :invitation_type, presence: true
   validates :invited_phone, format: { with: /\A[0-9]{10}\z/ }, if: :needs_validation?
+  validate :cannot_cancel_accepted
 
   enum invitation_type: %i[credential_delegate authorized_official]
   enum :status, %i[pending accepted expired cancelled], default: :pending
@@ -77,6 +78,12 @@ class Invitation < ApplicationRecord
     raise InvitationError, result[:failure_reason] unless result[:success]
 
     result[:success]
+  end
+
+  def cannot_cancel_accepted
+    return unless status_was == 'accepted' && cancelled?
+
+    errors.add(:status, :cancel_accepted, message: 'You may not cancel an accepted invitation.')
   end
 
   def needs_validation?

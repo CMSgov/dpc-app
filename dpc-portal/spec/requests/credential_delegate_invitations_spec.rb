@@ -183,11 +183,12 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
         bad_invitation = instance_double(Invitation)
         expect(bad_invitation).to receive(:provider_organization).and_return(org)
         expect(bad_invitation).to receive(:update).and_return(false)
+        allow(bad_invitation).to receive_message_chain(:errors, :size).and_return(5)
         expect(bad_invitation).to receive_message_chain(:errors, :full_messages).and_return(%w[fake_error])
         expect(invitation_class).to receive(:find).with(invitation.id.to_s).and_return(bad_invitation)
 
         delete "/organizations/#{org.id}/credential_delegate_invitations/#{invitation.id}"
-        expect(flash[:alert]).to eq('Unable to cancel invitation at this time: fake_error')
+        expect(flash[:alert]).to eq('fake_error')
         expect(invitation.reload).to be_pending
       end
       it 'does not allow deletion of invitation for another org' do
@@ -196,6 +197,13 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
         delete "/organizations/#{org.id}/credential_delegate_invitations/#{other_invitation.id}"
         expect(other_invitation.reload).to be_pending
         expect(flash[:alert]).to eq('You do not have permission to cancel this invitation.')
+        expect(response).to redirect_to(organization_path(org))
+      end
+      it 'does not allow deletion of accepted invitation' do
+        invitation.accept!
+        delete "/organizations/#{org.id}/credential_delegate_invitations/#{invitation.id}"
+        expect(invitation.reload).to be_accepted
+        expect(flash[:alert]).to eq('You may not cancel an accepted invitation.')
         expect(response).to redirect_to(organization_path(org))
       end
     end

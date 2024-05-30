@@ -222,6 +222,15 @@ RSpec.describe Invitation, type: :model do
         expect(cd_invite.match_user?(user_info)).to eq false
       end
     end
+
+    describe :cancel do
+      it 'should not cancel an accepted invitation' do
+        cd_invite = create(:invitation, :cd, status: :accepted)
+        cd_invite.status = :cancelled
+        expect(cd_invite.valid?).to eq false
+        expect(cd_invite.errors.first.message).to eq 'You may not cancel an accepted invitation.'
+      end
+    end
   end
 
   describe :ao do

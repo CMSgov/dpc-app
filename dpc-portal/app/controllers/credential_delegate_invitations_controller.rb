@@ -35,13 +35,20 @@ class CredentialDelegateInvitationsController < ApplicationController
     if @invitation.update(status: :cancelled)
       flash[:notice] = 'Invitation cancelled.'
     else
-      errors = @invitation.errors.full_messages
-      flash[:alert] = "Unable to cancel invitation at this time: #{errors.join(', ')}"
+      flash[:alert] = destroy_error_message
     end
     redirect_to organization_path(@organization)
   end
 
   private
+
+  def destroy_error_message
+    if @invitation.errors.size == 1 && @invitation.errors.first.type == :cancel_accepted
+      @invitation.errors.first.message
+    else
+      @invitation.errors.full_messages.join(', ')
+    end
+  end
 
   def build_invitation
     permitted = params.permit(:invited_given_name, :invited_family_name, :phone_raw, :invited_email,
