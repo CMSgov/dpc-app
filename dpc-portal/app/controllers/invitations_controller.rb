@@ -99,7 +99,7 @@ class InvitationsController < ApplicationController
     @invitation = Invitation.find(params[:id])
     if @organization != @invitation.provider_organization
       render(Page::Invitations::BadInvitationComponent.new('invalid', 'warning'), status: :not_found)
-    elsif @invitation.expired? || @invitation.accepted? || @invitation.cancelled_at.present?
+    elsif @invitation.expired? || @invitation.accepted? || @invitation.cancelled?
       render(Page::Invitations::BadInvitationComponent.new('invalid', 'warning'),
              status: :forbidden)
     end

@@ -38,7 +38,7 @@ RSpec.describe 'Invitations', type: :request do
           expect(response.body).to include('usa-alert--warning')
         end
         it 'should show warning page if cancelled' do
-          cd_invite.update_attribute(:cancelled_at, 3.days.ago)
+          cd_invite.update(status: :cancelled)
           get "/organizations/#{org.id}/invitations/#{cd_invite.id}/accept"
           expect(response).to be_forbidden
           expect(response.body).to include('usa-alert--warning')
@@ -127,7 +127,7 @@ RSpec.describe 'Invitations', type: :request do
           expect(response.body).to include('usa-alert--warning')
         end
         it 'should show warning page if cancelled' do
-          cd_invite.update_attribute(:cancelled_at, 3.days.ago)
+          cd_invite.update(status: :cancelled)
           post "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm", params: success_params
           expect(response).to be_forbidden
           expect(response.body).to include('usa-alert--warning')

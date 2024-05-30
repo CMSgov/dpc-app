@@ -45,7 +45,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_29_162554) do
     t.string "invited_phone"
     t.string "invited_email"
     t.string "verification_code"
-    t.datetime "cancelled_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "status"
