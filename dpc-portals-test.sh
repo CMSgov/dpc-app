@@ -4,7 +4,7 @@ set -e
 echo "┌───────────────────────────────┐"
 echo "│                               │"
 echo "│  Running Web, Admin & Portal  |"
-echo "|            Tests              │"
+echo "|             Tests             │"
 echo "│                               │"
 echo "└───────────────────────────────┘"
 
