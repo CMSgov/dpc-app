@@ -27,6 +27,6 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency 'activemodel', '~> 7.1.3.2'
   spec.add_dependency 'active_model_serializers'
-  spec.add_dependency 'fhir_client'
+  spec.add_dependency 'oauth2'
   spec.add_dependency 'macaroons'
 end

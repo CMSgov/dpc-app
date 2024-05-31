@@ -20,27 +20,29 @@ class DpcClient
   end
 
   def get_organization(api_id)
-    client = FHIR::Client.new(base_url)
-    client.additional_headers = auth_header(delegated_macaroon(api_id))
-    client.read(FHIR::Organization, api_id).resource
+    get "#{base_url}/Organization/#{api_id}", headers: auth_header(delegated_macaroon(api_id))
+    # client = FHIR::Client.new(base_url)
+    # client.additional_headers = auth_header(delegated_macaroon(api_id))
+    # client.read(FHIR::Organization, api_id).resource
   end
 
   def get_organization_by_npi(npi)
-    uri_string = "#{base_url}/Admin"
-    client = FHIR::Client.new(uri_string)
-    client.additional_headers = auth_header(golden_macaroon)
-    client.search(FHIR::Organization, search: { parameters: { npis: "npi|#{npi}" } }).resource
+    get "#{base_url}/Admin/Organization/_search?npis=npi|#{npi}", headers: auth_header(golden_macaroon)
+    # uri_string = "#{base_url}/Admin"
+    # client = FHIR::Client.new(uri_string)
+    # client.additional_headers = auth_header(golden_macaroon)
+    # client.search(FHIR::Organization, search: { parameters: { npis: "npi|#{npi}" } }).resource
   end
 
   def update_organization(reg_org, api_id, api_endpoint_ref)
     fhir_org = FhirResourceBuilder.new.fhir_org(reg_org, api_id, api_endpoint_ref)
-    fhir_client_update_request(api_id, fhir_org, api_id)
+    update_request(api_id, fhir_org, api_id)
     self
   end
 
   def update_endpoint(api_id, fhir_endpoint_id, fhir_endpoint)
     fhir_resource = FhirResourceBuilder.new.fhir_endpoint(api_id, fhir_endpoint_id, fhir_endpoint)
-    fhir_client_update_request(api_id, fhir_resource, fhir_endpoint_id)
+    update_request(api_id, fhir_resource, fhir_endpoint_id)
     self
   end
 
@@ -116,10 +118,6 @@ class DpcClient
     (200...299).cover? @response_status
   end
 
-  def fhir_client
-    @fhir_client ||= FHIR::Client.new(base_url)
-  end
-
   private
 
   def auth_header(token)
@@ -192,9 +190,10 @@ class DpcClient
     connection_error
   end
 
-  def fhir_client_update_request(reg_org_api_id, resource, resource_id)
-    fhir_client.additional_headers = auth_header(delegated_macaroon(reg_org_api_id))
-    response = fhir_client.update(resource, resource_id)
+  def update_request(reg_org_api_id, resource, resource_id)
+    response = put "#{base_url}/#{resource.type}/#{resource_id}", headers: auth_header(delegated_macaroon(reg_org_api_id))
+    # fhir_client.additional_headers = auth_header(delegated_macaroon(reg_org_api_id))
+    # response = fhir_client.update(resource, resource_id)
 
     @response_status = response.response[:code].to_i
     @response_body = response.response[:body]
