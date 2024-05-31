@@ -87,6 +87,8 @@ GEM
       public_suffix (>= 2.0.2, < 6.0)
     ast (2.4.2)
     base64 (0.2.0)
+    bcp47 (0.3.3)
+      i18n
     bcrypt (3.1.20)
     bigdecimal (3.1.7)
     bindex (0.8.1)
@@ -134,6 +136,7 @@ GEM
       database_cleaner-core (~> 2.0.0)
     database_cleaner-core (2.0.1)
     date (3.3.4)
+    date_time_precision (0.8.1)
     devise (4.9.4)
       bcrypt (~> 3.0)
       orm_adapter (~> 0.1)
@@ -169,6 +172,11 @@ GEM
     faraday-net_http (3.1.0)
       net-http
     ffi (1.16.3)
+    fhir_models (4.3.0)
+      bcp47 (>= 0.3)
+      date_time_precision (>= 0.8)
+      mime-types (>= 3.0)
+      nokogiri (>= 1.11.4)
     globalid (1.2.1)
       activesupport (>= 6.1)
     hashdiff (1.1.0)
@@ -233,6 +241,9 @@ GEM
     marcel (1.0.4)
     matrix (0.4.2)
     method_source (1.1.0)
+    mime-types (3.5.2)
+      mime-types-data (~> 3.2015)
+    mime-types-data (3.2024.0507)
     mini_mime (1.1.5)
     mini_portile2 (2.8.6)
     minitest (5.22.3)
@@ -471,6 +482,7 @@ DEPENDENCIES
   fakefs
   faker
   fakeredis
+  fhir_models
   health_check (>= 3.1.0)
   kaminari (>= 1.2.2)
   kramdown (~> 2.3, >= 2.3.1)
