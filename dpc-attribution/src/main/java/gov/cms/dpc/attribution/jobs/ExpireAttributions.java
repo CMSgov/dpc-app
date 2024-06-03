@@ -43,7 +43,7 @@ public class ExpireAttributions extends Job {
         final OffsetDateTime expirationTemporal = OffsetDateTime.now(ZoneOffset.UTC).plusYears(10);
 
         // Find all the jobs and remove them
-        logger.warn("Running test version of ExpireAttributions!!! Better not be in Prod!");
+        logger.error("Running test version of ExpireAttributions!!! Better not be in Prod!");
         logger.debug("Expiring active attribution relationships before {}.", expirationTemporal.format(DateTimeFormatter.ISO_DATE_TIME));
 
         try (final Connection connection = this.dataSource.getConnection(); final DSLContext context = DSL.using(connection, this.settings)) {
