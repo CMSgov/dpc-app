@@ -143,4 +143,69 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
       expect(response).to have_http_status(200)
     end
   end
+
+  describe 'Delete /destroy' do
+    let!(:user) { create(:user) }
+    let!(:org) { create(:provider_organization, terms_of_service_accepted_by: user) }
+    let!(:invitation) { create(:invitation, :cd, provider_organization: org) }
+
+    context 'as cd' do
+      before do
+        create(:cd_org_link, provider_organization: org, user:)
+        sign_in user
+      end
+      it 'fails' do
+        delete "/organizations/#{org.id}/credential_delegate_invitations/#{invitation.id}"
+        expect(invitation.reload).to be_pending
+        expect(response).to redirect_to(organizations_path)
+      end
+    end
+
+    context 'as ao' do
+      before do
+        create(:ao_org_link, provider_organization: org, user:)
+        sign_in user
+      end
+      it 'soft deletes invitation' do
+        expect do
+          delete "/organizations/#{org.id}/credential_delegate_invitations/#{invitation.id}"
+        end.to change { Invitation.count }.by(0)
+        expect(invitation.reload).to be_cancelled
+        expect(response).to redirect_to(organization_path(org))
+      end
+      it 'flashes success if succeeds' do
+        delete "/organizations/#{org.id}/credential_delegate_invitations/#{invitation.id}"
+        expect(flash[:notice]).to eq('Invitation cancelled.')
+      end
+      it 'returns error message on failure' do
+        invitation.errors.add(:invited_phone)
+        invitation_class = class_double(Invitation).as_stubbed_const
+        bad_invitation = instance_double(Invitation)
+        expect(bad_invitation).to receive(:provider_organization).and_return(org)
+        expect(bad_invitation).to receive(:update).and_return(false)
+        allow(bad_invitation).to receive_message_chain(:errors, :size).and_return(5)
+        expect(bad_invitation).to receive_message_chain(:errors, :full_messages).and_return(%w[fake_error])
+        expect(invitation_class).to receive(:find).with(invitation.id.to_s).and_return(bad_invitation)
+
+        delete "/organizations/#{org.id}/credential_delegate_invitations/#{invitation.id}"
+        expect(flash[:alert]).to eq('fake_error')
+        expect(invitation.reload).to be_pending
+      end
+      it 'does not allow deletion of invitation for another org' do
+        other_org = create(:provider_organization)
+        other_invitation = create(:invitation, :cd, provider_organization: other_org)
+        delete "/organizations/#{org.id}/credential_delegate_invitations/#{other_invitation.id}"
+        expect(other_invitation.reload).to be_pending
+        expect(flash[:alert]).to eq('You do not have permission to cancel this invitation.')
+        expect(response).to redirect_to(organization_path(org))
+      end
+      it 'does not allow deletion of accepted invitation' do
+        invitation.accept!
+        delete "/organizations/#{org.id}/credential_delegate_invitations/#{invitation.id}"
+        expect(invitation.reload).to be_accepted
+        expect(flash[:alert]).to eq('You may not cancel an accepted invitation.')
+        expect(response).to redirect_to(organization_path(org))
+      end
+    end
+  end
 end
