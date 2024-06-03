@@ -5,7 +5,7 @@ import gov.cms.dpc.attribution.dao.tables.Attributions;
 import gov.cms.dpc.attribution.exceptions.AttributionException;
 import io.dropwizard.db.ManagedDataSource;
 import io.dropwizard.jobs.Job;
-import io.dropwizard.jobs.annotations.On;
+import io.dropwizard.jobs.annotations.Every;
 import org.jooq.DSLContext;
 import org.jooq.conf.Settings;
 import org.jooq.impl.DSL;
@@ -24,7 +24,7 @@ import java.time.format.DateTimeFormatter;
  * This job runs every day at midnight to expire (remove) attribution relationships which are older than a certain threshold.
  * The value is set in the config file ({@link DPCAttributionConfiguration#getExpirationThreshold()}) and defaults to 90 days.
  */
-@On("0 /5 0 ? * *") // Run every 5 minutes for testing
+@Every("300s")
 public class ExpireAttributions extends Job {
 
     private static final Logger logger = LoggerFactory.getLogger(ExpireAttributions.class);
@@ -43,6 +43,7 @@ public class ExpireAttributions extends Job {
         final OffsetDateTime expirationTemporal = OffsetDateTime.now(ZoneOffset.UTC).plusYears(10);
 
         // Find all the jobs and remove them
+        logger.warn("Running test version of ExpireAttributions!!! Better not be in Prod!");
         logger.debug("Expiring active attribution relationships before {}.", expirationTemporal.format(DateTimeFormatter.ISO_DATE_TIME));
 
         try (final Connection connection = this.dataSource.getConnection(); final DSLContext context = DSL.using(connection, this.settings)) {
