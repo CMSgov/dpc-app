@@ -24,7 +24,8 @@ import java.time.format.DateTimeFormatter;
  * This job runs every day at midnight to expire (remove) attribution relationships which are older than a certain threshold.
  * The value is set in the config file ({@link DPCAttributionConfiguration#getExpirationThreshold()}) and defaults to 90 days.
  */
-@On("0 0 * * * ?")
+// @On("0 0 * * * ?")
+@On("0 /5 0 ? * *") // Run every 5 minutes for testing
 public class ExpireAttributions extends Job {
 
     private static final Logger logger = LoggerFactory.getLogger(ExpireAttributions.class);
@@ -38,7 +39,11 @@ public class ExpireAttributions extends Job {
 
     @Override
     public void doJob(JobExecutionContext jobContext) {
-        final OffsetDateTime expirationTemporal = OffsetDateTime.now(ZoneOffset.UTC);
+        // Setting expiration date 10 years in the future to force all attributions to be deleted to test DB functionality.
+        // DO NOT DEPLOY TO PRODUCTION!!!
+        //final OffsetDateTime expirationTemporal = OffsetDateTime.now(ZoneOffset.UTC);
+        final OffsetDateTime expirationTemporal = OffsetDateTime.now(ZoneOffset.UTC).plusYears(10);
+
         // Find all the jobs and remove them
         logger.debug("Expiring active attribution relationships before {}.", expirationTemporal.format(DateTimeFormatter.ISO_DATE_TIME));
 
