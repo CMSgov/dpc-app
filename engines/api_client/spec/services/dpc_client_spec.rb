@@ -49,26 +49,25 @@ RSpec.describe DpcClient do
       }
     end
     context 'successful API request' do
-      it 'uses fhir_client to retrieve organization data from API' do
+      it 'retrieves organization data from API' do
         body = '{"resourceType":"Organization"}'
         stub_request(:get, "http://dpc.example.com/Organization/#{reg_org.api_id}")
           .with(headers:).to_return(status: 200, body:, headers: {})
         client = DpcClient.new
-        fhir_client = client.get_organization(reg_org.api_id)
-        expect(fhir_client).to_not be_nil
-        expect(fhir_client.resourceType).to eq 'Organization'
+        response = client.get_organization(reg_org.api_id)
+        expect(response).to_not be_nil
+        expect(response.resourceType).to eq 'Organization'
       end
     end
 
     context 'unsuccessful request' do
-      it 'uses fhir_client to retrieve organization data from API' do
+      it 'does not retrieve organization data from API' do
         stub_request(:get, "http://dpc.example.com/Organization/#{reg_org.api_id}")
           .with(headers:).to_return(status: 500, body: '', headers: {})
 
         client = DpcClient.new
-
-        fhir_client = client.get_organization(reg_org.api_id)
-        expect(fhir_client).to be_nil
+        response = client.get_organization(reg_org.api_id)
+        expect(response).to be_nil
       end
     end
   end
@@ -85,26 +84,25 @@ RSpec.describe DpcClient do
       }
     end
     context 'successful API request' do
-      it 'uses fhir_client to retrieve organization data from API' do
+      it 'retrieves organization data from API' do
         body = '{"resourceType":"Organization"}'
         stub_request(:get, "http://dpc.example.com/Admin/Organization?npis=npi|#{org.npi}")
           .with(headers:).to_return(status: 200, body:, headers: {})
         client = DpcClient.new
-        fhir_client = client.get_organization_by_npi(org.npi)
-        expect(fhir_client).to_not be_nil
-        expect(fhir_client.resourceType).to eq 'Organization'
+        response = client.get_organization_by_npi(org.npi)
+        expect(response).to_not be_nil
+        expect(response.resourceType).to eq 'Organization'
       end
     end
 
     context 'unsuccessful request' do
-      it 'uses fhir_client to retrieve organization data from API' do
+      it 'does not retrieve organization data from API' do
         stub_request(:get, "http://dpc.example.com/Admin/Organization?npis=npi|#{org.npi}")
           .with(headers:).to_return(status: 500, body: '', headers: {})
 
         client = DpcClient.new
-
-        fhir_client = client.get_organization_by_npi(org.npi)
-        expect(fhir_client).to be_nil
+        response = client.get_organization_by_npi(org.npi)
+        expect(response).to be_nil
       end
     end
   end
@@ -303,7 +301,7 @@ RSpec.describe DpcClient do
 
   describe '#update_organization' do
     context 'successful request' do
-      it 'uses fhir_client to send org data to API' do
+      it 'sends org data to API' do
         stub_request(:put, "http://dpc.example.com/Organization/#{reg_org.api_id}")
           .with(
             body: /#{reg_org.api_id}/,
@@ -321,7 +319,7 @@ RSpec.describe DpcClient do
     end
 
     context 'unsuccessful request' do
-      it 'uses fhir_client to send org data to API' do
+      it 'does not send org data to API' do
         stub_request(:put, "http://dpc.example.com/Organization/#{reg_org.api_id}")
           .with(
             body: /#{reg_org.api_id}/,
@@ -341,7 +339,7 @@ RSpec.describe DpcClient do
 
   describe '#update_endpoint' do
     context 'successful request' do
-      it 'uses fhir_client to send endpoint data to API' do
+      it 'sends endpoint data to API' do
         stub_request(:put, "http://dpc.example.com/Endpoint/#{reg_org.fhir_endpoint_id}")
           .with(
             body: /#{reg_org.fhir_endpoint_id}/,
@@ -359,7 +357,7 @@ RSpec.describe DpcClient do
     end
 
     context 'unsuccessful request' do
-      it 'uses fhir_client to send org data to API' do
+      it 'does not send org data to API' do
         stub_request(:put, "http://dpc.example.com/Endpoint/#{reg_org.fhir_endpoint_id}")
           .with(
             body: /#{reg_org.fhir_endpoint_id}/,
