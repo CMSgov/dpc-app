@@ -3,6 +3,7 @@
 # Handles IP address requests
 class IpAddressesController < ApplicationController
   before_action :authenticate_user!
+  before_action :check_user_verification
   before_action :load_organization
   before_action :require_can_access
   before_action :tos_accepted

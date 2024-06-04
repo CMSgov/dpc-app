@@ -41,6 +41,7 @@ RSpec.describe User, type: :model do
     let(:user) { create(:user) }
     let(:other_user) { create(:user) }
     let(:provider_organization) { create(:provider_organization) }
+    let(:other_organization) { create(:provider_organization) }
 
     it 'should be ao if link present' do
       create(:ao_org_link, user:, provider_organization:)
@@ -50,6 +51,21 @@ RSpec.describe User, type: :model do
     it 'should not be ao if link not present' do
       create(:ao_org_link, user: other_user, provider_organization:)
       expect(user.ao?(provider_organization)).to be false
+    end
+
+    it 'should not be ao if only cd link present' do
+      create(:cd_org_link, user:, provider_organization:)
+      expect(user.ao?(provider_organization)).to be false
+    end
+
+    it 'should accept multiple organizations' do
+      create(:ao_org_link, user:, provider_organization:)
+      create(:cd_org_link, user:, provider_organization: other_organization)
+      expect(user.ao?([provider_organization, other_organization])).to be true
+    end
+
+    it 'should accept empty array' do
+      expect(user.ao?([])).to be false
     end
   end
   describe :cd do
@@ -102,23 +118,23 @@ RSpec.describe User, type: :model do
     end
   end
 
-  describe :provider_organizations do
+  describe :provider_links do
     let(:provider_organization) { create(:provider_organization) }
     let(:user) { create(:user) }
     it 'should return orgs with ao_org_link' do
-      create(:ao_org_link, provider_organization:, user:)
-      expect(user.provider_organizations).to include(provider_organization)
+      link = create(:ao_org_link, provider_organization:, user:)
+      expect(user.provider_links).to include(link)
     end
     it 'should return orgs with cd_org_link' do
-      create(:cd_org_link, provider_organization:, user:)
-      expect(user.provider_organizations).to include(provider_organization)
+      link = create(:cd_org_link, provider_organization:, user:)
+      expect(user.provider_links).to include(link)
     end
     it 'should not return orgs with disabaled cd_org_link' do
-      create(:cd_org_link, provider_organization:, user:, disabled_at: 2.days.ago)
-      expect(user.provider_organizations).to_not include(provider_organization)
+      link = create(:cd_org_link, provider_organization:, user:, disabled_at: 2.days.ago)
+      expect(user.provider_links).to_not include(link)
     end
     it 'should not return orgs without link' do
-      expect(user.provider_organizations).to_not include(provider_organization)
+      expect(user.provider_links).to be_empty
     end
   end
 end
