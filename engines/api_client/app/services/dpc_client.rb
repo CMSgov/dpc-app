@@ -188,9 +188,9 @@ class DpcClient
   end
 
   def fhir_update_request(reg_org_api_id, resource, resource_id)
-    uri = URI.parse "#{base_url}/#{resource.to_json['type']}/#{resource_id}"
+    uri = URI.parse "#{base_url}/#{resource.resourceType}/#{resource_id}"
     request = Net::HTTP::Put.new(uri.request_uri, fhir_headers(delegated_macaroon(reg_org_api_id)))
-    request.body = resource.to_json
+    request.body = resource_id
 
     response = http_request(request, uri)
     @response_status = response.response[:code].to_i
