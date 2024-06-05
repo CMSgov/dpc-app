@@ -4,6 +4,11 @@ require 'rails_helper'
 
 RSpec.describe ProviderOrganization, type: :model do
   include ActiveJob::TestHelper
+  let(:mock_client_token_manager) { instance_double(ClientTokenManager) }
+
+  before do
+    allow(ClientTokenManager).to receive(:new).and_return(mock_client_token_manager)
+  end
 
   describe :validations do
     let(:provider_organization) { create(:provider_organization) }
@@ -94,12 +99,11 @@ RSpec.describe ProviderOrganization, type: :model do
         verification_status: :approved
       )
       po.save
-      tokens = [{ 'token' => 'abcdef' }]
-
-      manager = instance_double(ClientTokenManager)
-      allow(manager).to receive(:client_tokens).and_return(tokens)
+      tokens = [{ 'id' => 'abcdef' }, { 'id' => 'ftguiol' }]
+      allow(mock_client_token_manager).to receive(:client_tokens).and_return(tokens)
+      allow(mock_client_token_manager).to receive(:delete_client_token).and_return(true)
       po.verification_status = :rejected
-      #expect(manager).to receive(:delete_client_token)
+      po.save
       assert_no_enqueued_jobs
     end
   end
