@@ -14,7 +14,6 @@ import com.github.nitram509.jmacaroons.MacaroonsBuilder;
 import com.google.common.net.HttpHeaders;
 import gov.cms.dpc.testing.models.KeyView;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpRequestInterceptor;
