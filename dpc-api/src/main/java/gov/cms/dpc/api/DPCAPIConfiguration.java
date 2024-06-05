@@ -53,6 +53,10 @@ public class DPCAPIConfiguration extends Configuration implements IDPCDatabase, 
     @NotNull
     private String attributionURL;
 
+    @NotEmpty
+    @NotNull
+    private String attributionHealthCheckURL;
+
     @Valid
     @NotNull
     @JsonProperty("fhir")
@@ -113,6 +117,10 @@ public class DPCAPIConfiguration extends Configuration implements IDPCDatabase, 
 
     public String getAttributionURL() {
         return attributionURL;
+    }
+
+    public String getAttributionHealthCheckURL() {
+        return attributionHealthCheckURL;
     }
 
     public void setAttributionURL(String attributionURL) {

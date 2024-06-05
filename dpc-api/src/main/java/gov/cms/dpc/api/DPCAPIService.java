@@ -31,6 +31,7 @@ import io.dropwizard.core.Application;
 import io.dropwizard.core.setup.Bootstrap;
 import io.dropwizard.core.setup.Environment;
 import io.dropwizard.db.DataSourceFactory;
+import io.dropwizard.health.check.http.HttpHealthCheck;
 import io.dropwizard.migrations.MigrationsBundle;
 import ru.vyarus.dropwizard.guice.GuiceBundle;
 import ru.vyarus.dropwizard.guice.injector.lookup.InjectorLookup;
@@ -100,6 +101,9 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
             ValidatorFactory validatorFactory = injector.get().getInstance(ValidatorFactory.class);
             environment.setValidator(validatorFactory.getValidator());
         }
+
+        // Healthchecks on dependent services
+        environment.healthChecks().register("dpc-attribution", new HttpHealthCheck(configuration.getAttributionHealthCheckURL()));
     }
 
     private GuiceBundle setupGuiceBundle() {
