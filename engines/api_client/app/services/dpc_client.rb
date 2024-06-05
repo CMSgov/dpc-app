@@ -21,23 +21,25 @@ class DpcClient
 
   def get_organization(api_id)
     uri_string = "#{base_url}/Organization/#{api_id}"
-    get_request(uri_string, delegated_macaroon(api_id))
+    org_json = get_request(uri_string, fhir_headers(delegated_macaroon(api_id)))
+    FHIR::Json.from_json(org_json)
   end
 
   def get_organization_by_npi(npi)
-    uri_string = "#{base_url}/Admin/Organization/_search?npis=npi|#{npi}"
-    get_request(uri_string, golden_macaroon)
+    uri_string = "#{base_url}/Admin/Organization/?npis=npi|#{npi}"
+    org_json = get_request(uri_string, fhir_headers(golden_macaroon))
+    FHIR::Json.from_json(org_json)
   end
 
   def update_organization(reg_org, api_id, api_endpoint_ref)
     fhir_org = FhirResourceBuilder.new.fhir_org(reg_org, api_id, api_endpoint_ref)
-    update_request(api_id, fhir_org, api_id)
+    fhir_update_request(api_id, fhir_org, api_id)
     self
   end
 
   def update_endpoint(api_id, fhir_endpoint_id, fhir_endpoint)
     fhir_resource = FhirResourceBuilder.new.fhir_endpoint(api_id, fhir_endpoint_id, fhir_endpoint)
-    update_request(api_id, fhir_resource, fhir_endpoint_id)
+    fhir_update_request(api_id, fhir_resource, fhir_endpoint_id)
     self
   end
 
@@ -65,7 +67,7 @@ class DpcClient
 
   def get_client_tokens(reg_org_api_id)
     uri_string = "#{base_url}/Token"
-    get_request(uri_string, delegated_macaroon(reg_org_api_id))
+    get_request(uri_string, headers(delegated_macaroon(reg_org_api_id)))
   end
 
   def create_public_key(reg_org_api_id, params: {})
@@ -88,7 +90,7 @@ class DpcClient
 
   def get_public_keys(reg_org_api_id)
     uri_string = "#{base_url}/Key"
-    get_request(uri_string, delegated_macaroon(reg_org_api_id))
+    get_request(uri_string, headers(delegated_macaroon(reg_org_api_id)))
   end
 
   def create_ip_address(reg_org_api_id, params: {})
@@ -96,7 +98,7 @@ class DpcClient
       "#{base_url}/IpAddress",
       { ip_address: params[:ip_address], label: params[:label] }.to_json,
       {},
-      delegated_macaroon(reg_org_api_id)
+      headers(delegated_macaroon(reg_org_api_id))
     )
     self
   end
@@ -106,7 +108,7 @@ class DpcClient
   end
 
   def get_ip_addresses(reg_org_api_id)
-    get_request("#{base_url}/IpAddress", delegated_macaroon(reg_org_api_id))
+    get_request("#{base_url}/IpAddress", headers(delegated_macaroon(reg_org_api_id)))
   end
 
   def response_successful?
@@ -144,9 +146,9 @@ class DpcClient
     http_request(request, uri)
   end
 
-  def get_request(uri_string, token)
+  def get_request(uri_string, headers)
     uri = URI.parse uri_string
-    request = Net::HTTP::Get.new(uri.request_uri, headers(token))
+    request = Net::HTTP::Get.new(uri.request_uri, headers)
 
     http_request(request, uri)
   end
@@ -185,10 +187,12 @@ class DpcClient
     connection_error
   end
 
-  def update_request(reg_org_api_id, resource, resource_id)
-    uri_string = "#{base_url}/#{resource.type}/#{resource_id}"
-    response = post_request(uri_string, resource, delegated_macaroon(reg_org_api_id))
+  def fhir_update_request(reg_org_api_id, resource, resource_id)
+    uri = URI.parse "#{base_url}/#{resource.to_json['type']}/#{resource_id}"
+    request = Net::HTTP::Put.new(uri.request_uri, fhir_headers(delegated_macaroon(reg_org_api_id)))
+    request.body = resource.to_json
 
+    response = http_request(request, uri)
     @response_status = response.response[:code].to_i
     @response_body = response.response[:body]
   end

@@ -41,10 +41,8 @@ RSpec.describe DpcClient do
     let(:headers) do
       {
         'Accept' => 'application/fhir+json',
-        'Accept-Charset' => 'utf-8',
         'Accept-Encoding' => 'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
-        'Host' => 'dpc.example.com',
-        'User-Agent' => 'Ruby FHIR Client',
+        'User-Agent' => 'Ruby',
         'Authorization' => /.*/
       }
     end
