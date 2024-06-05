@@ -113,7 +113,7 @@ public class APIAuthHelpers {
             audience = "https://prod.dpc.cms.gov/api/v1";
         }
         final String jwt = Jwts.builder()
-                .setHeaderParam("kid", keyID)
+                .setHeaderParam("kid", keyID.toString())
                 .setAudience(String.format("%s/Token/auth", audience))
                 .setIssuer(macaroon)
                 .setSubject(macaroon)
