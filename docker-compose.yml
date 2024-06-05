@@ -57,6 +57,7 @@ services:
       - ./ops/config/decrypted/local.env
     environment:
       - ATTRIBUTION_URL=http://attribution:8080/v1/
+      - ATTRIBUTION_HEALTHCHECK_URL=http://attribution:9900/healthcheck
       - ENV=local
       - JACOCO=${REPORT_COVERAGE}
       - EXPORT_PATH=/app/data

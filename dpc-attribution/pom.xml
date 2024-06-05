@@ -96,6 +96,7 @@
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
@@ -109,7 +110,6 @@
         <dependency>
             <groupId>${hapi.fhir.groupID}</groupId>
             <artifactId>hapi-fhir-client</artifactId>
-            <scope>test</scope>
         </dependency>
         <!-- required by HAPI FHIR; specifying non-vulnerable version -->
         <dependency>

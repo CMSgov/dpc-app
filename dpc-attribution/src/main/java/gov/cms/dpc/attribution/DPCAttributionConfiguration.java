@@ -30,6 +30,9 @@ public class DPCAttributionConfiguration extends JobConfiguration implements IDP
     @NotEmpty
     private String publicServerURL;
 
+    @NotEmpty
+    private String fhirReferenceURL;
+
     @Valid
     @NotNull
     @JsonProperty("fhir")
@@ -113,5 +116,9 @@ public class DPCAttributionConfiguration extends JobConfiguration implements IDP
 
     public void setLookBackExemptOrgs(List<String> lookBackExemptOrgs) {
         this.lookBackExemptOrgs = lookBackExemptOrgs;
+    }
+
+    public String getFhirReferenceURL() {
+        return fhirReferenceURL;
     }
 }

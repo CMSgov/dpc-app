@@ -77,3 +77,6 @@ swagger:
   description: |
     This service handles the majority of the application business logic, including authentication and attribution.
     <p>It performs no validation of input data, which is the domain of the API service or any internal services that might call it.
+
+# base URL for FHIR references to DPC resources (Patients, Organizations, etc) embedded in a Consent resource
+fhirReferenceURL: ${FHIR_REFERENCE_URL:-"http://localhost:8080/api/v1"}
