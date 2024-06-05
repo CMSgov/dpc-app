@@ -86,5 +86,6 @@ public class DPCConsentService extends Application<DPCConsentConfiguration> {
         EnvironmentParser.getEnvironment("Consent");
         final var listener = new InstrumentedResourceMethodApplicationListener(environment.metrics());
         environment.jersey().getResourceConfig().register(listener);
+        environment.jersey().property("Running", true);
     }
 }
