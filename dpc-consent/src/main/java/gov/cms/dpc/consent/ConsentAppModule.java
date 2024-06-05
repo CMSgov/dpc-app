@@ -39,10 +39,4 @@ class ConsentAppModule extends DropwizardAwareModule<DPCConsentConfiguration> {
         ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
         return ctx.newRestfulGenericClient(provideFhirReferenceURL());
     }
-
-    @Provides
-    @Named("jerseyStarted")
-    public boolean jerseyStarted() {
-        return Boolean.TRUE.equals(environment().jersey().getProperty("Running"));
-    }
 }

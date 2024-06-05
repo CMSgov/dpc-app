@@ -26,6 +26,7 @@ import gov.cms.dpc.common.annotations.APIV1;
 import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.common.annotations.JobTimeout;
 import gov.cms.dpc.common.annotations.ServiceBaseURL;
+import gov.cms.dpc.common.health.FhirMetaDataHealthCheck;
 import gov.cms.dpc.common.hibernate.auth.DPCAuthHibernateBundle;
 import gov.cms.dpc.common.hibernate.auth.DPCAuthManagedSessionFactory;
 import gov.cms.dpc.macaroons.MacaroonBakery;
@@ -90,6 +91,7 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
         // Additional health-checks can be added here
         // By default, Dropwizard adds a check for Hibernate and each additional database (e.g. auth, queue, etc)
         // We also get the JobQueueStatus by default, even though it always return healthy
+        binder.bind(FhirMetaDataHealthCheck.class);
     }
 
     // Since the KeyResource requires access to the Auth DB, we have to manually do the creation and resource injection,
@@ -197,5 +199,13 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
     @JobTimeout
     public int provideJobTimeoutInSeconds() {
         return configuration().getJobTimeoutInSeconds();
+    }
+
+    @Provides
+    @Singleton
+    @Named("localFhirClient")
+    public IGenericClient provideLocalFhirClient(FhirContext ctx) {
+        ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
+        return ctx.newRestfulGenericClient(provideV1URL());
     }
 }
