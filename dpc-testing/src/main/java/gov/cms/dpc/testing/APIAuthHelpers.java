@@ -63,15 +63,18 @@ public class APIAuthHelpers {
         // Not used
     }
 
-    public static IGenericClient buildAuthenticatedClient(FhirContext ctx, String baseURL, String macaroon, UUID keyID, PrivateKey privateKey) {
+    public static IGenericClient buildAuthenticatedClient(FhirContext ctx, String baseURL, String macaroon, UUID keyID,
+            PrivateKey privateKey) {
         return buildAuthenticatedClient(ctx, baseURL, macaroon, keyID, privateKey, false);
     }
 
-    public static IGenericClient buildAuthenticatedClient(FhirContext ctx, String baseURL, String macaroon, UUID keyID, PrivateKey privateKey, boolean disableSSLCheck) {
+    public static IGenericClient buildAuthenticatedClient(FhirContext ctx, String baseURL, String macaroon, UUID keyID,
+            PrivateKey privateKey, boolean disableSSLCheck) {
         return buildAuthenticatedClient(ctx, baseURL, macaroon, keyID, privateKey, disableSSLCheck, false);
     }
 
-    public static IGenericClient buildAuthenticatedClient(FhirContext ctx, String baseURL, String macaroon, UUID keyID, PrivateKey privateKey, boolean disableSSLCheck, boolean enableRequestLog) {
+    public static IGenericClient buildAuthenticatedClient(FhirContext ctx, String baseURL, String macaroon, UUID keyID,
+            PrivateKey privateKey, boolean disableSSLCheck, boolean enableRequestLog) {
         final IGenericClient client = createBaseFHIRClient(ctx, baseURL, disableSSLCheck, enableRequestLog);
         client.registerInterceptor(new HAPISmartInterceptor(baseURL, macaroon, keyID, privateKey));
 
@@ -79,7 +82,8 @@ public class APIAuthHelpers {
         final var addPreferInterceptor = new IClientInterceptor() {
             @Override
             public void interceptRequest(IHttpRequest iHttpRequest) {
-                // Manually set these values, rather than pulling a dependency on dpc-common, where the constants are defined
+                // Manually set these values, rather than pulling a dependency on dpc-common,
+                // where the constants are defined
                 iHttpRequest.addHeader("Prefer", "respond-async");
             }
 
@@ -93,18 +97,22 @@ public class APIAuthHelpers {
         return client;
     }
 
-    public static IGenericClient buildAdminClient(FhirContext ctx, String baseURL, String macaroon, boolean disableSSLCheck) {
+    public static IGenericClient buildAdminClient(FhirContext ctx, String baseURL, String macaroon,
+            boolean disableSSLCheck) {
         return buildAdminClient(ctx, baseURL, macaroon, disableSSLCheck, false);
     }
 
-    public static IGenericClient buildAdminClient(FhirContext ctx, String baseURL, String macaroon, boolean disableSSLCheck, boolean enableRequestLog) {
+    public static IGenericClient buildAdminClient(FhirContext ctx, String baseURL, String macaroon,
+            boolean disableSSLCheck, boolean enableRequestLog) {
         final IGenericClient client = createBaseFHIRClient(ctx, baseURL, disableSSLCheck, enableRequestLog);
         client.registerInterceptor(new MacaroonsInterceptor(macaroon));
         return client;
     }
 
-    public static AuthResponse jwtAuthFlow(String baseURL, String macaroon, UUID keyID, PrivateKey privateKey) throws IOException, URISyntaxException {
-        /* TODO revert this workaround to previous version of code
+    public static AuthResponse jwtAuthFlow(String baseURL, String macaroon, UUID keyID, PrivateKey privateKey)
+            throws IOException, URISyntaxException {
+        /*
+         * TODO revert this workaround to previous version of code
          * - git diff f2d3abe1f23e4d1ad2f2a01 5d799c57712418de674 <<< green is good
          * see also https://github.com/CMSgov/dpc-app/pull/849
          */
@@ -113,13 +121,13 @@ public class APIAuthHelpers {
             audience = "https://prod.dpc.cms.gov/api/v1";
         }
         final String jwt = Jwts.builder()
-                .setHeaderParam("kid", keyID)
-                .setAudience(String.format("%s/Token/auth", audience))
-                .setIssuer(macaroon)
-                .setSubject(macaroon)
-                .setId(UUID.randomUUID().toString())
-                .setExpiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES).minus(30, ChronoUnit.SECONDS)))
-                .signWith(privateKey, getSigningAlgorithm(KeyType.RSA))
+                .header().add("kid", keyID.toString()).and()
+                .audience().add(String.format("%s/Token/auth", audience)).and()
+                .issuer(macaroon)
+                .subject(macaroon)
+                .id(UUID.randomUUID().toString())
+                .expiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES).minus(30, ChronoUnit.SECONDS)))
+                .signWith(privateKey)
                 .compact();
 
         // Verify JWT with /validate endpoint
@@ -130,7 +138,8 @@ public class APIAuthHelpers {
             post.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN);
 
             try (CloseableHttpResponse response = client.execute(post)) {
-                assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Token validation should have succeeded");
+                assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(),
+                        "Token validation should have succeeded");
             }
         }
 
@@ -150,7 +159,8 @@ public class APIAuthHelpers {
             post.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED);
 
             try (CloseableHttpResponse response = client.execute(post)) {
-                assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Token request should have succeeded");
+                assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(),
+                        "Token request should have succeeded");
                 authResponse = mapper.readValue(response.getEntity().getContent(), AuthResponse.class);
                 assertNotEquals(macaroon, authResponse.accessToken, "New Macaroon should not be identical");
                 assertEquals(300, authResponse.expiresIn, "Should expire in 300 seconds");
@@ -201,18 +211,21 @@ public class APIAuthHelpers {
     }
 
     /**
-     * Generate a new {@link KeyPair} and submit the {@link PublicKey} to the API service, along with the given label
+     * Generate a new {@link KeyPair} and submit the {@link PublicKey} to the API
+     * service, along with the given label
      *
      * @param keyLabel       - {@link String} identifier (kid) of the public key
      * @param organizationID - {@link String} organization ID to register key with
      * @param goldenMacaroon - {@link String} admin Macaroon that can upload keys
      * @param baseURL        - {@link String} baseURl to submit Key to
-     * @return - {@link Pair}  of {@link UUID} (public key ID) and {@link PrivateKey} which matches the uploaded {@link PublicKey}
+     * @return - {@link Pair} of {@link UUID} (public key ID) and {@link PrivateKey}
+     *         which matches the uploaded {@link PublicKey}
      * @throws IOException              - throws if something bad happens
      * @throws URISyntaxException       - throws if the URI is no good
      * @throws NoSuchAlgorithmException - throws if security breaks
      */
-    public static Pair<UUID, PrivateKey> generateAndUploadKey(String keyLabel, String organizationID, String goldenMacaroon, String baseURL) throws IOException, URISyntaxException, GeneralSecurityException {
+    public static Pair<UUID, PrivateKey> generateAndUploadKey(String keyLabel, String organizationID,
+            String goldenMacaroon, String baseURL) throws IOException, URISyntaxException, GeneralSecurityException {
         final KeyPair keyPair = generateKeyPair();
         final String key = generatePublicKey(keyPair.getPublic());
         final String signature = signString(keyPair.getPrivate(), KEY_VERIFICATION_SNIPPET);
@@ -254,7 +267,8 @@ public class APIAuthHelpers {
         return Base64.getEncoder().encodeToString(sigBytes);
     }
 
-    private static IGenericClient createBaseFHIRClient(FhirContext ctx, String baseURL, boolean disableSSLCheck, boolean enableRequestLog) {
+    private static IGenericClient createBaseFHIRClient(FhirContext ctx, String baseURL, boolean disableSSLCheck,
+            boolean enableRequestLog) {
         final HttpClientBuilder clientBuilder = HttpClients.custom();
         if (disableSSLCheck) {
             try {
@@ -285,7 +299,7 @@ public class APIAuthHelpers {
     }
 
     private static TrustManager[] getTrustingManager() {
-        return new TrustManager[]{new X509TrustManager() {
+        return new TrustManager[] { new X509TrustManager() {
             @Override
             public X509Certificate[] getAcceptedIssuers() {
                 return null;
@@ -318,17 +332,6 @@ public class APIAuthHelpers {
         }
         };
     }
-
-    /**
-     * Get the correct {@link SignatureAlgorithm} for the given {@link KeyType}
-     *
-     * @param keyType - {@link KeyType} to get algorithm for
-     * @return - {@link SignatureAlgorithm} to use for signing JWT
-     */
-    public static SignatureAlgorithm getSigningAlgorithm(KeyType keyType) {
-        return keyType == KeyType.ECC ? SignatureAlgorithm.ES256 : SignatureAlgorithm.RS384;
-    }
-
 
     public static class MacaroonsInterceptor implements IClientInterceptor {
 
@@ -417,7 +420,8 @@ public class APIAuthHelpers {
         private void refreshAuthToken() {
             System.out.println("Refreshing access token");
             try {
-                final AuthResponse authResponse = jwtAuthFlow(this.baseURL, this.clientToken, this.keyID, this.privateKey);
+                final AuthResponse authResponse = jwtAuthFlow(this.baseURL, this.clientToken, this.keyID,
+                        this.privateKey);
                 // Set the refresh time to be 30 seconds before expiration
                 this.shouldRefreshToken = OffsetDateTime.now(ZoneOffset.UTC)
                         .plus(authResponse.expiresIn, ChronoUnit.SECONDS)
@@ -460,7 +464,8 @@ public class APIAuthHelpers {
         private void refreshAuthToken() {
             System.out.println("Refreshing access token");
             try {
-                final AuthResponse authResponse = jwtAuthFlow(this.baseURL, this.clientToken, this.keyID, this.privateKey);
+                final AuthResponse authResponse = jwtAuthFlow(this.baseURL, this.clientToken, this.keyID,
+                        this.privateKey);
                 // Set the refresh time to be 30 seconds before expiration
                 this.shouldRefreshToken = OffsetDateTime.now(ZoneOffset.UTC)
                         .plus(authResponse.expiresIn, ChronoUnit.SECONDS)
@@ -479,7 +484,6 @@ public class APIAuthHelpers {
         CustomHttpBuilder() {
             this.builder = HttpClients.custom();
         }
-
 
         public CustomHttpBuilder trusting() {
             try {
