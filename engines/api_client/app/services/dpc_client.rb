@@ -98,7 +98,7 @@ class DpcClient
       "#{base_url}/IpAddress",
       { ip_address: params[:ip_address], label: params[:label] }.to_json,
       {},
-      headers(delegated_macaroon(reg_org_api_id))
+      delegated_macaroon(reg_org_api_id)
     )
     self
   end
