@@ -74,10 +74,9 @@ RSpec.describe DpcClient do
     let(:headers) do
       {
         'Accept' => 'application/fhir+json',
-        'Accept-Charset' => 'utf-8',
         'Accept-Encoding' => 'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
-        'Host' => 'dpc.example.com',
-        'User-Agent' => 'Ruby FHIR Client',
+        'Content-Type'=>'application/fhir+json',
+        'User-Agent' => 'Ruby',
         'Authorization' => /.*/
       }
     end
@@ -305,7 +304,7 @@ RSpec.describe DpcClient do
             body: /#{reg_org.api_id}/,
             headers: {
               'Accept' => 'application/fhir+json',
-              'Content-Type' => 'application/fhir+json;charset=utf-8',
+              'Content-Type' => 'application/fhir+json',
               'Authorization' => /.*/
             }
           ).to_return(status: 200, body: '{}', headers: {})
@@ -323,7 +322,7 @@ RSpec.describe DpcClient do
             body: /#{reg_org.api_id}/,
             headers: {
               'Accept' => 'application/fhir+json',
-              'Content-Type' => 'application/fhir+json;charset=utf-8',
+              'Content-Type' => 'application/fhir+json',
               'Authorization' => /.*/
             }
           ).to_return(status: 500, body: '', headers: {})
@@ -343,7 +342,7 @@ RSpec.describe DpcClient do
             body: /#{reg_org.fhir_endpoint_id}/,
             headers: {
               'Accept' => 'application/fhir+json',
-              'Content-Type' => 'application/fhir+json;charset=utf-8',
+              'Content-Type' => 'application/fhir+json',
               'Authorization' => /.*/
             }
           ).to_return(status: 200, body: '{}', headers: {})
@@ -361,7 +360,7 @@ RSpec.describe DpcClient do
             body: /#{reg_org.fhir_endpoint_id}/,
             headers: {
               'Accept' => 'application/fhir+json',
-              'Content-Type' => 'application/fhir+json;charset=utf-8',
+              'Content-Type' => 'application/fhir+json',
               'Authorization' => /.*/
             }
           ).to_return(status: 500, body: '', headers: {})
