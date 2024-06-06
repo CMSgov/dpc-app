@@ -199,11 +199,7 @@ class DpcClient
     request = Net::HTTP::Put.new(uri.request_uri, fhir_headers(delegated_macaroon(reg_org_api_id)))
     request.body = resource_id
 
-    response = http_request(request, uri)
-    return if response.blank?
-
-    @response_status = response.response[:code].to_i
-    @response_body = response.response[:body]
+    http_request(request, uri)
   end
 
   def headers(token)
