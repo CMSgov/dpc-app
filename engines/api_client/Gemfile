@@ -8,9 +8,7 @@ gemspec
 
 gem 'active_model_serializers'
 gem 'fhir_models'
-# rubocop:disable Bundler/OrderedGems
 gem 'macaroons'
-# rubocop:enable Bundler/OrderedGems
 gem 'nokogiri', '>= 1.16.2'
 gem 'oauth2'
 gem 'rspec-rails'

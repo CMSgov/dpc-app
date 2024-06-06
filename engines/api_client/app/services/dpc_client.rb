@@ -193,10 +193,10 @@ class DpcClient
     request.body = resource_id
 
     response = http_request(request, uri)
-    unless response.blank?
-      @response_status = response.response[:code].to_i
-      @response_body = response.response[:body]
-    end
+    return if response.blank?
+
+    @response_status = response.response[:code].to_i
+    @response_body = response.response[:body]
   end
 
   def headers(token)
