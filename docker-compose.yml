@@ -53,6 +53,7 @@ services:
     ports:
       - "3002:3002"
       - "9903:9900"
+      - "5005:5005"
     env_file:
       - ./ops/config/decrypted/local.env
     environment:

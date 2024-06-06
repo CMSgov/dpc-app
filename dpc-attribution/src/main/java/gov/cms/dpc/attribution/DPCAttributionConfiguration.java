@@ -29,11 +29,6 @@ public class DPCAttributionConfiguration extends JobConfiguration implements IDP
     @JsonProperty("database")
     private DataSourceFactory database = new DataSourceFactory();
 
-    @Valid
-    @NotNull
-    @JsonProperty("server")
-    private DefaultServerFactory server = new DefaultServerFactory();
-
     @NotEmpty
     private String publicServerURL;
 
@@ -123,7 +118,8 @@ public class DPCAttributionConfiguration extends JobConfiguration implements IDP
     }
 
     public int getServicePort() {
-        HttpConnectorFactory connection = (HttpConnectorFactory) server.getApplicationConnectors().get(0);
+        DefaultServerFactory serverFactory = (DefaultServerFactory) this.getServerFactory();
+        HttpConnectorFactory connection = (HttpConnectorFactory) serverFactory.getApplicationConnectors().get(0);
         return connection.getPort();
     }
 }

@@ -21,6 +21,7 @@ import gov.cms.dpc.common.hibernate.queue.DPCQueueHibernateModule;
 import gov.cms.dpc.common.logging.filters.GenerateRequestIdFilter;
 import gov.cms.dpc.common.logging.filters.LogResponseFilter;
 import gov.cms.dpc.common.utils.EnvironmentParser;
+import gov.cms.dpc.common.utils.UrlGenerator;
 import gov.cms.dpc.fhir.FHIRModule;
 import gov.cms.dpc.macaroons.BakeryModule;
 import gov.cms.dpc.queue.JobQueueModule;
@@ -103,7 +104,9 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
         }
 
         // Http healthchecks on dependent services
-        environment.healthChecks().register("api-self-check", new HttpHealthCheck(configuration.getPublicURL() + "/v1/version"));
+        environment.healthChecks().register("api-self-check",
+            new HttpHealthCheck(UrlGenerator.generateVersionUrl(configuration.getServicePort()))
+        );
         environment.healthChecks().register("dpc-attribution", new HttpHealthCheck(configuration.getAttributionHealthCheckURL()));
     }
 

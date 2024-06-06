@@ -21,11 +21,6 @@ public class DPCConsentConfiguration extends Configuration implements IDPCConsen
     @JsonProperty("consentdb")
     private DataSourceFactory consentDatabase = new DataSourceFactory();
 
-    @Valid
-    @NotNull
-    @JsonProperty("server")
-    private DefaultServerFactory server = new DefaultServerFactory();
-
     @NotEmpty
     private String suppressionFileDir;
 
@@ -76,7 +71,8 @@ public class DPCConsentConfiguration extends Configuration implements IDPCConsen
     }
 
     public int getServicePort() {
-        HttpConnectorFactory connection = (HttpConnectorFactory) server.getApplicationConnectors().get(0);
+        DefaultServerFactory serverFactory = (DefaultServerFactory) this.getServerFactory();
+        HttpConnectorFactory connection = (HttpConnectorFactory) serverFactory.getApplicationConnectors().get(0);
         return connection.getPort();
     }
 }
