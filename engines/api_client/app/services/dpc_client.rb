@@ -26,7 +26,7 @@ class DpcClient
   end
 
   def get_organization_by_npi(npi)
-    uri_string = "#{base_url}/Admin/Organization/?npis=npi|#{npi}"
+    uri_string = "#{base_url}/Admin/Organization?npis=npi|#{npi}"
     org_json = get_request(uri_string, fhir_headers(golden_macaroon))
     FHIR::Json.from_json(org_json)
   end
