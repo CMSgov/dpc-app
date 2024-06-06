@@ -28,4 +28,10 @@ RSpec.describe CdOrgLink, type: :model do
     expect(attrs['verification_code']).to eq 'ABC123'
     expect(attrs['activated_at']).to eq cd_org_link.created_at.to_s
   end
+
+  it 'handles verification status' do
+    expect(cd_org_link.verification_status?).to be_truthy
+    cd_org_link.disabled_at = 1.day.ago
+    expect(cd_org_link.verification_status?).to be_falsey
+  end
 end

@@ -3,6 +3,7 @@
 # Manages invitations to become a Credential Delegate
 class CredentialDelegateInvitationsController < ApplicationController
   before_action :authenticate_user!
+  before_action :check_user_verification
   before_action :load_organization
   before_action :require_ao
   before_action :tos_accepted, except: %i[success destroy]
