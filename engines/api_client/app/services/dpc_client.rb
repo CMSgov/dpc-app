@@ -21,14 +21,14 @@ class DpcClient
 
   def get_organization(api_id)
     uri_string = "#{base_url}/Organization/#{api_id}"
-    org_json = get_request(uri_string, fhir_headers(delegated_macaroon(api_id)))
-    FHIR::Json.from_json(org_json)
+    org = get_request(uri_string, fhir_headers(delegated_macaroon(api_id)))
+    org.blank? ? nil : FHIR::Organization.new(org)
   end
 
   def get_organization_by_npi(npi)
     uri_string = "#{base_url}/Admin/Organization?npis=npi|#{npi}"
-    org_json = get_request(uri_string, fhir_headers(golden_macaroon))
-    FHIR::Json.from_json(org_json)
+    org = get_request(uri_string, fhir_headers(golden_macaroon))
+    org.blank? ? nil : FHIR::Organization.new(org)
   end
 
   def update_organization(reg_org, api_id, api_endpoint_ref)
