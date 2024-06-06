@@ -22,6 +22,7 @@ public class PropertiesProvider {
     }
 
     public OffsetDateTime getBuildTimestamp() {
+        System.out.println("builddate: " + this.properties.getProperty("application.builddate"));
         return OffsetDateTime.parse(this.properties.getProperty("application.builddate"), MAVEN_FORMATTER);
     }
 

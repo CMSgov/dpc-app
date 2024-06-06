@@ -1,6 +1,5 @@
 package gov.cms.dpc.api.auth;
 
-import gov.cms.dpc.api.auth.annotations.Public;
 import gov.cms.dpc.api.auth.jwt.PublicKeyHandler;
 import gov.cms.dpc.api.exceptions.PublicKeyException;
 import gov.cms.dpc.testing.APIAuthHelpers;

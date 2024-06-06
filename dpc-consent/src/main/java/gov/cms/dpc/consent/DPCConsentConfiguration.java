@@ -5,7 +5,9 @@ import gov.cms.dpc.common.hibernate.consent.IDPCConsentDatabase;
 import gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration;
 import gov.cms.dpc.fhir.configuration.IDPCFHIRConfiguration;
 import io.dropwizard.core.Configuration;
+import io.dropwizard.core.server.DefaultServerFactory;
 import io.dropwizard.db.DataSourceFactory;
+import io.dropwizard.jetty.HttpConnectorFactory;
 import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 
 import javax.validation.Valid;
@@ -18,6 +20,11 @@ public class DPCConsentConfiguration extends Configuration implements IDPCConsen
     @NotNull
     @JsonProperty("consentdb")
     private DataSourceFactory consentDatabase = new DataSourceFactory();
+
+    @Valid
+    @NotNull
+    @JsonProperty("server")
+    private DefaultServerFactory server = new DefaultServerFactory();
 
     @NotEmpty
     private String suppressionFileDir;
@@ -66,5 +73,10 @@ public class DPCConsentConfiguration extends Configuration implements IDPCConsen
 
     public void setFhirReferenceURL(String fhirReferenceURL) {
         this.fhirReferenceURL = fhirReferenceURL;
+    }
+
+    public int getServicePort() {
+        HttpConnectorFactory connection = (HttpConnectorFactory) server.getApplicationConnectors().get(0);
+        return connection.getPort();
     }
 }

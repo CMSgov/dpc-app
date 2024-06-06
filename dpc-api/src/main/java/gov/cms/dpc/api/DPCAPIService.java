@@ -102,7 +102,8 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
             environment.setValidator(validatorFactory.getValidator());
         }
 
-        // Healthchecks on dependent services
+        // Http healthchecks on dependent services
+        environment.healthChecks().register("api-self-check", new HttpHealthCheck(configuration.getPublicURL() + "/v1/version"));
         environment.healthChecks().register("dpc-attribution", new HttpHealthCheck(configuration.getAttributionHealthCheckURL()));
     }
 
