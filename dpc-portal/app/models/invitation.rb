@@ -46,6 +46,14 @@ class Invitation < ApplicationRecord
     end
   end
 
+  def unacceptable_reason
+    if expired? && authorized_official?
+      'ao_expired'
+    elsif expired? || accepted? || cancelled?
+      'invalid'
+    end
+  end
+
   private
 
   def cd_match?(user_info)

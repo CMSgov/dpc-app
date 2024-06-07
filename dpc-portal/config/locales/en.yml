@@ -4,6 +4,11 @@ en:
     pii_mismatch_status: Warning Status
     pii_mismatch_alert: This is a succinct, helpful message.
     pii_mismatch_text: Sorry, this invitation is for someone else.
+    ao_expired_heading:  Registration link expired
+    ao_expired_status: Error Status
+    ao_expired_alert: This is a succinct, helpful message.
+    ao_expired_text: The registration link for %{org_name} is expired.
+    invalid_heading:  Invitation is invalid
     invalid_heading:  Invitation is invalid
     invalid_status: Error Status
     invalid_alert: This is a succinct, helpful message.

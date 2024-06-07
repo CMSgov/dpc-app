@@ -10,7 +10,10 @@
   </div>
   <div>
     <p>
-      <%=raw t(@text) %>
+      <%=raw t(key=@text, org_name: @org_name) %>
     </p>
   </div>
+  <%= render Core::Button::ButtonComponent.new(label: "Request new invite",
+	destination: renew_organization_invitation_path(@invitation.provider_organization, @invitation),
+	method: :post) if @reason == :ao_expired %>
 </div>

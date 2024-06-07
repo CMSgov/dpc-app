@@ -4,6 +4,23 @@ require 'rails_helper'
 
 RSpec.describe 'Invitations', type: :request do
   describe 'GET /accept' do
+    context :ao do
+      context 'not logged in' do
+        let!(:ao_invite) { create(:invitation, :ao, created_at: 3.days.ago) }
+        let(:org) { ao_invite.provider_organization }
+        it 'should show warning page' do
+          get "/organizations/#{org.id}/invitations/#{ao_invite.id}/accept"
+          expect(response).to be_forbidden
+          expect(response.body).to include('usa-alert--warning')
+        end
+        it 'should show renew button' do
+          get "/organizations/#{org.id}/invitations/#{ao_invite.id}/accept"
+          expect(response).to be_forbidden
+          expect(response.body).to include('Request new invite')
+        end
+      end
+    end
+
     context :cd do
       let(:invited_by) { create(:invited_by) }
       let(:verification_code) { 'ABC123' }
@@ -43,11 +60,18 @@ RSpec.describe 'Invitations', type: :request do
           expect(response).to be_forbidden
           expect(response.body).to include('usa-alert--warning')
         end
-        it 'should show warning page if expired' do
-          cd_invite.update_attribute(:created_at, 3.days.ago)
-          get "/organizations/#{org.id}/invitations/#{cd_invite.id}/accept"
-          expect(response).to be_forbidden
-          expect(response.body).to include('usa-alert--warning')
+        context 'invitation expired' do
+          before { cd_invite.update_attribute(:created_at, 3.days.ago) }
+          it 'should show warning page' do
+            get "/organizations/#{org.id}/invitations/#{cd_invite.id}/accept"
+            expect(response).to be_forbidden
+            expect(response.body).to include('usa-alert--warning')
+          end
+          it 'should not show renew button' do
+            get "/organizations/#{org.id}/invitations/#{cd_invite.id}/accept"
+            expect(response).to be_forbidden
+            expect(response.body).to_not include('Request new invite')
+          end
         end
         it 'should show warning page if accepted' do
           cd_invite.accept!
@@ -260,6 +284,18 @@ RSpec.describe 'Invitations', type: :request do
       expect(response).to be_not_found
       expect(response.body).to include('usa-alert--warning')
     end
+  end
+end
+
+describe 'POST /renew' do
+  context :ao do
+    it 'should create another invitation for the user if expired'
+    it 'should not create another invitation for the user if accepted'
+    it 'should not create another invitation for the user if cancelled'
+  end
+
+  context :cd do
+    it 'should not create another invitation for the user'
   end
 end
 
