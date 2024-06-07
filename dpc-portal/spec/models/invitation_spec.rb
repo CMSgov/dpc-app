@@ -449,6 +449,17 @@ RSpec.describe Invitation, type: :model do
           invitation.renew
         end.to change { Invitation.count }.by 0
       end
+      it 'sends an invitation email on success' do
+        mailer = double(InvitationMailer)
+        expect(InvitationMailer).to receive(:with)
+          .with(invitation: instance_of(Invitation),
+                given_name: invitation.invited_given_name,
+                family_name: invitation.invited_family_name)
+          .and_return(mailer)
+        expect(mailer).to receive(:invite_ao).and_return(mailer)
+        expect(mailer).to receive(:deliver_now)
+        invitation.renew
+      end
     end
 
     context :cd do
