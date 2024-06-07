@@ -80,7 +80,7 @@ services:
       - DEBUG_MODE=${DEBUG_MODE:-false}
     ports:
       - "3600:3600"
-      - "9004:9904"
+      - "9904:9904"
     volumes:
       - ./jacocoReport/dpc-consent:/jacoco-report
 
@@ -95,7 +95,7 @@ services:
     depends_on:
       - attribution
       - aggregation
-    command: attribution:8080 aggregation:9900
+    command: attribution:8080 aggregation:9901
 
   start_api:
     image: dadarek/wait-for-dependencies
