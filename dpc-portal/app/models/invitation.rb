@@ -38,6 +38,19 @@ class Invitation < ApplicationRecord
             status: :accepted)
   end
 
+  def renew
+    return unless expired? && authorized_official?
+
+    invitation = Invitation.create(invited_email:,
+                                   invited_email_confirmation:,
+                                   provider_organization:,
+                                   invitation_type:)
+
+    InvitationMailer.with(invitation:, given_name: invited_given_name,
+                          family_name: invited_family_name).invite_ao.deliver_now
+    invitation
+  end
+
   def match_user?(user_info)
     if credential_delegate?
       cd_match?(user_info)

@@ -409,4 +409,46 @@ RSpec.describe Invitation, type: :model do
       expect(invitation.unacceptable_reason).to eq 'invalid'
     end
   end
+
+  describe :renew do
+    context :ao do
+      let!(:invitation) { create(:invitation, :ao) }
+      it 'should create another invitation for the user if expired' do
+        invitation.update(created_at: 49.hours.ago)
+        new_invitation = nil
+        expect do
+          new_invitation = invitation.renew
+        end.to change { Invitation.count }.by 1
+        expect(new_invitation.invited_email).to eq invitation.invited_email
+        expect(new_invitation.provider_organization).to eq invitation.provider_organization
+        expect(new_invitation.unacceptable_reason).to be_falsey
+      end
+      it 'should not create another invitation for the user if accepted' do
+        invitation.accept!
+        expect do
+          invitation.renew
+        end.to change { Invitation.count }.by 0
+      end
+      it 'should not create another invitation for the user if cancelled' do
+        invitation.update!(status: :cancelled)
+        expect do
+          invitation.renew
+        end.to change { Invitation.count }.by 0
+      end
+      it 'should not create another invitation for the user if valid' do
+        expect do
+          invitation.renew
+        end.to change { Invitation.count }.by 0
+      end
+    end
+
+    context :cd do
+      let!(:invitation) { create(:invitation, :cd, created_at: 49.hours.ago) }
+      it 'should not create another invitation for the user' do
+        expect do
+          invitation.renew
+        end.to change { Invitation.count }.by 0
+      end
+    end
+  end
 end
