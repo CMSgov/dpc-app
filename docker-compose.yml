@@ -19,7 +19,7 @@ services:
   aggregation:
     image: ${ECR_HOST:-755619740999.dkr.ecr.us-east-1.amazonaws.com/dpc-aggregation}:latest
     ports:
-      - "9901:9900"
+      - "9901:9901"
     env_file:
       - ./ops/config/decrypted/local.env
     environment:
@@ -45,7 +45,7 @@ services:
       - DEBUG_MODE=${DEBUG_MODE:-false}
     ports:
       - "3500:8080"
-      - "9902:9900"
+      - "9902:9902"
     volumes:
       - ./jacocoReport/dpc-attribution:/jacoco-report
 
@@ -80,7 +80,7 @@ services:
       - DEBUG_MODE=${DEBUG_MODE:-false}
     ports:
       - "3600:3600"
-      - "9004:9900"
+      - "9004:9904"
     volumes:
       - ./jacocoReport/dpc-consent:/jacoco-report
 

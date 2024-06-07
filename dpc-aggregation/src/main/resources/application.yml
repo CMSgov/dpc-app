@@ -27,7 +27,7 @@ server:
       port: 3002
   adminConnectors:
     - type: http
-      port: 9900
+      port: 9901
   requestLog:
     appenders:
       - type: console
