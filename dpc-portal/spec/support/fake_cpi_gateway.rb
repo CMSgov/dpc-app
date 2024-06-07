@@ -2,7 +2,6 @@
 
 require 'sinatra/base'
 
-# rubocop:disable Metrics/ClassLength
 # This class simulates the CPI API Gateway and the IDM identity service
 #
 # Endpoints:
@@ -139,4 +138,3 @@ class FakeCpiGateway < Sinatra::Base
 
   run! if __FILE__ == $PROGRAM_NAME
 end
-# rubocop:enable Metrics/ClassLength

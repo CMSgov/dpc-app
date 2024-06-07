@@ -4,7 +4,8 @@
 class InvitationsController < ApplicationController
   before_action :load_organization
   before_action :load_invitation
-  before_action :authenticate_user!, except: %i[login]
+  before_action :validate_invitation, except: %i[renew]
+  before_action :authenticate_user!, except: %i[login renew]
   before_action :invitation_matches_user, only: %i[confirm]
 
   def accept
@@ -41,6 +42,15 @@ class InvitationsController < ApplicationController
                                     nonce: @nonce,
                                     state: @state }.to_query)
     redirect_to url, allow_other_host: true
+  end
+
+  def renew
+    if @invitation.renew
+      flash[:notice] = 'You should receive your new invitation shortly'
+    else
+      flash[:alert] = 'Unable to create new invitation'
+    end
+    redirect_to accept_organization_invitation_url(@organization, @invitation)
   end
 
   private
@@ -99,12 +109,16 @@ class InvitationsController < ApplicationController
     @invitation = Invitation.find(params[:id])
     if @organization != @invitation.provider_organization
       render(Page::Invitations::BadInvitationComponent.new(@invitation, 'invalid', 'warning'), status: :not_found)
-    elsif @invitation.unacceptable_reason
-      render(Page::Invitations::BadInvitationComponent.new(@invitation, @invitation.unacceptable_reason, 'warning'),
-             status: :forbidden)
     end
   rescue ActiveRecord::RecordNotFound
     render(Page::Invitations::BadInvitationComponent.new(@invitation, 'invalid', 'warning'), status: :not_found)
+  end
+
+  def validate_invitation
+    return unless @invitation.unacceptable_reason
+
+    render(Page::Invitations::BadInvitationComponent.new(@invitation, @invitation.unacceptable_reason, 'warning'),
+           status: :forbidden)
   end
 
   def login_session

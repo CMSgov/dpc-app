@@ -20,3 +20,8 @@ Metrics/BlockLength:
 
 Metrics/MethodLength:
   Max: 20
+
+Metrics/ClassLength:
+  Exclude:
+    - app/controllers/invitations_controller.rb
+    - spec/support/fake_cpi_gateway.rb

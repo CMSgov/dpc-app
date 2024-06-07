@@ -41,10 +41,10 @@ class Invitation < ApplicationRecord
   def renew
     return unless expired? && authorized_official?
 
-    invitation = Invitation.create(invited_email:,
-                                   invited_email_confirmation:,
-                                   provider_organization:,
-                                   invitation_type:)
+    invitation = Invitation.create!(invited_email:,
+                                    invited_email_confirmation: invited_email,
+                                    provider_organization:,
+                                    invitation_type:)
 
     InvitationMailer.with(invitation:, given_name: invited_given_name,
                           family_name: invited_family_name).invite_ao.deliver_now

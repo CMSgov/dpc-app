@@ -288,14 +288,48 @@ RSpec.describe 'Invitations', type: :request do
 end
 
 describe 'POST /renew' do
+  let(:fail_message) { 'Unable to create new invitation' }
   context :ao do
-    it 'should create another invitation for the user if expired'
-    it 'should not create another invitation for the user if accepted'
-    it 'should not create another invitation for the user if cancelled'
+    let!(:invitation) { create(:invitation, :ao) }
+    let(:org_id) { invitation.provider_organization.id }
+    let(:success_message) { 'You should receive your new invitation shortly' }
+    it 'should create another invitation for the user if expired' do
+      invitation.update(created_at: 49.hours.ago)
+      expect do
+        post "/organizations/#{org_id}/invitations/#{invitation.id}/renew"
+      end.to change { Invitation.count }.by(1)
+      expect(flash[:notice]).to eq success_message
+      expect(response).to redirect_to(accept_organization_invitation_path(org_id, invitation))
+    end
+    it 'should not create another invitation for the user if accepted' do
+      invitation.accept!
+      expect do
+        post "/organizations/#{org_id}/invitations/#{invitation.id}/renew"
+      end.to change { Invitation.count }.by(0)
+      expect(flash[:alert]).to eq fail_message
+      expect(response).to redirect_to(accept_organization_invitation_path(org_id, invitation))
+    end
+
+    it 'should not create another invitation for the user if cancelled' do
+      invitation.update(status: :cancelled)
+      expect do
+        post "/organizations/#{org_id}/invitations/#{invitation.id}/renew"
+      end.to change { Invitation.count }.by(0)
+      expect(flash[:alert]).to eq fail_message
+      expect(response).to redirect_to(accept_organization_invitation_path(org_id, invitation))
+    end
   end
 
   context :cd do
-    it 'should not create another invitation for the user'
+    let!(:invitation) { create(:invitation, :cd, created_at: 49.hours.ago) }
+    let(:org_id) { invitation.provider_organization.id }
+    it 'should not create another invitation for the user' do
+      expect do
+        post "/organizations/#{org_id}/invitations/#{invitation.id}/renew"
+      end.to change { Invitation.count }.by(0)
+      expect(flash[:alert]).to eq fail_message
+      expect(response).to redirect_to(accept_organization_invitation_path(org_id, invitation))
+    end
   end
 end
 
