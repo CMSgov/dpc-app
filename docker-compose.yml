@@ -27,6 +27,7 @@ services:
       - USE_BFD_MOCK=${USE_BFD_MOCK:-true}
       - JACOCO=${REPORT_COVERAGE}
       - DEBUG_MODE=${DEBUG_MODE:-false}
+      - CONSENT_HEALTHCHECK_URL=http://consent:9900/healthcheck
     depends_on:
       - db
       - consent
@@ -53,7 +54,6 @@ services:
     ports:
       - "3002:3002"
       - "9903:9900"
-      - "5005:5005"
     env_file:
       - ./ops/config/decrypted/local.env
     environment:
