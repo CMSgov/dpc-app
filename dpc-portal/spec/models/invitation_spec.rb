@@ -395,6 +395,10 @@ RSpec.describe Invitation, type: :model do
       invitation = create(:invitation, :ao, created_at: 49.hours.ago, status: :accepted)
       expect(invitation.unacceptable_reason).to eq 'invalid'
     end
+    it 'should be invalid if expired and ao and cancelled' do
+      invitation = create(:invitation, :ao, created_at: 49.hours.ago, status: :cancelled)
+      expect(invitation.unacceptable_reason).to eq 'invalid'
+    end
     it 'should be ao_expired if expired and ao' do
       invitation = create(:invitation, :ao, created_at: 49.hours.ago)
       expect(invitation.unacceptable_reason).to eq 'ao_expired'

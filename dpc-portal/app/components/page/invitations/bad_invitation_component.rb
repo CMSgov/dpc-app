@@ -11,14 +11,14 @@ module Page
         @reason = if server_errors.include?(reason)
                     'server_error'
                   else
-                    reason.to_sym
+                    reason
                   end
         @level = level
         @heading = "verification.#{@reason}_heading"
         @status = "verification.#{@reason}_status"
         @alert = "verification.#{@reason}_alert"
         @text = "verification.#{@reason}_text"
-        @show_renew = @reason == :ao_expired
+        @show_renew = reason.to_sym == :ao_expired
         @disabled = invitation&.renewed?
       end
 
