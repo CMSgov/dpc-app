@@ -16,7 +16,7 @@ server:
       port: 3600
   adminConnectors:
     - type: http
-      port: 9900
+      port: 9904
   requestLog:
     appenders:
       - type: console
