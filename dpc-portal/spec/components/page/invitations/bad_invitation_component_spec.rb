@@ -40,6 +40,8 @@ RSpec.describe Page::Invitations::BadInvitationComponent, type: :component do
     end
 
     context 'AO expired' do
+      let(:status) { :pending }
+      let(:invitation) { create(:invitation, :ao, provider_organization:, status:) }
       let(:component) { described_class.new(invitation, 'ao_expired', 'error') }
       it 'should have organization name' do
         is_expected.to include(invitation.provider_organization.name)
@@ -47,6 +49,15 @@ RSpec.describe Page::Invitations::BadInvitationComponent, type: :component do
       it 'should have renew button' do
         button_url = "/organizations/#{provider_organization.id}/invitations/#{invitation.id}/renew"
         is_expected.to include(button_url)
+      end
+      context 'already renewed' do
+        let(:status) { :renewed }
+        it 'should have disabled renew button' do
+          button_url = "/organizations/#{provider_organization.id}/invitations/#{invitation.id}/renew"
+          disabled = %(<button class="usa-button" disabled="disabled" type="submit">)
+          is_expected.to include(button_url)
+          is_expected.to include(disabled)
+        end
       end
     end
   end

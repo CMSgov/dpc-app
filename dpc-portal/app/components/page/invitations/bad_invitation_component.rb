@@ -18,6 +18,8 @@ module Page
         @status = "verification.#{@reason}_status"
         @alert = "verification.#{@reason}_alert"
         @text = "verification.#{@reason}_text"
+        @show_renew = @reason == :ao_expired
+        @disabled = invitation&.renewed?
       end
 
       def server_errors

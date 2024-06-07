@@ -6,11 +6,12 @@ module Core
     class ButtonComponent < ViewComponent::Base
       attr_accessor :label, :destination, :method, :additional_classes
 
-      def initialize(label:, destination:, method: :get, additional_classes: nil)
+      def initialize(label:, destination:, method: :get, additional_classes: nil, disabled: false)
         super
         @label = label
         @destination = destination
         @method = method
+        @disabled = disabled
         @additional_classes = additional_classes
       end
 

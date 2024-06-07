@@ -391,6 +391,10 @@ RSpec.describe Invitation, type: :model do
       invitation = create(:invitation, :ao)
       expect(invitation.unacceptable_reason).to be_falsey
     end
+    it 'should be invalid if expired and ao and accepted' do
+      invitation = create(:invitation, :ao, created_at: 49.hours.ago, status: :accepted)
+      expect(invitation.unacceptable_reason).to eq 'invalid'
+    end
     it 'should be ao_expired if expired and ao' do
       invitation = create(:invitation, :ao, created_at: 49.hours.ago)
       expect(invitation.unacceptable_reason).to eq 'ao_expired'
@@ -412,9 +416,8 @@ RSpec.describe Invitation, type: :model do
 
   describe :renew do
     context :ao do
-      let!(:invitation) { create(:invitation, :ao) }
+      let!(:invitation) { create(:invitation, :ao, created_at: 49.hours.ago) }
       it 'should create another invitation for the user if expired' do
-        invitation.update(created_at: 49.hours.ago)
         new_invitation = nil
         expect do
           new_invitation = invitation.renew
@@ -422,6 +425,7 @@ RSpec.describe Invitation, type: :model do
         expect(new_invitation.invited_email).to eq invitation.invited_email
         expect(new_invitation.provider_organization).to eq invitation.provider_organization
         expect(new_invitation.unacceptable_reason).to be_falsey
+        expect(invitation.reload).to be_renewed
       end
       it 'should not create another invitation for the user if accepted' do
         invitation.accept!
@@ -436,6 +440,7 @@ RSpec.describe Invitation, type: :model do
         end.to change { Invitation.count }.by 0
       end
       it 'should not create another invitation for the user if valid' do
+        invitation.update(created_at: 1.day.ago)
         expect do
           invitation.renew
         end.to change { Invitation.count }.by 0
@@ -445,9 +450,11 @@ RSpec.describe Invitation, type: :model do
     context :cd do
       let!(:invitation) { create(:invitation, :cd, created_at: 49.hours.ago) }
       it 'should not create another invitation for the user' do
+        old_status = invitation.status
         expect do
           invitation.renew
         end.to change { Invitation.count }.by 0
+        expect(invitation.reload.status).to eq old_status
       end
     end
   end

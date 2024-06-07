@@ -6,17 +6,25 @@ RSpec.describe 'Invitations', type: :request do
   describe 'GET /accept' do
     context :ao do
       context 'not logged in' do
-        let!(:ao_invite) { create(:invitation, :ao, created_at: 3.days.ago) }
-        let(:org) { ao_invite.provider_organization }
-        it 'should show warning page' do
-          get "/organizations/#{org.id}/invitations/#{ao_invite.id}/accept"
-          expect(response).to be_forbidden
-          expect(response.body).to include('usa-alert--warning')
-        end
-        it 'should show renew button' do
-          get "/organizations/#{org.id}/invitations/#{ao_invite.id}/accept"
-          expect(response).to be_forbidden
-          expect(response.body).to include('Request new invite')
+        context :expired do
+          let!(:ao_invite) { create(:invitation, :ao, created_at: 3.days.ago) }
+          let(:org) { ao_invite.provider_organization }
+          it 'should show warning page' do
+            get "/organizations/#{org.id}/invitations/#{ao_invite.id}/accept"
+            expect(response).to be_forbidden
+            expect(response.body).to include('usa-alert--warning')
+          end
+          it 'should show renew button' do
+            get "/organizations/#{org.id}/invitations/#{ao_invite.id}/accept"
+            expect(response).to be_forbidden
+            expect(response.body).to include('Request new invite')
+          end
+          it 'should not show renew button if accepted' do
+            ao_invite.accept!
+            get "/organizations/#{org.id}/invitations/#{ao_invite.id}/accept"
+            expect(response).to be_forbidden
+            expect(response.body).to_not include('Request new invite')
+          end
         end
       end
     end

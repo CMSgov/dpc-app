@@ -12,7 +12,7 @@ class Invitation < ApplicationRecord
   validate :cannot_cancel_accepted
 
   enum invitation_type: %i[credential_delegate authorized_official]
-  enum :status, %i[pending accepted expired cancelled], default: :pending
+  enum :status, %i[pending accepted expired cancelled renewed], default: :pending
 
   belongs_to :provider_organization, required: true
   belongs_to :invited_by, class_name: 'User', required: false
@@ -39,7 +39,7 @@ class Invitation < ApplicationRecord
   end
 
   def renew
-    return unless expired? && authorized_official?
+    return unless pending? && expired? && authorized_official?
 
     invitation = Invitation.create!(invited_email:,
                                     invited_email_confirmation: invited_email,
@@ -48,6 +48,7 @@ class Invitation < ApplicationRecord
 
     InvitationMailer.with(invitation:, given_name: invited_given_name,
                           family_name: invited_family_name).invite_ao.deliver_now
+    update(status: :renewed)
     invitation
   end
 
@@ -60,9 +61,11 @@ class Invitation < ApplicationRecord
   end
 
   def unacceptable_reason
+    return 'invalid' if cancelled? || accepted?
+
     if expired? && authorized_official?
       'ao_expired'
-    elsif expired? || accepted? || cancelled?
+    elsif expired?
       'invalid'
     end
   end
