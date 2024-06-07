@@ -27,7 +27,7 @@ services:
       - USE_BFD_MOCK=${USE_BFD_MOCK:-true}
       - JACOCO=${REPORT_COVERAGE}
       - DEBUG_MODE=${DEBUG_MODE:-false}
-      - CONSENT_HEALTHCHECK_URL=http://consent:9900/healthcheck
+      - CONSENT_HEALTHCHECK_URL=http://consent:9904/healthcheck
     depends_on:
       - db
       - consent
@@ -58,7 +58,7 @@ services:
       - ./ops/config/decrypted/local.env
     environment:
       - ATTRIBUTION_URL=http://attribution:8080/v1/
-      - ATTRIBUTION_HEALTHCHECK_URL=http://attribution:9900/healthcheck
+      - ATTRIBUTION_HEALTHCHECK_URL=http://attribution:9902/healthcheck
       - ENV=local
       - JACOCO=${REPORT_COVERAGE}
       - EXPORT_PATH=/app/data
