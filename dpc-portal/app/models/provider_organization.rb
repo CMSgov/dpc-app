@@ -24,8 +24,7 @@ class ProviderOrganization < ApplicationRecord
     if verification_status_previously_changed?(from: :approved, to: :rejected) && dpc_api_organization_id.present?
       ctm = ClientTokenManager.new(dpc_api_organization_id)
       ctm.client_tokens.each do |token|
-        puts token.with_indifferent_access['id']
-        ctm.delete_client_token(id: token.with_indifferent_access['id'])
+        ctm.delete_client_token(id: token.with_indifferent_access)
       end
     end
   end

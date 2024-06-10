@@ -95,10 +95,9 @@ RSpec.describe ProviderOrganization, type: :model do
       po.save
       tokens = [{ 'id' => 'abcdef' }]
       allow(mock_ctm).to receive(:client_tokens).and_return(tokens)
-      allow(mock_ctm).to receive(:delete_client_token).and_return(true)
+      expect(mock_ctm).to receive(:delete_client_token).with(tokens[0])
       po.verification_status = :rejected
       po.save
-      expect(mock_ctm).to receive(:delete_client_token).with(tokens[0]['id'])
     end
   end
 end
