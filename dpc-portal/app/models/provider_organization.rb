@@ -22,16 +22,6 @@ class ProviderOrganization < ApplicationRecord
     SyncOrganizationJob.perform_later(id) unless dpc_api_organization_id.present?
   end
 
-  def disable_rejected
-    return unless verification_status_previously_changed?(from: :approved, to: :rejected) &&
-                  dpc_api_organization_id.present?
-
-    ctm = ClientTokenManager.new(dpc_api_organization_id)
-    ctm.client_tokens.each do |token|
-      ctm.delete_client_token(token.with_indifferent_access)
-    end
-  end
-
   def public_keys
     @keys ||= []
     if dpc_api_organization_id.present?
@@ -67,5 +57,15 @@ class ProviderOrganization < ApplicationRecord
     id
   end
 
-  private :disable_rejected
+  private
+
+  def disable_rejected
+    return unless verification_status_previously_changed?(from: :approved, to: :rejected) &&
+                  dpc_api_organization_id.present?
+
+    ctm = ClientTokenManager.new(dpc_api_organization_id)
+    ctm.client_tokens.each do |token|
+      ctm.delete_client_token(token.with_indifferent_access)
+    end
+  end
 end
