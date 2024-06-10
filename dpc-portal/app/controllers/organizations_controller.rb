@@ -3,6 +3,7 @@
 # Shows Credential Delegates info about the organizations they manage the credentials for
 class OrganizationsController < ApplicationController
   before_action :authenticate_user!
+  before_action :check_user_verification
   before_action :load_organization, only: %i[show tos_form sign_tos success]
   before_action :require_can_access, only: %i[show]
   before_action :check_npi, only: %i[create]
@@ -10,8 +11,9 @@ class OrganizationsController < ApplicationController
   before_action :tos_accepted, only: %i[show]
 
   def index
-    @organizations = current_user.provider_organizations
-    render(Page::Organization::OrganizationListComponent.new(organizations: @organizations))
+    @links = current_user.provider_links
+    ao_or_cd = @links.any? { |link| link.is_a?(AoOrgLink) }
+    render(Page::Organization::OrganizationListComponent.new(ao_or_cd:, links: @links))
   end
 
   def show

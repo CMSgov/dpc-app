@@ -13,6 +13,9 @@ class User < ApplicationRecord
   validates :verification_status, allow_nil: true,
                                   inclusion: { in: :verification_status }
 
+  has_many :ao_org_links
+  has_many :cd_org_links
+
   enum :verification_reason, %i[ao_med_sanction_waived ao_med_sanctions]
   enum :verification_status, %i[approved rejected]
 
@@ -25,10 +28,9 @@ class User < ApplicationRecord
     end
   end
 
-  def provider_organizations
-    ProviderOrganization.joins(:ao_org_links).where('ao_org_links.user_id = ?', id) +
-      ProviderOrganization.joins(:cd_org_links).where('cd_org_links.user_id = ? AND cd_org_links.disabled_at IS NULL',
-                                                      id)
+  def provider_links
+    ao_org_links.includes(:provider_organization) +
+      cd_org_links.where(disabled_at: nil).includes(:provider_organization)
   end
 
   def can_access?(organization)
