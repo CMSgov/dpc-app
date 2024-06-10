@@ -4,10 +4,10 @@ require 'rails_helper'
 
 RSpec.describe ProviderOrganization, type: :model do
   include ActiveJob::TestHelper
-  let(:mock_client_token_manager) { instance_double(ClientTokenManager) }
+  let(:mock_ctm) { instance_double(ClientTokenManager) }
 
   before do
-    allow(ClientTokenManager).to receive(:new).and_return(mock_client_token_manager)
+    allow(ClientTokenManager).to receive(:new).and_return(mock_ctm)
   end
 
   describe :validations do
@@ -89,22 +89,16 @@ RSpec.describe ProviderOrganization, type: :model do
     end
   end
 
-  describe 'after_update' do
+  describe 'disable_rejected' do
     it 'should delete client tokens' do
-      ActiveJob::Base.queue_adapter = :test
-      po = ProviderOrganization.new(
-        npi: 10.times.map { rand(0..9) }.join,
-        name: 'Test org',
-        dpc_api_organization_id: 1,
-        verification_status: :approved
-      )
+      po = create(:provider_organization, dpc_api_organization_id: 1, verification_status: :approved)
       po.save
-      tokens = [{ 'id' => 'abcdef' }, { 'id' => 'ftguiol' }]
-      allow(mock_client_token_manager).to receive(:client_tokens).and_return(tokens)
-      allow(mock_client_token_manager).to receive(:delete_client_token).and_return(true)
+      tokens = [{ 'id' => 'abcdef' }]
+      allow(mock_ctm).to receive(:client_tokens).and_return(tokens)
+      allow(mock_ctm).to receive(:delete_client_token).and_return(true)
       po.verification_status = :rejected
       po.save
-      assert_no_enqueued_jobs
+      expect(mock_ctm).to receive(:delete_client_token).with(tokens[0]['id'])
     end
   end
 end
