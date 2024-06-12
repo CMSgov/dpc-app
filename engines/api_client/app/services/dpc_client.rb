@@ -22,13 +22,13 @@ class DpcClient
   def get_organization(api_id)
     uri_string = "#{base_url}/Organization/#{api_id}"
     org = get_fhir_request(uri_string, delegated_macaroon(api_id))
-    org.blank? ? nil : FHIR::Organization.new(org)
+    response_successful? ? FHIR::Organization.new(org) : nil
   end
 
   def get_organization_by_npi(npi)
     uri_string = "#{base_url}/Admin/Organization?npis=npi|#{npi}"
     org = get_fhir_request(uri_string, golden_macaroon)
-    org.blank? ? nil : FHIR::Organization.new(org)
+    response_successful? ? FHIR::Bundle.new(org) : nil
   end
 
   def update_organization(reg_org, api_id, api_endpoint_ref)
