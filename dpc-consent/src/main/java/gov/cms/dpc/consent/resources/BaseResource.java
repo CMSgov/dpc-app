@@ -17,7 +17,7 @@ import javax.ws.rs.core.MediaType;
 @Path("/v1")
 public class BaseResource {
 
-    private final PropertiesProvider pp;
+    private PropertiesProvider pp;
 
     @Inject
     public BaseResource() {
