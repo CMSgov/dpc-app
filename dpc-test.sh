@@ -33,7 +33,7 @@ else
 fi
 
 # Build the application
-docker-compose up start_core_dependencies
+docker-compose -p start-v1-app up start_core_dependencies
 mvn clean compile -Perror-prone -B -V -ntp
 mvn package -Pci -ntp
 
@@ -43,16 +43,16 @@ if [ -n "$REPORT_COVERAGE" ]; then
 fi
 
 docker-compose down
-docker volume rm dpc-app_pgdata
-docker-compose up start_core_dependencies
+docker volume rm start-v1-app_pgdata14
+docker-compose -p start-v1-app up start_core_dependencies
 docker-compose up start_api_dependencies
 
 # Run the integration tests
 docker-compose up --exit-code-from tests tests
 
 docker-compose down
-docker volume rm dpc-app_pgdata
-docker-compose up start_core_dependencies
+docker volume rm start-v1-app_pgdata14
+docker-compose -p start-v1-app up start_core_dependencies
 docker-compose up start_api_dependencies
 
 # Start the API server
