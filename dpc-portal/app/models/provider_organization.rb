@@ -8,13 +8,15 @@ class ProviderOrganization < ApplicationRecord
   validates :verification_status, allow_nil: true,
                                   inclusion: { in: :verification_status }
 
-  enum verification_reason: %i[org_med_sanction_waived user_med_sanction no_approved_enrollments org_med_sanction]
+  enum verification_reason: %i[org_med_sanction_waived ao_med_sanctions no_approved_enrollment org_med_sanctions]
   enum verification_status: %i[approved rejected]
 
   belongs_to :terms_of_service_accepted_by, class_name: 'User', required: false
 
   has_many :ao_org_links
   has_many :cd_org_links
+
+  after_update :disable_rejected
 
   after_create do
     SyncOrganizationJob.perform_later(id) unless dpc_api_organization_id.present?
@@ -53,5 +55,17 @@ class ProviderOrganization < ApplicationRecord
 
   def path_id
     id
+  end
+
+  private
+
+  def disable_rejected
+    return unless verification_status_previously_changed?(from: :approved, to: :rejected) &&
+                  dpc_api_organization_id.present?
+
+    ctm = ClientTokenManager.new(dpc_api_organization_id)
+    ctm.client_tokens.each do |token|
+      ctm.delete_client_token(token.with_indifferent_access)
+    end
   end
 end

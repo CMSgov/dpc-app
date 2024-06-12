@@ -96,6 +96,12 @@ RSpec.describe Invitation, type: :model do
         expect(valid_new_cd_invite.errors.size).to eq 1
         expect(valid_new_cd_invite.errors[:invited_email_confirmation]).to eq ["doesn't match Invited email"]
       end
+
+      it 'fails on bad status' do
+        expect do
+          valid_new_cd_invite.status = :fake_status
+        end.to raise_error(ArgumentError)
+      end
     end
 
     describe :update do
@@ -153,14 +159,16 @@ RSpec.describe Invitation, type: :model do
       end
     end
 
-    describe :accepted do
-      it 'should be accepted if has cd_org_link' do
-        link = create(:cd_org_link)
-        expect(link.invitation.accepted?).to eq true
-      end
-      it 'should not be accepted if not have cd_org_link' do
+    describe :accept! do
+      it 'should unset attributes and change status' do
         invitation = create(:invitation, :cd)
-        expect(invitation.accepted?).to eq false
+        invitation.accept!
+        invitation.reload
+        expect(invitation.invited_given_name).to be_nil
+        expect(invitation.invited_family_name).to be_nil
+        expect(invitation.invited_phone).to be_nil
+        expect(invitation.invited_email).to be_nil
+        expect(invitation).to be_accepted
       end
     end
 
@@ -212,6 +220,15 @@ RSpec.describe Invitation, type: :model do
       it 'should not match user if phone not correct' do
         cd_invite.invited_phone = 'not number'
         expect(cd_invite.match_user?(user_info)).to eq false
+      end
+    end
+
+    describe :cancel do
+      it 'should not cancel an accepted invitation' do
+        cd_invite = create(:invitation, :cd, status: :accepted)
+        cd_invite.status = :cancelled
+        expect(cd_invite.valid?).to eq false
+        expect(cd_invite.errors.first.message).to eq 'You may not cancel an accepted invitation.'
       end
     end
   end
@@ -341,14 +358,16 @@ RSpec.describe Invitation, type: :model do
       end
     end
 
-    describe :accepted do
-      it 'should be accepted if has ao_org_link' do
-        link = create(:ao_org_link)
-        expect(link.invitation.accepted?).to eq true
-      end
-      it 'should not be accepted if not have ao_org_link' do
+    describe :accept! do
+      it 'should unset attributes and change status' do
         invitation = create(:invitation, :ao)
-        expect(invitation.accepted?).to eq false
+        invitation.accept!
+        invitation.reload
+        expect(invitation.invited_given_name).to be_nil
+        expect(invitation.invited_family_name).to be_nil
+        expect(invitation.invited_phone).to be_nil
+        expect(invitation.invited_email).to be_nil
+        expect(invitation).to be_accepted
       end
     end
 

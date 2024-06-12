@@ -3,9 +3,11 @@
 # Manages invitations to become a Credential Delegate
 class CredentialDelegateInvitationsController < ApplicationController
   before_action :authenticate_user!
+  before_action :check_user_verification
   before_action :load_organization
-  before_action :require_ao, only: %i[new create success]
-  before_action :tos_accepted
+  before_action :require_ao
+  before_action :tos_accepted, except: %i[success destroy]
+  before_action :verify_invitation, only: %i[destroy]
 
   def new
     render(Page::CredentialDelegate::NewInvitationComponent.new(@organization, Invitation.new))
@@ -30,7 +32,24 @@ class CredentialDelegateInvitationsController < ApplicationController
     render(Page::CredentialDelegate::InvitationSuccessComponent.new(@organization))
   end
 
+  def destroy
+    if @invitation.update(status: :cancelled)
+      flash[:notice] = 'Invitation cancelled.'
+    else
+      flash[:alert] = destroy_error_message
+    end
+    redirect_to organization_path(@organization)
+  end
+
   private
+
+  def destroy_error_message
+    if @invitation.errors.size == 1 && @invitation.errors.first.type == :cancel_accepted
+      @invitation.errors.first.message
+    else
+      @invitation.errors.full_messages.join(', ')
+    end
+  end
 
   def build_invitation
     permitted = params.permit(:invited_given_name, :invited_family_name, :phone_raw, :invited_email,
@@ -40,5 +59,13 @@ class CredentialDelegateInvitationsController < ApplicationController
                    invitation_type: :credential_delegate,
                    invited_by: current_user,
                    verification_code: (Array('A'..'Z') + Array(0..9)).sample(6).join)
+  end
+
+  def verify_invitation
+    @invitation = Invitation.find(params[:id])
+    return if @organization == @invitation.provider_organization
+
+    flash[:alert] = 'You do not have permission to cancel this invitation.'
+    redirect_to organization_path(@organization)
   end
 end

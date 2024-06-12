@@ -6,11 +6,19 @@
   <% if delete_path %>
   <td>
     <a href="#delete-modal-<%= obj['id'] %>" aria-controls="delete-modal-<%= obj['id'] %>" data-open-modal>X</a>
-    <%= render(Core::Modal::ModalComponent.new("Permanently revoke #{obj_name}?",
-        "Once revoked, the #{obj_name} will not work to access production data.",
-        button_to("Yes, revoke #{obj_name.split.last}", "#{delete_path}/#{obj['id']}", method: :delete, class: 'usa-button'),
-        'No, go back',
-        "delete-modal-#{obj['id']}")) %>
+    <% if obj_name == 'CD invitation' %>
+      <%= render(Core::Modal::ModalComponent.new('Cancel CD invite?',
+          'Once cancelled, this invitation can no longer be accepted by the invited credential delegate.',
+          button_to("Yes, delete invite", "#{delete_path}/#{obj['id']}", method: :delete, class: 'usa-button'),
+          'No, go back',
+          "delete-modal-#{obj['id']}")) %>
+    <% else %>
+      <%= render(Core::Modal::ModalComponent.new("Permanently revoke #{obj_name}?",
+          "Once revoked, the #{obj_name} will not work to access production data.",
+          button_to("Yes, revoke #{obj_name.split.last}", "#{delete_path}/#{obj['id']}", method: :delete, class: 'usa-button'),
+          'No, go back',
+          "delete-modal-#{obj['id']}")) %>
+    <% end %>
   </td>
   <% end %>
 </tr>

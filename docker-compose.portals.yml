@@ -17,6 +17,7 @@ services:
     volumes:
       - "./dpc-web/coverage:/dpc-web/coverage"
       - ./tmp/letter_opener/web:/dpc-web/tmp/letter_opener
+      - "./dpc-web/Gemfile.lock:/dpc-web/Gemfile.lock"
 
     environment:
       - REDIS_URL=redis://redis
@@ -62,6 +63,7 @@ services:
     volumes:
       - "./dpc-admin/coverage:/dpc-admin/coverage"
       - ./tmp/letter_opener/admin:/dpc-admin/tmp/letter_opener
+      - "./dpc-admin/Gemfile.lock:/dpc-admin/Gemfile.lock"
     environment:
       - REDIS_URL=redis://redis
       - GOLDEN_MACAROON=${GOLDEN_MACAROON}
@@ -154,6 +156,7 @@ services:
   portal_sidekiq:
     volumes:
       - ./tmp/letter_opener/portal:/dpc-portal/tmp/letter_opener
+      - "./dpc-portal/app:/dpc-portal/app"
     build:
       context: .
       dockerfile: dpc-portal/Dockerfile
@@ -167,6 +170,9 @@ services:
       - GOLDEN_MACAROON=${GOLDEN_MACAROON}
       - API_ADMIN_URL=http://api:9900
       - API_METADATA_URL=http://api:3002/v1
+      - CPI_API_GW_BASE_URL=http://localhost:4567/
+      - CMS_IDM_OAUTH_URL=http://localhost:4567/
+      - RUBY_YJIT_ENABLE=1
       - ENV=local
     depends_on:
       - redis

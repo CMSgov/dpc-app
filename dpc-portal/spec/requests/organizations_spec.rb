@@ -20,19 +20,32 @@ RSpec.describe 'Organizations', type: :request do
 
       it 'returns success if no orgs associated with user' do
         get '/organizations'
-        expect(assigns(:organizations)).to be_empty
+        expect(assigns(:links)).to be_empty
       end
 
       it 'returns organizations linked to user as ao' do
-        create(:ao_org_link, provider_organization: org, user:)
+        link = create(:ao_org_link, provider_organization: org, user:)
         get '/organizations'
-        expect(assigns(:organizations)).to eq [org]
+        expect(assigns(:links)).to eq [link]
       end
 
       it 'returns organizations linked to user as cd' do
-        create(:cd_org_link, provider_organization: org, user:)
+        link = create(:cd_org_link, provider_organization: org, user:)
         get '/organizations'
-        expect(assigns(:organizations)).to eq [org]
+        expect(assigns(:links)).to eq [link]
+      end
+    end
+
+    context 'user has sanctions' do
+      let!(:user) { create(:user, verification_status: 'rejected', verification_reason: 'ao_med_sanctions') }
+      let!(:org) { create(:provider_organization) }
+      before { sign_in user }
+
+      it 'should show access denied page' do
+        create(:ao_org_link, provider_organization: org, user:)
+        get '/organizations'
+        expect(response.body).to include(I18n.t('verification.ao_med_sanctions_status'))
+        expect(assigns(:organizations)).to be_nil
       end
     end
 
@@ -43,7 +56,7 @@ RSpec.describe 'Organizations', type: :request do
 
       it 'redirects to login after inactivity' do
         get '/organizations'
-        expect(response.body).to include('<option value>Organization Name</option>')
+        expect(response.body).to include("<p>You don't have any organizations to show.</p>")
         Timecop.travel(30.minutes.from_now)
         get '/organizations'
         expect(response).to redirect_to('/portal/users/sign_in')
@@ -53,11 +66,11 @@ RSpec.describe 'Organizations', type: :request do
       it 'redirects to login after session time elapses' do
         logged_in_at = Time.now
         get '/organizations'
-        expect(response.body).to include('<option value>Organization Name</option>')
+        expect(response.body).to include("<p>You don't have any organizations to show.</p>")
         Timecop.scale(360) do # 1 real second = 1 simulated hour
           until Time.now > logged_in_at + 12.hours
             get '/organizations'
-            expect(response.body).to include('<option value>Organization Name</option>')
+            expect(response.body).to include("<p>You don't have any organizations to show.</p>")
             Timecop.travel(20.minutes.from_now)
           end
           get '/organizations'
@@ -84,6 +97,82 @@ RSpec.describe 'Organizations', type: :request do
         org = create(:provider_organization)
         get "/organizations/#{org.id}"
         expect(response).to redirect_to(organizations_path)
+      end
+    end
+
+    context 'ao access denied' do
+      context 'org has sanctions' do
+        let!(:user) { create(:user) }
+        let!(:org) do
+          create(:provider_organization, verification_status: 'rejected',
+                                         verification_reason: 'org_med_sanctions')
+        end
+        before { sign_in user }
+
+        it 'should show access denied page' do
+          create(:ao_org_link, provider_organization: org, user:)
+          get "/organizations/#{org.id}"
+          expect(response.body).to include(I18n.t('verification.org_med_sanctions_status'))
+        end
+      end
+
+      context 'org not approved' do
+        let!(:user) { create(:user) }
+        let!(:org) do
+          create(:provider_organization, verification_status: 'rejected',
+                                         verification_reason: 'no_approved_enrollment')
+        end
+        before { sign_in user }
+
+        it 'should show access denied page' do
+          create(:ao_org_link, provider_organization: org, user:)
+          get "/organizations/#{org.id}"
+          expect(response.body).to include(I18n.t('verification.no_approved_enrollment_status'))
+        end
+      end
+
+      context 'user no longer ao' do
+        let!(:user) { create(:user) }
+        let!(:org) { create(:provider_organization) }
+        before { sign_in user }
+
+        it 'should show access denied page' do
+          create(:ao_org_link, provider_organization: org, user:, verification_status: false,
+                               verification_reason: 'user_not_authorized_official')
+          get "/organizations/#{org.id}"
+          expect(response.body).to include(I18n.t('verification.user_not_authorized_official_status'))
+        end
+      end
+    end
+    context 'cd access denied' do
+      context 'org has sanctions' do
+        let!(:user) { create(:user) }
+        let!(:org) do
+          create(:provider_organization, verification_status: 'rejected',
+                                         verification_reason: 'org_med_sanctions')
+        end
+        before { sign_in user }
+
+        it 'should show access denied page' do
+          create(:cd_org_link, provider_organization: org, user:)
+          get "/organizations/#{org.id}"
+          expect(response.body).to include(I18n.t('cd_access.org_med_sanctions_status'))
+        end
+      end
+
+      context 'org not approved' do
+        let!(:user) { create(:user) }
+        let!(:org) do
+          create(:provider_organization, verification_status: 'rejected',
+                                         verification_reason: 'no_approved_enrollment')
+        end
+        before { sign_in user }
+
+        it 'should show access denied page' do
+          create(:cd_org_link, provider_organization: org, user:)
+          get "/organizations/#{org.id}"
+          expect(response.body).to include(I18n.t('cd_access.no_approved_enrollment_status'))
+        end
       end
     end
 
@@ -191,8 +280,7 @@ RSpec.describe 'Organizations', type: :request do
           end
 
           it 'does not assign if only accepted exists' do
-            invitation = create(:invitation, :cd, provider_organization: org, invited_by: user)
-            create(:cd_org_link, provider_organization: org, invitation:)
+            create(:invitation, :cd, provider_organization: org, invited_by: user, status: :accepted)
             get "/organizations/#{org.id}"
             expect(assigns(:invitations).size).to eq 0
           end

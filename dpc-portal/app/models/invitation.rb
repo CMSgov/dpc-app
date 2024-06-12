@@ -9,8 +9,10 @@ class Invitation < ApplicationRecord
   validates :invited_email, format: Devise.email_regexp, confirmation: true, if: :new_record?
   validates :invitation_type, presence: true
   validates :invited_phone, format: { with: /\A[0-9]{10}\z/ }, if: :needs_validation?
+  validate :cannot_cancel_accepted
 
   enum invitation_type: %i[credential_delegate authorized_official]
+  enum :status, %i[pending accepted expired cancelled], default: :pending
 
   belongs_to :provider_organization, required: true
   belongs_to :invited_by, class_name: 'User', required: false
@@ -23,6 +25,7 @@ class Invitation < ApplicationRecord
   def show_attributes
     { full_name: "#{invited_given_name} #{invited_family_name}",
       email: invited_email,
+      id:,
       verification_code: }.with_indifferent_access
   end
 
@@ -30,12 +33,9 @@ class Invitation < ApplicationRecord
     created_at < 2.days.ago
   end
 
-  def accepted?
-    if credential_delegate?
-      CdOrgLink.where(invitation: self).exists?
-    elsif authorized_official?
-      AoOrgLink.where(invitation: self).exists?
-    end
+  def accept!
+    update!(invited_given_name: nil, invited_family_name: nil, invited_phone: nil, invited_email: nil,
+            status: :accepted)
   end
 
   def match_user?(user_info)
@@ -78,6 +78,12 @@ class Invitation < ApplicationRecord
     raise InvitationError, result[:failure_reason] unless result[:success]
 
     result[:success]
+  end
+
+  def cannot_cancel_accepted
+    return unless status_was == 'accepted' && cancelled?
+
+    errors.add(:status, :cancel_accepted, message: 'You may not cancel an accepted invitation.')
   end
 
   def needs_validation?

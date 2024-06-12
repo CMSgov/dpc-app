@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - master
+      - main
     paths:
       - lambda/opt-out-export/**
       - .github/workflows/opt-out-export-dev-deploy.yml
