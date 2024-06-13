@@ -105,7 +105,7 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
 
         // Http healthchecks on dependent services
         environment.healthChecks().register("api-self-check",
-            new HttpHealthCheck(UrlGenerator.generateVersionUrl(configuration.getServicePort()))
+            new HttpHealthCheck(UrlGenerator.generateVersionUrl(configuration.getServicePort(), configuration.getAppContextPath()))
         );
         environment.healthChecks().register("dpc-attribution", new HttpHealthCheck(configuration.getAttributionHealthCheckURL()));
     }

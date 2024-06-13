@@ -194,4 +194,9 @@ public class DPCAPIConfiguration extends Configuration implements IDPCDatabase, 
         HttpConnectorFactory connection = (HttpConnectorFactory) serverFactory.getApplicationConnectors().get(0);
         return connection.getPort();
     }
+
+    public String getAppContextPath() {
+        DefaultServerFactory serverFactory = (DefaultServerFactory) this.getServerFactory();
+        return serverFactory.getApplicationContextPath();
+    }
 }
