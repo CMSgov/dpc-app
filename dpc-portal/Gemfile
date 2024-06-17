@@ -25,7 +25,7 @@ gem 'devise', '>= 4.9.3'
 gem 'devise-async'
 gem 'devise-security'
 gem 'dotenv-rails', groups: %i[development test]
-gem 'fhir_client'
+gem 'fhir_models'
 gem 'health_check'
 gem 'jbuilder', '~> 2.7'
 gem 'json-jwt', '>= 1.16.6'

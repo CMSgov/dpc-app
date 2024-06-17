@@ -1,12 +1,12 @@
 #!/bin/bash
 set -e
 
-echo "┌────────────────────────────┐"
+echo "┌───────────────────────────────┐"
 echo "│                               │"
-echo "│ Running Web, Admin & Portal   |"
-echo "|            Tests              │"
+echo "│  Running Web, Admin & Portal  |"
+echo "|             Tests             │"
 echo "│                               │"
-echo "└────────────────────────────┘"
+echo "└───────────────────────────────┘"
 
 # Build the container
 make website
@@ -44,7 +44,7 @@ docker-compose -p start-v1-portals -f docker-compose.yml -f docker-compose.porta
 docker-compose -p start-v1-portals -f docker-compose.yml -f docker-compose.portals.yml run --entrypoint "bundle exec rspec" dpc_portal
 
 echo "┌───────────────────────────────────────────────┐"
-echo "│                                                   │"
-echo "│      Website, Admin, & Portal Tests Complete      │"
-echo "│                                                   │"
+echo "│                                               │"
+echo "│    Website, Admin, & Portal Tests Complete    │"
+echo "│                                               │"
 echo "└───────────────────────────────────────────────┘"
