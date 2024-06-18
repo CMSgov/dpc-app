@@ -4,6 +4,31 @@ require 'rails_helper'
 
 RSpec.describe 'Invitations', type: :request do
   describe 'GET /accept' do
+    context :ao do
+      context 'not logged in' do
+        context :expired do
+          let!(:ao_invite) { create(:invitation, :ao, created_at: 3.days.ago) }
+          let(:org) { ao_invite.provider_organization }
+          it 'should show warning page' do
+            get "/organizations/#{org.id}/invitations/#{ao_invite.id}/accept"
+            expect(response).to be_forbidden
+            expect(response.body).to include('usa-alert--warning')
+          end
+          it 'should show renew button' do
+            get "/organizations/#{org.id}/invitations/#{ao_invite.id}/accept"
+            expect(response).to be_forbidden
+            expect(response.body).to include('Request new invite')
+          end
+          it 'should not show renew button if accepted' do
+            ao_invite.accept!
+            get "/organizations/#{org.id}/invitations/#{ao_invite.id}/accept"
+            expect(response).to be_forbidden
+            expect(response.body).to_not include('Request new invite')
+          end
+        end
+      end
+    end
+
     context :cd do
       let(:invited_by) { create(:invited_by) }
       let(:verification_code) { 'ABC123' }
@@ -43,11 +68,18 @@ RSpec.describe 'Invitations', type: :request do
           expect(response).to be_forbidden
           expect(response.body).to include('usa-alert--warning')
         end
-        it 'should show warning page if expired' do
-          cd_invite.update_attribute(:created_at, 3.days.ago)
-          get "/organizations/#{org.id}/invitations/#{cd_invite.id}/accept"
-          expect(response).to be_forbidden
-          expect(response.body).to include('usa-alert--warning')
+        context 'invitation expired' do
+          before { cd_invite.update_attribute(:created_at, 3.days.ago) }
+          it 'should show warning page' do
+            get "/organizations/#{org.id}/invitations/#{cd_invite.id}/accept"
+            expect(response).to be_forbidden
+            expect(response.body).to include('usa-alert--warning')
+          end
+          it 'should not show renew button' do
+            get "/organizations/#{org.id}/invitations/#{cd_invite.id}/accept"
+            expect(response).to be_forbidden
+            expect(response.body).to_not include('Request new invite')
+          end
         end
         it 'should show warning page if accepted' do
           cd_invite.accept!
@@ -259,6 +291,52 @@ RSpec.describe 'Invitations', type: :request do
       post "/organizations/#{bad_org.id}/invitations/#{invitation.id}/login"
       expect(response).to be_not_found
       expect(response.body).to include('usa-alert--warning')
+    end
+  end
+end
+
+describe 'POST /renew' do
+  let(:fail_message) { 'Unable to create new invitation' }
+  context :ao do
+    let!(:invitation) { create(:invitation, :ao) }
+    let(:org_id) { invitation.provider_organization.id }
+    let(:success_message) { 'You should receive your new invitation shortly' }
+    it 'should create another invitation for the user if expired' do
+      invitation.update(created_at: 49.hours.ago)
+      expect do
+        post "/organizations/#{org_id}/invitations/#{invitation.id}/renew"
+      end.to change { Invitation.count }.by(1)
+      expect(flash[:notice]).to eq success_message
+      expect(response).to redirect_to(accept_organization_invitation_path(org_id, invitation))
+    end
+    it 'should not create another invitation for the user if accepted' do
+      invitation.accept!
+      expect do
+        post "/organizations/#{org_id}/invitations/#{invitation.id}/renew"
+      end.to change { Invitation.count }.by(0)
+      expect(flash[:alert]).to eq fail_message
+      expect(response).to redirect_to(accept_organization_invitation_path(org_id, invitation))
+    end
+
+    it 'should not create another invitation for the user if cancelled' do
+      invitation.update(status: :cancelled)
+      expect do
+        post "/organizations/#{org_id}/invitations/#{invitation.id}/renew"
+      end.to change { Invitation.count }.by(0)
+      expect(flash[:alert]).to eq fail_message
+      expect(response).to redirect_to(accept_organization_invitation_path(org_id, invitation))
+    end
+  end
+
+  context :cd do
+    let!(:invitation) { create(:invitation, :cd, created_at: 49.hours.ago) }
+    let(:org_id) { invitation.provider_organization.id }
+    it 'should not create another invitation for the user' do
+      expect do
+        post "/organizations/#{org_id}/invitations/#{invitation.id}/renew"
+      end.to change { Invitation.count }.by(0)
+      expect(flash[:alert]).to eq fail_message
+      expect(response).to redirect_to(accept_organization_invitation_path(org_id, invitation))
     end
   end
 end

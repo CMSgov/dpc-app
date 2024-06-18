@@ -32,6 +32,7 @@ Rails.application.routes.draw do
       get 'accept', on: :member
       post 'confirm', on: :member
       post 'login', on: :member
+      post 'renew', on: :member
     end
     get 'tos_form', on: :member
     post 'sign_tos', on: :member
