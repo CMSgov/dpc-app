@@ -14,6 +14,57 @@ env:
   ENV: "github-ci"
 
 jobs:
+  build-api:
+    name: "Build and Test API"
+    runs-on: ubuntu-20.04
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@v1
+      - name: "Set up JDK 11"
+        uses: actions/setup-java@v1
+        with:
+          java-version: "11"
+      - name: "Set up Python 3.8.1"
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.8.1"
+      - name: "API Build"
+        run: |
+          make ci-app
+      - name: "Smoke Test"
+        run: |
+          make smoke
+
+  build-dpc-web:
+    name: "Build and Test DPC Web"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@v1
+      - name: "DPC Web Build"
+        run: |
+          make ci-web-portal
+
+  build-dpc-admin:
+    name: "Build and Test DPC Admin Portal"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@v1
+      - name: "DPC Admin Portal Build"
+        run: |
+          make ci-admin-portal
+
+  build-dpc-portal:
+    name: "Build and Test DPC Portal"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@v1
+      - name: "DPC Portal Build"
+        run: |
+          make ci-portal
+
   build-dpc-client:
     name: "Build and Test DPC Client"
     runs-on: ubuntu-latest
