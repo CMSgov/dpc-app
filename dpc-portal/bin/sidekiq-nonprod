@@ -6,4 +6,4 @@ if ! gem list foreman -i --silent; then
 fi
 
 echo "Starting Procfile.nonprod"
-exec foreman start -f Procfile.sidekiq-nonprod "$@"
+exec foreman start -f Procfile.sidekiq-nonprod "$@" | sed s/.*?\|//

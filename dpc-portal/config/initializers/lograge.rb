@@ -1,12 +1,29 @@
 # frozen_string_literal: true
 
 Rails.application.configure do
+  config.lograge.enabled = true
+  config.lograge.logger = ActiveSupport::Logger.new(STDOUT)
+  config.lograge.formatter = Lograge::Formatters::Json.new
+
   config.lograge.custom_options = lambda do |event|
-    { ddsource: 'ruby',
-      params: event.payload[:params].reject { |k| %w(controller action).include? k },
+    info = { 
+      ddsource: 'ruby',
       environment: ENV['ENV'] || :development,
       exception: event.payload[:exception],
-      level: ENV['LOG_LEVEL'] || :info
+      level: ENV['LOG_LEVEL'] || :info,
+      request_id: event.payload[:request].request_id,
     }
+
+    exception = event.payload[:exception_object]
+
+    if exception
+      info[:exception_message] = exception.message
+      info[:exception_class] = exception.class
+      info[:exception_backtrace] = exception.backtrace
+    end
+
+    current_user = event.payload[:current_user]
+    info[:current_user] = current_user if current_user    
+    info
   end
 end

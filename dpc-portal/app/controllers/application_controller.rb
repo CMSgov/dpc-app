@@ -81,4 +81,17 @@ class ApplicationController < ActionController::Base
     has_ao_link = current_user.ao_org_links.where(provider_organization: @organization).exists?
     has_ao_link ? 'verification' : 'cd_access'
   end
+
+  # Appends information to payload for use in request-context logging.
+  # See usage in lograge initializer
+  def append_info_to_payload(payload)
+    super
+    return unless current_user
+
+    payload[:current_user] = {
+      id: current_user.id,
+      verification_status: current_user.verification_status,
+      verification_reason: current_user.verification_reason
+    }
+  end
 end
