@@ -11,7 +11,6 @@ class OrganizationsController < ApplicationController
   before_action :tos_accepted, only: %i[show]
 
   def index
-    raise StandardError.new('some error has occurred')
     @links = current_user.provider_links
     ao_or_cd = @links.any? { |link| link.is_a?(AoOrgLink) }
     render(Page::Organization::OrganizationListComponent.new(ao_or_cd:, links: @links))
