@@ -65,7 +65,7 @@ jobs:
         run: |
           make ci-portal
 
-  build-dpc-portal:
+  build-dpc-client:
     name: "Build and Test Dpc Client"
     runs-on: ubuntu-latest
     steps:
