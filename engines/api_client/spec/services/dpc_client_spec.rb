@@ -67,6 +67,15 @@ RSpec.describe DpcClient do
         response = client.get_organization(reg_org.api_id)
         expect(response).to be_nil
       end
+
+      it 'on credential error' do
+        stub_request(:get, "http://dpc.example.com/Organization/#{reg_org.api_id}")
+          .with(headers:).to_return(status: 401, body: 'Requires Credentials', headers: {})
+
+        client = DpcClient.new
+        response = client.get_organization(reg_org.api_id)
+        expect(response).to be_nil
+      end
     end
   end
 
@@ -82,13 +91,18 @@ RSpec.describe DpcClient do
     end
     context 'successful API request' do
       it 'retrieves organization data from API' do
-        body = '{"resourceType":"Organization"}'
+        body = { resourceType: 'Bundle',
+                 entry: [{ resource: { resourceType: 'Organization',
+                                       id: '6dae2c89-6344-4f62-a334-ec4be642ecb4',
+                                       identifier: [{ system: 'http://hl7.org/fhir/sid/us-npi',
+                                                      value: '3304239163' }] } }] }.to_json
         stub_request(:get, "http://dpc.example.com/Admin/Organization?npis=npi|#{org.npi}")
           .with(headers:).to_return(status: 200, body:, headers: {})
         client = DpcClient.new
         response = client.get_organization_by_npi(org.npi)
-        expect(response).to_not be_nil
-        expect(response.resourceType).to eq 'Organization'
+        expect(response&.entry).to_not be_nil
+        expect(response.entry.length).to eq 1
+        expect(response.entry.first.resource.id).to eq '6dae2c89-6344-4f62-a334-ec4be642ecb4'
       end
     end
 

@@ -12,7 +12,7 @@ class Invitation < ApplicationRecord
   validate :cannot_cancel_accepted
 
   enum invitation_type: %i[credential_delegate authorized_official]
-  enum :status, %i[pending accepted expired cancelled], default: :pending
+  enum :status, %i[pending accepted expired cancelled renewed], default: :pending
 
   belongs_to :provider_organization, required: true
   belongs_to :invited_by, class_name: 'User', required: false
@@ -38,11 +38,35 @@ class Invitation < ApplicationRecord
             status: :accepted)
   end
 
+  def renew
+    return unless pending? && expired? && authorized_official?
+
+    invitation = Invitation.create!(invited_email:,
+                                    invited_email_confirmation: invited_email,
+                                    provider_organization:,
+                                    invitation_type:)
+
+    InvitationMailer.with(invitation:, given_name: invited_given_name,
+                          family_name: invited_family_name).invite_ao.deliver_now
+    update(status: :renewed)
+    invitation
+  end
+
   def match_user?(user_info)
     if credential_delegate?
       cd_match?(user_info)
     elsif authorized_official?
       ao_match?(user_info)
+    end
+  end
+
+  def unacceptable_reason
+    return 'invalid' if cancelled? || accepted?
+
+    if expired? && authorized_official?
+      'ao_expired'
+    elsif expired?
+      'invalid'
     end
   end
 
