@@ -5,6 +5,7 @@ require 'rails_helper'
 RSpec.describe 'ClientTokens', type: :request do
   include DpcClientSupport
 
+  let(:terms_of_service_accepted_by) { create(:user) }
   describe 'GET /new' do
     context 'not logged in' do
       it 'redirects to login' do
@@ -13,9 +14,98 @@ RSpec.describe 'ClientTokens', type: :request do
       end
     end
 
+    context 'ao access denied' do
+      context 'user has sanctions' do
+        let!(:user) { create(:user, verification_status: 'rejected', verification_reason: 'ao_med_sanctions') }
+        let!(:org) { create(:provider_organization, terms_of_service_accepted_by:) }
+        before { sign_in user }
+
+        it 'should show access denied page' do
+          create(:ao_org_link, provider_organization: org, user:)
+          get "/organizations/#{org.id}/client_tokens/new"
+          expect(response.body).to include(I18n.t('verification.ao_med_sanctions_status'))
+          expect(assigns(:organization)).to be_nil
+        end
+      end
+
+      context 'org has sanctions' do
+        let!(:user) { create(:user) }
+        let!(:org) do
+          create(:provider_organization, terms_of_service_accepted_by:, verification_status: 'rejected',
+                                         verification_reason: 'org_med_sanctions')
+        end
+        before { sign_in user }
+
+        it 'should show access denied page' do
+          create(:ao_org_link, provider_organization: org, user:)
+          get "/organizations/#{org.id}/client_tokens/new"
+          expect(response.body).to include(I18n.t('verification.org_med_sanctions_status'))
+        end
+      end
+
+      context 'org not approved' do
+        let!(:user) { create(:user) }
+        let!(:org) do
+          create(:provider_organization, terms_of_service_accepted_by:, verification_status: 'rejected',
+                                         verification_reason: 'no_approved_enrollment')
+        end
+        before { sign_in user }
+
+        it 'should show access denied page' do
+          create(:ao_org_link, provider_organization: org, user:)
+          get "/organizations/#{org.id}/client_tokens/new"
+          expect(response.body).to include(I18n.t('verification.no_approved_enrollment_status'))
+        end
+      end
+
+      context 'user no longer ao' do
+        let!(:user) { create(:user) }
+        let!(:org) { create(:provider_organization, terms_of_service_accepted_by:) }
+        before { sign_in user }
+
+        it 'should show access denied page' do
+          create(:ao_org_link, provider_organization: org, user:, verification_status: false,
+                               verification_reason: 'user_not_authorized_official')
+          get "/organizations/#{org.id}/client_tokens/new"
+          expect(response.body).to include(I18n.t('verification.user_not_authorized_official_status'))
+        end
+      end
+    end
+    context 'cd access denied' do
+      context 'org has sanctions' do
+        let!(:user) { create(:user) }
+        let!(:org) do
+          create(:provider_organization, terms_of_service_accepted_by:, verification_status: 'rejected',
+                                         verification_reason: 'org_med_sanctions')
+        end
+        before { sign_in user }
+
+        it 'should show access denied page' do
+          create(:cd_org_link, provider_organization: org, user:)
+          get "/organizations/#{org.id}/client_tokens/new"
+          expect(response.body).to include(I18n.t('cd_access.org_med_sanctions_status'))
+        end
+      end
+
+      context 'org not approved' do
+        let!(:user) { create(:user) }
+        let!(:org) do
+          create(:provider_organization, terms_of_service_accepted_by:, verification_status: 'rejected',
+                                         verification_reason: 'no_approved_enrollment')
+        end
+        before { sign_in user }
+
+        it 'should show access denied page' do
+          create(:cd_org_link, provider_organization: org, user:)
+          get "/organizations/#{org.id}/client_tokens/new"
+          expect(response.body).to include(I18n.t('cd_access.no_approved_enrollment_status'))
+        end
+      end
+    end
+
     context 'no link to org' do
       let!(:user) { create(:user) }
-      let!(:org) { create(:provider_organization) }
+      let!(:org) { create(:provider_organization, terms_of_service_accepted_by:) }
       before { sign_in user }
       it 'redirects to organizations' do
         get "/organizations/#{org.id}/client_tokens/new"
@@ -23,9 +113,25 @@ RSpec.describe 'ClientTokens', type: :request do
       end
     end
 
-    context 'as cd' do
+    context :not_signed_tos do
       let!(:user) { create(:user) }
       let!(:org) { create(:provider_organization) }
+
+      before do
+        create(:cd_org_link, provider_organization: org, user:)
+        sign_in user
+      end
+
+      it 'redirects to organizations page' do
+        get "/organizations/#{org.id}/client_tokens/new"
+        expect(assigns(:organization)).to eq org
+        expect(response).to redirect_to(organizations_path)
+      end
+    end
+
+    context 'as cd' do
+      let!(:user) { create(:user) }
+      let!(:org) { create(:provider_organization, terms_of_service_accepted_by:) }
 
       before do
         create(:cd_org_link, provider_organization: org, user:)
@@ -51,7 +157,7 @@ RSpec.describe 'ClientTokens', type: :request do
     context 'as cd' do
       let!(:user) { create(:user) }
       let(:org_api_id) { SecureRandom.uuid }
-      let!(:org) { create(:provider_organization, dpc_api_organization_id: org_api_id) }
+      let!(:org) { create(:provider_organization, terms_of_service_accepted_by:, dpc_api_organization_id: org_api_id) }
 
       before do
         create(:cd_org_link, provider_organization: org, user:)
@@ -100,7 +206,7 @@ RSpec.describe 'ClientTokens', type: :request do
     context 'as cd' do
       let!(:user) { create(:user) }
       let(:org_api_id) { SecureRandom.uuid }
-      let!(:org) { create(:provider_organization, dpc_api_organization_id: org_api_id) }
+      let!(:org) { create(:provider_organization, terms_of_service_accepted_by:, dpc_api_organization_id: org_api_id) }
 
       before do
         create(:cd_org_link, provider_organization: org, user:)

@@ -1,0 +1,14 @@
+<section class="usa-section">
+      <h1 class="desktop:display-none font-sans-lg margin-bottom-4 tablet:margin-top-neg-3">
+	Invitation Login
+      </h1>
+      <div class="bg-white padding-y-3 padding-x-5 border border-base-lighter">
+        <h1 class="margin-bottom-0">Sign in to Accept Invitation</h1>
+        <p>You can access or create your account by signing in below.</p>
+        <%= button_to login_organization_invitation_url(@invitation.provider_organization, @invitation), class: 'usa-button width-full margin-bottom-3', data: { turbo: false } do %>
+          Sign in with <span class="login-button__logo">Login.gov</span>
+        <% end %>
+      </div>
+    </div>
+</section>
+
