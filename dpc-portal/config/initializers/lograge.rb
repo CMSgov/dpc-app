@@ -21,6 +21,7 @@ Rails.application.configure do
       info[:exception_backtrace] = Array(exception.backtrace).first(30).join("\n")
     end
 
+    # Insert optional information added during the request. See the ApplicationController.
     current_user = event.payload[:current_user]
     info[:current_user] = current_user if current_user
 
