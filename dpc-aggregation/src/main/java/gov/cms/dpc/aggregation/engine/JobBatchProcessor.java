@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 import javax.inject.Inject;
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -90,17 +91,34 @@ public class JobBatchProcessor {
 
         // Check if the patient passes look back
         if(flowable.isEmpty()) {
-            Optional<Pair<Flowable<Resource>, OutcomeReason>> lookBackResult = checkLookBack(optPatient.get(), job);
-            if(lookBackResult.isPresent()) {
-                flowable = Optional.of(lookBackResult.get().getLeft());
-                failReason = Optional.of(lookBackResult.get().getRight());
-            }
+            Pair<Flowable<Resource>, OutcomeReason> lookBackResult = checkLookBack(optPatient.get(), job);
+                flowable = Optional.of(lookBackResult.getLeft());  // if passing, list of EOBs
+                failReason = lookBackResult.getRight() == null ?
+                        Optional.empty() : Optional.of(lookBackResult.getRight());
         }
 
         // All checks passed, load resources
-        if(flowable.isEmpty()) {
+        if(failReason.isEmpty()) {
+            Flowable<Resource> coverageFlow = Flowable.empty();
+            if (job.getResourceTypes().contains(DPCResourceType.Coverage)) {
+                coverageFlow = fetchResource(job, optPatient.get(), DPCResourceType.Coverage, job.getSince().orElse(null));
+            }
+
+            Flowable<Resource> resultFlowable = Flowable.empty();
+            Map<DPCResourceType, Flowable<Resource>> resourceFlowables = Map.of(
+                    DPCResourceType.Patient, Flowable.just(optPatient.get()),
+                    DPCResourceType.ExplanationOfBenefit, flowable.get(),
+                    DPCResourceType.Coverage, coverageFlow
+            );
+            for (DPCResourceType jobType : job.getResourceTypes()) {
+                resultFlowable = Flowable.concat(resultFlowable, resourceFlowables.get(jobType));
+            }
+
+            Date sinceParam = job.getSince().isPresent() ?
+                    Date.from(job.getSince().get().toInstant()) : Date.from(Instant.EPOCH);
             flowable = Optional.of(
-                    Flowable.fromIterable(job.getResourceTypes()).flatMap(r -> fetchResource(job, optPatient.get(), r, job.getSince().orElse(null)))
+                    resultFlowable.filter(r -> r.getMeta().getLastUpdated() == null
+                                            || r.getMeta().getLastUpdated().after(sinceParam))
             );
         }
 
@@ -110,7 +128,7 @@ public class JobBatchProcessor {
         queue.completePartialBatch(job, aggregatorID);
 
         final String resourcesRequested = job.getResourceTypes().stream().map(DPCResourceType::getPath).filter(Objects::nonNull).collect(Collectors.joining(";"));
-        final String failReasonLabel = failReason.isEmpty() ? "NA" : failReason.get().name();
+        final String failReasonLabel = failReason.map(Enum::name).orElse("NA");
         stopWatch.stop();
         logger.info("dpcMetric=DataExportResult,dataRetrieved={},failReason={},resourcesRequested={},duration={}", failReason.isEmpty(), failReasonLabel, resourcesRequested, stopWatch.getTime());
         return results;
@@ -152,27 +170,28 @@ public class JobBatchProcessor {
      * @param patient   {@link Patient} resource we're looking for a relationship for.
      * @param job       {@link JobQueueBatch} currently running.
      * @return If there's a problem, it returns a pair of a {@link Flowable} {@link OperationOutcome} and an {@link OutcomeReason}.
-     * If the look back check passes, an empty {@link Optional}.
+     * If the look back check passes, a pair of a Flowable of {@link ExplanationOfBenefit} as Resource objects and a null OutcomeReason.
      */
-    private Optional<Pair<Flowable<Resource>, OutcomeReason>> checkLookBack(Patient patient, JobQueueBatch job) {
+    private Pair<Flowable<Resource>, OutcomeReason> checkLookBack(Patient patient, JobQueueBatch job) {
+        Pair<List<LookBackAnswer>, Flowable<Resource>> lookBackPair = getLookBackAnswers(job, patient);
+        List<LookBackAnswer> answers = lookBackPair.getLeft();
+        Flowable<Resource> eobs = lookBackPair.getRight();
+
         if (isLookBackExempt(job.getOrgID())) {
             logger.info("Skipping lookBack for org: {}", job.getOrgID().toString());
             MDC.put(MDCConstants.IS_SMOKE_TEST_ORG, "true");
         } else {
-            List<LookBackAnswer> answers = getLookBackAnswers(job, patient);
             if (!passesLookBack(answers)) {
                 OutcomeReason failReason = LookBackAnalyzer.analyze(answers);
-                return Optional.of(
-                        Pair.of(
+                return Pair.of(
                         Flowable.just(AggregationUtils.toOperationOutcome(failReason, FHIRExtractors.getPatientMBI(patient))),
                         failReason
-                        )
-                );
+                        );
             }
         }
 
-        // Passes lookback check
-        return Optional.empty();
+        // Passes lookback check or is exempt, return Explanations of Benefit and no fail reason
+        return Pair.of(eobs, null);
     }
 
     private boolean isLookBackExempt(UUID orgId) {
@@ -235,15 +254,16 @@ public class JobBatchProcessor {
         return Optional.empty();
     }
 
-    private List<LookBackAnswer> getLookBackAnswers(JobQueueBatch job, Patient patient) {
+    private Pair<List<LookBackAnswer>, Flowable<Resource>> getLookBackAnswers(JobQueueBatch job, Patient patient) {
         List<LookBackAnswer> result = new ArrayList<>();
+        Flowable<Resource> eobs = Flowable.empty();
         final String practitionerNPI = job.getProviderNPI();
         final String organizationNPI = job.getOrgNPI();
         if (practitionerNPI != null && organizationNPI != null) {
             MDC.put(MDCConstants.PROVIDER_NPI, practitionerNPI);
             Flowable<Resource> flowable = fetchResource(job, patient, DPCResourceType.ExplanationOfBenefit, null);
-            result = flowable
-                    .filter(resource -> Objects.requireNonNull(DPCResourceType.ExplanationOfBenefit.getPath()).equals(resource.getResourceType().getPath()))
+            eobs = flowable.filter(resource -> Objects.requireNonNull(DPCResourceType.ExplanationOfBenefit.getPath()).equals(resource.getResourceType().getPath()));
+            result = eobs
                     .map(ExplanationOfBenefit.class::cast)
                     .map(resource -> lookBackService.getLookBackAnswer(resource, organizationNPI, practitionerNPI, operationsConfig.getLookBackMonths()))
                     .toList()
@@ -252,7 +272,7 @@ public class JobBatchProcessor {
         } else {
             logger.error("couldn't get practitionerNPI and organizationNPI from job");
         }
-        return result;
+        return Pair.of(result, eobs);
     }
 
     private Flowable<JobQueueBatchFile> writeResource(JobQueueBatch job, Flowable<Resource> flow) {

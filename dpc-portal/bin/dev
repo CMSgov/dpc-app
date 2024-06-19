@@ -20,4 +20,5 @@ if [ -z "$GOLDEN_MACAROON" ]; then
   fi
 fi
 
+echo "Starting Procfile.dev"
 exec foreman start -f Procfile.dev "$@"

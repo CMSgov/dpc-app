@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_04_01_144012) do
+ActiveRecord::Schema[7.1].define(version: 2024_05_29_162554) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -20,6 +20,9 @@ ActiveRecord::Schema[7.1].define(version: 2024_04_01_144012) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "invitation_id"
+    t.boolean "verification_status", default: true, null: false
+    t.integer "verification_reason"
+    t.datetime "last_checked_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
     t.index ["invitation_id"], name: "index_ao_org_links_on_invitation_id"
     t.index ["user_id", "provider_organization_id"], name: "index_ao_org_links_on_user_id_and_provider_organization_id", unique: true
   end
@@ -42,9 +45,9 @@ ActiveRecord::Schema[7.1].define(version: 2024_04_01_144012) do
     t.string "invited_phone"
     t.string "invited_email"
     t.string "verification_code"
-    t.datetime "cancelled_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "status"
   end
 
   create_table "provider_organizations", force: :cascade do |t|
@@ -55,8 +58,20 @@ ActiveRecord::Schema[7.1].define(version: 2024_04_01_144012) do
     t.datetime "terms_of_service_accepted_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "verification_status"
+    t.integer "verification_reason"
+    t.datetime "last_checked_at"
     t.index ["dpc_api_organization_id"], name: "index_provider_organizations_on_dpc_api_organization_id", unique: true
     t.index ["npi"], name: "index_provider_organizations_on_npi", unique: true
+  end
+
+  create_table "sessions", force: :cascade do |t|
+    t.string "session_id", null: false
+    t.text "data"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["session_id"], name: "index_sessions_on_session_id", unique: true
+    t.index ["updated_at"], name: "index_sessions_on_updated_at"
   end
 
   create_table "users", force: :cascade do |t|
@@ -71,6 +86,10 @@ ActiveRecord::Schema[7.1].define(version: 2024_04_01_144012) do
     t.string "family_name"
     t.string "provider", limit: 50, default: "", null: false
     t.string "uid", limit: 50, default: "", null: false
+    t.string "pac_id"
+    t.integer "verification_status"
+    t.integer "verification_reason"
+    t.datetime "last_checked_at"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end

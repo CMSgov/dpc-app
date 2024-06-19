@@ -13,7 +13,17 @@ venv/bin/activate: requirements.txt
 	touch venv/bin/activate
 
 .PHONY: smoke
+smoke: ## If running on Jenkins, purges JMeter's library, then copies all of dpc-smoketests dependencies into it
 smoke:
+	@JENKINS_DIR="/var/jenkins_home/.bzt/jmeter-taurus/5.5/lib"; \
+	if [ -d $$JENKINS_DIR ]; then \
+		echo "Rebuilding JMeter lib"; \
+		rm $$JENKINS_DIR/*.jar; \
+		mvn clean install -DskipTests -Djib.skip=True -pl dpc-common -am -ntp; \
+		mvn dependency:copy-dependencies -pl dpc-smoketest -DoutputDirectory=$$JENKINS_DIR; \
+	else \
+		echo "Not running on Jenkins"; \
+	fi
 	@mvn clean package -DskipTests -Djib.skip=True -pl dpc-smoketest -am -ntp
 
 .PHONY: smoke/local
@@ -164,8 +174,11 @@ maven-config:
 psql: ## Run a psql shell
 	@docker-compose -f docker-compose.yml exec -it db psql -U postgres
 
+portal-sh: ## Run a portal shell
+	@docker-compose -f docker-compose.yml -f docker-compose.portals.yml exec -it dpc_portal bin/sh
+
 portal-console: ## Run a rails console shell
-	@docker-compose -f docker-compose.yml -f docker-compose.portals.yml exec -it dpc_portal rails console
+	@docker-compose -f docker-compose.yml -f docker-compose.portals.yml exec -it dpc_portal bin/console
 
 
 # Build & Test commands
