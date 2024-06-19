@@ -47,8 +47,6 @@ class ApplicationController < ActionController::Base
     params[:organization_id]
   end
 
-  attr_reader :organization
-
   def load_organization
     @organization = ProviderOrganization.find(organization_id)
     CurrentAttributes.organization = {
