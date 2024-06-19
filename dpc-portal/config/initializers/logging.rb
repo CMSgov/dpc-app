@@ -56,5 +56,7 @@ end
 
 Rails.application.configure do
     Rails.logger = DpcJsonLogger.new($stdout)
-    config.log_formatter = Rails.logger.formatter
+    config.logger = Rails.logger
+    config.logger.formatter = DpcJsonLogger.formatter
+    config.log_formatter = DpcJsonLogger.formatter
 end
