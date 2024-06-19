@@ -23,7 +23,10 @@ Rails.application.configure do
     end
 
     current_user = event.payload[:current_user]
-    info[:current_user] = current_user if current_user    
+    info[:current_user] = current_user if current_user
+
+    organization = event.payload[:organization]
+    info[:organization] = organization if organization
     info
   end
 end
