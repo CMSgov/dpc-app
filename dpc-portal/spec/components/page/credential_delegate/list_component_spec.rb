@@ -24,9 +24,7 @@ RSpec.describe Page::CredentialDelegate::ListComponent, type: :component do
 
       let(:expected_html) do
         <<~HTML
-          <div>
-            <h1>#{org.name}</h1>
-            <div class="margin-bottom-5">NPI: #{org.npi}</div>
+          <div id="credential_delegates">
             <div>
               <div class="bg-white shadow-5 border-1px border-base-lighter radius-md margin-bottom-4 padding-x-3 padding-bottom-3">
                 <div class="display-flex flex-row flex-justify">
@@ -111,7 +109,7 @@ RSpec.describe Page::CredentialDelegate::ListComponent, type: :component do
     context 'Pending credential delegate' do
       let(:invitations) do
         [Invitation.new(invited_given_name: 'Bob', invited_family_name: 'Hodges', invited_email: 'bob@example.com',
-                        verification_code: 'ABC123')]
+                        verification_code: 'ABC123', id: 3)]
       end
       let(:credential_delegates) { [] }
 
@@ -144,10 +142,15 @@ RSpec.describe Page::CredentialDelegate::ListComponent, type: :component do
             <td data-sort-value="Bob Hodges">Bob Hodges</td>
             <td data-sort-value="bob@example.com">bob@example.com</td>
             <td data-sort-value="ABC123">ABC123</td>
-            <td data-sort-value="X">X</td>
-          </tr>
+        HTML
+        delete_invitation = <<~HTML
+          <form class="button_to" method="post" action="/portal/organizations/2/credential_delegate_invitations/3">
+           <input type="hidden" name="_method" value="delete" autocomplete="off" />
+           <button class="usa-button" type="submit">Yes, delete invite</button>
+          </form>
         HTML
         is_expected.to include(normalize_space(expected_html))
+        is_expected.to include(normalize_space(delete_invitation))
       end
 
       it 'has no active credential delegates' do

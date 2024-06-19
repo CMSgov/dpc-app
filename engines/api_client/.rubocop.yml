@@ -15,7 +15,7 @@ Metrics/BlockLength:
   AllowedMethods: ['describe', 'context', 'it', 'config']
 
 Metrics/ClassLength:
-  Max: 160
+  Max: 200
 
 Metrics/MethodLength:
   Max: 30

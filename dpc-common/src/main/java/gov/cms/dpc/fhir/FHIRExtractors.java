@@ -210,7 +210,7 @@ public class FHIRExtractors {
      * @param identifiers List of {@link Identifier}s to search
      * @param system {@link DPCIdentifierSystem} to search identifiers for
      * @return {@link Identifier}
-     * @throws IllegalArgumentException
+     * @throws IllegalArgumentException thrown if no identifier is found
      */
     public static Identifier findMatchingIdentifier(List<Identifier> identifiers, DPCIdentifierSystem system) throws IllegalArgumentException {
         return identifiers

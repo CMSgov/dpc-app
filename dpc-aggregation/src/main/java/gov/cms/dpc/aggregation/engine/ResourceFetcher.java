@@ -121,23 +121,18 @@ class ResourceFetcher {
     /**
      * Based on resourceType, fetch a resource or a bundle of resources.
      *
-     * @param patient   {@link Patient} we're fetching resrouc
+     * @param patient   {@link Patient} we're fetching resources for
      * @return the first bundle of resources
      */
-    private Bundle fetchFirst(Patient patient, Map<String, String> headers) {
+    protected Bundle fetchFirst(Patient patient, Map<String, String> headers) {
         patient.getIdentifier().stream()
                 .filter(i -> i.getSystem().equals(DPCIdentifierSystem.MBI_HASH.getSystem()))
                 .findFirst()
                 .ifPresent(i -> MDC.put(MDCConstants.PATIENT_ID, i.getValue()));
 
         String patientId = patient.getIdElement().getIdPart();
-
-        final var lastUpdated = formLastUpdatedParam();
+        DateRangeParam lastUpdated = formLastUpdatedParam();
         switch (resourceType) {
-            // Why are we reloading the Patient, because on reload we're passing a lastUpdated parameter.  If the user
-            // only wants resources from the last month and our patient hasn't been updated in a year, this method will
-            // return an empty bundle.
-            // TODO: Implement the since parameter ourselves using meta.lastUpdated and avoid pulling Patient and EoB twice.
             case Patient:
                 return blueButtonClient.requestPatientFromServer(patientId, lastUpdated, headers);
             case ExplanationOfBenefit:
@@ -145,7 +140,7 @@ class ResourceFetcher {
             case Coverage:
                 return blueButtonClient.requestCoverageFromServer(patientId, lastUpdated, headers);
             default:
-                throw new JobQueueFailure(jobID, batchID, "Unexpected resource type: " + resourceType.toString());
+                throw new JobQueueFailure(jobID, batchID, "Unexpected resource type: " + resourceType);
         }
     }
 

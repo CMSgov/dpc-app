@@ -3,8 +3,10 @@
 # Handles public key requests
 class PublicKeysController < ApplicationController
   before_action :authenticate_user!
+  before_action :check_user_verification
   before_action :load_organization
   before_action :require_can_access
+  before_action :tos_accepted
 
   def new
     render Page::PublicKey::NewKeyComponent.new(@organization)

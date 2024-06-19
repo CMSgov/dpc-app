@@ -1,31 +1,31 @@
 source 'https://rubygems.org'
 git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
-ruby '3.3.0'
+ruby '~>3.3'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 # Specifying rails components to be able to omit unused actioncable
-gem 'actionmailbox', '~> 7.1.3.2'
-gem 'actionmailer', '~> 7.1.3.2'
-gem 'actionpack', '~> 7.1.3.2'
-gem 'actiontext', '~> 7.1.3.2'
-gem 'actionview', '~> 7.1.3.2'
-gem 'activejob', '~> 7.1.3.2'
-gem 'activemodel', '~> 7.1.3.2'
-gem 'activerecord', '~> 7.1.3.2'
-gem 'activestorage', '~> 7.1.3.2'
-gem 'activesupport', '~> 7.1.3.2'
-gem 'railties', '~> 7.1.3.2'
+gem 'actionmailbox', '~> 7.1.3.4'
+gem 'actionmailer', '~> 7.1.3.4'
+gem 'actionpack', '~> 7.1.3.4'
+gem 'actiontext', '~> 7.1.3.4'
+gem 'actionview', '~> 7.1.3.4'
+gem 'activejob', '~> 7.1.3.4'
+gem 'activemodel', '~> 7.1.3.4'
+gem 'activerecord', '~> 7.1.3.4'
+gem 'activestorage', '~> 7.1.3.4'
+gem 'activesupport', '~> 7.1.3.4'
+gem 'railties', '~> 7.1.3.4'
 gem 'bundler', '>= 1.15.0'
 gem 'dotenv-rails', groups: [:development, :test]
 gem 'puma', '~> 6.4.2'
 gem 'redis', '~> 4.0'
 gem 'luhnacy', '~> 0.2.1'
 gem 'omniauth-rails_csrf_protection', '~> 0.1.2'
-gem 'sidekiq', '~> 7.1'
+gem 'sidekiq', '~> 7.2.4'
 gem 'turbolinks', '~> 5'
 gem 'newrelic_rpm', '~> 8.10'
-gem 'rexml', '>= 3.2.5' # adding for CVE-2021-28965
+gem 'rexml', '>= 3.2.7'
 gem 'bootsnap', '>= 1.4.2', require: false
 gem 'sassc-rails', '>= 2.1.2'
 gem 'uglifier', '>= 1.3.0'
@@ -37,7 +37,7 @@ gem 'health_check'
 gem 'omniauth-github', '~> 1.4.0'
 gem 'omniauth-oktaoauth', '~> 0.1.6'
 gem 'octokit' # can be removed once we move past github omniauth
-gem 'fhir_client'
+gem 'fhir_models'
 gem 'sidekiq_alive', '~> 2.1.5'
 gem 'rack', '~> 2.2.8.1'
 gem 'redis-namespace'
@@ -47,8 +47,8 @@ gem 'lograge'
 gem 'macaroons'
 gem 'sprockets-rails', '>= 3.4.2'
 gem 'truemail'
-# < 1.13.2 has a vulnerability, and is required by other gems
-gem 'nokogiri', '>= 1.16.2'
+# < 1.16.5 has a vulnerability, and is required by other gems
+gem 'nokogiri', '>= 1.16.5'
 
 gem 'api_client', path: 'vendor/api_client'
 
@@ -78,7 +78,7 @@ group :development do
   gem 'simplecov', '<= 0.17'
   # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
   gem 'spring'
-  gem 'spring-watcher-listen', '~> 2.0.0'
+  gem 'spring-watcher-listen', '~> 2.1.0'
 
   gem 'letter_opener'
 end

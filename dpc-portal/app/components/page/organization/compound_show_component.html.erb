@@ -1,0 +1,7 @@
+<div>
+  <h1><%= @organization.name %></h1>
+  <div class="margin-bottom-5">NPI: <%= @organization.npi %></div>
+  <%= render(Core::Navigation::TabbedComponent.new('organization_nav', @links)) if @show_cds %>
+  <%= render(Page::CredentialDelegate::ListComponent.new(@organization, @active_credential_delegates, @pending_credential_delegates)) if @show_cds %>
+  <%= render(Page::Organization::CredentialsComponent.new(@organization)) %>
+</div>
