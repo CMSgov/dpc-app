@@ -9,7 +9,6 @@ Rails.application.configure do
     info = { 
       ddsource: 'ruby',
       environment: ENV['ENV'] || :development,
-      exception: event.payload[:exception],
       level: ENV['LOG_LEVEL'] || :info,
       request_id: event.payload[:request].request_id,
     }
