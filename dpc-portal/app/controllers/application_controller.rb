@@ -88,11 +88,4 @@ class ApplicationController < ActionController::Base
     CurrentAttributes.set_request_attributes(request)
     CurrentAttributes.set_user_attributes(current_user)
   end
-
-  # Appends information to payload for use in request-context logging.
-  # See usage in lograge initializer
-  def append_info_to_payload(payload)
-    super
-    logger.info('This is a test')
-  end
 end
