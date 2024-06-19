@@ -49,19 +49,7 @@ class ApplicationController < ActionController::Base
 
   def load_organization
     @organization = ProviderOrganization.find(organization_id)
-    CurrentAttributes.organization = {
-      id: @organization.id,
-      dpc_api_organization_id: @organization.dpc_api_organization_id
-    }
-
-    if current_user
-      begin
-        payload[:organization][:is_authorized_official] = current_user.ao?(@organization)
-        payload[:organization][:is_credential_delegate] = current_user.cd?(@organization)
-      rescue err
-        Rails.logger.warn('Failed to pull user roles for organization')
-      end
-    end
+    CurrentAttributes.set_organization_attributes(@organization, current_user)
   rescue ActiveRecord::RecordNotFound
     render file: "#{Rails.root}/public/404.html", layout: false, status: :not_found
   end
@@ -97,19 +85,8 @@ class ApplicationController < ActionController::Base
   end
 
   def set_current_request_attributes
-    CurrentAttributes.request_id = request.request_id
-    CurrentAttributes.request_user_agent = request.user_agent
-    CurrentAttributes.request_ip = request.ip
-    CurrentAttributes.forwarded_for = request.headers['X-Forwarded-For']
-    CurrentAttributes.method = request.method
-    CurrentAttributes.path = request.path
-    return unless current_user
-
-    CurrentAttributes.current_user = {
-      id: current_user.id,
-      external_id: current_user.uid,
-      pac_id: current_user.pac_id
-    }
+    CurrentAttributes.set_request_attributes(request)
+    CurrentAttributes.set_user_attributes(current_user)
   end
 
   # Appends information to payload for use in request-context logging.
