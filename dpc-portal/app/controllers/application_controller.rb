@@ -86,24 +86,21 @@ class ApplicationController < ActionController::Base
   # See usage in lograge initializer
   def append_info_to_payload(payload)
     super
+    return unless current_user
 
-    if current_user
-      payload[:current_user] = {
-        id: current_user.id,
-        external_id: current_user.uid,
-        pac_id: current_user.pac_id
-      }
+    payload[:current_user] = {
+      id: current_user.id,
+      external_id: current_user.uid,
+      pac_id: current_user.pac_id
+    }
 
-      if @organization
-        payload[:organization] = {
-          id: @organization.id,
-          dpc_api_organization_id: @organization.dpc_api_organization_id,
-          is_authorized_official: current_user.ao?(@organization),
-          is_credential_delegate: current_user.cd?(@organization)
-        }
-      end
-    end
+    return unless @organization
 
-    info
+    payload[:organization] = {
+      id: @organization.id,
+      dpc_api_organization_id: @organization.dpc_api_organization_id,
+      is_authorized_official: current_user.ao?(@organization),
+      is_credential_delegate: current_user.cd?(@organization)
+    }
   end
 end
