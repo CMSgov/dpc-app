@@ -18,7 +18,7 @@ Rails.application.configure do
     if exception
       info[:exception_message] = exception.message
       info[:exception_class] = exception.class
-      info[:exception_backtrace] = exception.backtrace
+      info[:exception_backtrace] = Array(exception.backtrace).first(30).join("\n")
     end
 
     current_user = event.payload[:current_user]
