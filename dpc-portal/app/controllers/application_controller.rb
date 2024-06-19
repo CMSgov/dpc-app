@@ -93,15 +93,15 @@ class ApplicationController < ActionController::Base
         external_id: current_user.uid,
         pac_id: current_user.pac_id
       }
-    end
 
-    if @organization
-      payload[:organization] = {
-        id: @organization.id,
-        dpc_api_organization_id: @organization.dpc_api_organization_id,
-        is_authorized_official: current_user.ao?(@organization),
-        is_credential_delegate: current_user.cd?(@organization)
-      }
+      if @organization
+        payload[:organization] = {
+          id: @organization.id,
+          dpc_api_organization_id: @organization.dpc_api_organization_id,
+          is_authorized_official: current_user.ao?(@organization),
+          is_credential_delegate: current_user.cd?(@organization)
+        }
+      end
     end
 
     info
