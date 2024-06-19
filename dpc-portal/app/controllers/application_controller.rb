@@ -49,7 +49,7 @@ class ApplicationController < ActionController::Base
 
   def load_organization
     @organization = ProviderOrganization.find(organization_id)
-    CurrentAttributes.set_organization_attributes(@organization, current_user)
+    CurrentAttributes.save_organization_attributes(@organization, current_user)
   rescue ActiveRecord::RecordNotFound
     render file: "#{Rails.root}/public/404.html", layout: false, status: :not_found
   end
@@ -85,7 +85,7 @@ class ApplicationController < ActionController::Base
   end
 
   def set_current_request_attributes
-    CurrentAttributes.set_request_attributes(request)
-    CurrentAttributes.set_user_attributes(current_user)
+    CurrentAttributes.save_request_attributes(request)
+    CurrentAttributes.save_user_attributes(current_user)
   end
 end

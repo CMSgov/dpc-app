@@ -8,7 +8,7 @@ class CurrentAttributes < ActiveSupport::CurrentAttributes
   attribute :current_user
   attribute :organization
 
-  def set_request_attributes(_req)
+  def save_request_attributes(request)
     CurrentAttributes.request_id = request.request_id
     CurrentAttributes.request_user_agent = request.user_agent
     CurrentAttributes.request_ip = request.ip
@@ -17,7 +17,7 @@ class CurrentAttributes < ActiveSupport::CurrentAttributes
     CurrentAttributes.path = request.path
   end
 
-  def set_user_attributes(user)
+  def save_user_attributes(user)
     return unless user
 
     CurrentAttributes.current_user = {
@@ -27,7 +27,7 @@ class CurrentAttributes < ActiveSupport::CurrentAttributes
     }
   end
 
-  def set_organization_attributes(org, user)
+  def save_organization_attributes(org, user)
     return unless org
 
     CurrentAttributes.organization = {
