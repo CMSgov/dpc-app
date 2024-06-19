@@ -1,6 +1,4 @@
-<div>
-  <h1><%= @organization.name %></h1>
-  <div class="margin-bottom-5">NPI: <%= @organization.npi %></div>
+<div id="credential_delegates">
   <%= render(Core::Card::BasicComponent.new(text_content: '<h2>Credential delegates</h2>',
     button_params: { name: 'Assign CD', path: new_organization_credential_delegate_invitation_path(@organization.path_id), method: :get} )) do %>
       <hr />
@@ -24,7 +22,7 @@
           <%= render(Core::Table::TableComponent.new(id: 'pending-cd-table', additional_classes: ['width-full'], sortable: false)) do %>
             <%= render(Core::Table::HeaderComponent.new(caption: 'Pending Credential Delegate Table',
                                                     columns: ['Name', 'Email', 'Invite code', ''])) %>
-            <%= render(Core::Table::RowComponent.with_collection(@pending_credential_delegates, keys: ['full_name', 'email', 'verification_code', 'X'])) %>
+            <%= render(Core::Table::RowComponent.with_collection(@pending_credential_delegates, keys: ['full_name', 'email', 'verification_code'], delete_path: organization_credential_delegate_invitations_path(@organization.path_id), obj_name: 'CD invitation')) %>
           <% end %>
       <% else %>
         <p>There are no pending credential delegates.</p>
