@@ -4,6 +4,7 @@
 class ApplicationController < ActionController::Base
   before_action :block_prod_sbx
   before_action :check_session_length
+  before_action :set_current_request_attributes
 
   auto_session_timeout User.timeout_in
 
@@ -46,8 +47,23 @@ class ApplicationController < ActionController::Base
     params[:organization_id]
   end
 
+  attr_reader :organization
+
   def load_organization
     @organization = ProviderOrganization.find(organization_id)
+    CurrentAttributes.organization = {
+      id: @organization.id,
+      dpc_api_organization_id: @organization.dpc_api_organization_id
+    }
+
+    if current_user
+      begin
+        payload[:organization][:is_authorized_official] = current_user.ao?(@organization)
+        payload[:organization][:is_credential_delegate] = current_user.cd?(@organization)
+      rescue err
+        Rails.logger.warn('Failed to pull user roles for organization')
+      end
+    end
   rescue ActiveRecord::RecordNotFound
     render file: "#{Rails.root}/public/404.html", layout: false, status: :not_found
   end
@@ -82,25 +98,26 @@ class ApplicationController < ActionController::Base
     has_ao_link ? 'verification' : 'cd_access'
   end
 
-  # Appends information to payload for use in request-context logging.
-  # See usage in lograge initializer
-  def append_info_to_payload(payload)
-    super
+  def set_current_request_attributes
+    CurrentAttributes.request_id = request.request_id
+    CurrentAttributes.request_user_agent = request.user_agent
+    CurrentAttributes.request_ip = request.ip
+    CurrentAttributes.forwarded_for = request.headers['X-Forwarded-For']
+    CurrentAttributes.method = request.method
+    CurrentAttributes.path = request.path
     return unless current_user
 
-    payload[:current_user] = {
+    CurrentAttributes.current_user = {
       id: current_user.id,
       external_id: current_user.uid,
       pac_id: current_user.pac_id
     }
+  end
 
-    return unless @organization
-
-    payload[:organization] = {
-      id: @organization.id,
-      dpc_api_organization_id: @organization.dpc_api_organization_id,
-      is_authorized_official: current_user.ao?(@organization),
-      is_credential_delegate: current_user.cd?(@organization)
-    }
+  # Appends information to payload for use in request-context logging.
+  # See usage in lograge initializer
+  def append_info_to_payload(payload)
+    super
+    logger.info('This is a test')
   end
 end
