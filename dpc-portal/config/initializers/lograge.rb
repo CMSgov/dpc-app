@@ -15,6 +15,7 @@ Rails.application.configure do
       request_ip: CurrentAttributes.request_ip,
       method: CurrentAttributes.method,
       path: CurrentAttributes.path,
+      time: Time.now
     }
 
     exception = event.payload[:exception_object]
