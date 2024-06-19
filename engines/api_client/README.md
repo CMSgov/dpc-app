@@ -12,10 +12,24 @@ dpc_client = DpcClient.new
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'api_client', github: 'CMSgov/dpc-app', branch: 'master', glob: 'engines/api_client/api_client.gemspec'
+gem 'api_client', github: 'CMSgov/dpc-app', branch: 'main', glob: 'engines/api_client/api_client.gemspec'
 ```
 
 And then execute:
 ```bash
 $ bundle install
+```
+
+## Testing
+Build the docker image
+
+In the api_client directory
+```bash
+$ docker build . -t api_client
+```
+
+Run the tests until they pass
+```
+$ docker run --rm -v ${PWD}:/api-client -w /api-client api_client bundle exec rspec
+$ docker run --rm -v ${PWD}:/api-client -w /api-client api_client bundle exec rubocop
 ```

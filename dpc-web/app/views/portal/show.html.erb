@@ -1,4 +1,23 @@
 <% title "Welcome!" %>
+<% if session['login_successful'] %>
+  <script>
+    function submitLoginEvent() {
+      if (typeof utag != 'undefined' && typeof utag.link != 'undefined') {
+        utag.link({
+          'event_name': 'login',
+          'link_type': 'link_other',
+          'link_url': 'login successful',
+        });
+      } else {
+        setTimeout(submitLoginEvent, 200);
+      }
+    }
+
+    submitLoginEvent();
+  </script>
+<% end %>
+
+<% session.delete 'login_successful' %>
 
 <div class="ds-l-container">
 

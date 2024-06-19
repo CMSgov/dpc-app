@@ -10,9 +10,11 @@ module Core
     class ButtonComponentPreview < ViewComponent::Preview
       # @param label "Label of the button"
       # @param destination "Destination when button is clicked"
-      def default(label: 'Text', destination: root_path)
+      # @param disabled
+      def default(label: 'Text', destination: root_path, disabled: false)
         render(Core::Button::ButtonComponent.new(label:,
-                                                 destination:))
+                                                 destination:,
+                                                 disabled:))
       end
 
       def outline_button(label: 'Text', destination: root_path, additional_classes: ['usa-button--outline'])

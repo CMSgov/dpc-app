@@ -27,6 +27,75 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
         expect(assigns(:organization)).to eq org
         expect(response).to have_http_status(200)
       end
+
+      it 'shows tos page if not signed' do
+        get "/organizations/#{org.id}/credential_delegate_invitations/new"
+        expect(assigns(:organization)).to eq org
+        expect(response.body).to include('<h2>Sign Terms of Service</h2>')
+      end
+
+      it 'shows invite cd form if tos signed' do
+        org.update(terms_of_service_accepted_by: user)
+        get "/organizations/#{org.id}/credential_delegate_invitations/new"
+        expect(assigns(:organization)).to eq org
+        expect(response.body).to include('<h1>Invite new user</h1>')
+      end
+    end
+
+    context 'user has sanctions' do
+      let!(:user) { create(:user, verification_status: 'rejected', verification_reason: 'ao_med_sanctions') }
+      let!(:org) { create(:provider_organization) }
+      before { sign_in user }
+
+      it 'should show access denied page' do
+        create(:ao_org_link, provider_organization: org, user:)
+        get "/organizations/#{org.id}/credential_delegate_invitations/new"
+        expect(response.body).to include(I18n.t('verification.ao_med_sanctions_status'))
+        expect(assigns(:organization)).to be_nil
+      end
+    end
+
+    context 'org has sanctions' do
+      let!(:user) { create(:user) }
+      let!(:org) do
+        create(:provider_organization, terms_of_service_accepted_by: user, verification_status: 'rejected',
+                                       verification_reason: 'org_med_sanctions')
+      end
+      before { sign_in user }
+
+      it 'should show access denied page' do
+        create(:ao_org_link, provider_organization: org, user:)
+        get "/organizations/#{org.id}/credential_delegate_invitations/new"
+        expect(response.body).to include(I18n.t('verification.org_med_sanctions_status'))
+      end
+    end
+
+    context 'org not approved' do
+      let!(:user) { create(:user) }
+      let!(:org) do
+        create(:provider_organization, terms_of_service_accepted_by: user, verification_status: 'rejected',
+                                       verification_reason: 'no_approved_enrollment')
+      end
+      before { sign_in user }
+
+      it 'should show access denied page' do
+        create(:ao_org_link, provider_organization: org, user:)
+        get "/organizations/#{org.id}/credential_delegate_invitations/new"
+        expect(response.body).to include(I18n.t('verification.no_approved_enrollment_status'))
+      end
+    end
+
+    context 'user no longer ao' do
+      let!(:user) { create(:user) }
+      let!(:org) { create(:provider_organization, terms_of_service_accepted_by: user) }
+      before { sign_in user }
+
+      it 'should show access denied page' do
+        create(:ao_org_link, provider_organization: org, user:, verification_status: false,
+                             verification_reason: 'user_not_authorized_official')
+        get "/organizations/#{org.id}/credential_delegate_invitations/new"
+        expect(response.body).to include(I18n.t('verification.user_not_authorized_official_status'))
+      end
     end
 
     context 'as cd' do
@@ -45,7 +114,7 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
 
   describe 'POST /create' do
     let!(:user) { create(:user) }
-    let!(:org) { create(:provider_organization) }
+    let!(:org) { create(:provider_organization, terms_of_service_accepted_by: user) }
     let!(:successful_parameters) do
       { invited_given_name: 'Bob',
         invited_family_name: 'Hodges',
@@ -117,7 +186,7 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
 
   describe 'GET /success' do
     let!(:user) { create(:user) }
-    let!(:org) { create(:provider_organization) }
+    let!(:org) { create(:provider_organization, terms_of_service_accepted_by: user) }
 
     before do
       sign_in user
@@ -131,143 +200,67 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
     end
   end
 
-  describe 'GET /accept' do
-    let(:invited_by) { create(:invited_by) }
-    let(:verification_code) { 'ABC123' }
-    let!(:cd_invite) { build(:invitation, verification_code:) }
-    let(:user) do
-      create(:user, given_name: cd_invite.invited_given_name,
-                    family_name: cd_invite.invited_family_name,
-                    email: cd_invite.invited_email)
-    end
-    let(:org) { create(:provider_organization) }
+  describe 'Delete /destroy' do
+    let!(:user) { create(:user) }
+    let!(:org) { create(:provider_organization, terms_of_service_accepted_by: user) }
+    let!(:invitation) { create(:invitation, :cd, provider_organization: org) }
 
-    before do
-      cd_invite.save!
-      sign_in user
-    end
-    it 'should show form if valid invitation' do
-      get "/organizations/#{org.id}/credential_delegate_invitations/#{cd_invite.id}/accept"
-      expect(response).to be_ok
-      expect(response.body).to include(confirm_organization_credential_delegate_invitation_path(org, cd_invite))
-    end
-    it 'should not show verification code' do
-      get "/organizations/#{org.id}/credential_delegate_invitations/#{cd_invite.id}/accept"
-      expect(response.body).to_not include(cd_invite.verification_code)
-    end
-    it 'should show warning page with 404 if missing' do
-      get "/organizations/#{org.id}/credential_delegate_invitations/bad-id/accept"
-      expect(response).to be_not_found
-      expect(response.body).to include('usa-alert--warning')
-    end
-    it 'should show warning page if cancelled' do
-      cd_invite.update_attribute(:cancelled_at, 3.days.ago)
-      get "/organizations/#{org.id}/credential_delegate_invitations/#{cd_invite.id}/accept"
-      expect(response).to be_forbidden
-      expect(response.body).to include('usa-alert--warning')
-    end
-    it 'should show warning page if expired' do
-      cd_invite.update_attribute(:created_at, 3.days.ago)
-      get "/organizations/#{org.id}/credential_delegate_invitations/#{cd_invite.id}/accept"
-      expect(response).to be_forbidden
-      expect(response.body).to include('usa-alert--warning')
-    end
-    it 'should show warning page if accepted' do
-      create(:cd_org_link, invitation: cd_invite)
-      get "/organizations/#{org.id}/credential_delegate_invitations/#{cd_invite.id}/accept"
-      expect(response).to be_forbidden
-      expect(response.body).to include('usa-alert--warning')
-    end
-    it 'should show error page if email not match' do
-      user.update_attribute(:email, 'another@example.com')
-      get "/organizations/#{org.id}/credential_delegate_invitations/#{cd_invite.id}/accept"
-      expect(response).to be_forbidden
-      expect(response.body).to include('usa-alert--error')
-    end
-  end
-
-  describe 'POST /confirm' do
-    let(:invited_by) { create(:invited_by) }
-    let(:verification_code) { 'ABC123' }
-    let!(:cd_invite) { build(:invitation, verification_code:) }
-    let(:user) do
-      create(:user, given_name: cd_invite.invited_given_name,
-                    family_name: cd_invite.invited_family_name,
-                    email: cd_invite.invited_email)
-    end
-    let(:org) { create(:provider_organization) }
-
-    let(:success_params) { { verification_code: } }
-    let(:fail_params) { { verification_code: 'badcode' } }
-
-    before do
-      cd_invite.save!
-      sign_in user
-    end
-    context 'success' do
-      it 'should create CdOrgLink' do
-        expect do
-          post "/organizations/#{org.id}/credential_delegate_invitations/#{cd_invite.id}/confirm",
-               params: success_params
-        end.to change { CdOrgLink.count }.by(1)
+    context 'as cd' do
+      before do
+        create(:cd_org_link, provider_organization: org, user:)
+        sign_in user
       end
-      it 'should update invitation' do
-        post "/organizations/#{org.id}/credential_delegate_invitations/#{cd_invite.id}/confirm", params: success_params
-        cd_invite.reload
-        expect(cd_invite.invited_given_name).to be_blank
-        expect(cd_invite.invited_family_name).to be_blank
-        expect(cd_invite.invited_phone).to be_blank
-        expect(cd_invite.invited_email).to be_blank
-      end
-      it 'should redirect to organizations page with notice' do
-        post "/organizations/#{org.id}/credential_delegate_invitations/#{cd_invite.id}/confirm", params: success_params
+      it 'fails' do
+        delete "/organizations/#{org.id}/credential_delegate_invitations/#{invitation.id}"
+        expect(invitation.reload).to be_pending
         expect(response).to redirect_to(organizations_path)
-        expected_message =  "Invitation accepted. You can now manage this organization's credentials. Learn more."
-        expect(flash[:notice]).to eq expected_message
       end
     end
-    context 'failure' do
-      it 'should show warning page with 404 if missing' do
-        post "/organizations/#{org.id}/credential_delegate_invitations/bad-id/confirm", params: success_params
-        expect(response).to be_not_found
-        expect(response.body).to include('usa-alert--warning')
+
+    context 'as ao' do
+      before do
+        create(:ao_org_link, provider_organization: org, user:)
+        sign_in user
       end
-      it 'should show warning page if cancelled' do
-        cd_invite.update_attribute(:cancelled_at, 3.days.ago)
-        post "/organizations/#{org.id}/credential_delegate_invitations/#{cd_invite.id}/confirm", params: success_params
-        expect(response).to be_forbidden
-        expect(response.body).to include('usa-alert--warning')
+      it 'soft deletes invitation' do
+        expect do
+          delete "/organizations/#{org.id}/credential_delegate_invitations/#{invitation.id}"
+        end.to change { Invitation.count }.by(0)
+        expect(invitation.reload).to be_cancelled
+        expect(response).to redirect_to(organization_path(org))
       end
-      it 'should show warning page if expired' do
-        cd_invite.update_attribute(:created_at, 3.days.ago)
-        post "/organizations/#{org.id}/credential_delegate_invitations/#{cd_invite.id}/confirm", params: success_params
-        expect(response).to be_forbidden
-        expect(response.body).to include('usa-alert--warning')
+      it 'flashes success if succeeds' do
+        delete "/organizations/#{org.id}/credential_delegate_invitations/#{invitation.id}"
+        expect(flash[:notice]).to eq('Invitation cancelled.')
       end
-      it 'should show warning page if accepted' do
-        create(:cd_org_link, invitation: cd_invite)
-        post "/organizations/#{org.id}/credential_delegate_invitations/#{cd_invite.id}/confirm", params: success_params
-        expect(response).to be_forbidden
-        expect(response.body).to include('usa-alert--warning')
+      it 'returns error message on failure' do
+        invitation.errors.add(:invited_phone)
+        invitation_class = class_double(Invitation).as_stubbed_const
+        bad_invitation = instance_double(Invitation)
+        expect(bad_invitation).to receive(:provider_organization).and_return(org)
+        expect(bad_invitation).to receive(:update).and_return(false)
+        allow(bad_invitation).to receive_message_chain(:errors, :size).and_return(5)
+        expect(bad_invitation).to receive_message_chain(:errors, :full_messages).and_return(%w[fake_error])
+        expect(invitation_class).to receive(:find).with(invitation.id.to_s).and_return(bad_invitation)
+
+        delete "/organizations/#{org.id}/credential_delegate_invitations/#{invitation.id}"
+        expect(flash[:alert]).to eq('fake_error')
+        expect(invitation.reload).to be_pending
       end
-      it 'should render form with error if OTP not match' do
-        post "/organizations/#{org.id}/credential_delegate_invitations/#{cd_invite.id}/confirm", params: fail_params
-        expect(response).to be_bad_request
-        expect(response.body).to include(confirm_organization_credential_delegate_invitation_path(org, cd_invite))
+      it 'does not allow deletion of invitation for another org' do
+        other_org = create(:provider_organization)
+        other_invitation = create(:invitation, :cd, provider_organization: other_org)
+        delete "/organizations/#{org.id}/credential_delegate_invitations/#{other_invitation.id}"
+        expect(other_invitation.reload).to be_pending
+        expect(flash[:alert]).to eq('You do not have permission to cancel this invitation.')
+        expect(response).to redirect_to(organization_path(org))
       end
-      it 'should render error page if PII not match' do
-        user.update_attribute(:family_name, "not #{cd_invite.invited_family_name}")
-        post "/organizations/#{org.id}/credential_delegate_invitations/#{cd_invite.id}/confirm", params: success_params
-        expect(response).to be_forbidden
-        expect(response.body).to_not include(confirm_organization_credential_delegate_invitation_path(org, cd_invite))
-        expect(response.body).to include('usa-alert--error')
-      end
-      it 'should render error page if PII not match and OTP not match' do
-        user.update_attribute(:family_name, "not #{cd_invite.invited_family_name}")
-        post "/organizations/#{org.id}/credential_delegate_invitations/#{cd_invite.id}/confirm", params: fail_params
-        expect(response).to be_forbidden
-        expect(response.body).to_not include(confirm_organization_credential_delegate_invitation_path(org, cd_invite))
-        expect(response.body).to include('usa-alert--error')
+      it 'does not allow deletion of accepted invitation' do
+        invitation.accept!
+        delete "/organizations/#{org.id}/credential_delegate_invitations/#{invitation.id}"
+        expect(invitation.reload).to be_accepted
+        expect(flash[:alert]).to eq('You may not cancel an accepted invitation.')
+        expect(response).to redirect_to(organization_path(org))
       end
     end
   end

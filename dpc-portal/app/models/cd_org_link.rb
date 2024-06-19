@@ -12,4 +12,8 @@ class CdOrgLink < ApplicationRecord
       verification_code: invitation&.verification_code,
       activated_at: created_at.to_s }.with_indifferent_access
   end
+
+  def verification_status?
+    disabled_at.blank?
+  end
 end

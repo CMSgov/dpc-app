@@ -3,12 +3,44 @@
 # Parent class of all controllers
 class ApplicationController < ActionController::Base
   before_action :block_prod_sbx
+  before_action :check_session_length
+
+  auto_session_timeout User.timeout_in
 
   private
+
+  def check_user_verification
+    return unless current_user&.rejected?
+
+    render(Page::Utility::AccessDeniedComponent.new(failure_code: "verification.#{current_user.verification_reason}"))
+  end
+
+  def tos_accepted
+    return if @organization.terms_of_service_accepted_by.present?
+
+    if current_user.ao?(@organization)
+      render(Page::Organization::TosFormComponent.new(@organization))
+    else
+      flash[:notice] = 'Organization is not ready for credential management'
+      redirect_to organizations_path
+    end
+  end
 
   def block_prod_sbx
     redirect_to root_url if ENV.fetch('ENV', nil) == 'prod-sbx'
   end
+
+  # rubocop:disable Metrics/AbcSize
+  def check_session_length
+    session[:logged_in_at] = Time.now if session[:logged_in_at].nil?
+    max_session = User.remember_for.to_i / 60
+    return unless max_session.minutes.ago > session[:logged_in_at]
+
+    reset_session
+    flash[:notice] = t('devise.failure.max_session_timeout', default: 'Your session has timed out.')
+    redirect_to sign_in_path
+  end
+  # rubocop:enable Metrics/AbcSize
 
   def organization_id
     params[:organization_id]
@@ -22,9 +54,31 @@ class ApplicationController < ActionController::Base
 
   def require_can_access
     redirect_to organizations_path unless current_user.can_access?(@organization)
+
+    verify_status
   end
 
   def require_ao
     redirect_to organizations_path unless current_user.ao?(@organization)
+
+    verify_status
+  end
+
+  def verify_status
+    if @organization.rejected?
+      failure_code = "#{code_prefix}.#{@organization.verification_reason}"
+      return render(Page::Utility::AccessDeniedComponent.new(organization: @organization, failure_code:))
+    end
+
+    links = current_user.ao_org_links.where(provider_organization: @organization)
+    return if links.empty? || links.any?(&:verification_status?)
+
+    failure_code = "verification.#{links.first.verification_reason}"
+    render(Page::Utility::AccessDeniedComponent.new(organization: @organization, failure_code:))
+  end
+
+  def code_prefix
+    has_ao_link = current_user.ao_org_links.where(provider_organization: @organization).exists?
+    has_ao_link ? 'verification' : 'cd_access'
   end
 end
