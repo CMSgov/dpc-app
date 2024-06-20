@@ -176,10 +176,33 @@ RSpec.describe 'ClientTokens', type: :request do
         expect(assigns(:client_token)['id']).to eq token_guid
       end
 
+      it 'adds a credential audit log record on success' do
+        token_guid = SecureRandom.uuid
+        api_client = stub_api_client(message: :get_organization,
+                                     response: default_get_org_response(org_api_id))
+        stub_self_returning_api_client(message: :create_client_token,
+                                       response: default_get_client_tokens(guid: token_guid)['entities'].first,
+                                       api_client:)
+        expect do
+          post "/organizations/#{org.id}/client_tokens", params: { label: 'New Token' }
+        end.to change { CredentialAuditLog.count }.by 1
+        log = CredentialAuditLog.last
+        expect(log.user).to eq user
+        expect(log.credential_type).to eq 'client_token'
+        expect(log.dpc_api_credential_id).to eq token_guid
+        expect(log.action).to eq 'add'
+      end
+
       it 'fails if no label' do
         post "/organizations/#{org.id}/client_tokens"
         expect(assigns(:organization)).to eq org
         expect(flash[:alert]).to eq('Label required.')
+      end
+
+      it 'does not add a credential audit log record on failure' do
+        expect do
+          post "/organizations/#{org.id}/client_tokens"
+        end.to change { CredentialAuditLog.count }.by 0
       end
 
       it 'shows error if problem' do
@@ -226,6 +249,24 @@ RSpec.describe 'ClientTokens', type: :request do
         expect(response).to redirect_to(organization_path(org.id))
       end
 
+      it 'adds a credential audit log record on success' do
+        token_guid = SecureRandom.uuid
+        api_client = stub_api_client(message: :get_organization,
+                                     response: default_get_org_response(org_api_id))
+        stub_self_returning_api_client(message: :delete_client_token,
+                                       response: nil,
+                                       with: [org_api_id, token_guid],
+                                       api_client:)
+        expect do
+          delete "/organizations/#{org.id}/client_tokens/#{token_guid}"
+        end.to change { CredentialAuditLog.count }.by 1
+        log = CredentialAuditLog.last
+        expect(log.user).to eq user
+        expect(log.credential_type).to eq 'client_token'
+        expect(log.dpc_api_credential_id).to eq token_guid
+        expect(log.action).to eq 'remove'
+      end
+
       it 'renders error if error' do
         token_guid = SecureRandom.uuid
         api_client = stub_api_client(message: :get_organization,
@@ -238,6 +279,20 @@ RSpec.describe 'ClientTokens', type: :request do
         delete "/organizations/#{org.id}/client_tokens/#{token_guid}"
         expect(flash[:alert]).to eq('Client token could not be deleted.')
         expect(response).to redirect_to(organization_path(org.id))
+      end
+
+      it 'does not add a credential audit log record on failure' do
+        token_guid = SecureRandom.uuid
+        api_client = stub_api_client(message: :get_organization,
+                                     response: default_get_org_response(org_api_id))
+        stub_self_returning_api_client(message: :delete_client_token,
+                                       response: nil,
+                                       success: false,
+                                       with: [org_api_id, token_guid],
+                                       api_client:)
+        expect do
+          delete "/organizations/#{org.id}/client_tokens/#{token_guid}"
+        end.to change { CredentialAuditLog.count }.by 0
       end
     end
   end
