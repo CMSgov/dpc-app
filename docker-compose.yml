@@ -12,7 +12,7 @@ services:
       # based on the POSTGRES_MULTIPLE_DATABASES variable above.
       - ./docker/postgres:/docker-entrypoint-initdb.d
       # Mount persistent volume to ensure data is not erased across containers.
-      - pgdata14:/var/lib/postgresql/data
+      - pgdata3823:/var/lib/postgresql/data
 
   aggregation:
     image: ${ECR_HOST:-755619740999.dkr.ecr.us-east-1.amazonaws.com/dpc-aggregation}:latest
@@ -117,7 +117,7 @@ services:
     network_mode: host
 
 volumes:
-  pgdata14:
+  pgdata3823:
   export-volume:
     driver: local
     driver_opts:
