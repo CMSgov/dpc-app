@@ -38,8 +38,8 @@ class CurrentAttributes < ActiveSupport::CurrentAttributes
     return unless user
 
     begin
-      payload[:organization][:is_authorized_official] = user.ao?(org)
-      payload[:organization][:is_credential_delegate] = user.cd?(org)
+      CurrentAttributes.organization[:is_authorized_official] = user.ao?(org)
+      CurrentAttributes.organization[:is_credential_delegate] = user.cd?(org)
     rescue err
       Rails.logger.warn('Failed to pull user roles for organization')
     end
@@ -50,6 +50,7 @@ class CurrentAttributes < ActiveSupport::CurrentAttributes
       request_id: CurrentAttributes.request_id,
       request_user_agent: CurrentAttributes.request_user_agent,
       request_ip: CurrentAttributes.request_ip,
+      forwarded_for: CurrentAttributes.forwarded_for,
       method: CurrentAttributes.method,
       path: CurrentAttributes.path,
       current_user: CurrentAttributes.current_user,
