@@ -52,7 +52,7 @@ services:
     image: ${ECR_HOST:-755619740999.dkr.ecr.us-east-1.amazonaws.com/dpc-api}:latest
     ports:
       - "3002:3002"
-      - "9903:9900"
+      - "9900:9900"
     env_file:
       - ./ops/config/decrypted/local.env
     environment:
