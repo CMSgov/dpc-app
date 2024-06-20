@@ -81,4 +81,15 @@ class ApplicationController < ActionController::Base
     has_ao_link = current_user.ao_org_links.where(provider_organization: @organization).exists?
     has_ao_link ? 'verification' : 'cd_access'
   end
+
+  def log_credential_action(credential_type, dpc_api_credential_id, action)
+    log = CredentialAuditLog.create(user: current_user,
+                                    credential_type:,
+                                    dpc_api_credential_id:,
+                                    action:)
+    return if log.valid?
+
+    logger.error("Unable to create client token CredentialAuditLog #{action} on #{token_id}")
+  end
+
 end

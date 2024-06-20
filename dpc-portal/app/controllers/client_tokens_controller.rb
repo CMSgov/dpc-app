@@ -16,7 +16,7 @@ class ClientTokensController < ApplicationController
     manager = ClientTokenManager.new(@organization.dpc_api_organization_id)
     if params_present? && manager.create_client_token(label: params[:label])
       @client_token = manager.client_token
-      log_action(@client_token['id'], 'add')
+      log_credential_action(:client_token, @client_token['id'], :add)
       render(Page::ClientToken::ShowTokenComponent.new(@organization, @client_token))
     else
       return render_error 'Label required.' unless params_present?
@@ -29,7 +29,7 @@ class ClientTokensController < ApplicationController
     manager = ClientTokenManager.new(@organization.dpc_api_organization_id)
     if manager.delete_client_token(id: params[:id])
       flash[:notice] = 'Client token successfully deleted.'
-      log_action(params[:id], 'remove')
+      log_credential_action(:client_token, params[:id], :remove)
     else
       flash[:alert] = 'Client token could not be deleted.'
     end
@@ -37,16 +37,6 @@ class ClientTokensController < ApplicationController
   end
 
   private
-
-  def log_action(token_id, action)
-    log = CredentialAuditLog.create(user: current_user,
-                                    credential_type: :client_token,
-                                    dpc_api_credential_id: token_id,
-                                    action:)
-    return if log.valid?
-
-    logger.error("Unable to create client token CredentialAuditLog #{action} on #{token_id}")
-  end
 
   def params_present?
     params[:label].present?
