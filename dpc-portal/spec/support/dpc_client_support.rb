@@ -33,9 +33,9 @@ module DpcClientSupport
     )
   end
 
-  def default_get_public_keys
+  def default_get_public_keys(guid: '579dd199-3c2d-48e8-8594-cec35e223527')
     { 'entities' =>
-      [{ 'id' => '579dd199-3c2d-48e8-8594-cec35e223527',
+      [{ 'id' => guid,
          'publicKey' =>
          "-----BEGIN PUBLIC KEY-----
 MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAyLrLpbFduLeGG7Eh2KdD
