@@ -75,8 +75,7 @@ RSpec.describe CurrentAttributes do
       CurrentAttributes.organization = {
         id: 987,
         dpc_api_organization_id: '876-45',
-        is_authorized_official: true,
-        is_credential_delegate: false
+        current_user_role: 'authorized_official'
       }
 
       expect(CurrentAttributes.to_log_hash).to eq(
