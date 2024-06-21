@@ -15,7 +15,7 @@
     <properties>
         <mainClass>gov.cms.dpc.api.DPCAPIService</mainClass>
         <jjwt.version>0.11.4</jjwt.version>
-        <mockserverVersion>5.14.0</mockserverVersion>
+        <mockserverVersion>5.15.0</mockserverVersion>
     </properties>
 
     <dependencies>
@@ -209,10 +209,6 @@
             <artifactId>mockserver-netty</artifactId>
             <version>${mockserverVersion}</version>
             <exclusions>
-                <exclusion>
-                    <groupId>io.netty</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
                 <exclusion>
                     <groupId>net.minidev</groupId>
                     <artifactId>json-smart</artifactId>
