@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe DpcJsonLogger do
+RSpec.shared_examples 'logger method' do |log_method|
   let(:strout) { StringIO.new }
   let(:logger) do
     lgr = DpcJsonLogger.new(strout)
@@ -10,21 +10,21 @@ RSpec.describe DpcJsonLogger do
     lgr
   end
 
-  describe :info do
-    it 'logs info' do
-      logger.info('This is a test', key: 'value')
+  describe log_method do
+    it "logs #{log_method}" do
+      logger.send(log_method, 'This is a test', key: 'value')
       json_result = JSON.parse(strout.string)
-      expect(json_result['level']).to eq('INFO')
+      expect(json_result['level']).to eq(log_method.upcase)
       expect(json_result['message']).to eq('This is a test')
       expect(json_result['key']).to eq('value')
     end
 
     it 'calculates message from block if provided' do
-      logger.info do
+      logger.send(log_method) do
         'Calculated message'
       end
       json_result = JSON.parse(strout.string)
-      expect(json_result['level']).to eq('INFO')
+      expect(json_result['level']).to eq(log_method.upcase)
       expect(json_result['message']).to eq('Calculated message')
     end
 
@@ -32,30 +32,11 @@ RSpec.describe DpcJsonLogger do
       expect { logger.info(1234).to raise_error(ArgumentError) }
     end
   end
+end
 
-  describe :other_methods do
-    it 'logs warning' do
-      logger.warn('This is a test', key: 'value')
-      json_result = JSON.parse(strout.string)
-      expect(json_result['level']).to eq('WARN')
-      expect(json_result['message']).to eq('This is a test')
-      expect(json_result['key']).to eq('value')
-    end
-
-    it 'logs debug' do
-      logger.debug('This is a test', key: 'value')
-      json_result = JSON.parse(strout.string)
-      expect(json_result['level']).to eq('DEBUG')
-      expect(json_result['message']).to eq('This is a test')
-      expect(json_result['key']).to eq('value')
-    end
-
-    it 'logs error' do
-      logger.error('This is a test', key: 'value')
-      json_result = JSON.parse(strout.string)
-      expect(json_result['level']).to eq('ERROR')
-      expect(json_result['message']).to eq('This is a test')
-      expect(json_result['key']).to eq('value')
-    end
-  end
+RSpec.describe DpcJsonLogger do
+  include_examples 'logger method', 'debug'
+  include_examples 'logger method', 'info'
+  include_examples 'logger method', 'warn'
+  include_examples 'logger method', 'error'
 end
