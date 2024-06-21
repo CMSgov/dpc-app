@@ -89,7 +89,7 @@ class ApplicationController < ActionController::Base
                                     action:)
     return if log.valid?
 
-    logger.error("Unable to create client token CredentialAuditLog #{action} on #{token_id}")
+    logger.error("CredentialAuditLog failure: unable to #{action} #{credential_type} #{token_id}")
   end
 
 end
