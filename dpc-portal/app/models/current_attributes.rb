@@ -38,8 +38,11 @@ class CurrentAttributes < ActiveSupport::CurrentAttributes
     return unless user
 
     begin
-      CurrentAttributes.organization[:is_authorized_official] = user.ao?(org)
-      CurrentAttributes.organization[:is_credential_delegate] = user.cd?(org)
+      if user.ao?(org)
+        CurrentAttributes.organization[:current_user_role] = 'authorized_official'
+      elsif user.cd?(org)
+        CurrentAttributes.organization[:current_user_role] = 'credential_delegate'
+      end
     rescue err
       Rails.logger.warn('Failed to pull user roles for organization')
     end

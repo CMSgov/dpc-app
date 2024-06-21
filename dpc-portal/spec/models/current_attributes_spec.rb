@@ -53,8 +53,7 @@ RSpec.describe CurrentAttributes do
         {
           id: org.id,
           dpc_api_organization_id: org.dpc_api_organization_id,
-          is_authorized_official: true,
-          is_credential_delegate: false
+          current_user_role: 'authorized_official'
         }
       )
     end
@@ -96,8 +95,7 @@ RSpec.describe CurrentAttributes do
           organization: {
             id: 987,
             dpc_api_organization_id: '876-45',
-            is_authorized_official: true,
-            is_credential_delegate: false
+            current_user_role: 'authorized_official'
           }
         }
       )
