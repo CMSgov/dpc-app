@@ -89,7 +89,6 @@ class ApplicationController < ActionController::Base
                                     action:)
     return if log.valid?
 
-    logger.error("CredentialAuditLog failure: unable to #{action} #{credential_type} #{token_id}")
+    logger.error("CredentialAuditLog failure: unable to #{action} #{credential_type} #{dpc_api_credential_id}")
   end
-
 end

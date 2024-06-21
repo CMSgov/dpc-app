@@ -9,8 +9,9 @@ RSpec.describe 'ClientTokens', type: :request do
   let(:terms_of_service_accepted_by) { create(:user) }
 
   describe 'common behavior' do
+    let(:create_params) { { label: 'New Token' } }
     let(:credential) { 'client_token' }
-    it_behaves_like "a credential resource"
+    it_behaves_like 'a credential resource'
   end
 
   describe 'GET /new' do

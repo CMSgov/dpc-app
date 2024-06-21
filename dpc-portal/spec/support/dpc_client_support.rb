@@ -54,9 +54,9 @@ koPuyOLZ4oalcqVMGJFeYpcCAwEAAQ==
          'expiresAt' => '2021-09-10T02:45:07.449+00:00' }] }
   end
 
-  def default_get_ip_addresses
+  def default_get_ip_addresses(guid: '579dd199-3c2d-48e8-8594-cec35e223527')
     { 'entities' =>
-        [{ 'id' => '579dd199-3c2d-48e8-8594-cec35e223527',
+        [{ 'id' => guid,
            'ipAddress' => '136.226.19.87',
            'createdAt' => '2020-09-10T02:30:27.526+00:00',
            'label' => 'IP address for organization 4b15098b-d53f-432d-a2f3-416a9483527b.' }] }

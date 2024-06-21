@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
-RSpec.shared_examples "a credential resource" do
+RSpec.shared_examples 'a credential resource' do
   describe 'Post /create' do
     context 'as cd' do
       let!(:user) { create(:user) }
@@ -16,10 +18,11 @@ RSpec.shared_examples "a credential resource" do
         api_client = stub_api_client(message: :get_organization,
                                      response: default_get_org_response(org_api_id))
         stub_self_returning_api_client(message: "create_#{credential}",
-                                       response: send("default_get_#{credential.pluralize}", guid: token_guid)['entities'].first,
+                                       response: send("default_get_#{credential.pluralize}",
+                                                      guid: token_guid)['entities'].first,
                                        api_client:)
         expect do
-          post "/organizations/#{org.id}/#{credential.pluralize}", params: { label: 'New Token' }
+          post "/organizations/#{org.id}/#{credential.pluralize}", params: create_params
         end.to change { CredentialAuditLog.count }.by 1
         log = CredentialAuditLog.last
         expect(log.user).to eq user
