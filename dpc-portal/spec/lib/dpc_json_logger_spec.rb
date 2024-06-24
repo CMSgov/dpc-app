@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.shared_examples 'logger method' do |log_method|
+RSpec.shared_examples 'logger method' do |log_method, level_name|
   let(:strout) { StringIO.new }
   let(:logger) do
     lgr = DpcJsonLogger.new(strout)
@@ -14,7 +14,7 @@ RSpec.shared_examples 'logger method' do |log_method|
     it "logs #{log_method}" do
       logger.send(log_method, 'This is a test', key: 'value')
       json_result = JSON.parse(strout.string)
-      expect(json_result['level']).to eq(log_method.upcase)
+      expect(json_result['level']).to eq(level_name)
       expect(json_result['message']).to eq('This is a test')
       expect(json_result['key']).to eq('value')
     end
@@ -24,7 +24,7 @@ RSpec.shared_examples 'logger method' do |log_method|
         'Calculated message'
       end
       json_result = JSON.parse(strout.string)
-      expect(json_result['level']).to eq(log_method.upcase)
+      expect(json_result['level']).to eq(level_name)
       expect(json_result['message']).to eq('Calculated message')
     end
 
@@ -35,8 +35,10 @@ RSpec.shared_examples 'logger method' do |log_method|
 end
 
 RSpec.describe DpcJsonLogger do
-  include_examples 'logger method', 'debug'
-  include_examples 'logger method', 'info'
-  include_examples 'logger method', 'warn'
-  include_examples 'logger method', 'error'
+  include_examples 'logger method', 'debug', 'DEBUG'
+  include_examples 'logger method', 'info', 'INFO'
+  include_examples 'logger method', 'warn', 'WARN'
+  include_examples 'logger method', 'error', 'ERROR'
+  include_examples 'logger method', 'fatal', 'FATAL'
+  include_examples 'logger method', 'unknown', 'ANY'
 end

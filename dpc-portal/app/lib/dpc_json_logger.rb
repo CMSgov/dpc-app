@@ -36,6 +36,16 @@ class DpcJsonLogger < ActiveSupport::Logger
     super(value, &nil)
   end
 
+  def fatal(*msg, &)
+    value = as_hash(msg[0], msg[1], &)
+    super(value, &nil)
+  end
+
+  def unknown(*msg, &)
+    value = as_hash(msg[0], msg[1], &)
+    super(value, &nil)
+  end
+
   private
 
   def as_hash(msg, attribs = {})
