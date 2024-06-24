@@ -473,4 +473,15 @@ RSpec.describe Invitation, type: :model do
       end
     end
   end
+
+  describe :expires_in do
+    after { Timecop.return }
+    let!(:invitation) { create(:invitation, :cd, created_at: 24.hours.ago) }
+    it 'should expire in 23 hours 10 minutes' do
+      Timecop.travel(2999.seconds.from_now)
+      hours, minutes = invitation.expires_in
+      expect(hours).to eq 23
+      expect(minutes).to eq 10
+    end
+  end
 end

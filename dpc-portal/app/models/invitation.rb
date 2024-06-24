@@ -70,6 +70,13 @@ class Invitation < ApplicationRecord
     end
   end
 
+  def expires_in
+    diff = 48.hours - (Time.now - created_at).round
+    hours, seconds = diff.divmod(1.hour)
+    minutes = seconds / 1.minute
+    [hours, minutes]
+  end
+
   private
 
   def cd_match?(user_info)
