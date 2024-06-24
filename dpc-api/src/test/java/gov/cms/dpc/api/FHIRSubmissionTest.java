@@ -251,7 +251,7 @@ class FHIRSubmissionTest {
 
         // Patient Operation
         Mockito.when(client.operation()).thenReturn(mockOperation);
-        when(mockOperation.onInstance(Mockito.any(IIdType.class))).thenReturn(unnamed);
+        Mockito.when(mockOperation.onInstance(Mockito.any(IIdType.class))).thenReturn(unnamed);
         Mockito.when(unnamed.named("patients")).thenReturn(untypedOperation);
         Mockito.when(untypedOperation.withParameters(Mockito.any())).thenReturn(paramOp);
         Mockito.when(paramOp.returnResourceType(Bundle.class)).thenReturn(inputOp);
