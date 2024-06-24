@@ -467,7 +467,7 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
                 .resource(orgBGroup)
                 .withAdditionalHeader("X-Provenance", ctx.newJsonParser().encodeResourceToString(provenance))
                 .execute();
-        assertNull(result, "Organization should have been able to delete their own group.");
+        assertNull(result.getOperationOutcome(), "Organization should have been able to delete their own group.");
     }
 
     @Test
