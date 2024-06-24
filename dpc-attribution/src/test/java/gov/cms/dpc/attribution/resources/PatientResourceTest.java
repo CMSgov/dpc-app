@@ -4,15 +4,14 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.ICreateTyped;
 import ca.uhn.fhir.rest.gclient.IQuery;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.gclient.IUpdateTyped;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import gov.cms.dpc.attribution.AbstractAttributionTest;
 import gov.cms.dpc.attribution.AttributionTestHelpers;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import org.hl7.fhir.dstu3.model.*;
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.junit.jupiter.api.Test;
 
 import java.sql.Date;
@@ -206,7 +205,7 @@ class PatientResourceTest extends AbstractAttributionTest {
         // Remove the patient and try the search again
         final Patient patient = (Patient) firstSearch.getEntryFirstRep().getResource();
 
-        final IBaseOperationOutcome deleteOutcome = client
+        final MethodOutcome deleteOutcome = client
                 .delete()
                 .resource(patient)
                 .encodedJson()

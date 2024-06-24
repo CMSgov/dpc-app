@@ -40,7 +40,7 @@ public class DefinitionResource extends AbstractDefinitionResource {
     @ApiOperation(value = "Fetch all structure definitions", notes = "FHIR endpoint which fetches all structure definitions from the server", response = Bundle.class)
     @Override
     public List<StructureDefinition> getStructureDefinitions() {
-        return profileSupport.fetchAllStructureDefinitions(ctx);
+        return profileSupport.fetchAllStructureDefinitions();
     }
 
     @Override
@@ -55,7 +55,7 @@ public class DefinitionResource extends AbstractDefinitionResource {
     public StructureDefinition getStructureDefinition(@ApiParam(value = "Structure Definition Resource ID", required = true) @PathParam("definitionID") @NoHtml String definitionID) {
         // The canonicalURL comes from the profile itself, which is always set to the production endpoint
         final String canonicalURL = String.format("https://dpc.cms.gov/api/v1/StructureDefinition/%s", definitionID);
-        final StructureDefinition definition = this.profileSupport.fetchStructureDefinition(ctx, canonicalURL);
+        final StructureDefinition definition = this.profileSupport.fetchStructureDefinition(canonicalURL);
         if (definition == null) {
             throw new WebApplicationException(String.format("Cannot find Structure Definition with ID: %s", definitionID), Response.Status.NOT_FOUND);
         }

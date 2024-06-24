@@ -27,6 +27,7 @@ import org.glassfish.jersey.server.spi.internal.ValueParamProvider;
 import org.glassfish.jersey.test.grizzly.GrizzlyWebTestContainerFactory;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -250,7 +251,7 @@ class FHIRSubmissionTest {
 
         // Patient Operation
         Mockito.when(client.operation()).thenReturn(mockOperation);
-        Mockito.when(mockOperation.onInstance(Mockito.any())).thenReturn(unnamed);
+        Mockito.when(mockOperation.onInstance((IIdType) Mockito.any())).thenReturn(unnamed);
         Mockito.when(unnamed.named("patients")).thenReturn(untypedOperation);
         Mockito.when(untypedOperation.withParameters(Mockito.any())).thenReturn(paramOp);
         Mockito.when(paramOp.returnResourceType(Bundle.class)).thenReturn(inputOp);

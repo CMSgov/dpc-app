@@ -22,7 +22,6 @@ import org.apache.http.HttpHeaders;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.codesystems.V3RoleClass;
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -463,7 +462,7 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
                     .execute();
         }, "Organization should not be able to delete another organization's group.");
 
-        IBaseOperationOutcome result = orgBClient
+        MethodOutcome result = orgBClient
                 .delete()
                 .resource(orgBGroup)
                 .withAdditionalHeader("X-Provenance", ctx.newJsonParser().encodeResourceToString(provenance))

@@ -151,7 +151,7 @@ class ResourceFetcherUnitTest {
 
         assertEquals(1, errors.size());
         OperationOutcome outcome = (OperationOutcome) errors.get(0);
-        assertEquals("Blue Button error fetching Patient resource. HTTP return code: 0", outcome.getIssueFirstRep().getDetails().getText());
+        assertEquals("Blue Button error fetching Patient resource. HTTP return code: 500", outcome.getIssueFirstRep().getDetails().getText());
     }
 
     @Test

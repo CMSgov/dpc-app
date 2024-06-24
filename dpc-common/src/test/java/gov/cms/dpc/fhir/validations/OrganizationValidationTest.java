@@ -1,15 +1,16 @@
 package gov.cms.dpc.fhir.validations;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationOptions;
 import ca.uhn.fhir.validation.ValidationResult;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.validations.profiles.OrganizationProfile;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
-import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
-import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
-import org.hl7.fhir.dstu3.hapi.validation.ValidationSupportChain;
+import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
+import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.dstu3.model.Address;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.junit.jupiter.api.BeforeAll;
@@ -32,7 +33,7 @@ class OrganizationValidationTest {
     @BeforeAll
     static void setup() {
         ctx = FhirContext.forDstu3();
-        final FhirInstanceValidator instanceValidator = new FhirInstanceValidator();
+        final FhirInstanceValidator instanceValidator = new FhirInstanceValidator(ctx);
 
         fhirValidator = ctx.newValidator();
         fhirValidator.setValidateAgainstStandardSchematron(false);
@@ -41,7 +42,11 @@ class OrganizationValidationTest {
 
 
         dpcModule = new DPCProfileSupport(ctx);
-        final ValidationSupportChain chain = new ValidationSupportChain(new DefaultProfileValidationSupport(), dpcModule);
+        final ValidationSupportChain chain = new ValidationSupportChain(
+                dpcModule,
+                new DefaultProfileValidationSupport(ctx),
+                new InMemoryTerminologyServerValidationSupport(ctx)
+        );
         instanceValidator.setValidationSupport(chain);
     }
 
@@ -81,7 +86,7 @@ class OrganizationValidationTest {
 
         final ValidationResult r2 = fhirValidator.validateWithResult(organization, new ValidationOptions().addProfile(OrganizationProfile.PROFILE_URI));
         assertAll(() -> assertFalse(r2.isSuccessful(), "Should have failed validation"),
-                () -> assertEquals(6, r2.getMessages().size(), "Should have multiple address failures"));
+                () -> assertEquals(7, r2.getMessages().size(), "Should have multiple address failures"));
 
         // Add valid address
         organization.setAddress(Collections.singletonList(generateFakeAddress()));

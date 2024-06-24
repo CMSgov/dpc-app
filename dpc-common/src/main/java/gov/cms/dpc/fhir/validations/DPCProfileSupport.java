@@ -1,22 +1,20 @@
 package gov.cms.dpc.fhir.validations;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import gov.cms.dpc.fhir.helpers.ServiceLoaderHelpers;
 import gov.cms.dpc.fhir.validations.profiles.IProfileLoader;
 import org.hl7.fhir.dstu3.conformance.ProfileUtilities;
-import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext;
-import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
-import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
-import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,51 +29,28 @@ public class DPCProfileSupport implements IValidationSupport {
 
     private static final Logger logger = LoggerFactory.getLogger(DPCProfileSupport.class);
 
+    private final FhirContext ctx;
     private final Map<String, StructureDefinition> structureMap;
 
     @Inject
     public DPCProfileSupport(FhirContext ctx) {
+        this.ctx = ctx;
         this.structureMap = loadProfiles(ctx);
     }
 
     @Override
-    public ValueSet.ValueSetExpansionComponent expandValueSet(FhirContext theContext, ValueSet.ConceptSetComponent theInclude) {
-        return null;
+    public FhirContext getFhirContext() {
+        return ctx;
     }
 
     @Override
-    public List<IBaseResource> fetchAllConformanceResources(FhirContext theContext) {
-        return null;
-    }
-
-    @Override
-    public List<StructureDefinition> fetchAllStructureDefinitions(FhirContext theContext) {
+    public List<StructureDefinition> fetchAllStructureDefinitions() {
         return new ArrayList<>(this.structureMap.values());
     }
 
     @Override
-    public CodeSystem fetchCodeSystem(FhirContext theContext, String theSystem) {
-        return null;
-    }
-
-    @Override
-    public ValueSet fetchValueSet(FhirContext fhirContext, String s) {
-        return null;
-    }
-
-    @Override
-    public CodeValidationResult validateCode(FhirContext fhirContext, String s, String s1, String s2, String s3) {
-        return null;
-    }
-
-    @Override
-    public CodeValidationResult validateCodeInValueSet(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
-        return null;
-    }
-
-    @Override
-    public <T extends IBaseResource> T fetchResource(FhirContext theContext, Class<T> theClass, String theUri) {
-        if (theClass.equals(StructureDefinition.class)) {
+    public <T extends IBaseResource> T fetchResource(Class<T> theClass, String theUri) {
+        if (theClass != null && theClass.equals(StructureDefinition.class)) {
             final StructureDefinition definition = this.structureMap.get(theUri);
             if (definition != null) {
                 return theClass.cast(definition);
@@ -86,24 +61,14 @@ public class DPCProfileSupport implements IValidationSupport {
     }
 
     @Override
-    public StructureDefinition fetchStructureDefinition(FhirContext theCtx, String theUrl) {
+    public StructureDefinition fetchStructureDefinition(String theUrl) {
 
         return this.structureMap.get(theUrl);
     }
 
     @Override
-    public boolean isCodeSystemSupported(FhirContext theContext, String theSystem) {
+    public boolean isCodeSystemSupported(ValidationSupportContext theContext, String theSystem) {
         return false;
-    }
-
-    @Override
-    public LookupCodeResult lookupCode(FhirContext fhirContext, String s, String s1) {
-        return null;
-    }
-
-    @Override
-    public StructureDefinition generateSnapshot(StructureDefinition structureDefinition, String s, String s1) {
-        return null;
     }
 
     private Map<String, StructureDefinition> loadProfiles(FhirContext ctx) {
@@ -113,7 +78,7 @@ public class DPCProfileSupport implements IValidationSupport {
         final Map<String, StructureDefinition> definitionMap = new HashMap<>();
 
         // Generate a validator to pull the base definitions from.
-        final DefaultProfileValidationSupport defaultValidation = new DefaultProfileValidationSupport();
+        final DefaultProfileValidationSupport defaultValidation = new DefaultProfileValidationSupport(ctx);
 
         final HapiWorkerContext hapiWorkerContext = new HapiWorkerContext(ctx, defaultValidation);
 
@@ -124,7 +89,7 @@ public class DPCProfileSupport implements IValidationSupport {
         ServiceLoaderHelpers.getLoaderStream(IProfileLoader.class)
                 .map(profileLoader -> toStructureDefinition(parser, profileLoader.getPath()))
                 .filter(Objects::nonNull)
-                .map(diffStructure -> mergeDiff(ctx, defaultValidation, profileUtilities, diffStructure))
+                .map(diffStructure -> mergeDiff(defaultValidation, profileUtilities, diffStructure))
                 .forEach(structure -> definitionMap.put(structure.getUrl(), structure));
 
         return definitionMap;
@@ -151,8 +116,8 @@ public class DPCProfileSupport implements IValidationSupport {
         }
     }
 
-    private StructureDefinition mergeDiff(FhirContext ctx, DefaultProfileValidationSupport defaultValidation, ProfileUtilities utils, StructureDefinition diffStruct) {
-        final StructureDefinition baseStructure = defaultValidation.fetchStructureDefinition(ctx, diffStruct.getBaseDefinition());
+    private StructureDefinition mergeDiff(DefaultProfileValidationSupport defaultValidation, ProfileUtilities utils, StructureDefinition diffStruct) {
+        final StructureDefinition baseStructure = (StructureDefinition) defaultValidation.fetchStructureDefinition(diffStruct.getBaseDefinition());
         if (baseStructure != null) {
             utils.generateSnapshot(baseStructure, diffStruct, "", "");
         }
