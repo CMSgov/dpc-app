@@ -91,14 +91,18 @@ RSpec.describe ProviderOrganization, type: :model do
 
   describe 'disable_rejected' do
     it 'should delete client tokens' do
-      po = create(:provider_organization, dpc_api_organization_id: 1, verification_status: :approved)
+      po = create(:provider_organization, dpc_api_organization_id: SecureRandom.uuid, verification_status: :approved)
       po.save
       tokens = [{ 'id' => 'abcdef' }, { 'id' => 'ftguiol' }]
       allow(mock_ctm).to receive(:client_tokens).and_return(tokens)
       expect(mock_ctm).to receive(:delete_client_token).with(tokens[0])
       expect(mock_ctm).to receive(:delete_client_token).with(tokens[1])
       po.verification_status = :rejected
-      po.save
+      expect do
+        po.save
+      end.to change { CredentialAuditLog.count }.by 2
+      expect(po.credential_audit_logs.count).to eq 2
+      po.credential_audit_logs.each { |log| expect(log.action).to eq 'remove' }
     end
   end
 end

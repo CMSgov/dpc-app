@@ -82,13 +82,13 @@ class ApplicationController < ActionController::Base
     has_ao_link ? 'verification' : 'cd_access'
   end
 
-  def log_credential_action(credential_type, dpc_api_credential_id, action)
-    log = CredentialAuditLog.create(user: current_user,
-                                    credential_type:,
-                                    dpc_api_credential_id:,
-                                    action:)
-    return if log.valid?
+  def log_credential_action(credential_type, action)
+    log = CredentialAuditLog.new(user: current_user,
+                                 credential_type:,
+                                 provider_organization: @organization,
+                                 action:)
+    return if log.save
 
-    logger.error("CredentialAuditLog failure: unable to #{action} #{credential_type} #{dpc_api_credential_id}")
+    logger.error("CredentialAuditLog failure: unable to #{action} #{credential_type} for #{@organization.id}")
   end
 end

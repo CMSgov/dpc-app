@@ -26,7 +26,7 @@ class PublicKeysController < ApplicationController
     )
 
     if new_public_key[:response]
-      log_credential_action(:public_key, new_public_key.dig(:message, 'id'), :add)
+      log_credential_action(:public_key, :add)
       flash[:notice] = 'Public key successfully created.'
       redirect_to organization_path(@organization)
     else
@@ -38,7 +38,7 @@ class PublicKeysController < ApplicationController
   def destroy
     manager = PublicKeyManager.new(@organization.dpc_api_organization_id)
     if manager.delete_public_key(params)
-      log_credential_action(:public_key, params[:id], :remove)
+      log_credential_action(:public_key, :remove)
       flash[:notice] = 'Public key successfully deleted.'
       redirect_to organization_path(@organization)
     else

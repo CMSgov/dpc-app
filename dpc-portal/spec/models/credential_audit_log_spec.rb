@@ -9,11 +9,9 @@ RSpec.describe CredentialAuditLog, type: :model do
       expect(log).to be_valid
     end
 
-    it 'fails if no user' do
+    it 'fail not fail if no user' do
       log.user = nil
-      expect(log).to_not be_valid
-      expect(log.errors.size).to eq(1), log.errors.inspect
-      expect(log.errors[:user]).to eq ['must exist']
+      expect(log).to be_valid
     end
 
     it 'fails if no credential type' do
@@ -29,11 +27,11 @@ RSpec.describe CredentialAuditLog, type: :model do
       end.to raise_error(ArgumentError)
     end
 
-    it 'fails if no dpc_api_credential_id' do
-      log.dpc_api_credential_id = nil
+    it 'fails if no provider organization' do
+      log.provider_organization = nil
       expect(log).to_not be_valid
       expect(log.errors.size).to eq(1), log.errors.inspect
-      expect(log.errors[:dpc_api_credential_id]).to eq ["can't be blank"]
+      expect(log.errors[:provider_organization]).to eq(['must exist'])
     end
 
     it 'fails if no action' do
