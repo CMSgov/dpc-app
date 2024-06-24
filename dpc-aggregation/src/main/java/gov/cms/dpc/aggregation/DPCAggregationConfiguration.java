@@ -1,6 +1,8 @@
 package gov.cms.dpc.aggregation;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import gov.cms.dpc.aws.config.AwsClientBundleConfiguration;
+import gov.cms.dpc.aws.config.AwsClientConfiguration;
 import gov.cms.dpc.bluebutton.config.BBClientConfiguration;
 import gov.cms.dpc.bluebutton.config.BlueButtonBundleConfiguration;
 import gov.cms.dpc.common.hibernate.attribution.IDPCDatabase;
@@ -18,7 +20,7 @@ import java.time.YearMonth;
 import java.time.ZoneId;
 import java.util.List;
 
-public class DPCAggregationConfiguration extends Configuration implements BlueButtonBundleConfiguration, IDPCDatabase, IDPCQueueDatabase, DPCQueueConfig {
+public class DPCAggregationConfiguration extends Configuration implements BlueButtonBundleConfiguration, AwsClientBundleConfiguration, IDPCDatabase, IDPCQueueDatabase, DPCQueueConfig {
 
     @Valid
     @NotNull
@@ -33,7 +35,12 @@ public class DPCAggregationConfiguration extends Configuration implements BlueBu
     @Valid
     @NotNull
     @JsonProperty("bbclient")
-    private final BBClientConfiguration clientConfiguration = new BBClientConfiguration();
+    private final BBClientConfiguration bbClientConfiguration = new BBClientConfiguration();
+
+    @Valid
+    @NotNull
+    @JsonProperty("awsclient")
+    private final AwsClientConfiguration awsClientConfiguration = new AwsClientConfiguration();
 
     @Valid
     @NotNull
@@ -103,8 +110,11 @@ public class DPCAggregationConfiguration extends Configuration implements BlueBu
 
     @Override
     public BBClientConfiguration getBlueButtonConfiguration() {
-        return this.clientConfiguration;
+        return this.bbClientConfiguration;
     }
+
+    @Override
+    public AwsClientConfiguration getAwsClientConfiguration() { return null; }
 
     @Override
     public int getPollingFrequency() {

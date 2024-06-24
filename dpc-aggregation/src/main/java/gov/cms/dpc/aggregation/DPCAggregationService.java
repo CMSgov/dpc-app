@@ -1,6 +1,7 @@
 package gov.cms.dpc.aggregation;
 
 import com.squarespace.jersey2.guice.JerseyGuiceUtils;
+import gov.cms.dpc.aws.AwsClientModule;
 import gov.cms.dpc.bluebutton.BlueButtonClientModule;
 import gov.cms.dpc.common.hibernate.attribution.DPCHibernateBundle;
 import gov.cms.dpc.common.hibernate.attribution.DPCHibernateModule;
@@ -46,7 +47,8 @@ public class DPCAggregationService extends Application<DPCAggregationConfigurati
                         new DPCQueueHibernateModule<>(queueHibernateBundle),
                         new DPCHibernateModule<>(hibernateBundle),
                         new JobQueueModule<DPCAggregationConfiguration>(),
-                        new BlueButtonClientModule<DPCAggregationConfiguration>())
+                        new BlueButtonClientModule<DPCAggregationConfiguration>(),
+                        new AwsClientModule<DPCAggregationConfiguration>())
                 .build();
 
         // The Hibernate bundle must be initialized before Guice.
