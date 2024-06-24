@@ -53,25 +53,12 @@ Rails.application.configure do
   # Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.
   # config.force_ssl = true
 
-  # Lograge config
-  config.lograge.enabled = true
-
-  # This specifies to log in JSON format
-  config.lograge.formatter = Lograge::Formatters::Json.new
-
   ## Disables log coloration
   config.colorize_logging = false
-
-  # Log to a dedicated file
-  config.lograge.logger = ActiveSupport::Logger.new(STDOUT)
 
   # Use the lowest log level to ensure availability of diagnostic information
   # when problems arise.
   config.log_level = ENV["LOG_LEVEL"] || :info
-
-
-  # Prepend all log lines with the following tags.
-  config.log_tags = [:request_id]
 
   # Use a different cache store in production.
   # config.cache_store = :mem_cache_store
@@ -103,19 +90,6 @@ Rails.application.configure do
 
   # Don't log any deprecations.
   config.active_support.report_deprecations = false
-
-  # Use default logging formatter so that PID and timestamp are not suppressed.
-  config.log_formatter = ::Logger::Formatter.new
-
-  # Use a different logger for distributed setups.
-  # require "syslog/logger"
-  # config.logger = ActiveSupport::TaggedLogging.new(Syslog::Logger.new "app-name")
-
-  if ENV['RAILS_LOG_TO_STDOUT'].present?
-    logger           = ActiveSupport::Logger.new($stdout)
-    logger.formatter = config.log_formatter
-    config.logger    = ActiveSupport::TaggedLogging.new(logger)
-  end
 
   # Do not dump schema after migrations.
   config.active_record.dump_schema_after_migration = false
