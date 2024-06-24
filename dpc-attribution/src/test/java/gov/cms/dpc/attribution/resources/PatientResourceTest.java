@@ -211,7 +211,7 @@ class PatientResourceTest extends AbstractAttributionTest {
                 .encodedJson()
                 .execute();
 
-        assertNull(deleteOutcome, "Should have succeeded with empty outcome");
+        assertNull(deleteOutcome.getOperationOutcome(), "Should have succeeded with empty outcome");
         // Try the first search again, which should be empty
 
         final Bundle finalSearch = firstQuery.execute();
