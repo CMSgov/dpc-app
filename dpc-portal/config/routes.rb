@@ -31,6 +31,7 @@ Rails.application.routes.draw do
     resources :invitations, only: [:show] do
       get 'accept', on: :member
       post 'confirm', on: :member
+      post 'register', on: :member
       post 'login', on: :member
       post 'renew', on: :member
     end

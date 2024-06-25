@@ -14,10 +14,21 @@ class InvitationsController < ApplicationController
   end
 
   def accept
+    session["invitation_status_#{@invitation.id}"] = 'identity_verified'
     render(Page::Invitations::AcceptInvitationComponent.new(@organization, @invitation))
   end
 
   def confirm
+    session["invitation_status_#{@invitation.id}"] = 'conditions_verified'
+    render(Page::Invitations::RegisterComponent.new)
+  end
+
+  def register
+    unless session["invitation_status_#{@invitation.id}"] == 'conditions_verified'
+      return redirect_to accept_organization_invitation_url(@organization,
+                                                            @invitation)
+    end
+
     if @invitation.credential_delegate?
       create_cd_org_link
     elsif @invitation.authorized_official?
@@ -26,6 +37,7 @@ class InvitationsController < ApplicationController
       return render(Page::Invitations::BadInvitationComponent.new(@invitation, 'invalid', 'warning'),
                     status: :unprocessable_entity)
     end
+    session.delete("invitation_status_#{@invitation.id}")
     redirect_to organization_path(@organization)
   end
 
@@ -84,6 +96,11 @@ class InvitationsController < ApplicationController
   end
 
   def invitation_matches_conditions
+    unless session["invitation_status_#{@invitation.id}"] == 'identity_verified'
+      return redirect_to accept_organization_invitation_url(@organization,
+                                                            @invitation)
+    end
+
     return check_code if @invitation.credential_delegate?
 
     user_info = UserInfoService.new.user_info(session)
