@@ -5,7 +5,8 @@ import gov.cms.dpc.bluebutton.config.BBClientConfiguration;
 import gov.cms.dpc.bluebutton.config.BlueButtonBundleConfiguration;
 import gov.cms.dpc.common.hibernate.attribution.IDPCDatabase;
 import gov.cms.dpc.common.hibernate.queue.IDPCQueueDatabase;
-import gov.cms.dpc.queue.DPCQueueConfig;
+import gov.cms.dpc.queue.config.DPCAwsQueueConfiguration;
+import gov.cms.dpc.queue.config.DPCQueueConfig;
 import io.dropwizard.core.Configuration;
 import io.dropwizard.db.DataSourceFactory;
 
@@ -35,6 +36,10 @@ public class DPCAggregationConfiguration extends Configuration implements BlueBu
     @JsonProperty("bbclient")
     private final BBClientConfiguration clientConfiguration = new BBClientConfiguration();
 
+    @NotNull
+    @JsonProperty("awsQueue")
+    private final DPCAwsQueueConfiguration dpcAwsQueueConfiguration = new DPCAwsQueueConfiguration();
+
     @Valid
     @NotNull
     @JsonProperty("consentServiceUrl")
@@ -57,6 +62,7 @@ public class DPCAggregationConfiguration extends Configuration implements BlueBu
     // How often in milliseconds to check the queue for new batches
     @Min(50)
     private final int pollingFrequency = 500;
+
 
     @Min(1)
     private final int jobTimeoutInSeconds = 5;
@@ -135,4 +141,6 @@ public class DPCAggregationConfiguration extends Configuration implements BlueBu
     public void setLookBackExemptOrgs(List<String> lookBackExemptOrgs) {
         this.lookBackExemptOrgs = lookBackExemptOrgs;
     }
+
+    public DPCAwsQueueConfiguration getDpcAwsQueueConfiguration() { return this.dpcAwsQueueConfiguration; }
 }

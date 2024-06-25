@@ -1,14 +1,15 @@
 package gov.cms.dpc.queue;
 
-import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.Timer;
+import com.codahale.metrics.*;
 import gov.cms.dpc.common.hibernate.queue.DPCQueueManagedSessionFactory;
 import gov.cms.dpc.common.utils.MetricMaker;
 import gov.cms.dpc.queue.annotations.QueueBatchSize;
+import gov.cms.dpc.queue.config.DPCAwsQueueConfiguration;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.queue.exceptions.JobQueueUnhealthy;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatchFile;
+import io.github.azagniotov.metrics.reporter.cloudwatch.DimensionedName;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -52,10 +53,12 @@ public class DistributedBatchQueue extends JobQueueCommon {
 
     @Inject
     public DistributedBatchQueue(
-            DPCQueueManagedSessionFactory factory,
-            @QueueBatchSize int batchSize,
-            MetricRegistry metricRegistry
-    ) {
+        DPCQueueManagedSessionFactory factory,
+        @QueueBatchSize int batchSize,
+        MetricRegistry metricRegistry,
+        ScheduledReporter reporter,
+        DPCAwsQueueConfiguration awsConfig
+        ) {
         super(batchSize);
 
         this.factory = factory.getSessionFactory();
@@ -66,7 +69,15 @@ public class DistributedBatchQueue extends JobQueueCommon {
         this.partialTimer = metricBuilder.registerTimer("partialTime");
         this.successTimer = metricBuilder.registerTimer("successTime");
         this.failureTimer = metricBuilder.registerTimer("failureTime");
-        metricBuilder.registerCachedGauge("queueLength", this::queueSize);
+
+        // Metrics going to AWS should have an environment dimension
+        DimensionedName queueSize = DimensionedName
+            .withName(awsConfig.getQueueSizeMetricName())
+            .withDimension("environment", awsConfig.getEnvironment())
+            .build();
+        metricBuilder.registerCachedGauge(queueSize.encode(), this::queueSize);
+
+        reporter.start(awsConfig.getAwsReportingInterval(), TimeUnit.SECONDS);
     }
 
     @Override

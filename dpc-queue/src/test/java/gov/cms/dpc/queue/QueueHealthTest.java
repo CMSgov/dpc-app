@@ -2,9 +2,11 @@ package gov.cms.dpc.queue;
 
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.dpc.common.hibernate.queue.DPCQueueManagedSessionFactory;
+import gov.cms.dpc.queue.config.DPCAwsQueueConfiguration;
 import gov.cms.dpc.queue.exceptions.JobQueueUnhealthy;
 import gov.cms.dpc.queue.health.JobQueueHealthCheck;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
+import io.dropwizard.metrics.common.ConsoleReporterFactory;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.NativeQuery;
@@ -47,7 +49,13 @@ public class QueueHealthTest {
         when(query.uniqueResult())
                 .thenReturn(0L);
 
-        final DistributedBatchQueue queue = new DistributedBatchQueue(managedSessionFactory, 100, metrics);
+        final DistributedBatchQueue queue = new DistributedBatchQueue(
+            managedSessionFactory,
+            100,
+            metrics,
+            new ConsoleReporterFactory().build(metrics),
+            new DPCAwsQueueConfiguration()
+        );
         assertDoesNotThrow(() -> queue.assertHealthy(UUID.randomUUID()), "Queue should be healthy");
 
         // Healthcheck should pass
@@ -60,7 +68,13 @@ public class QueueHealthTest {
         when(query.uniqueResult())
                 .thenReturn(2L);
 
-        final DistributedBatchQueue queue = new DistributedBatchQueue(managedSessionFactory, 100, metrics);
+        final DistributedBatchQueue queue = new DistributedBatchQueue(
+            managedSessionFactory,
+            100,
+            metrics,
+            new ConsoleReporterFactory().build(metrics),
+            new DPCAwsQueueConfiguration()
+        );
         assertThrows(JobQueueUnhealthy.class, () -> queue.assertHealthy(UUID.randomUUID()), "Queue should be unhealthy");
 
         // Healthcheck should pass

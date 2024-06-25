@@ -4,10 +4,12 @@ import com.codahale.metrics.MetricRegistry;
 import gov.cms.dpc.common.hibernate.queue.DPCQueueManagedSessionFactory;
 import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.DPCResourceType;
+import gov.cms.dpc.queue.config.DPCAwsQueueConfiguration;
 import gov.cms.dpc.queue.exceptions.JobQueueUnhealthy;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import gov.cms.dpc.testing.IntegrationTest;
+import io.dropwizard.metrics.common.ConsoleReporterFactory;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -38,7 +40,15 @@ public class DistributedBatchQueueTest {
     void setUp() {
         final Configuration conf = new Configuration();
         sessionFactory = conf.configure().buildSessionFactory();
-        queue = new DistributedBatchQueue(new DPCQueueManagedSessionFactory(sessionFactory), 100, new MetricRegistry());
+        MetricRegistry metricRegistry = new MetricRegistry();
+
+        queue = new DistributedBatchQueue(
+            new DPCQueueManagedSessionFactory(sessionFactory),
+            100,
+            metricRegistry,
+            new ConsoleReporterFactory().build(metricRegistry),
+            new DPCAwsQueueConfiguration()
+        );
     }
 
     @AfterEach

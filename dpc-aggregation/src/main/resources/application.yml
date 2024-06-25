@@ -86,6 +86,14 @@ bbclient:
 
   useBfdMock: ${USE_BFD_MOCK:-false}
 
+awsQueue:
+  emitAwsMetrics: ${EMIT_AWS_METRICS:-false}
+  queueSizeMetricName: ${QUEUE_SIZE_METRIC_NAME:-"JobQueueBatchSize"}
+  awsRegion: ${AWS_REGION:-"us-east-1"}
+  awsReportingInterval: ${AWS_REPORTING_INTERVAL:-60}
+  environment: ${ENV:-"unknown_env"}
+  awsNamespace: ${NAMESPACE:-"DPC"}
+
 consentServiceUrl: ${CONSENT_SERVICE_URL:-"http://consent:3600/v1/"}
 
 retryCount: 3 # Number of times to retry reach BB request
