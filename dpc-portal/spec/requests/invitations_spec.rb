@@ -3,6 +3,82 @@
 require 'rails_helper'
 
 RSpec.describe 'Invitations', type: :request do
+  RSpec.shared_examples 'an invitation endpoint' do |method, path_suffix|
+    context 'not logged in' do
+      let(:org) { invitation.provider_organization }
+      let(:bad_org) { create(:provider_organization) }
+      it 'should show login if valid invitation' do
+        send(method, "/organizations/#{org.id}/invitations/#{invitation.id}/#{path_suffix}")
+        expect(response).to be_ok
+        expect(response.body).to include(login_organization_invitation_path(org, invitation))
+      end
+      it 'should not show form if valid invitation' do
+        send(method, "/organizations/#{org.id}/invitations/#{invitation.id}/#{path_suffix}")
+        expect(response).to be_ok
+        expect(response.body).not_to include(confirm_organization_invitation_path(org, invitation))
+      end
+      it 'should show warning page with 404 if missing' do
+        send(method, "/organizations/#{org.id}/invitations/bad-id/#{path_suffix}")
+        expect(response).to be_not_found
+        expect(response.body).to include('usa-alert--warning')
+      end
+      it 'should show warning page with 404 if org-invitation mismatch' do
+        bad_org = create(:provider_organization)
+        send(method, "/organizations/#{bad_org.id}/invitations/#{invitation.id}/#{path_suffix}")
+        expect(response).to be_not_found
+        expect(response.body).to include('usa-alert--warning')
+      end
+      it 'should show warning page if cancelled' do
+        invitation.update(status: :cancelled)
+        send(method, "/organizations/#{org.id}/invitations/#{invitation.id}/#{path_suffix}")
+        expect(response).to be_forbidden
+        expect(response.body).to include('usa-alert--warning')
+      end
+      context 'invitation expired' do
+        before { invitation.update_attribute(:created_at, 3.days.ago) }
+        it 'should show warning page' do
+          send(method, "/organizations/#{org.id}/invitations/#{invitation.id}/#{path_suffix}")
+          expect(response).to be_forbidden
+          expect(response.body).to include('usa-alert--warning')
+        end
+        it 'should show renew button only if ao' do
+          send(method, "/organizations/#{org.id}/invitations/#{invitation.id}/#{path_suffix}")
+          expect(response).to be_forbidden
+          if invitation.authorized_official?
+            expect(response.body).to include('Request new invite')
+          else
+            expect(response.body).to_not include('Request new invite')
+          end
+        end
+        it 'should not show renew button if accepted' do
+          invitation.accept!
+          get "/organizations/#{org.id}/invitations/#{invitation.id}/#{path_suffix}"
+          expect(response).to be_forbidden
+          expect(response.body).to_not include('Request new invite')
+        end
+      end
+      it 'should show warning page if accepted' do
+        invitation.accept!
+        send(method, "/organizations/#{org.id}/invitations/#{invitation .id}/#{path_suffix}")
+        expect(response).to be_forbidden
+        expect(response.body).to include('usa-alert--warning')
+      end
+
+      context 'logged in' do
+        before do
+          sign_in create(:user)
+        end
+        it 'should show login if token expired' do
+          user_service_class = class_double(UserInfoService).as_stubbed_const
+          allow(user_service_class).to receive(:new).and_raise(UserInfoServiceError, 'unauthorized')
+          get "/organizations/#{org.id}/invitations/#{invitation.id}/#{path_suffix}"
+          expect(response).to be_ok
+          expect(response.body).to include(login_organization_invitation_path(org, invitation))
+        end
+      end
+    end
+  end
+
   describe 'GET /' do
     context :ao do
       let!(:ao_invite) { create(:invitation, :ao) }
@@ -23,127 +99,36 @@ RSpec.describe 'Invitations', type: :request do
 
   describe 'GET /accept' do
     context :ao do
-      context 'not logged in' do
-        context :expired do
-          let!(:ao_invite) { create(:invitation, :ao, created_at: 3.days.ago) }
-          let(:org) { ao_invite.provider_organization }
-          it 'should show warning page' do
-            get "/organizations/#{org.id}/invitations/#{ao_invite.id}/accept"
-            expect(response).to be_forbidden
-            expect(response.body).to include('usa-alert--warning')
-          end
-          it 'should show renew button' do
-            get "/organizations/#{org.id}/invitations/#{ao_invite.id}/accept"
-            expect(response).to be_forbidden
-            expect(response.body).to include('Request new invite')
-          end
-          it 'should not show renew button if accepted' do
-            ao_invite.accept!
-            get "/organizations/#{org.id}/invitations/#{ao_invite.id}/accept"
-            expect(response).to be_forbidden
-            expect(response.body).to_not include('Request new invite')
-          end
-        end
+      it_behaves_like 'an invitation endpoint', :get, 'accept' do
+        let!(:invitation) { create(:invitation, :ao) }
       end
-      context 'logged in' do
+      context :success do
         let!(:ao_invite) { create(:invitation, :ao) }
-        let!(:user) { create(:user) }
         let(:org) { ao_invite.provider_organization }
         before do
-          sign_in user
+          sign_in create(:user)
         end
-        context :token_expired do
-          it 'should show login if token expired' do
-            user_service_class = class_double(UserInfoService).as_stubbed_const
-            allow(user_service_class).to receive(:new).and_raise(UserInfoServiceError, 'unauthorized')
-            get "/organizations/#{org.id}/invitations/#{ao_invite.id}/accept"
-            expect(response).to be_ok
-            expect(response.body).to include(login_organization_invitation_path(org, ao_invite))
-          end
-        end
-        context :success do
-          before { stub_user_info }
-          it 'should show form if valid invitation' do
-            get "/organizations/#{org.id}/invitations/#{ao_invite.id}/accept"
-            expect(response).to be_ok
-            expect(response.body).to include(confirm_organization_invitation_path(org, ao_invite))
-            expect(request.session["invitation_status_#{ao_invite.id}"]).to eq 'identity_verified'
-          end
+        before { stub_user_info }
+        it 'should show form if valid invitation' do
+          get "/organizations/#{org.id}/invitations/#{ao_invite.id}/accept"
+          expect(response).to be_ok
+          expect(response.body).to include(confirm_organization_invitation_path(org, ao_invite))
+          expect(request.session["invitation_status_#{ao_invite.id}"]).to eq 'identity_verified'
         end
       end
     end
 
     context :cd do
-      let(:invited_by) { create(:invited_by) }
-      let(:verification_code) { 'ABC123' }
-      let!(:cd_invite) { create(:invitation, :cd, verification_code:) }
-      let(:user) do
-        create(:user, given_name: cd_invite.invited_given_name,
-                      family_name: cd_invite.invited_family_name,
-                      email: cd_invite.invited_email)
+      it_behaves_like 'an invitation endpoint', :get, 'accept' do
+        let!(:invitation) { create(:invitation, :cd) }
       end
-      let(:org) { cd_invite.provider_organization }
 
-      context 'not logged in' do
-        it 'should show login if valid invitation' do
-          get "/organizations/#{org.id}/invitations/#{cd_invite.id}/accept"
-          expect(response).to be_ok
-          expect(response.body).to include(login_organization_invitation_path(org, cd_invite))
-        end
-        it 'should not show form if valid invitation' do
-          get "/organizations/#{org.id}/invitations/#{cd_invite.id}/accept"
-          expect(response).to be_ok
-          expect(response.body).not_to include(confirm_organization_invitation_path(org, cd_invite))
-        end
-        it 'should show warning page with 404 if missing' do
-          get "/organizations/#{org.id}/invitations/bad-id/accept"
-          expect(response).to be_not_found
-          expect(response.body).to include('usa-alert--warning')
-        end
-        it 'should show warning page with 404 if org-invitation mismatch' do
-          bad_org = create(:provider_organization)
-          get "/organizations/#{bad_org.id}/invitations/#{cd_invite.id}/accept"
-          expect(response).to be_not_found
-          expect(response.body).to include('usa-alert--warning')
-        end
-        it 'should show warning page if cancelled' do
-          cd_invite.update(status: :cancelled)
-          get "/organizations/#{org.id}/invitations/#{cd_invite.id}/accept"
-          expect(response).to be_forbidden
-          expect(response.body).to include('usa-alert--warning')
-        end
-        context 'invitation expired' do
-          before { cd_invite.update_attribute(:created_at, 3.days.ago) }
-          it 'should show warning page' do
-            get "/organizations/#{org.id}/invitations/#{cd_invite.id}/accept"
-            expect(response).to be_forbidden
-            expect(response.body).to include('usa-alert--warning')
-          end
-          it 'should not show renew button' do
-            get "/organizations/#{org.id}/invitations/#{cd_invite.id}/accept"
-            expect(response).to be_forbidden
-            expect(response.body).to_not include('Request new invite')
-          end
-        end
-        it 'should show warning page if accepted' do
-          cd_invite.accept!
-          get "/organizations/#{org.id}/invitations/#{cd_invite.id}/accept"
-          expect(response).to be_forbidden
-          expect(response.body).to include('usa-alert--warning')
-        end
-      end
       context 'logged in' do
+        let(:verification_code) { 'ABC123' }
+        let!(:cd_invite) { create(:invitation, :cd, verification_code:) }
+        let(:org) { cd_invite.provider_organization }
         before do
-          sign_in user
-        end
-        context :token_expired do
-          it 'should show login if token expired' do
-            user_service_class = class_double(UserInfoService).as_stubbed_const
-            allow(user_service_class).to receive(:new).and_raise(UserInfoServiceError, 'unauthorized')
-            get "/organizations/#{org.id}/invitations/#{cd_invite.id}/accept"
-            expect(response).to be_ok
-            expect(response.body).to include(login_organization_invitation_path(org, cd_invite))
-          end
+          sign_in create(:user)
         end
         context :success do
           before { stub_user_info }
@@ -164,16 +149,15 @@ RSpec.describe 'Invitations', type: :request do
           end
         end
         context :failure do
-          before { stub_user_info }
           it 'should render error page if family_name not match' do
-            cd_invite.update_attribute(:invited_family_name, "not #{cd_invite.invited_family_name}")
+            stub_user_info(overrides: { 'family_name' => 'Something Else' })
             get "/organizations/#{org.id}/invitations/#{cd_invite.id}/accept"
             expect(response).to be_forbidden
             expect(response.body).to_not include(confirm_organization_invitation_path(org, cd_invite))
             expect(response.body).to include('usa-alert--error')
           end
           it 'should render error page if phone not match' do
-            cd_invite.update_attribute(:invited_phone, '9129999999')
+            stub_user_info(overrides: { 'phone' => '9999999999' })
             get "/organizations/#{org.id}/invitations/#{cd_invite.id}/accept"
             expect(response).to be_forbidden
             expect(response.body).to_not include(confirm_organization_invitation_path(org, cd_invite))
@@ -189,18 +173,13 @@ RSpec.describe 'Invitations', type: :request do
       let(:invited_by) { create(:invited_by) }
       let(:verification_code) { 'ABC123' }
       let!(:cd_invite) { create(:invitation, :cd, verification_code:) }
-      let(:user) do
-        create(:user, given_name: cd_invite.invited_given_name,
-                      family_name: cd_invite.invited_family_name,
-                      email: cd_invite.invited_email)
-      end
       let(:org) { cd_invite.provider_organization }
 
       let(:success_params) { { verification_code: } }
       let(:fail_params) { { verification_code: 'badcode' } }
 
       before do
-        sign_in user
+        sign_in create(:user)
       end
 
       context :success do
