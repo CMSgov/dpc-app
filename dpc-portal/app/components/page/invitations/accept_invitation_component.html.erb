@@ -1,3 +1,4 @@
+<%= render(Core::Navigation::StepIndicatorComponent.new(Invitation::STEPS, 1)) if @invitation.authorized_official? %>
 <div>
   <h1>Accept organization invite</h1>
   <div class="usa-alert usa-alert--info margin-bottom-4">

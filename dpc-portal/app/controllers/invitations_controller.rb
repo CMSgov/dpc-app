@@ -6,18 +6,14 @@ class InvitationsController < ApplicationController
   before_action :load_invitation
   before_action :validate_invitation, except: %i[renew]
   before_action :authenticate_user!, except: %i[login renew show]
-  before_action :invitation_matches_user, only: %i[confirm]
+  before_action :invitation_matches_user, only: %i[accept]
+  before_action :invitation_matches_conditions, only: %i[confirm]
 
   def show
     render(Page::Invitations::StartComponent.new(@organization, @invitation))
   end
 
   def accept
-    if current_user.email != @invitation.invited_email
-      return render(Page::Invitations::BadInvitationComponent.new(@invitation, 'pii_mismatch', 'error'),
-                    status: :forbidden)
-    end
-
     render(Page::Invitations::AcceptInvitationComponent.new(@organization, @invitation))
   end
 
@@ -80,12 +76,18 @@ class InvitationsController < ApplicationController
   def invitation_matches_user
     user_info = UserInfoService.new.user_info(session)
     unless @invitation.match_user?(user_info)
-      return render(Page::Invitations::BadInvitationComponent.new(@invitation, 'pii_mismatch', 'error'),
-                    status: :forbidden)
+      render(Page::Invitations::BadInvitationComponent.new(@invitation, 'pii_mismatch', 'error'),
+             status: :forbidden)
     end
-    check_code if @invitation.credential_delegate?
   rescue UserInfoServiceError => e
     handle_user_info_service_error(e)
+  end
+
+  def invitation_matches_conditions
+    return check_code if @invitation.credential_delegate?
+
+    user_info = UserInfoService.new.user_info(session)
+    @invitation.ao_match?(user_info)
   rescue InvitationError => e
     render(Page::Invitations::BadInvitationComponent.new(@invitation, e.message, 'error'),
            status: :forbidden)
