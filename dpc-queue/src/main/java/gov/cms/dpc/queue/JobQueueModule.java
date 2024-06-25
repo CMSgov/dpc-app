@@ -116,9 +116,4 @@ public class JobQueueModule<T extends Configuration & DPCQueueConfig> extends Dr
             return provideConsoleReporter(metricRegistry);
         }
     }
-
-    @Provides
-    DPCAwsQueueConfiguration provideDPCAwsQueueConfiguration() {
-        return configuration().getDpcAwsQueueConfiguration();
-    }
 }

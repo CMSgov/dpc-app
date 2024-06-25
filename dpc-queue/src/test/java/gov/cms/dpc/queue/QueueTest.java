@@ -4,13 +4,11 @@ import com.codahale.metrics.MetricRegistry;
 import gov.cms.dpc.common.hibernate.queue.DPCQueueManagedSessionFactory;
 import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.DPCResourceType;
-import gov.cms.dpc.queue.config.DPCAwsQueueConfiguration;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatchFile;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import gov.cms.dpc.testing.IntegrationTest;
-import io.dropwizard.metrics.common.ConsoleReporterFactory;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -56,14 +54,7 @@ class QueueTest {
                         // Create the session factory
                         final Configuration conf = new Configuration();
                         sessionFactory = conf.configure().buildSessionFactory();
-                        MetricRegistry metricRegistry = new MetricRegistry();
-                        return new DistributedBatchQueue(
-                            new DPCQueueManagedSessionFactory(sessionFactory),
-                            100,
-                            metricRegistry,
-                            new ConsoleReporterFactory().build(metricRegistry),
-                            new DPCAwsQueueConfiguration()
-                        );
+                        return new DistributedBatchQueue(new DPCQueueManagedSessionFactory(sessionFactory), 100, new MetricRegistry());
                     } else {
                         throw new IllegalArgumentException("I'm not that kind of queue");
                     }
