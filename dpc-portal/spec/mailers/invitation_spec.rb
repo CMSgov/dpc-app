@@ -19,7 +19,7 @@ RSpec.describe InvitationMailer, type: :mailer do
       invitation = build(:invitation, id: 4, provider_organization:)
       given_name = family_name = ''
       mailer = InvitationMailer.with(invitation:, given_name:, family_name:).invite_ao
-      expected_url = 'http://localhost:3100/portal/organizations/2/invitations/4/accept'
+      expected_url = 'http://localhost:3100/portal/organizations/2/invitations/4'
       expect(mailer.body).to match(expected_url)
     end
   end

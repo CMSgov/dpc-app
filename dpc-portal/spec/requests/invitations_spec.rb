@@ -3,6 +3,24 @@
 require 'rails_helper'
 
 RSpec.describe 'Invitations', type: :request do
+  describe 'GET /' do
+    context :ao do
+      let!(:ao_invite) { create(:invitation, :ao) }
+      let(:user) do
+        create(:user, given_name: 'Herman',
+                      family_name: 'Wouk',
+                      email: ao_invite.invited_email)
+      end
+      let(:org) { ao_invite.provider_organization }
+
+      it 'should show button to accept' do
+        get "/organizations/#{org.id}/invitations/#{ao_invite.id}"
+        expect(response).to be_ok
+        expect(response.body).to include(accept_organization_invitation_path(org, ao_invite))
+      end
+    end
+  end
+
   describe 'GET /accept' do
     context :ao do
       context 'not logged in' do

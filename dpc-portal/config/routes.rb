@@ -28,7 +28,7 @@ Rails.application.routes.draw do
     resources :credential_delegate_invitations, only: [:new, :create, :destroy] do
       get 'success', on: :member
     end
-    resources :invitations, only: [] do
+    resources :invitations, only: [:show] do
       get 'accept', on: :member
       post 'confirm', on: :member
       post 'login', on: :member

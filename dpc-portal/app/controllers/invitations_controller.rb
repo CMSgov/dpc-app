@@ -5,8 +5,12 @@ class InvitationsController < ApplicationController
   before_action :load_organization
   before_action :load_invitation
   before_action :validate_invitation, except: %i[renew]
-  before_action :authenticate_user!, except: %i[login renew]
+  before_action :authenticate_user!, except: %i[login renew show]
   before_action :invitation_matches_user, only: %i[confirm]
+
+  def show
+    render(Page::Invitations::StartComponent.new(@organization, @invitation))
+  end
 
   def accept
     if current_user.email != @invitation.invited_email
