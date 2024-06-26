@@ -96,6 +96,6 @@ class ApplicationController < ActionController::Base
                                  action:)
     return if log.save
 
-    logger.error("CredentialAuditLog failure: unable to #{action} #{credential_type} for #{@organization.id}")
+    logger.error(['CredentialAuditLog failure', { action:, credential_type:, org: @organization.id }])
   end
 end

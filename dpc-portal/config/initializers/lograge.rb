@@ -2,7 +2,7 @@
 
 Rails.application.configure do
   config.lograge.enabled = true
-  config.lograge.logger = ActiveSupport::Logger.new(STDOUT)
+  config.lograge.logger = ActiveSupport::Logger.new(STDOUT) unless ENV['DISABLE_JSON_LOGGER'] == 'true'
   config.lograge.formatter = Lograge::Formatters::Json.new
 
   config.lograge.custom_options = lambda do |event|
