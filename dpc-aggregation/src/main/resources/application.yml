@@ -88,7 +88,7 @@ bbclient:
 
 awsQueue:
   emitAwsMetrics: ${EMIT_AWS_METRICS:-true}
-  queueSizeMetricName: ${QUEUE_SIZE_METRIC_NAME:-"JobQueueBatchSize"}
+  queueSizeMetricName: ${QUEUE_SIZE_METRIC_NAME:-"JobQueueBatchCount"}
   awsRegion: ${AWS_REGION:-"us-east-1"}
   awsReportingInterval: ${AWS_REPORTING_INTERVAL:-60}
   environment: ${ENV:-"unknown_env"}

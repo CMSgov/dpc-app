@@ -1,5 +1,6 @@
 package gov.cms.dpc.queue;
 
+import com.codahale.metrics.Gauge;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.ScheduledReporter;
 import gov.cms.dpc.common.hibernate.queue.DPCQueueManagedSessionFactory;
@@ -25,13 +26,18 @@ public class AwsDistributedBatchQueue extends DistributedBatchQueue {
 	) {
 		super(factory, batchSize, metricRegistry);
 
-		DimensionedName queueSize = DimensionedName
+		DimensionedName queueSizeName = DimensionedName
 			.withName(awsConfig.getQueueSizeMetricName())
 			.withDimension("environment", awsConfig.getEnvironment())
 			.build();
 
+		metricRegistry.register(
+			queueSizeName.encode(),
+			(Gauge<Long>) () -> Long.valueOf(queueSize())
+		);
+
 		MetricMaker metricMaker = new MetricMaker(metricRegistry, AwsDistributedBatchQueue.class);
-		metricMaker.registerCachedGauge(queueSize.encode(), this::queueSize);
+		metricMaker.registerCachedGauge(queueSizeName.encode(), this::queueSize);
 
 		reporter.start(awsConfig.getAwsReportingInterval(), TimeUnit.SECONDS);
 	}
