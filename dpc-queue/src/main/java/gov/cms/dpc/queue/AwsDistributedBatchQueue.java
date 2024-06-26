@@ -8,9 +8,14 @@ import gov.cms.dpc.queue.annotations.QueueBatchSize;
 import gov.cms.dpc.queue.config.DPCAwsQueueConfiguration;
 import io.github.azagniotov.metrics.reporter.cloudwatch.DimensionedName;
 
+import javax.inject.Inject;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Extenssion of {@link DistributedBatchQueue} that emits its current queue size as a metric to AWS Cloudwatch.
+ */
 public class AwsDistributedBatchQueue extends DistributedBatchQueue {
+	@Inject
 	public AwsDistributedBatchQueue(
 		DPCQueueManagedSessionFactory factory,
 		@QueueBatchSize int batchSize,

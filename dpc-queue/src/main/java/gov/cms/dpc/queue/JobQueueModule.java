@@ -44,10 +44,17 @@ public class JobQueueModule<T extends Configuration & DPCQueueConfig> extends Dr
             binder.bind(IJobQueue.class)
                     .to(MemoryBatchQueue.class)
                     .in(Scopes.SINGLETON);
-        } else {
+
+        } else if (configuration().getDpcAwsQueueConfiguration() == null) {
+            // No AWS config, running in dpc-api, use a distributed queue
             binder.bind(IJobQueue.class)
                     .to(DistributedBatchQueue.class)
                     .in(Scopes.SINGLETON);
+        } else {
+            // Has AWS config, running in dpc-aggregation, use AWS distributed queue
+            binder.bind(IJobQueue.class)
+                .to(AwsDistributedBatchQueue.class)
+                .in(Scopes.SINGLETON);
         }
 
         // Bind the healthcheck
@@ -81,21 +88,15 @@ public class JobQueueModule<T extends Configuration & DPCQueueConfig> extends Dr
     @Provides
     @Inject
     CloudWatchReporter provideCloudWatchReporter(MetricRegistry metricRegistry, CloudWatchAsyncClient cloudWatchAsyncClient) {
-        // If running in local env, use the dry run config.  It will output a log without calling AWS.
-        CloudWatchReporter.Builder builder = CloudWatchReporter.forRegistry(
+       return CloudWatchReporter.forRegistry(
             metricRegistry,
             cloudWatchAsyncClient,
             configuration().getDpcAwsQueueConfiguration().getAwsNamespace()
         )
         .withReportRawCountValue()
         .withZeroValuesSubmission()
-        .filter(MetricFilter.contains(configuration().getDpcAwsQueueConfiguration().getQueueSizeMetricName()));
-
-        if( configuration().getDpcAwsQueueConfiguration().getEnvironment().equals("local")) {
-            return builder.withDryRun().build();
-        } else {
-            return builder.build();
-        }
+        .filter(MetricFilter.contains(configuration().getDpcAwsQueueConfiguration().getQueueSizeMetricName()))
+        .build();
     }
 
     @Provides
@@ -109,7 +110,8 @@ public class JobQueueModule<T extends Configuration & DPCQueueConfig> extends Dr
     @Provides
     @Inject
     ScheduledReporter provideScheduledReporter(MetricRegistry metricRegistry, CloudWatchAsyncClient cloudWatchAsyncClient) {
-        // If AwsMetrics are turned off, use a reporter that writes to the console instead of AWS
+        // If AwsMetrics are turned off, use a reporter that writes to the console instead of AWS.
+        // The logs are kind of ugly, but help with debugging.
         if( configuration().getDpcAwsQueueConfiguration().getEmitAwsMetrics() ) {
             return provideCloudWatchReporter(metricRegistry, cloudWatchAsyncClient);
         } else {

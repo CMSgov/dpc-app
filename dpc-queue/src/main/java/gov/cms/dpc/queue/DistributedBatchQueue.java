@@ -52,10 +52,10 @@ public class DistributedBatchQueue extends JobQueueCommon {
 
     @Inject
     public DistributedBatchQueue(
-        DPCQueueManagedSessionFactory factory,
-        @QueueBatchSize int batchSize,
-        MetricRegistry metricRegistry
-        ) {
+            DPCQueueManagedSessionFactory factory,
+            @QueueBatchSize int batchSize,
+            MetricRegistry metricRegistry
+    ) {
         super(batchSize);
 
         this.factory = factory.getSessionFactory();
@@ -66,6 +66,7 @@ public class DistributedBatchQueue extends JobQueueCommon {
         this.partialTimer = metricBuilder.registerTimer("partialTime");
         this.successTimer = metricBuilder.registerTimer("successTime");
         this.failureTimer = metricBuilder.registerTimer("failureTime");
+        metricBuilder.registerCachedGauge("queueLength", this::queueSize);
     }
 
     @Override
