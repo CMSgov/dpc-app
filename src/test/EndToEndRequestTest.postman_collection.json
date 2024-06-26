@@ -306,6 +306,7 @@
 								"exec": [
 									"// Status should be 200",
 									"pm.test(\"Status is 200\", function () {",
+                  "    console.log(pm.response.json());",
 									"    pm.response.to.have.status(200);",
 									"});",
 									"",
@@ -374,6 +375,7 @@
 								"exec": [
 									"// Status should be 201",
 									"pm.test(\"Status is 201\", function () {",
+                  "    console.log(pm.response.json());",
 									"    pm.response.to.have.status(201);",
 									"});",
 									"",
@@ -671,6 +673,7 @@
 								"exec": [
 									"// Status should be 200",
 									"pm.test(\"Status is 200\", function () {",
+                  "    console.log(pm.response.json());",
 									"    pm.response.to.have.status(200);",
 									"});",
 									"",
@@ -777,6 +780,7 @@
 								"exec": [
 									"// Status should be 400",
 									"pm.test(\"Status is 400\", function () {",
+                  "    console.log(pm.response.json());",
 									"    pm.response.to.have.status(400);",
 									"});",
 									"",
@@ -852,6 +856,7 @@
 								"exec": [
 									"// Status should be 202",
 									"pm.test(\"Status is 202\", function () {",
+                  "    console.log(pm.response.json());",
 									"    pm.response.to.have.status(202);",
 									"});",
 									"",
