@@ -1,7 +1,7 @@
 package gov.cms.dpc.queue;
 
-import gov.cms.dpc.queue.config.DPCAwsQueueConfiguration;
-import io.dropwizard.core.Configuration;
+import com.codahale.metrics.ConsoleReporter;
+import com.codahale.metrics.MetricRegistry;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
@@ -9,12 +9,9 @@ import org.mockito.Mockito;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.mock;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
 class JobQueueModuleUnitTest {
-	private Configuration config = mock(Configuration.class);
-	private DPCAwsQueueConfiguration awsConfig = mock(DPCAwsQueueConfiguration.class);
-
 	@Test
 	void testProvideBatchSize() {
 		JobQueueModule queueModule = new JobQueueModule();
@@ -31,5 +28,11 @@ class JobQueueModuleUnitTest {
 			JobQueueModule queueModule = new JobQueueModule();
 			assertEquals(testUUID, queueModule.provideAggregatorID());
 		}
+	}
+
+	@Test
+	void testProvideConsoleReporter() {
+		JobQueueModule queueModule = new JobQueueModule();
+		assertInstanceOf(ConsoleReporter.class, queueModule.provideConsoleReporter(new MetricRegistry()));
 	}
 }
