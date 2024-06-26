@@ -3,13 +3,28 @@
 require 'rails_helper'
 
 RSpec.describe Page::Invitations::RegisterComponent, type: :component do
-  pending "add some examples to (or delete) #{__FILE__}"
+  let(:component) { described_class.new(invitation.provider_organization, invitation) }
+  before { render_inline(component) }
 
-  # it "renders something useful" do
-  #   expect(
-  #     render_inline(described_class.new(attr: "value")) { "Hello, components!" }.css("p").to_html
-  #   ).to include(
-  #     "Hello, components!"
-  #   )
-  # end
+  describe 'cd' do
+    let(:invitation) { create(:invitation, :cd) }
+    it 'should post to register' do
+      expected = "/portal/organizations/#{invitation.provider_organization.id}/invitations/#{invitation.id}/register"
+      form = page.find('form')
+      expect(form[:action]).to eq expected
+    end
+  end
+  describe 'ao' do
+    let(:invitation) { create(:invitation, :ao) }
+    it 'should have step component at step 3' do
+      expect(page).to have_selector('.usa-step-indicator__current-step')
+      expect(page.find('.usa-step-indicator__current-step').text).to eq '3'
+    end
+
+    it 'should post to register' do
+      expected = "/portal/organizations/#{invitation.provider_organization.id}/invitations/#{invitation.id}/register"
+      form = page.find('form')
+      expect(form[:action]).to eq expected
+    end
+  end
 end

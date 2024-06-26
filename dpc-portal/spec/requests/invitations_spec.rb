@@ -262,6 +262,11 @@ RSpec.describe 'Invitations', type: :request do
           post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
           expect(request.session["invitation_status_#{invitation.id}"]).to be_nil
         end
+        it 'should show success page' do
+          post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+          expect(response).to be_ok
+          expect(response.body).to include('Registration completed')
+        end
       end
       context 'failure' do
         before do
@@ -284,29 +289,6 @@ RSpec.describe 'Invitations', type: :request do
         let(:invitation) { create(:invitation, :cd, verification_code:) }
         let(:success_params) { { verification_code: } }
       end
-      let(:verification_code) { 'ABC123' }
-      let(:cd_invite) { create(:invitation, :cd, verification_code:) }
-      let(:org) { cd_invite.provider_organization }
-
-      let(:success_params) { { verification_code: } }
-
-      context :logged_in do
-        before { sign_in create(:user) }
-
-        context 'success' do
-          before do
-            stub_user_info
-            get "/organizations/#{org.id}/invitations/#{cd_invite.id}/accept"
-            post "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm", params: success_params
-          end
-          it 'should redirect to organization page with notice' do
-            post "/organizations/#{org.id}/invitations/#{cd_invite.id}/register"
-            expect(response).to redirect_to(organization_path(org))
-            expected_message =  "Invitation accepted. You can now manage this organization's credentials. Learn more."
-            expect(flash[:notice]).to eq expected_message
-          end
-        end
-      end
     end
     context :ao do
       it_behaves_like 'an invitation endpoint', :post, 'register' do
@@ -315,24 +297,6 @@ RSpec.describe 'Invitations', type: :request do
       it_behaves_like 'a register endpoint' do
         let(:invitation) { create(:invitation, :ao) }
         let(:success_params) { {} }
-      end
-      let(:ao_invite) { create(:invitation, :ao) }
-      let(:org) { ao_invite.provider_organization }
-      context :logged_in do
-        before { sign_in create(:user) }
-        context 'success' do
-          before do
-            stub_user_info
-            get "/organizations/#{org.id}/invitations/#{ao_invite.id}/accept"
-            post "/organizations/#{org.id}/invitations/#{ao_invite.id}/confirm"
-          end
-          it 'should redirect to organization page with notice' do
-            post "/organizations/#{org.id}/invitations/#{ao_invite.id}/register"
-            expect(response).to redirect_to(organization_path(org))
-            expected_message =  'Invitation accepted.'
-            expect(flash[:notice]).to eq expected_message
-          end
-        end
       end
     end
   end

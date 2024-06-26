@@ -27,4 +27,14 @@ RSpec.describe Page::Session::InvitationLoginComponent, type: :component do
       expect(page.find('form')[:method]).to eq 'post'
     end
   end
+
+  describe 'ao' do
+    let(:invitation) { create(:invitation, :ao) }
+    let(:component) { described_class.new(invitation) }
+    before { render_inline(component) }
+    it 'should have step component at step 1' do
+      expect(page).to have_selector('.usa-step-indicator__current-step')
+      expect(page.find('.usa-step-indicator__current-step').text).to eq '1'
+    end
+  end
 end

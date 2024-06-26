@@ -2,8 +2,8 @@
 
 module Page
   module Invitations
-    # Displays register invitation form
-    class RegisterComponent < ViewComponent::Base
+    # Displays successful registration message
+    class SuccessComponent < ViewComponent::Base
       def initialize(organization, invitation)
         super
         @organization = organization

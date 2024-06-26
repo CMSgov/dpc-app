@@ -20,7 +20,7 @@ class InvitationsController < ApplicationController
 
   def confirm
     session["invitation_status_#{@invitation.id}"] = 'conditions_verified'
-    render(Page::Invitations::RegisterComponent.new)
+    render(Page::Invitations::RegisterComponent.new(@organization, @invitation))
   end
 
   def register
@@ -38,7 +38,7 @@ class InvitationsController < ApplicationController
                     status: :unprocessable_entity)
     end
     session.delete("invitation_status_#{@invitation.id}")
-    redirect_to organization_path(@organization)
+    render(Page::Invitations::SuccessComponent.new(@organization, @invitation))
   end
 
   def login
