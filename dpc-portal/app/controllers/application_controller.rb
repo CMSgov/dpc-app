@@ -4,6 +4,7 @@
 class ApplicationController < ActionController::Base
   before_action :block_prod_sbx
   before_action :check_session_length
+  before_action :set_current_request_attributes
 
   auto_session_timeout User.timeout_in
 
@@ -48,6 +49,7 @@ class ApplicationController < ActionController::Base
 
   def load_organization
     @organization = ProviderOrganization.find(organization_id)
+    CurrentAttributes.save_organization_attributes(@organization, current_user)
   rescue ActiveRecord::RecordNotFound
     render file: "#{Rails.root}/public/404.html", layout: false, status: :not_found
   end
@@ -80,6 +82,11 @@ class ApplicationController < ActionController::Base
   def code_prefix
     has_ao_link = current_user.ao_org_links.where(provider_organization: @organization).exists?
     has_ao_link ? 'verification' : 'cd_access'
+  end
+
+  def set_current_request_attributes
+    CurrentAttributes.save_request_attributes(request)
+    CurrentAttributes.save_user_attributes(current_user)
   end
 
   def log_credential_action(credential_type, action)
