@@ -38,12 +38,12 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_20_201824) do
 
   create_table "credential_audit_logs", force: :cascade do |t|
     t.bigint "user_id"
-    t.bigint "provider_organization_id", null: false
+    t.string "dpc_api_credential_id", null: false
     t.integer "credential_type", null: false
     t.integer "action", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["provider_organization_id"], name: "index_credential_audit_logs_on_provider_organization_id"
+    t.index ["dpc_api_credential_id"], name: "index_credential_audit_logs_on_dpc_api_credential_id"
     t.index ["user_id"], name: "index_credential_audit_logs_on_user_id"
   end
 

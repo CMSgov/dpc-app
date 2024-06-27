@@ -27,7 +27,7 @@ RSpec.shared_examples 'a credential resource' do
         log = CredentialAuditLog.last
         expect(log.user).to eq user
         expect(log.credential_type).to eq credential
-        expect(log.provider_organization).to eq org
+        expect(log.dpc_api_credential_id).to eq token_guid
         expect(log.action).to eq 'add'
       end
 
@@ -64,7 +64,7 @@ RSpec.shared_examples 'a credential resource' do
         log = CredentialAuditLog.last
         expect(log.user).to eq user
         expect(log.credential_type).to eq credential
-        expect(log.provider_organization).to eq org
+        expect(log.dpc_api_credential_id).to eq token_guid
         expect(log.action).to eq 'remove'
       end
 

@@ -17,7 +17,7 @@ class IpAddressesController < ApplicationController
     manager = IpAddressManager.new(@organization.dpc_api_organization_id)
     new_ip_address = manager.create_ip_address(ip_address: params[:ip_address], label: params[:label])
     if new_ip_address[:response]
-      log_credential_action(:ip_address, :add)
+      log_credential_action(:ip_address, new_ip_address.dig(:message, 'id'), :add)
       flash[:notice] = 'IP address successfully created.'
       redirect_to organization_path(@organization)
     else
@@ -30,7 +30,7 @@ class IpAddressesController < ApplicationController
     manager = IpAddressManager.new(@organization.dpc_api_organization_id)
     if manager.delete_ip_address(params)
       flash[:notice] = 'IP address successfully deleted.'
-      log_credential_action(:ip_address, :remove)
+      log_credential_action(:ip_address, params[:id], :remove)
     else
       flash[:alert] = "IP address could not be deleted: #{manager.errors.join(', ')}."
     end

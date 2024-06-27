@@ -180,7 +180,7 @@ RSpec.describe 'PublicKeys', type: :request do
         api_client = stub_api_client(message: :get_organization,
                                      response: default_get_org_response(org_api_id))
         stub_self_returning_api_client(message: :create_public_key,
-                                       response: default_get_public_keys,
+                                       response: default_get_public_keys['entities'].first,
                                        api_client:)
         post "/organizations/#{org.id}/public_keys", params: {
           label: 'New Key',

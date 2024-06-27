@@ -89,13 +89,13 @@ class ApplicationController < ActionController::Base
     CurrentAttributes.save_user_attributes(current_user)
   end
 
-  def log_credential_action(credential_type, action)
+  def log_credential_action(credential_type, dpc_api_credential_id, action)
     log = CredentialAuditLog.new(user: current_user,
                                  credential_type:,
-                                 provider_organization: @organization,
+                                 dpc_api_credential_id:,
                                  action:)
     return if log.save
 
-    logger.error(['CredentialAuditLog failure', { action:, credential_type:, org: @organization.id }])
+    logger.error(['CredentialAuditLog failure', { action:, credential_type:, dpc_api_credential_id: }])
   end
 end

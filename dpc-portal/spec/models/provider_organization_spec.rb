@@ -101,8 +101,9 @@ RSpec.describe ProviderOrganization, type: :model do
       expect do
         po.save
       end.to change { CredentialAuditLog.count }.by 2
-      expect(po.credential_audit_logs.count).to eq 2
-      po.credential_audit_logs.each { |log| expect(log.action).to eq 'remove' }
+      tokens.each do |token|
+        expect(CredentialAuditLog.where(dpc_api_credential_id: token['id'], action: 'remove')).to exist
+      end
     end
   end
 end

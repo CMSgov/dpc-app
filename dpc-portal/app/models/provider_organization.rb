@@ -15,7 +15,6 @@ class ProviderOrganization < ApplicationRecord
 
   has_many :ao_org_links
   has_many :cd_org_links
-  has_many :credential_audit_logs
 
   after_update :disable_rejected
 
@@ -68,10 +67,10 @@ class ProviderOrganization < ApplicationRecord
     ctm.client_tokens.each do |token|
       ctm.delete_client_token(token.with_indifferent_access)
       next if CredentialAuditLog.create(credential_type: :client_token,
-                                        provider_organization: self,
+                                        dpc_api_credential_id: token['id'],
                                         action: :remove)
 
-      logger.error("CredentialAuditLog failure: unable to remove client token for #{id}")
+      logger.error("CredentialAuditLog failure: unable to remove client token for #{token['id']}")
     end
   end
 end
