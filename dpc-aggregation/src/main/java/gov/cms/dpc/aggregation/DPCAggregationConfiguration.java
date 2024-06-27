@@ -45,6 +45,10 @@ public class DPCAggregationConfiguration extends Configuration implements BlueBu
     @JsonProperty("consentServiceUrl")
     private String consentServiceUrl;
 
+    @NotEmpty
+    @NotNull
+    private String consentHealthCheckURL;
+
     // The path to the folder that will contain the output files
     @NotEmpty
     private String exportPath;
@@ -136,6 +140,8 @@ public class DPCAggregationConfiguration extends Configuration implements BlueBu
     public String getConsentServiceUrl() {
         return consentServiceUrl;
     }
+
+    public String getConsentHealthCheckURL() { return consentHealthCheckURL; }
 
     @SuppressWarnings("unused")
     public void setLookBackExemptOrgs(List<String> lookBackExemptOrgs) {

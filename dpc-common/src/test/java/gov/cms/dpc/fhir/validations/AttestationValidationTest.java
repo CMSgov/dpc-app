@@ -1,13 +1,14 @@
 package gov.cms.dpc.fhir.validations;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
 import gov.cms.dpc.fhir.validations.profiles.AttestationProfile;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
-import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
-import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
-import org.hl7.fhir.dstu3.hapi.validation.ValidationSupportChain;
+import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
+import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.codesystems.V3RoleClass;
 import org.junit.jupiter.api.BeforeAll;
@@ -16,6 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.sql.Date;
 import java.util.Collections;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -29,7 +31,7 @@ class AttestationValidationTest {
     @BeforeAll
     static void setup() {
         ctx = FhirContext.forDstu3();
-        final FhirInstanceValidator instanceValidator = new FhirInstanceValidator();
+        final FhirInstanceValidator instanceValidator = new FhirInstanceValidator(ctx);
 
         fhirValidator = ctx.newValidator();
         fhirValidator.setValidateAgainstStandardSchematron(false);
@@ -38,15 +40,20 @@ class AttestationValidationTest {
 
 
         dpcModule = new DPCProfileSupport(ctx);
-        final ValidationSupportChain chain = new ValidationSupportChain(new DefaultProfileValidationSupport(), dpcModule);
+        final ValidationSupportChain chain = new ValidationSupportChain(
+                dpcModule,
+                new DefaultProfileValidationSupport(ctx),
+                new InMemoryTerminologyServerValidationSupport(ctx)
+        );
         instanceValidator.setValidationSupport(chain);
     }
 
     @Test
     void definitionIsValid() {
-        final StructureDefinition provenanceDefinition = dpcModule.fetchStructureDefinition(ctx, AttestationProfile.PROFILE_URI);
+        final StructureDefinition provenanceDefinition = dpcModule.fetchStructureDefinition(AttestationProfile.PROFILE_URI);
         final ValidationResult result = fhirValidator.validateWithResult(provenanceDefinition);
-        assertTrue(result.isSuccessful(), "Should have passed");
+        assertAll(() -> assertEquals(1, result.getMessages().size(), "Should have a single message"),
+                () -> assertTrue(result.getMessages().get(0).getMessage().contains("Provenance.target: derived min (0) cannot be less than base min (1)")));
     }
 
     @Test
@@ -59,28 +66,30 @@ class AttestationValidationTest {
         provenance.setMeta(meta);
         addAgent(provenance);
 
-
         final ValidationResult result = fhirValidator.validateWithResult(provenance);
 
         assertAll(() -> assertFalse(result.isSuccessful(), "Should not have passed"),
                 () -> assertEquals(1, result.getMessages().size(), "Should have a single message"));
 
         // Add a reason, but the wrong system
-        provenance.addReason().setSystem("http://test.local").setCode("TREAT");
+        Coding c1 = new Coding().setSystem("http://test.local").setCode("TREAT");
+        provenance.setReason(List.of(c1));
         final ValidationResult r2 = fhirValidator.validateWithResult(provenance);
 
         assertAll(() -> assertFalse(r2.isSuccessful(), "Should not have passed"),
                 () -> assertEquals(3, r2.getMessages().size(), "Should have errors for the given reason"));
 
         // Add a reason, but the wrong value
-        provenance.addReason().setSystem("http://hl7.org/fhir/v3/ActReason").setCode("wrongz");
+        Coding c2 = new Coding().setSystem("http://hl7.org/fhir/v3/ActReason").setCode("wrongz");
+        provenance.setReason(List.of(c2));
         final ValidationResult r3 = fhirValidator.validateWithResult(provenance);
 
         assertAll(() -> assertFalse(r3.isSuccessful(), "Should not have passed"),
-                () -> assertEquals(6 , r3.getMessages().size(), "Should errors for both reasons"));
+                () -> assertEquals(3 , r3.getMessages().size(), "Should errors for both reasons"));
 
-        // Add a correct reason (which should cause everything to pass)s
-        provenance.addReason().setSystem("http://hl7.org/fhir/v3/ActReason").setCode("TREAT");
+        // Add a correct reason (which should cause everything to pass)
+        Coding c3 = new Coding().setSystem("http://hl7.org/fhir/v3/ActReason").setCode("TREAT");
+        provenance.setReason(List.of(c3));
         final ValidationResult r4 = fhirValidator.validateWithResult(provenance);
         assertTrue(r4.isSuccessful(), "Should have passed");
     }

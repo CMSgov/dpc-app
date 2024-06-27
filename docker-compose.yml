@@ -17,7 +17,7 @@ services:
   aggregation:
     image: ${ECR_HOST:-755619740999.dkr.ecr.us-east-1.amazonaws.com/dpc-aggregation}:latest
     ports:
-      - "9901:9900"
+      - "9901:9901"
     env_file:
       - ./ops/config/decrypted/local.env
     environment:
@@ -43,7 +43,7 @@ services:
       - DEBUG_MODE=${DEBUG_MODE:-false}
     ports:
       - "3500:8080"
-      - "9902:9900"
+      - "9902:9902"
     volumes:
       - ./jacocoReport/dpc-attribution:/jacoco-report
 
@@ -55,7 +55,6 @@ services:
     env_file:
       - ./ops/config/decrypted/local.env
     environment:
-      - ATTRIBUTION_URL=http://attribution:8080/v1/
       - ENV=local
       - JACOCO=${REPORT_COVERAGE}
       - EXPORT_PATH=/app/data
@@ -77,7 +76,7 @@ services:
       - DEBUG_MODE=${DEBUG_MODE:-false}
     ports:
       - "3600:3600"
-      - "9004:9900"
+      - "9904:9904"
     volumes:
       - ./jacocoReport/dpc-consent:/jacoco-report
 
@@ -92,7 +91,7 @@ services:
     depends_on:
       - attribution
       - aggregation
-    command: attribution:8080 aggregation:9900
+    command: attribution:8080 aggregation:9901
 
   start_api:
     image: dadarek/wait-for-dependencies

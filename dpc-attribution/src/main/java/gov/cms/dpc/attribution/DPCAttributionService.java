@@ -9,6 +9,7 @@ import gov.cms.dpc.common.hibernate.attribution.DPCHibernateModule;
 import gov.cms.dpc.common.logging.filters.GenerateRequestIdFilter;
 import gov.cms.dpc.common.logging.filters.LogResponseFilter;
 import gov.cms.dpc.common.utils.EnvironmentParser;
+import gov.cms.dpc.common.utils.UrlGenerator;
 import gov.cms.dpc.fhir.FHIRModule;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
@@ -16,6 +17,7 @@ import io.dropwizard.core.Application;
 import io.dropwizard.core.setup.Bootstrap;
 import io.dropwizard.core.setup.Environment;
 import io.dropwizard.db.PooledDataSourceFactory;
+import io.dropwizard.health.check.http.HttpHealthCheck;
 import io.dropwizard.jobs.GuiceJobManager;
 import io.dropwizard.jobs.JobsBundle;
 import io.dropwizard.migrations.MigrationsBundle;
@@ -69,6 +71,11 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
         environment.jersey().getResourceConfig().register(listener);
         environment.jersey().register(new GenerateRequestIdFilter(true));
         environment.jersey().register(new LogResponseFilter());
+
+        // Http health checks
+        environment.healthChecks().register("attribution-self-check",
+            new HttpHealthCheck(UrlGenerator.generateVersionUrl(configuration.getServicePort()))
+        );
     }
 
     private void registerBundles(Bootstrap<DPCAttributionConfiguration> bootstrap) {

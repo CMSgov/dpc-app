@@ -1,6 +1,6 @@
 package gov.cms.dpc.api.resources.v1;
 
-import gov.cms.dpc.api.auth.annotations.Public;
+import gov.cms.dpc.common.annotations.Public;
 import gov.cms.dpc.api.core.Capabilities;
 import gov.cms.dpc.api.resources.*;
 import gov.cms.dpc.common.annotations.APIV1;

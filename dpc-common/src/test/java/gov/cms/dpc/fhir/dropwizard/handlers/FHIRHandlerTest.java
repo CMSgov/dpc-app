@@ -58,7 +58,7 @@ public class FHIRHandlerTest {
             final InputStream is = IOUtils.toInputStream("this is not fhir", StandardCharsets.UTF_8);
             final WebApplicationException exception = assertThrows(WebApplicationException.class, () -> handler.readFrom(BaseResource.class, null, null, MediaType.TEXT_HTML_TYPE, null, is), "Should throw exception");
             assertAll(() -> assertEquals(HttpStatus.BAD_REQUEST_400, exception.getResponse().getStatus(), "Should have correct error status"),
-                    () -> assertEquals("Content does not appear to be FHIR JSON, first non-whitespace character was: 't' (must be '{')", exception.getMessage(), "Should have correct message"));
+                    () -> assertEquals("HAPI-1859: Content does not appear to be FHIR JSON, first non-whitespace character was: 't' (must be '{')", exception.getMessage(), "Should have correct message"));
         }
     }
 

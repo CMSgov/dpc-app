@@ -1,6 +1,7 @@
 package gov.cms.dpc.api;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -38,8 +39,8 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.eclipse.jetty.http.HttpStatus;
 import org.glassfish.jersey.test.grizzly.GrizzlyWebTestContainerFactory;
-import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
-import org.hl7.fhir.dstu3.hapi.validation.ValidationSupportChain;
+import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.codesystems.V3RoleClass;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -168,8 +169,10 @@ public class APITestHelpers {
             config.setSchematronValidation(true);
             config.setSchemaValidation(true);
 
-            final DPCProfileSupport dpcModule = new DPCProfileSupport(ctx);
-            final ValidationSupportChain support = new ValidationSupportChain(new DefaultProfileValidationSupport(), dpcModule);
+            final ValidationSupportChain support = new ValidationSupportChain(
+                    new DPCProfileSupport(ctx),
+                    new DefaultProfileValidationSupport(ctx),
+                    new InMemoryTerminologyServerValidationSupport(ctx));
             final InjectingConstraintValidatorFactory constraintFactory = new InjectingConstraintValidatorFactory(
                     Set.of(new ProfileValidator(new FHIRValidatorProvider(ctx, config, support).get())));
 

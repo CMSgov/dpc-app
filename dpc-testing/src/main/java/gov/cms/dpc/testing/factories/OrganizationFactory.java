@@ -22,7 +22,7 @@ public class OrganizationFactory {
         address.setState("DC");
         address.setPostalCode("20006");
         address.setCountry("US");
-        address.setUse(Address.AddressUse.HOME);
+        address.setUse(Address.AddressUse.WORK);
         address.setType(Address.AddressType.PHYSICAL);
 
         return address;

@@ -22,7 +22,8 @@ public class AggregationServiceTest {
     private static final String configPath = "src/test/resources/test.application.yml";
     private static final DropwizardTestSupport<DPCAggregationConfiguration> APPLICATION =
             new DropwizardTestSupport<>(DPCAggregationService.class, configPath,
-                    ConfigOverride.config("server.applicationConnectors[0].port", "7777"));
+                    ConfigOverride.config("server.applicationConnectors[0].port", "7777"),
+                    ConfigOverride.config("server.adminConnectors[0].port", "8888"));
 
     @BeforeAll
     static void start() throws Exception{
@@ -42,6 +43,7 @@ public class AggregationServiceTest {
         // Ensure that the various healthchecks are propagated from the modules
         assertAll(() -> assertTrue(names.contains("blue-button-client"), "Should have BB health check"));
         assertAll(() -> assertTrue(names.contains("aggregation-engine"), "Should have Aggregation Engine health check"));
+        assertAll(() -> assertTrue(names.contains("dpc-consent"), "Should have dpc-consent health check"));
 
         // Everything should be true
         checks.runHealthChecks().forEach((key, value) -> assertTrue(value.isHealthy(), String.format("Healthcheck: %s is not ok.", key)));

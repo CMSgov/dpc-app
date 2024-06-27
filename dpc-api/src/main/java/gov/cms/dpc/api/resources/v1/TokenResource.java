@@ -6,7 +6,7 @@ import com.github.nitram509.jmacaroons.Macaroon;
 import gov.cms.dpc.api.auth.MacaroonHelpers;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.Authorizer;
-import gov.cms.dpc.api.auth.annotations.Public;
+import gov.cms.dpc.common.annotations.Public;
 import gov.cms.dpc.api.auth.jwt.IJTICache;
 import gov.cms.dpc.api.auth.jwt.ValidatingKeyResolver;
 import gov.cms.dpc.api.entities.TokenEntity;

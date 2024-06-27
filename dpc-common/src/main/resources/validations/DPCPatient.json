@@ -42,7 +42,7 @@
         "id": "Patient.identifier[x]:system",
         "path": "Patient.identifier.system",
         "min": 1,
-        "fixedCode": "http://hl7.org/fhir/sid/us-mbi"
+        "fixedUri": "http://hl7.org/fhir/sid/us-mbi"
       },
       {
         "id": "Patient.name",

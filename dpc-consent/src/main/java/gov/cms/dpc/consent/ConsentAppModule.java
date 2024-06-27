@@ -4,6 +4,7 @@ import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.google.inject.name.Named;
 import gov.cms.dpc.consent.jdbi.ConsentDAO;
+import gov.cms.dpc.consent.resources.BaseResource;
 import gov.cms.dpc.consent.resources.ConsentResource;
 import ru.vyarus.dropwizard.guice.module.support.DropwizardAwareModule;
 
@@ -13,6 +14,7 @@ class ConsentAppModule extends DropwizardAwareModule<DPCConsentConfiguration> {
     public void configure() {
         Binder binder = binder();
         binder.bind(ConsentResource.class);
+        binder.bind(BaseResource.class);
         binder.bind(ConsentDAO.class);
     }
 
