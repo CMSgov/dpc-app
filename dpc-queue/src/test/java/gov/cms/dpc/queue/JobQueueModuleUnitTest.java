@@ -6,6 +6,7 @@ import gov.cms.dpc.queue.config.DPCAwsQueueConfiguration;
 import gov.cms.dpc.queue.config.DPCQueueConfig;
 import io.dropwizard.core.Configuration;
 import io.github.azagniotov.metrics.reporter.cloudwatch.CloudWatchReporter;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.support.ReflectionSupport;
 import org.mockito.MockedStatic;
@@ -20,9 +21,23 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class JobQueueModuleUnitTest {
+	JobQueueModule queueModule = spy(JobQueueModule.class);
+	DPCAwsQueueConfiguration awsConfig = mock(DPCAwsQueueConfiguration.class);
 	MockConfig mockConfig = spy(new MockConfig());
-
 	DPCAwsQueueConfiguration awsQueueConfig = mock(DPCAwsQueueConfiguration.class);
+
+	MetricRegistry metricRegistry = new MetricRegistry();
+
+	@BeforeEach
+	void setup() throws NoSuchMethodException {
+		ReflectionSupport.invokeMethod(
+			DropwizardAwareModule.class.getDeclaredMethod("configuration"),
+			doReturn(mockConfig).when(queueModule)
+		);
+
+		when(mockConfig.getDpcAwsQueueConfiguration()).thenReturn(awsConfig);
+		when(awsConfig.getAwsRegion()).thenReturn(Region.US_EAST_1.toString());
+	}
 
 	@Test
 	void test_provideBatchSize() {
@@ -44,102 +59,37 @@ class JobQueueModuleUnitTest {
 
 	@Test
 	void test_provideDpcAwsQueueConfiguration() throws NoSuchMethodException {
-		JobQueueModule queueModule = spy(JobQueueModule.class);
-		ReflectionSupport.invokeMethod(
-			DropwizardAwareModule.class.getDeclaredMethod("configuration"),
-			doReturn(mockConfig).when(queueModule)
-		);
-
-		DPCAwsQueueConfiguration awsConfig = new DPCAwsQueueConfiguration();
-		when(mockConfig.getDpcAwsQueueConfiguration()).thenReturn(awsConfig);
-
 		assertSame(awsConfig, queueModule.provideDpcAwsQueueConfiguration());
 	}
 
 	@Test
 	void test_provideCloudWatchAsyncClient() throws NoSuchMethodException {
-		JobQueueModule queueModule = spy(JobQueueModule.class);
-		ReflectionSupport.invokeMethod(
-			DropwizardAwareModule.class.getDeclaredMethod("configuration"),
-			doReturn(mockConfig).when(queueModule)
-		);
-
-		DPCAwsQueueConfiguration awsConfig = mock(DPCAwsQueueConfiguration.class);
-		when(mockConfig.getDpcAwsQueueConfiguration()).thenReturn(awsConfig);
-		when(awsConfig.getAwsRegion()).thenReturn(Region.US_EAST_1.toString());
-
 		assertInstanceOf(CloudWatchAsyncClient.class, queueModule.provideCloudWatchAsyncClient());
 	}
 
 	@Test
 	void test_provideCloudWatchReporter() throws NoSuchMethodException {
-		JobQueueModule queueModule = spy(JobQueueModule.class);
-		ReflectionSupport.invokeMethod(
-			DropwizardAwareModule.class.getDeclaredMethod("configuration"),
-			doReturn(mockConfig).when(queueModule)
-		);
-
-		DPCAwsQueueConfiguration awsConfig = mock(DPCAwsQueueConfiguration.class);
-		when(mockConfig.getDpcAwsQueueConfiguration()).thenReturn(awsConfig);
-		when(awsConfig.getAwsRegion()).thenReturn(Region.US_EAST_1.toString());
-
-		MetricRegistry metricRegistry = new MetricRegistry();
 		CloudWatchAsyncClient client = queueModule.provideCloudWatchAsyncClient();
-
 		assertInstanceOf(CloudWatchReporter.class, queueModule.provideCloudWatchReporter(metricRegistry, client));
 	}
 
 	@Test
 	void test_provideSlf4jReporter() throws NoSuchMethodException {
-		JobQueueModule queueModule = spy(JobQueueModule.class);
-		ReflectionSupport.invokeMethod(
-			DropwizardAwareModule.class.getDeclaredMethod("configuration"),
-			doReturn(mockConfig).when(queueModule)
-		);
-
-		DPCAwsQueueConfiguration awsConfig = mock(DPCAwsQueueConfiguration.class);
-		when(mockConfig.getDpcAwsQueueConfiguration()).thenReturn(awsConfig);
 		when(awsConfig.getQueueSizeMetricName()).thenReturn("metricName");
-
-		MetricRegistry metricRegistry = new MetricRegistry();
 		assertInstanceOf(Slf4jReporter.class, queueModule.provideSlf4jReporter(metricRegistry));
 	}
 
 	@Test
 	void test_provideScheduledReporter_Returns_CloudWatch_Reporter() throws NoSuchMethodException {
-		JobQueueModule queueModule = spy(JobQueueModule.class);
-		ReflectionSupport.invokeMethod(
-			DropwizardAwareModule.class.getDeclaredMethod("configuration"),
-			doReturn(mockConfig).when(queueModule)
-		);
-
-		DPCAwsQueueConfiguration awsConfig = mock(DPCAwsQueueConfiguration.class);
-		when(mockConfig.getDpcAwsQueueConfiguration()).thenReturn(awsConfig);
 		when(awsConfig.getEmitAwsMetrics()).thenReturn(true);
-		when(awsConfig.getAwsRegion()).thenReturn(Region.US_EAST_1.toString());
-
-		MetricRegistry metricRegistry = new MetricRegistry();
 		CloudWatchAsyncClient client = queueModule.provideCloudWatchAsyncClient();
-
 		assertInstanceOf(CloudWatchReporter.class, queueModule.provideScheduledReporter(metricRegistry, client));
 	}
 
 	@Test
 	void test_provideScheduledReporter_Returns_Slf4j_Reporter() throws NoSuchMethodException {
-		JobQueueModule queueModule = spy(JobQueueModule.class);
-		ReflectionSupport.invokeMethod(
-			DropwizardAwareModule.class.getDeclaredMethod("configuration"),
-			doReturn(mockConfig).when(queueModule)
-		);
-
-		DPCAwsQueueConfiguration awsConfig = mock(DPCAwsQueueConfiguration.class);
-		when(mockConfig.getDpcAwsQueueConfiguration()).thenReturn(awsConfig);
 		when(awsConfig.getEmitAwsMetrics()).thenReturn(false);
-		when(awsConfig.getAwsRegion()).thenReturn(Region.US_EAST_1.toString());
-
-		MetricRegistry metricRegistry = new MetricRegistry();
 		CloudWatchAsyncClient client = queueModule.provideCloudWatchAsyncClient();
-
 		assertInstanceOf(Slf4jReporter.class, queueModule.provideScheduledReporter(metricRegistry, client));
 	}
 
