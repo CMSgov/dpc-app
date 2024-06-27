@@ -113,9 +113,12 @@ class JobQueueModuleUnitTest {
 
 	@Test
 	void test_Can_Configure_Distributed_Queue() {
-		when(awsConfig.getEmitAwsMetrics()).thenReturn(false);
+		when(mockConfig.getDpcAwsQueueConfiguration()).thenReturn(null);
 		final Injector injector = Guice.createInjector(queueModule, new MockModule<MockConfig>());
-		assertInstanceOf(DistributedBatchQueue.class, injector.getInstance(IJobQueue.class));
+		IJobQueue queue = injector.getInstance(IJobQueue.class);
+
+		// Can't use assertInstanceOf, because AwsDistributedBatchQueue is an DistributedBatchQueue
+		assertEquals(DistributedBatchQueue.class, queue.getClass());
 	}
 
 	// Dummy configuration class since we can't pull in the real DPCAggregationConfig
