@@ -12,7 +12,7 @@ import javax.inject.Inject;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Extenssion of {@link DistributedBatchQueue} that emits its current queue size as a metric to AWS Cloudwatch.
+ * Extension of {@link DistributedBatchQueue} that emits its current queue size as a metric to AWS Cloudwatch.
  */
 public class AwsDistributedBatchQueue extends DistributedBatchQueue {
 	@Inject
