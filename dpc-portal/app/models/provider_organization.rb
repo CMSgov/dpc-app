@@ -70,7 +70,8 @@ class ProviderOrganization < ApplicationRecord
                                         dpc_api_credential_id: token['id'],
                                         action: :remove)
 
-      logger.error("CredentialAuditLog failure: unable to remove client token for #{token['id']}")
+      logger.error(['CredentialAuditLog failure',
+                    { action: :remove, credential_type: :client_token, dpc_api_credential_id: token['id'] }])
     end
   end
 end

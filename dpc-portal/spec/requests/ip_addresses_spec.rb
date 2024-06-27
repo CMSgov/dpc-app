@@ -8,10 +8,9 @@ RSpec.describe 'IpAddresses', type: :request do
 
   let(:terms_of_service_accepted_by) { create(:user) }
 
-  describe 'common behavior' do
+  it_behaves_like 'a credential resource' do
     let(:credential) { 'ip_address' }
     let(:create_params) { { label: 'Public IP 1', ip_address: '136.226.19.87' } }
-    it_behaves_like 'a credential resource'
   end
 
   describe 'GET /new' do

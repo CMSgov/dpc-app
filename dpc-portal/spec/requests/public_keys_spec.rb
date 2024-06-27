@@ -8,14 +8,13 @@ RSpec.describe 'PublicKeys', type: :request do
 
   let(:terms_of_service_accepted_by) { create(:user) }
 
-  describe 'common behavior' do
+  it_behaves_like 'a credential resource' do
     let(:create_params) do
       { label: 'New Key',
         public_key: file_fixture('stubbed_key.pem').read,
         snippet_signature: 'test snippet signature' }
     end
     let(:credential) { 'public_key' }
-    it_behaves_like 'a credential resource'
   end
 
   describe 'GET /new' do

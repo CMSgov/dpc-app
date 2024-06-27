@@ -16,7 +16,6 @@ module Core
         @delete_path = delete_path
         @obj_name = obj_name
         keys.each do |key|
-          logger.debug(obj[key])
           attributes << format_if_date(obj[key] || key)
         end
       end
