@@ -3,7 +3,7 @@ package gov.cms.dpc.api.resources.v1;
 import ca.uhn.fhir.context.FhirContext;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
-import gov.cms.dpc.api.auth.annotations.Public;
+import gov.cms.dpc.common.annotations.Public;
 import gov.cms.dpc.api.resources.AbstractDefinitionResource;
 import gov.cms.dpc.common.annotations.NoHtml;
 import gov.cms.dpc.fhir.annotations.FHIR;

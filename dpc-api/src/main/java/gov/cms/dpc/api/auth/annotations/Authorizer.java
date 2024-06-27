@@ -1,5 +1,7 @@
 package gov.cms.dpc.api.auth.annotations;
 
+import gov.cms.dpc.common.annotations.Security;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;

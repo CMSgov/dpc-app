@@ -122,7 +122,9 @@ start-dpc-debug: secure-envs
 
 .PHONY: start-app-debug
 start-app-debug: secure-envs
-	@mvn clean install -Pdebug -DskipTests -ntp
+	@docker-compose down
+	@mvn clean compile -Pdebug -DskipTests -ntp
+	@mvn package -Pci -ntp -DskipTests
 	@docker-compose -f docker-compose.yml -f docker-compose.portals.yml up start_core_dependencies
 	@DEBUG_MODE=true USE_BFD_MOCK=false docker-compose -f docker-compose.yml -f docker-compose.portals.yml up start_api_dependencies
 	@DEBUG_MODE=true docker-compose -f docker-compose.yml -f docker-compose.portals.yml up start_api

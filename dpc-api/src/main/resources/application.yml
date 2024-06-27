@@ -100,6 +100,7 @@ bbclient:
 authenticationDisabled: ${AUTH_DISABLED:-false}
 
 attributionURL: ${ATTRIBUTION_URL:-"http://localhost:3500/v1/"}
+attributionHealthCheckURL: ${ATTRIBUTION_HEALTHCHECK_URL:-"http://localhost:9902/healthcheck"}
 exportPath: ${EXPORT_PATH:-"/tmp"}
 
 httpClient:

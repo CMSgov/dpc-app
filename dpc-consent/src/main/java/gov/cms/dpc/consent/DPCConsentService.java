@@ -5,6 +5,7 @@ import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.common.hibernate.consent.DPCConsentHibernateBundle;
 import gov.cms.dpc.common.hibernate.consent.DPCConsentHibernateModule;
 import gov.cms.dpc.common.utils.EnvironmentParser;
+import gov.cms.dpc.common.utils.UrlGenerator;
 import gov.cms.dpc.consent.cli.ConsentCommands;
 import gov.cms.dpc.consent.cli.SeedCommand;
 import gov.cms.dpc.fhir.FHIRModule;
@@ -14,6 +15,7 @@ import io.dropwizard.core.Application;
 import io.dropwizard.core.setup.Bootstrap;
 import io.dropwizard.core.setup.Environment;
 import io.dropwizard.db.PooledDataSourceFactory;
+import io.dropwizard.health.check.http.HttpHealthCheck;
 import io.dropwizard.migrations.MigrationsBundle;
 import io.federecio.dropwizard.swagger.SwaggerBundle;
 import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
@@ -86,5 +88,10 @@ public class DPCConsentService extends Application<DPCConsentConfiguration> {
         EnvironmentParser.getEnvironment("Consent");
         final var listener = new InstrumentedResourceMethodApplicationListener(environment.metrics());
         environment.jersey().getResourceConfig().register(listener);
+
+        // Http health checks
+        environment.healthChecks().register("consent-self-check",
+            new HttpHealthCheck(UrlGenerator.generateVersionUrl(configuration.getServicePort()))
+        );
     }
 }

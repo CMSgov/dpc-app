@@ -4,9 +4,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import gov.cms.dpc.common.hibernate.attribution.IDPCDatabase;
 import gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration;
 import gov.cms.dpc.fhir.configuration.IDPCFHIRConfiguration;
+import io.dropwizard.core.server.DefaultServerFactory;
 import io.dropwizard.db.DataSourceFactory;
-import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
+import io.dropwizard.jetty.HttpConnectorFactory;
 import io.dropwizard.jobs.JobConfiguration;
+import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
@@ -113,5 +115,11 @@ public class DPCAttributionConfiguration extends JobConfiguration implements IDP
 
     public void setLookBackExemptOrgs(List<String> lookBackExemptOrgs) {
         this.lookBackExemptOrgs = lookBackExemptOrgs;
+    }
+
+    public int getServicePort() {
+        DefaultServerFactory serverFactory = (DefaultServerFactory) this.getServerFactory();
+        HttpConnectorFactory connection = (HttpConnectorFactory) serverFactory.getApplicationConnectors().get(0);
+        return connection.getPort();
     }
 }

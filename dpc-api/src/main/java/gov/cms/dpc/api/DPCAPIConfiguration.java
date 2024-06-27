@@ -11,7 +11,9 @@ import gov.cms.dpc.fhir.configuration.IDPCFHIRConfiguration;
 import gov.cms.dpc.macaroons.config.TokenPolicy;
 import io.dropwizard.client.JerseyClientConfiguration;
 import io.dropwizard.core.Configuration;
+import io.dropwizard.core.server.DefaultServerFactory;
 import io.dropwizard.db.DataSourceFactory;
+import io.dropwizard.jetty.HttpConnectorFactory;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
@@ -52,6 +54,10 @@ public class DPCAPIConfiguration extends Configuration implements IDPCDatabase, 
     @NotEmpty
     @NotNull
     private String attributionURL;
+
+    @NotEmpty
+    @NotNull
+    private String attributionHealthCheckURL;
 
     @Valid
     @NotNull
@@ -113,6 +119,10 @@ public class DPCAPIConfiguration extends Configuration implements IDPCDatabase, 
 
     public String getAttributionURL() {
         return attributionURL;
+    }
+
+    public String getAttributionHealthCheckURL() {
+        return attributionHealthCheckURL;
     }
 
     public void setAttributionURL(String attributionURL) {
@@ -177,5 +187,16 @@ public class DPCAPIConfiguration extends Configuration implements IDPCDatabase, 
 
     public void setLookBackExemptOrgs(List<String> lookBackExemptOrgs) {
         this.lookBackExemptOrgs = lookBackExemptOrgs;
+    }
+
+    public int getServicePort() {
+        DefaultServerFactory serverFactory = (DefaultServerFactory) this.getServerFactory();
+        HttpConnectorFactory connection = (HttpConnectorFactory) serverFactory.getApplicationConnectors().get(0);
+        return connection.getPort();
+    }
+
+    public String getAppContextPath() {
+        DefaultServerFactory serverFactory = (DefaultServerFactory) this.getServerFactory();
+        return serverFactory.getApplicationContextPath();
     }
 }

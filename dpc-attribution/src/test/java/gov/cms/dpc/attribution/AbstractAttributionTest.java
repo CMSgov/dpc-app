@@ -28,7 +28,8 @@ public abstract class AbstractAttributionTest {
 
     protected static final DropwizardTestSupport<DPCAttributionConfiguration> APPLICATION =
             new DropwizardTestSupport<>(DPCAttributionService.class, configPath,
-                    ConfigOverride.config("server.applicationConnectors[0].port", "3727"));
+                    ConfigOverride.config("server.applicationConnectors[0].port", "3727"),
+                    ConfigOverride.config("server.adminConnectors[0].port", "3728"));
 
     protected static final String ORGANIZATION_ID = "0c527d2e-2e8a-4808-b11d-0fa06baf8254";
 

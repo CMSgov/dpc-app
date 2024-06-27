@@ -19,7 +19,7 @@ server:
       port: 8080
   adminConnectors:
     - type: http
-      port: 9900
+      port: 9902
   requestLog:
     appenders:
       - type: console

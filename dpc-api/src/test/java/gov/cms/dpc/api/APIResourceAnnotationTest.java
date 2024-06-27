@@ -6,7 +6,7 @@ import com.google.common.collect.ImmutableSet;
 import gov.cms.dpc.api.auth.annotations.AdminOperation;
 import gov.cms.dpc.api.auth.annotations.Authorizer;
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
-import gov.cms.dpc.api.auth.annotations.Public;
+import gov.cms.dpc.common.annotations.Public;
 import gov.cms.dpc.api.resources.v1.BaseResource;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import io.swagger.annotations.ApiOperation;

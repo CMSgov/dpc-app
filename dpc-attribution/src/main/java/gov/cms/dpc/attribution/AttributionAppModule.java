@@ -26,6 +26,7 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
         binder.bind(PractitionerResource.class);
         binder.bind(GroupResource.class);
         binder.bind(OrganizationResource.class);
+        binder.bind(BaseResource.class);
 
         // DAOs
         binder.bind(EndpointDAO.class);
@@ -43,7 +44,6 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
         // Healthchecks
         // Additional health-checks can be added here
         // By default, Dropwizard adds a check for Hibernate and each additional database (e.g. auth, queue, etc)
-
     }
 
     @Provides
