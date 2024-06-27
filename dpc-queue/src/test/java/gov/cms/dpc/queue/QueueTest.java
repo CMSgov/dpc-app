@@ -1,9 +1,13 @@
 package gov.cms.dpc.queue;
 
+import com.codahale.metrics.MetricFilter;
 import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.ScheduledReporter;
+import com.codahale.metrics.Slf4jReporter;
 import gov.cms.dpc.common.hibernate.queue.DPCQueueManagedSessionFactory;
 import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.DPCResourceType;
+import gov.cms.dpc.queue.config.DPCAwsQueueConfiguration;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatchFile;
@@ -34,7 +38,7 @@ class QueueTest {
 
     //    private JobQueue queue;
     private SessionFactory sessionFactory;
-    private final List<String> queues = List.of("memory", "distributed");
+    private final List<String> queues = List.of("memory", "distributed", "aws");
     private final UUID aggregatorID = UUID.randomUUID();
     private final UUID orgID = UUID.randomUUID();
     private final String orgNPI = NPIUtil.generateNPI();
@@ -55,6 +59,30 @@ class QueueTest {
                         final Configuration conf = new Configuration();
                         sessionFactory = conf.configure().buildSessionFactory();
                         return new DistributedBatchQueue(new DPCQueueManagedSessionFactory(sessionFactory), 100, new MetricRegistry());
+                    } else if(queueName.equals("aws")) {
+                        MetricRegistry metricRegistry = new MetricRegistry();
+
+                        ScheduledReporter reporter = Slf4jReporter.forRegistry(metricRegistry)
+                            .filter(MetricFilter.contains("metricName"))
+                            .withLoggingLevel(Slf4jReporter.LoggingLevel.DEBUG)
+                            .build();
+
+                        DPCAwsQueueConfiguration awsConfig = new DPCAwsQueueConfiguration();
+                        awsConfig
+                            .setQueueSizeMetricName("metricName")
+                            .setEnvironment("test")
+                            .setAwsReporitingInterval(10);
+
+                        final Configuration conf = new Configuration();
+                        sessionFactory = conf.configure().buildSessionFactory();
+
+                        return new AwsDistributedBatchQueue(
+                            new DPCQueueManagedSessionFactory(sessionFactory),
+                            100,
+                            metricRegistry,
+                            reporter,
+                            awsConfig
+                        );
                     } else {
                         throw new IllegalArgumentException("I'm not that kind of queue");
                     }

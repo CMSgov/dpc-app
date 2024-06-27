@@ -2,10 +2,17 @@ package gov.cms.dpc.queue;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Slf4jReporter;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.Provides;
+import gov.cms.dpc.common.annotations.ExportPath;
+import gov.cms.dpc.common.annotations.JobTimeout;
+import gov.cms.dpc.common.hibernate.queue.DPCQueueManagedSessionFactory;
 import gov.cms.dpc.queue.config.DPCAwsQueueConfiguration;
 import gov.cms.dpc.queue.config.DPCQueueConfig;
 import io.dropwizard.core.Configuration;
 import io.github.azagniotov.metrics.reporter.cloudwatch.CloudWatchReporter;
+import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.support.ReflectionSupport;
@@ -15,6 +22,7 @@ import ru.vyarus.dropwizard.guice.module.support.DropwizardAwareModule;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.cloudwatch.CloudWatchAsyncClient;
 
+import javax.inject.Singleton;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -24,7 +32,6 @@ class JobQueueModuleUnitTest {
 	JobQueueModule queueModule = spy(JobQueueModule.class);
 	DPCAwsQueueConfiguration awsConfig = mock(DPCAwsQueueConfiguration.class);
 	MockConfig mockConfig = mock(MockConfig.class);
-	DPCAwsQueueConfiguration awsQueueConfig = mock(DPCAwsQueueConfiguration.class);
 
 	MetricRegistry metricRegistry = new MetricRegistry();
 
@@ -37,6 +44,10 @@ class JobQueueModuleUnitTest {
 
 		when(mockConfig.getDpcAwsQueueConfiguration()).thenReturn(awsConfig);
 		when(awsConfig.getAwsRegion()).thenReturn(Region.US_EAST_1.toString());
+		when(awsConfig.getEnvironment()).thenReturn("env");
+		when(awsConfig.getQueueSizeMetricName()).thenReturn("metricName");
+		when(awsConfig.getAwsNamespace()).thenReturn("namespace");
+		when(awsConfig.getAwsReportingInterval()).thenReturn(15);
 	}
 
 	@Test
@@ -93,6 +104,20 @@ class JobQueueModuleUnitTest {
 		assertInstanceOf(Slf4jReporter.class, queueModule.provideScheduledReporter(metricRegistry, client));
 	}
 
+	@Test
+	void test_Can_Configure_AWS_Queue() {
+		when(awsConfig.getEmitAwsMetrics()).thenReturn(true);
+		final Injector injector = Guice.createInjector(queueModule, new MockModule<MockConfig>());
+		assertInstanceOf(AwsDistributedBatchQueue.class, injector.getInstance(IJobQueue.class));
+	}
+
+	@Test
+	void test_Can_Configure_Distributed_Queue() {
+		when(awsConfig.getEmitAwsMetrics()).thenReturn(false);
+		final Injector injector = Guice.createInjector(queueModule, new MockModule<MockConfig>());
+		assertInstanceOf(DistributedBatchQueue.class, injector.getInstance(IJobQueue.class));
+	}
+
 	// Dummy configuration class since we can't pull in the real DPCAggregationConfig
 	private class MockConfig extends Configuration implements DPCQueueConfig {
 		@Override
@@ -102,7 +127,29 @@ class JobQueueModuleUnitTest {
 
 		@Override
 		public DPCAwsQueueConfiguration getDpcAwsQueueConfiguration() {
-			return null;
+			return awsConfig;
+		}
+	}
+
+	// Dummy Module that implements the providers we need to build our queues.
+	private class MockModule <T extends Configuration & DPCQueueConfig> extends DropwizardAwareModule<T> {
+		@Provides
+		@JobTimeout
+		public int provideJobTimeoutInSeconds() {
+			return 100;
+		}
+
+		@Provides
+		@ExportPath
+		public String provideExportPath() {
+			return "/path";
+		}
+
+		@Provides
+		@Singleton
+		DPCQueueManagedSessionFactory getSessionFactory() {
+			SessionFactory factory = mock(SessionFactory.class);
+			return new DPCQueueManagedSessionFactory(factory);
 		}
 	}
 }
