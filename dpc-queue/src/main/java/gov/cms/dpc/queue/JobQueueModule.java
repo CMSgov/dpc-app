@@ -1,9 +1,6 @@
 package gov.cms.dpc.queue;
 
-import com.codahale.metrics.ConsoleReporter;
-import com.codahale.metrics.MetricFilter;
-import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.ScheduledReporter;
+import com.codahale.metrics.*;
 import com.google.inject.Binder;
 import com.google.inject.Inject;
 import com.google.inject.Provides;
@@ -94,28 +91,27 @@ public class JobQueueModule<T extends Configuration & DPCQueueConfig> extends Dr
             configuration().getDpcAwsQueueConfiguration().getAwsNamespace()
         )
         .withReportRawCountValue()
-        .withZeroValuesSubmission()
         .filter(MetricFilter.contains(configuration().getDpcAwsQueueConfiguration().getQueueSizeMetricName()))
         .build();
     }
 
     @Provides
     @Inject
-    ConsoleReporter provideConsoleReporter(MetricRegistry metricRegistry) {
-        return ConsoleReporter.forRegistry(metricRegistry)
-            .filter(MetricFilter.contains("JobQueueBatchSize"))
+    Slf4jReporter provideSlf4jReporter(MetricRegistry metricRegistry) {
+        return Slf4jReporter.forRegistry(metricRegistry)
+            .filter(MetricFilter.contains(configuration().getDpcAwsQueueConfiguration().getQueueSizeMetricName()))
+            .withLoggingLevel(Slf4jReporter.LoggingLevel.DEBUG)
             .build();
     }
 
     @Provides
     @Inject
     ScheduledReporter provideScheduledReporter(MetricRegistry metricRegistry, CloudWatchAsyncClient cloudWatchAsyncClient) {
-        // If AwsMetrics are turned off, use a reporter that writes to the console instead of AWS.
-        // The logs are kind of ugly, but help with debugging.
+        // If AwsMetrics are turned off, use a reporter that writes metrics to our logs instead.
         if( configuration().getDpcAwsQueueConfiguration().getEmitAwsMetrics() ) {
             return provideCloudWatchReporter(metricRegistry, cloudWatchAsyncClient);
         } else {
-            return provideConsoleReporter(metricRegistry);
+            return provideSlf4jReporter(metricRegistry);
         }
     }
 }
