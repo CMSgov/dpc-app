@@ -23,7 +23,7 @@ import static org.mockito.Mockito.*;
 class JobQueueModuleUnitTest {
 	JobQueueModule queueModule = spy(JobQueueModule.class);
 	DPCAwsQueueConfiguration awsConfig = mock(DPCAwsQueueConfiguration.class);
-	MockConfig mockConfig = spy(new MockConfig());
+	MockConfig mockConfig = mock(MockConfig.class);
 	DPCAwsQueueConfiguration awsQueueConfig = mock(DPCAwsQueueConfiguration.class);
 
 	MetricRegistry metricRegistry = new MetricRegistry();
