@@ -43,7 +43,7 @@ class LoginDotGovController < Devise::OmniauthCallbacksController
   end
 
   def path(user, auth)
-    if auth.extra.raw_info.ial == 'http://idmanagement.gov/ns/assurance/ial/1' && user.blank?
+    if user.blank? && auth.extra.raw_info.ial == 'http://idmanagement.gov/ns/assurance/ial/1'
       flash[:alert] = 'You must have an account to sign in.'
       return new_user_session_url
     end

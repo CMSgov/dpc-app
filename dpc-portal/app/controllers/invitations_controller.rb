@@ -5,7 +5,7 @@ class InvitationsController < ApplicationController
   before_action :load_organization
   before_action :load_invitation
   before_action :validate_invitation, except: %i[renew]
-  before_action :user_logged_in, except: %i[login renew show]
+  before_action :check_for_token, except: %i[login renew show]
   before_action :invitation_matches_user, only: %i[accept]
   before_action :invitation_matches_conditions, only: %i[confirm]
 
@@ -80,16 +80,16 @@ class InvitationsController < ApplicationController
   end
 
   def user
-    auth = UserInfoService.new.user_info(session)
-    User.find_or_create_by(provider: :openid_connect, uid: auth['sub']) do |user_to_create|
-      user_to_create.email = auth['email']
+    user_info = UserInfoService.new.user_info(session)
+    User.find_or_create_by(provider: :openid_connect, uid: user_info['sub']) do |user_to_create|
+      user_to_create.email = @invitation.invited_email
       # Assign random, acceptable password to keep Devise happy.
       # User should log in only through IdP
       user_to_create.password = user_to_create.password_confirmation = Devise.friendly_token[0, 20]
     end
   end
 
-  def user_logged_in
+  def check_for_token
     if session[:login_dot_gov_token].present? &&
        session[:login_dot_gov_token_exp].present? &&
        session[:login_dot_gov_token_exp] > Time.now
