@@ -1,6 +1,9 @@
 package gov.cms.dpc.queue;
 
-import com.codahale.metrics.*;
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.MetricFilter;
+import com.codahale.metrics.Slf4jReporter;
+import com.codahale.metrics.ScheduledReporter;
 import com.google.inject.Binder;
 import com.google.inject.Inject;
 import com.google.inject.Provides;
@@ -42,15 +45,16 @@ public class JobQueueModule<T extends Configuration & DPCQueueConfig> extends Dr
                     .to(MemoryBatchQueue.class)
                     .in(Scopes.SINGLETON);
 
-        } else if (configuration().getDpcAwsQueueConfiguration() == null) {
-            // No AWS config, running in dpc-api, use a distributed queue
-            binder.bind(IJobQueue.class)
-                    .to(DistributedBatchQueue.class)
-                    .in(Scopes.SINGLETON);
-        } else {
+        } else if (configuration().getDpcAwsQueueConfiguration() != null) {
             // Has AWS config, running in dpc-aggregation, use AWS distributed queue
             binder.bind(IJobQueue.class)
                 .to(AwsDistributedBatchQueue.class)
+                .in(Scopes.SINGLETON);
+
+        } else {
+            // No AWS config, running in dpc-api, use a distributed queue
+            binder.bind(IJobQueue.class)
+                .to(DistributedBatchQueue.class)
                 .in(Scopes.SINGLETON);
         }
 
