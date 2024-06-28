@@ -1,32 +1,21 @@
+<%= render(Core::Navigation::StepIndicatorComponent.new(Invitation::STEPS, 1)) if @invitation.authorized_official? %>
 <div>
-  <h1>Accept organization invite</h1>
-  <div class="usa-alert usa-alert--info margin-bottom-4">
-    <div class="usa-alert__body">
-      <h4 class="usa-alert__heading">Key information</h4>
-      <p class="usa-alert__text">
-        <ul>
-          <li>Info one</li>
-          <li>Info two</li>
-          <li>Info three</li>
-          <li>Info four</li>
-        </ul>
-      </p>
-    </div>
-  </div>
+  <h1>Identity Verified</h1>
   <div>
     <% if @invitation.credential_delegate? %>
     <h2>Provide invite code</h2>
     <p>You are invited to <%= @organization.name %> by the Authorized Official (AO),
       <%= @invitation.invited_by&.given_name %> <%= @invitation.invited_by&.family_name %>.</p>
-    <%= form_tag confirm_organization_invitation_path(@organization, @invitation), method: :post, class: ['usa-form'], id: "cd-accept-form" do %>
+      <%= form_tag confirm_organization_invitation_path(@organization, @invitation), method: :post, class: ['usa-form'], id: "cd-accept-form" do %>
       <%= render(Core::Form::TextInputComponent.new(label: 'Enter the invite code:',
           attribute: :verification_code,
           error_msg: @invitation.errors[:verification_code]&.first,
           input_options: { maxlength: 6 })) %>
-      <%= submit_tag "Accept invite", class: "usa-button", data: { test: "form:submit" } %>
-    <% end %>
+      <%= submit_tag "Validate invite code", class: "usa-button", data: { test: "form:submit" } %>
+      <% end %>
     <% else %>
-    <%= render Core::Button::ButtonComponent.new(label: "Manage #{@organization.name}",
+    <p>Press the button below to verify that you are an authorized official for <strong><%= @organization.name %></strong>.</p>
+    <%= render Core::Button::ButtonComponent.new(label: "Verify provider organization",
 	destination: confirm_organization_invitation_path(@organization, @invitation),
 	method: :post) %>
     <% end %>

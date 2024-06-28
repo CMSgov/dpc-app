@@ -1,11 +1,18 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
+require 'support/credential_resource_shared_examples'
 
 RSpec.describe 'ClientTokens', type: :request do
   include DpcClientSupport
 
   let(:terms_of_service_accepted_by) { create(:user) }
+
+  it_behaves_like 'a credential resource' do
+    let(:create_params) { { label: 'New Token' } }
+    let(:credential) { 'client_token' }
+  end
+
   describe 'GET /new' do
     context 'not logged in' do
       it 'redirects to login' do

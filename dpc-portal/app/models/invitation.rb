@@ -17,6 +17,9 @@ class Invitation < ApplicationRecord
   belongs_to :provider_organization, required: true
   belongs_to :invited_by, class_name: 'User', required: false
 
+  STEPS = ['Connect with Login.gov', 'Verify your identity', 'Verify the provider organization',
+           'Complete Registration'].freeze
+
   def phone_raw=(nbr)
     @phone_raw = nbr
     self.invited_phone = @phone_raw.tr('^0-9', '')
@@ -56,8 +59,17 @@ class Invitation < ApplicationRecord
     if credential_delegate?
       cd_match?(user_info)
     elsif authorized_official?
-      ao_match?(user_info)
+      email_match?(user_info)
     end
+  end
+
+  def ao_match?(user_info)
+    service = AoVerificationService.new
+    result = service.check_eligibility(provider_organization.npi,
+                                       Digest::SHA2.new(256).hexdigest(user_info['social_security_number']))
+    raise InvitationError, result[:failure_reason] unless result[:success]
+
+    result[:success]
   end
 
   def unacceptable_reason
@@ -70,6 +82,13 @@ class Invitation < ApplicationRecord
     end
   end
 
+  def expires_in
+    diff = 48.hours - (Time.now - created_at).round
+    hours, seconds = diff.divmod(1.hour)
+    minutes = seconds / 1.minute
+    [hours, minutes]
+  end
+
   private
 
   def cd_match?(user_info)
@@ -78,6 +97,10 @@ class Invitation < ApplicationRecord
 
     return false unless phone_match(user_info)
 
+    email_match?(user_info)
+  end
+
+  def email_match?(user_info)
     user_info['all_emails'].any? { |email| invited_email.downcase == email.downcase }
   end
 
@@ -94,15 +117,6 @@ class Invitation < ApplicationRecord
     end
   end
   # rubocop:enable Metrics/AbcSize
-
-  def ao_match?(user_info)
-    service = AoVerificationService.new
-    result = service.check_eligibility(provider_organization.npi,
-                                       Digest::SHA2.new(256).hexdigest(user_info['social_security_number']))
-    raise InvitationError, result[:failure_reason] unless result[:success]
-
-    result[:success]
-  end
 
   def cannot_cancel_accepted
     return unless status_was == 'accepted' && cancelled?

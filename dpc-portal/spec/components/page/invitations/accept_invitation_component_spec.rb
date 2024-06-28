@@ -23,17 +23,6 @@ RSpec.describe Page::Invitations::AcceptInvitationComponent, type: :component do
       let(:component) { described_class.new(org, cd_invite) }
 
       context 'New form' do
-        it 'should match header' do
-          header = <<~HTML
-            <h1>Accept organization invite</h1>
-              <div class="usa-alert usa-alert--info margin-bottom-4">
-                <div class="usa-alert__body">
-                  <h4 class="usa-alert__heading">Key information</h4>
-                  <p class="usa-alert__text">
-          HTML
-          is_expected.to include(normalize_space(header))
-        end
-
         it 'should match form tag' do
           form_url = "/portal/organizations/#{org.path_id}/invitations/#{cd_invite.id}/confirm"
           form_tag = ['<form class="usa-form" id="cd-accept-form"',
@@ -86,6 +75,12 @@ RSpec.describe Page::Invitations::AcceptInvitationComponent, type: :component do
         form_method_action = %(method="post" action="#{form_url}")
         is_expected.to include(form_method_action)
       end
+
+      it 'should have step component at step 2' do
+        expect(page).to have_selector('.usa-step-indicator__current-step')
+        expect(page.find('.usa-step-indicator__current-step').text).to eq '2'
+      end
+
       it 'should not have verification_code stanza' do
         verification_code = <<~HTML
           <div class="margin-bottom-4">
