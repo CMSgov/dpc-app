@@ -201,6 +201,7 @@ public class DPCAPIConfiguration extends Configuration implements IDPCDatabase, 
     @Override
     public DPCAwsQueueConfiguration getDpcAwsQueueConfiguration() {
         return null;
+    }
 
     public int getServicePort() {
         DefaultServerFactory serverFactory = (DefaultServerFactory) this.getServerFactory();
