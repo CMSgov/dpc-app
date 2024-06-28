@@ -372,16 +372,18 @@ RSpec.describe Invitation, type: :model do
     end
 
     describe :match_user do
-      let(:ao_invite) { build(:invitation, :ao) }
-      it 'should match user if ssn correct' do
-        user_info = { 'social_security_number' => '900111111' }
+      let(:ao_invite) { build(:invitation, :ao, invited_email: 'bob@example.com') }
+      it 'should match user if email match' do
+        user_info = { 'all_emails' => [
+          'bob@testy.com',
+          'bob@example.com'
+        ] }
+
         expect(ao_invite.match_user?(user_info)).to eq true
       end
-      it 'should not match user if ssn not correct' do
-        user_info = { 'social_security_number' => '900111112' }
-        expect do
-          ao_invite.match_user?(user_info)
-        end.to raise_error(InvitationError, 'user_not_authorized_official')
+      it 'should not match user if no email match' do
+        user_info = { 'all_emails' => ['tim@example.com'] }
+        expect(ao_invite.match_user?(user_info)).to eq false
       end
     end
   end
@@ -471,6 +473,17 @@ RSpec.describe Invitation, type: :model do
         end.to change { Invitation.count }.by 0
         expect(invitation.reload.status).to eq old_status
       end
+    end
+  end
+
+  describe :expires_in do
+    after { Timecop.return }
+    let!(:invitation) { create(:invitation, :cd, created_at: 24.hours.ago) }
+    it 'should expire in 23 hours 10 minutes' do
+      Timecop.travel(2999.seconds.from_now)
+      hours, minutes = invitation.expires_in
+      expect(hours).to eq 23
+      expect(minutes).to eq 10
     end
   end
 end

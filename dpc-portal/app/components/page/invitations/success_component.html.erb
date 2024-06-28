@@ -1,0 +1,5 @@
+<%= render(Core::Navigation::StepIndicatorComponent.new(Invitation::STEPS, 3)) if @invitation.authorized_official? %>
+<div>
+  <h1>Registration completed</h1>
+</div>
+

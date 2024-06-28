@@ -1,0 +1,8 @@
+<div>
+<h1>You have been invited</h1>
+<p>This is an invitation to connect <strong><%= @organization.name %></strong> with Data at the Point of Care.</p>
+<p class="font-body-3xs">This invitation will expire in <strong><%= "#{@hours} hours and" if @hours %> <%= @minutes %> minutes</strong>.
+    <%= render Core::Button::ButtonComponent.new(label: 'Start',
+	destination: accept_organization_invitation_path(@organization, @invitation),
+	method: :get) %>
+</div>

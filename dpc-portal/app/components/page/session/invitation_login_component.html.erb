@@ -1,3 +1,4 @@
+<%= render(Core::Navigation::StepIndicatorComponent.new(Invitation::STEPS, 0)) if @invitation.authorized_official? %>
 <section class="usa-section">
       <h1 class="desktop:display-none font-sans-lg margin-bottom-4 tablet:margin-top-neg-3">
 	Invitation Login
