@@ -3,6 +3,36 @@
 require 'rails_helper'
 
 RSpec.describe 'LoginDotGov', type: :request do
+  RSpec.shared_examples 'an openid client' do
+    context 'user exists' do
+      before { create(:user, uid: '12345', provider: 'openid_connect', email: 'bob@example.com') }
+      it 'should sign in a user' do
+        post '/users/auth/openid_connect'
+        follow_redirect!
+        expect(response.location).to eq organizations_url
+        expect(response).to be_redirect
+        follow_redirect!
+        expect(response).to be_ok
+      end
+      it 'should not add another user' do
+        expect(User.where(uid: '12345', provider: 'openid_connect').count).to eq 1
+        expect do
+          post '/users/auth/openid_connect'
+          follow_redirect!
+        end.to change { User.count }.by(0)
+      end
+    end
+
+    context 'user does not exist' do
+      it 'should not persist user' do
+        expect do
+          post '/users/auth/openid_connect'
+          follow_redirect!
+        end.to change { User.count }.by(0)
+      end
+    end
+  end
+
   describe 'POST /users/auth/openid_connect' do
     let(:token) { 'bearer-token' }
     context 'IAL/2' do
@@ -20,28 +50,19 @@ RSpec.describe 'LoginDotGov', type: :request do
                                                         ial: 'http://idmanagement.gov/ns/assurance/ial/2' } } })
       end
 
+      it_behaves_like 'an openid client'
+
       context :user_exists do
         before { create(:user, uid: '12345', provider: 'openid_connect', email: 'bob@example.com') }
-        it 'signs in a user' do
-          post '/users/auth/openid_connect'
-          follow_redirect!
-          expect(response.location).to eq organizations_url
-        end
-        it 'does not add another user' do
-          expect(User.where(uid: '12345', provider: 'openid_connect').count).to eq 1
+        it 'updates user names' do
           expect do
             post '/users/auth/openid_connect'
             follow_redirect!
-          end.to change { User.count }.by(0)
-        end
-        it 'adds user names' do
-          expect(User.where(uid: '12345', provider: 'openid_connect', email: 'bob@example.com', given_name: 'Bob',
-                            family_name: 'Hoskins').count).to eq 0
-          post '/users/auth/openid_connect'
-          follow_redirect!
+          end.to change {
+                   User.where(uid: '12345', provider: 'openid_connect', email: 'bob@example.com', given_name: 'Bob',
+                              family_name: 'Hoskins').count
+                 }.by 1
           expect(response.location).to eq organizations_url
-          expect(User.where(uid: '12345', provider: 'openid_connect', email: 'bob@example.com', given_name: 'Bob',
-                            family_name: 'Hoskins').count).to eq 1
         end
 
         it 'sets authentication token' do
@@ -52,27 +73,24 @@ RSpec.describe 'LoginDotGov', type: :request do
           expect(request.session[:login_dot_gov_token_exp]).to be_within(1.second).of 899.seconds.from_now
         end
       end
+
       context :user_does_not_exist do
-        it 'does not persist user' do
-          expect do
-            post '/users/auth/openid_connect'
-            follow_redirect!
-          end.to change { User.count }.by(0)
-        end
-        it 'does not sign in user if not exist' do
+        it 'does not sign in user' do
           post '/users/auth/openid_connect'
           follow_redirect!
           expect(response.location).to eq organizations_url
           expect(response).to be_redirect
+          follow_redirect!
+          expect(response).to be_redirect
         end
-      end
 
-      it 'sets authentication token' do
-        post '/users/auth/openid_connect'
-        follow_redirect!
-        expect(request.session[:login_dot_gov_token]).to eq token
-        expect(request.session[:login_dot_gov_token_exp]).to_not be_nil
-        expect(request.session[:login_dot_gov_token_exp]).to be_within(1.second).of 899.seconds.from_now
+        it 'sets authentication token' do
+          post '/users/auth/openid_connect'
+          follow_redirect!
+          expect(request.session[:login_dot_gov_token]).to eq token
+          expect(request.session[:login_dot_gov_token_exp]).to_not be_nil
+          expect(request.session[:login_dot_gov_token_exp]).to be_within(1.second).of 899.seconds.from_now
+        end
       end
     end
 
@@ -86,24 +104,13 @@ RSpec.describe 'LoginDotGov', type: :request do
                                                         ial: 'http://idmanagement.gov/ns/assurance/ial/1' } } })
       end
 
+      it_behaves_like 'an openid client'
+
       context :user_exists do
         before do
           create(:user, uid: '12345', provider: 'openid_connect', email: 'bob@example.com', given_name: 'Bob',
                         family_name: 'Hoskins')
         end
-        it 'signs in a user' do
-          post '/users/auth/openid_connect'
-          follow_redirect!
-          expect(response.location).to eq organizations_url
-        end
-
-        it 'does not add another user' do
-          expect do
-            post '/users/auth/openid_connect'
-            follow_redirect!
-          end.to change { User.count }.by(0)
-        end
-
         it 'does not update user names' do
           expect(User.where(uid: '12345', provider: 'openid_connect', email: 'bob@example.com', given_name: 'Bob',
                             family_name: 'Hoskins').count).to eq 1
@@ -131,13 +138,6 @@ RSpec.describe 'LoginDotGov', type: :request do
           expect(response).to be_redirect
         end
 
-        it 'does not persist user' do
-          expect do
-            post '/users/auth/openid_connect'
-            follow_redirect!
-          end.to change { User.count }.by(0)
-        end
-
         it 'does not set authentication token' do
           post '/users/auth/openid_connect'
           follow_redirect!
@@ -147,10 +147,11 @@ RSpec.describe 'LoginDotGov', type: :request do
       end
     end
   end
+
   describe 'Get /users/auth/failure' do
-    it 'succeeds' do
+    it 'should succeed' do
       get '/users/auth/failure'
-      expect(response).to have_http_status(200)
+      expect(response).to be_ok
     end
   end
 end
