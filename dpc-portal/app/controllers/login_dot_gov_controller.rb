@@ -7,13 +7,13 @@ class LoginDotGovController < Devise::OmniauthCallbacksController
   def openid_connect
     auth = request.env['omniauth.auth']
 
-    user = User.find_or_create_by(provider: auth.provider, uid: auth.uid) do |user_to_create|
-      assign_user_properties(user_to_create, auth)
+    user = User.find_by(provider: auth.provider, uid: auth.uid)
+    if user
+      sign_in(:user, user)
+      session[:logged_in_at] = Time.now
     end
     ial_2_actions(user, auth)
-    sign_in(:user, user)
-    session[:logged_in_at] = Time.now
-    redirect_to session[:user_return_to] || organizations_path
+    redirect_to path(user, auth)
   end
 
   def failure
@@ -28,19 +28,25 @@ class LoginDotGovController < Devise::OmniauthCallbacksController
 
   private
 
-  def ial_2_actions(user, auth)
-    data = auth.extra.raw_info
-    return unless data.ial == 'http://idmanagement.gov/ns/assurance/ial/2'
-
-    session[:login_dot_gov_token] = auth.credentials.token
-    session[:login_dot_gov_token_exp] = auth.credentials.expires_in.seconds.from_now
-    user.update(given_name: data.given_name, family_name: data.family_name)
+  def maybe_update_user(user, data)
+    user&.update(given_name: data.given_name, family_name: data.family_name)
   end
 
-  def assign_user_properties(user, auth)
-    user.email = auth.info.email
-    # Assign random, acceptable password to keep Devise happy.
-    # User should log in only through IdP
-    user.password = user.password_confirmation = Devise.friendly_token[0, 20]
+  def ial_2_actions(user, auth)
+    data = auth.extra.raw_info
+
+    return unless data.ial == 'http://idmanagement.gov/ns/assurance/ial/2'
+
+    maybe_update_user(user, data)
+    session[:login_dot_gov_token] = auth.credentials.token
+    session[:login_dot_gov_token_exp] = auth.credentials.expires_in.seconds.from_now
+  end
+
+  def path(user, auth)
+    if auth.extra.raw_info.ial == 'http://idmanagement.gov/ns/assurance/ial/1' && user.blank?
+      flash[:alert] = 'You must have an account to sign in.'
+      return new_user_session_url
+    end
+    session.delete(:user_return_to) || organizations_path
   end
 end

@@ -5,7 +5,7 @@ class InvitationsController < ApplicationController
   before_action :load_organization
   before_action :load_invitation
   before_action :validate_invitation, except: %i[renew]
-  before_action :authenticate_user!, except: %i[login renew show]
+  before_action :user_logged_in, except: %i[login renew show]
   before_action :invitation_matches_user, only: %i[accept]
   before_action :invitation_matches_conditions, only: %i[confirm]
 
@@ -68,19 +68,33 @@ class InvitationsController < ApplicationController
   private
 
   def create_cd_org_link
-    CdOrgLink.create!(user: current_user, provider_organization: @organization, invitation: @invitation)
+    CdOrgLink.create!(user:, provider_organization: @organization, invitation: @invitation)
     @invitation.accept!
     flash[:notice] = "Invitation accepted. You can now manage this organization's credentials. Learn more."
   end
 
   def create_ao_org_link
-    AoOrgLink.create!(user: current_user, provider_organization: @organization, invitation: @invitation)
+    AoOrgLink.create!(user:, provider_organization: @organization, invitation: @invitation)
     @invitation.accept!
     flash[:notice] = 'Invitation accepted.'
   end
 
-  def authenticate_user!
-    return if current_user
+  def user
+    auth = UserInfoService.new.user_info(session)
+    User.find_or_create_by(provider: :openid_connect, uid: auth['sub']) do |user_to_create|
+      user_to_create.email = auth['email']
+      # Assign random, acceptable password to keep Devise happy.
+      # User should log in only through IdP
+      user_to_create.password = user_to_create.password_confirmation = Devise.friendly_token[0, 20]
+    end
+  end
+
+  def user_logged_in
+    if session[:login_dot_gov_token].present? &&
+       session[:login_dot_gov_token_exp].present? &&
+       session[:login_dot_gov_token_exp] > Time.now
+      return
+    end
 
     render(Page::Session::InvitationLoginComponent.new(@invitation))
   end
