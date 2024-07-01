@@ -5,19 +5,30 @@ class InvitationsController < ApplicationController
   before_action :load_organization
   before_action :load_invitation
   before_action :validate_invitation, except: %i[renew]
-  before_action :authenticate_user!, except: %i[login renew]
-  before_action :invitation_matches_user, only: %i[confirm]
+  before_action :authenticate_user!, except: %i[login renew show]
+  before_action :invitation_matches_user, only: %i[accept]
+  before_action :invitation_matches_conditions, only: %i[confirm]
+
+  def show
+    render(Page::Invitations::StartComponent.new(@organization, @invitation))
+  end
 
   def accept
-    if current_user.email != @invitation.invited_email
-      return render(Page::Invitations::BadInvitationComponent.new(@invitation, 'pii_mismatch', 'error'),
-                    status: :forbidden)
-    end
-
+    session["invitation_status_#{@invitation.id}"] = 'identity_verified'
     render(Page::Invitations::AcceptInvitationComponent.new(@organization, @invitation))
   end
 
   def confirm
+    session["invitation_status_#{@invitation.id}"] = 'conditions_verified'
+    render(Page::Invitations::RegisterComponent.new(@organization, @invitation))
+  end
+
+  def register
+    unless session["invitation_status_#{@invitation.id}"] == 'conditions_verified'
+      return redirect_to accept_organization_invitation_url(@organization,
+                                                            @invitation)
+    end
+
     if @invitation.credential_delegate?
       create_cd_org_link
     elsif @invitation.authorized_official?
@@ -26,7 +37,8 @@ class InvitationsController < ApplicationController
       return render(Page::Invitations::BadInvitationComponent.new(@invitation, 'invalid', 'warning'),
                     status: :unprocessable_entity)
     end
-    redirect_to organization_path(@organization)
+    session.delete("invitation_status_#{@invitation.id}")
+    render(Page::Invitations::SuccessComponent.new(@organization, @invitation))
   end
 
   def login
@@ -76,12 +88,23 @@ class InvitationsController < ApplicationController
   def invitation_matches_user
     user_info = UserInfoService.new.user_info(session)
     unless @invitation.match_user?(user_info)
-      return render(Page::Invitations::BadInvitationComponent.new(@invitation, 'pii_mismatch', 'error'),
-                    status: :forbidden)
+      render(Page::Invitations::BadInvitationComponent.new(@invitation, 'pii_mismatch', 'error'),
+             status: :forbidden)
     end
-    check_code if @invitation.credential_delegate?
   rescue UserInfoServiceError => e
     handle_user_info_service_error(e)
+  end
+
+  def invitation_matches_conditions
+    unless session["invitation_status_#{@invitation.id}"] == 'identity_verified'
+      return redirect_to accept_organization_invitation_url(@organization,
+                                                            @invitation)
+    end
+
+    return check_code if @invitation.credential_delegate?
+
+    user_info = UserInfoService.new.user_info(session)
+    @invitation.ao_match?(user_info)
   rescue InvitationError => e
     render(Page::Invitations::BadInvitationComponent.new(@invitation, e.message, 'error'),
            status: :forbidden)

@@ -22,9 +22,10 @@ module Core
 
       def format_if_date(str)
         # verification_code ABC123 parses
-        return str unless str.length > 6
+        return str unless str.length > 18
 
-        datetime = DateTime.parse(str)
+        # Using strict parsing because guids were being parsed
+        datetime = DateTime.strptime(str[..18], '%Y-%m-%dT%H:%M:%S')
         datetime.strftime('%m/%d/%Y at %l:%M%p UTC')
       rescue Date::Error
         str

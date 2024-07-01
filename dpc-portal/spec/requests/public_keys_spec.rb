@@ -1,11 +1,22 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
+require 'support/credential_resource_shared_examples'
 
 RSpec.describe 'PublicKeys', type: :request do
   include DpcClientSupport
 
   let(:terms_of_service_accepted_by) { create(:user) }
+
+  it_behaves_like 'a credential resource' do
+    let(:create_params) do
+      { label: 'New Key',
+        public_key: file_fixture('stubbed_key.pem').read,
+        snippet_signature: 'test snippet signature' }
+    end
+    let(:credential) { 'public_key' }
+  end
+
   describe 'GET /new' do
     context 'not logged in' do
       it 'redirects to login' do
@@ -168,7 +179,7 @@ RSpec.describe 'PublicKeys', type: :request do
         api_client = stub_api_client(message: :get_organization,
                                      response: default_get_org_response(org_api_id))
         stub_self_returning_api_client(message: :create_public_key,
-                                       response: default_get_public_keys,
+                                       response: default_get_public_keys['entities'].first,
                                        api_client:)
         post "/organizations/#{org.id}/public_keys", params: {
           label: 'New Key',

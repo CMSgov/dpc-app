@@ -3,273 +3,300 @@
 require 'rails_helper'
 
 RSpec.describe 'Invitations', type: :request do
-  describe 'GET /accept' do
-    context :ao do
-      context 'not logged in' do
-        context :expired do
-          let!(:ao_invite) { create(:invitation, :ao, created_at: 3.days.ago) }
-          let(:org) { ao_invite.provider_organization }
-          it 'should show warning page' do
-            get "/organizations/#{org.id}/invitations/#{ao_invite.id}/accept"
-            expect(response).to be_forbidden
-            expect(response.body).to include('usa-alert--warning')
-          end
-          it 'should show renew button' do
-            get "/organizations/#{org.id}/invitations/#{ao_invite.id}/accept"
-            expect(response).to be_forbidden
+  RSpec.shared_examples 'an invitation endpoint' do |method, path_suffix|
+    let(:org) { invitation.provider_organization }
+    let(:bad_org) { create(:provider_organization) }
+    context 'not logged in' do
+      it 'should not show confirmation form if valid invitation' do
+        send(method, "/organizations/#{org.id}/invitations/#{invitation.id}/#{path_suffix}")
+        expect(response).to be_ok
+        expect(response.body).not_to include(confirm_organization_invitation_path(org, invitation))
+      end
+      it 'should show warning page with 404 if missing' do
+        send(method, "/organizations/#{org.id}/invitations/bad-id/#{path_suffix}")
+        expect(response).to be_not_found
+        expect(response.body).to include('usa-alert--warning')
+      end
+      it 'should show warning page with 404 if org-invitation mismatch' do
+        bad_org = create(:provider_organization)
+        send(method, "/organizations/#{bad_org.id}/invitations/#{invitation.id}/#{path_suffix}")
+        expect(response).to be_not_found
+        expect(response.body).to include('usa-alert--warning')
+      end
+      it 'should show warning page if cancelled' do
+        invitation.update(status: :cancelled)
+        send(method, "/organizations/#{org.id}/invitations/#{invitation.id}/#{path_suffix}")
+        expect(response).to be_forbidden
+        expect(response.body).to include('usa-alert--warning')
+      end
+      context 'invitation expired' do
+        before { invitation.update_attribute(:created_at, 3.days.ago) }
+        it 'should show warning page' do
+          send(method, "/organizations/#{org.id}/invitations/#{invitation.id}/#{path_suffix}")
+          expect(response).to be_forbidden
+          expect(response.body).to include('usa-alert--warning')
+        end
+        it 'should show renew button only if ao' do
+          send(method, "/organizations/#{org.id}/invitations/#{invitation.id}/#{path_suffix}")
+          expect(response).to be_forbidden
+          if invitation.authorized_official?
             expect(response.body).to include('Request new invite')
-          end
-          it 'should not show renew button if accepted' do
-            ao_invite.accept!
-            get "/organizations/#{org.id}/invitations/#{ao_invite.id}/accept"
-            expect(response).to be_forbidden
+          else
             expect(response.body).to_not include('Request new invite')
+          end
+        end
+        it 'should not show renew button if accepted' do
+          invitation.accept!
+          send method, "/organizations/#{org.id}/invitations/#{invitation.id}/#{path_suffix}"
+          expect(response).to be_forbidden
+          expect(response.body).to_not include('Request new invite')
+        end
+      end
+      it 'should show warning page if accepted' do
+        invitation.accept!
+        send(method, "/organizations/#{org.id}/invitations/#{invitation.id}/#{path_suffix}")
+        expect(response).to be_forbidden
+        expect(response.body).to include('usa-alert--warning')
+      end
+    end
+  end
+
+  describe 'GET /' do
+    context :ao do
+      let(:ao_invite) { create(:invitation, :ao) }
+      let(:org) { ao_invite.provider_organization }
+
+      it_behaves_like 'an invitation endpoint', :get, '' do
+        let(:invitation) { create(:invitation, :ao) }
+      end
+
+      it 'should show button to accept' do
+        get "/organizations/#{org.id}/invitations/#{ao_invite.id}"
+        expect(response).to be_ok
+        expect(response.body).to include(accept_organization_invitation_path(org, ao_invite))
+      end
+    end
+  end
+
+  describe 'GET /accept' do
+    shared_examples 'an accept endpoint' do
+      let(:org) { invitation.provider_organization }
+      context 'not logged in' do
+        it 'should show login if valid invitation' do
+          get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
+          expect(response).to be_ok
+          expect(response.body).to include(login_organization_invitation_path(org, invitation))
+        end
+      end
+
+      context 'logged in' do
+        before { sign_in create(:user) }
+        it 'should show login if token expired' do
+          user_service_class = class_double(UserInfoService).as_stubbed_const
+          allow(user_service_class).to receive(:new).and_raise(UserInfoServiceError, 'unauthorized')
+          get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
+          expect(response).to be_ok
+          expect(response.body).to include(login_organization_invitation_path(org, invitation))
+        end
+        context :success do
+          before { stub_user_info }
+          it 'should show confirm form if valid invitation' do
+            get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
+            expect(response).to be_ok
+            expect(response.body).to include(confirm_organization_invitation_path(org, invitation))
+            expect(request.session["invitation_status_#{invitation.id}"]).to eq 'identity_verified'
+          end
+        end
+        context :failure do
+          it 'should show error page if email not match' do
+            stub_user_info(overrides: { 'all_emails' => ['another@example.com'] })
+            get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
+            expect(response).to be_forbidden
+            expect(response.body).to include('usa-alert--error')
           end
         end
       end
     end
 
-    context :cd do
-      let(:invited_by) { create(:invited_by) }
-      let(:verification_code) { 'ABC123' }
-      let!(:cd_invite) { create(:invitation, :cd, verification_code:) }
-      let(:user) do
-        create(:user, given_name: cd_invite.invited_given_name,
-                      family_name: cd_invite.invited_family_name,
-                      email: cd_invite.invited_email)
+    context :ao do
+      it_behaves_like 'an invitation endpoint', :get, 'accept' do
+        let(:invitation) { create(:invitation, :ao) }
       end
-      let(:org) { cd_invite.provider_organization }
+      it_behaves_like 'an accept endpoint' do
+        let(:invitation) { create(:invitation, :ao) }
+      end
+    end
 
-      context 'not logged in' do
-        it 'should show login if valid invitation' do
-          get "/organizations/#{org.id}/invitations/#{cd_invite.id}/accept"
-          expect(response).to be_ok
-          expect(response.body).to include(login_organization_invitation_path(org, cd_invite))
-        end
-        it 'should not show form if valid invitation' do
-          get "/organizations/#{org.id}/invitations/#{cd_invite.id}/accept"
-          expect(response).to be_ok
-          expect(response.body).not_to include(confirm_organization_invitation_path(org, cd_invite))
-        end
-        it 'should show warning page with 404 if missing' do
-          get "/organizations/#{org.id}/invitations/bad-id/accept"
-          expect(response).to be_not_found
-          expect(response.body).to include('usa-alert--warning')
-        end
-        it 'should show warning page with 404 if org-invitation mismatch' do
-          bad_org = create(:provider_organization)
-          get "/organizations/#{bad_org.id}/invitations/#{cd_invite.id}/accept"
-          expect(response).to be_not_found
-          expect(response.body).to include('usa-alert--warning')
-        end
-        it 'should show warning page if cancelled' do
-          cd_invite.update(status: :cancelled)
-          get "/organizations/#{org.id}/invitations/#{cd_invite.id}/accept"
-          expect(response).to be_forbidden
-          expect(response.body).to include('usa-alert--warning')
-        end
-        context 'invitation expired' do
-          before { cd_invite.update_attribute(:created_at, 3.days.ago) }
-          it 'should show warning page' do
-            get "/organizations/#{org.id}/invitations/#{cd_invite.id}/accept"
-            expect(response).to be_forbidden
-            expect(response.body).to include('usa-alert--warning')
-          end
-          it 'should not show renew button' do
-            get "/organizations/#{org.id}/invitations/#{cd_invite.id}/accept"
-            expect(response).to be_forbidden
-            expect(response.body).to_not include('Request new invite')
-          end
-        end
-        it 'should show warning page if accepted' do
-          cd_invite.accept!
-          get "/organizations/#{org.id}/invitations/#{cd_invite.id}/accept"
-          expect(response).to be_forbidden
-          expect(response.body).to include('usa-alert--warning')
-        end
+    context :cd do
+      it_behaves_like 'an invitation endpoint', :get, 'accept' do
+        let(:invitation) { create(:invitation, :cd) }
       end
+      it_behaves_like 'an accept endpoint' do
+        let(:invitation) { create(:invitation, :cd) }
+      end
+
       context 'logged in' do
-        before do
-          sign_in user
+        let(:verification_code) { 'ABC123' }
+        let(:cd_invite) { create(:invitation, :cd, verification_code:) }
+        let(:org) { cd_invite.provider_organization }
+        before { sign_in create(:user) }
+        context :success do
+          before { stub_user_info }
+          it 'should not show verification code' do
+            get "/organizations/#{org.id}/invitations/#{cd_invite.id}/accept"
+            expect(response.body).to_not include(cd_invite.verification_code)
+          end
         end
-        it 'should show form if valid invitation' do
-          get "/organizations/#{org.id}/invitations/#{cd_invite.id}/accept"
-          expect(response).to be_ok
-          expect(response.body).to include(confirm_organization_invitation_path(org, cd_invite))
-        end
-        it 'should not show verification code' do
-          get "/organizations/#{org.id}/invitations/#{cd_invite.id}/accept"
-          expect(response.body).to_not include(cd_invite.verification_code)
-        end
-        it 'should show error page if email not match' do
-          user.update_attribute(:email, 'another@example.com')
-          get "/organizations/#{org.id}/invitations/#{cd_invite.id}/accept"
-          expect(response).to be_forbidden
-          expect(response.body).to include('usa-alert--error')
+        context :failure do
+          it 'should render error page if family_name not match' do
+            stub_user_info(overrides: { 'family_name' => 'Something Else' })
+            get "/organizations/#{org.id}/invitations/#{cd_invite.id}/accept"
+            expect(response).to be_forbidden
+            expect(response.body).to_not include(confirm_organization_invitation_path(org, cd_invite))
+            expect(response.body).to include('usa-alert--error')
+          end
+          it 'should render error page if phone not match' do
+            stub_user_info(overrides: { 'phone' => '9999999999' })
+            get "/organizations/#{org.id}/invitations/#{cd_invite.id}/accept"
+            expect(response).to be_forbidden
+            expect(response.body).to_not include(confirm_organization_invitation_path(org, cd_invite))
+            expect(response.body).to include('usa-alert--error')
+          end
         end
       end
     end
   end
 
   describe 'POST /confirm' do
-    context :cd do
-      let(:invited_by) { create(:invited_by) }
-      let(:verification_code) { 'ABC123' }
-      let!(:cd_invite) { create(:invitation, :cd, verification_code:) }
-      let(:user) do
-        create(:user, given_name: cd_invite.invited_given_name,
-                      family_name: cd_invite.invited_family_name,
-                      email: cd_invite.invited_email)
-      end
-      let(:org) { cd_invite.provider_organization }
-
-      let(:success_params) { { verification_code: } }
-      let(:fail_params) { { verification_code: 'badcode' } }
-
-      before { sign_in user }
-
-      context 'success' do
-        before { stub_user_info }
-
-        it 'should create CdOrgLink' do
-          expect do
-            post "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm",
-                 params: success_params
-          end.to change { CdOrgLink.count }.by(1)
-        end
-        it 'should update invitation' do
-          post "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm", params: success_params
-          cd_invite.reload
-          expect(cd_invite.invited_given_name).to be_blank
-          expect(cd_invite.invited_family_name).to be_blank
-          expect(cd_invite.invited_phone).to be_blank
-          expect(cd_invite.invited_email).to be_blank
-        end
-        it 'should redirect to organization page with notice' do
-          post "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm", params: success_params
-          expect(response).to redirect_to(organization_path(org))
-          expected_message =  "Invitation accepted. You can now manage this organization's credentials. Learn more."
-          expect(flash[:notice]).to eq expected_message
-        end
-      end
-      context 'failure' do
-        it 'should show warning page with 404 if missing' do
-          post "/organizations/#{org.id}/invitations/bad-id/confirm", params: success_params
-          expect(response).to be_not_found
-          expect(response.body).to include('usa-alert--warning')
-        end
-        it 'should show warning page if cancelled' do
-          cd_invite.update(status: :cancelled)
-          post "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm", params: success_params
-          expect(response).to be_forbidden
-          expect(response.body).to include('usa-alert--warning')
-        end
-        it 'should show warning page if expired' do
-          cd_invite.update_attribute(:created_at, 3.days.ago)
-          post "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm", params: success_params
-          expect(response).to be_forbidden
-          expect(response.body).to include('usa-alert--warning')
-        end
-        it 'should show warning page if accepted' do
-          cd_invite.accept!
-          post "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm", params: success_params
-          expect(response).to be_forbidden
-          expect(response.body).to include('usa-alert--warning')
-        end
-
-        it 'should show login if token expired' do
-          user_service_class = class_double(UserInfoService).as_stubbed_const
-          expect(user_service_class).to receive(:new).and_raise(UserInfoServiceError, 'unauthorized')
-          post "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm", params: success_params
+    shared_examples 'a confirm endpoint' do
+      let(:org) { invitation.provider_organization }
+      before { sign_in create(:user) }
+      context :success do
+        it 'should set session status to conditions verified' do
+          stub_user_info
+          get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
+          post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm", params: success_params
           expect(response).to be_ok
-          expect(response.body).to include(login_organization_invitation_path(org, cd_invite))
+          expect(request.session["invitation_status_#{invitation.id}"]).to eq 'conditions_verified'
         end
-
-        it 'should show error page if user info issue' do
-          user_service_class = class_double(UserInfoService).as_stubbed_const
-          expect(user_service_class).to receive(:new).and_raise(UserInfoServiceError, 'terrible thing happened')
-          post "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm", params: success_params
-          expect(response.body).to include(I18n.t('verification.server_error_text'))
+        context :failure do
+          context :not_accepted do
+            it 'should not confirm if not passed identity verification' do
+              post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm", params: success_params
+              expect(response).to redirect_to(accept_organization_invitation_path(org, invitation))
+              expect(request.session["invitation_status_#{invitation.id}"]).to be_nil
+            end
+          end
         end
+      end
+    end
 
-        context 'not match' do
-          before { stub_user_info }
+    context :ao do
+      it_behaves_like 'an invitation endpoint', :post, 'confirm' do
+        let(:invitation) { create(:invitation, :ao) }
+      end
+      it_behaves_like 'a confirm endpoint' do
+        let(:invitation) { create(:invitation, :ao) }
+        let(:success_params) { {} }
+      end
+    end
+
+    context :cd do
+      it_behaves_like 'an invitation endpoint', :post, 'confirm' do
+        let(:invitation) { create(:invitation, :cd) }
+      end
+      it_behaves_like 'a confirm endpoint' do
+        let(:verification_code) { 'ABC123' }
+        let(:invitation) { create(:invitation, :cd, verification_code:) }
+        let(:success_params) { { verification_code: } }
+      end
+
+      context :failure do
+        let(:verification_code) { 'ABC123' }
+        let(:cd_invite) { create(:invitation, :cd, verification_code:) }
+        let(:org) { cd_invite.provider_organization }
+        let(:fail_params) { { verification_code: 'badcode' } }
+        context :accepted do
+          before do
+            sign_in create(:user)
+            stub_user_info
+            get "/organizations/#{org.id}/invitations/#{cd_invite.id}/accept"
+          end
           it 'should render form with error if OTP not match' do
             post "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm", params: fail_params
             expect(response).to be_bad_request
             expect(response.body).to include(confirm_organization_invitation_path(org, cd_invite))
           end
-          it 'should render error page if family_name not match' do
-            cd_invite.update_attribute(:invited_family_name, "not #{cd_invite.invited_family_name}")
-            post "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm", params: success_params
-            expect(response).to be_forbidden
-            expect(response.body).to_not include(confirm_organization_invitation_path(org, cd_invite))
-            expect(response.body).to include('usa-alert--error')
-          end
-          it 'should render error page if phone not match' do
-            cd_invite.update_attribute(:invited_phone, '9129999999')
-            post "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm", params: success_params
-            expect(response).to be_forbidden
-            expect(response.body).to_not include(confirm_organization_invitation_path(org, cd_invite))
-            expect(response.body).to include('usa-alert--error')
-          end
-          it 'should render error page if PII not match and OTP not match' do
-            cd_invite.update_attribute(:invited_family_name, "not #{cd_invite.invited_family_name}")
-            post "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm", params: fail_params
-            expect(response).to be_forbidden
-            expect(response.body).to_not include(confirm_organization_invitation_path(org, cd_invite))
-            expect(response.body).to include('usa-alert--error')
-          end
         end
       end
     end
-    context :ao do
-      let!(:ao_invite) { create(:invitation, :ao) }
-      let(:user) do
-        create(:user, given_name: 'Herman',
-                      family_name: 'Wouk',
-                      email: ao_invite.invited_email)
-      end
-      let(:org) { ao_invite.provider_organization }
+  end
 
-      before do
-        sign_in user
-      end
-      context 'success' do
+  describe 'POST /register' do
+    shared_examples 'a register endpoint' do
+      let(:org) { invitation.provider_organization }
+      before { sign_in create(:user) }
+      context :success do
         before do
           stub_user_info
+          get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
+          post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm", params: success_params
         end
-        it 'should create AoOrgLink' do
+        it 'should create link to organization' do
+          klass = invitation.authorized_official? ? AoOrgLink : CdOrgLink
           expect do
-            post "/organizations/#{org.id}/invitations/#{ao_invite.id}/confirm"
-          end.to change { AoOrgLink.count }.by(1)
+            post "/organizations/#{org.id}/invitations/#{invitation.id}/register",
+                 params: success_params
+          end.to change { klass.count }.by(1)
         end
+
         it 'should update invitation' do
-          post "/organizations/#{org.id}/invitations/#{ao_invite.id}/confirm"
-          ao_invite.reload
-          expect(ao_invite.invited_given_name).to be_blank
-          expect(ao_invite.invited_family_name).to be_blank
-          expect(ao_invite.invited_phone).to be_blank
-          expect(ao_invite.invited_email).to be_blank
+          post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+          invitation.reload
+          expect(invitation.invited_given_name).to be_blank
+          expect(invitation.invited_family_name).to be_blank
+          expect(invitation.invited_phone).to be_blank
+          expect(invitation.invited_email).to be_blank
         end
-        it 'should redirect to organization page with notice' do
-          post "/organizations/#{org.id}/invitations/#{ao_invite.id}/confirm"
-          expect(response).to redirect_to(organization_path(org))
-          expected_message =  'Invitation accepted.'
-          expect(flash[:notice]).to eq expected_message
+        it 'should clear session variable' do
+          post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+          expect(request.session["invitation_status_#{invitation.id}"]).to be_nil
+        end
+        it 'should show success page' do
+          post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+          expect(response).to be_ok
+          expect(response.body).to include('Registration completed')
         end
       end
       context 'failure' do
         before do
-          stub_user_info(overrides: { 'social_security_number' => '900111112' })
+          stub_user_info
+          get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
         end
-        it 'should render error page if SSN not match' do
-          ao_invite.update(invited_email: 'some-other-email@example.com')
-          post "/organizations/#{org.id}/invitations/#{ao_invite.id}/confirm"
-          expect(response).to be_forbidden
-          expect(response.body).to_not include(confirm_organization_invitation_path(org, ao_invite))
-          expect(response.body).to include('usa-alert--error')
+        it 'should redirect if not confirmed' do
+          post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+          expect(response).to redirect_to(accept_organization_invitation_path(org, invitation))
         end
+      end
+    end
+
+    context :cd do
+      it_behaves_like 'an invitation endpoint', :post, 'register' do
+        let(:invitation) { create(:invitation, :cd) }
+      end
+      it_behaves_like 'a register endpoint' do
+        let(:verification_code) { 'ABC123' }
+        let(:invitation) { create(:invitation, :cd, verification_code:) }
+        let(:success_params) { { verification_code: } }
+      end
+    end
+    context :ao do
+      it_behaves_like 'an invitation endpoint', :post, 'register' do
+        let(:invitation) { create(:invitation, :ao) }
+      end
+      it_behaves_like 'a register endpoint' do
+        let(:invitation) { create(:invitation, :ao) }
+        let(:success_params) { {} }
       end
     end
   end
@@ -298,7 +325,7 @@ end
 describe 'POST /renew' do
   let(:fail_message) { 'Unable to create new invitation' }
   context :ao do
-    let!(:invitation) { create(:invitation, :ao) }
+    let(:invitation) { create(:invitation, :ao) }
     let(:org_id) { invitation.provider_organization.id }
     let(:success_message) { 'You should receive your new invitation shortly' }
     it 'should create another invitation for the user if expired' do
@@ -367,7 +394,7 @@ end
 def stub_user_info(overrides: {})
   user_service_class = class_double(UserInfoService).as_stubbed_const
   user_service = double(UserInfoService)
-  expect(user_service_class).to receive(:new).and_return(user_service)
+  expect(user_service_class).to receive(:new).at_least(:once).and_return(user_service)
 
-  expect(user_service).to receive(:user_info).and_return(user_info(overrides))
+  expect(user_service).to receive(:user_info).at_least(:once).and_return(user_info(overrides))
 end

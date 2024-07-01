@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_05_29_162554) do
+ActiveRecord::Schema[7.1].define(version: 2024_06_20_201824) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -34,6 +34,17 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_29_162554) do
     t.datetime "disabled_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "credential_audit_logs", force: :cascade do |t|
+    t.bigint "user_id"
+    t.string "dpc_api_credential_id", null: false
+    t.integer "credential_type", null: false
+    t.integer "action", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["dpc_api_credential_id"], name: "index_credential_audit_logs_on_dpc_api_credential_id"
+    t.index ["user_id"], name: "index_credential_audit_logs_on_user_id"
   end
 
   create_table "invitations", force: :cascade do |t|
