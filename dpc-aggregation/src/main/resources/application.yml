@@ -86,6 +86,14 @@ bbclient:
 
   useBfdMock: ${USE_BFD_MOCK:-false}
 
+awsQueue:
+  emitAwsMetrics: ${EMIT_AWS_METRICS:-true}
+  queueSizeMetricName: ${QUEUE_SIZE_METRIC_NAME:-"JobQueueBatchCount"}
+  awsRegion: ${AWS_REGION:-"us-east-1"}
+  awsReportingInterval: ${AWS_REPORTING_INTERVAL:-60}
+  environment: ${ENV:-"unknown_env"}
+  awsNamespace: ${NAMESPACE:-"DPC"}
+
 consentServiceUrl: ${CONSENT_SERVICE_URL:-"http://consent:3600/v1/"}
 consentHealthCheckURL: ${CONSENT_HEALTHCHECK_URL:-"http://consent:9904/healthcheck}
 
