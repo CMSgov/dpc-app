@@ -5,6 +5,7 @@ import com.codahale.metrics.Timer;
 import gov.cms.dpc.common.hibernate.queue.DPCQueueManagedSessionFactory;
 import gov.cms.dpc.common.utils.MetricMaker;
 import gov.cms.dpc.queue.annotations.QueueBatchSize;
+import gov.cms.dpc.queue.exceptions.DataRetrievalException;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.queue.exceptions.JobQueueUnhealthy;
 import gov.cms.dpc.queue.models.JobQueueBatch;
@@ -20,7 +21,9 @@ import javax.inject.Inject;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
+import java.sql.Timestamp;
 import java.time.Duration;
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -310,6 +313,32 @@ public class DistributedBatchQueue extends JobQueueCommon {
                 return session.createQuery(query).getSingleResult();
             } catch ( Exception e ) {
                 return 0;
+            }
+        }
+    }
+
+    /**
+     * Calculates the age in hours of the oldest job currently queued.
+     * Note: submit_time is nullable in the job_queue_batch table.  If a row has a null submit_time it'll be excluded
+     * from this query.
+     * @return Age in hours of oldest job in the queue, 0 if there isn't a job waiting.
+     */
+    public double queueAge() {
+        try (final Session session = this.factory.openSession()) {
+            try {
+                Optional<Timestamp> submitTime =
+                    session.createNativeQuery("SELECT MIN( submit_time ) FROM job_queue_batch WHERE status = " + JobStatus.QUEUED.ordinal())
+                    .uniqueResultOptional();
+
+                if(submitTime.isPresent()) {
+                    Long now = Timestamp.from(Instant.now()).getTime(); // Now in milliseconds from Unix epoch
+                    Long then = submitTime.get().getTime();             // Submit time in milliseconds from Unix epoch
+                    return ((double) (now - then)) / (1000 * 60 * 60);  // millisec difference / millisec in an hour
+                } else {
+                    return 0;
+                }
+            } catch ( Exception e ) {
+                throw new DataRetrievalException("Could not get queue age: ", e);
             }
         }
     }
