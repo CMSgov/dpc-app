@@ -194,7 +194,7 @@ public class DPCAPIConfiguration extends Configuration implements IDPCDatabase, 
     // Never used in dpc-api, but required for the queue service
     @Override
     public int getPollingFrequency() {
-        return 500;
+        throw new UnsupportedOperationException("getPollingFrequency() is not supported in dpc-api.");
     }
 
     // dpc-api isn't currently using an AWS queue.
