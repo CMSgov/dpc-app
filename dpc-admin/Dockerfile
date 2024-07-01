@@ -14,7 +14,8 @@ RUN mkdir -p /dpc-admin/vendor/api_client
 Workdir /dpc-admin
 
 # Copy over the files needed to fetch dependencies
-COPY /engines/api_client/ /dpc-admin/vendor/api_client/
+COPY /engines/api_client/Gemfile /engines/api_client/Gemfile.lock /engines/api_client/api_client.gemspec /dpc-admin/vendor/api_client/
+COPY /engines/api_client/lib/api_client/version.rb /dpc-admin/vendor/api_client/lib/api_client/
 COPY /dpc-admin/Gemfile /dpc-admin/Gemfile.lock /dpc-admin/
 COPY /dpc-admin/package.json /dpc-admin/package-lock.json /dpc-admin/
 
@@ -29,6 +30,7 @@ RUN gem install bundler --no-document && \
 RUN bundle exec bundle audit update && bundle exec bundle audit check --ignore CVE-2015-9284
 
 # Copy the code, test the app, and build the assets pipeline
+COPY /engines/api_client /dpc-admin/vendor/api_client
 COPY /dpc-admin /dpc-admin
 
 RUN rm -rf /bin/yarn
