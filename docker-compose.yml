@@ -23,6 +23,7 @@ services:
     environment:
       - ENV=local
       - USE_BFD_MOCK=${USE_BFD_MOCK:-true}
+      - EMIT_AWS_METRICS=${EMIT_AWS_METRICS:-false}
       - JACOCO=${REPORT_COVERAGE}
       - DEBUG_MODE=${DEBUG_MODE:-false}
     depends_on:

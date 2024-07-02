@@ -9,6 +9,8 @@ import gov.cms.dpc.common.hibernate.queue.IDPCQueueDatabase;
 import gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration;
 import gov.cms.dpc.fhir.configuration.IDPCFHIRConfiguration;
 import gov.cms.dpc.macaroons.config.TokenPolicy;
+import gov.cms.dpc.queue.config.DPCAwsQueueConfiguration;
+import gov.cms.dpc.queue.config.DPCQueueConfig;
 import io.dropwizard.client.JerseyClientConfiguration;
 import io.dropwizard.core.Configuration;
 import io.dropwizard.core.server.DefaultServerFactory;
@@ -22,7 +24,7 @@ import javax.validation.constraints.NotNull;
 import java.util.LinkedList;
 import java.util.List;
 
-public class DPCAPIConfiguration extends Configuration implements IDPCDatabase, IDPCQueueDatabase, IDPCAuthDatabase, IDPCFHIRConfiguration, BlueButtonBundleConfiguration {
+public class DPCAPIConfiguration extends Configuration implements IDPCDatabase, IDPCQueueDatabase, DPCQueueConfig, IDPCAuthDatabase, IDPCFHIRConfiguration, BlueButtonBundleConfiguration {
 
     @NotEmpty
     private String exportPath;
@@ -187,6 +189,18 @@ public class DPCAPIConfiguration extends Configuration implements IDPCDatabase, 
 
     public void setLookBackExemptOrgs(List<String> lookBackExemptOrgs) {
         this.lookBackExemptOrgs = lookBackExemptOrgs;
+    }
+
+    // Never used in dpc-api, but required for the queue service
+    @Override
+    public int getPollingFrequency() {
+        throw new UnsupportedOperationException("getPollingFrequency() is not supported in dpc-api.");
+    }
+
+    // dpc-api isn't currently using an AWS queue.
+    @Override
+    public DPCAwsQueueConfiguration getDpcAwsQueueConfiguration() {
+        return null;
     }
 
     public int getServicePort() {
