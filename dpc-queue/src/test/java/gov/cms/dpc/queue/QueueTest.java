@@ -62,16 +62,22 @@ class QueueTest {
                     } else if(queueName.equals("aws")) {
                         MetricRegistry metricRegistry = new MetricRegistry();
 
-                        ScheduledReporter reporter = Slf4jReporter.forRegistry(metricRegistry)
+                        ScheduledReporter reporter1 = Slf4jReporter.forRegistry(metricRegistry)
+                            .filter(MetricFilter.contains("metricName"))
+                            .withLoggingLevel(Slf4jReporter.LoggingLevel.DEBUG)
+                            .build();
+                        ScheduledReporter reporter2 = Slf4jReporter.forRegistry(metricRegistry)
                             .filter(MetricFilter.contains("metricName"))
                             .withLoggingLevel(Slf4jReporter.LoggingLevel.DEBUG)
                             .build();
 
                         DPCAwsQueueConfiguration awsConfig = new DPCAwsQueueConfiguration();
                         awsConfig
-                            .setQueueSizeMetricName("metricName")
+                            .setQueueSizeMetricName("sizeMetricName")
+                            .setQueueAgeMetricName("ageMetricName")
                             .setEnvironment("test")
-                            .setAwsReporitingInterval(10);
+                            .setAwsAgeReportingInterval(10)
+                            .setAwsSizeReportingInterval(10);
 
                         final Configuration conf = new Configuration();
                         sessionFactory = conf.configure().buildSessionFactory();
@@ -80,7 +86,8 @@ class QueueTest {
                             new DPCQueueManagedSessionFactory(sessionFactory),
                             100,
                             metricRegistry,
-                            reporter,
+                            reporter1,
+                            reporter2,
                             awsConfig
                         );
                     } else {

@@ -17,7 +17,6 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.spy;
 
 class DistributedBatchQueueUnitTest extends AbstractMultipleDAOTest {
 	DistributedBatchQueueUnitTest() {
@@ -30,7 +29,7 @@ class DistributedBatchQueueUnitTest extends AbstractMultipleDAOTest {
 
 	@BeforeEach
 	void setup() {
-		sessionFactory = spy(new DPCQueueManagedSessionFactory(db.getSessionFactory()));
+		sessionFactory = new DPCQueueManagedSessionFactory(db.getSessionFactory());
 		queue = new DistributedBatchQueue(sessionFactory, 100, new MetricRegistry());
 		session = sessionFactory.getSessionFactory().openSession();
 	}

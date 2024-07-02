@@ -333,7 +333,7 @@ public class DistributedBatchQueue extends JobQueueCommon {
                 if(submitTime.isPresent()) {
                     Long now = Timestamp.from(Instant.now()).getTime(); // Now in milliseconds from Unix epoch
                     Long then = submitTime.get().getTime();             // Submit time in milliseconds from Unix epoch
-                    return ((double) (now - then)) / (1000 * 60 * 60);  // millisec difference / millisec in an hour
+                    return ((double) (now - then)) / (1000 * 60 * 60);  // msec difference / msec in an hour
                 } else {
                     return 0;
                 }
