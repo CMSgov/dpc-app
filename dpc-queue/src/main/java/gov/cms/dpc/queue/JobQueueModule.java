@@ -115,6 +115,7 @@ public class JobQueueModule<T extends Configuration & DPCQueueConfig> extends Dr
                 configuration().getDpcAwsQueueConfiguration().getAwsNamespace()
             )
             .withReportRawCountValue()
+            .withZeroValuesSubmission()
             .filter(MetricFilter.contains(metricName))
             .build();
     }
