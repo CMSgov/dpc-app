@@ -81,12 +81,14 @@ class InvitationsController < ApplicationController
 
   def user
     user_info = UserInfoService.new.user_info(session)
-    User.find_or_create_by(provider: :openid_connect, uid: user_info['sub']) do |user_to_create|
+    local_user = User.find_or_create_by(provider: :openid_connect, uid: user_info['sub']) do |user_to_create|
       user_to_create.email = @invitation.invited_email
       # Assign random, acceptable password to keep Devise happy.
       # User should log in only through IdP
       user_to_create.password = user_to_create.password_confirmation = Devise.friendly_token[0, 20]
     end
+    local_user.update(pac_id: session[:user_pac_id]) unless local_user.pac_id
+    local_user
   end
 
   def check_for_token
@@ -117,8 +119,7 @@ class InvitationsController < ApplicationController
 
     return check_code if @invitation.credential_delegate?
 
-    user_info = UserInfoService.new.user_info(session)
-    @invitation.ao_match?(user_info)
+    check_ao
   rescue InvitationError => e
     render(Page::Invitations::BadInvitationComponent.new(@invitation, e.message, 'error'),
            status: :forbidden)
@@ -130,6 +131,13 @@ class InvitationsController < ApplicationController
     @invitation.errors.add(:verification_code, :bad_code, message: 'tbd')
     render(Page::Invitations::AcceptInvitationComponent.new(@organization, @invitation),
            status: :bad_request)
+  end
+
+  def check_ao
+    user_info = UserInfoService.new.user_info(session)
+    result = @invitation.ao_match?(user_info)
+    session[:user_pac_id] = result.dig(:ao_role, 'pacId') if result[:success]
+    result[:success]
   end
 
   def handle_user_info_service_error(error)
