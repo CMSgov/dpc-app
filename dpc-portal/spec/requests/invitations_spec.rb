@@ -324,22 +324,20 @@ RSpec.describe 'Invitations', type: :request do
         let(:invitation) { create(:invitation, :ao) }
         let(:success_params) { {} }
       end
-      context :custom do
+      context :success do
         let(:invitation) { create(:invitation, :ao) }
         let(:org) { invitation.provider_organization }
-        before { log_in }
-        context :success do
-          before do
-            stub_user_info
-            get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
-            post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"
-          end
-          it 'should set pac_id' do
-            post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
-            user = User.find_by(uid: user_info['sub'])
-            # We have the fake CPI API Gateway return the ssn as pac_id
-            expect(user.pac_id).to eq user_info['social_security_number']
-          end
+        before do
+          log_in
+          stub_user_info
+          get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
+          post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"
+        end
+        it 'should set pac_id' do
+          post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+          user = User.find_by(uid: user_info['sub'])
+          # We have the fake CPI API Gateway return the ssn as pac_id
+          expect(user.pac_id).to eq user_info['social_security_number']
         end
       end
     end
