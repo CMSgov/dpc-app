@@ -339,6 +339,20 @@ RSpec.describe 'Invitations', type: :request do
           # We have the fake CPI API Gateway return the ssn as pac_id
           expect(user.pac_id).to eq user_info['social_security_number']
         end
+        it 'should set pac_id on existing user' do
+          create(:user, provider: :openid_connect, uid: user_info['sub'])
+          post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+          user = User.find_by(uid: user_info['sub'])
+          # We have the fake CPI API Gateway return the ssn as pac_id
+          expect(user.pac_id).to eq user_info['social_security_number']
+        end
+        it 'should not override pac_id on existing user' do
+          create(:user, provider: :openid_connect, uid: user_info['sub'], pac_id: :foo)
+          post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+          user = User.find_by(uid: user_info['sub'])
+          # We have the fake CPI API Gateway return the ssn as pac_id
+          expect(user.pac_id).to eq 'foo'
+        end
       end
     end
   end
