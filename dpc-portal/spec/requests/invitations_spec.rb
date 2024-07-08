@@ -90,7 +90,7 @@ RSpec.describe 'Invitations', type: :request do
       end
 
       context 'logged in' do
-        before { sign_in create(:user) }
+        before { log_in }
         it 'should show login if token expired' do
           user_service_class = class_double(UserInfoService).as_stubbed_const
           allow(user_service_class).to receive(:new).and_raise(UserInfoServiceError, 'unauthorized')
@@ -139,7 +139,7 @@ RSpec.describe 'Invitations', type: :request do
         let(:verification_code) { 'ABC123' }
         let(:cd_invite) { create(:invitation, :cd, verification_code:) }
         let(:org) { cd_invite.provider_organization }
-        before { sign_in create(:user) }
+        before { log_in }
         context :success do
           before { stub_user_info }
           it 'should not show verification code' do
@@ -170,7 +170,7 @@ RSpec.describe 'Invitations', type: :request do
   describe 'POST /confirm' do
     shared_examples 'a confirm endpoint' do
       let(:org) { invitation.provider_organization }
-      before { sign_in create(:user) }
+      before { log_in }
       context :success do
         it 'should set session status to conditions verified' do
           stub_user_info
@@ -218,7 +218,7 @@ RSpec.describe 'Invitations', type: :request do
         let(:fail_params) { { verification_code: 'badcode' } }
         context :accepted do
           before do
-            sign_in create(:user)
+            log_in
             stub_user_info
             get "/organizations/#{org.id}/invitations/#{cd_invite.id}/accept"
           end
@@ -235,7 +235,7 @@ RSpec.describe 'Invitations', type: :request do
   describe 'POST /register' do
     shared_examples 'a register endpoint' do
       let(:org) { invitation.provider_organization }
-      before { sign_in create(:user) }
+      before { log_in }
       context :success do
         before do
           stub_user_info
@@ -366,6 +366,20 @@ describe 'POST /renew' do
       expect(response).to redirect_to(accept_organization_invitation_path(org_id, invitation))
     end
   end
+end
+
+def log_in
+  OmniAuth.config.test_mode = true
+  OmniAuth.config.add_mock(:openid_connect,
+                           { uid: '12345',
+                             credentials: { expires_in: 899,
+                                            token: 'bearer-token' },
+                             info: { email: 'bob@example.com' },
+                             extra: { raw_info: { given_name: 'Bob',
+                                                  family_name: 'Hoskins',
+                                                  ial: 'http://idmanagement.gov/ns/assurance/ial/2' } } })
+  post '/users/auth/openid_connect'
+  follow_redirect!
 end
 
 def user_info(overrides)
