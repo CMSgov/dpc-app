@@ -11,7 +11,10 @@ public class DPCAwsQueueConfiguration {
 	private String awsRegion;
 
 	@NotNull
-	private int awsReportingInterval;
+	private int awsSizeReportingInterval;
+
+	@NotNull
+	private int awsAgeReportingInterval;
 
 	@NotNull
 	private String environment;
@@ -22,39 +25,70 @@ public class DPCAwsQueueConfiguration {
 	@NotNull
 	private String queueSizeMetricName;
 
-	public boolean getEmitAwsMetrics() { return emitAwsMetrics; }
+	@NotNull
+	private String queueAgeMetricName;
+
+	public boolean getEmitAwsMetrics() {
+		return emitAwsMetrics;
+	}
 	public DPCAwsQueueConfiguration setEmitAwsMetrics(boolean emitAwsMetrics) {
 		this.emitAwsMetrics = emitAwsMetrics;
 		return this;
 	}
 
-	public String getAwsRegion() { return awsRegion; }
+	public String getAwsRegion() {
+		return awsRegion;
+	}
 	public DPCAwsQueueConfiguration setAwsRegion(String awsRegion) {
 		this.awsRegion = awsRegion;
 		return this;
 	}
 
-	public int getAwsReportingInterval() { return awsReportingInterval; }
-	public DPCAwsQueueConfiguration setAwsReporitingInterval(int awsReporitingInterval) {
-		this.awsReportingInterval = awsReporitingInterval;
+	public int getAwsSizeReportingInterval() {
+		return awsSizeReportingInterval;
+	}
+	public DPCAwsQueueConfiguration setAwsSizeReportingInterval(int awsSizeReportingInterval) {
+		this.awsSizeReportingInterval = awsSizeReportingInterval;
 		return this;
 	}
 
-	public String getEnvironment() { return environment; }
+	public int getAwsAgeReportingInterval() {
+		return awsAgeReportingInterval;
+	}
+	public DPCAwsQueueConfiguration setAwsAgeReportingInterval(int awsAgeReportingInterval) {
+		this.awsAgeReportingInterval = awsAgeReportingInterval;
+		return this;
+	}
+
+	public String getEnvironment() {
+		return environment;
+	}
 	public DPCAwsQueueConfiguration setEnvironment(String environment) {
 		this.environment = environment;
 		return this;
 	}
 
-	public String getAwsNamespace() { return awsNamespace; }
+	public String getAwsNamespace() {
+		return awsNamespace;
+	}
 	public DPCAwsQueueConfiguration setAwsNameSpace(String awsNamespace) {
 		this.awsNamespace = awsNamespace;
 		return this;
 	}
 
-	public String getQueueSizeMetricName() { return queueSizeMetricName; }
+	public String getQueueSizeMetricName() {
+		return queueSizeMetricName;
+	}
 	public DPCAwsQueueConfiguration setQueueSizeMetricName(String queueSizeMetricName) {
 		this.queueSizeMetricName = queueSizeMetricName;
+		return this;
+	}
+
+	public String getQueueAgeMetricName() {
+		return queueAgeMetricName;
+	}
+	public DPCAwsQueueConfiguration setQueueAgeMetricName(String queueAgeMetricName) {
+		this.queueAgeMetricName = queueAgeMetricName;
 		return this;
 	}
 }

@@ -88,9 +88,11 @@ bbclient:
 
 awsQueue:
   emitAwsMetrics: ${EMIT_AWS_METRICS:-false}
-  queueSizeMetricName: ${QUEUE_SIZE_METRIC_NAME:-"JobQueueBatchSize"}
+  queueSizeMetricName: ${QUEUE_SIZE_METRIC_NAME:-"JobQueueBatchCount"}
+  queueAgeMetricName: ${QUEUE_AGE_METRIC_NAME:-"JobQueueBatchAgeHours"}
   awsRegion: ${AWS_REGION:-"us-east-1"}
-  awsReportingInterval: ${AWS_REPORTING_INTERVAL:-60}
+  awsSizeReportingInterval: ${AWS_SIZE_REPORTING_INTERVAL:-60}
+  awsAgeReportingInterval: ${AWS_AGE_REPORTING_INTERVAL:-600}
   environment: ${ENV:-"unknown_env"}
   awsNamespace: ${NAMESPACE:-"DPC"}
 
