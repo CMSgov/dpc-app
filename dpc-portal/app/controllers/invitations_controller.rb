@@ -81,13 +81,11 @@ class InvitationsController < ApplicationController
 
   def user
     user_info = UserInfoService.new.user_info(session)
-    local_user = User.find_or_create_by(provider: :openid_connect, uid: user_info['sub']) do |user_to_create|
+    local_user = User.find_or_create_by!(provider: :openid_connect, uid: user_info['sub']) do |user_to_create|
       user_to_create.email = @invitation.invited_email
-      # Assign random, acceptable password to keep Devise happy.
-      # User should log in only through IdP
-      user_to_create.password = user_to_create.password_confirmation = Devise.friendly_token[0, 20]
+      user_to_create.pac_id = session.delete(:user_pac_id)
     end
-    local_user.update(pac_id: session[:user_pac_id]) unless local_user.pac_id
+    local_user.update(pac_id: session.delete(:user_pac_id)) unless local_user.pac_id
     local_user
   end
 
