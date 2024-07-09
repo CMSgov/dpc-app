@@ -15,8 +15,11 @@ class DPCAwsQueueConfigurationUnitTest {
 		config.setAwsRegion("region");
 		assertEquals("region", config.getAwsRegion());
 
-		config.setAwsReporitingInterval(60);
-		assertEquals(60, config.getAwsReportingInterval());
+		config.setAwsSizeReportingInterval(60);
+		assertEquals(60, config.getAwsSizeReportingInterval());
+
+		config.setAwsAgeReportingInterval(60);
+		assertEquals(60, config.getAwsAgeReportingInterval());
 
 		config.setEnvironment("env");
 		assertEquals("env", config.getEnvironment());
@@ -24,7 +27,10 @@ class DPCAwsQueueConfigurationUnitTest {
 		config.setAwsNameSpace("namespace");
 		assertEquals("namespace", config.getAwsNamespace());
 
-		config.setQueueSizeMetricName("metric");
-		assertEquals("metric", config.getQueueSizeMetricName());
+		config.setQueueSizeMetricName("size");
+		assertEquals("size", config.getQueueSizeMetricName());
+
+		config.setQueueAgeMetricName("age");
+		assertEquals("age", config.getQueueAgeMetricName());
 	}
 }
