@@ -9,7 +9,7 @@ RSpec.describe GrantAccessJob, type: :job do
     let(:user) { create(:user) }
     context :success do
       before { stub_api_client(message: :create_organization, success: true, response: default_org_creation_response) }
-      it 'should create organization', :focus do
+      it 'should create organization' do
         expect do
           GrantAccessJob.perform_now(user.id)
         end.to change { Organization.count }.by 1

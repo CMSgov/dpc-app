@@ -213,6 +213,18 @@ RSpec.describe User, type: :model do
     end
   end
 
+  describe 'grant access' do
+    let!(:job) { class_double(GrantAccessJob).as_stubbed_const }
+    let(:user) { create(:user, confirmed_at: nil) }
+    it 'should perform GrantAccessJob if confirmed_at changed' do
+      expect(job).to receive(:perform_later).with(user.id)
+      user.confirm
+    end
+    it 'should not perform GrantAccessJob if confirmed_at not changed' do
+      user.update!(first_name: 'Bob')
+    end
+  end
+
   describe 'scopes' do
     describe '.assigned' do
       it 'includes only users with an organization' do
