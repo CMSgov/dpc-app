@@ -4,6 +4,7 @@ require 'rails_helper'
 require 'fakefs/spec_helpers'
 
 RSpec.describe User, type: :model do
+  include ActiveJob::TestHelper
   subject { create :user }
 
   describe 'factory' do
@@ -214,14 +215,28 @@ RSpec.describe User, type: :model do
   end
 
   describe 'grant access' do
-    let!(:job) { class_double(GrantAccessJob).as_stubbed_const }
-    let(:user) { create(:user, confirmed_at: nil) }
-    it 'should perform GrantAccessJob if confirmed_at changed' do
-      expect(job).to receive(:perform_later).with(user.id)
-      user.confirm
+    context 'unconfirmed user' do
+      let(:user) { create(:user, confirmed_at: nil) }
+      it 'should perform GrantAccessJob if confirmed_at changed' do
+        user.confirm
+        assert_enqueued_jobs 1, only: GrantAccessJob
+        assert_enqueued_with(job: GrantAccessJob, args: [user.id], queue: :web)
+      end
+      it 'should not perform GrantAccessJob if confirmed_at not changed' do
+        user.update!(first_name: 'Bob')
+        assert_no_enqueued_jobs only: GrantAccessJob
+      end
     end
-    it 'should not perform GrantAccessJob if confirmed_at not changed' do
-      user.update!(first_name: 'Bob')
+    context 'confirmed user' do
+      let(:user) { create(:user, confirmed_at: 1.day.ago) }
+      it 'should not perform GrantAccessJob if confirmed_at changed' do
+        user.update(confirmed_at: 1.hour.ago)
+        assert_no_enqueued_jobs only: GrantAccessJob
+      end
+      it 'should not perform GrantAccessJob if confirmed_at not changed' do
+        user.update!(first_name: 'Bob')
+        assert_no_enqueued_jobs only: GrantAccessJob
+      end
     end
   end
 

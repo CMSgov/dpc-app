@@ -146,8 +146,8 @@ class User < ApplicationRecord
   end
 
   def grant_access_on_confirmed
-    return unless confirmed_at && confirmed_at_changed?
+    return unless confirmed_at_changed?(from: nil)
 
-    GrantAccessJob.perform_later(self.id)
+    GrantAccessJob.perform_later(id)
   end
 end
