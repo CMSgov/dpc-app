@@ -20,7 +20,6 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import ru.vyarus.dropwizard.guice.module.support.DropwizardAwareModule;
 import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.services.cloudwatch.CloudWatchAsyncClient;
 
 import javax.inject.Singleton;
 import java.util.UUID;
@@ -45,9 +44,11 @@ class JobQueueModuleUnitTest {
 		when(mockConfig.getDpcAwsQueueConfiguration()).thenReturn(awsConfig);
 		when(awsConfig.getAwsRegion()).thenReturn(Region.US_EAST_1.toString());
 		when(awsConfig.getEnvironment()).thenReturn("env");
-		when(awsConfig.getQueueSizeMetricName()).thenReturn("metricName");
+		when(awsConfig.getQueueSizeMetricName()).thenReturn("sizeMetricName");
+		when(awsConfig.getQueueAgeMetricName()).thenReturn("sizeAgeName");
 		when(awsConfig.getAwsNamespace()).thenReturn("namespace");
-		when(awsConfig.getAwsReportingInterval()).thenReturn(15);
+		when(awsConfig.getAwsAgeReportingInterval()).thenReturn(15);
+		when(awsConfig.getAwsSizeReportingInterval()).thenReturn(15);
 	}
 
 	@Test
@@ -74,34 +75,20 @@ class JobQueueModuleUnitTest {
 	}
 
 	@Test
-	void test_provideCloudWatchAsyncClient() throws NoSuchMethodException {
-		assertInstanceOf(CloudWatchAsyncClient.class, queueModule.provideCloudWatchAsyncClient());
+	void test_provideAgeReporter() throws NoSuchMethodException {
+		assertInstanceOf(Slf4jReporter.class, queueModule.provideAgeScheduledReporter(metricRegistry));
 	}
 
 	@Test
-	void test_provideCloudWatchReporter() throws NoSuchMethodException {
-		CloudWatchAsyncClient client = queueModule.provideCloudWatchAsyncClient();
-		assertInstanceOf(CloudWatchReporter.class, queueModule.provideCloudWatchReporter(metricRegistry, client));
-	}
-
-	@Test
-	void test_provideSlf4jReporter() throws NoSuchMethodException {
-		when(awsConfig.getQueueSizeMetricName()).thenReturn("metricName");
-		assertInstanceOf(Slf4jReporter.class, queueModule.provideSlf4jReporter(metricRegistry));
-	}
-
-	@Test
-	void test_provideScheduledReporter_Returns_CloudWatch_Reporter() throws NoSuchMethodException {
+	void test_provideSizeReporter_emitting_to_aws() throws NoSuchMethodException {
 		when(awsConfig.getEmitAwsMetrics()).thenReturn(true);
-		CloudWatchAsyncClient client = queueModule.provideCloudWatchAsyncClient();
-		assertInstanceOf(CloudWatchReporter.class, queueModule.provideScheduledReporter(metricRegistry, client));
+		assertInstanceOf(CloudWatchReporter.class, queueModule.provideSizeScheduledReporter(metricRegistry));
 	}
 
 	@Test
-	void test_provideScheduledReporter_Returns_Slf4j_Reporter() throws NoSuchMethodException {
+	void test_provideSizeReporter_not_emitting_to_aws() throws NoSuchMethodException {
 		when(awsConfig.getEmitAwsMetrics()).thenReturn(false);
-		CloudWatchAsyncClient client = queueModule.provideCloudWatchAsyncClient();
-		assertInstanceOf(Slf4jReporter.class, queueModule.provideScheduledReporter(metricRegistry, client));
+		assertInstanceOf(Slf4jReporter.class, queueModule.provideSizeScheduledReporter(metricRegistry));
 	}
 
 	@Test
