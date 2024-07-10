@@ -46,12 +46,19 @@ services:
       context: .
       dockerfile: dpc-web/Dockerfile
     command: sidekiq
-    image: dpc-web-sidekiq:latest
+    image: dpc-web:latest
     environment:
       - REDIS_URL=redis://redis
       - DATABASE_URL=postgresql://db/dpc-website_development
+      - TEST_DATABASE_URL=postgresql://db/dpc-website_test
+      - API_METADATA_URL=http://api:3002/v1
+      - API_ADMIN_URL=http://api:9900
+      - GOLDEN_MACAROON=${GOLDEN_MACAROON}
       - DB_USER=postgres
       - DB_PASS=dpc-safe
+      - DATABASE_CLEANER_ALLOW_REMOTE_DATABASE_URL=true
+      - DPC_CA_CERT=${DPC_CA_CERT}
+      - RUBY_YJIT_ENABLE=1
       - DISABLE_JSON_LOGGER=true
     depends_on:
       - redis
@@ -92,12 +99,18 @@ services:
       context: .
       dockerfile: dpc-admin/Dockerfile
     command: sidekiq
-    image: dpc-admin-sidekiq:latest
+    image: dpc-web-admin:latest
     environment:
       - REDIS_URL=redis://redis
+      - GOLDEN_MACAROON=${GOLDEN_MACAROON}
+      - API_METADATA_URL=http://api:3002/v1
+      - API_ADMIN_URL=http://api:9900
       - DATABASE_URL=postgresql://db/dpc-website_development
+      - TEST_DATABASE_URL=postgresql://db/dpc-website_test
       - DB_USER=postgres
       - DB_PASS=dpc-safe
+      - DATABASE_CLEANER_ALLOW_REMOTE_DATABASE_URL=true
+      - RUBY_YJIT_ENABLE=1
       - DISABLE_JSON_LOGGER=true
     depends_on:
       - redis
