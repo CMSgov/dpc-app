@@ -346,6 +346,7 @@ RSpec.describe 'Invitations', type: :request do
           user = User.find_by(uid: user_info['sub'])
           # We have the fake CPI API Gateway return the ssn as pac_id
           expect(user.pac_id).to eq user_info['social_security_number']
+          expect(request.session[:user_pac_id]).to be_nil
         end
         it 'should set pac_id on existing user' do
           create(:user, provider: :openid_connect, uid: user_info['sub'])
@@ -353,6 +354,7 @@ RSpec.describe 'Invitations', type: :request do
           user = User.find_by(uid: user_info['sub'])
           # We have the fake CPI API Gateway return the ssn as pac_id
           expect(user.pac_id).to eq user_info['social_security_number']
+          expect(request.session[:user_pac_id]).to be_nil
         end
       end
     end
