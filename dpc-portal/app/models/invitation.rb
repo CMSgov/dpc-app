@@ -69,7 +69,7 @@ class Invitation < ApplicationRecord
                                        Digest::SHA2.new(256).hexdigest(user_info['social_security_number']))
     raise InvitationError, result[:failure_reason] unless result[:success]
 
-    result[:success]
+    result
   end
 
   def unacceptable_reason

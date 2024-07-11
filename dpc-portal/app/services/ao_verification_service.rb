@@ -9,9 +9,9 @@ class AoVerificationService
   # rubocop:disable Metrics/AbcSize
   def check_eligibility(organization_npi, hashed_ao_ssn)
     check_org_med_sanctions(organization_npi)
-    check_ao_eligibility(organization_npi, :ssn, hashed_ao_ssn)
+    ao_role = check_ao_eligibility(organization_npi, :ssn, hashed_ao_ssn)
 
-    { success: true }
+    { success: true, ao_role: }
   rescue OAuth2::Error => e
     if e.response.status == 500
       Rails.logger.error 'API Gateway Error during AO Verification'
@@ -34,6 +34,7 @@ class AoVerificationService
     enrollment_ids = approved_enrollments.map { |enrollment| enrollment['enrollmentID'] }
     ao_role = get_authorized_official_role(enrollment_ids, identifier_type, identifier)
     check_provider_med_sanctions(ao_role['ssn'])
+    ao_role
   end
 
   def check_org_med_sanctions(npi)
