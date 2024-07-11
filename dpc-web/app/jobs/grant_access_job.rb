@@ -24,6 +24,9 @@ class GrantAccessJob < ApplicationJob
   end
 
   def find_or_create_org(user)
+    orgs = Organization.where('name ~* ?', user.requested_organization)
+    return orgs.first if orgs.one?
+
     Organization.find_or_create_by!(name: user.requested_organization) do |org|
       org.organization_type = user.requested_organization_type
       org.num_providers = user.requested_num_providers

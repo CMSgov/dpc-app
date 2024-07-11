@@ -41,7 +41,7 @@ RSpec.describe GrantAccessJob, type: :job do
         bad_org = Organization.new
         bad_org.errors.add(:base, 'bad')
         org_double = class_double(Organization).as_stubbed_const
-        expect(org_double).to receive(:find_or_create_by!).and_raise(ActiveRecord::RecordInvalid, bad_org)
+        expect(org_double).to receive(:where).and_raise(ActiveRecord::RecordInvalid, bad_org)
         expect do
           GrantAccessJob.perform_now(user.id)
         end.to change { OrganizationUserAssignment.count }.by 0
@@ -58,35 +58,81 @@ RSpec.describe GrantAccessJob, type: :job do
   describe 'existing organization' do
     let(:user) { create(:user) }
 
-    context :success do
-      before do
-        stub_api_client(message: :create_organization, success: true, response: default_org_creation_response)
-        create(:organization, name: user.requested_organization)
+    context 'One exact match' do
+      context :success do
+        before do
+          stub_api_client(message: :create_organization, success: true, response: default_org_creation_response)
+          create(:organization, name: user.requested_organization)
+        end
+        it 'should not create organization' do
+          expect do
+            GrantAccessJob.perform_now(user.id)
+          end.to change { Organization.count }.by 0
+        end
+        it 'should not create registered organization' do
+          expect do
+            GrantAccessJob.perform_now(user.id)
+          end.to change { RegisteredOrganization.count }.by 1
+        end
+        it 'should bind user to organization' do
+          expect do
+            organization = GrantAccessJob.perform_now(user.id)
+            expect(organization.users).to include(user)
+          end.to change { user.organizations.count }.by 1
+        end
       end
-      it 'should not create organization' do
-        expect do
-          GrantAccessJob.perform_now(user.id)
-        end.to change { Organization.count }.by 0
-      end
-      it 'should not create registered organization' do
-        expect do
-          GrantAccessJob.perform_now(user.id)
-        end.to change { RegisteredOrganization.count }.by 1
-      end
-      it 'should bind user to organization' do
-        expect do
-          organization = GrantAccessJob.perform_now(user.id)
-          expect(organization.users).to include(user)
-        end.to change { user.organizations.count }.by 1
+      context :failure do
+        it 'should fail if cannot register registered organization' do
+          stub_api_client(message: :create_organization, success: false)
+          expect do
+            GrantAccessJob.perform_now(user.id)
+          end.to change { RegisteredOrganization.count }.by 0
+          expect(user.reload.organizations.length).to eq 0
+        end
       end
     end
-    context :failure do
-      it 'should fail if cannot register registered organization' do
-        stub_api_client(message: :create_organization, success: false)
-        expect do
-          GrantAccessJob.perform_now(user.id)
-        end.to change { RegisteredOrganization.count }.by 0
-        expect(user.reload.organizations.length).to eq 0
+
+    context 'One match different case' do
+      context :success do
+        before do
+          stub_api_client(message: :create_organization, success: true, response: default_org_creation_response)
+          create(:organization, name: user.requested_organization.downcase)
+        end
+        it 'should not create organization' do
+          expect do
+            GrantAccessJob.perform_now(user.id)
+          end.to change { Organization.count }.by 0
+        end
+      end
+    end
+    context 'More than one match with exact' do
+      context :success do
+        let(:matching_org) { create(:organization, name: user.requested_organization) }
+        before do
+          stub_api_client(message: :create_organization, success: true, response: default_org_creation_response)
+          create(:organization, name: user.requested_organization.downcase)
+          matching_org
+        end
+        it 'should not create organization' do
+          expect do
+            organization = GrantAccessJob.perform_now(user.id)
+            expect(organization).to eq matching_org
+          end.to change { Organization.count }.by 0
+        end
+      end
+    end
+    context 'More than one match with no exact match' do
+      context :success do
+        before do
+          stub_api_client(message: :create_organization, success: true, response: default_org_creation_response)
+          create(:organization, name: user.requested_organization.downcase)
+          create(:organization, name: user.requested_organization.capitalize)
+        end
+        it 'should create organization' do
+          expect do
+            GrantAccessJob.perform_now(user.id)
+          end.to change { Organization.count }.by 1
+        end
       end
     end
   end
