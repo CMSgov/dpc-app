@@ -12,6 +12,7 @@ describe AoVerificationService do
     it 'succeeds with good input' do
       response = service.check_eligibility(good_org_npi, hashed_ao_ssn)
       expect(response).to include({ success: true })
+      expect(response[:ao_role]).to be_present
     end
 
     it 'returns an error if looking up enrollments for the NPI returns a 404' do

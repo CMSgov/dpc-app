@@ -199,6 +199,20 @@ RSpec.describe 'Invitations', type: :request do
         let(:invitation) { create(:invitation, :ao) }
         let(:success_params) { {} }
       end
+      context :success do
+        let(:invitation) { create(:invitation, :ao) }
+        let(:org) { invitation.provider_organization }
+        before do
+          stub_user_info
+          log_in
+          get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
+        end
+        it 'sets pac id' do
+          post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"
+          # We have the fake CPI API Gateway return the ssn as pac_id
+          expect(request.session[:user_pac_id]).to eq user_info['social_security_number']
+        end
+      end
     end
 
     context :cd do
@@ -267,7 +281,27 @@ RSpec.describe 'Invitations', type: :request do
           expect(response).to be_ok
           expect(response.body).to include('Registration completed')
         end
+
+        it 'should create user if not exist' do
+          expect do
+            post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+          end.to change { User.count }.by 1
+        end
+        it 'should not create user if exists' do
+          create(:user, provider: :openid_connect, uid: user_info['sub'])
+          expect do
+            post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+          end.to change { User.count }.by 0
+        end
+        it 'should not override pac_id on existing user' do
+          create(:user, provider: :openid_connect, uid: user_info['sub'], pac_id: :foo)
+          post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+          user = User.find_by(uid: user_info['sub'])
+          # We have the fake CPI API Gateway return the ssn as pac_id
+          expect(user.pac_id).to eq 'foo'
+        end
       end
+
       context 'failure' do
         before do
           stub_user_info
@@ -297,6 +331,31 @@ RSpec.describe 'Invitations', type: :request do
       it_behaves_like 'a register endpoint' do
         let(:invitation) { create(:invitation, :ao) }
         let(:success_params) { {} }
+      end
+      context :success do
+        let(:invitation) { create(:invitation, :ao) }
+        let(:org) { invitation.provider_organization }
+        before do
+          log_in
+          stub_user_info
+          get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
+          post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"
+        end
+        it 'should set pac_id' do
+          post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+          user = User.find_by(uid: user_info['sub'])
+          # We have the fake CPI API Gateway return the ssn as pac_id
+          expect(user.pac_id).to eq user_info['social_security_number']
+          expect(request.session[:user_pac_id]).to be_nil
+        end
+        it 'should set pac_id on existing user' do
+          create(:user, provider: :openid_connect, uid: user_info['sub'])
+          post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+          user = User.find_by(uid: user_info['sub'])
+          # We have the fake CPI API Gateway return the ssn as pac_id
+          expect(user.pac_id).to eq user_info['social_security_number']
+          expect(request.session[:user_pac_id]).to be_nil
+        end
       end
     end
   end
@@ -382,7 +441,7 @@ def log_in
   follow_redirect!
 end
 
-def user_info(overrides)
+def user_info(overrides = {})
   {
     'sub' => '097d06f7-e9ad-4327-8db3-0ba193b7a2c2',
     'iss' => 'https://idp.int.identitysandbox.gov/',
