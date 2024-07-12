@@ -1,9 +1,5 @@
 # Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
 version: v1.22.1
-# excludes spec files from scan
-exclude:
-  global:
-    - /usr/local/bundle/**/spec/*
 # ignores vulnerabilities until expiry date; change duration by modifying expiry date
 ignore:
   SNYK-JAVA-IONETTY-564897:
