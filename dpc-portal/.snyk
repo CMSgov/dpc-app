@@ -1,6 +1,0 @@
-# Snyk (https://snyk.io) policy file
-version: v1.22.1
-# excludes spec files from scan
-exclude:
-  global:
-    - /usr/local/bundle/gems/**/Gemfile.lock
