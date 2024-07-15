@@ -386,6 +386,24 @@ RSpec.describe Invitation, type: :model do
         expect(ao_invite.match_user?(user_info)).to eq false
       end
     end
+
+    describe :ao_match do
+      let(:ao_invite) { create(:invitation, :ao) }
+      it 'should pass with good ssn' do
+        user_info = { 'social_security_number' => '900111111' }
+        expect(ao_invite.ao_match?(user_info)).to be_truthy
+      end
+      it 'should pass with good ssn with dashes' do
+        user_info = { 'social_security_number' => '900-11-1111' }
+        expect(ao_invite.ao_match?(user_info)).to be_truthy
+      end
+      it 'should raise with bad ssn' do
+        user_info = { 'social_security_number' => '900666666' }
+        expect do
+          ao_invite.ao_match?(user_info)
+        end.to raise_error(InvitationError, 'ao_med_sanctions')
+      end
+    end
   end
 
   describe :unacceptable_reason do
