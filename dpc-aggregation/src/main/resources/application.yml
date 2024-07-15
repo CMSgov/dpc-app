@@ -53,6 +53,13 @@ logging:
     "metrics": INFO
   appenders:
     - type: console
+      filterFactories:
+        - type: secret-filter-factory
+          secrets:
+            - ATTRIBUTION_DB_PASS
+            - BB_KEYSTORE_PASS
+            - BFD_HASH_PEPPER
+            - QUEUE_DB_PASS
       timeZone: UTC
       layout:
         type: json-dpc
