@@ -3,6 +3,8 @@
 require 'rails_helper'
 
 RSpec.feature 'user signs in' do
+  include ActiveJob::TestHelper
+
   let!(:user) { create :user, password: '12345ABCDEfghi!', password_confirmation: '12345ABCDEfghi!' }
 
   scenario 'when successful' do
@@ -41,7 +43,7 @@ RSpec.feature 'user signs in' do
 
     expect do
       find('input[data-test="submit"]').click
-      Sidekiq::Worker.drain_all
+      perform_enqueued_jobs
     end.to change(ActionMailer::Base.deliveries, :count).by(2)
 
     last_delivery = ActionMailer::Base.deliveries.last
