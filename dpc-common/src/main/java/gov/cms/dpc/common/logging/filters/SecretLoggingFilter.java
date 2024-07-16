@@ -43,9 +43,9 @@ public class SecretLoggingFilter implements FilterFactory<ILoggingEvent> {
 		return new Filter<>() {
 			@Override
 			public FilterReply decide(ILoggingEvent event) {
-				for (String secret : secrets) {
-					if (event.getFormattedMessage().contains(envVars.get(secret))) {
-						logger.warn("Suppressing log, attempted to write " + secret + " in " + event.getLoggerName());
+				for (String secretName : secrets) {
+					if (event.getFormattedMessage().contains(envVars.get(secretName))) {
+						logger.warn("Suppressing log, attempted to write " + secretName + " in " + event.getLoggerName());
 						return FilterReply.DENY;
 					}
 				}
