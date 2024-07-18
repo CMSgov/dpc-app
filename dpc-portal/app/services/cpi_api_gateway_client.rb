@@ -31,6 +31,15 @@ class CpiApiGatewayClient
     response.parsed
   end
 
+  # fetch full enrollments information about an organization
+  def fetch_profile(npi)
+    body = { providerID: { npi: npi.to_s } }.to_json
+    response = request_client.post("#{@cpi_api_gateway_url}api/1.0/ppr/providers/profile",
+                                   headers: { 'Content-Type': 'application/json' },
+                                   body:)
+    response.parsed
+  end
+
   # fetch a list of roles, roughly corresponding to associated individuals
   def fetch_enrollment_roles(enrollment_id)
     response = request_client.get("#{@cpi_api_gateway_url}api/1.0/ppr/providers/enrollments/#{enrollment_id}/roles",

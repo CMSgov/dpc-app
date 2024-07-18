@@ -25,6 +25,33 @@ describe CpiApiGatewayClient do
     end
   end
 
+  describe '.fetch_profile' do
+    it 'returns enrollments' do
+      enrollment = client.fetch_profile(12_345)
+      expect(enrollment.dig('provider', 'enrollments').length).to eq 2
+      expect(enrollment.dig('provider', 'enrollments', 0, 'status')).to eq 'INACTIVE'
+      expect(enrollment.dig('provider', 'enrollments', 1, 'status')).to eq 'APPROVED'
+    end
+
+    it 'returns inactive enrollments with specific npi' do
+      enrollment = client.fetch_profile('3782297014')
+      expect(enrollment.dig('provider', 'enrollments').length).to eq 2
+      expect(enrollment.dig('provider', 'enrollments', 0, 'status')).to eq 'INACTIVE'
+      expect(enrollment.dig('provider', 'enrollments', 1, 'status')).to eq 'IN REVIEW'
+    end
+
+    it 'fetches roles' do
+      roles = client.fetch_profile(12_345)
+      expect(roles.dig('provider', 'enrollments', 0, 'roles', 0, 'roleCode')).to eq '10'
+      expect(roles.dig('provider', 'enrollments', 0, 'roles', 0, 'ssn')).to eq '900222222'
+
+      %w[900111111 900666666 900777777].each_with_index do |ssn, idx|
+        expect(roles.dig('provider', 'enrollments', 1, 'roles', idx, 'roleCode')).to eq '10'
+        expect(roles.dig('provider', 'enrollments', 1, 'roles', idx, 'ssn')).to eq ssn
+      end
+    end
+  end
+
   describe '.fetch_enrollment_roles' do
     it 'fetches roles' do
       roles = client.fetch_enrollment_roles(123_456)
