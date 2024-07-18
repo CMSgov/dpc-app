@@ -3,6 +3,7 @@ package gov.cms.dpc.fhir.validations;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.validation.FhirValidator;
+import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
 import gov.cms.dpc.fhir.validations.profiles.AttestationProfile;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
@@ -52,8 +53,21 @@ class AttestationValidationTest {
     void definitionIsValid() {
         final StructureDefinition provenanceDefinition = dpcModule.fetchStructureDefinition(AttestationProfile.PROFILE_URI);
         final ValidationResult result = fhirValidator.validateWithResult(provenanceDefinition);
-        assertAll(() -> assertEquals(1, result.getMessages().size(), "Should have a single message"),
-                () -> assertTrue(result.getMessages().get(0).getMessage().contains("Provenance.target: derived min (0) cannot be less than base min (1)")));
+
+        StringBuilder resultMessages = new StringBuilder();
+        for (SingleValidationMessage msg: result.getMessages()) {
+            resultMessages.append(msg.getMessage()).append(" ");
+        }
+
+        assertAll(
+                () -> assertEquals(3, result.getMessages().size(), "Should have exactly 3 messages"),
+                () -> assertTrue(resultMessages.toString().contains(
+                        "Element Provenance.target: derived min (0) cannot be less than the base min (1)")),
+                () -> assertTrue(resultMessages.toString().contains(
+                        "The slice definition for Provenance.reason has a minimum of 0 but the slices add up to a minimum of 1")),
+                () -> assertTrue(resultMessages.toString().contains(
+                        "The repeating element has a pattern. The pattern will apply to all the repeats (this has not been clear to all users)"))
+        );
     }
 
     @Test
