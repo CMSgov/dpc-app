@@ -92,7 +92,6 @@ public class BlueButtonClientImpl implements BlueButtonClient {
             return query
                 .returnBundle(Bundle.class)
                 .execute();
-
         });
     }
 
