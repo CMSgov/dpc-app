@@ -52,7 +52,6 @@
         <dependency>
             <groupId>${hapi.fhir.groupID}</groupId>
             <artifactId>hapi-fhir-caching-caffeine</artifactId>
-            <version>${hapi.fhir.version}</version>
         </dependency>
         <dependency>
             <groupId>io.dropwizard</groupId>
