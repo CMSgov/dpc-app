@@ -1,5 +1,6 @@
 package gov.cms.dpc.bluebutton.client;
 
+import ca.uhn.fhir.rest.api.SearchStyleEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.*;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -20,12 +21,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
 import java.security.GeneralSecurityException;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.KeySpec;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -86,7 +82,7 @@ public class BlueButtonClientImpl implements BlueButtonClient {
     }
 
     /**
-     * Hashes MBI and queries Blue Button server for patient data.
+     * Queries Blue Button server for patient data by MBI
      *
      * @param mbi The MBI
      * @param headers
@@ -94,29 +90,16 @@ public class BlueButtonClientImpl implements BlueButtonClient {
      */
     @Override
     public Bundle requestPatientFromServerByMbi(String mbi, Map<String, String> headers) throws ResourceNotFoundException, GeneralSecurityException {
-        String mbiHash = hashMbi(mbi.toUpperCase());
-        return requestPatientFromServerByMbiHash(mbiHash, headers);
-    }
-
-    /**
-     * Queries Blue Button server for patient data by hashed Medicare Beneficiary Identifier (MBI).
-     *
-     * @param mbiHash The hashed MBI
-     * @param headers
-     * @return {@link Bundle} A FHIR Bundle of Patient resources
-     */
-    @Override
-    public Bundle requestPatientFromServerByMbiHash(String mbiHash, Map<String, String> headers) throws ResourceNotFoundException {
-        logger.info("Attempting to fetch patient with MBI hash {} from baseURL: {}", mbiHash, client.getServerBase());
         return instrumentCall(REQUEST_PATIENT_METRIC, () -> {
             IQuery<IBaseBundle> query = client
-                    .search()
-                    .forResource(Patient.class)
-                    .where(Patient.IDENTIFIER.exactly().systemAndIdentifier(DPCIdentifierSystem.MBI_HASH.getSystem(), mbiHash));
+                .search()
+                .forResource(Patient.class)
+                .where(Patient.IDENTIFIER.exactly().systemAndIdentifier(DPCIdentifierSystem.MBI.getSystem(), mbi))
+                .usingStyle(SearchStyleEnum.POST);
             addBFDHeaders(query, headers);
             return query
-                    .returnBundle(Bundle.class)
-                    .execute();
+                .returnBundle(Bundle.class)
+                .execute();
 
         });
     }
@@ -202,26 +185,6 @@ public class BlueButtonClientImpl implements BlueButtonClient {
                         .capabilities()
                         .ofType(CapabilityStatement.class)
                         .execute());
-    }
-
-    @Override
-    public String hashMbi(String mbi) throws GeneralSecurityException {
-        if (StringUtils.isBlank(mbi)) {
-            logger.error("Could not generate hash; provided MBI string was null or empty");
-            return "";
-        }
-
-        final SecretKeyFactory instance;
-        try {
-            instance = SecretKeyFactory.getInstance(HASH_ALGORITHM);
-        } catch (NoSuchAlgorithmException e) {
-            logger.error("Secret key factory could not be created due to invalid algorithm: {}", HASH_ALGORITHM);
-            throw new GeneralSecurityException(e);
-        }
-
-        KeySpec keySpec = new PBEKeySpec(mbi.toCharArray(), bfdHashPepper, bfdHashIter, 256);
-        SecretKey secretKey = instance.generateSecret(keySpec);
-        return Hex.toHexString(secretKey.getEncoded());
     }
 
     /**
