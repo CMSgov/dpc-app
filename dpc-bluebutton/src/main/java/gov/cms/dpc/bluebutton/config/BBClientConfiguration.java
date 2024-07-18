@@ -34,11 +34,6 @@ public class BBClientConfiguration {
     @JsonProperty("keyStore")
     private KeystoreConfiguration keystore = new KeystoreConfiguration();
 
-    @NotEmpty
-    private String bfdHashPepper;
-
-    private int bfdHashIter;
-
     private boolean useBfdMock = false;
 
     private R4Configuration r4Configuration;
@@ -85,10 +80,6 @@ public class BBClientConfiguration {
     public void setRegisterHealthCheck(boolean registerHealthCheck) {
         this.registerHealthCheck = registerHealthCheck;
     }
-
-    public String getBfdHashPepper() { return bfdHashPepper; }
-
-    public int getBfdHashIter() { return bfdHashIter; }
 
     public boolean isUseBfdMock() {
         return useBfdMock;

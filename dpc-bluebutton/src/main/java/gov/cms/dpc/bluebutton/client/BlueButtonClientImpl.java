@@ -14,7 +14,6 @@ import gov.cms.dpc.common.Constants;
 import gov.cms.dpc.common.utils.MetricMaker;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import org.apache.commons.lang3.StringUtils;
-import org.bouncycastle.util.encoders.Hex;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -45,8 +44,6 @@ public class BlueButtonClientImpl implements BlueButtonClient {
     private Map<String, Timer> timers;
     private Map<String, Meter> exceptionMeters;
     private static final String HASH_ALGORITHM = "PBKDF2WithHmacSHA256";
-    private byte[] bfdHashPepper;
-    private int bfdHashIter;
 
     private static String formBeneficiaryID(String fromPatientID) {
         return "Patient/" + fromPatientID;
@@ -58,11 +55,6 @@ public class BlueButtonClientImpl implements BlueButtonClient {
         final var metricMaker = new MetricMaker(metricRegistry, BlueButtonClientImpl.class);
         this.exceptionMeters = metricMaker.registerMeters(REQUEST_METRICS);
         this.timers = metricMaker.registerTimers(REQUEST_METRICS);
-
-        bfdHashIter = config.getBfdHashIter();
-        if (config.getBfdHashPepper() != null) {
-            bfdHashPepper = Hex.decode(config.getBfdHashPepper());
-        }
     }
 
     /**
