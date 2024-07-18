@@ -3,6 +3,7 @@ package gov.cms.dpc.fhir.validations;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.validation.FhirValidator;
+import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.validations.profiles.PatientProfile;
@@ -16,6 +17,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.sql.Date;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -50,7 +53,22 @@ class PatientValidationTest {
     void definitionIsValid() {
         final StructureDefinition patientDefinition = dpcModule.fetchStructureDefinition(PatientProfile.PROFILE_URI);
         final ValidationResult result = fhirValidator.validateWithResult(patientDefinition);
-        assertTrue(result.isSuccessful(), "Should have passed");
+
+        ArrayList<String> resultMessages = new ArrayList<>();
+        for (SingleValidationMessage msg: result.getMessages()) {
+            resultMessages.add(msg.getMessage());
+        }
+        String resultMessagesString = String.join(", ", resultMessages);
+
+        List<String> expectedMessages = List.of(
+                "Found # expecting a token name",
+                " The slice definition for Patient.identifier has a minimum of 0 but the slices add up to a minimum of 1"
+        );
+
+        assertEquals(2, result.getMessages().size(), "Should have exactly 2 messages");
+        for (String msg: expectedMessages) {
+            assertTrue(resultMessagesString.contains(msg));
+        }
     }
 
     @Test

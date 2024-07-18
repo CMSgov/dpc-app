@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.sql.Date;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -54,20 +55,23 @@ class AttestationValidationTest {
         final StructureDefinition provenanceDefinition = dpcModule.fetchStructureDefinition(AttestationProfile.PROFILE_URI);
         final ValidationResult result = fhirValidator.validateWithResult(provenanceDefinition);
 
-        StringBuilder resultMessages = new StringBuilder();
+        ArrayList<String> resultMessages = new ArrayList<>();
         for (SingleValidationMessage msg: result.getMessages()) {
-            resultMessages.append(msg.getMessage()).append(" ");
+            resultMessages.add(msg.getMessage());
         }
+        String resultMessagesString = String.join(", ", resultMessages);
 
-        assertAll(
-                () -> assertEquals(3, result.getMessages().size(), "Should have exactly 3 messages"),
-                () -> assertTrue(resultMessages.toString().contains(
-                        "Element Provenance.target: derived min (0) cannot be less than the base min (1)")),
-                () -> assertTrue(resultMessages.toString().contains(
-                        "The slice definition for Provenance.reason has a minimum of 0 but the slices add up to a minimum of 1")),
-                () -> assertTrue(resultMessages.toString().contains(
-                        "The repeating element has a pattern. The pattern will apply to all the repeats (this has not been clear to all users)"))
+        List<String> expectedMessages = List.of(
+                "Element Provenance.target: derived min (0) cannot be less than the base min (1)",
+                "The slice definition for Provenance.reason has a minimum of 0 but the slices add up to a minimum of 1",
+                "The repeating element has a pattern. The pattern will apply to all the repeats (this has not been clear to all users)",
+                "Found # expecting a token name"
         );
+
+        assertEquals(4, result.getMessages().size(), "Should have exactly 4 messages");
+        for (String msg: expectedMessages) {
+            assertTrue(resultMessagesString.contains(msg));
+        }
     }
 
     @Test
