@@ -43,7 +43,8 @@ RUN RAILS_ENV=production SECRET_KEY_BASE=dummy bundle exec rake assets:precompil
 # Clean up from the build
 RUN rm -rf /usr/local/bundle/cache/*.gem && \
     find /usr/local/bundle/gems/ -name "*.c" -delete && \
-    find /usr/local/bundle/gems/ -name "*.o" -delete
+    find /usr/local/bundle/gems/ -name "*.o" -delete && \
+    find /usr/local/bundle/gems/ -name "Gemfile.lock" -delete
 
 # Declare the entrypoint shell script
 ENTRYPOINT ["./docker/entrypoint.sh"]
