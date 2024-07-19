@@ -27,6 +27,13 @@ describe AoVerificationService do
       expect(response).to include({ success: false, failure_reason: 'no_approved_enrollment' })
     end
 
+    it 'returns an error if the authorized official is only in an inactive enrollment' do
+      not_ao_ssn = '900222222'
+      hashed_not_ao_ssn = Digest::SHA2.new(256).hexdigest(not_ao_ssn)
+      response = service.check_eligibility(good_org_npi, hashed_not_ao_ssn)
+      expect(response).to include({ success: false, failure_reason: 'user_not_authorized_official' })
+    end
+
     it 'returns an error if the user is not an authorized official' do
       not_ao_ssn = '111223456'
       hashed_not_ao_ssn = Digest::SHA2.new(256).hexdigest(not_ao_ssn)
