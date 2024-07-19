@@ -86,7 +86,7 @@ class AttestationValidationTest {
         final ValidationResult result = fhirValidator.validateWithResult(provenance);
 
         assertAll(() -> assertFalse(result.isSuccessful(), "Should not have passed"),
-                () -> assertEquals(1, result.getMessages().size(), "Should have two messages for reason slice"));
+                () -> assertEquals(2, result.getMessages().size(), "Should have two messages for reason slice"));
 
         // Add a reason, but the wrong system
         Coding c1 = new Coding().setSystem("http://test.local").setCode("TREAT");
