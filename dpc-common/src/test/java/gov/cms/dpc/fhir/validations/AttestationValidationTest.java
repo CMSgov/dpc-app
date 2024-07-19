@@ -63,12 +63,11 @@ class AttestationValidationTest {
 
         List<String> expectedMessages = List.of(
                 "Element Provenance.target: derived min (0) cannot be less than the base min (1)",
-                "The slice definition for Provenance.reason has a minimum of 0 but the slices add up to a minimum of 1",
                 "The repeating element has a pattern. The pattern will apply to all the repeats (this has not been clear to all users)",
                 "Found # expecting a token name"
         );
 
-        assertEquals(4, result.getMessages().size(), "Should have exactly 4 messages");
+        assertEquals(3, result.getMessages().size(), "Should have exactly 3 messages");
         for (String msg: expectedMessages) {
             assertTrue(resultMessagesString.contains(msg));
         }

@@ -26,6 +26,7 @@
         "id": "Provenance.reason",
         "path": "Provenance.reason",
         "definition": "Must have attribution reason",
+        "min": 1,
         "slicing": {
           "discriminator": [
             {
