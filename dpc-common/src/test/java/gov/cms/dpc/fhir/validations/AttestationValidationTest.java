@@ -55,14 +55,23 @@ class AttestationValidationTest {
     void definitionIsValid() {
         final StructureDefinition provenanceDefinition = dpcModule.fetchStructureDefinition(AttestationProfile.PROFILE_URI);
         final ValidationResult result = fhirValidator.validateWithResult(provenanceDefinition);
+
         ArrayList<String> errorMessages = new ArrayList<>();
         for (SingleValidationMessage msg: result.getMessages()) {
             if (msg.getSeverity().equals(ResultSeverityEnum.ERROR)) {
                 errorMessages.add(msg.getMessage());
             }
         }
-        assertAll(() -> assertEquals(1, errorMessages.size(), "Should have a single message"),
-                () -> assertTrue(errorMessages.get(0).contains("Found # expecting a token name")));
+        String resultMessage = String.join(", ", errorMessages);
+        List<String> expectedMessages = List.of(
+                "Element Provenance.target: derived min (0) cannot be less than the base min (1)",
+                "Found # expecting a token name"
+        );
+
+        assertEquals(2, errorMessages.size(), "Should have exactly 2 messages");
+        for (String msg: expectedMessages) {
+            assertTrue(resultMessage.contains(msg));
+        }
     }
 
     @Test
@@ -78,7 +87,7 @@ class AttestationValidationTest {
         final ValidationResult result = fhirValidator.validateWithResult(provenance);
 
         assertAll(() -> assertFalse(result.isSuccessful(), "Should not have passed"),
-                () -> assertEquals(2, result.getMessages().size(), "Should have two messages for reason slice"));
+                () -> assertEquals(1, result.getMessages().size(), "Should have a single message"));
 
         // Add a reason, but the wrong system
         Coding c1 = new Coding().setSystem("http://test.local").setCode("TREAT");
@@ -270,7 +279,6 @@ class AttestationValidationTest {
 
 
         final ValidationResult result = fhirValidator.validateWithResult(provenance);
-
         assertAll(() -> assertFalse(result.isSuccessful(), "Should not have passed"),
                 () -> assertEquals(1, result.getMessages().size(), "Can only have 1 agent"));
     }

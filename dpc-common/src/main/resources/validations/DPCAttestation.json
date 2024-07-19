@@ -20,7 +20,7 @@
       {
         "id": "Provenance.target",
         "path": "Provenance.target",
-        "min": 1
+        "min": 0
       },
       {
         "id": "Provenance.reason",
