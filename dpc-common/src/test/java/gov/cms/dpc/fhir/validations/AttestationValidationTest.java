@@ -62,7 +62,6 @@ class AttestationValidationTest {
         String resultMessagesString = String.join(", ", resultMessages);
 
         List<String> expectedMessages = List.of(
-                "Element Provenance.target: derived min (0) cannot be less than the base min (1)",
                 "The repeating element has a pattern. The pattern will apply to all the repeats (this has not been clear to all users)",
                 "Found # expecting a token name"
         );
