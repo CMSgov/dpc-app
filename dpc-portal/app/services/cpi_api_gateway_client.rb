@@ -40,13 +40,6 @@ class CpiApiGatewayClient
     response.parsed
   end
 
-  # fetch a list of roles, roughly corresponding to associated individuals
-  def fetch_enrollment_roles(enrollment_id)
-    response = request_client.get("#{@cpi_api_gateway_url}api/1.0/ppr/providers/enrollments/#{enrollment_id}/roles",
-                                  headers: { 'Content-Type': 'application/json' })
-    response.parsed
-  end
-
   # fetch info about the authorized official, including a list of med sanctions
   def fetch_med_sanctions_and_waivers_by_ssn(ssn)
     body = {

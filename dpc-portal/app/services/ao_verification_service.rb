@@ -30,9 +30,7 @@ class AoVerificationService
   # rubocop:enable Metrics/AbcSize
 
   def check_ao_eligibility(organization_npi, identifier_type, identifier)
-    approved_enrollments = get_approved_enrollments(organization_npi)
-    enrollment_ids = approved_enrollments.map { |enrollment| enrollment['enrollmentID'] }
-    ao_role = get_authorized_official_role(enrollment_ids, identifier_type, identifier)
+    ao_role = get_authorized_official_role(organization_npi, identifier_type, identifier)
     check_provider_med_sanctions(ao_role['ssn'])
     ao_role
   end
@@ -82,11 +80,19 @@ class AoVerificationService
     !active_waiver.nil?
   end
 
-  def get_authorized_official_role(enrollment_ids, identifier_type, identifier)
-    enrollment_ids.each do |enrollment_id|
-      response = @cpi_api_gw_client.fetch_enrollment_roles(enrollment_id)
-      roles_response = response.dig('enrollments', 'roles')
-      roles_response.each do |role|
+  def get_authorized_official_role(organization_npi, identifier_type, identifier)
+    response = @cpi_api_gw_client.fetch_profile(organization_npi)
+    raise AoException, 'bad_npi' if response['code'] == '404'
+
+    enrollments = response.dig('provider', 'enrollments')&.select { |enrollment| enrollment['status'] == 'APPROVED' }
+    raise AoException, 'no_approved_enrollment' if enrollments.blank?
+
+    role_from_enrollments(enrollments, identifier_type, identifier)
+  end
+
+  def role_from_enrollments(enrollments, identifier_type, identifier)
+    enrollments.each do |enrollment|
+      enrollment['roles']&.each do |role|
         return role if role_matches(role, identifier_type, identifier)
       end
     end

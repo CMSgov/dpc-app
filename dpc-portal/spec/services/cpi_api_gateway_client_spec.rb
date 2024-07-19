@@ -52,16 +52,6 @@ describe CpiApiGatewayClient do
     end
   end
 
-  describe '.fetch_enrollment_roles' do
-    it 'fetches roles' do
-      roles = client.fetch_enrollment_roles(123_456)
-      %w[900111111 900666666 900777777].each_with_index do |ssn, idx|
-        expect(roles.dig('enrollments', 'roles', idx, 'roleCode')).to eq '10'
-        expect(roles.dig('enrollments', 'roles', idx, 'ssn')).to eq ssn
-      end
-    end
-  end
-
   describe '.fetch_authorized_official_med_sanctions' do
     it 'returns sanctions with specific ssn' do
       ssn = '900666666'
