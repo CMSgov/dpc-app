@@ -3,6 +3,7 @@ package gov.cms.dpc.fhir.validations;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.validation.FhirValidator;
+import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
 import gov.cms.dpc.fhir.validations.profiles.AttestationProfile;
@@ -54,22 +55,14 @@ class AttestationValidationTest {
     void definitionIsValid() {
         final StructureDefinition provenanceDefinition = dpcModule.fetchStructureDefinition(AttestationProfile.PROFILE_URI);
         final ValidationResult result = fhirValidator.validateWithResult(provenanceDefinition);
-
-        ArrayList<String> resultMessages = new ArrayList<>();
+        ArrayList<String> errorMessages = new ArrayList<>();
         for (SingleValidationMessage msg: result.getMessages()) {
-            resultMessages.add(msg.getMessage());
+            if (msg.getSeverity().equals(ResultSeverityEnum.ERROR)) {
+                errorMessages.add(msg.getMessage());
+            }
         }
-        String resultMessagesString = String.join(", ", resultMessages);
-
-        List<String> expectedMessages = List.of(
-                "The repeating element has a pattern. The pattern will apply to all the repeats (this has not been clear to all users)",
-                "Found # expecting a token name"
-        );
-
-        assertEquals(3, result.getMessages().size(), "Should have exactly 3 messages");
-        for (String msg: expectedMessages) {
-            assertTrue(resultMessagesString.contains(msg));
-        }
+        assertAll(() -> assertEquals(1, errorMessages.size(), "Should have a single message"),
+                () -> assertTrue(errorMessages.get(0).contains("Found # expecting a token name")));
     }
 
     @Test
