@@ -279,6 +279,7 @@ class AttestationValidationTest {
 
 
         final ValidationResult result = fhirValidator.validateWithResult(provenance);
+
         assertAll(() -> assertFalse(result.isSuccessful(), "Should not have passed"),
                 () -> assertEquals(1, result.getMessages().size(), "Can only have 1 agent"));
     }
