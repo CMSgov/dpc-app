@@ -96,7 +96,7 @@ class InvitationsController < ApplicationController
       return
     end
 
-    render(Page::Session::InvitationLoginComponent.new(@invitation))
+    render(Page::Invitations::InvitationLoginComponent.new(@invitation))
   end
 
   def invitation_matches_user
@@ -141,7 +141,7 @@ class InvitationsController < ApplicationController
   def handle_user_info_service_error(error)
     case error.message
     when 'unauthorized'
-      render(Page::Session::InvitationLoginComponent.new(@invitation))
+      render(Page::Invitations::InvitationLoginComponent.new(@invitation))
     else
       render(Page::Invitations::BadInvitationComponent.new(@invitation, 'server_error', 'warning'),
              status: :service_unavailable)

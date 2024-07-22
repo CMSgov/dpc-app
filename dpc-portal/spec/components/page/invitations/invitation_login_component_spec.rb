@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe Page::Session::InvitationLoginComponent, type: :component do
+RSpec.describe Page::Invitations::InvitationLoginComponent, type: :component do
   include ComponentSupport
   describe 'login component' do
     let(:provider_organization) { build(:provider_organization, dpc_api_organization_id: 'foo') }

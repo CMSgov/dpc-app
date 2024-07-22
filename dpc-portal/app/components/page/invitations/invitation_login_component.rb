@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Page
-  module Session
+  module Invitations
     # Component for Invitatation login (IAL/2 flow)
     class InvitationLoginComponent < ViewComponent::Base
       def initialize(invitation)
