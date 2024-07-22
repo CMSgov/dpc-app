@@ -279,7 +279,7 @@ RSpec.describe 'Invitations', type: :request do
         it 'should show success page' do
           post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
           expect(response).to be_ok
-          expect(response.body).to include('Registration completed')
+          expect(response.body).to include('Go to DPC Portal')
         end
 
         it 'should create user if not exist' do
