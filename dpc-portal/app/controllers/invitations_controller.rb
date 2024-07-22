@@ -77,13 +77,11 @@ class InvitationsController < ApplicationController
   def create_cd_org_link
     CdOrgLink.create!(user:, provider_organization: @organization, invitation: @invitation)
     @invitation.accept!
-    flash[:notice] = "Invitation accepted. You can now manage this organization's credentials. Learn more."
   end
 
   def create_ao_org_link
     AoOrgLink.create!(user:, provider_organization: @organization, invitation: @invitation)
     @invitation.accept!
-    flash[:notice] = 'Invitation accepted.'
   end
 
   def user
