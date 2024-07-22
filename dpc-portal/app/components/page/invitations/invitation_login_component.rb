@@ -7,6 +7,12 @@ module Page
       def initialize(invitation)
         super
         @invitation = invitation
+        @musts = [
+          'Email address (you must use the same email that received the invitation)',
+          'Drivers license or state ID',
+          'Social security number',
+          'Phone number'
+        ]
       end
     end
   end

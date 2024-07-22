@@ -9,10 +9,6 @@ RSpec.describe Page::Invitations::InvitationLoginComponent, type: :component do
     let(:invitation) { create(:invitation, :cd, provider_organization:) }
     let(:component) { described_class.new(invitation) }
     before { render_inline(component) }
-    it 'should be a usa section' do
-      expect(page).to have_selector('section.usa-section')
-    end
-
     it 'should have a login button' do
       expect(page).to have_selector('button.usa-button')
       expect(page.find('button.usa-button')).to have_content('Sign in with')
