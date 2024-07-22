@@ -356,6 +356,14 @@ RSpec.describe 'Invitations', type: :request do
           expect(user.pac_id).to eq user_info['social_security_number']
           expect(request.session[:user_pac_id]).to be_nil
         end
+        it 'should sign in user' do
+          post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+          get '/'
+          expect(response).to be_ok
+          links = assigns(:links)
+          expect(links.size).to eq 1
+          expect(links.first.provider_organization).to eq org
+        end
       end
     end
   end
