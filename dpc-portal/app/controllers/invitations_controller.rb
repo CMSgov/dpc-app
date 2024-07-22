@@ -29,15 +29,10 @@ class InvitationsController < ApplicationController
                                                             @invitation)
     end
 
-    if @invitation.credential_delegate?
-      create_cd_org_link
-    elsif @invitation.authorized_official?
-      create_ao_org_link
-    else
-      return render(Page::Invitations::BadInvitationComponent.new(@invitation, 'invalid', 'warning'),
-                    status: :unprocessable_entity)
-    end
+    return unless create_link
+
     session.delete("invitation_status_#{@invitation.id}")
+    sign_in(:user, @user)
     render(Page::Invitations::SuccessComponent.new(@organization, @invitation))
   end
 
@@ -67,6 +62,18 @@ class InvitationsController < ApplicationController
 
   private
 
+  def create_link
+    if @invitation.credential_delegate?
+      create_cd_org_link
+    elsif @invitation.authorized_official?
+      create_ao_org_link
+    else
+      render(Page::Invitations::BadInvitationComponent.new(@invitation, 'invalid', 'warning'),
+             status: :unprocessable_entity)
+      false
+    end
+  end
+
   def create_cd_org_link
     CdOrgLink.create!(user:, provider_organization: @organization, invitation: @invitation)
     @invitation.accept!
@@ -81,12 +88,12 @@ class InvitationsController < ApplicationController
 
   def user
     user_info = UserInfoService.new.user_info(session)
-    local_user = User.find_or_create_by!(provider: :openid_connect, uid: user_info['sub']) do |user_to_create|
+    @user = User.find_or_create_by!(provider: :openid_connect, uid: user_info['sub']) do |user_to_create|
       user_to_create.email = @invitation.invited_email
       user_to_create.pac_id = session.delete(:user_pac_id)
     end
-    local_user.update(pac_id: session.delete(:user_pac_id)) unless local_user.pac_id
-    local_user
+    @user.update(pac_id: session.delete(:user_pac_id)) unless @user.pac_id
+    @user
   end
 
   def check_for_token
