@@ -1,6 +1,5 @@
 <%= render(Core::Navigation::StepIndicatorComponent.new(Invitation::STEPS, 1)) if @invitation.authorized_official? %>
 <div>
-  <h1>Identity Verified</h1>
   <div>
     <% if @invitation.credential_delegate? %>
     <h2>Provide invite code</h2>
@@ -14,8 +13,10 @@
       <%= submit_tag "Validate invite code", class: "usa-button", data: { test: "form:submit" } %>
       <% end %>
     <% else %>
-    <p>Press the button below to verify that you are an authorized official for <strong><%= @organization.name %></strong>.</p>
-    <%= render Core::Button::ButtonComponent.new(label: "Verify provider organization",
+    <p>Thank you for signing in, <%= @name %>.</p>
+
+    <p>Now that your identity is verified we'll check your and your organization's enrollment with the Medicare Provider Enrollment, Chain, and Ownership System (PECOS).</p>
+    <%= render Core::Button::ButtonComponent.new(label: 'Continue to register',
 	destination: confirm_organization_invitation_path(@organization, @invitation),
 	method: :post) %>
     <% end %>

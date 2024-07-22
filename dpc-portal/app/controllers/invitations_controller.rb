@@ -15,7 +15,7 @@ class InvitationsController < ApplicationController
 
   def accept
     session["invitation_status_#{@invitation.id}"] = 'identity_verified'
-    render(Page::Invitations::AcceptInvitationComponent.new(@organization, @invitation))
+    render(Page::Invitations::AcceptInvitationComponent.new(@organization, @invitation, @given_name, @family_name))
   end
 
   def confirm
@@ -105,6 +105,8 @@ class InvitationsController < ApplicationController
       render(Page::Invitations::BadInvitationComponent.new(@invitation, 'pii_mismatch', 'error'),
              status: :forbidden)
     end
+    @user_given_name = user_info['given_name']
+    @user_family_name = user_info['family_name']
   rescue UserInfoServiceError => e
     handle_user_info_service_error(e)
   end
@@ -127,7 +129,7 @@ class InvitationsController < ApplicationController
     return if params[:verification_code] == @invitation.verification_code
 
     @invitation.errors.add(:verification_code, :bad_code, message: 'tbd')
-    render(Page::Invitations::AcceptInvitationComponent.new(@organization, @invitation),
+    render(Page::Invitations::AcceptInvitationComponent.new(@organization, @invitation, @given_name, @family_name),
            status: :bad_request)
   end
 
