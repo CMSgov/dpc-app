@@ -117,6 +117,11 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
+            <groupId>${hapi.fhir.groupID}</groupId>
+            <artifactId>hapi-fhir-caching-caffeine</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
             <groupId>com.helger</groupId>
             <artifactId>ph-schematron</artifactId>
             <scope>compile</scope>

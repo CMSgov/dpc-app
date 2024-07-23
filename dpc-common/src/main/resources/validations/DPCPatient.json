@@ -21,6 +21,7 @@
         "id": "Patient.identifier",
         "path": "Patient.identifier",
         "definition": "Must have MBI",
+        "min": 1,
         "slicing": {
           "discriminator": [
             {
