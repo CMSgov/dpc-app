@@ -15,16 +15,19 @@ RSpec.describe 'Invitations', type: :request do
       it 'should show warning page with 404 if missing' do
         send(method, "/organizations/#{org.id}/invitations/bad-id/#{path_suffix}")
         expect(response).to be_not_found
+        expect(response.body).to include(I18n.t('verification.invalid_status'))
       end
       it 'should show warning page with 404 if org-invitation mismatch' do
         bad_org = create(:provider_organization)
         send(method, "/organizations/#{bad_org.id}/invitations/#{invitation.id}/#{path_suffix}")
         expect(response).to be_not_found
+        expect(response.body).to include(I18n.t('verification.invalid_status'))
       end
       it 'should show warning page if cancelled' do
         invitation.update(status: :cancelled)
         send(method, "/organizations/#{org.id}/invitations/#{invitation.id}/#{path_suffix}")
         expect(response).to be_forbidden
+        expect(response.body).to include(I18n.t('verification.invalid_status'))
       end
       context 'invitation expired' do
         before { invitation.update_attribute(:created_at, 3.days.ago) }
@@ -52,6 +55,7 @@ RSpec.describe 'Invitations', type: :request do
         invitation.accept!
         send(method, "/organizations/#{org.id}/invitations/#{invitation.id}/#{path_suffix}")
         expect(response).to be_forbidden
+        expect(response.body).to include(I18n.t('verification.accepted_status'))
       end
     end
   end
@@ -171,14 +175,12 @@ RSpec.describe 'Invitations', type: :request do
           expect(response).to be_ok
           expect(request.session["invitation_status_#{invitation.id}"]).to eq 'conditions_verified'
         end
-        context :failure do
-          context :not_accepted do
-            it 'should not confirm if not passed identity verification' do
-              post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm", params: success_params
-              expect(response).to redirect_to(accept_organization_invitation_path(org, invitation))
-              expect(request.session["invitation_status_#{invitation.id}"]).to be_nil
-            end
-          end
+      end
+      context :failure do
+        it 'should not confirm if not passed identity verification' do
+          post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm", params: success_params
+          expect(response).to redirect_to(accept_organization_invitation_path(org, invitation))
+          expect(request.session["invitation_status_#{invitation.id}"]).to be_nil
         end
       end
     end
@@ -203,6 +205,20 @@ RSpec.describe 'Invitations', type: :request do
           post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"
           # We have the fake CPI API Gateway return the ssn as pac_id
           expect(request.session[:user_pac_id]).to eq user_info['social_security_number']
+        end
+      end
+      context :failure do
+        let(:invitation) { create(:invitation, :ao) }
+        let(:org) { invitation.provider_organization }
+        before do
+          stub_user_info(overrides: { 'social_security_number' => '000000000' })
+          log_in
+          get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
+        end
+        it 'renders not-ao error' do
+          post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"
+          expect(response).to be_forbidden
+          expect(response.body).to include(I18n.t('verification.user_not_authorized_official_status'))
         end
       end
     end

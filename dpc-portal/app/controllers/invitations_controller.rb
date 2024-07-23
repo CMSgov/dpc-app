@@ -126,7 +126,7 @@ class InvitationsController < ApplicationController
 
     check_ao
   rescue InvitationError => e
-    render(Page::Invitations::BadInvitationComponent.new(@invitation, e.message),
+    render(Page::Invitations::AoFlowFailComponent.new(@invitation, e.message, 2),
            status: :forbidden)
   end
 
