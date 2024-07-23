@@ -11,13 +11,13 @@
         <div class="usa-prose">
           <p>To access the DPC API portal, an Authorized Official (AO) needs to register your organization. This registration request is for <strong><%= @invitation.invited_email %></strong> at <%= @organization.name %>. Use this email to to sign in or create a Login.gov account.</p>
           <p>DPC uses Login.gov for identity verification. Continue to sign in or created a Login.gov account.</p>
-	  <div class="usa-alert usa-alert--warning margin-bottom-4">
-	    <div class="usa-alert__body">
-	      <p class="usa-alert__text">
-		This invitation will expire in <strong><%= @expiration %></strong>.
-	      </p>
-	    </div>
-	  </div>
+          <div class="usa-alert usa-alert--warning margin-bottom-4">
+            <div class="usa-alert__body">
+              <p class="usa-alert__text">
+                This invitation will expire in <strong><%= @expiration %></strong>.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -28,12 +28,12 @@
           <ul class="usa-icon-list">
             <% @musts.each do |must| %>
             <li class="usa-icon-list__item">
-	      <div class="usa-icon-list__icon">
+              <div class="usa-icon-list__icon">
                 <%= render Core::Icon::UswdsComponent.new('check_circle', additional_classes: @list_styles) %>
-	      </div>
-	      <div class="usa-icon-list__content">
+              </div>
+              <div class="usa-icon-list__content">
                 <%= must %>
-	      </div>
+              </div>
             </li>
             <% end %>
           </ul>

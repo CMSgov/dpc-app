@@ -8,8 +8,8 @@
     <p>Complete your registration of <%= @organization.name %>.</p>
     <% end %>
     <%= render Core::Button::ButtonComponent.new(label: "Complete registration",
-	destination: register_organization_invitation_path(@organization, @invitation),
-	method: :post) %>
+        destination: register_organization_invitation_path(@organization, @invitation),
+        method: :post) %>
   </div>
 </div>
 

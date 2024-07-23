@@ -17,8 +17,8 @@
 
     <p>Now that your identity is verified we'll check your and your organization's enrollment with the Medicare Provider Enrollment, Chain, and Ownership System (PECOS).</p>
     <%= render Core::Button::ButtonComponent.new(label: 'Continue to register',
-	destination: confirm_organization_invitation_path(@organization, @invitation),
-	method: :post) %>
+        destination: confirm_organization_invitation_path(@organization, @invitation),
+        method: :post) %>
     <% end %>
   </div>
 </div>
