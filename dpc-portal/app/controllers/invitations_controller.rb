@@ -110,8 +110,8 @@ class InvitationsController < ApplicationController
       render(Page::Invitations::BadInvitationComponent.new(@invitation, 'pii_mismatch', 'error'),
              status: :forbidden)
     end
-    @user_given_name = user_info['given_name']
-    @user_family_name = user_info['family_name']
+    @given_name = user_info['given_name']
+    @family_name = user_info['family_name']
   rescue UserInfoServiceError => e
     handle_user_info_service_error(e)
   end
