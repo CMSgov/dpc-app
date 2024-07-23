@@ -18,22 +18,30 @@ RSpec.describe Page::Invitations::BadInvitationComponent, type: :component do
     let(:provider_organization) { create(:provider_organization, name: 'Health Hut') }
     let(:invitation) { create(:invitation, :ao, provider_organization:) }
     context 'invalid invitation' do
-      let(:component) { described_class.new(invitation, 'invalid', 'warning') }
+      let(:component) { described_class.new(invitation, 'invalid') }
       it 'should match header' do
         header = <<~HTML
-          <h1>Invitation is invalid</h1>
-            <div class="usa-alert usa-alert--warning margin-bottom-4">
+          <h1>#{I18n.t('verification.invalid_heading')}</h1>
         HTML
         is_expected.to include(normalize_space(header))
       end
     end
 
     context 'PII mismatch' do
-      let(:component) { described_class.new(invitation, 'pii_mismatch', 'error') }
+      let(:component) { described_class.new(invitation, 'pii_mismatch') }
       it 'should match header' do
         header = <<~HTML
-          <h1>Invitation denied</h1>
-            <div class="usa-alert usa-alert--error margin-bottom-4">
+          <h1>#{I18n.t('verification.pii_mismatch_heading')}</h1>
+        HTML
+        is_expected.to include(normalize_space(header))
+      end
+    end
+
+    context 'Already accepted' do
+      let(:component) { described_class.new(invitation, 'accepted') }
+      it 'should match header' do
+        header = <<~HTML
+          <h1>#{I18n.t('verification.accepted_heading')}</h1>
         HTML
         is_expected.to include(normalize_space(header))
       end
@@ -42,7 +50,7 @@ RSpec.describe Page::Invitations::BadInvitationComponent, type: :component do
     context 'AO expired' do
       let(:status) { :pending }
       let(:invitation) { create(:invitation, :ao, provider_organization:, status:) }
-      let(:component) { described_class.new(invitation, 'ao_expired', 'error') }
+      let(:component) { described_class.new(invitation, 'ao_expired') }
       it 'should have organization name' do
         is_expected.to include(invitation.provider_organization.name)
       end

@@ -68,7 +68,7 @@ class InvitationsController < ApplicationController
     elsif @invitation.authorized_official?
       create_ao_org_link
     else
-      render(Page::Invitations::BadInvitationComponent.new(@invitation, 'invalid', 'warning'),
+      render(Page::Invitations::BadInvitationComponent.new(@invitation, 'invalid'),
              status: :unprocessable_entity)
       false
     end
@@ -109,7 +109,7 @@ class InvitationsController < ApplicationController
   def invitation_matches_user
     user_info = UserInfoService.new.user_info(session)
     unless @invitation.match_user?(user_info)
-      render(Page::Invitations::BadInvitationComponent.new(@invitation, 'pii_mismatch', 'error'),
+      render(Page::Invitations::BadInvitationComponent.new(@invitation, 'pii_mismatch'),
              status: :forbidden)
     end
   rescue UserInfoServiceError => e
@@ -126,7 +126,7 @@ class InvitationsController < ApplicationController
 
     check_ao
   rescue InvitationError => e
-    render(Page::Invitations::BadInvitationComponent.new(@invitation, e.message, 'error'),
+    render(Page::Invitations::BadInvitationComponent.new(@invitation, e.message),
            status: :forbidden)
   end
 
@@ -150,7 +150,7 @@ class InvitationsController < ApplicationController
     when 'unauthorized'
       render(Page::Session::InvitationLoginComponent.new(@invitation))
     else
-      render(Page::Invitations::BadInvitationComponent.new(@invitation, 'server_error', 'warning'),
+      render(Page::Invitations::BadInvitationComponent.new(@invitation, 'server_error'),
              status: :service_unavailable)
     end
   end
@@ -158,16 +158,16 @@ class InvitationsController < ApplicationController
   def load_invitation
     @invitation = Invitation.find(params[:id])
     if @organization != @invitation.provider_organization
-      render(Page::Invitations::BadInvitationComponent.new(@invitation, 'invalid', 'warning'), status: :not_found)
+      render(Page::Invitations::BadInvitationComponent.new(@invitation, 'invalid'), status: :not_found)
     end
   rescue ActiveRecord::RecordNotFound
-    render(Page::Invitations::BadInvitationComponent.new(@invitation, 'invalid', 'warning'), status: :not_found)
+    render(Page::Invitations::BadInvitationComponent.new(@invitation, 'invalid'), status: :not_found)
   end
 
   def validate_invitation
     return unless @invitation.unacceptable_reason
 
-    render(Page::Invitations::BadInvitationComponent.new(@invitation, @invitation.unacceptable_reason, 'warning'),
+    render(Page::Invitations::BadInvitationComponent.new(@invitation, @invitation.unacceptable_reason),
            status: :forbidden)
   end
 

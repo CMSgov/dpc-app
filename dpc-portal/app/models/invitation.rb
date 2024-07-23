@@ -73,7 +73,8 @@ class Invitation < ApplicationRecord
   end
 
   def unacceptable_reason
-    return 'invalid' if cancelled? || accepted?
+    return 'invalid' if cancelled?
+    return 'accepted' if accepted?
 
     if expired? && authorized_official?
       'ao_expired'

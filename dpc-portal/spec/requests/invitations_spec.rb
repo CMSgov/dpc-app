@@ -15,26 +15,22 @@ RSpec.describe 'Invitations', type: :request do
       it 'should show warning page with 404 if missing' do
         send(method, "/organizations/#{org.id}/invitations/bad-id/#{path_suffix}")
         expect(response).to be_not_found
-        expect(response.body).to include('usa-alert--warning')
       end
       it 'should show warning page with 404 if org-invitation mismatch' do
         bad_org = create(:provider_organization)
         send(method, "/organizations/#{bad_org.id}/invitations/#{invitation.id}/#{path_suffix}")
         expect(response).to be_not_found
-        expect(response.body).to include('usa-alert--warning')
       end
       it 'should show warning page if cancelled' do
         invitation.update(status: :cancelled)
         send(method, "/organizations/#{org.id}/invitations/#{invitation.id}/#{path_suffix}")
         expect(response).to be_forbidden
-        expect(response.body).to include('usa-alert--warning')
       end
       context 'invitation expired' do
         before { invitation.update_attribute(:created_at, 3.days.ago) }
         it 'should show warning page' do
           send(method, "/organizations/#{org.id}/invitations/#{invitation.id}/#{path_suffix}")
           expect(response).to be_forbidden
-          expect(response.body).to include('usa-alert--warning')
         end
         it 'should show renew button only if ao' do
           send(method, "/organizations/#{org.id}/invitations/#{invitation.id}/#{path_suffix}")
@@ -56,7 +52,6 @@ RSpec.describe 'Invitations', type: :request do
         invitation.accept!
         send(method, "/organizations/#{org.id}/invitations/#{invitation.id}/#{path_suffix}")
         expect(response).to be_forbidden
-        expect(response.body).to include('usa-alert--warning')
       end
     end
   end
@@ -112,7 +107,6 @@ RSpec.describe 'Invitations', type: :request do
             stub_user_info(overrides: { 'all_emails' => ['another@example.com'] })
             get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
             expect(response).to be_forbidden
-            expect(response.body).to include('usa-alert--error')
           end
         end
       end
@@ -153,14 +147,12 @@ RSpec.describe 'Invitations', type: :request do
             get "/organizations/#{org.id}/invitations/#{cd_invite.id}/accept"
             expect(response).to be_forbidden
             expect(response.body).to_not include(confirm_organization_invitation_path(org, cd_invite))
-            expect(response.body).to include('usa-alert--error')
           end
           it 'should render error page if phone not match' do
             stub_user_info(overrides: { 'phone' => '9999999999' })
             get "/organizations/#{org.id}/invitations/#{cd_invite.id}/accept"
             expect(response).to be_forbidden
             expect(response.body).to_not include(confirm_organization_invitation_path(org, cd_invite))
-            expect(response.body).to include('usa-alert--error')
           end
         end
       end
@@ -384,7 +376,6 @@ RSpec.describe 'Invitations', type: :request do
       bad_org = create(:provider_organization)
       post "/organizations/#{bad_org.id}/invitations/#{invitation.id}/login"
       expect(response).to be_not_found
-      expect(response.body).to include('usa-alert--warning')
     end
   end
 end

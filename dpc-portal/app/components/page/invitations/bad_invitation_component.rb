@@ -4,7 +4,7 @@ module Page
   module Invitations
     # Displays unfixable error message in accept invitation process
     class BadInvitationComponent < ViewComponent::Base
-      def initialize(invitation, reason, level)
+      def initialize(invitation, reason)
         super
         @invitation = invitation
         @org_name = invitation&.provider_organization&.name
@@ -13,13 +13,8 @@ module Page
                   else
                     reason
                   end
-        @level = level
         @heading = "verification.#{@reason}_heading"
-        @status = "verification.#{@reason}_status"
-        @alert = "verification.#{@reason}_alert"
         @text = "verification.#{@reason}_text"
-        @show_renew = reason.to_sym == :ao_expired
-        @disabled = invitation&.renewed?
       end
 
       def server_errors
