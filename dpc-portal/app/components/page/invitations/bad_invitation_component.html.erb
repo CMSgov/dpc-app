@@ -5,7 +5,7 @@
       <%=raw t(key=@text, org_name: @org_name) %>
     </p>
   </div>
-  <%
+  <% 'have to put the case statement here, as do not have route helper in ViewComponent'
     case(@reason&.to_sym)
       when :ao_expired %>
         <%= render Core::Button::ButtonComponent.new(label: "Request new invite",
