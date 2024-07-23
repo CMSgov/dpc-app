@@ -21,7 +21,7 @@ RSpec.describe Page::Invitations::BadInvitationComponent, type: :component do
       let(:component) { described_class.new(invitation, 'invalid') }
       it 'should match header' do
         header = <<~HTML
-          <h1>#{I18n.t('verification.invalid_heading')}</h1>
+          <h1>#{I18n.t('verification.invalid_status')}</h1>
         HTML
         is_expected.to include(normalize_space(header))
       end
@@ -31,7 +31,7 @@ RSpec.describe Page::Invitations::BadInvitationComponent, type: :component do
       let(:component) { described_class.new(invitation, 'pii_mismatch') }
       it 'should match header' do
         header = <<~HTML
-          <h1>#{I18n.t('verification.pii_mismatch_heading')}</h1>
+          <h1>#{I18n.t('verification.pii_mismatch_status')}</h1>
         HTML
         is_expected.to include(normalize_space(header))
       end
@@ -41,7 +41,7 @@ RSpec.describe Page::Invitations::BadInvitationComponent, type: :component do
       let(:component) { described_class.new(invitation, 'accepted') }
       it 'should match header' do
         header = <<~HTML
-          <h1>#{I18n.t('verification.accepted_heading')}</h1>
+          <h1>#{I18n.t('verification.accepted_status')}</h1>
         HTML
         is_expected.to include(normalize_space(header))
       end

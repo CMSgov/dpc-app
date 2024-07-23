@@ -13,7 +13,7 @@ module Page
                   else
                     reason
                   end
-        @heading = "verification.#{@reason}_heading"
+        @status = "verification.#{@reason}_status"
         @text = "verification.#{@reason}_text"
       end
 
