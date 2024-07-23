@@ -65,7 +65,7 @@ public class AggregationEngineBFDClientTest {
     @BeforeEach
     public void setup() throws GeneralSecurityException {
         BlueButtonClient blueButtonClient = Mockito.spy(new BlueButtonClientImpl(bbClient, new BBClientConfiguration(), metricRegistry));
-                OperationsConfig config = new OperationsConfig(1000, tempDir.toString(), 1, 1, 1, YearMonth.now(), List.of(orgID.toString()));
+        OperationsConfig config = new OperationsConfig(1000, tempDir.toString(), 1, 1, 1, YearMonth.now(), List.of(orgID.toString()));
         JobBatchProcessor processor = new JobBatchProcessor(blueButtonClient, fhirContext, metricRegistry, config, lookBackService, mockConsentService);
         queue = new MemoryBatchQueue(100);
         engine = new AggregationEngine(UUID.randomUUID(), queue, config, processor);
