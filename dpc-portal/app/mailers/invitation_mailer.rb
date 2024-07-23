@@ -16,7 +16,7 @@ class InvitationMailer < ApplicationMailer
     @family_name = params[:family_name]
     mail(
       to: @invitation.invited_email,
-      subject: 'You have been offered authorized official authority in Data at the Point of Care'
+      subject: 'Time to register your organization with DPC'
     )
   end
 end
