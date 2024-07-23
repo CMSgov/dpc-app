@@ -48,10 +48,6 @@
             <artifactId>hapi-fhir-structures-dstu3</artifactId>
         </dependency>
         <dependency>
-            <groupId>${hapi.fhir.groupID}</groupId>
-            <artifactId>hapi-fhir-validation</artifactId>
-        </dependency>
-        <dependency>
             <groupId>javax.ws.rs</groupId>
             <artifactId>javax.ws.rs-api</artifactId>
         </dependency>
@@ -146,6 +142,10 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-params</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>uk.org.webcompere</groupId>
+            <artifactId>system-stubs-jupiter</artifactId>
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>

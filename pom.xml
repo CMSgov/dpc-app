@@ -38,7 +38,7 @@
         <junit.jupiter.version>5.10.2</junit.jupiter.version>
         <slf4j.version>2.0.12</slf4j.version>
         <hapi.fhir.groupID>ca.uhn.hapi.fhir</hapi.fhir.groupID>
-        <hapi.fhir.version>5.7.6</hapi.fhir.version>
+        <hapi.fhir.version>7.2.1</hapi.fhir.version>
         <pgsql.version>42.7.3</pgsql.version>
         <java.version>11</java.version>
         <jib.container.appRoot>/app</jib.container.appRoot>
@@ -247,6 +247,11 @@
                 <version>${hapi.fhir.version}</version>
             </dependency>
             <dependency>
+                <groupId>${hapi.fhir.groupID}</groupId>
+                <artifactId>hapi-fhir-caching-caffeine</artifactId>
+                <version>${hapi.fhir.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>com.smoketurner</groupId>
                 <artifactId>dropwizard-swagger</artifactId>
                 <version>3.0.0-1</version>
@@ -289,6 +294,12 @@
                 <groupId>org.junit.jupiter</groupId>
                 <artifactId>junit-jupiter-params</artifactId>
                 <version>${junit.jupiter.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>uk.org.webcompere</groupId>
+                <artifactId>system-stubs-jupiter</artifactId>
+                <version>2.1.6</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
@@ -371,6 +382,11 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>uk.org.webcompere</groupId>
+            <artifactId>system-stubs-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
