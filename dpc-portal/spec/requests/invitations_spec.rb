@@ -238,15 +238,73 @@ RSpec.describe 'Invitations', type: :request do
       context :failure do
         let(:invitation) { create(:invitation, :ao) }
         let(:org) { invitation.provider_organization }
-        before do
-          stub_user_info(overrides: { 'social_security_number' => '000000000' })
-          log_in
-          get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
+        context 'cpi api gateway check' do
+          before do
+            stub_user_info(overrides: { 'social_security_number' => '000000000' })
+            log_in
+            get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
+          end
+          it 'renders not-ao error' do
+            post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"
+            expect(response).to be_forbidden
+            expect(response.body).to include(I18n.t('verification.user_not_authorized_official_status'))
+          end
+          it 'renders step 3' do
+            post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"
+            expect(response).to be_forbidden
+            expect(response.body).to include('<span class="usa-step-indicator__current-step">3</span>')
+          end
         end
-        it 'renders not-ao error' do
-          post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"
-          expect(response).to be_forbidden
-          expect(response.body).to include(I18n.t('verification.user_not_authorized_official_status'))
+        context 'login.gov server error' do
+          before do
+            user_service_class = class_double(UserInfoService).as_stubbed_const
+            user_service = double(UserInfoService)
+            expect(user_service_class).to receive(:new).at_least(:once).and_return(user_service)
+
+            expect(user_service).to receive(:user_info).and_invoke(proc { user_info },
+                                                                   proc { raise UserInfoServiceError, 'yikes' })
+
+            log_in
+            get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
+          end
+
+          it 'should show server error' do
+            post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"
+            expect(response.status).to eq 503
+            expect(response.body).to include(I18n.t('verification.server_error_status'))
+          end
+
+          it 'should show step 3' do
+            post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"
+            expect(response.status).to eq 503
+            expect(response.body).to include('<span class="usa-step-indicator__current-step">3</span>')
+          end
+        end
+
+        context 'cpi api gateway server error' do
+          before do
+            cpi_api_gateway_client_class = class_double(CpiApiGatewayClient).as_stubbed_const
+            cpi_api_gateway_client = double(CpiApiGatewayClient)
+            expect(cpi_api_gateway_client_class).to receive(:new).at_least(:once).and_return(cpi_api_gateway_client)
+            expect(cpi_api_gateway_client).to receive(:fetch_med_sanctions_and_waivers_by_org_npi).and_raise(
+              OAuth2::Error, Faraday::Response.new(status: 500)
+            )
+            stub_user_info
+            log_in
+            get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
+          end
+
+          it 'should show server error' do
+            post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"
+            expect(response.status).to eq 503
+            expect(response.body).to include(I18n.t('verification.server_error_status'))
+          end
+
+          it 'should show step 3' do
+            post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"
+            expect(response.status).to eq 503
+            expect(response.body).to include('<span class="usa-step-indicator__current-step">3</span>')
+          end
         end
       end
     end

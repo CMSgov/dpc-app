@@ -49,7 +49,7 @@ RSpec.describe Page::Invitations::AoFlowFailComponent, type: :component do
   end
 
   describe 'server error' do
-    let(:reason) { :api_gateway_error }
+    let(:reason) { 'api_gateway_error' }
     it 'should show generic server error message' do
       node = page.find('.usa-alert__text')
       expect(node.text).to include(I18n.t('verification.server_error_status'))

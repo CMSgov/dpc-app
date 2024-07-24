@@ -124,8 +124,11 @@ class InvitationsController < ApplicationController
     return check_code if @invitation.credential_delegate?
 
     check_ao
+  rescue UserInfoServiceError => e
+    handle_user_info_service_error(e, 2)
   rescue InvitationError => e
-    render(Page::Invitations::AoFlowFailComponent.new(@invitation, e.message, 2), status: :forbidden)
+    status = AoVerificationService::SERVER_ERRORS.include?(e.message) ? :service_unavailable : :forbidden
+    render(Page::Invitations::AoFlowFailComponent.new(@invitation, e.message, 2), status:)
   end
 
   def check_code

@@ -9,17 +9,13 @@ module Page
         @invitation = invitation
         @step = step.to_i
         @org_name = invitation&.provider_organization&.name
-        @reason = if server_errors.include?(reason)
+        @reason = if AoVerificationService::SERVER_ERRORS.include?(reason)
                     'server_error'
                   else
                     reason
                   end
         @status = "verification.#{@reason}_status"
         @text = "verification.#{@reason}_text"
-      end
-
-      def server_errors
-        %i[api_gateway_error invalid_endpoint_called unexpected_error]
       end
     end
   end
