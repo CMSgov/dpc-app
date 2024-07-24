@@ -69,7 +69,7 @@ describe UserInfoService do
         .to_raise(Errno::ECONNREFUSED)
       expect do
         service.user_info(valid_session)
-      end.to raise_error(UserInfoServiceError, 'connection_error')
+      end.to raise_error(UserInfoServiceError, 'server_error')
     end
   end
 

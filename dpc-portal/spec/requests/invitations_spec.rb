@@ -255,6 +255,7 @@ RSpec.describe 'Invitations', type: :request do
             expect(response.body).to include('<span class="usa-step-indicator__current-step">3</span>')
           end
         end
+
         context 'login.gov server error' do
           before do
             user_service_class = class_double(UserInfoService).as_stubbed_const
