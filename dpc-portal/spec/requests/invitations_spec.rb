@@ -112,6 +112,13 @@ RSpec.describe 'Invitations', type: :request do
             get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
             expect(response).to be_forbidden
           end
+          it 'should show server error page if server error' do
+            user_service_class = class_double(UserInfoService).as_stubbed_const
+            allow(user_service_class).to receive(:new).and_raise(UserInfoServiceError, 'yikes')
+            get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
+            expect(response.status).to eq 503
+            expect(response.body).to include(I18n.t('verification.server_error_status'))
+          end
         end
       end
     end
@@ -122,6 +129,20 @@ RSpec.describe 'Invitations', type: :request do
       end
       it_behaves_like 'an accept endpoint' do
         let(:invitation) { create(:invitation, :ao) }
+      end
+      context 'logged in' do
+        let(:invitation) { create(:invitation, :ao) }
+        let(:org) { invitation.provider_organization }
+        context :failure do
+          it 'should show step 2' do
+            user_service_class = class_double(UserInfoService).as_stubbed_const
+            allow(user_service_class).to receive(:new).and_raise(UserInfoServiceError, 'yikes')
+            log_in
+            get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
+            expect(response.status).to eq 503
+            expect(response.body).to include('<span class="usa-step-indicator__current-step">2</span>')
+          end
+        end
       end
     end
 
@@ -157,6 +178,13 @@ RSpec.describe 'Invitations', type: :request do
             get "/organizations/#{org.id}/invitations/#{cd_invite.id}/accept"
             expect(response).to be_forbidden
             expect(response.body).to_not include(confirm_organization_invitation_path(org, cd_invite))
+          end
+          it 'should not show step navigation' do
+            user_service_class = class_double(UserInfoService).as_stubbed_const
+            allow(user_service_class).to receive(:new).and_raise(UserInfoServiceError, 'yikes')
+            get "/organizations/#{org.id}/invitations/#{cd_invite.id}/accept"
+            expect(response.status).to eq 503
+            expect(response.body).to_not include('<span class="usa-step-indicator__current-step">')
           end
         end
       end

@@ -113,21 +113,19 @@ class InvitationsController < ApplicationController
              status: :forbidden)
     end
   rescue UserInfoServiceError => e
-    handle_user_info_service_error(e)
+    handle_user_info_service_error(e, 1)
   end
 
   def invitation_matches_conditions
     unless session["invitation_status_#{@invitation.id}"] == 'identity_verified'
-      return redirect_to accept_organization_invitation_url(@organization,
-                                                            @invitation)
+      return redirect_to accept_organization_invitation_url(@organization, @invitation)
     end
 
     return check_code if @invitation.credential_delegate?
 
     check_ao
   rescue InvitationError => e
-    render(Page::Invitations::AoFlowFailComponent.new(@invitation, e.message, 2),
-           status: :forbidden)
+    render(Page::Invitations::AoFlowFailComponent.new(@invitation, e.message, 2), status: :forbidden)
   end
 
   def check_code
@@ -145,12 +143,14 @@ class InvitationsController < ApplicationController
     result[:success]
   end
 
-  def handle_user_info_service_error(error)
-    case error.message
-    when 'unauthorized'
+  def handle_user_info_service_error(error, step)
+    if error.message == 'unauthorized'
       render(Page::Session::InvitationLoginComponent.new(@invitation))
-    else
+    elsif @invitation.credential_delegate?
       render(Page::Invitations::BadInvitationComponent.new(@invitation, 'server_error'),
+             status: :service_unavailable)
+    else
+      render(Page::Invitations::AoFlowFailComponent.new(@invitation, 'server_error', step),
              status: :service_unavailable)
     end
   end
