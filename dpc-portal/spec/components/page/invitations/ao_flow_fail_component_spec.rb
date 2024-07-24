@@ -55,4 +55,15 @@ RSpec.describe Page::Invitations::AoFlowFailComponent, type: :component do
       expect(node.text).to include(I18n.t('verification.server_error_status'))
     end
   end
+
+  describe 'fail to proof' do
+    let(:invitation) { create(:invitation, :ao) }
+    let(:reason) { 'fail_to_proof' }
+    it 'should have url to login' do
+      path = "organizations/#{invitation.provider_organization.id}/invitations/#{invitation.id}/login"
+      url = "http://test.host/portal/#{path}"
+      expect(page.find('form')[:action]).to eq url
+      expect(page.find('form')[:method]).to eq 'post'
+    end
+  end
 end

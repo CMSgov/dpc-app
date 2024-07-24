@@ -10,9 +10,9 @@ module Page
         @step = step.to_i
         @org_name = invitation&.provider_organization&.name
         @reason = if AoVerificationService::SERVER_ERRORS.include?(reason)
-                    'server_error'
+                    :server_error
                   else
-                    reason
+                    reason.to_sym
                   end
         @status = "verification.#{@reason}_status"
         @text = "verification.#{@reason}_text"
