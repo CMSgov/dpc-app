@@ -484,67 +484,112 @@ RSpec.describe 'Invitations', type: :request do
   end
 
   describe 'POST /login' do
-    let(:invitation) { create(:invitation, :cd) }
-    it 'should redirect to login.gov' do
-      org_id = invitation.provider_organization.id
-      post "/organizations/#{org_id}/invitations/#{invitation.id}/login"
-      redirect_params = Rack::Utils.parse_query(URI.parse(response.location).query)
-      expect(redirect_params['acr_values']).to eq('http://idmanagement.gov/ns/assurance/ial/2')
-      expect(redirect_params['redirect_uri'][...29]).to eq 'http://localhost:3100/portal/'
-      expected_redirect = accept_organization_invitation_url(org_id, invitation)
-      expect(request.session[:user_return_to]).to eq expected_redirect
-    end
+    RSpec.shared_examples 'a login endpoint' do
+      it 'should redirect to login.gov' do
+        org_id = invitation.provider_organization.id
+        post "/organizations/#{org_id}/invitations/#{invitation.id}/login"
+        redirect_params = Rack::Utils.parse_query(URI.parse(response.location).query)
+        expect(redirect_params['acr_values']).to eq('http://idmanagement.gov/ns/assurance/ial/2')
+        expect(redirect_params['redirect_uri'][...29]).to eq 'http://localhost:3100/portal/'
+        expected_redirect = accept_organization_invitation_url(org_id, invitation)
+        expect(request.session[:user_return_to]).to eq expected_redirect
+      end
 
-    it 'should show warning page with 404 if missing' do
-      bad_org = create(:provider_organization)
-      post "/organizations/#{bad_org.id}/invitations/#{invitation.id}/login"
-      expect(response).to be_not_found
+      it 'should show warning page with 404 if missing' do
+        bad_org = create(:provider_organization)
+        post "/organizations/#{bad_org.id}/invitations/#{invitation.id}/login"
+        expect(response).to be_not_found
+      end
+
+      it 'should show error page if fail to proof' do
+        org_id = invitation.provider_organization.id
+        post "/organizations/#{org_id}/invitations/#{invitation.id}/login"
+        get '/users/auth/failure'
+        expect(response).to be_forbidden
+        expect(response.body).to include(I18n.t('verification.fail_to_proof_text'))
+      end
+    end
+    context :cd do
+      it_behaves_like 'an invitation endpoint', :post, 'register' do
+        let(:invitation) { create(:invitation, :cd) }
+      end
+      it_behaves_like 'a login endpoint', :post, 'register' do
+        let(:invitation) { create(:invitation, :cd) }
+      end
+      context 'fail to proof' do
+        let(:invitation) { create(:invitation, :cd) }
+        it 'should not show step navigation' do
+          org_id = invitation.provider_organization.id
+          post "/organizations/#{org_id}/invitations/#{invitation.id}/login"
+          get '/users/auth/failure'
+          expect(response).to be_forbidden
+          expect(response.body).to_not include('<span class="usa-step-indicator__current-step">')
+        end
+      end
+    end
+    context :ao do
+      it_behaves_like 'an invitation endpoint', :post, 'register' do
+        let(:invitation) { create(:invitation, :ao) }
+      end
+      it_behaves_like 'a login endpoint', :post, 'register' do
+        let(:invitation) { create(:invitation, :ao) }
+      end
+      context 'fail to proof' do
+        let(:invitation) { create(:invitation, :ao) }
+        it 'should show step 2' do
+          org_id = invitation.provider_organization.id
+          post "/organizations/#{org_id}/invitations/#{invitation.id}/login"
+          get '/users/auth/failure'
+          expect(response).to be_forbidden
+          expect(response.body).to include('<span class="usa-step-indicator__current-step">2</span>')
+        end
+      end
     end
   end
-end
 
-describe 'POST /renew' do
-  let(:fail_message) { 'Unable to create new invitation' }
-  context :ao do
-    let(:invitation) { create(:invitation, :ao) }
-    let(:org_id) { invitation.provider_organization.id }
-    let(:success_message) { 'You should receive your new invitation shortly' }
-    it 'should create another invitation for the user if expired' do
-      invitation.update(created_at: 49.hours.ago)
-      expect do
-        post "/organizations/#{org_id}/invitations/#{invitation.id}/renew"
-      end.to change { Invitation.count }.by(1)
-      expect(flash[:notice]).to eq success_message
-      expect(response).to redirect_to(accept_organization_invitation_path(org_id, invitation))
-    end
-    it 'should not create another invitation for the user if accepted' do
-      invitation.accept!
-      expect do
-        post "/organizations/#{org_id}/invitations/#{invitation.id}/renew"
-      end.to change { Invitation.count }.by(0)
-      expect(flash[:alert]).to eq fail_message
-      expect(response).to redirect_to(accept_organization_invitation_path(org_id, invitation))
+  describe 'POST /renew' do
+    let(:fail_message) { 'Unable to create new invitation' }
+    context :ao do
+      let(:invitation) { create(:invitation, :ao) }
+      let(:org_id) { invitation.provider_organization.id }
+      let(:success_message) { 'You should receive your new invitation shortly' }
+      it 'should create another invitation for the user if expired' do
+        invitation.update(created_at: 49.hours.ago)
+        expect do
+          post "/organizations/#{org_id}/invitations/#{invitation.id}/renew"
+        end.to change { Invitation.count }.by(1)
+        expect(flash[:notice]).to eq success_message
+        expect(response).to redirect_to(accept_organization_invitation_path(org_id, invitation))
+      end
+      it 'should not create another invitation for the user if accepted' do
+        invitation.accept!
+        expect do
+          post "/organizations/#{org_id}/invitations/#{invitation.id}/renew"
+        end.to change { Invitation.count }.by(0)
+        expect(flash[:alert]).to eq fail_message
+        expect(response).to redirect_to(accept_organization_invitation_path(org_id, invitation))
+      end
+
+      it 'should not create another invitation for the user if cancelled' do
+        invitation.update(status: :cancelled)
+        expect do
+          post "/organizations/#{org_id}/invitations/#{invitation.id}/renew"
+        end.to change { Invitation.count }.by(0)
+        expect(flash[:alert]).to eq fail_message
+        expect(response).to redirect_to(accept_organization_invitation_path(org_id, invitation))
+      end
     end
 
-    it 'should not create another invitation for the user if cancelled' do
-      invitation.update(status: :cancelled)
-      expect do
-        post "/organizations/#{org_id}/invitations/#{invitation.id}/renew"
-      end.to change { Invitation.count }.by(0)
-      expect(flash[:alert]).to eq fail_message
-      expect(response).to redirect_to(accept_organization_invitation_path(org_id, invitation))
-    end
-  end
-
-  context :cd do
-    let!(:invitation) { create(:invitation, :cd, created_at: 49.hours.ago) }
-    let(:org_id) { invitation.provider_organization.id }
-    it 'should not create another invitation for the user' do
-      expect do
-        post "/organizations/#{org_id}/invitations/#{invitation.id}/renew"
-      end.to change { Invitation.count }.by(0)
-      expect(flash[:alert]).to eq fail_message
-      expect(response).to redirect_to(accept_organization_invitation_path(org_id, invitation))
+    context :cd do
+      let!(:invitation) { create(:invitation, :cd, created_at: 49.hours.ago) }
+      let(:org_id) { invitation.provider_organization.id }
+      it 'should not create another invitation for the user' do
+        expect do
+          post "/organizations/#{org_id}/invitations/#{invitation.id}/renew"
+        end.to change { Invitation.count }.by(0)
+        expect(flash[:alert]).to eq fail_message
+        expect(response).to redirect_to(accept_organization_invitation_path(org_id, invitation))
+      end
     end
   end
 end
