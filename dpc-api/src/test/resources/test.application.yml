@@ -95,8 +95,6 @@ bbclient:
     requestTimeout: 5000 # ms
   serverBaseUrl: ${BFD_URL}
   resourcesCount: 100 # Max number of resource that a request to BB will return before using another request
-  bfdHashPepper: "${BFD_HASH_PEPPER}"
-  bfdHashIter: ${BFD_HASH_ITER}
 
 authenticationDisabled: ${AUTH_DISABLED:-false}
 

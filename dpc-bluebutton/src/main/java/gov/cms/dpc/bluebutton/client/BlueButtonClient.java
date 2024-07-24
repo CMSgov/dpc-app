@@ -14,8 +14,6 @@ public interface BlueButtonClient {
 
     Bundle requestPatientFromServerByMbi(String mbi, Map<String, String> headers) throws ResourceNotFoundException, GeneralSecurityException;
 
-    Bundle requestPatientFromServerByMbiHash(String mbiHash, Map<String, String> headers) throws ResourceNotFoundException;
-
     Bundle requestPatientFromServer(String beneId, DateRangeParam lastUpdated, Map<String, String> headers) throws ResourceNotFoundException;
 
     Bundle requestEOBFromServer(String beneId, DateRangeParam lastUpdated, Map<String, String> headers) throws ResourceNotFoundException;
@@ -25,7 +23,5 @@ public interface BlueButtonClient {
     Bundle requestNextBundleFromServer(Bundle bundle, Map<String, String> headers) throws ResourceNotFoundException;
 
     CapabilityStatement requestCapabilityStatement() throws ResourceNotFoundException;
-
-    String hashMbi(String mbi) throws GeneralSecurityException;
 }
 
