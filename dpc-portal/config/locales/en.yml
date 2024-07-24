@@ -19,6 +19,8 @@ en:
     bad_npi_text: Your organization must have an approved enrollment status with Medicare to access beneficiary claims data. Your organization may need to <a href="https://www.cms.gov/medicare/enrollment-renewal/providers-suppliers/chain-ownership-system-pecos/manage-your-enrollment">manage its enrollment</a> in PECOS, the Medicare enrollment system.
     user_not_authorized_official_status: You’re not the Authorized Official.
     user_not_authorized_official_text: You are not on record as the Authorized Official for this organization. Your organization may need to <a href="https://pecos.cms.hhs.gov/pecos/login.do#headingLv1">update its Authorized Official</a> in PECOS, the Medicare enrollment system.
+    missing_info_status: Can't complete your registration.
+    missing_info_text: Something happened on our end and we're unable to continue. Please contact <a href="mailto:dpcinfo@cms.hhs.gov">dpcinfo@cms.hhs.gov</a>.
     server_error_status: "Registration unavailable: external system error."
     server_error_text: We're experiencing a temporary outage due to an external system error. Please try again later. 
     manage_org: Manage your organization.

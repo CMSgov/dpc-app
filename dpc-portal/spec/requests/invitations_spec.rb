@@ -114,7 +114,7 @@ RSpec.describe 'Invitations', type: :request do
           end
           it 'should show server error page if server error' do
             user_service_class = class_double(UserInfoService).as_stubbed_const
-            allow(user_service_class).to receive(:new).and_raise(UserInfoServiceError, 'yikes')
+            allow(user_service_class).to receive(:new).and_raise(UserInfoServiceError, 'server_error')
             get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
             expect(response.status).to eq 503
             expect(response.body).to include(I18n.t('verification.server_error_status'))
@@ -181,7 +181,7 @@ RSpec.describe 'Invitations', type: :request do
           end
           it 'should not show step navigation' do
             user_service_class = class_double(UserInfoService).as_stubbed_const
-            allow(user_service_class).to receive(:new).and_raise(UserInfoServiceError, 'yikes')
+            allow(user_service_class).to receive(:new).and_raise(UserInfoServiceError, 'server_error')
             get "/organizations/#{org.id}/invitations/#{cd_invite.id}/accept"
             expect(response.status).to eq 503
             expect(response.body).to_not include('<span class="usa-step-indicator__current-step">')
@@ -263,7 +263,7 @@ RSpec.describe 'Invitations', type: :request do
             expect(user_service_class).to receive(:new).at_least(:once).and_return(user_service)
 
             expect(user_service).to receive(:user_info).and_invoke(proc { user_info },
-                                                                   proc { raise UserInfoServiceError, 'yikes' })
+                                                                   proc { raise UserInfoServiceError, 'server_error' })
 
             log_in
             get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
@@ -273,6 +273,26 @@ RSpec.describe 'Invitations', type: :request do
             post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"
             expect(response.status).to eq 503
             expect(response.body).to include(I18n.t('verification.server_error_status'))
+          end
+
+          it 'should show step 3' do
+            post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"
+            expect(response.status).to eq 503
+            expect(response.body).to include('<span class="usa-step-indicator__current-step">3</span>')
+          end
+        end
+
+        context 'login.gov missing ssn' do
+          before do
+            stub_user_info(overrides: { 'social_security_number' => '' })
+            log_in
+            get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
+          end
+
+          it 'should show missing info error' do
+            post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"
+            expect(response.status).to eq 503
+            expect(response.body).to include(I18n.t('verification.missing_info_text'))
           end
 
           it 'should show step 3' do

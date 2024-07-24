@@ -147,13 +147,15 @@ class InvitationsController < ApplicationController
   end
 
   def handle_user_info_service_error(error, step)
+    logger.error "Invitation Flow UserInfoServiceError: #{error.message}"
+
     if error.message == 'unauthorized'
       render(Page::Session::InvitationLoginComponent.new(@invitation))
     elsif @invitation.credential_delegate?
-      render(Page::Invitations::BadInvitationComponent.new(@invitation, 'server_error'),
+      render(Page::Invitations::BadInvitationComponent.new(@invitation, error.message),
              status: :service_unavailable)
     else
-      render(Page::Invitations::AoFlowFailComponent.new(@invitation, 'server_error', step),
+      render(Page::Invitations::AoFlowFailComponent.new(@invitation, error.message, step),
              status: :service_unavailable)
     end
   end
