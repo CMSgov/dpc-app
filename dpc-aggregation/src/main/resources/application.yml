@@ -88,11 +88,6 @@ bbclient:
 
   serverBaseUrl: ${BFD_URL}
   resourcesCount: 100 # Max number of resource that a request to BB will return before using another request
-  bfdHashIter: ${BFD_HASH_ITER}
-  bfdHashPepper: "${BFD_HASH_PEPPER}"
-
-  r4Configuration:
-    serverBaseUrl: ${BFD_URL_V2}
 
   useBfdMock: ${USE_BFD_MOCK:-false}
 

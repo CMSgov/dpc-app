@@ -8,8 +8,6 @@ dpc {
         location = "path/to/decrypted/bb.keystore"
       }
       serverBaseUrl = "BFD_URL from decrypted local.env"
-      bfdHashPepper = "hash pepper from decrypted local.env"
-      bfdHashIter = "iter from decrytped local.env"
     }
 
     server {
