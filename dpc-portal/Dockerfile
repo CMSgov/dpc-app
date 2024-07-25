@@ -13,9 +13,8 @@ RUN apk update && \
     apk add xz && \
     apk add --no-cache gcompat
 
-ARG geckodriver_ver=0.34.0
-RUN curl -fL -o /tmp/geckodriver.tar.gz \
-             https://github.com/mozilla/geckodriver/releases/download/v${geckodriver_ver}/geckodriver-v${geckodriver_ver}-linux64.tar.gz && \
+ARG gecko_version=0.34.0
+RUN wget https://github.com/mozilla/geckodriver/releases/download/v${gecko_version}/geckodriver-v${gecko_version}-linux64.tar.gz && \
     tar -xzf /tmp/geckodriver.tar.gz -C /tmp/ && \
     chmod +x /tmp/geckodriver && \
     mv /tmp/geckodriver /usr/local/bin/
