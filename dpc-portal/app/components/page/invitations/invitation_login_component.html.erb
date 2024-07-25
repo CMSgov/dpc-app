@@ -1,6 +1,6 @@
 <%= render(Core::Navigation::StepIndicatorComponent.new(Invitation::STEPS, 0)) if @invitation.authorized_official? %>
 <div>
-  <p>To register your organization you'll need to have 1) have a Login.gov account and 2) verify your identity. Info to have ready:
+  <p>To register your organization you'll need to 1) have a Login.gov account and 2) verify your identity. Info to have ready:
     <ul>
       <% @musts.each do |must| %>
       <li class="margin-top-2"><%= must %></li>
