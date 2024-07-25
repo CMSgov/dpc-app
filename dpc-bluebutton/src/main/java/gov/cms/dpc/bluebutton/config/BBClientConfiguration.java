@@ -34,18 +34,7 @@ public class BBClientConfiguration {
     @JsonProperty("keyStore")
     private KeystoreConfiguration keystore = new KeystoreConfiguration();
 
-    @NotEmpty
-    private String bfdHashPepper;
-
-    private int bfdHashIter;
-
     private boolean useBfdMock = false;
-
-    private R4Configuration r4Configuration;
-
-    public R4Configuration getR4Configuration() {
-        return r4Configuration;
-    }
 
     public TimeoutConfiguration getTimeouts() {
         return timeouts;
@@ -86,10 +75,6 @@ public class BBClientConfiguration {
         this.registerHealthCheck = registerHealthCheck;
     }
 
-    public String getBfdHashPepper() { return bfdHashPepper; }
-
-    public int getBfdHashIter() { return bfdHashIter; }
-
     public boolean isUseBfdMock() {
         return useBfdMock;
     }
@@ -129,17 +114,6 @@ public class BBClientConfiguration {
         }
     }
 
-    public static class R4Configuration {
-        private String serverBaseUrl;
-
-        public R4Configuration() {
-            // Not used
-        }
-
-        public String getServerBaseUrl() {
-            return serverBaseUrl;
-        }
-    }
     public static class KeystoreConfiguration {
 
         @NotEmpty

@@ -45,17 +45,7 @@ public class MockBlueButtonClient implements BlueButtonClient {
             TEST_PATIENT_MBIS.get(6), "-10000010288391",
             TEST_PATIENT_MBIS.get(7), "-10000010288391"
             );
-    public static final Map<String, String> MBI_HASH_MAP = Map.of(
-            TEST_PATIENT_MBIS.get(0), "abadf57ff8dc94610ca0d479feadb1743c9cd3c77caf1eafde5719a154379fb6",
-            TEST_PATIENT_MBIS.get(1), "8930cab29ba5fe4311a5f5bcfd5b7384f3722b711402aacf796d2ae6fea54242",
-            TEST_PATIENT_MBIS.get(2), "e411277fd31da392eaa9a45df53b0c429e365626182f50d9f35810d77f0e2756",
-            TEST_PATIENT_MBIS.get(3), "41af07535e0a66226cf2f0e6c551c0a15bd49192fc055aa5cd2e63f31f90a419",
-            TEST_PATIENT_MBIS.get(4), "d35350fce12f555089f938c0323a13122622123038e8af057a4191fd450c2b90",
-            TEST_PATIENT_MBIS.get(5), "a006edba97087f2911a35706e46bf1287d21d8fa515024ace44d589bdef9d819",
-            TEST_PATIENT_MBIS.get(6), "bd02000753dfa2182d57bd9f3debaa274cb59af96d66e76c83df133c33970f80",
-            TEST_PATIENT_MBIS.get(7), "bd02000753dfa2182d57bd9f3debaa274cb59af96d66e76c83df133c33970f80"
 
-    );
     public static final List<String> TEST_PATIENT_WITH_BAD_IDS = List.of("-1", "-2", TEST_PATIENT_MBIS.get(0), TEST_PATIENT_MBIS.get(1), "-3");
     public static final OffsetDateTime BFD_TRANSACTION_TIME = OffsetDateTime.ofInstant(Instant.now().truncatedTo(ChronoUnit.MILLIS), ZoneOffset.UTC);
     public static final OffsetDateTime TEST_LAST_UPDATED = OffsetDateTime.parse("2020-01-01T00:00:00-05:00");
@@ -82,16 +72,6 @@ public class MockBlueButtonClient implements BlueButtonClient {
         return isInDateRange(lastUpdated) ?
                 loadBundle(SAMPLE_PATIENT_PATH_PREFIX, beneId) :
                 loadEmptyBundle();
-    }
-
-
-    @Override
-    public Bundle requestPatientFromServerByMbiHash(String mbiHash, Map<String, String> headers) throws ResourceNotFoundException {
-        String mbi = MBI_HASH_MAP.values().stream()
-                .filter(h -> h.equals(mbiHash))
-                .findFirst()
-                .orElse("");
-        return loadBundle(SAMPLE_PATIENT_PATH_PREFIX, MBI_BENE_ID_MAP.get(mbi));
     }
 
     @Override
@@ -136,11 +116,6 @@ public class MockBlueButtonClient implements BlueButtonClient {
         } catch(IOException ex) {
             throw formNoPatientException(null);
         }
-    }
-
-    @Override
-    public String hashMbi(String mbi) {
-        return MBI_HASH_MAP.get(mbi);
     }
 
     /**
