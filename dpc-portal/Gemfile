@@ -60,8 +60,10 @@ gem 'nokogiri', '>= 1.16.5'
 gem 'api_client', path: 'vendor/api_client'
 
 group :development, :test do
-  # Call 'byebug' anywhere in the code to stop execution and get a debugger console
+  gem 'axe-core-rspec', '4.1.0'
+  gem 'axe-core-selenium', '4.1.0'
   gem 'bundler-audit'
+  # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'byebug', platforms: %i[mri mingw x64_mingw]
   gem 'database_cleaner'
   gem 'factory_bot_rails'
@@ -90,7 +92,7 @@ group :test do
   gem 'fakefs', require: 'fakefs/safe'
   gem 'fakeredis'
   gem 'rails-controller-testing'
-  gem 'selenium-webdriver'
+  gem 'selenium-webdriver', '<4.0.0'
   gem 'timecop'
   gem 'webdrivers'
 end

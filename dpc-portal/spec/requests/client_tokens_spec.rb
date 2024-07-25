@@ -150,6 +150,11 @@ RSpec.describe 'ClientTokens', type: :request do
         expect(assigns(:organization)).to eq org
         expect(response).to have_http_status(200)
       end
+
+      it 'is valid HTML', js: true do
+        get "/organizations/#{org.id}/client_tokens/new"
+        expect(response).to be_axe_clean
+      end
     end
   end
 
