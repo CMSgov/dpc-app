@@ -14,7 +14,7 @@ class InvitationMailer < ApplicationMailer
     @invitation = params[:invitation]
     @given_name = params[:given_name]
     @family_name = params[:family_name]
-    attachments.inline['dpc-logo.svg'] = File.read("#{Rails.root}/app/assets/images/dpc.svg")
+    attachments.inline['dpc-logo.svg'] = File.read("#{Rails.root}/app/assets/images/dpc-with-words.svg")
     mail(
       to: @invitation.invited_email,
       subject: 'Time to register your organization with DPC'
