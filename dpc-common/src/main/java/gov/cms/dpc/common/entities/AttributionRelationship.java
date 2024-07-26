@@ -35,7 +35,7 @@ public class AttributionRelationship implements Serializable {
     @Column(name = "period_end", columnDefinition = "TIMESTAMP WITH TIME ZONE")
     private OffsetDateTime periodEnd;
 
-    AttributionRelationship() {
+    public AttributionRelationship() {
         // Hibernate required
     }
 

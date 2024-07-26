@@ -1,9 +1,6 @@
 package gov.cms.dpc.attribution.jdbi;
 
-import gov.cms.dpc.common.entities.AttributionRelationship;
-import gov.cms.dpc.common.entities.AttributionRelationship_;
-import gov.cms.dpc.common.entities.PatientEntity_;
-import gov.cms.dpc.common.entities.RosterEntity_;
+import gov.cms.dpc.common.entities.*;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
 import io.dropwizard.hibernate.AbstractDAO;
 import org.slf4j.Logger;
@@ -49,6 +46,25 @@ public class RelationshipDAO extends AbstractDAO<AttributionRelationship> {
                 builder.equal(root.get(AttributionRelationship_.patient).get(PatientEntity_.id), patient)));
 
         return Optional.ofNullable(uniqueResult(query));
+    }
+
+    /**
+     * Searches for attribution relationships in a given roster for a given list of patients.
+     * @param rosterId The id of the roster to search.
+     * @param patientIds The ids of the patients to search for.
+     * @return A list of {@link AttributionRelationship}s belonging to the roster for the given patients.
+     */
+    public List<AttributionRelationship> lookupAttributionRelationships(UUID rosterId, List<UUID> patientIds) {
+        final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
+        final CriteriaQuery<AttributionRelationship> query = builder.createQuery(AttributionRelationship.class);
+        final Root<AttributionRelationship> root = query.from(AttributionRelationship.class);
+
+        query.select(root)
+            .where(builder.and(
+                builder.equal(root.get(AttributionRelationship_.roster).get(RosterEntity_.id), rosterId)),
+                root.get(AttributionRelationship_.patient).get(PatientEntity_.id).in(patientIds)
+            );
+        return list(query);
     }
 
     /**
