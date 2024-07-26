@@ -50,6 +50,30 @@ describe CpiApiGatewayClient do
         expect(roles.dig('provider', 'enrollments', 1, 'roles', idx, 'ssn')).to eq ssn
       end
     end
+
+    context 'fetches med sanctions', :focus do
+      it 'returns sanctions with specific npi' do
+        npi = '3598564557'
+        sanctions = client.fetch_profile(npi)
+        puts sanctions.dig('provider', 'medSanctions')
+        expect(sanctions.dig('provider', 'medSanctions').size).to eq(1)
+        expect(sanctions.dig('provider', 'waiverInfo')).to be_blank
+      end
+
+      it 'returns waiver with specific npi' do
+        npi = '3098168743'
+        sanctions = client.fetch_profile(npi)
+        expect(sanctions.dig('provider', 'medSanctions').size).to eq(1)
+        expect(sanctions.dig('provider', 'waiverInfo').size).to eq(1)
+      end
+
+      it 'does not return sanctions or waivers with other npi' do
+        npi = '3740677877'
+        sanctions = client.fetch_profile(npi)
+        expect(sanctions.dig('provider', 'medSanctions')).to be_blank
+        expect(sanctions.dig('provider', 'waiverInfo')).to be_blank
+      end
+    end
   end
 
   describe '.fetch_authorized_official_med_sanctions' do
