@@ -22,15 +22,6 @@ class CpiApiGatewayClient
     fetch_token
   end
 
-  # fetch data about an organization, including enrollment_id
-  def fetch_enrollment(npi)
-    body = { providerID: { npi: npi.to_s } }.to_json
-    response = request_client.post("#{@cpi_api_gateway_url}api/1.0/ppr/providers/enrollments",
-                                   headers: { 'Content-Type': 'application/json' },
-                                   body:)
-    response.parsed
-  end
-
   # fetch full enrollments information about an organization
   def fetch_profile(npi)
     body = { providerID: { npi: npi.to_s } }.to_json
@@ -54,11 +45,14 @@ class CpiApiGatewayClient
         all: true
       }
     }.to_json
-    fetch_med_sanctions_and_waivers(body)
+    response = request_client.post("#{@cpi_api_gateway_url}api/1.0/ppr/providers",
+                                   headers: { 'Content-Type': 'application/json' },
+                                   body:)
+    response.parsed
   end
 
-  # fetch info about the organization, including a list of med sanctions
-  def fetch_med_sanctions_and_waivers_by_org_npi(npi)
+  # fetch info about the organization
+  def org_info(npi)
     body = {
       providerID: {
         providerType: 'org',
@@ -68,10 +62,11 @@ class CpiApiGatewayClient
         all: true
       }
     }.to_json
-    fetch_med_sanctions_and_waivers(body)
+    response = request_client.post("#{@cpi_api_gateway_url}api/1.0/ppr/providers",
+                                   headers: { 'Content-Type': 'application/json' },
+                                   body:)
+    response.parsed
   end
-
-  alias org_info fetch_med_sanctions_and_waivers_by_org_npi
 
   private
 
@@ -82,12 +77,5 @@ class CpiApiGatewayClient
   def request_client
     fetch_token if @access.nil? || @access.expired?
     @access
-  end
-
-  def fetch_med_sanctions_and_waivers(body)
-    response = request_client.post("#{@cpi_api_gateway_url}api/1.0/ppr/providers",
-                                   headers: { 'Content-Type': 'application/json' },
-                                   body:)
-    response.parsed
   end
 end

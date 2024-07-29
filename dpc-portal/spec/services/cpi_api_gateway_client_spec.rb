@@ -12,19 +12,6 @@ describe CpiApiGatewayClient do
     end
   end
 
-  describe '.fetch_enrollment' do
-    it 'returns enrollments' do
-      enrollment = client.fetch_enrollment(12_345)
-      expect(enrollment.dig('enrollments', 0, 'status')).to eq 'APPROVED'
-    end
-
-    it 'returns inactive enrollments with specific npi' do
-      enrollment = client.fetch_enrollment('3782297014')
-      expect(enrollment.dig('enrollments', 0, 'status')).to eq 'INACTIVE'
-      expect(enrollment.dig('enrollments', 1, 'status')).to eq 'IN REVIEW'
-    end
-  end
-
   describe '.fetch_profile' do
     it 'returns enrollments' do
       enrollment = client.fetch_profile(12_345)
@@ -51,11 +38,10 @@ describe CpiApiGatewayClient do
       end
     end
 
-    context 'fetches med sanctions', :focus do
+    context 'fetches med sanctions' do
       it 'returns sanctions with specific npi' do
         npi = '3598564557'
         sanctions = client.fetch_profile(npi)
-        puts sanctions.dig('provider', 'medSanctions')
         expect(sanctions.dig('provider', 'medSanctions').size).to eq(1)
         expect(sanctions.dig('provider', 'waiverInfo')).to be_blank
       end
@@ -99,24 +85,24 @@ describe CpiApiGatewayClient do
     end
   end
 
-  describe '.fetch_org_med_sanctions' do
+  describe '.org_info' do
     it 'returns sanctions with specific npi' do
       npi = '3598564557'
-      sanctions = client.fetch_med_sanctions_and_waivers_by_org_npi(npi)
+      sanctions = client.org_info(npi)
       expect(sanctions.dig('provider', 'medSanctions').size).to eq(1)
       expect(sanctions.dig('provider', 'waiverInfo').size).to eq(0)
     end
 
     it 'returns waiver with specific npi' do
       npi = '3098168743'
-      sanctions = client.fetch_med_sanctions_and_waivers_by_org_npi(npi)
+      sanctions = client.org_info(npi)
       expect(sanctions.dig('provider', 'medSanctions').size).to eq(1)
       expect(sanctions.dig('provider', 'waiverInfo').size).to eq(1)
     end
 
     it 'does not return sanctions or waivers with other npi' do
       npi = '3740677877'
-      sanctions = client.fetch_med_sanctions_and_waivers_by_org_npi(npi)
+      sanctions = client.org_info(npi)
       expect(sanctions.dig('provider', 'medSanctions').size).to eq(0)
       expect(sanctions.dig('provider', 'waiverInfo').size).to eq(0)
     end
