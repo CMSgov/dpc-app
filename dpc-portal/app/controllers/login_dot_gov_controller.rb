@@ -26,6 +26,10 @@ class LoginDotGovController < Devise::OmniauthCallbacksController
     end
   end
 
+  def logged_out
+    redirect_to new_user_session_path
+  end
+
   private
 
   def maybe_update_user(user, data)
