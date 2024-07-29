@@ -45,10 +45,7 @@ class CpiApiGatewayClient
         all: true
       }
     }.to_json
-    response = request_client.post("#{@cpi_api_gateway_url}api/1.0/ppr/providers",
-                                   headers: { 'Content-Type': 'application/json' },
-                                   body:)
-    response.parsed
+    fetch_provider_info(body)
   end
 
   # fetch info about the organization
@@ -62,10 +59,7 @@ class CpiApiGatewayClient
         all: true
       }
     }.to_json
-    response = request_client.post("#{@cpi_api_gateway_url}api/1.0/ppr/providers",
-                                   headers: { 'Content-Type': 'application/json' },
-                                   body:)
-    response.parsed
+    fetch_provider_info(body)
   end
 
   private
@@ -77,5 +71,12 @@ class CpiApiGatewayClient
   def request_client
     fetch_token if @access.nil? || @access.expired?
     @access
+  end
+
+  def fetch_provider_info(body)
+    response = request_client.post("#{@cpi_api_gateway_url}api/1.0/ppr/providers",
+                                   headers: { 'Content-Type': 'application/json' },
+                                   body:)
+    response.parsed
   end
 end
