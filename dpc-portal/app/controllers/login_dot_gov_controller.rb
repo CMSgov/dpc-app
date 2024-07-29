@@ -27,7 +27,7 @@ class LoginDotGovController < Devise::OmniauthCallbacksController
   end
 
   def logged_out
-    redirect_to new_user_session_path
+    redirect_to session.delete(:user_return_to) || organizations_path
   end
 
   private

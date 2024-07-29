@@ -6,7 +6,10 @@ module Users
     auto_session_timeout_actions
 
     def destroy
-#      session[:user_return_to] = accept_organization_invitation_url(@organization, params[:id])
+      if params[:invitation_id].present?
+        invitation = Invitation.find(params[:invitation_id])
+        session[:user_return_to] = accept_organization_invitation_url(invitation.provider_organization.id, invitation.id)
+      end
       session['omniauth.state'] = @state = SecureRandom.hex(16)
       sign_out(current_user)
       client_id = "urn:gov:cms:openidconnect.profiles:sp:sso:cms:dpc:#{ENV.fetch('ENV')}"

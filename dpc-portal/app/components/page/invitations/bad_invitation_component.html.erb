@@ -17,4 +17,7 @@
         disabled: @disabled,
 	destination: renew_organization_invitation_path(@invitation.provider_organization, @invitation),
 	method: :post) if @show_renew %>
+  <%= render Core::Button::ButtonComponent.new(label: "Try Again",
+	destination: logout_path(invitation_id: @invitation.id),
+	method: :delete) if @reason == 'pii_mismatch' %>
 </div>
