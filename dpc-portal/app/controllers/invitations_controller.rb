@@ -68,7 +68,7 @@ class InvitationsController < ApplicationController
     elsif @invitation.authorized_official?
       create_ao_org_link
     else
-      render(Page::Invitations::BadInvitationComponent.new(@invitation, 'invalid', 'warning'),
+      render(Page::Invitations::BadInvitationComponent.new(@invitation, 'invalid'),
              status: :unprocessable_entity)
       false
     end
@@ -107,27 +107,28 @@ class InvitationsController < ApplicationController
   def invitation_matches_user
     user_info = UserInfoService.new.user_info(session)
     unless @invitation.match_user?(user_info)
-      render(Page::Invitations::BadInvitationComponent.new(@invitation, 'pii_mismatch', 'error'),
+      render(Page::Invitations::BadInvitationComponent.new(@invitation, 'pii_mismatch'),
              status: :forbidden)
     end
     @given_name = user_info['given_name']
     @family_name = user_info['family_name']
   rescue UserInfoServiceError => e
-    handle_user_info_service_error(e)
+    handle_user_info_service_error(e, 1)
   end
 
   def invitation_matches_conditions
     unless session["invitation_status_#{@invitation.id}"] == 'identity_verified'
-      return redirect_to accept_organization_invitation_url(@organization,
-                                                            @invitation)
+      return redirect_to accept_organization_invitation_url(@organization, @invitation)
     end
 
     return check_code if @invitation.credential_delegate?
 
     check_ao
+  rescue UserInfoServiceError => e
+    handle_user_info_service_error(e, 2)
   rescue InvitationError => e
-    render(Page::Invitations::BadInvitationComponent.new(@invitation, e.message, 'error'),
-           status: :forbidden)
+    status = AoVerificationService::SERVER_ERRORS.include?(e.message) ? :service_unavailable : :forbidden
+    render(Page::Invitations::AoFlowFailComponent.new(@invitation, e.message, 2), status:)
   end
 
   def check_code
@@ -145,12 +146,16 @@ class InvitationsController < ApplicationController
     result[:success]
   end
 
-  def handle_user_info_service_error(error)
-    case error.message
-    when 'unauthorized'
+  def handle_user_info_service_error(error, step)
+    logger.error "Invitation Flow UserInfoServiceError: #{error.message}"
+
+    if error.message == 'unauthorized'
       render(Page::Invitations::InvitationLoginComponent.new(@invitation))
+    elsif @invitation.credential_delegate?
+      render(Page::Invitations::BadInvitationComponent.new(@invitation, error.message),
+             status: :service_unavailable)
     else
-      render(Page::Invitations::BadInvitationComponent.new(@invitation, 'server_error', 'warning'),
+      render(Page::Invitations::AoFlowFailComponent.new(@invitation, error.message, step),
              status: :service_unavailable)
     end
   end
@@ -158,16 +163,16 @@ class InvitationsController < ApplicationController
   def load_invitation
     @invitation = Invitation.find(params[:id])
     if @organization != @invitation.provider_organization
-      render(Page::Invitations::BadInvitationComponent.new(@invitation, 'invalid', 'warning'), status: :not_found)
+      render(Page::Invitations::BadInvitationComponent.new(@invitation, 'invalid'), status: :not_found)
     end
   rescue ActiveRecord::RecordNotFound
-    render(Page::Invitations::BadInvitationComponent.new(@invitation, 'invalid', 'warning'), status: :not_found)
+    render(Page::Invitations::BadInvitationComponent.new(@invitation, 'invalid'), status: :not_found)
   end
 
   def validate_invitation
     return unless @invitation.unacceptable_reason
 
-    render(Page::Invitations::BadInvitationComponent.new(@invitation, @invitation.unacceptable_reason, 'warning'),
+    render(Page::Invitations::BadInvitationComponent.new(@invitation, @invitation.unacceptable_reason),
            status: :forbidden)
   end
 
