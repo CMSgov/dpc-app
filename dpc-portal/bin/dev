@@ -21,4 +21,4 @@ if [ -z "$GOLDEN_MACAROON" ]; then
 fi
 
 echo "Starting Procfile.dev"
-exec foreman start --timestamp false -f Procfile.dev | sed s/\[^\|\]\*\|//
+exec foreman start -f Procfile.dev "$@"
