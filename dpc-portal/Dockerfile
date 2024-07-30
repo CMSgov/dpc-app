@@ -14,11 +14,11 @@ RUN apk update && \
     apk add --no-cache gcompat
 
 ARG gecko_version=0.34.0
-RUN wget https://github.com/mozilla/geckodriver/releases/download/v${gecko_version}/geckodriver-v${gecko_version}-linux64.tar.gz -P /tmp/ && \
-    tar -xzf /tmp/geckodriver-v${gecko_version}-linux64.tar.gz -C /tmp/ && \
-    echo "GECKO" && ls /tmp/geckodriver && echo "INNER GECKO" && ls /tmp/geckodriver/tmp/geckodriver && \
-    chmod +x /tmp/geckodriver && \
-    mv /tmp/geckodriver /usr/local/bin/
+RUN wget https://github.com/mozilla/geckodriver/releases/download/v${gecko_version}/geckodriver-v${gecko_version}-linux64.tar.gz && \
+    tar -xzf geckodriver-v${gecko_version}-linux64.tar.gz && \
+    chmod +x /geckodriver && \
+    mv /geckodriver /usr/local/bin/ && \
+    rm -rf geckodriver-v${gecko_version}-linux64.tar.gz
 
 # Set the working directory
 RUN mkdir -p /dpc-portal/vendor/api_client
