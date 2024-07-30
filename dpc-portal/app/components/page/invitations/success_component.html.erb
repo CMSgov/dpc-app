@@ -1,5 +1,19 @@
 <%= render(Core::Navigation::StepIndicatorComponent.new(Invitation::STEPS, 3)) if @invitation.authorized_official? %>
 <div>
+  <% if @invitation.credential_delegate? %>
   <h1>Registration completed</h1>
+  <% else %>
+  <div class="usa-alert usa-alert--success margin-bottom-4">
+    <div class="usa-alert__body">
+      <p class="usa-alert__text">
+        <%= @organization.name %> is successfully registered with Data at the Point of Care.
+      </p>
+    </div>
+  </div>
+  <p>Thank you for completing registration. You'll need to read and sign Terms of Service for organizations you manage. You can do this in your DPC Portal when you manage your organization.</p>
+  <% end %>
+  <%= render Core::Button::ButtonComponent.new(label: 'Go to DPC Portal',
+      destination: root_url,
+      method: :get) %>
 </div>
 
