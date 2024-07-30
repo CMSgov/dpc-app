@@ -37,7 +37,7 @@ class PatientDAOUnitTest extends AbstractAttributionDAOTest {
 			patientDAO.persistPatient(pat3);
 		});
 
-		List<PatientEntity> patients = patientDAO.patientSearch(List.of(pat1.getID(), pat2.getID()));
+		List<PatientEntity> patients = patientDAO.patientSearch(org.getId(), List.of(pat1.getID(), pat2.getID()));
 
 		assertEquals(2, patients.size());
 		assertTrue(patients.contains(pat1));

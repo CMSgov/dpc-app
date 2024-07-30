@@ -57,13 +57,16 @@ public class PatientDAO extends AbstractDAO<PatientEntity> {
      * @param resourceIDs
      * @return List of {@link PatientEntity}s
      */
-    public List<PatientEntity> patientSearch(List<UUID> resourceIDs) {
+    public List<PatientEntity> patientSearch(UUID organizationId, List<UUID> resourceIDs) {
         final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
         final CriteriaQuery<PatientEntity> query = builder.createQuery(PatientEntity.class);
         final Root<PatientEntity> root = query.from(PatientEntity.class);
 
         query.select(root)
-            .where(root.get(PatientEntity_.id).in(resourceIDs));
+            .where(builder.and(
+                root.get(PatientEntity_.id).in(resourceIDs),
+                builder.equal(root.get(PatientEntity_.organization).get(OrganizationEntity_.id), organizationId))
+            );
         return list(query);
     }
 
