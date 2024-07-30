@@ -15,7 +15,7 @@ class InvitationsController < ApplicationController
 
   def accept
     session["invitation_status_#{@invitation.id}"] = 'identity_verified'
-    render(Page::Invitations::AcceptInvitationComponent.new(@organization, @invitation))
+    render(Page::Invitations::AcceptInvitationComponent.new(@organization, @invitation, @given_name, @family_name))
   end
 
   def confirm
@@ -29,15 +29,10 @@ class InvitationsController < ApplicationController
                                                             @invitation)
     end
 
-    if @invitation.credential_delegate?
-      create_cd_org_link
-    elsif @invitation.authorized_official?
-      create_ao_org_link
-    else
-      return render(Page::Invitations::BadInvitationComponent.new(@invitation, 'invalid', 'warning'),
-                    status: :unprocessable_entity)
-    end
+    return unless create_link
+
     session.delete("invitation_status_#{@invitation.id}")
+    sign_in(:user, @user)
     render(Page::Invitations::SuccessComponent.new(@organization, @invitation))
   end
 
@@ -67,26 +62,36 @@ class InvitationsController < ApplicationController
 
   private
 
+  def create_link
+    if @invitation.credential_delegate?
+      create_cd_org_link
+    elsif @invitation.authorized_official?
+      create_ao_org_link
+    else
+      render(Page::Invitations::BadInvitationComponent.new(@invitation, 'invalid', 'warning'),
+             status: :unprocessable_entity)
+      false
+    end
+  end
+
   def create_cd_org_link
     CdOrgLink.create!(user:, provider_organization: @organization, invitation: @invitation)
     @invitation.accept!
-    flash[:notice] = "Invitation accepted. You can now manage this organization's credentials. Learn more."
   end
 
   def create_ao_org_link
     AoOrgLink.create!(user:, provider_organization: @organization, invitation: @invitation)
     @invitation.accept!
-    flash[:notice] = 'Invitation accepted.'
   end
 
   def user
     user_info = UserInfoService.new.user_info(session)
-    local_user = User.find_or_create_by!(provider: :openid_connect, uid: user_info['sub']) do |user_to_create|
+    @user = User.find_or_create_by!(provider: :openid_connect, uid: user_info['sub']) do |user_to_create|
       user_to_create.email = @invitation.invited_email
       user_to_create.pac_id = session.delete(:user_pac_id)
     end
-    local_user.update(pac_id: session.delete(:user_pac_id)) unless local_user.pac_id
-    local_user
+    @user.update(pac_id: session.delete(:user_pac_id)) unless @user.pac_id
+    @user
   end
 
   def check_for_token
@@ -96,7 +101,7 @@ class InvitationsController < ApplicationController
       return
     end
 
-    render(Page::Session::InvitationLoginComponent.new(@invitation))
+    render(Page::Invitations::InvitationLoginComponent.new(@invitation))
   end
 
   def invitation_matches_user
@@ -105,6 +110,8 @@ class InvitationsController < ApplicationController
       render(Page::Invitations::BadInvitationComponent.new(@invitation, 'pii_mismatch', 'error'),
              status: :forbidden)
     end
+    @given_name = user_info['given_name']
+    @family_name = user_info['family_name']
   rescue UserInfoServiceError => e
     handle_user_info_service_error(e)
   end
@@ -127,7 +134,7 @@ class InvitationsController < ApplicationController
     return if params[:verification_code] == @invitation.verification_code
 
     @invitation.errors.add(:verification_code, :bad_code, message: 'tbd')
-    render(Page::Invitations::AcceptInvitationComponent.new(@organization, @invitation),
+    render(Page::Invitations::AcceptInvitationComponent.new(@organization, @invitation, @given_name, @family_name),
            status: :bad_request)
   end
 
@@ -141,7 +148,7 @@ class InvitationsController < ApplicationController
   def handle_user_info_service_error(error)
     case error.message
     when 'unauthorized'
-      render(Page::Session::InvitationLoginComponent.new(@invitation))
+      render(Page::Invitations::InvitationLoginComponent.new(@invitation))
     else
       render(Page::Invitations::BadInvitationComponent.new(@invitation, 'server_error', 'warning'),
              status: :service_unavailable)
