@@ -16,7 +16,7 @@ RUN apk update && \
 ARG gecko_version=0.34.0
 RUN wget https://github.com/mozilla/geckodriver/releases/download/v${gecko_version}/geckodriver-v${gecko_version}-linux64.tar.gz -P /tmp/ && \
     tar -xzf /tmp/geckodriver-v${gecko_version}-linux64.tar.gz -C /tmp/ && \
-    echo "TMP FOLDER" && ls /tmp && echo "GECKO" && ls /tmp/geckodriver && \
+    echo "GECKO" && ls /tmp/geckodriver && echo "INNER GECKO" && ls /tmp/geckodriver/tmp/geckodriver && \
     chmod +x /tmp/geckodriver && \
     mv /tmp/geckodriver /usr/local/bin/
 
