@@ -13,14 +13,6 @@ RUN apk update && \
     apk add xz && \
     apk add --no-cache gcompat
 
-ARG gecko_version=0.34.0
-RUN wget https://github.com/mozilla/geckodriver/releases/download/v${gecko_version}/geckodriver-v${gecko_version}-linux64.tar.gz && \
-    tar -xzf geckodriver-v${gecko_version}-linux64.tar.gz && \
-    mv geckodriver /usr/bin/geckodriver && \
-    chown root:root /usr/bin/geckodriver && \
-    chmod +x /usr/bin/geckodriver && \
-    rm -rf geckodriver-v${gecko_version}-linux64.tar.gz
-
 # Set the working directory
 RUN mkdir -p /dpc-portal/vendor/api_client
 WORKDIR /dpc-portal
