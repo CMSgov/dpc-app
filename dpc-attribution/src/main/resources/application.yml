@@ -65,7 +65,7 @@ logging:
     "org.hibernate": ERROR
     "org.hibernate.SQL": ERROR
     # Turn this on to verify updates/inserts are getting batched
-    "org.hibernate.engine.jdbc.batch.internal.BatchingBatch": DEBUG
+    #"org.hibernate.engine.jdbc.batch.internal.BatchingBatch": DEBUG
     "gov.cms.dpc.api.auth": INFO
     "gov.cms.dpc.common.logging.filters": INFO
 

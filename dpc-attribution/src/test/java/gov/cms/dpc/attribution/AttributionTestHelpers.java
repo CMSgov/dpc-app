@@ -7,6 +7,7 @@ import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import gov.cms.dpc.common.entities.*;
 import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
+import gov.cms.dpc.testing.MBIUtil;
 import org.hl7.fhir.dstu3.model.*;
 
 import java.sql.Date;
@@ -115,10 +116,10 @@ public class AttributionTestHelpers {
         return organizationEntity;
     }
 
-    public static PatientEntity createPatientEntity(OrganizationEntity org, String mbi) {
+    public static PatientEntity createPatientEntity(OrganizationEntity org) {
         PatientEntity patientEntity = new PatientEntity();
         patientEntity.setID(UUID.randomUUID());
-        patientEntity.setBeneficiaryID(mbi);
+        patientEntity.setBeneficiaryID(MBIUtil.generateMBI());
         patientEntity.setDob(LocalDate.of(1980, 7, 14));
         patientEntity.setGender(Enumerations.AdministrativeGender.MALE);
         patientEntity.setOrganization(org);

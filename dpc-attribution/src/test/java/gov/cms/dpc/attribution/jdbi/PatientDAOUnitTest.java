@@ -24,11 +24,11 @@ class PatientDAOUnitTest extends AbstractAttributionDAOTest {
 	}
 
 	@Test
-	public void test_patientSearch_by_resourceId_happy_path() {
+	public void test_batch_patientSearch_happy_path() {
 		OrganizationEntity org = AttributionTestHelpers.createOrganizationEntity();
-		PatientEntity pat1 = AttributionTestHelpers.createPatientEntity(org, "1S00EU8FE91");
-		PatientEntity pat2 = AttributionTestHelpers.createPatientEntity(org, "1SQ3F00AA00");
-		PatientEntity pat3 = AttributionTestHelpers.createPatientEntity(org, "5S58A00AA00");
+		PatientEntity pat1 = AttributionTestHelpers.createPatientEntity(org);
+		PatientEntity pat2 = AttributionTestHelpers.createPatientEntity(org);
+		PatientEntity pat3 = AttributionTestHelpers.createPatientEntity(org);
 
 		db.inTransaction(() -> {
 			organizationDAO.registerOrganization(org);
@@ -38,6 +38,30 @@ class PatientDAOUnitTest extends AbstractAttributionDAOTest {
 		});
 
 		List<PatientEntity> patients = patientDAO.patientSearch(org.getId(), List.of(pat1.getID(), pat2.getID()));
+
+		assertEquals(2, patients.size());
+		assertTrue(patients.contains(pat1));
+		assertTrue(patients.contains(pat2));
+		assertFalse(patients.contains(pat3));
+	}
+
+	@Test
+	public void test_batch_patientSearch_only_finds_correct_org() {
+		OrganizationEntity goodOrg = AttributionTestHelpers.createOrganizationEntity();
+		OrganizationEntity badOrg = AttributionTestHelpers.createOrganizationEntity();
+		PatientEntity pat1 = AttributionTestHelpers.createPatientEntity(goodOrg);
+		PatientEntity pat2 = AttributionTestHelpers.createPatientEntity(goodOrg);
+		PatientEntity pat3 = AttributionTestHelpers.createPatientEntity(badOrg);
+
+		db.inTransaction(() -> {
+			organizationDAO.registerOrganization(goodOrg);
+			organizationDAO.registerOrganization(badOrg);
+			patientDAO.persistPatient(pat1);
+			patientDAO.persistPatient(pat2);
+			patientDAO.persistPatient(pat3);
+		});
+
+		List<PatientEntity> patients = patientDAO.patientSearch(goodOrg.getId(), List.of(pat1.getID(), pat2.getID(), pat3.getID()));
 
 		assertEquals(2, patients.size());
 		assertTrue(patients.contains(pat1));
