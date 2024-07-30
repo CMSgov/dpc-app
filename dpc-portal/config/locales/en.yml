@@ -1,43 +1,30 @@
 en:
   verification:
-    pii_mismatch_heading:  Invitation denied
-    pii_mismatch_status: Warning Status
-    pii_mismatch_alert: This is a succinct, helpful message.
+    pii_mismatch_status: Invitation denied
     pii_mismatch_text: Sorry, this invitation is for someone else.
-    ao_expired_heading:  Registration link expired
-    ao_expired_status: Error Status
-    ao_expired_alert: This is a succinct, helpful message.
+    accepted_status: Organization already registered.
+    accepted_text: If you meant to register a different organization, check your inbox for the correct request. Sign in to access details for this organization.
+    ao_expired_status:  Registration link expired
     ao_expired_text: The registration link for %{org_name} is expired.
-    invalid_heading:  Invitation is invalid
-    invalid_heading:  Invitation is invalid
-    invalid_status: Error Status
-    invalid_alert: This is a succinct, helpful message.
-    invalid_text: This invitation isn't valid. This could mean X, Y, or Z.
-    ao_med_sanctions_heading: Registration Failed
+    invalid_status:  Your registration link is invalid.
+    invalid_text: Please check the email where you received this request and try again. Make sure you're using the same email address to register as the one where you received the invite. If the problem persists contact DPC at <a href="mailto:dpcinfo@cms.hhs.gov">dpcinfo@cms.hhs.gov</a>.
     ao_med_sanctions_status: You are in the Medicare Exclusions Database.
-    ao_med_sanctions_alert: ''
     ao_med_sanctions_text: You are listed as an excluded individual by the Office of Inspector General (OIG), which prohibits you from acting as this organization’s Authorized Official. For more information, contact the <a href="https://oig.hhs.gov/about-oig/contact-us/#exclusions">OIG Exclusions Branch</a>.
-    org_med_sanctions_heading: Registration Failed
     org_med_sanctions_status: Your organization is in the Medicare Exclusions Database.
-    org_med_sanctions_alert: ''
     org_med_sanctions_text: Your organization is listed as an excluded entity by the Office of Inspector General (OIG), which prohibits it from accessing beneficiary claims data. For more information, contact the <a href="https://oig.hhs.gov/about-oig/contact-us/#exclusions">OIG Exclusions Branch</a>.
 
-    no_approved_enrollment_heading: Registration Failed
     no_approved_enrollment_status: Your organization is not currently approved by Medicare.
-    no_approved_enrollment_alert: ''
     no_approved_enrollment_text: Your organization must have an approved enrollment status with Medicare to access beneficiary claims data. Your organization may need to <a href="https://www.cms.gov/medicare/enrollment-renewal/providers-suppliers/chain-ownership-system-pecos/manage-your-enrollment">manage its enrollment</a> in PECOS, the Medicare enrollment system.
-    bad_npi_heading: Registration Failed
     bad_npi_status: Your organization is not currently approved by Medicare.
-    bad_npi_alert: ''
     bad_npi_text: Your organization must have an approved enrollment status with Medicare to access beneficiary claims data. Your organization may need to <a href="https://www.cms.gov/medicare/enrollment-renewal/providers-suppliers/chain-ownership-system-pecos/manage-your-enrollment">manage its enrollment</a> in PECOS, the Medicare enrollment system.
-    user_not_authorized_official_heading: Registration Failed
     user_not_authorized_official_status: You’re not the Authorized Official.
-    user_not_authorized_official_alert: ''
     user_not_authorized_official_text: You are not on record as the Authorized Official for this organization. Your organization may need to <a href="https://pecos.cms.hhs.gov/pecos/login.do#headingLv1">update its Authorized Official</a> in PECOS, the Medicare enrollment system.
-    server_error_heading: Unable to Process Request
-    server_error_status: Internal Error
-    server_error_alert: ''
-    server_error_text: We are not currently able to process your request.
+    fail_to_proof_status: Identity verification incomplete.
+    fail_to_proof_text: You still have steps to complete in order to continue to registration. Please sign in again at <a href="https://www.login.gov/what-is-login/">Login.gov</a> to complete those steps.
+    missing_info_status: Can't complete your registration.
+    missing_info_text: Something happened on our end and we're unable to continue. Please contact <a href="mailto:dpcinfo@cms.hhs.gov">dpcinfo@cms.hhs.gov</a>.
+    server_error_status: "Registration unavailable: external system error."
+    server_error_text: We're experiencing a temporary outage due to an external system error. Please try again later. 
     manage_org: Manage your organization.
     tos_not_signed: You must sign DPC Terms of Service.
   cd_access:
