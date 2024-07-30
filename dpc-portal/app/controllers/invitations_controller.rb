@@ -15,7 +15,7 @@ class InvitationsController < ApplicationController
 
   def accept
     session["invitation_status_#{@invitation.id}"] = 'identity_verified'
-    render(Page::Invitations::AcceptInvitationComponent.new(@organization, @invitation))
+    render(Page::Invitations::AcceptInvitationComponent.new(@organization, @invitation, @given_name, @family_name))
   end
 
   def confirm
@@ -77,13 +77,11 @@ class InvitationsController < ApplicationController
   def create_cd_org_link
     CdOrgLink.create!(user:, provider_organization: @organization, invitation: @invitation)
     @invitation.accept!
-    flash[:notice] = "Invitation accepted. You can now manage this organization's credentials. Learn more."
   end
 
   def create_ao_org_link
     AoOrgLink.create!(user:, provider_organization: @organization, invitation: @invitation)
     @invitation.accept!
-    flash[:notice] = 'Invitation accepted.'
   end
 
   def user
@@ -103,7 +101,7 @@ class InvitationsController < ApplicationController
       return
     end
 
-    render(Page::Session::InvitationLoginComponent.new(@invitation))
+    render(Page::Invitations::InvitationLoginComponent.new(@invitation))
   end
 
   def invitation_matches_user
@@ -112,6 +110,8 @@ class InvitationsController < ApplicationController
       render(Page::Invitations::BadInvitationComponent.new(@invitation, 'pii_mismatch'),
              status: :forbidden)
     end
+    @given_name = user_info['given_name']
+    @family_name = user_info['family_name']
   rescue UserInfoServiceError => e
     handle_user_info_service_error(e, 1)
   end
@@ -135,7 +135,7 @@ class InvitationsController < ApplicationController
     return if params[:verification_code] == @invitation.verification_code
 
     @invitation.errors.add(:verification_code, :bad_code, message: 'tbd')
-    render(Page::Invitations::AcceptInvitationComponent.new(@organization, @invitation),
+    render(Page::Invitations::AcceptInvitationComponent.new(@organization, @invitation, @given_name, @family_name),
            status: :bad_request)
   end
 
@@ -150,7 +150,7 @@ class InvitationsController < ApplicationController
     logger.error "Invitation Flow UserInfoServiceError: #{error.message}"
 
     if error.message == 'unauthorized'
-      render(Page::Session::InvitationLoginComponent.new(@invitation))
+      render(Page::Invitations::InvitationLoginComponent.new(@invitation))
     elsif @invitation.credential_delegate?
       render(Page::Invitations::BadInvitationComponent.new(@invitation, error.message),
              status: :service_unavailable)

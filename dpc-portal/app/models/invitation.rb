@@ -17,8 +17,8 @@ class Invitation < ApplicationRecord
   belongs_to :provider_organization, required: true
   belongs_to :invited_by, class_name: 'User', required: false
 
-  STEPS = ['Connect with Login.gov', 'Verify your identity', 'Verify the provider organization',
-           'Complete Registration'].freeze
+  STEPS = ['Sign in or create a Login.gov account', 'Confirm your identity', 'Confirm organization registration',
+           'Finished'].freeze
 
   def phone_raw=(nbr)
     @phone_raw = nbr

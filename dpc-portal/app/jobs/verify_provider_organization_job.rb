@@ -12,7 +12,6 @@ class VerifyProviderOrganizationJob < ApplicationJob
     service = AoVerificationService.new
     @start = Time.now
     orgs_to_check.each do |org|
-      service.check_org_med_sanctions(org.npi)
       service.get_approved_enrollments(org.npi)
       org.update!(last_checked_at: Time.now)
     rescue AoException => e

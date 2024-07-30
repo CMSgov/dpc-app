@@ -1,8 +1,47 @@
-<div>
-<h1>You have been invited</h1>
-<p>This is an invitation to connect <strong><%= @organization.name %></strong> with Data at the Point of Care.</p>
-<p class="font-body-3xs">This invitation will expire in <strong><%= "#{@hours} hours and" if @hours %> <%= @minutes %> minutes</strong>.
-    <%= render Core::Button::ButtonComponent.new(label: 'Start',
-	destination: accept_organization_invitation_path(@organization, @invitation),
-	method: :get) %>
-</div>
+<section class="usa-section">
+  <div class="grid-row margin-x-neg-205 flex-justify-center">
+    <div class="grid-col-12 mobile-lg:grid-col-10 tablet:grid-col-8 desktop:grid-col-6 padding-x-205">
+      <div class="border-top border-base-lighter padding-top-4 desktop:border-0 desktop:padding-top-0">
+        <h1 class="display-none desktop:display-block margin-top-2">
+          Welcome to the DPC Portal
+        </h1>
+        <h1 class="desktop:display-none font-sans-lg margin-bottom-4 tablet:margin-top-neg-3">
+          Welcome to the DPC Portal
+        </h1>
+        <div class="usa-prose">
+          <p>To access the DPC API portal, an Authorized Official (AO) needs to register your organization. This registration request is for <strong><%= @invitation.invited_email %></strong> at <%= @organization.name %>. Use this email to sign in or create a Login.gov account.</p>
+          <p>DPC uses Login.gov for identity verification. Continue to sign in or created a Login.gov account.</p>
+          <div class="usa-alert usa-alert--warning margin-bottom-4">
+            <div class="usa-alert__body">
+              <p class="usa-alert__text">
+                This invitation will expire in <strong><%= @expiration %></strong>.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="grid-col-12 mobile-lg:grid-col-10 tablet:grid-col-8 desktop:grid-col-6 padding-x-205 margin-bottom-4">
+      <div class="bg-white padding-y-3 padding-x-5 border border-base-lighter">
+        <h2 class="margin-bottom-0">It's time to register your organization</h2>
+        <p>To register your organization you must:
+          <ul class="usa-icon-list">
+            <% @musts.each do |must| %>
+            <li class="usa-icon-list__item">
+              <div class="usa-icon-list__icon">
+                <%= render Core::Icon::UswdsComponent.new('check_circle', additional_classes: @list_styles) %>
+              </div>
+              <div class="usa-icon-list__content">
+                <%= must %>
+              </div>
+            </li>
+            <% end %>
+          </ul>
+        </p>
+        <%= render Core::Button::ButtonComponent.new(label: 'Begin registration',
+            destination: accept_organization_invitation_path(@organization, @invitation),
+            method: :get) %>
+      </div>
+    </div>
+  </div>
+</section>

@@ -307,7 +307,7 @@ RSpec.describe 'Invitations', type: :request do
             cpi_api_gateway_client_class = class_double(CpiApiGatewayClient).as_stubbed_const
             cpi_api_gateway_client = double(CpiApiGatewayClient)
             expect(cpi_api_gateway_client_class).to receive(:new).at_least(:once).and_return(cpi_api_gateway_client)
-            expect(cpi_api_gateway_client).to receive(:fetch_med_sanctions_and_waivers_by_org_npi).and_raise(
+            expect(cpi_api_gateway_client).to receive(:fetch_profile).and_raise(
               OAuth2::Error, Faraday::Response.new(status: 500)
             )
             stub_user_info
@@ -394,7 +394,7 @@ RSpec.describe 'Invitations', type: :request do
         it 'should show success page' do
           post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
           expect(response).to be_ok
-          expect(response.body).to include('Registration completed')
+          expect(response.body).to include('Go to DPC Portal')
         end
 
         it 'should create user if not exist' do
