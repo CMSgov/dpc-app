@@ -19,7 +19,7 @@ RUN wget https://github.com/mozilla/geckodriver/releases/download/v${gecko_versi
     chmod +x /geckodriver && \
     mv /geckodriver /usr/local/bin/ && \
     rm -rf geckodriver-v${gecko_version}-linux64.tar.gz && \
-    pwd && ls && ls /usr/local/bin/
+    ls /usr/local/bin/geckodriver
 
 # Set the working directory
 RUN mkdir -p /dpc-portal/vendor/api_client
