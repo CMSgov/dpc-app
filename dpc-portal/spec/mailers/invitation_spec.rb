@@ -20,7 +20,8 @@ RSpec.describe InvitationMailer, type: :mailer do
       given_name = family_name = ''
       mailer = InvitationMailer.with(invitation:, given_name:, family_name:).invite_ao
       expected_url = 'http://localhost:3100/portal/organizations/2/invitations/4'
-      expect(mailer.body).to match(expected_url)
+      html = mailer.body.parts.select { |part| part.content_type.match 'text/html' }.first
+      expect(html.body).to match(expected_url)
     end
   end
 end
