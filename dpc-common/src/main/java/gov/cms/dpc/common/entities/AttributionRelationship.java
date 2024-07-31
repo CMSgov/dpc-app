@@ -1,5 +1,8 @@
 package gov.cms.dpc.common.entities;
 
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Parameter;
+
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
@@ -14,7 +17,27 @@ public class AttributionRelationship implements Serializable {
     public static final long serialVersionUID = 42L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    // @GeneratedValue(strategy = GenerationType.IDENTITY)
+    // @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "attributions_generator")
+    @GenericGenerator(
+        name="attributions_generator",
+        strategy = "sequence",
+        parameters = {
+            @Parameter(
+                name = "sequence_name",
+                value = "attributions_id_seq"
+            ),
+            @Parameter(
+                name = "increment_size",
+                value = "100"   // Tied to JDBC batch size
+            ),
+            @Parameter(
+                name = "optimizer",
+                value = "pooled-lo"
+            )
+        }
+    )
     @Column(name = "id", updatable = false, nullable = false)
     @Access(AccessType.PROPERTY)
     private Long attributionID;
