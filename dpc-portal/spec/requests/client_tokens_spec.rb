@@ -151,9 +151,11 @@ RSpec.describe 'ClientTokens', type: :request do
         expect(response).to have_http_status(200)
       end
 
-      it 'is valid HTML', js: true do
+      it 'is valid HTML', driver: :selenium_headless do
         driver = Axe::Configuration.instance
+        WebMock.allow_net_connect!
         driver.page.visit "/organizations/#{org.id}/client_tokens/new"
+        WebMock.disable_net_connect!
         expect(driver.page).to be_axe_clean
       end
     end

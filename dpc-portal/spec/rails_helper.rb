@@ -31,8 +31,7 @@ require 'capybara/rspec'
 #
 # Dir[Rails.root.join('spec', 'support', '**', '*.rb')].sort.each { |f| require f }
 
-# Configure Capybara for webpage testing
-Capybara.javascript_driver = :selenium_headless
+Capybara.run_server = false
 AxeCapybara.configure do |c|
   c.skip_iframes = true
 end
