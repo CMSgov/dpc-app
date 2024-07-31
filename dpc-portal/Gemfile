@@ -92,9 +92,8 @@ group :test do
   gem 'fakefs', require: 'fakefs/safe'
   gem 'fakeredis'
   gem 'rails-controller-testing'
-  gem 'selenium-webdriver'
+  gem 'selenium-webdriver', '~> 4.11'
   gem 'timecop'
-  gem 'webdrivers'
 end
 
 gem 'tzinfo-data', platforms: %i[mingw mswin x64_mingw jruby]
