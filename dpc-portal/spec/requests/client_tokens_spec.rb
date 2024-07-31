@@ -152,9 +152,7 @@ RSpec.describe 'ClientTokens', type: :request do
       end
 
       it 'is valid HTML', js: true do
-        driver = AxeCapybara.configure do |c|
-          c.skip_iframes = true
-        end
+        driver = Axe::Configuration.instance
         driver.page.visit "/organizations/#{org.id}/client_tokens/new"
         expect(driver.page).to be_axe_clean
       end

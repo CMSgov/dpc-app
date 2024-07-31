@@ -34,6 +34,9 @@ require 'webdrivers/geckodriver'
 
 # Configure Capybara for webpage testing
 Capybara.javascript_driver = :selenium_headless
+AxeCapybara.configure do |c|
+  c.skip_iframes = true
+end
 
 # Checks for pending migrations and applies them before tests are run.
 # If you are not using ActiveRecord, you can remove these lines.
