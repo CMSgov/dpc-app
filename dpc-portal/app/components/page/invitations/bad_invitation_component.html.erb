@@ -13,7 +13,7 @@
             destination: renew_organization_invitation_path(@invitation.provider_organization, @invitation),
             method: :post) %>
       <% when :accepted %>
-        <%= button_to root_path, class: 'usa-button', data: { turbo: false } do %>
+        <%= button_to new_user_session_path, class: 'usa-button', method: :get, data: { turbo: false } do %>
           Sign in with <span class="login-button__logo">Login.gov</span>
         <% end %>
       <% when :invalid %>
