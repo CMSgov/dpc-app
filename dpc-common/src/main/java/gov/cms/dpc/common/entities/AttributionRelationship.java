@@ -28,7 +28,7 @@ public class AttributionRelationship implements Serializable {
             ),
             @Parameter(
                 name = "increment_size",
-                value = "100"   // Tied to JDBC batch size
+                value = "100"   // Tied to attributions_id_seq in dpc_attribution DB
             ),
             @Parameter(
                 name = "optimizer",
