@@ -4,7 +4,7 @@ execution:
 
 scenarios:
   log_in_page:
-    browser: Chrome
+    browser: Firefox
     timeout: 10
     think-time: 1s500ms
     default-address: ${PORTAL_HOST}
