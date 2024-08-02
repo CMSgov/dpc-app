@@ -16,3 +16,7 @@ scenarios:
         - Sign in
         subject: body
         regexp: false
+reporting:
+  - module: passfail
+    criteria:
+      - "fail>50%, stop as failed"
