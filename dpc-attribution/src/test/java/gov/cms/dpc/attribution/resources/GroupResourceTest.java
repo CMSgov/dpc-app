@@ -10,6 +10,7 @@ import gov.cms.dpc.common.utils.SeedProcessor;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.testing.IntegrationTest;
 import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -69,6 +70,7 @@ public class GroupResourceTest extends AbstractAttributionTest {
                 .resource(group)
                 .encodedJson()
                 .execute();
+        IIdType groupId = methodOutcome.getResource().getIdElement();
 
         assertTrue(methodOutcome.getCreated());
 
@@ -78,7 +80,7 @@ public class GroupResourceTest extends AbstractAttributionTest {
 
         assertThrows(InvalidRequestException.class, () -> client.update()
                 .resource(group)
-                .withId(methodOutcome.getResource().getIdElement())
+                .withId(groupId)
                 .encodedJson()
                 .execute());
 
@@ -92,7 +94,13 @@ public class GroupResourceTest extends AbstractAttributionTest {
                 .encodedJson()
                 .execute();
 
-        assertEquals(patient2.getIdElement().getValueAsString(), ((Group) methodOutcomeUpdate.getResource()).getMemberFirstRep().getEntity().getReference());
+        final Group updatedGroup = client.read()
+            .resource(Group.class)
+            .withId(groupId)
+            .encodedJson()
+            .execute();
+
+        assertEquals(patient2.getIdElement().getValueAsString(), updatedGroup.getMemberFirstRep().getEntity().getReference());
     }
 
     @Test

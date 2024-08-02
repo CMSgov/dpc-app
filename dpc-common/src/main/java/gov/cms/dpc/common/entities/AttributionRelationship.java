@@ -17,8 +17,6 @@ public class AttributionRelationship implements Serializable {
     public static final long serialVersionUID = 42L;
 
     @Id
-    // @GeneratedValue(strategy = GenerationType.IDENTITY)
-    // @GeneratedValue(strategy = GenerationType.AUTO)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "attributions_generator")
     @GenericGenerator(
         name="attributions_generator",

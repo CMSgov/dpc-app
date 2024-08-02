@@ -83,14 +83,13 @@ public class GroupResource extends AbstractGroupResource {
         final List<RosterEntity> entities = this.rosterDAO.findEntities(null, organizationID, providerNPI, null);
         if (!entities.isEmpty()) {
             final RosterEntity rosterEntity = entities.get(0);
-            return Response.status(Response.Status.CONFLICT).entity(this.converter.toFHIR(Group.class, rosterEntity)).build();
+            return Response.status(Response.Status.OK).entity(this.converter.toFHIR(Group.class, rosterEntity)).build();
         }
 
         // Verify that all patients in the roster exist
         verifyAndGetMembers(attributionRoster);
 
         // Add the first provider and save the persisted Roster.
-        // Hibernate does Attribution inserts one by one.  If we want them to batch, we'll need to redefine our DB schema.
         final RosterEntity rosterEntity = RosterEntity.fromFHIR(attributionRoster, providers.get(0), generateExpirationTime());
         final RosterEntity persisted = this.rosterDAO.persistEntity(rosterEntity);
         final Group persistedGroup = this.converter.toFHIR(Group.class, persisted);
@@ -176,6 +175,7 @@ public class GroupResource extends AbstractGroupResource {
                 })
             .forEach(relationshipDAO::addAttributionRelationship);
 
+        // TODO: Force commit before making this call (DPC-4196)
         final RosterEntity rosterEntity1 = rosterDAO.getEntity(rosterID)
                 .orElseThrow(() -> NOT_FOUND_EXCEPTION);
 
@@ -229,10 +229,10 @@ public class GroupResource extends AbstractGroupResource {
             .collect(Collectors.toList());
 
         // Last but not least, save our changes
-        // Hibernate is currently configured to batch the updates together, but not the new inserts
         Stream.concat(existingAttributions.stream(), newAttributions.stream())
             .forEach(relationshipDAO::addAttributionRelationship);
 
+        // TODO: Force commit before making this call (DPC-4196)
         //Getting it again to access the latest updates from above code
         final RosterEntity rosterEntity1 = this.rosterDAO.getEntity(rosterID)
                 .orElseThrow(() -> NOT_FOUND_EXCEPTION);
