@@ -33,7 +33,19 @@ class Invitation < ApplicationRecord
   end
 
   def expired?
-    created_at < 2.days.ago
+    return false unless created_at < 2.days.ago
+
+    if credential_delegate?
+      logger.info('Credential Delegate Invitation expired',
+                  actionContext: LoggingConstants::ActionContext::Registration,
+                  actionType: LoggingConstants::ActionType::CdInvitationExpired)
+    end
+    if authorized_official?
+      logger.info('Authorized Official Invitation expired',
+                  actionContext: LoggingConstants::ActionContext::Registration,
+                  actionType: LoggingConstants::ActionType::AoInvitationExpired)
+    end
+    true
   end
 
   def accept!
@@ -52,6 +64,9 @@ class Invitation < ApplicationRecord
     InvitationMailer.with(invitation:, given_name: invited_given_name,
                           family_name: invited_family_name).invite_ao.deliver_now
     update(status: :renewed)
+    logger.info('Authorized Official renewed expired invitation',
+                actionContext: LoggingConstants::ActionContext::Registration,
+                actionType: LoggingConstants::ActionType::AoInvitationRenewed)
     invitation
   end
 

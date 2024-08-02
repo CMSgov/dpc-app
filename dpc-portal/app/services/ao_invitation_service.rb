@@ -12,6 +12,10 @@ class AoInvitationService
                                    provider_organization: organization,
                                    invitation_type: :authorized_official)
 
+    Rails.logger.info('Authorized Official invited',
+                      actionContext: LoggingConstants::ActionContext::Registration,
+                      actionType: LoggingConstants::ActionType::AoInvited)
+
     InvitationMailer.with(invitation:, given_name:, family_name:).invite_ao.deliver_now
 
     invitation
