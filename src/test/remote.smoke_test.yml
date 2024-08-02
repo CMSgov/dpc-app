@@ -1,7 +1,7 @@
 settings:
   env:
     HOST: ${HOST_URL}
-    PORTAL_HOST: ${PORTAL_URL}
+    PORTAL_HOST: ${PORTAL_HOST}
     ADMIN_URL: ${ELB_URL}
     SEED_FILE: src/main/resources/test_associations-dpr.csv
     PROVIDER_BUNDLE: provider_bundle.json
@@ -9,4 +9,5 @@ settings:
   artifacts-dir: bzt-out/%Y-%m-%d_%H-%M-%S.%f
 
 included-configs:
-  - selenium_test.yml
+  - smoke_test.yml
+  - portal_test.yml
