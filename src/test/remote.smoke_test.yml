@@ -1,6 +1,7 @@
 settings:
   env:
     HOST: ${HOST_URL}
+    PORTAL_HOST: ${HOST_URL}/portal
     ADMIN_URL: ${ELB_URL}
     SEED_FILE: src/main/resources/test_associations-dpr.csv
     PROVIDER_BUNDLE: provider_bundle.json
@@ -9,3 +10,4 @@ settings:
 
 included-configs:
   - smoke_test.yml
+  - selenium_test.yml

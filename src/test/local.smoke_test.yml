@@ -1,6 +1,7 @@
 settings:
   env:
     HOST: http://localhost:3002/v1
+    PORTAL_HOST: http://localhost:3100/portal
     ADMIN_URL: http://localhost:9903/tasks
     SEED_FILE: src/main/resources/test_associations-dpr.csv
     PROVIDER_BUNDLE: provider_bundle.json
@@ -8,4 +9,5 @@ settings:
   artifacts-dir: bzt-out/%Y-%m-%d_%H-%M-%S.%f
 
 included-configs:
+  - selenium_test.yml
   - smoke_test.yml

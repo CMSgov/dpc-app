@@ -1,0 +1,18 @@
+execution:
+- executor: selenium
+  scenario: log_in_page
+
+scenarios:
+  log_in_page:
+    browser: Chrome
+    timeout: 10
+    think-time: 1s500ms
+    default-address: ${PORTAL_HOST}
+    requests:
+    - url: /
+      assert:
+      - contains:
+        - Data at the Point of Care
+        - Sign in
+        subject: body
+        regexp: false
