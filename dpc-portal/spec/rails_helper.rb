@@ -31,11 +31,6 @@ require 'capybara/rspec'
 #
 # Dir[Rails.root.join('spec', 'support', '**', '*.rb')].sort.each { |f| require f }
 
-Capybara.run_server = false
-AxeCapybara.configure do |c|
-  c.skip_iframes = true
-end
-
 # Checks for pending migrations and applies them before tests are run.
 # If you are not using ActiveRecord, you can remove these lines.
 begin

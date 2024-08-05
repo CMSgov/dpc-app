@@ -92,7 +92,8 @@ group :test do
   gem 'fakefs', require: 'fakefs/safe'
   gem 'fakeredis'
   gem 'rails-controller-testing'
-  gem 'selenium-webdriver', '~> 4.11'
+  gem 'selenium'
+  gem 'selenium-webdriver'
   gem 'timecop'
 end
 

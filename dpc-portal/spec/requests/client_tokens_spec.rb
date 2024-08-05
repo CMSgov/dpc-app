@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
+require 'selenium/server'
 require 'support/credential_resource_shared_examples'
 
 RSpec.describe 'ClientTokens', type: :request do
@@ -150,14 +151,6 @@ RSpec.describe 'ClientTokens', type: :request do
         expect(assigns(:organization)).to eq org
         expect(response).to have_http_status(200)
       end
-
-      it 'is valid HTML', driver: :selenium_headless do
-        driver = Axe::Configuration.instance
-        WebMock.allow_net_connect!
-        driver.page.visit "/organizations/#{org.id}/client_tokens/new"
-        WebMock.disable_net_connect!
-        expect(driver.page).to be_axe_clean
-      end
     end
   end
 
@@ -254,6 +247,25 @@ RSpec.describe 'ClientTokens', type: :request do
         expect(flash[:alert]).to eq('Client token could not be deleted.')
         expect(response).to redirect_to(organization_path(org.id))
       end
+    end
+  end
+
+  describe 'Selenium tests' do
+    let server
+    before do
+      WebMock.allow_net_connect!
+      server = Selenium::Server.get(:latest, background: true)
+      WebMock.disable_net_connect!
+      server.start
+    end
+    after { server.stop }
+
+    it 'GET /new' do
+      options = Selenium::WebDriver::Options.chrome
+      driver = Selenium::WebDriver.for(:remote, url: server.webdriver_url, options:)
+
+      driver.page.visit "/organizations/#{org.id}/client_tokens/new"
+      expect(driver.page).to be_axe_clean
     end
   end
 end
