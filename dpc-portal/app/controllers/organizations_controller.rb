@@ -49,6 +49,9 @@ class OrganizationsController < ApplicationController
     @organization.terms_of_service_accepted_at = DateTime.now
     @organization.terms_of_service_accepted_by = current_user
     @organization.save!
+    logger.info('Authorized Official signed Terms of Service',
+                actionContext: LoggingConstants::ActionContext::Registration,
+                actionType: LoggingConstants::ActionType::AoSignedToS)
     redirect_to organization_path(@organization)
   end
 

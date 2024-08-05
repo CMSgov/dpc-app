@@ -11,6 +11,9 @@ class LoginDotGovController < Devise::OmniauthCallbacksController
     if user
       sign_in(:user, user)
       session[:logged_in_at] = Time.now
+      logger.info('User logged in',
+                  actionContext: LoggingConstants::ActionContext::Authentication,
+                  actionType: LoggingConstants::ActionType::UserLoggedIn)
     end
     ial_2_actions(user, auth)
     redirect_to path(user, auth)
@@ -25,7 +28,9 @@ class LoginDotGovController < Devise::OmniauthCallbacksController
       logger.error 'Login.gov Configuration error'
     else
       @message = 'You have decided not to authenticate via login.gov.'
-      logger.warn 'User decided not to continue logging in'
+      logger.info('User cancelled login',
+                  actionContext: LoggingConstants::ActionContext::Authentication,
+                  actionType: LoggingConstants::ActionType::UserCancelledLogin)
     end
   end
 
@@ -59,6 +64,9 @@ class LoginDotGovController < Devise::OmniauthCallbacksController
   def path(user, auth)
     if user.blank? && auth.extra.raw_info.ial == 'http://idmanagement.gov/ns/assurance/ial/1'
       flash[:alert] = 'You must have an account to sign in.'
+      logger.info('User logged in without account',
+                  actionContext: LoggingConstants::ActionContext::Authentication,
+                  actionType: LoggingConstants::ActionType::UserLoginWithoutAccount)
       return new_user_session_url
     end
     session.delete(:user_return_to) || organizations_path
