@@ -8,5 +8,12 @@ settings:
     PATIENT_BUNDLE: patient_bundle-dpr.json
   artifacts-dir: bzt-out/%Y-%m-%d_%H-%M-%S.%f
 
+modules:
+  jmeter:
+    gui: false
+    path: jmeter_stuff
+  console:
+    disable: true
+
 included-configs:
   - portal_test.yml
