@@ -16,6 +16,10 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.LinkedList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import static gov.cms.dpc.attribution.AttributionTestHelpers.DEFAULT_ORG_ID;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -212,12 +216,15 @@ public class GroupResourceTest extends AbstractAttributionTest {
         final Group group = SeedProcessor.createBaseAttributionGroup(FHIRExtractors.getProviderNPI(practitioner), DEFAULT_ORG_ID);
 
         // Create patients
+        List<Patient> patientList = new LinkedList<>();
         for(int i=0; i<MAX_PATIENTS; i++) {
-            Patient patient = createPatient(MBIUtil.generateMBI(), DEFAULT_ORG_ID);
-            group.addMember().setEntity(new Reference(patient));
+            Patient patient = AttributionTestHelpers.createPatientResource(MBIUtil.generateMBI(), DEFAULT_ORG_ID);
+            patientList.add(patient);
         }
+        List<Patient> insertedPatientList = bulkSubmitPatients(patientList);
 
         // Create roster around patients
+        insertedPatientList.forEach(patient -> group.addMember().setEntity(new Reference(patient)));
         MethodOutcome outcomeInsert = client.create()
             .resource(group)
             .encodedJson()
@@ -258,5 +265,27 @@ public class GroupResourceTest extends AbstractAttributionTest {
                 .encodedJson()
                 .execute();
         return (Patient) methodOutcome.getResource();
+    }
+
+    private List<Patient> bulkSubmitPatients(List<Patient> patients) {
+        Bundle patientBundle = new Bundle();
+        for (Patient patient : patients) {
+            patientBundle.addEntry(new Bundle.BundleEntryComponent().setResource(patient));
+        }
+
+        final Parameters parameters = new Parameters();
+        parameters.addParameter().setResource(patientBundle);
+
+        Bundle patientsReturned = client.operation()
+            .onType("Patient")
+            .named("submit")
+            .withParameters(parameters)
+            .returnResourceType(Bundle.class)
+            .encodedJson()
+            .execute();
+
+        return patientsReturned.getEntry().stream()
+            .map(component -> (Patient) component.getResource())
+            .collect(Collectors.toList());
     }
 }
