@@ -251,18 +251,17 @@ RSpec.describe 'ClientTokens', type: :request do
   end
 
   describe 'Selenium tests' do
-    let server
     before do
       WebMock.allow_net_connect!
-      server = Selenium::Server.get(:latest, background: true)
+      @server = Selenium::Server.get(:latest, background: true)
       WebMock.disable_net_connect!
-      server.start
+      @server.start
     end
     after { server.stop }
 
     it 'GET /new' do
       options = Selenium::WebDriver::Options.chrome
-      driver = Selenium::WebDriver.for(:remote, url: server.webdriver_url, options:)
+      driver = Selenium::WebDriver.for(:remote, url: @server.webdriver_url, options:)
 
       driver.page.visit "/organizations/#{org.id}/client_tokens/new"
       expect(driver.page).to be_axe_clean
