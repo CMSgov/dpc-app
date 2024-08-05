@@ -33,7 +33,7 @@ smoke/local: venv smoke
 	. venv/bin/activate; pip install -Ur requirements.txt; bzt src/test/local.smoke_test.yml
 
 .PHONY: smoke/remote
-smoke/remote: venv smoke
+smoke/remote: venv
 	@echo "Running Smoke Tests against ${HOST_URL}"
 	. venv/bin/activate; bzt src/test/remote.smoke_test.yml
 
