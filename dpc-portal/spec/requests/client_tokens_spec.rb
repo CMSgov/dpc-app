@@ -2,6 +2,7 @@
 
 require 'rails_helper'
 require 'selenium/server'
+require 'selenium/webdriver'
 require 'support/credential_resource_shared_examples'
 
 RSpec.describe 'ClientTokens', type: :request do
