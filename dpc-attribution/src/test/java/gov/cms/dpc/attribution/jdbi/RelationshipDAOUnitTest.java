@@ -4,9 +4,15 @@ import gov.cms.dpc.attribution.AbstractAttributionDAOTest;
 import gov.cms.dpc.attribution.AttributionTestHelpers;
 import gov.cms.dpc.common.entities.*;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
+import org.hibernate.Session;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Parameter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Field;
+import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -108,5 +114,29 @@ class RelationshipDAOUnitTest extends AbstractAttributionDAOTest {
 		assertTrue(attributions.contains(attribution1));
 		assertTrue(attributions.contains(attribution2));
 		assertFalse(attributions.contains(attribution3));
+	}
+
+	// If the Hibernate sequence generator increment size and the DB sequence increment don't match we'll start getting
+	// failed inserts for duplicate keys.  Check that here to prevent someone from accidentally changing one and not the
+	// other.
+	@Test
+	public void test_SequenceIncrementSizeMatches() throws ClassNotFoundException, NoSuchFieldException {
+		Field attributionID = ClassLoader.getSystemClassLoader()
+			.loadClass("gov.cms.dpc.common.entities.AttributionRelationship")
+			.getDeclaredField("attributionID");
+
+		GenericGenerator annotation = attributionID.getAnnotation(GenericGenerator.class);
+		Parameter[] parms = annotation.parameters();
+
+		Integer hibernateIncrement = Arrays.stream(parms)
+			.filter(parameter -> parameter.name().equals("increment_size"))
+			.map(parameter -> Integer.valueOf(parameter.value()))
+			.findAny().get();
+
+		Session session = db.getSessionFactory().getCurrentSession();
+		String sql = "select increment_by from pg_sequences where sequencename = 'attributions_id_seq'";
+		int dbIncrement = ((BigInteger) session.createNativeQuery(sql).getSingleResult()).intValue();
+
+		assertEquals(hibernateIncrement, dbIncrement);
 	}
 }

@@ -15,10 +15,6 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
 import static gov.cms.dpc.attribution.AttributionTestHelpers.DEFAULT_ORG_ID;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -207,31 +203,42 @@ public class GroupResourceTest extends AbstractAttributionTest {
     }
 
     @Test
-    public void testCanInsertGreaterThanHibernateBatchSize() {
-        Map<String, String> props = APPLICATION.getConfiguration().getDatabase().getProperties();
-        int hibernateBatchSize = Integer.parseInt(props.get("hibernate.jdbc.batch_size"));
-
-        // Change max for just this test
-        APPLICATION.getConfiguration().setPatientLimit(hibernateBatchSize+1);
+    public void testMaxPatients() {
+        final int MAX_PATIENTS = 1350;
+        APPLICATION.getConfiguration().setPatientLimit(MAX_PATIENTS);
 
         final Practitioner practitioner = createPractitioner("1111111112");
         final Group group = SeedProcessor.createBaseAttributionGroup(FHIRExtractors.getProviderNPI(practitioner), DEFAULT_ORG_ID);
 
         // Create patients
-        List<Patient> patients = new LinkedList<Patient>();
-        for(int i=0; i<hibernateBatchSize+1; i++) {
+        for(int i=0; i<MAX_PATIENTS; i++) {
             Patient patient = createPatient(MBIUtil.generateMBI(), DEFAULT_ORG_ID);
-            patients.add(patient);
             group.addMember().setEntity(new Reference(patient));
         }
 
+        // Create roster around patients
         MethodOutcome outcomeInsert = client.create()
             .resource(group)
             .encodedJson()
             .execute();
 
-        assertTrue(outcomeInsert.getCreated());
-        assertEquals(hibernateBatchSize+1, ((Group)outcomeInsert.getResource()).getMember().size());
+        group.setId(outcomeInsert.getResource().getIdElement().getValue());
+
+        // Update all patients in roster
+        final Parameters parameters = new Parameters();
+        parameters.addParameter().setResource(group);
+
+        Group groupResult = client.operation()
+            .onInstance(group.getIdElement().getValue())
+            .named("$add")
+            .withParameters(parameters)
+            .returnResourceType(Group.class)
+            .encodedJson()
+            .execute();
+
+        // If nothing blew up we should be good, but check a few things anyway
+        assertEquals(MAX_PATIENTS, groupResult.getMember().size());
+        assertEquals(group.getId(), groupResult.getId());
     }
 
     private Practitioner createPractitioner(String NPI) {
