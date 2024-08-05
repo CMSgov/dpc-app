@@ -13,7 +13,7 @@ set -o allexport
 set +o allexport
 
 function _finally {
-  docker-compose -p start-v1-app down
+  docker compose -p start-v1-app down
   docker volume rm start-v1-app_pgdata14
 }
 
@@ -35,7 +35,7 @@ else
 fi
 
 # Build the application
-docker-compose -p start-v1-app up start_core_dependencies
+docker compose -p start-v1-app up start_core_dependencies
 mvn clean compile -Perror-prone -B -V -ntp
 mvn package -Pci -ntp
 
@@ -44,28 +44,28 @@ if [ -n "$REPORT_COVERAGE" ]; then
   mvn jacoco:report -ntp
 fi
 
-docker-compose -p start-v1-app down
+docker compose -p start-v1-app down
 docker volume rm start-v1-app_pgdata14
-docker-compose -p start-v1-app up start_core_dependencies
-docker-compose -p start-v1-app up start_api_dependencies
+docker compose -p start-v1-app up start_core_dependencies
+docker compose -p start-v1-app up start_api_dependencies
 
 # Run the integration tests
-docker-compose -p start-v1-app up --exit-code-from tests tests
+docker compose -p start-v1-app up --exit-code-from tests tests
 
-docker-compose -p start-v1-app down
+docker compose -p start-v1-app down
 docker volume rm start-v1-app_pgdata14
-docker-compose -p start-v1-app up start_core_dependencies
-docker-compose -p start-v1-app up start_api_dependencies
+docker compose -p start-v1-app up start_core_dependencies
+docker compose -p start-v1-app up start_api_dependencies
 
 # Start the API server
-AUTH_DISABLED=true docker-compose -p start-v1-app up start_api start_consent
+AUTH_DISABLED=true docker compose -p start-v1-app up start_api start_consent
 
 # Run the Postman tests
 npm install
 npm run test
 
 # Wait for Jacoco to finish writing the output files
-docker-compose -p start-v1-app down -t 60
+docker compose -p start-v1-app down -t 60
 
 # Collect the coverage reports for the Docker integration tests
 if [ -n "$REPORT_COVERAGE" ]; then
