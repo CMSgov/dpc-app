@@ -76,17 +76,17 @@ class InvitationsController < ApplicationController
 
   def create_cd_org_link
     CdOrgLink.create!(user:, provider_organization: @organization, invitation: @invitation)
-    logger.info('Credential Delegate created and linked to organization',
-                actionContext: LoggingConstants::ActionContext::Registration,
-                actionType: LoggingConstants::ActionType::CdCreatedAndLinkedToOrg)
+    Rails.logger.info('Credential Delegate created and linked to organization',
+                      actionContext: LoggingConstants::ActionContext::Registration,
+                      actionType: LoggingConstants::ActionType::CdCreatedAndLinkedToOrg)
     @invitation.accept!
   end
 
   def create_ao_org_link
     AoOrgLink.create!(user:, provider_organization: @organization, invitation: @invitation)
-    logger.info('Authorized Official created and linked to organization',
-                actionContext: LoggingConstants::ActionContext::Registration,
-                actionType: LoggingConstants::ActionType::AoCreatedAndLinkedToOrg)
+    Rails.logger.info('Authorized Official created and linked to organization',
+                      actionContext: LoggingConstants::ActionContext::Registration,
+                      actionType: LoggingConstants::ActionType::AoCreatedAndLinkedToOrg)
     @invitation.accept!
   end
 

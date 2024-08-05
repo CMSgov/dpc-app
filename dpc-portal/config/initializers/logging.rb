@@ -22,7 +22,7 @@ module LoggingConstants
     CdInvited = 'CdInvited'
     AoInvitationExpired = 'AoInvitationExpired'
     CdInvitationExpired = 'CdInvitationExpired'
-    AoInvitationRenewed = 'AoInvitationRenewed'
+    AoRenewedExpiredInvitation = 'AoRenewedExpiredInvitation'
     AoSignedToS = 'AoSignedToS'
     AoCreatedAndLinkedToOrg = 'AoCreatedAndLinkedToOrg'
     CdCreatedAndLinkedToOrg = 'CdCreatedAndLinkedToOrg'

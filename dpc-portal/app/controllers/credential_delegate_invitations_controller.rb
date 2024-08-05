@@ -18,9 +18,9 @@ class CredentialDelegateInvitationsController < ApplicationController
     @cd_invitation = build_invitation
 
     if @cd_invitation.save
-      logger.info('Credential Delegate invited',
-                  actionContext: LoggingConstants::ActionContext::Registration,
-                  actionType: LoggingConstants::ActionType::CdInvited)
+      Rails.logger.info('Credential Delegate invited',
+                        actionContext: LoggingConstants::ActionContext::Registration,
+                        actionType: LoggingConstants::ActionType::CdInvited)
       InvitationMailer.with(invitation: @cd_invitation).invite_cd.deliver_later
       if Rails.env.local?
         logger.info("Invitation URL: #{accept_organization_invitation_url(@organization,

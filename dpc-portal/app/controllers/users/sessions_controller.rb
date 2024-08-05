@@ -6,9 +6,9 @@ module Users
     auto_session_timeout_actions
 
     def destroy
-      logger.info('User logged out',
-                  actionContext: LoggingConstants::ActionContext::Authentication,
-                  actionType: LoggingConstants::ActionType::UserLoggedOut)
+      Rails.logger.info('User logged out',
+                        actionContext: LoggingConstants::ActionContext::Authentication,
+                        actionType: LoggingConstants::ActionType::UserLoggedOut)
       super
     end
   end
