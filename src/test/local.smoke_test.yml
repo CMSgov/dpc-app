@@ -9,5 +9,4 @@ settings:
   artifacts-dir: bzt-out/%Y-%m-%d_%H-%M-%S.%f
 
 included-configs:
-  - smoke_test.yml
   - portal_test.yml
