@@ -6,6 +6,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import gov.cms.dpc.attribution.AbstractAttributionTest;
 import gov.cms.dpc.attribution.AttributionTestHelpers;
 import gov.cms.dpc.attribution.resources.v1.GroupResource;
+import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.common.utils.SeedProcessor;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.testing.IntegrationTest;
@@ -207,7 +208,7 @@ public class GroupResourceTest extends AbstractAttributionTest {
         final int MAX_PATIENTS = 1350;
         APPLICATION.getConfiguration().setPatientLimit(MAX_PATIENTS);
 
-        final Practitioner practitioner = createPractitioner("1111111112");
+        final Practitioner practitioner = createPractitioner(NPIUtil.generateNPI());
         final Group group = SeedProcessor.createBaseAttributionGroup(FHIRExtractors.getProviderNPI(practitioner), DEFAULT_ORG_ID);
 
         // Create patients
@@ -222,14 +223,14 @@ public class GroupResourceTest extends AbstractAttributionTest {
             .encodedJson()
             .execute();
 
-        group.setId(outcomeInsert.getResource().getIdElement().getValue());
+        Group createdGroup = (Group) outcomeInsert.getResource();
 
         // Update all patients in roster
         final Parameters parameters = new Parameters();
         parameters.addParameter().setResource(group);
 
         Group groupResult = client.operation()
-            .onInstance(group.getIdElement().getValue())
+            .onInstance(createdGroup.getIdElement())
             .named("$add")
             .withParameters(parameters)
             .returnResourceType(Group.class)
@@ -238,7 +239,7 @@ public class GroupResourceTest extends AbstractAttributionTest {
 
         // If nothing blew up we should be good, but check a few things anyway
         assertEquals(MAX_PATIENTS, groupResult.getMember().size());
-        assertEquals(group.getId(), groupResult.getId());
+        assertEquals(createdGroup.getId(), groupResult.getId());
     }
 
     private Practitioner createPractitioner(String NPI) {
