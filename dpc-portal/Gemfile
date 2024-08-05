@@ -60,8 +60,8 @@ gem 'nokogiri', '>= 1.16.5'
 gem 'api_client', path: 'vendor/api_client'
 
 group :development, :test do
-  gem 'bundler-audit'
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
+  gem 'bundler-audit'
   gem 'byebug', platforms: %i[mri mingw x64_mingw]
   gem 'database_cleaner'
   gem 'factory_bot_rails'
