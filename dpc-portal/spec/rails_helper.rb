@@ -12,10 +12,6 @@ require 'support/dpc_client_support'
 require 'support/match_html_fragment'
 # Add additional requires below this line. Rails is not loaded until this point!
 require 'view_component/test_helpers'
-require 'axe-capybara'
-require 'axe-rspec'
-require 'capybara/rails'
-require 'capybara/rspec'
 # Requires supporting ruby files with custom matchers and macros, etc, in
 # spec/support/ and its subdirectories. Files matching `spec/**/*_spec.rb` are
 # run as spec files by default. This means that files in spec/support that end
