@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
+require './app/services/user_info_service'
 
 RSpec.describe Invitation, type: :model do
   let(:organization) { build(:provider_organization) }
@@ -221,6 +222,30 @@ RSpec.describe Invitation, type: :model do
         cd_invite.invited_phone = 'not number'
         expect(cd_invite.match_user?(user_info)).to eq false
       end
+      it 'should raise error if user_info missing given name' do
+        missing_info = user_info.merge({ 'given_name' => '' })
+        expect do
+          cd_invite.match_user?(missing_info)
+        end.to raise_error(UserInfoServiceError, 'missing_info')
+      end
+      it 'should raise error if user_info missing family name' do
+        missing_info = user_info.merge({ 'family_name' => '' })
+        expect do
+          cd_invite.match_user?(missing_info)
+        end.to raise_error(UserInfoServiceError, 'missing_info')
+      end
+      it 'should raise error if user_info missing phone' do
+        missing_info = user_info.merge({ 'phone' => '' })
+        expect do
+          cd_invite.match_user?(missing_info)
+        end.to raise_error(UserInfoServiceError, 'missing_info')
+      end
+      it 'should raise error if user_info all_emails' do
+        missing_info = user_info.merge({ 'all_emails' => [] })
+        expect do
+          cd_invite.match_user?(missing_info)
+        end.to raise_error(UserInfoServiceError, 'missing_info')
+      end
     end
 
     describe :cancel do
@@ -385,6 +410,12 @@ RSpec.describe Invitation, type: :model do
         user_info = { 'all_emails' => ['tim@example.com'] }
         expect(ao_invite.match_user?(user_info)).to eq false
       end
+      it 'should raise error if user_info missing all_emails' do
+        user_info = { 'all_emails' => [] }
+        expect do
+          ao_invite.match_user?(user_info)
+        end.to raise_error(UserInfoServiceError, 'missing_info')
+      end
     end
 
     describe :ao_match do
@@ -403,6 +434,12 @@ RSpec.describe Invitation, type: :model do
           ao_invite.ao_match?(user_info)
         end.to raise_error(InvitationError, 'ao_med_sanctions')
       end
+      it 'should raise error if user_info missing ssn' do
+        user_info = { 'social_security_number' => nil }
+        expect do
+          ao_invite.ao_match?(user_info)
+        end.to raise_error(UserInfoServiceError, 'missing_info')
+      end
     end
   end
 
@@ -411,9 +448,9 @@ RSpec.describe Invitation, type: :model do
       invitation = create(:invitation, :ao)
       expect(invitation.unacceptable_reason).to be_falsey
     end
-    it 'should be invalid if expired and ao and accepted' do
+    it 'should be accepted if expired and ao and accepted' do
       invitation = create(:invitation, :ao, created_at: 49.hours.ago, status: :accepted)
-      expect(invitation.unacceptable_reason).to eq 'invalid'
+      expect(invitation.unacceptable_reason).to eq 'accepted'
     end
     it 'should be invalid if expired and ao and cancelled' do
       invitation = create(:invitation, :ao, created_at: 49.hours.ago, status: :cancelled)
@@ -434,7 +471,7 @@ RSpec.describe Invitation, type: :model do
     it 'should be invalid if accepted' do
       invitation = create(:invitation, :ao)
       invitation.accept!
-      expect(invitation.unacceptable_reason).to eq 'invalid'
+      expect(invitation.unacceptable_reason).to eq 'accepted'
     end
   end
 

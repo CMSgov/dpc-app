@@ -94,3 +94,7 @@ Rails.application.configure do
   # Do not dump schema after migrations.
   config.active_record.dump_schema_after_migration = false
 end
+# Do not log values for hashie (used by omniauth and warns in calls to IDM)
+# See https://github.com/omniauth/omniauth/issues/872#issuecomment-276501012
+# Only needs prod, as we stub IDM locally
+Hashie.logger = Logger.new(nil)
