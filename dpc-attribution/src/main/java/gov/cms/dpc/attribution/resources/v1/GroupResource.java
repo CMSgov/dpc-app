@@ -79,6 +79,7 @@ public class GroupResource extends AbstractGroupResource {
             throw new WebApplicationException("Unable to find attributable provider", Response.Status.NOT_FOUND);
         }
 
+        // TODO: Force commit before making this call (DPC-4196)
         // Check and see if a roster already exists for the provider, if so, we just return that and ignore what they sent in
         final List<RosterEntity> entities = this.rosterDAO.findEntities(null, organizationID, providerNPI, null);
         if (!entities.isEmpty()) {
@@ -204,13 +205,16 @@ public class GroupResource extends AbstractGroupResource {
             .collect(Collectors.toList());
 
         // Check which patients are already part of the roster and mark them active as of today
+        OffsetDateTime periodBegin = OffsetDateTime.now(ZoneOffset.UTC);
+        OffsetDateTime periodEnd = generateExpirationTime();
+
         List<AttributionRelationship> existingAttributions = relationshipDAO.lookupAttributionRelationships(rosterID, patientIds);
         existingAttributions.forEach(attribution -> {
             if (attribution.isInactive()) {
-                attribution.setPeriodBegin(OffsetDateTime.now(ZoneOffset.UTC));
+                attribution.setPeriodBegin(periodBegin);
             }
             attribution.setInactive(false);
-            attribution.setPeriodEnd(generateExpirationTime());
+            attribution.setPeriodEnd(periodEnd);
         });
 
         // Build attributions for the new patients
@@ -222,8 +226,8 @@ public class GroupResource extends AbstractGroupResource {
         List<AttributionRelationship> newAttributions = patientEntities.stream()
             .filter( patient -> !existingPatientIds.contains(patient.getID()))
             .map( patient -> {
-                AttributionRelationship attribution = new AttributionRelationship(rosterEntity, patient, OffsetDateTime.now(ZoneOffset.UTC));
-                attribution.setPeriodEnd(generateExpirationTime());
+                AttributionRelationship attribution = new AttributionRelationship(rosterEntity, patient, periodBegin);
+                attribution.setPeriodEnd(periodEnd);
                 return attribution;
             })
             .collect(Collectors.toList());
