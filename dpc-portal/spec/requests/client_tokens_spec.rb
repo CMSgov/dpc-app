@@ -250,6 +250,8 @@ RSpec.describe 'ClientTokens', type: :request do
   end
 
   describe 'Selenium tests' do
+    let(:wait) { Selenium::WebDriver::Wait.new(timeout: 2) }
+
     before { WebMock.allow_net_connect! }
     after { WebMock.disable_net_connect! }
 
