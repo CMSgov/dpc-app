@@ -15,7 +15,7 @@ modules:
     path: src/vendor
   console:
     disable: true
-    
+
 included-configs:
   - smoke_test.yml
   - src/test/portal_test.yml
