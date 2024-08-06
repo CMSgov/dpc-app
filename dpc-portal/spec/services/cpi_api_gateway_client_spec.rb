@@ -12,25 +12,52 @@ describe CpiApiGatewayClient do
     end
   end
 
-  describe '.fetch_enrollment' do
+  describe '.fetch_profile' do
     it 'returns enrollments' do
-      enrollment = client.fetch_enrollment(12_345)
-      expect(enrollment.dig('enrollments', 0, 'status')).to eq 'APPROVED'
+      enrollment = client.fetch_profile(12_345)
+      expect(enrollment.dig('provider', 'enrollments').length).to eq 2
+      expect(enrollment.dig('provider', 'enrollments', 0, 'status')).to eq 'INACTIVE'
+      expect(enrollment.dig('provider', 'enrollments', 1, 'status')).to eq 'APPROVED'
     end
 
     it 'returns inactive enrollments with specific npi' do
-      enrollment = client.fetch_enrollment('3782297014')
-      expect(enrollment.dig('enrollments', 0, 'status')).to eq 'INACTIVE'
-      expect(enrollment.dig('enrollments', 1, 'status')).to eq 'IN REVIEW'
+      enrollment = client.fetch_profile('3782297014')
+      expect(enrollment.dig('provider', 'enrollments').length).to eq 2
+      expect(enrollment.dig('provider', 'enrollments', 0, 'status')).to eq 'INACTIVE'
+      expect(enrollment.dig('provider', 'enrollments', 1, 'status')).to eq 'IN REVIEW'
     end
-  end
 
-  describe '.fetch_enrollment_roles' do
     it 'fetches roles' do
-      roles = client.fetch_enrollment_roles(123_456)
+      roles = client.fetch_profile(12_345)
+      expect(roles.dig('provider', 'enrollments', 0, 'roles', 0, 'roleCode')).to eq '10'
+      expect(roles.dig('provider', 'enrollments', 0, 'roles', 0, 'ssn')).to eq '900222222'
+
       %w[900111111 900666666 900777777].each_with_index do |ssn, idx|
-        expect(roles.dig('enrollments', 'roles', idx, 'roleCode')).to eq '10'
-        expect(roles.dig('enrollments', 'roles', idx, 'ssn')).to eq ssn
+        expect(roles.dig('provider', 'enrollments', 1, 'roles', idx, 'roleCode')).to eq '10'
+        expect(roles.dig('provider', 'enrollments', 1, 'roles', idx, 'ssn')).to eq ssn
+      end
+    end
+
+    context 'fetches med sanctions' do
+      it 'returns sanctions with specific npi' do
+        npi = '3598564557'
+        sanctions = client.fetch_profile(npi)
+        expect(sanctions.dig('provider', 'medSanctions').size).to eq(1)
+        expect(sanctions.dig('provider', 'waiverInfo')).to be_blank
+      end
+
+      it 'returns waiver with specific npi' do
+        npi = '3098168743'
+        sanctions = client.fetch_profile(npi)
+        expect(sanctions.dig('provider', 'medSanctions').size).to eq(1)
+        expect(sanctions.dig('provider', 'waiverInfo').size).to eq(1)
+      end
+
+      it 'does not return sanctions or waivers with other npi' do
+        npi = '3740677877'
+        sanctions = client.fetch_profile(npi)
+        expect(sanctions.dig('provider', 'medSanctions')).to be_blank
+        expect(sanctions.dig('provider', 'waiverInfo')).to be_blank
       end
     end
   end
@@ -58,24 +85,24 @@ describe CpiApiGatewayClient do
     end
   end
 
-  describe '.fetch_org_med_sanctions' do
+  describe '.org_info' do
     it 'returns sanctions with specific npi' do
       npi = '3598564557'
-      sanctions = client.fetch_med_sanctions_and_waivers_by_org_npi(npi)
+      sanctions = client.org_info(npi)
       expect(sanctions.dig('provider', 'medSanctions').size).to eq(1)
       expect(sanctions.dig('provider', 'waiverInfo').size).to eq(0)
     end
 
     it 'returns waiver with specific npi' do
       npi = '3098168743'
-      sanctions = client.fetch_med_sanctions_and_waivers_by_org_npi(npi)
+      sanctions = client.org_info(npi)
       expect(sanctions.dig('provider', 'medSanctions').size).to eq(1)
       expect(sanctions.dig('provider', 'waiverInfo').size).to eq(1)
     end
 
     it 'does not return sanctions or waivers with other npi' do
       npi = '3740677877'
-      sanctions = client.fetch_med_sanctions_and_waivers_by_org_npi(npi)
+      sanctions = client.org_info(npi)
       expect(sanctions.dig('provider', 'medSanctions').size).to eq(0)
       expect(sanctions.dig('provider', 'waiverInfo').size).to eq(0)
     end

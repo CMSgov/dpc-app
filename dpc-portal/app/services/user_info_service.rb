@@ -35,7 +35,7 @@ class UserInfoService
     end
   rescue Errno::ECONNREFUSED
     Rails.logger.error 'Could not connect to login.gov'
-    raise UserInfoServiceError, 'connection_error'
+    raise UserInfoServiceError, 'server_error'
   end
 
   def parsed_response(response)

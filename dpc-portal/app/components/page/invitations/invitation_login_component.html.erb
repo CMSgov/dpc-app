@@ -1,0 +1,14 @@
+<%= render(Core::Navigation::StepIndicatorComponent.new(Invitation::STEPS, 0)) if @invitation.authorized_official? %>
+<div>
+  <p>To register your organization you'll need to 1) have a Login.gov account and 2) verify your identity. Info to have ready:
+    <ul>
+      <% @musts.each do |must| %>
+      <li class="margin-top-2"><%= must %></li>
+      <% end %>
+    </ul>
+  </p>
+  <%= button_to login_organization_invitation_url(@invitation.provider_organization, @invitation), class: 'usa-button margin-bottom-3 margin-top-2', data: { turbo: false } do %>
+  Sign in with <span class="login-button__logo">Login.gov</span>
+  <% end %>
+  <div><%= link_to 'How to verify your identity', 'https://login.gov/help/verify-your-identity/how-to-verify-your-identity/' %> <%= link_to 'Login.gov FAQ', 'https://www.login.gov/help/', class: 'margin-left-2' %></div>
+</div>

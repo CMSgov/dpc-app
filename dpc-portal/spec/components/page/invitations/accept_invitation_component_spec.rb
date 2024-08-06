@@ -11,6 +11,8 @@ RSpec.describe Page::Invitations::AcceptInvitationComponent, type: :component do
     end
 
     let(:org) { ComponentSupport::MockOrg.new }
+    let(:given_name) { 'Paola' }
+    let(:family_name) { 'Pineiro' }
 
     before do
       render_inline(component)
@@ -20,7 +22,7 @@ RSpec.describe Page::Invitations::AcceptInvitationComponent, type: :component do
       let(:cd_invite) do
         Invitation.new(id: 4, invited_by: ao, verification_code: 'ABC123', invitation_type: :credential_delegate)
       end
-      let(:component) { described_class.new(org, cd_invite) }
+      let(:component) { described_class.new(org, cd_invite, given_name, family_name) }
 
       context 'New form' do
         it 'should match form tag' do
@@ -69,7 +71,7 @@ RSpec.describe Page::Invitations::AcceptInvitationComponent, type: :component do
 
     context 'authorized official' do
       let(:ao_invite) { Invitation.new(id: 5, invitation_type: :authorized_official) }
-      let(:component) { described_class.new(org, ao_invite) }
+      let(:component) { described_class.new(org, ao_invite, given_name, family_name) }
       it 'should match form method and action' do
         form_url = "/portal/organizations/#{org.path_id}/invitations/#{ao_invite.id}/confirm"
         form_method_action = %(method="post" action="#{form_url}")
