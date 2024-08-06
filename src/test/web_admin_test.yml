@@ -7,6 +7,7 @@ execution:
 scenarios:
   web_admin_log_in_page:
     default-address: ${WEB_ADMIN_HOST}
+    retrieve-resources: false
     requests:
     - url: /admin/internal/sign_in
       assert:
@@ -17,6 +18,7 @@ scenarios:
         regexp: false
   web_admin_org_page:
     default-address: ${WEB_ADMIN_HOST}
+    retrieve-resources: false
     requests:
     - url: /admin/organizations
       assert:
