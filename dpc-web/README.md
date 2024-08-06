@@ -137,7 +137,7 @@ The DPC website can also be run via docker. Follow the below steps to build and 
 To build the container, simply run the following command:
 
 ```Bash
-docker-compose build
+docker compose build
 ```
 
 ## Start the Docker Container
@@ -145,7 +145,7 @@ docker-compose build
 The following command will start both the database server and rails server:
 
 ```Bash
-docker-compose up
+docker compose up
 ```
 
 ## Stop / Destroy the Docker Container
@@ -153,7 +153,7 @@ docker-compose up
 When you're done, shut down the server with the following command (this also destroys the database):
 
 ```Bash
-docker-compose down
+docker compose down
 ```
 
 **Note:** The web app defaults to `http://localhost:3500/`.
