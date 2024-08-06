@@ -30,9 +30,6 @@ RUN gem install bundler --no-document && \
     bundle install && \
     npm install
 
-# Install Selenium dependencies
-RUN selenium install
-
 # Run bundler audit
 RUN bundle exec bundle audit update && bundle exec bundle audit check --ignore CVE-2015-9284
 

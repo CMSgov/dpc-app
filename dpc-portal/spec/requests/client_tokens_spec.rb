@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
-require 'selenium/server'
-require 'selenium-webdriver'
 require 'support/credential_resource_shared_examples'
 
 RSpec.describe 'ClientTokens', type: :request do
@@ -252,20 +250,27 @@ RSpec.describe 'ClientTokens', type: :request do
   end
 
   describe 'Selenium tests' do
-    before do
-      WebMock.allow_net_connect!
-      @server = Selenium::Server.get(:latest, background: true)
-      WebMock.disable_net_connect!
-      @server.start
-    end
-    after { server.stop }
+    before { WebMock.allow_net_connect! }
+    after { WebMock.disable_net_connect! }
 
-    it 'GET /new' do
-      options = Selenium::WebDriver::Options.chrome
-      driver = Selenium::WebDriver.for(:remote, url: @server.webdriver_url, options:)
+    context 'signed-in cd' do
+      let!(:user) { create(:user) }
+      let!(:org) { create(:provider_organization, terms_of_service_accepted_by:) }
 
-      driver.page.visit "/organizations/#{org.id}/client_tokens/new"
-      expect(driver.page).to be_axe_clean
+      before do
+        create(:cd_org_link, provider_organization: org, user:)
+        sign_in user
+      end
+
+      it 'GET /new' do
+        url = 'https://selenium.cloud.cms.gov'
+        options = Selenium::WebDriver::Options.chrome
+
+        driver = Selenium::WebDriver.for(:remote, url:, options:)
+
+        driver.get "/organizations/#{org.id}/client_tokens/new"
+        expect(driver.page).to be_axe_clean
+      end
     end
   end
 end
