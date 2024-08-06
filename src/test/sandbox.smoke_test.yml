@@ -11,8 +11,7 @@ settings:
 
 modules:
   jmeter:
-    gui: false
-    path: jmeter_stuff
+    path: src/vendor
   console:
     disable: true
 
