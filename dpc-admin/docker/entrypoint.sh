@@ -2,7 +2,7 @@
 
 set -e
 
-# Clean the existing pid if the server was previously started (using docker-compose for example)
+# Clean the existing pid if the server was previously started (using docker compose for example)
 if [ -f tmp/pids/server.pid ]; then
   rm tmp/pids/server.pid
 fi
