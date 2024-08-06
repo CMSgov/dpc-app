@@ -27,14 +27,20 @@ smoke:
 	@mvn clean package -DskipTests -Djib.skip=True -pl dpc-smoketest -am -ntp
 
 .PHONY: smoke/local
-smoke/local: venv 
+smoke/local: venv smoke
 	@echo "Running Smoke Tests against Local env"
+	@read -p "`echo '\n=====\nThe Smoke Tests require an authenticated environment!\nVerify your local API environment has \"authenticationDisabled = false\" or these tests will fail.\n=====\n\nPress ENTER to run the tests...'`"
 	. venv/bin/activate; pip install -Ur requirements.txt; bzt src/test/local.smoke_test.yml
 
 .PHONY: smoke/remote
-smoke/remote: venv
+smoke/remote: venv smoke
 	@echo "Running Smoke Tests against ${HOST_URL}"
 	. venv/bin/activate; bzt src/test/remote.smoke_test.yml
+
+.PHONY: smoke/sandbox
+smoke/remote: venv smoke
+	@echo "Running Smoke Tests against ${HOST_URL}"
+	. venv/bin/activate; bzt src/test/sandbox.smoke_test.yml
 
 .PHONY: smoke/prod
 smoke/prod: venv smoke

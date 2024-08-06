@@ -1,28 +1,28 @@
 execution:
 - executor: jmeter
-  scenario: portal_log_in_page
+  scenario: web_log_in_page
 - executor: jmeter
-  scenario: portal_org_page
+  scenario: web_root_page
 
 scenarios:
-  portal_log_in_page:
-    default-address: ${PORTAL_HOST}
+  web_log_in_page:
+    default-address: ${WEB_HOST}
     requests:
-    - url: /portal
+    - url: /users/sign_in
       assert:
       - contains:
         - Data at the Point of Care
-        - Sign in
+        - Log in
         subject: body
         regexp: false
-  portal_org_page:
-    default-address: ${PORTAL_HOST}
+  web_root_page:
+    default-address: ${WEB_HOST}
     requests:
-    - url: /portal/organizations
+    - url: /
       assert:
       - contains:
         - Data at the Point of Care
-        - Sign in
+        - Log in
         subject: body
         regexp: false
 reporting:

@@ -1,7 +1,6 @@
 settings:
   env:
     HOST: ${HOST_URL}
-    PORTAL_HOST: ${PORTAL_HOST}
     WEB_HOST: ${WEB_HOST}
     WEB_ADMIN_HOST: ${WEB_ADMIN_HOST}
     ADMIN_URL: ${ELB_URL}
@@ -19,6 +18,5 @@ modules:
 
 included-configs:
   - smoke_test.yml
-  - src/test/portal_test.yml
   - src/test/web_admin_test.yml
   - src/test/web_test.yml
