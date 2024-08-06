@@ -25,7 +25,6 @@ class VerifyAoJob < ApplicationJob
   end
 
   def check_link(service, link)
-    service.check_org_med_sanctions(link.provider_organization.npi)
     service.check_ao_eligibility(link.provider_organization.npi, :pac_id, link.user.pac_id)
   end
 

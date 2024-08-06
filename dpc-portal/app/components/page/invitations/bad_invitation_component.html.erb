@@ -1,20 +1,24 @@
 <div>
-  <h1><%= t(@heading) %></h1>
-  <div class="usa-alert usa-alert--<%= @level %> margin-bottom-4">
-    <div class="usa-alert__body">
-      <h4 class="usa-alert__heading"><%= t(@status) %></h4>
-      <p class="usa-alert__text">
-        <%= t(@alert) %>
-      </p>
-    </div>
-  </div>
+  <h1><%= t(@status) %></h1>
   <div>
     <p>
       <%=raw t(key=@text, org_name: @org_name) %>
     </p>
   </div>
-  <%= render Core::Button::ButtonComponent.new(label: "Request new invite",
-        disabled: @disabled,
-	destination: renew_organization_invitation_path(@invitation.provider_organization, @invitation),
-	method: :post) if @show_renew %>
+  <% 'have to put the case statement here, as do not have route helper in ViewComponent'
+    case(@reason)
+      when :ao_expired %>
+        <%= render Core::Button::ButtonComponent.new(label: "Request new invite",
+            disabled: @invitation&.renewed?,
+            destination: renew_organization_invitation_path(@invitation.provider_organization, @invitation),
+            method: :post) %>
+      <% when :accepted %>
+        <%= button_to new_user_session_path, class: 'usa-button', method: :get, data: { turbo: false } do %>
+          Sign in with <span class="login-button__logo">Login.gov</span>
+        <% end %>
+      <% when :invalid %>
+        <%= render Core::Button::ButtonComponent.new(label: "Go to DPC home",
+            destination: 'https://dpc.cms.gov/',
+            method: :get) %>
+    <% end %>
 </div>

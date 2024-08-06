@@ -3,10 +3,11 @@
 module Page
   module Invitations
     # Displays unfixable error message in accept invitation process
-    class BadInvitationComponent < ViewComponent::Base
-      def initialize(invitation, reason)
+    class AoFlowFailComponent < ViewComponent::Base
+      def initialize(invitation, reason, step)
         super
         @invitation = invitation
+        @step = step.to_i
         @org_name = invitation&.provider_organization&.name
         @reason = if AoVerificationService::SERVER_ERRORS.include?(reason)
                     :server_error

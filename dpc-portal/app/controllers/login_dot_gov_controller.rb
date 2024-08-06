@@ -17,7 +17,10 @@ class LoginDotGovController < Devise::OmniauthCallbacksController
   end
 
   def failure
-    if params[:code]
+    invitation_flow_match = session[:user_return_to]&.match(%r{/organizations/([0-9]+)/invitations/([0-9]+)})
+    if invitation_flow_match
+      handle_invitation_flow_failure(invitation_flow_match[2])
+    elsif params[:code]
       @message = 'Something went wrong.'
       logger.error 'Login.gov Configuration error'
     else
@@ -27,6 +30,17 @@ class LoginDotGovController < Devise::OmniauthCallbacksController
   end
 
   private
+
+  def handle_invitation_flow_failure(invitation_id)
+    invitation = Invitation.find(invitation_id)
+    if invitation.credential_delegate?
+      render(Page::Invitations::BadInvitationComponent.new(invitation, 'fail_to_proof'),
+             status: :forbidden)
+    else
+      render(Page::Invitations::AoFlowFailComponent.new(invitation, 'fail_to_proof', 1),
+             status: :forbidden)
+    end
+  end
 
   def maybe_update_user(user, data)
     user&.update(given_name: data.given_name, family_name: data.family_name)

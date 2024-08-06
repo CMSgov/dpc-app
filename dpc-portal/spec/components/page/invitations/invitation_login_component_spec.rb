@@ -2,17 +2,13 @@
 
 require 'rails_helper'
 
-RSpec.describe Page::Session::InvitationLoginComponent, type: :component do
+RSpec.describe Page::Invitations::InvitationLoginComponent, type: :component do
   include ComponentSupport
   describe 'login component' do
     let(:provider_organization) { build(:provider_organization, dpc_api_organization_id: 'foo') }
     let(:invitation) { create(:invitation, :cd, provider_organization:) }
     let(:component) { described_class.new(invitation) }
     before { render_inline(component) }
-    it 'should be a usa section' do
-      expect(page).to have_selector('section.usa-section')
-    end
-
     it 'should have a login button' do
       expect(page).to have_selector('button.usa-button')
       expect(page.find('button.usa-button')).to have_content('Sign in with')
