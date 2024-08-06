@@ -188,7 +188,7 @@ portal-console: ## Run a rails console shell
 
 .PHONY: docker-base
 docker-base:
-	@docker-compose -f ./docker-compose.base.yml build base
+	@docker compose -f ./docker-compose.base.yml build base
 
 .PHONY: ci-app
 ci-app: docker-base secure-envs
