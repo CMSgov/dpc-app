@@ -82,30 +82,30 @@ start-dpc: start-app start-portals
 
 start-db: ## Start the database
 start-db:
-	@docker-compose up start_core_dependencies
+	@docker compose up start_core_dependencies
 
 start-api-dependencies: # Start internal Java service dependencies, e.g. attribution and aggregation services.
 start-api-dependencies:
-	@USE_BFD_MOCK=false docker-compose up start_api_dependencies
+	@USE_BFD_MOCK=false docker compose up start_api_dependencies
 
 start-app: ## Start the API
 start-app: secure-envs start-db start-api-dependencies
-	@docker-compose up start_api
+	@docker compose up start_api
 
 start-api: ## Start the API
 start-api: start-app
 
 start-web: ## Start the sandbox portal
 start-web:
-	@docker-compose -f docker-compose.yml -f docker-compose.portals.yml up start_web
+	@docker compose -f docker-compose.yml -f docker-compose.portals.yml up start_web
 
 start-admin: ## Start the sandbox admin portal
 start-admin:
-	@docker-compose -f docker-compose.yml -f docker-compose.portals.yml up start_admin
+	@docker compose -f docker-compose.yml -f docker-compose.portals.yml up start_admin
 
 start-portal: ## Start the DPC portal
 start-portal: secure-envs
-	@docker-compose -f docker-compose.yml -f docker-compose.portals.yml up start_portal
+	@docker compose -f docker-compose.yml -f docker-compose.portals.yml up start_portal
 
 start-portals: ## Start all frontend services
 start-portals: start-db start-web start-admin start-portal
@@ -117,30 +117,30 @@ start-portals: start-db start-web start-admin start-portal
 .PHONY: start-dpc-debug
 start-dpc-debug: secure-envs
 	@mvn clean install -Pdebug -DskipTests -ntp
-	@docker-compose -f docker-compose.yml -f docker-compose.portals.yml up start_core_dependencies
-	@DEBUG_MODE=true USE_BFD_MOCK=false docker-compose -f docker-compose.yml -f docker-compose.portals.yml up start_api_dependencies
-	@DEBUG_MODE=true docker-compose -f docker-compose.yml -f docker-compose.portals.yml up start_api
-	@docker-compose -f docker-compose.yml -f docker-compose.portals.yml up start_web
-	@docker-compose -f docker-compose.yml -f docker-compose.portals.yml up start_admin
-	@docker-compose -f docker-compose.yml -f docker-compose.portals.yml up start_portal
+	@docker compose -f docker-compose.yml -f docker-compose.portals.yml up start_core_dependencies
+	@DEBUG_MODE=true USE_BFD_MOCK=false docker compose -f docker-compose.yml -f docker-compose.portals.yml up start_api_dependencies
+	@DEBUG_MODE=true docker compose -f docker-compose.yml -f docker-compose.portals.yml up start_api
+	@docker compose -f docker-compose.yml -f docker-compose.portals.yml up start_web
+	@docker compose -f docker-compose.yml -f docker-compose.portals.yml up start_admin
+	@docker compose -f docker-compose.yml -f docker-compose.portals.yml up start_portal
 	@docker ps
 
 .PHONY: start-app-debug
 start-app-debug: secure-envs
-	@docker-compose down
+	@docker compose down
 	@mvn clean compile -Pdebug -DskipTests -ntp
 	@mvn package -Pci -ntp -DskipTests
-	@docker-compose -f docker-compose.yml -f docker-compose.portals.yml up start_core_dependencies
-	@DEBUG_MODE=true USE_BFD_MOCK=false docker-compose -f docker-compose.yml -f docker-compose.portals.yml up start_api_dependencies
-	@DEBUG_MODE=true docker-compose -f docker-compose.yml -f docker-compose.portals.yml up start_api
+	@docker compose -f docker-compose.yml -f docker-compose.portals.yml up start_core_dependencies
+	@DEBUG_MODE=true USE_BFD_MOCK=false docker compose -f docker-compose.yml -f docker-compose.portals.yml up start_api_dependencies
+	@DEBUG_MODE=true docker compose -f docker-compose.yml -f docker-compose.portals.yml up start_api
 
 .PHONY: start-it-debug
 start-it-debug: secure-envs
-	@docker-compose down
+	@docker compose down
 	@mvn clean compile -Pdebug -B -V -ntp -DskipTests
 	@mvn package -Pci -ntp -DskipTests
-	@docker-compose up start_core_dependencies
-	@DEBUG_MODE=true docker-compose up start_api_dependencies
+	@docker compose up start_core_dependencies
+	@DEBUG_MODE=true docker compose up start_api_dependencies
 
 
 # Down commands
@@ -148,14 +148,14 @@ start-it-debug: secure-envs
 
 down-dpc: ## Shut down all services
 down-dpc:
-	@docker-compose -f docker-compose.yml -f docker-compose.portals.yml down
+	@docker compose -f docker-compose.yml -f docker-compose.portals.yml down
 
 down-portals: ## Shut down all services
 down-portals: down-dpc
 
 down-start-v1-portals: ## Shut down test services
 down-start-v1-portals:
-	@docker-compose -p start-v1-portals -f docker-compose.yml -f docker-compose.portals.yml down
+	@docker compose -p start-v1-portals -f docker-compose.yml -f docker-compose.portals.yml down
 
 # Utility commands
 # =================
@@ -179,13 +179,13 @@ maven-config:
 	@while read line;do echo "-D$${line} " >> ./.mvn/maven.config;done < ./ops/config/decrypted/local.env
 
 psql: ## Run a psql shell
-	@docker-compose -f docker-compose.yml exec -it db psql -U postgres
+	@docker compose -f docker-compose.yml exec -it db psql -U postgres
 
 portal-sh: ## Run a portal shell
-	@docker-compose -f docker-compose.yml -f docker-compose.portals.yml exec -it dpc_portal bin/sh
+	@docker compose -f docker-compose.yml -f docker-compose.portals.yml exec -it dpc_portal bin/sh
 
 portal-console: ## Run a rails console shell
-	@docker-compose -f docker-compose.yml -f docker-compose.portals.yml exec -it dpc_portal bin/console
+	@docker compose -f docker-compose.yml -f docker-compose.portals.yml exec -it dpc_portal bin/console
 
 
 # Build & Test commands
