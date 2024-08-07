@@ -37,6 +37,9 @@ class LoginDotGovController < Devise::OmniauthCallbacksController
   private
 
   def handle_invitation_flow_failure(invitation_id)
+    Rails.logger.info('Failed invitation flow',
+                      actionContext: LoggingConstants::ActionContext::Authentication,
+                      actionType: LoggingConstants::ActionType::FailedInvitationFlow)
     invitation = Invitation.find(invitation_id)
     if invitation.credential_delegate?
       render(Page::Invitations::BadInvitationComponent.new(invitation, 'fail_to_proof'),

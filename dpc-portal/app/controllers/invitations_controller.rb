@@ -33,6 +33,9 @@ class InvitationsController < ApplicationController
 
     session.delete("invitation_status_#{@invitation.id}")
     sign_in(:user, @user)
+    Rails.logger.info('User logged in',
+                      actionContext: LoggingConstants::ActionContext::Registration,
+                      actionType: LoggingConstants::ActionType::UserLoggedIn)
     render(Page::Invitations::SuccessComponent.new(@organization, @invitation))
   end
 
@@ -178,6 +181,15 @@ class InvitationsController < ApplicationController
   def validate_invitation
     return unless @invitation.unacceptable_reason
 
+    if @invitation.credential_delegate?
+      Rails.logger.info('Credential Delegate Invitation expired',
+                        actionContext: LoggingConstants::ActionContext::Registration,
+                        actionType: LoggingConstants::ActionType::CdInvitationExpired)
+    elsif @invitation.authorized_official?
+      Rails.logger.info('Authorized Official Invitation expired',
+                        actionContext: LoggingConstants::ActionContext::Registration,
+                        actionType: LoggingConstants::ActionType::AoInvitationExpired)
+    end
     render(Page::Invitations::BadInvitationComponent.new(@invitation, @invitation.unacceptable_reason),
            status: :forbidden)
   end

@@ -33,19 +33,7 @@ class Invitation < ApplicationRecord
   end
 
   def expired?
-    return false unless created_at < 2.days.ago
-
-    if credential_delegate?
-      Rails.logger.info('Credential Delegate Invitation expired',
-                        actionContext: LoggingConstants::ActionContext::Registration,
-                        actionType: LoggingConstants::ActionType::CdInvitationExpired)
-    end
-    if authorized_official?
-      Rails.logger.info('Authorized Official Invitation expired',
-                        actionContext: LoggingConstants::ActionContext::Registration,
-                        actionType: LoggingConstants::ActionType::AoInvitationExpired)
-    end
-    true
+    created_at < 2.days.ago
   end
 
   def accept!
