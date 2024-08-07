@@ -11,8 +11,8 @@ RSpec.describe VerifyAoJob, type: :job do
         allow(ENV).to receive(:fetch).and_call_original
         expect(ENV)
           .to receive(:fetch)
-          .with('VERIFICATION_MAX_RECORDS', '10')
-          .and_return('4').at_least(4)
+                .with('VERIFICATION_MAX_RECORDS', '10')
+                .and_return('4').at_least(4)
         user = create(:user, pac_id: '900111111', verification_status: :approved)
         10.times do |n|
           create(:ao_org_link, user:, last_checked_at: (n + 6).days.ago)
@@ -43,8 +43,8 @@ RSpec.describe VerifyAoJob, type: :job do
       it 'should only update VERIFICATION_MAX_RECORDS ao_org_links' do
         expect(ENV)
           .to receive(:fetch)
-          .with('VERIFICATION_MAX_RECORDS', '10')
-          .and_return('4')
+                .with('VERIFICATION_MAX_RECORDS', '10')
+                .and_return('4')
         expect(AoOrgLink.where(last_checked_at: ..6.days.ago).count).to eq 10
         VerifyAoJob.perform_now
         expect(AoOrgLink.where(last_checked_at: ..6.days.ago).count).to eq 6
@@ -53,8 +53,8 @@ RSpec.describe VerifyAoJob, type: :job do
         ten_days_in_hours = 10 * 24
         expect(ENV)
           .to receive(:fetch)
-          .with('VERIFICATION_LOOKBACK_HOURS', '144')
-          .and_return(ten_days_in_hours.to_s)
+                .with('VERIFICATION_LOOKBACK_HOURS', '144')
+                .and_return(ten_days_in_hours.to_s)
         expect(AoOrgLink.where(last_checked_at: ..10.days.ago).count).to eq 6
         expect(AoOrgLink.where(last_checked_at: ..6.days.ago).count).to eq 10
         VerifyAoJob.perform_now
@@ -95,16 +95,48 @@ RSpec.describe VerifyAoJob, type: :job do
       end
     end
     context :failures do
-      it "should update user and all user's orgs and links on failed ao med sanction" do
-        user = create(:user, pac_id: '900666666', verification_status: :approved)
-        links = []
-        3.times do |n|
-          provider_organization = create(:provider_organization, verification_status: :approved)
-          links << create(:ao_org_link, last_checked_at: (n + 4).days.ago, user:, provider_organization:)
+      context :ao_med_sanctions do
+        let(:user) { create(:user, pac_id: '900666666', verification_status: :approved) }
+        let(:links) { [] }
+        before do
+          3.times do |n|
+            provider_organization = create(:provider_organization, verification_status: :approved)
+            links << create(:ao_org_link, last_checked_at: (n + 4).days.ago, user:, provider_organization:)
+          end
         end
-        expect(AoOrgLink.where(last_checked_at: ..6.days.ago).count).to eq 1
-        VerifyAoJob.perform_now
-        links.each do |link|
+        it "should update user and all user's orgs and links" do
+          expect(AoOrgLink.where(last_checked_at: ..6.days.ago).count).to eq 1
+          VerifyAoJob.perform_now
+          links.each do |link|
+            link.reload
+            expect(link.verification_status).to be false
+            expect(link.verification_reason).to eq 'ao_med_sanctions'
+            expect(link.user.verification_status).to eq 'rejected'
+            expect(link.user.verification_reason).to eq 'ao_med_sanctions'
+            expect(link.provider_organization.verification_status).to eq 'rejected'
+            expect(link.provider_organization.verification_reason).to eq 'ao_med_sanctions'
+          end
+        end
+        it "should log user check failed" do
+          allow(Rails.logger).to receive(:info)
+          links.each do |link|
+            expect(Rails.logger).to receive(:info).with(['AO Check Fail',
+                                                         { actionContext: LoggingConstants::ActionContext::AoVerificationCheck,
+                                                           verificationReason: 'ao_med_sanctions',
+                                                           authorizedOfficial: user.id,
+                                                           providerOrganization: link.provider_organization.id }])
+          end
+          VerifyAoJob.perform_now
+        end
+        it 'should not update former org/link' do
+          user = create(:user, pac_id: '900666666', verification_status: :approved)
+          provider_organization = create(:provider_organization, verification_status: :approved)
+          link = create(:ao_org_link, last_checked_at: 8.days.ago, user:, provider_organization:)
+          former_org = create(:provider_organization, verification_status: :approved)
+          former_link = create(:ao_org_link, verification_status: false,
+                               verification_reason: 'user_not_authorized_official',
+                               last_checked_at: 8.days.ago, user:, provider_organization: former_org)
+          VerifyAoJob.perform_now
           link.reload
           expect(link.verification_status).to be false
           expect(link.verification_reason).to eq 'ao_med_sanctions'
@@ -112,71 +144,93 @@ RSpec.describe VerifyAoJob, type: :job do
           expect(link.user.verification_reason).to eq 'ao_med_sanctions'
           expect(link.provider_organization.verification_status).to eq 'rejected'
           expect(link.provider_organization.verification_reason).to eq 'ao_med_sanctions'
+          expect(link.verification_status).to be false
+          former_link.reload
+          expect(former_link.verification_reason).to eq 'user_not_authorized_official'
+          former_org.reload
+          expect(former_org.verification_status).to eq 'approved'
         end
       end
-      it 'should not update former org/link on user med sanction' do
-        user = create(:user, pac_id: '900666666', verification_status: :approved)
-        provider_organization = create(:provider_organization, verification_status: :approved)
-        link = create(:ao_org_link, last_checked_at: 8.days.ago, user:, provider_organization:)
-        former_org = create(:provider_organization, verification_status: :approved)
-        former_link = create(:ao_org_link, verification_status: false,
-                                           verification_reason: 'user_not_authorized_official',
-                                           last_checked_at: 8.days.ago, user:, provider_organization: former_org)
-        VerifyAoJob.perform_now
-        link.reload
-        expect(link.verification_status).to be false
-        expect(link.verification_reason).to eq 'ao_med_sanctions'
-        expect(link.user.verification_status).to eq 'rejected'
-        expect(link.user.verification_reason).to eq 'ao_med_sanctions'
-        expect(link.provider_organization.verification_status).to eq 'rejected'
-        expect(link.provider_organization.verification_reason).to eq 'ao_med_sanctions'
-        expect(link.verification_status).to be false
-        former_link.reload
-        expect(former_link.verification_reason).to eq 'user_not_authorized_official'
-        former_org.reload
-        expect(former_org.verification_status).to eq 'approved'
-      end
-
-      it 'should update org and link on fails no approved enrollments' do
-        user = create(:user, pac_id: '900111111', verification_status: :approved)
-        provider_organization = create(:provider_organization, npi: '3782297014', verification_status: :approved)
-        link = create(:ao_org_link, last_checked_at: 8.days.ago, user:, provider_organization:)
-        VerifyAoJob.perform_now
-        link.reload
-        expect(link.verification_status).to be false
-        expect(link.verification_reason).to eq 'no_approved_enrollment'
-        expect(link.user.verification_status).to eq 'approved'
-        expect(link.provider_organization.verification_status).to eq 'rejected'
-        expect(link.provider_organization.verification_reason).to eq 'no_approved_enrollment'
-      end
-      it 'should update only link and org date on fails no longer ao' do
-        user = create(:user, pac_id: 'bad-id', verification_status: :approved)
-        provider_organization = create(:provider_organization, verification_status: :approved)
-        link = create(:ao_org_link, last_checked_at: 8.days.ago, user:, provider_organization:)
-        VerifyAoJob.perform_now
-        link.reload
-        expect(link.verification_status).to be false
-        expect(link.verification_reason).to eq 'user_not_authorized_official'
-        expect(link.user.verification_status).to eq 'approved'
-        expect(link.provider_organization.verification_status).to eq 'approved'
-        expect(link.provider_organization.last_checked_at).to be > 1.day.ago
-      end
-      it 'should update org and link if org has med sanctions' do
-        provider_organization = create(:provider_organization, npi: '3598564557')
-        links = []
-        3.times do
-          links << create(:ao_org_link, provider_organization:)
-        end
-        links.first.update!(last_checked_at: 8.days.ago)
-        VerifyAoJob.perform_now
-        links.each do |link|
+      context :no_approved_enrollment do
+        let(:user) { create(:user, pac_id: '900111111', verification_status: :approved) }
+        let(:provider_organization) { create(:provider_organization, npi: '3782297014', verification_status: :approved) }
+        let!(:link) { create(:ao_org_link, last_checked_at: 8.days.ago, user:, provider_organization:) }
+        
+        it 'should update org and link on fails no approved enrollments' do
+          VerifyAoJob.perform_now
           link.reload
           expect(link.verification_status).to be false
-          expect(link.verification_reason).to eq 'org_med_sanctions'
-          expect(link.user.verification_status).to_not eq 'rejected'
+          expect(link.verification_reason).to eq 'no_approved_enrollment'
+          expect(link.user.verification_status).to eq 'approved'
           expect(link.provider_organization.verification_status).to eq 'rejected'
-          expect(link.provider_organization.verification_reason).to eq 'org_med_sanctions'
-          expect(link.last_checked_at).to be > 1.day.ago
+          expect(link.provider_organization.verification_reason).to eq 'no_approved_enrollment'
+        end
+
+        it "should log check failed" do
+          allow(Rails.logger).to receive(:info)
+          expect(Rails.logger).to receive(:info).with(['AO Check Fail',
+                                                       { actionContext: LoggingConstants::ActionContext::AoVerificationCheck,
+                                                         verificationReason: 'no_approved_enrollment',
+                                                         authorizedOfficial: user.id,
+                                                         providerOrganization: provider_organization.id }])
+          VerifyAoJob.perform_now
+        end
+      end
+      context :user_not_authorized_official do
+          let(:user) { create(:user, pac_id: 'bad-id', verification_status: :approved) }
+          let(:provider_organization) { create(:provider_organization, verification_status: :approved) }
+          let!(:link) { create(:ao_org_link, last_checked_at: 8.days.ago, user:, provider_organization:) }
+        it 'should update only link and org date' do
+          VerifyAoJob.perform_now
+          link.reload
+          expect(link.verification_status).to be false
+          expect(link.verification_reason).to eq 'user_not_authorized_official'
+          expect(link.user.verification_status).to eq 'approved'
+          expect(link.provider_organization.verification_status).to eq 'approved'
+          expect(link.provider_organization.last_checked_at).to be > 1.day.ago
+        end
+        it "should log check failed" do
+          allow(Rails.logger).to receive(:info)
+          expect(Rails.logger).to receive(:info).with(['AO Check Fail',
+                                                       { actionContext: LoggingConstants::ActionContext::AoVerificationCheck,
+                                                         verificationReason: 'user_not_authorized_official',
+                                                         authorizedOfficial: user.id,
+                                                         providerOrganization: provider_organization.id }])
+          VerifyAoJob.perform_now
+        end
+      end
+      context :org_med_sanctions do
+        let(:provider_organization) { create(:provider_organization, npi: '3598564557') }
+        let(:links) { [] }
+        before do
+          3.times do
+            links << create(:ao_org_link, provider_organization:)
+          end
+          links.first.update!(last_checked_at: 8.days.ago)
+        end
+        it 'should update org and link' do
+          links.first.update!(last_checked_at: 8.days.ago)
+          VerifyAoJob.perform_now
+          links.each do |link|
+            link.reload
+            expect(link.verification_status).to be false
+            expect(link.verification_reason).to eq 'org_med_sanctions'
+            expect(link.user.verification_status).to_not eq 'rejected'
+            expect(link.provider_organization.verification_status).to eq 'rejected'
+            expect(link.provider_organization.verification_reason).to eq 'org_med_sanctions'
+            expect(link.last_checked_at).to be > 1.day.ago
+          end
+        end
+        it "should log checks failed" do
+          allow(Rails.logger).to receive(:info)
+          links.each do |link|
+            expect(Rails.logger).to receive(:info).with(['AO Check Fail',
+                                                         { actionContext: LoggingConstants::ActionContext::AoVerificationCheck,
+                                                           verificationReason: 'org_med_sanctions',
+                                                           authorizedOfficial: link.user.id,
+                                                           providerOrganization: link.provider_organization.id }])
+          end
+          VerifyAoJob.perform_now
         end
       end
       it 'should not update if any object fails to update' do

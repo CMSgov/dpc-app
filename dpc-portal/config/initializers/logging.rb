@@ -15,6 +15,7 @@ module LoggingConstants
   module ActionContext
     Registration = 'Registration'
     Authentication = 'Authentication'
+    AoVerificationCheck = 'AoVerificationCheck'
   end
 
   module ActionType

@@ -26,6 +26,11 @@ module Verification
       org.update!(entity_error_attributes(message))
       org.ao_org_links.where(verification_status: true).each do |link|
         link.update!(link_error_attributes(message))
+        logger.info(['AO Check Fail',
+                     { actionContext: LoggingConstants::ActionContext::AoVerificationCheck,
+                       verificationReason: message,
+                       authorizedOfficial: link.user.id,
+                       providerOrganization: org.id }])
       end
     end
 

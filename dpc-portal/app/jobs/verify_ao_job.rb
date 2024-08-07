@@ -49,6 +49,11 @@ class VerifyAoJob < ApplicationJob
       when 'no_approved_enrollment'
         link.provider_organization.update!(entity_error_attributes(message))
       end
+      logger.info(['AO Check Fail',
+                   { actionContext: LoggingConstants::ActionContext::AoVerificationCheck,
+                     verificationReason: message,
+                     authorizedOfficial: link.user.id,
+                     providerOrganization: link.provider_organization.id }])
     end
   end
 
@@ -67,6 +72,11 @@ class VerifyAoJob < ApplicationJob
     AoOrgLink.where(user:, verification_status: true).each do |link|
       link.update!(link_error_attributes(message))
       link.provider_organization.update!(entity_error_attributes(message))
+      logger.info(['AO Check Fail',
+                   { actionContext: LoggingConstants::ActionContext::AoVerificationCheck,
+                     verificationReason: message,
+                     authorizedOfficial: link.user.id,
+                     providerOrganization: link.provider_organization.id }])
     end
   end
 end
