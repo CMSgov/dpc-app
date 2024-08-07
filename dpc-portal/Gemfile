@@ -61,7 +61,6 @@ gem 'api_client', path: 'vendor/api_client'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
-  gem 'axe-core-rspec'
   gem 'bundler-audit'
   gem 'byebug', platforms: %i[mri mingw x64_mingw]
   gem 'database_cleaner'
@@ -86,6 +85,7 @@ group :development do
 end
 
 group :test do
+  gem 'axe-core-rspec'
   gem 'capybara', '>= 2.15'
   gem 'climate_control'
   gem 'fakefs', require: 'fakefs/safe'

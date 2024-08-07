@@ -249,12 +249,7 @@ RSpec.describe 'ClientTokens', type: :request do
     end
   end
 
-  describe 'Selenium tests' do
-    let(:wait) { Selenium::WebDriver::Wait.new(timeout: 2) }
-
-    before { WebMock.allow_net_connect! }
-    after { WebMock.disable_net_connect! }
-
+  describe 'Selenium tests', type: feature, js: true, accessibility: true do
     context 'signed-in cd' do
       let!(:user) { create(:user) }
       let!(:org) { create(:provider_organization, terms_of_service_accepted_by:) }
@@ -265,13 +260,8 @@ RSpec.describe 'ClientTokens', type: :request do
       end
 
       it 'GET /new' do
-        url = 'https://selenium.cloud.cms.gov'
-        options = Selenium::WebDriver::Options.chrome
-
-        driver = Selenium::WebDriver.for(:remote, url:, options:)
-
-        driver.get "/organizations/#{org.id}/client_tokens/new"
-        expect(driver.page).to be_axe_clean
+        visit "/organizations/#{org.id}/client_tokens/new"
+        expect(page).to be_axe_clean
       end
     end
   end
