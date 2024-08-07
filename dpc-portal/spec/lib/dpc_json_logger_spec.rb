@@ -34,12 +34,12 @@ RSpec.shared_examples 'logger method' do |log_method, level_name|
 
     it 'accepts array' do
       logger.send(log_method) do
-        ['Calculated message', { foo: :bar}]
+        ['Calculated message', { foo: :bar }]
       end
       json_result = JSON.parse(strout.string)
       expect(json_result['level']).to eq(level_name)
       expect(json_result['message']).to eq('Calculated message')
-      expect(json_result['foo']).to eq('bar')      
+      expect(json_result['foo']).to eq('bar')
     end
   end
 end

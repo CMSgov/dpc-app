@@ -24,6 +24,10 @@ class VerifyAoJob < ApplicationJob
     end
   end
 
+  def action_context
+    LoggingConstants::ActionContext::BatchVerificationCheck
+  end
+
   def check_link(service, link)
     service.check_ao_eligibility(link.provider_organization.npi, :pac_id, link.user.pac_id)
   end
@@ -49,12 +53,16 @@ class VerifyAoJob < ApplicationJob
       when 'no_approved_enrollment'
         link.provider_organization.update!(entity_error_attributes(message))
       end
-      logger.info(['AO Check Fail',
-                   { actionContext: LoggingConstants::ActionContext::AoVerificationCheck,
-                     verificationReason: message,
-                     authorizedOfficial: link.user.id,
-                     providerOrganization: link.provider_organization.id }])
     end
+    log_error(link, message)
+  end
+
+  def log_error(link, message)
+    logger.info(['AO Check Fail',
+                 { actionContext: action_context,
+                   verificationReason: message,
+                   authorizedOfficial: link.user.id,
+                   providerOrganization: link.provider_organization.id }])
   end
 
   def update_ao_sanctions(link, message)
@@ -73,7 +81,7 @@ class VerifyAoJob < ApplicationJob
       link.update!(link_error_attributes(message))
       link.provider_organization.update!(entity_error_attributes(message))
       logger.info(['AO Check Fail',
-                   { actionContext: LoggingConstants::ActionContext::AoVerificationCheck,
+                   { actionContext: action_context,
                      verificationReason: message,
                      authorizedOfficial: link.user.id,
                      providerOrganization: link.provider_organization.id }])

@@ -72,6 +72,13 @@ class ProviderOrganization < ApplicationRecord
 
       logger.error(['CredentialAuditLog failure',
                     { action: :remove, credential_type: :client_token, dpc_api_credential_id: token['id'] }])
-    end
+    end.present? && log_disabled
+  end
+
+  def log_disabled
+    logger.info(['Org API disabled',
+                 { actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
+                   actionType: LoggingConstants::ActionType::ApiBlocked,
+                   providerOrganization: id }])
   end
 end

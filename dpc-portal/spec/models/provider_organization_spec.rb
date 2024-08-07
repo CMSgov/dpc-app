@@ -90,20 +90,43 @@ RSpec.describe ProviderOrganization, type: :model do
   end
 
   describe 'disable_rejected' do
+    let(:org) do
+      create(:provider_organization, dpc_api_organization_id: SecureRandom.uuid, verification_status: :approved)
+    end
     it 'should delete client tokens' do
-      po = create(:provider_organization, dpc_api_organization_id: SecureRandom.uuid, verification_status: :approved)
-      po.save
       tokens = [{ 'id' => 'abcdef' }, { 'id' => 'ftguiol' }]
       allow(mock_ctm).to receive(:client_tokens).and_return(tokens)
-      expect(mock_ctm).to receive(:delete_client_token).with(tokens[0])
-      expect(mock_ctm).to receive(:delete_client_token).with(tokens[1])
-      po.verification_status = :rejected
+      tokens.each { |token| expect(mock_ctm).to receive(:delete_client_token).with(token) }
       expect do
-        po.save
+        org.update(verification_status: :rejected)
       end.to change { CredentialAuditLog.count }.by 2
       tokens.each do |token|
         expect(CredentialAuditLog.where(dpc_api_credential_id: token['id'], action: 'remove')).to exist
       end
+    end
+    it 'should log API disabled' do
+      allow(Rails.logger).to receive(:info)
+      expect(Rails.logger).to receive(:info)
+        .with(['Org API disabled',
+               { actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
+                 actionType: LoggingConstants::ActionType::ApiBlocked,
+                 providerOrganization: org.id }])
+
+      tokens = [{ 'id' => 'abcdef' }, { 'id' => 'ftguiol' }]
+      allow(mock_ctm).to receive(:client_tokens).and_return(tokens)
+      tokens.each { |token| expect(mock_ctm).to receive(:delete_client_token).with(token) }
+      org.update(verification_status: :rejected)
+    end
+    it 'should not log API disabled if no tokens' do
+      allow(Rails.logger).to receive(:info)
+      expect(Rails.logger).to_not receive(:info)
+        .with(['Org API disabled',
+               { actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
+                 actionType: LoggingConstants::ActionType::ApiBlocked,
+                 providerOrganization: org.id }])
+
+      allow(mock_ctm).to receive(:client_tokens).and_return([])
+      org.update(verification_status: :rejected)
     end
   end
 end

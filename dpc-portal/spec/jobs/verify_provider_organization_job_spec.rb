@@ -85,39 +85,75 @@ RSpec.describe VerifyProviderOrganizationJob, type: :job do
       end
     end
     context :failures do
-      it 'should update org and link if org has med sanctions' do
-        provider_organization = create(:provider_organization, last_checked_at: 8.days.ago, npi: '3598564557',
-                                                               verification_status: :approved)
-        links = []
-        3.times do
-          links << create(:ao_org_link, provider_organization:)
+      context :org_med_sanctions do
+        let(:provider_organization) do
+          create(:provider_organization, last_checked_at: 8.days.ago, npi: '3598564557',
+                                         verification_status: :approved)
         end
-        VerifyProviderOrganizationJob.perform_now
-        links.each do |link|
-          link.reload
-          expect(link.verification_status).to be false
-          expect(link.verification_reason).to eq 'org_med_sanctions'
-          expect(link.user.verification_status).to_not eq 'rejected'
-          expect(link.provider_organization.verification_status).to eq 'rejected'
-          expect(link.provider_organization.verification_reason).to eq 'org_med_sanctions'
-          expect(link.last_checked_at).to be > 1.day.ago
+        let(:links) { [] }
+        before do
+          3.times do
+            links << create(:ao_org_link, provider_organization:)
+          end
+        end
+        it 'should update org and link' do
+          VerifyProviderOrganizationJob.perform_now
+          links.each do |link|
+            link.reload
+            expect(link.verification_status).to be false
+            expect(link.verification_reason).to eq 'org_med_sanctions'
+            expect(link.user.verification_status).to_not eq 'rejected'
+            expect(link.provider_organization.verification_status).to eq 'rejected'
+            expect(link.provider_organization.verification_reason).to eq 'org_med_sanctions'
+            expect(link.last_checked_at).to be > 1.day.ago
+          end
+        end
+        it 'should log checks failed' do
+          allow(Rails.logger).to receive(:info)
+          links.each do |link|
+            expect(Rails.logger).to receive(:info)
+              .with(['AO Check Fail',
+                     { actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
+                       verificationReason: 'org_med_sanctions',
+                       authorizedOfficial: link.user.id,
+                       providerOrganization: provider_organization.id }])
+          end
+          VerifyProviderOrganizationJob.perform_now
         end
       end
-      it 'should update org and links if org has no enrollments' do
-        provider_organization = create(:provider_organization, last_checked_at: 8.days.ago, npi: '3782297014',
-                                                               verification_status: :approved)
-        links = []
-        3.times do
-          links << create(:ao_org_link, provider_organization:)
+      context :no_approved_enrollment do
+        let(:provider_organization) do
+          create(:provider_organization, last_checked_at: 8.days.ago, npi: '3782297014',
+                                         verification_status: :approved)
         end
-        VerifyProviderOrganizationJob.perform_now
-        links.each do |link|
-          link.reload
-          expect(link.verification_status).to be false
-          expect(link.verification_reason).to eq 'no_approved_enrollment'
-          expect(link.user.verification_status).to_not eq 'rejected'
-          expect(link.provider_organization.verification_status).to eq 'rejected'
-          expect(link.provider_organization.verification_reason).to eq 'no_approved_enrollment'
+        let(:links) { [] }
+        before do
+          3.times do
+            links << create(:ao_org_link, provider_organization:)
+          end
+        end
+        it 'should update org and links if org has no enrollments' do
+          VerifyProviderOrganizationJob.perform_now
+          links.each do |link|
+            link.reload
+            expect(link.verification_status).to be false
+            expect(link.verification_reason).to eq 'no_approved_enrollment'
+            expect(link.user.verification_status).to_not eq 'rejected'
+            expect(link.provider_organization.verification_status).to eq 'rejected'
+            expect(link.provider_organization.verification_reason).to eq 'no_approved_enrollment'
+          end
+        end
+        it 'should log check failed' do
+          allow(Rails.logger).to receive(:info)
+          links.each do |link|
+            expect(Rails.logger).to receive(:info)
+              .with(['AO Check Fail',
+                     { actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
+                       verificationReason: 'no_approved_enrollment',
+                       authorizedOfficial: link.user.id,
+                       providerOrganization: provider_organization.id }])
+          end
+          VerifyProviderOrganizationJob.perform_now
         end
       end
       it 'should not update former link if no enrollments' do

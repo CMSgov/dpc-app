@@ -15,7 +15,7 @@ module LoggingConstants
   module ActionContext
     Registration = 'Registration'
     Authentication = 'Authentication'
-    AoVerificationCheck = 'AoVerificationCheck'
+    BatchVerificationCheck = 'BatchVerificationCheck'
   end
 
   module ActionType
@@ -33,5 +33,7 @@ module LoggingConstants
     SessionTimedOut = 'SessionTimedOut'
     UserCancelledLogin = 'UserCancelledLogin'
     UserLoginWithoutAccount = 'UserLoginWithoutAccount'
+
+    ApiBlocked = 'ApiBlocked'
   end
 end
