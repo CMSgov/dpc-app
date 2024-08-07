@@ -50,6 +50,10 @@ class DpcJsonLogger < ActiveSupport::Logger
 
   def as_hash(msg, attribs = {})
     msg = yield if block_given?
+    if msg.is_a?(Array)
+      attribs ||= msg[1]
+      msg = msg[0]
+    end
     raise ArgumentError, 'message must be a string' unless msg.is_a?(String)
 
     { message: msg }.merge(attribs || {}).merge(CurrentAttributes.to_log_hash)
