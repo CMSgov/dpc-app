@@ -10,3 +10,27 @@ Rails.application.configure do
     config.log_formatter = DpcJsonLogger.formatter
   end
 end
+
+module LoggingConstants
+  module ActionContext
+    Registration = 'Registration'
+    Authentication = 'Authentication'
+  end
+
+  module ActionType
+    AoInvited = 'AoInvited'
+    CdInvited = 'CdInvited'
+    AoInvitationExpired = 'AoInvitationExpired'
+    CdInvitationExpired = 'CdInvitationExpired'
+    AoRenewedExpiredInvitation = 'AoRenewedExpiredInvitation'
+    AoSignedToS = 'AoSignedToS'
+    AoCreatedAndLinkedToOrg = 'AoCreatedAndLinkedToOrg'
+    CdCreatedAndLinkedToOrg = 'CdCreatedAndLinkedToOrg'
+
+    UserLoggedIn = 'UserLoggedIn'
+    UserLoggedOut = 'UserLoggedOut'
+    SessionTimedOut = 'SessionTimedOut'
+    UserCancelledLogin = 'UserCancelledLogin'
+    UserLoginWithoutAccount = 'UserLoginWithoutAccount'
+  end
+end

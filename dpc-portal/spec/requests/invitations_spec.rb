@@ -254,6 +254,14 @@ RSpec.describe 'Invitations', type: :request do
             expect(response).to be_forbidden
             expect(response.body).to include('<span class="usa-step-indicator__current-step">3</span>')
           end
+          it 'logs failure' do
+            allow(Rails.logger).to receive(:info)
+            expect(Rails.logger).to receive(:info).with(['AO Check Fail',
+                                                         { actionContext: LoggingConstants::ActionContext::Registration,
+                                                           verificationReason: 'user_not_authorized_official',
+                                                           invitation: invitation.id }])
+            post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"
+          end
         end
 
         context 'login.gov server error' do

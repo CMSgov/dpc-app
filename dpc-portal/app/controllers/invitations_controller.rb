@@ -128,6 +128,7 @@ class InvitationsController < ApplicationController
     handle_user_info_service_error(e, 2)
   rescue InvitationError => e
     status = AoVerificationService::SERVER_ERRORS.include?(e.message) ? :service_unavailable : :forbidden
+    log_ao_invitation_error(e, status)
     render(Page::Invitations::AoFlowFailComponent.new(@invitation, e.message, 2), status:)
   end
 
@@ -147,7 +148,8 @@ class InvitationsController < ApplicationController
   end
 
   def handle_user_info_service_error(error, step)
-    logger.error "Invitation Flow UserInfoServiceError: #{error.message}"
+    logger.error(['User Info Service unavailable',
+                  { actionContext: LoggingConstants::ActionContext::Registration, error: error.message }])
 
     if error.message == 'unauthorized'
       render(Page::Invitations::InvitationLoginComponent.new(@invitation))
@@ -157,6 +159,19 @@ class InvitationsController < ApplicationController
     else
       render(Page::Invitations::AoFlowFailComponent.new(@invitation, error.message, step),
              status: :service_unavailable)
+    end
+  end
+
+  def log_ao_invitation_error(error, status)
+    case status
+    when :forbidden
+      logger.info(['AO Check Fail',
+                   { actionContext: LoggingConstants::ActionContext::Registration,
+                     verificationReason: error.message,
+                     invitation: @invitation.id }])
+    when :service_unavailable
+      logger.error(['CPI API Gateway unavailable',
+                    { actionContext: LoggingConstants::ActionContext::Registration, error: error.message }])
     end
   end
 
