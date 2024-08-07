@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe 'Accessibility', type: feature, js: true, accessibility: true do
+RSpec.describe 'Accessibility', type: :request, js: true, accessibility: true do
   include DpcClientSupport
 
   context 'client tokens' do
