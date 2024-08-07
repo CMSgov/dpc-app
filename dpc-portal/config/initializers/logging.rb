@@ -24,8 +24,11 @@ module LoggingConstants
     CdInvitationExpired = 'CdInvitationExpired'
     AoRenewedExpiredInvitation = 'AoRenewedExpiredInvitation'
     AoSignedToS = 'AoSignedToS'
-    AoCreatedAndLinkedToOrg = 'AoCreatedAndLinkedToOrg'
-    CdCreatedAndLinkedToOrg = 'CdCreatedAndLinkedToOrg'
+    AoCreated = 'AoCreated'
+    CdCreated = 'CdCreated'
+    AoLinkedToOrg = 'AoLinkedToOrg'
+    CdLinkedToOrg = 'CdLinkedToOrg'
+
 
     UserLoggedIn = 'UserLoggedIn'
     UserLoggedOut = 'UserLoggedOut'
