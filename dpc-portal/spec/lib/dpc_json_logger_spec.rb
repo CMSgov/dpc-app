@@ -31,6 +31,16 @@ RSpec.shared_examples 'logger method' do |log_method, level_name|
     it 'raises error if message is not a string' do
       expect { logger.info(1234).to raise_error(ArgumentError) }
     end
+
+    it 'accepts array' do
+      logger.send(log_method) do
+        ['Calculated message', { foo: :bar}]
+      end
+      json_result = JSON.parse(strout.string)
+      expect(json_result['level']).to eq(level_name)
+      expect(json_result['message']).to eq('Calculated message')
+      expect(json_result['foo']).to eq('bar')      
+    end
   end
 end
 
