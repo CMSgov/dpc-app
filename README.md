@@ -179,7 +179,7 @@ Note that this will always generate a unique hash, even if you didn't change the
 DPC requires an external Postgres database to be running. While a separate Postgres server can be used, the `docker-compose` file includes everything needed, and can be started like so: 
 
 ```bash
-docker-compose up start_core_dependencies
+docker compose up start_core_dependencies
 ```
 
 **Warning**: If you do have an existing Postgres database running on port 5342, docker-compose **will not** alert you to the port conflict. Ensure any local Postgres databases are stopped before starting docker-compose.
@@ -237,7 +237,7 @@ The application (along with all required dependencies) can be automatically star
 The individual services can be started (along with their dependencies) by passing the service name to the `up` command.
 
 ```bash
-docker-compose up {db,aggregation,attribution,api}
+docker compose up {db,aggregation,attribution,api}
 ``` 
 
 By default, the Docker containers start with minimal authentication enabled, meaning that some functionality (such as extracting the organization_id from the access token) will not work as expected and always returns the same value.
