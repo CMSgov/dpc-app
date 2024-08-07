@@ -50,7 +50,7 @@ end
 Capybara.server = :puma, { Threads: '1:1' }
 Capybara.server_port = '3100'
 Capybara.server_host = '0.0.0.0'
-Capybara.app_host = "http://dpc_portal:#{Capybara.server_port}"
+Capybara.app_host = "http://localhost:#{Capybara.server_port}"
 Capybara.always_include_port = true
 Capybara.default_max_wait_time = 30
 Capybara.enable_aria_label = true
