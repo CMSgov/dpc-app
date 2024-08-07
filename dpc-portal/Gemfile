@@ -85,6 +85,7 @@ group :development do
 end
 
 group :test do
+  gem 'axe-core-rspec'
   gem 'capybara', '>= 2.15'
   gem 'climate_control'
   gem 'fakefs', require: 'fakefs/safe'
@@ -92,7 +93,6 @@ group :test do
   gem 'rails-controller-testing'
   gem 'selenium-webdriver'
   gem 'timecop'
-  gem 'webdrivers'
 end
 
 gem 'tzinfo-data', platforms: %i[mingw mswin x64_mingw jruby]

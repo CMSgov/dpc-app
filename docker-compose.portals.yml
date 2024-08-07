@@ -197,6 +197,18 @@ services:
       - redis
       - db
 
+  selenium:
+    image: selenium/standalone-chrome:119.0
+    ports:
+      - "4444:4444"
+    volumes:
+      - /dev/shm:/dev/shm
+    environment:
+      # https://github.com/SeleniumHQ/docker-selenium/issues/429
+      - START_XVFB=false
+      - JAVA_OPTS=-Dwebdriver.chrome.whitelistedIps=
+    container_name: selenium
+
   # Starts up each service in the background
   start_core_dependencies:
     image: dadarek/wait-for-dependencies
@@ -204,6 +216,12 @@ services:
       - db
       - redis
     command: db:5432
+
+  start_test_dependencies:
+    image: dadarek/wait-for-dependencies
+    depends_on:
+      - selenium
+    command: selenium:4444
 
   start_web:
     image: dadarek/wait-for-dependencies
