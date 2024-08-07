@@ -40,12 +40,11 @@ Capybara.javascript_driver = :selenium_remote
 
 Capybara.register_driver :selenium_remote do |app|
   url = 'http://selenium:4444/wd/hub'
-  desired_capabilities = Selenium::WebDriver::Remote::Capabilities.chrome(
-    chromeOptions: { args: %w[headless no-sandbox disable-gpu disable-infobars window-size=1400,1000
-                              enable-features=NetworkService,NetworkServiceInProcess] }
-  )
+  args = %w[headless no-sandbox disable-gpu disable-infobars window-size=1400,1000
+            enable-features=NetworkService,NetworkServiceInProcess]
+  capabilities = Selenium::WebDriver::Chrome::Options.new(args:)
 
-  Capybara::Selenium::Driver.new(app, browser: :remote, desired_capabilities:, url:)
+  Capybara::Selenium::Driver.new(app, browser: :remote, capabilities:, url:)
 end
 
 Capybara.server = :puma, { Threads: '1:1' }
@@ -72,6 +71,7 @@ Capybara.enable_aria_label = true
 #
 # See https://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
 RSpec.configure do |config|
+  config.include Capybara::DSL
   # rspec-expectations config goes here. You can use an alternate
   # assertion/expectation library such as wrong or the stdlib/minitest
   # assertions if you prefer.

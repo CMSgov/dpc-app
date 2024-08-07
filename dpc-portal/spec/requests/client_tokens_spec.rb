@@ -248,21 +248,4 @@ RSpec.describe 'ClientTokens', type: :request do
       end
     end
   end
-
-  describe 'Selenium tests', type: feature, js: true, accessibility: true do
-    context 'signed-in cd' do
-      let!(:user) { create(:user) }
-      let!(:org) { create(:provider_organization, terms_of_service_accepted_by:) }
-
-      before do
-        create(:cd_org_link, provider_organization: org, user:)
-        sign_in user
-      end
-
-      it 'GET /new' do
-        visit "/organizations/#{org.id}/client_tokens/new"
-        expect(page).to be_axe_clean
-      end
-    end
-  end
 end

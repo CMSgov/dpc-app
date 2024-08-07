@@ -8,15 +8,3 @@ services:
       dockerfile: docker/Dockerfiles/Dockerfile.test
     env_file:
       - ./ops/config/decrypted/local.env
-
-  selenium:
-    image: selenium/standalone-chrome:latest
-    ports:
-      - '4444:4444'
-    volumes:
-      - /dev/shm:/dev/shm
-    environment:
-      # https://github.com/SeleniumHQ/docker-selenium/issues/429
-      - START_XVFB=false
-    container_name: selenium
-
