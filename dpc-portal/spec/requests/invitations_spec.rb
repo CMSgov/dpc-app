@@ -44,6 +44,25 @@ RSpec.describe 'Invitations', type: :request do
             expect(response.body).to_not include('Request new invite')
           end
         end
+        it 'logs if invitation is expired' do
+          if invitation.credential_delegate?
+            allow(Rails.logger).to receive(:info)
+            expect(Rails.logger).to receive(:info).with(
+              ['Credential Delegate Invitation expired',
+               { actionContext: LoggingConstants::ActionContext::Registration,
+                 actionType: LoggingConstants::ActionType::CdInvitationExpired }]
+            )
+          end
+          if invitation.authorized_official?
+            allow(Rails.logger).to receive(:info)
+            expect(Rails.logger).to receive(:info).with(
+              ['Authorized Official Invitation expired',
+               { actionContext: LoggingConstants::ActionContext::Registration,
+                 actionType: LoggingConstants::ActionType::AoInvitationExpired }]
+            )
+          end
+          send(method, "/organizations/#{org.id}/invitations/#{invitation.id}/#{path_suffix}")
+        end
         it 'should not show renew button if accepted' do
           invitation.accept!
           send method, "/organizations/#{org.id}/invitations/#{invitation.id}/#{path_suffix}"
@@ -378,6 +397,22 @@ RSpec.describe 'Invitations', type: :request do
                  params: success_params
           end.to change { klass.count }.by(1)
         end
+        it 'should log that link was created for credential delegate' do
+          invitation.update!(invitation_type: 0)
+          allow(Rails.logger).to receive(:info)
+          expect(Rails.logger).to receive(:info).with(['Credential Delegate created and linked to organization',
+                                                       { actionContext: LoggingConstants::ActionContext::Registration,
+                                                         actionType: LoggingConstants::ActionType::CdLinkedToOrg }])
+          post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+        end
+        it 'should log that link was created for authorized official' do
+          invitation.update!(invitation_type: 1)
+          allow(Rails.logger).to receive(:info)
+          expect(Rails.logger).to receive(:info).with(['Authorized Official created and linked to organization',
+                                                       { actionContext: LoggingConstants::ActionContext::Registration,
+                                                         actionType: LoggingConstants::ActionType::AoLinkedToOrg }])
+          post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+        end
 
         it 'should update invitation' do
           post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
@@ -396,11 +431,34 @@ RSpec.describe 'Invitations', type: :request do
           expect(response).to be_ok
           expect(response.body).to include('Go to DPC Portal')
         end
+        it 'should log on success' do
+          allow(Rails.logger).to receive(:info)
+          expect(Rails.logger).to receive(:info).with(['User logged in',
+                                                       { actionContext: LoggingConstants::ActionContext::Registration,
+                                                         actionType: LoggingConstants::ActionType::UserLoggedIn }])
+          post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+        end
 
         it 'should create user if not exist' do
           expect do
             post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
           end.to change { User.count }.by 1
+        end
+        it 'should log when credential delegate user is created' do
+          invitation.update!(invitation_type: 0)
+          allow(Rails.logger).to receive(:info)
+          expect(Rails.logger).to receive(:info).with(['Credential Delegate user created,',
+                                                       { actionContext: LoggingConstants::ActionContext::Registration,
+                                                         actionType: LoggingConstants::ActionType::CdCreated }])
+          post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+        end
+        it 'should log when authorized official user is created' do
+          invitation.update!(invitation_type: 1)
+          allow(Rails.logger).to receive(:info)
+          expect(Rails.logger).to receive(:info).with(['Authorized Official user created,',
+                                                       { actionContext: LoggingConstants::ActionContext::Registration,
+                                                         actionType: LoggingConstants::ActionType::AoCreated }])
+          post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
         end
         it 'should not create user if exists' do
           create(:user, provider: :openid_connect, uid: user_info['sub'])

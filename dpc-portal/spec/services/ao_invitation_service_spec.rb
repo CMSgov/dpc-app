@@ -74,5 +74,13 @@ describe AoInvitationService do
       expect(mailer).to receive(:deliver_now)
       service.create_invitation(*params, organization_npi)
     end
+
+    it 'logs on success' do
+      allow(Rails.logger).to receive(:info)
+      expect(Rails.logger).to receive(:info).with(['Authorized Official invited',
+                                                   { actionContext: LoggingConstants::ActionContext::Registration,
+                                                     actionType: LoggingConstants::ActionType::AoInvited }])
+      service.create_invitation(*params, organization_npi)
+    end
   end
 end
