@@ -276,6 +276,7 @@ RSpec.describe 'Invitations', type: :request do
             allow(Rails.logger).to receive(:info)
             expect(Rails.logger).to receive(:info).with(['AO Check Fail',
                                                          { actionContext: LoggingConstants::ActionContext::Registration,
+                                                           actionType: LoggingConstants::ActionType::FailCpiApiGwCheck,
                                                            verificationReason: 'user_not_authorized_official',
                                                            invitation: invitation.id }])
             post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"

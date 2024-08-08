@@ -108,8 +108,7 @@ RSpec.describe ProviderOrganization, type: :model do
       allow(Rails.logger).to receive(:info)
       expect(Rails.logger).to receive(:info)
         .with(['Org API disabled',
-               { actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
-                 actionType: LoggingConstants::ActionType::ApiBlocked,
+               { actionType: LoggingConstants::ActionType::ApiBlocked,
                  providerOrganization: org.id }])
 
       tokens = [{ 'id' => 'abcdef' }, { 'id' => 'ftguiol' }]
@@ -121,8 +120,7 @@ RSpec.describe ProviderOrganization, type: :model do
       allow(Rails.logger).to receive(:info)
       expect(Rails.logger).to_not receive(:info)
         .with(['Org API disabled',
-               { actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
-                 actionType: LoggingConstants::ActionType::ApiBlocked,
+               { actionType: LoggingConstants::ActionType::ApiBlocked,
                  providerOrganization: org.id }])
 
       allow(mock_ctm).to receive(:client_tokens).and_return([])

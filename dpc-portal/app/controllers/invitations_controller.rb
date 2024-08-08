@@ -190,6 +190,7 @@ class InvitationsController < ApplicationController
     when :forbidden
       logger.info(['AO Check Fail',
                    { actionContext: LoggingConstants::ActionContext::Registration,
+                     actionType: LoggingConstants::ActionType::FailCpiApiGwCheck,
                      verificationReason: error.message,
                      invitation: @invitation.id }])
     when :service_unavailable
