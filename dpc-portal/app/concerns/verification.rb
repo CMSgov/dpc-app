@@ -15,7 +15,8 @@ module Verification
 
     def link_error_attributes(message)
       { last_checked_at: Time.now, verification_status: false,
-        verification_reason: message }
+        verification_reason: message,
+        audit_comment: action_context }
     end
 
     def entity_error_attributes(message)

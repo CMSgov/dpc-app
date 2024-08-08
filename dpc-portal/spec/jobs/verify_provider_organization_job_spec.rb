@@ -119,6 +119,13 @@ RSpec.describe VerifyProviderOrganizationJob, type: :job do
                        providerOrganization: provider_organization.id }])
           end
           VerifyProviderOrganizationJob.perform_now
+          expected_comment = LoggingConstants::ActionContext::BatchVerificationCheck
+          expect(provider_organization.audits.length).to eq 1
+          expect(provider_organization.audits.first.comment).to eq expected_comment
+          links.each do |link|
+            expect(link.audits.length).to eq 1
+            expect(link.audits.first.comment).to eq expected_comment
+          end
         end
       end
       context :no_approved_enrollment do
@@ -154,6 +161,13 @@ RSpec.describe VerifyProviderOrganizationJob, type: :job do
                        providerOrganization: provider_organization.id }])
           end
           VerifyProviderOrganizationJob.perform_now
+          expected_comment = LoggingConstants::ActionContext::BatchVerificationCheck
+          expect(provider_organization.audits.length).to eq 1
+          expect(provider_organization.audits.first.comment).to eq expected_comment
+          links.each do |link|
+            expect(link.audits.length).to eq 1
+            expect(link.audits.first.comment).to eq expected_comment
+          end
         end
       end
       it 'should not update former link if no enrollments' do
