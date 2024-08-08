@@ -52,8 +52,7 @@ RSpec.describe 'Invitations', type: :request do
                { actionContext: LoggingConstants::ActionContext::Registration,
                  actionType: LoggingConstants::ActionType::CdInvitationExpired }]
             )
-          end
-          if invitation.authorized_official?
+          elsif invitation.authorized_official?
             allow(Rails.logger).to receive(:info)
             expect(Rails.logger).to receive(:info).with(
               ['Authorized Official Invitation expired',
@@ -400,7 +399,7 @@ RSpec.describe 'Invitations', type: :request do
         it 'should log that link was created for credential delegate' do
           invitation.update!(invitation_type: 0)
           allow(Rails.logger).to receive(:info)
-          expect(Rails.logger).to receive(:info).with(['Credential Delegate created and linked to organization',
+          expect(Rails.logger).to receive(:info).with(['Credential Delegate linked to organization',
                                                        { actionContext: LoggingConstants::ActionContext::Registration,
                                                          actionType: LoggingConstants::ActionType::CdLinkedToOrg }])
           post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
@@ -408,7 +407,7 @@ RSpec.describe 'Invitations', type: :request do
         it 'should log that link was created for authorized official' do
           invitation.update!(invitation_type: 1)
           allow(Rails.logger).to receive(:info)
-          expect(Rails.logger).to receive(:info).with(['Authorized Official created and linked to organization',
+          expect(Rails.logger).to receive(:info).with(['Authorized Official linked to organization',
                                                        { actionContext: LoggingConstants::ActionContext::Registration,
                                                          actionType: LoggingConstants::ActionType::AoLinkedToOrg }])
           post "/organizations/#{org.id}/invitations/#{invitation.id}/register"

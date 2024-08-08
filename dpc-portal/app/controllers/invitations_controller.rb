@@ -79,7 +79,7 @@ class InvitationsController < ApplicationController
 
   def create_cd_org_link
     CdOrgLink.create!(user:, provider_organization: @organization, invitation: @invitation)
-    Rails.logger.info(['Credential Delegate created and linked to organization',
+    Rails.logger.info(['Credential Delegate linked to organization',
                        { actionContext: LoggingConstants::ActionContext::Registration,
                          actionType: LoggingConstants::ActionType::CdLinkedToOrg }])
     @invitation.accept!
@@ -87,7 +87,7 @@ class InvitationsController < ApplicationController
 
   def create_ao_org_link
     AoOrgLink.create!(user:, provider_organization: @organization, invitation: @invitation)
-    Rails.logger.info(['Authorized Official created and linked to organization',
+    Rails.logger.info(['Authorized Official linked to organization',
                        { actionContext: LoggingConstants::ActionContext::Registration,
                          actionType: LoggingConstants::ActionType::AoLinkedToOrg }])
     @invitation.accept!
@@ -101,8 +101,7 @@ class InvitationsController < ApplicationController
         Rails.logger.info(['Credential Delegate user created,',
                            { actionContext: LoggingConstants::ActionContext::Registration,
                              actionType: LoggingConstants::ActionType::CdCreated }])
-      end
-      if @invitation.authorized_official?
+      elsif @invitation.authorized_official?
         Rails.logger.info(['Authorized Official user created,',
                            { actionContext: LoggingConstants::ActionContext::Registration,
                              actionType: LoggingConstants::ActionType::AoCreated }])

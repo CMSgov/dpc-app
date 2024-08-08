@@ -34,7 +34,7 @@ module LoggingConstants
     UserLoggedOut = 'UserLoggedOut'
     SessionTimedOut = 'SessionTimedOut'
     UserCancelledLogin = 'UserCancelledLogin'
-    FailedInvitationFlow = 'FailedInvitationFlow'
+    FailedLogin = 'FailedLogin'
     UserLoginWithoutAccount = 'UserLoginWithoutAccount'
   end
 end
