@@ -128,6 +128,15 @@ RSpec.describe VerifyAoJob, type: :job do
                        providerOrganization: link.provider_organization.id }])
           end
           VerifyAoJob.perform_now
+          expected_comment = LoggingConstants::ActionContext::BatchVerificationCheck
+          expect(user.audits.length).to eq 1
+          expect(user.audits.first.comment).to eq expected_comment
+          links.each do |link|
+            expect(link.audits.length).to eq 1
+            expect(link.audits.first.comment).to eq expected_comment
+            expect(link.provider_organization.audits.length).to eq 1
+            expect(link.provider_organization.audits.first.comment).to eq expected_comment
+          end
         end
         it 'should not update former org/link' do
           user = create(:user, pac_id: '900666666', verification_status: :approved)
@@ -178,6 +187,12 @@ RSpec.describe VerifyAoJob, type: :job do
                      authorizedOfficial: user.id,
                      providerOrganization: provider_organization.id }])
           VerifyAoJob.perform_now
+          expected_comment = LoggingConstants::ActionContext::BatchVerificationCheck
+          expect(user.audits.length).to eq 0
+          expect(link.audits.length).to eq 1
+          expect(link.audits.first.comment).to eq expected_comment
+          expect(provider_organization.audits.length).to eq 1
+          expect(provider_organization.audits.first.comment).to eq expected_comment
         end
       end
       context :user_not_authorized_official do
@@ -202,6 +217,11 @@ RSpec.describe VerifyAoJob, type: :job do
                      authorizedOfficial: user.id,
                      providerOrganization: provider_organization.id }])
           VerifyAoJob.perform_now
+          expected_comment = LoggingConstants::ActionContext::BatchVerificationCheck
+          expect(user.audits.length).to eq 0
+          expect(link.audits.length).to eq 1
+          expect(link.audits.first.comment).to eq expected_comment
+          expect(provider_organization.audits.length).to eq 0
         end
       end
       context :org_med_sanctions do
@@ -237,6 +257,14 @@ RSpec.describe VerifyAoJob, type: :job do
                        providerOrganization: link.provider_organization.id }])
           end
           VerifyAoJob.perform_now
+          expected_comment = LoggingConstants::ActionContext::BatchVerificationCheck
+          links.each do |link|
+            expect(link.user.audits.length).to eq 0
+            expect(link.audits.length).to eq 1
+            expect(link.audits.first.comment).to eq expected_comment
+          end
+          expect(provider_organization.audits.length).to eq 1
+          expect(provider_organization.audits.first.comment).to eq expected_comment
         end
       end
       it 'should not update if any object fails to update' do
