@@ -29,7 +29,7 @@ module LoggingConstants
     AoLinkedToOrg = 'AoLinkedToOrg'
     CdLinkedToOrg = 'CdLinkedToOrg'
 
-
+    BeginLogin = 'BeginLogin'
     UserLoggedIn = 'UserLoggedIn'
     UserLoggedOut = 'UserLoggedOut'
     SessionTimedOut = 'SessionTimedOut'

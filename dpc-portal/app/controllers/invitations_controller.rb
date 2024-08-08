@@ -41,6 +41,9 @@ class InvitationsController < ApplicationController
 
   def login
     login_session
+    Rails.logger.info(['User began login flow',
+                       { actionContext: LoggingConstants::ActionContext::Registration,
+                         actionType: LoggingConstants::ActionType::BeginLogin }])
     client_id = "urn:gov:cms:openidconnect.profiles:sp:sso:cms:dpc:#{ENV.fetch('ENV')}"
     url = URI::HTTPS.build(host: ENV.fetch('IDP_HOST'),
                            path: '/openid_connect/authorize',

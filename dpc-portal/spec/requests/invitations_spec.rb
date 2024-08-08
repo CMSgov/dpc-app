@@ -552,6 +552,15 @@ RSpec.describe 'Invitations', type: :request do
         expect(request.session[:user_return_to]).to eq expected_redirect
       end
 
+      it 'should log that user has begun login' do
+        allow(Rails.logger).to receive(:info)
+        expect(Rails.logger).to receive(:info).with(['User began login flow',
+                                                     { actionContext: LoggingConstants::ActionContext::Registration,
+                                                       actionType: LoggingConstants::ActionType::BeginLogin }])
+        org_id = invitation.provider_organization.id
+        post "/organizations/#{org_id}/invitations/#{invitation.id}/login"
+      end
+
       it 'should show warning page with 404 if missing' do
         bad_org = create(:provider_organization)
         post "/organizations/#{bad_org.id}/invitations/#{invitation.id}/login"
