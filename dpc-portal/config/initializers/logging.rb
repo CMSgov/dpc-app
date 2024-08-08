@@ -38,6 +38,7 @@ module LoggingConstants
     FailedLogin = 'FailedLogin'
     UserLoginWithoutAccount = 'UserLoginWithoutAccount'
 
+    FailCpiApiGwCheck = 'FailCpiApiGatewwayCheck'
     ApiBlocked = 'ApiBlocked'
   end
 end

@@ -24,10 +24,6 @@ class VerifyAoJob < ApplicationJob
     end
   end
 
-  def action_context
-    LoggingConstants::ActionContext::BatchVerificationCheck
-  end
-
   def check_link(service, link)
     service.check_ao_eligibility(link.provider_organization.npi, :pac_id, link.user.pac_id)
   end
@@ -58,8 +54,9 @@ class VerifyAoJob < ApplicationJob
   end
 
   def log_error(link, message)
-    logger.info(['AO Check Fail',
-                 { actionContext: action_context,
+    logger.info(["#{self.class.name} Check Fail",
+                 { actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
+                   actionType: LoggingConstants::ActionType::FailCpiApiGwCheck,
                    verificationReason: message,
                    authorizedOfficial: link.user.id,
                    providerOrganization: link.provider_organization.id }])
@@ -80,8 +77,9 @@ class VerifyAoJob < ApplicationJob
     AoOrgLink.where(user:, verification_status: true).each do |link|
       link.update!(link_error_attributes(message))
       link.provider_organization.update!(entity_error_attributes(message))
-      logger.info(['AO Check Fail',
-                   { actionContext: action_context,
+      logger.info(["#{self.class.name} Check Fail",
+                   { actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
+                     actionType: LoggingConstants::ActionType::FailCpiApiGwCheck,
                      verificationReason: message,
                      authorizedOfficial: link.user.id,
                      providerOrganization: link.provider_organization.id }])

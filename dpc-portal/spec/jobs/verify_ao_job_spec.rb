@@ -95,6 +95,15 @@ RSpec.describe VerifyAoJob, type: :job do
       end
     end
     context :failures do
+      def expect_log_for(link, reason)
+        expect(Rails.logger).to receive(:info)
+          .with(['VerifyAoJob Check Fail',
+                 { actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
+                   actionType: LoggingConstants::ActionType::FailCpiApiGwCheck,
+                   verificationReason: reason,
+                   authorizedOfficial: link.user.id,
+                   providerOrganization: link.provider_organization.id }])
+      end
       context :ao_med_sanctions do
         let(:user) { create(:user, pac_id: '900666666', verification_status: :approved) }
         let(:links) { [] }
@@ -120,12 +129,7 @@ RSpec.describe VerifyAoJob, type: :job do
         it 'should log user check failed' do
           allow(Rails.logger).to receive(:info)
           links.each do |link|
-            expect(Rails.logger).to receive(:info)
-              .with(['AO Check Fail',
-                     { actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
-                       verificationReason: 'ao_med_sanctions',
-                       authorizedOfficial: user.id,
-                       providerOrganization: link.provider_organization.id }])
+            expect_log_for(link, 'ao_med_sanctions')
           end
           VerifyAoJob.perform_now
           expected_comment = LoggingConstants::ActionContext::BatchVerificationCheck
@@ -180,12 +184,7 @@ RSpec.describe VerifyAoJob, type: :job do
 
         it 'should log check failed' do
           allow(Rails.logger).to receive(:info)
-          expect(Rails.logger).to receive(:info)
-            .with(['AO Check Fail',
-                   { actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
-                     verificationReason: 'no_approved_enrollment',
-                     authorizedOfficial: user.id,
-                     providerOrganization: provider_organization.id }])
+          expect_log_for(link, 'no_approved_enrollment')
           VerifyAoJob.perform_now
           expected_comment = LoggingConstants::ActionContext::BatchVerificationCheck
           expect(user.audits.length).to eq 0
@@ -210,12 +209,7 @@ RSpec.describe VerifyAoJob, type: :job do
         end
         it 'should log check failed' do
           allow(Rails.logger).to receive(:info)
-          expect(Rails.logger).to receive(:info)
-            .with(['AO Check Fail',
-                   { actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
-                     verificationReason: 'user_not_authorized_official',
-                     authorizedOfficial: user.id,
-                     providerOrganization: provider_organization.id }])
+          expect_log_for(link, 'user_not_authorized_official')
           VerifyAoJob.perform_now
           expected_comment = LoggingConstants::ActionContext::BatchVerificationCheck
           expect(user.audits.length).to eq 0
@@ -249,12 +243,7 @@ RSpec.describe VerifyAoJob, type: :job do
         it 'should log checks failed' do
           allow(Rails.logger).to receive(:info)
           links.each do |link|
-            expect(Rails.logger).to receive(:info)
-              .with(['AO Check Fail',
-                     { actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
-                       verificationReason: 'org_med_sanctions',
-                       authorizedOfficial: link.user.id,
-                       providerOrganization: link.provider_organization.id }])
+            expect_log_for(link, 'org_med_sanctions')
           end
           VerifyAoJob.perform_now
           expected_comment = LoggingConstants::ActionContext::BatchVerificationCheck

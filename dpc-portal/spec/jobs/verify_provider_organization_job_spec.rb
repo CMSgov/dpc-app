@@ -85,6 +85,15 @@ RSpec.describe VerifyProviderOrganizationJob, type: :job do
       end
     end
     context :failures do
+      def expect_log_for(link, reason)
+        expect(Rails.logger).to receive(:info)
+          .with(['VerifyProviderOrganizationJob Check Fail',
+                 { actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
+                   actionType: LoggingConstants::ActionType::FailCpiApiGwCheck,
+                   verificationReason: reason,
+                   authorizedOfficial: link.user.id,
+                   providerOrganization: link.provider_organization.id }])
+      end
       context :org_med_sanctions do
         let(:provider_organization) do
           create(:provider_organization, last_checked_at: 8.days.ago, npi: '3598564557',
@@ -111,12 +120,7 @@ RSpec.describe VerifyProviderOrganizationJob, type: :job do
         it 'should log checks failed' do
           allow(Rails.logger).to receive(:info)
           links.each do |link|
-            expect(Rails.logger).to receive(:info)
-              .with(['AO Check Fail',
-                     { actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
-                       verificationReason: 'org_med_sanctions',
-                       authorizedOfficial: link.user.id,
-                       providerOrganization: provider_organization.id }])
+            expect_log_for(link, 'org_med_sanctions')
           end
           VerifyProviderOrganizationJob.perform_now
           expected_comment = LoggingConstants::ActionContext::BatchVerificationCheck
@@ -153,12 +157,7 @@ RSpec.describe VerifyProviderOrganizationJob, type: :job do
         it 'should log check failed' do
           allow(Rails.logger).to receive(:info)
           links.each do |link|
-            expect(Rails.logger).to receive(:info)
-              .with(['AO Check Fail',
-                     { actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
-                       verificationReason: 'no_approved_enrollment',
-                       authorizedOfficial: link.user.id,
-                       providerOrganization: provider_organization.id }])
+            expect_log_for(link, 'no_approved_enrollment')
           end
           VerifyProviderOrganizationJob.perform_now
           expected_comment = LoggingConstants::ActionContext::BatchVerificationCheck

@@ -79,8 +79,7 @@ class ProviderOrganization < ApplicationRecord
 
   def log_disabled
     logger.info(['Org API disabled',
-                 { actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
-                   actionType: LoggingConstants::ActionType::ApiBlocked,
+                 { actionType: LoggingConstants::ActionType::ApiBlocked,
                    providerOrganization: id }])
   end
 end

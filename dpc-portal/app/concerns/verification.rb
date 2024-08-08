@@ -16,7 +16,7 @@ module Verification
     def link_error_attributes(message)
       { last_checked_at: Time.now, verification_status: false,
         verification_reason: message,
-        audit_comment: action_context }
+        audit_comment: LoggingConstants::ActionContext::BatchVerificationCheck }
     end
 
     def entity_error_attributes(message)
@@ -27,8 +27,9 @@ module Verification
       org.update!(entity_error_attributes(message))
       org.ao_org_links.where(verification_status: true).each do |link|
         link.update!(link_error_attributes(message))
-        logger.info(['AO Check Fail',
-                     { actionContext: action_context,
+        logger.info(["#{self.class.name} Check Fail",
+                     { actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
+                       actionType: LoggingConstants::ActionType::FailCpiApiGwCheck,
                        verificationReason: message,
                        authorizedOfficial: link.user.id,
                        providerOrganization: org.id }])

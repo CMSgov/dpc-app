@@ -22,10 +22,6 @@ class VerifyProviderOrganizationJob < ApplicationJob
     enqueue_job(VerifyProviderOrganizationJob)
   end
 
-  def action_context
-    LoggingConstants::ActionContext::BatchVerificationCheck
-  end
-
   def handle_error(org, message)
     ProviderOrganization.transaction do
       update_org_sanctions(org, message)
