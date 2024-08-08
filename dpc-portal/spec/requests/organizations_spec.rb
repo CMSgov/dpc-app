@@ -421,6 +421,16 @@ RSpec.describe 'Organizations', type: :request do
         expect(response).to redirect_to(organization_path(org))
       end
 
+      it 'logs if successful' do
+        allow(Rails.logger).to receive(:info)
+        expect(Rails.logger).to receive(:info).with(['Authorized Official signed Terms of Service',
+                                                     { actionContext: LoggingConstants::ActionContext::Registration,
+                                                       actionType: LoggingConstants::ActionType::AoSignedToS }])
+        org = create(:provider_organization)
+        create(:ao_org_link, provider_organization: org, user:)
+        post "/organizations/#{org.id}/sign_tos"
+      end
+
       it 'fails if not ao' do
         org = create(:provider_organization)
         create(:cd_org_link, provider_organization: org, user:)

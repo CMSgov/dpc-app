@@ -33,11 +33,17 @@ class InvitationsController < ApplicationController
 
     session.delete("invitation_status_#{@invitation.id}")
     sign_in(:user, @user)
+    Rails.logger.info(['User logged in',
+                       { actionContext: LoggingConstants::ActionContext::Registration,
+                         actionType: LoggingConstants::ActionType::UserLoggedIn }])
     render(Page::Invitations::SuccessComponent.new(@organization, @invitation))
   end
 
   def login
     login_session
+    Rails.logger.info(['User began login flow',
+                       { actionContext: LoggingConstants::ActionContext::Registration,
+                         actionType: LoggingConstants::ActionType::BeginLogin }])
     client_id = "urn:gov:cms:openidconnect.profiles:sp:sso:cms:dpc:#{ENV.fetch('ENV')}"
     url = URI::HTTPS.build(host: ENV.fetch('IDP_HOST'),
                            path: '/openid_connect/authorize',
@@ -76,23 +82,40 @@ class InvitationsController < ApplicationController
 
   def create_cd_org_link
     CdOrgLink.create!(user:, provider_organization: @organization, invitation: @invitation)
+    Rails.logger.info(['Credential Delegate linked to organization',
+                       { actionContext: LoggingConstants::ActionContext::Registration,
+                         actionType: LoggingConstants::ActionType::CdLinkedToOrg }])
     @invitation.accept!
   end
 
   def create_ao_org_link
     AoOrgLink.create!(user:, provider_organization: @organization, invitation: @invitation)
+    Rails.logger.info(['Authorized Official linked to organization',
+                       { actionContext: LoggingConstants::ActionContext::Registration,
+                         actionType: LoggingConstants::ActionType::AoLinkedToOrg }])
     @invitation.accept!
   end
 
+  # rubocop:disable Metrics/AbcSize
   def user
     user_info = UserInfoService.new.user_info(session)
     @user = User.find_or_create_by!(provider: :openid_connect, uid: user_info['sub']) do |user_to_create|
+      if @invitation.credential_delegate?
+        Rails.logger.info(['Credential Delegate user created,',
+                           { actionContext: LoggingConstants::ActionContext::Registration,
+                             actionType: LoggingConstants::ActionType::CdCreated }])
+      elsif @invitation.authorized_official?
+        Rails.logger.info(['Authorized Official user created,',
+                           { actionContext: LoggingConstants::ActionContext::Registration,
+                             actionType: LoggingConstants::ActionType::AoCreated }])
+      end
       user_to_create.email = @invitation.invited_email
       user_to_create.pac_id = session.delete(:user_pac_id)
     end
     @user.update(pac_id: session.delete(:user_pac_id)) unless @user.pac_id
     @user
   end
+  # rubocop:enable Metrics/AbcSize
 
   def check_for_token
     if session[:login_dot_gov_token].present? &&
@@ -187,6 +210,15 @@ class InvitationsController < ApplicationController
   def validate_invitation
     return unless @invitation.unacceptable_reason
 
+    if @invitation.credential_delegate?
+      Rails.logger.info(['Credential Delegate Invitation expired',
+                         { actionContext: LoggingConstants::ActionContext::Registration,
+                           actionType: LoggingConstants::ActionType::CdInvitationExpired }])
+    elsif @invitation.authorized_official?
+      Rails.logger.info(['Authorized Official Invitation expired',
+                         { actionContext: LoggingConstants::ActionContext::Registration,
+                           actionType: LoggingConstants::ActionType::AoInvitationExpired }])
+    end
     render(Page::Invitations::BadInvitationComponent.new(@invitation, @invitation.unacceptable_reason),
            status: :forbidden)
   end
