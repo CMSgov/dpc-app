@@ -129,4 +129,28 @@ RSpec.describe ProviderOrganization, type: :model do
       org.update(verification_status: :rejected)
     end
   end
+
+  describe :audits do
+    let(:org) { create(:provider_organization) }
+    it 'should not audit name' do
+      org.update(name: 'Botox Bonanza')
+      expect(org.audits.count).to eq 0
+    end
+    it 'should not audit npi' do
+      org.update(npi: 'another-npi')
+      expect(org.audits.count).to eq 0
+    end
+    it 'should audit verification_status' do
+      org.update(verification_status: :rejected)
+      expect(org.audits.count).to eq 1
+    end
+    it 'should audit verification_reason' do
+      org.update(verification_reason: :org_med_sanctions)
+      expect(org.audits.count).to eq 1
+    end
+    it 'should audit verification_status and _reason together' do
+      org.update(verification_status: :rejected, verification_reason: :org_med_sanctions)
+      expect(org.audits.count).to eq 1
+    end
+  end
 end

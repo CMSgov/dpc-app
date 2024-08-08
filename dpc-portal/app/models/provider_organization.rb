@@ -2,6 +2,8 @@
 
 # Link class to dpc-api Organization
 class ProviderOrganization < ApplicationRecord
+  audited only: %i[verification_reason verification_status], on: :update
+
   validates :npi, presence: true
   validates :verification_reason, allow_nil: true, allow_blank: true,
                                   inclusion: { in: :verification_reason }
