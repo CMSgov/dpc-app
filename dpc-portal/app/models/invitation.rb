@@ -52,6 +52,9 @@ class Invitation < ApplicationRecord
     InvitationMailer.with(invitation:, given_name: invited_given_name,
                           family_name: invited_family_name).invite_ao.deliver_now
     update(status: :renewed)
+    Rails.logger.info(['Authorized Official renewed expired invitation',
+                       { actionContext: LoggingConstants::ActionContext::Registration,
+                         actionType: LoggingConstants::ActionType::AoRenewedExpiredInvitation }])
     invitation
   end
 
