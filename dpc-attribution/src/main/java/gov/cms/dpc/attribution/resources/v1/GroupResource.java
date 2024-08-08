@@ -188,9 +188,26 @@ public class GroupResource extends AbstractGroupResource {
     @POST
     @Path("/{rosterID}/$add")
     @FHIR
-    @UnitOfWork
+    // @UnitOfWork
     @Override
     public Group addRosterMembers(@PathParam("rosterID") UUID rosterID, @FHIRParameter Group groupUpdate) {
+        createAttributionForNewRosterMember(rosterID, groupUpdate);
+
+        final RosterEntity rosterEntity1 = getRosterEntity(rosterID);
+
+        return converter.toFHIR(Group.class, rosterEntity1);
+    }
+
+    @UnitOfWork
+    private RosterEntity getRosterEntity(UUID rosterID) {
+        //Getting it again to access the latest updates from above code
+        final RosterEntity rosterEntity1 = this.rosterDAO.getEntity(rosterID)
+                .orElseThrow(() -> NOT_FOUND_EXCEPTION);
+        return rosterEntity1;
+    }
+
+    @UnitOfWork
+    private void createAttributionForNewRosterMember(UUID rosterID, Group groupUpdate) {
         if (!this.rosterDAO.rosterExists(rosterID)) {
             throw new WebApplicationException(NOT_FOUND_EXCEPTION, Response.Status.NOT_FOUND);
         }
@@ -234,12 +251,6 @@ public class GroupResource extends AbstractGroupResource {
                     return relationship;
                 })
                 .forEach(this.relationshipDAO::addAttributionRelationship);
-
-        //Getting it again to access the latest updates from above code
-        final RosterEntity rosterEntity1 = this.rosterDAO.getEntity(rosterID)
-                .orElseThrow(() -> NOT_FOUND_EXCEPTION);
-
-        return converter.toFHIR(Group.class, rosterEntity1);
     }
 
     @POST

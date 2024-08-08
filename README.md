@@ -444,6 +444,7 @@ If you're running locally through Docker and you want to use your debugger there
 ###### [`^`](#table-of-contents)
 If you want to run and debug integration tests through IntelliJ there are a few steps you have to do first.  The same concepts should apply to VS Code, but you'll have to figure out the details yourself.
 - When running a test in the IDE, IntelliJ creates a temporary debug configuration.  We need to make sure our secure env variables get included.
+  - Download the [EnvFile plugin](https://plugins.jetbrains.com/plugin/7861-envfile) if you haven't already
   - Go to Run -> Edit Configurations
   - Click Edit Configuration Templates and select JUnit
   - At the bottom, add a new .env file and point it to `ops/config/decrypted/local.env`

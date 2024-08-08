@@ -464,11 +464,14 @@ public class GroupResource extends AbstractGroupResource {
 
     private void verifyHeader(String practitionerUUID, Group attributionRoster) {
         try {
+            logger.info("querying for practitioner");
+            logger.info(practitionerUUID);
             Practitioner practitioner = client.read()
                     .resource(Practitioner.class)
                     .withId(FHIRExtractors.getEntityUUID(practitionerUUID).toString())
                     .encodedJson()
                     .execute();
+            logger.info("got a practitioner");
 
             Identifier provenancePractitionerNPI = FHIRExtractors.findMatchingIdentifier(practitioner.getIdentifier(), DPCIdentifierSystem.NPPES);
             String groupPractitionerNPI = FHIRExtractors.getAttributedNPI(attributionRoster);
