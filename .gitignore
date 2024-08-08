@@ -36,7 +36,6 @@ venv.bak/
 # Ignore smoke tests
 jmeter.log
 smoke.out
-src/vendor
 
 .vault_password
 ops/config/decrypted/*
