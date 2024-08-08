@@ -1,4 +1,4 @@
 verify_ao_job:
-  cron: "* * * * *"
+  cron: "* 1 * * 0"
   class: "VerifyAoJob"
   queue: default
