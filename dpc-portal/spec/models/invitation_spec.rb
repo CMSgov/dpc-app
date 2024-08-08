@@ -488,6 +488,16 @@ RSpec.describe Invitation, type: :model do
         expect(new_invitation.unacceptable_reason).to be_falsey
         expect(invitation.reload).to be_renewed
       end
+      it 'should log renewal' do
+        invitation.update!(created_at: 2.days.ago)
+        allow(Rails.logger).to receive(:info)
+        expect(Rails.logger).to receive(:info).with(
+          ['Authorized Official renewed expired invitation',
+           { actionContext: LoggingConstants::ActionContext::Registration,
+             actionType: LoggingConstants::ActionType::AoRenewedExpiredInvitation }]
+        )
+        invitation.renew
+      end
       it 'should not create another invitation for the user if accepted' do
         invitation.accept!
         expect do
