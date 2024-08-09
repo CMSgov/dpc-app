@@ -2,6 +2,9 @@
 
 require 'json'
 
+# Need to require as loaded as part of application configuration process
+require './app/models/current_attributes'
+
 # Custom JSON logger for DPC.
 #
 # Usage:
