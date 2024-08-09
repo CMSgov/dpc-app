@@ -4,12 +4,20 @@ require 'rails_helper'
 
 RSpec.describe InvitationMailer, type: :mailer do
   describe :invite_cd do
+    let(:invited_by) { build(:user) }
+    let(:provider_organization) { build(:provider_organization, id: 2) }
+    let(:invitation) { build(:invitation, id: 4, invited_by:, provider_organization:) }
     it 'has link to invitation' do
-      invited_by = build(:user)
-      provider_organization = build(:provider_organization, id: 2)
-      invitation = build(:invitation, id: 4, invited_by:, provider_organization:)
-      mailer = InvitationMailer.with(invitation:).invite_cd
       expected_url = 'http://localhost:3100/portal/organizations/2/invitations/4/accept'
+
+      mailer = InvitationMailer.with(invitation:).invite_cd
+      expect(mailer.body).to match(expected_url)
+    end
+    it 'has https link to invitation in prod' do
+      expect(Rails.env).to receive(:production?).and_return true
+      expected_url = 'https://localhost:3100/portal/organizations/2/invitations/4/accept'
+
+      mailer = InvitationMailer.with(invitation:).invite_cd
       expect(mailer.body).to match(expected_url)
     end
   end
