@@ -1,0 +1,4 @@
+verify_ao_job:
+  cron: "0 1 * * 0"
+  class: "VerifyAoJob"
+  queue: portal
