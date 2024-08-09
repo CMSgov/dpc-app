@@ -39,9 +39,9 @@ RSpec.describe 'Invitations', type: :request do
           send(method, "/organizations/#{org.id}/invitations/#{invitation.id}/#{path_suffix}")
           expect(response).to be_forbidden
           if invitation.authorized_official?
-            expect(response.body).to include('Request new invite')
+            expect(response.body).to include('Request new link')
           else
-            expect(response.body).to_not include('Request new invite')
+            expect(response.body).to_not include('Request new link')
           end
         end
         it 'logs if invitation is expired' do
@@ -66,7 +66,7 @@ RSpec.describe 'Invitations', type: :request do
           invitation.accept!
           send method, "/organizations/#{org.id}/invitations/#{invitation.id}/#{path_suffix}"
           expect(response).to be_forbidden
-          expect(response.body).to_not include('Request new invite')
+          expect(response.body).to_not include('Request new link')
         end
       end
       it 'should show warning page if accepted' do

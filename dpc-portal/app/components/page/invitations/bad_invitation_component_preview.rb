@@ -21,6 +21,12 @@ module Page
         invitation = Invitation.new(id: 3, provider_organization: ProviderOrganization.new(id: 1, name: 'Health Hut'))
         render(Page::Invitations::BadInvitationComponent.new(invitation, error_code))
       end
+
+      def ao_expired
+        invitation = Invitation.new(id: 4, provider_organization: ProviderOrganization.new(id: 1, name: 'Health Hut'))
+        reason = 'ao_expired'
+        render(Page::Invitations::BadInvitationComponent.new(invitation, reason))
+      end
     end
   end
 end

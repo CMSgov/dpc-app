@@ -9,16 +9,6 @@ RSpec.describe Page::Invitations::AoFlowFailComponent, type: :component do
   let(:component) { described_class.new(invitation, reason, step) }
   before { render_inline(component) }
 
-  describe 'translation needing org' do
-    let(:provider_organization) { build(:provider_organization, name: 'Health Hut') }
-    let(:invitation) { create(:invitation, :ao, provider_organization:) }
-    let(:reason) { :ao_expired }
-    it 'should have org name' do
-      expect(invitation.provider_organization.name).to be_present
-      expect(page.text).to include(invitation.provider_organization.name)
-    end
-  end
-
   describe 'steps' do
     context 'step 1' do
       let(:step) { 1 }
