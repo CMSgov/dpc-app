@@ -116,6 +116,21 @@ RSpec.describe ProviderOrganization, type: :model do
       tokens.each { |token| expect(mock_ctm).to receive(:delete_client_token).with(token) }
       org.update(verification_status: :rejected)
     end
+
+    it 'should log API disabled with comments if available' do
+      allow(Rails.logger).to receive(:info)
+      expect(Rails.logger).to receive(:info)
+        .with(['Org API disabled',
+               { actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
+                 actionType: LoggingConstants::ActionType::ApiBlocked,
+                 providerOrganization: org.id }])
+
+      tokens = [{ 'id' => 'abcdef' }, { 'id' => 'ftguiol' }]
+      allow(mock_ctm).to receive(:client_tokens).and_return(tokens)
+      tokens.each { |token| expect(mock_ctm).to receive(:delete_client_token).with(token) }
+      org.update(verification_status: :rejected, audit_comment: LoggingConstants::ActionContext::BatchVerificationCheck)
+    end
+
     it 'should not log API disabled if no tokens' do
       allow(Rails.logger).to receive(:info)
       expect(Rails.logger).to_not receive(:info)

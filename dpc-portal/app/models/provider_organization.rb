@@ -78,8 +78,11 @@ class ProviderOrganization < ApplicationRecord
   end
 
   def log_disabled
-    logger.info(['Org API disabled',
-                 { actionType: LoggingConstants::ActionType::ApiBlocked,
-                   providerOrganization: id }])
+    log = { actionType: LoggingConstants::ActionType::ApiBlocked,
+            providerOrganization: id }
+    audit = audits.last
+    log[:actionContext] = audit.comment if audit&.comment?
+
+    logger.info(['Org API disabled', log])
   end
 end
