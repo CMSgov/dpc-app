@@ -1,0 +1,31 @@
+execution:
+- executor: jmeter
+  scenario: web_log_in_page
+- executor: jmeter
+  scenario: web_root_page
+
+scenarios:
+  web_log_in_page:
+    default-address: ${WEB_HOST}
+    requests:
+    - url: /users/sign_in
+      assert:
+      - contains:
+        - Data at the Point of Care
+        - Log in
+        subject: body
+        regexp: false
+  web_root_page:
+    default-address: ${WEB_HOST}
+    requests:
+    - url: /
+      assert:
+      - contains:
+        - Data at the Point of Care
+        - Log in
+        subject: body
+        regexp: false
+reporting:
+  - module: passfail
+    criteria:
+      - "fail>1%, stop as failed"

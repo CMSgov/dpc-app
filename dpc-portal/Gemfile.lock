@@ -165,6 +165,8 @@ GEM
     email_validator (2.2.4)
       activemodel
     erubi (1.12.0)
+    et-orbi (1.2.11)
+      tzinfo
     eventmachine (1.2.7)
     execjs (2.9.1)
     factory_bot (6.4.6)
@@ -187,6 +189,9 @@ GEM
       date_time_precision (>= 0.8)
       mime-types (>= 3.0)
       nokogiri (>= 1.11.4)
+    fugit (1.11.0)
+      et-orbi (~> 1, >= 1.2.11)
+      raabro (~> 1.4)
     globalid (1.2.1)
       activesupport (>= 6.1)
     hashdiff (1.1.0)
@@ -339,6 +344,7 @@ GEM
     public_suffix (5.0.5)
     puma (6.4.2)
       nio4r (~> 2.0)
+    raabro (1.4.0)
     racc (1.8.0)
     rack (2.2.8.1)
     rack-oauth2 (2.2.1)
@@ -458,6 +464,10 @@ GEM
       connection_pool (>= 2.3.0)
       rack (>= 2.2.4)
       redis-client (>= 0.19.0)
+    sidekiq-cron (1.12.0)
+      fugit (~> 1.8)
+      globalid (>= 1.0.1)
+      sidekiq (>= 6)
     sidekiq_alive (2.1.9)
       rack (< 3)
       sidekiq (>= 5, < 8)
@@ -603,6 +613,7 @@ DEPENDENCIES
   sassc-rails (>= 2.1.2)
   selenium-webdriver
   sidekiq (~> 7.2.4)
+  sidekiq-cron
   sidekiq_alive (~> 2.1.5)
   simplecov (<= 0.17)
   sinatra
