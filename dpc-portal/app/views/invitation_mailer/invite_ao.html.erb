@@ -6,6 +6,7 @@
   </head>
   <body>
     <h1>Register <%= @invitation.provider_organization.name %> to access API claims data.</h1>
+
     <p>You've been identified as an Authorized Official (AO) of <%= @invitation.provider_organization.name %>. As an AO, you must register the organization so that it can access beneficiary claims data through Data at the Point of Care (DPC). You also must sign program Terms of Service.</p>
 
     <p><%= link_to 'Use this link to register your organization in the DPC Portal.',
