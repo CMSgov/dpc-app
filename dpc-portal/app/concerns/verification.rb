@@ -27,13 +27,17 @@ module Verification
       org.update!(entity_error_attributes(message))
       org.ao_org_links.where(verification_status: true).each do |link|
         link.update!(link_error_attributes(message))
-        logger.info(["#{self.class.name} Check Fail",
-                     { actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
-                       actionType: LoggingConstants::ActionType::FailCpiApiGwCheck,
-                       verificationReason: message,
-                       authorizedOfficial: link.user.id,
-                       providerOrganization: org.id }])
+        log_error(link, message)
       end
+    end
+
+    def log_error(link, message)
+      logger.info(["#{self.class.name} Check Fail",
+                   { actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
+                     actionType: LoggingConstants::ActionType::FailCpiApiGwCheck,
+                     verificationReason: message,
+                     authorizedOfficial: link.user.id,
+                     providerOrganization: link.provider_organization.id }])
     end
 
     def enqueue_job(klass)

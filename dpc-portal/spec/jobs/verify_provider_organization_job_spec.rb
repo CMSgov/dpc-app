@@ -94,6 +94,21 @@ RSpec.describe VerifyProviderOrganizationJob, type: :job do
                    authorizedOfficial: link.user.id,
                    providerOrganization: link.provider_organization.id }])
       end
+
+      # rubocop:disable Metrics/AbcSize
+      def expect_audits(link)
+        expected_comment = LoggingConstants::ActionContext::BatchVerificationCheck
+
+        expect(link.audits.length).to eq 1
+        expect(link.audits.first.comment).to eq expected_comment
+
+        expect(link.user.audits.length).to eq 0
+
+        expect(link.provider_organization.audits.length).to eq 1
+        expect(link.provider_organization.audits.first.comment).to eq expected_comment
+      end
+      # rubocop:enable Metrics/AbcSize
+
       context :org_med_sanctions do
         let(:provider_organization) do
           create(:provider_organization, last_checked_at: 8.days.ago, npi: '3598564557',
@@ -123,12 +138,8 @@ RSpec.describe VerifyProviderOrganizationJob, type: :job do
             expect_log_for(link, 'org_med_sanctions')
           end
           VerifyProviderOrganizationJob.perform_now
-          expected_comment = LoggingConstants::ActionContext::BatchVerificationCheck
-          expect(provider_organization.audits.length).to eq 1
-          expect(provider_organization.audits.first.comment).to eq expected_comment
           links.each do |link|
-            expect(link.audits.length).to eq 1
-            expect(link.audits.first.comment).to eq expected_comment
+            expect_audits(link)
           end
         end
       end
@@ -160,12 +171,8 @@ RSpec.describe VerifyProviderOrganizationJob, type: :job do
             expect_log_for(link, 'no_approved_enrollment')
           end
           VerifyProviderOrganizationJob.perform_now
-          expected_comment = LoggingConstants::ActionContext::BatchVerificationCheck
-          expect(provider_organization.audits.length).to eq 1
-          expect(provider_organization.audits.first.comment).to eq expected_comment
           links.each do |link|
-            expect(link.audits.length).to eq 1
-            expect(link.audits.first.comment).to eq expected_comment
+            expect_audits(link)
           end
         end
       end
