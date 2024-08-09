@@ -74,7 +74,7 @@ class ProviderOrganization < ApplicationRecord
 
       logger.error(['CredentialAuditLog failure',
                     { action: :remove, credential_type: :client_token, dpc_api_credential_id: token['id'] }])
-    end.present? && log_disabled
+    end.present? && log_disabled # Only log if has tokens
   end
 
   def log_disabled

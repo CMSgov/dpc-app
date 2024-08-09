@@ -72,7 +72,7 @@ class Invitation < ApplicationRecord
     service = AoVerificationService.new
     result = service.check_eligibility(provider_organization.npi,
                                        Digest::SHA2.new(256).hexdigest(user_info['social_security_number'].tr('-', '')))
-    raise InvitationError, result[:failure_reason] unless result[:success]
+    raise VerificationError, result[:failure_reason] unless result[:success]
 
     result
   end
@@ -152,4 +152,4 @@ class Invitation < ApplicationRecord
   end
 end
 
-class InvitationError < StandardError; end
+class VerificationError < StandardError; end
