@@ -3,7 +3,7 @@
 require 'rails_helper'
 
 RSpec.describe 'LoginDotGov', type: :request do
-  it 'is accessible', :system do
+  it 'is accessible', :system, :focus do
     visit '/users/sign_in'
     expect(page).to be_axe_clean
     page_body = find('body')
