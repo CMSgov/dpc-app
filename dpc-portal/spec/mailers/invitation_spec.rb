@@ -13,7 +13,7 @@ RSpec.describe InvitationMailer, type: :mailer do
       mailer = InvitationMailer.with(invitation:).invite_cd
       expect(mailer.body).to match(expected_url)
     end
-    it 'has https link to invitation in prod' do
+    it 'uses https for invitation link if it thinks it is prod' do
       expect(Rails.env).to receive(:production?).and_return true
       expected_url = 'https://localhost:3100/portal/organizations/2/invitations/4/accept'
 
@@ -33,7 +33,7 @@ RSpec.describe InvitationMailer, type: :mailer do
       html = mailer.body.parts.select { |part| part.content_type.match 'text/html' }.first
       expect(html.body).to match(expected_url)
     end
-    it 'has uses https if it thinks it is prod' do
+    it 'uses https for invitation link if it thinks it is prod' do
       expect(Rails.env).to receive(:production?).and_return true
       expected_url = 'https://localhost:3100/portal/organizations/2/invitations/4'
 
