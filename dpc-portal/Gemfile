@@ -85,8 +85,10 @@ group :development do
   gem 'spring-watcher-listen', '~> 2.1.0'
 end
 
-group :test do
-  gem 'capybara', '>= 2.15'
+group :test, :system_tests do
+  gem 'axe-core-capybara'
+  gem 'axe-core-rspec'
+  gem 'capybara', '>= 3.4'
   gem 'climate_control'
   gem 'fakefs', require: 'fakefs/safe'
   gem 'fakeredis'
