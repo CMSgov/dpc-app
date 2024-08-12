@@ -536,6 +536,12 @@ RSpec.describe 'Invitations', type: :request do
           expect(links.size).to eq 1
           expect(links.first.provider_organization).to eq org
         end
+        it 'should save verification_status on user and org' do
+          post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+          user = User.find_by(uid: user_info['sub'])
+          expect(user.verification_status).to eq('approved')
+          expect(org.reload.verification_status).to eq('approved')
+        end
       end
     end
   end

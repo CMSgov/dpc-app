@@ -36,6 +36,11 @@ class InvitationsController < ApplicationController
     Rails.logger.info(['User logged in',
                        { actionContext: LoggingConstants::ActionContext::Registration,
                          actionType: LoggingConstants::ActionType::UserLoggedIn }])
+
+    if @invitation.authorized_official?
+      @user.update(verification_status: 'approved')
+      @organization.update(verification_status: 'approved')
+    end
     render(Page::Invitations::SuccessComponent.new(@organization, @invitation))
   end
 
