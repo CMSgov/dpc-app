@@ -5,7 +5,7 @@ require 'rails_helper'
 RSpec.describe 'Accessibility', js: true, accessibility: true do
   base_url = 'localhost:3100'
   remote_url = 'https://selenium.cloud.cms.gov'
-  options = Selenium::WebDriver::Chrome::Options
+  options = Selenium::WebDriver::Chrome::Options.new(args: %w[headless ignore-certificate-errors])
   driver = Selenium::WebDriver.for(:remote, url: remote_url, options:)
   context 'not signed in' do
     it '/sign_in' do
