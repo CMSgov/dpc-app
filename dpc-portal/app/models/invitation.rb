@@ -77,9 +77,10 @@ class Invitation < ApplicationRecord
     result
   end
 
-  def unacceptable_reason
+  def unacceptable_reason # rubocop:disable Metrics/CyclomaticComplexity,Metrics/PerceivedComplexity
     return 'invalid' if cancelled?
     return 'accepted' if accepted?
+    return 'ao_renewed' if renewed? && authorized_official?
 
     if expired? && authorized_official?
       'ao_expired'

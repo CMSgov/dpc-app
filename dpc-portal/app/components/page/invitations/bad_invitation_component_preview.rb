@@ -23,8 +23,16 @@ module Page
       end
 
       def ao_expired
-        invitation = Invitation.new(id: 4, provider_organization: ProviderOrganization.new(id: 1, name: 'Health Hut'))
+        invitation = Invitation.new(id: 5, provider_organization: ProviderOrganization.new(id: 1, name: 'Health Hut'),
+                                    invitation_type: :authorized_official, created_at: 49.hours.ago)
         reason = 'ao_expired'
+        render(Page::Invitations::BadInvitationComponent.new(invitation, reason))
+      end
+
+      def ao_renewed
+        invitation = Invitation.new(id: 5, provider_organization: ProviderOrganization.new(id: 1, name: 'Health Hut'),
+                                    status: :renewed)
+        reason = 'ao_renewed'
         render(Page::Invitations::BadInvitationComponent.new(invitation, reason))
       end
     end
