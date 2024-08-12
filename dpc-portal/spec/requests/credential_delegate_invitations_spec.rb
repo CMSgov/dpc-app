@@ -155,6 +155,14 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
         post "/organizations/#{api_id}/credential_delegate_invitations", params: successful_parameters
       end
 
+      it 'logs on success' do
+        allow(Rails.logger).to receive(:info)
+        expect(Rails.logger).to receive(:info).with(['Credential Delegate invited',
+                                                     { actionContext: LoggingConstants::ActionContext::Registration,
+                                                       actionType: LoggingConstants::ActionType::CdInvited }])
+        post "/organizations/#{api_id}/credential_delegate_invitations", params: successful_parameters
+      end
+
       it 'does not create invitation record on failure' do
         successful_parameters['invited_given_name'] = ''
         expect do

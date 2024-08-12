@@ -21,6 +21,14 @@ RSpec.describe 'LoginDotGov', type: :request do
         follow_redirect!
         expect(response).to be_ok
       end
+      it 'should log on successful sign in' do
+        allow(Rails.logger).to receive(:info)
+        expect(Rails.logger).to receive(:info).with(['User logged in',
+                                                     { actionContext: LoggingConstants::ActionContext::Authentication,
+                                                       actionType: LoggingConstants::ActionType::UserLoggedIn }])
+        post '/users/auth/openid_connect'
+        follow_redirect!
+      end
       it 'should not add another user' do
         expect(User.where(uid: '12345', provider: 'openid_connect').count).to eq 1
         expect do
@@ -145,6 +153,17 @@ RSpec.describe 'LoginDotGov', type: :request do
           expect(response).to be_redirect
         end
 
+        it 'should log' do
+          allow(Rails.logger).to receive(:info)
+          expect(Rails.logger).to receive(:info).with(
+            ['User logged in without account',
+             { actionContext: LoggingConstants::ActionContext::Authentication,
+               actionType: LoggingConstants::ActionType::UserLoginWithoutAccount }]
+          )
+          post '/users/auth/openid_connect'
+          follow_redirect!
+        end
+
         it 'does not set authentication token' do
           post '/users/auth/openid_connect'
           follow_redirect!
@@ -159,6 +178,14 @@ RSpec.describe 'LoginDotGov', type: :request do
     it 'should succeed' do
       get '/users/auth/failure'
       expect(response).to be_ok
+    end
+
+    it 'should log on failure' do
+      allow(Rails.logger).to receive(:info)
+      expect(Rails.logger).to receive(:info).with(['User cancelled login',
+                                                   { actionContext: LoggingConstants::ActionContext::Authentication,
+                                                     actionType: LoggingConstants::ActionType::UserCancelledLogin }])
+      get '/users/auth/failure'
     end
   end
 end

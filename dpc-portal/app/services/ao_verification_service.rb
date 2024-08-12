@@ -8,8 +8,8 @@ class AoVerificationService
     @cpi_api_gw_client = CpiApiGatewayClient.new
   end
 
-  def check_eligibility(organization_npi, hashed_ao_ssn)
-    ao_role = check_ao_eligibility(organization_npi, :ssn, hashed_ao_ssn)
+  def check_eligibility(organization_npi, ssn)
+    ao_role = check_ao_eligibility(organization_npi, :ssn, ssn)
 
     { success: true, ao_role: }
   rescue OAuth2::Error => e
@@ -101,7 +101,7 @@ class AoVerificationService
   def role_matches(role, identifier_type, identifier)
     case identifier_type
     when :ssn
-      role['roleCode'] == '10' && Digest::SHA2.new(256).hexdigest(role['ssn']) == identifier
+      role['roleCode'] == '10' && role['ssn'] == identifier
     when :pac_id
       role['roleCode'] == '10' && role['pacId'] == identifier
     end

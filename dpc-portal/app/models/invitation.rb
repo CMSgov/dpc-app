@@ -52,6 +52,9 @@ class Invitation < ApplicationRecord
     InvitationMailer.with(invitation:, given_name: invited_given_name,
                           family_name: invited_family_name).invite_ao.deliver_now
     update(status: :renewed)
+    Rails.logger.info(['Authorized Official renewed expired invitation',
+                       { actionContext: LoggingConstants::ActionContext::Registration,
+                         actionType: LoggingConstants::ActionType::AoRenewedExpiredInvitation }])
     invitation
   end
 
@@ -68,7 +71,7 @@ class Invitation < ApplicationRecord
 
     service = AoVerificationService.new
     result = service.check_eligibility(provider_organization.npi,
-                                       Digest::SHA2.new(256).hexdigest(user_info['social_security_number'].tr('-', '')))
+                                       user_info['social_security_number'].tr('-', ''))
     raise InvitationError, result[:failure_reason] unless result[:success]
 
     result

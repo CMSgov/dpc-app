@@ -39,6 +39,9 @@ class ApplicationController < ActionController::Base
 
     reset_session
     flash[:notice] = t('devise.failure.max_session_timeout', default: 'Your session has timed out.')
+    Rails.logger.info(['User session timed out',
+                       { actionContext: LoggingConstants::ActionContext::Authentication,
+                         actionType: LoggingConstants::ActionType::SessionTimedOut }])
     redirect_to sign_in_path
   end
   # rubocop:enable Metrics/AbcSize

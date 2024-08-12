@@ -9,6 +9,11 @@ database:
   properties:
     charSet: UTF-8
     hibernate.dialect: org.hibernate.dialect.PostgreSQL10Dialect
+    hibernate.jdbc.batch_size: 100
+    hibernate.order_updates: true
+    hibernate.batch_versioned_data: true
+    hibernate.order_inserts: true
+    hibernate.show_sql: false
 
 server:
   enableThreadNameFilter: false
@@ -59,6 +64,8 @@ logging:
     "gov.cms.dpc.queue.DistributedBatchQueue": DEBUG
     "org.hibernate": ERROR
     "org.hibernate.SQL": ERROR
+    # Turn this on to verify updates/inserts are getting batched
+    #"org.hibernate.engine.jdbc.batch.internal.BatchingBatch": DEBUG
     "gov.cms.dpc.api.auth": INFO
     "gov.cms.dpc.common.logging.filters": INFO
 
