@@ -6,6 +6,8 @@ RSpec.describe 'LoginDotGov', type: :request do
   it 'is accessible', :system do
     visit '/users/sign_in'
     expect(page).to be_axe_clean
+    page_body = find('body')
+    expect(page_body).to have_css('.grid-container')
   end
 
   RSpec.shared_examples 'an openid client' do
