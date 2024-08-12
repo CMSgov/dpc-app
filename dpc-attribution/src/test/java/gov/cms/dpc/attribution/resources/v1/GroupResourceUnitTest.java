@@ -20,6 +20,7 @@ import org.mockito.MockitoAnnotations;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -82,8 +83,7 @@ public class GroupResourceUnitTest {
         configuration.setExpirationThreshold(10);
         Mockito.when(rosterDAO.findEntities(isNull(),eq(orgId), eq(providerNpi), isNull())).thenReturn(List.of());
         Mockito.when(providerDAO.getProviders(isNull(),eq(providerNpi), eq(orgId))).thenReturn(List.of(new ProviderEntity()));
-        patientBank.keySet().stream().forEach(patientId ->
-                Mockito.when(patientDAO.patientSearch(eq(patientId), isNull(),eq(orgId))).thenReturn(List.of(new PatientEntity())));
+        Mockito.when(patientDAO.patientSearch(eq(orgId), any(List.class))).thenReturn(Collections.nCopies(5, new PatientEntity()));
 
         Mockito.when(rosterDAO.persistEntity(any(RosterEntity.class))).thenAnswer(invocation -> invocation.getArguments()[0]);
 

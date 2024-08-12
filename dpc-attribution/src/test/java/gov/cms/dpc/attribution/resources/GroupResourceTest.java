@@ -6,12 +6,19 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import gov.cms.dpc.attribution.AbstractAttributionTest;
 import gov.cms.dpc.attribution.AttributionTestHelpers;
 import gov.cms.dpc.attribution.resources.v1.GroupResource;
+import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.common.utils.SeedProcessor;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.testing.IntegrationTest;
+import gov.cms.dpc.testing.MBIUtil;
 import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.util.LinkedList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static gov.cms.dpc.attribution.AttributionTestHelpers.DEFAULT_ORG_ID;
 import static org.junit.jupiter.api.Assertions.*;
@@ -69,6 +76,7 @@ public class GroupResourceTest extends AbstractAttributionTest {
                 .resource(group)
                 .encodedJson()
                 .execute();
+        IIdType groupId = methodOutcome.getResource().getIdElement();
 
         assertTrue(methodOutcome.getCreated());
 
@@ -78,7 +86,7 @@ public class GroupResourceTest extends AbstractAttributionTest {
 
         assertThrows(InvalidRequestException.class, () -> client.update()
                 .resource(group)
-                .withId(methodOutcome.getResource().getIdElement())
+                .withId(groupId)
                 .encodedJson()
                 .execute());
 
@@ -92,7 +100,13 @@ public class GroupResourceTest extends AbstractAttributionTest {
                 .encodedJson()
                 .execute();
 
-        assertEquals(patient2.getIdElement().getValueAsString(), ((Group) methodOutcomeUpdate.getResource()).getMemberFirstRep().getEntity().getReference());
+        final Group updatedGroup = client.read()
+            .resource(Group.class)
+            .withId(groupId)
+            .encodedJson()
+            .execute();
+
+        assertEquals(patient2.getIdElement().getValueAsString(), updatedGroup.getMemberFirstRep().getEntity().getReference());
     }
 
     @Test
@@ -193,6 +207,48 @@ public class GroupResourceTest extends AbstractAttributionTest {
         assertTrue(GroupResource.rosterSizeTooBig(1, group1, group2));
     }
 
+    @Test
+    public void testMaxPatients() {
+        final int MAX_PATIENTS = 1350;
+        APPLICATION.getConfiguration().setPatientLimit(MAX_PATIENTS);
+
+        final Practitioner practitioner = createPractitioner(NPIUtil.generateNPI());
+        final Group group = SeedProcessor.createBaseAttributionGroup(FHIRExtractors.getProviderNPI(practitioner), DEFAULT_ORG_ID);
+
+        // Create patients
+        List<Patient> patientList = new LinkedList<>();
+        for(int i=0; i<MAX_PATIENTS; i++) {
+            Patient patient = AttributionTestHelpers.createPatientResource(MBIUtil.generateMBI(), DEFAULT_ORG_ID);
+            patientList.add(patient);
+        }
+        List<Patient> insertedPatientList = bulkSubmitPatients(patientList);
+
+        // Create roster around patients
+        insertedPatientList.forEach(patient -> group.addMember().setEntity(new Reference(patient)));
+        MethodOutcome outcomeInsert = client.create()
+            .resource(group)
+            .encodedJson()
+            .execute();
+
+        Group createdGroup = (Group) outcomeInsert.getResource();
+
+        // Update all patients in roster
+        final Parameters parameters = new Parameters();
+        parameters.addParameter().setResource(group);
+
+        Group groupResult = client.operation()
+            .onInstance(createdGroup.getIdElement())
+            .named("$add")
+            .withParameters(parameters)
+            .returnResourceType(Group.class)
+            .encodedJson()
+            .execute();
+
+        // If nothing blew up we should be good, but check a few things anyway
+        assertEquals(MAX_PATIENTS, groupResult.getMember().size());
+        assertEquals(createdGroup.getId(), groupResult.getId());
+    }
+
     private Practitioner createPractitioner(String NPI) {
         final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource(NPI);
         MethodOutcome methodOutcome = client.create()
@@ -209,5 +265,27 @@ public class GroupResourceTest extends AbstractAttributionTest {
                 .encodedJson()
                 .execute();
         return (Patient) methodOutcome.getResource();
+    }
+
+    private List<Patient> bulkSubmitPatients(List<Patient> patients) {
+        Bundle patientBundle = new Bundle();
+        for (Patient patient : patients) {
+            patientBundle.addEntry(new Bundle.BundleEntryComponent().setResource(patient));
+        }
+
+        final Parameters parameters = new Parameters();
+        parameters.addParameter().setResource(patientBundle);
+
+        Bundle patientsReturned = client.operation()
+            .onType("Patient")
+            .named("submit")
+            .withParameters(parameters)
+            .returnResourceType(Bundle.class)
+            .encodedJson()
+            .execute();
+
+        return patientsReturned.getEntry().stream()
+            .map(component -> (Patient) component.getResource())
+            .collect(Collectors.toList());
     }
 }
