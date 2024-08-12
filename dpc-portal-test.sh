@@ -36,7 +36,6 @@ echo "│     Running AXE Tests     │"
 echo "│                           │"
 echo "└───────────────────────────┘"
 
-docker compose -p start-v1-portals -f docker-compose.yml -f docker-compose.portals.yml up start_test_dependencies
 docker compose -p start-v1-portals -f docker-compose.yml -f docker-compose.portals.yml up start_portal
 docker compose -p start-v1-portals -f docker-compose.yml -f docker-compose.portals.yml run --entrypoint "bundle exec rspec --tag accessibility" dpc_portal
 
