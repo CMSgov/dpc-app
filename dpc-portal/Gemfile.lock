@@ -580,7 +580,7 @@ DEPENDENCIES
   bundler (>= 1.15.0)
   bundler-audit
   byebug
-  capybara (>= 2.15)
+  capybara
   climate_control
   database_cleaner
   devise (>= 4.9.3)

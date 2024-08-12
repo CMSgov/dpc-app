@@ -3,6 +3,11 @@
 require 'rails_helper'
 
 RSpec.describe 'LoginDotGov', type: :request do
+  it 'is accessible', :system do
+    visit '/users/sign_in'
+    expect(page).to be_axe_clean
+  end
+
   RSpec.shared_examples 'an openid client' do
     context 'user exists' do
       before { create(:user, uid: '12345', provider: 'openid_connect', email: 'bob@example.com') }
