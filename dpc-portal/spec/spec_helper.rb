@@ -2,6 +2,9 @@
 
 require 'simplecov'
 
+require 'axe-rspec'
+require 'capybara/rspec'
+
 SimpleCov.start 'rails' do
   add_group 'Serializers', 'app/serializers'
   add_group 'Services', 'app/services'
@@ -27,7 +30,7 @@ SimpleCov.start 'rails' do
 end
 
 require 'webmock/rspec'
-WebMock.disable_net_connect!(allow_localhost: true)
+WebMock.enable_net_connect!
 
 require 'support/fake_cpi_gateway'
 
