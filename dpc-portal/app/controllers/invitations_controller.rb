@@ -36,8 +36,6 @@ class InvitationsController < ApplicationController
     Rails.logger.info(['User logged in',
                        { actionContext: LoggingConstants::ActionContext::Registration,
                          actionType: LoggingConstants::ActionType::UserLoggedIn }])
-
-    verify_ao
     render(Page::Invitations::SuccessComponent.new(@organization, @invitation))
   end
 
@@ -96,6 +94,8 @@ class InvitationsController < ApplicationController
                        { actionContext: LoggingConstants::ActionContext::Registration,
                          actionType: LoggingConstants::ActionType::AoLinkedToOrg }])
     @invitation.accept!
+    @user.update(verification_status: 'approved')
+    @organization.update(verification_status: 'approved')
   end
 
   # rubocop:disable Metrics/AbcSize
@@ -241,11 +241,4 @@ def redirect_host
   else
     "https://#{ENV.fetch('ENV', nil)}.dpc.cms.gov"
   end
-end
-
-def verify_ao
-  return unless @invitation.authorized_official?
-
-  @user.update(verification_status: 'approved')
-  @organization.update(verification_status: 'approved')
 end
