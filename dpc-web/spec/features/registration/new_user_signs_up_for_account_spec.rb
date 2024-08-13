@@ -54,6 +54,7 @@ RSpec.feature 'new user signs up for account' do
 
       expect(page).to have_http_status(200)
       expect(page).to have_css('[data-test="my-account-menu"]')
+      expect(page).to be_axe_clean
 
       find('[data-test="my-account-menu"]').click
       find('[data-test="dpc-registrations-profile-link"]', visible: false).click
