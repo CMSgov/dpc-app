@@ -54,6 +54,7 @@ gem 'nokogiri', '>= 1.16.5'
 gem 'api_client', path: 'vendor/api_client'
 
 group :development, :test do
+  gem 'axe-core-rspec'
   gem 'byebug', platforms: [:mri, :mingw, :x64_mingw]
   gem 'pry'
   gem 'pry-nav'

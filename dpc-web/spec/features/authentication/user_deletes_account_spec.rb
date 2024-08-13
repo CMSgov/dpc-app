@@ -15,6 +15,7 @@ RSpec.feature 'user deletes account' do
       find('[data-test="delete-user-account"]').click
 
       expect(page.body).to include('Bye! Your account has been successfully cancelled. We hope to see you again soon.')
+      expect(page).to be_axe_clean
     end
   end
 
