@@ -28,6 +28,11 @@ public class RosterDAO extends AbstractDAO<RosterEntity> {
         return Optional.ofNullable(this.get(rosterID));
     }
 
+    public void refresh(RosterEntity roster) {
+        currentSession().flush();
+        currentSession().refresh(roster);
+    }
+
     public List<RosterEntity> findEntities(UUID resourceID, UUID organizationID, String providerNPI, String patientReference) {
 
         // Build a selection query to get records from the database
