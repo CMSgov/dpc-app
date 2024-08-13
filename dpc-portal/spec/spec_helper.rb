@@ -26,17 +26,6 @@ SimpleCov.start 'rails' do
   SimpleCov.minimum_coverage_by_file 0
 end
 
-# Configure Capybara for accessibility testing
-require 'axe-rspec'
-require 'capybara'
-Capybara.register_driver :firefox_headless do |app|
-  args = %w[headless no-sandbox disable-dev-shm-usage]
-  options = Selenium::WebDriver::Firefox::Options.new(args:)
-  Capybara::Selenium::Driver.new(app, browser: :firefox, options:)
-end
-Capybara.default_driver = :firefox_headless
-Capybara.javascript_driver = :firefox_headless
-
 require 'webmock/rspec'
 WebMock.disable_net_connect!(allow_localhost: true)
 
