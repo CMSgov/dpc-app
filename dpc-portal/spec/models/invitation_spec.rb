@@ -432,7 +432,7 @@ RSpec.describe Invitation, type: :model do
         user_info = { 'social_security_number' => '900666666' }
         expect do
           ao_invite.ao_match?(user_info)
-        end.to raise_error(VerificationError, 'ao_med_sanctions')
+        end.to raise_error(InvitationError, 'ao_med_sanctions')
       end
       it 'should raise error if user_info missing ssn' do
         user_info = { 'social_security_number' => nil }

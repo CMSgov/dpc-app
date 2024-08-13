@@ -3,7 +3,7 @@
 require_relative 'boot'
 
 require 'rails/all'
-require './app/lib/dpc_json_logger'
+
 # Require the gems listed in Gemfile, including any gems
 # you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)
@@ -34,13 +34,5 @@ module DpcPortal
     # Look up previews directly in the path and set default layout
     config.view_component.preview_paths << Rails.root.join("app", "components")
     config.view_component.default_preview_layout = "component_preview"
-
-    # Use DpcJsonLogger unless disabled
-    unless ENV['DISABLE_JSON_LOGGER'] == 'true'
-      Rails.logger = DpcJsonLogger.new($stdout)
-      config.logger = Rails.logger
-      config.logger.formatter = DpcJsonLogger.formatter
-      config.log_formatter = DpcJsonLogger.formatter
-    end
   end
 end

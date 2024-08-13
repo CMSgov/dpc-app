@@ -8,8 +8,6 @@ class User < ApplicationRecord
          :recoverable, :rememberable, :validatable,
          :timeoutable, :omniauthable, omniauth_providers: [:openid_connect]
 
-  audited only: %i[verification_reason verification_status], on: :update
-
   validates :verification_reason, allow_nil: true, allow_blank: true,
                                   inclusion: { in: :verification_reason }
   validates :verification_status, allow_nil: true,

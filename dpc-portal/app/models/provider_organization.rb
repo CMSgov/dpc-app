@@ -2,8 +2,6 @@
 
 # Link class to dpc-api Organization
 class ProviderOrganization < ApplicationRecord
-  audited only: %i[verification_reason verification_status], on: :update
-
   validates :npi, presence: true
   validates :verification_reason, allow_nil: true, allow_blank: true,
                                   inclusion: { in: :verification_reason }
@@ -74,15 +72,6 @@ class ProviderOrganization < ApplicationRecord
 
       logger.error(['CredentialAuditLog failure',
                     { action: :remove, credential_type: :client_token, dpc_api_credential_id: token['id'] }])
-    end.present? && log_disabled # Only log if has tokens
-  end
-
-  def log_disabled
-    log = { actionType: LoggingConstants::ActionType::ApiBlocked,
-            providerOrganization: id }
-    audit = audits.last
-    log[:actionContext] = audit.comment if audit&.comment?
-
-    logger.info(['Org API disabled', log])
+    end
   end
 end

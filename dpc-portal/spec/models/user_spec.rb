@@ -111,87 +111,55 @@ RSpec.describe User, type: :model do
       expect(user.provider_links).to be_empty
     end
   end
+end
 
-  describe :validations do
-    let(:user) { create(:user) }
+describe :validations do
+  let(:user) { create(:user) }
 
-    it 'fails on invalid verification_reason' do
-      expect do
-        user.verification_reason = :fake_reason
-      end.to raise_error(ArgumentError)
-    end
-
-    it 'allows good verification_reason' do
-      expect do
-        user.verification_reason = :ao_med_sanction_waived
-        user.save
-      end.not_to raise_error
-    end
-
-    it 'allows blank verification_reason' do
-      expect do
-        user.verification_reason = ''
-        user.save
-      end.not_to raise_error
-    end
-
-    it 'allows nil verification_reason' do
-      expect do
-        user.verification_reason = nil
-        user.save
-      end.not_to raise_error
-    end
-
-    it 'fails on invalid verification_status' do
-      expect do
-        user.verification_status = :fake_status
-      end.to raise_error(ArgumentError)
-    end
-
-    it 'allows good verification_status' do
-      expect do
-        user.verification_status = :approved
-        user.save
-      end.not_to raise_error
-    end
-
-    it 'allows nil verification_status' do
-      expect do
-        user.verification_status = nil
-        user.save
-      end.not_to raise_error
-    end
+  it 'fails on invalid verification_reason' do
+    expect do
+      user.verification_reason = :fake_reason
+    end.to raise_error(ArgumentError)
   end
 
-  describe :audits do
-    let(:user) { create(:user) }
-    it 'should not audit email' do
-      user.update(email: 'new_email@test.com')
-      expect(user.audits.count).to eq 0
-    end
-    it 'should not audit given_name' do
-      user.update(given_name: 'Friedrich')
-      expect(user.audits.count).to eq 0
-    end
-    it 'should not audit family_name' do
-      user.update(family_name: 'Nietszche')
-      expect(user.audits.count).to eq 0
-    end
-    it 'should not audit pac_id' do
-      user.update(pac_id: 'some-new-id')
-      expect(user.audits.count).to eq 0
-    end
-    it 'should audit verification_status' do
-      user.update(verification_status: :rejected)
-      expect(user.audits.count).to eq 1
-    end
-    it 'should audit verification_reason' do
-      user.update(verification_reason: :ao_med_sanctions)
-      expect(user.audits.count).to eq 1
-    end
-    it 'should audit verification_status and _reason together' do
-      user.update(verification_status: :rejected, verification_reason: :ao_med_sanctions)
-      expect(user.audits.count).to eq 1
-    end
+  it 'allows good verification_reason' do
+    expect do
+      user.verification_reason = :ao_med_sanction_waived
+      user.save
+    end.not_to raise_error
+  end
+
+  it 'allows blank verification_reason' do
+    expect do
+      user.verification_reason = ''
+      user.save
+    end.not_to raise_error
+  end
+
+  it 'allows nil verification_reason' do
+    expect do
+      user.verification_reason = nil
+      user.save
+    end.not_to raise_error
+  end
+
+  it 'fails on invalid verification_status' do
+    expect do
+      user.verification_status = :fake_status
+    end.to raise_error(ArgumentError)
+  end
+
+  it 'allows good verification_status' do
+    expect do
+      user.verification_status = :approved
+      user.save
+    end.not_to raise_error
+  end
+
+  it 'allows nil verification_status' do
+    expect do
+      user.verification_status = nil
+      user.save
+    end.not_to raise_error
   end
 end

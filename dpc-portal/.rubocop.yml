@@ -17,7 +17,6 @@ Metrics/BlockLength:
   Exclude:
     - "spec/**/*"
     - "lib/tasks/dpc.rake"
-    - "app/concerns/*"
 
 Metrics/MethodLength:
   Max: 20
