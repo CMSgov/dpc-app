@@ -6,13 +6,24 @@ RSpec.feature 'new user signs up for account' do
   include ActiveJob::TestHelper
   include MailerHelper
 
-  before(:each) do
+  before { WebMock.allow_net_connect! }
+  after { WebMock.disable_net_connect! }
+
+  # before(:each) do
+  #   visit new_user_session_path
+  #   click_link 'sign-up'
+  # end
+
+  it 'is accessible', js: true do
     visit new_user_session_path
-    click_link 'sign-up'
+    expect(page).to be_axe_clean
   end
 
   context 'when successful' do
     before(:each) do
+      visit new_user_session_path
+      click_link 'sign-up'
+
       fill_in :user_first_name, with: 'Clarissa'
       fill_in :user_last_name, with: 'Dalloway'
       fill_in :user_email, with: 'clarissa@example.com'
@@ -54,7 +65,6 @@ RSpec.feature 'new user signs up for account' do
 
       expect(page).to have_http_status(200)
       expect(page).to have_css('[data-test="my-account-menu"]')
-      expect(page).to be_axe_clean
 
       find('[data-test="my-account-menu"]').click
       find('[data-test="dpc-registrations-profile-link"]', visible: false).click
@@ -66,6 +76,9 @@ RSpec.feature 'new user signs up for account' do
 
   context 'when not agreeing to terms' do
     scenario 'returns to the sign in page' do
+      visit new_user_session_path
+      click_link 'sign-up'
+
       fill_in :user_first_name, with: 'Clarissa'
       fill_in :user_last_name, with: 'Dalloway'
       fill_in :user_email, with: 'clarissa@example.com'
@@ -92,6 +105,9 @@ RSpec.feature 'new user signs up for account' do
 
   context 'when missing information on form' do
     scenario 'returns to the sign in page with error message' do
+      visit new_user_session_path
+      click_link 'sign-up'
+
       fill_in :user_first_name, with: 'Clarissa'
       fill_in :user_email, with: 'clarissa@example.com'
       fill_in :user_password, with: '1234567890'
@@ -115,6 +131,9 @@ RSpec.feature 'new user signs up for account' do
 
   context 'when using an email already registered' do
     scenario 'returns to the sign in page with error' do
+      visit new_user_session_path
+      click_link 'sign-up'
+
       create(:user, email: 'clarissa@example.com')
 
       fill_in :user_first_name, with: 'Clarissa'
@@ -141,6 +160,9 @@ RSpec.feature 'new user signs up for account' do
 
   context 'when user has not verified their email' do
     scenario 'unverified user tries and fails to sign in' do
+      visit new_user_session_path
+      click_link 'sign-up'
+
       fill_in :user_first_name, with: 'Clarissa'
       fill_in :user_last_name, with: 'Dalloway'
       fill_in :user_email, with: 'clarissa@example.com'

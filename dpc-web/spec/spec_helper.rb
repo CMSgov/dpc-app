@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 
 require 'axe-rspec'
+require 'capybara/rspec'
 require 'fakeredis/rspec'
 require 'simplecov'
+require 'webdrivers/chromedriver'
 
 SimpleCov.start 'rails' do
   track_files '**/{app,lib}/**/*.rb'
@@ -87,3 +89,5 @@ RSpec.configure do |config|
   # as the one that triggered the failure.
   # Kernel.srand config.seed
 end
+
+Capybara.javascript_driver = :selenium_headless
