@@ -4,8 +4,10 @@ en:
     pii_mismatch_text: Sorry, this invitation is for someone else.
     accepted_status: Organization already registered.
     accepted_text: If you meant to register a different organization, check your inbox for the correct request. Sign in to access details for this organization.
-    ao_expired_status:  Registration link expired
-    ao_expired_text: The registration link for %{org_name} is expired.
+    ao_expired_status:  Your registration link has expired.
+    ao_expired_text: You've exceeded the 48-hour expiration period.
+    ao_renewed_status: You already requested a new invite.
+    ao_renewed_text: Please check your email. We sent you a message which includes a new link.
     invalid_status:  Your registration link is invalid.
     invalid_text: Please check the email where you received this request and try again. Make sure you're using the same email address to register as the one where you received the invite. If the problem persists contact DPC at <a href="mailto:dpcinfo@cms.hhs.gov">dpcinfo@cms.hhs.gov</a>.
     ao_med_sanctions_status: You are in the Medicare Exclusions Database.

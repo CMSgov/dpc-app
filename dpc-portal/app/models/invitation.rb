@@ -71,15 +71,16 @@ class Invitation < ApplicationRecord
 
     service = AoVerificationService.new
     result = service.check_eligibility(provider_organization.npi,
-                                       Digest::SHA2.new(256).hexdigest(user_info['social_security_number'].tr('-', '')))
-    raise InvitationError, result[:failure_reason] unless result[:success]
+                                       user_info['social_security_number'].tr('-', ''))
+    raise VerificationError, result[:failure_reason] unless result[:success]
 
     result
   end
 
-  def unacceptable_reason
+  def unacceptable_reason # rubocop:disable Metrics/CyclomaticComplexity,Metrics/PerceivedComplexity
     return 'invalid' if cancelled?
     return 'accepted' if accepted?
+    return 'ao_renewed' if renewed? && authorized_official?
 
     if expired? && authorized_official?
       'ao_expired'
@@ -152,4 +153,4 @@ class Invitation < ApplicationRecord
   end
 end
 
-class InvitationError < StandardError; end
+class VerificationError < StandardError; end

@@ -432,7 +432,7 @@ RSpec.describe Invitation, type: :model do
         user_info = { 'social_security_number' => '900666666' }
         expect do
           ao_invite.ao_match?(user_info)
-        end.to raise_error(InvitationError, 'ao_med_sanctions')
+        end.to raise_error(VerificationError, 'ao_med_sanctions')
       end
       it 'should raise error if user_info missing ssn' do
         user_info = { 'social_security_number' => nil }
@@ -473,6 +473,10 @@ RSpec.describe Invitation, type: :model do
       invitation.accept!
       expect(invitation.unacceptable_reason).to eq 'accepted'
     end
+    it 'should be ao_renewed if renewed and authorized_official' do
+      invitation = create(:invitation, :ao, created_at: 49.hours.ago, status: :renewed)
+      expect(invitation.unacceptable_reason).to eq 'ao_renewed'
+    end
   end
 
   describe :renew do
@@ -486,6 +490,7 @@ RSpec.describe Invitation, type: :model do
         expect(new_invitation.invited_email).to eq invitation.invited_email
         expect(new_invitation.provider_organization).to eq invitation.provider_organization
         expect(new_invitation.unacceptable_reason).to be_falsey
+        expect(invitation.unacceptable_reason).to be 'ao_renewed'
         expect(invitation.reload).to be_renewed
       end
       it 'should log renewal' do

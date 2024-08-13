@@ -51,8 +51,11 @@ RSpec.describe Page::Invitations::BadInvitationComponent, type: :component do
       let(:status) { :pending }
       let(:invitation) { create(:invitation, :ao, provider_organization:, status:) }
       let(:component) { described_class.new(invitation, 'ao_expired') }
-      it 'should have organization name' do
-        is_expected.to include(invitation.provider_organization.name)
+      it 'should match header' do
+        header = <<~HTML
+          <h1>#{I18n.t('verification.ao_expired_status')}</h1>
+        HTML
+        is_expected.to include(normalize_space(header))
       end
       it 'should have renew button' do
         button_url = "/organizations/#{provider_organization.id}/invitations/#{invitation.id}/renew"
@@ -60,11 +63,16 @@ RSpec.describe Page::Invitations::BadInvitationComponent, type: :component do
       end
       context 'already renewed' do
         let(:status) { :renewed }
-        it 'should have disabled renew button' do
+        let(:component) { described_class.new(invitation, 'ao_renewed') }
+        it 'should match header' do
+          header = <<~HTML
+            <h1>#{I18n.t('verification.ao_renewed_status')}</h1>
+          HTML
+          is_expected.to include(normalize_space(header))
+        end
+        it 'should have no renew button' do
           button_url = "/organizations/#{provider_organization.id}/invitations/#{invitation.id}/renew"
-          disabled = %(<button class="usa-button" disabled="disabled" type="submit">)
-          is_expected.to include(button_url)
-          is_expected.to include(disabled)
+          is_expected.not_to include(button_url)
         end
       end
     end

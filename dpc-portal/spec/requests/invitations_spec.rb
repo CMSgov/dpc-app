@@ -39,9 +39,9 @@ RSpec.describe 'Invitations', type: :request do
           send(method, "/organizations/#{org.id}/invitations/#{invitation.id}/#{path_suffix}")
           expect(response).to be_forbidden
           if invitation.authorized_official?
-            expect(response.body).to include('Request new invite')
+            expect(response.body).to include('Request new link')
           else
-            expect(response.body).to_not include('Request new invite')
+            expect(response.body).to_not include('Request new link')
           end
         end
         it 'logs if invitation is expired' do
@@ -66,7 +66,7 @@ RSpec.describe 'Invitations', type: :request do
           invitation.accept!
           send method, "/organizations/#{org.id}/invitations/#{invitation.id}/#{path_suffix}"
           expect(response).to be_forbidden
-          expect(response.body).to_not include('Request new invite')
+          expect(response.body).to_not include('Request new link')
         end
       end
       it 'should show warning page if accepted' do
@@ -271,6 +271,15 @@ RSpec.describe 'Invitations', type: :request do
             post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"
             expect(response).to be_forbidden
             expect(response.body).to include('<span class="usa-step-indicator__current-step">3</span>')
+          end
+          it 'logs failure' do
+            allow(Rails.logger).to receive(:info)
+            expect(Rails.logger).to receive(:info).with(['AO Check Fail',
+                                                         { actionContext: LoggingConstants::ActionContext::Registration,
+                                                           actionType: LoggingConstants::ActionType::FailCpiApiGwCheck,
+                                                           verificationReason: 'user_not_authorized_official',
+                                                           invitation: invitation.id }])
+            post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"
           end
         end
 
