@@ -37,10 +37,7 @@ class InvitationsController < ApplicationController
                        { actionContext: LoggingConstants::ActionContext::Registration,
                          actionType: LoggingConstants::ActionType::UserLoggedIn }])
 
-    if @invitation.authorized_official?
-      @user.update(verification_status: 'approved')
-      @organization.update(verification_status: 'approved')
-    end
+    verify_ao
     render(Page::Invitations::SuccessComponent.new(@organization, @invitation))
   end
 
@@ -229,4 +226,11 @@ def redirect_host
   else
     "https://#{ENV.fetch('ENV', nil)}.dpc.cms.gov"
   end
+end
+
+def verify_ao
+  return unless @invitation.authorized_official?
+
+  @user.update(verification_status: 'approved')
+  @organization.update(verification_status: 'approved')
 end
