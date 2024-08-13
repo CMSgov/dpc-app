@@ -94,6 +94,8 @@ class InvitationsController < ApplicationController
                        { actionContext: LoggingConstants::ActionContext::Registration,
                          actionType: LoggingConstants::ActionType::AoLinkedToOrg }])
     @invitation.accept!
+    @user.update(verification_status: 'approved')
+    @organization.update(verification_status: 'approved')
   end
 
   # rubocop:disable Metrics/AbcSize

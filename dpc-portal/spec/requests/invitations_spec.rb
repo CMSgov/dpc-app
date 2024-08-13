@@ -504,6 +504,23 @@ RSpec.describe 'Invitations', type: :request do
         let(:invitation) { create(:invitation, :cd, verification_code:) }
         let(:success_params) { { verification_code: } }
       end
+      context :success do
+        let(:invitation) { create(:invitation, :cd) }
+        let(:org) { invitation.provider_organization }
+        before do
+          log_in
+          stub_user_info
+          get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
+          post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"
+        end
+        it 'should not save verification_status on user and org' do
+          create(:user, provider: :openid_connect, uid: user_info['sub'], pac_id: :foo)
+          post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+          user = User.find_by(uid: user_info['sub'])
+          expect(user.verification_status).to be_nil
+          expect(org.reload.verification_status).to be_nil
+        end
+      end
     end
     context :ao do
       it_behaves_like 'an invitation endpoint', :post, 'register' do
@@ -544,6 +561,12 @@ RSpec.describe 'Invitations', type: :request do
           links = assigns(:links)
           expect(links.size).to eq 1
           expect(links.first.provider_organization).to eq org
+        end
+        it 'should save verification_status on user and org' do
+          post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+          user = User.find_by(uid: user_info['sub'])
+          expect(user.verification_status).to eq('approved')
+          expect(org.reload.verification_status).to eq('approved')
         end
       end
     end
