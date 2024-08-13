@@ -37,8 +37,6 @@ end
 RSpec.configure do |config|
   config.include FactoryBot::Syntax::Methods
 
-  config.include Capybara::DSL
-
   # Devise test helpers
   config.include Devise::Test::IntegrationHelpers, type: :request
 
