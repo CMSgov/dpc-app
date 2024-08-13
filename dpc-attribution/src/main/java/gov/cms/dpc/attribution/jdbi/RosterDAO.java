@@ -1,9 +1,9 @@
 package gov.cms.dpc.attribution.jdbi;
 
 import gov.cms.dpc.common.entities.*;
+import gov.cms.dpc.common.hibernate.attribution.DPCAbstractDAO;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
 import gov.cms.dpc.fhir.FHIRExtractors;
-import io.dropwizard.hibernate.AbstractDAO;
 import org.hibernate.query.Query;
 
 import javax.inject.Inject;
@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public class RosterDAO extends AbstractDAO<RosterEntity> {
+public class RosterDAO extends DPCAbstractDAO<RosterEntity> {
 
     @Inject
     public RosterDAO(DPCManagedSessionFactory factory) {
@@ -26,11 +26,6 @@ public class RosterDAO extends AbstractDAO<RosterEntity> {
 
     public Optional<RosterEntity> getEntity(UUID rosterID) {
         return Optional.ofNullable(this.get(rosterID));
-    }
-
-    public void refresh(RosterEntity roster) {
-        currentSession().flush();
-        currentSession().refresh(roster);
     }
 
     public List<RosterEntity> findEntities(UUID resourceID, UUID organizationID, String providerNPI, String patientReference) {
