@@ -114,8 +114,8 @@ public class GroupResourceTest extends AbstractAttributionTest {
      */
     @Test
     public void testAddToRosterResponse() {
-        final Practitioner practitioner = createPractitioner("1211111111");
-        final Patient patient1 = createPatient("0O00O00OO02", DEFAULT_ORG_ID);
+        final Practitioner practitioner = createPractitioner(NPIUtil.generateNPI());
+        final Patient patient1 = createPatient("0O00O00OO04", DEFAULT_ORG_ID);
         final Group groupForParams = SeedProcessor.createBaseAttributionGroup(FHIRExtractors.getProviderNPI(practitioner), DEFAULT_ORG_ID);
         final MethodOutcome methodOutcome = client.create()
                 .resource(groupForParams)
