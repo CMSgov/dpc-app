@@ -5,7 +5,7 @@ class InvitationsController < ApplicationController
   before_action :load_organization
   before_action :load_invitation
   before_action :validate_invitation, except: %i[renew]
-  before_action :check_for_token, except: %i[login renew show]
+  before_action :check_for_token, except: %i[login renew show fake_login]
   before_action :invitation_matches_user, only: %i[accept]
   before_action :invitation_matches_conditions, only: %i[confirm]
 
@@ -64,6 +64,12 @@ class InvitationsController < ApplicationController
       flash[:alert] = 'Unable to create new invitation'
     end
     redirect_to accept_organization_invitation_url(@organization, @invitation)
+  end
+
+  def fake_login
+    session[:login_dot_gov_token] = 'token'
+    session[:login_dot_gov_token_exp] = 2.days.from_now
+    render plain: :foo
   end
 
   private
@@ -128,6 +134,7 @@ class InvitationsController < ApplicationController
   end
 
   def invitation_matches_user
+    puts 'here'
     user_info = UserInfoService.new.user_info(session)
     unless @invitation.match_user?(user_info)
       render(Page::Invitations::BadInvitationComponent.new(@invitation, 'pii_mismatch'),

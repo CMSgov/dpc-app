@@ -29,6 +29,7 @@ Rails.application.routes.draw do
       get 'success', on: :member
     end
     resources :invitations, only: [:show] do
+      get 'fake_login', on: :member
       get 'accept', on: :member
       post 'confirm', on: :member
       post 'register', on: :member

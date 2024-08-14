@@ -2,6 +2,7 @@ require 'rails_helper'
 
 RSpec.describe 'Accessibility', type: :system do
   include  Devise::Test::IntegrationHelpers
+  include DpcClientSupport
   before do
     driven_by(:selenium_headless)
   end
@@ -14,9 +15,25 @@ RSpec.describe 'Accessibility', type: :system do
   end
 
   context do :organizations
+    let(:dpc_api_organization_id) { 'some-gnarly-guid' }
     let!(:user) { create(:user) }
-    let!(:org) { create(:provider_organization) }
-    before { sign_in user }
+    let!(:org) { create(:provider_organization, dpc_api_organization_id:) }
+    let(:mock_ctm) { instance_double(ClientTokenManager) }
+    let(:mock_pkm) { instance_double(PublicKeyManager) }
+    let(:mock_iam) { instance_double(IpAddressManager) }
+    let(:tokens) { [] }
+    let(:keys) { [] }
+    let(:ip_addresses) { [] }
+
+    before do
+      allow(ClientTokenManager).to receive(:new).and_return(mock_ctm)
+      allow(PublicKeyManager).to receive(:new).and_return(mock_pkm)
+      allow(IpAddressManager).to receive(:new).and_return(mock_iam)
+      allow(mock_ctm).to receive(:client_tokens).and_return(tokens)
+      allow(mock_pkm).to receive(:public_keys).and_return(keys)
+      allow(mock_iam).to receive(:ip_addresses).and_return(ip_addresses)
+      sign_in user
+    end
     it 'should work' do
       visit '/organizations'
       expect(page).to have_text("You don't have any organizations to show.")
@@ -32,20 +49,33 @@ RSpec.describe 'Accessibility', type: :system do
       it 'should show tos' do
         visit "/organizations/#{org.id}"
         expect(page).to have_text("Terms of Service")
+        expect(page).to_not have_text("You can assign anyone as a CD")
+      end
+      it 'can sign tos' do
+        visit "/organizations/#{org.id}"
+        page.find('.usa-button', text: 'I have read and accepted the Terms of Service').click
+        expect(page).to_not have_text("Terms of Service")
+        expect(page).to have_text("You can assign anyone as a CD")
       end
       context :after_tos do
         before { org.update!(terms_of_service_accepted_by: user) }
-        it 'should show organization page with no cds or credentials' do
+        it 'should show organization page with no cds' do
           visit "/organizations/#{org.id}"
           expect(page).to have_text("You can assign anyone as a CD")
           expect(page).to have_css('#credential_delegates')
           expect(page).to_not have_css('#credentials')
           expect(page).to_not have_css('#active-cd-table')
           expect(page).to_not have_css('#pending-cd-table')
+        end
+        it 'should show organization page with no credentials' do
+          visit "/organizations/#{org.id}"
           page.execute_script('make_current(1)')
           expect(page).to have_text('you must create a unique client token')
           expect(page).to_not have_css('#credential_delegates')
           expect(page).to have_css('#credentials')
+          expect(page).to_not have_css('#client-tokens-table')
+          expect(page).to_not have_css('#public-keys-table')
+          expect(page).to_not have_css('#public-ips-table')
         end
         context :with_credential_delegates do
           let(:active_cd) { create(:user) }
@@ -59,7 +89,121 @@ RSpec.describe 'Accessibility', type: :system do
           end
         end
         context :with_credentials do
+          let(:tokens) { default_get_client_tokens['entities'] }
+          let(:keys) { default_get_public_keys['entities'] }
+          let(:ip_addresses) { default_get_ip_addresses['entities'] }
+          it 'should show credentials' do
+            visit "/organizations/#{org.id}"
+            page.execute_script('make_current(1)')
+            expect(page).to have_css('#client-tokens-table')
+            expect(page).to have_css('#public-keys-table')
+            expect(page).to have_css('#public-ips-table')
+          end
         end
+        context :client_tokens do
+          let(:tokens) { default_get_client_tokens['entities'] }
+          it 'should show new page' do
+            visit "/organizations/#{org.id}/client_tokens/new"
+            expect(page).to have_text('Create a new client token')
+            expect(page).to_not have_text('Label required')
+          end
+          it 'should show error page' do
+            visit "/organizations/#{org.id}/client_tokens/new"
+            page.all('.usa-button')[1].click
+            expect(page).to have_text('Label required')
+          end
+          it 'should show success page' do
+            expect(mock_ctm).to receive(:create_client_token).and_return(true)
+            expect(mock_ctm).to receive(:client_token).and_return(tokens.first)
+            visit "/organizations/#{org.id}/client_tokens/new"
+            page.fill_in 'label', with: 'new token'
+            page.all('.usa-button')[1].click
+            expect(page).to have_text('Client token created')
+          end
+        end
+        context :public_keys do
+          let(:keys) { default_get_public_keys['entities'] }
+          it 'should show new page' do
+            visit "/organizations/#{org.id}/public_keys/new"
+            expect(page).to have_text('Add Public Key')
+            expect(page).to_not have_text('Required values missing')
+          end
+          it 'should show error page' do
+            visit "/organizations/#{org.id}/public_keys/new"
+            page.all('.usa-button')[1].click
+            expect(page).to have_text('Required values missing')
+          end
+          it 'should show success page' do
+            expect(mock_pkm).to receive(:create_public_key).and_return({ response: { message: { 'id' => 'foo' } } })
+            visit "/organizations/#{org.id}/public_keys/new"
+            page.fill_in 'label', with: 'new key'
+            page.fill_in 'public_key', with: 'key'
+            page.all('.usa-button')[1].click
+            expect(page).to have_text('Public key successfully created')
+          end
+        end
+        context :ip_addresses do
+          let(:keys) { default_get_ip_addresses['entities'] }
+          it 'should show new page' do
+            visit "/organizations/#{org.id}/ip_addresses/new"
+            expect(page).to have_text('Add Public IP Address')
+            expect(page).to_not have_text('Label required')
+          end
+          it 'should show error page' do
+            expect(mock_iam).to receive(:create_ip_address).and_return({ })
+            expect(mock_iam).to receive(:errors).and_return(['bad'])
+            visit "/organizations/#{org.id}/ip_addresses/new"
+            page.find_button(value: 'Add IP').click
+            expect(page).to have_text('IP address could not be created')
+          end
+          it 'should show success page' do
+            expect(mock_iam).to receive(:create_ip_address).and_return({ response: { message: { 'id' => 'foo' } } })
+            visit "/organizations/#{org.id}/ip_addresses/new"
+            page.find_button(value: 'Add IP').click
+            expect(page).to have_text('IP address successfully created')
+          end
+        end
+        context :credential_delegate_invitation do
+          it 'should show new page' do          
+            visit "/organizations/#{org.id}/credential_delegate_invitations/new"
+            expect(page).to have_text('Send invite')
+            expect(page).to_not have_text("can't be blank")
+          end
+          it 'should show error page' do
+            visit "/organizations/#{org.id}/credential_delegate_invitations/new"
+            page.find('.usa-button', text: 'Send invite').click
+            page.find_button(value: 'Yes, assign CD').click
+            expect(page).to have_text("can't be blank")
+          end
+          it 'should show success page' do
+            visit "/organizations/#{org.id}/credential_delegate_invitations/new"
+            page.fill_in 'invited_given_name', with: 'John'
+            page.fill_in 'invited_family_name', with: 'Lennon'
+            page.fill_in 'invited_email', with: 'john@beatles.com'
+            page.fill_in 'invited_email_confirmation', with: 'john@beatles.com'
+            page.fill_in 'phone_raw', with: '9999999999'
+            page.find('.usa-button', text: 'Send invite').click
+            page.find_button(value: 'Yes, assign CD').click
+            expect(page).to_not have_text("can't be blank")
+            expect(page).to have_text('Credential delegate invite sent')
+          end
+        end
+      end
+    end
+    context :ao_invitation_flow, :focus do
+      let!(:invitation) { create(:invitation, :ao, provider_organization: org) }
+      it 'should show intro page' do
+        visit "/organizations/#{org.id}/invitations/#{invitation.id}"
+        expect(page).to have_text('Not be listed on the Medicare Exclusions Database')
+      end
+      it 'should show login page' do
+        visit "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
+        expect(page).to have_text('Sign in or create')
+      end
+      it 'should show accept page' do
+        visit "/organizations/#{org.id}/invitations/#{invitation.id}/fake_login"
+        visit "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
+        expect(page).to have_text('foo')
       end
     end
   end
