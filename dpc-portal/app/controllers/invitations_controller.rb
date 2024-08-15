@@ -134,7 +134,6 @@ class InvitationsController < ApplicationController
   end
 
   def invitation_matches_user
-    puts 'here'
     user_info = UserInfoService.new.user_info(session)
     unless @invitation.match_user?(user_info)
       render(Page::Invitations::BadInvitationComponent.new(@invitation, 'pii_mismatch'),

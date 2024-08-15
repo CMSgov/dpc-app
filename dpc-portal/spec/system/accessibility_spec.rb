@@ -190,8 +190,20 @@ RSpec.describe 'Accessibility', type: :system do
         end
       end
     end
-    context :ao_invitation_flow, :focus do
+    context :ao_invitation_flow do
       let!(:invitation) { create(:invitation, :ao, provider_organization: org) }
+      let!(:mock_uis) { instance_double(UserInfoService) }
+      let(:user_info) do
+        {
+          'sub' => 'some-guid',
+          'all_emails' => [invitation.invited_email],
+          'social_security_number' => '900111111'
+        }
+      end
+      before do
+        allow(UserInfoService).to receive(:new).and_return(mock_uis)
+        allow(mock_uis).to receive(:user_info).and_return(user_info)
+      end
       it 'should show intro page' do
         visit "/organizations/#{org.id}/invitations/#{invitation.id}"
         expect(page).to have_text('Not be listed on the Medicare Exclusions Database')
@@ -203,7 +215,20 @@ RSpec.describe 'Accessibility', type: :system do
       it 'should show accept page' do
         visit "/organizations/#{org.id}/invitations/#{invitation.id}/fake_login"
         visit "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
-        expect(page).to have_text('foo')
+        expect(page).to have_text('Step 2')
+      end
+      it 'should show confirm page' do
+        visit "/organizations/#{org.id}/invitations/#{invitation.id}/fake_login"
+        visit "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
+        page.find('.usa-button', text: 'Continue to register').click        
+        expect(page).to have_text('Step 3')
+      end
+      it 'should show register page' do
+        visit "/organizations/#{org.id}/invitations/#{invitation.id}/fake_login"
+        visit "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
+        page.find('.usa-button', text: 'Continue to register').click        
+        page.find('.usa-button', text: 'Complete registration').click        
+        expect(page).to have_text('Step 4')
       end
     end
   end
