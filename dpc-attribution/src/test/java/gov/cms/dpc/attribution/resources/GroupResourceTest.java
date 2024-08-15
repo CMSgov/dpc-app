@@ -109,6 +109,48 @@ public class GroupResourceTest extends AbstractAttributionTest {
         assertEquals(patient2.getIdElement().getValueAsString(), updatedGroup.getMemberFirstRep().getEntity().getReference());
     }
 
+    /**
+     * When $add is called and a new patient is added to a roster, it should show up in the response
+     */
+    @Test
+    public void testAddToRosterResponse() {
+        final Practitioner practitioner = createPractitioner(NPIUtil.generateNPI());
+        final Patient patient1 = createPatient("0O00O00OO04", DEFAULT_ORG_ID);
+        final Group groupForParams = SeedProcessor.createBaseAttributionGroup(FHIRExtractors.getProviderNPI(practitioner), DEFAULT_ORG_ID);
+        final MethodOutcome methodOutcome = client.create()
+                .resource(groupForParams)
+                .encodedJson()
+                .execute();
+        assertTrue(methodOutcome.getCreated());
+        final Group createdGroup = (Group) methodOutcome.getResource();
+
+        final Parameters parametersNoPatient = new Parameters();
+        parametersNoPatient.addParameter().setResource(groupForParams);
+        Group addMemberResponse = client
+                .operation()
+                .onInstance(createdGroup.getIdElement())
+                .named("$add")
+                .withParameters(parametersNoPatient)
+                .returnResourceType(Group.class)
+                .encodedJson()
+                .execute();
+        assertEquals(0, addMemberResponse.getMember().size());
+
+        groupForParams.addMember().setEntity(new Reference(patient1.getIdElement()));
+        final Parameters parametersWithPatient = new Parameters();
+        parametersWithPatient.addParameter().setResource(groupForParams);
+
+        addMemberResponse = client
+                .operation()
+                .onInstance(createdGroup.getIdElement())
+                .named("$add")
+                .withParameters(parametersNoPatient)
+                .returnResourceType(Group.class)
+                .encodedJson()
+                .execute();
+        assertEquals(1, addMemberResponse.getMember().size());
+    }
+
     @Test
     public void testAddMembersToRosterPatientLimit() {
         final Practitioner practitioner = createPractitioner("1112111111");
@@ -143,9 +185,11 @@ public class GroupResourceTest extends AbstractAttributionTest {
                 .execute());
 
         //Add same patient to existing group, should not throw an error nor should it update any members
+
         group.getMember().clear();
         group.addMember().setEntity(new Reference(patient1.getIdElement()));
 
+        // patient is already in group, this doesn't increase member size
         Group addMember = client
                 .operation()
                 .onInstance(createdGroup.getIdElement())
