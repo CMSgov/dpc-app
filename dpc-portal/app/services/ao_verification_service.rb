@@ -54,7 +54,10 @@ class AoVerificationService
   end
 
   def check_sanctions_response(response)
-    return false if waiver?(response.dig('provider', 'waiverInfo'))
+    if waiver?(response.dig('provider', 'waiverInfo'))
+      log_waiver(response.dig('provider'))
+      return false
+    end
 
     med_sanctions_records = response.dig('provider', 'medSanctions')
     unless med_sanctions_records.nil? || med_sanctions_records.empty?
@@ -105,6 +108,21 @@ class AoVerificationService
     when :pac_id
       role['roleCode'] == '10' && role['pacId'] == identifier
     end
+  end
+end
+
+def log_waiver(provider)
+  npi = provider.dig('npi')
+  if provider.dig('providerType') == 'org'
+    Rails.logger.info(['Org has a waiver',
+    { actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
+      actionType: LoggingConstants::ActionType::OrgHasWaiver,
+      npi: npi}])
+  else
+    Rails.logger.info(['AO has a waiver',
+    { actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
+      actionType: LoggingConstants::ActionType::AoHasWaiver,
+      npi: npi}])
   end
 end
 
