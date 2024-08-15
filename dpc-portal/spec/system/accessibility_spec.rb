@@ -17,7 +17,7 @@ RSpec.describe 'Accessibility', type: :system do
   context do :organizations
     let(:dpc_api_organization_id) { 'some-gnarly-guid' }
     let!(:user) { create(:user) }
-    let!(:org) { create(:provider_organization, dpc_api_organization_id:) }
+    let!(:org) { create(:provider_organization, dpc_api_organization_id:, name: 'Health Hut') }
     let(:mock_ctm) { instance_double(ClientTokenManager) }
     let(:mock_pkm) { instance_double(PublicKeyManager) }
     let(:mock_iam) { instance_double(IpAddressManager) }
@@ -34,28 +34,30 @@ RSpec.describe 'Accessibility', type: :system do
       allow(mock_iam).to receive(:ip_addresses).and_return(ip_addresses)
       sign_in user
     end
-    it 'should work' do
+    it 'empty list' do
       visit '/organizations'
       expect(page).to have_text("You don't have any organizations to show.")
-      #      expect(page).to be_axe_clean
+      expect(page).to be_axe_clean
     end
     context :with_organizations do
       let!(:ao_org_link) { create(:ao_org_link, user:, provider_organization: org) }
       it 'should show organizations' do
         visit '/organizations'
         expect(page).to_not have_text("You don't have any organizations to show.")
-        #        expect(page).to be_axe_clean
+        expect(page).to be_axe_clean
       end
       it 'should show tos' do
         visit "/organizations/#{org.id}"
         expect(page).to have_text("Terms of Service")
         expect(page).to_not have_text("You can assign anyone as a CD")
+        expect(page).to be_axe_clean
       end
       it 'can sign tos' do
         visit "/organizations/#{org.id}"
         page.find('.usa-button', text: 'I have read and accepted the Terms of Service').click
         expect(page).to_not have_text("Terms of Service")
         expect(page).to have_text("You can assign anyone as a CD")
+        expect(page).to be_axe_clean
       end
       context :after_tos do
         before { org.update!(terms_of_service_accepted_by: user) }
@@ -66,6 +68,7 @@ RSpec.describe 'Accessibility', type: :system do
           expect(page).to_not have_css('#credentials')
           expect(page).to_not have_css('#active-cd-table')
           expect(page).to_not have_css('#pending-cd-table')
+          expect(page).to be_axe_clean
         end
         it 'should show organization page with no credentials' do
           visit "/organizations/#{org.id}"
@@ -76,6 +79,7 @@ RSpec.describe 'Accessibility', type: :system do
           expect(page).to_not have_css('#client-tokens-table')
           expect(page).to_not have_css('#public-keys-table')
           expect(page).to_not have_css('#public-ips-table')
+          expect(page).to be_axe_clean
         end
         context :with_credential_delegates do
           let(:active_cd) { create(:user) }
@@ -86,6 +90,7 @@ RSpec.describe 'Accessibility', type: :system do
             expect(page).to have_text("You can assign anyone as a CD")
             expect(page).to have_css('#active-cd-table')
             expect(page).to have_css('#pending-cd-table')
+            expect(page).to be_axe_clean
           end
         end
         context :with_credentials do
@@ -98,6 +103,7 @@ RSpec.describe 'Accessibility', type: :system do
             expect(page).to have_css('#client-tokens-table')
             expect(page).to have_css('#public-keys-table')
             expect(page).to have_css('#public-ips-table')
+            expect(page).to be_axe_clean
           end
         end
         context :client_tokens do
@@ -106,11 +112,13 @@ RSpec.describe 'Accessibility', type: :system do
             visit "/organizations/#{org.id}/client_tokens/new"
             expect(page).to have_text('Create a new client token')
             expect(page).to_not have_text('Label required')
+            expect(page).to be_axe_clean
           end
           it 'should show error page' do
             visit "/organizations/#{org.id}/client_tokens/new"
             page.all('.usa-button')[1].click
             expect(page).to have_text('Label required')
+            expect(page).to be_axe_clean
           end
           it 'should show success page' do
             expect(mock_ctm).to receive(:create_client_token).and_return(true)
@@ -119,6 +127,7 @@ RSpec.describe 'Accessibility', type: :system do
             page.fill_in 'label', with: 'new token'
             page.all('.usa-button')[1].click
             expect(page).to have_text('Client token created')
+            expect(page).to be_axe_clean
           end
         end
         context :public_keys do
@@ -127,11 +136,13 @@ RSpec.describe 'Accessibility', type: :system do
             visit "/organizations/#{org.id}/public_keys/new"
             expect(page).to have_text('Add Public Key')
             expect(page).to_not have_text('Required values missing')
+            expect(page).to be_axe_clean
           end
           it 'should show error page' do
             visit "/organizations/#{org.id}/public_keys/new"
             page.all('.usa-button')[1].click
             expect(page).to have_text('Required values missing')
+            expect(page).to be_axe_clean
           end
           it 'should show success page' do
             expect(mock_pkm).to receive(:create_public_key).and_return({ response: { message: { 'id' => 'foo' } } })
@@ -140,6 +151,7 @@ RSpec.describe 'Accessibility', type: :system do
             page.fill_in 'public_key', with: 'key'
             page.all('.usa-button')[1].click
             expect(page).to have_text('Public key successfully created')
+            expect(page).to be_axe_clean
           end
         end
         context :ip_addresses do
@@ -148,6 +160,7 @@ RSpec.describe 'Accessibility', type: :system do
             visit "/organizations/#{org.id}/ip_addresses/new"
             expect(page).to have_text('Add Public IP Address')
             expect(page).to_not have_text('Label required')
+            expect(page).to be_axe_clean
           end
           it 'should show error page' do
             expect(mock_iam).to receive(:create_ip_address).and_return({ })
@@ -155,12 +168,14 @@ RSpec.describe 'Accessibility', type: :system do
             visit "/organizations/#{org.id}/ip_addresses/new"
             page.find_button(value: 'Add IP').click
             expect(page).to have_text('IP address could not be created')
+            expect(page).to be_axe_clean
           end
           it 'should show success page' do
             expect(mock_iam).to receive(:create_ip_address).and_return({ response: { message: { 'id' => 'foo' } } })
             visit "/organizations/#{org.id}/ip_addresses/new"
             page.find_button(value: 'Add IP').click
             expect(page).to have_text('IP address successfully created')
+            expect(page).to be_axe_clean
           end
         end
         context :credential_delegate_invitation do
@@ -168,12 +183,14 @@ RSpec.describe 'Accessibility', type: :system do
             visit "/organizations/#{org.id}/credential_delegate_invitations/new"
             expect(page).to have_text('Send invite')
             expect(page).to_not have_text("can't be blank")
+            expect(page).to be_axe_clean
           end
           it 'should show error page' do
             visit "/organizations/#{org.id}/credential_delegate_invitations/new"
             page.find('.usa-button', text: 'Send invite').click
             page.find_button(value: 'Yes, assign CD').click
             expect(page).to have_text("can't be blank")
+            expect(page).to be_axe_clean
           end
           it 'should show success page' do
             visit "/organizations/#{org.id}/credential_delegate_invitations/new"
@@ -186,6 +203,7 @@ RSpec.describe 'Accessibility', type: :system do
             page.find_button(value: 'Yes, assign CD').click
             expect(page).to_not have_text("can't be blank")
             expect(page).to have_text('Credential delegate invite sent')
+            expect(page).to be_axe_clean
           end
         end
       end
@@ -207,21 +225,25 @@ RSpec.describe 'Accessibility', type: :system do
       it 'should show intro page' do
         visit "/organizations/#{org.id}/invitations/#{invitation.id}"
         expect(page).to have_text('Not be listed on the Medicare Exclusions Database')
+        expect(page).to be_axe_clean
       end
       it 'should show login page' do
         visit "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
         expect(page).to have_text('Sign in or create')
+        expect(page).to be_axe_clean
       end
       it 'should show accept page' do
         visit "/organizations/#{org.id}/invitations/#{invitation.id}/fake_login"
         visit "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
         expect(page).to have_text('Step 2')
+        expect(page).to be_axe_clean
       end
       it 'should show confirm page' do
         visit "/organizations/#{org.id}/invitations/#{invitation.id}/fake_login"
         visit "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
         page.find('.usa-button', text: 'Continue to register').click        
         expect(page).to have_text('Step 3')
+        expect(page).to be_axe_clean
       end
       it 'should show register page' do
         visit "/organizations/#{org.id}/invitations/#{invitation.id}/fake_login"
@@ -229,6 +251,7 @@ RSpec.describe 'Accessibility', type: :system do
         page.find('.usa-button', text: 'Continue to register').click        
         page.find('.usa-button', text: 'Complete registration').click        
         expect(page).to have_text('Step 4')
+        expect(page).to be_axe_clean
       end
     end
   end
