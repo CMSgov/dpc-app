@@ -11,7 +11,7 @@ test:
 
 development:
   <<: *default_settings
-  log_file_name: dev_new_relic.log
+  log_file_name: dev_newrelic.log
   app_name: dpc-web-portal-local
 
 production:
