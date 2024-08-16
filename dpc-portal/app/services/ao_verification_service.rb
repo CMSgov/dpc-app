@@ -9,9 +9,9 @@ class AoVerificationService
   end
 
   def check_eligibility(organization_npi, ssn)
-    ao_role = check_ao_eligibility(organization_npi, :ssn, ssn)
+    response = check_ao_eligibility(organization_npi, :ssn, ssn)
 
-    { success: true, ao_role: }
+    { success: true, ao_role: response[:ao_role], has_ao_waiver: response[:has_ao_waiver], has_org_waiver: response[:has_org_waiver] }
   rescue OAuth2::Error => e
     if e.response.status == 500
       Rails.logger.error 'API Gateway Error during AO Verification'
@@ -29,45 +29,46 @@ class AoVerificationService
   end
 
   def check_ao_eligibility(organization_npi, identifier_type, identifier)
-    ao_role = get_authorized_official_role(organization_npi, identifier_type, identifier)
-    check_individual_med_sanctions(ao_role['ssn'])
-    ao_role
+    ao_role_response = get_authorized_official_role(organization_npi, identifier_type, identifier)
+    sanctions = check_individual_med_sanctions(ao_role_response[:role]['ssn'])
+    {ao_role: ao_role_response[:role], has_org_waiver: ao_role_response[:has_org_waiver], has_ao_waiver: sanctions[:has_ao_waiver]}
   end
 
   def get_approved_enrollments(organization_npi)
-    response = @cpi_api_gw_client.fetch_profile(organization_npi)
-    raise AoException, 'bad_npi' if response['code'] == '404'
+    profile = @cpi_api_gw_client.fetch_profile(organization_npi)
+    raise AoException, 'bad_npi' if profile['code'] == '404'
 
-    raise AoException, 'org_med_sanctions' if check_sanctions_response(response)
+    sanctions = check_sanctions_response(profile)
+    raise AoException, 'org_med_sanctions' if sanctions[:is_sanctioned]
 
-    enrollments = response.dig('provider', 'enrollments')&.select { |enrollment| enrollment['status'] == 'APPROVED' }
+    enrollments = profile.dig('provider', 'enrollments')&.select { |enrollment| enrollment['status'] == 'APPROVED' }
     raise AoException, 'no_approved_enrollment' if enrollments.empty?
 
-    enrollments
+    {enrollments: enrollments, has_org_waiver: sanctions[:has_waiver]}
   end
 
   private
 
   def check_individual_med_sanctions(ao_ssn)
     response = @cpi_api_gw_client.fetch_med_sanctions_and_waivers_by_ssn(ao_ssn)
-    raise AoException, 'ao_med_sanctions' if check_sanctions_response(response)
+    sanctions = check_sanctions_response(response)
+    raise AoException, 'ao_med_sanctions' if sanctions[:is_sanctioned]
+    {is_sanctioned: sanctions[:is_sanctioned], has_ao_waiver: sanctions[:has_waiver]}
   end
 
   def check_sanctions_response(response)
-    if waiver?(response.dig('provider', 'waiverInfo'))
-      log_waiver(response.dig('provider'))
-      return false
-    end
+    has_waiver = waiver?(response.dig('provider', 'waiverInfo'))
+    return {is_sanctioned: false, has_waiver: true} if has_waiver
 
     med_sanctions_records = response.dig('provider', 'medSanctions')
     unless med_sanctions_records.nil? || med_sanctions_records.empty?
       current_med_sanction = med_sanctions_records.find do |record|
         record['reinstatementDate'].nil? || Date.parse(record['reinstatementDate']) > Date.today
       end
-      return true if current_med_sanction.present?
+      return {is_sanctioned: true, has_waiver: false} if current_med_sanction.present?
     end
 
-    false
+    {is_sanctioned: false, has_waiver: false}
   end
 
   def waiver?(waivers_list)
@@ -80,15 +81,16 @@ class AoVerificationService
   end
 
   def get_authorized_official_role(organization_npi, identifier_type, identifier)
-    response = @cpi_api_gw_client.fetch_profile(organization_npi)
-    raise AoException, 'bad_npi' if response['code'] == '404'
+    profile = @cpi_api_gw_client.fetch_profile(organization_npi)
+    raise AoException, 'bad_npi' if profile['code'] == '404'
 
-    raise AoException, 'org_med_sanctions' if check_sanctions_response(response)
+    sanctions = check_sanctions_response(profile)
+    raise AoException, 'org_med_sanctions' if sanctions[:is_sanctioned]
 
-    enrollments = response.dig('provider', 'enrollments')&.select { |enrollment| enrollment['status'] == 'APPROVED' }
+    enrollments = profile.dig('provider', 'enrollments')&.select { |enrollment| enrollment['status'] == 'APPROVED' }
     raise AoException, 'no_approved_enrollment' if enrollments.blank?
 
-    role_from_enrollments(enrollments, identifier_type, identifier)
+    {role: role_from_enrollments(enrollments, identifier_type, identifier), has_org_waiver: sanctions[:has_waiver]}
   end
 
   def role_from_enrollments(enrollments, identifier_type, identifier)
@@ -108,21 +110,6 @@ class AoVerificationService
     when :pac_id
       role['roleCode'] == '10' && role['pacId'] == identifier
     end
-  end
-end
-
-def log_waiver(provider)
-  npi = provider.dig('npi')
-  if provider.dig('providerType') == 'org'
-    Rails.logger.info(['Org has a waiver',
-    { actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
-      actionType: LoggingConstants::ActionType::OrgHasWaiver,
-      npi: npi}])
-  else
-    Rails.logger.info(['AO has a waiver',
-    { actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
-      actionType: LoggingConstants::ActionType::AoHasWaiver,
-      npi: npi}])
   end
 end
 

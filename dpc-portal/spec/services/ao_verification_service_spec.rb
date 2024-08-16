@@ -7,11 +7,13 @@ describe AoVerificationService do
   let(:service) { AoVerificationService.new }
   let(:good_org_npi) { '3077494235' }
   let(:valid_ao_ssn) { '900111111' }
+  let(:waived_ao_ssn) { '900777777' }
+  let(:waived_org_npi) { '3098168743' }
 
   describe '.check_eligibility' do
     it 'succeeds with good input' do
       response = service.check_eligibility(good_org_npi, valid_ao_ssn)
-      expect(response).to include({ success: true })
+      expect(response).to include({ success: true, has_ao_waiver: false, has_org_waiver: false })
       expect(response[:ao_role]).to be_present
     end
 
@@ -52,15 +54,13 @@ describe AoVerificationService do
     end
 
     it 'does not return an error if user has a med sanction AND waiver' do
-      waived_ao_ssn = '900777777'
       response = service.check_eligibility(good_org_npi, waived_ao_ssn)
-      expect(response).to include({ success: true })
+      expect(response).to include({ success: true, has_ao_waiver: true, has_org_waiver: false })
     end
 
     it 'does not return an error if org has a med sanction AND waiver' do
-      waived_org_npi = '3098168743'
       response = service.check_eligibility(waived_org_npi, valid_ao_ssn)
-      expect(response).to include({ success: true })
+      expect(response).to include({ success: true, has_ao_waiver: false, has_org_waiver: true })
     end
 
     it 'returns an error on Gateway server error' do
@@ -87,9 +87,18 @@ describe AoVerificationService do
 
   describe '.check_ao_eligibility' do
     it 'should work with good ssn' do
-      expect do
-        service.check_ao_eligibility(good_org_npi, :ssn, valid_ao_ssn)
-      end.to_not raise_error
+      response = service.check_ao_eligibility(good_org_npi, :ssn, valid_ao_ssn)
+      expect(response).to include({ has_ao_waiver: false, has_org_waiver: false })
+    end
+
+    it 'should flag a user with a waiver' do
+      response = service.check_ao_eligibility(good_org_npi, :ssn, waived_ao_ssn)
+      expect(response).to include({ has_ao_waiver: true, has_org_waiver: false })
+    end
+
+    it 'should flag an org with a waiver' do
+      response = service.check_ao_eligibility(waived_org_npi, :ssn, valid_ao_ssn)
+      expect(response).to include({ has_ao_waiver: false, has_org_waiver: true })
     end
 
     it 'should raise error with bad ssn' do

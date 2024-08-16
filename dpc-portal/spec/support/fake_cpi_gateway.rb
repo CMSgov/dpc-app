@@ -87,8 +87,6 @@ class FakeCpiGateway < Sinatra::Base
       roles = ao_ssns.map { |ssn| { pacId: ssn, roleCode: '10', ssn: } }
       roles << { pacId: 'validPacId', roleCode: '10', ssn: '900428421' }
       provider = {
-        providerType: 'org',
-        npi: npi,
         enrollments: [
           {
             status: 'INACTIVE',
@@ -188,7 +186,7 @@ class FakeCpiGateway < Sinatra::Base
 
     return '{"code": "404"}' if identifier == '3299073577'
 
-    provider = { providerType: provider_type, npi: identifier, medSanctions: [], waiverInfo: [] }
+    provider = { providerType: provider_type, medSanctions: [], waiverInfo: [] }
 
     provider[:orgName] = "Organization #{identifier}" if provider_type == 'org'
 
