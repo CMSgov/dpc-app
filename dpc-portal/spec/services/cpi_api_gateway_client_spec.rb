@@ -113,6 +113,19 @@ describe CpiApiGatewayClient do
   end
 
   def verify_logs(status:, url:, method_name:, method: :get)
+    verify_new_relic(url, method)
+    verify_rails(status:, url:, method_name:, method:)
+  end
+
+  def verify_new_relic(uri, procedure)
+    new_relic_tracer = instance_double(NewRelic::Agent::Transaction::ExternalRequestSegment)
+    expect(NewRelic::Agent::Tracer).to receive(:start_external_request_segment)
+      .with(library: 'Net::HTTP', uri:, procedure:)
+      .and_return(new_relic_tracer)
+    expect(new_relic_tracer).to receive(:finish)
+  end
+
+  def verify_rails(status:, url:, method_name:, method:)
     allow(Rails.logger).to receive(:info)
     expect(Rails.logger).to receive(:info).with(
       ['Calling CPI API Gateway',

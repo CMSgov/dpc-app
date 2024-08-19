@@ -24,14 +24,17 @@ class CpiApiGatewayClient
 
   # fetch full enrollments information about an organization
   def fetch_profile(npi)
+    uri = "#{@cpi_api_gateway_url}api/1.0/ppr/providers/profile"
+    new_relic_tracer = NewRelic::Agent::Tracer.start_external_request_segment(library: 'Net::HTTP', uri:,
+                                                                              procedure: :post)
     start = Time.now
-    url = "#{@cpi_api_gateway_url}api/1.0/ppr/providers/profile"
-    log_start(:fetch_profile, :post, url)
+    log_start(:fetch_profile, :post, uri)
     body = { providerID: { npi: npi.to_s } }.to_json
-    response = request_client.post(url,
+    response = request_client.post(uri,
                                    headers: { 'Content-Type': 'application/json' },
                                    body:)
-    log_end(:fetch_profile, :post, url, start, response.status)
+    log_end(:fetch_profile, :post, uri, start, response.status)
+    new_relic_tracer.finish
     response.parsed
   end
 
@@ -78,13 +81,16 @@ class CpiApiGatewayClient
   end
 
   def fetch_provider_info(body)
+    uri = "#{@cpi_api_gateway_url}api/1.0/ppr/providers"
+    new_relic_tracer = NewRelic::Agent::Tracer.start_external_request_segment(library: 'Net::HTTP', uri:,
+                                                                              procedure: :post)
     start = Time.now
-    url = "#{@cpi_api_gateway_url}api/1.0/ppr/providers"
-    log_start(:fetch_provider_info, :post, url)
-    response = request_client.post(url,
+    log_start(:fetch_provider_info, :post, uri)
+    response = request_client.post(uri,
                                    headers: { 'Content-Type': 'application/json' },
                                    body:)
-    log_end(:fetch_provider_info, :post, url, start, response.status)
+    log_end(:fetch_provider_info, :post, uri, start, response.status)
+    new_relic_tracer.finish
     response.parsed
   end
 

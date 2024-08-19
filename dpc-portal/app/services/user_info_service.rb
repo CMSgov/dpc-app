@@ -23,8 +23,7 @@ class UserInfoService
   end
 
   def request_info(token)
-    start_time = Time.now
-    log_start
+    start_tracking
     response = Net::HTTP.get_response(USER_INFO_URI, auth_header(token))
     code = response.code.to_i
     case code
@@ -41,7 +40,7 @@ class UserInfoService
     Rails.logger.error 'Could not connect to login.gov'
     raise UserInfoServiceError, 'server_error'
   ensure
-    log_end(start_time, code)
+    finish_tracking(code)
   end
 
   def parsed_response(response)
@@ -50,23 +49,27 @@ class UserInfoService
     JSON.parse response.body
   end
 
-  def log_start
+  def start_tracking
+    @start = Time.now
     Rails.logger.info(
       ['Calling Login.gov user_info',
        { login_dot_gov_request_method: :get,
          login_dot_gov_request_url: USER_INFO_URI,
          login_dot_gov_request_method_name: :request_info }]
     )
+    @tracker = NewRelic::Agent::Tracer.start_external_request_segment(library: 'Net::HTTP', uri: USER_INFO_URI,
+                                                                      procedure: :get)
   end
 
-  def log_end(start, code)
+  def finish_tracking(code)
+    @tracker.finish
     Rails.logger.info(
       ['Login.gov user_info response info',
        { login_dot_gov_request_method: :get,
          login_dot_gov_request_url: USER_INFO_URI,
          login_dot_gov_request_method_name: :request_info,
          login_dot_gov_response_status_code: code,
-         login_dot_gov_response_duration: Time.now - start }]
+         login_dot_gov_response_duration: Time.now - @start }]
     )
   end
 end

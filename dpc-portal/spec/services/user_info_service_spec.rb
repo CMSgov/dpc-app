@@ -100,6 +100,19 @@ describe UserInfoService do
     end
   end
   def verify_logs(status:)
+    verify_new_relic
+    verify_rails(status)
+  end
+
+  def verify_new_relic
+    new_relic_tracer = instance_double(NewRelic::Agent::Transaction::ExternalRequestSegment)
+    expect(NewRelic::Agent::Tracer).to receive(:start_external_request_segment)
+      .with(library: 'Net::HTTP', uri: user_info_url, procedure: :get)
+      .and_return(new_relic_tracer)
+    expect(new_relic_tracer).to receive(:finish)
+  end
+
+  def verify_rails(status)
     allow(Rails.logger).to receive(:info)
     expect(Rails.logger).to receive(:info).with(
       ['Calling Login.gov user_info',
