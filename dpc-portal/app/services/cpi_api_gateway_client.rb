@@ -24,17 +24,13 @@ class CpiApiGatewayClient
 
   # fetch full enrollments information about an organization
   def fetch_profile(npi)
-    uri = "#{@cpi_api_gateway_url}api/1.0/ppr/providers/profile"
-    new_relic_tracer = NewRelic::Agent::Tracer.start_external_request_segment(library: 'Net::HTTP', uri:,
-                                                                              procedure: :post)
-    start = Time.now
-    log_start(:fetch_profile, :post, uri)
+    url = "#{@cpi_api_gateway_url}api/1.0/ppr/providers/profile"
+    start_tracking(:fetch_profile, url)
     body = { providerID: { npi: npi.to_s } }.to_json
-    response = request_client.post(uri,
+    response = request_client.post(url,
                                    headers: { 'Content-Type': 'application/json' },
                                    body:)
-    log_end(:fetch_profile, :post, uri, start, response.status)
-    new_relic_tracer.finish
+    stop_tracking(:fetch_profile, url, response.status)
     response.parsed
   end
 
@@ -81,36 +77,36 @@ class CpiApiGatewayClient
   end
 
   def fetch_provider_info(body)
-    uri = "#{@cpi_api_gateway_url}api/1.0/ppr/providers"
-    new_relic_tracer = NewRelic::Agent::Tracer.start_external_request_segment(library: 'Net::HTTP', uri:,
-                                                                              procedure: :post)
-    start = Time.now
-    log_start(:fetch_provider_info, :post, uri)
-    response = request_client.post(uri,
+    url = "#{@cpi_api_gateway_url}api/1.0/ppr/providers"
+    start_tracking(:fetch_provider_info, url)
+    response = request_client.post(url,
                                    headers: { 'Content-Type': 'application/json' },
                                    body:)
-    log_end(:fetch_provider_info, :post, uri, start, response.status)
-    new_relic_tracer.finish
+    stop_tracking(:fetch_provider_info, url, response.status)
     response.parsed
   end
 
-  def log_start(method_name, method, url)
+  def start_tracking(method_name, url)
+    @tracker = NewRelic::Agent::Tracer.start_external_request_segment(library: 'Net::HTTP', uri: url,
+                                                                      procedure: :post)
+    @start = Time.now
     Rails.logger.info(
       ['Calling CPI API Gateway',
-       { cpi_api_gateway_request_method: method,
+       { cpi_api_gateway_request_method: :post,
          cpi_api_gateway_request_url: url,
          cpi_api_gateway_request_method_name: method_name }]
     )
   end
 
-  def log_end(method_name, method, url, start, code)
+  def stop_tracking(method_name, url, code)
     Rails.logger.info(
       ['CPI API Gateway response info',
-       { cpi_api_gateway_request_method: method,
+       { cpi_api_gateway_request_method: :post,
          cpi_api_gateway_request_url: url,
          cpi_api_gateway_request_method_name: method_name,
          cpi_api_gateway_response_status_code: code,
-         cpi_api_gateway_response_duration: Time.now - start }]
+         cpi_api_gateway_response_duration: Time.now - @start }]
     )
+    @tracker.finish
   end
 end
