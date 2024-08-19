@@ -85,15 +85,17 @@ RSpec.describe VerifyProviderOrganizationJob, type: :job do
       end
     end
     context :org_has_waiver do
-      let(:provider_organization) { create(:provider_organization, npi: '3098168743', verification_status: :approved, last_checked_at: 8.days.ago) }
+      let(:provider_organization) do
+        create(:provider_organization, npi: '3098168743', verification_status: :approved, last_checked_at: 8.days.ago)
+      end
 
       it 'should log when a provider org has a waiver' do
         allow(Rails.logger).to receive(:info)
         expect(Rails.logger).to receive(:info)
-        .with(['Organization has a waiver',
-               { actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
-                 actionType: LoggingConstants::ActionType::OrgHasWaiver,
-                 providerOrganization: provider_organization.id }])
+          .with(['Organization has a waiver',
+                 { actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
+                   actionType: LoggingConstants::ActionType::OrgHasWaiver,
+                   providerOrganization: provider_organization.id }])
         VerifyProviderOrganizationJob.perform_now
       end
     end

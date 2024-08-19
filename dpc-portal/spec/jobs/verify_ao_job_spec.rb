@@ -102,11 +102,11 @@ RSpec.describe VerifyAoJob, type: :job do
       it 'should log when an AO has a waiver' do
         allow(Rails.logger).to receive(:info)
         expect(Rails.logger).to receive(:info)
-        .with(['Authorized official has a waiver',
-               { actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
-                 actionType: LoggingConstants::ActionType::AoHasWaiver,
-                 authorizedOfficial: link.user.id,
-                 providerOrganization: link.provider_organization.id }])
+          .with(['Authorized official has a waiver',
+                 { actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
+                   actionType: LoggingConstants::ActionType::AoHasWaiver,
+                   authorizedOfficial: link.user.id,
+                   providerOrganization: link.provider_organization.id }])
         VerifyAoJob.perform_now
       end
     end
@@ -118,11 +118,11 @@ RSpec.describe VerifyAoJob, type: :job do
       it 'should log when a provider org has a waiver' do
         allow(Rails.logger).to receive(:info)
         expect(Rails.logger).to receive(:info)
-        .with(['Organization has a waiver',
-               { actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
-                 actionType: LoggingConstants::ActionType::OrgHasWaiver,
-                 authorizedOfficial: link.user.id,
-                 providerOrganization: link.provider_organization.id }])
+          .with(['Organization has a waiver',
+                 { actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
+                   actionType: LoggingConstants::ActionType::OrgHasWaiver,
+                   authorizedOfficial: link.user.id,
+                   providerOrganization: link.provider_organization.id }])
         VerifyAoJob.perform_now
       end
     end

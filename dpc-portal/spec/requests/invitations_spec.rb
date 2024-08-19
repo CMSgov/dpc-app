@@ -264,10 +264,10 @@ RSpec.describe 'Invitations', type: :request do
         it 'logs a waiver' do
           allow(Rails.logger).to receive(:info)
           expect(Rails.logger).to receive(:info)
-          .with(['Authorized official has a waiver',
-                { actionContext: LoggingConstants::ActionContext::Registration,
-                  actionType: LoggingConstants::ActionType::AoHasWaiver,
-                  providerOrganization: org.id }])
+            .with(['Authorized official has a waiver',
+                   { actionContext: LoggingConstants::ActionContext::Registration,
+                     actionType: LoggingConstants::ActionType::AoHasWaiver,
+                     providerOrganization: org.id }])
           post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"
         end
       end
@@ -280,10 +280,10 @@ RSpec.describe 'Invitations', type: :request do
           get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
           allow(Rails.logger).to receive(:info)
           expect(Rails.logger).to receive(:info)
-          .with(['Organization has a waiver',
-                { actionContext: LoggingConstants::ActionContext::Registration,
-                  actionType: LoggingConstants::ActionType::OrgHasWaiver,
-                  providerOrganization: org.id }])
+            .with(['Organization has a waiver',
+                   { actionContext: LoggingConstants::ActionContext::Registration,
+                     actionType: LoggingConstants::ActionType::OrgHasWaiver,
+                     providerOrganization: org.id }])
           post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"
         end
       end

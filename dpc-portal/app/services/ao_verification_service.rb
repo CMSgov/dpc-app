@@ -8,10 +8,12 @@ class AoVerificationService
     @cpi_api_gw_client = CpiApiGatewayClient.new
   end
 
+  # rubocop:disable Metrics/AbcSize
   def check_eligibility(organization_npi, ssn)
     response = check_ao_eligibility(organization_npi, :ssn, ssn)
 
-    { success: true, ao_role: response[:ao_role], has_ao_waiver: response[:has_ao_waiver], has_org_waiver: response[:has_org_waiver] }
+    { success: true, ao_role: response[:ao_role], has_ao_waiver: response[:has_ao_waiver],
+      has_org_waiver: response[:has_org_waiver] }
   rescue OAuth2::Error => e
     if e.response.status == 500
       Rails.logger.error 'API Gateway Error during AO Verification'
@@ -27,11 +29,13 @@ class AoVerificationService
     Rails.logger.info "Failed check #{e.message} for organization NPI #{organization_npi}"
     { success: false, failure_reason: e.message }
   end
+  # rubocop:enable Metrics/AbcSize
 
   def check_ao_eligibility(organization_npi, identifier_type, identifier)
     ao_role_response = get_authorized_official_role(organization_npi, identifier_type, identifier)
     sanctions = check_individual_med_sanctions(ao_role_response[:role]['ssn'])
-    {ao_role: ao_role_response[:role], has_org_waiver: ao_role_response[:has_org_waiver], has_ao_waiver: sanctions[:has_ao_waiver]}
+    { ao_role: ao_role_response[:role], has_org_waiver: ao_role_response[:has_org_waiver],
+      has_ao_waiver: sanctions[:has_ao_waiver] }
   end
 
   def get_approved_enrollments(organization_npi)
@@ -44,7 +48,7 @@ class AoVerificationService
     enrollments = profile.dig('provider', 'enrollments')&.select { |enrollment| enrollment['status'] == 'APPROVED' }
     raise AoException, 'no_approved_enrollment' if enrollments.empty?
 
-    {enrollments: enrollments, has_org_waiver: sanctions[:has_waiver]}
+    { enrollments:, has_org_waiver: sanctions[:has_waiver] }
   end
 
   private
@@ -53,22 +57,23 @@ class AoVerificationService
     response = @cpi_api_gw_client.fetch_med_sanctions_and_waivers_by_ssn(ao_ssn)
     sanctions = check_sanctions_response(response)
     raise AoException, 'ao_med_sanctions' if sanctions[:is_sanctioned]
-    {is_sanctioned: sanctions[:is_sanctioned], has_ao_waiver: sanctions[:has_waiver]}
+
+    { is_sanctioned: sanctions[:is_sanctioned], has_ao_waiver: sanctions[:has_waiver] }
   end
 
   def check_sanctions_response(response)
     has_waiver = waiver?(response.dig('provider', 'waiverInfo'))
-    return {is_sanctioned: false, has_waiver: true} if has_waiver
+    return { is_sanctioned: false, has_waiver: true } if has_waiver
 
     med_sanctions_records = response.dig('provider', 'medSanctions')
     unless med_sanctions_records.nil? || med_sanctions_records.empty?
       current_med_sanction = med_sanctions_records.find do |record|
         record['reinstatementDate'].nil? || Date.parse(record['reinstatementDate']) > Date.today
       end
-      return {is_sanctioned: true, has_waiver: false} if current_med_sanction.present?
+      return { is_sanctioned: true, has_waiver: false } if current_med_sanction.present?
     end
 
-    {is_sanctioned: false, has_waiver: false}
+    { is_sanctioned: false, has_waiver: false }
   end
 
   def waiver?(waivers_list)
@@ -90,7 +95,7 @@ class AoVerificationService
     enrollments = profile.dig('provider', 'enrollments')&.select { |enrollment| enrollment['status'] == 'APPROVED' }
     raise AoException, 'no_approved_enrollment' if enrollments.blank?
 
-    {role: role_from_enrollments(enrollments, identifier_type, identifier), has_org_waiver: sanctions[:has_waiver]}
+    { role: role_from_enrollments(enrollments, identifier_type, identifier), has_org_waiver: sanctions[:has_waiver] }
   end
 
   def role_from_enrollments(enrollments, identifier_type, identifier)
