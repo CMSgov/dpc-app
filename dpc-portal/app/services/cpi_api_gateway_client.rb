@@ -24,10 +24,14 @@ class CpiApiGatewayClient
 
   # fetch full enrollments information about an organization
   def fetch_profile(npi)
+    start = Time.now
+    url = "#{@cpi_api_gateway_url}api/1.0/ppr/providers/profile"
+    log_start(:fetch_profile, :post, url)
     body = { providerID: { npi: npi.to_s } }.to_json
-    response = request_client.post("#{@cpi_api_gateway_url}api/1.0/ppr/providers/profile",
+    response = request_client.post(url,
                                    headers: { 'Content-Type': 'application/json' },
                                    body:)
+    log_end(:fetch_profile, :post, url, start, response.status)
     response.parsed
   end
 
@@ -74,9 +78,33 @@ class CpiApiGatewayClient
   end
 
   def fetch_provider_info(body)
-    response = request_client.post("#{@cpi_api_gateway_url}api/1.0/ppr/providers",
+    start = Time.now
+    url = "#{@cpi_api_gateway_url}api/1.0/ppr/providers"
+    log_start(:fetch_provider_info, :post, url)
+    response = request_client.post(url,
                                    headers: { 'Content-Type': 'application/json' },
                                    body:)
+    log_end(:fetch_provider_info, :post, url, start, response.status)
     response.parsed
+  end
+
+  def log_start(method_name, method, url)
+    Rails.logger.info(
+      ['Calling CPI API Gateway',
+       { cpi_api_gateway_request_method: method,
+         cpi_api_gateway_request_url: url,
+         cpi_api_gateway_request_method_name: method_name }]
+    )
+  end
+
+  def log_end(method_name, method, url, start, code)
+    Rails.logger.info(
+      ['CPI API Gateway response info',
+       { cpi_api_gateway_request_method: method,
+         cpi_api_gateway_request_url: url,
+         cpi_api_gateway_request_method_name: method_name,
+         cpi_api_gateway_response_status_code: code,
+         cpi_api_gateway_response_duration: Time.now - start }]
+    )
   end
 end
