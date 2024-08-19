@@ -12,7 +12,13 @@ class VerifyProviderOrganizationJob < ApplicationJob
     service = AoVerificationService.new
     @start = Time.now
     orgs_to_check.each do |org|
-      service.get_approved_enrollments(org.npi)
+      response = service.get_approved_enrollments(org.npi)
+      if response[:has_org_waiver]
+        Rails.logger.info(['Organization has a waiver',
+                          { actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
+                            actionType: LoggingConstants::ActionType::OrgHasWaiver,
+                            providerOrganization: org.id}])
+      end
       org.update!(last_checked_at: Time.now)
     rescue AoException => e
       handle_error(org, e.message)

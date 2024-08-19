@@ -168,6 +168,19 @@ class InvitationsController < ApplicationController
   def check_ao
     user_info = UserInfoService.new.user_info(session)
     result = @invitation.ao_match?(user_info)
+    if result[:has_org_waiver]
+      Rails.logger.info(['Organization has a waiver',
+                        { actionContext: LoggingConstants::ActionContext::Registration,
+                          actionType: LoggingConstants::ActionType::OrgHasWaiver,
+                          providerOrganization: @organization.id}])
+    end
+    if result[:has_ao_waiver]
+      Rails.logger.info(['Authorized official has a waiver',
+                        { actionContext: LoggingConstants::ActionContext::Registration,
+                          actionType: LoggingConstants::ActionType::AoHasWaiver,
+                          providerOrganization: @organization.id
+                          }])
+    end
     session[:user_pac_id] = result.dig(:ao_role, 'pacId') if result[:success]
     result[:success]
   end

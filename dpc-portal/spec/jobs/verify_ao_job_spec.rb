@@ -94,6 +94,38 @@ RSpec.describe VerifyAoJob, type: :job do
         end
       end
     end
+    context :ao_has_waiver do
+      let(:user) { create(:user, pac_id: '900777777', verification_status: :approved) }
+      let(:provider_organization) { create(:provider_organization, npi: '900111111', verification_status: :approved) }
+      let!(:link) { create(:ao_org_link, last_checked_at: 8.days.ago, user:, provider_organization:) }
+
+      it 'should log when an AO has a waiver' do
+        allow(Rails.logger).to receive(:info)
+        expect(Rails.logger).to receive(:info)
+        .with(['Authorized official has a waiver',
+               { actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
+                 actionType: LoggingConstants::ActionType::AoHasWaiver,
+                 authorizedOfficial: link.user.id,
+                 providerOrganization: link.provider_organization.id }])
+        VerifyAoJob.perform_now
+      end
+    end
+    context :org_has_waiver do
+      let(:user) { create(:user, pac_id: '900111111', verification_status: :approved) }
+      let(:provider_organization) { create(:provider_organization, npi: '3098168743', verification_status: :approved) }
+      let!(:link) { create(:ao_org_link, last_checked_at: 8.days.ago, user:, provider_organization:) }
+
+      it 'should log when a provider org has a waiver' do
+        allow(Rails.logger).to receive(:info)
+        expect(Rails.logger).to receive(:info)
+        .with(['Organization has a waiver',
+               { actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
+                 actionType: LoggingConstants::ActionType::OrgHasWaiver,
+                 authorizedOfficial: link.user.id,
+                 providerOrganization: link.provider_organization.id }])
+        VerifyAoJob.perform_now
+      end
+    end
     context :failures do
       def expect_log_for(link, reason)
         expect(Rails.logger).to receive(:info)
