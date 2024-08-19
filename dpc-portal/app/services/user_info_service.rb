@@ -23,8 +23,11 @@ class UserInfoService
   end
 
   def request_info(token)
+    start_time = Time.now
+    log_start
     response = Net::HTTP.get_response(USER_INFO_URI, auth_header(token))
-    case response.code.to_i
+    code = response.code.to_i
+    case code
     when 200...299
       parsed_response(response)
     when 401
@@ -34,14 +37,37 @@ class UserInfoService
       raise UserInfoServiceError, 'server_error'
     end
   rescue Errno::ECONNREFUSED
+    code = 503
     Rails.logger.error 'Could not connect to login.gov'
     raise UserInfoServiceError, 'server_error'
+  ensure
+    log_end(start_time, code)
   end
 
   def parsed_response(response)
     return if response.body.blank?
 
     JSON.parse response.body
+  end
+
+  def log_start
+    Rails.logger.info(
+      ['Calling Login.gov user_info',
+       { login_dot_gov_request_method: :get,
+         login_dot_gov_request_url: USER_INFO_URI,
+         login_dot_gov_request_method_name: :request_info }]
+    )
+  end
+
+  def log_end(start, code)
+    Rails.logger.info(
+      ['Login.gov user_info response info',
+       { login_dot_gov_request_method: :get,
+         login_dot_gov_request_url: USER_INFO_URI,
+         login_dot_gov_request_method_name: :request_info,
+         login_dot_gov_response_status_code: code,
+         login_dot_gov_response_duration: Time.now - start }]
+    )
   end
 end
 
