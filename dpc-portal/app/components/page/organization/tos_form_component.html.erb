@@ -11,7 +11,7 @@
             <%= button_to 'I have read and accepted the Terms of Service', sign_tos_organization_path(@organization), class: 'usa-button' %>
           </li>
           <li class="usa-button-group__item">
-            <%= button_to 'Cancel', organizations_path, class: ['usa-button', 'usa-button--unstyled', 'padding-105', 'text-center'] %>
+            <%= button_to 'Cancel', organizations_path, class: ['usa-button', 'usa-button--unstyled', 'padding-105', 'text-center'], method: :get %>
           </li>
         </ul>
     </div>
