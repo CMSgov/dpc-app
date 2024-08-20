@@ -151,6 +151,43 @@ public class GroupResourceTest extends AbstractAttributionTest {
         assertEquals(1, addMemberResponse.getMember().size());
     }
 
+    /**
+     * When replace roster endpoint called, new members PUT into roster should show up in response.
+     * This test calls the replaceRoster() endpoint with 0 members for update and 1 member for update
+     * in order to ensure the response includes the appropriate number of members
+     */
+    @Test
+    public void testReplaceRosterResponse() {
+        final Practitioner practitioner = createPractitioner(NPIUtil.generateNPI());
+        final Group groupForCreate = SeedProcessor.createBaseAttributionGroup(FHIRExtractors.getProviderNPI(practitioner), DEFAULT_ORG_ID);
+
+        final MethodOutcome methodOutcome = client.create()
+                .resource(groupForCreate)
+                .encodedJson()
+                .execute();
+        assertTrue(methodOutcome.getCreated());
+
+        final Group createdGroup = (Group) methodOutcome.getResource();
+        final Group groupForUpdate = SeedProcessor.createBaseAttributionGroup(FHIRExtractors.getProviderNPI(practitioner), DEFAULT_ORG_ID);
+        final MethodOutcome replaceRosterResponse = client
+                .update()
+                .resource(groupForUpdate)
+                .withId(createdGroup.getIdElement())
+                .execute();
+        final Group replacementGroup = (Group) replaceRosterResponse.getResource();
+        assertEquals(0, replacementGroup.getMember().size());
+
+        final Patient patient1 = createPatient("0O00O00OO05", DEFAULT_ORG_ID);
+        groupForUpdate.addMember().setEntity(new Reference(patient1.getIdElement()));
+        final MethodOutcome replaceRosterResponse2 = client
+                .update()
+                .resource(groupForUpdate)
+                .withId(replacementGroup.getIdElement())
+                .execute();
+        final Group replacementGroup2 = (Group) replaceRosterResponse2.getResource();
+        assertEquals(1, replacementGroup2.getMember().size());
+    }
+
     @Test
     public void testAddMembersToRosterPatientLimit() {
         final Practitioner practitioner = createPractitioner("1112111111");

@@ -34,6 +34,11 @@ RSpec.describe 'Organizations', type: :request do
         get '/organizations'
         expect(assigns(:links)).to eq [link]
       end
+
+      it 'logs user_id to new relic' do
+        expect(NewRelic::Agent).to receive(:add_custom_attributes).with({ user_id: user.id })
+        get '/organizations'
+      end
     end
 
     context 'user has sanctions' do
