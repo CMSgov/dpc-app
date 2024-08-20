@@ -8,27 +8,14 @@ class AoVerificationService
     @cpi_api_gw_client = CpiApiGatewayClient.new
   end
 
-  # rubocop:disable Metrics/AbcSize
   def check_eligibility(organization_npi, ssn)
     response = check_ao_eligibility(organization_npi, :ssn, ssn)
-
     response.merge(success: true)
   rescue OAuth2::Error => e
-    if e.response.status == 500
-      Rails.logger.error 'API Gateway Error during AO Verification'
-      { success: false, failure_reason: 'api_gateway_error' }
-    elsif e.response.status == 404
-      Rails.logger.error 'Invalid API Gateway endpoint called during AO verification'
-      { success: false, failure_reason: 'invalid_endpoint_called' }
-    else
-      Rails.logger.error 'Unexpected error during AO Verification'
-      { success: false, failure_reason: 'unexpected_error' }
-    end
+    handle_oauth_error(e)
   rescue AoException => e
-    Rails.logger.info "Failed check #{e.message} for organization NPI #{organization_npi}"
-    { success: false, failure_reason: e.message }
+    handle_ao_exception(e, organization_npi)
   end
-  # rubocop:enable Metrics/AbcSize
 
   def check_ao_eligibility(organization_npi, identifier_type, identifier)
     role_and_waivers = get_authorized_official_role(organization_npi, identifier_type, identifier)
@@ -114,6 +101,24 @@ class AoVerificationService
     when :pac_id
       role['roleCode'] == '10' && role['pacId'] == identifier
     end
+  end
+
+  def handle_oauth_error(error)
+    if error.response.status == 500
+      Rails.logger.error 'API Gateway Error during AO Verification'
+      { success: false, failure_reason: 'api_gateway_error' }
+    elsif error.response.status == 404
+      Rails.logger.error 'Invalid API Gateway endpoint called during AO verification'
+      { success: false, failure_reason: 'invalid_endpoint_called' }
+    else
+      Rails.logger.error 'Unexpected error during AO Verification'
+      { success: false, failure_reason: 'unexpected_error' }
+    end
+  end
+
+  def handle_ao_exception(exception, organization_npi)
+    Rails.logger.info "Failed check #{exception.message} for organization NPI #{organization_npi}"
+    { success: false, failure_reason: exception.message }
   end
 end
 
