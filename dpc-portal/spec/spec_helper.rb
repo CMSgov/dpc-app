@@ -30,7 +30,7 @@ SimpleCov.start 'rails' do
 end
 
 require 'webmock/rspec'
-WebMock.enable_net_connect!
+WebMock.disable_net_connect!(allow_localhost: true, allow: ['github.com', 'objects.githubusercontent.com'])
 
 require 'support/fake_cpi_gateway'
 
@@ -50,6 +50,7 @@ require 'support/fake_cpi_gateway'
 #
 # See https://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
 RSpec.configure do |config|
+  config.filter_run_excluding type: :system
   # rspec-expectations config goes here. You can use an alternate
   # assertion/expectation library such as wrong or the stdlib/minitest
   # assertions if you prefer.

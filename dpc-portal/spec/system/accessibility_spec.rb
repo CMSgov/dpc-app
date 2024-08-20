@@ -1,20 +1,22 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe 'Accessibility', type: :system do
-  include  Devise::Test::IntegrationHelpers
+  include Devise::Test::IntegrationHelpers
   include DpcClientSupport
   before do
     driven_by(:selenium_headless)
   end
-  context do :login
+  context do
     it 'shows login page ok' do
       visit '/users/sign_in'
       expect(page).to have_text('Sign in')
-      #      expect(page).to be_axe_clean
+      expect(page).to be_axe_clean
     end
   end
 
-  context do :organizations
+  context do
     let(:dpc_api_organization_id) { 'some-gnarly-guid' }
     let!(:user) { create(:user) }
     let!(:org) { create(:provider_organization, dpc_api_organization_id:, name: 'Health Hut') }
@@ -34,7 +36,7 @@ RSpec.describe 'Accessibility', type: :system do
       allow(mock_iam).to receive(:ip_addresses).and_return(ip_addresses)
       sign_in user
     end
-    it 'empty list' do
+    it 'organizations with empty list' do
       visit '/organizations'
       expect(page).to have_text("You don't have any organizations to show.")
       expect(page).to be_axe_clean
@@ -48,22 +50,22 @@ RSpec.describe 'Accessibility', type: :system do
       end
       it 'should show tos' do
         visit "/organizations/#{org.id}"
-        expect(page).to have_text("Terms of Service")
-        expect(page).to_not have_text("You can assign anyone as a CD")
+        expect(page).to have_text('Terms of Service')
+        expect(page).to_not have_text('You can assign anyone as a CD')
         expect(page).to be_axe_clean
       end
       it 'can sign tos' do
         visit "/organizations/#{org.id}"
         page.find('.usa-button', text: 'I have read and accepted the Terms of Service').click
-        expect(page).to_not have_text("Terms of Service")
-        expect(page).to have_text("You can assign anyone as a CD")
+        expect(page).to_not have_text('Terms of Service')
+        expect(page).to have_text('You can assign anyone as a CD')
         expect(page).to be_axe_clean
       end
       context :after_tos do
         before { org.update!(terms_of_service_accepted_by: user) }
         it 'should show organization page with no cds' do
           visit "/organizations/#{org.id}"
-          expect(page).to have_text("You can assign anyone as a CD")
+          expect(page).to have_text('You can assign anyone as a CD')
           expect(page).to have_css('#credential_delegates')
           expect(page).to_not have_css('#credentials')
           expect(page).to_not have_css('#active-cd-table')
@@ -87,7 +89,7 @@ RSpec.describe 'Accessibility', type: :system do
           let!(:invitation) { create(:invitation, :cd, provider_organization: org, invited_by: user) }
           it 'should show credential delegate tables' do
             visit "/organizations/#{org.id}"
-            expect(page).to have_text("You can assign anyone as a CD")
+            expect(page).to have_text('You can assign anyone as a CD')
             expect(page).to have_css('#active-cd-table')
             expect(page).to have_css('#pending-cd-table')
             expect(page).to be_axe_clean
@@ -163,7 +165,7 @@ RSpec.describe 'Accessibility', type: :system do
             expect(page).to be_axe_clean
           end
           it 'should show error page' do
-            expect(mock_iam).to receive(:create_ip_address).and_return({ })
+            expect(mock_iam).to receive(:create_ip_address).and_return({})
             expect(mock_iam).to receive(:errors).and_return(['bad'])
             visit "/organizations/#{org.id}/ip_addresses/new"
             page.find_button(value: 'Add IP').click
@@ -179,7 +181,7 @@ RSpec.describe 'Accessibility', type: :system do
           end
         end
         context :credential_delegate_invitation do
-          it 'should show new page' do          
+          it 'should show new page' do
             visit "/organizations/#{org.id}/credential_delegate_invitations/new"
             expect(page).to have_text('Send invite')
             expect(page).to_not have_text("can't be blank")
@@ -241,15 +243,15 @@ RSpec.describe 'Accessibility', type: :system do
       it 'should show confirm page' do
         visit "/organizations/#{org.id}/invitations/#{invitation.id}/fake_login"
         visit "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
-        page.find('.usa-button', text: 'Continue to register').click        
+        page.find('.usa-button', text: 'Continue to register').click
         expect(page).to have_text('Step 3')
         expect(page).to be_axe_clean
       end
       it 'should show register page' do
         visit "/organizations/#{org.id}/invitations/#{invitation.id}/fake_login"
         visit "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
-        page.find('.usa-button', text: 'Continue to register').click        
-        page.find('.usa-button', text: 'Complete registration').click        
+        page.find('.usa-button', text: 'Continue to register').click
+        page.find('.usa-button', text: 'Complete registration').click
         expect(page).to have_text('Step 4')
         expect(page).to be_axe_clean
       end
