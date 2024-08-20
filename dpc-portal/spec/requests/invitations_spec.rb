@@ -267,7 +267,7 @@ RSpec.describe 'Invitations', type: :request do
             .with(['Authorized official has a waiver',
                    { actionContext: LoggingConstants::ActionContext::Registration,
                      actionType: LoggingConstants::ActionType::AoHasWaiver,
-                     providerOrganization: org.id }])
+                     invitation: invitation.id }])
           post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"
         end
       end
@@ -283,7 +283,7 @@ RSpec.describe 'Invitations', type: :request do
             .with(['Organization has a waiver',
                    { actionContext: LoggingConstants::ActionContext::Registration,
                      actionType: LoggingConstants::ActionType::OrgHasWaiver,
-                     providerOrganization: org.id }])
+                     invitation: invitation.id }])
           post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"
         end
       end

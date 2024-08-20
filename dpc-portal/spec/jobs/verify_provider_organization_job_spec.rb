@@ -95,7 +95,7 @@ RSpec.describe VerifyProviderOrganizationJob, type: :job do
           .with(['Organization has a waiver',
                  { actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
                    actionType: LoggingConstants::ActionType::OrgHasWaiver,
-                   providerOrganization: provider_organization.id }])
+                   organization: provider_organization.id }])
         VerifyProviderOrganizationJob.perform_now
       end
     end

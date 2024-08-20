@@ -18,7 +18,7 @@ class VerifyProviderOrganizationJob < ApplicationJob
         Rails.logger.info(['Organization has a waiver',
                            { actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
                              actionType: LoggingConstants::ActionType::OrgHasWaiver,
-                             providerOrganization: org.id }])
+                             organization: org.id }])
       end
       org.update!(last_checked_at: Time.now)
     rescue AoException => e

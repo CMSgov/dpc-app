@@ -105,8 +105,8 @@ RSpec.describe VerifyAoJob, type: :job do
           .with(['Authorized official has a waiver',
                  { actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
                    actionType: LoggingConstants::ActionType::AoHasWaiver,
-                   authorizedOfficial: link.user.id,
-                   providerOrganization: link.provider_organization.id }])
+                   current_user: link.user.id,
+                   organization: link.provider_organization.id }])
         VerifyAoJob.perform_now
       end
     end
@@ -121,8 +121,8 @@ RSpec.describe VerifyAoJob, type: :job do
           .with(['Organization has a waiver',
                  { actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
                    actionType: LoggingConstants::ActionType::OrgHasWaiver,
-                   authorizedOfficial: link.user.id,
-                   providerOrganization: link.provider_organization.id }])
+                   current_user: link.user.id,
+                   organization: link.provider_organization.id }])
         VerifyAoJob.perform_now
       end
     end

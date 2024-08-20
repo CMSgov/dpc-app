@@ -12,8 +12,7 @@ class AoVerificationService
   def check_eligibility(organization_npi, ssn)
     response = check_ao_eligibility(organization_npi, :ssn, ssn)
 
-    { success: true, ao_role: response[:ao_role], has_ao_waiver: response[:has_ao_waiver],
-      has_org_waiver: response[:has_org_waiver] }
+    response.merge(success: true)
   rescue OAuth2::Error => e
     if e.response.status == 500
       Rails.logger.error 'API Gateway Error during AO Verification'
@@ -32,10 +31,10 @@ class AoVerificationService
   # rubocop:enable Metrics/AbcSize
 
   def check_ao_eligibility(organization_npi, identifier_type, identifier)
-    ao_role_response = get_authorized_official_role(organization_npi, identifier_type, identifier)
-    sanctions = check_individual_med_sanctions(ao_role_response[:role]['ssn'])
-    { ao_role: ao_role_response[:role], has_org_waiver: ao_role_response[:has_org_waiver],
-      has_ao_waiver: sanctions[:has_ao_waiver] }
+    role_and_waivers = get_authorized_official_role(organization_npi, identifier_type, identifier)
+    individual_sanctions = check_individual_med_sanctions(role_and_waivers[:ao_role]['ssn'])
+
+    role_and_waivers.merge(has_ao_waiver: individual_sanctions[:has_ao_waiver])
   end
 
   def get_approved_enrollments(organization_npi)
@@ -95,7 +94,7 @@ class AoVerificationService
     enrollments = profile.dig('provider', 'enrollments')&.select { |enrollment| enrollment['status'] == 'APPROVED' }
     raise AoException, 'no_approved_enrollment' if enrollments.blank?
 
-    { role: role_from_enrollments(enrollments, identifier_type, identifier), has_org_waiver: sanctions[:has_waiver] }
+    { ao_role: role_from_enrollments(enrollments, identifier_type, identifier), has_org_waiver: sanctions[:has_waiver] }
   end
 
   def role_from_enrollments(enrollments, identifier_type, identifier)

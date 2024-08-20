@@ -24,25 +24,10 @@ class VerifyAoJob < ApplicationJob
     end
   end
 
-  # rubocop:disable Metrics/AbcSize
   def check_link(service, link)
     response = service.check_ao_eligibility(link.provider_organization.npi, :pac_id, link.user.pac_id)
-    if response[:has_ao_waiver]
-      Rails.logger.info(['Authorized official has a waiver',
-                         { actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
-                           actionType: LoggingConstants::ActionType::AoHasWaiver,
-                           authorizedOfficial: link.user.id,
-                           providerOrganization: link.provider_organization.id }])
-    end
-    return unless response[:has_org_waiver]
-
-    Rails.logger.info(['Organization has a waiver',
-                       { actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
-                         actionType: LoggingConstants::ActionType::OrgHasWaiver,
-                         authorizedOfficial: link.user.id,
-                         providerOrganization: link.provider_organization.id }])
+    log_waivers(response, link)
   end
-  # rubocop:enable Metrics/AbcSize
 
   def update_success(link)
     AoOrgLink.transaction do
@@ -91,5 +76,24 @@ class VerifyAoJob < ApplicationJob
                      authorizedOfficial: link.user.id,
                      providerOrganization: link.provider_organization.id }])
     end
+  end
+
+  private
+
+  def log_waivers(role_and_waivers, link)
+    if role_and_waivers[:has_ao_waiver]
+      Rails.logger.info(['Authorized official has a waiver',
+                         { actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
+                           actionType: LoggingConstants::ActionType::AoHasWaiver,
+                           current_user: link.user.id,
+                           organization: link.provider_organization.id }])
+    end
+    return unless role_and_waivers[:has_org_waiver]
+
+    Rails.logger.info(['Organization has a waiver',
+                       { actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
+                         actionType: LoggingConstants::ActionType::OrgHasWaiver,
+                         current_user: link.user.id,
+                         organization: link.provider_organization.id }])
   end
 end
