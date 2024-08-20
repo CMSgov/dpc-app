@@ -164,6 +164,7 @@ services:
       - IDP_HOST=idp.int.identitysandbox.gov
       - RUBY_YJIT_ENABLE=1
       - ENV=local
+      - NEW_RELIC_MONITOR_MODE=false
       - DISABLE_JSON_LOGGER=true
     ports:
       - "3100:3100"
