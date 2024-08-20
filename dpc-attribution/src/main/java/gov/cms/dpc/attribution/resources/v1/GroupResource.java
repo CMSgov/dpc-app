@@ -176,9 +176,9 @@ public class GroupResource extends AbstractGroupResource {
                 })
             .forEach(relationshipDAO::addAttributionRelationship);
 
-        // TODO: Force commit before making this call (DPC-4196)
         final RosterEntity rosterEntity1 = rosterDAO.getEntity(rosterID)
                 .orElseThrow(() -> NOT_FOUND_EXCEPTION);
+        this.rosterDAO.refresh(rosterEntity1);
 
         return converter.toFHIR(Group.class, rosterEntity1);
     }
@@ -236,8 +236,7 @@ public class GroupResource extends AbstractGroupResource {
         Stream.concat(existingAttributions.stream(), newAttributions.stream())
             .forEach(relationshipDAO::addAttributionRelationship);
 
-        // TODO: Force commit before making this call (DPC-4196)
-        //Getting it again to access the latest updates from above code
+        this.rosterDAO.refresh(rosterEntity);
         final RosterEntity rosterEntity1 = this.rosterDAO.getEntity(rosterID)
                 .orElseThrow(() -> NOT_FOUND_EXCEPTION);
 

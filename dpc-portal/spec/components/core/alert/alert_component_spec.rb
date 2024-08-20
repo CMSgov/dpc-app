@@ -47,7 +47,7 @@ RSpec.describe Core::Alert::Component, type: :component do
       it 'includes the heading' do
         render_component
         expect(page)
-          .to have_selector('.usa-alert .usa-alert__body h4.usa-alert__heading')
+          .to have_selector('.usa-alert .usa-alert__body h2.usa-alert__heading')
       end
 
       it 'includes the heading text' do

@@ -24,10 +24,13 @@ class CpiApiGatewayClient
 
   # fetch full enrollments information about an organization
   def fetch_profile(npi)
+    url = "#{@cpi_api_gateway_url}api/1.0/ppr/providers/profile"
+    start_tracking(:fetch_profile, url)
     body = { providerID: { npi: npi.to_s } }.to_json
-    response = request_client.post("#{@cpi_api_gateway_url}api/1.0/ppr/providers/profile",
+    response = request_client.post(url,
                                    headers: { 'Content-Type': 'application/json' },
                                    body:)
+    stop_tracking(:fetch_profile, url, response.status)
     response.parsed
   end
 
@@ -74,9 +77,36 @@ class CpiApiGatewayClient
   end
 
   def fetch_provider_info(body)
-    response = request_client.post("#{@cpi_api_gateway_url}api/1.0/ppr/providers",
+    url = "#{@cpi_api_gateway_url}api/1.0/ppr/providers"
+    start_tracking(:fetch_provider_info, url)
+    response = request_client.post(url,
                                    headers: { 'Content-Type': 'application/json' },
                                    body:)
+    stop_tracking(:fetch_provider_info, url, response.status)
     response.parsed
+  end
+
+  def start_tracking(method_name, url)
+    @tracker = NewRelic::Agent::Tracer.start_external_request_segment(library: 'Net::HTTP', uri: url,
+                                                                      procedure: :post)
+    @start = Time.now
+    Rails.logger.info(
+      ['Calling CPI API Gateway',
+       { cpi_api_gateway_request_method: :post,
+         cpi_api_gateway_request_url: url,
+         cpi_api_gateway_request_method_name: method_name }]
+    )
+  end
+
+  def stop_tracking(method_name, url, code)
+    Rails.logger.info(
+      ['CPI API Gateway response info',
+       { cpi_api_gateway_request_method: :post,
+         cpi_api_gateway_request_url: url,
+         cpi_api_gateway_request_method_name: method_name,
+         cpi_api_gateway_response_status_code: code,
+         cpi_api_gateway_response_duration: Time.now - @start }]
+    )
+    @tracker.finish
   end
 end
