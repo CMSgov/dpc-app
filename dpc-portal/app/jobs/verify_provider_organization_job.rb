@@ -8,18 +8,12 @@ class VerifyProviderOrganizationJob < ApplicationJob
   queue_as :portal
   include Verification
 
-  # rubocop:disable Metrics/AbcSize
   def perform
     service = AoVerificationService.new
     @start = Time.now
     orgs_to_check.each do |org|
-      response = service.get_approved_enrollments(org.npi)
-      if response[:has_org_waiver]
-        Rails.logger.info(['Organization has a waiver',
-                           { actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
-                             actionType: LoggingConstants::ActionType::OrgHasWaiver,
-                             organization: org.id }])
-      end
+      enrollments_and_waivers = service.get_approved_enrollments(org.npi)
+      log_waiver(enrollments_and_waivers, org)
       org.update!(last_checked_at: Time.now)
     rescue AoException => e
       handle_error(org, e.message)
@@ -39,5 +33,15 @@ class VerifyProviderOrganizationJob < ApplicationJob
     ProviderOrganization.where(last_checked_at: ..lookback_hours.hours.ago,
                                verification_status: 'approved').limit(max_records)
   end
+
+  private
+
+  def log_waiver(enrollments_and_waivers, org)
+    return unless enrollments_and_waivers[:has_org_waiver]
+
+    Rails.logger.info(['Organization has a waiver',
+                       { actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
+                         actionType: LoggingConstants::ActionType::OrgHasWaiver,
+                         organization: org.id }])
+  end
 end
-# rubocop:enable Metrics/AbcSize
