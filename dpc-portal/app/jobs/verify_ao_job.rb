@@ -27,7 +27,7 @@ class VerifyAoJob < ApplicationJob
 
   def check_link(service, link)
     response = service.check_ao_eligibility(link.provider_organization.npi, :pac_id, link.user.pac_id)
-    log_waivers(response)
+    log_batch_verification_waivers(response)
   end
 
   def update_success(link)
@@ -77,20 +77,5 @@ class VerifyAoJob < ApplicationJob
                      authorizedOfficial: link.user.id,
                      providerOrganization: link.provider_organization.id }])
     end
-  end
-
-  private
-
-  def log_waivers(role_and_waivers)
-    if role_and_waivers[:has_ao_waiver]
-      Rails.logger.info(['Authorized official has a waiver',
-                         { actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
-                           actionType: LoggingConstants::ActionType::AoHasWaiver }])
-    end
-    return unless role_and_waivers[:has_org_waiver]
-
-    Rails.logger.info(['Organization has a waiver',
-                       { actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
-                         actionType: LoggingConstants::ActionType::OrgHasWaiver }])
   end
 end
