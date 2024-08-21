@@ -83,9 +83,18 @@ RSpec.describe VerifyProviderOrganizationJob, type: :job do
           expect(org.last_checked_at).to be > 1.day.ago
         end
       end
+      it 'should set the current provider_organization' do
+        approved_orgs = ProviderOrganization.where(verification_status: 'approved')
+        allow(CurrentAttributes).to receive(:save_organization_attributes)
+        expect(CurrentAttributes).to receive(:save_organization_attributes) do |org, user|
+          expect(approved_orgs.pluck(:id)).to include(org.id)
+          expect(user).to be_nil
+        end
+        VerifyProviderOrganizationJob.perform_now
+      end
     end
     context :org_has_waiver do
-      let(:provider_organization) do
+      let!(:provider_organization) do
         create(:provider_organization, npi: '3098168743', verification_status: :approved, last_checked_at: 8.days.ago)
       end
 
@@ -94,8 +103,7 @@ RSpec.describe VerifyProviderOrganizationJob, type: :job do
         expect(Rails.logger).to receive(:info)
           .with(['Organization has a waiver',
                  { actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
-                   actionType: LoggingConstants::ActionType::OrgHasWaiver,
-                   organization: provider_organization.id }])
+                   actionType: LoggingConstants::ActionType::OrgHasWaiver }])
         VerifyProviderOrganizationJob.perform_now
       end
     end

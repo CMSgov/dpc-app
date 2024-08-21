@@ -93,6 +93,16 @@ RSpec.describe VerifyAoJob, type: :job do
           expect(link.user.last_checked_at).to be_nil
         end
       end
+      it 'should set the current provider_organization and user' do
+        links_to_check = AoOrgLink.where(verification_status: true)
+        user_id = links_to_check.first.user.id
+        allow(CurrentAttributes).to receive(:save_organization_attributes)
+        expect(CurrentAttributes).to receive(:save_organization_attributes) do |org_from_job, user_from_job|
+          expect(links_to_check.pluck(:provider_organization_id)).to include(org_from_job.id)
+          expect(user_id).to equal(user_from_job.id)
+        end
+        VerifyAoJob.perform_now
+      end
     end
     context :ao_has_waiver do
       let(:user) { create(:user, pac_id: '900777777', verification_status: :approved) }
@@ -104,9 +114,7 @@ RSpec.describe VerifyAoJob, type: :job do
         expect(Rails.logger).to receive(:info)
           .with(['Authorized official has a waiver',
                  { actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
-                   actionType: LoggingConstants::ActionType::AoHasWaiver,
-                   current_user: link.user.id,
-                   organization: link.provider_organization.id }])
+                   actionType: LoggingConstants::ActionType::AoHasWaiver }])
         VerifyAoJob.perform_now
       end
     end
@@ -120,9 +128,7 @@ RSpec.describe VerifyAoJob, type: :job do
         expect(Rails.logger).to receive(:info)
           .with(['Organization has a waiver',
                  { actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
-                   actionType: LoggingConstants::ActionType::OrgHasWaiver,
-                   current_user: link.user.id,
-                   organization: link.provider_organization.id }])
+                   actionType: LoggingConstants::ActionType::OrgHasWaiver }])
         VerifyAoJob.perform_now
       end
     end
