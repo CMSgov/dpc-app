@@ -101,6 +101,10 @@ RSpec.describe VerifyAoJob, type: :job do
           expect(links_to_check.pluck(:provider_organization_id)).to include(org_from_job.id)
           expect(user_id).to equal(user_from_job.id)
         end
+        allow(CurrentAttributes).to receive(:save_user_attributes)
+        expect(CurrentAttributes).to receive(:save_user_attributes) do |user_from_job|
+          expect(user_id).to equal(user_from_job.id)
+        end
         VerifyAoJob.perform_now
       end
     end
