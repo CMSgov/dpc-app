@@ -19,7 +19,6 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.junit.jupiter.api.*;
-import org.mockito.MockedStatic;
 
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
@@ -29,7 +28,6 @@ import java.util.UUID;
 import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.*;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class IpAddressResourceTest extends AbstractSecureApplicationTest {
