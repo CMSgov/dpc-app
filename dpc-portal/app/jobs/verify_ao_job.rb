@@ -12,6 +12,7 @@ class VerifyAoJob < ApplicationJob
     @start = Time.now
     service = AoVerificationService.new
     links_to_check.each do |link|
+      config_attributes(link)
       check_link(service, link)
       update_success(link)
     rescue AoException => e
@@ -25,7 +26,8 @@ class VerifyAoJob < ApplicationJob
   end
 
   def check_link(service, link)
-    service.check_ao_eligibility(link.provider_organization.npi, :pac_id, link.user.pac_id)
+    response = service.check_ao_eligibility(link.provider_organization.npi, :pac_id, link.user.pac_id)
+    log_batch_verification_waivers(response)
   end
 
   def update_success(link)
@@ -75,5 +77,12 @@ class VerifyAoJob < ApplicationJob
                      authorizedOfficial: link.user.id,
                      providerOrganization: link.provider_organization.id }])
     end
+  end
+
+  private
+
+  def config_attributes(link)
+    CurrentAttributes.save_organization_attributes(link.provider_organization, link.user)
+    CurrentAttributes.save_user_attributes(link.user)
   end
 end
