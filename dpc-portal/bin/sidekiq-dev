@@ -21,4 +21,5 @@ if [ -z "$GOLDEN_MACAROON" ]; then
 fi
 
 echo "Starting Procfile.dev"
-exec foreman start -f Procfile.sidekiq-nonprod "$@"
+export EVERYTHING_AFTER_PIPE_REGEX='s/[^|]*|//'
+exec foreman start -f Procfile.sidekiq-nonprod "$@" | sed $EVERYTHING_AFTER_PIPE_REGEX
