@@ -65,14 +65,10 @@ public class ClientUtils {
                 .peek(jobResponse -> {
                     if (jobResponse.getError().size() > 0) {
                         ObjectMapper mapper = new ObjectMapper();
-                        List<JobCompletionModel.OutputEntry> errors = jobResponse.getError();
-
-                        for ( JobCompletionModel.OutputEntry error: errors ) {
-                            try {
-                                logger.error(mapper.writeValueAsString(error));
-                            } catch (JsonProcessingException e) {
-                                throw new IllegalStateException("Export job completed, but with unserializable errors");
-                            }
+                        try {
+                            logger.error(mapper.writeValueAsString(jobResponse));
+                        } catch (JsonProcessingException e) {
+                            throw new IllegalStateException("Export job completed, but with unserializable errors");
                         }
                         throw new IllegalStateException("Export job completed, but with errors");
                     }
