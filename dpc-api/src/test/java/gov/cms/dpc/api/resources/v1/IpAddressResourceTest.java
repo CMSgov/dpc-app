@@ -6,7 +6,6 @@ import gov.cms.dpc.api.AbstractSecureApplicationTest;
 import gov.cms.dpc.api.entities.IpAddressEntity;
 import gov.cms.dpc.api.models.CollectionResponse;
 import gov.cms.dpc.api.models.CreateIpAddressRequest;
-import gov.cms.dpc.common.utils.EnvironmentParser;
 import gov.cms.dpc.testing.APIAuthHelpers;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
