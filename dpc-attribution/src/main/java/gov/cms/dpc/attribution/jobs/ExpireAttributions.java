@@ -49,12 +49,8 @@ public class ExpireAttributions extends Job {
                     .where(Attributions.ATTRIBUTIONS.PERIOD_END.le(expirationTemporal))
                     .execute();
             logger.debug("Expired {} attribution relationships.", updated);
-        } catch (SQLException e) {
-            throw new AttributionException("Unable to open connection to database.", e);
-        }
 
-        // Remove everything that is inactive and has been expired for more than 6 months
-        try (final Connection connection = this.dataSource.getConnection(); final DSLContext context = DSL.using(connection, this.settings)) {
+            // Remove everything that is inactive and has been expired for more than 6 months
             final int removed = context
                     .delete(Attributions.ATTRIBUTIONS)
                     .where(Attributions.ATTRIBUTIONS.PERIOD_END.le(expirationTemporal.minusMonths(6))
