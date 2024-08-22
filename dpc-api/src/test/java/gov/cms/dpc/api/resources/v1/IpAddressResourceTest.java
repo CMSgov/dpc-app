@@ -6,6 +6,7 @@ import gov.cms.dpc.api.AbstractSecureApplicationTest;
 import gov.cms.dpc.api.entities.IpAddressEntity;
 import gov.cms.dpc.api.models.CollectionResponse;
 import gov.cms.dpc.api.models.CreateIpAddressRequest;
+import gov.cms.dpc.common.utils.EnvironmentParser;
 import gov.cms.dpc.testing.APIAuthHelpers;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
@@ -18,6 +19,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.junit.jupiter.api.*;
+import org.mockito.Mockito;
 
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
@@ -27,6 +29,7 @@ import java.util.UUID;
 import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.*;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class IpAddressResourceTest extends AbstractSecureApplicationTest {
@@ -41,9 +44,13 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
         this.fullyAuthedToken = APIAuthHelpers.jwtAuthFlow(getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY).accessToken;
     }
 
-    // TODO Once we turn on the IpAddress end point, remove this test and re-enable all of the others.
+    // TODO Once we turn on the IpAddress end point on Prod, remove this test.
     @Test
+    @Order(9)
     public void testForbidden() throws URISyntaxException, IOException {
+        EnvironmentParser mockParser = mock(EnvironmentParser.class);
+        Mockito.when(mockParser.getEnvironment("API", false)).thenReturn("prod");
+
         CloseableHttpClient client = HttpClients.createDefault();
         URIBuilder uriBuilder = new URIBuilder(String.format("%s/IpAddress", getBaseURL()));
 
@@ -56,7 +63,6 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    @Disabled
     @Order(1)
     public void testBadAuth() throws URISyntaxException, IOException {
         CloseableHttpClient client = HttpClients.createDefault();
@@ -71,7 +77,6 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    @Disabled
     @Order(2)
     public void testNoAuth() throws URISyntaxException, IOException {
         CloseableHttpClient client = HttpClients.createDefault();
@@ -85,7 +90,6 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    @Disabled
     @Order(3)
     public void testPost_happyPath() throws IOException, URISyntaxException {
         CloseableHttpClient client = HttpClients.createDefault();
@@ -113,7 +117,6 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    @Disabled
     @Order(4)
     // Force this to run after the POST test
     public void testGet() throws URISyntaxException, IOException {
@@ -140,7 +143,6 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    @Disabled
     @Order(5)
     public void testDelete_happyPath() throws URISyntaxException, IOException {
         CloseableHttpClient client = HttpClients.createDefault();
@@ -155,7 +157,6 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    @Disabled
     @Order(6)
     public void testDelete_notFound() throws URISyntaxException, IOException {
         CloseableHttpClient client = HttpClients.createDefault();
@@ -170,7 +171,6 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    @Disabled
     @Order(7)
     // Force this test to run last since it's going to max out our Ips for the org
     public void testPost_tooManyIps() throws IOException, URISyntaxException {
@@ -196,7 +196,6 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    @Disabled
     @Order(8)
     public void testPost_noIp() throws IOException, URISyntaxException {
         CreateIpAddressRequest emptyIpRequest = new CreateIpAddressRequest(null);
