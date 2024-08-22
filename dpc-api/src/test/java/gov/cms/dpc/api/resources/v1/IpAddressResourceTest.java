@@ -19,7 +19,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.junit.jupiter.api.*;
-import org.mockito.Mockito;
+import org.mockito.MockedStatic;
 
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
@@ -48,18 +48,19 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
     @Test
     @Order(9)
     public void testForbidden() throws URISyntaxException, IOException {
-        EnvironmentParser mockParser = mock(EnvironmentParser.class);
-        Mockito.when(mockParser.getEnvironment("API", false)).thenReturn("prod");
+        try (MockedStatic<EnvironmentParser> parser = mockStatic(EnvironmentParser.class)) {
+            parser.when(() -> EnvironmentParser.getEnvironment("API", false)).thenReturn("prod");
 
-        CloseableHttpClient client = HttpClients.createDefault();
-        URIBuilder uriBuilder = new URIBuilder(String.format("%s/IpAddress", getBaseURL()));
+            CloseableHttpClient client = HttpClients.createDefault();
+            URIBuilder uriBuilder = new URIBuilder(String.format("%s/IpAddress", getBaseURL()));
 
-        HttpGet get = new HttpGet(uriBuilder.build());
-        get.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
-        get.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + this.fullyAuthedToken);
+            HttpGet get = new HttpGet(uriBuilder.build());
+            get.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
+            get.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + this.fullyAuthedToken);
 
-        CloseableHttpResponse response = client.execute(get);
-        assertEquals(HttpStatus.SC_FORBIDDEN, response.getStatusLine().getStatusCode());
+            CloseableHttpResponse response = client.execute(get);
+            assertEquals(HttpStatus.SC_FORBIDDEN, response.getStatusLine().getStatusCode());
+        }
     }
 
     @Test
