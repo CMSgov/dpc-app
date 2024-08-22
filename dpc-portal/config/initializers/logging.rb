@@ -31,5 +31,7 @@ module LoggingConstants
 
     FailCpiApiGwCheck = 'FailCpiApiGatewwayCheck'
     ApiBlocked = 'ApiBlocked'
+    AoHasWaiver = 'AoHasWaiver'
+    OrgHasWaiver = 'OrgHasWaiver'
   end
 end

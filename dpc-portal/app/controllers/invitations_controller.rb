@@ -168,6 +168,8 @@ class InvitationsController < ApplicationController
   def check_ao
     user_info = UserInfoService.new.user_info(session)
     result = @invitation.ao_match?(user_info)
+
+    log_waivers(result)
     session[:user_pac_id] = result.dig(:ao_role, 'pacId') if result[:success]
     result[:success]
   end
@@ -241,4 +243,19 @@ def redirect_host
   else
     "https://#{ENV.fetch('ENV', nil)}.dpc.cms.gov"
   end
+end
+
+def log_waivers(role_and_waivers)
+  if role_and_waivers[:has_org_waiver]
+    Rails.logger.info(['Organization has a waiver',
+                       { actionContext: LoggingConstants::ActionContext::Registration,
+                         actionType: LoggingConstants::ActionType::OrgHasWaiver,
+                         invitation: @invitation.id }])
+  end
+  return unless role_and_waivers[:has_ao_waiver]
+
+  Rails.logger.info(['Authorized official has a waiver',
+                     { actionContext: LoggingConstants::ActionContext::Registration,
+                       actionType: LoggingConstants::ActionType::AoHasWaiver,
+                       invitation: @invitation.id }])
 end

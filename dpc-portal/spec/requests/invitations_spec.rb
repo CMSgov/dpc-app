@@ -253,6 +253,40 @@ RSpec.describe 'Invitations', type: :request do
           expect(request.session[:user_pac_id]).to eq user_info['social_security_number']
         end
       end
+      context :ao_has_waiver do
+        let(:invitation) { create(:invitation, :ao) }
+        let(:org) { invitation.provider_organization }
+        before do
+          stub_user_info(overrides: { 'social_security_number' => '900777777' })
+          log_in
+          get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
+        end
+        it 'logs a waiver' do
+          allow(Rails.logger).to receive(:info)
+          expect(Rails.logger).to receive(:info)
+            .with(['Authorized official has a waiver',
+                   { actionContext: LoggingConstants::ActionContext::Registration,
+                     actionType: LoggingConstants::ActionType::AoHasWaiver,
+                     invitation: invitation.id }])
+          post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"
+        end
+      end
+      context :org_has_waiver do
+        let(:org) { create(:provider_organization, npi: '3098168743', verification_status: :approved) }
+        let(:invitation) { create(:invitation, :ao, provider_organization: org) }
+        before { log_in }
+        it 'should log a waiver' do
+          stub_user_info
+          get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
+          allow(Rails.logger).to receive(:info)
+          expect(Rails.logger).to receive(:info)
+            .with(['Organization has a waiver',
+                   { actionContext: LoggingConstants::ActionContext::Registration,
+                     actionType: LoggingConstants::ActionType::OrgHasWaiver,
+                     invitation: invitation.id }])
+          post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"
+        end
+      end
       context :failure do
         let(:invitation) { create(:invitation, :ao) }
         let(:org) { invitation.provider_organization }

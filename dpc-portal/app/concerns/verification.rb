@@ -43,5 +43,18 @@ module Verification
     def enqueue_job(klass)
       klass.perform_later
     end
+
+    def log_batch_verification_waivers(role_and_waivers)
+      if role_and_waivers[:has_org_waiver]
+        logger.info(['Organization has a waiver',
+                     { actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
+                       actionType: LoggingConstants::ActionType::OrgHasWaiver }])
+      end
+      return unless role_and_waivers[:has_ao_waiver]
+
+      logger.info(['Authorized official has a waiver',
+                   { actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
+                     actionType: LoggingConstants::ActionType::AoHasWaiver }])
+    end
   end
 end
