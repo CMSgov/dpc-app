@@ -64,7 +64,6 @@ public abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organ
 
         // TODO Remove this when we want to turn on the IpAddress end point on Prod
         final String environment = EnvironmentParser.getEnvironment("API", false);
-        logger.error("ENVIRONMENT: " + environment);
         if(resourceRequested.equals("v1/IpAddress") && environment.equals("prod")) {
             throw new WebApplicationException(Response.Status.FORBIDDEN);
         }

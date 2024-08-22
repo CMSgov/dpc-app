@@ -44,26 +44,6 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
         this.fullyAuthedToken = APIAuthHelpers.jwtAuthFlow(getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY).accessToken;
     }
 
-    // TODO Once we turn on the IpAddress end point on Prod, remove this test.
-    @Test
-    @Order(9)
-    public void testForbidden() throws URISyntaxException, IOException {
-        try (MockedStatic<EnvironmentParser> parser = mockStatic(EnvironmentParser.class)) {
-            parser.when(() -> EnvironmentParser.getEnvironment("API", false)).thenReturn("prod");
-            assertEquals(EnvironmentParser.getEnvironment("API", false), "prod");
-
-            CloseableHttpClient client = HttpClients.createDefault();
-            URIBuilder uriBuilder = new URIBuilder(String.format("%s/IpAddress", getBaseURL()));
-
-            HttpGet get = new HttpGet(uriBuilder.build());
-            get.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
-            get.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + this.fullyAuthedToken);
-
-            CloseableHttpResponse response = client.execute(get);
-            assertEquals(HttpStatus.SC_FORBIDDEN, response.getStatusLine().getStatusCode());
-        }
-    }
-
     @Test
     @Order(1)
     public void testBadAuth() throws URISyntaxException, IOException {
