@@ -50,6 +50,7 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
     public void testForbidden() throws URISyntaxException, IOException {
         try (MockedStatic<EnvironmentParser> parser = mockStatic(EnvironmentParser.class)) {
             parser.when(() -> EnvironmentParser.getEnvironment("API", false)).thenReturn("prod");
+            assertEquals(EnvironmentParser.getEnvironment("API", false), "prod");
 
             CloseableHttpClient client = HttpClients.createDefault();
             URIBuilder uriBuilder = new URIBuilder(String.format("%s/IpAddress", getBaseURL()));
