@@ -117,6 +117,7 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
         String serviceUrl = configuration().getConsentServiceUrl();
         logger.info("Connecting to consent server at {}.", serviceUrl);
         ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
+        ctx.getRestfulClientFactory().setSocketTimeout(20 * 1000);  // Set timeout to 20 seconds
         return ctx.newRestfulGenericClient(serviceUrl);
     }
 

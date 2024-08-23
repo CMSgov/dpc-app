@@ -29,7 +29,7 @@ server:
             application: ${APPLICATION:-"dpc-consent"}
 
 logging:
-  level: DEBUG
+  level: ERROR
   loggers:
     "liquibase": INFO
     "gov.cms.dpc.queue.DistributedBatchQueue": DEBUG
