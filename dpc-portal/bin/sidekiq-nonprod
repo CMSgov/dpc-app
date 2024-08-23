@@ -6,4 +6,5 @@ if ! gem list foreman -i --silent; then
 fi
 
 echo "Starting Procfile.nonprod"
-exec foreman start -f Procfile.sidekiq-nonprod "$@" | sed s/.*?\|//
+export EVERYTHING_AFTER_PIPE_REGEX='s/[^|]*|//'
+exec foreman start -f Procfile.sidekiq-nonprod "$@" | sed $EVERYTHING_AFTER_PIPE_REGEX
