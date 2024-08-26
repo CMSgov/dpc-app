@@ -30,15 +30,11 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 /**
- * Integration test for verifying that the expiration jobs runs correctly.
- * We currently don't have a way of verifying that the job runs when expected, since we can't really override Dropwizard's time source.
- * In the future, we might consider using something like ByteBuddy to intercept all system time calls and see if the job still gets run.
- * <p>
- * Disabled until made effective
+ * Unit test for verifying that the expiration job correctly expires and deletes attributions.
  */
 @ExtendWith(BufferedLoggerHandler.class)
 @ExtendWith(MockitoExtension.class)
-class ExpirationJobUnitTest extends AbstractAttributionDAOTest {
+class ExpireAttributionsUnitTest extends AbstractAttributionDAOTest {
 
     private OrganizationDAO organizationDAO;
     private ProviderDAO providerDAO;
