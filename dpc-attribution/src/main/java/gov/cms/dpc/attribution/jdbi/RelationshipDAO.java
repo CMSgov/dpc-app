@@ -6,7 +6,6 @@ import gov.cms.dpc.common.entities.RosterEntity_;
 import gov.cms.dpc.common.entities.PatientEntity_;
 import gov.cms.dpc.common.hibernate.attribution.DPCAbstractDAO;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
-import io.dropwizard.hibernate.AbstractDAO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
