@@ -74,7 +74,7 @@ jobs:
           params: |
             DB_USER=/dpc/test/consent/db_read_only_user_dpc_consent
             DB_PASSWORD=/dpc/test/consent/db_read_only_pass_dpc_consent
-	    HOST=/dpc/test/db/url
+            HOST=/dpc/test/db/url
       - name: Verify suppression file was ingested
         env:
           FILENAME: ${{needs.trigger.outputs.filename}}
