@@ -410,7 +410,7 @@ GEM
     responders (3.1.1)
       actionpack (>= 5.2)
       railties (>= 5.2)
-    rexml (3.3.5)
+    rexml (3.3.6)
       strscan
     rouge (4.3.0)
     rspec-core (3.13.0)
@@ -608,7 +608,7 @@ DEPENDENCIES
   rbnacl-libsodium
   redis (~> 4.0)
   redis-namespace
-  rexml (>= 3.3.3)
+  rexml (>= 3.3.6)
   rspec-rails
   rubocop
   rubocop-performance
