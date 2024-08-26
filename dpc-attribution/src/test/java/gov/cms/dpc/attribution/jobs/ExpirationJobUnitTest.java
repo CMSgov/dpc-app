@@ -38,7 +38,7 @@ import static org.mockito.Mockito.*;
  */
 @ExtendWith(BufferedLoggerHandler.class)
 @ExtendWith(MockitoExtension.class)
-class ExpirationJobTestUnit extends AbstractAttributionDAOTest {
+class ExpirationJobUnitTest extends AbstractAttributionDAOTest {
 
     private OrganizationDAO organizationDAO;
     private ProviderDAO providerDAO;
@@ -54,7 +54,6 @@ class ExpirationJobTestUnit extends AbstractAttributionDAOTest {
     private JobExecutionContext jobContext;
     @Mock
     private Settings settings;
-    private static final String PROVIDER_ID = "2322222227";
     @InjectMocks
     private ExpireAttributions expireAttributions;
 
@@ -84,7 +83,7 @@ class ExpirationJobTestUnit extends AbstractAttributionDAOTest {
     }
 
     @Test
-    void testExpireAttribution() throws NoSuchFieldException, SQLException {
+    void testExpireAttribution() {
         OrganizationEntity org = AttributionTestHelpers.createOrganizationEntity();
         ProviderEntity provider = AttributionTestHelpers.createProviderEntity(org);
         RosterEntity roster = AttributionTestHelpers.createRosterEntity(org, provider);
@@ -143,7 +142,8 @@ class ExpirationJobTestUnit extends AbstractAttributionDAOTest {
         PatientEntity patient2 = AttributionTestHelpers.createPatientEntity(org);
         PatientEntity patient3 = AttributionTestHelpers.createPatientEntity(org);
 
-        // should expire
+        // should expire -- AttributionTestHelpers.createAttributionRelationship by default creates attribution
+        // record with periodEnd 1 month before now.
         AttributionRelationship attr1 = AttributionTestHelpers.createAttributionRelationship(roster, patient1);
 
         // should get deleted
