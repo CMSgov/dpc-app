@@ -1,9 +1,12 @@
 package gov.cms.dpc.aggregation.service;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import gov.cms.dpc.aggregation.engine.JobBatchProcessor;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Consent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Named;
 import java.util.List;
@@ -11,6 +14,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class ConsentServiceImpl implements ConsentService {
+
+    private static final Logger logger = LoggerFactory.getLogger(JobBatchProcessor.class);
 
     private final IGenericClient consentClient;
 
@@ -25,7 +30,14 @@ public class ConsentServiceImpl implements ConsentService {
 
     @Override
     public Optional<List<ConsentResult>> getConsent(List<String> mbis) {
-        final Bundle bundle = doConsentSearch(mbis);
+        final Bundle bundle;
+        try {
+            bundle = doConsentSearch(mbis);
+        } catch (Exception e) {
+            logger.debug("Ending consent check with exception");
+            throw e;
+        }
+        logger.debug("Ending consent check");
 
         return Optional.of(
             bundle.getEntry().stream().map( entry -> {
@@ -46,6 +58,7 @@ public class ConsentServiceImpl implements ConsentService {
                 .map( mbi -> String.format("%s|%s", DPCIdentifierSystem.MBI.getSystem(), mbi) )
                 .collect(Collectors.toList());
 
+        logger.debug("Starting consent check");
         return consentClient
                 .search()
                 .forResource(Consent.class)
