@@ -80,13 +80,12 @@ jobs:
           FILENAME: ${{needs.trigger.outputs.filename}}
         # CAUTION: if changing the script below, validate that sensitive information is not printed in the workflow
         run: |
-          CONNECTION_URL=postgresql://$DB_USER:$DB_PASSWORD@$HOST/dpc_consent
-          IMPORT_FILE=`psql -t "$CONNECTION_URL" -c "SELECT id FROM opt_out_file WHERE name = '$FILENAME' LIMIT 1" 2>&1`
+          IMPORT_FILE=`psql -t "postgresql://$DB_USER:$DB_PASSWORD@$HOST/dpc_consent" -c "SELECT id FROM opt_out_file WHERE name = '$FILENAME' LIMIT 1" 2>&1`
           if [[ $? -ne 0 || -z $SUPPRESSION_FILE ]]; then
             echo "suppression_file query returned zero results or command failed"
             exit 1
           else
-            IMPORT_FILE_UPDATES=`psql -t "$CONNECTION_URL" -c "SELECT count(mbi) FROM consent JOIN opt_out_file ON opt_out_file.id = opt_out_file_id WHERE opt_out_file.name = '$FILENAME'" 2>&1`
+            IMPORT_FILE_UPDATES=`psql -t "postgresql://$DB_USER:$DB_PASSWORD@$HOST/dpc_consent" -c "SELECT count(mbi) FROM consent JOIN opt_out_file ON opt_out_file.id = opt_out_file_id WHERE opt_out_file.name = '$FILENAME'" 2>&1`
               if [[ $? -ne 0 || -z $SUPPRESSIONS ]]; then
                 echo "suppressions query returned zero results or command failed"
                 exit 1
