@@ -4,6 +4,7 @@ import gov.cms.dpc.common.entities.AttributionRelationship_;
 import gov.cms.dpc.common.entities.AttributionRelationship;
 import gov.cms.dpc.common.entities.RosterEntity_;
 import gov.cms.dpc.common.entities.PatientEntity_;
+import gov.cms.dpc.common.hibernate.attribution.DPCAbstractDAO;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
 import io.dropwizard.hibernate.AbstractDAO;
 import org.slf4j.Logger;
@@ -18,7 +19,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public class RelationshipDAO extends AbstractDAO<AttributionRelationship> {
+public class RelationshipDAO extends DPCAbstractDAO<AttributionRelationship> {
 
     private static final Logger logger = LoggerFactory.getLogger(RelationshipDAO.class);
 

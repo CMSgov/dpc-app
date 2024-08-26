@@ -43,6 +43,7 @@ public class ExpireAttributions extends Job {
         logger.debug("Expiring active attribution relationships before {}.", expirationTemporal.format(DateTimeFormatter.ISO_DATE_TIME));
 
         try (final Connection connection = this.dataSource.getConnection(); final DSLContext context = DSL.using(connection, this.settings)) {
+            connection.setAutoCommit(false);
             final int updated = context
                     .update(Attributions.ATTRIBUTIONS)
                     .set(Attributions.ATTRIBUTIONS.INACTIVE, true)
@@ -57,6 +58,8 @@ public class ExpireAttributions extends Job {
                             .and(Attributions.ATTRIBUTIONS.INACTIVE.eq(true)))
                     .execute();
             logger.debug("Removed {} attribution relationships.", removed);
+
+            connection.commit();
         } catch (SQLException e) {
             throw new AttributionException("Unable to open connection to database.", e);
         }
