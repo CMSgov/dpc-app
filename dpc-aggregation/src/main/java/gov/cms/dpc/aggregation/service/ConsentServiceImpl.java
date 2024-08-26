@@ -34,10 +34,10 @@ public class ConsentServiceImpl implements ConsentService {
         try {
             bundle = doConsentSearch(mbis);
         } catch (Exception e) {
-            logger.debug("Ending consent check with exception");
+            logger.warn("Ending consent check with exception");
             throw e;
         }
-        logger.debug("Ending consent check");
+        logger.warn("Ending consent check");
 
         return Optional.of(
             bundle.getEntry().stream().map( entry -> {
@@ -58,7 +58,7 @@ public class ConsentServiceImpl implements ConsentService {
                 .map( mbi -> String.format("%s|%s", DPCIdentifierSystem.MBI.getSystem(), mbi) )
                 .collect(Collectors.toList());
 
-        logger.debug("Starting consent check");
+        logger.warn("Starting consent check");
         return consentClient
                 .search()
                 .forResource(Consent.class)
