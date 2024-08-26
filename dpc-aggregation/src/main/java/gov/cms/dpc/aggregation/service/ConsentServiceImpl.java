@@ -9,6 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Named;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -30,14 +32,7 @@ public class ConsentServiceImpl implements ConsentService {
 
     @Override
     public Optional<List<ConsentResult>> getConsent(List<String> mbis) {
-        final Bundle bundle;
-        try {
-            bundle = doConsentSearch(mbis);
-        } catch (Exception e) {
-            logger.warn("Ending consent check with exception");
-            throw e;
-        }
-        logger.warn("Ending consent check");
+        final Bundle bundle = doConsentSearch(mbis);
 
         return Optional.of(
             bundle.getEntry().stream().map( entry -> {
@@ -58,13 +53,19 @@ public class ConsentServiceImpl implements ConsentService {
                 .map( mbi -> String.format("%s|%s", DPCIdentifierSystem.MBI.getSystem(), mbi) )
                 .collect(Collectors.toList());
 
-        logger.warn("Starting consent check");
-        return consentClient
+        Instant startInstant = Instant.now();
+        try {
+            return consentClient
                 .search()
                 .forResource(Consent.class)
                 .encodedJson()
                 .returnBundle(Bundle.class)
                 .where(Consent.PATIENT.hasAnyOfIds(fullMbis))
                 .execute();
+        } catch (Exception e) {
+            Duration runTime = Duration.between(startInstant, Instant.now());
+            logger.error("Error getting consent: " + runTime.toSeconds() + " seconds");
+            throw e;
+        }
     }
 }
