@@ -3,6 +3,7 @@ package gov.cms.dpc.aggregation;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
+import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Binder;
 import com.google.inject.Provides;
@@ -117,8 +118,19 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
         String serviceUrl = configuration().getConsentServiceUrl();
         logger.info("Connecting to consent server at {}.", serviceUrl);
         ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
+
+        logger.warn("Updating consent client timeouts and setting logger");
         ctx.getRestfulClientFactory().setSocketTimeout(180 * 1000);  // Increase timeouts from the default (10s)
-        return ctx.newRestfulGenericClient(serviceUrl);
+        ctx.getRestfulClientFactory().setConnectTimeout(180 * 1000);
+        ctx.getRestfulClientFactory().setConnectionRequestTimeout(180 * 1000);
+        LoggingInterceptor loggingInterceptor = new LoggingInterceptor();
+        loggingInterceptor.setLogResponseSummary(true);
+        loggingInterceptor.setLogResponseBody(true);
+        loggingInterceptor.setLogResponseHeaders(true);
+        IGenericClient consentClient = ctx.newRestfulGenericClient(serviceUrl);
+        consentClient.registerInterceptor(loggingInterceptor);
+
+        return consentClient; // ctx.newRestfulGenericClient(serviceUrl);
     }
 
     @Provides

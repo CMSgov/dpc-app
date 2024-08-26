@@ -54,6 +54,7 @@ public class ConsentServiceImpl implements ConsentService {
                 .collect(Collectors.toList());
 
         Instant startInstant = Instant.now();
+
         try {
             return consentClient
                 .search()
