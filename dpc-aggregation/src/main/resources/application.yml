@@ -51,7 +51,6 @@ logging:
     "gov.cms.dpc.api.auth": INFO
     "gov.cms.dpc.common.logging.filters": INFO
     "metrics": INFO
-    "gov.cms.dpc.aggregation.service.ConsentServiceImpl": DEBUG
   appenders:
     - type: console
       filterFactories:

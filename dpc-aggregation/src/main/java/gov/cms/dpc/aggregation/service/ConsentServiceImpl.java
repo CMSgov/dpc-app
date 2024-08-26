@@ -63,8 +63,9 @@ public class ConsentServiceImpl implements ConsentService {
                 .where(Consent.PATIENT.hasAnyOfIds(fullMbis))
                 .execute();
         } catch (Exception e) {
+            int consentTimeOut = consentClient.getFhirContext().getRestfulClientFactory().getSocketTimeout();
             Duration runTime = Duration.between(startInstant, Instant.now());
-            logger.error("Error getting consent: " + runTime.toSeconds() + " seconds");
+            logger.error("Error getting consent: " + runTime.toSeconds() + " seconds.  Time out: " + consentTimeOut);
             throw e;
         }
     }
