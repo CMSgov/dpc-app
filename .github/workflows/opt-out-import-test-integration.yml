@@ -29,6 +29,8 @@ jobs:
     defaults:
       run:
         working-directory: ./lambda/opt-out-import
+    outputs:
+      filename: ${{ steps.createfile.outputs.FILENAME }}
     steps:
       - uses: actions/checkout@v4
       - uses: aws-actions/configure-aws-credentials@v4
@@ -43,8 +45,53 @@ jobs:
           role-chaining: true
           role-skip-session-tagging: true
       - name: Upload test file to the BFD bucket to trigger lambda function via SNS message
+        id: createfile
         run: |
+          fname=T.NGD.DPC.RSP.D$(date +'%y%m%d').T$(date +'%H%M%S')1.IN
+          echo "FILENAME=$fname" >> "$GITHUB_OUTPUT"
           aws s3 cp --no-progress synthetic_test_data/T.NGD.DPC.RSP.D240123.T1122001.IN \
-            s3://bfd-test-eft/bfdeft01/dpc/in/T.NGD.DPC.RSP.D$(date +'%y%m%d').T$(date +'%H%M%S')1.IN
+            s3://bfd-test-eft/bfdeft01/dpc/in/$fname
+
+  verify:
+    needs: trigger
+    runs-on: self-hosted
+    env:
+      ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: "true"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-test-opt-out-import-function
+      - name: Install psql
+        run: |
+          sudo amazon-linux-extras install postgresql14
+      - name: Get database credentials
+        uses: cmsgov/ab2d-bcda-dpc-platform/actions/aws-params-env-action@main
+        env:
+          AWS_REGION: ${{ vars.AWS_REGION }}
+        with:
+          params: |
+            DB_USER=/dpc/test/consent/db_read_only_user_dpc_consent
+            DB_PASSWORD=/dpc/test/consent/db_read_only_pass_dpc_consent
+      - name: Verify suppression file was ingested
+        env:
+          FILENAME: ${{needs.trigger.outputs.filename}}
+        # CAUTION: if changing the script below, validate that sensitive information is not printed in the workflow
+        run: |
+          HOST=$(aws rds describe-db-instances --db-instance-identifier dpc-test-db-20190829 2>&1 | jq -r '.DBInstances[0].Endpoint.Address' 2>&1)
+          CONNECTION_URL=postgresql://$DB_USER:$DB_PASSWORD@$HOST/dpc_consent
+          IMPORT_FILE=`psql -t "$CONNECTION_URL" -c "SELECT id FROM opt_out_file WHERE name = '$FILENAME' LIMIT 1" 2>&1`
+          if [[ $? -ne 0 || -z $SUPPRESSION_FILE ]]; then
+            echo "suppression_file query returned zero results or command failed"
+            exit 1
+          else
+            IMPORT_FILE_UPDATES=`psql -t "$CONNECTION_URL" -c "SELECT count(mbi) FROM consent JOIN opt_out_file ON opt_out_file.id = opt_out_file_id WHERE opt_out_file.name = '$FILENAME'" 2>&1`
+              if [[ $? -ne 0 || -z $SUPPRESSIONS ]]; then
+                echo "suppressions query returned zero results or command failed"
+                exit 1
+              fi
+          fi
+
 
   # TODO Run another job to check database for update, then check bucket for response file
