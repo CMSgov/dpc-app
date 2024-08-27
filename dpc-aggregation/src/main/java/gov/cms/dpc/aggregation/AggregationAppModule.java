@@ -124,9 +124,9 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
 
         logger.warn("Updating consent client timeouts and setting logger");
         RequestConfig requestConfig = RequestConfig.custom()
-            .setConnectTimeout(30*100)
-            .setConnectionRequestTimeout(30*100)
-            .setSocketTimeout(30*100)
+            .setConnectTimeout(30*1000)
+            .setConnectionRequestTimeout(30*1000)
+            .setSocketTimeout(30*1000)
             .build();
         HttpClient httpClient = HttpClients.custom()
             .setDefaultRequestConfig(requestConfig)
