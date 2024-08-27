@@ -129,6 +129,8 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
         String serviceUrl = configuration().getConsentServiceUrl();
         logger.info("Connecting to consent server at {}.", serviceUrl);
         ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
+        ctx.getRestfulClientFactory().setSocketTimeout(30 * 1000);
+        ctx.getRestfulClientFactory().setConnectTimeout(30 * 1000);
 
         IGenericClient consentClient = ctx.newRestfulGenericClient(serviceUrl);
         LoggingInterceptor loggingInterceptor = new LoggingInterceptor();
