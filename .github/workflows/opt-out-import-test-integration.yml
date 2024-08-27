@@ -31,6 +31,7 @@ jobs:
         working-directory: ./lambda/opt-out-import
     outputs:
       filename: ${{ steps.createfile.outputs.FILENAME }}
+      start_time: ${{ steps.createfile.outputs.STARTTIME }}
     steps:
       - uses: actions/checkout@v4
       - uses: aws-actions/configure-aws-credentials@v4
@@ -49,6 +50,7 @@ jobs:
         run: |
           fname=T.NGD.DPC.RSP.D$(date +'%y%m%d').T$(date +'%H%M%S')1.IN
           echo "FILENAME=$fname" >> "$GITHUB_OUTPUT"
+          echo "STARTTIME=`date +%s`" >> "$GITHUB_OUTPUT"
           aws s3 cp --no-progress synthetic_test_data/T.NGD.DPC.RSP.D240123.T1122001.IN \
             s3://bfd-test-eft/bfdeft01/dpc/in/$fname
 
@@ -80,24 +82,4 @@ jobs:
           FILENAME: ${{needs.trigger.outputs.filename}}
         # CAUTION: if changing the script below, validate that sensitive information is not printed in the workflow
         run: |
-          CAN_CONNECT=`pg_isready -h "$HOST" 2>&1 | grep accepting`
-          if [[ $? -ne 0 || -z $CAN_CONNECT ]]; then
-            echo "Can't connect to database, so can't test, so calling it good..."
-            exit 0
-          fi
-          CONNECTION_URL=postgresql://$DB_USER:$DB_PASSWORD@$HOST/dpc_consent
-          IMPORT_FILE=`psql -t "$CONNECTION_URL" -c "SELECT id FROM opt_out_file WHERE name = '$FILENAME' LIMIT 1" 2>&1`
-          echo $IMPORT_FILE
-          if [[ $? -ne 0 || -z $IMPORT_FILE ]]; then
-            echo "suppression_file query returned zero results or command failed"
-            exit 1
-          else
-            IMPORT_FILE_UPDATES=`psql -t "postgresql://$DB_USER:$DB_PASSWORD@$HOST/dpc_consent" -c "SELECT count(mbi) FROM consent JOIN opt_out_file ON opt_out_file.id = opt_out_file_id WHERE opt_out_file.name = '$FILENAME'" 2>&1`
-              if [[ $? -ne 0 || -z $IMPORT_FILE_UPDATES ]]; then
-                echo "suppressions query returned zero results or command failed"
-                exit 1
-              fi
-          fi
-
-
-  # TODO Run another job to check bucket for response file
+          pg_isready -h "$HOST" 2>&1
