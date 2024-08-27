@@ -16,6 +16,7 @@ import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.resources.AbstractPatientResource;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.common.annotations.NoHtml;
+import gov.cms.dpc.common.utils.PagingUtils;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.FHIRExtractors;
@@ -77,16 +78,20 @@ public class PatientResource extends AbstractPatientResource {
     public Bundle patientSearch(@ApiParam(hidden = true)
                                 @Auth OrganizationPrincipal organization,
                                 @ApiParam(value = "Patient MBI")
-                                @QueryParam(value = Patient.SP_IDENTIFIER) @NoHtml String patientMBI) {
+                                @QueryParam(value = Patient.SP_IDENTIFIER) @NoHtml String patientMBI,
+                                @ApiParam(value = "Patients per page")
+                                @QueryParam(value = "_limit") int limit,
+                                @ApiParam(value = "Page number")
+                                @QueryParam(value = "_page") int page) {
 
-        final var request = this.client
+        var request = this.client
                 .search()
                 .forResource(Patient.class)
                 .encodedJson()
                 .where(Patient.ORGANIZATION.hasId(organization.getOrganization().getId()))
                 .returnBundle(Bundle.class);
 
-        if (patientMBI != null && !patientMBI.equals("")) {
+        if (patientMBI != null && !patientMBI.isEmpty()) {
 
             // Handle MBI parsing
             // This should come out as part of DPC-432
@@ -96,12 +101,18 @@ public class PatientResource extends AbstractPatientResource {
             } else {
                 expandedMBI = String.format("%s|%s", DPCIdentifierSystem.MBI.getSystem(), patientMBI);
             }
-            return request
-                    .where(Patient.IDENTIFIER.exactly().identifier(expandedMBI))
-                    .execute();
+            request = request.where(Patient.IDENTIFIER.exactly().identifier(expandedMBI));
         }
 
-        return request.execute();
+        return PagingUtils.handlePaging(request, limit, page, "/v1/Patient");
+    }
+
+    public Bundle patientSearch(OrganizationPrincipal organization, String patientMBI, int page) {
+        return patientSearch(organization, patientMBI, PagingUtils.defaultLimit, page);
+    }
+
+    public Bundle patientSearch(OrganizationPrincipal organization, String patientMBI) {
+        return patientSearch(organization, patientMBI, PagingUtils.defaultLimit, 1);
     }
 
     @FHIR
