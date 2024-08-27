@@ -72,7 +72,7 @@ class ExpireAttributionsUnitTest extends AbstractAttributionDAOTest {
     }
 
     @Test
-    void testExpireAttribution() throws SQLException {
+    void testExpireAttribution() {
         OrganizationEntity org = AttributionTestHelpers.createOrganizationEntity();
         ProviderEntity provider = AttributionTestHelpers.createProviderEntity(org);
         RosterEntity roster = AttributionTestHelpers.createRosterEntity(org, provider);
