@@ -3,6 +3,7 @@ package gov.cms.dpc.aggregation;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import gov.cms.dpc.bluebutton.config.BBClientConfiguration;
 import gov.cms.dpc.bluebutton.config.BlueButtonBundleConfiguration;
+import gov.cms.dpc.common.TimeoutConfiguration;
 import gov.cms.dpc.common.hibernate.attribution.IDPCDatabase;
 import gov.cms.dpc.common.hibernate.queue.IDPCQueueDatabase;
 import gov.cms.dpc.queue.config.DPCAwsQueueConfiguration;
@@ -36,14 +37,14 @@ public class DPCAggregationConfiguration extends Configuration implements BlueBu
     @JsonProperty("bbclient")
     private final BBClientConfiguration clientConfiguration = new BBClientConfiguration();
 
+    @Valid
+    @NotNull
+    @JsonProperty("consentClient")
+    private final ConsentClientConfiguration consentClientConfiguration = new ConsentClientConfiguration();
+
     @NotNull
     @JsonProperty("awsQueue")
     private final DPCAwsQueueConfiguration dpcAwsQueueConfiguration = new DPCAwsQueueConfiguration();
-
-    @Valid
-    @NotNull
-    @JsonProperty("consentServiceUrl")
-    private String consentServiceUrl;
 
     @NotEmpty
     @NotNull
@@ -116,6 +117,8 @@ public class DPCAggregationConfiguration extends Configuration implements BlueBu
         return this.clientConfiguration;
     }
 
+    public ConsentClientConfiguration getConsentClientConfiguration() { return this.consentClientConfiguration; }
+
     @Override
     public int getPollingFrequency() {
         return pollingFrequency;
@@ -137,10 +140,6 @@ public class DPCAggregationConfiguration extends Configuration implements BlueBu
         return lookBackExemptOrgs;
     }
 
-    public String getConsentServiceUrl() {
-        return consentServiceUrl;
-    }
-
     public String getConsentHealthCheckURL() { return consentHealthCheckURL; }
 
     @SuppressWarnings("unused")
@@ -149,4 +148,20 @@ public class DPCAggregationConfiguration extends Configuration implements BlueBu
     }
 
     public DPCAwsQueueConfiguration getDpcAwsQueueConfiguration() { return this.dpcAwsQueueConfiguration; }
+
+    public static class ConsentClientConfiguration {
+        @NotEmpty
+        private String serverBaseUrl;
+
+        @Valid
+        @NotNull
+        @JsonProperty("timeouts")
+        private TimeoutConfiguration timeouts = new TimeoutConfiguration();
+
+        public TimeoutConfiguration getTimeouts() {
+            return timeouts;
+        }
+
+        public String getServerBaseUrl() { return serverBaseUrl; }
+    }
 }

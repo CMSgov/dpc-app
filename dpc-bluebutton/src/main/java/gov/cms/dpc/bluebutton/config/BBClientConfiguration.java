@@ -1,6 +1,7 @@
 package gov.cms.dpc.bluebutton.config;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import gov.cms.dpc.common.TimeoutConfiguration;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Max;
@@ -77,41 +78,6 @@ public class BBClientConfiguration {
 
     public boolean isUseBfdMock() {
         return useBfdMock;
-    }
-
-    public static class TimeoutConfiguration {
-
-        private Integer connectionTimeout;
-        private Integer socketTimeout;
-        private Integer requestTimeout;
-
-        TimeoutConfiguration() {
-            // Jackson required
-        }
-
-        public Integer getConnectionTimeout() {
-            return connectionTimeout;
-        }
-
-        public void setConnectionTimeout(Integer connectionTimeout) {
-            this.connectionTimeout = connectionTimeout;
-        }
-
-        public Integer getSocketTimeout() {
-            return socketTimeout;
-        }
-
-        public void setSocketTimeout(Integer socketTimeout) {
-            this.socketTimeout = socketTimeout;
-        }
-
-        public Integer getRequestTimeout() {
-            return requestTimeout;
-        }
-
-        public void setRequestTimeout(Integer requestTimeout) {
-            this.requestTimeout = requestTimeout;
-        }
     }
 
     public static class KeystoreConfiguration {

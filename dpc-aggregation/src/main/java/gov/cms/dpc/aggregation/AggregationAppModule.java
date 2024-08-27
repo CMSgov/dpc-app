@@ -3,7 +3,6 @@ package gov.cms.dpc.aggregation;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
-import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Binder;
 import com.google.inject.Provides;
@@ -126,23 +125,16 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
     @Singleton
     @Named("consentClient")
     public IGenericClient provideConsentClient(@Named("fhirContextConsentSTU3") FhirContext ctx) {
-        String serviceUrl = configuration().getConsentServiceUrl();
+        DPCAggregationConfiguration.ConsentClientConfiguration clientConfiguration = configuration().getConsentClientConfiguration();
+        String serviceUrl = clientConfiguration.getServerBaseUrl();
+
         logger.info("Connecting to consent server at {}.", serviceUrl);
         ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
-        ctx.getRestfulClientFactory().setSocketTimeout(30 * 1000);
-        ctx.getRestfulClientFactory().setConnectTimeout(30 * 1000);
+        ctx.getRestfulClientFactory().setSocketTimeout(clientConfiguration.getTimeouts().getSocketTimeout());
+        ctx.getRestfulClientFactory().setConnectTimeout(clientConfiguration.getTimeouts().getConnectionTimeout());
+        ctx.getRestfulClientFactory().setConnectionRequestTimeout(clientConfiguration.getTimeouts().getRequestTimeout());
 
-        IGenericClient consentClient = ctx.newRestfulGenericClient(serviceUrl);
-        LoggingInterceptor loggingInterceptor = new LoggingInterceptor();
-        loggingInterceptor.setLogResponseSummary(true);
-        loggingInterceptor.setLogResponseBody(true);
-        loggingInterceptor.setLogResponseHeaders(true);
-        loggingInterceptor.setLogRequestHeaders(true);
-        loggingInterceptor.setLogRequestSummary(true);
-        loggingInterceptor.setLogRequestBody(true);
-        consentClient.registerInterceptor(loggingInterceptor);
-
-        return consentClient; // ctx.newRestfulGenericClient(serviceUrl);
+        return ctx.newRestfulGenericClient(serviceUrl);
     }
 
     @Provides
