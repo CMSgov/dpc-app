@@ -9,24 +9,21 @@ public class PagingUtils {
     private static String formatURL(String url, int page) {
         return url + "?page=" + page;
     }
+
+    private static void addRelationLink(Bundle bundle, String name, String path, int page) {
+        bundle.addLink().setRelation(name).setUrl(formatURL(path, page));
+    }
+
     public static Bundle handlePaging(IQuery<Bundle> request, int limit, int page, String requestPath) {
-        int offset = limit*(page-1);
-        request.offset(offset);
-        request.count(limit);
-        Bundle resultBundle = request.execute();
+        Bundle resultBundle = request.offset(limit*(page-1)).count(limit).execute();
 
-        resultBundle.addLink().setRelation("self").setUrl(formatURL(requestPath, page));
-        resultBundle.addLink().setRelation("first").setUrl(formatURL(requestPath, 1));
-        if (page > 1) {
-            resultBundle.addLink().setRelation("previous").setUrl(formatURL(requestPath, page-1));
-        }
+        addRelationLink(resultBundle, "self", requestPath, page);
+        addRelationLink(resultBundle, "first", requestPath, 1);
+        if (page > 1) addRelationLink(resultBundle, "previous", requestPath, page-1);
 
-        int total = resultBundle.getTotal();
-        int lastPage = (int) Math.ceil((float) total / limit);
-        if (page + 1 <= lastPage) {
-            resultBundle.addLink().setRelation("next").setUrl(formatURL(requestPath, page+1));
-        }
-        resultBundle.addLink().setRelation("last").setUrl(formatURL(requestPath, lastPage));
+        int lastPage = (int) Math.ceil((float) resultBundle.getTotal() / limit);
+        if (page + 1 <= lastPage) addRelationLink(resultBundle, "next", requestPath, page+1);
+        addRelationLink(resultBundle, "last", requestPath, lastPage);
 
         return resultBundle;
     }
