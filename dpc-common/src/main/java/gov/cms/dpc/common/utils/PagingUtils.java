@@ -22,7 +22,7 @@ public class PagingUtils {
         }
 
         int total = resultBundle.getTotal();
-        int lastPage = total == 0 ? 1 : (int) Math.ceil((float) total / limit);
+        int lastPage = (int) Math.ceil((float) total / limit);
         if (page + 1 <= lastPage) {
             resultBundle.addLink().setRelation("next").setUrl(formatURL(requestPath, page+1));
         }
