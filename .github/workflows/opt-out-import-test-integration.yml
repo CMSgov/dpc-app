@@ -80,7 +80,10 @@ jobs:
           aws s3 ls s3://bfd-test-eft/bfdeft01/dpc/out/ | grep CONF | while read line; do
             echo $line
             filedate_s=`echo $line | awk '{print $1 " " $2}'`
+            echo $filedate_s
             filedate=`date -d "$filedate_s" +%s`
+            echo $filedate
+            echo $((filedate - STARTTIME))
             if [[ $filedate -gt $STARTTIME ]]; then
               exit 0
             fi
