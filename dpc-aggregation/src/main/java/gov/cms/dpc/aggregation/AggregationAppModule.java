@@ -127,6 +127,9 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
         loggingInterceptor.setLogResponseSummary(true);
         loggingInterceptor.setLogResponseBody(true);
         loggingInterceptor.setLogResponseHeaders(true);
+        loggingInterceptor.setLogRequestHeaders(true);
+        loggingInterceptor.setLogRequestSummary(true);
+        loggingInterceptor.setLogRequestBody(true);
         IGenericClient consentClient = ctx.newRestfulGenericClient(serviceUrl);
         consentClient.registerInterceptor(loggingInterceptor);
 
