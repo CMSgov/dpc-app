@@ -17,11 +17,11 @@ import gov.cms.dpc.testing.BufferedLoggerHandler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.quartz.JobExecutionContext;
 
 
-import java.lang.reflect.Field;
 import java.sql.*;
 import java.time.OffsetDateTime;
 import java.util.Optional;
@@ -42,14 +42,16 @@ class ExpireAttributionsUnitTest extends AbstractAttributionDAOTest {
     private PatientDAO patientDAO;
     private RelationshipDAO relationshipDAO;
 
-    @Mock
+    @Spy
     private ManagedDataSource dataSource;
     @Mock
     private Connection connection;
     @Mock
     private JobExecutionContext jobContext;
-    @Mock
-    private Settings settings;
+    @Spy
+    private Settings settings = new Settings()
+            .withRenderFormatted(true)
+            .withRenderQuotedNames(RenderQuotedNames.EXPLICIT_DEFAULT_UNQUOTED);
     @InjectMocks
     private ExpireAttributions expireAttributions;
 
@@ -60,15 +62,6 @@ class ExpireAttributionsUnitTest extends AbstractAttributionDAOTest {
         Session session = db.getSessionFactory().openSession();
         this.connection = session.doReturningWork(connection1 -> connection1);
         when(this.dataSource.getConnection()).thenReturn(this.connection);
-
-        Field dataSourceField = ExpireAttributions.class.getDeclaredField("dataSource");
-        dataSourceField.setAccessible(true);
-        dataSourceField.set(expireAttributions, this.dataSource);
-
-        this.settings = new Settings().withRenderFormatted(true).withRenderQuotedNames(RenderQuotedNames.EXPLICIT_DEFAULT_UNQUOTED);
-        Field settingsField = ExpireAttributions.class.getDeclaredField("settings");
-        settingsField.setAccessible(true);
-        settingsField.set(expireAttributions, this.settings);
 
         DPCManagedSessionFactory dpcManagedSessionFactory = new DPCManagedSessionFactory(db.getSessionFactory());
         relationshipDAO = new RelationshipDAO(dpcManagedSessionFactory);

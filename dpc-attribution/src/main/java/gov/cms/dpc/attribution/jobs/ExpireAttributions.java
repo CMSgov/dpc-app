@@ -39,7 +39,7 @@ public class ExpireAttributions extends Job {
     @Override
     public void doJob(JobExecutionContext jobContext) {
         final OffsetDateTime expirationTemporal = OffsetDateTime.now(ZoneOffset.UTC);
-        // Find all the jobs and remove them
+        // Find all the jobs and expire them
         logger.debug("Expiring active attribution relationships before {}.", expirationTemporal.format(DateTimeFormatter.ISO_DATE_TIME));
 
         try (final Connection connection = this.dataSource.getConnection(); final DSLContext context = DSL.using(connection, this.settings)) {
@@ -61,7 +61,7 @@ public class ExpireAttributions extends Job {
 
             connection.commit();
         } catch (SQLException e) {
-            throw new AttributionException("Unable to open connection to database.", e);
+            throw new AttributionException("An error occurred during the database operation.", e);
         }
     }
 }
