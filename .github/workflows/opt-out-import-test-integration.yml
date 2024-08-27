@@ -77,6 +77,6 @@ jobs:
         env:
           STARTTIME: ${{needs.trigger.outputs.start_time}}
         run: |
-          aws --endpoint-url=http://localhost:4566 s3api list-objects-v2 --bucket bfd-test-eft
-          KEY=$(aws --endpoint-url=http://localhost:4566 s3api list-objects-v2 --bucket bfd-test-eft | jq --argjson STARTTIME "$LAST_RAN" -r '.Contents.[] | select(.Key | contains("CONF")) | select(.LastModified | strptime("%Y-%m-%dT%H:%M:%S+00:00") | mktime > $LAST_RAN)')
+          aws s3api list-objects-v2 --bucket bfd-test-eft
+          KEY=$(aws s3api list-objects-v2 --bucket bfd-test-eft | jq --argjson LAST_RAN "$STARTTIME" -r '.Contents.[] | select(.Key | contains("CONF")) | select(.LastModified | strptime("%Y-%m-%dT%H:%M:%S+00:00") | mktime > $LAST_RAN)')
           echo $KEY
