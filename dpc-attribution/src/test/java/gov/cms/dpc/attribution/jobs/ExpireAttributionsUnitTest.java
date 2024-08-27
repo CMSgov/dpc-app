@@ -2,11 +2,11 @@ package gov.cms.dpc.attribution.jobs;
 
 import gov.cms.dpc.attribution.AbstractAttributionDAOTest;
 import gov.cms.dpc.attribution.AttributionTestHelpers;
+import gov.cms.dpc.attribution.exceptions.AttributionException;
 import gov.cms.dpc.attribution.jdbi.*;
 import gov.cms.dpc.common.entities.*;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
 import io.dropwizard.db.ManagedDataSource;
-import org.hibernate.Session;
 import org.jooq.conf.RenderQuotedNames;
 import org.jooq.conf.Settings;
 import org.mockito.InjectMocks;
@@ -44,8 +44,10 @@ class ExpireAttributionsUnitTest extends AbstractAttributionDAOTest {
 
     @Spy
     private ManagedDataSource dataSource;
-    @Mock
-    private Connection connection;
+    @Spy
+    private Connection connection = db.getSessionFactory()
+            .openSession()
+            .doReturningWork(conn -> conn);
     @Mock
     private JobExecutionContext jobContext;
     @Spy
@@ -59,8 +61,6 @@ class ExpireAttributionsUnitTest extends AbstractAttributionDAOTest {
     public void setUp() throws SQLException {
         MockitoAnnotations.openMocks(this);
 
-        Session session = db.getSessionFactory().openSession();
-        this.connection = session.doReturningWork(connection1 -> connection1);
         when(this.dataSource.getConnection()).thenReturn(this.connection);
 
         DPCManagedSessionFactory dpcManagedSessionFactory = new DPCManagedSessionFactory(db.getSessionFactory());
@@ -72,7 +72,7 @@ class ExpireAttributionsUnitTest extends AbstractAttributionDAOTest {
     }
 
     @Test
-    void testExpireAttribution() {
+    void testExpireAttribution() throws SQLException {
         OrganizationEntity org = AttributionTestHelpers.createOrganizationEntity();
         ProviderEntity provider = AttributionTestHelpers.createProviderEntity(org);
         RosterEntity roster = AttributionTestHelpers.createRosterEntity(org, provider);
@@ -170,5 +170,13 @@ class ExpireAttributionsUnitTest extends AbstractAttributionDAOTest {
             relationshipDAO.refresh(attrib3.get());
             assertFalse(attrib3.get().isInactive());
         });
+    }
+
+    @Test
+    void testDatabaseException() throws SQLException {
+        when(this.dataSource.getConnection()).thenThrow(new SQLException());
+        AttributionException exception = assertThrows(AttributionException.class,
+                () -> this.expireAttributions.doJob(this.jobContext));
+        assertEquals(exception.getMessage(), "An error occurred during the database operation.");
     }
 }
