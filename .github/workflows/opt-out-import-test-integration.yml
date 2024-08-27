@@ -54,32 +54,29 @@ jobs:
           aws s3 cp --no-progress synthetic_test_data/T.NGD.DPC.RSP.D240123.T1122001.IN \
             s3://bfd-test-eft/bfdeft01/dpc/in/$fname
 
-  verify-db-changes:
+  verify-bucket:
     needs: trigger
-    runs-on: self-hosted
-    env:
-      ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: "true"
+    permissions:
+      contents: read
+      id-token: write
+      runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: aws-actions/configure-aws-credentials@v3
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-test-github-actions
-      - name: Install psql
-        run: |
-          sudo amazon-linux-extras install postgresql14
-      - name: Get database credentials
-        uses: cmsgov/ab2d-bcda-dpc-platform/actions/aws-params-env-action@main
-        env:
-          AWS_REGION: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/bcda-test-opt-out-import-function
+      - uses: aws-actions/configure-aws-credentials@v4
         with:
-          params: |
-            DB_USER=/dpc/test/consent/db_read_only_user_dpc_consent
-            DB_PASSWORD=/dpc/test/consent/db_read_only_pass_dpc_consent
-            HOST=/dpc/test/db/url
-      - name: Verify suppression file was ingested
+          aws-region: ${{ vars.AWS_REGION }}
+          # Note that we use the BFD role with access to the bucket
+          role-to-assume: arn:aws:iam::${{ secrets.BFD_ACCOUNT_ID }}:role/bfd-test-eft-bcda-bucket-role
+          role-chaining: true
+          role-skip-session-tagging: true
+      - name: Verify confirmation file put in bucket
         env:
-          FILENAME: ${{needs.trigger.outputs.filename}}
-        # CAUTION: if changing the script below, validate that sensitive information is not printed in the workflow
+          STARTTIME: ${{needs.trigger.outputs.start_time}}
         run: |
-          pg_isready -h "$HOST" 2>&1
+          aws --endpoint-url=http://localhost:4566 s3api list-objects-v2 --bucket bfd-test-eft
+          KEY=$(aws --endpoint-url=http://localhost:4566 s3api list-objects-v2 --bucket bfd-test-eft | jq --argjson STARTTIME "$LAST_RAN" -r '.Contents.[] | select(.Key | contains("CONF")) | select(.LastModified | strptime("%Y-%m-%dT%H:%M:%S+00:00") | mktime > $LAST_RAN)')
+          echo $KEY
