@@ -77,5 +77,14 @@ jobs:
         env:
           STARTTIME: ${{needs.trigger.outputs.start_time}}
         run: |
-          aws s3 ls s3://bfd-test-eft/bfdeft01/dpc/out/
+          aws s3 ls s3://bfd-test-eft/bfdeft01/dpc/out/ | grep CONF | while read line; do
+            echo $line
+            filedate_s=`echo $line | awk '{print $1 " " $2}'`
+            filedate=`date -d "$filedate_s" +%s`
+            if [[ $filedate -gt $STARTTIME ]]; then
+              exit 0
+            fi
+          done
+          echo "no new file found"
+          exit 1
 
