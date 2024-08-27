@@ -56,7 +56,7 @@ class ExpireAttributionsUnitTest extends AbstractAttributionDAOTest {
     private ExpireAttributions expireAttributions;
 
     @BeforeEach
-    public void setUp() throws SQLException, NoSuchFieldException, IllegalAccessException {
+    public void setUp() throws SQLException {
         MockitoAnnotations.openMocks(this);
 
         Session session = db.getSessionFactory().openSession();
