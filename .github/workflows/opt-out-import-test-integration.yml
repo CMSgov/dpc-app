@@ -52,7 +52,7 @@ jobs:
           aws s3 cp --no-progress synthetic_test_data/T.NGD.DPC.RSP.D240123.T1122001.IN \
             s3://bfd-test-eft/bfdeft01/dpc/in/$fname
 
-  verify:
+  verify-db-changes:
     needs: trigger
     runs-on: self-hosted
     env:
@@ -80,10 +80,10 @@ jobs:
           FILENAME: ${{needs.trigger.outputs.filename}}
         # CAUTION: if changing the script below, validate that sensitive information is not printed in the workflow
         run: |
-	  CAN_CONNECT=`pg_isready -h "$HOST" 2>&1 | grep accepting`
-	  if [[ $? -ne 0 || -z $CAN_CONNECT ]]; then
-	    echo "Can't connect to database, so can't test, so calling it good..."
-	    exit 0
+          CAN_CONNECT=`pg_isready -h "$HOST" 2>&1 | grep accepting`
+          if [[ $? -ne 0 || -z $CAN_CONNECT ]]; then
+            echo "Can't connect to database, so can't test, so calling it good..."
+            exit 0
           fi
           CONNECTION_URL=postgresql://$DB_USER:$DB_PASSWORD@$HOST/dpc_consent
           IMPORT_FILE=`psql -t "$CONNECTION_URL" -c "SELECT id FROM opt_out_file WHERE name = '$FILENAME' LIMIT 1" 2>&1`
