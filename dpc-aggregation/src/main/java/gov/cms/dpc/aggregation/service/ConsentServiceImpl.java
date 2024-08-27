@@ -1,12 +1,9 @@
 package gov.cms.dpc.aggregation.service;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import gov.cms.dpc.aggregation.engine.JobBatchProcessor;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Consent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.inject.Named;
 import java.util.List;
@@ -14,9 +11,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class ConsentServiceImpl implements ConsentService {
-
-    private static final Logger logger = LoggerFactory.getLogger(JobBatchProcessor.class);
-
     private final IGenericClient consentClient;
 
     public ConsentServiceImpl(@Named("consentClient") IGenericClient consentClient){

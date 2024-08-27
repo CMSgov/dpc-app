@@ -41,7 +41,7 @@ server:
             application: ${APPLICATION:-"dpc-aggregation"}
 
 logging:
-  level: DEBUG
+  level: WARN
   loggers:
     "liquibase": INFO
     "gov.cms.dpc.aggregation.engine": INFO
@@ -92,7 +92,7 @@ bbclient:
   useBfdMock: ${USE_BFD_MOCK:-false}
 
 consentClient:
-  consentServiceUrl: ${CONSENT_SERVICE_URL:-"http://consent:3600/v1/"}
+  serverBaseUrl: ${CONSENT_SERVICE_URL:-"http://consent:3600/v1/"}
   timeouts:
     connectionTimeout: 30000 # ms
     socketTimeout: 30000 # ms
