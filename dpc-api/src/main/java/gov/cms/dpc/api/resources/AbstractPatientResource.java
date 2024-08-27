@@ -23,7 +23,7 @@ public abstract class AbstractPatientResource extends AbstractResourceWithSince 
     }
 
     @GET
-    public abstract Bundle patientSearch(OrganizationPrincipal organization, @NoHtml String patientMBI);
+    public abstract Bundle patientSearch(OrganizationPrincipal organization, @NoHtml String patientMBI, int limit, int page);
 
     @POST
     public abstract Response submitPatient(OrganizationPrincipal organization, @Valid @Profiled Patient patient);
