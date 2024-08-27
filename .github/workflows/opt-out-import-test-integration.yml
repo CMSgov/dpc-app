@@ -59,7 +59,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
-      runs-on: ubuntu-latest
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: aws-actions/configure-aws-credentials@v4
