@@ -82,9 +82,9 @@ bbclient:
     location: ${BB_KEYSTORE_LOCATION:-"/bb.keystore"}
 
   timeouts:
-    connectionTimeout: 15000 # ms
-    socketTimeout: 15000 # ms
-    requestTimeout: 15000 # ms
+    connectionTimeout: 5000 # ms
+    socketTimeout: 5000 # ms
+    requestTimeout: 5000 # ms
 
   serverBaseUrl: ${BFD_URL}
   resourcesCount: 100 # Max number of resource that a request to BB will return before using another request

@@ -18,9 +18,6 @@ import gov.cms.dpc.common.annotations.JobTimeout;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
 import gov.cms.dpc.fhir.hapi.ContextUtils;
 import gov.cms.dpc.queue.models.JobQueueBatch;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.impl.client.HttpClients;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.vyarus.dropwizard.guice.module.support.DropwizardAwareModule;
@@ -74,6 +71,17 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
 
     @Provides
     @Singleton
+    @Named("fhirContextConsentSTU3")
+    public FhirContext provideConsentSTU3Context() {
+        final var fhirContext = FhirContext.forDstu3();
+
+        // Setup the context with model scans (avoids doing this on the fetch threads and perhaps multithreaded bug)
+        ContextUtils.prefetchResourceModels(fhirContext, JobQueueBatch.validResourceTypes);
+        return fhirContext;
+    }
+
+    @Provides
+    @Singleton
     MetricRegistry provideMetricRegistry() {
         return environment().metrics();
     }
@@ -117,25 +125,12 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
     @Provides
     @Singleton
     @Named("consentClient")
-    public IGenericClient provideConsentClient(FhirContext ctx) {
+    public IGenericClient provideConsentClient(@Named("fhirContextConsentSTU3") FhirContext ctx) {
         String serviceUrl = configuration().getConsentServiceUrl();
         logger.info("Connecting to consent server at {}.", serviceUrl);
         ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 
-        logger.warn("Updating consent client timeouts and setting logger");
-        RequestConfig requestConfig = RequestConfig.custom()
-            .setConnectTimeout(30*1000)
-            .setConnectionRequestTimeout(30*1000)
-            .setSocketTimeout(30*1000)
-            .build();
-        HttpClient httpClient = HttpClients.custom()
-            .setDefaultRequestConfig(requestConfig)
-            .build();
-        ctx.getRestfulClientFactory().setHttpClient(httpClient);
-
-        //ctx.getRestfulClientFactory().setSocketTimeout(180 * 1000);  // Increase timeouts from the default (10s)
-        //ctx.getRestfulClientFactory().setConnectTimeout(180 * 1000);
-        //ctx.getRestfulClientFactory().setConnectionRequestTimeout(180 * 1000);
+        IGenericClient consentClient = ctx.newRestfulGenericClient(serviceUrl);
         LoggingInterceptor loggingInterceptor = new LoggingInterceptor();
         loggingInterceptor.setLogResponseSummary(true);
         loggingInterceptor.setLogResponseBody(true);
@@ -143,7 +138,6 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
         loggingInterceptor.setLogRequestHeaders(true);
         loggingInterceptor.setLogRequestSummary(true);
         loggingInterceptor.setLogRequestBody(true);
-        IGenericClient consentClient = ctx.newRestfulGenericClient(serviceUrl);
         consentClient.registerInterceptor(loggingInterceptor);
 
         return consentClient; // ctx.newRestfulGenericClient(serviceUrl);
