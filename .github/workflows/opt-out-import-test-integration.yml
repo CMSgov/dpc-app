@@ -84,7 +84,8 @@ jobs:
             filedate=`date -d "$filedate_s" +%s`
             echo $filedate
             echo $((filedate - STARTTIME))
-            if [[ $filedate -gt $STARTTIME ]]; then
+            echo $((filedate > STARTTIME))
+            if [[ $((filedate > STARTTIME)) == 1 ]]; then
               exit 0
             fi
           done
