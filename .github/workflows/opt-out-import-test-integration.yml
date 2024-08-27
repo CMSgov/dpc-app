@@ -80,10 +80,7 @@ jobs:
           FILENAME: ${{needs.trigger.outputs.filename}}
         # CAUTION: if changing the script below, validate that sensitive information is not printed in the workflow
         run: |
-          echo $HOST
-          echo $DB_USER
-          echo "postgresql://$DB_USER:$DB_PASSWORD@$HOST/dpc_consent"
-          IMPORT_FILE=`psql -t "postgresql://$DB_USER:$DB_PASSWORD@$HOST/dpc_consent" -c "SELECT id FROM opt_out_file WHERE name = '$FILENAME' LIMIT 1" 2>&1`
+          IMPORT_FILE=`psql -t 'postgresql://$DB_USER:$DB_PASSWORD@$HOST/dpc_consent' -c "SELECT id FROM opt_out_file WHERE name = '$FILENAME' LIMIT 1" 2>&1`
           if [[ $? -ne 0 || -z $SUPPRESSION_FILE ]]; then
             echo "suppression_file query returned zero results or command failed"
             exit 1
