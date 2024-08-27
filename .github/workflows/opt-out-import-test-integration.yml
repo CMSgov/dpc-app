@@ -82,6 +82,7 @@ jobs:
         run: |
           CONNECTION_URL=postgresql://$DB_USER:$DB_PASSWORD@$HOST/dpc_consent
           IMPORT_FILE=`psql -t "$CONNECTION_URL" -c "SELECT id FROM opt_out_file WHERE name = '$FILENAME' LIMIT 1" 2>&1`
+          echo $IMPORT_FILE
           if [[ $? -ne 0 || -z $IMPORT_FILE ]]; then
             echo "suppression_file query returned zero results or command failed"
             exit 1
