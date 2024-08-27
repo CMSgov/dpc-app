@@ -12,6 +12,7 @@ import com.google.common.net.HttpHeaders;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.common.utils.NPIUtil;
+import gov.cms.dpc.common.utils.PagingUtils;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.queue.service.DataService;
@@ -118,6 +119,83 @@ public class PatientResourceUnitTest {
 
         Bundle actualResponse = patientResource.patientSearch(organizationPrincipal, null);
         assertEquals(bundle, actualResponse);
+    }
+
+    @Test
+    public void testPatientSearchPaging() {
+        UUID orgId = UUID.randomUUID();
+        Organization organization = new Organization();
+        organization.setId(orgId.toString());
+        OrganizationPrincipal organizationPrincipal = new OrganizationPrincipal(organization);
+        Patient p1 = new Patient();
+        p1.setId("patient-1");
+        p1.setManagingOrganizationTarget(organization);
+        Patient p2 = new Patient();
+        p2.setId("patient-2");
+        p2.setManagingOrganizationTarget(organization);
+        Patient p3 = new Patient();
+        p3.setId("patient-3");
+        p3.setManagingOrganizationTarget(organization);
+        Bundle bundle = new Bundle();
+        bundle.addEntry().setResource(p1);
+        bundle.setTotal(3);
+
+        @SuppressWarnings("unchecked")
+        IQuery<IBaseBundle> queryExec = mock(IQuery.class, Answers.RETURNS_DEEP_STUBS);
+        @SuppressWarnings("unchecked")
+        IQuery<Bundle> mockQuery = mock(IQuery.class);
+        when(attributionClient
+                .search()
+                .forResource(Patient.class)
+                .encodedJson()
+        ).thenReturn(queryExec);
+        when(queryExec.where(any(ICriterion.class)).returnBundle(Bundle.class)).thenReturn(mockQuery);
+        when(mockQuery.execute()).thenReturn(bundle);
+
+        Bundle actualResponse = patientResource.patientSearch(organizationPrincipal, null);
+        assertEquals(bundle, actualResponse);
+        assertEquals(bundle.getEntry().size(), PagingUtils.defaultLimit);
+        assertEquals(bundle.getEntryFirstRep().getResource().getId(), "patient-1");
+
+        String requestPath = "/v1/Patient?page=";
+        assertEquals(bundle.getLink("self").getUrl(), requestPath + "1");
+        assertEquals(bundle.getLink("first").getUrl(), requestPath + "1");
+        assertEquals(bundle.getLink("next").getUrl(), requestPath + "2");
+        assertEquals(bundle.getLink("last").getUrl(), requestPath + "3");
+
+        Bundle bundle2 = new Bundle();
+        bundle2.addEntry().setResource(p2);
+        bundle2.setTotal(3);
+
+        when(mockQuery.execute()).thenReturn(bundle2);
+
+        Bundle response2 = patientResource.patientSearch(organizationPrincipal, null, 2);
+        assertEquals(bundle2, response2);
+        assertEquals(bundle2.getEntry().size(), PagingUtils.defaultLimit);
+        assertEquals(bundle2.getEntryFirstRep().getResource().getId(), "patient-2");
+
+        assertEquals(bundle2.getLink("self").getUrl(), requestPath + "2");
+        assertEquals(bundle2.getLink("first").getUrl(), requestPath + "1");
+        assertEquals(bundle2.getLink("previous").getUrl(), requestPath + "1");
+        assertEquals(bundle2.getLink("next").getUrl(), requestPath + "3");
+        assertEquals(bundle2.getLink("last").getUrl(), requestPath + "3");
+
+        Bundle bundle3 = new Bundle();
+        bundle3.addEntry().setResource(p3);
+        bundle3.setTotal(3);
+
+        when(mockQuery.execute()).thenReturn(bundle3);
+
+        Bundle response3 = patientResource.patientSearch(organizationPrincipal, null, 3);
+        assertEquals(bundle3, response3);
+        assertEquals(bundle3.getEntry().size(), PagingUtils.defaultLimit);
+        assertEquals(bundle3.getEntryFirstRep().getResource().getId(), "patient-3");
+
+        assertEquals(bundle3.getLink("self").getUrl(), requestPath + "3");
+        assertEquals(bundle3.getLink("first").getUrl(), requestPath + "1");
+        assertEquals(bundle3.getLink("previous").getUrl(), requestPath + "2");
+        assertEquals(bundle3.getLink("last").getUrl(), requestPath + "3");
+
     }
 
     @Test
