@@ -9,8 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Named;
-import java.time.Duration;
-import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -53,21 +51,12 @@ public class ConsentServiceImpl implements ConsentService {
                 .map( mbi -> String.format("%s|%s", DPCIdentifierSystem.MBI.getSystem(), mbi) )
                 .collect(Collectors.toList());
 
-        Instant startInstant = Instant.now();
-
-        try {
-            return consentClient
-                .search()
-                .forResource(Consent.class)
-                .encodedJson()
-                .returnBundle(Bundle.class)
-                .where(Consent.PATIENT.hasAnyOfIds(fullMbis))
-                .execute();
-        } catch (Exception e) {
-            int consentTimeOut = consentClient.getFhirContext().getRestfulClientFactory().getSocketTimeout();
-            Duration runTime = Duration.between(startInstant, Instant.now());
-            logger.error("Error getting consent: " + runTime.toSeconds() + " seconds.  Time out: " + consentTimeOut);
-            throw e;
-        }
+        return consentClient
+            .search()
+            .forResource(Consent.class)
+            .encodedJson()
+            .returnBundle(Bundle.class)
+            .where(Consent.PATIENT.hasAnyOfIds(fullMbis))
+            .execute();
     }
 }
