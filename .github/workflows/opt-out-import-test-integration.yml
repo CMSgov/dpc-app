@@ -87,3 +87,5 @@ jobs:
           done < <(aws s3 ls s3://bfd-test-eft/bfdeft01/dpc/out/ | grep CONF)
           echo "no new file found"
           exit 1
+
+  # TODO Run another job to check database for update (currently cannot connect to db)
