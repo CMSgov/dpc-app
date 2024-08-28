@@ -77,7 +77,7 @@ jobs:
         env:
           STARTTIME: ${{needs.trigger.outputs.start_time}}
         run: |
-          aws s3 ls s3://bfd-test-eft/bfdeft01/dpc/out/ | grep CONF | while read line; do
+          while read line; do
             echo $line
             filedate_s=`echo $line | awk '{print $1 " " $2}'`
             echo $filedate_s
@@ -86,9 +86,10 @@ jobs:
             echo $((filedate - STARTTIME))
             echo $((filedate > STARTTIME))
             if [[ $((filedate > STARTTIME)) == 1 ]]; then
+              echo "we have a winner!"
               exit 0
             fi
-          done
+          done < <(aws s3 ls s3://bfd-test-eft/bfdeft01/dpc/out/ | grep CONF)
           echo "no new file found"
           exit 1
 
