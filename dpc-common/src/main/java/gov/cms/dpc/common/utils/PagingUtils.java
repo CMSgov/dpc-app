@@ -15,7 +15,9 @@ public class PagingUtils {
     }
 
     public static Bundle handlePaging(IQuery<Bundle> request, int limit, int page, String requestPath) {
-        Bundle resultBundle = request.offset(limit*(page-1)).count(limit).execute();
+        request.offset(limit*(page-1));
+        request.count(limit);
+        Bundle resultBundle = request.execute();
 
         addRelationLink(resultBundle, "self", requestPath, page);
         addRelationLink(resultBundle, "first", requestPath, 1);
