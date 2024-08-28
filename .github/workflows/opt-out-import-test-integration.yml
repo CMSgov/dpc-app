@@ -87,4 +87,3 @@ jobs:
           done < <(aws s3 ls s3://bfd-test-eft/bfdeft01/dpc/out/ | grep CONF)
           echo "no new file found"
           exit 1
-
