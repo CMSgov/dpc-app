@@ -30,7 +30,7 @@ jobs:
       run:
         working-directory: ./lambda/opt-out-export
     outputs:
-      start_time: ${{ steps.createfile.outputs.STARTTIME }}
+      start_time: ${{ steps.invoke-lambda.outputs.STARTTIME }}
     steps:
       - uses: actions/checkout@v4
       - uses: aws-actions/configure-aws-credentials@v4
@@ -38,6 +38,7 @@ jobs:
           aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-test-github-actions
       - name: Send event to trigger export lambda function
+        id: invoke-lambda
         run: |
           echo "STARTTIME=`date +%s`" >> "$GITHUB_OUTPUT"
           aws lambda invoke --function-name dpc-test-opt-out-export test-result.txt
