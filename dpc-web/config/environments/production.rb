@@ -93,6 +93,7 @@ Rails.application.configure do
     password:             ENV['SMTP_PASSWORD'],
     authentication:       ENV['SMTP_AUTH'],
     openssl_verify_mode:  ENV['SMTP_SSL_VERIFY'],
+    tls: true,
     enable_starttls_auto: true
   }
 
