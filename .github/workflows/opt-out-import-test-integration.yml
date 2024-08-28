@@ -78,13 +78,8 @@ jobs:
           STARTTIME: ${{needs.trigger.outputs.start_time}}
         run: |
           while read line; do
-            echo $line
             filedate_s=`echo $line | awk '{print $1 " " $2}'`
-            echo $filedate_s
             filedate=`date -d "$filedate_s" +%s`
-            echo $filedate
-            echo $((filedate - STARTTIME))
-            echo $((filedate > STARTTIME))
             if [[ $((filedate > STARTTIME)) == 1 ]]; then
               echo "we have a winner!"
               exit 0
