@@ -2,6 +2,7 @@ FROM ruby:3.3-alpine AS ruby_builder
 
 # Add HHS CA Cert
 COPY HHS-FPKI-Intermediate-CA-E1.pem /usr/local/share/ca-certificates/HHS-FPKI-Intermediate-CA-E1.pem
+COPY fcpcag2.cer /usr/local/share/ca-certificates/fcpcag2.cer
 RUN update-ca-certificates
 
 # Install build dependencies
