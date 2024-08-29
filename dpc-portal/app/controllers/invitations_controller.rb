@@ -5,7 +5,9 @@ class InvitationsController < ApplicationController
   before_action :load_organization
   before_action :load_invitation
   before_action :validate_invitation, except: %i[renew]
-  before_action :check_for_token, except: %i[login renew show]
+  before_action :verify_ao_invitation, only: %i[accept confirm]
+  before_action :verify_cd_invitation, only: %i[code verify_code confirm_cd]
+  before_action :check_for_token, only: %i[accept confirm confirm_cd register]
 
   def show
     render(Page::Invitations::StartComponent.new(@organization, @invitation))
@@ -21,24 +23,43 @@ class InvitationsController < ApplicationController
 
   # CD Only
   def code
+    render(Page::Invitations::OtpComponent.new(@organization, @invitation))
   end
 
   # CD Only
-  def check_code
+  def verify_code
+    unless params[:verification_code] == @invitation.verification_code
+      @invitation.errors.add(:verification_code, :bad_code, message: 'tbd')
+      return render(Page::Invitations::OtpComponent.new(@organization, @invitation), status: :bad_request)
+    end
+
+    session["invitation_status_#{@invitation.id}"] = 'code_verified'
+    render(Page::Invitations::InvitationLoginComponent.new(@invitation))
   end
-  
+
+  def confirm_cd
+    unless session["invitation_status_#{@invitation.id}"] == 'code_verified'
+      return redirect_to code_organization_invitation_url(@organization, @invitation)
+    end
+
+    invitation_matches_user
+    return if performed?
+
+    session["invitation_status_#{@invitation.id}"] = 'verification_complete'
+    render(Page::Invitations::RegisterComponent.new(@organization, @invitation))
+  end
+
   def confirm
     invitation_matches_conditions
     return if performed?
 
-    session["invitation_status_#{@invitation.id}"] = 'conditions_verified'
+    session["invitation_status_#{@invitation.id}"] = 'verification_complete'
     render(Page::Invitations::RegisterComponent.new(@organization, @invitation))
   end
 
   def register
-    unless session["invitation_status_#{@invitation.id}"] == 'conditions_verified'
-      return redirect_to accept_organization_invitation_url(@organization,
-                                                            @invitation)
+    unless session["invitation_status_#{@invitation.id}"] == 'verification_complete'
+      return redirect_to accept_organization_invitation_url(@organization, @invitation)
     end
 
     return unless create_link
@@ -159,8 +180,6 @@ class InvitationsController < ApplicationController
       return redirect_to accept_organization_invitation_url(@organization, @invitation)
     end
 
-    return check_code if @invitation.credential_delegate?
-
     check_ao
   rescue UserInfoServiceError => e
     handle_user_info_service_error(e, 2)
@@ -168,14 +187,6 @@ class InvitationsController < ApplicationController
     status = AoVerificationService::SERVER_ERRORS.include?(e.message) ? :service_unavailable : :forbidden
     log_ao_verification_error(e, status == :service_unavailable)
     render(Page::Invitations::AoFlowFailComponent.new(@invitation, e.message, 2), status:)
-  end
-
-  def check_code
-    return if params[:verification_code] == @invitation.verification_code
-
-    @invitation.errors.add(:verification_code, :bad_code, message: 'tbd')
-    render(Page::Invitations::AcceptInvitationComponent.new(@organization, @invitation, @given_name, @family_name),
-           status: :bad_request)
   end
 
   def check_ao
@@ -241,10 +252,22 @@ class InvitationsController < ApplicationController
   end
 
   def login_session
-    session[:user_return_to] = accept_organization_invitation_url(@organization, params[:id])
+    if @invitation.authorized_official?
+      session[:user_return_to] = accept_organization_invitation_url(@organization, params[:id])
+    else
+      session[:user_return_to] = confirm_cd_organization_invitation_url(@organization, params[:id])
+    end
     session['omniauth.nonce'] = @nonce = SecureRandom.hex(16)
     session['omniauth.state'] = @state = SecureRandom.hex(16)
   end
+end
+
+def verify_ao_invitation
+  redirect_to organization_invitation_url(@organization, @invitation) unless @invitation.authorized_official?
+end
+
+def verify_cd_invitation
+  redirect_to organization_invitation_url(@organization, @invitation) unless @invitation.credential_delegate?
 end
 
 def redirect_host
