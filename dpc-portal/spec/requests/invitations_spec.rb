@@ -691,7 +691,9 @@ RSpec.describe 'Invitations', type: :request do
       end
       it_behaves_like 'a login endpoint', :post, 'register' do
         let(:invitation) { create(:invitation, :cd) }
-        let(:expected_redirect) { confirm_cd_organization_invitation_url(invitation.provider_organization.id, invitation) }
+        let(:expected_redirect) do
+          confirm_cd_organization_invitation_url(invitation.provider_organization.id, invitation)
+        end
       end
       context 'fail to proof' do
         let(:invitation) { create(:invitation, :cd) }
