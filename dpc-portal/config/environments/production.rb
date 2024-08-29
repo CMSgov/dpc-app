@@ -78,7 +78,7 @@ Rails.application.configure do
     port:            ENV['SMTP_PORT'],
     domain:          ENV['SMTP_DOMAIN'],
     tls: true,
-    ca_path: '/etc/ssl/certs/'
+    ca_path: '/etc/ssl/certs'
   }
 
   # Ignore bad email addresses and do not raise email delivery errors.
