@@ -45,7 +45,6 @@ class UserInfoService
 
   def parsed_response(response)
     return if response.body.blank?
-
     JSON.parse response.body
   end
 

@@ -194,8 +194,8 @@ RSpec.describe Invitation, type: :model do
         cd_invite.invited_email = cd_invite.invited_email.upcase_first
         expect(cd_invite.match_user?(user_info)).to eq true
       end
-      it 'should match if invited email in all_emails' do
-        cd_invite.invited_email = user_info.dig('all_emails', 1)
+      it 'should match if invited email eq email' do
+        cd_invite.invited_email = user_info['email']
         expect(cd_invite.match_user?(user_info)).to eq true
       end
       it 'should match if user info phone starts with 1' do
@@ -240,8 +240,8 @@ RSpec.describe Invitation, type: :model do
           cd_invite.match_user?(missing_info)
         end.to raise_error(UserInfoServiceError, 'missing_info')
       end
-      it 'should raise error if user_info all_emails' do
-        missing_info = user_info.merge({ 'all_emails' => [] })
+      it 'should raise error if no user_info email' do
+        missing_info = user_info.merge({ 'email' => '' })
         expect do
           cd_invite.match_user?(missing_info)
         end.to raise_error(UserInfoServiceError, 'missing_info')
@@ -399,19 +399,21 @@ RSpec.describe Invitation, type: :model do
     describe :match_user do
       let(:ao_invite) { build(:invitation, :ao, invited_email: 'bob@example.com') }
       it 'should match user if email match' do
-        user_info = { 'all_emails' => [
-          'bob@testy.com',
-          'bob@example.com'
-        ] }
+        user_info = {
+          'email' => 'bob@example.com',
+          'all_emails' => [
+            'bob@testy.com',
+            'bob@example.com']
+        }
 
         expect(ao_invite.match_user?(user_info)).to eq true
       end
       it 'should not match user if no email match' do
-        user_info = { 'all_emails' => ['tim@example.com'] }
+        user_info = { 'email' => 'tim@example.com' }
         expect(ao_invite.match_user?(user_info)).to eq false
       end
       it 'should raise error if user_info missing all_emails' do
-        user_info = { 'all_emails' => [] }
+        user_info = { 'email' => '' }
         expect do
           ao_invite.match_user?(user_info)
         end.to raise_error(UserInfoServiceError, 'missing_info')

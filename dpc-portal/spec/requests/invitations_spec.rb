@@ -126,7 +126,7 @@ RSpec.describe 'Invitations', type: :request do
         end
         context :failure do
           it 'should show error page if email not match' do
-            stub_user_info(overrides: { 'all_emails' => ['another@example.com'] })
+            stub_user_info(overrides: { 'email' => 'another@example.com' })
             get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
             expect(response).to be_forbidden
           end
