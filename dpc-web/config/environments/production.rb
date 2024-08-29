@@ -93,7 +93,8 @@ Rails.application.configure do
     password:             ENV['SMTP_PASSWORD'],
     authentication:       ENV['SMTP_AUTH'],
     openssl_verify_mode:  ENV['SMTP_SSL_VERIFY'],
-    tls: true
+    tls: true,
+    ca_path: '/etc/ssl/certs/ca-certificates.crt'
   }
 
   # Ignore bad email addresses and do not raise email delivery errors.
