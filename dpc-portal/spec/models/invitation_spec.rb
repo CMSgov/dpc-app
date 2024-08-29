@@ -403,7 +403,8 @@ RSpec.describe Invitation, type: :model do
           'email' => 'bob@example.com',
           'all_emails' => [
             'bob@testy.com',
-            'bob@example.com']
+            'bob@example.com'
+          ]
         }
 
         expect(ao_invite.match_user?(user_info)).to eq true

@@ -96,148 +96,67 @@ RSpec.describe 'Invitations', type: :request do
   end
 
   describe 'GET /accept' do
-    shared_examples 'an accept endpoint' do
-      let(:org) { invitation.provider_organization }
-      context 'not logged in' do
-        it 'should show login if valid invitation' do
+    it_behaves_like 'an invitation endpoint', :get, 'accept' do
+      let(:invitation) { create(:invitation, :ao) }
+    end
+    let(:invitation) { create(:invitation, :ao) }
+    let(:org) { invitation.provider_organization }
+
+    context 'not logged in' do
+      it 'should show login if valid invitation' do
+        get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
+        expect(response).to be_ok
+        expect(response.body).to include(login_organization_invitation_path(org, invitation))
+      end
+    end
+
+    context 'logged in' do
+      before { log_in }
+      it 'should show login if token expired' do
+        user_service_class = class_double(UserInfoService).as_stubbed_const
+        allow(user_service_class).to receive(:new).and_raise(UserInfoServiceError, 'unauthorized')
+        get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
+        expect(response).to be_ok
+        expect(response.body).to include(login_organization_invitation_path(org, invitation))
+      end
+      context :success do
+        before { stub_user_info }
+        it 'should show confirm form if valid invitation' do
           get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
           expect(response).to be_ok
-          expect(response.body).to include(login_organization_invitation_path(org, invitation))
+          expect(response.body).to include(confirm_organization_invitation_path(org, invitation))
+          expect(request.session["invitation_status_#{invitation.id}"]).to eq 'identity_verified'
         end
       end
-
-      context 'logged in' do
-        before { log_in }
-        it 'should show login if token expired' do
+      context :failure do
+        it 'should show error page if email not match' do
+          stub_user_info(overrides: { 'email' => 'another@example.com' })
+          get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
+          expect(response).to be_forbidden
+        end
+        it 'should show server error page if server error' do
           user_service_class = class_double(UserInfoService).as_stubbed_const
-          allow(user_service_class).to receive(:new).and_raise(UserInfoServiceError, 'unauthorized')
+          allow(user_service_class).to receive(:new).and_raise(UserInfoServiceError, 'server_error')
           get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
-          expect(response).to be_ok
-          expect(response.body).to include(login_organization_invitation_path(org, invitation))
+          expect(response.status).to eq 503
+          expect(response.body).to include(I18n.t('verification.server_error_status'))
         end
-        context :success do
-          before { stub_user_info }
-          it 'should show confirm form if valid invitation' do
-            get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
-            expect(response).to be_ok
-            expect(response.body).to include(confirm_organization_invitation_path(org, invitation))
-            expect(request.session["invitation_status_#{invitation.id}"]).to eq 'identity_verified'
-          end
-        end
-        context :failure do
-          it 'should show error page if email not match' do
-            stub_user_info(overrides: { 'email' => 'another@example.com' })
-            get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
-            expect(response).to be_forbidden
-          end
-          it 'should show server error page if server error' do
-            user_service_class = class_double(UserInfoService).as_stubbed_const
-            allow(user_service_class).to receive(:new).and_raise(UserInfoServiceError, 'server_error')
-            get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
-            expect(response.status).to eq 503
-            expect(response.body).to include(I18n.t('verification.server_error_status'))
-          end
-        end
-      end
-    end
-
-    context :ao do
-      it_behaves_like 'an invitation endpoint', :get, 'accept' do
-        let(:invitation) { create(:invitation, :ao) }
-      end
-      it_behaves_like 'an accept endpoint' do
-        let(:invitation) { create(:invitation, :ao) }
-      end
-      context 'logged in' do
-        let(:invitation) { create(:invitation, :ao) }
-        let(:org) { invitation.provider_organization }
-        context :failure do
-          it 'should show step 2' do
-            user_service_class = class_double(UserInfoService).as_stubbed_const
-            allow(user_service_class).to receive(:new).and_raise(UserInfoServiceError, 'yikes')
-            log_in
-            get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
-            expect(response.status).to eq 503
-            expect(response.body).to include('<span class="usa-step-indicator__current-step">2</span>')
-          end
-        end
-      end
-    end
-
-    context :cd do
-      it_behaves_like 'an invitation endpoint', :get, 'accept' do
-        let(:invitation) { create(:invitation, :cd) }
-      end
-      it_behaves_like 'an accept endpoint' do
-        let(:invitation) { create(:invitation, :cd) }
-      end
-
-      context 'logged in' do
-        let(:verification_code) { 'ABC123' }
-        let(:cd_invite) { create(:invitation, :cd, verification_code:) }
-        let(:org) { cd_invite.provider_organization }
-        before { log_in }
-        context :success do
-          before { stub_user_info }
-          it 'should not show verification code' do
-            get "/organizations/#{org.id}/invitations/#{cd_invite.id}/accept"
-            expect(response.body).to_not include(cd_invite.verification_code)
-          end
-        end
-        context :failure do
-          it 'should render error page if family_name not match' do
-            stub_user_info(overrides: { 'family_name' => 'Something Else' })
-            get "/organizations/#{org.id}/invitations/#{cd_invite.id}/accept"
-            expect(response).to be_forbidden
-            expect(response.body).to_not include(confirm_organization_invitation_path(org, cd_invite))
-          end
-          it 'should render error page if phone not match' do
-            stub_user_info(overrides: { 'phone' => '9999999999' })
-            get "/organizations/#{org.id}/invitations/#{cd_invite.id}/accept"
-            expect(response).to be_forbidden
-            expect(response.body).to_not include(confirm_organization_invitation_path(org, cd_invite))
-          end
-          it 'should not show step navigation' do
-            user_service_class = class_double(UserInfoService).as_stubbed_const
-            allow(user_service_class).to receive(:new).and_raise(UserInfoServiceError, 'server_error')
-            get "/organizations/#{org.id}/invitations/#{cd_invite.id}/accept"
-            expect(response.status).to eq 503
-            expect(response.body).to_not include('<span class="usa-step-indicator__current-step">')
-          end
+        it 'should show step 2' do
+          user_service_class = class_double(UserInfoService).as_stubbed_const
+          allow(user_service_class).to receive(:new).and_raise(UserInfoServiceError, 'yikes')
+          log_in
+          get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
+          expect(response.status).to eq 503
+          expect(response.body).to include('<span class="usa-step-indicator__current-step">2</span>')
         end
       end
     end
   end
 
   describe 'POST /confirm' do
-    shared_examples 'a confirm endpoint' do
-      let(:org) { invitation.provider_organization }
-      before { log_in }
-      context :success do
-        it 'should set session status to conditions verified' do
-          stub_user_info
-          get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
-          post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm", params: success_params
-          expect(response).to be_ok
-          expect(request.session["invitation_status_#{invitation.id}"]).to eq 'conditions_verified'
-        end
-      end
-      context :failure do
-        it 'should not confirm if not passed identity verification' do
-          post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm", params: success_params
-          expect(response).to redirect_to(accept_organization_invitation_path(org, invitation))
-          expect(request.session["invitation_status_#{invitation.id}"]).to be_nil
-        end
-      end
-    end
-
     context :ao do
       it_behaves_like 'an invitation endpoint', :post, 'confirm' do
         let(:invitation) { create(:invitation, :ao) }
-      end
-      it_behaves_like 'a confirm endpoint' do
-        let(:invitation) { create(:invitation, :ao) }
-        let(:success_params) { {} }
       end
       context :success do
         let(:invitation) { create(:invitation, :ao) }
@@ -247,10 +166,26 @@ RSpec.describe 'Invitations', type: :request do
           log_in
           get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
         end
+        it 'should set session status to conditions verified' do
+          post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"
+          expect(response).to be_ok
+          expect(request.session["invitation_status_#{invitation.id}"]).to eq 'conditions_verified'
+        end
         it 'sets pac id' do
           post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"
           # We have the fake CPI API Gateway return the ssn as pac_id
           expect(request.session[:user_pac_id]).to eq user_info['social_security_number']
+        end
+      end
+      context :failure do
+        let(:invitation) { create(:invitation, :ao) }
+        let(:org) { invitation.provider_organization }
+        before { log_in }
+
+        it 'should not confirm if not passed identity verification' do
+          post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"
+          expect(response).to redirect_to(accept_organization_invitation_path(org, invitation))
+          expect(request.session["invitation_status_#{invitation.id}"]).to be_nil
         end
       end
       context :ao_has_waiver do
@@ -394,11 +329,6 @@ RSpec.describe 'Invitations', type: :request do
     context :cd do
       it_behaves_like 'an invitation endpoint', :post, 'confirm' do
         let(:invitation) { create(:invitation, :cd) }
-      end
-      it_behaves_like 'a confirm endpoint' do
-        let(:verification_code) { 'ABC123' }
-        let(:invitation) { create(:invitation, :cd, verification_code:) }
-        let(:success_params) { { verification_code: } }
       end
 
       context :failure do

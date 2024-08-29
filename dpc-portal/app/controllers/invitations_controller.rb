@@ -6,19 +6,31 @@ class InvitationsController < ApplicationController
   before_action :load_invitation
   before_action :validate_invitation, except: %i[renew]
   before_action :check_for_token, except: %i[login renew show]
-  before_action :invitation_matches_user, only: %i[accept]
-  before_action :invitation_matches_conditions, only: %i[confirm]
 
   def show
     render(Page::Invitations::StartComponent.new(@organization, @invitation))
   end
 
+  # AO Only
   def accept
-    session["invitation_status_#{@invitation.id}"] = 'identity_verified'
+    invitation_matches_user
+    return if performed?
+
     render(Page::Invitations::AcceptInvitationComponent.new(@organization, @invitation, @given_name, @family_name))
   end
 
+  # CD Only
+  def code
+  end
+
+  # CD Only
+  def check_code
+  end
+  
   def confirm
+    invitation_matches_conditions
+    return if performed?
+
     session["invitation_status_#{@invitation.id}"] = 'conditions_verified'
     render(Page::Invitations::RegisterComponent.new(@organization, @invitation))
   end
@@ -135,6 +147,7 @@ class InvitationsController < ApplicationController
       render(Page::Invitations::BadInvitationComponent.new(@invitation, 'pii_mismatch'),
              status: :forbidden)
     end
+    session["invitation_status_#{@invitation.id}"] = 'identity_verified'
     @given_name = user_info['given_name']
     @family_name = user_info['family_name']
   rescue UserInfoServiceError => e
