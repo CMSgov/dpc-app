@@ -17,12 +17,6 @@ COPY /engines/api_client/ /dpc-web/vendor/api_client/
 COPY /dpc-web/Gemfile /dpc-web/Gemfile.lock /dpc-web/
 COPY /dpc-web/package.json /dpc-web/package-lock.json /dpc-web/
 
-# Add HHS CA Cert
-COPY certs/HHS-FPKI-Intermediate-CA-E1.cer /usr/local/share/ca-certificates/HHS-FPKI-Intermediate-CA-E1.cer
-COPY certs/fcpcag2.cer /usr/local/share/ca-certificates/fcpcag2.cer
-
-RUN chmod 644 /usr/local/share/ca-certificates/HHS-FPKI-Intermediate-CA-E1.cer && chmod 644 /usr/local/share/ca-certificates/fcpcag2.cer && update-ca-certificates
-
 # Install the website dependencies
 RUN gem install bundler --no-document && \
     gem uninstall nokogiri -I && \
@@ -46,6 +40,12 @@ RUN rm -rf /usr/local/bundle/cache/*.gem && \
 
 
 FROM ruby:3.3-alpine
+
+# Add HHS CA Cert
+COPY certs/HHS-FPKI-Intermediate-CA-E1.cer /usr/local/share/ca-certificates/HHS-FPKI-Intermediate-CA-E1.cer
+COPY certs/fcpcag2.cer /usr/local/share/ca-certificates/fcpcag2.cer
+
+RUN chmod 644 /usr/local/share/ca-certificates/HHS-FPKI-Intermediate-CA-E1.cer && chmod 644 /usr/local/share/ca-certificates/fcpcag2.cer && update-ca-certificates
 
 # Install app dependencies
 RUN apk add --no-cache postgresql-client nodejs tzdata
