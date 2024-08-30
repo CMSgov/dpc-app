@@ -33,7 +33,7 @@ var uploadToS3 = dpcaws.UploadFileToS3
 var newLocalSession = dpcaws.NewLocalSession
 var newSession = dpcaws.NewSession
 
-var isTesting = os.Getenv("IS_TESTING") == "true"
+var isTesting = os.Getenv("LOCAL_STACK_ENDPOINT") == "true"
 
 func main() {
 	if isTesting {
@@ -62,7 +62,7 @@ func handler(ctx context.Context, event events.S3Event) (string, error) {
 }
 
 func generateRequestFile() (string, error) {
-	session, sessErr := getAwsSession()
+	session, sessErr := dpcaws.GetAwsSession()
 	if sessErr != nil {
 		return "", sessErr
 	}
@@ -183,21 +183,8 @@ func getAssumeRoleSession(session *session.Session) (*session.Session, error) {
 	}
 
 	if isTesting {
-		return getAwsSession()
+		return dpcaws.GetAwsSession()
 	} else {
 		return newSession(assumeRoleArn)
-	}
-}
-
-func getAwsSession() (*session.Session, error) {
-	// If we're testing, connect to local stack.  If we're not, connect to the AWS environment.
-	if isTesting {
-		endPoint, found := os.LookupEnv("LOCAL_STACK_ENDPOINT")
-		if !found {
-			return nil, fmt.Errorf("LOCAL_STACK_ENDPOINT env variable not defined")
-		}
-		return newLocalSession(endPoint)
-	} else {
-		return newSession("")
 	}
 }

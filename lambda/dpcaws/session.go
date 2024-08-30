@@ -1,6 +1,8 @@
 package dpcaws
 
 import (
+	"os"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -57,4 +59,14 @@ func NewLocalSession(endPoint string) (*session.Session, error) {
 		return nil, err
 	}
 	return sess, nil
+}
+
+func GetAwsSession() (*session.Session, error) {
+	// If we're testing, connect to local stack. If we're not, connect to the AWS environment.
+	endPoint, found := os.LookupEnv("LOCAL_STACK_ENDPOINT")
+	if found {
+		return NewLocalSession(endPoint)
+	} else {
+		return NewSession("")
+	}
 }
