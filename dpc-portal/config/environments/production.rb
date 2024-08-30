@@ -77,7 +77,7 @@ Rails.application.configure do
     address:         ENV['SMTP_ADDRESS'],
     port:            ENV['SMTP_PORT'],
     domain:          ENV['SMTP_DOMAIN'],
-    openssl_verify_mode:  true,
+    openssl_verify_mode:  'peer',
     tls: true
   }
 
