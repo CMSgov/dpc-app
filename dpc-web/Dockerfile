@@ -1,13 +1,5 @@
 FROM ruby:3.3-alpine AS ruby_builder
 
-# Add HHS CA Cert
-COPY HHS-FPKI-Intermediate-CA-E1.pem /usr/local/share/ca-certificates/HHS-FPKI-Intermediate-CA-E1.pem
-COPY HHS-FPKI-Intermediate-CA-E1.cer /usr/local/share/ca-certificates/HHS-FPKI-Intermediate-CA-E1.cer
-COPY HHS-FPKI-Intermediate-CA-E1.p7b /usr/local/share/ca-certificates/HHS-FPKI-Intermediate-CA-E1.p7b
-COPY fcpcag2.crt /usr/local/share/ca-certificates/fcpcag2.crt
-COPY fcpcag2.cer /usr/local/share/ca-certificates/fcpcag2.cer
-RUN update-ca-certificates
-
 # Install build dependencies
 RUN apk update && \
     apk add --no-cache postgresql-dev && \
@@ -24,6 +16,12 @@ WORKDIR /dpc-web
 COPY /engines/api_client/ /dpc-web/vendor/api_client/
 COPY /dpc-web/Gemfile /dpc-web/Gemfile.lock /dpc-web/
 COPY /dpc-web/package.json /dpc-web/package-lock.json /dpc-web/
+
+# Add HHS CA Cert
+COPY certs/HHS-FPKI-Intermediate-CA-E1.cer /usr/local/share/ca-certificates/HHS-FPKI-Intermediate-CA-E1.cer
+COPY certs/fcpcag2.cer /usr/local/share/ca-certificates/fcpcag2.cer
+
+RUN chmod 644 /usr/local/share/ca-certificates/HHS-FPKI-Intermediate-CA-E1.cer && chmod 644 /usr/local/share/ca-certificates/fcpcag2.cer && update-ca-certificates
 
 # Install the website dependencies
 RUN gem install bundler --no-document && \

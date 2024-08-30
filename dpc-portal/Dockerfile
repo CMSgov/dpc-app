@@ -1,13 +1,5 @@
 FROM ruby:3.3-alpine AS ruby_builder
 
-# Add HHS CA Cert
-COPY HHS-FPKI-Intermediate-CA-E1.pem /usr/local/share/ca-certificates/HHS-FPKI-Intermediate-CA-E1.pem
-COPY HHS-FPKI-Intermediate-CA-E1.cer /usr/local/share/ca-certificates/HHS-FPKI-Intermediate-CA-E1.cer
-COPY HHS-FPKI-Intermediate-CA-E1.p7b /usr/local/share/ca-certificates/HHS-FPKI-Intermediate-CA-E1.p7b
-COPY fcpcag2.crt /usr/local/share/ca-certificates/fcpcag2.crt
-COPY fcpcag2.cer /usr/local/share/ca-certificates/fcpcag2.cer
-RUN update-ca-certificates
-
 # Install build dependencies
 RUN apk update && \
     apk add --no-cache postgresql-dev && \
@@ -21,6 +13,12 @@ RUN apk update && \
 # Set the working directory
 RUN mkdir -p /dpc-portal/vendor/api_client
 WORKDIR /dpc-portal
+
+# Add HHS CA Cert
+COPY /certs/HHS-FPKI-Intermediate-CA-E1.cer /usr/local/share/ca-certificates/HHS-FPKI-Intermediate-CA-E1.cer
+COPY /certs/fcpcag2.cer /usr/local/share/ca-certificates/fcpcag2.cer
+
+RUN update-ca-certificates
 
 # Copy over the files needed to fetch dependencies
 COPY /engines/api_client/ /dpc-portal/vendor/api_client/
