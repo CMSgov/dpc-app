@@ -1,8 +1,9 @@
 package dpcaws
+
 import (
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
+	"github.com/aws/aws-sdk-go/aws/session"
 )
 
 var s3Region = "us-east-1"
@@ -17,13 +18,21 @@ var newSessionWithOptions = session.NewSessionWithOptions
 func NewSession(roleArn string) (*session.Session, error) {
 	sess := session.Must(session.NewSession())
 
-	sess, err := newSession(&aws.Config{
-		Region: aws.String(s3Region),
-		Credentials: stscreds.NewCredentials(
-			sess,
-			roleArn,
-		),
-	})
+	var err error
+
+	if roleArn != "" {
+		sess, err = newSession(&aws.Config{
+			Region: aws.String(s3Region),
+			Credentials: stscreds.NewCredentials(
+				sess,
+				roleArn,
+			),
+		})
+	} else {
+		sess, err = newSession(&aws.Config{
+			Region: aws.String(s3Region),
+		})
+	}
 
 	if err != nil {
 		return nil, err
