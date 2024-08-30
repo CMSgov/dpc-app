@@ -1,36 +1,16 @@
 package main
 
 import (
-	"database/sql"
-	"fmt"
+	"dpcaws"
 	"os"
 
 	log "github.com/sirupsen/logrus"
 )
 
-var createConnection = func(dbName string, dbUser string, dbPassword string) (*sql.DB, error) {
-	var dbHost string = os.Getenv("DB_HOST")
-	var dbPort int = 5432
-	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", dbHost, dbPort, dbUser, dbPassword, dbName)
-
-	db, err := sql.Open("postgres", psqlInfo)
-	if err != nil {
-		log.Warning("Error connecting to database")
-		return db, err
-	}
-	// Call db.Ping() to check the connection
-	pingErr := db.Ping()
-	if pingErr != nil {
-		log.Warning("Ping error")
-		return db, pingErr
-	}
-	log.Info("Connected!")
-
-	return db, nil
-}
+var createConnection = dpcaws.CreateConnection
 
 var getAttributionData = func(dbUser string, dbPassword string, patientInfos map[string]PatientInfo) error {
-	db, attributionConnErr := createConnection("dpc_attribution", dbUser, dbPassword)
+	db, attributionConnErr := createConnection(os.Getenv("DB_HOST"), "dpc_attribution", dbUser, dbPassword)
 	if attributionConnErr != nil {
 		return attributionConnErr
 	}
@@ -64,7 +44,7 @@ var getAttributionData = func(dbUser string, dbPassword string, patientInfos map
 }
 
 var getConsentData = func(dbUser string, dbPassword string, patientInfos map[string]PatientInfo) error {
-	db, consentConnErr := createConnection("dpc_consent", dbUser, dbPassword)
+	db, consentConnErr := createConnection(os.Getenv("DB_HOST"), "dpc_consent", dbUser, dbPassword)
 	if consentConnErr != nil {
 		return consentConnErr
 	}

@@ -97,7 +97,7 @@ func TestGetConsentData(t *testing.T) {
 }
 
 func mockCreateConnection(db *sql.DB) {
-	createConnection = func(dbName string, dbUser string, dbPassword string) (*sql.DB, error) {
+	createConnection = func(dbHost string, dbName string, dbUser string, dbPassword string) (*sql.DB, error) {
 		return db, nil
 	}
 }
