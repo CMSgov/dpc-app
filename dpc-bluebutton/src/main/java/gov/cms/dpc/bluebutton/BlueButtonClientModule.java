@@ -13,7 +13,7 @@ import gov.cms.dpc.bluebutton.config.BBClientConfiguration;
 import gov.cms.dpc.bluebutton.config.BlueButtonBundleConfiguration;
 import gov.cms.dpc.bluebutton.exceptions.BlueButtonClientSetupException;
 import gov.cms.dpc.bluebutton.health.BlueButtonHealthCheck;
-import gov.cms.dpc.common.TimeoutConfiguration;
+import gov.cms.dpc.fhir.configuration.TimeoutConfiguration;
 import io.dropwizard.core.Configuration;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;

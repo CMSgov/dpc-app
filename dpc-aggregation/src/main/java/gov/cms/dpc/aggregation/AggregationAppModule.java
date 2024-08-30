@@ -15,6 +15,7 @@ import gov.cms.dpc.aggregation.service.*;
 import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.common.annotations.JobTimeout;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
+import gov.cms.dpc.fhir.configuration.FHIRClientConfiguration;
 import gov.cms.dpc.fhir.hapi.ContextUtils;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import org.slf4j.Logger;
@@ -125,7 +126,7 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
     @Singleton
     @Named("consentClient")
     public IGenericClient provideConsentClient(@Named("fhirContextConsentSTU3") FhirContext ctx) {
-        DPCAggregationConfiguration.ConsentClientConfiguration clientConfiguration = configuration().getConsentClientConfiguration();
+        FHIRClientConfiguration clientConfiguration = configuration().getConsentClientConfiguration();
         String serviceUrl = clientConfiguration.getServerBaseUrl();
 
         logger.info("Connecting to consent server at {}.", serviceUrl);

@@ -94,9 +94,9 @@ bbclient:
 consentClient:
   serverBaseUrl: ${CONSENT_SERVICE_URL:-"http://consent:3600/v1/"}
   timeouts:
-    connectionTimeout: 30000 # ms
-    socketTimeout: 30000 # ms
-    requestTimeout: 30000 # ms
+    connectionTimeout: 20000 # ms
+    socketTimeout: 20000 # ms
+    requestTimeout: 20000 # ms
 
 consentHealthCheckURL: ${CONSENT_HEALTHCHECK_URL:-"http://consent:9904/healthcheck}
 

@@ -3,9 +3,9 @@ package gov.cms.dpc.aggregation;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import gov.cms.dpc.bluebutton.config.BBClientConfiguration;
 import gov.cms.dpc.bluebutton.config.BlueButtonBundleConfiguration;
-import gov.cms.dpc.common.TimeoutConfiguration;
 import gov.cms.dpc.common.hibernate.attribution.IDPCDatabase;
 import gov.cms.dpc.common.hibernate.queue.IDPCQueueDatabase;
+import gov.cms.dpc.fhir.configuration.FHIRClientConfiguration;
 import gov.cms.dpc.queue.config.DPCAwsQueueConfiguration;
 import gov.cms.dpc.queue.config.DPCQueueConfig;
 import io.dropwizard.core.Configuration;
@@ -40,7 +40,7 @@ public class DPCAggregationConfiguration extends Configuration implements BlueBu
     @Valid
     @NotNull
     @JsonProperty("consentClient")
-    private final ConsentClientConfiguration consentClientConfiguration = new ConsentClientConfiguration();
+    private final FHIRClientConfiguration consentClientConfiguration = new FHIRClientConfiguration();
 
     @NotNull
     @JsonProperty("awsQueue")
@@ -117,7 +117,7 @@ public class DPCAggregationConfiguration extends Configuration implements BlueBu
         return this.clientConfiguration;
     }
 
-    public ConsentClientConfiguration getConsentClientConfiguration() { return this.consentClientConfiguration; }
+    public FHIRClientConfiguration getConsentClientConfiguration() { return this.consentClientConfiguration; }
 
     @Override
     public int getPollingFrequency() {
@@ -148,20 +148,4 @@ public class DPCAggregationConfiguration extends Configuration implements BlueBu
     }
 
     public DPCAwsQueueConfiguration getDpcAwsQueueConfiguration() { return this.dpcAwsQueueConfiguration; }
-
-    public static class ConsentClientConfiguration {
-        @NotEmpty
-        private String serverBaseUrl;
-
-        @Valid
-        @NotNull
-        @JsonProperty("timeouts")
-        private TimeoutConfiguration timeouts = new TimeoutConfiguration();
-
-        public TimeoutConfiguration getTimeouts() {
-            return timeouts;
-        }
-
-        public String getServerBaseUrl() { return serverBaseUrl; }
-    }
 }

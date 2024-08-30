@@ -1,7 +1,7 @@
 package gov.cms.dpc.bluebutton.config;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import gov.cms.dpc.common.TimeoutConfiguration;
+import gov.cms.dpc.fhir.configuration.FHIRClientConfiguration;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Max;
@@ -9,7 +9,7 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
-public class BBClientConfiguration {
+public class BBClientConfiguration extends FHIRClientConfiguration {
 
     @NotEmpty
     @JsonProperty("healthcheck")
@@ -17,14 +17,6 @@ public class BBClientConfiguration {
 
     @JsonProperty("registerHealthCheck")
     private boolean registerHealthCheck = false;
-
-    @NotEmpty
-    private String serverBaseUrl;
-
-    @Valid
-    @NotNull
-    @JsonProperty("timeouts")
-    private TimeoutConfiguration timeouts = new TimeoutConfiguration();
 
     @Min(10)
     @Max(1000)
@@ -37,10 +29,6 @@ public class BBClientConfiguration {
 
     private boolean useBfdMock = false;
 
-    public TimeoutConfiguration getTimeouts() {
-        return timeouts;
-    }
-
     public int getResourcesCount() { return resourcesCount; }
 
     public KeystoreConfiguration getKeystore() {
@@ -49,14 +37,6 @@ public class BBClientConfiguration {
 
     public BBClientConfiguration() {
         // Not used
-    }
-
-    public String getServerBaseUrl() {
-        return serverBaseUrl;
-    }
-
-    public void setServerBaseUrl(String serverBaseUrl) {
-        this.serverBaseUrl = serverBaseUrl;
     }
 
     public String getHealthcheckName() {

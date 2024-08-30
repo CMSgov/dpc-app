@@ -1,4 +1,4 @@
-package gov.cms.dpc.common;
+package gov.cms.dpc.fhir.configuration;
 
 import org.junit.jupiter.api.Test;
 
