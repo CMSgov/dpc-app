@@ -1,0 +1,7 @@
+go 1.21
+
+use (
+	dpcaws
+	opt-out-import
+	opt-out-export
+)

@@ -14,7 +14,7 @@ import (
 	_ "github.com/lib/pq"
 	log "github.com/sirupsen/logrus"
 
-	"opt-out-beneficiary-data-lambda/dpcaws"
+	"dpcaws"
 )
 
 type PatientInfo struct {
