@@ -63,7 +63,7 @@ class InvitationsController < ApplicationController
   # Everybody
   def register
     unless session["invitation_status_#{@invitation.id}"] == 'verification_complete'
-      return redirect_to accept_organization_invitation_url(@organization, @invitation)
+      return redirect_to organization_invitation_url(@organization, @invitation)
     end
 
     return unless create_link
@@ -121,15 +121,14 @@ class InvitationsController < ApplicationController
   def verify_user_is_ao
     user_info = UserInfoService.new.user_info(session)
     result = @invitation.ao_match?(user_info) # raises if does not match
-
-    log_waivers(result)
     session[:user_pac_id] = result.dig(:ao_role, 'pacId')
-  rescue UserInfoServiceError => e
-    handle_user_info_service_error(e, 2)
+    log_waivers(result)
   rescue VerificationError => e
     status = AoVerificationService::SERVER_ERRORS.include?(e.message) ? :service_unavailable : :forbidden
     log_ao_verification_error(e, status == :service_unavailable)
     render(Page::Invitations::AoFlowFailComponent.new(@invitation, e.message, 2), status:)
+  rescue UserInfoServiceError => e
+    handle_user_info_service_error(e, 2)
   end
 
   def handle_user_info_service_error(error, step)

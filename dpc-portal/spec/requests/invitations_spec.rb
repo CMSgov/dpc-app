@@ -670,7 +670,7 @@ RSpec.describe 'Invitations', type: :request do
         end
         it 'should redirect if not confirmed' do
           post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
-          expect(response).to redirect_to(accept_organization_invitation_path(org, invitation))
+          expect(response).to redirect_to(organization_invitation_path(org, invitation))
         end
       end
     end
