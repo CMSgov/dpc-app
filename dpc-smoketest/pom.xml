@@ -80,21 +80,12 @@
             </exclusions>
         </dependency>
         <!-- tika parser explicit upgrade to something that doesn't break snyk -->
-<<<<<<< Updated upstream
         <dependency>
             <groupId>org.apache.tika</groupId>
             <artifactId>tika-parsers</artifactId>
             <version>2.9.2</version>
             <type>pom</type>
         </dependency>
-=======
-<dependency>
-    <groupId>org.apache.tika</groupId>
-    <artifactId>tika-parsers</artifactId>
-    <version>2.2.0</version>
-    <type>pom</type>
-</dependency>
->>>>>>> Stashed changes
         <dependency>
             <groupId>xerces</groupId>
             <artifactId>xercesImpl</artifactId>

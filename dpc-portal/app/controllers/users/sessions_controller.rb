@@ -22,7 +22,6 @@ module Users
                                       post_logout_redirect_uri: "#{root_url}users/auth/logged_out",
                                       state: @state }.to_query)
       redirect_to url, allow_other_host: true
-      super
     end
   end
 end
