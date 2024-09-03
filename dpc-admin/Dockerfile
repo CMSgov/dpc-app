@@ -13,12 +13,6 @@ RUN apk update && \
 RUN mkdir -p /dpc-admin/vendor/api_client
 Workdir /dpc-admin
 
-# Add HHS CA Cert
-COPY /certs/HHS-FPKI-Intermediate-CA-E1.cer /usr/local/share/ca-certificates/HHS-FPKI-Intermediate-CA-E1.cer
-COPY /certs/fcpcag2.cer /usr/local/share/ca-certificates/fcpcag2.cer
-
-RUN update-ca-certificates
-
 # Copy over the files needed to fetch dependencies
 COPY /engines/api_client/ /dpc-admin/vendor/api_client/
 COPY /dpc-admin/Gemfile /dpc-admin/Gemfile.lock /dpc-admin/
@@ -60,6 +54,10 @@ WORKDIR /dpc-admin
 # Copy the compiled Ruby app
 COPY --from=ruby_builder /usr/local/bundle/ /usr/local/bundle/
 COPY --from=ruby_builder /dpc-admin /dpc-admin
+
+# Add Federal Common Policy CA G2 root certificate for SMTP
+COPY certs/fcpcag2.crt /usr/local/share/ca-certificates/fcpcag2.crt
+RUN cat /usr/local/share/ca-certificates/fcpcag2.crt >> /etc/ssl/certs/ca-certificates.crt
 
 # Declare the entrypoint shell script
 ENTRYPOINT ["./docker/entrypoint.sh"]

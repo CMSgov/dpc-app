@@ -14,12 +14,6 @@ RUN apk update && \
 RUN mkdir -p /dpc-portal/vendor/api_client
 WORKDIR /dpc-portal
 
-# Add HHS CA Cert
-COPY /certs/HHS-FPKI-Intermediate-CA-E1.cer /usr/local/share/ca-certificates/HHS-FPKI-Intermediate-CA-E1.cer
-COPY /certs/fcpcag2.cer /usr/local/share/ca-certificates/fcpcag2.cer
-
-RUN update-ca-certificates
-
 # Copy over the files needed to fetch dependencies
 COPY /engines/api_client/ /dpc-portal/vendor/api_client/
 COPY /dpc-portal/Gemfile /dpc-portal/Gemfile.lock /dpc-portal/
@@ -48,6 +42,10 @@ RUN rm -rf /usr/local/bundle/cache/*.gem && \
     find /usr/local/bundle/gems/ -name "*.c" -delete && \
     find /usr/local/bundle/gems/ -name "*.o" -delete && \
     find /usr/local/bundle/gems/ -name "Gemfile.lock" -delete
+
+# Add Federal Common Policy CA G2 root certificate for SMTP
+COPY certs/fcpcag2.crt /usr/local/share/ca-certificates/fcpcag2.crt
+RUN cat /usr/local/share/ca-certificates/fcpcag2.crt >> /etc/ssl/certs/ca-certificates.crt
 
 # Declare the entrypoint shell script
 ENTRYPOINT ["./docker/entrypoint.sh"]
