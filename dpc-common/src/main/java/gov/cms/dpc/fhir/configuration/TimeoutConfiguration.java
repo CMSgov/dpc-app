@@ -1,5 +1,8 @@
 package gov.cms.dpc.fhir.configuration;
 
+/**
+ * Used to load a fhir client's timeouts from an application's config file.
+ */
 public class TimeoutConfiguration {
 
 	private Integer connectionTimeout;

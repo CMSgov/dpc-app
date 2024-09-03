@@ -6,6 +6,9 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
+/**
+ * Used to load a fhir client's time-outs and base url from an application's config file.
+ */
 public class FHIRClientConfiguration {
 	@NotEmpty
 	private String serverBaseUrl;
