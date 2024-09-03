@@ -102,7 +102,7 @@ class InvitationsController < ApplicationController
     user_info = UserInfoService.new.user_info(session)
     @user = User.find_or_create_by!(provider: :openid_connect, uid: user_info['sub']) do |user_to_create|
       assign_user_attributes(user_to_create)
-      log_user_create
+      log_create_user
     end
     update_user(user_info)
     @user
@@ -236,15 +236,15 @@ class InvitationsController < ApplicationController
     session['omniauth.state'] = @state = SecureRandom.hex(16)
   end
 
-  def log_user_create
-    if @invitation.authorized_official?
-      Rails.logger.info(['Authorized Official user created,',
-                         { actionContext: LoggingConstants::ActionContext::Registration,
-                           actionType: LoggingConstants::ActionType::AoCreated }])
-    elsif @invitation.credential_delegate?
+  def log_create_user
+    if @invitation.credential_delegate?
       Rails.logger.info(['Credential Delegate user created,',
                          { actionContext: LoggingConstants::ActionContext::Registration,
                            actionType: LoggingConstants::ActionType::CdCreated }])
+    elsif @invitation.authorized_official?
+      Rails.logger.info(['Authorized Official user created,',
+                         { actionContext: LoggingConstants::ActionContext::Registration,
+                           actionType: LoggingConstants::ActionType::AoCreated }])
     end
   end
 end
