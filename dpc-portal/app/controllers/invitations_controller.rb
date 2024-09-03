@@ -112,6 +112,8 @@ class InvitationsController < ApplicationController
                              actionType: LoggingConstants::ActionType::AoCreated }])
       end
       user_to_create.email = @invitation.invited_email
+      user_to_create.given_name = user_info['given_name']
+      user_to_create.family_name = user_info['family_name']
       user_to_create.pac_id = session.delete(:user_pac_id)
     end
     @user.update(pac_id: session.delete(:user_pac_id)) unless @user.pac_id

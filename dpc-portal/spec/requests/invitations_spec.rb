@@ -485,6 +485,9 @@ RSpec.describe 'Invitations', type: :request do
           expect do
             post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
           end.to change { User.count }.by 1
+          user = User.last
+          expect(user.given_name).to eq user_info['given_name']
+          expect(user.family_name).to eq user_info['family_name']
         end
         it 'should log when credential delegate user is created' do
           invitation.update!(invitation_type: 0)
