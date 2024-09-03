@@ -45,8 +45,8 @@ FROM ruby:3.3-alpine
 COPY certs/HHS-FPKI-Intermediate-CA-E1.cer /usr/local/share/ca-certificates/HHS-FPKI-Intermediate-CA-E1.cer
 COPY certs/fcpcag2.cer /usr/local/share/ca-certificates/fcpcag2.cer
 
-RUN cat /usr/local/share/ca-certificates/HHS-FPKI-Intermediate-CA-E1.cer >> /etc/ssl/certs/ca-certificates.crt && \
-    cat /usr/local/share/ca-certificates/fcpcag2.cer >> /etc/ssl/certs/ca-certificates.crt && \
+RUN cat /usr/local/share/ca-certificates/fcpcag2.cer >> /etc/ssl/certs/ca-certificates.crt && \
+    cat /usr/local/share/ca-certificates/HHS-FPKI-Intermediate-CA-E1.cer >> /etc/ssl/certs/ca-certificates.crt && \
     apk --no-cache add \
         curl
         
