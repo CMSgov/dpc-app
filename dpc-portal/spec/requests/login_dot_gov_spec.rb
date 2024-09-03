@@ -181,4 +181,17 @@ RSpec.describe 'LoginDotGov', type: :request do
       get '/users/auth/failure'
     end
   end
+
+  describe 'GET /users/auth/logged_out' do
+    it 'should go to sign in page' do
+      get '/users/auth/logged_out'
+      expect(response).to redirect_to(new_user_session_path)
+      expect(flash).to be_empty
+    end
+    it 'should go to bespoke page if set' do
+      get '/organizations'
+      get '/users/auth/logged_out'
+      expect(response).to redirect_to(organizations_path)
+    end
+  end
 end

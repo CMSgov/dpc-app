@@ -9,10 +9,7 @@ module Users
       Rails.logger.info(['User logged out',
                          { actionContext: LoggingConstants::ActionContext::Authentication,
                            actionType: LoggingConstants::ActionType::UserLoggedOut }])
-      if params[:invitation_id].present?
-        invitation = Invitation.find(params[:invitation_id])
-        session[:user_return_to] = accept_organization_invitation_url(invitation.provider_organization.id, invitation.id)
-      end
+      set_user_return_to
       session['omniauth.state'] = @state = SecureRandom.hex(16)
       sign_out(current_user)
       client_id = "urn:gov:cms:openidconnect.profiles:sp:sso:cms:dpc:#{ENV.fetch('ENV')}"
@@ -22,6 +19,16 @@ module Users
                                       post_logout_redirect_uri: "#{root_url}users/auth/logged_out",
                                       state: @state }.to_query)
       redirect_to url, allow_other_host: true
+    end
+
+    private
+
+    def set_user_return_to
+      return unless params[:invitation_id].present?
+
+      invitation = Invitation.find(params[:invitation_id])
+      session[:user_return_to] =
+        organization_invitation_url(invitation.provider_organization.id, invitation.id)
     end
   end
 end
