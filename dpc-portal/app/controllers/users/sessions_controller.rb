@@ -1,11 +1,14 @@
 # frozen_string_literal: true
 
 module Users
-  # Adds auto session timeout functions to devise session controller
+  # Adds functionality to devise session controller
   class SessionsController < Devise::SessionsController
     auto_session_timeout_actions
 
     def destroy
+      Rails.logger.info(['User logged out',
+                         { actionContext: LoggingConstants::ActionContext::Authentication,
+                           actionType: LoggingConstants::ActionType::UserLoggedOut }])
       if params[:invitation_id].present?
         invitation = Invitation.find(params[:invitation_id])
         session[:user_return_to] = accept_organization_invitation_url(invitation.provider_organization.id, invitation.id)
@@ -19,6 +22,7 @@ module Users
                                       post_logout_redirect_uri: "#{root_url}users/auth/logged_out",
                                       state: @state }.to_query)
       redirect_to url, allow_other_host: true
+      super
     end
   end
 end

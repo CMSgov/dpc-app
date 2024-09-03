@@ -22,19 +22,15 @@ class CpiApiGatewayClient
     fetch_token
   end
 
-  # fetch data about an organization, including enrollment_id
-  def fetch_enrollment(npi)
+  # fetch full enrollments information about an organization
+  def fetch_profile(npi)
+    url = "#{@cpi_api_gateway_url}api/1.0/ppr/providers/profile"
+    start_tracking(:fetch_profile, url)
     body = { providerID: { npi: npi.to_s } }.to_json
-    response = request_client.post("#{@cpi_api_gateway_url}api/1.0/ppr/providers/enrollments",
+    response = request_client.post(url,
                                    headers: { 'Content-Type': 'application/json' },
                                    body:)
-    response.parsed
-  end
-
-  # fetch a list of roles, roughly corresponding to associated individuals
-  def fetch_enrollment_roles(enrollment_id)
-    response = request_client.get("#{@cpi_api_gateway_url}api/1.0/ppr/providers/enrollments/#{enrollment_id}/roles",
-                                  headers: { 'Content-Type': 'application/json' })
+    stop_tracking(:fetch_profile, url, response.status)
     response.parsed
   end
 
@@ -52,11 +48,11 @@ class CpiApiGatewayClient
         all: true
       }
     }.to_json
-    fetch_med_sanctions_and_waivers(body)
+    fetch_provider_info(body)
   end
 
-  # fetch info about the organization, including a list of med sanctions
-  def fetch_med_sanctions_and_waivers_by_org_npi(npi)
+  # fetch info about the organization
+  def org_info(npi)
     body = {
       providerID: {
         providerType: 'org',
@@ -66,10 +62,8 @@ class CpiApiGatewayClient
         all: true
       }
     }.to_json
-    fetch_med_sanctions_and_waivers(body)
+    fetch_provider_info(body)
   end
-
-  alias org_info fetch_med_sanctions_and_waivers_by_org_npi
 
   private
 
@@ -82,10 +76,37 @@ class CpiApiGatewayClient
     @access
   end
 
-  def fetch_med_sanctions_and_waivers(body)
-    response = request_client.post("#{@cpi_api_gateway_url}api/1.0/ppr/providers",
+  def fetch_provider_info(body)
+    url = "#{@cpi_api_gateway_url}api/1.0/ppr/providers"
+    start_tracking(:fetch_provider_info, url)
+    response = request_client.post(url,
                                    headers: { 'Content-Type': 'application/json' },
                                    body:)
+    stop_tracking(:fetch_provider_info, url, response.status)
     response.parsed
+  end
+
+  def start_tracking(method_name, url)
+    @tracker = NewRelic::Agent::Tracer.start_external_request_segment(library: 'Net::HTTP', uri: url,
+                                                                      procedure: :post)
+    @start = Time.now
+    Rails.logger.info(
+      ['Calling CPI API Gateway',
+       { cpi_api_gateway_request_method: :post,
+         cpi_api_gateway_request_url: url,
+         cpi_api_gateway_request_method_name: method_name }]
+    )
+  end
+
+  def stop_tracking(method_name, url, code)
+    Rails.logger.info(
+      ['CPI API Gateway response info',
+       { cpi_api_gateway_request_method: :post,
+         cpi_api_gateway_request_url: url,
+         cpi_api_gateway_request_method_name: method_name,
+         cpi_api_gateway_response_status_code: code,
+         cpi_api_gateway_response_duration: Time.now - @start }]
+    )
+    @tracker.finish
   end
 end

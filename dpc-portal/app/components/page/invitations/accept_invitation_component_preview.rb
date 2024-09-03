@@ -8,14 +8,14 @@ module Page
         org = ProviderOrganization.new(id: 2, name: 'Health Hut')
         user = User.new(given_name: 'Robert', family_name: 'Hodges')
         invitation = Invitation.new(id: 4, invited_by: user, invitation_type: :credential_delegate)
-        render(Page::Invitations::AcceptInvitationComponent.new(org, invitation))
+        render(Page::Invitations::AcceptInvitationComponent.new(org, invitation, 'Paula', 'Pineiro'))
       end
 
       def accept_ao
         org = ProviderOrganization.new(id: 2, name: 'Health Hut')
         user = User.new(given_name: 'Robert', family_name: 'Hodges')
         invitation = Invitation.new(id: 4, invited_by: user, invitation_type: :authorized_official)
-        render(Page::Invitations::AcceptInvitationComponent.new(org, invitation))
+        render(Page::Invitations::AcceptInvitationComponent.new(org, invitation, 'Paula', 'Pineiro'))
       end
 
       def error
@@ -23,7 +23,7 @@ module Page
         user = User.new(given_name: 'Robert', family_name: 'Hodges')
         invitation = Invitation.new(id: 4, invited_by: user)
         invitation.errors.add(:verification_code, :not_right, message: 'Helpful error message')
-        render(Page::Invitations::AcceptInvitationComponent.new(org, invitation))
+        render(Page::Invitations::AcceptInvitationComponent.new(org, invitation, 'Paula', 'Pineiro'))
       end
     end
   end

@@ -10,7 +10,7 @@ RSpec.describe Page::Invitations::StartComponent, type: :component do
   describe 'basic page' do
     it 'should show start button' do
       button = page.find('.usa-button')
-      expect(button.text).to eq 'Start'
+      expect(button.text).to eq 'Begin registration'
     end
 
     it 'should go to accept page' do

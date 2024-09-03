@@ -1,13 +1,5 @@
 <div>
-  <h1><%= t(@heading) %></h1>
-  <div class="usa-alert usa-alert--<%= @level %> margin-bottom-4">
-    <div class="usa-alert__body">
-      <h4 class="usa-alert__heading"><%= t(@status) %></h4>
-      <p class="usa-alert__text">
-        <%= t(@alert) %>
-      </p>
-    </div>
-  </div>
+  <h1><%= t(@status) %></h1>
   <div>
     <p>
       <%=raw t(key=@text, org_name: @org_name) %>

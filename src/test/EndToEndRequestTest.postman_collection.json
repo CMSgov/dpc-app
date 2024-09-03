@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "fa460e5e-c6fa-4028-b873-52c3cf08e8ee",
+		"_postman_id": "ac6568e9-9212-4c68-a397-04d3503b72c4",
 		"name": "EndToEndRequestTest",
 		"description": "This test is an example of an end to end set of API requests to submit a roster and export patient data. Each element in the 'item' list is a single request.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
@@ -97,7 +97,6 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"name": "Content-Type",
 								"value": "application/fhir+json",
 								"type": "text"
 							}
@@ -486,7 +485,6 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"name": "Content-Type",
 								"value": "application/fhir+json",
 								"type": "text"
 							},
@@ -768,7 +766,8 @@
 									"",
 									"pm.environment.set(\"attestationHeader\", JSON.stringify(attestation))"
 								],
-								"type": "text/javascript"
+								"type": "text/javascript",
+								"packages": {}
 							}
 						},
 						{
@@ -790,10 +789,11 @@
 									"    ",
 									"    // Should be a search set with one less entry",
 									"    pm.expect(response.issue).to.have.length(1);",
-									"    pm.expect(response.issue[0].details.text).to.have.string('Cannot find patient with ID');",
+									"    pm.expect(response.issue[0].details.text).to.have.string('All patients in group must exist. Cannot find 1 patient(s).');",
 									"});"
 								],
-								"type": "text/javascript"
+								"type": "text/javascript",
+								"packages": {}
 							}
 						}
 					],
@@ -802,8 +802,8 @@
 						"header": [
 							{
 								"key": "Accept",
-								"type": "text",
-								"value": "application/fhir+json"
+								"value": "application/fhir+json",
+								"type": "text"
 							},
 							{
 								"key": "Content-Type",
@@ -885,13 +885,13 @@
 						"header": [
 							{
 								"key": "Accept",
-								"type": "text",
-								"value": "application/fhir+json"
+								"value": "application/fhir+json",
+								"type": "text"
 							},
 							{
 								"key": "Prefer",
-								"type": "text",
-								"value": "respond-async"
+								"value": "respond-async",
+								"type": "text"
 							}
 						],
 						"url": {
@@ -1320,8 +1320,8 @@
 						"header": [
 							{
 								"key": "If-Modified-Since",
-								"type": "text",
-								"value": "{{file_timestamp}}"
+								"value": "{{file_timestamp}}",
+								"type": "text"
 							}
 						],
 						"url": {
@@ -1387,13 +1387,13 @@
 						"header": [
 							{
 								"key": "Accept",
-								"type": "text",
-								"value": "application/fhir+json"
+								"value": "application/fhir+json",
+								"type": "text"
 							},
 							{
 								"key": "Prefer",
-								"type": "text",
-								"value": "respond-async"
+								"value": "respond-async",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -1571,9 +1571,8 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/fire+json"
+								"value": "application/fire+json",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -1628,7 +1627,6 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"name": "Content-Type",
 								"value": "application/fhir+json",
 								"type": "text"
 							}
@@ -1682,9 +1680,8 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/fhir+json"
+								"value": "application/fhir+json",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -1732,9 +1729,8 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/fhir+json"
+								"value": "application/fhir+json",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -2057,9 +2053,8 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/fhir+json"
+								"value": "application/fhir+json",
+								"type": "text"
 							}
 						],
 						"url": {

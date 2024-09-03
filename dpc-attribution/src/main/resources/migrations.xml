@@ -434,4 +434,8 @@
             <column name="beneficiary_id" valueComputed="UPPER(beneficiary_id)"/>
         </update>
     </changeSet>
+
+    <changeSet id="increment-attributions_id_seq" author="MEsposito">
+        <alterSequence sequenceName="attributions_id_seq" incrementBy="100"></alterSequence>
+    </changeSet>
 </databaseChangeLog>

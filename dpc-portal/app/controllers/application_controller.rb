@@ -39,6 +39,9 @@ class ApplicationController < ActionController::Base
 
     reset_session
     flash[:notice] = t('devise.failure.max_session_timeout', default: 'Your session has timed out.')
+    Rails.logger.info(['User session timed out',
+                       { actionContext: LoggingConstants::ActionContext::Authentication,
+                         actionType: LoggingConstants::ActionType::SessionTimedOut }])
     redirect_to sign_in_path
   end
   # rubocop:enable Metrics/AbcSize
@@ -85,6 +88,7 @@ class ApplicationController < ActionController::Base
   end
 
   def set_current_request_attributes
+    ::NewRelic::Agent.add_custom_attributes({ user_id: current_user.id }) if current_user
     CurrentAttributes.save_request_attributes(request)
     CurrentAttributes.save_user_attributes(current_user)
   end

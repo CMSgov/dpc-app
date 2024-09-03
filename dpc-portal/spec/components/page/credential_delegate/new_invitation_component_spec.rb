@@ -25,7 +25,7 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
           <h1>Invite new user</h1>
             <div class="usa-alert usa-alert--warning margin-bottom-4">
               <div class="usa-alert__body">
-                <h4 class="usa-alert__heading">Exact match required</h4>
+                <h2 class="usa-alert__heading">Exact match required</h2>
                 <p class="usa-alert__text">
                   The name and contact info you enter must be an exact match to the name and contact info your Credential Delegate will provide after receiving this invite.
                 </p>

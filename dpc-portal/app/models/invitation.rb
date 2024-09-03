@@ -17,8 +17,8 @@ class Invitation < ApplicationRecord
   belongs_to :provider_organization, required: true
   belongs_to :invited_by, class_name: 'User', required: false
 
-  STEPS = ['Connect with Login.gov', 'Verify your identity', 'Verify the provider organization',
-           'Complete Registration'].freeze
+  STEPS = ['Sign in or create a Login.gov account', 'Confirm your identity', 'Confirm organization registration',
+           'Finished'].freeze
 
   def phone_raw=(nbr)
     @phone_raw = nbr
@@ -52,6 +52,9 @@ class Invitation < ApplicationRecord
     InvitationMailer.with(invitation:, given_name: invited_given_name,
                           family_name: invited_family_name).invite_ao.deliver_now
     update(status: :renewed)
+    Rails.logger.info(['Authorized Official renewed expired invitation',
+                       { actionContext: LoggingConstants::ActionContext::Registration,
+                         actionType: LoggingConstants::ActionType::AoRenewedExpiredInvitation }])
     invitation
   end
 
@@ -64,16 +67,20 @@ class Invitation < ApplicationRecord
   end
 
   def ao_match?(user_info)
+    check_missing_user_info(user_info, 'social_security_number')
+
     service = AoVerificationService.new
     result = service.check_eligibility(provider_organization.npi,
-                                       Digest::SHA2.new(256).hexdigest(user_info['social_security_number'].tr('-', '')))
-    raise InvitationError, result[:failure_reason] unless result[:success]
+                                       user_info['social_security_number'].tr('-', ''))
+    raise VerificationError, result[:failure_reason] unless result[:success]
 
     result
   end
 
-  def unacceptable_reason
-    return 'invalid' if cancelled? || accepted?
+  def unacceptable_reason # rubocop:disable Metrics/CyclomaticComplexity,Metrics/PerceivedComplexity
+    return 'invalid' if cancelled?
+    return 'accepted' if accepted?
+    return 'ao_renewed' if renewed? && authorized_official?
 
     if expired? && authorized_official?
       'ao_expired'
@@ -92,6 +99,8 @@ class Invitation < ApplicationRecord
   private
 
   def cd_match?(user_info)
+    cd_info_present?(user_info)
+
     return false unless invited_given_name.downcase == user_info['given_name'].downcase &&
                         invited_family_name.downcase == user_info['family_name'].downcase
 
@@ -100,8 +109,23 @@ class Invitation < ApplicationRecord
     email_match?(user_info)
   end
 
+  def cd_info_present?(user_info)
+    %w[given_name family_name phone].each do |key|
+      check_missing_user_info(user_info, key)
+    end
+  end
+
   def email_match?(user_info)
+    check_missing_user_info(user_info, 'all_emails')
+
     user_info['all_emails'].any? { |email| invited_email.downcase == email.downcase }
+  end
+
+  def check_missing_user_info(user_info, key)
+    return if user_info[key].present?
+
+    Rails.logger.error("User Info Missing: #{key}")
+    raise UserInfoServiceError, 'missing_info'
   end
 
   # rubocop:disable Metrics/AbcSize
@@ -129,4 +153,4 @@ class Invitation < ApplicationRecord
   end
 end
 
-class InvitationError < StandardError; end
+class VerificationError < StandardError; end

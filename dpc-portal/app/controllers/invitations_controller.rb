@@ -15,7 +15,7 @@ class InvitationsController < ApplicationController
 
   def accept
     session["invitation_status_#{@invitation.id}"] = 'identity_verified'
-    render(Page::Invitations::AcceptInvitationComponent.new(@organization, @invitation))
+    render(Page::Invitations::AcceptInvitationComponent.new(@organization, @invitation, @given_name, @family_name))
   end
 
   def confirm
@@ -29,20 +29,21 @@ class InvitationsController < ApplicationController
                                                             @invitation)
     end
 
-    if @invitation.credential_delegate?
-      create_cd_org_link
-    elsif @invitation.authorized_official?
-      create_ao_org_link
-    else
-      return render(Page::Invitations::BadInvitationComponent.new(@invitation, 'invalid', 'warning'),
-                    status: :unprocessable_entity)
-    end
+    return unless create_link
+
     session.delete("invitation_status_#{@invitation.id}")
+    sign_in(:user, @user)
+    Rails.logger.info(['User logged in',
+                       { actionContext: LoggingConstants::ActionContext::Registration,
+                         actionType: LoggingConstants::ActionType::UserLoggedIn }])
     render(Page::Invitations::SuccessComponent.new(@organization, @invitation))
   end
 
   def login
     login_session
+    Rails.logger.info(['User began login flow',
+                       { actionContext: LoggingConstants::ActionContext::Registration,
+                         actionType: LoggingConstants::ActionType::BeginLogin }])
     client_id = "urn:gov:cms:openidconnect.profiles:sp:sso:cms:dpc:#{ENV.fetch('ENV')}"
     url = URI::HTTPS.build(host: ENV.fetch('IDP_HOST'),
                            path: '/openid_connect/authorize',
@@ -67,27 +68,56 @@ class InvitationsController < ApplicationController
 
   private
 
+  def create_link
+    if @invitation.credential_delegate?
+      create_cd_org_link
+    elsif @invitation.authorized_official?
+      create_ao_org_link
+    else
+      render(Page::Invitations::BadInvitationComponent.new(@invitation, 'invalid'),
+             status: :unprocessable_entity)
+      false
+    end
+  end
+
   def create_cd_org_link
     CdOrgLink.create!(user:, provider_organization: @organization, invitation: @invitation)
+    Rails.logger.info(['Credential Delegate linked to organization',
+                       { actionContext: LoggingConstants::ActionContext::Registration,
+                         actionType: LoggingConstants::ActionType::CdLinkedToOrg }])
     @invitation.accept!
-    flash[:notice] = "Invitation accepted. You can now manage this organization's credentials. Learn more."
   end
 
   def create_ao_org_link
     AoOrgLink.create!(user:, provider_organization: @organization, invitation: @invitation)
+    Rails.logger.info(['Authorized Official linked to organization',
+                       { actionContext: LoggingConstants::ActionContext::Registration,
+                         actionType: LoggingConstants::ActionType::AoLinkedToOrg }])
     @invitation.accept!
-    flash[:notice] = 'Invitation accepted.'
+    @user.update(verification_status: 'approved')
+    @organization.update(verification_status: 'approved')
   end
 
+  # rubocop:disable Metrics/AbcSize
   def user
     user_info = UserInfoService.new.user_info(session)
-    local_user = User.find_or_create_by!(provider: :openid_connect, uid: user_info['sub']) do |user_to_create|
+    @user = User.find_or_create_by!(provider: :openid_connect, uid: user_info['sub']) do |user_to_create|
+      if @invitation.credential_delegate?
+        Rails.logger.info(['Credential Delegate user created,',
+                           { actionContext: LoggingConstants::ActionContext::Registration,
+                             actionType: LoggingConstants::ActionType::CdCreated }])
+      elsif @invitation.authorized_official?
+        Rails.logger.info(['Authorized Official user created,',
+                           { actionContext: LoggingConstants::ActionContext::Registration,
+                             actionType: LoggingConstants::ActionType::AoCreated }])
+      end
       user_to_create.email = @invitation.invited_email
       user_to_create.pac_id = session.delete(:user_pac_id)
     end
-    local_user.update(pac_id: session.delete(:user_pac_id)) unless local_user.pac_id
-    local_user
+    @user.update(pac_id: session.delete(:user_pac_id)) unless @user.pac_id
+    @user
   end
+  # rubocop:enable Metrics/AbcSize
 
   def check_for_token
     if session[:login_dot_gov_token].present? &&
@@ -96,71 +126,104 @@ class InvitationsController < ApplicationController
       return
     end
 
-    render(Page::Session::InvitationLoginComponent.new(@invitation))
+    render(Page::Invitations::InvitationLoginComponent.new(@invitation))
   end
 
   def invitation_matches_user
     user_info = UserInfoService.new.user_info(session)
     unless @invitation.match_user?(user_info)
-      render(Page::Invitations::BadInvitationComponent.new(@invitation, 'pii_mismatch', 'error'),
+      render(Page::Invitations::BadInvitationComponent.new(@invitation, 'pii_mismatch'),
              status: :forbidden)
     end
+    @given_name = user_info['given_name']
+    @family_name = user_info['family_name']
   rescue UserInfoServiceError => e
-    handle_user_info_service_error(e)
+    handle_user_info_service_error(e, 1)
   end
 
   def invitation_matches_conditions
     unless session["invitation_status_#{@invitation.id}"] == 'identity_verified'
-      return redirect_to accept_organization_invitation_url(@organization,
-                                                            @invitation)
+      return redirect_to accept_organization_invitation_url(@organization, @invitation)
     end
 
     return check_code if @invitation.credential_delegate?
 
     check_ao
-  rescue InvitationError => e
-    render(Page::Invitations::BadInvitationComponent.new(@invitation, e.message, 'error'),
-           status: :forbidden)
+  rescue UserInfoServiceError => e
+    handle_user_info_service_error(e, 2)
+  rescue VerificationError => e
+    status = AoVerificationService::SERVER_ERRORS.include?(e.message) ? :service_unavailable : :forbidden
+    log_ao_verification_error(e, status == :service_unavailable)
+    render(Page::Invitations::AoFlowFailComponent.new(@invitation, e.message, 2), status:)
   end
 
   def check_code
     return if params[:verification_code] == @invitation.verification_code
 
     @invitation.errors.add(:verification_code, :bad_code, message: 'tbd')
-    render(Page::Invitations::AcceptInvitationComponent.new(@organization, @invitation),
+    render(Page::Invitations::AcceptInvitationComponent.new(@organization, @invitation, @given_name, @family_name),
            status: :bad_request)
   end
 
   def check_ao
     user_info = UserInfoService.new.user_info(session)
     result = @invitation.ao_match?(user_info)
+
+    log_waivers(result)
     session[:user_pac_id] = result.dig(:ao_role, 'pacId') if result[:success]
     result[:success]
   end
 
-  def handle_user_info_service_error(error)
-    case error.message
-    when 'unauthorized'
-      render(Page::Session::InvitationLoginComponent.new(@invitation))
-    else
-      render(Page::Invitations::BadInvitationComponent.new(@invitation, 'server_error', 'warning'),
+  def handle_user_info_service_error(error, step)
+    logger.error(['User Info Service unavailable',
+                  { actionContext: LoggingConstants::ActionContext::Registration, error: error.message }])
+
+    if error.message == 'unauthorized'
+      render(Page::Invitations::InvitationLoginComponent.new(@invitation))
+    elsif @invitation.credential_delegate?
+      render(Page::Invitations::BadInvitationComponent.new(@invitation, error.message),
              status: :service_unavailable)
+    else
+      render(Page::Invitations::AoFlowFailComponent.new(@invitation, error.message, step),
+             status: :service_unavailable)
+    end
+  end
+
+  def log_ao_verification_error(error, service_unavailable)
+    if service_unavailable
+      logger.error(['CPI API Gateway unavailable',
+                    { actionContext: LoggingConstants::ActionContext::Registration, error: error.message }])
+    else
+      logger.info(['AO Check Fail',
+                   { actionContext: LoggingConstants::ActionContext::Registration,
+                     actionType: LoggingConstants::ActionType::FailCpiApiGwCheck,
+                     verificationReason: error.message,
+                     invitation: @invitation.id }])
     end
   end
 
   def load_invitation
     @invitation = Invitation.find(params[:id])
     if @organization != @invitation.provider_organization
-      render(Page::Invitations::BadInvitationComponent.new(@invitation, 'invalid', 'warning'), status: :not_found)
+      render(Page::Invitations::BadInvitationComponent.new(@invitation, 'invalid'), status: :not_found)
     end
   rescue ActiveRecord::RecordNotFound
-    render(Page::Invitations::BadInvitationComponent.new(@invitation, 'invalid', 'warning'), status: :not_found)
+    render(Page::Invitations::BadInvitationComponent.new(@invitation, 'invalid'), status: :not_found)
   end
 
   def validate_invitation
     return unless @invitation.unacceptable_reason
 
-    render(Page::Invitations::BadInvitationComponent.new(@invitation, @invitation.unacceptable_reason, 'warning'),
+    if @invitation.credential_delegate?
+      Rails.logger.info(['Credential Delegate Invitation expired',
+                         { actionContext: LoggingConstants::ActionContext::Registration,
+                           actionType: LoggingConstants::ActionType::CdInvitationExpired }])
+    elsif @invitation.authorized_official?
+      Rails.logger.info(['Authorized Official Invitation expired',
+                         { actionContext: LoggingConstants::ActionContext::Registration,
+                           actionType: LoggingConstants::ActionType::AoInvitationExpired }])
+    end
+    render(Page::Invitations::BadInvitationComponent.new(@invitation, @invitation.unacceptable_reason),
            status: :forbidden)
   end
 
@@ -180,4 +243,19 @@ def redirect_host
   else
     "https://#{ENV.fetch('ENV', nil)}.dpc.cms.gov"
   end
+end
+
+def log_waivers(role_and_waivers)
+  if role_and_waivers[:has_org_waiver]
+    Rails.logger.info(['Organization has a waiver',
+                       { actionContext: LoggingConstants::ActionContext::Registration,
+                         actionType: LoggingConstants::ActionType::OrgHasWaiver,
+                         invitation: @invitation.id }])
+  end
+  return unless role_and_waivers[:has_ao_waiver]
+
+  Rails.logger.info(['Authorized official has a waiver',
+                     { actionContext: LoggingConstants::ActionContext::Registration,
+                       actionType: LoggingConstants::ActionType::AoHasWaiver,
+                       invitation: @invitation.id }])
 end

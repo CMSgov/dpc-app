@@ -39,30 +39,30 @@ public class ExpireAttributions extends Job {
     @Override
     public void doJob(JobExecutionContext jobContext) {
         final OffsetDateTime expirationTemporal = OffsetDateTime.now(ZoneOffset.UTC);
-        // Find all the jobs and remove them
+        // Find all the jobs and expire them
         logger.debug("Expiring active attribution relationships before {}.", expirationTemporal.format(DateTimeFormatter.ISO_DATE_TIME));
 
         try (final Connection connection = this.dataSource.getConnection(); final DSLContext context = DSL.using(connection, this.settings)) {
+            connection.setAutoCommit(false);
+
             final int updated = context
                     .update(Attributions.ATTRIBUTIONS)
                     .set(Attributions.ATTRIBUTIONS.INACTIVE, true)
                     .where(Attributions.ATTRIBUTIONS.PERIOD_END.le(expirationTemporal))
                     .execute();
             logger.debug("Expired {} attribution relationships.", updated);
-        } catch (SQLException e) {
-            throw new AttributionException("Unable to open connection to database.", e);
-        }
 
-        // Remove everything that is inactive and has been expired for more than 6 months
-        try (final Connection connection = this.dataSource.getConnection(); final DSLContext context = DSL.using(connection, this.settings)) {
+            // Remove everything that is inactive and has been expired for more than 6 months
             final int removed = context
                     .delete(Attributions.ATTRIBUTIONS)
                     .where(Attributions.ATTRIBUTIONS.PERIOD_END.le(expirationTemporal.minusMonths(6))
                             .and(Attributions.ATTRIBUTIONS.INACTIVE.eq(true)))
                     .execute();
             logger.debug("Removed {} attribution relationships.", removed);
+
+            connection.commit();
         } catch (SQLException e) {
-            throw new AttributionException("Unable to open connection to database.", e);
+            throw new AttributionException("An error occurred during the database operation.", e);
         }
     }
 }

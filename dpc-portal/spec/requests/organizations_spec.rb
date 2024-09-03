@@ -34,6 +34,11 @@ RSpec.describe 'Organizations', type: :request do
         get '/organizations'
         expect(assigns(:links)).to eq [link]
       end
+
+      it 'logs user_id to new relic' do
+        expect(NewRelic::Agent).to receive(:add_custom_attributes).with({ user_id: user.id })
+        get '/organizations'
+      end
     end
 
     context 'user has sanctions' do
@@ -419,6 +424,16 @@ RSpec.describe 'Organizations', type: :request do
         expect(org.terms_of_service_accepted_at).to be_present
         expect(org.terms_of_service_accepted_by).to eq user
         expect(response).to redirect_to(organization_path(org))
+      end
+
+      it 'logs if successful' do
+        allow(Rails.logger).to receive(:info)
+        expect(Rails.logger).to receive(:info).with(['Authorized Official signed Terms of Service',
+                                                     { actionContext: LoggingConstants::ActionContext::Registration,
+                                                       actionType: LoggingConstants::ActionType::AoSignedToS }])
+        org = create(:provider_organization)
+        create(:ao_org_link, provider_organization: org, user:)
+        post "/organizations/#{org.id}/sign_tos"
       end
 
       it 'fails if not ao' do

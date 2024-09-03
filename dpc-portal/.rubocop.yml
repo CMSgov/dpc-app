@@ -17,6 +17,7 @@ Metrics/BlockLength:
   Exclude:
     - "spec/**/*"
     - "lib/tasks/dpc.rake"
+    - "app/concerns/*"
 
 Metrics/MethodLength:
   Max: 20
@@ -24,4 +25,5 @@ Metrics/MethodLength:
 Metrics/ClassLength:
   Exclude:
     - app/controllers/invitations_controller.rb
+    - app/models/invitation.rb
     - spec/support/fake_cpi_gateway.rb
