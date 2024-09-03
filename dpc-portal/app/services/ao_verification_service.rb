@@ -9,6 +9,7 @@ class AoVerificationService
   end
 
   def check_eligibility(organization_npi, ssn)
+      # webapp
     response = check_ao_eligibility(organization_npi, :ssn, ssn)
     response.merge(success: true)
   rescue OAuth2::Error => e
@@ -18,9 +19,13 @@ class AoVerificationService
   end
 
   def check_ao_eligibility(organization_npi, identifier_type, identifier)
+      # sidekiq
+    puts "check_ao_eligibility"
     role_and_waivers = get_authorized_official_role(organization_npi, identifier_type, identifier)
+    puts "11111111111111111111"
     individual_sanctions = check_individual_med_sanctions(role_and_waivers[:ao_role]['ssn'])
 
+    puts "role_and_waivers.merge from check_ao_eligibility()"
     role_and_waivers.merge(has_ao_waiver: individual_sanctions[:has_ao_waiver])
   end
 
@@ -41,7 +46,9 @@ class AoVerificationService
 
   def check_individual_med_sanctions(ao_ssn)
     response = @cpi_api_gw_client.fetch_med_sanctions_and_waivers_by_ssn(ao_ssn)
+    puts "got response from @cpi_api_gw_client.fetch_med_sanctions_and_waivers_by_ssn(ao_ssn)"
     sanctions = check_sanctions_response(response)
+    puts "raising AoException for ao_med_sanctions"
     raise AoException, 'ao_med_sanctions' if sanctions[:is_sanctioned]
 
     { is_sanctioned: sanctions[:is_sanctioned], has_ao_waiver: sanctions[:has_waiver] }
@@ -104,6 +111,7 @@ class AoVerificationService
   end
 
   def handle_oauth_error(error)
+      # webapp logs, do this in
     if error.response.status == 500
       Rails.logger.error 'API Gateway Error during AO Verification'
       { success: false, failure_reason: 'api_gateway_error' }

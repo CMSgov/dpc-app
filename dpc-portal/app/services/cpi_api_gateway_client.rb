@@ -24,6 +24,9 @@ class CpiApiGatewayClient
 
   # fetch full enrollments information about an organization
   def fetch_profile(npi)
+    puts "this is the code I want to 403 on"
+    puts "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+    puts "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
     url = "#{@cpi_api_gateway_url}api/1.0/ppr/providers/profile"
     start_tracking(:fetch_profile, url)
     body = { providerID: { npi: npi.to_s } }.to_json

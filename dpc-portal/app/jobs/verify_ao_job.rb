@@ -17,6 +17,7 @@ class VerifyAoJob < ApplicationJob
       update_success(link)
     rescue AoException => e
       handle_error(link, e.message)
+      raise
     end
     if links_to_check.present?
       enqueue_job(VerifyAoJob)
@@ -26,10 +27,19 @@ class VerifyAoJob < ApplicationJob
   end
 
   def check_link(service, link)
+    puts "check_link"
     begin
-      response = service.check_ao_eligibility(link.provider_organization.npi, :pac_id, link.user.pac_id)
+      puts "link.provider_organization.npi, #{link.provider_organization.npi}"
+      puts ":pac_id, #{:pac_id}"
+      puts "link.user.pac_id, #{link.user.pac_id}"
+      arg1 = link.provider_organization.npi
+      arg2 = :pac_id
+      arg3 = link.user.pac_id
+      response = service.check_ao_eligibility(arg1, arg2, arg3)
     rescue OAuth2::Error => e
+      puts "calling service.handle_oauth_error() from check_link"
       service.handle_oauth_error(e)
+      puts "this is the code we want to reach"
       raise
     end
     log_batch_verification_waivers(response)

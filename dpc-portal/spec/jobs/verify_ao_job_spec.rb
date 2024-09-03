@@ -1,11 +1,47 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
+require 'oauth2'
 
 RSpec.describe VerifyAoJob, type: :job do
   include ActiveJob::TestHelper
 
   describe :perform do
+    context :unauthorized_cpi_gw do
+      let(:client) { instance_double(CpiApiGatewayClient) }
+      before do
+        allow(ENV).to receive(:fetch).and_call_original
+        expect(ENV)
+          .to receive(:fetch)
+          .with('VERIFICATION_MAX_RECORDS', '10')
+          .and_return('4').at_least(4)
+        user = create(:user, pac_id: '900111111', verification_status: :approved)
+#         10.times do |n|
+#           create(:ao_org_link, user:, last_checked_at: (n + 6).days.ago)
+#         end
+        create(:ao_org_link, user:, last_checked_at: (6).days.ago)
+#         allow(CpiApiGatewayClient.request_client).to receive(:post).and_raise(OAuth2::Error)
+#         allow(CpiApiGatewayClient).to receive(:fetch_profile).and_raise(OAuth2::Error)
+#         allow(AoVerificationService).to receive(:check_ao_eligibility).and_raise(OAuth2::Error)
+#         expect_any_instance_of(AoVerificationService).to receive(:check_ao_eligibility).with(anything, anything, anything).and_raise(OAuth2::Error)
+        allow(client).to receive(:fetch_profile).and_raise(OAuth2::Error)
+
+#         expect_any_instance_of(CpiApiGatewayClient).to receive(:fetch_profile).with(anything).and_raise(OAuth2::Error)
+      end
+      it 'should log message and re-raise error' do
+        puts "hihihihihihi"
+        # expect(AoOrgLink.where(last_checked_at: ..6.days.ago).count).to eq 10
+#         expect(AoOrgLink.where(last_checked_at: ..6.days.ago).count).to eq 10
+#         VerifyAoJob.perform_now
+#         expect_any_instance_of(AoVerificationService).to receive(:check_ao_eligibility).with(anything, anything, anything).and_raise(OAuth2::Error)
+        expect{VerifyAoJob.perform_now}.to raise_error(OAuth2::Error)
+#         expect(AoOrgLink.where(last_checked_at: ..6.days.ago).count).to eq 6
+        # VerifyAoJob.perform_now
+        # puts "trigger failure, check logs manually"
+        # expect(AoOrgLink.where(last_checked_at: ..6.days.ago).count).to eq 99999
+      end
+    end
+
     context :chained do
       before do
         allow(ENV).to receive(:fetch).and_call_original

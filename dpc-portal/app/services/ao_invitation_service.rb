@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+# this fails daily
 
 # A service that verifies generates an ao invitation
 class AoInvitationService
