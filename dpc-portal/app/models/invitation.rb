@@ -21,11 +21,17 @@ class Invitation < ApplicationRecord
   STEPS = ['Sign in or create a Login.gov account', 'Confirm your identity', 'Confirm organization registration',
            'Finished'].freeze
 
-  MAX_TRIES_COUNT = 5
-
   def phone_raw=(nbr)
     @phone_raw = nbr
     self.invited_phone = @phone_raw.tr('^0-9', '')
+  end
+
+  def add_try
+    if @tries_count.nil?
+      @tries_count = 1
+    else
+      @tries_count += 1
+    end
   end
 
   def show_attributes
@@ -80,12 +86,7 @@ class Invitation < ApplicationRecord
     result
   end
 
-  def max_tries_exceeded?
-    tries_count >= MAX_TRIES_COUNT
-  end
-
   def unacceptable_reason # rubocop:disable Metrics/CyclomaticComplexity,Metrics/PerceivedComplexity
-    return 'max_tries_exceeded' if max_tries_exceeded?
     return 'invalid' if cancelled?
     return 'accepted' if accepted?
     return 'ao_renewed' if renewed? && authorized_official?

@@ -9,6 +9,8 @@ class InvitationsController < ApplicationController
   before_action :invitation_matches_user, only: %i[accept]
   before_action :invitation_matches_conditions, only: %i[confirm]
 
+  MAX_TRIES_COUNT = 5
+
   def show
     render(Page::Invitations::StartComponent.new(@organization, @invitation))
   end
@@ -160,9 +162,9 @@ class InvitationsController < ApplicationController
   def check_code
     return if params[:verification_code] == @invitation.verification_code
 
-    @invitation.tries_count += 1
+    @invitation.add_try
     if @invitation.tries_count >= MAX_TRIES_COUNT
-      return render(Page::Invitations::BadInvitationComponent.new(@invitation, 'max_tries_exceeded'),)
+      return render(Page::Invitations::BadInvitationComponent.new(@invitation, 'max_tries_exceeded'))
     end
 
     @invitation.errors.add(:verification_code, :bad_code, message: 'tbd')
