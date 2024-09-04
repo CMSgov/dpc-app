@@ -160,6 +160,11 @@ class InvitationsController < ApplicationController
   def check_code
     return if params[:verification_code] == @invitation.verification_code
 
+    @invitation.tries_count += 1
+    if @invitation.tries_count >= MAX_TRIES_COUNT
+      return render(Page::Invitations::BadInvitationComponent.new(@invitation, 'max_tries_exceeded'),)
+    end
+
     @invitation.errors.add(:verification_code, :bad_code, message: 'tbd')
     render(Page::Invitations::AcceptInvitationComponent.new(@organization, @invitation, @given_name, @family_name),
            status: :bad_request)

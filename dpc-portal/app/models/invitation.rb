@@ -3,6 +3,7 @@
 # Record of invitation, with possible verification code
 class Invitation < ApplicationRecord
   attr_reader :phone_raw
+  attr_accessor :tries_count
 
   validates :invited_by, :invited_given_name, :invited_family_name, :phone_raw, presence: true, if: :needs_validation?
   validates :invited_email, :invited_email_confirmation, presence: true, if: :new_record?
@@ -19,6 +20,8 @@ class Invitation < ApplicationRecord
 
   STEPS = ['Sign in or create a Login.gov account', 'Confirm your identity', 'Confirm organization registration',
            'Finished'].freeze
+
+  MAX_TRIES_COUNT = 5
 
   def phone_raw=(nbr)
     @phone_raw = nbr
@@ -77,7 +80,12 @@ class Invitation < ApplicationRecord
     result
   end
 
+  def max_tries_exceeded?
+    tries_count >= MAX_TRIES_COUNT
+  end
+
   def unacceptable_reason # rubocop:disable Metrics/CyclomaticComplexity,Metrics/PerceivedComplexity
+    return 'max_tries_exceeded' if max_tries_exceeded?
     return 'invalid' if cancelled?
     return 'accepted' if accepted?
     return 'ao_renewed' if renewed? && authorized_official?
