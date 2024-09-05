@@ -6,6 +6,23 @@ RSpec.describe VerifyAoJob, type: :job do
   include ActiveJob::TestHelper
 
   describe :perform do
+    context :cpi_gateway_client_error do
+      before do
+          user = create(:user, pac_id: '900111111', verification_status: :approved)
+          create(:ao_org_link, user:, last_checked_at: 6.days.ago)
+          cpi_api_gateway_client_class = class_double(CpiApiGatewayClient).as_stubbed_const
+          cpi_api_gateway_client = double(CpiApiGatewayClient)
+          expect(cpi_api_gateway_client_class).to receive(:new).at_least(:once).and_return(cpi_api_gateway_client)
+          expect(cpi_api_gateway_client).to receive(:fetch_profile).and_raise(
+            OAuth2::Error, Faraday::Response.new(status: 500)
+          )
+      end
+      it 'handles OAuth2::Error raised by service.check_ao_eligibility in the perform method' do
+          expect(Rails.logger).to receive(:error).with(['API Gateway Error during AO Verification'])
+          VerifyAoJob.perform_now
+      end
+    end
+
     context :chained do
       before do
         allow(ENV).to receive(:fetch).and_call_original
