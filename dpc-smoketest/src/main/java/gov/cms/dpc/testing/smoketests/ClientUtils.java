@@ -271,18 +271,14 @@ public class ClientUtils {
         try (InputStream resource = baseClass.getClassLoader().getResourceAsStream(filename)) {
             final Parameters parameters = parser.parseResource(Parameters.class, resource);
 
-            final Bundle bundle = (Bundle) parameters.getParameterFirstRep().getResource();
-
-            bundle
-                    .getEntry()
-                    .stream()
-                    .map(Bundle.BundleEntryComponent::getResource)
-                    .filter(entry -> entry.getClass().equals(clazz))
-                    .forEach(entry -> client
-                            .create()
-                            .resource(entry)
-                            .encodedJson()
-                            .execute());
+            client
+                .operation()
+                .onType(clazz)
+                .named("submit")
+                .withParameters(parameters)
+                .returnResourceType(Bundle.class)
+                .encodedJson()
+                .execute();
 
             // Fetch the new bundle, so we make sure we get the IDs that we're after
             return client
