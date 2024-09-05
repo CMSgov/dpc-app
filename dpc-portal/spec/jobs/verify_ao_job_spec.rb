@@ -7,38 +7,36 @@ RSpec.describe VerifyAoJob, type: :job do
   include ActiveJob::TestHelper
 
   describe :perform do
-    context :unauthorized_cpi_gw do
-      let(:client) { instance_double(CpiApiGatewayClient) }
+    context :cpi_gateway_client_error do
       before do
-        allow(ENV).to receive(:fetch).and_call_original
-        expect(ENV)
-          .to receive(:fetch)
-          .with('VERIFICATION_MAX_RECORDS', '10')
-          .and_return('4').at_least(4)
-        user = create(:user, pac_id: '900111111', verification_status: :approved)
-#         10.times do |n|
-#           create(:ao_org_link, user:, last_checked_at: (n + 6).days.ago)
-#         end
-        create(:ao_org_link, user:, last_checked_at: (6).days.ago)
-#         allow(CpiApiGatewayClient.request_client).to receive(:post).and_raise(OAuth2::Error)
-#         allow(CpiApiGatewayClient).to receive(:fetch_profile).and_raise(OAuth2::Error)
-#         allow(AoVerificationService).to receive(:check_ao_eligibility).and_raise(OAuth2::Error)
-#         expect_any_instance_of(AoVerificationService).to receive(:check_ao_eligibility).with(anything, anything, anything).and_raise(OAuth2::Error)
-        allow(client).to receive(:fetch_profile).and_raise(OAuth2::Error)
-
-#         expect_any_instance_of(CpiApiGatewayClient).to receive(:fetch_profile).with(anything).and_raise(OAuth2::Error)
+          user = create(:user, pac_id: '900111111', verification_status: :approved)
+          create(:ao_org_link, user:, last_checked_at: 6.days.ago)
+          cpi_api_gateway_client_class = class_double(CpiApiGatewayClient).as_stubbed_const
+          cpi_api_gateway_client = double(CpiApiGatewayClient)
+          expect(cpi_api_gateway_client_class).to receive(:new).at_least(:once).and_return(cpi_api_gateway_client)
+          expect(cpi_api_gateway_client).to receive(:fetch_profile).and_raise(
+            OAuth2::Error, Faraday::Response.new(status: 500)
+          )
       end
-      it 'should log message and re-raise error' do
-        puts "hihihihihihi"
-        # expect(AoOrgLink.where(last_checked_at: ..6.days.ago).count).to eq 10
-#         expect(AoOrgLink.where(last_checked_at: ..6.days.ago).count).to eq 10
-#         VerifyAoJob.perform_now
-#         expect_any_instance_of(AoVerificationService).to receive(:check_ao_eligibility).with(anything, anything, anything).and_raise(OAuth2::Error)
-        expect{VerifyAoJob.perform_now}.to raise_error(OAuth2::Error)
-#         expect(AoOrgLink.where(last_checked_at: ..6.days.ago).count).to eq 6
-        # VerifyAoJob.perform_now
-        # puts "trigger failure, check logs manually"
-        # expect(AoOrgLink.where(last_checked_at: ..6.days.ago).count).to eq 99999
+      it 'handles OAuth2::Error raised by service.check_ao_eligibility in the perform method' do
+          expect(Rails.logger).to receive(:error).with(['API Gateway Error during AO Verification'])
+          VerifyAoJob.perform_now
+      end
+    end
+
+    it 'should not update if any object fails to update' do
+      links_to_check = AoOrgLink.where(last_checked_at: ..6.days.ago,
+                                       verification_status: true)
+      expect_any_instance_of(User).to receive(:update!).and_raise('error')
+      expect do
+        VerifyAoJob.perform_now
+      end.to raise_error(RuntimeError, 'error')
+
+      links_to_check.each do |link|
+        link.reload
+        expect(link.last_checked_at).to be < 6.days.ago
+        expect(link.provider_organization.last_checked_at).to be_nil
+        expect(link.user.last_checked_at).to be_nil
       end
     end
 
