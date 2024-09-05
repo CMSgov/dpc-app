@@ -79,8 +79,6 @@ RSpec.describe Page::CredentialDelegate::ListComponent, type: :component do
                 <th scope="row" role="columnheader">
                   Active since
                 </th>
-                <th scope="row" role="columnheader">
-                </th>
               </tr>
             </thead>
         HTML
@@ -94,7 +92,6 @@ RSpec.describe Page::CredentialDelegate::ListComponent, type: :component do
             <td data-sort-value="Bob Hodges">Bob Hodges</td>
             <td data-sort-value="bob@example.com">bob@example.com</td>
             <td data-sort-value="#{activated}">#{activated}</td>
-            <td data-sort-value="X">X</td>
           </tr>
         HTML
         is_expected.to include(normalize_space(expected_html))

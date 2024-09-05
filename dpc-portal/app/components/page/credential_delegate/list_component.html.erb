@@ -8,8 +8,8 @@
         <% if @active_credential_delegates.present? %>
           <%= render(Core::Table::TableComponent.new(id: 'active-cd-table', additional_classes: ['width-full'], sortable: false)) do %>
             <%= render(Core::Table::HeaderComponent.new(caption: 'Active Credential Delegate Table',
-                                                    columns: ['Name', 'Email', 'Active since', ''])) %>
-            <%= render(Core::Table::RowComponent.with_collection(@active_credential_delegates, keys: ['full_name', 'email', 'activated_at', 'X'])) %>
+                                                    columns: ['Name', 'Email', 'Active since'])) %>
+            <%= render(Core::Table::RowComponent.with_collection(@active_credential_delegates, keys: ['full_name', 'email', 'activated_at'])) %>
           <% end %>
         <% else %>
           <p>There are no active credential delegates.</p>

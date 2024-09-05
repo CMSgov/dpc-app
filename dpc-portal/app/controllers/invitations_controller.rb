@@ -98,26 +98,29 @@ class InvitationsController < ApplicationController
     @organization.update(verification_status: 'approved')
   end
 
-  # rubocop:disable Metrics/AbcSize
   def user
     user_info = UserInfoService.new.user_info(session)
     @user = User.find_or_create_by!(provider: :openid_connect, uid: user_info['sub']) do |user_to_create|
-      if @invitation.credential_delegate?
-        Rails.logger.info(['Credential Delegate user created,',
-                           { actionContext: LoggingConstants::ActionContext::Registration,
-                             actionType: LoggingConstants::ActionType::CdCreated }])
-      elsif @invitation.authorized_official?
-        Rails.logger.info(['Authorized Official user created,',
-                           { actionContext: LoggingConstants::ActionContext::Registration,
-                             actionType: LoggingConstants::ActionType::AoCreated }])
-      end
-      user_to_create.email = @invitation.invited_email
-      user_to_create.pac_id = session.delete(:user_pac_id)
+      assign_user_attributes(user_to_create)
+      log_create_user
     end
-    @user.update(pac_id: session.delete(:user_pac_id)) unless @user.pac_id
+    update_user(user_info)
     @user
   end
-  # rubocop:enable Metrics/AbcSize
+
+  def assign_user_attributes(user_to_create)
+    user_to_create.email = @invitation.invited_email
+    user_to_create.given_name = user_info['given_name']
+    user_to_create.family_name = user_info['family_name']
+    user_to_create.pac_id = session.delete(:user_pac_id)
+  end
+
+  def update_user(user_info)
+    @user.pac_id = session.delete(:user_pac_id) unless @user.pac_id
+    @user.given_name = user_info['given_name']
+    @user.family_name = user_info['family_name']
+    @user.save
+  end
 
   def check_for_token
     if session[:login_dot_gov_token].present? &&
@@ -231,6 +234,18 @@ class InvitationsController < ApplicationController
     session[:user_return_to] = accept_organization_invitation_url(@organization, params[:id])
     session['omniauth.nonce'] = @nonce = SecureRandom.hex(16)
     session['omniauth.state'] = @state = SecureRandom.hex(16)
+  end
+
+  def log_create_user
+    if @invitation.credential_delegate?
+      Rails.logger.info(['Credential Delegate user created,',
+                         { actionContext: LoggingConstants::ActionContext::Registration,
+                           actionType: LoggingConstants::ActionType::CdCreated }])
+    elsif @invitation.authorized_official?
+      Rails.logger.info(['Authorized Official user created,',
+                         { actionContext: LoggingConstants::ActionContext::Registration,
+                           actionType: LoggingConstants::ActionType::AoCreated }])
+    end
   end
 end
 
