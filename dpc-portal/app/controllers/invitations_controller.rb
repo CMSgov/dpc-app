@@ -42,8 +42,6 @@ class InvitationsController < ApplicationController
     unless params[:verification_code] == @invitation.verification_code
       @invitation.errors.add(:verification_code, :bad_code, message: 'tbd')
       add_failed_attempt
-
-      return render(Page::Invitations::OtpComponent.new(@organization, @invitation), status: :bad_request)
     end
 
     session["invitation_status_#{@invitation.id}"] = 'code_verified'
@@ -52,8 +50,10 @@ class InvitationsController < ApplicationController
 
   def add_failed_attempt
     max_attempts = 5
-    @invitation.failed_attempts += 1
-    return unless @invitation.failed_attempts >= max_attempts # TODO: show remaining attempts
+    @invitation.add_failed_attempt
+    unless @invitation.failed_attempts >= max_attempts # TODO: show remaining attempts
+      return render(Page::Invitations::OtpComponent.new(@organization, @invitation), status: :bad_request)
+    end
 
     render(Page::Invitations::BadInvitationComponent.new(@invitation, 'max_tries_exceeded'))
   end
