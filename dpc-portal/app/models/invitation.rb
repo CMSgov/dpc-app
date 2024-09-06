@@ -22,9 +22,9 @@ class Invitation < ApplicationRecord
            'Finished'].freeze
   MAX_ATTEMPTS = 5
 
-  def initialize(attributes = {})
-    super
-    @attempts_remaining = MAX_ATTEMPTS
+  def failed_attempt
+    @attempts_remaining = MAX_ATTEMPTS if @attempts_remaining.nil?
+    @attempts_remaining -= 1
   end
 
   def phone_raw=(nbr)
