@@ -3,7 +3,7 @@
 # Record of invitation, with possible verification code
 class Invitation < ApplicationRecord
   attr_reader :phone_raw
-  attr_accessor :tries_count
+  attr_accessor :attempts_remaining
 
   validates :invited_by, :invited_given_name, :invited_family_name, :phone_raw, presence: true, if: :needs_validation?
   validates :invited_email, :invited_email_confirmation, presence: true, if: :new_record?
@@ -20,17 +20,18 @@ class Invitation < ApplicationRecord
 
   STEPS = ['Sign in or create a Login.gov account', 'Confirm your identity', 'Confirm organization registration',
            'Finished'].freeze
+  MAX_ATTEMPTS = 5
 
   def phone_raw=(nbr)
     @phone_raw = nbr
     self.invited_phone = @phone_raw.tr('^0-9', '')
   end
 
-  def add_try
-    if @tries_count.nil?
-      @tries_count = 1
+  def add_failure
+    if @attempts_remaining.nil?
+      @attempts_remaining = MAX_ATTEMPTS - 1
     else
-      @tries_count += 1
+      @attempts_remaining -= 1
     end
   end
 

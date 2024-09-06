@@ -9,8 +9,6 @@ class InvitationsController < ApplicationController
   before_action :verify_cd_invitation, only: %i[code verify_code confirm_cd]
   before_action :check_for_token, only: %i[accept confirm confirm_cd register]
 
-  MAX_TRIES_COUNT = 5
-
   def show
     render(Page::Invitations::StartComponent.new(@organization, @invitation))
   end
@@ -224,10 +222,11 @@ class InvitationsController < ApplicationController
   def validate_invitation
     return unless @invitation.unacceptable_reason
 
-    @invitation.add_try
-    if @invitation.tries_count >= MAX_TRIES_COUNT
+    @invitation.add_failure
+    if @invitation.attempts_remaining <= 0
       return render(Page::Invitations::BadInvitationComponent.new(@invitation, 'max_tries_exceeded'))
     end
+
     if @invitation.credential_delegate?
       Rails.logger.info(['Credential Delegate Invitation expired',
                          { actionContext: LoggingConstants::ActionContext::Registration,
