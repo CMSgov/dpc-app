@@ -222,8 +222,8 @@ class InvitationsController < ApplicationController
   def validate_invitation
     return unless @invitation.unacceptable_reason
 
-    @invitation.add_failure
-    if @invitation.attempts_remaining <= 0
+    @invitation.attempts_remaining -= 1
+    if @invitation.attempts_remaining == 0
       return render(Page::Invitations::BadInvitationComponent.new(@invitation, 'max_tries_exceeded'))
     end
 
