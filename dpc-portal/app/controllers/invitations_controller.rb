@@ -41,11 +41,21 @@ class InvitationsController < ApplicationController
   def verify_code
     unless params[:verification_code] == @invitation.verification_code
       @invitation.errors.add(:verification_code, :bad_code, message: 'tbd')
+      add_failed_attempt
+
       return render(Page::Invitations::OtpComponent.new(@organization, @invitation), status: :bad_request)
     end
 
     session["invitation_status_#{@invitation.id}"] = 'code_verified'
     render(Page::Invitations::InvitationLoginComponent.new(@invitation))
+  end
+
+  def add_failed_attempt
+    max_attempts = 5
+    @invitation.failed_attempts += 1
+    return unless @invitation.failed_attempts >= max_attempts # TODO: show remaining attempts
+
+    render(Page::Invitations::BadInvitationComponent.new(@invitation, 'max_tries_exceeded'))
   end
 
   def confirm_cd
@@ -221,11 +231,6 @@ class InvitationsController < ApplicationController
 
   def validate_invitation
     return unless @invitation.unacceptable_reason
-
-    @invitation.failed_attempt
-    if @invitation.attempts_remaining.zero?
-      return render(Page::Invitations::BadInvitationComponent.new(@invitation, 'max_tries_exceeded'))
-    end
 
     if @invitation.credential_delegate?
       Rails.logger.info(['Credential Delegate Invitation expired',
