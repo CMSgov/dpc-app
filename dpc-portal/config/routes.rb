@@ -35,6 +35,9 @@ Rails.application.routes.draw do
       post 'register', on: :member
       post 'login', on: :member
       post 'renew', on: :member
+      get 'code', on: :member
+      post 'verify_code', on: :member
+      get 'confirm_cd', on: :member
     end
     get 'tos_form', on: :member
     post 'sign_tos', on: :member
