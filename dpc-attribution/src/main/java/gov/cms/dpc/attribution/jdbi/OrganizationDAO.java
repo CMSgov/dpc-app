@@ -56,10 +56,6 @@ public class OrganizationDAO extends DPCAbstractDAO<OrganizationEntity> {
     }
 
     public void deleteOrganization(OrganizationEntity entity) {
-        // Deletes are cascaded to both rosters and patients, and sometimes Hibernate tries to delete the patients
-        // first, which violates a foreign key on the attributions table.  We need to force rosters and attributions to
-        // get deleted before patients.
-        deleteRosters(entity);
         currentSession().delete(entity);
     }
 
@@ -82,15 +78,5 @@ public class OrganizationDAO extends DPCAbstractDAO<OrganizationEntity> {
         query.where(builder.equal(root.get("organizationID").get("value"), identifier));
 
         return list(query);
-    }
-
-    /**
-     * Deletes all rosters attached to the organization, flushes the changes and refreshes the org in the Hibernate
-     * persistence layer.
-     * @param entity {@link OrganizationEntity} that will have its rosters deleted.
-     */
-    private void deleteRosters(OrganizationEntity entity) {
-        entity.getRosters().forEach(roster -> currentSession().delete(roster));
-        refresh(entity);
     }
 }
