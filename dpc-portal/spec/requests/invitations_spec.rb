@@ -484,11 +484,12 @@ RSpec.describe 'Invitations', type: :request do
       it 'should be rendered invalid after 5 failed attempts' do
         5.times.each do |i|
           post "/organizations/#{org.id}/invitations/#{cd_invite.id}/verify_code", params: fail_params
-          expect(cd_invite.reload.failed_attempts).to eq i
+          expect(cd_invite.reload.attempts_remaining).to eq 5-i
         end
       end
       post "/organizations/#{org.id}/invitations/#{cd_invite.id}/verify_code", params: fail_params
-      expect(cd_invite.reload.failed_attempts).to eq 5
+      expect(response).to be_bad_request
+      expect(response.to_json).to be nil
     end
   end
 
