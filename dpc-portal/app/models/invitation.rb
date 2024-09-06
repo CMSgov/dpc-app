@@ -22,7 +22,7 @@ class Invitation < ApplicationRecord
            'Finished'].freeze
   MAX_ATTEMPTS = 5
 
-  def initialize
+  def initialize(attributes = {})
     super
     @attempts_remaining = MAX_ATTEMPTS
   end
