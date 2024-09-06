@@ -8,6 +8,7 @@ Rails.application.routes.draw do
   devise_for :users, controllers: { omniauth_callbacks: 'login_dot_gov' }
   devise_scope :user do
     get '/users/auth/failure', to: 'login_dot_gov#failure', as: 'login_dot_gov_failure'
+    delete '/logout', to: 'login_dot_gov#logout', as: 'login_dot_gov_logout'
     get 'active', to: 'users/sessions#active'
     get 'timeout', to: 'users/sessions#timeout'
   end

@@ -34,6 +34,20 @@ class LoginDotGovController < Devise::OmniauthCallbacksController
     end
   end
 
+  def logout
+      if params[:invitation_id].present?
+        invitation = Invitation.find(params[:invitation_id])
+        session[:user_return_to] = organization_invitation_url(invitation.provider_organization.id, invitation.id)
+      end
+      session['omniauth.state'] = @state = SecureRandom.hex(16)
+      url = URI::HTTPS.build(host: IDP_HOST,
+                             path: '/openid_connect/logout',
+                             query: { client_id: IDP_CLIENT_ID,
+                                      post_logout_redirect_uri: "#{root_url}users/auth/logged_out",
+                                      state: @state }.to_query)
+      redirect_to url, allow_other_host: true
+  end
+
   private
 
   def handle_invitation_flow_failure(invitation_id)

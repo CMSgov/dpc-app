@@ -181,4 +181,17 @@ RSpec.describe 'LoginDotGov', type: :request do
       get '/users/auth/failure'
     end
   end
+
+  describe 'Delete /logout' do
+    it 'should redirect to login.gov' do
+      delete '/logout'
+      expect(response.location).to include(ENV.fetch('IDP_HOST'))
+      expect(request.session[:user_return_to]).to be_nil
+    end
+    it 'should set return to invitation flow if invitation sent' do
+      invitation = create(:invitation, :ao)
+      delete "/logout?invitation_id=#{invitation.id}"
+      expect(request.session[:user_return_to]).to eq organization_invitation_url(invitation.provider_organization.id, invitation.id)
+    end
+  end
 end

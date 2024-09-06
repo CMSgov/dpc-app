@@ -20,5 +20,9 @@
         <%= render Core::Button::ButtonComponent.new(label: "Go to DPC home",
             destination: 'https://dpc.cms.gov/',
             method: :get) %>
+      <% when :pii_mismatch %>
+        <%= render Core::Button::ButtonComponent.new(label: "Sign out of Login.gov",
+            destination: login_dot_gov_logout_path(invitation_id: @invitation.id),
+            method: :delete) %>
     <% end %>
 </div>
