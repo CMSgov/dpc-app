@@ -49,8 +49,10 @@ class InvitationsController < ApplicationController
   end
 
   def add_failed_attempt
+    @invitation.failed_attempts += 1
+    @invitation.save
+
     max_attempts = 5
-    @invitation.add_failed_attempt
     if @invitation.failed_attempts >= max_attempts
       render(Page::Invitations::BadInvitationComponent.new(@invitation, 'max_tries_exceeded'))
     else
