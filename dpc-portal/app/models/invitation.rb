@@ -3,7 +3,6 @@
 # Record of invitation, with possible verification code
 class Invitation < ApplicationRecord
   attr_reader :phone_raw
-  attr_accessor :failed_attempts
 
   validates :invited_by, :invited_given_name, :invited_family_name, :phone_raw, presence: true, if: :needs_validation?
   validates :invited_email, :invited_email_confirmation, presence: true, if: :new_record?
