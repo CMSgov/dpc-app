@@ -486,10 +486,10 @@ RSpec.describe 'Invitations', type: :request do
           post "/organizations/#{org.id}/invitations/#{cd_invite.id}/verify_code", params: fail_params
           expect(cd_invite.reload.attempts_remaining).to eq 5 - i
         end
+        post "/organizations/#{org.id}/invitations/#{cd_invite.id}/verify_code", params: fail_params
+        expect(response).to be_bad_request
+        expect(response.to_json).to be nil
       end
-      post "/organizations/#{org.id}/invitations/#{cd_invite.id}/verify_code", params: fail_params
-      expect(response).to be_bad_request
-      expect(response.to_json).to be nil
     end
   end
 
