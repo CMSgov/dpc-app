@@ -1,8 +1,8 @@
 package gov.cms.dpc.attribution.jdbi;
 
 import gov.cms.dpc.common.entities.OrganizationEntity;
+import gov.cms.dpc.common.hibernate.attribution.DPCAbstractDAO;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
-import io.dropwizard.hibernate.AbstractDAO;
 
 import javax.inject.Inject;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -13,7 +13,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-public class OrganizationDAO extends AbstractDAO<OrganizationEntity> {
+public class OrganizationDAO extends DPCAbstractDAO<OrganizationEntity> {
 
     @Inject
     public OrganizationDAO(DPCManagedSessionFactory factory) {
@@ -56,6 +56,10 @@ public class OrganizationDAO extends AbstractDAO<OrganizationEntity> {
     }
 
     public void deleteOrganization(OrganizationEntity entity) {
+        // Deletes are cascaded to both rosters and patients, and sometimes Hibernate tries to delete the patients
+        // first, which violates a foreign key in the DB.  We need to force rosters and attributions to get deleted
+        // before patients.
+        deleteRosters(entity);
         currentSession().delete(entity);
     }
 
@@ -78,5 +82,15 @@ public class OrganizationDAO extends AbstractDAO<OrganizationEntity> {
         query.where(builder.equal(root.get("organizationID").get("value"), identifier));
 
         return list(query);
+    }
+
+    /**
+     * Deletes all rosters attached to the organization, flushes the changes and refreshes the org in the Hibernate
+     * persistence layer.
+     * @param entity {@link OrganizationEntity} that will have its rosters deleted.
+     */
+    private void deleteRosters(OrganizationEntity entity) {
+        entity.getRosters().forEach(org -> currentSession().delete(org));
+        refresh(entity);
     }
 }
