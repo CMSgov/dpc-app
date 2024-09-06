@@ -125,9 +125,9 @@ class Invitation < ApplicationRecord
   end
 
   def email_match?(user_info)
-    check_missing_user_info(user_info, 'all_emails')
+    check_missing_user_info(user_info, 'email')
 
-    user_info['all_emails'].any? { |email| invited_email.downcase == email.downcase }
+    user_info['email'].downcase == invited_email.downcase
   end
 
   def check_missing_user_info(user_info, key)
