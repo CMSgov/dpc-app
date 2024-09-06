@@ -485,6 +485,9 @@ RSpec.describe 'Invitations', type: :request do
           expect do
             post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
           end.to change { User.count }.by 1
+          user = User.last
+          expect(user.given_name).to eq user_info['given_name']
+          expect(user.family_name).to eq user_info['family_name']
         end
         it 'should log when credential delegate user is created' do
           invitation.update!(invitation_type: 0)
@@ -507,6 +510,15 @@ RSpec.describe 'Invitations', type: :request do
           expect do
             post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
           end.to change { User.count }.by 0
+        end
+        it 'should update name of user if changed' do
+          user = create(:user, provider: :openid_connect, uid: user_info['sub'], given_name: :foo, family_name: :bar)
+          expect do
+            post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+          end.to change { User.count }.by 0
+          user.reload
+          expect(user.given_name).to eq user_info['given_name']
+          expect(user.family_name).to eq user_info['family_name']
         end
         it 'should not override pac_id on existing user' do
           create(:user, provider: :openid_connect, uid: user_info['sub'], pac_id: :foo)
