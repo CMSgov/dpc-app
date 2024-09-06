@@ -39,13 +39,13 @@ class InvitationsController < ApplicationController
   end
 
   def verify_code
-    unless params[:verification_code] == @invitation.verification_code
+    if params[:verification_code] == @invitation.verification_code
+      session["invitation_status_#{@invitation.id}"] = 'code_verified'
+      render(Page::Invitations::InvitationLoginComponent.new(@invitation))
+    else
       @invitation.errors.add(:verification_code, :bad_code, message: 'tbd')
       add_failed_attempt
     end
-
-    session["invitation_status_#{@invitation.id}"] = 'code_verified'
-    render(Page::Invitations::InvitationLoginComponent.new(@invitation))
   end
 
   def add_failed_attempt
