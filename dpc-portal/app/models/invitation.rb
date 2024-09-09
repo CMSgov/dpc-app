@@ -26,7 +26,7 @@ class Invitation < ApplicationRecord
   end
 
   def add_failed_attempt
-    self.failed_attempts += 1
+    update(failed_attempts: failed_attempts + 1)
     save
   end
 
