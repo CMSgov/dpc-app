@@ -34,6 +34,10 @@ class LoginDotGovController < Devise::OmniauthCallbacksController
     end
   end
 
+  def logged_out
+    redirect_to session.delete(:user_return_to) || new_user_session_path
+  end
+
   private
 
   def handle_invitation_flow_failure(invitation_id)

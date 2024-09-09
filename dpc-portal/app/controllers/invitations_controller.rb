@@ -81,11 +81,10 @@ class InvitationsController < ApplicationController
     Rails.logger.info(['User began login flow',
                        { actionContext: LoggingConstants::ActionContext::Registration,
                          actionType: LoggingConstants::ActionType::BeginLogin }])
-    client_id = "urn:gov:cms:openidconnect.profiles:sp:sso:cms:dpc:#{ENV.fetch('ENV')}"
-    url = URI::HTTPS.build(host: ENV.fetch('IDP_HOST'),
+    url = URI::HTTPS.build(host: IDP_HOST,
                            path: '/openid_connect/authorize',
                            query: { acr_values: 'http://idmanagement.gov/ns/assurance/ial/2',
-                                    client_id:,
+                                    client_id: IDP_CLIENT_ID,
                                     redirect_uri: "#{redirect_host}/portal/users/auth/openid_connect/callback",
                                     response_type: 'code',
                                     scope: 'openid email all_emails profile phone social_security_number',

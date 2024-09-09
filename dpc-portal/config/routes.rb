@@ -5,9 +5,10 @@
 # and config.ru via config.relative_url_root.
 #
 Rails.application.routes.draw do
-  devise_for :users, controllers: { omniauth_callbacks: 'login_dot_gov' }
+  devise_for :users, controllers: { sessions: 'users/sessions', omniauth_callbacks: 'login_dot_gov' }
   devise_scope :user do
     get '/users/auth/failure', to: 'login_dot_gov#failure', as: 'login_dot_gov_failure'
+    get '/users/auth/logged_out', to: 'login_dot_gov#logged_out', as: 'login_dot_gov_logged_out'
     get 'active', to: 'users/sessions#active'
     get 'timeout', to: 'users/sessions#timeout'
   end
