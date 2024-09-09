@@ -489,7 +489,7 @@ RSpec.describe 'Invitations', type: :request do
         end
         post "/organizations/#{org.id}/invitations/#{cd_invite.id}/verify_code", params: fail_params
         puts response.body
-        expect false
+        expect(response.body).to include('You have exceeded the number of failed attempts.')
       end
     end
   end
