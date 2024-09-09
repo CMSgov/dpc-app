@@ -25,6 +25,11 @@ class Invitation < ApplicationRecord
     self.invited_phone = @phone_raw.tr('^0-9', '')
   end
 
+  def add_failed_attempt
+    self.failed_attempts += 1
+    save
+  end
+
   def show_attributes
     { full_name: "#{invited_given_name} #{invited_family_name}",
       email: invited_email,
