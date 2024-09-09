@@ -3,45 +3,45 @@
 require 'rails_helper'
 
 RSpec.describe 'LoginDotGov', type: :request do
-  RSpec.shared_examples 'an openid client' do
-    context 'user exists' do
-      before { create(:user, uid: '12345', provider: 'openid_connect', email: 'bob@example.com') }
-      it 'should sign in a user' do
-        post '/users/auth/openid_connect'
-        follow_redirect!
-        expect(response.location).to eq organizations_url
-        expect(response).to be_redirect
-        follow_redirect!
-        expect(response).to be_ok
-      end
-      it 'should log on successful sign in' do
-        allow(Rails.logger).to receive(:info)
-        expect(Rails.logger).to receive(:info).with(['User logged in',
-                                                     { actionContext: LoggingConstants::ActionContext::Authentication,
-                                                       actionType: LoggingConstants::ActionType::UserLoggedIn }])
-        post '/users/auth/openid_connect'
-        follow_redirect!
-      end
-      it 'should not add another user' do
-        expect(User.where(uid: '12345', provider: 'openid_connect').count).to eq 1
-        expect do
-          post '/users/auth/openid_connect'
-          follow_redirect!
-        end.to change { User.count }.by(0)
-      end
-    end
-
-    context 'user does not exist' do
-      it 'should not persist user' do
-        expect do
-          post '/users/auth/openid_connect'
-          follow_redirect!
-        end.to change { User.count }.by(0)
-      end
-    end
-  end
-
   describe 'POST /users/auth/openid_connect' do
+    RSpec.shared_examples 'an openid client' do
+      context 'user exists' do
+        before { create(:user, uid: '12345', provider: 'openid_connect', email: 'bob@example.com') }
+        it 'should sign in a user' do
+          post '/users/auth/openid_connect'
+          follow_redirect!
+          expect(response.location).to eq organizations_url
+          expect(response).to be_redirect
+          follow_redirect!
+          expect(response).to be_ok
+        end
+        it 'should log on successful sign in' do
+          allow(Rails.logger).to receive(:info)
+          expect(Rails.logger).to receive(:info).with(['User logged in',
+                                                       { actionContext: LoggingConstants::ActionContext::Authentication,
+                                                         actionType: LoggingConstants::ActionType::UserLoggedIn }])
+          post '/users/auth/openid_connect'
+          follow_redirect!
+        end
+        it 'should not add another user' do
+          expect(User.where(uid: '12345', provider: 'openid_connect').count).to eq 1
+          expect do
+            post '/users/auth/openid_connect'
+            follow_redirect!
+          end.to change { User.count }.by(0)
+        end
+      end
+
+      context 'user does not exist' do
+        it 'should not persist user' do
+          expect do
+            post '/users/auth/openid_connect'
+            follow_redirect!
+          end.to change { User.count }.by(0)
+        end
+      end
+    end
+
     let(:token) { 'bearer-token' }
     context 'IAL/2' do
       before do
