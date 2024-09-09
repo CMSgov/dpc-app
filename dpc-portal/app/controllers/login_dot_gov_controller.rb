@@ -36,7 +36,11 @@ class LoginDotGovController < Devise::OmniauthCallbacksController
 
   # Documentation at https://developers.login.gov/oidc/logout/
   def logout
-    set_invitation_return_to
+    if params[:invitation_id].present?
+
+      invitation = Invitation.find(params[:invitation_id])
+      session[:user_return_to] = organization_invitation_url(invitation.provider_organization.id, invitation.id)
+    end
     redirect_to url_for_login_dot_gov_logout, allow_other_host: true
   end
 
@@ -59,13 +63,6 @@ class LoginDotGovController < Devise::OmniauthCallbacksController
       render(Page::Invitations::AoFlowFailComponent.new(invitation, 'fail_to_proof', 1),
              status: :forbidden)
     end
-  end
-
-  def set_invitation_return_to
-    return unless params[:invitation_id].present?
-
-    invitation = Invitation.find(params[:invitation_id])
-    session[:user_return_to] = organization_invitation_url(invitation.provider_organization.id, invitation.id)
   end
 
   def maybe_update_user(user, data)
