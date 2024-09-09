@@ -43,13 +43,13 @@ class InvitationsController < ApplicationController
       session["invitation_status_#{@invitation.id}"] = 'code_verified'
       render(Page::Invitations::InvitationLoginComponent.new(@invitation))
     else
-      @invitation.errors.add(:verification_code, :bad_code, message: 'tbd')
+      @invitation.errors.add(:verification_code, :bad_code, message: 'Incorrect invite code.')
       add_failed_attempt
     end
   end
 
   def add_failed_attempt
-    if @invitation.failed_attempts < 5
+    if @invitation.failed_attempts < MAX_ATTEMPTS
       @invitation.add_failed_attempt
       render(Page::Invitations::OtpComponent.new(@organization, @invitation), status: :bad_request)
     else
