@@ -49,12 +49,12 @@ class InvitationsController < ApplicationController
   end
 
   def add_failed_attempt
-    if @invitation.failed_attempts < MAX_ATTEMPTS
+    unless @invitation.attempts_remaining.zero?
       @invitation.add_failed_attempt
       render(Page::Invitations::OtpComponent.new(@organization, @invitation), status: :bad_request)
-    else
-      render(Page::Invitations::BadInvitationComponent.new(@invitation, 'max_tries_exceeded'), status: :forbidden)
     end
+
+    render(Page::Invitations::BadInvitationComponent.new(@invitation, 'max_tries_exceeded'), status: :forbidden)
   end
 
   def confirm_cd
