@@ -126,6 +126,7 @@ public class ClientUtils {
                     final Provenance provenance = createAttestation(organizationID, providerNPIUUIDMap.get(providerRoster.getKey()));
 
                     // Now, submit the bundle
+                    logger.info("Submitting group for provider: {}", providerRoster.getKey());
                     try {
                         client
                             .create()
