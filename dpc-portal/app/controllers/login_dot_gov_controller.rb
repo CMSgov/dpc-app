@@ -37,10 +37,10 @@ class LoginDotGovController < Devise::OmniauthCallbacksController
   # Documentation at https://developers.login.gov/oidc/logout/
   def logout
     if params[:invitation_id].present?
-
       invitation = Invitation.find(params[:invitation_id])
       session[:user_return_to] = organization_invitation_url(invitation.provider_organization.id, invitation.id)
     end
+
     redirect_to url_for_login_dot_gov_logout, allow_other_host: true
   end
 
