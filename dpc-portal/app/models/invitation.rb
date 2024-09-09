@@ -32,6 +32,7 @@ class Invitation < ApplicationRecord
   end
 
   def attempts_remaining
+    puts "FAILED ATTEMPTS: #{failed_attempts}"
     MAX_ATTEMPTS - failed_attempts
   end
 
