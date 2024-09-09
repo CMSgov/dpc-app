@@ -328,6 +328,12 @@ public class ClientUtils {
             handleBaseServerException(e, "practitioner");
         }
 
+        List<String> returnedIdentifiers = providerBundle.getEntry().stream().map(provider -> {
+            Practitioner practitioner = (Practitioner) provider.getResource();
+            return practitioner.getIdentifierFirstRep().getValue();
+        }).collect(Collectors.toList());
+        logger.info("Practitioners submitted and returned: {}", returnedIdentifiers.toString());
+
         return providerBundle;
     }
 
