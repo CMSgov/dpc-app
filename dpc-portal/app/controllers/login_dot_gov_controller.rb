@@ -34,6 +34,7 @@ class LoginDotGovController < Devise::OmniauthCallbacksController
     end
   end
 
+  # Documentation at https://developers.login.gov/oidc/logout/
   def logout
     set_invitation_return_to
     session['omniauth.state'] = @state = SecureRandom.hex(16)
