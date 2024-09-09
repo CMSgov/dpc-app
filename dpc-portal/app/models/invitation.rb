@@ -19,6 +19,7 @@ class Invitation < ApplicationRecord
 
   STEPS = ['Sign in or create a Login.gov account', 'Confirm your identity', 'Confirm organization registration',
            'Finished'].freeze
+  MAX_ATTEMPTS = 5
 
   def phone_raw=(nbr)
     @phone_raw = nbr
@@ -28,6 +29,10 @@ class Invitation < ApplicationRecord
   def add_failed_attempt
     update(failed_attempts: failed_attempts + 1)
     save
+  end
+
+  def attempts_remaining
+    MAX_ATTEMPTS - failed_attempts
   end
 
   def show_attributes

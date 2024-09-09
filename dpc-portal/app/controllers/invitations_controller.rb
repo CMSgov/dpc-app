@@ -51,7 +51,6 @@ class InvitationsController < ApplicationController
   def add_failed_attempt
     if @invitation.failed_attempts < 5
       @invitation.add_failed_attempt
-      # TODO: show remaining attempts
       render(Page::Invitations::OtpComponent.new(@organization, @invitation), status: :bad_request)
     else
       render(Page::Invitations::BadInvitationComponent.new(@invitation, 'max_tries_exceeded'), status: :forbidden)

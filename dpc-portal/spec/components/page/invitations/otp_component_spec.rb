@@ -64,6 +64,9 @@ RSpec.describe Page::Invitations::OtpComponent, type: :component do
           HTML
           is_expected.to include(normalize_space(verification_code))
         end
+        it 'should mention attempts remaining' do
+          is_expected.to include('You have 4 remaining attempts.')
+        end
       end
     end
   end
