@@ -191,7 +191,8 @@ RSpec.describe 'LoginDotGov', type: :request do
     it 'should set return to invitation flow if invitation sent' do
       invitation = create(:invitation, :ao)
       delete "/logout?invitation_id=#{invitation.id}"
-      expect(request.session[:user_return_to]).to eq organization_invitation_url(invitation.provider_organization.id, invitation.id)
+      expect(request.session[:user_return_to]).to eq organization_invitation_url(invitation.provider_organization.id,
+                                                                                 invitation.id)
     end
   end
 end

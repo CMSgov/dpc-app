@@ -35,17 +35,14 @@ class LoginDotGovController < Devise::OmniauthCallbacksController
   end
 
   def logout
-      if params[:invitation_id].present?
-        invitation = Invitation.find(params[:invitation_id])
-        session[:user_return_to] = organization_invitation_url(invitation.provider_organization.id, invitation.id)
-      end
-      session['omniauth.state'] = @state = SecureRandom.hex(16)
-      url = URI::HTTPS.build(host: IDP_HOST,
-                             path: '/openid_connect/logout',
-                             query: { client_id: IDP_CLIENT_ID,
-                                      post_logout_redirect_uri: "#{root_url}users/auth/logged_out",
-                                      state: @state }.to_query)
-      redirect_to url, allow_other_host: true
+    set_invitation_return_to
+    session['omniauth.state'] = @state = SecureRandom.hex(16)
+    url = URI::HTTPS.build(host: IDP_HOST,
+                           path: '/openid_connect/logout',
+                           query: { client_id: IDP_CLIENT_ID,
+                                    post_logout_redirect_uri: "#{root_url}users/auth/logged_out",
+                                    state: @state }.to_query)
+    redirect_to url, allow_other_host: true
   end
 
   private
@@ -62,6 +59,13 @@ class LoginDotGovController < Devise::OmniauthCallbacksController
       render(Page::Invitations::AoFlowFailComponent.new(invitation, 'fail_to_proof', 1),
              status: :forbidden)
     end
+  end
+
+  def set_invitation_return_to
+    return unless params[:invitation_id].present?
+
+    invitation = Invitation.find(params[:invitation_id])
+    session[:user_return_to] = organization_invitation_url(invitation.provider_organization.id, invitation.id)
   end
 
   def maybe_update_user(user, data)
