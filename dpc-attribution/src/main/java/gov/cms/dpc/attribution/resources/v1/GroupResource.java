@@ -76,7 +76,6 @@ public class GroupResource extends AbstractGroupResource {
         final String providerNPI = FHIRExtractors.getAttributedNPI(attributionRoster);
         final List<ProviderEntity> providers = this.providerDAO.getProviders(null, providerNPI, organizationID);
         if (providers.isEmpty()) {
-            logger.warn("Cannot find provider {} for org {}", providerNPI, organizationID);
             throw new WebApplicationException("Unable to find attributable provider", Response.Status.NOT_FOUND);
         }
 
