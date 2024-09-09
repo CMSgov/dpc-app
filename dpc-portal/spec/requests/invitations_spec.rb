@@ -488,7 +488,7 @@ RSpec.describe 'Invitations', type: :request do
           expect(cd_invite.reload.failed_attempts).to eq i + 1
         end
         post "/organizations/#{org.id}/invitations/#{cd_invite.id}/verify_code", params: fail_params
-        puts response.to_json
+        puts response.body
         expect false
       end
     end
