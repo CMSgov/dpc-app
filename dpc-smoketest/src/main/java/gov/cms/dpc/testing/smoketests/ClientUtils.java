@@ -126,7 +126,7 @@ public class ClientUtils {
                     final Provenance provenance = createAttestation(organizationID, providerNPIUUIDMap.get(providerRoster.getKey()));
 
                     // Now, submit the bundle
-                    logger.info("Submitting group for provider: {}", providerRoster.getKey());
+                    logger.info("Submitting group for provider {} and org {}", providerRoster.getKey(), organizationID);
                     try {
                         client
                             .create()
@@ -135,7 +135,7 @@ public class ClientUtils {
                             .encodedJson()
                             .execute();
                     } catch (BaseServerResponseException e) {
-                        handleBaseServerException(e, "provider");
+                        handleBaseServerException(e, "attribution group");
                     }
                 });
     }
