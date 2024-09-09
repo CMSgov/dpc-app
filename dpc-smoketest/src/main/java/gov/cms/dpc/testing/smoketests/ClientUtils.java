@@ -5,6 +5,7 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -125,12 +126,18 @@ public class ClientUtils {
                     final Provenance provenance = createAttestation(organizationID, providerNPIUUIDMap.get(providerRoster.getKey()));
 
                     // Now, submit the bundle
-                    client
+                    try {
+                        client
                             .create()
                             .resource(attributionRoster)
                             .withAdditionalHeader("X-Provenance", ctx.newJsonParser().encodeResourceToString(provenance))
                             .encodedJson()
                             .execute();
+                    } catch (BaseServerResponseException e) {
+                        logger.error("Resource not found: {}", e);
+                        logger.error("Response error response body: {}", e.getResponseBody());
+                        throw e;
+                    }
                 });
     }
 
@@ -303,6 +310,7 @@ public class ClientUtils {
                 .map(Bundle.BundleEntryComponent::getResource)
                 .map(resource -> (Patient) resource)
                 .forEach(patient -> patientReferences.put(patient.getIdentifierFirstRep().getValue(), new Reference(patient.getId())));
+        logger.info("{} patients submitted and retrieved", patientReferences.size());
 
         return patientReferences;
     }
@@ -318,7 +326,7 @@ public class ClientUtils {
 
     static void createAndUploadRosters(String seedsFile, Bundle providerBundle, IGenericClient client, UUID organizationID, Map<String, Reference> patientReferences) throws IOException {
         // Read the provider bundle from the given file
-        try (InputStream resource = new FileInputStream(new File(seedsFile))) {
+        try (InputStream resource = new FileInputStream(seedsFile)) {
             System.out.println("Uploading Patient roster");
             createRosterSubmission(client, resource, providerBundle, organizationID, patientReferences);
         }
