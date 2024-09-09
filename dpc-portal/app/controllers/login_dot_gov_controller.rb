@@ -45,6 +45,11 @@ class LoginDotGovController < Devise::OmniauthCallbacksController
     redirect_to url, allow_other_host: true
   end
 
+  # Return from login.gov
+  def logged_out
+    redirect_to session.delete(:user_return_to) || new_user_session_path
+  end
+
   private
 
   def handle_invitation_flow_failure(invitation_id)

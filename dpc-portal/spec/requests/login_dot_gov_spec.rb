@@ -195,4 +195,18 @@ RSpec.describe 'LoginDotGov', type: :request do
                                                                                  invitation.id)
     end
   end
+
+  describe 'Get /users/auth/logged_out' do
+    it 'should redirect to user_return_to' do
+      get '/organizations'
+      expect(request.session[:user_return_to]).to eq organizations_path
+      get '/users/auth/logged_out'
+      expect(response).to redirect_to(organizations_path)
+    end
+
+    it 'should redirect to new session if no user_return_to set' do
+      get '/users/auth/logged_out'
+      expect(response).to redirect_to(new_user_session_path)
+    end
+  end
 end
