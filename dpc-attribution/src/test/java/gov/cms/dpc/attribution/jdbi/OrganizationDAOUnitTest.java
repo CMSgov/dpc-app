@@ -57,40 +57,4 @@ class OrganizationDAOUnitTest extends AbstractAttributionDAOTest {
 		assertTrue(rosterDAO.getEntity(roster.getId()).isEmpty());
 		assertTrue(relationshipDAO.lookupAttributionRelationship(roster.getId(), pat.getID()).isEmpty());
 	}
-
-	@Test
-	void test_can_delete_pat_in_multiple_orgs() {
-		OrganizationEntity org1 = AttributionTestHelpers.createOrganizationEntity();
-		OrganizationEntity org2 = AttributionTestHelpers.createOrganizationEntity();
-
-		// Same patient id, but different orgs
-		PatientEntity pat1 = AttributionTestHelpers.createPatientEntity(org1);
-		PatientEntity pat2 = AttributionTestHelpers.createPatientEntity(org2);
-		pat2.setID(pat1.getID());
-
-		ProviderEntity provider = AttributionTestHelpers.createProviderEntity(org1);
-		RosterEntity roster = AttributionTestHelpers.createRosterEntity(org1, provider);
-		AttributionRelationship attribution = AttributionTestHelpers.createAttributionRelationship(roster, pat1);
-
-		// Insert org, provider, patient, attribution and roster
-		db.inTransaction(() -> {
-			organizationDAO.registerOrganization(org1);
-			organizationDAO.registerOrganization(org2);
-			patientDAO.persistPatient(pat1);
-			patientDAO.persistPatient(pat2);
-			providerDAO.persistProvider(provider);
-			rosterDAO.persistEntity(roster);
-			relationshipDAO.addAttributionRelationship(attribution);
-		});
-
-		// Delete
-		db.inTransaction(() -> {
-			dpcManagedSessionFactory.getSessionFactory().getCurrentSession().clear();
-			OrganizationEntity persistedOrg = organizationDAO.fetchOrganization(org1.getId()).get();
-			organizationDAO.deleteOrganization(persistedOrg);
-		});
-
-		// Test
-		System.out.println("blowed up?");
-	}
 }
