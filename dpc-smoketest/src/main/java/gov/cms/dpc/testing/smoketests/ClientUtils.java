@@ -135,9 +135,7 @@ public class ClientUtils {
                             .encodedJson()
                             .execute();
                     } catch (BaseServerResponseException e) {
-                        logger.error("Resource not found: {}", e);
-                        logger.error("Response error response body: {}", e.getResponseBody());
-                        throw e;
+                        handleBaseServerException(e, "provider");
                     }
                 });
     }
@@ -305,22 +303,30 @@ public class ClientUtils {
         patientBundle = bundleSubmitter(baseClass, Patient.class, patientBundleFilename, ctx.newJsonParser(), exportClient);
 
         final Map<String, Reference> patientReferences = new HashMap<>();
-        patientBundle
+        try {
+            patientBundle
                 .getEntry()
                 .stream()
                 .map(Bundle.BundleEntryComponent::getResource)
                 .map(resource -> (Patient) resource)
                 .forEach(patient -> patientReferences.put(patient.getIdentifierFirstRep().getValue(), new Reference(patient.getId())));
+        } catch (BaseServerResponseException e) {
+            handleBaseServerException(e, "patient");
+        }
         logger.info("{} patients submitted and retrieved", patientReferences.size());
 
         return patientReferences;
     }
 
     static Bundle submitPractitioners(String providerBundleFilename, Class<?> baseClass, FhirContext ctx, IGenericClient exportClient) throws IOException {
-        final Bundle providerBundle;
+        Bundle providerBundle = null;
 
         System.out.println("Submitting practitioners");
-        providerBundle = bundleSubmitter(baseClass, Practitioner.class, providerBundleFilename, ctx.newJsonParser(), exportClient);
+        try {
+            providerBundle = bundleSubmitter(baseClass, Practitioner.class, providerBundleFilename, ctx.newJsonParser(), exportClient);
+        } catch (BaseServerResponseException e) {
+            handleBaseServerException(e, "practitioner");
+        }
 
         return providerBundle;
     }
@@ -354,5 +360,12 @@ public class ClientUtils {
         provenance.addAgent(agent);
 
         return provenance;
+    }
+
+    private static void handleBaseServerException(BaseServerResponseException e, String endPoint) {
+        logger.error("BaseServerResponseException:", e);
+        logger.error("Exception at: {}", endPoint);
+        logger.error("Response body: {}", e.getResponseBody());
+        throw e;
     }
 }
