@@ -182,16 +182,31 @@ RSpec.describe 'LoginDotGov', type: :request do
     end
   end
 
-  describe 'GET /users/auth/logged_out' do
-    it 'should go to sign in page' do
-      get '/users/auth/logged_out'
-      expect(response).to redirect_to(new_user_session_path)
-      expect(flash).to be_empty
+  describe 'Delete /logout' do
+    it 'should redirect to login.gov' do
+      delete '/logout'
+      expect(response.location).to include(ENV.fetch('IDP_HOST'))
+      expect(request.session[:user_return_to]).to be_nil
     end
-    it 'should go to bespoke page if set' do
+    it 'should set return to invitation flow if invitation sent' do
+      invitation = create(:invitation, :ao)
+      delete "/logout?invitation_id=#{invitation.id}"
+      expect(request.session[:user_return_to]).to eq organization_invitation_url(invitation.provider_organization.id,
+                                                                                 invitation.id)
+    end
+  end
+
+  describe 'Get /users/auth/logged_out' do
+    it 'should redirect to user_return_to' do
       get '/organizations'
+      expect(request.session[:user_return_to]).to eq organizations_path
       get '/users/auth/logged_out'
       expect(response).to redirect_to(organizations_path)
+    end
+
+    it 'should redirect to new session if no user_return_to set' do
+      get '/users/auth/logged_out'
+      expect(response).to redirect_to(new_user_session_path)
     end
   end
 end

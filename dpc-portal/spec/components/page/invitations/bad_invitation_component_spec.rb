@@ -31,9 +31,13 @@ RSpec.describe Page::Invitations::BadInvitationComponent, type: :component do
       let(:component) { described_class.new(invitation, 'pii_mismatch') }
       it 'should match header' do
         header = <<~HTML
-          <h1>#{I18n.t('verification.pii_mismatch_status')}</h1>
+          <h1>#{CGI.escapeHTML(I18n.t('verification.pii_mismatch_status'))}</h1>
         HTML
         is_expected.to include(normalize_space(header))
+      end
+      it 'should have logout button' do
+        button_url = "/logout?invitation_id=#{invitation.id}"
+        is_expected.to include(button_url)
       end
     end
 

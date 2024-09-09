@@ -9,14 +9,8 @@ module Users
       Rails.logger.info(['User logged out',
                          { actionContext: LoggingConstants::ActionContext::Authentication,
                            actionType: LoggingConstants::ActionType::UserLoggedOut }])
-      session['omniauth.state'] = @state = SecureRandom.hex(16)
       sign_out(current_user)
-      url = URI::HTTPS.build(host: IDP_HOST,
-                             path: '/openid_connect/logout',
-                             query: { client_id: IDP_CLIENT_ID,
-                                      post_logout_redirect_uri: "#{root_url}users/auth/logged_out",
-                                      state: @state }.to_query)
-      redirect_to url, allow_other_host: true
+      redirect_to url_for_login_dot_gov_logout, allow_other_host: true
     end
   end
 end
