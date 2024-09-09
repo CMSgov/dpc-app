@@ -29,6 +29,7 @@ class ApplicationController < ActionController::Base
     end
   end
 
+  # Documentation at https://developers.login.gov/oidc/logout/
   def url_for_login_dot_gov_logout
     state = SecureRandom.hex(16)
     session['omniauth.state'] = state

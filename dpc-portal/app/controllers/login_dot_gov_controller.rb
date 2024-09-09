@@ -34,7 +34,6 @@ class LoginDotGovController < Devise::OmniauthCallbacksController
     end
   end
 
-  # Documentation at https://developers.login.gov/oidc/logout/
   def logout
     if params[:invitation_id].present?
       invitation = Invitation.find(params[:invitation_id])
