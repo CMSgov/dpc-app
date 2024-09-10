@@ -224,7 +224,7 @@ RSpec.describe 'Invitations', type: :request do
           stub_user_info(overrides: { 'email' => 'another@example.com' })
           get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
           expect(response).to be_forbidden
-          expect(response.body).to include(I18n.t('verification.pii_mismatch_status'))
+          expect(response.body).to include(CGI.escapeHTML(I18n.t('verification.pii_mismatch_status')))
         end
         context :server_error do
           it 'should show server error page' do
@@ -529,7 +529,7 @@ RSpec.describe 'Invitations', type: :request do
             stub_user_info(overrides: { 'email' => 'another@example.com' })
             get "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm_cd"
             expect(response).to be_forbidden
-            expect(response.body).to include(I18n.t('verification.pii_mismatch_status'))
+            expect(response.body).to include(CGI.escapeHTML(I18n.t('verification.pii_mismatch_status')))
             expect(response.body).to_not include(confirm_organization_invitation_path(org, cd_invite))
           end
           it 'should render error page if given_name not match' do
