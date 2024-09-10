@@ -32,7 +32,7 @@ class Invitation < ApplicationRecord
   end
 
   def attempts_remaining
-    failed_attempts < MAX_ATTEMPTS
+    MAX_ATTEMPTS - failed_attempts
   end
 
   def show_attributes

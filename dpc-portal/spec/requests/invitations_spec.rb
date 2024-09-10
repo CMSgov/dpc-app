@@ -488,8 +488,7 @@ RSpec.describe 'Invitations', type: :request do
           expect(cd_invite.reload.failed_attempts).to eq i + 1
         end
         post "/organizations/#{org.id}/invitations/#{cd_invite.id}/verify_code", params: fail_params
-        puts response.body
-        expect(response.body).to include('You have exceeded the number of failed attempts.')
+        expect(response.body).to include('Your access is locked due to too many attempts.')
       end
     end
   end
