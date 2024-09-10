@@ -54,8 +54,8 @@ RSpec.describe Page::Invitations::OtpComponent, type: :component do
         let(:error_msg) { 'Incorrect invite code. You have 4 remaining attempts.' }
 
         before do
-          cd_invite.errors.add(:verification_code, :is_bad, message: error_msg)
           cd_invite.add_failed_attempt
+          cd_invite.errors.add(:verification_code, :is_bad, message: error_msg)
         end
         it 'should have errored verification_code stanza' do
           verification_code = <<~HTML

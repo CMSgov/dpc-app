@@ -485,9 +485,11 @@ RSpec.describe 'Invitations', type: :request do
         expect(cd_invite.reload.failed_attempts).to eq 0
         5.times.each do |i|
           post "/organizations/#{org.id}/invitations/#{cd_invite.id}/verify_code", params: fail_params
+          expect(response.status).to be 400
           expect(cd_invite.reload.failed_attempts).to eq i + 1
         end
         post "/organizations/#{org.id}/invitations/#{cd_invite.id}/verify_code", params: fail_params
+        expect(response.status).to be 401
         expect(response.body).to include('Your access is locked due to too many attempts.')
       end
     end
