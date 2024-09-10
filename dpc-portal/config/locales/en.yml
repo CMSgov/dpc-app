@@ -17,7 +17,7 @@ en:
     incorrect_invite_code_status: Incorrect invite code.
     incorrect_invite_code_text: Incorrect invite code. You have 5 total attempts to enter your invite code.
     max_tries_exceeded_status: Your access is locked due to too many attempts.
-    max_tried_exceeded_text: You have made too many attempts. Please request a new invite from the Authorized Official.
+    max_tries_exceeded_text: You have made too many attempts. Please request a new invite from the Authorized Official.
     no_approved_enrollment_status: Your organization is not currently approved by Medicare.
     no_approved_enrollment_text: Your organization must have an approved enrollment status with Medicare to access beneficiary claims data. Your organization may need to <a href="https://www.cms.gov/medicare/enrollment-renewal/providers-suppliers/chain-ownership-system-pecos/manage-your-enrollment">manage its enrollment</a> in PECOS, the Medicare enrollment system.
     bad_npi_status: Your organization is not currently approved by Medicare.
