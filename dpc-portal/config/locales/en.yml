@@ -14,8 +14,6 @@ en:
     ao_med_sanctions_text: You are listed as an excluded individual by the Office of Inspector General (OIG), which prohibits you from acting as this organization’s Authorized Official. For more information, contact the <a href="https://oig.hhs.gov/about-oig/contact-us/#exclusions">OIG Exclusions Branch</a>.
     org_med_sanctions_status: Your organization is in the Medicare Exclusions Database.
     org_med_sanctions_text: Your organization is listed as an excluded entity by the Office of Inspector General (OIG), which prohibits it from accessing beneficiary claims data. For more information, contact the <a href="https://oig.hhs.gov/about-oig/contact-us/#exclusions">OIG Exclusions Branch</a>.
-    incorrect_invite_code_status: Incorrect invite code.
-    incorrect_invite_code_text: Incorrect invite code. You have 5 total attempts to enter your invite code.
     max_tries_exceeded_status: Your access is locked due to too many attempts.
     max_tries_exceeded_text: You have made too many attempts. Please request a new invite from the Authorized Official.
     no_approved_enrollment_status: Your organization is not currently approved by Medicare.
