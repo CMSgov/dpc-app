@@ -31,6 +31,11 @@ class Invitation < ApplicationRecord
     save
   end
 
+  def reset_attempts
+    update(failed_attempts: 0)
+    save
+  end
+
   def attempts_remaining
     MAX_ATTEMPTS - failed_attempts
   end
