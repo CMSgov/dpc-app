@@ -27,7 +27,7 @@ class Invitation < ApplicationRecord
   end
 
   def update_attempts
-    update(failed_attempts: failed_attempts + 1)
+    update(failed_attempts: failed_attempts + 1) if failed_attempts < MAX_ATTEMPTS
     save
     MAX_ATTEMPTS - failed_attempts
   end
