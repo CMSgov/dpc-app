@@ -2,12 +2,12 @@
   <h1><%= t(@status) %></h1>
   <div>
     <p>
-      <%=raw t(key=@text, org_name: @org_name, ao_display_name: @ao_display_name) %>
+      <%=raw t(key=@text, org_name: @org_name, ao_full_name: @ao_full_name) %>
     </p>
   </div>
   <% 'have to put the case statement here, as do not have route helper in ViewComponent'
     case(@reason)
-      when :ao_expired %>
+      when :ao_expired, :max_tries_exceeded %>
         <%= render Core::Button::ButtonComponent.new(label: "Request new link",
             disabled: @invitation&.renewed?,
             destination: renew_organization_invitation_path(@invitation.provider_organization, @invitation),

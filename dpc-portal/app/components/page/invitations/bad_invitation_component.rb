@@ -8,7 +8,7 @@ module Page
         super
         @invitation = invitation
         @org_name = invitation&.provider_organization&.name
-        @ao_display_name = "#{invitation&.invited_given_name} #{invitation&.invited_family_name}"
+        @ao_full_name = invitation&.invited_by_full_name
         @reason = if AoVerificationService::SERVER_ERRORS.include?(reason)
                     :server_error
                   else

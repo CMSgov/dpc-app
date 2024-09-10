@@ -45,6 +45,10 @@ class Invitation < ApplicationRecord
       verification_code: }.with_indifferent_access
   end
 
+  def invited_by_full_name
+    invited_by.nil? ? '' : "#{invited_by.given_name} #{invited_by.family_name}"
+  end
+
   def expired?
     created_at < 2.days.ago
   end
