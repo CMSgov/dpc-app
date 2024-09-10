@@ -492,6 +492,8 @@ RSpec.describe 'Invitations', type: :request do
         post "/organizations/#{org.id}/invitations/#{cd_invite.id}/verify_code", params: fail_params
         expect(response).to be_forbidden
         expect(response.body).to include(I18n.t('verification.max_tries_exceeded_text'))
+        expect(cd_invite.reload.failed_attempts).to eq 5
+        expect(cd_invite.unacceptable_reason).to eq 'max_tries_exceeded'
       end
     end
   end

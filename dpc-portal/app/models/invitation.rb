@@ -94,6 +94,7 @@ class Invitation < ApplicationRecord
     return 'invalid' if cancelled?
     return 'accepted' if accepted?
     return 'ao_renewed' if renewed? && authorized_official?
+    return 'max_tries_exceeded' if attempts_remaining.zero?
 
     if expired? && authorized_official?
       'ao_expired'
