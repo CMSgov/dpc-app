@@ -31,6 +31,10 @@ class Invitation < ApplicationRecord
     save
   end
 
+  def attempts_remaining?
+    failed_attempts < MAX_ATTEMPTS
+  end
+
   def attempts_remaining
     MAX_ATTEMPTS - failed_attempts
   end
