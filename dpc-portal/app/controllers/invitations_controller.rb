@@ -47,8 +47,7 @@ class InvitationsController < ApplicationController
   end
 
   def add_failed_attempt
-    @invitation.add_failed_attempt
-    attempts_remaining = @invitation.reload.attempts_remaining
+    attempts_remaining = @invitation.update_attempts
     if attempts_remaining.positive?
       @invitation.errors.add(:verification_code, :bad_code,
                              message: "Incorrect invite code. You have #{attempts_remaining} remaining attempts.")

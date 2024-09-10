@@ -26,18 +26,15 @@ class Invitation < ApplicationRecord
     self.invited_phone = @phone_raw.tr('^0-9', '')
   end
 
-  def add_failed_attempt
+  def update_attempts
     update(failed_attempts: failed_attempts + 1)
     save
+    MAX_ATTEMPTS - failed_attempts
   end
 
   def reset_attempts
     update(failed_attempts: 0)
     save
-  end
-
-  def attempts_remaining
-    MAX_ATTEMPTS - failed_attempts
   end
 
   def show_attributes
