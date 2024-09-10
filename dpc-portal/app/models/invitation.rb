@@ -28,13 +28,11 @@ class Invitation < ApplicationRecord
 
   def update_attempts
     update(failed_attempts: failed_attempts + 1) unless failed_attempts == MAX_ATTEMPTS
-    save
     MAX_ATTEMPTS - failed_attempts
   end
 
   def reset_attempts
     update(failed_attempts: 0)
-    save
   end
 
   def show_attributes
