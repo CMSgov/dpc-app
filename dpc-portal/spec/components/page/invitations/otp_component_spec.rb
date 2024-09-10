@@ -53,7 +53,10 @@ RSpec.describe Page::Invitations::OtpComponent, type: :component do
       context 'Errors' do
         let(:error_msg) { 'Some error message' }
 
-        before { cd_invite.errors.add(:verification_code, :is_bad, message: error_msg) }
+        before do
+          cd_invite.errors.add(:verification_code, :is_bad, message: error_msg)
+          cd_invite.add_failed_attempt
+        end
         it 'should have errored verification_code stanza' do
           verification_code = <<~HTML
             <div class="margin-bottom-4">
