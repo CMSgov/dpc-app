@@ -32,7 +32,6 @@ class Invitation < ApplicationRecord
   end
 
   def attempts_remaining
-    reload.attempts_remaining
     MAX_ATTEMPTS - failed_attempts
   end
 
