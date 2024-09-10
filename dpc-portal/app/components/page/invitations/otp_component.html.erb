@@ -8,10 +8,11 @@
 	attribute: :verification_code,
 	error_msg: @invitation.errors[:verification_code]&.first,
 	input_options: { maxlength: 6 })) %>
+    <% if @invitation.failed_attempts.positive? %>
+      <p style="color: #b50909">Incorrect invite code. You have <%= @invitation.attempts_remaining %> remaining attempts.</p>
+    <% end %>
     <%= submit_tag "Validate invite code", class: "usa-button", data: { test: "form:submit" } %>
     <% end %>
-    <% if @invitation.failed_attempts.positive? %>
-      <p>Incorrect invite code. You have <%= @invitation.attempts_remaining %> remaining attempts.</p>
-    <% end %>
+
   </div>
 </div>
