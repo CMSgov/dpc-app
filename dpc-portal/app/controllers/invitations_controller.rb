@@ -48,13 +48,12 @@ class InvitationsController < ApplicationController
 
   def handle_failed_attempt
     @invitation.increment_failed_attempts
-    attempts_remaining = @invitation.reload.attempts_remaining
-    if attempts_remaining.zero?
+    if @invitation.attempts_remaining.zero?
       return render(Page::Invitations::BadInvitationComponent.new(@invitation, 'max_tries_exceeded'),
                     status: :forbidden)
     end
 
-    flash[:alert] = "Incorrect invite code. You have #{attempts_remaining} remaining attempts."
+    flash[:alert] = "Incorrect invite code. You have #{@invitation.attempts_remaining} remaining attempts."
     @invitation.errors.add(:verification_code, :bad_code, message: 'Incorrect invite code.')
     render(Page::Invitations::OtpComponent.new(@organization, @invitation), status: :bad_request)
   end
