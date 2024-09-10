@@ -11,7 +11,7 @@
     <%= submit_tag "Validate invite code", class: "usa-button", data: { test: "form:submit" } %>
     <% end %>
     <% if @invitation.failed_attempts %>
-      <p>Incorrect invite code. You have <%= @invitation.attempts_remaining %> remaining attempts.</p>
+      <p>Incorrect invite code. You have <%= @invitation.reload.attempts_remaining %> remaining attempts.</p>
     <% end %>
   </div>
 </div>
