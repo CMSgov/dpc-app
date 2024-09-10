@@ -486,6 +486,7 @@ RSpec.describe 'Invitations', type: :request do
         4.times.each do |i|
           post "/organizations/#{org.id}/invitations/#{cd_invite.id}/verify_code", params: fail_params
           expect(response.status).to eq 400
+          expect(response.body).to include("Incorrect invite code. You have #{4 - i} remaining attempts.")
           expect(cd_invite.reload.failed_attempts).to eq i + 1
         end
         post "/organizations/#{org.id}/invitations/#{cd_invite.id}/verify_code", params: fail_params
