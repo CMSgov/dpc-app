@@ -47,7 +47,8 @@ class InvitationsController < ApplicationController
   end
 
   def handle_failed_attempt
-    attempts_remaining = @invitation.update_attempts
+    @invitation.increment_failed_attempts
+    attempts_remaining = @invitation.reload.attempts_remaining
     if attempts_remaining.zero?
       return render(Page::Invitations::BadInvitationComponent.new(@invitation, 'max_tries_exceeded'),
                     status: :forbidden)
