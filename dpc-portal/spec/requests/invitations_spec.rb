@@ -486,12 +486,12 @@ RSpec.describe 'Invitations', type: :request do
         4.times.each do |i|
           post "/organizations/#{org.id}/invitations/#{cd_invite.id}/verify_code", params: fail_params
           expect(response).to be_bad_request
-          expect(response.body).to include("Incorrect invite code. You have #{4 - i} remaining attempts.")
+          expect(flash[:alert]).to eq("Incorrect invite code. You have #{4 - i} remaining attempts.")
           expect(cd_invite.reload.failed_attempts).to eq i + 1
         end
         post "/organizations/#{org.id}/invitations/#{cd_invite.id}/verify_code", params: fail_params
         expect(response).to be_forbidden
-        expect(response.body).to include('Your access is locked due to too many attempts.')
+        expect(response.body).to include(I18n.t('verification.max_tries_exceeded_text'))
       end
     end
   end
