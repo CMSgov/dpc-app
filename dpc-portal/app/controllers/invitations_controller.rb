@@ -39,12 +39,10 @@ class InvitationsController < ApplicationController
   end
 
   def verify_code
-    if params[:verification_code] == @invitation.verification_code
-      session["invitation_status_#{@invitation.id}"] = 'code_verified'
-      render(Page::Invitations::InvitationLoginComponent.new(@invitation))
-    else
-      add_failed_attempt
-    end
+    return add_failed_attempt unless params[:verification_code] == @invitation.verification_code
+
+    session["invitation_status_#{@invitation.id}"] = 'code_verified'
+    render(Page::Invitations::InvitationLoginComponent.new(@invitation))
   end
 
   def add_failed_attempt
