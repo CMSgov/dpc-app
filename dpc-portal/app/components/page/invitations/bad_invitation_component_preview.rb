@@ -37,8 +37,9 @@ module Page
       end
 
       def max_tries_exceeded
+        invited_by = User.new(given_name: 'Gavin', family_name: 'McCloud')
         invitation = Invitation.new(id: 6, provider_organization: ProviderOrganization.new(id: 1, name: 'Health Hut'),
-                                    failed_attempts: 5, invited_by_id: :ao)
+                                    failed_attempts: 5, invited_by:)
         reason = 'max_tries_exceeded'
         render(Page::Invitations::BadInvitationComponent.new(invitation, reason))
       end

@@ -7,7 +7,7 @@
   </div>
   <% 'have to put the case statement here, as do not have route helper in ViewComponent'
     case(@reason)
-      when :ao_expired, :max_tries_exceeded %>
+      when :ao_expired %>
         <%= render Core::Button::ButtonComponent.new(label: "Request new link",
             disabled: @invitation&.renewed?,
             destination: renew_organization_invitation_path(@invitation.provider_organization, @invitation),
