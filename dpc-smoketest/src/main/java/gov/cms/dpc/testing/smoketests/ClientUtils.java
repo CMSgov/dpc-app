@@ -164,7 +164,7 @@ public class ClientUtils {
 
         while (!done) {
             // Our WAF rate limits us to 300 requests every 5 minutes, so don't poll too often
-            Thread.sleep(5000);
+            Thread.sleep(20000);
             logger.debug(statusMessage);
             try (CloseableHttpResponse response = client.execute(jobGet)) {
                 final int statusCode = response.getStatusLine().getStatusCode();
