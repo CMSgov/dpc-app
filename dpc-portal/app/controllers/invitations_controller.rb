@@ -53,8 +53,8 @@ class InvitationsController < ApplicationController
                     status: :forbidden)
     end
 
-    flash[:alert] = "Incorrect invite code. You have #{@invitation.attempts_remaining} remaining attempts."
-    @invitation.errors.add(:verification_code, :bad_code, message: 'Incorrect invite code.')
+    message = "Incorrect invite code. You have #{@invitation.attempts_remaining} remaining attempts."
+    @invitation.errors.add(:verification_code, :bad_code, message:)
     render(Page::Invitations::OtpComponent.new(@organization, @invitation), status: :bad_request)
   end
 
