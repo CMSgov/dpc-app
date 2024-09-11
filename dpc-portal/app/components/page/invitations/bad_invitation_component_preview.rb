@@ -37,7 +37,7 @@ module Page
       end
 
       def max_tries_exceeded
-        invited_by = User.new(given_name: 'Gavin', family_name: 'McCloud')
+        invited_by = User.new(given_name: 'Robert', family_name: 'Hodges')
         invitation = Invitation.new(id: 6, provider_organization: ProviderOrganization.new(id: 1, name: 'Health Hut'),
                                     failed_attempts: 5, invited_by:)
         reason = 'max_tries_exceeded'
