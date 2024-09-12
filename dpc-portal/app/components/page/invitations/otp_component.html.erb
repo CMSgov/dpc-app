@@ -1,14 +1,23 @@
-<div>
-  <div>
-    <h2>Provide invite code</h2>
-    <p>You are invited to <%= @organization.name %> by the Authorized Official (AO),
-      <%= @invitation.invited_by&.given_name %> <%= @invitation.invited_by&.family_name %>.</p>
-    <%= form_tag verify_code_organization_invitation_path(@organization, @invitation), method: :post, class: ['usa-form'], id: "cd-accept-form" do %>
-    <%= render(Core::Form::TextInputComponent.new(label: 'Enter the invite code:',
-	attribute: :verification_code,
-	error_msg: @invitation.errors[:verification_code]&.first,
-	input_options: { maxlength: 6 })) %>
-    <%= submit_tag "Validate invite code", class: "usa-button", data: { test: "form:submit" } %>
-    <% end %>
-  </div>
-</div>
+<section class="usa-section">
+	<div>
+		<div>
+			<h1>Accept organization invite</h1>
+			<div class="bg-accent-cool-lighter padding-y-1 padding-x-3 border border-1px border-cyan">
+				<h3>If you did not receive an invite code:</h3>
+				<ul>
+					<li>The Authorized Official (AO) who delegated you will need to give you a new one.</li>
+					<li>The AO can get this code by signing in to the DPC Portal.</li>
+				</ul>
+			</div>
+			<h2>Enter invite code</h2>
+			<p>Use the code provided to you by <%= @invitation.invited_by&.given_name %> <%= @invitation.invited_by&.family_name %>.</p>
+			<%= form_tag verify_code_organization_invitation_path(@organization, @invitation), method: :post, class: ['usa-form'], id: "cd-accept-form" do %>
+			<%= render(Core::Form::TextInputComponent.new(label: 'Enter the invite code:',
+		attribute: :verification_code,
+		error_msg: @invitation.errors[:verification_code]&.first,
+		input_options: { maxlength: 6 })) %>
+			<%= submit_tag "Submit code", class: "usa-button", data: { test: "form:submit" } %>
+			<% end %>
+		</div>
+	</div>
+</section>

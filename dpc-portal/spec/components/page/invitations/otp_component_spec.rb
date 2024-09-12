@@ -31,10 +31,6 @@ RSpec.describe Page::Invitations::OtpComponent, type: :component do
           is_expected.to include(form_tag)
         end
 
-        it 'should mention org name' do
-          is_expected.to include(org.name)
-        end
-
         it 'should mention AO name' do
           is_expected.to include('Bob Hodges')
         end
