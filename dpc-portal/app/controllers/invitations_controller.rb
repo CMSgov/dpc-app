@@ -73,7 +73,7 @@ class InvitationsController < ApplicationController
     Rails.logger.info(['User logged in',
                        { actionContext: LoggingConstants::ActionContext::Registration,
                          actionType: LoggingConstants::ActionType::UserLoggedIn }])
-    render(Page::Invitations::SuccessComponent.new(@organization, @invitation))
+    render(Page::Invitations::SuccessComponent.new(@organization, @invitation, @given_name, @family_name))
   end
 
   def login
