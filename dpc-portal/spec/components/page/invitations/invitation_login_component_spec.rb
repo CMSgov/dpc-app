@@ -33,4 +33,14 @@ RSpec.describe Page::Invitations::InvitationLoginComponent, type: :component do
       expect(page.find('.usa-step-indicator__current-step').text).to eq '1'
     end
   end
+
+  describe 'cd' do
+    let(:invitation) { create(:invitation, :cd) }
+    let(:component) { described_class.new(invitation) }
+    before { render_inline(component) }
+    it 'should have step component at step 1' do
+      expect(page).to have_selector('.usa-step-indicator__current-step')
+      expect(page.find('.usa-step-indicator__current-step').text).to eq '1'
+    end
+  end
 end

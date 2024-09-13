@@ -1,4 +1,4 @@
-<%= render(Core::Navigation::StepIndicatorComponent.new(Invitation::STEPS, 1)) if @invitation.authorized_official? %>
+<%= render(Core::Navigation::StepIndicatorComponent.new(Invitation::AO_STEPS, 1)) if @invitation.authorized_official? %>
 <div>
   <div>
     <p>Thank you for signing in, <%= @name %>.</p>

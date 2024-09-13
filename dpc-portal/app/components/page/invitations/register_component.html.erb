@@ -1,4 +1,4 @@
-<%= render(Core::Navigation::StepIndicatorComponent.new(Invitation::STEPS, 2)) if @invitation.authorized_official? %>
+<%= render(Core::Navigation::StepIndicatorComponent.new(Invitation::AO_STEPS, 2)) if @invitation.authorized_official? %>
 <div>
   <div>
     <% if @invitation.credential_delegate? %>
