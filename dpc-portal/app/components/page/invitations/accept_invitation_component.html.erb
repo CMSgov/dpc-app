@@ -1,11 +1,22 @@
 <%= render(Core::Navigation::StepIndicatorComponent.new(Invitation::AO_STEPS, 1)) if @invitation.authorized_official? %>
+<%= render(Core::Navigation::StepIndicatorComponent.new(Invitation::CD_STEPS, 1)) if @invitation.credential_delegate? %>
 <div>
   <div>
+    <% if @invitation.authorized_official? %>
     <p>Thank you for signing in, <%= @name %>.</p>
 
     <p>Now that your identity is verified we'll check your and your organization's enrollment with the Medicare Provider Enrollment, Chain, and Ownership System (PECOS).</p>
     <%= render Core::Button::ButtonComponent.new(label: 'Continue to register',
         destination: confirm_organization_invitation_path(@organization, @invitation),
         method: :post) %>
+    <% end %>
+    <% if @invitation.credential_delegate? %>
+    <p>Thank you for signing in, <%= @name %>.</p>
+
+    <p>Now that we've confirmed your identity via Login.gov you can complete your acceptance of this invite.</p>
+    <%= render Core::Button::ButtonComponent.new(label: 'Accept Invite',
+        destination: accept_organization_invitation_path(@organization, @invitation),
+        method: :post) %>
+    <% end %>
   </div>
 </div>
