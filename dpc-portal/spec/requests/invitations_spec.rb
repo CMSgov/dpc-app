@@ -450,7 +450,8 @@ RSpec.describe 'Invitations', type: :request do
       let(:invitation) { create(:invitation, :cd) }
     end
     let(:verification_code) { 'ABC123' }
-    let(:cd_invite) { create(:invitation, :cd, verification_code:) }
+    let(:invited_by) { create(:user, given_name: 'Gavin', family_name: 'McCloud') }
+    let(:cd_invite) { create(:invitation, :cd, verification_code:, invited_by:) }
     let(:org) { cd_invite.provider_organization }
     let(:success_params) { { verification_code: } }
     let(:fail_params) { { verification_code: 'badcode' } }
@@ -480,6 +481,20 @@ RSpec.describe 'Invitations', type: :request do
         org = ao_invite.provider_organization
         post "/organizations/#{org.id}/invitations/#{ao_invite.id}/verify_code", params: success_params
         expect(response).to redirect_to(organization_invitation_path(org, ao_invite))
+      end
+      it 'should be rendered invalid after 5 failed attempts' do
+        expect(cd_invite.reload.failed_attempts).to eq 0
+        4.times.each do |i|
+          post "/organizations/#{org.id}/invitations/#{cd_invite.id}/verify_code", params: fail_params
+          expect(response).to be_bad_request
+          expect(response.body).to include("Incorrect invite code. You have #{4 - i} remaining attempts.")
+          expect(cd_invite.reload.failed_attempts).to eq i + 1
+        end
+        post "/organizations/#{org.id}/invitations/#{cd_invite.id}/verify_code", params: fail_params
+        expect(response).to be_forbidden
+        expect(response.body).to include(I18n.t('verification.max_tries_exceeded_text', ao_full_name: 'Gavin McCloud'))
+        expect(cd_invite.reload.failed_attempts).to eq 5
+        expect(cd_invite.unacceptable_reason).to eq 'max_tries_exceeded'
       end
     end
   end
