@@ -2,7 +2,7 @@
   <h1><%= t(@status) %></h1>
   <div>
     <p>
-      <%=raw t(key=@text, org_name: @org_name) %>
+      <%=raw t(key=@text, org_name: @org_name, ao_full_name: @ao_full_name) %>
     </p>
   </div>
   <% 'have to put the case statement here, as do not have route helper in ViewComponent'

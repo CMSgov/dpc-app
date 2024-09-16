@@ -480,6 +480,10 @@ RSpec.describe Invitation, type: :model do
       invitation = create(:invitation, :ao, created_at: 49.hours.ago, status: :renewed)
       expect(invitation.unacceptable_reason).to eq 'ao_renewed'
     end
+    it 'should be max_tries_exceeded if 5 failed attempts' do
+      invitation = create(:invitation, :cd, failed_attempts: 5)
+      expect(invitation.unacceptable_reason).to eq 'max_tries_exceeded'
+    end
   end
 
   describe :renew do
