@@ -85,8 +85,8 @@ class Invitation < ApplicationRecord
 
     if expired? && authorized_official?
       'ao_expired'
-    elsif expired?
-      'invalid'
+    elsif expired? && credential_delegate?
+      'cd_expired'
     end
   end
 

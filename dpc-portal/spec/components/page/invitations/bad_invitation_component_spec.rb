@@ -91,5 +91,17 @@ RSpec.describe Page::Invitations::BadInvitationComponent, type: :component do
         end
       end
     end
+
+    context 'CD expired' do
+      let(:status) { :pending }
+      let(:invitation) { create(:invitation, :cd, provider_organization:, status:) }
+      let(:component) { described_class.new(invitation, 'cd_expired') }
+      it 'should match header' do
+        header = <<~HTML
+          <h1>#{I18n.t('verification.cd_expired_status')}</h1>
+        HTML
+        is_expected.to include(normalize_space(header))
+      end
+    end
   end
 end

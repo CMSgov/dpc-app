@@ -37,8 +37,15 @@ module Page
         render(Page::Invitations::BadInvitationComponent.new(invitation, reason))
       end
 
+      def cd_expired
+        invitation = Invitation.new(id: 6, provider_organization: ProviderOrganization.new(id: 1, name: 'Health Hut'),
+                                    invitation_type: :credential_delegate, created_at: 49.hours.ago)
+        reason = 'cd_expired'
+        render(Page::Invitations::BadInvitationComponent.new(invitation, reason))
+      end
+
       def ao_renewed
-        invitation = Invitation.new(id: 5, provider_organization: ProviderOrganization.new(id: 1, name: 'Health Hut'),
+        invitation = Invitation.new(id: 7, provider_organization: ProviderOrganization.new(id: 1, name: 'Health Hut'),
                                     status: :renewed)
         reason = 'ao_renewed'
         render(Page::Invitations::BadInvitationComponent.new(invitation, reason))
