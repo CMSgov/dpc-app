@@ -52,13 +52,28 @@ RSpec.describe Page::Invitations::BadInvitationComponent, type: :component do
       end
     end
 
-    context 'Already accepted' do
-      let(:component) { described_class.new(invitation, 'accepted') }
+    context 'AO already accepted' do
+      let(:component) { described_class.new(invitation, 'ao_accepted') }
       it 'should match header' do
         header = <<~HTML
-          <h1>#{I18n.t('verification.accepted_status')}</h1>
+          <h1>#{I18n.t('verification.ao_accepted_status')}</h1>
         HTML
         is_expected.to include(normalize_space(header))
+      end
+    end
+
+    context 'CD already accepted' do
+      let(:component) { described_class.new(invitation, 'cd_accepted') }
+      it 'should match header' do
+        header = <<~HTML
+          <h1>#{I18n.t('verification.cd_accepted_status')}</h1>
+        HTML
+        is_expected.to include(normalize_space(header))
+      end
+
+      it 'should have Go to DPC home button' do
+        button_url = 'https://dpc.cms.gov/'
+        is_expected.to include(button_url)
       end
     end
 

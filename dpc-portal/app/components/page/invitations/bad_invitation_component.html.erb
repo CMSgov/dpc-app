@@ -12,10 +12,14 @@
             disabled: @invitation&.renewed?,
             destination: renew_organization_invitation_path(@invitation.provider_organization, @invitation),
             method: :post) %>
-      <% when :accepted %>
+      <% when :ao_accepted %>
         <%= button_to new_user_session_path, class: 'usa-button', method: :get, data: { turbo: false } do %>
           Sign in with <span class="login-button__logo">Login.gov</span>
         <% end %>
+      <% when :cd_accepted %>
+        <%= render Core::Button::ButtonComponent.new(label: "Go to DPC home",
+            destination: 'https://dpc.cms.gov/',
+            method: :get) %>
       <% when :invalid %>
         <%= render Core::Button::ButtonComponent.new(label: "Go to DPC home",
             destination: 'https://dpc.cms.gov/',

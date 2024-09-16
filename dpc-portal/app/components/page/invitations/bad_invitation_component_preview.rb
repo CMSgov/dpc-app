@@ -50,6 +50,13 @@ module Page
         reason = 'ao_renewed'
         render(Page::Invitations::BadInvitationComponent.new(invitation, reason))
       end
+
+      def cd_accepted
+        invitation = Invitation.new(id: 8, provider_organization: ProviderOrganization.new(id: 1, name: 'Health Hut'),
+                                    invitation_type: :credential_delegate, status: :renewed)
+        reason = 'cd_accepted'
+        render(Page::Invitations::BadInvitationComponent.new(invitation, reason))
+      end
     end
   end
 end
