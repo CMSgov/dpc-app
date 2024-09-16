@@ -4,16 +4,8 @@ module Page
   module Invitations
     # Displays unfixable error message in accept invitation process
     class BadInvitationComponentPreview < ViewComponent::Preview
-      def ao_invalid_invitation
-        invitation = Invitation.new(provider_organization: ProviderOrganization.new(name: 'Health Hut'),
-                                    invitation_type: :authorized_official)
-        reason = 'invalid'
-        render(Page::Invitations::BadInvitationComponent.new(invitation, reason))
-      end
-
-      def cd_invalid_invitation
-        invitation = Invitation.new(provider_organization: ProviderOrganization.new(name: 'Health Hut'),
-                                    invitation_type: :credential_delegate)
+      def invalid_invitation
+        invitation = Invitation.new(provider_organization: ProviderOrganization.new(name: 'Health Hut'))
         reason = 'invalid'
         render(Page::Invitations::BadInvitationComponent.new(invitation, reason))
       end

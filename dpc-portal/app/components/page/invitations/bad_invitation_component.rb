@@ -14,20 +14,8 @@ module Page
                   else
                     reason.to_sym
                   end
-        @status = get_status(invitation, reason)
+        @status = "verification.#{@reason}_status"
         @text = "verification.#{@reason}_text"
-      end
-
-      private
-
-      def get_status(invitation, reason)
-        if reason == 'invalid' && invitation.authorized_official?
-          'verification.ao_invalid_status'
-        elsif reason == 'invalid' && invitation.credential_delegate?
-          'verification.cd_invalid_status'
-        else
-          "verification.#{@reason}_status"
-        end
       end
     end
   end

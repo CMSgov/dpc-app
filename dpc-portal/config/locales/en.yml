@@ -14,8 +14,7 @@ en:
     cd_expired_text: Contact the Authorized Official (AO) who sent you the invite code at AO email to ask for a new one.
     ao_renewed_status: You already requested a new invite.
     ao_renewed_text: Please check your email. We sent you a message which includes a new link.
-    ao_invalid_status: Your registration link is invalid.
-    cd_invalid_status: Your invite is invalid.
+    invalid_status: Your link is invalid.
     invalid_text: Please check the email where you received this request and try again. Make sure you're using the same email address to register as the one where you received the invite. If the problem persists contact DPC at <a href="mailto:dpcinfo@cms.hhs.gov">dpcinfo@cms.hhs.gov</a>.
     ao_med_sanctions_status: You are in the Medicare Exclusions Database.
     ao_med_sanctions_text: You are listed as an excluded individual by the Office of Inspector General (OIG), which prohibits you from acting as this organization’s Authorized Official. For more information, contact the <a href="https://oig.hhs.gov/about-oig/contact-us/#exclusions">OIG Exclusions Branch</a>.
