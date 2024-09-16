@@ -453,7 +453,7 @@ RSpec.describe Invitation, type: :model do
     end
     it 'should be accepted if expired and ao and accepted' do
       invitation = create(:invitation, :ao, created_at: 49.hours.ago, status: :accepted)
-      expect(invitation.unacceptable_reason).to eq 'accepted'
+      expect(invitation.unacceptable_reason).to eq 'ao_accepted'
     end
     it 'should be invalid if expired and ao and cancelled' do
       invitation = create(:invitation, :ao, created_at: 49.hours.ago, status: :cancelled)
@@ -465,7 +465,7 @@ RSpec.describe Invitation, type: :model do
     end
     it 'should be invalid if expired and cd' do
       invitation = create(:invitation, :cd, created_at: 49.hours.ago)
-      expect(invitation.unacceptable_reason).to eq 'invalid'
+      expect(invitation.unacceptable_reason).to eq 'cd_expired'
     end
     it 'should be invalid if cancelled' do
       invitation = create(:invitation, :cd, status: :cancelled)
@@ -474,7 +474,7 @@ RSpec.describe Invitation, type: :model do
     it 'should be invalid if accepted' do
       invitation = create(:invitation, :ao)
       invitation.accept!
-      expect(invitation.unacceptable_reason).to eq 'accepted'
+      expect(invitation.unacceptable_reason).to eq 'ao_accepted'
     end
     it 'should be ao_renewed if renewed and authorized_official' do
       invitation = create(:invitation, :ao, created_at: 49.hours.ago, status: :renewed)

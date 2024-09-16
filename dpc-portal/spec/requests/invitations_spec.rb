@@ -75,7 +75,11 @@ RSpec.describe 'Invitations', type: :request do
       invitation.accept!
       send(method, "/organizations/#{org.id}/invitations/#{invitation.id}/#{path_suffix}")
       expect(response).to be_forbidden
-      expect(response.body).to include(I18n.t('verification.accepted_status'))
+      if invitation.authorized_official?
+        expect(response.body).to include(I18n.t('verification.ao_accepted_status'))
+      elsif invitation.credential_delegate?
+        expect(response.body).to include(I18n.t('verification.cd_accepted_status'))
+      end
     end
   end
 
