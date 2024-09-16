@@ -17,11 +17,22 @@ RSpec.describe Page::Invitations::BadInvitationComponent, type: :component do
 
     let(:provider_organization) { create(:provider_organization, name: 'Health Hut') }
     let(:invitation) { create(:invitation, :ao, provider_organization:) }
-    context 'invalid invitation' do
+    context 'ao invalid invitation' do
       let(:component) { described_class.new(invitation, 'invalid') }
       it 'should match header' do
         header = <<~HTML
-          <h1>#{I18n.t('verification.invalid_status')}</h1>
+          <h1>#{I18n.t('verification.ao_invalid_status')}</h1>
+        HTML
+        is_expected.to include(normalize_space(header))
+      end
+    end
+
+    context 'cd invalid invitation' do
+      let(:invitation) { create(:invitation, :cd, provider_organization:) }
+      let(:component) { described_class.new(invitation, 'invalid') }
+      it 'should match header' do
+        header = <<~HTML
+          <h1>#{I18n.t('verification.cd_invalid_status')}</h1>
         HTML
         is_expected.to include(normalize_space(header))
       end

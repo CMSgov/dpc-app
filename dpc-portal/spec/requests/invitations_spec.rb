@@ -13,20 +13,23 @@ RSpec.describe 'Invitations', type: :request do
     end
     it 'should show warning page with 404 if missing' do
       send(method, "/organizations/#{org.id}/invitations/bad-id/#{path_suffix}")
+      status = invitation.authorized_official? ? 'ao_invalid_status' : 'cd_invalid_status'
       expect(response).to be_not_found
-      expect(response.body).to include(I18n.t('verification.invalid_status'))
+      expect(response.body).to include(I18n.t("verification.#{status}"))
     end
     it 'should show warning page with 404 if org-invitation mismatch' do
       bad_org = create(:provider_organization)
       send(method, "/organizations/#{bad_org.id}/invitations/#{invitation.id}/#{path_suffix}")
+      status = invitation.authorized_official? ? 'ao_invalid_status' : 'cd_invalid_status'
       expect(response).to be_not_found
-      expect(response.body).to include(I18n.t('verification.invalid_status'))
+      expect(response.body).to include(I18n.t("verification.#{status}"))
     end
     it 'should show warning page if cancelled' do
       invitation.update(status: :cancelled)
       send(method, "/organizations/#{org.id}/invitations/#{invitation.id}/#{path_suffix}")
+      status = invitation.authorized_official? ? 'ao_invalid_status' : 'cd_invalid_status'
       expect(response).to be_forbidden
-      expect(response.body).to include(I18n.t('verification.invalid_status'))
+      expect(response.body).to include(I18n.t("verification.#{status}"))
     end
     context 'invitation expired' do
       before { invitation.update_attribute(:created_at, 3.days.ago) }
