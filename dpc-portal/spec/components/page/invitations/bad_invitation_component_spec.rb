@@ -133,5 +133,15 @@ RSpec.describe Page::Invitations::BadInvitationComponent, type: :component do
         is_expected.to include(normalize_space(header))
       end
     end
+
+    context 'Server error' do
+      let(:component) { described_class.new(invitation, 'server_error') }
+      it 'should match header' do
+        header = <<~HTML
+          <h1>#{I18n.t('verification.server_error_status')}</h1>
+        HTML
+        is_expected.to include(normalize_space(header))
+      end
+    end
   end
 end

@@ -55,6 +55,12 @@ module Page
         reason = 'cd_accepted'
         render(Page::Invitations::BadInvitationComponent.new(invitation, reason))
       end
+
+      def server_error
+        invitation = Invitation.new(provider_organization: ProviderOrganization.new(name: 'Health Hut'))
+        reason = 'server_error'
+        render(Page::Invitations::BadInvitationComponent.new(invitation, reason))
+      end
     end
   end
 end
