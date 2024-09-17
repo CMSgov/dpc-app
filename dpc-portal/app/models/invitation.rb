@@ -76,14 +76,6 @@ class Invitation < ApplicationRecord
     invitation
   end
 
-  def match_user?(user_info)
-    if credential_delegate?
-      cd_match?(user_info)
-    elsif authorized_official?
-      email_match?(user_info)
-    end
-  end
-
   def ao_match?(user_info)
     check_missing_user_info(user_info, 'social_security_number')
 
@@ -120,29 +112,27 @@ class Invitation < ApplicationRecord
     [hours, minutes]
   end
 
-  private
-
   def cd_match?(user_info)
     cd_info_present?(user_info)
 
     return false unless invited_given_name.downcase == user_info['given_name'].downcase &&
                         invited_family_name.downcase == user_info['family_name'].downcase
 
-    return false unless phone_match(user_info)
-
-    email_match?(user_info)
-  end
-
-  def cd_info_present?(user_info)
-    %w[given_name family_name phone].each do |key|
-      check_missing_user_info(user_info, key)
-    end
+    phone_match(user_info)
   end
 
   def email_match?(user_info)
     check_missing_user_info(user_info, 'email')
 
     user_info['email'].downcase == invited_email.downcase
+  end
+
+  private
+
+  def cd_info_present?(user_info)
+    %w[given_name family_name phone].each do |key|
+      check_missing_user_info(user_info, key)
+    end
   end
 
   def check_missing_user_info(user_info, key)

@@ -186,64 +186,66 @@ RSpec.describe Invitation, type: :model do
           'phone' => '+111-111-1111' }
       end
       it 'should match user if names, email, and phone correct' do
-        expect(cd_invite.match_user?(user_info)).to eq true
+        expect(cd_invite.cd_match?(user_info)).to eq true
+        expect(cd_invite.email_match?(user_info)).to eq true
       end
       it 'should match user if names and email different case' do
         cd_invite.invited_given_name.upcase!
         cd_invite.invited_family_name.downcase!
         cd_invite.invited_email = cd_invite.invited_email.upcase_first
-        expect(cd_invite.match_user?(user_info)).to eq true
+        expect(cd_invite.cd_match?(user_info)).to eq true
+        expect(cd_invite.email_match?(user_info)).to eq true
       end
       it 'should match if invited email eq email' do
         cd_invite.invited_email = user_info['email']
-        expect(cd_invite.match_user?(user_info)).to eq true
+        expect(cd_invite.email_match?(user_info)).to eq true
       end
       it 'should match if user info phone starts with 1' do
         plus_phone = user_info.merge('phone' => '+1-111-111-1111')
-        expect(cd_invite.match_user?(plus_phone)).to eq true
+        expect(cd_invite.cd_match?(plus_phone)).to eq true
       end
       it 'should match if invited phone starts with 1' do
         cd_invite.phone_raw = '+1-111-111-1111'
-        expect(cd_invite.match_user?(user_info)).to eq true
+        expect(cd_invite.cd_match?(user_info)).to eq true
       end
       it 'should not match user if given name not correct' do
         cd_invite.invited_given_name = "not #{cd_invite.invited_given_name}"
-        expect(cd_invite.match_user?(user_info)).to eq false
+        expect(cd_invite.cd_match?(user_info)).to eq false
       end
       it 'should not match user if family name not correct' do
         cd_invite.invited_family_name = "not #{cd_invite.invited_family_name}"
-        expect(cd_invite.match_user?(user_info)).to eq false
+        expect(cd_invite.cd_match?(user_info)).to eq false
       end
       it 'should not match user if email not correct' do
         cd_invite.invited_email = "not #{cd_invite.invited_email}"
-        expect(cd_invite.match_user?(user_info)).to eq false
+        expect(cd_invite.email_match?(user_info)).to eq false
       end
       it 'should not match user if phone not correct' do
         cd_invite.invited_phone = 'not number'
-        expect(cd_invite.match_user?(user_info)).to eq false
+        expect(cd_invite.cd_match?(user_info)).to eq false
       end
       it 'should raise error if user_info missing given name' do
         missing_info = user_info.merge({ 'given_name' => '' })
         expect do
-          cd_invite.match_user?(missing_info)
+          cd_invite.cd_match?(missing_info)
         end.to raise_error(UserInfoServiceError, 'missing_info')
       end
       it 'should raise error if user_info missing family name' do
         missing_info = user_info.merge({ 'family_name' => '' })
         expect do
-          cd_invite.match_user?(missing_info)
+          cd_invite.cd_match?(missing_info)
         end.to raise_error(UserInfoServiceError, 'missing_info')
       end
       it 'should raise error if user_info missing phone' do
         missing_info = user_info.merge({ 'phone' => '' })
         expect do
-          cd_invite.match_user?(missing_info)
+          cd_invite.cd_match?(missing_info)
         end.to raise_error(UserInfoServiceError, 'missing_info')
       end
       it 'should raise error if no user_info email' do
         missing_info = user_info.merge({ 'email' => '' })
         expect do
-          cd_invite.match_user?(missing_info)
+          cd_invite.email_match?(missing_info)
         end.to raise_error(UserInfoServiceError, 'missing_info')
       end
     end
@@ -407,16 +409,16 @@ RSpec.describe Invitation, type: :model do
           ]
         }
 
-        expect(ao_invite.match_user?(user_info)).to eq true
+        expect(ao_invite.email_match?(user_info)).to eq true
       end
       it 'should not match user if no email match' do
         user_info = { 'email' => 'tim@example.com' }
-        expect(ao_invite.match_user?(user_info)).to eq false
+        expect(ao_invite.email_match?(user_info)).to eq false
       end
       it 'should raise error if user_info missing all_emails' do
         user_info = { 'email' => '' }
         expect do
-          ao_invite.match_user?(user_info)
+          ao_invite.email_match?(user_info)
         end.to raise_error(UserInfoServiceError, 'missing_info')
       end
     end

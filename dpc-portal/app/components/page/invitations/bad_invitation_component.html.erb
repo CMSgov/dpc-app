@@ -28,5 +28,9 @@
         <%= render Core::Button::ButtonComponent.new(label: "Sign out of Login.gov",
             destination: login_dot_gov_logout_path(invitation_id: @invitation.id),
             method: :delete) %>
+      <% when :email_mismatch %>
+        <%= render Core::Button::ButtonComponent.new(label: "Sign out of Login.gov",
+            destination: login_dot_gov_logout_path(invitation_id: @invitation.id),
+            method: :delete) %>
     <% end %>
 </div>

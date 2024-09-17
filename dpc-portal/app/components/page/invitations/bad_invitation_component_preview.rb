@@ -16,6 +16,12 @@ module Page
         render(Page::Invitations::BadInvitationComponent.new(invitation, reason))
       end
 
+      def email_mismatch
+        invitation = Invitation.new(provider_organization: ProviderOrganization.new(name: 'Health Hut'))
+        reason = 'email_mismatch'
+        render(Page::Invitations::BadInvitationComponent.new(invitation, reason))
+      end
+
       # @param error_code
       def verification_failure(error_code: :user_not_authorized_official)
         invitation = Invitation.new(id: 3, provider_organization: ProviderOrganization.new(id: 1, name: 'Health Hut'))
