@@ -21,7 +21,7 @@ jobs:
         env:
           CGO_ENABLED: 0
         run: |
-          go build -o bootstrap main.go db.go
+          go build -o bootstrap main.go db.go aws.go
           zip function.zip bootstrap
       - uses: aws-actions/configure-aws-credentials@v4
         with:

@@ -3,7 +3,9 @@ package main
 import (
 	"context"
 	"fmt"
+	"maps"
 	"os"
+	"slices"
 	"time"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -17,7 +19,8 @@ type IpAddress struct {
 }
 
 // Allow these to be switched out during unit tests
-var getSecrets = dpcaws.GetParameters
+var getSecrets = getAuthDbSecrets
+var updateIpAddresses = updateIPSetInWAF
 
 var isTesting = os.Getenv("IS_TESTING") == "true"
 
@@ -35,42 +38,41 @@ func main() {
 }
 
 func handler(ctx context.Context, event events.S3Event) ([]string, error) {
+    emptySet := []string{}
 	log.SetFormatter(&log.JSONFormatter{
 		DisableHTMLEscape: true,
 		TimestampFormat:   time.RFC3339Nano,
 	})
 	var ipSet, err = updateIpSet()
 	if err != nil {
-		return [], err
+		return emptySet, err
 	}
 	log.Info("Successfully completed executing export lambda")
 	return ipSet, nil
 }
 
 func updateIpSet() ([]string, error) {
+    emptySet := []string{}
     ipAddresses := make(map[string]IpAddress)
     ipSetName := fmt.Sprintf("dpc-%s-api-customers", os.Getenv("ENV"))
 
     authDbUser := fmt.Sprintf("/dpc/%s/auth/db_read_only_user_dpc_auth", os.Getenv("ENV"))
     authDbPassword := fmt.Sprintf("/dpc/%s/auth/db_read_only_pass_dpc_auth", os.Getenv("ENV"))
-    var keynames []*string = make([]*string, 2)
-    keynames[0] = &authDbUser
-    keynames[1] = &authDbPassword
-
-    secretsInfo, pmErr := getSecrets(session, keynames)
-    if pmErr != nil {
-        return [], pmErr
+    secretsInfo, secretErr := getSecrets(authDbUser, authDbPassword)
+    if secretErr != nil {
+		return emptySet, secretErr
     }
 
     authDbErr := getAuthData(secretsInfo[authDbUser], secretsInfo[authDbPassword], ipAddresses)
     if authDbErr != nil {
-        return [], authDbErr
+        return emptySet, authDbErr
     }
 
-    wafErr, params := UpdateIPSetInWAF(ipSetName, ipAddresses)
+    ipAddressSlice := slices.Collect(maps.Keys(ipAddresses))
+    wafErr, params := updateIpAddresses(ipSetName, ipAddressSlice)
     if wafErr != nil {
-        return [], wafErr
+        return emptySet, wafErr
     }
 
-    return params, nil
+    return params.Addresses, nil
 }
