@@ -41,7 +41,7 @@ jobs:
         id: invoke-lambda
         run: |
           echo "STARTTIME=`date +%s`" >> "$GITHUB_OUTPUT"
-          aws lambda invoke --function-name dpc-test-api-waf-sync test-result.txt
+          aws lambda invoke --function-name dpc-dev-api-waf-sync test-result.txt
 
 
   verify-bucket:
