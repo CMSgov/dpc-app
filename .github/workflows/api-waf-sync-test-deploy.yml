@@ -30,6 +30,6 @@ jobs:
       - name: Upload and reload
         run: |
           aws s3 cp --no-progress function.zip \
-            s3://dpc-test-api-waf-sync-function/function-${{ github.sha }}.zip
+            s3://dpc-dev-api-waf-sync-function/function-${{ github.sha }}.zip
           aws lambda update-function-code --function-name dpc-test-api-waf-sync \
             --s3-bucket dpc-dev-api-waf-sync-function --s3-key function-${{ github.sha }}.zip
