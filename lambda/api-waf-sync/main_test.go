@@ -1,15 +1,9 @@
 package main
 
 import (
-	"bytes"
-	"bufio"
-	"database/sql"
-	"fmt"
-	"os"
-	"strings"
 	"testing"
-	"time"
 
+	"github.com/aws/aws-sdk-go/service/wafv2"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -28,7 +22,7 @@ func TestIntegrationUpdateIpSet(t *testing.T) {
 		{
 			err: nil,
 			mockFunc: func() {
-				getSecrets = func(s *session.Session, keynames []*string) (map[string]string, error) {
+				getSecrets = func(dbUser string, dbPassword string) (map[string]string, error) {
 					return map[string]string{
 						"/dpc/dev/auth/db_user_dpc_auth": "db_user_dpc_auth",
 						"/dpc/dev/auth/db_pass_dpc_auth": "db_pass_dpc_auth",
@@ -44,15 +38,16 @@ func TestIntegrationUpdateIpSet(t *testing.T) {
 
 	for _, test := range tests {
 		test.mockFunc()
-		params, err := updateIpSet()
-		assert.NotEmpty(t, params["Addresses"])
+		addresses, err := updateIpSet()
+		assert.NotEmpty(t, addresses)
 		assert.Nil(t, err)
 
-        updatedAddresses = params["Addresses"]
-        delete(params, "Addresses")
-		ipSet, wafErr := wafv2.GetIPSet(params)
+		sess, sessErr := createSession()
+		assert.Nil(t, sessErr)
+		wafsvc := wafv2.New(sess)
+		ipSet, wafErr := (*wafv2.WAFV2).GetIPSet(wafsvc, &wafv2.GetIPSetInput{})
 		assert.Nil(t, wafErr)
-		assert.Equal(t, ipSet["Addresses"], updatedAddresses)
+		assert.Equal(t, ipSet.IPSet.Addresses, addresses)
 	}
 
 	getSecrets = oriGetSecrets

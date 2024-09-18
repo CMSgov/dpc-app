@@ -4,19 +4,19 @@ import (
 	"fmt"
 	"os"
 
-    "github.com/aws/aws-sdk-go/aws"
-    "github.com/aws/aws-sdk-go/aws/credentials/stscreds"
-    "github.com/aws/aws-sdk-go/aws/session"
-    "github.com/aws/aws-sdk-go/service/ssm"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/ssm"
 	"github.com/aws/aws-sdk-go/service/wafv2"
 )
 
 type Parameters struct {
-    Id string
-    Name string
-    Scope string
-    LockToken string
-    Addresses []string
+	Id        string
+	Name      string
+	Scope     string
+	LockToken string
+	Addresses []string
 }
 
 var listIpSetsWaf = (*wafv2.WAFV2).ListIPSets
@@ -39,7 +39,7 @@ func createSession() (*session.Session, error) {
 		assumeRoleArn, err := getAssumeRoleArn()
 
 		if err == nil {
-			sess, err = session.NewSession(&aws.Config{
+			sess, _ = session.NewSession(&aws.Config{
 				Region: aws.String("us-east-1"),
 				Credentials: stscreds.NewCredentials(
 					sess,
@@ -101,91 +101,91 @@ func getAssumeRoleArn() (string, error) {
 }
 
 func getAuthDbSecrets(dbUser string, dbPassword string) (map[string]string, error) {
-    secretsInfo := make(map[string]string)
-    if isTesting {
-        secretsInfo[dbUser] = os.Getenv("DB_USER_DPC_AUTH")
-        secretsInfo[dbPassword] = os.Getenv("DB_PASS_DPC_AUTH")
-    } else {
-        var keynames []*string = make([]*string, 2)
-        keynames[0] = &dbUser
-        keynames[1] = &dbPassword
+	secretsInfo := make(map[string]string)
+	if isTesting {
+		secretsInfo[dbUser] = os.Getenv("DB_USER_DPC_AUTH")
+		secretsInfo[dbPassword] = os.Getenv("DB_PASS_DPC_AUTH")
+	} else {
+		var keynames []*string = make([]*string, 2)
+		keynames[0] = &dbUser
+		keynames[1] = &dbPassword
 
-        sess, err := session.NewSession(&aws.Config{
-            Region: aws.String("us-east-1"),
-        })
-        if err != nil {
-            return nil, fmt.Errorf("getAuthDbSecrets: Error creating AWS session: %w", err)
-        }
-        ssmsvc := ssm.New(sess)
+		sess, err := session.NewSession(&aws.Config{
+			Region: aws.String("us-east-1"),
+		})
+		if err != nil {
+			return nil, fmt.Errorf("getAuthDbSecrets: Error creating AWS session: %w", err)
+		}
+		ssmsvc := ssm.New(sess)
 
-        withDecryption := true
-        params, err := ssmsvc.GetParameters(&ssm.GetParametersInput{
-            Names:          keynames,
-            WithDecryption: &withDecryption,
-        })
-        if err != nil {
-            return nil, fmt.Errorf("getAuthDbSecrets: Error connecting to parameter store: %w", err)
-        }
+		withDecryption := true
+		params, err := ssmsvc.GetParameters(&ssm.GetParametersInput{
+			Names:          keynames,
+			WithDecryption: &withDecryption,
+		})
+		if err != nil {
+			return nil, fmt.Errorf("getAuthDbSecrets: Error connecting to parameter store: %w", err)
+		}
 
-        // Unknown keys will come back as invalid, make sure we error on them
-        if len(params.InvalidParameters) > 0 {
-            invalidParamsStr := ""
-            for i := 0; i < len(params.InvalidParameters); i++ {
-                invalidParamsStr += fmt.Sprintf("%s,\n", *params.InvalidParameters[i])
-            }
-            return nil, fmt.Errorf("invalid parameters error: %s", invalidParamsStr)
-        }
+		// Unknown keys will come back as invalid, make sure we error on them
+		if len(params.InvalidParameters) > 0 {
+			invalidParamsStr := ""
+			for i := 0; i < len(params.InvalidParameters); i++ {
+				invalidParamsStr += fmt.Sprintf("%s,\n", *params.InvalidParameters[i])
+			}
+			return nil, fmt.Errorf("invalid parameters error: %s", invalidParamsStr)
+		}
 
-        for _, item := range params.Parameters {
-            secretsInfo[*item.Name] = *item.Value
-        }
-    }
+		for _, item := range params.Parameters {
+			secretsInfo[*item.Name] = *item.Value
+		}
+	}
 	return secretsInfo, nil
 }
 
-func updateIPSetInWAF(ipSetName string, ipAddresses []string) (error, []string) {
-    emptySet := []string{}
+func updateIPSetInWAF(ipSetName string, ipAddresses []string) ([]string, error) {
+	emptySet := []string{}
 
-    sess, sessErr := createSession()
-    if sessErr != nil {
-        return sessErr, emptySet
-    }
-    wafsvc := wafv2.New(sess)
+	sess, sessErr := createSession()
+	if sessErr != nil {
+		return emptySet, fmt.Errorf("failed to create session to update ip set, %v", sessErr)
+	}
+	wafsvc := wafv2.New(sess)
 
-    listParams := &wafv2.ListIPSetsInput{
-        Scope: aws.String("CLOUDFRONT"),
-    }
-    ipSetList, listErr := (*wafv2.WAFV2).ListIPSets(wafsvc, listParams)
-    if listErr != nil {
-		return fmt.Errorf("failed to fetch ip address sets, %v", listErr), emptySet
-    }
+	listParams := &wafv2.ListIPSetsInput{
+		Scope: aws.String("CLOUDFRONT"),
+	}
+	ipSetList, listErr := listIpSetsWaf(wafsvc, listParams)
+	if listErr != nil {
+		return emptySet, fmt.Errorf("failed to fetch ip address sets, %v", listErr)
+	}
 
-    getParams := &wafv2.GetIPSetInput{
-        Name: &ipSetName,
-        Scope: aws.String("CLOUDFRONT"),
-    }
-    for _, ipSet := range ipSetList.IPSets {
-        if *ipSet.Name == ipSetName {
-            getParams.Id = ipSet.Id
-            break;
-        }
-    }
-    ipSet, getErr := getIpSetWaf(wafsvc, getParams)
-    if getErr != nil {
-        return fmt.Errorf("failed to get expected ip address set, %v", getErr), emptySet
-    }
+	getParams := &wafv2.GetIPSetInput{
+		Name:  &ipSetName,
+		Scope: aws.String("CLOUDFRONT"),
+	}
+	for _, ipSet := range ipSetList.IPSets {
+		if *ipSet.Name == ipSetName {
+			getParams.Id = ipSet.Id
+			break
+		}
+	}
+	ipSet, getErr := getIpSetWaf(wafsvc, getParams)
+	if getErr != nil {
+		return emptySet, fmt.Errorf("failed to get expected ip address set, %v", getErr)
+	}
 
-    updateParams := &wafv2.UpdateIPSetInput{
-        Id: ipSet.IPSet.Id,
-        Name: aws.String(ipSetName),
-        Scope: aws.String("CLOUDFRONT"),
-        LockToken: ipSet.LockToken,
-        Addresses: aws.StringSlice(ipAddresses),
-    }
-    _, updateErr := updateIpSetWaf(wafsvc, updateParams)
-    if updateErr != nil {
-    	return fmt.Errorf("failed to update ip address set, %v", updateErr), emptySet
-    }
+	updateParams := &wafv2.UpdateIPSetInput{
+		Id:        ipSet.IPSet.Id,
+		Name:      aws.String(ipSetName),
+		Scope:     aws.String("CLOUDFRONT"),
+		LockToken: ipSet.LockToken,
+		Addresses: aws.StringSlice(ipAddresses),
+	}
+	_, updateErr := updateIpSetWaf(wafsvc, updateParams)
+	if updateErr != nil {
+		return emptySet, fmt.Errorf("failed to update ip address set, %v", updateErr)
+	}
 
-    return nil, ipAddresses
+	return ipAddresses, nil
 }

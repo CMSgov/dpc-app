@@ -3,9 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
-	"maps"
 	"os"
-	"slices"
 	"time"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -15,7 +13,7 @@ import (
 )
 
 type IpAddress struct {
-    ip_address string
+	ip_address string
 }
 
 // Allow these to be switched out during unit tests
@@ -38,7 +36,7 @@ func main() {
 }
 
 func handler(ctx context.Context, event events.S3Event) ([]string, error) {
-    emptySet := []string{}
+	emptySet := []string{}
 	log.SetFormatter(&log.JSONFormatter{
 		DisableHTMLEscape: true,
 		TimestampFormat:   time.RFC3339Nano,
@@ -52,27 +50,30 @@ func handler(ctx context.Context, event events.S3Event) ([]string, error) {
 }
 
 func updateIpSet() ([]string, error) {
-    emptySet := []string{}
-    ipAddresses := make(map[string]IpAddress)
-    ipSetName := fmt.Sprintf("dpc-%s-api-customers", os.Getenv("ENV"))
+	emptySet := []string{}
+	ipAddresses := make(map[string]IpAddress)
+	ipSetName := fmt.Sprintf("dpc-%s-api-customers", os.Getenv("ENV"))
 
-    authDbUser := fmt.Sprintf("/dpc/%s/auth/db_read_only_user_dpc_auth", os.Getenv("ENV"))
-    authDbPassword := fmt.Sprintf("/dpc/%s/auth/db_read_only_pass_dpc_auth", os.Getenv("ENV"))
-    secretsInfo, secretErr := getSecrets(authDbUser, authDbPassword)
-    if secretErr != nil {
+	authDbUser := fmt.Sprintf("/dpc/%s/auth/db_read_only_user_dpc_auth", os.Getenv("ENV"))
+	authDbPassword := fmt.Sprintf("/dpc/%s/auth/db_read_only_pass_dpc_auth", os.Getenv("ENV"))
+	secretsInfo, secretErr := getSecrets(authDbUser, authDbPassword)
+	if secretErr != nil {
 		return emptySet, secretErr
-    }
+	}
 
-    authDbErr := getAuthData(secretsInfo[authDbUser], secretsInfo[authDbPassword], ipAddresses)
-    if authDbErr != nil {
-        return emptySet, authDbErr
-    }
+	authDbErr := getAuthData(secretsInfo[authDbUser], secretsInfo[authDbPassword], ipAddresses)
+	if authDbErr != nil {
+		return emptySet, authDbErr
+	}
 
-    ipAddressSlice := slices.Collect(maps.Keys(ipAddresses))
-    wafErr, addresses := updateIpAddresses(ipSetName, ipAddressSlice)
-    if wafErr != nil {
-        return emptySet, wafErr
-    }
+	var ipAddressArray []string
+	for ip := range ipAddresses {
+		ipAddressArray = append(ipAddressArray, ip)
+	}
+	addresses, wafErr := updateIpAddresses(ipSetName, ipAddressArray)
+	if wafErr != nil {
+		return emptySet, wafErr
+	}
 
-    return addresses, nil
+	return addresses, nil
 }
