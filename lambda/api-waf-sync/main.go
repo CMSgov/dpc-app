@@ -69,10 +69,10 @@ func updateIpSet() ([]string, error) {
     }
 
     ipAddressSlice := slices.Collect(maps.Keys(ipAddresses))
-    wafErr, params := updateIpAddresses(ipSetName, ipAddressSlice)
+    wafErr, addresses := updateIpAddresses(ipSetName, ipAddressSlice)
     if wafErr != nil {
         return emptySet, wafErr
     }
 
-    return params.Addresses, nil
+    return addresses, nil
 }
