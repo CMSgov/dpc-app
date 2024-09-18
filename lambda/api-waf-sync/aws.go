@@ -146,10 +146,16 @@ func getAuthDbSecrets(dbUser string, dbPassword string) (map[string]string, erro
 func updateIPSetInWAF(ipSetName string, ipAddresses []string) (error, []string) {
     emptySet := []string{}
 
+    sess, sessErr := createSession()
+    if sessErr != nil {
+        return sessErr, emptySet
+    }
+    wafsvc := wafv2.New(sess)
+
     listParams := &wafv2.ListIPSetsInput{
         Scope: aws.String("CLOUDFRONT"),
     }
-    ipSetList, listErr := (*wafv2.WAFV2).ListIPSets(*wafv2.WAFV2, listParams)
+    ipSetList, listErr := (*wafv2.WAFV2).ListIPSets(wafsvc, listParams)
     if listErr != nil {
 		return fmt.Errorf("failed to fetch ip address sets, %v", listErr), emptySet
     }
@@ -164,7 +170,7 @@ func updateIPSetInWAF(ipSetName string, ipAddresses []string) (error, []string) 
             break;
         }
     }
-    ipSet, getErr := getIpSetWaf(*wafv2.WAFV2, getParams)
+    ipSet, getErr := getIpSetWaf(wafsvc, getParams)
     if getErr != nil {
         return fmt.Errorf("failed to get expected ip address set, %v", getErr), emptySet
     }
@@ -174,9 +180,9 @@ func updateIPSetInWAF(ipSetName string, ipAddresses []string) (error, []string) 
         Name: aws.String(ipSetName),
         Scope: aws.String("CLOUDFRONT"),
         LockToken: ipSet.LockToken,
-        Addresses: ipAddresses,
+        Addresses: aws.StringSlice(ipAddresses),
     }
-    _, updateErr := updateIpSetWaf(*wafv2.WAFV2, updateParams)
+    _, updateErr := updateIpSetWaf(wafsvc, updateParams)
     if updateErr != nil {
     	return fmt.Errorf("failed to update ip address set, %v", updateErr), emptySet
     }
