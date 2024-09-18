@@ -1,9 +1,7 @@
 package main
 
 import (
-	"bytes"
 	"context"
-	"database/sql"
 	"fmt"
 	"os"
 	"time"
@@ -41,9 +39,9 @@ func handler(ctx context.Context, event events.S3Event) ([]string, error) {
 		DisableHTMLEscape: true,
 		TimestampFormat:   time.RFC3339Nano,
 	})
-	var ipSet, err = generateIpSet()
+	var ipSet, err = updateIpSet()
 	if err != nil {
-		return "", err
+		return [], err
 	}
 	log.Info("Successfully completed executing export lambda")
 	return ipSet, nil
@@ -61,17 +59,17 @@ func updateIpSet() ([]string, error) {
 
     secretsInfo, pmErr := getSecrets(session, keynames)
     if pmErr != nil {
-        return "", pmErr
+        return [], pmErr
     }
 
     authDbErr := getAuthData(secretsInfo[authDbUser], secretsInfo[authDbPassword], ipAddresses)
     if authDbErr != nil {
-        return "", authDbErr
+        return [], authDbErr
     }
 
     wafErr, params := UpdateIPSetInWAF(ipSetName, ipAddresses)
     if wafErr != nil {
-        return "", wafErr
+        return [], wafErr
     }
 
     return params, nil
