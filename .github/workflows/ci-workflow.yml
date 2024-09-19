@@ -20,7 +20,10 @@ jobs:
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v1
-      - name: "Move the test results so can upload :eyeroll:"
+      - name: "DPC Portal Build"
+        run: |
+          make ci-portal
+      - name: "Move the test results" # won't upload hidden files
         run: |
           sudo mv ./dpc-portal/coverage/.resultset.json ./dpc-portal/coverage/resultset.json
       - name: Archive code coverage results
