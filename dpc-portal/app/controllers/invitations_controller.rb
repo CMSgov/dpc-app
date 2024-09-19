@@ -201,14 +201,14 @@ class InvitationsController < ApplicationController
   def user
     user_info = UserInfoService.new.user_info(session)
     @user = User.find_or_create_by!(provider: :openid_connect, uid: user_info['sub']) do |user_to_create|
-      assign_user_attributes(user_to_create)
+      assign_user_attributes(user_to_create, user_info)
       log_create_user
     end
     update_user(user_info)
     @user
   end
 
-  def assign_user_attributes(user_to_create)
+  def assign_user_attributes(user_to_create, user_info)
     user_to_create.email = @invitation.invited_email
     user_to_create.given_name = user_info['given_name']
     user_to_create.family_name = user_info['family_name']
