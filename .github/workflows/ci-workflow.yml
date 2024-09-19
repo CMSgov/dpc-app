@@ -64,6 +64,6 @@ jobs:
             -Dsonar.ruby.coverage.reportPaths=./dpc-admin/coverage/resultset.json
             -Dsonar.working.directory=./sonar_workspace
             -Dsonar.branch.name=${{ github.event.pull_request.head.ref }}
-            -Dsonar.projectVersion=${{ github.event.pull_request.head.ref }}
+            -Dsonar.projectVersion=${{ github.event.pull_request.head.sha }}
             -Dsonar.qualitygate.wait=true
-            -Dsonar.newCode.referenceBranch=main
+            -Dsonar.scm.provider=git
