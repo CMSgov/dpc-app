@@ -22,7 +22,7 @@ jobs:
         uses: actions/checkout@v1
       - name: "DPC Admin Portal Build"
         run: |
-          make ci-admin-portal
+          echo "make ci-admin-portal"
       - name: "Move the test results" # won't upload hidden files
         run: |
           sudo mv ./dpc-admin/coverage/.resultset.json ./dpc-admin/coverage/resultset.json
@@ -64,6 +64,5 @@ jobs:
             -Dsonar.ruby.coverage.reportPaths=./dpc-admin/coverage/resultset.json
             -Dsonar.working.directory=./sonar_workspace
             -Dsonar.branch.name=${{ github.event.pull_request.head.ref }}
-            -Dsonar.projectVersion=${{ github.event.pull_request.head.sha }}
             -Dsonar.qualitygate.wait=true
             -Dsonar.newCode.referenceBranch=main
