@@ -58,7 +58,7 @@ jobs:
             -Dsonar.projectKey=bcda-dpc-portal
             -Dsonar.scm.disabled=true
             -Dsonar.sources=./dpc-portal/app,./dpc-portal/lib
-            -Dsonar.coverage.exclusions=**/*_previewx.rb
+            -Dsonar.coverage.exclusions=**/*_preview.rb,**/*html.erb,**/application_*
             -Dsonar.ruby.coverage.reportPaths=./dpc-portal/coverage/resultset.json
             -Dsonar.working.directory=./sonar_workspace
             -Dsonar.branch.name=${{ github.event.pull_request.head.ref }}
