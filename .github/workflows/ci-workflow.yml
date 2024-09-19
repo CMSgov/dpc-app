@@ -27,6 +27,7 @@ jobs:
         uses: s4u/setup-maven-action@v1.14.0
         with:
           java-version: 11
+          maven-version: 3.0
       - name: Set env vars from AWS params
         uses: cmsgov/ab2d-bcda-dpc-platform/actions/aws-params-env-action@main
         env:
