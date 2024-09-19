@@ -22,6 +22,7 @@ jobs:
         uses: actions/checkout@v1
       - name: "DPC Portal Build"
         run: |
+          make ci-portal
       - name: Archive code coverage results
         uses: actions/upload-artifact@v3
         with:
