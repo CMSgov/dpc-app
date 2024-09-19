@@ -114,8 +114,17 @@ class InvitationsController < ApplicationController
 
   private
 
-  def invitation_matches_user # rubocop:disable Metrics/AbcSize
+  def invitation_matches_user
     user_info = UserInfoService.new.user_info(session)
+    render_bad_invitation(user_info)
+    session["invitation_status_#{@invitation.id}"] = 'identity_verified'
+    @given_name = user_info['given_name']
+    @family_name = user_info['family_name']
+  rescue UserInfoServiceError => e
+    handle_user_info_service_error(e, 1)
+  end
+
+  def render_bad_invitation(user_info)
     if @invitation.credential_delegate? && !@invitation.cd_match?(user_info)
       render(Page::Invitations::BadInvitationComponent.new(@invitation, 'pii_mismatch'),
              status: :forbidden)
@@ -123,11 +132,6 @@ class InvitationsController < ApplicationController
       render(Page::Invitations::BadInvitationComponent.new(@invitation, 'email_mismatch'),
              status: :forbidden)
     end
-    session["invitation_status_#{@invitation.id}"] = 'identity_verified'
-    @given_name = user_info['given_name']
-    @family_name = user_info['family_name']
-  rescue UserInfoServiceError => e
-    handle_user_info_service_error(e, 1)
   end
 
   def verify_user_is_ao
