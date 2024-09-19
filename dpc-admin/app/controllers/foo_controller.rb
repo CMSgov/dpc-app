@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class OrganizationsController < ApplicationController
+class FooController < ApplicationController
   before_action :authenticate_internal_user!
 
   def xindex
