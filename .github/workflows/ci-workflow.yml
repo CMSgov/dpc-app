@@ -66,3 +66,4 @@ jobs:
             -Dsonar.branch.name=${{ github.event.pull_request.head.ref }}
             -Dsonar.projectVersion=${{ github.event.pull_request.head.sha }}
             -Dsonar.qualitygate.wait=true
+            -Dsonar.newCode.referenceBranch=main
