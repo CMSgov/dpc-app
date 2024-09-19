@@ -56,6 +56,14 @@ module Page
         render(Page::Invitations::BadInvitationComponent.new(invitation, reason))
       end
 
+      def max_tries_exceeded
+        invited_by = User.new(given_name: 'Robert', family_name: 'Hodges')
+        invitation = Invitation.new(id: 9, provider_organization: ProviderOrganization.new(id: 1, name: 'Health Hut'),
+                                    failed_attempts: 5, invited_by:)
+        reason = 'max_tries_exceeded'
+        render(Page::Invitations::BadInvitationComponent.new(invitation, reason))
+      end
+
       def server_error
         invitation = Invitation.new(provider_organization: ProviderOrganization.new(name: 'Health Hut'))
         reason = 'server_error'
