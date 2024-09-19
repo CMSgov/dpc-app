@@ -223,6 +223,8 @@ Then, run `mvn clean install` to build and test the application. Dependencies wi
 
 Running `mvn clean install` will also construct the Docker images for the individual services. To skip the Docker build, pass `-Djib.skip=True`.
 
+If a build failure is encountered when running `mvn clean install`, attempt to resolve this by separating the build process into two steps by running `make api` followed by `mvn install`.
+
 Note that the `dpc-base` image produced by `make docker-base` is not stored in a remote repository. The `mvn clean install` process relies on the base image being available via the local Docker daemon.
 
 ## Running the DPC API
