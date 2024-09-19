@@ -1,12 +1,7 @@
 <%= render(Core::Navigation::StepIndicatorComponent.new(Invitation::AO_STEPS, 2)) if @invitation.authorized_official? %>
 <div>
   <div>
-    <% if @invitation.credential_delegate? %>
-    <h1>Invite code verified</h1>
-    <p>Press the button below to complete registration.</p>
-    <% else %>
     <p>Complete your registration of <%= @organization.name %>.</p>
-    <% end %>
     <%= render Core::Button::ButtonComponent.new(label: "Complete registration",
         destination: register_organization_invitation_path(@organization, @invitation),
         method: :post) %>

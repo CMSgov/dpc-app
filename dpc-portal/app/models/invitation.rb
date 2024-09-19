@@ -91,18 +91,11 @@ class Invitation < ApplicationRecord
     return 'invalid' if cancelled?
     return 'ao_renewed' if renewed? && authorized_official?
     return 'max_tries_exceeded' if attempts_remaining.zero?
+    return 'ao_accepted' if accepted? && authorized_official?
+    return 'cd_accepted' if accepted? && credential_delegate?
+    return 'ao_expired' if expired? && authorized_official?
 
-    if accepted? && authorized_official?
-      return 'ao_accepted'
-    elsif accepted? && credential_delegate?
-      return 'cd_accepted'
-    end
-
-    if expired? && authorized_official?
-      'ao_expired'
-    elsif expired? && credential_delegate?
-      'cd_expired'
-    end
+    'cd_expired' if expired? && credential_delegate?
   end
 
   def expires_in
