@@ -9,12 +9,12 @@ class FooController < ApplicationController
   before_action :tos_accepted, except: %i[success destroy]
   before_action :verify_invitation, only: %i[destroy]
 
-  def new
+  def xnew
     render(Page::CredentialDelegate::NewInvitationComponent.new(@organization, Invitation.new))
   end
 
   # rubocop:disable Metrics/AbcSize
-  def create
+  def xcreate
     @cd_invitation = build_invitation
 
     if @cd_invitation.save
@@ -33,11 +33,11 @@ class FooController < ApplicationController
   end
   # rubocop:enable Metrics/AbcSize
 
-  def success
+  def xsuccess
     render(Page::CredentialDelegate::InvitationSuccessComponent.new(@organization))
   end
 
-  def destroy
+  def xdestroy
     if @invitation.update(status: :cancelled)
       flash[:notice] = 'Invitation cancelled.'
     else
@@ -48,7 +48,7 @@ class FooController < ApplicationController
 
   private
 
-  def destroy_error_message
+  def xdestroy_error_message
     if @invitation.errors.size == 1 && @invitation.errors.first.type == :cancel_accepted
       @invitation.errors.first.message
     else
@@ -56,7 +56,7 @@ class FooController < ApplicationController
     end
   end
 
-  def build_invitation
+  def xbuild_invitation
     permitted = params.permit(:invited_given_name, :invited_family_name, :phone_raw, :invited_email,
                               :invited_email_confirmation)
     Invitation.new(**permitted.to_h,
@@ -66,7 +66,7 @@ class FooController < ApplicationController
                    verification_code: (Array('A'..'Z') + Array(0..9)).sample(6).join)
   end
 
-  def verify_invitation
+  def xverify_invitation
     @invitation = Invitation.find(params[:id])
     return if @organization == @invitation.provider_organization
 
