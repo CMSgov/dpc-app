@@ -58,7 +58,7 @@ jobs:
         uses: sonarsource/sonarqube-scan-action@master
         with:
           args:
-            -Dsonar.projectKey=bcda-dpc-portal
+            -Dsonar.projectKey=bcda-dpc-web
             -Dsonar.scm.disabled=true
             -Dsonar.sources=./dpc-admin/app,./dpc-admin/lib
             -Dsonar.ruby.coverage.reportPaths=./dpc-admin/coverage/resultset.json
