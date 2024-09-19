@@ -3,6 +3,7 @@ package main
 import (
 	"testing"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/wafv2"
 	"github.com/stretchr/testify/assert"
 )
@@ -29,7 +30,8 @@ func TestIntegrationUpdateIpSet(t *testing.T) {
 					}, nil
 				}
 
-				getAuthData = func(dbUser string, dbPassword string, ipAddresses map[string]IpAddress) error {
+				getAuthData = func(dbUser string, dbPassword string, ipAddresses []string) error {
+					_ = append(ipAddresses, "127.0.0.1")
 					return nil
 				}
 			},
@@ -38,16 +40,19 @@ func TestIntegrationUpdateIpSet(t *testing.T) {
 
 	for _, test := range tests {
 		test.mockFunc()
-		addresses, err := updateIpSet()
-		assert.NotEmpty(t, addresses)
+		params, err := updateIpSet()
+		assert.NotEmpty(t, params["Addresses"])
 		assert.Nil(t, err)
 
 		sess, sessErr := createSession()
 		assert.Nil(t, sessErr)
 		wafsvc := wafv2.New(sess)
-		ipSet, wafErr := (*wafv2.WAFV2).GetIPSet(wafsvc, &wafv2.GetIPSetInput{})
+		ipSet, wafErr := (*wafv2.WAFV2).GetIPSet(wafsvc, &wafv2.GetIPSetInput{
+			Id:   aws.String(params["Id"].(string)),
+			Name: aws.String(params["Name"].(string)),
+		})
 		assert.Nil(t, wafErr)
-		assert.Equal(t, ipSet.IPSet.Addresses, addresses)
+		assert.Equal(t, ipSet.IPSet.Addresses, params["Addresses"])
 	}
 
 	getSecrets = oriGetSecrets

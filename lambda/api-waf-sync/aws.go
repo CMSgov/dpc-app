@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
@@ -143,23 +144,34 @@ func getAuthDbSecrets(dbUser string, dbPassword string) (map[string]string, erro
 	return secretsInfo, nil
 }
 
-func updateIPSetInWAF(ipSetName string, ipAddresses []string) ([]string, error) {
-	emptySet := []string{}
-
+func updateIPSetInWAF(ipSetName string, ipAddresses []string) (map[string]any, error) {
 	sess, sessErr := createSession()
 	if sessErr != nil {
-		return emptySet, fmt.Errorf("failed to create session to update ip set, %v", sessErr)
+		return nil, fmt.Errorf("failed to create session to update ip set, %v", sessErr)
 	}
-	wafsvc := wafv2.New(sess)
 
+	assumeRoleArn, arnErr := getAssumeRoleArn()
+	if arnErr != nil {
+		return nil, fmt.Errorf("failed to get ARN, %v", arnErr)
+	}
+	wafsvc := wafv2.New(sess, &aws.Config{
+		Region: aws.String("us-east-1"),
+		Credentials: stscreds.NewCredentials(
+			sess,
+			assumeRoleArn,
+		),
+	})
+
+	params := map[string]any{"Scope": "CLOUDFRONT"}
 	listParams := &wafv2.ListIPSetsInput{
 		Scope: aws.String("CLOUDFRONT"),
 	}
 	ipSetList, listErr := listIpSetsWaf(wafsvc, listParams)
 	if listErr != nil {
-		return emptySet, fmt.Errorf("failed to fetch ip address sets, %v", listErr)
+		return nil, fmt.Errorf("failed to fetch ip address sets, %v", listErr)
 	}
 
+	params["Name"] = ipSetName
 	getParams := &wafv2.GetIPSetInput{
 		Name:  &ipSetName,
 		Scope: aws.String("CLOUDFRONT"),
@@ -167,14 +179,17 @@ func updateIPSetInWAF(ipSetName string, ipAddresses []string) ([]string, error) 
 	for _, ipSet := range ipSetList.IPSets {
 		if *ipSet.Name == ipSetName {
 			getParams.Id = ipSet.Id
+			params["Id"] = *ipSet.Id
 			break
 		}
 	}
 	ipSet, getErr := getIpSetWaf(wafsvc, getParams)
 	if getErr != nil {
-		return emptySet, fmt.Errorf("failed to get expected ip address set, %v", getErr)
+		return nil, fmt.Errorf("failed to get expected ip address set, %v", getErr)
 	}
 
+	params["LockToken"] = *ipSet.LockToken
+	params["Addresses"] = strings.Join(ipAddresses, ",")
 	updateParams := &wafv2.UpdateIPSetInput{
 		Id:        ipSet.IPSet.Id,
 		Name:      aws.String(ipSetName),
@@ -184,8 +199,8 @@ func updateIPSetInWAF(ipSetName string, ipAddresses []string) ([]string, error) 
 	}
 	_, updateErr := updateIpSetWaf(wafsvc, updateParams)
 	if updateErr != nil {
-		return emptySet, fmt.Errorf("failed to update ip address set, %v", updateErr)
+		return nil, fmt.Errorf("failed to update ip address set, %v", updateErr)
 	}
 
-	return ipAddresses, nil
+	return params, nil
 }

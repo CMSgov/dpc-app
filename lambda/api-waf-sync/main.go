@@ -12,10 +12,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type IpAddress struct {
-	ip_address string
-}
-
 // Allow these to be switched out during unit tests
 var getSecrets = getAuthDbSecrets
 var updateIpAddresses = updateIPSetInWAF
@@ -41,39 +37,35 @@ func handler(ctx context.Context, event events.S3Event) ([]string, error) {
 		DisableHTMLEscape: true,
 		TimestampFormat:   time.RFC3339Nano,
 	})
-	var ipSet, err = updateIpSet()
+	var params, err = updateIpSet()
 	if err != nil {
 		return emptySet, err
 	}
 	log.Info("Successfully completed executing export lambda")
-	return ipSet, nil
+	return params["Addresses"].([]string), nil
 }
 
-func updateIpSet() ([]string, error) {
-	emptySet := []string{}
-	ipAddresses := make(map[string]IpAddress)
+func updateIpSet() (map[string]any, error) {
+	params := map[string]any{"Addresses": []string{}}
 	ipSetName := fmt.Sprintf("dpc-%s-api-customers", os.Getenv("ENV"))
 
 	authDbUser := fmt.Sprintf("/dpc/%s/auth/db_read_only_user_dpc_auth", os.Getenv("ENV"))
 	authDbPassword := fmt.Sprintf("/dpc/%s/auth/db_read_only_pass_dpc_auth", os.Getenv("ENV"))
 	secretsInfo, secretErr := getSecrets(authDbUser, authDbPassword)
 	if secretErr != nil {
-		return emptySet, secretErr
+		return nil, secretErr
 	}
 
+	ipAddresses := params["Addresses"].([]string)
 	authDbErr := getAuthData(secretsInfo[authDbUser], secretsInfo[authDbPassword], ipAddresses)
 	if authDbErr != nil {
-		return emptySet, authDbErr
+		return nil, authDbErr
 	}
 
-	var ipAddressArray []string
-	for ip := range ipAddresses {
-		ipAddressArray = append(ipAddressArray, ip)
-	}
-	addresses, wafErr := updateIpAddresses(ipSetName, ipAddressArray)
+	params, wafErr := updateIpAddresses(ipSetName, ipAddresses)
 	if wafErr != nil {
-		return emptySet, wafErr
+		return nil, wafErr
 	}
 
-	return addresses, nil
+	return params, nil
 }

@@ -29,36 +29,36 @@ var createConnection = func(dbName string, dbUser string, dbPassword string) (*s
 	return db, nil
 }
 
-var getAuthData = func(dbUser string, dbPassword string, ipAddresses map[string]IpAddress) error {
-    db, authConnErr := createConnection("dpc_auth", dbUser, dbPassword)
-    if authConnErr != nil {
-        return authConnErr
-    }
-    defer db.Close()
+var getAuthData = func(dbUser string, dbPassword string, ipAddresses []string) error {
+	db, authConnErr := createConnection("dpc_auth", dbUser, dbPassword)
+	if authConnErr != nil {
+		return authConnErr
+	}
+	defer db.Close()
 
-    rows, err := db.Query(`SELECT ip_address FROM ip_addresses`)
-    if err != nil {
-        log.Warningf("Error running query: %v", err)
-        return err
-    }
+	rows, err := db.Query(`SELECT ip_address FROM ip_addresses`)
+	if err != nil {
+		log.Warningf("Error running query: %v", err)
+		return err
+	}
 
-    count := 0
-    defer rows.Close()
-    for rows.Next() {
-        var perIpAddress IpAddress
+	count := 0
+	defer rows.Close()
+	for rows.Next() {
+		var ip string
 
-        err = rows.Scan(&perIpAddress.ip_address)
-        if err != nil {
-            log.Warningf("Error reading data: %v", err)
-        } else {
-            count += 1
-            if count%10000 == 0 {
-                log.Infof("Read %d rows", count)
-            }
-        }
+		err = rows.Scan(ip)
+		if err != nil {
+			log.Warningf("Error reading data: %v", err)
+		} else {
+			count += 1
+			if count%10000 == 0 {
+				log.Infof("Read %d rows", count)
+			}
+		}
 
-        ipAddresses[perIpAddress.ip_address] = perIpAddress
-    }
-    log.WithField("num_rows_scanned", count).Info("Successfully retrieved ip address data")
+		ipAddresses = append(ipAddresses, ip)
+	}
+	log.WithField("num_rows_scanned", count).Info("Successfully retrieved ip address data")
 	return nil
 }

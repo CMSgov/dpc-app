@@ -20,24 +20,20 @@ func TestGetAuthData(t *testing.T) {
 	defer db.Close()
 
 	tests := []struct {
-		expectedIpAddresses map[string]IpAddress
+		expectedIpAddresses []string
 		err                 error
 		ipAddressResult     *sqlmock.Rows
 	}{
 		{
-			expectedIpAddresses: map[string]IpAddress{
-				"127.0.0.1": {
-					ip_address: "127.0.0.1",
-				},
-			},
-			err:             nil,
-			ipAddressResult: sqlmock.NewRows(ipAddressColumns).AddRow("127.0.0.1"),
+			expectedIpAddresses: []string{"127.0.0.1"},
+			err:                 nil,
+			ipAddressResult:     sqlmock.NewRows(ipAddressColumns).AddRow("127.0.0.1"),
 		},
 	}
 
 	for _, test := range tests {
 		mock.ExpectQuery(ipAddressQuery).WillReturnRows(test.ipAddressResult)
-		ipAddresses := make(map[string]IpAddress)
+		ipAddresses := []string{}
 		err = getAuthData("user", "pass", ipAddresses)
 		assert.Equal(t, test.expectedIpAddresses, ipAddresses)
 		assert.Equal(t, test.err, err)
