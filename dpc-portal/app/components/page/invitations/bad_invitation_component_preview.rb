@@ -11,7 +11,9 @@ module Page
       end
 
       def pii_mismatch
-        invitation = Invitation.new(provider_organization: ProviderOrganization.new(name: 'Health Hut'))
+        user = User.new(email: 'bilbo.baggins@cms.hms.gov')
+        invitation = Invitation.new(provider_organization: ProviderOrganization.new(name: 'Health Hut'),
+                                    invited_by: user)
         reason = 'pii_mismatch'
         render(Page::Invitations::BadInvitationComponent.new(invitation, reason))
       end
