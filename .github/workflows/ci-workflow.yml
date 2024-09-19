@@ -37,5 +37,7 @@ jobs:
       # Workaround until https://jira.cms.gov/browse/PLT-338 is implemented.
       ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: "true"
     steps:
+      - name: "Checkout code"
+        uses: actions/checkout@v1
       - name: look for app
         run: find . -name dpc-portal
