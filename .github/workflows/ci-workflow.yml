@@ -20,6 +20,9 @@ jobs:
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v1
+      - name: "DPC Portal Build"
+        run: |
+          cat dpc-portal/coverage/.resultset.json
       - name: Archive code coverage results
         uses: actions/upload-artifact@v3
         with:
