@@ -52,15 +52,6 @@ jobs:
         with:
           name: code-coverage-report-dpc-web
           path: ./dpc-web/coverage/resultset.json
-      - name: "Move the test results" # won't upload hidden files
-        run: |
-          sudo mv ./dpc-admin/coverage/.resultset.json ./dpc-admin/coverage/resultset.json
-      - name: Archive code coverage results
-        uses: actions/upload-artifact@v3
-        with:
-          name: code-coverage-report-dpc-admin
-          path: ./dpc-admin/coverage/resultset.json
-
   build-dpc-admin:
     name: "Build and Test DPC Admin Portal"
     runs-on: ubuntu-latest
@@ -70,6 +61,15 @@ jobs:
       - name: "DPC Admin Portal Build"
         run: |
           make ci-admin-portal
+      - name: "Move the test results" # won't upload hidden files
+        run: |
+          sudo mv ./dpc-admin/coverage/.resultset.json ./dpc-admin/coverage/resultset.json
+      - name: Archive code coverage results
+        uses: actions/upload-artifact@v3
+        with:
+          name: code-coverage-report-dpc-admin
+          path: ./dpc-admin/coverage/resultset.json
+
 
   build-dpc-portal:
     name: "Build and Test DPC Portal"
