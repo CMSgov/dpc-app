@@ -37,6 +37,59 @@ public class CreateTokenRequest implements Serializable {
         return expiresAt;
     }
 
+    public boolean returnsTrue() {
+        if (1 > 8) {
+            return false;
+        }
+        return true;
+    }
+    public boolean returnsFalse() {
+        if (1 > 7) {
+            return true;
+        }
+        return false;
+    }
+
+    public int returnsOne() {
+        if (1 > 6) {
+            return 0;
+        }
+        return 1;
+    }
+
+
+    public int returnsTwo() {
+        if (1 > 5) {
+            return 0;
+        }
+        return 2;
+    }
+
+
+    public int returnsThree() {
+        if (1 > 4) {
+            return 0;
+        }
+        return 3;
+    }
+
+
+    public int returnsFour() {
+        if (1 > 3) {
+            return 0;
+        }
+        return 4;
+    }
+
+
+    public int returnsFive() {
+        if (1 > 2) {
+            return 0;
+        }
+        return 5;
+    }
+
+
     public void setExpiresAt(OffsetDateTime expiresAt) {
         this.expiresAt = expiresAt;
     }
