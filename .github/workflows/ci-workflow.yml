@@ -127,6 +127,8 @@ jobs:
             SONAR_TOKEN=/sonarqube/token
       - name: Run quality gate scan
         uses: sonarsource/sonarqube-scan-action@master
+        env:
+          PROJECT_VERSION: "${{ github.ref_name == 'main' && github.sha || 'branch' }}"
         with:
           args:
             -Dsonar.projectKey=bcda-dpc-web
@@ -134,7 +136,7 @@ jobs:
             -Dsonar.ruby.coverage.reportPaths=./dpc-web/coverage/resultset.json,./dpc-admin/coverage/resultset.json
             -Dsonar.working.directory=./sonar_workspace
             -Dsonar.branch.name=${{ github.ref_name }}
-            -Dsonar.projectVersion=${{ github.sha }}
+            -Dsonar.projectVersion=$PROJECT_VERSION
             -Dsonar.qualitygate.wait=true
 
   sonar-quality-gate-dpc-portal:
@@ -161,6 +163,8 @@ jobs:
             SONAR_TOKEN=/sonarqube/token
       - name: Run quality gate scan
         uses: sonarsource/sonarqube-scan-action@master
+        env:
+          PROJECT_VERSION: "${{ github.ref_name == 'main' && github.sha || 'branch' }}"
         with:
           args:
             -Dsonar.projectKey=bcda-dpc-portal
@@ -169,7 +173,7 @@ jobs:
             -Dsonar.ruby.coverage.reportPaths=./dpc-portal/coverage/resultset.json
             -Dsonar.working.directory=./sonar_workspace
             -Dsonar.branch.name=${{ github.ref_name }}
-            -Dsonar.projectVersion=${{ github.sha }}
+            -Dsonar.projectVersion=$PROJECT_VERSION
             -Dsonar.qualitygate.wait=true
 
   sonar-quality-gate-dpc-api:
@@ -211,5 +215,7 @@ jobs:
         run: |
           mvn compile
       - name: Run quality gate scan
+        env:
+          PROJECT_VERSION: "${{ github.ref_name == 'main' && github.sha || 'branch' }}"
         run: |
-          mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.7.0.1746:sonar -Dsonar.projectKey=bcda-dpc-api -Dsonar.branch.name=${{ github.ref_name }} -Dsonar.working.directory=./.sonar_workspace -Dsonar.projectVersion=${{ github.sha }} -Dsonar.qualitygate.wait=true
+          mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.7.0.1746:sonar -Dsonar.projectKey=bcda-dpc-api -Dsonar.branch.name=${{ github.ref_name }} -Dsonar.working.directory=./.sonar_workspace -Dsonar.projectVersion=$PROJECT_VERSION -Dsonar.qualitygate.wait=true
