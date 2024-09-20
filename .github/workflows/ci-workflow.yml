@@ -133,8 +133,8 @@ jobs:
             -Dsonar.sources=./dpc-web/app,./dpc-web/lib,./dpc-admin/app,./dpc-admin/lib
             -Dsonar.ruby.coverage.reportPaths=./dpc-web/coverage/resultset.json,./dpc-admin/coverage/resultset.json
             -Dsonar.working.directory=./sonar_workspace
-            -Dsonar.branch.name=${{ github.event.pull_request.head.ref }}
-            -Dsonar.projectVersion=${{ github.event.pull_request.head.sha }}
+            -Dsonar.branch.name=${{ github.ref_name }}
+            -Dsonar.projectVersion=${{ github.sha }}
             -Dsonar.qualitygate.wait=true
 
   sonar-quality-gate-dpc-portal:
@@ -168,8 +168,8 @@ jobs:
             -Dsonar.coverage.exclusions=**/*_preview.rb,**/*html.erb,**/application_*
             -Dsonar.ruby.coverage.reportPaths=./dpc-portal/coverage/resultset.json
             -Dsonar.working.directory=./sonar_workspace
-            -Dsonar.branch.name=${{ github.event.pull_request.head.ref }}
-            -Dsonar.projectVersion=${{ github.event.pull_request.head.sha }}
+            -Dsonar.branch.name=${{ github.ref_name }}
+            -Dsonar.projectVersion=${{ github.sha }}
             -Dsonar.qualitygate.wait=true
 
   sonar-quality-gate-dpc-app:
@@ -207,4 +207,4 @@ jobs:
           mvn -ntp -U clean
       - name: SonarQube analysis
         run: |
-          mvn compile && mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.7.0.1746:sonar -Dsonar.qualitygate.wait=true -Dsonar.projectKey=bcda-dpc-api -Dsonar.branch.name=${{ github.event.pull_request.head.ref }} -Dsonar.working.directory=./.sonar_workspace -Dsonar.projectVersion=${{ github.event.pull_request.head.sha }}
+          mvn compile && mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.7.0.1746:sonar -Dsonar.qualitygate.wait=true -Dsonar.projectKey=bcda-dpc-api -Dsonar.branch.name=${{ github.ref_name }} -Dsonar.working.directory=./.sonar_workspace -Dsonar.projectVersion=${{ github.sha }}
