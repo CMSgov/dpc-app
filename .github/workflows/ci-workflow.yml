@@ -172,7 +172,8 @@ jobs:
             -Dsonar.projectVersion=${{ github.sha }}
             -Dsonar.qualitygate.wait=true
 
-  sonar-quality-gate-dpc-app:
+  sonar-quality-gate-dpc-api:
+    name: Sonarqube Quality Gate for dpc-api
     runs-on: self-hosted
     env:
       ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
@@ -205,6 +206,9 @@ jobs:
       - name: Clean maven
         run: |
           mvn -ntp -U clean
-      - name: SonarQube analysis
+      - name: Compile project
         run: |
-          mvn compile && mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.7.0.1746:sonar -Dsonar.qualitygate.wait=true -Dsonar.projectKey=bcda-dpc-api -Dsonar.branch.name=${{ github.ref_name }} -Dsonar.working.directory=./.sonar_workspace -Dsonar.projectVersion=${{ github.sha }}
+          mvn compile
+      - name: Run quality gate scan
+        run: |
+          mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.7.0.1746:sonar -Dsonar.qualitygate.wait=true -Dsonar.projectKey=bcda-dpc-api -Dsonar.branch.name=${{ github.ref_name }} -Dsonar.working.directory=./.sonar_workspace -Dsonar.projectVersion=${{ github.sha }}
