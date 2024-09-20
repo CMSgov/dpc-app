@@ -28,4 +28,39 @@ class CreateTokenRequestUnitTest {
 
 
     }
+    @Test
+    void testReturnsTrue() {
+        CreateTokenRequest token = new CreateTokenRequest();
+        assertTrue(token.returnsTrue());
+    }
+    @Test
+    void testReturnsFalse() {
+        CreateTokenRequest token = new CreateTokenRequest();
+        assertFalse(token.returnsFalse());
+    }
+    @Test
+    void testReturnsOne() {
+        CreateTokenRequest token = new CreateTokenRequest();
+        assertEquals(1, token.returnsOne());
+    }
+    @Test
+    void testReturnsTwo() {
+        CreateTokenRequest token = new CreateTokenRequest();
+        assertEquals(2, token.returnsTwo());
+    }
+    @Test
+    void testReturnsThree() {
+        CreateTokenRequest token = new CreateTokenRequest();
+        assertEquals(3, token.returnsThree());
+    }
+    @Test
+    void testReturnsFour() {
+        CreateTokenRequest token = new CreateTokenRequest();
+        assertEquals(4, token.returnsFour());
+    }
+    @Test
+    void testReturnsFive() {
+        CreateTokenRequest token = new CreateTokenRequest();
+        assertEquals(5, token.returnsFive());
+    }
 }
