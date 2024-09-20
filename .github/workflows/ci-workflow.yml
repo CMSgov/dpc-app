@@ -46,6 +46,9 @@ jobs:
           curl -LsS https://archive.apache.org/dist/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz | tar xzf - -C "$tmpdir"
           sudo rm -rf /opt/maven
           sudo mv "$tmpdir/apache-maven-3.6.3" /opt/maven
+      - name: Build Base
+        run: |
+          docker build . -f docker/Dockerfiles/Dockerfile.base -t dpc-base
       - name: Compile
         run: |
           mvn clean compile -Perror-prone -B -V -ntp
