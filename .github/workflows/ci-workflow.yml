@@ -20,7 +20,6 @@ jobs:
     env:
       # Workaround until https://jira.cms.gov/browse/PLT-338 is implemented.
       ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
-
     steps:
       - name: Checkout Code
         uses: actions/checkout@v1
@@ -47,15 +46,12 @@ jobs:
           curl -LsS https://archive.apache.org/dist/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz | tar xzf - -C "$tmpdir"
           sudo rm -rf /opt/maven
           sudo mv "$tmpdir/apache-maven-3.6.3" /opt/maven
-      - name: Clean maven
+      - name: "API Build"
         run: |
-          mvn -ntp -U clean
-      - name: Compile project
+          make ci-app
+      - name: "Smoke Test"
         run: |
-          mvn clean compile -Perror-prone -B -V -ntp
-      -name: Run tests
-        run: |
-          mvn package -Pci -ntp
+          make smoke
       - name: Run quality gate scan
         run: |
           mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.7.0.1746:sonar -Dsonar.projectKey=bcda-dpc-api -Dsonar.branch.name=${{ github.event_name == 'pull_request' && github.head_ref || github.event_name == 'pull_request' && github.head_ref || github.ref_name }} -Dsonar.working.directory=./.sonar_workspace -Dsonar.projectVersion=${{ github.ref_name == 'main' && github.sha || 'branch' }} -Dsonar.qualitygate.wait=true
