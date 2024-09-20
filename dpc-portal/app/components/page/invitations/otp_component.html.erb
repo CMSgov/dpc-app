@@ -1,7 +1,7 @@
-<section class="usa-section">
+<%= render(Core::Navigation::StepIndicatorComponent.new(Invitation::CD_STEPS, 0)) %>
+<div>
 	<div>
 		<div>
-			<h1>Accept organization invite</h1>
 			<div class="bg-accent-cool-lighter padding-y-1 padding-x-3 border border-1px border-cyan">
 				<h3>If you did not receive an invite code:</h3>
 				<ul>
@@ -20,4 +20,4 @@
 			<% end %>
 		</div>
 	</div>
-</section>
+</div>

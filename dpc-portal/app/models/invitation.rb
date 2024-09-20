@@ -19,7 +19,7 @@ class Invitation < ApplicationRecord
 
   AO_STEPS = ['Sign in or create a Login.gov account', 'Confirm your identity', 'Confirm organization registration',
               'Finished'].freeze
-  CD_STEPS = ['Sign in or create a Login.gov account', 'Accept invite', 'Finished'].freeze
+  CD_STEPS = ['Enter invite code', 'Sign in or create a Login.gov account', 'Accept invite', 'Finished'].freeze
   MAX_ATTEMPTS = 5
 
   def phone_raw=(nbr)

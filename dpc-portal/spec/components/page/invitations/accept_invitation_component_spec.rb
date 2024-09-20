@@ -45,9 +45,9 @@ RSpec.describe Page::Invitations::AcceptInvitationComponent, type: :component do
         is_expected.to include(form_method_action)
       end
 
-      it 'should have step component at step 2' do
+      it 'should have step component at step 3' do
         expect(page).to have_selector('.usa-step-indicator__current-step')
-        expect(page.find('.usa-step-indicator__current-step').text).to eq '2'
+        expect(page.find('.usa-step-indicator__current-step').text).to eq '3'
       end
 
       it 'should have Accept Invite button' do
