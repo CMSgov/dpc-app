@@ -46,12 +46,12 @@ jobs:
           curl -LsS https://archive.apache.org/dist/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz | tar xzf - -C "$tmpdir"
           sudo rm -rf /opt/maven
           sudo mv "$tmpdir/apache-maven-3.6.3" /opt/maven
-      - name: "API Build"
+      - name: Compile
         run: |
-          make ci-app
-      - name: "Smoke Test"
+          mvn clean compile -Perror-prone -B -V -ntp
+      - name: Package and Test
         run: |
-          make smoke
+          mvn package -Pci -ntp
       - name: Run quality gate scan
         run: |
           mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.7.0.1746:sonar -Dsonar.projectKey=bcda-dpc-api -Dsonar.branch.name=${{ github.event_name == 'pull_request' && github.head_ref || github.event_name == 'pull_request' && github.head_ref || github.ref_name }} -Dsonar.working.directory=./.sonar_workspace -Dsonar.projectVersion=${{ github.ref_name == 'main' && github.sha || 'branch' }} -Dsonar.qualitygate.wait=true
