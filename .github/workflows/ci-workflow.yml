@@ -176,6 +176,7 @@ jobs:
     name: Sonarqube Quality Gate for dpc-api
     runs-on: self-hosted
     env:
+      # Workaround until https://jira.cms.gov/browse/PLT-338 is implemented.
       ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
     steps:
       - name: Checkout Code
@@ -211,4 +212,4 @@ jobs:
           mvn compile
       - name: Run quality gate scan
         run: |
-          mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.7.0.1746:sonar -Dsonar.qualitygate.wait=true -Dsonar.projectKey=bcda-dpc-api -Dsonar.branch.name=${{ github.ref_name }} -Dsonar.working.directory=./.sonar_workspace -Dsonar.projectVersion=${{ github.sha }}
+          mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.7.0.1746:sonar -Dsonar.projectKey=bcda-dpc-api -Dsonar.branch.name=${{ github.ref_name }} -Dsonar.working.directory=./.sonar_workspace -Dsonar.projectVersion=${{ github.sha }} -Dsonar.qualitygate.wait=true
