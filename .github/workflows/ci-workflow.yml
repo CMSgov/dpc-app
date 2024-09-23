@@ -25,12 +25,12 @@ jobs:
           make ci-portal
       - name: "Move the test results" # won't upload hidden files
         run: |
-          sudo mv ./dpc-portal/coverage/.resultset.json ./dpc-portal/coverage/resultset.json
+          sudo jq '.RSpec.coverage |= with_entries(if .key | contains("dpc-portal") then .key |= sub("/dpc-portal"; "/github/workspace/dpc-portal") else . end)' dpc-portal/coverage/.resultset.json > resultset.json
       - name: Archive code coverage results
         uses: actions/upload-artifact@v3
         with:
           name: code-coverage-report-dpc-portal
-          path: ./dpc-portal/coverage/resultset.json
+          path: ./resultset.json
   sonar-quality-gate-dpc-portal:
     name: Sonarqube Quality Gate for dpc-portal
     needs: build-dpc-portal
@@ -53,9 +53,6 @@ jobs:
           params: |
             SONAR_HOST_URL=/sonarqube/url
             SONAR_TOKEN=/sonarqube/token
-      - name: Build good resultset
-        run: |
-          cat ./resultset.json | jq '.RSpec.coverage |= with_entries(if .key | contains("dpc-portal") then .key |= sub("/dpc-portal"; "/github/workspace/dpc-portal") else . end)' > resultset_fixed_portal.json
       - name: Run quality gate scan
         uses: sonarsource/sonarqube-scan-action@master
         with:
@@ -63,7 +60,7 @@ jobs:
             -Dsonar.projectKey=bcda-dpc-portal
             -Dsonar.sources=./dpc-portal/app,./dpc-portal/lib
             -Dsonar.coverage.exclusions=**/*_preview.rb,**/*html.erb,**/application_*
-            -Dsonar.ruby.coverage.reportPaths=./resultset_fixed_portal.json
+            -Dsonar.ruby.coverage.reportPaths=./resultset.json
             -Dsonar.working.directory=./sonar_workspace
             -Dsonar.branch.name=${{ github.event_name == 'pull_request' && github.head_ref || github.ref_name }}
             -Dsonar.projectVersion=${{ github.ref_name == 'main' && github.sha || 'branch' }}
