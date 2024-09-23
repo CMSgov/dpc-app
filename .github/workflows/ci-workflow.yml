@@ -25,5 +25,5 @@ jobs:
         uses: actions/checkout@v1
       - name: "find code"
         run: |
-          pwd && find . -name foo.rb
+          cat /opt/actions-runner/_work/dpc-app/dpc-app/dpc-portal/app/models/foo.rb
           
