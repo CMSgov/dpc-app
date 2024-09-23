@@ -16,7 +16,6 @@ env:
 jobs:
   sonar-quality-gate-dpc-portal:
     name: Sonarqube Quality Gate for dpc-portal
-    needs: build-dpc-portal
     runs-on: self-hosted
     env:
       # Workaround until https://jira.cms.gov/browse/PLT-338 is implemented.
