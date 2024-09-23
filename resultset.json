@@ -1,7 +1,7 @@
 {
   "RSpec": {
     "coverage": {
-      "/dpc-portal/app/lib/dpc_json_logger.rb": [
+      "./dpc-portal/app/lib/dpc_json_logger.rb": [
         null,
         null,
         1,
@@ -67,7 +67,7 @@
         null,
         null
       ],
-      "/dpc-portal/app/models/current_attributes.rb": [
+      "./dpc-portal/app/models/current_attributes.rb": [
         null,
         null,
         null,
@@ -132,7 +132,7 @@
         null,
         null
       ],
-      "/dpc-portal/app/models/user.rb": [
+      "./dpc-portal/app/models/user.rb": [
         null,
         null,
         null,
@@ -180,7 +180,7 @@
         null,
         null
       ],
-      "/dpc-portal/app/components/core/alert/component.rb": [
+      "./dpc-portal/app/components/core/alert/component.rb": [
         null,
         null,
         1,
@@ -199,7 +199,7 @@
         null,
         null
       ],
-      "/dpc-portal/app/components/core/button/button_component.rb": [
+      "./dpc-portal/app/components/core/button/button_component.rb": [
         null,
         null,
         1,
@@ -226,7 +226,7 @@
         null,
         null
       ],
-      "/dpc-portal/app/components/core/card/basic_component.rb": [
+      "./dpc-portal/app/components/core/card/basic_component.rb": [
         null,
         null,
         1,
@@ -244,7 +244,7 @@
         null,
         null
       ],
-      "/dpc-portal/app/components/core/card/organization_card_component.rb": [
+      "./dpc-portal/app/components/core/card/organization_card_component.rb": [
         null,
         null,
         1,
@@ -276,7 +276,7 @@
         null,
         null
       ],
-      "/dpc-portal/app/components/core/combo_box/combo_box_component.rb": [
+      "./dpc-portal/app/components/core/combo_box/combo_box_component.rb": [
         null,
         null,
         1,
@@ -294,7 +294,7 @@
         null,
         null
       ],
-      "/dpc-portal/app/components/core/form/masked_input_component.rb": [
+      "./dpc-portal/app/components/core/form/masked_input_component.rb": [
         null,
         null,
         1,
@@ -325,7 +325,7 @@
         null,
         null
       ],
-      "/dpc-portal/app/components/core/form/text_area_component.rb": [
+      "./dpc-portal/app/components/core/form/text_area_component.rb": [
         null,
         null,
         1,
@@ -348,7 +348,7 @@
         null,
         null
       ],
-      "/dpc-portal/app/components/core/form/text_input_component.rb": [
+      "./dpc-portal/app/components/core/form/text_input_component.rb": [
         null,
         null,
         1,
@@ -375,7 +375,7 @@
         null,
         null
       ],
-      "/dpc-portal/app/components/core/icon/uswds_component.rb": [
+      "./dpc-portal/app/components/core/icon/uswds_component.rb": [
         null,
         null,
         1,
@@ -398,7 +398,7 @@
         null,
         null
       ],
-      "/dpc-portal/app/components/core/modal/modal_component.rb": [
+      "./dpc-portal/app/components/core/modal/modal_component.rb": [
         null,
         null,
         1,
@@ -420,7 +420,7 @@
         null,
         null
       ],
-      "/dpc-portal/app/components/core/navigation/step_indicator_component.rb": [
+      "./dpc-portal/app/components/core/navigation/step_indicator_component.rb": [
         null,
         null,
         1,
@@ -440,7 +440,7 @@
         null,
         null
       ],
-      "/dpc-portal/app/components/core/navigation/tabbed_component.rb": [
+      "./dpc-portal/app/components/core/navigation/tabbed_component.rb": [
         null,
         null,
         1,
@@ -469,7 +469,7 @@
         null,
         null
       ],
-      "/dpc-portal/app/components/core/site_header/component.rb": [
+      "./dpc-portal/app/components/core/site_header/component.rb": [
         null,
         null,
         1,
@@ -486,7 +486,7 @@
         null,
         null
       ],
-      "/dpc-portal/app/components/core/table/header_component.rb": [
+      "./dpc-portal/app/components/core/table/header_component.rb": [
         null,
         null,
         1,
@@ -505,7 +505,7 @@
         null,
         null
       ],
-      "/dpc-portal/app/components/core/table/row_component.rb": [
+      "./dpc-portal/app/components/core/table/row_component.rb": [
         null,
         null,
         1,
@@ -542,7 +542,7 @@
         null,
         null
       ],
-      "/dpc-portal/app/components/core/table/table_component.rb": [
+      "./dpc-portal/app/components/core/table/table_component.rb": [
         null,
         null,
         1,
@@ -567,7 +567,7 @@
         null,
         null
       ],
-      "/dpc-portal/app/components/page/client_token/new_token_component.rb": [
+      "./dpc-portal/app/components/page/client_token/new_token_component.rb": [
         null,
         null,
         1,
@@ -585,7 +585,7 @@
         null,
         null
       ],
-      "/dpc-portal/app/components/page/client_token/show_token_component.rb": [
+      "./dpc-portal/app/components/page/client_token/show_token_component.rb": [
         null,
         null,
         1,
@@ -603,7 +603,7 @@
         null,
         null
       ],
-      "/dpc-portal/app/components/page/credential_delegate/invitation_success_component.rb": [
+      "./dpc-portal/app/components/page/credential_delegate/invitation_success_component.rb": [
         null,
         null,
         1,
@@ -620,7 +620,7 @@
         null,
         null
       ],
-      "/dpc-portal/app/components/page/credential_delegate/list_component.rb": [
+      "./dpc-portal/app/components/page/credential_delegate/list_component.rb": [
         null,
         null,
         1,
@@ -639,7 +639,7 @@
         null,
         null
       ],
-      "/dpc-portal/app/components/page/credential_delegate/new_invitation_component.rb": [
+      "./dpc-portal/app/components/page/credential_delegate/new_invitation_component.rb": [
         null,
         null,
         1,
@@ -657,7 +657,7 @@
         null,
         null
       ],
-      "/dpc-portal/app/components/page/invitations/accept_invitation_component.rb": [
+      "./dpc-portal/app/components/page/invitations/accept_invitation_component.rb": [
         null,
         null,
         1,
@@ -674,7 +674,7 @@
         null,
         null
       ],
-      "/dpc-portal/app/components/page/invitations/ao_flow_fail_component.rb": [
+      "./dpc-portal/app/components/page/invitations/ao_flow_fail_component.rb": [
         null,
         null,
         1,
@@ -698,7 +698,7 @@
         null,
         null
       ],
-      "/dpc-portal/app/components/page/invitations/bad_invitation_component.rb": [
+      "./dpc-portal/app/components/page/invitations/bad_invitation_component.rb": [
         null,
         null,
         1,
@@ -722,7 +722,7 @@
         null,
         null
       ],
-      "/dpc-portal/app/components/page/invitations/invitation_login_component.rb": [
+      "./dpc-portal/app/components/page/invitations/invitation_login_component.rb": [
         null,
         null,
         1,
@@ -743,7 +743,7 @@
         null,
         null
       ],
-      "/dpc-portal/app/components/page/invitations/otp_component.rb": [
+      "./dpc-portal/app/components/page/invitations/otp_component.rb": [
         null,
         null,
         1,
@@ -759,7 +759,7 @@
         null,
         null
       ],
-      "/dpc-portal/app/components/page/invitations/register_component.rb": [
+      "./dpc-portal/app/components/page/invitations/register_component.rb": [
         null,
         null,
         1,
@@ -775,7 +775,7 @@
         null,
         null
       ],
-      "/dpc-portal/app/components/page/invitations/start_component.rb": [
+      "./dpc-portal/app/components/page/invitations/start_component.rb": [
         null,
         null,
         1,
@@ -799,7 +799,7 @@
         null,
         null
       ],
-      "/dpc-portal/app/components/page/invitations/success_component.rb": [
+      "./dpc-portal/app/components/page/invitations/success_component.rb": [
         null,
         null,
         1,
@@ -815,7 +815,7 @@
         null,
         null
       ],
-      "/dpc-portal/app/components/page/ip_address/new_address_component.rb": [
+      "./dpc-portal/app/components/page/ip_address/new_address_component.rb": [
         null,
         null,
         1,
@@ -833,7 +833,7 @@
         null,
         null
       ],
-      "/dpc-portal/app/components/page/organization/compound_show_component.rb": [
+      "./dpc-portal/app/components/page/organization/compound_show_component.rb": [
         null,
         null,
         1,
@@ -853,7 +853,7 @@
         null,
         null
       ],
-      "/dpc-portal/app/components/page/organization/credentials_component.rb": [
+      "./dpc-portal/app/components/page/organization/credentials_component.rb": [
         null,
         null,
         1,
@@ -870,7 +870,7 @@
         null,
         null
       ],
-      "/dpc-portal/app/components/page/organization/new_organization_component.rb": [
+      "./dpc-portal/app/components/page/organization/new_organization_component.rb": [
         null,
         null,
         1,
@@ -887,7 +887,7 @@
         null,
         null
       ],
-      "/dpc-portal/app/components/page/organization/new_organization_success_component.rb": [
+      "./dpc-portal/app/components/page/organization/new_organization_success_component.rb": [
         null,
         null,
         1,
@@ -902,7 +902,7 @@
         null,
         null
       ],
-      "/dpc-portal/app/components/page/organization/organization_list_component.rb": [
+      "./dpc-portal/app/components/page/organization/organization_list_component.rb": [
         null,
         null,
         1,
@@ -922,7 +922,7 @@
         null,
         null
       ],
-      "/dpc-portal/app/components/page/organization/tos_form_component.rb": [
+      "./dpc-portal/app/components/page/organization/tos_form_component.rb": [
         null,
         null,
         1,
@@ -939,7 +939,7 @@
         null,
         null
       ],
-      "/dpc-portal/app/components/page/public_key/new_key_component.rb": [
+      "./dpc-portal/app/components/page/public_key/new_key_component.rb": [
         null,
         null,
         1,
@@ -957,7 +957,7 @@
         null,
         null
       ],
-      "/dpc-portal/app/components/page/session/login_component.rb": [
+      "./dpc-portal/app/components/page/session/login_component.rb": [
         null,
         null,
         1,
@@ -972,7 +972,7 @@
         null,
         null
       ],
-      "/dpc-portal/app/components/page/utility/access_denied_component.rb": [
+      "./dpc-portal/app/components/page/utility/access_denied_component.rb": [
         null,
         null,
         1,
@@ -988,7 +988,7 @@
         null,
         null
       ],
-      "/dpc-portal/app/jobs/sync_organization_job.rb": [
+      "./dpc-portal/app/jobs/sync_organization_job.rb": [
         null,
         null,
         null,
@@ -1067,7 +1067,7 @@
         null,
         null
       ],
-      "/dpc-portal/app/jobs/verify_ao_job.rb": [
+      "./dpc-portal/app/jobs/verify_ao_job.rb": [
         null,
         null,
         null,
@@ -1157,7 +1157,7 @@
         null,
         null
       ],
-      "/dpc-portal/app/concerns/verification.rb": [
+      "./dpc-portal/app/concerns/verification.rb": [
         null,
         null,
         null,
@@ -1219,7 +1219,7 @@
         null,
         null
       ],
-      "/dpc-portal/app/jobs/verify_provider_organization_job.rb": [
+      "./dpc-portal/app/jobs/verify_provider_organization_job.rb": [
         null,
         null,
         null,
@@ -1258,7 +1258,7 @@
         null,
         null
       ],
-      "/dpc-portal/app/mailers/invitation_mailer.rb": [
+      "./dpc-portal/app/mailers/invitation_mailer.rb": [
         null,
         null,
         null,
@@ -1283,7 +1283,7 @@
         null,
         null
       ],
-      "/dpc-portal/app/models/ao_org_link.rb": [
+      "./dpc-portal/app/models/ao_org_link.rb": [
         null,
         null,
         null,
@@ -1304,7 +1304,7 @@
         1,
         null
       ],
-      "/dpc-portal/app/models/cd_org_link.rb": [
+      "./dpc-portal/app/models/cd_org_link.rb": [
         null,
         null,
         null,
@@ -1325,7 +1325,7 @@
         null,
         null
       ],
-      "/dpc-portal/app/models/credential_audit_log.rb": [
+      "./dpc-portal/app/models/credential_audit_log.rb": [
         null,
         null,
         null,
@@ -1338,7 +1338,7 @@
         1,
         null
       ],
-      "/dpc-portal/app/models/foo.rb": [
+      "./dpc-portal/app/models/foo.rb": [
         null,
         null,
         null,
@@ -1362,7 +1362,7 @@
         null,
         null
       ],
-      "/dpc-portal/app/services/user_info_service.rb": [
+      "./dpc-portal/app/services/user_info_service.rb": [
         null,
         null,
         null,
@@ -1441,7 +1441,7 @@
         null,
         1
       ],
-      "/dpc-portal/app/models/invitation.rb": [
+      "./dpc-portal/app/models/invitation.rb": [
         null,
         null,
         null,
@@ -1617,7 +1617,7 @@
         null,
         1
       ],
-      "/dpc-portal/app/models/provider_organization.rb": [
+      "./dpc-portal/app/models/provider_organization.rb": [
         null,
         null,
         null,
@@ -1707,7 +1707,7 @@
         null,
         null
       ],
-      "/dpc-portal/app/services/ao_invitation_service.rb": [
+      "./dpc-portal/app/services/ao_invitation_service.rb": [
         null,
         null,
         null,
@@ -1749,7 +1749,7 @@
         null,
         1
       ],
-      "/dpc-portal/app/services/ao_verification_service.rb": [
+      "./dpc-portal/app/services/ao_verification_service.rb": [
         null,
         null,
         null,
@@ -1876,7 +1876,7 @@
         null,
         1
       ],
-      "/dpc-portal/app/services/client_token_manager.rb": [
+      "./dpc-portal/app/services/client_token_manager.rb": [
         null,
         null,
         null,
@@ -1913,7 +1913,7 @@
         null,
         null
       ],
-      "/dpc-portal/app/services/cpi_api_gateway_client.rb": [
+      "./dpc-portal/app/services/cpi_api_gateway_client.rb": [
         null,
         null,
         1,
@@ -2027,7 +2027,7 @@
         null,
         null
       ],
-      "/dpc-portal/app/services/ip_address_manager.rb": [
+      "./dpc-portal/app/services/ip_address_manager.rb": [
         null,
         null,
         null,
@@ -2117,7 +2117,7 @@
         null,
         null
       ],
-      "/dpc-portal/app/services/public_key_manager.rb": [
+      "./dpc-portal/app/services/public_key_manager.rb": [
         null,
         null,
         null,
@@ -2183,7 +2183,7 @@
         null,
         null
       ],
-      "/dpc-portal/app/controllers/application_controller.rb": [
+      "./dpc-portal/app/controllers/application_controller.rb": [
         null,
         null,
         null,
@@ -2303,7 +2303,7 @@
         null,
         null
       ],
-      "/dpc-portal/app/controllers/client_tokens_controller.rb": [
+      "./dpc-portal/app/controllers/client_tokens_controller.rb": [
         null,
         null,
         null,
@@ -2359,7 +2359,7 @@
         null,
         null
       ],
-      "/dpc-portal/app/controllers/credential_delegate_invitations_controller.rb": [
+      "./dpc-portal/app/controllers/credential_delegate_invitations_controller.rb": [
         null,
         null,
         null,
@@ -2437,7 +2437,7 @@
         null,
         null
       ],
-      "/dpc-portal/app/controllers/invitations_controller.rb": [
+      "./dpc-portal/app/controllers/invitations_controller.rb": [
         null,
         null,
         null,
@@ -2754,7 +2754,7 @@
         null,
         null
       ],
-      "/dpc-portal/app/controllers/login_dot_gov_controller.rb": [
+      "./dpc-portal/app/controllers/login_dot_gov_controller.rb": [
         null,
         null,
         null,
@@ -2847,7 +2847,7 @@
         null,
         null
       ],
-      "/dpc-portal/app/controllers/organizations_controller.rb": [
+      "./dpc-portal/app/controllers/organizations_controller.rb": [
         null,
         null,
         null,
@@ -2943,7 +2943,7 @@
         null,
         null
       ],
-      "/dpc-portal/app/controllers/ip_addresses_controller.rb": [
+      "./dpc-portal/app/controllers/ip_addresses_controller.rb": [
         null,
         null,
         null,
@@ -2985,7 +2985,7 @@
         null,
         null
       ],
-      "/dpc-portal/app/controllers/public_keys_controller.rb": [
+      "./dpc-portal/app/controllers/public_keys_controller.rb": [
         null,
         null,
         null,
@@ -3054,7 +3054,7 @@
         null,
         null
       ],
-      "/dpc-portal/app/controllers/users/sessions_controller.rb": [
+      "./dpc-portal/app/controllers/users/sessions_controller.rb": [
         null,
         null,
         1,
@@ -3073,6 +3073,6 @@
         null
       ]
     },
-    "timestamp": 1727106866
+    "timestamp": 1727110515
   }
 }
