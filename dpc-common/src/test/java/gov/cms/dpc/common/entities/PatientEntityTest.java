@@ -1,15 +1,12 @@
 package gov.cms.dpc.common.entities;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import org.junit.jupiter.api.Test;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import org.junit.jupiter.api.Test;
+
+import java.time.*;
+import java.util.*;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class PatientEntityTest {
 
@@ -82,5 +79,21 @@ public class PatientEntityTest {
 		assertNotNull(convertedDate);
 		assertNotNull(utilityDate);
 		assertEquals(localDate, convertedDate);
+	}
+
+	@Test
+	public void testToLocalDateHandlesTimeZoneChange() {
+		// Date is in our local time zone, but converting it to an instant stores it in UTC.  1/1/2024 at 11:30pm EST is
+		// 1/2/2024 12:30am UTC.  When we convert this back to a LocalDate, it becomes 1/2/2024 instead of 1/1/2024 if
+		// we don't manage time zones correctly.
+
+		// 1/1/2024 11:55pm EST
+		Date testDate = new Calendar.Builder()
+			.setDate(2024, 0, 1)
+			.setTimeOfDay(23, 55, 0).build().getTime();
+
+		LocalDate resultLocalDate = PatientEntity.toLocalDate(testDate);
+
+		assertEquals(LocalDate.of(2024, 1, 1), resultLocalDate);
 	}
 }
