@@ -33,7 +33,7 @@ jobs:
             SONAR_TOKEN=/sonarqube/token
       - name: Build good resultset
         run: |
-          cat ./resultset.json | jq '.RSpec.coverage |= with_entries(if .key | contains("dpc-portal") then .key |= sub("/dpc-portal"; "/github/workspace/dpc-portal") else . end)' > resultset_fixed_portal.json
+          cat ./resultset.json | jq '.RSpec.coverage |= with_entries(if .key | contains("dpc-portal") then .key |= sub("/dpc-portal"; "/github/workspace/dpc-app/dpc-portal") else . end)' > resultset_fixed_portal.json
       - name: Run quality gate scan
         uses: sonarsource/sonarqube-scan-action@master
         with:
