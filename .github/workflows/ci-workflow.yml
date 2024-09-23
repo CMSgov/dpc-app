@@ -55,6 +55,9 @@ jobs:
       - name: Package and Test
         run: |
           mvn package -Pci -ntp
+      - name: Jacoco Report
+        run: |
+          mvn jacoco:report -ntp
       - name: Run quality gate scan
         run: |
           mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.7.0.1746:sonar -Dsonar.projectKey=bcda-dpc-api -Dsonar.branch.name=${{ github.event_name == 'pull_request' && github.head_ref || github.event_name == 'pull_request' && github.head_ref || github.ref_name }} -Dsonar.working.directory=./.sonar_workspace -Dsonar.projectVersion=${{ github.ref_name == 'main' && github.sha || 'branch' }} -Dsonar.qualitygate.wait=true
