@@ -16,4 +16,10 @@ RSpec.describe Bar, type: :model do
   it 'should something_bar else c' do
     expect(bar.something_bar_else('c')).to eq 'c'
   end
+  it 'should something_bar third e' do
+    expect(bar.something_bar_third('e')).to eq 'e'
+  end
+  it 'should something_bar third f' do
+    expect(bar.something_bar_third('f')).to eq 'f'
+  end
 end
