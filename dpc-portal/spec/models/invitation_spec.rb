@@ -473,10 +473,15 @@ RSpec.describe Invitation, type: :model do
       invitation = create(:invitation, :cd, status: :cancelled)
       expect(invitation.unacceptable_reason).to eq 'invalid'
     end
-    it 'should be invalid if accepted' do
+    it 'should be ao_accepted if accepted and ao' do
       invitation = create(:invitation, :ao)
       invitation.accept!
       expect(invitation.unacceptable_reason).to eq 'ao_accepted'
+    end
+    it 'should be cd_accepted if accepted and cd' do
+      invitation = create(:invitation, :cd)
+      invitation.accept!
+      expect(invitation.unacceptable_reason).to eq 'cd_accepted'
     end
     it 'should be ao_renewed if renewed and authorized_official' do
       invitation = create(:invitation, :ao, created_at: 49.hours.ago, status: :renewed)
