@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # It Foos
-class Foo < ApplicationRecord
+class Foo
   def something(check)
     return 'a' if check == 'a'
 
