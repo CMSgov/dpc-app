@@ -23,6 +23,27 @@ jobs:
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v1
-      - name: Grep for foo
+      - name: Verify files
         run: |
-          grep foo ./resultset.json
+          cat /opt/actions-runner/_work/dpc-app/dpc-app/resultset.json
+          cat /opt/actions-runner/_work/dpc-app/dpc-app/dpc-portal/app/models/foo.rb
+      - name: Set env vars from AWS params
+        uses: cmsgov/ab2d-bcda-dpc-platform/actions/aws-params-env-action@main
+        env:
+          AWS_REGION: ${{ vars.AWS_REGION }}
+        with:
+          params: |
+            SONAR_HOST_URL=/sonarqube/url
+            SONAR_TOKEN=/sonarqube/token
+      - name: Run quality gate scan
+        uses: sonarsource/sonarqube-scan-action@master
+        with:
+          args:
+            -Dsonar.projectKey=bcda-dpc-portal
+            -Dsonar.sources=./dpc-portal/app,./dpc-portal/lib
+            -Dsonar.coverage.exclusions=**/*_preview.rb,**/*html.erb,**/application_*
+            -Dsonar.ruby.coverage.reportPaths=/opt/actions-runner/_work/dpc-app/dpc-app/resultset.json
+            -Dsonar.working.directory=./sonar_workspace
+            -Dsonar.branch.name=${{ github.event_name == 'pull_request' && github.head_ref || github.ref_name }}
+            -Dsonar.projectVersion=${{ github.ref_name == 'main' && github.sha || 'branch' }}
+            -Dsonar.qualitygate.wait=true
