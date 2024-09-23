@@ -21,7 +21,8 @@ RSpec.describe Page::Invitations::SuccessComponent, type: :component do
 
   describe 'cd' do
     let(:invitation) { create(:invitation, :cd) }
-    let(:component) { described_class.new(invitation.provider_organization, invitation, 'Paola', 'Pineiro') }
+    let(:org) { ComponentSupport::MockOrg.new }
+    let(:component) { described_class.new(org, invitation, 'Paola', 'Pineiro') }
 
     before { render_inline(component) }
 
@@ -30,8 +31,8 @@ RSpec.describe Page::Invitations::SuccessComponent, type: :component do
       expect(page.find('.usa-step-indicator__current-step').text).to eq '4'
     end
 
-    it "should have the invited user's name" do
-      expect(page).to have_text('Paola Pineiro')
+    it "should have the organization's name" do
+      expect(page).to have_text(org.name)
     end
   end
 end
