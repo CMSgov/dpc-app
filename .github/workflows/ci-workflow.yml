@@ -47,4 +47,4 @@ jobs:
           name: code-coverage-report-dpc-portal
       - name: Check for download
         run: |
-          cat ./dpc-portal/coverage/resultset.json
+          find /  -name resultset.json
