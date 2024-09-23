@@ -23,7 +23,6 @@ jobs:
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v1
-      - name: Can load pwd
+      - name: Current dir
         run: |
-          export CURRENT_DIR=pwd
-          echo $CURRENT_DIR
+          cat ./resultset.json | jq '.RSpec.coverage |= with_entries(if .key | contains("dpc-portal") then .key |= sub("/dpc-portal"; "${{ github.workspace }}/dpc-portal") else . end)'
