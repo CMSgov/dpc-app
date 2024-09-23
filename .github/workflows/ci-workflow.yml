@@ -187,6 +187,9 @@ jobs:
           java-version: '11'
           distribution: temurin
           cache: maven
+      - name: Build base image
+        run: |
+          docker build . -f docker/Dockerfiles/Dockerfile.base -t dpc-base
       - name: Set env vars from AWS params
         uses: cmsgov/ab2d-bcda-dpc-platform/actions/aws-params-env-action@main
         env:
