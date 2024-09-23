@@ -23,7 +23,6 @@ jobs:
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v1
-      - name: "find code"
+      - name: Grep for foo
         run: |
-          cat /opt/actions-runner/_work/dpc-app/dpc-app/dpc-portal/app/models/foo.rb
-          
+          grep foo ./resultset.json
