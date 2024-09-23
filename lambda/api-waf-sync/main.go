@@ -56,8 +56,7 @@ func updateIpSet() (map[string]any, error) {
 		return nil, secretErr
 	}
 
-	ipAddresses := params["Addresses"].([]string)
-	authDbErr := getAuthData(secretsInfo[authDbUser], secretsInfo[authDbPassword], ipAddresses)
+	ipAddresses, authDbErr := getAuthData(secretsInfo[authDbUser], secretsInfo[authDbPassword])
 	if authDbErr != nil {
 		return nil, authDbErr
 	}

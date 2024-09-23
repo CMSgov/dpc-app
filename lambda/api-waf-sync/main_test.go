@@ -15,6 +15,7 @@ func TestIntegrationUpdateIpSet(t *testing.T) {
 	oriGetSecrets := getSecrets
 	oriCreateConnection := createConnection
 	oriGetAuthData := getAuthData
+	oriGetAssumeRoleArn := getArnValue
 
 	tests := []struct {
 		err      error
@@ -30,9 +31,12 @@ func TestIntegrationUpdateIpSet(t *testing.T) {
 					}, nil
 				}
 
-				getAuthData = func(dbUser string, dbPassword string, ipAddresses []string) error {
-					_ = append(ipAddresses, "127.0.0.1")
-					return nil
+				getAuthData = func(dbUser string, dbPassword string) ([]string, error) {
+					return []string{"127.0.0.1"}, nil
+				}
+
+				getArnValue = func() (string, error) {
+					return "arn:aws:iam::577373831711:role/bfd-test-eft-dpc-bucket-role", nil
 				}
 			},
 		},
@@ -58,4 +62,5 @@ func TestIntegrationUpdateIpSet(t *testing.T) {
 	getSecrets = oriGetSecrets
 	createConnection = oriCreateConnection
 	getAuthData = oriGetAuthData
+	getArnValue = oriGetAssumeRoleArn
 }

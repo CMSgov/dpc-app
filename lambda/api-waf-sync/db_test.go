@@ -33,8 +33,7 @@ func TestGetAuthData(t *testing.T) {
 
 	for _, test := range tests {
 		mock.ExpectQuery(ipAddressQuery).WillReturnRows(test.ipAddressResult)
-		ipAddresses := []string{}
-		err = getAuthData("user", "pass", ipAddresses)
+		ipAddresses, err := getAuthData("user", "pass")
 		assert.Equal(t, test.expectedIpAddresses, ipAddresses)
 		assert.Equal(t, test.err, err)
 	}

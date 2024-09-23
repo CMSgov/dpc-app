@@ -23,6 +23,7 @@ type Parameters struct {
 var listIpSetsWaf = (*wafv2.WAFV2).ListIPSets
 var getIpSetWaf = (*wafv2.WAFV2).GetIPSet
 var updateIpSetWaf = (*wafv2.WAFV2).UpdateIPSet
+var getArnValue = getAssumeRoleArn
 
 func createSession() (*session.Session, error) {
 	sess := session.Must(session.NewSession())
@@ -37,7 +38,7 @@ func createSession() (*session.Session, error) {
 			},
 		})
 	} else {
-		assumeRoleArn, err := getAssumeRoleArn()
+		assumeRoleArn, err := getArnValue()
 
 		if err == nil {
 			sess, _ = session.NewSession(&aws.Config{
@@ -67,7 +68,7 @@ func getAssumeRoleArn() (string, error) {
 		return val, nil
 	}
 
-	parameterName := fmt.Sprintf("/api-waf-sync/dpc/%s/bfd-bucket-role-arn", os.Getenv("ENV"))
+	parameterName := fmt.Sprintf("/opt-out-import/dpc/%s/bfd-bucket-role-arn", os.Getenv("ENV")) //todo: make buckets for api-waf-sync?
 
 	var keynames []*string = make([]*string, 1)
 	keynames[0] = &parameterName
@@ -150,7 +151,7 @@ func updateIPSetInWAF(ipSetName string, ipAddresses []string) (map[string]any, e
 		return nil, fmt.Errorf("failed to create session to update ip set, %v", sessErr)
 	}
 
-	assumeRoleArn, arnErr := getAssumeRoleArn()
+	assumeRoleArn, arnErr := getArnValue()
 	if arnErr != nil {
 		return nil, fmt.Errorf("failed to get ARN, %v", arnErr)
 	}
