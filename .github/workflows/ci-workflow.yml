@@ -23,6 +23,8 @@ jobs:
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v1
-      - name: JQ exists
+      - name: Can load pwd
+        env:
+          CURRENT_DIR: pwd
         run: |
-          which jq
+          echo $CURRENT_DIR
