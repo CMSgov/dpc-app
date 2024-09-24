@@ -1,7 +1,7 @@
 name: "DPC CI Workflow"
 
 on:
-  push:
+  pull_request:
     paths-ignore:
       - .github/workflows/opt-out-*
       - lambda/**
@@ -46,12 +46,12 @@ jobs:
           make ci-web-portal
       - name: "Reformat test results" # Sonarqube will run in a docker container and wants the paths to be from /github/workspace
         run: |
-          sudo jq '.RSpec.coverage |= with_entries(if .key | contains("dpc-web") then .key |= sub("/dpc-web"; "/github/workspace/dpc-web") else . end)' dpc-web/coverage/.resultset.json > webresultset.json
+          sudo jq '.RSpec.coverage |= with_entries(if .key | contains("dpc-web") then .key |= sub("/dpc-web"; "/github/workspace/dpc-web") else . end)' dpc-web/coverage/.resultset.json > web-resultset.json
       - name: Archive code coverage results
         uses: actions/upload-artifact@v3
         with:
           name: code-coverage-report-dpc-web
-          path: ./webresultset.json
+          path: ./web-resultset.json
 
   build-dpc-admin:
     name: "Build and Test DPC Admin Portal"
@@ -64,12 +64,12 @@ jobs:
           make ci-admin-portal
       - name: "Reformat test results" # Sonarqube will run in a docker container and wants the paths to be from /github/workspace
         run: |
-          sudo jq '.RSpec.coverage |= with_entries(if .key | contains("dpc-admin") then .key |= sub("/dpc-admin"; "/github/workspace/dpc-admin") else . end)' dpc-admin/coverage/.resultset.json > adminresultset.json
+          sudo jq '.RSpec.coverage |= with_entries(if .key | contains("dpc-admin") then .key |= sub("/dpc-admin"; "/github/workspace/dpc-admin") else . end)' dpc-admin/coverage/.resultset.json > admin-resultset.json
       - name: Archive code coverage results
         uses: actions/upload-artifact@v3
         with:
           name: code-coverage-report-dpc-admin
-          path: ./adminresultset.json
+          path: ./admin-resultset.json
 
   build-dpc-portal:
     name: "Build and Test DPC Portal"
@@ -82,12 +82,12 @@ jobs:
           make ci-portal
       - name: "Reformat test results" # Sonarqube will run in a docker container and wants the paths to be from /github/workspace
         run: |
-          sudo jq '.RSpec.coverage |= with_entries(if .key | contains("dpc-portal") then .key |= sub("/dpc-portal"; "/github/workspace/dpc-portal") else . end)' dpc-portal/coverage/.resultset.json > portalresultset.json
+          sudo jq '.RSpec.coverage |= with_entries(if .key | contains("dpc-portal") then .key |= sub("/dpc-portal"; "/github/workspace/dpc-portal") else . end)' dpc-portal/coverage/.resultset.json > portal-resultset.json
       - name: Archive code coverage results
         uses: actions/upload-artifact@v3
         with:
           name: code-coverage-report-dpc-portal
-          path: ./portalresultset.json
+          path: ./portal-resultset.json
 
   build-dpc-client:
     name: "Build and Test DPC Client"
@@ -131,7 +131,7 @@ jobs:
           args:
             -Dsonar.projectKey=bcda-dpc-web
             -Dsonar.sources=./dpc-web/app,./dpc-web/lib,./dpc-admin/app,./dpc-admin/lib
-            -Dsonar.ruby.coverage.reportPaths=./webresultset.json,./adminresultset.json
+            -Dsonar.ruby.coverage.reportPaths=./web-resultset.json,./admin-resultset.json
             -Dsonar.working.directory=./sonar_workspace
             -Dsonar.branch.name=${{ github.event_name == 'pull_request' && github.head_ref || github.ref_name }}
             -Dsonar.projectVersion=${{ github.ref_name == 'main' && github.sha || 'branch' }}
@@ -166,7 +166,7 @@ jobs:
             -Dsonar.projectKey=bcda-dpc-portal
             -Dsonar.sources=./dpc-portal/app,./dpc-portal/lib
             -Dsonar.coverage.exclusions=**/*_preview.rb,**/*html.erb,**/application_*
-            -Dsonar.ruby.coverage.reportPaths=./portalresultset.json
+            -Dsonar.ruby.coverage.reportPaths=./portal-resultset.json
             -Dsonar.working.directory=./sonar_workspace
             -Dsonar.branch.name=${{ github.event_name == 'pull_request' && github.head_ref || github.ref_name }}
             -Dsonar.projectVersion=${{ github.ref_name == 'main' && github.sha || 'branch' }}
