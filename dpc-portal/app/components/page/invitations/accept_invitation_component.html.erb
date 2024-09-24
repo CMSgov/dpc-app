@@ -14,7 +14,7 @@
     <p>Thank you for signing in, <%= @name %>.</p>
 
     <p>Now that we've confirmed your identity via Login.gov you can complete your acceptance of this invite.</p>
-    <%= render Core::Button::ButtonComponent.new(label: 'Accept Invite',
+    <%= render Core::Button::ButtonComponent.new(label: 'Accept invite',
         destination: accept_organization_invitation_path(@organization, @invitation),
         method: :post) %>
     <% end %>

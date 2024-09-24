@@ -2,8 +2,11 @@
 <%= render(Core::Navigation::StepIndicatorComponent.new(Invitation::CD_STEPS, 3)) if @invitation.credential_delegate? %>
 <div>
   <% if @invitation.credential_delegate? %>
-    <p>You're now authorized to manage the DPC API for <%= @organization.name %>.</p>
-
+    <div class="usa-alert usa-alert--success margin-bottom-4">
+      <div class="usa-alert__body">
+        <p class="usa-alert__text">You're now authorized to manage the DPC API for <%= @organization.name %>.</p>
+      </div>
+    </div>
     <p>Thank you for accepting your invite. You can now manage your organization's credentials in the DPC Portal.</p>
   <% else %>
   <div class="usa-alert usa-alert--success margin-bottom-4">
