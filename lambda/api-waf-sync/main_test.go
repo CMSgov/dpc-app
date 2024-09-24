@@ -36,7 +36,7 @@ func TestIntegrationUpdateIpSet(t *testing.T) {
 				}
 
 				getArnValue = func() (string, error) {
-					return "arn:aws:iam::577373831711:role/bfd-test-eft-dpc-bucket-role", nil
+					return "arn:aws:iam::755619740999:role/delegatedadmin/developer/dpc-dev-api-waf-sync-function", nil
 				}
 			},
 		},
@@ -51,6 +51,8 @@ func TestIntegrationUpdateIpSet(t *testing.T) {
 		sess, sessErr := createSession()
 		assert.Nil(t, sessErr)
 		wafsvc := wafv2.New(sess)
+		println("IP SETS FOUND:")
+		println(wafsvc.ListIPSets(&wafv2.ListIPSetsInput{Scope: aws.String("CLOUDFRONT")}))
 		ipSet, wafErr := (*wafv2.WAFV2).GetIPSet(wafsvc, &wafv2.GetIPSetInput{
 			Id:   aws.String(params["Id"].(string)),
 			Name: aws.String(params["Name"].(string)),
