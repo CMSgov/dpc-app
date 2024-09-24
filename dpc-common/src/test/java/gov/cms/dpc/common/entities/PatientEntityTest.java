@@ -83,9 +83,8 @@ public class PatientEntityTest {
 
 	@Test
 	public void testToLocalDateHandlesTimeZoneChange() {
-		// Date is in our local time zone, but converting it to an instant stores it in UTC.  1/1/2024 at 11:30pm EST is
-		// 1/2/2024 12:30am UTC.  When we convert this back to a LocalDate, it becomes 1/2/2024 instead of 1/1/2024 if
-		// we don't manage time zones correctly.
+		// A previous version of toLocalDate failed when converting a date/time close to midnight because it converted
+		// to UTC before getting the LocalDate.  Make sure that's no longer the case.
 
 		// 1/1/2024 11:55pm EST
 		Date testDate = new Calendar.Builder()
