@@ -40,7 +40,7 @@ RSpec.describe Page::Invitations::AcceptInvitationComponent, type: :component do
       let(:cd_invite) { Invitation.new(id: 6, invitation_type: :credential_delegate) }
       let(:component) { described_class.new(org, cd_invite, given_name, family_name) }
       it 'should match form method and action' do
-        form_url = "/portal/organizations/#{org.path_id}/invitations/#{cd_invite.id}/accept"
+        form_url = "/portal/organizations/#{org.path_id}/invitations/#{cd_invite.id}/register"
         form_method_action = %(method="post" action="#{form_url}")
         is_expected.to include(form_method_action)
       end

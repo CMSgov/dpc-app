@@ -67,7 +67,7 @@ class InvitationsController < ApplicationController
     return if performed?
 
     session["invitation_status_#{@invitation.id}"] = 'verification_complete'
-    render(Page::Invitations::RegisterComponent.new(@organization, @invitation))
+    render(Page::Invitations::AcceptInvitationComponent.new(@organization, @invitation, @given_name, @family_name))
   end
 
   # Everybody
