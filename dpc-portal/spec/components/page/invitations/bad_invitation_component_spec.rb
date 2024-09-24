@@ -17,7 +17,18 @@ RSpec.describe Page::Invitations::BadInvitationComponent, type: :component do
 
     let(:provider_organization) { create(:provider_organization, name: 'Health Hut') }
     let(:invitation) { create(:invitation, :ao, provider_organization:) }
-    context 'invalid invitation' do
+    context 'ao invalid invitation' do
+      let(:component) { described_class.new(invitation, 'invalid') }
+      it 'should match header' do
+        header = <<~HTML
+          <h1>#{I18n.t('verification.invalid_status')}</h1>
+        HTML
+        is_expected.to include(normalize_space(header))
+      end
+    end
+
+    context 'cd invalid invitation' do
+      let(:invitation) { create(:invitation, :cd, provider_organization:) }
       let(:component) { described_class.new(invitation, 'invalid') }
       it 'should match header' do
         header = <<~HTML
@@ -41,13 +52,43 @@ RSpec.describe Page::Invitations::BadInvitationComponent, type: :component do
       end
     end
 
-    context 'Already accepted' do
-      let(:component) { described_class.new(invitation, 'accepted') }
+    context 'Email mismatch' do
+      let(:invitation) { create(:invitation, :cd, provider_organization:) }
+      let(:component) { described_class.new(invitation, 'email_mismatch') }
       it 'should match header' do
         header = <<~HTML
-          <h1>#{I18n.t('verification.accepted_status')}</h1>
+          <h1>#{CGI.escapeHTML(I18n.t('verification.email_mismatch_status'))}</h1>
         HTML
         is_expected.to include(normalize_space(header))
+      end
+      it 'should have logout button' do
+        button_url = "/logout?invitation_id=#{invitation.id}"
+        is_expected.to include(button_url)
+      end
+    end
+
+    context 'AO already accepted' do
+      let(:component) { described_class.new(invitation, 'ao_accepted') }
+      it 'should match header' do
+        header = <<~HTML
+          <h1>#{I18n.t('verification.ao_accepted_status')}</h1>
+        HTML
+        is_expected.to include(normalize_space(header))
+      end
+    end
+
+    context 'CD already accepted' do
+      let(:component) { described_class.new(invitation, 'cd_accepted') }
+      it 'should match header' do
+        header = <<~HTML
+          <h1>#{I18n.t('verification.cd_accepted_status')}</h1>
+        HTML
+        is_expected.to include(normalize_space(header))
+      end
+
+      it 'should have Go to DPC home button' do
+        button_url = 'https://dpc.cms.gov/'
+        is_expected.to include(button_url)
       end
     end
 
@@ -78,6 +119,28 @@ RSpec.describe Page::Invitations::BadInvitationComponent, type: :component do
           button_url = "/organizations/#{provider_organization.id}/invitations/#{invitation.id}/renew"
           is_expected.not_to include(button_url)
         end
+      end
+    end
+
+    context 'CD expired' do
+      let(:status) { :pending }
+      let(:invitation) { create(:invitation, :cd, provider_organization:, status:) }
+      let(:component) { described_class.new(invitation, 'cd_expired') }
+      it 'should match header' do
+        header = <<~HTML
+          <h1>#{I18n.t('verification.cd_expired_status')}</h1>
+        HTML
+        is_expected.to include(normalize_space(header))
+      end
+    end
+
+    context 'Server error' do
+      let(:component) { described_class.new(invitation, 'server_error') }
+      it 'should match header' do
+        header = <<~HTML
+          <h1>#{I18n.t('verification.server_error_status')}</h1>
+        HTML
+        is_expected.to include(normalize_space(header))
       end
     end
   end

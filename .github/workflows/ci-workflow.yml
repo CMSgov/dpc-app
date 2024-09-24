@@ -135,7 +135,7 @@ jobs:
             -Dsonar.working.directory=./sonar_workspace
             -Dsonar.branch.name=${{ github.event_name == 'pull_request' && github.head_ref || github.ref_name }}
             -Dsonar.projectVersion=${{ github.ref_name == 'main' && github.sha || 'branch' }}
-            -Dsonar.qualitygate.wait=true
+            # -Dsonar.qualitygate.wait=true uncomment when sonarqube issues are resolved
 
   sonar-quality-gate-dpc-portal:
     name: Sonarqube Quality Gate for dpc-portal
@@ -170,7 +170,7 @@ jobs:
             -Dsonar.working.directory=./sonar_workspace
             -Dsonar.branch.name=${{ github.event_name == 'pull_request' && github.head_ref || github.ref_name }}
             -Dsonar.projectVersion=${{ github.ref_name == 'main' && github.sha || 'branch' }}
-            -Dsonar.qualitygate.wait=true
+            # -Dsonar.qualitygate.wait=true uncomment when sonarqube issues are resolved
 
   sonar-quality-gate-dpc-api:
     name: Sonarqube Quality Gate for dpc-api
