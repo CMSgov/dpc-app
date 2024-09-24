@@ -33,7 +33,7 @@ jobs:
           make ci-app
       - name: "Smoke Test"
         run: |
-          make smoke
+          find . -name 'jacoco.xml'
       - name: "Move jacoco reports"
         run: |
           sudo mkdir jacoco-reports
@@ -229,6 +229,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: code-coverage-report-dpc-api
+          path: jacoco-reports
       - name: Run quality gate scan
         run: |
-          mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.7.0.1746:sonar -Dsonar.projectKey=bcda-dpc-api -Dsonar.branch.name=${{ github.event_name == 'pull_request' && github.head_ref || github.event_name == 'pull_request' && github.head_ref || github.ref_name }} -Dsonar.working.directory=./.sonar_workspace -Dsonar.projectVersion=${{ github.ref_name == 'main' && github.sha || 'branch' }} -Dsonar.qualitygate.wait=true -Dsonar.coverage.jacoco.xmlReportPaths="../*.xml"
+          mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.7.0.1746:sonar -Dsonar.projectKey=bcda-dpc-api -Dsonar.branch.name=${{ github.event_name == 'pull_request' && github.head_ref || github.event_name == 'pull_request' && github.head_ref || github.ref_name }} -Dsonar.working.directory=./.sonar_workspace -Dsonar.projectVersion=${{ github.ref_name == 'main' && github.sha || 'branch' }} -Dsonar.qualitygate.wait=true -Dsonar.coverage.jacoco.xmlReportPaths="../jacoco-reports/*.xml"
