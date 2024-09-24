@@ -17,8 +17,9 @@ class Invitation < ApplicationRecord
   belongs_to :provider_organization, required: true
   belongs_to :invited_by, class_name: 'User', required: false
 
-  STEPS = ['Sign in or create a Login.gov account', 'Confirm your identity', 'Confirm organization registration',
-           'Finished'].freeze
+  AO_STEPS = ['Sign in or create a Login.gov account', 'Confirm your identity', 'Confirm organization registration',
+              'Finished'].freeze
+  CD_STEPS = ['Enter invite code', 'Sign in or create a Login.gov account', 'Accept invite', 'Finished'].freeze
   MAX_ATTEMPTS = 5
 
   def phone_raw=(nbr)
@@ -75,14 +76,6 @@ class Invitation < ApplicationRecord
     invitation
   end
 
-  def match_user?(user_info)
-    if credential_delegate?
-      cd_match?(user_info)
-    elsif authorized_official?
-      email_match?(user_info)
-    end
-  end
-
   def ao_match?(user_info)
     check_missing_user_info(user_info, 'social_security_number')
 
@@ -94,17 +87,15 @@ class Invitation < ApplicationRecord
     result
   end
 
-  def unacceptable_reason # rubocop:disable Metrics/CyclomaticComplexity,Metrics/PerceivedComplexity
+  def unacceptable_reason # rubocop:disable Metrics/CyclomaticComplexity,Metrics/PerceivedComplexity,Metrics/AbcSize
     return 'invalid' if cancelled?
-    return 'accepted' if accepted?
     return 'ao_renewed' if renewed? && authorized_official?
     return 'max_tries_exceeded' if attempts_remaining.zero?
+    return 'ao_accepted' if accepted? && authorized_official?
+    return 'cd_accepted' if accepted? && credential_delegate?
+    return 'ao_expired' if expired? && authorized_official?
 
-    if expired? && authorized_official?
-      'ao_expired'
-    elsif expired?
-      'invalid'
-    end
+    'cd_expired' if expired? && credential_delegate?
   end
 
   def expires_in
@@ -114,29 +105,27 @@ class Invitation < ApplicationRecord
     [hours, minutes]
   end
 
-  private
-
   def cd_match?(user_info)
     cd_info_present?(user_info)
 
     return false unless invited_given_name.downcase == user_info['given_name'].downcase &&
                         invited_family_name.downcase == user_info['family_name'].downcase
 
-    return false unless phone_match(user_info)
-
-    email_match?(user_info)
-  end
-
-  def cd_info_present?(user_info)
-    %w[given_name family_name phone].each do |key|
-      check_missing_user_info(user_info, key)
-    end
+    phone_match(user_info)
   end
 
   def email_match?(user_info)
     check_missing_user_info(user_info, 'email')
 
     user_info['email'].downcase == invited_email.downcase
+  end
+
+  private
+
+  def cd_info_present?(user_info)
+    %w[given_name family_name phone].each do |key|
+      check_missing_user_info(user_info, key)
+    end
   end
 
   def check_missing_user_info(user_info, key)
