@@ -31,6 +31,26 @@ jobs:
       - name: "API Build"
         run: |
           make ci-app
+      - name: "Move jacoco reports"
+        run: |
+          sudo mkdir jacoco-reports
+          sudo cp ./dpc-aggregation/target/site/jacoco-it/jacoco.xml jacoco-reports/dpc-aggregation-it-jacoco.xml
+          sudo cp ./dpc-aggregation/target/site/jacoco/jacoco.xml jacoco-reports/dpc-aggregation-jacoco.xml
+          sudo cp ./dpc-api/target/site/jacoco-it/jacoco.xml jacoco-reports/dpc-api-it-jacoco.xml
+          sudo cp ./dpc-api/target/site/jacoco/jacoco.xml jacoco-reports/dpc-api-jacoco.xml
+          sudo cp ./dpc-attribution/target/site/jacoco-it/jacoco.xml jacoco-reports/dpc-attribution-it-jacoco.xml
+          sudo cp ./dpc-attribution/target/site/jacoco/jacoco.xml jacoco-reports/dpc-attribution-jacoco.xml
+          sudo cp ./dpc-bluebutton/target/site/jacoco/jacoco.xml jacoco-reports/dpc-bluebutton-jacoco.xml
+          sudo cp ./dpc-common/target/site/jacoco/jacoco.xml jacoco-reports/dpc-common-jacoco.xml
+          sudo cp ./dpc-consent/target/site/jacoco-it/jacoco.xml jacoco-reports/dpc-consent-it-jacoco.xml
+          sudo cp ./dpc-consent/target/site/jacoco/jacoco.xml jacoco-reports/dpc-consent-jacoco.xml
+          sudo cp ./dpc-macaroons/target/site/jacoco/jacoco.xml jacoco-reports/dpc-macaroons-jacoco.xml
+          sudo cp ./dpc-queue/target/site/jacoco/jacoco.xml jacoco-reports/dpc-queue-jacoco.xml
+      - name: Upload jacoco reports
+        uses: actions/upload-artifact@v3
+        with:
+          name: code-coverage-report-dpc-api
+          path: ./jacoco-reports
       - name: "Smoke Test"
         run: |
           make smoke
@@ -44,14 +64,14 @@ jobs:
       - name: "DPC Web Build"
         run: |
           make ci-web-portal
-      - name: "Move the test results" # won't upload hidden files
+      - name: "Reformat test results" # Sonarqube will run in a docker container and wants the paths to be from /github/workspace
         run: |
-          sudo mv ./dpc-web/coverage/.resultset.json ./dpc-web/coverage/resultset.json
+          sudo jq '.RSpec.coverage |= with_entries(if .key | contains("dpc-web") then .key |= sub("/dpc-web"; "/github/workspace/dpc-web") else . end)' dpc-web/coverage/.resultset.json > web-resultset.json
       - name: Archive code coverage results
         uses: actions/upload-artifact@v3
         with:
           name: code-coverage-report-dpc-web
-          path: ./dpc-web/coverage/resultset.json
+          path: ./web-resultset.json
 
   build-dpc-admin:
     name: "Build and Test DPC Admin Portal"
@@ -62,14 +82,14 @@ jobs:
       - name: "DPC Admin Portal Build"
         run: |
           make ci-admin-portal
-      - name: "Move the test results" # won't upload hidden files
+      - name: "Reformat test results" # Sonarqube will run in a docker container and wants the paths to be from /github/workspace
         run: |
-          sudo mv ./dpc-admin/coverage/.resultset.json ./dpc-admin/coverage/resultset.json
+          sudo jq '.RSpec.coverage |= with_entries(if .key | contains("dpc-admin") then .key |= sub("/dpc-admin"; "/github/workspace/dpc-admin") else . end)' dpc-admin/coverage/.resultset.json > admin-resultset.json
       - name: Archive code coverage results
         uses: actions/upload-artifact@v3
         with:
           name: code-coverage-report-dpc-admin
-          path: ./dpc-admin/coverage/resultset.json
+          path: ./admin-resultset.json
 
   build-dpc-portal:
     name: "Build and Test DPC Portal"
@@ -80,14 +100,14 @@ jobs:
       - name: "DPC Portal Build"
         run: |
           make ci-portal
-      - name: "Move the test results" # won't upload hidden files
+      - name: "Reformat test results" # Sonarqube will run in a docker container and wants the paths to be from /github/workspace
         run: |
-          sudo mv ./dpc-portal/coverage/.resultset.json ./dpc-portal/coverage/resultset.json
+          sudo jq '.RSpec.coverage |= with_entries(if .key | contains("dpc-portal") then .key |= sub("/dpc-portal"; "/github/workspace/dpc-portal") else . end)' dpc-portal/coverage/.resultset.json > portal-resultset.json
       - name: Archive code coverage results
         uses: actions/upload-artifact@v3
         with:
           name: code-coverage-report-dpc-portal
-          path: ./dpc-portal/coverage/resultset.json
+          path: ./portal-resultset.json
 
   build-dpc-client:
     name: "Build and Test DPC Client"
@@ -131,7 +151,7 @@ jobs:
           args:
             -Dsonar.projectKey=bcda-dpc-web
             -Dsonar.sources=./dpc-web/app,./dpc-web/lib,./dpc-admin/app,./dpc-admin/lib
-            -Dsonar.ruby.coverage.reportPaths=./dpc-web/coverage/resultset.json,./dpc-admin/coverage/resultset.json
+            -Dsonar.ruby.coverage.reportPaths=./web-resultset.json,./admin-resultset.json
             -Dsonar.working.directory=./sonar_workspace
             -Dsonar.branch.name=${{ github.event_name == 'pull_request' && github.head_ref || github.ref_name }}
             -Dsonar.projectVersion=${{ github.ref_name == 'main' && github.sha || 'branch' }}
@@ -166,7 +186,7 @@ jobs:
             -Dsonar.projectKey=bcda-dpc-portal
             -Dsonar.sources=./dpc-portal/app,./dpc-portal/lib
             -Dsonar.coverage.exclusions=**/*_preview.rb,**/*html.erb,**/application_*
-            -Dsonar.ruby.coverage.reportPaths=./dpc-portal/coverage/resultset.json
+            -Dsonar.ruby.coverage.reportPaths=./portal-resultset.json
             -Dsonar.working.directory=./sonar_workspace
             -Dsonar.branch.name=${{ github.event_name == 'pull_request' && github.head_ref || github.ref_name }}
             -Dsonar.projectVersion=${{ github.ref_name == 'main' && github.sha || 'branch' }}
@@ -174,6 +194,7 @@ jobs:
 
   sonar-quality-gate-dpc-api:
     name: Sonarqube Quality Gate for dpc-api
+    needs: build-api
     runs-on: self-hosted
     env:
       # Workaround until https://jira.cms.gov/browse/PLT-338 is implemented.
@@ -207,9 +228,17 @@ jobs:
       - name: Clean maven
         run: |
           mvn -ntp -U clean
-      - name: Compile project
+      - name: Compile Project
         run: |
-          mvn compile
+          mvn clean compile -Perror-prone -B -V -ntp
+      - name: Download code coverage
+        uses: actions/download-artifact@v3
+        with:
+          name: code-coverage-report-dpc-api
+          path: jacoco-reports
+      - name: Verify download
+        run: |
+          find . -name dpc-api-jacoco.xml
       - name: Run quality gate scan
         run: |
-          mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.7.0.1746:sonar -Dsonar.projectKey=bcda-dpc-api -Dsonar.branch.name=${{ github.event_name == 'pull_request' && github.head_ref || github.event_name == 'pull_request' && github.head_ref || github.ref_name }} -Dsonar.working.directory=./.sonar_workspace -Dsonar.projectVersion=${{ github.ref_name == 'main' && github.sha || 'branch' }} -Dsonar.qualitygate.wait=true
+          mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.7.0.1746:sonar -Dsonar.projectKey=bcda-dpc-api -Dsonar.branch.name=${{ github.event_name == 'pull_request' && github.head_ref || github.event_name == 'pull_request' && github.head_ref || github.ref_name }} -Dsonar.working.directory=./.sonar_workspace -Dsonar.projectVersion=${{ github.ref_name == 'main' && github.sha || 'branch' }} -Dsonar.qualitygate.wait=true -Dsonar.coverage.jacoco.xmlReportPaths="../jacoco-reports/*.xml"
