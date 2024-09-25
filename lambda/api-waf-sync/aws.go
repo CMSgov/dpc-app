@@ -20,9 +20,6 @@ type Parameters struct {
 	Addresses []string
 }
 
-var listIpSetsWaf = (*wafv2.WAFV2).ListIPSets
-var getIpSetWaf = (*wafv2.WAFV2).GetIPSet
-var updateIpSetWaf = (*wafv2.WAFV2).UpdateIPSet
 var getArnValue = getAssumeRoleArn
 
 func createSession() (*session.Session, error) {
@@ -167,7 +164,7 @@ func updateIPSetInWAF(ipSetName string, ipAddresses []string) (map[string]any, e
 	listParams := &wafv2.ListIPSetsInput{
 		Scope: aws.String("CLOUDFRONT"),
 	}
-	ipSetList, listErr := listIpSetsWaf(wafsvc, listParams)
+	ipSetList, listErr := wafsvc.ListIPSets(listParams)
 	if listErr != nil {
 		return nil, fmt.Errorf("failed to fetch ip address sets, %v", listErr)
 	}
@@ -184,7 +181,7 @@ func updateIPSetInWAF(ipSetName string, ipAddresses []string) (map[string]any, e
 			break
 		}
 	}
-	ipSet, getErr := getIpSetWaf(wafsvc, getParams)
+	ipSet, getErr := wafsvc.GetIPSet(getParams)
 	if getErr != nil {
 		return nil, fmt.Errorf("failed to get expected ip address set, %v", getErr)
 	}
@@ -198,7 +195,7 @@ func updateIPSetInWAF(ipSetName string, ipAddresses []string) (map[string]any, e
 		LockToken: ipSet.LockToken,
 		Addresses: aws.StringSlice(ipAddresses),
 	}
-	_, updateErr := updateIpSetWaf(wafsvc, updateParams)
+	_, updateErr := wafsvc.UpdateIPSet(updateParams)
 	if updateErr != nil {
 		return nil, fmt.Errorf("failed to update ip address set, %v", updateErr)
 	}

@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
 	"github.com/aws/aws-sdk-go/service/wafv2"
 	"github.com/stretchr/testify/assert"
 )
@@ -15,7 +16,7 @@ func TestIntegrationUpdateIpSet(t *testing.T) {
 	oriGetSecrets := getSecrets
 	oriCreateConnection := createConnection
 	oriGetAuthData := getAuthData
-	oriGetAssumeRoleArn := getArnValue
+	oriGetArnValue := getArnValue
 
 	tests := []struct {
 		err      error
@@ -26,8 +27,8 @@ func TestIntegrationUpdateIpSet(t *testing.T) {
 			mockFunc: func() {
 				getSecrets = func(dbUser string, dbPassword string) (map[string]string, error) {
 					return map[string]string{
-						"/dpc/dev/auth/db_user_dpc_auth": "db_user_dpc_auth",
-						"/dpc/dev/auth/db_pass_dpc_auth": "db_pass_dpc_auth",
+						"/dpc/dev/api/db_user_dpc_auth": "db_user_dpc_auth",
+						"/dpc/dev/api/db_pass_dpc_auth": "db_pass_dpc_auth",
 					}, nil
 				}
 
@@ -50,10 +51,19 @@ func TestIntegrationUpdateIpSet(t *testing.T) {
 
 		sess, sessErr := createSession()
 		assert.Nil(t, sessErr)
-		wafsvc := wafv2.New(sess)
+		assumeRoleArn, _ := getArnValue()
+		wafsvc := wafv2.New(sess, &aws.Config{
+			Region: aws.String("us-east-1"),
+			Credentials: stscreds.NewCredentials(
+				sess,
+				assumeRoleArn,
+			),
+		})
 		println("IP SETS FOUND:")
-		println(wafsvc.ListIPSets(&wafv2.ListIPSetsInput{Scope: aws.String("CLOUDFRONT")}))
-		ipSet, wafErr := (*wafv2.WAFV2).GetIPSet(wafsvc, &wafv2.GetIPSetInput{
+		ipSetList, listErr := wafsvc.ListIPSets(&wafv2.ListIPSetsInput{Scope: aws.String("CLOUDFRONT")})
+		println(ipSetList.IPSets)
+		assert.Nil(t, listErr)
+		ipSet, wafErr := wafsvc.GetIPSet(&wafv2.GetIPSetInput{
 			Id:   aws.String(params["Id"].(string)),
 			Name: aws.String(params["Name"].(string)),
 		})
@@ -64,5 +74,5 @@ func TestIntegrationUpdateIpSet(t *testing.T) {
 	getSecrets = oriGetSecrets
 	createConnection = oriCreateConnection
 	getAuthData = oriGetAuthData
-	getArnValue = oriGetAssumeRoleArn
+	getArnValue = oriGetArnValue
 }
