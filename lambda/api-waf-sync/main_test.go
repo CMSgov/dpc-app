@@ -60,9 +60,8 @@ func TestIntegrationUpdateIpSet(t *testing.T) {
 				assumeRoleArn,
 			),
 		})
-		log.Info("IP SETS FOUND:")
 		ipSetList, listErr := wafsvc.ListIPSets(&wafv2.ListIPSetsInput{Scope: aws.String("CLOUDFRONT")})
-		log.Info(ipSetList.IPSets)
+		log.Info("IP Set:", ipSetList.IPSets)
 		assert.Nil(t, listErr)
 		ipSet, wafErr := wafsvc.GetIPSet(&wafv2.GetIPSetInput{
 			Id:   aws.String(params["Id"].(string)),
