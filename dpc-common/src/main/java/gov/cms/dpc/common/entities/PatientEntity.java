@@ -151,7 +151,7 @@ public class PatientEntity extends PersonEntity {
 
     @SuppressWarnings("JdkObsolete") // Date class is used by FHIR stu3 Patient model
     public static Date fromLocalDate(LocalDate date) {
-        return Date.from(date.atStartOfDay().toInstant(ZoneOffset.UTC));
+        return Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant());
     }
 
 
