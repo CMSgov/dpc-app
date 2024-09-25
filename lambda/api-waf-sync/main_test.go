@@ -6,6 +6,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
 	"github.com/aws/aws-sdk-go/service/wafv2"
+	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -59,9 +60,9 @@ func TestIntegrationUpdateIpSet(t *testing.T) {
 				assumeRoleArn,
 			),
 		})
-		println("IP SETS FOUND:")
+		log.Info("IP SETS FOUND:")
 		ipSetList, listErr := wafsvc.ListIPSets(&wafv2.ListIPSetsInput{Scope: aws.String("CLOUDFRONT")})
-		println(ipSetList.IPSets)
+		log.Info(ipSetList.IPSets)
 		assert.Nil(t, listErr)
 		ipSet, wafErr := wafsvc.GetIPSet(&wafv2.GetIPSetInput{
 			Id:   aws.String(params["Id"].(string)),
