@@ -53,6 +53,7 @@ func TestIntegrationUpdateIpSet(t *testing.T) {
 		sess, sessErr := createSession()
 		assert.Nil(t, sessErr)
 		assumeRoleArn, _ := getArnValue()
+		log.WithField("arn_value", assumeRoleArn).Info("Assume Role")
 		wafsvc := wafv2.New(sess, &aws.Config{
 			Region: aws.String("us-east-1"),
 			Credentials: stscreds.NewCredentials(
@@ -61,7 +62,7 @@ func TestIntegrationUpdateIpSet(t *testing.T) {
 			),
 		})
 		ipSetList, listErr := wafsvc.ListIPSets(&wafv2.ListIPSetsInput{Scope: aws.String("CLOUDFRONT")})
-		log.Info("IP Set:", ipSetList.IPSets)
+		log.WithField("ip_set", ipSetList.IPSets).Info("IP Set:")
 		assert.Nil(t, listErr)
 		ipSet, wafErr := wafsvc.GetIPSet(&wafv2.GetIPSetInput{
 			Id:   aws.String(params["Id"].(string)),
