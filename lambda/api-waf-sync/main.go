@@ -49,8 +49,8 @@ func updateIpSet() (map[string]any, error) {
 	params := map[string]any{"Addresses": []string{}}
 	ipSetName := fmt.Sprintf("dpc-%s-api-customers", os.Getenv("ENV"))
 
-	authDbUser := fmt.Sprintf("/dpc/%s/auth/db_read_only_user_dpc_auth", os.Getenv("ENV"))
-	authDbPassword := fmt.Sprintf("/dpc/%s/auth/db_read_only_pass_dpc_auth", os.Getenv("ENV"))
+	authDbUser := fmt.Sprintf("/dpc/%s/api/db_read_only_user_dpc_auth", os.Getenv("ENV"))
+	authDbPassword := fmt.Sprintf("/dpc/%s/api/db_read_only_pass_dpc_auth", os.Getenv("ENV"))
 	secretsInfo, secretErr := getSecrets(authDbUser, authDbPassword)
 	if secretErr != nil {
 		return nil, secretErr
