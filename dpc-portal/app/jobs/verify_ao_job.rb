@@ -57,7 +57,7 @@ class VerifyAoJob < ApplicationJob
 
   def update_ao_sanctions(link, message)
     link.user.update!(entity_error_attributes(message))
-    link.provider_organization.update!(entity_error_attributes(message))
+#     link.provider_organization.update!(entity_error_attributes(message))
     unverify_all_links_and_orgs(link.user, message)
   end
 
@@ -69,7 +69,7 @@ class VerifyAoJob < ApplicationJob
   def unverify_all_links_and_orgs(user, message)
     AoOrgLink.where(user:, verification_status: true).each do |link|
       link.update!(link_error_attributes(message))
-      link.provider_organization.update!(entity_error_attributes(message))
+#       link.provider_organization.update!(entity_error_attributes(message))
       logger.info(["#{self.class.name} Check Fail",
                    { actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
                      actionType: LoggingConstants::ActionType::FailCpiApiGwCheck,
