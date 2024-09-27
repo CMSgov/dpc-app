@@ -60,6 +60,7 @@ func TestIntegrationUpdateIpSet(t *testing.T) {
 				sess,
 				assumeRoleArn,
 			),
+			CredentialsChainVerboseErrors: aws.Bool(true),
 		})
 		ipSetList, listErr := wafsvc.ListIPSets(&wafv2.ListIPSetsInput{Scope: aws.String("CLOUDFRONT")})
 		log.WithField("ip_set", ipSetList.IPSets).Info("IP Set:")
