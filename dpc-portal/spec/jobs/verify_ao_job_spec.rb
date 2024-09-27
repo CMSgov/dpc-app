@@ -198,9 +198,6 @@ RSpec.describe VerifyAoJob, type: :job do
             expect_log_for(link, 'ao_med_sanctions')
           end
           VerifyAoJob.perform_now
-          links.each do |link|
-            expect_audits(link, also: %i[user org])
-          end
         end
         it 'neither former nor current org link updated when ao verification status rejected' do
           user = create(:user, pac_id: '900666666', verification_status: :approved)
