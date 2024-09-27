@@ -35,8 +35,12 @@ services:
       - JACOCO=${REPORT_COVERAGE}
       - DEBUG_MODE=${DEBUG_MODE:-false}
     depends_on:
-      - db
-      - consent
+      db:
+        condition: service_healthy
+        restart: true
+      consent:
+        condition: service_healthy
+        restart: true
     volumes:
       - export-volume:/app/data
       - ./jacocoReport/dpc-aggregation:/jacoco-report
@@ -86,11 +90,19 @@ services:
       - ENV=local
       - JACOCO=${REPORT_COVERAGE}
       - DEBUG_MODE=${DEBUG_MODE:-false}
+      - CONSENT_SVC_PORT=9904
     ports:
       - "3600:3600"
       - "9904:9904"
     volumes:
       - ./jacocoReport/dpc-consent:/jacoco-report
+    healthcheck:
+      test: ["CMD-SHELL", "[[ $(curl -s 'http://localhost:'$${CONSENT_SVC_PORT}'/healthcheck?pretty=true' | grep '\"healthy\" : true' | wc -l) =~ 3 ]]"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+    restart: unless-stopped
 
   start_api_dependencies:
     image: dadarek/wait-for-dependencies
@@ -104,12 +116,6 @@ services:
     depends_on:
       - api
     command: api:3002
-
-  start_consent:
-    image: dadarek/wait-for-dependencies
-    depends_on:
-      - consent
-    command: consent:3600
 
   tests:
     image: maven:3.6-jdk-11
