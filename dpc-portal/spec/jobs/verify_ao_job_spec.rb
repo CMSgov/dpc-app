@@ -180,7 +180,7 @@ RSpec.describe VerifyAoJob, type: :job do
           end
         end
         # @@@
-        it "should update user, but not impact ProviderOrganization.verification_status" do
+        it 'should update user, but not impact ProviderOrganization.verification_status' do
           expect(AoOrgLink.where(last_checked_at: ..6.days.ago).count).to eq 1
           VerifyAoJob.perform_now
           links.each do |link|
