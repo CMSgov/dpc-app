@@ -26,7 +26,12 @@ class VerifyAoJob < ApplicationJob
   end
 
   def check_link(service, link)
-    response = service.check_ao_eligibility(link.provider_organization.npi, :pac_id, link.user.pac_id)
+    begin
+      response = service.check_ao_eligibility(link.provider_organization.npi, :pac_id, link.user.pac_id)
+    rescue OAuth2::Error => e
+      service.handle_oauth_error(e)
+      raise
+    end
     log_batch_verification_waivers(response)
   end
 
