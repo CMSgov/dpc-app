@@ -80,9 +80,15 @@ portal:
 start-dpc: ## Start all DPC API and portal services
 start-dpc: start-app start-portals
 
-start-db: ## Start the database
+start-db: ## Start the postgres database supporting the api
 start-db:
-	@docker compose up start_core_dependencies
+	@docker compose -f docker-compose.yml -f docker-compose.override.yml create --no-recreate db
+	@docker compose -f docker-compose.yml -f docker-compose.override.yml start db
+
+start-redis: ## Start the redis database supporting the portal
+start-redis:
+	@docker compose -f docker-compose.yml -f docker-compose.portals.yml create --no-recreate redis
+	@docker compose -f docker-compose.yml -f docker-compose.portals.yml start redis 
 
 start-api-dependencies: # Start internal Java service dependencies, e.g. attribution and aggregation services.
 start-api-dependencies:
@@ -117,7 +123,7 @@ start-portals: start-db start-web start-admin start-portal
 .PHONY: start-dpc-debug
 start-dpc-debug: secure-envs
 	@mvn clean install -Pdebug -DskipTests -ntp
-	@docker compose -f docker-compose.yml -f docker-compose.portals.yml up start_core_dependencies
+	@make start-db start-redis
 	@DEBUG_MODE=true USE_BFD_MOCK=false docker compose -f docker-compose.yml -f docker-compose.portals.yml up start_api_dependencies
 	@DEBUG_MODE=true docker compose -f docker-compose.yml -f docker-compose.portals.yml up start_api
 	@docker compose -f docker-compose.yml -f docker-compose.portals.yml up start_web
@@ -130,7 +136,7 @@ start-app-debug: secure-envs
 	@docker compose down
 	@mvn clean compile -Pdebug -DskipTests -ntp
 	@mvn package -Pci -ntp -DskipTests
-	@docker compose -f docker-compose.yml -f docker-compose.portals.yml up start_core_dependencies
+	@make start-db start-redis
 	@DEBUG_MODE=true USE_BFD_MOCK=false docker compose -f docker-compose.yml -f docker-compose.portals.yml up start_api_dependencies
 	@DEBUG_MODE=true docker compose -f docker-compose.yml -f docker-compose.portals.yml up start_api
 
@@ -139,7 +145,7 @@ start-it-debug: secure-envs
 	@docker compose down
 	@mvn clean compile -Pdebug -B -V -ntp -DskipTests
 	@mvn package -Pci -ntp -DskipTests
-	@docker compose up start_core_dependencies
+	@make start-db
 	@DEBUG_MODE=true docker compose up start_api_dependencies
 
 

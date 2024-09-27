@@ -176,10 +176,10 @@ Note that this will always generate a unique hash, even if you didn't change the
 ###### [`^`](#table-of-contents)
 
 
-DPC requires an external Postgres database to be running. While a separate Postgres server can be used, the `docker-compose` file includes everything needed, and can be started like so: 
+DPC requires an external Postgres database to be running. While a separate Postgres server can be used, it is recommended to use Docker to better manage your local dev/test environment. A Docker container running Postgres can be started with this command: 
 
 ```bash
-docker compose up start_core_dependencies
+make start-db
 ```
 
 **Warning**: If you do have an existing Postgres database running on port 5342, docker-compose **will not** alert you to the port conflict. Ensure any local Postgres databases are stopped before starting docker-compose.
