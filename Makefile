@@ -95,6 +95,11 @@ start-consent:
 	@docker compose -f docker-compose.yml -f docker-compose.override.yml create --no-recreate consent
 	@docker compose -f docker-compose.yml -f docker-compose.override.yml start consent
 
+start-attribution: ## Start the attribution service supporting the api
+start-attribution:
+	@docker compose -f docker-compose.yml -f docker-compose.override.yml create --no-recreate attribution
+	@docker compose -f docker-compose.yml -f docker-compose.override.yml start attribution
+
 start-api-dependencies: # Start internal Java service dependencies, e.g. attribution and aggregation services.
 start-api-dependencies:
 	@USE_BFD_MOCK=false docker compose up start_api_dependencies

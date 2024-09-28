@@ -55,9 +55,18 @@ services:
       - ENV=local
       - JACOCO=${REPORT_COVERAGE}
       - DEBUG_MODE=${DEBUG_MODE:-false}
+      - ATTRIBUTION_SVC_PORT=9902
+      - HEALTH_CHECK_COUNT=3
     ports:
       - "3500:8080"
       - "9902:9902"
+    healthcheck:
+      test: ["CMD-SHELL", "[[ $(curl -s 'http://localhost:'$${ATTRIBUTION_SVC_PORT}'/healthcheck?pretty=true' | grep '\"healthy\" : true' | wc -l) =~ $${HEALTH_CHECK_COUNT} ]]"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+    restart: unless-stopped
     volumes:
       - ./jacocoReport/dpc-attribution:/jacoco-report
 
@@ -75,7 +84,9 @@ services:
       - AUTH_DISABLED=${AUTH_DISABLED:-false}
       - DEBUG_MODE=${DEBUG_MODE:-false}
     depends_on:
-      - attribution
+      attribution:
+        condition: service_healthy
+        restart: true
     volumes:
       - export-volume:/app/data
       - ./jacocoReport/dpc-api:/jacoco-report
