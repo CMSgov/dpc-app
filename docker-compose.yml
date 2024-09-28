@@ -102,13 +102,14 @@ services:
       - JACOCO=${REPORT_COVERAGE}
       - DEBUG_MODE=${DEBUG_MODE:-false}
       - CONSENT_SVC_PORT=9904
+      - HEALTH_CHECK_COUNT=3
     ports:
       - "3600:3600"
       - "9904:9904"
     volumes:
       - ./jacocoReport/dpc-consent:/jacoco-report
     healthcheck:
-      test: ["CMD-SHELL", "[[ $(curl -s 'http://localhost:'$${CONSENT_SVC_PORT}'/healthcheck?pretty=true' | grep '\"healthy\" : true' | wc -l) =~ 3 ]]"]
+      test: ["CMD-SHELL", "[[ $(curl -s 'http://localhost:'$${CONSENT_SVC_PORT}'/healthcheck?pretty=true' | grep '\"healthy\" : true' | wc -l) =~ $${HEALTH_CHECK_COUNT} ]]"]
       interval: 10s
       retries: 5
       start_period: 30s
