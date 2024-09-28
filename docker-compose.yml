@@ -34,6 +34,15 @@ services:
       - EMIT_AWS_METRICS=${EMIT_AWS_METRICS:-false}
       - JACOCO=${REPORT_COVERAGE}
       - DEBUG_MODE=${DEBUG_MODE:-false}
+      - AGGREGATION_SVC_PORT=9901
+      - HEALTH_CHECK_COUNT=6
+    healthcheck:
+      test: ["CMD-SHELL", "[[ $(curl -s 'http://localhost:'$${AGGREGATION_SVC_PORT}'/healthcheck?pretty=true' | grep '\"healthy\" : true' | wc -l) =~ $${HEALTH_CHECK_COUNT} ]]"]
+      interval: 10s
+      retries: 6
+      start_period: 60s
+      timeout: 10s
+    restart: unless-stopped
     depends_on:
       db:
         condition: service_healthy

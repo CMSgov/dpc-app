@@ -100,6 +100,11 @@ start-attribution:
 	@docker compose -f docker-compose.yml -f docker-compose.override.yml create --no-recreate attribution
 	@docker compose -f docker-compose.yml -f docker-compose.override.yml start attribution
 
+start-aggregation: ## Start the aggregation service supporting the api
+start-aggregation:
+	@docker compose -f docker-compose.yml -f docker-compose.override.yml create --no-recreate aggregation
+	@docker compose -f docker-compose.yml -f docker-compose.override.yml start aggregation
+
 start-api-dependencies: # Start internal Java service dependencies, e.g. attribution and aggregation services.
 start-api-dependencies:
 	@USE_BFD_MOCK=false docker compose up start_api_dependencies
