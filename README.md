@@ -245,19 +245,8 @@ docker compose up {db,aggregation,attribution,api}
 By default, the Docker containers start with minimal authentication enabled, meaning that some functionality (such as extracting the organization_id from the access token) will not work as expected and always returns the same value.
 This can be overridden during startup by setting the `AUTH_DISABLED=false` environment variable. 
 
-When running locally, you'll need to update the docker-compse.yml file by adding:
-```yaml
-ports: 
-  - "5432:5432"
-```
+The project Makefile auto-detects if the build is not running in AWS EC2 and applies an override configuration to restrict the postgres db port to the Postgres default (TCP 5432). This can be automatically forced by editing the Makefile or docker-compose.yml file, if desired.
 
-in the `db` node e.g.
-```yaml
-db: 
-  image: postgres:11 
-  ports: 
-    - "5432:5432"
-```
 ### Generating a golden macaroon
 
 Golden macaroons are automatically generated and configured upon startup for the frontend applications. To generate your own for use, run the command below:
