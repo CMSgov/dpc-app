@@ -1,4 +1,6 @@
 #!/bin/bash
+PROJECT_NAME="start-v1-app"
+
 set -Ee
 
 # Current working directory
@@ -35,7 +37,7 @@ else
 fi
 
 # Build the application
-docker compose -p start-v1-app up start_core_dependencies
+DOCKER_PROJECT_NAME=$PROJECT_NAME make start-db
 mvn clean compile -Perror-prone -B -V -ntp
 mvn package -Pci -ntp
 
@@ -44,28 +46,28 @@ if [ -n "$REPORT_COVERAGE" ]; then
   mvn jacoco:report -ntp
 fi
 
-docker compose -p start-v1-app down
+DOCKER_PROJECT_NAME=$PROJECT_NAME make down-dpc
 docker volume rm start-v1-app_pgdata14
-docker compose -p start-v1-app up start_core_dependencies
-docker compose -p start-v1-app up start_api_dependencies
+DOCKER_PROJECT_NAME=$PROJECT_NAME make start-db
+DOCKER_PROJECT_NAME=$PROJECT_NAME make start-api-dependencies
 
 # Run the integration tests
-docker compose -p start-v1-app up --exit-code-from tests tests
+docker compose -p $PROJECT_NAME --exit-code-from tests tests
 
-docker compose -p start-v1-app down
-docker volume rm start-v1-app_pgdata14
-docker compose -p start-v1-app up start_core_dependencies
-docker compose -p start-v1-app up start_api_dependencies
+DOCKER_PROJECT_NAME=$PROJECT_NAME make down-dpc
+docker volume rm $PROJECT_NAME_pgdata14
+DOCKER_PROJECT_NAME=$PROJECT_NAME make start-db
+DOCKER_PROJECT_NAME=$PROJECT_NAME make start-api-dependencies
 
 # Start the API server
-AUTH_DISABLED=true docker compose -p start-v1-app up start_api start_consent
+AUTH_DISABLED=true DOCKER_PROJECT_NAME=$PROJECT_NAME make start-api
 
 # Run the Postman tests
 npm install
 npm run test
 
 # Wait for Jacoco to finish writing the output files
-docker compose -p start-v1-app down -t 60
+docker compose -p $PROJECT_NAME -t 60
 
 # Collect the coverage reports for the Docker integration tests
 if [ -n "$REPORT_COVERAGE" ]; then
