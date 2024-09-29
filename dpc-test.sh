@@ -52,7 +52,7 @@ DOCKER_PROJECT_NAME=$PROJECT_NAME make start-db
 DOCKER_PROJECT_NAME=$PROJECT_NAME make start-api-dependencies
 
 # Run the integration tests
-docker compose -p $PROJECT_NAME --exit-code-from tests tests
+docker compose -p $PROJECT_NAME up --exit-code-from tests tests
 
 DOCKER_PROJECT_NAME=$PROJECT_NAME make down-dpc
 docker volume rm $PROJECT_NAME_pgdata14
@@ -67,7 +67,7 @@ npm install
 npm run test
 
 # Wait for Jacoco to finish writing the output files
-docker compose -p $PROJECT_NAME -t 60
+docker compose -p $PROJECT_NAME down -t 60
 
 # Collect the coverage reports for the Docker integration tests
 if [ -n "$REPORT_COVERAGE" ]; then
