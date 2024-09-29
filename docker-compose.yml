@@ -37,7 +37,7 @@ services:
       - AGGREGATION_SVC_PORT=9901
       - HEALTH_CHECK_COUNT=6
     healthcheck:
-      test: ["CMD-SHELL", "[[ $(curl -s 'http://localhost:'$${AGGREGATION_SVC_PORT}'/healthcheck?pretty=true' | grep '\"healthy\" : true' | wc -l) =~ $${HEALTH_CHECK_COUNT} ]]"]
+      test: ["CMD-SHELL", "[[ $(curl -s 'http://localhost:'$${AGGREGATION_SVC_PORT}'/healthcheck?pretty=true' | grep '\"healthy\" : true' | wc -l) =~ $(echo $(($$HEALTH_CHECK_COUNT - $( [ \"$$USE_BFD_MOCK\" = 'true' ] && echo 1 || echo 0 )))) ]]" ]
       interval: 10s
       retries: 6
       start_period: 60s
@@ -92,8 +92,19 @@ services:
       - EXPORT_PATH=/app/data
       - AUTH_DISABLED=${AUTH_DISABLED:-false}
       - DEBUG_MODE=${DEBUG_MODE:-false}
+      - API_SVC_PORT=9900
+      - HEALTH_CHECK_COUNT=7
+    healthcheck:
+      test: ["CMD-SHELL", "[[ $(curl -s 'http://localhost:'$${API_SVC_PORT}'/healthcheck?pretty=true' | grep '\"healthy\" : true' | wc -l) =~ $${HEALTH_CHECK_COUNT} ]]"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
     depends_on:
       attribution:
+        condition: service_healthy
+        restart: true
+      aggregation:
         condition: service_healthy
         restart: true
     volumes:
@@ -124,19 +135,6 @@ services:
       start_period: 30s
       timeout: 10s
     restart: unless-stopped
-
-  start_api_dependencies:
-    image: dadarek/wait-for-dependencies
-    depends_on:
-      - attribution
-      - aggregation
-    command: attribution:8080 aggregation:9901
-
-  start_api:
-    image: dadarek/wait-for-dependencies
-    depends_on:
-      - api
-    command: api:3002
 
   tests:
     image: maven:3.6-jdk-11

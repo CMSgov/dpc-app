@@ -106,12 +106,21 @@ start-aggregation:
 	@docker compose -f docker-compose.yml -f docker-compose.override.yml start aggregation
 
 start-api-dependencies: # Start internal Java service dependencies, e.g. attribution and aggregation services.
-start-api-dependencies:
-	@USE_BFD_MOCK=false docker compose up start_api_dependencies
+start-api-dependencies: start-attribution 
+	@USE_BFD_MOCK=false make start-aggregation
+
+start-mock-api-dependencies: # Start internal Java service dependencies, e.g. attribution and aggregation services with mock BFD.
+start-mock-api-dependencies: start-attribution start-aggregation
 
 start-app: ## Start the API
 start-app: secure-envs start-db start-api-dependencies
-	@docker compose up start_api
+	@docker compose -f docker-compose.yml -f docker-compose.override.yml create --no-recreate api
+	@docker compose -f docker-compose.yml -f docker-compose.override.yml start api
+
+start-mock-app: ## Start the API with mock BFD
+start-mock-app: secure-envs start-db start-mock-api-dependencies
+	@docker compose -f docker-compose.yml -f docker-compose.override.yml create --no-recreate api
+	@docker compose -f docker-compose.yml -f docker-compose.override.yml start api
 
 start-api: ## Start the API
 start-api: start-app
