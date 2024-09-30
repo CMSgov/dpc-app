@@ -143,6 +143,13 @@ services:
     volumes:
       - export-volume:/tmp
       - ./:/usr/src/mymaven
+    depends_on:
+      attribution:
+        condition: service_healthy
+        restart: true
+      aggregation:
+        condition: service_healthy
+        restart: true
     working_dir: /usr/src/mymaven
     command: sh -c "mvn test -Pintegration-tests -am -ntp"
     network_mode: host
