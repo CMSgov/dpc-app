@@ -179,7 +179,8 @@ RSpec.describe VerifyAoJob, type: :job do
             links << create(:ao_org_link, last_checked_at: (n + 4).days.ago, user:, provider_organization:)
           end
         end
-        it "should update user and all user's orgs and links" do
+        # @@@
+        it 'should update user, but not impact ProviderOrganization.verification_status' do
           expect(AoOrgLink.where(last_checked_at: ..6.days.ago).count).to eq 1
           VerifyAoJob.perform_now
           links.each do |link|
@@ -188,8 +189,8 @@ RSpec.describe VerifyAoJob, type: :job do
             expect(link.verification_reason).to eq 'ao_med_sanctions'
             expect(link.user.verification_status).to eq 'rejected'
             expect(link.user.verification_reason).to eq 'ao_med_sanctions'
-            expect(link.provider_organization.verification_status).to eq 'rejected'
-            expect(link.provider_organization.verification_reason).to eq 'ao_med_sanctions'
+            expect(link.provider_organization.verification_status).to eq 'approved'
+            expect(link.provider_organization.verification_reason).to be nil
           end
         end
         it 'should log user check failed' do
@@ -199,10 +200,10 @@ RSpec.describe VerifyAoJob, type: :job do
           end
           VerifyAoJob.perform_now
           links.each do |link|
-            expect_audits(link, also: %i[user org])
+            expect_audits(link, also: %i[user])
           end
         end
-        it 'should not update former org/link' do
+        it 'neither former nor current org link updated when ao verification status rejected' do
           user = create(:user, pac_id: '900666666', verification_status: :approved)
           provider_organization = create(:provider_organization, verification_status: :approved)
           link = create(:ao_org_link, last_checked_at: 8.days.ago, user:, provider_organization:)
@@ -216,8 +217,8 @@ RSpec.describe VerifyAoJob, type: :job do
           expect(link.verification_reason).to eq 'ao_med_sanctions'
           expect(link.user.verification_status).to eq 'rejected'
           expect(link.user.verification_reason).to eq 'ao_med_sanctions'
-          expect(link.provider_organization.verification_status).to eq 'rejected'
-          expect(link.provider_organization.verification_reason).to eq 'ao_med_sanctions'
+          expect(link.provider_organization.verification_status).to eq 'approved'
+          expect(link.provider_organization.verification_reason).to be nil
           expect(link.verification_status).to be false
           former_link.reload
           expect(former_link.verification_reason).to eq 'user_not_authorized_official'
