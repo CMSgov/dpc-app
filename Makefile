@@ -116,11 +116,11 @@ start-mock-api-dependencies: # Start internal Java service dependencies, e.g. at
 start-mock-api-dependencies: start-attribution start-aggregation
 
 start-app: ## Start the API
-start-app: secure-envs start-db start-api-dependencies
-	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) up --wait -d api
+start-app: secure-envs 
+	@USE_BFD_MOCK=false docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) up --wait -d api
 
 start-mock-app: ## Start the API with mock BFD
-start-mock-app: secure-envs start-db start-mock-api-dependencies
+start-mock-app: secure-envs
 	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) up --wait -d api
 
 start-api: ## Start the API
