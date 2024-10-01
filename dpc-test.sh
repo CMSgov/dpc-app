@@ -1,6 +1,8 @@
 #!/bin/bash
 PROJECT_NAME="start-v1-app"
 
+IS_AWS_EC2=./ops/scripts/is_aws_ec2.sh
+
 set -Ee
 
 # Current working directory
@@ -27,6 +29,11 @@ if [ -n "$REPORT_COVERAGE" ]; then
   echo "┌──────────────────────────────────────┐"
   echo "│                                      │"
   echo "│      Running Tests and Coverage      │"
+  if [ "$IS_AWS_EC2" == "yes" ]; then
+    echo "│              (AWS EC2)               │"
+  else
+    echo "│                                      │"
+  fi
   echo "│                                      │"
   echo "└──────────────────────────────────────┘"
 else
@@ -58,11 +65,6 @@ if [ -n "$REPORT_COVERAGE" ]; then
   mvn jacoco:report -ntp
 fi
 
-echo "┌──────────────────────────────────────┐"
-echo "│                                      │"
-echo "│    Deploying the Full Application    │"
-echo "│                                      │"
-echo "└──────────────────────────────────────┘"
 DOCKER_PROJECT_NAME=$PROJECT_NAME make down-dpc
 docker volume rm "$PROJECT_NAME"_pgdata14
 echo "^^^^^^^^^^^^^^^"
