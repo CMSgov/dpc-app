@@ -131,7 +131,7 @@ services:
     healthcheck:
       test: ["CMD-SHELL", "[[ $(curl -s 'http://localhost:'$${CONSENT_SVC_PORT}'/healthcheck?pretty=true' | grep '\"healthy\" : true' | wc -l) =~ $${HEALTH_CHECK_COUNT} ]]"]
       interval: 10s
-      retries: 5
+      retries: 12
       start_period: 30s
       timeout: 10s
     restart: unless-stopped
