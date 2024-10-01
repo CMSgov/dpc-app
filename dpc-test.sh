@@ -91,7 +91,7 @@ echo "│                                      │"
 echo "└──────────────────────────────────────┘"
 
 # Start the API server
-AUTH_DISABLED=true DOCKER_PROJECT_NAME=$PROJECT_NAME make start-api
+AUTH_DISABLED=true DOCKER_PROJECT_NAME=$PROJECT_NAME make start-mock-app
 
 # Run the Postman tests
 npm install
