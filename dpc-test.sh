@@ -1,7 +1,7 @@
 #!/bin/bash
 PROJECT_NAME="start-v1-app"
 
-IS_AWS_EC2=./ops/scripts/is_aws_ec2.sh
+IS_AWS_EC2=$(./ops/scripts/is_aws_ec2.sh)
 
 set -Ee
 
