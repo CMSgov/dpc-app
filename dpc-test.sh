@@ -1,5 +1,5 @@
 #!/bin/bash
-PROJECT_NAME="start-v1-app"
+PROJECT_NAME="${APP-PROJ-NAME:-start-v1-app}"
 
 IS_AWS_EC2=$(./ops/scripts/is_aws_ec2.sh)
 
