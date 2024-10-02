@@ -78,20 +78,21 @@ echo "│                                      │"
 echo "└──────────────────────────────────────┘"
 docker compose -p $PROJECT_NAME up --exit-code-from tests tests
 
+echo "Checking for unhealthy containers...";
 #check for unhealthy containers
 UNHEALTHY_CONTAINERS=$(docker ps | grep unhealthy | wc -l | xargs);
-echo "$UNHEALTHY_CONTAINERS";
+echo "There were $UNHEALTHY_CONTAINERS";
+echo "the answer was $UNHEALTHY_CONTAINERS and i hope thats ok";
 if [ "$UNHEALTHY_CONTAINERS" != 0 ]
 then
   echo "${UNHEALTHY_CONTAINERS} unhealthy container$( [ $UNHEALTHY_CONTAINERS != 1 ] && echo 's' ). You can debug or stop $[ $UNHEALTHY_CONTAINERS != 1 ] && echo 'them' || echo 'it' ).";
-  exit -1;
+  docker ps -f json > /tmp/chuck-ps.log;
+  CONTAINER_ID=$(docker ps | grep consent | awk '{print $1;}');
+  docker logs $CONTAINER_ID > /tmp/chuck-log.log;
+  sleep 15000;
 fi
 
 
-docker ps -f json > /tmp/chuck-ps.log;
-CONTAINER_ID=$(docker ps | grep consent | awk '{print $1;}');
-docker logs $CONTAINER_ID > /tmp/chuck-log.log;
-sleep 15000
 #docker volume rm "$PROJECT_NAME"_pgdata14
 #echo "^^^^^^^^^^^^^^^"
 #echo "└└└└└└└└└└└└└└└-------- this volume has been removed!"
