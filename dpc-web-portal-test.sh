@@ -1,9 +1,13 @@
 #!/bin/bash
+PROJECT_NAME="${PORTAL-PROJ-NAME:-start-v1-portals}"
+
 set -e
 
 function _finally {
-    docker compose -p start-v1-portals -f docker-compose.yml -f docker-compose.portals.yml down
-    docker volume rm start-v1-portals_pgdata14
+    docker compose -p $PROJECT_NAME -f docker-compose.yml -f docker-compose.portals.yml down
+    docker volume rm "$PROJECT_NAME"_pgdata14
+    echo "^^^^^^^^^^^^^^^"
+    echo "└└└└└└└└└└└└└└└-------- this volume has been removed!"
 }
 trap _finally EXIT
 
@@ -17,8 +21,8 @@ echo "└───────────────────────�
 make website
 
 # Prepare the environment 
-docker compose -p start-v1-portals -f docker-compose.yml -f docker-compose.portals.yml up start_core_dependencies
-docker compose -p start-v1-portals -f docker-compose.yml -f docker-compose.portals.yml run --entrypoint "bundle exec rails db:create db:migrate RAILS_ENV=test" dpc_web
+DOCKER_PROJECT_NAME=$PROJECT_NAME make start-portal-dbs
+docker compose -p $PROJECT_NAME -f docker-compose.yml -f docker-compose.portals.yml run --entrypoint "bundle exec rails db:create db:migrate RAILS_ENV=test" dpc_web
 
 # Run the tests
 echo "┌─────────────────────────┐"
