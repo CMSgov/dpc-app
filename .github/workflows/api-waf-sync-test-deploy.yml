@@ -28,5 +28,7 @@ jobs:
           aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-api-waf-sync-function
       - name: Run tests
+        env:
+          ACCOUNT_ID: ${{ secrets.ACCOUNT_ID }}
         run: |
           IS_TESTING=true go test

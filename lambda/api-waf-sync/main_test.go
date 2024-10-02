@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"os"
 	"testing"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -38,7 +40,7 @@ func TestIntegrationUpdateIpSet(t *testing.T) {
 				}
 
 				getArnValue = func() (string, error) {
-					return "arn:aws:iam::755619740999:role/delegatedadmin/developer/dpc-dev-api-waf-sync-function", nil
+					return fmt.Sprintf("arn:aws:iam::%s:role/delegatedadmin/developer/dpc-dev-api-waf-sync-function", os.Getenv("ACCOUNT_ID")), nil
 				}
 			},
 		},
