@@ -96,6 +96,9 @@ start-redis: ## Start the redis database supporting the portal
 start-redis:
 	@docker compose $(DOCKER_PROJ) -f docker-compose.yml -f docker-compose.portals.yml up --wait -d redis
 
+start-portal-dbs: ## Start the postgres and redis database supporting the portal
+start-portal-dbs: start-db start-redis
+
 start-consent: ## Start the consent service supporting the api
 start-consent:
 	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) up --wait -d consent
