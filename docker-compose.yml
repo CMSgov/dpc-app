@@ -39,7 +39,7 @@ services:
     healthcheck:
       test: ["CMD-SHELL", "[[ $(curl -s 'http://localhost:'$${AGGREGATION_SVC_PORT}'/healthcheck?pretty=true' | grep '\"healthy\" : true' | wc -l) =~ $(echo $(($$HEALTH_CHECK_COUNT - $( [ \"$$USE_BFD_MOCK\" = 'true' ] && echo 1 || echo 0 )))) ]]" ]
       interval: 10s
-      retries: 6
+      retries: 5
       start_period: 60s
       timeout: 10s
     restart: unless-stopped
