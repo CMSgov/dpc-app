@@ -79,6 +79,7 @@ echo "└───────────────────────�
 docker compose -p $PROJECT_NAME up --exit-code-from tests tests
 
 echo "Checking for unhealthy containers...";
+
 #check for unhealthy containers
 UNHEALTHY_CONTAINERS=$(docker ps | grep unhealthy | wc -l | xargs);
 echo "There were $UNHEALTHY_CONTAINERS";
@@ -93,43 +94,48 @@ then
 fi
 
 
-#docker volume rm "$PROJECT_NAME"_pgdata14
-#echo "^^^^^^^^^^^^^^^"
-#echo "└└└└└└└└└└└└└└└-------- this volume has been removed!"
+docker compose -p $PROJECT_NAME down
+docker volume rm "$PROJECT_NAME"_pgdata14
+echo "^^^^^^^^^^^^^^^"
+echo "└└└└└└└└└└└└└└└-------- this volume has been removed!"
 
 # Run the system tests
-#echo "┌──────────────────────────────────────┐"
-#echo "│                                      │"
-#echo "│        Running system tests...       │"
-#echo "│                                      │"
-#echo "└──────────────────────────────────────┘"
+echo "┌──────────────────────────────────────┐"
+echo "│                                      │"
+echo "│        Running system tests...       │"
+echo "│                                      │"
+echo "└──────────────────────────────────────┘"
 
 # Start the API server
-#AUTH_DISABLED=true DOCKER_PROJECT_NAME=$PROJECT_NAME make start-mock-app
+AUTH_DISABLED=true DOCKER_PROJECT_NAME=$PROJECT_NAME make start-mock-app
 
 #check for unhealthy containers
 UNHEALTHY_CONTAINERS=$(docker ps | grep unhealthy | wc -l | xargs);
-echo "$UNHEALTHY_CONTAINERS";
+echo "There were $UNHEALTHY_CONTAINERS";
+echo "the answer was $UNHEALTHY_CONTAINERS and i hope thats ok";
 if [ "$UNHEALTHY_CONTAINERS" != 0 ]
 then
   echo "${UNHEALTHY_CONTAINERS} unhealthy container$( [ $UNHEALTHY_CONTAINERS != 1 ] && echo 's' ). You can debug or stop $[ $UNHEALTHY_CONTAINERS != 1 ] && echo 'them' || echo 'it' ).";
-  exit -1;
+  docker ps -f json > /tmp/chuck-ps.log;
+  CONTAINER_ID=$(docker ps | grep consent | awk '{print $1;}');
+  docker logs $CONTAINER_ID > /tmp/chuck-log.log;
+  sleep 15000;
 fi
 
 # Run the Postman tests
-#npm install
-#npm run test
+npm install
+npm run test
 
 # Wait for Jacoco to finish writing the output files
-#docker compose -p $PROJECT_NAME down -t 60
+docker compose -p $PROJECT_NAME down -t 60
 
 # Collect the coverage reports for the Docker integration tests
-#if [ -n "$REPORT_COVERAGE" ]; then
-#  mvn jacoco:report-integration -Pci -ntp
-#fi
+if [ -n "$REPORT_COVERAGE" ]; then
+  mvn jacoco:report-integration -Pci -ntp
+fi
 
-#echo "┌──────────────────────────────────────────┐"
-#echo "│                                          │"
-#echo "│             All Tests Complete           │"
-#echo "│                                          │"
-#echo "└──────────────────────────────────────────┘"
+echo "┌──────────────────────────────────────────┐"
+echo "│                                          │"
+echo "│             All Tests Complete           │"
+echo "│                                          │"
+echo "└──────────────────────────────────────────┘"
