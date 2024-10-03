@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Hanles client token requests
+# Handles client token requests
 class ClientTokensController < ApplicationController
   before_action :authenticate_user!
   before_action :check_user_verification
