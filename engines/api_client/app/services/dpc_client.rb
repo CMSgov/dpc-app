@@ -48,6 +48,7 @@ class DpcClient
 
     json = params.to_json
     macaroon = delegated_macaroon(reg_org_api_id)
+    Rails.logger.warn "making /Token call to #{uri_string} #{json} #{macaroon}"
     post_request(uri_string, json, headers(macaroon))
 
     self
