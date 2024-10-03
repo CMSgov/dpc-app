@@ -6,6 +6,14 @@ RSpec.feature 'new user signs up for account' do
   include ActiveJob::TestHelper
   include MailerHelper
 
+  before { WebMock.allow_net_connect! }
+  after { WebMock.disable_net_connect! }
+
+  it 'is accessible', js: true do
+    visit new_user_session_path
+    expect(page).to be_axe_clean
+  end
+
   before(:each) do
     visit new_user_session_path
     click_link 'sign-up'
