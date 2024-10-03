@@ -6,10 +6,10 @@ import (
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ssm"
 	"github.com/aws/aws-sdk-go/service/wafv2"
+	log "github.com/sirupsen/logrus"
 )
 
 type Parameters struct {
@@ -19,8 +19,6 @@ type Parameters struct {
 	LockToken string
 	Addresses []string
 }
-
-var getArnValue = getAssumeRoleArn
 
 func createSession() (*session.Session, error) {
 	sess := session.Must(session.NewSession())
@@ -34,18 +32,6 @@ func createSession() (*session.Session, error) {
 				Endpoint:         aws.String("http://localhost:4566"),
 			},
 		})
-	} else {
-		assumeRoleArn, err := getArnValue()
-
-		if err == nil {
-			sess, _ = session.NewSession(&aws.Config{
-				Region: aws.String("us-east-1"),
-				Credentials: stscreds.NewCredentials(
-					sess,
-					assumeRoleArn,
-				),
-			})
-		}
 	}
 
 	if err != nil {
@@ -53,50 +39,6 @@ func createSession() (*session.Session, error) {
 	}
 
 	return sess, nil
-}
-
-func getAssumeRoleArn() (string, error) {
-	if isTesting {
-		val := os.Getenv("AWS_ASSUME_ROLE_ARN")
-		if val == "" {
-			return "", fmt.Errorf("AWS_ASSUME_ROLE_ARN must be set during testing")
-		}
-
-		return val, nil
-	}
-
-	parameterName := fmt.Sprintf("/opt-out-import/dpc/%s/bfd-bucket-role-arn", os.Getenv("ENV")) //todo: make buckets for api-waf-sync?
-
-	var keynames []*string = make([]*string, 1)
-	keynames[0] = &parameterName
-
-	sess, err := session.NewSession(&aws.Config{
-		Region: aws.String("us-east-1"),
-	})
-
-	if err != nil {
-		return "", fmt.Errorf("getAssumeRoleArn: Error creating AWS session: %w", err)
-	}
-
-	ssmsvc := ssm.New(sess)
-
-	withDecryption := true
-	result, err := ssmsvc.GetParameter(&ssm.GetParameterInput{
-		Name:           &parameterName,
-		WithDecryption: &withDecryption,
-	})
-
-	if err != nil {
-		return "", fmt.Errorf("getAssumeRoleArn: Error connecting to parameter store: %w", err)
-	}
-
-	arn := *result.Parameter.Value
-
-	if arn == "" {
-		return "", fmt.Errorf("getAssumeRoleArn: No value found for bfd-bucket-role-arn")
-	}
-
-	return arn, nil
 }
 
 func getAuthDbSecrets(dbUser string, dbPassword string) (map[string]string, error) {
@@ -148,16 +90,8 @@ func updateIPSetInWAF(ipSetName string, ipAddresses []string) (map[string]any, e
 		return nil, fmt.Errorf("failed to create session to update ip set, %v", sessErr)
 	}
 
-	assumeRoleArn, arnErr := getArnValue()
-	if arnErr != nil {
-		return nil, fmt.Errorf("failed to get ARN, %v", arnErr)
-	}
 	wafsvc := wafv2.New(sess, &aws.Config{
 		Region: aws.String("us-east-1"),
-		Credentials: stscreds.NewCredentials(
-			sess,
-			assumeRoleArn,
-		),
 	})
 
 	params := map[string]any{"Scope": "CLOUDFRONT"}
@@ -175,6 +109,7 @@ func updateIPSetInWAF(ipSetName string, ipAddresses []string) (map[string]any, e
 		Scope: aws.String("CLOUDFRONT"),
 	}
 	for _, ipSet := range ipSetList.IPSets {
+		log.WithField("name", *ipSet.Name).Info("IP set")
 		if *ipSet.Name == ipSetName {
 			getParams.Id = ipSet.Id
 			params["Id"] = *ipSet.Id
