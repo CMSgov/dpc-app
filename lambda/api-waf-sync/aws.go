@@ -94,9 +94,9 @@ func updateIPSetInWAF(ipSetName string, ipAddresses []string) (map[string]any, e
 		Region: aws.String("us-east-1"),
 	})
 
-	params := map[string]any{"Scope": "CLOUDFRONT"}
+	params := map[string]any{"Scope": "REGIONAL"}
 	listParams := &wafv2.ListIPSetsInput{
-		Scope: aws.String("CLOUDFRONT"),
+		Scope: aws.String("REGIONAL"),
 	}
 	ipSetList, listErr := wafsvc.ListIPSets(listParams)
 	if listErr != nil {
@@ -106,7 +106,7 @@ func updateIPSetInWAF(ipSetName string, ipAddresses []string) (map[string]any, e
 	params["Name"] = ipSetName
 	getParams := &wafv2.GetIPSetInput{
 		Name:  &ipSetName,
-		Scope: aws.String("CLOUDFRONT"),
+		Scope: aws.String("REGIONAL"),
 	}
 	for _, ipSet := range ipSetList.IPSets {
 		log.WithField("name", *ipSet.Name).Info("IP set")
@@ -126,7 +126,7 @@ func updateIPSetInWAF(ipSetName string, ipAddresses []string) (map[string]any, e
 	updateParams := &wafv2.UpdateIPSetInput{
 		Id:        ipSet.IPSet.Id,
 		Name:      aws.String(ipSetName),
-		Scope:     aws.String("CLOUDFRONT"),
+		Scope:     aws.String("REGIONAL"),
 		LockToken: ipSet.LockToken,
 		Addresses: aws.StringSlice(ipAddresses),
 	}

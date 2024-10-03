@@ -31,31 +31,61 @@ func TestIntegrationUpdateIpSet(t *testing.T) {
 				}
 
 				getAuthData = func(dbUser string, dbPassword string) ([]string, error) {
-					return []string{"127.0.0.1"}, nil
+					return []string{"127.0.0.1/32"}, nil
 				}
 			},
 		},
 	}
 
 	for _, test := range tests {
-		test.mockFunc()
-		params, err := updateIpSet()
-		assert.NotEmpty(t, params["Addresses"])
-		assert.Nil(t, err)
-
 		sess, sessErr := createSession()
 		assert.Nil(t, sessErr)
 		wafsvc := wafv2.New(sess, &aws.Config{
 			Region: aws.String("us-east-1"),
 		})
-		_, listErr := wafsvc.ListIPSets(&wafv2.ListIPSetsInput{Scope: aws.String("CLOUDFRONT")})
+
+		// Get current IP set and save existing addresses
+		dpcSetName := "dpc-test-api-customers"
+		ipSetList, listErr := wafsvc.ListIPSets(&wafv2.ListIPSetsInput{Scope: aws.String("REGIONAL")})
 		assert.Nil(t, listErr)
+		var ipSetId string
+		for _, set := range ipSetList.IPSets {
+			if *set.Name == dpcSetName {
+				ipSetId = *set.Id
+				break
+			}
+		}
+		assert.NotNil(t, ipSetId)
 		ipSet, wafErr := wafsvc.GetIPSet(&wafv2.GetIPSetInput{
-			Id:   aws.String(params["Id"].(string)),
-			Name: aws.String(params["Name"].(string)),
+			Id:    &ipSetId,
+			Name:  &dpcSetName,
+			Scope: aws.String("REGIONAL"),
 		})
 		assert.Nil(t, wafErr)
-		assert.Equal(t, ipSet.IPSet.Addresses, params["Addresses"])
+		oriIpAddresses := ipSet.IPSet.Addresses
+
+		// Update IP set with new addresses and verify
+		test.mockFunc()
+		params, err := updateIpSet()
+		assert.Equal(t, params["Addresses"], []string{"127.0.0.1/32"})
+		assert.Nil(t, err)
+
+		// Reset original IP addresses and verify
+		_, updateErr := wafsvc.UpdateIPSet(&wafv2.UpdateIPSetInput{
+			Id:        ipSet.IPSet.Id,
+			Name:      aws.String(dpcSetName),
+			Scope:     aws.String("REGIONAL"),
+			LockToken: ipSet.LockToken,
+			Addresses: oriIpAddresses,
+		})
+		assert.Nil(t, updateErr)
+		ipSetUpdated, wafErr := wafsvc.GetIPSet(&wafv2.GetIPSetInput{
+			Id:    &ipSetId,
+			Name:  &dpcSetName,
+			Scope: aws.String("REGIONAL"),
+		})
+		assert.Nil(t, wafErr)
+		assert.Equal(t, ipSetUpdated.IPSet.Addresses, oriIpAddresses)
 	}
 
 	getSecrets = oriGetSecrets
