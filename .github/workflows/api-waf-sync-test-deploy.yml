@@ -24,5 +24,4 @@ jobs:
       - name: Run tests
         env:
           ACCOUNT_ID: ${{ secrets.ACCOUNT_ID }}
-        run: |
-          IS_TESTING=true go test
+        run: go test
