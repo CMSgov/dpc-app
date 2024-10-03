@@ -67,10 +67,16 @@ func TestIntegrationUpdateIpSet(t *testing.T) {
 		// Update IP set with new addresses and verify
 		test.mockFunc()
 		params, err := updateIpSet()
-		assert.Equal(t, params["Addresses"], []string{"127.0.0.1/32"})
+		assert.Equal(t, "127.0.0.1/32", params["Addresses"])
 		assert.Nil(t, err)
 
 		// Reset original IP addresses and verify
+		ipSet, wafErr = wafsvc.GetIPSet(&wafv2.GetIPSetInput{
+			Id:    &ipSetId,
+			Name:  &dpcSetName,
+			Scope: aws.String("REGIONAL"),
+		})
+		assert.Nil(t, wafErr)
 		_, updateErr := wafsvc.UpdateIPSet(&wafv2.UpdateIPSetInput{
 			Id:        ipSet.IPSet.Id,
 			Name:      aws.String(dpcSetName),
@@ -79,13 +85,13 @@ func TestIntegrationUpdateIpSet(t *testing.T) {
 			Addresses: oriIpAddresses,
 		})
 		assert.Nil(t, updateErr)
-		ipSetUpdated, wafErr := wafsvc.GetIPSet(&wafv2.GetIPSetInput{
+		ipSet, wafErr = wafsvc.GetIPSet(&wafv2.GetIPSetInput{
 			Id:    &ipSetId,
 			Name:  &dpcSetName,
 			Scope: aws.String("REGIONAL"),
 		})
 		assert.Nil(t, wafErr)
-		assert.Equal(t, ipSetUpdated.IPSet.Addresses, oriIpAddresses)
+		assert.Equal(t, ipSet.IPSet.Addresses, oriIpAddresses)
 	}
 
 	getSecrets = oriGetSecrets

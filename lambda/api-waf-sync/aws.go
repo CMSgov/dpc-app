@@ -124,11 +124,12 @@ func updateIPSetInWAF(ipSetName string, ipAddresses []string) (map[string]any, e
 	params["LockToken"] = *ipSet.LockToken
 	params["Addresses"] = strings.Join(ipAddresses, ",")
 	updateParams := &wafv2.UpdateIPSetInput{
-		Id:        ipSet.IPSet.Id,
-		Name:      aws.String(ipSetName),
-		Scope:     aws.String("REGIONAL"),
-		LockToken: ipSet.LockToken,
-		Addresses: aws.StringSlice(ipAddresses),
+		Id:          ipSet.IPSet.Id,
+		Name:        aws.String(ipSetName),
+		Scope:       aws.String("REGIONAL"),
+		LockToken:   ipSet.LockToken,
+		Addresses:   aws.StringSlice(ipAddresses),
+		Description: aws.String("IP ranges for customers of this API"),
 	}
 	_, updateErr := wafsvc.UpdateIPSet(updateParams)
 	if updateErr != nil {
