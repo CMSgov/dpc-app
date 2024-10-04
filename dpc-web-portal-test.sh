@@ -1,5 +1,5 @@
 #!/bin/bash
-PROJECT_NAME="${PORTAL-PROJ-NAME:-start-v1-portals}"
+PROJECT_NAME="${PORTAL_PROJ_NAME:-start-v1-portals}"
 
 set -e
 
