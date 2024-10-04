@@ -130,5 +130,13 @@ var updateIpAddresses = func(ipSetName string, ipAddresses []string) ([]string, 
 		return nil, fmt.Errorf("failed to update ip address set, %v", updateErr)
 	}
 
-	return ipAddresses, nil
+	addrs := []string{}
+	ipSet, getErr = wafsvc.GetIPSet(getParams)
+	if getErr != nil {
+		return nil, fmt.Errorf("failed to get expected ip address set, %v", getErr)
+	}
+	for _, addr := range ipSet.IPSet.Addresses {
+		addrs = append(addrs, *addr)
+	}
+	return addrs, nil
 }
