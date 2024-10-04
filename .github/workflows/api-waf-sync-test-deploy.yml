@@ -30,7 +30,7 @@ jobs:
       - name: Run tests
         env:
           ACCOUNT_ID: ${{ secrets.ACCOUNT_ID }}
-        run: go test
+        run: ENV=test go test
       - name: Upload and reload
         run: |
           aws s3 cp --no-progress function.zip \

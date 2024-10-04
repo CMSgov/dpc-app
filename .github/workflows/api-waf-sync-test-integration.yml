@@ -29,7 +29,6 @@ jobs:
     defaults:
       run:
         working-directory: ./lambda/api-waf-sync
-    environment: test
     outputs:
       start_time: ${{ steps.invoke-lambda.outputs.STARTTIME }}
     steps:
