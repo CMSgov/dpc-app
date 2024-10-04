@@ -22,6 +22,11 @@ RSpec.describe Page::Invitations::OtpComponent, type: :component do
       end
       let(:component) { described_class.new(org, cd_invite) }
 
+      it 'should have step component at step 1' do
+        expect(page).to have_selector('.usa-step-indicator__current-step')
+        expect(page.find('.usa-step-indicator__current-step').text).to eq '1'
+      end
+
       context 'New form' do
         it 'should match form tag' do
           form_url = "/portal/organizations/#{org.path_id}/invitations/#{cd_invite.id}/verify_code"
@@ -29,10 +34,6 @@ RSpec.describe Page::Invitations::OtpComponent, type: :component do
                       %(action="#{form_url}"),
                       'accept-charset="UTF-8" method="post">'].join(' ')
           is_expected.to include(form_tag)
-        end
-
-        it 'should mention org name' do
-          is_expected.to include(org.name)
         end
 
         it 'should mention AO name' do

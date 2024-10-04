@@ -9,6 +9,7 @@ module Page
         @invitation = invitation
         @org_name = invitation&.provider_organization&.name
         @ao_full_name = invitation&.invited_by_full_name
+        @ao_email = invitation&.invited_by&.email
         @reason = if AoVerificationService::SERVER_ERRORS.include?(reason)
                     :server_error
                   else

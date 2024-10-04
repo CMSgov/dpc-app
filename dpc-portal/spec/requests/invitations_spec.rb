@@ -72,7 +72,11 @@ RSpec.describe 'Invitations', type: :request do
       invitation.accept!
       send(method, "/organizations/#{org.id}/invitations/#{invitation.id}/#{path_suffix}")
       expect(response).to be_forbidden
-      expect(response.body).to include(I18n.t('verification.accepted_status'))
+      if invitation.authorized_official?
+        expect(response.body).to include(I18n.t('verification.ao_accepted_status'))
+      elsif invitation.credential_delegate?
+        expect(response.body).to include(I18n.t('verification.cd_accepted_status'))
+      end
     end
   end
 
@@ -224,7 +228,7 @@ RSpec.describe 'Invitations', type: :request do
           stub_user_info(overrides: { 'email' => 'another@example.com' })
           get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
           expect(response).to be_forbidden
-          expect(response.body).to include(CGI.escapeHTML(I18n.t('verification.pii_mismatch_status')))
+          expect(response.body).to include(CGI.escapeHTML(I18n.t('verification.email_mismatch_status')))
         end
         context :server_error do
           it 'should show server error page' do
@@ -267,7 +271,7 @@ RSpec.describe 'Invitations', type: :request do
       it 'sets pac id' do
         post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"
         # We have the fake CPI API Gateway return the ssn as pac_id
-        expect(request.session[:user_pac_id]).to eq user_info['social_security_number']
+        expect(request.session[:user_pac_id]).to eq user_info_template['social_security_number']
       end
       context :ao_has_waiver do
         let(:invitation) { create(:invitation, :ao) }
@@ -356,7 +360,7 @@ RSpec.describe 'Invitations', type: :request do
           user_service = double(UserInfoService)
           expect(user_service_class).to receive(:new).at_least(:once).and_return(user_service)
 
-          expect(user_service).to receive(:user_info).and_invoke(proc { user_info },
+          expect(user_service).to receive(:user_info).and_invoke(proc { user_info_template },
                                                                  proc { raise UserInfoServiceError, 'server_error' })
 
           log_in
@@ -532,7 +536,7 @@ RSpec.describe 'Invitations', type: :request do
             stub_user_info(overrides: { 'email' => 'another@example.com' })
             get "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm_cd"
             expect(response).to be_forbidden
-            expect(response.body).to include(CGI.escapeHTML(I18n.t('verification.pii_mismatch_status')))
+            expect(response.body).to include(CGI.escapeHTML(I18n.t('verification.email_mismatch_status')))
             expect(response.body).to_not include(confirm_organization_invitation_path(org, cd_invite))
           end
           it 'should render error page if given_name not match' do
@@ -637,8 +641,8 @@ RSpec.describe 'Invitations', type: :request do
             post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
           end.to change { User.count }.by 1
           user = User.last
-          expect(user.given_name).to eq user_info['given_name']
-          expect(user.family_name).to eq user_info['family_name']
+          expect(user.given_name).to eq user_info_template['given_name']
+          expect(user.family_name).to eq user_info_template['family_name']
         end
 
         it 'should log when user is created' do
@@ -655,24 +659,25 @@ RSpec.describe 'Invitations', type: :request do
           post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
         end
         it 'should not create user if exists' do
-          create(:user, provider: :openid_connect, uid: user_info['sub'])
+          create(:user, provider: :openid_connect, uid: user_info_template['sub'])
           expect do
             post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
           end.to change { User.count }.by 0
         end
         it 'should update name of user if changed' do
-          user = create(:user, provider: :openid_connect, uid: user_info['sub'], given_name: :foo, family_name: :bar)
+          user = create(:user, provider: :openid_connect, uid: user_info_template['sub'], given_name: :foo,
+                               family_name: :bar)
           expect do
             post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
           end.to change { User.count }.by 0
           user.reload
-          expect(user.given_name).to eq user_info['given_name']
-          expect(user.family_name).to eq user_info['family_name']
+          expect(user.given_name).to eq user_info_template['given_name']
+          expect(user.family_name).to eq user_info_template['family_name']
         end
         it 'should not override pac_id on existing user' do
-          create(:user, provider: :openid_connect, uid: user_info['sub'], pac_id: :foo)
+          create(:user, provider: :openid_connect, uid: user_info_template['sub'], pac_id: :foo)
           post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
-          user = User.find_by(uid: user_info['sub'])
+          user = User.find_by(uid: user_info_template['sub'])
           # We have the fake CPI API Gateway return the ssn as pac_id
           expect(user.pac_id).to eq 'foo'
         end
@@ -723,9 +728,9 @@ RSpec.describe 'Invitations', type: :request do
           get "/organizations/#{org.id}/invitations/#{invitation.id}/confirm_cd"
         end
         it 'should not save verification_status on user and org' do
-          create(:user, provider: :openid_connect, uid: user_info['sub'], pac_id: :foo)
+          create(:user, provider: :openid_connect, uid: user_info_template['sub'], pac_id: :foo)
           post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
-          user = User.find_by(uid: user_info['sub'])
+          user = User.find_by(uid: user_info_template['sub'])
           expect(user.verification_status).to be_nil
           expect(org.reload.verification_status).to be_nil
         end
@@ -750,22 +755,22 @@ RSpec.describe 'Invitations', type: :request do
         end
         it 'should set pac_id on new user' do
           post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
-          user = User.find_by(uid: user_info['sub'])
+          user = User.find_by(uid: user_info_template['sub'])
           # We have the fake CPI API Gateway return the ssn as pac_id
-          expect(user.pac_id).to eq user_info['social_security_number']
+          expect(user.pac_id).to eq user_info_template['social_security_number']
           expect(request.session[:user_pac_id]).to be_nil
         end
         it 'should set pac_id on existing user' do
-          create(:user, provider: :openid_connect, uid: user_info['sub'])
+          create(:user, provider: :openid_connect, uid: user_info_template['sub'])
           post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
-          user = User.find_by(uid: user_info['sub'])
+          user = User.find_by(uid: user_info_template['sub'])
           # We have the fake CPI API Gateway return the ssn as pac_id
-          expect(user.pac_id).to eq user_info['social_security_number']
+          expect(user.pac_id).to eq user_info_template['social_security_number']
           expect(request.session[:user_pac_id]).to be_nil
         end
         it 'should save verification_status on user and org' do
           post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
-          user = User.find_by(uid: user_info['sub'])
+          user = User.find_by(uid: user_info_template['sub'])
           expect(user.verification_status).to eq('approved')
           expect(org.reload.verification_status).to eq('approved')
         end
@@ -834,7 +839,7 @@ def log_in
   follow_redirect!
 end
 
-def user_info(overrides = {})
+def user_info_template(overrides = {})
   {
     'sub' => '097d06f7-e9ad-4327-8db3-0ba193b7a2c2',
     'iss' => 'https://idp.int.identitysandbox.gov/',
@@ -862,5 +867,5 @@ def stub_user_info(overrides: {})
   user_service = double(UserInfoService)
   expect(user_service_class).to receive(:new).at_least(:once).and_return(user_service)
 
-  expect(user_service).to receive(:user_info).at_least(:once).and_return(user_info(overrides))
+  expect(user_service).to receive(:user_info).at_least(:once).and_return(user_info_template(overrides))
 end

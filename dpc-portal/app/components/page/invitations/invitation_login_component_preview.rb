@@ -2,14 +2,17 @@
 
 module Page
   module Invitations
-    # Preview of Invitatation login (IAL/2 flow)
+    # Preview of Invitation login (IAL/2 flow)
     class InvitationLoginComponentPreview < ViewComponent::Preview
-      #
-      # @param for_ao toggle
-      def parameterized(for_ao: true)
+      def ao_login
         provider_organization = ProviderOrganization.new(id: 4, name: 'Health Hut')
-        invitation_type = for_ao ? :authorized_official : :credential_delegate
-        invitation = Invitation.new(id: 2, provider_organization:, invitation_type:)
+        invitation = Invitation.new(id: 2, provider_organization:, invitation_type: :authorized_official)
+        render(Page::Invitations::InvitationLoginComponent.new(invitation))
+      end
+
+      def cd_login
+        provider_organization = ProviderOrganization.new(id: 4, name: 'Health Hut')
+        invitation = Invitation.new(id: 2, provider_organization:, invitation_type: :credential_delegate)
         render(Page::Invitations::InvitationLoginComponent.new(invitation))
       end
     end
