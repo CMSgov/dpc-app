@@ -1,5 +1,5 @@
 #!/bin/bash
-PROJECT_NAME="${APP-PROJ-NAME:-start-v1-app}"
+PROJECT_NAME="${APP_PROJ_NAME:-start-v1-app}"
 
 IS_AWS_EC2=$(./ops/scripts/is_aws_ec2.sh)
 
@@ -78,12 +78,10 @@ echo "│                                      │"
 echo "└──────────────────────────────────────┘"
 docker compose -p $PROJECT_NAME up --exit-code-from tests tests
 
-echo "Checking for unhealthy containers...";
-
 #check for unhealthy containers
+echo "Checking for unhealthy containers...";
 UNHEALTHY_CONTAINERS=$(docker ps | grep unhealthy | wc -l | xargs);
 echo "There were $UNHEALTHY_CONTAINERS";
-echo "the answer was $UNHEALTHY_CONTAINERS and i hope thats ok";
 if [ "$UNHEALTHY_CONTAINERS" != 0 ]
 then
   echo "${UNHEALTHY_CONTAINERS} unhealthy container$( [ $UNHEALTHY_CONTAINERS != 1 ] && echo 's' ). You can debug or stop $[ $UNHEALTHY_CONTAINERS != 1 ] && echo 'them' || echo 'it' ).";
@@ -110,9 +108,9 @@ echo "└───────────────────────�
 AUTH_DISABLED=true DOCKER_PROJECT_NAME=$PROJECT_NAME make start-mock-app
 
 #check for unhealthy containers
+echo "Checking for unhealthy containers...";
 UNHEALTHY_CONTAINERS=$(docker ps | grep unhealthy | wc -l | xargs);
 echo "There were $UNHEALTHY_CONTAINERS";
-echo "the answer was $UNHEALTHY_CONTAINERS and i hope thats ok";
 if [ "$UNHEALTHY_CONTAINERS" != 0 ]
 then
   echo "${UNHEALTHY_CONTAINERS} unhealthy container$( [ $UNHEALTHY_CONTAINERS != 1 ] && echo 's' ). You can debug or stop $[ $UNHEALTHY_CONTAINERS != 1 ] && echo 'them' || echo 'it' ).";
