@@ -3,13 +3,11 @@ package main
 import (
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ssm"
 	"github.com/aws/aws-sdk-go/service/wafv2"
-	log "github.com/sirupsen/logrus"
 )
 
 type Parameters struct {
@@ -84,7 +82,7 @@ var getAuthDbSecrets = func(dbUser string, dbPassword string) (map[string]string
 	return secretsInfo, nil
 }
 
-var updateIpAddresses = func(ipSetName string, ipAddresses []string) (map[string]string, error) {
+var updateIpAddresses = func(ipSetName string, ipAddresses []string) ([]string, error) {
 	sess, sessErr := createSession()
 	if sessErr != nil {
 		return nil, fmt.Errorf("failed to create session to update ip set, %v", sessErr)
@@ -93,18 +91,13 @@ var updateIpAddresses = func(ipSetName string, ipAddresses []string) (map[string
 	wafsvc := wafv2.New(sess, &aws.Config{
 		Region: aws.String("us-east-1"),
 	})
-
-	params := map[string]string{"Scope": "REGIONAL"}
-	listParams := &wafv2.ListIPSetsInput{
+	ipSetList, listErr := wafsvc.ListIPSets(&wafv2.ListIPSetsInput{
 		Scope: aws.String("REGIONAL"),
-	}
-	ipSetList, listErr := wafsvc.ListIPSets(listParams)
+	})
 	if listErr != nil {
 		return nil, fmt.Errorf("failed to fetch ip address sets, %v", listErr)
 	}
 
-	params["Name"] = ipSetName
-	log.WithField("expected", ipSetName).Info("Set name")
 	getParams := &wafv2.GetIPSetInput{
 		Name:  &ipSetName,
 		Scope: aws.String("REGIONAL"),
@@ -112,7 +105,6 @@ var updateIpAddresses = func(ipSetName string, ipAddresses []string) (map[string
 	for _, ipSet := range ipSetList.IPSets {
 		if *ipSet.Name == ipSetName {
 			getParams.Id = ipSet.Id
-			params["Id"] = *ipSet.Id
 			break
 		}
 	}
@@ -121,20 +113,21 @@ var updateIpAddresses = func(ipSetName string, ipAddresses []string) (map[string
 		return nil, fmt.Errorf("failed to get expected ip address set, %v", getErr)
 	}
 
-	params["LockToken"] = *ipSet.LockToken
-	params["Addresses"] = strings.Join(ipAddresses, ",")
-	updateParams := &wafv2.UpdateIPSetInput{
+	_, updateErr := wafsvc.UpdateIPSet(&wafv2.UpdateIPSetInput{
 		Id:          ipSet.IPSet.Id,
 		Name:        aws.String(ipSetName),
 		Scope:       aws.String("REGIONAL"),
 		LockToken:   ipSet.LockToken,
 		Addresses:   aws.StringSlice(ipAddresses),
 		Description: aws.String("IP ranges for customers of this API"),
-	}
-	_, updateErr := wafsvc.UpdateIPSet(updateParams)
+	})
 	if updateErr != nil {
 		return nil, fmt.Errorf("failed to update ip address set, %v", updateErr)
 	}
 
-	return params, nil
+	addresses := []string{}
+	for _, addr := range ipSet.IPSet.Addresses {
+		addresses = append(addresses, *addr)
+	}
+	return addresses, nil
 }
