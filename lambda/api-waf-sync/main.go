@@ -27,20 +27,21 @@ func main() {
 	}
 }
 
-func handler(ctx context.Context, event events.S3Event) ([]string, error) {
+func handler(ctx context.Context, event events.S3Event) (string, error) {
 	log.SetFormatter(&log.JSONFormatter{
 		DisableHTMLEscape: true,
 		TimestampFormat:   time.RFC3339Nano,
 	})
-	var addresses, err = updateIpSet()
+	var params, err = updateIpSet()
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	log.Info("Successfully completed executing export lambda")
-	return addresses, nil
+	return params["Addresses"], nil
 }
 
-var updateIpSet = func() ([]string, error) {
+var updateIpSet = func() (map[string]string, error) {
+	params := map[string]string{"Addresses": ""}
 	ipSetName := fmt.Sprintf("dpc-%s-api-customers", os.Getenv("ENV"))
 
 	authDbUser := fmt.Sprintf("/dpc/%s/api/db_read_only_user_dpc_auth", os.Getenv("ENV"))
@@ -55,10 +56,10 @@ var updateIpSet = func() ([]string, error) {
 		return nil, authDbErr
 	}
 
-	addresses, wafErr := updateIpAddresses(ipSetName, ipAddresses)
+	params, wafErr := updateIpAddresses(ipSetName, ipAddresses)
 	if wafErr != nil {
 		return nil, wafErr
 	}
 
-	return addresses, nil
+	return params, nil
 }
