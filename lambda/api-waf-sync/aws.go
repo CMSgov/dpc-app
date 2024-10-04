@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -84,7 +83,7 @@ var getAuthDbSecrets = func(dbUser string, dbPassword string) (map[string]string
 	return secretsInfo, nil
 }
 
-var updateIpAddresses = func(ipSetName string, ipAddresses []string) (map[string]string, error) {
+var updateIpAddresses = func(ipSetName string, ipAddresses []string) ([]string, error) {
 	sess, sessErr := createSession()
 	if sessErr != nil {
 		return nil, fmt.Errorf("failed to create session to update ip set, %v", sessErr)
@@ -94,7 +93,6 @@ var updateIpAddresses = func(ipSetName string, ipAddresses []string) (map[string
 		Region: aws.String("us-east-1"),
 	})
 
-	params := map[string]string{"Scope": "REGIONAL"}
 	listParams := &wafv2.ListIPSetsInput{
 		Scope: aws.String("REGIONAL"),
 	}
@@ -103,8 +101,7 @@ var updateIpAddresses = func(ipSetName string, ipAddresses []string) (map[string
 		return nil, fmt.Errorf("failed to fetch ip address sets, %v", listErr)
 	}
 
-	params["Name"] = ipSetName
-	log.WithField("expected", ipSetName).Info("Set name")
+	log.WithField("name", ipSetName).Info("Fetching IP set")
 	getParams := &wafv2.GetIPSetInput{
 		Name:  &ipSetName,
 		Scope: aws.String("REGIONAL"),
@@ -112,7 +109,6 @@ var updateIpAddresses = func(ipSetName string, ipAddresses []string) (map[string
 	for _, ipSet := range ipSetList.IPSets {
 		if *ipSet.Name == ipSetName {
 			getParams.Id = ipSet.Id
-			params["Id"] = *ipSet.Id
 			break
 		}
 	}
@@ -121,8 +117,6 @@ var updateIpAddresses = func(ipSetName string, ipAddresses []string) (map[string
 		return nil, fmt.Errorf("failed to get expected ip address set, %v", getErr)
 	}
 
-	params["LockToken"] = *ipSet.LockToken
-	params["Addresses"] = strings.Join(ipAddresses, ",")
 	updateParams := &wafv2.UpdateIPSetInput{
 		Id:          ipSet.IPSet.Id,
 		Name:        aws.String(ipSetName),
@@ -136,5 +130,5 @@ var updateIpAddresses = func(ipSetName string, ipAddresses []string) (map[string
 		return nil, fmt.Errorf("failed to update ip address set, %v", updateErr)
 	}
 
-	return params, nil
+	return ipAddresses, nil
 }

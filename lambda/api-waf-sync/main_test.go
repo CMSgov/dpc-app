@@ -65,8 +65,8 @@ func TestIntegrationUpdateIpSet(t *testing.T) {
 
 		// Update IP set with new addresses and verify
 		test.mockFunc()
-		params, err := updateIpSet()
-		assert.Equal(t, "127.0.0.1/32", params["Addresses"])
+		addrs, err := updateIpSet()
+		assert.Equal(t, []string{"127.0.0.1/32"}, addrs)
 		assert.Nil(t, err)
 
 		// Reset original IP addresses and verify
