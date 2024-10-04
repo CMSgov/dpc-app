@@ -104,12 +104,12 @@ var updateIpAddresses = func(ipSetName string, ipAddresses []string) (map[string
 	}
 
 	params["Name"] = ipSetName
+	log.WithField("expected", ipSetName).Info("Set name")
 	getParams := &wafv2.GetIPSetInput{
 		Name:  &ipSetName,
 		Scope: aws.String("REGIONAL"),
 	}
 	for _, ipSet := range ipSetList.IPSets {
-		log.WithField("name", *ipSet.Name).Info("IP set")
 		if *ipSet.Name == ipSetName {
 			getParams.Id = ipSet.Id
 			params["Id"] = *ipSet.Id
