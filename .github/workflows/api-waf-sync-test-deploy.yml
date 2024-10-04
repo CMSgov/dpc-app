@@ -17,11 +17,23 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
+      - name: Build api-waf-sync zip file
+        env:
+          CGO_ENABLED: 0
+        run: |
+          go build -o bootstrap main.go db.go aws.go
+          zip function.zip bootstrap
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-test-github-actions
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-api-waf-sync-function #TODO: need one for test?
       - name: Run tests
         env:
           ACCOUNT_ID: ${{ secrets.ACCOUNT_ID }}
         run: go test
+      - name: Upload and reload
+        run: |
+          aws s3 cp --no-progress function.zip \
+            s3://dpc-test-api-waf-sync-function/function-${{ github.sha }}.zip
+          aws lambda update-function-code --function-name dpc-test-api-waf-sync \
+            --s3-bucket dpc-test-api-waf-sync-function --s3-key function-${{ github.sha }}.zip

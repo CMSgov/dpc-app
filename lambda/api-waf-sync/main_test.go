@@ -12,8 +12,7 @@ func TestIntegrationUpdateIpSet(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skipping integration test.")
 	}
-	oriGetSecrets := getSecrets
-	oriCreateConnection := createConnection
+	oriGetSecrets := getAuthDbSecrets
 	oriGetAuthData := getAuthData
 
 	tests := []struct {
@@ -23,7 +22,7 @@ func TestIntegrationUpdateIpSet(t *testing.T) {
 		{
 			err: nil,
 			mockFunc: func() {
-				getSecrets = func(dbUser string, dbPassword string) (map[string]string, error) {
+				getAuthDbSecrets = func(dbUser string, dbPassword string) (map[string]string, error) {
 					return map[string]string{
 						"/dpc/dev/api/db_user_dpc_auth": "db_user_dpc_auth",
 						"/dpc/dev/api/db_pass_dpc_auth": "db_pass_dpc_auth",
@@ -94,7 +93,6 @@ func TestIntegrationUpdateIpSet(t *testing.T) {
 		assert.Equal(t, ipSet.IPSet.Addresses, oriIpAddresses)
 	}
 
-	getSecrets = oriGetSecrets
-	createConnection = oriCreateConnection
+	getAuthDbSecrets = oriGetSecrets
 	getAuthData = oriGetAuthData
 }

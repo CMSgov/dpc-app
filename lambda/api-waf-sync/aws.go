@@ -20,7 +20,7 @@ type Parameters struct {
 	Addresses []string
 }
 
-func createSession() (*session.Session, error) {
+var createSession = func() (*session.Session, error) {
 	sess := session.Must(session.NewSession())
 	var err error
 	if isTesting {
@@ -41,7 +41,7 @@ func createSession() (*session.Session, error) {
 	return sess, nil
 }
 
-func getAuthDbSecrets(dbUser string, dbPassword string) (map[string]string, error) {
+var getAuthDbSecrets = func(dbUser string, dbPassword string) (map[string]string, error) {
 	secretsInfo := make(map[string]string)
 	if isTesting {
 		secretsInfo[dbUser] = os.Getenv("DB_USER_DPC_AUTH")
@@ -84,7 +84,7 @@ func getAuthDbSecrets(dbUser string, dbPassword string) (map[string]string, erro
 	return secretsInfo, nil
 }
 
-func updateIPSetInWAF(ipSetName string, ipAddresses []string) (map[string]any, error) {
+var updateIpAddresses = func(ipSetName string, ipAddresses []string) (map[string]string, error) {
 	sess, sessErr := createSession()
 	if sessErr != nil {
 		return nil, fmt.Errorf("failed to create session to update ip set, %v", sessErr)
@@ -94,7 +94,7 @@ func updateIPSetInWAF(ipSetName string, ipAddresses []string) (map[string]any, e
 		Region: aws.String("us-east-1"),
 	})
 
-	params := map[string]any{"Scope": "REGIONAL"}
+	params := map[string]string{"Scope": "REGIONAL"}
 	listParams := &wafv2.ListIPSetsInput{
 		Scope: aws.String("REGIONAL"),
 	}
