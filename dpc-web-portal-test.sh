@@ -1,4 +1,10 @@
 #!/bin/bash
+IS_AWS_EC2=$(./ops/scripts/is_aws_ec2.sh);
+NEW_RELIC_AGENT_ENABLED=true;
+if [ "$IS_AWS_EC2" == "no" ]; then
+  LOCAL_DOCKER_OVERRIDE="-f docker-compose.override.yml";
+  NEW_RELIC_AGENT_ENABLED="false";
+fi
 PROJECT_NAME="${PORTAL_PROJ_NAME:-start-v1-portals}"
 
 set -e
@@ -31,7 +37,7 @@ echo "│  Running DPC Web Tests  │"
 echo "│                         |"
 echo "└─────────────────────────┘"
 docker compose -p start-v1-portals -f docker-compose.yml -f docker-compose.portals.yml run --entrypoint "bundle exec rubocop" dpc_web
-docker compose -p start-v1-portals -f docker-compose.yml -f docker-compose.portals.yml run --entrypoint "bundle exec rspec" dpc_web
+NEW_RELIC_AGENT_ENABLE=$NEW_RELIC_AGENT_ENABLE docker compose -p start-v1-portals -f docker-compose.yml -f docker-compose.portals.yml run --entrypoint "bundle exec rspec" dpc_web
 
 echo "┌──────────────────────────────┐"
 echo "│                              │"
