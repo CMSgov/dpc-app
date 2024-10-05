@@ -213,7 +213,7 @@ maven-config:
 	@while read line;do echo "-D$${line} " >> ./.mvn/maven.config;done < ./ops/config/decrypted/local.env
 
 psql: ## Run a psql shell
-	@docker compose $(DOCKER_PROJ) -f docker-compose.yml exec -it db psql -U postgres
+	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) exec -it db psql -U postgres
 
 portal-sh: ## Run a portal shell
 	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) -f docker-compose.portals.yml exec -it dpc_portal bin/sh
