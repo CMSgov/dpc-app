@@ -35,8 +35,8 @@ make portal
 
 # Prepare the environment
 DOCKER_PROJECT_NAME=$PROJECT_NAME make start-portal-dbs
-docker compose -p $PROJECT_NAME -f docker-compose.yml $LOCAL_DOCKER_OVERRIDE -f docker-compose.portals.yml run --entrypoint "bundle exec rails db:create db:migrate RAILS_ENV=test" dpc_web
-docker compose -p $PROJECT_NAME -f docker-compose.yml $LOCAL_DOCKER_OVERRIDE -f docker-compose.portals.yml run --entrypoint "bundle exec rails db:create db:migrate RAILS_ENV=test" dpc_portal
+docker compose -p $PROJECT_NAME -f docker-compose.yml $LOCAL_DOCKER_OVERRIDE -f docker-compose.portals.yml run --rm --entrypoint "bundle exec rails db:create db:migrate RAILS_ENV=test" dpc_web
+docker compose -p $PROJECT_NAME -f docker-compose.yml $LOCAL_DOCKER_OVERRIDE -f docker-compose.portals.yml run --rm --entrypoint "bundle exec rails db:create db:migrate RAILS_ENV=test" dpc_portal
 
 # Run the tests
 echo "┌─────────────────────────┐"
@@ -44,24 +44,24 @@ echo "│                         │"
 echo "│  Running DPC Web Tests  │"
 echo "│                         │"
 echo "└─────────────────────────┘"
-docker compose -p $PROJECT_NAME -f docker-compose.yml $LOCAL_DOCKER_OVERRIDE -f docker-compose.portals.yml run --entrypoint "bundle exec rubocop" dpc_web
-NEW_RELIC_AGENT_ENABLED=$NEW_RELIC_AGENT_ENABLED docker compose -p $PROJECT_NAME -f docker-compose.yml $LOCAL_DOCKER_OVERRIDE -f docker-compose.portals.yml run --entrypoint "bundle exec rspec" dpc_web
+docker compose -p $PROJECT_NAME -f docker-compose.yml $LOCAL_DOCKER_OVERRIDE -f docker-compose.portals.yml run --rm --entrypoint "bundle exec rubocop" dpc_web
+NEW_RELIC_AGENT_ENABLED=$NEW_RELIC_AGENT_ENABLED docker compose -p $PROJECT_NAME -f docker-compose.yml $LOCAL_DOCKER_OVERRIDE -f docker-compose.portals.yml run --rm --entrypoint "bundle exec rspec" dpc_web
 
 echo "┌───────────────────────────┐"
 echo "│                           │"
 echo "│  Running DPC Admin Tests  │"
 echo "│                           │"
 echo "└───────────────────────────┘"
-docker compose -p $PROJECT_NAME -f docker-compose.yml $LOCAL_DOCKER_OVERRIDE -f docker-compose.portals.yml run --entrypoint "bundle exec rubocop" dpc_admin
-NEW_RELIC_AGENT_ENABLED=$NEW_RELIC_AGENT_ENABLED #docker compose -p $PROJECT_NAME -f docker-compose.yml $LOCAL_DOCKER_OVERRIDE -f docker-compose.portals.yml run --entrypoint "bundle exec rspec" dpc_admin
+docker compose -p $PROJECT_NAME -f docker-compose.yml $LOCAL_DOCKER_OVERRIDE -f docker-compose.portals.yml run --rm --entrypoint "bundle exec rubocop" dpc_admin
+NEW_RELIC_AGENT_ENABLED=$NEW_RELIC_AGENT_ENABLED #docker compose -p $PROJECT_NAME -f docker-compose.yml $LOCAL_DOCKER_OVERRIDE -f docker-compose.portals.yml run --rm --entrypoint "bundle exec rspec" dpc_admin
 
 echo "┌───────────────────────────┐"
 echo "│                           │"
 echo "│  Running DPC Portal Tests │"
 echo "│                           │"
 echo "└───────────────────────────┘"
-docker compose -p $PROJECT_NAME -f docker-compose.yml $LOCAL_DOCKER_OVERRIDE -f docker-compose.portals.yml run --entrypoint "bundle exec rubocop" dpc_portal
-docker compose -p $PROJECT_NAME -f docker-compose.yml $LOCAL_DOCKER_OVERRIDE -f docker-compose.portals.yml run --entrypoint "bundle exec rspec" dpc_portal
+docker compose -p $PROJECT_NAME -f docker-compose.yml $LOCAL_DOCKER_OVERRIDE -f docker-compose.portals.yml run --rm --entrypoint "bundle exec rubocop" dpc_portal
+docker compose -p $PROJECT_NAME -f docker-compose.yml $LOCAL_DOCKER_OVERRIDE -f docker-compose.portals.yml run --rm --entrypoint "bundle exec rspec" dpc_portal
 
 echo "┌───────────────────────────────────────────────┐"
 echo "│                                               │"
