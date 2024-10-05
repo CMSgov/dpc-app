@@ -39,6 +39,7 @@ services:
       - RUBY_YJIT_ENABLE=1
       - DISABLE_JSON_LOGGER=true
       - NEW_RELIC_AGENT_ENABLED=${NEW_RELIC_AGENT_ENABLED:-true}
+      - WEB_SVC_PORT=3500
     ports:
       - "3900:3500"
     depends_on:
@@ -46,7 +47,7 @@ services:
         condition: service_healthy
         restart: true
     healthcheck:
-      test: ["CMD-SHELL", "[ \"$(echo $( wget -q http://$$HOSTNAME:3500/assets/site.webmanifest -O- ))\" == \"$(echo $(cat /dpc-web/app/assets/images/site.webmanifest))\" ]"]
+      test: ["CMD-SHELL", "[ \"$(echo $( wget -q http://127.0.0.1:$$WEB_SVC_PORT/health_check -O- ))\" == \"success\" ]"]
       interval: 10s
       retries: 5
       start_period: 60s
@@ -75,8 +76,9 @@ services:
       - RUBY_YJIT_ENABLE=1
       - DISABLE_JSON_LOGGER=true
       - NEW_RELIC_AGENT_ENABLED=${NEW_RELIC_AGENT_ENABLED:-true}
+      - SIDEKIQ_SVC_PORT=7433
     healthcheck:
-      test: ["CMD-SHELL", "[[  $(wget -q http://$(hostname):7433 -O-) == \"Alive!\" ]]"]
+      test: ["CMD-SHELL", "[[  $(wget -q http://127.0.0.1:$$SIDEKIQ_SVC_PORT -O-) == \"Alive!\" ]]"]
       interval: 10s
       retries: 5
       start_period: 60s
@@ -111,6 +113,7 @@ services:
       - DATABASE_CLEANER_ALLOW_REMOTE_DATABASE_URL=true
       - RUBY_YJIT_ENABLE=1
       - DISABLE_JSON_LOGGER=true
+      - ADMIN_SVC_PORT=3000
     ports:
       - "3000:3000"
     depends_on:
@@ -118,7 +121,7 @@ services:
         condition: service_healthy
         restart: true
     healthcheck:
-      test: ["CMD-SHELL", "[ \"$(echo $( wget -q http://$$HOSTNAME:3000/assets/minus.svg -O- ))\" == \"$(echo $(cat /dpc-web/app/assets/images/minus.svg))\" ]"]
+      test: ["CMD-SHELL", "[ \"$(wget -q http://127.0.0.1:$$ADMIN_SVC_PORT/admin/health_check -O- )\" == \"success\" ]"]
       interval: 10s
       retries: 5
       start_period: 60s
@@ -145,8 +148,9 @@ services:
       - DATABASE_CLEANER_ALLOW_REMOTE_DATABASE_URL=true
       - RUBY_YJIT_ENABLE=1
       - DISABLE_JSON_LOGGER=true
+      - SIDEKIQ_SVC_PORT=7434
     healthcheck:
-      test: ["CMD-SHELL", "[[  $(wget -q http://$(hostname):7434 -O-) == \"Alive!\" ]]"]
+      test: ["CMD-SHELL", "[[  $(wget -q http://127.0.0.1:$$SIDEKIQ_SVC_PORT -O-) == \"Alive!\" ]]"]
       interval: 10s
       retries: 5
       start_period: 60s
@@ -210,6 +214,7 @@ services:
       - ENV=local
       - NEW_RELIC_MONITOR_MODE=false
       - DISABLE_JSON_LOGGER=true
+      - PORTAL_SVC_PORT=3100
     ports:
       - "3100:3100"
     depends_on:
@@ -217,7 +222,7 @@ services:
         condition: service_healthy
         restart: true
     healthcheck:
-      test: ["CMD-SHELL", "[[  $(wget -q http://$(hostname):3100/portal/health_check -O-) == \"success\" ]]"]
+      test: ["CMD-SHELL", "[[  $(wget -q http://127.0.0.1:$$PORTAL_SVC_PORT/portal/health_check -O-) == \"success\" ]]"]
       interval: 10s
       retries: 5
       start_period: 60s
@@ -246,8 +251,9 @@ services:
       - RUBY_YJIT_ENABLE=1
       - ENV=local
       - DISABLE_JSON_LOGGER=true
+      - SIDEKIQ_SVC_PORT=7435
     healthcheck:
-      test: ["CMD-SHELL", "[[  $(wget -q http://$(hostname):7435 -O-) == \"Alive!\" ]]"]
+      test: ["CMD-SHELL", "[[  $(wget -q http://127.0.0.1:$$SIDEKIQ_SVC_PORT -O-) == \"Alive!\" ]]"]
       interval: 10s
       retries: 5
       start_period: 60s
