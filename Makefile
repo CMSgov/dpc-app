@@ -118,31 +118,31 @@ start-api-dependencies: start-attribution
 start-mock-api-dependencies: # Start internal Java service dependencies, e.g. attribution and aggregation services with mock BFD.
 start-mock-api-dependencies: start-attribution start-aggregation
 
-start-app: ## Start the API
-start-app: secure-envs 
-	@USE_BFD_MOCK=false docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) up --wait -d api
-
 start-mock-app: ## Start the API with mock BFD
 start-mock-app: secure-envs
 	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) up --wait -d api
+
+start-app: ## Start the API
+start-app: secure-envs 
+	@USE_BFD_MOCK=false docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) up --wait -d api
 
 start-api: ## Start the API
 start-api: start-app
 
 start-web: ## Start the sandbox portal
-start-web:
-	@docker compose $(DOCKER_PROJ) -f docker-compose.yml -f docker-compose.portals.yml up --wait -d start_web
+start-web: 
+	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) -f docker-compose.portals.yml up --wait -d dpc_web
 
 start-admin: ## Start the sandbox admin portal
 start-admin:
-	@docker compose $(DOCKER_PROJ) -f docker-compose.yml -f docker-compose.portals.yml up --wait -d start_admin
+	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) -f docker-compose.portals.yml up --wait -d dpc_admin
 
 start-portal: ## Start the DPC portal
 start-portal: secure-envs
-	@docker compose $(DOCKER_PROJ) -f docker-compose.yml -f docker-compose.portals.yml up --wait -d start_portal
+	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) -f docker-compose.portals.yml up --wait -d dpc_portal
 
 start-portals: ## Start all frontend services
-start-portals: start-db start-web start-admin start-portal
+start-portals: start-web start-admin start-portal
 
 
 # Debug commands
@@ -152,11 +152,11 @@ start-portals: start-db start-web start-admin start-portal
 start-dpc-debug: secure-envs
 	@mvn clean install -Pdebug -DskipTests -ntp
 	@make start-db start-redis
-	@DEBUG_MODE=true USE_BFD_MOCK=false docker compose $(DOCKER_PROJ) -f docker-compose.yml -f docker-compose.portals.yml up --wait -d start_api_dependencies
-	@DEBUG_MODE=true docker compose $(DOCKER_PROJ) -f docker-compose.yml -f docker-compose.portals.yml up --wait -d start_api
-	@docker compose $(DOCKER_PROJ) -f docker-compose.yml -f docker-compose.portals.yml up --wait -d start_web
-	@docker compose $(DOCKER_PROJ) -f docker-compose.yml -f docker-compose.portals.yml up --wait -d start_admin
-	@docker compose $(DOCKER_PROJ) -f docker-compose.yml -f docker-compose.portals.yml up --wait -d start_portal
+	@DEBUG_MODE=true USE_BFD_MOCK=false docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) -f docker-compose.portals.yml up --wait -d start_api_dependencies
+	@DEBUG_MODE=true docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) -f docker-compose.portals.yml up --wait -d start_api
+	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) -f docker-compose.portals.yml up --wait -d start_web
+	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) -f docker-compose.portals.yml up --wait -d start_admin
+	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) -f docker-compose.portals.yml up --wait -d start_portal
 	@docker ps
 
 .PHONY: start-app-debug
@@ -166,7 +166,7 @@ start-app-debug: secure-envs
 	@mvn package -Pci -ntp -DskipTests
 	@make start-db start-redis
 	@DEBUG_MODE=true USE_BFD_MOCK=false docker compose $(DOCKER_PROJ) -f docker-compose.yml -f docker-compose.portals.yml up --wait -d start_api_dependencies
-	@DEBUG_MODE=true docker compose $(DOCKER_PROJ) -f docker-compose.yml -f docker-compose.portals.yml up --wait -d start_api
+	@DEBUG_MODE=true docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) -f docker-compose.portals.yml up --wait -d start_api
 
 .PHONY: start-it-debug
 start-it-debug: secure-envs
@@ -182,14 +182,14 @@ start-it-debug: secure-envs
 
 down-dpc: ## Shut down all services
 down-dpc:
-	@docker compose $(DOCKER_PROJ) -f docker-compose.yml -f docker-compose.portals.yml down
+	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) -f docker-compose.portals.yml down
 
 down-portals: ## Shut down all services
 down-portals: down-dpc
 
 down-start-v1-portals: ## Shut down test services
 down-start-v1-portals:
-	@docker compose $(DOCKER_PROJ) -p start-v1-portals -f docker-compose.yml -f docker-compose.portals.yml down
+	@docker compose $(DOCKER_PROJ) -p start-v1-portals -f docker-compose.yml $(IS_AWS_EC2) -f docker-compose.portals.yml down
 
 # Utility commands
 # =================
@@ -216,10 +216,10 @@ psql: ## Run a psql shell
 	@docker compose $(DOCKER_PROJ) -f docker-compose.yml exec -it db psql -U postgres
 
 portal-sh: ## Run a portal shell
-	@docker compose $(DOCKER_PROJ) -f docker-compose.yml -f docker-compose.portals.yml exec -it dpc_portal bin/sh
+	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) -f docker-compose.portals.yml exec -it dpc_portal bin/sh
 
 portal-console: ## Run a rails console shell
-	@docker compose $(DOCKER_PROJ) -f docker-compose.yml -f docker-compose.portals.yml exec -it dpc_portal bin/console
+	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) -f docker-compose.portals.yml exec -it dpc_portal bin/console
 
 
 # Build & Test commands
