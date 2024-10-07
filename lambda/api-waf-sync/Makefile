@@ -1,2 +1,2 @@
 test:
-	ENV=test IS_TESTING=true go test -v
+	ENV=test go test -v
