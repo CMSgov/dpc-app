@@ -30,7 +30,7 @@ jobs:
       - name: Run tests
         env:
           ACCOUNT_ID: ${{ secrets.ACCOUNT_ID }}
-        run: ENV=test go test
+        run: make test
       - name: Upload and reload #TODO: need s3 bucket and lambda function for test?
         run: |
           aws s3 cp --no-progress function.zip \
