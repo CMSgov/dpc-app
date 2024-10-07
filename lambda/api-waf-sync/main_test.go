@@ -77,11 +77,12 @@ func TestIntegrationUpdateIpSet(t *testing.T) {
 		})
 		assert.Nil(t, wafErr)
 		_, updateErr := wafsvc.UpdateIPSet(&wafv2.UpdateIPSetInput{
-			Id:        ipSet.IPSet.Id,
-			Name:      aws.String(dpcSetName),
-			Scope:     aws.String("REGIONAL"),
-			LockToken: ipSet.LockToken,
-			Addresses: oriIpAddresses,
+			Id:          ipSet.IPSet.Id,
+			Name:        aws.String(dpcSetName),
+			Scope:       aws.String("REGIONAL"),
+			LockToken:   ipSet.LockToken,
+			Addresses:   oriIpAddresses,
+			Description: aws.String("IP ranges for customers of this API"),
 		})
 		assert.Nil(t, updateErr)
 		ipSet, wafErr = wafsvc.GetIPSet(&wafv2.GetIPSetInput{
