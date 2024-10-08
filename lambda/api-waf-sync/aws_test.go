@@ -11,19 +11,16 @@ import (
 
 func TestNewSession(t *testing.T) {
 	tests := []struct {
-		expect     *session.Session
 		err        error
 		newSession func(cfgs ...*aws.Config) (*session.Session, error)
 	}{
 		{
 			// Happy path
-			expect:     nil,
 			err:        nil,
 			newSession: func(cfgs ...*aws.Config) (*session.Session, error) { return nil, nil },
 		},
 		{
 			// Error returned from NewSession
-			expect:     nil,
 			err:        errors.New("error"),
 			newSession: func(cfgs ...*aws.Config) (*session.Session, error) { return nil, errors.New("error") },
 		},
@@ -31,28 +28,25 @@ func TestNewSession(t *testing.T) {
 
 	for _, test := range tests {
 		newSession := test.newSession
-		s, err := newSession(aws.NewConfig())
+		sess, err := newSession(aws.NewConfig())
 
-		assert.Equal(t, test.expect, s)
+		assert.Nil(t, sess)
 		assert.Equal(t, test.err, err)
 	}
 }
 
 func TestNewLocalSession(t *testing.T) {
 	tests := []struct {
-		expect                *session.Session
 		err                   error
 		newSessionWithOptions func(opts session.Options) (*session.Session, error)
 	}{
 		{
 			// Happy path
-			expect:                nil,
 			err:                   nil,
 			newSessionWithOptions: func(opts session.Options) (*session.Session, error) { return nil, nil },
 		},
 		{
 			// Error returned from NewSessionWithOptions
-			expect:                nil,
 			err:                   errors.New("error"),
 			newSessionWithOptions: func(opts session.Options) (*session.Session, error) { return nil, errors.New("error") },
 		},
@@ -61,9 +55,9 @@ func TestNewLocalSession(t *testing.T) {
 	for _, test := range tests {
 		newSessionWithOptions := test.newSessionWithOptions
 
-		s, err := newSessionWithOptions(session.Options{})
+		sess, err := newSessionWithOptions(session.Options{})
 
-		assert.Equal(t, test.expect, s)
+		assert.Nil(t, sess)
 		assert.Equal(t, test.err, err)
 	}
 }
