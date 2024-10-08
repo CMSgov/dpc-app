@@ -25,9 +25,9 @@ func TestGetAuthData(t *testing.T) {
 		ipAddressResult     *sqlmock.Rows
 	}{
 		{
-			expectedIpAddresses: []string{"127.0.0.1"},
+			expectedIpAddresses: []string{"127.0.0.1/32", "127.0.0.2/32"},
 			err:                 nil,
-			ipAddressResult:     sqlmock.NewRows(ipAddressColumns).AddRow("127.0.0.1"),
+			ipAddressResult:     sqlmock.NewRows(ipAddressColumns).AddRow("127.0.0.1/32").AddRow("127.0.0.2/32"),
 		},
 	}
 
