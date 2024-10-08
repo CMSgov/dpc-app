@@ -10,7 +10,7 @@
         <%= button_to @login_path, class: 'usa-button width-full margin-bottom-3', data: { turbo: false } do %>
           Sign in with <span class="login-button__logo">Login.gov</span>
         <% end %>
-        <div style="border-top: 1px solid #e6e6e6;"></div>
+        <div class="line-separator"></div>
         <p>
           <strong>You must use your unique DPC Portal username and password to sign in.</strong>
         </p>
@@ -26,12 +26,12 @@
 	</h2>
         <div class="usa-prose">
           <p>To sign in, you must:</p>
-          <ul>
-            <li style="line-height: 1.8;">Have a unique DPC Portal Login.gov account</li>
-            <li style="line-height: 1.8;">Have received an invite to create that account</li>
-            <li style="line-height: 1.8;">Used the email address identified in your invite</li>
+          <ul class="sign-in-instructions">
+            <li>Have a unique DPC Portal Login.gov account</li>
+            <li>Have received an invite to create that account</li>
+            <li>Used the email address identified in your invite</li>
           </ul>
-        <div style="border-top: 1px solid #e6e6e6;"></div>
+        <div class="line-separator"></div>
           <p>
             You don't need an invite to sign up for the DPC Sandbox. This publicly available resource gives you access to test data.
           </p>
