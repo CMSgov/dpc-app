@@ -521,13 +521,20 @@ RSpec.describe 'Invitations', type: :request do
         before { post "/organizations/#{org.id}/invitations/#{cd_invite.id}/verify_code", params: success_params }
 
         context :success do
-          before { stub_user_info }
           it 'should show register' do
+            stub_user_info
             get "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm_cd"
             expect(response.body).to include(register_organization_invitation_path(org, cd_invite))
           end
           it 'should set verification complete' do
+            stub_user_info
             get "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm_cd"
+            expect(request.session["invitation_status_#{cd_invite.id}"]).to eq 'verification_complete'
+          end
+          it 'should ignore given name and phone' do
+            stub_user_info(overrides: { 'given_name' => 'Something Else', 'phone' => '9999999999' })
+            get "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm_cd"
+            expect(response.body).to include(register_organization_invitation_path(org, cd_invite))
             expect(request.session["invitation_status_#{cd_invite.id}"]).to eq 'verification_complete'
           end
         end
@@ -539,20 +546,8 @@ RSpec.describe 'Invitations', type: :request do
             expect(response.body).to include(CGI.escapeHTML(I18n.t('verification.email_mismatch_status')))
             expect(response.body).to_not include(confirm_organization_invitation_path(org, cd_invite))
           end
-          it 'should render error page if given_name not match' do
-            stub_user_info(overrides: { 'given_name' => 'Something Else' })
-            get "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm_cd"
-            expect(response).to be_forbidden
-            expect(response.body).to_not include(confirm_organization_invitation_path(org, cd_invite))
-          end
           it 'should render error page if family_name not match' do
             stub_user_info(overrides: { 'family_name' => 'Something Else' })
-            get "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm_cd"
-            expect(response).to be_forbidden
-            expect(response.body).to_not include(confirm_organization_invitation_path(org, cd_invite))
-          end
-          it 'should render error page if phone not match' do
-            stub_user_info(overrides: { 'phone' => '9999999999' })
             get "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm_cd"
             expect(response).to be_forbidden
             expect(response.body).to_not include(confirm_organization_invitation_path(org, cd_invite))

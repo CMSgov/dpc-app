@@ -107,11 +107,7 @@ class Invitation < ApplicationRecord
 
   def cd_match?(user_info)
     cd_info_present?(user_info)
-
-    return false unless invited_given_name.downcase == user_info['given_name'].downcase &&
-                        invited_family_name.downcase == user_info['family_name'].downcase
-
-    phone_match(user_info)
+    invited_family_name.downcase == user_info['family_name'].downcase
   end
 
   def email_match?(user_info)
@@ -134,20 +130,6 @@ class Invitation < ApplicationRecord
     Rails.logger.error("User Info Missing: #{key}")
     raise UserInfoServiceError, 'missing_info'
   end
-
-  # rubocop:disable Metrics/AbcSize
-  # Go ahead and pass if one or the other starts with US country code (1)
-  def phone_match(user_info)
-    user_phone = user_info['phone'].tr('^0-9', '')
-    if user_phone.length == invited_phone.length
-      user_phone == invited_phone
-    elsif user_phone.length > invited_phone.length && user_phone[0] == '1'
-      user_phone[1..] == invited_phone
-    elsif user_phone.length < invited_phone.length && invited_phone[0] == '1'
-      user_phone == invited_phone[1..]
-    end
-  end
-  # rubocop:enable Metrics/AbcSize
 
   def cannot_cancel_accepted
     return unless status_was == 'accepted' && cancelled?
