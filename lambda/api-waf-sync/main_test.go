@@ -30,7 +30,7 @@ func TestIntegrationUpdateIpSet(t *testing.T) {
 				}
 
 				getAuthData = func(dbUser string, dbPassword string) ([]string, error) {
-					return []string{"127.0.0.1/32"}, nil
+					return []string{"127.0.0.1/32", "127.0.0.2/32"}, nil
 				}
 			},
 		},
@@ -66,7 +66,7 @@ func TestIntegrationUpdateIpSet(t *testing.T) {
 		// Update IP set with new addresses and verify
 		test.mockFunc()
 		addrs, err := updateIpSet()
-		assert.Equal(t, []string{"127.0.0.1/32"}, addrs)
+		assert.Equal(t, []string{"127.0.0.1/32", "127.0.0.2/32"}, addrs)
 		assert.Nil(t, err)
 
 		// Reset original IP addresses and verify
