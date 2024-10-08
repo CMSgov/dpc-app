@@ -16,11 +16,26 @@ func TestIntegrationUpdateIpSet(t *testing.T) {
 	oriGetAuthData := getAuthData
 
 	tests := []struct {
-		err      error
+		expected []string
 		mockFunc func()
 	}{
 		{
-			err: nil,
+			expected: []string{"127.0.0.1/32"},
+			mockFunc: func() {
+				getAuthDbSecrets = func(dbUser string, dbPassword string) (map[string]string, error) {
+					return map[string]string{
+						"/dpc/dev/api/db_user_dpc_auth": "db_user_dpc_auth",
+						"/dpc/dev/api/db_pass_dpc_auth": "db_pass_dpc_auth",
+					}, nil
+				}
+
+				getAuthData = func(dbUser string, dbPassword string) ([]string, error) {
+					return []string{"127.0.0.1/32"}, nil
+				}
+			},
+		},
+		{
+			expected: []string{"127.0.0.1/32", "127.0.0.2/32"},
 			mockFunc: func() {
 				getAuthDbSecrets = func(dbUser string, dbPassword string) (map[string]string, error) {
 					return map[string]string{
@@ -66,7 +81,7 @@ func TestIntegrationUpdateIpSet(t *testing.T) {
 		// Update IP set with new addresses and verify
 		test.mockFunc()
 		addrs, err := updateIpSet()
-		assert.Equal(t, []string{"127.0.0.1/32", "127.0.0.2/32"}, addrs)
+		assert.Equal(t, test.expected, addrs)
 		assert.Nil(t, err)
 
 		// Reset original IP addresses and verify
