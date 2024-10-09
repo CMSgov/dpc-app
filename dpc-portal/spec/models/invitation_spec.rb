@@ -185,32 +185,27 @@ RSpec.describe Invitation, type: :model do
           'family_name' => 'Hodges',
           'phone' => '+111-111-1111' }
       end
-      it 'should match user if names, email, and phone correct' do
+      it 'should match user if last name and email correct' do
         expect(cd_invite.cd_match?(user_info)).to eq true
         expect(cd_invite.email_match?(user_info)).to eq true
       end
       it 'should match user if names and email different case' do
-        cd_invite.invited_given_name.upcase!
         cd_invite.invited_family_name.downcase!
         cd_invite.invited_email = cd_invite.invited_email.upcase_first
         expect(cd_invite.cd_match?(user_info)).to eq true
         expect(cd_invite.email_match?(user_info)).to eq true
       end
+      it 'should match user if given name different' do
+        cd_invite.invited_given_name = 'fake'
+        expect(cd_invite.cd_match?(user_info)).to eq true
+      end
+      it 'should match user if phone different' do
+        cd_invite.invited_phone = '11234567890'
+        expect(cd_invite.cd_match?(user_info)).to eq true
+      end
       it 'should match if invited email eq email' do
         cd_invite.invited_email = user_info['email']
         expect(cd_invite.email_match?(user_info)).to eq true
-      end
-      it 'should match if user info phone starts with 1' do
-        plus_phone = user_info.merge('phone' => '+1-111-111-1111')
-        expect(cd_invite.cd_match?(plus_phone)).to eq true
-      end
-      it 'should match if invited phone starts with 1' do
-        cd_invite.phone_raw = '+1-111-111-1111'
-        expect(cd_invite.cd_match?(user_info)).to eq true
-      end
-      it 'should not match user if given name not correct' do
-        cd_invite.invited_given_name = "not #{cd_invite.invited_given_name}"
-        expect(cd_invite.cd_match?(user_info)).to eq false
       end
       it 'should not match user if family name not correct' do
         cd_invite.invited_family_name = "not #{cd_invite.invited_family_name}"
@@ -219,10 +214,6 @@ RSpec.describe Invitation, type: :model do
       it 'should not match user if email not correct' do
         cd_invite.invited_email = "not #{cd_invite.invited_email}"
         expect(cd_invite.email_match?(user_info)).to eq false
-      end
-      it 'should not match user if phone not correct' do
-        cd_invite.invited_phone = 'not number'
-        expect(cd_invite.cd_match?(user_info)).to eq false
       end
       it 'should raise error if user_info missing given name' do
         missing_info = user_info.merge({ 'given_name' => '' })
