@@ -195,8 +195,9 @@ class DpcClient
     response = http.request(request)
     @response_status = response.code.to_i
     @response_body = response_successful? ? parsed_response(response) : response.body
-  rescue Errno::ECONNREFUSED
-    connection_error
+  rescue => e
+    # There are a whole bunch of errors that can get thrown if we're having network issues and we want to catch them all
+    connection_error(e)
   end
 
   def update_fhir_request(reg_org_api_id, resource, resource_id)
@@ -220,8 +221,8 @@ class DpcClient
     !(Rails.env.development? || Rails.env.test?)
   end
 
-  def connection_error
-    Rails.logger.warn 'Could not connect to API'
+  def connection_error(error)
+    Rails.logger.warn "Could not connect to API: #{error}"
     @response_status = 500
     @response_body = { 'issue' => [{ 'details' => { 'text' => 'Connection error' } }] }
   end
