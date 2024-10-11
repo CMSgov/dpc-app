@@ -33,6 +33,7 @@ RSpec.describe DpcClient do
   # rubocop:disable Layout/LineLength
   before(:each) do
     allow(ENV).to receive(:fetch).with('API_METADATA_URL').and_return('http://dpc.example.com')
+    allow(ENV).to receive(:fetch).with('API_ADMIN_URL').and_return('http://dpc.example.com')
     allow(ENV).to receive(:fetch).with('GOLDEN_MACAROON').and_return('MDAyM2xvY2F0aW9uIGh0dHA6Ly9sb2NhbGhvc3Q6MzAwMgowMDM0aWRlbnRpZmllciBiODY2NmVjMi1lOWY1LTRjODctYjI0My1jMDlhYjgyY2QwZTMKMDAyZnNpZ25hdHVyZSA1hzDOqfW_1hasj-tOps9XEBwMTQIW9ACQcZPuhAGxwwo')
   end
   # rubocop:enable Layout/LineLength
@@ -790,6 +791,44 @@ RSpec.describe DpcClient do
           expect(api_client.response_status).to eq(500)
           expect(api_client.response_body).to eq('{}')
         end
+      end
+    end
+  end
+
+  describe '#get healthcheck' do
+    context 'successful api request' do
+      it 'calls healthcheck' do
+        stub_request(:get, 'http://dpc.example.com/healthcheck').with(
+            headers: { 
+              'Content-Type' => 'application/json', 
+              'Accept' => 'application/json' 
+            }
+          ).to_return(
+            status: 200,
+            body: ''
+          )
+
+          api_client = DpcClient.new
+          api_client.get_healthcheck
+          expect(api_client.response_status).to eq(200)
+      end
+    end
+
+    context 'unsuccessful api request' do
+      it 'calls healthcheck' do
+        stub_request(:get, 'http://dpc.example.com/healthcheck').with(
+            headers: { 
+              'Content-Type' => 'application/json', 
+              'Accept' => 'application/json' 
+            }
+          ).to_return(
+            status: 500,
+            body: ''
+          )
+
+          api_client = DpcClient.new
+          api_client.get_healthcheck
+          expect(api_client.response_status).to eq(500)
       end
     end
   end

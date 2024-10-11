@@ -2,10 +2,11 @@
 
 # Provides interaction with dpc-api
 class DpcClient
-  attr_reader :base_url, :response_body, :response_status
+  attr_reader :base_url, :admin_url, :response_body, :response_status
 
   def initialize
     @base_url = ENV.fetch('API_METADATA_URL')
+    @admin_url = ENV.fetch('API_ADMIN_URL')
   end
 
   def json_content
@@ -111,6 +112,10 @@ class DpcClient
     get_request("#{base_url}/IpAddress", delegated_macaroon(reg_org_api_id))
   end
 
+  def get_healthcheck
+    get_request("#{admin_url}/healthcheck", nil)
+  end
+
   def response_successful?
     (200...299).cover? @response_status
   end
@@ -203,7 +208,8 @@ class DpcClient
   end
 
   def headers(token)
-    { 'Content-Type' => json_content, Accept: json_content }.merge(auth_header(token))
+    headers = { 'Content-Type' => json_content, Accept: json_content }
+    token.nil? ? headers : headers.merge(auth_header(token))
   end
 
   def fhir_headers(token)
