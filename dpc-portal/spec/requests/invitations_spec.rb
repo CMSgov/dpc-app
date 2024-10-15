@@ -531,6 +531,14 @@ RSpec.describe 'Invitations', type: :request do
             get "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm_cd"
             expect(request.session["invitation_status_#{cd_invite.id}"]).to eq 'verification_complete'
           end
+          it 'should log approved access for CD' do
+            stub_user_info
+            allow(Rails.logger).to receive(:info)
+            expect(Rails.logger).to receive(:info).with(['Approved access authorization occurred for the Credential Delegate',
+                       { actionContext: LoggingConstants::ActionContext::Registration,
+                         actionType: LoggingConstants::ActionType::CdConfirmed }])
+            get "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm_cd"
+          end
           it 'should ignore given name and phone' do
             stub_user_info(overrides: { 'given_name' => 'Something Else', 'phone' => '9999999999' })
             get "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm_cd"
