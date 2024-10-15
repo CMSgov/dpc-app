@@ -103,10 +103,10 @@ RSpec.describe 'Invitations', type: :request do
         let(:invitation) { create(:invitation, :cd) }
       end
 
-      it 'should show button to code check' do
+      it 'should show button to confirm identity' do
         get "/organizations/#{org.id}/invitations/#{cd_invite.id}"
         expect(response).to be_ok
-        expect(response.body).to include(code_organization_invitation_path(org, cd_invite))
+        expect(response.body).to include(confirm_cd_organization_invitation_path(org, cd_invite))
       end
     end
   end
@@ -428,6 +428,65 @@ RSpec.describe 'Invitations', type: :request do
     end
   end
 
+  describe 'GET /confirm_cd' do
+    it_behaves_like 'an invitation endpoint', :get, 'confirm_cd' do
+      let(:invitation) { create(:invitation, :cd) }
+    end
+    context 'logged in' do
+      let(:cd_invite) { create(:invitation, :cd) }
+      let(:org) { cd_invite.provider_organization }
+      before { log_in }
+      context 'passed identity confirmation' do
+        context :success do
+          it 'should show register' do
+            stub_user_info
+            get "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm_cd"
+            expect(response.body).to include(register_organization_invitation_path(org, cd_invite))
+          end
+          it 'should set verification complete' do
+            stub_user_info
+            get "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm_cd"
+            expect(request.session["invitation_status_#{cd_invite.id}"]).to eq 'verification_complete'
+          end
+          it 'should ignore given name and phone' do
+            stub_user_info(overrides: { 'given_name' => 'Something Else', 'phone' => '9999999999' })
+            get "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm_cd"
+            expect(response.body).to include(register_organization_invitation_path(org, cd_invite))
+            expect(request.session["invitation_status_#{cd_invite.id}"]).to eq 'verification_complete'
+          end
+        end
+        context :failure do
+          it 'should render error page if email not match' do
+            stub_user_info(overrides: { 'email' => 'another@example.com' })
+            get "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm_cd"
+            expect(response).to be_forbidden
+            expect(response.body).to include(CGI.escapeHTML(I18n.t('verification.email_mismatch_status')))
+            expect(response.body).to_not include(confirm_organization_invitation_path(org, cd_invite))
+          end
+          it 'should render error page if family_name not match' do
+            stub_user_info(overrides: { 'family_name' => 'Something Else' })
+            get "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm_cd"
+            expect(response).to be_forbidden
+            expect(response.body).to_not include(confirm_organization_invitation_path(org, cd_invite))
+          end
+          it 'should not show step navigation' do
+            user_service_class = class_double(UserInfoService).as_stubbed_const
+            allow(user_service_class).to receive(:new).and_raise(UserInfoServiceError, 'server_error')
+            get "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm_cd"
+            expect(response.status).to eq 503
+            expect(response.body).to_not include('<span class="usa-step-indicator__current-step">')
+          end
+          it 'should fail if ao invitation' do
+            ao_invite = create(:invitation, :ao)
+            org = ao_invite.provider_organization
+            get "/organizations/#{org.id}/invitations/#{ao_invite.id}/confirm_cd"
+            expect(response).to redirect_to(organization_invitation_path(org, ao_invite))
+          end
+        end
+      end
+    end
+  end
+
   describe 'POST /register' do
     shared_examples 'a register endpoint' do
       let(:org) { invitation.provider_organization }
@@ -458,6 +517,12 @@ RSpec.describe 'Invitations', type: :request do
         it 'should clear session variable' do
           post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
           expect(request.session["invitation_status_#{invitation.id}"]).to be_nil
+        end
+        it 'should create link to organization' do
+          klass = invitation.authorized_official? ? AoOrgLink : CdOrgLink
+          expect do
+            post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+          end.to change { klass.count }.by(1)
         end
         it 'should log that link was created' do
           allow(Rails.logger).to receive(:info)
@@ -580,7 +645,6 @@ RSpec.describe 'Invitations', type: :request do
       end
       it_behaves_like 'a register endpoint' do
         let(:invitation) { create(:invitation, :ao) }
-        let(:success_params) { {} }
       end
       context :success do
         let(:invitation) { create(:invitation, :ao) }

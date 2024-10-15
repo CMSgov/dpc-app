@@ -44,11 +44,5 @@ RSpec.describe Page::Invitations::StartComponent, type: :component do
         expect(list_items[1]).to have_text('Enter your invite code')
       end
     end
-
-    it 'should go to code page' do
-      expected = "/portal/organizations/#{invitation.provider_organization.id}/invitations/#{invitation.id}/code"
-      form = page.find('form')
-      expect(form[:action]).to eq expected
-    end
   end
 end
