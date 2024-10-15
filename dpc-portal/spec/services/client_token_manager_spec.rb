@@ -33,6 +33,10 @@ RSpec.describe ClientTokenManager do
         expect(manager.client_token).to eq(nil)
       end
     end
+
+    context 'invalid values' do
+      it 'has too long of a label'
+    end
   end
 
   describe '#client_tokens' do

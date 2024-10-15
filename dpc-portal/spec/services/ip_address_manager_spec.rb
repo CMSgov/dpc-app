@@ -44,10 +44,12 @@ RSpec.describe IpAddressManager do
           expect(new_ip_address[:response]).to eq(false)
           expect(new_ip_address[:message]).to eq(response)
         end
+        it 'indicates when too many ip addresses reached'
       end
     end
 
     context 'with invalid params' do
+      it 'has errors on all missing fields'
       context 'label over 25 characters' do
         it 'response with error' do
           api_id = SecureRandom.uuid

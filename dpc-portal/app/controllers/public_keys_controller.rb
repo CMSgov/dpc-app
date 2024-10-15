@@ -24,13 +24,13 @@ class PublicKeysController < ApplicationController
       label: params[:label],
       snippet_signature: params[:snippet_signature]
     )
-
+    logger.debug(new_public_key)
     if new_public_key[:response]
       log_credential_action(:public_key, new_public_key.dig(:message, 'id'), :add)
       flash[:notice] = 'Public key successfully created.'
       redirect_to organization_path(@organization)
     else
-      render_error 'Public key could not be created.'
+      render_error 'Invalid encoding'
     end
   end
   # rubocop:enable Metrics/AbcSize

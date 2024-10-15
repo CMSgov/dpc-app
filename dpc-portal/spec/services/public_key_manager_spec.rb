@@ -6,6 +6,8 @@ RSpec.describe PublicKeyManager do
   include DpcClientSupport
 
   describe '#create_public_key' do
+    let(:api_id) { SecureRandom.uuid }
+    let(:manager) { PublicKeyManager.new(api_id) }
     before(:each) do
       @public_key_params = { label: 'Test Key 1', public_key: file_fixture('stubbed_key.pem').read,
                              snippet_signature: 'stubbed_sign_txt_signature' }
@@ -14,13 +16,10 @@ RSpec.describe PublicKeyManager do
     context 'with valid key' do
       context 'successful API request' do
         it 'responds true' do
-          api_id = SecureRandom.uuid
           response = { 'id' => '570f7a71-0e8f-48a1-83b0-c46ac35d6ef3' }
           stub_self_returning_api_client(message: :create_public_key,
                                          response:,
                                          with: [api_id, { params: @public_key_params }])
-
-          manager = PublicKeyManager.new(api_id)
 
           new_public_key = manager.create_public_key(**@public_key_params)
 
@@ -31,14 +30,11 @@ RSpec.describe PublicKeyManager do
 
       context 'failed API request' do
         it 'responds false' do
-          api_id = SecureRandom.uuid
           response = { 'id' => nil }
           stub_self_returning_api_client(message: :create_public_key,
                                          success: false,
                                          response:,
                                          with: [api_id, { params: @public_key_params }])
-
-          manager = PublicKeyManager.new(api_id)
 
           new_public_key = manager.create_public_key(**@public_key_params)
 
@@ -48,11 +44,25 @@ RSpec.describe PublicKeyManager do
       end
     end
 
+    context 'invalid values' do
+      it 'has errors on all missing fields' do
+        response = manager.create_public_key(label: '', public_key: '', snippet_signature: '')
+        expect(response[:response]).to eq(false)
+        expect(manager.errors.size).to eq 3
+        expect(manager.errors[:label]).to eq 'Cannot be blank'
+        expect(manager.errors[:public_key]).to eq 'Cannot be blank'
+        expect(manager.errors[:snippet_signature]).to eq 'Cannot be blank'
+      end
+
+      it 'has too long of a label' do
+        manager.create_public_key(label: 'aaaaabbbbbcccccdddddeeeeefffff', public_key: '',
+                                  snippet_signature: '')
+        expect(manager.errors[:label]).to eq 'Label must be 25 characters or fewer'
+      end
+    end
+
     context 'with invalid key' do
       it 'returns false when key is private' do
-        api_id = SecureRandom.uuid
-        manager = PublicKeyManager.new(api_id)
-
         force_key_private
         response = manager.create_public_key(label: 'Test Key 1',
                                              public_key: file_fixture('stubbed_key.pem').read,
@@ -60,17 +70,28 @@ RSpec.describe PublicKeyManager do
 
         expect(response[:response]).to eq(false)
         expect(manager.errors.size).to eq 1
-        expect(manager.errors.first).to eq 'Must be a public key'
+        expect(manager.errors[:public_key]).to eq 'Must be a public key'
       end
 
       it 'returns false when key is not in pem format' do
-        api_id = SecureRandom.uuid
-        manager = PublicKeyManager.new(api_id)
-
         new_public_key = manager.create_public_key(label: 'Test Key 1', public_key: file_fixture('bad_cert.pub').read,
                                                    snippet_signature: 'stubbed_sign_txt_signature')
 
         expect(new_public_key[:response]).to eq(false)
+      end
+    end
+    context 'when signature sig not match' do
+      it 'returns false' do
+        response = 'error: Public key could not be verified'
+        stub_self_returning_api_client(message: :create_public_key,
+                                       success: false,
+                                       response:,
+                                       with: [api_id, { params: @public_key_params }])
+
+        new_public_key = manager.create_public_key(**@public_key_params)
+
+        expect(new_public_key[:response]).to eq(false)
+        expect(new_public_key[:errors][:snippet_signature]).to eq "Signature doesn't match"
       end
     end
   end
@@ -81,60 +102,32 @@ RSpec.describe PublicKeyManager do
                              snippet_signature: 'stubbed_sign_txt_signature' }
     end
 
-    context 'with valid key' do
-      context 'successful API request' do
-        it 'responds true' do
-          api_id = SecureRandom.uuid
-          key_guid = SecureRandom.uuid
-          stub_self_returning_api_client(message: :delete_public_key,
-                                         with: [api_id, key_guid])
+    context 'successful API request' do
+      it 'responds true' do
+        api_id = SecureRandom.uuid
+        key_guid = SecureRandom.uuid
+        stub_self_returning_api_client(message: :delete_public_key,
+                                       with: [api_id, key_guid])
 
-          manager = PublicKeyManager.new(api_id)
-          response = manager.delete_public_key(id: key_guid)
+        manager = PublicKeyManager.new(api_id)
+        response = manager.delete_public_key(id: key_guid)
 
-          expect(response).to be true
-        end
-      end
-
-      context 'failed API request' do
-        it 'responds false' do
-          api_id = SecureRandom.uuid
-          key_guid = SecureRandom.uuid
-          stub_self_returning_api_client(message: :delete_public_key,
-                                         success: false,
-                                         with: [api_id, key_guid])
-
-          manager = PublicKeyManager.new(api_id)
-          response = manager.delete_public_key(id: key_guid)
-
-          expect(response).to be false
-        end
+        expect(response).to be true
       end
     end
 
-    context 'with invalid key' do
-      it 'returns false when key is private' do
+    context 'failed API request' do
+      it 'responds false' do
         api_id = SecureRandom.uuid
+        key_guid = SecureRandom.uuid
+        stub_self_returning_api_client(message: :delete_public_key,
+                                       success: false,
+                                       with: [api_id, key_guid])
+
         manager = PublicKeyManager.new(api_id)
+        response = manager.delete_public_key(id: key_guid)
 
-        force_key_private
-        response = manager.create_public_key(label: 'Test Key 1',
-                                             public_key: file_fixture('stubbed_key.pem').read,
-                                             snippet_signature: 'stubbed_sign_txt_signature')
-
-        expect(response[:response]).to eq(false)
-        expect(manager.errors.size).to eq 1
-        expect(manager.errors.first).to eq 'Must be a public key'
-      end
-
-      it 'returns false when key is not in pem format' do
-        api_id = SecureRandom.uuid
-        manager = PublicKeyManager.new(api_id)
-
-        new_public_key = manager.create_public_key(label: 'Test Key 1', public_key: file_fixture('bad_cert.pub').read,
-                                                   snippet_signature: 'stubbed_sign_txt_signature')
-
-        expect(new_public_key[:response]).to eq(false)
+        expect(response).to be false
       end
     end
   end
@@ -165,7 +158,7 @@ RSpec.describe PublicKeyManager do
 
         manager = PublicKeyManager.new(api_id)
         expect(manager.public_keys).to eq([])
-        expect(manager.errors).to eq([{ error: 'Bad request' }])
+        expect(manager.errors).to eq({ error: 'Bad request' })
       end
     end
   end

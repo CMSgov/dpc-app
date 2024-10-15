@@ -221,7 +221,7 @@ RSpec.describe 'PublicKeys', type: :request do
           public_key: file_fixture('stubbed_key.pem').read,
           snippet_signature: 'test snippet signature'
         }
-        expect(flash[:alert]).to eq('Public key could not be created.')
+        expect(flash[:alert]).to eq('Invalid encoding')
       end
     end
   end
