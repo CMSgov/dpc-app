@@ -53,12 +53,6 @@
             </li>
             <% end %>
           </ul>
-        </p>
-        <p>
-          <% if @invitation.credential_delegate? %>
-            If you didn't receive this code contact <strong><%= @invitation.invited_by.given_name %> <%= @invitation.invited_by.family_name %></strong>. The code must not be sent via email.
-          <% end %>
-        </p>
         <%= render Core::Button::ButtonComponent.new(label: 'Begin registration',
             destination: accept_organization_invitation_path(@organization, @invitation),
             method: :get) if @invitation.authorized_official? %>

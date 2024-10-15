@@ -8,8 +8,7 @@ RSpec.describe CdOrgLink, type: :model do
     User.new(given_name: 'Bob', family_name: 'Hodges', email: 'bob@example.com')
   end
   let(:invitation) do
-    Invitation.new(invited_given_name: 'Bob', invited_family_name: 'Hodges', invited_email: 'bob@example.com',
-                   verification_code: 'ABC123')
+    Invitation.new(invited_given_name: 'Bob', invited_family_name: 'Hodges', invited_email: 'bob@example.com')
   end
   let(:cd_org_link) do
     build(:cd_org_link, user:, provider_organization:, invitation:)
@@ -25,7 +24,6 @@ RSpec.describe CdOrgLink, type: :model do
     attrs = cd_org_link.show_attributes
     expect(attrs['full_name']).to eq 'Bob Hodges'
     expect(attrs['email']).to eq 'bob@example.com'
-    expect(attrs['verification_code']).to eq 'ABC123'
     expect(attrs['activated_at']).to eq cd_org_link.created_at.to_s
   end
 

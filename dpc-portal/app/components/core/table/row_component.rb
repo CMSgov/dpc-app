@@ -21,7 +21,6 @@ module Core
       end
 
       def format_if_date(str)
-        # verification_code ABC123 parses
         return str unless str.length > 18
 
         # Using strict parsing because guids were being parsed

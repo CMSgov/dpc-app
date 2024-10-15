@@ -629,7 +629,6 @@ DEPENDENCIES
   view_component (~> 3.9)
   webdrivers
   webmock
-  webrick (~> 1.8.2)
   yard (>= 0.9.36)
 
 RUBY VERSION
