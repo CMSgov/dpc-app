@@ -20,6 +20,7 @@ gem 'activestorage', '~> 7.1.3.4'
 gem 'activesupport', '~> 7.1.3.4'
 gem 'audited'
 gem 'auto-session-timeout'
+gem 'aws-sdk-cloudwatch'
 gem 'bootsnap', '>= 1.4.2', require: false
 gem 'bundler', '>= 1.15.0'
 gem 'devise', '>= 4.9.3'

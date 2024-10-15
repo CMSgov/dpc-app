@@ -7,6 +7,7 @@ module LoggingConstants
     Registration = 'Registration'
     Authentication = 'Authentication'
     BatchVerificationCheck = 'BatchVerificationCheck'
+    HealthCheck = 'HealthCheck'
   end
 
   module ActionType
@@ -33,5 +34,8 @@ module LoggingConstants
     ApiBlocked = 'ApiBlocked'
     AoHasWaiver = 'AoHasWaiver'
     OrgHasWaiver = 'OrgHasWaiver'
+
+    HealthCheckPassed = 'HealthCheckPassed'
+    HealthCheckFailed = 'HealthCheckFailed'
   end
 end
