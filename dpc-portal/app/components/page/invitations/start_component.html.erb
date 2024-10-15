@@ -14,7 +14,8 @@
             <p>DPC uses Login.gov for identity verification. Continue to sign in or created a Login.gov account.</p>
           <% end %>
           <% if @invitation.credential_delegate? %>
-            <p>You've been delegated to manage access to the Data at the Point of Care (DPC) API for <strong><%= @organization.name %></strong>. You should've received an invite code by text, direct message, or other means from <strong><%= @invitation.invited_by.given_name %> <%= @invitation.invited_by.family_name %></strong>, the organization's Authorized Official (AO).</p>
+            <p>Welcome <%= @name %> (<%= @invitation.invited_email %>).</p>
+            <p>You've been delegated to manage access to the Data at the Point of Care (DPC) API for <%= @organization.name %> (NPI <%= @organization.npi %>). </p>
           <% end %>
           <div class="usa-alert usa-alert--warning margin-bottom-4">
             <div class="usa-alert__body">
@@ -54,16 +55,13 @@
             <% end %>
           </ul>
         </p>
-        <p>
-          <% if @invitation.credential_delegate? %>
-            If you didn't receive this code contact <strong><%= @invitation.invited_by.given_name %> <%= @invitation.invited_by.family_name %></strong>. The code must not be sent via email.
-          <% end %>
-        </p>
         <%= render Core::Button::ButtonComponent.new(label: 'Begin registration',
             destination: accept_organization_invitation_path(@organization, @invitation),
+                                                     additional_classes: ['start-component-button'],
             method: :get) if @invitation.authorized_official? %>
-        <%= render Core::Button::ButtonComponent.new(label: 'Confirm your identity',
+        <%= render Core::Button::ButtonComponent.new(label: 'Accept invitation',
             destination: code_organization_invitation_path(@organization, @invitation),
+                                                     additional_classes: ['start-component-button'],
             method: :get) if @invitation.credential_delegate? %>
       </div>
     </div>

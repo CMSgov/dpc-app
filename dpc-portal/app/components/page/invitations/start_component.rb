@@ -8,6 +8,7 @@ module Page
         super
         @organization = organization
         @invitation = invitation
+        @name = "#{invitation&.invited_given_name} #{invitation&.invited_family_name}"
         @hours, @minutes = invitation.expires_in
         @expiration = @hours.positive? ? pluralize(@hours, 'hour') : pluralize(@minutes, 'minute')
         @list_styles = %i[text-green usa-media-block__img]
@@ -19,8 +20,9 @@ module Page
                    ]
                  else
                    [
-                     'Verify your identity with Login.gov.',
-                     'Enter your invite code.'
+                     'Verify your identity with Login.gov',
+                     'Use the same email address the invite was sent to',
+                     'Make sure the name you sign up with matches the one shown on this screen'
                    ]
                  end
       end

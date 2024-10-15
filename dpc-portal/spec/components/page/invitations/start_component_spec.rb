@@ -34,14 +34,15 @@ RSpec.describe Page::Invitations::StartComponent, type: :component do
     let(:invitation) { create(:invitation, :cd) }
     it 'should show start button' do
       button = page.find('.usa-button')
-      expect(button.text).to eq 'Confirm your identity'
+      expect(button.text).to eq 'Accept invitation'
     end
 
     it 'should include the correct musts' do
       within('.usa-icon-list') do
         list_items = all('li')
         expect(list_items[0]).to have_text('Verify your identity with Login.gov')
-        expect(list_items[1]).to have_text('Enter your invite code')
+        expect(list_items[1]).to have_text('Use the same email address the invite was sent to')
+        expect(list_items[2]).to have_text('Make sure the name you sign up with matches the one shown on this screen')
       end
     end
 
