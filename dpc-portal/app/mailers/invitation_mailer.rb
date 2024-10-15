@@ -6,7 +6,7 @@ class InvitationMailer < ApplicationMailer
     @invitation = params[:invitation]
     mail(
       to: @invitation.invited_email,
-      subject: 'You have been granted credential delegate authority in Data at the Point of Care'
+      subject: "You've been delegated to manage API access"
     )
   end
 
