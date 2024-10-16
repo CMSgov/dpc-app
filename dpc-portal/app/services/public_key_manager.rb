@@ -54,9 +54,12 @@ class PublicKeyManager
     else
       @errors[:public_key] = 'Cannot be blank' unless public_key.present?
     end
-    @errors[:label] = 'Cannot be blank' unless label.present?
+    if label.present?
+      @errors[:label] = 'Label must be 25 characters or fewer' if label.length > 25
+    else
+      @errors[:label] = 'Cannot be blank'
+    end
     @errors[:snippet_signature] = 'Cannot be blank' unless snippet_signature.present?
-    @errors[:label] = 'Label must be 25 characters or fewer' if label && label.length > 25
     @errors.blank?
   end
 
