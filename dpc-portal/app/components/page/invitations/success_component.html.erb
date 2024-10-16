@@ -1,5 +1,5 @@
 <%= render(Core::Navigation::StepIndicatorComponent.new(Invitation::AO_STEPS, 3)) if @invitation.authorized_official? %>
-<%= render(Core::Navigation::StepIndicatorComponent.new(Invitation::CD_STEPS, 3)) if @invitation.credential_delegate? %>
+<%= render(Core::Navigation::StepIndicatorComponent.new(Invitation::CD_STEPS, 2)) if @invitation.credential_delegate? %>
 <div>
   <% if @invitation.credential_delegate? %>
     <div class="usa-alert usa-alert--success margin-bottom-4">

@@ -103,10 +103,10 @@ RSpec.describe 'Invitations', type: :request do
         let(:invitation) { create(:invitation, :cd) }
       end
 
-      it 'should show button to code check' do
+      it 'should show button to confirm identity' do
         get "/organizations/#{org.id}/invitations/#{cd_invite.id}"
         expect(response).to be_ok
-        expect(response.body).to include(code_organization_invitation_path(org, cd_invite))
+        expect(response.body).to include(confirm_cd_organization_invitation_path(org, cd_invite))
       end
     end
   end
@@ -428,98 +428,15 @@ RSpec.describe 'Invitations', type: :request do
     end
   end
 
-  describe 'GET /code' do
-    it_behaves_like 'an invitation endpoint', :get, 'code' do
-      let(:invitation) { create(:invitation, :cd) }
-    end
-    let(:verification_code) { 'ABC123' }
-    let(:cd_invite) { create(:invitation, :cd, verification_code:) }
-    let(:org) { cd_invite.provider_organization }
-    it 'should show code form without verification code' do
-      get "/organizations/#{org.id}/invitations/#{cd_invite.id}/code"
-      expect(response).to be_ok
-      expect(response.body).to include(verify_code_organization_invitation_path(org, cd_invite))
-      expect(response.body).to_not include(cd_invite.verification_code)
-    end
-    it 'should fail if ao invitation' do
-      ao_invite = create(:invitation, :ao)
-      org = ao_invite.provider_organization
-      get "/organizations/#{org.id}/invitations/#{ao_invite.id}/code"
-      expect(response).to redirect_to(organization_invitation_path(org, ao_invite))
-    end
-  end
-
-  describe 'POST /verify_code' do
-    it_behaves_like 'an invitation endpoint', :post, 'verify_code' do
-      let(:invitation) { create(:invitation, :cd) }
-    end
-    let(:verification_code) { 'ABC123' }
-    let(:invited_by) { create(:user, given_name: 'Gavin', family_name: 'McCloud') }
-    let(:cd_invite) { create(:invitation, :cd, verification_code:, invited_by:) }
-    let(:org) { cd_invite.provider_organization }
-    let(:success_params) { { verification_code: } }
-    let(:fail_params) { { verification_code: 'badcode' } }
-    context :success do
-      it 'should render login page on success' do
-        post "/organizations/#{org.id}/invitations/#{cd_invite.id}/verify_code", params: success_params
-        expect(response).to be_ok
-        expect(response.body).to include(login_organization_invitation_url(org, cd_invite))
-      end
-      it 'should set code verified in session' do
-        post "/organizations/#{org.id}/invitations/#{cd_invite.id}/verify_code", params: success_params
-        expect(request.session["invitation_status_#{cd_invite.id}"]).to eq 'code_verified'
-      end
-    end
-    context :failure do
-      it 'should render form with error if code not match' do
-        post "/organizations/#{org.id}/invitations/#{cd_invite.id}/verify_code", params: fail_params
-        expect(response).to be_bad_request
-        expect(response.body).to include(verify_code_organization_invitation_path(org, cd_invite))
-      end
-      it 'should not set code passed in session' do
-        post "/organizations/#{org.id}/invitations/#{cd_invite.id}/verify_code", params: fail_params
-        expect(request.session["invitation_status_#{cd_invite.id}"]).to_not eq 'code_verified'
-      end
-      it 'should fail if ao invitation' do
-        ao_invite = create(:invitation, :ao)
-        org = ao_invite.provider_organization
-        post "/organizations/#{org.id}/invitations/#{ao_invite.id}/verify_code", params: success_params
-        expect(response).to redirect_to(organization_invitation_path(org, ao_invite))
-      end
-      it 'should be rendered invalid after 5 failed attempts' do
-        expect(cd_invite.reload.failed_attempts).to eq 0
-        4.times.each do |i|
-          post "/organizations/#{org.id}/invitations/#{cd_invite.id}/verify_code", params: fail_params
-          expect(response).to be_bad_request
-          expect(response.body).to include("Incorrect invite code. You have #{4 - i} remaining attempts.")
-          expect(cd_invite.reload.failed_attempts).to eq i + 1
-        end
-        post "/organizations/#{org.id}/invitations/#{cd_invite.id}/verify_code", params: fail_params
-        expect(response).to be_forbidden
-        expect(response.body).to include(I18n.t('verification.max_tries_exceeded_text', ao_full_name: 'Gavin McCloud'))
-        expect(cd_invite.reload.failed_attempts).to eq 5
-        expect(cd_invite.unacceptable_reason).to eq 'max_tries_exceeded'
-      end
-    end
-  end
-
   describe 'GET /confirm_cd' do
     it_behaves_like 'an invitation endpoint', :get, 'confirm_cd' do
       let(:invitation) { create(:invitation, :cd) }
     end
     context 'logged in' do
-      let(:verification_code) { 'ABC123' }
-      let(:cd_invite) { create(:invitation, :cd, verification_code:) }
+      let(:cd_invite) { create(:invitation, :cd) }
       let(:org) { cd_invite.provider_organization }
       before { log_in }
-      it 'should redirect to code if not yet verified' do
-        get "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm_cd"
-        expect(response).to redirect_to(code_organization_invitation_path(org, cd_invite))
-      end
-      context 'passed verification code' do
-        let(:success_params) { { verification_code: } }
-        before { post "/organizations/#{org.id}/invitations/#{cd_invite.id}/verify_code", params: success_params }
-
+      context 'passed identity confirmation' do
         context :success do
           it 'should show register' do
             stub_user_info
@@ -592,7 +509,6 @@ RSpec.describe 'Invitations', type: :request do
             get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
             post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"
           else
-            post "/organizations/#{org.id}/invitations/#{invitation.id}/verify_code", params: success_params
             get "/organizations/#{org.id}/invitations/#{invitation.id}/confirm_cd"
           end
         end
@@ -616,8 +532,7 @@ RSpec.describe 'Invitations', type: :request do
         it 'should create link to organization' do
           klass = invitation.authorized_official? ? AoOrgLink : CdOrgLink
           expect do
-            post "/organizations/#{org.id}/invitations/#{invitation.id}/register",
-                 params: success_params
+            post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
           end.to change { klass.count }.by(1)
         end
         it 'should log that link was created' do
@@ -702,8 +617,6 @@ RSpec.describe 'Invitations', type: :request do
           if invitation.authorized_official?
             stub_user_info
             get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
-          else
-            post "/organizations/#{org.id}/invitations/#{invitation.id}/verify_code", params: success_params
           end
         end
         it 'should redirect if not confirmed' do
@@ -718,19 +631,14 @@ RSpec.describe 'Invitations', type: :request do
         let(:invitation) { create(:invitation, :cd) }
       end
       it_behaves_like 'a register endpoint' do
-        let(:verification_code) { 'ABC123' }
-        let(:invitation) { create(:invitation, :cd, verification_code:) }
-        let(:success_params) { { verification_code: } }
+        let(:invitation) { create(:invitation, :cd) }
       end
       context :success do
-        let(:verification_code) { 'ABC123' }
-        let(:invitation) { create(:invitation, :cd, verification_code:) }
-        let(:success_params) { { verification_code: } }
+        let(:invitation) { create(:invitation, :cd) }
         let(:org) { invitation.provider_organization }
         before do
           log_in
           stub_user_info
-          post "/organizations/#{org.id}/invitations/#{invitation.id}/verify_code", params: success_params
           get "/organizations/#{org.id}/invitations/#{invitation.id}/confirm_cd"
         end
         it 'should not save verification_status on user and org' do
@@ -748,7 +656,6 @@ RSpec.describe 'Invitations', type: :request do
       end
       it_behaves_like 'a register endpoint' do
         let(:invitation) { create(:invitation, :ao) }
-        let(:success_params) { {} }
       end
       context :success do
         let(:invitation) { create(:invitation, :ao) }

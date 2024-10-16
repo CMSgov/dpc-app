@@ -34,35 +34,8 @@ class InvitationsController < ApplicationController
   end
 
   # CD Flow
-  def code
-    render(Page::Invitations::OtpComponent.new(@organization, @invitation))
-  end
-
-  def verify_code
-    return handle_failed_attempt unless params[:verification_code] == @invitation.verification_code
-
-    @invitation.reset_attempts
-    session["invitation_status_#{@invitation.id}"] = 'code_verified'
-    render(Page::Invitations::InvitationLoginComponent.new(@invitation))
-  end
-
-  def handle_failed_attempt
-    @invitation.increment_failed_attempts
-    if @invitation.attempts_remaining.zero?
-      return render(Page::Invitations::BadInvitationComponent.new(@invitation, 'max_tries_exceeded'),
-                    status: :forbidden)
-    end
-
-    message = "Incorrect invite code. You have #{@invitation.attempts_remaining} remaining attempts."
-    @invitation.errors.add(:verification_code, :bad_code, message:)
-    render(Page::Invitations::OtpComponent.new(@organization, @invitation), status: :bad_request)
-  end
 
   def confirm_cd
-    unless session["invitation_status_#{@invitation.id}"] == 'code_verified'
-      return redirect_to code_organization_invitation_url(@organization, @invitation)
-    end
-
     invitation_matches_user
     return if performed?
 
