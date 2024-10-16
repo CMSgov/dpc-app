@@ -535,9 +535,9 @@ RSpec.describe 'Invitations', type: :request do
             stub_user_info
             allow(Rails.logger).to receive(:info)
             approved_access_log_message = [
-                'Approved access authorization occurred for the Credential Delegate',
-                { actionContext: LoggingConstants::ActionContext::Registration,
-                actionType: LoggingConstants::ActionType::CdConfirmed }
+              'Approved access authorization occurred for the Credential Delegate',
+              { actionContext: LoggingConstants::ActionContext::Registration,
+              actionType: LoggingConstants::ActionType::CdConfirmed }
             ]
             expect(Rails.logger).to receive(:info).with(approved_access_log_message)
             get "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm_cd"
