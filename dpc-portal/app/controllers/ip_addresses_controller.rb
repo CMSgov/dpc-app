@@ -23,7 +23,7 @@ class IpAddressesController < ApplicationController
     else
       @errors = new_ip_address[:errors] || {}
       flash[:alert] = @errors[:root] || 'IP address invalid'
-      render Page::IpAddress::NewAddressComponent.new(@organization)
+      render Page::IpAddress::NewAddressComponent.new(@organization, errors: @errors)
     end
   end
 
