@@ -192,10 +192,12 @@ RSpec.describe 'PublicKeys', type: :request do
       end
 
       it 'fails if missing params' do
-        stub_api_client(message: :get_organization,
-                        response: default_get_org_response(org_api_id))
         post "/organizations/#{org.id}/public_keys"
-        expect(flash[:alert]).to eq('Required values missing.')
+        expect(flash[:alert]).to eq('Invalid encoding')
+        error_msg = 'Cannot be blank'
+        expect(assigns(:errors)).to eq(public_key: error_msg,
+                                       snippet_signature: error_msg,
+                                       label: error_msg)
       end
 
       it 'fails if label over 25 characters' do
@@ -206,7 +208,8 @@ RSpec.describe 'PublicKeys', type: :request do
           public_key: file_fixture('stubbed_key.pem').read,
           snippet_signature: 'test snippet signature'
         }
-        expect(flash[:alert]).to eq('Label cannot be over 25 characters')
+        expect(flash[:alert]).to eq('Invalid encoding')
+        expect(assigns(:errors)).to eq(label: 'Label must be 25 characters or fewer')        
       end
 
       it 'shows error if problem' do

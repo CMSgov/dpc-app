@@ -4,10 +4,6 @@
 class PublicKeyManager
   attr_reader :api_id, :errors
 
-  SIGNATURE_FAIULRE_MESSAGES = ['Key and signature do not match',
-                                'Signature could not be verified.',
-                                'Public key could not be verified'].freeze
-
   def initialize(api_id)
     @api_id = api_id
     @errors = {}
@@ -16,38 +12,20 @@ class PublicKeyManager
   def create_public_key(public_key:, label:, snippet_signature:)
     public_key = strip_carriage_returns(public_key)
     snippet_signature = strip_carriage_returns(snippet_signature)
-    return { response: false, errors: @errors } if invalid_input?(public_key, label, snippet_signature)
 
-    return { response: false, errors: @errors } if invalid_encoding?(public_key)
+    return { response: false, errors: @errors } unless valid_input?(public_key, label, snippet_signature)
 
     api_client = DpcClient.new
     api_client.create_public_key(api_id,
-                                 params: { label:, public_key:,
-                                           snippet_signature: })
+                                 params: { label:, public_key:, snippet_signature: })
 
     unless api_client.response_successful?
       Rails.logger.error "Failed to create public key: #{api_client.response_body}"
-      if api_client.response_body&.include?('Public key could not be verified')
-        @errors[:snippet_signature] =
-          "Signature doesn't match"
-      end
+      parse_errors(api_client.response_body) if api_client.response_body.present?
     end
     { response: api_client.response_successful?,
       message: api_client.response_body,
       errors: }
-  end
-
-  def invalid_encoding?(key_string)
-    key = OpenSSL::PKey::RSA.new(key_string)
-    if key.private?
-      @errors[:public_key] = 'Must be a public key'
-      true
-    else
-      false
-    end
-  rescue OpenSSL::PKey::RSAError
-    @errors[:public_key] = 'Must have valid encoding'
-    true
   end
 
   def delete_public_key(params)
@@ -70,15 +48,31 @@ class PublicKeyManager
     end
   end
 
-  def invalid_input?(public_key, label, snippet_signature)
-    @errors[:public_key] = 'Cannot be blank' unless public_key.present?
+  def valid_input?(public_key, label, snippet_signature)
+    if public_key.present?
+      validate_encoding(public_key)
+    else
+      @errors[:public_key] = 'Cannot be blank' unless public_key.present?
+    end
     @errors[:label] = 'Cannot be blank' unless label.present?
     @errors[:snippet_signature] = 'Cannot be blank' unless snippet_signature.present?
-    @errors[:label] = 'Label must be 25 characters or fewer' if label.length > 25
-    @errors.present?
+    @errors[:label] = 'Label must be 25 characters or fewer' if label && label.length > 25
+    @errors.blank?
+  end
+
+  def validate_encoding(key_string)
+    key = OpenSSL::PKey::RSA.new(key_string)
+    @errors[:public_key] = 'Must be a public key' if key.private?
+  rescue OpenSSL::PKey::RSAError
+    @errors[:public_key] = 'Must have valid encoding'
   end
 
   def strip_carriage_returns(str)
-    str.gsub("\r", '')
+    str&.gsub("\r", '')
+  end
+
+  def parse_errors(error_msg)
+    @errors[:snippet_signature] = "Signature doesn't match" if error_msg.include?('Public key could not be verified')
+    @errors[:public_key] = 'Must have valid encoding' if error_msg.include?('Public key is not valid')
   end
 end

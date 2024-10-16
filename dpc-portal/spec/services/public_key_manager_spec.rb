@@ -79,6 +79,18 @@ RSpec.describe PublicKeyManager do
 
         expect(new_public_key[:response]).to eq(false)
       end
+      it 'returns false when backend does not like key' do
+        response = 'error: Public key is not valid'
+        stub_self_returning_api_client(message: :create_public_key,
+                                       success: false,
+                                       response:,
+                                       with: [api_id, { params: @public_key_params }])
+
+        new_public_key = manager.create_public_key(**@public_key_params)
+
+        expect(new_public_key[:response]).to eq(false)
+        expect(new_public_key[:errors][:public_key]).to eq 'Must have valid encoding'
+      end
     end
     context 'when signature sig not match' do
       it 'returns false' do
