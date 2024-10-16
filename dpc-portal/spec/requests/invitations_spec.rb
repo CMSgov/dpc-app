@@ -534,9 +534,12 @@ RSpec.describe 'Invitations', type: :request do
           it 'should log approved access for CD' do
             stub_user_info
             allow(Rails.logger).to receive(:info)
-            expect(Rails.logger).to receive(:info).with(['Approved access authorization occurred for the Credential Delegate',
-                                                         { actionContext: LoggingConstants::ActionContext::Registration,
-                                                           actionType: LoggingConstants::ActionType::CdConfirmed }])
+            approved_access_log_message = [
+                'Approved access authorization occurred for the Credential Delegate',
+                { actionContext: LoggingConstants::ActionContext::Registration,
+                actionType: LoggingConstants::ActionType::CdConfirmed }
+            ]
+            expect(Rails.logger).to receive(:info).with(approved_access_log_message)
             get "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm_cd"
           end
           it 'should ignore given name and phone' do
