@@ -80,7 +80,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_10_163724) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "status"
-    t.integer "failed_attempts", default: 0, null: false
   end
 
   create_table "provider_organizations", force: :cascade do |t|
