@@ -14,7 +14,7 @@
             <p>DPC uses Login.gov for identity verification. Continue to sign in or created a Login.gov account.</p>
           <% end %>
           <% if @invitation.credential_delegate? %>
-            <p>You've been delegated to manage access to the Data at the Point of Care (DPC) API for <strong><%= @organization.name %></strong>. You should've received an invite code by text, direct message, or other means from <strong><%= @invitation.invited_by.given_name %> <%= @invitation.invited_by.family_name %></strong>, the organization's Authorized Official (AO).</p>
+            <p>You've been delegated to manage access to the Data at the Point of Care (DPC) API for <strong><%= @organization.name %></strong>.</p>
           <% end %>
           <div class="usa-alert usa-alert--warning margin-bottom-4">
             <div class="usa-alert__body">
