@@ -17,12 +17,11 @@
       </div>
       <div>
         <h2>Pending</h2>
-        <p>You will need to send an invited Credential Delegate their invite code when they accept the organization invite. Please do not send the code via email.</p>
         <% if @pending_credential_delegates.present? %>
           <%= render(Core::Table::TableComponent.new(id: 'pending-cd-table', additional_classes: ['width-full'], sortable: false)) do %>
             <%= render(Core::Table::HeaderComponent.new(caption: 'Pending Credential Delegate Table',
-                                                    columns: ['Name', 'Email', 'Invite code', ''])) %>
-            <%= render(Core::Table::RowComponent.with_collection(@pending_credential_delegates, keys: ['full_name', 'email', 'verification_code'], delete_path: organization_credential_delegate_invitations_path(@organization.path_id), obj_name: 'CD invitation')) %>
+                                                    columns: ['Name', 'Email', ''])) %>
+            <%= render(Core::Table::RowComponent.with_collection(@pending_credential_delegates, keys: ['full_name', 'email'], delete_path: organization_credential_delegate_invitations_path(@organization.path_id), obj_name: 'CD invitation')) %>
           <% end %>
       <% else %>
         <p>There are no pending credential delegates.</p>
