@@ -21,7 +21,8 @@ class IpAddressesController < ApplicationController
       flash[:notice] = 'IP address successfully created.'
       redirect_to organization_path(@organization)
     else
-      flash[:alert] = "IP address could not be created: #{manager.errors.join(', ')}."
+      @errors = new_ip_address[:errors] || {}
+      flash[:alert] = @errors[:root] || 'IP address invalid'
       render Page::IpAddress::NewAddressComponent.new(@organization)
     end
   end
@@ -32,7 +33,7 @@ class IpAddressesController < ApplicationController
       flash[:notice] = 'IP address successfully deleted.'
       log_credential_action(:ip_address, params[:id], :remove)
     else
-      flash[:alert] = "IP address could not be deleted: #{manager.errors.join(', ')}."
+      flash[:alert] = manager.errors[:root] || 'IP address could not be deleted.'
     end
     redirect_to organization_path(@organization)
   end

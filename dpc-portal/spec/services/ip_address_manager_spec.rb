@@ -120,7 +120,6 @@ RSpec.describe IpAddressManager do
   describe '#ip_addresses' do
     context 'successful API request' do
       it 'returns array of IP addresses' do
-
         addresses = [{ 'id' => SecureRandom.uuid }]
         stub_self_returning_api_client(message: :get_ip_addresses,
                                        response: { 'entities' => addresses },

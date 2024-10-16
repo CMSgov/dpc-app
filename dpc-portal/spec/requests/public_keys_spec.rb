@@ -209,7 +209,7 @@ RSpec.describe 'PublicKeys', type: :request do
           snippet_signature: 'test snippet signature'
         }
         expect(flash[:alert]).to eq('Invalid encoding')
-        expect(assigns(:errors)).to eq(label: 'Label must be 25 characters or fewer')        
+        expect(assigns(:errors)).to eq(label: 'Label must be 25 characters or fewer')
       end
 
       it 'shows error if problem' do

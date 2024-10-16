@@ -21,7 +21,7 @@ class PublicKeyManager
 
     unless api_client.response_successful?
       Rails.logger.error "Failed to create public key: #{api_client.response_body}"
-      parse_errors(api_client.response_body) if api_client.response_body.present?
+      parse_errors(api_client.response_body)
     end
     { response: api_client.response_successful?,
       message: api_client.response_body,
@@ -75,6 +75,8 @@ class PublicKeyManager
   end
 
   def parse_errors(error_msg)
+    return unless error_msg.present?
+
     @errors[:snippet_signature] = "Signature doesn't match" if error_msg.include?('Public key could not be verified')
     @errors[:public_key] = 'Must have valid encoding' if error_msg.include?('Public key is not valid')
   end

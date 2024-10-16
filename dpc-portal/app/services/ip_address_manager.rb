@@ -11,7 +11,6 @@ class IpAddressManager
     @errors = {}
   end
 
-  # rubocop:disable Metrics/AbcSize
   def create_ip_address(ip_address:, label:)
     label = strip_carriage_returns(label)
     ip_address = strip_carriage_returns(ip_address)
@@ -22,14 +21,13 @@ class IpAddressManager
 
     unless api_client.response_successful?
       Rails.logger.error "Failed to create IP address: #{api_client.response_body}"
-      parse_errors(api_client.response_body) if api_client.response_body.present?
+      parse_errors(api_client.response_body)
     end
 
     { response: api_client.response_successful?,
       message: api_client.response_body,
       errors: }
   end
-  # rubocop:enable Metrics/AbcSize
 
   def delete_ip_address(params)
     api_client = DpcClient.new
@@ -79,15 +77,15 @@ class IpAddressManager
   end
 
   def strip_carriage_returns(str)
-    str.gsub("\r", '')
+    str&.gsub("\r", '')
   end
 
   def parse_errors(error_msg)
     max_msg = 'Max Ips for organization reached'
-    if error_msg.include?(max_msg)
-      @errors[:root] = max_msg
-    else
-      @errors[:root] = 'Unable to process request'
-    end
+    @errors[:root] = if error_msg&.include?(max_msg)
+                       max_msg
+                     else
+                       'Unable to process request'
+                     end
   end
 end
