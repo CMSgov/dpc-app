@@ -40,6 +40,9 @@ class InvitationsController < ApplicationController
     return if performed?
 
     session["invitation_status_#{@invitation.id}"] = 'verification_complete'
+    Rails.logger.info(['Approved access authorization occurred for the Credential Delegate',
+                       { actionContext: LoggingConstants::ActionContext::Registration,
+                         actionType: LoggingConstants::ActionType::CdConfirmed }])
     render(Page::Invitations::AcceptInvitationComponent.new(@organization, @invitation, @given_name, @family_name))
   end
 
