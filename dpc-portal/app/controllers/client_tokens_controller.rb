@@ -42,8 +42,8 @@ class ClientTokensController < ApplicationController
     params[:label].present?
   end
 
-  def render_error(msg, errors: {})
+  def render_error(msg)
     flash.now.alert = msg
-    render Page::ClientToken::NewTokenComponent.new(@organization, errors:)
+    render Page::ClientToken::NewTokenComponent.new(@organization, errors: @errors)
   end
 end

@@ -44,7 +44,7 @@ RSpec.describe ClientTokenManager do
       it 'should fail if label too long' do
         new_token = manager.create_client_token(label: '12345678901234567890123456')
         expect(new_token[:response]).to eq(false)
-          expect(new_token[:errors]).to eq(label: 'Label must be 25 characters or fewer')
+        expect(new_token[:errors]).to eq(label: 'Label must be 25 characters or fewer')
       end
     end
   end
