@@ -63,10 +63,6 @@ RSpec.describe IpAddressManager do
       context 'label over 25 characters' do
         it 'response with error' do
           ip_address_params[:label] = 'aaaaabbbbbcccccdddddeeeeefffff'
-          stub_self_returning_api_client(message: :create_ip_address,
-                                         response: { 'id' => '570f7a71-0e8f-48a1-83b0-c46ac35d6ef3' },
-                                         with: [api_id, { params: ip_address_params }])
-
           new_ip_address = manager.create_ip_address(**ip_address_params)
 
           expect(new_ip_address[:response]).to eq(false)
@@ -77,10 +73,6 @@ RSpec.describe IpAddressManager do
       context 'invalid IP' do
         it 'response with error' do
           ip_address_params[:ip_address] = '333.333.333.333'
-          stub_self_returning_api_client(message: :create_ip_address,
-                                         response: { 'id' => '570f7a71-0e8f-48a1-83b0-c46ac35d6ef3' },
-                                         with: [api_id, { params: ip_address_params }])
-
           new_ip_address = manager.create_ip_address(**ip_address_params)
 
           expect(new_ip_address[:response]).to eq(false)

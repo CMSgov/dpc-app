@@ -2,19 +2,27 @@
 
 # Manages client tokens for an organization
 class ClientTokenManager
-  attr_reader :api_id, :client_token
+  attr_reader :api_id, :errors
 
   def initialize(api_id)
     @api_id = api_id
+    @errors = {}
   end
 
   def create_client_token(label: nil)
+    return { response: false, errors: @errors } unless valid_input?(label)
+
     api_client = DpcClient.new
     api_client.create_client_token(api_id, params: { label: })
 
-    @client_token = api_client.response_body
+    unless api_client.response_successful?
+      Rails.logger.error "Failed to create client token: #{api_client.response_body}"
+      @errors[:root] = 'Unable to process request'
+    end
 
-    api_client.response_successful?
+    { response: api_client.response_successful?,
+      message: api_client.response_body,
+      errors: }
   end
 
   def delete_client_token(params)
@@ -31,5 +39,16 @@ class ClientTokenManager
     else
       []
     end
+  end
+
+  private
+
+  def valid_input?(label)
+    if label.present?
+      @errors[:label] = 'Label must be 25 characters or fewer' if label.length > 25
+    else
+      @errors[:label] = 'Cannot be blank'
+    end
+    @errors.blank?
   end
 end

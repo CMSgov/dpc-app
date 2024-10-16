@@ -43,7 +43,7 @@ RSpec.describe Page::IpAddress::NewAddressComponent, type: :component do
       before do
         render_inline(component)
       end
-  
+
       it { is_expected.to match_html_fragment(expected_html) }
     end
     context 'with error on' do
