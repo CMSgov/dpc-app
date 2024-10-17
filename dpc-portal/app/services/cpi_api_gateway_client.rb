@@ -4,7 +4,7 @@ require 'oauth2'
 
 # A client for requests to the CPI API Gateway
 class CpiApiGatewayClient
-  attr_accessor :access
+  attr_accessor :access, :client
 
   def initialize
     env = ENV.fetch('ENV', nil)
@@ -65,10 +65,13 @@ class CpiApiGatewayClient
     fetch_provider_info(body)
   end
 
-  # The CPI API Gateway doesn't support a healthcheck, and they're suggestion was to just hit one of their
+  # The CPI API Gateway doesn't support a healthcheck, and their suggestion was to just hit one of their
   # end points and see if we get a response.  Don't over use this, as it counts against our rate limit.
   def healthcheck
-    !@client.client_credentials.get_token(scope: 'READ').nil?
+    @client.client_credentials.get_token(scope: 'READ').nil?
+    true
+  rescue OAuth2::Error
+    false
   end
 
   private
