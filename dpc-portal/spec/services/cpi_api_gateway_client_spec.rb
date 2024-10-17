@@ -118,7 +118,10 @@ describe CpiApiGatewayClient do
     end
 
     it 'returns false when it cannot get a token' do
-      expect(client.healthcheck).to eq(true)
+      client.client = OAuth2::Client.new('fake_id', 'fake_secret',
+                                         site: ENV.fetch('CMS_IDM_OAUTH_URL', nil),
+                                         token_url: '/oauth2/bad_token/v1/token')
+      expect(client.healthcheck).to eq(false)
     end
   end
 

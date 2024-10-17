@@ -70,7 +70,7 @@ class CpiApiGatewayClient
   def healthcheck
     @client.client_credentials.get_token(scope: 'READ').nil?
     true
-  rescue OAuth2::Error
+  rescue StandardError
     false
   end
 

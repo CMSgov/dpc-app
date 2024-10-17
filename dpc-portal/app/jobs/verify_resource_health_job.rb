@@ -9,26 +9,46 @@ class VerifyResourceHealthJob < ApplicationJob
   METRIC_NAMESPACE = 'DPC'
   REGION = 'us-east-1'
   ENVIRONMENT = ENV.fetch('ENV', 'none')
+  IDP_HOST = ENV.fetch('IDP_HOST', nil)
 
   def perform
-    client = DpcClient.new
-    client.get_healthcheck
-    logger.warn(client.response_body) unless client.response_successful?
-
-    log_healthcheck(
-      'PortalConnectedToDpcApi',
-      client.response_successful?
-    )
-
-    nil
+    dpc_healthcheck
+    idp_healthcheck
+    cpi_gateway_healthcheck
   end
 
   private
 
-  def log_healthcheck(
-    check_name,
-    healthy
-  )
+  def dpc_healthcheck
+    dpc_client = DpcClient.new
+    dpc_client.get_healthcheck
+    logger.warn(dpc_client.response_body) unless dpc_client.response_successful?
+
+    log_healthcheck(
+      'PortalConnectedToDpcApi',
+      dpc_client.response_successful?
+    )
+  end
+
+  def idp_healthcheck
+    return log_healthcheck('PortalConnectedToIdp', false) if IDP_HOST.nil?
+
+    # Login.gov doesn't have a /healthcheck, so we look for a 200 to verify connectivity.
+    response = Net::HTTP.get_response(URI("https://#{IDP_HOST}"))
+    log_healthcheck(
+      'PortalConnectedToIdp',
+      response.code.to_i.between?(200, 299)
+    )
+  end
+
+  def cpi_gateway_healthcheck
+    log_healthcheck(
+      'PortalConnectedToCpiApiGateway',
+      CpiApiGatewayClient.new.healthcheck
+    )
+  end
+
+  def log_healthcheck(check_name, healthy)
     action_type = if healthy
                     LoggingConstants::ActionType::HealthCheckPassed
                   else
@@ -37,7 +57,6 @@ class VerifyResourceHealthJob < ApplicationJob
     logger.info(["Healthcheck #{check_name}",
                  { actionContext: LoggingConstants::ActionContext::HealthCheck,
                    actionType: action_type }])
-
     emit_cloudwatch_metric(check_name, healthy)
   end
 
@@ -49,26 +68,23 @@ class VerifyResourceHealthJob < ApplicationJob
       },
       {
         name: 'environment',
-        value: environment
+        value: ENVIRONMENT
       }
     ]
   end
 
-  def emit_cloudwatch_metric(
-    check_name,
-    healthy
-  )
-    Aws::CloudWatch::Client.new(region: REGION).put_metric_data(
-      namespace: METRIC_NAMESPACE,
-      metric_data: [
-        {
-          metric_name: check_name,
-          dimensions:,
-          value: healthy ? 1 : 0,
-          unit: 'None'
-        }
-      ]
-    )
+  def emit_cloudwatch_metric(check_name, healthy)
+    Aws::CloudWatch::Client.new(region: REGION).put_metric_data({
+                                                                  namespace: METRIC_NAMESPACE,
+                                                                  metric_data: [
+                                                                    {
+                                                                      metric_name: check_name,
+                                                                      dimensions:,
+                                                                      value: healthy ? 1 : 0,
+                                                                      unit: 'None'
+                                                                    }
+                                                                  ]
+                                                                })
   rescue StandardError
     # If we're not running on AWS, or don't have the AWS CLI configured, we'll get an error.
     # This is normal when running locally, so only logging in debug mode.
