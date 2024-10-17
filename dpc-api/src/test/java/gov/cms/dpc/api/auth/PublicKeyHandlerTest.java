@@ -171,6 +171,14 @@ class PublicKeyHandlerTest {
             PublicKeyException pke = assertThrows(PublicKeyException.class, () -> PublicKeyHandler.verifySignature(publicKeyStr, snippet, sigStr));
             assertEquals("Key and signature do not match", pke.getMessage());
         }
+
+        @Test
+        void testVerifySignatureBadSigStr() throws Exception {
+            KeyPair keyPair = APIAuthHelpers.generateKeyPair(KeyType.RSA);
+            String publicKeyStr = APIAuthHelpers.generatePublicKey(keyPair.getPublic());
+            String snippet = "Verify signature test";
+            assertThrows(PublicKeyException.class, ()  -> PublicKeyHandler.verifySignature(publicKeyStr, snippet, "hoohaw;"));
+        }
     }
 
     @Test

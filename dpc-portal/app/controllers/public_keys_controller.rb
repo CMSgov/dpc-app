@@ -14,9 +14,6 @@ class PublicKeysController < ApplicationController
 
   # rubocop:disable Metrics/AbcSize
   def create
-    return render_error('Required values missing.') if missing_params
-    return render_error('Label cannot be over 25 characters') if label_length
-
     manager = PublicKeyManager.new(@organization.dpc_api_organization_id)
 
     new_public_key = manager.create_public_key(
@@ -30,7 +27,8 @@ class PublicKeysController < ApplicationController
       flash[:notice] = 'Public key successfully created.'
       redirect_to organization_path(@organization)
     else
-      render_error 'Public key could not be created.'
+      @errors = new_public_key[:errors]
+      render_error @errors[:root] || 'Invalid encoding'
     end
   end
   # rubocop:enable Metrics/AbcSize
@@ -54,7 +52,7 @@ class PublicKeysController < ApplicationController
 
   def render_error(msg)
     flash[:alert] = msg
-    render Page::PublicKey::NewKeyComponent.new(@organization)
+    render Page::PublicKey::NewKeyComponent.new(@organization, errors: @errors)
   end
 
   def missing_params
