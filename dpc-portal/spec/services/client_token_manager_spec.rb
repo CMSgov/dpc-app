@@ -31,7 +31,7 @@ RSpec.describe ClientTokenManager do
         new_token = manager.create_client_token(label: 'Test Token 1')
 
         expect(new_token[:response]).to eq(false)
-        expect(new_token[:errors]).to eq(root: 'Unable to process request')
+        expect(new_token[:errors]).to eq(root: "We're sorry, but we can't complete your request. Please try again tomorrow.")
       end
     end
 
@@ -39,12 +39,12 @@ RSpec.describe ClientTokenManager do
       it 'should fail if label blank' do
         new_token = manager.create_client_token(label: '')
         expect(new_token[:response]).to eq(false)
-        expect(new_token[:errors]).to eq(label: 'Cannot be blank')
+        expect(new_token[:errors]).to eq(label: "Label can't be blank", root: 'No token name.')
       end
       it 'should fail if label too long' do
         new_token = manager.create_client_token(label: '12345678901234567890123456')
         expect(new_token[:response]).to eq(false)
-        expect(new_token[:errors]).to eq(label: 'Label must be 25 characters or fewer')
+        expect(new_token[:errors]).to eq(label: 'Label must be 25 characters or fewer.', root: 'Label is too long.')
       end
     end
   end

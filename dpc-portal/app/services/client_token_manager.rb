@@ -17,7 +17,7 @@ class ClientTokenManager
 
     unless api_client.response_successful?
       Rails.logger.error "Failed to create client token: #{api_client.response_body}"
-      @errors[:root] = 'Unable to process request'
+      @errors[:root] = "We're sorry, but we can't complete your request. Please try again tomorrow."
     end
 
     { response: api_client.response_successful?,
@@ -44,10 +44,12 @@ class ClientTokenManager
   private
 
   def valid_input?(label)
-    if label.present?
-      @errors[:label] = 'Label must be 25 characters or fewer' if label.length > 25
-    else
-      @errors[:label] = 'Cannot be blank'
+    if label&.length > 25
+      @errors[:label] = 'Label must be 25 characters or fewer.'
+      @errors[:root] = 'Label is too long.'
+    elsif label.blank?
+      @errors[:label] = "Label can't be blank"
+      @errors[:root] = 'No token name.'
     end
     @errors.blank?
   end

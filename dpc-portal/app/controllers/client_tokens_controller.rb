@@ -21,7 +21,7 @@ class ClientTokensController < ApplicationController
       render(Page::ClientToken::ShowTokenComponent.new(@organization, @client_token))
     else
       @errors = new_token[:errors] || {}
-      render_error manager.errors[:root] || 'No token name'
+      render_error manager.errors[:root] || 'No token name.'
     end
   end
 
