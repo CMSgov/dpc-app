@@ -26,13 +26,17 @@ RSpec.describe Page::Invitations::SuccessComponent, type: :component do
 
     before { render_inline(component) }
 
-    it 'should have step component at step 4' do
+    it 'should have step component at step 3' do
       expect(page).to have_selector('.usa-step-indicator__current-step')
-      expect(page.find('.usa-step-indicator__current-step').text).to eq '4'
+      expect(page.find('.usa-step-indicator__current-step').text).to eq '3'
     end
 
     it "should have the organization's name" do
       expect(page).to have_text(org.name)
+    end
+
+    it "should not have the invited user's name" do
+      expect(page).not_to have_text('Paola Pineiro')
     end
   end
 end

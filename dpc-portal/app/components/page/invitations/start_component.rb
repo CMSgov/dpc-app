@@ -19,8 +19,7 @@ module Page
                    ]
                  else
                    [
-                     'Verify your identity with Login.gov.',
-                     'Enter your invite code.'
+                     'Verify your identity with Login.gov.'
                    ]
                  end
       end

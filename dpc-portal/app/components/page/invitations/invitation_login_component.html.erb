@@ -1,5 +1,5 @@
 <%= render(Core::Navigation::StepIndicatorComponent.new(Invitation::AO_STEPS, 0)) if @invitation.authorized_official? %>
-<%= render(Core::Navigation::StepIndicatorComponent.new(Invitation::CD_STEPS, 1)) if @invitation.credential_delegate? %>
+<%= render(Core::Navigation::StepIndicatorComponent.new(Invitation::CD_STEPS, 0)) if @invitation.credential_delegate? %>
 <div>
   <p>To register your organization you'll need to 1) have a Login.gov account and 2) verify your identity. Info to have ready:
     <ul>
