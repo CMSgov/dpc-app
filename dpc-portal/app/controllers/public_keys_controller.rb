@@ -28,7 +28,7 @@ class PublicKeysController < ApplicationController
       redirect_to organization_path(@organization)
     else
       @errors = new_public_key[:errors]
-      render_error 'Invalid encoding'
+      render_error @errors[:root] || 'Invalid encoding'
     end
   end
   # rubocop:enable Metrics/AbcSize

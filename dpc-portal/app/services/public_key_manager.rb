@@ -75,9 +75,12 @@ class PublicKeyManager
   end
 
   def parse_errors(error_msg)
-    return unless error_msg.present?
-
-    @errors[:snippet_signature] = "Signature doesn't match" if error_msg.include?('Public key could not be verified')
-    @errors[:public_key] = 'Must have valid encoding' if error_msg.include?('Public key is not valid')
+    if error_msg&.include?('Public key could not be verified')
+      @errors[:snippet_signature] = "Signature doesn't match"
+    elsif error_msg&.include?('Public key is not valid')
+      @errors[:public_key] = 'Must have valid encoding'
+    else
+      @errors[:root] = 'Unable to process request'
+    end
   end
 end

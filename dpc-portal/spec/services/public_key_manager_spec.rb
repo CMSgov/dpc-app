@@ -40,6 +40,7 @@ RSpec.describe PublicKeyManager do
 
           expect(new_public_key[:response]).to eq(false)
           expect(new_public_key[:message]).to eq(response)
+          expect(new_public_key[:errors]).to eq({ root: 'Unable to process request' })
         end
       end
     end
