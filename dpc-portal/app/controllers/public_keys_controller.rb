@@ -14,7 +14,7 @@ class PublicKeysController < ApplicationController
 
   # rubocop:disable Metrics/AbcSize
   def create
-    manager = PublicKeyManager.new(@organization.dpc_api_organization_id + 'x')
+    manager = PublicKeyManager.new(@organization.dpc_api_organization_id)
 
     new_public_key = manager.create_public_key(
       public_key: params[:public_key],
