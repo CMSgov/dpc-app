@@ -60,7 +60,7 @@
                                                      additional_classes: ['start-component-button'],
             method: :get) if @invitation.authorized_official? %>
         <%= render Core::Button::ButtonComponent.new(label: 'Accept invitation',
-            destination: code_organization_invitation_path(@organization, @invitation),
+            destination: confirm_cd_organization_invitation_path(@organization, @invitation),
                                                      additional_classes: ['start-component-button'],
             method: :get) if @invitation.credential_delegate? %>
       </div>

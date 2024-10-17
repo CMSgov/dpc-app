@@ -62,8 +62,7 @@ class CredentialDelegateInvitationsController < ApplicationController
     Invitation.new(**permitted.to_h,
                    provider_organization: @organization,
                    invitation_type: :credential_delegate,
-                   invited_by: current_user,
-                   verification_code: (Array('A'..'Z') + Array(0..9)).sample(6).join)
+                   invited_by: current_user)
   end
 
   def verify_invitation

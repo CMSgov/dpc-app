@@ -16,26 +16,13 @@ class Invitation < ApplicationRecord
 
   AO_STEPS = ['Sign in or create a Login.gov account', 'Confirm your identity', 'Confirm organization registration',
               'Finished'].freeze
-  CD_STEPS = ['Enter invite code', 'Sign in or create a Login.gov account', 'Accept invite', 'Finished'].freeze
+  CD_STEPS = ['Sign in or create a Login.gov account', 'Accept invite', 'Finished'].freeze
   MAX_ATTEMPTS = 5
-
-  def increment_failed_attempts
-    update(failed_attempts: failed_attempts + 1) unless failed_attempts == MAX_ATTEMPTS
-  end
-
-  def reset_attempts
-    update(failed_attempts: 0)
-  end
-
-  def attempts_remaining
-    MAX_ATTEMPTS - failed_attempts
-  end
 
   def show_attributes
     { full_name: "#{invited_given_name} #{invited_family_name}",
       email: invited_email,
-      id:,
-      verification_code: }.with_indifferent_access
+      id: }.with_indifferent_access
   end
 
   def invited_by_full_name
@@ -79,10 +66,9 @@ class Invitation < ApplicationRecord
     result
   end
 
-  def unacceptable_reason # rubocop:disable Metrics/CyclomaticComplexity,Metrics/PerceivedComplexity,Metrics/AbcSize
+  def unacceptable_reason # rubocop:disable Metrics/CyclomaticComplexity,Metrics/PerceivedComplexity
     return 'invalid' if cancelled?
     return 'ao_renewed' if renewed? && authorized_official?
-    return 'max_tries_exceeded' if attempts_remaining.zero?
     return 'ao_accepted' if accepted? && authorized_official?
     return 'cd_accepted' if accepted? && credential_delegate?
     return 'ao_expired' if expired? && authorized_official?

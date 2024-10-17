@@ -43,7 +43,6 @@ RSpec.describe Page::CredentialDelegate::ListComponent, type: :component do
                 </div>
                 <div>
                   <h2>Pending</h2>
-                  <p>You will need to send an invited Credential Delegate their invite code when they accept the organization invite. Please do not send the code via email.</p>
                   <p>There are no pending credential delegates.</p>
                 </div>
               </div>
@@ -58,8 +57,7 @@ RSpec.describe Page::CredentialDelegate::ListComponent, type: :component do
     context 'Active credential delegate' do
       let(:user) { User.new(given_name: 'Bob', family_name: 'Hodges', email: 'bob@example.com') }
       let(:invitation) do
-        Invitation.new(invited_given_name: 'Bob', invited_family_name: 'Hodges', invited_email: 'bob@example.com',
-                       verification_code: 'ABC123')
+        Invitation.new(invited_given_name: 'Bob', invited_family_name: 'Hodges', invited_email: 'bob@example.com')
       end
       let(:invitations) { [] }
       let(:credential_delegates) { [CdOrgLink.new(user:, invitation:)] }
@@ -106,7 +104,7 @@ RSpec.describe Page::CredentialDelegate::ListComponent, type: :component do
     context 'Pending credential delegate' do
       let(:invitations) do
         [Invitation.new(invited_given_name: 'Bob', invited_family_name: 'Hodges', invited_email: 'bob@example.com',
-                        verification_code: 'ABC123', id: 3)]
+                        id: 3)]
       end
       let(:credential_delegates) { [] }
 
@@ -123,9 +121,6 @@ RSpec.describe Page::CredentialDelegate::ListComponent, type: :component do
                   Email
                 </th>
                 <th scope="row" role="columnheader">
-                  Invite code
-                </th>
-                <th scope="row" role="columnheader">
                 </th>
               </tr>
             </thead>
@@ -138,7 +133,6 @@ RSpec.describe Page::CredentialDelegate::ListComponent, type: :component do
           <tr>
             <td data-sort-value="Bob Hodges">Bob Hodges</td>
             <td data-sort-value="bob@example.com">bob@example.com</td>
-            <td data-sort-value="ABC123">ABC123</td>
         HTML
         delete_invitation = <<~HTML
           <form class="button_to" method="post" action="/portal/organizations/2/credential_delegate_invitations/3">
