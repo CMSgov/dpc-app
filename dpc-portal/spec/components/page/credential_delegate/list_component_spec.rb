@@ -38,7 +38,7 @@ RSpec.describe Page::CredentialDelegate::ListComponent, type: :component do
                 <hr />
                 <p>A credential delegate (CD) manages secure API login information. You can assign anyone as a CD.</p>
                 <div>
-                  <h2>Active invitations</h2>
+                  <h2>Active</h2>
                   <p>There are no active credential delegates.</p>
                 </div>
                 <div>

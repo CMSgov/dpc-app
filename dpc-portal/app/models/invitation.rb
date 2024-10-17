@@ -17,7 +17,6 @@ class Invitation < ApplicationRecord
   AO_STEPS = ['Sign in or create a Login.gov account', 'Confirm your identity', 'Confirm organization registration',
               'Finished'].freeze
   CD_STEPS = ['Sign in or create a Login.gov account', 'Accept invite', 'Finished'].freeze
-  MAX_ATTEMPTS = 5
 
   def show_attributes
     { full_name: "#{invited_given_name} #{invited_family_name}",

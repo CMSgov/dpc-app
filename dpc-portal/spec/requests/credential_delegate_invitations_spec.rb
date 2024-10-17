@@ -236,7 +236,6 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
         expect(flash[:notice]).to eq('Invitation cancelled.')
       end
       it 'returns error message on failure' do
-        invitation.errors.add(:invited_phone)
         invitation_class = class_double(Invitation).as_stubbed_const
         bad_invitation = instance_double(Invitation)
         expect(bad_invitation).to receive(:provider_organization).and_return(org)

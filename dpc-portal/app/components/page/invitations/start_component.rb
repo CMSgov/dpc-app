@@ -8,7 +8,6 @@ module Page
         super
         @organization = organization
         @invitation = invitation
-        @name = "#{invitation&.invited_given_name} #{invitation&.invited_family_name}"
         @hours, @minutes = invitation.expires_in
         @expiration = @hours.positive? ? pluralize(@hours, 'hour') : pluralize(@minutes, 'minute')
         @list_styles = %i[text-green usa-media-block__img]

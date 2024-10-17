@@ -4,7 +4,7 @@
       <hr />
       <p>A credential delegate (CD) manages secure API login information. You can assign anyone as a CD.</p>
       <div>
-        <h2>Active invitations</h2>
+        <h2>Active</h2>
         <% if @active_credential_delegates.present? %>
           <%= render(Core::Table::TableComponent.new(id: 'active-cd-table', additional_classes: ['width-full'], sortable: false)) do %>
             <%= render(Core::Table::HeaderComponent.new(caption: 'Active Credential Delegate Table',
