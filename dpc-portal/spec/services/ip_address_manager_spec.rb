@@ -48,7 +48,7 @@ RSpec.describe IpAddressManager do
           new_ip_address = manager.create_ip_address(**ip_address_params)
 
           expect(new_ip_address[:response]).to eq(false)
-          expect(new_ip_address[:errors]).to eq(root: 'Max Ips for organization reached')
+          expect(new_ip_address[:errors]).to eq(root: 'Maximum IP addresses for organization reached')
         end
       end
     end

@@ -83,7 +83,7 @@ class IpAddressManager
   def parse_errors(error_msg)
     max_msg = 'Max Ips for organization reached'
     @errors[:root] = if error_msg&.include?(max_msg)
-                       max_msg
+                       'Maximum IP addresses for organization reached'
                      else
                        'Unable to process request'
                      end
