@@ -2,13 +2,10 @@
 
 # Record of invitation, with possible verification code
 class Invitation < ApplicationRecord
-  attr_reader :phone_raw
-
-  validates :invited_by, :invited_given_name, :invited_family_name, :phone_raw, presence: true, if: :needs_validation?
+  validates :invited_by, :invited_given_name, :invited_family_name, presence: true, if: :needs_validation?
   validates :invited_email, :invited_email_confirmation, presence: true, if: :new_record?
   validates :invited_email, format: Devise.email_regexp, confirmation: true, if: :new_record?
   validates :invitation_type, presence: true
-  validates :invited_phone, format: { with: /\A[0-9]{10}\z/ }, if: :needs_validation?
   validate :cannot_cancel_accepted
 
   enum invitation_type: %i[credential_delegate authorized_official]
@@ -21,11 +18,6 @@ class Invitation < ApplicationRecord
               'Finished'].freeze
   CD_STEPS = ['Enter invite code', 'Sign in or create a Login.gov account', 'Accept invite', 'Finished'].freeze
   MAX_ATTEMPTS = 5
-
-  def phone_raw=(nbr)
-    @phone_raw = nbr
-    self.invited_phone = @phone_raw.tr('^0-9', '')
-  end
 
   def increment_failed_attempts
     update(failed_attempts: failed_attempts + 1) unless failed_attempts == MAX_ATTEMPTS
@@ -55,7 +47,7 @@ class Invitation < ApplicationRecord
   end
 
   def accept!
-    update!(invited_given_name: nil, invited_family_name: nil, invited_phone: nil, invited_email: nil,
+    update!(invited_given_name: nil, invited_family_name: nil, invited_email: nil,
             status: :accepted)
   end
 
@@ -119,7 +111,7 @@ class Invitation < ApplicationRecord
   private
 
   def cd_info_present?(user_info)
-    %w[given_name family_name phone].each do |key|
+    %w[given_name family_name].each do |key|
       check_missing_user_info(user_info, key)
     end
   end

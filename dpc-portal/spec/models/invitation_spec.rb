@@ -54,28 +54,6 @@ RSpec.describe Invitation, type: :model do
         expect(valid_new_cd_invite.errors[:invited_family_name]).to eq ["can't be blank"]
       end
 
-      it 'fails on fewer than ten digits in phone' do
-        valid_new_cd_invite.phone_raw = '877-288-313'
-        expect(valid_new_cd_invite.valid?).to eq false
-        expect(valid_new_cd_invite.errors.size).to eq 1
-        expect(valid_new_cd_invite.errors[:invited_phone]).to eq ['is invalid']
-      end
-
-      it 'fails on more than ten digits in phone' do
-        valid_new_cd_invite.phone_raw = '877-288-31333'
-        expect(valid_new_cd_invite.valid?).to eq false
-        expect(valid_new_cd_invite.errors.size).to eq 1
-        expect(valid_new_cd_invite.errors[:invited_phone]).to eq ['is invalid']
-      end
-
-      it 'fails on blank phone' do
-        valid_new_cd_invite.phone_raw = ''
-        expect(valid_new_cd_invite.valid?).to eq false
-        expect(valid_new_cd_invite.errors.size).to eq 2
-        expect(valid_new_cd_invite.errors[:phone_raw]).to eq ["can't be blank"]
-        expect(valid_new_cd_invite.errors[:invited_phone]).to eq ['is invalid']
-      end
-
       it 'fails on bad email' do
         valid_new_cd_invite.invited_email_confirmation = valid_new_cd_invite.invited_email = 'rob-at-example.com'
         expect(valid_new_cd_invite.valid?).to eq false
@@ -113,14 +91,8 @@ RSpec.describe Invitation, type: :model do
       it 'should allow blank invitation values' do
         saved_cd_invite.invited_given_name = ''
         saved_cd_invite.invited_family_name = ''
-        saved_cd_invite.invited_phone = ''
         saved_cd_invite.invited_email = ''
         saved_cd_invite.invited_email_confirmation = ''
-        expect(saved_cd_invite.valid?).to eq true
-      end
-
-      it 'should allow blank phone_raw' do
-        saved_cd_invite.phone_raw = ''
         expect(saved_cd_invite.valid?).to eq true
       end
 
@@ -167,7 +139,6 @@ RSpec.describe Invitation, type: :model do
         invitation.reload
         expect(invitation.invited_given_name).to be_nil
         expect(invitation.invited_family_name).to be_nil
-        expect(invitation.invited_phone).to be_nil
         expect(invitation.invited_email).to be_nil
         expect(invitation).to be_accepted
       end
@@ -182,8 +153,7 @@ RSpec.describe Invitation, type: :model do
             'bob@example.com'
           ],
           'given_name' => 'Bob',
-          'family_name' => 'Hodges',
-          'phone' => '+111-111-1111' }
+          'family_name' => 'Hodges' }
       end
       it 'should match user if last name and email correct' do
         expect(cd_invite.cd_match?(user_info)).to eq true
@@ -197,10 +167,6 @@ RSpec.describe Invitation, type: :model do
       end
       it 'should match user if given name different' do
         cd_invite.invited_given_name = 'fake'
-        expect(cd_invite.cd_match?(user_info)).to eq true
-      end
-      it 'should match user if phone different' do
-        cd_invite.invited_phone = '11234567890'
         expect(cd_invite.cd_match?(user_info)).to eq true
       end
       it 'should match if invited email eq email' do
@@ -223,12 +189,6 @@ RSpec.describe Invitation, type: :model do
       end
       it 'should raise error if user_info missing family name' do
         missing_info = user_info.merge({ 'family_name' => '' })
-        expect do
-          cd_invite.cd_match?(missing_info)
-        end.to raise_error(UserInfoServiceError, 'missing_info')
-      end
-      it 'should raise error if user_info missing phone' do
-        missing_info = user_info.merge({ 'phone' => '' })
         expect do
           cd_invite.cd_match?(missing_info)
         end.to raise_error(UserInfoServiceError, 'missing_info')
@@ -293,11 +253,6 @@ RSpec.describe Invitation, type: :model do
         expect(valid_new_ao_invite.valid?).to eq true
       end
 
-      it 'does not fail on blank phone' do
-        valid_new_ao_invite.phone_raw = ''
-        expect(valid_new_ao_invite.valid?).to eq true
-      end
-
       it 'fails on bad email' do
         valid_new_ao_invite.invited_email_confirmation = valid_new_ao_invite.invited_email = 'rob-at-example.com'
         expect(valid_new_ao_invite.valid?).to eq false
@@ -329,14 +284,8 @@ RSpec.describe Invitation, type: :model do
       it 'should allow blank invitation values' do
         saved_ao_invite.invited_given_name = ''
         saved_ao_invite.invited_family_name = ''
-        saved_ao_invite.invited_phone = ''
         saved_ao_invite.invited_email = ''
         saved_ao_invite.invited_email_confirmation = ''
-        expect(saved_ao_invite.valid?).to eq true
-      end
-
-      it 'should allow blank phone_raw' do
-        saved_ao_invite.phone_raw = ''
         expect(saved_ao_invite.valid?).to eq true
       end
 
@@ -383,7 +332,6 @@ RSpec.describe Invitation, type: :model do
         invitation.reload
         expect(invitation.invited_given_name).to be_nil
         expect(invitation.invited_family_name).to be_nil
-        expect(invitation.invited_phone).to be_nil
         expect(invitation.invited_email).to be_nil
         expect(invitation).to be_accepted
       end

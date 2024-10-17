@@ -118,7 +118,6 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
     let!(:successful_parameters) do
       { invited_given_name: 'Bob',
         invited_family_name: 'Hodges',
-        phone_raw: '222-222-2222',
         invited_email: 'bob@example.com',
         invited_email_confirmation: 'bob@example.com' }
     end

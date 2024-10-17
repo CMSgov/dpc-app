@@ -97,7 +97,7 @@ class InvitationsController < ApplicationController
                                     client_id: IDP_CLIENT_ID,
                                     redirect_uri: "#{redirect_host}/portal/users/auth/openid_connect/callback",
                                     response_type: 'code',
-                                    scope: 'openid email all_emails profile phone social_security_number',
+                                    scope: 'openid email all_emails profile social_security_number',
                                     nonce: @nonce,
                                     state: @state }.to_query)
     redirect_to url, allow_other_host: true

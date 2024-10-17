@@ -531,8 +531,8 @@ RSpec.describe 'Invitations', type: :request do
             get "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm_cd"
             expect(request.session["invitation_status_#{cd_invite.id}"]).to eq 'verification_complete'
           end
-          it 'should ignore given name and phone' do
-            stub_user_info(overrides: { 'given_name' => 'Something Else', 'phone' => '9999999999' })
+          it 'should ignore given name' do
+            stub_user_info(overrides: { 'given_name' => 'Something Else' })
             get "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm_cd"
             expect(response.body).to include(register_organization_invitation_path(org, cd_invite))
             expect(request.session["invitation_status_#{cd_invite.id}"]).to eq 'verification_complete'
@@ -595,7 +595,6 @@ RSpec.describe 'Invitations', type: :request do
           invitation.reload
           expect(invitation.invited_given_name).to be_blank
           expect(invitation.invited_family_name).to be_blank
-          expect(invitation.invited_phone).to be_blank
           expect(invitation.invited_email).to be_blank
         end
         it 'should clear session variable' do
@@ -849,8 +848,6 @@ def user_info_template(overrides = {})
     'family_name' => 'Hodges',
     'birthdate' => '1938-10-06',
     'social_security_number' => '900888888',
-    'phone' => '+1111111111',
-    'phone_verified' => true,
     'verified_at' => 1_704_834_157,
     'ial' => 'http://idmanagement.gov/ns/assurance/ial/2',
     'aal' => 'urn:gov:gsa:ac:classes:sp:PasswordProtectedTransport:duo'

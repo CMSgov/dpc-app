@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_09_06_182122) do
+ActiveRecord::Schema[7.1].define(version: 2024_10_17_133900) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -75,7 +75,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_06_182122) do
     t.integer "invitation_type", null: false
     t.string "invited_given_name"
     t.string "invited_family_name"
-    t.string "invited_phone"
     t.string "invited_email"
     t.string "verification_code"
     t.datetime "created_at", null: false

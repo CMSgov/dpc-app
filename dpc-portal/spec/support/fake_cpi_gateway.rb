@@ -22,7 +22,8 @@ require 'sinatra/base'
 #      3299073577: returns code 404
 #      3782297014: has no valid enrollments
 #   Enrollment Roles
-#    AO SSNS: 900111111
+#     Valid for testing in Login.gov
+#     AO SSNS: 900111111
 class FakeCpiGateway < Sinatra::Base
   set :server, 'thin'
 

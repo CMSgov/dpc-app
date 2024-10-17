@@ -57,7 +57,7 @@ class CredentialDelegateInvitationsController < ApplicationController
   end
 
   def build_invitation
-    permitted = params.permit(:invited_given_name, :invited_family_name, :phone_raw, :invited_email,
+    permitted = params.permit(:invited_given_name, :invited_family_name, :invited_email,
                               :invited_email_confirmation)
     Invitation.new(**permitted.to_h,
                    provider_organization: @organization,
