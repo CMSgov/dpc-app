@@ -8,14 +8,14 @@ RSpec.describe InvitationMailer, type: :mailer do
     let(:provider_organization) { build(:provider_organization, id: 2) }
     let(:invitation) { build(:invitation, id: 4, invited_by:, provider_organization:) }
     it 'has link to invitation' do
-      expected_url = 'http://localhost:3100/portal/organizations/2/invitations/4/accept'
+      expected_url = 'http://localhost:3100/portal/organizations/2/invitations/4'
 
       mailer = InvitationMailer.with(invitation:).invite_cd
       expect(mailer.body).to match(expected_url)
     end
     it 'uses https for invitation link if it thinks it is prod' do
       expect(Rails.env).to receive(:production?).and_return true
-      expected_url = 'https://localhost:3100/portal/organizations/2/invitations/4/accept'
+      expected_url = 'https://localhost:3100/portal/organizations/2/invitations/4'
 
       mailer = InvitationMailer.with(invitation:).invite_cd
       expect(mailer.body).to match(expected_url)

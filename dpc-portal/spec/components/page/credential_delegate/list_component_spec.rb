@@ -42,7 +42,7 @@ RSpec.describe Page::CredentialDelegate::ListComponent, type: :component do
                   <p>There are no active credential delegates.</p>
                 </div>
                 <div>
-                  <h2>Pending</h2>
+                  <h2>Pending invitations</h2>
                   <p>There are no pending credential delegates.</p>
                 </div>
               </div>
