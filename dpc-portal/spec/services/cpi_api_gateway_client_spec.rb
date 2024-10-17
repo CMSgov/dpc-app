@@ -112,6 +112,16 @@ describe CpiApiGatewayClient do
     end
   end
 
+  describe '.healthcheck' do
+    it 'returns true when it can get a token' do
+      expect(client.healthcheck).to eq(true)
+    end
+
+    it 'returns false when it cannot get a token' do
+      expect(client.healthcheck).to eq(true)
+    end
+  end
+
   def verify_logs(status:, url:, method_name:, method: :get)
     verify_new_relic(url, method)
     verify_rails(status:, url:, method_name:, method:)

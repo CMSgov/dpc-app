@@ -65,6 +65,12 @@ class CpiApiGatewayClient
     fetch_provider_info(body)
   end
 
+  # The CPI API Gateway doesn't support a healthcheck, and they're suggestion was to just hit one of their
+  # end points and see if we get a response.  Don't over use this, as it counts against our rate limit.
+  def healthcheck
+    !@client.client_credentials.get_token(scope: 'READ').nil?
+  end
+
   private
 
   def fetch_token
