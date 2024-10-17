@@ -9,7 +9,7 @@
     <p>The Authorized Official (AO) of <%= @invitation.provider_organization.name %> (NPI <%= @invitation.provider_organization.npi %>) has assigned you to
       complete the API onboarding process for Data at the Point of Care (DPC).</p>
     <p><%= link_to 'Use this link to accept your invitation in the DPC Portal.',
-	   accept_organization_invitation_url(@invitation.provider_organization, @invitation, protocol: Rails.env.production? ? 'https' : 'http') %></p>
+	   organization_invitation_url(@invitation.provider_organization, @invitation, protocol: Rails.env.production? ? 'https' : 'http') %></p>
     <p>This link will expire in 48 hours.</p>
 
     <h2>What is DPC?</h2>
