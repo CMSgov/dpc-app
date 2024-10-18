@@ -186,8 +186,8 @@ RSpec.describe 'ClientTokens', type: :request do
       it 'fails if no label' do
         post "/organizations/#{org.id}/client_tokens"
         expect(assigns(:organization)).to eq org
-        expect(flash[:alert]).to eq('No token name')
-        expect(assigns[:errors]).to eq(label: 'Cannot be blank')
+        expect(flash[:alert]).to eq('No token name.')
+        expect(assigns(:errors)).to eq(label: "Label can't be blank", root: 'No token name.')
       end
 
       it 'shows error if problem' do
@@ -198,7 +198,7 @@ RSpec.describe 'ClientTokens', type: :request do
                                        response: nil,
                                        api_client:)
         post "/organizations/#{org.id}/client_tokens", params: { label: 'New Token' }
-        expect(flash[:alert]).to eq('Unable to process request')
+        expect(flash[:alert]).to eq("We're sorry, but we can't complete your request. Please try again tomorrow.")
       end
     end
   end

@@ -44,7 +44,7 @@ class ClientTokenManager
   private
 
   def valid_input?(label)
-    if label&.length > 25
+    if label && label.length > 25
       @errors[:label] = 'Label must be 25 characters or fewer.'
       @errors[:root] = 'Label is too long.'
     elsif label.blank?
