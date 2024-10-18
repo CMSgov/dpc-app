@@ -109,6 +109,8 @@ public class PublicKeyHandler {
             if (!signature.verify(Base64.getDecoder().decode(sigStr))) {
                 throw new PublicKeyException("Key and signature do not match");
             }
+        } catch (IllegalArgumentException e) {
+            throw new PublicKeyException("Invalid signature", e);
         } catch (NoSuchAlgorithmException e) {
             throw new PublicKeyException("Invalid algorithm", e);
         } catch (GeneralSecurityException e) {

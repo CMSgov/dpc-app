@@ -13,16 +13,15 @@ class ClientTokensController < ApplicationController
   end
 
   def create
-    return render_error 'Label required.' unless params_present?
-
     manager = ClientTokenManager.new(@organization.dpc_api_organization_id)
-    if manager.create_client_token(label: params[:label])
-      @client_token = manager.client_token
+    new_token = manager.create_client_token(label: params[:label])
+    if new_token[:response]
+      @client_token = new_token[:message]
       log_credential_action(:client_token, @client_token['id'], :add)
       render(Page::ClientToken::ShowTokenComponent.new(@organization, @client_token))
     else
-      log_create_failure(manager)
-      render_error 'Client token could not be created.'
+      @errors = new_token[:errors] || {}
+      render_error manager.errors[:root] || 'No token name.'
     end
   end
 
@@ -45,10 +44,6 @@ class ClientTokensController < ApplicationController
 
   def render_error(msg)
     flash.now.alert = msg
-    render Page::ClientToken::NewTokenComponent.new(@organization)
-  end
-
-  def log_create_failure(manager)
-    logger.error(['Unable to create client token', JSON.parse(manager.client_token || '{}')])
+    render Page::ClientToken::NewTokenComponent.new(@organization, errors: @errors)
   end
 end

@@ -6,10 +6,11 @@ module Page
     class NewTokenComponent < ViewComponent::Base
       attr_accessor :organization, :obj_name
 
-      def initialize(organization)
+      def initialize(organization, errors: {})
         super
         @organization = organization
         @obj_name = 'client token'
+        @errors = errors
       end
     end
   end
