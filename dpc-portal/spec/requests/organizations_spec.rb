@@ -268,7 +268,7 @@ RSpec.describe 'Organizations', type: :request do
         it 'shows CD list page' do
           get "/organizations/#{org.id}"
           expect(response.body).to include('<h2>Credential delegates</h2>')
-          expect(response.body).to include('<h2>Pending</h2>')
+          expect(response.body).to include('<h2>Pending invitations</h2>')
           expect(response.body).to include('<h2>Active</h2>')
         end
 

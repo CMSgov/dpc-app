@@ -25,6 +25,7 @@ module LoggingConstants
     BeginLogin = 'BeginLogin'
     UserLoggedIn = 'UserLoggedIn'
     UserLoggedOut = 'UserLoggedOut'
+    CdConfirmed = 'CdConfirmed'
     SessionTimedOut = 'SessionTimedOut'
     UserCancelledLogin = 'UserCancelledLogin'
     FailedLogin = 'FailedLogin'

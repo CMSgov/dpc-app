@@ -118,7 +118,6 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
     let!(:successful_parameters) do
       { invited_given_name: 'Bob',
         invited_family_name: 'Hodges',
-        phone_raw: '222-222-2222',
         invited_email: 'bob@example.com',
         invited_email_confirmation: 'bob@example.com' }
     end
@@ -134,11 +133,6 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
         expect do
           post "/organizations/#{api_id}/credential_delegate_invitations", params: successful_parameters
         end.to change { Invitation.count }.by(1)
-      end
-
-      it 'adds verification code to invitation record on success' do
-        post "/organizations/#{api_id}/credential_delegate_invitations", params: successful_parameters
-        expect(assigns(:cd_invitation).verification_code.length).to eq 6
       end
 
       it 'redirects on success' do
@@ -242,7 +236,6 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
         expect(flash[:notice]).to eq('Invitation cancelled.')
       end
       it 'returns error message on failure' do
-        invitation.errors.add(:invited_phone)
         invitation_class = class_double(Invitation).as_stubbed_const
         bad_invitation = instance_double(Invitation)
         expect(bad_invitation).to receive(:provider_organization).and_return(org)
