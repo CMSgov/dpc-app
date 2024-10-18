@@ -40,7 +40,7 @@ RSpec.describe PublicKeyManager do
 
           expect(new_public_key[:response]).to eq(false)
           expect(new_public_key[:message]).to eq(response)
-          expect(new_public_key[:errors]).to eq({ root: "We're sorry, but we can't complete your request. Please try again tomorrow." })
+          expect(new_public_key[:errors]).to eq({ root: PublicKeyManager::SERVER_ERROR_MSG })
         end
       end
     end
@@ -67,7 +67,7 @@ RSpec.describe PublicKeyManager do
         response = manager.create_public_key(label: 'aaaaabbbbbcccccdddddeeeeefffff',
                                              public_key: '', snippet_signature: '')
         expect(response[:response]).to eq(false)
-        root = "Errors:<ul><li>Fields can't be blank.</li><li>Invalid label.</li></ul>"
+        root = "Errors:<ul><li>Invalid label.</li><li>Fields can't be blank.</li></ul>"
         expect(response[:errors]).to eq(label: 'Label must be 25 characters or fewer.',
                                         public_key: "Public key can't be blank.",
                                         snippet_signature: "Snippet signature can't be blank.",

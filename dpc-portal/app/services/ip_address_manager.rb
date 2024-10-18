@@ -3,13 +3,7 @@
 # Manages ip addresses for an organization
 class IpAddressManager
   require 'ipaddr'
-
-  attr_reader :api_id, :errors
-
-  def initialize(api_id)
-    @api_id = api_id
-    @errors = {}
-  end
+  include CredentialManager
 
   def create_ip_address(ip_address:, label:)
     label = strip_carriage_returns(label)
@@ -57,41 +51,22 @@ class IpAddressManager
   private
 
   def invalid_input?(ip_address, label)
-    root_errors = Set.new
-    if label && label.length > 25
-      @errors[:label] = 'Label must be 25 characters or fewer.'
-      root_errors << 'Invalid label.'
-    elsif label.blank?
-      @errors[:label] = "Label can't be blank."
-      root_errors << "Fields can't be blank."
-    end
-    if ip_address.present?
-      unless valid_ip_address?(ip_address)
-        @errors[:ip_address] = 'Invalid IP address.'
-        root_errors << 'Invalid IP address.'
-      end
-    else
+    validate_label(label)
+    validate_ip_address(ip_address)
+    handle_root_errors if @root_errors.present?
+    @errors.present?
+  end
+
+  def validate_ip_address(addr_string)
+    if addr_string.blank?
       @errors[:ip_address] = "IP address can't be blank."
-      root_errors << "Fields can't be blank."
-    end
-    handle_root_errors(root_errors)
-  end
-
-  def handle_root_errors(root_errors)
-    case root_errors.size
-    when 0
-      false
-    when 1
-      @errors[:root] = root_errors.first
+      @root_errors << "Fields can't be blank."
     else
-      @errors[:root] = %(Errors:<ul>#{root_errors.map { |e| "<li>#{e}</li>" }.join}</ul>)
+      IPAddr.new(addr_string).blank?
     end
-  end
-
-  def valid_ip_address?(addr_string)
-    IPAddr.new(addr_string)
   rescue IPAddr::InvalidAddressError
-    false
+    @errors[:ip_address] = 'Invalid IP address.'
+    @root_errors << 'Invalid IP address.'
   end
 
   def strip_carriage_returns(str)
@@ -102,7 +77,7 @@ class IpAddressManager
     @errors[:root] = if error_msg&.include?('Max Ips for organization reached')
                        'You entered the maximum number if IP addresses.'
                      else
-                       "We're sorry, but we can't complete your request. Please try again tomorrow."
+                       SERVER_ERROR_MSG
                      end
   end
 end

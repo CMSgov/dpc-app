@@ -2,12 +2,7 @@
 
 # Manages public keys for an organization
 class PublicKeyManager
-  attr_reader :api_id, :errors
-
-  def initialize(api_id)
-    @api_id = api_id
-    @errors = {}
-  end
+  include CredentialManager
 
   def create_public_key(public_key:, label:, snippet_signature:)
     public_key = strip_carriage_returns(public_key)
@@ -49,52 +44,32 @@ class PublicKeyManager
   end
 
   def invalid_input?(public_key, label, snippet_signature)
-    root_errors = Set.new
-    if public_key.present?
-      validate_encoding(public_key, root_errors)
-    else
-      @errors[:public_key] = "Public key can't be blank."
-      root_errors << "Fields can't be blank."
-    end
-    if label && label.length > 25
-      @errors[:label] = 'Label must be 25 characters or fewer.'
-      root_errors << 'Invalid label.'
-    elsif label.blank?
-      @errors[:label] = "Label can't be blank."
-      root_errors << "Fields can't be blank."
-    end
-    if snippet_signature.blank?
-      @errors[:snippet_signature] = "Snippet signature can't be blank."
-      root_errors << "Fields can't be blank."
-    end
-    @errors[:root] = root_errors.first if root_errors.present?
-    handle_root_errors(root_errors)
+    validate_label(label)
+    handle_blanks(public_key:, snippet_signature:)
+    validate_encoding(public_key) if public_key.present?
+    handle_root_errors if @root_errors.present?
+    @errors.present?
   end
 
-  def validate_encoding(key_string, root_errors)
+  def handle_blanks(to_check)
+    to_check.each do |key, value|
+      next unless value.blank?
+
+      name = key.to_s.capitalize.gsub('_', ' ')
+      @errors[key] = "#{name} can't be blank."
+      @root_errors << "Fields can't be blank."
+    end
+  end
+
+  def validate_encoding(key_string)
     key = OpenSSL::PKey::RSA.new(key_string)
     if key.private?
       @errors[:public_key] = 'Must be a public key (not a private key).'
-      root_errors << 'Invalid public key.'
+      @root_errors << 'Invalid public key.'
     end
   rescue OpenSSL::PKey::RSAError
     @errors[:public_key] = 'Must be a valid public key.'
-    root_errors << 'Invalid public key.'
-  end
-
-  def handle_root_errors(root_errors)
-    case root_errors.size
-    when 0
-      false
-    when 1
-      @errors[:root] = root_errors.first
-    else
-      @errors[:root] = %(Errors:<ul>#{root_errors.map { |e| "<li>#{e}</li>" }.join}</ul>)
-    end
-  end
-
-  def strip_carriage_returns(str)
-    str&.gsub("\r", '')
+    @root_errors << 'Invalid public key.'
   end
 
   def parse_errors(error_msg)
@@ -105,7 +80,7 @@ class PublicKeyManager
       @errors[:public_key] = 'Must be a valid public key.'
       @errors[:root] = 'Invalid public key.'
     else
-      @errors[:root] = "We're sorry, but we can't complete your request. Please try again tomorrow."
+      @errors[:root] = SERVER_ERROR_MSG
     end
   end
 end

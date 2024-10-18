@@ -7,7 +7,6 @@ RSpec.describe IpAddressManager do
 
   let(:api_id) { SecureRandom.uuid }
   let(:manager) { IpAddressManager.new(api_id) }
-  let(:server_error) { "We're sorry, but we can't complete your request. Please try again tomorrow." }
   describe '#create_ip_address' do
     let(:ip_address_params) { { label: 'Public IP 1', ip_address: '136.226.19.87' } }
 
@@ -38,7 +37,7 @@ RSpec.describe IpAddressManager do
 
           expect(new_ip_address[:response]).to eq(false)
           expect(new_ip_address[:message]).to eq(response)
-          expect(new_ip_address[:errors]).to eq(root: server_error)
+          expect(new_ip_address[:errors]).to eq(root: IpAddressManager::SERVER_ERROR_MSG)
         end
         it 'indicates when too many ip addresses reached' do
           response = 'Max Ips for organization reached: 8'
@@ -146,7 +145,7 @@ RSpec.describe IpAddressManager do
                                        with: [api_id])
 
         expect(manager.ip_addresses).to eq([])
-        expect(manager.errors).to eq({ root: server_error })
+        expect(manager.errors).to eq({ root: IpAddressManager::SERVER_ERROR_MSG })
       end
     end
   end
