@@ -40,7 +40,7 @@ RSpec.describe PublicKeyManager do
 
           expect(new_public_key[:response]).to eq(false)
           expect(new_public_key[:message]).to eq(response)
-          expect(new_public_key[:errors]).to eq({ root: 'Unable to process request' })
+          expect(new_public_key[:errors]).to eq({ root: "We're sorry, but we can't complete your request. Please try again tomorrow." })
         end
       end
     end
@@ -49,16 +49,29 @@ RSpec.describe PublicKeyManager do
       it 'has errors on all missing fields' do
         response = manager.create_public_key(label: '', public_key: '', snippet_signature: '')
         expect(response[:response]).to eq(false)
-        expect(manager.errors.size).to eq 3
-        expect(manager.errors[:label]).to eq 'Cannot be blank'
-        expect(manager.errors[:public_key]).to eq 'Cannot be blank'
-        expect(manager.errors[:snippet_signature]).to eq 'Cannot be blank'
+        expect(response[:errors]).to eq(label: "Label can't be blank.",
+                                        public_key: "Public key can't be blank.",
+                                        snippet_signature: "Snippet signature can't be blank.",
+                                        root: "Fields can't be blank.")
       end
 
       it 'has too long of a label' do
-        manager.create_public_key(label: 'aaaaabbbbbcccccdddddeeeeefffff', public_key: '',
-                                  snippet_signature: '')
-        expect(manager.errors[:label]).to eq 'Label must be 25 characters or fewer'
+        manager.create_public_key(label: 'aaaaabbbbbcccccdddddeeeeefffff',
+                                  public_key: file_fixture('stubbed_key.pem').read,
+                                  snippet_signature: 'stubbed_sign_txt_signature')
+        expect(manager.errors.size).to eq 2
+        expect(manager.errors[:label]).to eq 'Label must be 25 characters or fewer.'
+        expect(manager.errors[:root]).to eq 'Invalid label.'
+      end
+      it 'has multiple errors' do
+        response = manager.create_public_key(label: 'aaaaabbbbbcccccdddddeeeeefffff',
+                                             public_key: '', snippet_signature: '')
+        expect(response[:response]).to eq(false)
+        root = "Errors:<ul><li>Fields can't be blank.</li><li>Invalid label.</li></ul>"
+        expect(response[:errors]).to eq(label: 'Label must be 25 characters or fewer.',
+                                        public_key: "Public key can't be blank.",
+                                        snippet_signature: "Snippet signature can't be blank.",
+                                        root:)
       end
     end
 
@@ -70,8 +83,9 @@ RSpec.describe PublicKeyManager do
                                              snippet_signature: 'stubbed_sign_txt_signature')
 
         expect(response[:response]).to eq(false)
-        expect(manager.errors.size).to eq 1
-        expect(manager.errors[:public_key]).to eq 'Must be a public key'
+        expect(manager.errors.size).to eq 2
+        expect(manager.errors[:public_key]).to eq 'Must be a public key (not a private key).'
+        expect(manager.errors[:root]).to eq 'Invalid public key.'
       end
 
       it 'returns false when key is not in pem format' do
@@ -79,7 +93,11 @@ RSpec.describe PublicKeyManager do
                                                    snippet_signature: 'stubbed_sign_txt_signature')
 
         expect(new_public_key[:response]).to eq(false)
+        expect(manager.errors.size).to eq 2
+        expect(manager.errors[:public_key]).to eq 'Must be a valid public key.'
+        expect(manager.errors[:root]).to eq 'Invalid public key.'
       end
+
       it 'returns false when backend does not like key' do
         response = 'error: Public key is not valid'
         stub_self_returning_api_client(message: :create_public_key,
@@ -90,7 +108,9 @@ RSpec.describe PublicKeyManager do
         new_public_key = manager.create_public_key(**@public_key_params)
 
         expect(new_public_key[:response]).to eq(false)
-        expect(new_public_key[:errors][:public_key]).to eq 'Must have valid encoding'
+        expect(manager.errors.size).to eq 2
+        expect(manager.errors[:public_key]).to eq 'Must be a valid public key.'
+        expect(manager.errors[:root]).to eq 'Invalid public key.'
       end
     end
     context 'when signature sig not match' do
@@ -104,7 +124,8 @@ RSpec.describe PublicKeyManager do
         new_public_key = manager.create_public_key(**@public_key_params)
 
         expect(new_public_key[:response]).to eq(false)
-        expect(new_public_key[:errors][:snippet_signature]).to eq "Signature doesn't match"
+        expect(new_public_key[:errors][:snippet_signature]).to eq "Signature snippet doesn't match public key."
+        expect(new_public_key[:errors][:root]).to eq 'Invalid signature snippet.'
       end
     end
   end

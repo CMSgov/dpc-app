@@ -193,11 +193,11 @@ RSpec.describe 'PublicKeys', type: :request do
 
       it 'fails if missing params' do
         post "/organizations/#{org.id}/public_keys"
-        expect(flash[:alert]).to eq('Invalid encoding')
-        error_msg = 'Cannot be blank'
-        expect(assigns(:errors)).to eq(public_key: error_msg,
-                                       snippet_signature: error_msg,
-                                       label: error_msg)
+        expect(flash[:alert]).to eq("Fields can't be blank.")
+        expect(assigns(:errors)).to eq(public_key: "Public key can't be blank.",
+                                       snippet_signature: "Snippet signature can't be blank.",
+                                       label: "Label can't be blank.",
+                                       root: "Fields can't be blank.")
       end
 
       it 'fails if label over 25 characters' do
@@ -208,8 +208,8 @@ RSpec.describe 'PublicKeys', type: :request do
           public_key: file_fixture('stubbed_key.pem').read,
           snippet_signature: 'test snippet signature'
         }
-        expect(flash[:alert]).to eq('Invalid encoding')
-        expect(assigns(:errors)).to eq(label: 'Label must be 25 characters or fewer')
+        expect(flash[:alert]).to eq('Invalid label.')
+        expect(assigns(:errors)).to eq(label: 'Label must be 25 characters or fewer.', root: 'Invalid label.')
       end
 
       it 'shows error if problem' do
@@ -224,7 +224,7 @@ RSpec.describe 'PublicKeys', type: :request do
           public_key: file_fixture('stubbed_key.pem').read,
           snippet_signature: 'test snippet signature'
         }
-        expect(flash[:alert]).to eq('Unable to process request')
+        expect(flash[:alert]).to eq("We're sorry, but we can't complete your request. Please try again tomorrow.")
       end
     end
   end
