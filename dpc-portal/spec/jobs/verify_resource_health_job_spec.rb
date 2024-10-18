@@ -63,7 +63,7 @@ RSpec.describe VerifyResourceHealthJob, type: :job do
 
         expect(mock_dpc_client).to receive(:get_healthcheck)
         expect(mock_dpc_client).to receive(:response_successful?).twice.and_return(false)
-        expect(mock_dpc_client).to receive(:response_body).and_return('bad request body')
+        expect(mock_dpc_client).to receive(:response_body).and_return({'healthcheck' => false})
         expect(mock_cpi_client).to receive(:healthcheck).and_return(true)
         expect(mock_cloudwatch_client).to receive(:put_metric_data).with(
           put_metric_data_parms(

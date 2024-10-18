@@ -22,8 +22,8 @@ class VerifyResourceHealthJob < ApplicationJob
   def dpc_healthcheck
     dpc_client = DpcClient.new
     dpc_client.get_healthcheck
-    logger.warn(dpc_client.response_body) unless dpc_client.response_successful?
-
+    logger.warn(dpc_client.response_body.to_s) unless dpc_client.response_successful?
+    
     log_healthcheck(
       'PortalConnectedToDpcApi',
       dpc_client.response_successful?
