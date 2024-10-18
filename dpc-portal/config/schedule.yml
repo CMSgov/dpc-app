@@ -2,3 +2,8 @@ verify_ao_job:
   cron: "0 1 * * 0"
   class: "VerifyAoJob"
   queue: portal
+
+verify_resource_health_job:
+  cron: "*/1 * * * *"
+  class: "VerifyResourceHealthJob"
+  queue: portal

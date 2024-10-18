@@ -195,6 +195,7 @@ services:
       - RUBY_YJIT_ENABLE=1
       - ENV=local
       - DISABLE_JSON_LOGGER=true
+      - IDP_HOST=idp.int.identitysandbox.gov
     depends_on:
       - redis
       - db
