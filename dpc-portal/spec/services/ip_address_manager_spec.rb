@@ -7,6 +7,7 @@ RSpec.describe IpAddressManager do
 
   let(:api_id) { SecureRandom.uuid }
   let(:manager) { IpAddressManager.new(api_id) }
+  let(:server_error) { "We're sorry, but we can't complete your request. Please try again tomorrow." }
   describe '#create_ip_address' do
     let(:ip_address_params) { { label: 'Public IP 1', ip_address: '136.226.19.87' } }
 
@@ -37,6 +38,7 @@ RSpec.describe IpAddressManager do
 
           expect(new_ip_address[:response]).to eq(false)
           expect(new_ip_address[:message]).to eq(response)
+          expect(new_ip_address[:errors]).to eq(root: server_error)
         end
         it 'indicates when too many ip addresses reached' do
           response = 'Max Ips for organization reached: 8'
@@ -48,7 +50,7 @@ RSpec.describe IpAddressManager do
           new_ip_address = manager.create_ip_address(**ip_address_params)
 
           expect(new_ip_address[:response]).to eq(false)
-          expect(new_ip_address[:errors]).to eq(root: 'Maximum IP addresses for organization reached')
+          expect(new_ip_address[:errors]).to eq(root: 'You entered the maximum number if IP addresses.')
         end
       end
     end
@@ -57,8 +59,9 @@ RSpec.describe IpAddressManager do
       it 'has errors on all missing fields' do
         new_ip_address = manager.create_ip_address(ip_address: '', label: '')
         expect(new_ip_address[:response]).to eq(false)
-        error_msg = 'Cannot be blank'
-        expect(new_ip_address[:errors]).to eq(label: error_msg, ip_address: error_msg)
+        expect(new_ip_address[:errors]).to eq(label: "Label can't be blank.",
+                                              ip_address: "IP address can't be blank.",
+                                              root: "Fields can't be blank.")
       end
       context 'label over 25 characters' do
         it 'response with error' do
@@ -66,7 +69,7 @@ RSpec.describe IpAddressManager do
           new_ip_address = manager.create_ip_address(**ip_address_params)
 
           expect(new_ip_address[:response]).to eq(false)
-          expect(new_ip_address[:errors]).to eq(label: 'Label must be 25 characters or fewer')
+          expect(new_ip_address[:errors]).to eq(label: 'Label must be 25 characters or fewer.', root: 'Invalid label.')
         end
       end
 
@@ -76,7 +79,20 @@ RSpec.describe IpAddressManager do
           new_ip_address = manager.create_ip_address(**ip_address_params)
 
           expect(new_ip_address[:response]).to eq(false)
-          expect(new_ip_address[:errors]).to eq(ip_address: 'invalid IP address')
+          expect(new_ip_address[:errors]).to eq(ip_address: 'Invalid IP address.', root: 'Invalid IP address.')
+        end
+      end
+      context 'mixed errors' do
+        it 'response with errors' do
+          ip_address_params[:label] = 'aaaaabbbbbcccccdddddeeeeefffff'
+          ip_address_params[:ip_address] = '333.333.333.333'
+          new_ip_address = manager.create_ip_address(**ip_address_params)
+
+          expect(new_ip_address[:response]).to eq(false)
+          root = 'Errors:<ul><li>Invalid label.</li><li>Invalid IP address.</li></ul>'
+          expect(new_ip_address[:errors]).to eq(label: 'Label must be 25 characters or fewer.',
+                                                ip_address: 'Invalid IP address.',
+                                                root:)
         end
       end
     end
@@ -130,7 +146,7 @@ RSpec.describe IpAddressManager do
                                        with: [api_id])
 
         expect(manager.ip_addresses).to eq([])
-        expect(manager.errors).to eq({ root: 'Unable to process request' })
+        expect(manager.errors).to eq({ root: server_error })
       end
     end
   end

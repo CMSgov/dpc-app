@@ -3,7 +3,8 @@
     <h1>Add Public IP Address</h1>
 
     <section class="box">
-        <div>
+      <div>
+	<p>Limit of 8 addresses per organization.</p>
             <h2>New IP address for <%= @organization.name %></h2>
             <%= form_tag organization_ip_addresses_path(organization_id: organization.path_id), method: :post do %>
                 <%= render(Core::Form::TextInputComponent.new(
@@ -12,8 +13,8 @@
                         error_msg: @errors[:label])
                     ) %>
                 <%= render(Core::Form::TextInputComponent.new(
-                        label: "Public IP address", attribute: :ip_address, default: params[:ip_address], input_options: { maxlength: 15 },
-                        hint: 'For example, 136.226.19.87',
+                        label: "Public IP address (IPv4 only)", attribute: :ip_address, default: params[:ip_address], input_options: { maxlength: 15 },
+                        hint: 'Use the format 136.226.19.87',
                         error_msg: @errors[:ip_address])
                     ) %>
                 <%= submit_tag "Add IP", class: "usa-button", data: { test: "form:submit" } %>

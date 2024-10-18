@@ -21,6 +21,7 @@ RSpec.describe Page::IpAddress::NewAddressComponent, type: :component do
             <h1>Add Public IP Address</h1>
             <section class="box">
               <div>
+                <p>Limit of 8 addresses per organization.</p>
                 <h2>New IP address for #{org.name}</h2>
                 <form action="/portal/organizations/#{org.path_id}/ip_addresses" accept-charset="UTF-8" method="post">
                   <div class="margin-bottom-4">
@@ -29,8 +30,8 @@ RSpec.describe Page::IpAddress::NewAddressComponent, type: :component do
                     <input type="text" name="label" id="label" maxlength="25" class="usa-input">
                   </div>
                   <div class="margin-bottom-4">
-                    <label class="usa-label" for="ip_address">Public IP address</label>
-                    <p class="usa-hint">For example, 136.226.19.87</p>
+                    <label class="usa-label" for="ip_address">Public IP address (IPv4 only)</label>
+                    <p class="usa-hint">Use the format 136.226.19.87</p>
                     <input type="text" name="ip_address" id="ip_address" maxlength="15" class="usa-input">
                   </div>
                   <input type="submit" name="commit" value="Add IP" class="usa-button" data-test="form:submit" data-disable-with="Add IP">

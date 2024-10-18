@@ -186,8 +186,9 @@ RSpec.describe 'IpAddresses', type: :request do
                         response: default_get_org_response(org_api_id))
         post "/organizations/#{org.id}/ip_addresses"
         expect(assigns(:organization)).to eq org
-        expect(flash[:alert]).to eq('IP address invalid')
-        expect(assigns[:errors]).to eq(ip_address: 'Cannot be blank', label: 'Cannot be blank')
+        expect(flash[:alert]).to eq("Fields can't be blank.")
+        expect(assigns[:errors]).to eq(ip_address: "IP address can't be blank.", label: "Label can't be blank.",
+                                       root: "Fields can't be blank.")
       end
 
       it 'fails if invalid IP' do
@@ -198,8 +199,9 @@ RSpec.describe 'IpAddresses', type: :request do
                                        api_client:)
         post "/organizations/#{org.id}/ip_addresses", params: { label: 'Public IP 1', ip_address: '333.333.333.333' }
         expect(assigns(:organization)).to eq org
-        expect(flash[:alert]).to eq('IP address invalid')
-        expect(assigns[:errors]).to eq(ip_address: 'invalid IP address')
+        error_msg = 'Invalid IP address.'
+        expect(flash[:alert]).to eq(error_msg)
+        expect(assigns[:errors]).to eq(ip_address: error_msg, root: error_msg)
       end
 
       it 'fails if label over 25 characters' do
@@ -211,8 +213,8 @@ RSpec.describe 'IpAddresses', type: :request do
         post "/organizations/#{org.id}/ip_addresses",
              params: { label: 'aaaaabbbbbcccccdddddeeeeefffff', ip_address: '136.226.19.87' }
         expect(assigns(:organization)).to eq org
-        expect(flash[:alert]).to eq('IP address invalid')
-        expect(assigns[:errors]).to eq(label: 'Label must be 25 characters or fewer')
+        expect(flash[:alert]).to eq('Invalid label.')
+        expect(assigns[:errors]).to eq(label: 'Label must be 25 characters or fewer.', root: 'Invalid label.')
       end
 
       it 'shows error if problem' do
@@ -223,7 +225,7 @@ RSpec.describe 'IpAddresses', type: :request do
                                        response: nil,
                                        api_client:)
         post "/organizations/#{org.id}/ip_addresses", params: { label: 'Public IP 1', ip_address: '136.226.19.87' }
-        expect(flash[:alert]).to eq('Unable to process request')
+        expect(flash[:alert]).to eq("We're sorry, but we can't complete your request. Please try again tomorrow.")
       end
     end
   end

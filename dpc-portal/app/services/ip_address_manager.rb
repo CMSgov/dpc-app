@@ -14,7 +14,7 @@ class IpAddressManager
   def create_ip_address(ip_address:, label:)
     label = strip_carriage_returns(label)
     ip_address = strip_carriage_returns(ip_address)
-    return { response: false, errors: @errors } unless valid_input?(ip_address, label)
+    return { response: false, errors: @errors } if invalid_input?(ip_address, label)
 
     api_client = DpcClient.new
     api_client.create_ip_address(api_id, params: { label:, ip_address: })
@@ -56,24 +56,42 @@ class IpAddressManager
 
   private
 
-  def valid_input?(ip_address, label)
-    if label.present?
-      @errors[:label] = 'Label must be 25 characters or fewer' if label.length > 25
-    else
-      @errors[:label] = 'Cannot be blank'
+  def invalid_input?(ip_address, label)
+    root_errors = Set.new
+    if label && label.length > 25
+      @errors[:label] = 'Label must be 25 characters or fewer.'
+      root_errors << 'Invalid label.'
+    elsif label.blank?
+      @errors[:label] = "Label can't be blank."
+      root_errors << "Fields can't be blank."
     end
     if ip_address.present?
-      validate_ip_address(ip_address)
+      unless valid_ip_address?(ip_address)
+        @errors[:ip_address] = 'Invalid IP address.'
+        root_errors << 'Invalid IP address.'
+      end
     else
-      @errors[:ip_address] = 'Cannot be blank'
+      @errors[:ip_address] = "IP address can't be blank."
+      root_errors << "Fields can't be blank."
     end
-    @errors.blank?
+    handle_root_errors(root_errors)
   end
 
-  def validate_ip_address(addr_string)
+  def handle_root_errors(root_errors)
+    case root_errors.size
+    when 0
+      false
+    when 1
+      @errors[:root] = root_errors.first
+    else
+      @errors[:root] = %(Errors:<ul>#{root_errors.map { |e| "<li>#{e}</li>" }.join}</ul>)
+    end
+  end
+
+  def valid_ip_address?(addr_string)
     IPAddr.new(addr_string)
   rescue IPAddr::InvalidAddressError
-    @errors[:ip_address] = 'invalid IP address'
+    false
   end
 
   def strip_carriage_returns(str)
@@ -81,11 +99,10 @@ class IpAddressManager
   end
 
   def parse_errors(error_msg)
-    max_msg = 'Max Ips for organization reached'
-    @errors[:root] = if error_msg&.include?(max_msg)
-                       'Maximum IP addresses for organization reached'
+    @errors[:root] = if error_msg&.include?('Max Ips for organization reached')
+                       'You entered the maximum number if IP addresses.'
                      else
-                       'Unable to process request'
+                       "We're sorry, but we can't complete your request. Please try again tomorrow."
                      end
   end
 end

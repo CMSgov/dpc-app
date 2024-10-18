@@ -31,7 +31,8 @@ RSpec.describe ClientTokenManager do
         new_token = manager.create_client_token(label: 'Test Token 1')
 
         expect(new_token[:response]).to eq(false)
-        expect(new_token[:errors]).to eq(root: "We're sorry, but we can't complete your request. Please try again tomorrow.")
+        root = "We're sorry, but we can't complete your request. Please try again tomorrow."
+        expect(new_token[:errors]).to eq(root:)
       end
     end
 
