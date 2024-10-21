@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Data at the Point of Care</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <%= javascript_include_tag '@uswds/uswds/dist/js/uswds-init.min.js' %>
+    <%= stylesheet_link_tag "application", media: "all" %>
+  </head>
+  <body class="minh-viewport">
+    <%= javascript_include_tag '@uswds/uswds/dist/js/uswds.min.js' %>
+    <%= render Core::SiteHeader::Component.new(logged_in: false, border: false) %>
+    <div class="grid-container margin-top-5 margin-bottom-8">
+      <main>
+        <%= yield %>
+      </main>
+    </div>
+  </body>
+</html>
