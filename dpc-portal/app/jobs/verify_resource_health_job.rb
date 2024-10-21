@@ -3,7 +3,8 @@
 require 'aws-sdk-cloudwatch'
 
 # A background job that verifies that external services are up and accessible.
-class VerifyResourceHealthJob < ApplicationJob
+class VerifyResourceHealthJob
+  include Sidekiq::Job
   queue_as :portal
 
   METRIC_NAMESPACE = 'DPC'
