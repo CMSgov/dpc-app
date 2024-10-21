@@ -1,7 +1,7 @@
 <div class="font-body-2xs margin-bottom-3">
   <span>
     By signing in with Login.gov, you are agreeing to our
-    <%= link_to system_use_agreement_path do %>
+    <%= link_to system_use_agreement_path, target: :_blank do %>
       System Use Agreement
       <%= render(Core::Icon::UswdsComponent.new('launch')) %>
     <% end %>
