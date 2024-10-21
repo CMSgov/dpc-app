@@ -195,7 +195,7 @@ RSpec.describe 'PublicKeys', type: :request do
         post "/organizations/#{org.id}/public_keys"
         expect(flash[:alert]).to eq("Fields can't be blank.")
         expect(assigns(:errors)).to eq(public_key: "Public key can't be blank.",
-                                       snippet_signature: "Snippet signature can't be blank.",
+                                       snippet_signature: "Signature snippet can't be blank.",
                                        label: "Label can't be blank.",
                                        root: "Fields can't be blank.")
       end

@@ -49,7 +49,7 @@ RSpec.describe IpAddressManager do
           new_ip_address = manager.create_ip_address(**ip_address_params)
 
           expect(new_ip_address[:response]).to eq(false)
-          expect(new_ip_address[:errors]).to eq(root: 'You entered the maximum number if IP addresses.')
+          expect(new_ip_address[:errors]).to eq(root: 'You entered the maximum number of IP addresses.')
         end
       end
     end

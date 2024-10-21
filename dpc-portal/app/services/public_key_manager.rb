@@ -45,20 +45,11 @@ class PublicKeyManager
 
   def invalid_input?(public_key, label, snippet_signature)
     validate_label(label)
-    handle_blanks(public_key:, snippet_signature:)
+    @errors[:public_key] = "Public key can't be blank." if public_key.blank?
+    @errors[:snippet_signature] = "Signature snippet can't be blank." if snippet_signature.blank?
     validate_encoding(public_key) if public_key.present?
     handle_root_errors if @root_errors.present?
     @errors.present?
-  end
-
-  def handle_blanks(to_check)
-    to_check.each do |key, value|
-      next unless value.blank?
-
-      name = key.to_s.capitalize.gsub('_', ' ')
-      @errors[key] = "#{name} can't be blank."
-      @root_errors << "Fields can't be blank."
-    end
   end
 
   def validate_encoding(key_string)

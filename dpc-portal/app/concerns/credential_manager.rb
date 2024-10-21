@@ -25,6 +25,7 @@ module CredentialManager
     end
 
     def handle_root_errors
+      @root_errors << "Fields can't be blank." if @errors.values.any? { |e| e.include?("can't be blank.") }
       @errors[:root] = if @root_errors.size == 1
                          @root_errors.first
                        else

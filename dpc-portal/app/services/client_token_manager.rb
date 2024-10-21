@@ -44,7 +44,7 @@ class ClientTokenManager
       @errors[:root] = 'Label is too long.'
     elsif label.blank?
       @errors[:label] = "Label can't be blank."
-      @errors[:root] = 'No token name.'
+      @errors[:root] = "Fields can't be blank."
     end
     @errors.present?
   end

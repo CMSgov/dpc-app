@@ -60,7 +60,6 @@ class IpAddressManager
   def validate_ip_address(addr_string)
     if addr_string.blank?
       @errors[:ip_address] = "IP address can't be blank."
-      @root_errors << "Fields can't be blank."
     else
       IPAddr.new(addr_string).blank?
     end
@@ -75,7 +74,7 @@ class IpAddressManager
 
   def parse_errors(error_msg)
     @errors[:root] = if error_msg&.include?('Max Ips for organization reached')
-                       'You entered the maximum number if IP addresses.'
+                       'You entered the maximum number of IP addresses.'
                      else
                        SERVER_ERROR_MSG
                      end

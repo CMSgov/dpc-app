@@ -186,8 +186,8 @@ RSpec.describe 'ClientTokens', type: :request do
       it 'fails if no label' do
         post "/organizations/#{org.id}/client_tokens"
         expect(assigns(:organization)).to eq org
-        expect(flash[:alert]).to eq('No token name.')
-        expect(assigns(:errors)).to eq(label: "Label can't be blank.", root: 'No token name.')
+        expect(flash[:alert]).to eq("Fields can't be blank.")
+        expect(assigns(:errors)).to eq(label: "Label can't be blank.", root: "Fields can't be blank.")
       end
 
       it 'shows error if problem' do

@@ -51,7 +51,7 @@ RSpec.describe PublicKeyManager do
         expect(response[:response]).to eq(false)
         expect(response[:errors]).to eq(label: "Label can't be blank.",
                                         public_key: "Public key can't be blank.",
-                                        snippet_signature: "Snippet signature can't be blank.",
+                                        snippet_signature: "Signature snippet can't be blank.",
                                         root: "Fields can't be blank.")
       end
 
@@ -70,7 +70,7 @@ RSpec.describe PublicKeyManager do
         root = "Errors:<ul><li>Invalid label.</li><li>Fields can't be blank.</li></ul>"
         expect(response[:errors]).to eq(label: 'Label must be 25 characters or fewer.',
                                         public_key: "Public key can't be blank.",
-                                        snippet_signature: "Snippet signature can't be blank.",
+                                        snippet_signature: "Signature snippet can't be blank.",
                                         root:)
       end
     end
