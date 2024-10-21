@@ -18,7 +18,7 @@ RSpec.describe Page::IpAddress::NewAddressComponent, type: :component do
         <<~HTML
           <div>
             <div class="margin-bottom-5">← <a href="/portal/organizations/#{org.path_id}">#{org.name}</a></div>
-            <h1>Add Public IP Address</h1>
+            <h1>Add public IP address</h1>
             <section class="box">
               <div>
                 <p>Limit of 8 addresses per organization.</p>

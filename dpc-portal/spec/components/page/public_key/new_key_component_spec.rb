@@ -22,10 +22,10 @@ RSpec.describe Page::PublicKey::NewKeyComponent, type: :component do
         <<~HTML
           <div>
             <div class="margin-bottom-5">← <a href="/portal/organizations/#{org.path_id}">#{org.name}</a></div>
-            <h1>Add Public Key</h1>
+            <h1>Add public key</h1>
             <section class="box">
               <div>
-                <h2>New Public Key for #{org.name}</h2>
+                <h2>New public key for #{org.name}</h2>
                 <form action="/portal/organizations/#{org.path_id}/public_keys" accept-charset="UTF-8" method="post">
                   <div class="margin-bottom-4">
                     <label class="usa-label" for="label">Label</label>
@@ -33,12 +33,12 @@ RSpec.describe Page::PublicKey::NewKeyComponent, type: :component do
                     <input type="text" name="label" id="label" maxlength="25" class="usa-input">
                   </div>
                   <div class="margin-bottom-4">
-                    <label class="usa-label" for="public_key">Public Key</label>
+                    <label class="usa-label" for="public_key">Public key</label>
                     <p class="usa-hint">Must include the "BEGIN PUBLIC KEY" and "END PUBLIC KEY" tags from your public.pem file.</p>
                     <textarea name="public_key" id="public_key" class="usa-textarea"></textarea>
                   </div>
                   <div class="margin-bottom-4">
-                    <label class="usa-label" for="snippet_signature">Signature Snippet</label>
+                    <label class="usa-label" for="snippet_signature">Signature snippet</label>
                     <p class="usa-hint">Must yield "Verified Ok" results in order to generate the signature.sig file.</p>
                     <textarea name="snippet_signature" id="snippet_signature" class="usa-textarea"></textarea>
                   </div>
