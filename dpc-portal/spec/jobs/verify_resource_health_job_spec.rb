@@ -24,7 +24,7 @@ RSpec.describe VerifyResourceHealthJob, type: :job do
         VerifyResourceHealthJob::IDP_HOST = 'www.idp_test.com'
         stub_request(:get, 'https://www.idp_test.com').to_return(status: 200)
 
-        expect(mock_dpc_client).to receive(:get_healthcheck)
+        expect(mock_dpc_client).to receive(:healthcheck)
         expect(mock_dpc_client).to receive(:response_successful?).twice.and_return(true)
         expect(mock_cpi_client).to receive(:healthcheck).and_return(true)
         expect(mock_cloudwatch_client).to receive(:put_metric_data).with(
@@ -61,7 +61,7 @@ RSpec.describe VerifyResourceHealthJob, type: :job do
         VerifyResourceHealthJob::IDP_HOST = 'www.idp_test.com'
         stub_request(:get, 'https://www.idp_test.com').to_return(status: 200)
 
-        expect(mock_dpc_client).to receive(:get_healthcheck)
+        expect(mock_dpc_client).to receive(:healthcheck)
         expect(mock_dpc_client).to receive(:response_successful?).twice.and_return(false)
         expect(mock_dpc_client).to receive(:response_body).and_return({ 'healthcheck' => false })
         expect(mock_cpi_client).to receive(:healthcheck).and_return(true)
@@ -99,7 +99,7 @@ RSpec.describe VerifyResourceHealthJob, type: :job do
         VerifyResourceHealthJob::IDP_HOST = 'www.idp_test.com'
         stub_request(:get, 'https://www.idp_test.com').to_return(status: 500)
 
-        expect(mock_dpc_client).to receive(:get_healthcheck)
+        expect(mock_dpc_client).to receive(:healthcheck)
         expect(mock_dpc_client).to receive(:response_successful?).twice.and_return(true)
         expect(mock_cpi_client).to receive(:healthcheck).and_return(true)
         expect(mock_cloudwatch_client).to receive(:put_metric_data).with(
@@ -134,7 +134,7 @@ RSpec.describe VerifyResourceHealthJob, type: :job do
         VerifyResourceHealthJob::IDP_HOST = nil
         stub_request(:get, 'https://www.idp_test.com').to_return(status: 200)
 
-        expect(mock_dpc_client).to receive(:get_healthcheck)
+        expect(mock_dpc_client).to receive(:healthcheck)
         expect(mock_dpc_client).to receive(:response_successful?).twice.and_return(true)
         expect(mock_cpi_client).to receive(:healthcheck).and_return(true)
         expect(mock_cloudwatch_client).to receive(:put_metric_data).with(
@@ -171,7 +171,7 @@ RSpec.describe VerifyResourceHealthJob, type: :job do
         VerifyResourceHealthJob::IDP_HOST = 'www.idp_test.com'
         stub_request(:get, 'https://www.idp_test.com').to_return(status: 200)
 
-        expect(mock_dpc_client).to receive(:get_healthcheck)
+        expect(mock_dpc_client).to receive(:healthcheck)
         expect(mock_dpc_client).to receive(:response_successful?).twice.and_return(true)
         expect(mock_cpi_client).to receive(:healthcheck).and_return(false)
         expect(mock_cloudwatch_client).to receive(:put_metric_data).with(
@@ -209,7 +209,7 @@ RSpec.describe VerifyResourceHealthJob, type: :job do
       VerifyResourceHealthJob::IDP_HOST = 'www.idp_test.com'
       stub_request(:get, 'https://www.idp_test.com').to_return(status: 200)
 
-      expect(mock_dpc_client).to receive(:get_healthcheck)
+      expect(mock_dpc_client).to receive(:healthcheck)
       expect(mock_dpc_client).to receive(:response_successful?).twice.and_return(true)
       expect(mock_cpi_client).to receive(:healthcheck).and_return(true)
 

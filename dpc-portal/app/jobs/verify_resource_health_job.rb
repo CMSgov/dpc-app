@@ -21,7 +21,7 @@ class VerifyResourceHealthJob < ApplicationJob
 
   def dpc_healthcheck
     dpc_client = DpcClient.new
-    dpc_client.get_healthcheck
+    dpc_client.healthcheck
     logger.warn(dpc_client.response_body.to_s) unless dpc_client.response_successful?
 
     log_healthcheck(

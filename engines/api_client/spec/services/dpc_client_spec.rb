@@ -799,56 +799,45 @@ RSpec.describe DpcClient do
     context 'successful api request' do
       it 'calls healthcheck' do
         stub_request(:get, 'http://dpc.example.com/healthcheck').with(
-            headers: { 
-              'Content-Type' => 'application/json', 
-              'Accept' => 'application/json' 
-            }
-          ).to_return(
-            status: 200,
-            body: ''
-          )
+          headers: {
+            'Content-Type' => 'application/json',
+            'Accept' => 'application/json'
+          }
+        ).to_return(
+          status: 200,
+          body: ''
+        )
 
-          api_client = DpcClient.new
-          api_client.get_healthcheck
-          expect(api_client.response_status).to eq(200)
+        api_client = DpcClient.new
+        api_client.healthcheck
+        expect(api_client.response_status).to eq(200)
       end
     end
 
     context 'unsuccessful api request' do
       it 'calls healthcheck and gets bad response' do
         stub_request(:get, 'http://dpc.example.com/healthcheck').with(
-            headers: { 
-              'Content-Type' => 'application/json', 
-              'Accept' => 'application/json' 
-            }
-          ).to_return(
-            status: 500,
-            body: ''
-          )
+          headers: {
+            'Content-Type' => 'application/json',
+            'Accept' => 'application/json'
+          }
+        ).to_return(
+          status: 500,
+          body: ''
+        )
 
-          api_client = DpcClient.new
-          api_client.get_healthcheck
-          expect(api_client.response_status).to eq(500)
+        api_client = DpcClient.new
+        api_client.healthcheck
+        expect(api_client.response_status).to eq(500)
       end
       it 'cannot reach healthcheck due to error' do
         http_stub = instance_double(Net::HTTP)
         allow(Net::HTTP).to receive(:new).and_return(http_stub)
-        allow(http_stub).to receive(:use_ssl=).with(false).and_return(false)
         allow(http_stub).to receive(:request).and_raise(Socket::ResolutionError)
 
-        stub_request(:get, 'http://dpc.example.com/healthcheck').with(
-            headers: { 
-              'Content-Type' => 'application/json', 
-              'Accept' => 'application/json' 
-            }
-          ).to_return(
-            status: 500,
-            body: ''
-          )
-
-          api_client = DpcClient.new
-          api_client.get_healthcheck
-          expect(api_client.response_status).to eq(500)
+        api_client = DpcClient.new
+        api_client.healthcheck
+        expect(api_client.response_status).to eq(500)
       end
     end
   end

@@ -112,7 +112,7 @@ class DpcClient
     get_request("#{base_url}/IpAddress", delegated_macaroon(reg_org_api_id))
   end
 
-  def get_healthcheck
+  def healthcheck
     get_request("#{admin_url}/healthcheck", nil)
   end
 
@@ -187,7 +187,7 @@ class DpcClient
   def http_request(request, uri)
     http = Net::HTTP.new(uri.host, uri.port)
 
-    if use_ssl?
+    if use_ssl? && (uri.scheme == 'https')
       http.use_ssl = true
       http.verify_mode = OpenSSL::SSL::VERIFY_PEER
     end
@@ -195,7 +195,7 @@ class DpcClient
     response = http.request(request)
     @response_status = response.code.to_i
     @response_body = response_successful? ? parsed_response(response) : response.body
-  rescue => e
+  rescue StandardError => e
     # There are a whole bunch of errors that can get thrown if we're having network issues and we want to catch them all
     connection_error(e)
   end
