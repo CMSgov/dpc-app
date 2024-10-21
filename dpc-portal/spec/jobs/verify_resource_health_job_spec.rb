@@ -18,6 +18,8 @@ RSpec.describe VerifyResourceHealthJob, type: :job do
     allow(Aws::CloudWatch::Client).to receive(:new).with(region: 'us-east-1').and_return(mock_cloudwatch_client)
   end
 
+  let(:job) { VerifyResourceHealthJob.new }
+
   context 'can successfully send metrics' do
     describe 'everything healthy' do
       it 'should emit healthy metrics' do
@@ -52,7 +54,7 @@ RSpec.describe VerifyResourceHealthJob, type: :job do
           )
         )
 
-        VerifyResourceHealthJob.perform_now
+        job.perform
       end
     end
 
@@ -90,7 +92,7 @@ RSpec.describe VerifyResourceHealthJob, type: :job do
           )
         )
 
-        VerifyResourceHealthJob.perform_now
+        job.perform
       end
     end
 
@@ -127,7 +129,7 @@ RSpec.describe VerifyResourceHealthJob, type: :job do
           )
         )
 
-        VerifyResourceHealthJob.perform_now
+        job.perform
       end
 
       it 'should emit an unhealthy metric when url is not configured' do
@@ -162,7 +164,7 @@ RSpec.describe VerifyResourceHealthJob, type: :job do
           )
         )
 
-        VerifyResourceHealthJob.perform_now
+        job.perform
       end
     end
 
@@ -199,7 +201,7 @@ RSpec.describe VerifyResourceHealthJob, type: :job do
           )
         )
 
-        VerifyResourceHealthJob.perform_now
+        job.perform
       end
     end
   end
@@ -214,7 +216,7 @@ RSpec.describe VerifyResourceHealthJob, type: :job do
       expect(mock_cpi_client).to receive(:healthcheck).and_return(true)
 
       allow(mock_cloudwatch_client).to receive(:put_metric_data).and_raise(StandardError)
-      VerifyResourceHealthJob.perform_now
+      job.perform
     end
   end
 
