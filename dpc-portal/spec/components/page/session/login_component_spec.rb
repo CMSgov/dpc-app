@@ -20,6 +20,11 @@ RSpec.describe Page::Session::LoginComponent, type: :component do
       expect(page.find('button.usa-button span.login-button__logo')).to have_content('Login.gov')
     end
 
+    it 'should render a link to the System Use Agreement' do
+      expect(page).to have_link('System Use Agreement',
+                                href: Rails.application.routes.url_helpers.system_use_agreement_path)
+    end
+
     it 'login.gov button should post to appropriate url' do
       expect(page.find('form', match: :first)[:action]).to eq url
       expect(page.find('form', match: :first)[:method]).to eq 'post'
