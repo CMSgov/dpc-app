@@ -7,9 +7,10 @@
       <div class="bg-white padding-y-3 padding-x-5 border border-base-lighter">
         <h1 class="margin-bottom-0">DPC Portal sign in</h1>
         <p>Sign in with your DPC Portal Login.gov account</p>
-        <%= button_to @login_path, class: 'usa-button width-full margin-bottom-3', data: { turbo: false } do %>
+        <%= button_to @login_path, class: 'usa-button width-full margin-bottom-1', data: { turbo: false } do %>
           Sign in with <span class="login-button__logo">Login.gov</span>
         <% end %>
+        <%= render(Core::Navigation::SystemUseAgreementLinkComponent.new) %>
         <div class="line-separator"></div>
         <p>
           <strong>You must use your unique DPC Portal username and password to sign in.</strong>
