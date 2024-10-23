@@ -42,5 +42,23 @@ RSpec.describe Core::SiteHeader::Component, type: :component do
         expect(page.find('.usa-header button')).to have_content('Log Out')
       end
     end
+
+    context 'border toggle is true' do
+      let(:component) { described_class.new(border: true) }
+
+      it 'should render a bottom border' do
+        render_inline(component)
+        expect(page).to have_selector('.height-2.width-full.bg-base-dark')
+      end
+    end
+
+    context 'border toggle is false' do
+      let(:component) { described_class.new(border: false) }
+
+      it 'should not render a bottom border' do
+        render_inline(component)
+        expect(page).not_to have_selector('.height-2.width-full.bg-base-dark')
+      end
+    end
   end
 end

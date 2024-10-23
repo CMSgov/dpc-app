@@ -103,5 +103,7 @@
     </div>
     <%= render Core::Button::ButtonComponent.new(label: "Log Out", destination: destroy_user_session_path, method: :delete) if logged_in %>
   </div>
-  <div class="height-2 width-full bg-base-dark"></div>
+  <% if border %>
+    <div class="height-2 width-full bg-base-dark"></div>
+  <% end %>
 </header>

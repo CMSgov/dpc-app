@@ -21,7 +21,7 @@
           <% end %>
           <% if alert %>
             <%= render Core::Alert::Component.new(status: :error) do %>
-              <%= alert %>
+              <%=raw alert %>
             <% end %>
           <% end %>
           <main class="<%= 'margin-top-5' if notice or alert %>">
