@@ -23,9 +23,9 @@ RSpec.describe VerifyResourceHealthJob, type: :job do
   context 'can successfully send metrics' do
     describe 'everything healthy' do
       it 'should emit healthy metrics' do
-        expect_dpc_api(true, 1)
-        expect_cpi(true, true, 1)
-        expect_idp(200, 1)
+        expect_dpc_api
+        expect_cpi
+        expect_idp
 
         job.perform
       end
@@ -33,9 +33,9 @@ RSpec.describe VerifyResourceHealthJob, type: :job do
 
     describe 'dpc-api is down' do
       it 'should emit an unhealthy metric' do
-        expect_dpc_api(false, 0)
-        expect_cpi(true, true, 1)
-        expect_idp(200, 1)
+        expect_dpc_api(response_successful: false, metric: 0)
+        expect_cpi
+        expect_idp
 
         job.perform
       end
@@ -43,9 +43,9 @@ RSpec.describe VerifyResourceHealthJob, type: :job do
 
     describe 'cpi gateway auth is down' do
       it 'should emit an unhealthy metric' do
-        expect_dpc_api(true, 1)
-        expect_cpi(false, true, 0)
-        expect_idp(200, 1)
+        expect_dpc_api
+        expect_cpi(auth_health: false, metric: 0)
+        expect_idp
 
         job.perform
       end
@@ -53,9 +53,9 @@ RSpec.describe VerifyResourceHealthJob, type: :job do
 
     describe 'cpi gateway api is down' do
       it 'should emit an unhealthy metric' do
-        expect_dpc_api(true, 1)
-        expect_cpi(true, false, 0)
-        expect_idp(200, 1)
+        expect_dpc_api
+        expect_cpi(api_health: false, metric: 0)
+        expect_idp
 
         job.perform
       end
@@ -63,9 +63,9 @@ RSpec.describe VerifyResourceHealthJob, type: :job do
 
     describe 'idp is down' do
       it 'should emit an unhealthy metric' do
-        expect_dpc_api(true, 1)
-        expect_cpi(true, true, 1)
-        expect_idp(500, 0)
+        expect_dpc_api
+        expect_cpi
+        expect_idp(site_status: 500, metric: 0)
 
         job.perform
       end
@@ -81,9 +81,9 @@ RSpec.describe VerifyResourceHealthJob, type: :job do
       end
 
       it 'should emit an unhealthy metric when url is not configured' do
-        expect_dpc_api(true, 1)
-        expect_cpi(true, true, 1)
-        expect_idp(200, 0)
+        expect_dpc_api
+        expect_cpi
+        expect_idp(metric: 0)
 
         job.perform
       end
@@ -129,20 +129,20 @@ RSpec.describe VerifyResourceHealthJob, type: :job do
     }
   end
 
-  def expect_dpc_api(response_successful, metric)
+  def expect_dpc_api(response_successful: true, metric: 1)
     expect(mock_dpc_client).to receive(:healthcheck)
     expect(mock_dpc_client).to receive(:response_successful?).twice.and_return(response_successful)
     allow(mock_dpc_client).to receive(:response_body).and_return({ 'healthcheck' => metric })
     expect_put_metric('PortalConnectedToDpcApi', metric)
   end
 
-  def expect_cpi(auth_health, api_health, metric)
+  def expect_cpi(auth_health: true, api_health: true, metric: 1)
     expect(mock_cpi_client).to receive(:healthy_auth?).and_return(auth_health)
     expect(mock_cpi_client).to receive(:healthy_api?).and_return(api_health)
     expect_put_metric('PortalConnectedToCpiApiGateway', metric)
   end
 
-  def expect_idp(site_status, metric)
+  def expect_idp(site_status: 200, metric: 1)
     stub_request(:get, 'https://idp.int.identitysandbox.gov').to_return(status: site_status)
     expect_put_metric('PortalConnectedToIdp', metric)
   end
