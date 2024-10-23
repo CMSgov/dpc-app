@@ -104,6 +104,19 @@ RSpec.describe VerifyResourceHealthJob, type: :job do
     end
   end
 
+  context 'only runs requested checks' do
+    it 'runs dpc-api check' do
+      expect_dpc_api
+      job.perform({ check_dpc: true, check_cpi: false, check_idp: false })
+    end
+
+    it 'runs idp and cpi checks' do
+      expect_cpi
+      expect_idp
+      job.perform({ check_dpc: false, check_cpi: true, check_idp: true })
+    end
+  end
+
   private
 
   def put_metric_data_parms(namespace, env, check_name, value)

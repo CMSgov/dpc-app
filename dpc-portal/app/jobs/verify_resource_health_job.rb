@@ -12,10 +12,11 @@ class VerifyResourceHealthJob
   ENVIRONMENT = ENV.fetch('ENV', 'none')
   IDP_HOST = ENV.fetch('IDP_HOST', nil)
 
-  def perform
-    dpc_healthcheck
-    idp_healthcheck
-    cpi_gateway_healthcheck
+  # Runs all healthchecks if no args provided
+  def perform(args = {})
+    dpc_healthcheck if args.key?(:check_dpc) ? args[:check_dpc] : true
+    idp_healthcheck if args.key?(:check_idp) ? args[:check_idp] : true
+    cpi_gateway_healthcheck if args.key?(:check_cpi) ? args[:check_cpi] : true
   end
 
   private
@@ -91,17 +92,19 @@ class VerifyResourceHealthJob
   end
 
   def emit_cloudwatch_metric(check_name, healthy)
-    Aws::CloudWatch::Client.new(region: REGION).put_metric_data({
-                                                                  namespace: METRIC_NAMESPACE,
-                                                                  metric_data: [
-                                                                    {
-                                                                      metric_name: check_name,
-                                                                      dimensions:,
-                                                                      value: healthy ? 1 : 0,
-                                                                      unit: 'None'
-                                                                    }
-                                                                  ]
-                                                                })
+    Aws::CloudWatch::Client.new(region: REGION).put_metric_data(
+      {
+        namespace: METRIC_NAMESPACE,
+        metric_data: [
+          {
+            metric_name: check_name,
+            dimensions:,
+            value: healthy ? 1 : 0,
+            unit: 'None'
+          }
+        ]
+      }
+    )
   rescue StandardError
     # If we're not running on AWS, or don't have the AWS CLI configured, we'll get an error.
     # This is normal when running locally, so only logging in debug mode.
