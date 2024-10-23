@@ -23,36 +23,9 @@ RSpec.describe VerifyResourceHealthJob, type: :job do
   context 'can successfully send metrics' do
     describe 'everything healthy' do
       it 'should emit healthy metrics' do
-        VerifyResourceHealthJob::IDP_HOST = 'www.idp_test.com'
-        stub_request(:get, 'https://www.idp_test.com').to_return(status: 200)
-
-        expect(mock_dpc_client).to receive(:healthcheck)
-        expect(mock_dpc_client).to receive(:response_successful?).twice.and_return(true)
-        expect(mock_cpi_client).to receive(:healthcheck).and_return(true)
-        expect(mock_cloudwatch_client).to receive(:put_metric_data).with(
-          put_metric_data_parms(
-            VerifyResourceHealthJob::METRIC_NAMESPACE,
-            VerifyResourceHealthJob::ENVIRONMENT,
-            'PortalConnectedToDpcApi',
-            1
-          )
-        )
-        expect(mock_cloudwatch_client).to receive(:put_metric_data).with(
-          put_metric_data_parms(
-            VerifyResourceHealthJob::METRIC_NAMESPACE,
-            VerifyResourceHealthJob::ENVIRONMENT,
-            'PortalConnectedToIdp',
-            1
-          )
-        )
-        expect(mock_cloudwatch_client).to receive(:put_metric_data).with(
-          put_metric_data_parms(
-            VerifyResourceHealthJob::METRIC_NAMESPACE,
-            VerifyResourceHealthJob::ENVIRONMENT,
-            'PortalConnectedToCpiApiGateway',
-            1
-          )
-        )
+        expect_dpc_api(true, 1)
+        expect_cpi(true, true, 1)
+        expect_idp(200, 1)
 
         job.perform
       end
@@ -60,146 +33,57 @@ RSpec.describe VerifyResourceHealthJob, type: :job do
 
     describe 'dpc-api is down' do
       it 'should emit an unhealthy metric' do
-        VerifyResourceHealthJob::IDP_HOST = 'www.idp_test.com'
-        stub_request(:get, 'https://www.idp_test.com').to_return(status: 200)
+        expect_dpc_api(false, 0)
+        expect_cpi(true, true, 1)
+        expect_idp(200, 1)
 
-        expect(mock_dpc_client).to receive(:healthcheck)
-        expect(mock_dpc_client).to receive(:response_successful?).twice.and_return(false)
-        expect(mock_dpc_client).to receive(:response_body).and_return({ 'healthcheck' => false })
-        expect(mock_cpi_client).to receive(:healthcheck).and_return(true)
-        expect(mock_cloudwatch_client).to receive(:put_metric_data).with(
-          put_metric_data_parms(
-            VerifyResourceHealthJob::METRIC_NAMESPACE,
-            VerifyResourceHealthJob::ENVIRONMENT,
-            'PortalConnectedToDpcApi',
-            0
-          )
-        )
-        expect(mock_cloudwatch_client).to receive(:put_metric_data).with(
-          put_metric_data_parms(
-            VerifyResourceHealthJob::METRIC_NAMESPACE,
-            VerifyResourceHealthJob::ENVIRONMENT,
-            'PortalConnectedToIdp',
-            1
-          )
-        )
-        expect(mock_cloudwatch_client).to receive(:put_metric_data).with(
-          put_metric_data_parms(
-            VerifyResourceHealthJob::METRIC_NAMESPACE,
-            VerifyResourceHealthJob::ENVIRONMENT,
-            'PortalConnectedToCpiApiGateway',
-            1
-          )
-        )
+        job.perform
+      end
+    end
+
+    describe 'cpi gateway auth is down' do
+      it 'should emit an unhealthy metric' do
+        expect_dpc_api(true, 1)
+        expect_cpi(false, true, 0)
+        expect_idp(200, 1)
+
+        job.perform
+      end
+    end
+
+    describe 'cpi gateway api is down' do
+      it 'should emit an unhealthy metric' do
+        expect_dpc_api(true, 1)
+        expect_cpi(true, false, 0)
+        expect_idp(200, 1)
 
         job.perform
       end
     end
 
     describe 'idp is down' do
-      it 'should emit an unhealthy metric when url cannot be reached' do
-        VerifyResourceHealthJob::IDP_HOST = 'www.idp_test.com'
-        stub_request(:get, 'https://www.idp_test.com').to_return(status: 500)
-
-        expect(mock_dpc_client).to receive(:healthcheck)
-        expect(mock_dpc_client).to receive(:response_successful?).twice.and_return(true)
-        expect(mock_cpi_client).to receive(:healthcheck).and_return(true)
-        expect(mock_cloudwatch_client).to receive(:put_metric_data).with(
-          put_metric_data_parms(
-            VerifyResourceHealthJob::METRIC_NAMESPACE,
-            VerifyResourceHealthJob::ENVIRONMENT,
-            'PortalConnectedToDpcApi',
-            1
-          )
-        )
-        expect(mock_cloudwatch_client).to receive(:put_metric_data).with(
-          put_metric_data_parms(
-            VerifyResourceHealthJob::METRIC_NAMESPACE,
-            VerifyResourceHealthJob::ENVIRONMENT,
-            'PortalConnectedToIdp',
-            0
-          )
-        )
-        expect(mock_cloudwatch_client).to receive(:put_metric_data).with(
-          put_metric_data_parms(
-            VerifyResourceHealthJob::METRIC_NAMESPACE,
-            VerifyResourceHealthJob::ENVIRONMENT,
-            'PortalConnectedToCpiApiGateway',
-            1
-          )
-        )
-
-        job.perform
-      end
-
-      it 'should emit an unhealthy metric when url is not configured' do
-        VerifyResourceHealthJob::IDP_HOST = nil
-        stub_request(:get, 'https://www.idp_test.com').to_return(status: 200)
-
-        expect(mock_dpc_client).to receive(:healthcheck)
-        expect(mock_dpc_client).to receive(:response_successful?).twice.and_return(true)
-        expect(mock_cpi_client).to receive(:healthcheck).and_return(true)
-        expect(mock_cloudwatch_client).to receive(:put_metric_data).with(
-          put_metric_data_parms(
-            VerifyResourceHealthJob::METRIC_NAMESPACE,
-            VerifyResourceHealthJob::ENVIRONMENT,
-            'PortalConnectedToDpcApi',
-            1
-          )
-        )
-        expect(mock_cloudwatch_client).to receive(:put_metric_data).with(
-          put_metric_data_parms(
-            VerifyResourceHealthJob::METRIC_NAMESPACE,
-            VerifyResourceHealthJob::ENVIRONMENT,
-            'PortalConnectedToIdp',
-            0
-          )
-        )
-        expect(mock_cloudwatch_client).to receive(:put_metric_data).with(
-          put_metric_data_parms(
-            VerifyResourceHealthJob::METRIC_NAMESPACE,
-            VerifyResourceHealthJob::ENVIRONMENT,
-            'PortalConnectedToCpiApiGateway',
-            1
-          )
-        )
+      it 'should emit an unhealthy metric' do
+        expect_dpc_api(true, 1)
+        expect_cpi(true, true, 1)
+        expect_idp(500, 0)
 
         job.perform
       end
     end
 
-    describe 'cpi gateway is down' do
-      it 'should emit an unhealthy metric' do
-        VerifyResourceHealthJob::IDP_HOST = 'www.idp_test.com'
-        stub_request(:get, 'https://www.idp_test.com').to_return(status: 200)
+    describe 'idp is not configured' do
+      let!(:previous_idp) { VerifyResourceHealthJob::IDP_HOST }
+      before do
+        VerifyResourceHealthJob::IDP_HOST = nil
+      end
+      after do
+        VerifyResourceHealthJob::IDP_HOST = previous_idp
+      end
 
-        expect(mock_dpc_client).to receive(:healthcheck)
-        expect(mock_dpc_client).to receive(:response_successful?).twice.and_return(true)
-        expect(mock_cpi_client).to receive(:healthcheck).and_return(false)
-        expect(mock_cloudwatch_client).to receive(:put_metric_data).with(
-          put_metric_data_parms(
-            VerifyResourceHealthJob::METRIC_NAMESPACE,
-            VerifyResourceHealthJob::ENVIRONMENT,
-            'PortalConnectedToDpcApi',
-            1
-          )
-        )
-        expect(mock_cloudwatch_client).to receive(:put_metric_data).with(
-          put_metric_data_parms(
-            VerifyResourceHealthJob::METRIC_NAMESPACE,
-            VerifyResourceHealthJob::ENVIRONMENT,
-            'PortalConnectedToIdp',
-            1
-          )
-        )
-        expect(mock_cloudwatch_client).to receive(:put_metric_data).with(
-          put_metric_data_parms(
-            VerifyResourceHealthJob::METRIC_NAMESPACE,
-            VerifyResourceHealthJob::ENVIRONMENT,
-            'PortalConnectedToCpiApiGateway',
-            0
-          )
-        )
+      it 'should emit an unhealthy metric when url is not configured' do
+        expect_dpc_api(true, 1)
+        expect_cpi(true, true, 1)
+        expect_idp(200, 0)
 
         job.perform
       end
@@ -208,14 +92,14 @@ RSpec.describe VerifyResourceHealthJob, type: :job do
 
   context 'not connected to AWS' do
     it 'should ignore connection error and move on gracefully' do
-      VerifyResourceHealthJob::IDP_HOST = 'www.idp_test.com'
-      stub_request(:get, 'https://www.idp_test.com').to_return(status: 200)
+      stub_request(:get, 'https://idp.int.identitysandbox.gov').to_return(status: 200)
 
       expect(mock_dpc_client).to receive(:healthcheck)
-      expect(mock_dpc_client).to receive(:response_successful?).twice.and_return(true)
-      expect(mock_cpi_client).to receive(:healthcheck).and_return(true)
+      expect(mock_dpc_client).to receive(:response_successful?).and_return(true).twice
+      expect(mock_cpi_client).to receive(:healthy_auth?).and_return(true)
+      expect(mock_cpi_client).to receive(:healthy_api?).and_return(true)
 
-      allow(mock_cloudwatch_client).to receive(:put_metric_data).and_raise(StandardError)
+      expect(mock_cloudwatch_client).to receive(:put_metric_data).and_raise(StandardError).thrice
       job.perform
     end
   end
@@ -243,5 +127,34 @@ RSpec.describe VerifyResourceHealthJob, type: :job do
         }
       ]
     }
+  end
+
+  def expect_dpc_api(response_successful, metric)
+    expect(mock_dpc_client).to receive(:healthcheck)
+    expect(mock_dpc_client).to receive(:response_successful?).twice.and_return(response_successful)
+    allow(mock_dpc_client).to receive(:response_body).and_return({ 'healthcheck' => metric })
+    expect_put_metric('PortalConnectedToDpcApi', metric)
+  end
+
+  def expect_cpi(auth_health, api_health, metric)
+    expect(mock_cpi_client).to receive(:healthy_auth?).and_return(auth_health)
+    expect(mock_cpi_client).to receive(:healthy_api?).and_return(api_health)
+    expect_put_metric('PortalConnectedToCpiApiGateway', metric)
+  end
+
+  def expect_idp(site_status, metric)
+    stub_request(:get, 'https://idp.int.identitysandbox.gov').to_return(status: site_status)
+    expect_put_metric('PortalConnectedToIdp', metric)
+  end
+
+  def expect_put_metric(name, value)
+    expect(mock_cloudwatch_client).to receive(:put_metric_data).with(
+      put_metric_data_parms(
+        VerifyResourceHealthJob::METRIC_NAMESPACE,
+        VerifyResourceHealthJob::ENVIRONMENT,
+        name,
+        value
+      )
+    )
   end
 end

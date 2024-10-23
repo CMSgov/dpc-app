@@ -798,15 +798,11 @@ RSpec.describe DpcClient do
   describe '#get healthcheck' do
     context 'successful api request' do
       it 'calls healthcheck' do
-        stub_request(:get, 'http://dpc.example.com/healthcheck').with(
-          headers: {
-            'Content-Type' => 'application/json',
-            'Accept' => 'application/json'
-          }
-        ).to_return(
-          status: 200,
-          body: ''
-        )
+        stub_request(:get, 'http://dpc.example.com/healthcheck')
+          .to_return(
+            status: 200,
+            body: ''
+          )
 
         api_client = DpcClient.new
         api_client.healthcheck

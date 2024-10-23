@@ -187,7 +187,7 @@ class DpcClient
   def http_request(request, uri)
     http = Net::HTTP.new(uri.host, uri.port)
 
-    if use_ssl? && (uri.scheme == 'https')
+    if use_ssl?(uri)
       http.use_ssl = true
       http.verify_mode = OpenSSL::SSL::VERIFY_PEER
     end
@@ -217,8 +217,8 @@ class DpcClient
     { 'Content-Type' => 'application/fhir+json', Accept: 'application/fhir+json' }.merge(auth_header(token))
   end
 
-  def use_ssl?
-    !(Rails.env.development? || Rails.env.test?)
+  def use_ssl?(uri)
+    !(Rails.env.development? || Rails.env.test?) && (uri.scheme == 'https')
   end
 
   def connection_error(error)

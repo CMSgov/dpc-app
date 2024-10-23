@@ -23,7 +23,10 @@ class VerifyResourceHealthJob
   def dpc_healthcheck
     dpc_client = DpcClient.new
     dpc_client.healthcheck
-    logger.warn(dpc_client.response_body.to_s) unless dpc_client.response_successful?
+    unless dpc_client.response_successful?
+      logger.warn([dpc_client.response_body.to_s,
+                   { actionContext: LoggingConstants::ActionContext::HealthCheck }])
+    end
 
     log_healthcheck(
       'PortalConnectedToDpcApi',
@@ -43,9 +46,22 @@ class VerifyResourceHealthJob
   end
 
   def cpi_gateway_healthcheck
+    cpi_client = CpiApiGatewayClient.new
+    auth_health = cpi_client.healthy_auth?
+    api_health = cpi_client.healthy_api?
+
+    unless auth_health
+      logger.warn(['CPI API gateway auth endpoint is currently down',
+                   { actionContext: LoggingConstants::ActionContext::HealthCheck }])
+    end
+    unless api_health
+      logger.warn(['CPI API gateway api endpoints are currently down',
+                   { actionContext: LoggingConstants::ActionContext::HealthCheck }])
+    end
+
     log_healthcheck(
       'PortalConnectedToCpiApiGateway',
-      CpiApiGatewayClient.new.healthcheck
+      auth_health && api_health
     )
   end
 
