@@ -71,7 +71,7 @@ class CpiApiGatewayClient
 
   def healthy_auth?
     # Check if we can get a token
-    @client.client_credentials.get_token(scope: 'READ').nil?
+    fetch_token
     true
   rescue StandardError
     false
