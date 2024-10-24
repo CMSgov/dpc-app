@@ -41,14 +41,18 @@ class FakeCpiGateway < Sinatra::Base
 
   # IDM identity service
   post '/oauth2/:token_id/v1/token' do
-    headers['content-type'] = 'application/json; charset=UTF-8'
-    {
-      access_token: 'fake-token',
-      token_type: 'Bearer',
-      expires_in: 3600,
-      refresh_token: 'fake-token',
-      scope: 'create'
-    }.to_json
+    if params['token_id'] == 'bad_token'
+      halt 401
+    else
+      headers['content-type'] = 'application/json; charset=UTF-8'
+      {
+        access_token: 'fake-token',
+        token_type: 'Bearer',
+        expires_in: 3600,
+        refresh_token: 'fake-token',
+        scope: 'create'
+      }.to_json
+    end
   end
 
   # CPI API Gateway
