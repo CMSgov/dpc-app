@@ -35,10 +35,12 @@
     <%= link_to 'Go Back', organization_path(organization.path_id), class: ['usa-button', 'usa-button--outline'] %>
     <a href="#verify-modal" aria-controls="verify-modal" class="usa-button" data-open-modal>Send invite</a>
     <%= render(Core::Modal::ModalComponent.new(
-        'Are you sure?',
-        'Messaging for AO Invite agreement',
-        submit_tag("Yes, assign CD", class: "usa-button", form: "cd-form"),
-        'No, go back',
+        'Acknowledgement',
+        "<p>By assigning this user as a delegate, you are providing them with access to private health information. This means you assume responsibility for their compliance with the Health Insurance Portability and Accountability Act (HIPAA).</p>
+        <p>Do you acknowledge your responsibility for your delegate's compliance with HIPAA regulations?</p>
+        <p>Upon your acknowledgement they will receive an invitation to sign up for access to the DPC Portal. This invitation will expire in 48 hours.</p>",
+        submit_tag("Yes, I acknowledge", class: "usa-button", form: "cd-form"),
+        'Cancel',
         'verify-modal')) %>
   </div>
 </div>
