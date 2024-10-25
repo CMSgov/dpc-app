@@ -27,8 +27,7 @@ RSpec.describe Page::Organization::TosFormComponent, type: :component do
                 <form class="button_to" method="post" action="/portal/organizations/#{organization.id}/sign_tos"><button class="usa-button" type="submit">I have read and accepted the Terms of Service</button></form>
               </li>
               <li class="usa-button-group__item">
-                <button type="button" class="usa-button usa-button--unstyled padding-105 text-center" data-close-modal>
-                  <a href="/portal/organizations">Cancel</a>
+                <form class="button_to" method="get" action="/portal/organizations"><button class="usa-button usa-button--unstyled padding-105 text-center" type="submit">Cancel</button></form>
                 </button>
               </li>
             </ul>

@@ -1,8 +1,8 @@
 package gov.cms.dpc.attribution.jdbi;
 
 import gov.cms.dpc.common.entities.OrganizationEntity;
+import gov.cms.dpc.common.hibernate.attribution.DPCAbstractDAO;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
-import io.dropwizard.hibernate.AbstractDAO;
 
 import javax.inject.Inject;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -13,10 +13,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-public class OrganizationDAO extends AbstractDAO<OrganizationEntity> {
+public class OrganizationDAO extends DPCAbstractDAO<OrganizationEntity> {
 
     @Inject
-    OrganizationDAO(DPCManagedSessionFactory factory) {
+    public OrganizationDAO(DPCManagedSessionFactory factory) {
         super(factory.getSessionFactory());
     }
 

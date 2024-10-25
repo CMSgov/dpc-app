@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
+require './app/services/user_info_service'
 
 RSpec.describe Invitation, type: :model do
   let(:organization) { build(:provider_organization) }
@@ -53,28 +54,6 @@ RSpec.describe Invitation, type: :model do
         expect(valid_new_cd_invite.errors[:invited_family_name]).to eq ["can't be blank"]
       end
 
-      it 'fails on fewer than ten digits in phone' do
-        valid_new_cd_invite.phone_raw = '877-288-313'
-        expect(valid_new_cd_invite.valid?).to eq false
-        expect(valid_new_cd_invite.errors.size).to eq 1
-        expect(valid_new_cd_invite.errors[:invited_phone]).to eq ['is invalid']
-      end
-
-      it 'fails on more than ten digits in phone' do
-        valid_new_cd_invite.phone_raw = '877-288-31333'
-        expect(valid_new_cd_invite.valid?).to eq false
-        expect(valid_new_cd_invite.errors.size).to eq 1
-        expect(valid_new_cd_invite.errors[:invited_phone]).to eq ['is invalid']
-      end
-
-      it 'fails on blank phone' do
-        valid_new_cd_invite.phone_raw = ''
-        expect(valid_new_cd_invite.valid?).to eq false
-        expect(valid_new_cd_invite.errors.size).to eq 2
-        expect(valid_new_cd_invite.errors[:phone_raw]).to eq ["can't be blank"]
-        expect(valid_new_cd_invite.errors[:invited_phone]).to eq ['is invalid']
-      end
-
       it 'fails on bad email' do
         valid_new_cd_invite.invited_email_confirmation = valid_new_cd_invite.invited_email = 'rob-at-example.com'
         expect(valid_new_cd_invite.valid?).to eq false
@@ -112,14 +91,8 @@ RSpec.describe Invitation, type: :model do
       it 'should allow blank invitation values' do
         saved_cd_invite.invited_given_name = ''
         saved_cd_invite.invited_family_name = ''
-        saved_cd_invite.invited_phone = ''
         saved_cd_invite.invited_email = ''
         saved_cd_invite.invited_email_confirmation = ''
-        expect(saved_cd_invite.valid?).to eq true
-      end
-
-      it 'should allow blank phone_raw' do
-        saved_cd_invite.phone_raw = ''
         expect(saved_cd_invite.valid?).to eq true
       end
 
@@ -166,7 +139,6 @@ RSpec.describe Invitation, type: :model do
         invitation.reload
         expect(invitation.invited_given_name).to be_nil
         expect(invitation.invited_family_name).to be_nil
-        expect(invitation.invited_phone).to be_nil
         expect(invitation.invited_email).to be_nil
         expect(invitation).to be_accepted
       end
@@ -181,45 +153,51 @@ RSpec.describe Invitation, type: :model do
             'bob@example.com'
           ],
           'given_name' => 'Bob',
-          'family_name' => 'Hodges',
-          'phone' => '+111-111-1111' }
+          'family_name' => 'Hodges' }
       end
-      it 'should match user if names, email, and phone correct' do
-        expect(cd_invite.match_user?(user_info)).to eq true
+      it 'should match user if last name and email correct' do
+        expect(cd_invite.cd_match?(user_info)).to eq true
+        expect(cd_invite.email_match?(user_info)).to eq true
       end
       it 'should match user if names and email different case' do
-        cd_invite.invited_given_name.upcase!
         cd_invite.invited_family_name.downcase!
         cd_invite.invited_email = cd_invite.invited_email.upcase_first
-        expect(cd_invite.match_user?(user_info)).to eq true
+        expect(cd_invite.cd_match?(user_info)).to eq true
+        expect(cd_invite.email_match?(user_info)).to eq true
       end
-      it 'should match if invited email in all_emails' do
-        cd_invite.invited_email = user_info.dig('all_emails', 1)
-        expect(cd_invite.match_user?(user_info)).to eq true
+      it 'should match user if given name different' do
+        cd_invite.invited_given_name = 'fake'
+        expect(cd_invite.cd_match?(user_info)).to eq true
       end
-      it 'should match if user info phone starts with 1' do
-        plus_phone = user_info.merge('phone' => '+1-111-111-1111')
-        expect(cd_invite.match_user?(plus_phone)).to eq true
-      end
-      it 'should match if invited phone starts with 1' do
-        cd_invite.phone_raw = '+1-111-111-1111'
-        expect(cd_invite.match_user?(user_info)).to eq true
-      end
-      it 'should not match user if given name not correct' do
-        cd_invite.invited_given_name = "not #{cd_invite.invited_given_name}"
-        expect(cd_invite.match_user?(user_info)).to eq false
+      it 'should match if invited email eq email' do
+        cd_invite.invited_email = user_info['email']
+        expect(cd_invite.email_match?(user_info)).to eq true
       end
       it 'should not match user if family name not correct' do
         cd_invite.invited_family_name = "not #{cd_invite.invited_family_name}"
-        expect(cd_invite.match_user?(user_info)).to eq false
+        expect(cd_invite.cd_match?(user_info)).to eq false
       end
       it 'should not match user if email not correct' do
         cd_invite.invited_email = "not #{cd_invite.invited_email}"
-        expect(cd_invite.match_user?(user_info)).to eq false
+        expect(cd_invite.email_match?(user_info)).to eq false
       end
-      it 'should not match user if phone not correct' do
-        cd_invite.invited_phone = 'not number'
-        expect(cd_invite.match_user?(user_info)).to eq false
+      it 'should raise error if user_info missing given name' do
+        missing_info = user_info.merge({ 'given_name' => '' })
+        expect do
+          cd_invite.cd_match?(missing_info)
+        end.to raise_error(UserInfoServiceError, 'missing_info')
+      end
+      it 'should raise error if user_info missing family name' do
+        missing_info = user_info.merge({ 'family_name' => '' })
+        expect do
+          cd_invite.cd_match?(missing_info)
+        end.to raise_error(UserInfoServiceError, 'missing_info')
+      end
+      it 'should raise error if no user_info email' do
+        missing_info = user_info.merge({ 'email' => '' })
+        expect do
+          cd_invite.email_match?(missing_info)
+        end.to raise_error(UserInfoServiceError, 'missing_info')
       end
     end
 
@@ -275,11 +253,6 @@ RSpec.describe Invitation, type: :model do
         expect(valid_new_ao_invite.valid?).to eq true
       end
 
-      it 'does not fail on blank phone' do
-        valid_new_ao_invite.phone_raw = ''
-        expect(valid_new_ao_invite.valid?).to eq true
-      end
-
       it 'fails on bad email' do
         valid_new_ao_invite.invited_email_confirmation = valid_new_ao_invite.invited_email = 'rob-at-example.com'
         expect(valid_new_ao_invite.valid?).to eq false
@@ -311,14 +284,8 @@ RSpec.describe Invitation, type: :model do
       it 'should allow blank invitation values' do
         saved_ao_invite.invited_given_name = ''
         saved_ao_invite.invited_family_name = ''
-        saved_ao_invite.invited_phone = ''
         saved_ao_invite.invited_email = ''
         saved_ao_invite.invited_email_confirmation = ''
-        expect(saved_ao_invite.valid?).to eq true
-      end
-
-      it 'should allow blank phone_raw' do
-        saved_ao_invite.phone_raw = ''
         expect(saved_ao_invite.valid?).to eq true
       end
 
@@ -365,7 +332,6 @@ RSpec.describe Invitation, type: :model do
         invitation.reload
         expect(invitation.invited_given_name).to be_nil
         expect(invitation.invited_family_name).to be_nil
-        expect(invitation.invited_phone).to be_nil
         expect(invitation.invited_email).to be_nil
         expect(invitation).to be_accepted
       end
@@ -374,16 +340,25 @@ RSpec.describe Invitation, type: :model do
     describe :match_user do
       let(:ao_invite) { build(:invitation, :ao, invited_email: 'bob@example.com') }
       it 'should match user if email match' do
-        user_info = { 'all_emails' => [
-          'bob@testy.com',
-          'bob@example.com'
-        ] }
+        user_info = {
+          'email' => 'bob@example.com',
+          'all_emails' => [
+            'bob@testy.com',
+            'bob@example.com'
+          ]
+        }
 
-        expect(ao_invite.match_user?(user_info)).to eq true
+        expect(ao_invite.email_match?(user_info)).to eq true
       end
       it 'should not match user if no email match' do
-        user_info = { 'all_emails' => ['tim@example.com'] }
-        expect(ao_invite.match_user?(user_info)).to eq false
+        user_info = { 'email' => 'tim@example.com' }
+        expect(ao_invite.email_match?(user_info)).to eq false
+      end
+      it 'should raise error if user_info missing all_emails' do
+        user_info = { 'email' => '' }
+        expect do
+          ao_invite.email_match?(user_info)
+        end.to raise_error(UserInfoServiceError, 'missing_info')
       end
     end
 
@@ -401,7 +376,13 @@ RSpec.describe Invitation, type: :model do
         user_info = { 'social_security_number' => '900666666' }
         expect do
           ao_invite.ao_match?(user_info)
-        end.to raise_error(InvitationError, 'ao_med_sanctions')
+        end.to raise_error(VerificationError, 'ao_med_sanctions')
+      end
+      it 'should raise error if user_info missing ssn' do
+        user_info = { 'social_security_number' => nil }
+        expect do
+          ao_invite.ao_match?(user_info)
+        end.to raise_error(UserInfoServiceError, 'missing_info')
       end
     end
   end
@@ -411,9 +392,9 @@ RSpec.describe Invitation, type: :model do
       invitation = create(:invitation, :ao)
       expect(invitation.unacceptable_reason).to be_falsey
     end
-    it 'should be invalid if expired and ao and accepted' do
+    it 'should be ao_accepted if expired and ao and accepted' do
       invitation = create(:invitation, :ao, created_at: 49.hours.ago, status: :accepted)
-      expect(invitation.unacceptable_reason).to eq 'invalid'
+      expect(invitation.unacceptable_reason).to eq 'ao_accepted'
     end
     it 'should be invalid if expired and ao and cancelled' do
       invitation = create(:invitation, :ao, created_at: 49.hours.ago, status: :cancelled)
@@ -423,18 +404,27 @@ RSpec.describe Invitation, type: :model do
       invitation = create(:invitation, :ao, created_at: 49.hours.ago)
       expect(invitation.unacceptable_reason).to eq 'ao_expired'
     end
-    it 'should be invalid if expired and cd' do
+    it 'should be cd_expired if expired and cd' do
       invitation = create(:invitation, :cd, created_at: 49.hours.ago)
-      expect(invitation.unacceptable_reason).to eq 'invalid'
+      expect(invitation.unacceptable_reason).to eq 'cd_expired'
     end
     it 'should be invalid if cancelled' do
       invitation = create(:invitation, :cd, status: :cancelled)
       expect(invitation.unacceptable_reason).to eq 'invalid'
     end
-    it 'should be invalid if accepted' do
+    it 'should be ao_accepted if accepted and ao' do
       invitation = create(:invitation, :ao)
       invitation.accept!
-      expect(invitation.unacceptable_reason).to eq 'invalid'
+      expect(invitation.unacceptable_reason).to eq 'ao_accepted'
+    end
+    it 'should be cd_accepted if accepted and cd' do
+      invitation = create(:invitation, :cd)
+      invitation.accept!
+      expect(invitation.unacceptable_reason).to eq 'cd_accepted'
+    end
+    it 'should be ao_renewed if renewed and authorized_official' do
+      invitation = create(:invitation, :ao, created_at: 49.hours.ago, status: :renewed)
+      expect(invitation.unacceptable_reason).to eq 'ao_renewed'
     end
   end
 
@@ -449,7 +439,18 @@ RSpec.describe Invitation, type: :model do
         expect(new_invitation.invited_email).to eq invitation.invited_email
         expect(new_invitation.provider_organization).to eq invitation.provider_organization
         expect(new_invitation.unacceptable_reason).to be_falsey
+        expect(invitation.unacceptable_reason).to be 'ao_renewed'
         expect(invitation.reload).to be_renewed
+      end
+      it 'should log renewal' do
+        invitation.update!(created_at: 2.days.ago)
+        allow(Rails.logger).to receive(:info)
+        expect(Rails.logger).to receive(:info).with(
+          ['Authorized Official renewed expired invitation',
+           { actionContext: LoggingConstants::ActionContext::Registration,
+             actionType: LoggingConstants::ActionType::AoRenewedExpiredInvitation }]
+        )
+        invitation.renew
       end
       it 'should not create another invitation for the user if accepted' do
         invitation.accept!

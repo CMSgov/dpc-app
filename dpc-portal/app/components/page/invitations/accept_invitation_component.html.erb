@@ -1,23 +1,22 @@
-<%= render(Core::Navigation::StepIndicatorComponent.new(Invitation::STEPS, 1)) if @invitation.authorized_official? %>
+<%= render(Core::Navigation::StepIndicatorComponent.new(Invitation::AO_STEPS, 1)) if @invitation.authorized_official? %>
+<%= render(Core::Navigation::StepIndicatorComponent.new(Invitation::CD_STEPS, 1)) if @invitation.credential_delegate? %>
 <div>
-  <h1>Identity Verified</h1>
   <div>
+    <% if @invitation.authorized_official? %>
+    <p>Thank you for signing in, <%= @name %>.</p>
+
+    <p>Now that your identity is verified we'll check your and your organization's enrollment with the Medicare Provider Enrollment, Chain, and Ownership System (PECOS).</p>
+    <%= render Core::Button::ButtonComponent.new(label: 'Continue to register',
+        destination: confirm_organization_invitation_path(@organization, @invitation),
+        method: :post) %>
+    <% end %>
     <% if @invitation.credential_delegate? %>
-    <h2>Provide invite code</h2>
-    <p>You are invited to <%= @organization.name %> by the Authorized Official (AO),
-      <%= @invitation.invited_by&.given_name %> <%= @invitation.invited_by&.family_name %>.</p>
-      <%= form_tag confirm_organization_invitation_path(@organization, @invitation), method: :post, class: ['usa-form'], id: "cd-accept-form" do %>
-      <%= render(Core::Form::TextInputComponent.new(label: 'Enter the invite code:',
-          attribute: :verification_code,
-          error_msg: @invitation.errors[:verification_code]&.first,
-          input_options: { maxlength: 6 })) %>
-      <%= submit_tag "Validate invite code", class: "usa-button", data: { test: "form:submit" } %>
-      <% end %>
-    <% else %>
-    <p>Press the button below to verify that you are an authorized official for <strong><%= @organization.name %></strong>.</p>
-    <%= render Core::Button::ButtonComponent.new(label: "Verify provider organization",
-	destination: confirm_organization_invitation_path(@organization, @invitation),
-	method: :post) %>
+    <p>Thank you for signing in, <%= @name %>.</p>
+
+    <p>Now that we've confirmed your identity via Login.gov you can complete your acceptance of this invite.</p>
+    <%= render Core::Button::ButtonComponent.new(label: 'Accept invite',
+        destination: register_organization_invitation_path(@organization, @invitation),
+        method: :post) %>
     <% end %>
   </div>
 </div>

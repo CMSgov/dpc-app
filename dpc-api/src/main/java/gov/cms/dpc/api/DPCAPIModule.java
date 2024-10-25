@@ -28,6 +28,7 @@ import gov.cms.dpc.common.annotations.JobTimeout;
 import gov.cms.dpc.common.annotations.ServiceBaseURL;
 import gov.cms.dpc.common.hibernate.auth.DPCAuthHibernateBundle;
 import gov.cms.dpc.common.hibernate.auth.DPCAuthManagedSessionFactory;
+import gov.cms.dpc.fhir.configuration.FHIRClientConfiguration;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.macaroons.annotations.PublicURL;
 import gov.cms.dpc.macaroons.config.TokenPolicy;
@@ -184,11 +185,24 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
 
     @Provides
     @Singleton
+    @Named("fhirContextAttributionSTU3")
+    public FhirContext provideAttributionSTU3Context() {
+        return FhirContext.forDstu3();
+    }
+
+    @Provides
+    @Singleton
     @Named("attribution")
-    public IGenericClient provideFHIRClient(FhirContext ctx) {
-        String attributionUrl = configuration().getAttributionURL();
+    public IGenericClient provideFHIRClient(@Named("fhirContextAttributionSTU3") FhirContext ctx) {
+        FHIRClientConfiguration fhirClientConfiguration = configuration().getFhirClientConfiguration();
+
+        String attributionUrl = fhirClientConfiguration.getServerBaseUrl();
         logger.info("Connecting to attribution server at {}.", attributionUrl);
         ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
+        ctx.getRestfulClientFactory().setSocketTimeout(fhirClientConfiguration.getTimeouts().getSocketTimeout());
+        ctx.getRestfulClientFactory().setConnectTimeout(fhirClientConfiguration.getTimeouts().getConnectionTimeout());
+        ctx.getRestfulClientFactory().setConnectionRequestTimeout(fhirClientConfiguration.getTimeouts().getRequestTimeout());
+
         IGenericClient client = ctx.newRestfulGenericClient(attributionUrl);
         client.registerInterceptor(new RequestIdHeaderInterceptor());
         return client;

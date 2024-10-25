@@ -13,10 +13,14 @@ class CredentialDelegateInvitationsController < ApplicationController
     render(Page::CredentialDelegate::NewInvitationComponent.new(@organization, Invitation.new))
   end
 
+  # rubocop:disable Metrics/AbcSize
   def create
     @cd_invitation = build_invitation
 
     if @cd_invitation.save
+      Rails.logger.info(['Credential Delegate invited',
+                         { actionContext: LoggingConstants::ActionContext::Registration,
+                           actionType: LoggingConstants::ActionType::CdInvited }])
       InvitationMailer.with(invitation: @cd_invitation).invite_cd.deliver_later
       if Rails.env.local?
         logger.info("Invitation URL: #{accept_organization_invitation_url(@organization,
@@ -27,6 +31,7 @@ class CredentialDelegateInvitationsController < ApplicationController
       render(Page::CredentialDelegate::NewInvitationComponent.new(@organization, @cd_invitation), status: :bad_request)
     end
   end
+  # rubocop:enable Metrics/AbcSize
 
   def success
     render(Page::CredentialDelegate::InvitationSuccessComponent.new(@organization))
@@ -52,13 +57,12 @@ class CredentialDelegateInvitationsController < ApplicationController
   end
 
   def build_invitation
-    permitted = params.permit(:invited_given_name, :invited_family_name, :phone_raw, :invited_email,
+    permitted = params.permit(:invited_given_name, :invited_family_name, :invited_email,
                               :invited_email_confirmation)
     Invitation.new(**permitted.to_h,
                    provider_organization: @organization,
                    invitation_type: :credential_delegate,
-                   invited_by: current_user,
-                   verification_code: (Array('A'..'Z') + Array(0..9)).sample(6).join)
+                   invited_by: current_user)
   end
 
   def verify_invitation

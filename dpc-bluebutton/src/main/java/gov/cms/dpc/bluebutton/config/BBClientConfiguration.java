@@ -1,6 +1,7 @@
 package gov.cms.dpc.bluebutton.config;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import gov.cms.dpc.fhir.configuration.FHIRClientConfiguration;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Max;
@@ -8,7 +9,7 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
-public class BBClientConfiguration {
+public class BBClientConfiguration extends FHIRClientConfiguration {
 
     @NotEmpty
     @JsonProperty("healthcheck")
@@ -16,14 +17,6 @@ public class BBClientConfiguration {
 
     @JsonProperty("registerHealthCheck")
     private boolean registerHealthCheck = false;
-
-    @NotEmpty
-    private String serverBaseUrl;
-
-    @Valid
-    @NotNull
-    @JsonProperty("timeouts")
-    private TimeoutConfiguration timeouts = new TimeoutConfiguration();
 
     @Min(10)
     @Max(1000)
@@ -34,22 +27,7 @@ public class BBClientConfiguration {
     @JsonProperty("keyStore")
     private KeystoreConfiguration keystore = new KeystoreConfiguration();
 
-    @NotEmpty
-    private String bfdHashPepper;
-
-    private int bfdHashIter;
-
     private boolean useBfdMock = false;
-
-    private R4Configuration r4Configuration;
-
-    public R4Configuration getR4Configuration() {
-        return r4Configuration;
-    }
-
-    public TimeoutConfiguration getTimeouts() {
-        return timeouts;
-    }
 
     public int getResourcesCount() { return resourcesCount; }
 
@@ -59,14 +37,6 @@ public class BBClientConfiguration {
 
     public BBClientConfiguration() {
         // Not used
-    }
-
-    public String getServerBaseUrl() {
-        return serverBaseUrl;
-    }
-
-    public void setServerBaseUrl(String serverBaseUrl) {
-        this.serverBaseUrl = serverBaseUrl;
     }
 
     public String getHealthcheckName() {
@@ -86,60 +56,10 @@ public class BBClientConfiguration {
         this.registerHealthCheck = registerHealthCheck;
     }
 
-    public String getBfdHashPepper() { return bfdHashPepper; }
-
-    public int getBfdHashIter() { return bfdHashIter; }
-
     public boolean isUseBfdMock() {
         return useBfdMock;
     }
 
-    public static class TimeoutConfiguration {
-
-        private Integer connectionTimeout;
-        private Integer socketTimeout;
-        private Integer requestTimeout;
-
-        TimeoutConfiguration() {
-            // Jackson required
-        }
-
-        public Integer getConnectionTimeout() {
-            return connectionTimeout;
-        }
-
-        public void setConnectionTimeout(Integer connectionTimeout) {
-            this.connectionTimeout = connectionTimeout;
-        }
-
-        public Integer getSocketTimeout() {
-            return socketTimeout;
-        }
-
-        public void setSocketTimeout(Integer socketTimeout) {
-            this.socketTimeout = socketTimeout;
-        }
-
-        public Integer getRequestTimeout() {
-            return requestTimeout;
-        }
-
-        public void setRequestTimeout(Integer requestTimeout) {
-            this.requestTimeout = requestTimeout;
-        }
-    }
-
-    public static class R4Configuration {
-        private String serverBaseUrl;
-
-        public R4Configuration() {
-            // Not used
-        }
-
-        public String getServerBaseUrl() {
-            return serverBaseUrl;
-        }
-    }
     public static class KeystoreConfiguration {
 
         @NotEmpty

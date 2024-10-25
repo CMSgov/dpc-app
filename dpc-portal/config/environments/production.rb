@@ -77,7 +77,9 @@ Rails.application.configure do
     address:         ENV['SMTP_ADDRESS'],
     port:            ENV['SMTP_PORT'],
     domain:          ENV['SMTP_DOMAIN'],
-    enable_starttls: false
+    openssl_verify_mode:  'peer',
+    tls: true,
+    ca_file: '/etc/ssl/certs/ca-certificates.crt'
   }
 
   # Ignore bad email addresses and do not raise email delivery errors.
@@ -94,3 +96,7 @@ Rails.application.configure do
   # Do not dump schema after migrations.
   config.active_record.dump_schema_after_migration = false
 end
+# Do not log values for hashie (used by omniauth and warns in calls to IDM)
+# See https://github.com/omniauth/omniauth/issues/872#issuecomment-276501012
+# Only needs prod, as we stub IDM locally
+Hashie.logger = Logger.new(nil)

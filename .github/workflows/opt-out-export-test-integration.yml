@@ -29,6 +29,8 @@ jobs:
     defaults:
       run:
         working-directory: ./lambda/opt-out-export
+    outputs:
+      start_time: ${{ steps.invoke-lambda.outputs.STARTTIME }}
     steps:
       - uses: actions/checkout@v4
       - uses: aws-actions/configure-aws-credentials@v4
@@ -36,7 +38,42 @@ jobs:
           aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-test-github-actions
       - name: Send event to trigger export lambda function
+        id: invoke-lambda
         run: |
+          echo "STARTTIME=`date +%s`" >> "$GITHUB_OUTPUT"
           aws lambda invoke --function-name dpc-test-opt-out-export test-result.txt
 
-  # TODO Check bucket for export file
+
+  verify-bucket:
+    needs: trigger
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-test-opt-out-import-function
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          # Note that we use the BFD role with access to the bucket
+          role-to-assume: arn:aws:iam::${{ secrets.BFD_ACCOUNT_ID }}:role/bfd-test-eft-dpc-bucket-role
+          role-chaining: true
+          role-skip-session-tagging: true
+      - name: Verify confirmation file put in bucket
+        env:
+          STARTTIME: ${{needs.trigger.outputs.start_time}}
+        run: |
+          while read line; do
+            filedate_s=`echo $line | awk '{print $1 " " $2}'`
+            filedate=`date -d "$filedate_s" +%s`
+            if [[ $((filedate > STARTTIME)) == 1 ]]; then
+              echo "we have a winner!"
+              exit 0
+            fi
+          done < <(aws s3 ls s3://bfd-test-eft/bfdeft01/dpc/out/ | grep REQ)
+          echo "no new file found"
+          exit 1

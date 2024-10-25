@@ -3,6 +3,8 @@ package gov.cms.dpc.fhir.validations;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.validation.FhirValidator;
+import ca.uhn.fhir.validation.ResultSeverityEnum;
+import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
 import gov.cms.dpc.fhir.validations.profiles.AttestationProfile;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
@@ -16,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.sql.Date;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -52,8 +55,23 @@ class AttestationValidationTest {
     void definitionIsValid() {
         final StructureDefinition provenanceDefinition = dpcModule.fetchStructureDefinition(AttestationProfile.PROFILE_URI);
         final ValidationResult result = fhirValidator.validateWithResult(provenanceDefinition);
-        assertAll(() -> assertEquals(1, result.getMessages().size(), "Should have a single message"),
-                () -> assertTrue(result.getMessages().get(0).getMessage().contains("Provenance.target: derived min (0) cannot be less than base min (1)")));
+
+        ArrayList<String> errorMessages = new ArrayList<>();
+        for (SingleValidationMessage msg: result.getMessages()) {
+            if (msg.getSeverity().equals(ResultSeverityEnum.ERROR)) {
+                errorMessages.add(msg.getMessage());
+            }
+        }
+        String resultMessage = String.join(", ", errorMessages);
+        List<String> expectedMessages = List.of(
+                "Element Provenance.target: derived min (0) cannot be less than the base min (1)",
+                "Found # expecting a token name"
+        );
+
+        assertEquals(2, errorMessages.size(), "Should have exactly 2 messages");
+        for (String msg: expectedMessages) {
+            assertTrue(resultMessage.contains(msg));
+        }
     }
 
     @Test

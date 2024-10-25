@@ -7,6 +7,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 )
 
@@ -31,4 +32,15 @@ func UploadFileToS3(s *session.Session, fileName string, buff bytes.Buffer, s3Bu
 		return fmt.Errorf("failed to upload file, %v", s3Err)
 	}
 	return nil
+}
+
+func DownloadFileFromS3(s *session.Session, bucket string, file string) ([]byte, error) {
+	downloader := s3manager.NewDownloader(s)
+	buff := &aws.WriteAtBuffer{}
+	_, err := downloader.Download(buff, &s3.GetObjectInput{
+		Bucket: aws.String(bucket),
+		Key:    aws.String(file),
+	})
+
+	return buff.Bytes(), err
 }

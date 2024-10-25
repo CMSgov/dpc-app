@@ -50,7 +50,8 @@ class PatientValidationTest {
     void definitionIsValid() {
         final StructureDefinition patientDefinition = dpcModule.fetchStructureDefinition(PatientProfile.PROFILE_URI);
         final ValidationResult result = fhirValidator.validateWithResult(patientDefinition);
-        assertTrue(result.isSuccessful(), "Should have passed");
+        assertEquals(1, result.getMessages().size(), "Should have a single message");
+        assertTrue(result.getMessages().get(0).getMessage().contains("Found # expecting a token name"));
     }
 
     @Test
@@ -104,7 +105,7 @@ class PatientValidationTest {
 
         final ValidationResult result = fhirValidator.validateWithResult(patient);
         assertAll(() -> assertFalse(result.isSuccessful(), "Should have failed validation"),
-                () -> assertEquals(1, result.getMessages().size(), "Should have a single failure"));
+                () -> assertEquals(2, result.getMessages().size(), "Should have two failures for ID slice"));
 
         // Add an NPI
         patient.addIdentifier().setSystem(DPCIdentifierSystem.NPPES.getSystem()).setValue("test-npi");

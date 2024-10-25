@@ -40,12 +40,14 @@ describe UserInfoService do
     end
 
     it 'should return info with valid session' do
+      verify_logs(status: 200)
       expect(service.user_info(valid_session)).to eq response
     end
   end
 
   context :bad_request do
     it 'should throw error if status is 401' do
+      verify_logs(status: 401)
       error = '{"error":"No can do"}'
       stub_request(:get, user_info_url)
         .with(headers: { Authorization: "Bearer #{token}" })
@@ -55,6 +57,7 @@ describe UserInfoService do
       end.to raise_error(UserInfoServiceError, 'unauthorized')
     end
     it 'should throw error if status is 500' do
+      verify_logs(status: 500)
       error = '{"error":"shrug"}'
       stub_request(:get, user_info_url)
         .with(headers: { Authorization: "Bearer #{token}" })
@@ -64,12 +67,13 @@ describe UserInfoService do
       end.to raise_error(UserInfoServiceError, 'server_error')
     end
     it 'should throw error if cannot connect' do
+      verify_logs(status: 503)
       stub_request(:get, user_info_url)
         .with(headers: { Authorization: "Bearer #{token}" })
         .to_raise(Errno::ECONNREFUSED)
       expect do
         service.user_info(valid_session)
-      end.to raise_error(UserInfoServiceError, 'connection_error')
+      end.to raise_error(UserInfoServiceError, 'server_error')
     end
   end
 
@@ -94,5 +98,35 @@ describe UserInfoService do
         end.to raise_error(UserInfoServiceError, 'expired_token')
       end
     end
+  end
+  def verify_logs(status:)
+    verify_new_relic
+    verify_rails(status)
+  end
+
+  def verify_new_relic
+    new_relic_tracer = instance_double(NewRelic::Agent::Transaction::ExternalRequestSegment)
+    expect(NewRelic::Agent::Tracer).to receive(:start_external_request_segment)
+      .with(library: 'Net::HTTP', uri: user_info_url, procedure: :get)
+      .and_return(new_relic_tracer)
+    expect(new_relic_tracer).to receive(:finish)
+  end
+
+  def verify_rails(status)
+    allow(Rails.logger).to receive(:info)
+    expect(Rails.logger).to receive(:info).with(
+      ['Calling Login.gov user_info',
+       { login_dot_gov_request_method: :get,
+         login_dot_gov_request_url: user_info_url,
+         login_dot_gov_request_method_name: :request_info }]
+    )
+    expect(Rails.logger).to receive(:info).with(
+      ['Login.gov user_info response info',
+       { login_dot_gov_request_method: :get,
+         login_dot_gov_request_url: user_info_url,
+         login_dot_gov_request_method_name: :request_info,
+         login_dot_gov_response_status_code: status,
+         login_dot_gov_response_duration: anything }]
+    )
   end
 end

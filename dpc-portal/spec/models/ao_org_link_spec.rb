@@ -92,4 +92,20 @@ RSpec.describe AoOrgLink, type: :model do
       end.not_to raise_error
     end
   end
+
+  describe :audits do
+    let(:ao_org_link) { create(:ao_org_link, verification_status: true) }
+    it 'should audit verification_status' do
+      ao_org_link.update(verification_status: false)
+      expect(ao_org_link.audits.count).to eq 1
+    end
+    it 'should audit verification_reason' do
+      ao_org_link.update(verification_reason: :org_med_sanctions)
+      expect(ao_org_link.audits.count).to eq 1
+    end
+    it 'should audit verification_status and _reason together' do
+      ao_org_link.update(verification_status: false, verification_reason: :org_med_sanctions)
+      expect(ao_org_link.audits.count).to eq 1
+    end
+  end
 end

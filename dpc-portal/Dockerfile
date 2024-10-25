@@ -1,9 +1,5 @@
 FROM ruby:3.3-alpine AS ruby_builder
 
-# Add HHS CA Cert
-COPY HHS-FPKI-Intermediate-CA-E1.pem /usr/local/share/ca-certificates/HHS-FPKI-Intermediate-CA-E1.pem
-RUN update-ca-certificates
-
 # Install build dependencies
 RUN apk update && \
     apk add --no-cache postgresql-dev && \
@@ -11,7 +7,8 @@ RUN apk update && \
     apk add --no-cache shared-mime-info && \
     apk add --no-cache --virtual build-deps alpine-sdk npm tzdata && \
     apk add xz && \
-    apk add --no-cache gcompat
+    apk add --no-cache gcompat && \
+    apk add --no-cache curl
 
 # Set the working directory
 RUN mkdir -p /dpc-portal/vendor/api_client
@@ -45,6 +42,10 @@ RUN rm -rf /usr/local/bundle/cache/*.gem && \
     find /usr/local/bundle/gems/ -name "*.c" -delete && \
     find /usr/local/bundle/gems/ -name "*.o" -delete && \
     find /usr/local/bundle/gems/ -name "Gemfile.lock" -delete
+
+# Add Federal Common Policy CA G2 root certificate for SMTP
+COPY certs/fcpcag2.crt /usr/local/share/ca-certificates/fcpcag2.crt
+RUN cat /usr/local/share/ca-certificates/fcpcag2.crt >> /etc/ssl/certs/ca-certificates.crt
 
 # Declare the entrypoint shell script
 ENTRYPOINT ["./docker/entrypoint.sh"]

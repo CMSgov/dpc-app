@@ -11,7 +11,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class ConsentServiceImpl implements ConsentService {
-
     private final IGenericClient consentClient;
 
     public ConsentServiceImpl(@Named("consentClient") IGenericClient consentClient){
@@ -47,11 +46,11 @@ public class ConsentServiceImpl implements ConsentService {
                 .collect(Collectors.toList());
 
         return consentClient
-                .search()
-                .forResource(Consent.class)
-                .encodedJson()
-                .returnBundle(Bundle.class)
-                .where(Consent.PATIENT.hasAnyOfIds(fullMbis))
-                .execute();
+            .search()
+            .forResource(Consent.class)
+            .encodedJson()
+            .returnBundle(Bundle.class)
+            .where(Consent.PATIENT.hasAnyOfIds(fullMbis))
+            .execute();
     }
 }

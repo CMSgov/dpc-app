@@ -36,6 +36,7 @@ import java.time.ZoneOffset;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class GroupResource extends AbstractGroupResource {
 
@@ -69,25 +70,28 @@ public class GroupResource extends AbstractGroupResource {
             throw TOO_MANY_MEMBERS_EXCEPTION;
         }
 
-        final String providerNPI = FHIRExtractors.getAttributedNPI(attributionRoster);
-
-        // Check and see if a roster already exists for the provider
         final UUID organizationID = UUID.fromString(FHIRExtractors.getOrganizationID(attributionRoster));
-        final List<RosterEntity> entities = this.rosterDAO.findEntities(null, organizationID, providerNPI, null);
-        if (!entities.isEmpty()) {
-            final RosterEntity rosterEntity = entities.get(0);
-            return Response.status(Response.Status.OK).entity(this.converter.toFHIR(Group.class, rosterEntity)).build();
-        }
+
+        // Make sure the provider exists for this org
+        final String providerNPI = FHIRExtractors.getAttributedNPI(attributionRoster);
         final List<ProviderEntity> providers = this.providerDAO.getProviders(null, providerNPI, organizationID);
         if (providers.isEmpty()) {
             throw new WebApplicationException("Unable to find attributable provider", Response.Status.NOT_FOUND);
         }
 
-        verifyMembers(attributionRoster, organizationID);
+        // TODO: Force commit before making this call (DPC-4196)
+        // Check and see if a roster already exists for the provider, if so, we just return that and ignore what they sent in
+        final List<RosterEntity> entities = this.rosterDAO.findEntities(null, organizationID, providerNPI, null);
+        if (!entities.isEmpty()) {
+            final RosterEntity rosterEntity = entities.get(0);
+            return Response.status(Response.Status.OK).entity(this.converter.toFHIR(Group.class, rosterEntity)).build();
+        }
 
+        // Verify that all patients in the roster exist
+        verifyAndGetMembers(attributionRoster);
+
+        // Add the first provider and save the persisted Roster.
         final RosterEntity rosterEntity = RosterEntity.fromFHIR(attributionRoster, providers.get(0), generateExpirationTime());
-
-        // Add the first provider
         final RosterEntity persisted = this.rosterDAO.persistEntity(rosterEntity);
         final Group persistedGroup = this.converter.toFHIR(Group.class, persisted);
 
@@ -148,39 +152,33 @@ public class GroupResource extends AbstractGroupResource {
     @UnitOfWork
     @Override
     public Group replaceRoster(@PathParam("rosterID") UUID rosterID, Group groupUpdate) {
+        // Check that the roster exists, that the new roster isn't too big, and that all patients exist
         if (!this.rosterDAO.rosterExists(rosterID)) {
             throw new WebApplicationException(NOT_FOUND_EXCEPTION, Response.Status.NOT_FOUND);
         }
-
         if (rosterSizeTooBig(config.getPatientLimit(), groupUpdate)) {
             throw TOO_MANY_MEMBERS_EXCEPTION;
         }
-        final UUID organizationID = UUID.fromString(FHIRExtractors.getOrganizationID(groupUpdate));
-        verifyMembers(groupUpdate, organizationID);
+        List<PatientEntity> patientEntities = verifyAndGetMembers(groupUpdate);
 
         final RosterEntity rosterEntity = new RosterEntity();
         rosterEntity.setId(rosterID);
-        final OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
 
         // Remove all roster relationships
         this.relationshipDAO.removeRosterAttributions(rosterID);
 
-        groupUpdate
-                .getMember()
-                .stream()
-                .map(Group.GroupMemberComponent::getEntity)
-                .map(ref -> {
-                    final PatientEntity pe = new PatientEntity();
-                    pe.setID(UUID.fromString(new IdType(ref.getReference()).getIdPart()));
-                    return pe;
+        // Build an attribution for each patient and add them to the roster
+        patientEntities.stream()
+            .map( pe -> {
+                AttributionRelationship attribution = new AttributionRelationship(rosterEntity, pe, OffsetDateTime.now(ZoneOffset.UTC));
+                attribution.setPeriodEnd(generateExpirationTime());
+                return attribution;
                 })
-                .map(pe -> new AttributionRelationship(rosterEntity, pe))
-                .peek(relationship -> relationship.setPeriodEnd(generateExpirationTime()))
-                .peek(relationship -> relationship.setPeriodBegin(now))
-                .forEach(relationshipDAO::addAttributionRelationship);
+            .forEach(relationshipDAO::addAttributionRelationship);
 
         final RosterEntity rosterEntity1 = rosterDAO.getEntity(rosterID)
                 .orElseThrow(() -> NOT_FOUND_EXCEPTION);
+        this.rosterDAO.refresh(rosterEntity1);
 
         return converter.toFHIR(Group.class, rosterEntity1);
     }
@@ -191,51 +189,54 @@ public class GroupResource extends AbstractGroupResource {
     @UnitOfWork
     @Override
     public Group addRosterMembers(@PathParam("rosterID") UUID rosterID, @FHIRParameter Group groupUpdate) {
-        if (!this.rosterDAO.rosterExists(rosterID)) {
-            throw new WebApplicationException(NOT_FOUND_EXCEPTION, Response.Status.NOT_FOUND);
-        }
-
+        // Get the roster if it exists, if not return NOT_FOUND
         final RosterEntity rosterEntity = this.rosterDAO.getEntity(rosterID)
-                .orElseThrow(() -> NOT_FOUND_EXCEPTION);
-
+                .orElseThrow(() -> new WebApplicationException(NOT_FOUND_EXCEPTION, Response.Status.NOT_FOUND));
 
         if (rosterSizeTooBig(config.getPatientLimit(), converter.toFHIR(Group.class, rosterEntity), groupUpdate)) {
             throw TOO_MANY_MEMBERS_EXCEPTION;
         }
 
-        final UUID orgId = UUID.fromString(FHIRExtractors.getOrganizationID(groupUpdate));
 
-        final OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
-        // For each group member, check to see if the patient exists, if not, throw an exception
-        // Check to see if they're already rostered, if so, ignore
-        groupUpdate
-                .getMember()
-                .stream()
-                .map(Group.GroupMemberComponent::getEntity)
-                // Check to see if patient exists, if not, throw an exception
-                .map(entity -> {
-                    final UUID patientID = UUID.fromString(new IdType(entity.getReference()).getIdPart());
-                    List<PatientEntity> patientEntities = this.patientDAO.patientSearch(patientID, null, orgId);
-                    if (patientEntities == null || patientEntities.isEmpty()) {
-                        throw new WebApplicationException(String.format("Cannot find patient with ID %s", patientID.toString()), Response.Status.BAD_REQUEST);
-                    }
-                    return patientEntities.get(0);
-                })
-                .map(patient -> {
-                    // Check to see if the attribution already exists, if so, re-extend the expiration time
-                    final AttributionRelationship relationship = this.relationshipDAO.lookupAttributionRelationship(rosterID, patient.getID())
-                            .orElse(new AttributionRelationship(rosterEntity, patient, now));
-                    // If the relationship is inactive, then we need to update the period begin for the new membership span
-                    if (relationship.isInactive()) {
-                        relationship.setPeriodBegin(now);
-                    }
-                    relationship.setInactive(false);
-                    relationship.setPeriodEnd(generateExpirationTime());
-                    return relationship;
-                })
-                .forEach(this.relationshipDAO::addAttributionRelationship);
+        // Verify that all patients in the update exist
+        List<PatientEntity> patientEntities = verifyAndGetMembers(groupUpdate);
+        List<UUID> patientIds = patientEntities.stream()
+            .map(PatientEntity::getID)
+            .collect(Collectors.toList());
 
-        //Getting it again to access the latest updates from above code
+        // Check which patients are already part of the roster and mark them active as of today
+        OffsetDateTime periodBegin = OffsetDateTime.now(ZoneOffset.UTC);
+        OffsetDateTime periodEnd = generateExpirationTime();
+
+        List<AttributionRelationship> existingAttributions = relationshipDAO.lookupAttributionRelationships(rosterID, patientIds);
+        existingAttributions.forEach(attribution -> {
+            if (attribution.isInactive()) {
+                attribution.setPeriodBegin(periodBegin);
+            }
+            attribution.setInactive(false);
+            attribution.setPeriodEnd(periodEnd);
+        });
+
+        // Build attributions for the new patients
+        List<UUID> existingPatientIds = existingAttributions.stream()
+            .map(AttributionRelationship::getPatient)
+            .map(PatientEntity::getID)
+            .collect(Collectors.toList());
+
+        List<AttributionRelationship> newAttributions = patientEntities.stream()
+            .filter( patient -> !existingPatientIds.contains(patient.getID()))
+            .map( patient -> {
+                AttributionRelationship attribution = new AttributionRelationship(rosterEntity, patient, periodBegin);
+                attribution.setPeriodEnd(periodEnd);
+                return attribution;
+            })
+            .collect(Collectors.toList());
+
+        // Last but not least, save our changes
+        Stream.concat(existingAttributions.stream(), newAttributions.stream())
+            .forEach(relationshipDAO::addAttributionRelationship);
+
+        this.rosterDAO.refresh(rosterEntity);
         final RosterEntity rosterEntity1 = this.rosterDAO.getEntity(rosterID)
                 .orElseThrow(() -> NOT_FOUND_EXCEPTION);
 
@@ -325,13 +326,37 @@ public class GroupResource extends AbstractGroupResource {
         return Pair.of(leftID, rightID);
     }
 
-    private void verifyMembers(Group group, UUID orgId) {
-        for (Group.GroupMemberComponent member : group.getMember()) {
-            final UUID patientID = UUID.fromString(new IdType(member.getEntity().getReference()).getIdPart());
-            List<PatientEntity> patientEntities = patientDAO.patientSearch(patientID, null, orgId);
-            if (patientEntities.isEmpty()) {
-                throw new WebApplicationException(String.format("Cannot find patient with ID %s", patientID.toString()), Response.Status.BAD_REQUEST);
-            }
+    /**
+     * Verifies that all patients referenced in the {@link Group} exist, then returns their {@link PatientEntity}s.
+     * If any of the patients don't exist it throws a {@link WebApplicationException}.
+     * @param group A {@link Group} whose patient references need to be verified.
+     * @return List of {@link PatientEntity}s
+     */
+    private List<PatientEntity> verifyAndGetMembers(Group group) {
+        final UUID orgId = UUID.fromString(FHIRExtractors.getOrganizationID(group));
+
+        // Get list of patient Ids
+        List<UUID> patientIds = group
+            .getMember()
+            .stream()
+            .map(Group.GroupMemberComponent::getEntity)
+            .map(ref -> UUID.fromString(new IdType(ref.getReference()).getIdPart()))
+            .distinct()
+            .collect(Collectors.toList());
+
+        // Get corresponding PatientEntities
+        // As of 7/30/24, we're currently capped at 1350 patients per group.  If we ever raise that it might be worth
+        // considering breaking this up into multiple queries.
+        List<PatientEntity> patientEntities = patientDAO.patientSearch(orgId, patientIds);
+
+        // Make sure we have the same number of Ids and entities
+        if(patientIds.size() != patientEntities.size()) {
+            throw new WebApplicationException(
+                String.format("All patients in group must exist. Cannot find %d patient(s).", patientIds.size() - patientEntities.size()),
+                Response.Status.BAD_REQUEST
+            );
+        } else {
+            return patientEntities;
         }
     }
 }

@@ -2,6 +2,8 @@
 
 # Link between authorized official and provider organization
 class AoOrgLink < ApplicationRecord
+  audited only: %i[verification_reason verification_status], on: :update
+
   validates :user_id,
             uniqueness: { scope: :provider_organization_id, message: 'already exists for this provider.' }
   validates :invitation_id, allow_nil: true,

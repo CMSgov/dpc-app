@@ -5,12 +5,30 @@
     <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
   </head>
   <body>
-    <h1>Dear <%= @given_name %> <%= @family_name %>,</h1>
-    <p>You have been invited to exercise Authorized Official management of
-      <%= @invitation.provider_organization.name %> within Data at the Point of Care.</p>
-    <p><%= link_to 'Accept this invitation', organization_invitation_url(@invitation.provider_organization, @invitation) %></p>
-    <p>Sincerely,</p>
+    <h1>Register <%= @invitation.provider_organization.name %> to access API claims data.</h1>
 
-    <p>The Data at the Point of Care Team</p>
+    <p>You've been identified as an Authorized Official (AO) of <%= @invitation.provider_organization.name %>. As an AO, you must register the organization so that it can access beneficiary claims data through Data at the Point of Care (DPC). You also must sign program Terms of Service.</p>
+
+    <p><%= link_to 'Use this link to register your organization in the DPC Portal.',
+	   organization_invitation_url(@invitation.provider_organization, @invitation, protocol: Rails.env.production? ? 'https' : 'http') %></p>
+
+    <p>This link will expire in 48 hours.</p>
+
+    <h2>What is DPC?</h2>
+
+    <p>DPC is an Application Programming Interface (API) allowing your systems to access patient medical data. The API delivers information from Medicare claims for treatment purposes. <%= link_to 'Learn more about DPC', 'https://dpc.cms.gov/' %>.</p>
+
+    <h2>What happens when I select the registration link?</h2>
+
+    <p>You'll be prompted to sign in or create an account with <%= link_to 'Login.gov', 'https://www.login.gov/what-is-login/' %> at the DPC Portal. You may need to provide your State-Issued ID, a Social Security Number, and email address. <%= link_to 'How to verify your identity', 'https://www.login.gov/help/verify-your-identity/how-to-verify-your-identity/' %>.</p>
+
+    <p>Once you register your organization you have the opportunity to assign a delegate who will manage the remainder of the API onboarding process.</p>
+
+    <p>Thank you for your interest in Data at the Point of Care.</p>
+
+    <p>- Centers for Medicare & Medicaid Services</p>
+    <div>
+      <%= image_tag attachments['dpc.png'].url, style: "height: 34px" -%>
+    </div>
   </body>
 </html>
