@@ -4,33 +4,47 @@ require 'rails_helper'
 
 RSpec.describe ClientTokenManager do
   include DpcClientSupport
+  let(:api_id) { SecureRandom.uuid }
+  let(:manager) { ClientTokenManager.new(api_id) }
   describe '#create_client_token' do
     context 'successful API request' do
       it 'responds true with @client_token set' do
-        api_id = SecureRandom.uuid
         token = 'exampleToken'
         label = { params: { label: 'Test Token 1' } }
         stub_self_returning_api_client(message: :create_client_token,
                                        response: token,
                                        with: [api_id, label])
-        manager = ClientTokenManager.new(api_id)
-        expect(manager.create_client_token(label: 'Test Token 1')).to eq(true)
-        expect(manager.client_token).to eq(token)
+        new_token = manager.create_client_token(label: 'Test Token 1')
+
+        expect(new_token[:response]).to eq(true)
+        expect(new_token[:message]).to eq(token)
       end
     end
 
     context 'failed API request' do
       it 'responds false' do
-        api_id = SecureRandom.uuid
-        instance_double(DpcClient)
         label = { params: { label: 'Test Token 1' } }
         stub_self_returning_api_client(message: :create_client_token,
                                        success: false,
                                        response: nil,
                                        with: [api_id, label])
-        manager = ClientTokenManager.new(api_id)
-        expect(manager.create_client_token(label: 'Test Token 1')).to eq(false)
-        expect(manager.client_token).to eq(nil)
+        new_token = manager.create_client_token(label: 'Test Token 1')
+
+        expect(new_token[:response]).to eq(false)
+        expect(new_token[:errors]).to eq(root: ClientTokenManager::SERVER_ERROR_MSG)
+      end
+    end
+
+    context 'invalid values' do
+      it 'should fail if label blank' do
+        new_token = manager.create_client_token(label: '')
+        expect(new_token[:response]).to eq(false)
+        expect(new_token[:errors]).to eq(label: "Label can't be blank.", root: "Fields can't be blank.")
+      end
+      it 'should fail if label too long' do
+        new_token = manager.create_client_token(label: '12345678901234567890123456')
+        expect(new_token[:response]).to eq(false)
+        expect(new_token[:errors]).to eq(label: 'Label must be 25 characters or fewer.', root: 'Label is too long.')
       end
     end
   end
@@ -38,25 +52,21 @@ RSpec.describe ClientTokenManager do
   describe '#client_tokens' do
     context 'successful API request' do
       it 'responds with client_tokens array' do
-        api_id = SecureRandom.uuid
         tokens = [{ 'token' => 'exampleToken' }]
         stub_self_returning_api_client(message: :get_client_tokens,
                                        response: { 'entities' => tokens },
                                        with: [api_id])
-        manager = ClientTokenManager.new(api_id)
         expect(manager.client_tokens).to eq(tokens)
       end
     end
 
     context 'failed API request' do
       it 'responds with empty array' do
-        api_id = SecureRandom.uuid
         tokens = [{ 'token' => 'exampleToken' }]
         stub_self_returning_api_client(message: :get_client_tokens,
                                        success: false,
                                        response: { 'entities' => tokens },
                                        with: [api_id])
-        manager = ClientTokenManager.new(api_id)
         expect(manager.client_tokens).to eq([])
       end
     end
@@ -64,22 +74,18 @@ RSpec.describe ClientTokenManager do
 
   describe '#delete_client_token' do
     it 'responds with success on success' do
-      api_id = SecureRandom.uuid
       params = { id: 'token-guid' }
       stub_self_returning_api_client(message: :delete_client_token,
                                      with: [api_id, params[:id]])
 
-      manager = ClientTokenManager.new(api_id)
       expect(manager.delete_client_token(params)).to be true
     end
     it 'responds with failure on failure' do
-      api_id = SecureRandom.uuid
       params = { id: 'token-guid' }
       stub_self_returning_api_client(message: :delete_client_token,
                                      success: false,
                                      with: [api_id, params[:id]])
 
-      manager = ClientTokenManager.new(api_id)
       expect(manager.delete_client_token(params)).to be false
     end
   end

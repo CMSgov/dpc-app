@@ -67,7 +67,6 @@ The DPC application is split into multiple services.
 | [dpc-api](/dpc-api)                 |Public API| Asynchronous FHIR API for managing organizations and requesting or retrieving data     |Java (Dropwizard)|
 | [dpc-attribution](/dpc-attribution) |Internal API| Provides and updates data about attribution                                            |Java (Dropwizard)|
 | [dpc-consent](/dpc-consent)         |Internal API| Provides and updates information about data-sharing consent for individuals            |Java (Dropwizard)|
-| [dpc-queue](/dpc-queue)             |Internal API| Provides and updates data about export jobs and batches                                |Java (Dropwizard)|
 | [dpc-aggregation](/dpc-aggregation) |Internal Worker Service| Polls for job batches and exports data for singular batches                            |Java (Dropwizard + RxJava)|
 
 #### Shared Modules
@@ -78,6 +77,7 @@ In addition to services, several modules are shared across components.
 |---|---|---|
 |[dpc-bluebutton](/dpc-bluebutton)|Bluebutton API Client|Java|
 |[dpc-macaroons](/dpc-macaroons)|Implementation of macaroons for authentication|Java|
+|[dpc-queue](/dpc-queue)| Provides an interface for managing export jobs and batches|Java|
 |[dpc-common](/dpc-common)|Shared utilities for components|Java|
 |[dpc-testing](/dpc-testing)|Shared utilities for testing|Java|
 |[dpc-smoketest](/dpc-smoketest)|Smoke test suite|Java|
@@ -179,7 +179,7 @@ Note that this will always generate a unique hash, even if you didn't change the
 DPC requires an external Postgres database to be running. While a separate Postgres server can be used, the `docker-compose` file includes everything needed, and can be started like so: 
 
 ```bash
-docker-compose up start_core_dependencies
+docker compose up start_core_dependencies
 ```
 
 **Warning**: If you do have an existing Postgres database running on port 5342, docker-compose **will not** alert you to the port conflict. Ensure any local Postgres databases are stopped before starting docker-compose.
@@ -223,6 +223,8 @@ Then, run `mvn clean install` to build and test the application. Dependencies wi
 
 Running `mvn clean install` will also construct the Docker images for the individual services. To skip the Docker build, pass `-Djib.skip=True`.
 
+If a build failure is encountered when running `mvn clean install`, attempt to resolve this by separating the build process into two steps by running `make api` followed by `mvn install`.
+
 Note that the `dpc-base` image produced by `make docker-base` is not stored in a remote repository. The `mvn clean install` process relies on the base image being available via the local Docker daemon.
 
 ## Running the DPC API
@@ -237,7 +239,7 @@ The application (along with all required dependencies) can be automatically star
 The individual services can be started (along with their dependencies) by passing the service name to the `up` command.
 
 ```bash
-docker-compose up {db,aggregation,attribution,api}
+docker compose up {db,aggregation,attribution,api}
 ``` 
 
 By default, the Docker containers start with minimal authentication enabled, meaning that some functionality (such as extracting the organization_id from the access token) will not work as expected and always returns the same value.
@@ -451,12 +453,13 @@ If you want to run and debug integration tests through IntelliJ there are a few 
   - This will recompile dpc with debug extensions included and start containers for dpc-attribution, dpc-aggregation, dpc-consent and a db.
 - Now you should be able to run any of the integration tests under dpc-api by clicking on the little green arrow next to their implementation.
   - Need to debug a test?  Right click on the triangle and select debug.
+  - If running ExpirationJobTest results in a port collision error, you can stop the attribution service in Docker and try running the test again. 
 - If you have to debug one of the dependant services, for instance because an IT is calling dpc-attribution and getting a 500, and you can't figure out why, follow the instructions under [Local Debugging](#local-debugging) to open up the dependant service's debugger port in docker-compose, then rerun `make start-it-debug`.
   - Now you can attach your debugger to that service and still run integration tests as described above.
   - You'll have one debugger tab open on an IT in dpc-api and another on the dependant service, allowing you to set break points in either and examine the test end to end.
 
 #### Running Integration Tests Against the BFD Sandbox
-Want to run your integration tests against the real BFD sandbox instead of using the MockBlueButtonClient?  In docker-compose.yml, under the aggregation service, set the USE_BFD_MOCK env variable to true and then rerun `make start-it-debug.`
+Want to run your integration tests against the real BFD sandbox instead of using the MockBlueButtonClient?  In docker-compose.yml, under the aggregation service, set the USE_BFD_MOCK env variable to false and then rerun `make start-it-debug.`
 
 Note: Many of our integration tests are written for specific test data that only exists in our MockBlueButtonClient.  If you switch to the real BFD sandbox these tests will fail, but if you want a true end to end test this is the way to go.  A list of synthetic patients in the sandbox can be found [here](https://github.com/CMSgov/beneficiary-fhir-data/wiki/Synthetic-Data-Guide).
 

@@ -12,6 +12,7 @@ class VerifyAoJob < ApplicationJob
     @start = Time.now
     service = AoVerificationService.new
     links_to_check.each do |link|
+      config_attributes(link)
       check_link(service, link)
       update_success(link)
     rescue AoException => e
@@ -25,8 +26,8 @@ class VerifyAoJob < ApplicationJob
   end
 
   def check_link(service, link)
-    service.check_org_med_sanctions(link.provider_organization.npi)
-    service.check_ao_eligibility(link.provider_organization.npi, :pac_id, link.user.pac_id)
+    response = service.check_ao_eligibility(link.provider_organization.npi, :pac_id, link.user.pac_id)
+    log_batch_verification_waivers(response)
   end
 
   def update_success(link)
@@ -51,11 +52,11 @@ class VerifyAoJob < ApplicationJob
         link.provider_organization.update!(entity_error_attributes(message))
       end
     end
+    log_error(link, message)
   end
 
   def update_ao_sanctions(link, message)
     link.user.update!(entity_error_attributes(message))
-    link.provider_organization.update!(entity_error_attributes(message))
     unverify_all_links_and_orgs(link.user, message)
   end
 
@@ -67,7 +68,19 @@ class VerifyAoJob < ApplicationJob
   def unverify_all_links_and_orgs(user, message)
     AoOrgLink.where(user:, verification_status: true).each do |link|
       link.update!(link_error_attributes(message))
-      link.provider_organization.update!(entity_error_attributes(message))
+      logger.info(["#{self.class.name} Check Fail",
+                   { actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
+                     actionType: LoggingConstants::ActionType::FailCpiApiGwCheck,
+                     verificationReason: message,
+                     authorizedOfficial: link.user.id,
+                     providerOrganization: link.provider_organization.id }])
     end
+  end
+
+  private
+
+  def config_attributes(link)
+    CurrentAttributes.save_organization_attributes(link.provider_organization, link.user)
+    CurrentAttributes.save_user_attributes(link.user)
   end
 end

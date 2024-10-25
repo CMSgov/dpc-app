@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"bufio"
 	"database/sql"
 	"fmt"
 	"os"
@@ -11,16 +12,18 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/stretchr/testify/assert"
+	"opt-out-beneficiary-data-lambda/dpcaws"
 )
 
-func TestGenerateRequestFile(t *testing.T) {
+func TestIntegrationGenerateRequestFile(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping integration test.")
+	}
 	oriGetSecret := getSecret
 	oriGetSecrets := getSecrets
 	oriCreateConnection := createConnection
 	oriGetAttributionData := getAttributionData
 	oriGetConsentData := getConsentData
-
-	t.Setenv("AWS_ASSUME_ROLE_ARN", "fake_arn")
 
 	tests := []struct {
 		err      error
@@ -43,40 +46,58 @@ func TestGenerateRequestFile(t *testing.T) {
 				}
 
 				getAttributionData = func(dbUser string, dbPassword string, patientInfos map[string]PatientInfo) error {
-					patientInfos["test_id"] = PatientInfo{
-						beneficiary_id: "test_id",
-						first_name:     sql.NullString{String: "fname", Valid: true},
-						last_name:      sql.NullString{String: "lname", Valid: true},
-						dob:            time.Now(),
-					}
-
 					return nil
 				}
 
 				getConsentData = func(dbUser string, dbPassword string, patientInfos map[string]PatientInfo) error {
-					patientInfos["test_id"] = PatientInfo{
-						beneficiary_id: "test_id",
+					patientInfos["optout"] = PatientInfo{
+						beneficiary_id: "optout",
 						first_name:     sql.NullString{String: "fname", Valid: true},
 						last_name:      sql.NullString{String: "lname", Valid: true},
-						dob:            time.Now(),
+						dob:            time.Date(1967, 01, 10, 0, 0, 0, 0, time.UTC),
 						effective_date: time.Now(),
 						policy_code:    sql.NullString{String: "OPTOUT", Valid: true},
 					}
-					return nil
-				}
+					patientInfos["optin"] = PatientInfo{
+						beneficiary_id: "optin",
+						first_name:     sql.NullString{String: "fname", Valid: true},
+						last_name:      sql.NullString{String: "lname", Valid: true},
+						dob:            time.Date(1968, 01, 10, 0, 0, 0, 0, time.UTC),
+						effective_date: time.Now(),
+						policy_code:    sql.NullString{String: "OPTIN", Valid: true},
+					}
+					patientInfos["noconsent"] = PatientInfo{
+						beneficiary_id: "noconsent",
+						first_name:     sql.NullString{String: "fname", Valid: true},
+						last_name:      sql.NullString{String: "lname", Valid: true},
+						dob:            time.Date(1969, 01, 10, 0, 0, 0, 0, time.UTC),
+						effective_date: time.Now(),
+						policy_code:    sql.NullString{String: "", Valid: false},
+					}
 
-				uploadToS3 = func(s *session.Session, fileName string, buff bytes.Buffer, s3Bucket string, s3Path string) error {
 					return nil
 				}
 			},
 		},
 	}
 
+	session, sessionErr := getAwsSession()
+	assert.Nil(t, sessionErr)
 	for _, test := range tests {
 		test.mockFunc()
 		filename, err := generateRequestFile()
 		assert.NotEmpty(t, filename)
 		assert.Nil(t, err)
+
+		b, downloadErr := dpcaws.DownloadFileFromS3(session, os.Getenv("S3_UPLOAD_BUCKET"), fmt.Sprintf("%s/%s", os.Getenv("S3_UPLOAD_PATH"), filename))
+		assert.Nil(t, downloadErr)
+		r := bytes.NewReader(b)
+		scanner := bufio.NewScanner(r)
+		ctr := 0
+		for scanner.Scan() {
+			ctr += 1
+		}
+		assert.Equal(t, 5, ctr)
 	}
 
 	getSecret = oriGetSecret

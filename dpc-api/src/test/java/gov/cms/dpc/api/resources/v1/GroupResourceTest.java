@@ -548,7 +548,7 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
             createAndSubmitGroup(orgBContext.getOrgId(), orgBPractitioner, orgBClient, Collections.singletonList(orgAPatientId));
         }, "Org should not be able to add patients they do not managed to their group.");
 
-        assertTrue(e.getResponseBody().contains("Cannot find patient with ID " + new IdType(orgAPatient.getId()).getIdPart()));
+        assertTrue(e.getResponseBody().contains("All patients in group must exist."));
     }
 
     @Test
@@ -576,7 +576,7 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
             APITestHelpers.updateResource(orgBClient, orgBGroup.getId(), orgBGroup, Map.of("X-Provenance", provenanceStr));
         }, "Org B should not be able to update roster with patient managed by Org A ");
 
-        assertTrue(e.getResponseBody().contains("Cannot find patient with ID " + new IdType(orgAPatient.getId()).getIdPart()));
+        assertTrue(e.getResponseBody().contains("All patients in group must exist."));
     }
 
 
@@ -616,7 +616,7 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
 
         assertEquals(HttpStatus.BAD_REQUEST_400, conn.getResponseCode());
         String body = new String(conn.getErrorStream().readAllBytes());
-        assertTrue(body.contains("Cannot find patient with ID " + new IdType(orgAPatient.getId()).getIdPart()));
+        assertTrue(body.contains("All patients in group must exist"));
 
         conn.disconnect();
     }

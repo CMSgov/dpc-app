@@ -11,7 +11,6 @@ module Page
       def filled_in
         cd_invite = Invitation.new(invited_given_name: 'Bob',
                                    invited_family_name: 'Hogan',
-                                   phone_raw: '877-288-3131',
                                    invited_email: 'bob@example.com',
                                    invited_email_confirmation: 'bob@example.com')
         render(Page::CredentialDelegate::NewInvitationComponent.new(org, cd_invite))

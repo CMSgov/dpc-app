@@ -10,8 +10,6 @@ import gov.cms.dpc.aggregation.service.ConsentService;
 import gov.cms.dpc.aggregation.service.LookBackServiceImpl;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
-import gov.cms.dpc.bluebutton.clientV2.BlueButtonClientV2;
-import gov.cms.dpc.bluebutton.clientV2.MockBlueButtonClientV2;
 import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.hapi.ContextUtils;
@@ -48,7 +46,6 @@ public class AggregationEngineHealthCheckTest {
 
     private IJobQueue queue;
     private BlueButtonClient bbclient;
-    private BlueButtonClientV2 bbclientV2;
     private AggregationEngine engine;
     private ConsentService consentService;
 
@@ -68,7 +65,6 @@ public class AggregationEngineHealthCheckTest {
     void setupEach() {
         queue = Mockito.spy(new MemoryBatchQueue(10));
         bbclient = Mockito.spy(new MockBlueButtonClient(fhirContext));
-        bbclientV2 = Mockito.spy(new MockBlueButtonClientV2(fhirContextR4));
         var operationalConfig = new OperationsConfig(1000, exportPath, 500, YearMonth.of(2015, 3));
         LookBackServiceImpl lookBackService = Mockito.spy(new LookBackServiceImpl(operationalConfig));
         JobBatchProcessor jobBatchProcessor = Mockito.spy(new JobBatchProcessor(bbclient, fhirContext, metricRegistry, operationalConfig, lookBackService, consentService));

@@ -95,13 +95,18 @@ bbclient:
     requestTimeout: 5000 # ms
   serverBaseUrl: ${BFD_URL}
   resourcesCount: 100 # Max number of resource that a request to BB will return before using another request
-  bfdHashPepper: "${BFD_HASH_PEPPER}"
-  bfdHashIter: ${BFD_HASH_ITER}
+
+attributionClient:
+  serverBaseUrl: ${ATTRIBUTION_URL:-"http://localhost:3500/v1/"}
+  timeouts:
+    connectionTimeout: 20000 # ms
+    socketTimeout: 20000 # ms
+    requestTimeout: 20000 # ms
+
+attributionHealthCheckURL: ${ATTRIBUTION_HEALTHCHECK_URL:-"http://localhost:9902/healthcheck"}
 
 authenticationDisabled: ${AUTH_DISABLED:-false}
 
-attributionURL: ${ATTRIBUTION_URL:-"http://localhost:3500/v1/"}
-attributionHealthCheckURL: ${ATTRIBUTION_HEALTHCHECK_URL:-"http://localhost:9902/healthcheck"}
 exportPath: ${EXPORT_PATH:-"/tmp"}
 
 httpClient:

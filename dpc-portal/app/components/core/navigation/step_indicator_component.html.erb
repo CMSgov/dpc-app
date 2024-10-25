@@ -1,4 +1,4 @@
-<div class="usa-step-indicator" aria-label="progress">
+<div class="usa-step-indicator bg-base-lightest" aria-label="progress">
   <ol class="usa-step-indicator__segments">
     <% @steps.each_with_index do |step, current_index|
     
@@ -22,14 +22,14 @@
   </ol>
   <% if @index < @steps.length %>
   <div class="usa-step-indicator__header">
-    <h4 class="usa-step-indicator__heading">
+    <h1 class="usa-step-indicator__heading">
       <span class="usa-step-indicator__heading-counter">
-	<span class="usa-sr-only">Step</span>
+        <span class="usa-sr-only">Step</span>
         <span class="usa-step-indicator__current-step"><%= @index + 1 %></span>
         <span class="usa-step-indicator__total-steps">of <%= @steps.length %></span>
       </span>
       <span class="usa-step-indicator__heading-text"><%= @steps[@index] %></span>
-    </h4>
+    </h1>
   </div>
   <% end %>
 </div>

@@ -29,6 +29,9 @@ jobs:
     defaults:
       run:
         working-directory: ./lambda/opt-out-import
+    outputs:
+      filename: ${{ steps.createfile.outputs.FILENAME }}
+      start_time: ${{ steps.createfile.outputs.STARTTIME }}
     steps:
       - uses: actions/checkout@v4
       - uses: aws-actions/configure-aws-credentials@v4
@@ -43,8 +46,46 @@ jobs:
           role-chaining: true
           role-skip-session-tagging: true
       - name: Upload test file to the BFD bucket to trigger lambda function via SNS message
+        id: createfile
         run: |
+          fname=T.NGD.DPC.RSP.D$(date +'%y%m%d').T$(date +'%H%M%S')1.IN
+          echo "FILENAME=$fname" >> "$GITHUB_OUTPUT"
+          echo "STARTTIME=`date +%s`" >> "$GITHUB_OUTPUT"
           aws s3 cp --no-progress synthetic_test_data/T.NGD.DPC.RSP.D240123.T1122001.IN \
-            s3://bfd-test-eft/bfdeft01/dpc/in/T.NGD.DPC.RSP.D$(date +'%y%m%d').T$(date +'%H%M%S')1.IN
+            s3://bfd-test-eft/bfdeft01/dpc/in/$fname
 
-  # TODO Run another job to check database for update, then check bucket for response file
+  verify-bucket:
+    needs: trigger
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-test-opt-out-import-function
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          # Note that we use the BFD role with access to the bucket
+          role-to-assume: arn:aws:iam::${{ secrets.BFD_ACCOUNT_ID }}:role/bfd-test-eft-dpc-bucket-role
+          role-chaining: true
+          role-skip-session-tagging: true
+      - name: Verify confirmation file put in bucket
+        env:
+          STARTTIME: ${{needs.trigger.outputs.start_time}}
+        run: |
+          while read line; do
+            filedate_s=`echo $line | awk '{print $1 " " $2}'`
+            filedate=`date -d "$filedate_s" +%s`
+            if [[ $((filedate > STARTTIME)) == 1 ]]; then
+              echo "we have a winner!"
+              exit 0
+            fi
+          done < <(aws s3 ls s3://bfd-test-eft/bfdeft01/dpc/out/ | grep CONF)
+          echo "no new file found"
+          exit 1
+
+  # TODO Run another job to check database for update (currently cannot connect to db)
