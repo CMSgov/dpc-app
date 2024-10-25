@@ -7,7 +7,7 @@
     "node": ">=0.12"
   },
   "dependencies": {
-    "newman": "^6.1.1",
+    "newman": "^6.2.0",
     "ansi-regex": ">=5.0.1"
   },
   "dependenciesComments": {
