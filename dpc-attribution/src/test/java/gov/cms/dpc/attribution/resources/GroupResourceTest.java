@@ -66,7 +66,6 @@ public class GroupResourceTest extends AbstractAttributionTest {
 
     @Test
     public void testCreateDuplicateRoster() {
-        System.out.println("====== RUNNING TEST!!!! ======");
         final Practitioner practitioner = createPractitioner(NPIUtil.generateNPI());
         final Patient patient = createPatient(MBIUtil.generateMBI(), DEFAULT_ORG_ID);
 
