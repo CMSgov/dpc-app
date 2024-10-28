@@ -72,20 +72,13 @@ RSpec.describe VerifyResourceHealthJob, type: :job do
     end
 
     describe 'idp is not configured' do
-      let!(:previous_idp) { VerifyResourceHealthJob::IDP_HOST }
-      before do
-        VerifyResourceHealthJob::IDP_HOST = nil
-      end
-      after do
-        VerifyResourceHealthJob::IDP_HOST = previous_idp
-      end
-
       it 'should emit an unhealthy metric when url is not configured' do
+        stub_const('VerifyResourceHealthJob::IDP_HOST', nil)
         expect_dpc_api
         expect_cpi
         expect_idp(metric: 0)
 
-        job.perform
+        VerifyResourceHealthJob.new.perform
       end
     end
   end
