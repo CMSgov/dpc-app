@@ -1,0 +1,44 @@
+name: api-waf-sync integration tests
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/api-waf-sync-test-integration.yml
+      - .github/workflows/api-waf-sync-test-deploy.yml
+      - lambda/api-waf-sync/**
+  workflow_dispatch:
+
+# Ensure we have only one integration test running at a time
+concurrency:
+  group: api-waf-sync-test-integration
+
+jobs:
+  # Deploy first if triggered by pull_request
+  deploy:
+    if: ${{ github.event_name == 'pull_request' }}
+    uses: ./.github/workflows/api-waf-sync-test-deploy.yml
+    secrets: inherit
+
+  trigger:
+    if: ${{ always() }}
+    needs: deploy
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./lambda/api-waf-sync
+    outputs:
+      start_time: ${{ steps.invoke-lambda.outputs.STARTTIME }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-test-github-actions
+      - name: Send event to trigger lambda function
+        id: invoke-lambda
+        run: |
+          echo "STARTTIME=`date +%s`" >> "$GITHUB_OUTPUT"
+          aws lambda invoke --function-name dpc-dev-api-waf-sync test-result.txt

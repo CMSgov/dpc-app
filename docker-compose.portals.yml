@@ -13,6 +13,7 @@ services:
       dockerfile: dpc-web/Dockerfile
     image: dpc-web:latest
     volumes:
+      - "./dpc-web/certs:/dpc-web/certs"
       - "./dpc-web/coverage:/dpc-web/coverage"
       - ./tmp/letter_opener/web:/dpc-web/tmp/letter_opener
       - "./dpc-web/Gemfile.lock:/dpc-web/Gemfile.lock"
@@ -191,6 +192,7 @@ services:
       - API_METADATA_URL=http://api:3002/v1
       - CPI_API_GW_BASE_URL=http://localhost:4567/
       - CMS_IDM_OAUTH_URL=http://localhost:4567/
+      - IDP_HOST=idp.int.identitysandbox.gov
       - RUBY_YJIT_ENABLE=1
       - ENV=local
       - DISABLE_JSON_LOGGER=true

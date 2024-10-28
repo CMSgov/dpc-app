@@ -65,15 +65,6 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
         is_expected.to include(normalize_space(invited_family_name))
       end
 
-      it 'should have empty phone stanza' do
-        phone = ['<label class="usa-label" for="phone_raw">Primary phone number</label>',
-                 '<p class="usa-hint">10-digit, U.S. only, for example 999-999-9999</p>',
-                 '<input type="text" name="phone_raw" id="phone_raw" ',
-                 'class="usa-input usa-masked" placeholder="___-___-____" ',
-                 'pattern="\\d{3}-\\d{3}-\\d{4}" aria-describedby="telHint" />'].join
-        is_expected.to include(phone)
-      end
-
       it 'should have empty email stanza' do
         email = <<~HTML
           <div class="margin-bottom-4">
@@ -100,6 +91,41 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
                         'Send invite',
                         '</a>'].join
         is_expected.to include(modal_prompt)
+      end
+
+      it 'should render a modal with the correct content' do
+        modal = <<~HTML
+                <div class="usa-modal" id="verify-modal" aria-labelledby="verify-modal-heading" aria-describedby="verify-modal-description">
+          <div class="usa-modal__content">
+              <div class="usa-modal__main">
+                  <h2 class="usa-modal__heading" id="verify-modal-heading">Acknowledgement</h2>
+                  <div class="usa-prose">
+                      <p id="verify-modal-description">
+                          <p>By assigning this user as a delegate, you are providing them with access to private health information. This means you assume responsibility for their compliance with the Health Insurance Portability and Accountability Act (HIPAA).</p>
+                          <p>Do you acknowledge your responsibility for your delegate's compliance with HIPAA regulations?</p>
+                          <p>Upon your acknowledgement they will receive an invitation to sign up for access to the DPC Portal. This invitation will expire in 48 hours.</p>
+                      </p>
+                  </div>
+                  <div class="usa-modal__footer">
+                      <ul class="usa-button-group">
+                          <li class="usa-button-group__item">
+                              <input type="submit" name="commit" value="Yes, I acknowledge" class="usa-button" form="cd-form" data-disable-with="Yes, I acknowledge" />
+                          </li>
+                          <li class="usa-button-group__item">
+                              <button type="button" class="usa-button usa-button--unstyled padding-105 text-center" data-close-modal>Cancel</button>
+                          </li>
+                      </ul>
+                  </div>
+              </div>
+              <button type="button" class="usa-button usa-modal__close" aria-label="Close this window" data-close-modal>
+                  <svg class="usa-icon" aria-hidden="true" focusable="false" role="img">
+                      <use xlink:href="/assets/img/sprite.svg#close"></use>
+                  </svg>
+              </button>
+          </div></div></div></div>
+        HTML
+
+        is_expected.to include(normalize_space(modal))
       end
     end
 
@@ -129,16 +155,6 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
         is_expected.to include(normalize_space(invited_family_name))
       end
 
-      it 'should have errored phone stanza' do
-        phone = ['<label class="usa-label" for="phone_raw">Primary phone number</label>',
-                 '<p class="usa-hint">10-digit, U.S. only, for example 999-999-9999</p>',
-                 %(<p style="color: #b50909;">can't be blank</p>),
-                 '<input type="text" name="phone_raw" id="phone_raw" ',
-                 'class="usa-input usa-masked usa-input--error" placeholder="___-___-____" ',
-                 'pattern="\\d{3}-\\d{3}-\\d{4}" aria-describedby="telHint" />'].join
-        is_expected.to include(normalize_space(phone))
-      end
-
       it 'should have errored email stanza' do
         email = <<~HTML
           <div class="margin-bottom-4">
@@ -166,7 +182,6 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
       before do
         cd_invite.invited_given_name = 'Bob'
         cd_invite.invited_family_name = 'Hodges'
-        cd_invite.phone_raw = '222-222-2222'
         cd_invite.invited_email = cd_invite.invited_email_confirmation = 'bob@example.com'
       end
 
@@ -190,15 +205,6 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
           </div>
         HTML
         is_expected.to include(normalize_space(invited_family_name))
-      end
-
-      it 'should have filled phone stanza' do
-        phone = ['<label class="usa-label" for="phone_raw">Primary phone number</label>',
-                 '<p class="usa-hint">10-digit, U.S. only, for example 999-999-9999</p>',
-                 '<input type="text" name="phone_raw" id="phone_raw" value="222-222-2222" ',
-                 'class="usa-input usa-masked" placeholder="___-___-____" ',
-                 'pattern="\\d{3}-\\d{3}-\\d{4}" aria-describedby="telHint" />'].join
-        is_expected.to include(normalize_space(phone))
       end
 
       it 'should have filled email stanza' do

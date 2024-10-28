@@ -7,6 +7,7 @@ module LoggingConstants
     Registration = 'Registration'
     Authentication = 'Authentication'
     BatchVerificationCheck = 'BatchVerificationCheck'
+    HealthCheck = 'HealthCheck'
   end
 
   module ActionType
@@ -24,6 +25,7 @@ module LoggingConstants
     BeginLogin = 'BeginLogin'
     UserLoggedIn = 'UserLoggedIn'
     UserLoggedOut = 'UserLoggedOut'
+    CdConfirmed = 'CdConfirmed'
     SessionTimedOut = 'SessionTimedOut'
     UserCancelledLogin = 'UserCancelledLogin'
     FailedLogin = 'FailedLogin'
@@ -31,5 +33,10 @@ module LoggingConstants
 
     FailCpiApiGwCheck = 'FailCpiApiGatewwayCheck'
     ApiBlocked = 'ApiBlocked'
+    AoHasWaiver = 'AoHasWaiver'
+    OrgHasWaiver = 'OrgHasWaiver'
+
+    HealthCheckPassed = 'HealthCheckPassed'
+    HealthCheckFailed = 'HealthCheckFailed'
   end
 end

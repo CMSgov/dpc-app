@@ -93,6 +93,48 @@ RSpec.describe VerifyAoJob, type: :job do
           expect(link.user.last_checked_at).to be_nil
         end
       end
+      it 'should set the current provider_organization and user' do
+        links_to_check = AoOrgLink.where(verification_status: true)
+        user_id = links_to_check.first.user.id
+        allow(CurrentAttributes).to receive(:save_organization_attributes)
+        expect(CurrentAttributes).to receive(:save_organization_attributes) do |org_from_job, user_from_job|
+          expect(links_to_check.pluck(:provider_organization_id)).to include(org_from_job.id)
+          expect(user_id).to equal(user_from_job.id)
+        end
+        allow(CurrentAttributes).to receive(:save_user_attributes)
+        expect(CurrentAttributes).to receive(:save_user_attributes) do |user_from_job|
+          expect(user_id).to equal(user_from_job.id)
+        end
+        VerifyAoJob.perform_now
+      end
+    end
+    context :ao_has_waiver do
+      let(:user) { create(:user, pac_id: '900777777', verification_status: :approved) }
+      let(:provider_organization) { create(:provider_organization, npi: '900111111', verification_status: :approved) }
+      let!(:link) { create(:ao_org_link, last_checked_at: 8.days.ago, user:, provider_organization:) }
+
+      it 'should log when an AO has a waiver' do
+        allow(Rails.logger).to receive(:info)
+        expect(Rails.logger).to receive(:info)
+          .with(['Authorized official has a waiver',
+                 { actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
+                   actionType: LoggingConstants::ActionType::AoHasWaiver }])
+        VerifyAoJob.perform_now
+      end
+    end
+    context :org_has_waiver do
+      let(:user) { create(:user, pac_id: '900111111', verification_status: :approved) }
+      let(:provider_organization) { create(:provider_organization, npi: '3098168743', verification_status: :approved) }
+      let!(:link) { create(:ao_org_link, last_checked_at: 8.days.ago, user:, provider_organization:) }
+
+      it 'should log when a provider org has a waiver' do
+        allow(Rails.logger).to receive(:info)
+        expect(Rails.logger).to receive(:info)
+          .with(['Organization has a waiver',
+                 { actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
+                   actionType: LoggingConstants::ActionType::OrgHasWaiver }])
+        VerifyAoJob.perform_now
+      end
     end
     context :failures do
       def expect_log_for(link, reason)
@@ -137,7 +179,8 @@ RSpec.describe VerifyAoJob, type: :job do
             links << create(:ao_org_link, last_checked_at: (n + 4).days.ago, user:, provider_organization:)
           end
         end
-        it "should update user and all user's orgs and links" do
+        # @@@
+        it 'should update user, but not impact ProviderOrganization.verification_status' do
           expect(AoOrgLink.where(last_checked_at: ..6.days.ago).count).to eq 1
           VerifyAoJob.perform_now
           links.each do |link|
@@ -146,8 +189,8 @@ RSpec.describe VerifyAoJob, type: :job do
             expect(link.verification_reason).to eq 'ao_med_sanctions'
             expect(link.user.verification_status).to eq 'rejected'
             expect(link.user.verification_reason).to eq 'ao_med_sanctions'
-            expect(link.provider_organization.verification_status).to eq 'rejected'
-            expect(link.provider_organization.verification_reason).to eq 'ao_med_sanctions'
+            expect(link.provider_organization.verification_status).to eq 'approved'
+            expect(link.provider_organization.verification_reason).to be nil
           end
         end
         it 'should log user check failed' do
@@ -157,10 +200,10 @@ RSpec.describe VerifyAoJob, type: :job do
           end
           VerifyAoJob.perform_now
           links.each do |link|
-            expect_audits(link, also: %i[user org])
+            expect_audits(link, also: %i[user])
           end
         end
-        it 'should not update former org/link' do
+        it 'neither former nor current org link updated when ao verification status rejected' do
           user = create(:user, pac_id: '900666666', verification_status: :approved)
           provider_organization = create(:provider_organization, verification_status: :approved)
           link = create(:ao_org_link, last_checked_at: 8.days.ago, user:, provider_organization:)
@@ -174,8 +217,8 @@ RSpec.describe VerifyAoJob, type: :job do
           expect(link.verification_reason).to eq 'ao_med_sanctions'
           expect(link.user.verification_status).to eq 'rejected'
           expect(link.user.verification_reason).to eq 'ao_med_sanctions'
-          expect(link.provider_organization.verification_status).to eq 'rejected'
-          expect(link.provider_organization.verification_reason).to eq 'ao_med_sanctions'
+          expect(link.provider_organization.verification_status).to eq 'approved'
+          expect(link.provider_organization.verification_reason).to be nil
           expect(link.verification_status).to be false
           former_link.reload
           expect(former_link.verification_reason).to eq 'user_not_authorized_official'

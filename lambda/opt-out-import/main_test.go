@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bufio"
+	"bytes"
 	"context"
 	"database/sql"
 	"encoding/json"
@@ -44,12 +46,93 @@ func TestIntegrationImportResponseFile(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skipping integration test.")
 	}
+	today := time.Now().Format("20060102")
+
+	db, _ := createConnectionVar(os.Getenv("DB_USER_DPC_CONSENT"), os.Getenv("DB_PASS_DPC_CONSENT"))
+	defer db.Close()
+
+	// clear consent
+	deleteConsent := fmt.Sprintf("DELETE FROM consent WHERE effective_date = '%s'", today)
+	deleteOptOutFile := fmt.Sprintf("DELETE FROM opt_out_file WHERE created_at > '%s'", today)
+	_, consentErr := db.Exec(deleteConsent)
+	assert.Nil(t, consentErr)
+	_, oofErr := db.Exec(deleteOptOutFile)
+	assert.Nil(t, oofErr)
 
 	createdOptOutCount, createdOptInCount, confirmationFileName, err := importResponseFile("demo-bucket", "bfdeft01/dpc/in/T.NGD.DPC.RSP.D240123.T1122001.IN")
 	assert.Nil(t, err)
 	assert.Equal(t, 6, createdOptOutCount)
 	assert.Equal(t, 1, createdOptInCount)
 	assert.True(t, strings.Contains(confirmationFileName, "T#EFT.ON.DPC.NGD.CONF."))
+
+	// Test confirmation file correct
+	b, downloadErr := downloadS3File("demo-bucket", confirmationFileName)
+	assert.Nil(t, downloadErr)
+	r := bytes.NewReader(b)
+	scanner := bufio.NewScanner(r)
+	ctr := 0
+	for scanner.Scan() {
+		ctr += 1
+		if ctr == 1 {
+			var row FileHeader
+			fixedwidth.Unmarshal(scanner.Bytes(), &row)
+			assert.Equal(t, "HDR_BENECONFIRM", row.HeaderCode)
+			assert.Equal(t, today, row.FileCreationDate)
+		} else if ctr < 9 {
+			var row ConfirmationFileRow
+			fixedwidth.Unmarshal(scanner.Bytes(), &row)
+			assert.Equal(t, fmt.Sprintf("%dSJ0A00AA00", ctr - 1), row.MBI)
+			assert.Equal(t, today, row.EffectiveDate)
+			assert.Equal(t, "Accepted", row.RecordStatus)
+			assert.Equal(t, "00", row.ReasonCode)
+			if ctr == 7 {
+				assert.Equal(t, "Y", row.SharingPreference)
+			} else {
+				assert.Equal(t, "N", row.SharingPreference)
+			}
+		} else {
+			var row FileTrailer
+			fixedwidth.Unmarshal(scanner.Bytes(), &row)
+			assert.Equal(t, "TRL_BENECONFIRM", row.TrailerCode)
+			assert.Equal(t, today, row.FileCreationDate)
+			assert.Equal(t, "0000000007", row.DetailRecordCount)
+		}
+	}
+
+	// test database updated
+	countOptOutFile := fmt.Sprintf("SELECT COUNT(*) FROM opt_out_file WHERE import_status = 'Completed' AND created_at > '%s'", today)
+	var oofCount int
+	cOofErr := db.QueryRow(countOptOutFile).Scan(&oofCount)
+	assert.Nil(t, cOofErr)
+	assert.Equal(t, 1, oofCount)
+
+	// Fetch opt_out_file id for checking consent inserts
+	queryOptOutFile := fmt.Sprintf("SELECT id FROM opt_out_file WHERE import_status = 'Completed' AND created_at > '%s'", today)
+	var oofId string
+	qOofErr := db.QueryRow(queryOptOutFile).Scan(&oofId)
+	assert.Nil(t, qOofErr)
+	assert.NotNil(t, oofId)
+
+	countConsent := fmt.Sprintf("SELECT COUNT(*) FROM consent WHERE effective_date = '%s'", today)
+	var consentCount int
+	qConsentErr := db.QueryRow(countConsent).Scan(&consentCount)
+	assert.Nil(t, qConsentErr)
+	assert.Equal(t, 7, consentCount)
+
+	queryConsent := fmt.Sprintf("SELECT policy_code, COUNT(*) FROM consent WHERE opt_out_file_id = '%s' AND effective_date = '%s' GROUP BY policy_code", oofId, today)
+	var pc string
+	var num int
+	consentRows, consentErr := db.Query(queryConsent)
+	defer consentRows.Close()
+	assert.Nil(t, consentErr)
+	for consentRows.Next() {
+		consentRows.Scan(&pc, &num)
+		if pc == "OPTOUT" {
+			assert.Equal(t, 6, num)
+		} else if pc == "OPTIN" {
+			assert.Equal(t, 1, num)
+		}
+	}
 }
 
 func TestHandlerDatabaseTimeoutError(t *testing.T) {

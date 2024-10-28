@@ -7,7 +7,6 @@ import (
 )
 
 var s3Region = "us-east-1"
-var profile = "755619740999_ct-ado-bcda-application-admin"
 
 // Makes these easily mockable for testing
 var newSession = session.NewSession
@@ -45,7 +44,6 @@ func NewSession(roleArn string) (*session.Session, error) {
 // so we'll be using the default profile that can be pulled from CloudTamer.
 func NewLocalSession(endPoint string) (*session.Session, error) {
 	var sess, err = newSessionWithOptions(session.Options{
-		Profile: profile,
 		Config: aws.Config{
 			Region:           aws.String(s3Region),
 			S3ForcePathStyle: aws.Bool(true),

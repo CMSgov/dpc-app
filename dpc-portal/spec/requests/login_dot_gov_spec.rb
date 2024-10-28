@@ -3,45 +3,45 @@
 require 'rails_helper'
 
 RSpec.describe 'LoginDotGov', type: :request do
-  RSpec.shared_examples 'an openid client' do
-    context 'user exists' do
-      before { create(:user, uid: '12345', provider: 'openid_connect', email: 'bob@example.com') }
-      it 'should sign in a user' do
-        post '/users/auth/openid_connect'
-        follow_redirect!
-        expect(response.location).to eq organizations_url
-        expect(response).to be_redirect
-        follow_redirect!
-        expect(response).to be_ok
-      end
-      it 'should log on successful sign in' do
-        allow(Rails.logger).to receive(:info)
-        expect(Rails.logger).to receive(:info).with(['User logged in',
-                                                     { actionContext: LoggingConstants::ActionContext::Authentication,
-                                                       actionType: LoggingConstants::ActionType::UserLoggedIn }])
-        post '/users/auth/openid_connect'
-        follow_redirect!
-      end
-      it 'should not add another user' do
-        expect(User.where(uid: '12345', provider: 'openid_connect').count).to eq 1
-        expect do
-          post '/users/auth/openid_connect'
-          follow_redirect!
-        end.to change { User.count }.by(0)
-      end
-    end
-
-    context 'user does not exist' do
-      it 'should not persist user' do
-        expect do
-          post '/users/auth/openid_connect'
-          follow_redirect!
-        end.to change { User.count }.by(0)
-      end
-    end
-  end
-
   describe 'POST /users/auth/openid_connect' do
+    RSpec.shared_examples 'an openid client' do
+      context 'user exists' do
+        before { create(:user, uid: '12345', provider: 'openid_connect', email: 'bob@example.com') }
+        it 'should sign in a user' do
+          post '/users/auth/openid_connect'
+          follow_redirect!
+          expect(response.location).to eq organizations_url
+          expect(response).to be_redirect
+          follow_redirect!
+          expect(response).to be_ok
+        end
+        it 'should log on successful sign in' do
+          allow(Rails.logger).to receive(:info)
+          expect(Rails.logger).to receive(:info).with(['User logged in',
+                                                       { actionContext: LoggingConstants::ActionContext::Authentication,
+                                                         actionType: LoggingConstants::ActionType::UserLoggedIn }])
+          post '/users/auth/openid_connect'
+          follow_redirect!
+        end
+        it 'should not add another user' do
+          expect(User.where(uid: '12345', provider: 'openid_connect').count).to eq 1
+          expect do
+            post '/users/auth/openid_connect'
+            follow_redirect!
+          end.to change { User.count }.by(0)
+        end
+      end
+
+      context 'user does not exist' do
+        it 'should not persist user' do
+          expect do
+            post '/users/auth/openid_connect'
+            follow_redirect!
+          end.to change { User.count }.by(0)
+        end
+      end
+    end
+
     let(:token) { 'bearer-token' }
     context 'IAL/2' do
       before do
@@ -179,6 +179,34 @@ RSpec.describe 'LoginDotGov', type: :request do
                                                    { actionContext: LoggingConstants::ActionContext::Authentication,
                                                      actionType: LoggingConstants::ActionType::UserCancelledLogin }])
       get '/users/auth/failure'
+    end
+  end
+
+  describe 'Delete /logout' do
+    it 'should redirect to login.gov' do
+      delete '/logout'
+      expect(response.location).to include(ENV.fetch('IDP_HOST'))
+      expect(request.session[:user_return_to]).to be_nil
+    end
+    it 'should set return to invitation flow if invitation sent' do
+      invitation = create(:invitation, :ao)
+      delete "/logout?invitation_id=#{invitation.id}"
+      expect(request.session[:user_return_to]).to eq organization_invitation_url(invitation.provider_organization.id,
+                                                                                 invitation.id)
+    end
+  end
+
+  describe 'Get /users/auth/logged_out' do
+    it 'should redirect to user_return_to' do
+      get '/organizations'
+      expect(request.session[:user_return_to]).to eq organizations_path
+      get '/users/auth/logged_out'
+      expect(response).to redirect_to(organizations_path)
+    end
+
+    it 'should redirect to new session if no user_return_to set' do
+      get '/users/auth/logged_out'
+      expect(response).to redirect_to(new_user_session_path)
     end
   end
 end

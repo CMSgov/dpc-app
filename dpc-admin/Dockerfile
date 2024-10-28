@@ -55,6 +55,10 @@ WORKDIR /dpc-admin
 COPY --from=ruby_builder /usr/local/bundle/ /usr/local/bundle/
 COPY --from=ruby_builder /dpc-admin /dpc-admin
 
+# Add Federal Common Policy CA G2 root certificate for SMTP
+COPY certs/fcpcag2.crt /usr/local/share/ca-certificates/fcpcag2.crt
+RUN cat /usr/local/share/ca-certificates/fcpcag2.crt >> /etc/ssl/certs/ca-certificates.crt
+
 # Declare the entrypoint shell script
 ENTRYPOINT ["./docker/entrypoint.sh"]
 

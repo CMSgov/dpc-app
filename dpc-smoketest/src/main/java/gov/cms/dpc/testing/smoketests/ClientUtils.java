@@ -5,7 +5,9 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import gov.cms.dpc.common.models.JobCompletionModel;
@@ -62,8 +64,15 @@ public class ClientUtils {
                 .map(search -> (Group) search.getEntryFirstRep().getResource())
                 .map(group -> jobCompletionLambda(exportClient, httpClient, group, overrideURL))
                 .peek(jobResponse -> {
-                    if (jobResponse.getError().size() > 0)
+                    if (jobResponse.getError().size() > 0) {
+                        ObjectMapper mapper = new ObjectMapper();
+                        try {
+                            logger.error(mapper.writeValueAsString(jobResponse));
+                        } catch (JsonProcessingException e) {
+                            throw new IllegalStateException("Export job completed, but with unserializable errors");
+                        }
                         throw new IllegalStateException("Export job completed, but with errors");
+                    }
                 })
                 .forEach(jobResponse -> jobResponse.getOutput().forEach(entry -> {
                     jobResponseHandler(httpClient, entry);
@@ -117,12 +126,17 @@ public class ClientUtils {
                     final Provenance provenance = createAttestation(organizationID, providerNPIUUIDMap.get(providerRoster.getKey()));
 
                     // Now, submit the bundle
-                    client
+                    logger.info("Submitting group for provider {} and org {}", providerRoster.getKey(), organizationID);
+                    try {
+                        client
                             .create()
                             .resource(attributionRoster)
                             .withAdditionalHeader("X-Provenance", ctx.newJsonParser().encodeResourceToString(provenance))
                             .encodedJson()
                             .execute();
+                    } catch (BaseServerResponseException e) {
+                        handleBaseServerException(e, "attribution group");
+                    }
                 });
     }
 
@@ -149,7 +163,8 @@ public class ClientUtils {
         boolean done = false;
 
         while (!done) {
-            Thread.sleep(1000);
+            // Our WAF rate limits us to 300 requests every 5 minutes, so don't poll too often
+            Thread.sleep(20000);
             logger.debug(statusMessage);
             try (CloseableHttpResponse response = client.execute(jobGet)) {
                 final int statusCode = response.getStatusLine().getStatusCode();
@@ -263,18 +278,14 @@ public class ClientUtils {
         try (InputStream resource = baseClass.getClassLoader().getResourceAsStream(filename)) {
             final Parameters parameters = parser.parseResource(Parameters.class, resource);
 
-            final Bundle bundle = (Bundle) parameters.getParameterFirstRep().getResource();
-
-            bundle
-                    .getEntry()
-                    .stream()
-                    .map(Bundle.BundleEntryComponent::getResource)
-                    .filter(entry -> entry.getClass().equals(clazz))
-                    .forEach(entry -> client
-                            .create()
-                            .resource(entry)
-                            .encodedJson()
-                            .execute());
+            client
+                .operation()
+                .onType(clazz)
+                .named("submit")
+                .withParameters(parameters)
+                .returnResourceType(Bundle.class)
+                .encodedJson()
+                .execute();
 
             // Fetch the new bundle, so we make sure we get the IDs that we're after
             return client
@@ -293,28 +304,43 @@ public class ClientUtils {
         patientBundle = bundleSubmitter(baseClass, Patient.class, patientBundleFilename, ctx.newJsonParser(), exportClient);
 
         final Map<String, Reference> patientReferences = new HashMap<>();
-        patientBundle
+        try {
+            patientBundle
                 .getEntry()
                 .stream()
                 .map(Bundle.BundleEntryComponent::getResource)
                 .map(resource -> (Patient) resource)
                 .forEach(patient -> patientReferences.put(patient.getIdentifierFirstRep().getValue(), new Reference(patient.getId())));
+        } catch (BaseServerResponseException e) {
+            handleBaseServerException(e, "patient");
+        }
+        logger.info("{} patients submitted and retrieved", patientReferences.size());
 
         return patientReferences;
     }
 
     static Bundle submitPractitioners(String providerBundleFilename, Class<?> baseClass, FhirContext ctx, IGenericClient exportClient) throws IOException {
-        final Bundle providerBundle;
+        Bundle providerBundle = null;
 
         System.out.println("Submitting practitioners");
-        providerBundle = bundleSubmitter(baseClass, Practitioner.class, providerBundleFilename, ctx.newJsonParser(), exportClient);
+        try {
+            providerBundle = bundleSubmitter(baseClass, Practitioner.class, providerBundleFilename, ctx.newJsonParser(), exportClient);
+        } catch (BaseServerResponseException e) {
+            handleBaseServerException(e, "practitioner");
+        }
+
+        List<String> returnedIdentifiers = providerBundle.getEntry().stream().map(provider -> {
+            Practitioner practitioner = (Practitioner) provider.getResource();
+            return practitioner.getIdentifierFirstRep().getValue();
+        }).collect(Collectors.toList());
+        logger.info("Practitioners submitted and returned: {}", returnedIdentifiers.toString());
 
         return providerBundle;
     }
 
     static void createAndUploadRosters(String seedsFile, Bundle providerBundle, IGenericClient client, UUID organizationID, Map<String, Reference> patientReferences) throws IOException {
         // Read the provider bundle from the given file
-        try (InputStream resource = new FileInputStream(new File(seedsFile))) {
+        try (InputStream resource = new FileInputStream(seedsFile)) {
             System.out.println("Uploading Patient roster");
             createRosterSubmission(client, resource, providerBundle, organizationID, patientReferences);
         }
@@ -341,5 +367,12 @@ public class ClientUtils {
         provenance.addAgent(agent);
 
         return provenance;
+    }
+
+    private static void handleBaseServerException(BaseServerResponseException e, String endPoint) {
+        logger.error("BaseServerResponseException:", e);
+        logger.error("Exception at: {}", endPoint);
+        logger.error("Response body: {}", e.getResponseBody());
+        throw e;
     }
 }
