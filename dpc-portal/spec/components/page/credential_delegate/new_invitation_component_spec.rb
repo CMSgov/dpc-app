@@ -92,6 +92,41 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
                         '</a>'].join
         is_expected.to include(modal_prompt)
       end
+
+      it 'should render a modal with the correct content' do
+        modal = <<~HTML
+                <div class="usa-modal" id="verify-modal" aria-labelledby="verify-modal-heading" aria-describedby="verify-modal-description">
+          <div class="usa-modal__content">
+              <div class="usa-modal__main">
+                  <h2 class="usa-modal__heading" id="verify-modal-heading">Acknowledgement</h2>
+                  <div class="usa-prose">
+                      <p id="verify-modal-description">
+                          <p>By assigning this user as a delegate, you are providing them with access to private health information. This means you assume responsibility for their compliance with the Health Insurance Portability and Accountability Act (HIPAA).</p>
+                          <p>Do you acknowledge your responsibility for your delegate's compliance with HIPAA regulations?</p>
+                          <p>Upon your acknowledgement they will receive an invitation to sign up for access to the DPC Portal. This invitation will expire in 48 hours.</p>
+                      </p>
+                  </div>
+                  <div class="usa-modal__footer">
+                      <ul class="usa-button-group">
+                          <li class="usa-button-group__item">
+                              <input type="submit" name="commit" value="Yes, I acknowledge" class="usa-button" form="cd-form" data-disable-with="Yes, I acknowledge" />
+                          </li>
+                          <li class="usa-button-group__item">
+                              <button type="button" class="usa-button usa-button--unstyled padding-105 text-center" data-close-modal>Cancel</button>
+                          </li>
+                      </ul>
+                  </div>
+              </div>
+              <button type="button" class="usa-button usa-modal__close" aria-label="Close this window" data-close-modal>
+                  <svg class="usa-icon" aria-hidden="true" focusable="false" role="img">
+                      <use xlink:href="/assets/img/sprite.svg#close"></use>
+                  </svg>
+              </button>
+          </div></div></div></div>
+        HTML
+
+        is_expected.to include(normalize_space(modal))
+      end
     end
 
     context 'Errors' do

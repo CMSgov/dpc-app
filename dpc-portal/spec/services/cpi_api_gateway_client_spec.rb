@@ -112,6 +112,33 @@ describe CpiApiGatewayClient do
     end
   end
 
+  describe '.healthy_api?' do
+    it 'returns true when the api responds' do
+      expect(client.healthy_api?).to eq(true)
+    end
+
+    it 'returns false when the api does not respond' do
+      stub_request(:post, 'https://val.cpiapi.cms.gov/api/1.0/ppr/providers').to_timeout
+      expect(client.healthy_api?).to eq(false)
+    end
+  end
+
+  describe '.healthy_auth?' do
+    it 'returns true when it can get a token' do
+      expect(client.healthy_auth?).to eq(true)
+    end
+
+    it 'returns false when it cannot get a token' do
+      client.client = OAuth2::Client.new(
+        'fake_id',
+        'fake_secret',
+        site: ENV.fetch('CMS_IDM_OAUTH_URL', nil),
+        token_url: '/oauth2/bad_token/v1/token'
+      )
+      expect(client.healthy_auth?).to eq(false)
+    end
+  end
+
   def verify_logs(status:, url:, method_name:, method: :get)
     verify_new_relic(url, method)
     verify_rails(status:, url:, method_name:, method:)
