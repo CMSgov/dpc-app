@@ -25,8 +25,8 @@ class VerifyResourceHealthJob
     dpc_client = DpcClient.new
     dpc_client.healthcheck
     unless dpc_client.response_successful?
-      logger.warn([dpc_client.response_body.to_s,
-                   { actionContext: LoggingConstants::ActionContext::HealthCheck }])
+      Rails.logger.warn([dpc_client.response_body.to_s,
+                         { actionContext: LoggingConstants::ActionContext::HealthCheck }])
     end
 
     log_healthcheck(
@@ -52,12 +52,12 @@ class VerifyResourceHealthJob
     api_health = cpi_client.healthy_api?
 
     unless auth_health
-      logger.warn(['CPI API gateway auth endpoint is currently down',
-                   { actionContext: LoggingConstants::ActionContext::HealthCheck }])
+      Rails.logger.warn(['CPI API gateway auth endpoint is currently down',
+                         { actionContext: LoggingConstants::ActionContext::HealthCheck }])
     end
     unless api_health
-      logger.warn(['CPI API gateway api endpoints are currently down',
-                   { actionContext: LoggingConstants::ActionContext::HealthCheck }])
+      Rails.logger.warn(['CPI API gateway api endpoints are currently down',
+                         { actionContext: LoggingConstants::ActionContext::HealthCheck }])
     end
 
     log_healthcheck(
@@ -72,9 +72,9 @@ class VerifyResourceHealthJob
                   else
                     LoggingConstants::ActionType::HealthCheckFailed
                   end
-    logger.info(["Healthcheck #{check_name}",
-                 { actionContext: LoggingConstants::ActionContext::HealthCheck,
-                   actionType: action_type }])
+    Rails.logger.info(["Healthcheck #{check_name}",
+                       { actionContext: LoggingConstants::ActionContext::HealthCheck,
+                         actionType: action_type }])
     emit_cloudwatch_metric(check_name, healthy)
   end
 
@@ -108,7 +108,7 @@ class VerifyResourceHealthJob
   rescue StandardError
     # If we're not running on AWS, or don't have the AWS CLI configured, we'll get an error.
     # This is normal when running locally, so only logging in debug mode.
-    logger.debug(["Could not emit metric #{check_name} to AWS",
-                  { actionContext: LoggingConstants::ActionContext::HealthCheck }])
+    Rails.logger.debug(["Could not emit metric #{check_name} to AWS",
+                        { actionContext: LoggingConstants::ActionContext::HealthCheck }])
   end
 end
