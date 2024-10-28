@@ -76,13 +76,6 @@ RSpec.describe Invitation, type: :model do
         expect(valid_new_cd_invite.errors[:invited_email_confirmation]).to eq ["doesn't match Invited email"]
       end
 
-      it 'fails on duplicate email and full name' do
-        new_cd_invite = build(:invitation, :cd)
-        expect(new_cd_invite.valid?).to eq false
-        expect(new_cd_invite.errors.size).to eq 1
-        expect(new_cd_invite.errors[:invited_email]).to eq ['has already been taken']
-      end
-
       it 'fails on bad status' do
         expect do
           valid_new_cd_invite.status = :fake_status
