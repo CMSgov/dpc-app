@@ -2,40 +2,25 @@
 
 # Manages public keys for an organization
 class PublicKeyManager
-  attr_reader :api_id, :errors
-
-  def initialize(api_id)
-    @api_id = api_id
-    @errors = []
-  end
+  include CredentialManager
 
   def create_public_key(public_key:, label:, snippet_signature:)
     public_key = strip_carriage_returns(public_key)
     snippet_signature = strip_carriage_returns(snippet_signature)
 
-    return { response: false, message: @errors[0] } if invalid_encoding?(public_key)
+    return { response: false, errors: @errors } if invalid_input?(public_key, label, snippet_signature)
 
     api_client = DpcClient.new
     api_client.create_public_key(api_id,
-                                 params: { label:, public_key:,
-                                           snippet_signature: })
+                                 params: { label:, public_key:, snippet_signature: })
 
-    Rails.logger.error "Failed to create public key: #{api_client.response_body}" unless api_client.response_successful?
-    { response: api_client.response_successful?,
-      message: api_client.response_body }
-  end
-
-  def invalid_encoding?(key_string)
-    key = OpenSSL::PKey::RSA.new(key_string)
-    if key.private?
-      @errors << 'Must be a public key'
-      true
-    else
-      false
+    unless api_client.response_successful?
+      Rails.logger.error "Failed to create public key: #{api_client.response_body}"
+      parse_errors(api_client.response_body)
     end
-  rescue OpenSSL::PKey::RSAError
-    @errors << 'Must have valid encoding'
-    true
+    { response: api_client.response_successful?,
+      message: api_client.response_body,
+      errors: }
   end
 
   def delete_public_key(params)
@@ -53,12 +38,40 @@ class PublicKeyManager
       api_client.response_body['entities']
     else
       Rails.logger.warn 'Could not get public keys'
-      @errors << api_client.response_body
+      @errors.merge!(api_client.response_body)
       []
     end
   end
 
-  def strip_carriage_returns(str)
-    str.gsub("\r", '')
+  def invalid_input?(public_key, label, snippet_signature)
+    validate_label(label)
+    @errors[:public_key] = "Public key can't be blank." if public_key.blank?
+    @errors[:snippet_signature] = "Signature snippet can't be blank." if snippet_signature.blank?
+    validate_encoding(public_key) if public_key.present?
+    handle_root_errors if @root_errors.present?
+    @errors.present?
+  end
+
+  def validate_encoding(key_string)
+    key = OpenSSL::PKey::RSA.new(key_string)
+    if key.private?
+      @errors[:public_key] = 'Must be a public key (not a private key).'
+      @root_errors << 'Invalid public key.'
+    end
+  rescue OpenSSL::PKey::RSAError
+    @errors[:public_key] = 'Must be a valid public key.'
+    @root_errors << 'Invalid public key.'
+  end
+
+  def parse_errors(error_msg)
+    if error_msg&.include?('Public key could not be verified')
+      @errors[:snippet_signature] = "Signature snippet doesn't match public key."
+      @errors[:root] = 'Invalid signature snippet.'
+    elsif error_msg&.include?('Public key is not valid')
+      @errors[:public_key] = 'Must be a valid public key.'
+      @errors[:root] = 'Invalid public key.'
+    else
+      @errors[:root] = SERVER_ERROR_MSG
+    end
   end
 end

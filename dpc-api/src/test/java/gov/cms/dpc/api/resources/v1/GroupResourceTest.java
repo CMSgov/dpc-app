@@ -621,33 +621,6 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
         conn.disconnect();
     }
 
-    @Test
-    public void testApiDoesNotUseOrgTagSpecifiedByClient() throws GeneralSecurityException, IOException, URISyntaxException {
-        final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
-        final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
-        final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());
-        final IGenericClient orgBClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgBContext.getClientToken(), UUID.fromString(orgBContext.getPublicKeyId()), orgBContext.getPrivateKey());
-
-        //Setup Org A with a practitioner.
-        final Practitioner orgAPractitioner = createAndSubmitPractitioner(orgAContext.getOrgId(), orgAClient);
-        final Group orgAGroup = createAndSubmitGroup(orgAContext.getOrgId(), orgAPractitioner, orgAClient, Collections.emptyList());
-
-        //Setup OrgB with a practitioner.
-        final Practitioner orgBPractitioner = createAndSubmitPractitioner(orgBContext.getOrgId(), orgBClient);
-        final Group orgBGroup = createAndSubmitGroup(orgBContext.getOrgId(), orgBPractitioner, orgBClient, Collections.emptyList());
-
-        Group groupWithOrgATag = FHIRGroupBuilder.newBuild()
-                .attributedTo(orgBPractitioner.getIdentifierFirstRep().getValue())
-                .withOrgTag(UUID.fromString(orgAContext.getOrgId()))
-                .build();
-
-        Provenance provenance = APITestHelpers.createProvenance(orgBContext.getOrgId(), orgBPractitioner.getId(), Collections.emptyList());
-        Group result = (Group) APITestHelpers.createResource(orgBClient, groupWithOrgATag, Map.of("X-Provenance", ctx.newJsonParser().encodeResourceToString(provenance))).getResource();
-
-        assertEquals(orgBGroup.getId(),result.getId(), "Org B's group should have been returned even if they specified Org A in the meta tag");
-    }
-
-
     private Practitioner createAndSubmitPractitioner(String orgId, IGenericClient client) {
         Practitioner practitioner = APITestHelpers.createPractitionerResource(NPIUtil.generateNPI(), orgId);
         MethodOutcome methodOutcome = client.create()

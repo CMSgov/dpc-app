@@ -15,6 +15,7 @@ import gov.cms.dpc.aggregation.service.*;
 import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.common.annotations.JobTimeout;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
+import gov.cms.dpc.fhir.configuration.FHIRClientConfiguration;
 import gov.cms.dpc.fhir.hapi.ContextUtils;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import org.slf4j.Logger;
@@ -70,6 +71,17 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
 
     @Provides
     @Singleton
+    @Named("fhirContextConsentSTU3")
+    public FhirContext provideConsentSTU3Context() {
+        final var fhirContext = FhirContext.forDstu3();
+
+        // Setup the context with model scans (avoids doing this on the fetch threads and perhaps multithreaded bug)
+        ContextUtils.prefetchResourceModels(fhirContext, JobQueueBatch.validResourceTypes);
+        return fhirContext;
+    }
+
+    @Provides
+    @Singleton
     MetricRegistry provideMetricRegistry() {
         return environment().metrics();
     }
@@ -113,10 +125,16 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
     @Provides
     @Singleton
     @Named("consentClient")
-    public IGenericClient provideConsentClient(FhirContext ctx) {
-        String serviceUrl = configuration().getConsentServiceUrl();
+    public IGenericClient provideConsentClient(@Named("fhirContextConsentSTU3") FhirContext ctx) {
+        FHIRClientConfiguration clientConfiguration = configuration().getConsentClientConfiguration();
+        String serviceUrl = clientConfiguration.getServerBaseUrl();
+
         logger.info("Connecting to consent server at {}.", serviceUrl);
         ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
+        ctx.getRestfulClientFactory().setSocketTimeout(clientConfiguration.getTimeouts().getSocketTimeout());
+        ctx.getRestfulClientFactory().setConnectTimeout(clientConfiguration.getTimeouts().getConnectionTimeout());
+        ctx.getRestfulClientFactory().setConnectionRequestTimeout(clientConfiguration.getTimeouts().getRequestTimeout());
+
         return ctx.newRestfulGenericClient(serviceUrl);
     }
 

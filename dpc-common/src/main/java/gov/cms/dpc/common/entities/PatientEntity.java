@@ -8,8 +8,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
-import java.time.LocalDate;
-import java.time.ZoneOffset;
+import java.time.*;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -144,14 +143,15 @@ public class PatientEntity extends PersonEntity {
 
     @SuppressWarnings("JdkObsolete") // Date class is used by FHIR stu3 Patient model
     public static LocalDate toLocalDate(Date date) {
-        return date.toInstant()
-                .atZone(ZoneOffset.UTC)
-                .toLocalDate();
+        // LocalDateTime has no concept of time zone, so the best we can do is guess based on the system default.
+        // We should really avoid using it where possible.
+        return ZonedDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault())
+            .toLocalDate();
     }
 
     @SuppressWarnings("JdkObsolete") // Date class is used by FHIR stu3 Patient model
     public static Date fromLocalDate(LocalDate date) {
-        return Date.from(date.atStartOfDay().toInstant(ZoneOffset.UTC));
+        return Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant());
     }
 
 

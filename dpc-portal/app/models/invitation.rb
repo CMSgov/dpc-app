@@ -2,13 +2,10 @@
 
 # Record of invitation, with possible verification code
 class Invitation < ApplicationRecord
-  attr_reader :phone_raw
-
-  validates :invited_by, :invited_given_name, :invited_family_name, :phone_raw, presence: true, if: :needs_validation?
+  validates :invited_by, :invited_given_name, :invited_family_name, presence: true, if: :needs_validation?
   validates :invited_email, :invited_email_confirmation, presence: true, if: :new_record?
   validates :invited_email, format: Devise.email_regexp, confirmation: true, if: :new_record?
   validates :invitation_type, presence: true
-  validates :invited_phone, format: { with: /\A[0-9]{10}\z/ }, if: :needs_validation?
   validate :cannot_cancel_accepted
 
   enum invitation_type: %i[credential_delegate authorized_official]
@@ -17,19 +14,18 @@ class Invitation < ApplicationRecord
   belongs_to :provider_organization, required: true
   belongs_to :invited_by, class_name: 'User', required: false
 
-  STEPS = ['Sign in or create a Login.gov account', 'Confirm your identity', 'Confirm organization registration',
-           'Finished'].freeze
-
-  def phone_raw=(nbr)
-    @phone_raw = nbr
-    self.invited_phone = @phone_raw.tr('^0-9', '')
-  end
+  AO_STEPS = ['Sign in or create a Login.gov account', 'Confirm your identity', 'Confirm organization registration',
+              'Finished'].freeze
+  CD_STEPS = ['Sign in or create a Login.gov account', 'Accept invite', 'Finished'].freeze
 
   def show_attributes
     { full_name: "#{invited_given_name} #{invited_family_name}",
       email: invited_email,
-      id:,
-      verification_code: }.with_indifferent_access
+      id: }.with_indifferent_access
+  end
+
+  def invited_by_full_name
+    "#{invited_by&.given_name} #{invited_by&.family_name}"
   end
 
   def expired?
@@ -37,7 +33,7 @@ class Invitation < ApplicationRecord
   end
 
   def accept!
-    update!(invited_given_name: nil, invited_family_name: nil, invited_phone: nil, invited_email: nil,
+    update!(invited_given_name: nil, invited_family_name: nil, invited_email: nil,
             status: :accepted)
   end
 
@@ -58,14 +54,6 @@ class Invitation < ApplicationRecord
     invitation
   end
 
-  def match_user?(user_info)
-    if credential_delegate?
-      cd_match?(user_info)
-    elsif authorized_official?
-      email_match?(user_info)
-    end
-  end
-
   def ao_match?(user_info)
     check_missing_user_info(user_info, 'social_security_number')
 
@@ -79,14 +67,12 @@ class Invitation < ApplicationRecord
 
   def unacceptable_reason # rubocop:disable Metrics/CyclomaticComplexity,Metrics/PerceivedComplexity
     return 'invalid' if cancelled?
-    return 'accepted' if accepted?
     return 'ao_renewed' if renewed? && authorized_official?
+    return 'ao_accepted' if accepted? && authorized_official?
+    return 'cd_accepted' if accepted? && credential_delegate?
+    return 'ao_expired' if expired? && authorized_official?
 
-    if expired? && authorized_official?
-      'ao_expired'
-    elsif expired?
-      'invalid'
-    end
+    'cd_expired' if expired? && credential_delegate?
   end
 
   def expires_in
@@ -96,29 +82,23 @@ class Invitation < ApplicationRecord
     [hours, minutes]
   end
 
-  private
-
   def cd_match?(user_info)
     cd_info_present?(user_info)
-
-    return false unless invited_given_name.downcase == user_info['given_name'].downcase &&
-                        invited_family_name.downcase == user_info['family_name'].downcase
-
-    return false unless phone_match(user_info)
-
-    email_match?(user_info)
-  end
-
-  def cd_info_present?(user_info)
-    %w[given_name family_name phone].each do |key|
-      check_missing_user_info(user_info, key)
-    end
+    invited_family_name.downcase == user_info['family_name'].downcase
   end
 
   def email_match?(user_info)
-    check_missing_user_info(user_info, 'all_emails')
+    check_missing_user_info(user_info, 'email')
 
-    user_info['all_emails'].any? { |email| invited_email.downcase == email.downcase }
+    user_info['email'].downcase == invited_email.downcase
+  end
+
+  private
+
+  def cd_info_present?(user_info)
+    %w[given_name family_name].each do |key|
+      check_missing_user_info(user_info, key)
+    end
   end
 
   def check_missing_user_info(user_info, key)
@@ -127,20 +107,6 @@ class Invitation < ApplicationRecord
     Rails.logger.error("User Info Missing: #{key}")
     raise UserInfoServiceError, 'missing_info'
   end
-
-  # rubocop:disable Metrics/AbcSize
-  # Go ahead and pass if one or the other starts with US country code (1)
-  def phone_match(user_info)
-    user_phone = user_info['phone'].tr('^0-9', '')
-    if user_phone.length == invited_phone.length
-      user_phone == invited_phone
-    elsif user_phone.length > invited_phone.length && user_phone[0] == '1'
-      user_phone[1..] == invited_phone
-    elsif user_phone.length < invited_phone.length && invited_phone[0] == '1'
-      user_phone == invited_phone[1..]
-    end
-  end
-  # rubocop:enable Metrics/AbcSize
 
   def cannot_cancel_accepted
     return unless status_was == 'accepted' && cancelled?

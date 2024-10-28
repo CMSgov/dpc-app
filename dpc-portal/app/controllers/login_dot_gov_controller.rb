@@ -34,6 +34,20 @@ class LoginDotGovController < Devise::OmniauthCallbacksController
     end
   end
 
+  def logout
+    if params[:invitation_id].present?
+      invitation = Invitation.find(params[:invitation_id])
+      session[:user_return_to] = organization_invitation_url(invitation.provider_organization.id, invitation.id)
+    end
+
+    redirect_to url_for_login_dot_gov_logout, allow_other_host: true
+  end
+
+  # Return from login.gov
+  def logged_out
+    redirect_to session.delete(:user_return_to) || new_user_session_path
+  end
+
   private
 
   def handle_invitation_flow_failure(invitation_id)

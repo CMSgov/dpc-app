@@ -7,6 +7,7 @@ import gov.cms.dpc.common.hibernate.attribution.IDPCDatabase;
 import gov.cms.dpc.common.hibernate.auth.IDPCAuthDatabase;
 import gov.cms.dpc.common.hibernate.queue.IDPCQueueDatabase;
 import gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration;
+import gov.cms.dpc.fhir.configuration.FHIRClientConfiguration;
 import gov.cms.dpc.fhir.configuration.IDPCFHIRConfiguration;
 import gov.cms.dpc.macaroons.config.TokenPolicy;
 import gov.cms.dpc.queue.config.DPCAwsQueueConfiguration;
@@ -53,9 +54,10 @@ public class DPCAPIConfiguration extends Configuration implements IDPCDatabase, 
     @JsonProperty("bbclient")
     private BBClientConfiguration clientConfiguration = new BBClientConfiguration();
 
-    @NotEmpty
+    @Valid
     @NotNull
-    private String attributionURL;
+    @JsonProperty("attributionClient")
+    private final FHIRClientConfiguration fhirClientConfiguration = new FHIRClientConfiguration();
 
     @NotEmpty
     @NotNull
@@ -119,16 +121,8 @@ public class DPCAPIConfiguration extends Configuration implements IDPCDatabase, 
         this.httpClient = httpClient;
     }
 
-    public String getAttributionURL() {
-        return attributionURL;
-    }
-
     public String getAttributionHealthCheckURL() {
         return attributionHealthCheckURL;
-    }
-
-    public void setAttributionURL(String attributionURL) {
-        this.attributionURL = attributionURL;
     }
 
     public String getExportPath() {
@@ -175,6 +169,10 @@ public class DPCAPIConfiguration extends Configuration implements IDPCDatabase, 
     @Override
     public BBClientConfiguration getBlueButtonConfiguration() {
         return this.clientConfiguration;
+    }
+
+    public FHIRClientConfiguration getFhirClientConfiguration() {
+        return this.fhirClientConfiguration;
     }
 
     public int getJobTimeoutInSeconds() {

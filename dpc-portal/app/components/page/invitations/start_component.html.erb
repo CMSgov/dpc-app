@@ -9,8 +9,14 @@
           Welcome to the DPC Portal
         </h1>
         <div class="usa-prose">
-          <p>To access the DPC API portal, an Authorized Official (AO) needs to register your organization. This registration request is for <strong><%= @invitation.invited_email %></strong> at <%= @organization.name %>. Use this email to sign in or create a Login.gov account.</p>
-          <p>DPC uses Login.gov for identity verification. Continue to sign in or created a Login.gov account.</p>
+          <% if @invitation.authorized_official? %>
+            <p>To access the DPC API portal, an Authorized Official (AO) needs to register your organization. This registration request is for <strong><%= @invitation.invited_email %></strong> at <%= @organization.name %>. Use this email to sign in or create a Login.gov account.</p>
+            <p>DPC uses Login.gov for identity verification. Continue to sign in or created a Login.gov account.</p>
+          <% end %>
+          <% if @invitation.credential_delegate? %>
+            <p>Welcome <%= @invitation.show_attributes['full_name'] %> (<%= @invitation.invited_email %>).</p>
+            <p>You've been delegated to manage access to the Data at the Point of Care (DPC) API for <%= @organization.name %> (NPI <%= @organization.npi %>). </p>
+          <% end %>
           <div class="usa-alert usa-alert--warning margin-bottom-4">
             <div class="usa-alert__body">
               <p class="usa-alert__text">
@@ -23,8 +29,19 @@
     </div>
     <div class="grid-col-12 mobile-lg:grid-col-10 tablet:grid-col-8 desktop:grid-col-6 padding-x-205 margin-bottom-4">
       <div class="bg-white padding-y-3 padding-x-5 border border-base-lighter">
-        <h2 class="margin-bottom-0">It's time to register your organization</h2>
-        <p>To register your organization you must:
+        <% if @invitation.authorized_official? %>
+          <h2 class="margin-bottom-0">It's time to register your organization</h2>
+        <% end %>
+        <% if @invitation.credential_delegate? %>
+          <h2 class="margin-bottom-0">It's time to accept your organization invite.</h2>
+        <% end %>
+        <p>
+          <% if @invitation.authorized_official? %>
+            To register your organization you must:
+          <% end %>
+          <% if @invitation.credential_delegate? %>
+            To accept your invite, you must:
+          <% end %>
           <ul class="usa-icon-list">
             <% @musts.each do |must| %>
             <li class="usa-icon-list__item">
@@ -40,7 +57,12 @@
         </p>
         <%= render Core::Button::ButtonComponent.new(label: 'Begin registration',
             destination: accept_organization_invitation_path(@organization, @invitation),
-            method: :get) %>
+                                                     additional_classes: ['start-component-button'],
+            method: :get) if @invitation.authorized_official? %>
+        <%= render Core::Button::ButtonComponent.new(label: 'Accept invitation',
+            destination: confirm_cd_organization_invitation_path(@organization, @invitation),
+                                                     additional_classes: ['start-component-button'],
+            method: :get) if @invitation.credential_delegate? %>
       </div>
     </div>
   </div>
