@@ -16,10 +16,18 @@ module Page
         render(Page::CredentialDelegate::NewInvitationComponent.new(org, cd_invite))
       end
 
-      def errors
+      def missing_fields
         cd_invite = Invitation.new
         cd_invite.valid?
         render(Page::CredentialDelegate::NewInvitationComponent.new(org, cd_invite))
+      end
+
+      def duplicate
+        cd_invite = Invitation.new(invited_given_name: 'Bob',
+                                   invited_family_name: 'Hogan',
+                                   invited_email: 'bob@example.com',
+                                   invited_email_confirmation: 'bob@example.com')
+        render(Page::CredentialDelegate::NewInvitationComponent.new(org, cd_invite, errors: { root: 'duplicate' }))
       end
 
       private

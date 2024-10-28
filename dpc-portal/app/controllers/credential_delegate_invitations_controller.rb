@@ -30,6 +30,9 @@ class CredentialDelegateInvitationsController < ApplicationController
     else
       render(Page::CredentialDelegate::NewInvitationComponent.new(@organization, @cd_invitation), status: :bad_request)
     end
+  rescue UserInfoServiceError => e
+    render(Page::CredentialDelegate::NewInvitationComponent.new(@organization, @cd_invitation,
+                                                                errors: { root: e.message }), status: :bad_request)
   end
   # rubocop:enable Metrics/AbcSize
 

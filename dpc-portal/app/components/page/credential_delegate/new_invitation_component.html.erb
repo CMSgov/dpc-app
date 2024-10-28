@@ -1,4 +1,12 @@
 <div>
+  <% if @errors[:root] %>
+    <div class="usa-alert usa-alert--error margin-bottom-4">
+      <div class="usa-alert__body">
+        <h2 class="usa-alert__heading"><%= I18n.t("verification.#{@errors[:root]}_status") %></h2>
+        <p class="usa-alert__text"><%= I18n.t("verification.#{@errors[:root]}_text") %></p>
+      </div>
+    </div>
+  <% end %>
   <h1>Invite new user</h1>
   <div class="usa-alert usa-alert--warning margin-bottom-4">
     <div class="usa-alert__body">
