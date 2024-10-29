@@ -43,8 +43,8 @@ ops/config/decrypted/*
 !ops/config/decrypted/README.md
 .mvn/
 
-/tmp/letter_opener/admin/*
-/tmp/letter_opener/web/*
+# Ignore project tmp/ directory
+tmp/
 
 # Ignore Go unit test results
 dpc-go/dpc-api/results.json
