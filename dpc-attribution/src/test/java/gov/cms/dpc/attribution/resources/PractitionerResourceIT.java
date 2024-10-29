@@ -7,7 +7,7 @@ import ca.uhn.fhir.rest.gclient.IDeleteTyped;
 import ca.uhn.fhir.rest.gclient.IReadExecutable;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import gov.cms.dpc.attribution.AbstractAttributionIT;
+import gov.cms.dpc.attribution.AbstractAttributionTest;
 import gov.cms.dpc.attribution.AttributionTestHelpers;
 import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
@@ -23,13 +23,15 @@ import static gov.cms.dpc.attribution.AttributionTestHelpers.DEFAULT_ORG_ID;
 import static gov.cms.dpc.attribution.AttributionTestHelpers.createFHIRClient;
 import static gov.cms.dpc.common.utils.SeedProcessor.createBaseAttributionGroup;
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
 
-class PractitionerResourceIT extends AbstractAttributionIT {
+@DisplayName("Practitioner resource handling")
+class PractitionerResourceTest extends AbstractAttributionTest {
 
     final IGenericClient client;
     final List<Practitioner> practitionersToCleanUp;
 
-    private PractitionerResourceIT() {
+    private PractitionerResourceTest() {
         client = createFHIRClient(ctx, getServerURL());
         practitionersToCleanUp = new ArrayList<>();
     }
@@ -52,6 +54,7 @@ class PractitionerResourceIT extends AbstractAttributionIT {
     }
 
     @Test
+    @DisplayName("Create and access practitioner resource 🥳")
     void testPractitionerReadWrite() {
 
         final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
@@ -76,9 +79,6 @@ class PractitionerResourceIT extends AbstractAttributionIT {
 
         assertTrue(foundProfile, "Should have appropriate DPC profile");
 
-        // Try again, should fail
-        final MethodOutcome execute = creation.execute();
-        assertNull(execute.getCreated(), "Should already exist");
 
         // Try to directly access
 
@@ -90,34 +90,31 @@ class PractitionerResourceIT extends AbstractAttributionIT {
                 .execute();
 
         assertTrue(pract2.equalsDeep(pract3), "Created and fetched resources should be identical");
-
-        // Delete it and make sure it's gone.
-
-        client
-                .delete()
-                .resource(pract3)
-                .encodedJson()
-                .execute();
-
-        final IReadExecutable<Practitioner> deletedRead = client
-                .read()
-                .resource(Practitioner.class)
-                .withId(pract3.getId())
-                .encodedJson();
-
-        assertThrows(ResourceNotFoundException.class, deletedRead::execute, "Should not be able to find the provider");
-
-
-        // Try to delete it again
-        final IDeleteTyped deleteOp = client
-                .delete()
-                .resource(pract3)
-                .encodedJson();
-
-        assertThrows(ResourceNotFoundException.class, deleteOp::execute, "Should not be able to find the provider");
     }
 
     @Test
+    @DisplayName("Create duplicate practitioner resource 🤮")
+    void testDuplicatePractitioner() {
+
+        final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
+
+        final ICreateTyped creation = client
+                .create()
+                .resource(practitioner)
+                .encodedJson();
+        final MethodOutcome mo = creation
+                .execute();
+
+        final Practitioner pract2 = (Practitioner) mo.getResource();
+        practitionersToCleanUp.add(pract2);
+
+        // Try again, should fail
+        final MethodOutcome execute = creation.execute();
+        assertNull(execute.getCreated(), "Should already exist");
+    }
+
+    @Test
+    @DisplayName("Search pracititioner resource 🥳")
     void testPractitionerSearch() {
 
         final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
@@ -160,6 +157,7 @@ class PractitionerResourceIT extends AbstractAttributionIT {
 
 
     @Test
+    @DisplayName("Update practitioner resource 🥳")
     void testPractitionerUpdate() {
         final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
 
@@ -208,6 +206,7 @@ class PractitionerResourceIT extends AbstractAttributionIT {
     }
 
     @Test
+    @DisplayName("Remove practitioner resource 🥳")
     void testPractitionerRemoval() {
         final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
 
@@ -245,9 +244,18 @@ class PractitionerResourceIT extends AbstractAttributionIT {
                 .encodedJson();
 
         assertThrows(ResourceNotFoundException.class, getRequest::execute, "Should not have resource");
+
+        // Try to delete it again
+        final IDeleteTyped deleteOp = client
+                .delete()
+                .resource(pract2)
+                .encodedJson();
+
+        assertThrows(ResourceNotFoundException.class, deleteOp::execute, "Should not be able to find the provider");
     }
 
     @Test
+    @DisplayName("Create practitioner exceeding provider limit 🤮")
     void testPractitionerSubmitWhenPastLimit() throws Exception {
 
         // Restart so update takes effect
@@ -280,6 +288,7 @@ class PractitionerResourceIT extends AbstractAttributionIT {
     }
 
     @Test
+    @DisplayName("Create practitioner when provider limit is disabled 🥳")
     void testPractitionerSubmitWhenLimitIsSetToNegativeOne() throws Exception {
 
         // Restart so update takes effect

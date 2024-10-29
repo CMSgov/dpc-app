@@ -30,10 +30,12 @@ import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
 
 @SuppressWarnings({"OptionalGetWithoutIsPresent"})
 @ExtendWith(BufferedLoggerHandler.class)
 @IntegrationTest
+@DisplayName("Job batch processing")
 class QueueIT {
 
     //    private JobQueue queue;
@@ -95,12 +97,13 @@ class QueueIT {
                     }
                 })
                 .map(queue -> {
-                    final DynamicTest first = DynamicTest.dynamicTest(nameGenerator.apply(queue, "Simple Submission"), () -> testSimpleSubmissionCompletion(queue));
-                    final DynamicTest second = DynamicTest.dynamicTest(nameGenerator.apply(queue, "Missing Job"), () -> testMissingJob(queue));
-                    final DynamicTest third = DynamicTest.dynamicTest(nameGenerator.apply(queue, "EOB Submission"), () -> testPatientAndEOBSubmission(queue));
-                    final DynamicTest fourth = DynamicTest.dynamicTest(nameGenerator.apply(queue, "Invalid batch on queue"), () -> testInvalidJobBatch(queue));
-                    final DynamicTest fifth = DynamicTest.dynamicTest(nameGenerator.apply(queue, "since equal transaction time"), () -> testSinceEqualTransactionTime(queue));
-                    return List.of(first, second, third, fourth, fifth);
+                    final DynamicTest first = DynamicTest.dynamicTest(nameGenerator.apply(queue, "Verify queue size 🥳"), () -> testQueueSize(queue));
+                    final DynamicTest second = DynamicTest.dynamicTest(nameGenerator.apply(queue, "Verify complete batch job lifecycle 🥳"), () -> testSimpleSubmissionCompletion(queue));
+                    final DynamicTest third = DynamicTest.dynamicTest(nameGenerator.apply(queue, "Fail to get or complete unrecognized batch job 🤮"), () -> testMissingJob(queue));
+                    final DynamicTest fourth= DynamicTest.dynamicTest(nameGenerator.apply(queue, "Queue and complete patient and EOB batch jobs 🥳"), () -> testPatientAndEOBSubmission(queue));
+                    final DynamicTest fifth = DynamicTest.dynamicTest(nameGenerator.apply(queue, "Queue fails to claim invalid batch job 🤮"), () -> testInvalidJobBatch(queue));
+                    final DynamicTest sixth = DynamicTest.dynamicTest(nameGenerator.apply(queue, "Queue a batch job with since parameter 🥳"), () -> testQueueJob(queue));
+                    return List.of(first, second, third, fourth, fifth, sixth);
                 })
                 .flatMap(Collection::stream);
     }
@@ -116,8 +119,8 @@ class QueueIT {
 
             final Transaction tx = session.beginTransaction();
             try {
-                session.createQuery("delete from job_queue_batch_file").executeUpdate();
-                session.createQuery("delete from job_queue_batch").executeUpdate();
+                session.createMutationQuery("delete from job_queue_batch_file").executeUpdate();
+                session.createMutationQuery("delete from job_queue_batch").executeUpdate();
             } finally {
                 tx.commit();
             }
@@ -125,6 +128,7 @@ class QueueIT {
         sessionFactory.close();
     }
 
+    @DisplayName("Verify complete batch job lifecycle 🥳")
     void testSimpleSubmissionCompletion(JobQueueCommon queue) {
         // Add a couple of jobs
         var firstJobID = queue.createJob(orgID, orgNPI, providerNPI, patientMBIs, Collections.singletonList(DPCResourceType.Patient), null, OffsetDateTime.now(ZoneOffset.UTC), null, null,true, false);
@@ -197,6 +201,7 @@ class QueueIT {
         assertEquals(0, queue.queueSize(), "Worked all jobs in the queue, but the queue is not empty");
     }
 
+    @DisplayName("Queue and complete patient and EOB batch jobs 🥳")
     void testPatientAndEOBSubmission(JobQueueCommon queue) {
         // Add a job with a EOB resource
         final var jobID = queue.createJob(orgID, orgNPI, providerNPI, patientMBIs,
@@ -225,24 +230,28 @@ class QueueIT {
         });
     }
 
-    void testMissingJob(JobQueueCommon queue) {
-        UUID batchID = UUID.randomUUID();
-
+    @DisplayName("Verify queue size 🥳")
+    void testQueueSize(JobQueueCommon queue) {
         // Check that things are empty
         assertAll(() -> assertTrue(queue.claimBatch(aggregatorID).isEmpty(), "Should not have a job to work"),
                 () -> assertEquals(0, queue.queueSize(), "Should have an empty queue"));
+    }
+
+    @DisplayName("Get or complete unrecognized batch job 🤮")
+    void testMissingJob(JobQueueCommon queue) {
+        UUID batchID = UUID.randomUUID();
 
         assertTrue(queue.getBatch(batchID).isEmpty(), "Should not be able to get a missing batch");
         assertThrows(JobQueueFailure.class, () -> queue.completeBatch(null, aggregatorID), "Should error when completing a job which does not exist");
     }
 
-
-    void testSinceEqualTransactionTime(JobQueueCommon queue) {
+    @DisplayName("Queue a batch job to an empty queue 🥳")
+    void testQueueJob(JobQueueCommon queue) {
         final var transactionTime = OffsetDateTime.now(ZoneOffset.UTC);
         final var jobId = queue.createJob(orgID, orgNPI, providerNPI, patientMBIs,
                 Arrays.asList(DPCResourceType.Patient, DPCResourceType.ExplanationOfBenefit),
                 transactionTime,
-                transactionTime, null, null,true, false);
+                transactionTime, null, null, true, false);
 
         // Check that the Job has a empty queue
         final Optional<JobQueueBatch> job = queue.getJobBatches(jobId).stream().findFirst();
@@ -251,6 +260,7 @@ class QueueIT {
                 () -> assertTrue(job.get().getPatients().isEmpty()));
     }
 
+    @DisplayName("Queue fails to claim invalid batch job 🤮")
     void testInvalidJobBatch(JobQueueCommon queue) {
         final UUID jobID = UUID.randomUUID();
 

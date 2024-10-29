@@ -9,7 +9,7 @@ import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import gov.cms.dpc.consent.AbstractConsentIT;
+import gov.cms.dpc.consent.AbstractConsentTest;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.converters.entities.ConsentEntityConverter;
 import org.hl7.fhir.dstu3.model.*;
@@ -24,20 +24,22 @@ import java.util.List;
 
 import static gov.cms.dpc.fhir.DPCIdentifierSystem.MBI;
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
 
 /**
  * Tests ConsentResource using a live database. These tests will fail if the database is not running or
  * seed data is not loaded.
  */
-class ConsentResourceIT extends AbstractConsentIT {
+class ConsentResourceTest extends AbstractConsentTest {
 
     private static final String TEST_CONSENT_UUID = "3a51c388-a9b0-42e2-afe4-688a2b6cef95";
     private static final String TEST_CONSENT_REF = String.format("Consent/%s", TEST_CONSENT_UUID);
 
-    private ConsentResourceIT() {
+    private ConsentResourceTest() {
     }
 
     @Test
+    @DisplayName("Create consent resource 🥳")
     final void createConsent() {
         final IGenericClient client = createFHIRClient(ctx, getServerURL());
         Consent consent = new Consent();
@@ -73,6 +75,7 @@ class ConsentResourceIT extends AbstractConsentIT {
     }
 
     @Test
+    @DisplayName("Create Consent with Invalid MBI")
     final void createConsent_fails_withInvalidMbi() {
         final IGenericClient client = createFHIRClient(ctx, getServerURL());
         Consent consent = new Consent();
@@ -101,6 +104,7 @@ class ConsentResourceIT extends AbstractConsentIT {
     }
 
     @Test
+    @DisplayName("Get Consent with Non-Existant ID")
     final void getConsentResource_fails_withNonExtantId() {
         final IGenericClient client = createFHIRClient(ctx, getServerURL());
 
@@ -114,6 +118,7 @@ class ConsentResourceIT extends AbstractConsentIT {
     }
 
     @Test
+    @DisplayName("Find Consent Resource using Valid ID")
     final void getConsentResource_finds_validId() {
         final IGenericClient client = createFHIRClient(ctx, getServerURL());
 
@@ -129,6 +134,7 @@ class ConsentResourceIT extends AbstractConsentIT {
     }
 
     @Test
+    @DisplayName("Consent Search Fails with No Parameters")
     final void searchConsentResource_fails_withNoParams() {
         // an attempt to the resource with an empty value is routed to the search endpoint
 
@@ -143,6 +149,7 @@ class ConsentResourceIT extends AbstractConsentIT {
     }
 
     @Test
+    @DisplayName("Consent Search Succeeeds using Valid ID")
     final void searchConsentResource_finds_validIdParam() {
 
         final IGenericClient client = createFHIRClient(ctx, getServerURL());
@@ -162,6 +169,7 @@ class ConsentResourceIT extends AbstractConsentIT {
     }
 
     @Test
+    @DisplayName("Consent Search Succeeds using Valid Identifier")
     final void searchConsentResource_finds_validIdentifierParam() {
 
         final IGenericClient client = createFHIRClient(ctx, getServerURL());
@@ -181,6 +189,7 @@ class ConsentResourceIT extends AbstractConsentIT {
     }
 
     @ParameterizedTest
+    @DisplayName("Consent Search Succeeds using Patient ID")
     @CsvSource({"MBI,mbi_1", "HICN,hicn_1"})
     final void searchConsentResource_finds_validPatientParam(String system, String patientId) {
 
@@ -202,6 +211,7 @@ class ConsentResourceIT extends AbstractConsentIT {
     }
 
     @Test
+    @DisplayName("Consent Search Returns a Single Matching Record from Multiple Hits")
     final void searchConsentResource_multiple_ids_for_one_patient() {
         String patientIds = String.format("%s|%s,%s|%s", MBI.getSystem(), "mbi_1", MBI.getSystem(), "mbi_no_record");
         final IGenericClient client = createFHIRClient(ctx, getServerURL());

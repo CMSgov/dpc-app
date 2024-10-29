@@ -4,7 +4,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import gov.cms.dpc.attribution.AbstractAttributionIT;
+import gov.cms.dpc.attribution.AbstractAttributionTest;
 import gov.cms.dpc.attribution.AttributionTestHelpers;
 import gov.cms.dpc.attribution.resources.v1.GroupResource;
 import gov.cms.dpc.common.utils.NPIUtil;
@@ -13,7 +13,6 @@ import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.testing.IntegrationTest;
 import gov.cms.dpc.testing.MBIUtil;
 import org.hl7.fhir.dstu3.model.*;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -23,9 +22,15 @@ import java.util.stream.Collectors;
 
 import static gov.cms.dpc.attribution.AttributionTestHelpers.DEFAULT_ORG_ID;
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.TestMethodOrder;
 
 @IntegrationTest
-public class GroupResourceIT extends AbstractAttributionIT {
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@DisplayName("Group Resource integrated tests")
+public class GroupResourceIT extends AbstractAttributionTest {
 
     private IGenericClient client;
 
@@ -36,6 +41,8 @@ public class GroupResourceIT extends AbstractAttributionIT {
     }
 
     @Test
+    @DisplayName("Create roster exceeding patient limit 🤮")
+    @Order(2)
     public void testCreateRosterPatientLimit() {
         final Practitioner practitioner = createPractitioner("1111111112");
         final Patient patient1 = createPatient("0O00O00OO01", DEFAULT_ORG_ID);
@@ -61,32 +68,12 @@ public class GroupResourceIT extends AbstractAttributionIT {
                 .execute();
 
         assertTrue(methodOutcome.getCreated());
-
     }
 
     @Test
-    public void testCreateDuplicateRoster() {
-        final Practitioner practitioner = createPractitioner(NPIUtil.generateNPI());
-        final Patient patient = createPatient(MBIUtil.generateMBI(), DEFAULT_ORG_ID);
-
-        final Group group = SeedProcessor.createBaseAttributionGroup(FHIRExtractors.getProviderNPI(practitioner), DEFAULT_ORG_ID);
-        group.addMember().setEntity(new Reference(patient.getIdElement()));
-
-        client.create()
-            .resource(group)
-            .encodedJson()
-            .execute();
-
-        // "Create" a new roster for the same provider and org
-        assertThrows(ForbiddenOperationException.class, () ->
-            client.create()
-            .resource(group)
-            .encodedJson()
-            .execute(), "Should error on a duplicate roster");
-    }
-
-    @Test
-    public void testReplaceRosterPatientLimit() {
+    @DisplayName("Create patient roster 🥳")
+    @Order(1)
+    public void testCreateRoster() {
         final Practitioner practitioner = createPractitioner("1211111111");
         final Patient patient1 = createPatient("0O00O00OO02", DEFAULT_ORG_ID);
         final Group group = SeedProcessor.createBaseAttributionGroup(FHIRExtractors.getProviderNPI(practitioner), DEFAULT_ORG_ID);
@@ -98,43 +85,105 @@ public class GroupResourceIT extends AbstractAttributionIT {
                 .resource(group)
                 .encodedJson()
                 .execute();
-        IIdType groupId = methodOutcome.getResource().getIdElement();
+        methodOutcome.getResource().getIdElement();
 
         assertTrue(methodOutcome.getCreated());
-
-        //Add an additional patient
-        final Patient patient2 = createPatient("0O00O00OO00", DEFAULT_ORG_ID);
-        group.addMember().setEntity(new Reference(patient2.getIdElement()));
-
-        assertThrows(InvalidRequestException.class, () -> client.update()
-                .resource(group)
-                .withId(groupId)
-                .encodedJson()
-                .execute());
-
-        //Replace patient
-        group.getMember().clear();
-        group.addMember().setEntity(new Reference(patient2.getIdElement()));
-
-        final MethodOutcome methodOutcomeUpdate = client.update()
-                .resource(group)
-                .withId(methodOutcome.getResource().getIdElement())
-                .encodedJson()
-                .execute();
-
-        final Group updatedGroup = client.read()
-            .resource(Group.class)
-            .withId(groupId)
-            .encodedJson()
-            .execute();
-
-        assertEquals(patient2.getIdElement().getValueAsString(), updatedGroup.getMemberFirstRep().getEntity().getReference());
     }
 
+    @Test
+    public void testCreateDuplicateRoster() {
+        final Practitioner practitioner = createPractitioner(NPIUtil.generateNPI());
+        final Patient patient = createPatient(MBIUtil.generateMBI(), DEFAULT_ORG_ID);
+        final Group group = SeedProcessor.createBaseAttributionGroup(FHIRExtractors.getProviderNPI(practitioner), DEFAULT_ORG_ID);
+        group.addMember().setEntity(new Reference(patient.getIdElement()));
+        client.create()
+            .resource(group)
+            .encodedJson()
+            .execute();
+        // "Create" a new roster for the same provider and org
+        assertThrows(ForbiddenOperationException.class, () ->
+            client.create()
+            .resource(group)
+            .encodedJson()
+            .execute(), "Should error on a duplicate roster");
+    }
+
+    @Test
+    @DisplayName("Replace patient in roster 🥳")
+    @Order(3)
+    public void testReplaceRosterPatient() {
+
+        final Practitioner practitioner = createPractitioner(NPIUtil.generateNPI());
+        final Group groupForCreate = SeedProcessor.createBaseAttributionGroup(FHIRExtractors.getProviderNPI(practitioner), DEFAULT_ORG_ID);
+        final Patient patient1 = createPatient(MBIUtil.generateMBI(), DEFAULT_ORG_ID);
+        final Patient patient2 = createPatient(MBIUtil.generateMBI(), DEFAULT_ORG_ID);
+
+        // create initial group with single patient
+        groupForCreate.addMember().setEntity(new Reference(patient1.getIdElement()));
+        final MethodOutcome createRosterResponse = client.create()
+                .resource(groupForCreate)
+                .encodedJson()
+                .execute();
+        assertTrue(createRosterResponse.getCreated());
+
+        final Group createdGroup = (Group) (createRosterResponse.getResource());
+        assertEquals(1, createdGroup.getMember().size());
+        assertEquals(patient1.getIdElement().getValueAsString(), createdGroup.getMemberFirstRep().getEntity().getReference());
+        
+        // create replace patient1 with patient 2
+        createdGroup.getMember().clear();
+        createdGroup.addMember().setEntity(new Reference(patient2.getIdElement()));
+
+        final MethodOutcome replaceRosterResponse = client
+                .update()
+                .resource(createdGroup)
+                .withId(createdGroup.getIdElement())
+                .execute();
+
+        final Group replacementGroup = (Group) replaceRosterResponse.getResource();
+        assertEquals(1, replacementGroup.getMember().size());
+        assertEquals(patient2.getIdElement().getValueAsString(), replacementGroup.getMemberFirstRep().getEntity().getReference());
+    }
+        
+    @Test
+    @DisplayName("Replace patient in full roster 🤮")
+    @Order(3)
+    public void testReplaceRosterPatientLimit() {
+
+        final Practitioner practitioner = createPractitioner(NPIUtil.generateNPI());
+        final Group groupForCreate = SeedProcessor.createBaseAttributionGroup(FHIRExtractors.getProviderNPI(practitioner), DEFAULT_ORG_ID);
+        final Patient patient1 = createPatient(MBIUtil.generateMBI(), DEFAULT_ORG_ID);
+        final Patient patient2 = createPatient(MBIUtil.generateMBI(), DEFAULT_ORG_ID);
+
+        // create initial group with single patient
+        groupForCreate.addMember().setEntity(new Reference(patient1.getIdElement()));
+        final MethodOutcome createRosterResponse = client.create()
+                .resource(groupForCreate)
+                .encodedJson()
+                .execute();
+        assertTrue(createRosterResponse.getCreated());
+
+        final Group createdGroup = (Group) (createRosterResponse.getResource());
+        assertEquals(1, createdGroup.getMember().size());
+        assertEquals(patient1.getIdElement().getValueAsString(), createdGroup.getMemberFirstRep().getEntity().getReference());
+        
+        // create replace patient1 with patient 2
+        createdGroup.addMember().setEntity(new Reference(patient2.getIdElement()));
+
+        assertThrows(InvalidRequestException.class, () -> 
+                client
+                .update()
+                .resource(createdGroup)
+                .withId(createdGroup.getIdElement())
+                .execute());
+    }
+    
     /**
      * When $add is called and a new patient is added to a roster, it should show up in the response
      */
     @Test
+    @DisplayName("Add patient to roster and return to client 🥳")
+    @Order(4)
     public void testAddToRosterResponse() {
         final Practitioner practitioner = createPractitioner(NPIUtil.generateNPI());
         final Patient patient1 = createPatient("0O00O00OO04", DEFAULT_ORG_ID);
@@ -179,6 +228,8 @@ public class GroupResourceIT extends AbstractAttributionIT {
      * in order to ensure the response includes the appropriate number of members
      */
     @Test
+    @DisplayName("Add patient to empty roster 🥳")
+    @Order(5)
     public void testReplaceRosterResponse() {
         final Practitioner practitioner = createPractitioner(NPIUtil.generateNPI());
         final Group groupForCreate = SeedProcessor.createBaseAttributionGroup(FHIRExtractors.getProviderNPI(practitioner), DEFAULT_ORG_ID);
@@ -211,9 +262,11 @@ public class GroupResourceIT extends AbstractAttributionIT {
     }
 
     @Test
+    @DisplayName("Exceed limit for additions to new roster 🤮")
+    @Order(6)
     public void testAddMembersToRosterPatientLimit() {
-        final Practitioner practitioner = createPractitioner("1112111111");
-        final Patient patient1 = createPatient("0O00O00OO03", DEFAULT_ORG_ID);
+        final Practitioner practitioner = createPractitioner(NPIUtil.generateNPI());
+        final Patient patient1 = createPatient(MBIUtil.generateMBI(), DEFAULT_ORG_ID);
         final Group group = SeedProcessor.createBaseAttributionGroup(FHIRExtractors.getProviderNPI(practitioner), DEFAULT_ORG_ID);
 
         //Create initial group
@@ -223,10 +276,9 @@ public class GroupResourceIT extends AbstractAttributionIT {
                 .resource(group)
                 .encodedJson()
                 .execute();
-
         assertTrue(methodOutcome.getCreated());
-        final Group createdGroup = (Group) methodOutcome.getResource();
 
+        final Group createdGroup = (Group) methodOutcome.getResource();
         //Add new patient to existing group, should throw error
         final Patient patient2 = createPatient("0O00O00OO10", DEFAULT_ORG_ID);
         group.addMember().setEntity(new Reference(patient2.getIdElement()));
@@ -260,10 +312,51 @@ public class GroupResourceIT extends AbstractAttributionIT {
 
         assertEquals(1, addMember.getMember().size());
         assertEquals(patient1.getIdElement().getValueAsString(), addMember.getMemberFirstRep().getEntity().getReference());
-
     }
 
     @Test
+    @DisplayName("Add existing member to roster 🥳")
+    @Order(7)
+    public void testAddSameMemberToRoster() {
+        final Practitioner practitioner = createPractitioner("1112111111");
+        final Patient patient1 = createPatient("0O00O00OO03", DEFAULT_ORG_ID);
+        final Group group = SeedProcessor.createBaseAttributionGroup(FHIRExtractors.getProviderNPI(practitioner), DEFAULT_ORG_ID);
+
+        //Create initial group
+        group.addMember().setEntity(new Reference(patient1.getIdElement()));
+
+        final MethodOutcome methodOutcome = client.create()
+                .resource(group)
+                .encodedJson()
+                .execute();
+
+        assertTrue(methodOutcome.getCreated());
+        final Group createdGroup = (Group) methodOutcome.getResource();
+
+        final Parameters parameters = new Parameters();
+        parameters.addParameter().setResource(group);
+
+        //Add same patient to existing group, should not throw an error nor should it update any members
+        group.getMember().clear();
+        group.addMember().setEntity(new Reference(patient1.getIdElement()));
+
+        // patient is already in group, this doesn't increase member size
+        Group addMember = client
+                .operation()
+                .onInstance(createdGroup.getIdElement())
+                .named("$add")
+                .withParameters(parameters)
+                .returnResourceType(Group.class)
+                .encodedJson()
+                .execute();
+
+        assertEquals(1, addMember.getMember().size());
+        assertEquals(patient1.getIdElement().getValueAsString(), addMember.getMemberFirstRep().getEntity().getReference());
+    }
+
+    @Test
+    @DisplayName("Verify roster size limit checking 🤮")
+    @Order(8)
     public void testRosterSizeToBigMethodDirectly() {
         final Practitioner practitioner1 = AttributionTestHelpers.createPractitionerResource("1111111112");
         final Group group1 = SeedProcessor.createBaseAttributionGroup(FHIRExtractors.getProviderNPI(practitioner1), DEFAULT_ORG_ID);
@@ -311,6 +404,8 @@ public class GroupResourceIT extends AbstractAttributionIT {
     }
 
     @Test
+    @DisplayName("Verify bulk add of patients to roster 🥳")
+    @Order(9) 
     public void testMaxPatients() {
         final int MAX_PATIENTS = 1350;
         APPLICATION.getConfiguration().setPatientLimit(MAX_PATIENTS);

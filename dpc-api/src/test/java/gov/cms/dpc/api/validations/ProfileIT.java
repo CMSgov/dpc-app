@@ -17,7 +17,10 @@ import java.sql.Date;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.DisplayName;
 
+@DisplayName("Entity profile tests")
 class ProfileIT extends AbstractSecureApplicationIT {
 
     private ProfileIT() {
@@ -25,7 +28,8 @@ class ProfileIT extends AbstractSecureApplicationIT {
     }
 
     @Test
-    void testPatientProfile() {
+    @DisplayName("Create patient with invalid profile 🤮")
+    void testInvalidPatientProfile() {
         final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
         // Create a new patient record
 
@@ -52,6 +56,41 @@ class ProfileIT extends AbstractSecureApplicationIT {
                 .execute();
 
         assertEquals(4, outcome.getIssue().size(), "Should have validation failures");
+    }
+
+    @Test
+    @DisplayName("Create patient with valid profile 🥳")
+    void testPatientProfile() {
+        final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
+
+        final Patient validPatient = new Patient();
+        validPatient.addName().addGiven("test").setFamily("patient");
+
+        // Try for a valid patient
+        validPatient.addIdentifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("0O00O00OO00");
+        validPatient.setGender(Enumerations.AdministrativeGender.MALE);
+        validPatient.setBirthDate(Date.valueOf("1990-01-01"));
+        MethodOutcome outcome = client
+                .create()
+                .resource(validPatient)
+                .encodedJson()
+                .execute();
+        
+        assertTrue(outcome.getCreated());
+    }
+
+
+    @Test
+    @DisplayName("Bulk create patients containing an invalid profile 🤮")
+    void testBulkInvalidPatientProfile() {
+        final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
+        // Create a new patient record
+
+        final Patient invalidPatient = new Patient();
+        invalidPatient.addName().addGiven("test").setFamily("patient");
+
+        final Parameters vParams = new Parameters();
+        vParams.addParameter().setResource(invalidPatient);
 
         // Try for a valid patient
         final Patient validPatient = invalidPatient.copy();
@@ -85,7 +124,8 @@ class ProfileIT extends AbstractSecureApplicationIT {
     }
 
     @Test
-    void testProviderProfile() {
+    @DisplayName("Create provider with invalid profile 🤮")
+    void testInvalidProviderProfile() {
         final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
 
         final Practitioner invalidPractitioner = new Practitioner();
@@ -111,8 +151,18 @@ class ProfileIT extends AbstractSecureApplicationIT {
                 .execute();
 
         assertEquals(1, outcome.getIssue().size(), "Should have validation failures");
+    }
 
-        final Practitioner validPractitioner = invalidPractitioner.copy();
+    @Test
+    @DisplayName("Create provider with valid profile 🥳")
+    void testProviderProfile() {
+        final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
+
+        final Practitioner validPractitioner = new Practitioner();
+        validPractitioner.addName().addGiven("Test").setFamily("Practitioner");
+
+        final Parameters vParams = new Parameters();
+        vParams.addParameter().setResource(validPractitioner);
         validPractitioner.addIdentifier().setSystem(DPCIdentifierSystem.NPPES.getSystem()).setValue("1232312110");
 
         final MethodOutcome created = client
@@ -120,6 +170,23 @@ class ProfileIT extends AbstractSecureApplicationIT {
                 .resource(validPractitioner)
                 .encodedJson()
                 .execute();
+        
+        assertTrue(created.getCreated());
+    }
+
+    @Test
+    @DisplayName("Bulk create providers containing an invalid profile 🤮")
+    void testBulkProviderProfile() {
+        final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
+
+        final Practitioner invalidPractitioner = new Practitioner();
+        invalidPractitioner.addName().addGiven("Test").setFamily("Practitioner");
+
+        final Parameters vParams = new Parameters();
+        vParams.addParameter().setResource(invalidPractitioner);
+
+        final Practitioner validPractitioner = invalidPractitioner.copy();
+        validPractitioner.addIdentifier().setSystem(DPCIdentifierSystem.NPPES.getSystem()).setValue("1232312110");
 
         final Bundle bundle = new Bundle();
         bundle.addEntry().setResource(invalidPractitioner);

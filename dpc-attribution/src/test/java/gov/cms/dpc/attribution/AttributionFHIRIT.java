@@ -35,9 +35,10 @@ import static gov.cms.dpc.attribution.SharedMethods.submitAttributionBundle;
 import static gov.cms.dpc.common.utils.SeedProcessor.createBaseAttributionGroup;
 import static org.junit.jupiter.api.Assertions.*;
 
-@Disabled
 @ExtendWith(BufferedLoggerHandler.class)
 @IntegrationTest
+@DisplayName("Attribution roster operations")
+@Disabled
 class AttributionFHIRIT {
 
     private static final String configPath = "src/test/resources/test.application.yml";
@@ -57,9 +58,9 @@ class AttributionFHIRIT {
         APPLICATION.getApplication().run("db", "migrate", configPath);
 
         // Get the test seeds
-        final InputStream resource = AttributionFHIRIT.class.getClassLoader().getResourceAsStream(CSV);
+        final InputStream resource = AttributionFHIRTest.class.getClassLoader().getResourceAsStream(CSV);
         if (resource == null) {
-            throw new MissingResourceException("Can not find seeds file", AttributionFHIRIT.class.getName(), CSV);
+            throw new MissingResourceException("Can not find seeds file", AttributionFHIRTest.class.getName(), CSV);
         }
 
         // Read in the seeds and create the 'Roster' bundle
@@ -89,9 +90,10 @@ class AttributionFHIRIT {
                 .stream()
                 .map((Map.Entry<String, List<Pair<String, String>>> entry) -> SeedProcessor.generateAttributionBundle(entry, orgID))
                 .flatMap((bundle) -> Stream.of(
-                        DynamicTest.dynamicTest(nameGenerator.apply(bundle, "Submit"), () -> submitRoster(bundle)),
-                        DynamicTest.dynamicTest(nameGenerator.apply(bundle, "Update"), () -> updateRoster(bundle)),
-                        DynamicTest.dynamicTest(nameGenerator.apply(bundle, "Remove"), () -> removeRoster(bundle))));
+                        DynamicTest.dynamicTest(nameGenerator.apply(bundle, "Submit roster 🥳"), () -> submitRoster(bundle)),
+                        DynamicTest.dynamicTest(nameGenerator.apply(bundle, "Get missing roster 🤮"), () -> getMissingRoster()),
+                        DynamicTest.dynamicTest(nameGenerator.apply(bundle, "Update roster 🥳"), () -> updateRoster(bundle)),
+                        DynamicTest.dynamicTest(nameGenerator.apply(bundle, "Remove roster 🥳"), () -> removeRoster(bundle))));
     }
 
     private void submitRoster(Bundle bundle) {
@@ -163,6 +165,11 @@ class AttributionFHIRIT {
                 .execute();
 
         assertEquals(group2.getMember().size(), attributed.getTotal(), "Should have the same number of patients");
+    }
+    
+    private void getMissingRoster() {
+        ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
+        final IGenericClient client = ctx.newRestfulGenericClient("http://localhost:" + APPLICATION.getLocalPort() + "/v1/");
 
         // Try to get a non-existent roster
 

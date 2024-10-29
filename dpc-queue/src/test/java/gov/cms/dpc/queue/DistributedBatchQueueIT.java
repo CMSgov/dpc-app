@@ -25,9 +25,11 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
 
 @ExtendWith(BufferedLoggerHandler.class)
 @IntegrationTest
+@DisplayName("Distributed batch queue")
 public class DistributedBatchQueueIT {
 
     private final UUID aggregatorID = UUID.randomUUID();
@@ -46,8 +48,8 @@ public class DistributedBatchQueueIT {
         try (final Session session = sessionFactory.openSession()) {
             final Transaction tx = session.beginTransaction();
             try {
-                session.createQuery("delete from job_queue_batch_file").executeUpdate();
-                session.createQuery("delete from job_queue_batch").executeUpdate();
+                session.createMutationQuery("delete from job_queue_batch_file").executeUpdate();
+                session.createMutationQuery("delete from job_queue_batch").executeUpdate();
             } finally {
                 tx.commit();
             }
@@ -56,6 +58,7 @@ public class DistributedBatchQueueIT {
     }
 
     @Test
+    @DisplayName("Handle stuck batch job 🥳")
     void handleStuckBatchWithClaim() {
         // One organization id for both jobs
         final UUID orgID = UUID.randomUUID();
@@ -82,6 +85,7 @@ public class DistributedBatchQueueIT {
     }
 
     @Test
+    @DisplayName("Verify queue health 🥳")
     void validateHealthyQueue() {
         // This test is kind of crappy, since there is nothing to assert
         // If the queue is not health, an exception is thrown
@@ -89,6 +93,7 @@ public class DistributedBatchQueueIT {
     }
 
     @Test
+    @DisplayName("Verify queue health due to stuck batch job 🤮")
     void validateUnhealthyQueueDueToJobFailure() {
         // One organization id for both jobs
         final UUID orgID = UUID.randomUUID();
@@ -135,7 +140,7 @@ public class DistributedBatchQueueIT {
         try (final Session session = sessionFactory.openSession()) {
             final Transaction tx = session.beginTransaction();
             try {
-                session.createQuery("update job_queue_batch set updateTime = :updateTime where jobID = :jobID")
+                session.createMutationQuery("update job_queue_batch set updateTime = :updateTime where jobID = :jobID")
                         .setParameter("jobID", jobID)
                         .setParameter("updateTime", OffsetDateTime.now().minusMinutes(15))
                         .executeUpdate();

@@ -4,7 +4,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IReadExecutable;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import gov.cms.dpc.attribution.AbstractAttributionIT;
+import gov.cms.dpc.attribution.AbstractAttributionTest;
 import gov.cms.dpc.attribution.AttributionTestHelpers;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.testing.IntegrationTest;
@@ -16,13 +16,16 @@ import org.hl7.fhir.dstu3.model.Organization;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
 
 @IntegrationTest
-public class EndpointResourceIT extends AbstractAttributionIT {
+@DisplayName("Endpoint resource handling")
+public class EndpointResourceIT extends AbstractAttributionTest {
 
     final IGenericClient client = AttributionTestHelpers.createFHIRClient(ctx, getServerURL());
 
     @Test
+    @DisplayName("Create endpoint 🥳")
     void testCreateEndpoint() {
         Organization organization = OrganizationHelpers.createOrganization(ctx, client, "1111111112", false);
         Endpoint endpoint = OrganizationFactory.createValidFakeEndpoint(organization.getId());
@@ -37,6 +40,7 @@ public class EndpointResourceIT extends AbstractAttributionIT {
     }
 
     @Test
+    @DisplayName("Search endpoints 🥳")
     void testSearchEndpoints() {
         Organization organization = OrganizationHelpers.createOrganization(ctx, client, "1111111211", false);
         String endpointId = FHIRExtractors.getEntityUUID(organization.getEndpointFirstRep().getReference()).toString();
@@ -53,6 +57,7 @@ public class EndpointResourceIT extends AbstractAttributionIT {
     }
 
     @Test
+    @DisplayName("Fetch endpoint 🥳")
     void testFetchEndpoint() {
         Organization organization = OrganizationHelpers.createOrganization(ctx, client, "1111111310", false);
         String endpointId = FHIRExtractors.getEntityUUID(organization.getEndpointFirstRep().getReference()).toString();
@@ -67,6 +72,7 @@ public class EndpointResourceIT extends AbstractAttributionIT {
     }
 
     @Test
+    @DisplayName("Update endpoint 🥳")
     void testUpdateEndpoint() {
         Organization organization = OrganizationHelpers.createOrganization(ctx, client, "1211111111", false);
         String endpointId = FHIRExtractors.getEntityUUID(organization.getEndpointFirstRep().getReference()).toString();
@@ -90,6 +96,7 @@ public class EndpointResourceIT extends AbstractAttributionIT {
     }
 
     @Test
+    @DisplayName("Delete endpoint 🥳")
     void testDeleteEndpoint() {
         Organization organization = OrganizationHelpers.createOrganization(ctx, client, "1112111111", false);
         String endpointId = FHIRExtractors.getEntityUUID(organization.getEndpointFirstRep().getReference()).toString();

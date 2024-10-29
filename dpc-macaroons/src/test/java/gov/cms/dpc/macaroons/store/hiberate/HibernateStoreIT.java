@@ -27,7 +27,7 @@ class HibernateStoreIT extends AbstractStoreTest {
         try (SessionFactory sessionFactory = buildSessionFactory()) {
             try (Session session = sessionFactory.openSession()) {
                 final Transaction tx = session.beginTransaction();
-                session.createNativeQuery("DROP TABLE root_keys CASCADE").executeUpdate();
+                session.createNativeQuery("DROP TABLE root_keys CASCADE", Object.class).executeUpdate();
                 tx.commit();
             }
         }
