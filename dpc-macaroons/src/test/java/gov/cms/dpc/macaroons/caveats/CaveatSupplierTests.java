@@ -10,10 +10,13 @@ import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
 
+@DisplayName("Caveat supplier")
 class CaveatSupplierTests {
 
     @Test
+    @DisplayName("Expire caveats 🥳")
     void testExpirationSupplier() {
         final OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
         final Duration lifetime = Duration.of(5, ChronoUnit.MINUTES);
@@ -27,6 +30,7 @@ class CaveatSupplierTests {
     }
 
     @Test
+    @DisplayName("Get version 🥳")
     void testVersionSupplier() {
         final MacaroonCaveat caveat = new VersionCaveatSupplier(1).get();
 

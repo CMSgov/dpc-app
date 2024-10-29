@@ -5,10 +5,13 @@ import org.junit.jupiter.api.Test;
 import java.time.OffsetDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
 
+@DisplayName("Token handling")
 class CreateTokenRequestUnitTest {
 
     @Test
+    @DisplayName("Override token request hashcode and equals 🥳")
     void testEqualsAndHashCode() {
         CreateTokenRequest token1 = new CreateTokenRequest();
         token1.setExpiresAt(OffsetDateTime.now());
@@ -25,7 +28,5 @@ class CreateTokenRequestUnitTest {
         assertFalse(token1.equals(token2), "Tokens should NOT have been equal");
         assertFalse(token2.equals(token1), "Tokens should NOT have been equal");
         assertFalse(token1.hashCode() == token2.hashCode(), "Hash code should NOT match.");
-
-
     }
 }

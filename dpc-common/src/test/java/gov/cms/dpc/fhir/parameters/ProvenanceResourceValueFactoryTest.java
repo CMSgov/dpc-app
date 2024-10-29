@@ -1,6 +1,7 @@
 package gov.cms.dpc.fhir.parameters;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.inject.Injector;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import org.eclipse.jetty.http.HttpStatus;
@@ -11,12 +12,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.WebApplicationException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.BadRequestException;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
 
 @ExtendWith(BufferedLoggerHandler.class)
+@DisplayName("Provenance resource value factory")
 class ProvenanceResourceValueFactoryTest {
 
     private static final FhirContext ctx = FhirContext.forDstu3();
@@ -26,6 +29,7 @@ class ProvenanceResourceValueFactoryTest {
     }
 
     @Test
+    @DisplayName("Validate provenance 🥳")
     void testValidProvenance() {
         final Provenance provenance = new Provenance();
         provenance.addTarget(new Reference("Organization/nothing-real"));
@@ -44,6 +48,7 @@ class ProvenanceResourceValueFactoryTest {
     }
 
     @Test
+    @DisplayName("Validate provenance with missing header 🤮")
     void testMissingHeader() {
         final HttpServletRequest mock = Mockito.mock(HttpServletRequest.class);
         Mockito.when(mock.getHeader(ProvenanceResourceValueFactory.PROVENANCE_HEADER)).thenReturn(null);
@@ -53,12 +58,13 @@ class ProvenanceResourceValueFactoryTest {
 
         final ProvenanceResourceValueFactory factory = new ProvenanceResourceValueFactory(mockInjector, ctx);
 
-        final WebApplicationException exception = assertThrows(WebApplicationException.class, factory::provide, "Should throw an exception");
-        assertAll(() -> assertEquals(HttpStatus.BAD_REQUEST_400, exception.getResponse().getStatus(), "Should be a bad request"),
+        final InvalidRequestException exception = assertThrows(InvalidRequestException.class, factory::provide, "Should throw an exception");
+        assertAll(() -> assertEquals(HttpStatus.BAD_REQUEST_400, exception.getStatusCode(), "Should be a bad request"),
                 () -> assertEquals(String.format("Must have %s header", ProvenanceResourceValueFactory.PROVENANCE_HEADER), exception.getMessage(), "Should show missing header"));
     }
 
     @Test
+    @DisplayName("Validate invalid provenance 🤮")
     void testInvalidProvenance() {
 
         final Patient patient = new Patient();
@@ -72,8 +78,9 @@ class ProvenanceResourceValueFactoryTest {
 
         final ProvenanceResourceValueFactory factory = new ProvenanceResourceValueFactory(mockInjector, ctx);
 
-        final WebApplicationException exception = assertThrows(WebApplicationException.class, factory::provide, "Should throw an exception");
-        assertAll(() -> assertEquals(HttpStatus.BAD_REQUEST_400, exception.getResponse().getStatus(), "Should be a bad request"),
+        final InvalidRequestException exception = assertThrows(InvalidRequestException.class, factory::provide, "Should throw an exception");
+
+        assertAll(() -> assertEquals(HttpStatus.BAD_REQUEST_400, exception.getStatusCode(), "Should be a bad request"),
                 () -> assertEquals("Cannot parse FHIR `Provenance` resource", exception.getMessage(), "Should show missing header"));
     }
 }

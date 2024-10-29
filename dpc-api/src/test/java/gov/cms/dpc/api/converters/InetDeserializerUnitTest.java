@@ -14,10 +14,12 @@ import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.junit.jupiter.api.DisplayName;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
+@DisplayName("Inet deserialization")
 class InetDeserializerUnitTest {
     InetDeserializer deserializer = new InetDeserializer();
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
@@ -27,6 +29,7 @@ class InetDeserializerUnitTest {
     DeserializationContext ctx;
 
     @Test
+    @DisplayName("Deserialize inet address 🥳")
     public void deserializeTest_happyPath() throws IOException {
         JsonNode treeNode = mock(JsonNode.class);
         JsonNode addressNode = mock(JsonNode.class);
@@ -40,6 +43,7 @@ class InetDeserializerUnitTest {
     }
 
     @Test
+    @DisplayName("Inet address not found 🤮")
     public void deserializeTest_noIpFound() throws IOException {
         JsonNode treeNode = mock(JsonNode.class);
 

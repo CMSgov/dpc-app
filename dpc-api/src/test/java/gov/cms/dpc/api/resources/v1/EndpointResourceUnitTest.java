@@ -12,16 +12,17 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.junit.jupiter.api.DisplayName;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-
+@DisplayName("Endpoint resource operations")
 public class EndpointResourceUnitTest {
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
@@ -36,6 +37,7 @@ public class EndpointResourceUnitTest {
     }
 
     @Test
+    @DisplayName("Create endpoint with no managing org 🥳")
     public void testCreateEndpointWithNoManagingOrganization() {
         OrganizationPrincipal op = APITestHelpers.makeOrganizationPrincipal();
 
@@ -56,6 +58,7 @@ public class EndpointResourceUnitTest {
     }
 
     @Test
+    @DisplayName("Create endpoint with managing org mismatch 🤮")
     public void testCreateEndpointWithManagingOrganizationMismatch() {
         OrganizationPrincipal organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
 
@@ -66,6 +69,7 @@ public class EndpointResourceUnitTest {
     }
 
     @Test
+    @DisplayName("Create endpoint with managing org 🥳")
     public void testCreateEndpointWithMatchingManagingOrganizations() {
         OrganizationPrincipal op = APITestHelpers.makeOrganizationPrincipal();
 
@@ -87,6 +91,7 @@ public class EndpointResourceUnitTest {
     }
 
     @Test
+    @DisplayName("Get multiple endpoints 🥳")
     public void testGetEndpoints() {
         OrganizationPrincipal organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
 
@@ -105,6 +110,7 @@ public class EndpointResourceUnitTest {
     }
 
     @Test
+    @DisplayName("Get single endpoint 🥳")
     public void testFetchEndpoint() {
         Endpoint endPoint = mock(Endpoint.class);
         IReadExecutable<Endpoint> iReadExecutable = mock(IReadExecutable.class);
@@ -120,6 +126,7 @@ public class EndpointResourceUnitTest {
     }
 
     @Test
+    @DisplayName("Update endpoint 🥳")
     public void testUpdateEndPoint() {
         Endpoint endPoint = mock(Endpoint.class, Answers.RETURNS_DEEP_STUBS);
         when(endPoint.getManagingOrganization().getReference()).thenReturn("orgReference");
@@ -143,6 +150,7 @@ public class EndpointResourceUnitTest {
     }
 
     @Test
+    @DisplayName("Update endpoint with unrecognized id 🤮")
     public void testUpdateEndPointWithWrongId() {
         Endpoint newEndPoint = mock(Endpoint.class, Answers.RETURNS_DEEP_STUBS);
         when(newEndPoint.getManagingOrganization().getReference()).thenReturn("newRef");
@@ -159,6 +167,7 @@ public class EndpointResourceUnitTest {
     }
 
     @Test
+    @DisplayName("Delete endpoint 🥳")
     public void deleteEndPoint() {
         UUID endPointUUID = UUID.randomUUID();
 

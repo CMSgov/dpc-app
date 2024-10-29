@@ -1,6 +1,5 @@
 package gov.cms.dpc.consent.resources;
 
-import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.common.consent.entities.ConsentEntity;
 import gov.cms.dpc.consent.jdbi.ConsentDAO;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
@@ -14,13 +13,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import static gov.cms.dpc.fhir.FHIRMediaTypes.FHIR_JSON;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.DisplayName;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -33,8 +33,6 @@ import static org.mockito.Mockito.when;
 public class ConsentResourceUnitTest {
 
     static {
-        // otherwise our testContainer doesn't get assembled properly
-        JerseyGuiceUtils.reset();
     }
 
     private static final String TEST_HICN = "this_is_a_placeholder_hicn";
@@ -64,6 +62,7 @@ public class ConsentResourceUnitTest {
     }
 
     @Test
+    @DisplayName("Get consent resource with valid ID 🥳")
     final void getResource_withValidId_returnsConsentResource() {
         try (Response response = resource.target("/Consent/" + TEST_ID)
                 .request()
@@ -78,6 +77,7 @@ public class ConsentResourceUnitTest {
     }
 
     @Test
+    @DisplayName("Get consent resource with no ID 🤮")
     final void search_withEmptyString_isInvalid() {
         try (Response response = resource.target("/Consent/")
                 .request()
@@ -89,6 +89,7 @@ public class ConsentResourceUnitTest {
     }
 
     @ParameterizedTest
+    @DisplayName("Get consent resource with invalid path parameters 🤮")
     @ValueSource(strings = {"/Consent?", "/Consent?_id=,patient=mbi_1", "/Consent?identifier=", "/Consent?patient=", "/Consent?owieurijefj"})
     final void searchConsentResource_fails_withInvalidSearchParameters(String path) {
         try (Response response = resource.target(path)

@@ -13,12 +13,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
 
 @ExtendWith(BufferedLoggerHandler.class)
+@DisplayName("Provenance resource value factory for Provider")
 class ProvenanceResourceValueFactoryProviderTest {
 
     private static Injector injector = Mockito.mock(Injector.class);
@@ -31,6 +33,7 @@ class ProvenanceResourceValueFactoryProviderTest {
     }
 
     @Test
+    @DisplayName("Create provenance factory 🥳")
     void testCorrectFactory() {
         final Parameter parameter = Mockito.mock(Parameter.class);
         final ProvenanceHeader mockAnnotation = Mockito.mock(ProvenanceHeader.class);
@@ -50,6 +53,7 @@ class ProvenanceResourceValueFactoryProviderTest {
     }
 
     @Test
+    @DisplayName("Create provenance factory with missing annotation 🤮")
     void testMissingAnnotation() {
         final Parameter parameter = Mockito.mock(Parameter.class);
         Mockito.when(parameter.getDeclaredAnnotation(ProvenanceHeader.class)).thenReturn(null);
@@ -58,6 +62,7 @@ class ProvenanceResourceValueFactoryProviderTest {
     }
 
     @Test
+    @DisplayName("Create provenance factory with incorrect parameter 🤮")
     void testIncorrectParameter() {
         final Parameter parameter = Mockito.mock(Parameter.class);
         final ProvenanceHeader mockAnnotation = Mockito.mock(ProvenanceHeader.class);

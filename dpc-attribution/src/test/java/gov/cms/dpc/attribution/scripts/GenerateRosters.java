@@ -14,6 +14,7 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
+import org.junit.jupiter.api.DisplayName;
 
 /**
  * Generate Rosters from SyntheticMass data
@@ -22,6 +23,7 @@ import java.util.stream.Collectors;
  * Make sure APIKEY environment variable it set
  */
 @Disabled
+@DisplayName("Roster generation")
 class GenerateRosters {
 
     private static final String CSV = "test_associations.csv";
@@ -32,6 +34,7 @@ class GenerateRosters {
     }
 
     @Test
+    @DisplayName("Generate patients via script 🥳")
     public void generatePatients() throws IOException {
 
         final String apikey = System.getenv("APIKEY");

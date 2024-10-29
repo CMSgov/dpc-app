@@ -1,7 +1,6 @@
 package gov.cms.dpc.fhir.dropwizard.handlers;
 
 import ca.uhn.fhir.context.FhirContext;
-import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
 import gov.cms.dpc.fhir.annotations.BundleReturnProperties;
@@ -11,24 +10,21 @@ import org.hl7.fhir.dstu3.model.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.GenericType;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.GenericType;
 import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.DisplayName;
 
 @ExtendWith(DropwizardExtensionsSupport.class)
+@DisplayName("Bundle data handling")
 public class BundleHandlerTest {
-
-    static {
-        // otherwise our testContainer doesn't get assembled properly
-        JerseyGuiceUtils.reset();
-    }
 
     private static ResourceExtension resource = buildResource();
     private static FhirContext ctx;
@@ -45,6 +41,7 @@ public class BundleHandlerTest {
     }
 
     @Test
+    @DisplayName("Create bundle from resource 🥳")
     void testBundle() {
         final String bundleString = resource
                 .target("")
@@ -61,6 +58,7 @@ public class BundleHandlerTest {
     }
 
     @Test
+    @DisplayName("Create bundle from raw string 🥳")
     void testRawBundle() {
         final String bundleString = resource
                 .target("/raw")
@@ -73,6 +71,7 @@ public class BundleHandlerTest {
     }
 
     @Test
+    @DisplayName("Create empty bundle 🥳")
     void testEmptyBundle() {
         final String bundleString = resource
                 .target("/empty")
@@ -84,6 +83,7 @@ public class BundleHandlerTest {
     }
 
     @Test
+    @DisplayName("Create collection bundle 🥳?")
     void testCollectionBundle() {
         final String bundleString = resource
                 .target("/collection")
@@ -124,6 +124,7 @@ public class BundleHandlerTest {
     }
 
     @Test
+    @DisplayName("Create Strings List resource 🥳")
     void testStringListReturn() {
         //noinspection Convert2Diamond - Removing the class assertion causes javac to explode.
         final List<String> strings = resource
@@ -137,6 +138,7 @@ public class BundleHandlerTest {
     }
 
     @Test
+    @DisplayName("Create String resource 🥳")
     void testStringReturn() {
 
         final String s = resource

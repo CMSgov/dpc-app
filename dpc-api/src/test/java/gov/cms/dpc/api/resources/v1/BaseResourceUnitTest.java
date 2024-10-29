@@ -8,6 +8,7 @@ import org.hl7.fhir.dstu3.model.CapabilityStatement;
 import org.junit.jupiter.api.*;
 import org.mockito.*;
 
+@DisplayName("Base resource operations")
 class BaseResourceUnitTest {
     @Mock KeyResource kr;
     @Mock TokenResource tr;
@@ -31,6 +32,7 @@ class BaseResourceUnitTest {
     }
 
     @Test
+    @DisplayName("Base resource getters 🥳")
     public void testGetterMethods() {
         BaseResource baseResource = new BaseResource(kr, tr, gr, jr, dr, er, or, par, pr, sdr, ar, ip, url);
 
@@ -49,6 +51,7 @@ class BaseResourceUnitTest {
     }
 
     @Test
+    @DisplayName("Valid capability statement returned 🥳")
     public void testMetadata() {
         BaseResource baseResource = new BaseResource(kr, tr, gr, jr, dr, er, or, par, pr, sdr, ar, ip, url);
         CapabilityStatement capabilityStatement = Mockito.mock(CapabilityStatement.class);
@@ -61,6 +64,7 @@ class BaseResourceUnitTest {
     }
 
     @Test
+    @DisplayName("Get version 🥳")
     void testVersion() {
         try(MockedConstruction<PropertiesProvider> mock = Mockito.mockConstruction(PropertiesProvider.class)) {
             BaseResource baseResource = new BaseResource(kr, tr, gr, jr, dr, er, or, par, pr, sdr, ar, ip, url);
