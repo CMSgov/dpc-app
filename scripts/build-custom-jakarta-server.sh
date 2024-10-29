@@ -5,10 +5,12 @@ NEED_TO_BUILD=0
 JAKARTA_VERSION="6.1.0"
 CUSTOM_VERSION="6.1.0-DPC"
 JAKARTA_REPO="https://github.com/eclipse-ee4j/servlet-api.git"
-TARGET_DIR="./jakarta.servlet-api"
+WORKING_DIR="$(pwd)";
+TMP_DIR="$[pwd)/tmp";
+REPO_DIR="$(pwd)/repo";
+TARGET_DIR="jakarta.servlet-api"
 INTERFACE_FILE="SingleThreadModel.java"
-PACKAGE_DIR="jakarta/servlet" # Adjust this path as per the structure in the repository
-CUSTOM_REPO_DIR="../../../repo"
+PACKAGE_DIR="jakarta/servlet"
 
 echo -n "Checking if DPC Custom Jakarta Servlet API already exists..."
 mvn dependency:get -DgroupId=jakarta.servlet -DartifactId=jakarta.servlet-api -Dversion=$CUSTOM_VERSION -Dmaven.repo.local=./repo > /dev/null 2>&1
@@ -41,13 +43,12 @@ fi
 
 echo "Building DPC-custom Jakarta Servlet API...";
 
-
 # Step 1: Clone the jakarta.servlet-api repository
 echo -n "	Step 1: Cloning the jakarta.servlet-api repository..."
 (mkdir -p tmp && cd tmp && git clone --branch $JAKARTA_VERSION-RELEASE --single-branch --depth 1 $JAKARTA_REPO $TARGET_DIR > /dev/null 2>&1)
 
 if [ $? -ne 0 ]; then
-  echo "Failed to clone repository."
+  echo "failed to clone repository!"
   exit 1
 else
   echo "done!"
@@ -59,7 +60,7 @@ mkdir -p tmp/$TARGET_DIR/src/main/java/$PACKAGE_DIR
 cp scripts/$INTERFACE_FILE tmp/$TARGET_DIR/api/src/main/java/$PACKAGE_DIR/
 
 if [ $? -ne 0 ]; then
-  echo "Failed to add SingleThreadModel interface."
+  echo "failed to add SingleThreadModel interface!"
   exit 1
 else
   echo "done!"
@@ -67,10 +68,16 @@ fi
 
 # Step 3: Modify the version in the POM file
 echo -n "	Step 3: Modifying the version in the POM file..."
-sed -i '' "s/<version>$JAKARTA_VERSION<\/version>/<version>$CUSTOM_VERSION<\/version>/" tmp/$TARGET_DIR/api/pom.xml
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  # macOS
+  sed -i '' "s/<version>$JAKARTA_VERSION<\/version>/<version>$CUSTOM_VERSION<\/version>/" tmp/$TARGET_DIR/api/pom.xml
+else
+  # Linux or other systems
+  sed -i "s/<version>$JAKARTA_VERSION<\/version>/<version>$CUSTOM_VERSION<\/version>/" tmp/$TARGET_DIR/api/pom.xml
+fi
 
 if [ $? -ne 0 ]; then
-  echo "Failed to modify the POM file!";
+  echo "failed to modify the POM file!";
   exit 1;
 else
   echo "done!";
@@ -81,7 +88,7 @@ echo -n "	Step 4: Building the custom Jakarta Servlet API v$CUSTOM_VERSION...";
 (cd tmp/$TARGET_DIR/api && mvn clean package -DskipTests > /dev/null 2>&1)
 
 if [ $? -ne 0 ]; then
-  echo "Build failed."
+  echo "build failed!"
   exit 1
 else
   echo "done!"
@@ -98,7 +105,7 @@ echo -n "	Step 5: Installing the artifact in the project repository...";
   -DlocalRepositoryPath=$CUSTOM_REPO_DIR > /dev/null 2>&1)
 
 if [ $? -ne 0 ]; then
-  echo "Failed to install artifact to custom repository."
+  echo "failed to install artifact to custom repository!"
   exit 1
 else
   echo "done!"
