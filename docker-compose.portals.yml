@@ -1,12 +1,18 @@
 volumes:
   coverage:
 
-
 services:
 
   redis:
     image: redis:latest
-
+    healthcheck:
+      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+      interval: 10s
+      retries: 5
+      start_period: 60s
+      timeout: 10s
+    restart: unless-stopped
+      
   dpc_web:
     build:
       context: .
@@ -19,26 +25,34 @@ services:
       - "./dpc-web/Gemfile.lock:/dpc-web/Gemfile.lock"
       - "./dpc-web/app:/dpc-web/app"
       - "./dpc-web/spec:/dpc-web/spec"
-
     environment:
       - REDIS_URL=redis://redis
       - DATABASE_URL=postgresql://db/dpc-website_development
       - TEST_DATABASE_URL=postgresql://db/dpc-website_test
       - API_METADATA_URL=http://api:3002/v1
       - API_ADMIN_URL=http://api:9900
-      - GOLDEN_MACAROON=${GOLDEN_MACAROON}
+      - GOLDEN_MACAROON=${GOLDEN_MACAROON:-}
       - DB_USER=postgres
       - DB_PASS=dpc-safe
       - DATABASE_CLEANER_ALLOW_REMOTE_DATABASE_URL=true
-      - DPC_CA_CERT=${DPC_CA_CERT}
+      - DPC_CA_CERT=${DPC_CA_CERT:-}
       - RUBY_YJIT_ENABLE=1
       - DISABLE_JSON_LOGGER=true
+      - NEW_RELIC_AGENT_ENABLED=${NEW_RELIC_AGENT_ENABLED:-true}
+      - WEB_SVC_PORT=3500
     ports:
       - "3900:3500"
     depends_on:
-      - db
-      - redis
-      - web_sidekiq
+      web_sidekiq:
+        condition: service_healthy
+        restart: true
+    healthcheck:
+      test: ["CMD-SHELL", "[ \"$(echo $( wget -q http://127.0.0.1:$$WEB_SVC_PORT/health_check -O- ))\" == \"success\" ]"]
+      interval: 10s
+      retries: 5
+      start_period: 60s
+      timeout: 10s
+    restart: unless-stopped
 
   web_sidekiq:
     volumes:
@@ -54,16 +68,29 @@ services:
       - TEST_DATABASE_URL=postgresql://db/dpc-website_test
       - API_METADATA_URL=http://api:3002/v1
       - API_ADMIN_URL=http://api:9900
-      - GOLDEN_MACAROON=${GOLDEN_MACAROON}
+      - GOLDEN_MACAROON=${GOLDEN_MACAROON:-}
       - DB_USER=postgres
       - DB_PASS=dpc-safe
       - DATABASE_CLEANER_ALLOW_REMOTE_DATABASE_URL=true
-      - DPC_CA_CERT=${DPC_CA_CERT}
+      - DPC_CA_CERT=${DPC_CA_CERT:-}
       - RUBY_YJIT_ENABLE=1
       - DISABLE_JSON_LOGGER=true
+      - NEW_RELIC_AGENT_ENABLED=${NEW_RELIC_AGENT_ENABLED:-true}
+      - SIDEKIQ_SVC_PORT=7433
+    healthcheck:
+      test: ["CMD-SHELL", "[[  $(wget -q http://127.0.0.1:$$SIDEKIQ_SVC_PORT -O-) == \"Alive!\" ]]"]
+      interval: 10s
+      retries: 5
+      start_period: 60s
+      timeout: 10s
+    restart: unless-stopped
     depends_on:
-      - redis
-      - db
+      redis:
+        condition: service_healthy
+        restart: true
+      db:
+        condition: service_healthy
+        restart: true
 
   dpc_admin:
     build:
@@ -76,7 +103,7 @@ services:
       - "./dpc-admin/Gemfile.lock:/dpc-admin/Gemfile.lock"
     environment:
       - REDIS_URL=redis://redis
-      - GOLDEN_MACAROON=${GOLDEN_MACAROON}
+      - GOLDEN_MACAROON=${GOLDEN_MACAROON:-}
       - API_METADATA_URL=http://api:3002/v1
       - API_ADMIN_URL=http://api:9900
       - DATABASE_URL=postgresql://db/dpc-website_development
@@ -86,12 +113,20 @@ services:
       - DATABASE_CLEANER_ALLOW_REMOTE_DATABASE_URL=true
       - RUBY_YJIT_ENABLE=1
       - DISABLE_JSON_LOGGER=true
+      - ADMIN_SVC_PORT=3000
     ports:
       - "3000:3000"
     depends_on:
-      - db
-      - redis
-      - admin_sidekiq
+      admin_sidekiq:
+        condition: service_healthy
+        restart: true
+    healthcheck:
+      test: ["CMD-SHELL", "[ \"$(wget -q http://127.0.0.1:$$ADMIN_SVC_PORT/admin/health_check -O- )\" == \"success\" ]"]
+      interval: 10s
+      retries: 5
+      start_period: 60s
+      timeout: 10s
+    restart: unless-stopped
 
   admin_sidekiq:
     volumes:
@@ -103,7 +138,7 @@ services:
     image: dpc-web-admin:latest
     environment:
       - REDIS_URL=redis://redis
-      - GOLDEN_MACAROON=${GOLDEN_MACAROON}
+      - GOLDEN_MACAROON=${GOLDEN_MACAROON:-}
       - API_METADATA_URL=http://api:3002/v1
       - API_ADMIN_URL=http://api:9900
       - DATABASE_URL=postgresql://db/dpc-website_development
@@ -113,9 +148,21 @@ services:
       - DATABASE_CLEANER_ALLOW_REMOTE_DATABASE_URL=true
       - RUBY_YJIT_ENABLE=1
       - DISABLE_JSON_LOGGER=true
+      - SIDEKIQ_SVC_PORT=7434
+    healthcheck:
+      test: ["CMD-SHELL", "[[  $(wget -q http://127.0.0.1:$$SIDEKIQ_SVC_PORT -O-) == \"Alive!\" ]]"]
+      interval: 10s
+      retries: 5
+      start_period: 60s
+      timeout: 10s
+    restart: unless-stopped
     depends_on:
-      - redis
-      - db
+      redis:
+        condition: service_healthy
+        restart: true
+      db:
+        condition: service_healthy
+        restart: true
 
   dpc_portal:
     build:
@@ -154,7 +201,7 @@ services:
       - REDIS_URL=redis://redis
       - DATABASE_URL=postgresql://db/dpc-portal_development
       - TEST_DATABASE_URL=postgresql://db/dpc-portal_test
-      - GOLDEN_MACAROON=${GOLDEN_MACAROON}
+      - GOLDEN_MACAROON=${GOLDEN_MACAROON:-}
       - API_METADATA_URL=http://api:3002/v1
       - API_ADMIN_URL=http://api:9900
       - DB_USER=postgres
@@ -167,11 +214,20 @@ services:
       - ENV=local
       - NEW_RELIC_MONITOR_MODE=false
       - DISABLE_JSON_LOGGER=true
+      - PORTAL_SVC_PORT=3100
     ports:
       - "3100:3100"
     depends_on:
-      - db
-      - portal_sidekiq
+      portal_sidekiq:
+        condition: service_healthy
+        restart: true
+    healthcheck:
+      test: ["CMD-SHELL", "[[  $(wget -q http://127.0.0.1:$$PORTAL_SVC_PORT/portal/health_check -O-) == \"success\" ]]"]
+      interval: 10s
+      retries: 5
+      start_period: 60s
+      timeout: 10s
+    restart: unless-stopped
 
   portal_sidekiq:
     volumes:
@@ -187,7 +243,7 @@ services:
       - DATABASE_URL=postgresql://db/dpc-portal_development
       - DB_USER=postgres
       - DB_PASS=dpc-safe
-      - GOLDEN_MACAROON=${GOLDEN_MACAROON}
+      - GOLDEN_MACAROON=${GOLDEN_MACAROON:-}
       - API_ADMIN_URL=http://api:9900
       - API_METADATA_URL=http://api:3002/v1
       - CPI_API_GW_BASE_URL=http://localhost:4567/
@@ -196,32 +252,18 @@ services:
       - RUBY_YJIT_ENABLE=1
       - ENV=local
       - DISABLE_JSON_LOGGER=true
+      - SIDEKIQ_SVC_PORT=7435
+    healthcheck:
+      test: ["CMD-SHELL", "[[  $(wget -q http://127.0.0.1:$$SIDEKIQ_SVC_PORT -O-) == \"Alive!\" ]]"]
+      interval: 10s
+      retries: 5
+      start_period: 60s
+      timeout: 10s
+    restart: unless-stopped
     depends_on:
-      - redis
-      - db
-
-  # Starts up each service in the background
-  start_core_dependencies:
-    image: dadarek/wait-for-dependencies
-    depends_on:
-      - db
-      - redis
-    command: db:5432
-
-  start_web:
-    image: dadarek/wait-for-dependencies
-    depends_on:
-      - dpc_web
-    command: dpc_web:3500
-
-  start_admin:
-    image: dadarek/wait-for-dependencies
-    depends_on:
-      - dpc_admin
-    command: dpc_admin:3000
-
-  start_portal:
-    image: dadarek/wait-for-dependencies
-    depends_on:
-      - dpc_portal
-    command: dpc_portal:3100
+      redis:
+        condition: service_healthy
+        restart: true
+      db:
+        condition: service_healthy
+        restart: true
