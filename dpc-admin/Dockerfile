@@ -11,7 +11,7 @@ RUN apk update && \
 
 # Set the working directory
 RUN mkdir -p /dpc-admin/vendor/api_client
-Workdir /dpc-admin
+WORKDIR /dpc-admin
 
 # Copy over the files needed to fetch dependencies
 COPY /engines/api_client/ /dpc-admin/vendor/api_client/

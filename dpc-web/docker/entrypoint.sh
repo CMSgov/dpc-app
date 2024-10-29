@@ -18,7 +18,7 @@ if [ "$1" == "web" ]; then
   # Autogenerate fresh golden macaroons in local development
   if [[ "$RAILS_ENV" != "production" ]] && [[ -z "$GOLDEN_MACAROON" ]]; then
     echo "No golden macaroon found. Attempting to generate a new one..."
-    export GOLDEN_MACAROON=$(curl -X POST -w '\n' ${API_ADMIN_URL}/tasks/generate-token || echo '')
+    export GOLDEN_MACAROON=$(wget -q --post-data '\n' ${API_ADMIN_URL}/tasks/generate-token -O- || echo '');
 
     if [ -n "$GOLDEN_MACAROON" ]; then
       echo "Successfully generated new golden macaroon."
