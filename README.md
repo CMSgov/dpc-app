@@ -120,7 +120,9 @@ For development, we recommend the following tooling:
 
 ### Installing and Using Pre-commit
 
-Anyone committing to this repo must use the pre-commit hook to lower the likelihood that secrets will be exposed.
+[pre-commit](https://pre-commit.com/) is a framework for running filters against proposed commits prior to them being committed. The tools can range from quality assurance to detecting potential leaks of secure or sensitive informaiton. Once a branch is pushed to the public dpc-app repo, it is available to the public and cached in github, presenting a security incident.
+
+Anyone committing to this repo <span style="color:red"><u><ins>**must use the pre-commit hook**</ins></u></span> to lower the likelihood that secrets will be exposed. 
 
 #### Step 1: Install pre-commit
 
@@ -134,13 +136,13 @@ Other installation options can be found in the [pre-commit documentation](https:
 
 #### Step 2: Install the hooks
 
-Run the following command to install the gitleaks hook:
+From the project directory, run the following command to install the gitleaks hook:
 
 ```sh
 pre-commit install
 ```
 
-This will download and install the pre-commit hooks specified in `.pre-commit-config.yaml`.
+This will download the pre-commit hooks specified in `.pre-commit-config.yaml` and install them in the project's local git repo (.git/).
 
 ### Quickstart
 
@@ -153,13 +155,14 @@ The files committed in the `ops/config/encrypted` directory hold secret informat
 
 Before building the app or running any tests, the decrypted secrets must be available as environment variables.
 
-In order to encrypt and decrypt configuration variables, you must create a `.vault_password` file in the root directory. Contact another team member to gain access to the vault password.
+In order to encrypt and decrypt configuration variables, you must create a `.vault_password` file in the project root directory. Contact another team member to gain access to the vault password.
 
 Run the following to decrypt the encrypted files:
 
 ```sh
 make secure-envs
 ```
+
 
 If decrypted successfully, you will see the decrypted data in new files under `/ops/config/decrypted` with the same names as the corresponding encrypted files.
 
@@ -179,8 +182,10 @@ Note that this will always generate a unique hash, even if you didn't change the
 DPC requires an external Postgres database to be running. While a separate Postgres server can be used, the `docker-compose` file includes everything needed, and can be started like so: 
 
 ```bash
-docker compose up start_core_dependencies
+make start-db
 ```
+
+For insight into how resources are being configured and orchestrated, review the project Makefile and docker-compose*.yml files.
 
 **Warning**: If you do have an existing Postgres database running on port 5342, docker-compose **will not** alert you to the port conflict. Ensure any local Postgres databases are stopped before starting docker-compose.
 
@@ -245,19 +250,6 @@ docker compose up {db,aggregation,attribution,api}
 By default, the Docker containers start with minimal authentication enabled, meaning that some functionality (such as extracting the organization_id from the access token) will not work as expected and always returns the same value.
 This can be overridden during startup by setting the `AUTH_DISABLED=false` environment variable. 
 
-When running locally, you'll need to update the docker-compse.yml file by adding:
-```yaml
-ports: 
-  - "5432:5432"
-```
-
-in the `db` node e.g.
-```yaml
-db: 
-  image: postgres:11 
-  ports: 
-    - "5432:5432"
-```
 ### Generating a golden macaroon
 
 Golden macaroons are automatically generated and configured upon startup for the frontend applications. To generate your own for use, run the command below:
@@ -337,7 +329,7 @@ The demo performs the following actions:
 ### Manual testing
 
 The recommended method for testing the services is with the [Postman](https://www.getpostman.com) application.
-This allows easy visualization of responses, as well as simplifies adding the necessary HTTP headers.
+This allows easy visualization of responses, as well as simplifies adding the necessary HTTP headers. Please be aware that more recent updates to Postman software and services have created Postman cloud services that store some Postman configuration and project data in the Postman cloud. Make sure to use Postman vault and/or mark environment variables as "secure" to prevent them from being stored on Postman servers.
 
 Steps for testing the data export:
 
