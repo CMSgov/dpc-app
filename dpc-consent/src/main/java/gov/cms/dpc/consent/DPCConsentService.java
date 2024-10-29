@@ -1,7 +1,6 @@
 package gov.cms.dpc.consent;
 
-import com.codahale.metrics.jersey2.InstrumentedResourceMethodApplicationListener;
-import com.squarespace.jersey2.guice.JerseyGuiceUtils;
+import com.codahale.metrics.jersey3.InstrumentedResourceMethodApplicationListener;
 import gov.cms.dpc.common.hibernate.consent.DPCConsentHibernateBundle;
 import gov.cms.dpc.common.hibernate.consent.DPCConsentHibernateModule;
 import gov.cms.dpc.common.utils.EnvironmentParser;
@@ -43,8 +42,6 @@ public class DPCConsentService extends Application<DPCConsentConfiguration> {
 
     @Override
     public void initialize(Bootstrap<DPCConsentConfiguration> bootstrap) {
-        JerseyGuiceUtils.reset();
-
         // Enable variable substitution with environment variables
         EnvironmentVariableSubstitutor substitutor = new EnvironmentVariableSubstitutor(false);
         SubstitutingSourceProvider provider =

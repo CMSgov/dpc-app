@@ -8,9 +8,8 @@ import org.bouncycastle.util.encoders.Hex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.NotFoundException;
 import java.io.File;
 import java.nio.file.Paths;
 import java.time.OffsetDateTime;
@@ -32,10 +31,10 @@ public class FileManager {
     public FilePointer getFile(UUID organizationID, String fileID) {
 
         final JobQueueBatchFile batchFile = this.jobQueue.getJobBatchFile(organizationID, fileID)
-                .orElseThrow(() -> new WebApplicationException("Cannot find file", Response.Status.NOT_FOUND));
+                .orElseThrow(() -> new NotFoundException("Cannot find file"));
 
         final JobQueueBatch jobQueueBatch = this.jobQueue.getBatch(batchFile.getBatchID())
-                .orElseThrow(() -> new WebApplicationException("Cannot export job for file", Response.Status.NOT_FOUND));
+                .orElseThrow(() -> new NotFoundException("Cannot export job for file"));
 
         final java.nio.file.Path path = Paths.get(String.format("%s/%s.ndjson", fileLocation, batchFile.getFileName()));
         logger.debug("Streaming file {}", path.toString());

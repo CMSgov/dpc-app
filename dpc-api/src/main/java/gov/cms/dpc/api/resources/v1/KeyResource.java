@@ -1,6 +1,7 @@
 package gov.cms.dpc.api.resources.v1;
 
 
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
@@ -17,16 +18,15 @@ import io.dropwizard.auth.Auth;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.swagger.annotations.*;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.eclipse.jetty.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import java.security.SecureRandom;
 import java.util.List;
 import java.util.Optional;
@@ -78,7 +78,7 @@ public class KeyResource extends AbstractKeyResource {
     public PublicKeyEntity getPublicKey(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal, @NotNull @PathParam(value = "keyID") UUID keyID) {
         final List<PublicKeyEntity> publicKeys = this.dao.publicKeySearch(keyID, organizationPrincipal.getID());
         if (publicKeys.isEmpty()) {
-            throw new WebApplicationException("Cannot find public key", Response.Status.NOT_FOUND);
+            throw new NotFoundException("Cannot find public key");
         }
         return publicKeys.get(0);
     }
@@ -101,7 +101,7 @@ public class KeyResource extends AbstractKeyResource {
         final List<PublicKeyEntity> keys = this.dao.publicKeySearch(keyID, organizationPrincipal.getID());
 
         if (keys.isEmpty()) {
-            throw new WebApplicationException("Cannot find certificate", Response.Status.NOT_FOUND);
+            throw new NotFoundException("Cannot find certificate");
         }
         keys.forEach(this.dao::deletePublicKey);
 
@@ -130,7 +130,7 @@ public class KeyResource extends AbstractKeyResource {
         final String keyLabel;
         if (keyLabelOptional.isPresent()) {
             if (keyLabelOptional.get().length() > 25) {
-                throw new WebApplicationException("Key label cannot be more than 25 characters", Response.Status.BAD_REQUEST);
+                throw new BadRequestException("Key label cannot be more than 25 characters");
             }
             keyLabel = keyLabelOptional.get();
         } else {
@@ -139,8 +139,8 @@ public class KeyResource extends AbstractKeyResource {
 
         final String key = keySignature.getKey();
         final String signature = keySignature.getSignature();
-
         final SubjectPublicKeyInfo publicKey = parseAndValidateKey(key, signature);
+
         return savePublicKeyEntry(organizationPrincipal, keyLabel, publicKey);
     }
 
@@ -150,11 +150,11 @@ public class KeyResource extends AbstractKeyResource {
             publicKeyInfo = PublicKeyHandler.parsePEMString(publicKeyPem);
         } catch (PublicKeyException e) {
             logger.error("Cannot parse provided public key.", e);
-            throw new WebApplicationException("Public key could not be parsed", Response.Status.BAD_REQUEST);
+            throw new BadRequestException("Public key could not be parsed");
         }
 
         if (PublicKeyHandler.ECC_KEY.equals(publicKeyInfo.getAlgorithm().getAlgorithm())) {
-            throw new WebApplicationException("ECC keys are not currently supported", HttpStatus.UNPROCESSABLE_ENTITY_422);
+            throw new UnprocessableEntityException("ECC keys are not currently supported");
         }
 
         // Validate public key
@@ -162,14 +162,14 @@ public class KeyResource extends AbstractKeyResource {
             PublicKeyHandler.validatePublicKey(publicKeyInfo);
         } catch (PublicKeyException e) {
             logger.error("Cannot validate provided public key.", e);
-            throw new WebApplicationException("Public key is not valid", Response.Status.BAD_REQUEST);
+            throw new BadRequestException("Public key is not valid");
         }
 
         try {
             PublicKeyHandler.verifySignature(publicKeyPem, SNIPPET, sigStr);
         } catch (PublicKeyException e) {
-            logger.error("Cannot verify public key with signature.", e);
-            throw new WebApplicationException("Public key could not be verified", Response.Status.BAD_REQUEST);
+            logger.error("Cannot verify signature with public key", e);
+            throw new BadRequestException("Cannot verify signature with public key");
         }
 
         return publicKeyInfo;
@@ -184,8 +184,12 @@ public class KeyResource extends AbstractKeyResource {
         publicKeyEntity.setId(UUID.randomUUID());
         publicKeyEntity.setPublicKey(publicKey);
         publicKeyEntity.setLabel(keyLabel);
-
-        return this.dao.persistPublicKey(publicKeyEntity);
+        
+        try{
+            return this.dao.persistPublicKey(publicKeyEntity);
+        } catch(Exception e){
+            throw new BadRequestException("Key cannot be re-used");
+        }
     }
 
     private String buildDefaultKeyID() {

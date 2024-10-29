@@ -31,6 +31,7 @@ public class Capabilities {
      * <p>
      * This value is lazily generated the first time it's called.
      *
+     * @param baseURL the base URL of the service
      * @return - {@link CapabilityStatement} of system.
      */
     public static CapabilityStatement getCapabilities(String baseURL) {

@@ -1,7 +1,6 @@
 package gov.cms.dpc.attribution;
 
-import com.codahale.metrics.jersey2.InstrumentedResourceMethodApplicationListener;
-import com.squarespace.jersey2.guice.JerseyGuiceUtils;
+import com.codahale.metrics.jersey3.InstrumentedResourceMethodApplicationListener;
 import gov.cms.dpc.attribution.cli.SeedCommand;
 import gov.cms.dpc.attribution.jobs.ExpireAttributions;
 import gov.cms.dpc.common.hibernate.attribution.DPCHibernateBundle;
@@ -46,9 +45,6 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
 
     @Override
     public void initialize(Bootstrap<DPCAttributionConfiguration> bootstrap) {
-        // This is required for Guice to load correctly. Not entirely sure why
-        // https://github.com/dropwizard/dropwizard/issues/1772
-        JerseyGuiceUtils.reset();
 
         // Enable variable substitution with environment variables
         EnvironmentVariableSubstitutor substitutor = new EnvironmentVariableSubstitutor(false);

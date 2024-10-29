@@ -8,10 +8,10 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
 
-import javax.inject.Inject;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
+import jakarta.inject.Inject;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 import java.util.List;
 import java.util.UUID;
 
@@ -26,6 +26,7 @@ public class TokenDAO extends AbstractDAO<TokenEntity> {
     }
 
     public TokenEntity persistToken(TokenEntity entity) {
+        currentSession().flush();
         return persist(entity);
     }
 
@@ -73,6 +74,6 @@ public class TokenDAO extends AbstractDAO<TokenEntity> {
     }
 
     public void deleteToken(TokenEntity entity) {
-        this.currentSession().delete(entity);
+        this.currentSession().remove(entity);
     }
 }

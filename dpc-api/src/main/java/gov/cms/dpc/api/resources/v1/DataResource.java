@@ -20,11 +20,11 @@ import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
-import javax.ws.rs.*;
-import javax.ws.rs.core.CacheControl;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.CacheControl;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.StreamingOutput;
 import java.io.*;
 import java.time.Instant;
 import java.time.OffsetDateTime;
@@ -185,7 +185,7 @@ public class DataResource extends AbstractDataResource {
                 // Use the IOUtils copy method, which internally buffers the files
                 IOUtils.copy(fileInputStream, outputStream);
             } catch (FileNotFoundException e) {
-                throw new WebApplicationException(String.format("Unable to open file `%s`.`.", fileID), e, Response.Status.INTERNAL_SERVER_ERROR);
+                throw new InternalServerErrorException(String.format("Unable to open file `%s`.`.", fileID), e);
             }
             outputStream.flush();
         };
@@ -216,7 +216,7 @@ public class DataResource extends AbstractDataResource {
         try {
             randomAccessFile = new RandomAccessFile(file, "r");
         } catch (IOException e) {
-            throw new WebApplicationException(String.format("Unable to open file `%s`.`.", fileID), e, Response.Status.INTERNAL_SERVER_ERROR);
+            throw new InternalServerErrorException(String.format("Unable to open file `%s`.`.", fileID), e);
         }
         try {
             randomAccessFile.seek(rangeStart);
@@ -226,7 +226,7 @@ public class DataResource extends AbstractDataResource {
             } catch (IOException e1) {
                 logger.error("Failed to close file after exception", e1);
             }
-            throw new WebApplicationException(String.format("Unable to read file `%s`.`.", fileID), e, Response.Status.INTERNAL_SERVER_ERROR);
+            throw new InternalServerErrorException(String.format("Unable to read file `%s`.`.", fileID), e);
         }
 
         final PartialFileStreamer fileStreamer = new PartialFileStreamer((int) len, randomAccessFile);

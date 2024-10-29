@@ -12,12 +12,11 @@ import io.swagger.annotations.*;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 
-import javax.inject.Inject;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
 import java.util.List;
 
 @Api(value = "StructureDefinition")
@@ -57,7 +56,7 @@ public class DefinitionResource extends AbstractDefinitionResource {
         final String canonicalURL = String.format("https://dpc.cms.gov/api/v1/StructureDefinition/%s", definitionID);
         final StructureDefinition definition = this.profileSupport.fetchStructureDefinition(canonicalURL);
         if (definition == null) {
-            throw new WebApplicationException(String.format("Cannot find Structure Definition with ID: %s", definitionID), Response.Status.NOT_FOUND);
+            throw new NotFoundException(String.format("Cannot find Structure Definition with ID: %s", definitionID));
         }
 
         return definition;

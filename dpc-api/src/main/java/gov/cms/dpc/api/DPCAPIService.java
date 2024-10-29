@@ -1,17 +1,25 @@
 package gov.cms.dpc.api;
 
-import com.codahale.metrics.jersey2.InstrumentedResourceMethodApplicationListener;
+import com.codahale.metrics.jersey3.InstrumentedResourceMethodApplicationListener;
 import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.datatype.hibernate5.Hibernate5Module;
+import com.fasterxml.jackson.datatype.hibernate6.Hibernate6Module;
 import com.google.inject.Injector;
-import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.api.auth.AuthModule;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.cli.keys.KeyCommand;
 import gov.cms.dpc.api.cli.organizations.OrganizationCommand;
 import gov.cms.dpc.api.cli.tokens.TokenCommand;
-import gov.cms.dpc.api.exceptions.JsonParseExceptionMapper;
+import gov.cms.dpc.api.exceptions.BadRequestExceptionMapper;
+import gov.cms.dpc.api.exceptions.ConstraintViolationExceptionMapper;
+import gov.cms.dpc.api.exceptions.ForbiddenExceptionMapper;
+import gov.cms.dpc.api.exceptions.InternalServerErrorExceptionMapper;
 import gov.cms.dpc.bluebutton.BlueButtonClientModule;
+import gov.cms.dpc.api.exceptions.JsonParseExceptionMapper;
+import gov.cms.dpc.api.exceptions.NotAcceptableExceptionMapper;
+import gov.cms.dpc.api.exceptions.NotAuthorizedExceptionMapper;
+import gov.cms.dpc.api.exceptions.NotDeSerializableExceptionMapper;
+import gov.cms.dpc.api.exceptions.NotFoundExceptionMapper;
+import gov.cms.dpc.api.exceptions.UnprocessableEntityExceptionMapper;
 import gov.cms.dpc.common.hibernate.attribution.DPCHibernateBundle;
 import gov.cms.dpc.common.hibernate.attribution.DPCHibernateModule;
 import gov.cms.dpc.common.hibernate.auth.DPCAuthHibernateBundle;
@@ -37,7 +45,7 @@ import io.dropwizard.migrations.MigrationsBundle;
 import ru.vyarus.dropwizard.guice.GuiceBundle;
 import ru.vyarus.dropwizard.guice.injector.lookup.InjectorLookup;
 
-import javax.validation.ValidatorFactory;
+import jakarta.validation.ValidatorFactory;
 import java.util.List;
 import java.util.Optional;
 
@@ -51,7 +59,7 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
     public static void main(final String[] args) throws Exception {
         new DPCAPIService().run(args);
     }
-
+    
     @Override
     public String getName() {
         return "DPC API Service";
@@ -93,6 +101,15 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
         environment.jersey().getResourceConfig().register(listener);
         environment.jersey().register(new AuthValueFactoryProvider.Binder<>(OrganizationPrincipal.class));
         environment.jersey().register(new JsonParseExceptionMapper());
+        environment.jersey().register(new UnprocessableEntityExceptionMapper());
+        environment.jersey().register(new BadRequestExceptionMapper());
+        environment.jersey().register(new NotDeSerializableExceptionMapper());
+        environment.jersey().register(new ConstraintViolationExceptionMapper());
+        environment.jersey().register(new ForbiddenExceptionMapper());
+        environment.jersey().register(new InternalServerErrorExceptionMapper());
+        environment.jersey().register(new NotAcceptableExceptionMapper());
+        environment.jersey().register(new NotAuthorizedExceptionMapper());
+        environment.jersey().register(new NotFoundExceptionMapper());
         environment.jersey().register(new GenerateRequestIdFilter(false));
         environment.jersey().register(new LogResponseFilter());
 
@@ -111,9 +128,6 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
     }
 
     private GuiceBundle setupGuiceBundle() {
-        // This is required for Guice to load correctly. Not entirely sure why
-        // https://github.com/dropwizard/dropwizard/issues/1772
-        JerseyGuiceUtils.reset();
         return GuiceBundle.builder()
                 .modules(
                         new DPCHibernateModule<>(hibernateBundle),
@@ -151,9 +165,9 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
     private void setupJacksonMapping(final Bootstrap<DPCAPIConfiguration> bootstrap) {
         // By default, Jackson will ignore @Transient annotated fields. We need to disable this so we can use Hibernate entities for serialization as well.
         // We can still ignore fields using @JsonIgnore
-        final Hibernate5Module h5M = new Hibernate5Module();
-        h5M.disable(Hibernate5Module.Feature.USE_TRANSIENT_ANNOTATION);
-        bootstrap.getObjectMapper().registerModule(h5M);
+        final Hibernate6Module h6M = new Hibernate6Module();
+        h6M.disable(Hibernate6Module.Feature.USE_TRANSIENT_ANNOTATION);
+        bootstrap.getObjectMapper().registerModule(h6M);
         bootstrap.getObjectMapper().disable(DeserializationFeature.WRAP_EXCEPTIONS);
     }
 }

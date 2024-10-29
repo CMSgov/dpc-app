@@ -16,11 +16,11 @@ import io.swagger.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.validation.constraints.NotNull;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -71,7 +71,7 @@ public class IpAddressResource extends AbstractIpAddressResource {
             // Converts to a Java InetAddress and verifies host.  Throws an exception if it fails.
             ipAddress.toInetAddress();
         } catch(Exception e) {
-            throw new WebApplicationException(String.format("Invalid ip address: %s", createIpAddressRequest.getIpAddress()), e, Response.Status.BAD_REQUEST);
+            throw new BadRequestException(String.format("Invalid ip address: %s", createIpAddressRequest.getIpAddress()), e);
         }
 
 
@@ -79,7 +79,7 @@ public class IpAddressResource extends AbstractIpAddressResource {
 
         if(currentIps.getCount() >= MAX_IPS) {
             logger.debug(String.format("Cannot add Ip for org: %s.  They are already at the max of %d.", organizationPrincipal.getID(), MAX_IPS));
-            throw new WebApplicationException(String.format("Max Ips for organization reached: %d", MAX_IPS), Response.Status.BAD_REQUEST);
+            throw new BadRequestException(String.format("Max Ips for organization reached: %d", MAX_IPS));
         } else {
             IpAddressEntity ipAddressEntity = new IpAddressEntity()
                 .setOrganizationId(organizationPrincipal.getID())
@@ -114,7 +114,7 @@ public class IpAddressResource extends AbstractIpAddressResource {
             return Response.noContent().build();
         } else {
             logger.debug("Cannot delete Ip: %s for org: %s.  Ip address not found.");
-            throw new WebApplicationException("Ip address not found", Response.Status.NOT_FOUND);
+            throw new NotFoundException("Ip address not found");
         }
     }
 }

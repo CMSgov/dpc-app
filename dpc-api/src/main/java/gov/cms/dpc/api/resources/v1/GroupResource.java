@@ -2,6 +2,7 @@ package gov.cms.dpc.api.resources.v1;
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
@@ -34,12 +35,12 @@ import org.hl7.fhir.dstu3.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Response;
 import java.net.URI;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -81,7 +82,7 @@ public class GroupResource extends AbstractGroupResource {
     @Authorizer
     @ApiOperation(value = "Create Attribution Group", notes = "FHIR endpoint to create an Attribution Group resource) associated to the provider listed in the in the Group characteristics.")
     @ApiImplicitParams(
-            @ApiImplicitParam(name = "X-Provenance", required = true, paramType = "header", type = "string", dataTypeClass = Provenance.class))
+                @ApiImplicitParam(name = "X-Provenance", required = true, paramType = "header", type = "string", dataTypeClass = Provenance.class))
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "Successfully created Roster"),
             @ApiResponse(code = 200, message = "Roster already exists"),
@@ -295,7 +296,7 @@ public class GroupResource extends AbstractGroupResource {
         // Get the attributed patients
         final List<String> attributedPatients = fetchPatientMBIs(group);
         if (CollectionUtils.isEmpty(attributedPatients)) {
-            throw new WebApplicationException("No active attributed patients found for the group", HttpStatus.SC_NOT_ACCEPTABLE);
+            throw new NotAcceptableException("No active attributed patients found for the group");
         }
 
         // Generate a job ID and submit it to the queue
@@ -381,11 +382,13 @@ public class GroupResource extends AbstractGroupResource {
 
     private List<String> fetchPatientMBIs(Group group) {
         if (group.getMember().isEmpty()) {
-            throw new WebApplicationException("Cannot perform export with no beneficiaries", Response.Status.NOT_ACCEPTABLE);
+            throw new NotAcceptableException("Cannot perform export with no beneficiaries");
         }
 
         final Parameters parameters = new Parameters();
         parameters.addParameter().setValue(new BooleanType(true)).setName("active");
+
+        client.registerInterceptor(new LoggingInterceptor(true));
 
         // Get the patients, along with their MBIs
         final Bundle patients = this.client

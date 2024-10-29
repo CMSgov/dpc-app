@@ -21,11 +21,11 @@ import io.dropwizard.hibernate.UnitOfWork;
 import io.swagger.annotations.*;
 import org.hl7.fhir.dstu3.model.*;
 
-import javax.inject.Inject;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Response;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -107,7 +107,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
             notes = "FHIR endpoint which returns the Organization resource that is currently registered with the application.",
             authorizations = @Authorization(value = "access_token"))
     @ApiResponses(value = {
-            @ApiResponse(code = 401, message = "An organization is only allowed to see their own Organization resource")})
+            @ApiResponse(code = 403, message = "An organization is only allowed to see their own Organization resource")})
     public Organization getOrganization(@NotNull @PathParam("organizationID") UUID organizationID) {
         return this.client
                 .read()
@@ -177,7 +177,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
 
         final Organization resource = (Organization) outcome.getResource();
         if (resource == null) {
-            throw new WebApplicationException("Unable to update Organization", Response.Status.INTERNAL_SERVER_ERROR);
+            throw new InternalServerErrorException("Unable to update Organization");
         }
 
         return resource;
@@ -192,7 +192,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
                 .map(Bundle.BundleEntryComponent::getResource)
                 .filter(resource -> resource.getResourceType().getPath().equals(DPCResourceType.Organization.getPath()))
                 .findAny()
-                .orElseThrow(() -> new WebApplicationException("Bundle must include Organization", Response.Status.BAD_REQUEST));
+                .orElseThrow(() -> new BadRequestException("Bundle must include Organization"));
 
 
         // Make sure we have some endpoints
@@ -205,7 +205,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
                 .collect(Collectors.toList());
 
         if (endpoints.isEmpty()) {
-            throw new WebApplicationException("Organization must have at least 1 endpoint", Response.Status.BAD_REQUEST);
+            throw new BadRequestException("Organization must have at least 1 endpoint");
         }
     }
 }

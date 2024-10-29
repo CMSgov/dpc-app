@@ -5,10 +5,10 @@ import gov.cms.dpc.api.entities.PublicKeyEntity_;
 import gov.cms.dpc.common.hibernate.auth.DPCAuthManagedSessionFactory;
 import io.dropwizard.hibernate.AbstractDAO;
 
-import javax.inject.Inject;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
+import jakarta.inject.Inject;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -21,7 +21,9 @@ public class PublicKeyDAO extends AbstractDAO<PublicKeyEntity> {
     }
 
     public PublicKeyEntity persistPublicKey(PublicKeyEntity entity) {
-        return persist(entity);
+        PublicKeyEntity publicKeyEntity = persist(entity);
+        currentSession().flush();
+        return publicKeyEntity;
     }
 
     public List<PublicKeyEntity> fetchPublicKeys(UUID organizationID) {
@@ -52,7 +54,7 @@ public class PublicKeyDAO extends AbstractDAO<PublicKeyEntity> {
     }
 
     public void deletePublicKey(PublicKeyEntity keyEntity) {
-        currentSession().delete(keyEntity);
+        currentSession().remove(keyEntity);
     }
 
     public PublicKeyEntity findKeyByLabel(String keyLabel) {

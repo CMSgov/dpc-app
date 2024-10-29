@@ -42,7 +42,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.vyarus.dropwizard.guice.module.support.DropwizardAwareModule;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
 
@@ -103,16 +103,18 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
     }
 
     @Provides
-    public TokenResource provideTokenResource(TokenDAO dao, MacaroonBakery bakery, SigningKeyResolverAdapter resolver, IJTICache cache, @APIV1 String publicURL) {
+    public TokenResource provideTokenResource(TokenDAO tokenDao, PublicKeyDAO keyDao, MacaroonBakery bakery, SigningKeyResolverAdapter resolver, IJTICache cache, @APIV1 String publicURL) {
         return new UnitOfWorkAwareProxyFactory(authHibernateBundle)
                 .create(TokenResource.class,
                         new Class<?>[]{TokenDAO.class,
+                                PublicKeyDAO.class,
                                 MacaroonBakery.class,
                                 TokenPolicy.class,
                                 SigningKeyResolverAdapter.class,
                                 IJTICache.class,
                                 String.class},
-                        new Object[]{dao,
+                        new Object[]{tokenDao,
+                                keyDao,
                                 bakery,
                                 this.configuration().getTokenPolicy(),
                                 resolver,

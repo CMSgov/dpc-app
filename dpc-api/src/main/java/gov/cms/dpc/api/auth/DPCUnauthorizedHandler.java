@@ -4,9 +4,9 @@ import io.dropwizard.auth.UnauthorizedHandler;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
-import javax.inject.Inject;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
 import static gov.cms.dpc.fhir.FHIRMediaTypes.FHIR_JSON;
 
 public class DPCUnauthorizedHandler implements UnauthorizedHandler {
@@ -24,7 +24,7 @@ public class DPCUnauthorizedHandler implements UnauthorizedHandler {
         outcome.addIssue()
                 .setSeverity(OperationOutcome.IssueSeverity.ERROR)
                 .setCode(OperationOutcome.IssueType.EXCEPTION)
-                .setDetails(new CodeableConcept().addCoding(coding));
+                .setDetails(new CodeableConcept().addCoding(coding).setText("HTTP 401 Unauthorized, Credentials are required to access this resource."));
 
         return Response.status(Status.UNAUTHORIZED)
                 .type(FHIR_JSON)

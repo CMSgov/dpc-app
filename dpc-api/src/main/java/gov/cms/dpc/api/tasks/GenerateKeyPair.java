@@ -10,10 +10,9 @@ import org.slf4j.LoggerFactory;
 import org.whispersystems.curve25519.Curve25519;
 import org.whispersystems.curve25519.Curve25519KeyPair;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.ws.rs.BadRequestException;
 import java.io.PrintWriter;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -49,7 +48,7 @@ public class GenerateKeyPair extends Task {
 
         final List<String> userCollection = parameters.get("user");
         if (userCollection == null || userCollection.isEmpty()) {
-            throw new WebApplicationException("Must have ID of user generating keypair", Response.Status.BAD_REQUEST);
+            throw new BadRequestException("Must have ID of user generating keypair");
         }
         final String userID = userCollection.get(0);
 

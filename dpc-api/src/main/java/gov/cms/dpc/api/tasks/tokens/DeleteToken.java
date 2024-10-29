@@ -5,16 +5,15 @@ import gov.cms.dpc.api.resources.v1.TokenResource;
 import io.dropwizard.servlets.tasks.Task;
 import org.hl7.fhir.dstu3.model.Organization;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.io.PrintWriter;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import static gov.cms.dpc.api.tasks.TasksCommon.extractOrganization;
+import jakarta.ws.rs.BadRequestException;
 
 /**
  * Admin task to delete a {@link gov.cms.dpc.api.entities.TokenEntity} registered for a given {@link Organization}
@@ -39,7 +38,7 @@ public class DeleteToken extends Task {
         final List<String> tokenCollection = parameters.get("token");
 
         if (tokenCollection == null || tokenCollection.isEmpty()) {
-            throw new WebApplicationException("Must have token", Response.Status.BAD_REQUEST);
+            throw new BadRequestException("Must have token");
         }
 
         final String tokenID = tokenCollection.get(0);

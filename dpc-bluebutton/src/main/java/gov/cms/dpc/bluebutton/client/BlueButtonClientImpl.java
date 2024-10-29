@@ -43,7 +43,6 @@ public class BlueButtonClientImpl implements BlueButtonClient {
     private BBClientConfiguration config;
     private Map<String, Timer> timers;
     private Map<String, Meter> exceptionMeters;
-    private static final String HASH_ALGORITHM = "PBKDF2WithHmacSHA256";
 
     private static String formBeneficiaryID(String fromPatientID) {
         return "Patient/" + fromPatientID;
@@ -61,7 +60,7 @@ public class BlueButtonClientImpl implements BlueButtonClient {
      * Queries Blue Button server for patient data
      *
      * @param patientId The {@link Patient} resource's id
-     * @param headers
+     * @param headers a map of header keys and values
      * @return {@link Patient} A FHIR Patient resource
      * @throws ResourceNotFoundException when no such patient with the provided ID exists
      */
@@ -77,7 +76,7 @@ public class BlueButtonClientImpl implements BlueButtonClient {
      * Queries Blue Button server for patient data by MBI
      *
      * @param mbi The MBI
-     * @param headers
+     * @param headers  map of header keys and values
      * @return {@link Bundle} A FHIR Bundle of Patient resources
      */
     @Override
@@ -109,7 +108,7 @@ public class BlueButtonClientImpl implements BlueButtonClient {
      *  that contain no EoBs.
      *
      * @param patientId The {@link Patient} resource's ID
-     * @param headers
+     * @param headers map of header keys and values
      * @return {@link Bundle} Containing a number (possibly 0) of {@link ExplanationOfBenefit} objects
      * @throws ResourceNotFoundException when the requested patient does not exist
      */
@@ -143,7 +142,7 @@ public class BlueButtonClientImpl implements BlueButtonClient {
      *  that contain no coverage records.
      *
      * @param patientId The requested {@link Patient} resource's ID
-     * @param headers
+     * @param headers map of header keys and values
      * @return {@link Bundle} Containing a number (possibly 0) of {@link ExplanationOfBenefit} objects
      * @throws ResourceNotFoundException when the requested patient does not exist
      */

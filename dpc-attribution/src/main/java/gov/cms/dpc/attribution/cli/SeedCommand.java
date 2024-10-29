@@ -37,10 +37,11 @@ import java.sql.Connection;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
+import org.jooq.conf.RenderNameCase;
 
 public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration> {
 
-    private static Logger logger = LoggerFactory.getLogger(SeedCommand.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SeedCommand.class);
     private static final String CSV = "test_associations.csv";
     private static final String ORGANIZATION_BUNDLE = "organization_bundle.json";
     private static final String PROVIDER_BUNDLE = "provider_bundle.json";
@@ -76,10 +77,10 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
         final OffsetDateTime creationTimestamp = generateTimestamp(namespace);
 
         // Read in the seeds file and write things
-        logger.info("Seeding attributions at time {}", creationTimestamp.toLocalDateTime());
-
-        try (final Connection connection = dataSource.getConnection();
-             DSLContext context = DSL.using(connection, this.settings)) {
+        LOGGER.info("Seeding attributions at time {}", creationTimestamp.toLocalDateTime());
+        
+        try (final Connection connection = dataSource.getConnection()) {
+            DSLContext context = DSL.using(connection, new Settings().withRenderNameCase(RenderNameCase.LOWER));
 
             // Truncate everything
             DBUtils.truncateAllTables(context, "public");
@@ -99,7 +100,7 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
             // Get the test attribution seeds
             seedAttributions(context, ORGANIZATION_ID, creationTimestamp, patientReferences);
 
-            logger.info("Finished loading seeds");
+            LOGGER.info("Finished loading seeds");
         }
     }
 

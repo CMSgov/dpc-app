@@ -6,19 +6,20 @@ import gov.cms.dpc.attribution.exceptions.AttributionException;
 import io.dropwizard.db.ManagedDataSource;
 import io.dropwizard.jobs.Job;
 import io.dropwizard.jobs.annotations.On;
-import org.jooq.DSLContext;
 import org.jooq.conf.Settings;
 import org.jooq.impl.DSL;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import org.jooq.DSLContext;
+import org.jooq.exception.DataAccessException;
 
 /**
  * This job runs every day at midnight to expire (remove) attribution relationships which are older than a certain threshold.
@@ -42,26 +43,28 @@ public class ExpireAttributions extends Job {
         // Find all the jobs and expire them
         logger.debug("Expiring active attribution relationships before {}.", expirationTemporal.format(DateTimeFormatter.ISO_DATE_TIME));
 
-        try (final Connection connection = this.dataSource.getConnection(); final DSLContext context = DSL.using(connection, this.settings)) {
-            connection.setAutoCommit(false);
+        try (final Connection connection = this.dataSource.getConnection()) {
+                final DSLContext context = DSL.using(connection, this.settings);
+               
+                connection.setAutoCommit(false);
 
-            final int updated = context
-                    .update(Attributions.ATTRIBUTIONS)
-                    .set(Attributions.ATTRIBUTIONS.INACTIVE, true)
-                    .where(Attributions.ATTRIBUTIONS.PERIOD_END.le(expirationTemporal))
-                    .execute();
-            logger.debug("Expired {} attribution relationships.", updated);
+                final int updated = context
+                        .update(Attributions.ATTRIBUTIONS)
+                        .set(Attributions.ATTRIBUTIONS.INACTIVE, true)
+                        .where(Attributions.ATTRIBUTIONS.PERIOD_END.le(expirationTemporal))
+                        .execute();
+                logger.debug("Expired {} attribution relationships.", updated);
 
-            // Remove everything that is inactive and has been expired for more than 6 months
-            final int removed = context
-                    .delete(Attributions.ATTRIBUTIONS)
-                    .where(Attributions.ATTRIBUTIONS.PERIOD_END.le(expirationTemporal.minusMonths(6))
-                            .and(Attributions.ATTRIBUTIONS.INACTIVE.eq(true)))
-                    .execute();
-            logger.debug("Removed {} attribution relationships.", removed);
+                // Remove everything that is inactive and has been expired for more than 6 months
+                final int removed = context
+                        .delete(Attributions.ATTRIBUTIONS)
+                        .where(Attributions.ATTRIBUTIONS.PERIOD_END.le(expirationTemporal.minusMonths(6))
+                                .and(Attributions.ATTRIBUTIONS.INACTIVE.eq(true)))
+                        .execute();
+                logger.debug("Removed {} attribution relationships.", removed);
 
-            connection.commit();
-        } catch (SQLException e) {
+                connection.commit();
+            } catch (SQLException | DataAccessException e) {
             throw new AttributionException("An error occurred during the database operation.", e);
         }
     }

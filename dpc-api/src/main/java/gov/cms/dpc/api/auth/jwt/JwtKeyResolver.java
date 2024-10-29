@@ -14,14 +14,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
-import javax.inject.Inject;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
 import java.security.Key;
 import java.util.List;
 import java.util.UUID;
 
 import static gov.cms.dpc.api.auth.MacaroonHelpers.ORGANIZATION_CAVEAT_KEY;
+import jakarta.ws.rs.InternalServerErrorException;
+import jakarta.ws.rs.NotAuthorizedException;
+import jakarta.ws.rs.core.Response;
 
 public class JwtKeyResolver extends SigningKeyResolverAdapter {
 
@@ -40,7 +41,7 @@ public class JwtKeyResolver extends SigningKeyResolverAdapter {
         final String keyId = header.getKeyId();
         if (keyId == null) {
             logger.error("JWT KID field is missing");
-            throw new WebApplicationException("JWT must have KID field", Response.Status.UNAUTHORIZED);
+            throw new NotAuthorizedException("JWT must have KID field", Response.status(Response.Status.UNAUTHORIZED));
         }
 
         final UUID organizationID = getOrganizationID(claims.getIssuer());
@@ -50,27 +51,27 @@ public class JwtKeyResolver extends SigningKeyResolverAdapter {
         final PublicKeyEntity keyEntity;
         try {
             keyEntity = this.dao.fetchPublicKey(organizationID, UUID.fromString(keyId))
-                    .orElseThrow(() -> new WebApplicationException(String.format("Cannot find public key with id: %s", keyId), Response.Status.UNAUTHORIZED));
+                    .orElseThrow(() -> new NotAuthorizedException(String.format("Cannot find public key with id: %s", keyId), Response.status(Response.Status.UNAUTHORIZED)));
         } catch (IllegalArgumentException e) {
             logger.error("Cannot convert '{}' to UUID", keyId, e);
-            throw new WebApplicationException("Invalid Public Key ID", Response.Status.UNAUTHORIZED);
+            throw new NotAuthorizedException("Invalid Public Key ID", Response.status(Response.Status.UNAUTHORIZED));
         }
 
         try {
             return PublicKeyHandler.publicKeyFromEntity(keyEntity);
         } catch (PublicKeyException e) {
             logger.error("Cannot convert public key", e);
-            throw new WebApplicationException("Internal server error", Response.Status.INTERNAL_SERVER_ERROR);
+            throw new InternalServerErrorException("Internal server error");
         }
     }
 
     protected UUID getOrganizationID(String macaroon) {
         if (macaroon == null || macaroon.equals("")) {
-            throw new WebApplicationException("JWT must have client_id", Response.Status.UNAUTHORIZED);
+            throw new NotAuthorizedException("JWT must have client_id", Response.status(Response.Status.UNAUTHORIZED));
         }
         final List<Macaroon> macaroons = MacaroonBakery.deserializeMacaroon(macaroon);
         if (macaroons.isEmpty()) {
-            throw new WebApplicationException("JWT must have client_id", Response.Status.UNAUTHORIZED);
+            throw new NotAuthorizedException("JWT must have client_id", Response.status(Response.Status.UNAUTHORIZED));
         }
 
         return MacaroonBakery.getCaveats(macaroons.get(0))
@@ -79,6 +80,6 @@ public class JwtKeyResolver extends SigningKeyResolverAdapter {
                 .filter(cond -> cond.getKey().equals(ORGANIZATION_CAVEAT_KEY))
                 .map(condition -> UUID.fromString(condition.getValue()))
                 .findAny()
-                .orElseThrow(() -> new WebApplicationException("JWT client token must have organization_id", Response.Status.UNAUTHORIZED));
+                .orElseThrow(() -> new NotAuthorizedException("JWT client token must have organization_id", Response.status(Response.Status.UNAUTHORIZED)));
     }
 }
