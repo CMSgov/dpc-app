@@ -7,7 +7,7 @@ import io.dropwizard.db.PooledDataSourceFactory;
 import io.dropwizard.hibernate.HibernateBundle;
 import io.dropwizard.hibernate.SessionFactoryFactory;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 import java.util.Collections;
 

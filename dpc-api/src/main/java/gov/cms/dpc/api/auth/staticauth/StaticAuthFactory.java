@@ -7,7 +7,7 @@ import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import io.dropwizard.auth.AuthFilter;
 import io.dropwizard.auth.Authenticator;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 /**
  * Implementation of {@link AuthFactory} that always injects a {@link StaticAuthFilter}

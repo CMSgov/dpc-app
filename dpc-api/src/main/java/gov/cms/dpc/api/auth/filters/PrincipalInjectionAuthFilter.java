@@ -10,9 +10,9 @@ import gov.cms.dpc.api.auth.DPCUnauthorizedHandler;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Organization;
 
-import javax.annotation.Priority;
-import javax.ws.rs.Priorities;
-import javax.ws.rs.core.UriInfo;
+import jakarta.annotation.Priority;
+import jakarta.ws.rs.Priorities;
+import jakarta.ws.rs.core.UriInfo;
 import java.util.UUID;
 
 /**

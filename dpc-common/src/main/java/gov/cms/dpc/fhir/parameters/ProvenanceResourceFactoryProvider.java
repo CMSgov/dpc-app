@@ -9,8 +9,8 @@ import org.glassfish.jersey.server.spi.internal.ValueParamProvider;
 import org.hl7.fhir.dstu3.model.Provenance;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import javax.inject.Inject;
-import javax.ws.rs.ext.Provider;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.ext.Provider;
 import java.util.function.Function;
 
 /**

@@ -5,7 +5,7 @@ import com.google.inject.Scopes;
 import io.dropwizard.core.Configuration;
 import ru.vyarus.dropwizard.guice.module.support.DropwizardAwareModule;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 public class DPCAuthHibernateModule<T extends Configuration & IDPCAuthDatabase> extends DropwizardAwareModule<T> {
 

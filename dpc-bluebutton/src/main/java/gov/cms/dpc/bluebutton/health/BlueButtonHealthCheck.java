@@ -5,8 +5,8 @@ import org.hl7.fhir.dstu3.model.CapabilityStatement;
 import org.hl7.fhir.dstu3.model.Enumerations;
 import ru.vyarus.dropwizard.guice.module.installer.feature.health.NamedHealthCheck;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
 /**
  * {@link NamedHealthCheck} class that verifies whether or not the Blue Button endpoint is accessible.
