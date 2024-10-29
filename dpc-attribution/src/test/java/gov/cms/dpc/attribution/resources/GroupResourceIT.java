@@ -4,7 +4,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import gov.cms.dpc.attribution.AbstractAttributionTest;
+import gov.cms.dpc.attribution.AbstractAttributionIT;
 import gov.cms.dpc.attribution.AttributionTestHelpers;
 import gov.cms.dpc.attribution.resources.v1.GroupResource;
 import gov.cms.dpc.common.utils.NPIUtil;
@@ -30,7 +30,7 @@ import org.junit.jupiter.api.TestMethodOrder;
 @IntegrationTest
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @DisplayName("Group Resource integrated tests")
-public class GroupResourceIT extends AbstractAttributionTest {
+public class GroupResourceIT extends AbstractAttributionIT {
 
     private IGenericClient client;
 

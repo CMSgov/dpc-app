@@ -58,9 +58,9 @@ class AttributionFHIRIT {
         APPLICATION.getApplication().run("db", "migrate", configPath);
 
         // Get the test seeds
-        final InputStream resource = AttributionFHIRTest.class.getClassLoader().getResourceAsStream(CSV);
+        final InputStream resource = AttributionFHIRIT.class.getClassLoader().getResourceAsStream(CSV);
         if (resource == null) {
-            throw new MissingResourceException("Can not find seeds file", AttributionFHIRTest.class.getName(), CSV);
+            throw new MissingResourceException("Can not find seeds file", AttributionFHIRIT.class.getName(), CSV);
         }
 
         // Read in the seeds and create the 'Roster' bundle
