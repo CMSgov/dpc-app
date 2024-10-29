@@ -111,7 +111,7 @@ public class KeyResourceUnitTest {
     @DisplayName("Add public key to key store 🥳")
     public void testSubmitKey() throws GeneralSecurityException, IOException {
         OrganizationPrincipal organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
-        KeyResource.KeySignature keySignature = KeyResourceTest.generateKeyAndSignature();
+        KeyResource.KeySignature keySignature = KeyResourceIT.generateKeyAndSignature();
 
         String label = "A test key label";
 
@@ -133,7 +133,7 @@ public class KeyResourceUnitTest {
     @DisplayName("Add public key to key store with long label 🤮")
     public void testSubmitKeyTooLong() throws GeneralSecurityException {
         OrganizationPrincipal organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
-        KeyResource.KeySignature keySignature = KeyResourceTest.generateKeyAndSignature();
+        KeyResource.KeySignature keySignature = KeyResourceIT.generateKeyAndSignature();
         String label = "A really, really, really long, test key label";
 
         BadRequestException exception = assertThrows(BadRequestException.class,
