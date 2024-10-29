@@ -176,8 +176,8 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
           post "/organizations/#{api_id}/credential_delegate_invitations", params: successful_parameters
         end.to change { Invitation.count }.by(0)
         expect(response.status).to eq(400)
-        expect(response.body).to include(I18n.t('errors.attributes.base.duplicate.status'))
-        expect(response.body).to include(I18n.t('errors.attributes.base.duplicate.status'))
+        expect(response.body).to include(I18n.t('errors.attributes.base.duplicate_cd.status'))
+        expect(response.body).to include(I18n.t('errors.attributes.base.duplicate_cd.text'))
       end
     end
 

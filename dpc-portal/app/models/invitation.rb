@@ -97,7 +97,7 @@ class Invitation < ApplicationRecord
   def check_if_duplicate
     return unless credential_delegate? && (existing_invite? || existing_credential_delegate?)
 
-    errors.add :base, :duplicate
+    errors.add(:base, :duplicate_cd)
   end
 
   def existing_invite?
@@ -110,10 +110,7 @@ class Invitation < ApplicationRecord
   def existing_credential_delegate?
     return false unless provider_organization&.cd_org_links
 
-    provider_organization.cd_org_links.any? do |link|
-      link.disabled_at.nil? && link.user.email == :invited_email &&
-        link.user.given_name == :invited_given_name && link.user.family_name == :invited_family_name
-    end
+    provider_organization.cd_org_links.any? { |link| link.disabled_at.nil? && link.user.email == :invited_email }
   end
 
   private

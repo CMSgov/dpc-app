@@ -227,7 +227,7 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
         is_expected.to include(normalize_space(email_confirmation))
       end
       context 'existing CD with provided information' do
-        before { cd_invite.errors.add :base, :duplicate }
+        before { cd_invite.errors.add(:base, :duplicate_cd) }
         it 'should include error message' do
           error = <<~HTML
             <div class="usa-alert usa-alert--error margin-bottom-4">
