@@ -25,7 +25,7 @@ class InvitationMailer < ApplicationMailer
     @invitation = params[:invitation]
     mail(
       to: @invitation&.invited_by&.email,
-      subject: 'Credential Delegate has successfully signed up'
+      subject: 'Credential Delegate has signed up successfully'
     )
   end
 end
