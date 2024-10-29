@@ -101,15 +101,18 @@ start-portal-dbs: start-db start-redis
 
 start-consent: ## Start the consent service supporting the api
 start-consent:
-	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) up --wait -d consent
+	$(eval DEBUG_ARG := $(if $(filter true,$(DEBUG_MODE)),-f docker-compose.debug-override.yml,))
+	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) $(DEBUG_ARG) up --wait -d consent
 
 start-attribution: ## Start the attribution service supporting the api
 start-attribution:
-	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) up --wait -d attribution
+	$(eval DEBUG_ARG := $(if $(filter true,$(DEBUG_MODE)),-f docker-compose.debug-override.yml,))
+	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) $(DEBUG_ARG) up --wait -d attribution
 
 start-aggregation: ## Start the aggregation service supporting the api
 start-aggregation:
-	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) up --wait -d aggregation
+	$(eval DEBUG_ARG := $(if $(filter true,$(DEBUG_MODE)),-f docker-compose.debug-override.yml,))
+	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) $(DEBUG_ARG) up --wait -d aggregation
 
 start-api-dependencies: # Start internal Java service dependencies, e.g. attribution and aggregation services.
 start-api-dependencies: start-attribution 
@@ -144,6 +147,12 @@ start-portal: secure-envs
 start-portals: ## Start all frontend services
 start-portals: start-web start-admin start-portal
 
+start-portals-no-auth: ## Start the web sites with authentication disabled
+start-portals-no-auth: 
+	@AUTH_DISABLED=true make start-portals
+
+start-system-smoke: ## Start the system for local smoke tests
+start-system-smoke: start-api start-portals-no-auth
 
 # Debug commands
 # ==============
@@ -152,12 +161,8 @@ start-portals: start-web start-admin start-portal
 start-dpc-debug: secure-envs
 	@mvn clean install -Pdebug -DskipTests -ntp
 	@make start-db start-redis
-	@DEBUG_MODE=true USE_BFD_MOCK=false docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) -f docker-compose.portals.yml up --wait -d start_api_dependencies
-	@DEBUG_MODE=true docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) -f docker-compose.portals.yml up --wait -d start_api
-	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) -f docker-compose.portals.yml up --wait -d start_web
-	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) -f docker-compose.portals.yml up --wait -d start_admin
-	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) -f docker-compose.portals.yml up --wait -d start_portal
-	@docker ps
+	@DEBUG_MODE=true make start-api
+	@docker make start-portals
 
 .PHONY: start-app-debug
 start-app-debug: secure-envs
@@ -165,8 +170,7 @@ start-app-debug: secure-envs
 	@mvn clean compile -Pdebug -DskipTests -ntp
 	@mvn package -Pci -ntp -DskipTests
 	@make start-db start-redis
-	@DEBUG_MODE=true USE_BFD_MOCK=false docker compose $(DOCKER_PROJ) -f docker-compose.yml -f docker-compose.portals.yml up --wait -d start_api_dependencies
-	@DEBUG_MODE=true docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) -f docker-compose.portals.yml up --wait -d start_api
+	@DEBUG_MODE=true make start-api
 
 .PHONY: start-it-debug
 start-it-debug: secure-envs
@@ -174,7 +178,7 @@ start-it-debug: secure-envs
 	@mvn clean compile -Pdebug -B -V -ntp -DskipTests
 	@mvn package -Pci -ntp -DskipTests
 	@make start-db
-	@DEBUG_MODE=true docker compose $(DOCKER_PROJ) up --wait -d start_api_dependencies
+	@DEBUG_MODE=true make start-api-dependencies
 
 
 # Down commands
@@ -260,3 +264,15 @@ ci-api-client:
 .PHONY: unit-tests
 unit-tests:
 	@bash ./dpc-unit-test.sh
+
+.PHONY: int-tests
+int-tests: 
+	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) up tests
+	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) down
+
+.PHONY: sys-tests
+sys-tests:
+	@AUTH_DISABLED=true make start-mock-app
+	@npm run test
+	@docker compose $(PROJECT_NAME) down -t 60
+	@if [ -n "$REPORT_COVERAGE" ]; then mvn jacoco:report-integration -Pci -ntp; fi

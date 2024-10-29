@@ -2,6 +2,8 @@
 
 This is a quick start guide for running the DPC API on your local environment. For full documentation, see the [User Guide](./README.md).
 
+Be sure to pre-install all necessary software (JDK, Docker, etc.) as described in the full documentation.
+
 SECURE
 ====
 
@@ -17,60 +19,63 @@ Afterwards, run the following to decrypt files for local development:
 make secure-envs
 ```
 
+This will decrypt the secrets contained in the ops/config/encrypted/local.env file and write a decrypted version to ops/config/decrypted/local.env.
+Both the .vault_password and ops/config/decrypted/local.env files are included in this project's .gitignore and should never be committed and pushed to the project's public git repository.
+
 BUILD
 ====
-Run the `make ci-app` command.
 
+The following steps will obtain the project, build the docker images to host the system, compile and package the software and install it on the docker images.
 
+1) Clone the dpc-app project from https://github.com/CMSgov/dpc-app (main branch and desired dev branches). Use `git clone` or your IDE.
 
-CONFIGURE
-====
-- Run the `make start-app` command.
-- Verify successful launch by running the command `curl -H "Accept: application/fhir+json" http://localhost:3002/v1/metadata`. You should view the server's response if all goes well.
+2) From the project directory, run the command `make docker-base website admin portal` to pull and build the docker images used by the project.
 
-### Edit the `docker-compose.yml` file
-
-#### Ports
-When running locally, you'll need to update the docker-compse.yml file by adding:
-```yaml
-ports: 
-  - "5432:5432"
-```
-
-in the `db` service. E.g.:
-```yaml
-db: 
-  image: postgres:11 
-  ports: 
-    - "5432:5432"
-```
-#### JVM Authentication
-Set authentication_disabled for JVM set to **[true]** in the `api` service in the same file.
-
-`AUTH_DISABLED=true`
-
-By default, the Docker containers start with minimal authentication enabled, meaning that some functionality (such as extracting the organization_id from the access token) will not work as expected and always return the same value.
-This can be overridden during startup by setting the `AUTH_DISABLED=false` environment variable.
+3) From the project directory, run the command `JAVA_HOME=<jdk11 path> make api` to build and package the software.
 
 RUN
 ====
 
-Run the `make start-dpc`.
-- Clear the project's cache by running the command: `docker exec -it ${containerID} rails dev:cache`.
-- Request access by visiting http://localhost:3900.
-- Simulate the approval process by visiting http://localhost:3900/letter_opener and clicking on the **confirm my account** link.
+The following commands will launch docker containers that start the API services.
 
-If no EUA is granted, you will have to manually populate the necessary db tables. Sample tables are provided [here](./DbTables.md).
-Once populated, you should see the options to create a public key and a client token.
-	
-	Create Public Key
-		-- Use notepad to convert CRLF to LF
+1) From the project directory, run the command, `make start-app`, to launch containers running the API and its dependent services`.
+
+2) From the project directory, run the command, `make start-portals`, to launch containers running the websites for administering access to the API.
+
+USE
+====
+
+To prime a new system with an empty database, 
+
+1) Visit the website at http://localhost:3900 to see the website where access by a client organization may be requested. The step of requesting access is not necessary in development unless you want to explore these features.
+
+2) Simulate the approval process by visiting http://localhost:3900/letter_opener and clicking on the **confirm my account** link.
+
+3) From the project directory, run the command, `make portal-sh`, to launch a command line for creating the invitation link needed for a client administrator to gain access to the administration site.
+
+4) Enter the command, `rails dpc:invite_ao INVITE=<firstName>,<lastName>,<emailAddress>,<orgID e.g. 7838426501>`. This command will insert the user info into the database and generate an invitation URL.
+
+5) Visit the URL returned in the previous step. You will be asked to sign in to the SANDBOX version of login.gov, a unified Federal service for performing online identity-proofing and permitting authentication to supporting web sites and applications. The sandbox version is for testing and does not require real identity information nor does it verify the information submitted for establishing a test account.  The email address used in registering with the sandbox login.gov does need to be real and accessible. After creating a sandbox login.gov account and signing into it, you will be returned to the DPC portal. 
+
+6) In order to use the API, you will require:
+        a) to obtain a client token, which is generated and provided by the portal;
+        b) to generate a key pair for signing JSON web tokens and submit the public key and evidence of its validity to the portal;
+        c) the public key ID assigned by the portal to the key submitted in step (6b).
+
+
 TEST
 ====
-### Test with Postman
-Once the development environment is up and running, you should now be able to run some calls to the API via the [DPC Postman Collections](https://dpc.cms.gov/docsV1.html#postman-collection). Below, are a few for verifying a functional development environment:
-- Register single patient
-- Register practitioner
-- Get all groups
-- Add patient to group
-- Create export data request
+
+There are four stages of test that can be done locally with the dpc-app.
+
+1) Unit tests of the Java software projects can be run locally from the project directory with the command, `JAVA_HOME=<jdk11 path> make unit-tests`. This will run tests, but not compile changes.  To compile changes and test them, run the command, `JAVA_HOME=<jdk11 path> mvn install`.
+
+2) Integration tests of the Java software projects can be run from the project directory with the command, `make int-tests`. This will launch docker containers to host the services and a tests container to run the integration tests.
+
+3) System tests of the Java software projects can be run from the project directory with the comamnd, `make sys-tests`. This will launch the full set of API services in containers and run tests using the project's Postman collection.
+
+Note: unit, integration,and system test can be run back-to-back by running the command, `make ci-app`, from the project directory.
+
+4) Open testing of the API via Postman can be done by downloading the project's Postman collection (linked in full documentation) and configuration the Postman environment with the client token, private signing key for JWT signing, and public key key-id as discussed above.
+
+5) Smoke tests can be run on the system to verify its online integration and performance. To run smoke tests, from the project directory, run the command, `make start-smoke-local`, to launch the necessary containers and configuration. Once the containers are healthy, run the command, `JAVA_HOME=<jdk11 path> make smoke/local`. 
