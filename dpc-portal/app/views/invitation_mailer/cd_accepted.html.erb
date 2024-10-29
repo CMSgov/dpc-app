@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Data at the Point of Care</title>
+    <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
+  </head>
+  <body>
+    <h1><%= @invitation.invited_given_name %> <%= @invitation.invited_family_name %> has successfully signed up as your Credential Delegate</h1>
+    <p><%= @invitation.invited_given_name %> <%= @invitation.invited_family_name %> is your Credential Delegate for <%= @invitation.provider_organization.name %> 
+        (NPI <%= @invitation.provider_organization.npi %>).  They're now authorized to manage access to the Data at the Point of Care API, including creating a token, 
+        providing a public key, and identifying IP addresses for your organization. You can sign in to the DPC Portal to view or invite new Credential Delegates at 
+        any time.</p>
+    <p>Thank you for your interest in Data at the Point of Care.</p>
+
+    <p>- Centers for Medicare & Medicaid Services</p>
+  </body>
+</html>

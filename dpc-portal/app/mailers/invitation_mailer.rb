@@ -20,4 +20,12 @@ class InvitationMailer < ApplicationMailer
       subject: 'Time to register your organization with DPC'
     )
   end
+
+  def cd_accepted
+    @invitation = params[:invitation]
+    mail(
+      to: @invitation&.invited_by&.email,
+      subject: 'Credential Delegate has successfully signed up'
+    )
+  end
 end
