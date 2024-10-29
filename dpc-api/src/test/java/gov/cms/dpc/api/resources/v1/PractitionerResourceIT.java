@@ -8,7 +8,7 @@ import ca.uhn.fhir.rest.gclient.IUpdateExecutable;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import gov.cms.dpc.api.APITestHelpers;
-import gov.cms.dpc.api.AbstractSecureApplicationTest;
+import gov.cms.dpc.api.AbstractSecureApplicationIT;
 import gov.cms.dpc.api.TestOrganizationContext;
 import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
@@ -38,7 +38,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class PractitionerResourceTest extends AbstractSecureApplicationTest {
+class PractitionerResourceIT extends AbstractSecureApplicationIT {
 
     @Test
     void ensurePractitionersExist() throws IOException, URISyntaxException, GeneralSecurityException {

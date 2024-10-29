@@ -37,7 +37,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 @IntegrationTest
 @ExtendWith(BufferedLoggerHandler.class)
-public class AbstractSecureApplicationTest {
+public class AbstractSecureApplicationIT {
     protected static final String OTHER_ORG_ID = "065fbe84-3551-4ec3-98a3-0d1198c3cb55";
     protected static final String configPath = "src/test/resources/test.application.yml";
     private static final ObjectMapper mapper = new ObjectMapper();
@@ -51,7 +51,7 @@ public class AbstractSecureApplicationTest {
     protected static PrivateKey PRIVATE_KEY;
     protected static UUID PUBLIC_KEY_ID;
 
-    protected AbstractSecureApplicationTest() {
+    protected AbstractSecureApplicationIT() {
         //not used
     }
 

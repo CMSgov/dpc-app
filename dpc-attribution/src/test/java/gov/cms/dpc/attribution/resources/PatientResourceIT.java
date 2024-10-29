@@ -7,7 +7,7 @@ import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.IUpdateTyped;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import gov.cms.dpc.attribution.AbstractAttributionTest;
+import gov.cms.dpc.attribution.AbstractAttributionIT;
 import gov.cms.dpc.attribution.AttributionTestHelpers;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;
@@ -21,9 +21,9 @@ import static gov.cms.dpc.attribution.AttributionTestHelpers.*;
 import static gov.cms.dpc.common.utils.SeedProcessor.createBaseAttributionGroup;
 import static org.junit.jupiter.api.Assertions.*;
 
-class PatientResourceTest extends AbstractAttributionTest {
+class PatientResourceIT extends AbstractAttributionIT {
 
-    private PatientResourceTest() {
+    private PatientResourceIT() {
         // Not used
     }
 

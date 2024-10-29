@@ -8,7 +8,7 @@ import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import gov.cms.dpc.api.APITestHelpers;
-import gov.cms.dpc.api.AbstractSecureApplicationTest;
+import gov.cms.dpc.api.AbstractSecureApplicationIT;
 import gov.cms.dpc.api.TestOrganizationContext;
 import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.common.utils.SeedProcessor;
@@ -48,7 +48,7 @@ import static gov.cms.dpc.api.APITestHelpers.createProvenance;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(BufferedLoggerHandler.class)
-public class GroupResourceTest extends AbstractSecureApplicationTest {
+public class GroupResourceIT extends AbstractSecureApplicationIT {
 
     @Test
     void testMissingProvenance() throws IOException {

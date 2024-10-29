@@ -9,7 +9,7 @@ import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import gov.cms.dpc.consent.AbstractConsentTest;
+import gov.cms.dpc.consent.AbstractConsentIT;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.converters.entities.ConsentEntityConverter;
 import org.hl7.fhir.dstu3.model.*;
@@ -29,7 +29,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Tests ConsentResource using a live database. These tests will fail if the database is not running or
  * seed data is not loaded.
  */
-class ConsentResourceTest extends AbstractConsentTest {
+class ConsentResourceTest extends AbstractConsentIT {
 
     private static final String TEST_CONSENT_UUID = "3a51c388-a9b0-42e2-afe4-688a2b6cef95";
     private static final String TEST_CONSENT_REF = String.format("Consent/%s", TEST_CONSENT_UUID);

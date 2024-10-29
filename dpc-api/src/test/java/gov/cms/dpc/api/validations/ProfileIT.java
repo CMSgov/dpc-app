@@ -6,7 +6,7 @@ import ca.uhn.fhir.rest.gclient.ICreateTyped;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import gov.cms.dpc.api.AbstractSecureApplicationTest;
+import gov.cms.dpc.api.AbstractSecureApplicationIT;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.testing.APIAuthHelpers;
 import org.hl7.fhir.dstu3.model.*;
@@ -18,9 +18,9 @@ import java.sql.Date;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class ProfileTests extends AbstractSecureApplicationTest {
+class ProfileIT extends AbstractSecureApplicationIT {
 
-    private ProfileTests() {
+    private ProfileIT() {
         // Not used
     }
 

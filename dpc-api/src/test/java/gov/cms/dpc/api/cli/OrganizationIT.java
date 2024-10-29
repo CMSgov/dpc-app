@@ -1,6 +1,6 @@
 package gov.cms.dpc.api.cli;
 
-import gov.cms.dpc.api.AbstractApplicationTest;
+import gov.cms.dpc.api.AbstractApplicationIT;
 import gov.cms.dpc.api.DPCAPIConfiguration;
 import gov.cms.dpc.api.DPCAPIService;
 import gov.cms.dpc.api.cli.organizations.OrganizationDelete;
@@ -22,7 +22,7 @@ import java.util.regex.Pattern;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class OrganizationTests extends AbstractApplicationTest {
+public class OrganizationIT extends AbstractApplicationIT {
     private final PrintStream originalOut = System.out;
     private final PrintStream originalErr = System.err;
 
@@ -30,7 +30,7 @@ public class OrganizationTests extends AbstractApplicationTest {
     private final ByteArrayOutputStream stdErr = new ByteArrayOutputStream();
     private Cli cli;
 
-    OrganizationTests() {
+    OrganizationIT() {
         // not used
     }
 

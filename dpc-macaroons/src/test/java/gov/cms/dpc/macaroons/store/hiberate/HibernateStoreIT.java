@@ -11,9 +11,9 @@ import org.hibernate.cfg.Configuration;
 import java.security.SecureRandom;
 
 @IntegrationTest
-class HibernateStoreTest extends AbstractStoreTest {
+class HibernateStoreIT extends AbstractStoreTest {
 
-    HibernateStoreTest() {
+    HibernateStoreIT() {
         super(new HibernateKeyStore(buildSessionFactory(), new SecureRandom()));
     }
 

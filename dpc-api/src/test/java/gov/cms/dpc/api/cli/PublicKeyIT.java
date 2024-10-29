@@ -1,6 +1,6 @@
 package gov.cms.dpc.api.cli;
 
-import gov.cms.dpc.api.AbstractApplicationTest;
+import gov.cms.dpc.api.AbstractApplicationIT;
 import gov.cms.dpc.api.DPCAPIConfiguration;
 import gov.cms.dpc.api.DPCAPIService;
 import gov.cms.dpc.api.cli.keys.KeyDelete;
@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 import static gov.cms.dpc.testing.APIAuthHelpers.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class PublicKeyTests extends AbstractApplicationTest {
+public class PublicKeyIT extends AbstractApplicationIT {
 
     private final PrintStream originalOut = System.out;
     private final PrintStream originalErr = System.err;
@@ -42,7 +42,7 @@ public class PublicKeyTests extends AbstractApplicationTest {
     private final ByteArrayOutputStream stdErr = new ByteArrayOutputStream();
     private Cli cli;
 
-    PublicKeyTests() {
+    PublicKeyIT() {
         // Not used
     }
 

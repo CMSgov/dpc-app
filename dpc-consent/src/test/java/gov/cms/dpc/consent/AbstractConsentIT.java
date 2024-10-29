@@ -12,7 +12,7 @@ import org.junit.jupiter.api.BeforeAll;
 import ru.vyarus.dropwizard.guice.module.context.SharedConfigurationState;
 
 @IntegrationTest
-public abstract class AbstractConsentTest {
+public abstract class AbstractConsentIT {
     protected static final String configPath = "src/test/resources/test.application.yml";
 
     protected static final DropwizardTestSupport<DPCConsentConfiguration> APPLICATION =
