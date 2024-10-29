@@ -23,16 +23,12 @@ class CredentialDelegateInvitationsController < ApplicationController
                            actionType: LoggingConstants::ActionType::CdInvited }])
       InvitationMailer.with(invitation: @cd_invitation).invite_cd.deliver_later
       if Rails.env.local?
-        logger.info("Invitation URL: #{accept_organization_invitation_url(@organization,
-                                                                          @cd_invitation)}")
+        logger.info("Invitation URL: #{accept_organization_invitation_url(@organization, @cd_invitation)}")
       end
       redirect_to success_organization_credential_delegate_invitation_path(@organization.path_id, 'new-invitation')
     else
       render(Page::CredentialDelegate::NewInvitationComponent.new(@organization, @cd_invitation), status: :bad_request)
     end
-  rescue UserInfoServiceError => e
-    render(Page::CredentialDelegate::NewInvitationComponent.new(@organization, @cd_invitation,
-                                                                errors: { root: e.message }), status: :bad_request)
   end
   # rubocop:enable Metrics/AbcSize
 

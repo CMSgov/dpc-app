@@ -7,7 +7,7 @@ class Invitation < ApplicationRecord
   validates :invited_email, format: Devise.email_regexp, confirmation: true, if: :new_record?
   validates :invitation_type, presence: true
   validate :cannot_cancel_accepted
-  after_validation :check_if_duplicate, if: :new_record?
+  validate :check_if_duplicate, if: :new_record?
 
   enum invitation_type: %i[credential_delegate authorized_official]
   enum :status, %i[pending accepted expired cancelled renewed], default: :pending
@@ -97,7 +97,7 @@ class Invitation < ApplicationRecord
   def check_if_duplicate
     return unless credential_delegate? && (existing_invite? || existing_credential_delegate?)
 
-    raise UserInfoServiceError, 'duplicate'
+    errors.add :base, :duplicate
   end
 
   def existing_invite?

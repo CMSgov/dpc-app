@@ -27,7 +27,8 @@ module Page
                                    invited_family_name: 'Hogan',
                                    invited_email: 'bob@example.com',
                                    invited_email_confirmation: 'bob@example.com')
-        render(Page::CredentialDelegate::NewInvitationComponent.new(org, cd_invite, errors: { root: 'duplicate' }))
+        cd_invite.errors.add :base, :duplicate
+        render(Page::CredentialDelegate::NewInvitationComponent.new(org, cd_invite))
       end
 
       private

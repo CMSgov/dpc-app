@@ -1,9 +1,9 @@
 <div>
-  <% if @errors[:root] %>
+  <% unless cd_invite.errors[:base].empty? %>
     <div class="usa-alert usa-alert--error margin-bottom-4">
       <div class="usa-alert__body">
-        <h2 class="usa-alert__heading"><%= I18n.t("verification.#{@errors[:root]}_status") %></h2>
-        <p class="usa-alert__text"><%= I18n.t("verification.#{@errors[:root]}_text") %></p>
+        <h2 class="usa-alert__heading"><%= cd_invite.errors[:base].first[:status] %></h2>
+        <p class="usa-alert__text"><%= cd_invite.errors[:base].first[:text] %></p>
       </div>
     </div>
   <% end %>

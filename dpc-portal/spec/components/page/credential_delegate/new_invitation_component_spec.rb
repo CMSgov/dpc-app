@@ -12,9 +12,8 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
 
     let(:org) { ComponentSupport::MockOrg.new }
     let(:cd_invite) { Invitation.new(invitation_type: :credential_delegate) }
-    let(:errors) { {} }
 
-    let(:component) { described_class.new(org, cd_invite, errors:) }
+    let(:component) { described_class.new(org, cd_invite) }
 
     before do
       render_inline(component)
@@ -227,8 +226,11 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
         HTML
         is_expected.to include(normalize_space(email_confirmation))
       end
-      context 'Existing CD with provided information' do
-        let(:errors) { { root: 'duplicate' } }
+      context 'existing CD with provided information' do
+        before do
+          cd_invite.errors.add :base, :duplicate
+          cd_invite.valid?
+        end
         it 'should include error message' do
           error = <<~HTML
             <div class="usa-alert usa-alert--error margin-bottom-4">
