@@ -102,7 +102,7 @@ echo -n "	Step 5: Installing the artifact in the project repository...";
   -DartifactId=jakarta.servlet-api \
   -Dversion=$CUSTOM_VERSION \
   -Dpackaging=jar \
-  -DlocalRepositoryPath=$CUSTOM_REPO_DIR > /dev/null 2>&1)
+  -DlocalRepositoryPath=$REPO_DIR > /dev/null 2>&1)
 
 if [ $? -ne 0 ]; then
   echo "failed to install artifact to custom repository!"
