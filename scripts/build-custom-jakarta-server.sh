@@ -67,13 +67,13 @@ else
 fi
 
 # Step 3: Modify the version in the POM file
-echo -n "	Step 3: Modifying the version in the POM file..."
-if [[ "$OSTYPE" == "darwin"* ]]; then
+echo -n "    Step 3: Modifying the version in the POM file..."
+if [ "$(uname)" = "Darwin" ]; then
   # macOS
-  sed -i '' "s/<version>$JAKARTA_VERSION<\/version>/<version>$CUSTOM_VERSION<\/version>/" tmp/$TARGET_DIR/api/pom.xml
+  sed -i '' "s/<version>$JAKARTA_VERSION<\/version>/<version>$CUSTOM_VERSION<\/version>/" tmp/"$TARGET_DIR"/api/pom.xml
 else
   # Linux or other systems
-  sed -i "s/<version>$JAKARTA_VERSION<\/version>/<version>$CUSTOM_VERSION<\/version>/" tmp/$TARGET_DIR/api/pom.xml
+  sed -i "s/<version>$JAKARTA_VERSION<\/version>/<version>$CUSTOM_VERSION<\/version>/" tmp/"$TARGET_DIR"/api/pom.xml
 fi
 
 if [ $? -ne 0 ]; then
