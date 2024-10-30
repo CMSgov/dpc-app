@@ -1,4 +1,4 @@
-IS_AWS_EC2=$(shell [[ $(shell ./ops/scripts/is_aws_ec2.sh) = "no" ]] && echo "-f docker-compose.override.yml" )
+IS_AWS_EC2=$(shell [ "$$(./ops/scripts/is_aws_ec2.sh)" = "no" ] && echo "-f docker-compose.override.yml" )
 
 ifdef DOCKER_PROJECT_NAME
         DOCKER_PROJ:="-p${DOCKER_PROJECT_NAME}"
