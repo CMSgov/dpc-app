@@ -23,6 +23,8 @@ class InvitationMailer < ApplicationMailer
 
   def cd_accepted
     @invitation = params[:invitation]
+    @invited_given_name = params[:invited_given_name]
+    @invited_family_name = params[:invited_family_name]
     mail(
       to: @invitation&.invited_by&.email,
       subject: 'Credential Delegate has signed up successfully'

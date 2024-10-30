@@ -5,8 +5,8 @@
     <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
   </head>
   <body>
-    <h1><%= @invitation.invited_given_name %> <%= @invitation.invited_family_name %> has successfully signed up as your Credential Delegate</h1>
-    <p><%= @invitation.invited_given_name %> <%= @invitation.invited_family_name %> is now your Credential Delegate for <%= @invitation.provider_organization.name %> 
+    <h1><%= @invited_given_name %> <%= @invited_family_name %> has successfully signed up as your Credential Delegate</h1>
+    <p><%= @invited_given_name %> <%= @invited_family_name %> is now your Credential Delegate for <%= @invitation.provider_organization.name %> 
         (NPI <%= @invitation.provider_organization.npi %>).  They're authorized to manage access to the Data at the Point of Care API (DPC), including creating a token, 
         providing a public key, and identifying IP addresses for your organization. You can sign in to the 
         <%= link_to 'DPC Portal', organization_url(@invitation.provider_organization, protocol: Rails.env.production? ? 'https' : 'http') %> to view or invite 

@@ -146,7 +146,9 @@ RSpec.describe Invitation, type: :model do
         invitation = create(:invitation, :cd)
         mailer = double(InvitationMailer)
         expect(InvitationMailer).to receive(:with)
-          .with(invitation)
+          .with(invitation:,
+                invited_given_name: invitation.invited_given_name,
+                invited_family_name: invitation.invited_family_name)
           .and_return(mailer)
         expect(mailer).to receive(:cd_accepted).and_return(mailer)
         expect(mailer).to receive(:deliver_later)

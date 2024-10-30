@@ -33,7 +33,9 @@ class Invitation < ApplicationRecord
   end
 
   def accept!
-    InvitationMailer.with(self).cd_accepted.deliver_later if credential_delegate?
+    if credential_delegate?
+      InvitationMailer.with(invitation: self, invited_given_name:, invited_family_name:).cd_accepted.deliver_later
+    end
     update!(invited_given_name: nil, invited_family_name: nil, invited_email: nil,
             status: :accepted)
   end
