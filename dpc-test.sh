@@ -13,7 +13,7 @@ export MAVEN_OPTS=-Dorg.slf4j.simpleLogger.defaultLogLevel=info
 
 # Include secure environment variables
 set -o allexport
-[[ -f ${DIR}/ops/config/decrypted/local.env ]] && source ${DIR}/ops/config/decrypted/local.env
+[ -f "${DIR}/ops/config/decrypted/local.env" ] && . "${DIR}/ops/config/decrypted/local.env"
 set +o allexport
 
 function _finally {
