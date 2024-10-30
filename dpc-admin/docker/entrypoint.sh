@@ -2,18 +2,19 @@
 
 set -e
 
-# Clean the existing pid if the server was previously started (using docker compose for example)
-if [ -f tmp/pids/server.pid ]; then
-  rm tmp/pids/server.pid
+# Clean the existing pid if the server was previously started
+if [ -d tmp/pids ]; then
+  rm -f tmp/pids/server.pid
 fi
 
-if [ "$1" == "admin" ]; then
+if [ "$1" = "admin" ]; then
   # Autogenerate fresh golden macaroons in local development
-  if [[ "$RAILS_ENV" != "production" ]] && [[ -z "$GOLDEN_MACAROON" ]]; then
+  if [ "$RAILS_ENV" != "production" ] && [ -z "$GOLDEN_MACAROON" ]; then
     echo "No golden macaroon found. Attempting to generate a new one..."
-    export GOLDEN_MACAROON=$(wget -q --post-data '\n' ${API_ADMIN_URL}/tasks/generate-token -O- || echo '')
+    GOLDEN_MACAROON=$(wget -q --post-data '\n' "${API_ADMIN_URL}/tasks/generate-token" -O- || echo '')
 
     if [ -n "$GOLDEN_MACAROON" ]; then
+      export GOLDEN_MACAROON
       echo "Successfully generated new golden macaroon."
     else
       echo "Could not generate a valid golden macaroon. Check that the API service is running."
@@ -23,9 +24,10 @@ if [ "$1" == "admin" ]; then
 
   echo "Starting Rails server..."
   bundle exec rails server -b 0.0.0.0 -p 3000
-fi
-
-if [ "$1" == "sidekiq" ]; then
+elif [ "$1" = "sidekiq" ]; then
   # Start Sidekiq job processing
   bundle exec sidekiq -q admin
+else
+  echo "Usage: $0 {admin|sidekiq}"
+  exit 1
 fi

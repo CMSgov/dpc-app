@@ -7,7 +7,7 @@ if [ -f tmp/pids/server.pid ]; then
   rm tmp/pids/server.pid
 fi
 
-if [ "$1" == "web" ]; then
+if [ "$1" = "web" ]; then
   # Run the database migrations
   echo "Migrating the database..."
   bundle exec rails db:migrate
@@ -16,11 +16,12 @@ if [ "$1" == "web" ]; then
   # This step is not needed, as there is no database seed data yet
 
   # Autogenerate fresh golden macaroons in local development
-  if [[ "$RAILS_ENV" != "production" ]] && [[ -z "$GOLDEN_MACAROON" ]]; then
+  if [ "$RAILS_ENV" != "production" ] && [ -z "$GOLDEN_MACAROON" ]; then
     echo "No golden macaroon found. Attempting to generate a new one..."
-    export GOLDEN_MACAROON=$(wget -q --post-data '\n' ${API_ADMIN_URL}/tasks/generate-token -O- || echo '');
+    GOLDEN_MACAROON=$(wget -q --post-data '\n' "${API_ADMIN_URL}/tasks/generate-token" -O- || echo '')
 
     if [ -n "$GOLDEN_MACAROON" ]; then
+      export GOLDEN_MACAROON
       echo "Successfully generated new golden macaroon."
     else
       echo "Could not generate a valid golden macaroon. Check that the API service is running."
@@ -33,8 +34,7 @@ if [ "$1" == "web" ]; then
   bundle exec rails server -b 0.0.0.0 -p 3500
 fi
 
-if [ "$1" == "sidekiq" ]; then
+if [ "$1" = "sidekiq" ]; then
   # Start Sidekiq job processing
-
   bundle exec sidekiq -q web
 fi

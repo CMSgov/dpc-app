@@ -151,7 +151,7 @@ services:
         condition: service_healthy
         restart: true
     working_dir: /usr/src/mymaven
-    command: sh -c "mvn verify -Pintegration-tests -am -ntp -Djib.skip=true"
+    command: sh -c "mvn verify -Pintegration-tests -am -ntp -Djib.skip=true ${TEST_VERBOSITY+$( [ \"\$TEST_VERBOSITY\" != \"false\" ] && echo '-Dtest.verbosity=true' )}"
     network_mode: host
 
 volumes:

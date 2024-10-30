@@ -88,7 +88,7 @@ echo "│                                      │"
 echo "│     Running integration tests...     │"
 echo "│                                      │"
 echo "└──────────────────────────────────────┘"
-docker compose -p "$PROJECT_NAME" up --exit-code-from tests tests
+DOCKER_PROJECT_NAME="$PROJECT_NAME" make int-tests-cicd
 
 # Check for unhealthy containers
 echo "Checking for unhealthy containers..."
