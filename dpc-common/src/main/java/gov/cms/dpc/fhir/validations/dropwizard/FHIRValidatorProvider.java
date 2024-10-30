@@ -17,13 +17,13 @@ import jakarta.inject.Provider;
 import java.sql.Date;
 
 import static gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration.FHIRValidationConfiguration;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class FHIRValidatorProvider implements Provider<FhirValidator> {
 
     private static final Logger logger = LoggerFactory.getLogger(FHIRValidatorProvider.class);
 
-    private static final Object lock = new Object();
-    private static volatile boolean initialized = false;
+    private static final AtomicBoolean INITIALIZED = new AtomicBoolean(false);
 
     private final FhirContext ctx;
     private final FHIRValidationConfiguration validationConfiguration;
@@ -36,17 +36,11 @@ public class FHIRValidatorProvider implements Provider<FhirValidator> {
         this.validationConfiguration = config;
         this.supportChain = supportChain;
 
-        // Double lock check to eagerly init the validator
         // Since we can't inject the provider as a singleton, we need a way to prime the validator on first use, but only once.
-        if (!initialized) {
-            synchronized (lock) {
-                if (!initialized) {
-                    // Initialize
-                    final FhirValidator fhirValidator = get();
-                    initialize(fhirValidator);
-                    initialized = true;
-                }
-            }
+        if(INITIALIZED.compareAndSet(false, true)) {
+            // Initialize
+            final FhirValidator fhirValidator = get();
+            initialize(fhirValidator);
         }
     }
 
