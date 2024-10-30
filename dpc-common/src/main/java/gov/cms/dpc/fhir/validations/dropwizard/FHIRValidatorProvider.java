@@ -17,44 +17,65 @@ import jakarta.inject.Provider;
 import java.sql.Date;
 
 import static gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration.FHIRValidationConfiguration;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class FHIRValidatorProvider implements Provider<FhirValidator> {
 
     private static final Logger logger = LoggerFactory.getLogger(FHIRValidatorProvider.class);
 
-    private static final AtomicBoolean INITIALIZED = new AtomicBoolean(false);
-
+    private volatile FhirValidator fhirValidator = null;
     private final FhirContext ctx;
     private final FHIRValidationConfiguration validationConfiguration;
     private final ValidationSupportChain supportChain;
 
     @Inject
-    @SuppressWarnings("StaticAssignmentInConstructor") // Needed to eagerly init the validator
     public FHIRValidatorProvider(FhirContext ctx, FHIRValidationConfiguration config, ValidationSupportChain supportChain) {
         this.ctx = ctx;
         this.validationConfiguration = config;
         this.supportChain = supportChain;
-
-        // Since we can't inject the provider as a singleton, we need a way to prime the validator on first use, but only once.
-        if(INITIALIZED.compareAndSet(false, true)) {
-            // Initialize
-            final FhirValidator fhirValidator = get();
-            initialize(fhirValidator);
-        }
+        
+        logger.info("A FHIRValidatorProvider has been constructed!");
     }
 
+    private FhirValidator initializeValidator() {
+        logger.debug("Initializing FhirValidator with schema validation enabled");
 
+        FhirValidator validator = ctx.newValidator();
+        FhirInstanceValidator instanceValidator = new FhirInstanceValidator(ctx);
+        validator.registerValidatorModule(instanceValidator);
+
+        instanceValidator.setValidationSupport(supportChain);
+        validator.setValidateAgainstStandardSchema(validationConfiguration.isSchemaValidation());
+
+        // Prime the validator with a dummy patient if necessary
+        ValidationOptions options = new ValidationOptions();
+        options.addProfile(PatientProfile.PROFILE_URI);
+        validator.validateWithResult(createDummyPatient(), options);
+
+        logger.info("Initialization of FhirValidator complete!");
+        return validator;
+    }
+ 
     @Override
     public FhirValidator get() {
+
+        // Lazy initialization with double-checked locking
+        if (fhirValidator == null) {
+            synchronized (this) {
+                if (fhirValidator == null) {
+                    fhirValidator = initializeValidator();
+                    logger.info("OK, lazily initialized FhirValidator!");
+                }
+            }
+        }
+
         logger.debug("Schema validation enabled: {}", validationConfiguration.isSchemaValidation());
         final FhirInstanceValidator instanceValidator = new FhirInstanceValidator(ctx);
-        final FhirValidator fhirValidator = ctx.newValidator();
-        fhirValidator.setValidateAgainstStandardSchema(validationConfiguration.isSchemaValidation());
-        fhirValidator.registerValidatorModule(instanceValidator);
+        final FhirValidator newFhirValidator = ctx.newValidator();
+        newFhirValidator.setValidateAgainstStandardSchema(validationConfiguration.isSchemaValidation());
+        newFhirValidator.registerValidatorModule(instanceValidator);
 
         instanceValidator.setValidationSupport(this.supportChain);
-        return fhirValidator;
+        return newFhirValidator;
     }
 
     /**
@@ -66,7 +87,7 @@ public class FHIRValidatorProvider implements Provider<FhirValidator> {
      *
      * @param validator - {@link FhirValidator} validator to prime
      */
-    private static void initialize(FhirValidator validator) {
+    private Patient createDummyPatient() {
         logger.trace("Validating dummy patient");
         final Patient patient = new Patient();
         patient.addName().addGiven("Dummy").setFamily("Patient");
@@ -74,8 +95,6 @@ public class FHIRValidatorProvider implements Provider<FhirValidator> {
         patient.setGender(Enumerations.AdministrativeGender.MALE);
         patient.setBirthDate(Date.valueOf("1990-01-01"));
 
-        final ValidationOptions op = new ValidationOptions();
-        op.addProfile(PatientProfile.PROFILE_URI);
-        validator.validateWithResult(patient, op);
+        return patient;
     }
 }
