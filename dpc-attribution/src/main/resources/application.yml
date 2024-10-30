@@ -66,6 +66,7 @@ logging:
     "org.hibernate.SQL": ERROR
     "org.hibernate.engine.jdbc": "OFF"
     io.dropwizard.jersey: "OFF"
+    "org.postgresql": "OFF"
     # Turn this on to verify updates/inserts are getting batched
     #"org.hibernate.engine.jdbc.batch.internal.BatchingBatch": DEBUG
     "gov.cms.dpc.api.auth": INFO
