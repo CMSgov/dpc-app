@@ -7,7 +7,7 @@ RSpec.describe Invitation, type: :model do
   let(:organization) { build(:provider_organization) }
 
   describe :cd do
-    let(:valid_new_cd_invite) { build(:invitation, :cd) }
+    let(:valid_new_cd_invite) { build(:invitation, :cd, provider_organization: organization) }
     describe :create do
       it 'passes validations' do
         expect(valid_new_cd_invite.valid?).to eq true
@@ -80,6 +80,22 @@ RSpec.describe Invitation, type: :model do
         expect do
           valid_new_cd_invite.status = :fake_status
         end.to raise_error(ArgumentError)
+      end
+
+      context 'duplicate information' do
+        before { valid_new_cd_invite.save! }
+        it 'fails on existing invitation with same email and full name' do
+          user = build(:user)
+          new_cd_invite = build(:invitation, :cd, provider_organization: organization, invited_by: user,
+                                                  invited_given_name: valid_new_cd_invite.invited_given_name,
+                                                  invited_family_name: valid_new_cd_invite.invited_family_name,
+                                                  invited_email: valid_new_cd_invite.invited_email,
+                                                  invited_email_confirmation: valid_new_cd_invite.invited_email)
+          expect(new_cd_invite.valid?).to eq false
+          expect(new_cd_invite.errors[:base].size).to eq 1
+          expect(new_cd_invite.errors[:base].first[:status]).to eq I18n.t('errors.attributes.base.duplicate_cd.status')
+          expect(new_cd_invite.errors[:base].first[:text]).to eq I18n.t('errors.attributes.base.duplicate_cd.text')
+        end
       end
     end
 
