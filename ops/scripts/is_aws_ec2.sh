@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Test if environment is running inside AWS EC2
 #
 # Josh Kupershmidt (https://serverfault.com/users/223639/josh-kupershmidt) 3/20/2018
