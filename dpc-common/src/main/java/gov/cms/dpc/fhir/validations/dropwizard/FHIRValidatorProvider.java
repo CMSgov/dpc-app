@@ -57,25 +57,20 @@ public class FHIRValidatorProvider implements Provider<FhirValidator> {
  
     @Override
     public FhirValidator get() {
+        FhirValidator fhirValidator = this.fhirValidator;
 
         // Lazy initialization with double-checked locking
         if (fhirValidator == null) {
             synchronized (this) {
+                fhirValidator = this.fhirValidator;
                 if (fhirValidator == null) {
-                    fhirValidator = initializeValidator();
+                    this.fhirValidator = fhirValidator = initializeValidator();
                     logger.info("OK, lazily initialized FhirValidator!");
                 }
             }
         }
-
-        logger.debug("Schema validation enabled: {}", validationConfiguration.isSchemaValidation());
-        final FhirInstanceValidator instanceValidator = new FhirInstanceValidator(ctx);
-        final FhirValidator newFhirValidator = ctx.newValidator();
-        newFhirValidator.setValidateAgainstStandardSchema(validationConfiguration.isSchemaValidation());
-        newFhirValidator.registerValidatorModule(instanceValidator);
-
-        instanceValidator.setValidationSupport(this.supportChain);
-        return newFhirValidator;
+        
+        return fhirValidator;
     }
 
     /**
