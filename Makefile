@@ -6,6 +6,7 @@ else
         DOCKER_PROJ:=
 endif
 
+TEST_VERBOSITY ?= false
 REPORT_COVERAGE ?= false
 
 # Smoke Testing

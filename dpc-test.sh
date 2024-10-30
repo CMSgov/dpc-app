@@ -7,6 +7,10 @@ else
     PROJECT_NAME="$APP_PROJ_NAME"
 fi
 
+if [ -z "$TEST_VERBOSITY" ]; then
+    TEST_VERBOSITY="false"
+fi
+
 # Check if running on AWS EC2
 IS_AWS_EC2=$(./ops/scripts/is_aws_ec2.sh)
 
@@ -88,7 +92,7 @@ echo "│                                      │"
 echo "│     Running integration tests...     │"
 echo "│                                      │"
 echo "└──────────────────────────────────────┘"
-DOCKER_PROJECT_NAME="$PROJECT_NAME" make int-tests-cicd
+TEST_VERBOSITY="$TEST_VERBOSITY" DOCKER_PROJECT_NAME="$PROJECT_NAME" make int-tests-cicd
 
 # Check for unhealthy containers
 echo "Checking for unhealthy containers..."
