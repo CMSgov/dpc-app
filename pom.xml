@@ -255,7 +255,7 @@
                 <artifactId>jetty-io</artifactId>
                 <version>11.0.19</version>
             </dependency>
-            <dependency>
+<!--            <dependency>
                 <groupId>ru.vyarus</groupId>
                 <artifactId>dropwizard-guicey</artifactId>
                 <version>7.1.4</version>
@@ -265,7 +265,7 @@
                         <artifactId>jetty-io</artifactId>
                     </exclusion>
                 </exclusions>
-            </dependency>
+            </dependency>-->
             <dependency>
                 <groupId>com.typesafe</groupId>
                 <artifactId>config</artifactId>
