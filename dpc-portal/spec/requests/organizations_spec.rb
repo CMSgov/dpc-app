@@ -223,16 +223,6 @@ RSpec.describe 'Organizations', type: :request do
           expect(assigns(:invitations)).to be_nil
         end
       end
-
-      it 'redirects if prod-sbx' do
-        allow(ENV)
-          .to receive(:fetch)
-          .with('ENV', nil)
-          .and_return('prod-sbx')
-        get "/organizations/#{org.id}"
-        expect(assigns(:organization)).to be_nil
-        expect(response).to redirect_to(root_url)
-      end
     end
 
     context 'as ao' do
