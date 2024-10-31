@@ -67,7 +67,7 @@ else
 fi
 
 # Step 3: Modify the version in the POM file
-echo -n "    Step 3: Modifying the version in the POM file..."
+echo -n "	Step 3: Modifying the version in the POM file..."
 if [ "$(uname)" = "Darwin" ]; then
   # macOS
   sed -i '' "s/<version>$JAKARTA_VERSION<\/version>/<version>$CUSTOM_VERSION<\/version>/" tmp/"$TARGET_DIR"/api/pom.xml
