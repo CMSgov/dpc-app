@@ -51,6 +51,7 @@
         <newrelic.agent.version>7.11.1</newrelic.agent.version>
         <newrelic.agent.type>zip</newrelic.agent.type>
         <h2.version>2.2.220</h2.version>
+        <logback.version>1.4.11</logback.version>
     </properties>
 
     <developers>
@@ -225,6 +226,11 @@
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
                 <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-classic</artifactId>
+                <version>${logback.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.dropwizard</groupId>
