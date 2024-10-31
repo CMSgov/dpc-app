@@ -7,7 +7,7 @@ RSpec.describe Invitation, type: :model do
   let(:organization) { build(:provider_organization) }
 
   describe :cd do
-    let(:valid_new_cd_invite) { build(:invitation, :cd) }
+    let(:valid_new_cd_invite) { build(:invitation, :cd, provider_organization: organization) }
     describe :create do
       it 'passes validations' do
         expect(valid_new_cd_invite.valid?).to eq true
@@ -80,6 +80,31 @@ RSpec.describe Invitation, type: :model do
         expect do
           valid_new_cd_invite.status = :fake_status
         end.to raise_error(ArgumentError)
+      end
+
+      context 'duplicate information' do
+        let(:ao_user) { build(:user) }
+        before { valid_new_cd_invite.save! }
+        it 'fails on existing invitation with same email and full name' do
+          new_cd_invite = build(:invitation, :cd, provider_organization: organization, invited_by: ao_user)
+          expect(new_cd_invite.valid?).to eq false
+          expect(new_cd_invite.errors[:base].size).to eq 1
+          expect(new_cd_invite.errors[:base].first[:status]).to eq I18n.t('errors.attributes.base.duplicate_cd.status')
+          expect(new_cd_invite.errors[:base].first[:text]).to eq I18n.t('errors.attributes.base.duplicate_cd.text')
+        end
+
+        it 'fails on existing cd with same email' do
+          user = create(:user)
+          new_cd_invite = build(:invitation, :cd, provider_organization: organization, invited_by: ao_user,
+                                                  invited_email: user.email, invited_email_confirmation: user.email)
+          expect(new_cd_invite.valid?).to eq true
+
+          create(:cd_org_link, user:, provider_organization: organization, invitation: valid_new_cd_invite)
+          expect(new_cd_invite.valid?).to eq false
+          expect(new_cd_invite.errors[:base].size).to eq 1
+          expect(new_cd_invite.errors[:base].first[:status]).to eq I18n.t('errors.attributes.base.duplicate_cd.status')
+          expect(new_cd_invite.errors[:base].first[:text]).to eq I18n.t('errors.attributes.base.duplicate_cd.text')
+        end
       end
     end
 

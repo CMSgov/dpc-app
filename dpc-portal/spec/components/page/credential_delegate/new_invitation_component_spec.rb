@@ -226,6 +226,36 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
         HTML
         is_expected.to include(normalize_space(email_confirmation))
       end
+      context 'existing CD with provided information' do
+        before { cd_invite.errors.add(:base, :duplicate_cd) }
+        it 'should include error message' do
+          error = <<~HTML
+            <div class="usa-alert usa-alert--error margin-bottom-4">
+              <div class="usa-alert__body">
+                <h2 class="usa-alert__heading">#{I18n.t('errors.attributes.base.duplicate_cd.status')}</h2>
+                <p class="usa-alert__text">#{I18n.t('errors.attributes.base.duplicate_cd.text')}</p>
+              </div>
+            </div>
+            <h1>Invite new user</h1>
+          HTML
+          is_expected.to include(normalize_space(error))
+        end
+        it 'should match header' do
+          header = <<~HTML
+            <h1>Invite new user</h1>
+              <div class="usa-alert usa-alert--warning margin-bottom-4">
+                <div class="usa-alert__body">
+                  <h2 class="usa-alert__heading">Exact match required</h2>
+                  <p class="usa-alert__text">
+                    The name and contact info you enter must be an exact match to the name and contact info your Credential Delegate will provide after receiving this invite.
+                  </p>
+                </div>
+              </div>
+            <div>
+          HTML
+          is_expected.to include(normalize_space(header))
+        end
+      end
     end
   end
 end
