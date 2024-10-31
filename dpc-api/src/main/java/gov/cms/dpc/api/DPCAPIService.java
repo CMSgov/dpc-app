@@ -4,6 +4,7 @@ import com.codahale.metrics.jersey3.InstrumentedResourceMethodApplicationListene
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.datatype.hibernate6.Hibernate6Module;
 import com.google.inject.Injector;
+import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.api.auth.AuthModule;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.cli.keys.KeyCommand;
@@ -128,6 +129,8 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
     }
 
     private GuiceBundle setupGuiceBundle() {
+        JerseyGuiceUtils.reset();
+
         return GuiceBundle.builder()
                 .modules(
                         new DPCHibernateModule<>(hibernateBundle),

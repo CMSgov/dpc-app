@@ -47,7 +47,7 @@
         <jacoco.version>0.8.12</jacoco.version>
 
         <hapi.fhir.groupID>ca.uhn.hapi.fhir</hapi.fhir.groupID>
-        <hapi.fhir.version>7.4.3</hapi.fhir.version>
+        <hapi.fhir.version>7.4.5</hapi.fhir.version>
 
         <gson.version>2.11.0</gson.version>
         <jaxb.version>2.3.1</jaxb.version>
@@ -154,6 +154,11 @@
                 <artifactId>jersey-server</artifactId>
                 <version>3.1.8</version>
             </dependency>
+<!--            <dependency>
+                <groupId>org.glassfish.hk2</groupId>
+                <artifactId>hk2-locator</artifactId>
+                <version>3.1.1</version>
+            </dependency>-->
             <dependency>
                 <groupId>jakarta.servlet</groupId>
                 <artifactId>jakarta.servlet-api</artifactId>
@@ -509,8 +514,6 @@
                         <configuration>
                             <testFailureIgnore>false</testFailureIgnore>
                             <skip>false</skip>
-                            <parallel>all</parallel>
-                            <threadCount>10</threadCount>
                             <reportFormat>plain</reportFormat>
                             <consoleOutputReporter>
                                <disable>${disable.console}</disable>
