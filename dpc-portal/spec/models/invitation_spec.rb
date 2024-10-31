@@ -94,9 +94,12 @@ RSpec.describe Invitation, type: :model do
         end
 
         it 'fails on existing cd with same email' do
-          cd_user = build(:user)
-          build(:cd_org_link, user: cd_user, provider_organization: organization, invitation: valid_new_cd_invite)
-          new_cd_invite = build(:invitation, :cd, provider_organization: organization, invited_by: ao_user)
+          user = create(:user)
+          create(:cd_org_link, user:, provider_organization: organization)
+          valid_new_cd_invite.accept!
+
+          new_cd_invite = build(:invitation, :cd, provider_organization: organization, invited_by: ao_user,
+                                                  invited_email: user.email, invited_email_confirmation: user.email)
           expect(new_cd_invite.valid?).to eq false
           expect(new_cd_invite.errors[:base].size).to eq 1
           expect(new_cd_invite.errors[:base].first[:status]).to eq I18n.t('errors.attributes.base.duplicate_cd.status')

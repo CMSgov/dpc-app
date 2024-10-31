@@ -101,16 +101,14 @@ class Invitation < ApplicationRecord
   end
 
   def existing_invite?
-    return false unless provider_organization
-
     Invitation.where(provider_organization:, invited_email:, invited_given_name:, invited_family_name:,
                      status: :pending).any?
   end
 
   def existing_credential_delegate?
-    return false unless provider_organization&.cd_org_links
+    return false unless provider_organization&.cd_org_links&.any?
 
-    provider_organization.cd_org_links.any? { |link| link.disabled_at.nil? && link.user.email == :invited_email }
+    provider_organization.cd_org_links.any? { |link| link.disabled_at.nil? && link.user.email == invited_email }
   end
 
   private
