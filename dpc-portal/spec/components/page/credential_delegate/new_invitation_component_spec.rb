@@ -232,8 +232,8 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
           error = <<~HTML
             <div class="usa-alert usa-alert--error margin-bottom-4">
               <div class="usa-alert__body">
-                <h2 class="usa-alert__heading">User is already a Credential Delegate (CD).</h2>
-                <p class="usa-alert__text">A user with this name or email has already been invited to manage credentials for this organization.</p>
+                <h2 class="usa-alert__heading">#{I18n.t('attributes.base.duplicate_cd.status')}</h2>
+                <p class="usa-alert__text">#{I18n.t('attributes.base.duplicate_cd.text')}</p>
               </div>
             </div>
             <h1>Invite new user</h1>

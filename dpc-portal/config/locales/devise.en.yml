@@ -64,8 +64,3 @@ en:
       not_saved:
         one: "1 error prohibited this %{resource} from being saved:"
         other: "%{count} errors prohibited this %{resource} from being saved:"
-    attributes:
-      base:
-        duplicate_cd:
-          status: "User is already a Credential Delegate (CD)."
-          text: "A user with this name or email has already been invited to manage credentials for this organization."
