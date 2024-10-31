@@ -1,4 +1,12 @@
 <div>
+  <% unless cd_invite.errors[:base].empty? %>
+    <div class="usa-alert usa-alert--error margin-bottom-4">
+      <div class="usa-alert__body">
+        <h2 class="usa-alert__heading"><%= cd_invite.errors[:base].first[:status] %></h2>
+        <p class="usa-alert__text"><%= cd_invite.errors[:base].first[:text] %></p>
+      </div>
+    </div>
+  <% end %>
   <h1>Invite new user</h1>
   <div class="usa-alert usa-alert--warning margin-bottom-4">
     <div class="usa-alert__body">
