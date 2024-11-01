@@ -96,7 +96,7 @@ RSpec.describe 'Accessibility', type: :system do
             expect(page).to be_axe_clean
           end
         end
-        context :with_credentials do
+        context :with_tokens_keys_and_ips do
           let(:tokens) { default_get_client_tokens['entities'] }
           let(:keys) { default_get_public_keys['entities'] }
           let(:ip_addresses) { default_get_ip_addresses['entities'] }
