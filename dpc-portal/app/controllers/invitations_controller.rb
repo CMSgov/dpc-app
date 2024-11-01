@@ -257,7 +257,7 @@ class InvitationsController < ApplicationController
   end
 
   def block_test_utilities
-    return render plain: :forbidden, status: :forbidden unless Rails.env.test?
+    render plain: :forbidden, status: :forbidden unless Rails.env.test?
   end
 
   def log_ao_verification_error(error, service_unavailable)
