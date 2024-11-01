@@ -8,21 +8,17 @@
 #
 # Use this hook to configure devise mailer, warden hooks and so forth.
 # Many of these configuration options can be set straight in your model.
+
+require "dpc_portal_utils"
+
 Devise.setup do |config|
+  include DpcPortalUtils
   begin
     private_key = OpenSSL::PKey::RSA.new(ENV['LOGIN_GOV_PRIVATE_KEY'])
   rescue TypeError, OpenSSL::PKey::RSAError => e
     Rails.logger.error("Unable to create private key for omniauth: #{e}")
     private_key = OpenSSL::PKey::RSA.new(1024)
   end
-  host = case ENV['ENV']
-         when 'local'
-           'http://localhost:3100'
-         when 'prod'
-           'https://dpc.cms.gov'
-         else
-           "https://#{ENV['ENV']}.dpc.cms.gov"
-         end
   idp_host = ENV.fetch('IDP_HOST', 'idp.int.identitysandbox.gov')
   config.omniauth :openid_connect, {
                     name: :openid_connect,
@@ -38,7 +34,7 @@ Devise.setup do |config|
                       host: idp_host,
                       identifier: "urn:gov:cms:openidconnect.profiles:sp:sso:cms:dpc:#{ENV['ENV']}",
                       private_key: private_key,
-                      redirect_uri: "#{host}/portal/users/auth/openid_connect/callback"
+                      redirect_uri: "#{my_protocol_host}/portal/users/auth/openid_connect/callback"
                     }
                   }
   # The secret key used by Devise. Devise uses this key to generate
