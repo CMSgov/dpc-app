@@ -735,6 +735,26 @@ RSpec.describe 'Invitations', type: :request do
       end
     end
   end
+
+  describe 'GET /set_idp_token' do
+    let(:invitation) { create(:invitation, :ao) }
+    let(:org_id) { invitation.provider_organization.id }
+
+    it_behaves_like 'an invitation endpoint', :get, 'set_idp_token' do
+      let(:invitation) { create(:invitation, :ao) }
+    end
+
+    it 'should succeed in Rails.test' do
+      get "/organizations/#{org_id}/invitations/#{invitation.id}/set_idp_token"
+      expect(response).to be_ok
+      expect(response.body).to be_blank
+    end
+    it 'should fail outside Rails.test' do
+      allow(Rails.env).to receive(:test?).and_return false
+      get "/organizations/#{org_id}/invitations/#{invitation.id}/set_idp_token"
+      expect(response).to be_forbidden
+    end
+  end
 end
 
 def log_in

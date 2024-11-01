@@ -31,13 +31,13 @@ Rails.application.routes.draw do
       get 'success', on: :member
     end
     resources :invitations, only: [:show] do
-      get 'fake_login', on: :member
       get 'accept', on: :member
       post 'confirm', on: :member
       post 'register', on: :member
       post 'login', on: :member
       post 'renew', on: :member
       get 'confirm_cd', on: :member
+      get 'set_idp_token', on: :member
     end
     get 'tos_form', on: :member
     post 'sign_tos', on: :member

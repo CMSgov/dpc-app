@@ -12,6 +12,7 @@ class InvitationsController < ApplicationController
   before_action :verify_ao_invitation, only: %i[accept confirm]
   before_action :verify_cd_invitation, only: %i[code verify_code confirm_cd]
   before_action :check_for_token, only: %i[accept confirm confirm_cd register]
+  before_action :block_test_utilities, only: %i[set_idp_token]
 
   def show
     render(Page::Invitations::StartComponent.new(@organization, @invitation))
@@ -92,10 +93,10 @@ class InvitationsController < ApplicationController
     redirect_to accept_organization_invitation_url(@organization, @invitation)
   end
 
-  def fake_login
+  def set_idp_token
     session[:login_dot_gov_token] = 'token'
     session[:login_dot_gov_token_exp] = 2.days.from_now
-    render plain: :foo
+    head :ok
   end
 
   private
@@ -253,6 +254,10 @@ class InvitationsController < ApplicationController
     end
 
     render(Page::Invitations::InvitationLoginComponent.new(@invitation))
+  end
+
+  def block_test_utilities
+    return render plain: :forbidden, status: :forbidden unless Rails.env.test?
   end
 
   def log_ao_verification_error(error, service_unavailable)
