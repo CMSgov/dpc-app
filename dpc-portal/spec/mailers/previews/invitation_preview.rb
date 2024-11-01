@@ -29,7 +29,6 @@ class InvitationPreview < ActionMailer::Preview
     provider_organization = ProviderOrganization.new(id: 2, name: 'Health Hut', npi: '123456789')
     invited_by = User.new(given_name: 'Robert', family_name: 'Hodges', email: 'rhodges@health_hut.com')
     invitation = Invitation.new(id: 4,
-                                invited_email: 'gm@example.com',
                                 invited_by:, provider_organization:)
     InvitationMailer.with(invitation:, invited_given_name:, invited_family_name:).cd_accepted
   end
