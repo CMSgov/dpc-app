@@ -17,6 +17,7 @@
         <exec.skip>true</exec.skip>
         <test.verbosity>false</test.verbosity>
         <disable.console>true</disable.console>
+        <jib.skip>true</jib.skip>
     </properties>
 
     <dependencyManagement>

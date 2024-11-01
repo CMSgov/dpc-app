@@ -59,14 +59,17 @@ smoke/prod: venv smoke
 
 # Build commands
 #
-# These commands build/compile our applications and docker images.
+# These commands build/compile our docker images.
 # To start the applications, use the start-* commands below.
 # ==============
 
-api: ## Builds the Java API services
-api: secure-envs
-	mvn clean compile -Perror-prone -B -V -ntp -T 4 -DskipTests
-	mvn package -Pci -ntp -T 4 -DskipTests
+.PHONY: docker-base
+docker-base:
+	@docker compose -f ./docker-compose.base.yml build base
+
+.PHONY: docker-base-amd
+docker-base-amd:
+	@docker compose -f ./docker-compose.amd-base.yml build base
 
 website: ## Builds the sandbox portal website
 website:
@@ -81,7 +84,6 @@ portal:
 	mkdir -p dpc-portal/vendor/api_client
 	cp -r engines/api_client/ dpc-portal/vendor/api_client/
 	@docker build -f dpc-portal/Dockerfile . -t dpc-web-portal
-
 
 # Start commands
 # ==============
@@ -227,12 +229,18 @@ portal-console: ## Run a rails console shell
 	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) -f docker-compose.portals.yml exec -it dpc_portal bin/console
 
 
-# Build & Test commands
+# Software Build & Test commands
 # ======================
 
-.PHONY: docker-base
-docker-base:
-	@docker compose $(DOCKER_PROJ) -f ./docker-compose.base.yml build base
+api: ## Builds the Java API services
+api: secure-envs
+	mvn clean compile -Perror-prone -B -V -ntp -T 4 -DskipTests
+	mvn package -Pci -ntp -T 4 -DskipTests
+
+api-amd: ## Builds the Java API services
+api-amd: secure-envs
+	mvn clean compile -Perror-prone -B -V -ntp -T 4 -DskipTests
+	mvn package -Pci -ntp -T 4 -DskipTests -DuseAMD=true
 
 .PHONY: ci-app
 ci-app: docker-base secure-envs

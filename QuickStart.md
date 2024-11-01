@@ -78,4 +78,4 @@ Note: unit, integration,and system test can be run back-to-back by running the c
 
 4) Open testing of the API via Postman can be done by downloading the project's Postman collection (linked in full documentation) and configuration the Postman environment with the client token, private signing key for JWT signing, and public key key-id as discussed above.
 
-5) Smoke tests can be run on the system to verify its online integration and performance. To run smoke tests, from the project directory, run the command, `make start-smoke-local`, to launch the necessary containers and configuration. Once the containers are healthy, run the command, `JAVA_HOME=<jdk11 path> make smoke/local`. 
+5) Smoke tests can be run on the system to verify its online integration and performance. To run smoke tests, from the project directory, run the command, `make start-system-smoke`, to launch the necessary containers and configuration. Once the containers are healthy, run the command, `JAVA_HOME=<jdk11 path> make smoke/local`. 

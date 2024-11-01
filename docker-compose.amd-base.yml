@@ -1,0 +1,7 @@
+services:
+  base:
+    image: dpc-base-amd:latest
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: docker/Dockerfiles/Dockerfile.base

@@ -64,6 +64,8 @@
         
         <test.verbosity>false</test.verbosity>
         <disable.console>true</disable.console>
+
+        <base.image>docker://dpc-base:latest</base.image>
     </properties>
 
     <developers>
@@ -154,11 +156,6 @@
                 <artifactId>jersey-server</artifactId>
                 <version>3.1.8</version>
             </dependency>
-<!--            <dependency>
-                <groupId>org.glassfish.hk2</groupId>
-                <artifactId>hk2-locator</artifactId>
-                <version>3.1.1</version>
-            </dependency>-->
             <dependency>
                 <groupId>jakarta.servlet</groupId>
                 <artifactId>jakarta.servlet-api</artifactId>
@@ -238,7 +235,6 @@
             <dependency>
                 <groupId>ru.vyarus.guicey</groupId>
                 <artifactId>guicey-bom</artifactId>
-                <!-- Guicey 6.x tied to DropWizard 3.x - JDK11 support -->
                 <version>7.1.4</version>
                 <type>pom</type>
                 <scope>import</scope>
@@ -255,7 +251,7 @@
                 <artifactId>jetty-io</artifactId>
                 <version>11.0.19</version>
             </dependency>
-<!--            <dependency>
+            <dependency>
                 <groupId>ru.vyarus</groupId>
                 <artifactId>dropwizard-guicey</artifactId>
                 <version>7.1.4</version>
@@ -265,7 +261,7 @@
                         <artifactId>jetty-io</artifactId>
                     </exclusion>
                 </exclusions>
-            </dependency>-->
+            </dependency>
             <dependency>
                 <groupId>com.typesafe</groupId>
                 <artifactId>config</artifactId>
@@ -585,6 +581,21 @@
             <build>
                 <plugins>
                     <plugin>
+                        <groupId>com.google.cloud.tools</groupId>
+                        <artifactId>jib-maven-plugin</artifactId>
+                        <configuration>
+                            <to>
+                                <image>${jib.ecr.root}/${project.artifactId}</image>
+                                <tags>
+                                    <tag>latest</tag>
+                                </tags>
+                            </to>
+                            <from>
+                                <image>${base.image}</image>
+                            </from>
+                        </configuration>
+                    </plugin>
+                    <plugin>
                         <artifactId>maven-dependency-plugin</artifactId>
                         <executions>
                             <execution>
@@ -729,10 +740,14 @@
                         <artifactId>jib-maven-plugin</artifactId>
                         <configuration>
                             <to>
+                                <image>${jib.ecr.root}/${project.artifactId}</image>
                                 <tags combine.children="override">
                                     <tag>${project.version}</tag>
                                 </tags>
                             </to>
+                            <from>
+                                <image>${base.image}</image>
+                            </from>
                         </configuration>
                     </plugin>
                 </plugins>
@@ -760,6 +775,31 @@
                                 </configuration>
                             </execution>
                         </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>use-amd-image</id>
+            <activation>
+                <property>
+                    <name>useAMD</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <properties>
+                <base.image>docker://dpc-base-amd:latest</base.image>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.google.cloud.tools</groupId>
+                        <artifactId>jib-maven-plugin</artifactId>
+                        <configuration>
+                            <from>
+                                <image>${base.image}</image>
+                            </from>
+                        </configuration>
                     </plugin>
                 </plugins>
             </build>
@@ -819,18 +859,7 @@
                 <plugin>
                     <groupId>com.google.cloud.tools</groupId>
                     <artifactId>jib-maven-plugin</artifactId>
-                    <version>3.4.3</version>
-                    <configuration>
-                        <to>
-                            <image>${jib.ecr.root}/${project.artifactId}</image>
-                            <tags>
-                                <tag>latest</tag>
-                            </tags>
-                        </to>
-                        <from>
-                            <image>docker://dpc-base:latest</image>
-                        </from>
-                    </configuration>
+                    <version>3.4.4</version>
                     <executions>
                         <execution>
                             <phase>package</phase>

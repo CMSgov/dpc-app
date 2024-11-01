@@ -16,6 +16,7 @@
         <exec.skip>true</exec.skip>
         <test.verbosity>false</test.verbosity>
         <disable.console>true</disable.console>
+        <jib.skip>true</jib.skip>
     </properties>
 
     <dependencies>
@@ -97,7 +98,7 @@
             <groupId>io.dropwizard</groupId>
             <artifactId>dropwizard-core</artifactId>
         </dependency>
-        <dependency>
+         <dependency>
             <groupId>io.dropwizard</groupId>
             <artifactId>dropwizard-jersey</artifactId>
         </dependency>

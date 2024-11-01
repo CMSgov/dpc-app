@@ -65,6 +65,7 @@ fi
 echo "┌──────────────────────────────────────┐"
 echo "│                                      │"
 echo "│          Application Build           │"
+echo "│             & Unit Tests             │"
 echo "│                                      │"
 echo "└──────────────────────────────────────┘"
 DOCKER_PROJECT_NAME="$PROJECT_NAME" make start-db
@@ -89,7 +90,7 @@ echo "└└└└└└└└└└└└└└└-------- this volume has been
 # Run the integration tests
 echo "┌──────────────────────────────────────┐"
 echo "│                                      │"
-echo "│     Running integration tests...     │"
+echo "│     Running Integration Tests...     │"
 echo "│                                      │"
 echo "└──────────────────────────────────────┘"
 TEST_VERBOSITY="$TEST_VERBOSITY" DOCKER_PROJECT_NAME="$PROJECT_NAME" make int-tests-cicd
@@ -102,7 +103,7 @@ if [ "$UNHEALTHY_CONTAINERS" != 0 ]; then
     echo "${UNHEALTHY_CONTAINERS} unhealthy container$( [ "$UNHEALTHY_CONTAINERS" != 1 ] && echo 's' ). You can debug or stop $( [ "$UNHEALTHY_CONTAINERS" != 1 ] && echo 'them' || echo 'it' )."
     docker ps -f json > /tmp/chuck-ps.log
     CONTAINER_ID=$(docker ps | grep consent | awk '{print $1;}')
-    docker logs "$CONTAINER_ID" > /tmp/chuck-log.log
+    docker logs "$CONTAINER_ID" > /tmp/container-log.log
     sleep 15000
 fi
 
@@ -114,7 +115,7 @@ echo "└└└└└└└└└└└└└└└-------- this volume has been
 # Run the system tests
 echo "┌──────────────────────────────────────┐"
 echo "│                                      │"
-echo "│        Running system tests...       │"
+echo "│        Running System Tests...       │"
 echo "│                                      │"
 echo "└──────────────────────────────────────┘"
 
@@ -129,7 +130,7 @@ if [ "$UNHEALTHY_CONTAINERS" != 0 ]; then
     echo "${UNHEALTHY_CONTAINERS} unhealthy container$( [ "$UNHEALTHY_CONTAINERS" != 1 ] && echo 's' ). You can debug or stop $( [ "$UNHEALTHY_CONTAINERS" != 1 ] && echo 'them' || echo 'it' )."
     docker ps -f json > /tmp/chuck-ps.log
     CONTAINER_ID=$(docker ps | grep consent | awk '{print $1;}')
-    docker logs "$CONTAINER_ID" > /tmp/chuck-log.log
+    docker logs "$CONTAINER_ID" > /tmp/container-log.log
     sleep 15000
 fi
 
