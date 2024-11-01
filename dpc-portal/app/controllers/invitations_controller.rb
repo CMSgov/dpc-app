@@ -1,7 +1,11 @@
 # frozen_string_literal: true
 
+require 'dpc_portal_utils'
+
 # Handles acceptance of invitations
 class InvitationsController < ApplicationController
+  include DpcPortalUtils
+
   before_action :load_organization
   before_action :load_invitation
   before_action :validate_invitation, except: %i[renew]
@@ -71,7 +75,7 @@ class InvitationsController < ApplicationController
                            path: '/openid_connect/authorize',
                            query: { acr_values: 'http://idmanagement.gov/ns/assurance/ial/2',
                                     client_id: IDP_CLIENT_ID,
-                                    redirect_uri: "#{redirect_host}/portal/users/auth/openid_connect/callback",
+                                    redirect_uri: "#{my_protocol_host}/portal/users/auth/openid_connect/callback",
                                     response_type: 'code',
                                     scope: 'openid email all_emails profile social_security_number',
                                     nonce: @nonce,
@@ -289,16 +293,5 @@ class InvitationsController < ApplicationController
                        { actionContext: LoggingConstants::ActionContext::Registration,
                          actionType: LoggingConstants::ActionType::AoHasWaiver,
                          invitation: @invitation.id }])
-  end
-end
-
-def redirect_host
-  case ENV.fetch('ENV', nil)
-  when 'local'
-    'http://localhost:3100'
-  when 'prod'
-    'https://dpc.cms.gov'
-  else
-    "https://#{ENV.fetch('ENV', nil)}.dpc.cms.gov"
   end
 end
