@@ -195,6 +195,7 @@ func importResponseFile(bucket string, file string) (int, int, string, error) {
 }
 
 func createV2Cfg() (*awsv2.Config, error) {
+	// disable default logging from aws-sdk-go-v2
 	cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithLogger(logging.Nop{}))
 	assumeRoleArn, err := getAssumeRoleArn()
 
