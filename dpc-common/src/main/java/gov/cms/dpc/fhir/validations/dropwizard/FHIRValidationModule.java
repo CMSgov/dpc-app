@@ -51,19 +51,19 @@ public class FHIRValidationModule extends AbstractModule {
         Multibinder<ConstraintValidator<?, ?>> constraintBinder = Multibinder.newSetBinder(binder(), constraintType);
         constraintBinder.addBinding().to(ProfileValidator.class);
 
-        bind(ConstraintValidatorFactory.class).to(InjectingConstraintValidatorFactory.class);
-        bind(ValidatorFactory.class).toProvider(ValidatorFactoryProvider.class);
-        bind(ConfiguredValidator.class).to(InjectingConfiguredValidator.class);
-
-        bind(DPCProfileSupport.class).in(Scopes.SINGLETON);
-        
         synchronized(this) {
             LOG.info("Hey! Some thread wants to bind the FHIR Validator!");
             if(BOUND.compareAndSet(false, true)) {
                 LOG.info("OK a thread got in to call the binding!");
+                bind(ConstraintValidatorFactory.class).to(InjectingConstraintValidatorFactory.class);
+                bind(ValidatorFactory.class).toProvider(ValidatorFactoryProvider.class);
+                bind(ConfiguredValidator.class).to(InjectingConfiguredValidator.class);
                 bind(FhirValidator.class).toProvider(FHIRValidatorProvider.class);
             }
         }
+
+        bind(DPCProfileSupport.class).in(Scopes.SINGLETON);
+        
         LOG.info("Chuck! Configure is done!!");
     }
 
