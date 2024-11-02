@@ -21,7 +21,6 @@ import gov.cms.dpc.api.exceptions.NotAuthorizedExceptionMapper;
 import gov.cms.dpc.api.exceptions.NotDeSerializableExceptionMapper;
 import gov.cms.dpc.api.exceptions.NotFoundExceptionMapper;
 import gov.cms.dpc.api.exceptions.UnprocessableEntityExceptionMapper;
-//import gov.cms.dpc.api.utils.JerseyGuiceUtils;
 import gov.cms.dpc.common.hibernate.attribution.DPCHibernateBundle;
 import gov.cms.dpc.common.hibernate.attribution.DPCHibernateModule;
 import gov.cms.dpc.common.hibernate.auth.DPCAuthHibernateBundle;
