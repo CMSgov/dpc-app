@@ -24,8 +24,8 @@ import jakarta.validation.ValidatorFactory;
  * Guice module for setting up the required Validation components, if requested by the application
  */
 public class FHIRValidationModule extends AbstractModule {
-
-    private final FHIRValidationConfiguration config;
+    
+        private final FHIRValidationConfiguration config;
 
     public FHIRValidationModule(FHIRValidationConfiguration config) {
         this.config = config;
@@ -46,7 +46,8 @@ public class FHIRValidationModule extends AbstractModule {
         bind(ConfiguredValidator.class).to(InjectingConfiguredValidator.class);
 
         bind(DPCProfileSupport.class).in(Scopes.SINGLETON);
-        bind(FhirValidator.class).toProvider(FHIRValidatorProvider.class);
+
+        bind(FhirValidator.class).toProvider(FHIRValidatorProvider.class).in(Scopes.SINGLETON);
     }
 
     @Provides
