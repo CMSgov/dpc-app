@@ -4,7 +4,7 @@ import com.codahale.metrics.jersey3.InstrumentedResourceMethodApplicationListene
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.datatype.hibernate6.Hibernate6Module;
 import com.google.inject.Injector;
-import com.squarespace.jersey2.guice.JerseyGuiceUtils;
+//import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.api.auth.AuthModule;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.cli.keys.KeyCommand;
@@ -21,6 +21,7 @@ import gov.cms.dpc.api.exceptions.NotAuthorizedExceptionMapper;
 import gov.cms.dpc.api.exceptions.NotDeSerializableExceptionMapper;
 import gov.cms.dpc.api.exceptions.NotFoundExceptionMapper;
 import gov.cms.dpc.api.exceptions.UnprocessableEntityExceptionMapper;
+import gov.cms.dpc.api.utils.JerseyGuiceUtils;
 import gov.cms.dpc.common.hibernate.attribution.DPCHibernateBundle;
 import gov.cms.dpc.common.hibernate.attribution.DPCHibernateModule;
 import gov.cms.dpc.common.hibernate.auth.DPCAuthHibernateBundle;
