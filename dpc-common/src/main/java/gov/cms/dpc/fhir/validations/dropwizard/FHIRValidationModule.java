@@ -19,22 +19,32 @@ import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorFactory;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
+import java.util.concurrent.atomic.AtomicBoolean;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Guice module for setting up the required Validation components, if requested by the application
  */
 public class FHIRValidationModule extends AbstractModule {
     
-        private final FHIRValidationConfiguration config;
+    private static final Logger LOG = LoggerFactory.getLogger(FHIRValidationModule.class);
+    
+    private static final AtomicBoolean BOUND = new AtomicBoolean(false);
+    private final FHIRValidationConfiguration config;
 
     public FHIRValidationModule(FHIRValidationConfiguration config) {
         this.config = config;
     }
 
+    public static void reset() {
+        BOUND.set(false);
+    }
 
     @Override
     protected void configure() {
 
+        LOG.info("Chuck,Something is running configure!");
         // Create a multi-binder for automatically bundling and injecting a Set of ConstraintValidators
         TypeLiteral<ConstraintValidator<?, ?>> constraintType = new TypeLiteral<>() {
         };
@@ -46,8 +56,15 @@ public class FHIRValidationModule extends AbstractModule {
         bind(ConfiguredValidator.class).to(InjectingConfiguredValidator.class);
 
         bind(DPCProfileSupport.class).in(Scopes.SINGLETON);
-
-        bind(FhirValidator.class).toProvider(FHIRValidatorProvider.class).in(Scopes.SINGLETON);
+        
+        synchronized(this) {
+            LOG.info("Hey! Some thread wants to bind the FHIR Validator!");
+            if(BOUND.compareAndSet(false, true)) {
+                LOG.info("OK a thread got in to call the binding!");
+                bind(FhirValidator.class).toProvider(FHIRValidatorProvider.class);
+            }
+        }
+        LOG.info("Chuck! Configure is done!!");
     }
 
     @Provides

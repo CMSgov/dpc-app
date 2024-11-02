@@ -33,6 +33,7 @@ import gov.cms.dpc.common.logging.filters.LogResponseFilter;
 import gov.cms.dpc.common.utils.EnvironmentParser;
 import gov.cms.dpc.common.utils.UrlGenerator;
 import gov.cms.dpc.fhir.FHIRModule;
+import gov.cms.dpc.fhir.validations.dropwizard.FHIRValidationModule;
 import gov.cms.dpc.macaroons.BakeryModule;
 import gov.cms.dpc.queue.JobQueueModule;
 import io.dropwizard.auth.AuthValueFactoryProvider;
@@ -131,6 +132,7 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
 
     private GuiceBundle setupGuiceBundle() {
         JerseyGuiceUtils.reset();
+        FHIRValidationModule.reset();
 
         return GuiceBundle.builder()
                 .modules(
