@@ -500,7 +500,7 @@
                                 <phase>verify</phase>
                             </execution>
                         </executions>
-                        <dependencies>
+<!--                        <dependencies>
                           <dependency>
                              <groupId>me.fabriciorby</groupId>
                              <artifactId>maven-surefire-junit5-tree-reporter</artifactId>
@@ -520,7 +520,7 @@
                                 <printStdoutOnFailure>${test.verbosity}</printStdoutOnFailure>
                                 <printStderrOnFailure>${test.verbosity}</printStderrOnFailure>
                             </statelessTestsetInfoReporter>
-                        </configuration>
+                        </configuration>-->
                     </plugin>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
