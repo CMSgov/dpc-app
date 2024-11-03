@@ -4,6 +4,7 @@ import com.codahale.metrics.jersey3.InstrumentedResourceMethodApplicationListene
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.datatype.hibernate6.Hibernate6Module;
 import com.google.inject.Injector;
+//import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.api.auth.AuthModule;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.cli.keys.KeyCommand;
@@ -49,9 +50,13 @@ import ru.vyarus.dropwizard.guice.injector.lookup.InjectorLookup;
 import jakarta.validation.ValidatorFactory;
 import java.util.List;
 import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DPCAPIService extends Application<DPCAPIConfiguration> {
 
+    private static final Logger LOG = LoggerFactory.getLogger(DPCAPIService.class);
+    
     private final DPCHibernateBundle<DPCAPIConfiguration> hibernateBundle = new DPCHibernateBundle<>();
     private final DPCQueueHibernateBundle<DPCAPIConfiguration> hibernateQueueBundle = new DPCQueueHibernateBundle<>();
     private final DPCAuthHibernateBundle<DPCAPIConfiguration> hibernateAuthBundle = new DPCAuthHibernateBundle<>(List.of(
@@ -68,6 +73,8 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
 
     @Override
     public void initialize(final Bootstrap<DPCAPIConfiguration> bootstrap) {
+        LOG.info("Initializing DPC API Service...");
+        
         // Enable variable substitution with environment variables
         EnvironmentVariableSubstitutor substitutor = new EnvironmentVariableSubstitutor(false);
         SubstitutingSourceProvider provider =
@@ -117,6 +124,7 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
         // Find Guice-aware validator and swap in for Dropwizard's default hk2 validator.
         Optional<Injector> injector = InjectorLookup.getInjector(this);
         if (injector.isPresent()) {
+            
             ValidatorFactory validatorFactory = injector.get().getInstance(ValidatorFactory.class);
             environment.setValidator(validatorFactory.getValidator());
         }

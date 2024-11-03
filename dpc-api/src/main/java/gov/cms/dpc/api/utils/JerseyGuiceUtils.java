@@ -56,7 +56,15 @@ public class JerseyGuiceUtils {
   
   private JerseyGuiceUtils() {}
   
-  /**
+    public static void install(Injector injector) {
+        // This binding is provided by JerseyGuiceModule
+        ServiceLocator locator = injector.getInstance(ServiceLocator.class);
+
+        GuiceServiceLocatorGenerator generator = getOrCreateGuiceServiceLocatorGenerator();
+        generator.add(locator);
+    }
+
+/**
    * 
    */
   public static void reset() {
