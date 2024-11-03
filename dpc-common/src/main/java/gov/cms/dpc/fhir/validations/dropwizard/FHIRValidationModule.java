@@ -37,10 +37,6 @@ public class FHIRValidationModule extends AbstractModule {
         this.config = config;
     }
 
-    public static void reset() {
-        BOUND.set(false);
-    }
-
     @Override
     protected void configure() {
 

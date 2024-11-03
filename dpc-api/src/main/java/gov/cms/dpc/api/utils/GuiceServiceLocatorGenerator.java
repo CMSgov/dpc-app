@@ -68,13 +68,16 @@ class GuiceServiceLocatorGenerator implements ServiceLocatorGenerator {
   
     @Override
     public ServiceLocator create(String name, ServiceLocator parent) {
+        if(generator != null && delegateRef.get() == null)
+            delegateRef.set(generator);
+            
         // Using remove() to transfer ownership of the ServiceLocator from
         // this object to the caller. Something is really wrong if the caller 
         // uses the same name again!
         LOG.info("Someone wants me to create a locator: " + name + " / " + parent);
         ServiceLocator locator = locators.remove(name);
-        LOG.info("Well it was already in the locators map, so I'll return it to them rather than create one!");
         if (locator != null) {
+            LOG.info("Well it was already in the locators map, so I'll return it to them rather than create one!");
             return locator;
         }
     

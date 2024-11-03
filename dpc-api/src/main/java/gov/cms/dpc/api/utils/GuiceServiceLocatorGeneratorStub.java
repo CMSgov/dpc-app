@@ -60,7 +60,7 @@ public class GuiceServiceLocatorGeneratorStub implements ServiceLocatorGenerator
             LOG.error("The generator is null!");
             throw new IllegalStateException("It appears there is no ServiceLocatorGenerator installed.");
         }
-
+        
         ServiceLocator locator = generator.create(name, parent);
         LOG.info("OK created a locator: " + locator.getClass().getCanonicalName() + " using " + name + " / " + parent);
         return locator;

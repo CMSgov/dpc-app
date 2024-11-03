@@ -4,7 +4,6 @@ import com.codahale.metrics.jersey3.InstrumentedResourceMethodApplicationListene
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.datatype.hibernate6.Hibernate6Module;
 import com.google.inject.Injector;
-//import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.api.auth.AuthModule;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.cli.keys.KeyCommand;
@@ -33,7 +32,6 @@ import gov.cms.dpc.common.logging.filters.LogResponseFilter;
 import gov.cms.dpc.common.utils.EnvironmentParser;
 import gov.cms.dpc.common.utils.UrlGenerator;
 import gov.cms.dpc.fhir.FHIRModule;
-import gov.cms.dpc.fhir.validations.dropwizard.FHIRValidationModule;
 import gov.cms.dpc.macaroons.BakeryModule;
 import gov.cms.dpc.queue.JobQueueModule;
 import io.dropwizard.auth.AuthValueFactoryProvider;
@@ -53,7 +51,7 @@ import java.util.List;
 import java.util.Optional;
 
 public class DPCAPIService extends Application<DPCAPIConfiguration> {
-    
+
     private final DPCHibernateBundle<DPCAPIConfiguration> hibernateBundle = new DPCHibernateBundle<>();
     private final DPCQueueHibernateBundle<DPCAPIConfiguration> hibernateQueueBundle = new DPCQueueHibernateBundle<>();
     private final DPCAuthHibernateBundle<DPCAPIConfiguration> hibernateAuthBundle = new DPCAuthHibernateBundle<>(List.of(
@@ -132,8 +130,7 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
 
     private GuiceBundle setupGuiceBundle() {
         JerseyGuiceUtils.reset();
-        FHIRValidationModule.reset();
-
+        
         return GuiceBundle.builder()
                 .modules(
                         new DPCHibernateModule<>(hibernateBundle),
