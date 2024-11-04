@@ -13,6 +13,7 @@ fi
 
 # Check if running on AWS EC2
 IS_AWS_EC2=$(./ops/scripts/is_aws_ec2.sh)
+echo "I got an AWS response as $IS_AWS_EC2"
 
 # Set script options for error handling
 set -e
