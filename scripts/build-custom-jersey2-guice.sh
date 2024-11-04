@@ -75,7 +75,7 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-(cd tmp/jersey2-guice/jersey2-guice-impl && mvn clean package -DskipTests)# > /dev/null 2>&1)
+(cd tmp/jersey2-guice/jersey2-guice-impl && mvn clean package -ntp -DskipTests)# > /dev/null 2>&1)
 
 if [ $? -ne 0 ]; then
   echo "build failed!"
