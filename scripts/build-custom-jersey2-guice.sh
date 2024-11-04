@@ -68,7 +68,7 @@ fi
 
 # Step 3: Build the Jersey2-Guice projects
 echo -n "	Step 3: Building the custom Jersey2-Guice v1.0.6-DPC...";
-(cd tmp/jersey2-guice/jersey2-guice-spi && mvn clean package -DskipTests)# > /dev/null 2>&1)
+(cd tmp/jersey2-guice/jersey2-guice-spi && mvn clean package -DskipTests > /dev/null 2>&1)
 
 if [ $? -ne 0 ]; then
   echo "build failed!"
