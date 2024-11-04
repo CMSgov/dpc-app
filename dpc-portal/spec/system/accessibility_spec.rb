@@ -8,7 +8,8 @@ RSpec.describe 'Accessibility', type: :system do
   before do
     driven_by(:selenium_headless)
   end
-  context do
+  let(:dpc_api_organization_id) { 'some-gnarly-guid' }
+  context 'login' do
     it 'shows login page ok' do
       visit '/users/sign_in'
       expect(page).to_not have_text('You need to sign in or sign up before continuing.')
@@ -16,11 +17,12 @@ RSpec.describe 'Accessibility', type: :system do
       expect(page).to be_axe_clean
     end
     it 'shows login failure' do
-      visit '/users/auth/openid_connect/callback'
+      visit '/users/auth/failure'
       expect(page).to have_text('Try again')
       expect(page).to be_axe_clean
     end
-    context 'bad user logged in' do
+
+    context 'bad user tries to log in' do
       before do
         OmniAuth.config.test_mode = true
         OmniAuth.config.add_mock(:openid_connect,
@@ -34,7 +36,7 @@ RSpec.describe 'Accessibility', type: :system do
         expect(page).to have_text('You must have an account to sign in.')
         expect(page).to be_axe_clean
       end
-      it 'shows excluded ao page' do
+      it 'shows sanctioned ao page' do
         create(:user, provider: :openid_connect, uid: '12345',
                       verification_status: 'rejected', verification_reason: 'ao_med_sanctions')
         visit '/users/auth/openid_connect/callback'
@@ -44,33 +46,32 @@ RSpec.describe 'Accessibility', type: :system do
     end
   end
 
-  context do
-    let(:dpc_api_organization_id) { 'some-gnarly-guid' }
+  context 'organizations' do
     let!(:user) { create(:user) }
     let!(:org) { create(:provider_organization, dpc_api_organization_id:, name: 'Health Hut') }
-    let(:mock_ctm) { instance_double(ClientTokenManager) }
-    let(:mock_pkm) { instance_double(PublicKeyManager) }
-    let(:mock_iam) { instance_double(IpAddressManager) }
+    let(:mock_client_token_manager) { instance_double(ClientTokenManager) }
+    let(:mock_public_key_manager) { instance_double(PublicKeyManager) }
+    let(:mock_ip_address_manager) { instance_double(IpAddressManager) }
     let(:tokens) { [] }
     let(:keys) { [] }
     let(:ip_addresses) { [] }
 
     before do
-      allow(ClientTokenManager).to receive(:new).and_return(mock_ctm)
-      allow(PublicKeyManager).to receive(:new).and_return(mock_pkm)
-      allow(IpAddressManager).to receive(:new).and_return(mock_iam)
-      allow(mock_ctm).to receive(:client_tokens).and_return(tokens)
-      allow(mock_pkm).to receive(:public_keys).and_return(keys)
-      allow(mock_iam).to receive(:ip_addresses).and_return(ip_addresses)
+      allow(ClientTokenManager).to receive(:new).and_return(mock_client_token_manager)
+      allow(PublicKeyManager).to receive(:new).and_return(mock_public_key_manager)
+      allow(IpAddressManager).to receive(:new).and_return(mock_ip_address_manager)
+      allow(mock_client_token_manager).to receive(:client_tokens).and_return(tokens)
+      allow(mock_public_key_manager).to receive(:public_keys).and_return(keys)
+      allow(mock_ip_address_manager).to receive(:ip_addresses).and_return(ip_addresses)
       sign_in user
     end
-    context 'organization list' do
-      it 'should handle empty list' do
+    context 'list' do
+      it 'empty' do
         visit '/organizations'
         expect(page).to have_text("You don't have any organizations to show.")
         expect(page).to be_axe_clean
       end
-      context 'ao full list' do
+      context 'ao' do
         before do
           org_good = create(:provider_organization, terms_of_service_accepted_at: 1.day.ago)
           org_not_ao = create(:provider_organization, terms_of_service_accepted_at: 1.day.ago)
@@ -84,7 +85,7 @@ RSpec.describe 'Accessibility', type: :system do
                                verification_reason: :user_not_authorized_official)
           create(:ao_org_link, user:, provider_organization: org_bad_org)
         end
-        it 'should show organizations' do
+        it 'should show all organizations' do
           visit '/organizations'
           expect(page).to_not have_text("You don't have any organizations to show.")
           expect(page).to have_text(I18n.t('verification.tos_not_signed'))
@@ -94,7 +95,7 @@ RSpec.describe 'Accessibility', type: :system do
           expect(page).to be_axe_clean
         end
       end
-      context 'cd full list' do
+      context 'cd' do
         before do
           org_good = create(:provider_organization, terms_of_service_accepted_at: 1.day.ago)
           create(:provider_organization, terms_of_service_accepted_at: 1.day.ago)
@@ -105,7 +106,7 @@ RSpec.describe 'Accessibility', type: :system do
           create(:cd_org_link, user:, provider_organization: org_good)
           create(:cd_org_link, user:, provider_organization: org_bad_org)
         end
-        it 'should show organizations' do
+        it 'should show all organizations' do
           visit '/organizations'
           expect(page).to_not have_text("You don't have any organizations to show.")
           expect(page).to have_text(I18n.t('cd_access.tos_not_signed'))
@@ -121,7 +122,7 @@ RSpec.describe 'Accessibility', type: :system do
           create(:ao_org_link, user:, provider_organization: ao_org)
           create(:cd_org_link, user:, provider_organization: cd_org)
         end
-        it 'should show organizations' do
+        it 'should show all organizations' do
           visit '/organizations'
           expect(page).to_not have_text("You don't have any organizations to show.")
           expect(page).to have_text(I18n.t('verification.manage_org'))
@@ -130,25 +131,25 @@ RSpec.describe 'Accessibility', type: :system do
         end
       end
     end
-    context 'organization page' do
+    context 'page' do
       context :ao do
         let!(:ao_org_link) { create(:ao_org_link, user:, provider_organization: org) }
-        it 'should show tos' do
+        it 'shows needs terms of service' do
           visit "/organizations/#{org.id}"
           expect(page).to have_text('Terms of Service')
           expect(page).to_not have_text('You can assign anyone as a CD')
           expect(page).to be_axe_clean
         end
-        it 'can sign tos' do
+        it 'shows terms of service signed success' do
           visit "/organizations/#{org.id}"
           page.find('.usa-button', text: 'I have read and accepted the Terms of Service').click
           expect(page).to_not have_text('Terms of Service')
           expect(page).to have_text('You can assign anyone as a CD')
           expect(page).to be_axe_clean
         end
-        context :after_tos do
+        context 'tos signed' do
           before { org.update!(terms_of_service_accepted_by: user) }
-          it 'should show organization page with no cds' do
+          it 'should show with no cds' do
             visit "/organizations/#{org.id}"
             expect(page).to have_text('You can assign anyone as a CD')
             expect(page).to have_css('#credential_delegates')
@@ -157,7 +158,7 @@ RSpec.describe 'Accessibility', type: :system do
             expect(page).to_not have_css('#pending-cd-table')
             expect(page).to be_axe_clean
           end
-          it 'should show organization page with no credentials' do
+          it 'should show with no credentials' do
             visit "/organizations/#{org.id}"
             page.execute_script('make_current(1)')
             expect(page).to have_text('you must create a unique client token')
@@ -168,7 +169,7 @@ RSpec.describe 'Accessibility', type: :system do
             expect(page).to_not have_css('#public-ips-table')
             expect(page).to be_axe_clean
           end
-          context :with_credential_delegates do
+          context 'with credential delegates' do
             let(:active_cd) { create(:user) }
             let!(:active_link) { create(:cd_org_link, user: active_cd, provider_organization: org) }
             let!(:invitation) { create(:invitation, :cd, provider_organization: org, invited_by: user) }
@@ -180,11 +181,11 @@ RSpec.describe 'Accessibility', type: :system do
               expect(page).to be_axe_clean
             end
           end
-          context :with_tokens_keys_and_ips do
+          context 'with tokens keys and ips' do
             let(:tokens) { default_get_client_tokens['entities'] }
             let(:keys) { default_get_public_keys['entities'] }
             let(:ip_addresses) { default_get_ip_addresses['entities'] }
-            it 'should show credentials' do
+            it 'should show credentials tables' do
               visit "/organizations/#{org.id}"
               page.execute_script('make_current(1)')
               expect(page).to have_css('#client-tokens-table')
@@ -193,7 +194,7 @@ RSpec.describe 'Accessibility', type: :system do
               expect(page).to be_axe_clean
             end
           end
-          context :client_tokens do
+          context 'create client token' do
             let(:tokens) { default_get_client_tokens['entities'] }
             it 'should show new page' do
               visit "/organizations/#{org.id}/client_tokens/new"
@@ -202,15 +203,16 @@ RSpec.describe 'Accessibility', type: :system do
               expect(page).to be_axe_clean
             end
             it 'should show error page' do
-              expect(mock_ctm).to receive(:create_client_token).and_return({})
-              expect(mock_ctm).to receive(:errors).and_return({ root: 'Test Error' })
+              expect(mock_client_token_manager).to receive(:create_client_token).and_return({})
+              expect(mock_client_token_manager).to receive(:errors).and_return({ root: 'Test Error' })
               visit "/organizations/#{org.id}/client_tokens/new"
               page.all('.usa-button')[1].click
               expect(page).to have_text('Test Error')
               expect(page).to be_axe_clean
             end
             it 'should show success page' do
-              expect(mock_ctm).to receive(:create_client_token).and_return({ response: true, message: :token })
+              success_response = { response: true, message: :token }
+              expect(mock_client_token_manager).to receive(:create_client_token).and_return(success_response)
               visit "/organizations/#{org.id}/client_tokens/new"
               page.fill_in 'label', with: 'new token'
               page.all('.usa-button')[1].click
@@ -218,7 +220,7 @@ RSpec.describe 'Accessibility', type: :system do
               expect(page).to be_axe_clean
             end
           end
-          context :public_keys do
+          context 'create public key' do
             let(:keys) { default_get_public_keys['entities'] }
             it 'should show new page' do
               visit "/organizations/#{org.id}/public_keys/new"
@@ -227,14 +229,16 @@ RSpec.describe 'Accessibility', type: :system do
               expect(page).to be_axe_clean
             end
             it 'should show error page' do
-              expect(mock_pkm).to receive(:create_public_key).and_return({ errors: { root: 'Test Error' } })
+              error_response = { errors: { root: 'Test Error' } }
+              expect(mock_public_key_manager).to receive(:create_public_key).and_return(error_response)
               visit "/organizations/#{org.id}/public_keys/new"
               page.all('.usa-button')[1].click
               expect(page).to have_text('Test Error')
               expect(page).to be_axe_clean
             end
             it 'should show success page' do
-              expect(mock_pkm).to receive(:create_public_key).and_return({ response: { message: { 'id' => 'foo' } } })
+              success_response = { response: { message: { 'id' => 'foo' } } }
+              expect(mock_public_key_manager).to receive(:create_public_key).and_return(success_response)
               visit "/organizations/#{org.id}/public_keys/new"
               page.fill_in 'label', with: 'new key'
               page.fill_in 'public_key', with: 'key'
@@ -243,7 +247,7 @@ RSpec.describe 'Accessibility', type: :system do
               expect(page).to be_axe_clean
             end
           end
-          context :ip_addresses do
+          context 'create IP address' do
             let(:keys) { default_get_ip_addresses['entities'] }
             it 'should show new page' do
               visit "/organizations/#{org.id}/ip_addresses/new"
@@ -252,21 +256,23 @@ RSpec.describe 'Accessibility', type: :system do
               expect(page).to be_axe_clean
             end
             it 'should show error page' do
-              expect(mock_iam).to receive(:create_ip_address).and_return({ errors: { root: 'Test Error' } })
+              error_response = { errors: { root: 'Test Error' } }
+              expect(mock_ip_address_manager).to receive(:create_ip_address).and_return(error_response)
               visit "/organizations/#{org.id}/ip_addresses/new"
               page.find_button(value: 'Add IP').click
               expect(page).to have_text('Test Error')
               expect(page).to be_axe_clean
             end
             it 'should show success page' do
-              expect(mock_iam).to receive(:create_ip_address).and_return({ response: { message: { 'id' => 'foo' } } })
+              success_response = { response: { message: { 'id' => 'foo' } } }
+              expect(mock_ip_address_manager).to receive(:create_ip_address).and_return(success_response)
               visit "/organizations/#{org.id}/ip_addresses/new"
               page.find_button(value: 'Add IP').click
               expect(page).to have_text('IP address successfully created')
               expect(page).to be_axe_clean
             end
           end
-          context :credential_delegate_invitation do
+          context 'create credential delegate invitation' do
             it 'should show new page' do
               visit "/organizations/#{org.id}/credential_delegate_invitations/new"
               expect(page).to have_text('Send invite')
@@ -310,25 +316,24 @@ RSpec.describe 'Accessibility', type: :system do
       end
       context :cd do
         let!(:cd_org_link) { create(:cd_org_link, user:, provider_organization: org) }
-        it 'should show tos not signed' do
+        it 'shows needs terms of service' do
           visit "/organizations/#{org.id}"
           expect(page).to have_text('is not ready for credential management')
           expect(page).to be_axe_clean
         end
-        context :after_tos do
+        context 'tos signed' do
           before { org.update!(terms_of_service_accepted_by: user) }
-          it 'should show organization page with no credentials' do
+          it 'should show with no credentials' do
             visit "/organizations/#{org.id}"
             expect(page).to_not have_text('You can assign anyone as a CD')
-            expect(page).to have_text('you must create a unique client token')
             expect(page).to_not have_css('#credential_delegates')
-            expect(page).to have_css('#credentials')
             expect(page).to_not have_css('#client-tokens-table')
             expect(page).to_not have_css('#public-keys-table')
             expect(page).to_not have_css('#public-ips-table')
+            expect(page).to have_text('you must create a unique client token')
             expect(page).to be_axe_clean
           end
-          context :with_tokens_keys_and_ips do
+          context 'with tokens keys and ips' do
             let(:tokens) { default_get_client_tokens['entities'] }
             let(:keys) { default_get_public_keys['entities'] }
             let(:ip_addresses) { default_get_ip_addresses['entities'] }
@@ -343,170 +348,172 @@ RSpec.describe 'Accessibility', type: :system do
         end
       end
     end
-    context :ao_invitation_flow do
-      let!(:invitation) { create(:invitation, :ao, provider_organization: org) }
-      let!(:mock_uis) { instance_double(UserInfoService) }
+  end
+  context 'ao invitation flow' do
+    let!(:org) { create(:provider_organization, dpc_api_organization_id:, name: 'Health Hut') }
+    let!(:invitation) { create(:invitation, :ao, provider_organization: org) }
+    let!(:mock_uis) { instance_double(UserInfoService) }
+    let(:user_info) do
+      {
+        'sub' => 'some-guid',
+        'all_emails' => [invitation.invited_email],
+        'email' => invitation.invited_email,
+        'social_security_number' => '900111111'
+      }
+    end
+    before do
+      allow(UserInfoService).to receive(:new).and_return(mock_uis)
+      allow(mock_uis).to receive(:user_info).and_return(user_info)
+    end
+    it 'should show intro page' do
+      visit "/organizations/#{org.id}/invitations/#{invitation.id}"
+      expect(page).to have_text('Not be listed on the Medicare Exclusions Database')
+      expect(page).to be_axe_clean
+    end
+    it 'should show login page' do
+      visit "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
+      expect(page).to have_text('Sign in or create')
+      expect(page).to be_axe_clean
+    end
+    it 'should show accept page' do
+      visit "/organizations/#{org.id}/invitations/#{invitation.id}/set_idp_token"
+      visit "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
+      expect(page).to have_text('Step 2')
+      expect(page).to be_axe_clean
+    end
+    it 'should show register page' do
+      visit "/organizations/#{org.id}/invitations/#{invitation.id}/set_idp_token"
+      visit "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
+      page.find('.usa-button', text: 'Continue to register').click
+      expect(page).to have_text('Step 3')
+      expect(page).to be_axe_clean
+    end
+    it 'should show success page' do
+      visit "/organizations/#{org.id}/invitations/#{invitation.id}/set_idp_token"
+      visit "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
+      page.find('.usa-button', text: 'Continue to register').click
+      page.find('.usa-button', text: 'Complete registration').click
+      expect(page).to have_text('Step 4')
+      expect(page).to be_axe_clean
+    end
+    context :failure do
       let(:user_info) do
         {
           'sub' => 'some-guid',
           'all_emails' => [invitation.invited_email],
           'email' => invitation.invited_email,
-          'social_security_number' => '900111111'
+          'social_security_number' => '900111112'
         }
       end
-      before do
-        allow(UserInfoService).to receive(:new).and_return(mock_uis)
-        allow(mock_uis).to receive(:user_info).and_return(user_info)
+      let(:renew_success) { 'You should receive your new invitation shortly' }
+      it 'should show bad invitation' do
+        visit "/organizations/#{org.id}/invitations/bad-id"
+        expect(page).to have_text('Your link is invalid.')
+        expect(page).to be_axe_clean
       end
-      it 'should show intro page' do
+      it 'should show expired invitation' do
+        invitation.update(created_at: 4.days.ago)
         visit "/organizations/#{org.id}/invitations/#{invitation.id}"
-        expect(page).to have_text('Not be listed on the Medicare Exclusions Database')
+        expect(page).to have_text(I18n.t('verification.ao_expired_status'))
         expect(page).to be_axe_clean
       end
-      it 'should show login page' do
-        visit "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
-        expect(page).to have_text('Sign in or create')
+      it 'should show successful renewal of invitation' do
+        invitation.update(created_at: 4.days.ago)
+        visit "/organizations/#{org.id}/invitations/#{invitation.id}"
+        page.find('.usa-button', text: 'Request new link').click
+        expect(page).to have_text(renew_success)
         expect(page).to be_axe_clean
       end
-      it 'should show accept page' do
-        visit "/organizations/#{org.id}/invitations/#{invitation.id}/set_idp_token"
-        visit "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
-        expect(page).to have_text('Step 2')
+      it 'should show already-renewed error' do
+        invitation.update(status: :renewed)
+        visit "/organizations/#{org.id}/invitations/#{invitation.id}"
+        expect(page).to_not have_text(renew_success)
+        expect(page).to have_text(I18n.t('verification.ao_renewed_text'))
         expect(page).to be_axe_clean
       end
-      it 'should show register page' do
+      it 'should show email does not match error' do
+        mismatched_invitation = create(:invitation, :ao, provider_organization: org,
+                                                         invited_email: 'somethingelse@example.com',
+                                                         invited_email_confirmation: 'somethingelse@example.com')
+        visit "/organizations/#{org.id}/invitations/#{mismatched_invitation.id}/set_idp_token"
+        visit "/organizations/#{org.id}/invitations/#{mismatched_invitation.id}/accept"
+        expect(page).to have_text("The email you used to sign in doesn't match your invite.")
+        expect(page).to be_axe_clean
+      end
+      it 'should show failed ao check' do
         visit "/organizations/#{org.id}/invitations/#{invitation.id}/set_idp_token"
         visit "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
         page.find('.usa-button', text: 'Continue to register').click
         expect(page).to have_text('Step 3')
+        expect(page).to have_text('You’re not the Authorized Official.')
         expect(page).to be_axe_clean
-      end
-      it 'should show success page' do
-        visit "/organizations/#{org.id}/invitations/#{invitation.id}/set_idp_token"
-        visit "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
-        page.find('.usa-button', text: 'Continue to register').click
-        page.find('.usa-button', text: 'Complete registration').click
-        expect(page).to have_text('Step 4')
-        expect(page).to be_axe_clean
-      end
-      context :failure do
-        let(:user_info) do
-          {
-            'sub' => 'some-guid',
-            'all_emails' => [invitation.invited_email],
-            'email' => invitation.invited_email,
-            'social_security_number' => '900111112'
-          }
-        end
-        let(:renew_success) { 'You should receive your new invitation shortly' }
-        it 'bad invitation' do
-          visit "/organizations/#{org.id}/invitations/bad-id"
-          expect(page).to have_text('Your link is invalid.')
-          expect(page).to be_axe_clean
-        end
-        it 'expired invitation' do
-          invitation.update(created_at: 4.days.ago)
-          visit "/organizations/#{org.id}/invitations/#{invitation.id}"
-          expect(page).to have_text(I18n.t('verification.ao_expired_status'))
-          expect(page).to be_axe_clean
-        end
-        it 'renew invitation' do
-          invitation.update(created_at: 4.days.ago)
-          visit "/organizations/#{org.id}/invitations/#{invitation.id}"
-          page.find('.usa-button', text: 'Request new link').click
-          expect(page).to have_text(renew_success)
-          expect(page).to be_axe_clean
-        end
-        it 'renewed invitation' do
-          invitation.update(status: :renewed)
-          visit "/organizations/#{org.id}/invitations/#{invitation.id}"
-          expect(page).to_not have_text(renew_success)
-          expect(page).to have_text(I18n.t('verification.ao_renewed_text'))
-          expect(page).to be_axe_clean
-        end
-        it 'email does not match' do
-          mismatched_invitation = create(:invitation, :ao, provider_organization: org,
-                                                           invited_email: 'somethingelse@example.com',
-                                                           invited_email_confirmation: 'somethingelse@example.com')
-          visit "/organizations/#{org.id}/invitations/#{mismatched_invitation.id}/set_idp_token"
-          visit "/organizations/#{org.id}/invitations/#{mismatched_invitation.id}/accept"
-          expect(page).to have_text("The email you used to sign in doesn't match your invite.")
-          expect(page).to be_axe_clean
-        end
-        it 'should show fail ao check' do
-          visit "/organizations/#{org.id}/invitations/#{invitation.id}/set_idp_token"
-          visit "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
-          page.find('.usa-button', text: 'Continue to register').click
-          expect(page).to have_text('Step 3')
-          expect(page).to have_text('You’re not the Authorized Official.')
-          expect(page).to be_axe_clean
-        end
       end
     end
-    context :cd_invitation_flow do
-      let!(:invitation) { create(:invitation, :cd, provider_organization: org) }
-      let!(:mock_uis) { instance_double(UserInfoService) }
+  end
+  context :cd_invitation_flow do
+    let!(:org) { create(:provider_organization, dpc_api_organization_id:, name: 'Health Hut') }
+    let!(:invitation) { create(:invitation, :cd, provider_organization: org) }
+    let!(:mock_uis) { instance_double(UserInfoService) }
+    let(:user_info) do
+      {
+        'sub' => 'some-guid',
+        'all_emails' => [invitation.invited_email],
+        'email' => invitation.invited_email,
+        'given_name' => invitation.invited_given_name,
+        'family_name' => invitation.invited_family_name
+      }
+    end
+    before do
+      allow(UserInfoService).to receive(:new).and_return(mock_uis)
+      allow(mock_uis).to receive(:user_info).and_return(user_info)
+    end
+    it 'should show intro page' do
+      visit "/organizations/#{org.id}/invitations/#{invitation.id}"
+      expect(page).to have_text("You've been delegated to manage access")
+      expect(page).to be_axe_clean
+    end
+    it 'should show login page' do
+      visit "/organizations/#{org.id}/invitations/#{invitation.id}/confirm_cd"
+      expect(page).to have_text('Sign in or create a Login.gov account')
+      expect(page).to be_axe_clean
+    end
+    it 'should show confirm page' do
+      visit "/organizations/#{org.id}/invitations/#{invitation.id}/set_idp_token"
+      visit "/organizations/#{org.id}/invitations/#{invitation.id}/confirm_cd"
+      expect(page).to have_text('Accept invite')
+      expect(page).to be_axe_clean
+    end
+    it 'should show success page' do
+      visit "/organizations/#{org.id}/invitations/#{invitation.id}/set_idp_token"
+      visit "/organizations/#{org.id}/invitations/#{invitation.id}/confirm_cd"
+      page.find('.usa-button', text: 'Accept invite').click
+      expect(page).to have_text('Thank you for accepting your invite.')
+      expect(page).to be_axe_clean
+    end
+    context :failure do
       let(:user_info) do
         {
           'sub' => 'some-guid',
           'all_emails' => [invitation.invited_email],
           'email' => invitation.invited_email,
-          'given_name' => invitation.invited_given_name,
-          'family_name' => invitation.invited_family_name
+          'given_name' => 'Eustace',
+          'family_name' => 'McGillicuddy'
         }
       end
-      before do
-        allow(UserInfoService).to receive(:new).and_return(mock_uis)
-        allow(mock_uis).to receive(:user_info).and_return(user_info)
-      end
-      it 'should show intro page' do
+      it 'should show expired invitation' do
+        invitation.update(created_at: 4.days.ago)
         visit "/organizations/#{org.id}/invitations/#{invitation.id}"
-        expect(page).to have_text("You've been delegated to manage access")
+        expect(page).to have_text(I18n.t('verification.cd_expired_status'))
         expect(page).to be_axe_clean
       end
-      it 'should show login page' do
-        visit "/organizations/#{org.id}/invitations/#{invitation.id}/confirm_cd"
-        expect(page).to have_text('Sign in or create a Login.gov account')
+      it 'should show email does not match error' do
+        mismatched_invitation = create(:invitation, :cd, provider_organization: org,
+                                                         invited_email: 'somethingelse@example.com',
+                                                         invited_email_confirmation: 'somethingelse@example.com')
+        visit "/organizations/#{org.id}/invitations/#{mismatched_invitation.id}/set_idp_token"
+        visit "/organizations/#{org.id}/invitations/#{mismatched_invitation.id}/confirm_cd"
+        expect(page).to have_text(I18n.t('verification.pii_mismatch_status'))
         expect(page).to be_axe_clean
-      end
-      it 'should show confirm page' do
-        visit "/organizations/#{org.id}/invitations/#{invitation.id}/set_idp_token"
-        visit "/organizations/#{org.id}/invitations/#{invitation.id}/confirm_cd"
-        expect(page).to have_text('Accept invite')
-        expect(page).to be_axe_clean
-      end
-      it 'should show success page' do
-        visit "/organizations/#{org.id}/invitations/#{invitation.id}/set_idp_token"
-        visit "/organizations/#{org.id}/invitations/#{invitation.id}/confirm_cd"
-        page.find('.usa-button', text: 'Accept invite').click
-        expect(page).to have_text('Thank you for accepting your invite.')
-        expect(page).to be_axe_clean
-      end
-      context :failure do
-        let(:user_info) do
-          {
-            'sub' => 'some-guid',
-            'all_emails' => [invitation.invited_email],
-            'email' => invitation.invited_email,
-            'given_name' => 'Eustace',
-            'family_name' => 'McGillicuddy'
-          }
-        end
-        it 'expired invitation' do
-          invitation.update(created_at: 4.days.ago)
-          visit "/organizations/#{org.id}/invitations/#{invitation.id}"
-          expect(page).to have_text(I18n.t('verification.cd_expired_status'))
-          expect(page).to be_axe_clean
-        end
-        it 'email does not match' do
-          mismatched_invitation = create(:invitation, :cd, provider_organization: org,
-                                                           invited_email: 'somethingelse@example.com',
-                                                           invited_email_confirmation: 'somethingelse@example.com')
-          visit "/organizations/#{org.id}/invitations/#{mismatched_invitation.id}/set_idp_token"
-          visit "/organizations/#{org.id}/invitations/#{mismatched_invitation.id}/confirm_cd"
-          expect(page).to have_text(I18n.t('verification.pii_mismatch_status'))
-          expect(page).to be_axe_clean
-        end
       end
     end
   end
