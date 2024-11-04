@@ -8,6 +8,7 @@ import com.google.inject.Provides;
 import com.google.inject.Scopes;
 import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.Multibinder;
+import com.google.inject.name.Named;
 import gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration.FHIRValidationConfiguration;
 import gov.cms.dpc.fhir.validations.DPCProfileSupport;
 import gov.cms.dpc.fhir.validations.ProfileValidator;
@@ -65,6 +66,7 @@ public class FHIRValidationModule extends AbstractModule {
     }
 
     @Provides
+    @Named("FHIRValidator")
     Validator provideValidator(ValidatorFactory factory) {
         return factory.getValidator();
     }
