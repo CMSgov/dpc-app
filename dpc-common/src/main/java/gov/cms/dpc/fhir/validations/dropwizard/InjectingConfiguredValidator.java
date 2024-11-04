@@ -8,7 +8,7 @@ import jakarta.validation.Validator;
 public class InjectingConfiguredValidator extends DropwizardConfiguredValidator {
 
     @Inject
-    public InjectingConfiguredValidator( @jakarta.inject.Named("FhirVal") Validator validator) {
+    public InjectingConfiguredValidator(Validator validator) {
         super(validator);
     }
 }

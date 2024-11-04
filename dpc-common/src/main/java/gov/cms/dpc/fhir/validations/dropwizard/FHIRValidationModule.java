@@ -50,7 +50,7 @@ public class FHIRValidationModule extends AbstractModule {
         LOG.info("Hey! Some thread wants to bind the FHIR Validator!");
         LOG.info("OK a thread got in to call the binding!");
         bind(ConstraintValidatorFactory.class).to(InjectingConstraintValidatorFactory.class);
-        bind(ValidatorFactory.class).toProvider(ValidatorFactoryProvider.class);
+        bind(ValidatorFactory.class).toProvider(ValidatorFactoryProvider.class).in(Scopes.SINGLETON);
         bind(ConfiguredValidator.class).to(InjectingConfiguredValidator.class);
         bind(FhirValidator.class).toProvider(FHIRValidatorProvider.class).asEagerSingleton();
 
@@ -65,7 +65,6 @@ public class FHIRValidationModule extends AbstractModule {
     }
 
     @Provides
-    @jakarta.inject.Named("FhirVal")
     Validator provideValidator(ValidatorFactory factory) {
         return factory.getValidator();
     }
