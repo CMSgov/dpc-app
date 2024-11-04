@@ -35,7 +35,7 @@
         <dependency>
             <groupId>com.squarespace.jersey2-guice</groupId>
             <artifactId>jersey2-guice-impl</artifactId>
-            <version>1.0.6</version>
+            <version>1.0.6-DPC</version>
         </dependency>        
         <dependency>
             <groupId>ru.vyarus</groupId>

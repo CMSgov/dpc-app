@@ -899,6 +899,19 @@
                 <version>3.4.1</version>
                 <executions>
                     <execution>
+                        <id>build-custom-jersey2-guice</id>
+                        <phase>initialize</phase> <!-- Executes at the start of the build -->
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>bash</executable>
+                            <arguments>
+                                <argument>scripts/build-custom-jersey2-guice.sh</argument> <!-- Path to your script -->
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
                         <id>build-custom-jakarta-server</id>
                         <phase>initialize</phase> <!-- Executes at the start of the build -->
                         <goals>
