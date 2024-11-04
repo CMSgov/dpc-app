@@ -44,19 +44,6 @@ RUN rm -rf /usr/local/bundle/cache/*.gem && \
     find /usr/local/bundle/gems/ -name "*.o" -delete && \
     find /usr/local/bundle/gems/ -name "Gemfile.lock" -delete
 
-FROM ruby:3.3-alpine
-
-# Install app dependencies
-RUN apk add --no-cache postgresql-client nodejs tzdata
-
-# Set the working directory
-RUN mkdir /dpc-portal
-WORKDIR /dpc-portal
-
-# Copy the compiled Ruby app
-COPY --from=ruby_builder /usr/local/bundle/ /usr/local/bundle/
-COPY --from=ruby_builder /dpc-portal /dpc-portal
-
 # Add Federal Common Policy CA G2 root certificate for SMTP
 COPY certs/fcpcag2.crt /usr/local/share/ca-certificates/fcpcag2.crt
 RUN cat /usr/local/share/ca-certificates/fcpcag2.crt >> /etc/ssl/certs/ca-certificates.crt
