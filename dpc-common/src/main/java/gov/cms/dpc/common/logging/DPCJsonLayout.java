@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 public class DPCJsonLayout extends EventJsonLayout {
 
     private static final String MESSAGE = "message";
+    private static final String EXCEPTION = "exception";
     private static final String KEY_VALUE_SEPARATOR = "=";
     private static final String ENTRY_SEPARATOR = ",";
     private static final Pattern MBI_PATTERN = Pattern.compile("\\d[a-zA-Z][a-zA-Z0-9]\\d[a-zA-Z][a-zA-Z0-9]\\d[a-zA-Z]{2}\\d{2}");
@@ -31,8 +32,13 @@ public class DPCJsonLayout extends EventJsonLayout {
         Map<String, Object> map = super.toJsonMap(event);
         if(map.containsKey(MESSAGE)){
             String maskedMessage = maskMBI(event.getFormattedMessage());
+            maskedMessage = maskPSQLData(maskedMessage);
             map.put(MESSAGE, maskedMessage);
             parseJsonMessageIfPossible(map, maskedMessage);
+        }
+        if(map.containsKey(EXCEPTION)){
+            String maskedExceptionDetails = maskPSQLData(map.get(EXCEPTION).toString());
+            map.put(EXCEPTION, maskedExceptionDetails);
         }
         return map;
     }
@@ -59,6 +65,19 @@ public class DPCJsonLayout extends EventJsonLayout {
     private String maskMBI(String unMaskedMessage) {
         try {
             return MBI_PATTERN.matcher(unMaskedMessage).replaceAll(MBI_MASK);
+        } catch (Exception e) {
+            return unMaskedMessage;
+        }
+    }
+
+    private String maskPSQLData(String unMaskedMessage) {
+        try {
+            if (unMaskedMessage.contains("PSQLException")) {
+                int detailIndex = unMaskedMessage.indexOf("Detail:");
+                return unMaskedMessage.substring(0, detailIndex) + "^^^^^^^^^^";
+            } else {
+                return unMaskedMessage;
+            }
         } catch (Exception e) {
             return unMaskedMessage;
         }
