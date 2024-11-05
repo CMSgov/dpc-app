@@ -35,12 +35,10 @@
         <dependency>
             <groupId>com.squarespace.jersey2-guice</groupId>
             <artifactId>jersey2-guice-impl</artifactId>
-            <version>1.0.6-DPC</version>
         </dependency>        
         <dependency>
             <groupId>com.squarespace.jersey2-guice</groupId>
             <artifactId>jersey2-guice-spi</artifactId>
-            <version>1.0.6-DPC</version>
         </dependency>        
         <dependency>
             <groupId>ru.vyarus</groupId>
@@ -387,6 +385,9 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
+                <configuration>
+                    <runOrder>alphabetical</runOrder>
+                </configuration>
 <!--                <dependencies>
                   <dependency>
                      <groupId>me.fabriciorby</groupId>
