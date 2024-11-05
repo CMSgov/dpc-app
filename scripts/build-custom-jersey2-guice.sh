@@ -87,15 +87,24 @@ echo -n "	Step 4: Installing the artifacts in the project repository...";
   -Dpackaging=jar \
   -DlocalRepositoryPath=$REPO_DIR > /dev/null 2>&1)
 
+if [ $? -ne 0 ]; then
+  echo "build failed!"
+  exit 1
+else
+  echo "done!"
+fi
+
 # Step 5: Generate checksums
 echo -n "	Step 5: Generating checksums for the jersey2-guice-spi project..."
 (cd repo/com/squarespace/jersey2-guice/jersey2-guice-spi/1.0.6-DPC && md5sum jersey2-guice-spi-1.0.6-DPC.pom > jersey2-guice-spi-1.0.6-DPC.pom.md5)
 (cd repo/com/squarespace/jersey2-guice/jersey2-guice-spi/1.0.6-DPC && sha1sum jersey2-guice-spi-1.0.6-DPC.pom > jersey2-guice-spi-1.0.6-DPC.pom.sha1)
+(cd repo/com/squarespace/jersey2-guice/jersey2-guice-spi/1.0.6-DPC && md5sum jersey2-guice-spi-1.0.6-DPC.jar > jersey2-guice-spi-1.0.6-DPC.jar.md5)
+(cd repo/com/squarespace/jersey2-guice/jersey2-guice-spi/1.0.6-DPC && sha1sum jersey2-guice-spi-1.0.6-DPC.jar > jersey2-guice-spi-1.0.6-DPC.jar.sha1)
 echo "done!" 
 
 # Step 6: Build the Jersey2-Guice Impl project
 echo -n "	Step 6: Building the custom Jersey2-Guice implementation v1.0.6-DPC...";
-(cd tmp/jersey2-guice/jersey2-guice-impl && mvn clean package -ntp -DskipTests)# > /dev/null 2>&1)
+(cd tmp/jersey2-guice/jersey2-guice-impl && mvn clean package -ntp -DskipTests > /dev/null 2>&1)
 
 if [ $? -ne 0 ]; then
   echo "build failed!"
@@ -123,6 +132,8 @@ fi
 
 # Step 8: Generate checksums
 echo -n "	Step 8: Generating checksums for the jersey2-guice-impl project..."
+(cd repo/com/squarespace/jersey2-guice/jersey2-guice-impl/1.0.6-DPC && md5sum jersey2-guice-impl-1.0.6-DPC.pom > jersey2-guice-impl-1.0.6-DPC.pom.md5)
+(cd repo/com/squarespace/jersey2-guice/jersey2-guice-impl/1.0.6-DPC && sha1sum jersey2-guice-impl-1.0.6-DPC.pom > jersey2-guice-impl-1.0.6-DPC.pom.sha1)
 (cd repo/com/squarespace/jersey2-guice/jersey2-guice-impl/1.0.6-DPC && md5sum jersey2-guice-impl-1.0.6-DPC.jar > jersey2-guice-impl-1.0.6-DPC.jar.md5)
 (cd repo/com/squarespace/jersey2-guice/jersey2-guice-impl/1.0.6-DPC && sha1sum jersey2-guice-impl-1.0.6-DPC.jar > jersey2-guice-impl-1.0.6-DPC.jar.sha1)
 echo "done!" 
