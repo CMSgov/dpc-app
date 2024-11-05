@@ -215,6 +215,10 @@ ci-admin-portal: secure-envs
 ci-portal: secure-envs
 	@./dpc-portal-test.sh
 
+.PHONY: ci-portal-accessibility
+ci-portal-accessibility: secure-envs
+	@./dpc-portal-accessibility-test.sh
+
 .PHONY: ci-web-portal
 ci-web-portal: secure-envs
 	@./dpc-web-portal-test.sh

@@ -42,7 +42,8 @@ Rails.application.configure do
 
   config.action_mailer.default_url_options = { host: 'localhost', port: 3100 }
   config.action_mailer.asset_host = "http://localhost:3100"
-
+  # Need to have this set up for capybara accessibility tests
+  config.action_controller.asset_host = "file://#{::Rails.root}/public" if ENV['ACCESSIBILITY'] == 'true'
   # Tell Action Mailer not to deliver emails to the real world.
   # The :test delivery method accumulates sent emails in the
   # ActionMailer::Base.deliveries array.

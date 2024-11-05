@@ -88,7 +88,9 @@ group :development do
 end
 
 group :test do
-  gem 'capybara', '>= 2.15'
+  gem 'axe-core-capybara'
+  gem 'axe-core-rspec'
+  gem 'capybara'
   gem 'climate_control'
   gem 'fakefs', require: 'fakefs/safe'
   gem 'fakeredis'

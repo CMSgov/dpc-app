@@ -37,6 +37,7 @@ Rails.application.routes.draw do
       post 'login', on: :member
       post 'renew', on: :member
       get 'confirm_cd', on: :member
+      get 'set_idp_token', on: :member
     end
     get 'tos_form', on: :member
     post 'sign_tos', on: :member
