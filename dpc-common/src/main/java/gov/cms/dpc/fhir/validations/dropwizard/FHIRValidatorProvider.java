@@ -36,11 +36,18 @@ public class FHIRValidatorProvider implements Provider<FhirValidator> {
         this.validationConfiguration = config;
         this.supportChain = supportChain;
 
+        logger.info("Injected FhirContext: {}", ctx);
+        logger.info("Injected FHIRValidationConfiguration: {}", config);
+        logger.info("Injected ValidationSupportChain: {}", supportChain);
+
         // Double lock check to eagerly init the validator
         // Since we can't inject the provider as a singleton, we need a way to prime the validator on first use, but only once.
+        logger.info(("Something wants to initiialize the a FhirValidator!"));
         if (!initialized) {
             synchronized (lock) {
+                logger.info("Something made it into the synchronized block!");
                 if (!initialized) {
+                    logger.info("Initializing the FHIR Validator. Thread: {}", Thread.currentThread().getId());
                     // Initialize
                     final FhirValidator fhirValidator = get();
                     initialize(fhirValidator);

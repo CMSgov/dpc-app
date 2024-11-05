@@ -27,6 +27,7 @@ import gov.cms.dpc.common.hibernate.auth.DPCAuthHibernateBundle;
 import gov.cms.dpc.common.hibernate.auth.DPCAuthHibernateModule;
 import gov.cms.dpc.common.hibernate.queue.DPCQueueHibernateBundle;
 import gov.cms.dpc.common.hibernate.queue.DPCQueueHibernateModule;
+import gov.cms.dpc.common.logging.GuiceLoggingModule;
 import gov.cms.dpc.common.logging.filters.GenerateRequestIdFilter;
 import gov.cms.dpc.common.logging.filters.LogResponseFilter;
 import gov.cms.dpc.common.utils.EnvironmentParser;
@@ -140,6 +141,7 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
         
         return GuiceBundle.builder()
                 .modules(
+                        new GuiceLoggingModule(),
                         new DPCHibernateModule<>(hibernateBundle),
                         new DPCQueueHibernateModule<>(hibernateQueueBundle),
                         new DPCAuthHibernateModule<>(hibernateAuthBundle),
