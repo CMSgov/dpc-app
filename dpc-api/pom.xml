@@ -38,6 +38,11 @@
             <version>1.0.6-DPC</version>
         </dependency>        
         <dependency>
+            <groupId>com.squarespace.jersey2-guice</groupId>
+            <artifactId>jersey2-guice-spi</artifactId>
+            <version>1.0.6-DPC</version>
+        </dependency>        
+        <dependency>
             <groupId>ru.vyarus</groupId>
             <artifactId>dropwizard-guicey</artifactId>
             <version>7.1.4</version>
