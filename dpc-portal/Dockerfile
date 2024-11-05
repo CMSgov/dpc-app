@@ -28,7 +28,8 @@ RUN gem install bundler --no-document && \
     npm install
 
 # Run bundler audit
-RUN bundle exec bundle audit update && bundle exec bundle audit check
+# ignoring CVE-2024-21510 as it affects Sinatra, which is only used internally
+RUN bundle exec bundle audit update && bundle exec bundle audit check --ignore CVE-2024-21510
 
 # Copy the code, test the app, and build the assets pipeline
 COPY /dpc-portal /dpc-portal
