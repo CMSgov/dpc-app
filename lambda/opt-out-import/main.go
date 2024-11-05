@@ -195,8 +195,11 @@ func importResponseFile(bucket string, file string) (int, int, string, error) {
 
 func createV2Cfg() (*awsv2.Config, error) {
 	cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithRegion("us-east-1"))
-	assumeRoleArn, err := getAssumeRoleArn()
+	if err != nil {
+		return nil, err
+	}
 
+	assumeRoleArn, err := getAssumeRoleArn()
 	if err != nil {
 		return nil, err
 	}
