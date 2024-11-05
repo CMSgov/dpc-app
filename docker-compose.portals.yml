@@ -142,7 +142,7 @@ services:
 
       # Mount coverage and utility files
       - "./dpc-portal/coverage:/dpc-portal/coverage"
-      - ./tmp/letter_opener/portal:/dpc-portal/tmp/letter_opener
+      - ./tmp:/dpc-portal/tmp
     env_file:
       - ./ops/config/decrypted/local.env
     environment:
