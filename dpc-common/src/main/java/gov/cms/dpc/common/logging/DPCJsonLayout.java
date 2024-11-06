@@ -33,13 +33,13 @@ public class DPCJsonLayout extends EventJsonLayout {
     @Override
     protected Map<String, Object> toJsonMap(ILoggingEvent event) {
         Map<String, Object> map = super.toJsonMap(event);
-        if(map.containsKey(MESSAGE)){
+        if(map.get(MESSAGE) != null){
             String maskedMessage = maskMBI(event.getFormattedMessage());
             maskedMessage = maskPSQLData(maskedMessage);
             map.put(MESSAGE, maskedMessage);
             parseJsonMessageIfPossible(map, maskedMessage);
         }
-        if(map.containsKey(EXCEPTION)){
+        if(map.get(EXCEPTION) != null){
             String maskedExceptionDetails = maskPSQLData(map.get(EXCEPTION).toString());
             map.put(EXCEPTION, maskedExceptionDetails);
         }
