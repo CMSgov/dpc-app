@@ -125,4 +125,19 @@ public class DPCJsonLayoutUnitTest {
         assertEquals("***MBI?***", map.get("key2"));
         assertEquals("value3", map.get("key3"));
     }
+
+    @Test
+    public void testPostgresMasking() {
+        String badLogMessage = "[ERROR] org.postgresql.util.PSQLException: ERROR: duplicate key value violates unique constraint \"organization_idx\"\n" +
+                "  Detail: Key (id_system, id_value)=(1, 1111111112) already exists.\n" +
+                "\tat org.postgresql.core.v3.QueryExecutorImpl.receiveErrorResponse(QueryExecutorImpl.java:2725)\n" +
+                "\tat org.postgresql.core.v3.QueryExecutorImpl.processResults(QueryExecutorImpl.java:2412)\n";
+        String expectedLogMessage = "[ERROR] org.postgresql.util.PSQLException: ERROR: duplicate key value violates unique constraint \"organization_idx\"\n" +
+                "  **********\n" +
+                "\tat org.postgresql.core.v3.QueryExecutorImpl.receiveErrorResponse(QueryExecutorImpl.java:2725)\n" +
+                "\tat org.postgresql.core.v3.QueryExecutorImpl.processResults(QueryExecutorImpl.java:2412)\n";
+        when(loggingEvent.getFormattedMessage()).thenReturn(badLogMessage);
+        Map<String, Object> map = dpcJsonLayout.toJsonMap(loggingEvent);
+        assertEquals(expectedLogMessage, map.get("message"));
+    }
 }
