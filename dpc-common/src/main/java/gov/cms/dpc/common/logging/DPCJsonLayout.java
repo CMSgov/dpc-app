@@ -22,6 +22,9 @@ public class DPCJsonLayout extends EventJsonLayout {
     private static final String ENTRY_SEPARATOR = ",";
     private static final Pattern MBI_PATTERN = Pattern.compile("\\d[a-zA-Z][a-zA-Z0-9]\\d[a-zA-Z][a-zA-Z0-9]\\d[a-zA-Z]{2}\\d{2}");
     private static final String MBI_MASK = "***MBI?***";
+    private static final String DATABASE_INFO_MASK = "**********";
+    private static final Pattern PSQL_BATCH_ENTRY_EXCEPTION_PATTERN = Pattern.compile("Batch entry \\d+.*?was aborted");
+    private static final Pattern PSQL_DETAIL_EXCEPTION_PATTERN = Pattern.compile("Detail:.*");
 
     public DPCJsonLayout(JsonFormatter jsonFormatter, TimestampFormatter timestampFormatter, ThrowableHandlingConverter throwableProxyConverter, Set<EventAttribute> includes, Map<String, String> customFieldNames, Map<String, Object> additionalFields, Set<String> includesMdcKeys, boolean flattenMdc) {
         super(jsonFormatter, timestampFormatter, throwableProxyConverter, includes, customFieldNames, additionalFields, includesMdcKeys, flattenMdc);
@@ -72,16 +75,8 @@ public class DPCJsonLayout extends EventJsonLayout {
 
     private String maskPSQLData(String unMaskedMessage) {
         try {
-            String newMessage = unMaskedMessage;
-            if (unMaskedMessage.contains("Detail:")) {
-                int detailIndex = unMaskedMessage.indexOf("Detail:");
-                newMessage = unMaskedMessage.substring(0, detailIndex) + "Detail: ***********";
-            }
-            if (newMessage.contains("Batch entry ") && newMessage.contains("was aborted")) {
-                int batchEntryIndex = newMessage.indexOf("Batch entry");
-                int abortIndex = newMessage.indexOf("was aborted");
-                newMessage = newMessage.substring(0, batchEntryIndex) + "Batch entry " + "&&&&&&&&&" + newMessage.substring(abortIndex);
-            }
+            String newMessage = PSQL_DETAIL_EXCEPTION_PATTERN.matcher(unMaskedMessage).replaceAll(DATABASE_INFO_MASK);
+            newMessage = PSQL_BATCH_ENTRY_EXCEPTION_PATTERN.matcher(newMessage).replaceAll(DATABASE_INFO_MASK);
             return newMessage;
         } catch (Exception e) {
             return unMaskedMessage;
