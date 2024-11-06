@@ -142,6 +142,15 @@ public class DPCJsonLayoutUnitTest {
     }
 
     @Test
+    public void testBatchMessageMasking() {
+        String reallyLongLogMessage = "Wrapped by: java.sql.BatchUpdateException: Batch entry 0 /* insert gov.cms.dpc.common.entities.OrganizationEntity */ insert into organizations (city, country, district, line1, line2, postal_code, state, address_type, address_use, id_system, id_value, organization_name, id) values (('Akron'), ('US'), (NULL), ('111 Main ST'), ('STE 5'), ('22222'), ('OH'), ('2'::int4), ('1'::int4), ('1'::int4), ('1111111112'), ('Org'), ('d2fcd068-a818-4874-9fc2-fd9633b073a2'::uuid)) was aborted: ERROR: duplicate key value violates unique constraint \\\"organization_idx\\\"\\n  Detail: some bad info here";
+        String expectedLogMessage = "Wrapped by: java.sql.BatchUpdateException: **********: ERROR: duplicate key value violates unique constraint \\\"organization_idx\\\"\\n  **********";
+        when(loggingEvent.getFormattedMessage()).thenReturn(reallyLongLogMessage);
+        Map<String, Object> map = dpcJsonLayout.toJsonMap(loggingEvent);
+        assertEquals(expectedLogMessage, map.get("message"));
+    }
+
+    @Test
     public void testPostgresMaskingOnException() {
         String badLogOnException = "2024-11-01 12:23:25 {\"timestamp\":\"2024-11-01T19:23:25.359+0000\"," +
                 "\"level\":\"ERROR\",\"thread\":\"pool-3-thread-6\"," +
