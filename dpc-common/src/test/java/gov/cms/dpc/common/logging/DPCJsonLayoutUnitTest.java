@@ -140,4 +140,22 @@ public class DPCJsonLayoutUnitTest {
         Map<String, Object> map = dpcJsonLayout.toJsonMap(loggingEvent);
         assertEquals(expectedLogMessage, map.get("message"));
     }
+
+    @Test
+    public void testPostgresMaskingOnException() {
+        String badLogOnException = "2024-11-01 12:23:25 {\"timestamp\":\"2024-11-01T19:23:25.359+0000\"," +
+                "\"level\":\"ERROR\",\"thread\":\"pool-3-thread-6\"," +
+                "\"logger\":\"io.dropwizard.jersey.errors.LoggingExceptionMapper\"," +
+                "\"message\":\"Error handling a request: 33abf771288c609f\"," +
+                "\"exception\":\"org.postgresql.util.PSQLException: ERROR: duplicate key value violates unique constraint \\\"organization_idx\\\"\\n  Detail: Key (id_system, id_value)=(1, 1111111112) already exists.\\n\\tat org.postgresql.core.v3.QueryExecutorImpl.receiveErrorResponse(QueryExecutorImpl.java:2725)\\n\\tat ";
+        String expectedLogMessage = "2024-11-01 12:23:25 {\"timestamp\":\"2024-11-01T19:23:25.359+0000\"," +
+                "\"level\":\"ERROR\",\"thread\":\"pool-3-thread-6\"," +
+                "\"logger\":\"io.dropwizard.jersey.errors.LoggingExceptionMapper\"," +
+                "\"message\":\"Error handling a request: 33abf771288c609f\"," +
+                "\"exception\":\"org.postgresql.util.PSQLException: ERROR: duplicate key value violates unique constraint \\\"organization_idx\\\"\\n  **********";
+
+        when(loggingEvent.getFormattedMessage()).thenReturn(badLogOnException);
+        Map<String, Object> map = dpcJsonLayout.toJsonMap(loggingEvent);
+        assertEquals(expectedLogMessage, map.get("message"));
+    }
 }
