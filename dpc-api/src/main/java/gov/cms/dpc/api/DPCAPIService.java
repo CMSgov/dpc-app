@@ -3,7 +3,6 @@ package gov.cms.dpc.api;
 import com.codahale.metrics.jersey3.InstrumentedResourceMethodApplicationListener;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.datatype.hibernate6.Hibernate6Module;
-import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.api.auth.AuthModule;
@@ -28,6 +27,7 @@ import gov.cms.dpc.common.hibernate.auth.DPCAuthHibernateBundle;
 import gov.cms.dpc.common.hibernate.auth.DPCAuthHibernateModule;
 import gov.cms.dpc.common.hibernate.queue.DPCQueueHibernateBundle;
 import gov.cms.dpc.common.hibernate.queue.DPCQueueHibernateModule;
+import gov.cms.dpc.common.logging.DebugLoggingModule;
 import gov.cms.dpc.common.logging.GuiceLoggingModule;
 import gov.cms.dpc.common.logging.filters.GenerateRequestIdFilter;
 import gov.cms.dpc.common.logging.filters.LogResponseFilter;
@@ -45,14 +45,10 @@ import io.dropwizard.core.setup.Environment;
 import io.dropwizard.db.DataSourceFactory;
 import io.dropwizard.health.check.http.HttpHealthCheck;
 import io.dropwizard.migrations.MigrationsBundle;
-import io.logz.guice.jersey.JerseyModule;
-import io.logz.guice.jersey.JerseyServer;
-import io.logz.guice.jersey.configuration.JerseyConfiguration;
 import ru.vyarus.dropwizard.guice.GuiceBundle;
 import ru.vyarus.dropwizard.guice.injector.lookup.InjectorLookup;
 
 import jakarta.validation.ValidatorFactory;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.slf4j.Logger;
@@ -89,7 +85,7 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
         setupJacksonMapping(bootstrap);
         // Setup Guice bundle and module injection
         final GuiceBundle guiceBundle = setupGuiceBundle();
-
+ 
         // The Hibernate bundle must be initialized before Guice.
         // The Hibernate Guice module requires an initialized SessionFactory,
         // so Dropwizard needs to initialize the HibernateBundle first to create the SessionFactory.
@@ -111,22 +107,6 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
     @Override
     public void run(final DPCAPIConfiguration configuration,
                     final Environment environment) {
-
-        JerseyConfiguration jerseyConfiguration = JerseyConfiguration.builder()
-                .addPackage("gov.cms.dpc.api.resources")   // For abstract resources
-                .addPackage("gov.cms.dpc.api.resources.v1") // For concrete implementations
-                .addPort(8080)  // Set the port as needed
-                .build();
-
-        List<com.google.inject.Module> gModules = new ArrayList<>(guiceModules);
-        gModules.add(new JerseyModule(jerseyConfiguration));
-        
-        try {
-            Guice.createInjector(guiceModules).getInstance(JerseyServer.class).start();
-        }
-        catch(Exception e) {
-            LOG.error("Whoa major exception: " + e);
-        }
 
         EnvironmentParser.getEnvironment("API");
         final var listener = new InstrumentedResourceMethodApplicationListener(environment.metrics());
@@ -164,6 +144,7 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
         
         guiceModules = List.of( 
                 new AuthModule(),
+                new DebugLoggingModule(),
                 new GuiceLoggingModule(),
                 new DPCHibernateModule<>(hibernateBundle),
                 new DPCQueueHibernateModule<>(hibernateQueueBundle),

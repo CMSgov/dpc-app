@@ -10,7 +10,7 @@ import gov.cms.dpc.macaroons.exceptions.BakeryException;
 import io.jsonwebtoken.*;
 
 import jakarta.annotation.Nullable;
-import jakarta.inject.Inject;
+import com.google.inject.Inject;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.NotAuthorizedException;
 import jakarta.ws.rs.core.Response;

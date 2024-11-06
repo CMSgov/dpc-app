@@ -8,7 +8,7 @@ import gov.cms.dpc.common.utils.PropertiesProvider;
 import io.swagger.annotations.*;
 import org.hl7.fhir.dstu3.model.CapabilityStatement;
 
-import jakarta.inject.Inject;
+import com.google.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;

@@ -4,7 +4,7 @@ import io.dropwizard.auth.UnauthorizedHandler;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
-import jakarta.inject.Inject;
+import com.google.inject.Inject;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 import static gov.cms.dpc.fhir.FHIRMediaTypes.FHIR_JSON;

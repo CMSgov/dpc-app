@@ -42,7 +42,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.vyarus.dropwizard.guice.module.support.DropwizardAwareModule;
 
-import jakarta.inject.Singleton;
+import com.google.inject.Singleton;
 
 public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
 

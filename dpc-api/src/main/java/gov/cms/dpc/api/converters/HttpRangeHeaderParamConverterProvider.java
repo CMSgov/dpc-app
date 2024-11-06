@@ -2,7 +2,7 @@ package gov.cms.dpc.api.converters;
 
 import gov.cms.dpc.api.models.RangeHeader;
 
-import jakarta.inject.Inject;
+import com.google.inject.Inject;
 import jakarta.ws.rs.ext.ParamConverter;
 import jakarta.ws.rs.ext.ParamConverterProvider;
 import jakarta.ws.rs.ext.Provider;

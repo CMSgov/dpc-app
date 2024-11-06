@@ -10,8 +10,8 @@ import org.slf4j.LoggerFactory;
 import org.whispersystems.curve25519.Curve25519;
 import org.whispersystems.curve25519.Curve25519KeyPair;
 
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import jakarta.ws.rs.BadRequestException;
 import java.io.PrintWriter;
 import java.time.OffsetDateTime;

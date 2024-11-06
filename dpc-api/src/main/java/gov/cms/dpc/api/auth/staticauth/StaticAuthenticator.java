@@ -5,7 +5,7 @@ import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import io.dropwizard.auth.Authenticator;
 import org.hl7.fhir.dstu3.model.Organization;
 
-import jakarta.inject.Inject;
+import com.google.inject.Inject;
 import java.util.Optional;
 
 /**

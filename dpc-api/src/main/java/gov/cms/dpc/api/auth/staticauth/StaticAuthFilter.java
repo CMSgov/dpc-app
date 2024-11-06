@@ -11,7 +11,7 @@ import org.hl7.fhir.dstu3.model.Organization;
 import org.slf4j.MDC;
 
 import jakarta.annotation.Priority;
-import jakarta.inject.Inject;
+import com.google.inject.Inject;
 import jakarta.ws.rs.Priorities;
 import jakarta.ws.rs.container.ContainerRequestContext;
 

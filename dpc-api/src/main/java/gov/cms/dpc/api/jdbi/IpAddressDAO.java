@@ -4,7 +4,7 @@ import gov.cms.dpc.api.entities.IpAddressEntity;
 import gov.cms.dpc.api.entities.IpAddressEntity_;
 import gov.cms.dpc.common.hibernate.auth.DPCAuthManagedSessionFactory;
 import io.dropwizard.hibernate.AbstractDAO;
-import jakarta.inject.Inject;
+import com.google.inject.Inject;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;

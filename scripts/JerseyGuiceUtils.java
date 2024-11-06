@@ -31,7 +31,7 @@ import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 import org.glassfish.hk2.api.ActiveDescriptor;
 import org.glassfish.hk2.api.DynamicConfiguration;
@@ -273,7 +273,7 @@ public class JerseyGuiceUtils {
     
     config.bind(Utilities.getLocatorDescriptor(locator));
     
-    ActiveDescriptor<InjectionResolver<javax.inject.Inject>> threeThirtyResolver 
+    ActiveDescriptor<InjectionResolver<jakarta.inject.Inject>> threeThirtyResolver 
       = newThreeThirtyInjectionResolverDescriptor(locator);
     
     config.addActiveDescriptor(threeThirtyResolver);

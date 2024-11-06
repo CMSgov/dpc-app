@@ -6,31 +6,26 @@ import ca.uhn.fhir.validation.FhirValidator;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Scopes;
-import com.google.inject.TypeLiteral;
-import com.google.inject.multibindings.Multibinder;
 import gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration.FHIRValidationConfiguration;
 import gov.cms.dpc.fhir.validations.DPCProfileSupport;
 import gov.cms.dpc.fhir.validations.ProfileValidator;
-import org.glassfish.jersey.server.internal.inject.ConfiguredValidator;
-import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
-import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
-
+import com.google.inject.Singleton;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorFactory;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
-import java.util.concurrent.atomic.AtomicBoolean;
+import org.glassfish.jersey.server.internal.inject.ConfiguredValidator;
+import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Guice module for setting up the required Validation components, if requested by the application
- */
+import java.util.HashSet;
+import java.util.Set;
+
 public class FHIRValidationModule extends AbstractModule {
-    
     private static final Logger LOG = LoggerFactory.getLogger(FHIRValidationModule.class);
-    
-    private static final AtomicBoolean BOUND = new AtomicBoolean(false);
+
     private final FHIRValidationConfiguration config;
 
     public FHIRValidationModule(FHIRValidationConfiguration config) {
@@ -39,25 +34,23 @@ public class FHIRValidationModule extends AbstractModule {
 
     @Override
     protected void configure() {
+        LOG.info("Configure is running!");
 
-        LOG.info("Chuck,Something is running configure!");
-        // Create a multi-binder for automatically bundling and injecting a Set of ConstraintValidators
-        TypeLiteral<ConstraintValidator<?, ?>> constraintType = new TypeLiteral<>() {
-        };
-        Multibinder<ConstraintValidator<?, ?>> constraintBinder = Multibinder.newSetBinder(binder(), constraintType);
-        constraintBinder.addBinding().to(ProfileValidator.class);
-
-        LOG.info("Hey! Some thread wants to bind the FHIR Validator!");
-        LOG.info("OK a thread got in to call the binding!");
         bind(ConstraintValidatorFactory.class).to(InjectingConstraintValidatorFactory.class);
         bind(ValidatorFactory.class).toProvider(ValidatorFactoryProvider.class).in(Scopes.SINGLETON);
         bind(ConfiguredValidator.class).to(InjectingConfiguredValidator.class);
         bind(FhirValidator.class).toProvider(FHIRValidatorProvider.class).asEagerSingleton();
-
         bind(DPCProfileSupport.class).in(Scopes.SINGLETON);
-        
-        LOG.info("Chuck! Configure is done!!");
     }
+    
+    @Provides
+    @Singleton
+    public Set<ConstraintValidator<?, ?>> provideConstraintValidators(FhirValidator fhirValidator) {
+        Set<ConstraintValidator<?, ?>> validators = new HashSet<>();
+        validators.add(new ProfileValidator(fhirValidator));
+        return validators;
+    }
+
 
     @Provides
     FHIRValidationConfiguration provideValidationConfig() {
