@@ -72,12 +72,17 @@ public class DPCJsonLayout extends EventJsonLayout {
 
     private String maskPSQLData(String unMaskedMessage) {
         try {
-            if (unMaskedMessage.contains("PSQLException")) {
+            String newMessage = unMaskedMessage;
+            if (unMaskedMessage.contains("Detail:")) {
                 int detailIndex = unMaskedMessage.indexOf("Detail:");
-                return unMaskedMessage.substring(0, detailIndex) + "^^^^^^^^^^";
-            } else {
-                return unMaskedMessage;
+                newMessage = unMaskedMessage.substring(0, detailIndex) + "Detail: ***********";
             }
+            if (newMessage.contains("Batch entry ") && newMessage.contains("was aborted")) {
+                int batchEntryIndex = newMessage.indexOf("Batch entry");
+                int abortIndex = newMessage.indexOf("was aborted");
+                newMessage = newMessage.substring(0, batchEntryIndex) + "Batch entry " + "&&&&&&&&&" + newMessage.substring(abortIndex);
+            }
+            return newMessage;
         } catch (Exception e) {
             return unMaskedMessage;
         }
