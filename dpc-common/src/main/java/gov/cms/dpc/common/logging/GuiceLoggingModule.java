@@ -19,7 +19,7 @@ public class GuiceLoggingModule extends AbstractModule {
         binder.bindListener(Matchers.any(), new TypeListener() {
             @Override
             public <T> void hear(TypeLiteral<T> typeLiteral, TypeEncounter<T> typeEncounter) {
-                logger.info("Guicey Binding: " + typeLiteral);
+//                logger.info("Guicey Binding: " + typeLiteral);
             }
         });
     }

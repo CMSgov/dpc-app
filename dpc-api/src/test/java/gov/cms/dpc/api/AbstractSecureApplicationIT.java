@@ -31,6 +31,8 @@ import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
 import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_NPI;
 import static gov.cms.dpc.testing.APIAuthHelpers.TASK_URL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Abstract test that enables the default token authentication backend.
@@ -38,6 +40,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @IntegrationTest
 @ExtendWith(BufferedLoggerHandler.class)
 public class AbstractSecureApplicationIT {
+    
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractSecureApplicationIT.class);
+    
     protected static final String OTHER_ORG_ID = "065fbe84-3551-4ec3-98a3-0d1198c3cb55";
     protected static final String configPath = "src/test/resources/test.application.yml";
     private static final ObjectMapper mapper = new ObjectMapper();
@@ -79,7 +84,10 @@ public class AbstractSecureApplicationIT {
     @BeforeAll
     public static void setup() throws Exception {
         APITestHelpers.setupApplication(APPLICATION);
-        ctx = FhirContext.forDstu3();
+        LOG.info("I have setup the application for testing!");
+        
+        ctx = FhirContext.forDstu3Cached();
+        LOG.info("I created a FHIR context!");
         // Register a test organization for us
         // First, create a Golden macaroon for admin uses
         GOLDEN_MACAROON = APIAuthHelpers.createGoldenMacaroon();
