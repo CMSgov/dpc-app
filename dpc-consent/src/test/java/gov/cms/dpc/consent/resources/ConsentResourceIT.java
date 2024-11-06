@@ -30,6 +30,7 @@ import org.junit.jupiter.api.DisplayName;
  * Tests ConsentResource using a live database. These tests will fail if the database is not running or
  * seed data is not loaded.
  */
+@DisplayName("Consent Resource tests")
 class ConsentResourceIT extends AbstractConsentIT {
 
     private static final String TEST_CONSENT_UUID = "3a51c388-a9b0-42e2-afe4-688a2b6cef95";

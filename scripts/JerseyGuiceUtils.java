@@ -88,11 +88,21 @@ public class JerseyGuiceUtils {
    * @see JerseyGuiceModule
    */
   public static void install(Injector injector) {
+    LOG.info("OK time to install JerseyGuiceUtils!");
+
     // This binding is provided by JerseyGuiceModule
     ServiceLocator locator = injector.getInstance(ServiceLocator.class);
     
     GuiceServiceLocatorGenerator generator = getOrCreateGuiceServiceLocatorGenerator();
     generator.add(locator);
+
+    LOG.info("I am installing the JerseyGuiceUtils! Generated a locator and a generator.");
+            injector.getAllBindings().forEach((key, binding) -> {
+            if (key.getTypeLiteral().getRawType().getName().contains("Validator")) {
+                LOG.info("Validator binding: " + key + 
+                    "\n  from: " + binding.getSource());
+            }
+        });
   }
   
   /**
