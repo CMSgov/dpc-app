@@ -86,7 +86,7 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
         setupJacksonMapping(bootstrap);
         // Setup Guice bundle and module injection
         final GuiceBundle guiceBundle = setupGuiceBundle();
- 
+       
         // The Hibernate bundle must be initialized before Guice.
         // The Hibernate Guice module requires an initialized SessionFactory,
         // so Dropwizard needs to initialize the HibernateBundle first to create the SessionFactory.
@@ -95,7 +95,7 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
         bootstrap.addBundle(hibernateAuthBundle);
 
         bootstrap.addBundle(guiceBundle);
-
+        
         // Wrapper around some of the uglier bundle initialization commands
         setupCustomBundles(bootstrap);
 
