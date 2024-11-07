@@ -1,8 +1,10 @@
 package gov.cms.dpc.common.logging;
 
+import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.pattern.ThrowableHandlingConverter;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.LoggerContextVO;
+import ch.qos.logback.core.read.ListAppender;
 import com.google.common.collect.Maps;
 import io.dropwizard.logging.json.EventAttribute;
 import io.dropwizard.logging.json.layout.JsonFormatter;
@@ -11,14 +13,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.slf4j.LoggerFactory;
+import org.hibernate.exception.ConstraintViolationException;
+import java.sql.SQLException;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 
@@ -47,7 +50,7 @@ public class DPCJsonLayoutUnitTest {
         dpcJsonLayout = new DPCJsonLayout(jsonFormatter,
                 timestampFormatter,
                 throwableHandlingConverter,
-                Set.of(EventAttribute.MESSAGE),
+                Set.of(EventAttribute.MESSAGE, EventAttribute.EXCEPTION),
                 new HashMap<>(),
                 new HashMap<>(),
                 new HashSet<>(),
@@ -163,8 +166,24 @@ public class DPCJsonLayoutUnitTest {
                 "\"message\":\"Error handling a request: 33abf771288c609f\"," +
                 "\"exception\":\"org.postgresql.util.PSQLException: ERROR: duplicate key value violates unique constraint \\\"organization_idx\\\"\\n  **********";
 
-        when(loggingEvent.getFormattedMessage()).thenReturn(badLogOnException);
+        when(throwableHandlingConverter.convert(any())).thenReturn(badLogOnException);
+        Logger logger = (Logger) LoggerFactory.getLogger("justtesting");
+        ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
+        listAppender.start();
+        logger.addAppender(listAppender);
+
+        // log exception with nested database info
+        SQLException sqlException = new SQLException("/* insert gov.cms.dpc.common.entities.OrganizationEntity */ insert into organizations (city, country, district, line1, line2, postal_code, state, address_type, address_use, id_system, id_value, organization_name, id) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        ConstraintViolationException exception = new ConstraintViolationException("could not execute batch", sqlException, "organization_idx");
+        logger.error("Error handling a request: 33211570adcaad95", exception);
+
+        // Retrieve the LoggingEvent object
+        ILoggingEvent loggingEvent = listAppender.list.stream()
+                .filter(event -> event.getFormattedMessage().contains("Error handling a request: 33211570adcaad95"))
+                .findFirst()
+                .orElse(null);
+
         Map<String, Object> map = dpcJsonLayout.toJsonMap(loggingEvent);
-        assertEquals(expectedLogMessage, map.get("message"));
+        assertEquals(expectedLogMessage, map.get("exception"));
     }
 }
