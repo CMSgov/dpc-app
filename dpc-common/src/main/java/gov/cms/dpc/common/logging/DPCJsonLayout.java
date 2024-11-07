@@ -17,10 +17,14 @@ import java.util.stream.Collectors;
 public class DPCJsonLayout extends EventJsonLayout {
 
     private static final String MESSAGE = "message";
+    private static final String EXCEPTION = "exception";
     private static final String KEY_VALUE_SEPARATOR = "=";
     private static final String ENTRY_SEPARATOR = ",";
     private static final Pattern MBI_PATTERN = Pattern.compile("\\d[a-zA-Z][a-zA-Z0-9]\\d[a-zA-Z][a-zA-Z0-9]\\d[a-zA-Z]{2}\\d{2}");
     private static final String MBI_MASK = "***MBI?***";
+    private static final String DATABASE_INFO_MASK = "**********";
+    private static final Pattern PSQL_BATCH_ENTRY_EXCEPTION_PATTERN = Pattern.compile("Batch entry \\d+.*?was aborted");
+    private static final Pattern PSQL_DETAIL_EXCEPTION_PATTERN = Pattern.compile("Detail:.*");
 
     public DPCJsonLayout(JsonFormatter jsonFormatter, TimestampFormatter timestampFormatter, ThrowableHandlingConverter throwableProxyConverter, Set<EventAttribute> includes, Map<String, String> customFieldNames, Map<String, Object> additionalFields, Set<String> includesMdcKeys, boolean flattenMdc) {
         super(jsonFormatter, timestampFormatter, throwableProxyConverter, includes, customFieldNames, additionalFields, includesMdcKeys, flattenMdc);
@@ -29,10 +33,15 @@ public class DPCJsonLayout extends EventJsonLayout {
     @Override
     protected Map<String, Object> toJsonMap(ILoggingEvent event) {
         Map<String, Object> map = super.toJsonMap(event);
-        if(map.containsKey(MESSAGE)){
+        if(map.get(MESSAGE) != null){
             String maskedMessage = maskMBI(event.getFormattedMessage());
+            maskedMessage = maskPSQLData(maskedMessage);
             map.put(MESSAGE, maskedMessage);
             parseJsonMessageIfPossible(map, maskedMessage);
+        }
+        if(map.get(EXCEPTION) != null){
+            String maskedExceptionDetails = maskPSQLData(map.get(EXCEPTION).toString());
+            map.put(EXCEPTION, maskedExceptionDetails);
         }
         return map;
     }
@@ -59,6 +68,16 @@ public class DPCJsonLayout extends EventJsonLayout {
     private String maskMBI(String unMaskedMessage) {
         try {
             return MBI_PATTERN.matcher(unMaskedMessage).replaceAll(MBI_MASK);
+        } catch (Exception e) {
+            return unMaskedMessage;
+        }
+    }
+
+    private String maskPSQLData(String unMaskedMessage) {
+        try {
+            String newMessage = PSQL_DETAIL_EXCEPTION_PATTERN.matcher(unMaskedMessage).replaceAll(DATABASE_INFO_MASK);
+            newMessage = PSQL_BATCH_ENTRY_EXCEPTION_PATTERN.matcher(newMessage).replaceAll(DATABASE_INFO_MASK);
+            return newMessage;
         } catch (Exception e) {
             return unMaskedMessage;
         }
