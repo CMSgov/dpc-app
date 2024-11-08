@@ -227,6 +227,7 @@ RSpec.describe 'Invitations', type: :request do
         it 'should show error page if email not match' do
           stub_user_info(overrides: { 'email' => 'another@example.com' })
           get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
+          expect(assigns(:given_name)).to be_nil
           expect(response).to be_forbidden
           expect(response.body).to include(CGI.escapeHTML(I18n.t('verification.email_mismatch_status')))
         end
@@ -470,6 +471,7 @@ RSpec.describe 'Invitations', type: :request do
           it 'should render error page if email not match' do
             stub_user_info(overrides: { 'email' => 'another@example.com' })
             get "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm_cd"
+            expect(assigns(:given_name)).to be_nil
             expect(response).to be_forbidden
             expect(response.body).to include(CGI.escapeHTML(I18n.t('verification.email_mismatch_status')))
             expect(response.body).to_not include(confirm_organization_invitation_path(org, cd_invite))
