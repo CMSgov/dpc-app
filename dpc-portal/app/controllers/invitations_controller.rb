@@ -114,18 +114,11 @@ class InvitationsController < ApplicationController
 
   def render_bad_invitation?(user_info)
     if @invitation.credential_delegate? && !@invitation.cd_match?(user_info)
-      logger.info(['CD PII Check Fail',
-                   { actionContext: LoggingConstants::ActionContext::Registration,
-                     actionType: LoggingConstants::ActionType::FailCdPiiCheck,
-                     invitation: @invitation.id }])
-
+      log_pii_mismatch
       render(Page::Invitations::BadInvitationComponent.new(@invitation, 'pii_mismatch'),
              status: :forbidden)
     elsif !@invitation.email_match?(user_info)
-      logger.info(['AO PII Check Fail',
-                   { actionContext: LoggingConstants::ActionContext::Registration,
-                     actionType: LoggingConstants::ActionType::FailAoPiiCheck,
-                     invitation: @invitation.id }])
+      log_pii_mismatch
       render(Page::Invitations::BadInvitationComponent.new(@invitation, 'email_mismatch'),
              status: :forbidden)
     end
@@ -292,6 +285,20 @@ class InvitationsController < ApplicationController
       Rails.logger.info(['Authorized Official user created,',
                          { actionContext: LoggingConstants::ActionContext::Registration,
                            actionType: LoggingConstants::ActionType::AoCreated }])
+    end
+  end
+
+  def log_pii_mismatch
+    if @invitation.credential_delegate?
+      Rails.logger.info(['CD PII Check Fail',
+                         { actionContext: LoggingConstants::ActionContext::Registration,
+                           actionType: LoggingConstants::ActionType::FailCdPiiCheck,
+                           invitation: @invitation.id }])
+    else
+      logger.info(['AO PII Check Fail',
+                   { actionContext: LoggingConstants::ActionContext::Registration,
+                     actionType: LoggingConstants::ActionType::FailAoPiiCheck,
+                     invitation: @invitation.id }])
     end
   end
 
