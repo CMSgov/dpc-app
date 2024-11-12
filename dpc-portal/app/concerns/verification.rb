@@ -48,13 +48,15 @@ module Verification
       if role_and_waivers[:has_org_waiver]
         logger.info(['Organization has a waiver',
                      { actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
-                       actionType: LoggingConstants::ActionType::OrgHasWaiver }])
+                       actionType: LoggingConstants::ActionType::OrgHasWaiver,
+                       invitation: @invitation.id }])
       end
       return unless role_and_waivers[:has_ao_waiver]
 
       logger.info(['Authorized official has a waiver',
                    { actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
-                     actionType: LoggingConstants::ActionType::AoHasWaiver }])
+                     actionType: LoggingConstants::ActionType::AoHasWaiver,
+                     invitation: @invitation.id }])
     end
   end
 end
