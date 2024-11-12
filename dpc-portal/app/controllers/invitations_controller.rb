@@ -15,6 +15,7 @@ class InvitationsController < ApplicationController
   before_action :block_test_utilities, only: %i[set_idp_token]
 
   def show
+    log_invitation_flow
     render(Page::Invitations::StartComponent.new(@organization, @invitation))
   end
 
@@ -258,6 +259,18 @@ class InvitationsController < ApplicationController
 
   def block_test_utilities
     render plain: :forbidden, status: :forbidden unless Rails.env.test?
+  end
+
+  def log_invitation_flow
+    if @invitation.credential_delegate?
+      Rails.logger.info(['Credential Delegate invitation flow started,',
+                         { actionContext: LoggingConstants::ActionContext::Registration,
+                           actionType: LoggingConstants::ActionType::CdInvitationFlowStarted }])
+    elsif @invitation.authorized_official?
+      Rails.logger.info(['Authorized Official invitation flow started,',
+                         { actionContext: LoggingConstants::ActionContext::Registration,
+                           actionType: LoggingConstants::ActionType::AoInvitationFlowStarted }])
+    end
   end
 
   def log_ao_verification_error(error, service_unavailable)
