@@ -107,7 +107,8 @@ class InvitationsController < ApplicationController
 
   def invitation_matches_user
     user_info = UserInfoService.new.user_info(session)
-    render_if_bad_invitation(user_info)
+    return if render_bad_invitation?(user_info)
+
     session["invitation_status_#{@invitation.id}"] = 'identity_verified'
     @given_name = user_info['given_name']
     @family_name = user_info['family_name']
@@ -115,11 +116,13 @@ class InvitationsController < ApplicationController
     handle_user_info_service_error(e, 1)
   end
 
-  def render_if_bad_invitation(user_info)
+  def render_bad_invitation?(user_info)
     if @invitation.credential_delegate? && !@invitation.cd_match?(user_info)
+      log_pii_mismatch
       render(Page::Invitations::BadInvitationComponent.new(@invitation, 'pii_mismatch'),
              status: :forbidden)
     elsif !@invitation.email_match?(user_info)
+      log_pii_mismatch
       render(Page::Invitations::BadInvitationComponent.new(@invitation, 'email_mismatch'),
              status: :forbidden)
     end
@@ -307,6 +310,20 @@ class InvitationsController < ApplicationController
                          { actionContext: LoggingConstants::ActionContext::Registration,
                            actionType: LoggingConstants::ActionType::AoCreated,
                            invitation: @invitation.id }])
+    end
+  end
+
+  def log_pii_mismatch
+    if @invitation.credential_delegate?
+      Rails.logger.info(['CD PII Check Fail',
+                         { actionContext: LoggingConstants::ActionContext::Registration,
+                           actionType: LoggingConstants::ActionType::FailCdPiiCheck,
+                           invitation: @invitation.id }])
+    else
+      logger.info(['AO PII Check Fail',
+                   { actionContext: LoggingConstants::ActionContext::Registration,
+                     actionType: LoggingConstants::ActionType::FailAoPiiCheck,
+                     invitation: @invitation.id }])
     end
   end
 
