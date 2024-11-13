@@ -150,10 +150,22 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
       end
 
       it 'logs on success' do
+        invitation_id = 123
+        invitation = instance_double(Invitation)
+        expect(invitation).to receive(:id).and_return(invitation_id)
+        expect(invitation).to receive(:save).and_return(true)
+        expect(Invitation).to receive(:new).and_return(invitation)
+
+        mailer = double(InvitationMailer)
+        expect(InvitationMailer).to receive(:with).with(invitation:).and_return(mailer)
+        expect(mailer).to receive(:invite_cd).and_return(mailer)
+        expect(mailer).to receive(:deliver_later)
+
         allow(Rails.logger).to receive(:info)
         expect(Rails.logger).to receive(:info).with(['Credential Delegate invited',
                                                      { actionContext: LoggingConstants::ActionContext::Registration,
-                                                       actionType: LoggingConstants::ActionType::CdInvited }])
+                                                       actionType: LoggingConstants::ActionType::CdInvited,
+                                                       invitation: invitation_id }])
         post "/organizations/#{api_id}/credential_delegate_invitations", params: successful_parameters
       end
 

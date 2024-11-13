@@ -15,6 +15,7 @@ class InvitationsController < ApplicationController
   before_action :block_test_utilities, only: %i[set_idp_token]
 
   def show
+    log_invitation_flow_start
     render(Page::Invitations::StartComponent.new(@organization, @invitation))
   end
 
@@ -47,7 +48,8 @@ class InvitationsController < ApplicationController
     session["invitation_status_#{@invitation.id}"] = 'verification_complete'
     Rails.logger.info(['Approved access authorization occurred for the Credential Delegate',
                        { actionContext: LoggingConstants::ActionContext::Registration,
-                         actionType: LoggingConstants::ActionType::CdConfirmed }])
+                         actionType: LoggingConstants::ActionType::CdConfirmed,
+                         invitation: @invitation.id }])
     render(Page::Invitations::AcceptInvitationComponent.new(@organization, @invitation, @given_name, @family_name))
   end
 
@@ -63,7 +65,8 @@ class InvitationsController < ApplicationController
     sign_in(:user, @user)
     Rails.logger.info(['User logged in',
                        { actionContext: LoggingConstants::ActionContext::Registration,
-                         actionType: LoggingConstants::ActionType::UserLoggedIn }])
+                         actionType: LoggingConstants::ActionType::UserLoggedIn,
+                         invitation: @invitation.id }])
     render(Page::Invitations::SuccessComponent.new(@organization, @invitation, @given_name, @family_name))
   end
 
@@ -71,7 +74,8 @@ class InvitationsController < ApplicationController
     login_session
     Rails.logger.info(['User began login flow',
                        { actionContext: LoggingConstants::ActionContext::Registration,
-                         actionType: LoggingConstants::ActionType::BeginLogin }])
+                         actionType: LoggingConstants::ActionType::BeginLogin,
+                         invitation: @invitation.id }])
     url = URI::HTTPS.build(host: IDP_HOST,
                            path: '/openid_connect/authorize',
                            query: { acr_values: 'http://idmanagement.gov/ns/assurance/ial/2',
@@ -178,7 +182,8 @@ class InvitationsController < ApplicationController
     CdOrgLink.create!(user:, provider_organization: @organization, invitation: @invitation)
     Rails.logger.info(['Credential Delegate linked to organization',
                        { actionContext: LoggingConstants::ActionContext::Registration,
-                         actionType: LoggingConstants::ActionType::CdLinkedToOrg }])
+                         actionType: LoggingConstants::ActionType::CdLinkedToOrg,
+                         invitation: @invitation.id }])
     @invitation.accept!
   end
 
@@ -186,7 +191,8 @@ class InvitationsController < ApplicationController
     AoOrgLink.create!(user:, provider_organization: @organization, invitation: @invitation)
     Rails.logger.info(['Authorized Official linked to organization',
                        { actionContext: LoggingConstants::ActionContext::Registration,
-                         actionType: LoggingConstants::ActionType::AoLinkedToOrg }])
+                         actionType: LoggingConstants::ActionType::AoLinkedToOrg,
+                         invitation: @invitation.id }])
     @invitation.accept!
     @user.update(verification_status: 'approved')
     @organization.update(verification_status: 'approved')
@@ -231,11 +237,13 @@ class InvitationsController < ApplicationController
     if @invitation.credential_delegate?
       Rails.logger.info(['Credential Delegate Invitation expired',
                          { actionContext: LoggingConstants::ActionContext::Registration,
-                           actionType: LoggingConstants::ActionType::CdInvitationExpired }])
+                           actionType: LoggingConstants::ActionType::CdInvitationExpired,
+                           invitation: @invitation.id }])
     elsif @invitation.authorized_official?
       Rails.logger.info(['Authorized Official Invitation expired',
                          { actionContext: LoggingConstants::ActionContext::Registration,
-                           actionType: LoggingConstants::ActionType::AoInvitationExpired }])
+                           actionType: LoggingConstants::ActionType::AoInvitationExpired,
+                           invitation: @invitation.id }])
     end
     render(Page::Invitations::BadInvitationComponent.new(@invitation, @invitation.unacceptable_reason),
            status: :forbidden)
@@ -263,10 +271,25 @@ class InvitationsController < ApplicationController
     render plain: :forbidden, status: :forbidden unless Rails.env.test?
   end
 
+  def log_invitation_flow_start
+    if @invitation.credential_delegate?
+      Rails.logger.info(['Credential Delegate invitation flow started,',
+                         { actionContext: LoggingConstants::ActionContext::Registration,
+                           actionType: LoggingConstants::ActionType::CdInvitationFlowStarted,
+                           invitation: @invitation.id }])
+    elsif @invitation.authorized_official?
+      Rails.logger.info(['Authorized Official invitation flow started,',
+                         { actionContext: LoggingConstants::ActionContext::Registration,
+                           actionType: LoggingConstants::ActionType::AoInvitationFlowStarted,
+                           invitation: @invitation.id }])
+    end
+  end
+
   def log_ao_verification_error(error, service_unavailable)
     if service_unavailable
       logger.error(['CPI API Gateway unavailable',
-                    { actionContext: LoggingConstants::ActionContext::Registration, error: error.message }])
+                    { actionContext: LoggingConstants::ActionContext::Registration, error: error.message,
+                      invitation: @invitation.id }])
     else
       logger.info(['AO Check Fail',
                    { actionContext: LoggingConstants::ActionContext::Registration,
@@ -280,11 +303,13 @@ class InvitationsController < ApplicationController
     if @invitation.credential_delegate?
       Rails.logger.info(['Credential Delegate user created,',
                          { actionContext: LoggingConstants::ActionContext::Registration,
-                           actionType: LoggingConstants::ActionType::CdCreated }])
+                           actionType: LoggingConstants::ActionType::CdCreated,
+                           invitation: @invitation.id }])
     elsif @invitation.authorized_official?
       Rails.logger.info(['Authorized Official user created,',
                          { actionContext: LoggingConstants::ActionContext::Registration,
-                           actionType: LoggingConstants::ActionType::AoCreated }])
+                           actionType: LoggingConstants::ActionType::AoCreated,
+                           invitation: @invitation.id }])
     end
   end
 

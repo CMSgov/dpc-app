@@ -11,6 +11,8 @@ module LoggingConstants
   end
 
   module ActionType
+    AoInvitationFlowStarted = 'AoInvitationFlowStarted'
+    CdInvitationFlowStarted = 'CdInvitationFlowStarted'
     AoInvited = 'AoInvited'
     CdInvited = 'CdInvited'
     AoInvitationExpired = 'AoInvitationExpired'
