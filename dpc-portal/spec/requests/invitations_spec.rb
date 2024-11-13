@@ -225,8 +225,16 @@ RSpec.describe 'Invitations', type: :request do
           expect(response).to redirect_to(organization_invitation_path(org, cd_invite))
         end
         it 'should show error page if email not match' do
+          allow(Rails.logger).to receive(:info)
+          expect(Rails.logger).to receive(:info).with(
+            ['AO PII Check Fail',
+             { actionContext: LoggingConstants::ActionContext::Registration,
+               actionType: LoggingConstants::ActionType::FailAoPiiCheck,
+               invitation: invitation.id }]
+          )
           stub_user_info(overrides: { 'email' => 'another@example.com' })
           get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
+          expect(assigns(:given_name)).to be_nil
           expect(response).to be_forbidden
           expect(response.body).to include(CGI.escapeHTML(I18n.t('verification.email_mismatch_status')))
         end
@@ -468,13 +476,28 @@ RSpec.describe 'Invitations', type: :request do
         end
         context :failure do
           it 'should render error page if email not match' do
+            allow(Rails.logger).to receive(:info)
+            expect(Rails.logger).to receive(:info).with(
+              ['CD PII Check Fail',
+               { actionContext: LoggingConstants::ActionContext::Registration,
+                 actionType: LoggingConstants::ActionType::FailCdPiiCheck,
+                 invitation: cd_invite.id }]
+            )
             stub_user_info(overrides: { 'email' => 'another@example.com' })
             get "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm_cd"
+            expect(assigns(:given_name)).to be_nil
             expect(response).to be_forbidden
             expect(response.body).to include(CGI.escapeHTML(I18n.t('verification.email_mismatch_status')))
             expect(response.body).to_not include(confirm_organization_invitation_path(org, cd_invite))
           end
           it 'should render error page if family_name not match' do
+            allow(Rails.logger).to receive(:info)
+            expect(Rails.logger).to receive(:info).with(
+              ['CD PII Check Fail',
+               { actionContext: LoggingConstants::ActionContext::Registration,
+                 actionType: LoggingConstants::ActionType::FailCdPiiCheck,
+                 invitation: cd_invite.id }]
+            )
             stub_user_info(overrides: { 'family_name' => 'Something Else' })
             get "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm_cd"
             expect(response).to be_forbidden
