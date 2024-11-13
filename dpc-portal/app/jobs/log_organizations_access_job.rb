@@ -5,33 +5,21 @@ class LogOrganizationsAccessJob < ApplicationJob
 
   def perform
     @start = Time.now
-    fetch_organizations.each do |organization|
-      credential_status = fetch_credential_status(organization)
-      Rails.logger.info("Organization: #{organization['name']}, Credential Status: #{credential_status}")
-    rescue Exception => e
-      Rails.logger("failed to retrieve credential status for organization: #{organization}")
+    ProviderOrganization.where.not(terms_of_service_accepted_by: nil).find_each do |organization|
+      fetch_credential_status(organization)
     end
   end
 
-  def fetch_organizations
-    url = URI("https://#{put_env_here}.dpc.cms.gov/#{put_endpoint_here}")
-
-    https = Net::HTTP.new(url.host, url.port)
-    https.use_ssl = true
-
-    request = Net::HTTP::Get.new(url)
-    request["Content-Type"] = "application/x-www-form-urlencoded"
-    request["Accept"] = "application/json"
-    request.body = "put_details_here"
-    response = https.request(request)
-
-    return JSON.parse(response)["organizations"]
-  rescue StandardError => e
-    Rails.logger.error("Failed to fetch companies: #{e.message}")
-    raise
+  def fetch_credential_status(organization)
+      tokens = dpc_client.get_client_tokens(organization.id)
+      pub_keys = dpc_client.get_public_keys(organization.id)
+      return {
+        "tokens": tokens,
+        "public_keys": pub_keys,
+      }
   end
 
-  def fetch_credential_status(organization)
-      nil
+  def dpc_client
+    @dpc_client ||= DpcClient.new
   end
 end
