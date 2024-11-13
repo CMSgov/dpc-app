@@ -7,7 +7,6 @@ describe AoInvitationService do
   let(:client) { CpiApiGatewayClient.new }
   let(:service) { AoInvitationService.new }
   let(:organization_npi) { '3624913885' }
-  let(:invitation_id) { 123 }
 
   describe 'org_name' do
     it 'fetches the name' do

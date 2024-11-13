@@ -15,7 +15,7 @@ class InvitationsController < ApplicationController
   before_action :block_test_utilities, only: %i[set_idp_token]
 
   def show
-    log_invitation_flow
+    log_invitation_flow_start
     render(Page::Invitations::StartComponent.new(@organization, @invitation))
   end
 
@@ -268,7 +268,7 @@ class InvitationsController < ApplicationController
     render plain: :forbidden, status: :forbidden unless Rails.env.test?
   end
 
-  def log_invitation_flow
+  def log_invitation_flow_start
     if @invitation.credential_delegate?
       Rails.logger.info(['Credential Delegate invitation flow started,',
                          { actionContext: LoggingConstants::ActionContext::Registration,
