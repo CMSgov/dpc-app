@@ -1,7 +1,7 @@
 services:
 
   db:
-    image: postgres:14
+    image: postgres:16.4
     command: postgres -c 'max_connections=250'
     environment:
       - POSTGRES_MULTIPLE_DATABASES=dpc_attribution,dpc_queue,dpc_auth,dpc_consent,dpc-website_development,bcda,dpc-portal_development
@@ -12,7 +12,8 @@ services:
       # based on the POSTGRES_MULTIPLE_DATABASES variable above.
       - ./docker/postgres:/docker-entrypoint-initdb.d
       # Mount persistent volume to ensure data is not erased across containers.
-      - pgdata14:/var/lib/postgresql/data
+      - pgdata16:/var/lib/postgresql/data
+      - ./tmp:/var/tmp
 
   aggregation:
     image: ${ECR_HOST:-755619740999.dkr.ecr.us-east-1.amazonaws.com/dpc-aggregation}:latest
@@ -117,7 +118,7 @@ services:
     network_mode: host
 
 volumes:
-  pgdata14:
+  pgdata16:
   export-volume:
     driver: local
     driver_opts:
