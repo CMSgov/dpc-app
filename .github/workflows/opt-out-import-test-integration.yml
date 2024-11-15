@@ -23,9 +23,6 @@ jobs:
         with:
           aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-test-github-actions
-      - name: Install psql
-        run: |
-          docker compose up start_core_dependencies
       - name: Get database credentials
         uses: cmsgov/ab2d-bcda-dpc-platform/actions/aws-params-env-action@main
         env:
@@ -35,6 +32,9 @@ jobs:
             DB_USER=/dpc/test/consent/db_read_only_user_dpc_consent
             DB_PASSWORD=/dpc/test/consent/db_read_only_pass_dpc_consent
             HOST=/dpc/test/db/url
+      - name: Install psql
+        run: |
+          docker run --name dpc-app-db-1 -e POSTGRES_PASSWORD="$DB_PASSWORD" -d postgres:16.4
       - name: Verify suppression file was ingested
         env:
           FILENAME: ${{needs.trigger.outputs.filename}}
