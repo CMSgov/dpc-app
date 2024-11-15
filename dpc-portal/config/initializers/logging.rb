@@ -11,6 +11,8 @@ module LoggingConstants
   end
 
   module ActionType
+    AoInvitationFlowStarted = 'AoInvitationFlowStarted'
+    CdInvitationFlowStarted = 'CdInvitationFlowStarted'
     AoInvited = 'AoInvited'
     CdInvited = 'CdInvited'
     AoInvitationExpired = 'AoInvitationExpired'
@@ -31,7 +33,9 @@ module LoggingConstants
     FailedLogin = 'FailedLogin'
     UserLoginWithoutAccount = 'UserLoginWithoutAccount'
 
-    FailCpiApiGwCheck = 'FailCpiApiGatewwayCheck'
+    FailAoPiiCheck = 'FailAoPiiCheck'
+    FailCdPiiCheck = 'FailCdPiiCheck'
+    FailCpiApiGwCheck = 'FailCpiApiGatewayCheck'
     ApiBlocked = 'ApiBlocked'
     AoHasWaiver = 'AoHasWaiver'
     OrgHasWaiver = 'OrgHasWaiver'

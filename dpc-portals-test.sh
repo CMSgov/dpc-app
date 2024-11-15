@@ -3,7 +3,7 @@ set -e
 
 function _finally {
     docker compose -p start-v1-portals -f docker-compose.yml -f docker-compose.portals.yml down
-    docker volume rm start-v1-portals_pgdata14
+    docker volume rm start-v1-portals_pgdata16
 }
 trap _finally EXIT
 
