@@ -7,7 +7,9 @@ class LogOrganizationsAccessJob < ApplicationJob
     @start = Time.now
     ProviderOrganization.where.not(terms_of_service_accepted_by: nil).find_each do |organization|
       credential_status = fetch_credential_status?(organization)
-      Rails.logger.info("Credential status for organization #{organization.name} (#{organization.id}): #{credential_status}")
+      Rails.logger.info(['Credential status for organization',
+                         { name: organization.name, id: organization.id,
+                         has_prod_credentials: credential_status}])
     end
   end
 
