@@ -32,12 +32,6 @@ jobs:
             DB_USER=/dpc/test/consent/db_read_only_user_dpc_consent
             DB_PASSWORD=/dpc/test/consent/db_read_only_pass_dpc_consent
             HOST=/dpc/test/db/url
-      - name: Stop old container
-        run: |
-          docker stop dpc-app-db-1 || echo 'not here'
-      - name: Remove old container
-        run: |
-          docker rm dpc-app-db-1 || echo 'not here'
       - name: Install psql
         run: |
           docker run --rm --name dpc-app-db-1 -e POSTGRES_PASSWORD="$DB_PASSWORD" -d postgres:16.4
@@ -46,10 +40,4 @@ jobs:
           FILENAME: ${{needs.trigger.outputs.filename}}
         # CAUTION: if changing the script below, validate that sensitive information is not printed in the workflow
         run: |
-          CAN_CONNECT=`docker exec dpc-app-db-1 pg_isready -h "$HOST" 2>&1 | grep accepting`
-          if [[ $? -ne 0 || -z $CAN_CONNECT ]]; then
-            echo "Can't connect to database, so can't test, so calling it good..."
-            exit 0
-          else
-            echo $CAN_CONNECT
-          fi
+          docker exec dpc-app-db-1 pg_isready -h "$HOST" 2>&1
