@@ -25,7 +25,7 @@ jobs:
           role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-test-github-actions
       - name: Install psql
         run: |
-          docker-compose up start_core_dependencies
+          docker compose up start_core_dependencies
       - name: Get database credentials
         uses: cmsgov/ab2d-bcda-dpc-platform/actions/aws-params-env-action@main
         env:
