@@ -44,5 +44,6 @@ jobs:
           if [[ $? -ne 0 || -z $CAN_CONNECT ]]; then
             echo "Can't connect to database, so can't test, so calling it good..."
             exit 0
+          else
+            echo $CAN_CONNECT
           fi
-          which python
