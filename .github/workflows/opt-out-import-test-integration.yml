@@ -32,6 +32,9 @@ jobs:
             DB_USER=/dpc/test/consent/db_read_only_user_dpc_consent
             DB_PASSWORD=/dpc/test/consent/db_read_only_pass_dpc_consent
             HOST=/dpc/test/db/url
+      - name: Stop old container
+        run: |
+          docker stop dpc-app-db-1 || echo 'not here'
       - name: Remove old container
         run: |
           docker rm dpc-app-db-1 || echo 'not here'
