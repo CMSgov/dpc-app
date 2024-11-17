@@ -559,23 +559,6 @@
             <build>
                 <plugins>
                     <plugin>
-                      <groupId>org.apache.maven.plugins</groupId>
-                      <artifactId>maven-clean-plugin</artifactId>
-                      <version>3.4.0</version>
-                      <executions>
-                        <execution>
-                          <phase>clean</phase>
-                          <goals>
-                            <goal>clean</goal>
-                          </goals>
-                          <configuration>
-                              <retryOnError>true</retryOnError>
-                              <failOnError>false</failOnError>
-                          </configuration>
-                        </execution>
-                      </executions>
-                    </plugin>
-                    <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-compiler-plugin</artifactId>
                         <executions>
@@ -602,7 +585,23 @@
     <build>
         <pluginManagement>
             <plugins>
-
+                <plugin>
+                  <groupId>org.apache.maven.plugins</groupId>
+                  <artifactId>maven-clean-plugin</artifactId>
+                  <version>3.4.0</version>
+                  <executions>
+                    <execution>
+                      <phase>clean</phase>
+                      <goals>
+                        <goal>clean</goal>
+                      </goals>
+                      <configuration>
+                          <retryOnError>true</retryOnError>
+                          <failOnError>false</failOnError>
+                      </configuration>
+                    </execution>
+                  </executions>
+                </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-shade-plugin</artifactId>
@@ -693,6 +692,23 @@
         </pluginManagement>
 
         <plugins>
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-clean-plugin</artifactId>
+              <version>3.4.0</version>
+              <executions>
+                <execution>
+                  <phase>clean</phase>
+                  <goals>
+                    <goal>clean</goal>
+                  </goals>
+                  <configuration>
+                      <retryOnError>true</retryOnError>
+                      <failOnError>false</failOnError>
+                  </configuration>
+                </execution>
+              </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
