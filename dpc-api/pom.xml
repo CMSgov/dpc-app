@@ -355,7 +355,7 @@
                     </annotationProcessorPaths>
                 </configuration>
             </plugin>
-            <plugin>
+<!--            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
                 <dependencies>
@@ -379,11 +379,11 @@
                         <printStderrOnFailure>${test.verbosity}</printStderrOnFailure>
                     </statelessTestsetInfoReporter>
                 </configuration>
-            </plugin>
+            </plugin>-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <dependencies>
+<!--                <dependencies>
                   <dependency>
                      <groupId>me.fabriciorby</groupId>
                      <artifactId>maven-surefire-junit5-tree-reporter</artifactId>
@@ -401,7 +401,7 @@
                         <printStdoutOnFailure>${test.verbosity}</printStdoutOnFailure>
                         <printStderrOnFailure>${test.verbosity}</printStderrOnFailure>
                     </statelessTestsetInfoReporter>
-                </configuration>
+                </configuration>-->
             </plugin>
         </plugins>
     </build>
@@ -412,6 +412,17 @@
             <build>
                 <plugins>
                     <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration combine.self="override">
+                            <groups>Integration</groups>
+                            <forkedProcessExitTimeoutInSeconds>600</forkedProcessExitTimeoutInSeconds>
+                            <includes>
+                                <include>**/*IT.java</include>
+                            </includes>
+                        </configuration>
+                    </plugin>
+<!--                    <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-surefire-plugin</artifactId>
                         <configuration>
@@ -437,7 +448,7 @@
                                 <phase>verify</phase>
                             </execution>
                         </executions>
-                    </plugin>
+                    </plugin>-->
                 </plugins>
             </build>
         </profile>
