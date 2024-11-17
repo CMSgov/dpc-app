@@ -41,4 +41,7 @@ fi
 CMDLINE="java ${DEBUG_FLAGS} ${JACOCO} ${NR_AGENT} ${JAVA_CLASSES}"
 
 echo "Running server via entrypoint!"
+
+echo "${CMDLINE} \"$@\" ${CONF_FILE}"
 exec ${CMDLINE} "$@" ${CONF_FILE}
+

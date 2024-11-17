@@ -1,6 +1,10 @@
 package gov.cms.dpc.fhir.dropwizard.handlers;
 
 import ca.uhn.fhir.context.FhirContext;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.squarespace.jersey2.guice.GuiceServiceLocatorGeneratorStub;
+import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
 import gov.cms.dpc.fhir.annotations.BundleReturnProperties;
@@ -26,20 +30,28 @@ import org.junit.jupiter.api.DisplayName;
 @DisplayName("Bundle data handling")
 public class BundleHandlerTest {
 
+    private static Injector injector;
     private static ResourceExtension resource = buildResource();
     private static FhirContext ctx;
 
     private static ResourceExtension buildResource() {
+        injector = Guice.createInjector(new UnitTestModule(null));
+        JerseyGuiceUtils.install(injector);
         ctx = FhirContext.forDstu3();
         final FHIRHandler fhirHandler = new FHIRHandler(ctx);
+
+        // Register the Guice ServiceLocator Generator to avoid IllegalStateException
+        final GuiceServiceLocatorGeneratorStub generator = new GuiceServiceLocatorGeneratorStub();
+        
         return ResourceExtension
                 .builder()
                 .addProvider(fhirHandler)
                 .addProvider(new BundleHandler(fhirHandler))
                 .addResource(new BundleTestResource())
+                .addProvider(generator) // Ensure generator is added here
                 .build();
     }
-
+    
     @Test
     @DisplayName("Create bundle from resource 🥳")
     void testBundle() {

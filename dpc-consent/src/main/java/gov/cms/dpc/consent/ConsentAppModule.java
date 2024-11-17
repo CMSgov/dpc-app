@@ -2,11 +2,13 @@ package gov.cms.dpc.consent;
 
 import com.google.inject.Binder;
 import com.google.inject.Provides;
-import com.google.inject.name.Named;
+import com.google.inject.Scopes;
+import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import gov.cms.dpc.consent.jdbi.ConsentDAO;
 import gov.cms.dpc.consent.resources.BaseResource;
 import gov.cms.dpc.consent.resources.ConsentResource;
-import ru.vyarus.dropwizard.guice.module.support.DropwizardAwareModule;
+import gov.cms.dpc.fhir.parameters.ProvenanceResourceValueFactory;
+import jakarta.inject.Named;
 
 class ConsentAppModule extends DropwizardAwareModule<DPCConsentConfiguration> {
 
@@ -16,6 +18,7 @@ class ConsentAppModule extends DropwizardAwareModule<DPCConsentConfiguration> {
         binder.bind(ConsentResource.class);
         binder.bind(BaseResource.class);
         binder.bind(ConsentDAO.class);
+        bind(ProvenanceResourceValueFactory.class).in(Scopes.SINGLETON);
     }
 
     @Provides

@@ -6,7 +6,6 @@ import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
-import com.google.inject.name.Named;
 import gov.cms.dpc.api.APIHelpers;
 import gov.cms.dpc.api.DPCAPIConfiguration;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
@@ -48,6 +47,7 @@ import java.util.stream.Collectors;
 import static gov.cms.dpc.api.APIHelpers.addOrganizationTag;
 import static gov.cms.dpc.fhir.FHIRMediaTypes.*;
 import static gov.cms.dpc.fhir.helpers.FHIRHelpers.handleMethodOutcome;
+import jakarta.inject.Named;
 
 
 @Api(value = "Group", authorizations = @Authorization(value = "access_token"))

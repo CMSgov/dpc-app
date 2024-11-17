@@ -52,7 +52,7 @@ public class KeyResource extends AbstractKeyResource {
     @Timed
     @ExceptionMetered
     @Authorizer
-    @UnitOfWork
+    @UnitOfWork("hibernate.auth")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Fetch public keys for Organization",
             notes = "This endpoint returns all the public keys currently associated with the organization." +
@@ -67,7 +67,7 @@ public class KeyResource extends AbstractKeyResource {
     @Timed
     @ExceptionMetered
     @Path("/{keyID}")
-    @UnitOfWork
+    @UnitOfWork("hibernate.auth")
     @Authorizer
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Fetch public key for Organization",
@@ -87,7 +87,7 @@ public class KeyResource extends AbstractKeyResource {
     @Timed
     @ExceptionMetered
     @Path("/{keyID}")
-    @UnitOfWork
+    @UnitOfWork("hibernate.auth")
     @Produces(MediaType.APPLICATION_JSON)
     @Authorizer
     @ApiOperation(value = "Delete public key for Organization",
@@ -121,7 +121,7 @@ public class KeyResource extends AbstractKeyResource {
                     "- secp256r1" +
                     "- secp384r1")
     @ApiResponses(@ApiResponse(code = 400, message = "Public key is not valid."))
-    @UnitOfWork
+    @UnitOfWork("hibernate.auth")
     @Override
     public PublicKeyEntity submitKey(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
                                      @ApiParam KeySignature keySignature,
@@ -188,6 +188,9 @@ public class KeyResource extends AbstractKeyResource {
         try{
             return this.dao.persistPublicKey(publicKeyEntity);
         } catch(Exception e){
+            logger.error("Exception saving public key: " + e);
+            System.err.println("Exception saving public key: " + e);
+            e.printStackTrace();
             throw new BadRequestException("Key cannot be re-used");
         }
     }

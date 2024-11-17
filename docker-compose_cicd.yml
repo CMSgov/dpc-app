@@ -1,0 +1,166 @@
+services:
+
+  db:
+    image: postgres:14
+    command: postgres -c 'max_connections=250'
+    environment:
+      - POSTGRES_MULTIPLE_DATABASES=dpc_attribution,dpc_queue,dpc_auth,dpc_consent,dpc-website_development,bcda,dpc-portal_development
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=postgres
+      - POSTGRES_PASSWORD=dpc-safe
+    volumes:
+      # Mount database startup script, which automatically creates new databases
+      # based on the POSTGRES_MULTIPLE_DATABASES variable above.
+      - ./docker/postgres:/docker-entrypoint-initdb.d
+      # Mount persistent volume to ensure data is not erased across containers.
+      - pgdata14:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      retries: 5
+      start_period: 60s
+      timeout: 10s
+    restart: unless-stopped
+
+  aggregation:
+    image: ${ECR_HOST:-755619740999.dkr.ecr.us-east-1.amazonaws.com/dpc-aggregation}:latest
+    ports:
+      - "9901:9901"
+    env_file:
+      - ./ops/config/decrypted/local.env
+    environment:
+      - ENV=local
+      - USE_BFD_MOCK=${USE_BFD_MOCK:-true}
+      - EMIT_AWS_METRICS=${EMIT_AWS_METRICS:-false}
+      - JACOCO=${REPORT_COVERAGE:-false}
+      - DEBUG_MODE=${DEBUG_MODE:-false}
+      - AGGREGATION_SVC_PORT=9901
+      - HEALTH_CHECK_COUNT=6
+    healthcheck:
+      test: ["CMD-SHELL", "test $(curl -s 'http://localhost:'$${AGGREGATION_SVC_PORT}'/healthcheck?pretty=true' | grep -c '\"healthy\" : true') -eq $((HEALTH_CHECK_COUNT - $( [ \"$$USE_BFD_MOCK\" = 'true' ] && echo 1 || echo 0 )))"]
+      interval: 10s
+      retries: 5
+      start_period: 60s
+      timeout: 10s
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+        restart: true
+      consent:
+        condition: service_healthy
+        restart: true
+    volumes:
+      - export-volume:/app/data
+      - ./jacocoReport/dpc-aggregation:/jacoco-report
+
+  attribution:
+    image: ${ECR_HOST:-755619740999.dkr.ecr.us-east-1.amazonaws.com/dpc-attribution}:latest
+    depends_on:
+      db:
+        condition: service_healthy
+        restart: true
+    environment:
+      - ENV=local
+      - JACOCO=${REPORT_COVERAGE:-false}
+      - DEBUG_MODE=${DEBUG_MODE:-false}
+      - ATTRIBUTION_SVC_PORT=9902
+      - HEALTH_CHECK_COUNT=3
+    ports:
+      - "3500:8080"
+      - "9902:9902"
+    healthcheck:
+      test: ["CMD-SHELL", "test $(curl -s 'http://localhost:'$${ATTRIBUTION_SVC_PORT}'/healthcheck?pretty=true' | grep -c '\"healthy\" : true') -eq $${HEALTH_CHECK_COUNT}"]
+      interval: 10s
+      retries: 5
+      start_period: 60s
+      timeout: 10s
+    restart: unless-stopped
+    volumes:
+      - ./jacocoReport/dpc-attribution:/jacoco-report
+
+  api:
+    image: ${ECR_HOST:-755619740999.dkr.ecr.us-east-1.amazonaws.com/dpc-api}:latest
+    ports:
+      - "3002:3002"
+      - "9903:9900"
+    env_file:
+      - ./ops/config/decrypted/local.env
+    environment:
+      - ENV=local
+      - JACOCO=${REPORT_COVERAGE:-false}
+      - EXPORT_PATH=/app/data
+      - AUTH_DISABLED=${AUTH_DISABLED:-false}
+      - DEBUG_MODE=${DEBUG_MODE:-false}
+      - API_SVC_PORT=9900
+      - HEALTH_CHECK_COUNT=7
+    healthcheck:
+      test: ["CMD-SHELL", "test $(curl -s 'http://localhost:'$${API_SVC_PORT}'/healthcheck?pretty=true' | grep -c '\"healthy\" : true') -eq $${HEALTH_CHECK_COUNT}"]
+      interval: 10s
+      retries: 5
+      start_period: 60s
+      timeout: 10s
+    depends_on:
+      attribution:
+        condition: service_healthy
+        restart: true
+      aggregation:
+        condition: service_healthy
+        restart: true
+    volumes:
+      - export-volume:/app/data
+      - ./jacocoReport/dpc-api:/jacoco-report
+
+  consent:
+    image: ${ECR_HOST:-755619740999.dkr.ecr.us-east-1.amazonaws.com/dpc-consent}:latest
+    depends_on:
+      db:
+        condition: service_healthy
+        restart: true
+    environment:
+      - ENV=local
+      - JACOCO=${REPORT_COVERAGE:-false}
+      - DEBUG_MODE=${DEBUG_MODE:-false}
+      - CONSENT_SVC_PORT=9904
+      - HEALTH_CHECK_COUNT=3
+    ports:
+      - "3600:3600"
+      - "9904:9904"
+    volumes:
+      - ./jacocoReport/dpc-consent:/jacoco-report
+    healthcheck:
+      test: ["CMD-SHELL", "test $(curl -s 'http://localhost:'$${CONSENT_SVC_PORT}'/healthcheck?pretty=true' | grep -c '\"healthy\" : true') -eq $${HEALTH_CHECK_COUNT}"]
+      interval: 10s
+      retries: 5
+      start_period: 60s
+      timeout: 10s
+    restart: unless-stopped
+
+  tests:
+    image: maven:3.6-jdk-11
+    env_file:
+      - ./ops/config/decrypted/local.env
+    environment:
+      - TEST_VERBOSITY=${TEST_VERBOSITY:-false}
+    volumes:
+      - export-volume:/tmp
+      - ./:/usr/src/mymaven
+    depends_on:
+      attribution:
+        condition: service_healthy
+        restart: true
+      aggregation:
+        condition: service_healthy
+        restart: true
+    working_dir: /usr/src/mymaven
+    command: sh -c "mvn verify -Pintegration-tests -am -ntp -Djib.skip=true $${TEST_VERBOSITY+$( [ \"$$TEST_VERBOSITY\" = \"true\" ] && echo '-Dtest.verbosity=true' )}"
+    network_mode: host
+
+volumes:
+  pgdata14:
+  export-volume:
+    driver: local
+    driver_opts:
+      type: none
+      device: /tmp
+      o: bind

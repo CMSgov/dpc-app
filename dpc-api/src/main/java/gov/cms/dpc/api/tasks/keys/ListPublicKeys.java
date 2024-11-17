@@ -9,12 +9,12 @@ import io.dropwizard.servlets.tasks.Task;
 import org.hl7.fhir.dstu3.model.Organization;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import java.io.PrintWriter;
 import java.util.List;
 import java.util.Map;
 
 import static gov.cms.dpc.api.tasks.TasksCommon.extractOrganization;
+import jakarta.inject.Singleton;
 
 /**
  * Admin task to list {@link PublicKeyEntity} for a given {@link Organization}

@@ -1,5 +1,7 @@
 package gov.cms.dpc.aggregation;
 
+import com.google.inject.servlet.GuiceFilter;
+import com.hubspot.dropwizard.guicier.GuiceBundle;
 import gov.cms.dpc.bluebutton.BlueButtonClientModule;
 import gov.cms.dpc.common.hibernate.attribution.DPCHibernateBundle;
 import gov.cms.dpc.common.hibernate.attribution.DPCHibernateModule;
@@ -15,14 +17,19 @@ import io.dropwizard.core.setup.Environment;
 import io.dropwizard.db.DataSourceFactory;
 import io.dropwizard.health.check.http.HttpHealthCheck;
 import io.dropwizard.migrations.MigrationsBundle;
-import ru.vyarus.dropwizard.guice.GuiceBundle;
+import java.util.Arrays;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DPCAggregationService extends Application<DPCAggregationConfiguration> {
 
+    private static final Logger logger = LoggerFactory.getLogger(DPCAggregationService.class);
+    
     private final DPCQueueHibernateBundle<DPCAggregationConfiguration> queueHibernateBundle = new DPCQueueHibernateBundle<>();
     private final DPCHibernateBundle<DPCAggregationConfiguration> hibernateBundle = new DPCHibernateBundle<>();
 
     public static void main(final String[] args) throws Exception {
+        logger.info("OK Chuck I am going to run the aggregation service with args: " + Arrays.toString(args));
         new DPCAggregationService().run(args);
     }
 
@@ -32,6 +39,7 @@ public class DPCAggregationService extends Application<DPCAggregationConfigurati
     }
 
     @Override
+    @SuppressWarnings("rawtypes")
     public void initialize(Bootstrap<DPCAggregationConfiguration> bootstrap) {
 
         // Enable variable substitution with environment variables
@@ -40,13 +48,15 @@ public class DPCAggregationService extends Application<DPCAggregationConfigurati
                 new SubstitutingSourceProvider(bootstrap.getConfigurationSourceProvider(), substitutor);
         bootstrap.setConfigurationSourceProvider(provider);
 
-        GuiceBundle guiceBundle = GuiceBundle.builder()
+        System.out.println("============> I am about to set up the guice bundle!");
+        GuiceBundle guiceBundle = GuiceBundle.defaultBuilder(DPCAggregationConfiguration.class)
                 .modules(new AggregationAppModule(),
                         new DPCQueueHibernateModule<>(queueHibernateBundle),
                         new DPCHibernateModule<>(hibernateBundle),
                         new JobQueueModule<DPCAggregationConfiguration>(),
                         new BlueButtonClientModule<DPCAggregationConfiguration>())
                 .build();
+        System.out.println("============> I set up the guice bundle!");
 
         // The Hibernate bundle must be initialized before Guice.
         // The Hibernate Guice module requires an initialized SessionFactory,
@@ -58,6 +68,7 @@ public class DPCAggregationService extends Application<DPCAggregationConfigurati
         bootstrap.addBundle(new MigrationsBundle<>() {
             @Override
             public DataSourceFactory getDataSourceFactory(DPCAggregationConfiguration dpcAggregationConfiguration) {
+                System.out.println("============> Connecting to database " + dpcAggregationConfiguration.getDatabase().getDriverClass() + " at " + dpcAggregationConfiguration.getDatabase().getUrl());
                 return dpcAggregationConfiguration.getQueueDatabase();
             }
 
@@ -66,11 +77,16 @@ public class DPCAggregationService extends Application<DPCAggregationConfigurati
                 return "migrations/queue.migrations.xml";
             }
         });
+
+        System.out.println("==============> Initialize of DPC Aggregation Service is done!!");
     }
 
     @Override
     public void run(DPCAggregationConfiguration configuration, Environment environment) {
+        logger.info("Starting DPCAggregationService run!");
         EnvironmentParser.getEnvironment("Aggregation");
+
+        environment.servlets().addFilter("GuiceFilter", GuiceFilter.class).addMappingForUrlPatterns(null, false, "/*");
 
         // Http healthchecks on dependent services
         environment.healthChecks().register("dpc-consent", new HttpHealthCheck(configuration.getConsentHealthCheckURL()));

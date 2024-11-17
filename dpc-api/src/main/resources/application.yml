@@ -8,7 +8,7 @@ database:
   maxSize: 10
   properties:
     charSet: UTF-8
-    hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
+#    hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
 
 queuedb:
   driverClass: org.postgresql.Driver
@@ -42,7 +42,7 @@ server:
             application: ${APPLICATION:-"dpc-api"}
 
 logging:
-  level: WARN
+  level: INFO
   loggers:
     "liquibase": INFO
     "gov.cms.dpc.api.resources.v1": INFO
@@ -51,6 +51,8 @@ logging:
     "org.hibernate.SQL": ERROR
     "gov.cms.dpc.api.auth": INFO
     "gov.cms.dpc.common.logging.filters": INFO
+    "org.glassfish.jersey.server": ERROR
+    "com.google.inject": DEBUG
   appenders:
     - type: console
       filterFactories:

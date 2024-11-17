@@ -34,6 +34,8 @@ public class BaseResource extends AbstractBaseResource {
     private final PropertiesProvider pp;
     private final AbstractIpAddressResource ip;
     private final String baseURL;
+    
+    
     @Inject
     public BaseResource(KeyResource kr,
                         TokenResource tr,
@@ -132,16 +134,16 @@ public class BaseResource extends AbstractBaseResource {
 
     @Override
     public AbstractPatientResource patientOperations() {
-        return this.par;
+      return this.par;
     }
 
     @Override
     public AbstractPractitionerResource practitionerOperations() {
-        return this.pr;
+      return this.pr;
     }
 
     @Override
     public AbstractIpAddressResource ipAddressOperations() {
-        return this.ip;
+      return this.ip;
     }
 }

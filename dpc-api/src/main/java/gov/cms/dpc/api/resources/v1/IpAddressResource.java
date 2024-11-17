@@ -42,7 +42,7 @@ public class IpAddressResource extends AbstractIpAddressResource {
     @Timed
     @ExceptionMetered
     @Authorizer
-    @UnitOfWork
+    @UnitOfWork("hibernate.auth")
     @ApiOperation(
         value = "Fetch Ip addresses for an organization",
         authorizations = @Authorization(value = "access_token")
@@ -58,13 +58,14 @@ public class IpAddressResource extends AbstractIpAddressResource {
     @Timed
     @ExceptionMetered
     @Authorizer
-    @UnitOfWork
+    @UnitOfWork("hibernate.auth")
     @ApiOperation(
             value = "Submits an Ip address for an organization",
             notes = "Organizations are currently limited to 8 Ip addresses.  If you attempt to submit more a 400 will be returned.",
             authorizations = @Authorization(value = "access_token")
     )
     @ApiResponses(@ApiResponse(code = 400, message = "Organization has too many Ip addresses."))
+    @SuppressWarnings("rawtypes")
     public IpAddressEntity submitIpAddress(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal, @ApiParam CreateIpAddressRequest createIpAddressRequest) {
         Inet ipAddress = new Inet(createIpAddressRequest.getIpAddress());
         try {
@@ -96,11 +97,12 @@ public class IpAddressResource extends AbstractIpAddressResource {
     @Timed
     @ExceptionMetered
     @Authorizer
-    @UnitOfWork
+    @UnitOfWork("hibernate.auth")
     @ApiOperation(
             value = "Deletes an Ip address for an organization",
             authorizations = @Authorization(value = "access_token")
     )
+    @SuppressWarnings("rawtypes")
     public Response deleteIpAddress(
             @ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
             @ApiParam @NotNull @PathParam(value = "ipAddressId") UUID ipAddressId

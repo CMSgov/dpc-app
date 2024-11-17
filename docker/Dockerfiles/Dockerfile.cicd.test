@@ -1,0 +1,32 @@
+FROM golang:1.23.2-bullseye
+
+ENV GOPATH=/go
+
+WORKDIR /go/src/app
+
+COPY go.mod go.sum ./
+RUN go get github.com/google/go-cmp/cmp
+RUN go mod download
+
+COPY tools.go ./
+
+RUN curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin
+
+# Download all dependencies
+
+ENV GO111MODULE=on 
+RUN go get -u github.com/xo/usql
+ENV GO111MODULE=on 
+RUN go get -u github.com/securego/gosec/cmd/gosec
+RUN go get -u gotest.tools/gotestsum
+RUN go get -u github.com/tsenart/vegeta
+RUN go get -u github.com/golang-migrate/migrate/v4/cmd/migrate
+RUN go get -u -d github.com/golang-migrate/migrate/cmd/migrate; \
+    cd $GOPATH/src/github.com/golang-migrate/migrate/cmd/migrate; \
+    git checkout v4.10.0; \
+    go build -tags 'postgres' -ldflags="-X main.Version=$(git describe --tags)" -o $GOPATH/bin/migrate github.com/golang-migrate/migrate/v4/cmd/migrate
+
+WORKDIR /go/src/github.com/CMSgov/dpc-app
+COPY . .
+
+ENTRYPOINT []

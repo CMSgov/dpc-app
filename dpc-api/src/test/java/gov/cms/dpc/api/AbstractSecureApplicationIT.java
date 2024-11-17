@@ -4,6 +4,11 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.nitram509.jmacaroons.Macaroon;
+import com.github.nitram509.jmacaroons.MacaroonsBuilder;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.helpers.FHIRHelpers;
 import gov.cms.dpc.testing.APIAuthHelpers;
@@ -30,6 +35,7 @@ import java.util.UUID;
 import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
 import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_NPI;
 import static gov.cms.dpc.testing.APIAuthHelpers.TASK_URL;
+import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,12 +91,22 @@ public class AbstractSecureApplicationIT {
     public static void setup() throws Exception {
         APITestHelpers.setupApplication(APPLICATION);
         LOG.info("I have setup the application for testing!");
-        
+
+        Injector injector = Guice.createInjector(new UnitTestModule(null));
+        JerseyGuiceUtils.install(injector);
+
         ctx = FhirContext.forDstu3Cached();
         LOG.info("I created a FHIR context!");
+
         // Register a test organization for us
         // First, create a Golden macaroon for admin uses
         GOLDEN_MACAROON = APIAuthHelpers.createGoldenMacaroon();
+        LOG.info("I got a GOLDEN_MACAROON: " + GOLDEN_MACAROON);
+        final List<Macaroon> macaroons = MacaroonsBuilder.deserialize(GOLDEN_MACAROON);
+        LOG.info("Deserialized " + macaroons.size() + " golden macaroon(s): ");
+        for(Macaroon m : macaroons)
+            LOG.info("Macaroon " + m.identifier);
+
         final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
         ORGANIZATION_TOKEN = FHIRHelpers.registerOrganization(attrClient, ctx.newJsonParser(), ORGANIZATION_ID, ORGANIZATION_NPI, TASK_URL);
 
@@ -102,7 +118,6 @@ public class AbstractSecureApplicationIT {
 
     @BeforeEach
     public void eachSetup() throws IOException {
-
         // Check health
         APITestHelpers.checkHealth(APPLICATION);
     }
@@ -116,6 +131,7 @@ public class AbstractSecureApplicationIT {
     public static void shutdown() throws IOException {
         checkAllConnectionsClosed(String.format("http://localhost:%s", APPLICATION.getAdminPort()));
         APPLICATION.after();
+        JerseyGuiceUtils.reset();
     }
 
     private static void checkAllConnectionsClosed(String adminURL) throws IOException {

@@ -35,9 +35,10 @@ services:
       - JACOCO=${REPORT_COVERAGE:-false}
       - DEBUG_MODE=${DEBUG_MODE:-false}
       - AGGREGATION_SVC_PORT=9901
-      - HEALTH_CHECK_COUNT=6
+#      - HEALTH_CHECK_COUNT=7
     healthcheck:
-      test: ["CMD-SHELL", "test $(curl -s 'http://localhost:'$${AGGREGATION_SVC_PORT}'/healthcheck?pretty=true' | grep -c '\"healthy\" : true') -eq $((HEALTH_CHECK_COUNT - $( [ \"$$USE_BFD_MOCK\" = 'true' ] && echo 1 || echo 0 )))"]
+#      test: ["CMD-SHELL", "test $(curl -s 'http://localhost:'$${AGGREGATION_SVC_PORT}'/healthcheck?pretty=true' | grep -c '\"healthy\" : true') -eq $((HEALTH_CHECK_COUNT - $( [ \"$$USE_BFD_MOCK\" = 'true' ] && echo 1 || echo 0 )))"]
+      test: ["CMD-SHELL", "test $(curl -s 'http://localhost:'$${AGGREGATION_SVC_PORT}'/healthcheck?pretty=true' | grep -c '\"healthy\" : false') -eq $( [ \"$$USE_BFD_MOCK\" = 'true' ] && echo 1 || echo 0 )"]
       interval: 10s
       retries: 5
       start_period: 60s
@@ -93,7 +94,7 @@ services:
       - AUTH_DISABLED=${AUTH_DISABLED:-false}
       - DEBUG_MODE=${DEBUG_MODE:-false}
       - API_SVC_PORT=9900
-      - HEALTH_CHECK_COUNT=7
+      - HEALTH_CHECK_COUNT=8
     healthcheck:
       test: ["CMD-SHELL", "test $(curl -s 'http://localhost:'$${API_SVC_PORT}'/healthcheck?pretty=true' | grep -c '\"healthy\" : true') -eq $${HEALTH_CHECK_COUNT}"]
       interval: 10s

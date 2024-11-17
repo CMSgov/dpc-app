@@ -9,6 +9,7 @@ import gov.cms.dpc.fhir.FHIRFormatters;
 import java.io.IOException;
 
 public class TokenEntitySerializer extends StdSerializer<TokenEntity> {
+    public static final long serialVersionUID = 42L;
 
     public TokenEntitySerializer() {
         super(TokenEntity.class);

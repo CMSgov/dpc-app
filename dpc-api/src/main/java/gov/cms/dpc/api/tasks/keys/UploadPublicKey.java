@@ -9,7 +9,7 @@ import io.dropwizard.servlets.tasks.PostBodyTask;
 import org.hl7.fhir.dstu3.model.Organization;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import jakarta.inject.Singleton;
 import java.io.PrintWriter;
 import java.util.List;
 import java.util.Map;

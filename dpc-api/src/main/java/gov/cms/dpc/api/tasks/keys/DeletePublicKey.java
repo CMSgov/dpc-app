@@ -6,13 +6,13 @@ import io.dropwizard.servlets.tasks.Task;
 import org.hl7.fhir.dstu3.model.Organization;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import java.io.PrintWriter;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import static gov.cms.dpc.api.tasks.TasksCommon.extractOrganization;
+import jakarta.inject.Singleton;
 import jakarta.ws.rs.BadRequestException;
 
 /**

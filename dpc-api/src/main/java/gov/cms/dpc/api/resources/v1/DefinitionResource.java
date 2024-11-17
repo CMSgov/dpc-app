@@ -1,6 +1,5 @@
 package gov.cms.dpc.api.resources.v1;
 
-import ca.uhn.fhir.context.FhirContext;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import gov.cms.dpc.common.annotations.Public;
@@ -23,12 +22,10 @@ import java.util.List;
 @Path("/v1/StructureDefinition")
 public class DefinitionResource extends AbstractDefinitionResource {
 
-    private final FhirContext ctx;
     private final DPCProfileSupport profileSupport;
 
     @Inject
-    DefinitionResource(FhirContext ctx, DPCProfileSupport profileSupport) {
-        this.ctx = ctx;
+    DefinitionResource(DPCProfileSupport profileSupport) {
         this.profileSupport = profileSupport;
     }
 

@@ -1,6 +1,8 @@
 package gov.cms.dpc.attribution;
 
 import com.codahale.metrics.jersey3.InstrumentedResourceMethodApplicationListener;
+import com.google.inject.servlet.GuiceFilter;
+import com.hubspot.dropwizard.guicier.GuiceBundle;
 import gov.cms.dpc.attribution.cli.SeedCommand;
 import gov.cms.dpc.attribution.jobs.ExpireAttributions;
 import gov.cms.dpc.common.hibernate.attribution.DPCHibernateBundle;
@@ -22,9 +24,9 @@ import io.dropwizard.jobs.JobsBundle;
 import io.dropwizard.migrations.MigrationsBundle;
 import io.federecio.dropwizard.swagger.SwaggerBundle;
 import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
+import java.util.Arrays;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.vyarus.dropwizard.guice.GuiceBundle;
 
 public class DPCAttributionService extends Application<DPCAttributionConfiguration> {
 
@@ -32,9 +34,11 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
 
     private final DPCHibernateBundle<DPCAttributionConfiguration> hibernateBundle = new DPCHibernateBundle<>();
 
+    @SuppressWarnings("rawtypes")
     private GuiceBundle guiceBundle;
 
     public static void main(final String[] args) throws Exception {
+        logger.info("OK Chuck I am going to run the attribution service with args: " + Arrays.toString(args));
         new DPCAttributionService().run(args);
     }
 
@@ -59,14 +63,20 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
 
     @Override
     public void run(DPCAttributionConfiguration configuration, Environment environment) {
+        logger.info("Starting DPCAttributionService run!");
+        EnvironmentParser.getEnvironment("Attribution");
+
         GuiceJobManager jobManager = new GuiceJobManager(configuration, guiceBundle.getInjector());
         environment.lifecycle().manage(jobManager);
 
-        EnvironmentParser.getEnvironment("Attribution");
+        environment.servlets().addFilter("GuiceFilter", GuiceFilter.class).addMappingForUrlPatterns(null, false, "/*");
+
         final var listener = new InstrumentedResourceMethodApplicationListener(environment.metrics());
         environment.jersey().getResourceConfig().register(listener);
         environment.jersey().register(new GenerateRequestIdFilter(true));
         environment.jersey().register(new LogResponseFilter());
+
+        logger.info("Chuck here is a checkpoint!");
 
         // Http health checks
         environment.healthChecks().register("attribution-self-check",
@@ -75,13 +85,15 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
     }
 
     private void registerBundles(Bootstrap<DPCAttributionConfiguration> bootstrap) {
-        guiceBundle = GuiceBundle.builder()
-                .enableAutoConfig("gov.cms.dpc.attribution")
+
+        System.out.println("============> I am about to set up the guice bundle!");
+        guiceBundle = GuiceBundle.defaultBuilder(DPCAttributionConfiguration.class)
                 .modules(
                         new DPCHibernateModule<>(hibernateBundle),
                         new AttributionAppModule(),
                         new FHIRModule<DPCAttributionConfiguration>())
                 .build();
+        System.out.println("============> I set up the guice bundle!");
 
         // The Hibernate bundle must be initialized before Guice.
         // The Hibernate Guice module requires an initialized SessionFactory,
@@ -92,7 +104,7 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
         bootstrap.addBundle(new MigrationsBundle<>() {
             @Override
             public PooledDataSourceFactory getDataSourceFactory(DPCAttributionConfiguration configuration) {
-                logger.debug("Connecting to database {} at {}", configuration.getDatabase().getDriverClass(), configuration.getDatabase().getUrl());
+                System.out.println("============> Connecting to database " + configuration.getDatabase().getDriverClass() + " at " + configuration.getDatabase().getUrl());
                 return configuration.getDatabase();
             }
         });

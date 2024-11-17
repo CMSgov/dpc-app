@@ -22,7 +22,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class FHIRValidationModule extends AbstractModule {
     private static final Logger LOG = LoggerFactory.getLogger(FHIRValidationModule.class);
@@ -33,8 +32,6 @@ public class FHIRValidationModule extends AbstractModule {
         this.config = config;
     }
     
-    public static final AtomicBoolean BOUND = new AtomicBoolean(false);
-
     @Override
     protected void configure() {
         LOG.info("Configure is running!");
@@ -42,7 +39,7 @@ public class FHIRValidationModule extends AbstractModule {
         bind(ConstraintValidatorFactory.class).to(InjectingConstraintValidatorFactory.class);
         bind(ValidatorFactory.class).toProvider(ValidatorFactoryProvider.class).in(Scopes.SINGLETON);
         bind(ConfiguredValidator.class).to(InjectingConfiguredValidator.class);
-        bind(FhirValidator.class).toProvider(FHIRValidatorProvider.class);
+        bind(FhirValidator.class).toProvider(FHIRValidatorProvider.class).asEagerSingleton();
         bind(DPCProfileSupport.class).in(Scopes.SINGLETON);
     }
     

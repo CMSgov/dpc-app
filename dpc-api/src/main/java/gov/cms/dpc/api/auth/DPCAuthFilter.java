@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static gov.cms.dpc.api.auth.MacaroonHelpers.BEARER_PREFIX;
+import jakarta.inject.Inject;
 import jakarta.ws.rs.ForbiddenException;
 import jakarta.ws.rs.NotAuthorizedException;
 
@@ -43,6 +44,7 @@ public abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organ
     private final DPCUnauthorizedHandler dpc401handler;
 
 
+    @Inject
     protected DPCAuthFilter(MacaroonBakery bakery, Authenticator<DPCAuthCredentials, OrganizationPrincipal> auth, TokenDAO dao, DPCUnauthorizedHandler dpc401handler ) {
         this.authenticator = auth;
         this.bakery = bakery;
@@ -65,6 +67,7 @@ public abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organ
         // TODO Remove this when we want to turn on the IpAddress end point on Prod
         final String environment = EnvironmentParser.getEnvironment("API", false);
         if(resourceRequested.equals("v1/IpAddress") && environment.equals("prod")) {
+            logger.info("We are about to fail!");
             throw new ForbiddenException();
         }
 
@@ -72,6 +75,7 @@ public abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organ
         if (!authenticated) {
             throw new NotAuthorizedException(dpc401handler.buildResponse(BEARER_PREFIX, realm));
         }
+        logger.info("Authenticated!");
         logger.info("event_type=request-received, resource_requested={}, organization_id={}, method={}", resourceRequested, orgId, method);
     }
 
@@ -110,7 +114,9 @@ public abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organ
         final UUID macaroonID = UUID.fromString(rootMacaroon.identifier);
         UUID orgID;
         try {
+            logger.info("Hey I am going to find the org ID!!!!");
             orgID = this.dao.findOrgByToken(macaroonID);
+            logger.info("Hey I was able to find the org ID!!!!");
         } catch (Exception e) {
             // The macaroon ID doesn't match, we need to determine if we're looking at a Golden Macaroon, or if the client id has been deleted
             // Check the length of the provided Macaroons, if more than 1, it's a client token which has been removed, so fail
@@ -124,6 +130,7 @@ public abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organ
                         logger.error("Cannot find organization_id on Macaroon");
                         throw new NotAuthorizedException(dpc401handler.buildResponse(BEARER_PREFIX, realm));
                     });
+            logger.info("I snuck the org id out of the macaroon!");
         }
 
         return orgID;

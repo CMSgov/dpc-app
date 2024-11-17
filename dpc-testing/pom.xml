@@ -267,7 +267,7 @@
                            </execution>
                        </executions>
                        <configuration>
-                           <skip>false</skip> <!-- Specific configuration for this profile -->
+                           <skip>false</skip>
                        </configuration>
                    </plugin>
                </plugins>

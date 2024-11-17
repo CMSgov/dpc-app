@@ -3,7 +3,6 @@ package gov.cms.dpc.consent.resources;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.base.Splitter;
-import com.google.inject.name.Named;
 import gov.cms.dpc.common.consent.entities.ConsentEntity;
 import gov.cms.dpc.consent.jdbi.ConsentDAO;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
@@ -20,6 +19,7 @@ import org.hl7.fhir.dstu3.model.Consent;
 import org.hl7.fhir.dstu3.model.Identifier;
 
 import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
 import java.util.ArrayList;

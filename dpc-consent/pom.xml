@@ -86,10 +86,7 @@
             <artifactId>h2</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>io.dropwizard</groupId>
-            <artifactId>dropwizard-core</artifactId>
-        </dependency>
+
         <dependency>
             <groupId>io.dropwizard</groupId>
             <artifactId>dropwizard-migrations</artifactId>
@@ -123,15 +120,6 @@
         <dependency>
             <groupId>com.smoketurner</groupId>
             <artifactId>dropwizard-swagger</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>ru.vyarus</groupId>
-            <artifactId>dropwizard-guicey</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.google.inject</groupId>
-            <artifactId>guice</artifactId>
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
@@ -183,10 +171,6 @@
             <type>${newrelic.agent.type}</type>
         </dependency>
         <!-- required by HAPI FHIR; specifying non-vulnerable version -->
-        <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-        </dependency>
         <dependency>
             <groupId>io.swagger</groupId>
             <artifactId>swagger-annotations</artifactId>

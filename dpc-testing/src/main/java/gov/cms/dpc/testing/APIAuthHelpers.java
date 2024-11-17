@@ -213,16 +213,20 @@ public class APIAuthHelpers {
      * @throws NoSuchAlgorithmException - throws if security breaks
      */
     public static Pair<UUID, PrivateKey> generateAndUploadKey(String keyLabel, String organizationID, String goldenMacaroon, String baseURL) throws IOException, URISyntaxException, GeneralSecurityException {
+        System.err.println("Generate and upload key...");
+                
         final KeyPair keyPair = generateKeyPair();
         final String key = generatePublicKey(keyPair.getPublic());
         final String signature = signString(keyPair.getPrivate(), KEY_VERIFICATION_SNIPPET);
-
+        
         // Create org specific macaroon from Golden Macaroon
         final String macaroon = MacaroonsBuilder
                 .modify(MacaroonsBuilder.deserialize(goldenMacaroon).get(0))
                 .add_first_party_caveat(String.format("organization_id = %s", organizationID))
                 .getMacaroon().serialize(MacaroonVersion.SerializationVersion.V2_JSON);
 
+        System.out.println("Made a macaroon!  " + macaroon);
+        
         final KeyView keyEntity;
         final URIBuilder builder = new URIBuilder(String.format("%s/Key", baseURL));
         builder.addParameter("label", keyLabel);
@@ -234,7 +238,9 @@ public class APIAuthHelpers {
         post.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
         try (CloseableHttpClient client = createCustomHttpClient().trusting().build()) {
             try (CloseableHttpResponse response = client.execute(post)) {
-                keyEntity = mapper.readValue(response.getEntity().getContent(), KeyView.class);
+                String r = new String(response.getEntity().getContent().readAllBytes(), StandardCharsets.UTF_8);
+                System.err.println("Response: " + r);
+                keyEntity = mapper.readValue(r, KeyView.class);
                 assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Key should be valid");
             }
         }

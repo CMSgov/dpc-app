@@ -25,7 +25,6 @@ import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
 import org.hl7.fhir.dstu3.model.*;
 import org.jooq.DSLContext;
-import org.jooq.conf.RenderQuotedNames;
 import org.jooq.conf.Settings;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
@@ -48,11 +47,8 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
     private static final String PATIENT_BUNDLE = "patient_bundle.json";
     private static final UUID ORGANIZATION_ID = UUID.fromString("46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0");
 
-    private final Settings settings;
-
     public SeedCommand(Application<DPCAttributionConfiguration> application) {
         super(application, "seed", "Seed the attribution roster");
-        this.settings = new Settings().withRenderQuotedNames(RenderQuotedNames.EXPLICIT_DEFAULT_UNQUOTED);
     }
 
     @Override

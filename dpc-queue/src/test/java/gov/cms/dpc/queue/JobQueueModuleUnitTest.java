@@ -5,6 +5,7 @@ import com.codahale.metrics.Slf4jReporter;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Provides;
+import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.common.annotations.JobTimeout;
 import gov.cms.dpc.common.hibernate.queue.DPCQueueManagedSessionFactory;
@@ -18,7 +19,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.support.ReflectionSupport;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
-import ru.vyarus.dropwizard.guice.module.support.DropwizardAwareModule;
 import software.amazon.awssdk.regions.Region;
 
 import jakarta.inject.Singleton;
@@ -39,7 +39,7 @@ class JobQueueModuleUnitTest {
 	@BeforeEach
 	void setup() throws NoSuchMethodException {
 		ReflectionSupport.invokeMethod(
-			DropwizardAwareModule.class.getDeclaredMethod("configuration"),
+                        DropwizardAwareModule.class.getDeclaredMethod("configuration"),
 			doReturn(mockConfig).when(queueModule)
 		);
 

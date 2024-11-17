@@ -9,16 +9,18 @@ import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
 
 import com.google.inject.Inject;
+import jakarta.inject.Singleton;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
 import java.util.List;
 import java.util.UUID;
 
+@Singleton
 public class TokenDAO extends AbstractDAO<TokenEntity> {
 
     private final SessionFactory factory;
-
+    
     @Inject
     public TokenDAO(DPCAuthManagedSessionFactory factory) {
         super(factory.getSessionFactory());

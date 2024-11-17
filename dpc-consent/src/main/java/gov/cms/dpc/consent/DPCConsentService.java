@@ -1,6 +1,8 @@
 package gov.cms.dpc.consent;
 
 import com.codahale.metrics.jersey3.InstrumentedResourceMethodApplicationListener;
+import com.google.inject.servlet.GuiceFilter;
+import com.hubspot.dropwizard.guicier.GuiceBundle;
 import gov.cms.dpc.common.hibernate.consent.DPCConsentHibernateBundle;
 import gov.cms.dpc.common.hibernate.consent.DPCConsentHibernateModule;
 import gov.cms.dpc.common.utils.EnvironmentParser;
@@ -21,9 +23,9 @@ import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 import liquibase.exception.DatabaseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.vyarus.dropwizard.guice.GuiceBundle;
 
 import java.sql.SQLException;
+import java.util.Arrays;
 
 
 public class DPCConsentService extends Application<DPCConsentConfiguration> {
@@ -32,6 +34,7 @@ public class DPCConsentService extends Application<DPCConsentConfiguration> {
     private final DPCConsentHibernateBundle<DPCConsentConfiguration> hibernateBundle = new DPCConsentHibernateBundle<>();
 
     public static void main(final String[] args) throws Exception {
+        logger.info("OK Chuck I am going to run the consent service with args: " + Arrays.toString(args));
         new DPCConsentService().run(args);
     }
 
@@ -41,6 +44,7 @@ public class DPCConsentService extends Application<DPCConsentConfiguration> {
     }
 
     @Override
+    @SuppressWarnings("rawtypes")
     public void initialize(Bootstrap<DPCConsentConfiguration> bootstrap) {
         // Enable variable substitution with environment variables
         EnvironmentVariableSubstitutor substitutor = new EnvironmentVariableSubstitutor(false);
@@ -48,19 +52,21 @@ public class DPCConsentService extends Application<DPCConsentConfiguration> {
                 new SubstitutingSourceProvider(bootstrap.getConfigurationSourceProvider(), substitutor);
         bootstrap.setConfigurationSourceProvider(provider);
 
-        GuiceBundle guiceBundle = GuiceBundle.builder()
-                .modules(
-                        new DPCConsentHibernateModule<>(hibernateBundle),
+        System.out.println("============> I am about to set up the guice bundle!");
+        GuiceBundle guiceBundle = GuiceBundle.defaultBuilder(DPCConsentConfiguration.class)
+                .modules(new DPCConsentHibernateModule<>(hibernateBundle),
                         new FHIRModule<DPCConsentConfiguration>(),
-                        new ConsentAppModule())
+                        new ConsentAppModule()
+                )
                 .build();
+        System.out.println("============> I set up the guice bundle!");
 
         bootstrap.addBundle(hibernateBundle);
         bootstrap.addBundle(guiceBundle);
         bootstrap.addBundle(new MigrationsBundle<>() {
             @Override
             public PooledDataSourceFactory getDataSourceFactory(DPCConsentConfiguration configuration) {
-                logger.debug("Connecting to database {} at {}", configuration.getConsentDatabase().getDriverClass(), configuration.getConsentDatabase().getUrl());
+                System.out.println("============> Connecting to database " + configuration.getConsentDatabase().getDriverClass() + " at " + configuration.getConsentDatabase().getUrl());
                 return configuration.getConsentDatabase();
             }
 
@@ -78,17 +84,26 @@ public class DPCConsentService extends Application<DPCConsentConfiguration> {
 
         bootstrap.addCommand(new SeedCommand(bootstrap.getApplication()));
         bootstrap.addCommand(new ConsentCommands());
+        
+        System.out.println("==============> Initialize of DPC Consent Service is done!!");
     }
 
     @Override
     public void run(DPCConsentConfiguration configuration, Environment environment) throws DatabaseException, SQLException {
+        logger.info("Starting DPCConsentService run!");
         EnvironmentParser.getEnvironment("Consent");
+        
+        environment.servlets().addFilter("GuiceFilter", GuiceFilter.class).addMappingForUrlPatterns(null, false, "/*");
+
         final var listener = new InstrumentedResourceMethodApplicationListener(environment.metrics());
         environment.jersey().getResourceConfig().register(listener);
 
+        logger.info("Chuck here is a checkpoint!");
         // Http health checks
         environment.healthChecks().register("consent-self-check",
             new HttpHealthCheck(UrlGenerator.generateVersionUrl(configuration.getServicePort()))
         );
+        
+        logger.info("The run method is done!");
     }
 }

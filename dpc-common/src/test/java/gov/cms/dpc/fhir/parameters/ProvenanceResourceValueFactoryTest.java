@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.inject.Injector;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
+import jakarta.inject.Provider;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Provenance;
@@ -38,10 +39,10 @@ class ProvenanceResourceValueFactoryTest {
         final HttpServletRequest mock = Mockito.mock(HttpServletRequest.class);
         Mockito.when(mock.getHeader(ProvenanceResourceValueFactory.PROVENANCE_HEADER)).thenReturn(provString);
 
-        final Injector mockInjector = Mockito.mock(Injector.class);
-        Mockito.when(mockInjector.getInstance(HttpServletRequest.class)).thenReturn(mock);
-
-        final ProvenanceResourceValueFactory factory = new ProvenanceResourceValueFactory(mockInjector, ctx);
+        final Provider<HttpServletRequest> mockProvider = Mockito.mock(Provider.class);
+        Mockito.when(mockProvider.get()).thenReturn(mock);
+        
+        final ProvenanceResourceValueFactory factory = new ProvenanceResourceValueFactory(mockProvider, ctx);
 
         final Provenance prov2 = factory.provide();
         assertTrue(provenance.equalsDeep(prov2), "Should have matching provenance resource");
@@ -53,10 +54,10 @@ class ProvenanceResourceValueFactoryTest {
         final HttpServletRequest mock = Mockito.mock(HttpServletRequest.class);
         Mockito.when(mock.getHeader(ProvenanceResourceValueFactory.PROVENANCE_HEADER)).thenReturn(null);
 
-        final Injector mockInjector = Mockito.mock(Injector.class);
-        Mockito.when(mockInjector.getInstance(HttpServletRequest.class)).thenReturn(mock);
+        final Provider<HttpServletRequest> mockProvider = Mockito.mock(Provider.class);
+        Mockito.when(mockProvider.get()).thenReturn(mock);
 
-        final ProvenanceResourceValueFactory factory = new ProvenanceResourceValueFactory(mockInjector, ctx);
+        final ProvenanceResourceValueFactory factory = new ProvenanceResourceValueFactory(mockProvider, ctx);
 
         final InvalidRequestException exception = assertThrows(InvalidRequestException.class, factory::provide, "Should throw an exception");
         assertAll(() -> assertEquals(HttpStatus.BAD_REQUEST_400, exception.getStatusCode(), "Should be a bad request"),
@@ -73,10 +74,10 @@ class ProvenanceResourceValueFactoryTest {
         final HttpServletRequest mock = Mockito.mock(HttpServletRequest.class);
         Mockito.when(mock.getHeader(ProvenanceResourceValueFactory.PROVENANCE_HEADER)).thenReturn(provString);
 
-        final Injector mockInjector = Mockito.mock(Injector.class);
-        Mockito.when(mockInjector.getInstance(HttpServletRequest.class)).thenReturn(mock);
+        final Provider<HttpServletRequest> mockProvider = Mockito.mock(Provider.class);
+        Mockito.when(mockProvider.get()).thenReturn(mock);
 
-        final ProvenanceResourceValueFactory factory = new ProvenanceResourceValueFactory(mockInjector, ctx);
+        final ProvenanceResourceValueFactory factory = new ProvenanceResourceValueFactory(mockProvider, ctx);
 
         final InvalidRequestException exception = assertThrows(InvalidRequestException.class, factory::provide, "Should throw an exception");
 

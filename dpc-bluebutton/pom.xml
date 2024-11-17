@@ -28,10 +28,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>io.dropwizard</groupId>
-            <artifactId>dropwizard-core</artifactId>
-        </dependency>
-        <dependency>
             <groupId>${hapi.fhir.groupID}</groupId>
             <artifactId>hapi-fhir-structures-dstu3</artifactId>
         </dependency>
@@ -39,10 +35,6 @@
             <groupId>${hapi.fhir.groupID}</groupId>
             <artifactId>hapi-fhir-structures-r4</artifactId>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>ru.vyarus</groupId>
-            <artifactId>dropwizard-guicey</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents.client5</groupId>
@@ -62,7 +54,6 @@
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.mock-server/mockserver-core -->
         <dependency>
             <groupId>org.mozilla</groupId>
             <artifactId>rhino</artifactId>
@@ -71,7 +62,7 @@
         <dependency>
             <groupId>org.apache.velocity</groupId>
             <artifactId>velocity-engine-scripting</artifactId>
-            <version>2.4</version>
+            <version>2.4.1</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -125,10 +116,6 @@
             <artifactId>bcprov-jdk18on</artifactId>
         </dependency>
         <!-- required by HAPI FHIR; specifying non-vulnerable version -->
-        <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-        </dependency>
     </dependencies>
 
     <build>
@@ -243,7 +230,7 @@
                            </execution>
                        </executions>
                        <configuration>
-                           <skip>false</skip> <!-- Specific configuration for this profile -->
+                           <skip>false</skip>
                        </configuration>
                    </plugin>
                </plugins>

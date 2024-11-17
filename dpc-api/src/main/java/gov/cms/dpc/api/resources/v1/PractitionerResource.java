@@ -6,7 +6,6 @@ import ca.uhn.fhir.validation.ValidationOptions;
 import ca.uhn.fhir.validation.ValidationResult;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
-import com.google.inject.name.Named;
 import gov.cms.dpc.api.APIHelpers;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.Authorizer;
@@ -35,6 +34,7 @@ import java.util.function.Consumer;
 
 import static gov.cms.dpc.api.APIHelpers.bulkResourceClient;
 import static gov.cms.dpc.fhir.helpers.FHIRHelpers.handleMethodOutcome;
+import jakarta.inject.Named;
 
 @Api(value = "Practitioner", authorizations = @Authorization(value = "access_token"))
 @Path("/v1/Practitioner")

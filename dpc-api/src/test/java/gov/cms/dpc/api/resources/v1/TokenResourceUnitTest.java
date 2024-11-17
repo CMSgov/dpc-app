@@ -13,7 +13,7 @@ import gov.cms.dpc.macaroons.config.TokenPolicy;
 import gov.cms.dpc.macaroons.config.TokenPolicy.ExpirationPolicy;
 import gov.cms.dpc.macaroons.config.TokenPolicy.VersionPolicy;
 import io.dropwizard.jersey.jsr310.OffsetDateTimeParam;
-import io.jsonwebtoken.SigningKeyResolverAdapter;
+import io.jsonwebtoken.LocatorAdapter;
 import jakarta.ws.rs.NotFoundException;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.*;
 
 import jakarta.ws.rs.core.Response;
+import java.security.Key;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -48,7 +49,7 @@ public class TokenResourceUnitTest {
     private static TokenPolicy policy;
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private static Macaroon macaroon;
-    private static SigningKeyResolverAdapter resolver = Mockito.mock(SigningKeyResolverAdapter.class);
+    private static LocatorAdapter<Key> resolver = Mockito.mock(LocatorAdapter.class);
     private static IJTICache cache = Mockito.mock(IJTICache.class);
     private static String authURL = "auth_url";
     private TokenResource tokenResource;
@@ -56,7 +57,7 @@ public class TokenResourceUnitTest {
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
-        this.tokenResource = new TokenResource(mockTokenDao, mockPublicKeyDao, bakery, policy, resolver, cache, authURL);
+        this.tokenResource = new TokenResource(mockTokenDao, bakery, policy, resolver, cache, authURL);
     }
 
     @Test

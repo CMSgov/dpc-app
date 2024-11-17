@@ -35,7 +35,6 @@ public class DPCAuthDynamicFeature implements DynamicFeature {
     @Override
     public void configure(ResourceInfo resourceInfo, FeatureContext context) {
 
-
         final AnnotatedMethod am = new AnnotatedMethod(resourceInfo.getResourceMethod());
 
         // Check for Admin annotated params
@@ -55,7 +54,7 @@ public class DPCAuthDynamicFeature implements DynamicFeature {
 
         // Check for @Authorized annotated param
         if (isMethodClassAnnotated(Authorizer.class, resourceInfo, am)) {
-            logger.trace("Registering Auth param on method {}", am.toString());
+            logger.info("Registering Auth param on method {}", am.toString());
             context.register(this.factory.createStandardAuthorizer());
             return;
         }

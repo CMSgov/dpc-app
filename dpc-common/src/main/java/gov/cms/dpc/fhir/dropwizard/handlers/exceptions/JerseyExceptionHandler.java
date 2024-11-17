@@ -13,6 +13,7 @@ import jakarta.inject.Inject;
 import jakarta.validation.ConstraintViolation;
 import jakarta.ws.rs.container.ResourceInfo;
 import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.Provider;
 import java.util.Set;
@@ -65,6 +66,7 @@ public class JerseyExceptionHandler extends AbstractFHIRExceptionHandler<JerseyV
 
         return Response.status(errorStatusPair.getRight())
                 .entity(new DPCValidationErrorMessage(exceptionIDtoHex(exceptionID), errorStatusPair.getLeft()))
+                .type(MediaType.APPLICATION_JSON) 
                 .build();
     }
 

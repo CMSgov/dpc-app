@@ -4,6 +4,9 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.api.auth.staticauth.StaticAuthFilter;
 import gov.cms.dpc.fhir.helpers.FHIRHelpers;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
@@ -54,10 +57,13 @@ public class AbstractApplicationIT {
     @BeforeAll
     public static void setup() throws Exception {
         APITestHelpers.setupApplication(APPLICATION);
+        Injector injector = Guice.createInjector(new UnitTestModule(null));
+        JerseyGuiceUtils.install(injector);
     }
 
     @BeforeEach
     public void eachSetup() throws IOException {
+        
         ctx = FhirContext.forDstu3();
         final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
         FHIRHelpers.registerOrganization(attrClient,
@@ -79,6 +85,7 @@ public class AbstractApplicationIT {
     public static void shutdown() throws IOException {
         checkAllConnectionsClosed(String.format("http://localhost:%s", APPLICATION.getAdminPort()));
         APPLICATION.after();
+        JerseyGuiceUtils.reset();
     }
 
     private static void checkAllConnectionsClosed(String adminURL) throws IOException {

@@ -4,7 +4,6 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
-import com.google.inject.name.Named;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.AdminOperation;
 import gov.cms.dpc.api.auth.annotations.Authorizer;
@@ -22,6 +21,7 @@ import io.swagger.annotations.*;
 import org.hl7.fhir.dstu3.model.*;
 
 import com.google.inject.Inject;
+import jakarta.inject.Named;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
@@ -123,7 +123,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
     @Timed
     @ExceptionMetered
     @AdminOperation
-    @UnitOfWork
+    @UnitOfWork("hibernate.auth")
     @ApiOperation(value = "Delete Organization",
             notes = "FHIR endpoint which removes the organization currently registered with the application.\n" +
                     "This also removes all associated resources",

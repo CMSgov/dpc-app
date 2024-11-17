@@ -33,6 +33,8 @@ class AuthenticationIT extends AbstractSecureApplicationIT {
     @Test
     @DisplayName("Basic authentication 🥳")
     void testBasicAuthentication() throws IOException, URISyntaxException {
+        System.err.println("Chuck beginning basic authentication test.");
+        
         // Manually setup the required org functions
         final String macaroon = FHIRHelpers.registerOrganization(APITestHelpers.buildAttributionClient(ctx), ctx.newJsonParser(), ORGANIZATION_ID, ORGANIZATION_NPI, getAdminURL());
 
@@ -47,11 +49,13 @@ class AuthenticationIT extends AbstractSecureApplicationIT {
                 .execute();
 
         assertNotNull(organization, "Should have a single Organization");
+        System.err.println("Chuck finished basic authentication test.");
     }
 
     @Test
     @DisplayName("Get organization with bad org ID 🤮")
     void testBadOrgId() throws IOException, URISyntaxException {
+        System.err.println("Chuck beginning bad org id test.");
         final String macaroon = FHIRHelpers.registerOrganization(APITestHelpers.buildAttributionClient(ctx), ctx.newJsonParser(), ORGANIZATION_ID, ORGANIZATION_NPI, getAdminURL());
 
         // Now, try to read the organization, which should succeed
@@ -64,11 +68,14 @@ class AuthenticationIT extends AbstractSecureApplicationIT {
                 .encodedJson();
 
         assertThrows(AuthenticationException.class, orgRequest::execute, "Should be unauthorized");
+        System.err.println("Chuck finished bad org id test.");
     }
     
     @Test
     @DisplayName("Missing macaroon 🤮")
     void testMissingJwt() {
+        System.err.println("Chuck beginning missing jwt test.");
+
         final IGenericClient client = ctx.newRestfulGenericClient(getBaseURL());
         // Try for empty Macaroon
         client.registerInterceptor(new APIAuthHelpers.MacaroonsInterceptor(""));
@@ -86,11 +93,13 @@ class AuthenticationIT extends AbstractSecureApplicationIT {
                 .encodedJson();
 
         assertThrows(AuthenticationException.class, fetchOrg::execute, "Should throw exception with empty Token");
+        System.err.println("Chuck finished bad org id test.");
     }
 
     @Test
     @DisplayName("Malformed macaroon 🤮")
     void testMalformedTokens() {
+        System.err.println("Chuck beginning malformed macaroon test.");
         // Manually build the FHIR client, so we can use custom Macaroon values
 
         final IGenericClient c2 = ctx.newRestfulGenericClient(getBaseURL());
@@ -109,5 +118,6 @@ class AuthenticationIT extends AbstractSecureApplicationIT {
                 .encodedJson();
 
         assertThrows(InvalidRequestException.class, fo2::execute, "Should throw exception with malformed token");
+        System.err.println("Chuck finished malformed macaroon test.");
     }
 }

@@ -2,7 +2,8 @@ package gov.cms.dpc.fhir.parameters;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import com.google.inject.Injector;
+import jakarta.inject.Inject;
+import jakarta.inject.Provider;
 import org.glassfish.hk2.api.Factory;
 import org.hl7.fhir.dstu3.model.Provenance;
 import org.slf4j.Logger;
@@ -18,32 +19,33 @@ public class ProvenanceResourceValueFactory implements Factory<Provenance> {
     static final String PROVENANCE_HEADER = "X-Provenance";
     private static final Logger logger = LoggerFactory.getLogger(ProvenanceResourceValueFactory.class);
 
-    private final Injector injector;
+    private final Provider<HttpServletRequest> requestProvider;
     private final FhirContext ctx;
 
-    ProvenanceResourceValueFactory(Injector injector, FhirContext ctx) {
-        this.injector = injector;
+    @Inject
+    public ProvenanceResourceValueFactory(Provider<HttpServletRequest> requestProvider, FhirContext ctx) {
+        this.requestProvider = requestProvider;
         this.ctx = ctx;
     }
 
     @Override
     public Provenance provide() {
-        final HttpServletRequest request = injector.getInstance(HttpServletRequest.class);
+        logger.info("Hey I have been asked to provide a Provenance!");
+
+        final HttpServletRequest request = requestProvider.get();
         final String headerValue = request.getHeader(PROVENANCE_HEADER);
         
         if (headerValue == null) {
             String message = String.format("Must have %s header", PROVENANCE_HEADER);
             throw new InvalidRequestException(message);
         }
-        final Provenance provenance;
+
         try {
-            provenance = ctx.newJsonParser().parseResource(Provenance.class, headerValue);
+            return ctx.newJsonParser().parseResource(Provenance.class, headerValue);
         } catch (Exception e) {
             logger.error("Cannot parse Provenance", e);
             throw new InvalidRequestException("Cannot parse FHIR `Provenance` resource");
         }
-
-        return provenance;
     }
 
     @Override

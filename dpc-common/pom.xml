@@ -21,6 +21,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>gov.cms.dpc</groupId>
+            <artifactId>dropwizard-guiciest</artifactId>
+            <version>0.4.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
             <groupId>org.eclipse.sisu</groupId>
             <artifactId>org.eclipse.sisu.inject</artifactId>
             <version>0.9.0.M3</version>
@@ -46,10 +51,6 @@
             <artifactId>dpc-testing</artifactId>
             <version>0.4.0-SNAPSHOT</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.google.inject</groupId>
-            <artifactId>guice</artifactId>
         </dependency>
         <dependency>
             <groupId>${hapi.fhir.groupID}</groupId>
@@ -89,10 +90,6 @@
             <groupId>org.reflections</groupId>
             <artifactId>reflections</artifactId>
             <version>0.10.2</version>
-        </dependency>
-        <dependency>
-            <groupId>ru.vyarus</groupId>
-            <artifactId>dropwizard-guicey</artifactId>
         </dependency>
         <dependency>
             <groupId>io.dropwizard</groupId>
@@ -298,7 +295,7 @@
                            </execution>
                        </executions>
                        <configuration>
-                           <skip>false</skip> <!-- Specific configuration for this profile -->
+                           <skip>false</skip> 
                        </configuration>
                    </plugin>
                </plugins>
