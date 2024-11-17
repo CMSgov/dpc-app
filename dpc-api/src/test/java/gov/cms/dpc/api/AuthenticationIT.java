@@ -19,10 +19,10 @@ import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_NPI;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class AuthenticationTest extends AbstractSecureApplicationTest {
+class AuthenticationIT extends AbstractSecureApplicationTest {
     private static final String BAD_ORG_ID = "065fbe84-3551-4ec3-98a3-0d1198c3cb55";
 
-    private AuthenticationTest() {
+    private AuthenticationIT() {
         // Not used
     }
 

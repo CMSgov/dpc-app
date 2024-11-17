@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @IntegrationTest
 @ExtendWith(BufferedLoggerHandler.class)
-public class AggregationServiceTest {
+public class AggregationServiceIT {
 
     private static final String configPath = "src/test/resources/test.application.yml";
     private static final DropwizardTestSupport<DPCAggregationConfiguration> APPLICATION =

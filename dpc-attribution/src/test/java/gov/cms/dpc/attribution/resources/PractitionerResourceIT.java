@@ -24,12 +24,12 @@ import static gov.cms.dpc.attribution.AttributionTestHelpers.createFHIRClient;
 import static gov.cms.dpc.common.utils.SeedProcessor.createBaseAttributionGroup;
 import static org.junit.jupiter.api.Assertions.*;
 
-class PractitionerResourceTest extends AbstractAttributionTest {
+class PractitionerResourceIT extends AbstractAttributionTest {
 
     final IGenericClient client;
     final List<Practitioner> practitionersToCleanUp;
 
-    private PractitionerResourceTest() {
+    private PractitionerResourceIT() {
         client = createFHIRClient(ctx, getServerURL());
         practitionersToCleanUp = new ArrayList<>();
     }

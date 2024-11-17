@@ -18,7 +18,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 @IntegrationTest
-public class EndpointResourceTest extends AbstractAttributionTest {
+public class EndpointResourceIT extends AbstractAttributionTest {
 
     final IGenericClient client = AttributionTestHelpers.createFHIRClient(ctx, getServerURL());
 

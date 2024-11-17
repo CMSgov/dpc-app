@@ -18,9 +18,9 @@ import java.sql.Date;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class ProfileTests extends AbstractSecureApplicationTest {
+class ProfileIT extends AbstractSecureApplicationTest {
 
-    private ProfileTests() {
+    private ProfileIT() {
         // Not used
     }
 

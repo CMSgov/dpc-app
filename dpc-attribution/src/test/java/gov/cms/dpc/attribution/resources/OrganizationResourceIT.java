@@ -24,12 +24,12 @@ import java.util.Map;
 import static gov.cms.dpc.common.utils.SeedProcessor.createBaseAttributionGroup;
 import static org.junit.jupiter.api.Assertions.*;
 
-class OrganizationResourceTest extends AbstractAttributionTest {
+class OrganizationResourceIT extends AbstractAttributionTest {
 
         final IGenericClient client;
         final List<Organization> organizationsToCleanUp;
 
-    private OrganizationResourceTest() {
+    private OrganizationResourceIT() {
         client = AttributionTestHelpers.createFHIRClient(ctx, getServerURL());
         organizationsToCleanUp = new ArrayList<>();
     }

@@ -2,7 +2,7 @@ package gov.cms.dpc.api.resources.v1;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import gov.cms.dpc.api.AbstractSecureApplicationTest;
+import gov.cms.dpc.api.AbstractSecureApplicationIT;
 import gov.cms.dpc.api.entities.IpAddressEntity;
 import gov.cms.dpc.api.models.CollectionResponse;
 import gov.cms.dpc.api.models.CreateIpAddressRequest;
@@ -29,7 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class IpAddressResourceTest extends AbstractSecureApplicationTest {
+class IpAddressResourceIT extends AbstractSecureApplicationIT {
     private final ObjectMapper mapper = new ObjectMapper();
     private final String fullyAuthedToken;
 
@@ -37,7 +37,7 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
 
     private final CreateIpAddressRequest ipRequest = new CreateIpAddressRequest("192.168.1.1", "test label");
 
-    private IpAddressResourceTest() throws IOException, URISyntaxException {
+    private IpAddressResourceIT() throws IOException, URISyntaxException {
         this.fullyAuthedToken = APIAuthHelpers.jwtAuthFlow(getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY).accessToken;
     }
 

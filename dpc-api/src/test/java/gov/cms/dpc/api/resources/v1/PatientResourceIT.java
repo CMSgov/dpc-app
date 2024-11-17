@@ -13,7 +13,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import gov.cms.dpc.aggregation.service.ConsentResult;
 import gov.cms.dpc.api.APITestHelpers;
-import gov.cms.dpc.api.AbstractSecureApplicationTest;
+import gov.cms.dpc.api.AbstractSecureApplicationIT;
 import gov.cms.dpc.api.TestOrganizationContext;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
 import gov.cms.dpc.common.utils.SeedProcessor;
@@ -58,7 +58,7 @@ import static org.junit.jupiter.api.Assertions.*;
     opt outs from the previous run will interfere with the current one.
  */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class PatientResourceTest extends AbstractSecureApplicationTest {
+class PatientResourceIT extends AbstractSecureApplicationIT {
     final java.util.Date dateYesterday = Date.from(Instant.now().minus(1, ChronoUnit.DAYS));
     final java.util.Date dateToday = Date.from(Instant.now());
 

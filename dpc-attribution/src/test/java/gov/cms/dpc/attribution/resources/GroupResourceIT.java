@@ -25,7 +25,7 @@ import static gov.cms.dpc.attribution.AttributionTestHelpers.DEFAULT_ORG_ID;
 import static org.junit.jupiter.api.Assertions.*;
 
 @IntegrationTest
-public class GroupResourceTest extends AbstractAttributionTest {
+public class GroupResourceIT extends AbstractAttributionTest {
 
     private IGenericClient client;
 

@@ -32,7 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 @IntegrationTest
 @ExtendWith(BufferedLoggerHandler.class)
-public class AbstractApplicationTest {
+public class AbstractApplicationIT {
 
     protected static final String configPath = "src/test/resources/test.application.yml";
 
@@ -43,7 +43,7 @@ public class AbstractApplicationTest {
                     ConfigOverride.config("authenticationDisabled", "true"));
     protected FhirContext ctx;
 
-    protected AbstractApplicationTest() {
+    protected AbstractApplicationIT() {
         // Not used
     }
 

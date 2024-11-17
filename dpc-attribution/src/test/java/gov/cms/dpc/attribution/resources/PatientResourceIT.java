@@ -21,9 +21,9 @@ import static gov.cms.dpc.attribution.AttributionTestHelpers.*;
 import static gov.cms.dpc.common.utils.SeedProcessor.createBaseAttributionGroup;
 import static org.junit.jupiter.api.Assertions.*;
 
-class PatientResourceTest extends AbstractAttributionTest {
+class PatientResourceIT extends AbstractAttributionTest {
 
-    private PatientResourceTest() {
+    private PatientResourceIT() {
         // Not used
     }
 

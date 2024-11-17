@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @IntegrationTest
-class ConsentCommandsTest {
+class ConsentCommandsIT {
 
     private final PrintStream originalOut = System.out;
     private final PrintStream originalErr = System.err;
