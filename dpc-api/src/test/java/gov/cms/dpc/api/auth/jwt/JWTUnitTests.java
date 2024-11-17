@@ -794,7 +794,6 @@ class JWTUnitTests {
         @ParameterizedTest
         @DisplayName("JWT with incorrect expiration date format 🤮")
         @EnumSource(KeyType.class)
-        @SuppressWarnings({"secrets", "java:S6437"})  
         void testIncorrectExpFormat(KeyType keyType) throws NoSuchAlgorithmException {
             /*
             
