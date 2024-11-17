@@ -57,7 +57,7 @@ services:
       - ./ops/config/decrypted/local.env
     environment:
       - ENV=local
-      - JACOCO=${REPORT_COVERAGE}
+      - JACOCO=${REPORT_COVERAGE:-false}
       - EXPORT_PATH=/app/data
       - AUTH_DISABLED=${AUTH_DISABLED:-false}
       - DEBUG_MODE=${DEBUG_MODE:-false}
@@ -73,7 +73,7 @@ services:
       - db
     environment:
       - ENV=local
-      - JACOCO=${REPORT_COVERAGE}
+      - JACOCO=${REPORT_COVERAGE:-false}
       - DEBUG_MODE=${DEBUG_MODE:-false}
     ports:
       - "3600:3600"
@@ -110,11 +110,13 @@ services:
     image: maven:3.6-jdk-11
     env_file:
       - ./ops/config/decrypted/local.env
+    environment:
+      - TEST_VERBOSITY=${TEST_VERBOSITY:-false}
     volumes:
       - export-volume:/tmp
       - ./:/usr/src/mymaven
     working_dir: /usr/src/mymaven
-    command: sh -c "mvn test -Pintegration-tests -am -ntp"
+    command: sh -c "mvn verify -Pintegration-tests -am -ntp -Djib.skip=true $${TEST_VERBOSITY+$( [ \"$$TEST_VERBOSITY\" = \"true\" ] && echo '-Dtest.verbosity=true' )}"
     network_mode: host
 
 volumes:
