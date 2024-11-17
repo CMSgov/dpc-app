@@ -32,7 +32,7 @@ fi
 set +o allexport
 
 # Define the cleanup function
-function _finally {
+_finally() {
     docker compose -p "$PROJECT_NAME" down
     docker volume rm "${PROJECT_NAME}_pgdata16"
     echo "^^^^^^^^^^^^^^^"
