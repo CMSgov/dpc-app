@@ -5,7 +5,7 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IUpdateTyped;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import gov.cms.dpc.attribution.AbstractAttributionTest;
+import gov.cms.dpc.attribution.AbstractAttributionIT;
 import gov.cms.dpc.attribution.AttributionTestHelpers;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;
@@ -24,7 +24,7 @@ import java.util.Map;
 import static gov.cms.dpc.common.utils.SeedProcessor.createBaseAttributionGroup;
 import static org.junit.jupiter.api.Assertions.*;
 
-class OrganizationResourceIT extends AbstractAttributionTest {
+class OrganizationResourceIT extends AbstractAttributionIT {
 
         final IGenericClient client;
         final List<Organization> organizationsToCleanUp;

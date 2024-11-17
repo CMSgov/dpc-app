@@ -4,7 +4,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IReadExecutable;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import gov.cms.dpc.attribution.AbstractAttributionTest;
+import gov.cms.dpc.attribution.AbstractAttributionIT;
 import gov.cms.dpc.attribution.AttributionTestHelpers;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.testing.IntegrationTest;
@@ -18,7 +18,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 @IntegrationTest
-public class EndpointResourceIT extends AbstractAttributionTest {
+public class EndpointResourceIT extends AbstractAttributionIT {
 
     final IGenericClient client = AttributionTestHelpers.createFHIRClient(ctx, getServerURL());
 

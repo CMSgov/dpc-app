@@ -7,7 +7,7 @@ import ca.uhn.fhir.rest.gclient.IDeleteTyped;
 import ca.uhn.fhir.rest.gclient.IReadExecutable;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import gov.cms.dpc.attribution.AbstractAttributionTest;
+import gov.cms.dpc.attribution.AbstractAttributionIT;
 import gov.cms.dpc.attribution.AttributionTestHelpers;
 import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
@@ -24,7 +24,7 @@ import static gov.cms.dpc.attribution.AttributionTestHelpers.createFHIRClient;
 import static gov.cms.dpc.common.utils.SeedProcessor.createBaseAttributionGroup;
 import static org.junit.jupiter.api.Assertions.*;
 
-class PractitionerResourceIT extends AbstractAttributionTest {
+class PractitionerResourceIT extends AbstractAttributionIT {
 
     final IGenericClient client;
     final List<Practitioner> practitionersToCleanUp;

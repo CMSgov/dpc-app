@@ -4,7 +4,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import gov.cms.dpc.attribution.AbstractAttributionTest;
+import gov.cms.dpc.attribution.AbstractAttributionIT;
 import gov.cms.dpc.attribution.AttributionTestHelpers;
 import gov.cms.dpc.attribution.resources.v1.GroupResource;
 import gov.cms.dpc.common.utils.NPIUtil;
@@ -25,7 +25,7 @@ import static gov.cms.dpc.attribution.AttributionTestHelpers.DEFAULT_ORG_ID;
 import static org.junit.jupiter.api.Assertions.*;
 
 @IntegrationTest
-public class GroupResourceIT extends AbstractAttributionTest {
+public class GroupResourceIT extends AbstractAttributionIT {
 
     private IGenericClient client;
 
