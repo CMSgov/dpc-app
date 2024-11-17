@@ -45,7 +45,13 @@ echo "Building DPC-custom Jakarta Servlet API...";
 
 # Step 1: Clone the jakarta.servlet-api repository
 echo -n "	Step 1: Cloning the jakarta.servlet-api repository..."
-(mkdir -p tmp && cd tmp && git clone --branch $JAKARTA_VERSION-RELEASE --single-branch --depth 1 $JAKARTA_REPO $TARGET_DIR > /dev/null 2>&1)
+curl -I https://github.com
+git config --list
+df -kh
+mkdir -p tmp
+touch tmp/testfile
+
+(mkdir -p tmp && cd tmp && git clone -v --branch $JAKARTA_VERSION-RELEASE --single-branch --depth 1 $JAKARTA_REPO $TARGET_DIR > /dev/null 2>&1)
 
 if [ $? -ne 0 ]; then
   echo "failed to clone repository!"
