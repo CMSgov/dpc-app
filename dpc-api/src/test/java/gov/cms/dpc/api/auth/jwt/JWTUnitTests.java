@@ -818,8 +818,6 @@ class JWTUnitTests {
             
             */
             
-            /* BEGIN-ALLOW-SECRETS */
-
             try {
             final String publicKeyPEM = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAldZ+rTLLJ2QQRdsaP5wrU127ZGYS5fygdC1MuVllRlecSJnzXZRuL112Xzj5vWxzr7/ynVptifMI1InsFYdqVLIocq9tcOWTSCMWzl8nazpkm2emWFZrRbky4+AVeK4ArSNwpSGR2yoVo70PkEAr56KQQFhnHtNAvJe6JdU7epc76DtVHr7FUWlSbkxVpBHT/G8CqOV5IJKmHv5aayuykxTVL5L4Um7vdD+gVIOJ8vGWSJi9aqMUUq2PEj7sQbkYdf1GUdqkVNKRlK0LEzaaDMXRvSt9ds9RyqpKcNu+/kDof29+QmrFmmANHIkCJh9UmfJxAJYcj9pSTKeOZYlMSQIDAQAB";
             final KeyPair keyPair = APIAuthHelpers.generateKeyPair(keyType);
@@ -833,21 +831,10 @@ class JWTUnitTests {
             } catch(NoSuchAlgorithmException | InvalidKeySpecException e) {
                 // test will fail 
             }
-            /* END-ALLOW-SECRETS */
-
             
             // TEST_ONLY: Invalid JWT for unit testing exp claim format
-            // nosec pragma: allowlist-secret
-            // git-secrets-ignore
-            // gitleaks:allow
             final String header = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6ImY1OTAxNjUxLTU5ZTktOWNlNy04YzY3LThjZDRiNDk2NTYxOSJ9";
-            // nosec pragma: allowlist-secret
-            // git-secrets-ignore
-            // gitleaks:allow
             final String payload = "eyJpc3MiOiJ7XCJ2XCI6MixcImxcIjpcImh0dHA6Ly90ZXN0LmxvY2FsXCIsXCJpXCI6XCIwXCIsXCJjXCI6W3tcImk2NFwiOlwiYjNKbllXNXBlbUYwYVc5dVgybGtJRDBnTURjMU5UVmxZalV0TmpobU9TMDBaakpqTFdKaU5ERXROREV4WmpBeE5ERTNZamcwXCJ9XSxcInM2NFwiOlwiNXZERUlQUUhkdE5KOERkVUdWS3dReWJLVDQ0T3lkWE5oZVlpaUE1dzRMRVwifSIsImF1ZCI6ImxvY2FsaG9zdDozMDAyL3YxL1Rva2VuL2F1dGgiLCJzdWIiOiJ7XCJ2XCI6MixcImxcIjpcImh0dHA6Ly90ZXN0LmxvY2FsXCIsXCJpXCI6XCIwXCIsXCJjXCI6W3tcImk2NFwiOlwiYjNKbllXNXBlbUYwYVc5dVgybGtJRDBnTURjMU5UVmxZalV0TmpobU9TMDBaakpqTFdKaU5ERXROREV4WmpBeE5ERTNZamcwXCJ9XSxcInM2NFwiOlwiNXZERUlQUUhkdE5KOERkVUdWS3dReWJLVDQ0T3lkWE5oZVlpaUE1dzRMRVwifSIsImV4cCI6IkNodWNrIGlzIHByZXR0eSBnb29kISIsImp0aSI6ImFlMzUyMzdjLTMyMzYtNDY3OC1hODE2LTg3NGYwZDJiNTI0ZSJ9";
-            // nosec pragma: allowlist-secret
-            // git-secrets-ignore
-            // gitleaks:allow
             final String sig = "BXXbxq0ar-Kr001cPBhr_L9w7AOuEGHaVqXrAH1Nag-t6YjaNNWYpEqw5-DC39cwtrP3r6QBO9VRhqPNbCcru2s9OsF5MANfKmr_oUfnaJLZD6rVgNF5r7PpjqzSjEwsK0e4UVVREk50yrPRFTQ9AB4I4wqftboqOQq5LtVMtsEQ_29NugeadpsD28gH0omySSEqGiNFYMkubgnHNYDCgq3cIGB_0id1VN_Rj8qPeicnsY0MOacXWISqZ2zkDmL5YFcPOPXS19xUCavuzxj4m4F_7MKBDyrKLeXXYFOGqW00cYub0inUhet92STpAyIRDLaI8XRBD1ZVz_nLb1__Lw";
             final String testJwt = String.format("%s.%s.%s", header, payload, sig);
 
@@ -869,16 +856,6 @@ class JWTUnitTests {
         return Pair.of(uuid.toString(), keyPair.getPrivate());
 
     }
-    // hrllo theoihwjorwe
-    // hrllo theoihwjorwe
-    // hrllo theoihwjorwe
-    // hrllo theoihwjorwe
-    // hrllo theoihwjorwe
-    // hrllo theoihwjorwe
-    // hrllo theoihwjorwe
-    // hrllo theoihwjorwe
-    // hrllo theoihwjorwe
-    // hrllo theoihwjorwe
 
     private static ResourceExtension buildResources() {
         final IGenericClient client = mock(IGenericClient.class);
