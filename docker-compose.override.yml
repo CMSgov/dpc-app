@@ -1,20 +1,10 @@
-version: '3'
-
 services:
+
   db:
     ports:
       - "5432:5432"
 
-  # Open up the debugger port on each service
-  api:
-    ports:
-      - "5005:5005"
-  aggregation:
-    ports:
-      - "5006:5005"
-  attribution:
-    ports:
-      - "5007:5005"
-  consent:
-    ports:
-      - "5008:5005"
+  tests:
+    volumes:
+      - "${HOME}/.m2:/root/.m2"
+

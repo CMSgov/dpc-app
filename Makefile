@@ -1,3 +1,12 @@
+IS_AWS_EC2="-fdocker-compose.override.yml"
+REPORT_COVERAGE ?= false
+
+ifdef DOCKER_PROJECT_NAME
+        DOCKER_PROJ:="-p${DOCKER_PROJECT_NAME}"
+else
+        DOCKER_PROJ:=
+endif
+
 REPORT_COVERAGE ?= false
 
 # Smoke Testing
@@ -48,16 +57,14 @@ smoke/prod: venv smoke
 	. venv/bin/activate; bzt src/test/prod.smoke_test.yml
 
 
-# Build commands
+# Build targets
 #
-# These commands build/compile our applications and docker images.
-# To start the applications, use the start-* commands below.
+# These targets build/compile our docker images.
 # ==============
 
-api: ## Builds the Java API services
-api: secure-envs
-	mvn clean compile -Perror-prone -B -V -ntp -T 4 -DskipTests
-	mvn package -Pci -ntp -T 4 -DskipTests
+.PHONY: docker-base
+docker-base:
+	@docker compose -f ./docker-compose.base.yml build base
 
 website: ## Builds the sandbox portal website
 website:
@@ -74,90 +81,120 @@ portal:
 	@docker build -f dpc-portal/Dockerfile . -t dpc-web-portal
 
 
-# Start commands
+# Start targets
+# These targets bring up the docker containers hosting DPC system components
 # ==============
 
 start-dpc: ## Start all DPC API and portal services
 start-dpc: start-app start-portals
 
-start-db: ## Start the database
+start-db: ## Start the postgres database supporting the api
 start-db:
-	@docker compose up start_core_dependencies
+	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) up --wait -d db
+
+start-redis: ## Start the redis database supporting the portal
+start-redis:
+	@docker compose $(DOCKER_PROJ) -f docker-compose.yml -f docker-compose.portals.yml up --wait -d redis
+
+start-portal-dbs: ## Start the postgres and redis database supporting the portal
+start-portal-dbs: start-db start-redis
+
+start-consent: ## Start the consent service supporting the api
+start-consent:
+	$(eval DEBUG_ARG := $(if $(filter true,$(DEBUG_MODE)),-f docker-compose.debug-override.yml,))
+	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) $(DEBUG_ARG) up --wait -d consent
+
+start-attribution: ## Start the attribution service supporting the api
+start-attribution:
+	$(eval DEBUG_ARG := $(if $(filter true,$(DEBUG_MODE)),-f docker-compose.debug-override.yml,))
+	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) $(DEBUG_ARG) up --wait -d attribution
+
+start-aggregation: ## Start the aggregation service supporting the api
+start-aggregation:
+	$(eval DEBUG_ARG := $(if $(filter true,$(DEBUG_MODE)),-f docker-compose.debug-override.yml,))
+	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) $(DEBUG_ARG) up --wait -d aggregation
 
 start-api-dependencies: # Start internal Java service dependencies, e.g. attribution and aggregation services.
-start-api-dependencies:
-	@USE_BFD_MOCK=false docker compose up start_api_dependencies
+start-api-dependencies: start-attribution 
+	@USE_BFD_MOCK=false make start-aggregation
+
+start-mock-api-dependencies: # Start internal Java service dependencies, e.g. attribution and aggregation services with mock BFD.
+start-mock-api-dependencies: start-attribution start-aggregation
+
+start-mock-app: ## Start the API with mock BFD
+start-mock-app: secure-envs
+	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) up --wait -d api
 
 start-app: ## Start the API
-start-app: secure-envs start-db start-api-dependencies
-	@docker compose up start_api
+start-app: secure-envs 
+	@USE_BFD_MOCK=false docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) up --wait -d api
 
 start-api: ## Start the API
 start-api: start-app
 
 start-web: ## Start the sandbox portal
-start-web:
-	@docker compose -f docker-compose.yml -f docker-compose.portals.yml up start_web
+start-web: 
+	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) -f docker-compose.portals.yml up --wait -d dpc_web
 
 start-admin: ## Start the sandbox admin portal
 start-admin:
-	@docker compose -f docker-compose.yml -f docker-compose.portals.yml up start_admin
+	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) -f docker-compose.portals.yml up --wait -d dpc_admin
 
 start-portal: ## Start the DPC portal
 start-portal: secure-envs
-	@docker compose -f docker-compose.yml -f docker-compose.portals.yml up start_portal
+	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) -f docker-compose.portals.yml up --wait -d dpc_portal
 
 start-portals: ## Start all frontend services
-start-portals: start-db start-web start-admin start-portal
+start-portals: start-web start-admin start-portal
+
+start-portals-no-auth: ## Start the web sites with authentication disabled
+start-portals-no-auth: 
+	@AUTH_DISABLED=true make start-portals
+
+start-system-smoke: ## Start the system for local smoke tests
+start-system-smoke: start-api start-portals-no-auth
 
 
 # Debug commands
+# These targets compile the DPC software with debugging info 
+# and open debug ports for attaching a remote debugger
+# See docker-compose.debug-override.yml for debug port info
 # ==============
 
 .PHONY: start-dpc-debug
 start-dpc-debug: secure-envs
 	@mvn clean install -Pdebug -DskipTests -ntp
-	@docker compose -f docker-compose.yml -f docker-compose.portals.yml up start_core_dependencies
-	@DEBUG_MODE=true USE_BFD_MOCK=false docker compose -f docker-compose.yml -f docker-compose.portals.yml up start_api_dependencies
-	@DEBUG_MODE=true docker compose -f docker-compose.yml -f docker-compose.portals.yml up start_api
-	@docker compose -f docker-compose.yml -f docker-compose.portals.yml up start_web
-	@docker compose -f docker-compose.yml -f docker-compose.portals.yml up start_admin
-	@docker compose -f docker-compose.yml -f docker-compose.portals.yml up start_portal
-	@docker ps
+	@make start-db start-redis
+	@DEBUG_MODE=true make start-api
+	@docker make start-portals
 
 .PHONY: start-app-debug
 start-app-debug: secure-envs
-	@docker compose down
+	@docker compose $(DOCKER_PROJ) down
 	@mvn clean compile -Pdebug -DskipTests -ntp
 	@mvn package -Pci -ntp -DskipTests
-	@docker compose -f docker-compose.yml -f docker-compose.portals.yml up start_core_dependencies
-	@DEBUG_MODE=true USE_BFD_MOCK=false docker compose -f docker-compose.yml -f docker-compose.portals.yml up start_api_dependencies
-	@DEBUG_MODE=true docker compose -f docker-compose.yml -f docker-compose.portals.yml up start_api
+	@make start-db start-redis
+	@DEBUG_MODE=true make start-api
 
 .PHONY: start-it-debug
 start-it-debug: secure-envs
-	@docker compose down
+	@docker compose $(DOCKER_PROJ) down
 	@mvn clean compile -Pdebug -B -V -ntp -DskipTests
 	@mvn package -Pci -ntp -DskipTests
-	@docker compose up start_core_dependencies
-	@DEBUG_MODE=true docker compose up start_api_dependencies
+	@make start-db
+	@DEBUG_MODE=true make start-api-dependencies
 
 
-# Down commands
+# Down targets
+# These targets bring down dpc docker containers
 # ==============
 
 down-dpc: ## Shut down all services
 down-dpc:
-	@docker compose -f docker-compose.yml -f docker-compose.portals.yml down
+	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) -f docker-compose.portals.yml down
 
-down-portals: ## Shut down all services
-down-portals: down-dpc
-
-down-start-v1-portals: ## Shut down test services
-down-start-v1-portals:
-	@docker compose -p start-v1-portals -f docker-compose.yml -f docker-compose.portals.yml down
-
-# Utility commands
+# Utility targets
+# These targets provider CLI support
 # =================
 
 CONF_FILE = "dpc-attribution/src/test/resources/test.application.yml"
@@ -179,21 +216,23 @@ maven-config:
 	@while read line;do echo "-D$${line} " >> ./.mvn/maven.config;done < ./ops/config/decrypted/local.env
 
 psql: ## Run a psql shell
-	@docker compose -f docker-compose.yml exec -it db psql -U postgres
+	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) exec -it db psql -U postgres
 
 portal-sh: ## Run a portal shell
-	@docker compose -f docker-compose.yml -f docker-compose.portals.yml exec -it dpc_portal bin/sh
+	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) -f docker-compose.portals.yml exec -it dpc_portal bin/sh
 
 portal-console: ## Run a rails console shell
-	@docker compose -f docker-compose.yml -f docker-compose.portals.yml exec -it dpc_portal bin/console
+	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) -f docker-compose.portals.yml exec -it dpc_portal bin/console
 
 
-# Build & Test commands
+# Software Build & Test targets
+# These targets build the software and run tests
 # ======================
 
-.PHONY: docker-base
-docker-base:
-	@docker compose -f ./docker-compose.base.yml build base
+api: ## Builds the Java API services
+api: secure-envs
+	mvn clean compile -Perror-prone -B -V -ntp -T 4 -DskipTests
+	mvn package -Pci -ntp -T 4 -DskipTests
 
 .PHONY: ci-app
 ci-app: docker-base secure-envs
@@ -230,3 +269,20 @@ ci-api-client:
 .PHONY: unit-tests
 unit-tests:
 	@bash ./dpc-unit-test.sh
+
+.PHONY: int-tests
+int-tests: 
+	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) up tests
+	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) down
+
+.PHONY: int-tests-cicd
+int-tests-cicd: 
+	@TEST_VERBOSITY=true docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) up --exit-code-from tests tests
+	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) down
+
+.PHONY: sys-tests
+sys-tests:
+	@AUTH_DISABLED=true make start-mock-app
+	@npm run test
+	@docker compose $(PROJECT_NAME) down -t 60
+	@if [ -n "$REPORT_COVERAGE" ]; then mvn jacoco:report-integration -Pci -ntp; fi

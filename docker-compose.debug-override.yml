@@ -1,0 +1,18 @@
+services:
+
+  consent:
+    ports:
+      - "9873:5005"
+
+  attribution:
+    ports:
+      - "9874:5005"
+
+  aggregation:
+    ports:
+      - "9875:5005"
+
+  api:
+    ports:
+      - "9876:5005"
+

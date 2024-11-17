@@ -1,21 +1,21 @@
-#!/bin/bash
-set -Ee
+#!/bin/sh
+set -e
 
 # Current working directory
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+DIR="$(cd "$(dirname "$0")" >/dev/null 2>&1 && pwd)"
 
 # Configure the Maven log level
 export MAVEN_OPTS=-Dorg.slf4j.simpleLogger.defaultLogLevel=info
 
 # Include secure environment variables
-set -o allexport
-[[ -f ${DIR}/ops/config/decrypted/local.env ]] && source ${DIR}/ops/config/decrypted/local.env
-set +o allexport
+if [ -f "${DIR}/ops/config/decrypted/local.env" ]; then
+  . "${DIR}/ops/config/decrypted/local.env"
+fi
 
-function _finally {
+_cleanup() {
   docker compose down
 }
-trap _finally EXIT
+trap _cleanup EXIT
 
 echo "┌──────────────────────────────────────────┐"
 echo "│                                          │"

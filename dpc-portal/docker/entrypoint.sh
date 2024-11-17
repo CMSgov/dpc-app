@@ -7,17 +7,17 @@ if [ -f tmp/pids/server.pid ]; then
   rm tmp/pids/server.pid
 fi
 
-if [ "$1" == "portal" ]; then
+if [ "$1" = "portal" ]; then
   # Start the database service (and make accessible outside the Docker container)
   echo "Starting Rails server..."
 
   echo "Migrating the database..."
   bundle exec rails db:migrate
 
-  if [[ "$ENV" == "production" ]]; then
+  if [ "$ENV" = "production" ]; then
     echo "Starting in production"
     bundle exec rails server -b 0.0.0.0 -p 3100
-  elif [[ "$ENV" == "local" ]]; then
+  elif [ "$ENV" = "local" ]; then
     echo "Starting in development"
     ./bin/dev
   else
@@ -26,11 +26,11 @@ if [ "$1" == "portal" ]; then
   fi
 fi
 
-if [ "$1" == "sidekiq" ]; then
-  if [[ "$ENV" == "production" ]]; then
+if [ "$1" = "sidekiq" ]; then
+  if [ "$ENV" = "production" ]; then
     echo "Starting in production"
     bundle exec sidekiq -q portal
-  elif [[ "$ENV" == "local" ]]; then
+  elif [ "$ENV" = "local" ]; then
     echo "Starting in development"
     ./bin/sidekiq-dev
   else
