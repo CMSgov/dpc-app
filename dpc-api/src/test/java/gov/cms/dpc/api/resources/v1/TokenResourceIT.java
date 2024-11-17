@@ -40,7 +40,10 @@ import java.util.stream.Collectors;
 
 import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
 
+@DisplayName("Token resource operations")
 class TokenResourceIT extends AbstractSecureApplicationIT {
 
     private final ObjectMapper mapper;
@@ -71,6 +74,7 @@ class TokenResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
+    @DisplayName("Get client token list 🥳")
     void testTokenList() throws IOException {
 
         final CollectionResponse<TokenEntity> tokens = fetchTokens(ORGANIZATION_ID, this.fullyAuthedToken);
@@ -97,6 +101,7 @@ class TokenResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
+    @DisplayName("Create a list token with custom label 🥳")
     void testTokenCustomLabel() throws IOException {
         // List the tokens
 
@@ -123,6 +128,7 @@ class TokenResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
+    @DisplayName("Create client token with excessive expiration time 🤮")
     void testTokenCreationWithExceedingExpirationTime() throws IOException {
         // Create a new token with an expiration greater than 1 year
         final OffsetDateTime expires = OffsetDateTime.now(ZoneOffset.UTC).plusYears(5);
@@ -136,6 +142,7 @@ class TokenResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
+    @DisplayName("Create client token that has already expired 🤮")
     void testTokenCreationWithPastExpirationTime() throws IOException {
         final OffsetDateTime expires = OffsetDateTime.now(ZoneOffset.UTC).minusDays(10);
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
@@ -150,6 +157,7 @@ class TokenResourceIT extends AbstractSecureApplicationIT {
 
 
     @Test
+    @DisplayName("Create a client token with custom expiration 🥳")
     void testTokenCreationWithValidCustomExpiration() throws IOException {
         final OffsetDateTime expiresFinal = OffsetDateTime.now(ZoneOffset.UTC).plusDays(10);
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
@@ -165,6 +173,7 @@ class TokenResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
+    @DisplayName("Create client token with default parameters 🥳")
     void testTokenCreationWithDefaults() throws IOException {
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
             final HttpPost httpPost = new HttpPost(getBaseURL() + String.format("/Token"));
@@ -200,6 +209,7 @@ class TokenResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
+    @DisplayName("Create client token using body parameters 🥳")
     void testTokenCreationUsingBodyParams() throws IOException {
         final OffsetDateTime expiresFinal = OffsetDateTime.now(ZoneOffset.UTC).plusDays(10);
         final String expiresFormatted =  FHIRFormatters.INSTANT_FORMATTER.format(expiresFinal);
@@ -220,6 +230,7 @@ class TokenResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
+    @DisplayName("Create client token with HTML in label 🤮")
     void testNoHtmlInBodyLabel() throws IOException {
         final OffsetDateTime expiresFinal = OffsetDateTime.now(ZoneOffset.UTC).plusDays(10);
         final String expiresFormatted =  FHIRFormatters.INSTANT_FORMATTER.format(expiresFinal);
@@ -235,6 +246,7 @@ class TokenResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
+    @DisplayName("Create client token with invalid expiration body parameter 🤮")
     void testTokenCreationWithInvalidExpirationBodyParam() throws IOException {
         final String expiresFormatted =  "invalid-date-time-format-ZZZ";
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
@@ -248,9 +260,8 @@ class TokenResourceIT extends AbstractSecureApplicationIT {
         }
     }
 
-
-
     @Test
+    @DisplayName("Delete client token 🥳")
     void testTokenDeletion() throws IOException {
         //Create a token
         TokenEntity token = createToken();
@@ -308,6 +319,7 @@ class TokenResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
+    @DisplayName("Verify a client token 🥳")
     void testTokenSigning() throws IOException, URISyntaxException {
         final IParser parser = ctx.newJsonParser();
         final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);

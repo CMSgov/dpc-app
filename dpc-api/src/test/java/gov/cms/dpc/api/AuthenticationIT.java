@@ -18,7 +18,9 @@ import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
 import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_NPI;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.junit.jupiter.api.DisplayName;
 
+@DisplayName("API client authentication")
 class AuthenticationIT extends AbstractSecureApplicationIT {
     private static final String BAD_ORG_ID = "065fbe84-3551-4ec3-98a3-0d1198c3cb55";
 
@@ -27,6 +29,7 @@ class AuthenticationIT extends AbstractSecureApplicationIT {
     }
 
     @Test
+    @DisplayName("Basic authentication 🥳")
     void testBasicAuthentication() throws IOException, URISyntaxException {
         // Manually setup the required org functions
         final String macaroon = FHIRHelpers.registerOrganization(APITestHelpers.buildAttributionClient(ctx), ctx.newJsonParser(), ORGANIZATION_ID, ORGANIZATION_NPI, getAdminURL());
@@ -51,7 +54,7 @@ class AuthenticationIT extends AbstractSecureApplicationIT {
 
         assertThrows(AuthenticationException.class, orgRequest::execute, "Should be unauthorized");
     }
-
+    
     @Test
     void testMalformedTokens() {
         // Manually build the FHIR client, so we can use custom Macaroon values

@@ -15,8 +15,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.WebApplicationException;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
 
 @ExtendWith(BufferedLoggerHandler.class)
+@DisplayName("Provenance resource value factory")
 class ProvenanceResourceValueFactoryTest {
 
     private static final FhirContext ctx = FhirContext.forDstu3();
@@ -26,6 +28,7 @@ class ProvenanceResourceValueFactoryTest {
     }
 
     @Test
+    @DisplayName("Validate provenance 🥳")
     void testValidProvenance() {
         final Provenance provenance = new Provenance();
         provenance.addTarget(new Reference("Organization/nothing-real"));
@@ -36,7 +39,7 @@ class ProvenanceResourceValueFactoryTest {
 
         final Injector mockInjector = Mockito.mock(Injector.class);
         Mockito.when(mockInjector.getInstance(HttpServletRequest.class)).thenReturn(mock);
-
+        
         final ProvenanceResourceValueFactory factory = new ProvenanceResourceValueFactory(mockInjector, ctx);
 
         final Provenance prov2 = factory.provide();
@@ -44,6 +47,7 @@ class ProvenanceResourceValueFactoryTest {
     }
 
     @Test
+    @DisplayName("Validate provenance with missing header 🤮")
     void testMissingHeader() {
         final HttpServletRequest mock = Mockito.mock(HttpServletRequest.class);
         Mockito.when(mock.getHeader(ProvenanceResourceValueFactory.PROVENANCE_HEADER)).thenReturn(null);
@@ -59,6 +63,7 @@ class ProvenanceResourceValueFactoryTest {
     }
 
     @Test
+    @DisplayName("Validate invalid provenance 🤮")
     void testInvalidProvenance() {
 
         final Patient patient = new Patient();

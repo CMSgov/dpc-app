@@ -30,6 +30,7 @@ class MacaroonHelpersTest {
     class MacaroonTests {
 
         @Test
+        @DisplayName("Macaroon extraction from header 🥳")
         void getMacaroonFromHeader() {
             final ContainerRequestContext request = mock(ContainerRequestContext.class);
             final MultivaluedMap headers = mock(MultivaluedMap.class);
@@ -42,6 +43,7 @@ class MacaroonHelpersTest {
         }
 
         @Test
+        @DisplayName("Macaroon extraction from query parameter 🥳")
         void getMacaroonFromQueryParam() {
             final ContainerRequestContext request = mock(ContainerRequestContext.class);
             final MultivaluedMap headers = mock(MultivaluedMap.class);
@@ -59,6 +61,7 @@ class MacaroonHelpersTest {
         }
 
         @Test
+        @DisplayName("Request without macaroon 🤮")
         void getNoMacaroon() {
             final ContainerRequestContext request = mock(ContainerRequestContext.class);
             final MultivaluedMap headers = mock(MultivaluedMap.class);
@@ -75,6 +78,7 @@ class MacaroonHelpersTest {
         }
 
         @Test
+        @DisplayName("Macaroon from header is prioritized 🥳")
         void ensureHeaderPriority() {
             final ContainerRequestContext request = mock(ContainerRequestContext.class);
             final MultivaluedMap headers = mock(MultivaluedMap.class);
@@ -92,6 +96,7 @@ class MacaroonHelpersTest {
         }
 
         @Test
+        @DisplayName("Blank macaroon in header 🤮")
         void testBlankMacaroonHeader() {
             final ContainerRequestContext request = mock(ContainerRequestContext.class);
             final MultivaluedMap headers = mock(MultivaluedMap.class);
@@ -109,6 +114,7 @@ class MacaroonHelpersTest {
         }
 
         @Test
+        @DisplayName("Blank macaroon in query parameter 🤮")
         void testBlankMacaroonQueryParam() {
             final ContainerRequestContext request = mock(ContainerRequestContext.class);
             final MultivaluedMap headers = mock(MultivaluedMap.class);
@@ -126,6 +132,7 @@ class MacaroonHelpersTest {
         }
 
         @Test
+        @DisplayName("Macaroon with whitespace 🤮")
         void testHeaderNoSpace() {
             final ContainerRequestContext request = mock(ContainerRequestContext.class);
             final MultivaluedMap headers = mock(MultivaluedMap.class);
@@ -143,6 +150,7 @@ class MacaroonHelpersTest {
         }
 
         @Test
+        @DisplayName("Bearer token missing from header 🤮")
         void testHeaderNoBearer() {
             final ContainerRequestContext request = mock(ContainerRequestContext.class);
             final MultivaluedMap headers = mock(MultivaluedMap.class);

@@ -6,9 +6,12 @@ import org.junit.Before;
 import org.junit.jupiter.api.Test;
 import java.time.OffsetDateTime;
 import java.util.UUID;
+import org.junit.jupiter.api.DisplayName;
 
+@DisplayName("Person Entity tests")
 public class PersonEntityTest {
 	@Test
+        @DisplayName("Test getters and setters 🥳")
 	public void testGettersAndSetters() {
 		PersonEntityImpl personEntity = new PersonEntityImpl();
 		String firstName = "Sydney";
@@ -30,6 +33,7 @@ public class PersonEntityTest {
 	}
 
 	@Test
+        @DisplayName("Person creation 🥳")
 	public void testSetCreation() {
 		PersonEntityImpl personEntity = new PersonEntityImpl();
 		personEntity.setCreation();
@@ -38,6 +42,7 @@ public class PersonEntityTest {
 	}
 
 	@Test
+        @DisplayName("Person update 🥳")
 	public void testSetUpdateTime() {
 		PersonEntityImpl personEntity = new PersonEntityImpl();
 		personEntity.setUpdateTime();

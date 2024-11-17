@@ -23,8 +23,10 @@ import java.util.stream.Collectors;
 
 import static gov.cms.dpc.attribution.AttributionTestHelpers.DEFAULT_ORG_ID;
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
 
 @IntegrationTest
+@DisplayName("Group Resource integrated tests")
 public class GroupResourceIT extends AbstractAttributionIT {
 
     private IGenericClient client;
@@ -36,6 +38,7 @@ public class GroupResourceIT extends AbstractAttributionIT {
     }
 
     @Test
+    @DisplayName("Create roster exceeding patient limit 🤮")
     public void testCreateRosterPatientLimit() {
         final Practitioner practitioner = createPractitioner("1111111112");
         final Patient patient1 = createPatient("0O00O00OO01", DEFAULT_ORG_ID);
@@ -86,6 +89,7 @@ public class GroupResourceIT extends AbstractAttributionIT {
     }
 
     @Test
+    @DisplayName("Replace patient in roster 🥳")
     public void testReplaceRosterPatientLimit() {
         final Practitioner practitioner = createPractitioner("1211111111");
         final Patient patient1 = createPatient("0O00O00OO02", DEFAULT_ORG_ID);
@@ -101,7 +105,7 @@ public class GroupResourceIT extends AbstractAttributionIT {
         IIdType groupId = methodOutcome.getResource().getIdElement();
 
         assertTrue(methodOutcome.getCreated());
-
+        
         //Add an additional patient
         final Patient patient2 = createPatient("0O00O00OO00", DEFAULT_ORG_ID);
         group.addMember().setEntity(new Reference(patient2.getIdElement()));
@@ -115,7 +119,7 @@ public class GroupResourceIT extends AbstractAttributionIT {
         //Replace patient
         group.getMember().clear();
         group.addMember().setEntity(new Reference(patient2.getIdElement()));
-
+        
         final MethodOutcome methodOutcomeUpdate = client.update()
                 .resource(group)
                 .withId(methodOutcome.getResource().getIdElement())
@@ -125,16 +129,17 @@ public class GroupResourceIT extends AbstractAttributionIT {
         final Group updatedGroup = client.read()
             .resource(Group.class)
             .withId(groupId)
-            .encodedJson()
-            .execute();
+                .encodedJson()
+                .execute();
 
         assertEquals(patient2.getIdElement().getValueAsString(), updatedGroup.getMemberFirstRep().getEntity().getReference());
     }
-
+    
     /**
      * When $add is called and a new patient is added to a roster, it should show up in the response
      */
     @Test
+    @DisplayName("Add patient to roster and return to client 🥳")
     public void testAddToRosterResponse() {
         final Practitioner practitioner = createPractitioner(NPIUtil.generateNPI());
         final Patient patient1 = createPatient("0O00O00OO04", DEFAULT_ORG_ID);
@@ -179,6 +184,7 @@ public class GroupResourceIT extends AbstractAttributionIT {
      * in order to ensure the response includes the appropriate number of members
      */
     @Test
+    @DisplayName("Add patient to empty roster 🥳")
     public void testReplaceRosterResponse() {
         final Practitioner practitioner = createPractitioner(NPIUtil.generateNPI());
         final Group groupForCreate = SeedProcessor.createBaseAttributionGroup(FHIRExtractors.getProviderNPI(practitioner), DEFAULT_ORG_ID);
@@ -211,6 +217,7 @@ public class GroupResourceIT extends AbstractAttributionIT {
     }
 
     @Test
+    @DisplayName("Exceed limit for additions to new roster 🤮")
     public void testAddMembersToRosterPatientLimit() {
         final Practitioner practitioner = createPractitioner("1112111111");
         final Patient patient1 = createPatient("0O00O00OO03", DEFAULT_ORG_ID);
@@ -264,6 +271,7 @@ public class GroupResourceIT extends AbstractAttributionIT {
     }
 
     @Test
+    @DisplayName("Verify roster size limit checking 🤮")
     public void testRosterSizeToBigMethodDirectly() {
         final Practitioner practitioner1 = AttributionTestHelpers.createPractitionerResource("1111111112");
         final Group group1 = SeedProcessor.createBaseAttributionGroup(FHIRExtractors.getProviderNPI(practitioner1), DEFAULT_ORG_ID);
@@ -311,6 +319,7 @@ public class GroupResourceIT extends AbstractAttributionIT {
     }
 
     @Test
+    @DisplayName("Verify bulk add of patients to roster 🥳")
     public void testMaxPatients() {
         final int MAX_PATIENTS = 1350;
         APPLICATION.getConfiguration().setPatientLimit(MAX_PATIENTS);

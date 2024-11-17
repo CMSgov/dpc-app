@@ -21,6 +21,7 @@ import java.util.UUID;
 
 import static gov.cms.dpc.fhir.FHIRMediaTypes.FHIR_JSON;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.DisplayName;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -64,6 +65,7 @@ public class ConsentResourceUnitTest {
     }
 
     @Test
+    @DisplayName("Get consent resource with valid ID 🥳")
     final void getResource_withValidId_returnsConsentResource() {
         try (Response response = resource.target("/Consent/" + TEST_ID)
                 .request()
@@ -78,6 +80,7 @@ public class ConsentResourceUnitTest {
     }
 
     @Test
+    @DisplayName("Get consent resource with no ID 🤮")
     final void search_withEmptyString_isInvalid() {
         try (Response response = resource.target("/Consent/")
                 .request()
@@ -89,6 +92,7 @@ public class ConsentResourceUnitTest {
     }
 
     @ParameterizedTest
+    @DisplayName("Get consent resource with invalid path parameters 🤮")
     @ValueSource(strings = {"/Consent?", "/Consent?_id=,patient=mbi_1", "/Consent?identifier=", "/Consent?patient=", "/Consent?owieurijefj"})
     final void searchConsentResource_fails_withInvalidSearchParameters(String path) {
         try (Response response = resource.target(path)

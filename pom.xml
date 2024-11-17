@@ -44,13 +44,17 @@
         <jib.container.appRoot>/app</jib.container.appRoot>
         <jib.ecr.root>755619740999.dkr.ecr.us-east-1.amazonaws.com</jib.ecr.root>
         <timestamp>${maven.build.timestamp}</timestamp>
-        <jacoco.version>0.8.5</jacoco.version>
+        <jacoco.version>0.8.12</jacoco.version>
         <jooq.version>3.13.4</jooq.version>
         <bouncey.version>1.70</bouncey.version>
         <pitest.version>1.5.1</pitest.version>
         <newrelic.agent.version>7.11.1</newrelic.agent.version>
         <newrelic.agent.type>zip</newrelic.agent.type>
         <h2.version>2.2.220</h2.version>
+
+        <test.verbosity>false</test.verbosity>
+        <disable.console>true</disable.console>
+        <base.image>docker://dpc-base:latest</base.image>
     </properties>
 
     <developers>
@@ -423,10 +427,50 @@
                 <plugins>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>integration-test</id>
+                                <goals>
+                                    <goal>integration-test</goal>   
+                                </goals>
+                                <phase>integration-test</phase>
+                            </execution>
+                            <execution>
+                                <id>verify</id>
+                                <goals>
+                                    <goal>verify</goal>
+                                </goals>
+                                <phase>verify</phase>
+                            </execution>
+                        </executions>
+                        <dependencies>
+                          <dependency>
+                             <groupId>me.fabriciorby</groupId>
+                             <artifactId>maven-surefire-junit5-tree-reporter</artifactId>
+                             <version>1.3.0</version>
+                          </dependency>
+                        </dependencies>                        
+                        <configuration>
+                            <testFailureIgnore>false</testFailureIgnore>
+                            <skip>false</skip>
+                            <reportFormat>plain</reportFormat>
+                            <consoleOutputReporter>
+                               <disable>${disable.console}</disable>
+                            </consoleOutputReporter>
+                            <statelessTestsetInfoReporter implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5StatelessTestsetInfoTreeReporterUnicode">
+                                <theme>UNICODE</theme>
+                                <printStacktraceOnFailure>${test.verbosity}</printStacktraceOnFailure>
+                                <printStdoutOnFailure>${test.verbosity}</printStdoutOnFailure>
+                                <printStderrOnFailure>${test.verbosity}</printStderrOnFailure>
+                            </statelessTestsetInfoReporter>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-surefire-plugin</artifactId>
-                        <configuration combine.self="override">
-                            <groups>Integration</groups>
-                            <forkedProcessExitTimeoutInSeconds>600</forkedProcessExitTimeoutInSeconds>
+                        <configuration>
+                            <skip>true</skip>
                         </configuration>
                     </plugin>
                 </plugins>
@@ -439,11 +483,38 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-surefire-plugin</artifactId>
+                        <dependencies>
+                          <dependency>
+                             <groupId>me.fabriciorby</groupId>
+                             <artifactId>maven-surefire-junit5-tree-reporter</artifactId>
+                             <version>1.3.0</version>
+                          </dependency>
+                        </dependencies>                        
                         <configuration>
+                            <skip>false</skip>
                             <excludedGroups>Integration</excludedGroups>
                             <parallel>all</parallel>
                             <threadCount>10</threadCount>
+                            <reportFormat>plain</reportFormat>
+                            <consoleOutputReporter>
+                               <disable>${disable.console}</disable>
+                            </consoleOutputReporter>
+                            <statelessTestsetInfoReporter implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5StatelessTestsetInfoTreeReporterUnicode">
+                                <theme>UNICODE</theme>
+                                <printStacktraceOnFailure>${test.verbosity}</printStacktraceOnFailure>
+                                <printStdoutOnFailure>${test.verbosity}</printStdoutOnFailure>
+                                <printStderrOnFailure>${test.verbosity}</printStderrOnFailure>
+                            </statelessTestsetInfoReporter>
                         </configuration>
+                        <executions>
+                            <execution>
+                                <id>unit-test</id>
+                                <goals>
+                                    <goal>test</goal> <!-- Bind it to the integration-test phase -->
+                                </goals>
+                                <phase>test</phase>
+                            </execution>
+                        </executions>
                     </plugin>
                 </plugins>
             </build>
@@ -453,6 +524,21 @@
             <id>ci</id>
             <build>
                 <plugins>
+                    <plugin>
+                        <groupId>com.google.cloud.tools</groupId>
+                        <artifactId>jib-maven-plugin</artifactId>
+                        <configuration>
+                            <to>
+                                <image>${jib.ecr.root}/${project.artifactId}</image>
+                                <tags>
+                                    <tag>latest</tag>
+                                </tags>
+                            </to>
+                            <from>
+                                <image>${base.image}</image>
+                            </from>
+                        </configuration>
+                    </plugin>
                     <plugin>
                         <artifactId>maven-dependency-plugin</artifactId>
                         <executions>
@@ -487,6 +573,32 @@
                                 </goals>
                             </execution>
                         </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <dependencies>
+                          <dependency>
+                             <groupId>me.fabriciorby</groupId>
+                             <artifactId>maven-surefire-junit5-tree-reporter</artifactId>
+                             <version>1.3.0</version>
+                          </dependency>
+                        </dependencies>                        
+                        <configuration>
+                            <excludedGroups>Integration</excludedGroups>
+                            <parallel>all</parallel>
+                            <threadCount>10</threadCount>
+                            <reportFormat>plain</reportFormat>
+                            <consoleOutputReporter>
+                               <disable>true</disable>
+                            </consoleOutputReporter>
+                            <statelessTestsetInfoReporter implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5StatelessTestsetInfoTreeReporterUnicode">
+                                <theme>UNICODE</theme>
+                                <printStacktraceOnFailure>${test.verbosity}</printStacktraceOnFailure>
+                                <printStdoutOnFailure>${test.verbosity}</printStdoutOnFailure>
+                                <printStderrOnFailure>${test.verbosity}</printStderrOnFailure>
+                            </statelessTestsetInfoReporter>
+                        </configuration>
                     </plugin>
                 </plugins>
             </build>
@@ -533,6 +645,32 @@
                             </execution>
                         </executions>
                     </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <dependencies>
+                          <dependency>
+                             <groupId>me.fabriciorby</groupId>
+                             <artifactId>maven-surefire-junit5-tree-reporter</artifactId>
+                             <version>1.3.0</version>
+                          </dependency>
+                        </dependencies>                        
+                        <configuration>
+                            <excludedGroups>Integration</excludedGroups>
+                            <parallel>all</parallel>
+                            <threadCount>10</threadCount>
+                            <reportFormat>plain</reportFormat>
+                            <consoleOutputReporter>
+                               <disable>true</disable>
+                            </consoleOutputReporter>
+                            <statelessTestsetInfoReporter implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5StatelessTestsetInfoTreeReporterUnicode">
+                                <theme>UNICODE</theme>
+                                <printStacktraceOnFailure>${test.verbosity}</printStacktraceOnFailure>
+                                <printStdoutOnFailure>${test.verbosity}</printStdoutOnFailure>
+                                <printStderrOnFailure>${test.verbosity}</printStderrOnFailure>
+                            </statelessTestsetInfoReporter>
+                        </configuration>
+                    </plugin>
                 </plugins>
             </build>
         </profile>
@@ -545,10 +683,14 @@
                         <artifactId>jib-maven-plugin</artifactId>
                         <configuration>
                             <to>
+                                <image>${jib.ecr.root}/${project.artifactId}</image>
                                 <tags combine.children="override">
                                     <tag>${project.version}</tag>
                                 </tags>
                             </to>
+                            <from>
+                                <image>${base.image}</image>
+                            </from>
                         </configuration>
                     </plugin>
                 </plugins>
@@ -585,31 +727,35 @@
     <build>
         <pluginManagement>
             <plugins>
-
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-shade-plugin</artifactId>
-                    <version>3.2.2</version>
+                    <version>3.6.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>3.0.0-M3</version>
+                    <version>3.5.2</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <version>3.5.2</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
-                    <version>3.2.0</version>
+                    <version>3.4.2</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.8.1</version>
+                    <version>3.13.0</version>
                 </plugin>
                 <!-- Base configuration for Docker images -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-dependency-plugin</artifactId>
-                    <version>3.1.2</version>
+                    <version>3.8.1</version>
                     <executions>
                         <execution>
                             <id>unpack-newrelic</id>
@@ -631,18 +777,7 @@
                 <plugin>
                     <groupId>com.google.cloud.tools</groupId>
                     <artifactId>jib-maven-plugin</artifactId>
-                    <version>3.4.1</version>
-                    <configuration>
-                        <to>
-                            <image>${jib.ecr.root}/${project.artifactId}</image>
-                            <tags>
-                                <tag>latest</tag>
-                            </tags>
-                        </to>
-                        <from>
-                            <image>docker://dpc-base:latest</image>
-                        </from>
-                    </configuration>
+                    <version>3.4.4</version>
                     <executions>
                         <execution>
                             <phase>package</phase>
@@ -655,27 +790,36 @@
                 <plugin>
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
-                    <version>0.8.5</version>
+                    <version>0.8.12</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-site-plugin</artifactId>
-                    <version>3.9.0</version>
+                    <version>4.0.0-M16</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-project-info-reports-plugin</artifactId>
-                    <version>3.1.0</version>
+                    <version>3.8.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-deploy-plugin</artifactId>
-                    <version>3.0.0-M1</version>
+                    <version>3.1.3</version>
                 </plugin>
             </plugins>
         </pluginManagement>
 
         <plugins>
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-clean-plugin</artifactId>
+              <version>3.4.0</version>
+                <configuration>
+                    <retryOnError>true</retryOnError>
+                    <failOnError>false</failOnError>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
@@ -692,7 +836,7 @@
             </plugin>
             <plugin>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>3.2.1</version>
+                <version>3.3.1</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>
@@ -704,7 +848,7 @@
             </plugin>
             <plugin>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.2.0</version>
+                <version>3.11.1</version>
                 <executions>
                     <execution>
                         <id>attach-javadocs</id>
@@ -725,7 +869,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
-                <version>3.0.0-M3</version>
+                <version>3.5.0</version>
                 <executions>
                     <execution>
                         <id>enforce-maven</id>
@@ -781,7 +925,7 @@
             <plugin>
                 <groupId>pl.project13.maven</groupId>
                 <artifactId>git-commit-id-plugin</artifactId>
-                <version>4.0.0</version>
+                <version>4.9.10</version>
                 <executions>
                     <execution>
                         <id>git-commit</id>
@@ -802,7 +946,7 @@
                     <dependency>
                         <groupId>org.pitest</groupId>
                         <artifactId>pitest-junit5-plugin</artifactId>
-                        <version>0.12</version>
+                        <version>1.2.1</version>
                     </dependency>
                 </dependencies>
             </plugin>
@@ -814,11 +958,11 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-site-plugin</artifactId>
-                <version>3.9.0</version>
+                <version>4.0.0-M16</version>
             </plugin>
             <plugin>
                 <artifactId>maven-project-info-reports-plugin</artifactId>
-                <version>3.1.0</version>
+                <version>3.7.0</version>
                 <configuration>
                     <dependencyDetailsEnabled>false</dependencyDetailsEnabled>
                 </configuration>
@@ -826,4 +970,11 @@
         </plugins>
     </reporting>
 
+    <repositories>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
+    
 </project>

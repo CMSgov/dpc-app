@@ -230,3 +230,20 @@ ci-api-client:
 .PHONY: unit-tests
 unit-tests:
 	@bash ./dpc-unit-test.sh
+
+.PHONY: int-tests
+int-tests: 
+	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) up tests
+	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) down
+
+.PHONY: int-tests-cicd
+int-tests-cicd: 
+	@TEST_VERBOSITY=true docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) up --exit-code-from tests tests
+	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) down
+
+.PHONY: sys-tests
+sys-tests:
+	@AUTH_DISABLED=true make start-mock-app
+	@npm run test
+	@docker compose $(PROJECT_NAME) down -t 60
+	@if [ -n "$REPORT_COVERAGE" ]; then mvn jacoco:report-integration -Pci -ntp; fi

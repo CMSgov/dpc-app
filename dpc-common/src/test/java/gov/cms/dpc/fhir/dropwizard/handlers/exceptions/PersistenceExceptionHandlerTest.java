@@ -14,10 +14,13 @@ import java.sql.SQLException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.DisplayName;
 
+@DisplayName("Persistence exception handling")
 public class PersistenceExceptionHandlerTest {
 
     @Test
+    @DisplayName("Violate FHIR DB constraints ?🤮")
     void testToResponse_fhirException_constraintViolationException() {
         ResourceInfo info = Mockito.mock(ResourceInfo.class);
         Mockito.when(info.getResourceClass()).thenAnswer(answer -> FHIRResourceClass.class);
@@ -34,6 +37,7 @@ public class PersistenceExceptionHandlerTest {
     }
 
     @Test
+    @DisplayName("Encounter FHIR DB unknown exception 🤮")
     void testToResponse_fhirException_otherException() {
         ResourceInfo info = Mockito.mock(ResourceInfo.class);
         Mockito.when(info.getResourceClass()).thenAnswer(answer -> FHIRResourceClass.class);
@@ -48,6 +52,7 @@ public class PersistenceExceptionHandlerTest {
     }
 
     @Test
+    @DisplayName("Violate non-FHIR DB constraint 🤮")
     void testToResponse_nonFhirException_constraintViolationException() {
         final PersistenceExceptionHandler handler = new PersistenceExceptionHandler(Mockito.mock(ResourceInfo.class));
 
@@ -61,6 +66,7 @@ public class PersistenceExceptionHandlerTest {
     }
 
     @Test
+    @DisplayName("Encounter non-FHIR DB unknown exception 🤮")
     void testToResponse_nonFhirException_otherException() {
         ResourceInfo info = Mockito.mock(ResourceInfo.class);
         final PersistenceExceptionHandler handler = new PersistenceExceptionHandler(info);

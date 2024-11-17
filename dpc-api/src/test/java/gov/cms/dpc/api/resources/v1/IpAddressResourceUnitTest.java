@@ -20,10 +20,12 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
+@DisplayName("Inet resource operations")
 class IpAddressResourceUnitTest {
     IpAddressResource ipAddressResource;
     OrganizationPrincipal organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
@@ -37,6 +39,7 @@ class IpAddressResourceUnitTest {
     }
 
     @Test
+    @DisplayName("Get IP address 🥳")
     public void testGet() {
         IpAddressEntity ipAddressEntity = new IpAddressEntity();
 
@@ -48,6 +51,7 @@ class IpAddressResourceUnitTest {
     }
 
     @Test
+    @DisplayName("Get empty list when no IP addresses are defined 🥳")
     public void testGet_nothingReturned() {
         when(ipAddressDAO.fetchIpAddresses(organizationPrincipal.getID())).thenReturn(List.of());
 
@@ -56,6 +60,7 @@ class IpAddressResourceUnitTest {
     }
 
     @Test
+    @DisplayName("Add an IP address 🥳")
     public void testPost_happyPath() {
         CreateIpAddressRequest createIpAddressRequest = new CreateIpAddressRequest("192.168.1.1");
         IpAddressEntity ipAddressEntity = new IpAddressEntity();
@@ -68,6 +73,7 @@ class IpAddressResourceUnitTest {
     }
 
     @Test
+    @DisplayName("Add an invalid IP address 🤮")
     public void testPost_badIp() {
         CreateIpAddressRequest createIpAddressRequest = new CreateIpAddressRequest("1.bad.ip.addr");
         IpAddressEntity ipAddressEntity = new IpAddressEntity();
@@ -78,6 +84,7 @@ class IpAddressResourceUnitTest {
     }
 
     @Test
+    @DisplayName("Add too many IP addresses 🤮")
     public void testPost_tooManyIps() {
         CreateIpAddressRequest createIpAddressRequest = new CreateIpAddressRequest("192.168.1.1");
 
@@ -94,6 +101,7 @@ class IpAddressResourceUnitTest {
     }
 
     @Test
+    @DisplayName("Delete IP address 🥳")
     public void testDelete_happyPath() {
         UUID ipId = UUID.randomUUID();
         IpAddressEntity existingIp = new IpAddressEntity().setId(ipId);
@@ -105,6 +113,7 @@ class IpAddressResourceUnitTest {
     }
 
     @Test
+    @DisplayName("Unrecognized IP address 🤮")
     public void testDelete_notFound() {
         IpAddressEntity existingIp = new IpAddressEntity().setId(UUID.randomUUID());
 

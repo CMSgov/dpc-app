@@ -28,8 +28,11 @@ import java.util.UUID;
 import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
 import static org.mockito.ArgumentMatchers.any;
 
+
+@DisplayName("Organization resource operations")
 public class OrganizationResourceUnitTest {
 
     @Mock
@@ -57,6 +60,7 @@ public class OrganizationResourceUnitTest {
     }
 
     @Test
+    @DisplayName("Get organizations by ID 🥳")
     void testGetOrganizationsByIds() {
         OrganizationEntity orgEnt1 = createOrganizationEntity("123", "org1");
         OrganizationEntity orgEnt2 = createOrganizationEntity("456", "org2");
@@ -71,6 +75,7 @@ public class OrganizationResourceUnitTest {
     }
 
     @Test
+    @DisplayName("Create organization with no look back exemptions 🥳")
     void submitTestOrganizationAndNoLookbackExemptions() {
         Mockito.when(mockOrganizationDao.registerOrganization(any())).thenAnswer(invocation -> invocation.getArguments()[0]);
         configuration.setLookBackExemptOrgs(null);
@@ -83,6 +88,7 @@ public class OrganizationResourceUnitTest {
     }
 
     @Test
+    @DisplayName("Create organization with look back exemptions 🥳")
     void submitTestOrganizationWithLookbackExemptions() {
         Mockito.when(mockOrganizationDao.registerOrganization(any())).thenAnswer(invocation -> invocation.getArguments()[0]);
         configuration.setLookBackExemptOrgs(List.of(lookbackExcemptOrgId));
@@ -95,6 +101,7 @@ public class OrganizationResourceUnitTest {
     }
 
     @Test
+    @DisplayName("Create organization with ID specified 🥳")
     void submitOrganizationWithIdSpecified() {
         Mockito.when(mockOrganizationDao.registerOrganization(any())).thenAnswer(invocation -> invocation.getArguments()[0]);
         configuration.setLookBackExemptOrgs(List.of(lookbackExcemptOrgId));
@@ -109,6 +116,7 @@ public class OrganizationResourceUnitTest {
     }
 
     @Test
+    @DisplayName("Create organization with no ID specified 🥳")
     void submitOrganizationWithNoIdSpecified() throws IllegalAccessException, NoSuchFieldException {
         Mockito.when(mockOrganizationDao.registerOrganization(any())).thenAnswer(invocation -> invocation.getArguments()[0]);
         configuration.setLookBackExemptOrgs(List.of(lookbackExcemptOrgId));

@@ -17,8 +17,10 @@ import org.mockito.Mockito;
 import javax.ws.rs.WebApplicationException;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
 
 @ExtendWith(BufferedLoggerHandler.class)
+@DisplayName("Parameter resource factory")
 class ParamResourceFactoryTest {
 
     private ParamResourceFactoryTest() {

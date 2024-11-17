@@ -14,6 +14,8 @@
 
     <properties>
         <mainClass>gov.cms.dpc.consent.DPCConsentService</mainClass>
+        <test.verbosity>false</test.verbosity>
+        <disable.console>true</disable.console>
     </properties>
 
     <dependencies>
@@ -159,6 +161,29 @@
         </testResources>
         <plugins>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <dependencies>
+                  <dependency>
+                     <groupId>me.fabriciorby</groupId>
+                     <artifactId>maven-surefire-junit5-tree-reporter</artifactId>
+                     <version>1.3.0</version>
+                  </dependency>
+                </dependencies>                        
+                <configuration>
+                    <reportFormat>plain</reportFormat>
+                    <consoleOutputReporter>
+                       <disable>${disable.console}</disable>
+                    </consoleOutputReporter>
+                    <statelessTestsetInfoReporter implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5StatelessTestsetInfoTreeReporterUnicode">
+                        <theme>UNICODE</theme>
+                        <printStacktraceOnFailure>${test.verbosity}</printStacktraceOnFailure>
+                        <printStdoutOnFailure>${test.verbosity}</printStdoutOnFailure>
+                        <printStderrOnFailure>${test.verbosity}</printStderrOnFailure>
+                    </statelessTestsetInfoReporter>
+                </configuration>
+            </plugin>
+            <plugin>
                 <artifactId>maven-shade-plugin</artifactId>
                 <configuration>
                     <createDependencyReducedPom>true</createDependencyReducedPom>
@@ -173,6 +198,7 @@
                         <filter>
                             <artifact>*:*</artifact>
                             <excludes>
+                                <exclude>module-info.class</exclude>
                                 <exclude>META-INF/*.SF</exclude>
                                 <exclude>META-INF/*.DSA</exclude>
                                 <exclude>META-INF/*.RSA</exclude>
@@ -314,6 +340,90 @@
                     </dependency>
                 </dependencies>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <dependencies>
+                  <dependency>
+                     <groupId>me.fabriciorby</groupId>
+                     <artifactId>maven-surefire-junit5-tree-reporter</artifactId>
+                     <version>1.3.0</version>
+                  </dependency>
+                </dependencies>                        
+                <configuration>
+                    <testFailureIgnore>false</testFailureIgnore>
+                    <reportFormat>plain</reportFormat>
+                    <consoleOutputReporter>
+                       <disable>${disable.console}</disable>
+                    </consoleOutputReporter>
+                    <statelessTestsetInfoReporter implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5StatelessTestsetInfoTreeReporterUnicode">
+                        <theme>UNICODE</theme>
+                        <printStacktraceOnFailure>${test.verbosity}</printStacktraceOnFailure>
+                        <printStdoutOnFailure>${test.verbosity}</printStdoutOnFailure>
+                        <printStderrOnFailure>${test.verbosity}</printStderrOnFailure>
+                    </statelessTestsetInfoReporter>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>integration-tests</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <skip>true</skip>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>integration-test</id>
+                                <goals>
+                                    <goal>integration-test</goal>
+                                </goals>
+                                <phase>integration-test</phase>
+                            </execution>
+                            <execution>
+                                <id>verify</id>
+                                <goals>
+                                    <goal>verify</goal>
+                                </goals>
+                                <phase>verify</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+           <id>unit-tests</id>
+           <build>
+               <plugins>
+                   <plugin>
+                       <groupId>org.apache.maven.plugins</groupId>
+                       <artifactId>maven-surefire-plugin</artifactId>
+                       <executions>
+                           <execution>
+                               <id>unit-test</id>
+                               <goals>
+                                   <goal>test</goal>
+                               </goals>
+                               <phase>test</phase>
+                           </execution>
+                       </executions>
+                       <configuration>
+                           <skip>false</skip>
+                       </configuration>
+                   </plugin>
+               </plugins>
+           </build>
+       </profile>
+    </profiles>
 </project>

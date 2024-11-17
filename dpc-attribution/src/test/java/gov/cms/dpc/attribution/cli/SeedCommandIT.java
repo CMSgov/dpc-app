@@ -19,8 +19,10 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.DisplayName;
 
 @IntegrationTest
+@DisplayName("Seed command submission")
 public class SeedCommandIT {
 
     private final PrintStream originalOut = System.out;
@@ -36,6 +38,7 @@ public class SeedCommandIT {
         // Configure bootstrap - adapted from DropwizardTestSupport
         DPCAttributionService app = new DPCAttributionService();
         Bootstrap<DPCAttributionConfiguration> bs = new Bootstrap<>(app) {
+            @Override
             public void run(DPCAttributionConfiguration configuration, Environment environment) throws Exception {
                 super.run(configuration, environment);
                 setConfigurationFactoryFactory((klass, validator, objectMapper, propertyPrefix) ->
@@ -56,6 +59,7 @@ public class SeedCommandIT {
     }
 
     @Test
+    @DisplayName("Run seed command 🥳")
     void testSeedCommand() {
         final Optional<Throwable> success = cli.run("seed", "src/test/resources/test.application.yml");
         assertTrue(success.isEmpty(), "Should have succeeded");

@@ -40,7 +40,7 @@ import static org.mockito.Mockito.mock;
 
 @ExtendWith(DropwizardExtensionsSupport.class)
 @ExtendWith(BufferedLoggerHandler.class)
-@DisplayName("Unit tests for public key handling")
+@DisplayName("Public key handling")
 @SuppressWarnings("InnerClassMayBeStatic")
 class PublicKeyUnitTests {
 
@@ -55,6 +55,7 @@ class PublicKeyUnitTests {
     class KeySubmissionTests {
 
         @ParameterizedTest
+        @DisplayName("Unsupported media type 🤮")
         @EnumSource(KeyType.class)
         void testMediaType(KeyType keyType) throws NoSuchAlgorithmException {
             final KeyPair key = APIAuthHelpers.generateKeyPair(keyType);
@@ -67,6 +68,7 @@ class PublicKeyUnitTests {
         }
 
         @Test
+        @DisplayName("Invalid key submission 🤮")
         void testInvalidKey() {
             final Response response = RESOURCE
                     .target("/v1/Key")
@@ -78,6 +80,7 @@ class PublicKeyUnitTests {
         }
 
         @ParameterizedTest
+        @DisplayName("Default key label 🥳")
         @EnumSource(KeyType.class)
         void testKeyDefaultLabel(KeyType keyType) throws GeneralSecurityException {
             // TODO: Remove. ECC tests skipped temporarily.
@@ -97,6 +100,7 @@ class PublicKeyUnitTests {
         }
 
         @ParameterizedTest
+        @DisplayName("Custom key label 🥳")
         @EnumSource(KeyType.class)
         void testKeyCustomLabel(KeyType keyType) throws GeneralSecurityException {
             // TODO: Remove. ECC tests skipped temporarily.

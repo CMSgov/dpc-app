@@ -15,8 +15,10 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
 
 @ExtendWith(BufferedLoggerHandler.class)
+@DisplayName("Third party caveats")
 class ThirdPartyCaveatTests {
 
     private static MacaroonBakery as;
@@ -44,6 +46,7 @@ class ThirdPartyCaveatTests {
      * No direct contact between as and ts is required
      */
     @Test
+    @DisplayName("Third party caveat round trip 🥳")
     void testThirdPartyRoundTrip() {
         // TS Creates a macaroon
         final Macaroon tsMacaroon = ts.createMacaroon(Collections.emptyList());
@@ -64,6 +67,7 @@ class ThirdPartyCaveatTests {
     }
 
     @Test
+    @DisplayName("Verify third party caveats instead of discharge 🤮")
     void testThirdPartyFailsWithoutDischarge() {
         // TS Creates a macaroon
         final Macaroon tsMacaroon = ts.createMacaroon(Collections.emptyList());

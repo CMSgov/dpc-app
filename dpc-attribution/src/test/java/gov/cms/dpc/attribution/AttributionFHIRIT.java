@@ -35,9 +35,10 @@ import static gov.cms.dpc.attribution.SharedMethods.submitAttributionBundle;
 import static gov.cms.dpc.common.utils.SeedProcessor.createBaseAttributionGroup;
 import static org.junit.jupiter.api.Assertions.*;
 
-@Disabled
 @ExtendWith(BufferedLoggerHandler.class)
 @IntegrationTest
+@DisplayName("Attribution roster operations")
+@Disabled
 class AttributionFHIRIT {
 
     private static final String configPath = "src/test/resources/test.application.yml";
@@ -163,7 +164,7 @@ class AttributionFHIRIT {
                 .execute();
 
         assertEquals(group2.getMember().size(), attributed.getTotal(), "Should have the same number of patients");
-
+    
         // Try to get a non-existent roster
 
         final IReadExecutable<Group> badRead = client

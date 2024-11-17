@@ -18,9 +18,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import static gov.cms.dpc.testing.factories.OrganizationFactory.createFakeEndpoint;
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
 
 @ExtendWith(BufferedLoggerHandler.class)
-    class EndpointValidationTest {
+@DisplayName("Endpoint validation")
+class EndpointValidationTest {
 
     private static FhirValidator fhirValidator;
     private static DPCProfileSupport dpcModule;
@@ -47,6 +49,7 @@ import static org.junit.jupiter.api.Assertions.*;
     }
 
     @Test
+    @DisplayName("Validate endpoint with managing org 🤮")
     void testManagingOrg() {
         final Endpoint endpoint = createFakeEndpoint();
         endpoint.setName("Test Name");
@@ -64,6 +67,7 @@ import static org.junit.jupiter.api.Assertions.*;
     }
 
     @Test
+    @DisplayName("Validate endpoint with name 🤮")
     void testName() {
         final Endpoint endpoint = createFakeEndpoint();
         endpoint.setManagingOrganization(new Reference("Organization/fake-org"));
@@ -93,5 +97,4 @@ import static org.junit.jupiter.api.Assertions.*;
         final ValidationResult r2 = fhirValidator.validateWithResult(endpoint, new ValidationOptions().addProfile(EndpointProfile.PROFILE_URI));
         assertTrue(r2.isSuccessful());
     }
-
 }

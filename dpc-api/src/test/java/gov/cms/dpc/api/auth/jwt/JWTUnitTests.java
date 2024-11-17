@@ -59,7 +59,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(DropwizardExtensionsSupport.class)
 @ExtendWith(BufferedLoggerHandler.class)
-@DisplayName("Token Resource Unit Tests")
+@DisplayName("Token resource processing")
 @SuppressWarnings("InnerClassMayBeStatic")
 class JWTUnitTests {
 
@@ -68,7 +68,7 @@ class JWTUnitTests {
 
     private JWTUnitTests() {
     }
-
+    
     @AfterEach
     void cleanup() {
         JWTKeys.clear();
@@ -140,6 +140,7 @@ class JWTUnitTests {
         }
 
         @Test
+        @DisplayName("Invalid grant type value 🤮")
         void testInvalidGrantTypeValue() {
             final MultivaluedMap<String, String> formData = new MultivaluedHashMap<>();
             formData.add("scope", "system/*.*");
@@ -157,6 +158,7 @@ class JWTUnitTests {
         }
 
         @Test
+        @DisplayName("Empty grant type value 🤮")
         void testEmptyGrantTypeValue() {
             final MultivaluedMap<String, String> formData = new MultivaluedHashMap<>();
             formData.add("scope", "system/*.*");
@@ -175,6 +177,7 @@ class JWTUnitTests {
         }
 
         @Test
+        @DisplayName("Invalid client assertion type 🤮")
         void testInvalidClientAssertionType() {
             final MultivaluedMap<String, String> formData = new MultivaluedHashMap<>();
             formData.add("scope", "system/*.*");
@@ -191,6 +194,7 @@ class JWTUnitTests {
         }
 
         @Test
+        @DisplayName("Empty client assertion type 🤮")
         void testEmptyClientAssertionType() {
             final MultivaluedMap<String, String> formData = new MultivaluedHashMap<>();
             formData.add("scope", "system/*.*");
@@ -210,6 +214,7 @@ class JWTUnitTests {
         }
 
         @Test
+        @DisplayName("Invalid scope type 🤮")
         void testInvalidScopeType() {
             final MultivaluedMap<String, String> formData = new MultivaluedHashMap<>();
             formData.add("scope", "this is not a scope");
@@ -227,6 +232,7 @@ class JWTUnitTests {
         }
 
         @Test
+        @DisplayName("Empty scope type 🤮")
         void testEmptyScopeType() {
             final MultivaluedMap<String, String> formData = new MultivaluedHashMap<>();
             formData.add("scope", "");
@@ -248,8 +254,9 @@ class JWTUnitTests {
     @Nested
     @DisplayName("JWT Tests")
     class JWTests {
-
+    
         @ParameterizedTest
+        @DisplayName("JWT public key not found in key store 🤮")
         @EnumSource(KeyType.class)
         void testMissingJWTPublicKey(KeyType keyType) throws NoSuchAlgorithmException {
             // Submit JWT with missing key
@@ -279,6 +286,7 @@ class JWTUnitTests {
         }
 
         @ParameterizedTest
+        @DisplayName("Expired JWT 🤮")
         @EnumSource(KeyType.class)
         void testExpiredJWT(KeyType keyType) throws NoSuchAlgorithmException {
             final Pair<String, PrivateKey> keyPair = generateKeypair(keyType);
@@ -292,7 +300,7 @@ class JWTUnitTests {
                     .setExpiration(Date.from(Instant.now().minus(5, ChronoUnit.MINUTES)))
                     .signWith(keyPair.getRight(), APIAuthHelpers.getSigningAlgorithm(keyType))
                     .compact();
-
+            
             // Submit the JWT
             Response response = RESOURCE.target("/v1/Token/auth")
                     .queryParam("scope", "system/*.*")
@@ -307,6 +315,7 @@ class JWTUnitTests {
         }
 
         @ParameterizedTest
+        @DisplayName("Incorrect verification key 🤮")
         @EnumSource(KeyType.class)
         void testJWTWrongSigningKey(KeyType keyType) throws NoSuchAlgorithmException {
             final Pair<String, PrivateKey> keyPair = generateKeypair(keyType);
@@ -320,7 +329,7 @@ class JWTUnitTests {
                     .setExpiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
                     .signWith(keyPair.getRight(), APIAuthHelpers.getSigningAlgorithm(keyType))
                     .compact();
-
+            
             // Submit the JWT
             Response response = RESOURCE.target("/v1/Token/auth")
                     .queryParam("scope", "system/*.*")
@@ -335,6 +344,7 @@ class JWTUnitTests {
         }
 
         @ParameterizedTest
+        @DisplayName("JWT replay attack 🤮")
         @EnumSource(KeyType.class)
         void testJTIReplay(KeyType keyType) throws NoSuchAlgorithmException {
             final Pair<String, PrivateKey> keyPair = generateKeypair(keyType);
@@ -350,7 +360,7 @@ class JWTUnitTests {
                     .setExpiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
                     .signWith(keyPair.getRight(), APIAuthHelpers.getSigningAlgorithm(keyType))
                     .compact();
-
+            
             // Submit the JWT
             Response response = RESOURCE.target("/v1/Token/auth")
                     .queryParam("scope", "system/*.*")
@@ -381,6 +391,7 @@ class JWTUnitTests {
     class ValidationTests {
 
         @ParameterizedTest
+        @DisplayName("Invalid JWT 🤮")
         @EnumSource(KeyType.class)
         void testNonToken(KeyType keyType) throws NoSuchAlgorithmException {
             // Submit JWT with non-client token
@@ -407,6 +418,7 @@ class JWTUnitTests {
         }
 
         @ParameterizedTest
+        @DisplayName("JWT with random issuer/subject ID 🤮")
         @EnumSource(KeyType.class)
         void testUUIDToken(KeyType keyType) throws NoSuchAlgorithmException {
             // Submit JWT with non-client token
@@ -422,7 +434,7 @@ class JWTUnitTests {
                     .setExpiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
                     .signWith(keyPair.getRight(), APIAuthHelpers.getSigningAlgorithm(keyType))
                     .compact();
-
+ 
             // Submit the JWT
             Response response = RESOURCE.target("/v1/Token/validate")
                     .request()
@@ -434,6 +446,7 @@ class JWTUnitTests {
         }
 
         @ParameterizedTest
+        @DisplayName("Expired JWT with date-based expiration 🤮")
         @EnumSource(KeyType.class)
         void testExpiredJWT(KeyType keyType) throws NoSuchAlgorithmException {
             // Submit JWT with non-client token
@@ -461,6 +474,7 @@ class JWTUnitTests {
         }
 
         @ParameterizedTest
+        @DisplayName("Expired JWT with numeric expiration 🤮")
         @EnumSource(KeyType.class)
         void testNumericExpiration(KeyType keyType) throws NoSuchAlgorithmException {
             // Submit JWT with non-client token
@@ -479,7 +493,7 @@ class JWTUnitTests {
                     .addClaims(claims)
                     .signWith(keyPair.getPrivate(), APIAuthHelpers.getSigningAlgorithm(keyType))
                     .compact();
-
+            
             // Submit the JWT
             Response response = RESOURCE.target("/v1/Token/validate")
                     .request()
@@ -491,6 +505,7 @@ class JWTUnitTests {
         }
 
         @ParameterizedTest
+        @DisplayName("JWT with missing expiration date 🤮")
         @EnumSource(KeyType.class)
         void testDateExpiration(KeyType keyType) throws NoSuchAlgorithmException {
             // Submit JWT with non-client token
@@ -521,6 +536,7 @@ class JWTUnitTests {
         }
 
         @ParameterizedTest
+        @DisplayName("JWT lifetime eclipses policy-based limit 🤮")
         @EnumSource(KeyType.class)
         void testOverlongJWT(KeyType keyType) throws NoSuchAlgorithmException {
             // Submit JWT with non-client token
@@ -536,7 +552,7 @@ class JWTUnitTests {
                     .setExpiration(Date.from(Instant.now().plus(12, ChronoUnit.MINUTES)))
                     .signWith(keyPair.getPrivate(), APIAuthHelpers.getSigningAlgorithm(keyType))
                     .compact();
-
+            
             // Submit the JWT
             Response response = RESOURCE.target("/v1/Token/validate")
                     .request()
@@ -548,6 +564,7 @@ class JWTUnitTests {
         }
 
         @ParameterizedTest
+        @DisplayName("JWT with incorrect audience claim 🤮")
         @EnumSource(KeyType.class)
         void testWrongAudClaim(KeyType keyType) throws NoSuchAlgorithmException {
             final KeyPair keyPair = APIAuthHelpers.generateKeyPair(keyType);
@@ -563,7 +580,7 @@ class JWTUnitTests {
                     .setExpiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
                     .signWith(keyPair.getPrivate(), APIAuthHelpers.getSigningAlgorithm(keyType))
                     .compact();
-
+            
             // Submit the JWT
             Response response = RESOURCE.target("/v1/Token/validate")
                     .request()
@@ -575,6 +592,7 @@ class JWTUnitTests {
         }
 
         @ParameterizedTest
+        @DisplayName("Successful JWT verification 🥳")
         @EnumSource(KeyType.class)
         void testSuccess(KeyType keyType) throws NoSuchAlgorithmException {
             final String m = buildMacaroon();
@@ -590,7 +608,7 @@ class JWTUnitTests {
                     .setExpiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
                     .signWith(keyPair.getPrivate(), APIAuthHelpers.getSigningAlgorithm(keyType))
                     .compact();
-
+            
             // Submit the JWT
             Response response = RESOURCE.target("/v1/Token/validate")
                     .request()
@@ -601,6 +619,7 @@ class JWTUnitTests {
         }
 
         @ParameterizedTest
+        @DisplayName("JWT with mismatched claims 🤮")
         @EnumSource(KeyType.class)
         void testMismatchClaims(KeyType keyType) throws NoSuchAlgorithmException {
             final KeyPair keyPair = APIAuthHelpers.generateKeyPair(keyType);
@@ -615,7 +634,7 @@ class JWTUnitTests {
                     .setExpiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
                     .signWith(keyPair.getPrivate(), APIAuthHelpers.getSigningAlgorithm(keyType))
                     .compact();
-
+            
             // Submit the JWT
             Response response = RESOURCE.target("/v1/Token/validate")
                     .request()
@@ -627,6 +646,7 @@ class JWTUnitTests {
         }
 
         @ParameterizedTest
+        @DisplayName("JWT with missing claims 🤮")
         @EnumSource(KeyType.class)
         void testMissingClaim(KeyType keyType) throws NoSuchAlgorithmException {
             final KeyPair keyPair = APIAuthHelpers.generateKeyPair(keyType);
@@ -640,7 +660,7 @@ class JWTUnitTests {
                     .setExpiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
                     .signWith(keyPair.getPrivate(), APIAuthHelpers.getSigningAlgorithm(keyType))
                     .compact();
-
+            
             // Submit the JWT
             Response response = RESOURCE.target("/v1/Token/validate")
                     .request()
@@ -652,6 +672,7 @@ class JWTUnitTests {
         }
 
         @Test
+        @DisplayName("Incorrectly-formatted JWT 🤮")
         void testNotJWT() {
             // Submit the JWT
             Response response = RESOURCE.target("/v1/Token/validate")
@@ -664,6 +685,7 @@ class JWTUnitTests {
         }
 
         @ParameterizedTest
+        @DisplayName("JWT with missing verification key id 🤮")
         @EnumSource(KeyType.class)
         void testMissingKID(KeyType keyType) throws NoSuchAlgorithmException {
             final String m = buildMacaroon();
@@ -678,7 +700,7 @@ class JWTUnitTests {
                     .setExpiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
                     .signWith(keyPair.getPrivate(), APIAuthHelpers.getSigningAlgorithm(keyType))
                     .compact();
-
+            
             // Submit the JWT
             Response response = RESOURCE.target("/v1/Token/validate")
                     .request()
@@ -690,6 +712,7 @@ class JWTUnitTests {
         }
 
         @ParameterizedTest
+        @DisplayName("JWT with invalid verification key id 🤮")
         @EnumSource(KeyType.class)
         void testInvalidKID(KeyType keyType) throws NoSuchAlgorithmException {
             final String m = buildMacaroon();
@@ -705,7 +728,7 @@ class JWTUnitTests {
                     .setExpiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
                     .signWith(keyPair.getPrivate(), APIAuthHelpers.getSigningAlgorithm(keyType))
                     .compact();
-
+            
             // Submit the JWT
             Response response = RESOURCE.target("/v1/Token/validate")
                     .request()
@@ -717,12 +740,13 @@ class JWTUnitTests {
         }
 
         @ParameterizedTest
+        @DisplayName("JWT with incorrect expiration date format 🤮")
         @EnumSource(KeyType.class)
         void testIncorrectExpFormat(KeyType keyType) throws NoSuchAlgorithmException {
             final Pair<String, PrivateKey> keyPair = generateKeypair(keyType);
             final String m = buildMacaroon();
-
-
+            
+            
             final String id = UUID.randomUUID().toString();
             final String jwt = Jwts.builder()
                     .setHeaderParam("kid", UUID.randomUUID())
@@ -733,9 +757,9 @@ class JWTUnitTests {
                     .claim("exp", Instant.now().plus(1, ChronoUnit.MINUTES).atOffset(ZoneOffset.UTC).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME))
                     .signWith(keyPair.getRight(), APIAuthHelpers.getSigningAlgorithm(keyType))
                     .compact();
-
+            
             // Submit the JWT
-            Response response = RESOURCE.target("/v1/Token/validate")
+                Response response = RESOURCE.target("/v1/Token/validate")
                     .request()
                     .accept(MediaType.APPLICATION_JSON)
                     .post(Entity.entity(jwt, MediaType.TEXT_PLAIN));

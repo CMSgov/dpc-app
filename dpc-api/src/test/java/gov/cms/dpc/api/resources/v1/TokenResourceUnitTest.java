@@ -4,6 +4,7 @@ import com.github.nitram509.jmacaroons.Macaroon;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.jwt.IJTICache;
 import gov.cms.dpc.api.entities.TokenEntity;
+import gov.cms.dpc.api.jdbi.PublicKeyDAO;
 import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.api.models.CollectionResponse;
 import gov.cms.dpc.macaroons.MacaroonBakery;
@@ -31,10 +32,15 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.junit.jupiter.api.DisplayName;
 
+@DisplayName("Token resource operations")
 public class TokenResourceUnitTest {
     @Mock
     TokenDAO mockTokenDao;
+    
+    @Mock
+    PublicKeyDAO mockPublicKeyDao;
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private static MacaroonBakery bakery;
@@ -54,6 +60,7 @@ public class TokenResourceUnitTest {
     }
 
     @Test
+    @DisplayName("Get client tokens 🥳")
     public void testGetOrganizationTokens() {
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
@@ -65,13 +72,14 @@ public class TokenResourceUnitTest {
         CollectionResponse<TokenEntity> expected = new CollectionResponse<>(tokenEntityList);
 
         Mockito.when(mockTokenDao.fetchTokens(orgId)).thenAnswer(answer -> tokenEntityList);
-
+        
         CollectionResponse<TokenEntity> actualResponse = tokenResource.getOrganizationTokens(organizationPrincipal);
 
         assertEquals(expected.getEntities(), actualResponse.getEntities());
     }
 
     @Test
+    @DisplayName("Get client token 🥳")
     public void testGetOrganizationToken() {
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
@@ -90,6 +98,7 @@ public class TokenResourceUnitTest {
     }
 
     @Test
+    @DisplayName("Get unrecognized client token 🤮")
     public void testGetOrganizationTokenNoMatch() {
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
@@ -103,6 +112,7 @@ public class TokenResourceUnitTest {
     }
 
     @Test
+    @DisplayName("Create client token 🥳")
     public void testCreateOrganizationToken() {
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
@@ -142,6 +152,7 @@ public class TokenResourceUnitTest {
     }
 
     @Test
+    @DisplayName("Delete client token 🥳")
     public void testDeleteOrganizationToken() {
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();

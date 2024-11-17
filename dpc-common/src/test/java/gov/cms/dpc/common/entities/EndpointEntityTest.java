@@ -5,10 +5,13 @@ import org.junit.jupiter.api.Test;
 
 import org.hl7.fhir.dstu3.model.Endpoint;
 import java.util.UUID;
+import org.junit.jupiter.api.DisplayName;
 
+@DisplayName("Endpoint Entity tests")
 public class EndpointEntityTest {
 
 	@Test
+        @DisplayName("Test endpoint getters and setters 🥳")
 	public void testGettersAndSetters() {
 		EndpointEntity endpoint = new EndpointEntity();
 		UUID id = UUID.randomUUID();
@@ -41,6 +44,7 @@ public class EndpointEntityTest {
 	}
 
 	@Test
+        @DisplayName("Update endpoint 🥳")
 	public void testUpdate() {
 		EndpointEntity e1 = new EndpointEntity();
 		EndpointEntity e2 = new EndpointEntity();
@@ -52,6 +56,7 @@ public class EndpointEntityTest {
 	}
 
 	@Test
+        @DisplayName("Test connection getters and setters 🥳")
 	public void testConnectionGettersAndSetters() {
 		EndpointEntity.ConnectionType connectionType = new EndpointEntity.ConnectionType();
 		String system = "example-system";

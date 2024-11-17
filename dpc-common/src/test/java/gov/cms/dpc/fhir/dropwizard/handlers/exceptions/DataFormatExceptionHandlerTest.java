@@ -11,10 +11,13 @@ import javax.ws.rs.core.Response;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
+import org.junit.jupiter.api.DisplayName;
 
+@DisplayName("Data format exception handling")
 public class DataFormatExceptionHandlerTest {
 
     @Test
+    @DisplayName("Handle FHIR exception 🤮")
     void testHandleFHIRException() {
         final DataFormatExceptionHandler handler = new DataFormatExceptionHandler(Mockito.mock(ResourceInfo.class));
 
@@ -28,6 +31,7 @@ public class DataFormatExceptionHandlerTest {
     }
 
     @Test
+    @DisplayName("Handle non-FHIR exception 🤮")
     void testHandleNonFHIRException() {
         final DataFormatExceptionHandler handler = new DataFormatExceptionHandler(Mockito.mock(ResourceInfo.class));
 

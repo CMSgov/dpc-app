@@ -41,8 +41,10 @@ import java.time.YearMonth;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.DisplayName;
 
 @ExtendWith(BufferedLoggerHandler.class)
+@DisplayName("Aggregation Engine BFD client usage")
 public class AggregationEngineBFDClientTest {
 
     @TempDir
@@ -80,6 +82,7 @@ public class AggregationEngineBFDClientTest {
     }
 
     @Test
+    @DisplayName("Complete a bulk job using BFD data 🥳")
     @SuppressWarnings("unchecked")
     void testHeadersPassedToBFDForBulkJob() {
         //Mock out the interactions of using IGenericClient to capture things
@@ -93,7 +96,6 @@ public class AggregationEngineBFDClientTest {
         ArgumentCaptor<String> headerValue = ArgumentCaptor.forClass(String.class);
         Mockito.when(iQuery.withAdditionalHeader(headerKey.capture(), headerValue.capture())).thenReturn(iQuery);
 
-        UUID providerID = UUID.randomUUID();
         UUID jobID = queue.createJob(
                 orgID,
                 TEST_ORG_NPI,
@@ -111,8 +113,8 @@ public class AggregationEngineBFDClientTest {
 
         // Look at the result
         final var completeJob = queue.getJobBatches(jobID).stream().findFirst().orElseThrow();
-        assertEquals(JobStatus.COMPLETED, completeJob.getStatus());
 
+        assertEquals(JobStatus.COMPLETED, completeJob.getStatus());
         Assertions.assertThat(completeJob.getJobID()).isNotNull();
         Assertions.assertThat(completeJob.getProviderNPI()).isNotNull();
         Assertions.assertThat(completeJob.getTransactionTime()).isNotNull();
@@ -123,6 +125,7 @@ public class AggregationEngineBFDClientTest {
     }
 
     @Test
+    @DisplayName("Complete a non-bulk job using BFD data 🥳")
     @SuppressWarnings("unchecked")
     void testHeadersPassedToBFDForNonBulkJob() {
         //Mock out the interactions of using IGenericClient to capture things

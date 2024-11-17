@@ -13,12 +13,15 @@ import javax.ws.rs.core.Response;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.DisplayName;
 
+@DisplayName("Jersey exception handling")
 public class JerseyExceptionHandlerTest {
 
     // TODO: add constraint violations
 
     @Test
+    @DisplayName("Cause FHIR exception 🤮")
     void testToResponse_fhirException() {
         ResourceInfo info = Mockito.mock(ResourceInfo.class);
         Mockito.when(info.getResourceClass()).thenAnswer(answer -> FHIRResourceClass.class);
@@ -31,6 +34,7 @@ public class JerseyExceptionHandlerTest {
     }
 
     @Test
+    @DisplayName("Cause non-FHIR exception 🤮")
     void testToResponse_nonFhirException() {
         final JerseyExceptionHandler handler = new JerseyExceptionHandler(Mockito.mock(ResourceInfo.class));
 

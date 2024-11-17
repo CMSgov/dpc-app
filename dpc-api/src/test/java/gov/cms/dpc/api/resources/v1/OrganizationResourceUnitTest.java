@@ -24,11 +24,13 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
+import org.junit.jupiter.api.DisplayName;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.openMocks;
 
+@DisplayName("Organization resource operations")
 public class OrganizationResourceUnitTest {
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
@@ -45,6 +47,7 @@ public class OrganizationResourceUnitTest {
     }
 
     @Test
+    @DisplayName("Add organization")
     public void testSubmitOrganization() {
         UUID orgID = UUID.randomUUID();
         Organization organization = new Organization();
@@ -71,6 +74,7 @@ public class OrganizationResourceUnitTest {
     }
 
     @Test
+    @DisplayName("Add organization with missing parameters 🤮")
     public void testSubmitOrganizationNoOrganization() {
         Bundle bundle = new Bundle();
 
@@ -85,6 +89,7 @@ public class OrganizationResourceUnitTest {
     }
 
     @Test
+    @DisplayName("Add organization with no endpoints 🤮")
     public void testSubmitOrganizationNoEndpoints() {
         UUID orgID = UUID.randomUUID();
         Organization organization = new Organization();
@@ -103,6 +108,7 @@ public class OrganizationResourceUnitTest {
     }
 
     @Test
+    @DisplayName("Get organization 🥳")
     public void testGetOrganization() {
         UUID orgID = UUID.randomUUID();
         Organization organization = new Organization();
@@ -123,6 +129,7 @@ public class OrganizationResourceUnitTest {
     }
 
     @Test
+    @DisplayName("Delete organization 🥳")
     public void testDeleteOrganization() {
         UUID orgID = UUID.randomUUID();
 
@@ -138,6 +145,7 @@ public class OrganizationResourceUnitTest {
     }
 
     @Test
+    @DisplayName("Update organization 🥳")
     public void testUpdateOrganization() {
         UUID orgID = UUID.randomUUID();
         Organization organization = new Organization();
@@ -160,6 +168,7 @@ public class OrganizationResourceUnitTest {
     }
 
     @Test
+    @DisplayName("Update unrecognized organization 🤮")
     public void testUpdateOrganizationNoResource() {
         UUID orgID = UUID.randomUUID();
         Organization organization = new Organization();

@@ -146,7 +146,7 @@ public class APITestHelpers {
      */
     public static ResourceExtension buildResourceExtension(FhirContext
                                                                    ctx, List<Object> resources, List<Object> providers, boolean validation) {
-
+        
         final FHIRHandler fhirHandler = new FHIRHandler(ctx);
         final var builder = ResourceExtension
                 .builder()
@@ -217,11 +217,11 @@ public class APITestHelpers {
         try (CloseableHttpClient client = HttpClients.createDefault()) {
             final HttpGet healthCheck = new HttpGet(healthURI);
 
-            try (CloseableHttpResponse execute = client.execute(healthCheck)) {
+                try (CloseableHttpResponse execute = client.execute(healthCheck)) {
                 assertEquals(HttpStatus.OK_200, execute.getStatusLine().getStatusCode(), "Should be healthy");
-            }
-        }
-    }
+                    }
+                    }
+                }
 
     private static Validator provideValidator(InjectingConstraintValidatorFactory factory) {
         return Validation.byDefaultProvider()

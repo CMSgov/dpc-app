@@ -8,10 +8,13 @@ import org.junit.jupiter.api.Test;
 import javax.ws.rs.core.Response;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.DisplayName;
 
+@DisplayName("HAPI exception handling")
 public class HAPIExceptionHandlerTest {
 
     @Test
+    @DisplayName("Receive FHIR exception without operation outcome 🤮")
     void testToResponse_noOperationOutcome() {
         final HAPIExceptionHandler handler = new HAPIExceptionHandler();
 
@@ -26,6 +29,7 @@ public class HAPIExceptionHandlerTest {
     }
 
     @Test
+    @DisplayName("Receive FHIR exception with operaiton outcome 🤮")
     void testToResponse_hasOperationOutcome() {
         final HAPIExceptionHandler handler = new HAPIExceptionHandler();
 

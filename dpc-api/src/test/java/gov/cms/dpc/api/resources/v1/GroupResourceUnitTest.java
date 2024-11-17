@@ -41,11 +41,13 @@ import java.util.UUID;
 import static gov.cms.dpc.api.resources.v1.GroupResource.SYNTHETIC_BENE_ID;
 import static gov.cms.dpc.fhir.FHIRMediaTypes.FHIR_JSON;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.DisplayName;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.*;
 
 @SuppressWarnings("unchecked")
+@DisplayName("Group resource operations")
 public class GroupResourceUnitTest {
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
@@ -72,6 +74,7 @@ public class GroupResourceUnitTest {
     }
 
     @Test
+    @DisplayName("Create roster 🥳")
     public void testCreateRoster() {
         String practitionerNPI = NPIUtil.generateNPI();
         UUID practitionerId = UUID.randomUUID();
@@ -200,6 +203,7 @@ public class GroupResourceUnitTest {
     }
 
     @Test
+    @DisplayName("Create roster when provider not found 🤮")
     public void testCreateRosterProviderNotFound() {
         UUID practitionerId = UUID.randomUUID();
         UUID orgId = UUID.randomUUID();
@@ -235,6 +239,7 @@ public class GroupResourceUnitTest {
     }
 
     @Test
+    @DisplayName("Export roster with valid `Since` parameter 🥳")
     public void testExportWithValidSinceParam() {
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
@@ -309,6 +314,7 @@ public class GroupResourceUnitTest {
     }
 
     @Test
+    @DisplayName("Export roster with invalid times 🤮")
     public void testExportWithInvalidTimes() {
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
@@ -388,6 +394,7 @@ public class GroupResourceUnitTest {
     }
 
     @Test
+    @DisplayName("Set export output format 🥳")
     public void testOutputFormatSetting() {
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
@@ -468,7 +475,8 @@ public class GroupResourceUnitTest {
     }
 
     @Test
-    public void testExportWithExpiredPatietn() {
+    @DisplayName("Export group with expired patient 🤮")
+    public void testExportWithExpiredPatient() {
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
         organization.setId(orgId.toString());

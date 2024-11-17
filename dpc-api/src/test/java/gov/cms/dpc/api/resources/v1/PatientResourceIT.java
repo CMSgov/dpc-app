@@ -58,6 +58,7 @@ import static org.junit.jupiter.api.Assertions.*;
     opt outs from the previous run will interfere with the current one.
  */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@DisplayName("Patient resource operations")
 class PatientResourceIT extends AbstractSecureApplicationIT {
     final java.util.Date dateYesterday = Date.from(Instant.now().minus(1, ChronoUnit.DAYS));
     final java.util.Date dateToday = Date.from(Instant.now());
@@ -73,6 +74,7 @@ class PatientResourceIT extends AbstractSecureApplicationIT {
     final IGenericClient consentClient = APITestHelpers.buildConsentClient(ctx);
 
     @Test
+    @DisplayName("Create Patient and return headers 🥳")
     @Order(1)
     public void testCreatePatientReturnsAppropriateHeaders() {
         IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
@@ -103,6 +105,7 @@ class PatientResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
+    @DisplayName("Get existing patients 🥳")
     @Order(2)
     void ensurePatientsExist() throws IOException, URISyntaxException, GeneralSecurityException {
         IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
@@ -160,8 +163,9 @@ class PatientResourceIT extends AbstractSecureApplicationIT {
 
         assertEquals(0, otherSpecificSearch.getTotal(), "Should have a specific provider");
     }
-
+    
     @Test
+    @DisplayName("Remove patient 🥳")
     @Order(3)
     void testPatientRemoval() throws IOException, URISyntaxException, GeneralSecurityException {
         final String macaroon = FHIRHelpers.registerOrganization(attrClient, parser, ORGANIZATION_ID, ORGANIZATION_NPI, getAdminURL());
@@ -201,6 +205,7 @@ class PatientResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
+    @DisplayName("Update Patient 🥳")
     @Order(4)
     void testPatientUpdating() throws IOException, URISyntaxException, GeneralSecurityException {
         final String macaroon = FHIRHelpers.registerOrganization(attrClient, parser, ORGANIZATION_ID, ORGANIZATION_NPI, getAdminURL());
@@ -240,6 +245,7 @@ class PatientResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
+    @DisplayName("Create patient with invalid data 🤮")
     @Order(5)
     void testCreateInvalidPatient() throws IOException, URISyntaxException {
         URL url = new URL(getBaseURL() + "/Patient");
@@ -271,6 +277,7 @@ class PatientResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
+    @DisplayName("Fetch Patient$Everything 🥳")
     @Order(6)
     void testPatientEverythingWithoutGroupFetchesData() throws IOException, URISyntaxException, GeneralSecurityException {
         IGenericClient client = generateClient(ORGANIZATION_NPI, RandomStringUtils.randomAlphabetic(25));
@@ -346,6 +353,7 @@ class PatientResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
+    @DisplayName("Fetch Patient$Everything from patient in group 🥳")
     @Order(7)
     void testPatientEverythingWithGroupFetchesData() throws IOException, URISyntaxException, GeneralSecurityException {
         IGenericClient client = generateClient(ORGANIZATION_NPI, RandomStringUtils.randomAlphabetic(25));
@@ -430,9 +438,10 @@ class PatientResourceIT extends AbstractSecureApplicationIT {
 
         assertEquals(0, resultValidSince.getTotal(), "Should have 0 entries in Bundle");
     }
-
+    
     @Disabled
     @Test
+    @DisplayName("Fetch Patient$Everything for patient with multiple MBIs 🥳")
     @Order(8)
     void testPatientEverything_CanHandlePatientWithMultipleMBIs() throws IOException, URISyntaxException, GeneralSecurityException {
         IGenericClient client = generateClient(ORGANIZATION_NPI, RandomStringUtils.randomAlphabetic(25));
@@ -467,6 +476,7 @@ class PatientResourceIT extends AbstractSecureApplicationIT {
 
     @Disabled
     @Test
+    @DisplayName("Fetch Patient$Everything for opted-out patient 🤮")
     @Order(9)
     void testPatientEverythingForOptedOutPatient() throws IOException, URISyntaxException, GeneralSecurityException {
         IGenericClient client = generateClient(ORGANIZATION_NPI, RandomStringUtils.randomAlphabetic(25));
@@ -492,6 +502,7 @@ class PatientResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
+    @DisplayName("Fetch Patient$Everything for opted-out patient with multiple MBIs 🤮")
     @Order(10)
     void testPatientEverythingForOptedOutPatientOnMultipleMbis() throws IOException, URISyntaxException, GeneralSecurityException {
         IGenericClient client = generateClient(ORGANIZATION_NPI, RandomStringUtils.randomAlphabetic(25));
@@ -519,6 +530,7 @@ class PatientResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
+    @DisplayName("Patient opt-in 🥳")
     public void testOptInPatient() throws GeneralSecurityException, IOException, URISyntaxException {
         IGenericClient client = generateClient(ORGANIZATION_NPI, RandomStringUtils.randomAlphabetic(25));
 
@@ -549,6 +561,7 @@ class PatientResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
+    @DisplayName("Fetch Patient by UUID 🥳")
     public void testGetPatientByUUID() throws GeneralSecurityException, IOException, URISyntaxException {
         final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
         final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
@@ -567,6 +580,7 @@ class PatientResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
+    @DisplayName("Fetch Patient by UUID from other org 🤮")
     public void testDeletePatient() throws GeneralSecurityException, IOException, URISyntaxException {
         final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
         final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
@@ -581,6 +595,7 @@ class PatientResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
+    @DisplayName("Get Patients by ID 🥳")
     public void testPatientPathAuthorization() throws GeneralSecurityException, IOException, URISyntaxException {
         final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
         final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
@@ -618,7 +633,7 @@ class PatientResourceIT extends AbstractSecureApplicationIT {
        assertEquals(64, result.getTotal(), "Should have 64 entries in Bundle");
 
         final String orgAPractitionerId = orgAPractitioner.getIdElement().getIdPart();
-       assertThrows(AuthenticationException.class, () ->
+        assertThrows(AuthenticationException.class, () ->
                APITestHelpers.getPatientEverything(orgBClient, orgAPatient.getIdElement().getIdPart(), generateProvenance(orgAContext.getOrgId(), orgAPractitionerId))
        , "Expected auth error when export another org's patient's data");
     }

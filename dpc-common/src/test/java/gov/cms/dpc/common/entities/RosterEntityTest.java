@@ -12,10 +12,13 @@ import org.hl7.fhir.dstu3.model.Meta;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
+import org.junit.jupiter.api.DisplayName;
 
+@DisplayName("Roster Entity tests")
 public class RosterEntityTest {
 
 	@Test
+        @DisplayName("Test getters and setters 🥳")
 	public void testGettersAndSetters() {
 		RosterEntity roster = new RosterEntity();
 		UUID id = UUID.randomUUID();
@@ -41,6 +44,7 @@ public class RosterEntityTest {
 	}
 
 	@Test
+        @DisplayName("Roster entity returned from FHIR 🥳")
 	public void testFromFHIR() {
 		Group attributionRoster = new Group();
 
@@ -66,6 +70,7 @@ public class RosterEntityTest {
 	}
 
 	@Test
+        @DisplayName("Overrides for hashcode and equals 🥳")
 	public void testEqualsAndHashCode() {
 		UUID id = UUID.randomUUID();
 		RosterEntity r1 = new RosterEntity();

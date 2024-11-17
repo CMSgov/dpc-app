@@ -3,6 +3,7 @@ package gov.cms.dpc.attribution.resources;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IUpdateTyped;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.dpc.attribution.AbstractAttributionIT;
@@ -23,7 +24,9 @@ import java.util.Map;
 
 import static gov.cms.dpc.common.utils.SeedProcessor.createBaseAttributionGroup;
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
 
+@DisplayName("Organization resource handling")
 class OrganizationResourceIT extends AbstractAttributionIT {
 
         final IGenericClient client;
@@ -52,6 +55,7 @@ class OrganizationResourceIT extends AbstractAttributionIT {
     }
 
     @Test
+    @DisplayName("Basic registration  🥳")
     void testBasicRegistration() {
         final Organization organization = OrganizationHelpers.createOrganization(ctx, client);
         assertAll(() -> assertNotNull(organization, "Should have an org back"),
@@ -60,6 +64,7 @@ class OrganizationResourceIT extends AbstractAttributionIT {
     }
 
     @Test
+    @DisplayName("Register with invalid organization 🤮")
     void testInvalidOrganization() {
 
         // Create fake organization with missing data
@@ -81,6 +86,7 @@ class OrganizationResourceIT extends AbstractAttributionIT {
     }
 
     @Test
+    @DisplayName("Register with unnamed parameter 🤮")
     void testUnnamedParameterSubmission() {
 
         // Create fake organization with missing data
@@ -102,6 +108,7 @@ class OrganizationResourceIT extends AbstractAttributionIT {
     }
 
     @Test
+    @DisplayName("Delete organization 🥳")
     void testOrgDeletion() {
         final Organization organization = OrganizationHelpers.createOrganization(ctx, client, "1234567992", false);
         // Add a fake provider and practitioner
@@ -172,6 +179,7 @@ class OrganizationResourceIT extends AbstractAttributionIT {
     }
 
     @Test
+    @DisplayName("Update organization 🥳")
     void testUpdateOrganization() {
         Organization organization = OrganizationHelpers.createOrganization(ctx, client, "1632101113", false);
 
@@ -195,6 +203,7 @@ class OrganizationResourceIT extends AbstractAttributionIT {
     }
 
     @Test
+    @DisplayName("Delete an organization with a duplicate NPI 🤮")
     void testUpdateOrganizationWithDuplicateNPI() {
         Organization organization1 = OrganizationHelpers.createOrganization(ctx, client, "1633101112", true);
         Organization organization2 = OrganizationHelpers.createOrganization(ctx, client, "1235567892", false);
@@ -212,6 +221,7 @@ class OrganizationResourceIT extends AbstractAttributionIT {
     }
 
     @Test
+    @DisplayName("Get organization by ID 🥳")
     void testGetOrganizationsByIds() {
         List<String> ids = new ArrayList<String>();
         Organization organization1 = OrganizationHelpers.createOrganization(ctx, client, "1633101112", true);

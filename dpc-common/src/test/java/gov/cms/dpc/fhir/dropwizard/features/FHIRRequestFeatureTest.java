@@ -13,8 +13,10 @@ import org.mockito.Mockito;
 import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.FeatureContext;
 import java.lang.reflect.Method;
+import org.junit.jupiter.api.DisplayName;
 
 @ExtendWith(DropwizardExtensionsSupport.class)
+@DisplayName("FHIR request feature annotation")
 public class FHIRRequestFeatureTest {
 
     ResourceInfo info = Mockito.mock(ResourceInfo.class);
@@ -32,6 +34,7 @@ public class FHIRRequestFeatureTest {
     }
 
     @Test
+    @DisplayName("Annotate FHIR resource 🥳")
     void testFHIRResourceAnnotation() throws NoSuchMethodException {
         Method method = FHIRRequestFeatureTest.class.getMethod("testFhirAnnotationMethod");
         Mockito.when(info.getResourceMethod()).thenReturn(method);
@@ -40,6 +43,7 @@ public class FHIRRequestFeatureTest {
     }
 
     @Test
+    @DisplayName("Annotate FHIR Java class 🥳")
     void testFHIRClassAnnotation() throws NoSuchMethodException {
         Method method = FHIRRequestFeatureTest.class.getMethod("testNoAnnotationMethod");
         Mockito.when(info.getResourceClass()).thenAnswer(answer -> FHIRResourceClass.class);
@@ -49,6 +53,7 @@ public class FHIRRequestFeatureTest {
     }
 
     @Test
+    @DisplayName("Annotate Async FHIR resource 🥳")
     void testAsyncFHIRResourceAnnotation() throws NoSuchMethodException {
         Method method = FHIRRequestFeatureTest.class.getMethod("testFhirAsyncAnnotatedMethod");
         Mockito.when(info.getResourceClass()).thenAnswer(answer -> FHIRAsyncResourceClass.class);
@@ -58,6 +63,7 @@ public class FHIRRequestFeatureTest {
     }
 
     @Test
+    @DisplayName("Annotate Async FHIR Java class 🥳")
     void testAsyncFHIRClassAnnotation() throws NoSuchMethodException {
         Method method = FHIRRequestFeatureTest.class.getMethod("testFhirAsyncAnnotatedMethod");
         Mockito.when(info.getResourceClass()).thenAnswer(answer -> FHIRAsyncResourceClass.class);
@@ -68,6 +74,7 @@ public class FHIRRequestFeatureTest {
 
 
     @Test
+    @DisplayName("Select no annotation method 🥳")
     void testNoAnnotation() throws NoSuchMethodException {
         Method method = FHIRRequestFeatureTest.class.getMethod("testNoAnnotationMethod");
         Mockito.when(info.getResourceClass()).thenAnswer(answer -> NoAnnotationClass.class);

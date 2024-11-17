@@ -37,10 +37,13 @@ import java.sql.Date;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
 
+@DisplayName("Practitioner resource operations")
 class PractitionerResourceIT extends AbstractSecureApplicationIT {
 
     @Test
+    @DisplayName("Get all practitioners for an organization 🥳")
     void ensurePractitionersExist() throws IOException, URISyntaxException, GeneralSecurityException {
         final IParser parser = ctx.newJsonParser();
         final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
@@ -126,6 +129,7 @@ class PractitionerResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
+    @DisplayName("Create practitioner with invalid parameters 🤮")
     void testCreateInvalidPractitioner() throws IOException, URISyntaxException {
         URL url = new URL(getBaseURL() + "/Practitioner");
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -156,6 +160,7 @@ class PractitionerResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
+    @DisplayName("Create practitioner 🥳")
     public void testCreatePractitionerReturnsAppropriateHeaders() {
         IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
         Practitioner practitioner = APITestHelpers.createPractitionerResource(NPIUtil.generateNPI(), APITestHelpers.ORGANIZATION_ID);
@@ -185,6 +190,7 @@ class PractitionerResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
+    @DisplayName("Update practitioner - not yet implemented 🤮")
     public void testUpdatePractitionerNotImplemented() throws IOException {
         IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
         final IParser parser = ctx.newJsonParser();
@@ -208,8 +214,8 @@ class PractitionerResourceIT extends AbstractSecureApplicationIT {
         assertThrows(NotImplementedOperationException.class, update::execute);
     }
 
-
     @Test
+    @DisplayName("Get pracitioners with valid authorization 🥳")
     public void testPractitionerPathAuthorization() throws GeneralSecurityException, IOException, URISyntaxException {
         final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
         final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
@@ -258,7 +264,34 @@ class PractitionerResourceIT extends AbstractSecureApplicationIT {
         APITestHelpers.deleteResourceById(orgBClient, DPCResourceType.Practitioner, orgBPractitioner.getIdElement().getIdPart());
     }
 
+    
     @Test
+    @DisplayName("Delete practitioners 🥳")
+    public void testDeletePractitionerPathAuthorization() throws GeneralSecurityException, IOException, URISyntaxException {
+        final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
+        final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
+        final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());
+        final IGenericClient orgBClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgBContext.getClientToken(), UUID.fromString(orgBContext.getPublicKeyId()), orgBContext.getPrivateKey());
+
+        Practitioner practitioner = FHIRPractitionerBuilder.newBuilder()
+                .withOrgTag(orgBContext.getOrgId())
+                .withNpi(NPIUtil.generateNPI())
+                .withName("Org B Practitioner", "Last name")
+                .build();
+
+        //Test forgery during practitioner creation (Specify another org's id in the metadata tag)
+        practitioner.getMeta().addTag(DPCIdentifierSystem.DPC.getSystem(), orgBContext.getOrgId(), "Organization ID");
+        APITestHelpers.createResource(orgAClient, practitioner).getResource();
+
+        Bundle bundle = APITestHelpers.resourceSearch(orgBClient, DPCResourceType.Practitioner);
+        assertEquals(0, bundle.getTotal(), "Expected Org B to have 0 practitioners.");
+
+        bundle = APITestHelpers.resourceSearch(orgAClient, DPCResourceType.Practitioner);
+        assertEquals(1, bundle.getTotal(), "Expected Org A to have 1 practitioner.");
+    }
+
+    @Test
+    @DisplayName("Create and access practitioner with override of mismatching metadata 🥳")
     public void testRequestBodyForgery() throws GeneralSecurityException, IOException, URISyntaxException {
         final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
         final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
@@ -283,30 +316,7 @@ class PractitionerResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
-    public void testRequestBodyForgeryOnCreate() throws GeneralSecurityException, IOException, URISyntaxException {
-        final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
-        final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
-        final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());
-        final IGenericClient orgBClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgBContext.getClientToken(), UUID.fromString(orgBContext.getPublicKeyId()), orgBContext.getPrivateKey());
-
-        Practitioner practitioner = FHIRPractitionerBuilder.newBuilder()
-                .withOrgTag(orgBContext.getOrgId())
-                .withNpi(NPIUtil.generateNPI())
-                .withName("Org B Practitioner", "Last name")
-                .build();
-
-        //Test forgery during practitioner creation (Specify another org's id in the metadata tag)
-        practitioner.getMeta().addTag(DPCIdentifierSystem.DPC.getSystem(), orgBContext.getOrgId(), "Organization ID");
-        APITestHelpers.createResource(orgAClient, practitioner).getResource();
-
-        Bundle bundle = APITestHelpers.resourceSearch(orgBClient, DPCResourceType.Practitioner);
-        assertEquals(0, bundle.getTotal(), "Expected Org B to have 0 practitioners.");
-
-        bundle = APITestHelpers.resourceSearch(orgAClient, DPCResourceType.Practitioner);
-        assertEquals(1, bundle.getTotal(), "Expected Org A to have 1 practitioner.");
-    }
-
-    @Test
+    @DisplayName("Create and access multiple practitioners with override of mismatching metadata 🥳")
     public void testRequestBodyForgeryOnMultipleSubmit() throws GeneralSecurityException, IOException, URISyntaxException {
         final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
         final TestOrganizationContext orgBContext = registerAndSetupNewOrg();

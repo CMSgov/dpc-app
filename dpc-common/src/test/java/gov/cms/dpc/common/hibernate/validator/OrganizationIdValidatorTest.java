@@ -13,7 +13,9 @@ import javax.validation.*;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.DisplayName;
 
+@DisplayName("Organization ID validation")
 public class OrganizationIdValidatorTest {
 
     private Validator validator;
@@ -25,6 +27,7 @@ public class OrganizationIdValidatorTest {
     }
 
     @ParameterizedTest
+    @DisplayName("Validate organization ID 🥳")
     @MethodSource("stringSource")
     public void organizationIdValidatorTest(DPCIdentifierSystem dpcIdentifierSystem, String value, boolean isValid) {
 

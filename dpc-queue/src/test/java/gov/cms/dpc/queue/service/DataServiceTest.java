@@ -22,7 +22,9 @@ import java.io.File;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.junit.jupiter.api.DisplayName;
 
+@DisplayName("Job Queue data service responses")
 public class DataServiceTest {
 
     private final UUID aggregatorID = UUID.randomUUID();
@@ -56,6 +58,7 @@ public class DataServiceTest {
     }
 
     @Test
+    @DisplayName("Handle data retrieval exceptions during job 🤮")
     public void whenGetJobBatchesThrowsException() {
         DPCResourceType resourceType = DPCResourceType.ExplanationOfBenefit;
 
@@ -65,6 +68,7 @@ public class DataServiceTest {
     }
 
     @Test
+    @DisplayName("Handle failed jobs 🤮")
     public void whenGetJobBatchesReturnsFailedJob() {
         DPCResourceType resourceType = DPCResourceType.ExplanationOfBenefit;
 
@@ -73,6 +77,7 @@ public class DataServiceTest {
     }
 
     @Test
+    @DisplayName("Get job batch with completed job as resource bundle 🥳")
     public void whenGetJobBatchesReturnsCompletedJobWithResourceType() {
         DPCResourceType resourceType = DPCResourceType.ExplanationOfBenefit;
 
@@ -82,6 +87,7 @@ public class DataServiceTest {
     }
 
     @Test
+    @DisplayName("Get job batch with completed job as outcome 🥳")
     public void whenGetJobBatchesReturnsCompletedJobWithOperationOutcome() {
         UUID patientID = UUID.randomUUID();
         DPCResourceType resourceType = DPCResourceType.ExplanationOfBenefit;
@@ -92,6 +98,7 @@ public class DataServiceTest {
     }
 
     @Test
+    @DisplayName("Handle exception when providing no resource type to retrieve data 🥳")
     public void whenPassingInNoResourceTypes() {
         workJob(false, DPCResourceType.ExplanationOfBenefit);
         Assertions.assertThrows(DataRetrievalException.class, () -> dataService.retrieveData(orgID, orgNPI, providerNPI, List.of(patientID.toString())));

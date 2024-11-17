@@ -18,8 +18,10 @@ import java.security.GeneralSecurityException;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
 import static org.mockito.Mockito.*;
 
+@DisplayName("Public key resource operations")
 public class KeyResourceUnitTest {
 
     @Mock
@@ -34,6 +36,7 @@ public class KeyResourceUnitTest {
     }
 
     @Test
+    @DisplayName("Get public keys from key store 🥳")
     public void testGetPublicKeys() {
         OrganizationPrincipal organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
 
@@ -48,7 +51,8 @@ public class KeyResourceUnitTest {
     }
 
     @Test
-    public void testGetPublicKey() {
+    @DisplayName("Get specified public key from key store 🥳")
+    public void testFetchPublicKey() {
         OrganizationPrincipal organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
         UUID publicKeyUUID = UUID.randomUUID();
 
@@ -61,6 +65,7 @@ public class KeyResourceUnitTest {
     }
 
     @Test
+    @DisplayName("Return unrecognized public key 🤮")
     public void testGetPublicKeyNotFound() {
         OrganizationPrincipal organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
         UUID publicKeyUUID = UUID.randomUUID();
@@ -73,6 +78,7 @@ public class KeyResourceUnitTest {
     }
 
     @Test
+    @DisplayName("Delete public key from key store 🥳")
     public void testDeletePublicKey() {
         OrganizationPrincipal organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
         UUID publicKeyUUID = UUID.randomUUID();
@@ -87,6 +93,7 @@ public class KeyResourceUnitTest {
     }
 
     @Test
+    @DisplayName("Delete unrecognized public key 🤮")
     public void testDeletePublicKeyNotFound() {
         OrganizationPrincipal organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
         UUID publicKeyUUID = UUID.randomUUID();
@@ -100,9 +107,10 @@ public class KeyResourceUnitTest {
     }
 
     @Test
+    @DisplayName("Add public key to key store 🥳")
     public void testSubmitKey() throws GeneralSecurityException, IOException {
         OrganizationPrincipal organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
-        KeyResource.KeySignature keySignature = KeyResourceTest.generateKeyAndSignature();
+        KeyResource.KeySignature keySignature = KeyResourceIT.generateKeyAndSignature();
 
         String label = "A test key label";
 
@@ -121,9 +129,10 @@ public class KeyResourceUnitTest {
     }
 
     @Test
+    @DisplayName("Add public key to key store with long label 🤮")
     public void testSubmitKeyTooLong() throws GeneralSecurityException {
         OrganizationPrincipal organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
-        KeyResource.KeySignature keySignature = KeyResourceTest.generateKeyAndSignature();
+        KeyResource.KeySignature keySignature = KeyResourceIT.generateKeyAndSignature();
         String label = "A really, really, really long, test key label";
 
         WebApplicationException exception = assertThrows(WebApplicationException.class,
@@ -133,6 +142,7 @@ public class KeyResourceUnitTest {
     }
 
     @Test
+    @DisplayName("Add unreadable public key to key store 🤮")
     public void testSubmitKeyBadPEMString() {
         OrganizationPrincipal organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
         KeyResource.KeySignature keySignature = new KeyResource.KeySignature("badPEMString", "badSignature");

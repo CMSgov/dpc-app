@@ -9,10 +9,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.DisplayName;
 
+@DisplayName("Organization Entity tests")
 public class OrganizationEntityTest {
 
 	@Test
+        @DisplayName("Test organization getters and setters 🥳")
 	public void testGettersAndSetters() {
 		OrganizationEntity org = new OrganizationEntity();
 		UUID id = UUID.randomUUID();
@@ -49,6 +52,7 @@ public class OrganizationEntityTest {
 	}
 
 	@Test
+        @DisplayName("Update organization 🥳")
 	public void testUpdate() {
 		OrganizationEntity o1 = new OrganizationEntity();
 		OrganizationEntity o2 = new OrganizationEntity();
@@ -59,6 +63,7 @@ public class OrganizationEntityTest {
 	}
 
 	@Test
+        @DisplayName("Test organization ID getters and setters 🥳")
 	public void testOrganizationIDGettersAndSetters() {
 		OrganizationEntity.OrganizationID orgId = new OrganizationEntity.OrganizationID();
 		DPCIdentifierSystem system = DPCIdentifierSystem.NPPES;
@@ -72,6 +77,7 @@ public class OrganizationEntityTest {
 	}
 
 	@Test
+        @DisplayName("Convert organization ID to FHIR ID 🥳")
 	public void testOrganizationIDToFHIR() {
 		OrganizationEntity.OrganizationID orgId = new OrganizationEntity.OrganizationID(DPCIdentifierSystem.NPPES,
 				"1234");
