@@ -49,6 +49,7 @@ curl -I https://github.com
 git config --list
 df -kh
 mkdir -p tmp
+chmod 777 tmp
 touch tmp/testfile
 
 (mkdir -p tmp && cd tmp && git clone -v --branch $JAKARTA_VERSION-RELEASE --single-branch --depth 1 $JAKARTA_REPO $TARGET_DIR > /dev/null 2>&1)
