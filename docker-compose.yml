@@ -36,8 +36,9 @@ services:
       - JACOCO=${REPORT_COVERAGE:-false}
       - DEBUG_MODE=${DEBUG_MODE:-false}
       - AGGREGATION_SVC_PORT=9901
+      - HEALTH_CHECK_COUNT=6
     healthcheck:
-      test: ["CMD-SHELL", "test $(curl -s 'http://localhost:'$${AGGREGATION_SVC_PORT}'/healthcheck?pretty=true' | grep -c '\"healthy\" : true') -eq $(expr $(curl -s 'http://localhost:'$${AGGREGATION_SVC_PORT}'/healthcheck?pretty=true' | grep -c '\"healthy\" :') - $(if [ \"$$USE_BFD_MOCK\" = \"true\" ]; then echo 1; else echo 0; fi))"]
+      test: ["CMD-SHELL", "test $(curl -s 'http://localhost:'$${AGGREGATION_SVC_PORT}'/healthcheck?pretty=true' | grep -c '\"healthy\" : true') -eq $((HEALTH_CHECK_COUNT - $( [ \"$$USE_BFD_MOCK\" = 'true' ] && echo 1 || echo 0 )))"]
       interval: 10s
       retries: 5
       start_period: 60s
@@ -65,11 +66,12 @@ services:
       - JACOCO=${REPORT_COVERAGE:-false}
       - DEBUG_MODE=${DEBUG_MODE:-false}
       - ATTRIBUTION_SVC_PORT=9902
+      - HEALTH_CHECK_COUNT=3
     ports:
       - "3500:8080"
       - "9902:9902"
     healthcheck:
-      test: ["CMD-SHELL", "test $(curl -s 'http://localhost:'$${ATTRIBUTION_SVC_PORT}'/healthcheck?pretty=true' | grep -c '\"healthy\" : true') -eq $(curl -s 'http://localhost:'$${ATTRIBUTION_SVC_PORT}'/healthcheck?pretty=true' | grep -c '\"healthy\" :')"]
+      test: ["CMD-SHELL", "test $(curl -s 'http://localhost:'$${ATTRIBUTION_SVC_PORT}'/healthcheck?pretty=true' | grep -c '\"healthy\" : true') -eq $${HEALTH_CHECK_COUNT}"]
       interval: 10s
       retries: 5
       start_period: 60s
@@ -92,8 +94,9 @@ services:
       - AUTH_DISABLED=${AUTH_DISABLED:-false}
       - DEBUG_MODE=${DEBUG_MODE:-false}
       - API_SVC_PORT=9900
+      - HEALTH_CHECK_COUNT=7
     healthcheck:
-      test: ["CMD-SHELL", "test $(curl -s 'http://localhost:'$${API_SVC_PORT}'/healthcheck?pretty=true' | grep -c '\"healthy\" : true') -eq $(curl -s 'http://localhost:'$${API_SVC_PORT}'/healthcheck?pretty=true' | grep -c '\"healthy\" :')"]
+      test: ["CMD-SHELL", "test $(curl -s 'http://localhost:'$${API_SVC_PORT}'/healthcheck?pretty=true' | grep -c '\"healthy\" : true') -eq $${HEALTH_CHECK_COUNT}"]
       interval: 10s
       retries: 5
       start_period: 60s
@@ -120,13 +123,14 @@ services:
       - JACOCO=${REPORT_COVERAGE:-false}
       - DEBUG_MODE=${DEBUG_MODE:-false}
       - CONSENT_SVC_PORT=9904
+      - HEALTH_CHECK_COUNT=3
     ports:
       - "3600:3600"
       - "9904:9904"
     volumes:
       - ./jacocoReport/dpc-consent:/jacoco-report
     healthcheck:
-      test: ["CMD-SHELL", "test $(curl -s 'http://localhost:'$${CONSENT_SVC_PORT}'/healthcheck?pretty=true' | grep -c '\"healthy\" : true') -eq $(curl -s 'http://localhost:'$${CONSENT_SVC_PORT}'/healthcheck?pretty=true' | grep -c '\"healthy\" :')"]
+      test: ["CMD-SHELL", "test $(curl -s 'http://localhost:'$${CONSENT_SVC_PORT}'/healthcheck?pretty=true' | grep -c '\"healthy\" : true') -eq $${HEALTH_CHECK_COUNT}"]
       interval: 10s
       retries: 5
       start_period: 60s
