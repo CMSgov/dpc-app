@@ -11,7 +11,7 @@ set -e
 
 function _finally {
     docker compose -p $PROJECT_NAME -f docker-compose.yml -f docker-compose.portals.yml down
-    docker volume rm "$PROJECT_NAME"_pgdata14
+    docker volume rm "$PROJECT_NAME"_pgdata16
     echo "^^^^^^^^^^^^^^^"
     echo "└└└└└└└└└└└└└└└-------- this volume has been removed!"
 }

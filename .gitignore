@@ -46,6 +46,7 @@ ops/config/decrypted/*
 # Ignore project tmp/ directory
 tmp/
 
+
 # Ignore Go unit test results
 dpc-go/dpc-api/results.json
 dpc-go/dpc-api/test_results/*

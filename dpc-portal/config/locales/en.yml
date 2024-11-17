@@ -43,3 +43,9 @@ en:
     org_med_sanctions_text: This organization is listed as an excluded entity by the Office of Inspector General (OIG), which prohibits it from accessing beneficiary claims data.
     manage_org: Manage credentials.
     tos_not_signed: DPC Terms of Service not yet signed.
+  errors:
+    attributes:
+      base:
+        duplicate_cd:
+          status: User is already a Credential Delegate (CD).
+          text: A user with this name or email has already been invited to manage credentials for this organization.

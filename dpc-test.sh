@@ -32,9 +32,9 @@ fi
 set +o allexport
 
 # Define the cleanup function
-_finally() {
+function _finally() {
     docker compose -p "$PROJECT_NAME" down
-    docker volume rm "${PROJECT_NAME}_pgdata14"
+    docker volume rm "${PROJECT_NAME}_pgdata16"
     echo "^^^^^^^^^^^^^^^"
     echo "└└└└└└└└└└└└└└└-------- this volume has been removed!"
 }
@@ -84,7 +84,7 @@ if [ -n "$REPORT_COVERAGE" ]; then
 fi
 
 DOCKER_PROJECT_NAME="$PROJECT_NAME" make down-dpc
-docker volume rm "${PROJECT_NAME}_pgdata14"
+docker volume rm "${PROJECT_NAME}_pgdata16"
 echo "^^^^^^^^^^^^^^^"
 echo "└└└└└└└└└└└└└└└-------- this volume has been removed!"
 
@@ -109,7 +109,7 @@ if [ "$UNHEALTHY_CONTAINERS" != 0 ]; then
 fi
 
 docker compose -p "$PROJECT_NAME" down
-docker volume rm "${PROJECT_NAME}_pgdata14"
+docker volume rm "${PROJECT_NAME}_pgdata16"
 echo "^^^^^^^^^^^^^^^"
 echo "└└└└└└└└└└└└└└└-------- this volume has been removed!"
 

@@ -22,6 +22,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/aws/smithy-go/logging"
 
 	"github.com/ianlopshire/go-fixedwidth"
 )
@@ -194,9 +195,13 @@ func importResponseFile(bucket string, file string) (int, int, string, error) {
 }
 
 func createV2Cfg() (*awsv2.Config, error) {
-	cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithRegion("us-east-1"))
-	assumeRoleArn, err := getAssumeRoleArn()
+	// disable default logging from aws-sdk-go-v2
+	cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithRegion("us-east-1"), config.WithLogger(logging.Nop{}))
+	if err != nil {
+		return nil, err
+	}
 
+	assumeRoleArn, err := getAssumeRoleArn()
 	if err != nil {
 		return nil, err
 	}

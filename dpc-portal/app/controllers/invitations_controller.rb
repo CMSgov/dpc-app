@@ -1,15 +1,21 @@
 # frozen_string_literal: true
 
+require 'dpc_portal_utils'
+
 # Handles acceptance of invitations
 class InvitationsController < ApplicationController
+  include DpcPortalUtils
+
   before_action :load_organization
   before_action :load_invitation
   before_action :validate_invitation, except: %i[renew]
   before_action :verify_ao_invitation, only: %i[accept confirm]
   before_action :verify_cd_invitation, only: %i[code verify_code confirm_cd]
   before_action :check_for_token, only: %i[accept confirm confirm_cd register]
+  before_action :block_test_utilities, only: %i[set_idp_token]
 
   def show
+    log_invitation_flow_start
     render(Page::Invitations::StartComponent.new(@organization, @invitation))
   end
 
@@ -42,7 +48,8 @@ class InvitationsController < ApplicationController
     session["invitation_status_#{@invitation.id}"] = 'verification_complete'
     Rails.logger.info(['Approved access authorization occurred for the Credential Delegate',
                        { actionContext: LoggingConstants::ActionContext::Registration,
-                         actionType: LoggingConstants::ActionType::CdConfirmed }])
+                         actionType: LoggingConstants::ActionType::CdConfirmed,
+                         invitation: @invitation.id }])
     render(Page::Invitations::AcceptInvitationComponent.new(@organization, @invitation, @given_name, @family_name))
   end
 
@@ -58,7 +65,8 @@ class InvitationsController < ApplicationController
     sign_in(:user, @user)
     Rails.logger.info(['User logged in',
                        { actionContext: LoggingConstants::ActionContext::Registration,
-                         actionType: LoggingConstants::ActionType::UserLoggedIn }])
+                         actionType: LoggingConstants::ActionType::UserLoggedIn,
+                         invitation: @invitation.id }])
     render(Page::Invitations::SuccessComponent.new(@organization, @invitation, @given_name, @family_name))
   end
 
@@ -66,12 +74,13 @@ class InvitationsController < ApplicationController
     login_session
     Rails.logger.info(['User began login flow',
                        { actionContext: LoggingConstants::ActionContext::Registration,
-                         actionType: LoggingConstants::ActionType::BeginLogin }])
+                         actionType: LoggingConstants::ActionType::BeginLogin,
+                         invitation: @invitation.id }])
     url = URI::HTTPS.build(host: IDP_HOST,
                            path: '/openid_connect/authorize',
                            query: { acr_values: 'http://idmanagement.gov/ns/assurance/ial/2',
                                     client_id: IDP_CLIENT_ID,
-                                    redirect_uri: "#{redirect_host}/portal/users/auth/openid_connect/callback",
+                                    redirect_uri: "#{my_protocol_host}/portal/users/auth/openid_connect/callback",
                                     response_type: 'code',
                                     scope: 'openid email all_emails profile social_security_number',
                                     nonce: @nonce,
@@ -88,11 +97,18 @@ class InvitationsController < ApplicationController
     redirect_to accept_organization_invitation_url(@organization, @invitation)
   end
 
+  def set_idp_token
+    session[:login_dot_gov_token] = 'token'
+    session[:login_dot_gov_token_exp] = 2.days.from_now
+    head :ok
+  end
+
   private
 
   def invitation_matches_user
     user_info = UserInfoService.new.user_info(session)
-    render_if_bad_invitation(user_info)
+    return if render_bad_invitation?(user_info)
+
     session["invitation_status_#{@invitation.id}"] = 'identity_verified'
     @given_name = user_info['given_name']
     @family_name = user_info['family_name']
@@ -100,11 +116,13 @@ class InvitationsController < ApplicationController
     handle_user_info_service_error(e, 1)
   end
 
-  def render_if_bad_invitation(user_info)
+  def render_bad_invitation?(user_info)
     if @invitation.credential_delegate? && !@invitation.cd_match?(user_info)
+      log_pii_mismatch
       render(Page::Invitations::BadInvitationComponent.new(@invitation, 'pii_mismatch'),
              status: :forbidden)
     elsif !@invitation.email_match?(user_info)
+      log_pii_mismatch
       render(Page::Invitations::BadInvitationComponent.new(@invitation, 'email_mismatch'),
              status: :forbidden)
     end
@@ -164,7 +182,8 @@ class InvitationsController < ApplicationController
     CdOrgLink.create!(user:, provider_organization: @organization, invitation: @invitation)
     Rails.logger.info(['Credential Delegate linked to organization',
                        { actionContext: LoggingConstants::ActionContext::Registration,
-                         actionType: LoggingConstants::ActionType::CdLinkedToOrg }])
+                         actionType: LoggingConstants::ActionType::CdLinkedToOrg,
+                         invitation: @invitation.id }])
     @invitation.accept!
   end
 
@@ -172,7 +191,8 @@ class InvitationsController < ApplicationController
     AoOrgLink.create!(user:, provider_organization: @organization, invitation: @invitation)
     Rails.logger.info(['Authorized Official linked to organization',
                        { actionContext: LoggingConstants::ActionContext::Registration,
-                         actionType: LoggingConstants::ActionType::AoLinkedToOrg }])
+                         actionType: LoggingConstants::ActionType::AoLinkedToOrg,
+                         invitation: @invitation.id }])
     @invitation.accept!
     @user.update(verification_status: 'approved')
     @organization.update(verification_status: 'approved')
@@ -217,11 +237,13 @@ class InvitationsController < ApplicationController
     if @invitation.credential_delegate?
       Rails.logger.info(['Credential Delegate Invitation expired',
                          { actionContext: LoggingConstants::ActionContext::Registration,
-                           actionType: LoggingConstants::ActionType::CdInvitationExpired }])
+                           actionType: LoggingConstants::ActionType::CdInvitationExpired,
+                           invitation: @invitation.id }])
     elsif @invitation.authorized_official?
       Rails.logger.info(['Authorized Official Invitation expired',
                          { actionContext: LoggingConstants::ActionContext::Registration,
-                           actionType: LoggingConstants::ActionType::AoInvitationExpired }])
+                           actionType: LoggingConstants::ActionType::AoInvitationExpired,
+                           invitation: @invitation.id }])
     end
     render(Page::Invitations::BadInvitationComponent.new(@invitation, @invitation.unacceptable_reason),
            status: :forbidden)
@@ -245,10 +267,29 @@ class InvitationsController < ApplicationController
     render(Page::Invitations::InvitationLoginComponent.new(@invitation))
   end
 
+  def block_test_utilities
+    render plain: :forbidden, status: :forbidden unless Rails.env.test?
+  end
+
+  def log_invitation_flow_start
+    if @invitation.credential_delegate?
+      Rails.logger.info(['Credential Delegate invitation flow started,',
+                         { actionContext: LoggingConstants::ActionContext::Registration,
+                           actionType: LoggingConstants::ActionType::CdInvitationFlowStarted,
+                           invitation: @invitation.id }])
+    elsif @invitation.authorized_official?
+      Rails.logger.info(['Authorized Official invitation flow started,',
+                         { actionContext: LoggingConstants::ActionContext::Registration,
+                           actionType: LoggingConstants::ActionType::AoInvitationFlowStarted,
+                           invitation: @invitation.id }])
+    end
+  end
+
   def log_ao_verification_error(error, service_unavailable)
     if service_unavailable
       logger.error(['CPI API Gateway unavailable',
-                    { actionContext: LoggingConstants::ActionContext::Registration, error: error.message }])
+                    { actionContext: LoggingConstants::ActionContext::Registration, error: error.message,
+                      invitation: @invitation.id }])
     else
       logger.info(['AO Check Fail',
                    { actionContext: LoggingConstants::ActionContext::Registration,
@@ -262,11 +303,27 @@ class InvitationsController < ApplicationController
     if @invitation.credential_delegate?
       Rails.logger.info(['Credential Delegate user created,',
                          { actionContext: LoggingConstants::ActionContext::Registration,
-                           actionType: LoggingConstants::ActionType::CdCreated }])
+                           actionType: LoggingConstants::ActionType::CdCreated,
+                           invitation: @invitation.id }])
     elsif @invitation.authorized_official?
       Rails.logger.info(['Authorized Official user created,',
                          { actionContext: LoggingConstants::ActionContext::Registration,
-                           actionType: LoggingConstants::ActionType::AoCreated }])
+                           actionType: LoggingConstants::ActionType::AoCreated,
+                           invitation: @invitation.id }])
+    end
+  end
+
+  def log_pii_mismatch
+    if @invitation.credential_delegate?
+      Rails.logger.info(['CD PII Check Fail',
+                         { actionContext: LoggingConstants::ActionContext::Registration,
+                           actionType: LoggingConstants::ActionType::FailCdPiiCheck,
+                           invitation: @invitation.id }])
+    else
+      logger.info(['AO PII Check Fail',
+                   { actionContext: LoggingConstants::ActionContext::Registration,
+                     actionType: LoggingConstants::ActionType::FailAoPiiCheck,
+                     invitation: @invitation.id }])
     end
   end
 
@@ -283,16 +340,5 @@ class InvitationsController < ApplicationController
                        { actionContext: LoggingConstants::ActionContext::Registration,
                          actionType: LoggingConstants::ActionType::AoHasWaiver,
                          invitation: @invitation.id }])
-  end
-end
-
-def redirect_host
-  case ENV.fetch('ENV', nil)
-  when 'local'
-    'http://localhost:3100'
-  when 'prod'
-    'https://dpc.cms.gov'
-  else
-    "https://#{ENV.fetch('ENV', nil)}.dpc.cms.gov"
   end
 end
