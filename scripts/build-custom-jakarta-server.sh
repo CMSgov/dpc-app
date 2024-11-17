@@ -1,5 +1,5 @@
 #!/bin/bash
-
+set -x
 # Variables
 NEED_TO_BUILD=0
 JAKARTA_VERSION="6.1.0"
