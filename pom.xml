@@ -586,23 +586,6 @@
         <pluginManagement>
             <plugins>
                 <plugin>
-                  <groupId>org.apache.maven.plugins</groupId>
-                  <artifactId>maven-clean-plugin</artifactId>
-                  <version>3.4.0</version>
-                  <executions>
-                    <execution>
-                      <phase>clean</phase>
-                      <goals>
-                        <goal>clean</goal>
-                      </goals>
-                      <configuration>
-                          <retryOnError>true</retryOnError>
-                          <failOnError>false</failOnError>
-                      </configuration>
-                    </execution>
-                  </executions>
-                </plugin>
-                <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-shade-plugin</artifactId>
                     <version>3.2.2</version>
@@ -696,18 +679,10 @@
               <groupId>org.apache.maven.plugins</groupId>
               <artifactId>maven-clean-plugin</artifactId>
               <version>3.4.0</version>
-              <executions>
-                <execution>
-                  <phase>clean</phase>
-                  <goals>
-                    <goal>clean</goal>
-                  </goals>
-                  <configuration>
-                      <retryOnError>true</retryOnError>
-                      <failOnError>false</failOnError>
-                  </configuration>
-                </execution>
-              </executions>
+              <configuration>
+                  <retryOnError>true</retryOnError>
+                  <failOnError>false</failOnError>
+              </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
