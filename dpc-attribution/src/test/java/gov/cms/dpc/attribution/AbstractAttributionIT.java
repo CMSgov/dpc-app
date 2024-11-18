@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(BufferedLoggerHandler.class)
 @IntegrationTest
-public abstract class AbstractAttributionTest {
+public abstract class AbstractAttributionIT {
     protected static final String configPath = "src/test/resources/test.application.yml";
     private static final ObjectMapper mapper = new ObjectMapper();
 

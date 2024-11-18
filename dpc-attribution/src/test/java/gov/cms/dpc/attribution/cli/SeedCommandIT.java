@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @IntegrationTest
-public class SeedCommandTest {
+public class SeedCommandIT {
 
     private final PrintStream originalOut = System.out;
     private final PrintStream originalErr = System.err;

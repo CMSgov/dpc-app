@@ -5,7 +5,7 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.dpc.api.APITestHelpers;
-import gov.cms.dpc.api.AbstractSecureApplicationTest;
+import gov.cms.dpc.api.AbstractSecureApplicationIT;
 import gov.cms.dpc.api.entities.TokenEntity;
 import gov.cms.dpc.api.models.CollectionResponse;
 import gov.cms.dpc.fhir.FHIRFormatters;
@@ -41,12 +41,12 @@ import java.util.stream.Collectors;
 import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
 import static org.junit.jupiter.api.Assertions.*;
 
-class TokenResourceTest extends AbstractSecureApplicationTest {
+class TokenResourceIT extends AbstractSecureApplicationIT {
 
     private final ObjectMapper mapper;
     private String fullyAuthedToken;
 
-    private TokenResourceTest() {
+    private TokenResourceIT() {
         this.mapper = new ObjectMapper();
 
         try {

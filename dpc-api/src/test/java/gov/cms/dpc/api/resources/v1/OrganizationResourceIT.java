@@ -14,7 +14,7 @@ import com.github.nitram509.jmacaroons.Macaroon;
 import com.github.nitram509.jmacaroons.MacaroonVersion;
 import com.github.nitram509.jmacaroons.MacaroonsBuilder;
 import gov.cms.dpc.api.APITestHelpers;
-import gov.cms.dpc.api.AbstractSecureApplicationTest;
+import gov.cms.dpc.api.AbstractSecureApplicationIT;
 import gov.cms.dpc.api.entities.PublicKeyEntity;
 import gov.cms.dpc.api.entities.TokenEntity;
 import gov.cms.dpc.api.models.CollectionResponse;
@@ -53,11 +53,11 @@ import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
 import static gov.cms.dpc.testing.APIAuthHelpers.TASK_URL;
 import static org.junit.jupiter.api.Assertions.*;
 
-class OrganizationResourceTest extends AbstractSecureApplicationTest {
+class OrganizationResourceIT extends AbstractSecureApplicationIT {
 
     private final ObjectMapper mapper;
 
-    OrganizationResourceTest() {
+    OrganizationResourceIT() {
         this.mapper = new ObjectMapper();
     }
 

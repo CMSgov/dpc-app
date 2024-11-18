@@ -34,7 +34,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SuppressWarnings({"OptionalGetWithoutIsPresent"})
 @ExtendWith(BufferedLoggerHandler.class)
 @IntegrationTest
-class QueueTest {
+class QueueIT {
 
     //    private JobQueue queue;
     private SessionFactory sessionFactory;

@@ -2,7 +2,7 @@ package gov.cms.dpc.api.resources.v1;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import gov.cms.dpc.api.AbstractSecureApplicationTest;
+import gov.cms.dpc.api.AbstractSecureApplicationIT;
 import gov.cms.dpc.api.models.CollectionResponse;
 import gov.cms.dpc.testing.APIAuthHelpers;
 import gov.cms.dpc.testing.KeyType;
@@ -30,12 +30,12 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class KeyResourceTest extends AbstractSecureApplicationTest {
+class KeyResourceIT extends AbstractSecureApplicationIT {
 
     private final ObjectMapper mapper;
     private final String fullyAuthedToken;
 
-    private KeyResourceTest() {
+    private KeyResourceIT() {
         this.mapper = new ObjectMapper();
         // Do the JWT flow in order to get a correct ORGANIZATION_TOKEN, this is normally handled by the HAPI client
         try {

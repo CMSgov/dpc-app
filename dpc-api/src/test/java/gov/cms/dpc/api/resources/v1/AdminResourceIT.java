@@ -2,7 +2,7 @@ package gov.cms.dpc.api.resources.v1;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import gov.cms.dpc.api.APITestHelpers;
-import gov.cms.dpc.api.AbstractSecureApplicationTest;
+import gov.cms.dpc.api.AbstractSecureApplicationIT;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.testing.APIAuthHelpers;
 import org.apache.http.HttpHeaders;
@@ -20,7 +20,7 @@ import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class AdminResourceTest extends AbstractSecureApplicationTest{
+public class AdminResourceIT extends AbstractSecureApplicationIT{
 
     @Test
     void testNoGoldenMacaroon() throws IOException, URISyntaxException {

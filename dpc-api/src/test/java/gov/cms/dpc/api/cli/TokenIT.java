@@ -1,6 +1,6 @@
 package gov.cms.dpc.api.cli;
 
-import gov.cms.dpc.api.AbstractApplicationTest;
+import gov.cms.dpc.api.AbstractApplicationIT;
 import gov.cms.dpc.api.DPCAPIConfiguration;
 import gov.cms.dpc.api.DPCAPIService;
 import gov.cms.dpc.api.cli.organizations.OrganizationRegistration;
@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class TokenTests extends AbstractApplicationTest {
+class TokenIT extends AbstractApplicationIT {
 
     private final PrintStream originalOut = System.out;
     private final PrintStream originalErr = System.err;
@@ -38,7 +38,7 @@ class TokenTests extends AbstractApplicationTest {
     private final ByteArrayOutputStream stdErr = new ByteArrayOutputStream();
     private Cli cli;
 
-    TokenTests() {
+    TokenIT() {
         // Not used
     }
 
