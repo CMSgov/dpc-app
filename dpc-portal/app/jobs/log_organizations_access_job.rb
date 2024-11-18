@@ -5,6 +5,8 @@ class LogOrganizationsAccessJob < ApplicationJob
 
   def perform
     @start = Time.now
+    puts('starting LogOrganizationsAccessJob :|')
+    Rails.logger.info('random message')
     organizations_credential_aggregate_status = {
       have_active_credentials: 0,
       have_incomplete_or_no_credentials: 0,
