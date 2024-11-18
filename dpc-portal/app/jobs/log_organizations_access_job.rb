@@ -1,5 +1,9 @@
 # frozen_string_literal: true
 
+# A background job that determines the number of active Provider Organizations that
+# have access to make API calls.
+# This is determined by checking for tokens, public keys, and ip addresses for all
+# organizations that are in the portal with completed Terms of Service agreement.
 class LogOrganizationsAccessJob < ApplicationJob
   queue_as :portal
 
@@ -10,7 +14,6 @@ class LogOrganizationsAccessJob < ApplicationJob
       have_incomplete_or_no_credentials: 0,
       have_no_credentials: 0
     }
-    ProviderOrganization.count
     ProviderOrganization.where.not(terms_of_service_accepted_by: nil).find_each do |organization|
       credential_status = fetch_credential_status?(organization)
       Rails.logger.info(['Credential status for organization',
