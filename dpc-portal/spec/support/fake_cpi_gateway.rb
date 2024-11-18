@@ -34,10 +34,7 @@ class FakeCpiGateway < Sinatra::Base
   end
 
   before method: :post do
-    if request.env['CONTENT_TYPE'] == 'application/json'
-      request.body.rewind
-      @request_payload = JSON.parse request.body.read
-    end
+    @request_payload = JSON.parse(request.body.read) if request.env['CONTENT_TYPE'] == 'application/json'
   end
 
   # IDM identity service

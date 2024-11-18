@@ -648,7 +648,7 @@ DEPENDENCIES
   sidekiq-cron
   sidekiq_alive (~> 2.4)
   simplecov (<= 0.17)
-  sinatra (>= 4)
+  sinatra (~> 4)
   spring
   spring-watcher-listen (~> 2.1.0)
   timecop
