@@ -5,26 +5,26 @@ class LogOrganizationsAccessJob < ApplicationJob
 
   def perform
     @start = Time.now
-    puts('starting LogOrganizationsAccessJob :|')
-    Rails.logger.info('random message')
     organizations_credential_aggregate_status = {
       have_active_credentials: 0,
       have_incomplete_or_no_credentials: 0,
-      have_no_credentials: 0,
+      have_no_credentials: 0
     }
+    ProviderOrganization.count
     ProviderOrganization.where.not(terms_of_service_accepted_by: nil).find_each do |organization|
       credential_status = fetch_credential_status?(organization)
       Rails.logger.info(['Credential status for organization',
                          { name: organization.name, id: organization.id,
-                           credential_status: credential_status }])
-      credential_status_values_as_arr = [credential_status["num_tokens"], credential_status["num_keys"], credential_status["num_ips"]]
+                           credential_status: }])
+      credential_status_values_as_arr = [credential_status['num_tokens'], credential_status['num_keys'],
+                                         credential_status['num_ips']]
       if credential_status_values_as_arr.all?
-          organizations_credential_aggregate_status[:have_active_credentials] += 1
+        organizations_credential_aggregate_status[:have_active_credentials] += 1
       elsif credential_status_values_as_arr.any?
-          organizations_credential_aggregate_status[:have_incomplete_or_no_credentials] += 1
+        organizations_credential_aggregate_status[:have_incomplete_or_no_credentials] += 1
       else
-          organizations_credential_aggregate_status[:have_incomplete_or_no_credentials] += 1
-          organizations_credential_aggregate_status[:have_no_credentials] += 1
+        organizations_credential_aggregate_status[:have_incomplete_or_no_credentials] += 1
+        organizations_credential_aggregate_status[:have_no_credentials] += 1
       end
     end
     Rails.logger.info(['Organizations API credential status', organizations_credential_aggregate_status])
@@ -35,10 +35,10 @@ class LogOrganizationsAccessJob < ApplicationJob
     pub_keys = dpc_client.get_public_keys(organization.id)
     ip_addresses = dpc_client.get_ip_addresses(organization.id)
 
-    return {
-      "num_tokens": tokens['count'],
-      "num_keys": pub_keys['count'],
-      "num_ips": ip_addresses['count'],
+    {
+      num_tokens: tokens['count'],
+      num_keys: pub_keys['count'],
+      num_ips: ip_addresses['count']
     }
   end
 
