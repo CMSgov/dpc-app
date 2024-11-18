@@ -21,7 +21,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
 
+@DisplayName("Organization command submission")
 public class OrganizationIT extends AbstractApplicationIT {
     private final PrintStream originalOut = System.out;
     private final PrintStream originalErr = System.err;
@@ -60,6 +62,8 @@ public class OrganizationIT extends AbstractApplicationIT {
     }
 
     @Test
+@DisplayName("Organization commands 🥳")
+
     void testOrganizationCommands() {
         // Create the organization
         final Optional<Throwable> register = cli.run("register", "-f", "../src/main/resources/organization.tmpl.json", "--no-token", "--host", "http://localhost:3500/v1");

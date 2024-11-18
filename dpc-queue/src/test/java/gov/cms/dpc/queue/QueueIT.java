@@ -30,10 +30,13 @@ import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
 
 @SuppressWarnings({"OptionalGetWithoutIsPresent"})
 @ExtendWith(BufferedLoggerHandler.class)
 @IntegrationTest
+@DisplayName("Job batch processing")
+
 class QueueIT {
 
     //    private JobQueue queue;
@@ -124,6 +127,8 @@ class QueueIT {
         }
         sessionFactory.close();
     }
+@DisplayName("Verify complete batch job lifecycle 🥳")
+
 
     void testSimpleSubmissionCompletion(JobQueueCommon queue) {
         // Add a couple of jobs
@@ -196,6 +201,8 @@ class QueueIT {
         // After working two jobs the queue should be empty
         assertEquals(0, queue.queueSize(), "Worked all jobs in the queue, but the queue is not empty");
     }
+@DisplayName("Queue and complete patient and EOB batch jobs 🥳")
+
 
     void testPatientAndEOBSubmission(JobQueueCommon queue) {
         // Add a job with a EOB resource
@@ -224,6 +231,8 @@ class QueueIT {
             assertEquals(1, batch.getJobQueueFile(DPCResourceType.Patient).orElseThrow().getCount());
         });
     }
+@DisplayName("Get or complete unrecognized batch job 🤮")
+
 
     void testMissingJob(JobQueueCommon queue) {
         UUID batchID = UUID.randomUUID();
@@ -250,6 +259,8 @@ class QueueIT {
                 () -> assertEquals(JobStatus.QUEUED, job.get().getStatus(), "Job should be in queue"),
                 () -> assertTrue(job.get().getPatients().isEmpty()));
     }
+@DisplayName("Queue fails to claim invalid batch job 🤮")
+
 
     void testInvalidJobBatch(JobQueueCommon queue) {
         final UUID jobID = UUID.randomUUID();

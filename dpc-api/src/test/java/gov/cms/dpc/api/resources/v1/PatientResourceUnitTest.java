@@ -36,7 +36,9 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.openMocks;
+import org.junit.jupiter.api.DisplayName;
 
+@DisplayName("Patient resource operations")
 public class PatientResourceUnitTest {
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
@@ -60,7 +62,8 @@ public class PatientResourceUnitTest {
     }
 
     @Test
-    public void testPatientSearch() {
+    @DisplayName("Search patient by MBI 🥳")
+public void testPatientSearch() {
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
         organization.setId(orgId.toString());
@@ -90,7 +93,8 @@ public class PatientResourceUnitTest {
     }
 
     @Test
-    public void testPatientSearchNoIdentifier() {
+    @DisplayName("Search patient with no identifier specified 🥳")
+public void testPatientSearchNoIdentifier() {
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
         organization.setId(orgId.toString());
@@ -117,7 +121,8 @@ public class PatientResourceUnitTest {
     }
 
     @Test
-    public void testSubmitPatient() {
+    @DisplayName("Add patient 🥳")
+public void testSubmitPatient() {
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
         organization.setId(orgId.toString());
@@ -139,7 +144,8 @@ public class PatientResourceUnitTest {
     }
 
     @Test
-    public void testBulkSubmitPatients() {
+    @DisplayName("Bulk add patient 🥳")
+public void testBulkSubmitPatients() {
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
         organization.setId(orgId.toString());
@@ -165,7 +171,8 @@ public class PatientResourceUnitTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void testGetPatient() {
+    @DisplayName("Get patient by UUID 🥳")
+public void testGetPatient() {
         IReadExecutable<Patient> readExec = mock(IReadExecutable.class);
 
         UUID patientId = UUID.randomUUID();
@@ -182,7 +189,8 @@ public class PatientResourceUnitTest {
     }
 
     @Test
-    public void testEverything() {
+    @DisplayName("Get Patient$Everything 🥳")
+public void testEverything() {
         UUID practitionerId = UUID.randomUUID();
         Practitioner practitioner = new Practitioner();
         practitioner.setId(practitionerId.toString());
@@ -250,7 +258,8 @@ public class PatientResourceUnitTest {
     }
 
     @Test
-    public void testEverythingNoPractitioner() {
+    @DisplayName("Get Patient$Everything without attribution 🤮")
+public void testEverythingNoPractitioner() {
         UUID practitionerId = UUID.randomUUID();
         UUID patientId = UUID.randomUUID();
         UUID orgId = UUID.randomUUID();
@@ -279,7 +288,8 @@ public class PatientResourceUnitTest {
     }
 
     @Test
-    public void testDeletePatient() {
+    @DisplayName("Delete Patient 🥳")
+public void testDeletePatient() {
         UUID patientId = UUID.randomUUID();
 
         IDeleteTyped delResp = mock(IDeleteTyped.class);
@@ -294,7 +304,8 @@ public class PatientResourceUnitTest {
     }
 
     @Test
-    public void testUpdatePatient() {
+    @DisplayName("Update Patient 🥳")
+public void testUpdatePatient() {
         UUID patientId = UUID.randomUUID();
         Patient patient = new Patient();
         patient.setId(patientId.toString());
@@ -316,7 +327,8 @@ public class PatientResourceUnitTest {
     }
 
     @Test
-    public void testUpdatePatientNoResource() {
+    @DisplayName("Update unrecognized patient 🤮")
+public void testUpdatePatientNoResource() {
         UUID patientId = UUID.randomUUID();
         Patient patient = new Patient();
         patient.setId(patientId.toString());
@@ -341,7 +353,8 @@ public class PatientResourceUnitTest {
     }
 
     @Test
-    public void testValidatePatient() {
+    @DisplayName("Validate Patient profile 🥳")
+public void testValidatePatient() {
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
         organization.setId(orgId.toString());

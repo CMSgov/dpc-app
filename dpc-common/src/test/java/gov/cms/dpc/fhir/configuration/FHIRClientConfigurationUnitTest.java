@@ -3,11 +3,15 @@ package gov.cms.dpc.fhir.configuration;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
+@DisplayName("FHIR Client configuration")
+
 
 class FHIRClientConfigurationUnitTest {
 	private FHIRClientConfiguration fhirClientConfiguration = new FHIRClientConfiguration();
 	@Test
-	public void testSettersAndGetters() {
+	@DisplayName("Use setters and getters 🥳")
+public void testSettersAndGetters() {
 		TimeoutConfiguration timeouts = new TimeoutConfiguration();
 
 		fhirClientConfiguration.setTimeouts(timeouts);

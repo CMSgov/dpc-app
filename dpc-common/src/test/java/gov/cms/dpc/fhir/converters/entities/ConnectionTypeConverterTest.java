@@ -7,7 +7,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.DisplayName;
 
+@DisplayName("Connection Type conversion")
 public class ConnectionTypeConverterTest {
     ConnectionTypeConverter converter = new ConnectionTypeConverter();
     FHIREntityConverter fhirEntityConverter = FHIREntityConverter.initialize();
@@ -27,6 +29,8 @@ public class ConnectionTypeConverterTest {
     }
 
     @Test
+@DisplayName("Convert connection type with attributes from FHIR 🥳")
+
     void fromFHIR(){
         EndpointEntity.ConnectionType convertedConnectionType = converter.fromFHIR(fhirEntityConverter, coding);
         assertEquals(connectionType.getCode(), convertedConnectionType.getCode());
@@ -34,17 +38,23 @@ public class ConnectionTypeConverterTest {
     }
 
     @Test
+@DisplayName("Convert connection type with attributes to FHIR 🥳")
+
     void toFHIR(){
         Coding convertedCoding = converter.toFHIR(fhirEntityConverter, connectionType);
         assertEquals(coding.getCode(), convertedCoding.getCode());
         assertEquals(coding.getSystem(), convertedCoding.getSystem());
     }
     @Test
+@DisplayName("Convert Coding Java class to FHIR resource 🥳")
+
     void getFHIRResource() {
         assertEquals(Coding.class, converter.getFHIRResource());
     }
 
     @Test
+@DisplayName("Convert Connection Type FHIR resource to Java class 🥳")
+
     void getJavaClass() {
         assertEquals(EndpointEntity.ConnectionType.class, converter.getJavaClass());
     }

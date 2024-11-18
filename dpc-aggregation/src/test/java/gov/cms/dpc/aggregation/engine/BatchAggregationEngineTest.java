@@ -34,8 +34,10 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.doReturn;
+import org.junit.jupiter.api.DisplayName;
 
 @ExtendWith(BufferedLoggerHandler.class)
+@DisplayName("Job batch aggregation engine operations")
 class BatchAggregationEngineTest {
     private static final UUID aggregatorID = UUID.randomUUID();
     private static final String TEST_ORG_NPI = NPIUtil.generateNPI();
@@ -96,6 +98,7 @@ class BatchAggregationEngineTest {
      * Test if a engine can handle a simple job with one resource type, one test provider, and one patient.
      */
     @Test
+@DisplayName("Queue and process a large job 🥳")
     void largeJobTestSingleResource() {
         // Make a simple job with one resource type
         final var orgID = UUID.randomUUID();
@@ -132,6 +135,7 @@ class BatchAggregationEngineTest {
      * Test if a engine can handle a simple job with one resource type, one test provider, and one patient.
      */
     @Test
+    @DisplayName("Queue and process a large job with mixes resource types 🥳")
     void largeJobTest() {
 
         // Make a simple job with one resource type
@@ -172,6 +176,8 @@ class BatchAggregationEngineTest {
      * Test if a engine can handle a simple job with one resource type, one test provider, and one patient.
      */
     @Test
+@DisplayName("Queue and process a job containing a patient with bad IDs 🤮")
+
     void largeJobWithBadPatientTest() {
         final var orgID = UUID.randomUUID();
 
@@ -205,6 +211,8 @@ class BatchAggregationEngineTest {
         assertTrue(Files.exists(Path.of(errorFilePath)), "expect error file for failed patient");
     }
     @Test
+@DisplayName("Queue and process a job containing look back date mismatch 🤮")
+
     void lookBackDateCriteriaMismatch() throws IOException {
         final var orgID = UUID.randomUUID();
         final var npi = NPIUtil.generateNPI();
@@ -248,6 +256,8 @@ class BatchAggregationEngineTest {
     }
 
     @Test
+@DisplayName("Queue and process a job containing multiple look back mismatches 🤮")
+
     void lookBackAllCriteriaMismatch() throws IOException {
         final var orgID = UUID.randomUUID();
         final var npi = NPIUtil.generateNPI();
@@ -291,6 +301,8 @@ class BatchAggregationEngineTest {
     }
 
     @Test
+@DisplayName("Queue and process a job containing look back NPI mismatches 🤮")
+
     void lookBackNpiCriteriaMismatch() throws IOException {
         final var orgID = UUID.randomUUID();
         final var npi = NPIUtil.generateNPI();
@@ -334,6 +346,8 @@ class BatchAggregationEngineTest {
     }
 
     @Test
+@DisplayName("Queue and process job with look back match 🥳")
+
     void lookBackNpiCriteriaMatch() {
         final var orgID = UUID.randomUUID();
         final var npi = NPIUtil.generateNPI();

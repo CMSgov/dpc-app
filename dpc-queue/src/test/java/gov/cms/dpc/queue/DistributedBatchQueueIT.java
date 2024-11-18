@@ -25,9 +25,11 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
 
 @ExtendWith(BufferedLoggerHandler.class)
 @IntegrationTest
+@DisplayName("Distributed batch queue")
 public class DistributedBatchQueueIT {
 
     private final UUID aggregatorID = UUID.randomUUID();
@@ -56,6 +58,8 @@ public class DistributedBatchQueueIT {
     }
 
     @Test
+@DisplayName("Handle stuck batch job 🥳")
+
     void handleStuckBatchWithClaim() {
         // One organization id for both jobs
         final UUID orgID = UUID.randomUUID();
@@ -82,6 +86,8 @@ public class DistributedBatchQueueIT {
     }
 
     @Test
+@DisplayName("Verify queue health 🥳")
+
     void validateHealthyQueue() {
         // This test is kind of crappy, since there is nothing to assert
         // If the queue is not health, an exception is thrown
@@ -89,6 +95,8 @@ public class DistributedBatchQueueIT {
     }
 
     @Test
+@DisplayName("Verify queue health due to stuck batch job 🤮")
+
     void validateUnhealthyQueueDueToJobFailure() {
         // One organization id for both jobs
         final UUID orgID = UUID.randomUUID();

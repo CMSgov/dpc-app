@@ -17,6 +17,9 @@ import java.sql.Date;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.junit.jupiter.api.DisplayName;
+@DisplayName("Entity profile tests")
+
 
 class ProfileIT extends AbstractSecureApplicationIT {
 
@@ -25,6 +28,8 @@ class ProfileIT extends AbstractSecureApplicationIT {
     }
 
     @Test
+@DisplayName("Create patient with valid profile 🥳")
+
     void testPatientProfile() {
         final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
         // Create a new patient record
@@ -85,6 +90,8 @@ class ProfileIT extends AbstractSecureApplicationIT {
     }
 
     @Test
+@DisplayName("Create provider with valid profile 🥳")
+
     void testProviderProfile() {
         final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
 

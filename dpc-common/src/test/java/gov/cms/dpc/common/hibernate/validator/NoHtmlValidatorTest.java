@@ -13,7 +13,9 @@ import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 import java.util.Set;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.DisplayName;
 
+@DisplayName("HTML validation")
 public class NoHtmlValidatorTest {
 
     private Validator validator;
@@ -26,7 +28,8 @@ public class NoHtmlValidatorTest {
 
     @ParameterizedTest
     @MethodSource("stringSource")
-    public void noHtmlValidatorTest(String value, boolean isValid) {
+    @DisplayName("Valid HTML 🥳")
+public void noHtmlValidatorTest(String value, boolean isValid) {
 
         TestObject testObject = new TestObject();
         testObject.setA(value);

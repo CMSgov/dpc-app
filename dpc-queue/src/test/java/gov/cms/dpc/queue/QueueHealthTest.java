@@ -17,9 +17,11 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import org.junit.jupiter.api.DisplayName;
 
 @SuppressWarnings("rawtypes")
 @ExtendWith(BufferedLoggerHandler.class)
+@DisplayName("Job queue health checks")
 public class QueueHealthTest {
 
     private Session session = mock(Session.class);
@@ -43,6 +45,8 @@ public class QueueHealthTest {
     }
 
     @Test
+@DisplayName("Verify queue health when queue is healthy 🥳")
+
     void testHealthyQueue() {
         when(query.uniqueResult())
                 .thenReturn(0L);
@@ -56,6 +60,8 @@ public class QueueHealthTest {
     }
 
     @Test
+@DisplayName("Verify queue health when queue is unhealthy 🥳")
+
     void testUnhealthyQueue() {
         when(query.uniqueResult())
                 .thenReturn(2L);

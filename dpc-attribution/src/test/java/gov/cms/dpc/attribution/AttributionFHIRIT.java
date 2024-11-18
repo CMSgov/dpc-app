@@ -34,10 +34,12 @@ import java.util.stream.Stream;
 import static gov.cms.dpc.attribution.SharedMethods.submitAttributionBundle;
 import static gov.cms.dpc.common.utils.SeedProcessor.createBaseAttributionGroup;
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
 
 @Disabled
 @ExtendWith(BufferedLoggerHandler.class)
 @IntegrationTest
+@DisplayName("Attribution roster operations")
 class AttributionFHIRIT {
 
     private static final String configPath = "src/test/resources/test.application.yml";

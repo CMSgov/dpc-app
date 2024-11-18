@@ -21,7 +21,9 @@ import java.io.IOException;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
 
+@DisplayName("Request IDs")
 public class GenerateRequestIdFilterUnitTest {
     private GenerateRequestIdFilter filter;
 
@@ -34,7 +36,8 @@ public class GenerateRequestIdFilterUnitTest {
     }
 
     @Test
-    public void testRequestIdIsGeneratedWhenMissingInHeader() throws IOException {
+    @DisplayName("Request ID generation when missing in header 🥳")
+public void testRequestIdIsGeneratedWhenMissingInHeader() throws IOException {
         Mockito.when(mockContext.getHeaderString(ArgumentMatchers.eq(Constants.DPC_REQUEST_ID_HEADER))).thenReturn(null);
         UriInfo mockUriInfo = Mockito.mock(UriInfo.class);
         Mockito.when(mockUriInfo.getPath()).thenReturn("v1/Patients");
@@ -69,7 +72,8 @@ public class GenerateRequestIdFilterUnitTest {
     }
 
     @Test
-    public void testRequestIdIsNotExtractedWhenExtractionDisabled() throws IOException {
+    @DisplayName("Disable request ID extraction 🥳?")
+public void testRequestIdIsNotExtractedWhenExtractionDisabled() throws IOException {
         String requestId = UUID.randomUUID().toString();
         Mockito.when(mockContext.getHeaderString(ArgumentMatchers.eq(Constants.DPC_REQUEST_ID_HEADER))).thenReturn(requestId);
         UriInfo mockUriInfo = Mockito.mock(UriInfo.class);
@@ -97,7 +101,8 @@ public class GenerateRequestIdFilterUnitTest {
     }
 
     @Test
-    public void testRequestIdIsExtractedWhenExtractionIsEnabled() throws IOException {
+    @DisplayName("Enable request ID extraction 🥳")
+public void testRequestIdIsExtractedWhenExtractionIsEnabled() throws IOException {
         String requestId = UUID.randomUUID().toString();
         Mockito.when(mockContext.getHeaderString(ArgumentMatchers.eq(Constants.DPC_REQUEST_ID_HEADER))).thenReturn(requestId);
         UriInfo mockUriInfo = Mockito.mock(UriInfo.class);
@@ -125,7 +130,8 @@ public class GenerateRequestIdFilterUnitTest {
     }
 
     @Test
-    public void testMdcIsBeingCleared() throws IOException {
+    @DisplayName("Clear MDC 🥳")
+public void testMdcIsBeingCleared() throws IOException {
         String requestId = UUID.randomUUID().toString();
         Mockito.when(mockContext.getHeaderString(ArgumentMatchers.eq(Constants.DPC_REQUEST_ID_HEADER))).thenReturn(requestId);
         UriInfo mockUriInfo = Mockito.mock(UriInfo.class);

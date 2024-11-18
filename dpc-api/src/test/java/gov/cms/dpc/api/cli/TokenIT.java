@@ -27,6 +27,9 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
+@DisplayName("JWT lifecycle processing")
+
 
 class TokenIT extends AbstractApplicationIT {
 
@@ -70,6 +73,8 @@ class TokenIT extends AbstractApplicationIT {
     }
 
     @Test
+@DisplayName("Complete JWT lifecycle 🥳")
+
     void testTokenLifecycle() throws Exception {
         // Create the organization
         final Optional<Throwable> success = cli.run("register", "-f", "../src/main/resources/organization.tmpl.json", "--no-token", "--host", "http://localhost:3500/v1");

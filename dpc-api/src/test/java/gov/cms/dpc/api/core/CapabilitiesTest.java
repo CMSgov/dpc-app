@@ -14,8 +14,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.DisplayName;
 
 @ExtendWith(BufferedLoggerHandler.class)
+@DisplayName("Capabilities statement verification")
+
 class CapabilitiesTest {
 
     private FhirValidator validator;
@@ -31,6 +34,8 @@ class CapabilitiesTest {
     }
 
     @Test
+@DisplayName("Validate capabilities statement 🥳")
+
     void capabilitiesIsValid() {
         final CapabilityStatement capabilities = Capabilities.getCapabilities("https://sandbox.dpc.cms.gov/api/v1");
         final ValidationResult validationResult = validator.validateWithResult(capabilities);

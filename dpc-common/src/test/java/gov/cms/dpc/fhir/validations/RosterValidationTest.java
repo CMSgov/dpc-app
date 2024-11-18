@@ -15,8 +15,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.DisplayName;
 
 @ExtendWith(BufferedLoggerHandler.class)
+@DisplayName("Roster validation")
 public class RosterValidationTest {
 
     private static FhirValidator fhirValidator;
@@ -44,6 +46,8 @@ public class RosterValidationTest {
     }
 
     @Test
+@DisplayName("Validate roster 🥳")
+
     void testAttributed() {
         final Group group = generateFakeGroup();
         final CodeableConcept concept = new CodeableConcept();

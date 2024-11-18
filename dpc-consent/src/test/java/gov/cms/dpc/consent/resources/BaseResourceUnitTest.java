@@ -9,7 +9,9 @@ import org.mockito.MockitoAnnotations;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.doReturn;
+import org.junit.jupiter.api.DisplayName;
 
+@DisplayName("Base resource")
 class BaseResourceUnitTest {
 	@InjectMocks
 	BaseResource baseResource;
@@ -23,7 +25,8 @@ class BaseResourceUnitTest {
 	}
 
 	@Test
-	public void testGetVersion() {
+	@DisplayName("Get base resource version 🥳")
+        public void testGetVersion() {
 		doReturn("version").when(pp).getBuildVersion();
 		assertEquals("version", baseResource.version());
 	}

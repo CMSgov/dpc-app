@@ -19,8 +19,11 @@ import java.io.IOException;
 import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
 
 @ExtendWith(BufferedLoggerHandler.class)
+@DisplayName("FHIR parameter value factory")
+
 class FHIRParamValueFactoryTest {
 
     private static FhirContext ctx = FhirContext.forDstu3();
@@ -33,6 +36,8 @@ class FHIRParamValueFactoryTest {
     }
 
     @Test
+@DisplayName("Create parameter value factory 🥳")
+
     void testCorrectFactory() throws IOException {
         final Parameter parameter = Mockito.mock(Parameter.class);
         final FHIRParameter mockAnnotation = Mockito.mock(FHIRParameter.class);
@@ -59,6 +64,8 @@ class FHIRParamValueFactoryTest {
     }
 
     @Test
+@DisplayName("Create parameter value factory with missing annotation 🤮")
+
     void testMissingAnnotation() {
         final Parameter parameter = Mockito.mock(Parameter.class);
         Mockito.when(parameter.getDeclaredAnnotation(FHIRParameter.class)).thenReturn(null);
@@ -68,6 +75,8 @@ class FHIRParamValueFactoryTest {
     }
 
     @Test
+@DisplayName("Create parameter value factory with incorrect parameter 🤮")
+
     void testIncorrectParameter() {
         final Parameter parameter = Mockito.mock(Parameter.class);
         final FHIRParameter mockAnnotation = Mockito.mock(FHIRParameter.class);

@@ -23,8 +23,11 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
 
 @ExtendWith(BufferedLoggerHandler.class)
+@DisplayName("Attestation validation")
+
 class AttestationValidationTest {
 
     private static FhirValidator fhirValidator;
@@ -52,6 +55,8 @@ class AttestationValidationTest {
     }
 
     @Test
+@DisplayName("Validate attestation definition 🤮")
+
     void definitionIsValid() {
         final StructureDefinition provenanceDefinition = dpcModule.fetchStructureDefinition(AttestationProfile.PROFILE_URI);
         final ValidationResult result = fhirValidator.validateWithResult(provenanceDefinition);
@@ -75,6 +80,8 @@ class AttestationValidationTest {
     }
 
     @Test
+@DisplayName("Validate provenance with reason 🤮")
+
     void testHasReason() {
         final Provenance provenance = new Provenance();
         provenance.setRecorded(Date.valueOf("1990-01-01"));
@@ -113,6 +120,8 @@ class AttestationValidationTest {
     }
 
     @Test
+@DisplayName("Validate provenance with role agent 🥳")
+
     void testRoleAgent() {
         final Provenance provenance = new Provenance();
         provenance.setRecorded(Date.valueOf("1990-01-01"));
@@ -143,6 +152,8 @@ class AttestationValidationTest {
     }
 
     @Test
+@DisplayName("Validate provenance with no role agent 🤮")
+
     void testRoleNoAgent() {
         final Provenance provenance = new Provenance();
         provenance.setRecorded(Date.valueOf("1990-01-01"));
@@ -172,6 +183,8 @@ class AttestationValidationTest {
     }
 
     @Test
+@DisplayName("Validate provenance with missing behalf of 🤮")
+
     void testRoleAgentNoBehalf() {
         final Provenance provenance = new Provenance();
         provenance.setRecorded(Date.valueOf("1990-01-01"));
@@ -202,6 +215,8 @@ class AttestationValidationTest {
     }
 
     @Test
+@DisplayName("Validate provenance with multiple agents 🥳")
+
     void testMultipleAgent() {
         final Provenance provenance = new Provenance();
         provenance.setRecorded(Date.valueOf("1990-01-01"));
@@ -246,6 +261,8 @@ class AttestationValidationTest {
     }
 
     @Test
+@DisplayName("Validate provenance with duplicate agents 🤮")
+
     void testDuplicateAgent() {
         final Provenance provenance = new Provenance();
         provenance.setRecorded(Date.valueOf("1990-01-01"));

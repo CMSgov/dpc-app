@@ -22,8 +22,10 @@ import java.security.SecureRandom;
 import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.junit.jupiter.api.DisplayName;
 
 @ExtendWith(BufferedLoggerHandler.class)
+@DisplayName("Macaroon bakery")
 class BakeryTests {
 
     private static final String ORGANIZATION_ID = "0c527d2e-2e8a-4808-b11d-0fa06baf8254";
@@ -38,6 +40,7 @@ class BakeryTests {
 
 
     @Test
+    @DisplayName("Wrong org's macaroon 🤮")
     void testOrganizationToken() {
 
         final Macaroon macaroon = bakery

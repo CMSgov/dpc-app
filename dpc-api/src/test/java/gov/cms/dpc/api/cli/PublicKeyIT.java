@@ -31,7 +31,9 @@ import java.util.stream.Collectors;
 
 import static gov.cms.dpc.testing.APIAuthHelpers.*;
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
 
+@DisplayName("Public key lifecycle processing")
 public class PublicKeyIT extends AbstractApplicationIT {
 
     private final PrintStream originalOut = System.out;
@@ -74,6 +76,8 @@ public class PublicKeyIT extends AbstractApplicationIT {
     }
 
     @Test
+@DisplayName("Complete public key lifecycle 🥳")
+
     void testPublicKeyLifecycle() throws Exception {
         // Create the organization
         final Optional<Throwable> success = cli.run("register", "-f", "../src/main/resources/organization.tmpl.json", "--no-token", "--host", "http://localhost:3500/v1");

@@ -31,7 +31,9 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.junit.jupiter.api.DisplayName;
 
+@DisplayName("Token resource operations")
 public class TokenResourceUnitTest {
     @Mock
     TokenDAO mockTokenDao;
@@ -54,7 +56,8 @@ public class TokenResourceUnitTest {
     }
 
     @Test
-    public void testGetOrganizationTokens() {
+    @DisplayName("Get client tokens 🥳")
+public void testGetOrganizationTokens() {
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
         organization.setId(orgId.toString());
@@ -72,7 +75,8 @@ public class TokenResourceUnitTest {
     }
 
     @Test
-    public void testGetOrganizationToken() {
+    @DisplayName("Get client token 🥳")
+public void testGetOrganizationToken() {
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
         organization.setId(orgId.toString());
@@ -90,7 +94,8 @@ public class TokenResourceUnitTest {
     }
 
     @Test
-    public void testGetOrganizationTokenNoMatch() {
+    @DisplayName("Get unrecognized client token 🤮")
+public void testGetOrganizationTokenNoMatch() {
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
         organization.setId(orgId.toString());
@@ -103,7 +108,8 @@ public class TokenResourceUnitTest {
     }
 
     @Test
-    public void testCreateOrganizationToken() {
+    @DisplayName("Create client token 🥳")
+public void testCreateOrganizationToken() {
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
         organization.setId(orgId.toString());
@@ -142,7 +148,8 @@ public class TokenResourceUnitTest {
     }
 
     @Test
-    public void testDeleteOrganizationToken() {
+    @DisplayName("Delete client token 🥳")
+public void testDeleteOrganizationToken() {
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
         organization.setId(orgId.toString());

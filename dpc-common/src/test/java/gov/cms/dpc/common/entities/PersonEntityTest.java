@@ -6,10 +6,13 @@ import org.junit.Before;
 import org.junit.jupiter.api.Test;
 import java.time.OffsetDateTime;
 import java.util.UUID;
+import org.junit.jupiter.api.DisplayName;
 
+@DisplayName("Person Entity tests")
 public class PersonEntityTest {
 	@Test
-	public void testGettersAndSetters() {
+	@DisplayName("Test getters and setters 🥳")
+public void testGettersAndSetters() {
 		PersonEntityImpl personEntity = new PersonEntityImpl();
 		String firstName = "Sydney";
 		String lastName = "Danger";
@@ -30,7 +33,8 @@ public class PersonEntityTest {
 	}
 
 	@Test
-	public void testSetCreation() {
+	@DisplayName("Person creation 🥳")
+public void testSetCreation() {
 		PersonEntityImpl personEntity = new PersonEntityImpl();
 		personEntity.setCreation();
 		assertNotNull(personEntity.getCreatedAt());
@@ -38,7 +42,8 @@ public class PersonEntityTest {
 	}
 
 	@Test
-	public void testSetUpdateTime() {
+	@DisplayName("Person update 🥳")
+public void testSetUpdateTime() {
 		PersonEntityImpl personEntity = new PersonEntityImpl();
 		personEntity.setUpdateTime();
 		assertNotNull(personEntity.getUpdatedAt());

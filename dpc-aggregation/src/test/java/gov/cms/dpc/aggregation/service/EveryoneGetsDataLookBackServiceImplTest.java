@@ -3,13 +3,16 @@ package gov.cms.dpc.aggregation.service;
 import gov.cms.dpc.common.utils.NPIUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
 
+@DisplayName("Look Back common data set")
 public class EveryoneGetsDataLookBackServiceImplTest {
 
     private final LookBackService lookBackService = new EveryoneGetsDataLookBackServiceImpl();
 
     @Test
-    public void alwaysReturnTrueFromHasClaimWithin() {
+    @DisplayName("Look back data matches 🥳")
+public void alwaysReturnTrueFromHasClaimWithin() {
         LookBackAnswer result = lookBackService.getLookBackAnswer(null, NPIUtil.generateNPI(), NPIUtil.generateNPI(), 0L);
         Assertions.assertTrue(result.orgNPIMatchAnyEobNPIs());
         Assertions.assertTrue(result.practitionerMatchEob());

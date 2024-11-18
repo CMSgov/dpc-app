@@ -7,11 +7,14 @@ import java.time.*;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
 
+@DisplayName("Patient Entity tests")
 public class PatientEntityTest {
 
 	@Test
-	public void testGettersAndSetters() {
+	@DisplayName("Test getters and setters")
+public void testGettersAndSetters() {
 		PatientEntity patient = new PatientEntity();
 		String beneficiaryId = "12345";
 		String mbiHash = "54321";
@@ -37,7 +40,8 @@ public class PatientEntityTest {
 	}
 
 	@Test
-	public void testUpdate() {
+	@DisplayName("Update patient 🥳")
+public void testUpdate() {
 		PatientEntity patient = new PatientEntity();
 		PatientEntity newPatient = new PatientEntity();
 		UUID id = UUID.randomUUID();
@@ -49,7 +53,8 @@ public class PatientEntityTest {
 	}
 
 	@Test
-	public void testUpperCaseBeneId() {
+	@DisplayName("Upper-case beneficiary ID")
+public void testUpperCaseBeneId() {
 		PatientEntity patient = new PatientEntity();
 		String beneficiaryId = "abcd1234";
 		patient.setBeneficiaryID(beneficiaryId);
@@ -59,7 +64,8 @@ public class PatientEntityTest {
 	}
 
 	@Test
-	public void testEqualsAndHashCode() {
+	@DisplayName("Overriden hashcode and equals 🥳")
+public void testEqualsAndHashCode() {
 
 		PatientEntity p1 = new PatientEntity();
 		PatientEntity p2 = new PatientEntity();
@@ -71,7 +77,8 @@ public class PatientEntityTest {
 	}
 
 	@Test
-	public void testLocalDateFunctions() {
+	@DisplayName("Convert date formats 🥳")
+public void testLocalDateFunctions() {
 		LocalDate localDate = LocalDate.of(2023, 10, 15);
 		Date utilityDate = PatientEntity.fromLocalDate(localDate);
 		LocalDate convertedDate = PatientEntity.toLocalDate(utilityDate);
@@ -82,7 +89,8 @@ public class PatientEntityTest {
 	}
 
 	@Test
-	public void testToLocalDateHandlesTimeZoneChange() {
+	@DisplayName("Convert time zones 🥳")
+public void testToLocalDateHandlesTimeZoneChange() {
 		// A previous version of toLocalDate failed when converting a date/time close to midnight because it converted
 		// to UTC before getting the LocalDate.  Make sure that's no longer the case.
 

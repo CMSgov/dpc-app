@@ -10,14 +10,17 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(BufferedLoggerHandler.class)
+@DisplayName("Blue Button health checks")
 class TestBlueButtonHealth {
 
     private static final String EXCEPTION_MESSAGE = "Timeout, not good";
 
     @Test
+    @DisplayName("Blue Button healthy 🥳")
     void testHealthy() {
 
         final BlueButtonClient bbc = Mockito.mock(BlueButtonClient.class);
@@ -29,6 +32,7 @@ class TestBlueButtonHealth {
     }
 
     @Test
+    @DisplayName("Blue Button unhealthy 🤮")
     void testException() {
 
         final BlueButtonClient bbc = Mockito.mock(BlueButtonClient.class);
@@ -45,6 +49,7 @@ class TestBlueButtonHealth {
     }
 
     @Test
+    @DisplayName("Blue Button health check failure 🤮")
     void testInvalidResponse() {
 
         final BlueButtonClient bbc = Mockito.mock(BlueButtonClient.class);

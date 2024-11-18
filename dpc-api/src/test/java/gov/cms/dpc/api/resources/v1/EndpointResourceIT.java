@@ -36,12 +36,16 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
 
+@DisplayName("Endpoint resource operations")
 public class EndpointResourceIT extends AbstractSecureApplicationIT {
 
     final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
 
     @Test
+@DisplayName("Create endpoint 🥳")
+
     void testCreateEndpoint() {
         Endpoint endpoint = OrganizationFactory.createValidFakeEndpoint();
 
@@ -55,6 +59,8 @@ public class EndpointResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
+@DisplayName("Create invalid endpoint 🤮")
+
     void testCreateInvalidEndpoint() throws IOException, URISyntaxException {
         URL url = new URL(getBaseURL() + "/Endpoint");
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -85,6 +91,8 @@ public class EndpointResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
+@DisplayName("Create fake endpoint 🤮")
+
     void testCreateEndpointNullStatus() {
         Endpoint endpoint = OrganizationFactory.createValidFakeEndpoint();
         endpoint.setStatus(null);
@@ -94,6 +102,8 @@ public class EndpointResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
+@DisplayName("Create endpoint with wrong org 🤮")
+
     void testCreateEndpointDifferentOrg() throws IOException {
         final String goldenMacaroon = APIAuthHelpers.createGoldenMacaroon();
         final IGenericClient adminClient = APIAuthHelpers.buildAdminClient(ctx, getBaseURL(), goldenMacaroon, false);
@@ -106,6 +116,8 @@ public class EndpointResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
+@DisplayName("Create endpoint without address 🤮")
+
     void testCreateEndpointWithoutAddress() {
         Endpoint endpoint = OrganizationFactory.createValidFakeEndpoint();
         endpoint.setAddress((String)null);
@@ -114,6 +126,8 @@ public class EndpointResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
+@DisplayName("Get multiple endpoints 🥳")
+
     void testGetEndpoints() {
         Bundle result = client.search().forResource(Endpoint.class).returnBundle(Bundle.class).execute();
         assertTrue(result.getTotal() > 0);
@@ -126,6 +140,8 @@ public class EndpointResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
+@DisplayName("Get single endpoint 🥳")
+
     void testFetchEndpoint() throws GeneralSecurityException, IOException, URISyntaxException {
         final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
         final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
@@ -154,6 +170,8 @@ public class EndpointResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
+@DisplayName("Update endpoints 🥳")
+
     void testUpdateEndpoint() throws GeneralSecurityException, IOException, URISyntaxException {
         final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
         final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
@@ -202,6 +220,8 @@ public class EndpointResourceIT extends AbstractSecureApplicationIT {
 
 
     @Test
+@DisplayName("Delete last remaining endpoint 🤮")
+
     void testDeleteOrgsOnlyEndpoint() throws IOException, GeneralSecurityException, URISyntaxException {
         final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
         final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());
@@ -223,6 +243,8 @@ public class EndpointResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
+@DisplayName("Delete other org's endpoint 🤮")
+
     void testDeleteEndpoint() throws GeneralSecurityException, IOException, URISyntaxException {
         final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
         final TestOrganizationContext orgBContext = registerAndSetupNewOrg();

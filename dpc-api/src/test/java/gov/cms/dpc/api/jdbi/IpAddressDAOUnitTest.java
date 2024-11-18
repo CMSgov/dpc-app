@@ -12,6 +12,9 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
+@DisplayName("Inet address handling")
+
 
 class IpAddressDAOUnitTest extends AbstractDAOTest<IpAddressEntity> {
     IpAddressDAO ipAddressDAO;
@@ -22,7 +25,8 @@ class IpAddressDAOUnitTest extends AbstractDAOTest<IpAddressEntity> {
     }
 
     @Test
-    public void writesIpAddress() {
+    @DisplayName("IP address written to allow list 🥳")
+public void writesIpAddress() {
         IpAddressEntity ipAddressEntity = createIpAddressEntity(UUID.randomUUID(), "192.168.1.1", "test label");
 
         IpAddressEntity returnedIp = db.inTransaction(() -> ipAddressDAO.persistIpAddress(ipAddressEntity));
@@ -35,14 +39,16 @@ class IpAddressDAOUnitTest extends AbstractDAOTest<IpAddressEntity> {
     }
 
     @Test
-    public void failsWritingBadIpAddress() {
+    @DisplayName("Malformed IP address fails to write to allow list 🤮")
+public void failsWritingBadIpAddress() {
         IpAddressEntity ipAddressEntity = createIpAddressEntity(UUID.randomUUID(), "bad_ip", "test label");
         assertThrows(PersistenceException.class, () ->
             db.inTransaction(() -> ipAddressDAO.persistIpAddress(ipAddressEntity)));
     }
 
     @Test
-    public void fetchesIpAddress() {
+    @DisplayName("Fetch IP addresses from allow list 🥳")
+public void fetchesIpAddress() {
         UUID orgId1 = UUID.randomUUID();
         UUID orgId2 = UUID.randomUUID();
 
@@ -68,7 +74,8 @@ class IpAddressDAOUnitTest extends AbstractDAOTest<IpAddressEntity> {
     }
 
     @Test
-    public void deletesIpAddress() {
+    @DisplayName("Delete IP address from allow list 🥳")
+public void deletesIpAddress() {
         UUID orgId = UUID.randomUUID();
 
         IpAddressEntity persistedIpAddress = db.inTransaction(() ->

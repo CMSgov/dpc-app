@@ -44,8 +44,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.*;
+import org.junit.jupiter.api.DisplayName;
 
 @SuppressWarnings("unchecked")
+@DisplayName("Group resource operations")
 public class GroupResourceUnitTest {
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
@@ -72,7 +74,8 @@ public class GroupResourceUnitTest {
     }
 
     @Test
-    public void testCreateRoster() {
+    @DisplayName("Create roster 🥳")
+public void testCreateRoster() {
         String practitionerNPI = NPIUtil.generateNPI();
         UUID practitionerId = UUID.randomUUID();
         UUID orgId = UUID.randomUUID();
@@ -117,6 +120,7 @@ public class GroupResourceUnitTest {
     }
 
     @Test
+    @DisplayName("Create roster with incorrect tag 🤮")
     public void testCreateRosterUsesCorrectTag() {
         OrganizationPrincipal organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
         Organization organization = organizationPrincipal.getOrganization();
@@ -160,7 +164,8 @@ public class GroupResourceUnitTest {
     }
 
     @Test
-    public void testCreateRosterNonMatchingNPI() {
+    @DisplayName("Create roster with non-matching NPI 🤮")
+public void testCreateRosterNonMatchingNPI() {
         UUID practitionerId = UUID.randomUUID();
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
@@ -200,7 +205,8 @@ public class GroupResourceUnitTest {
     }
 
     @Test
-    public void testCreateRosterProviderNotFound() {
+    @DisplayName("Create roster when provider not found 🤮")
+public void testCreateRosterProviderNotFound() {
         UUID practitionerId = UUID.randomUUID();
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
@@ -235,7 +241,8 @@ public class GroupResourceUnitTest {
     }
 
     @Test
-    public void testExportWithValidSinceParam() {
+    @DisplayName("Export roster with valid `Since` parameter 🥳")
+public void testExportWithValidSinceParam() {
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
         organization.setId(orgId.toString());
@@ -309,7 +316,8 @@ public class GroupResourceUnitTest {
     }
 
     @Test
-    public void testExportWithInvalidTimes() {
+    @DisplayName("Export roster with invalid times 🤮")
+public void testExportWithInvalidTimes() {
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
         organization.setId(orgId.toString());
@@ -388,7 +396,8 @@ public class GroupResourceUnitTest {
     }
 
     @Test
-    public void testOutputFormatSetting() {
+    @DisplayName("Set export output format 🥳")
+public void testOutputFormatSetting() {
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
         organization.setId(orgId.toString());

@@ -52,6 +52,9 @@ import java.util.UUID;
 import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
 import static gov.cms.dpc.testing.APIAuthHelpers.TASK_URL;
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
+@DisplayName("Organization resource operations")
+
 
 class OrganizationResourceIT extends AbstractSecureApplicationIT {
 
@@ -62,7 +65,8 @@ class OrganizationResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
-    void testOrganizationRegistration() throws IOException {
+    @DisplayName("Register organization 🥳")
+void testOrganizationRegistration() throws IOException {
         // Generate a golden macaroon
         final String goldenMacaroon = APIAuthHelpers.createGoldenMacaroon();
         final IGenericClient client = APIAuthHelpers.buildAdminClient(ctx, getBaseURL(), goldenMacaroon, false);
@@ -81,7 +85,8 @@ class OrganizationResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
-    void testCreateInvalidOrganization() throws IOException, URISyntaxException {
+    @DisplayName("Register org with invalid parameters 🤮")
+void testCreateInvalidOrganization() throws IOException, URISyntaxException {
         URL url = new URL(getBaseURL() + "/Organization/$submit");
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod(HttpMethod.POST);
@@ -109,7 +114,8 @@ class OrganizationResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
-    void testOrganizationFetch() {
+    @DisplayName("Fetch organization 🥳")
+void testOrganizationFetch() {
         final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
 
         final Bundle organizations = client
@@ -125,7 +131,8 @@ class OrganizationResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
-    void testOrganizationFetchById() {
+    @DisplayName("Fetch organization by ID 🥳")
+void testOrganizationFetchById() {
 
         final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
 
@@ -161,7 +168,8 @@ class OrganizationResourceIT extends AbstractSecureApplicationIT {
 
 
     @Test
-    void testMissingEndpoint() throws IOException {
+    @DisplayName("Fetch organization with missing endpoint 🤮")
+void testMissingEndpoint() throws IOException {
         // Generate a golden macaroon
         final String goldenMacaroon = APIAuthHelpers.createGoldenMacaroon();
         final IGenericClient client = APIAuthHelpers.buildAdminClient(ctx, getBaseURL(), goldenMacaroon, false);
@@ -186,7 +194,8 @@ class OrganizationResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
-    void testMissingOrganization() throws IOException {
+    @DisplayName("Fetch unrecognized organization 🤮")
+void testMissingOrganization() throws IOException {
         // Generate a golden macaroon
         final String goldenMacaroon = APIAuthHelpers.createGoldenMacaroon();
         final IGenericClient client = APIAuthHelpers.buildAdminClient(ctx, getBaseURL(), goldenMacaroon, false);
@@ -210,7 +219,8 @@ class OrganizationResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
-    void testUpdateOrganization() throws IOException, URISyntaxException, GeneralSecurityException {
+    @DisplayName("Update organization 🥳")
+void testUpdateOrganization() throws IOException, URISyntaxException, GeneralSecurityException {
         final String orgID = UUID.randomUUID().toString();
         final IParser parser = ctx.newJsonParser();
         final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
@@ -253,7 +263,8 @@ class OrganizationResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
-    void testOrganizationDeletion() throws IOException, URISyntaxException, GeneralSecurityException {
+    @DisplayName("Delete organization 🥳")
+void testOrganizationDeletion() throws IOException, URISyntaxException, GeneralSecurityException {
 //        // Generate a golden macaroon
         final UUID orgDeletionID = UUID.randomUUID();
         final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);

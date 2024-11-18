@@ -21,8 +21,10 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.DisplayName;
 
 @ExtendWith(DropwizardExtensionsSupport.class)
+@DisplayName("Bundle data handling")
 public class BundleHandlerTest {
 
     static {
@@ -45,6 +47,8 @@ public class BundleHandlerTest {
     }
 
     @Test
+@DisplayName("Create bundle from resource 🥳")
+
     void testBundle() {
         final String bundleString = resource
                 .target("")
@@ -61,6 +65,8 @@ public class BundleHandlerTest {
     }
 
     @Test
+@DisplayName("Create bundle from raw string 🥳")
+
     void testRawBundle() {
         final String bundleString = resource
                 .target("/raw")
@@ -73,6 +79,8 @@ public class BundleHandlerTest {
     }
 
     @Test
+@DisplayName("Create empty bundle 🥳")
+
     void testEmptyBundle() {
         final String bundleString = resource
                 .target("/empty")
@@ -84,6 +92,8 @@ public class BundleHandlerTest {
     }
 
     @Test
+@DisplayName("Create collection bundle 🥳?")
+
     void testCollectionBundle() {
         final String bundleString = resource
                 .target("/collection")
@@ -124,6 +134,8 @@ public class BundleHandlerTest {
     }
 
     @Test
+@DisplayName("Create Strings List resource 🥳")
+
     void testStringListReturn() {
         //noinspection Convert2Diamond - Removing the class assertion causes javac to explode.
         final List<String> strings = resource
@@ -137,6 +149,8 @@ public class BundleHandlerTest {
     }
 
     @Test
+@DisplayName("Create String resource 🥳")
+
     void testStringReturn() {
 
         final String s = resource

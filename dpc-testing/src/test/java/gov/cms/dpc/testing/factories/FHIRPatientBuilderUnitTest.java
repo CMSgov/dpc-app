@@ -9,11 +9,15 @@ import java.sql.Date;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
+@DisplayName("FHIR-based Patient Factory tests")
+
 
 class FHIRPatientBuilderUnitTest {
 
     @Test
-    public void testBuildWithMultiple() {
+    @DisplayName("Build patient with multiple attributes 🥳")
+public void testBuildWithMultiple() {
         String gender =  "other";
         UUID orgId =  UUID.randomUUID();
 
@@ -26,7 +30,8 @@ class FHIRPatientBuilderUnitTest {
     }
 
     @Test
-    public void withId() {
+    @DisplayName("Build patient with ID 🥳")
+public void withId() {
         UUID id = UUID.randomUUID();
         Patient patient = FHIRPatientBuilder.newBuild().withId(id).build();
         assertEquals(id.toString(),patient.getId());
@@ -37,7 +42,8 @@ class FHIRPatientBuilderUnitTest {
     }
 
     @Test
-    public void withMbi() {
+    @DisplayName("Build patient with MBI 🥳")
+public void withMbi() {
         String mbi =  "4S41C00AA00";
         Patient patient = FHIRPatientBuilder.newBuild().withMbi(mbi).build();
         assertEquals(1,patient.getIdentifier().size());
@@ -46,7 +52,8 @@ class FHIRPatientBuilderUnitTest {
     }
 
     @Test
-    public void testWithName() {
+    @DisplayName("Build patient with full name 🥳")
+public void testWithName() {
         String first =  "Salvadoritito";
         String last = "Burger";
         Patient patient = FHIRPatientBuilder.newBuild().withName(first,last).build();
@@ -56,7 +63,8 @@ class FHIRPatientBuilderUnitTest {
     }
 
     @Test
-    public void testWithBirthDate() {
+    @DisplayName("Build patient with DOB 🥳")
+public void testWithBirthDate() {
         String dob =  "1990-10-10";
         Patient patient = FHIRPatientBuilder.newBuild().withBirthDate(dob).build();
         assertEquals(Date.valueOf(dob), patient.getBirthDate());
@@ -67,7 +75,8 @@ class FHIRPatientBuilderUnitTest {
 
 
     @Test
-    public void testWithGender() {
+    @DisplayName("Build patient with gender 🥳")
+public void testWithGender() {
         String gender =  "other";
         Patient patient = FHIRPatientBuilder.newBuild().withGender(gender).build();
         assertEquals(Enumerations.AdministrativeGender.OTHER, patient.getGender());
@@ -77,7 +86,8 @@ class FHIRPatientBuilderUnitTest {
     }
 
     @Test
-    public void testManagedBy() {
+    @DisplayName("Build patient with managed-by attribute 🥳")
+public void testManagedBy() {
         UUID orgId =  UUID.randomUUID();
         Patient patient = FHIRPatientBuilder.newBuild().managedBy(orgId).build();
         assertEquals("Organization/"+orgId,patient.getManagingOrganization().getReference());

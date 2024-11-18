@@ -27,7 +27,9 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
+import org.junit.jupiter.api.DisplayName;
 
+@DisplayName("Group resource operations")
 public class GroupResourceUnitTest {
 
     private GroupResource groupResource;
@@ -64,7 +66,8 @@ public class GroupResourceUnitTest {
 
 
     @Test
-    public void testCreateRosterHappyCase(){
+    @DisplayName("Create roster 🥳")
+public void testCreateRosterHappyCase(){
         //Arrange
         final UUID orgId = UUID.randomUUID();
         final String providerNpi = NPIUtil.generateNPI();
@@ -97,7 +100,8 @@ public class GroupResourceUnitTest {
     }
 
     @Test
-    public void testCreateRosterWithInvalidPatient(){
+    @DisplayName("Create roster with invalid patient 🤮")
+public void testCreateRosterWithInvalidPatient(){
         //Arrange
         final UUID orgId = UUID.randomUUID();
         final String providerNpi = NPIUtil.generateNPI();

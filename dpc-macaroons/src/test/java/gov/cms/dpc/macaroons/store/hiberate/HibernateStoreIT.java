@@ -9,8 +9,10 @@ import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
 
 import java.security.SecureRandom;
+import org.junit.jupiter.api.DisplayName;
 
 @IntegrationTest
+@DisplayName("Hibernate keystore")
 class HibernateStoreIT extends AbstractStoreTest {
 
     HibernateStoreIT() {

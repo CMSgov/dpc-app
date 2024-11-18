@@ -37,11 +37,15 @@ import java.sql.Date;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
+@DisplayName("Practitioner resource operations")
+
 
 class PractitionerResourceIT extends AbstractSecureApplicationIT {
 
     @Test
-    void ensurePractitionersExist() throws IOException, URISyntaxException, GeneralSecurityException {
+    @DisplayName("Get all practitioners for an organization 🥳")
+void ensurePractitionersExist() throws IOException, URISyntaxException, GeneralSecurityException {
         final IParser parser = ctx.newJsonParser();
         final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
         IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
@@ -126,7 +130,8 @@ class PractitionerResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
-    void testCreateInvalidPractitioner() throws IOException, URISyntaxException {
+    @DisplayName("Create practitioner with invalid parameters 🤮")
+void testCreateInvalidPractitioner() throws IOException, URISyntaxException {
         URL url = new URL(getBaseURL() + "/Practitioner");
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod(HttpMethod.POST);
@@ -156,7 +161,8 @@ class PractitionerResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
-    public void testCreatePractitionerReturnsAppropriateHeaders() {
+    @DisplayName("Create practitioner 🥳")
+public void testCreatePractitionerReturnsAppropriateHeaders() {
         IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
         Practitioner practitioner = APITestHelpers.createPractitionerResource(NPIUtil.generateNPI(), APITestHelpers.ORGANIZATION_ID);
 
@@ -185,7 +191,8 @@ class PractitionerResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
-    public void testUpdatePractitionerNotImplemented() throws IOException {
+    @DisplayName("Update practitioner - not yet implemented 🤮")
+public void testUpdatePractitionerNotImplemented() throws IOException {
         IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
         final IParser parser = ctx.newJsonParser();
         APITestHelpers.setupPractitionerTest(client, parser);
@@ -210,7 +217,8 @@ class PractitionerResourceIT extends AbstractSecureApplicationIT {
 
 
     @Test
-    public void testPractitionerPathAuthorization() throws GeneralSecurityException, IOException, URISyntaxException {
+    @DisplayName("Get pracitioners with valid authorization 🥳")
+public void testPractitionerPathAuthorization() throws GeneralSecurityException, IOException, URISyntaxException {
         final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
         final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
         final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());
@@ -259,7 +267,8 @@ class PractitionerResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
-    public void testRequestBodyForgery() throws GeneralSecurityException, IOException, URISyntaxException {
+    @DisplayName("Create and access practitioner with override of mismatching metadata 🥳")
+public void testRequestBodyForgery() throws GeneralSecurityException, IOException, URISyntaxException {
         final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
         final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
         final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());
@@ -307,7 +316,8 @@ class PractitionerResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
-    public void testRequestBodyForgeryOnMultipleSubmit() throws GeneralSecurityException, IOException, URISyntaxException {
+    @DisplayName("Create and access multiple practitioners with override of mismatching metadata 🥳")
+public void testRequestBodyForgeryOnMultipleSubmit() throws GeneralSecurityException, IOException, URISyntaxException {
         final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
         final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
         final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());

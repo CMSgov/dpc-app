@@ -27,7 +27,9 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
+import org.junit.jupiter.api.DisplayName;
 
+@DisplayName("Token deletion")
 public class TokenDeleteUnitTest {
     private final PrintStream originalOut = System.out;
     private final PrintStream originalErr = System.err;
@@ -63,7 +65,8 @@ public class TokenDeleteUnitTest {
     }
 
     @Test
-    public void testDeleteToken_happyPath() throws IOException {
+    @DisplayName("Delete client token from token store 🥳")
+public void testDeleteToken_happyPath() throws IOException {
         new MockServerClient(taskUri.getHost(), taskUri.getPort())
             .when(
                 HttpRequest.request()
@@ -87,7 +90,8 @@ public class TokenDeleteUnitTest {
     }
 
     @Test
-    public void testDeleteToken_badResponse() throws IOException {
+    @DisplayName("Invalid request fails to delete client token from token store 🤮")
+public void testDeleteToken_badResponse() throws IOException {
         new MockServerClient(taskUri.getHost(), taskUri.getPort())
             .when(
                 HttpRequest.request()

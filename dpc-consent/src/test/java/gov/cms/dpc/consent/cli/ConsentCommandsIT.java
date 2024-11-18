@@ -17,9 +17,11 @@ import java.io.PrintStream;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @IntegrationTest
+@DisplayName("Consent commands")
 class ConsentCommandsIT {
 
     private final PrintStream originalOut = System.out;
@@ -77,6 +79,7 @@ class ConsentCommandsIT {
     }
 
     @Test
+    @DisplayName("Display consent commands help message 🥳")
     final void pertinentHelpMessageDisplayed() throws Exception {
         final Optional<Throwable> t1 = cli.run("consent", "create", "-h");
         String errorMsg = String.format("Should have pertinent help message, got: %s", stdOut.toString());
@@ -86,6 +89,7 @@ class ConsentCommandsIT {
     }
 
     @Test
+    @DisplayName("Mix --in and --out arguments for consent comment 🤮")
     final void onlyAllowsInOrOut() throws Exception {
         final Optional<Throwable> t1 = cli.run("consent", "create", configPath, "-p", "t2-mbi", "-d", "2019-11-22", "-i", "-o", "--host", "http://localhost:3500/v1");
         assertAll(() -> assertTrue(t1.isPresent(), "Should have failed"),
@@ -95,6 +99,7 @@ class ConsentCommandsIT {
     }
 
     @Test
+    @DisplayName("Parse date with consent command 🤮")
     final void detectsInvalidDate() throws Exception {
         final Optional<Throwable> t5 = cli.run("consent", "create", configPath, "-p", "tA-mbi", "-d", "Nov 22 2019", "-i", "--host", "http://localhost:3500/v1");
         assertAll(() -> assertTrue(t5.isPresent(), "Should have failed"),
@@ -104,6 +109,7 @@ class ConsentCommandsIT {
     }
 
     @Test
+    @DisplayName("Create opt-in record 🥳")
     final void createDefaultOptInRecord() throws Exception {
         final Optional<Throwable> t2 = cli.run("consent", "create", configPath, "-p", "t2-mbi", "-d", "2019-11-22", "-i", "--host", "http://localhost:3500/v1");
         assertAll(() -> assertFalse(t2.isPresent(), "Should have succeeded"),
@@ -111,6 +117,7 @@ class ConsentCommandsIT {
     }
 
     @Test
+    @DisplayName("Create opt-out record 🥳")
     final void createDefaultOptOutRecord() throws Exception {
         final Optional<Throwable> t3 = cli.run("consent", "create", configPath, "-p", "t3-mbi", "-d", "2019-11-23", "-o", "--host", "http://localhost:3500/v1");
         assertAll(() -> assertFalse(t3.isPresent(), "Should have succeeded"),

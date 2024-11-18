@@ -19,6 +19,7 @@ import ru.vyarus.dropwizard.guice.module.context.SharedConfigurationState;
 import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.DisplayName;
 
 @ExtendWith(BufferedLoggerHandler.class)
 @IntegrationTest

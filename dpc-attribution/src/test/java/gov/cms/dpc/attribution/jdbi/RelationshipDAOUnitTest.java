@@ -16,6 +16,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
+@DisplayName("Relationship data operations")
+
 
 class RelationshipDAOUnitTest extends AbstractAttributionDAOTest {
 	private RelationshipDAO relationshipDAO;
@@ -35,7 +38,8 @@ class RelationshipDAOUnitTest extends AbstractAttributionDAOTest {
 	}
 
 	@Test
-	public void test_AttributionRelationship_batch_search_happy_path() {
+	@DisplayName("Batch search for attributions 🥳")
+public void test_AttributionRelationship_batch_search_happy_path() {
 		OrganizationEntity org = AttributionTestHelpers.createOrganizationEntity();
 
 		PatientEntity pat1 = AttributionTestHelpers.createPatientEntity(org);
@@ -74,7 +78,8 @@ class RelationshipDAOUnitTest extends AbstractAttributionDAOTest {
 	}
 
 	@Test
-	public void test_AttributionRelationship_batch_search_only_finds_correct_roster() {
+	@DisplayName("Search attributions with roster filtering 🥳")
+public void test_AttributionRelationship_batch_search_only_finds_correct_roster() {
 		OrganizationEntity org = AttributionTestHelpers.createOrganizationEntity();
 
 		PatientEntity pat1 = AttributionTestHelpers.createPatientEntity(org);
@@ -120,7 +125,8 @@ class RelationshipDAOUnitTest extends AbstractAttributionDAOTest {
 	// failed inserts for duplicate keys.  Check that here to prevent someone from accidentally changing one and not the
 	// other.
 	@Test
-	public void test_SequenceIncrementSizeMatches() throws ClassNotFoundException, NoSuchFieldException {
+	@DisplayName("Verify internal database key integrity 🥳")
+public void test_SequenceIncrementSizeMatches() throws ClassNotFoundException, NoSuchFieldException {
 		Field attributionID = ClassLoader.getSystemClassLoader()
 			.loadClass("gov.cms.dpc.common.entities.AttributionRelationship")
 			.getDeclaredField("attributionID");

@@ -10,6 +10,7 @@ import io.dropwizard.testing.DropwizardTestSupport;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import ru.vyarus.dropwizard.guice.module.context.SharedConfigurationState;
+import org.junit.jupiter.api.DisplayName;
 
 @IntegrationTest
 public abstract class AbstractConsentIT {

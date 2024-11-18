@@ -32,6 +32,9 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
+import org.junit.jupiter.api.DisplayName;
+@DisplayName("Public key enumeration")
+
 
 class KeyListUnitTest {
     private final PrintStream originalOut = System.out;
@@ -68,7 +71,8 @@ class KeyListUnitTest {
     }
 
     @Test
-    public void testListKeys_happyPath() throws IOException {
+    @DisplayName("List public keys in key store 🥳")
+public void testListKeys_happyPath() throws IOException {
         PublicKeyEntity publicKeyEntity = new PublicKeyEntity();
         publicKeyEntity.setId(UUID.randomUUID());
         publicKeyEntity.setLabel("test public key");
@@ -99,7 +103,8 @@ class KeyListUnitTest {
     }
 
     @Test
-    public void testListKeys_badResponse() throws IOException {
+    @DisplayName("Invalid request fails to list public keys in key store 🤮")
+public void testListKeys_badResponse() throws IOException {
         new MockServerClient(taskUri.getHost(), taskUri.getPort())
             .when(
                 HttpRequest.request()

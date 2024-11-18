@@ -29,6 +29,9 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
+@DisplayName("Public key resource operations")
+
 
 class KeyResourceIT extends AbstractSecureApplicationIT {
 
@@ -46,6 +49,8 @@ class KeyResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
+@DisplayName("Submit public key to key store with long label 🤮")
+
     void testInvalidKeySubmission() throws GeneralSecurityException, IOException, URISyntaxException {
         KeyResource.KeySignature keySig = generateKeyAndSignature();
 
@@ -93,6 +98,8 @@ class KeyResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
+@DisplayName("Submit public key with incorrect signature 🤮")
+
     void testMismatchedKeyAndSignature() throws GeneralSecurityException, IOException, URISyntaxException {
         KeyResource.KeySignature keySig1 = generateKeyAndSignature();
         KeyResource.KeySignature keySig2 = generateKeyAndSignature();
@@ -113,6 +120,8 @@ class KeyResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
+@DisplayName("Validate public key round trip process 🥳")
+
     void testRoundTrip() throws GeneralSecurityException, IOException {
         KeyResource.KeySignature keySig = generateKeyAndSignature();
 
@@ -170,7 +179,8 @@ class KeyResourceIT extends AbstractSecureApplicationIT {
     // TODO: Remove this test when ECC support is re-enabled.
     @Test
     @SuppressWarnings("unchecked")
-    public void testRejectEccKey() throws NoSuchAlgorithmException, IOException {
+    @DisplayName("Process ECC key type 🤮")
+public void testRejectEccKey() throws NoSuchAlgorithmException, IOException {
         KeyPair eccKeyPair = APIAuthHelpers.generateKeyPair(KeyType.ECC);
         String publicKeyStr = APIAuthHelpers.generatePublicKey(eccKeyPair.getPublic());
         KeyResource.KeySignature keySig = new KeyResource.KeySignature(publicKeyStr, "");

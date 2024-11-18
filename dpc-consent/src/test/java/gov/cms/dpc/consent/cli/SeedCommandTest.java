@@ -17,8 +17,10 @@ import java.io.PrintStream;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
 
 @Disabled
+@DisplayName("Seed commands")
 class SeedCommandTest {
 
     private final PrintStream originalOut = System.out;
@@ -56,6 +58,7 @@ class SeedCommandTest {
     }
 
     @Test
+    @DisplayName("Run seed command 🥳")
     void testSeedCommand() throws Exception {
 
         final Optional<Throwable> success = cli.run("seed", "src/test/resources/test.application.yml");

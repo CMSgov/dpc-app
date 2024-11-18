@@ -18,7 +18,9 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
 
+@DisplayName("Roster entity conversion")
 public class RosterEntityConverterTest {
     RosterEntityConverter rosterEntityConverter = new RosterEntityConverter();
     FHIREntityConverter fhirEntityConverter = FHIREntityConverter.initialize();
@@ -51,6 +53,8 @@ public class RosterEntityConverterTest {
     }
 
     @Test
+@DisplayName("Convert null with from FHIR 🤮")
+
     void fromFHIR() {
         String expected = "Entity cannot be converted from FHIR, using this class";
         Exception exception = assertThrows(UnsupportedOperationException.class, () -> {
@@ -60,6 +64,8 @@ public class RosterEntityConverterTest {
     }
 
     @Test
+@DisplayName("Convert group with attributes to FHIR 🥳")
+
     void toFHIR() {
         Group convertedResource = rosterEntityConverter.toFHIR(fhirEntityConverter, rosterEntity);
         assertEquals(Group.GroupType.PERSON, convertedResource.getType());
@@ -78,11 +84,15 @@ public class RosterEntityConverterTest {
     }
 
     @Test
+@DisplayName("Get Group FHIR resource from Java class 🥳")
+
     void getFHIRResource() {
         assertEquals(Group.class, rosterEntityConverter.getFHIRResource());
     }
 
     @Test
+@DisplayName("Convert Roster Entity Java class from Roster Entity FHIR resource 🥳🤮")
+
     void getJavaClass() {
         assertEquals(RosterEntity.class, rosterEntityConverter.getJavaClass());
     }}

@@ -9,8 +9,11 @@ import org.mockito.Mockito;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import org.junit.jupiter.api.DisplayName;
 
 @ExtendWith(BufferedLoggerHandler.class)
+@DisplayName("Aggregation Engine management")
+
 class AggregationManagerTest {
 
     private AggregationEngine engine;
@@ -22,6 +25,8 @@ class AggregationManagerTest {
     }
 
     @Test
+@DisplayName("Shut down aggregation engine 🥳")
+
     void testShutdown() {
         new AggregationManager(engine).stop();
         verify(engine).stop();

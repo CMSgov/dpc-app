@@ -27,8 +27,11 @@ import java.util.UUID;
 import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import org.junit.jupiter.api.DisplayName;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@DisplayName("Inet resource operations")
+
 class IpAddressResourceIT extends AbstractSecureApplicationIT {
     private final ObjectMapper mapper = new ObjectMapper();
     private final String fullyAuthedToken;
@@ -43,7 +46,8 @@ class IpAddressResourceIT extends AbstractSecureApplicationIT {
 
     @Test
     @Order(1)
-    public void testBadAuth() throws URISyntaxException, IOException {
+    @DisplayName("Access IP Address resource with fake auth token 🤮")
+public void testBadAuth() throws URISyntaxException, IOException {
         CloseableHttpClient client = HttpClients.createDefault();
         URIBuilder uriBuilder = new URIBuilder(String.format("%s/IpAddress", getBaseURL()));
 
@@ -57,7 +61,8 @@ class IpAddressResourceIT extends AbstractSecureApplicationIT {
 
     @Test
     @Order(2)
-    public void testNoAuth() throws URISyntaxException, IOException {
+    @DisplayName("Access IP Address resource with no auth token 🤮")
+public void testNoAuth() throws URISyntaxException, IOException {
         CloseableHttpClient client = HttpClients.createDefault();
         URIBuilder uriBuilder = new URIBuilder(String.format("%s/IpAddress", getBaseURL()));
 
@@ -70,7 +75,8 @@ class IpAddressResourceIT extends AbstractSecureApplicationIT {
 
     @Test
     @Order(3)
-    public void testPost_happyPath() throws IOException, URISyntaxException {
+    @DisplayName("Access IP Address resource with auth token 🥳")
+public void testPost_happyPath() throws IOException, URISyntaxException {
         CloseableHttpClient client = HttpClients.createDefault();
         String ipAddressJson = mapper.writeValueAsString(ipRequest);
         URIBuilder uriBuilder = new URIBuilder(String.format("%s/IpAddress", getBaseURL()));
@@ -98,7 +104,8 @@ class IpAddressResourceIT extends AbstractSecureApplicationIT {
     @Test
     @Order(4)
     // Force this to run after the POST test
-    public void testGet() throws URISyntaxException, IOException {
+    @DisplayName("Get IP address 🥳")
+public void testGet() throws URISyntaxException, IOException {
         CloseableHttpClient client = HttpClients.createDefault();
         URIBuilder uriBuilder = new URIBuilder(String.format("%s/IpAddress", getBaseURL()));
 
@@ -123,7 +130,8 @@ class IpAddressResourceIT extends AbstractSecureApplicationIT {
 
     @Test
     @Order(5)
-    public void testDelete_happyPath() throws URISyntaxException, IOException {
+    @DisplayName("Delete IP address 🥳")
+public void testDelete_happyPath() throws URISyntaxException, IOException {
         CloseableHttpClient client = HttpClients.createDefault();
         URIBuilder uriBuilder = new URIBuilder(String.format("%s/IpAddress/%s", getBaseURL(), ipAddressEntityResponse.getId()));
 
@@ -137,7 +145,8 @@ class IpAddressResourceIT extends AbstractSecureApplicationIT {
 
     @Test
     @Order(6)
-    public void testDelete_notFound() throws URISyntaxException, IOException {
+    @DisplayName("Delete unrecognized IP Address 🤮")
+public void testDelete_notFound() throws URISyntaxException, IOException {
         CloseableHttpClient client = HttpClients.createDefault();
         URIBuilder uriBuilder = new URIBuilder(String.format("%s/IpAddress/%s", getBaseURL(), UUID.randomUUID()));
 
@@ -152,7 +161,8 @@ class IpAddressResourceIT extends AbstractSecureApplicationIT {
     @Test
     @Order(7)
     // Force this test to run last since it's going to max out our Ips for the org
-    public void testPost_tooManyIps() throws IOException, URISyntaxException {
+    @DisplayName("Allow too many IP addresses to be set 🤮")
+public void testPost_tooManyIps() throws IOException, URISyntaxException {
         // We shouldn't have any rows in the table at this point, so fill up to the max
         for(int i=1; i<=8; i++) {
             writeIpAddress(String.format("test post %d", i), "192.168.1.1");
@@ -176,7 +186,8 @@ class IpAddressResourceIT extends AbstractSecureApplicationIT {
 
     @Test
     @Order(8)
-    public void testPost_noIp() throws IOException, URISyntaxException {
+    @DisplayName("Get IP address with missing parameter 🤮")
+public void testPost_noIp() throws IOException, URISyntaxException {
         CreateIpAddressRequest emptyIpRequest = new CreateIpAddressRequest(null);
 
         CloseableHttpClient client = HttpClients.createDefault();

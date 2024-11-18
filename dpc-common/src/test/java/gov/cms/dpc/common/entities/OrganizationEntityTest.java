@@ -9,11 +9,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.DisplayName;
 
+@DisplayName("Organization Entity tests")
 public class OrganizationEntityTest {
 
 	@Test
-	public void testGettersAndSetters() {
+	@DisplayName("Test organization getters and setters 🥳")
+public void testGettersAndSetters() {
 		OrganizationEntity org = new OrganizationEntity();
 		UUID id = UUID.randomUUID();
 		OrganizationEntity.OrganizationID organizationID = new OrganizationEntity.OrganizationID(
@@ -49,7 +52,8 @@ public class OrganizationEntityTest {
 	}
 
 	@Test
-	public void testUpdate() {
+	@DisplayName("Update organization 🥳")
+public void testUpdate() {
 		OrganizationEntity o1 = new OrganizationEntity();
 		OrganizationEntity o2 = new OrganizationEntity();
 		o1.setOrganizationName("Test-Entity");
@@ -59,7 +63,8 @@ public class OrganizationEntityTest {
 	}
 
 	@Test
-	public void testOrganizationIDGettersAndSetters() {
+	@DisplayName("Test organization ID getters and setters 🥳")
+public void testOrganizationIDGettersAndSetters() {
 		OrganizationEntity.OrganizationID orgId = new OrganizationEntity.OrganizationID();
 		DPCIdentifierSystem system = DPCIdentifierSystem.NPPES;
 		String val = "1234";
@@ -72,7 +77,8 @@ public class OrganizationEntityTest {
 	}
 
 	@Test
-	public void testOrganizationIDToFHIR() {
+	@DisplayName("Convert organization ID to FHIR ID 🥳")
+public void testOrganizationIDToFHIR() {
 		OrganizationEntity.OrganizationID orgId = new OrganizationEntity.OrganizationID(DPCIdentifierSystem.NPPES,
 				"1234");
 		Identifier fhirID = orgId.toFHIR();

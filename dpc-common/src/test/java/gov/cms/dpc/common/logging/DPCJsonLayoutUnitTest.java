@@ -23,8 +23,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import org.junit.jupiter.api.DisplayName;
 
 
+@DisplayName("JSON layout and content")
 public class DPCJsonLayoutUnitTest {
 
     private DPCJsonLayout dpcJsonLayout;
@@ -61,7 +63,8 @@ public class DPCJsonLayoutUnitTest {
     }
 
     @Test
-    public void noChangeWhenMessageNotParseableAsMap() {
+    @DisplayName("Plain logging format when message not parsable as map 🥳")
+public void noChangeWhenMessageNotParseableAsMap() {
         String message = "hello I'm not parsable";
         when(loggingEvent.getFormattedMessage()).thenReturn(message);
         Map<String, Object> map = dpcJsonLayout.toJsonMap(loggingEvent);
@@ -74,7 +77,8 @@ public class DPCJsonLayoutUnitTest {
     }
 
     @Test
-    public void changeWhenMessageIsParsableAsMap() {
+    @DisplayName("Map logging format when message parsable as map 🥳")
+public void changeWhenMessageIsParsableAsMap() {
         String message = "key1=value1, key2=value2";
 
         when(loggingEvent.getFormattedMessage()).thenReturn(message);
@@ -85,7 +89,8 @@ public class DPCJsonLayoutUnitTest {
     }
 
     @Test
-    public void testLookBackLogJsonParsing() {
+    @DisplayName("Look back log JSON parsing 🥳")
+public void testLookBackLogJsonParsing() {
         String message = "billingPeriodDate=Thu Jul 01 00:00:00 UTC 1999, lookBackDate=Thu Aug 27 00:43:30 UTC 2020, monthsDifference=253, eobProvider=null, eobCareTeamProviders=999999999999;9999999999, jobProvider=1232125215, eobOrganization=9999999999, jobOrganization=5808156785, withinLimit=false, eobProviderMatch=false, eobOrganizationMatch=false";
         when(loggingEvent.getFormattedMessage()).thenReturn(message);
         Map<String, Object> map = dpcJsonLayout.toJsonMap(loggingEvent);
@@ -94,7 +99,8 @@ public class DPCJsonLayoutUnitTest {
     }
 
     @Test
-    public void testMBIMasking() {
+    @DisplayName("Mask MBIs in log statements 🥳")
+public void testMBIMasking() {
         Map<String,String> inputOutputMap = Maps.newHashMap();
         inputOutputMap.put("1SQ3F00AA00", "***MBI?***");
         inputOutputMap.put("mbi1SQ3F00AA00", "mbi***MBI?***");
@@ -118,7 +124,8 @@ public class DPCJsonLayoutUnitTest {
     }
 
     @Test
-    public void testMBIMaskingWhenMessageIsParsableAsMap() {
+    @DisplayName("Mask MBIs in logged maps 🥳")
+public void testMBIMaskingWhenMessageIsParsableAsMap() {
         final String message = "key1=value1, key2=1SQ3F00AA00, key3=value3";
 
         when(loggingEvent.getFormattedMessage()).thenReturn(message);

@@ -7,6 +7,9 @@ import gov.cms.dpc.common.utils.PropertiesProvider;
 import org.hl7.fhir.dstu3.model.CapabilityStatement;
 import org.junit.jupiter.api.*;
 import org.mockito.*;
+import org.junit.jupiter.api.DisplayName;
+@DisplayName("Base resource operations")
+
 
 class BaseResourceUnitTest {
     @Mock KeyResource kr;
@@ -31,7 +34,8 @@ class BaseResourceUnitTest {
     }
 
     @Test
-    public void testGetterMethods() {
+    @DisplayName("Base resource getters 🥳")
+public void testGetterMethods() {
         BaseResource baseResource = new BaseResource(kr, tr, gr, jr, dr, er, or, par, pr, sdr, ar, ip, url);
 
         assertEquals(kr, baseResource.keyOperations());
@@ -49,7 +53,8 @@ class BaseResourceUnitTest {
     }
 
     @Test
-    public void testMetadata() {
+    @DisplayName("Valid capability statement returned 🥳")
+public void testMetadata() {
         BaseResource baseResource = new BaseResource(kr, tr, gr, jr, dr, er, or, par, pr, sdr, ar, ip, url);
         CapabilityStatement capabilityStatement = Mockito.mock(CapabilityStatement.class);
 
@@ -61,6 +66,8 @@ class BaseResourceUnitTest {
     }
 
     @Test
+@DisplayName("Get version 🥳")
+
     void testVersion() {
         try(MockedConstruction<PropertiesProvider> mock = Mockito.mockConstruction(PropertiesProvider.class)) {
             BaseResource baseResource = new BaseResource(kr, tr, gr, jr, dr, er, or, par, pr, sdr, ar, ip, url);

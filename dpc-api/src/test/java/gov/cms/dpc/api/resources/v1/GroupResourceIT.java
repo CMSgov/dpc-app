@@ -46,11 +46,15 @@ import java.util.UUID;
 import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
 import static gov.cms.dpc.api.APITestHelpers.createProvenance;
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
 
 @ExtendWith(BufferedLoggerHandler.class)
+@DisplayName("Group resource operations")
 public class GroupResourceIT extends AbstractSecureApplicationIT {
 
     @Test
+@DisplayName("Missing provenance 🤮")
+
     void testMissingProvenance() throws IOException {
         final IParser parser = ctx.newJsonParser();
         IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
@@ -132,7 +136,8 @@ public class GroupResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
-    public void testInvalidInputsWhenCreatingGroup() throws IOException {
+    @DisplayName("Invalid inputs fail to create group 🤮")
+public void testInvalidInputsWhenCreatingGroup() throws IOException {
         final IParser parser = ctx.newJsonParser();
         IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
         APITestHelpers.setupPatientTest(client, parser);
@@ -216,6 +221,8 @@ public class GroupResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
+@DisplayName("Create invalid group 🤮")
+
     void testCreateInvalidGroup() throws IOException, URISyntaxException {
         Provenance provenance = new Provenance();
         provenance.setRecorded(Date.valueOf(LocalDate.now()));
@@ -252,7 +259,8 @@ public class GroupResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
-    public void testCreateGroupReturnsAppropriateHeaders() throws IOException {
+    @DisplayName("Group creation returns headers 🥳")
+public void testCreateGroupReturnsAppropriateHeaders() throws IOException {
         final IParser parser = ctx.newJsonParser();
         IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
         APITestHelpers.setupPatientTest(client, parser);
@@ -339,7 +347,8 @@ public class GroupResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
-    public void testProvenanceHeaderAndGroupProviderMatch() {
+    @DisplayName("Create group with provenance header and group provider mismatch 🤮")
+public void testProvenanceHeaderAndGroupProviderMatch() {
         IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
         Practitioner practitioner = APITestHelpers.createPractitionerResource(NPIUtil.generateNPI(), ORGANIZATION_ID);
 
@@ -400,7 +409,8 @@ public class GroupResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
-    public void testGroupCanOnlyBeRetrievedByOwner() throws GeneralSecurityException, IOException, URISyntaxException {
+    @DisplayName("Unauthorized group retrieval 🤮")
+public void testGroupCanOnlyBeRetrievedByOwner() throws GeneralSecurityException, IOException, URISyntaxException {
         final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
         final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
         final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());
@@ -500,7 +510,8 @@ public class GroupResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
-    public void testOrgCanOnlyListTheirOwnGroups() throws GeneralSecurityException, IOException, URISyntaxException {
+    @DisplayName("List groups 🥳")
+public void testOrgCanOnlyListTheirOwnGroups() throws GeneralSecurityException, IOException, URISyntaxException {
         final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
         final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
         final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());
@@ -581,7 +592,8 @@ public class GroupResourceIT extends AbstractSecureApplicationIT {
 
 
     @Test
-    public void testOrgCanOnlyAddPatientsTheyManageToGroup() throws IOException, URISyntaxException, GeneralSecurityException {
+    @DisplayName("Add other org's patients to group 🤮")
+public void testOrgCanOnlyAddPatientsTheyManageToGroup() throws IOException, URISyntaxException, GeneralSecurityException {
         final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
         final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
         final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());

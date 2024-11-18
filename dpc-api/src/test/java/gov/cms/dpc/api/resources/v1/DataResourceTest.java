@@ -49,6 +49,8 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(DropwizardExtensionsSupport.class)
 @ExtendWith(BufferedLoggerHandler.class)
 @SuppressWarnings("InnerClassMayBeStatic")
+@DisplayName("Data resource operations")
+
 class DataResourceTest {
 
     private static final FileManager manager = Mockito.mock(FileManager.class);
@@ -65,6 +67,8 @@ class DataResourceTest {
     }
 
     @Test
+@DisplayName("Stream ndjson to client 🥳")
+
     void streamingTest() throws IOException {
 
         Mockito.when(manager.getFile(Mockito.any(), Mockito.anyString())).thenAnswer(answer -> {
@@ -113,6 +117,8 @@ class DataResourceTest {
     }
 
     @Test
+@DisplayName("Range request processing 🥳")
+
     void testRangeRequest() throws IOException {
         final File tempPath = FileUtils.getTempDirectory();
         final File file = File.createTempFile("test", ".ndjson", tempPath);
@@ -204,6 +210,8 @@ class DataResourceTest {
     }
 
     @Test
+@DisplayName("Non-byte range requested 🤮")
+
     void testNonByteRange() {
         Mockito.when(manager.getFile(Mockito.any(), Mockito.anyString())).thenAnswer(answer -> {
             final File tempPath = FileUtils.getTempDirectory();
@@ -240,6 +248,8 @@ class DataResourceTest {
         }
 
         @HttpParamTest
+@DisplayName("Download with missing eTag header 🥳")
+
         void testMissingETagHeader(String method) {
             final Invocation.Builder builder = RESOURCE.target("/v1/Data/test.ndjson")
                     .request();
@@ -250,6 +260,8 @@ class DataResourceTest {
         }
 
         @HttpParamTest
+@DisplayName("Download with mismatching eTag header 🥳")
+
         void testMismatchingETagHeader(String method) {
             final Invocation.Builder builder = RESOURCE.target("/v1/Data/test.ndjson")
                     .request()
@@ -262,6 +274,8 @@ class DataResourceTest {
         }
 
         @HttpParamTest
+@DisplayName("Download with correct eTag header 🥳")
+
         void testCorrectETagHeader(String method) {
             final Invocation.Builder builder = RESOURCE.target("/v1/Data/test.ndjson")
                     .request()
@@ -273,6 +287,8 @@ class DataResourceTest {
         }
 
         @HttpParamTest
+@DisplayName("Download with weak eTag header 🥳")
+
         void testWeakETagHeader(String method) {
             final Invocation.Builder builder = RESOURCE.target("/v1/Data/test.ndjson")
                     .request()
@@ -285,6 +301,8 @@ class DataResourceTest {
         }
 
         @HttpParamTest
+@DisplayName("Download with unmodified timestamp 🥳")
+
         void testModifiedTimestamp(String method) {
 
             final Invocation.Builder builder = RESOURCE.target("/v1/Data/test.ndjson")
@@ -298,6 +316,8 @@ class DataResourceTest {
         }
 
         @HttpParamTest
+@DisplayName("Download with malformed timestamp 🥳")
+
         void testMalformedModifiedTimestamp(String method) {
             final Invocation.Builder builder = RESOURCE.target("/v1/Data/test.ndjson")
                     .request()

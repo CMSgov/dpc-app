@@ -52,12 +52,15 @@ import java.util.stream.Collectors;
 import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
 import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_NPI;
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
 
 /*
     If you're running this locally, you'll need to wipe out the rows in the consent table in between runs.  If not, the
     opt outs from the previous run will interfere with the current one.
  */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@DisplayName("Patient resource operations")
+
 class PatientResourceIT extends AbstractSecureApplicationIT {
     final java.util.Date dateYesterday = Date.from(Instant.now().minus(1, ChronoUnit.DAYS));
     final java.util.Date dateToday = Date.from(Instant.now());
@@ -74,7 +77,8 @@ class PatientResourceIT extends AbstractSecureApplicationIT {
 
     @Test
     @Order(1)
-    public void testCreatePatientReturnsAppropriateHeaders() {
+    @DisplayName("Create Patient and return headers 🥳")
+public void testCreatePatientReturnsAppropriateHeaders() {
         IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
         Patient patient = APITestHelpers.createPatientResource("4S41C00AA00", APITestHelpers.ORGANIZATION_ID);
 
@@ -104,7 +108,8 @@ class PatientResourceIT extends AbstractSecureApplicationIT {
 
     @Test
     @Order(2)
-    void ensurePatientsExist() throws IOException, URISyntaxException, GeneralSecurityException {
+    @DisplayName("Get existing patients 🥳")
+void ensurePatientsExist() throws IOException, URISyntaxException, GeneralSecurityException {
         IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
         APITestHelpers.setupPatientTest(client, parser);
 
@@ -163,7 +168,8 @@ class PatientResourceIT extends AbstractSecureApplicationIT {
 
     @Test
     @Order(3)
-    void testPatientRemoval() throws IOException, URISyntaxException, GeneralSecurityException {
+    @DisplayName("Remove patient 🥳")
+void testPatientRemoval() throws IOException, URISyntaxException, GeneralSecurityException {
         final String macaroon = FHIRHelpers.registerOrganization(attrClient, parser, ORGANIZATION_ID, ORGANIZATION_NPI, getAdminURL());
         final String keyLabel = "patient-deletion-key";
         final Pair<UUID, PrivateKey> uuidPrivateKeyPair = APIAuthHelpers.generateAndUploadKey(keyLabel, ORGANIZATION_ID, GOLDEN_MACAROON, getBaseURL());
@@ -202,7 +208,8 @@ class PatientResourceIT extends AbstractSecureApplicationIT {
 
     @Test
     @Order(4)
-    void testPatientUpdating() throws IOException, URISyntaxException, GeneralSecurityException {
+    @DisplayName("Update Patient 🥳")
+void testPatientUpdating() throws IOException, URISyntaxException, GeneralSecurityException {
         final String macaroon = FHIRHelpers.registerOrganization(attrClient, parser, ORGANIZATION_ID, ORGANIZATION_NPI, getAdminURL());
         final String keyLabel = "patient-update-key";
         final Pair<UUID, PrivateKey> uuidPrivateKeyPair = APIAuthHelpers.generateAndUploadKey(keyLabel, ORGANIZATION_ID, GOLDEN_MACAROON, getBaseURL());
@@ -241,7 +248,8 @@ class PatientResourceIT extends AbstractSecureApplicationIT {
 
     @Test
     @Order(5)
-    void testCreateInvalidPatient() throws IOException, URISyntaxException {
+    @DisplayName("Create patient with invalid data 🤮")
+void testCreateInvalidPatient() throws IOException, URISyntaxException {
         URL url = new URL(getBaseURL() + "/Patient");
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod(HttpMethod.POST);
@@ -272,7 +280,8 @@ class PatientResourceIT extends AbstractSecureApplicationIT {
 
     @Test
     @Order(6)
-    void testPatientEverythingWithoutGroupFetchesData() throws IOException, URISyntaxException, GeneralSecurityException {
+    @DisplayName("Fetch Patient$Everything 🥳")
+void testPatientEverythingWithoutGroupFetchesData() throws IOException, URISyntaxException, GeneralSecurityException {
         IGenericClient client = generateClient(ORGANIZATION_NPI, RandomStringUtils.randomAlphabetic(25));
         APITestHelpers.setupPractitionerTest(client, parser);
 
@@ -347,7 +356,8 @@ class PatientResourceIT extends AbstractSecureApplicationIT {
 
     @Test
     @Order(7)
-    void testPatientEverythingWithGroupFetchesData() throws IOException, URISyntaxException, GeneralSecurityException {
+    @DisplayName("Fetch Patient$Everything from patient in group 🥳")
+void testPatientEverythingWithGroupFetchesData() throws IOException, URISyntaxException, GeneralSecurityException {
         IGenericClient client = generateClient(ORGANIZATION_NPI, RandomStringUtils.randomAlphabetic(25));
 
         String mbi = MockBlueButtonClient.TEST_PATIENT_MBIS.get(2);
@@ -434,7 +444,8 @@ class PatientResourceIT extends AbstractSecureApplicationIT {
     @Disabled
     @Test
     @Order(8)
-    void testPatientEverything_CanHandlePatientWithMultipleMBIs() throws IOException, URISyntaxException, GeneralSecurityException {
+    @DisplayName("Fetch Patient$Everything for patient with multiple MBIs 🥳")
+void testPatientEverything_CanHandlePatientWithMultipleMBIs() throws IOException, URISyntaxException, GeneralSecurityException {
         IGenericClient client = generateClient(ORGANIZATION_NPI, RandomStringUtils.randomAlphabetic(25));
 
         String mbi = MockBlueButtonClient.TEST_PATIENT_MBIS.get(6);
@@ -468,7 +479,8 @@ class PatientResourceIT extends AbstractSecureApplicationIT {
     @Disabled
     @Test
     @Order(9)
-    void testPatientEverythingForOptedOutPatient() throws IOException, URISyntaxException, GeneralSecurityException {
+    @DisplayName("Fetch Patient$Everything for opted-out patient 🤮")
+void testPatientEverythingForOptedOutPatient() throws IOException, URISyntaxException, GeneralSecurityException {
         IGenericClient client = generateClient(ORGANIZATION_NPI, RandomStringUtils.randomAlphabetic(25));
 
         String mbi = MockBlueButtonClient.TEST_PATIENT_MBIS.get(2);
@@ -493,7 +505,8 @@ class PatientResourceIT extends AbstractSecureApplicationIT {
 
     @Test
     @Order(10)
-    void testPatientEverythingForOptedOutPatientOnMultipleMbis() throws IOException, URISyntaxException, GeneralSecurityException {
+    @DisplayName("Fetch Patient$Everything for opted-out patient with multiple MBIs 🤮")
+void testPatientEverythingForOptedOutPatientOnMultipleMbis() throws IOException, URISyntaxException, GeneralSecurityException {
         IGenericClient client = generateClient(ORGANIZATION_NPI, RandomStringUtils.randomAlphabetic(25));
 
         String mbi = MockBlueButtonClient.TEST_PATIENT_MBIS.get(6);
@@ -519,7 +532,8 @@ class PatientResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
-    public void testOptInPatient() throws GeneralSecurityException, IOException, URISyntaxException {
+    @DisplayName("Patient opt-in 🥳")
+public void testOptInPatient() throws GeneralSecurityException, IOException, URISyntaxException {
         IGenericClient client = generateClient(ORGANIZATION_NPI, RandomStringUtils.randomAlphabetic(25));
 
         String mbi = MockBlueButtonClient.TEST_PATIENT_MBIS.get(2);
@@ -549,7 +563,8 @@ class PatientResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
-    public void testGetPatientByUUID() throws GeneralSecurityException, IOException, URISyntaxException {
+    @DisplayName("Fetch Patient by UUID 🥳")
+public void testGetPatientByUUID() throws GeneralSecurityException, IOException, URISyntaxException {
         final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
         final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
         final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());
@@ -567,7 +582,8 @@ class PatientResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
-    public void testDeletePatient() throws GeneralSecurityException, IOException, URISyntaxException {
+    @DisplayName("Delete patient 🥳")
+public void testDeletePatient() throws GeneralSecurityException, IOException, URISyntaxException {
         final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
         final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
         final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());
@@ -581,7 +597,8 @@ class PatientResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
-    public void testPatientPathAuthorization() throws GeneralSecurityException, IOException, URISyntaxException {
+    @DisplayName("Get Patients by ID 🥳")
+public void testPatientPathAuthorization() throws GeneralSecurityException, IOException, URISyntaxException {
         final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
         final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
         final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());

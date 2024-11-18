@@ -14,9 +14,11 @@ import java.util.SortedSet;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.DisplayName;
 
 @IntegrationTest
 @ExtendWith(BufferedLoggerHandler.class)
+@DisplayName("Aggregation Service management")
 public class AggregationServiceIT {
 
     private static final String configPath = "src/test/resources/test.application.yml";
@@ -36,6 +38,8 @@ public class AggregationServiceIT {
     }
 
     @Test
+@DisplayName("Verify health of blue button client, aggregation engine, and consent service 🥳")
+
     void testHealthChecks() {
         final HealthCheckRegistry checks = APPLICATION.getEnvironment().healthChecks();
         final SortedSet<String> names = checks.getNames();

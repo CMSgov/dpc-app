@@ -23,6 +23,9 @@ import static gov.cms.dpc.attribution.AttributionTestHelpers.DEFAULT_ORG_ID;
 import static gov.cms.dpc.attribution.AttributionTestHelpers.createFHIRClient;
 import static gov.cms.dpc.common.utils.SeedProcessor.createBaseAttributionGroup;
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
+@DisplayName("Practitioner resource handling")
+
 
 class PractitionerResourceIT extends AbstractAttributionIT {
 
@@ -52,6 +55,8 @@ class PractitionerResourceIT extends AbstractAttributionIT {
     }
 
     @Test
+@DisplayName("Create and access practitioner resource 🥳")
+
     void testPractitionerReadWrite() {
 
         final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
@@ -118,6 +123,8 @@ class PractitionerResourceIT extends AbstractAttributionIT {
     }
 
     @Test
+@DisplayName("Search pracititioner resource 🥳")
+
     void testPractitionerSearch() {
 
         final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
@@ -160,6 +167,8 @@ class PractitionerResourceIT extends AbstractAttributionIT {
 
 
     @Test
+@DisplayName("Update practitioner resource 🥳")
+
     void testPractitionerUpdate() {
         final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
 
@@ -208,6 +217,8 @@ class PractitionerResourceIT extends AbstractAttributionIT {
     }
 
     @Test
+@DisplayName("Remove practitioner resource 🥳")
+
     void testPractitionerRemoval() {
         final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
 
@@ -248,6 +259,8 @@ class PractitionerResourceIT extends AbstractAttributionIT {
     }
 
     @Test
+@DisplayName("Create practitioner exceeding provider limit 🤮")
+
     void testPractitionerSubmitWhenPastLimit() throws Exception {
 
         // Restart so update takes effect
@@ -280,6 +293,8 @@ class PractitionerResourceIT extends AbstractAttributionIT {
     }
 
     @Test
+@DisplayName("Create practitioner when provider limit is disabled 🥳")
+
     void testPractitionerSubmitWhenLimitIsSetToNegativeOne() throws Exception {
 
         // Restart so update takes effect

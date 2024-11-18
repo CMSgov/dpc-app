@@ -41,8 +41,10 @@ import java.time.YearMonth;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.DisplayName;
 
 @ExtendWith(BufferedLoggerHandler.class)
+@DisplayName("Aggregation Engine BFD client usage")
 public class AggregationEngineBFDClientTest {
 
     @TempDir
@@ -81,7 +83,8 @@ public class AggregationEngineBFDClientTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    void testHeadersPassedToBFDForBulkJob() {
+    @DisplayName("Complete a bulk job using BFD data 🥳")
+void testHeadersPassedToBFDForBulkJob() {
         //Mock out the interactions of using IGenericClient to capture things
         IUntypedQuery<IBaseBundle> iUntypedQuery = Mockito.mock(IUntypedQuery.class);
         Mockito.when(bbClient.search()).thenReturn(iUntypedQuery);
@@ -124,7 +127,8 @@ public class AggregationEngineBFDClientTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    void testHeadersPassedToBFDForNonBulkJob() {
+    @DisplayName("Complete a non-bulk job using BFD data 🥳")
+void testHeadersPassedToBFDForNonBulkJob() {
         //Mock out the interactions of using IGenericClient to capture things
         IUntypedQuery<IBaseBundle> iUntypedQuery = Mockito.mock(IUntypedQuery.class);
         Mockito.when(bbClient.search()).thenReturn(iUntypedQuery);

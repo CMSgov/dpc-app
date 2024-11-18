@@ -11,6 +11,9 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
+@DisplayName("Address entity conversion")
+
 
 class AddressEntityConverterTest {
     AddressEntityConverter converter = new AddressEntityConverter();
@@ -51,6 +54,8 @@ class AddressEntityConverterTest {
     }
 
     @Test
+@DisplayName("Convert address with attributes from FHIR 🥳")
+
     void fromFHIR() {
         AddressEntity convertedAddress = converter.fromFHIR(fhirEntityConverter, fhirAddress);
         assertEquals(Address.AddressType.PHYSICAL, convertedAddress.getType());
@@ -65,6 +70,8 @@ class AddressEntityConverterTest {
     }
 
     @Test
+@DisplayName("Convert address with single line from FHIR 🥳")
+
     void fromFHIROneLine() {
         fhirAddress.setLine(List.of(line1ST));
         AddressEntity convertedAddress = converter.fromFHIR(fhirEntityConverter, fhirAddress);
@@ -72,6 +79,8 @@ class AddressEntityConverterTest {
         assertNull(convertedAddress.getLine2());
     }
     @Test
+@DisplayName("Convert address with three lines from FHIR 🥳")
+
     void fromFHIRThreeLines() {
 
         StringType line3 = new StringType("Red Door");
@@ -81,11 +90,15 @@ class AddressEntityConverterTest {
     }
 
     @Test
+@DisplayName("Convert empty address from FHIR 🤮")
+
     void fromFhirEmptyLines() {
         fhirAddress.setLine(new java.util.ArrayList<StringType>());
         assertThrows(DataTranslationException.class, () -> converter.fromFHIR(null, fhirAddress));
     }
     @Test
+@DisplayName("Convert address with attributes to FHIR 🥳")
+
     void toFHIR() {
         Address convertedAddress = converter.toFHIR(fhirEntityConverter, entityAddress);
         assertEquals(Address.AddressType.PHYSICAL, convertedAddress.getType());
@@ -100,11 +113,15 @@ class AddressEntityConverterTest {
     }
 
     @Test
+@DisplayName("Convert Address java class to FHIR resource 🥳")
+
     void getFHIRResource() {
         assertEquals(Address.class, converter.getFHIRResource());
     }
 
     @Test
+@DisplayName("Convert Address Entity FHIR resource to Java class 🥳")
+
     void getJavaClass() {
         assertEquals(AddressEntity.class, converter.getJavaClass());
     }
