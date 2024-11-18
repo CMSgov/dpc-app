@@ -21,16 +21,21 @@ class LogOrganizationsAccessJob < ApplicationJob
                            credential_status: }])
       credential_status_values_as_arr = [credential_status['num_tokens'], credential_status['num_keys'],
                                          credential_status['num_ips']]
-      if credential_status_values_as_arr.all?
-        organizations_credential_aggregate_status[:have_active_credentials] += 1
-      elsif credential_status_values_as_arr.any?
-        organizations_credential_aggregate_status[:have_incomplete_or_no_credentials] += 1
-      else
-        organizations_credential_aggregate_status[:have_incomplete_or_no_credentials] += 1
-        organizations_credential_aggregate_status[:have_no_credentials] += 1
-      end
+      update_organization_aggregate_hash(organizations_credential_aggregate_status, credential_status_values_as_arr)
     end
     Rails.logger.info(['Organizations API credential status', organizations_credential_aggregate_status])
+  end
+
+  def update_organization_aggregate_hash(aggregate_stats, organization_credentials_as_arr)
+    if organization_credentials_as_arr.all?
+      aggregate_stats[:have_active_credentials] += 1
+    elsif organization_credentials_as_arr.any?
+      aggregate_stats[:have_incomplete_or_no_credentials] += 1
+    else
+      aggregate_stats[:have_incomplete_or_no_credentials] += 1
+      aggregate_stats[:have_no_credentials] += 1
+    end
+    aggregate_stats
   end
 
   def fetch_credential_status?(organization)
