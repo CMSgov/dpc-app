@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe LogOrganizationsAccessJob, type: :job do
+RSpec.describe LogOrganizationsApiCredentialStatusJob, type: :job do
   include ActiveJob::TestHelper
 
   let(:mock_dpc_client) { instance_double(DpcClient) }

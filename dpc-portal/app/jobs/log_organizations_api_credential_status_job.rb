@@ -4,7 +4,7 @@
 # have access to make API calls.
 # This is determined by checking for tokens, public keys, and ip addresses for all
 # organizations that are in the portal with completed Terms of Service agreement.
-class LogOrganizationsAccessJob < ApplicationJob
+class LogOrganizationsApiCredentialStatusJob < ApplicationJob
   queue_as :portal
 
   def perform
