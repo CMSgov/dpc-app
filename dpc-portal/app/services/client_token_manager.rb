@@ -36,6 +36,17 @@ class ClientTokenManager
     end
   end
 
+  def active_client_tokens
+    all_tokens = client_tokens
+    active_tokens = []
+
+    current_datetime = DateTime.now
+    all_tokens.each do |token|
+      active_tokens << token if token['expiresAt'] > current_datetime
+    end
+    active_tokens
+  end
+
   private
 
   def invalid_input?(label)
