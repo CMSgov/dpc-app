@@ -34,13 +34,14 @@ class LogOrganizationsApiCredentialStatusJob < ApplicationJob
   end
 
   def fetch_credential_status(organization_id)
-    client_token_manager = ClientTokenManager.new(organization_id)
-    tokens = client_token_manager.active_client_tokens
+    tokens = dpc_client.get_client_tokens(organization_id)
+    current_datetime = DateTime.now
+    active_tokens = tokens['entities'].select { |tok| tok['expiresAt'] > current_datetime }
     pub_keys = dpc_client.get_public_keys(organization_id)
     ip_addresses = dpc_client.get_ip_addresses(organization_id)
 
     {
-      num_tokens: tokens.length,
+      num_tokens: active_tokens.length,
       num_keys: pub_keys['count'],
       num_ips: ip_addresses['count']
     }

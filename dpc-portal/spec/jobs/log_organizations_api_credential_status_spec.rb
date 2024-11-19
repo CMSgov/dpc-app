@@ -50,8 +50,6 @@ RSpec.describe LogOrganizationsApiCredentialStatusJob, type: :job do
     it 'organization has no api credentials' do
       provider_organization.save!
 
-      expect(mock_dpc_client).to receive(:response_successful?).and_return(true).once
-      expect(mock_dpc_client).to receive(:response_body).and_return(mock_no_tokens_response).once
       expect(mock_dpc_client).to receive(:get_client_tokens).and_return(mock_no_tokens_response).once
       expect(mock_dpc_client).to receive(:get_public_keys).and_return({ 'count' => 0 }).once
       expect(mock_dpc_client).to receive(:get_ip_addresses).and_return({ 'count' => 0 }).once
@@ -66,8 +64,6 @@ RSpec.describe LogOrganizationsApiCredentialStatusJob, type: :job do
   it 'updates log with 1 organization that has all 3 credentials' do
     provider_organization.save!
 
-    expect(mock_dpc_client).to receive(:response_successful?).and_return(true).once
-    expect(mock_dpc_client).to receive(:response_body).and_return(mock_one_token_response).once
     expect(mock_dpc_client).to receive(:get_client_tokens).and_return(mock_one_token_response).once
     expect(mock_dpc_client).to receive(:get_public_keys).and_return({ 'count' => 2 }).once
     expect(mock_dpc_client).to receive(:get_ip_addresses).and_return({ 'count' => 3 }).once
@@ -81,8 +77,6 @@ RSpec.describe LogOrganizationsApiCredentialStatusJob, type: :job do
   it 'updates log with 1 organization that has partial credentials' do
     provider_organization.save!
 
-    expect(mock_dpc_client).to receive(:response_successful?).and_return(true).once
-    expect(mock_dpc_client).to receive(:response_body).and_return(mock_one_token_response).once
     expect(mock_dpc_client).to receive(:get_client_tokens).and_return(mock_one_token_response).once
     expect(mock_dpc_client).to receive(:get_public_keys).and_return({ 'count' => 2 }).once
     expect(mock_dpc_client).to receive(:get_ip_addresses).and_return({ 'count' => 0 }).once
