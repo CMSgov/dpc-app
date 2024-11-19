@@ -38,7 +38,7 @@ class LogOrganizationsAccessJob < ApplicationJob
     aggregate_stats
   end
 
-  def fetch_credential_status?(organization)
+  def fetch_credential_status(organization)
     tokens = dpc_client.get_client_tokens(organization.id)
     pub_keys = dpc_client.get_public_keys(organization.id)
     ip_addresses = dpc_client.get_ip_addresses(organization.id)
