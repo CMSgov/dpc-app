@@ -11,7 +11,7 @@ class LogOrganizationsApiCredentialStatusJob < ApplicationJob
     @start = Time.now
     organizations_credential_aggregate_status = {
       have_active_credentials: 0,
-      have_incomplete_or_no_credentials: 0,
+      have_incomplete_or_no_credentials: 0
     }
     ProviderOrganization.where.not(terms_of_service_accepted_by: nil).find_each do |organization|
       credential_status = fetch_credential_status(organization.dpc_api_organization_id)
@@ -19,19 +19,16 @@ class LogOrganizationsApiCredentialStatusJob < ApplicationJob
                          { name: organization.name,
                            dpc_api_org_id: organization.dpc_api_organization_id,
                            credential_status: }])
-      credential_status_values_as_arr = [credential_status[:num_tokens], credential_status[:num_keys],
-                                         credential_status[:num_ips]]
-      update_organization_aggregate_hash(organizations_credential_aggregate_status, credential_status_values_as_arr)
+      update_organization_aggregate_hash(organizations_credential_aggregate_status, credential_status)
     end
     Rails.logger.info(['Organizations API credential status', organizations_credential_aggregate_status])
   end
 
-  def update_organization_aggregate_hash(aggregate_stats, organization_credentials_as_arr)
-    zero_count = organization_credentials_as_arr.count(0)
-    if zero_count.zero?
-      aggregate_stats[:have_active_credentials] += 1
-    else
+  def update_organization_aggregate_hash(aggregate_stats, credential_status)
+    if credential_status[:num_tokens].zero? || credential_status[:num_keys].zero? || credential_status[:num_ips].zero?
       aggregate_stats[:have_incomplete_or_no_credentials] += 1
+    else
+      aggregate_stats[:have_active_credentials] += 1
     end
     aggregate_stats
   end
