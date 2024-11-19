@@ -14,6 +14,7 @@
 
     <properties>
         <mainClass>gov.cms.dpc.attribution.DPCAttributionService</mainClass>
+        <exec.skip>true</exec.skip>
     </properties>
 
     <dependencies>

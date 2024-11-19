@@ -14,6 +14,7 @@
 
     <properties>
         <aws.java.sdk.version>2.26.7</aws.java.sdk.version>
+        <exec.skip>true</exec.skip>
     </properties>
 
     <dependencyManagement>

@@ -15,6 +15,7 @@
     <properties>
         <jjwt.version>0.12.5</jjwt.version>
         <sonar.skip>true</sonar.skip>
+        <exec.skip>true</exec.skip>
     </properties>
 
     <dependencies>

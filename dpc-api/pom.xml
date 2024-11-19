@@ -16,6 +16,7 @@
         <mainClass>gov.cms.dpc.api.DPCAPIService</mainClass>
         <jjwt.version>0.11.4</jjwt.version>
         <mockserverVersion>5.15.0</mockserverVersion>
+        <exec.skip>true</exec.skip>
     </properties>
 
     <dependencies>

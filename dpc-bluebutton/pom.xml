@@ -14,6 +14,7 @@
 
     <properties>
         <mockserverVersion>5.15.0</mockserverVersion>
+        <exec.skip>true</exec.skip>
     </properties>
 
     <dependencies>

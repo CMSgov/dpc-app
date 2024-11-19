@@ -11,6 +11,10 @@
 
     <artifactId>dpc-common</artifactId>
     <name>DPC Common Libraries</name>
+    
+    <properties>
+        <exec.skip>true</exec.skip>
+    </properties>
 
     <dependencies>
         <dependency>
