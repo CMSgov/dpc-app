@@ -18,6 +18,7 @@ class LogOrganizationsApiCredentialStatusJob < ApplicationJob
       credential_status = fetch_credential_status(organization.dpc_api_organization_id)
       Rails.logger.info(['Credential status for organization',
                          { name: organization.name, id: organization.id,
+                           dpc_api_org_id: organization.dpc_api_organization_id,
                            credential_status: }])
       credential_status_values_as_arr = [credential_status[:num_tokens], credential_status[:num_keys],
                                          credential_status[:num_ips]]
