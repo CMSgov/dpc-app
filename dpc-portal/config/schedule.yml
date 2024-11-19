@@ -22,6 +22,6 @@ verify_non_dpc_health_job:
     check_idp: true
 
 log_organizations_api_credential_status_job:
-  cron: "0 * * * *"
+  cron: "0 0 * * *"
   class: "LogOrganizationsApiCredentialStatusJob"
   queue: portal
