@@ -58,8 +58,7 @@ RSpec.describe LogOrganizationsApiCredentialStatusJob, type: :job do
       allow(Rails.logger).to receive(:info)
       expect(Rails.logger).to receive(:info).with(['Organizations API credential status',
                                                    { have_active_credentials: 0,
-                                                     have_incomplete_or_no_credentials: 1,
-                                                     have_no_credentials: 1 }])
+                                                     have_incomplete_or_no_credentials: 1 }])
 
       described_class.perform_now
     end
@@ -75,8 +74,7 @@ RSpec.describe LogOrganizationsApiCredentialStatusJob, type: :job do
     allow(Rails.logger).to receive(:info)
     expect(Rails.logger).to receive(:info).with(['Organizations API credential status',
                                                  { have_active_credentials: 1,
-                                                   have_incomplete_or_no_credentials: 0,
-                                                   have_no_credentials: 0 }])
+                                                   have_incomplete_or_no_credentials: 0 }])
 
     described_class.perform_now
   end
@@ -91,8 +89,7 @@ RSpec.describe LogOrganizationsApiCredentialStatusJob, type: :job do
     allow(Rails.logger).to receive(:info)
     expect(Rails.logger).to receive(:info).with(['Organizations API credential status',
                                                  { have_active_credentials: 0,
-                                                   have_incomplete_or_no_credentials: 1,
-                                                   have_no_credentials: 0 }])
+                                                   have_incomplete_or_no_credentials: 1 }])
 
     described_class.perform_now
   end

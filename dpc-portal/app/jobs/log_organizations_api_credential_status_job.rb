@@ -12,7 +12,6 @@ class LogOrganizationsApiCredentialStatusJob < ApplicationJob
     organizations_credential_aggregate_status = {
       have_active_credentials: 0,
       have_incomplete_or_no_credentials: 0,
-      have_no_credentials: 0
     }
     ProviderOrganization.where.not(terms_of_service_accepted_by: nil).find_each do |organization|
       credential_status = fetch_credential_status(organization.dpc_api_organization_id)
@@ -31,11 +30,8 @@ class LogOrganizationsApiCredentialStatusJob < ApplicationJob
     zero_count = organization_credentials_as_arr.count(0)
     if zero_count.zero?
       aggregate_stats[:have_active_credentials] += 1
-    elsif zero_count == 1
-      aggregate_stats[:have_incomplete_or_no_credentials] += 1
     else
       aggregate_stats[:have_incomplete_or_no_credentials] += 1
-      aggregate_stats[:have_no_credentials] += 1
     end
     aggregate_stats
   end
