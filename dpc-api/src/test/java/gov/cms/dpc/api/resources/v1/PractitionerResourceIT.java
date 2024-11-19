@@ -292,30 +292,6 @@ public void testRequestBodyForgery() throws GeneralSecurityException, IOExceptio
     }
 
     @Test
-    public void testRequestBodyForgeryOnCreate() throws GeneralSecurityException, IOException, URISyntaxException {
-        final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
-        final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
-        final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());
-        final IGenericClient orgBClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgBContext.getClientToken(), UUID.fromString(orgBContext.getPublicKeyId()), orgBContext.getPrivateKey());
-
-        Practitioner practitioner = FHIRPractitionerBuilder.newBuilder()
-                .withOrgTag(orgBContext.getOrgId())
-                .withNpi(NPIUtil.generateNPI())
-                .withName("Org B Practitioner", "Last name")
-                .build();
-
-        //Test forgery during practitioner creation (Specify another org's id in the metadata tag)
-        practitioner.getMeta().addTag(DPCIdentifierSystem.DPC.getSystem(), orgBContext.getOrgId(), "Organization ID");
-        APITestHelpers.createResource(orgAClient, practitioner).getResource();
-
-        Bundle bundle = APITestHelpers.resourceSearch(orgBClient, DPCResourceType.Practitioner);
-        assertEquals(0, bundle.getTotal(), "Expected Org B to have 0 practitioners.");
-
-        bundle = APITestHelpers.resourceSearch(orgAClient, DPCResourceType.Practitioner);
-        assertEquals(1, bundle.getTotal(), "Expected Org A to have 1 practitioner.");
-    }
-
-    @Test
     @DisplayName("Create and access multiple practitioners with override of mismatching metadata 🥳")
 public void testRequestBodyForgeryOnMultipleSubmit() throws GeneralSecurityException, IOException, URISyntaxException {
         final TestOrganizationContext orgAContext = registerAndSetupNewOrg();

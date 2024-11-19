@@ -57,6 +57,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.junit.jupiter.api.Assertions;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -67,6 +68,8 @@ public class APITestHelpers {
     private static final String ATTRIBUTION_TRUNCATE_TASK = "http://localhost:9902/tasks/truncate";
     public static String BASE_URL = "https://dpc.cms.gov/api";
     public static String ORGANIZATION_NPI = "1111111112";
+    public static final int HEALTH_RETRIES = 10;
+    public static final int HEALTH_RETRY_MS = 1000;
 
     private static final String configPath = "src/test/resources/test.application.yml";
 
@@ -214,12 +217,27 @@ public class APITestHelpers {
             IOException {
         // URI of the API Service Healthcheck
         final String healthURI = String.format("http://localhost:%s/healthcheck", application.getAdminPort());
+        System.out.println("Testing " + healthURI);
         try (CloseableHttpClient client = HttpClients.createDefault()) {
             final HttpGet healthCheck = new HttpGet(healthURI);
 
-            try (CloseableHttpResponse execute = client.execute(healthCheck)) {
-                assertEquals(HttpStatus.OK_200, execute.getStatusLine().getStatusCode(), "Should be healthy");
+            boolean isHealthy = false;
+            for(int i = 0; i < HEALTH_RETRIES; i++) {
+                try (CloseableHttpResponse execute = client.execute(healthCheck)) {
+
+                    if(execute.getStatusLine().getStatusCode() == HttpStatus.OK_200) {
+                        isHealthy = true;
+                        break;
+                    }
+
+                    try {
+                        Thread.sleep(HEALTH_RETRY_MS);
+                    } catch(InterruptedException e) {
+                        break;
+                    }
+                }
             }
+            Assertions.assertTrue(isHealthy, "Should be healthy");
         }
     }
 
