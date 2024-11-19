@@ -17,7 +17,7 @@ class LogOrganizationsApiCredentialStatusJob < ApplicationJob
     ProviderOrganization.where.not(terms_of_service_accepted_by: nil).find_each do |organization|
       credential_status = fetch_credential_status(organization.dpc_api_organization_id)
       Rails.logger.info(['Credential status for organization',
-                         { name: organization.name, id: organization.id,
+                         { name: organization.name,
                            dpc_api_org_id: organization.dpc_api_organization_id,
                            credential_status: }])
       credential_status_values_as_arr = [credential_status[:num_tokens], credential_status[:num_keys],
