@@ -15,7 +15,7 @@ class LogOrganizationsAccessJob < ApplicationJob
       have_no_credentials: 0
     }
     ProviderOrganization.where.not(terms_of_service_accepted_by: nil).find_each do |organization|
-      credential_status = fetch_credential_status?(organization)
+      credential_status = fetch_credential_status(organization.id)
       Rails.logger.info(['Credential status for organization',
                          { name: organization.name, id: organization.id,
                            credential_status: }])
@@ -38,10 +38,10 @@ class LogOrganizationsAccessJob < ApplicationJob
     aggregate_stats
   end
 
-  def fetch_credential_status(organization)
-    tokens = dpc_client.get_client_tokens(organization.id)
-    pub_keys = dpc_client.get_public_keys(organization.id)
-    ip_addresses = dpc_client.get_ip_addresses(organization.id)
+  def fetch_credential_status(organization_id)
+    tokens = dpc_client.get_client_tokens(organization_id)
+    pub_keys = dpc_client.get_public_keys(organization_id)
+    ip_addresses = dpc_client.get_ip_addresses(organization_id)
 
     {
       num_tokens: tokens['count'],
