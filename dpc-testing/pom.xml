@@ -10,7 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>dpc-testing</artifactId>
-    <name>Common DPC testing code</name>
+    <name>DPC Common Testing Code</name>
 
     <properties>
         <jjwt.version>0.12.5</jjwt.version>
