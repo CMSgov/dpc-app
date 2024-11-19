@@ -15,21 +15,22 @@ class LogOrganizationsAccessJob < ApplicationJob
       have_no_credentials: 0
     }
     ProviderOrganization.where.not(terms_of_service_accepted_by: nil).find_each do |organization|
-      credential_status = fetch_credential_status(organization.id)
+      credential_status = fetch_credential_status(organization.dpc_api_organization_id)
       Rails.logger.info(['Credential status for organization',
                          { name: organization.name, id: organization.id,
                            credential_status: }])
-      credential_status_values_as_arr = [credential_status['num_tokens'], credential_status['num_keys'],
-                                         credential_status['num_ips']]
+      credential_status_values_as_arr = [credential_status[:num_tokens], credential_status[:num_keys],
+                                         credential_status[:num_ips]]
       update_organization_aggregate_hash(organizations_credential_aggregate_status, credential_status_values_as_arr)
     end
     Rails.logger.info(['Organizations API credential status', organizations_credential_aggregate_status])
   end
 
   def update_organization_aggregate_hash(aggregate_stats, organization_credentials_as_arr)
-    if organization_credentials_as_arr.all?
+    zero_count = organization_credentials_as_arr.count(0)
+    if zero_count.zero?
       aggregate_stats[:have_active_credentials] += 1
-    elsif organization_credentials_as_arr.any?
+    elsif zero_count == 1
       aggregate_stats[:have_incomplete_or_no_credentials] += 1
     else
       aggregate_stats[:have_incomplete_or_no_credentials] += 1
