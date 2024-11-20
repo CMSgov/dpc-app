@@ -22,6 +22,8 @@ class OrganizationsController < ApplicationController
       @invitations = Invitation.where(provider_organization: @organization,
                                       invited_by: current_user,
                                       status: :pending)
+      @expired_invitations = Invitation.where(provider_organization: @organization,
+                                              invited_by: current_user).select {|inv| inv.expired? }
       @cds = CdOrgLink.where(provider_organization: @organization, disabled_at: nil)
     end
     render(Page::Organization::CompoundShowComponent.new(@organization, @cds, @invitations, show_cds))
