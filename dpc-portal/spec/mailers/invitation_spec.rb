@@ -5,7 +5,7 @@ require 'rails_helper'
 RSpec.describe InvitationMailer, type: :mailer do
   describe :invite_cd do
     let(:invited_by) { build(:user) }
-    let(:provider_organization) { build(:provider_organization, id: 2) }
+    let(:provider_organization) { build(:provider_organization, id: 2, name: 'Health Hut') }
     let(:invitation) { build(:invitation, id: 4, invited_by:, provider_organization:) }
     it 'has link to invitation' do
       expected_url = 'http://localhost:3100/portal/organizations/2/invitations/4'
@@ -26,7 +26,7 @@ RSpec.describe InvitationMailer, type: :mailer do
     end
   end
   describe :invite_ao do
-    let(:provider_organization) { build(:provider_organization, id: 2) }
+    let(:provider_organization) { build(:provider_organization, id: 2, name: 'Health Hut') }
     let(:invitation) { build(:invitation, id: 4, provider_organization:) }
     let(:given_name) { '' }
     let(:family_name) { '' }
@@ -48,12 +48,12 @@ RSpec.describe InvitationMailer, type: :mailer do
     it 'has organization name and NPI' do
       mailer = InvitationMailer.with(invitation:, given_name:, family_name:).invite_ao
       html = mailer.body.parts.select { |part| part.content_type.match 'text/html' }.first
-      expect(html.body).to match("#{provider_organization.name} (NPI #{provider_organization.npi})")
+      expect(html.body).to include("#{provider_organization.name} (NPI #{provider_organization.npi})")
     end
   end
   describe :cd_accepted do
     let(:invited_by) { build(:user) }
-    let(:provider_organization) { build(:provider_organization, id: 2) }
+    let(:provider_organization) { build(:provider_organization, id: 2, name: 'Health Hut') }
     let(:invitation) { build(:invitation, id: 4, invited_by:, provider_organization:) }
     let(:invited_given_name) { '' }
     let(:invited_family_name) { '' }
@@ -72,7 +72,7 @@ RSpec.describe InvitationMailer, type: :mailer do
     end
     it 'has organization name and NPI' do
       mailer = InvitationMailer.with(invitation:, invited_given_name:, invited_family_name:).cd_accepted
-      expect(mailer.body).to match("#{provider_organization.name} (NPI #{provider_organization.npi})")
+      expect(mailer.body).to include("#{provider_organization.name} (NPI #{provider_organization.npi})")
     end
   end
 end
