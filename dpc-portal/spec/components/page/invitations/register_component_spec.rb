@@ -15,7 +15,7 @@ RSpec.describe Page::Invitations::RegisterComponent, type: :component do
     end
 
     it 'should include organization name and NPI' do
-      expect(page).to have_text "#{invitation.provider_organization.name} (#{invitation.provider_organization.npi})"
+      expect(page).to have_text "#{invitation.provider_organization.name} (NPI #{invitation.provider_organization.npi})"
     end
   end
 
@@ -33,7 +33,7 @@ RSpec.describe Page::Invitations::RegisterComponent, type: :component do
     end
 
     it 'should include organization name and NPI' do
-      expect(page).to have_text "#{invitation.provider_organization.name} (#{invitation.provider_organization.npi})"
+      expect(page).to have_text "#{invitation.provider_organization.name} (NPI #{invitation.provider_organization.npi})"
     end
   end
 end

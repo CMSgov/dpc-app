@@ -15,7 +15,8 @@ RSpec.describe Page::Invitations::SuccessComponent, type: :component do
     end
 
     it "should have the organization's name and NPI" do
-      expect(page).to have_text("#{invitation.provider_organization.name} (#{invitation.provider_organization.npi})")
+      org = invitation.provider_organization
+      expect(page).to have_text("#{org.name} (NPI #{org.npi})")
     end
 
     it "should not have the invited user's name" do
@@ -36,7 +37,7 @@ RSpec.describe Page::Invitations::SuccessComponent, type: :component do
     end
 
     it "should have the organization's name and NPI" do
-      expect(page).to have_text("#{org.name} (#{org.npi})")
+      expect(page).to have_text("#{org.name} (NPI #{org.npi})")
     end
 
     it "should not have the invited user's name" do

@@ -4,7 +4,7 @@
   <% if @invitation.credential_delegate? %>
     <div class="usa-alert usa-alert--success margin-bottom-4">
       <div class="usa-alert__body">
-        <p class="usa-alert__text">You're now authorized to manage the DPC API for <%= @organization.name %> (<%= @organization.npi %>).</p>
+        <p class="usa-alert__text">You're now authorized to manage the DPC API for <%= @organization.name %> (NPI <%= @organization.npi %>).</p>
       </div>
     </div>
     <p>Thank you for accepting your invite. You can now manage your organization's credentials in the DPC Portal.</p>
@@ -12,7 +12,7 @@
   <div class="usa-alert usa-alert--success margin-bottom-4">
     <div class="usa-alert__body">
       <p class="usa-alert__text">
-        <%= @organization.name %> (<%= @organization.npi %>) is successfully registered with Data at the Point of Care.
+        <%= @organization.name %> (NPI <%= @organization.npi %>) is successfully registered with Data at the Point of Care.
       </p>
     </div>
   </div>
