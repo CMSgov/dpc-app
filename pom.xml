@@ -16,6 +16,7 @@
         <module>dpc-macaroons</module>
         <module>dpc-smoketest</module>
         <module>dpc-testing</module>
+        <module>dropwizard-guiciest</module>
     </modules>
 
     <groupId>gov.cms.dpc</groupId>
