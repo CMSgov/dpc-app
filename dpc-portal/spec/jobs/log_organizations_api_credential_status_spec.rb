@@ -60,31 +60,31 @@ RSpec.describe LogOrganizationsApiCredentialStatusJob, type: :job do
 
       described_class.perform_now
     end
-  end
-  it 'updates log with 1 organization that has all 3 credentials' do
-    provider_organization.save!
+    it 'updates log with 1 organization that has all 3 credentials' do
+      provider_organization.save!
 
-    expect(mock_dpc_client).to receive(:get_client_tokens).and_return(mock_one_token_response).once
-    expect(mock_dpc_client).to receive(:get_public_keys).and_return({ 'count' => 2 }).once
-    expect(mock_dpc_client).to receive(:get_ip_addresses).and_return({ 'count' => 3 }).once
-    allow(Rails.logger).to receive(:info)
-    expect(Rails.logger).to receive(:info).with(['Organizations API credential status',
-                                                 { have_active_credentials: 1,
-                                                   have_incomplete_or_no_credentials: 0 }])
+      expect(mock_dpc_client).to receive(:get_client_tokens).and_return(mock_one_token_response).once
+      expect(mock_dpc_client).to receive(:get_public_keys).and_return({ 'count' => 2 }).once
+      expect(mock_dpc_client).to receive(:get_ip_addresses).and_return({ 'count' => 3 }).once
+      allow(Rails.logger).to receive(:info)
+      expect(Rails.logger).to receive(:info).with(['Organizations API credential status',
+                                                   { have_active_credentials: 1,
+                                                     have_incomplete_or_no_credentials: 0 }])
 
-    described_class.perform_now
-  end
-  it 'updates log with 1 organization that has partial credentials' do
-    provider_organization.save!
+      described_class.perform_now
+    end
+    it 'updates log with 1 organization that has partial credentials' do
+      provider_organization.save!
 
-    expect(mock_dpc_client).to receive(:get_client_tokens).and_return(mock_one_token_response).once
-    expect(mock_dpc_client).to receive(:get_public_keys).and_return({ 'count' => 2 }).once
-    expect(mock_dpc_client).to receive(:get_ip_addresses).and_return({ 'count' => 0 }).once
-    allow(Rails.logger).to receive(:info)
-    expect(Rails.logger).to receive(:info).with(['Organizations API credential status',
-                                                 { have_active_credentials: 0,
-                                                   have_incomplete_or_no_credentials: 1 }])
+      expect(mock_dpc_client).to receive(:get_client_tokens).and_return(mock_one_token_response).once
+      expect(mock_dpc_client).to receive(:get_public_keys).and_return({ 'count' => 2 }).once
+      expect(mock_dpc_client).to receive(:get_ip_addresses).and_return({ 'count' => 0 }).once
+      allow(Rails.logger).to receive(:info)
+      expect(Rails.logger).to receive(:info).with(['Organizations API credential status',
+                                                   { have_active_credentials: 0,
+                                                     have_incomplete_or_no_credentials: 1 }])
 
-    described_class.perform_now
+      described_class.perform_now
+    end
   end
 end
