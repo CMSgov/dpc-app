@@ -6,7 +6,7 @@
       "resource": {
         "resourceType": "Bundle",
         "id": "synthetic-roster-bundle",
-        "type": "collection",
+        "type": "transaction",
         "entry": [
           {
             "resource": {

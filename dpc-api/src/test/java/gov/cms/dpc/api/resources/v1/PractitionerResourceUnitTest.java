@@ -24,6 +24,8 @@ import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 public class PractitionerResourceUnitTest {
 
@@ -116,17 +118,11 @@ public class PractitionerResourceUnitTest {
         Parameters params = new Parameters();
         params.addParameter().setResource(bundle);
 
-        @SuppressWarnings("unchecked")
-        IOperationUntypedWithInput<Bundle> practitionerBundle = Mockito.mock(IOperationUntypedWithInput.class);
-        Mockito.when(attributionClient
-            .operation()
-            .onType(Practitioner.class)
-            .named("submit")
-            .withParameters(Mockito.any())
-            .returnResourceType(Bundle.class)
-            .encodedJson()
-        ).thenReturn(practitionerBundle);
-        Mockito.when(practitionerBundle.execute()).thenReturn(bundle);
+        when(attributionClient
+            .transaction()
+            .withBundle(any(Bundle.class))
+            .execute()
+        ).thenReturn(bundle);
 
         Bundle actualResponse = practitionerResource.bulkSubmitProviders(organizationPrincipal, params);
 

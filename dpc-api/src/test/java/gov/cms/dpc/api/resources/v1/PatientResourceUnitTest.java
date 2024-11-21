@@ -149,15 +149,11 @@ public class PatientResourceUnitTest {
         Parameters params = new Parameters();
         params.addParameter().setResource(bundle);
 
-        @SuppressWarnings("unchecked")
-        IOperationUntypedWithInput<Bundle> patientBundle = mock(IOperationUntypedWithInput.class);
         when(attributionClient
-                .operation()
-                .onType(Patient.class)
-                .named("submit")
-                .withParameters(any()).returnResourceType(Bundle.class).encodedJson()
-        ).thenReturn(patientBundle);
-        when(patientBundle.execute()).thenReturn(bundle);
+            .transaction()
+            .withBundle(any(Bundle.class))
+            .execute()
+        ).thenReturn(bundle);
 
         Bundle actualResponse = patientResource.bulkSubmitPatients(organizationPrincipal, params);
         assertEquals(bundle, actualResponse);

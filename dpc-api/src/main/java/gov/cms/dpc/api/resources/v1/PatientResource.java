@@ -27,6 +27,7 @@ import gov.cms.dpc.fhir.validations.profiles.PatientProfile;
 import gov.cms.dpc.queue.service.DataService;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.*;
+import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
@@ -87,17 +88,21 @@ public class PatientResource extends AbstractPatientResource {
                 .returnBundle(Bundle.class);
 
         if (patientMBI != null && !patientMBI.equals("")) {
-
             // Handle MBI parsing
             // This should come out as part of DPC-432
-            final String expandedMBI;
-            if (IDENTIFIER_PATTERN.matcher(patientMBI).matches()) {
-                expandedMBI = patientMBI;
+            final String mbiValue;
+            final String mbiSystem;
+            Pair<String, String> mbiPair = FHIRExtractors.parseTag(patientMBI);
+
+            mbiValue = mbiPair.getRight();
+            if(mbiPair.getLeft().isEmpty()) {
+                mbiSystem = DPCIdentifierSystem.MBI.getSystem();
             } else {
-                expandedMBI = String.format("%s|%s", DPCIdentifierSystem.MBI.getSystem(), patientMBI);
+                mbiSystem = mbiPair.getLeft();
             }
+
             return request
-                    .where(Patient.IDENTIFIER.exactly().identifier(expandedMBI))
+                    .where(Patient.IDENTIFIER.exactly().systemAndIdentifier(mbiSystem, mbiValue))
                     .execute();
         }
 
@@ -115,7 +120,7 @@ public class PatientResource extends AbstractPatientResource {
     public Response submitPatient(@ApiParam(hidden = true) @Auth OrganizationPrincipal organization, @Valid @Profiled @ApiParam Patient patient) {
 
         // Set the Managing Organization on the Patient
-        final Reference orgReference = new Reference(new IdType("Organization", organization.getOrganization().getId()));
+        final Reference orgReference = new Reference(new IdType("Organization", organization.getOrganization().getIdPart()));
         patient.setManagingOrganization(orgReference);
         final MethodOutcome outcome = this.client
                 .create()
@@ -139,7 +144,7 @@ public class PatientResource extends AbstractPatientResource {
     public Bundle bulkSubmitPatients(@ApiParam(hidden = true) @Auth OrganizationPrincipal organization,
                                      @ApiParam Parameters params) {
         final Bundle patientBundle = (Bundle) params.getParameterFirstRep().getResource();
-        final Consumer<Patient> entryHandler = (patient) -> validateAndAddOrg(patient, organization.getOrganization().getId(), validator);
+        final Consumer<Patient> entryHandler = (patient) -> validateAndAddOrg(patient, organization.getOrganization().getIdPart(), validator);
 
         return bulkResourceClient(Patient.class, client, entryHandler, patientBundle);
     }

@@ -22,6 +22,7 @@ import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.HAPIExceptionHandler;
 import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.JerseyExceptionHandler;
 import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.PersistenceExceptionHandler;
 import gov.cms.dpc.fhir.hapi.ContextUtils;
+import gov.cms.dpc.fhir.helpers.FHIRHelpers;
 import gov.cms.dpc.fhir.validations.DPCProfileSupport;
 import gov.cms.dpc.fhir.validations.ProfileValidator;
 import gov.cms.dpc.fhir.validations.dropwizard.FHIRValidatorProvider;
@@ -34,7 +35,6 @@ import io.dropwizard.testing.DropwizardTestSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.eclipse.jetty.http.HttpStatus;
@@ -53,18 +53,14 @@ import java.io.InputStream;
 import java.sql.Date;
 import java.time.Instant;
 import java.time.ZoneOffset;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class APITestHelpers {
-    private static final String ATTRIBUTION_URL = "http://localhost:3500/v1";
+    private static final String ATTRIBUTION_URL = "http://localhost:8080/fhir";
     private static final String CONSENT_URL = "http://localhost:3600/v1";
     public static final String ORGANIZATION_ID = "46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0";
-    private static final String ATTRIBUTION_TRUNCATE_TASK = "http://localhost:9902/tasks/truncate";
     public static String BASE_URL = "https://dpc.cms.gov/api";
     public static String ORGANIZATION_NPI = "1111111112";
 
@@ -97,7 +93,6 @@ public class APITestHelpers {
         loggingInterceptor.setLogRequestSummary(false);
         loggingInterceptor.setLogResponseSummary(false);
         client.registerInterceptor(loggingInterceptor);
-
         return client;
     }
 
@@ -199,14 +194,27 @@ public class APITestHelpers {
 
     }
 
-    private static void truncateDatabase() throws IOException {
+    private static void truncateDatabase() throws IOException, InterruptedException {
+        // TODO: Rewrite this as an operation on the FHIR server
+        // This is replacing a call to the DropWizard admin end point on dpc-attribution.  For now, we'll just grab
+        // a list of resources and delete them.  This is definitely not ideal, but it works for a PoC.
+        IGenericClient client = buildAttributionClient(FhirContext.forDstu3());
 
-        try (CloseableHttpClient client = HttpClients.createDefault()) {
-            final HttpPost post = new HttpPost(ATTRIBUTION_TRUNCATE_TASK);
+        // Order matters to prevent referential integrity problems
+        List<Class<? extends DomainResource>> resourceClasses = Arrays.asList(
+            Group.class, Patient.class, Practitioner.class, Endpoint.class, Organization.class
+        );
 
-            try (CloseableHttpResponse execute = client.execute(post)) {
-                assertEquals(HttpStatus.OK_200, execute.getStatusLine().getStatusCode(), "Should have truncated database");
+        for (Class<? extends DomainResource> resourceClass : resourceClasses ) {
+            Bundle bundle = client.search().forResource(resourceClass).encodedJson().returnBundle(Bundle.class).execute();
+            bundle = FHIRHelpers.getPages(client, bundle);
+            for (Bundle.BundleEntryComponent component : bundle.getEntry()) {
+                client.delete().resource(component.getResource()).execute();
             }
+
+            // Sometimes the deletes take a second to complete, and prevents the next delete from working due to
+            // referential integrity checks.
+            Thread.sleep(350);
         }
     }
 
@@ -291,13 +299,15 @@ public class APITestHelpers {
     }
 
     public  static Bundle resourceSearch(IGenericClient client, DPCResourceType resourceType, Map<String,List<String>> searchParams){
-        return client
+        Bundle firstPage = client
                 .search()
                 .forResource(resourceType.name())
                 .whereMap(searchParams)
                 .returnBundle(Bundle.class)
                 .encodedJson()
                 .execute();
+
+        return FHIRHelpers.getPages(client, firstPage);
     }
 
     public  static Bundle resourceSearch(IGenericClient client, DPCResourceType resourceType){

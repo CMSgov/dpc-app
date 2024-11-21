@@ -67,25 +67,19 @@ public class PractitionerResource extends AbstractPractitionerResource {
 
         // Create search params
         Map<String, List<String>> searchParams = new HashMap<>();
-        searchParams.put("organization", Collections
-                .singletonList(organization
-                        .getOrganization()
-                        .getIdElement()
-                        .getIdPart()));
-
-        final var request = this.client
-                .search()
-                .forResource(Practitioner.class)
-                .encodedJson()
-                .returnBundle(Bundle.class);
+        searchParams.put("_tag", Collections.singletonList(organization.getOrganization().getId()));
 
         if (providerNPI != null && !providerNPI.equals("")) {
             searchParams.put("identifier", Collections.singletonList(providerNPI));
         }
 
-        return request
-                .whereMap(searchParams)
-                .execute();
+        return this.client
+            .search()
+            .forResource(Practitioner.class)
+            .encodedJson()
+            .returnBundle(Bundle.class)
+            .whereMap(searchParams)
+            .execute();
     }
 
     @GET

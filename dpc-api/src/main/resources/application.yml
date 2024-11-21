@@ -106,13 +106,13 @@ bbclient:
   resourcesCount: 100 # Max number of resource that a request to BB will return before using another request
 
 attributionClient:
-  serverBaseUrl: ${ATTRIBUTION_URL:-"http://localhost:3500/v1/"}
+  serverBaseUrl: ${ATTRIBUTION_URL:-"http://localhost:8080/fhir/"}
   timeouts:
     connectionTimeout: 20000 # ms
     socketTimeout: 20000 # ms
     requestTimeout: 20000 # ms
 
-attributionHealthCheckURL: ${ATTRIBUTION_HEALTHCHECK_URL:-"http://localhost:9902/healthcheck"}
+attributionHealthCheckURL: ${ATTRIBUTION_HEALTHCHECK_URL:-"http://localhost:8080/fhir/metadata"}
 
 authenticationDisabled: ${AUTH_DISABLED:-false}
 

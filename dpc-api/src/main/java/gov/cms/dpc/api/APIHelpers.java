@@ -31,21 +31,13 @@ public class APIHelpers {
                 .getEntry()
                 .stream()
                 .filter(Bundle.BundleEntryComponent::hasResource)
+                .map(component -> component.setRequest(new Bundle.BundleEntryRequestComponent().setMethod(Bundle.HTTPVerb.POST)))
                 .map(Bundle.BundleEntryComponent::getResource)
                 .filter(resource -> resource.getClass().equals(clazz))
                 .map(clazz::cast)
                 .forEach(entryConsumer);
 
-        final Parameters params = new Parameters();
-        params.addParameter().setResource(resourceBundle);
-        return client
-                .operation()
-                .onType(clazz)
-                .named("submit")
-                .withParameters(params)
-                .returnResourceType(Bundle.class)
-                .encodedJson()
-                .execute();
+        return client.transaction().withBundle(resourceBundle).execute();
     }
 
     public static String formatValidationMessages(List<SingleValidationMessage> messages) {

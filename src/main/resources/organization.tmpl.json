@@ -58,7 +58,7 @@
       },
       "request": {
         "method": "POST",
-        "url": "Group"
+        "url": "Organization"
       }
     },
     {
@@ -70,7 +70,12 @@
           "code": "hl7-fhir-rest"
         },
         "name": "Test Organization Endpoint",
-        "address": "http://test-address.nope"
+        "address": "http://test-address.nope",
+        "payloadType": [
+          {
+            "text": "fake payload"
+          }
+        ]
       },
       "request": {
         "method": "POST",

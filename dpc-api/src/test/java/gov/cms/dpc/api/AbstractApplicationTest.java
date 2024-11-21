@@ -59,6 +59,7 @@ public class AbstractApplicationTest {
     @BeforeEach
     public void eachSetup() throws IOException {
         ctx = FhirContext.forDstu3();
+        ctx.getParserOptions().setOverrideResourceIdWithBundleEntryFullUrl(false);
         final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
         FHIRHelpers.registerOrganization(attrClient,
                 ctx.newJsonParser(),

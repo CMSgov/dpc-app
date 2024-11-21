@@ -58,10 +58,12 @@ services:
       - ENV=local
       - JACOCO=${REPORT_COVERAGE}
       - EXPORT_PATH=/app/data
-      - AUTH_DISABLED=${AUTH_DISABLED:-false}
+      #- AUTH_DISABLED=${AUTH_DISABLED:-false}
+      - AUTH_DISABLED=true
       - DEBUG_MODE=${DEBUG_MODE:-false}
     depends_on:
       - attribution
+      - fhir
     volumes:
       - export-volume:/app/data
       - ./jacocoReport/dpc-api:/jacoco-report
@@ -89,9 +91,10 @@ services:
   start_api_dependencies:
     image: dadarek/wait-for-dependencies
     depends_on:
-      - attribution
+      #- attribution
+      - fhir
       - aggregation
-    command: attribution:8080 aggregation:9901
+    command: fhir:8080 aggregation:9901
 
   start_api:
     image: dadarek/wait-for-dependencies
@@ -116,7 +119,33 @@ services:
     command: sh -c "mvn test -Pintegration-tests -am -ntp"
     network_mode: host
 
+  fhir:
+    container_name: fhir
+    image: "hapiproject/hapi:latest"
+    ports:
+      - "8080:8080"
+    configs:
+      - source: hapi
+        target: /app/config/application.yaml
+    depends_on:
+      - hapi_db
+
+  hapi_db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: admin
+      POSTGRES_USER: admin
+      POSTGRES_DB: hapi
+    volumes:
+      - hapi_pg_data:/data:delegated
+
+configs:
+  hapi:
+    file: ./hapi.application.yaml
+
 volumes:
+  hapi_pg_data:
   pgdata14:
   export-volume:
     driver: local
