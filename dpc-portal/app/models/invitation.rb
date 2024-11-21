@@ -35,9 +35,9 @@ class Invitation < ApplicationRecord
   end
 
   def expired_at
-    if expired?
-      created_at + 2.days
-    end
+    return unless expired?
+
+    created_at + 2.days
   end
 
   def accept!
