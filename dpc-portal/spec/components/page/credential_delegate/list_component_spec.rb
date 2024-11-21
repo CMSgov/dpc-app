@@ -12,14 +12,14 @@ RSpec.describe Page::CredentialDelegate::ListComponent, type: :component do
 
     let(:org) { ComponentSupport::MockOrg.new }
 
-    let(:component) { described_class.new(org, invitations, expired_invitations, credential_delegates) }
+    let(:component) { described_class.new(org, pending_invitations, expired_invitations, credential_delegates) }
 
     before do
       render_inline(component)
     end
 
     context 'No credential delegates' do
-      let(:invitations) { [] }
+      let(:pending_invitations) { [] }
       let(:expired_invitations) { [] }
       let(:credential_delegates) { [] }
 
@@ -65,7 +65,7 @@ RSpec.describe Page::CredentialDelegate::ListComponent, type: :component do
       let(:invitation) do
         Invitation.new(invited_given_name: 'Bob', invited_family_name: 'Hodges', invited_email: 'bob@example.com')
       end
-      let(:invitations) { [] }
+      let(:pending_invitations) { [] }
       let(:expired_invitations) { [] }
       let(:credential_delegates) { [CdOrgLink.new(user:, invitation:)] }
 
@@ -109,7 +109,7 @@ RSpec.describe Page::CredentialDelegate::ListComponent, type: :component do
     end
 
     context 'Pending credential delegate' do
-      let(:invitations) do
+      let(:pending_invitations) do
         [Invitation.new(invited_given_name: 'Bob', invited_family_name: 'Hodges', invited_email: 'bob@example.com',
                         id: 3, created_at: 1.day.ago)]
       end
@@ -164,7 +164,7 @@ RSpec.describe Page::CredentialDelegate::ListComponent, type: :component do
     end
 
     context 'Expired invitations' do
-      let(:invitations) { [] }
+      let(:pending_invitations) { [] }
       let(:expired_invitations) do
         [Invitation.new(invited_given_name: 'Bob', invited_family_name: 'Hodges', invited_email: 'bob@example.com',
                         id: 3, created_at: 3.days.ago)]

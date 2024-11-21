@@ -31,12 +31,16 @@ class Invitation < ApplicationRecord
   end
 
   def expired?
-    created_at < 2.days.ago
+    Time.now > expiration_date
   end
 
   def expired_at
     return unless expired?
 
+    expiration_date
+  end
+
+  def expiration_date
     created_at + 2.days
   end
 
