@@ -15,10 +15,9 @@ RSpec.describe Page::Organization::TosFormComponent, type: :component do
     let(:expected_html) do
       <<~HTML
         <div>
-          <div class="margin-bottom-5">← <a href="/portal/">path</a></div>
           <h1>Add new organization</h1>
           <h2>Sign Terms of Service</h2>
-          <p>Confirmed! We succesfully identified you as an Authorized Official (AO) of Health Hut (NPI 11111111).</p>
+          <p>Confirmed! We successfully identified you as an Authorized Official (AO) of Health Hut (NPI 11111111).</p>
           <p>To manage this organization's credentials, you must agree to the DPC API's Terms of Service.</p>
           <div style="width: 100%; height: 200px; background-color: silver" class="margin-bottom-5">&nbsp;</div>
           <div>
