@@ -43,10 +43,8 @@ ops/config/decrypted/*
 !ops/config/decrypted/README.md
 .mvn/
 
-/tmp/cache/*
-/tmp/local_secret.txt
-/tmp/letter_opener/admin/*
-/tmp/letter_opener/web/*
+/tmp
+!/tmp/.keep
 
 # Ignore Go unit test results
 dpc-go/dpc-api/results.json
@@ -65,3 +63,4 @@ dpc-go/dpc-attribution/src/attribution
 #BFD Certs
 dpc-go/dpc-attribution/shared_files/decrypted/*
 !dpc-go/dpc-attribution/shared_files/decrypted/README.md
+!/tmp/
