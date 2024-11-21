@@ -104,6 +104,10 @@ RSpec.describe LogOrganizationsApiCredentialStatusJob, type: :job do
         StandardError.new('something failed inside fetch_credential_status!')
       )
 
+      allow(Rails.logger).to receive(:error)
+      expect(Rails.logger).to receive(:error).with(['Failed to fetch api credential status for organization',
+                                                    {  name: 'Test2',
+                                                       dpc_api_org_id: 'bar' }])
       allow(Rails.logger).to receive(:info)
       expect(Rails.logger).to receive(:info).with(['Organizations API credential status',
                                                    { have_active_credentials: 1,
